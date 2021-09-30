@@ -156,11 +156,14 @@ const variables = css`
     /* COLORS */
     --gray: hsl(${COLORS.gray});
     --gray-light: hsla(${COLORS.grayLight});
+    --gray-lightest: hsla(${COLORS.grayLightest});
     --white: hsl(${COLORS.white});
     --black: hsl(${COLORS.black});
     --primary: hsl(${COLORS.primary});
     --primary-dark: hsl(${COLORS.primaryDark});
     --secondary: hsl(${COLORS.secondary});
+    --error: hsl(${COLORS.error});
+    --error-light: hsla(${COLORS.errorLight});
 
     --primary-transparent: hsla(${COLORS.primary} / 0.4);
     --gray-transparent: hsla(${COLORS.black} / 0.75);
@@ -200,4 +203,5 @@ const globalStyles = css`
   ${variables}
 `;
 
-export default () => <Global styles={globalStyles} />;
+const GlobalStyles = () => <Global styles={globalStyles} />;
+export default GlobalStyles;

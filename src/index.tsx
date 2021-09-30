@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 
 import App from "./App";
 import { GlobalStyles } from "./components";
-import { store } from "./app/store";
+import { store } from "./state";
 import { Provider } from "react-redux";
 
 ReactDOM.render(

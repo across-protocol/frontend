@@ -3,7 +3,6 @@ import styled from "@emotion/styled";
 import { Link as UnstyledLink, useLocation } from "react-router-dom";
 
 import { ReactComponent as Logo } from "../../assets/logo.svg";
-import Wallet from "../Wallet";
 
 const LINKS = [
   { href: "/", name: "Send" },
@@ -11,9 +10,8 @@ const LINKS = [
   { href: "/about", name: "About" },
 ];
 
-const Header: React.FC = () => {
+const Header: React.FC = ({ children }) => {
   const location = useLocation();
-  console.log(location);
   return (
     <Wrapper>
       <LogoWrapper>
@@ -31,7 +29,7 @@ const Header: React.FC = () => {
         </Navigation>
       </NavigationWrapper>
 
-      <Wallet />
+      {children}
     </Wrapper>
   );
 };

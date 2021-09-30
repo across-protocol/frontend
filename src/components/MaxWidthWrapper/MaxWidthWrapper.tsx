@@ -25,10 +25,9 @@ const STYLES: Record<Size, WrapperStyles> = {
   },
 };
 
-const MaxWidthWrapper: React.FC<Props> = ({ size = "xl", ...delegated }) => {
-  const styles = STYLES[size];
-  return <Wrapper style={styles} {...delegated} />;
-};
+const MaxWidthWrapper: React.FC<Props> = ({ size = "xl", ...delegated }) => (
+  <Wrapper style={STYLES[size]} {...delegated} />
+);
 
 export default MaxWidthWrapper;
 

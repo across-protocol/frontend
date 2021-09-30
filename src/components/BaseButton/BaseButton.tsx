@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "@emotion/styled";
 
 export const BaseButton = styled.button`
@@ -9,6 +8,7 @@ export const BaseButton = styled.button`
   cursor: pointer;
   :disabled {
     cursor: not-allowed;
+    opacity: 0.25;
   }
 `;
 
