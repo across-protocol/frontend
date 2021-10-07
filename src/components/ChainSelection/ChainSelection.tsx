@@ -1,27 +1,28 @@
 import React from "react";
 import styled from "@emotion/styled";
-import optimism from "../../assets/optimism.svg";
 import { PrimaryButton as UnstyledButton } from "../BaseButton";
-import { useOnboard } from "../../hooks";
-import { useConnection } from "../../state/hooks";
-import { switchToOptimism } from "../../utils/optimism";
+import { useOnboard } from "hooks";
+import { useGlobal, useSelectedSendArgs, useConnection } from "state/hooks";
+import { CHAINS, networkFromChainId, switchToChain } from "utils";
 
 const ChainSelection: React.FC = () => {
-  const { provider, chainId, isConnected } = useConnection();
+  const { isConnected, provider } = useConnection();
+  const { currentChainId } = useGlobal();
+  const { fromChain } = useSelectedSendArgs();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setError] = React.useState<Error | null>(null);
   const { init } = useOnboard();
-  const isOnOptimism = chainId === 10;
-  const actionText = isOnOptimism
+  const isOnCorrectChain = currentChainId === fromChain;
+  const actionText = isOnCorrectChain
     ? null
     : isConnected
-    ? "Switch to Optimism"
+    ? `Switch to ${networkFromChainId(fromChain)}`
     : "Connect Wallet";
   const handleClick = () => {
     if (!provider) {
       init();
-    } else if (!isOnOptimism) {
-      switchToOptimism(provider).catch(setError);
+    } else if (!isOnCorrectChain) {
+      switchToChain(provider, fromChain).catch(setError);
     }
   };
 
@@ -29,10 +30,13 @@ const ChainSelection: React.FC = () => {
     <>
       <Heading>From</Heading>
       <Option>
-        <Logo src={optimism} alt="optimism logo" />
-        <span>Optimism</span>
+        <Logo
+          src={CHAINS[fromChain].logoURI}
+          alt={`${CHAINS[fromChain].name}`}
+        />
+        <span>{networkFromChainId(fromChain)}</span>
       </Option>
-      {!isOnOptimism && <Button onClick={handleClick}>{actionText}</Button>}
+      {!isOnCorrectChain && <Button onClick={handleClick}>{actionText}</Button>}
     </>
   );
 };
@@ -42,6 +46,7 @@ export default ChainSelection;
 const Button = styled(UnstyledButton)`
   width: 100%;
   font-size: ${18 / 16}rem;
+  text-transform: capitalize;
 `;
 
 const Heading = styled.h3`
@@ -62,4 +67,5 @@ const Option = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 16px;
+  text-transform: capitalize;
 `;

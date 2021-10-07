@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "@emotion/styled";
 import { SecondaryButton } from "../BaseButton";
-import { shortenAddress } from "../../utils";
+import { shortenAddress, networkFromChainId } from "utils";
 
 type Props = {
   account?: string;
@@ -68,14 +68,3 @@ const Info = styled.div`
     color: var(--gray-light);
   }
 `;
-
-function networkFromChainId(chainId: number) {
-  switch (chainId) {
-    case 1:
-      return "mainnet";
-    case 10:
-      return "optimism";
-    default:
-      return "unknown";
-  }
-}

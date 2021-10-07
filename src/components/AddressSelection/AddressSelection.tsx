@@ -1,23 +1,22 @@
 import React, { useState } from "react";
 import styled from "@emotion/styled";
 import { XOctagon } from "react-feather";
-import ethereumLogo from "../../assets/ethereum-logo.png";
 import { BaseButton, SecondaryButton, PrimaryButton } from "../BaseButton";
 import Dialog from "../Dialog";
-import { useSelectedAddress } from "../../state/hooks";
-import { isValidAddress, shortenAddress } from "../../utils";
+import { useSelectedSendArgs } from "state/hooks";
+import { CHAINS, isValidAddress, shortenAddress } from "utils";
 
 const AddressSelection: React.FC = () => {
-  const { address: storeAddress, setAddress } = useSelectedAddress();
+  const { address: storeAddress, setAddress, toChain } = useSelectedSendArgs();
 
   const [isOpen, setOpen] = useState(false);
   const [userAddress, setUserAddress] = useState(storeAddress);
 
-  const isValid = isValidAddress(userAddress);
+  const isValid = isValidAddress(userAddress ?? "");
   const toggle = () => setOpen((oldOpen) => !oldOpen);
   const handleSubmit = () => {
-    if (isValid) {
-      setAddress(userAddress);
+    if (isValid && userAddress) {
+      setAddress({ address: userAddress });
       toggle();
     }
   };
@@ -33,10 +32,10 @@ const AddressSelection: React.FC = () => {
     <>
       <Heading>To</Heading>
       <SelectAddress>
-        <Logo src={ethereumLogo} />
+        <Logo src={CHAINS[toChain].logoURI} />
         <Info>
-          <h6>Mainnet</h6>
-          <div>{shortenAddress(storeAddress)}</div>
+          <h6>{CHAINS[toChain].name}</h6>
+          <div>{shortenAddress(storeAddress ?? "")}</div>
         </Info>
         <Button onClick={toggle}>Change</Button>
       </SelectAddress>

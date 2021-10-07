@@ -5,10 +5,15 @@ import { ChevronDown } from "react-feather";
 import { SecondaryButton } from "../BaseButton";
 import { COIN_LIST, formatUnits } from "../../utils";
 import { useBalances } from "../../state/chain";
-import { useConnection, useGlobal } from "../../state/hooks";
+import {
+  useConnection,
+  useGlobal,
+  useSelectedSendArgs,
+} from "../../state/hooks";
 
 const CoinSelection: React.FC = () => {
   const [coinAmount, setCoinAmount] = useState<number>(0);
+  const { setAmount, setAsset } = useSelectedSendArgs();
   const [error, setError] = useState<string>("");
   const { chainId } = useConnection();
   const { currentAccount, currentChainId } = useGlobal();
@@ -31,7 +36,16 @@ const CoinSelection: React.FC = () => {
     getItemProps,
     getMenuProps,
     selectedItem,
-  } = useSelect({ items: coinList, defaultSelectedItem: coinList[0] });
+  } = useSelect({
+    items: coinList,
+    defaultSelectedItem: coinList[0],
+    onSelectedItemChange: ({ selectedItem }) => {
+      if (selectedItem) {
+        setAsset({ asset: selectedItem.address });
+        setCoinAmount(0);
+      }
+    },
+  });
 
   const selectedIndex = useMemo(
     () => coinList.findIndex((c) => c.address === selectedItem!.address),
@@ -50,8 +64,7 @@ const CoinSelection: React.FC = () => {
       );
 
       setCoinAmount(parsedBalance);
-    } else {
-      setCoinAmount(0);
+      setAmount({ amount: balance });
     }
   };
 
@@ -68,6 +81,7 @@ const CoinSelection: React.FC = () => {
       setError("");
     }
     setCoinAmount(value);
+    setAmount({ amount: value });
   };
 
   return (

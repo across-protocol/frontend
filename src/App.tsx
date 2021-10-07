@@ -1,10 +1,11 @@
 import React from "react";
 
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import { Header, Layout, Send, Wallet } from "./components";
-import { useOnboard } from "./hooks";
-import { useConnection, useETHBalance } from "./state/hooks";
-import { formatEther } from "./utils";
+import { Header, Wallet } from "./components";
+import { Send, Pool, About } from "views";
+import { useOnboard } from "hooks";
+import { useConnection, useETHBalance } from "state/hooks";
+import { formatEther } from "utils";
 
 function App() {
   const { account, chainId } = useConnection();
@@ -24,13 +25,12 @@ function App() {
           onWalletConnect={init}
         />
       </Header>
-      <Layout>
-        <Switch>
-          <Route exact path="/" component={Send} />
-          <Route path="/pool" component={Send} />
-          <Route path="/about" component={Send} />
-        </Switch>
-      </Layout>
+
+      <Switch>
+        <Route exact path="/" component={Send} />
+        <Route path="/pool" component={Pool} />
+        <Route path="/about" component={About} />
+      </Switch>
     </Router>
   );
 }

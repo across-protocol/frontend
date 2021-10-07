@@ -30,16 +30,22 @@ const initialState: State = {
       transactions: {},
       balances: {},
     },
-    10: {
-      accounts: {},
-      transactions: {},
-      balances: {},
-    },
     42: {
       accounts: {},
       transactions: {},
       balances: {},
     },
+    10: {
+      accounts: {},
+      transactions: {},
+      balances: {},
+    },
+    69: {
+      accounts: {},
+      transactions: {},
+      balances: {},
+    },
+
     1337: {
       accounts: {},
       transactions: {},
@@ -86,6 +92,7 @@ const globalSlice = createSlice({
           [transaction.hash]: transaction,
         },
       };
+
       return state;
     },
   },

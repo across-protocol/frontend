@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { bindActionCreators } from "redux";
 import type { RootState, AppDispatch } from "./";
-import { set } from "./selectedAddress";
+import { address, fromChain, toChain, amount, asset } from "./selectedSendArgs";
 import {
   connect,
   disconnect,
@@ -10,16 +10,29 @@ import {
   error as errorAction,
 } from "./connection";
 
+import { transfer, toggle } from "./transfers";
+
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-export function useSelectedAddress() {
-  const address = useAppSelector((state) => state.selectedAddress);
+export function useSelectedSendArgs() {
+  const state = useAppSelector((state) => state.selectedSendArgs);
   const dispatch = useAppDispatch();
-  const actions = bindActionCreators({ set }, dispatch);
+  const actions = bindActionCreators(
+    { address, fromChain, toChain, amount, asset },
+    dispatch
+  );
 
-  return { address, setAddress: actions.set, dispatch };
+  return {
+    ...state,
+    setAddress: actions.address,
+    setStartingChain: actions.fromChain,
+    setTargetChain: actions.toChain,
+    setAmount: actions.amount,
+    setAsset: actions.asset,
+    dispatch,
+  };
 }
 
 export function useConnection() {
@@ -63,6 +76,14 @@ export function useGlobal() {
 export function useAccounts() {
   const state = useGlobal();
   return state.chains[state.currentChainId].accounts;
+}
+
+export function useTransfers() {
+  const state = useAppSelector((state) => state.transfers);
+  const dispatch = useAppDispatch();
+  const { transfer: addTransfer, toggle: toggleShowLatestTransfer } =
+    bindActionCreators({ transfer, toggle }, dispatch);
+  return { ...state, addTransfer, toggleShowLatestTransfer };
 }
 
 export { useBalances, useETHBalance } from "./chain";
