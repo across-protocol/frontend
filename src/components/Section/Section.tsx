@@ -12,6 +12,6 @@ export const AccentSection = styled.section`
   padding: 0 30px;
   background-image: linear-gradient(
     var(--color-primary-dark),
-    var(--color-dark)
+    var(--color-gray)
   );
 `;

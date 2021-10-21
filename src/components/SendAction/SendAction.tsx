@@ -36,7 +36,7 @@ const SendAction: React.FC = () => {
     if (tx) {
       addTransaction({ ...tx, meta: { label: TransactionTypes.DEPOSIT } });
       const receipt = await tx.wait();
-      addDeposit({ deposit: receipt });
+      addDeposit({ tx: receipt, toChain, fromChain, amount, token });
     }
   };
   const handleClick = () => {

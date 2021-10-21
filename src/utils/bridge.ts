@@ -37,7 +37,14 @@ export type BridgeFees = RelayFees;
 const { constants, gasFeeCalculator } = across;
 
 // currently available constants
-const { FAST_ETH_GAS, FAST_ERC_GAS, FAST_UMA_GAS } = constants;
+const {
+  FAST_ETH_GAS,
+  FAST_ERC_GAS,
+  FAST_UMA_GAS,
+  SLOW_ETH_GAS,
+  SLOW_ERC_GAS,
+  SLOW_UMA_GAS,
+} = constants;
 
 export async function getRelayFees(token: string, amount: ethers.BigNumber) {
   const l1Equivalent = TOKENS_LIST[ChainId.MAINNET].find(
@@ -47,23 +54,42 @@ export async function getRelayFees(token: string, amount: ethers.BigNumber) {
     throw new Error(`Token ${token} not found in TOKENS_LIST`);
   }
   const provider = PROVIDERS[ChainId.MAINNET]();
-  const gasAmount =
+  const gasAmountFast =
     token === "ETH"
-      ? FAST_ETH_GAS
+      ? FAST_ETH_GAS - SLOW_ETH_GAS
       : token === "UMA"
-      ? FAST_UMA_GAS
-      : FAST_ERC_GAS;
+      ? FAST_UMA_GAS - SLOW_UMA_GAS
+      : FAST_ERC_GAS - SLOW_ERC_GAS;
 
-  const gasFees = await gasFeeCalculator(
+  const gasAmountSlow =
+    token === "ETH"
+      ? SLOW_ETH_GAS
+      : token === "UMA"
+      ? SLOW_UMA_GAS
+      : SLOW_ERC_GAS;
+
+  const gasFeesSlow = await gasFeeCalculator(
     provider,
     amount,
-    gasAmount,
-    l1Equivalent
+    gasAmountSlow,
+    l1Equivalent === ethers.constants.AddressZero ? undefined : l1Equivalent
+  );
+  const gasFeesFast = await gasFeeCalculator(
+    provider,
+    amount,
+    gasAmountFast,
+    l1Equivalent === ethers.constants.AddressZero ? undefined : l1Equivalent
   );
 
   return {
-    instantRelayFee: { pct: gasFees.feesAsPercent, total: gasFees.gasFees },
-    slowRelayFee: { pct: gasFees.feesAsPercent, total: gasFees.gasFees },
+    instantRelayFee: {
+      pct: gasFeesFast.feesAsPercent,
+      total: gasFeesFast.gasFees,
+    },
+    slowRelayFee: {
+      pct: gasFeesSlow.feesAsPercent,
+      total: gasFeesSlow.gasFees,
+    },
   };
 }
 

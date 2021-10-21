@@ -83,12 +83,23 @@ export function useSend() {
   );
   const hasToApprove = allowance?.hasToApprove ?? false;
   const hasToSwitchChain = isConnected && fromChain !== chainId;
+
+  const tokenSymbol =
+    TOKENS_LIST[fromChain].find((t) => t.address === token)?.symbol ?? "";
+  const { data: fees } = useBridgeFees(
+    {
+      amount,
+      tokenSymbol,
+    },
+    { skip: tokenSymbol === "" }
+  );
   const canSend = useMemo(
     () =>
       fromChain &&
       toChain &&
       amount &&
       token &&
+      fees &&
       toAddress &&
       isValidAddress(toAddress) &&
       !hasToApprove &&
@@ -99,20 +110,12 @@ export function useSend() {
       toChain,
       amount,
       token,
-      error,
+      fees,
       toAddress,
       hasToApprove,
       hasToSwitchChain,
+      error,
     ]
-  );
-  const tokenSymbol =
-    TOKENS_LIST[fromChain].find((t) => t.address === token)?.symbol ?? "";
-  const { data: fees } = useBridgeFees(
-    {
-      amount,
-      tokenSymbol,
-    },
-    { skip: tokenSymbol === "" }
   );
   const send = useCallback(async () => {
     if (!signer || !canSend || !fees || !toAddress) {
@@ -125,7 +128,7 @@ export function useSend() {
       const value = isETH ? amount : ethers.constants.Zero;
       const l2Token = isETH ? TOKENS_LIST[fromChain][0].address : token;
       const { instantRelayFee, slowRelayFee } = fees;
-      timestamp = (await PROVIDERS[fromChain]().getBlock("latest")).timestamp;
+      timestamp = (await PROVIDERS[toChain]().getBlock("latest")).timestamp;
 
       const tx = await depositBox.deposit(
         toAddress,
@@ -138,6 +141,7 @@ export function useSend() {
       );
       return tx;
     } catch (e) {
+      console.error(e);
       throw new TransactionError(
         depositBox.address,
         "deposit",

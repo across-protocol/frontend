@@ -1,8 +1,8 @@
 import React from "react";
 import { Check, ArrowUpRight } from "react-feather";
 import { TOKENS_LIST, CHAINS, formatUnits } from "utils";
-import { useDeposits, useSend } from "state/hooks";
-import { Layout, Section, AccentSection } from "components";
+import { useDeposits } from "state/hooks";
+import { Layout } from "components";
 import {
   Wrapper,
   Heading,
@@ -10,28 +10,32 @@ import {
   Link,
   Info,
   Button,
+  Logo,
+  InfoSection,
+  Header,
 } from "./Confirmation.styles";
 
 const Confirmation: React.FC = () => {
   const { deposit, toggle } = useDeposits();
-  const { fromChain, toAddress, toChain, token, amount } = useSend();
   if (!deposit) return null;
 
-  const tokenInfo = TOKENS_LIST[fromChain].find((t) => t.address === token);
+  const tokenInfo = TOKENS_LIST[deposit.fromChain].find(
+    (t) => t.address === deposit.token
+  );
 
   return (
     <Layout>
       <Wrapper>
-        <Section>
+        <Header>
           <Heading>Deposit succeeded</Heading>
           <SuccessIcon>
             <Check strokeWidth={4} />
           </SuccessIcon>
-        </Section>
-        <AccentSection>
+        </Header>
+        <InfoSection>
           <Link
-            href={CHAINS[fromChain].constructExplorerLink(
-              deposit.transactionHash
+            href={CHAINS[deposit.fromChain].constructExplorerLink(
+              deposit.txHash
             )}
             target="_blank"
             rel="noopener norefferrer"
@@ -42,9 +46,12 @@ const Confirmation: React.FC = () => {
             <Info>
               <h3>Sending</h3>
               <div>
-                <img src="" alt={`${2} logo`} />
+                <Logo
+                  src={tokenInfo?.logoURI}
+                  alt={`${tokenInfo?.symbol} logo`}
+                />
                 <div>
-                  {formatUnits(amount, tokenInfo?.decimals ?? 18)}{" "}
+                  {formatUnits(deposit.amount, tokenInfo?.decimals ?? 18)}{" "}
                   {tokenInfo?.symbol}
                 </div>
               </div>
@@ -52,9 +59,9 @@ const Confirmation: React.FC = () => {
             <Info>
               <h3>From</h3>
               <div>
-                <img
-                  src={CHAINS[fromChain].logoURI}
-                  alt={`${CHAINS[fromChain].name} logo`}
+                <Logo
+                  src={CHAINS[deposit.fromChain].logoURI}
+                  alt={`${CHAINS[deposit.fromChain].name} logo`}
                 />
                 <div>{deposit.from}</div>
               </div>
@@ -62,15 +69,15 @@ const Confirmation: React.FC = () => {
             <Info>
               <h3>To</h3>
               <div>
-                <img
-                  src={CHAINS[toChain].logoURI}
-                  alt={`${CHAINS[toChain].name} logo`}
+                <Logo
+                  src={CHAINS[deposit.toChain].logoURI}
+                  alt={`${CHAINS[deposit.toChain].name} logo`}
                 />
-                <div>{toAddress}</div>
+                <div>{deposit.to}</div>
               </div>
             </Info>
             <Info>
-              <h3>ETA to {CHAINS[fromChain].name}</h3>
+              <h3>ETA to {CHAINS[deposit.fromChain].name}</h3>
               <div>
                 <div>~2 minutes</div>
               </div>
@@ -79,7 +86,7 @@ const Confirmation: React.FC = () => {
           <Button onClick={() => toggle({ showConfirmationScreen: false })}>
             Close
           </Button>
-        </AccentSection>
+        </InfoSection>
       </Wrapper>
     </Layout>
   );
