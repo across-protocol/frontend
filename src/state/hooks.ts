@@ -161,6 +161,7 @@ export function useSend() {
     fromChain,
     signer,
     toAddress,
+    toChain,
     token,
   ]);
 

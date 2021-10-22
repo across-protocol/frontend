@@ -105,7 +105,7 @@ const CoinSelection = () => {
   return (
     <Section>
       <Wrapper>
-        <SectionTitle>Amount</SectionTitle>
+        <SectionTitle>Asset</SectionTitle>
         <InputGroup>
           <RoundBox as="label" {...getLabelProps()}>
             <ToggleButton
