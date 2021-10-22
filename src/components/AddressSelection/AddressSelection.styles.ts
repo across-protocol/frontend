@@ -1,7 +1,11 @@
 import styled from "@emotion/styled";
 import { RoundBox as UnstyledRoundBox } from "../Box";
+import { Section } from "../Section";
 import { PrimaryButton, SecondaryButton, BaseButton } from "../Buttons";
 
+export const LastSection = styled(Section)`
+  border-bottom: none;
+`;
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;

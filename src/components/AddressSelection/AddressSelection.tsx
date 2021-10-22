@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { XOctagon } from "react-feather";
 import { useConnection, useSend } from "state/hooks";
 import { CHAINS, shortenAddress, isValidAddress } from "utils";
-import { Section, SectionTitle } from "../Section";
+import { SectionTitle } from "../Section";
 import Dialog from "../Dialog";
 import { SecondaryButton } from "../Buttons";
 import {
+  LastSection,
   Wrapper,
   RoundBox,
   Logo,
@@ -45,7 +46,7 @@ const AddressSelection: React.FC = () => {
   };
 
   return (
-    <Section>
+    <LastSection>
       <Wrapper>
         <SectionTitle>To</SectionTitle>
         <RoundBox>
@@ -83,7 +84,7 @@ const AddressSelection: React.FC = () => {
           </SecondaryButton>
         </ButtonGroup>
       </Dialog>
-    </Section>
+    </LastSection>
   );
 };
 

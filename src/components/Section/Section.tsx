@@ -14,4 +14,5 @@ export const AccentSection = styled.section`
     var(--color-primary-dark),
     var(--color-gray)
   );
+  border: 1px solid var(--color-gray);
 `;
