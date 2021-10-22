@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { Link as UnstyledLink } from "react-router-dom";
+import { COLORS } from "utils";
 import { ReactComponent as UnstyledLogo } from "assets/logo.svg";
 
 export const Wrapper = styled.header`
@@ -35,8 +36,7 @@ export const Item = styled.li`
     font-weight: bold;
   }
   &:hover:not([aria-selected="true"]) {
-    color: var(--color-white-transparent);
-    background-color: var(--color-gray);
+    color: hsla(${COLORS.gray[500]} / 0.5);
   }
 `;
 
