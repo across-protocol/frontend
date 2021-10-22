@@ -12,8 +12,8 @@ export const Wrapper = styled.div`
 `;
 export const RoundBox = styled(UnstyledBox)`
   --color: var(--color-white);
-  padding: 10px 15px;
   background-color: var(--color);
+  padding: 10px 15px;
   margin-top: 16px;
   flex: 2;
   display: flex;
@@ -102,6 +102,9 @@ export const Input = styled.input`
   margin: 0;
   width: 100%;
   text-align: right;
+  &::placeholder {
+    color: var(--color-gray-100);
+  }
 `;
 
 export const ErrorBox = styled(RoundBox)`
