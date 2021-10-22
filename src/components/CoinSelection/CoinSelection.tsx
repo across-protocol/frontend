@@ -43,12 +43,10 @@ const CoinSelection = () => {
   } = useSelect({
     items: tokenList,
     defaultSelectedItem: tokenList[0],
-    onSelectedItemChange: ({ selectedItem, highlightedIndex }) => {
+    onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
         setToken({ token: selectedItem.address });
       }
-      setAmount({ amount: ethers.constants.Zero });
-      setInputAmount("");
     },
   });
 
