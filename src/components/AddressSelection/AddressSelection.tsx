@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { XOctagon } from "react-feather";
 import { useConnection, useSend } from "state/hooks";
 import { CHAINS, shortenAddress, isValidAddress } from "utils";
@@ -24,8 +24,14 @@ import {
 const AddressSelection: React.FC = () => {
   const { isConnected } = useConnection();
   const { toChain, toAddress, setToAddress } = useSend();
-  const [address, setAddress] = useState(toAddress);
-  const [open, setOpen] = React.useState(false);
+  const [address, setAddress] = useState("");
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (toAddress) {
+      setAddress(toAddress);
+    }
+  }, [toAddress]);
 
   const toggle = () => {
     setOpen((oldOpen) => !oldOpen);
