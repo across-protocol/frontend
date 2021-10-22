@@ -141,6 +141,9 @@ const CoinSelection = () => {
               "--color": error
                 ? "var(--color-error-light)"
                 : "var(--color-white)",
+              "--outline-color": error
+                ? "var(--color-error)"
+                : "var(--color-primary)",
             }}
           >
             <MaxButton onClick={handleMaxClick} disabled={!isConnected}>

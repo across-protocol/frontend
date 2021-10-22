@@ -36,16 +36,30 @@ export const ChangeButton = styled(SecondaryButton)`
 export const DialogTitle = styled.h3``;
 
 export const InputWrapper = styled(RoundBox)`
+  position: relative;
   display: flex;
   align-items: center;
   background-color: var(--color-white);
   padding: 16px;
   margin: 14px 0 25px 0;
+  &:focus-within {
+    outline: var(--color-primary-dark) solid 1px;
+  }
 `;
 export const Input = styled.input`
   width: 100%;
   border: none;
   background-color: inherit;
+  outline: none;
+`;
+
+export const InputError = styled.div`
+  color: var(--color-gray);
+  font-size: ${12 / 16}rem;
+  position: absolute;
+  bottom: 0;
+  right: 16px;
+  transform: translateY(105%);
 `;
 
 export const ClearButton = styled(BaseButton)`

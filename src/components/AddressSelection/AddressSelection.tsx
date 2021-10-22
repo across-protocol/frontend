@@ -17,6 +17,7 @@ import {
   ClearButton,
   CancelButton,
   ButtonGroup,
+  InputError,
 } from "./AddressSelection.styles";
 
 const AddressSelection: React.FC = () => {
@@ -35,7 +36,7 @@ const AddressSelection: React.FC = () => {
   const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     setAddress(evt.target.value);
   };
-  const isValid = isValidAddress(address ?? "");
+  const isValid = !address || isValidAddress(address);
   const handleSubmit = () => {
     if (isValid && address) {
       setToAddress({ toAddress: address });
@@ -69,10 +70,15 @@ const AddressSelection: React.FC = () => {
               stroke="var(--color-white)"
             />
           </ClearButton>
+          {!isValid && <InputError>Not a valid address</InputError>}
         </InputWrapper>
+
         <ButtonGroup>
           <CancelButton onClick={toggle}>Cancel</CancelButton>
-          <SecondaryButton onClick={handleSubmit} disabled={!isValid}>
+          <SecondaryButton
+            onClick={handleSubmit}
+            disabled={!isValid || !address}
+          >
             Save Changes
           </SecondaryButton>
         </ButtonGroup>
