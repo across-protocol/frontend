@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { XOctagon } from "react-feather";
 import { useConnection, useSend } from "state/hooks";
 import { CHAINS, shortenAddress, isValidAddress } from "utils";

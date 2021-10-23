@@ -2,11 +2,7 @@ import React from "react";
 import Onboard from "bnc-onboard";
 import { Wallet } from "bnc-onboard/dist/src/interfaces";
 import { ethers } from "ethers";
-import {
-  onboardBaseConfig,
-  UnsupportedChainIdError,
-  isSupportedChainId,
-} from "utils";
+import { onboardBaseConfig } from "utils";
 import { useConnection } from "state/hooks";
 
 export function useOnboard() {
@@ -17,20 +13,13 @@ export function useOnboard() {
       Onboard({
         ...onboardBaseConfig(),
         subscriptions: {
-          address: (address: string) => {
-            setUpdate({ account: address });
-          },
           network: (chainIdInHex) => {
             if (chainIdInHex == null) {
               return;
             }
             const chainId = ethers.BigNumber.from(chainIdInHex).toNumber();
 
-            if (!isSupportedChainId(chainId)) {
-              setError({ error: new UnsupportedChainIdError(chainId) });
-            } else {
-              setUpdate({ chainId });
-            }
+            setUpdate({ chainId });
           },
           wallet: (wallet: Wallet) => {
             if (wallet?.provider?.selectedAddress) {
@@ -41,29 +30,25 @@ export function useOnboard() {
               const chainId = ethers.BigNumber.from(
                 wallet.provider.chainId
               ).toNumber();
-              if (!isSupportedChainId(chainId)) {
-                setError({ error: new UnsupportedChainIdError(chainId) });
-              } else {
-                setUpdate({
-                  account: wallet.provider.selectedAddress,
-                  chainId,
-                  provider,
-                  signer,
-                });
-              }
+
+              setUpdate({
+                account: wallet.provider.selectedAddress,
+                chainId,
+                provider,
+                signer,
+              });
             } else {
               disconnect();
             }
           },
         },
       }),
-    [setUpdate, setError, disconnect]
+    [setUpdate, disconnect]
   );
 
   const init = React.useCallback(async () => {
     try {
       await instance.walletSelect();
-      await instance.walletCheck();
     } catch (error: unknown) {
       setError({ error: new Error("Could not initialize Onboard.") });
     }
