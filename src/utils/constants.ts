@@ -25,7 +25,7 @@ export const QUERIES = {
 export const COLORS = {
   gray: {
     100: "0deg 0% 89%",
-    300: "240deg 2% 39%",
+    300: "240deg 4% 27%",
     500: "230deg 6% 19%",
   },
   primary: {
@@ -205,6 +205,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       decimals: 18,
       logoURI: wethLogo,
       bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
+    },
+    {
+      address: "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+      name: "USD Coin",
+      symbol: "USDC",
+      decimals: 6,
+      logoURI: usdcLogo,
+      bridgePool: "0xA45a8f21529119634daE22909BAc76cF4BE2f90f",
     },
     {
       address: ethers.constants.AddressZero,
@@ -442,20 +450,13 @@ export const DEFAULT_TO_CHAIN_ID = ChainId.MAINNET;
 /* Onboard config */
 
 export function onboardBaseConfig(): Initialization {
-  const infuraRpc = PROVIDERS[DEFAULT_FROM_CHAIN_ID]().connection.url;
+  // const infuraRpc = PROVIDERS[DEFAULT_FROM_CHAIN_ID]().connection.url;
   return {
     dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY || "",
     networkId: DEFAULT_FROM_CHAIN_ID,
     hideBranding: true,
     walletSelect: {
-      wallets: [
-        { walletName: "metamask", preferred: true },
-        {
-          walletName: "walletConnect",
-          rpc: { [DEFAULT_FROM_CHAIN_ID]: infuraRpc },
-        },
-        { walletName: "gnosis" },
-      ],
+      wallets: [{ walletName: "metamask", preferred: true }],
     },
     walletCheck: [
       { checkName: "connect" },

@@ -22,6 +22,7 @@ export const List = styled.ul`
   display: flex;
   list-style: none;
   height: 100%;
+  font-size: ${18 / 16}rem;
 `;
 
 export const Item = styled.li`

@@ -8,7 +8,7 @@ import { SecondaryButton } from "../Buttons";
 import {
   LastSection,
   Wrapper,
-  RoundBox,
+  MainBox,
   Logo,
   ChangeButton,
   Address,
@@ -55,7 +55,7 @@ const AddressSelection: React.FC = () => {
     <LastSection>
       <Wrapper>
         <SectionTitle>To</SectionTitle>
-        <RoundBox>
+        <MainBox>
           <Logo src={CHAINS[toChain].logoURI} alt={CHAINS[toChain].name} />
           <Info>
             <div>{CHAINS[toChain].name}</div>
@@ -64,7 +64,7 @@ const AddressSelection: React.FC = () => {
           <ChangeButton onClick={toggle} disabled={!isConnected}>
             Change
           </ChangeButton>
-        </RoundBox>
+        </MainBox>
       </Wrapper>
       <Dialog isOpen={open} onClose={toggle}>
         <h3>Send To</h3>

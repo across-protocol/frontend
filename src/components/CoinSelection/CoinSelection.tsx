@@ -2,9 +2,16 @@ import React, { useEffect } from "react";
 import { ethers } from "ethers";
 import { useSelect } from "downshift";
 
-import { useSend, useBalances, useConnection } from "state/hooks";
+import {
+  useSend,
+  useBalances,
+  useConnection,
+  useBridgeFees,
+  useBlocks,
+} from "state/hooks";
 import { parseUnits, formatUnits, ParsingError, TOKENS_LIST } from "utils";
 import { Section, SectionTitle } from "../Section";
+
 import {
   RoundBox,
   Wrapper,
@@ -15,14 +22,15 @@ import {
   Logo,
   ToggleIcon,
   MaxButton,
-  ErrorBox,
   Input,
+  ErrorBox,
 } from "./CoinSelection.styles";
 
 const CoinSelection = () => {
   const [inputAmount, setInputAmount] = React.useState<string>("");
   const { account, isConnected } = useConnection();
-  const { setAmount, setToken, fromChain, amount } = useSend();
+  const { setAmount, setToken, fromChain, toChain, amount } = useSend();
+
   const [error, setError] = React.useState<Error>();
   const tokenList = TOKENS_LIST[fromChain];
   const { data: balances } = useBalances(
@@ -42,7 +50,9 @@ const CoinSelection = () => {
     getMenuProps,
   } = useSelect({
     items: tokenList,
-    defaultSelectedItem: tokenList[0],
+    defaultSelectedItem: tokenList.find(
+      (t) => t.address === ethers.constants.AddressZero
+    ),
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
         setToken({ token: selectedItem.address });
@@ -99,6 +109,25 @@ const CoinSelection = () => {
       setInputAmount(formatUnits(balance, selectedItem.decimals));
     }
   };
+
+  const { block } = useBlocks(toChain);
+
+  const { data: fees } = useBridgeFees(
+    {
+      amount,
+      tokenSymbol: selectedItem!.symbol,
+      blockNumber: block?.blockNumber ?? 0,
+    },
+    { skip: !isConnected || amount.lte(0) || !block }
+  );
+
+  const errorMsg = error
+    ? error.message
+    : fees?.isAmountTooLow
+    ? "Bridge fee is too high. Try sending a larger amount."
+    : undefined;
+
+  const showError = error || (fees?.isAmountTooLow && amount.gt(0));
 
   return (
     <Section>
@@ -158,7 +187,7 @@ const CoinSelection = () => {
             />
           </RoundBox>
         </InputGroup>
-        {error && <ErrorBox>{error.message}</ErrorBox>}
+        {showError && <ErrorBox>{errorMsg}</ErrorBox>}
       </Wrapper>
     </Section>
   );

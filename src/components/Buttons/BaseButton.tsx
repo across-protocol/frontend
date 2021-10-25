@@ -7,6 +7,7 @@ export const BaseButton = styled.button`
   background: inherit;
   cursor: pointer;
   padding: 16px;
+  font-size: ${16 / 16}rem;
   border-radius: var(--radius);
   &:disabled {
     cursor: not-allowed;

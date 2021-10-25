@@ -5,6 +5,7 @@ import sendReducer from "./send";
 import chainApi from "./chainApi";
 import transactionsReducer from "./transactions";
 import depositsReducer from "./deposits";
+import blocksReducer from "./blocks";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     send: sendReducer,
     transactions: transactionsReducer,
     deposits: depositsReducer,
+    blocks: blocksReducer,
     [chainApi.reducerPath]: chainApi.reducer,
   },
   middleware: (getDefaultMiddleWare) =>

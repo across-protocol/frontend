@@ -3,8 +3,12 @@ import { useOnboard } from "hooks";
 import { useConnection, useSend } from "state/hooks";
 import { CHAINS, switchChain } from "utils";
 import { Section, SectionTitle } from "../Section";
-import { Wrapper, RoundBox, Logo } from "./ChainSelection.styles";
-import { PrimaryButton } from "components";
+import {
+  Wrapper,
+  RoundBox,
+  Logo,
+  ConnectButton,
+} from "./ChainSelection.styles";
 
 const ChainSelection: React.FC = () => {
   const { init } = useOnboard();
@@ -37,7 +41,7 @@ const ChainSelection: React.FC = () => {
           <span>{CHAINS[fromChain].name}</span>
         </RoundBox>
         {(hasToSwitchChain || !isConnected) && (
-          <PrimaryButton onClick={handleClick}>{buttonText}</PrimaryButton>
+          <ConnectButton onClick={handleClick}>{buttonText}</ConnectButton>
         )}
       </Wrapper>
     </Section>

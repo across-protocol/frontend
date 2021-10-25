@@ -1,4 +1,3 @@
-import { SecondaryButton } from "components";
 import { useOnboard } from "hooks";
 import React from "react";
 import { useConnection, useETHBalance } from "state/hooks";
@@ -8,7 +7,7 @@ import {
   shortenAddress,
   formatEther,
 } from "utils";
-import { Wrapper, Account, Info } from "./Wallet.styles";
+import { Wrapper, Account, Info, ConnectButton } from "./Wallet.styles";
 
 const Wallet: React.FC = () => {
   const { account, isConnected, chainId } = useConnection();
@@ -20,7 +19,7 @@ const Wallet: React.FC = () => {
   );
 
   if (!isConnected || !account || !chainId) {
-    return <SecondaryButton onClick={init}>Connect Wallet</SecondaryButton>;
+    return <ConnectButton onClick={init}>Connect Wallet</ConnectButton>;
   }
 
   return (

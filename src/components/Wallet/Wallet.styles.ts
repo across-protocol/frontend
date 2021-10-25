@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { RoundBox } from "../Box";
+import { SecondaryButton } from "../Buttons";
 
 export const Wrapper = styled(RoundBox)`
   background-color: inherit;
@@ -7,6 +8,11 @@ export const Wrapper = styled(RoundBox)`
   display: grid;
   grid-template-columns: 1fr 1fr;
   cursor: pointer;
+`;
+
+export const ConnectButton = styled(SecondaryButton)`
+  padding: 12px 16px;
+  border: 1px solid transparent;
 `;
 
 export const Account = styled.div`
@@ -32,6 +38,7 @@ export const Info = styled.div`
     line-height: 1;
   }
   & > div:last-of-type {
-    color: var(--gray-300);
+    color: var(--color-gray-300);
+    font-size: ${14 / 16}rem;
   }
 `;

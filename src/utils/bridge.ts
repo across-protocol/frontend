@@ -22,18 +22,6 @@ export function getDepositBox(
   );
 }
 
-export type RelayFees = {
-  instantRelayFee: {
-    pct: ethers.BigNumber;
-    total: ethers.BigNumber;
-  };
-  slowRelayFee: {
-    pct: ethers.BigNumber;
-    total: ethers.BigNumber;
-  };
-};
-export type BridgeFees = RelayFees;
-
 const { constants, gasFeeCalculator } = across;
 
 // currently available constants
@@ -46,7 +34,26 @@ const {
   SLOW_UMA_GAS,
 } = constants;
 
-export async function getRelayFees(token: string, amount: ethers.BigNumber) {
+export type Fee = {
+  total: ethers.BigNumber;
+  pct: ethers.BigNumber;
+};
+
+type RelayFees = {
+  instantRelayFee: Fee;
+  slowRelayFee: Fee;
+};
+
+export type BridgeFees = {
+  instantRelayFee: Fee;
+  slowRelayFee: Fee;
+  lpFee: Fee;
+};
+
+export async function getRelayFees(
+  token: string,
+  amount: ethers.BigNumber
+): Promise<RelayFees & { isAmountTooLow: boolean }> {
   const l1Equivalent = TOKENS_LIST[ChainId.MAINNET].find(
     (t) => t.symbol === token
   )?.address;
@@ -81,15 +88,23 @@ export async function getRelayFees(token: string, amount: ethers.BigNumber) {
     l1Equivalent === ethers.constants.AddressZero ? undefined : l1Equivalent
   );
 
+  const totalFees = ethers.BigNumber.from(gasFeesSlow.gasFees).add(
+    gasFeesFast.gasFees
+  );
+
+  // amount*0.25 <= totalFees <==> amount*25 <= totalFees * 100
+  const isFeeMoreThan25Percent = amount.mul(25).lte(totalFees.mul(100));
+
   return {
     instantRelayFee: {
-      pct: gasFeesFast.feesAsPercent,
-      total: gasFeesFast.gasFees,
+      pct: ethers.BigNumber.from(gasFeesFast.feesAsPercent),
+      total: ethers.BigNumber.from(gasFeesFast.gasFees),
     },
     slowRelayFee: {
-      pct: gasFeesSlow.feesAsPercent,
-      total: gasFeesSlow.gasFees,
+      pct: ethers.BigNumber.from(gasFeesSlow.feesAsPercent),
+      total: ethers.BigNumber.from(gasFeesSlow.gasFees),
     },
+    isAmountTooLow: isFeeMoreThan25Percent,
   };
 }
 
@@ -103,7 +118,7 @@ const { calculateRealizedLpFeePct } = across.feeCalculator;
 export async function getLpFee(
   tokenSymbol: string,
   amount: ethers.BigNumber
-): Promise<ethers.BigNumber> {
+): Promise<Fee> {
   const provider = PROVIDERS[ChainId.MAINNET]();
   const l1EqInfo = TOKENS_LIST[ChainId.MAINNET].find(
     (t) => t.symbol === tokenSymbol
@@ -128,5 +143,8 @@ export async function getLpFee(
     nextUt
   );
   const total = amount.mul(realizedLpFeePct);
-  return total;
+  return {
+    pct: realizedLpFeePct,
+    total,
+  };
 }

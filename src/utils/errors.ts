@@ -25,3 +25,18 @@ export class TransactionError extends Error {
     this.message = `Transaction to ${address} calling ${method} reverted with args: [${txArgs}]`;
   }
 }
+
+export class FeeTooHighError extends Error {
+  public constructor() {
+    super();
+    this.name = this.constructor.name;
+    this.message = "Fees are too high.";
+  }
+}
+export class InsufficientLiquidityError extends Error {
+  public constructor(token: string) {
+    super();
+    this.name = this.constructor.name;
+    this.message = `Insufficient liquidity for ${token}.`;
+  }
+}

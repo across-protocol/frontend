@@ -5,6 +5,7 @@ import {
   useDeposits,
   useSend,
   useTransactions,
+  useBlocks,
 } from "state/hooks";
 import { TransactionTypes } from "state/transactions";
 import { useERC20 } from "hooks";
@@ -15,15 +16,23 @@ import { Wrapper, Info } from "./SendAction.styles";
 const SendAction: React.FC = () => {
   const { amount, fromChain, toChain, token, send, hasToApprove, canSend } =
     useSend();
+
+  const { block } = useBlocks(toChain);
+
   const { addTransaction } = useTransactions();
   const { addDeposit } = useDeposits();
   const { approve } = useERC20(token);
   const { signer } = useConnection();
   const tokenInfo = TOKENS_LIST[fromChain].find((t) => t.address === token);
-  const { data: fees } = useBridgeFees({
-    tokenSymbol: tokenInfo!.symbol,
-    amount,
-  });
+
+  const { data: fees } = useBridgeFees(
+    {
+      amount,
+      tokenSymbol: tokenInfo!.symbol,
+      blockNumber: block?.blockNumber ?? 0,
+    },
+    { skip: !tokenInfo || !block || !amount.gt(0) }
+  );
   const depositBox = getDepositBox(fromChain);
   const handleApprove = async () => {
     const tx = await approve({ amount, spender: depositBox.address, signer });
@@ -54,11 +63,6 @@ const SendAction: React.FC = () => {
 
   const buttonMsg = hasToApprove ? "Approve" : "Send";
 
-  console.log({
-    instant: fees?.instantRelayFee?.total?.toString(),
-    slow: fees?.slowRelayFee?.total?.toString(),
-    lpFee: fees?.lpFee?.total?.toString(),
-  });
   const amountMinusFees =
     fees && amount.gte(0)
       ? amount.sub(fees.instantRelayFee.total).sub(fees.slowRelayFee.total)
@@ -76,7 +80,10 @@ const SendAction: React.FC = () => {
             <Info>
               <div>Bridge Fee</div>
               <div>
-                {formatUnits(fees.instantRelayFee.total, tokenInfo.decimals)}{" "}
+                {formatUnits(
+                  fees.instantRelayFee.total.add(fees.slowRelayFee.total),
+                  tokenInfo.decimals
+                )}{" "}
                 {tokenInfo.symbol}
               </div>
             </Info>
@@ -89,6 +96,7 @@ const SendAction: React.FC = () => {
             </Info>
           </>
         )}
+
         <PrimaryButton
           onClick={handleClick}
           disabled={!canSend || amountMinusFees.lte(0)}

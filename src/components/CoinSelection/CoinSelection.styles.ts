@@ -2,18 +2,18 @@ import styled from "@emotion/styled";
 import { SecondaryButton } from "../Buttons";
 import { ChevronDown } from "react-feather";
 import { COLORS } from "utils";
-import { RoundBox as UnstyledBox } from "../Box";
+import { RoundBox as UnstyledBox, ErrorBox as UnstyledErrorBox } from "../Box";
 
 export const Wrapper = styled.div`
   --radius: 30px;
   display: flex;
   flex-direction: column;
-  padding-bottom: 20px;
 `;
 export const RoundBox = styled(UnstyledBox)`
   --color: var(--color-white);
   --outline-color: var(--color-primary);
   background-color: var(--color);
+  font-size: ${16 / 16}rem;
   padding: 10px 15px;
   margin-top: 16px;
   flex: 2;
@@ -36,6 +36,7 @@ export const ToggleButton = styled.button`
   --radius: 30px;
   padding: 0;
   margin: 0;
+  font-size: inherit;
   background-color: inherit;
   border: none;
   display: flex;
@@ -96,6 +97,7 @@ export const ToggleIcon = styled(ChevronDown)`
 export const MaxButton = styled(SecondaryButton)`
   text-transform: uppercase;
   padding: 10px 20px;
+  font-size: ${14 / 16}rem;
 `;
 
 export const Input = styled.input`
@@ -109,11 +111,10 @@ export const Input = styled.input`
   outline: none;
 
   &::placeholder {
-    color: var(--color-gray-100);
+    color: var(--color-gray-300);
   }
 `;
 
-export const ErrorBox = styled(RoundBox)`
-  background-color: var(--color-error);
-  color: var(--color-gray);
+export const ErrorBox = styled(UnstyledErrorBox)`
+  margin-top: 10px;
 `;

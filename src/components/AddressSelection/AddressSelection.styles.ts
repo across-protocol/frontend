@@ -17,6 +17,11 @@ export const RoundBox = styled(UnstyledRoundBox)`
   align-items: center;
 `;
 
+export const MainBox = styled(RoundBox)`
+  --radius: 45px;
+  padding: 10px 15px;
+`;
+
 export const Logo = styled.img`
   width: 30px;
   height: 30px;
@@ -31,10 +36,12 @@ export const Info = styled.div`
 `;
 export const Address = styled.div`
   color: var(--color-white-transparent);
+  font-size: ${14 / 16}rem;
 `;
 export const ChangeButton = styled(SecondaryButton)`
   margin-left: auto;
-  padding: 12px;
+  padding: 10px 14px;
+  font-size: ${14 / 16}rem;
 `;
 
 export const DialogTitle = styled.h3``;

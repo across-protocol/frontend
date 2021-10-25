@@ -1,6 +1,7 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ethers } from "ethers";
-import { PROVIDERS, getRelayFees, ChainId, TOKENS_LIST, getLpFee } from "utils";
+import { PROVIDERS, getRelayFees, ChainId, TOKENS_LIST } from "utils";
+import type { BridgeFees } from "utils";
 
 import { clients } from "@uma/sdk";
 
@@ -20,6 +21,11 @@ type AllowanceQueryArgs = {
 type BridgeFeesQueryArgs = {
   amount: ethers.BigNumber;
   tokenSymbol: string;
+  blockNumber: number;
+};
+
+type BridgeFeesQueryResult = BridgeFees & {
+  isAmountTooLow: boolean;
 };
 
 const api = createApi({
@@ -81,16 +87,24 @@ const api = createApi({
         }
       },
     }),
-    bridgeFees: build.query<any, BridgeFeesQueryArgs>({
-      queryFn: async ({ amount, tokenSymbol }) => {
+    bridgeFees: build.query<BridgeFeesQueryResult, BridgeFeesQueryArgs>({
+      // We want to re-run the fee query on each block change
+      queryFn: async ({ amount, tokenSymbol, blockNumber }) => {
         try {
-          const { instantRelayFee, slowRelayFee } = await getRelayFees(
-            tokenSymbol,
-            amount
-          );
-          const lpFee = await getLpFee(tokenSymbol, amount);
-          return { data: { instantRelayFee, slowRelayFee, lpFee } };
+          const { instantRelayFee, slowRelayFee, isAmountTooLow } =
+            await getRelayFees(tokenSymbol, amount);
+          //const lpFee = await getLpFee(tokenSymbol, amount);
+          const lpFee = {
+            total: ethers.constants.Zero,
+            pct: ethers.constants.Zero,
+          };
+          console.log({ instantRelayFee, slowRelayFee, lpFee, blockNumber });
+          return {
+            data: { instantRelayFee, slowRelayFee, lpFee, isAmountTooLow },
+          };
         } catch (error) {
+          console.log("bridge fee calculation failed");
+          console.log(error);
           return { error };
         }
       },

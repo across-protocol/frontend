@@ -1,5 +1,6 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { ethers } from "ethers";
 import { bindActionCreators } from "redux";
 import {
   getDepositBox,
@@ -7,6 +8,7 @@ import {
   TOKENS_LIST,
   PROVIDERS,
   TransactionError,
+  ChainId,
 } from "utils";
 import type { RootState, AppDispatch } from "./";
 import { update, disconnect, error as errorAction } from "./connection";
@@ -21,7 +23,7 @@ import {
 import { useAllowance, useBridgeFees } from "./chainApi";
 import { add } from "./transactions";
 import { deposit as depositAction, toggle } from "./deposits";
-import { ethers } from "ethers";
+import { setBlock } from "./blocks";
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
@@ -53,6 +55,26 @@ export function useConnection() {
   };
 }
 
+export function useBlocks(toChain: ChainId) {
+  const state = useAppSelector((state) => state.blocks);
+  const dispatch = useAppDispatch();
+  const actions = bindActionCreators({ setBlock }, dispatch);
+  useEffect(() => {
+    const provider = PROVIDERS[toChain]();
+    provider.on("block", async (blockNumber: number) => {
+      const block = await provider.getBlock(blockNumber);
+      setBlock({ block: { ...block, blockNumber } });
+    });
+    return () => {
+      provider.removeAllListeners();
+    };
+  }, [toChain]);
+  return {
+    block: state.block,
+    setBlock: actions.setBlock,
+  };
+}
+
 export function useSend() {
   const { isConnected, chainId, account, signer } = useConnection();
   const { fromChain, toChain, toAddress, amount, token, error } =
@@ -70,6 +92,8 @@ export function useSend() {
     dispatch
   );
 
+  const { block } = useBlocks(toChain);
+
   const depositBox = getDepositBox(fromChain);
   const { data: allowance } = useAllowance(
     {
@@ -86,16 +110,19 @@ export function useSend() {
 
   const tokenSymbol =
     TOKENS_LIST[fromChain].find((t) => t.address === token)?.symbol ?? "";
+
   const { data: fees } = useBridgeFees(
     {
       amount,
       tokenSymbol,
+      blockNumber: block?.blockNumber ?? 0,
     },
-    { skip: tokenSymbol === "" }
+    { skip: tokenSymbol === "" || amount.lte(0) || !block }
   );
   const canSend = useMemo(
     () =>
       fromChain &&
+      block &&
       toChain &&
       amount &&
       token &&
@@ -104,9 +131,11 @@ export function useSend() {
       isValidAddress(toAddress) &&
       !hasToApprove &&
       !hasToSwitchChain &&
-      !error,
+      !error &&
+      !fees.isAmountTooLow,
     [
       fromChain,
+      block,
       toChain,
       amount,
       token,
@@ -118,17 +147,17 @@ export function useSend() {
     ]
   );
   const send = useCallback(async () => {
-    if (!signer || !canSend || !fees || !toAddress) {
+    if (!signer || !canSend || !fees || !toAddress || !block) {
       return;
     }
-    let timestamp = NaN;
+
     try {
       const depositBox = getDepositBox(fromChain, signer);
       const isETH = token === ethers.constants.AddressZero;
       const value = isETH ? amount : ethers.constants.Zero;
       const l2Token = isETH ? TOKENS_LIST[fromChain][0].address : token;
       const { instantRelayFee, slowRelayFee } = fees;
-      timestamp = (await PROVIDERS[toChain]().getBlock("latest")).timestamp;
+      const timestamp = block.timestamp;
 
       const tx = await depositBox.deposit(
         toAddress,
@@ -150,18 +179,18 @@ export function useSend() {
         amount,
         fees.slowRelayFee.pct,
         fees.instantRelayFee.pct,
-        timestamp
+        block.timestamp
       );
     }
   }, [
     amount,
+    block,
     canSend,
     depositBox.address,
     fees,
     fromChain,
     signer,
     toAddress,
-    toChain,
     token,
   ]);
 

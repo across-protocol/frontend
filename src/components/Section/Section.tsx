@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 export const Section = styled.section`
   color: var(--color-white);
   border-bottom: 1px solid var(--color-primary-dark);
-  padding: 15px 30px;
+  padding: 8px 30px 25px;
 `;
 export const SectionTitle = styled.h3`
   font-weight: 700;

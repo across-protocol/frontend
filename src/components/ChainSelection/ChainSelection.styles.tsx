@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { PrimaryButton } from "../Buttons";
 import { RoundBox as UnstyledBox } from "../Box";
 
 export const Wrapper = styled.div`
@@ -9,7 +10,11 @@ export const Wrapper = styled.div`
 export const RoundBox = styled(UnstyledBox)`
   display: flex;
   align-items: center;
-  margin: 16px 0;
+  margin-top: 16px;
+`;
+
+export const ConnectButton = styled(PrimaryButton)`
+  margin-top: 16px;
 `;
 
 export const Logo = styled.img`
