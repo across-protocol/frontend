@@ -19,11 +19,13 @@ import {
   toChain as toChainAction,
   toAddress as toAddressAction,
   error as sendErrorAction,
+  amount,
 } from "./send";
 import { useAllowance, useBridgeFees } from "./chainApi";
 import { add } from "./transactions";
 import { deposit as depositAction, toggle } from "./deposits";
 import { setBlock } from "./blocks";
+import { parseEther } from "@ethersproject/units";
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
@@ -155,7 +157,9 @@ export function useSend() {
     try {
       const depositBox = getDepositBox(fromChain, signer);
       const isETH = token === ethers.constants.AddressZero;
-      const value = isETH ? amount : ethers.constants.Zero;
+      const value = isETH
+        ? amount.sub(parseEther("0.02"))
+        : ethers.constants.Zero;
       const l2Token = isETH ? TOKENS_LIST[fromChain][0].address : token;
       const { instantRelayFee, slowRelayFee } = fees;
       const timestamp = block.timestamp;
@@ -163,7 +167,7 @@ export function useSend() {
       const tx = await depositBox.deposit(
         toAddress,
         l2Token,
-        amount,
+        isETH ? amount.sub(parseEther("0.02")) : amount,
         slowRelayFee.pct,
         instantRelayFee.pct,
         timestamp,

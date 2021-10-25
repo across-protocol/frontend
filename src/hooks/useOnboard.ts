@@ -30,29 +30,22 @@ export function useOnboard() {
                 wallet.provider
               );
               const signer = provider.getSigner();
-              const chainId = ethers.BigNumber.from(
-                wallet.provider.chainId
-              ).toNumber();
-
               setUpdate({
                 account: wallet.provider.selectedAddress,
-                chainId,
                 provider,
                 signer,
               });
-            } else {
-              disconnect();
             }
           },
         },
       }),
-    [setUpdate, disconnect]
+    [setUpdate]
   );
 
   const init = React.useCallback(async () => {
     try {
-      const selected = await instance.walletSelect("metamask");
-      console.log({ selected });
+      await instance.walletSelect();
+      await instance.walletCheck();
     } catch (error: unknown) {
       setError({ error: new Error("Could not initialize Onboard.") });
     }
