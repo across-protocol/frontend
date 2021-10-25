@@ -1,6 +1,6 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ethers } from "ethers";
-import { PROVIDERS, getRelayFees, ChainId, TOKENS_LIST } from "utils";
+import { PROVIDERS, getRelayFees, ChainId, TOKENS_LIST, getLpFee } from "utils";
 import type { BridgeFees } from "utils";
 
 import { clients } from "@uma/sdk";
@@ -100,11 +100,11 @@ const api = createApi({
         try {
           const { instantRelayFee, slowRelayFee, isAmountTooLow } =
             await getRelayFees(tokenSymbol, amount);
-          //const lpFee = await getLpFee(tokenSymbol, amount);
-          const lpFee = {
-            total: ethers.constants.Zero,
-            pct: ethers.constants.Zero,
-          };
+          const lpFee = await getLpFee(tokenSymbol, amount);
+          // const lpFee = {
+          //   total: ethers.constants.Zero,
+          //   pct: ethers.constants.Zero,
+          // };
           console.log({ instantRelayFee, slowRelayFee, lpFee, blockNumber });
           return {
             data: { instantRelayFee, slowRelayFee, lpFee, isAmountTooLow },
