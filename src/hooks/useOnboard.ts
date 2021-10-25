@@ -25,17 +25,13 @@ export function useOnboard() {
             setUpdate({ chainId });
           },
           wallet: (wallet: Wallet) => {
-            if (wallet?.provider?.selectedAddress) {
-              const provider = new ethers.providers.Web3Provider(
-                wallet.provider
-              );
-              const signer = provider.getSigner();
-              setUpdate({
-                account: wallet.provider.selectedAddress,
-                provider,
-                signer,
-              });
-            }
+            const provider = new ethers.providers.Web3Provider(wallet.provider);
+            const signer = provider.getSigner();
+            setUpdate({
+              account: wallet.provider.selectedAddress,
+              provider,
+              signer,
+            });
           },
         },
       }),

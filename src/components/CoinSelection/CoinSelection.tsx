@@ -41,6 +41,7 @@ const CoinSelection = () => {
     { skip: !account }
   );
 
+  console.log({ balances: balances?.map((b) => b.toString()) });
   const {
     isOpen,
     selectedItem,

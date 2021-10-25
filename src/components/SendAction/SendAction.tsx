@@ -6,6 +6,7 @@ import {
   useSend,
   useTransactions,
   useBlocks,
+  useAllowance,
 } from "state/hooks";
 import { TransactionTypes } from "state/transactions";
 import { useERC20 } from "hooks";
@@ -16,6 +17,7 @@ import { Wrapper, Info } from "./SendAction.styles";
 const SendAction: React.FC = () => {
   const { amount, fromChain, toChain, token, send, hasToApprove, canSend } =
     useSend();
+  const { account } = useConnection();
 
   const { block } = useBlocks(toChain);
 
@@ -33,11 +35,24 @@ const SendAction: React.FC = () => {
     },
     { skip: !tokenInfo || !block || !amount.gt(0) }
   );
+
   const depositBox = getDepositBox(fromChain);
+  const { refetch } = useAllowance(
+    {
+      owner: account!,
+      spender: depositBox.address,
+      chainId: fromChain,
+      token,
+      amount,
+    },
+    { skip: !account }
+  );
   const handleApprove = async () => {
     const tx = await approve({ amount, spender: depositBox.address, signer });
     if (tx) {
       addTransaction({ ...tx, meta: { label: TransactionTypes.APPROVE } });
+      await tx.wait();
+      refetch();
     }
   };
   const handleSend = async () => {
@@ -68,6 +83,8 @@ const SendAction: React.FC = () => {
       ? amount.sub(fees.instantRelayFee.total).sub(fees.slowRelayFee.total)
       : amount;
 
+  const buttonDisabled = (!hasToApprove && !canSend) || amountMinusFees.lte(0);
+
   return (
     <AccentSection>
       <Wrapper>
@@ -97,10 +114,7 @@ const SendAction: React.FC = () => {
           </>
         )}
 
-        <PrimaryButton
-          onClick={handleClick}
-          disabled={!canSend || amountMinusFees.lte(0)}
-        >
+        <PrimaryButton onClick={handleClick} disabled={buttonDisabled}>
           {buttonMsg}
         </PrimaryButton>
       </Wrapper>
