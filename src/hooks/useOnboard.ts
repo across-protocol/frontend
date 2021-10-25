@@ -51,7 +51,8 @@ export function useOnboard() {
 
   const init = React.useCallback(async () => {
     try {
-      await instance.walletSelect();
+      const selected = await instance.walletSelect("metamask");
+      console.log({ selected });
     } catch (error: unknown) {
       setError({ error: new Error("Could not initialize Onboard.") });
     }
