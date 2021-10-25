@@ -412,11 +412,8 @@ export const PROVIDERS: Record<ChainId, GetProvider> = {
   [ChainId.ARBITRUM]: memoize(
     () =>
       new ethers.providers.JsonRpcProvider(
-        `https://arb-mainnet.g.alchemy.com/v2/1SJeu8UAnhkQNR23ixdtkOjnJy6LbF4G`
+        `https://arbitrum-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
-    // new ethers.providers.JsonRpcProvider(
-    //   `https://arbitrum-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
-    // )
   ),
   [ChainId.ARBITRUM_RINKEBY]: memoize(
     () =>

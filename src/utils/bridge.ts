@@ -75,16 +75,20 @@ export async function getRelayFees(
       ? SLOW_UMA_GAS
       : SLOW_ERC_GAS;
 
+  const DISCOUNT = 0.95;
+  const gasAmountSlowWithDiscount = gasAmountSlow * (1 - DISCOUNT);
+  const gasAmountFastWithDiscount = gasAmountFast * (1 - DISCOUNT);
+
   const gasFeesSlow = await gasFeeCalculator(
     provider,
     amount,
-    gasAmountSlow,
+    gasAmountSlowWithDiscount,
     l1Equivalent === ethers.constants.AddressZero ? undefined : l1Equivalent
   );
   const gasFeesFast = await gasFeeCalculator(
     provider,
     amount,
-    gasAmountFast,
+    gasAmountFastWithDiscount,
     l1Equivalent === ethers.constants.AddressZero ? undefined : l1Equivalent
   );
 
