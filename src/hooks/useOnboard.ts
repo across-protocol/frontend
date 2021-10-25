@@ -13,6 +13,9 @@ export function useOnboard() {
       Onboard({
         ...onboardBaseConfig(),
         subscriptions: {
+          address: (address: string) => {
+            setUpdate({ account: address });
+          },
           network: (chainIdInHex) => {
             if (chainIdInHex == null) {
               return;

@@ -16,7 +16,7 @@ const blockSlice = createSlice({
     },
   },
   extraReducers: (builder) =>
-    builder.addCase(toChain, (state, action) => {
+    builder.addCase(toChain, (state) => {
       state = initialState;
       return state;
     }),
