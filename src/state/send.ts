@@ -2,12 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ethers } from "ethers";
 import { update } from "./connection";
 
-import {
-  ChainId,
-  TOKENS_LIST,
-  DEFAULT_FROM_CHAIN_ID,
-  DEFAULT_TO_CHAIN_ID,
-} from "utils";
+import { ChainId, DEFAULT_FROM_CHAIN_ID, DEFAULT_TO_CHAIN_ID } from "utils";
 
 type State = {
   token: string;
@@ -19,7 +14,7 @@ type State = {
 };
 
 const initialState: State = {
-  token: TOKENS_LIST[DEFAULT_FROM_CHAIN_ID][0].address,
+  token: ethers.constants.AddressZero,
   amount: ethers.constants.Zero,
   toChain: DEFAULT_TO_CHAIN_ID,
   fromChain: DEFAULT_FROM_CHAIN_ID,

@@ -59,6 +59,7 @@ const api = createApi({
         try {
           const provider = PROVIDERS[chainId]();
           // For ETH, allowance does not make sense
+          console.log({ token, amount });
           if (token === ethers.constants.AddressZero) {
             return {
               data: {

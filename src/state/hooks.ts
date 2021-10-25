@@ -98,7 +98,7 @@ export function useSend() {
   const { data: allowance } = useAllowance(
     {
       chainId: fromChain,
-      token: token,
+      token,
       owner: account!,
       spender: depositBox.address,
       amount,
@@ -106,6 +106,7 @@ export function useSend() {
     { skip: !account || !isConnected || !depositBox }
   );
   const hasToApprove = allowance?.hasToApprove ?? false;
+  console.log({ hasToApprove });
   const hasToSwitchChain = isConnected && fromChain !== chainId;
 
   const tokenSymbol =

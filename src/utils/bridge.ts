@@ -127,6 +127,9 @@ export async function getLpFee(
   if (!l1EqInfo) {
     throw new Error(`Token ${tokenSymbol} not found in TOKENS_LIST`);
   }
+  if (amount.lte(0)) {
+    throw new Error(`Amount must be greater than 0.`);
+  }
   const { bridgePool: bridgePoolAddress } = l1EqInfo;
   const bridgePool = BridgePoolEthers__factory.connect(
     bridgePoolAddress,
