@@ -76,8 +76,8 @@ export async function getRelayFees(
       : SLOW_ERC_GAS;
 
   const DISCOUNT = 0.95;
-  const gasAmountSlowWithDiscount = gasAmountSlow * (1 - DISCOUNT);
-  const gasAmountFastWithDiscount = gasAmountFast * (1 - DISCOUNT);
+  const gasAmountSlowWithDiscount = Math.floor(gasAmountSlow * (1 - DISCOUNT));
+  const gasAmountFastWithDiscount = Math.floor(gasAmountFast * (1 - DISCOUNT));
 
   const gasFeesSlow = await gasFeeCalculator(
     provider,

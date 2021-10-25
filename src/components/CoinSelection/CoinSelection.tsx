@@ -157,7 +157,7 @@ const CoinSelection = () => {
                   <div>{token.name}</div>
                   <div>
                     {balances &&
-                      formatUnits(balances[index], selectedItem!.decimals)}
+                      formatUnits(balances[index], tokenList[index].decimals)}
                   </div>
                 </Item>
               ))}
