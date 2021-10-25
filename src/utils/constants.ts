@@ -199,7 +199,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   ],
   [ChainId.ARBITRUM]: [
     {
-      address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      address: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
       name: "Wrapped Ethereum",
       symbol: "WETH",
       decimals: 18,

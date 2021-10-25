@@ -19,7 +19,6 @@ import {
   toChain as toChainAction,
   toAddress as toAddressAction,
   error as sendErrorAction,
-  amount,
 } from "./send";
 import { useAllowance, useBridgeFees } from "./chainApi";
 import { add } from "./transactions";
@@ -108,7 +107,7 @@ export function useSend() {
     { skip: !account || !isConnected || !depositBox }
   );
   const hasToApprove = allowance?.hasToApprove ?? false;
-  console.log({ hasToApprove });
+
   const hasToSwitchChain = isConnected && fromChain !== chainId;
 
   const tokenSymbol =
@@ -158,7 +157,7 @@ export function useSend() {
       const depositBox = getDepositBox(fromChain, signer);
       const isETH = token === ethers.constants.AddressZero;
       const value = isETH
-        ? amount.sub(parseEther("0.02"))
+        ? amount.sub(parseEther("0.002"))
         : ethers.constants.Zero;
       const l2Token = isETH ? TOKENS_LIST[fromChain][0].address : token;
       const { instantRelayFee, slowRelayFee } = fees;
@@ -167,7 +166,7 @@ export function useSend() {
       const tx = await depositBox.deposit(
         toAddress,
         l2Token,
-        isETH ? amount.sub(parseEther("0.02")) : amount,
+        isETH ? amount.sub(parseEther("0.002")) : amount,
         slowRelayFee.pct,
         instantRelayFee.pct,
         timestamp,

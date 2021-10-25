@@ -4,6 +4,7 @@ import { PROVIDERS, getRelayFees, ChainId, TOKENS_LIST } from "utils";
 import type { BridgeFees } from "utils";
 
 import { clients } from "@uma/sdk";
+import { ERC20Ethers__factory } from "@uma/contracts-frontend";
 
 type BalancesQueryArgs = {
   account: string;
@@ -36,13 +37,19 @@ const api = createApi({
         try {
           const provider = PROVIDERS[chainId]();
           const balances = await Promise.all(
-            TOKENS_LIST[chainId].map((token) => {
+            TOKENS_LIST[chainId].map(async (token) => {
               // If it is ETH, use getBalance from the provider
               if (token.symbol === "ETH") {
                 return provider.getBalance(account);
               }
-              const contract = clients.erc20.connect(token.address, provider);
-              return contract.balanceOf(account);
+              const contract = ERC20Ethers__factory.connect(
+                token.address,
+                provider
+              );
+              const balance = await contract.balanceOf(account);
+
+              console.log({ balance, token, contract });
+              return balance;
             })
           );
           return { data: balances };
@@ -59,7 +66,6 @@ const api = createApi({
         try {
           const provider = PROVIDERS[chainId]();
           // For ETH, allowance does not make sense
-          console.log({ token, amount });
           if (token === ethers.constants.AddressZero) {
             return {
               data: {
