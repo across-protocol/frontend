@@ -477,7 +477,7 @@ export const POOL_LIST: Token[] = [
     symbol: "ETH",
     decimals: 18,
     logoURI: ethereumLogo,
-    bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
+    bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
   },
   {
     address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
@@ -485,7 +485,7 @@ export const POOL_LIST: Token[] = [
     symbol: "USDC",
     decimals: 6,
     logoURI: usdcLogo,
-    bridgePool: "0x190978cC580f5A48D55A4A20D0A952FA1dA3C057",
+    bridgePool: "0x54d8d0a00b8288b49694a765C59694ddE8e4B931",
   },
   {
     address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
@@ -493,6 +493,6 @@ export const POOL_LIST: Token[] = [
     symbol: "UMA",
     decimals: 18,
     logoURI: umaLogo,
-    bridgePool: "0xFDe94018c0218Ac90377ED7c405c540105dbb20f",
+    bridgePool: "0x4495C9F0C10D82823a2Dc5658615874a5B48bFA0",
   },
 ];
