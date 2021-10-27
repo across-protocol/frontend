@@ -77,7 +77,7 @@ const Confirmation: React.FC = () => {
               </div>
             </Info>
             <Info>
-              <h3>ETA to {CHAINS[deposit.fromChain].name}</h3>
+              <h3>ETA to {CHAINS[deposit.toChain].name}</h3>
               <div>
                 <div>~2 minutes</div>
               </div>

@@ -204,15 +204,15 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
-      bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
+      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
     },
     {
-      address: "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+      address: "",
       name: "USD Coin",
       symbol: "USDC",
       decimals: 6,
       logoURI: usdcLogo,
-      bridgePool: "0xA45a8f21529119634daE22909BAc76cF4BE2f90f",
+      bridgePool: "0x54d8d0a00b8288b49694a765C59694ddE8e4B931",
     },
     {
       address: ethers.constants.AddressZero,
@@ -220,7 +220,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "ETH",
       decimals: 18,
       logoURI: ethereumLogo,
-      bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
+      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
     },
   ],
   [ChainId.ARBITRUM_RINKEBY]: [

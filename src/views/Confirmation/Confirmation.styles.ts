@@ -44,6 +44,7 @@ export const Link = styled.a`
 
 export const InfoSection = styled(AccentSection)`
   padding: 30px 40px;
+  border-top: none;
 `;
 
 export const Info = styled.article`

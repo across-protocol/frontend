@@ -83,7 +83,7 @@ const SendAction: React.FC = () => {
       ? amount.sub(fees.instantRelayFee.total).sub(fees.slowRelayFee.total)
       : amount;
 
-  // const buttonDisabled = (!hasToApprove && !canSend) || amountMinusFees.lte(0);
+  const buttonDisabled = (!hasToApprove && !canSend) || amountMinusFees.lte(0);
 
   return (
     <AccentSection>
@@ -114,7 +114,7 @@ const SendAction: React.FC = () => {
           </>
         )}
 
-        <PrimaryButton onClick={handleClick} disabled={true}>
+        <PrimaryButton onClick={handleClick} disabled={buttonDisabled}>
           {buttonMsg}
         </PrimaryButton>
       </Wrapper>
