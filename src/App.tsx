@@ -1,6 +1,5 @@
-import React from "react";
 import { Switch, BrowserRouter as Router, Route } from "react-router-dom";
-import { Send, Pool, About, Confirmation } from "views";
+import { Send, Confirmation, Pool, About } from "views";
 import { Header, SuperHeader } from "components";
 import { useConnection, useDeposits, useSend } from "state/hooks";
 import {
@@ -32,13 +31,16 @@ function App() {
       )}
       <Header />
       <Switch>
+        {process.env.HIDE_POOL ? (
+          <Route exact path="/pool" component={Pool} />
+        ) : null}
+
+        <Route exact path="/about" component={About} />
         <Route
           exact
           path="/"
           component={showConfirmationScreen ? Confirmation : Send}
         />
-        <Route path="/pool" component={Pool} />
-        <Route path="/about" component={About} />
       </Switch>
     </Router>
   );

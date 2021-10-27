@@ -79,6 +79,7 @@ const globalStyles = css`
     height: 100%;
     isolation: isolate;
   }
+
   ${typography}
   ${variables}
 `;

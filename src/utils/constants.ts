@@ -6,6 +6,7 @@ import optimismLogo from "assets/optimism.svg";
 import wethLogo from "assets/weth-logo.svg";
 import arbitrumLogo from "assets/arbitrum-logo.svg";
 import memoize from "lodash.memoize";
+import umaLogo from "assets/UMA-round.svg";
 
 /* Colors and Media Queries section */
 
@@ -54,7 +55,8 @@ export enum ChainId {
   ARBITRUM = 42161,
   ARBITRUM_RINKEBY = 421611,
 }
-type Token = {
+
+export type Token = {
   address: string;
   name: string;
   symbol: string;
@@ -242,6 +244,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
     },
   ],
 };
+
 type ChainInfo = {
   name: string;
   chainId: ChainId;
@@ -466,3 +469,30 @@ export function onboardBaseConfig(): Initialization {
     blockPollingInterval: 1000 * 60 * 60,
   };
 }
+
+export const POOL_LIST: Token[] = [
+  {
+    address: ethers.constants.AddressZero,
+    name: "Ether",
+    symbol: "ETH",
+    decimals: 18,
+    logoURI: ethereumLogo,
+    bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
+  },
+  {
+    address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    name: "USD Coin",
+    symbol: "USDC",
+    decimals: 6,
+    logoURI: usdcLogo,
+    bridgePool: "0x190978cC580f5A48D55A4A20D0A952FA1dA3C057",
+  },
+  {
+    address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
+    name: "UMA Token",
+    symbol: "UMA",
+    decimals: 18,
+    logoURI: umaLogo,
+    bridgePool: "0xFDe94018c0218Ac90377ED7c405c540105dbb20f",
+  },
+];
