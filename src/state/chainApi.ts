@@ -1,5 +1,5 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ethers } from "ethers";
+import { ethers,BigNumber } from "ethers";
 import { PROVIDERS, getRelayFees, ChainId, TOKENS_LIST, getLpFee } from "utils";
 import type { BridgeFees } from "utils";
 
@@ -38,21 +38,24 @@ const api = createApi({
           const provider = PROVIDERS[chainId]();
           const balances = await Promise.all(
             TOKENS_LIST[chainId].map(async (token) => {
-              // If it is ETH, use getBalance from the provider
-              if (token.symbol === "ETH") {
-                return provider.getBalance(account);
+              try{
+                // If it is ETH, use getBalance from the provider
+                if (token.symbol === "ETH") {
+                  return provider.getBalance(account);
+                }
+                const contract = ERC20Ethers__factory.connect(
+                  token.address,
+                  provider
+                );
+                return await contract.balanceOf(account);
+              }catch(err){
+                console.error(`Error fetching balance for: ${token.name} at ${token.address}`)
+                console.error(err)
+                return BigNumber.from('0')
               }
-              const contract = ERC20Ethers__factory.connect(
-                token.address,
-                provider
-              );
-              const balance = await contract.balanceOf(account);
-
-              console.log({ balance, token, contract });
-              return balance;
             })
           );
-          return { data: balances };
+          return { data:balances}
         } catch (error) {
           return { error };
         }
@@ -105,13 +108,12 @@ const api = createApi({
           //   total: ethers.constants.Zero,
           //   pct: ethers.constants.Zero,
           // };
-          console.log({ instantRelayFee, slowRelayFee, lpFee, blockNumber });
           return {
             data: { instantRelayFee, slowRelayFee, lpFee, isAmountTooLow },
           };
         } catch (error) {
-          console.log("bridge fee calculation failed");
-          console.log(error);
+          console.error("bridge fee calculation failed");
+          console.error(error);
           return { error };
         }
       },

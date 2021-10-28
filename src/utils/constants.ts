@@ -209,7 +209,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
     },
     {
-      address: "",
+      address: "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
       name: "USD Coin",
       symbol: "USDC",
       decimals: 6,
