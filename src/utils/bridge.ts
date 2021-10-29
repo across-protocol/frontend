@@ -1,6 +1,6 @@
 import { clients, across } from "@uma/sdk";
 import { BridgePoolEthers__factory } from "@uma/contracts-frontend";
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { PROVIDERS, TOKENS_LIST } from "utils";
 
 import { ADDRESSES, CHAINS, ChainId } from "./constants";
@@ -127,7 +127,6 @@ export async function getLpFee(
   const l1EqInfo = TOKENS_LIST[ChainId.MAINNET].find(
     (t) => t.symbol === tokenSymbol
   );
-
   if (!l1EqInfo) {
     throw new Error(`Token ${tokenSymbol} not found in TOKENS_LIST`);
   }
@@ -139,19 +138,20 @@ export async function getLpFee(
     bridgePoolAddress,
     provider
   );
+  
   const [currentUt, nextUt] = await Promise.all([
     bridgePool.callStatic.liquidityUtilizationCurrent(),
     bridgePool.callStatic.liquidityUtilizationPostRelay(amount),
   ]);
 
-  const realizedLpFeePct = calculateRealizedLpFeePct(
-    RATE_MODEL,
-    currentUt,
-    nextUt
-  );
-  const total = amount.mul(realizedLpFeePct);
-  return {
-    pct: realizedLpFeePct,
-    total,
-  };
+  const result = {pct:BigNumber.from(0), total:BigNumber.from(0)}
+  if(!currentUt.eq(nextUt)){
+    result.pct = calculateRealizedLpFeePct(
+      RATE_MODEL,
+      currentUt,
+      nextUt
+    );
+    result.total = amount.mul(result.pct);
+  }
+  return result
 }

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { ethers } from "ethers";
 import { bindActionCreators } from "redux";
@@ -23,7 +23,6 @@ import {
 import { useAllowance, useBridgeFees } from "./chainApi";
 import { add } from "./transactions";
 import { deposit as depositAction, toggle } from "./deposits";
-import { setBlock } from "./blocks";
 import { parseEther } from "@ethersproject/units";
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
@@ -56,23 +55,32 @@ export function useConnection() {
   };
 }
 
+// TODO: put this back into global state. Wasnt able to get it working.
 export function useBlocks(toChain: ChainId) {
-  const state = useAppSelector((state) => state.blocks);
-  const dispatch = useAppDispatch();
-  const actions = bindActionCreators({ setBlock }, dispatch);
+  const [state, setBlock] = useState< ethers.providers.Block & { blockNumber: number } | undefined >()
   useEffect(() => {
     const provider = PROVIDERS[toChain]();
-    provider.on("block", async (blockNumber: number) => {
-      const block = await provider.getBlock(blockNumber);
-      setBlock({ block: { ...block, blockNumber } });
-    });
+    provider.getBlock('latest')
+      .then(block=>{
+        setBlock({...block,blockNumber:block.number})
+      })
+      .catch(error=>console.error('Error getting block',error))
+      .finally(()=>{
+         provider.on("block", async (blockNumber: number) => {
+           const block = await provider.getBlock(blockNumber);
+           setBlock({ ...block, blockNumber });
+         });
+      })
+
     return () => {
       provider.removeAllListeners();
     };
+
   }, [toChain]);
+
   return {
-    block: state.block,
-    setBlock: actions.setBlock,
+    block: state,
+    setBlock: setBlock,
   };
 }
 
