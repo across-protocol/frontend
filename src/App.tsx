@@ -37,7 +37,7 @@ function App() {
       )}
       <Header />
       <Switch>
-        {!process.env.HIDE_POOL ? (
+        {!process.env.REACT_APP_HIDE_POOL ? (
           <Route exact path="/pool" component={Pool} />
         ) : null}
 
