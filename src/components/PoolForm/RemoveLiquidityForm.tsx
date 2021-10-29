@@ -1,6 +1,7 @@
 import { FC, Dispatch, SetStateAction } from "react";
 import PoolFormSlider from "./PoolFormSlider";
-
+import { useOnboard } from "hooks";
+import { useConnection } from "state/hooks";
 import {
   RemoveAmount,
   RemovePercentButtonsWrapper,
@@ -14,6 +15,15 @@ interface Props {
   setRemoveAmount: Dispatch<SetStateAction<number>>;
 }
 const RemoveLiqudityForm: FC<Props> = ({ removeAmount, setRemoveAmount }) => {
+  const { init } = useOnboard();
+  const { isConnected, provider } = useConnection();
+
+  const handleButtonClick = () => {
+    if (!provider) {
+      init();
+    }
+  };
+
   return (
     <>
       <RemoveAmount>
@@ -35,7 +45,9 @@ const RemoveLiqudityForm: FC<Props> = ({ removeAmount, setRemoveAmount }) => {
         </RemovePercentButton>
       </RemovePercentButtonsWrapper>
       <RemoveFormButtonWrapper>
-        <RemoveFormButton>Remove liquidity</RemoveFormButton>
+        <RemoveFormButton onClick={handleButtonClick}>
+          {!isConnected ? "Connect wallet" : "Remove liquidity"}
+        </RemoveFormButton>
       </RemoveFormButtonWrapper>
     </>
   );

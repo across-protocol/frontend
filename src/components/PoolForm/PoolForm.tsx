@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import Tabs from "../Tabs";
 import AddLiquidityForm from "./AddLiquidityForm";
 import RemoveLiqudityForm from "./RemoveLiquidityForm";
+
 import {
   Wrapper,
   Info,
@@ -20,8 +21,10 @@ import {
 interface Props {
   symbol: string;
   icon: string;
+  decimals: number;
   apy: string;
-  totalPoolSize: string;
+  totalPoolSize: ethers.BigNumber;
+  totalPosition: ethers.BigNumber;
   position: ethers.BigNumber;
   feesEarned: ethers.BigNumber;
 }
@@ -29,7 +32,9 @@ interface Props {
 const PoolForm: FC<Props> = ({
   symbol,
   icon,
+  decimals,
   totalPoolSize,
+  totalPosition,
   apy,
   position,
   feesEarned,
@@ -45,28 +50,31 @@ const PoolForm: FC<Props> = ({
         <InfoText>{symbol} Pool</InfoText>
         <PositionWrapper>
           <PositionBlock>
-            <PositionBlockItem>My position</PositionBlockItem>
+            <PositionBlockItem>My deposit</PositionBlockItem>
             <PositionBlockItem>
-              {position.toString()} {symbol}
+              {ethers.utils.formatUnits(position, decimals)} {symbol}
             </PositionBlockItem>
           </PositionBlock>
           <PositionBlock>
             <PositionBlockItem>Fees earned</PositionBlockItem>
             <PositionBlockItem>
-              {feesEarned.toString()} {symbol}
+              {ethers.utils.formatUnits(feesEarned, decimals)}
+              {symbol}
             </PositionBlockItem>
           </PositionBlock>
           <PositionBlock>
             <PositionBlockItemBold>Total</PositionBlockItemBold>
             <PositionBlockItemBold>
-              {position.add(feesEarned).toString()} ETH
+              {ethers.utils.formatUnits(totalPosition, decimals)}
+              {symbol}
             </PositionBlockItemBold>
           </PositionBlock>
         </PositionWrapper>
         <ROIWrapper>
           <ROIItem>Total Pool Size:</ROIItem>
           <ROIItem>
-            {totalPoolSize} {symbol}
+            {ethers.utils.formatUnits(totalPoolSize, decimals)}
+            {symbol}
           </ROIItem>
         </ROIWrapper>
         <ROIWrapper>
@@ -82,7 +90,6 @@ const PoolForm: FC<Props> = ({
             onChange={(event: ChangeEvent<HTMLInputElement>) =>
               setInputAmount(event.target.value)
             }
-            buttonClickHandler={() => console.log("Add")}
           />
         </TabContentWrapper>
         <TabContentWrapper data-label="Remove">

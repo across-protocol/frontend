@@ -1,4 +1,6 @@
 import { FC, ChangeEvent } from "react";
+import { useOnboard } from "hooks";
+import { useConnection } from "state/hooks";
 import {
   RoundBox,
   MaxButton,
@@ -12,10 +14,17 @@ interface Props {
   error: Error | undefined;
   amount: string;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  buttonClickHandler: () => void;
 }
 
 const AddLiquidityForm: FC<Props> = ({ error, amount, onChange }) => {
+  const { init } = useOnboard();
+  const { isConnected, provider } = useConnection();
+
+  const handleButtonClick = () => {
+    if (!provider) {
+      init();
+    }
+  };
   return (
     <>
       <FormHeader>Amount</FormHeader>
@@ -34,10 +43,7 @@ const AddLiquidityForm: FC<Props> = ({ error, amount, onChange }) => {
               : "var(--color-primary)",
           }}
         >
-          <MaxButton
-            onClick={() => null}
-            // disabled={!isConnected}
-          >
+          <MaxButton onClick={() => null} disabled={!isConnected}>
             max
           </MaxButton>
           <Input
@@ -45,11 +51,13 @@ const AddLiquidityForm: FC<Props> = ({ error, amount, onChange }) => {
             id="amount"
             value={amount}
             onChange={onChange}
-            // disabled={!isConnected}
+            disabled={!isConnected}
           />
         </RoundBox>
       </InputGroup>
-      <FormButton>Connect wallet</FormButton>
+      <FormButton onClick={handleButtonClick}>
+        {!isConnected ? "Connect wallet" : "Add liquidity"}
+      </FormButton>
     </>
   );
 };

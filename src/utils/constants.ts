@@ -496,3 +496,6 @@ export const POOL_LIST: Token[] = [
     bridgePool: "0x4495C9F0C10D82823a2Dc5658615874a5B48bFA0",
   },
 ];
+
+// this client requires multicall2 be accessible on the chain. This is the address for mainnet.
+export const multicallTwoAddress = "0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696";

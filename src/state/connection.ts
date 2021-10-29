@@ -13,6 +13,15 @@ type State = {
 export type Update = Omit<State, "error" | "chainId"> & { chainId?: number };
 type ErrorUpdate = Required<Pick<State, "error">>;
 
+function getAddress(address: string | undefined) {
+  if (address === undefined) return;
+  try {
+    return ethers.utils.getAddress(address);
+  } catch (err) {
+    return address;
+  }
+}
+
 const initialState: State = {};
 
 const connectionSlice = createSlice({
@@ -21,7 +30,7 @@ const connectionSlice = createSlice({
   reducers: {
     update: (state, action: PayloadAction<Update>) => {
       const { account, chainId, provider, signer } = action.payload;
-      state.account = account ?? state.account;
+      state.account = getAddress(account ?? state.account);
       state.provider = provider ?? state.provider;
       state.signer = signer ?? state.signer;
       if (chainId) {

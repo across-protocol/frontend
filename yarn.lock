@@ -3356,23 +3356,28 @@
   resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.1.5.tgz#d0300642b5f32b57b939e504325ee6e88d1d45f9"
   integrity sha512-+rgW6B0/HZXZXGuW2uVv6rag/dlRJm4VoEVvu5YwCAO+XrP161dLvRRP13KplkIqRIIAOor51Jdiq3XgrhAbkw==
 
-"@uma/contracts-node@^0.1.5":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.1.5.tgz#5284c2b8bbbafa656413f7bf93e9121fdc9170ef"
-  integrity sha512-JcYTwpfsg+hQTwMrRbvvUGn7t5rnbW0lvSbiylb53ezogiSL9pKgEoVgcj3DWF8VDKckAGD6p0wbYqOXZkUsug==
+"@uma/contracts-frontend@^0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.1.6.tgz#bb2c042b7805028a98f9aa1588b56451abf227d8"
+  integrity sha512-UtPY4dAX/Iwp1tsA53pG9TCgt9vONWvk4FQBi+sdekZw+7se+TINNvCMjTUDSXfoN5Ug8HmFLzqsC7N6N6ddCQ==
 
-"@uma/sdk@^0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@uma/sdk/-/sdk-0.9.0.tgz#8edfe572832e4130177f59c2d1200f85090a4c5a"
-  integrity sha512-2sfTMysmBANKhyo05NxoRHxsPSRA2FJAiS7bE97eKIJ7wJ57BF4L1hUkJ1L09oVWYQTJCGH9v8ZNF8zavkC1FQ==
+"@uma/contracts-node@^0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.1.6.tgz#5a998beccc4a20f23b822cef41afc9821e04db7b"
+  integrity sha512-1tkaRvL5LCCNH/zb4fGNxUnZ5WkhigfIpCDPTfbdkM9IqjZiw5vd1tjqRU/Uk4SxkvwvBsANNfO9OvXJAk4ESQ==
+
+"@uma/sdk@^0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@uma/sdk/-/sdk-0.10.0.tgz#89e5443bc6e9ed8b3e22e65f5eef3d52f7bda143"
+  integrity sha512-pscrPAh7HzpZiyoTHzviOiEg38s8zO/liChP0PQ11KnQSHk+oaaoCqvclpaM9uopsUMAGbQIVl2TWE99i+ZlgQ==
   dependencies:
     "@google-cloud/datastore" "^6.6.0"
-    "@uma/contracts-frontend" "^0.1.5"
-    "@uma/contracts-node" "^0.1.5"
+    "@uma/contracts-frontend" "^0.1.6"
+    "@uma/contracts-node" "^0.1.6"
     axios "^0.21.4"
     decimal.js "^10.3.1"
     highland "^2.13.5"
-    lodash-es "^4.17.21"
+    lodash "^4.17.21"
 
 "@walletconnect/browser-utils@^1.6.6":
   version "1.6.6"
