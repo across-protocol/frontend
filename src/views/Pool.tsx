@@ -4,9 +4,9 @@ import Layout from "components/Layout";
 import PoolSelection from "components/PoolSelection";
 import PoolForm from "components/PoolForm";
 import { POOL_LIST, Token } from "utils";
-import { useAppDispatch, useAppSelector, useConnection } from "state/hooks";
-import { getPoolState, getUserPoolState } from "state/pools";
-import get from 'lodash/get'
+import { useAppSelector, useConnection } from "state/hooks";
+import get from "lodash/get";
+import { poolClient } from "state/poolsApi";
 
 const Pool: FC = () => {
   const [token, setToken] = useState<Token>(POOL_LIST[0]);
@@ -15,37 +15,36 @@ const Pool: FC = () => {
   );
   const [apy, setApy] = useState("0.00%");
 
-  const dispatch = useAppDispatch();
-  const pools = useAppSelector((state) => state.pools.pools[token.bridgePool]);
+  const pool = useAppSelector((state) => state.pools.pools[token.bridgePool]);
   const connection = useAppSelector((state) => state.connection);
-  const userPosition = useAppSelector(
-    (state) => get(state,['pools','userData',state?.connection?.account || '','userPoolsData',token.bridgePool])
+  const userPosition = useAppSelector((state) =>
+    get(state, [
+      "pools",
+      "users",
+      state?.connection?.account || "",
+      token.bridgePool,
+    ])
   );
 
   const { isConnected } = useConnection();
 
   // Get pool state on mount of view.
   useEffect(() => {
-    dispatch(getPoolState(token.bridgePool));
-  }, [dispatch, token]);
+    poolClient.updatePool(token.bridgePool);
+  }, [token]);
 
   useEffect(() => {
-    if (pools) {
-      setTotalPoolSize(ethers.BigNumber.from(pools.totalPoolSize));
-      setApy(`${Number(pools.estimatedApy) * 100}%`);
+    if (pool) {
+      setTotalPoolSize(ethers.BigNumber.from(pool.totalPoolSize || "0"));
+      setApy(`${Number(pool.estimatedApy || 0) * 100}%`);
     }
-  }, [token, pools]);
+  }, [token, pool]);
 
   useEffect(() => {
     if (isConnected && connection.account && token.bridgePool) {
-      dispatch(
-        getUserPoolState({
-          account: connection.account,
-          poolAddress: token.bridgePool,
-        })
-      );
+      poolClient.updateUser(connection.account, token.bridgePool);
     }
-  }, [isConnected, connection.account, token.bridgePool, dispatch]);
+  }, [isConnected, connection.account, token.bridgePool]);
 
   return (
     <Layout>
@@ -56,13 +55,13 @@ const Pool: FC = () => {
         decimals={token.decimals}
         totalPoolSize={totalPoolSize}
         apy={apy}
-        position={ethers.BigNumber.from(userPosition?.totalDeposited || '0' )}
-        feesEarned={ethers.BigNumber.from(userPosition?.feesEarned || '0')}
-        totalPosition={ethers.BigNumber.from(userPosition?.positionValue || '0')}
+        position={ethers.BigNumber.from(userPosition?.totalDeposited || "0")}
+        feesEarned={ethers.BigNumber.from(userPosition?.feesEarned || "0")}
+        totalPosition={ethers.BigNumber.from(
+          userPosition?.positionValue || "0"
+        )}
       />
     </Layout>
   );
 };
 export default Pool;
-
-// const Wrapper = styled.
