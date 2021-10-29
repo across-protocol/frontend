@@ -85,7 +85,8 @@ const CoinSelection = () => {
         ({ address }) => address === selectedItem!.address
       );
       const balance = balances[selectedIndex];
-      if (amount.lte(balance)) {
+      const isEth = tokenList[selectedIndex].symbol === "ETH";
+      if (amount.lte(isEth ? balance.sub(ethers.utils.parseEther("0.004")) : balance)) {
         // clear the previous error if it is not a parsing error
         setError((oldError) => {
           if (oldError instanceof ParsingError) {
@@ -104,7 +105,8 @@ const CoinSelection = () => {
       const selectedIndex = tokenList.findIndex(
         ({ address }) => address === selectedItem.address
       );
-      const balance = balances[selectedIndex];
+      const isEth = tokenList[selectedIndex].symbol === "ETH";
+      const balance = isEth ? balances[selectedIndex].sub(ethers.utils.parseEther("0.004")) : balances[selectedIndex];
       setAmount({ amount: balance });
       setInputAmount(formatUnits(balance, selectedItem.decimals));
     }
