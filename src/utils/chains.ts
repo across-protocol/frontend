@@ -26,11 +26,9 @@ export async function switchChain(
         ]);
       } catch (addError) {
         console.error(`Failed to add ${CHAINS[chainId].name}`);
-        throw switchError;
       }
     } else {
       console.error(`Failed to switch to ${CHAINS[chainId].name}`);
-      throw switchError;
     }
   }
 }

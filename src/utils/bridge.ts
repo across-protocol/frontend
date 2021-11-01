@@ -138,20 +138,16 @@ export async function getLpFee(
     bridgePoolAddress,
     provider
   );
-  
+
   const [currentUt, nextUt] = await Promise.all([
     bridgePool.callStatic.liquidityUtilizationCurrent(),
     bridgePool.callStatic.liquidityUtilizationPostRelay(amount),
   ]);
 
-  const result = {pct:BigNumber.from(0), total:BigNumber.from(0)}
-  if(!currentUt.eq(nextUt)){
-    result.pct = calculateRealizedLpFeePct(
-      RATE_MODEL,
-      currentUt,
-      nextUt
-    );
+  const result = { pct: BigNumber.from(0), total: BigNumber.from(0) };
+  if (!currentUt.eq(nextUt)) {
+    result.pct = calculateRealizedLpFeePct(RATE_MODEL, currentUt, nextUt);
     result.total = amount.mul(result.pct);
   }
-  return result
+  return result;
 }

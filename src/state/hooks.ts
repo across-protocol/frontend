@@ -40,7 +40,6 @@ export function useConnection() {
   );
 
   const isConnected = !!chainId && !!signer && !!account;
-
   return {
     account,
     chainId,
@@ -56,25 +55,27 @@ export function useConnection() {
 
 // TODO: put this back into global state. Wasnt able to get it working.
 export function useBlocks(toChain: ChainId) {
-  const [state, setBlock] = useState< ethers.providers.Block & { blockNumber: number } | undefined >()
+  const [state, setBlock] = useState<
+    (ethers.providers.Block & { blockNumber: number }) | undefined
+  >();
   useEffect(() => {
     const provider = PROVIDERS[toChain]();
-    provider.getBlock('latest')
-      .then(block=>{
-        setBlock({...block,blockNumber:block.number})
+    provider
+      .getBlock("latest")
+      .then((block) => {
+        setBlock({ ...block, blockNumber: block.number });
       })
-      .catch(error=>console.error('Error getting block',error))
-      .finally(()=>{
-         provider.on("block", async (blockNumber: number) => {
-           const block = await provider.getBlock(blockNumber);
-           setBlock({ ...block, blockNumber });
-         });
-      })
+      .catch((error) => console.error("Error getting block", error))
+      .finally(() => {
+        provider.on("block", async (blockNumber: number) => {
+          const block = await provider.getBlock(blockNumber);
+          setBlock({ ...block, blockNumber });
+        });
+      });
 
     return () => {
       provider.removeAllListeners();
     };
-
   }, [toChain]);
 
   return {
@@ -163,9 +164,7 @@ export function useSend() {
     try {
       const depositBox = getDepositBox(fromChain, signer);
       const isETH = token === ethers.constants.AddressZero;
-      const value = isETH
-        ? amount
-        : ethers.constants.Zero;
+      const value = isETH ? amount : ethers.constants.Zero;
       const l2Token = isETH ? TOKENS_LIST[fromChain][0].address : token;
       const { instantRelayFee, slowRelayFee } = fees;
       const timestamp = block.timestamp;
@@ -181,7 +180,6 @@ export function useSend() {
       );
       return tx;
     } catch (e) {
-      console.error(e);
       throw new TransactionError(
         depositBox.address,
         "deposit",

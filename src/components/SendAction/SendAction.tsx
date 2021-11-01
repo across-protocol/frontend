@@ -68,11 +68,11 @@ const SendAction: React.FC = () => {
       return;
     }
     if (hasToApprove) {
-      handleApprove();
+      handleApprove().catch((err) => console.error(err));
       return;
     }
     if (canSend) {
-      handleSend();
+      handleSend().catch((err) => console.error(err));
     }
   };
 

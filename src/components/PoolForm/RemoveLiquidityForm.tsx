@@ -1,6 +1,6 @@
 import { FC, Dispatch, SetStateAction } from "react";
 import PoolFormSlider from "./PoolFormSlider";
-import { useOnboard } from "hooks";
+import { onboard } from "utils";
 import { useConnection } from "state/hooks";
 import {
   RemoveAmount,
@@ -15,7 +15,7 @@ interface Props {
   setRemoveAmount: Dispatch<SetStateAction<number>>;
 }
 const RemoveLiqudityForm: FC<Props> = ({ removeAmount, setRemoveAmount }) => {
-  const { init } = useOnboard();
+  const { init } = onboard;
   const { isConnected, provider } = useConnection();
 
   const handleButtonClick = () => {

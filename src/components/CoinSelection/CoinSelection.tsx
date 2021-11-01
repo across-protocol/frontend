@@ -86,7 +86,11 @@ const CoinSelection = () => {
       );
       const balance = balances[selectedIndex];
       const isEth = tokenList[selectedIndex].symbol === "ETH";
-      if (amount.lte(isEth ? balance.sub(ethers.utils.parseEther("0.004")) : balance)) {
+      if (
+        amount.lte(
+          isEth ? balance.sub(ethers.utils.parseEther("0.004")) : balance
+        )
+      ) {
         // clear the previous error if it is not a parsing error
         setError((oldError) => {
           if (oldError instanceof ParsingError) {
@@ -106,7 +110,10 @@ const CoinSelection = () => {
         ({ address }) => address === selectedItem.address
       );
       const isEth = tokenList[selectedIndex].symbol === "ETH";
-      const balance = isEth ? balances[selectedIndex].sub(ethers.utils.parseEther("0.004")) : balances[selectedIndex];
+      // TODO: need to select max of 0 and balances.sub. 
+      const balance = isEth
+        ? balances[selectedIndex].sub(ethers.utils.parseEther("0.004"))
+        : balances[selectedIndex];
       setAmount({ amount: balance });
       setInputAmount(formatUnits(balance, selectedItem.decimals));
     }

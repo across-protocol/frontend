@@ -1,4 +1,4 @@
-import { useOnboard } from "hooks";
+import { onboard } from "utils";
 import React from "react";
 import { useConnection, useETHBalance } from "state/hooks";
 import {
@@ -11,7 +11,7 @@ import { Wrapper, Account, Info, ConnectButton } from "./Wallet.styles";
 
 const Wallet: React.FC = () => {
   const { account, isConnected, chainId } = useConnection();
-  const { init } = useOnboard();
+  const { init } = onboard;
 
   const { data: balance } = useETHBalance(
     { account: account ?? "", chainId: chainId ?? DEFAULT_FROM_CHAIN_ID },

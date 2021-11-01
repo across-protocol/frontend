@@ -1,5 +1,5 @@
 import { FC, ChangeEvent } from "react";
-import { useOnboard } from "hooks";
+import { onboard } from "utils";
 import { useConnection } from "state/hooks";
 import {
   RoundBox,
@@ -17,7 +17,7 @@ interface Props {
 }
 
 const AddLiquidityForm: FC<Props> = ({ error, amount, onChange }) => {
-  const { init } = useOnboard();
+  const { init } = onboard;
   const { isConnected, provider } = useConnection();
 
   const handleButtonClick = () => {
