@@ -15,7 +15,7 @@ import { PrimaryButton, AccentSection } from "components";
 import { Wrapper, Info } from "./SendAction.styles";
 
 const SendAction: React.FC = () => {
-  const { amount, fromChain, toChain, token, send, hasToApprove, canSend } =
+  const { amount, fromChain, toChain, token, send, hasToApprove, canSend, toAddress } =
     useSend();
   const { account } = useConnection();
 
@@ -60,7 +60,7 @@ const SendAction: React.FC = () => {
     if (tx) {
       addTransaction({ ...tx, meta: { label: TransactionTypes.DEPOSIT } });
       const receipt = await tx.wait();
-      addDeposit({ tx: receipt, toChain, fromChain, amount, token });
+      addDeposit({ tx: receipt, toChain, fromChain, amount, token, toAddress });
     }
   };
   const handleClick = () => {

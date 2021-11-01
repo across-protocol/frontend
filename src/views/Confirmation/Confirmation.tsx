@@ -73,7 +73,7 @@ const Confirmation: React.FC = () => {
                   src={CHAINS[deposit.toChain].logoURI}
                   alt={`${CHAINS[deposit.toChain].name} logo`}
                 />
-                <div>{deposit.to}</div>
+                <div>{deposit.toAddress}</div>
               </div>
             </Info>
             <Info>

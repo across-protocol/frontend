@@ -6,6 +6,7 @@ type Deposit = {
   txHash: string;
   amount: ethers.BigNumber;
   to: string;
+  toAddress?: string;
   from: string;
   token: string;
   fromChain: ChainId;
@@ -27,6 +28,7 @@ type DepositAction = PayloadAction<{
   amount: ethers.BigNumber;
   fromChain: ChainId;
   toChain: ChainId;
+  toAddress?: string;
 }>;
 
 const connectionSlice = createSlice({
@@ -48,6 +50,7 @@ const connectionSlice = createSlice({
       const from = depositTx.from;
       const to = depositTx.to;
       const token = action.payload.token;
+      const toAddress = action.payload.toAddress;
       state.tx = depositTx;
       state.deposit = {
         txHash: depositTx.transactionHash,
@@ -57,6 +60,7 @@ const connectionSlice = createSlice({
         from,
         fromChain,
         toChain,
+        toAddress,
       };
       state.showConfirmationScreen = true;
       return state;
