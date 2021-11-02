@@ -4,7 +4,7 @@ import { COLORS } from "utils";
 export const BaseButton = styled.button`
   --radius: 30px;
   border: none;
-  background: inherit;
+  background-color: inherit;
   cursor: pointer;
   padding: 16px;
   font-size: ${16 / 16}rem;
