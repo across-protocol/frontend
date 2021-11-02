@@ -105,11 +105,9 @@ const api = createApi({
         try {
           const { instantRelayFee, slowRelayFee, isAmountTooLow } =
             await getRelayFees(tokenSymbol, amount);
+
           const lpFee = await getLpFee(tokenSymbol, amount);
-          // const lpFee = {
-          //   total: ethers.constants.Zero,
-          //   pct: ethers.constants.Zero,
-          // };
+
           return {
             data: { instantRelayFee, slowRelayFee, lpFee, isAmountTooLow },
           };

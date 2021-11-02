@@ -147,7 +147,7 @@ export async function getLpFee(
   const result = { pct: BigNumber.from(0), total: BigNumber.from(0) };
   if (!currentUt.eq(nextUt)) {
     result.pct = calculateRealizedLpFeePct(RATE_MODEL, currentUt, nextUt);
-    result.total = amount.mul(result.pct);
+    result.total = amount.mul(result.pct).div(parseEther("1"));
   }
   return result;
 }

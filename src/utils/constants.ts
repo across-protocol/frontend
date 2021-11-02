@@ -84,7 +84,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
-      bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
+      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
     },
     {
       address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
@@ -92,7 +92,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "USDC",
       decimals: 6,
       logoURI: usdcLogo,
-      bridgePool: "0x190978cC580f5A48D55A4A20D0A952FA1dA3C057",
+      bridgePool: "0x54d8d0a00b8288b49694a765C59694ddE8e4B931",
     },
     {
       address: ethers.constants.AddressZero,
@@ -100,7 +100,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "ETH",
       decimals: 18,
       logoURI: ethereumLogo,
-      bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
+      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
     },
   ],
   [ChainId.RINKEBY]: [
@@ -154,7 +154,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
-      bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
+      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
     },
     {
       address: "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
@@ -170,7 +170,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "ETH",
       decimals: 18,
       logoURI: ethereumLogo,
-      bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
+      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
     },
   ],
   [ChainId.KOVAN_OPTIMISM]: [
@@ -384,46 +384,43 @@ type GetProvider = () => ethers.providers.JsonRpcProvider;
 export const PROVIDERS: Record<ChainId, GetProvider> = {
   [ChainId.MAINNET]: memoize(
     () =>
-      new ethers.providers.JsonRpcProvider(
+      new ethers.providers.StaticJsonRpcProvider(
         `https://mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
   ),
   [ChainId.RINKEBY]: memoize(
     () =>
-      new ethers.providers.JsonRpcProvider(
+      new ethers.providers.StaticJsonRpcProvider(
         `https://rinkeby.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
   ),
   [ChainId.KOVAN]: memoize(
     () =>
-      new ethers.providers.JsonRpcProvider(
+      new ethers.providers.StaticJsonRpcProvider(
         `https://kovan.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
   ),
   [ChainId.OPTIMISM]: memoize(
     () =>
-      new ethers.providers.JsonRpcProvider(
+      new ethers.providers.StaticJsonRpcProvider(
         `https://optimism-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
   ),
   [ChainId.KOVAN_OPTIMISM]: memoize(
     () =>
-      new ethers.providers.JsonRpcProvider(
+      new ethers.providers.StaticJsonRpcProvider(
         `https://optimism-kovan.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
   ),
   [ChainId.ARBITRUM]: memoize(
     () =>
-      new ethers.providers.JsonRpcProvider(
-        "https://arb-mainnet.g.alchemy.com/v2/1SJeu8UAnhkQNR23ixdtkOjnJy6LbF4G"
+      new ethers.providers.StaticJsonRpcProvider(
+        `https://arbitrum-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
-    // new ethers.providers.JsonRpcProvider(
-    //   `https://arbitrum-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
-    // )
   ),
   [ChainId.ARBITRUM_RINKEBY]: memoize(
     () =>
-      new ethers.providers.JsonRpcProvider(
+      new ethers.providers.StaticJsonRpcProvider(
         `https://arbitrum-rinkeby.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
   ),

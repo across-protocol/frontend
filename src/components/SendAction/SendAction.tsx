@@ -16,8 +16,16 @@ import { Wrapper, Info } from "./SendAction.styles";
 import api from 'state/chainApi'
 
 const SendAction: React.FC = () => {
-  const { amount, fromChain, toChain, token, send, hasToApprove, canSend, toAddress } =
-    useSend();
+  const {
+    amount,
+    fromChain,
+    toChain,
+    token,
+    send,
+    hasToApprove,
+    canSend,
+    toAddress,
+  } = useSend();
   const { account } = useConnection();
 
   const { block } = useBlocks(toChain);
@@ -86,7 +94,10 @@ const SendAction: React.FC = () => {
 
   const amountMinusFees =
     fees && amount.gte(0)
-      ? amount.sub(fees.instantRelayFee.total).sub(fees.slowRelayFee.total)
+      ? amount
+          .sub(fees.instantRelayFee.total)
+          .sub(fees.slowRelayFee.total)
+          .sub(fees.lpFee.total)
       : amount;
 
   const buttonDisabled = (!hasToApprove && !canSend) || amountMinusFees.lte(0);
