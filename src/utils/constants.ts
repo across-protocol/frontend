@@ -517,6 +517,13 @@ type RateModel = {
   R2: ethers.BigNumber;
 };
 export const RATE_MODELS: Record<string, RateModel> = {
+  // this should be the same as weth?
+  ETH: {
+    UBar: ethers.BigNumber.from("650000000000000000"),
+    R0: ethers.BigNumber.from("0"),
+    R1: ethers.BigNumber.from("80000000000000000"),
+    R2: ethers.BigNumber.from("1000000000000000000"),
+  },
   WETH: {
     UBar: ethers.BigNumber.from("650000000000000000"),
     R0: ethers.BigNumber.from("0"),
