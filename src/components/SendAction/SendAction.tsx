@@ -13,6 +13,7 @@ import { useERC20 } from "hooks";
 import { CHAINS, getDepositBox, TOKENS_LIST, formatUnits } from "utils";
 import { PrimaryButton, AccentSection } from "components";
 import { Wrapper, Info } from "./SendAction.styles";
+import api from 'state/chainApi'
 
 const SendAction: React.FC = () => {
   const { amount, fromChain, toChain, token, send, hasToApprove, canSend, toAddress } =
@@ -25,6 +26,7 @@ const SendAction: React.FC = () => {
   const { addDeposit } = useDeposits();
   const { approve } = useERC20(token);
   const { signer } = useConnection();
+  const [updateEthBalance] = api.endpoints.ethBalance.useLazyQuery()
   const tokenInfo = TOKENS_LIST[fromChain].find((t) => t.address === token);
 
   const { data: fees } = useBridgeFees(
@@ -61,6 +63,10 @@ const SendAction: React.FC = () => {
       addTransaction({ ...tx, meta: { label: TransactionTypes.DEPOSIT } });
       const receipt = await tx.wait();
       addDeposit({ tx: receipt, toChain, fromChain, amount, token, toAddress });
+      // update balances after tx
+      if(account){
+        updateEthBalance({chainId:fromChain,account});
+      }
     }
   };
   const handleClick = () => {
