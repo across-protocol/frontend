@@ -14,7 +14,7 @@ export function shortenAddress(address: string): string {
 }
 
 const numberFormatter = new Intl.NumberFormat("en-US", {
-  minimumFractionDigits: 2,
+  minimumFractionDigits: 4,
 }).format;
 export function formatUnits(
   wei: ethers.BigNumberish,
