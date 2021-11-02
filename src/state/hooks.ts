@@ -149,6 +149,7 @@ export function useSend() {
       !hasToSwitchChain &&
       !error &&
       !fees.isAmountTooLow &&
+      !fees.isLiquidityInsufficient && 
       balance.gte(amount),
     [
       fromChain,

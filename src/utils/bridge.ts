@@ -1,9 +1,15 @@
 import { clients, across } from "@uma/sdk";
 import { BridgePoolEthers__factory } from "@uma/contracts-frontend";
 import { ethers, BigNumber } from "ethers";
-import { PROVIDERS, TOKENS_LIST } from "utils";
 
-import { ADDRESSES, CHAINS, ChainId } from "./constants";
+import {
+  ADDRESSES,
+  CHAINS,
+  ChainId,
+  PROVIDERS,
+  TOKENS_LIST,
+  RATE_MODELS,
+} from "./constants";
 import { isValidString, parseEther } from "./format";
 
 export function getDepositBox(
@@ -112,17 +118,11 @@ export async function getRelayFees(
   };
 }
 
-const RATE_MODEL = {
-  UBar: parseEther("0.65"),
-  R0: parseEther("0.00"),
-  R1: parseEther("0.08"),
-  R2: parseEther("1.00"),
-};
 const { calculateRealizedLpFeePct } = across.feeCalculator;
 export async function getLpFee(
   tokenSymbol: string,
   amount: ethers.BigNumber
-): Promise<Fee> {
+): Promise<Fee & { isLiquidityInsufficient: boolean }> {
   const provider = PROVIDERS[ChainId.MAINNET]();
   const l1EqInfo = TOKENS_LIST[ChainId.MAINNET].find(
     (t) => t.symbol === tokenSymbol
@@ -132,6 +132,9 @@ export async function getLpFee(
   }
   if (amount.lte(0)) {
     throw new Error(`Amount must be greater than 0.`);
+  }
+  if (!RATE_MODELS[tokenSymbol]) {
+    throw new Error(`Rate model for ${tokenSymbol} not found.`);
   }
   const { bridgePool: bridgePoolAddress } = l1EqInfo;
   const bridgePool = BridgePoolEthers__factory.connect(
@@ -144,10 +147,25 @@ export async function getLpFee(
     bridgePool.callStatic.liquidityUtilizationPostRelay(amount),
   ]);
 
-  const result = { pct: BigNumber.from(0), total: BigNumber.from(0) };
+  const result = {
+    pct: BigNumber.from(0),
+    total: BigNumber.from(0),
+    isLiquidityInsufficient: false,
+  };
   if (!currentUt.eq(nextUt)) {
-    result.pct = calculateRealizedLpFeePct(RATE_MODEL, currentUt, nextUt);
+    result.pct = calculateRealizedLpFeePct(
+      RATE_MODELS[tokenSymbol],
+      currentUt,
+      nextUt
+    );
     result.total = amount.mul(result.pct).div(parseEther("1"));
   }
+  const liquidityReserves = await bridgePool.liquidReserves();
+  const pendingReserves = await bridgePool.pendingReserves();
+
+  const isLiquidityInsufficient = liquidityReserves
+    .sub(pendingReserves)
+    .lte(amount);
+  result.isLiquidityInsufficient = isLiquidityInsufficient;
   return result;
 }

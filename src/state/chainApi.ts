@@ -27,6 +27,7 @@ type BridgeFeesQueryArgs = {
 
 type BridgeFeesQueryResult = BridgeFees & {
   isAmountTooLow: boolean;
+  isLiquidityInsufficient: boolean;
 };
 
 const api = createApi({
@@ -106,10 +107,19 @@ const api = createApi({
           const { instantRelayFee, slowRelayFee, isAmountTooLow } =
             await getRelayFees(tokenSymbol, amount);
 
-          const lpFee = await getLpFee(tokenSymbol, amount);
+          const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
+            tokenSymbol,
+            amount
+          );
 
           return {
-            data: { instantRelayFee, slowRelayFee, lpFee, isAmountTooLow },
+            data: {
+              instantRelayFee,
+              slowRelayFee,
+              lpFee,
+              isAmountTooLow,
+              isLiquidityInsufficient,
+            },
           };
         } catch (error) {
           console.error("bridge fee calculation failed");

@@ -494,6 +494,26 @@ export const POOL_LIST: Token[] = [
     bridgePool: "0x4495C9F0C10D82823a2Dc5658615874a5B48bFA0",
   },
 ];
+type RateModel = {
+  UBar: ethers.BigNumber;
+  R0: ethers.BigNumber;
+  R1: ethers.BigNumber;
+  R2: ethers.BigNumber;
+};
+export const RATE_MODELS: Record<string, RateModel> = {
+  WETH: {
+    UBar: ethers.BigNumber.from("650000000000000000"),
+    R0: ethers.BigNumber.from("0"),
+    R1: ethers.BigNumber.from("80000000000000000"),
+    R2: ethers.BigNumber.from("1000000000000000000"),
+  },
+  USDC: {
+    UBar: ethers.BigNumber.from("800000000000000000"),
+    R0: ethers.BigNumber.from("0"),
+    R1: ethers.BigNumber.from("40000000000000000"),
+    R2: ethers.BigNumber.from("600000000000000000"),
+  },
+};
 
 // this client requires multicall2 be accessible on the chain. This is the address for mainnet.
 export const multicallTwoAddress = "0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696";
