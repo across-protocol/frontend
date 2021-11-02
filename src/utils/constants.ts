@@ -7,6 +7,7 @@ import wethLogo from "assets/weth-logo.svg";
 import arbitrumLogo from "assets/arbitrum-logo.svg";
 import memoize from "lodash.memoize";
 import umaLogo from "assets/UMA-round.svg";
+import { getAddress } from "./address";
 
 /* Colors and Media Queries section */
 
@@ -79,20 +80,20 @@ type TokenList = [
 export const TOKENS_LIST: Record<ChainId, TokenList> = {
   [ChainId.MAINNET]: [
     {
-      address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      address: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
       name: "Wrapped Ethereum",
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
-      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
+      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
     },
     {
-      address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      address: getAddress("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
       name: "USD Coin",
       symbol: "USDC",
       decimals: 6,
       logoURI: usdcLogo,
-      bridgePool: "0x54d8d0a00b8288b49694a765C59694ddE8e4B931",
+      bridgePool: getAddress("0x54d8d0a00b8288b49694a765C59694ddE8e4B931"),
     },
     {
       address: ethers.constants.AddressZero,
@@ -100,17 +101,17 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "ETH",
       decimals: 18,
       logoURI: ethereumLogo,
-      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
+      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
     },
   ],
   [ChainId.RINKEBY]: [
     {
-      address: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
+      address: getAddress("0xc778417E063141139Fce010982780140Aa0cD5Ab"),
       name: "Wrapped Ethereum",
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
-      bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
+      bridgePool: getAddress("0xf42bB7EC88d065dF48D60cb672B88F8330f9f764"),
     },
     {
       address: ethers.constants.AddressZero,
@@ -123,7 +124,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   ],
   [ChainId.KOVAN]: [
     {
-      address: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
+      address: getAddress("0xd0a1e359811322d97991e03f863a0c30c2cf029c"),
       name: "Wrapped Ethereum",
       symbol: "WETH",
       decimals: 18,
@@ -131,7 +132,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: "i",
     },
     {
-      address: "0x08ae34860fbfe73e223596e65663683973c72dd3",
+      address: getAddress("0x08ae34860fbfe73e223596e65663683973c72dd3"),
       name: "DAI Stablecoin",
       symbol: "DAI",
       decimals: 18,
@@ -149,20 +150,20 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   ],
   [ChainId.OPTIMISM]: [
     {
-      address: "0x4200000000000000000000000000000000000006",
+      address: getAddress("0x4200000000000000000000000000000000000006"),
       name: "Wrapped Ethereum",
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
-      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
+      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
     },
     {
-      address: "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+      address: getAddress("0x7f5c764cbc14f9669b88837ca1490cca17c31607"),
       name: "USD Coin",
       symbol: "USDC",
       decimals: 6,
       logoURI: usdcLogo,
-      bridgePool: "0x190978cC580f5A48D55A4A20D0A952FA1dA3C057",
+      bridgePool: getAddress("0x190978cC580f5A48D55A4A20D0A952FA1dA3C057"),
     },
     {
       address: ethers.constants.AddressZero,
@@ -170,12 +171,12 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "ETH",
       decimals: 18,
       logoURI: ethereumLogo,
-      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
+      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
     },
   ],
   [ChainId.KOVAN_OPTIMISM]: [
     {
-      address: "0x4200000000000000000000000000000000000006",
+      address: getAddress("0x4200000000000000000000000000000000000006"),
       name: "Wrapped Ethereum",
       symbol: "WETH",
       decimals: 18,
@@ -183,7 +184,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: "m",
     },
     {
-      address: "0x2a41F55E25EfEE3E53834140c0bD81dBF3464831",
+      address: getAddress("0x2a41F55E25EfEE3E53834140c0bD81dBF3464831"),
       name: "DAI (L2 Dai)",
       symbol: "DAI",
       decimals: 18,
@@ -201,20 +202,20 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   ],
   [ChainId.ARBITRUM]: [
     {
-      address: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+      address: getAddress("0x82af49447d8a07e3bd95bd0d56f35241523fbab1"),
       name: "Wrapped Ethereum",
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
-      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
+      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
     },
     {
-      address: "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+      address: getAddress("0xff970a61a04b1ca14834a43f5de4533ebddb5cc8"),
       name: "USD Coin",
       symbol: "USDC",
       decimals: 6,
       logoURI: usdcLogo,
-      bridgePool: "0x54d8d0a00b8288b49694a765C59694ddE8e4B931",
+      bridgePool: getAddress("0x54d8d0a00b8288b49694a765C59694ddE8e4B931"),
     },
     {
       address: ethers.constants.AddressZero,
@@ -222,12 +223,12 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "ETH",
       decimals: 18,
       logoURI: ethereumLogo,
-      bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
+      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
     },
   ],
   [ChainId.ARBITRUM_RINKEBY]: [
     {
-      address: "0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681",
+      address: getAddress("0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681"),
       name: "Wrapped Ethereum",
       symbol: "WETH",
       decimals: 18,

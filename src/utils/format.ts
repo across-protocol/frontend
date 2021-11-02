@@ -36,4 +36,3 @@ export function parseUnits(value: string, decimals: number): ethers.BigNumber {
 export function parseEther(value: string): ethers.BigNumber {
   return parseUnits(value, 18);
 }
-

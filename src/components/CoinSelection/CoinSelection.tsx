@@ -110,7 +110,7 @@ const CoinSelection = () => {
         ({ address }) => address === selectedItem.address
       );
       const isEth = tokenList[selectedIndex].symbol === "ETH";
-      // TODO: need to select max of 0 and balances.sub. 
+      // TODO: need to select max of 0 and balances.sub.
       const balance = isEth
         ? balances[selectedIndex].sub(ethers.utils.parseEther("0.004"))
         : balances[selectedIndex];
