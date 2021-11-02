@@ -35,6 +35,8 @@ const SendAction: React.FC = () => {
   const { approve } = useERC20(token);
   const { signer } = useConnection();
   const [updateEthBalance] = api.endpoints.ethBalance.useLazyQuery()
+  // trigger balance update
+  const [updateBalances] = api.endpoints.balances.useLazyQuery()
   const tokenInfo = TOKENS_LIST[fromChain].find((t) => t.address === token);
 
   const { data: fees } = useBridgeFees(
@@ -74,6 +76,7 @@ const SendAction: React.FC = () => {
       // update balances after tx
       if(account){
         updateEthBalance({chainId:fromChain,account});
+        updateBalances({chainId:fromChain,account});
       }
     }
   };
