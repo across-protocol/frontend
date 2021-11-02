@@ -61,3 +61,15 @@ export const FormHeader = styled.h2`
   line-height: 1.5rem;
   margin-bottom: 1rem;
 `;
+
+export const Balance = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  span {
+    --color: var(--color-primary);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    margin-right: 1.5rem;
+    margin-top: 0.66rem;
+  }
+`;

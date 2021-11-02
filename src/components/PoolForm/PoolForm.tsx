@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import Tabs from "../Tabs";
 import AddLiquidityForm from "./AddLiquidityForm";
 import RemoveLiqudityForm from "./RemoveLiquidityForm";
+import { QuerySubState } from "@reduxjs/toolkit/dist/query/core/apiState";
 
 import {
   Wrapper,
@@ -27,6 +28,14 @@ interface Props {
   totalPosition: ethers.BigNumber;
   position: ethers.BigNumber;
   feesEarned: ethers.BigNumber;
+  bridgeAddress: string;
+  lpTokens: ethers.BigNumber;
+  tokenAddress: string;
+  ethBalance: QuerySubState<any> | null | undefined;
+  erc20Balances: QuerySubState<any> | null | undefined;
+  setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
+  balance: ethers.BigNumber;
 }
 
 const PoolForm: FC<Props> = ({
@@ -38,6 +47,14 @@ const PoolForm: FC<Props> = ({
   apy,
   position,
   feesEarned,
+  bridgeAddress,
+  lpTokens,
+  tokenAddress,
+  ethBalance,
+  erc20Balances,
+  setShowSuccess,
+  setDepositUrl,
+  balance,
 }) => {
   const [inputAmount, setInputAmount] = useState("");
   const [removeAmount, setRemoveAmount] = useState(0);
@@ -58,15 +75,13 @@ const PoolForm: FC<Props> = ({
           <PositionBlock>
             <PositionBlockItem>Fees earned</PositionBlockItem>
             <PositionBlockItem>
-              {ethers.utils.formatUnits(feesEarned, decimals)}
-              {symbol}
+              {ethers.utils.formatUnits(feesEarned, decimals)} {symbol}
             </PositionBlockItem>
           </PositionBlock>
           <PositionBlock>
             <PositionBlockItemBold>Total</PositionBlockItemBold>
             <PositionBlockItemBold>
-              {ethers.utils.formatUnits(totalPosition, decimals)}
-              {symbol}
+              {ethers.utils.formatUnits(totalPosition, decimals)} {symbol}
             </PositionBlockItemBold>
           </PositionBlock>
         </PositionWrapper>
@@ -90,12 +105,27 @@ const PoolForm: FC<Props> = ({
             onChange={(event: ChangeEvent<HTMLInputElement>) =>
               setInputAmount(event.target.value)
             }
+            bridgeAddress={bridgeAddress}
+            decimals={decimals}
+            symbol={symbol}
+            tokenAddress={tokenAddress}
+            setShowSuccess={setShowSuccess}
+            setDepositUrl={setDepositUrl}
+            balance={balance}
+            setAmount={setInputAmount}
           />
         </TabContentWrapper>
         <TabContentWrapper data-label="Remove">
           <RemoveLiqudityForm
             removeAmount={removeAmount}
             setRemoveAmount={setRemoveAmount}
+            bridgeAddress={bridgeAddress}
+            lpTokens={lpTokens}
+            decimals={decimals}
+            symbol={symbol}
+            setShowSuccess={setShowSuccess}
+            setDepositUrl={setDepositUrl}
+            balance={balance}
           />
         </TabContentWrapper>
       </Tabs>

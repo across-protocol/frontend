@@ -6,6 +6,7 @@ import {
   isSupportedChainId,
   getAddress,
 } from "utils";
+import Notify, { API as NotifyAPI } from "bnc-notify";
 
 type State = {
   account?: string;
@@ -13,12 +14,21 @@ type State = {
   provider?: ethers.providers.Web3Provider;
   signer?: ethers.Signer;
   error?: Error;
+  notify: NotifyAPI;
 };
 
-export type Update = Omit<State, "error" | "chainId"> & { chainId?: number };
+export type Update = Omit<State, "error" | "chainId" | "notify"> & {
+  chainId?: number;
+};
 type ErrorUpdate = Required<Pick<State, "error">>;
 
-const initialState: State = {};
+const initialState: State = {
+  notify: Notify({
+    dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY, // [String] The API key created by step one above
+    networkId: 1, // [Integer] The Ethereum network ID your Dapp uses.
+    desktopPosition: "topRight",
+  }),
+};
 
 const connectionSlice = createSlice({
   name: "connection",

@@ -29,7 +29,7 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function useConnection() {
-  const { account, signer, provider, error, chainId } = useAppSelector(
+  const { account, signer, provider, error, chainId, notify } = useAppSelector(
     (state) => state.connection
   );
 
@@ -50,6 +50,7 @@ export function useConnection() {
     setUpdate: actions.update,
     disconnect: actions.disconnect,
     setError: actions.errorAction,
+    notify,
   };
 }
 
@@ -149,7 +150,7 @@ export function useSend() {
       !hasToSwitchChain &&
       !error &&
       !fees.isAmountTooLow &&
-      !fees.isLiquidityInsufficient && 
+      !fees.isLiquidityInsufficient &&
       balance.gte(amount),
     [
       fromChain,

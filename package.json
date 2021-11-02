@@ -20,6 +20,7 @@
     "@uma/sdk": "^0.10.1",
     "@web3-react/core": "^6.1.9",
     "@web3-react/injected-connector": "^6.0.7",
+    "bnc-notify": "^1.9.1",
     "bnc-onboard": "^1.35.2",
     "downshift": "^6.1.7",
     "ethers": "^5.4.7",

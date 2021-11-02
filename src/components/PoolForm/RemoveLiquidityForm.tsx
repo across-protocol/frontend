@@ -8,19 +8,97 @@ import {
   RemovePercentButton,
   RemoveFormButton,
   RemoveFormButtonWrapper,
+  Balance,
 } from "./RemoveLiquidityForm.styles";
+import { ethers } from "ethers";
+import { toWeiSafe } from "utils/weiMath";
+import { poolClient } from "state/poolsApi";
+import { addEtherscan } from "utils/notify";
+
+const toBN = ethers.BigNumber.from;
 
 interface Props {
   removeAmount: number;
   setRemoveAmount: Dispatch<SetStateAction<number>>;
+  bridgeAddress: string;
+  lpTokens: ethers.BigNumber;
+  decimals: number;
+  symbol: string;
+  setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
+  balance: ethers.BigNumber;
 }
-const RemoveLiqudityForm: FC<Props> = ({ removeAmount, setRemoveAmount }) => {
+const RemoveLiqudityForm: FC<Props> = ({
+  removeAmount,
+  setRemoveAmount,
+  bridgeAddress,
+  lpTokens,
+  decimals,
+  symbol,
+  setShowSuccess,
+  setDepositUrl,
+  balance,
+}) => {
   const { init } = onboard;
-  const { isConnected, provider } = useConnection();
+  const { isConnected, provider, signer, account, notify } = useConnection();
 
-  const handleButtonClick = () => {
+  const handleButtonClick = async () => {
     if (!provider) {
       init();
+    }
+    if (isConnected && removeAmount > 0 && signer) {
+      const scaler = toBN("10").pow(decimals);
+
+      const removeAmountToWei = toWeiSafe(
+        (removeAmount / 100).toString(),
+        decimals
+      );
+
+      const weiAmount = lpTokens.mul(removeAmountToWei).div(scaler);
+
+      console.log("weiAmount", weiAmount, weiAmount.toString());
+
+      try {
+        let txId;
+        if (symbol === "ETH") {
+          txId = await poolClient.removeEthliquidity(
+            signer,
+            bridgeAddress,
+            weiAmount
+          );
+        } else {
+          txId = await poolClient.removeTokenLiquidity(
+            signer,
+            bridgeAddress,
+            weiAmount
+          );
+        }
+
+        const transaction = poolClient.getTx(txId);
+
+        if (transaction.hash) {
+          const { emitter } = notify.hash(transaction.hash);
+          emitter.on("all", addEtherscan);
+
+          // Scope to closure.
+          const acc = account;
+          emitter.on("txConfirmed", (tx) => {
+            setShowSuccess(true);
+            const url = `https://etherscan.io/tx/${transaction.hash}`;
+            setDepositUrl(url);
+            // Nodes are out of sync. Update state in 30 secounds
+            setTimeout(() => {
+              poolClient.updatePool(bridgeAddress);
+              if (acc) {
+                poolClient.updateUser(acc, bridgeAddress);
+              }
+            }, 30000);
+          });
+        }
+        return transaction;
+      } catch (err) {
+        console.error("err in RemoveLiquidity call", err);
+      }
     }
   };
 
@@ -44,6 +122,11 @@ const RemoveLiqudityForm: FC<Props> = ({ removeAmount, setRemoveAmount }) => {
           Max
         </RemovePercentButton>
       </RemovePercentButtonsWrapper>
+      <Balance>
+        <span>
+          Balance: {ethers.utils.formatUnits(balance, decimals)} {symbol}
+        </span>
+      </Balance>
       <RemoveFormButtonWrapper>
         <RemoveFormButton onClick={handleButtonClick}>
           {!isConnected ? "Connect wallet" : "Remove liquidity"}

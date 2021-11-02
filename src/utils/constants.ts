@@ -103,6 +103,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       logoURI: ethereumLogo,
       bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
     },
+    {
+      address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
+      name: "UMA Token",
+      symbol: "UMA",
+      decimals: 18,
+      logoURI: umaLogo,
+      bridgePool: "0x4495C9F0C10D82823a2Dc5658615874a5B48bFA0",
+    },
   ],
   [ChainId.RINKEBY]: [
     {
@@ -476,6 +484,14 @@ export const POOL_LIST: Token[] = [
     decimals: 18,
     logoURI: ethereumLogo,
     bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
+  },
+  {
+    address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    name: "Wrapped Ethereum",
+    symbol: "WETH",
+    decimals: 18,
+    logoURI: wethLogo,
+    bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
   },
   {
     address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",

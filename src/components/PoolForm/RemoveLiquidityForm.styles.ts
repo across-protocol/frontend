@@ -46,3 +46,16 @@ export const RemovePercentButton = styled(BaseButton)`
   color: hsla(230, 6%, 19%, 1);
   font-size: 0.875rem;
 `;
+
+export const Balance = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  span {
+    color: hsla(166, 92%, 70%, 1);
+    font-size: 0.75rem;
+    font-family: "Barlow";
+    line-height: 1rem;
+    margin-right: 1.5rem;
+    margin-top: 0.66rem;
+  }
+`;
