@@ -11,7 +11,7 @@ import {
 } from "state/hooks";
 import { TransactionTypes } from "state/transactions";
 import { useERC20 } from "hooks";
-import { CHAINS, getDepositBox, TOKENS_LIST, formatUnits } from "utils";
+import { CHAINS, getDepositBox, TOKENS_LIST, formatUnits, max } from "utils";
 import { PrimaryButton, AccentSection } from "components";
 import { Wrapper, Info } from "./SendAction.styles";
 import api from "state/chainApi";
@@ -105,10 +105,13 @@ const SendAction: React.FC = () => {
 
   const amountMinusFees =
     fees && amount.gte(0)
-      ? amount
-          .sub(fees.instantRelayFee.total)
-          .sub(fees.slowRelayFee.total)
-          .sub(fees.lpFee.total)
+      ? max(
+          amount
+            .sub(fees.instantRelayFee.total)
+            .sub(fees.slowRelayFee.total)
+            .sub(fees.lpFee.total),
+          "0"
+        )
       : amount;
 
   const buttonDisabled =

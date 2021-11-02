@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { ethers } from "ethers";
 import { useSelect } from "downshift";
+import { max } from "utils";
 
 import {
   useSend,
@@ -26,6 +27,7 @@ import {
   ErrorBox,
 } from "./CoinSelection.styles";
 
+const FEE_ESTIMATION = ".004";
 const CoinSelection = () => {
   const [inputAmount, setInputAmount] = React.useState<string>("");
   const { account, isConnected } = useConnection();
@@ -88,7 +90,7 @@ const CoinSelection = () => {
       const isEth = tokenList[selectedIndex].symbol === "ETH";
       if (
         amount.lte(
-          isEth ? balance.sub(ethers.utils.parseEther("0.004")) : balance
+          isEth ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION)) : balance
         )
       ) {
         // clear the previous error if it is not a parsing error
@@ -110,9 +112,13 @@ const CoinSelection = () => {
         ({ address }) => address === selectedItem.address
       );
       const isEth = tokenList[selectedIndex].symbol === "ETH";
-      // TODO: need to select max of 0 and balances.sub.
       const balance = isEth
-        ? balances[selectedIndex].sub(ethers.utils.parseEther("0.004"))
+        ? max(
+            balances[selectedIndex].sub(
+              ethers.utils.parseEther(FEE_ESTIMATION)
+            ),
+            0
+          )
         : balances[selectedIndex];
       setAmount({ amount: balance });
       setInputAmount(formatUnits(balance, selectedItem.decimals));
