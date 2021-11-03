@@ -5,6 +5,7 @@ import { store } from "state";
 import { GlobalStyles } from "components";
 
 import App from "./App";
+import "./onboard-override.css";
 
 ReactDOM.render(
   <React.StrictMode>
