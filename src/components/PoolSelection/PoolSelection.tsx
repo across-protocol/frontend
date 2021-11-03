@@ -18,10 +18,11 @@ import {
 } from "./PoolSelection.styles";
 
 interface Props {
+  token: Token;
   setToken: Dispatch<SetStateAction<Token>>;
 }
 
-const PoolSelection: FC<Props> = ({ setToken }) => {
+const PoolSelection: FC<Props> = ({ token, setToken }) => {
   const { account, isConnected } = useConnection();
 
   const { data: balances } = useBalances(
@@ -41,7 +42,7 @@ const PoolSelection: FC<Props> = ({ setToken }) => {
     getMenuProps,
   } = useSelect({
     items: POOL_LIST,
-    defaultSelectedItem: POOL_LIST[0],
+    defaultSelectedItem: token,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
         setToken(selectedItem);

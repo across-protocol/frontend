@@ -17,9 +17,13 @@ export function poolEventHandler(path: string[], data: any) {
 export const poolClient = new Client(
   {
     multicall2Address: multicallTwoAddress,
+    confirmations: 1,
   },
   {
     provider,
   },
   poolEventHandler
 );
+
+// Checks every 30 seconds for new Pool data on new transactions
+poolClient.startInterval(20000);

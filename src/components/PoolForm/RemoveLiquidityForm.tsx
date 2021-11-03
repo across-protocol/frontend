@@ -40,7 +40,7 @@ const RemoveLiqudityForm: FC<Props> = ({
   balance,
 }) => {
   const { init } = onboard;
-  const { isConnected, provider, signer, account, notify } = useConnection();
+  const { isConnected, provider, signer, notify } = useConnection();
 
   const handleButtonClick = async () => {
     if (!provider) {
@@ -55,8 +55,6 @@ const RemoveLiqudityForm: FC<Props> = ({
       );
 
       const weiAmount = lpTokens.mul(removeAmountToWei).div(scaler);
-
-      console.log("weiAmount", weiAmount, weiAmount.toString());
 
       try {
         let txId;
@@ -80,19 +78,10 @@ const RemoveLiqudityForm: FC<Props> = ({
           const { emitter } = notify.hash(transaction.hash);
           emitter.on("all", addEtherscan);
 
-          // Scope to closure.
-          const acc = account;
           emitter.on("txConfirmed", (tx) => {
             setShowSuccess(true);
             const url = `https://etherscan.io/tx/${transaction.hash}`;
             setDepositUrl(url);
-            // Nodes are out of sync. Update state in 30 secounds
-            setTimeout(() => {
-              poolClient.updatePool(bridgeAddress);
-              if (acc) {
-                poolClient.updateUser(acc, bridgeAddress);
-              }
-            }, 30000);
           });
         }
         return transaction;

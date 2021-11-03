@@ -70,7 +70,7 @@ const Pool: FC = () => {
     <Layout>
       {!showSuccess ? (
         <>
-          <PoolSelection setToken={setToken} />
+          <PoolSelection token={token} setToken={setToken} />
           {!loadingPoolState ? (
             <PoolForm
               symbol={token.symbol}

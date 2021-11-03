@@ -3375,25 +3375,25 @@
   resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.1.5.tgz#d0300642b5f32b57b939e504325ee6e88d1d45f9"
   integrity sha512-+rgW6B0/HZXZXGuW2uVv6rag/dlRJm4VoEVvu5YwCAO+XrP161dLvRRP13KplkIqRIIAOor51Jdiq3XgrhAbkw==
 
-"@uma/contracts-frontend@^0.1.7":
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.1.7.tgz#f3be9247c9e478060c1adcb3c81404377534c0af"
-  integrity sha512-RiatG2bJi+2i4AGvJV6cJrPhhUBxqt0AY4WrSCVV9in/YY+N94MyJtR8zcsZPnNH/QywKhwEuOQC1EiprDyLCg==
+"@uma/contracts-frontend@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.1.8.tgz#04e1cffcae9722a5701a4ba5b253952c22ed5043"
+  integrity sha512-dCE873HRcv3xOdeS2yNTO0xTuSemQ+S+do0XRfAEuhedUtvbN0GIvLjU0McnhN1tLexXvcrJ5EF1fHIYQTdaNA==
 
-"@uma/contracts-node@^0.1.7":
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.1.7.tgz#6f96acadc306f2f26d7cbfd1a98c71053eabd78d"
-  integrity sha512-HH5k6QzcaKJXkem1Zf8RJYxUKJgZfDBwnu1EkcsWWO2YEWFlo/MftCUo5Aa2TEuCgSyglIyRtWTVqATE3/tdWQ==
+"@uma/contracts-node@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.1.8.tgz#17bbd1054394bd94f8cda012e63617ed300aacda"
+  integrity sha512-SiWkxwdLcMqIMEMGl+DePT7BXFjfISZcAaW5F7GsPl/mOD/UebEuGt7eTPPyC+d4FTSYQiw79E51WVI/hXFfVQ==
 
-"@uma/sdk@^0.10.1":
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/@uma/sdk/-/sdk-0.10.1.tgz#34895cbf396b4197f43059c233c4f99977d76e53"
-  integrity sha512-h0VWDQaztot4NUWOmyKIlDlAu0zTLc/Ldm+NefO+swvtEx/mVDPTnTONSGdyRCXfUMii+fCPMvJe54Yfj0B42Q==
+"@uma/sdk@^0.10.2":
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/@uma/sdk/-/sdk-0.10.2.tgz#6ace9c89482f52f88e5c001b37e76b78e0aa876c"
+  integrity sha512-OUn/Bx21FUVmblH7d+1Ipx+d3qAxqrYLBaAG48xt622+Zppo7c5TPx0jPEUgJB3C9Ak11sNxDokAW6fS5Pwg3A==
   dependencies:
     "@google-cloud/datastore" "^6.6.0"
     "@types/lodash-es" "^4.17.5"
-    "@uma/contracts-frontend" "^0.1.7"
-    "@uma/contracts-node" "^0.1.7"
+    "@uma/contracts-frontend" "^0.1.8"
+    "@uma/contracts-node" "^0.1.8"
     axios "^0.21.4"
     bn.js "^4.11.9"
     decimal.js "^10.3.1"
