@@ -11,7 +11,13 @@ import {
 } from "state/hooks";
 import { TransactionTypes } from "state/transactions";
 import { useERC20 } from "hooks";
-import { CHAINS, getDepositBox, TOKENS_LIST, formatUnits, max } from "utils";
+import {
+  CHAINS,
+  getDepositBox,
+  TOKENS_LIST,
+  formatUnits,
+  receiveAmount,
+} from "utils";
 import { PrimaryButton, AccentSection } from "components";
 import { Wrapper, Info } from "./SendAction.styles";
 import api from "state/chainApi";
@@ -78,11 +84,19 @@ const SendAction: React.FC = () => {
     }
   };
   const handleSend = async () => {
-    const tx = await send();
-    if (tx) {
+    const { tx, fees } = await send();
+    if (tx && fees) {
       addTransaction({ ...tx, meta: { label: TransactionTypes.DEPOSIT } });
       const receipt = await tx.wait(CONFIRMATIONS);
-      addDeposit({ tx: receipt, toChain, fromChain, amount, token, toAddress });
+      addDeposit({
+        tx: receipt,
+        toChain,
+        fromChain,
+        amount,
+        token,
+        toAddress,
+        fees,
+      });
       // update balances after tx
       if (account) {
         updateEthBalance({ chainId: fromChain, account });
@@ -118,16 +132,7 @@ const SendAction: React.FC = () => {
     return "Send";
   };
 
-  const amountMinusFees =
-    fees && amount.gte(0)
-      ? max(
-          amount
-            .sub(fees.instantRelayFee.total)
-            .sub(fees.slowRelayFee.total)
-            .sub(fees.lpFee.total),
-          "0"
-        )
-      : amount;
+  const amountMinusFees = receiveAmount(amount, fees);
 
   const buttonDisabled =
     isSendPending ||

@@ -168,7 +168,7 @@ export function useSend() {
   );
   const send = useCallback(async () => {
     if (!signer || !canSend || !fees || !toAddress || !block) {
-      return;
+      return {};
     }
 
     try {
@@ -188,7 +188,7 @@ export function useSend() {
         timestamp,
         { value }
       );
-      return tx;
+      return { tx, fees };
     } catch (e) {
       throw new TransactionError(
         depositBox.address,

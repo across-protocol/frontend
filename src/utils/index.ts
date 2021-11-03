@@ -5,3 +5,4 @@ export * from "./bridge";
 export * from "./chains";
 export * from "./errors";
 export * from "./onboard";
+export * from "./math";

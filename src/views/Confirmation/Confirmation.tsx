@@ -1,6 +1,6 @@
 import React from "react";
 import { Check, ArrowUpRight } from "react-feather";
-import { TOKENS_LIST, CHAINS, formatUnits } from "utils";
+import { TOKENS_LIST, CHAINS, formatUnits, receiveAmount } from "utils";
 import { useDeposits } from "state/hooks";
 import { Layout } from "components";
 import {
@@ -13,11 +13,13 @@ import {
   Logo,
   InfoSection,
   Header,
+  Row,
 } from "./Confirmation.styles";
 
 const Confirmation: React.FC = () => {
   const { deposit, toggle } = useDeposits();
   if (!deposit) return null;
+  const amountMinusFees = receiveAmount(deposit.amount, deposit.fees);
 
   const tokenInfo = TOKENS_LIST[deposit.fromChain].find(
     (t) => t.address === deposit.token
@@ -43,19 +45,35 @@ const Confirmation: React.FC = () => {
             Explorer <ArrowUpRight width={16} height={16} />
           </Link>
           <div>
-            <Info>
-              <h3>Sending</h3>
-              <div>
-                <Logo
-                  src={tokenInfo?.logoURI}
-                  alt={`${tokenInfo?.symbol} logo`}
-                />
+            <Row>
+              <Info>
+                <h3>Sending</h3>
                 <div>
-                  {formatUnits(deposit.amount, tokenInfo?.decimals ?? 18)}{" "}
-                  {tokenInfo?.symbol}
+                  <Logo
+                    src={tokenInfo?.logoURI}
+                    alt={`${tokenInfo?.symbol} logo`}
+                  />
+                  <div>
+                    {formatUnits(deposit.amount, tokenInfo?.decimals ?? 18)}{" "}
+                    {tokenInfo?.symbol}
+                  </div>
                 </div>
-              </div>
-            </Info>
+              </Info>
+              <Info></Info>
+              <Info>
+                <h3>Receiving</h3>
+                <div>
+                  <Logo
+                    src={tokenInfo?.logoURI}
+                    alt={`${tokenInfo?.symbol} logo`}
+                  />
+                  <div>
+                    {formatUnits(amountMinusFees, tokenInfo?.decimals ?? 18)}{" "}
+                    {tokenInfo?.symbol}
+                  </div>
+                </div>
+              </Info>
+            </Row>
             <Info>
               <h3>From</h3>
               <div>

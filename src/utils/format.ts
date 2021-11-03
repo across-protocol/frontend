@@ -1,4 +1,4 @@
-import { ethers, BigNumber } from "ethers";
+import { ethers } from "ethers";
 
 export function isValidString(s: string | null | undefined | ""): s is string {
   if (s != null && typeof s === "string" && s !== "") {
@@ -35,9 +35,4 @@ export function parseUnits(value: string, decimals: number): ethers.BigNumber {
 
 export function parseEther(value: string): ethers.BigNumber {
   return parseUnits(value, 18);
-}
-
-export function max(a: ethers.BigNumberish, b: ethers.BigNumberish) {
-  if (BigNumber.from(a).gte(b)) return BigNumber.from(a);
-  return BigNumber.from(b);
 }

@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ethers } from "ethers";
 import { ChainId } from "utils";
+import type { BridgeFees } from "utils";
 
 type Deposit = {
   txHash: string;
@@ -11,6 +12,7 @@ type Deposit = {
   token: string;
   fromChain: ChainId;
   toChain: ChainId;
+  fees: BridgeFees;
 };
 type State = {
   showConfirmationScreen: boolean;
@@ -29,6 +31,7 @@ type DepositAction = PayloadAction<{
   fromChain: ChainId;
   toChain: ChainId;
   toAddress?: string;
+  fees: BridgeFees;
 }>;
 
 const connectionSlice = createSlice({
@@ -51,6 +54,7 @@ const connectionSlice = createSlice({
       const to = depositTx.to;
       const token = action.payload.token;
       const toAddress = action.payload.toAddress;
+      const fees = action.payload.fees;
       state.tx = depositTx;
       state.deposit = {
         txHash: depositTx.transactionHash,
@@ -61,6 +65,7 @@ const connectionSlice = createSlice({
         fromChain,
         toChain,
         toAddress,
+        fees,
       };
       state.showConfirmationScreen = true;
       return state;

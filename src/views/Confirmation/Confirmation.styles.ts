@@ -47,6 +47,11 @@ export const InfoSection = styled(AccentSection)`
   border-top: none;
 `;
 
+export const Row = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
 export const Info = styled.article`
   border-bottom: 1px solid var(--color-primary-dark);
   --horizontalPadding: 40px;
