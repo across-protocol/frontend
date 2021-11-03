@@ -139,7 +139,7 @@ const CoinSelection = () => {
   const errorMsg = error
     ? error.message
     : fees?.isAmountTooLow
-    ? "Bridge fee is too high. Try sending a larger amount."
+    ? "Bridge fee is high for this amount. Send a larger amount."
     : fees?.isLiquidityInsufficient
     ? `Insufficient liquidity for ${selectedItem?.symbol}.`
     : undefined;
