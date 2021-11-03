@@ -21,7 +21,9 @@ const Header: React.FC = () => {
 
   return (
     <Wrapper>
-      <Logo />
+      <Link to="/">
+        <Logo />
+      </Link>
       <Navigation>
         <List>
           {LINKS.map(({ href, name }) => (
