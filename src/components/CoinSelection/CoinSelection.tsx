@@ -133,7 +133,7 @@ const CoinSelection = () => {
       tokenSymbol: selectedItem!.symbol,
       blockNumber: block?.blockNumber ?? 0,
     },
-    { skip: !isConnected || amount.lte(0) || !block }
+    { skip: amount.lte(0) || !block || !selectedItem?.symbol }
   );
 
   const errorMsg = error
@@ -203,7 +203,6 @@ const CoinSelection = () => {
               id="amount"
               value={inputAmount}
               onChange={handleChange}
-              disabled={!isConnected}
             />
           </RoundBox>
         </InputGroup>

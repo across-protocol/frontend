@@ -107,7 +107,6 @@ const SocialLink = styled.a`
     height: 45px;
     width: 40px;
     margin: 0 1rem;
-
   }
 `;
 export default About;
