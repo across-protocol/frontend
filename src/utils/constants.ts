@@ -483,7 +483,7 @@ export const POOL_LIST: Token[] = [
     symbol: "ETH",
     decimals: 18,
     logoURI: ethereumLogo,
-    bridgePool: "0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17",
+    bridgePool: "0x7355Efc63Ae731f584380a9838292c7046c1e433",
   },
   {
     address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
@@ -491,7 +491,7 @@ export const POOL_LIST: Token[] = [
     symbol: "WETH",
     decimals: 18,
     logoURI: wethLogo,
-    bridgePool: "0xf42bB7EC88d065dF48D60cb672B88F8330f9f764",
+    bridgePool: "0x7355Efc63Ae731f584380a9838292c7046c1e433 ",
   },
   {
     address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
@@ -499,7 +499,7 @@ export const POOL_LIST: Token[] = [
     symbol: "USDC",
     decimals: 6,
     logoURI: usdcLogo,
-    bridgePool: "0x54d8d0a00b8288b49694a765C59694ddE8e4B931",
+    bridgePool: "0x256C8919CE1AB0e33974CF6AA9c71561Ef3017b6 ",
   },
   {
     address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
@@ -507,7 +507,7 @@ export const POOL_LIST: Token[] = [
     symbol: "UMA",
     decimals: 18,
     logoURI: umaLogo,
-    bridgePool: "0x4495C9F0C10D82823a2Dc5658615874a5B48bFA0",
+    bridgePool: "0xdfe0ec39291e3b60ACa122908f86809c9eE64E90",
   },
 ];
 type RateModel = {
