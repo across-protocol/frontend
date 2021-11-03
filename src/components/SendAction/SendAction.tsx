@@ -122,7 +122,7 @@ const SendAction: React.FC = () => {
   return (
     <AccentSection>
       <Wrapper>
-        {fees && tokenInfo && (
+        {amount.gt(0) && fees && tokenInfo && (
           <>
             <Info>
               <div>Time to {CHAINS[toChain].name}</div>

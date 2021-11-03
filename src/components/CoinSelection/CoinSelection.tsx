@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { useSelect } from "downshift";
 import { max } from "utils";
 
@@ -29,9 +29,8 @@ import {
 
 const FEE_ESTIMATION = ".004";
 const CoinSelection = () => {
-  const [inputAmount, setInputAmount] = React.useState<string>("");
   const { account, isConnected } = useConnection();
-  const { setAmount, setToken, fromChain, toChain, amount } = useSend();
+  const { setAmount, setToken, fromChain, toChain, amount, token } = useSend();
 
   const [error, setError] = React.useState<Error>();
   const tokenList = TOKENS_LIST[fromChain];
@@ -52,15 +51,20 @@ const CoinSelection = () => {
     getMenuProps,
   } = useSelect({
     items: tokenList,
-    defaultSelectedItem: tokenList.find(
-      (t) => t.address === ethers.constants.AddressZero
-    ),
+    defaultSelectedItem: tokenList.find((t) => t.address === token),
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
+        setInputAmount("");
+        setAmount({ amount: BigNumber.from("0") });
         setToken({ token: selectedItem.address });
       }
     },
   });
+  const [inputAmount, setInputAmount] = React.useState<string>(
+    selectedItem && amount.gt("0")
+      ? formatUnits(amount, selectedItem.decimals)
+      : ""
+  );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -82,9 +86,9 @@ const CoinSelection = () => {
   };
 
   useEffect(() => {
-    if (balances && amount && inputAmount !== "") {
+    if (balances && amount && inputAmount) {
       const selectedIndex = tokenList.findIndex(
-        ({ address }) => address === selectedItem!.address
+        ({ address }) => address === token
       );
       const balance = balances[selectedIndex];
       const isEth = tokenList[selectedIndex].symbol === "ETH";
@@ -103,8 +107,10 @@ const CoinSelection = () => {
       } else {
         setError(new Error("Insufficient balance."));
       }
+    } else {
+      setError(undefined);
     }
-  }, [balances, amount, selectedItem, tokenList, inputAmount]);
+  }, [balances, amount, token, tokenList, inputAmount]);
 
   const handleMaxClick = () => {
     if (balances && selectedItem) {
