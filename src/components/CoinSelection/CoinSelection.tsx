@@ -155,11 +155,7 @@ const CoinSelection = () => {
         <SectionTitle>Asset</SectionTitle>
         <InputGroup>
           <RoundBox as="label" {...getLabelProps()}>
-            <ToggleButton
-              type="button"
-              {...getToggleButtonProps()}
-              disabled={!isConnected}
-            >
+            <ToggleButton type="button" {...getToggleButtonProps()}>
               <Logo src={selectedItem?.logoURI} alt={selectedItem?.name} />
               <div>{selectedItem?.symbol}</div>
               <ToggleIcon />
