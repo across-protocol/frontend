@@ -3,7 +3,12 @@ import { ethers } from "ethers";
 import { update } from "./connection";
 import { toggle as toggleConfirmationScreen } from "./deposits";
 
-import { ChainId, DEFAULT_FROM_CHAIN_ID, DEFAULT_TO_CHAIN_ID } from "utils";
+import {
+  ChainId,
+  DEFAULT_FROM_CHAIN_ID,
+  DEFAULT_TO_CHAIN_ID,
+  getAddress,
+} from "utils";
 
 type State = {
   token: string;
@@ -56,7 +61,10 @@ const sendSlice = createSlice({
   extraReducers: (builder) =>
     builder
       .addCase(update, (state, action) => {
-        state.toAddress = action.payload.account ?? state.toAddress;
+        // since this is hooked in from a connection update, we need to treat the address the same way. Onboard is all lowercase.
+        state.toAddress = action.payload.account
+          ? getAddress(action.payload.account)
+          : state.toAddress;
         return state;
       })
       .addCase(toggleConfirmationScreen, (state, action) => {
