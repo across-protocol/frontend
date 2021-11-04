@@ -15,7 +15,7 @@ const Footer: FC<Props> = () => {
         <LinksList>
           <LinksListItem>
             <LinkAnchor
-              href="https://umaproject.org"
+              href="https://across.gitbook.io/bridge/faq"
               target="_blank"
               rel="noreferrer"
             >
@@ -24,7 +24,7 @@ const Footer: FC<Props> = () => {
           </LinksListItem>
           <LinksListItem>
             <LinkAnchor
-              href="https://umaproject.org"
+              href="https://across.gitbook.io/bridge/"
               target="_blank"
               rel="noreferrer"
             >
@@ -65,7 +65,7 @@ const Footer: FC<Props> = () => {
       <LinksList>
         <LinksListItem>
           <LinkAnchor
-            href="https://umaproject.org"
+            href="https://across.gitbook.io/bridge/faq"
             target="_blank"
             rel="noreferrer"
           >
@@ -74,7 +74,7 @@ const Footer: FC<Props> = () => {
         </LinksListItem>
         <LinksListItem>
           <LinkAnchor
-            href="https://umaproject.org"
+            href="https://across.gitbook.io/bridge/"
             target="_blank"
             rel="noreferrer"
           >
