@@ -85,7 +85,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
-      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
+      bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
     },
     {
       address: getAddress("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
@@ -93,7 +93,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "USDC",
       decimals: 6,
       logoURI: usdcLogo,
-      bridgePool: getAddress("0x54d8d0a00b8288b49694a765C59694ddE8e4B931"),
+      bridgePool: getAddress("0x256C8919CE1AB0e33974CF6AA9c71561Ef3017b6"),
     },
     {
       address: ethers.constants.AddressZero,
@@ -101,7 +101,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "ETH",
       decimals: 18,
       logoURI: ethereumLogo,
-      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
+      bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
     },
     {
       address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
@@ -109,7 +109,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "UMA",
       decimals: 18,
       logoURI: umaLogo,
-      bridgePool: "0x4495C9F0C10D82823a2Dc5658615874a5B48bFA0",
+      bridgePool: "0xdfe0ec39291e3b60ACa122908f86809c9eE64E90",
     },
   ],
   [ChainId.RINKEBY]: [
@@ -163,7 +163,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
-      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
+      bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
     },
     {
       address: getAddress("0x7f5c764cbc14f9669b88837ca1490cca17c31607"),
@@ -179,7 +179,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "ETH",
       decimals: 18,
       logoURI: ethereumLogo,
-      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
+      bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
     },
   ],
   [ChainId.KOVAN_OPTIMISM]: [
@@ -215,7 +215,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
-      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
+      bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
     },
     {
       address: getAddress("0xff970a61a04b1ca14834a43f5de4533ebddb5cc8"),
@@ -223,7 +223,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "USDC",
       decimals: 6,
       logoURI: usdcLogo,
-      bridgePool: getAddress("0x54d8d0a00b8288b49694a765C59694ddE8e4B931"),
+      bridgePool: getAddress("0x256C8919CE1AB0e33974CF6AA9c71561Ef3017b6"),
     },
     {
       address: ethers.constants.AddressZero,
@@ -231,7 +231,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "ETH",
       decimals: 18,
       logoURI: ethereumLogo,
-      bridgePool: getAddress("0x75a29a66452C80702952bbcEDd284C8c4CF5Ab17"),
+      bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
     },
   ],
   [ChainId.ARBITRUM_RINKEBY]: [
@@ -382,7 +382,7 @@ export const ADDRESSES: Record<ChainId, { BRIDGE?: string }> = {
     BRIDGE: "0x2271a5E74eA8A29764ab10523575b41AA52455f0",
   },
   [ChainId.ARBITRUM]: {
-    BRIDGE: "0xeF684C38F94F48775959ECf2012D7E864ffb9dd4",
+    BRIDGE: "0xD8c6dD978a3768F7DDfE3A9aAD2c3Fd75Fa9B6Fd",
   },
   [ChainId.ARBITRUM_RINKEBY]: {
     BRIDGE: "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
