@@ -3,7 +3,7 @@ import { FC, Dispatch, SetStateAction } from "react";
 import { useSelect } from "downshift";
 
 import { useBalances, useConnection } from "state/hooks";
-import { formatUnits, POOL_LIST, ChainId, Token } from "utils";
+import { formatUnits, TOKENS_LIST, ChainId, Token } from "utils";
 import { Section, SectionTitle } from "../Section";
 
 import {
@@ -23,7 +23,7 @@ interface Props {
 }
 
 const PoolSelection: FC<Props> = ({ token, setToken }) => {
-  const { account, isConnected } = useConnection();
+  const { account } = useConnection();
 
   const { data: balances } = useBalances(
     {
@@ -41,7 +41,7 @@ const PoolSelection: FC<Props> = ({ token, setToken }) => {
     getItemProps,
     getMenuProps,
   } = useSelect({
-    items: POOL_LIST,
+    items: TOKENS_LIST[ChainId.MAINNET],
     defaultSelectedItem: token,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
@@ -56,11 +56,7 @@ const PoolSelection: FC<Props> = ({ token, setToken }) => {
         <SectionTitle>Select pool</SectionTitle>
         <InputGroup>
           <RoundBox as="label" {...getLabelProps()}>
-            <ToggleButton
-              type="button"
-              {...getToggleButtonProps()}
-              disabled={!isConnected}
-            >
+            <ToggleButton type="button" {...getToggleButtonProps()}>
               <Logo src={selectedItem?.logoURI} alt={selectedItem?.name} />
               <div>{selectedItem?.symbol}</div>
               <ToggleIcon />
@@ -68,18 +64,17 @@ const PoolSelection: FC<Props> = ({ token, setToken }) => {
           </RoundBox>
           <Menu {...getMenuProps()}>
             {isOpen &&
-              POOL_LIST.map((token, index) => (
-                <Item
-                  {...getItemProps({ item: token, index })}
-                  key={token.address}
-                >
-                  <Logo src={token.logoURI} alt={token.name} />
-                  <div>{token.name}</div>
-                  <div>
-                    {balances && formatUnits(balances[index], token.decimals)}
-                  </div>
-                </Item>
-              ))}
+              TOKENS_LIST[ChainId.MAINNET].map((t, index) => {
+                return (
+                  <Item {...getItemProps({ item: t, index })} key={t.address}>
+                    <Logo src={t.logoURI} alt={t.name} />
+                    <div>{t.name}</div>
+                    <div>
+                      {balances && formatUnits(balances[index], t.decimals)}
+                    </div>
+                  </Item>
+                );
+              })}
           </Menu>
         </InputGroup>
       </Wrapper>

@@ -4,7 +4,7 @@ import Layout from "components/Layout";
 import PoolSelection from "components/PoolSelection";
 import PoolForm from "components/PoolForm";
 import DepositSuccess from "components/PoolForm/DepositSuccess";
-import { POOL_LIST, Token } from "utils";
+import { TOKENS_LIST, ChainId, Token } from "utils";
 import { useAppSelector, useConnection } from "state/hooks";
 import get from "lodash/get";
 import { poolClient } from "state/poolsApi";
@@ -15,7 +15,7 @@ import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { BounceType } from "components/BouncingDotsLoader/BouncingDotsLoader";
 
 const Pool: FC = () => {
-  const [token, setToken] = useState<Token>(POOL_LIST[0]);
+  const [token, setToken] = useState<Token>(TOKENS_LIST[ChainId.MAINNET][2]);
   const [showSuccess, setShowSuccess] = useState(false);
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);
@@ -121,7 +121,6 @@ const Pool: FC = () => {
               }
               setShowSuccess={setShowSuccess}
               setDepositUrl={setDepositUrl}
-              // currentERC20Contract={currentERC20Contract}
               balance={balance}
             />
           ) : (
