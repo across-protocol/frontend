@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-
 import { CHAINS, ChainId } from "./constants";
 
 export async function switchChain(
@@ -35,4 +34,11 @@ export async function switchChain(
 
 export function isSupportedChainId(chainId: number): chainId is ChainId {
   return chainId in ChainId;
+}
+
+// this could be replaced eventually with a better gas estimator
+export async function getGasPrice(
+  provider: ethers.providers.JsonRpcProvider
+): Promise<ethers.BigNumber> {
+  return provider.getGasPrice();
 }
