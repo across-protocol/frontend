@@ -213,11 +213,13 @@ const AddLiquidityForm: FC<Props> = ({
           />
         </RoundBox>
       </InputGroup>
-      <Balance>
-        <span>
-          Balance: {ethers.utils.formatUnits(balance, decimals)} {symbol}
-        </span>
-      </Balance>
+      {isConnected && (
+        <Balance>
+          <span>
+            Balance: {ethers.utils.formatUnits(balance, decimals)} {symbol}
+          </span>
+        </Balance>
+      )}
       <FormButton
         onClick={() =>
           approveOrPoolTransactionHandler().catch((err) =>

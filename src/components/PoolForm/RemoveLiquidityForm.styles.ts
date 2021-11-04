@@ -37,6 +37,7 @@ export const RemovePercentButtonsWrapper = styled.div`
   display: flex;
   margin-top: 2rem;
   justify-content: space-between;
+  margin-bottom: 1rem;
 `;
 
 export const RemovePercentButton = styled(BaseButton)`
@@ -57,5 +58,43 @@ export const Balance = styled.div`
     line-height: 1rem;
     margin-right: 1.5rem;
     margin-top: 0.66rem;
+  }
+`;
+
+export const FeesBlockWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+`;
+
+export const FeesBlock = styled.div`
+  color: #ffffff;
+  font-family: "Barlow";
+`;
+
+export const FeesPercent = styled.span`
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 700;
+`;
+
+export const FeesBoldInfo = styled.div`
+  font-size: 1rem;
+  font-weight: 700;
+`;
+
+export const FeesInfo = styled.div`
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+`;
+
+export const FeesValues = styled.div`
+  text-align: right;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+  &:first-of-type {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #ffffff;
   }
 `;

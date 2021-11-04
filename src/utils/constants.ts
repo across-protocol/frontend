@@ -6,7 +6,7 @@ import optimismLogo from "assets/optimism.svg";
 import wethLogo from "assets/weth-logo.svg";
 import arbitrumLogo from "assets/arbitrum-logo.svg";
 import memoize from "lodash.memoize";
-import umaLogo from "assets/UMA-round.svg";
+// import umaLogo from "assets/UMA-round.svg";
 import { getAddress } from "./address";
 
 /* Colors and Media Queries section */
@@ -103,14 +103,15 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       logoURI: ethereumLogo,
       bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
     },
-    {
-      address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
-      name: "UMA Token",
-      symbol: "UMA",
-      decimals: 18,
-      logoURI: umaLogo,
-      bridgePool: "0xdfe0ec39291e3b60ACa122908f86809c9eE64E90",
-    },
+    // Temp comment out
+    // {
+    //   address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
+    //   name: "UMA Token",
+    //   symbol: "UMA",
+    //   decimals: 18,
+    //   logoURI: umaLogo,
+    //   bridgePool: "0xdfe0ec39291e3b60ACa122908f86809c9eE64E90",
+    // },
   ],
   [ChainId.RINKEBY]: [
     {

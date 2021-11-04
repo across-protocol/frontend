@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 
 export const Wrapper = styled.div`
-  height: 82vh;
+  height: 100%;
   background-color: #6cf9d8;
   border-radius: 12px;
 `;

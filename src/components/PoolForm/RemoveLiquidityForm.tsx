@@ -8,12 +8,21 @@ import {
   RemovePercentButton,
   RemoveFormButton,
   RemoveFormButtonWrapper,
-  Balance,
+  FeesBlockWrapper,
+  FeesBlock,
+  FeesValues,
+  FeesBoldInfo,
+  FeesInfo,
+  FeesPercent,
 } from "./RemoveLiquidityForm.styles";
 import { ethers } from "ethers";
 import { toWeiSafe } from "utils/weiMath";
 import { poolClient } from "state/poolsApi";
 import { addEtherscan } from "utils/notify";
+import * as umaSdk from "@uma/sdk";
+import { formatUnits } from "utils";
+
+const { previewRemoval } = umaSdk.across.clients.bridgePool;
 
 const toBN = ethers.BigNumber.from;
 
@@ -27,6 +36,8 @@ interface Props {
   setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
   balance: ethers.BigNumber;
+  position: ethers.BigNumber;
+  feesEarned: ethers.BigNumber;
 }
 const RemoveLiqudityForm: FC<Props> = ({
   removeAmount,
@@ -38,6 +49,8 @@ const RemoveLiqudityForm: FC<Props> = ({
   setShowSuccess,
   setDepositUrl,
   balance,
+  position,
+  feesEarned,
 }) => {
   const { init } = onboard;
   const { isConnected, provider, signer, notify } = useConnection();
@@ -91,6 +104,14 @@ const RemoveLiqudityForm: FC<Props> = ({
     }
   };
 
+  const preview = isConnected
+    ? previewRemoval(
+        position.toString(),
+        feesEarned.toString(),
+        removeAmount / 100
+      )
+    : null;
+
   return (
     <>
       <RemoveAmount>
@@ -111,11 +132,55 @@ const RemoveLiqudityForm: FC<Props> = ({
           Max
         </RemovePercentButton>
       </RemovePercentButtonsWrapper>
-      <Balance>
-        <span>
-          Balance: {ethers.utils.formatUnits(balance, decimals)} {symbol}
-        </span>
-      </Balance>
+
+      {isConnected && (
+        <>
+          <FeesBlockWrapper>
+            <FeesBlock>
+              <FeesBoldInfo>
+                Remove amount<FeesPercent>({removeAmount}%)</FeesPercent>
+              </FeesBoldInfo>
+              <FeesInfo>Left in pool</FeesInfo>
+            </FeesBlock>
+            <FeesBlock>
+              <FeesValues>
+                {preview && formatUnits(preview.position.recieve, decimals)}{" "}
+                {symbol}
+              </FeesValues>
+              <FeesValues>
+                {preview && formatUnits(preview.position.remain, decimals)}
+                {symbol}
+              </FeesValues>
+            </FeesBlock>
+          </FeesBlockWrapper>
+          <FeesBlockWrapper>
+            <FeesBlock>
+              <FeesBoldInfo>Fees earned</FeesBoldInfo>
+              <FeesInfo>Left in pool</FeesInfo>
+            </FeesBlock>
+            <FeesBlock>
+              <FeesValues>
+                {preview && formatUnits(preview.fees.recieve, decimals)}{" "}
+                {symbol}
+              </FeesValues>
+              <FeesValues>
+                {preview && formatUnits(preview.fees.remain, decimals)} {symbol}
+              </FeesValues>
+            </FeesBlock>
+          </FeesBlockWrapper>
+          <FeesBlockWrapper>
+            <FeesBlock>
+              <FeesBoldInfo>You will get</FeesBoldInfo>
+            </FeesBlock>
+            <FeesBlock>
+              <FeesValues>
+                {preview && formatUnits(preview.total.recieve, decimals)}
+                {symbol}
+              </FeesValues>
+            </FeesBlock>
+          </FeesBlockWrapper>
+        </>
+      )}
       <RemoveFormButtonWrapper>
         <RemoveFormButton onClick={handleButtonClick}>
           {!isConnected ? "Connect wallet" : "Remove liquidity"}
