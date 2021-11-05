@@ -129,6 +129,7 @@ const PoolForm: FC<Props> = ({
             balance={balance}
             position={position}
             feesEarned={feesEarned}
+            totalPosition={totalPosition}
           />
         </TabContentWrapper>
       </Tabs>

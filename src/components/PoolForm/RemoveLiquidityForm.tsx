@@ -37,6 +37,7 @@ interface Props {
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
   balance: ethers.BigNumber;
   position: ethers.BigNumber;
+  totalPosition: ethers.BigNumber;
   feesEarned: ethers.BigNumber;
   wrongNetwork?: boolean;
 }
@@ -53,6 +54,7 @@ const RemoveLiqudityForm: FC<Props> = ({
   position,
   feesEarned,
   wrongNetwork,
+  totalPosition,
 }) => {
   const { init } = onboard;
   const { isConnected, provider, signer, notify } = useConnection();
@@ -117,8 +119,7 @@ const RemoveLiqudityForm: FC<Props> = ({
 
   const preview = isConnected
     ? previewRemoval(
-        position.toString(),
-        feesEarned.toString(),
+        { totalDeposited: position, feesEarned, positionValue: totalPosition },
         removeAmount / 100
       )
     : null;
