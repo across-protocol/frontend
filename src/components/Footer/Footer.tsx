@@ -33,7 +33,7 @@ const Footer: FC<Props> = () => {
           </LinksListItem>
           <LinksListItem>
             <LinkAnchor
-              href="https://discord.gg/yyxGkUqW"
+              href="https://discord.gg/across"
               target="_blank"
               rel="noreferrer"
             >
@@ -83,7 +83,7 @@ const Footer: FC<Props> = () => {
         </LinksListItem>
         <LinksListItem>
           <LinkAnchor
-            href="https://discord.gg/yyxGkUqW"
+            href="https://discord.gg/across"
             target="_blank"
             rel="noreferrer"
           >
