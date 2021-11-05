@@ -82,8 +82,9 @@ const AddLiquidityForm: FC<Props> = ({
   }, [account, tokenAddress, bridgeAddress, signer, balance]);
 
   useEffect(() => {
-    if (isConnected && symbol !== "ETH") checkIfUserHasToApprove();
-  }, [isConnected, symbol, checkIfUserHasToApprove]);
+    if (isConnected && symbol !== "ETH" && !wrongNetwork)
+      checkIfUserHasToApprove();
+  }, [isConnected, symbol, checkIfUserHasToApprove, wrongNetwork]);
 
   // TODO: move this to redux and update on an interval, every X blocks or something
   useEffect(() => {

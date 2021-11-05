@@ -11,10 +11,9 @@ import {
   Token,
   UnsupportedChainIdError,
 } from "utils";
-import { useAppSelector, useConnection } from "state/hooks";
+import { useAppSelector, useConnection, useBalance } from "state/hooks";
 import get from "lodash/get";
 import { poolClient } from "state/poolsApi";
-import { clients } from "@uma/sdk";
 import styled from "@emotion/styled";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 
@@ -26,7 +25,6 @@ const Pool: FC = () => {
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);
 
-  const [balance, setBalance] = useState(ethers.BigNumber.from("0"));
   const pool = useAppSelector((state) => state.pools.pools[token.bridgePool]);
   const connection = useAppSelector((state) => state.connection);
   const userPosition = useAppSelector((state) =>
@@ -38,10 +36,15 @@ const Pool: FC = () => {
     ])
   );
 
-  const { isConnected, account, signer, provider, error, chainId } =
-    useConnection();
+  const { isConnected, account, provider, error, chainId } = useConnection();
 
   const queries = useAppSelector((state) => state.api.queries);
+
+  const { balance } = useBalance({
+    chainId: ChainId.MAINNET,
+    account,
+    tokenAddress: token.address,
+  });
 
   const wrongNetwork =
     provider &&
@@ -62,21 +65,6 @@ const Pool: FC = () => {
       poolClient.updateUser(connection.account, token.bridgePool);
     }
   }, [isConnected, connection.account, token.bridgePool]);
-
-  useEffect(() => {
-    if (isConnected && signer && account && provider) {
-      if (token.symbol !== "ETH") {
-        const erc20 = clients.erc20.connect(token.address, signer);
-        erc20.balanceOf(account).then((res: ethers.BigNumber) => {
-          setBalance(res);
-        });
-      } else {
-        provider.getBalance(account).then((res: ethers.BigNumber) => {
-          setBalance(res);
-        });
-      }
-    }
-  }, [token, isConnected, signer, account, provider]);
 
   return (
     <Layout>
