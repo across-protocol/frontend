@@ -13,7 +13,7 @@ export function shortenAddress(address: string): string {
   return `${address.substr(0, 4)}...${address.substr(-4)}`;
 }
 
-const numberFormatter = new Intl.NumberFormat("en-US", {
+export const numberFormatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 4,
 }).format;
 export function formatUnits(

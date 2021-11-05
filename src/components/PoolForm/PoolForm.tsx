@@ -18,7 +18,7 @@ import {
   PositionBlockItem,
   PositionBlockItemBold,
 } from "./PoolForm.styles";
-import { formatUnits } from "utils";
+import { formatUnits, numberFormatter } from "utils";
 
 interface Props {
   symbol: string;
@@ -60,7 +60,6 @@ const PoolForm: FC<Props> = ({
   const [inputAmount, setInputAmount] = useState("");
   const [removeAmount, setRemoveAmount] = useState(0);
   const [error] = useState<Error>();
-
   return (
     <Wrapper>
       <Info>
@@ -70,19 +69,19 @@ const PoolForm: FC<Props> = ({
           <PositionBlock>
             <PositionBlockItem>My deposit</PositionBlockItem>
             <PositionBlockItem>
-              {ethers.utils.formatUnits(position, decimals)} {symbol}
+              {formatUnits(position, decimals)} {symbol}
             </PositionBlockItem>
           </PositionBlock>
           <PositionBlock>
             <PositionBlockItem>Fees earned</PositionBlockItem>
             <PositionBlockItem>
-              {ethers.utils.formatUnits(feesEarned, decimals)} {symbol}
+              {formatUnits(feesEarned, decimals)} {symbol}
             </PositionBlockItem>
           </PositionBlock>
           <PositionBlock>
             <PositionBlockItemBold>Total</PositionBlockItemBold>
             <PositionBlockItemBold>
-              {ethers.utils.formatUnits(totalPosition, decimals)} {symbol}
+              {formatUnits(totalPosition, decimals)} {symbol}
             </PositionBlockItemBold>
           </PositionBlock>
         </PositionWrapper>
@@ -94,7 +93,7 @@ const PoolForm: FC<Props> = ({
         </ROIWrapper>
         <ROIWrapper>
           <ROIItem>Estimated APY:</ROIItem>
-          <ROIItem>{apy}</ROIItem>
+          <ROIItem>{numberFormatter(Number(apy)).replaceAll(",", "")}%</ROIItem>
         </ROIWrapper>
       </Info>
       <Tabs>

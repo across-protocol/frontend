@@ -89,8 +89,8 @@ const Pool: FC = () => {
               }
               apy={
                 pool && pool.estimatedApy
-                  ? `${Number(pool.estimatedApy) * 100}%`
-                  : "0%"
+                  ? `${Number(pool.estimatedApy) * 100}`
+                  : "0"
               }
               position={
                 userPosition
