@@ -25,5 +25,5 @@ export const poolClient = new Client(
   poolEventHandler
 );
 
-// Checks every 30 seconds for new Pool data on new transactions
-poolClient.startInterval(20000);
+// Checks every 10 seconds for new Pool data on new transactions
+poolClient.startInterval(10000);

@@ -24,7 +24,7 @@ const poolsSlice = createSlice({
   name: "pools",
   initialState,
   reducers: {
-    update: (state, action: PayloadAction<any>) => {
+    update: (state, action: PayloadAction<{ path: string[]; data: any }>) => {
       const nextState = set(state, action.payload.path, action.payload.data);
       return nextState;
     },

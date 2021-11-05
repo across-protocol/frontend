@@ -92,7 +92,6 @@ const RemoveLiqudityForm: FC<Props> = ({
             weiAmount
           );
         }
-
         const transaction = poolClient.getTx(txId);
 
         if (transaction.hash) {
@@ -100,9 +99,13 @@ const RemoveLiqudityForm: FC<Props> = ({
           emitter.on("all", addEtherscan);
 
           emitter.on("txConfirmed", (tx) => {
-            setShowSuccess(true);
+            if (transaction.hash) notify.unsubscribe(transaction.hash);
             const url = `https://etherscan.io/tx/${transaction.hash}`;
+            setShowSuccess(true);
             setDepositUrl(url);
+          });
+          emitter.on("txFailed", () => {
+            if (transaction.hash) notify.unsubscribe(transaction.hash);
           });
         }
         return transaction;

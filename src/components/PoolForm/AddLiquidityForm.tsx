@@ -76,7 +76,7 @@ const AddLiquidityForm: FC<Props> = ({
           setUserNeedsToApprove(true);
         }
       } catch (err) {
-        console.log("err in check approval call", err);
+        console.error("err in check approval call", err);
       }
     }
   }, [account, tokenAddress, bridgeAddress, signer, balance]);
@@ -107,11 +107,13 @@ const AddLiquidityForm: FC<Props> = ({
       emitter.on("all", addEtherscan);
 
       emitter.on("txConfirmed", () => {
+        notify.unsubscribe(tx.hash);
         setTxSubmitted(false);
         setUserNeedsToApprove(false);
       });
 
-      emitter.on("txError", () => {
+      emitter.on("txFailed", () => {
+        notify.unsubscribe(tx.hash);
         setTxSubmitted(false);
       });
     }
@@ -145,23 +147,24 @@ const AddLiquidityForm: FC<Props> = ({
 
         if (transaction.hash) {
           setTxSubmitted(true);
-
           const { emitter } = notify.hash(transaction.hash);
           emitter.on("all", addEtherscan);
-          emitter.on("txConfirmed", (tx: any) => {
-            setTxSubmitted(false);
+          emitter.on("txConfirmed", (tx) => {
+            if (transaction.hash) notify.unsubscribe(transaction.hash);
             setShowSuccess(true);
+            setTxSubmitted(false);
             const url = `https://etherscan.io/tx/${transaction.hash}`;
             setDepositUrl(url);
           });
-          emitter.on("txError", () => {
+          emitter.on("txFailed", () => {
+            if (transaction.hash) notify.unsubscribe(transaction.hash);
             setTxSubmitted(false);
           });
         }
 
         return transaction;
       } catch (err) {
-        console.error("err in AddEthLiqudity call", err);
+        console.error("err in AddEthLiquidity call", err);
       }
     }
   };
