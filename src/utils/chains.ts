@@ -40,5 +40,6 @@ export function isSupportedChainId(chainId: number): chainId is ChainId {
 export async function getGasPrice(
   provider: ethers.providers.JsonRpcProvider
 ): Promise<ethers.BigNumber> {
-  return provider.getGasPrice();
+  const fees = await provider.getFeeData();
+  return fees.maxFeePerGas || fees.gasPrice || (await provider.getGasPrice());
 }

@@ -23,10 +23,10 @@ const MAX_UINT_VAL = ethers.constants.MaxUint256;
 const INFINITE_APPROVAL_AMOUNT = MAX_UINT_VAL;
 
 // TODO: could move these 3 into envs
-const DEFAULT_GAS_PRICE = toWeiSafe("150", 9);
-const GAS_PRICE_BUFFER = toWeiSafe("25", 9);
-// Rounded up from a mainnet transaction sending eth
-const ADD_LIQUIDITY_ETH_GAS = BigNumber.from(80000);
+const DEFAULT_GAS_PRICE = toWeiSafe("300", 9);
+const GAS_PRICE_BUFFER = toWeiSafe("1", 9);
+// Rounded up from a mainnet transaction sending eth gas limit
+const ADD_LIQUIDITY_ETH_GAS = BigNumber.from(82796);
 
 interface Props {
   error: Error | undefined;
@@ -89,7 +89,9 @@ const AddLiquidityForm: FC<Props> = ({
   // TODO: move this to redux and update on an interval, every X blocks or something
   useEffect(() => {
     if (!provider || !isConnected) return;
-    getGasPrice(provider).then(setGasPrice);
+    getGasPrice(provider).then(setGasPrice).catch(err=>{
+      console.error('Error getting gas price',err)
+    })
   }, [provider, isConnected]);
 
   const handleApprove = async () => {
