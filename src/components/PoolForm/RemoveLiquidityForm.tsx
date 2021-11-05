@@ -38,6 +38,7 @@ interface Props {
   balance: ethers.BigNumber;
   position: ethers.BigNumber;
   feesEarned: ethers.BigNumber;
+  wrongNetwork?: boolean;
 }
 const RemoveLiqudityForm: FC<Props> = ({
   removeAmount,
@@ -51,9 +52,16 @@ const RemoveLiqudityForm: FC<Props> = ({
   balance,
   position,
   feesEarned,
+  wrongNetwork,
 }) => {
   const { init } = onboard;
   const { isConnected, provider, signer, notify } = useConnection();
+
+  function buttonMessage() {
+    if (!isConnected) return "Connect wallet";
+    if (wrongNetwork) return "Switch to Ethereum Mainnet";
+    return "Remove liquidity";
+  }
 
   const handleButtonClick = async () => {
     if (!provider) {
@@ -182,8 +190,8 @@ const RemoveLiqudityForm: FC<Props> = ({
         </>
       )}
       <RemoveFormButtonWrapper>
-        <RemoveFormButton onClick={handleButtonClick}>
-          {!isConnected ? "Connect wallet" : "Remove liquidity"}
+        <RemoveFormButton onClick={handleButtonClick} disabled={wrongNetwork}>
+          {buttonMessage()}
         </RemoveFormButton>
       </RemoveFormButtonWrapper>
     </>

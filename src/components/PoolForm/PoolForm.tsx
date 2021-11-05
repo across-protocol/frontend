@@ -2,7 +2,7 @@ import { FC, useState, ChangeEvent } from "react";
 import { ethers } from "ethers";
 import Tabs from "../Tabs";
 import AddLiquidityForm from "./AddLiquidityForm";
-import RemoveLiqudityForm from "./RemoveLiquidityForm";
+import RemoveLiquidityForm from "./RemoveLiquidityForm";
 import { QuerySubState } from "@reduxjs/toolkit/dist/query/core/apiState";
 
 import {
@@ -37,6 +37,7 @@ interface Props {
   setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
   balance: ethers.BigNumber;
+  wrongNetwork?: boolean;
 }
 
 const PoolForm: FC<Props> = ({
@@ -54,6 +55,7 @@ const PoolForm: FC<Props> = ({
   setShowSuccess,
   setDepositUrl,
   balance,
+  wrongNetwork,
 }) => {
   const [inputAmount, setInputAmount] = useState("");
   const [removeAmount, setRemoveAmount] = useState(0);
@@ -98,6 +100,7 @@ const PoolForm: FC<Props> = ({
       <Tabs>
         <TabContentWrapper data-label="Add">
           <AddLiquidityForm
+            wrongNetwork={wrongNetwork}
             error={error}
             amount={inputAmount}
             onChange={(event: ChangeEvent<HTMLInputElement>) =>
@@ -114,7 +117,8 @@ const PoolForm: FC<Props> = ({
           />
         </TabContentWrapper>
         <TabContentWrapper data-label="Remove">
-          <RemoveLiqudityForm
+          <RemoveLiquidityForm
+            wrongNetwork={wrongNetwork}
             removeAmount={removeAmount}
             setRemoveAmount={setRemoveAmount}
             bridgeAddress={bridgeAddress}

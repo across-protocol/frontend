@@ -5,6 +5,7 @@ import { Header, SuperHeader } from "components";
 import { useConnection, useDeposits, useSend } from "state/hooks";
 import {
   DEFAULT_FROM_CHAIN_ID,
+  DEFAULT_TO_CHAIN_ID,
   CHAINS,
   UnsupportedChainIdError,
   switchChain,
@@ -12,8 +13,6 @@ import {
 import Footer from "components/Footer";
 
 interface Props {}
-
-const MAINNET_CHAINID = 1;
 
 // Need this component for useLocation hook
 const Routes: FC<Props> = () => {
@@ -26,7 +25,8 @@ const Routes: FC<Props> = () => {
     (error instanceof UnsupportedChainIdError || chainId !== fromChain);
   const wrongNetworkPool =
     provider &&
-    (error instanceof UnsupportedChainIdError || chainId !== MAINNET_CHAINID);
+    (error instanceof UnsupportedChainIdError ||
+      chainId !== DEFAULT_TO_CHAIN_ID);
   return (
     <>
       {wrongNetworkSend && location.pathname === "/" && (
@@ -43,8 +43,8 @@ const Routes: FC<Props> = () => {
         <SuperHeader>
           <div>
             You are on the wrong network. Please{" "}
-            <button onClick={() => switchChain(provider, MAINNET_CHAINID)}>
-              switch to {CHAINS[MAINNET_CHAINID].name}
+            <button onClick={() => switchChain(provider, DEFAULT_TO_CHAIN_ID)}>
+              switch to {CHAINS[DEFAULT_TO_CHAIN_ID].name}
             </button>
           </div>
         </SuperHeader>

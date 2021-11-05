@@ -20,6 +20,7 @@ import {
 interface Props {
   token: Token;
   setToken: Dispatch<SetStateAction<Token>>;
+  wrongNetwork?: boolean;
 }
 
 const PoolSelection: FC<Props> = ({ token, setToken }) => {

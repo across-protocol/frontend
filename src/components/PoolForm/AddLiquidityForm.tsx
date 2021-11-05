@@ -40,6 +40,7 @@ interface Props {
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
   balance: ethers.BigNumber;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
+  wrongNetwork?: boolean;
 }
 
 const AddLiquidityForm: FC<Props> = ({
@@ -54,6 +55,7 @@ const AddLiquidityForm: FC<Props> = ({
   setDepositUrl,
   balance,
   setAmount,
+  wrongNetwork,
 }) => {
   const { init } = onboard;
   const { isConnected, provider, signer, notify, account } = useConnection();
@@ -161,6 +163,12 @@ const AddLiquidityForm: FC<Props> = ({
     }
   };
 
+  function buttonMessage() {
+    if (!isConnected) return "Connect wallet";
+    if (wrongNetwork) return "Switch to Ethereum Mainnet";
+    if (userNeedsToApprove) return "Approve";
+    return "Add Liquidity";
+  }
   return (
     <>
       <FormHeader>Amount</FormHeader>
@@ -221,17 +229,14 @@ const AddLiquidityForm: FC<Props> = ({
         </Balance>
       )}
       <FormButton
+        disabled={wrongNetwork}
         onClick={() =>
           approveOrPoolTransactionHandler().catch((err) =>
             console.error("Error on click to approve or pool tx", err)
           )
         }
       >
-        {!isConnected
-          ? "Connect wallet"
-          : userNeedsToApprove
-          ? "Approve"
-          : "Add liquidity"}
+        {buttonMessage()}
         {txSubmitted ? <BouncingDotsLoader /> : null}
       </FormButton>
     </>

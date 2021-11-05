@@ -4,7 +4,13 @@ import Layout from "components/Layout";
 import PoolSelection from "components/PoolSelection";
 import PoolForm from "components/PoolForm";
 import DepositSuccess from "components/PoolForm/DepositSuccess";
-import { TOKENS_LIST, ChainId, Token } from "utils";
+import {
+  DEFAULT_TO_CHAIN_ID,
+  TOKENS_LIST,
+  ChainId,
+  Token,
+  UnsupportedChainIdError,
+} from "utils";
 import { useAppSelector, useConnection } from "state/hooks";
 import get from "lodash/get";
 import { poolClient } from "state/poolsApi";
@@ -32,9 +38,15 @@ const Pool: FC = () => {
     ])
   );
 
-  const { isConnected, account, signer, provider } = useConnection();
+  const { isConnected, account, signer, provider, error, chainId } =
+    useConnection();
 
   const queries = useAppSelector((state) => state.api.queries);
+
+  const wrongNetwork =
+    provider &&
+    (error instanceof UnsupportedChainIdError ||
+      chainId !== DEFAULT_TO_CHAIN_ID);
 
   // Update pool info when token changes
   useEffect(() => {
@@ -70,9 +82,14 @@ const Pool: FC = () => {
     <Layout>
       {!showSuccess ? (
         <>
-          <PoolSelection token={token} setToken={setToken} />
+          <PoolSelection
+            wrongNetwork={wrongNetwork}
+            token={token}
+            setToken={setToken}
+          />
           {!loadingPoolState ? (
             <PoolForm
+              wrongNetwork={wrongNetwork}
               symbol={token.symbol}
               icon={token.logoURI}
               decimals={token.decimals}
