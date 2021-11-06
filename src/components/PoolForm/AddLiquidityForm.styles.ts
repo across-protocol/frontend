@@ -18,7 +18,6 @@ export const RoundBox = styled(UnstyledBox)`
 `;
 
 export const MaxButton = styled(SecondaryButton)`
-  position: static;
   text-transform: uppercase;
   padding: 10px 20px;
   font-size: ${14 / 16}rem;
