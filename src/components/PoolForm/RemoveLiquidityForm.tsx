@@ -40,6 +40,8 @@ interface Props {
   totalPosition: ethers.BigNumber;
   feesEarned: ethers.BigNumber;
   wrongNetwork?: boolean;
+  // refetch balance
+  refetchBalance: () => void;
 }
 const RemoveLiqudityForm: FC<Props> = ({
   removeAmount,
@@ -50,7 +52,6 @@ const RemoveLiqudityForm: FC<Props> = ({
   symbol,
   setShowSuccess,
   setDepositUrl,
-  balance,
   position,
   feesEarned,
   wrongNetwork,

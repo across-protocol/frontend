@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { RoundBox as UnstyledBox } from "../Box";
+import { RoundBox as UnstyledBox, ErrorBox } from "../Box";
 import { SecondaryButton, PrimaryButton } from "../Buttons";
 
 export const RoundBox = styled(UnstyledBox)`
@@ -13,16 +13,21 @@ export const RoundBox = styled(UnstyledBox)`
   flex: 2;
   display: flex;
   &:not(:first-of-type):focus-within {
-    outline: var(--outline-color) solid 1px;
+    outline: 1px solid var(--outline-color);
   }
 `;
 
 export const MaxButton = styled(SecondaryButton)`
+  position: static;
   text-transform: uppercase;
   padding: 10px 20px;
   font-size: ${14 / 16}rem;
-`;
+  transition: background-color 100ms linear;
 
+  &:hover {
+    background-color: var(--color-gray-300);
+  }
+`;
 export const Input = styled.input`
   border: none;
   font-size: inherit;
@@ -43,11 +48,11 @@ export const FormButton = styled(PrimaryButton)`
   width: 100%;
   margin-left: auto;
   margin-right: auto;
-  background: hsla(166, 92%, 70%, 1);
-  color: hsla(230, 6%, 19%, 1);
+  background: var(--color-primary);
+  color: var(--color-gray);
   font-weight: 700;
-  font-size: 1.1.rem;
-  line-height: 1.25rem;
+  font-size: ${18 / 16}rem;
+  line-height: 1.1;
 `;
 
 export const InputGroup = styled.div`
@@ -57,9 +62,9 @@ export const InputGroup = styled.div`
 
 export const FormHeader = styled.h2`
   font-weight: 600;
-  font-size: 1.25rem;
-  line-height: 1.5rem;
-  margin-bottom: 1rem;
+  font-size: ${20 / 16}rem;
+  line-height: 1.2;
+  margin-bottom: 16px;
 `;
 
 export const Balance = styled.div`
@@ -67,9 +72,13 @@ export const Balance = styled.div`
   justify-content: flex-end;
   span {
     --color: var(--color-primary);
-    font-size: 0.75rem;
-    line-height: 1rem;
-    margin-right: 1.5rem;
-    margin-top: 0.66rem;
+    font-size: ${12 / 16}rem;
+    line-height: 1.33;
+    margin-right: 24px;
+    margin-top: 12px;
   }
+`;
+
+export const LiquidityErrorBox = styled(ErrorBox)`
+  margin-top: 10px;
 `;

@@ -25,14 +25,14 @@ const PoolFormSlider: FC<Props> = ({ value, setValue }) => {
 export default PoolFormSlider;
 
 const Slider = styled(ReactSlider)`
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  margin-left: 8px;
+  margin-right: 8px;
   .PoolForm-thumb {
     height: 34px;
     width: 34px;
-    background-color: hsla(166, 92%, 70%, 1);
+    background-color: var(--color-primary);
     border-radius: 16px;
-    border: 3px solid hsla(0, 0%, 100%, 1);
+    border: 3px solid var(--color-white);
     margin-bottom: -8px;
     top: -17px;
     &:focus {
@@ -41,6 +41,6 @@ const Slider = styled(ReactSlider)`
   }
   .PoolForm-track {
     height: 3px;
-    background-color: hsla(0, 0%, 100%, 1);
+    background-color: var(--color-white);
   }
 `;

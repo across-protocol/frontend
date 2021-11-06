@@ -22,6 +22,5 @@ const Main = styled.main`
   height: 100%;
   grid-column: 2;
   box-shadow: 0 0 120px hsla(${COLORS.primary[500]} / 0.25);
-  /* clip-path: inset(0px -160px 0px -160px); */
-  overflow-y: visible;
+  clip-path: inset(0px -160px 0px -160px);
 `;

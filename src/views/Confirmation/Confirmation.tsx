@@ -8,6 +8,7 @@ import {
   Heading,
   SuccessIcon,
   Link,
+  SecondaryLink,
   Info,
   Button,
   Logo,
@@ -81,7 +82,17 @@ const Confirmation: React.FC = () => {
                   src={CHAINS[deposit.fromChain].logoURI}
                   alt={`${CHAINS[deposit.fromChain].name} logo`}
                 />
-                <div>{deposit.from}</div>
+                <div>
+                  <SecondaryLink
+                    href={`${CHAINS[deposit.fromChain].explorerUrl}/address/${
+                      deposit.from
+                    }`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {deposit.from}
+                  </SecondaryLink>
+                </div>
               </div>
             </Info>
             <Info>
@@ -91,7 +102,17 @@ const Confirmation: React.FC = () => {
                   src={CHAINS[deposit.toChain].logoURI}
                   alt={`${CHAINS[deposit.toChain].name} logo`}
                 />
-                <div>{deposit.toAddress}</div>
+                <div>
+                  <SecondaryLink
+                    href={`${CHAINS[deposit.toChain].explorerUrl}/address/${
+                      deposit.to
+                    }`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {deposit.toAddress}
+                  </SecondaryLink>
+                </div>
               </div>
             </Info>
             <Info>

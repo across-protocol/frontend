@@ -8,7 +8,7 @@ import arbitrumLogo from "assets/arbitrum-logo.svg";
 import memoize from "lodash.memoize";
 // import umaLogo from "assets/UMA-round.svg";
 import { getAddress } from "./address";
-
+import { toWeiSafe } from "./weiMath";
 /* Colors and Media Queries section */
 
 export const BREAKPOINTS = {
@@ -507,3 +507,8 @@ export const RATE_MODELS: Record<string, RateModel> = {
 
 // this client requires multicall2 be accessible on the chain. This is the address for mainnet.
 export const multicallTwoAddress = "0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696";
+
+export const DEFAULT_GAS_PRICE = toWeiSafe("300", 9);
+export const GAS_PRICE_BUFFER = toWeiSafe("1", 9);
+// Rounded up from a mainnet transaction sending eth gas limit
+export const ADD_LIQUIDITY_ETH_GAS = ethers.BigNumber.from(82796);

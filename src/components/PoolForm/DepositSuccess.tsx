@@ -43,29 +43,28 @@ const DepositSuccess: FC<Props> = ({
 export default DepositSuccess;
 
 const DepositTopWrapper = styled.div`
-  background-color: #2d2e33;
+  background-color: var(--color-gray);
   text-align: center;
-  padding: 1rem;
+  padding: 16px;
 `;
 
 const SuccessText = styled.h2`
-  font-size: 1.5rem;
-  color: #ffffff;
-  line-height: 2rem;
-  font-family: "Barlow";
+  font-size: ${24 / 16}rem;
+  color: var(--color-white);
+  line-height: 1.33;
   font-weight: 700;
-  margin-top: 1.5rem;
+  margin-top: 24px;
 `;
 
 const CheckMarkWrapper = styled.div`
-  background-color: hsla(166, 92%, 70%, 1);
+  background-color: var(--color-primary);
   height: 70px;
   width: 70px;
   border-radius: 36px;
-  margin: 1rem auto;
+  margin: 16px auto;
   svg {
     margin-top: 24px;
-    color: #2d2e33;
+    color: var(--color-gray);
   }
   /* &:before {
     height: 16px;
@@ -102,12 +101,11 @@ const DepositBottomWrapper = styled.div`
 `;
 
 const EtherscanUrl = styled.div`
-  margin-top: 1rem;
-  padding-top: 1rem;
+  margin-top: 16px;
+  padding-top: 16px;
   a {
-    color: hsla(166, 92%, 70%, 1);
-    font-size: 0.875rem;
-    font-family: "Barlow";
+    color: var(--color-primary);
+    font-size: ${14 / 16}rem;
     font-weight: 400;
     text-decoration: underline;
 
@@ -118,16 +116,13 @@ const EtherscanUrl = styled.div`
 `;
 
 const DepositButton = styled(PrimaryButton)`
-  margin-top: 2rem;
+  margin-top: 32px;
   width: 95%;
   margin-left: auto;
   margin-right: auto;
-
-  background: hsla(166, 92%, 70%, 1);
-  color: hsla(230, 6%, 19%, 1);
   font-weight: 700;
-  font-size: 1.1rem;
-  line-height: 1.25rem;
+  font-size: ${18 / 16}rem;
+  line-height: 1.1;
   a {
     text-decoration: underline;
     &:hover {

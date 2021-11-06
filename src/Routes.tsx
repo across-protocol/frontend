@@ -32,7 +32,7 @@ const Routes: FC<Props> = () => {
       {wrongNetworkSend && location.pathname === "/" && (
         <SuperHeader>
           <div>
-            You are on the wrong network. Please{" "}
+            You are on an incorrect network. Please{" "}
             <button onClick={() => switchChain(provider, fromChain)}>
               switch to {CHAINS[DEFAULT_FROM_CHAIN_ID].name}
             </button>
@@ -42,7 +42,7 @@ const Routes: FC<Props> = () => {
       {wrongNetworkPool && location.pathname === "/pool" && (
         <SuperHeader>
           <div>
-            You are on the wrong network. Please{" "}
+            You are on an incorrect network. Please{" "}
             <button onClick={() => switchChain(provider, DEFAULT_TO_CHAIN_ID)}>
               switch to {CHAINS[DEFAULT_TO_CHAIN_ID].name}
             </button>

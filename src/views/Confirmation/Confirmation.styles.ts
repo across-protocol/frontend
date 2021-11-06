@@ -37,9 +37,15 @@ export const Link = styled.a`
   display: block;
   width: fit-content;
   margin: auto;
+  transition: opacity 100ms linear;
   &:hover {
     text-decoration: underline;
+    opacity: 0.8;
   }
+`;
+
+export const SecondaryLink = styled(Link)`
+  color: inherit;
 `;
 
 export const InfoSection = styled(AccentSection)`

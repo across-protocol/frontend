@@ -2,9 +2,11 @@ import styled from "@emotion/styled";
 import { ChevronDown } from "react-feather";
 import { COLORS } from "utils";
 import { RoundBox as UnstyledBox, ErrorBox as UnstyledErrorBox } from "../Box";
+import { Section } from "../Section";
 
-export const Wrapper = styled.div`
+export const Wrapper = styled(Section)`
   --radius: 30px;
+  border-bottom: none;
   display: flex;
   flex-direction: column;
 `;

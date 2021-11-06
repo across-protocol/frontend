@@ -95,9 +95,15 @@ export const ToggleIcon = styled(ChevronDown)`
 `;
 
 export const MaxButton = styled(SecondaryButton)`
+  position: static;
   text-transform: uppercase;
   padding: 10px 20px;
   font-size: ${14 / 16}rem;
+  transition: background-color 100ms linear;
+
+  &:hover {
+    background-color: var(--color-gray-300);
+  }
 `;
 
 export const Input = styled.input`

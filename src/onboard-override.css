@@ -1,14 +1,14 @@
 /* Onboard custom CSS */
 .bn-onboard-custom .bn-onboard-modal-content {
-  background-color: #6cf9d8;
-  color: #2d2e33;
+  background-color: var(--color-primary);
+  color: var(--color-gray);
   border-radius: 12px;
 }
 
 .bn-onboard-custom .bn-onboard-modal-select-wallets {
-  background-color: #2d2e33;
-  border-radius: 24px;
-  color: #ffffff;
+  background-color: var(--color-gray);
+  border-radius: 48px;
+  color: var(--color-white);
 }
 
 .bn-onboard-custom .bn-onboard-modal-content-header-icon {
@@ -38,7 +38,7 @@
 }
 
 .bn-onboard-custom .bn-onboard-modal-content-close:hover {
-  background-color: #6cf9d8;
+  background-color: var(--color-primary);
   cursor: pointer;
 }
 
@@ -47,5 +47,5 @@
   width: 16px;
 }
 .bn-onboard-custom .bn-onboard-modal-content-close svg path {
-  fill: #2d2e33;
+  fill: var(--color-gray);
 }

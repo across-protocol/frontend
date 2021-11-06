@@ -10,9 +10,9 @@ interface Props {
 const UserBalance: FC<Props> = ({ symbol, balance }) => {
   return (
     <UserBalanceWrapper>
-      <Balance>
+      <span>
         Balance: {balance.toString()} {symbol}
-      </Balance>
+      </span>
     </UserBalanceWrapper>
   );
 };
@@ -23,5 +23,3 @@ const UserBalanceWrapper = styled.div`
   display: flex;
   align-items: flex-end;
 `;
-
-const Balance = styled.span``;
