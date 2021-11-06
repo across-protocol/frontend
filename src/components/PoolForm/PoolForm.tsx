@@ -94,24 +94,30 @@ const PoolForm: FC<Props> = ({
 
   const validateInput = useCallback(
     (value: string) => {
-      if (Number(value) < 0) return setFormError("Cannot be less than 0.");
-      if (value && balance) {
-        const valueToWei = toWeiSafe(value, decimals);
-        if (valueToWei.gt(balance))
-          return setFormError("Liquidity amount greater than balance.");
-      }
+      try {
+        if (Number(value) < 0) return setFormError("Cannot be less than 0.");
+        if (value && balance) {
+          const valueToWei = toWeiSafe(value, decimals);
+          if (valueToWei.gt(balance))
+            return setFormError("Liquidity amount greater than balance.");
+        }
 
-      if (value && symbol === "ETH") {
-        const valueToWei = toWeiSafe(value, decimals);
+        if (value && symbol === "ETH") {
+          const valueToWei = toWeiSafe(value, decimals);
 
-        const approxGas = estimateGas(
-          ADD_LIQUIDITY_ETH_GAS,
-          gasPrice,
-          GAS_PRICE_BUFFER
-        );
+          const approxGas = estimateGas(
+            ADD_LIQUIDITY_ETH_GAS,
+            gasPrice,
+            GAS_PRICE_BUFFER
+          );
 
-        if (valueToWei.add(approxGas).gt(balance))
-          return setFormError("Transaction may fail due to insufficient gas.");
+          if (valueToWei.add(approxGas).gt(balance))
+            return setFormError(
+              "Transaction may fail due to insufficient gas."
+            );
+        }
+      } catch (e) {
+        return setFormError("Invalid number.");
       }
     },
     [balance, decimals, symbol, gasPrice]
