@@ -23,6 +23,7 @@ import * as umaSdk from "@uma/sdk";
 import { formatUnits } from "utils";
 import { DEFAULT_TO_CHAIN_ID, CHAINS, switchChain } from "utils";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
+import api from "state/chainApi";
 
 const { previewRemoval } = umaSdk.across.clients.bridgePool;
 
@@ -60,9 +61,9 @@ const RemoveLiqudityForm: FC<Props> = ({
   totalPosition,
 }) => {
   const { init } = onboard;
-  const { isConnected, provider, signer, notify } = useConnection();
+  const { isConnected, provider, signer, notify, account } = useConnection();
   const [txSubmitted, setTxSubmitted] = useState(false);
-
+  const [updateEthBalance] = api.endpoints.ethBalance.useLazyQuery();
   function buttonMessage() {
     if (!isConnected) return "Connect wallet";
     if (wrongNetwork) return "Switch to Ethereum Mainnet";
@@ -112,6 +113,11 @@ const RemoveLiqudityForm: FC<Props> = ({
             setShowSuccess(true);
             setDepositUrl(url);
             setTxSubmitted(false);
+            if (account)
+              setTimeout(
+                () => updateEthBalance({ chainId: 1, account }),
+                15000
+              );
           });
           emitter.on("txFailed", () => {
             if (transaction.hash) notify.unsubscribe(transaction.hash);

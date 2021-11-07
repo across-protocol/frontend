@@ -20,6 +20,7 @@ import { addEtherscan } from "utils/notify";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { ADD_LIQUIDITY_ETH_GAS, GAS_PRICE_BUFFER } from "utils/constants";
 import { DEFAULT_TO_CHAIN_ID, CHAINS, switchChain } from "utils";
+import api from "state/chainApi";
 
 // max uint value is 2^256 - 1
 const MAX_UINT_VAL = ethers.constants.MaxUint256;
@@ -66,6 +67,7 @@ const AddLiquidityForm: FC<Props> = ({
 
   const [userNeedsToApprove, setUserNeedsToApprove] = useState(false);
   const [txSubmitted, setTxSubmitted] = useState(false);
+  const [updateEthBalance] = api.endpoints.ethBalance.useLazyQuery();
 
   const checkIfUserHasToApprove = useCallback(async () => {
     if (signer && account) {
@@ -104,6 +106,9 @@ const AddLiquidityForm: FC<Props> = ({
         notify.unsubscribe(tx.hash);
         setTxSubmitted(false);
         setUserNeedsToApprove(false);
+        if (account) {
+          setTimeout(() => updateEthBalance({ chainId: 1, account }), 15000);
+        }
       });
 
       emitter.on("txFailed", () => {
@@ -149,6 +154,11 @@ const AddLiquidityForm: FC<Props> = ({
             setTxSubmitted(false);
             const url = `https://etherscan.io/tx/${transaction.hash}`;
             setDepositUrl(url);
+            if (account)
+              setTimeout(
+                () => updateEthBalance({ chainId: 1, account }),
+                15000
+              );
           });
           emitter.on("txFailed", () => {
             if (transaction.hash) notify.unsubscribe(transaction.hash);
