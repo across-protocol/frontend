@@ -42,3 +42,10 @@ export const Info = styled.div`
     font-size: ${14 / 16}rem;
   }
 `;
+
+export const UnsupportedNetwork = styled.div`
+  background-color: rgba(45, 46, 51, 0.25);
+  padding: 1rem 0.5rem;
+  font-family: "Barlow";
+  font-weight: 600;
+`;

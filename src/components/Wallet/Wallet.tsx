@@ -7,7 +7,13 @@ import {
   shortenAddress,
   formatEther,
 } from "utils";
-import { Wrapper, Account, Info, ConnectButton } from "./Wallet.styles";
+import {
+  Wrapper,
+  Account,
+  Info,
+  ConnectButton,
+  UnsupportedNetwork,
+} from "./Wallet.styles";
 
 const Wallet: React.FC = () => {
   const { account, isConnected, chainId } = useConnection();
@@ -18,7 +24,15 @@ const Wallet: React.FC = () => {
     { skip: !isConnected }
   );
 
-  if (!isConnected || !account || !chainId) {
+  if (account && !isConnected && !chainId) {
+    return (
+      <UnsupportedNetwork>
+        Unsupported Network. Please swap networks.
+      </UnsupportedNetwork>
+    );
+  }
+
+  if (!isConnected) {
     return <ConnectButton onClick={init}>Connect Wallet</ConnectButton>;
   }
 
@@ -26,11 +40,12 @@ const Wallet: React.FC = () => {
     <Wrapper>
       <Info>
         <div>
-          {formatEther(balance ?? "0")} {CHAINS[chainId].nativeCurrency.symbol}
+          {formatEther(balance ?? "0")}{" "}
+          {CHAINS[chainId ?? 1].nativeCurrency.symbol}
         </div>
-        <div>{CHAINS[chainId].name}</div>
+        <div>{CHAINS[chainId ?? 1].name}</div>
       </Info>
-      <Account>{shortenAddress(account)}</Account>
+      <Account>{shortenAddress(account ?? "")}</Account>
     </Wrapper>
   );
 };
