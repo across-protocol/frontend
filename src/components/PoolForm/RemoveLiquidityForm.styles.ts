@@ -43,6 +43,13 @@ export const RemovePercentButton = styled(BaseButton)`
   background-color: var(--color-white);
   color: var(--color-gray);
   font-size: ${14 / 16}rem;
+  height: ${40 / 16}rem;
+  padding: 0.5rem;
+  font-weight: 500;
+  border-radius: ${32 / 16}rem;
+  &:hover {
+    background-color: #6cf9d8;
+  }
 `;
 
 export const Balance = styled.div`

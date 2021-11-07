@@ -20,9 +20,7 @@ export function formatUnits(
   wei: ethers.BigNumberish,
   decimals: number
 ): string {
-  return numberFormatter(
-    Number(ethers.utils.formatUnits(wei, decimals))
-  ).replaceAll(",", "");
+  return numberFormatter(Number(ethers.utils.formatUnits(wei, decimals)));
 }
 
 export function formatEther(wei: ethers.BigNumberish): string {

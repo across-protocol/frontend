@@ -142,7 +142,7 @@ const RemoveLiqudityForm: FC<Props> = ({
           75%
         </RemovePercentButton>
         <RemovePercentButton onClick={() => setRemoveAmount(100)}>
-          Max
+          MAX
         </RemovePercentButton>
       </RemovePercentButtonsWrapper>
 

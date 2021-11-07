@@ -1,4 +1,7 @@
 /* Onboard custom CSS */
+.bn-onboard-custom.bn-onboard-modal {
+  background: rgba(0, 0, 0, 0.9);
+}
 .bn-onboard-custom .bn-onboard-modal-content {
   background-color: var(--color-primary);
   color: var(--color-gray);
@@ -17,7 +20,6 @@
 
 .bn-onboard-custom .bn-onboard-modal-content-header-heading {
   visibility: hidden;
-  /* position: absolute; */
 }
 
 .bn-onboard-custom .bn-onboard-modal-content-header-heading::before {
@@ -48,4 +50,18 @@
 }
 .bn-onboard-custom .bn-onboard-modal-content-close svg path {
   fill: var(--color-gray);
+}
+
+.bn-onboard-custom.bn-onboard-icon-button {
+  height: 50px;
+}
+.bn-onboard-custom.bn-onboard-modal-select-wallets ul li {
+  width: 100%;
+}
+.bn-onboard-custom.bn-onboard-icon-button span {
+  margin-left: 42%;
+}
+
+.bn-onboard-custom.bn-onboard-icon-button div {
+  margin-left: 8px;
 }
