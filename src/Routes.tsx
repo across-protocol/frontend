@@ -29,6 +29,7 @@ const Routes: FC<Props> = () => {
       chainId !== DEFAULT_TO_CHAIN_ID);
   return (
     <>
+      <Header />
       {wrongNetworkSend && location.pathname === "/" && (
         <SuperHeader>
           <div>
@@ -49,7 +50,6 @@ const Routes: FC<Props> = () => {
           </div>
         </SuperHeader>
       )}
-      <Header />
       <Switch>
         {!process.env.REACT_APP_HIDE_POOL ? (
           <Route exact path="/pool" component={Pool} />
