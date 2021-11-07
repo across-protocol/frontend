@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import styled from "@emotion/styled";
 import { PrimaryButton } from "../Buttons";
 import { Check, ArrowUpRight } from "react-feather";
@@ -13,6 +13,10 @@ const DepositSuccess: FC<Props> = ({
   setShowSuccess,
   setDepositUrl,
 }) => {
+  // Make sure we scroll to top when deposit screen mounts
+  useEffect(() => {
+    window.scroll(0, 0);
+  }, []);
   return (
     <div>
       <DepositTopWrapper>
