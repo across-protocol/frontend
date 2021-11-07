@@ -78,10 +78,20 @@ const PoolForm: FC<Props> = ({
 
   const { isConnected, provider } = useConnection();
 
-  // TODO: move this to redux and update on an interval, every X blocks or something
   useEffect(() => {
     if (!provider || !isConnected) return;
-    getGasPrice(provider).then(setGasPrice);
+    getGasPrice(provider)
+      .then(setGasPrice)
+      .catch((err) => console.error("Error getting gas price", err));
+
+    // get gas price on an interval
+    const handle = setInterval(() => {
+      getGasPrice(provider)
+        .then(setGasPrice)
+        .catch((err) => console.error("Error getting gas price", err));
+    }, 30000);
+
+    return () => clearInterval(handle);
   }, [provider, isConnected]);
 
   const addLiquidityOnChangeHandler = (
