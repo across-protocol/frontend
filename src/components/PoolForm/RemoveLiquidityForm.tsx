@@ -1,4 +1,4 @@
-import { FC, Dispatch, SetStateAction } from "react";
+import { FC, Dispatch, SetStateAction, useState } from "react";
 import PoolFormSlider from "./PoolFormSlider";
 import { onboard } from "utils";
 import { useConnection } from "state/hooks";
@@ -21,6 +21,8 @@ import { poolClient } from "state/poolsApi";
 import { addEtherscan } from "utils/notify";
 import * as umaSdk from "@uma/sdk";
 import { formatUnits } from "utils";
+import { DEFAULT_TO_CHAIN_ID, CHAINS, switchChain } from "utils";
+import BouncingDotsLoader from "components/BouncingDotsLoader";
 
 const { previewRemoval } = umaSdk.across.clients.bridgePool;
 
@@ -59,6 +61,7 @@ const RemoveLiqudityForm: FC<Props> = ({
 }) => {
   const { init } = onboard;
   const { isConnected, provider, signer, notify } = useConnection();
+  const [txSubmitted, setTxSubmitted] = useState(false);
 
   function buttonMessage() {
     if (!isConnected) return "Connect wallet";
@@ -98,6 +101,8 @@ const RemoveLiqudityForm: FC<Props> = ({
         const transaction = poolClient.getTx(txId);
 
         if (transaction.hash) {
+          setTxSubmitted(true);
+
           const { emitter } = notify.hash(transaction.hash);
           emitter.on("all", addEtherscan);
 
@@ -106,9 +111,11 @@ const RemoveLiqudityForm: FC<Props> = ({
             const url = `https://etherscan.io/tx/${transaction.hash}`;
             setShowSuccess(true);
             setDepositUrl(url);
+            setTxSubmitted(false);
           });
           emitter.on("txFailed", () => {
             if (transaction.hash) notify.unsubscribe(transaction.hash);
+            setTxSubmitted(false);
           });
         }
         return transaction;
@@ -195,9 +202,21 @@ const RemoveLiqudityForm: FC<Props> = ({
         </>
       )}
       <RemoveFormButtonWrapper>
-        <RemoveFormButton onClick={handleButtonClick} disabled={wrongNetwork}>
-          {buttonMessage()}
-        </RemoveFormButton>
+        {wrongNetwork && provider ? (
+          <RemoveFormButton
+            onClick={() => switchChain(provider, DEFAULT_TO_CHAIN_ID)}
+          >
+            Switch to {CHAINS[DEFAULT_TO_CHAIN_ID].name}
+          </RemoveFormButton>
+        ) : (
+          <RemoveFormButton
+            onClick={handleButtonClick}
+            disabled={wrongNetwork && !provider}
+          >
+            {buttonMessage()}
+            {txSubmitted ? <BouncingDotsLoader /> : null}
+          </RemoveFormButton>
+        )}
       </RemoveFormButtonWrapper>
     </>
   );

@@ -19,6 +19,7 @@ import { clients } from "@uma/sdk";
 import { addEtherscan } from "utils/notify";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { ADD_LIQUIDITY_ETH_GAS, GAS_PRICE_BUFFER } from "utils/constants";
+import { DEFAULT_TO_CHAIN_ID, CHAINS, switchChain } from "utils";
 
 // max uint value is 2^256 - 1
 const MAX_UINT_VAL = ethers.constants.MaxUint256;
@@ -164,10 +165,10 @@ const AddLiquidityForm: FC<Props> = ({
 
   function buttonMessage() {
     if (!isConnected) return "Connect wallet";
-    if (wrongNetwork) return "Switch to Ethereum Mainnet";
     if (userNeedsToApprove) return "Approve";
     return "Add Liquidity";
   }
+
   return (
     <>
       <FormHeader>Amount</FormHeader>
@@ -228,17 +229,23 @@ const AddLiquidityForm: FC<Props> = ({
         </Balance>
       )}
       {formError && <LiquidityErrorBox>{formError}</LiquidityErrorBox>}
-      <FormButton
-        disabled={wrongNetwork && !!formError}
-        onClick={() =>
-          approveOrPoolTransactionHandler().catch((err) =>
-            console.error("Error on click to approve or pool tx", err)
-          )
-        }
-      >
-        {buttonMessage()}
-        {txSubmitted ? <BouncingDotsLoader /> : null}
-      </FormButton>
+      {wrongNetwork && provider ? (
+        <FormButton onClick={() => switchChain(provider, DEFAULT_TO_CHAIN_ID)}>
+          Switch to {CHAINS[DEFAULT_TO_CHAIN_ID].name}
+        </FormButton>
+      ) : (
+        <FormButton
+          disabled={!provider && !!formError}
+          onClick={() =>
+            approveOrPoolTransactionHandler().catch((err) =>
+              console.error("Error on click to approve or pool tx", err)
+            )
+          }
+        >
+          {buttonMessage()}
+          {txSubmitted ? <BouncingDotsLoader /> : null}
+        </FormButton>
+      )}
     </>
   );
 };
