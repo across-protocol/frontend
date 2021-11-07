@@ -75,8 +75,8 @@ export const FeesBlock = styled.div`
 `;
 
 export const FeesPercent = styled.span`
-  color: var(--color-transparent-white);
-  font-weight: 700;
+  color: var(--color-white);
+  font-weight: 400;
 `;
 
 export const FeesBoldInfo = styled.div`
@@ -91,7 +91,7 @@ export const FeesInfo = styled.div`
 
 export const FeesValues = styled.div`
   text-align: right;
-  font-size: 14px;
+  font-size: ${14 / 16}rem;
   font-weight: 400;
   color: var(--color-transparent-white);
   &:first-of-type {

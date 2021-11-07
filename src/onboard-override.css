@@ -65,3 +65,36 @@
 .bn-onboard-custom.bn-onboard-icon-button div {
   margin-left: 8px;
 }
+
+.bn-notify-custom.bn-notify-notifications {
+  font-family: "Barlow";
+  border-radius: 5px !important;
+}
+
+.bn-notify-custom.bn-notify-notification-status-icon g circle,
+.bn-notify-custom.bn-notify-notification-status-icon g g {
+  stroke: var(--color-gray) !important;
+}
+
+.bn-notify-custom.bn-notify-notification-info {
+  font-family: "Barlow";
+}
+
+.bn-notify-custom.bn-notify-notification-info-message {
+  font-weight: 500;
+  color: var(--color-gray);
+}
+
+.bn-notify-custom.bn-notify-notification-close-icon {
+  opacity: 0.8;
+}
+
+.bn-notify-custom.bn-notify-notification-close-icon svg {
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+.bn-notify-custom.bn-notify-notification-close-icon svg g {
+  stroke: var(--color-gray);
+  margin-top: 4px;
+}

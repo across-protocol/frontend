@@ -25,7 +25,7 @@ const Pool: FC = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);
-
+  const [defaultTab, setDefaultTab] = useState("Add");
   const pool = useAppSelector((state) => state.pools.pools[token.bridgePool]);
   const connection = useAppSelector((state) => state.connection);
   const userPosition = useAppSelector((state) =>
@@ -138,6 +138,8 @@ const Pool: FC = () => {
               setDepositUrl={setDepositUrl}
               balance={balance}
               refetchBalance={refetchBalance}
+              defaultTab={defaultTab}
+              setDefaultTab={setDefaultTab}
             />
           ) : (
             <LoadingWrapper>

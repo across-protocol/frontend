@@ -50,6 +50,8 @@ interface Props {
   wrongNetwork?: boolean;
   // refetch balance
   refetchBalance: () => void;
+  defaultTab: string;
+  setDefaultTab: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const PoolForm: FC<Props> = ({
@@ -69,6 +71,8 @@ const PoolForm: FC<Props> = ({
   balance,
   wrongNetwork,
   refetchBalance,
+  defaultTab,
+  setDefaultTab,
 }) => {
   const [inputAmount, setInputAmount] = useState("");
   const [removeAmount, setRemoveAmount] = useState(0);
@@ -178,7 +182,12 @@ const PoolForm: FC<Props> = ({
           <ROIItem>{numberFormatter(Number(apy)).replaceAll(",", "")}%</ROIItem>
         </ROIWrapper>
       </Info>
-      <Tabs>
+      <Tabs
+        defaultTab={defaultTab}
+        changeDefaultTab={(tab: string) => {
+          setDefaultTab(tab);
+        }}
+      >
         <TabContentWrapper data-label="Add">
           <AddLiquidityForm
             wrongNetwork={wrongNetwork}
