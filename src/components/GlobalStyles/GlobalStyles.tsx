@@ -38,7 +38,8 @@ const variables = css`
     --color-primary-dark: hsl(${COLORS.primary[700]});
     --color-secondary: hsl(${COLORS.secondary[500]});
     --color-error: hsl(${COLORS.error[500]});
-    --color-error-light: hsla(${COLORS.error[300]});
+    --color-error-light: hsl(${COLORS.error[300]});
+    --color-uma-red: hsl(${COLORS.umaRed});
 
     --color-primary-transparent: hsla(${COLORS.primary[500]} / 0.4);
     --color-black-transparent: hsla(${COLORS.black} / 0.75);

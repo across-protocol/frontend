@@ -43,6 +43,7 @@ export const COLORS = {
   },
   white: "0deg 100% 100%",
   black: "0deg 0% 0%",
+  umaRed: "0deg 100% 65%",
 };
 
 /* Chains and Tokens section */
