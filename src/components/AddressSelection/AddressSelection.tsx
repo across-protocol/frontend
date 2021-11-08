@@ -34,6 +34,8 @@ const AddressSelection: React.FC = () => {
   }, [toAddress]);
 
   const toggle = () => {
+    // modal is closing, reset address to the current toAddress
+    if (open) setAddress(toAddress || address);
     setOpen((oldOpen) => !oldOpen);
   };
   const clearInput = () => {
