@@ -49,10 +49,10 @@ export const Link = styled(UnstyledLink)`
   display: grid;
   place-items: center;
 `;
-
-export const Logo = styled(UnstyledLogo)`
-  padding-left: 40px;
+export const LogoLink = styled(UnstyledLink)`
+  padding-left: 45px;
 `;
+export const Logo = styled(UnstyledLogo)``;
 
 export const WalletWrapper = styled.div`
   justify-self: flex-end;

@@ -119,10 +119,6 @@ const AboutFooterWrapper = styled.footer`
   border-top: 1px solid rgba(255, 255, 255, 0.25);
   display: flex;
   justify-content: space-between;
-  z-index: 1;
-  max-width: 1450px;
-  margin-left: auto;
-  margin-right: auto;
 `;
 
 const FooterWrapper = styled(AboutFooterWrapper)`
@@ -144,7 +140,6 @@ const LinksListItem = styled.li`
 `;
 
 const LinkAnchor = styled.a`
-  font-family: "Barlow";
   font-style: normal;
   font-weight: 300;
   font-size: 1rem;

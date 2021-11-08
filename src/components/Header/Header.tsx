@@ -5,6 +5,7 @@ import {
   Wrapper,
   Navigation,
   Link,
+  LogoLink,
   Logo,
   List,
   Item,
@@ -21,9 +22,9 @@ const Header: React.FC = () => {
 
   return (
     <Wrapper>
-      <Link to="/">
+      <LogoLink to="/">
         <Logo />
-      </Link>
+      </LogoLink>
       <Navigation>
         <List>
           {LINKS.map(({ href, name }) => (

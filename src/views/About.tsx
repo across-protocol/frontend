@@ -6,107 +6,86 @@ import BulletImg from "assets/Across-logo-bullet.svg";
 const About: FC = () => {
   return (
     <Wrapper>
-      <Hero>
+      <HeroBg>
         <HeroHeader>
-          Instantly Send Assets from L2 Rollups to L1 Ethereum
+          Instantly Send Assets from Layer 2 Rollups to Ethereum
         </HeroHeader>
-      </Hero>
-      <BodyWrapper>
-        <BulletWrapper>
-          <BulletImageWrapper>
-            <BulletImage src={BulletImg} alt="across_logo" />
-          </BulletImageWrapper>
-          <BulletTextWrapper>
-            <BulletHeader>Fast Transfers</BulletHeader>
+      </HeroBg>
+      <Body>
+        <Bullet>
+          <Image src={BulletImg} alt="across_logo" />
+          <TextWrapper>
+            <BulletHeader>Instantaneous Liquidity</BulletHeader>
             <BulletText>
-              Lorem ipsum SEO sit amet, consectetur adipiscing elit. Sed vitae
-              tristique erat. Maecenas suscipit commodo quam, vitae scelerisque
-              elit vestibulum id.
-              <br /> <br />
-              Mauris sed magna tempor, feugiat elit placerat, sagittis urna.
-              Suspendisse porttitor neque ex, et rutrum here is a link sed. Cras
-              sodales nunc ac nunc.
+              Assets are bridged and available for use on mainnet almost
+              instantly.
             </BulletText>
-          </BulletTextWrapper>
-        </BulletWrapper>
-        <BulletWrapper>
-          <BulletImageWrapper>
-            <BulletImage src={BulletImg} alt="across_logo" />
-          </BulletImageWrapper>
-          <BulletTextWrapper>
-            <BulletHeader>Across different chains</BulletHeader>
+          </TextWrapper>
+        </Bullet>
+        <Bullet>
+          <Image src={BulletImg} alt="across_logo" />
+          <TextWrapper>
+            <BulletHeader>Secure</BulletHeader>
             <BulletText>
-              Cosectetur adipiscing SEO. Sed vitae tristique erat. Maecenas
-              suscipit commodo quam, vitae scelerisque elit vestibulum id.
-              <br /> <br />
-              Mauris sed magna tempor, feugiat elit placerat, sagittis urna.
+              Powered By UMA protocol. Transfers are secured by UMA's Optimistic Oracle,
+              which is audited by OpenZeppelin and trusted by top teams to
+              protect hundreds of millions of dollars in value.
             </BulletText>
-          </BulletTextWrapper>
-        </BulletWrapper>
-        <BulletWrapper>
-          <BulletImageWrapper>
-            <BulletImage src={BulletImg} alt="across_logo" />
-          </BulletImageWrapper>
-          <BulletTextWrapper>
-            <BulletHeader>Secured by lorem ipsum</BulletHeader>
+          </TextWrapper>
+        </Bullet>
+        <Bullet>
+          <Image src={BulletImg} alt="across_logo" />
+          <TextWrapper>
+            <BulletHeader>Cheap</BulletHeader>
             <BulletText>
-              Lorem SEO dolor sit amet, consectetur adipiscing elit. Sed vitae
-              tristique erat. Maecenas suscipit commodo quam, vitae scelerisque
-              elit vestibulum id.
-              <br /> <br />
-              Mauris sed magna tempor, feugiat elit placerat, sagittis urna.
-              Suspendisse porttitor neque ex, et rutrum elit cursus sed. Cras
-              sodales nunc ac nunc.
-              <br /> <br />
-              <Link
-                href="https://umaproject.org"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Here is a link
-              </Link>
+              Relayers and liquidity providers are compensated with fees from
+              users initiating transfers, but this fee is less than any other
+              solution on the market.
             </BulletText>
-          </BulletTextWrapper>
-        </BulletWrapper>
-      </BodyWrapper>
+            <Link
+              href="https://across.gitbook.io/bridge/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read more
+            </Link>
+          </TextWrapper>
+        </Bullet>
+      </Body>
     </Wrapper>
   );
 };
 
-const Hero = styled.div`
+const Wrapper = styled.div`
+  --horinzontal-padding: 75px;
+  --heroHeight: 240px;
+  height: calc(100% - var(--heroHeight));
+  padding: 0 var(--horinzontal-padding);
+`;
+const HeroBg = styled.div`
   background-image: url(${heroBg});
-  padding-top: 1rem;
-  padding-bottom: 4rem;
-  height: auto;
   background-size: cover;
   background-repeat: no-repeat;
+  padding: 0 var(--horinzontal-padding);
+  margin: 0 calc(-1 * var(--horinzontal-padding));
+  display: flex;
+  align-items: center;
+  height: var(--heroHeight);
 `;
 
 const HeroHeader = styled.h1`
-  color: hsla(166, 92%, 70%, 1);
-  font-size: 3.5rem;
+  color: var(--color-primary);
+  font-size: ${56 / 16}rem;
   font-weight: 700;
-  font-family: "Barlow";
-  line-height: 4.5rem;
-  width: 80%;
-  max-width: ${900 / 16}rem;
-  padding-top: 2.5rem;
-  flex-basis: 70%;
-  margin-left: 18vw;
-  margin-right: auto;
+  line-height: 1.28;
+  max-width: 1000px;
 `;
 
-const Wrapper = styled.div``;
-
-const BodyWrapper = styled.div`
-  padding: 1.5rem 1.5rem 0.75rem;
-  max-width: ${1600 / 16}rem;
-  margin-left: auto;
-  margin-right: auto;
+const Body = styled.section`
+  padding: 55px 0 65px;
 `;
 
 const Link = styled.a`
-  font-family: "Barlow";
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1rem;
@@ -119,45 +98,33 @@ const Link = styled.a`
   }
 `;
 
-const BulletWrapper = styled.div`
+const Bullet = styled.article`
   display: flex;
-  margin-top: 1rem;
-  margin-bottom: 2rem;
-`;
-
-const BulletImageWrapper = styled.div`
-  flex-basis: 6%;
-  text-align: right;
-  margin-right: ${45 / 16}rem;
-  margin-left: ${38 / 16}rem;
-`;
-const BulletImage = styled.img`
-  flex-basis: 20%;
-  height: 35px;
-  width: 35px;
-`;
-
-const BulletTextWrapper = styled.div`
-  flex-basis: 40%;
-  > img {
-    justify-content: end;
+  align-items: flex-start;
+  &:not(:first-of-type) {
+    margin-top: 64px;
   }
 `;
 
-const BulletText = styled.h4`
-  font-family: "Barlow";
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1rem;
-  margin-bottom: 1rem;
+const Image = styled.img`
+  height: 35px;
+  width: 35px;
+  object-fit: cover;
+  margin-right: 45px;
 `;
 
-const BulletHeader = styled.h2`
-  font-size: 1.25rem;
+const TextWrapper = styled.div``;
+
+const BulletText = styled.p`
+  max-width: 65ch;
+`;
+
+const BulletHeader = styled.h4`
+  font-size: ${30 / 16}rem;
   font-weight: 700;
-  line-height: 1.5rem;
-  font-family: "Barlow";
-  margin-bottom: 1rem;
+  line-height: 1;
+  margin-bottom: 14px;
+  transform: translateY(-5px);
 `;
 
 export default About;
