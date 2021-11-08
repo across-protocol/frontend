@@ -154,7 +154,7 @@ const SendAction: React.FC = () => {
               <div>Bridge Fee</div>
               <div>
                 {formatUnits(
-                  fees.instantRelayFee.total.add(fees.slowRelayFee.total),
+                  fees.instantRelayFee.total.add(fees.slowRelayFee.total).add(fees.lpFee.total),
                   tokenInfo.decimals
                 )}{" "}
                 {tokenInfo.symbol}
