@@ -22,7 +22,7 @@ const DISCORD_LINK = {
 };
 const TWITTER_LINK = {
   name: "Twitter",
-  url: "https://twitter.com/across_io",
+  url: "https://twitter.com/AcrossProtocol",
 };
 
 const Layout: React.FC = ({ children }) => (
