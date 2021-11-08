@@ -6,3 +6,5 @@ export * from "./chains";
 export * from "./errors";
 export * from "./onboard";
 export * from "./math";
+export * from "./notify";
+export * from "./weiMath";

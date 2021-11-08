@@ -11,6 +11,7 @@ import {
   Token,
   UnsupportedChainIdError,
   COLORS,
+  max,
 } from "utils";
 import { useAppSelector, useConnection, useBalance } from "state/hooks";
 import get from "lodash/get";
@@ -109,7 +110,7 @@ const Pool: FC = () => {
               }
               feesEarned={
                 userPosition
-                  ? ethers.BigNumber.from(userPosition.feesEarned)
+                  ? max(ethers.BigNumber.from(userPosition.feesEarned), 0)
                   : ethers.BigNumber.from("0")
               }
               totalPosition={

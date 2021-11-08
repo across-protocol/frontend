@@ -1,6 +1,5 @@
 import { FC, Dispatch, SetStateAction, useState } from "react";
 import PoolFormSlider from "./PoolFormSlider";
-import { onboard } from "utils";
 import { useConnection } from "state/hooks";
 import {
   RemoveAmount,
@@ -16,12 +15,18 @@ import {
   FeesPercent,
 } from "./RemoveLiquidityForm.styles";
 import { ethers } from "ethers";
-import { toWeiSafe } from "utils/weiMath";
 import { poolClient } from "state/poolsApi";
-import { addEtherscan } from "utils/notify";
 import * as umaSdk from "@uma/sdk";
-import { formatUnits } from "utils";
-import { DEFAULT_TO_CHAIN_ID, CHAINS, switchChain } from "utils";
+import {
+  formatUnits,
+  toWeiSafe,
+  addEtherscan,
+  max,
+  onboard,
+  DEFAULT_TO_CHAIN_ID,
+  CHAINS,
+  switchChain,
+} from "utils";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import api from "state/chainApi";
 
@@ -133,7 +138,11 @@ const RemoveLiqudityForm: FC<Props> = ({
 
   const preview = isConnected
     ? previewRemoval(
-        { totalDeposited: position, feesEarned, positionValue: totalPosition },
+        {
+          totalDeposited: position,
+          feesEarned: max(feesEarned, 0),
+          positionValue: totalPosition,
+        },
         removeAmount / 100
       )
     : null;
