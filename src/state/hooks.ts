@@ -24,6 +24,8 @@ import chainApi, { useAllowance, useBridgeFees } from "./chainApi";
 import { add } from "./transactions";
 import { deposit as depositAction, toggle } from "./deposits";
 
+const FEE_ESTIMATION = "0.004";
+
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
@@ -136,6 +138,7 @@ export function useSend() {
     },
     { skip: tokenSymbol === "" || amount.lte(0) || !block }
   );
+
   const canSend = useMemo(
     () =>
       fromChain &&
@@ -151,7 +154,7 @@ export function useSend() {
       !error &&
       !fees.isAmountTooLow &&
       !fees.isLiquidityInsufficient &&
-      balance.gte(amount),
+      balance.sub(token === "0x0000000000000000000000000000000000000000" ? BigNumber.from(ethers.utils.parseEther(FEE_ESTIMATION)) : BigNumber.from("0")).gte(amount),
     [
       fromChain,
       block,
