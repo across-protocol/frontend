@@ -76,6 +76,8 @@ const CoinSelection = () => {
     }
     try {
       const amount = parseUnits(value, selectedItem!.decimals);
+      // just throw an error if lt 0 and let the catch set the parsing error
+      if (amount.lt(0)) throw new Error();
       setAmount({ amount });
       if (error instanceof ParsingError) {
         setError(undefined);
