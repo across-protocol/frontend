@@ -13,7 +13,9 @@ const About: FC = () => {
       </Hero>
       <BodyWrapper>
         <BulletWrapper>
-          <BulletImage src={BulletImg} alt="across_logo" />
+          <BulletImageWrapper>
+            <BulletImage src={BulletImg} alt="across_logo" />
+          </BulletImageWrapper>
           <BulletTextWrapper>
             <BulletHeader>Fast Transfers</BulletHeader>
             <BulletText>
@@ -28,7 +30,9 @@ const About: FC = () => {
           </BulletTextWrapper>
         </BulletWrapper>
         <BulletWrapper>
-          <BulletImage src={BulletImg} alt="across_logo" />
+          <BulletImageWrapper>
+            <BulletImage src={BulletImg} alt="across_logo" />
+          </BulletImageWrapper>
           <BulletTextWrapper>
             <BulletHeader>Across different chains</BulletHeader>
             <BulletText>
@@ -40,7 +44,9 @@ const About: FC = () => {
           </BulletTextWrapper>
         </BulletWrapper>
         <BulletWrapper>
-          <BulletImage src={BulletImg} alt="across_logo" />
+          <BulletImageWrapper>
+            <BulletImage src={BulletImg} alt="across_logo" />
+          </BulletImageWrapper>
           <BulletTextWrapper>
             <BulletHeader>Secured by lorem ipsum</BulletHeader>
             <BulletText>
@@ -69,8 +75,11 @@ const About: FC = () => {
 
 const Hero = styled.div`
   background-image: url(${heroBg});
-  min-height: 25vh;
+  padding-top: 1rem;
+  padding-bottom: 4rem;
   height: auto;
+  background-size: cover;
+  background-repeat: no-repeat;
 `;
 
 const HeroHeader = styled.h1`
@@ -80,15 +89,20 @@ const HeroHeader = styled.h1`
   font-family: "Barlow";
   line-height: 4.5rem;
   width: 80%;
-  max-width: 800px;
-  margin-left: 10vw;
+  max-width: ${900 / 16}rem;
   padding-top: 2.5rem;
+  flex-basis: 70%;
+  margin-left: 18vw;
+  margin-right: auto;
 `;
 
 const Wrapper = styled.div``;
 
 const BodyWrapper = styled.div`
-  padding: 1.5rem;
+  padding: 1.5rem 1.5rem 0.75rem;
+  max-width: ${1600 / 16}rem;
+  margin-left: auto;
+  margin-right: auto;
 `;
 
 const Link = styled.a`
@@ -111,6 +125,12 @@ const BulletWrapper = styled.div`
   margin-bottom: 2rem;
 `;
 
+const BulletImageWrapper = styled.div`
+  flex-basis: 6%;
+  text-align: right;
+  margin-right: ${45 / 16}rem;
+  margin-left: ${38 / 16}rem;
+`;
 const BulletImage = styled.img`
   flex-basis: 20%;
   height: 35px;
@@ -118,7 +138,10 @@ const BulletImage = styled.img`
 `;
 
 const BulletTextWrapper = styled.div`
-  flex-basis: 50%;
+  flex-basis: 40%;
+  > img {
+    justify-content: end;
+  }
 `;
 
 const BulletText = styled.h4`
