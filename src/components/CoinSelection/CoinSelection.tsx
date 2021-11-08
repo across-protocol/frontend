@@ -100,7 +100,7 @@ const CoinSelection = () => {
         return undefined;
       });
 
-      if (balances) {
+      if (balances && amount.gt(0)) {
         const selectedIndex = tokenList.findIndex(
           ({ address }) => address === token
         );
