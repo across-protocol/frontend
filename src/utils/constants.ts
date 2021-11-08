@@ -70,7 +70,7 @@ type TokenList = [
   {
     address: string;
     symbol: "WETH";
-    name: "Wrapped Ethereum";
+    name: "Wrapped Ether";
     decimals: 18;
     logoURI: typeof wethLogo;
     bridgePool: string;
@@ -81,7 +81,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   [ChainId.MAINNET]: [
     {
       address: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-      name: "Wrapped Ethereum",
+      name: "Wrapped Ether",
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
@@ -103,7 +103,6 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       logoURI: ethereumLogo,
       bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
     },
-    // Temp comment out
     {
       address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
       name: "UMA Token",
@@ -116,7 +115,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   [ChainId.RINKEBY]: [
     {
       address: getAddress("0xc778417E063141139Fce010982780140Aa0cD5Ab"),
-      name: "Wrapped Ethereum",
+      name: "Wrapped Ether",
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
@@ -134,7 +133,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   [ChainId.KOVAN]: [
     {
       address: getAddress("0xd0a1e359811322d97991e03f863a0c30c2cf029c"),
-      name: "Wrapped Ethereum",
+      name: "Wrapped Ether",
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
@@ -160,7 +159,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   [ChainId.OPTIMISM]: [
     {
       address: getAddress("0x4200000000000000000000000000000000000006"),
-      name: "Wrapped Ethereum",
+      name: "Wrapped Ether",
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
@@ -186,7 +185,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   [ChainId.KOVAN_OPTIMISM]: [
     {
       address: getAddress("0x4200000000000000000000000000000000000006"),
-      name: "Wrapped Ethereum",
+      name: "Wrapped Ether",
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
@@ -212,7 +211,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   [ChainId.ARBITRUM]: [
     {
       address: getAddress("0x82af49447d8a07e3bd95bd0d56f35241523fbab1"),
-      name: "Wrapped Ethereum",
+      name: "Wrapped Ether",
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
@@ -227,6 +226,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: getAddress("0x256C8919CE1AB0e33974CF6AA9c71561Ef3017b6"),
     },
     {
+      address: getAddress("0xd693ec944a85eeca4247ec1c3b130dca9b0c3b22"),
+      name: "UMA Token",
+      symbol: "UMA",
+      decimals: 18,
+      logoURI: umaLogo,
+      bridgePool: getAddress("0xdfe0ec39291e3b60ACa122908f86809c9eE64E90"),
+    },
+    {
       address: ethers.constants.AddressZero,
       name: "Ether",
       symbol: "ETH",
@@ -238,7 +245,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   [ChainId.ARBITRUM_RINKEBY]: [
     {
       address: getAddress("0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681"),
-      name: "Wrapped Ethereum",
+      name: "Wrapped Ether",
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
