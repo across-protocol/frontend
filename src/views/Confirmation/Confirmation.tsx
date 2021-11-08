@@ -15,6 +15,7 @@ import {
   InfoSection,
   Header,
   Row,
+  SubHeading,
 } from "./Confirmation.styles";
 
 const Confirmation: React.FC = () => {
@@ -31,6 +32,7 @@ const Confirmation: React.FC = () => {
       <Wrapper>
         <Header>
           <Heading>Deposit succeeded</Heading>
+          <SubHeading>Your funds will arrive in ~2 minutes</SubHeading>
           <SuccessIcon>
             <Check strokeWidth={4} />
           </SuccessIcon>

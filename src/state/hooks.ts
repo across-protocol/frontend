@@ -154,7 +154,13 @@ export function useSend() {
       !error &&
       !fees.isAmountTooLow &&
       !fees.isLiquidityInsufficient &&
-      balance.sub(token === "0x0000000000000000000000000000000000000000" ? BigNumber.from(ethers.utils.parseEther(FEE_ESTIMATION)) : BigNumber.from("0")).gte(amount),
+      balance
+        .sub(
+          token === "0x0000000000000000000000000000000000000000"
+            ? BigNumber.from(ethers.utils.parseEther(FEE_ESTIMATION))
+            : BigNumber.from("0")
+        )
+        .gte(amount),
     [
       fromChain,
       block,

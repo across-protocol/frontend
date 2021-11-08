@@ -18,7 +18,11 @@ export const Header = styled(Section)`
 export const Heading = styled(SectionTitle)`
   font-weight: 700;
   font-size: ${30 / 16}rem;
-  margin-bottom: 36px;
+`;
+
+export const SubHeading = styled(SectionTitle)`
+  font-weight: 100;
+  margin-bottom: 20px;
 `;
 
 export const SuccessIcon = styled.div`
