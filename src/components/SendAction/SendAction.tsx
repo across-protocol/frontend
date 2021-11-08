@@ -161,7 +161,7 @@ const SendAction: React.FC = () => {
               </div>
             </Info>
             <Info>
-              <div>You will get</div>
+              <div>You will receive</div>
               <div>
                 {formatUnits(amountMinusFees, tokenInfo.decimals)}{" "}
                 {tokenInfo.symbol}
