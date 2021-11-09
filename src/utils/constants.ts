@@ -511,6 +511,12 @@ export const RATE_MODELS: Record<string, RateModel> = {
     R1: ethers.BigNumber.from("40000000000000000"),
     R2: ethers.BigNumber.from("600000000000000000"),
   },
+  UMA: {
+    UBar: ethers.BigNumber.from("500000000000000000"),
+    R0: ethers.BigNumber.from("0"),
+    R1: ethers.BigNumber.from("50000000000000000"),
+    R2: ethers.BigNumber.from("2000000000000000000"),
+  },
 };
 
 // this client requires multicall2 be accessible on the chain. This is the address for mainnet.
