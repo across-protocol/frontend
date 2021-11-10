@@ -285,10 +285,8 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
     name: "Ethereum Mainnet",
     chainId: ChainId.MAINNET,
     logoURI: ethereumLogo,
-    explorerUrl: "https://etherscan.io/",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://etherscan.io/"
-    ),
+    explorerUrl: "https://etherscan.io",
+    constructExplorerLink: defaultConstructExplorerLink("https://etherscan.io"),
     nativeCurrency: {
       name: "Ether",
       symbol: "ETH",
@@ -328,9 +326,9 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
     chainId: ChainId.OPTIMISM,
     logoURI: optimismLogo,
     rpcUrl: "https://mainnet.optimism.io",
-    explorerUrl: "https://optimistic.etherscan.io/",
+    explorerUrl: "https://optimistic.etherscan.io",
     constructExplorerLink: defaultConstructExplorerLink(
-      "https://optimistic.etherscan.io/"
+      "https://optimistic.etherscan.io"
     ),
     nativeCurrency: {
       name: "Ether",

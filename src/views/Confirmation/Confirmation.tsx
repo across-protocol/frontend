@@ -107,7 +107,7 @@ const Confirmation: React.FC = () => {
                 <div>
                   <SecondaryLink
                     href={`${CHAINS[deposit.toChain].explorerUrl}/address/${
-                      deposit.to
+                      deposit.toAddress
                     }`}
                     target="_blank"
                     rel="noopener noreferrer"
