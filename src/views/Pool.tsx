@@ -141,6 +141,11 @@ const Pool: FC = () => {
               refetchBalance={refetchBalance}
               defaultTab={defaultTab}
               setDefaultTab={setDefaultTab}
+              utilization={
+                pool && pool.liquidityUtilizationCurrent
+                  ? pool.liquidityUtilizationCurrent
+                  : "0"
+              }
             />
           ) : (
             <LoadingWrapper>

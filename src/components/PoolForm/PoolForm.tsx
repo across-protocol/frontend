@@ -52,6 +52,7 @@ interface Props {
   refetchBalance: () => void;
   defaultTab: string;
   setDefaultTab: React.Dispatch<React.SetStateAction<string>>;
+  utilization: string;
 }
 
 const PoolForm: FC<Props> = ({
@@ -73,6 +74,7 @@ const PoolForm: FC<Props> = ({
   refetchBalance,
   defaultTab,
   setDefaultTab,
+  utilization,
 }) => {
   const [inputAmount, setInputAmount] = useState("");
   const [removeAmount, setRemoveAmount] = useState(0);
@@ -176,6 +178,10 @@ const PoolForm: FC<Props> = ({
           <ROIItem>
             {formatUnits(totalPoolSize, decimals)} {symbol}
           </ROIItem>
+        </ROIWrapper>
+        <ROIWrapper>
+          <ROIItem>Pool Utilization:</ROIItem>
+          <ROIItem>{formatUnits(utilization, 16)}%</ROIItem>
         </ROIWrapper>
         <ROIWrapper>
           <ROIItem>Estimated APY:</ROIItem>
