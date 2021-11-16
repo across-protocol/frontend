@@ -174,13 +174,13 @@ const PoolForm: FC<Props> = ({
           </PositionBlock>
         </PositionWrapper>
         <ROIWrapper>
-          <ROIItem>Total Pool Size:</ROIItem>
+          <ROIItem>Total pool size:</ROIItem>
           <ROIItem>
             {formatUnits(totalPoolSize, decimals)} {symbol}
           </ROIItem>
         </ROIWrapper>
         <ROIWrapper>
-          <ROIItem>Pool Utilization:</ROIItem>
+          <ROIItem>Pool utilization:</ROIItem>
           <ROIItem>{formatUnits(utilization, 16)}%</ROIItem>
         </ROIWrapper>
         <ROIWrapper>
