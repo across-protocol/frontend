@@ -104,11 +104,12 @@ export function useSend() {
     dispatch
   );
 
-  const { balance } = useBalance({
+  const { balance: balanceStr } = useBalance({
     chainId: fromChain,
     account,
     tokenAddress: token,
   });
+  const balance = BigNumber.from(balanceStr);
   const { block } = useBlocks(toChain);
 
   const depositBox = getDepositBox(fromChain);
@@ -290,9 +291,7 @@ export function useBalance(params: {
   const selectedIndex = tokenList.findIndex(
     ({ address }) => address === tokenAddress
   );
-  const balance = result?.data
-    ? result.data[selectedIndex]
-    : BigNumber.from("0");
+  const balance = result?.data ? result.data[selectedIndex].toString() : "0";
 
   return {
     balance,

@@ -43,7 +43,7 @@ interface Props {
   symbol: string;
   setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
-  balance: ethers.BigNumber;
+  balance: string;
   position: ethers.BigNumber;
   totalPosition: ethers.BigNumber;
   feesEarned: ethers.BigNumber;

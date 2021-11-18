@@ -25,12 +25,3 @@ export function receiveAmount(amount: BigNumberish, fees?: PartialBridgeFees) {
     0
   );
 }
-
-// for a dynamic gas estimation
-export function estimateGas(
-  gas: BigNumber,
-  gasPriceWei: BigNumber,
-  buffer: BigNumber = BigNumber.from("0")
-) {
-  return gas.mul(gasPriceWei.add(buffer));
-}

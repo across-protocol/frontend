@@ -13,9 +13,11 @@ export function shortenAddress(address: string): string {
   return `${address.substr(0, 4)}...${address.substr(-4)}`;
 }
 
+// this actually will round up in some cases
 export const numberFormatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 4,
 }).format;
+
 export function formatUnits(
   wei: ethers.BigNumberish,
   decimals: number
@@ -25,6 +27,10 @@ export function formatUnits(
 
 export function formatEther(wei: ethers.BigNumberish): string {
   return formatUnits(wei, 18);
+}
+
+export function formatEtherRaw(wei: ethers.BigNumberish): string {
+  return ethers.utils.formatUnits(wei, 18);
 }
 
 export function parseUnits(value: string, decimals: number): ethers.BigNumber {

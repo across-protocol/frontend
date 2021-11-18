@@ -1,5 +1,5 @@
-import { FC, ChangeEvent, useState, useCallback, useEffect } from "react";
-import { onboard, formatEther, max, estimateGas } from "utils";
+import { FC, useState, useCallback, useEffect } from "react";
+import { onboard } from "utils";
 import { useConnection } from "state/hooks";
 import {
   RoundBox,
@@ -18,7 +18,6 @@ import { ethers } from "ethers";
 import { clients } from "@uma/sdk";
 import { addEtherscan } from "utils/notify";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
-import { ADD_LIQUIDITY_ETH_GAS, GAS_PRICE_BUFFER } from "utils/constants";
 import { DEFAULT_TO_CHAIN_ID, CHAINS, switchChain } from "utils";
 import api from "state/chainApi";
 
@@ -29,20 +28,20 @@ const INFINITE_APPROVAL_AMOUNT = MAX_UINT_VAL;
 interface Props {
   error: Error | undefined;
   amount: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (value: string) => void;
   bridgeAddress: string;
   decimals: number;
   symbol: string;
   tokenAddress: string;
   setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
-  balance: ethers.BigNumber;
+  balance: string;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
   wrongNetwork?: boolean;
   formError: string;
-  gasPrice: ethers.BigNumber;
   // refetch balance
   refetchBalance: () => void;
+  onMaxClick: () => void;
 }
 
 const AddLiquidityForm: FC<Props> = ({
@@ -59,7 +58,7 @@ const AddLiquidityForm: FC<Props> = ({
   setAmount,
   wrongNetwork,
   formError,
-  gasPrice,
+  onMaxClick,
 }) => {
   const { init } = onboard;
   const { isConnected, provider, signer, notify, account } = useConnection();
@@ -197,36 +196,14 @@ const AddLiquidityForm: FC<Props> = ({
               : "var(--color-primary)",
           }}
         >
-          <MaxButton
-            onClick={() => {
-              if (symbol === "ETH") {
-                setAmount(
-                  formatEther(
-                    max(
-                      "0",
-                      balance.sub(
-                        estimateGas(
-                          ADD_LIQUIDITY_ETH_GAS,
-                          gasPrice,
-                          GAS_PRICE_BUFFER
-                        )
-                      )
-                    )
-                  )
-                );
-              } else {
-                setAmount(ethers.utils.formatUnits(balance, decimals));
-              }
-            }}
-            disabled={!isConnected}
-          >
+          <MaxButton onClick={onMaxClick} disabled={!isConnected}>
             max
           </MaxButton>
           <Input
             placeholder="0.00"
             id="amount"
             value={amount}
-            onChange={onChange}
+            onChange={(e) => onChange(e.target.value)}
             disabled={!isConnected}
           />
         </RoundBox>
@@ -245,7 +222,9 @@ const AddLiquidityForm: FC<Props> = ({
         </FormButton>
       ) : (
         <FormButton
-          disabled={!provider && !!formError}
+          disabled={
+            (!provider || !!formError || Number(amount) <= 0) && isConnected
+          }
           onClick={() =>
             approveOrPoolTransactionHandler().catch((err) =>
               console.error("Error on click to approve or pool tx", err)
