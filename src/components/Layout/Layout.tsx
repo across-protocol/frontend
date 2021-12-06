@@ -65,13 +65,10 @@ const Footer = styled.footer`
   bottom: 0;
   padding: 0 15px 15px;
   align-self: self-end;
-  &:last-of-type {
-    justify-self: self-end;
-  }
+  justify-self: center;
 
   &:first-of-type {
     display: flex;
-    justify-self: center;
     padding-bottom: 25px;
     & svg {
       width: 25px;
