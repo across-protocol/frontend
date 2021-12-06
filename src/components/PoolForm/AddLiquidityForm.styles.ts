@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 
 import { RoundBox as UnstyledBox, ErrorBox } from "../Box";
-import { SecondaryButton, PrimaryButton } from "../Buttons";
+import { PrimaryButton, SecondaryButtonWithoutShadow } from "../Buttons";
 
 export const RoundBox = styled(UnstyledBox)`
   --color: var(--color-white);
@@ -17,7 +17,7 @@ export const RoundBox = styled(UnstyledBox)`
   }
 `;
 
-export const MaxButton = styled(SecondaryButton)`
+export const MaxButton = styled(SecondaryButtonWithoutShadow)`
   text-transform: uppercase;
   padding: 10px 20px;
   font-size: ${14 / 16}rem;

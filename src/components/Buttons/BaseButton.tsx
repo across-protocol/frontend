@@ -59,3 +59,9 @@ export const SecondaryButton = styled(BaseButton)`
     }
   }
 `;
+
+export const SecondaryButtonWithoutShadow = styled(SecondaryButton)`
+  &:after {
+    display: none;
+  }
+`;

@@ -1,7 +1,12 @@
 import styled from "@emotion/styled";
 import { RoundBox as UnstyledRoundBox } from "../Box";
 import { Section } from "../Section";
-import { PrimaryButton, SecondaryButton, BaseButton } from "../Buttons";
+import {
+  PrimaryButton,
+  BaseButton,
+  SecondaryButtonWithoutShadow,
+} from "../Buttons";
+import { COLORS } from "utils";
 
 export const LastSection = styled(Section)`
   border-bottom: none;
@@ -38,10 +43,15 @@ export const Address = styled.div`
   color: var(--color-white-transparent);
   font-size: ${14 / 16}rem;
 `;
-export const ChangeButton = styled(SecondaryButton)`
+export const ChangeButton = styled(SecondaryButtonWithoutShadow)`
   margin-left: auto;
   padding: 10px 14px;
   font-size: ${14 / 16}rem;
+  transition: background-color 100ms linear;
+
+  &:hover {
+    background-color: hsla(${COLORS.gray[500]} / 0.75);
+  }
 `;
 
 export const DialogTitle = styled.h3``;
