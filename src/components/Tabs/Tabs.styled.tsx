@@ -10,8 +10,7 @@ export const TabList = styled.ol`
   padding-left: 0;
   display: flex;
   background-color: linear-gradient(#f5f5f5 86.46%, #eeeeee 100%);
-
-  font-family: "Halyard Display";
+  font-weight: 700;
   /* @media ${QUERIES.laptopAndUp} {
     width: 400px;
   } */
@@ -40,6 +39,6 @@ export const TabListItem = styled.li`
     background-color: #2d2e33;
     border: solid var(--primary, 500);
     border-width: 4px 0px 0 0px;
-    font-weight: 600;
+    font-weight: 400;
   }
 `;
