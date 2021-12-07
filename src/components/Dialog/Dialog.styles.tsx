@@ -11,6 +11,8 @@ export const Wrapper = styled(DialogContent)`
   width: 440px;
   max-width: 440px;
   top: 25%;
+  overflow: auto;
+  max-height: 100vh;
 `;
 
 export const CloseButton = styled.button`
