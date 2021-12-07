@@ -5,6 +5,7 @@ import { RoundBox as UnstyledBox } from "../Box";
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
+  padding-top: 20px;
 `;
 
 export const RoundBox = styled(UnstyledBox)`

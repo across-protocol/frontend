@@ -9,6 +9,7 @@ export const Wrapper = styled(Section)`
   border-bottom: none;
   display: flex;
   flex-direction: column;
+  padding-top: 20px;
 `;
 export const RoundBox = styled(UnstyledBox)`
   --color: var(--color-white);

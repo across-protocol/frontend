@@ -10,11 +10,11 @@ import { COLORS } from "utils";
 const NAV_LINKS = [
   {
     name: "FAQ",
-    url: "https://across.gitbook.io/bridge/faq",
+    url: "https://docs.across.to/bridge/faq",
   },
   {
     name: "Docs",
-    url: "https://across.gitbook.io/bridge/",
+    url: "https://docs.across.to/bridge/",
   },
 ];
 const DISCORD_LINK = {

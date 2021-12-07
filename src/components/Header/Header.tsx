@@ -13,7 +13,7 @@ import {
 } from "./Header.styles";
 
 const LINKS = [
-  { href: "/", name: "Send" },
+  { href: "/", name: "Bridge" },
   { href: "/pool", name: "Pool" },
   { href: "/about", name: "About" },
 ];
