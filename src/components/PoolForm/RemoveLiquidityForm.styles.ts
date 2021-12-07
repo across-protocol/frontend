@@ -6,7 +6,6 @@ export const RemoveFormButton = styled(PrimaryButton)`
   width: 90%;
   background: var(--color-primary);
   color: var(--color-gray);
-  font-weight: 700;
   font-size: ${18 / 16}rem;
   line-height: 1.1;
   padding: 16px 8px;

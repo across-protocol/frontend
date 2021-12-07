@@ -49,7 +49,6 @@ export const FormButton = styled(PrimaryButton)`
   margin-right: auto;
   background: var(--color-primary);
   color: var(--color-gray);
-  font-weight: 700;
   font-size: ${18 / 16}rem;
   line-height: 1.1;
 `;
