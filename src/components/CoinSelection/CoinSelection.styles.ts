@@ -58,6 +58,7 @@ export const Menu = styled.ul`
   right: 0;
   padding-top: 10px;
   transform: translateY(100%);
+  box-shadow: inset 0 8px 8% rgba(45, 46, 51, 0.2);
   list-style: none;
   display: flex;
   flex-direction: column;
@@ -99,7 +100,9 @@ export const MaxButton = styled(SecondaryButtonWithoutShadow)`
   padding: 10px 20px;
   font-size: ${14 / 16}rem;
   transition: background-color 100ms linear;
-
+  &::after {
+    box-shadow: none;
+  }
   &:hover {
     background-color: var(--color-gray-300);
   }

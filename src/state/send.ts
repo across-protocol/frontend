@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ethers } from "ethers";
 import { update } from "./connection";
 import { toggle as toggleConfirmationScreen } from "./deposits";
+import { IChainSelection, CHAINS_SELECTION } from "utils";
 
 import {
   ChainId,
@@ -17,6 +18,8 @@ type State = {
   fromChain: ChainId;
   toAddress?: string;
   error?: Error;
+  currentlySelectedToChain: IChainSelection;
+  currentlySelectedFromChain: IChainSelection;
 };
 
 const initialState: State = {
@@ -24,6 +27,9 @@ const initialState: State = {
   amount: ethers.constants.Zero,
   toChain: DEFAULT_TO_CHAIN_ID,
   fromChain: DEFAULT_FROM_CHAIN_ID,
+  // Default to ethereum, which should be end of this array.
+  currentlySelectedToChain: CHAINS_SELECTION[CHAINS_SELECTION.length - 1],
+  currentlySelectedFromChain: CHAINS_SELECTION[0],
 };
 
 const sendSlice = createSlice({
@@ -44,6 +50,17 @@ const sendSlice = createSlice({
     },
     fromChain: (state, action: PayloadAction<Pick<State, "fromChain">>) => {
       state.fromChain = action.payload.fromChain;
+      return state;
+    },
+    updateSelectedToChain: (state, action: PayloadAction<IChainSelection>) => {
+      state.currentlySelectedToChain = action.payload;
+      return state;
+    },
+    updateSelectedFromChain: (
+      state,
+      action: PayloadAction<IChainSelection>
+    ) => {
+      state.currentlySelectedFromChain = action.payload;
       return state;
     },
     toAddress: (
@@ -76,7 +93,7 @@ const sendSlice = createSlice({
       }),
 });
 
-const { actions, reducer } = sendSlice;
+export const { actions, reducer } = sendSlice;
 // Extract and export each action creator by name
 export const { token, amount, fromChain, toChain, toAddress, error } = actions;
 // Export the reducer, either as a default or named export

@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { BaseButton, PrimaryButton } from "../Buttons";
-
+import { ErrorBox } from "../Box";
 export const RemoveFormButton = styled(PrimaryButton)`
   margin-top: 32px;
   width: 90%;
@@ -16,6 +16,7 @@ export const RemoveFormButton = styled(PrimaryButton)`
 export const RemoveFormButtonWrapper = styled.div`
   background: linear-gradient(180deg, #334243 0%, rgba(51, 66, 67, 0) 100%);
   margin: 16px -16px 0;
+  padding-top: 1.5rem;
 `;
 
 export const RemoveAmount = styled.div`
@@ -98,4 +99,9 @@ export const FeesValues = styled.div`
     font-size: ${16 / 16}rem;
     color: var(--color-white);
   }
+`;
+
+export const RemoveFormErrorBox = styled(ErrorBox)`
+  margin-right: 1.5rem;
+  margin-left: 1.5rem;
 `;

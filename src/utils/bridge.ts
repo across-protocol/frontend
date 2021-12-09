@@ -8,9 +8,13 @@ import {
   ChainId,
   PROVIDERS,
   TOKENS_LIST,
-  RATE_MODELS,
 } from "./constants";
+
 import { isValidString, parseEther } from "./format";
+
+const lpFeeCalculator = new across.LpFeeCalculator(
+  PROVIDERS[ChainId.MAINNET]()
+);
 
 export function getDepositBox(
   chainId: ChainId,
@@ -118,48 +122,47 @@ export async function getRelayFees(
   };
 }
 
-const { calculateRealizedLpFeePct } = across.feeCalculator;
 export async function getLpFee(
   tokenSymbol: string,
-  amount: ethers.BigNumber
+  amount: ethers.BigNumber,
+  blockTime?: number
 ): Promise<Fee & { isLiquidityInsufficient: boolean }> {
-  const provider = PROVIDERS[ChainId.MAINNET]();
+  // eth and weth can be treated the sasme same in this case, but the rate model only currently supports weth address
+  // TODO: add address 0 to sdk rate model ( duplicate weth)
+  if (tokenSymbol === "ETH") tokenSymbol = "WETH";
+
   const l1EqInfo = TOKENS_LIST[ChainId.MAINNET].find(
     (t) => t.symbol === tokenSymbol
   );
+
   if (!l1EqInfo) {
     throw new Error(`Token ${tokenSymbol} not found in TOKENS_LIST`);
   }
   if (amount.lte(0)) {
     throw new Error(`Amount must be greater than 0.`);
   }
-  if (!RATE_MODELS[tokenSymbol]) {
-    throw new Error(`Rate model for ${tokenSymbol} not found.`);
-  }
-  const { bridgePool: bridgePoolAddress } = l1EqInfo;
-  const bridgePool = BridgePoolEthers__factory.connect(
-    bridgePoolAddress,
-    provider
-  );
-
-  const [currentUt, nextUt] = await Promise.all([
-    bridgePool.callStatic.liquidityUtilizationCurrent(),
-    bridgePool.callStatic.liquidityUtilizationPostRelay(amount),
-  ]);
+  const { address: tokenAddress, bridgePool: bridgePoolAddress } = l1EqInfo;
 
   const result = {
     pct: BigNumber.from(0),
     total: BigNumber.from(0),
     isLiquidityInsufficient: false,
   };
-  if (!currentUt.eq(nextUt)) {
-    result.pct = calculateRealizedLpFeePct(
-      RATE_MODELS[tokenSymbol],
-      currentUt,
-      nextUt
-    );
-    result.total = amount.mul(result.pct).div(parseEther("1"));
-  }
+
+  result.pct = await lpFeeCalculator.getLpFeePct(
+    tokenAddress,
+    bridgePoolAddress,
+    amount,
+    blockTime
+  );
+  result.total = amount.mul(result.pct).div(parseEther("1"));
+
+  // TODO: move this into the sdk lp fee client
+  const provider = PROVIDERS[ChainId.MAINNET]();
+  const bridgePool = BridgePoolEthers__factory.connect(
+    bridgePoolAddress,
+    provider
+  );
   const liquidityReserves = await bridgePool.liquidReserves();
   const pendingReserves = await bridgePool.pendingReserves();
 

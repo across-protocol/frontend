@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 
 export const Wrapper = styled.div`
+  min-height: 80%;
   flex: 1;
   background-color: var(--color-primary);
   border-radius: 12px 12px 0 0;

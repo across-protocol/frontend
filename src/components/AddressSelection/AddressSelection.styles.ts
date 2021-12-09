@@ -1,12 +1,8 @@
 import styled from "@emotion/styled";
-import { RoundBox as UnstyledRoundBox } from "../Box";
 import { Section } from "../Section";
-import {
-  PrimaryButton,
-  BaseButton,
-  SecondaryButtonWithoutShadow,
-} from "../Buttons";
-import { COLORS } from "utils";
+import { PrimaryButton, BaseButton } from "../Buttons";
+import { ChevronDown } from "react-feather";
+import { RoundBox as UnstyledBox } from "../Box";
 
 export const LastSection = styled(Section)`
   border-bottom: none;
@@ -16,15 +12,23 @@ export const Wrapper = styled.div`
   flex-direction: column;
 `;
 
-export const RoundBox = styled(UnstyledRoundBox)`
-  margin-top: 16px;
-  display: flex;
-  align-items: center;
-`;
-
-export const MainBox = styled(RoundBox)`
-  --radius: 45px;
+export const RoundBox = styled(UnstyledBox)`
+  --color: var(--color-white);
+  --outline-color: var(--color-primary);
+  background-color: var(--color);
+  font-size: ${16 / 16}rem;
   padding: 10px 15px;
+  margin-top: 16px;
+  margin-right: auto;
+  margin-left: auto;
+  flex: 2;
+  display: flex;
+  &:not(:first-of-type):focus-within {
+    outline: var(--outline-color) solid 1px;
+  }
+  &:first-of-type {
+    flex: 1;
+  }
 `;
 
 export const Logo = styled.img`
@@ -40,17 +44,25 @@ export const Info = styled.div`
   }
 `;
 export const Address = styled.div`
-  color: var(--color-white-transparent);
   font-size: ${14 / 16}rem;
+  text-align: left;
 `;
-export const ChangeButton = styled(SecondaryButtonWithoutShadow)`
-  margin-left: auto;
-  padding: 10px 14px;
-  font-size: ${14 / 16}rem;
-  transition: background-color 100ms linear;
 
-  &:hover {
-    background-color: hsla(${COLORS.gray[500]} / 0.75);
+export const ChangeWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 8px;
+`;
+
+export const ChangeButton = styled.div`
+  color: #6cf9d8;
+  font-size: 0.8rem;
+  font-family: "Barlow";
+  cursor: pointer;
+  margin-top: 4px;
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 `;
 
@@ -94,5 +106,111 @@ export const ButtonGroup = styled.div`
   gap: 20px;
   & > button {
     flex: 1;
+  }
+`;
+
+interface IMenuProps {
+  isOpen?: boolean;
+}
+
+export const Menu = styled.ul<IMenuProps>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  padding-top: 10px;
+  transform: translateY(100%);
+  list-style: none;
+  display: ${(props) => (props.isOpen ? "flex" : "none")};
+  flex-direction: column;
+  z-index: 10000;
+  width: 95%;
+  margin: 0 auto;
+  box-shadow: inset 0 8px 8% rgba(45, 46, 51, 0.2);
+`;
+
+export const Item = styled.li`
+  padding: 15px 10px 10px;
+  display: flex;
+  gap: 10px;
+  cursor: pointer;
+  background-color: var(--color-white);
+
+  font-family: "Barlow";
+  transition: background-color 100ms linear;
+
+  &:first-of-type {
+    border-radius: 16px 16px 0 0;
+  }
+
+  &:last-of-type {
+    border-radius: 0 0 16px 16px;
+  }
+
+  &:hover {
+    background-color: var(--color-gray-100);
+  }
+
+  & > div:last-of-type {
+    margin-left: 0.25rem;
+    color: #2d2e33;
+  }
+
+  div {
+    flex-basis: 15%;
+  }
+
+  span {
+    color: #2d2e33;
+    flex-basis: 75%;
+    text-align: right;
+    padding-right: 8px;
+  }
+
+  &.disabled {
+    background-color: var(--color-white);
+    color: rgba(255, 255, 255, 0.65);
+    pointer-events: none;
+    cursor: not-allowed;
+    > * {
+      opacity: 0.5;
+    }
+  }
+`;
+
+export const ToggleIcon = styled(ChevronDown)`
+  margin-left: 250px;
+`;
+
+export const ToggleButton = styled.button`
+  --radius: 30px;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  background-color: inherit;
+  border: none;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+`;
+
+export const InputGroup = styled.div`
+  position: relative;
+  display: flex;
+  width: 100%;
+`;
+
+export const ToggleChainName = styled.div`
+  width: 85px;
+  text-align: left;
+`;
+
+export const ItemWarning = styled(Item)`
+  background-color: #6cf9d8;
+  color: #000000;
+  &:hover {
+    background-color: #6cf9d8;
+    cursor: not-allowed;
   }
 `;

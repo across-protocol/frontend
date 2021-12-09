@@ -18,6 +18,7 @@ export const store = configureStore({
     pools: poolsReducer,
     [chainApi.reducerPath]: chainApi.reducer,
   },
+  devTools: true,
   middleware: (getDefaultMiddleWare) =>
     getDefaultMiddleWare({ serializableCheck: false }).concat(
       chainApi.middleware

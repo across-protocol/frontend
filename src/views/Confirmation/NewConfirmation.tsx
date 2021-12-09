@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { Check, ArrowUpRight } from "react-feather";
-import { TOKENS_LIST, CHAINS, formatUnits, receiveAmount } from "utils";
+import {
+  TOKENS_LIST,
+  CHAINS,
+  formatUnits,
+  // receiveAmount
+} from "utils";
 import { useDeposits } from "state/hooks";
 import { Layout } from "components";
 import {
   Wrapper,
-  Heading,
   SuccessIcon,
   Link,
   SecondaryLink,
@@ -15,14 +19,21 @@ import {
   InfoSection,
   Header,
   Row,
-  SubHeading,
-} from "./Confirmation.styles";
+  SuccessIconRow,
+  ConfirmationIcon,
+  ConfirmationLine,
+  SuccessInfoRow,
+  SuccessInfoBlock,
+  SuccessInfoText,
+  ConfirmationText,
+} from "./NewConfirmation.styles";
 
 const Confirmation: React.FC = () => {
   const { deposit, toggle } = useDeposits();
+  const [l1DepositSuccess] = useState(true);
 
   if (!deposit) return null;
-  const amountMinusFees = receiveAmount(deposit.amount, deposit.fees);
+  // const amountMinusFees = receiveAmount(deposit.amount, deposit.fees);
 
   const tokenInfo = TOKENS_LIST[deposit.fromChain].find(
     (t) => t.address === deposit.token
@@ -32,26 +43,59 @@ const Confirmation: React.FC = () => {
     <Layout>
       <Wrapper>
         <Header>
-          <Heading>Deposit succeeded</Heading>
-          <SubHeading>Your funds will arrive in ~2 minutes</SubHeading>
-          <SuccessIcon>
-            <Check strokeWidth={4} />
-          </SuccessIcon>
+          <SuccessIconRow>
+            <SuccessIcon>
+              <Check strokeWidth={4} />
+            </SuccessIcon>
+            {l1DepositSuccess ? (
+              <SuccessIcon>
+                <Check strokeWidth={4} />
+              </SuccessIcon>
+            ) : (
+              <ConfirmationIcon>
+                <div>~2 minutes</div>
+              </ConfirmationIcon>
+            )}
+          </SuccessIconRow>
+          {l1DepositSuccess ? <SuccessIconRow /> : <ConfirmationLine />}
+          <SuccessInfoRow>
+            <SuccessInfoBlock>
+              <SuccessInfoText>Deposit succeeded</SuccessInfoText>
+              <Link
+                href={CHAINS[deposit.fromChain].constructExplorerLink(
+                  deposit.txHash
+                )}
+                target="_blank"
+                rel="noopener norefferrer"
+              >
+                Explorer <ArrowUpRight width={16} height={16} />
+              </Link>
+            </SuccessInfoBlock>
+            <SuccessInfoBlock>
+              {l1DepositSuccess ? (
+                <>
+                  <SuccessInfoText>Transfer succeeded</SuccessInfoText>
+                  <Link
+                    href={CHAINS[deposit.fromChain].constructExplorerLink(
+                      deposit.txHash
+                    )}
+                    target="_blank"
+                    rel="noopener norefferrer"
+                  >
+                    Explorer <ArrowUpRight width={16} height={16} />
+                  </Link>
+                </>
+              ) : (
+                <ConfirmationText>Funds transferred</ConfirmationText>
+              )}
+            </SuccessInfoBlock>
+          </SuccessInfoRow>
         </Header>
         <InfoSection>
-          <Link
-            href={CHAINS[deposit.fromChain].constructExplorerLink(
-              deposit.txHash
-            )}
-            target="_blank"
-            rel="noopener norefferrer"
-          >
-            Explorer <ArrowUpRight width={16} height={16} />
-          </Link>
           <div>
             <Row>
               <Info>
-                <h3>Sending</h3>
+                <h3>Send</h3>
                 <div>
                   <Logo
                     src={tokenInfo?.logoURI}
@@ -64,7 +108,7 @@ const Confirmation: React.FC = () => {
                 </div>
               </Info>
               <Info></Info>
-              <Info>
+              {/* <Info>
                 <h3>Receiving</h3>
                 <div>
                   <Logo
@@ -76,7 +120,7 @@ const Confirmation: React.FC = () => {
                     {tokenInfo?.symbol}
                   </div>
                 </div>
-              </Info>
+              </Info> */}
             </Row>
             <Info>
               <h3>From</h3>

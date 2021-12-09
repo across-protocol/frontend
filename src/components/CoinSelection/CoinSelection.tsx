@@ -12,6 +12,7 @@ import {
 } from "state/hooks";
 import { parseUnits, formatUnits, ParsingError, TOKENS_LIST } from "utils";
 import { Section, SectionTitle } from "../Section";
+import { useAppSelector } from "state/hooks";
 
 import {
   RoundBox,
@@ -30,14 +31,16 @@ import {
 const FEE_ESTIMATION = ".004";
 const CoinSelection = () => {
   const { account, isConnected } = useConnection();
-  const { setAmount, setToken, fromChain, toChain, amount, token } = useSend();
+  const { setAmount, setToken, amount, token } = useSend();
 
   const [error, setError] = React.useState<Error>();
-  const tokenList = TOKENS_LIST[fromChain];
+  const sendState = useAppSelector((state) => state.send);
+
+  const tokenList = TOKENS_LIST[sendState.currentlySelectedFromChain.chainId];
   const { data: balances } = useBalances(
     {
       account: account!,
-      chainId: fromChain,
+      chainId: sendState.currentlySelectedFromChain.chainId,
     },
     { skip: !account }
   );
@@ -104,16 +107,18 @@ const CoinSelection = () => {
         const selectedIndex = tokenList.findIndex(
           ({ address }) => address === token
         );
-        const balance = balances[selectedIndex];
-        const isEth = tokenList[selectedIndex].symbol === "ETH";
-        if (
-          amount.gt(
-            isEth
-              ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION))
-              : balance
-          )
-        ) {
-          setError(new Error("Insufficient balance."));
+        if (balances[selectedIndex]) {
+          const balance = balances[selectedIndex] || ethers.BigNumber.from("0");
+          const isEth = tokenList[selectedIndex].symbol === "ETH";
+          if (
+            amount.gt(
+              isEth
+                ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION))
+                : balance
+            )
+          ) {
+            setError(new Error("Insufficient balance."));
+          }
         }
       }
     }
@@ -124,29 +129,36 @@ const CoinSelection = () => {
       const selectedIndex = tokenList.findIndex(
         ({ address }) => address === selectedItem.address
       );
-      const isEth = tokenList[selectedIndex].symbol === "ETH";
-      const balance = isEth
-        ? max(
-            balances[selectedIndex].sub(
-              ethers.utils.parseEther(FEE_ESTIMATION)
-            ),
-            0
-          )
-        : balances[selectedIndex];
-      setAmount({ amount: balance });
-      setInputAmount(formatUnits(balance, selectedItem.decimals));
+      if (balances[selectedIndex]) {
+        const isEth = tokenList[selectedIndex].symbol === "ETH";
+        const balance = isEth
+          ? max(
+              balances[selectedIndex].sub(
+                ethers.utils.parseEther(FEE_ESTIMATION)
+              ),
+              0
+            )
+          : balances[selectedIndex];
+        setAmount({ amount: balance });
+        setInputAmount(formatUnits(balance, selectedItem.decimals));
+      } else {
+        setAmount({ amount: ethers.BigNumber.from("0") });
+        setInputAmount(
+          formatUnits(ethers.BigNumber.from("0"), selectedItem.decimals)
+        );
+      }
     }
   };
 
-  const { block } = useBlocks(toChain);
+  const { block } = useBlocks(sendState.currentlySelectedToChain.chainId);
 
   const { data: fees } = useBridgeFees(
     {
       amount,
       tokenSymbol: selectedItem!.symbol,
-      blockNumber: block?.blockNumber ?? 0,
+      blockTime: block?.timestamp!,
     },
-    { skip: amount.lte(0) || !block || !selectedItem?.symbol }
+    { skip: amount.lte(0) || !block?.timestamp || !selectedItem?.symbol }
   );
 
   const errorMsg = error

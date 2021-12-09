@@ -1,4 +1,4 @@
-import { FC, Dispatch, SetStateAction, useState } from "react";
+import { FC, Dispatch, SetStateAction, useState, useEffect } from "react";
 import PoolFormSlider from "./PoolFormSlider";
 import { useConnection } from "state/hooks";
 import {
@@ -13,6 +13,7 @@ import {
   FeesBoldInfo,
   FeesInfo,
   FeesPercent,
+  RemoveFormErrorBox,
 } from "./RemoveLiquidityForm.styles";
 import { ethers } from "ethers";
 import { poolClient } from "state/poolsApi";
@@ -74,12 +75,17 @@ const RemoveLiqudityForm: FC<Props> = ({
     if (wrongNetwork) return "Switch to Ethereum Mainnet";
     return "Remove liquidity";
   }
+  const [errorMessage, setErrorMessage] = useState("");
+  useEffect(() => {
+    setErrorMessage("");
+  }, [removeAmount]);
 
   const handleButtonClick = async () => {
     if (!provider) {
       init();
     }
     if (isConnected && removeAmount > 0 && signer) {
+      setErrorMessage("");
       const scaler = toBN("10").pow(decimals);
 
       const removeAmountToWei = toWeiSafe(
@@ -130,7 +136,8 @@ const RemoveLiqudityForm: FC<Props> = ({
           });
         }
         return transaction;
-      } catch (err) {
+      } catch (err: any) {
+        setErrorMessage(err.message);
         console.error("err in RemoveLiquidity call", err);
       }
     }
@@ -217,6 +224,11 @@ const RemoveLiqudityForm: FC<Props> = ({
         </>
       )}
       <RemoveFormButtonWrapper>
+        {errorMessage && (
+          <RemoveFormErrorBox>
+            <div>{errorMessage}</div>
+          </RemoveFormErrorBox>
+        )}
         {wrongNetwork && provider ? (
           <RemoveFormButton
             onClick={() => switchChain(provider, DEFAULT_TO_CHAIN_ID)}

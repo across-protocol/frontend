@@ -89,8 +89,16 @@ export function useBlocks(toChain: ChainId) {
 
 export function useSend() {
   const { isConnected, chainId, account, signer } = useConnection();
-  const { fromChain, toChain, toAddress, amount, token, error } =
-    useAppSelector((state) => state.send);
+  const {
+    fromChain,
+    toChain,
+    toAddress,
+    amount,
+    token,
+    error,
+    currentlySelectedFromChain,
+    currentlySelectedToChain,
+  } = useAppSelector((state) => state.send);
   const dispatch = useAppDispatch();
   const actions = bindActionCreators(
     {
@@ -105,17 +113,17 @@ export function useSend() {
   );
 
   const { balance: balanceStr } = useBalance({
-    chainId: fromChain,
+    chainId: currentlySelectedFromChain.chainId,
     account,
     tokenAddress: token,
   });
   const balance = BigNumber.from(balanceStr);
-  const { block } = useBlocks(toChain);
+  const { block } = useBlocks(currentlySelectedFromChain.chainId);
 
-  const depositBox = getDepositBox(fromChain);
+  const depositBox = getDepositBox(currentlySelectedFromChain.chainId);
   const { data: allowance } = useAllowance(
     {
-      chainId: fromChain,
+      chainId: currentlySelectedFromChain.chainId,
       token,
       owner: account!,
       spender: depositBox.address,
@@ -126,25 +134,28 @@ export function useSend() {
   const canApprove = balance.gte(amount) && amount.gte(0);
   const hasToApprove = allowance?.hasToApprove ?? false;
 
-  const hasToSwitchChain = isConnected && fromChain !== chainId;
+  const hasToSwitchChain =
+    isConnected && currentlySelectedFromChain.chainId !== chainId;
 
   const tokenSymbol =
-    TOKENS_LIST[fromChain].find((t) => t.address === token)?.symbol ?? "";
+    TOKENS_LIST[currentlySelectedFromChain.chainId].find(
+      (t) => t.address === token
+    )?.symbol ?? "";
 
   const { data: fees } = useBridgeFees(
     {
       amount,
       tokenSymbol,
-      blockNumber: block?.blockNumber ?? 0,
+      blockTime: block?.timestamp!,
     },
-    { skip: tokenSymbol === "" || amount.lte(0) || !block }
+    { skip: tokenSymbol === "" || amount.lte(0) || !block?.timestamp }
   );
 
   const canSend = useMemo(
     () =>
-      fromChain &&
+      currentlySelectedFromChain.chainId &&
       block &&
-      toChain &&
+      currentlySelectedToChain.chainId &&
       amount &&
       token &&
       fees &&
@@ -163,9 +174,9 @@ export function useSend() {
         )
         .gte(amount),
     [
-      fromChain,
+      currentlySelectedFromChain.chainId,
       block,
-      toChain,
+      currentlySelectedToChain.chainId,
       amount,
       token,
       fees,
@@ -176,18 +187,24 @@ export function useSend() {
       balance,
     ]
   );
+
   const send = useCallback(async () => {
     if (!signer || !canSend || !fees || !toAddress || !block) {
       return {};
     }
 
     try {
-      const depositBox = getDepositBox(fromChain, signer);
+      const depositBox = getDepositBox(
+        currentlySelectedFromChain.chainId,
+        signer
+      );
       const isETH = token === ethers.constants.AddressZero;
       const value = isETH ? amount : ethers.constants.Zero;
-      const l2Token = isETH ? TOKENS_LIST[fromChain][0].address : token;
+      const l2Token = isETH
+        ? TOKENS_LIST[currentlySelectedFromChain.chainId][0].address
+        : token;
       const { instantRelayFee, slowRelayFee } = fees;
-      const timestamp = block.timestamp;
+      let timestamp = block.timestamp;
 
       const tx = await depositBox.deposit(
         toAddress,
@@ -217,7 +234,7 @@ export function useSend() {
     canSend,
     depositBox.address,
     fees,
-    fromChain,
+    currentlySelectedFromChain.chainId,
     signer,
     toAddress,
     token,
@@ -291,7 +308,10 @@ export function useBalance(params: {
   const selectedIndex = tokenList.findIndex(
     ({ address }) => address === tokenAddress
   );
-  const balance = result?.data ? result.data[selectedIndex].toString() : "0";
+  const balance =
+    result?.data && result.data[selectedIndex]
+      ? result.data[selectedIndex].toString()
+      : "0";
 
   return {
     balance,

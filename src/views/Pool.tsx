@@ -103,6 +103,11 @@ const Pool: FC = () => {
                   ? `${Number(pool.estimatedApy) * 100}`
                   : "0"
               }
+              projectedApr={
+                pool && pool.projectedApr
+                  ? `${Number(pool.projectedApr) * 100}`
+                  : "0"
+              }
               position={
                 userPosition
                   ? ethers.BigNumber.from(userPosition.totalDeposited)

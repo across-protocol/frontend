@@ -7,6 +7,7 @@ import wethLogo from "assets/weth-logo.svg";
 import arbitrumLogo from "assets/arbitrum-logo.svg";
 import memoize from "lodash-es/memoize";
 import umaLogo from "assets/UMA-round.svg";
+import bobaLogo from "assets/Across-Boba-Color30x30.svg";
 import { getAddress } from "./address";
 /* Colors and Media Queries section */
 
@@ -55,6 +56,7 @@ export enum ChainId {
   KOVAN_OPTIMISM = 69,
   ARBITRUM = 42161,
   ARBITRUM_RINKEBY = 421611,
+  BOBA = 288,
 }
 
 export type Token = {
@@ -173,6 +175,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       logoURI: usdcLogo,
       bridgePool: getAddress("0x190978cC580f5A48D55A4A20D0A952FA1dA3C057"),
     },
+    // {
+    //   address: getAddress("0xE7798f023fC62146e8Aa1b36Da45fb70855a77Ea"),
+    //   name: "UMA Token",
+    //   symbol: "UMA",
+    //   decimals: 18,
+    //   logoURI: umaLogo,
+    //   bridgePool: getAddress("0xdfe0ec39291e3b60ACa122908f86809c9eE64E90"),
+    // },
     {
       address: ethers.constants.AddressZero,
       name: "Ether",
@@ -260,6 +270,33 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: "",
     },
   ],
+  // Stubbed
+  [ChainId.BOBA]: [
+    {
+      address: getAddress("0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000"),
+      name: "Wrapped Ether",
+      symbol: "WETH",
+      decimals: 18,
+      logoURI: wethLogo,
+      bridgePool: "",
+    },
+    {
+      address: getAddress("0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc"),
+      name: "USD Coin",
+      symbol: "USDC",
+      decimals: 6,
+      logoURI: usdcLogo,
+      bridgePool: getAddress("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
+    },
+    {
+      address: ethers.constants.AddressZero,
+      name: "Boba",
+      symbol: "BOBA",
+      decimals: 18,
+      logoURI: bobaLogo,
+      bridgePool: "",
+    },
+  ],
 };
 
 type ChainInfo = {
@@ -321,14 +358,13 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
     },
   },
   [ChainId.OPTIMISM]: {
-    name: "Optimistic Ethereum",
+    name: "Optimism",
     chainId: ChainId.OPTIMISM,
     logoURI: optimismLogo,
     rpcUrl: "https://mainnet.optimism.io",
     explorerUrl: "https://optimistic.etherscan.io",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://optimistic.etherscan.io"
-    ),
+    constructExplorerLink: (txHash: string) =>
+      `https://optimistic.etherscan.io/tx/${txHash}`,
     nativeCurrency: {
       name: "Ether",
       symbol: "OETH",
@@ -336,7 +372,7 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
     },
   },
   [ChainId.KOVAN_OPTIMISM]: {
-    name: "Optimistic Ethereum Testnet Kovan",
+    name: "Optimism Testnet Kovan",
     chainId: ChainId.KOVAN_OPTIMISM,
     logoURI: optimismLogo,
     rpcUrl: "https://kovan.optimism.io",
@@ -377,13 +413,36 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       decimals: 18,
     },
   },
+  [ChainId.BOBA]: {
+    name: "Boba",
+    chainId: ChainId.BOBA,
+    logoURI: bobaLogo,
+    rpcUrl: "https://mainnet.boba.network",
+    explorerUrl: "https://blockexplorer.boba.network",
+    constructExplorerLink: (txHash: string) =>
+      `https://blockexplorer.boba.network/tx/${txHash}`,
+    nativeCurrency: {
+      name: "Boba",
+      symbol: "BOBA",
+      decimals: 18,
+    },
+  },
 };
 
 export const ADDRESSES: Record<ChainId, { BRIDGE?: string }> = {
-  [ChainId.MAINNET]: {},
+  [ChainId.MAINNET]: {
+    // Stubbed value. Does not work. TODO: Change this out when contract deployed.
+    BRIDGE: "0x2271a5E74eA8A29764ab10523575b41AA52455f0",
+  },
   [ChainId.RINKEBY]: {},
   [ChainId.KOVAN]: {},
-  [ChainId.OPTIMISM]: {},
+  [ChainId.OPTIMISM]: {
+    BRIDGE: "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+  },
+  [ChainId.BOBA]: {
+    // Stubbed value. Does not work. TODO: Change this out when contract deployed.
+    BRIDGE: "0x2271a5E74eA8A29764ab10523575b41AA52455f0",
+  },
   [ChainId.KOVAN_OPTIMISM]: {
     BRIDGE: "0x2271a5E74eA8A29764ab10523575b41AA52455f0",
   },
@@ -439,6 +498,11 @@ export const PROVIDERS: Record<ChainId, GetProvider> = {
         `https://arbitrum-rinkeby.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
   ),
+  // Doesn't have an rpc on infura.
+  [ChainId.BOBA]: memoize(
+    () =>
+      new ethers.providers.StaticJsonRpcProvider(`https://mainnet.boba.network`)
+  ),
 };
 
 export function getChainName(chainId: ChainId): string {
@@ -482,39 +546,96 @@ export function onboardBaseConfig(): Initialization {
   };
 }
 
-type RateModel = {
-  UBar: ethers.BigNumber;
-  R0: ethers.BigNumber;
-  R1: ethers.BigNumber;
-  R2: ethers.BigNumber;
-};
-export const RATE_MODELS: Record<string, RateModel> = {
-  // this should be the same as weth?
-  ETH: {
-    UBar: ethers.BigNumber.from("650000000000000000"),
-    R0: ethers.BigNumber.from("0"),
-    R1: ethers.BigNumber.from("80000000000000000"),
-    R2: ethers.BigNumber.from("1000000000000000000"),
-  },
-  WETH: {
-    UBar: ethers.BigNumber.from("650000000000000000"),
-    R0: ethers.BigNumber.from("0"),
-    R1: ethers.BigNumber.from("80000000000000000"),
-    R2: ethers.BigNumber.from("1000000000000000000"),
-  },
-  USDC: {
-    UBar: ethers.BigNumber.from("800000000000000000"),
-    R0: ethers.BigNumber.from("0"),
-    R1: ethers.BigNumber.from("40000000000000000"),
-    R2: ethers.BigNumber.from("600000000000000000"),
-  },
-  UMA: {
-    UBar: ethers.BigNumber.from("500000000000000000"),
-    R0: ethers.BigNumber.from("0"),
-    R1: ethers.BigNumber.from("50000000000000000"),
-    R2: ethers.BigNumber.from("2000000000000000000"),
-  },
-};
-
 // this client requires multicall2 be accessible on the chain. This is the address for mainnet.
 export const multicallTwoAddress = "0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696";
+export interface IChainSelection {
+  name: string;
+  chainId: ChainId;
+  logoURI: string;
+  rpcUrl: string;
+  explorerUrl: string;
+  constructExplorerLink: (txHash: string) => string;
+  nativeCurrency: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
+}
+
+interface EthChainInfo {
+  name: "Ethereum";
+  chainId: 1;
+  logoURI: string;
+  rpcUrl: string;
+  explorerUrl: string;
+  constructExplorerLink: (txHash: string) => string;
+  nativeCurrency: {
+    name: "Ether";
+    symbol: "ETH";
+    decimals: 18;
+  };
+}
+
+type ChainsSelection = [...IChainSelection[], EthChainInfo];
+export const CHAINS_SELECTION: ChainsSelection = [
+  {
+    name: "Optimism",
+    chainId: ChainId.OPTIMISM,
+    logoURI: optimismLogo,
+    rpcUrl: "https://mainnet.optimism.io",
+    explorerUrl: "https://optimistic.etherscan.io",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://optimistic.etherscan.io"
+    ),
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "OETH",
+      decimals: 18,
+    },
+  },
+  {
+    name: "Arbitrum",
+    chainId: ChainId.ARBITRUM,
+    logoURI: arbitrumLogo,
+    rpcUrl: "https://arb1.arbitrum.io/rpc",
+    explorerUrl: "https://arbiscan.io",
+    constructExplorerLink: (txHash: string) =>
+      `https://arbiscan.io/tx/${txHash}`,
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "AETH",
+      decimals: 18,
+    },
+  },
+  // Stretch goal.
+  // Removing for now
+  // {
+  //   name: "Boba",
+  //   chainId: ChainId.BOBA,
+  //   logoURI: bobaLogo,
+  //   rpcUrl: "https://mainnet.boba.network",
+  //   explorerUrl: "https://blockexplorer.boba.network",
+  //   constructExplorerLink: (txHash: string) =>
+  //     `https://blockexplorer.boba.network/tx/${txHash}`,
+  //   nativeCurrency: {
+  //     name: "Boba",
+  //     symbol: "BOBA",
+  //     decimals: 18,
+  //   },
+  // },
+  {
+    name: "Ethereum",
+    chainId: ChainId.MAINNET,
+    logoURI: ethereumLogo,
+    // Doesn't have an RPC on Infura. Need to know how to handle this
+    rpcUrl: "https://mainnet.infura.io/v3/",
+    explorerUrl: "https://etherscan.io",
+    constructExplorerLink: (txHash: string) =>
+      `https://etherscan.io/tx/${txHash}`,
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+    },
+  },
+];

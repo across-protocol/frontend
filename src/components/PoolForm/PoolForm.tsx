@@ -52,6 +52,7 @@ interface Props {
   defaultTab: string;
   setDefaultTab: React.Dispatch<React.SetStateAction<string>>;
   utilization: string;
+  projectedApr: string;
 }
 
 const PoolForm: FC<Props> = ({
@@ -74,6 +75,7 @@ const PoolForm: FC<Props> = ({
   defaultTab,
   setDefaultTab,
   utilization,
+  projectedApr,
 }) => {
   const [inputAmount, setInputAmount] = useState("");
   const [removeAmount, setRemoveAmount] = useState(0);
@@ -190,6 +192,12 @@ const PoolForm: FC<Props> = ({
         <ROIWrapper>
           <ROIItem>Estimated APY:</ROIItem>
           <ROIItem>{numberFormatter(Number(apy)).replaceAll(",", "")}%</ROIItem>
+        </ROIWrapper>
+        <ROIWrapper>
+          <ROIItem>Projected APY:</ROIItem>
+          <ROIItem>
+            {numberFormatter(Number(projectedApr)).replaceAll(",", "")}%
+          </ROIItem>
         </ROIWrapper>
       </Info>
       <Tabs
