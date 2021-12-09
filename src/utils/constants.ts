@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import { Initialization } from "bnc-onboard/dist/src/interfaces";
 import ethereumLogo from "assets/ethereum-logo.png";
 import usdcLogo from "assets/usdc-logo.png";
-import optimismLogo from "assets/optimism.svg";
+import optimismLogo from "assets/optimism-alt-logo.svg";
 import wethLogo from "assets/weth-logo.svg";
 import arbitrumLogo from "assets/arbitrum-logo.svg";
 import memoize from "lodash-es/memoize";
