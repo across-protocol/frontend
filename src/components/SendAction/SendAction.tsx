@@ -6,7 +6,7 @@ import {
   useDeposits,
   useSend,
   useTransactions,
-  useBlocks,
+  useL2Block,
   useAllowance,
 } from "state/hooks";
 import { TransactionTypes } from "state/transactions";
@@ -32,7 +32,7 @@ const SendAction: React.FC = () => {
   const { account } = useConnection();
   const sendState = useAppSelector((state) => state.send);
 
-  const { block } = useBlocks(sendState.currentlySelectedFromChain.chainId);
+  const { block } = useL2Block();
 
   const [isInfoModalOpen, setOpenInfoModal] = useState(false);
   const toggleInfoModal = () => setOpenInfoModal((oldOpen) => !oldOpen);

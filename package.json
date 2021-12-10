@@ -19,6 +19,7 @@
     "@types/react-router-dom": "^5.3.1",
     "@uma/contracts-frontend": "^0.1.5",
     "@uma/sdk": "^0.16.0",
+    "@use-it/interval": "^1.0.0",
     "@web3-react/core": "^6.1.9",
     "@web3-react/injected-connector": "^6.0.7",
     "bnc-notify": "^1.9.1",

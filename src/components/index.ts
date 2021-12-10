@@ -7,7 +7,6 @@ export { default as AddressSelection } from "./AddressSelection";
 export { default as SendAction } from "./SendAction";
 export { default as Dialog } from "./Dialog";
 export { default as SuperHeader } from "./SuperHeader";
-export { default as BlockPoller } from "./BlockPoller";
 export * from "./Box";
 export * from "./Buttons";
 export * from "./Section";

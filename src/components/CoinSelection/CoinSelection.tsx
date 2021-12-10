@@ -8,7 +8,7 @@ import {
   useBalances,
   useConnection,
   useBridgeFees,
-  useBlocks,
+  useL2Block,
 } from "state/hooks";
 import { parseUnits, formatUnits, ParsingError, TOKENS_LIST } from "utils";
 import { Section, SectionTitle } from "../Section";
@@ -150,7 +150,7 @@ const CoinSelection = () => {
     }
   };
 
-  const { block } = useBlocks(sendState.currentlySelectedToChain.chainId);
+  const { block } = useL2Block();
 
   const { data: fees } = useBridgeFees(
     {

@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useEffect, useState } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import useInterval from "@use-it/interval";
 import { ethers, BigNumber } from "ethers";
 import { bindActionCreators } from "redux";
 import {
@@ -57,34 +58,41 @@ export function useConnection() {
 }
 
 // TODO: put this back into global state. Wasnt able to get it working.
-export function useBlocks(toChain: ChainId) {
-  const [state, setBlock] = useState<
-    (ethers.providers.Block & { blockNumber: number }) | undefined
+export function useL2Block() {
+  const { currentlySelectedFromChain } = useAppSelector((state) => state.send);
+  const [latestBlock, setBlock] = useState<
+    ethers.providers.Block | undefined
   >();
+
   useEffect(() => {
-    const provider = PROVIDERS[toChain]();
+    if (!latestBlock) {
+      const provider = PROVIDERS[currentlySelectedFromChain.chainId]();
+      provider
+        .getBlock("latest")
+        .then(setBlock)
+        .catch(() => {
+          console.error("Error getting latest block");
+        });
+    }
+  }, [currentlySelectedFromChain.chainId, latestBlock]);
+
+  useInterval(() => {
+    const provider = PROVIDERS[currentlySelectedFromChain.chainId]();
     provider
       .getBlock("latest")
       .then((block) => {
-        setBlock({ ...block, blockNumber: block.number });
+        setBlock(block);
       })
-      .catch((error) => console.error("Error getting block", error))
-      .finally(() => {
-        provider.on("block", async (blockNumber: number) => {
-          const block = await provider.getBlock(blockNumber);
-          setBlock({ ...block, blockNumber });
-        });
+      .catch(() => {
+        console.error("Error getting latest block");
       });
 
     return () => {
       provider.removeAllListeners();
     };
-  }, [toChain]);
+  }, 30 * 1000);
 
-  return {
-    block: state,
-    setBlock: setBlock,
-  };
+  return { block: latestBlock };
 }
 
 export function useSend() {
@@ -118,7 +126,7 @@ export function useSend() {
     tokenAddress: token,
   });
   const balance = BigNumber.from(balanceStr);
-  const { block } = useBlocks(currentlySelectedFromChain.chainId);
+  const { block } = useL2Block();
 
   const depositBox = getDepositBox(currentlySelectedFromChain.chainId);
   const { data: allowance } = useAllowance(
