@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect, useState } from "react";
+import { useCallback, useMemo, useEffect, useState, useContext } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import useInterval from "@use-it/interval";
 import { ethers, BigNumber } from "ethers";
@@ -24,6 +24,7 @@ import {
 import chainApi, { useAllowance, useBridgeFees } from "./chainApi";
 import { add } from "./transactions";
 import { deposit as depositAction, toggle } from "./deposits";
+import { ErrorContext } from "context/ErrorContext";
 
 const FEE_ESTIMATION = "0.004";
 
@@ -64,17 +65,29 @@ export function useL2Block() {
     ethers.providers.Block | undefined
   >();
 
+  const { addError, removeError, error } = useContext(ErrorContext);
+
   useEffect(() => {
     if (!latestBlock) {
       const provider = PROVIDERS[currentlySelectedFromChain.chainId]();
       provider
         .getBlock("latest")
-        .then(setBlock)
+        .then((res) => {
+          if (error) removeError();
+          setBlock(res);
+        })
         .catch(() => {
+          addError(new Error("Infura issue, please try again later."));
           console.error("Error getting latest block");
         });
     }
-  }, [currentlySelectedFromChain.chainId, latestBlock]);
+  }, [
+    currentlySelectedFromChain.chainId,
+    latestBlock,
+    error,
+    removeError,
+    addError,
+  ]);
 
   useInterval(() => {
     const provider = PROVIDERS[currentlySelectedFromChain.chainId]();

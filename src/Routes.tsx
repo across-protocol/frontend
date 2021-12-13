@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useContext } from "react";
 import { Switch, Route, useLocation } from "react-router-dom";
 import { Send, Confirmation, Pool, About } from "views";
 import { Header, SuperHeader } from "components";
@@ -11,6 +11,7 @@ import {
 } from "utils";
 
 import { useAppSelector } from "state/hooks";
+import { ErrorContext } from "context/ErrorContext";
 
 interface Props {}
 
@@ -20,6 +21,7 @@ const Routes: FC<Props> = () => {
   const { error, provider, chainId } = useConnection();
   const location = useLocation();
   const sendState = useAppSelector((state) => state.send);
+  const { error: globalError } = useContext(ErrorContext);
 
   const wrongNetworkSend =
     provider &&
@@ -33,6 +35,11 @@ const Routes: FC<Props> = () => {
 
   return (
     <>
+      {globalError && (
+        <SuperHeader>
+          <div>{globalError}</div>
+        </SuperHeader>
+      )}
       {wrongNetworkSend && location.pathname === "/" && (
         <SuperHeader>
           <div>
@@ -51,6 +58,7 @@ const Routes: FC<Props> = () => {
           </div>
         </SuperHeader>
       )}
+
       {wrongNetworkPool && location.pathname === "/pool" && (
         <SuperHeader>
           <div>
