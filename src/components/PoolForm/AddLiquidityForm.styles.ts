@@ -9,7 +9,7 @@ export const RoundBox = styled(UnstyledBox)`
   background-color: var(--color);
   font-size: ${16 / 16}rem;
   padding: 10px 15px;
-  margin-top: 16px;
+  margin-top: 4px;
   flex: 2;
   display: flex;
   &:not(:first-of-type):focus-within {
@@ -59,10 +59,9 @@ export const InputGroup = styled.div`
 `;
 
 export const FormHeader = styled.h2`
-  font-weight: 600;
-  font-size: ${20 / 16}rem;
-  line-height: 1.2;
+  font-weight: 700;
   margin-bottom: 16px;
+  font-size: ${20 / 16}rem;
 `;
 
 export const Balance = styled.div`

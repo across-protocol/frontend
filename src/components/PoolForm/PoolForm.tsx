@@ -8,14 +8,12 @@ import {
   Wrapper,
   Info,
   InfoText,
-  ROIWrapper,
-  ROIItem,
   Logo,
   TabContentWrapper,
-  PositionWrapper,
-  PositionBlock,
-  PositionBlockItem,
-  PositionBlockItemBold,
+  Position,
+  PositionItem,
+  ROI,
+  ROIItem,
 } from "./PoolForm.styles";
 import {
   formatUnits,
@@ -156,50 +154,52 @@ const PoolForm: FC<Props> = ({
       <Info>
         <Logo src={icon} />
         <InfoText>{symbol} Pool</InfoText>
-        <PositionWrapper>
-          <PositionBlock>
-            <PositionBlockItem>My deposit</PositionBlockItem>
-            <PositionBlockItem>
-              {formatUnits(position, decimals)} {symbol}
-            </PositionBlockItem>
-          </PositionBlock>
-          <PositionBlock>
-            <PositionBlockItem>Fees earned</PositionBlockItem>
-            <PositionBlockItem>
-              {Number(formatUnits(feesEarned, decimals)) > 0
-                ? formatUnits(feesEarned, decimals)
-                : "0.0000"}{" "}
-              {symbol}
-            </PositionBlockItem>
-          </PositionBlock>
-          <PositionBlock>
-            <PositionBlockItemBold>Total</PositionBlockItemBold>
-            <PositionBlockItemBold>
-              {formatUnits(totalPosition, decimals)} {symbol}
-            </PositionBlockItemBold>
-          </PositionBlock>
-        </PositionWrapper>
-        <ROIWrapper>
-          <ROIItem>Total pool size:</ROIItem>
-          <ROIItem>
-            {formatUnits(totalPoolSize, decimals)} {symbol}
-          </ROIItem>
-        </ROIWrapper>
-        <ROIWrapper>
-          <ROIItem>Pool utilization:</ROIItem>
-          <ROIItem>{formatUnits(utilization, 16)}%</ROIItem>
-        </ROIWrapper>
-        <ROIWrapper>
-          <ROIItem>Estimated APY:</ROIItem>
-          <ROIItem>{numberFormatter(Number(apy)).replaceAll(",", "")}%</ROIItem>
-        </ROIWrapper>
-        <ROIWrapper>
-          <ROIItem>Projected APY:</ROIItem>
-          <ROIItem>
-            {numberFormatter(Number(projectedApr)).replaceAll(",", "")}%
-          </ROIItem>
-        </ROIWrapper>
       </Info>
+      <Position>
+        <PositionItem>
+          <div>My deposit</div>
+          <div>
+            {formatUnits(position, decimals)} {symbol}
+          </div>
+        </PositionItem>
+        <PositionItem>
+          <div>Fees earned</div>
+          <div>
+            {Number(formatUnits(feesEarned, decimals)) > 0
+              ? formatUnits(feesEarned, decimals)
+              : "0.0000"}{" "}
+            {symbol}
+          </div>
+        </PositionItem>
+        <PositionItem>
+          <div>Total</div>
+          <div>
+            {formatUnits(totalPoolSize, decimals)} {symbol}
+          </div>
+        </PositionItem>
+      </Position>
+      <ROI>
+        <ROIItem>
+          <div>Total pool size:</div>
+          <div>
+            {formatUnits(totalPoolSize, decimals)} {symbol}
+          </div>
+        </ROIItem>
+        <ROIItem>
+          <div>Pool utilization:</div>
+          <div>{formatUnits(utilization, 16)}%</div>
+        </ROIItem>
+        <ROIItem>
+          <div>Estimated APY:</div>
+          <div>{numberFormatter(Number(apy)).replaceAll(",", "")}%</div>
+        </ROIItem>
+        <ROIItem>
+          <div>Projected APY:</div>
+          <div>
+            {numberFormatter(Number(projectedApr)).replaceAll(",", "")}%
+          </div>
+        </ROIItem>
+      </ROI>
       <Tabs
         defaultTab={defaultTab}
         changeDefaultTab={(tab: string) => {

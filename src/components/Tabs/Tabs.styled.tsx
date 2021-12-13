@@ -1,19 +1,12 @@
 import styled from "@emotion/styled";
-import { QUERIES } from "../../utils";
 
 export const TabList = styled.ol`
-  width: 90%;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 2rem;
+  margin-top: 10px;
   border-bottom: 1px solid #ccc;
   padding-left: 0;
   display: flex;
   background-color: linear-gradient(#f5f5f5 86.46%, #eeeeee 100%);
   font-weight: 700;
-  /* @media ${QUERIES.laptopAndUp} {
-    width: 400px;
-  } */
 `;
 
 export const TabListItem = styled.li`

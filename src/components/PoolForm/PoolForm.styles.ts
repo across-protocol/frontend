@@ -5,12 +5,12 @@ export const Wrapper = styled.div`
   flex: 1;
   background-color: var(--color-primary);
   border-radius: 12px 12px 0 0;
+  padding: 0 30px;
 `;
 
 export const Info = styled.div`
   text-align: center;
 `;
-
 export const InfoText = styled.h3`
   font-size: ${24 / 16}rem;
   color: var(--color-gray);
@@ -21,20 +21,9 @@ export const ROIWrapper = styled.div`
   margin-top: 8px;
   text-align: left;
   display: flex;
-  width: 90%;
   margin-left: auto;
   margin-right: auto;
   padding: 8px 16px;
-`;
-
-export const ROIItem = styled.div`
-  flex-basis: 50%;
-  color: var(--color-gray);
-  font-size: ${16 / 16}rem;
-  align-content: space-between;
-  &:nth-of-type(2) {
-    text-align: right;
-  }
 `;
 
 export const Logo = styled.img`
@@ -49,39 +38,38 @@ export const Logo = styled.img`
 `;
 
 export const TabContentWrapper = styled.div`
-  width: 90%;
-  margin-left: auto;
-  margin-right: auto;
   background-color: var(--color-gray);
-  padding: 32px 16px;
+  padding: 20px;
 `;
 
-export const PositionWrapper = styled.div`
+export const Position = styled.div`
   background-color: var(--color-white-transparent);
-  width: 90%;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 16px;
   border-radius: 5px;
-`;
-
-export const PositionBlock = styled.div`
-  display: flex;
-  text-align: left;
-`;
-
-export const PositionBlockItem = styled.div`
-  flex-basis: 50%;
+  padding: 15px;
   color: var(--color-gray);
-  font-size: 16px;
-  align-content: space-between;
-  font-weight: 400;
-  margin: 8px 0;
-  &:nth-of-type(2) {
-    text-align: right;
+  margin-bottom: 5px;
+`;
+
+export const PositionItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  &:not(:last-of-type) {
+    margin-bottom: 15px;
+  }
+  &:last-of-type {
+    font-weight: 700;
   }
 `;
 
-export const PositionBlockItemBold = styled(PositionBlockItem)`
-  font-weight: 700;
+export const ROI = styled.div`
+  color: var(--color-gray);
+  padding: 15px;
+`;
+
+export const ROIItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  &:not(:last-of-type) {
+    margin-bottom: 15px;
+  }
 `;
