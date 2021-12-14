@@ -68,22 +68,19 @@ export function useL2Block() {
   const { addError, removeError, error } = useContext(ErrorContext);
 
   useEffect(() => {
-    if (!latestBlock) {
-      const provider = PROVIDERS[currentlySelectedFromChain.chainId]();
-      provider
-        .getBlock("latest")
-        .then((res) => {
-          if (error) removeError();
-          setBlock(res);
-        })
-        .catch(() => {
-          addError(new Error("Infura issue, please try again later."));
-          console.error("Error getting latest block");
-        });
-    }
+    const provider = PROVIDERS[currentlySelectedFromChain.chainId]();
+    provider
+      .getBlock("latest")
+      .then((res) => {
+        if (error) removeError();
+        setBlock(res);
+      })
+      .catch(() => {
+        addError(new Error("Infura issue, please try again later."));
+        console.error("Error getting latest block");
+      });
   }, [
     currentlySelectedFromChain.chainId,
-    latestBlock,
     error,
     removeError,
     addError,
