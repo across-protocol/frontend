@@ -3797,30 +3797,30 @@
     "@typescript-eslint/types" "4.15.2"
     eslint-visitor-keys "^2.0.0"
 
-"@uma/contracts-frontend@^0.1.15":
-  version "0.1.15"
-  resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.1.15.tgz#55d3ccfe7ca84d2dd820bb447c1f95ff86f19187"
-  integrity sha512-jgsS9UtiQ5ZouhUZplyV9eu5DJ/krpllrMHMGC++bMqfiwt0gGsXf26ODh3DD0/ty39PaJiZNl+CM7mavt66gg==
+"@uma/contracts-frontend@^0.1.16":
+  version "0.1.16"
+  resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.1.16.tgz#ab5ea61d42cae4ee9ca8a4dbcd39060637f3c5e7"
+  integrity sha512-gHGR9mlPOgMpALyOjmjVzn+h+z5+RqbEsGJ4YEkCY4Ds053K7ZboX87syHvPL0FlS/oBRoNstOBj8zMw/xSYDw==
 
 "@uma/contracts-frontend@^0.1.5":
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.1.5.tgz#d0300642b5f32b57b939e504325ee6e88d1d45f9"
   integrity sha512-+rgW6B0/HZXZXGuW2uVv6rag/dlRJm4VoEVvu5YwCAO+XrP161dLvRRP13KplkIqRIIAOor51Jdiq3XgrhAbkw==
 
-"@uma/contracts-node@^0.1.15":
-  version "0.1.15"
-  resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.1.15.tgz#20fc12728399fe30847b4fec5acb78d9cc9cb773"
-  integrity sha512-aTo5JMMcc7hFDqnyUNV3RAuGZWHDpLcjYpjx3cgW9kXHvb/JxIqfKlGg+FTjT3mahHFhLrhqZ8Vn+7iBiqJh7A==
+"@uma/contracts-node@^0.1.16":
+  version "0.1.16"
+  resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.1.16.tgz#12da33baf35323aedad90f5311914f6eb9b97d1c"
+  integrity sha512-fDWShsPb+1WdEVf7q0s80vbxR1XYp1uNH2Mo915rvdtkYSVZWlK4m19G9nqDsfyrvIVlaRCs1vid0zZTa5mt7Q==
 
-"@uma/sdk@^0.16.0":
-  version "0.16.0"
-  resolved "https://registry.yarnpkg.com/@uma/sdk/-/sdk-0.16.0.tgz#90bf5499bec251ff6579d7fb5ef4cde9ff985324"
-  integrity sha512-HXlWnnjCY+UmHB0dmCx9r+Dzx3JzmpcTOwAcKA1ytpVv1PYCnqAVD45DEvXXXeO8CviUNV9n3D0ZCNTWI3vtXw==
+"@uma/sdk@^0.16.1":
+  version "0.16.1"
+  resolved "https://registry.yarnpkg.com/@uma/sdk/-/sdk-0.16.1.tgz#828f3ee284c4ab60f47b65c83bede1255ca9ec84"
+  integrity sha512-Wq40tgL6EDBJJAFztZkMbAtXyI7gEEIo6r5fZrhHBX0QIDEvepq3f3lJw7CSUArCMTzeGG3OYrDIEtaUWgbFPg==
   dependencies:
     "@google-cloud/datastore" "^6.6.0"
     "@types/lodash-es" "^4.17.5"
-    "@uma/contracts-frontend" "^0.1.15"
-    "@uma/contracts-node" "^0.1.15"
+    "@uma/contracts-frontend" "^0.1.16"
+    "@uma/contracts-node" "^0.1.16"
     axios "^0.21.4"
     bn.js "^4.11.9"
     decimal.js "^10.3.1"
