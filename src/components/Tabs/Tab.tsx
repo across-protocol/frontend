@@ -20,7 +20,7 @@ const Tab: FC<TabProps> = ({ onClick, "data-label": label, activeTab }) => {
   let className = "";
 
   if (activeTab === label) {
-    className = "tab-list-active";
+    className = "tab-active";
   }
 
   return (

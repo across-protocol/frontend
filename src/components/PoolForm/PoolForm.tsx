@@ -190,7 +190,7 @@ const PoolForm: FC<Props> = ({
           <div>{formatUnits(utilization, 16)}%</div>
         </ROIItem>
         <ROIItem>
-          <div>Estimated APY:</div>
+          <div>Current APY:</div>
           <div>{numberFormatter(Number(apy)).replaceAll(",", "")}%</div>
         </ROIItem>
         <ROIItem>
