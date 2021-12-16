@@ -43,6 +43,7 @@ const connectionSlice = createSlice({
       action: PayloadAction<Pick<State, "showConfirmationScreen">>
     ) => {
       state.showConfirmationScreen = action.payload.showConfirmationScreen;
+
       return state;
     },
     deposit: (state, action: DepositAction) => {

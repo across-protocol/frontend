@@ -279,7 +279,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "WETH",
       decimals: 18,
       logoURI: wethLogo,
-      bridgePool: "",
+      bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
     },
     {
       address: getAddress("0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc"),
@@ -291,10 +291,10 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
     },
     {
       address: ethers.constants.AddressZero,
-      name: "Boba",
-      symbol: "BOBA",
+      name: "Ether",
+      symbol: "ETH",
       decimals: 18,
-      logoURI: bobaLogo,
+      logoURI: ethereumLogo,
       bridgePool: "",
     },
   ],
@@ -423,8 +423,8 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
     constructExplorerLink: (txHash: string) =>
       `https://blockexplorer.boba.network/tx/${txHash}`,
     nativeCurrency: {
-      name: "Boba",
-      symbol: "BOBA",
+      name: "Ether",
+      symbol: "ETH",
       decimals: 18,
     },
   },
@@ -441,8 +441,7 @@ export const ADDRESSES: Record<ChainId, { BRIDGE?: string }> = {
     BRIDGE: "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
   },
   [ChainId.BOBA]: {
-    // Stubbed value. Does not work. TODO: Change this out when contract deployed.
-    BRIDGE: "0x2271a5E74eA8A29764ab10523575b41AA52455f0",
+    BRIDGE: "0xCD43CEa89DF8fE39031C03c24BC24480e942470B",
   },
   [ChainId.KOVAN_OPTIMISM]: {
     BRIDGE: "0x2271a5E74eA8A29764ab10523575b41AA52455f0",
@@ -608,22 +607,20 @@ export const CHAINS_SELECTION: ChainsSelection = [
       decimals: 18,
     },
   },
-  // Stretch goal.
-  // Removing for now
-  // {
-  //   name: "Boba",
-  //   chainId: ChainId.BOBA,
-  //   logoURI: bobaLogo,
-  //   rpcUrl: "https://mainnet.boba.network",
-  //   explorerUrl: "https://blockexplorer.boba.network",
-  //   constructExplorerLink: (txHash: string) =>
-  //     `https://blockexplorer.boba.network/tx/${txHash}`,
-  //   nativeCurrency: {
-  //     name: "Boba",
-  //     symbol: "BOBA",
-  //     decimals: 18,
-  //   },
-  // },
+  {
+    name: "Boba",
+    chainId: ChainId.BOBA,
+    logoURI: bobaLogo,
+    rpcUrl: "https://mainnet.boba.network",
+    explorerUrl: "https://blockexplorer.boba.network",
+    constructExplorerLink: (txHash: string) =>
+      `https://blockexplorer.boba.network/tx/${txHash}`,
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+    },
+  },
   {
     name: "Ethereum",
     chainId: ChainId.MAINNET,

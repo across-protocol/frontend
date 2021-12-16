@@ -85,9 +85,13 @@ const sendSlice = createSlice({
         return state;
       })
       .addCase(toggleConfirmationScreen, (state, action) => {
-        // If the confirmation screen is closed, reset the state.
+        // If the confirmation screen is closed, reset some values in the state.
         if (action.payload.showConfirmationScreen === false) {
-          state = initialState;
+          state = {
+            ...state,
+            amount: ethers.constants.Zero,
+            error: undefined,
+          };
         }
         return state;
       }),

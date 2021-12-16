@@ -12,6 +12,7 @@ import {
 
 import { useAppSelector } from "state/hooks";
 import { ErrorContext } from "context/ErrorContext";
+import styled from "@emotion/styled";
 
 interface Props {}
 
@@ -21,7 +22,7 @@ const Routes: FC<Props> = () => {
   const { error, provider, chainId } = useConnection();
   const location = useLocation();
   const sendState = useAppSelector((state) => state.send);
-  const { error: globalError } = useContext(ErrorContext);
+  const { error: globalError, removeError } = useContext(ErrorContext);
 
   const wrongNetworkSend =
     provider &&
@@ -38,6 +39,7 @@ const Routes: FC<Props> = () => {
       {globalError && (
         <SuperHeader>
           <div>{globalError}</div>
+          <RemoveErrorSpan onClick={() => removeError()}>X</RemoveErrorSpan>
         </SuperHeader>
       )}
       {wrongNetworkSend && location.pathname === "/" && (
@@ -87,3 +89,9 @@ const Routes: FC<Props> = () => {
 };
 
 export default Routes;
+
+const RemoveErrorSpan = styled.span`
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+`;

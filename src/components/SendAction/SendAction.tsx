@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { ethers } from "ethers";
 import {
   useBridgeFees,
@@ -23,6 +23,7 @@ import { Wrapper, Info, AccentSection, InfoIcon } from "./SendAction.styles";
 import api from "state/chainApi";
 import InformationDialog from "components/InformationDialog";
 import { useAppSelector } from "state/hooks";
+import { ErrorContext } from "context/ErrorContext";
 
 const CONFIRMATIONS = 1;
 const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
@@ -48,6 +49,7 @@ const SendAction: React.FC = () => {
   const tokenInfo = TOKENS_LIST[
     sendState.currentlySelectedFromChain.chainId
   ].find((t) => t.address === token);
+  const { error, addError, removeError } = useContext(ErrorContext);
 
   const { data: fees } = useBridgeFees(
     {
@@ -118,14 +120,21 @@ const SendAction: React.FC = () => {
     if (hasToApprove) {
       setApprovalPending(true);
       handleApprove()
-        .catch((err) => console.error(err))
+        .catch((err) => {
+          addError(new Error(`Error in approve call: ${err.message}`));
+          console.error(err);
+        })
         .finally(() => setApprovalPending(false));
       return;
     }
     if (canSend) {
       setSendPending(true);
+      if (error) removeError();
       handleSend()
-        .catch((err) => console.error(err))
+        .catch((err) => {
+          addError(new Error(`Error with send call: ${err.message}`));
+          console.error(err);
+        })
         // this actually happens after component unmounts, which is not good. it causes a react warning, but we need
         // it here if user cancels the send. so keep this until theres a better way.
         .finally(() => setSendPending(false));
