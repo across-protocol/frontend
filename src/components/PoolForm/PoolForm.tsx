@@ -26,6 +26,7 @@ import {
   toWeiSafe,
 } from "utils";
 import { useConnection } from "state/hooks";
+import type { ShowSuccess } from "views/Pool";
 
 interface Props {
   symbol: string;
@@ -41,7 +42,7 @@ interface Props {
   tokenAddress: string;
   ethBalance: QuerySubState<any> | null | undefined;
   erc20Balances: QuerySubState<any> | null | undefined;
-  setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowSuccess: React.Dispatch<React.SetStateAction<ShowSuccess | undefined>>;
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
   balance: string;
   wrongNetwork?: boolean;

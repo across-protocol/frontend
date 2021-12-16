@@ -21,9 +21,11 @@ import BouncingDotsLoader from "components/BouncingDotsLoader";
 
 import { BounceType } from "components/BouncingDotsLoader/BouncingDotsLoader";
 
+export type ShowSuccess = "deposit" | "withdraw";
+
 const Pool: FC = () => {
   const [token, setToken] = useState<Token>(TOKENS_LIST[ChainId.MAINNET][2]);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [showSuccess, setShowSuccess] = useState<ShowSuccess | undefined>();
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);
   const [defaultTab, setDefaultTab] = useState("Add");
@@ -168,6 +170,7 @@ const Pool: FC = () => {
         <DepositSuccess
           depositUrl={depositUrl}
           setShowSuccess={setShowSuccess}
+          showSuccess={showSuccess}
           setDepositUrl={setDepositUrl}
         />
       )}

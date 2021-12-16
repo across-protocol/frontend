@@ -20,7 +20,9 @@ import { addEtherscan } from "utils/notify";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { DEFAULT_TO_CHAIN_ID, CHAINS, switchChain } from "utils";
 import api from "state/chainApi";
+import type { ShowSuccess } from "views/Pool";
 import { ErrorContext } from "context/ErrorContext";
+
 
 // max uint value is 2^256 - 1
 const MAX_UINT_VAL = ethers.constants.MaxUint256;
@@ -34,7 +36,7 @@ interface Props {
   decimals: number;
   symbol: string;
   tokenAddress: string;
-  setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowSuccess: React.Dispatch<React.SetStateAction<ShowSuccess | undefined>>;
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
   balance: string;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
@@ -157,7 +159,7 @@ const AddLiquidityForm: FC<Props> = ({
           emitter.on("all", addEtherscan);
           emitter.on("txConfirmed", (tx) => {
             if (transaction.hash) notify.unsubscribe(transaction.hash);
-            setShowSuccess(true);
+            setShowSuccess("deposit");
             setTxSubmitted(false);
             const url = `https://etherscan.io/tx/${transaction.hash}`;
             setDepositUrl(url);

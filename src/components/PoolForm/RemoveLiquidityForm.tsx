@@ -30,6 +30,7 @@ import {
 } from "utils";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import api from "state/chainApi";
+import { ShowSuccess } from "views/Pool";
 
 const { previewRemoval } = umaSdk.across.clients.bridgePool;
 
@@ -42,7 +43,7 @@ interface Props {
   lpTokens: ethers.BigNumber;
   decimals: number;
   symbol: string;
-  setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowSuccess: React.Dispatch<React.SetStateAction<ShowSuccess | undefined>>;
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
   balance: string;
   position: ethers.BigNumber;
@@ -121,7 +122,7 @@ const RemoveLiqudityForm: FC<Props> = ({
           emitter.on("txConfirmed", (tx) => {
             if (transaction.hash) notify.unsubscribe(transaction.hash);
             const url = `https://etherscan.io/tx/${transaction.hash}`;
-            setShowSuccess(true);
+            setShowSuccess("withdraw");
             setDepositUrl(url);
             setTxSubmitted(false);
             if (account)
