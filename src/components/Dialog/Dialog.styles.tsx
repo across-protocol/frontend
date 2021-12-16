@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { DialogContent, DialogOverlay } from "@reach/dialog";
-import { COLORS } from "utils";
+import { COLORS, QUERIES } from "utils";
 
 export const Wrapper = styled(DialogContent)`
   position: relative;
@@ -10,9 +10,13 @@ export const Wrapper = styled(DialogContent)`
   border-radius: 12px;
   width: 440px;
   max-width: 440px;
-  top: 25%;
+  top: 10vh;
   overflow: auto;
-  max-height: 100vh;
+  min-height: 60vh;
+  max-height: 80vh;
+  @media ${QUERIES.mobileAndDown} {
+    top: 25%;
+  }
 `;
 
 export const CloseButton = styled.button`

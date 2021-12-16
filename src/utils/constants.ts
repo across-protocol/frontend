@@ -22,6 +22,7 @@ export const QUERIES = {
   laptopAndUp: `(min-width: ${BREAKPOINTS.laptopMin / 16}rem)`,
   desktopAndUp: `(min-width: ${BREAKPOINTS.desktopMin / 16}rem)`,
   tabletAndDown: `(max-width: ${(BREAKPOINTS.laptopMin - 1) / 16}rem)`,
+  mobileAndDown: `(max-width: ${(BREAKPOINTS.tabletMin - 1) / 16}rem)`,
 };
 
 export const COLORS = {
