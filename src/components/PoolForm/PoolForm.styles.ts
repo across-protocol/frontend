@@ -33,7 +33,6 @@ export const Logo = styled.img`
   margin-right: 10px;
   background-color: var(--color-white);
   border-radius: 16px;
-  padding: 4px;
   margin-top: 12px;
 `;
 
