@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { Section } from "../Section";
 import { PrimaryButton, BaseButton } from "../Buttons";
 import { ChevronDown } from "react-feather";
+import { motion } from "framer-motion";
 import { RoundBox as UnstyledBox } from "../Box";
 
 export const LastSection = styled(Section)`
@@ -130,14 +131,12 @@ export const Menu = styled.ul<IMenuProps>`
   box-shadow: inset 0 8px 8% rgba(45, 46, 51, 0.2);
 `;
 
-export const Item = styled.li`
+export const Item = motion(styled.li`
   padding: 15px 10px 10px;
   display: flex;
   gap: 10px;
   cursor: pointer;
   background-color: var(--color-white);
-
-  font-family: "Barlow";
   transition: background-color 100ms linear;
 
   &:first-of-type {
@@ -177,7 +176,7 @@ export const Item = styled.li`
       opacity: 0.5;
     }
   }
-`;
+`);
 
 export const ToggleIcon = styled(ChevronDown)`
   margin-left: 250px;

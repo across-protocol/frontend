@@ -27,6 +27,7 @@ import {
   Input,
   ErrorBox,
 } from "./CoinSelection.styles";
+import { AnimatePresence } from "framer-motion";
 
 const FEE_ESTIMATION = ".004";
 const CoinSelection = () => {
@@ -175,61 +176,67 @@ const CoinSelection = () => {
     (fees?.isLiquidityInsufficient && amount.gt(0));
 
   return (
-    <Section>
-      <Wrapper>
-        <SectionTitle>Asset</SectionTitle>
-        <InputGroup>
-          <RoundBox as="label" {...getLabelProps()}>
-            <ToggleButton type="button" {...getToggleButtonProps()}>
-              <Logo src={selectedItem?.logoURI} alt={selectedItem?.name} />
-              <div>{selectedItem?.symbol}</div>
-              <ToggleIcon />
-            </ToggleButton>
-          </RoundBox>
-          <Menu {...getMenuProps()}>
-            {isOpen &&
-              tokenList.map((token, index) => (
-                <Item
-                  {...getItemProps({ item: token, index })}
-                  key={token.address}
-                >
-                  <Logo src={token.logoURI} alt={token.name} />
-                  <div>{token.name}</div>
-                  <div>
-                    {balances &&
-                      formatUnits(balances[index], tokenList[index].decimals)}
-                  </div>
-                </Item>
-              ))}
-          </Menu>
+    <AnimatePresence>
+      <Section>
+        <Wrapper>
+          <SectionTitle>Asset</SectionTitle>
+          <InputGroup>
+            <RoundBox as="label" {...getLabelProps()}>
+              <ToggleButton type="button" {...getToggleButtonProps()}>
+                <Logo src={selectedItem?.logoURI} alt={selectedItem?.name} />
+                <div>{selectedItem?.symbol}</div>
+                <ToggleIcon />
+              </ToggleButton>
+            </RoundBox>
 
-          <RoundBox
-            as="label"
-            htmlFor="amount"
-            style={{
-              // @ts-expect-error TS does not likes custom CSS vars
-              "--color": error
-                ? "var(--color-error-light)"
-                : "var(--color-white)",
-              "--outline-color": error
-                ? "var(--color-error)"
-                : "var(--color-primary)",
-            }}
-          >
-            <MaxButton onClick={handleMaxClick} disabled={!isConnected}>
-              max
-            </MaxButton>
-            <Input
-              placeholder="0.00"
-              id="amount"
-              value={inputAmount}
-              onChange={handleChange}
-            />
-          </RoundBox>
-        </InputGroup>
-        {showError && <ErrorBox>{errorMsg}</ErrorBox>}
-      </Wrapper>
-    </Section>
+            <Menu {...getMenuProps()}>
+              {isOpen &&
+                tokenList.map((token, index) => (
+                  <Item
+                    {...getItemProps({ item: token, index })}
+                    initial={{ y: -10 }}
+                    animate={{ y: 0 }}
+                    exit={{ y: -10 }}
+                    key={token.address}
+                  >
+                    <Logo src={token.logoURI} alt={token.name} />
+                    <div>{token.name}</div>
+                    <div>
+                      {balances &&
+                        formatUnits(balances[index], tokenList[index].decimals)}
+                    </div>
+                  </Item>
+                ))}
+            </Menu>
+
+            <RoundBox
+              as="label"
+              htmlFor="amount"
+              style={{
+                // @ts-expect-error TS does not likes custom CSS vars
+                "--color": error
+                  ? "var(--color-error-light)"
+                  : "var(--color-white)",
+                "--outline-color": error
+                  ? "var(--color-error)"
+                  : "var(--color-primary)",
+              }}
+            >
+              <MaxButton onClick={handleMaxClick} disabled={!isConnected}>
+                max
+              </MaxButton>
+              <Input
+                placeholder="0.00"
+                id="amount"
+                value={inputAmount}
+                onChange={handleChange}
+              />
+            </RoundBox>
+          </InputGroup>
+          {showError && <ErrorBox>{errorMsg}</ErrorBox>}
+        </Wrapper>
+      </Section>
+    </AnimatePresence>
   );
 };
 

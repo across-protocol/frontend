@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { ChevronDown } from "react-feather";
+import { motion } from "framer-motion";
 import { COLORS } from "utils";
 import { RoundBox as UnstyledBox, ErrorBox as UnstyledErrorBox } from "../Box";
 import { Section } from "../Section";
@@ -68,7 +69,7 @@ export const Menu = styled.ul`
   z-index: 1;
 `;
 
-export const Item = styled.li`
+export const Item = motion(styled.li`
   padding: 15px 10px 10px;
   display: flex;
   gap: 10px;
@@ -92,7 +93,7 @@ export const Item = styled.li`
     margin-left: auto;
     color: hsla(${COLORS.gray[500]} / 0.5);
   }
-`;
+`);
 
 export const ToggleIcon = styled(ChevronDown)`
   margin-left: 325px;

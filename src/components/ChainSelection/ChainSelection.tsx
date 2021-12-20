@@ -109,6 +109,9 @@ const ChainSelection: React.FC = () => {
                         : ""
                     }
                     {...getItemProps({ item: t, index })}
+                    initial={{ y: -10 }}
+                    animate={{ y: 0 }}
+                    exit={{ y: -10 }}
                     key={t.chainId}
                   >
                     <Logo src={t.logoURI} alt={t.name} />
