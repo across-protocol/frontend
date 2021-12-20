@@ -23,7 +23,6 @@ import api from "state/chainApi";
 import type { ShowSuccess } from "views/Pool";
 import { ErrorContext } from "context/ErrorContext";
 
-
 // max uint value is 2^256 - 1
 const MAX_UINT_VAL = ethers.constants.MaxUint256;
 const INFINITE_APPROVAL_AMOUNT = MAX_UINT_VAL;

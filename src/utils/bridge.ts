@@ -8,6 +8,7 @@ import {
   ChainId,
   PROVIDERS,
   TOKENS_LIST,
+  MAX_RELAY_FEE_PERCENT,
 } from "./constants";
 
 import { isValidString, parseEther } from "./format";
@@ -32,17 +33,7 @@ export function getDepositBox(
   );
 }
 
-const { constants, gasFeeCalculator } = across;
-
-// currently available constants
-const {
-  FAST_ETH_GAS,
-  FAST_ERC_GAS,
-  FAST_UMA_GAS,
-  SLOW_ETH_GAS,
-  SLOW_ERC_GAS,
-  SLOW_UMA_GAS,
-} = constants;
+const { gasFeeCalculator } = across;
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -71,54 +62,24 @@ export async function getRelayFees(
     throw new Error(`Token ${token} not found in TOKENS_LIST`);
   }
   const provider = PROVIDERS[ChainId.MAINNET]();
-  const gasAmountFast =
-    token === "ETH"
-      ? FAST_ETH_GAS - SLOW_ETH_GAS
-      : token === "UMA"
-      ? FAST_UMA_GAS - SLOW_UMA_GAS
-      : FAST_ERC_GAS - SLOW_ERC_GAS;
-
-  const gasAmountSlow =
-    token === "ETH"
-      ? SLOW_ETH_GAS
-      : token === "UMA"
-      ? SLOW_UMA_GAS
-      : SLOW_ERC_GAS;
-
-  const DISCOUNT = 0.25;
-  const gasAmountSlowWithDiscount = Math.floor(gasAmountSlow * (1 - DISCOUNT));
-  const gasAmountFastWithDiscount = Math.floor(gasAmountFast * (1 - DISCOUNT));
-
-  const gasFeesSlow = await gasFeeCalculator(
-    provider,
-    amount,
-    gasAmountSlowWithDiscount,
-    l1Equivalent === ethers.constants.AddressZero ? undefined : l1Equivalent
-  );
-  const gasFeesFast = await gasFeeCalculator(
-    provider,
-    amount,
-    gasAmountFastWithDiscount,
-    l1Equivalent === ethers.constants.AddressZero ? undefined : l1Equivalent
-  );
-
-  const totalFees = ethers.BigNumber.from(gasFeesSlow.gasFees).add(
-    gasFeesFast.gasFees
-  );
-
-  // amount*0.25 <= totalFees <==> amount*25 <= totalFees * 100
-  const isFeeMoreThan25Percent = amount.mul(25).lte(totalFees.mul(100));
+  const { instant, slow, isAmountTooLow } =
+    await gasFeeCalculator.getDepositFeesDetails(
+      provider,
+      amount,
+      l1Equivalent,
+      MAX_RELAY_FEE_PERCENT
+    );
 
   return {
     instantRelayFee: {
-      pct: ethers.BigNumber.from(gasFeesFast.feesAsPercent),
-      total: ethers.BigNumber.from(gasFeesFast.gasFees),
+      pct: ethers.BigNumber.from(instant.pct),
+      total: ethers.BigNumber.from(instant.total),
     },
     slowRelayFee: {
-      pct: ethers.BigNumber.from(gasFeesSlow.feesAsPercent),
-      total: ethers.BigNumber.from(gasFeesSlow.gasFees),
+      pct: ethers.BigNumber.from(slow.pct),
+      total: ethers.BigNumber.from(slow.total),
     },
-    isAmountTooLow: isFeeMoreThan25Percent,
+    isAmountTooLow,
   };
 }
 

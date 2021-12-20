@@ -25,6 +25,8 @@ export const QUERIES = {
   mobileAndDown: `(max-width: ${(BREAKPOINTS.tabletMin - 1) / 16}rem)`,
 };
 
+export const MAX_RELAY_FEE_PERCENT = 25;
+
 export const COLORS = {
   gray: {
     100: "0deg 0% 89%",

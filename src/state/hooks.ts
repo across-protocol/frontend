@@ -79,12 +79,7 @@ export function useL2Block() {
         addError(new Error("Infura issue, please try again later."));
         console.error("Error getting latest block");
       });
-  }, [
-    currentlySelectedFromChain.chainId,
-    error,
-    removeError,
-    addError,
-  ]);
+  }, [currentlySelectedFromChain.chainId, error, removeError, addError]);
 
   useInterval(() => {
     const provider = PROVIDERS[currentlySelectedFromChain.chainId]();
