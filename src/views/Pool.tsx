@@ -144,7 +144,7 @@ const Pool: FC = () => {
               }
               setShowSuccess={setShowSuccess}
               setDepositUrl={setDepositUrl}
-              balance={balance}
+              balance={balance.toString()}
               refetchBalance={refetchBalance}
               defaultTab={defaultTab}
               setDefaultTab={setDefaultTab}
