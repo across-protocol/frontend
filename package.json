@@ -17,7 +17,8 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/react-router-dom": "^5.3.1",
-    "@uma/contracts-frontend": "^0.1.5",
+    "@uma/contracts-frontend": "^0.1.17",
+    "@uma/contracts-node": "^0.1.17",
     "@uma/sdk": "^0.17.0",
     "@use-it/interval": "^1.0.0",
     "@web3-react/core": "^6.1.9",
@@ -41,7 +42,6 @@
     "typescript": "^4.1.2"
   },
   "scripts": {
-    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
