@@ -20,9 +20,6 @@ import { CHAINS_SELECTION } from "utils/constants";
 import { actions } from "state/send";
 import { useAppDispatch, useAppSelector } from "state/hooks";
 
-// Remove eth from this list.
-const filteredChains = CHAINS_SELECTION.slice(0, CHAINS_SELECTION.length - 1);
-
 const ChainSelection: React.FC = () => {
   const { init } = onboard;
   const { isConnected, provider, chainId, error } = useConnection();
@@ -58,7 +55,7 @@ const ChainSelection: React.FC = () => {
     getItemProps,
     getMenuProps,
   } = useSelect({
-    items: filteredChains,
+    items: CHAINS_SELECTION,
     defaultSelectedItem: sendState.currentlySelectedFromChain,
     selectedItem: sendState.currentlySelectedFromChain,
     onSelectedItemChange: ({ selectedItem }) => {
@@ -100,7 +97,7 @@ const ChainSelection: React.FC = () => {
           </RoundBox>
           <Menu isOpen={isOpen} {...getMenuProps()}>
             {isOpen &&
-              filteredChains.map((t, index) => {
+              CHAINS_SELECTION.map((t, index) => {
                 return (
                   <Item
                     className={

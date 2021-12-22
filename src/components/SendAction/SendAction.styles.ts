@@ -40,3 +40,8 @@ export const Info = styled.div`
     margin-bottom: 32px;
   }
 `;
+
+export const L1Info = styled(Info)`
+  justify-content: space-around;
+  margin-top: 1rem;
+`;

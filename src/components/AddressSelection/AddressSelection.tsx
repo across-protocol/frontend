@@ -110,7 +110,6 @@ const AddressSelection: React.FC = () => {
                       ? "Mainnet"
                       : selectedItem?.name}
                   </ToggleChainName>
-
                   {toAddress && <Address>{shortenAddress(toAddress)}</Address>}
                 </div>
                 <ToggleIcon />
@@ -124,7 +123,8 @@ const AddressSelection: React.FC = () => {
                   return (
                     <Item
                       className={
-                        t === sendState.currentlySelectedToChain
+                        t === sendState.currentlySelectedToChain ||
+                        t.chainId === ChainId.MAINNET
                           ? "disabled"
                           : ""
                       }
@@ -134,7 +134,7 @@ const AddressSelection: React.FC = () => {
                       <Logo src={t.logoURI} alt={t.name} />
                       <div>{t.name}</div>
                       <span className="layer-type">
-                        {t.name !== "Ether" ? "L2" : "L1"}
+                        {t.chainId !== ChainId.MAINNET ? "L2" : "L1"}
                       </span>
                     </Item>
                   );
@@ -195,7 +195,6 @@ const AddressSelection: React.FC = () => {
             </ClearButton>
             {!isValid && <InputError>Not a valid address</InputError>}
           </InputWrapper>
-
           <ButtonGroup>
             <CancelButton onClick={toggle}>Cancel</CancelButton>
             <SecondaryButton

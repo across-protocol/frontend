@@ -1,6 +1,12 @@
 import React from "react";
 import { Check, ArrowUpRight } from "react-feather";
-import { TOKENS_LIST, CHAINS, formatUnits, receiveAmount } from "utils";
+import {
+  TOKENS_LIST,
+  CHAINS,
+  formatUnits,
+  receiveAmount,
+  getConfirmationDepositTime,
+} from "utils";
 import { useDeposits } from "state/hooks";
 import { Layout } from "components";
 import {
@@ -23,7 +29,6 @@ const Confirmation: React.FC = () => {
 
   if (!deposit) return null;
   const amountMinusFees = receiveAmount(deposit.amount, deposit.fees);
-
   const tokenInfo = TOKENS_LIST[deposit.fromChain].find(
     (t) => t.address === deposit.token
   );
@@ -33,7 +38,10 @@ const Confirmation: React.FC = () => {
       <Wrapper>
         <Header>
           <Heading>Deposit succeeded</Heading>
-          <SubHeading>Your funds will arrive in ~2 minutes</SubHeading>
+          <SubHeading>
+            Your funds will arrive in{" "}
+            {getConfirmationDepositTime(deposit.toChain)}
+          </SubHeading>
           <SuccessIcon>
             <Check strokeWidth={4} />
           </SuccessIcon>
@@ -121,7 +129,7 @@ const Confirmation: React.FC = () => {
             <Info>
               <h3>Estimated time of arrival</h3>
               <div>
-                <div>~2 minutes</div>
+                <div>{getConfirmationDepositTime(deposit.toChain)}</div>
               </div>
             </Info>
           </div>

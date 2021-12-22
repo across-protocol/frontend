@@ -109,7 +109,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
     },
     {
-      address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
+      address: getAddress("0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828"),
       name: "UMA Token",
       symbol: "UMA",
       decimals: 18,
@@ -639,3 +639,5 @@ export const CHAINS_SELECTION: ChainsSelection = [
     },
   },
 ];
+
+export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;

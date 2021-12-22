@@ -83,6 +83,7 @@ const api = createApi({
           const contract = clients.erc20.connect(token, provider);
           const allowance = await contract.allowance(owner, spender);
           const hasToApprove = amount.gt(allowance);
+
           return { data: { allowance, hasToApprove } };
         } catch (error) {
           return { error };
