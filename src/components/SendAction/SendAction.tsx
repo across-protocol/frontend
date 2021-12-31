@@ -32,7 +32,6 @@ const CONFIRMATIONS = 1;
 const SendAction: React.FC = () => {
   const {
     amount,
-    toChain,
     token,
     send,
     hasToApprove,
@@ -162,7 +161,9 @@ const SendAction: React.FC = () => {
                 Time to{" "}
                 {CHAINS[sendState.currentlySelectedToChain.chainId].name}
               </div>
-              <div>{getEstimatedDepositTime(toChain)}</div>
+              <div>
+                {getEstimatedDepositTime(sendState.currentlySelectedToChain.chainId)}
+              </div>
             </Info>
             {sendState.currentlySelectedFromChain.chainId !==
               ChainId.MAINNET && (
@@ -178,7 +179,12 @@ const SendAction: React.FC = () => {
               </Info>
             )}
             <Info>
-              <div>Native Bridge Fee</div>
+              <div>
+                {sendState.currentlySelectedFromChain.chainId ===
+                ChainId.MAINNET
+                  ? "Native Bridge Fee"
+                  : "Bridge Fee"}
+              </div>
               <div>
                 {sendState.currentlySelectedFromChain.chainId ===
                 ChainId.MAINNET
