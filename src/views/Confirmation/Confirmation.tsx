@@ -3,6 +3,7 @@ import { Check, ArrowUpRight } from "react-feather";
 import {
   TOKENS_LIST,
   CHAINS,
+  ChainId,
   formatUnits,
   receiveAmount,
   getConfirmationDepositTime,
@@ -24,6 +25,10 @@ import {
   SubHeading,
 } from "./Confirmation.styles";
 
+const MAINNET_ETH = TOKENS_LIST[ChainId.MAINNET].find(
+  (t) => t.symbol === "ETH"
+);
+
 const Confirmation: React.FC = () => {
   const { deposit, toggle } = useDeposits();
 
@@ -32,6 +37,7 @@ const Confirmation: React.FC = () => {
   const tokenInfo = TOKENS_LIST[deposit.fromChain].find(
     (t) => t.address === deposit.token
   );
+  const isWETH = tokenInfo?.symbol === "WETH";
 
   return (
     <Layout>
@@ -76,12 +82,18 @@ const Confirmation: React.FC = () => {
                 <h3>Receiving</h3>
                 <div>
                   <Logo
-                    src={tokenInfo?.logoURI}
-                    alt={`${tokenInfo?.symbol} logo`}
+                    src={isWETH ? MAINNET_ETH?.logoURI : tokenInfo?.logoURI}
+                    alt={`${
+                      isWETH ? MAINNET_ETH?.symbol : tokenInfo?.symbol
+                    } logo`}
                   />
                   <div>
-                    {formatUnits(amountMinusFees, tokenInfo?.decimals ?? 18)}{" "}
-                    {tokenInfo?.symbol}
+                    {formatUnits(
+                      amountMinusFees,
+                      (isWETH ? MAINNET_ETH?.decimals : tokenInfo?.decimals) ??
+                        18
+                    )}{" "}
+                    {isWETH ? MAINNET_ETH?.symbol : tokenInfo?.symbol}
                   </div>
                 </div>
               </Info>
