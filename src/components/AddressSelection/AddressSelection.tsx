@@ -35,7 +35,7 @@ import { AnimatePresence } from "framer-motion";
 
 const AddressSelection: React.FC = () => {
   const { isConnected } = useConnection();
-  const { toChain, toAddress, setToAddress } = useSend();
+  const { toChain, toAddress, fromChain, setToAddress } = useSend();
   const [address, setAddress] = useState("");
   const [open, setOpen] = useState(false);
   const dispatch = useAppDispatch();
@@ -94,6 +94,8 @@ const AddressSelection: React.FC = () => {
       toggle();
     }
   };
+
+  const isL1toL2 = fromChain === ChainId.MAINNET;
 
   return (
     <AnimatePresence>
@@ -176,11 +178,13 @@ const AddressSelection: React.FC = () => {
                 )}
             </Menu>
           </InputGroup>
-          <ChangeWrapper onClick={toggle}>
-            <ChangeButton className={!isConnected ? "disabled" : ""}>
-              Change account
-            </ChangeButton>
-          </ChangeWrapper>
+          {!isL1toL2 && (
+            <ChangeWrapper onClick={toggle}>
+              <ChangeButton className={!isConnected ? "disabled" : ""}>
+                Change account
+              </ChangeButton>
+            </ChangeWrapper>
+          )}
         </Wrapper>
         <Dialog isOpen={open} onClose={toggle}>
           <h3>Send To</h3>
