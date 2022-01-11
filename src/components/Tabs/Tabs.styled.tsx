@@ -6,7 +6,6 @@ export const TabList = styled.ol`
   padding-left: 0;
   display: flex;
   background-color: linear-gradient(#f5f5f5 86.46%, #eeeeee 100%);
-  font-weight: 700;
 `;
 
 export const TabListItem = styled.li`
