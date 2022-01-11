@@ -1,10 +1,14 @@
 import styled from "@emotion/styled";
 import AccentSectionBorder from "assets/border.svg";
+import { QUERIES } from "utils";
 
 export const Section = styled.section`
   color: var(--color-white);
   border-bottom: 1px solid var(--color-primary-dark);
-  padding: 10px 30px 25px;
+  padding: 10px 10px 20px;
+  @media ${QUERIES.tabletAndUp} {
+    padding: 10px 30px 25px;
+  }
 `;
 export const SectionTitle = styled.h3`
   font-weight: 700;

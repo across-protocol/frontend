@@ -1,11 +1,15 @@
 import styled from "@emotion/styled";
+import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
   min-height: 80%;
   flex: 1;
   background-color: var(--color-primary);
   border-radius: 12px 12px 0 0;
-  padding: 0 30px;
+  padding: 0 10px;
+  @media ${QUERIES.tabletAndUp} {
+    padding: 0 30px;
+  }
 `;
 
 export const Info = styled.div`

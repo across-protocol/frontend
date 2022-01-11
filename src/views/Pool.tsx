@@ -11,6 +11,7 @@ import {
   Token,
   UnsupportedChainIdError,
   COLORS,
+  QUERIES,
   max,
 } from "utils";
 import { useAppSelector, useConnection, useBalance } from "state/hooks";
@@ -180,9 +181,14 @@ const Pool: FC = () => {
 export default Pool;
 
 const Wrapper = styled.div`
-  height: 100%;
+  padding-bottom: 50px;
+  height: calc(100% - 50px);
   display: flex;
   flex-direction: column;
+  @media ${QUERIES.tabletAndUp} {
+    padding-bottom: 0;
+    height: 100%;
+  }
 `;
 
 const LoadingWrapper = styled.div`

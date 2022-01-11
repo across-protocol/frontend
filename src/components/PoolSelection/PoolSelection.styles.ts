@@ -16,37 +16,19 @@ export const RoundBox = styled(UnstyledBox)`
   --color: var(--color-white);
   --outline-color: var(--color-primary);
   background-color: var(--color);
-  font-size: ${16 / 16}rem;
+  display: block;
   padding: 10px 15px;
   margin-top: 16px;
   margin-right: auto;
   margin-left: auto;
-  flex: 2;
-  display: flex;
   &:not(:first-of-type):focus-within {
     outline: var(--outline-color) solid 1px;
-  }
-  &:first-of-type {
-    margin-right: 16px;
-    flex: 1;
   }
 `;
 
 export const InputGroup = styled.div`
   position: relative;
-  display: flex;
-`;
-
-export const ToggleButton = styled.button`
-  --radius: 30px;
-  padding: 0;
-  margin: 0;
-  font-size: inherit;
-  background-color: inherit;
-  border: none;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
+  width: 100%;
 `;
 
 export const Logo = styled.img`
@@ -55,7 +37,10 @@ export const Logo = styled.img`
   object-fit: cover;
   margin-right: 10px;
 `;
-export const Menu = styled.ul`
+type MenuProps = {
+  isOpen: boolean;
+};
+export const Menu = styled.ul<MenuProps>`
   position: absolute;
   top: 0;
   left: 0;
@@ -63,6 +48,8 @@ export const Menu = styled.ul`
   right: 0;
   padding-top: 10px;
   transform: translateY(100%);
+  pointer-events: ${({ isOpen }) => (isOpen ? "auto" : "none")};
+  outline: none;
   list-style: none;
   display: flex;
   flex-direction: column;
@@ -96,7 +83,22 @@ export const Item = motion(styled.li`
 `);
 
 export const ToggleIcon = styled(ChevronDown)`
-  margin-left: 325px;
+  margin-left: auto;
+`;
+
+export const ToggleButton = styled.button`
+  --radius: 30px;
+  width: 100%;
+  color: var(--color-gray);
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  background-color: inherit;
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 `;
 
 export const ErrorBox = styled(UnstyledErrorBox)`

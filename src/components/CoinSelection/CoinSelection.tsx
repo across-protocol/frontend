@@ -50,12 +50,15 @@ const CoinSelection = () => {
     { skip: !account }
   );
   const tokenBalanceMap = useMemo(() => {
-    return TOKENS_LIST[sendState.currentlySelectedFromChain.chainId].reduce((acc, val, idx) => {
-      return {
-        ...acc,
-        [val.address]: balances ? balances[idx] : undefined,
-      };
-    }, {} as Record<string, BigNumber | undefined>);
+    return TOKENS_LIST[sendState.currentlySelectedFromChain.chainId].reduce(
+      (acc, val, idx) => {
+        return {
+          ...acc,
+          [val.address]: balances ? balances[idx] : undefined,
+        };
+      },
+      {} as Record<string, BigNumber | undefined>
+    );
   }, [balances, sendState.currentlySelectedFromChain.chainId]);
 
   const [dropdownItem, setDropdownItem] = useState(() =>
@@ -64,14 +67,16 @@ const CoinSelection = () => {
 
   // Adjust coin dropdown when chain id changes, as some tokens don't exist on all chains.
   useEffect(() => {
-    const newToken = tokenList.find((t) => t.address === ethers.constants.AddressZero);
+    const newToken = tokenList.find(
+      (t) => t.address === ethers.constants.AddressZero
+    );
     setInputAmount("");
     // since we are resetting input to 0, reset any errors
     setError(undefined);
     setAmount({ amount: BigNumber.from("0") });
     setDropdownItem(() => newToken);
     setToken({ token: newToken?.address || "" });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sendState.currentlySelectedFromChain.chainId, tokenList]);
 
   const {
@@ -205,29 +210,6 @@ const CoinSelection = () => {
                 <ToggleIcon />
               </ToggleButton>
             </RoundBox>
-            <Menu {...getMenuProps()}>
-              {isOpen &&
-                tokenList.map((token, index) => (
-                  <Item
-                    {...getItemProps({ item: token, index })}
-                    initial={{ y: -10 }}
-                    animate={{ y: 0 }}
-                    exit={{ y: -10 }}
-                    key={token.address}
-                  >
-                    <Logo src={token.logoURI} alt={token.name} />
-                    <div>{token.name}</div>
-                    <div>
-                      {tokenBalanceMap &&
-                        formatUnits(
-                          tokenBalanceMap[token.address] || "0",
-                          tokenList[index].decimals
-                        )}
-                    </div>
-                  </Item>
-                ))}
-            </Menu>
-
             <RoundBox
               as="label"
               htmlFor="amount"
@@ -251,6 +233,28 @@ const CoinSelection = () => {
                 onChange={handleChange}
               />
             </RoundBox>
+            <Menu {...getMenuProps()} isOpen={isOpen}>
+              {isOpen &&
+                tokenList.map((token, index) => (
+                  <Item
+                    {...getItemProps({ item: token, index })}
+                    initial={{ y: -10 }}
+                    animate={{ y: 0 }}
+                    exit={{ y: -10 }}
+                    key={token.address}
+                  >
+                    <Logo src={token.logoURI} alt={token.name} />
+                    <div>{token.name}</div>
+                    <div>
+                      {tokenBalanceMap &&
+                        formatUnits(
+                          tokenBalanceMap[token.address] || "0",
+                          tokenList[index].decimals
+                        )}
+                    </div>
+                  </Item>
+                ))}
+            </Menu>
           </InputGroup>
           {showError && <ErrorBox>{errorMsg}</ErrorBox>}
         </Wrapper>

@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { QUERIES } from "utils";
 import { RoundBox } from "../Box";
 import { SecondaryButton } from "../Buttons";
 
@@ -8,6 +9,7 @@ export const Wrapper = styled(RoundBox)`
   display: grid;
   grid-template-columns: 1fr 1fr;
   cursor: pointer;
+  padding: 0;
 `;
 
 export const ConnectButton = styled(SecondaryButton)`
@@ -20,9 +22,12 @@ export const Account = styled.div`
   color: var(--color-white);
   display: grid;
   place-items: center;
-  padding: 0 30px;
+  padding: 0 10px;
   border-radius: 0 var(--radius) var(--radius) 0;
   border: 1px solid var(--color-gray);
+  @media ${QUERIES.tabletAndUp} {
+    padding: 0 30px;
+  }
 `;
 
 export const Info = styled.div`
@@ -32,7 +37,7 @@ export const Info = styled.div`
   text-transform: capitalize;
   border-radius: var(--radius) 0 0 var(--radius);
   border: 1px solid var(--color-gray);
-  padding: 10px 20px 5px;
+  padding: 5px 10px;
   white-space: nowrap;
   & > div {
     line-height: 1;
@@ -41,11 +46,12 @@ export const Info = styled.div`
     color: var(--color-gray-300);
     font-size: ${14 / 16}rem;
   }
+  @media ${QUERIES.tabletAndUp} {
+    padding: 10px 20px 5px;
+  }
 `;
 
 export const UnsupportedNetwork = styled.div`
   background-color: rgba(45, 46, 51, 0.25);
   padding: 1rem 0.5rem;
-  font-family: "Barlow";
-  font-weight: 600;
 `;

@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
-import { COLORS } from "utils";
+import { COLORS, QUERIES } from "utils";
 import { ReactComponent as UnstyledUmaLogo } from "assets/Across-Powered-UMA.svg";
 import { ReactComponent as DiscordLogo } from "assets/disc-logo.svg";
 import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
@@ -27,7 +27,7 @@ const TWITTER_LINK = {
 
 const Layout: React.FC = ({ children }) => (
   <Wrapper>
-    <Footer>
+    <LinkFooter>
       {NAV_LINKS.map((link) => (
         <Link
           key={link.name}
@@ -44,9 +44,9 @@ const Layout: React.FC = ({ children }) => (
       <Link href={TWITTER_LINK.url} target="_blank" rel="noopener noreferrer">
         <TwitterLogo />
       </Link>
-    </Footer>
+    </LinkFooter>
     <Main>{children}</Main>
-    <Footer>
+    <LogoFooter>
       <AccentLink
         href="https://umaproject.org"
         target="_blank"
@@ -54,29 +54,41 @@ const Layout: React.FC = ({ children }) => (
       >
         <PoweredByUMA />
       </AccentLink>
-    </Footer>
+    </LogoFooter>
   </Wrapper>
 );
 
 export default Layout;
 
-const Footer = styled.footer`
+const BaseFooter = styled.footer`
   position: sticky;
   bottom: 0;
   padding: 0 15px 15px;
   align-self: self-end;
   justify-self: center;
+`;
 
-  &:first-of-type {
-    display: flex;
-    padding-bottom: 25px;
-    & svg {
-      width: 25px;
-      height: 25px;
-      & path {
-        fill: currentColor;
-      }
+const LinkFooter = styled(BaseFooter)`
+  display: none;
+  padding-bottom: 25px;
+  & svg {
+    width: 25px;
+    height: 25px;
+    & path {
+      fill: currentColor;
     }
+  }
+  @media ${QUERIES.tabletAndUp} {
+    display: flex;
+  }
+`;
+
+const LogoFooter = styled(BaseFooter)`
+  position: absolute;
+  right: 10px;
+  @media ${QUERIES.tabletAndUp} {
+    position: sticky;
+    right: revert;
   }
 `;
 
@@ -102,7 +114,6 @@ const AccentLink = styled(Link)`
 
 const PoweredByUMA = styled(UnstyledUmaLogo)`
   fill: currentColor;
-
   transition: fill linear 100ms;
   & path {
     fill: currentColor;
@@ -110,10 +121,14 @@ const PoweredByUMA = styled(UnstyledUmaLogo)`
 `;
 
 const Wrapper = styled.div`
+  position: relative;
   display: grid;
-  padding: 0 30px;
-  grid-template-columns: 1fr var(--central-content) 1fr;
+  padding: 0 10px;
+  grid-template-columns: 1fr min(var(--central-content), 100%) 1fr;
   height: 100%;
+  @media ${QUERIES.tabletAndUp} {
+    padding: 0 30px;
+  }
 `;
 
 const Main = styled.main`

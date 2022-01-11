@@ -5,7 +5,7 @@ import BulletImg from "assets/Across-logo-bullet.svg";
 import { ReactComponent as UnstyledUmaLogo } from "assets/Across-Powered-UMA.svg";
 import { ReactComponent as DiscordLogo } from "assets/disc-logo.svg";
 import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
-import { COLORS } from "utils";
+import { COLORS, QUERIES } from "utils";
 
 const NAV_LINKS = [
   {
@@ -115,12 +115,20 @@ const About: FC = () => {
 };
 
 const Wrapper = styled.div`
-  --horinzontal-padding: 75px;
-  --heroHeight: 240px;
+  --horinzontal-padding: 20px;
+  --heroHeight: 180px;
   height: 100%;
   display: flex;
   flex-direction: column;
   padding: 0 var(--horinzontal-padding);
+  @media ${QUERIES.tabletAndUp} {
+    --horizontal-padding: 50px;
+    --heroHeight: 200px;
+  }
+  @media ${QUERIES.desktopAndUp} {
+    --horinzontal-padding: 75px;
+    --heroHeight: 240px;
+  }
 `;
 const HeroBg = styled.div`
   flex-basis: var(--heroHeight);
@@ -136,15 +144,22 @@ const HeroBg = styled.div`
 
 const HeroHeader = styled.h1`
   color: var(--color-primary);
-  font-size: ${56 / 16}rem;
+  // will change the font from 24px to 56px fluidly
+  font-size: clamp(1.5rem, 2.9vw + 1rem, 3.5rem);
   font-weight: 700;
   line-height: 1.28;
-  max-width: 1000px;
+  max-width: 65ch;
+  @media ${QUERIES.tabletAndUp} {
+    max-width: 1000px;
+  }
 `;
 
 const Body = styled.section`
   flex: 1;
-  padding: 55px 0 65px;
+  padding: 15px 0 50px;
+  @media ${QUERIES.tabletAndUp} {
+    padding: 55px 0 65px;
+  }
 `;
 
 const Link = styled.a`
@@ -161,10 +176,14 @@ const Link = styled.a`
 `;
 
 const Bullet = styled.article`
+  --bulletMarginTop: 32px;
   display: flex;
   align-items: flex-start;
   &:not(:first-of-type) {
-    margin-top: 64px;
+    margin-top: var(--bulletMarginTop);
+  }
+  @media ${QUERIES.tabletAndUp} {
+    --bulletMarginTop: 64px;
   }
 `;
 
@@ -173,6 +192,10 @@ const Image = styled.img`
   width: 35px;
   object-fit: cover;
   margin-right: 45px;
+  display: none;
+  @media ${QUERIES.laptopAndUp} {
+    display: revert;
+  }
 `;
 
 const TextWrapper = styled.div``;
@@ -182,11 +205,15 @@ const BulletText = styled.p`
 `;
 
 const BulletHeader = styled.h4`
-  font-size: ${30 / 16}rem;
+  font-size: ${20 / 16}rem;
   font-weight: 700;
   line-height: 1;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
   transform: translateY(-5px);
+  @media ${QUERIES.tabletAndUp} {
+    font-size: ${30 / 16}rem;
+    margin-bottom: 14px;
+  }
 `;
 
 const Footer = styled.footer`
@@ -195,13 +222,16 @@ const Footer = styled.footer`
   margin-top: auto;
   padding: 35px 0;
   color: hsla(${COLORS.white} / 0.5);
-  border-top: 1px solid currentColor;
+  @media ${QUERIES.tabletAndUp} {
+    border-top: 1px solid currentColor;
+  }
 `;
 
 const FooterLink = styled.a`
   color: inherit;
   text-decoration: none;
   transition: color 100ms linear;
+  display: none;
 
   & svg {
     width: 25px;
@@ -218,10 +248,15 @@ const FooterLink = styled.a`
   &:hover {
     color: var(--color-white);
   }
+
+  @media ${QUERIES.tabletAndUp} {
+    display: revert;
+  }
 `;
 
 const UmaLink = styled(FooterLink)`
   margin-left: auto;
+  display: revert;
   & svg {
     width: revert;
     height: 15px;

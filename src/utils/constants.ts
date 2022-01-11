@@ -30,6 +30,7 @@ export const MAX_RELAY_FEE_PERCENT = 25;
 export const COLORS = {
   gray: {
     100: "0deg 0% 89%",
+    200: "220deg 2% 72%",
     300: "240deg 4% 27%",
     500: "230deg 6% 19%",
   },

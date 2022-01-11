@@ -17,18 +17,13 @@ export const RoundBox = styled(UnstyledBox)`
   --color: var(--color-white);
   --outline-color: var(--color-primary);
   background-color: var(--color);
-  font-size: ${16 / 16}rem;
+  display: block;
   padding: 10px 15px;
   margin-top: 16px;
   margin-right: auto;
   margin-left: auto;
-  flex: 2;
-  display: flex;
   &:not(:first-of-type):focus-within {
     outline: var(--outline-color) solid 1px;
-  }
-  &:first-of-type {
-    flex: 1;
   }
 `;
 
@@ -58,7 +53,7 @@ export const ChangeWrapper = styled.div`
 export const ChangeButton = styled.div`
   color: #6cf9d8;
   font-size: 0.8rem;
-  font-family: "Barlow";
+
   cursor: pointer;
   margin-top: 4px;
   &.disabled {
@@ -110,11 +105,11 @@ export const ButtonGroup = styled.div`
   }
 `;
 
-interface IMenuProps {
-  isOpen?: boolean;
-}
+type MenuProps = {
+  isOpen: boolean;
+};
 
-export const Menu = styled.ul<IMenuProps>`
+export const Menu = styled.ul<MenuProps>`
   position: absolute;
   top: 0;
   left: 0;
@@ -124,6 +119,8 @@ export const Menu = styled.ul<IMenuProps>`
   transform: translateY(100%);
   list-style: none;
   display: ${(props) => (props.isOpen ? "flex" : "none")};
+  pointer-events: ${({ isOpen }) => (isOpen ? "auto" : "none")};
+  outline: none;
   flex-direction: column;
   z-index: 10000;
   width: 95%;
@@ -179,16 +176,19 @@ export const Item = motion(styled.li`
 `);
 
 export const ToggleIcon = styled(ChevronDown)`
-  margin-left: 250px;
+  margin-left: auto;
 `;
 
 export const ToggleButton = styled.button`
   --radius: 30px;
+  width: 100%;
+  color: var(--color-gray);
   padding: 0;
   margin: 0;
   font-size: inherit;
   background-color: inherit;
   border: none;
+  outline: none;
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -196,7 +196,6 @@ export const ToggleButton = styled.button`
 
 export const InputGroup = styled.div`
   position: relative;
-  display: flex;
   width: 100%;
 `;
 

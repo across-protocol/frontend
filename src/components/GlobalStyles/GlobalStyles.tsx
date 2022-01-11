@@ -1,7 +1,7 @@
 import React from "react";
 import { Global, css } from "@emotion/react";
 import { reset } from "./reset";
-import { COLORS } from "utils";
+import { COLORS, QUERIES } from "utils";
 
 export const typography = css`
   /* only take latin chars to reduce bundle size */
@@ -31,6 +31,7 @@ const variables = css`
     /* COLORS */
     --color-gray: hsl(${COLORS.gray[500]});
     --color-gray-300: hsla(${COLORS.gray[300]});
+    --color-gray-200: hsla(${COLORS.gray[200]});
     --color-gray-100: hsla(${COLORS.gray[100]});
     --color-white: hsl(${COLORS.white});
     --color-black: hsl(${COLORS.black});
@@ -54,6 +55,10 @@ const variables = css`
     Keep a consistent width between the middle section and the headers
   */
     --central-content: 500px;
+    --header-height: 60px;
+    @media ${QUERIES.tabletAndUp} {
+      --header-height: 100px;
+    }
   }
 `;
 

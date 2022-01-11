@@ -14,19 +14,13 @@ export const RoundBox = styled(UnstyledBox)`
   --color: var(--color-white);
   --outline-color: var(--color-primary);
   background-color: var(--color);
-  font-size: ${16 / 16}rem;
+  display: block;
   padding: 10px 15px;
   margin-top: 16px;
   margin-right: auto;
   margin-left: auto;
-  flex: 2;
-  display: flex;
   &:not(:first-of-type):focus-within {
     outline: var(--outline-color) solid 1px;
-  }
-  &:first-of-type {
-    /* margin-right: 16px; */
-    flex: 1;
   }
 `;
 
@@ -41,11 +35,11 @@ export const Logo = styled.img`
   margin-right: 20px;
 `;
 
-interface IMenuProps {
-  isOpen?: boolean;
-}
+type MenuProps = {
+  isOpen: boolean;
+};
 
-export const Menu = styled.ul<IMenuProps>`
+export const Menu = styled.ul<MenuProps>`
   position: absolute;
   top: 0;
   left: 0;
@@ -56,6 +50,8 @@ export const Menu = styled.ul<IMenuProps>`
   box-shadow: inset 0 8px 8% rgba(45, 46, 51, 0.2);
   list-style: none;
   display: ${(props) => (props.isOpen ? "flex" : "none")};
+  pointer-events: ${(props) => (props.isOpen ? "all" : "none")};
+  outline: none;
   flex-direction: column;
   z-index: 10000;
   width: 95%;
@@ -109,16 +105,19 @@ export const Item = motion(styled.li`
 `);
 
 export const ToggleIcon = styled(ChevronDown)`
-  margin-left: 250px;
+  margin-left: auto;
 `;
 
 export const ToggleButton = styled.button`
   --radius: 30px;
+  width: 100%;
+  color: var(--color-gray);
   padding: 0;
   margin: 0;
   font-size: inherit;
   background-color: inherit;
   border: none;
+  outline: none;
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -126,7 +125,6 @@ export const ToggleButton = styled.button`
 
 export const InputGroup = styled.div`
   position: relative;
-  display: flex;
   width: 100%;
 `;
 

@@ -1,21 +1,30 @@
 import styled from "@emotion/styled";
 import { Link as UnstyledLink } from "react-router-dom";
-import { COLORS } from "utils";
-import { ReactComponent as UnstyledLogo } from "assets/logo.svg";
-
+import { motion } from "framer-motion";
+import { COLORS, QUERIES } from "utils";
+import { ReactComponent as UnstyledDesktopLogo } from "assets/logo.svg";
+import { ReactComponent as UnstyledMobileLogo } from "assets/logo-mobile.svg";
 export const Wrapper = styled.header`
-  height: 100px;
-  padding: 0 30px;
+  height: var(--header-height);
+  padding: 0 20px;
   display: grid;
-  grid-template-columns: 1fr var(--central-content) 1fr;
+  grid-template-columns: min-content 1fr min-content;
   gap: 15px;
   align-items: center;
   background-color: var(--color-primary);
   color: var(--color-gray);
+  @media ${QUERIES.tabletAndUp} {
+    padding: 0 30px;
+    grid-template-columns: 1fr min(100%, var(--central-content)) 1fr;
+  }
 `;
 
 export const Navigation = styled.nav`
   height: 100%;
+  display: none;
+  @media ${QUERIES.desktopAndUp} {
+    display: revert;
+  }
 `;
 
 export const List = styled.ul`
@@ -40,20 +49,75 @@ export const Item = styled.li`
     color: hsla(${COLORS.gray[500]} / 0.5);
   }
 `;
-
-export const Link = styled(UnstyledLink)`
+export const BaseLink = styled(UnstyledLink)`
+  display: block;
   text-decoration: none;
   color: inherit;
   height: 100%;
   width: 100%;
+`;
+
+export const Link = styled(BaseLink)`
   display: grid;
   place-items: center;
 `;
 export const LogoLink = styled(UnstyledLink)`
-  padding-left: 45px;
+  padding-left: 10px;
+  @media ${QUERIES.desktopAndUp} {
+    padding-left: 45px;
+  }
 `;
-export const Logo = styled(UnstyledLogo)``;
+export const Logo = styled(UnstyledDesktopLogo)`
+  display: none;
+  @media ${QUERIES.desktopAndUp} {
+    display: revert;
+  }
+`;
+
+export const MobileLogo = styled(UnstyledMobileLogo)`
+  @media ${QUERIES.desktopAndUp} {
+    display: none;
+  }
+`;
 
 export const WalletWrapper = styled.div`
   justify-self: flex-end;
+`;
+
+export const MobileNavigation = styled(motion.nav)`
+  @media ${QUERIES.desktopAndUp} {
+    display: none;
+  }
+`;
+
+export const MobileList = styled.ul`
+  display: flex;
+  list-style: none;
+  flex-direction: column;
+  color: var(--color-gray);
+`;
+
+export const MobileItem = styled.li`
+  padding: 12px 20px;
+  background-color: var(--color-white);
+  transition: background-color 100ms linear;
+
+  &:not(:last-of-type) {
+    border-bottom: 1px solid hsla(${COLORS.gray[500]} / 0.1);
+  }
+  &[aria-selected="true"] {
+    color: var(--color-gray-200);
+  }
+  &:hover:not([aria-selected="true"]) {
+    background-color: var(--color-gray-100);
+  }
+
+  &:first-of-type {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+  &:last-of-type {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
 `;

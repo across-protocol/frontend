@@ -63,7 +63,7 @@ const PoolSelection: FC<Props> = ({ token, setToken }) => {
               <ToggleIcon />
             </ToggleButton>
           </RoundBox>
-          <Menu {...getMenuProps()}>
+          <Menu {...getMenuProps()} isOpen={isOpen}>
             {isOpen &&
               TOKENS_LIST[ChainId.MAINNET].map((t, index) => {
                 return (
