@@ -273,7 +273,6 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: "",
     },
   ],
-  // Stubbed
   [ChainId.BOBA]: [
     {
       address: getAddress("0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000"),
@@ -290,6 +289,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       decimals: 6,
       logoURI: usdcLogo,
       bridgePool: getAddress("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
+    },
+    {
+      address: getAddress("0x780f33Ad21314d9A1Ffb6867Fe53d48a76Ec0D16"),
+      name: "UMA Token",
+      symbol: "UMA",
+      decimals: 18,
+      logoURI: umaLogo,
+      bridgePool: getAddress("0xdfe0ec39291e3b60ACa122908f86809c9eE64E90"),
     },
     {
       address: ethers.constants.AddressZero,
