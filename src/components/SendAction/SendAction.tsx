@@ -162,7 +162,9 @@ const SendAction: React.FC = () => {
                 {CHAINS[sendState.currentlySelectedToChain.chainId].name}
               </div>
               <div>
-                {getEstimatedDepositTime(sendState.currentlySelectedToChain.chainId)}
+                {getEstimatedDepositTime(
+                  sendState.currentlySelectedToChain.chainId
+                )}
               </div>
             </Info>
             {sendState.currentlySelectedFromChain.chainId !==
@@ -209,7 +211,7 @@ const SendAction: React.FC = () => {
         </PrimaryButton>
         {sendState.currentlySelectedFromChain.chainId === ChainId.MAINNET && (
           <L1Info>
-            <div>L1 to L2 transfers use the destination’s canonical bridge</div>
+            <div>L1 to L2 transfers use the destination’s native bridge</div>
           </L1Info>
         )}
       </Wrapper>
