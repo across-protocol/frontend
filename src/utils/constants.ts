@@ -8,6 +8,7 @@ import arbitrumLogo from "assets/arbitrum-logo.svg";
 import memoize from "lodash-es/memoize";
 import umaLogo from "assets/UMA-round.svg";
 import bobaLogo from "assets/Across-Boba-Color30x30.svg";
+import badgerLogo from "assets/badger-logo.png";
 import { getAddress } from "./address";
 /* Colors and Media Queries section */
 
@@ -116,6 +117,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       decimals: 18,
       logoURI: umaLogo,
       bridgePool: "0xdfe0ec39291e3b60ACa122908f86809c9eE64E90",
+    },
+    {
+      address: getAddress("0x3472A5A71965499acd81997a54BBA8D852C6E53d"),
+      name: "Badger",
+      symbol: "BADGER",
+      decimals: 18,
+      logoURI: badgerLogo,
+      bridgePool: getAddress("0x43298F9f91a4545dF64748e78a2c777c580573d6"),
     },
   ],
   [ChainId.RINKEBY]: [
@@ -254,6 +263,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       decimals: 18,
       logoURI: ethereumLogo,
       bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
+    },
+    {
+      address: getAddress("0xbfa641051ba0a0ad1b0acf549a89536a0d76472e"),
+      name: "Badger",
+      symbol: "BADGER",
+      decimals: 18,
+      logoURI: badgerLogo,
+      bridgePool: getAddress("0x43298F9f91a4545dF64748e78a2c777c580573d6"),
     },
   ],
   [ChainId.ARBITRUM_RINKEBY]: [
