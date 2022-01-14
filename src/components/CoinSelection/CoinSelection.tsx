@@ -37,7 +37,7 @@ const CoinSelection = () => {
     }
     if (fromChain === ChainId.MAINNET && toChain === ChainId.BOBA) {
       return TOKENS_LIST[sendState.currentlySelectedFromChain.chainId].filter(
-        (token) => ["USDC", "ETH"].includes(token.symbol)
+        (token) => ["USDC", "ETH", "WBTC"].includes(token.symbol)
       );
     }
     return TOKENS_LIST[sendState.currentlySelectedFromChain.chainId];

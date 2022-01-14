@@ -9,6 +9,7 @@ import memoize from "lodash-es/memoize";
 import umaLogo from "assets/UMA-round.svg";
 import bobaLogo from "assets/Across-Boba-Color30x30.svg";
 import badgerLogo from "assets/badger-logo.png";
+import wbtcLogo from "assets/wbtc-logo.svg";
 import { getAddress } from "./address";
 /* Colors and Media Queries section */
 
@@ -111,6 +112,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
     },
     {
+      address: getAddress("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"),
+      name: "Wrapped Bitcoin",
+      symbol: "WBTC",
+      decimals: 8,
+      logoURI: wbtcLogo,
+      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152")
+    },
+    {
       address: getAddress("0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828"),
       name: "UMA Token",
       symbol: "UMA",
@@ -189,6 +198,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: getAddress("0x190978cC580f5A48D55A4A20D0A952FA1dA3C057"),
     },
     {
+      address: getAddress("0x68f180fcCe6836688e9084f035309E29Bf0A2095"),
+      name: "Wrapped Bitcoin",
+      symbol: "WBTC",
+      decimals: 8,
+      logoURI: wbtcLogo,
+      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152")
+    },
+    {
       address: getAddress("0xE7798f023fC62146e8Aa1b36Da45fb70855a77Ea"),
       name: "UMA Token",
       symbol: "UMA",
@@ -249,6 +266,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: getAddress("0x256C8919CE1AB0e33974CF6AA9c71561Ef3017b6"),
     },
     {
+      address: getAddress("0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"),
+      name: "Wrapped Bitcoin",
+      symbol: "WBTC",
+      decimals: 8,
+      logoURI: wbtcLogo,
+      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152")
+    },
+    {
       address: getAddress("0xd693ec944a85eeca4247ec1c3b130dca9b0c3b22"),
       name: "UMA Token",
       symbol: "UMA",
@@ -307,6 +332,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       decimals: 6,
       logoURI: usdcLogo,
       bridgePool: getAddress("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
+    },
+    {
+      address: getAddress("0xdc0486f8bf31DF57a952bcd3c1d3e166e3d9eC8b"),
+      name: "Wrapped Bitcoin",
+      symbol: "WBTC",
+      decimals: 8,
+      logoURI: wbtcLogo,
+      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152")
     },
     {
       address: getAddress("0x780f33Ad21314d9A1Ffb6867Fe53d48a76Ec0D16"),

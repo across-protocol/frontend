@@ -163,11 +163,17 @@ export const optimismErc20Pairs = () => {
   const usdcMainnet = TOKENS_LIST[ChainId.MAINNET].filter(
     (token) => token.symbol === "USDC"
   )[0];
+  const wbtcMainnet = TOKENS_LIST[ChainId.MAINNET].filter(
+    (token) => token.symbol === "WBTC"
+  )[0];
   const umaMainnet = TOKENS_LIST[ChainId.MAINNET].filter(
     (token) => token.symbol === "UMA"
   )[0];
   const usdcOptimism = TOKENS_LIST[ChainId.OPTIMISM].filter(
     (token) => token.symbol === "USDC"
+  )[0];
+  const wbtcOptimism = TOKENS_LIST[ChainId.OPTIMISM].filter(
+    (token) => token.symbol === "WBTC"
   )[0];
   const umaOptimism = TOKENS_LIST[ChainId.OPTIMISM].filter(
     (token) => token.symbol === "UMA"
@@ -175,6 +181,7 @@ export const optimismErc20Pairs = () => {
 
   return {
     [usdcMainnet.address]: usdcOptimism.address,
+    [wbtcMainnet.address]: wbtcOptimism.address,
     [umaMainnet.address]: umaOptimism.address,
   };
 };
@@ -188,7 +195,15 @@ export const bobaErc20Pairs = () => {
     (token) => token.symbol === "USDC"
   )[0];
 
+  const wbtcMainnet = TOKENS_LIST[ChainId.MAINNET].filter(
+    (token) => token.symbol === "WBTC"
+  )[0];
+  const wbtcBoba = TOKENS_LIST[ChainId.BOBA].filter(
+    (token) => token.symbol === "WBTC"
+  )[0];
+
   return {
     [usdcMainnet.address]: usdcBoba.address,
+    [wbtcMainnet.address]: wbtcBoba.address,
   };
 };
