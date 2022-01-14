@@ -151,6 +151,8 @@ const SendAction: React.FC = () => {
     (hasToApprove && !canApprove) ||
     amountMinusFees.lte(0);
 
+  const isWETH = tokenInfo?.symbol === "WETH";
+
   return (
     <AccentSection>
       <Wrapper>
@@ -199,7 +201,7 @@ const SendAction: React.FC = () => {
               <div>You will receive</div>
               <div>
                 {formatUnits(amountMinusFees, tokenInfo.decimals)}{" "}
-                {tokenInfo.symbol}
+                {isWETH ? "ETH" : tokenInfo.symbol}
               </div>
             </Info>
             <InfoIcon aria-label="info dialog" onClick={toggleInfoModal} />
