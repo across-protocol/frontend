@@ -85,6 +85,17 @@ const globalStyles = css`
     height: 100%;
     isolation: isolate;
   }
+  // iphone query
+  @media screen and (-webkit-min-device-pixel-ratio: 2) {
+    select,
+    select:focus,
+    textarea,
+    textarea:focus,
+    input,
+    input:focus {
+      font-size: 16px;
+    }
+  }
 
   ${typography}
   ${variables}

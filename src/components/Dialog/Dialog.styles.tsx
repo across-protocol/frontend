@@ -8,8 +8,8 @@ export const Wrapper = styled(DialogContent)`
   background-color: var(--color-primary);
   color: var(--color-gray);
   border-radius: 12px;
-  width: 440px;
   max-width: 440px;
+  width: min(440px, calc(100% - 20px));
   top: 10vh;
   overflow: auto;
   min-height: 60vh;
