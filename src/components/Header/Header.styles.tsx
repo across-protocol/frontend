@@ -22,7 +22,7 @@ export const Wrapper = styled.header`
 export const Navigation = styled.nav`
   height: 100%;
   display: none;
-  @media ${QUERIES.desktopAndUp} {
+  @media ${QUERIES.laptopAndUp} {
     display: revert;
   }
 `;
@@ -85,7 +85,7 @@ export const WalletWrapper = styled.div`
 `;
 
 export const MobileNavigation = styled(motion.nav)`
-  @media ${QUERIES.desktopAndUp} {
+  @media ${QUERIES.laptopAndUp} {
     display: none;
   }
 `;
