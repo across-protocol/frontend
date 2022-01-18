@@ -5,6 +5,7 @@ import BulletImg from "assets/Across-logo-bullet.svg";
 import { ReactComponent as UnstyledUmaLogo } from "assets/Across-Powered-UMA.svg";
 import { ReactComponent as DiscordLogo } from "assets/disc-logo.svg";
 import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
+import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
 import { COLORS, QUERIES } from "utils";
 
 const NAV_LINKS = [
@@ -25,6 +26,10 @@ const DISCORD_LINK = {
 const TWITTER_LINK = {
   name: "Twitter",
   url: "https://twitter.com/AcrossProtocol",
+};
+const GITHUB_LINK = {
+  name: "Github",
+  url: "https://github.com/across-protocol",
 };
 
 const About: FC = () => {
@@ -101,7 +106,13 @@ const About: FC = () => {
         >
           <TwitterLogo />
         </FooterLink>
-
+        <FooterLink
+          href={GITHUB_LINK.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <GithubLogo />
+        </FooterLink>
         <UmaLink
           href="https://umaproject.org"
           target="_blank"

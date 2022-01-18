@@ -4,6 +4,7 @@ import { COLORS, QUERIES } from "utils";
 import { ReactComponent as UnstyledUmaLogo } from "assets/Across-Powered-UMA.svg";
 import { ReactComponent as DiscordLogo } from "assets/disc-logo.svg";
 import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
+import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
 
 const NAV_LINKS = [
   {
@@ -24,6 +25,10 @@ const TWITTER_LINK = {
   name: "Twitter",
   url: "https://twitter.com/AcrossProtocol",
 };
+const GITHUB_LINK = {
+  name: "Github",
+  url: "https://github.com/across-protocol",
+};
 
 const Layout: React.FC = ({ children }) => (
   <Wrapper>
@@ -43,6 +48,9 @@ const Layout: React.FC = ({ children }) => (
       </Link>
       <Link href={TWITTER_LINK.url} target="_blank" rel="noopener noreferrer">
         <TwitterLogo />
+      </Link>
+      <Link href={GITHUB_LINK.url} target="_blank" rel="noopener noreferrer">
+        <GithubLogo />
       </Link>
     </LinkFooter>
     <Main>{children}</Main>
