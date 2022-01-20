@@ -19,7 +19,7 @@
     "@types/react-router-dom": "^5.3.1",
     "@uma/contracts-frontend": "^0.1.17",
     "@uma/contracts-node": "^0.1.17",
-    "@uma/sdk": "^0.18.0",
+    "@uma/sdk": "^0.19.0",
     "@use-it/interval": "^1.0.0",
     "@web3-react/core": "^6.1.9",
     "@web3-react/injected-connector": "^6.0.7",
