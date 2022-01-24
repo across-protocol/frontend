@@ -13,6 +13,17 @@
   border-radius: 48px;
   color: var(--color-white);
 }
+.bn-onboard-custom.bn-onboard-icon-button span {
+  margin-left: 25px;
+}
+@media (min-width: 34.375rem) {
+  .bn-onboard-custom .bn-onboard-modal-select-wallets {
+    width: auto;
+  }
+  .bn-onboard-custom.bn-onboard-icon-button span {
+    margin-left: 42%;
+  }
+}
 
 .bn-onboard-custom .bn-onboard-modal-content-header-icon {
   display: none;
@@ -57,9 +68,6 @@
 }
 .bn-onboard-custom.bn-onboard-modal-select-wallets ul li {
   width: 100%;
-}
-.bn-onboard-custom.bn-onboard-icon-button span {
-  margin-left: 42%;
 }
 
 .bn-onboard-custom.bn-onboard-icon-button div {
