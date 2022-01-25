@@ -181,8 +181,7 @@ const Pool: FC = () => {
 export default Pool;
 
 const Wrapper = styled.div`
-  padding-bottom: 50px;
-  height: calc(100% - 50px);
+  height: 100%;
   display: flex;
   flex-direction: column;
   @media ${QUERIES.tabletAndUp} {

@@ -43,6 +43,7 @@ export const Logo = styled.img`
 export const TabContentWrapper = styled.div`
   background-color: var(--color-gray);
   padding: 20px;
+  padding-bottom: 40px;
 `;
 
 export const Position = styled.div`
