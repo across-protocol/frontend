@@ -5,6 +5,7 @@ import {
   Section,
   AccentSection,
 } from "components";
+import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
   padding-top: 50px;
@@ -51,11 +52,26 @@ export const Link = styled.a`
 
 export const SecondaryLink = styled(Link)`
   color: inherit;
+  & > span:first-of-type {
+    display: none;
+    @media ${QUERIES.tabletAndUp} {
+      display: revert;
+    }
+  }
+  & > span {
+    @media ${QUERIES.tabletAndUp} {
+      display: none;
+    }
+  }
 `;
 
 export const InfoSection = styled(AccentSection)`
-  padding: 30px 40px;
+  --horizontalPadding: 25px;
+  padding: 30px var(--horizontalPadding);
   border-top: none;
+  @media ${QUERIES.tabletAndUp} {
+    --horizontalPadding: 40px;
+  }
 `;
 
 export const Row = styled.div`
@@ -65,9 +81,8 @@ export const Row = styled.div`
 
 export const Info = styled.article`
   border-bottom: 1px solid var(--color-primary-dark);
-  --horizontalPadding: 40px;
   margin: 0 calc(-1 * var(--horizontalPadding));
-  padding: 15px 40px;
+  padding: 15px var(--horizontalPadding);
 
   & > h3 {
     line-height: 1;
