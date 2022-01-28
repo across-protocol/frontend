@@ -7,6 +7,7 @@ export const Wrapper = styled(DialogContent)`
   padding: 20px 25px;
   background-color: var(--color-primary);
   color: var(--color-gray);
+  outline: none;
   border-radius: 12px;
   max-width: 440px;
   width: min(440px, calc(100% - 20px));
@@ -23,9 +24,11 @@ export const CloseButton = styled.button`
   position: absolute;
   top: 0;
   right: 0;
+  color: var(--color-gray);
   background-color: transparent;
   padding: 8px;
   border: none;
+  outline: none;
   cursor: pointer;
 `;
 
