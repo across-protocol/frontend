@@ -113,7 +113,7 @@ const Pool: FC = () => {
               }
               position={
                 userPosition
-                  ? ethers.BigNumber.from(userPosition.totalDeposited)
+                  ? ethers.BigNumber.from(userPosition.positionValue)
                   : ethers.BigNumber.from("0")
               }
               feesEarned={
