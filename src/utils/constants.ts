@@ -598,7 +598,7 @@ export function onboardBaseConfig(): Initialization {
     networkId: DEFAULT_FROM_CHAIN_ID,
     hideBranding: true,
     walletSelect: {
-      wallets: [{ walletName: "metamask", preferred: true }],
+      wallets: [{ walletName: "metamask", preferred: true },{ walletName: "tally", preferred: true }],
     },
     walletCheck: [{ checkName: "connect" }, { checkName: "accounts" }],
     // To prevent providers from requesting block numbers every 4 seconds (see https://github.com/WalletConnect/walletconnect-monorepo/issues/357)

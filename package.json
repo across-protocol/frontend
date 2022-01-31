@@ -25,7 +25,7 @@
     "@web3-react/injected-connector": "^6.0.7",
     "arb-ts": "^1.0.2",
     "bnc-notify": "^1.9.1",
-    "bnc-onboard": "^1.35.2",
+    "bnc-onboard": "^1.37.0",
     "downshift": "^6.1.7",
     "ethers": "^5.4.7",
     "framer-motion": "4.1.17",
