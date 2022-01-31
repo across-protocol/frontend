@@ -12,6 +12,7 @@ import {
   MobileList,
   MobileItem,
   BaseLink as MobileLink,
+  ExternalMobileLink,
   List,
   Item,
   WalletWrapper,
@@ -23,6 +24,12 @@ const LINKS = [
   { href: "/", name: "Bridge" },
   { href: "/pool", name: "Pool" },
   { href: "/about", name: "About" },
+];
+const MOBILE_ONLY_LINKS = [
+  { href: "https://docs.across.to/bridge/", name: "Docs" },
+  { href: "https://discord.gg/across", name: "Support (Discord)" },
+  { href: "https://twitter.com/AcrossProtocol", name: "Twitter" },
+  { href: "https://github.com/across-protocol", name: "Github" },
 ];
 const Header: React.FC = () => {
   const location = useLocation();
@@ -65,6 +72,17 @@ const Header: React.FC = () => {
                   aria-selected={location.pathname === href}
                 >
                   <MobileLink to={href}>{name}</MobileLink>
+                </MobileItem>
+              ))}
+              {MOBILE_ONLY_LINKS.map(({ href, name }) => (
+                <MobileItem key={href}>
+                  <ExternalMobileLink
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {name}
+                  </ExternalMobileLink>
                 </MobileItem>
               ))}
             </MobileList>

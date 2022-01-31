@@ -2,33 +2,27 @@ import React from "react";
 import styled from "@emotion/styled";
 import { COLORS, QUERIES } from "utils";
 import { ReactComponent as UnstyledUmaLogo } from "assets/Across-Powered-UMA.svg";
-import { ReactComponent as DiscordLogo } from "assets/disc-logo.svg";
-import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
+import { ReactComponent as SupportLogo } from "assets/support-logo.svg";
 import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
+import { ReactComponent as DocsLogo } from "assets/docs-logo.svg";
 
 const NAV_LINKS = [
   {
-    name: "FAQ",
-    url: "https://docs.across.to/bridge/faq",
-  },
-  {
     name: "Docs",
     url: "https://docs.across.to/bridge/",
+    icon: DocsLogo,
+  },
+  {
+    name: "Support",
+    url: "https://discord.gg/across",
+    icon: SupportLogo,
+  },
+  {
+    name: "Github",
+    url: "https://github.com/across-protocol",
+    icon: GithubLogo,
   },
 ];
-const DISCORD_LINK = {
-  name: "Discord",
-  url: "https://discord.gg/across",
-  logo: DiscordLogo,
-};
-const TWITTER_LINK = {
-  name: "Twitter",
-  url: "https://twitter.com/AcrossProtocol",
-};
-const GITHUB_LINK = {
-  name: "Github",
-  url: "https://github.com/across-protocol",
-};
 
 const Layout: React.FC = ({ children }) => (
   <Wrapper>
@@ -40,18 +34,10 @@ const Layout: React.FC = ({ children }) => (
           target="_blank"
           rel="noopener noreferrer"
         >
-          {link.name}
+          <link.icon />
+          <div>{link.name}</div>
         </Link>
       ))}
-      <Link href={DISCORD_LINK.url} target="_blank" rel="noopener noreferrer">
-        <DiscordLogo />
-      </Link>
-      <Link href={TWITTER_LINK.url} target="_blank" rel="noopener noreferrer">
-        <TwitterLogo />
-      </Link>
-      <Link href={GITHUB_LINK.url} target="_blank" rel="noopener noreferrer">
-        <GithubLogo />
-      </Link>
     </LinkFooter>
     <Main>{children}</Main>
     <LogoFooter>
@@ -78,15 +64,12 @@ const BaseFooter = styled.footer`
 
 const LinkFooter = styled(BaseFooter)`
   display: none;
-  padding-bottom: 25px;
+  align-items: center;
   & svg {
     width: 25px;
     height: 25px;
-    & path {
-      fill: currentColor;
-    }
   }
-  @media ${QUERIES.tabletAndUp} {
+  @media ${QUERIES.laptopAndUp} {
     display: flex;
   }
 `;
@@ -104,6 +87,11 @@ const Link = styled.a`
   text-decoration: none;
   transition: color 100ms linear;
   color: hsla(${COLORS.white} / 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: ${14 / 16}rem;
 
   &:not(:last-of-type) {
     margin-right: 45px;

@@ -123,3 +123,10 @@ export const MobileItem = styled.li`
     border-bottom-right-radius: 10px;
   }
 `;
+
+export const ExternalMobileLink = styled.a`
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  outline: none;
+`;
