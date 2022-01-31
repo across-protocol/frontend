@@ -1,13 +1,17 @@
 import styled from "@emotion/styled";
 import { PrimaryButton } from "../Buttons";
 import { RoundBox as UnstyledBox } from "../Box";
+import { QUERIES } from "utils";
 import { ChevronDown } from "react-feather";
 import { motion } from "framer-motion";
 
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  padding-top: 20px;
+  padding-top: 15px;
+  @media ${QUERIES.tabletAndUp} {
+    padding-top: 20px;
+  }
 `;
 
 export const RoundBox = styled(UnstyledBox)`

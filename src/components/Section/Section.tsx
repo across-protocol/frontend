@@ -5,7 +5,7 @@ import { QUERIES } from "utils";
 export const Section = styled.section`
   color: var(--color-white);
   border-bottom: 1px solid var(--color-primary-dark);
-  padding: 10px 10px 20px;
+  padding: 0px 10px 20px;
   @media ${QUERIES.tabletAndUp} {
     padding: 10px 30px 25px;
   }

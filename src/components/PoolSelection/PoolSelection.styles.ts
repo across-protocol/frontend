@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { ChevronDown } from "react-feather";
 import { motion } from "framer-motion";
-import { COLORS } from "utils";
+import { COLORS, QUERIES } from "utils";
 import { RoundBox as UnstyledBox, ErrorBox as UnstyledErrorBox } from "../Box";
 import { Section } from "../Section";
 
@@ -10,7 +10,10 @@ export const Wrapper = styled(Section)`
   border-bottom: none;
   display: flex;
   flex-direction: column;
-  padding-top: 30px;
+  padding-top: 15px;
+  @media ${QUERIES.tabletAndUp} {
+    padding-top: 30px;
+  }
 `;
 export const RoundBox = styled(UnstyledBox)`
   --color: var(--color-white);
