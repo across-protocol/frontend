@@ -8,8 +8,10 @@ export const Wrapper = styled(RoundBox)`
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  cursor: pointer;
   padding: 0;
+  &:hover {
+    cursor: pointer;
+  }
 `;
 
 export const ConnectButton = styled(SecondaryButton)`
@@ -54,4 +56,42 @@ export const Info = styled.div`
 export const UnsupportedNetwork = styled.div`
   background-color: rgba(45, 46, 51, 0.25);
   padding: 1rem 0.5rem;
+`;
+
+export const WalletModal = styled.div`
+  position: absolute;
+  background: var(--color-white);
+  border-radius: 16px;
+  min-height: 100px;
+  width: 300px;
+  margin-top: 4px;
+  margin-left: 4px;
+  padding: 1rem;
+  z-index: 10000;
+`;
+
+export const WalletModalHeader = styled.h3`
+  font-size: ${14 / 16}rem;
+  font-weight: 700;
+  text-indent: 2px;
+`;
+
+export const WalletModalAccount = styled.div`
+  font-size: ${12 / 16}rem;
+  text-indent: 2px;
+`;
+
+export const WalletModalChain = styled.div`
+  text-indent: 2px;
+  font-size: ${12 / 16}rem;
+  border-bottom: 1px solid var(--color-gray-transparent);
+  padding-bottom: 0.5rem;
+`;
+
+export const WalletModalDisconnect = styled.div`
+  font-size: ${14 / 16}rem;
+  text-indent: 2px;
+  margin-top: 4px;
+  color: var(--color-secondary);
+  cursor: pointer;
 `;

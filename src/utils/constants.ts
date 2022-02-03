@@ -50,6 +50,7 @@ export const COLORS = {
   white: "0deg 100% 100%",
   black: "0deg 0% 0%",
   umaRed: "0deg 100% 65%",
+  purple: "267deg 77% 62%",
 };
 
 /* Chains and Tokens section */
@@ -117,7 +118,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "WBTC",
       decimals: 8,
       logoURI: wbtcLogo,
-      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152")
+      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152"),
     },
     {
       address: getAddress("0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828"),
@@ -203,7 +204,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "WBTC",
       decimals: 8,
       logoURI: wbtcLogo,
-      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152")
+      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152"),
     },
     {
       address: getAddress("0xE7798f023fC62146e8Aa1b36Da45fb70855a77Ea"),
@@ -271,7 +272,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "WBTC",
       decimals: 8,
       logoURI: wbtcLogo,
-      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152")
+      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152"),
     },
     {
       address: getAddress("0xd693ec944a85eeca4247ec1c3b130dca9b0c3b22"),
@@ -339,7 +340,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       symbol: "WBTC",
       decimals: 8,
       logoURI: wbtcLogo,
-      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152")
+      bridgePool: getAddress("0x02fbb64517e1c6ed69a6faa3abf37db0482f1152"),
     },
     {
       address: getAddress("0x780f33Ad21314d9A1Ffb6867Fe53d48a76Ec0D16"),
@@ -598,7 +599,10 @@ export function onboardBaseConfig(): Initialization {
     networkId: DEFAULT_FROM_CHAIN_ID,
     hideBranding: true,
     walletSelect: {
-      wallets: [{ walletName: "metamask", preferred: true },{ walletName: "tally", preferred: true }],
+      wallets: [
+        { walletName: "metamask", preferred: true },
+        { walletName: "tally", preferred: true },
+      ],
     },
     walletCheck: [{ checkName: "connect" }, { checkName: "accounts" }],
     // To prevent providers from requesting block numbers every 4 seconds (see https://github.com/WalletConnect/walletconnect-monorepo/issues/357)

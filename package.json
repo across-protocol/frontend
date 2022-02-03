@@ -77,5 +77,9 @@
     "babel-preset-react": "^6.24.1",
     "babel-register": "^6.26.0",
     "prettier": "^2.4.1"
+  },
+  "resolutions": {
+    "//": "See https://github.com/facebook/create-react-app/issues/11773",
+    "react-error-overlay": "6.0.9"
   }
 }
