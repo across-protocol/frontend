@@ -191,7 +191,7 @@ const RemoveLiqudityForm: FC<Props> = ({
                 {symbol}
               </FeesValues>
               <FeesValues>
-                {preview && formatUnits(preview.position.remain, decimals)}
+                {preview && formatUnits(preview.position.remain, decimals)}{" "}
                 {symbol}
               </FeesValues>
             </FeesBlock>
@@ -217,7 +217,7 @@ const RemoveLiqudityForm: FC<Props> = ({
             </FeesBlock>
             <FeesBlock>
               <FeesValues>
-                {preview && formatUnits(preview.total.recieve, decimals)}
+                {preview && formatUnits(preview.total.recieve, decimals)}{" "}
                 {symbol}
               </FeesValues>
             </FeesBlock>

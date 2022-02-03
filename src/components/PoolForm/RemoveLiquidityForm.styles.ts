@@ -24,7 +24,6 @@ export const RemoveAmount = styled.div`
   color: var(--color-white);
   font-weight: 700;
   padding-bottom: 32px;
-  padding-left: 8px;
   span {
     color: var(--color-primary);
   }
@@ -67,7 +66,7 @@ export const Balance = styled.div`
 export const FeesBlockWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 8px 0px;
 `;
 
 export const FeesBlock = styled.div`

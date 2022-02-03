@@ -25,8 +25,6 @@ const PoolFormSlider: FC<Props> = ({ value, setValue }) => {
 export default PoolFormSlider;
 
 const Slider = styled(ReactSlider)`
-  margin-left: 8px;
-  margin-right: 8px;
   .PoolForm-thumb {
     height: 34px;
     width: 34px;
