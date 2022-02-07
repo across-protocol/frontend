@@ -8,7 +8,7 @@ import arbitrumLogo from "assets/arbitrum-logo.svg";
 import memoize from "lodash-es/memoize";
 import umaLogo from "assets/UMA-round.svg";
 import bobaLogo from "assets/Across-Boba-Color30x30.svg";
-import badgerLogo from "assets/badger-logo.png";
+import badgerLogo from "assets/badger.svg";
 import wbtcLogo from "assets/wbtc-logo.svg";
 import { getAddress } from "./address";
 /* Colors and Media Queries section */
