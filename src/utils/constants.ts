@@ -601,6 +601,17 @@ export function onboardBaseConfig(): Initialization {
     walletSelect: {
       wallets: [
         { walletName: "metamask", preferred: true },
+        {
+          walletName: "walletConnect",
+          rpc: {
+            1: `https://mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
+            10: `https://optimism-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
+            288: `https://mainnet.boba.network/`,
+            42161: `https://arbitrum-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
+          },
+          preferred: true,
+        },
+        { walletName: "coinbase", preferred: true },
         { walletName: "tally", preferred: true },
       ],
     },

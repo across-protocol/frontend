@@ -21,7 +21,7 @@
   }
   .bn-onboard-custom.bn-onboard-icon-button span {
     margin-left: 18%;
-    display: block ;
+    display: block;
     text-align: center;
   }
 }
@@ -78,14 +78,19 @@
   width: 100%;
 }
 
-.bn-onboard-custom.bn-onboard-modal-select-wallets li{
+.bn-onboard-custom.bn-onboard-modal-select-wallets li {
   background-color: var(--color-gray);
-  border-radius: 40px;
+}
+
+@media screen and (min-width: 768px) {
+  .bn-onboard-custom.bn-onboard-modal-select-wallets li {
+    border-radius: 40px;
+  }
 }
 
 .bn-onboard-custom.bn-onboard-icon-button span {
   margin-left: 18%;
-  display: block ;
+  display: block;
   text-align: center;
 }
 
