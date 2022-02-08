@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { onboard } from "utils";
 import { useConnection } from "state/hooks";
 import { CHAINS, switchChain, ChainId, UnsupportedChainIdError } from "utils";
@@ -19,13 +19,48 @@ import { useSelect } from "downshift";
 import { CHAINS_SELECTION } from "utils/constants";
 import { actions } from "state/send";
 import { useAppDispatch, useAppSelector } from "state/hooks";
+import usePrevious from "hooks/usePrevious";
 
 const ChainSelection: React.FC = () => {
   const { init } = onboard;
   const { isConnected, provider, chainId, error } = useConnection();
   const sendState = useAppSelector((state) => state.send);
-
   const dispatch = useAppDispatch();
+
+  const [dropdownValue, setDropdownValue] = useState(
+    sendState.currentlySelectedFromChain
+  );
+
+  /*
+    The following block will attempt to change the dropdown when the user connects the app.
+
+    Otherwise, it just makes sure to map the dropdown value when the currentSelected block changes.
+
+    This will also change the dropdown value in <AddressSelection /> because of the hook in there.
+  */
+  const previousChainId = usePrevious(chainId);
+  useEffect(() => {
+    if (chainId && previousChainId === undefined) {
+      const findChain = CHAINS_SELECTION.find((x) => x.chainId === chainId);
+      const notFindChain = CHAINS_SELECTION.filter(
+        (x) => x.chainId !== chainId
+      );
+      if (findChain && notFindChain) {
+        setDropdownValue(findChain);
+        dispatch(actions.updateSelectedFromChain(findChain));
+        dispatch(
+          actions.updateSelectedToChain(notFindChain[notFindChain.length - 1])
+        );
+      }
+    } else {
+      setDropdownValue(sendState.currentlySelectedFromChain);
+    }
+  }, [
+    chainId,
+    previousChainId,
+    sendState.currentlySelectedFromChain,
+    dispatch,
+  ]);
 
   const wrongNetworkSend =
     provider &&
@@ -56,10 +91,11 @@ const ChainSelection: React.FC = () => {
     getMenuProps,
   } = useSelect({
     items: CHAINS_SELECTION,
-    defaultSelectedItem: sendState.currentlySelectedFromChain,
-    selectedItem: sendState.currentlySelectedFromChain,
+    defaultSelectedItem: dropdownValue,
+    selectedItem: dropdownValue,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
+        setDropdownValue(selectedItem);
         const nextState = { ...sendState, fromChain: selectedItem.chainId };
         dispatch(actions.fromChain(nextState));
         dispatch(actions.updateSelectedFromChain(selectedItem));
