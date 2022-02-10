@@ -28,4 +28,5 @@ export const Overlay = styled(DialogOverlay)`
 
 const Content = styled(DialogContent)`
   padding: 10px;
+  outline: none;
 `;
