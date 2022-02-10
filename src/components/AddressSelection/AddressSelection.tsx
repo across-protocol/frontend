@@ -41,14 +41,6 @@ const AddressSelection: React.FC = () => {
   const dispatch = useAppDispatch();
 
   const sendState = useAppSelector((state) => state.send);
-  const [dropdownValue, setDropdownValue] = useState(
-    sendState.currentlySelectedToChain
-  );
-
-  // If somehow currentlySelectedToChain is changed externally, make sure the dropdown maps to it.
-  useEffect(() => {
-    setDropdownValue(sendState.currentlySelectedToChain);
-  }, [sendState.currentlySelectedToChain]);
 
   const {
     isOpen,
@@ -59,11 +51,10 @@ const AddressSelection: React.FC = () => {
     getMenuProps,
   } = useSelect({
     items: CHAINS_SELECTION,
-    defaultSelectedItem: dropdownValue,
-    selectedItem: dropdownValue,
+    defaultSelectedItem: sendState.currentlySelectedToChain,
+    selectedItem: sendState.currentlySelectedToChain,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
-        setDropdownValue(selectedItem);
         const nextState = { ...sendState, toChain: selectedItem.chainId };
         dispatch(actions.toChain(nextState));
         dispatch(actions.updateSelectedToChain(selectedItem));

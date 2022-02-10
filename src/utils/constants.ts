@@ -493,8 +493,8 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
 
 export const ADDRESSES: Record<ChainId, { BRIDGE?: string }> = {
   [ChainId.MAINNET]: {
-    // Stubbed value. Does not work. TODO: Change this out when contract deployed.
-    BRIDGE: "0x2271a5E74eA8A29764ab10523575b41AA52455f0",
+    // Stubbed value.
+    BRIDGE: "0xB524735356985D2f267FA010D681f061DfF03715",
   },
   [ChainId.RINKEBY]: {},
   [ChainId.KOVAN]: {},

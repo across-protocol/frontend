@@ -49,7 +49,7 @@ const Wallet: FC = () => {
   if (account && !isConnected && !chainId) {
     return (
       <UnsupportedNetwork>
-        Unsupported Network. Please change networks.
+        Unsupported network. Please change networks.
       </UnsupportedNetwork>
     );
   }

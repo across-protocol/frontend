@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { onboard } from "utils";
 import { useConnection } from "state/hooks";
 import { CHAINS, switchChain, ChainId, UnsupportedChainIdError } from "utils";
@@ -27,10 +27,6 @@ const ChainSelection: React.FC = () => {
   const sendState = useAppSelector((state) => state.send);
   const dispatch = useAppDispatch();
 
-  const [dropdownValue, setDropdownValue] = useState(
-    sendState.currentlySelectedFromChain
-  );
-
   /*
     The following block will attempt to change the dropdown when the user connects the app.
 
@@ -45,21 +41,29 @@ const ChainSelection: React.FC = () => {
       const notFindChain = CHAINS_SELECTION.filter(
         (x) => x.chainId !== chainId
       );
+
       if (findChain && notFindChain) {
-        setDropdownValue(findChain);
         dispatch(actions.updateSelectedFromChain(findChain));
         dispatch(
           actions.updateSelectedToChain(notFindChain[notFindChain.length - 1])
         );
+        dispatch(
+          actions.fromChain({ ...sendState, fromChain: findChain.chainId })
+        );
+        dispatch(
+          actions.toChain({
+            ...sendState,
+            toChain: notFindChain[notFindChain.length - 1].chainId,
+          })
+        );
       }
-    } else {
-      setDropdownValue(sendState.currentlySelectedFromChain);
     }
   }, [
     chainId,
     previousChainId,
     sendState.currentlySelectedFromChain,
     dispatch,
+    sendState,
   ]);
 
   const wrongNetworkSend =
@@ -91,11 +95,10 @@ const ChainSelection: React.FC = () => {
     getMenuProps,
   } = useSelect({
     items: CHAINS_SELECTION,
-    defaultSelectedItem: dropdownValue,
-    selectedItem: dropdownValue,
+    defaultSelectedItem: sendState.currentlySelectedFromChain,
+    selectedItem: sendState.currentlySelectedFromChain,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
-        setDropdownValue(selectedItem);
         const nextState = { ...sendState, fromChain: selectedItem.chainId };
         dispatch(actions.fromChain(nextState));
         dispatch(actions.updateSelectedFromChain(selectedItem));
