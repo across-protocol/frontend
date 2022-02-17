@@ -1,4 +1,4 @@
-import { clients, across } from "@uma/sdk";
+import { clients, across, utils } from "@uma/sdk";
 import { BridgePoolEthers__factory } from "@uma/contracts-frontend";
 import { ethers, BigNumber } from "ethers";
 
@@ -158,52 +158,38 @@ export const getConfirmationDepositTime = (chainId: ChainId) => {
   }
 };
 
+// General function to pull a token mapping from adress fromChain -> toChain with an optional list of symbols to exclude.
+function getTokenPairMapping(
+  fromChain: ChainId,
+  toChain: ChainId,
+  symbolsToExclude: string[] = []
+): Record<string, string> {
+  return Object.fromEntries(
+    TOKENS_LIST[fromChain]
+      .map((fromChainElement) => {
+        if (symbolsToExclude.includes(fromChainElement.symbol)) return null;
+        const toChainElement = TOKENS_LIST[toChain].find(
+          ({ symbol }) => symbol === fromChainElement.symbol
+        );
+        if (!toChainElement) {
+          return null;
+        } else {
+          return [fromChainElement.address, toChainElement.address];
+        }
+      })
+      .filter(utils.exists)
+  );
+}
+
 // This will be moved inside the SDK in the near future
 export const optimismErc20Pairs = () => {
-  const usdcMainnet = TOKENS_LIST[ChainId.MAINNET].filter(
-    (token) => token.symbol === "USDC"
-  )[0];
-  const wbtcMainnet = TOKENS_LIST[ChainId.MAINNET].filter(
-    (token) => token.symbol === "WBTC"
-  )[0];
-  const umaMainnet = TOKENS_LIST[ChainId.MAINNET].filter(
-    (token) => token.symbol === "UMA"
-  )[0];
-  const usdcOptimism = TOKENS_LIST[ChainId.OPTIMISM].filter(
-    (token) => token.symbol === "USDC"
-  )[0];
-  const wbtcOptimism = TOKENS_LIST[ChainId.OPTIMISM].filter(
-    (token) => token.symbol === "WBTC"
-  )[0];
-  const umaOptimism = TOKENS_LIST[ChainId.OPTIMISM].filter(
-    (token) => token.symbol === "UMA"
-  )[0];
-
-  return {
-    [usdcMainnet.address]: usdcOptimism.address,
-    [wbtcMainnet.address]: wbtcOptimism.address,
-    [umaMainnet.address]: umaOptimism.address,
-  };
+  return getTokenPairMapping(ChainId.MAINNET, ChainId.OPTIMISM, [
+    "WETH",
+    "ETH",
+  ]);
 };
 
 // This will be moved inside the SDK in the near future
 export const bobaErc20Pairs = () => {
-  const usdcMainnet = TOKENS_LIST[ChainId.MAINNET].filter(
-    (token) => token.symbol === "USDC"
-  )[0];
-  const usdcBoba = TOKENS_LIST[ChainId.BOBA].filter(
-    (token) => token.symbol === "USDC"
-  )[0];
-
-  const wbtcMainnet = TOKENS_LIST[ChainId.MAINNET].filter(
-    (token) => token.symbol === "WBTC"
-  )[0];
-  const wbtcBoba = TOKENS_LIST[ChainId.BOBA].filter(
-    (token) => token.symbol === "WBTC"
-  )[0];
-
-  return {
-    [usdcMainnet.address]: usdcBoba.address,
-    [wbtcMainnet.address]: wbtcBoba.address,
-  };
+  return getTokenPairMapping(ChainId.MAINNET, ChainId.BOBA, ["WETH", "ETH"]);
 };

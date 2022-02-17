@@ -136,6 +136,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       logoURI: badgerLogo,
       bridgePool: getAddress("0x43298F9f91a4545dF64748e78a2c777c580573d6"),
     },
+    {
+      address: getAddress("0x42bbfa2e77757c645eeaad1655e0911a7553efbc"),
+      name: "Boba",
+      symbol: "BOBA",
+      decimals: 18,
+      logoURI: bobaLogo,
+      bridgePool: getAddress("0x4841572daA1f8E4Ce0f62570877c2D0CC18C9535"),
+    },
   ],
   [ChainId.RINKEBY]: [
     {
@@ -349,6 +357,14 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       decimals: 18,
       logoURI: umaLogo,
       bridgePool: getAddress("0xdfe0ec39291e3b60ACa122908f86809c9eE64E90"),
+    },
+    {
+      address: getAddress("0xa18bF3994C0Cc6E3b63ac420308E5383f53120D7"),
+      name: "Boba",
+      symbol: "BOBA",
+      decimals: 18,
+      logoURI: bobaLogo,
+      bridgePool: getAddress("0x4841572daA1f8E4Ce0f62570877c2D0CC18C9535"),
     },
     {
       address: ethers.constants.AddressZero,

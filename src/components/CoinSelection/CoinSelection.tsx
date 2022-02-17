@@ -4,7 +4,13 @@ import { useSelect } from "downshift";
 import { ChainId, max } from "utils";
 
 import { useSend, useBalances, useConnection } from "state/hooks";
-import { parseUnits, formatUnits, ParsingError, TOKENS_LIST } from "utils";
+import {
+  parseUnits,
+  formatUnits,
+  ParsingError,
+  TOKENS_LIST,
+  Token,
+} from "utils";
 import { Section, SectionTitle } from "../Section";
 import { useAppSelector } from "state/hooks";
 
@@ -26,22 +32,31 @@ import { AnimatePresence } from "framer-motion";
 const FEE_ESTIMATION = ".004";
 const CoinSelection = () => {
   const { account, isConnected } = useConnection();
-  const { setAmount, setToken, fromChain, amount, token, fees, toChain } =
-    useSend();
+  const { setAmount, setToken, amount, token, fees } = useSend();
 
   const [error, setError] = React.useState<Error>();
   const sendState = useAppSelector((state) => state.send);
   const tokenList = useMemo(() => {
-    if (fromChain === ChainId.MAINNET && toChain === ChainId.OPTIMISM) {
-      return TOKENS_LIST[sendState.currentlySelectedFromChain.chainId].slice(1);
-    }
-    if (fromChain === ChainId.MAINNET && toChain === ChainId.BOBA) {
-      return TOKENS_LIST[sendState.currentlySelectedFromChain.chainId].filter(
-        (token) => ["USDC", "ETH", "WBTC"].includes(token.symbol)
+    const filterByToChain = (token: Token) =>
+      TOKENS_LIST[sendState.currentlySelectedToChain.chainId].some(
+        (element) => element.symbol === token.symbol
       );
+    if (
+      sendState.currentlySelectedFromChain.chainId === ChainId.MAINNET &&
+      sendState.currentlySelectedToChain.chainId === ChainId.OPTIMISM
+    ) {
+      // Note: because of how Optimism treats WETH, it must not be sent over their canonical bridge.
+      return TOKENS_LIST[sendState.currentlySelectedFromChain.chainId]
+        .filter((element) => element.symbol !== "WETH")
+        .filter(filterByToChain);
     }
-    return TOKENS_LIST[sendState.currentlySelectedFromChain.chainId];
-  }, [fromChain, toChain, sendState.currentlySelectedFromChain.chainId]);
+    return TOKENS_LIST[sendState.currentlySelectedFromChain.chainId].filter(
+      filterByToChain
+    );
+  }, [
+    sendState.currentlySelectedFromChain.chainId,
+    sendState.currentlySelectedToChain.chainId,
+  ]);
   const { data: balances } = useBalances(
     {
       account: account!,
