@@ -6,12 +6,15 @@
   background-color: var(--color-primary);
   color: var(--color-gray);
   border-radius: 12px;
+  padding: 1rem 1rem 0;
 }
 
 .bn-onboard-custom .bn-onboard-modal-select-wallets {
   border-radius: 48px;
   color: var(--color-white);
+  margin: 1.25rem 0 0.67rem !important;
 }
+
 .bn-onboard-custom.bn-onboard-icon-button span {
   margin-left: 25px;
 }
@@ -32,11 +35,16 @@
 
 .bn-onboard-custom .bn-onboard-modal-content-header-heading {
   visibility: hidden;
+  margin-bottom: -1rem !important;
 }
 
 .bn-onboard-custom .bn-onboard-modal-content-header-heading::before {
   content: "Choose wallet provider";
   visibility: visible;
+}
+
+.bn-onboard-custom .bn-onboard-icon-button {
+  margin: 12px 0;
 }
 
 .bn-onboard-custom .bn-onboard-select-description {
@@ -106,6 +114,9 @@
 .bn-notify-custom.bn-notify-notification-status-icon g circle,
 .bn-notify-custom.bn-notify-notification-status-icon g g {
   stroke: var(--color-gray) !important;
+}
+.bn-onboard-custom .bn-onboard-modal-content-close {
+  top: 1rem;
 }
 
 .bn-notify-custom.bn-notify-notification-info {
