@@ -16,7 +16,7 @@ export const Wrapper = styled(DialogContent)`
   min-height: 60vh;
   max-height: 80vh;
   @media ${QUERIES.tabletAndUp} {
-    top: 25%;
+    top: 17%;
   }
 `;
 
