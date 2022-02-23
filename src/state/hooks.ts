@@ -215,7 +215,7 @@ export function useSendAcross() {
       (t) => t.address === token
     )?.symbol ?? "";
 
-  const { data: fees } = useBridgeFees(
+  const { data: fees, isFetching: isFetchingFees } = useBridgeFees(
     {
       amount,
       tokenSymbol,
@@ -232,6 +232,7 @@ export function useSendAcross() {
       amount &&
       token &&
       fees &&
+      !isFetchingFees &&
       toAddress &&
       isValidAddress(toAddress) &&
       !hasToApprove &&
@@ -253,6 +254,7 @@ export function useSendAcross() {
       amount,
       token,
       fees,
+      isFetchingFees,
       toAddress,
       hasToApprove,
       hasToSwitchChain,
@@ -262,7 +264,14 @@ export function useSendAcross() {
   );
 
   const send = useCallback(async () => {
-    if (!signer || !canSend || !fees || !toAddress || !block) {
+    if (
+      !signer ||
+      !canSend ||
+      !fees ||
+      isFetchingFees ||
+      !toAddress ||
+      !block
+    ) {
       return {};
     }
 
@@ -307,6 +316,7 @@ export function useSendAcross() {
     canSend,
     depositBox.address,
     fees,
+    isFetchingFees,
     currentlySelectedFromChain.chainId,
     signer,
     toAddress,
@@ -326,7 +336,7 @@ export function useSendAcross() {
     hasToSwitchChain,
     send,
     approve,
-    fees,
+    fees: isFetchingFees ? undefined : fees,
     spender: depositBox.address,
   };
 }
