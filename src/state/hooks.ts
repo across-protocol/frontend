@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useEffect, useState, useContext } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import useInterval from "@use-it/interval";
 import { ethers, BigNumber } from "ethers";
 import { bindActionCreators } from "redux";
@@ -13,6 +14,7 @@ import {
   MAX_APPROVAL_AMOUNT,
   optimismErc20Pairs,
   bobaErc20Pairs,
+  tagAddress,
 } from "utils";
 import type { RootState, AppDispatch } from "./";
 import { ErrorContext } from "context/ErrorContext";
@@ -40,6 +42,14 @@ const FEE_ESTIMATION = "0.004";
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+function useQuery() {
+  const { search } = useLocation();
+  return useMemo(() => {
+    const params = new URLSearchParams(search);
+    return Object.fromEntries(params.entries());
+  }, [search]);
+}
 
 export function useConnection() {
   const { account, signer, provider, error, chainId, notify } = useAppSelector(
@@ -167,6 +177,7 @@ export function useSend() {
   };
 }
 export function useSendAcross() {
+  const { referrer } = useQuery();
   const { isConnected, chainId, account, signer } = useConnection();
   const {
     fromChain,
@@ -288,15 +299,25 @@ export function useSendAcross() {
       const { instantRelayFee, slowRelayFee } = fees;
       let timestamp = block.timestamp;
 
-      const tx = await depositBox.deposit(
+      const data = depositBox.interface.encodeFunctionData("deposit", [
         toAddress,
         l2Token,
         amount,
         slowRelayFee.pct,
         instantRelayFee.pct,
         timestamp,
-        { value }
-      );
+      ]);
+
+      // do not tag a referrer if data is not provided as a hex string.
+      const taggedData =
+        referrer && ethers.utils.isAddress(referrer)
+          ? tagAddress(data, referrer)
+          : data;
+      const tx = await signer.sendTransaction({
+        data: taggedData,
+        value,
+        to: depositBox.address,
+      });
       return { tx, fees };
     } catch (e) {
       throw new TransactionError(
@@ -321,6 +342,7 @@ export function useSendAcross() {
     signer,
     toAddress,
     token,
+    referrer,
   ]);
 
   return {
