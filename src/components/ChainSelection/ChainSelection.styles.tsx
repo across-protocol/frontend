@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { PrimaryButton } from "../Buttons";
 import { RoundBox as UnstyledBox } from "../Box";
-import { QUERIES } from "utils";
+import { QUERIES, COLORS } from "utils";
 import { ChevronDown } from "react-feather";
 import { motion } from "framer-motion";
 
@@ -51,7 +51,7 @@ export const Menu = styled.ul<MenuProps>`
   right: 0;
   padding-top: 10px;
   transform: translateY(100%);
-  box-shadow: inset 0 8px 8% rgba(45, 46, 51, 0.2);
+  box-shadow: 0px 160px 8px 8px hsla(${COLORS.gray[500]} / 0.2);
   list-style: none;
   display: ${(props) => (props.isOpen ? "flex" : "none")};
   pointer-events: ${(props) => (props.isOpen ? "all" : "none")};
