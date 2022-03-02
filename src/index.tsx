@@ -3,18 +3,24 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { store } from "state";
 import { GlobalStyles } from "components";
+import { QueryClientProvider, QueryClient } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 import ErrorProvider from "context/ErrorContext";
 
 import App from "./App";
 import "./onboard-override.css";
 
+const client = new QueryClient();
 ReactDOM.render(
   <React.StrictMode>
     <GlobalStyles />
     <Provider store={store}>
-      <ErrorProvider>
-        <App />
-      </ErrorProvider>
+      <QueryClientProvider client={client}>
+        <ErrorProvider>
+          <App />
+        </ErrorProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </Provider>
   </React.StrictMode>,
   document.getElementById("root")

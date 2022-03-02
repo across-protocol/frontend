@@ -730,3 +730,4 @@ export const CHAINS_SELECTION: ChainsSelection = [
 ];
 
 export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
+export const ETH_ADDRESS = ethers.constants.AddressZero;
