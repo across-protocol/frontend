@@ -1,29 +1,23 @@
-import { useLayoutEffect, useEffect, useState } from 'react'
+import { useQuery } from 'react-query';
 import { PROVIDERS, ChainId } from 'utils';
-
 
 
 /**
  * 
  * @param chainId The chain Id of the chain to poll for new blocks.
- * @returns The latest block number of the chain, if fetched.
+ * @returns The balance of the account and the UseQueryResult object
  */
-export function useBlockNumber(chainId: ChainId): number | undefined {
-	const [blockNumber, setBlockNumber] = useState<number | undefined>();
-	useLayoutEffect(() => {
+export function useBlockNumber(chainId: ChainId) {
+	const { data: blockNumber, ...delegated } = useQuery(["block", chainId], async () => {
 		const provider = PROVIDERS[chainId]();
-		if (!blockNumber) {
-			provider.getBlockNumber().then(setBlockNumber);
-		}
-	}, [blockNumber, chainId]);
-	useEffect(() => {
-		const provider = PROVIDERS[chainId]();
-		provider.on('block', (blockNumber) => {
-			setBlockNumber(blockNumber);
-		});
-		return () => {
-			provider.removeAllListeners('block');
-		}
-	}, [chainId])
-	return blockNumber;
+		const blockNumber = await provider.getBlockNumber();
+		return blockNumber;
+	}, {
+		// refetch every 5 seconds
+		refetchInterval: 5 * 1000,
+	});
+	return {
+		blockNumber,
+		...delegated
+	}
 }

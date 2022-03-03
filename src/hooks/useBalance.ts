@@ -13,7 +13,7 @@ import { getBalance } from 'utils';
 export function useBalance(token: string, account?: string, blockNumber?: number) {
 	const { chainId, account: connectedAccount } = useConnection();
 	const accountToQuery = account ?? connectedAccount;
-	const latestBlockNumber = useBlockNumber(chainId ?? 1);
+	const { blockNumber: latestBlockNumber } = useBlockNumber(chainId ?? 1);
 	const blockNumberToQuery = blockNumber ?? latestBlockNumber;
 	const { data: balance, ...delegated } = useQuery(["balance", accountToQuery, blockNumberToQuery], async () => {
 		const balance = await getBalance(chainId!, token, accountToQuery!, blockNumberToQuery);
