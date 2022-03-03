@@ -14,7 +14,7 @@ export const Title = styled.h2`
 `;
 
 export const ConnectButton = styled(PrimaryButton)`
-  margin-top: 2rem;
+  margin-top: 3rem;
   width: 200px;
   height: 50px;
   padding: 0;
