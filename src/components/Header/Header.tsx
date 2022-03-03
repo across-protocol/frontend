@@ -24,6 +24,7 @@ const LINKS = [
   { href: "/", name: "Bridge" },
   { href: "/pool", name: "Pool" },
   { href: "/about", name: "About" },
+  { href: "/transactions", name: "Transactions" },
 ];
 const MOBILE_ONLY_LINKS = [
   { href: "https://docs.across.to/bridge/", name: "Docs" },
@@ -34,11 +35,11 @@ const MOBILE_ONLY_LINKS = [
 const Header: React.FC = () => {
   const location = useLocation();
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const pathname = location.pathname;
+
   // each time we click a link from the mobile menu, we want to close it
   useEffect(() => {
     setMenuOpen(false);
-  }, [pathname]);
+  }, [location.pathname]);
 
   const toggleMenu = () => {
     setMenuOpen((oldOpen) => !oldOpen);

@@ -1,6 +1,6 @@
 import { FC, useContext } from "react";
 import { Switch, Route, useLocation } from "react-router-dom";
-import { Send, Confirmation, Pool, About } from "views";
+import { Send, Confirmation, Pool, About, Transactions } from "views";
 import { Header, SuperHeader } from "components";
 import { useConnection, useDeposits } from "state/hooks";
 import {
@@ -73,10 +73,8 @@ const Routes: FC<Props> = () => {
       )}
       <Header />
       <Switch>
-        {!process.env.REACT_APP_HIDE_POOL ? (
-          <Route exact path="/pool" component={Pool} />
-        ) : null}
-
+        <Route exact path="/transactions" component={Transactions} />
+        <Route exact path="/pool" component={Pool} />
         <Route exact path="/about" component={About} />
         <Route
           exact
