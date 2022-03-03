@@ -18,3 +18,7 @@ export function getBalance(chainId: ChainId, token: string, account: string, blo
 	const contract = clients.erc20.connect(token, provider);
 	return contract.balanceOf(account, { blockTag: blockNumber ?? "latest" })
 }
+
+export function getBalances(chainId: ChainId, tokens: string[], account: string, blockNumber?: number): Promise<ethers.BigNumber[]> {
+	return Promise.all(tokens.map(token => getBalance(chainId, token, account, blockNumber)));
+}
