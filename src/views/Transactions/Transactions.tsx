@@ -20,6 +20,8 @@ const Transactions = () => {
       {(!isConnected) && (
           <ConnectButton onClick={handleClick}>Connect Wallet</ConnectButton>
         )}
+
+        
     </Wrapper>
   );
 };
