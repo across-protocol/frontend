@@ -1,4 +1,4 @@
-import React, { FC, ReactElement } from "react";
+import  { FC, ReactElement } from "react";
 import { TableWrapper, Row, Body, HeadRow, Cell, Title } from "./Table.styles";
 
 export interface TableProps {
