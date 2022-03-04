@@ -1,7 +1,7 @@
 import { useQuery } from 'react-query';
 import { useConnection } from 'state/hooks';
 import { useBlockNumber } from './useBlockNumber';
-import { getBalance, getBalances } from 'utils';
+import { getBalance, getBalances, balanceQueryKey, balancesQueryKey } from 'utils';
 
 /**
  * @param token - The token to fetch the balance of.
@@ -15,7 +15,7 @@ export function useBalance(token: string, account?: string, blockNumber?: number
 	const accountToQuery = account ?? connectedAccount;
 	const { blockNumber: latestBlockNumber } = useBlockNumber(chainId);
 	const blockNumberToQuery = blockNumber ?? latestBlockNumber;
-	const { data: balance, ...delegated } = useQuery(["balance", token, accountToQuery, blockNumberToQuery], async () => {
+	const { data: balance, ...delegated } = useQuery(balanceQueryKey(chainId!, token, accountToQuery!, blockNumberToQuery), async () => {
 		const balance = await getBalance(chainId!, token, accountToQuery!, blockNumberToQuery);
 		return balance;
 	}, {
@@ -40,7 +40,7 @@ export function useBalances(tokens: string[], account?: string, blockNumber?: nu
 	const accountToQuery = account ?? connectedAccount;
 	const { blockNumber: latestBlockNumber } = useBlockNumber(chainId);
 	const blockNumberToQuery = blockNumber ?? latestBlockNumber;
-	const { data: balances, ...delegated } = useQuery(["balances", tokens, accountToQuery, blockNumberToQuery], async () => {
+	const { data: balances, ...delegated } = useQuery(balancesQueryKey(chainId!, tokens, accountToQuery!, blockNumberToQuery), async () => {
 		const balances = await getBalances(chainId!, tokens, accountToQuery!, blockNumberToQuery);
 		return balances;
 	}, {
