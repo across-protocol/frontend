@@ -1,0 +1,33 @@
+import styled from "@emotion/styled";
+import {
+  TableWrapper,
+  HeadRow,
+  Body,
+  Row,
+  Cell,
+} from "components/Table/Table.styles";
+
+export const Wrapper = styled.div`
+  margin-top: 2rem;
+`;
+
+export const Title = styled.h2`
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+`;
+
+export const StyledTableWrapper = styled(TableWrapper)`
+  background-color: inherit;
+`;
+
+export const StyledHeadRow = styled(HeadRow)`
+  background-color: #000000;
+`;
+
+export const StyledBody = styled(Body)``;
+
+export const StyledRow = styled(Row)``;
+
+export const StyledCell = styled(Cell)``;

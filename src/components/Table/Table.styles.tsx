@@ -89,13 +89,6 @@ export const Cell = styled.div<ICellStyled>`
   &:not(:first-of-type) {
     min-width: 150px;
   }
-  &:nth-of-type(4) {
-    flex: 1 2 550px;
-    word-break: break-word;
-    @media ${QUERIES.tabletAndUp} {
-      min-width: 250px;
-    }
-  }
 `;
 
 export const Body = styled.div`
