@@ -28,6 +28,8 @@ export const StyledHeadRow = styled(HeadRow)`
 
 export const StyledBody = styled(Body)``;
 
-export const StyledRow = styled(Row)``;
+export const StyledRow = styled(Row)`
+  background: rgba(255, 255, 255, 0.08);
+`;
 
 export const StyledCell = styled(Cell)``;

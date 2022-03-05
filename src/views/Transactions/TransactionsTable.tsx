@@ -47,7 +47,7 @@ const rows: IRow[] = [
   {
     cells: [
       {
-        size: "sm",
+        size: "md",
         value: "Feb 5th",
       },
       {
