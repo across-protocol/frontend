@@ -11,7 +11,7 @@ import {
 
 const hc: ICell[] = [
   {
-    size: "md",
+    size: "lg",
     value: "Deposit time",
   },
   {
@@ -48,8 +48,8 @@ const rows: IRow[] = [
   {
     cells: [
       {
-        size: "md",
-        value: "Feb 5th",
+        size: "lg",
+        value: "5 Feb 2022 - 5:41 AM",
       },
       {
         size: "sm",
@@ -84,8 +84,8 @@ const rows: IRow[] = [
   {
     cells: [
       {
-        size: "md",
-        value: "Feb 5th",
+        size: "lg",
+        value: "1 Feb 2022 - 8:22 PM",
       },
       {
         size: "sm",
@@ -120,8 +120,8 @@ const rows: IRow[] = [
   {
     cells: [
       {
-        size: "md",
-        value: "Feb 5th",
+        size: "lg",
+        value: "22 Jan 2022 - 8:08 AM",
       },
       {
         size: "sm",

@@ -77,10 +77,10 @@ interface ICellStyled {
 export const Cell = styled.div<ICellStyled>`
   flex: ${({ size = "sm" }) => {
     if (size === "xs") return "0 0 30px";
-    if (size === "sm" || size === undefined) return "0 0 60px";
-    if (size === "md") return "0 0 130px";
-    if (size === "lg") return "flex: 1 2 550px";
-    return "0 0 60px";
+    if (size === "md") return "1 0 130px";
+    if (size === "lg") return "1 1 250px";
+    if (size === "sm" || size === undefined) return "1 0 60px";
+    return "1 0 60px";
   }};
   margin: 0 8px;
   &:first-of-type {
