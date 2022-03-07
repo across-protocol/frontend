@@ -23,7 +23,11 @@ const Transactions = () => {
       {!isConnected && (
         <ConnectButton onClick={handleClick}>Connect Wallet</ConnectButton>
       )}
-      <TransactionsTable />
+      {isConnected && (
+        <>
+          <TransactionsTable />
+        </>
+      )}
     </Wrapper>
   );
 };
