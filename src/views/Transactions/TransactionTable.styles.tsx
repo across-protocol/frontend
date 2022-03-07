@@ -12,7 +12,7 @@ export const Wrapper = styled.div`
 `;
 
 export const Title = styled.h2`
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1rem;
@@ -23,7 +23,7 @@ export const StyledTableWrapper = styled(TableWrapper)`
 `;
 
 export const StyledHeadRow = styled(HeadRow)`
-  background-color: #000000;
+  background-color: var(--color-black);
 `;
 
 export const StyledBody = styled(Body)``;
@@ -55,7 +55,7 @@ export const TableLogo = styled.img`
 `;
 
 export const TableLink = styled.a`
-  color: #6cf9d8;
+  color: var(--color-primary);
   &:hover {
     opacity: 0.7;
   }
