@@ -22,6 +22,10 @@ export function shortenAddressLong(address: string, numDots = 3): string {
   return `${address.substr(0, 10)}${dots}${address.substr(-10)}`;
 }
 
+export function shortenTransactionHash(hash: string): string {
+  return `${hash.substring(0, 5)}...`;
+}
+
 // this actually will round up in some cases
 export const numberFormatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 4,

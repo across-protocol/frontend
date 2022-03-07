@@ -53,3 +53,10 @@ export const TableLogo = styled.img`
   height: 15px;
   margin-right: 4px;
 `;
+
+export const TableLink = styled.a`
+  color: #6cf9d8;
+  &:hover {
+    opacity: 0.7;
+  }
+`;

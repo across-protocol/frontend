@@ -8,7 +8,10 @@ import {
   Wrapper,
   Title,
   TableLogo,
+  TableLink,
 } from "./TransactionTable.styles";
+import { shortenTransactionHash } from "utils/format";
+
 import arbLogo from "assets/arbitrum-logo.svg";
 import umaLogo from "assets/UMA-round.svg";
 import ethLogo from "assets/ethereum-logo.svg";
@@ -101,7 +104,17 @@ const rows: IRow[] = [
       },
       {
         size: "sm",
-        value: "0x123...",
+        value: (
+          <TableLink
+            href="https://etherscan.io/address/0x0000000000000000000000000000000000000000"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {shortenTransactionHash(
+              "0x0000000000000000000000000000000000000000"
+            )}
+          </TableLink>
+        ),
       },
     ],
   },
@@ -149,7 +162,17 @@ const rows: IRow[] = [
       },
       {
         size: "sm",
-        value: "0x123...",
+        value: (
+          <TableLink
+            href="https://etherscan.io/address/0x0000000000000000000000000000000000000000"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {shortenTransactionHash(
+              "0x0000000000000000000000000000000000000000"
+            )}
+          </TableLink>
+        ),
       },
     ],
   },
@@ -197,7 +220,17 @@ const rows: IRow[] = [
       },
       {
         size: "sm",
-        value: "0x123...",
+        value: (
+          <TableLink
+            href="https://etherscan.io/address/0x0000000000000000000000000000000000000000"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {shortenTransactionHash(
+              "0x0000000000000000000000000000000000000000"
+            )}
+          </TableLink>
+        ),
       },
     ],
   },
