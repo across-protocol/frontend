@@ -1,5 +1,14 @@
 import { ChainId } from "./constants";
 
+/**
+ * Generates query keys for react-query `useQuery` hook, used in the `useLatestBlock` hook. 
+ * @param chainId The chain Id of the chain to poll for new blocks.
+ * @returns 
+ */
+export function latestBlockQueryKey(chainId?: ChainId) {
+	return ["block", chainId];
+}
+
 
 /**
  * Generates query keys for react-query `useQuery` hook, used in the `useBalance` hook.
@@ -30,6 +39,6 @@ export function balancesQueryKey(chainId: ChainId, tokens: string[], account: st
  * @param blockNumber
  * @returns An array of query keys for react-query `useQuery` hook.
  */
-export function bridgeFeesQueryKey(chainId: ChainId, tokenSymbol: string, blockNumber: number) {
+export function bridgeFeesQueryKey(chainId: ChainId, tokenSymbol: string, blockNumber?: number) {
 	return ['bridgeFees', chainId, tokenSymbol, blockNumber];
 }

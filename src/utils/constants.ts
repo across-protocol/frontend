@@ -389,6 +389,7 @@ type ChainInfo = {
     symbol: string;
     decimals: number;
   };
+  pollingInterval?: number;
 };
 
 const defaultConstructExplorerLink =

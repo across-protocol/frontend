@@ -1,8 +1,8 @@
 import { useQuery } from 'react-query';
 import { ethers } from 'ethers';
-import { bridgeFeesQueryKey, getBridgeFees, PROVIDERS } from 'utils';
+import { bridgeFeesQueryKey, getBridgeFees } from 'utils';
 import { useConnection } from 'state/hooks';
-import { useBlockNumber } from './useBlockNumber';
+import { useBlock } from './useBlock';
 
 
 
@@ -15,13 +15,12 @@ import { useBlockNumber } from './useBlockNumber';
  */
 export function useBridgeFees(amount: ethers.BigNumber, tokenSymbol: string) {
 	const { chainId } = useConnection();
-	const { blockNumber } = useBlockNumber(chainId);
-	const { data: fees, ...delegated } = useQuery(bridgeFeesQueryKey(chainId!, tokenSymbol, blockNumber!), async () => {
-		const provider = await PROVIDERS[chainId!]();
-		const blockTimestamp = await provider.getBlock(blockNumber!).then(block => block.timestamp);
-		return getBridgeFees({ amount, tokenSymbol, blockTimestamp });
+	const { block } = useBlock(chainId);
+
+	const { data: fees, ...delegated } = useQuery(bridgeFeesQueryKey(chainId!, tokenSymbol, block?.number), async () => {
+		return getBridgeFees({ amount, tokenSymbol, blockTimestamp: block!.timestamp });
 	}, {
-		enabled: !!blockNumber && !!chainId,
+		enabled: !!block && !!chainId,
 	});
 	return {
 		fees,

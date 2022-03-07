@@ -146,13 +146,6 @@ type GetBridgeFeesResult = BridgeFees & {
   isLiquidityInsufficient: boolean;
 };
 
-class FailedFeeCalculationError extends Error {
-  constructor() {
-    super();
-    this.name = this.constructor.name;
-    this.message = `Failed to calculate bridge fees`;
-  }
-}
 /**
  * 
  * @param amount - amount to bridge

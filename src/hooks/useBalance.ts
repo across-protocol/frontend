@@ -1,6 +1,6 @@
 import { useQuery } from 'react-query';
 import { useConnection } from 'state/hooks';
-import { useBlockNumber } from './useBlockNumber';
+import { useBlock } from './useBlock';
 import { getBalance, getBalances, balanceQueryKey, balancesQueryKey } from 'utils';
 
 /**
@@ -13,8 +13,8 @@ import { getBalance, getBalances, balanceQueryKey, balancesQueryKey } from 'util
 export function useBalance(token: string, account?: string, blockNumber?: number) {
 	const { chainId, account: connectedAccount } = useConnection();
 	const accountToQuery = account ?? connectedAccount;
-	const { blockNumber: latestBlockNumber } = useBlockNumber(chainId);
-	const blockNumberToQuery = blockNumber ?? latestBlockNumber;
+	const { block: latestBlock } = useBlock(chainId);
+	const blockNumberToQuery = blockNumber ?? latestBlock?.number;
 	const { data: balance, ...delegated } = useQuery(balanceQueryKey(chainId!, token, accountToQuery!, blockNumberToQuery), async () => {
 		const balance = await getBalance(chainId!, token, accountToQuery!, blockNumberToQuery);
 		return balance;
@@ -38,13 +38,15 @@ export function useBalance(token: string, account?: string, blockNumber?: number
 export function useBalances(tokens: string[], account?: string, blockNumber?: number) {
 	const { chainId, account: connectedAccount } = useConnection();
 	const accountToQuery = account ?? connectedAccount;
-	const { blockNumber: latestBlockNumber } = useBlockNumber(chainId);
-	const blockNumberToQuery = blockNumber ?? latestBlockNumber;
+	const { block: latestBlock } = useBlock(chainId);
+	const blockNumberToQuery = blockNumber ?? latestBlock?.number;
+	// To fetch balances, we need a list of tokens, an account to get balances of, and a specified chainId.
+	const enabledQuery = !!chainId && !!accountToQuery && tokens.length > 0
 	const { data: balances, ...delegated } = useQuery(balancesQueryKey(chainId!, tokens, accountToQuery!, blockNumberToQuery), async () => {
 		const balances = await getBalances(chainId!, tokens, accountToQuery!, blockNumberToQuery);
 		return balances;
 	}, {
-		enabled: !!chainId && !!accountToQuery && tokens.length > 0,
+		enabled: enabledQuery,
 		// We already re-fetch when the block change, so we don't need to re-fetch on an interval.
 		refetchInterval: false
 	});
