@@ -30,6 +30,16 @@ export const StyledBody = styled(Body)``;
 
 export const StyledRow = styled(Row)`
   background: rgba(255, 255, 255, 0.08);
+  /* Don't do zebra */
+  &:first-of-type {
+    margin-bottom: 2px;
+  }
+  &:not(:first-of-type) {
+    margin: 2px 0;
+  }
+  &:nth-of-type(2n) {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
 `;
 
 export const StyledCell = styled(Cell)``;

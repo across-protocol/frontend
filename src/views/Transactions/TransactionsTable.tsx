@@ -8,6 +8,7 @@ import {
   Wrapper,
   Title,
 } from "./TransactionTable.styles";
+
 const hc: ICell[] = [
   {
     size: "md",
@@ -44,6 +45,78 @@ const hc: ICell[] = [
 ];
 
 const rows: IRow[] = [
+  {
+    cells: [
+      {
+        size: "md",
+        value: "Feb 5th",
+      },
+      {
+        size: "sm",
+        value: "Filled",
+      },
+      {
+        size: "sm",
+        value: "100%",
+      },
+      {
+        size: "sm",
+        value: "Arbitrum",
+      },
+      {
+        size: "sm",
+        value: "Ethereum",
+      },
+      {
+        size: "sm",
+        value: "UMA",
+      },
+      {
+        size: "sm",
+        value: "5000",
+      },
+      {
+        size: "sm",
+        value: "0x123...",
+      },
+    ],
+  },
+  {
+    cells: [
+      {
+        size: "md",
+        value: "Feb 5th",
+      },
+      {
+        size: "sm",
+        value: "Filled",
+      },
+      {
+        size: "sm",
+        value: "100%",
+      },
+      {
+        size: "sm",
+        value: "Arbitrum",
+      },
+      {
+        size: "sm",
+        value: "Ethereum",
+      },
+      {
+        size: "sm",
+        value: "UMA",
+      },
+      {
+        size: "sm",
+        value: "5000",
+      },
+      {
+        size: "sm",
+        value: "0x123...",
+      },
+    ],
+  },
   {
     cells: [
       {
