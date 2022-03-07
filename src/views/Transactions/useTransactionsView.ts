@@ -4,7 +4,7 @@ import { onboard } from "utils";
 
 export default function useTransactionsView() {
   const [transactions] = useState([]);
-  const { provider, chainId, isConnected } = useConnection();
+  const { provider, chainId, isConnected, account } = useConnection();
   const { init } = onboard;
 
   return {
@@ -12,6 +12,7 @@ export default function useTransactionsView() {
     provider,
     chainId,
     isConnected,
-    initOnboard: init
+    account,
+    initOnboard: init,
   };
 }

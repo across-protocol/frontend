@@ -1,8 +1,10 @@
-import { Wrapper, Title, ConnectButton } from "./Transactions.styles";
+import { Wrapper, Title, ConnectButton, Account } from "./Transactions.styles";
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
+import { shortenAddressLong } from "utils/format";
+
 const Transactions = () => {
-  const { provider, isConnected, initOnboard } = useTransactionsView();
+  const { provider, isConnected, initOnboard, account } = useTransactionsView();
 
   const handleClick = () => {
     if (!provider) {
@@ -12,7 +14,12 @@ const Transactions = () => {
 
   return (
     <Wrapper>
-      <Title>Transactions</Title>
+      <Title>
+        Transactions
+        {isConnected && account && (
+          <Account>({shortenAddressLong(account, 6)})</Account>
+        )}
+      </Title>
       {!isConnected && (
         <ConnectButton onClick={handleClick}>Connect Wallet</ConnectButton>
       )}

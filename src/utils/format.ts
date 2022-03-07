@@ -14,11 +14,12 @@ export function shortenAddress(address: string): string {
   return `${address.substr(0, 4)}...${address.substr(-4)}`;
 }
 
-export function shortenAddressLong(address: string): string {
+export function shortenAddressLong(address: string, numDots = 3): string {
   if (!isValidString(address)) {
     return "";
   }
-  return `${address.substr(0, 10)}...${address.substr(-10)}`;
+  const dots = new Array(numDots + 1).join(".");
+  return `${address.substr(0, 10)}${dots}${address.substr(-10)}`;
 }
 
 // this actually will round up in some cases
