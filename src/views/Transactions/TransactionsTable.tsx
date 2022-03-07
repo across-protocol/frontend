@@ -7,40 +7,52 @@ import {
   StyledCell,
   Wrapper,
   Title,
+  TableLogo,
 } from "./TransactionTable.styles";
+import arbLogo from "assets/arbitrum-logo.svg";
+import umaLogo from "assets/UMA-round.svg";
+import ethLogo from "assets/ethereum-logo.svg";
 
 const hc: ICell[] = [
   {
     size: "lg",
     value: "Deposit time",
+    cellClassName: "header-cell",
   },
   {
     size: "sm",
     value: "Status",
+    cellClassName: "header-cell",
   },
   {
     size: "sm",
     value: "Filled %",
+    cellClassName: "header-cell",
   },
   {
     size: "sm",
     value: "Source",
+    cellClassName: "header-cell",
   },
   {
     size: "sm",
     value: "Destination",
+    cellClassName: "header-cell",
   },
   {
     size: "sm",
     value: "Asset",
+    cellClassName: "header-cell",
   },
   {
     size: "sm",
     value: "Amount",
+    cellClassName: "header-cell",
   },
   {
     size: "sm",
     value: "Deposit tx",
+    cellClassName: "header-cell",
   },
 ];
 
@@ -61,15 +73,27 @@ const rows: IRow[] = [
       },
       {
         size: "sm",
-        value: "Arbitrum",
+        value: (
+          <>
+            <TableLogo src={arbLogo} alt="arbitrum_logo" /> Arbitrum
+          </>
+        ),
       },
       {
         size: "sm",
-        value: "Ethereum",
+        value: (
+          <>
+            <TableLogo src={ethLogo} alt="arbitrum_logo" /> Ethereum
+          </>
+        ),
       },
       {
         size: "sm",
-        value: "UMA",
+        value: (
+          <>
+            <TableLogo src={umaLogo} alt="arbitrum_logo" /> UMA
+          </>
+        ),
       },
       {
         size: "sm",
@@ -97,15 +121,27 @@ const rows: IRow[] = [
       },
       {
         size: "sm",
-        value: "Arbitrum",
+        value: (
+          <>
+            <TableLogo src={arbLogo} alt="arbitrum_logo" /> Arbitrum
+          </>
+        ),
       },
       {
         size: "sm",
-        value: "Ethereum",
+        value: (
+          <>
+            <TableLogo src={ethLogo} alt="arbitrum_logo" /> Ethereum
+          </>
+        ),
       },
       {
         size: "sm",
-        value: "UMA",
+        value: (
+          <>
+            <TableLogo src={umaLogo} alt="arbitrum_logo" /> UMA
+          </>
+        ),
       },
       {
         size: "sm",
@@ -133,15 +169,27 @@ const rows: IRow[] = [
       },
       {
         size: "sm",
-        value: "Arbitrum",
+        value: (
+          <>
+            <TableLogo src={arbLogo} alt="arbitrum_logo" /> Arbitrum
+          </>
+        ),
       },
       {
         size: "sm",
-        value: "Ethereum",
+        value: (
+          <>
+            <TableLogo src={ethLogo} alt="arbitrum_logo" /> Ethereum
+          </>
+        ),
       },
       {
         size: "sm",
-        value: "UMA",
+        value: (
+          <>
+            <TableLogo src={umaLogo} alt="arbitrum_logo" /> UMA
+          </>
+        ),
       },
       {
         size: "sm",

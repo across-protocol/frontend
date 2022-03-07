@@ -42,4 +42,14 @@ export const StyledRow = styled(Row)`
   }
 `;
 
-export const StyledCell = styled(Cell)``;
+export const StyledCell = styled(Cell)`
+  &.header-cell {
+    font-size: ${16 / 16}rem;
+    font-weight: 500;
+  }
+`;
+
+export const TableLogo = styled.img`
+  height: 15px;
+  margin-right: 4px;
+`;
