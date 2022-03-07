@@ -23,7 +23,6 @@ import MobileMenu from "./MobileMenu";
 const LINKS = [
   { href: "/", name: "Bridge" },
   { href: "/pool", name: "Pool" },
-  { href: "/about", name: "About" },
   { href: "/transactions", name: "Transactions" },
 ];
 const MOBILE_ONLY_LINKS = [
