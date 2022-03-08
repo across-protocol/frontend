@@ -39,7 +39,10 @@ export function shortenString(
   delimiter: string,
   numChars: number
 ) {
-  return `${str.substring(0, numChars)}${delimiter}${str.substring(-numChars)}`;
+  return `${str.substring(0, numChars)}${delimiter}${str.substring(
+    str.length - numChars,
+    str.length
+  )}`;
 }
 
 export function shortenTransactionHash(hash: string): string {
