@@ -24,7 +24,7 @@ export function shortenAddress(
   if (!isValidString(address)) {
     return "";
   }
-  return shortenAddress(address, delimiter, numChars);
+  return shortenString(address, delimiter, numChars);
 }
 
 /**

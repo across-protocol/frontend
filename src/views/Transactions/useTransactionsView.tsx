@@ -241,8 +241,8 @@ export default function useTransactionsView() {
     chainId,
     isConnected,
     account,
-    initOnboard: init,
     headerCells: hc,
     rows,
+    initOnboard: init,
   };
 }

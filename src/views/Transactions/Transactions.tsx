@@ -4,14 +4,8 @@ import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
 
 const Transactions = () => {
-  const { provider, isConnected, initOnboard, account, rows, headerCells } =
+  const { isConnected, initOnboard, account, rows, headerCells } =
     useTransactionsView();
-
-  const handleClick = () => {
-    if (!provider) {
-      initOnboard();
-    }
-  };
 
   return (
     <Wrapper>
@@ -22,7 +16,7 @@ const Transactions = () => {
         )}
       </Title>
       {!isConnected && (
-        <ConnectButton onClick={handleClick}>Connect Wallet</ConnectButton>
+        <ConnectButton onClick={initOnboard}>Connect Wallet</ConnectButton>
       )}
       {isConnected && (
         <>
