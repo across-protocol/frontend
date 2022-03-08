@@ -1,18 +1,6 @@
 import styled from "@emotion/styled";
 import { CellSize } from "./Table";
-
-const BREAKPOINTS = {
-  tabletMin: 550,
-  laptopMin: 1100,
-  desktopMin: 1500,
-};
-
-const QUERIES = {
-  tabletAndUp: `(min-width: ${BREAKPOINTS.tabletMin / 16}rem)`,
-  laptopAndUp: `(min-width: ${BREAKPOINTS.laptopMin / 16}rem)`,
-  desktopAndUp: `(min-width: ${BREAKPOINTS.desktopMin / 16}rem)`,
-  tabletAndDown: `(max-width: ${(BREAKPOINTS.laptopMin - 1) / 16}rem)`,
-};
+import { QUERIES } from "utils";
 
 export const TableWrapper = styled.div`
   width: 100%;
@@ -53,20 +41,20 @@ export const NameHeading = styled.h6`
 
 export const Row = styled.div`
   width: 100%;
-  background-color: #f5f5f5;
+  background-color: var(--color-gray-150);
   display: flex;
   align-items: center;
   padding: 15px 0;
   transition: all linear 0.2s;
   &:nth-of-type(2n) {
-    background-color: #ffffff;
+    background-color: var(--color-white);
   }
 `;
 
 export const HeadRow = styled(Row)`
   font-weight: 600;
   cursor: default;
-  background: #ffffff;
+  background: var(--color-white);
   margin-bottom: 0;
 `;
 
@@ -96,7 +84,7 @@ export const Body = styled.div`
 `;
 
 export const Title = styled.h3`
-  background-color: #ffffff;
+  background-color: var(--color-white);
   margin-bottom: 0;
   padding-top: 1rem;
   padding-left: 0.75rem;
