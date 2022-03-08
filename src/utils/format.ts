@@ -7,19 +7,39 @@ export function isValidString(s: string | null | undefined | ""): s is string {
   }
   return false;
 }
-export function shortenAddress(address: string): string {
+
+/**
+ *
+ * @param address valid web3 address
+ * @param delimiter string to put between your split string, eg: "...", "---"
+ * @param numChars number of characters to keep on each part of the string
+ * @returns
+ */
+
+export function shortenAddress(
+  address: string,
+  delimiter: string,
+  numChars: number
+): string {
   if (!isValidString(address)) {
     return "";
   }
-  return `${address.substr(0, 4)}...${address.substr(-4)}`;
+  return shortenAddress(address, delimiter, numChars);
 }
 
-export function shortenAddressLong(address: string, numDots = 3): string {
-  if (!isValidString(address)) {
-    return "";
-  }
-  const dots = new Array(numDots + 1).join(".");
-  return `${address.substr(0, 10)}${dots}${address.substr(-10)}`;
+/**
+ *
+ * @param str string to shorten
+ * @param delimiter string to put between your split string, eg: "...", "---"
+ * @param numChars number of characters to keep on each part of the string
+ * @returns
+ */
+export function shortenString(
+  str: string,
+  delimiter: string,
+  numChars: number
+) {
+  return `${str.substring(0, numChars)}${delimiter}${str.substring(-numChars)}`;
 }
 
 export function shortenTransactionHash(hash: string): string {

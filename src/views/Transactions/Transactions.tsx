@@ -1,7 +1,7 @@
 import { Wrapper, Title, ConnectButton, Account } from "./Transactions.styles";
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
-import { shortenAddressLong } from "utils/format";
+import { shortenAddress } from "utils/format";
 
 const Transactions = () => {
   const { provider, isConnected, initOnboard, account, rows, headerCells } =
@@ -18,7 +18,7 @@ const Transactions = () => {
       <Title>
         Transactions
         {isConnected && account && (
-          <Account>({shortenAddressLong(account, 6)})</Account>
+          <Account>({shortenAddress(account, "......", 6)})</Account>
         )}
       </Title>
       {!isConnected && (
