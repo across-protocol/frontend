@@ -4,7 +4,8 @@ import TransactionsTable from "./TransactionsTable";
 import { shortenAddressLong } from "utils/format";
 
 const Transactions = () => {
-  const { provider, isConnected, initOnboard, account } = useTransactionsView();
+  const { provider, isConnected, initOnboard, account, rows, headerCells } =
+    useTransactionsView();
 
   const handleClick = () => {
     if (!provider) {
@@ -25,7 +26,7 @@ const Transactions = () => {
       )}
       {isConnected && (
         <>
-          <TransactionsTable />
+          <TransactionsTable rows={rows} headerCells={headerCells} />
         </>
       )}
     </Wrapper>
