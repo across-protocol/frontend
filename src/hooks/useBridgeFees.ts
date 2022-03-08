@@ -16,11 +16,12 @@ import { useBlock } from './useBlock';
 export function useBridgeFees(amount: ethers.BigNumber, tokenSymbol: string) {
 	const { chainId } = useConnection();
 	const { block } = useBlock(chainId);
-
-	const { data: fees, ...delegated } = useQuery(bridgeFeesQueryKey(chainId!, tokenSymbol, block?.number), async () => {
+	const enabledQuery = !!chainId && !!block;
+	const queryKey = enabledQuery ? bridgeFeesQueryKey(tokenSymbol, amount, chainId, block.number) : "DISABLED_BRIDGE_FEE_QUERY";
+	const { data: fees, ...delegated } = useQuery(queryKey, async () => {
 		return getBridgeFees({ amount, tokenSymbol, blockTimestamp: block!.timestamp });
 	}, {
-		enabled: !!block && !!chainId,
+		enabled: enabledQuery,
 	});
 	return {
 		fees,
