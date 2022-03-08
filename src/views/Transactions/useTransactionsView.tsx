@@ -2,7 +2,6 @@ import { TableLogo, TableLink } from "./TransactionTable.styles";
 import { shortenTransactionHash } from "utils/format";
 
 import { ICell, IRow } from "components/Table/Table";
-import { useState } from "react";
 import { useConnection } from "state/hooks";
 import { onboard } from "utils";
 
@@ -231,12 +230,10 @@ const rows: IRow[] = [
 ];
 
 export default function useTransactionsView() {
-  const [transactions] = useState([]);
   const { provider, chainId, isConnected, account } = useConnection();
   const { init } = onboard;
 
   return {
-    transactions,
     provider,
     chainId,
     isConnected,
