@@ -92,7 +92,6 @@ export const Cell = styled.div<ICellStyled>`
 `;
 
 export const Body = styled.div`
-  /* padding: 15px 0; */
   background-color: var(--gray-300);
 `;
 

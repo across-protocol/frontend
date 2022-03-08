@@ -13,7 +13,7 @@ export const Wrapper = styled.div`
 
 export const Title = styled.h2`
   color: var(--color-white);
-  font-size: 1.25rem;
+  font-size: ${20 / 16}rem;
   font-weight: 600;
   margin-bottom: 1rem;
 `;
