@@ -12,16 +12,16 @@ import {
 
 interface Props {
   rows: IRow[];
-  headerCells: ICell[];
+  headers: ICell[];
 }
 
-const TransactionsTable: FC<Props> = ({ rows, headerCells }) => {
+const TransactionsTable: FC<Props> = ({ rows, headers }) => {
   return (
     <Wrapper>
       <Title>History</Title>
       <StyledTableWrapper>
         <StyledHeadRow>
-          {headerCells.map((cell, index) => {
+          {headers.map((cell, index) => {
             return (
               <StyledCell
                 key={index}
