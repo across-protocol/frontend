@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState, useEffect } from "react";
 import {
   StyledTableWrapper,
   StyledHeadRow,
@@ -9,11 +9,20 @@ import {
   Title,
 } from "./TransactionTable.styles";
 import formatTransactions from "./formatTransactions";
+import { ICell, IRow } from "components/Table/Table";
 
 interface Props {}
 
 const TransactionsTable: FC<Props> = () => {
-  const { rows, headers } = formatTransactions();
+  const [rows, setRows] = useState<IRow[]>([]);
+  const [headers, setHeaders] = useState<ICell[]>([]);
+  // Only run this when transactions changes.
+  // Stubbed in should only need to run once.
+  useEffect(() => {
+    const { rows: r, headers: h } = formatTransactions();
+    setHeaders(h);
+    setRows(r);
+  }, []);
 
   return (
     <Wrapper>
