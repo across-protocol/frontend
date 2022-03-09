@@ -134,6 +134,46 @@ export async function getLpFee(
   return result;
 }
 
+
+type GetBridgeFeesArgs = {
+  amount: ethers.BigNumber;
+  tokenSymbol: string;
+  blockTimestamp: number;
+};
+
+type GetBridgeFeesResult = BridgeFees & {
+  isAmountTooLow: boolean;
+  isLiquidityInsufficient: boolean;
+};
+
+/**
+ * 
+ * @param amount - amount to bridge
+ * @param tokenSymbol - symbol of the token to bridge
+ * @param blockTimestamp - timestamp of the block to use for calculating fees on
+ * @returns Returns the `slowRelayFee`, `instantRelayFee`, and `lpFee` fees for bridging the given amount of tokens, along with an `isAmountTooLow` flag indicating whether the amount is too low to bridge and an `isLiquidityInsufficient` flag indicating whether the liquidity is insufficient. 
+ */
+export async function getBridgeFees({ amount, tokenSymbol, blockTimestamp }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
+  const { instantRelayFee, slowRelayFee, isAmountTooLow } =
+    await getRelayFees(tokenSymbol, amount);
+
+  const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
+    tokenSymbol,
+    amount,
+    blockTimestamp
+  );
+
+  return {
+    instantRelayFee,
+    slowRelayFee,
+    lpFee,
+    isAmountTooLow,
+    isLiquidityInsufficient,
+  };
+}
+
+
+
 export const getEstimatedDepositTime = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.OPTIMISM:
