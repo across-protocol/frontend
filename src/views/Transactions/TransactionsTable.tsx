@@ -1,5 +1,4 @@
 import { FC } from "react";
-import { ICell, IRow } from "components/Table/Table";
 import {
   StyledTableWrapper,
   StyledHeadRow,
@@ -9,13 +8,13 @@ import {
   Wrapper,
   Title,
 } from "./TransactionTable.styles";
+import formatTransactions from "./formatTransactions";
 
-interface Props {
-  rows: IRow[];
-  headers: ICell[];
-}
+interface Props {}
 
-const TransactionsTable: FC<Props> = ({ rows, headers }) => {
+const TransactionsTable: FC<Props> = () => {
+  const { rows, headers } = formatTransactions();
+
   return (
     <Wrapper>
       <Title>History</Title>

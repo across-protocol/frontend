@@ -2,11 +2,9 @@ import { Wrapper, Title, ConnectButton, Account } from "./Transactions.styles";
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
-import formatTransactions from "./formatTransactions";
 
 const Transactions = () => {
   const { isConnected, initOnboard, account } = useTransactionsView();
-  const { rows, headers } = formatTransactions();
 
   return (
     <Wrapper>
@@ -21,7 +19,7 @@ const Transactions = () => {
       )}
       {isConnected && (
         <>
-          <TransactionsTable rows={rows} headers={headers} />
+          <TransactionsTable />
         </>
       )}
     </Wrapper>
