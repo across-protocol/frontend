@@ -8,7 +8,7 @@ import {
   Wrapper,
   Title,
 } from "./TransactionTable.styles";
-import formatTransactions from "./formatTransactions";
+import { formatTransactions } from "./format";
 import { ICell, IRow } from "components/Table/Table";
 
 interface Props {}

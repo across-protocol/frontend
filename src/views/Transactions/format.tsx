@@ -8,7 +8,7 @@ import ethLogo from "assets/ethereum-logo.svg";
 
 // Stub of function.
 // Will take View Model Transaction as arg
-export default function formatTransactions() {
+export function formatTransactions() {
   const headers: ICell[] = [
     {
       size: "lg",
