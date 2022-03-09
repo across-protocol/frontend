@@ -15,7 +15,6 @@ import { poolClient } from "state/poolsApi";
 import { toWeiSafe } from "utils/weiMath";
 import { useERC20 } from "hooks";
 import { ethers } from "ethers";
-import { clients } from "@uma/sdk";
 import { addEtherscan } from "utils/notify";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { DEFAULT_TO_CHAIN_ID, CHAINS, switchChain } from "utils";
@@ -66,32 +65,39 @@ const AddLiquidityForm: FC<Props> = ({
 
   const { init } = onboard;
   const { isConnected, provider, signer, notify, account } = useConnection();
-  const { approve } = useERC20(tokenAddress);
+  const { approve, allowance: getAllowance } = useERC20(tokenAddress);
 
+  const [allowance, setAllowance] = useState("0");
   const [userNeedsToApprove, setUserNeedsToApprove] = useState(false);
   const [txSubmitted, setTxSubmitted] = useState(false);
   const [updateEthBalance] = api.endpoints.ethBalance.useLazyQuery();
 
-  const checkIfUserHasToApprove = useCallback(async () => {
-    if (signer && account) {
-      try {
-        const token = clients.erc20.connect(tokenAddress, signer);
-        const allowance = await token.allowance(account, bridgeAddress);
+  const updateAllowance = useCallback(async () => {
+    if (!account || !provider) return;
+    const allowance = await getAllowance({
+      account,
+      spender: bridgeAddress,
+      provider,
+    });
+    setAllowance(allowance.toString());
+  }, [setAllowance, getAllowance, provider, account, bridgeAddress]);
 
-        const hasToApprove = allowance.lt(balance);
-        if (hasToApprove) {
-          setUserNeedsToApprove(true);
-        }
-      } catch (err) {
-        console.error("err in check approval call", err);
-      }
-    }
-  }, [account, tokenAddress, bridgeAddress, signer, balance]);
-
+  // trigger update allowance, only if bridge/token changes. ignore eth.
   useEffect(() => {
-    if (isConnected && symbol !== "ETH" && !wrongNetwork)
-      checkIfUserHasToApprove();
-  }, [isConnected, symbol, checkIfUserHasToApprove, wrongNetwork]);
+    if (isConnected && symbol !== "ETH" && !wrongNetwork) updateAllowance();
+  }, [isConnected, symbol, updateAllowance, wrongNetwork]);
+
+  // check if user needs to approve based on amount entered in form or a change in allowance
+  useEffect(() => {
+    try {
+      const weiAmount = toWeiSafe(amount, decimals);
+      const hasToApprove = weiAmount.gt(allowance);
+      setUserNeedsToApprove(hasToApprove);
+    } catch (err) {
+      // do nothing. this happens when users input is not a number and causes toWei to throw. if we dont
+      // catch here, app will crash when user enters something like "0."
+    }
+  }, [amount, allowance, symbol, decimals]);
 
   const handleApprove = async () => {
     try {
@@ -108,10 +114,16 @@ const AddLiquidityForm: FC<Props> = ({
 
         emitter.on("txConfirmed", () => {
           notify.unsubscribe(tx.hash);
-          setTxSubmitted(false);
-          setUserNeedsToApprove(false);
           if (account) {
-            setTimeout(() => updateEthBalance({ chainId: 1, account }), 15000);
+            setTimeout(() => {
+              // these need to be delayed, because our providers need time to catch up with notifyjs.
+              // If we don't wait then these calls will fail to update correctly, leaving the user to have to refresh.
+              setTxSubmitted(false);
+              updateAllowance().catch((err) =>
+                console.error("Error checking approval:", err)
+              );
+              updateEthBalance({ chainId: 1, account });
+            }, 15000);
           }
         });
 

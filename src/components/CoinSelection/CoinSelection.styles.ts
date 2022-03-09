@@ -11,7 +11,9 @@ export const Wrapper = styled.div`
   flex-direction: column;
 `;
 // User agents wars, so have to check for chrome too
-const isSafari = navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0
+const isSafari =
+  navigator.userAgent.search("Safari") >= 0 &&
+  navigator.userAgent.search("Chrome") < 0;
 export const RoundBox = styled(UnstyledBox)`
   --color: var(--color-white);
   --outline-color: var(--color-primary);
@@ -75,7 +77,8 @@ export const Menu = styled.ul<MenuProps>`
   right: 0;
   padding-top: 10px;
   transform: translateY(50%);
-  box-shadow: ${({ isOpen }) => (isOpen ? `0px 160px 8px 8px hsla(${COLORS.gray[500]} / 0.2)` : "none")};
+  box-shadow: ${({ isOpen }) =>
+    isOpen ? `0px 160px 8px 8px hsla(${COLORS.gray[500]} / 0.2)` : "none"};
   list-style: none;
   display: flex;
   flex-direction: column;
