@@ -7,10 +7,16 @@ export const Wrapper = styled.div`
   padding: 2rem;
 `;
 
-export const Title = styled.h2`
+export const Title = styled.div`
   font-size: ${30 / 16}rem;
   line-height: ${32 / 16}rem;
   font-weight: 700;
+`;
+
+export const Account = styled.span`
+  font-size: ${16 / 16}rem;
+  font-weight: 400;
+  margin-left: 16px;
 `;
 
 export const ConnectButton = styled(PrimaryButton)`

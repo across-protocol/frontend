@@ -68,7 +68,7 @@ const Wallet: FC = () => {
           </div>
           <div>{CHAINS[chainId ?? 1].name}</div>
         </Info>
-        <Account>{shortenAddress(account ?? "")}</Account>
+        <Account>{shortenAddress(account ?? "", "...", 4)}</Account>
       </Wrapper>
       {isOpen && (
         <WalletModal>

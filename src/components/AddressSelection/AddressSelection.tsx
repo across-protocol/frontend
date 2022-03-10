@@ -112,7 +112,9 @@ const AddressSelection: React.FC = () => {
                       ? "Mainnet"
                       : selectedItem?.name}
                   </ToggleChainName>
-                  {toAddress && <Address>{shortenAddress(toAddress)}</Address>}
+                  {toAddress && (
+                    <Address>{shortenAddress(toAddress, "...", 4)}</Address>
+                  )}
                 </div>
                 <ToggleIcon />
               </ToggleButton>
