@@ -9,6 +9,7 @@ import {
 
 export const Wrapper = styled.div`
   margin-top: 2rem;
+  margin-bottom: 5rem;
 `;
 
 export const Title = styled.h2`
