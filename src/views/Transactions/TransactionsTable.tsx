@@ -8,27 +8,18 @@ import {
   Wrapper,
   Title,
 } from "./TransactionTable.styles";
-import { formatTransactions } from "./format";
 import { ICell, IRow } from "components/Table/Table";
 
-interface Props {}
+interface Props {
+  rows: IRow[];
+  headers: ICell[];
+  title: string;
+}
 
-const TransactionsTable: FC<Props> = () => {
-  const [rows, setRows] = useState<IRow[]>([]);
-  const [headers, setHeaders] = useState<ICell[]>([]);
-  // Only run this when transactions changes.
-  // Stubbed in should only need to run once.
-  useEffect(() => {
-    const { rows: r, headers: h } = formatTransactions();
-    const filledRows = r.filter((x, i) => i !== 0);
-
-    setHeaders(h);
-    setRows(filledRows);
-  }, []);
-
+const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
   return (
     <Wrapper>
-      <Title>History</Title>
+      <Title>{title}</Title>
       <StyledTableWrapper>
         <StyledHeadRow>
           {headers.map((cell, index) => {

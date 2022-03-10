@@ -1,6 +1,6 @@
 import { TableLogo, TableLink } from "./TransactionTable.styles";
 import { shortenTransactionHash } from "utils/format";
-import { ICell, IRow } from "components/Table/Table";
+import { IRow } from "components/Table/Table";
 
 import arbLogo from "assets/arbitrum-logo.svg";
 import umaLogo from "assets/UMA-round.svg";
@@ -9,49 +9,6 @@ import ethLogo from "assets/ethereum-logo.svg";
 // Stub of function.
 // Will take View Model Transaction as arg
 export function formatTransactions() {
-  const headers: ICell[] = [
-    {
-      size: "lg",
-      value: "Deposit time",
-      cellClassName: "header-cell",
-    },
-    {
-      size: "sm",
-      value: "Status",
-      cellClassName: "header-cell",
-    },
-    {
-      size: "sm",
-      value: "Filled %",
-      cellClassName: "header-cell",
-    },
-    {
-      size: "sm",
-      value: "Source",
-      cellClassName: "header-cell",
-    },
-    {
-      size: "sm",
-      value: "Destination",
-      cellClassName: "header-cell",
-    },
-    {
-      size: "sm",
-      value: "Asset",
-      cellClassName: "header-cell",
-    },
-    {
-      size: "sm",
-      value: "Amount",
-      cellClassName: "header-cell",
-    },
-    {
-      size: "sm",
-      value: "Deposit tx",
-      cellClassName: "header-cell",
-    },
-  ];
-
   const rows: IRow[] = [
     {
       cells: [
@@ -287,5 +244,5 @@ export function formatTransactions() {
     },
   ];
 
-  return { headers, rows };
+  return { rows };
 }
