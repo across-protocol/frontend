@@ -13,22 +13,22 @@ import { ICell, IRow } from "components/Table/Table";
 
 interface Props {}
 
-const TransactionsTable: FC<Props> = () => {
+const OngoingTransactionsTable: FC<Props> = () => {
   const [rows, setRows] = useState<IRow[]>([]);
   const [headers, setHeaders] = useState<ICell[]>([]);
   // Only run this when transactions changes.
   // Stubbed in should only need to run once.
   useEffect(() => {
     const { rows: r, headers: h } = formatTransactions();
-    const filledRows = r.filter((x, i) => i !== 0);
-
+    // First element is pending.
+    const pendingRows = r.filter((x, i) => i === 0);
     setHeaders(h);
-    setRows(filledRows);
+    setRows(pendingRows);
   }, []);
 
   return (
     <Wrapper>
-      <Title>History</Title>
+      <Title>Ongoing</Title>
       <StyledTableWrapper>
         <StyledHeadRow>
           {headers.map((cell, index) => {
@@ -67,4 +67,4 @@ const TransactionsTable: FC<Props> = () => {
   );
 };
 
-export default TransactionsTable;
+export default OngoingTransactionsTable;

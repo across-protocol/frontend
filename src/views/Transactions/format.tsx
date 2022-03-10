@@ -61,6 +61,64 @@ export function formatTransactions() {
         },
         {
           size: "sm",
+          value: "Pending",
+        },
+        {
+          size: "sm",
+          value: "43%",
+        },
+        {
+          size: "sm",
+          value: (
+            <>
+              <TableLogo src={arbLogo} alt="arbitrum_logo" /> Arbitrum
+            </>
+          ),
+        },
+        {
+          size: "sm",
+          value: (
+            <>
+              <TableLogo src={ethLogo} alt="arbitrum_logo" /> Ethereum
+            </>
+          ),
+        },
+        {
+          size: "sm",
+          value: (
+            <>
+              <TableLogo src={umaLogo} alt="arbitrum_logo" /> UMA
+            </>
+          ),
+        },
+        {
+          size: "sm",
+          value: "5000",
+        },
+        {
+          size: "sm",
+          value: (
+            <TableLink
+              href="https://etherscan.io/address/0x0000000000000000000000000000000000000000"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {shortenTransactionHash(
+                "0x0000000000000000000000000000000000000000"
+              )}
+            </TableLink>
+          ),
+        },
+      ],
+    },
+    {
+      cells: [
+        {
+          size: "lg",
+          value: "5 Feb 2022 - 5:41 AM",
+        },
+        {
+          size: "sm",
           value: "Filled",
         },
         {
