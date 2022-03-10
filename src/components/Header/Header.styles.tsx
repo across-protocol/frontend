@@ -65,7 +65,7 @@ export const Link = styled(BaseLink)`
 export const LogoLink = styled(UnstyledLink)`
   padding-left: 10px;
   @media ${QUERIES.desktopAndUp} {
-    padding-left: 45px;
+    /* padding-left: 45px; */
   }
 `;
 export const Logo = styled(UnstyledDesktopLogo)`

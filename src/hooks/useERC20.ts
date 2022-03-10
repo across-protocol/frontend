@@ -11,7 +11,19 @@ type ApproveArgs = {
 type Approve = (
   args: ApproveArgs
 ) => Promise<ethers.ContractTransaction | undefined>;
-export function useERC20(tokenAddress: string): { approve: Approve } {
+
+type AllowanceArgs = {
+  account: string;
+  spender: string;
+  provider: ethers.Signer | ethers.providers.Provider;
+};
+
+type Allowance = (args: AllowanceArgs) => Promise<ethers.BigNumber>;
+
+export function useERC20(tokenAddress: string): {
+  approve: Approve;
+  allowance: Allowance;
+} {
   const approve = useCallback(
     async ({ spender, amount, signer }: ApproveArgs) => {
       if (!signer) {
@@ -24,5 +36,13 @@ export function useERC20(tokenAddress: string): { approve: Approve } {
     [tokenAddress]
   );
 
-  return { approve };
+  const allowance = useCallback(
+    async ({ spender, account, provider }: AllowanceArgs) => {
+      const token = clients.erc20.connect(tokenAddress, provider);
+      return token.allowance(account, spender);
+    },
+    [tokenAddress]
+  );
+
+  return { approve, allowance };
 }
