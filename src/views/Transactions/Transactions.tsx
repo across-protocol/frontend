@@ -1,12 +1,18 @@
+import { useMemo } from "react";
 import { Wrapper, Title, ConnectButton, Account } from "./Transactions.styles";
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
-import useTransactionTableValues from "./useTransactionTableValues";
+import formatTransactionData from "./formatTransactionData";
 
 const Transactions = () => {
   const { isConnected, initOnboard, account } = useTransactionsView();
-  const { ongoingRows, filledRows, headers } = useTransactionTableValues();
+
+  // Will take a Transaction Model argument
+  const { ongoingTx, filledTx, headers } = useMemo(
+    () => formatTransactionData(),
+    []
+  );
 
   return (
     <Wrapper>
@@ -24,12 +30,12 @@ const Transactions = () => {
           <TransactionsTable
             title="Ongoing"
             headers={headers}
-            rows={ongoingRows}
+            rows={ongoingTx}
           />
           <TransactionsTable
             title="History"
             headers={headers}
-            rows={filledRows}
+            rows={filledTx}
           />
         </>
       )}
