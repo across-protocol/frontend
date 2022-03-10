@@ -1,4 +1,7 @@
-import { TableLogo, TableLink } from "./TransactionTable.styles";
+import {
+  TableLogo,
+  TableLink,
+} from "./TransactionsTable/TransactionsTable.styles";
 import { shortenTransactionHash } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 

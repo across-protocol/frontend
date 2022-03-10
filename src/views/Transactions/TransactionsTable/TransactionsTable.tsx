@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from "react";
+import { FC } from "react";
 import {
   StyledTableWrapper,
   StyledHeadRow,
@@ -7,7 +7,7 @@ import {
   StyledCell,
   Wrapper,
   Title,
-} from "./TransactionTable.styles";
+} from "./TransactionsTable.styles";
 import { ICell, IRow } from "components/Table/Table";
 
 interface Props {
