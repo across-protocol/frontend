@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Wrapper, Title, ConnectButton, Account } from "./Transactions.styles";
 import useTransactionsView from "./useTransactionsView";
-import TransactionsTable from "./TransactionsTable/TransactionsTable";
+import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
 import formatTransactionData from "./formatTransactionData";
 
