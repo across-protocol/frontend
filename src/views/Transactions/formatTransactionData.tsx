@@ -38,7 +38,7 @@ function formatRows(transactions: Transaction[]) {
 
     const status: ICell = {
       size: "sm",
-      value: tx.filled !== 100 ? "Pending" : "Filled",
+      value: tx.filled < 100 ? "Pending" : "Filled",
     };
     row.cells.push(status);
 
