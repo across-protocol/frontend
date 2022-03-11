@@ -1,16 +1,14 @@
+import { DateTime } from "luxon";
+import { ethers } from "ethers";
 import {
   TableLogo,
   TableLink,
 } from "./TransactionsTable/TransactionsTable.styles";
 import { shortenTransactionHash } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
-
-import arbLogo from "assets/arbitrum-logo.svg";
-import umaLogo from "assets/UMA-round.svg";
-import ethLogo from "assets/ethereum-logo.svg";
 import { Transaction } from "./createTransactionModel";
-import { DateTime } from "luxon";
-import { ethers } from "ethers";
+import { CHAINS, TOKENS_LIST } from "utils/constants";
+
 // Stub of function.
 // Will take View Model Transaction as arg
 export default function formatTransactionsData(transactions: Transaction[]) {
@@ -50,31 +48,40 @@ function formatRows(transactions: Transaction[]) {
     };
     row.cells.push(filled);
 
+    const fromChainName = CHAINS[tx.fromChain].name;
+    const fromLogo = CHAINS[tx.fromChain].logoURI;
     const fromChain: ICell = {
       size: "sm",
       value: (
         <>
-          <TableLogo src={arbLogo} alt="chain_logo" /> Arbitrum
+          <TableLogo src={fromLogo} alt={`${fromChainName}_logo`} />{" "}
+          {fromChainName}
         </>
       ),
     };
     row.cells.push(fromChain);
 
+    const toChainName = CHAINS[tx.toChain].name;
+    const toLogo = CHAINS[tx.fromChain].logoURI;
     const toChain: ICell = {
       size: "sm",
       value: (
         <>
-          <TableLogo src={ethLogo} alt="chain_logo" /> Ethereum
+          <TableLogo src={toLogo} alt={`${toChainName}_logo`} /> {toChainName}
         </>
       ),
     };
     row.cells.push(toChain);
 
+    const token = TOKENS_LIST[1].find(
+      (x) => x.address === tx.assetContractAddress
+    );
     const symbol: ICell = {
       size: "sm",
       value: (
         <>
-          <TableLogo src={umaLogo} alt="chain_logo" /> UMA
+          <TableLogo src={token?.logoURI} alt={`${token?.name}_logo`} />{" "}
+          {token?.name}
         </>
       ),
     };
@@ -86,11 +93,12 @@ function formatRows(transactions: Transaction[]) {
     };
     row.cells.push(amount);
 
+    // TODO: change href to proper url when we get real TX data
     const txHash: ICell = {
       size: "sm",
       value: (
         <TableLink
-          href={`https://etherscan.io/address/${tx.txHash}`}
+          href={`https://etherscan.io/tx/${tx.txHash}`}
           target="_blank"
           rel="noreferrer"
         >

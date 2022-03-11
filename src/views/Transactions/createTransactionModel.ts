@@ -6,7 +6,7 @@ export interface Transaction {
   filled: number;
   fromChain: ChainId;
   toChain: ChainId;
-  symbol: string;
+  assetContractAddress: string;
   amount: ethers.BigNumber;
   txHash: string;
 }
@@ -19,27 +19,30 @@ export default function createTransactionModel(): Transaction[] {
       filled: 43,
       fromChain: 42161,
       toChain: 1,
-      symbol: "UMA",
-      amount: ethers.BigNumber.from("10"),
-      txHash: "0x0000000000000000000000000000000000000000",
+      assetContractAddress: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
+      amount: ethers.BigNumber.from("1000000000000000000"),
+      txHash:
+        "0xc3598d86464653f844158327bb2e5cb5c7f4023e83b7d9217cc4543c864011f8",
     },
     {
       timestamp: 1647020614,
       filled: 100,
       fromChain: 42161,
       toChain: 1,
-      symbol: "UMA",
-      amount: ethers.BigNumber.from("20"),
-      txHash: "0x0000000000000000000000000000000000000000",
+      assetContractAddress: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
+      amount: ethers.BigNumber.from("2000000000000000000"),
+      txHash:
+        "0xc3598d86464653f844158327bb2e5cb5c7f4023e83b7d9217cc4543c864011f8",
     },
     {
       timestamp: 1646020614,
       filled: 100,
       fromChain: 42161,
       toChain: 1,
-      symbol: "UMA",
-      amount: ethers.BigNumber.from("15"),
-      txHash: "0x0000000000000000000000000000000000000000",
+      assetContractAddress: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828",
+      amount: ethers.BigNumber.from("150000000000000000"),
+      txHash:
+        "0xc3598d86464653f844158327bb2e5cb5c7f4023e83b7d9217cc4543c864011f8",
     },
   ];
 }
