@@ -6,12 +6,13 @@ import { shortenAddress } from "utils/format";
 import formatTransactionData from "./formatTransactionData";
 
 const Transactions = () => {
-  const { isConnected, initOnboard, account } = useTransactionsView();
+  const { isConnected, initOnboard, account, transactions } =
+    useTransactionsView();
 
   // Will take a Transaction Model argument
   const { ongoingTx, filledTx, headers } = useMemo(
-    () => formatTransactionData(),
-    []
+    () => formatTransactionData(transactions),
+    [transactions]
   );
 
   return (
