@@ -32,7 +32,7 @@ function formatRows(transactions: Transaction[]) {
 
     const timestamp: ICell = {
       size: "lg",
-      value: DateTime.fromSeconds(tx.timestamp).toString(),
+      value: DateTime.fromSeconds(tx.timestamp).toFormat("d MMM yyyy - t"),
     };
     row.cells.push(timestamp);
 
