@@ -31,47 +31,62 @@ function formatRows(transactions: Transaction[]) {
     const row: IRow = {
       cells: [],
     };
-    row.cells.push({
+
+    const timestamp: ICell = {
       size: "lg",
       value: DateTime.fromSeconds(tx.timestamp).toString(),
-    });
-    row.cells.push({
+    };
+    row.cells.push(timestamp);
+
+    const status: ICell = {
       size: "sm",
       value: tx.filled !== 100 ? "Pending" : "Filled",
-    });
-    row.cells.push({
+    };
+    row.cells.push(status);
+
+    const filled: ICell = {
       size: "sm",
       value: `${tx.filled}%`,
-    });
-    row.cells.push({
+    };
+    row.cells.push(filled);
+
+    const fromChain: ICell = {
       size: "sm",
       value: (
         <>
           <TableLogo src={arbLogo} alt="chain_logo" /> Arbitrum
         </>
       ),
-    });
-    row.cells.push({
+    };
+    row.cells.push(fromChain);
+
+    const toChain: ICell = {
       size: "sm",
       value: (
         <>
           <TableLogo src={ethLogo} alt="chain_logo" /> Ethereum
         </>
       ),
-    });
-    row.cells.push({
+    };
+    row.cells.push(toChain);
+
+    const symbol: ICell = {
       size: "sm",
       value: (
         <>
           <TableLogo src={umaLogo} alt="chain_logo" /> UMA
         </>
       ),
-    });
-    row.cells.push({
+    };
+    row.cells.push(symbol);
+
+    const amount: ICell = {
       size: "sm",
       value: ethers.utils.formatEther(tx.amount),
-    });
-    row.cells.push({
+    };
+    row.cells.push(amount);
+
+    const txHash: ICell = {
       size: "sm",
       value: (
         <TableLink
@@ -82,7 +97,8 @@ function formatRows(transactions: Transaction[]) {
           {shortenTransactionHash(tx.txHash)}
         </TableLink>
       ),
-    });
+    };
+    row.cells.push(txHash);
 
     rows.push(row);
   });
