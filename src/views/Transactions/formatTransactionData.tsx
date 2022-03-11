@@ -13,8 +13,8 @@ import { CHAINS, TOKENS_LIST } from "utils/constants";
 // Will take View Model Transaction as arg
 export default function formatTransactionsData(transactions: Transaction[]) {
   const rows = formatRows(transactions);
-  const filledTx = rows.filter((x, i) => i !== 0);
-  const ongoingTx = rows.filter((x, i) => i === 0);
+  const filledTx = rows.filter((x, i) => x.cells[1].value === "Filled");
+  const ongoingTx = rows.filter((x, i) => x.cells[1].value === "Pending");
   return {
     headers,
     ongoingTx,
