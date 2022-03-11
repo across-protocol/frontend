@@ -9,6 +9,7 @@ import {
   PROVIDERS,
   TOKENS_LIST,
   MAX_RELAY_FEE_PERCENT,
+  Token
 } from "./constants";
 
 import { isValidString, parseEther } from "./format";
@@ -233,3 +234,24 @@ export const optimismErc20Pairs = () => {
 export const bobaErc20Pairs = () => {
   return getTokenPairMapping(ChainId.MAINNET, ChainId.BOBA, ["WETH", "ETH"]);
 };
+
+/**
+ * Returns the list of tokens that can be sent from chain A to chain B, by computing their tokenList intersection and taking care of additional chain specific quirks. 
+ * @param chainA - the chain to bridge from, that is, the chain that tokens are sent from. 
+ * @param chainB - the destination chain, that is, where tokens will be sent. 
+ * @returns Returns a list of tokens that can be sent from chain A to chain B.
+ */
+export function filterTokensByDestinationChain(chainA: ChainId, chainB: ChainId) {
+  const filterByToChain = (token: Token) =>
+    TOKENS_LIST[chainB].some((element) => element.symbol === token.symbol);
+
+  if (chainA === ChainId.MAINNET && chainB === ChainId.OPTIMISM) {
+    // Note: because of how Optimism treats WETH, it must not be sent over their canonical bridge.
+    return TOKENS_LIST[chainA]
+      .filter((element) => element.symbol !== "WETH")
+      .filter(filterByToChain);
+  }
+  return TOKENS_LIST[chainA].filter(
+    filterByToChain
+  );
+}

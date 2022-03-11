@@ -13,15 +13,16 @@ import { useBlock } from './useBlock';
  * @param tokenSymbol - The token symbol to check bridge fees for. 
  * @returns The bridge fees for the given amount and token symbol and the UseQueryResult object. 
  */
-export function useBridgeFees(amount: ethers.BigNumber, tokenSymbol: string) {
+export function useBridgeFees(amount: ethers.BigNumber, tokenSymbol?: string) {
 	const { chainId } = useConnection();
 	const { block } = useBlock(chainId);
-	const enabledQuery = !!chainId && !!block;
+	const enabledQuery = !!chainId && !!block && !!tokenSymbol && amount.gt(0);
 	const queryKey = enabledQuery ? bridgeFeesQueryKey(tokenSymbol, amount, chainId, block.number) : "DISABLED_BRIDGE_FEE_QUERY";
 	const { data: fees, ...delegated } = useQuery(queryKey, async () => {
-		return getBridgeFees({ amount, tokenSymbol, blockTimestamp: block!.timestamp });
+		return getBridgeFees({ amount, tokenSymbol: tokenSymbol!, blockTimestamp: block!.timestamp });
 	}, {
 		enabled: enabledQuery,
+
 	});
 	return {
 		fees,

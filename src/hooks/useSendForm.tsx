@@ -1,0 +1,332 @@
+import {
+  useReducer,
+  useEffect,
+  useCallback,
+  useContext,
+  createContext,
+} from "react";
+import { ethers } from "ethers";
+import {
+  ChainId,
+  DEFAULT_FROM_CHAIN_ID,
+  DEFAULT_TO_CHAIN_ID,
+  CHAINS_SELECTION,
+  getAddress,
+  ParsingError,
+  InsufficientBalanceError,
+  ETH_ADDRESS,
+} from "utils";
+import { usePrevious } from "hooks";
+import { useConnection } from "state/hooks";
+
+type FormStatus = "idle" | "valid" | "error";
+
+type FormState = {
+  status: FormStatus;
+  token: string;
+  amount: ethers.BigNumber;
+  toChain: ChainId;
+  fromChain: ChainId;
+  toAddress?: string;
+  error?: ParsingError;
+};
+
+const initialFormState: FormState = {
+  status: "idle",
+  token: ethers.constants.AddressZero,
+  amount: ethers.constants.Zero,
+  toChain: DEFAULT_TO_CHAIN_ID,
+  fromChain: DEFAULT_FROM_CHAIN_ID,
+};
+
+enum ActionType {
+  SET_TOKEN = "SET_TOKEN",
+  SET_AMOUNT = "SET_AMOUNT",
+  SET_TO_CHAIN = "SET_TO_CHAIN",
+  SET_FROM_CHAIN = "SET_FROM_CHAIN",
+  SET_TO_ADDRESS = "SET_TO_ADDRESS",
+  SET_ERROR = "SET_ERROR",
+}
+type Action =
+  | {
+      type: ActionType.SET_TOKEN;
+      payload: string;
+    }
+  | {
+      type: ActionType.SET_AMOUNT;
+      payload: ethers.BigNumber;
+    }
+  | {
+      type: ActionType.SET_TO_CHAIN;
+      payload: ChainId;
+    }
+  | {
+      type: ActionType.SET_FROM_CHAIN;
+      payload: ChainId;
+    }
+  | {
+      type: ActionType.SET_TO_ADDRESS;
+      payload: string;
+    }
+  | {
+      type: ActionType.SET_ERROR;
+      payload: ParsingError | InsufficientBalanceError | undefined;
+    };
+
+function tokenReducer(state: FormState, token: string): FormState {
+  switch (state.status) {
+    case "idle":
+    case "valid":
+    case "error":
+      return {
+        ...state,
+        status: "idle",
+        token,
+        amount: ethers.constants.Zero,
+        error: undefined,
+      };
+
+    default:
+      throw new Error("unreachable");
+  }
+}
+
+function amountReducer(state: FormState, amount: ethers.BigNumber): FormState {
+  const isLtZero = amount.lt(0);
+  const error = isLtZero ? new ParsingError() : undefined;
+  switch (state.status) {
+    case "idle":
+    case "valid":
+    case "error":
+      return {
+        ...state,
+        status: isLtZero ? "error" : "valid",
+        amount,
+        error,
+      };
+
+    default:
+      throw new Error("unreachable");
+  }
+}
+
+function fromChainReducer(state: FormState, chainId: ChainId): FormState {
+  let toChain = state.toChain;
+  if (chainId === ChainId.MAINNET) {
+    toChain = ChainId.OPTIMISM;
+  }
+  if (chainId !== ChainId.MAINNET && toChain !== ChainId.MAINNET) {
+    toChain = ChainId.MAINNET;
+  }
+
+  switch (state.status) {
+    case "idle":
+    case "valid":
+    case "error":
+      return {
+        ...state,
+        status: "idle",
+        fromChain: chainId,
+        toChain,
+        amount: ethers.constants.Zero,
+        token: ETH_ADDRESS,
+        error: undefined,
+      };
+    default:
+      throw new Error("unreachable");
+  }
+}
+
+function toChainReducer(state: FormState, chainId: ChainId): FormState {
+  let fromChain = state.fromChain;
+  if (chainId === ChainId.MAINNET) {
+    fromChain = ChainId.OPTIMISM;
+  }
+  switch (state.status) {
+    case "idle":
+    case "valid":
+    case "error":
+      return {
+        ...state,
+        status: "idle",
+        toChain: chainId,
+        fromChain,
+        amount: ethers.constants.Zero,
+        token: ETH_ADDRESS,
+        error: undefined,
+      };
+    default:
+      throw new Error("unreachable");
+  }
+}
+
+function toAddressReducer(state: FormState, address: string): FormState {
+  switch (state.status) {
+    case "idle":
+    case "valid":
+    case "error":
+      return { ...state, toAddress: address };
+    default:
+      throw new Error("unreachable");
+  }
+}
+
+function errorReducer(
+  state: FormState,
+  error: ParsingError | undefined
+): FormState {
+  switch (state.status) {
+    case "idle":
+    case "valid":
+      return { ...state, status: "error", error };
+    case "error":
+      return state;
+    default:
+      throw new Error("unreachable");
+  }
+}
+
+function formReducer(state: FormState, action: Action) {
+  switch (action.type) {
+    case ActionType.SET_TOKEN:
+      return tokenReducer(state, action.payload);
+    case ActionType.SET_AMOUNT:
+      return amountReducer(state, action.payload);
+    case ActionType.SET_TO_CHAIN:
+      return toChainReducer(state, action.payload);
+    case ActionType.SET_FROM_CHAIN:
+      return fromChainReducer(state, action.payload);
+    case ActionType.SET_TO_ADDRESS:
+      return toAddressReducer(state, action.payload);
+    case ActionType.SET_ERROR:
+      return errorReducer(state, action.payload);
+
+    default: {
+      throw new Error(`Unhandled action type`);
+    }
+  }
+}
+
+type SendFormManagerContext = FormState & {
+  setFromChain: (fromChain: ChainId) => void;
+  setToChain: (toChain: ChainId) => void;
+  setToken: (token: string) => void;
+  setAmount: (amount: ethers.BigNumber) => void;
+  setToAddress: (toAddress: string) => void;
+  setError: (error: ParsingError | undefined) => void;
+};
+
+function useSendFormManager(): SendFormManagerContext {
+  const [state, dispatch] = useReducer(formReducer, initialFormState);
+  const { account: connectedAccount, chainId } = useConnection();
+  console.log(state);
+  // Keep the connected account and the toAddress in sync. If a user switches account, the toAddress should be updated to this new account.
+  useEffect(() => {
+    if (connectedAccount) {
+      dispatch({
+        type: ActionType.SET_TO_ADDRESS,
+        payload: getAddress(connectedAccount),
+      });
+    }
+  }, [connectedAccount]);
+  /*
+	  The following block will change `fromChain` and `toChain` when the user first connects to the app.
+    If connected to an unsupported chain, `fromChain` and `toChain` won't be set.
+	*/
+  const previousChainId = usePrevious(chainId);
+  useEffect(() => {
+    // The user has just connected to the app.
+    if (chainId && previousChainId === undefined) {
+      const connectedChain = CHAINS_SELECTION.find(
+        (x) => x.chainId === chainId
+      );
+      const otherChains = CHAINS_SELECTION.filter((x) => x.chainId !== chainId);
+
+      if (connectedChain && otherChains) {
+        dispatch({
+          type: ActionType.SET_FROM_CHAIN,
+          payload: connectedChain.chainId,
+        });
+        dispatch({
+          type: ActionType.SET_TO_CHAIN,
+          payload: otherChains[otherChains.length - 1].chainId,
+        });
+      }
+    }
+  }, [chainId, previousChainId]);
+
+  const setToken = useCallback((token: string) => {
+    dispatch({
+      type: ActionType.SET_TOKEN,
+      payload: token,
+    });
+  }, []);
+  const setAmount = useCallback((amount: ethers.BigNumber) => {
+    dispatch({
+      type: ActionType.SET_AMOUNT,
+      payload: amount,
+    });
+  }, []);
+  const setToChain = useCallback((toChain: ChainId) => {
+    dispatch({
+      type: ActionType.SET_TO_CHAIN,
+      payload: toChain,
+    });
+  }, []);
+  const setFromChain = useCallback((fromChain: ChainId) => {
+    dispatch({
+      type: ActionType.SET_FROM_CHAIN,
+      payload: fromChain,
+    });
+  }, []);
+  const setToAddress = useCallback((toAddress: string) => {
+    dispatch({
+      type: ActionType.SET_TO_ADDRESS,
+      payload: toAddress,
+    });
+  }, []);
+  const setError = useCallback((error: ParsingError | undefined) => {
+    dispatch({
+      type: ActionType.SET_ERROR,
+      payload: error,
+    });
+  }, []);
+
+  return {
+    ...state,
+    setToken,
+    setAmount,
+    setToChain,
+    setFromChain,
+    setToAddress,
+    setError,
+  };
+}
+const SendFormContext = createContext<SendFormManagerContext | undefined>(
+  undefined
+);
+/**
+ * Context provider for the send form. This is used to share the state of the form between components.
+ * @param props  React props, only accepting `children`
+ */
+export const SendFormProvider: React.FC = ({ children }) => {
+  const state = useSendFormManager();
+
+  return (
+    <SendFormContext.Provider value={state}>
+      {children}
+    </SendFormContext.Provider>
+  );
+};
+/**
+ * This hook is used to manage the send form state. It returns the current state of the form, along with setters for the form.
+ * @remarks This hook must be used within the {@link SendFormProvider} component.
+ * @returns Returns a {@link SendFormManagerContext} object
+ */
+export function useSendForm() {
+  const context = useContext(SendFormContext);
+  if (!context) {
+    throw new Error("UseSendForm must be used within a <SendFormProvider>");
+  }
+  return context;
+}

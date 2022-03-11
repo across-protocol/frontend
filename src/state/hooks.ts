@@ -30,7 +30,7 @@ import {
 import chainApi, { useAllowance, useBridgeFees } from "./chainApi";
 import { add } from "./transactions";
 import { deposit as depositAction, toggle } from "./deposits";
-import { useERC20 } from "hooks";
+import { useERC20, useQueryParams } from "hooks";
 import { across } from "@uma/sdk";
 import { Bridge } from "arb-ts";
 
@@ -43,13 +43,6 @@ const FEE_ESTIMATION = "0.004";
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-function useQuery() {
-  const { search } = useLocation();
-  return useMemo(() => {
-    const params = new URLSearchParams(search);
-    return Object.fromEntries(params.entries());
-  }, [search]);
-}
 
 export function useConnection() {
   const { account, signer, provider, error, chainId, notify } = useAppSelector(
@@ -177,7 +170,7 @@ export function useSend() {
   };
 }
 export function useSendAcross() {
-  const { referrer } = useQuery();
+  const { referrer } = useQueryParams();
   const { isConnected, chainId, account, signer } = useConnection();
   const {
     fromChain,

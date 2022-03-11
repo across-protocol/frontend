@@ -18,7 +18,7 @@ export function useBalance(token: string, chainId?: ChainId, account?: string, b
 	const { block: latestBlock } = useBlock(chainId);
 	const blockNumberToQuery = blockNumber ?? latestBlock?.number;
 	const enabledQuery = !!chainIdToQuery && !!accountToQuery && !!blockNumberToQuery;
-	const queryKey = enabledQuery ? balanceQueryKey(chainIdToQuery, token, accountToQuery, blockNumberToQuery) : "DISABLED_BALANCE_QUERY";
+	const queryKey = enabledQuery ? balanceQueryKey(chainIdToQuery, token, accountToQuery, blockNumberToQuery) : ["DISABLED_BALANCE_QUERY", { chainIdToQuery, token, accountToQuery, blockNumberToQuery }];
 	const { data: balance, ...delegated } = useQuery(queryKey, async () => {
 		const balance = await getBalance(chainId!, token, accountToQuery!, blockNumberToQuery);
 		return balance;
@@ -48,7 +48,7 @@ export function useBalances(tokens: string[], chainId?: ChainId, account?: strin
 	const blockNumberToQuery = blockNumber ?? latestBlock?.number;
 	// To fetch balances, we need a list of tokens, an account to get balances of, and a specified chainId.
 	const enabledQuery = !!chainIdToQuery && !!accountToQuery && tokens.length > 0 && !!blockNumberToQuery;
-	const queryKey = enabledQuery ? balancesQueryKey(chainIdToQuery, tokens, accountToQuery, blockNumberToQuery) : "DISABLED_BALANCES_QUERY";
+	const queryKey = enabledQuery ? balancesQueryKey(chainIdToQuery, tokens, accountToQuery, blockNumberToQuery) : ["DISABLED_BALANCES_QUERY", { chainIdToQuery, tokens, accountToQuery, blockNumberToQuery }];
 	const { data: balances, ...delegated } = useQuery(queryKey, async () => {
 		const balances = await getBalances(chainId!, tokens, accountToQuery!, blockNumberToQuery);
 		return balances;

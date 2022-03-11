@@ -377,7 +377,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
   ],
 };
 
-type ChainInfo = {
+export type ChainInfo = {
   name: string;
   chainId: ChainId;
   logoURI: string;
@@ -395,6 +395,11 @@ type ChainInfo = {
 const defaultConstructExplorerLink =
   (explorerUrl: string) => (txHash: string) =>
     `${explorerUrl}/tx/${txHash}`;
+
+export const isProduction = () =>
+  process.env.REACT_APP_VERCEL_GIT_COMMIT_REF === "master";
+
+
 export const CHAINS: Record<ChainId, ChainInfo> = {
   [ChainId.MAINNET]: {
     name: "Ethereum Mainnet",
@@ -656,7 +661,7 @@ export interface IChainSelection {
 
 interface EthChainInfo {
   name: "Ethereum";
-  chainId: 1;
+  chainId: ChainId.MAINNET;
   logoURI: string;
   rpcUrl: string;
   explorerUrl: string;
@@ -733,3 +738,4 @@ export const CHAINS_SELECTION: ChainsSelection = [
 export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
 // FIXME: https://github.com/across-protocol/frontend-v2/pull/2#discussion_r822100493
 export const ETH_ADDRESS = ethers.constants.AddressZero;
+export const FEE_ESTIMATION = ".004";

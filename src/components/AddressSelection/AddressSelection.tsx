@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { XOctagon } from "react-feather";
-import { useConnection, useSend } from "state/hooks";
-import { CHAINS, shortenAddress, isValidAddress, ChainId } from "utils";
+import { CHAINS, shortenAddress, ChainId } from "utils";
 import { SectionTitle } from "../Section";
 import Dialog from "../Dialog";
 import { SecondaryButton } from "../Buttons";
@@ -27,76 +26,30 @@ import {
   Address,
   ItemWarning,
 } from "./AddressSelection.styles";
-import { useSelect } from "downshift";
 import { CHAINS_SELECTION } from "utils/constants";
-import { useAppDispatch, useAppSelector } from "state/hooks";
-import { actions } from "state/send";
 import { AnimatePresence } from "framer-motion";
+import useAddressSelection from "./useAddressSelection";
 
 const AddressSelection: React.FC = () => {
-  const { isConnected } = useConnection();
-  const { toChain, toAddress, fromChain, setToAddress } = useSend();
-  const [address, setAddress] = useState("");
-  const [open, setOpen] = useState(false);
-  const dispatch = useAppDispatch();
-
-  const sendState = useAppSelector((state) => state.send);
-
   const {
-    isOpen,
-    selectedItem,
-    getLabelProps,
-    getToggleButtonProps,
     getItemProps,
+    getLabelProps,
     getMenuProps,
-  } = useSelect({
-    items: CHAINS_SELECTION,
-    defaultSelectedItem: sendState.currentlySelectedToChain,
-    selectedItem: sendState.currentlySelectedToChain,
-    onSelectedItemChange: ({ selectedItem }) => {
-      if (selectedItem) {
-        const nextState = { ...sendState, toChain: selectedItem.chainId };
-        dispatch(actions.toChain(nextState));
-        dispatch(actions.updateSelectedToChain(selectedItem));
-        const nsToChain = { ...sendState };
-        if (selectedItem.chainId === ChainId.MAINNET) {
-          nsToChain.fromChain = ChainId.OPTIMISM;
-          dispatch(actions.fromChain(nsToChain));
-          dispatch(actions.updateSelectedFromChain(CHAINS_SELECTION[0]));
-        }
-      }
-    },
-  });
-
-  useEffect(() => {
-    if (toAddress) {
-      setAddress(toAddress);
-    }
-  }, [toAddress]);
-
-  const toggle = () => {
-    // modal is closing, reset address to the current toAddress
-    if (!isConnected) return;
-    if (open) setAddress(toAddress || address);
-    setOpen((oldOpen) => !oldOpen);
-  };
-  const clearInput = () => {
-    setAddress("");
-  };
-
-  const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    setAddress(evt.target.value);
-  };
-  const isValid = !address || isValidAddress(address);
-  const handleSubmit = () => {
-    if (isValid && address) {
-      setToAddress({ toAddress: address });
-      toggle();
-    }
-  };
-
-  const isL1toL2 = fromChain === ChainId.MAINNET;
-
+    getToggleButtonProps,
+    selectedItem,
+    isOpen,
+    toChain,
+    toAddress,
+    isL1toL2,
+    isValid,
+    isConnected,
+    toggle,
+    handleChange,
+    handleSubmit,
+    clearInput,
+    open,
+    address,
+  } = useAddressSelection();
   return (
     <AnimatePresence>
       <LastSection>
@@ -119,14 +72,12 @@ const AddressSelection: React.FC = () => {
             </RoundBox>
             <Menu isOpen={isOpen} {...getMenuProps()}>
               {isOpen &&
-                sendState.currentlySelectedToChain.chainId !==
-                  ChainId.MAINNET &&
+                toChain !== ChainId.MAINNET &&
                 CHAINS_SELECTION.map((t, index) => {
                   return (
                     <Item
                       className={
-                        t === sendState.currentlySelectedToChain ||
-                        t.chainId === ChainId.MAINNET
+                        t.chainId === toChain || t.chainId === ChainId.MAINNET
                           ? "disabled"
                           : ""
                       }
@@ -141,41 +92,37 @@ const AddressSelection: React.FC = () => {
                     </Item>
                   );
                 })}
-              {isOpen &&
-                sendState.currentlySelectedToChain.chainId ===
-                  ChainId.MAINNET && (
-                  <>
-                    <ItemWarning
-                      initial={{ y: -10 }}
-                      animate={{ y: 0 }}
-                      exit={{ y: -10 }}
-                    >
-                      <p>
-                        Transfers between L2 chains is not possible at this time
-                      </p>
-                    </ItemWarning>
-                    {CHAINS_SELECTION.map((t, index) => {
-                      return (
-                        <Item
-                          className={"disabled"}
-                          {...getItemProps({ item: t, index })}
-                          key={t.chainId}
-                          initial={{ y: -10 }}
-                          animate={{ y: 0 }}
-                          exit={{ y: -10 }}
-                        >
-                          <Logo src={t.logoURI} alt={t.name} />
-                          <div>{t.name}</div>
-                          <span className="layer-type">
-                            {index !== CHAINS_SELECTION.length - 1
-                              ? "L2"
-                              : "L1"}
-                          </span>
-                        </Item>
-                      );
-                    })}
-                  </>
-                )}
+              {isOpen && toChain === ChainId.MAINNET && (
+                <>
+                  <ItemWarning
+                    initial={{ y: -10 }}
+                    animate={{ y: 0 }}
+                    exit={{ y: -10 }}
+                  >
+                    <p>
+                      Transfers between L2 chains is not possible at this time
+                    </p>
+                  </ItemWarning>
+                  {CHAINS_SELECTION.map((t, index) => {
+                    return (
+                      <Item
+                        className={"disabled"}
+                        {...getItemProps({ item: t, index })}
+                        key={t.chainId}
+                        initial={{ y: -10 }}
+                        animate={{ y: 0 }}
+                        exit={{ y: -10 }}
+                      >
+                        <Logo src={t.logoURI} alt={t.name} />
+                        <div>{t.name}</div>
+                        <span className="layer-type">
+                          {index !== CHAINS_SELECTION.length - 1 ? "L2" : "L1"}
+                        </span>
+                      </Item>
+                    );
+                  })}
+                </>
+              )}
             </Menu>
           </InputGroup>
           {!isL1toL2 && (
