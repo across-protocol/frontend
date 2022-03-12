@@ -83,12 +83,12 @@ export const MobileLogo = styled(UnstyledMobileLogo)`
 
 export const WalletWrapper = styled.div`
   justify-self: flex-end;
+  display: flex;
+  align-items: center;
 `;
 
 export const MobileNavigation = styled(motion.nav)`
-  @media ${QUERIES.laptopAndUp} {
-    display: none;
-  }
+  margin-left: 16px;
 `;
 
 export const MobileList = styled.ul`
@@ -129,4 +129,14 @@ export const ExternalMobileLink = styled.a`
   text-decoration: none;
   color: inherit;
   outline: none;
+`;
+
+export const Hamburger = styled.div`
+  display: inline;
+  > div {
+    width: 35px;
+    height: 5px;
+    background-color: black;
+    margin: 6px 0;
+  }
 `;

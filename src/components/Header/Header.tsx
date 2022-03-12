@@ -16,6 +16,7 @@ import {
   List,
   Item,
   WalletWrapper,
+  Hamburger,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
 import MobileMenu from "./MobileMenu";
@@ -60,35 +61,36 @@ const Header: React.FC = () => {
       </Navigation>
       <WalletWrapper>
         <Wallet />
-      </WalletWrapper>
-      <MobileNavigation animate={isMenuOpen ? "open" : "closed"}>
-        <MenuToggle toggle={toggleMenu} />
-        <MobileMenu isOpen={isMenuOpen}>
-          {isMenuOpen && (
-            <MobileList>
-              {LINKS.map(({ href, name }) => (
-                <MobileItem
-                  key={href}
-                  aria-selected={location.pathname === href}
-                >
-                  <MobileLink to={href}>{name}</MobileLink>
-                </MobileItem>
-              ))}
-              {MOBILE_ONLY_LINKS.map(({ href, name }) => (
-                <MobileItem key={href}>
-                  <ExternalMobileLink
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+
+        <MobileNavigation animate={isMenuOpen ? "open" : "closed"}>
+          <MenuToggle toggle={toggleMenu} />
+          <MobileMenu isOpen={isMenuOpen}>
+            {isMenuOpen && (
+              <MobileList>
+                {LINKS.map(({ href, name }) => (
+                  <MobileItem
+                    key={href}
+                    aria-selected={location.pathname === href}
                   >
-                    {name}
-                  </ExternalMobileLink>
-                </MobileItem>
-              ))}
-            </MobileList>
-          )}
-        </MobileMenu>
-      </MobileNavigation>
+                    <MobileLink to={href}>{name}</MobileLink>
+                  </MobileItem>
+                ))}
+                {MOBILE_ONLY_LINKS.map(({ href, name }) => (
+                  <MobileItem key={href}>
+                    <ExternalMobileLink
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {name}
+                    </ExternalMobileLink>
+                  </MobileItem>
+                ))}
+              </MobileList>
+            )}
+          </MobileMenu>
+        </MobileNavigation>
+      </WalletWrapper>
     </Wrapper>
   );
 };

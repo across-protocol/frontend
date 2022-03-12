@@ -13,6 +13,7 @@ import {
 import { useAppSelector } from "state/hooks";
 import { ErrorContext } from "context/ErrorContext";
 import styled from "@emotion/styled";
+import Sidebar from "components/Sidebar";
 
 interface Props {}
 
@@ -72,6 +73,7 @@ const Routes: FC<Props> = () => {
         </SuperHeader>
       )}
       <Header />
+      <Sidebar />
       <Switch>
         <Route exact path="/transactions" component={Transactions} />
         <Route exact path="/pool" component={Pool} />
