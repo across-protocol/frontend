@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useSendForm, useBridgeFees } from 'hooks';
+import { useSendForm, useBridgeFees, useAcross } from 'hooks';
 import { onboard, TOKENS_LIST, ChainId, receiveAmount } from 'utils';
 
 
@@ -11,12 +11,8 @@ export default function useSendAction() {
 	const { fromChain, toChain, amount, token } = useSendForm();
 	const tokenInfo = TOKENS_LIST[fromChain].find(t => t.address === token);
 	const { fees } = useBridgeFees(amount, tokenInfo?.symbol);
-	const buttonMsg = () => {
-		//if (isSendPending) return "Sending in progress...";
-		//if (isApprovalPending) return "Approval in progress...";
-		//if (hasToApprove) return "Approve";
-		return "Send";
-	};
+	const { status, hasToApprove } = useAcross();
+
 	const amountMinusFees = useMemo(() => {
 		if (fromChain === ChainId.MAINNET) {
 			return amount;
@@ -26,9 +22,16 @@ export default function useSendAction() {
 
 	const handleClick = () => { };
 
-	const buttonDisabled = false;
+	const buttonDisabled = status !== 'ready';
 
-
+	let buttonMsg: string = "Send";
+	if (status === 'ready') {
+		buttonMsg = hasToApprove ? "Approve" : "Send";
+	} else if (status === 'validating') {
+		buttonMsg = "Loading...";
+	} else if (status === 'error') {
+		buttonMsg = "Send";
+	}
 	const isWETH = tokenInfo?.symbol === "WETH";
 	return {
 		init,

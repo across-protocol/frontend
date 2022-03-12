@@ -12,7 +12,6 @@ import {
 
 import InformationDialog from "components/InformationDialog";
 import useSendAction from "./useSendAction";
-import { AnimatePresence } from "framer-motion";
 
 const SendAction: React.FC = () => {
   const {
@@ -33,63 +32,61 @@ const SendAction: React.FC = () => {
   const showFees = amount.gt(0) && fees && tokenInfo;
   return (
     <AccentSection>
-      <AnimatePresence>
-        <Wrapper>
-          <InfoWrapper animate={{ opacity: showFees ? 1 : 0 }}>
+      <Wrapper>
+        <InfoWrapper animate={{ opacity: showFees ? 1 : 0 }}>
+          <Info>
+            <div>Time to {CHAINS[toChain].name}</div>
+            <div>{getEstimatedDepositTime(toChain)}</div>
+          </Info>
+          {fromChain !== ChainId.MAINNET && (
             <Info>
-              <div>Time to {CHAINS[toChain].name}</div>
-              <div>{getEstimatedDepositTime(toChain)}</div>
+              <div>Ethereum Gas Fee</div>
+              {showFees && (
+                <div>
+                  {formatUnits(
+                    fees.instantRelayFee.total.add(fees.slowRelayFee.total),
+                    tokenInfo.decimals
+                  )}{" "}
+                  {tokenInfo.symbol}
+                </div>
+              )}
             </Info>
-            {fromChain !== ChainId.MAINNET && (
-              <Info>
-                <div>Ethereum Gas Fee</div>
-                {showFees && (
-                  <div>
-                    {formatUnits(
-                      fees.instantRelayFee.total.add(fees.slowRelayFee.total),
-                      tokenInfo.decimals
-                    )}{" "}
-                    {tokenInfo.symbol}
-                  </div>
-                )}
-              </Info>
-            )}
-            <Info>
+          )}
+          <Info>
+            <div>
+              {fromChain === ChainId.MAINNET
+                ? "Native Bridge Fee"
+                : "Bridge Fee"}
+            </div>
+            {showFees && (
               <div>
                 {fromChain === ChainId.MAINNET
-                  ? "Native Bridge Fee"
-                  : "Bridge Fee"}
-              </div>
-              {showFees && (
-                <div>
-                  {fromChain === ChainId.MAINNET
-                    ? "Free"
-                    : `${formatUnits(fees.lpFee.total, tokenInfo.decimals)}
+                  ? "Free"
+                  : `${formatUnits(fees.lpFee.total, tokenInfo.decimals)}
                   ${tokenInfo.symbol}`}
-                </div>
-              )}
-            </Info>
-            <Info>
-              <div>You will receive</div>
-              {showFees && (
-                <div>
-                  {formatUnits(amountMinusFees, tokenInfo.decimals)}{" "}
-                  {isWETH ? "ETH" : tokenInfo.symbol}
-                </div>
-              )}
-            </Info>
-            <InfoIcon aria-label="info dialog" onClick={toggleInfoModal} />
-          </InfoWrapper>
-          <PrimaryButton onClick={handleClick} disabled={buttonDisabled}>
-            {buttonMsg()}
-          </PrimaryButton>
-          {fromChain === ChainId.MAINNET && (
-            <L1Info>
-              <div>L1 to L2 transfers use the destination’s native bridge</div>
-            </L1Info>
-          )}
-        </Wrapper>
-      </AnimatePresence>
+              </div>
+            )}
+          </Info>
+          <Info>
+            <div>You will receive</div>
+            {showFees && (
+              <div>
+                {formatUnits(amountMinusFees, tokenInfo.decimals)}{" "}
+                {isWETH ? "ETH" : tokenInfo.symbol}
+              </div>
+            )}
+          </Info>
+          <InfoIcon aria-label="info dialog" onClick={toggleInfoModal} />
+        </InfoWrapper>
+        <PrimaryButton onClick={handleClick} disabled={buttonDisabled}>
+          {buttonMsg}
+        </PrimaryButton>
+        {fromChain === ChainId.MAINNET && (
+          <L1Info>
+            <div>L1 to L2 transfers use the destination’s native bridge</div>
+          </L1Info>
+        )}
+      </Wrapper>
       <InformationDialog isOpen={isInfoModalOpen} onClose={toggleInfoModal} />
     </AccentSection>
   );

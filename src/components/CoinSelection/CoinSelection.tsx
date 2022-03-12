@@ -95,7 +95,10 @@ const CoinSelection = () => {
                 ))}
             </Menu>
           </InputGroup>
-          {showError && <ErrorBox>{errorMsg}</ErrorBox>}
+
+          <ErrorBox animate={{ opacity: showError ? 1 : 0 }}>
+            {showError && errorMsg}
+          </ErrorBox>
         </Wrapper>
       </Section>
     </AnimatePresence>
