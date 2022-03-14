@@ -74,7 +74,7 @@ const Routes: FC<Props> = () => {
         </SuperHeader>
       )}
       <Header setOpenSidebar={setOpenSidebar} />
-      {openSidebar && <Sidebar setOpenSidebar={setOpenSidebar} />}
+      <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
         <Route exact path="/transactions" component={Transactions} />
         <Route exact path="/pool" component={Pool} />

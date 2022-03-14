@@ -5,7 +5,7 @@ import "react-pro-sidebar/dist/css/styles.css";
 import { SecondaryButton } from "../Buttons";
 
 export const Overlay = styled.div`
-  z-index: 10000;
+  z-index: 500;
   position: fixed;
   top: 0;
   left: 0;
@@ -28,9 +28,14 @@ export const Overlay = styled.div`
 
 export const StyledSidebar = styled(ProSidebar)`
   position: absolute;
-  right: 0;
+  transition: all 0.5s ease-in-out;
+  right: -450px;
   top: 0;
   width: 450px;
+  transform: translateX(50px);
+  &.open {
+    transform: translateX(-450px);
+  }
   .pro-sidebar-inner > .pro-sidebar-layout {
     background-color: #4d4c53;
   }

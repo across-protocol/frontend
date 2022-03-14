@@ -17,16 +17,18 @@ import { useConnection } from "state/hooks";
 const { init, reset } = onboard;
 
 interface Props {
+  openSidebar: boolean;
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
+const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
   const { account, isConnected, chainId } = useConnection();
   const location = useLocation();
 
   return (
-    <Overlay>
-      <StyledSidebar>
+    <>
+      {openSidebar && <Overlay />}
+      <StyledSidebar className={openSidebar ? "open" : ""}>
         <StyledHeader>
           <CloseButton onClick={() => setOpenSidebar(false)}>X</CloseButton>
           <ConnectText isConnected={isConnected}>
@@ -103,7 +105,7 @@ const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
           </StyledMenuItem>
         </StyledMenu>
       </StyledSidebar>
-    </Overlay>
+    </>
   );
 };
 
