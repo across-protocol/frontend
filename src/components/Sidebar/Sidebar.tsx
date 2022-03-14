@@ -8,6 +8,7 @@ import {
   ConnectButton,
   StyledMenu,
   StyledMenuItem,
+  ConnectText,
 } from "./Sidebar.styles";
 import { onboard, CHAINS } from "utils";
 import { useConnection } from "state/hooks";
@@ -26,6 +27,9 @@ const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
       <StyledSidebar>
         <StyledHeader>
           <CloseButton onClick={() => setOpenSidebar(false)}>X</CloseButton>
+          <ConnectText isConnected={isConnected}>
+            <div /> {isConnected ? "Connected" : "Disconnected"}
+          </ConnectText>
           {account && <HeaderText>{account}</HeaderText>}
           {chainId && isConnected && (
             <HeaderText>{CHAINS[chainId].name}</HeaderText>

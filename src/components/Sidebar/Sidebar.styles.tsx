@@ -70,15 +70,30 @@ interface IStyledMenuItem {
   selected?: boolean;
 }
 export const StyledMenuItem = styled(MenuItem)<IStyledMenuItem>`
-  color: #fff;
+  color: var(--color-white);
   font-weight: 600;
   padding-left: 1rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #68686c;
-  &:not(:first-of-type) {
-  }
   background-color: ${(props) => {
     return props.selected ? "#68686c" : "#4d4c53";
   }};
+`;
+
+interface IConnectedText {
+  isConnected?: boolean;
+}
+export const ConnectText = styled.div<IConnectedText>`
+  > div {
+    display: inline-block;
+    background-color: ${({ isConnected }) =>
+      isConnected ? "var(--color-white)" : "var(--color-gray)"};
+    height: 12px;
+    width: 12px;
+    margin-right: 4px;
+    border-radius: 8px;
+    content: " ";
+  }
+  color: #2d2e33;
 `;
