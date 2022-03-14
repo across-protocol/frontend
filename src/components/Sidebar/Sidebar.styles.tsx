@@ -31,6 +31,9 @@ export const StyledSidebar = styled(ProSidebar)`
   right: 0;
   top: 0;
   width: 450px;
+  .pro-sidebar-inner > .pro-sidebar-layout {
+    background-color: #4d4c53;
+  }
 `;
 
 export const StyledHeader = styled(SidebarHeader)`
@@ -68,6 +71,7 @@ export const StyledMenu = styled(Menu)`
       color: var(--color-white);
     }
   }
+  background-color: "#4d4c53";
 `;
 interface IStyledMenuItem {
   selected?: boolean;
