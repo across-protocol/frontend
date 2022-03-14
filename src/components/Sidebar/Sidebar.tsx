@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   StyledSidebar,
   StyledHeader,
@@ -21,7 +22,8 @@ interface Props {
 
 const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
   const { account, isConnected, chainId } = useConnection();
-
+  const location = useLocation();
+  console.log("location", location);
   return (
     <Overlay>
       <StyledSidebar>
@@ -47,10 +49,26 @@ const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
           </ConnectButton>
         </StyledHeader>
         <StyledMenu>
-          <StyledMenuItem>Bridge</StyledMenuItem>
-          <StyledMenuItem>Pool</StyledMenuItem>
-          <StyledMenuItem selected={true}>Transactions</StyledMenuItem>
-          <StyledMenuItem>About</StyledMenuItem>
+          <StyledMenuItem selected={location.pathname === "/"}>
+            <Link onClick={() => setOpenSidebar(false)} to="/">
+              Bridge
+            </Link>
+          </StyledMenuItem>
+          <StyledMenuItem selected={location.pathname === "/pool"}>
+            <Link onClick={() => setOpenSidebar(false)} to="/pool">
+              Pool
+            </Link>
+          </StyledMenuItem>
+          <StyledMenuItem selected={location.pathname === "/transactions"}>
+            <Link onClick={() => setOpenSidebar(false)} to="/transactions">
+              Transactions
+            </Link>
+          </StyledMenuItem>
+          <StyledMenuItem selected={location.pathname === "/about"}>
+            <Link onClick={() => setOpenSidebar(false)} to="/about">
+              About
+            </Link>
+          </StyledMenuItem>
           <StyledMenuItem>Docs</StyledMenuItem>
           <StyledMenuItem>Support (Discord)</StyledMenuItem>
           <StyledMenuItem>Github</StyledMenuItem>

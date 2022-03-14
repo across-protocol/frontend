@@ -64,6 +64,9 @@ export const StyledMenu = styled(Menu)`
   &.pro-menu {
     padding-top: 0;
     padding-bottom: 0;
+    a {
+      color: var(--color-white);
+    }
   }
 `;
 interface IStyledMenuItem {
