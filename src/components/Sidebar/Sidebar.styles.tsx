@@ -1,4 +1,5 @@
-import { ProSidebar, SidebarHeader } from "react-pro-sidebar";
+import { ProSidebar, SidebarHeader, Menu, MenuItem } from "react-pro-sidebar";
+
 import styled from "@emotion/styled";
 import "react-pro-sidebar/dist/css/styles.css";
 import { SecondaryButton } from "../Buttons";
@@ -56,4 +57,26 @@ export const ConnectButton = styled(SecondaryButton)`
   border: 1px solid transparent;
   margin-top: 1.25rem;
   font-size: ${14 / 16}rem;
+`;
+export const StyledMenu = styled(Menu)`
+  &.pro-menu {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+`;
+interface IStyledMenuItem {
+  selected?: boolean;
+}
+export const StyledMenuItem = styled(MenuItem)<IStyledMenuItem>`
+  color: #fff;
+  font-weight: 600;
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #68686c;
+  &:not(:first-of-type) {
+  }
+  background-color: ${(props) => {
+    return props.selected ? "#68686c" : "#4d4c53";
+  }};
 `;

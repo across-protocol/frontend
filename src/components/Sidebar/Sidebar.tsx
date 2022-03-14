@@ -1,5 +1,4 @@
 import { FC } from "react";
-import { Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import {
   StyledSidebar,
   StyledHeader,
@@ -7,6 +6,8 @@ import {
   CloseButton,
   HeaderText,
   ConnectButton,
+  StyledMenu,
+  StyledMenuItem,
 } from "./Sidebar.styles";
 interface Props {
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,13 +23,17 @@ const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
           <HeaderText>Ethereum Mainnet</HeaderText>
           <ConnectButton>Disconnect</ConnectButton>
         </StyledHeader>
-        {/* <Menu iconShape="square">
-        <MenuItem>Dashboard</MenuItem>
-        <SubMenu title="Components">
-          <MenuItem>Component 1</MenuItem>
-          <MenuItem>Component 2</MenuItem>
-        </SubMenu>
-      </Menu> */}
+        <StyledMenu>
+          <StyledMenuItem>Bridge</StyledMenuItem>
+          <StyledMenuItem>Pool</StyledMenuItem>
+          <StyledMenuItem selected={true}>Transactions</StyledMenuItem>
+          <StyledMenuItem>About</StyledMenuItem>
+          <StyledMenuItem>Docs</StyledMenuItem>
+          <StyledMenuItem>Support (Discord)</StyledMenuItem>
+          <StyledMenuItem>Github</StyledMenuItem>
+          <StyledMenuItem>Twitter</StyledMenuItem>
+          <StyledMenuItem>Medium</StyledMenuItem>
+        </StyledMenu>
       </StyledSidebar>
     </Overlay>
   );
