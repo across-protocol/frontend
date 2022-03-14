@@ -9,19 +9,36 @@ import {
   StyledMenu,
   StyledMenuItem,
 } from "./Sidebar.styles";
+import { onboard } from "utils";
+import { useConnection } from "state/hooks";
+
+const { init, reset } = onboard;
+
 interface Props {
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
+  const { account, isConnected } = useConnection();
+
   return (
     <Overlay>
       <StyledSidebar>
         <StyledHeader>
           <CloseButton onClick={() => setOpenSidebar(false)}>X</CloseButton>
-          <HeaderText>0xc18BB25b7CC6FAF2365F8aD777aD34C057eE4617</HeaderText>
+          {account && <HeaderText>{account}</HeaderText>}
           <HeaderText>Ethereum Mainnet</HeaderText>
-          <ConnectButton>Disconnect</ConnectButton>
+          <ConnectButton
+            onClick={() => {
+              if (isConnected) {
+                return reset();
+              } else {
+                return init();
+              }
+            }}
+          >
+            {isConnected ? "Disconnect" : "Connect wallet"}
+          </ConnectButton>
         </StyledHeader>
         <StyledMenu>
           <StyledMenuItem>Bridge</StyledMenuItem>

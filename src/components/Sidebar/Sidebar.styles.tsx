@@ -44,6 +44,8 @@ export const CloseButton = styled.div`
   font-size: ${24 / 16}rem;
   font-weight: 700;
   cursor: pointer;
+  width: 25px;
+  margin-left: auto;
 `;
 export const HeaderText = styled.div`
   color: #2d2e33;
