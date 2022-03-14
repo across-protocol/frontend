@@ -130,13 +130,3 @@ export const ExternalMobileLink = styled.a`
   color: inherit;
   outline: none;
 `;
-
-export const Hamburger = styled.div`
-  display: inline;
-  > div {
-    width: 35px;
-    height: 5px;
-    background-color: black;
-    margin: 6px 0;
-  }
-`;

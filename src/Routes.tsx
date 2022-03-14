@@ -1,4 +1,4 @@
-import { FC, useContext } from "react";
+import { FC, useContext, useState } from "react";
 import { Switch, Route, useLocation } from "react-router-dom";
 import { Send, Confirmation, Pool, About, Transactions } from "views";
 import { Header, SuperHeader } from "components";
@@ -19,6 +19,7 @@ interface Props {}
 
 // Need this component for useLocation hook
 const Routes: FC<Props> = () => {
+  const [openSidebar, setOpenSidebar] = useState(false);
   const { showConfirmationScreen } = useDeposits();
   const { error, provider, chainId } = useConnection();
   const location = useLocation();
@@ -72,8 +73,8 @@ const Routes: FC<Props> = () => {
           </div>
         </SuperHeader>
       )}
-      <Header />
-      <Sidebar />
+      <Header setOpenSidebar={setOpenSidebar} />
+      {openSidebar && <Sidebar />}
       <Switch>
         <Route exact path="/transactions" component={Transactions} />
         <Route exact path="/pool" component={Pool} />

@@ -16,7 +16,6 @@ import {
   List,
   Item,
   WalletWrapper,
-  Hamburger,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
 import MobileMenu from "./MobileMenu";
@@ -32,7 +31,11 @@ const MOBILE_ONLY_LINKS = [
   { href: "https://twitter.com/AcrossProtocol", name: "Twitter" },
   { href: "https://github.com/across-protocol", name: "Github" },
 ];
-const Header: React.FC = () => {
+
+interface Props {
+  setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+}
+const Header: React.FC<Props> = ({ setOpenSidebar }) => {
   const location = useLocation();
   const [isMenuOpen, setMenuOpen] = useState(false);
 
@@ -42,8 +45,10 @@ const Header: React.FC = () => {
   }, [location.pathname]);
 
   const toggleMenu = () => {
-    setMenuOpen((oldOpen) => !oldOpen);
+    // setMenuOpen((oldOpen) => !oldOpen);
+    setOpenSidebar((prevValue) => !prevValue);
   };
+
   return (
     <Wrapper>
       <LogoLink to="/">
