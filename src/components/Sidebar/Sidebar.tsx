@@ -9,7 +9,7 @@ import {
   StyledMenu,
   StyledMenuItem,
 } from "./Sidebar.styles";
-import { onboard } from "utils";
+import { onboard, CHAINS } from "utils";
 import { useConnection } from "state/hooks";
 
 const { init, reset } = onboard;
@@ -19,7 +19,7 @@ interface Props {
 }
 
 const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
-  const { account, isConnected } = useConnection();
+  const { account, isConnected, chainId } = useConnection();
 
   return (
     <Overlay>
@@ -27,7 +27,9 @@ const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
         <StyledHeader>
           <CloseButton onClick={() => setOpenSidebar(false)}>X</CloseButton>
           {account && <HeaderText>{account}</HeaderText>}
-          <HeaderText>Ethereum Mainnet</HeaderText>
+          {chainId && isConnected && (
+            <HeaderText>{CHAINS[chainId].name}</HeaderText>
+          )}
           <ConnectButton
             onClick={() => {
               if (isConnected) {
