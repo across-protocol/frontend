@@ -1,3 +1,4 @@
+import { FC } from "react";
 import { Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import {
   StyledSidebar,
@@ -5,16 +6,21 @@ import {
   Overlay,
   CloseButton,
   HeaderText,
+  ConnectButton,
 } from "./Sidebar.styles";
-interface Props {}
-const Sidebar = () => {
+interface Props {
+  setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
   return (
     <Overlay>
       <StyledSidebar>
         <StyledHeader>
-          <CloseButton>X</CloseButton>
+          <CloseButton onClick={() => setOpenSidebar(false)}>X</CloseButton>
           <HeaderText>0xc18BB25b7CC6FAF2365F8aD777aD34C057eE4617</HeaderText>
           <HeaderText>Ethereum Mainnet</HeaderText>
+          <ConnectButton>Disconnect</ConnectButton>
         </StyledHeader>
         {/* <Menu iconShape="square">
         <MenuItem>Dashboard</MenuItem>
