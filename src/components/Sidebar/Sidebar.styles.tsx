@@ -28,8 +28,19 @@ export const StyledSidebar = styled(ProSidebar)`
   position: absolute;
   right: 0;
   top: 0;
+  width: 450px;
 `;
 
 export const StyledHeader = styled(SidebarHeader)`
   background-color: var(--color-primary);
+  padding: 1rem;
 `;
+
+export const CloseButton = styled.div`
+  text-align: right;
+  color: #2d2e33;
+  font-size: ${24 / 16}rem;
+  font-weight: 500;
+  cursor: pointer;
+`;
+export const HeaderText = styled.div``;
