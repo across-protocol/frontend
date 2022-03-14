@@ -399,7 +399,6 @@ const defaultConstructExplorerLink =
 export const isProduction = () =>
   process.env.REACT_APP_VERCEL_GIT_COMMIT_REF === "master";
 
-
 export const CHAINS: Record<ChainId, ChainInfo> = {
   [ChainId.MAINNET]: {
     name: "Ethereum Mainnet",

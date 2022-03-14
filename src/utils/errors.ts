@@ -11,10 +11,10 @@ export class UnsupportedChainIdError extends Error {
 }
 
 export class WrongNetworkError extends Error {
-  public constructor(fromChain: ChainId, chainId: number) {
+  public constructor() {
     super();
     this.name = this.constructor.name;
-    this.message = `Trying to send from chaind with id: ${fromChain} but connected to chain with id: ${chainId}.`;
+    this.message = `Connected to the wrong network.`;
   }
 }
 

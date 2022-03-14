@@ -52,7 +52,7 @@ export default function useCoinSelection() {
       }
     },
   });
-  const { fees } = useBridgeFees(amount, selectedItem!.symbol);
+  const { fees } = useBridgeFees(amount, fromChain, selectedItem!.symbol);
   const [inputAmount, setInputAmount] = React.useState<string>(
     selectedItem && amount.gt("0")
       ? formatUnits(amount, selectedItem.decimals)

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useEffect, useState, useContext } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+
 import useInterval from "@use-it/interval";
 import { ethers, BigNumber } from "ethers";
 import { bindActionCreators } from "redux";
@@ -42,7 +42,6 @@ const FEE_ESTIMATION = "0.004";
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-
 
 export function useConnection() {
   const { account, signer, provider, error, chainId, notify } = useAppSelector(

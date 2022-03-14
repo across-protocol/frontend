@@ -19,7 +19,7 @@ import {
 import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
 
-type FormStatus = "idle" | "valid" | "error";
+export type FormStatus = "idle" | "touched" | "valid" | "error";
 
 type FormState = {
   status: FormStatus;
@@ -76,6 +76,7 @@ type Action =
 function tokenReducer(state: FormState, token: string): FormState {
   switch (state.status) {
     case "idle":
+    case "touched":
     case "valid":
     case "error":
       return {
@@ -93,15 +94,28 @@ function tokenReducer(state: FormState, token: string): FormState {
 
 function amountReducer(state: FormState, amount: ethers.BigNumber): FormState {
   const isLtZero = amount.lt(0);
+  const isGtZero = amount.gt(0);
+  const canTransitionToValid = !!state.toAddress && isGtZero;
   const error = isLtZero ? new ParsingError() : undefined;
   switch (state.status) {
     case "idle":
-    case "valid":
+    case "touched":
     case "error":
       return {
         ...state,
-        status: isLtZero ? "error" : "valid",
         amount,
+        status: isLtZero
+          ? "error"
+          : !canTransitionToValid
+          ? "touched"
+          : "valid",
+        error,
+      };
+    case "valid":
+      return {
+        ...state,
+        amount,
+        status: isLtZero ? "error" : isGtZero ? "valid" : "touched",
         error,
       };
 
@@ -121,6 +135,7 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
 
   switch (state.status) {
     case "idle":
+    case "touched":
     case "valid":
     case "error":
       return {
@@ -144,6 +159,7 @@ function toChainReducer(state: FormState, chainId: ChainId): FormState {
   }
   switch (state.status) {
     case "idle":
+    case "touched":
     case "valid":
     case "error":
       return {
@@ -161,8 +177,21 @@ function toChainReducer(state: FormState, chainId: ChainId): FormState {
 }
 
 function toAddressReducer(state: FormState, address: string): FormState {
+  const isAmountGtZero = state.amount.gt(0);
   switch (state.status) {
-    case "idle":
+    case "idle": {
+      return {
+        ...state,
+        status: "touched",
+        toAddress: address,
+      };
+    }
+    case "touched":
+      return {
+        ...state,
+        status: isAmountGtZero ? "valid" : "touched",
+        toAddress: address,
+      };
     case "valid":
     case "error":
       return { ...state, toAddress: address };
@@ -177,6 +206,7 @@ function errorReducer(
 ): FormState {
   switch (state.status) {
     case "idle":
+    case "touched":
     case "valid":
       return { ...state, status: "error", error };
     case "error":

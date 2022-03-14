@@ -28,8 +28,8 @@ const SendAction: React.FC = () => {
     toggleInfoModal,
     buttonMsg,
   } = useSendAction();
+  const showFees = amount.gt(0) && !!fees;
 
-  const showFees = amount.gt(0) && fees && tokenInfo;
   return (
     <AccentSection>
       <Wrapper>
