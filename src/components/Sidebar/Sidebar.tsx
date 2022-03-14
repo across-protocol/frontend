@@ -23,7 +23,7 @@ interface Props {
 const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
   const { account, isConnected, chainId } = useConnection();
   const location = useLocation();
-  console.log("location", location);
+
   return (
     <Overlay>
       <StyledSidebar>
@@ -69,11 +69,38 @@ const Sidebar: FC<Props> = ({ setOpenSidebar }) => {
               About
             </Link>
           </StyledMenuItem>
-          <StyledMenuItem>Docs</StyledMenuItem>
+          <StyledMenuItem>
+            <a
+              href="https://docs.across.to/bridge/"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setOpenSidebar(false)}
+            >
+              Docs
+            </a>
+          </StyledMenuItem>
           <StyledMenuItem>Support (Discord)</StyledMenuItem>
-          <StyledMenuItem>Github</StyledMenuItem>
+          <StyledMenuItem>
+            <a
+              href="https://github.com/across-protocol/frontend-v2/"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setOpenSidebar(false)}
+            >
+              Github
+            </a>
+          </StyledMenuItem>
           <StyledMenuItem>Twitter</StyledMenuItem>
-          <StyledMenuItem>Medium</StyledMenuItem>
+          <StyledMenuItem>
+            <a
+              href="https://medium.com/across-protocol"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setOpenSidebar(false)}
+            >
+              Medium
+            </a>
+          </StyledMenuItem>
         </StyledMenu>
       </StyledSidebar>
     </Overlay>
