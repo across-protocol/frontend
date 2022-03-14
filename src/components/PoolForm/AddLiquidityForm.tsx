@@ -1,4 +1,4 @@
-import { FC, useState, useCallback, useEffect, useContext } from "react";
+import { FC, useState, useCallback, useEffect } from "react";
 import { onboard } from "utils";
 import { useConnection } from "state/hooks";
 import {
@@ -20,7 +20,7 @@ import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { DEFAULT_TO_CHAIN_ID, CHAINS, switchChain } from "utils";
 import api from "state/chainApi";
 import type { ShowSuccess } from "views/Pool";
-import { ErrorContext } from "context/ErrorContext";
+import { useError } from "hooks";
 
 // max uint value is 2^256 - 1
 const MAX_UINT_VAL = ethers.constants.MaxUint256;
@@ -61,7 +61,7 @@ const AddLiquidityForm: FC<Props> = ({
   formError,
   onMaxClick,
 }) => {
-  const { addError } = useContext(ErrorContext);
+  const { addError } = useError();
 
   const { init } = onboard;
   const { isConnected, provider, signer, notify, account } = useConnection();

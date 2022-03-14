@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect, useState, useContext } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 import useInterval from "@use-it/interval";
@@ -17,7 +17,6 @@ import {
   tagAddress,
 } from "utils";
 import type { RootState, AppDispatch } from "./";
-import { ErrorContext } from "context/ErrorContext";
 import { update, disconnect, error as errorAction } from "./connection";
 import {
   token as tokenAction,
@@ -30,7 +29,7 @@ import {
 import chainApi, { useAllowance, useBridgeFees } from "./chainApi";
 import { add } from "./transactions";
 import { deposit as depositAction, toggle } from "./deposits";
-import { useERC20, useQueryParams } from "hooks";
+import { useERC20, useQueryParams, useError } from "hooks";
 import { across } from "@uma/sdk";
 import { Bridge } from "arb-ts";
 
@@ -76,7 +75,7 @@ export function useL2Block() {
     ethers.providers.Block | undefined
   >();
 
-  const { addError, removeError, error } = useContext(ErrorContext);
+  const { addError, removeError, error } = useError();
 
   useEffect(() => {
     const provider = PROVIDERS[currentlySelectedFromChain.chainId]();

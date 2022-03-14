@@ -6,3 +6,4 @@ export * from "./usePrevious";
 export * from "./useSendForm";
 export * from "./useBridge";
 export * from "./useQueryParams";
+export * from "./useError";

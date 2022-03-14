@@ -5,10 +5,10 @@ import { store } from "state";
 import { GlobalStyles } from "components";
 import { QueryClientProvider, QueryClient } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import ErrorProvider from "context/ErrorContext";
 
 import App from "./App";
 import "./onboard-override.css";
+import { ErrorProvider } from "hooks";
 
 const client = new QueryClient();
 ReactDOM.render(
