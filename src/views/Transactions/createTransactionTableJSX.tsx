@@ -9,7 +9,6 @@ import { ICell, IRow } from "components/Table/Table";
 import { Transaction } from "./createTransactionModel";
 import { CHAINS, TOKENS_LIST } from "utils/constants";
 
-// Stub of function.
 // Will take View Model Transaction as arg
 export default function createTransactionTableJSX(transactions: Transaction[]) {
   const rows = formatTransactionRows(transactions);
