@@ -38,15 +38,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
           {chainId && isConnected && (
             <HeaderText>{CHAINS[chainId].name}</HeaderText>
           )}
-          <ConnectButton
-            onClick={() => {
-              if (isConnected) {
-                return reset();
-              } else {
-                return init();
-              }
-            }}
-          >
+          <ConnectButton onClick={() => (isConnected ? reset() : init())}>
             {isConnected ? "Disconnect" : "Connect wallet"}
           </ConnectButton>
         </StyledHeader>
