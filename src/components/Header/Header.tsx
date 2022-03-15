@@ -45,7 +45,6 @@ const Header: React.FC<Props> = ({ setOpenSidebar }) => {
   }, [location.pathname]);
 
   const toggleMenu = () => {
-    // setMenuOpen((oldOpen) => !oldOpen);
     setOpenSidebar((prevValue) => !prevValue);
   };
 

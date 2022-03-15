@@ -16,13 +16,7 @@ export const Overlay = styled.div`
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-  -ms-flex-pack: center;
-  -webkit-justify-content: center;
   justify-content: center;
-  -webkit-align-items: flex-start;
-  -webkit-box-align: flex-start;
-  -ms-flex-align: flex-start;
   align-items: flex-start;
 `;
 
@@ -32,9 +26,8 @@ export const StyledSidebar = styled(ProSidebar)`
   right: -450px;
   top: 0;
   width: 450px;
-  transform: translateX(50px);
   &.open {
-    transform: translateX(-450px);
+    transform: translateX(-100%);
   }
   .pro-sidebar-inner > .pro-sidebar-layout {
     background-color: var(--color-gray-600);
