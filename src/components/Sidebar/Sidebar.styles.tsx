@@ -11,7 +11,7 @@ export const Overlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--color-gray-lighter);
+  background-color: var(--color-gray-transparent-lighter);
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
