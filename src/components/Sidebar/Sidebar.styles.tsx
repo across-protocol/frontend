@@ -11,7 +11,7 @@ export const Overlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(45, 46, 51, 0.65);
+  background-color: var(--color-gray-lighter);
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -37,7 +37,7 @@ export const StyledSidebar = styled(ProSidebar)`
     transform: translateX(-450px);
   }
   .pro-sidebar-inner > .pro-sidebar-layout {
-    background-color: #4d4c53;
+    background-color: var(--color-gray-600);
   }
 `;
 
@@ -48,7 +48,7 @@ export const StyledHeader = styled(SidebarHeader)`
 
 export const CloseButton = styled.div`
   text-align: right;
-  color: #2d2e33;
+  color: var(--color-gray);
   font-size: ${24 / 16}rem;
   font-weight: 700;
   cursor: pointer;
@@ -56,7 +56,7 @@ export const CloseButton = styled.div`
   margin-left: auto;
 `;
 export const HeaderText = styled.div`
-  color: #2d2e33;
+  color: var(--color-gray);
   font-size: ${16 / 16}rem;
 `;
 
@@ -76,7 +76,7 @@ export const StyledMenu = styled(Menu)`
       color: var(--color-white);
     }
   }
-  background-color: "#4d4c53";
+  background-color: var(--color-gray-700);
 `;
 interface IStyledMenuItem {
   selected?: boolean;
@@ -87,9 +87,9 @@ export const StyledMenuItem = styled(MenuItem)<IStyledMenuItem>`
   padding-left: 1rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #68686c;
-  background-color: ${(props) => {
-    return props.selected ? "#68686c" : "#4d4c53";
+  border-bottom: 1px solid var(--color-gray-700);
+  background-color: ${({ selected }) => {
+    return selected ? "var(--color-gray-700)" : "var(--color-gray-600)";
   }};
 `;
 
@@ -107,5 +107,5 @@ export const ConnectText = styled.div<IConnectedText>`
     border-radius: 8px;
     content: " ";
   }
-  color: #2d2e33;
+  color: var(--color-gray);
 `;
