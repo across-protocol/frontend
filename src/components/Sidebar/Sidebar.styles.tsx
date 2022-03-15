@@ -76,7 +76,7 @@ export const StyledMenu = styled(Menu)`
       color: var(--color-white);
     }
   }
-  background-color: var(--color-gray-700);
+  background-color: var(--color-gray-550);
 `;
 interface IStyledMenuItem {
   selected?: boolean;
@@ -87,9 +87,9 @@ export const StyledMenuItem = styled(MenuItem)<IStyledMenuItem>`
   padding-left: 1rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--color-gray-700);
+  border-bottom: 1px solid var(--color-gray-550);
   background-color: ${({ selected }) => {
-    return selected ? "var(--color-gray-700)" : "var(--color-gray-600)";
+    return selected ? "var(--color-gray-550)" : "var(--color-gray-600)";
   }};
 `;
 
