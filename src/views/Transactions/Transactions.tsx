@@ -3,7 +3,7 @@ import { Wrapper, Title, ConnectButton, Account } from "./Transactions.styles";
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
-import formatTransactionData from "./formatTransactionData";
+import createTransactionTableJSX from "./createTransactionTableJSX";
 
 const Transactions = () => {
   const { isConnected, initOnboard, account, transactions } =
@@ -11,7 +11,7 @@ const Transactions = () => {
 
   // Will take a Transaction Model argument
   const { ongoingTx, filledTx, headers } = useMemo(
-    () => formatTransactionData(transactions),
+    () => createTransactionTableJSX(transactions),
     [transactions]
   );
 
