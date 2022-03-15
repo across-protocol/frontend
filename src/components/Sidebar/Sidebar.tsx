@@ -85,7 +85,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
           </StyledMenuItem>
           <StyledMenuItem>
             <a
-              href="https://github.com/across-protocol/frontend-v2/"
+              href="https://github.com/across-protocol"
               target="_blank"
               rel="noreferrer"
               onClick={() => setOpenSidebar(false)}
