@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   StyledSidebar,
   StyledHeader,
@@ -12,8 +12,7 @@ import {
   ConnectText,
 } from "./Sidebar.styles";
 import { onboard, CHAINS } from "utils";
-import { useConnection } from "state/hooks";
-
+import useSidebar from "./useSidebar";
 const { init, reset } = onboard;
 
 interface Props {
@@ -22,8 +21,7 @@ interface Props {
 }
 
 const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
-  const { account, isConnected, chainId } = useConnection();
-  const location = useLocation();
+  const { account, isConnected, chainId, location } = useSidebar();
 
   return (
     <>
