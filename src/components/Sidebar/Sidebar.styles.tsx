@@ -5,7 +5,7 @@ import "react-pro-sidebar/dist/css/styles.css";
 import { SecondaryButton } from "../Buttons";
 
 export const Overlay = styled.div`
-  z-index: 500;
+  z-index: 50;
   position: fixed;
   top: 0;
   left: 0;
