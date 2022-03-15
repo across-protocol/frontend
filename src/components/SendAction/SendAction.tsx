@@ -22,7 +22,7 @@ const SendAction: React.FC = () => {
     fromChain,
     amountMinusFees,
     isWETH,
-    handleClick,
+    handleActionClick,
     buttonDisabled,
     isInfoModalOpen,
     toggleInfoModal,
@@ -78,7 +78,7 @@ const SendAction: React.FC = () => {
           </Info>
           <InfoIcon aria-label="info dialog" onClick={toggleInfoModal} />
         </InfoWrapper>
-        <PrimaryButton onClick={handleClick} disabled={buttonDisabled}>
+        <PrimaryButton onClick={handleActionClick} disabled={buttonDisabled}>
           {buttonMsg}
         </PrimaryButton>
         {fromChain === ChainId.MAINNET && (

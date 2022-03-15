@@ -7,7 +7,7 @@ type Deposit = {
   txHash: string;
   amount: ethers.BigNumber;
   to: string;
-  toAddress?: string;
+  toAddress: string;
   from: string;
   token: string;
   fromChain: ChainId;
@@ -30,7 +30,7 @@ type DepositAction = PayloadAction<{
   amount: ethers.BigNumber;
   fromChain: ChainId;
   toChain: ChainId;
-  toAddress?: string;
+  toAddress: string;
   fees: BridgeFees;
 }>;
 

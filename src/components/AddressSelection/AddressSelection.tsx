@@ -44,7 +44,7 @@ const AddressSelection: React.FC = () => {
     isValid,
     isConnected,
     toggle,
-    handleChange,
+    handleAddressChange,
     handleSubmit,
     clearInput,
     open,
@@ -137,7 +137,7 @@ const AddressSelection: React.FC = () => {
           <h3>Send To</h3>
           <div>Address on {CHAINS[toChain].name}</div>
           <InputWrapper>
-            <Input onChange={handleChange} value={address} />
+            <Input onChange={handleAddressChange} value={address} />
             <ClearButton onClick={clearInput}>
               <XOctagon
                 fill="var(--color-gray-300)"

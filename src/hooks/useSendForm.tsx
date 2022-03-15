@@ -19,7 +19,12 @@ import {
 import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
 
-export type FormStatus = "idle" | "touched" | "valid" | "error";
+export enum FormStatus {
+  IDLE = "idle",
+  TOUCHED = "touched",
+  VALID = "valid",
+  ERROR = "error",
+}
 
 type FormState = {
   status: FormStatus;
@@ -32,7 +37,7 @@ type FormState = {
 };
 
 const initialFormState: FormState = {
-  status: "idle",
+  status: FormStatus.IDLE,
   token: ethers.constants.AddressZero,
   amount: ethers.constants.Zero,
   toChain: DEFAULT_TO_CHAIN_ID,
@@ -75,13 +80,13 @@ type Action =
 
 function tokenReducer(state: FormState, token: string): FormState {
   switch (state.status) {
-    case "idle":
-    case "touched":
-    case "valid":
-    case "error":
+    case FormStatus.IDLE:
+    case FormStatus.TOUCHED:
+    case FormStatus.VALID:
+    case FormStatus.ERROR:
       return {
         ...state,
-        status: "idle",
+        status: FormStatus.IDLE,
         token,
         amount: ethers.constants.Zero,
         error: undefined,
@@ -98,24 +103,28 @@ function amountReducer(state: FormState, amount: ethers.BigNumber): FormState {
   const canTransitionToValid = !!state.toAddress && isGtZero;
   const error = isLtZero ? new ParsingError() : undefined;
   switch (state.status) {
-    case "idle":
-    case "touched":
-    case "error":
+    case FormStatus.IDLE:
+    case FormStatus.TOUCHED:
+    case FormStatus.ERROR:
       return {
         ...state,
         amount,
         status: isLtZero
-          ? "error"
+          ? FormStatus.ERROR
           : !canTransitionToValid
-          ? "touched"
-          : "valid",
+          ? FormStatus.TOUCHED
+          : FormStatus.VALID,
         error,
       };
-    case "valid":
+    case FormStatus.VALID:
       return {
         ...state,
         amount,
-        status: isLtZero ? "error" : isGtZero ? "valid" : "touched",
+        status: isLtZero
+          ? FormStatus.ERROR
+          : isGtZero
+          ? FormStatus.VALID
+          : FormStatus.TOUCHED,
         error,
       };
 
@@ -134,13 +143,13 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
   }
 
   switch (state.status) {
-    case "idle":
-    case "touched":
-    case "valid":
-    case "error":
+    case FormStatus.IDLE:
+    case FormStatus.TOUCHED:
+    case FormStatus.VALID:
+    case FormStatus.ERROR:
       return {
         ...state,
-        status: "idle",
+        status: FormStatus.IDLE,
         fromChain: chainId,
         toChain,
         amount: ethers.constants.Zero,
@@ -158,13 +167,13 @@ function toChainReducer(state: FormState, chainId: ChainId): FormState {
     fromChain = ChainId.OPTIMISM;
   }
   switch (state.status) {
-    case "idle":
-    case "touched":
-    case "valid":
-    case "error":
+    case FormStatus.IDLE:
+    case FormStatus.TOUCHED:
+    case FormStatus.VALID:
+    case FormStatus.ERROR:
       return {
         ...state,
-        status: "idle",
+        status: FormStatus.IDLE,
         toChain: chainId,
         fromChain,
         amount: ethers.constants.Zero,
@@ -179,21 +188,21 @@ function toChainReducer(state: FormState, chainId: ChainId): FormState {
 function toAddressReducer(state: FormState, address: string): FormState {
   const isAmountGtZero = state.amount.gt(0);
   switch (state.status) {
-    case "idle": {
+    case FormStatus.IDLE: {
       return {
         ...state,
-        status: "touched",
+        status: FormStatus.TOUCHED,
         toAddress: address,
       };
     }
-    case "touched":
+    case FormStatus.TOUCHED:
       return {
         ...state,
-        status: isAmountGtZero ? "valid" : "touched",
+        status: isAmountGtZero ? FormStatus.VALID : FormStatus.TOUCHED,
         toAddress: address,
       };
-    case "valid":
-    case "error":
+    case FormStatus.VALID:
+    case FormStatus.ERROR:
       return { ...state, toAddress: address };
     default:
       throw new Error("unreachable");
@@ -205,11 +214,11 @@ function errorReducer(
   error: ParsingError | undefined
 ): FormState {
   switch (state.status) {
-    case "idle":
-    case "touched":
-    case "valid":
-      return { ...state, status: "error", error };
-    case "error":
+    case FormStatus.IDLE:
+    case FormStatus.TOUCHED:
+    case FormStatus.VALID:
+      return { ...state, status: FormStatus.ERROR, error };
+    case FormStatus.ERROR:
       return state;
     default:
       throw new Error("unreachable");
@@ -249,7 +258,7 @@ type SendFormManagerContext = FormState & {
 function useSendFormManager(): SendFormManagerContext {
   const [state, dispatch] = useReducer(formReducer, initialFormState);
   const { account: connectedAccount, chainId } = useConnection();
-  console.log(state);
+
   // Keep the connected account and the toAddress in sync. If a user switches account, the toAddress should be updated to this new account.
   useEffect(() => {
     if (connectedAccount) {

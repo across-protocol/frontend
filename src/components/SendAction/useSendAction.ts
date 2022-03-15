@@ -31,7 +31,7 @@ export default function useSendAction() {
     return receiveAmount(amount, fees);
   }, [amount, fees, fromChain]);
 
-  const handleClick = async () => {
+  const handleActionClick = async () => {
     if (hasToApprove) {
       const tx = await approve();
       console.log(tx);
@@ -62,7 +62,7 @@ export default function useSendAction() {
     fees,
     tokenInfo,
     isWETH,
-    handleClick,
+    handleActionClick,
     amountMinusFees,
     buttonMsg,
     buttonDisabled,

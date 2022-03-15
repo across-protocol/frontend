@@ -19,7 +19,13 @@ import {
   WrongNetworkError,
 } from "utils";
 
-type SendStatus = "idle" | "validating" | "ready" | "error";
+
+enum SendStatus {
+  IDLE = "idle",
+  VALIDATING = "validating",
+  READY = "ready",
+  ERROR = "error",
+}
 type SendError =
   | InsufficientBalanceError
   | FeeTooHighError
@@ -138,11 +144,11 @@ function computeStatus({
   fees,
   token,
 }: ComputeStatusArgs): { status: SendStatus; error?: SendError } {
-  if (formStatus !== "valid") {
-    return { status: "idle" };
+  if (formStatus !== FormStatus.VALID) {
+    return { status: SendStatus.IDLE };
   }
   if (hasToSwitchChain) {
-    return { status: "error", error: new WrongNetworkError() };
+    return { status: SendStatus.ERROR, error: new WrongNetworkError() };
   }
   if (balance) {
     const adjustedBalance =
@@ -150,19 +156,19 @@ function computeStatus({
         ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION))
         : balance;
     if (adjustedBalance.lt(amount)) {
-      return { status: "error", error: new InsufficientBalanceError() };
+      return { status: SendStatus.ERROR, error: new InsufficientBalanceError() };
     }
   }
   if (fees) {
     if (fees.isLiquidityInsufficient) {
-      return { status: "error", error: new InsufficientLiquidityError(token) };
+      return { status: SendStatus.ERROR, error: new InsufficientLiquidityError(token) };
     }
     if (fees.isAmountTooLow) {
-      return { status: "error", error: new FeeTooHighError() };
+      return { status: SendStatus.ERROR, error: new FeeTooHighError() };
     }
   }
   if (!balance || !fees) {
-    return { status: "validating" };
+    return { status: SendStatus.VALIDATING };
   }
-  return { status: "ready" };
+  return { status: SendStatus.READY };
 }

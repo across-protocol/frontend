@@ -28,18 +28,17 @@ export default function useAddressSelection() {
       setAddress(toAddress);
     }
   }, [toAddress]);
-
+  // modal is closing, reset address to the current toAddress
   const toggle = () => {
-    // modal is closing, reset address to the current toAddress
     if (!isConnected) return;
     if (open) setAddress(toAddress || address);
-    setOpen((oldOpen) => !oldOpen);
+    setOpen((prevOpen) => !prevOpen);
   };
   const clearInput = () => {
     setAddress("");
   };
 
-  const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddressChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     setAddress(evt.target.value);
   };
   const isValid = !address || isValidAddress(address);
@@ -55,7 +54,7 @@ export default function useAddressSelection() {
   return {
     ...downshiftState,
     handleSubmit,
-    handleChange,
+    handleAddressChange,
     clearInput,
     isL1toL2,
     isValid,

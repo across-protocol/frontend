@@ -30,7 +30,7 @@ const CoinSelection = () => {
     handleMaxClick,
     tokenList,
     inputAmount,
-    handleChange,
+    handleInputChange,
     errorMsg,
     error,
     showError,
@@ -69,7 +69,7 @@ const CoinSelection = () => {
                 placeholder="0.00"
                 id="amount"
                 value={inputAmount}
-                onChange={handleChange}
+                onChange={handleInputChange}
               />
             </RoundBox>
             <Menu {...getMenuProps()} isOpen={isOpen}>

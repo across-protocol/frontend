@@ -1,7 +1,7 @@
 import { useSelect } from "downshift";
 import { ethers } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useCallback } from "react";
 import { useConnection } from "state/hooks";
 import { useBalance, useBalances, useBridgeFees, useSendForm } from "hooks";
 import {
@@ -65,22 +65,25 @@ export default function useCoinSelection() {
     }
   }, [formStatus]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setInputAmount(value);
-    if (value === "") {
-      setAmount(ethers.constants.Zero);
-      return;
-    }
-    try {
-      const amount = parseUnits(value, selectedItem!.decimals);
-      setAmount(amount);
-    } catch (e) {
-      setFormError(new ParsingError());
-    }
-  };
+  const handleInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setInputAmount(value);
+      if (value === "") {
+        setAmount(ethers.constants.Zero);
+        return;
+      }
+      try {
+        const amount = parseUnits(value, selectedItem!.decimals);
+        setAmount(amount);
+      } catch (e) {
+        setFormError(new ParsingError());
+      }
+    },
+    [selectedItem, setAmount, setFormError]
+  );
 
-  const handleMaxClick = () => {
+  const handleMaxClick = useCallback(() => {
     if (balances && selectedItem) {
       const selectedIndex = tokenList.findIndex(
         ({ address }) => address === selectedItem.address
@@ -104,7 +107,7 @@ export default function useCoinSelection() {
         );
       }
     }
-  };
+  }, [balance, balances, selectedItem, setAmount, tokenList]);
   // checks for insufficient balance errors
   let error: InsufficientBalanceError | ParsingError | undefined = formError;
   const isEth = token === ETH_ADDRESS;
@@ -136,7 +139,7 @@ export default function useCoinSelection() {
     balance,
     errorMsg,
     showError,
-    handleChange,
+    handleInputChange,
     handleMaxClick,
     inputAmount,
     setInputAmount,
