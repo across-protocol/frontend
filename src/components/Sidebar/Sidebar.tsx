@@ -81,7 +81,16 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               Docs
             </a>
           </StyledMenuItem>
-          <StyledMenuItem>Support (Discord)</StyledMenuItem>
+          <StyledMenuItem>
+            <a
+              href="https://discord.com/invite/across"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setOpenSidebar(false)}
+            >
+              Support (Discord)
+            </a>
+          </StyledMenuItem>
           <StyledMenuItem>
             <a
               href="https://github.com/across-protocol/frontend-v2/"
@@ -92,7 +101,16 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               Github
             </a>
           </StyledMenuItem>
-          <StyledMenuItem>Twitter</StyledMenuItem>
+          <StyledMenuItem>
+            <a
+              href="https://twitter.com/AcrossProtocol/"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setOpenSidebar(false)}
+            >
+              Twitter
+            </a>
+          </StyledMenuItem>
           <StyledMenuItem>
             <a
               href="https://medium.com/across-protocol"
