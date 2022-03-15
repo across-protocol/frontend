@@ -4,14 +4,20 @@ import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
 import createTransactionTableJSX from "./createTransactionTableJSX";
+import { headers } from "./createTransactionTableJSX";
 
 const Transactions = () => {
   const { isConnected, initOnboard, account, transactions } =
     useTransactionsView();
 
-  // Will take a Transaction Model argument
-  const { ongoingTx, filledTx, headers } = useMemo(
-    () => createTransactionTableJSX(transactions),
+  const ongoingTx = useMemo(
+    () => createTransactionTableJSX(transactions.filter((x) => x.filled < 100)),
+    [transactions]
+  );
+
+  const filledTx = useMemo(
+    () =>
+      createTransactionTableJSX(transactions.filter((x) => x.filled >= 100)),
     [transactions]
   );
 

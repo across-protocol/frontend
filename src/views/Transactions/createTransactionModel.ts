@@ -11,7 +11,7 @@ export interface Transaction {
   txHash: string;
 }
 
-// Will take a raw TX argument and transform into ViewModel.
+// Will take an raw data array argument and transform into ViewModel.
 export default function createTransactionModel(): Transaction[] {
   return [
     {

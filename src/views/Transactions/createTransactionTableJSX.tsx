@@ -12,18 +12,12 @@ import { CHAINS, TOKENS_LIST } from "utils/constants";
 // Stub of function.
 // Will take View Model Transaction as arg
 export default function createTransactionTableJSX(transactions: Transaction[]) {
-  const rows = formatRows(transactions);
-  const filledTx = rows.filter((x, i) => x.cells[1].value === "Filled");
-  const ongoingTx = rows.filter((x, i) => x.cells[1].value === "Pending");
-  return {
-    headers,
-    ongoingTx,
-    filledTx,
-  };
+  const rows = formatTransactionRows(transactions);
+  return rows;
 }
 
 // Will take a TransactionsArg
-function formatRows(transactions: Transaction[]): IRow[] {
+function formatTransactionRows(transactions: Transaction[]): IRow[] {
   return transactions.map((tx) => {
     const row: IRow = {
       cells: [],
@@ -111,7 +105,7 @@ function formatRows(transactions: Transaction[]): IRow[] {
   });
 }
 
-const headers: ICell[] = [
+export const headers: ICell[] = [
   {
     size: "lg",
     value: "Deposit time",
