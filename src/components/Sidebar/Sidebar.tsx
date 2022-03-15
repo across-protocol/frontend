@@ -7,9 +7,11 @@ import {
   CloseButton,
   HeaderText,
   ConnectButton,
+  DisconnectButton,
   StyledMenu,
   StyledMenuItem,
   ConnectText,
+  TopHeaderRow,
 } from "./Sidebar.styles";
 import { onboard, CHAINS } from "utils";
 import useSidebar from "./useSidebar";
@@ -28,17 +30,28 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
       {openSidebar && <Overlay />}
       <StyledSidebar className={openSidebar ? "open" : ""}>
         <StyledHeader>
-          <CloseButton onClick={() => setOpenSidebar(false)}>X</CloseButton>
-          <ConnectText isConnected={isConnected}>
-            <div /> {isConnected ? "Connected" : "Disconnected"}
-          </ConnectText>
+          <TopHeaderRow>
+            {!isConnected && (
+              <ConnectButton onClick={() => init()}>
+                Connect wallet
+              </ConnectButton>
+            )}
+            {isConnected && (
+              <ConnectText>
+                <div /> Connected
+              </ConnectText>
+            )}
+            <CloseButton onClick={() => setOpenSidebar(false)}>X</CloseButton>
+          </TopHeaderRow>
           {account && <HeaderText>{account}</HeaderText>}
           {chainId && isConnected && (
             <HeaderText>{CHAINS[chainId].name}</HeaderText>
           )}
-          <ConnectButton onClick={() => (isConnected ? reset() : init())}>
-            {isConnected ? "Disconnect" : "Connect wallet"}
-          </ConnectButton>
+          {isConnected && (
+            <DisconnectButton onClick={() => reset()}>
+              Disconnect
+            </DisconnectButton>
+          )}
         </StyledHeader>
         <StyledMenu>
           <StyledMenuItem selected={location.pathname === "/"}>

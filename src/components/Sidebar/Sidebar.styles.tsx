@@ -39,10 +39,9 @@ export const StyledHeader = styled(SidebarHeader)`
 export const CloseButton = styled.div`
   text-align: right;
   color: var(--color-gray);
-  font-size: ${24 / 16}rem;
+  font-size: ${20 / 16}rem;
   font-weight: 700;
   cursor: pointer;
-  width: 25px;
   margin-left: auto;
 `;
 export const HeaderText = styled.div`
@@ -55,8 +54,11 @@ export const ConnectButton = styled(SecondaryButton)`
   height: 40px;
   width: 154px;
   border: 1px solid transparent;
-  margin-top: 1.25rem;
   font-size: ${14 / 16}rem;
+`;
+
+export const DisconnectButton = styled(ConnectButton)`
+  margin-top: 1.25rem;
 `;
 export const StyledMenu = styled(Menu)`
   &.pro-menu {
@@ -83,14 +85,10 @@ export const StyledMenuItem = styled(MenuItem)<IStyledMenuItem>`
   }};
 `;
 
-interface IConnectedText {
-  isConnected?: boolean;
-}
-export const ConnectText = styled.div<IConnectedText>`
+export const ConnectText = styled.div`
   > div {
     display: inline-block;
-    background-color: ${({ isConnected }) =>
-      isConnected ? "var(--color-white)" : "var(--color-gray)"};
+    background-color: var(--color-white);
     height: 12px;
     width: 12px;
     margin-right: 4px;
@@ -98,4 +96,8 @@ export const ConnectText = styled.div<IConnectedText>`
     content: " ";
   }
   color: var(--color-gray);
+`;
+
+export const TopHeaderRow = styled.div`
+  display: flex;
 `;
