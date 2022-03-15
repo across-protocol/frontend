@@ -73,7 +73,7 @@ const Routes: FC<Props> = () => {
           </div>
         </SuperHeader>
       )}
-      <Header setOpenSidebar={setOpenSidebar} />
+      <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
         <Route exact path="/transactions" component={Transactions} />
