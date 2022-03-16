@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Switch, Route, useLocation } from "react-router-dom";
-import { Send, Confirmation, Pool, About, Transactions } from "views";
+import { Send, Pool, About, Transactions } from "views";
 import { Header, SuperHeader } from "components";
-import { useConnection, useDeposits } from "state/hooks";
+import { useConnection } from "state/hooks";
 import { CHAINS, UnsupportedChainIdError, switchChain, ChainId } from "utils";
 
 import { useAppSelector } from "state/hooks";
@@ -13,7 +13,6 @@ import Sidebar from "components/Sidebar";
 // Need this component for useLocation hook
 const Routes: React.FC = () => {
   const [openSidebar, setOpenSidebar] = useState(false);
-  const { showConfirmationScreen } = useDeposits();
   const { provider, chainId, error } = useConnection();
   const location = useLocation();
   const sendState = useAppSelector((state) => state.send);
@@ -74,11 +73,7 @@ const Routes: React.FC = () => {
         <Route exact path="/transactions" component={Transactions} />
         <Route exact path="/pool" component={Pool} />
         <Route exact path="/about" component={About} />
-        <Route
-          exact
-          path="/"
-          component={showConfirmationScreen ? Confirmation : Send}
-        />
+        <Route exact path="/" component={Send} />
       </Switch>
     </>
   );

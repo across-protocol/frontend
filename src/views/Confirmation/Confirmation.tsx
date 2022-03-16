@@ -5,11 +5,11 @@ import {
   CHAINS,
   ChainId,
   formatUnits,
-  receiveAmount,
   getConfirmationDepositTime,
   shortenAddress,
+  receiveAmount,
 } from "utils";
-import { useDeposits } from "state/hooks";
+import type { BridgeFees } from "utils";
 import { Layout } from "components";
 import {
   Wrapper,
@@ -25,14 +25,26 @@ import {
   Row,
   SubHeading,
 } from "./Confirmation.styles";
+import { ethers } from "ethers";
 
 const MAINNET_ETH = TOKENS_LIST[ChainId.MAINNET].find(
   (t) => t.symbol === "ETH"
 );
-
-const Confirmation: React.FC = () => {
-  const { deposit, toggle } = useDeposits();
-
+export type Deposit = {
+  txHash: string;
+  amount: ethers.BigNumber;
+  to: string;
+  from: string;
+  token: string;
+  fromChain: ChainId;
+  toChain: ChainId;
+  fees: BridgeFees;
+};
+type Props = {
+  onClose: () => void;
+  deposit?: Deposit;
+};
+const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
   if (!deposit) return null;
   const amountMinusFees = receiveAmount(deposit.amount, deposit.fees);
   const tokenInfo = TOKENS_LIST[deposit.fromChain].find(
@@ -130,15 +142,13 @@ const Confirmation: React.FC = () => {
                 <div>
                   <SecondaryLink
                     href={`${CHAINS[deposit.toChain].explorerUrl}/address/${
-                      deposit.toAddress
+                      deposit.to
                     }`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <span>{deposit.toAddress}</span>
-                    <span>
-                      {shortenAddress(deposit.toAddress ?? "", "...", 10)}
-                    </span>
+                    <span>{deposit.to}</span>
+                    <span>{shortenAddress(deposit.to ?? "", "...", 10)}</span>
                   </SecondaryLink>
                 </div>
               </div>
@@ -150,9 +160,7 @@ const Confirmation: React.FC = () => {
               </div>
             </Info>
           </div>
-          <Button onClick={() => toggle({ showConfirmationScreen: false })}>
-            Close
-          </Button>
+          <Button onClick={onClose}>Close</Button>
         </InfoSection>
       </Wrapper>
     </Layout>

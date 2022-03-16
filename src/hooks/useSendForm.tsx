@@ -344,6 +344,7 @@ function useSendFormManager(): SendFormManagerContext {
 const SendFormContext = createContext<SendFormManagerContext | undefined>(
   undefined
 );
+SendFormContext.displayName = "SendFormContext";
 /**
  * Context provider for the send form. This is used to share the state of the form between components.
  * @param props  React props, only accepting `children`

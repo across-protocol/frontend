@@ -12,8 +12,12 @@ import {
 
 import InformationDialog from "components/InformationDialog";
 import useSendAction from "./useSendAction";
+import type { Deposit } from "views/Confirmation";
 
-const SendAction: React.FC = () => {
+type Props = {
+  onDeposit: (deposit: Deposit) => void;
+};
+const SendAction: React.FC<Props> = ({ onDeposit }) => {
   const {
     amount,
     fees,
@@ -27,7 +31,7 @@ const SendAction: React.FC = () => {
     isInfoModalOpen,
     toggleInfoModal,
     buttonMsg,
-  } = useSendAction();
+  } = useSendAction(onDeposit);
   const showFees = amount.gt(0) && !!fees;
 
   return (
