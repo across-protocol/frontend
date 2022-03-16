@@ -1,40 +1,35 @@
-import { FC, useContext, useState } from "react";
+import { useState } from "react";
 import { Switch, Route, useLocation } from "react-router-dom";
 import { Send, Confirmation, Pool, About, Transactions } from "views";
 import { Header, SuperHeader } from "components";
 import { useConnection, useDeposits } from "state/hooks";
-import {
-  DEFAULT_TO_CHAIN_ID,
-  CHAINS,
-  UnsupportedChainIdError,
-  switchChain,
-} from "utils";
+import { CHAINS, UnsupportedChainIdError, switchChain, ChainId } from "utils";
 
 import { useAppSelector } from "state/hooks";
-import { ErrorContext } from "context/ErrorContext";
+import { useError } from "hooks";
 import styled from "@emotion/styled";
 import Sidebar from "components/Sidebar";
 
-interface Props {}
-
 // Need this component for useLocation hook
-const Routes: FC<Props> = () => {
+const Routes: React.FC = () => {
   const [openSidebar, setOpenSidebar] = useState(false);
   const { showConfirmationScreen } = useDeposits();
-  const { error, provider, chainId } = useConnection();
+  const { provider, chainId, error } = useConnection();
   const location = useLocation();
   const sendState = useAppSelector((state) => state.send);
-  const { error: globalError, removeError } = useContext(ErrorContext);
+  const { error: globalError, removeError } = useError();
 
   const wrongNetworkSend =
     provider &&
     chainId &&
+    location.pathname === "/" &&
     (error instanceof UnsupportedChainIdError ||
       chainId !== sendState.currentlySelectedFromChain.chainId);
   const wrongNetworkPool =
     provider &&
-    (error instanceof UnsupportedChainIdError ||
-      chainId !== DEFAULT_TO_CHAIN_ID);
+    !!chainId &&
+    location.pathname === "/pool" &&
+    (error instanceof UnsupportedChainIdError || chainId !== ChainId.MAINNET);
 
   return (
     <>
@@ -63,12 +58,12 @@ const Routes: FC<Props> = () => {
         </SuperHeader>
       )}
 
-      {wrongNetworkPool && location.pathname === "/pool" && (
+      {wrongNetworkPool && (
         <SuperHeader>
           <div>
             You are on an incorrect network. Please{" "}
-            <button onClick={() => switchChain(provider, DEFAULT_TO_CHAIN_ID)}>
-              switch to {CHAINS[DEFAULT_TO_CHAIN_ID].name}
+            <button onClick={() => switchChain(provider, ChainId.MAINNET)}>
+              switch to {CHAINS[ChainId.MAINNET].name}
             </button>
           </div>
         </SuperHeader>

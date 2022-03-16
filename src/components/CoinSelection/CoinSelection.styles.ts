@@ -148,6 +148,6 @@ export const Input = styled.input`
   }
 `;
 
-export const ErrorBox = styled(UnstyledErrorBox)`
+export const ErrorBox = motion(styled(UnstyledErrorBox)`
   margin-top: 10px;
-`;
+`);

@@ -9,5 +9,5 @@ export * from "./math";
 export * from "./notify";
 export * from "./weiMath";
 export * from "./pool";
-export * from "./balance";
+export * from "./token";
 export * from "./query-keys";

@@ -6,14 +6,17 @@ import {
   AddressSelection,
   SendAction,
 } from "components";
+import { SendFormProvider } from "hooks";
 
 const Send: React.FC = () => {
   return (
     <Layout>
-      <ChainSelection />
-      <CoinSelection />
-      <AddressSelection />
-      <SendAction />
+      <SendFormProvider>
+        <ChainSelection />
+        <CoinSelection />
+        <AddressSelection />
+        <SendAction />
+      </SendFormProvider>
     </Layout>
   );
 };

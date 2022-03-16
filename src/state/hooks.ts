@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useEffect, useState, useContext } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+
 import useInterval from "@use-it/interval";
 import { ethers, BigNumber } from "ethers";
 import { bindActionCreators } from "redux";
@@ -17,7 +17,6 @@ import {
   tagAddress,
 } from "utils";
 import type { RootState, AppDispatch } from "./";
-import { ErrorContext } from "context/ErrorContext";
 import { update, disconnect, error as errorAction } from "./connection";
 import {
   token as tokenAction,
@@ -30,7 +29,7 @@ import {
 import chainApi, { useAllowance, useBridgeFees } from "./chainApi";
 import { add } from "./transactions";
 import { deposit as depositAction, toggle } from "./deposits";
-import { useERC20 } from "hooks";
+import { useERC20, useQueryParams, useError } from "hooks";
 import { across } from "@uma/sdk";
 import { Bridge } from "arb-ts";
 
@@ -42,14 +41,6 @@ const FEE_ESTIMATION = "0.004";
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-
-function useQuery() {
-  const { search } = useLocation();
-  return useMemo(() => {
-    const params = new URLSearchParams(search);
-    return Object.fromEntries(params.entries());
-  }, [search]);
-}
 
 export function useConnection() {
   const { account, signer, provider, error, chainId, notify } = useAppSelector(
@@ -84,7 +75,7 @@ export function useL2Block() {
     ethers.providers.Block | undefined
   >();
 
-  const { addError, removeError, error } = useContext(ErrorContext);
+  const { addError, removeError, error } = useError();
 
   useEffect(() => {
     const provider = PROVIDERS[currentlySelectedFromChain.chainId]();
@@ -177,7 +168,7 @@ export function useSend() {
   };
 }
 export function useSendAcross() {
-  const { referrer } = useQuery();
+  const { referrer } = useQueryParams();
   const { isConnected, chainId, account, signer } = useConnection();
   const {
     fromChain,

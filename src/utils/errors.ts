@@ -10,6 +10,14 @@ export class UnsupportedChainIdError extends Error {
   }
 }
 
+export class WrongNetworkError extends Error {
+  public constructor() {
+    super();
+    this.name = this.constructor.name;
+    this.message = `Connected to the wrong network.`;
+  }
+}
+
 export class ParsingError extends Error {
   public constructor() {
     super();
@@ -38,5 +46,13 @@ export class InsufficientLiquidityError extends Error {
     super();
     this.name = this.constructor.name;
     this.message = `Insufficient liquidity for ${token}.`;
+  }
+}
+
+export class InsufficientBalanceError extends Error {
+  constructor() {
+    super();
+    this.name = this.constructor.name;
+    this.message = "Insufficient balance.";
   }
 }

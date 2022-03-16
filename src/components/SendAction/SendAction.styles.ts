@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { motion } from "framer-motion";
 import { Info as UnstyledInfoIcon } from "react-feather";
 import { AccentSection as UnstyledAccentSection } from "../Section";
 
@@ -40,6 +41,7 @@ export const Info = styled.div`
     margin-bottom: 32px;
   }
 `;
+export const InfoWrapper = motion.div;
 
 export const L1Info = styled(Info)`
   justify-content: space-around;
