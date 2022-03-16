@@ -1,4 +1,4 @@
-import { FC, useContext, useState } from "react";
+import { useState } from "react";
 import { Switch, Route, useLocation } from "react-router-dom";
 import { Send, Confirmation, Pool, About, Transactions } from "views";
 import { Header, SuperHeader } from "components";
@@ -11,7 +11,7 @@ import styled from "@emotion/styled";
 import Sidebar from "components/Sidebar";
 
 // Need this component for useLocation hook
-const Routes: FC<Props> = () => {
+const Routes: React.FC = () => {
   const [openSidebar, setOpenSidebar] = useState(false);
   const { showConfirmationScreen } = useDeposits();
   const { provider, chainId, error } = useConnection();
