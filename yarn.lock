@@ -2958,6 +2958,11 @@
   resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.1.tgz#459c65fa1867dafe6a8f322c4c51695663cc55e9"
   integrity sha512-5tXH6Bx/kNGd3MgffdmP4dy2Z+G4eaXw0SE81Tq3BNadtnMR5/ySMzX4SLEzHJzSmPNn4HIdpQsBvXMUykr58w==
 
+"@types/luxon@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-2.3.0.tgz#0f4d912c385e47890374cb694da9bc93bacbe2b0"
+  integrity sha512-mWXdRlg+5dWvxU+uaijB2RY5NrJtMEXR6j+D6W66hPuezSVXrQqQvWa/JNHntgEYgjzeoVRrQVmMWAbKjUJiFQ==
+
 "@types/minimatch@*":
   version "3.0.5"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.5.tgz#1001cc5e6a3704b83c236027e77f2f58ea010f40"
@@ -11765,6 +11770,11 @@ ltgt@~2.2.0:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/ltgt/-/ltgt-2.2.1.tgz#f35ca91c493f7b73da0e07495304f17b31f87ee5"
   integrity sha1-81ypHEk/e3PaDgdJUwTxezH4fuU=
+
+luxon@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-2.3.1.tgz#f276b1b53fd9a740a60e666a541a7f6dbed4155a"
+  integrity sha512-I8vnjOmhXsMSlNMZlMkSOvgrxKJl0uOsEzdGgGNZuZPaS9KlefpE9KV95QFftlJSC+1UyCC9/I69R02cz/zcCA==
 
 lz-string@^1.4.4:
   version "1.4.4"
