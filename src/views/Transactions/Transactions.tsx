@@ -1,5 +1,13 @@
 import { useMemo } from "react";
-import { Wrapper, Title, ConnectButton, Account } from "./Transactions.styles";
+import {
+  Wrapper,
+  Title,
+  ConnectButton,
+  Account,
+  BottomRow,
+  TopRow,
+  TitleRow,
+} from "./Transactions.styles";
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
@@ -23,27 +31,45 @@ const Transactions = () => {
 
   return (
     <Wrapper>
-      <Title>
-        Transactions
-        {isConnected && account && (
-          <Account>({shortenAddress(account, "......", 6)})</Account>
-        )}
-      </Title>
-      {!isConnected && (
-        <ConnectButton onClick={initOnboard}>Connect Wallet</ConnectButton>
+      {(ongoingTx.length === 0 || !isConnected) && (
+        <TitleRow>
+          <Title>
+            Transactions
+            {isConnected && account && (
+              <Account>({shortenAddress(account, "......", 6)})</Account>
+            )}
+          </Title>
+          {!isConnected && (
+            <ConnectButton onClick={initOnboard}>Connect Wallet</ConnectButton>
+          )}
+        </TitleRow>
       )}
+
       {isConnected && (
         <>
-          <TransactionsTable
-            title="Ongoing"
-            headers={headers}
-            rows={ongoingTx}
-          />
-          <TransactionsTable
-            title="History"
-            headers={headers}
-            rows={filledTx}
-          />
+          {ongoingTx.length > 0 && (
+            <TopRow>
+              <Title>
+                Transactions
+                {account && (
+                  <Account>({shortenAddress(account, "......", 6)})</Account>
+                )}
+              </Title>
+              <TransactionsTable
+                title="Ongoing"
+                headers={headers}
+                rows={ongoingTx}
+              />
+            </TopRow>
+          )}
+
+          <BottomRow>
+            <TransactionsTable
+              title="History"
+              headers={headers}
+              rows={filledTx}
+            />
+          </BottomRow>
         </>
       )}
     </Wrapper>

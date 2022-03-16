@@ -23,7 +23,9 @@ export const StyledSidebar = styled(ProSidebar)`
   right: -450px;
   top: 0;
   width: 450px;
+  display: none;
   &.open {
+    display: block;
     transform: translateX(-100%);
   }
   .pro-sidebar-inner > .pro-sidebar-layout {

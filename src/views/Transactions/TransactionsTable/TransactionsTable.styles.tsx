@@ -8,8 +8,9 @@ import {
 } from "components/Table/Table.styles";
 
 export const Wrapper = styled.div`
-  margin-top: 2rem;
-  margin-bottom: 5rem;
+  margin: 2rem auto;
+  max-width: 1900px;
+  overflow-x: auto;
 `;
 
 export const Title = styled.h2`
@@ -21,16 +22,22 @@ export const Title = styled.h2`
 
 export const StyledTableWrapper = styled(TableWrapper)`
   background-color: inherit;
+  margin: 0 auto;
 `;
 
 export const StyledHeadRow = styled(HeadRow)`
   background-color: var(--color-black);
+  width: 1900px;
+  overflow-x: auto;
 `;
 
 export const StyledBody = styled(Body)``;
 
 export const StyledRow = styled(Row)`
   background: rgba(255, 255, 255, 0.08);
+  width: 1900px;
+  overflow-x: auto;
+  margin: 0 auto;
   /* Don't do zebra */
   &:first-of-type {
     margin-bottom: 2px;
