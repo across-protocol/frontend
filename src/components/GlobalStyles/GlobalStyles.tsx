@@ -29,9 +29,13 @@ export const typography = css`
 const variables = css`
   :root {
     /* COLORS */
+
     --color-gray: hsl(${COLORS.gray[500]});
+    --color-gray-600: hsla(${COLORS.gray[600]});
+    --color-gray-550: hsla(${COLORS.gray[550]});
     --color-gray-300: hsla(${COLORS.gray[300]});
     --color-gray-200: hsla(${COLORS.gray[200]});
+    --color-gray-150: hsla(${COLORS.gray[150]});
     --color-gray-100: hsla(${COLORS.gray[100]});
     --color-white: hsl(${COLORS.white});
     --color-black: hsl(${COLORS.black});
@@ -46,7 +50,7 @@ const variables = css`
     --color-black-transparent: hsla(${COLORS.black} / 0.75);
     --color-white-transparent: hsla(${COLORS.white} / 0.75);
     --color-gray-transparent: rgba(45, 46, 51, 0.1);
-
+    --color-gray-transparent-lighter: rgba(45, 46, 51, 0.65);
     /*
     Silence the warning about missing Reach Dialog styles
   */

@@ -1,12 +1,12 @@
-import React from "react";
+import { FC } from "react";
 import styled from "@emotion/styled";
 import { motion } from "framer-motion";
 
-type MenuToggleProps = {
+interface MenuToggleProps {
   toggle: () => void;
-};
+}
 
-const MenuToggle: React.FC<MenuToggleProps> = ({ toggle }) => {
+const MenuToggle: FC<MenuToggleProps> = ({ toggle }) => {
   return (
     <CloseButton onClick={() => toggle()}>
       <Slice

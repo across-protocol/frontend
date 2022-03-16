@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router";
 import Wallet from "../Wallet";
 import {
@@ -9,41 +8,29 @@ import {
   Logo,
   MobileLogo,
   MobileNavigation,
-  MobileList,
-  MobileItem,
-  BaseLink as MobileLink,
-  ExternalMobileLink,
   List,
   Item,
   WalletWrapper,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
-import MobileMenu from "./MobileMenu";
 
 const LINKS = [
   { href: "/", name: "Bridge" },
   { href: "/pool", name: "Pool" },
-  { href: "/about", name: "About" },
   { href: "/transactions", name: "Transactions" },
 ];
-const MOBILE_ONLY_LINKS = [
-  { href: "https://docs.across.to/bridge/", name: "Docs" },
-  { href: "https://discord.gg/across", name: "Support (Discord)" },
-  { href: "https://twitter.com/AcrossProtocol", name: "Twitter" },
-  { href: "https://github.com/across-protocol", name: "Github" },
-];
-const Header: React.FC = () => {
-  const location = useLocation();
-  const [isMenuOpen, setMenuOpen] = useState(false);
 
-  // each time we click a link from the mobile menu, we want to close it
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname]);
+interface Props {
+  openSidebar: boolean;
+  setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+}
+const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
+  const location = useLocation();
 
   const toggleMenu = () => {
-    setMenuOpen((oldOpen) => !oldOpen);
+    setOpenSidebar((prevValue) => !prevValue);
   };
+
   return (
     <Wrapper>
       <LogoLink to="/">
@@ -61,35 +48,11 @@ const Header: React.FC = () => {
       </Navigation>
       <WalletWrapper>
         <Wallet />
+
+        <MobileNavigation animate={openSidebar ? "open" : "closed"}>
+          <MenuToggle toggle={toggleMenu} />
+        </MobileNavigation>
       </WalletWrapper>
-      <MobileNavigation animate={isMenuOpen ? "open" : "closed"}>
-        <MenuToggle toggle={toggleMenu} />
-        <MobileMenu isOpen={isMenuOpen}>
-          {isMenuOpen && (
-            <MobileList>
-              {LINKS.map(({ href, name }) => (
-                <MobileItem
-                  key={href}
-                  aria-selected={location.pathname === href}
-                >
-                  <MobileLink to={href}>{name}</MobileLink>
-                </MobileItem>
-              ))}
-              {MOBILE_ONLY_LINKS.map(({ href, name }) => (
-                <MobileItem key={href}>
-                  <ExternalMobileLink
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {name}
-                  </ExternalMobileLink>
-                </MobileItem>
-              ))}
-            </MobileList>
-          )}
-        </MobileMenu>
-      </MobileNavigation>
     </Wrapper>
   );
 };
