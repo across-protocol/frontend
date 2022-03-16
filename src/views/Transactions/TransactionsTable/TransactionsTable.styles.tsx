@@ -23,6 +23,7 @@ export const Title = styled.h2`
 export const StyledTableWrapper = styled(TableWrapper)`
   background-color: inherit;
   margin: 0 auto;
+  box-shadow: none;
 `;
 
 export const StyledHeadRow = styled(HeadRow)`
