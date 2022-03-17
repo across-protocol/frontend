@@ -7,6 +7,7 @@ import {
   BottomRow,
   TopRow,
   TitleRow,
+  ButtonWrapper,
 } from "./Transactions.styles";
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
@@ -40,7 +41,11 @@ const Transactions = () => {
             )}
           </Title>
           {!isConnected && (
-            <ConnectButton onClick={initOnboard}>Connect Wallet</ConnectButton>
+            <ButtonWrapper>
+              <ConnectButton onClick={initOnboard}>
+                Connect Wallet
+              </ConnectButton>
+            </ButtonWrapper>
           )}
         </TitleRow>
       )}

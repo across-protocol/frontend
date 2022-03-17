@@ -26,12 +26,18 @@ export const ConnectButton = styled(PrimaryButton)`
   padding: 0;
 `;
 
+export const ButtonWrapper = styled.div`
+  margin: 0 auto;
+  max-width: 1900px;
+`;
+
 export const TopRow = styled.div`
-  background-color: #27292c;
+  background-color: var(--color-gray-175);
   padding: 2rem;
 `;
 export const BottomRow = styled.div`
-  background-color: #2c2f33;
+  background-color: var(--color-gray-500);
+
   padding: 2rem;
 `;
 
