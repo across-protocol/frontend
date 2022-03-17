@@ -1,6 +1,7 @@
 import { onboard } from "utils";
-import { FC, useEffect, useState, useRef } from "react";
+import { FC } from "react";
 import { useConnection, useETHBalance } from "state/hooks";
+
 import {
   DEFAULT_FROM_CHAIN_ID,
   CHAINS,
@@ -14,32 +15,16 @@ import {
   Info,
   ConnectButton,
   UnsupportedNetwork,
-  WalletModal,
-  WalletModalHeader,
-  WalletModalAccount,
-  WalletModalChain,
-  WalletModalDisconnect,
 } from "./Wallet.styles";
 
-import useClickOutsideModal from "hooks/useClickOutsideModal";
+const { init } = onboard;
 
-const { init, reset } = onboard;
+interface Props {
+  setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-const Wallet: FC = () => {
+const Wallet: FC<Props> = ({ setOpenSidebar }) => {
   const { account, isConnected, chainId } = useConnection();
-  const [isOpen, setIsOpen] = useState(false);
-  const modalRef = useRef(null);
-  useClickOutsideModal(modalRef, () => setIsOpen(false));
-
-  // Note: this must be before early returns.
-  useEffect(() => {
-    if (!isConnected && isOpen) setIsOpen(false);
-  }, [isConnected, isOpen]);
-
-  const disconnectWallet = () => {
-    setIsOpen(false);
-    reset();
-  };
 
   const { data: balance } = useETHBalance(
     { account: account ?? "", chainId: chainId ?? DEFAULT_FROM_CHAIN_ID },
@@ -59,28 +44,20 @@ const Wallet: FC = () => {
   }
 
   return (
-    <div ref={modalRef}>
-      <Wrapper onClick={() => setIsOpen(!isOpen)}>
-        <Info>
-          <div>
-            {formatEther(balance ?? "0")}{" "}
-            {CHAINS[chainId ?? 1].nativeCurrency.symbol}
-          </div>
-          <div>{CHAINS[chainId ?? 1].name}</div>
-        </Info>
-        <Account>{shortenAddress(account ?? "", "...", 4)}</Account>
-      </Wrapper>
-      {isOpen && (
-        <WalletModal>
-          <WalletModalHeader>Connected</WalletModalHeader>
-          <WalletModalAccount>{account}</WalletModalAccount>
-          <WalletModalChain>{CHAINS[chainId ?? 1].name}</WalletModalChain>
-          <WalletModalDisconnect onClick={() => disconnectWallet()}>
-            Disconnect
-          </WalletModalDisconnect>
-        </WalletModal>
-      )}
-    </div>
+    <Wrapper onClick={() => setOpenSidebar(true)}>
+      <Info>
+        {chainId && (
+          <>
+            <div>
+              {formatEther(balance ?? "0")}{" "}
+              {CHAINS[chainId].nativeCurrency.symbol}
+            </div>
+            <div>{CHAINS[chainId].name}</div>
+          </>
+        )}
+      </Info>
+      <Account>{shortenAddress(account ?? "", "...", 4)}</Account>
+    </Wrapper>
   );
 };
 export default Wallet;

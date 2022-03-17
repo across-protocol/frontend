@@ -47,7 +47,7 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
         </List>
       </Navigation>
       <WalletWrapper>
-        <Wallet />
+        <Wallet setOpenSidebar={setOpenSidebar} />
 
         <MobileNavigation animate={openSidebar ? "open" : "closed"}>
           <MenuToggle toggle={toggleMenu} />

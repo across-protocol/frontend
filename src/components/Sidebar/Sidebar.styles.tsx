@@ -23,7 +23,9 @@ export const StyledSidebar = styled(ProSidebar)`
   right: -450px;
   top: 0;
   width: 450px;
+  display: none;
   &.open {
+    display: block;
     transform: translateX(-100%);
   }
   .pro-sidebar-inner > .pro-sidebar-layout {
@@ -75,7 +77,7 @@ interface IStyledMenuItem {
 }
 export const StyledMenuItem = styled(MenuItem)<IStyledMenuItem>`
   color: var(--color-white);
-  font-weight: 600;
+  font-weight: ${({ selected }) => (selected ? "600" : "400")};
   padding-left: 1rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
