@@ -1,9 +1,6 @@
 import { DateTime } from "luxon";
 import { ethers } from "ethers";
-import {
-  TableLogo,
-  TableLink,
-} from "./TransactionsTable/TransactionsTable.styles";
+import { TableLogo, TableLink } from "./TransactionsTable.styles";
 import { shortenTransactionHash } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 import { Transaction } from "./createTransactionModel";

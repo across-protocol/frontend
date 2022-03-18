@@ -12,11 +12,13 @@ import {
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
-import createTransactionTableJSX from "./createTransactionTableJSX";
-import { headers } from "./createTransactionTableJSX";
+import createTransactionTableJSX, {
+  headers,
+} from "./TransactionsTable/createTransactionTableJSX";
+import { BREAKPOINTS } from "utils";
 
 const Transactions = () => {
-  const { isConnected, initOnboard, account, transactions } =
+  const { isConnected, initOnboard, account, transactions, width } =
     useTransactionsView();
 
   const ongoingTx = useMemo(
@@ -60,20 +62,24 @@ const Transactions = () => {
                   <Account>({shortenAddress(account, "......", 6)})</Account>
                 )}
               </Title>
-              <TransactionsTable
-                title="Ongoing"
-                headers={headers}
-                rows={ongoingTx}
-              />
+              {width >= BREAKPOINTS.laptopMin && (
+                <TransactionsTable
+                  title="Ongoing"
+                  headers={headers}
+                  rows={ongoingTx}
+                />
+              )}
             </TopRow>
           )}
 
           <BottomRow>
-            <TransactionsTable
-              title="History"
-              headers={headers}
-              rows={filledTx}
-            />
+            {width >= BREAKPOINTS.laptopMin && (
+              <TransactionsTable
+                title="History"
+                headers={headers}
+                rows={filledTx}
+              />
+            )}
           </BottomRow>
         </>
       )}

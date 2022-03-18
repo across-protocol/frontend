@@ -9,17 +9,17 @@ import {
   Title,
 } from "./TransactionsTable.styles";
 import { ICell, IRow } from "components/Table/Table";
-interface TxTableIRow extends IRow {
+interface MobileTxTableIRow extends IRow {
   onClick?: () => void;
 }
 
 interface Props {
-  rows: TxTableIRow[];
+  rows: MobileTxTableIRow[];
   headers: ICell[];
   title: string;
 }
 
-const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
+const MobileTransactionsTable: FC<Props> = ({ rows, headers, title }) => {
   return (
     <Wrapper>
       <Title>{title}</Title>
@@ -40,7 +40,7 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
         <StyledBody>
           {rows.map((row, ridx) => {
             return (
-              <StyledRow key={ridx}>
+              <StyledRow key={ridx} onClick={row.onClick}>
                 {row.cells.map((cell, cidx) => {
                   return (
                     <StyledCell
@@ -61,4 +61,4 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
   );
 };
 
-export default TransactionsTable;
+export default MobileTransactionsTable;
