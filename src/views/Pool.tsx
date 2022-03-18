@@ -5,7 +5,6 @@ import PoolSelection from "components/PoolSelection";
 import PoolForm from "components/PoolForm";
 import DepositSuccess from "components/PoolForm/DepositSuccess";
 import {
-  DEFAULT_TO_CHAIN_ID,
   TOKENS_LIST,
   ChainId,
   Token,
@@ -13,6 +12,7 @@ import {
   COLORS,
   QUERIES,
   max,
+  WrongNetworkError,
 } from "utils";
 import { useAppSelector, useConnection, useBalance } from "state/hooks";
 import get from "lodash/get";
@@ -21,6 +21,7 @@ import styled from "@emotion/styled";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 
 import { BounceType } from "components/BouncingDotsLoader/BouncingDotsLoader";
+import { useError } from "hooks";
 
 export type ShowSuccess = "deposit" | "withdraw";
 
@@ -53,9 +54,14 @@ const Pool: FC = () => {
 
   const wrongNetwork =
     provider &&
-    (error instanceof UnsupportedChainIdError ||
-      chainId !== DEFAULT_TO_CHAIN_ID);
-
+    (error instanceof UnsupportedChainIdError || chainId !== ChainId.MAINNET);
+  const { addError } = useError();
+  // if the user is connected but not to mainnet, dispatch a global error
+  useEffect(() => {
+    if (chainId && chainId !== ChainId.MAINNET) {
+      addError(new WrongNetworkError(ChainId.MAINNET));
+    }
+  });
   // Update pool info when token changes
   useEffect(() => {
     setLoadingPoolState(true);

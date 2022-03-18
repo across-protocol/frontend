@@ -17,6 +17,7 @@ import {
   getRoute,
   MAX_APPROVAL_AMOUNT,
   WrongNetworkError,
+  ChainId,
 } from "utils";
 
 
@@ -66,6 +67,7 @@ export function useBridge() {
     hasToSwitchChain,
     balance,
     fees,
+    fromChain
   });
 
   const hasToApprove = !!allowance && amount.gt(allowance);
@@ -123,6 +125,7 @@ type ComputeStatusArgs = {
   formStatus: FormStatus;
   hasToSwitchChain: boolean;
   balance: ethers.BigNumber | undefined;
+  fromChain: ChainId;
   fees:
   | {
     isLiquidityInsufficient: boolean;
@@ -143,12 +146,13 @@ function computeStatus({
   balance,
   fees,
   token,
+  fromChain
 }: ComputeStatusArgs): { status: SendStatus; error?: SendError } {
   if (formStatus !== FormStatus.VALID) {
     return { status: SendStatus.IDLE };
   }
   if (hasToSwitchChain) {
-    return { status: SendStatus.ERROR, error: new WrongNetworkError() };
+    return { status: SendStatus.ERROR, error: new WrongNetworkError(fromChain) };
   }
   if (balance) {
     const adjustedBalance =
