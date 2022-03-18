@@ -15,6 +15,7 @@ import {
 } from "./Sidebar.styles";
 import { onboard, CHAINS } from "utils";
 import useSidebar from "./useSidebar";
+import closeIcon from "assets/across-close-button.svg";
 const { init, reset } = onboard;
 
 interface Props {
@@ -39,7 +40,9 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
                 <div /> Connected
               </ConnectText>
             )}
-            <CloseButton onClick={() => setOpenSidebar(false)}>X</CloseButton>
+            <CloseButton onClick={() => setOpenSidebar(false)}>
+              <img src={closeIcon} alt="close_button" />
+            </CloseButton>
           </TopHeaderRow>
           {account && <HeaderText>{account}</HeaderText>}
           {chainId && isConnected && (

@@ -51,6 +51,9 @@ export const CloseButton = styled.div`
   font-weight: 700;
   cursor: pointer;
   margin-left: auto;
+  img {
+    height: 20px;
+  }
 `;
 export const HeaderText = styled.div`
   color: var(--color-gray);
