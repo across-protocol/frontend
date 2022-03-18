@@ -28,6 +28,7 @@ export const StyledSidebar = styled(ProSidebar)`
   @media ${QUERIES.tabletAndDown} {
     width: 100%;
     right: -100%;
+    height: 100%;
   }
   &.open {
     display: block;
