@@ -127,7 +127,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
                     rel="noopener noreferrer"
                   >
                     <span>{deposit.from}</span>
-                    <span>{shortenAddress(deposit.from ?? "", "...", 10)}</span>
+                    <span>{shortenAddress(deposit.from, "...", 10)}</span>
                   </SecondaryLink>
                 </div>
               </div>
@@ -148,7 +148,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
                     rel="noopener noreferrer"
                   >
                     <span>{deposit.to}</span>
-                    <span>{shortenAddress(deposit.to ?? "", "...", 10)}</span>
+                    <span>{shortenAddress(deposit.to, "...", 10)}</span>
                   </SecondaryLink>
                 </div>
               </div>

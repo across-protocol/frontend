@@ -15,7 +15,7 @@ type TokenInfo =
   }
   | Token;
 
-export default function useSendAction(onDeposit: (deposit: Deposit) => void) {
+export default function useSendAction(onDepositConfirmed: (deposit: Deposit) => void) {
   const { init } = onboard;
   const [isInfoModalOpen, setOpenInfoModal] = useState(false);
   const toggleInfoModal = () => setOpenInfoModal((oldOpen) => !oldOpen);
@@ -48,7 +48,7 @@ export default function useSendAction(onDeposit: (deposit: Deposit) => void) {
       // NOTE: This check is redundant, as if `status` is `ready`, all of those are defined.
       if (tx && toAddress && account && feesUsed) {
         tx.wait(CONFIRMATIONS).then(tx => {
-          onDeposit({
+          onDepositConfirmed({
             txHash: tx.transactionHash,
             amount,
             token,
@@ -58,7 +58,7 @@ export default function useSendAction(onDeposit: (deposit: Deposit) => void) {
             from: account,
             fees: feesUsed,
           })
-        });
+        }).catch(console.error);
         // TODO: we should invalidate and refetch any queries of the transaction tab, so when a user switches to it, they see the new transaction immediately.
       }
       return tx;

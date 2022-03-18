@@ -10,16 +10,16 @@ import { SendFormProvider } from "hooks";
 import type { Deposit } from "views/Confirmation";
 
 type Props = {
-  onDeposit: (deposit: Deposit) => void;
+  onDepositConfirmed: (deposit: Deposit) => void;
 };
-const SendForm: React.FC<Props> = ({ onDeposit }) => {
+const SendForm: React.FC<Props> = ({ onDepositConfirmed }) => {
   return (
     <SendFormProvider>
       <Layout>
         <ChainSelection />
         <CoinSelection />
         <AddressSelection />
-        <SendAction onDeposit={onDeposit} />
+        <SendAction onDeposit={onDepositConfirmed} />
       </Layout>
     </SendFormProvider>
   );
