@@ -68,7 +68,7 @@ export function useBridge() {
     fees,
   });
 
-  const hasToApprove = !!allowance && amount.lte(allowance);
+  const hasToApprove = !!allowance && amount.gt(allowance);
 
   const route = getRoute(fromChain, toChain);
 

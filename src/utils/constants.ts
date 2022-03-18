@@ -749,3 +749,4 @@ export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
 // FIXME: https://github.com/across-protocol/frontend-v2/pull/2#discussion_r822100493
 export const ETH_ADDRESS = ethers.constants.AddressZero;
 export const FEE_ESTIMATION = ".004";
+export const CONFIRMATIONS = Number(process.env.REACT_APP_PUBLIC_CONFIRMATIONS) || 1;
