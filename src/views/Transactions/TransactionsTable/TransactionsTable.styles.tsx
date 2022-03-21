@@ -69,3 +69,16 @@ export const TableLink = styled.a`
     opacity: 0.7;
   }
 `;
+
+export const MobileWrapper = styled(Wrapper)`
+  max-width: 100%;
+  width: 100%;
+`;
+
+export const StyledMobileHeadRow = styled(StyledHeadRow)`
+  width: 100%;
+`;
+
+export const StyledMobileRow = styled(StyledRow)`
+  width: 100%;
+`;

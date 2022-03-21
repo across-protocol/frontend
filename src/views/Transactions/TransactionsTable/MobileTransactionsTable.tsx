@@ -1,11 +1,11 @@
 import { FC } from "react";
 import {
   StyledTableWrapper,
-  StyledHeadRow,
+  StyledMobileHeadRow,
   StyledBody,
-  StyledRow,
+  StyledMobileRow,
   StyledCell,
-  Wrapper,
+  MobileWrapper,
   Title,
 } from "./TransactionsTable.styles";
 import { ICell, IRow } from "components/Table/Table";
@@ -21,10 +21,10 @@ interface Props {
 
 const MobileTransactionsTable: FC<Props> = ({ rows, headers, title }) => {
   return (
-    <Wrapper>
+    <MobileWrapper>
       <Title>{title}</Title>
       <StyledTableWrapper>
-        <StyledHeadRow>
+        <StyledMobileHeadRow>
           {headers.map((cell, index) => {
             return (
               <StyledCell
@@ -36,11 +36,11 @@ const MobileTransactionsTable: FC<Props> = ({ rows, headers, title }) => {
               </StyledCell>
             );
           })}
-        </StyledHeadRow>
+        </StyledMobileHeadRow>
         <StyledBody>
           {rows.map((row, ridx) => {
             return (
-              <StyledRow key={ridx} onClick={row.onClick}>
+              <StyledMobileRow key={ridx} onClick={row.onClick}>
                 {row.cells.map((cell, cidx) => {
                   return (
                     <StyledCell
@@ -52,12 +52,12 @@ const MobileTransactionsTable: FC<Props> = ({ rows, headers, title }) => {
                     </StyledCell>
                   );
                 })}
-              </StyledRow>
+              </StyledMobileRow>
             );
           })}
         </StyledBody>
       </StyledTableWrapper>
-    </Wrapper>
+    </MobileWrapper>
   );
 };
 
