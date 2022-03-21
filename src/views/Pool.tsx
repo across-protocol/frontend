@@ -55,13 +55,17 @@ const Pool: FC = () => {
   const wrongNetwork =
     provider &&
     (error instanceof UnsupportedChainIdError || chainId !== ChainId.MAINNET);
-  const { addError } = useError();
-  // if the user is connected but not to mainnet, dispatch a global error
+  const { addError, removeError, error: globalError } = useError();
+  // // if the user is connected but not to mainnet, dispatch a global error
   useEffect(() => {
-    if (chainId && chainId !== ChainId.MAINNET) {
+    const isWrongNetworkError = globalError instanceof WrongNetworkError;
+    if (!isWrongNetworkError && chainId && chainId !== ChainId.MAINNET) {
       addError(new WrongNetworkError(ChainId.MAINNET));
     }
-  });
+    if (isWrongNetworkError && chainId === ChainId.MAINNET) {
+      removeError();
+    }
+  }, [chainId, addError, removeError, globalError]);
   // Update pool info when token changes
   useEffect(() => {
     setLoadingPoolState(true);
