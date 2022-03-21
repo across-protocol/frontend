@@ -15,6 +15,9 @@ import { shortenAddress } from "utils/format";
 import createTransactionTableJSX, {
   headers,
 } from "./TransactionsTable/createTransactionTableJSX";
+
+import MobileTransactionsTable from "./TransactionsTable/MobileTransactionsTable";
+import { mobileHeaders } from "./TransactionsTable/createMobileTransactionTableJSX";
 import { BREAKPOINTS } from "utils";
 
 const Transactions = () => {
@@ -73,11 +76,17 @@ const Transactions = () => {
           )}
 
           <BottomRow>
-            {width >= BREAKPOINTS.laptopMin && (
+            {width >= BREAKPOINTS.laptopMin ? (
               <TransactionsTable
                 title="History"
                 headers={headers}
                 rows={filledTx}
+              />
+            ) : (
+              <MobileTransactionsTable
+                title="History"
+                headers={mobileHeaders}
+                rows={[]}
               />
             )}
           </BottomRow>

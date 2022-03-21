@@ -103,7 +103,7 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
   });
 }
 
-export const headers: ICell[] = [
+export const mobileHeaders: ICell[] = [
   {
     size: "lg",
     value: "Deposit time",
@@ -117,31 +117,6 @@ export const headers: ICell[] = [
   {
     size: "sm",
     value: "Filled %",
-    cellClassName: "header-cell",
-  },
-  {
-    size: "sm",
-    value: "Source",
-    cellClassName: "header-cell",
-  },
-  {
-    size: "sm",
-    value: "Destination",
-    cellClassName: "header-cell",
-  },
-  {
-    size: "sm",
-    value: "Asset",
-    cellClassName: "header-cell",
-  },
-  {
-    size: "sm",
-    value: "Amount",
-    cellClassName: "header-cell",
-  },
-  {
-    size: "sm",
-    value: "Deposit tx",
     cellClassName: "header-cell",
   },
 ];
