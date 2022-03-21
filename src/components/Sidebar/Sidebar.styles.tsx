@@ -3,6 +3,7 @@ import { ProSidebar, SidebarHeader, Menu, MenuItem } from "react-pro-sidebar";
 import styled from "@emotion/styled";
 import "react-pro-sidebar/dist/css/styles.css";
 import { SecondaryButton } from "../Buttons";
+import { QUERIES } from "utils";
 
 export const Overlay = styled.div`
   z-index: 50;
@@ -24,6 +25,11 @@ export const StyledSidebar = styled(ProSidebar)`
   top: 0;
   width: 450px;
   display: none;
+  @media ${QUERIES.tabletAndDown} {
+    width: 100%;
+    right: -100%;
+    height: 100%;
+  }
   &.open {
     display: block;
     transform: translateX(-100%);
@@ -45,6 +51,9 @@ export const CloseButton = styled.div`
   font-weight: 700;
   cursor: pointer;
   margin-left: auto;
+  img {
+    height: 20px;
+  }
 `;
 export const HeaderText = styled.div`
   color: var(--color-gray);
