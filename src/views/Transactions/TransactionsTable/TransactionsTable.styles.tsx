@@ -82,3 +82,19 @@ export const StyledMobileHeadRow = styled(StyledHeadRow)`
 export const StyledMobileRow = styled(StyledRow)`
   width: 100%;
 `;
+
+export const MobileCell = styled(StyledCell)`
+  &.header-cell {
+    font-size: ${16 / 16}rem;
+    font-weight: 500;
+  }
+
+  &:not(:first-of-type) {
+    min-width: 100px;
+  }
+`;
+
+export const MobileChevron = styled.div`
+  text-align: right;
+  margin-right: 24px;
+`;

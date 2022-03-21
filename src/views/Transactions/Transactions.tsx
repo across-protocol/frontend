@@ -17,7 +17,9 @@ import createTransactionTableJSX, {
 } from "./TransactionsTable/createTransactionTableJSX";
 
 import MobileTransactionsTable from "./TransactionsTable/MobileTransactionsTable";
-import { mobileHeaders } from "./TransactionsTable/createMobileTransactionTableJSX";
+import createMobileTransactionTableJSX, {
+  mobileHeaders,
+} from "./TransactionsTable/createMobileTransactionTableJSX";
 import { BREAKPOINTS } from "utils";
 
 const Transactions = () => {
@@ -32,6 +34,14 @@ const Transactions = () => {
   const filledTx = useMemo(
     () =>
       createTransactionTableJSX(transactions.filter((x) => x.filled >= 100)),
+    [transactions]
+  );
+
+  const mobileFilledTx = useMemo(
+    () =>
+      createMobileTransactionTableJSX(
+        transactions.filter((x) => x.filled >= 100)
+      ),
     [transactions]
   );
 
@@ -86,7 +96,7 @@ const Transactions = () => {
               <MobileTransactionsTable
                 title="History"
                 headers={mobileHeaders}
-                rows={[]}
+                rows={mobileFilledTx}
               />
             )}
           </BottomRow>

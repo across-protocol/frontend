@@ -4,17 +4,15 @@ import {
   StyledMobileHeadRow,
   StyledBody,
   StyledMobileRow,
-  StyledCell,
+  MobileCell,
   MobileWrapper,
   Title,
 } from "./TransactionsTable.styles";
-import { ICell, IRow } from "components/Table/Table";
-interface MobileTxTableIRow extends IRow {
-  onClick?: () => void;
-}
+import { ICell } from "components/Table/Table";
+import { IMobileRow } from "./createMobileTransactionTableJSX";
 
 interface Props {
-  rows: MobileTxTableIRow[];
+  rows: IMobileRow[];
   headers: ICell[];
   title: string;
 }
@@ -27,13 +25,13 @@ const MobileTransactionsTable: FC<Props> = ({ rows, headers, title }) => {
         <StyledMobileHeadRow>
           {headers.map((cell, index) => {
             return (
-              <StyledCell
+              <MobileCell
                 key={index}
                 className={cell.cellClassName ?? ""}
                 size={cell.size}
               >
                 {cell.value}
-              </StyledCell>
+              </MobileCell>
             );
           })}
         </StyledMobileHeadRow>
@@ -43,13 +41,13 @@ const MobileTransactionsTable: FC<Props> = ({ rows, headers, title }) => {
               <StyledMobileRow key={ridx} onClick={row.onClick}>
                 {row.cells.map((cell, cidx) => {
                   return (
-                    <StyledCell
+                    <MobileCell
                       className={cell.cellClassName ?? ""}
                       key={cidx}
                       size={cell.size}
                     >
                       {cell.value}
-                    </StyledCell>
+                    </MobileCell>
                   );
                 })}
               </StyledMobileRow>

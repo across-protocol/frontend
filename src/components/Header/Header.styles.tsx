@@ -13,7 +13,7 @@ export const Wrapper = styled.header`
   align-items: center;
   background-color: var(--color-primary);
   color: var(--color-gray);
-  @media ${QUERIES.tabletAndUp} {
+  @media ${QUERIES.laptopAndUp} {
     padding: 0 30px;
     grid-template-columns: 1fr min(100%, var(--central-content)) 1fr;
   }
