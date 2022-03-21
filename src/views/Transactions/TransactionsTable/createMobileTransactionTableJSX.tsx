@@ -9,6 +9,7 @@ import { shortenTransactionHash } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 import { Transaction } from "./createTransactionModel";
 import { CHAINS, TOKENS_LIST } from "utils/constants";
+import { CLOSED_DROPDOWN_INDEX } from "../useTransactionsView";
 
 export interface IMobileRow extends IRow {
   toChain: React.ReactElement;
@@ -21,15 +22,19 @@ export interface IMobileRow extends IRow {
 
 // Will take View Model Transaction as arg
 export default function createMobileTransactionTableJSX(
-  transactions: Transaction[]
+  transactions: Transaction[],
+  setOpenIndex: React.Dispatch<React.SetStateAction<number>>
 ) {
-  const rows = formatTransactionRows(transactions);
+  const rows = formatTransactionRows(transactions, setOpenIndex);
   return rows;
 }
 
 // Will take a TransactionsArg
-function formatTransactionRows(transactions: Transaction[]): IMobileRow[] {
-  return transactions.map((tx) => {
+function formatTransactionRows(
+  transactions: Transaction[],
+  setOpenIndex: React.Dispatch<React.SetStateAction<number>>
+): IMobileRow[] {
+  return transactions.map((tx, index) => {
     const timestamp: ICell = {
       size: "md",
       value: DateTime.fromSeconds(tx.timestamp).toFormat("d MMM yyyy - t"),
@@ -97,7 +102,9 @@ function formatTransactionRows(transactions: Transaction[]): IMobileRow[] {
       amount,
       txHash,
       onClick: () => {
-        console.log("Cell clicked", timestamp, status, filled, downChevron);
+        setOpenIndex((prevValue) =>
+          prevValue !== index ? index : CLOSED_DROPDOWN_INDEX
+        );
       },
     } as IMobileRow;
   });

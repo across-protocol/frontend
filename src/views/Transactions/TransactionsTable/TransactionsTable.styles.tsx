@@ -81,6 +81,7 @@ export const StyledMobileHeadRow = styled(StyledHeadRow)`
 
 export const StyledMobileRow = styled(StyledRow)`
   width: 100%;
+  cursor: pointer;
 `;
 
 export const MobileCell = styled(StyledCell)`
@@ -97,4 +98,5 @@ export const MobileCell = styled(StyledCell)`
 export const MobileChevron = styled.div`
   text-align: right;
   margin-right: 24px;
+  cursor: pointer;
 `;

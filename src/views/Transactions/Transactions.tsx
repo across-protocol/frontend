@@ -23,8 +23,15 @@ import createMobileTransactionTableJSX, {
 import { BREAKPOINTS } from "utils";
 
 const Transactions = () => {
-  const { isConnected, initOnboard, account, transactions, width } =
-    useTransactionsView();
+  const {
+    isConnected,
+    initOnboard,
+    account,
+    transactions,
+    width,
+    openIndex,
+    setOpenIndex,
+  } = useTransactionsView();
 
   const ongoingTx = useMemo(
     () => createTransactionTableJSX(transactions.filter((x) => x.filled < 100)),
@@ -40,10 +47,13 @@ const Transactions = () => {
   const mobileFilledTx = useMemo(
     () =>
       createMobileTransactionTableJSX(
-        transactions.filter((x) => x.filled >= 100)
+        transactions.filter((x) => x.filled >= 100),
+        setOpenIndex
       ),
-    [transactions]
+    [transactions, setOpenIndex]
   );
+
+  console.log("openIndex", openIndex);
 
   return (
     <Wrapper>
@@ -97,6 +107,7 @@ const Transactions = () => {
                 title="History"
                 headers={mobileHeaders}
                 rows={mobileFilledTx}
+                openIndex={openIndex}
               />
             )}
           </BottomRow>
