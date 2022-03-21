@@ -15,9 +15,8 @@ import {
   ParsingError,
   InsufficientBalanceError,
   ETH_ADDRESS,
-  WrongNetworkError,
 } from "utils";
-import { useError, usePrevious } from "hooks";
+import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
 
 export enum FormStatus {
@@ -259,18 +258,6 @@ type SendFormManagerContext = FormState & {
 function useSendFormManager(): SendFormManagerContext {
   const [state, dispatch] = useReducer(formReducer, initialFormState);
   const { account: connectedAccount, chainId } = useConnection();
-  const { addError, removeError, error: globalError } = useError();
-
-  // Dispatch a global error if the user is connected but not to the fromChain
-  useEffect(() => {
-    const isWrongNetworkError = globalError instanceof WrongNetworkError;
-    if (!isWrongNetworkError && chainId && chainId !== state.fromChain) {
-      addError(new WrongNetworkError(state.fromChain));
-    }
-    if (isWrongNetworkError && chainId && chainId === state.fromChain) {
-      removeError();
-    }
-  }, [chainId, globalError, state.fromChain, addError, removeError]);
 
   // Keep the connected account and the toAddress in sync. If a user switches account, the toAddress should be updated to this new account.
   useEffect(() => {

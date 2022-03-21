@@ -1,6 +1,8 @@
 import styled from "@emotion/styled";
+import { useLayoutEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 
-const SuperHeader = styled.div`
+const Wrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -26,4 +28,30 @@ const SuperHeader = styled.div`
   }
 `;
 
+/**
+ * React component that renders its children in a super header on top of the page.
+ */
+const SuperHeader: React.FC = ({ children }) => {
+  const container = useRef(document.getElementById("super-header"));
+  // We create the "super-header" element and insert it into the DOM, if it does not exist already
+  useLayoutEffect(() => {
+    if (!container.current) {
+      // we know this to always be defined.
+      const root = document.getElementById("root") as HTMLDivElement;
+      const div = document.createElement("div");
+      div.id = "super-header";
+      root.insertBefore(div, root.firstChild);
+      container.current = div;
+    }
+    return () => {
+      if (container.current) {
+        container.current.remove();
+      }
+    };
+  }, []);
+  if (!container.current) {
+    return null;
+  }
+  return createPortal(<Wrapper>{children}</Wrapper>, container.current);
+};
 export default SuperHeader;

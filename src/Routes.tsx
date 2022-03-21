@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Switch, Route, useLocation } from "react-router-dom";
 import { Send, Pool, About, Transactions } from "views";
 import { Header, SuperHeader } from "components";
 import { useConnection } from "state/hooks";
-import { CHAINS, switchChain, WrongNetworkError } from "utils";
-import { useError, usePrevious } from "hooks";
+import { WrongNetworkError } from "utils";
+import { useError } from "hooks";
 import styled from "@emotion/styled";
 import Sidebar from "components/Sidebar";
 
@@ -14,16 +14,6 @@ function useRoutes() {
   const location = useLocation();
   const { error, removeError } = useError();
 
-  // reset wrong chain error on route change
-  const prevLocation = usePrevious(location);
-  useEffect(() => {
-    if (
-      error instanceof WrongNetworkError &&
-      prevLocation.pathname !== location.pathname
-    ) {
-      removeError();
-    }
-  }, [removeError, error, location.pathname, prevLocation.pathname]);
   return {
     openSidebar,
     setOpenSidebar,
@@ -35,25 +25,14 @@ function useRoutes() {
 }
 // Need this component for useLocation hook
 const Routes: React.FC = () => {
-  const { openSidebar, setOpenSidebar, error, removeError, provider } =
-    useRoutes();
-  const showError = provider && error instanceof WrongNetworkError;
+  const { openSidebar, setOpenSidebar, error, removeError } = useRoutes();
+
   return (
     <>
       {error && !(error instanceof WrongNetworkError) && (
         <SuperHeader>
           <div>{error.message}</div>
           <RemoveErrorSpan onClick={() => removeError()}>X</RemoveErrorSpan>
-        </SuperHeader>
-      )}
-      {showError && (
-        <SuperHeader>
-          <div>
-            You are on an incorrect network. Please{" "}
-            <button onClick={() => switchChain(provider, error.correctChainId)}>
-              switch to {CHAINS[error.correctChainId].name}
-            </button>
-          </div>
         </SuperHeader>
       )}
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />

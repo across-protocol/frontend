@@ -12,7 +12,8 @@ import {
   COLORS,
   QUERIES,
   max,
-  WrongNetworkError,
+  switchChain,
+  CHAINS,
 } from "utils";
 import { useAppSelector, useConnection, useBalance } from "state/hooks";
 import get from "lodash/get";
@@ -21,7 +22,7 @@ import styled from "@emotion/styled";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 
 import { BounceType } from "components/BouncingDotsLoader/BouncingDotsLoader";
-import { useError } from "hooks";
+import { SuperHeader } from "components";
 
 export type ShowSuccess = "deposit" | "withdraw";
 
@@ -55,17 +56,7 @@ const Pool: FC = () => {
   const wrongNetwork =
     provider &&
     (error instanceof UnsupportedChainIdError || chainId !== ChainId.MAINNET);
-  const { addError, removeError, error: globalError } = useError();
-  // // if the user is connected but not to mainnet, dispatch a global error
-  useEffect(() => {
-    const isWrongNetworkError = globalError instanceof WrongNetworkError;
-    if (!isWrongNetworkError && chainId && chainId !== ChainId.MAINNET) {
-      addError(new WrongNetworkError(ChainId.MAINNET));
-    }
-    if (isWrongNetworkError && chainId === ChainId.MAINNET) {
-      removeError();
-    }
-  }, [chainId, addError, removeError, globalError]);
+
   // Update pool info when token changes
   useEffect(() => {
     setLoadingPoolState(true);
@@ -92,6 +83,16 @@ const Pool: FC = () => {
 
   return (
     <Layout>
+      {wrongNetwork && (
+        <SuperHeader>
+          <div>
+            You are on an incorrect network. Please{" "}
+            <button onClick={() => switchChain(provider, ChainId.MAINNET)}>
+              switch to {CHAINS[ChainId.MAINNET].name}
+            </button>
+          </div>
+        </SuperHeader>
+      )}
       {!showSuccess ? (
         <Wrapper>
           <PoolSelection
