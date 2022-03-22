@@ -10,6 +10,9 @@ import {
 } from "./TransactionsTable.styles";
 import { ICell } from "components/Table/Table";
 import { IMobileRow } from "./createMobileTransactionTableJSX";
+import { MobileChevron } from "./TransactionsTable.styles";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   rows: IMobileRow[];
@@ -53,7 +56,13 @@ const MobileTransactionsTable: FC<Props> = ({
                         key={cidx}
                         size={cell.size}
                       >
-                        {cell.value}
+                        {cidx === 3 && openIndex === ridx ? (
+                          <MobileChevron>
+                            <FontAwesomeIcon icon={faChevronUp} />
+                          </MobileChevron>
+                        ) : (
+                          cell.value
+                        )}
                       </MobileCell>
                     );
                   })}

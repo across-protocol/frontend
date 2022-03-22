@@ -99,4 +99,7 @@ export const MobileChevron = styled.div`
   text-align: right;
   margin-right: 24px;
   cursor: pointer;
+  svg {
+    color: var(--color-primary);
+  }
 `;

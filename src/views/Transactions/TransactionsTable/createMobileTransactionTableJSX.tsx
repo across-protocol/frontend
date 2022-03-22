@@ -10,6 +10,8 @@ import { ICell, IRow } from "components/Table/Table";
 import { Transaction } from "./createTransactionModel";
 import { CHAINS, TOKENS_LIST } from "utils/constants";
 import { CLOSED_DROPDOWN_INDEX } from "../useTransactionsView";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 export interface IMobileRow extends IRow {
   toChain: React.ReactElement;
@@ -52,7 +54,11 @@ function formatTransactionRows(
 
     const downChevron: ICell = {
       size: "xs",
-      value: <MobileChevron>^</MobileChevron>,
+      value: (
+        <MobileChevron>
+          <FontAwesomeIcon icon={faChevronDown} />
+        </MobileChevron>
+      ),
     };
 
     const fromChainName = CHAINS[tx.fromChain].name;
