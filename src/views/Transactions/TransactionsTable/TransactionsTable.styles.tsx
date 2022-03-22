@@ -118,6 +118,9 @@ export const AccordionWrapper = styled.div`
 
 export const AccordionRow = styled.div`
   display: flex;
+  > div {
+    padding: 8px 0;
+  }
   &:first-of-type {
     div:first-of-type {
       border-top: 1px solid #2c2f33;
@@ -127,14 +130,16 @@ export const AccordionRow = styled.div`
     }
   }
   > div:first-of-type {
-    flex: 1 0 130px;
+    flex: 1 0 60px;
     background-color: var(--color-black);
     border-bottom: 1px solid #2c2f33;
+    text-indent: 24px;
   }
   > div:nth-of-type(2) {
-    flex: 2 0 130px;
+    flex: 3 0 130px;
     background: rgba(255, 255, 255, 0.08);
     border-bottom: 1px solid #2c2f33;
+    text-indent: 12px;
   }
   &:nth-of-type(5) > div {
     border-bottom: none;

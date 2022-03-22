@@ -70,7 +70,7 @@ function formatTransactionRows(
       </>
     );
     const toChainName = CHAINS[tx.toChain].name;
-    const toLogo = CHAINS[tx.fromChain].logoURI;
+    const toLogo = CHAINS[tx.toChain].logoURI;
     const toChain = (
       <>
         <TableLogo src={toLogo} alt={`${toChainName}_logo`} /> {toChainName}

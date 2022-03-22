@@ -43,7 +43,7 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
     };
 
     const toChainName = CHAINS[tx.toChain].name;
-    const toLogo = CHAINS[tx.fromChain].logoURI;
+    const toLogo = CHAINS[tx.toChain].logoURI;
     const toChain: ICell = {
       size: "sm",
       value: (
