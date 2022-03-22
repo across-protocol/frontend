@@ -125,6 +125,16 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               Medium
             </a>
           </StyledMenuItem>
+          <StyledMenuItem>
+            <a
+              href="https://forum.across.to/"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setOpenSidebar(false)}
+            >
+              Discourse
+            </a>
+          </StyledMenuItem>
         </StyledMenu>
       </StyledSidebar>
     </>
