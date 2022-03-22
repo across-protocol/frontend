@@ -7,6 +7,8 @@ import {
   MobileCell,
   MobileWrapper,
   Title,
+  AccordionWrapper,
+  AccordionRow,
 } from "./TransactionsTable.styles";
 import { ICell } from "components/Table/Table";
 import { IMobileRow } from "./createMobileTransactionTableJSX";
@@ -20,6 +22,8 @@ interface Props {
   title: string;
   openIndex: number;
 }
+
+const CHEVRON_INDEX = 3;
 
 const MobileTransactionsTable: FC<Props> = ({
   rows,
@@ -56,7 +60,8 @@ const MobileTransactionsTable: FC<Props> = ({
                         key={cidx}
                         size={cell.size}
                       >
-                        {cidx === 3 && openIndex === ridx ? (
+                        {/* ChevronDown is 4th cell of row; replace the down arrow with up if they click it */}
+                        {cidx === CHEVRON_INDEX && openIndex === ridx ? (
                           <MobileChevron>
                             <FontAwesomeIcon icon={faChevronUp} />
                           </MobileChevron>
@@ -68,15 +73,28 @@ const MobileTransactionsTable: FC<Props> = ({
                   })}
                 </StyledMobileRow>
                 {openIndex === ridx && (
-                  <div key={openIndex}>
-                    <ul>
-                      <li>{row.fromChain}</li>
-                      <li>{row.toChain}</li>
-                      <li>{row.symbol}</li>
-                      <li>{row.amount}</li>
-                      <li>{row.txHash}</li>
-                    </ul>
-                  </div>
+                  <AccordionWrapper key={openIndex}>
+                    <AccordionRow>
+                      <div>Source</div>
+                      <div>{row.fromChain}</div>
+                    </AccordionRow>
+                    <AccordionRow>
+                      <div>Destination</div>
+                      <div>{row.toChain}</div>
+                    </AccordionRow>
+                    <AccordionRow>
+                      <div>Asset</div>
+                      <div>{row.symbol}</div>
+                    </AccordionRow>
+                    <AccordionRow>
+                      <div>Amount</div>
+                      <div>{row.amount}</div>
+                    </AccordionRow>
+                    <AccordionRow>
+                      <div>Deposit tx</div>
+                      <div>{row.txHash}</div>
+                    </AccordionRow>
+                  </AccordionWrapper>
                 )}
               </>
             );

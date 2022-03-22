@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { ethers } from "ethers";
 import {
   TableLogo,
-  TableLink,
+  MobileTableLink,
   MobileChevron,
 } from "./TransactionsTable.styles";
 import { shortenTransactionHash } from "utils/format";
@@ -91,13 +91,13 @@ function formatTransactionRows(
 
     // TODO: change href to proper url when we get real TX data
     const txHash = (
-      <TableLink
+      <MobileTableLink
         href={`https://etherscan.io/tx/${tx.txHash}`}
         target="_blank"
         rel="noreferrer"
       >
         {shortenTransactionHash(tx.txHash)}
-      </TableLink>
+      </MobileTableLink>
     );
 
     return {

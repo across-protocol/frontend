@@ -82,6 +82,12 @@ export const StyledMobileHeadRow = styled(StyledHeadRow)`
 export const StyledMobileRow = styled(StyledRow)`
   width: 100%;
   cursor: pointer;
+  &:first-of-type {
+    margin-bottom: 0px;
+  }
+  &:not(:first-of-type) {
+    margin: 1px 0;
+  }
 `;
 
 export const MobileCell = styled(StyledCell)`
@@ -102,4 +108,39 @@ export const MobileChevron = styled.div`
   svg {
     color: var(--color-primary);
   }
+`;
+
+export const AccordionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+export const AccordionRow = styled.div`
+  display: flex;
+  &:first-of-type {
+    div:first-of-type {
+      border-top: 1px solid #2c2f33;
+    }
+    div:nth-of-type(2) {
+      border-top: 1px solid #2c2f33;
+    }
+  }
+  > div:first-of-type {
+    flex: 1 0 130px;
+    background-color: var(--color-black);
+    border-bottom: 1px solid #2c2f33;
+  }
+  > div:nth-of-type(2) {
+    flex: 2 0 130px;
+    background: rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid #2c2f33;
+  }
+  &:nth-of-type(5) > div {
+    border-bottom: none;
+  }
+`;
+
+export const MobileTableLink = styled(TableLink)`
+  border-bottom: none;
 `;
