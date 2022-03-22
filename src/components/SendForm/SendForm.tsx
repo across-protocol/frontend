@@ -5,23 +5,21 @@ import {
   CoinSelection,
   AddressSelection,
   SendAction,
+  SuperHeader,
 } from "components";
-import { useSendForm } from "hooks";
 import type { Deposit } from "views/Confirmation";
-import SuperHeader from "components/SuperHeader";
-import { useConnection } from "state/hooks";
 import { CHAINS, switchChain } from "utils";
+import useSendFormComponent from "./useSendFormComponent";
 
 type Props = {
   onDepositConfirmed: (deposit: Deposit) => void;
 };
 const SendForm: React.FC<Props> = ({ onDepositConfirmed }) => {
-  const { fromChain } = useSendForm();
-  const { chainId, provider } = useConnection();
-  const showError = !!chainId && provider && chainId !== fromChain;
+  const { fromChain, provider, wrongNetwork } = useSendFormComponent();
+
   return (
     <>
-      {showError && (
+      {wrongNetwork && provider && (
         <SuperHeader>
           <div>
             You are on an incorrect network. Please{" "}
