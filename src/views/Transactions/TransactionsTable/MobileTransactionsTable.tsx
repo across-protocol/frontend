@@ -59,7 +59,7 @@ const MobileTransactionsTable: FC<Props> = ({
                   })}
                 </StyledMobileRow>
                 {openIndex === ridx && (
-                  <div>
+                  <div key={openIndex}>
                     <ul>
                       <li>{row.fromChain}</li>
                       <li>{row.toChain}</li>
