@@ -73,7 +73,7 @@ const MobileTransactionsTable: FC<Props> = ({
                   })}
                 </StyledMobileRow>
                 {openIndex === ridx && (
-                  <AccordionWrapper key={openIndex}>
+                  <AccordionWrapper key={ridx + 1}>
                     <AccordionRow>
                       <div>Source</div>
                       <div>{row.fromChain}</div>
