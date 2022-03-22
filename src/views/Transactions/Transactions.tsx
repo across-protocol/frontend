@@ -29,8 +29,10 @@ const Transactions = () => {
     account,
     transactions,
     width,
-    openIndex,
-    setOpenIndex,
+    openFilledRow,
+    setOpenFilledRow,
+    openOngoingRow,
+    setOpenOngoingRow,
   } = useTransactionsView();
 
   const ongoingTx = useMemo(
@@ -48,12 +50,19 @@ const Transactions = () => {
     () =>
       createMobileTransactionTableJSX(
         transactions.filter((x) => x.filled >= 100),
-        setOpenIndex
+        setOpenFilledRow
       ),
-    [transactions, setOpenIndex]
+    [transactions, setOpenFilledRow]
   );
 
-  console.log("openIndex", openIndex);
+  const mobileOngoingTx = useMemo(
+    () =>
+      createMobileTransactionTableJSX(
+        transactions.filter((x) => x.filled < 100),
+        setOpenOngoingRow
+      ),
+    [transactions, setOpenOngoingRow]
+  );
 
   return (
     <Wrapper>
@@ -85,11 +94,18 @@ const Transactions = () => {
                   <Account>({shortenAddress(account, "......", 6)})</Account>
                 )}
               </Title>
-              {width >= BREAKPOINTS.laptopMin && (
+              {width >= BREAKPOINTS.laptopMin ? (
                 <TransactionsTable
                   title="Ongoing"
                   headers={headers}
                   rows={ongoingTx}
+                />
+              ) : (
+                <MobileTransactionsTable
+                  title="History"
+                  headers={mobileHeaders}
+                  rows={mobileOngoingTx}
+                  openIndex={openOngoingRow}
                 />
               )}
             </TopRow>
@@ -107,7 +123,7 @@ const Transactions = () => {
                 title="History"
                 headers={mobileHeaders}
                 rows={mobileFilledTx}
-                openIndex={openIndex}
+                openIndex={openFilledRow}
               />
             )}
           </BottomRow>

@@ -10,7 +10,9 @@ export default function useTransactionsView() {
   const transactions = createTransactionModel();
 
   const { width } = useWindowSize();
-  const [openIndex, setOpenIndex] = useState<number>(-1);
+  const [openFilledRow, setOpenFilledRow] = useState<number>(-1);
+  const [openOngoingRow, setOpenOngoingRow] = useState<number>(-1);
+
   return {
     provider,
     chainId,
@@ -20,8 +22,10 @@ export default function useTransactionsView() {
     transactions,
     // windowSize can return undefined -- default to 0 for easier typing.
     width: width || 0,
-    openIndex,
-    setOpenIndex,
+    openFilledRow,
+    setOpenFilledRow,
+    openOngoingRow,
+    setOpenOngoingRow,
   };
 }
 
