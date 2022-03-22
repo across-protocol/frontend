@@ -5,7 +5,6 @@ import PoolSelection from "components/PoolSelection";
 import PoolForm from "components/PoolForm";
 import DepositSuccess from "components/PoolForm/DepositSuccess";
 import {
-  DEFAULT_TO_CHAIN_ID,
   TOKENS_LIST,
   ChainId,
   Token,
@@ -13,6 +12,8 @@ import {
   COLORS,
   QUERIES,
   max,
+  switchChain,
+  CHAINS,
 } from "utils";
 import { useAppSelector, useConnection, useBalance } from "state/hooks";
 import get from "lodash/get";
@@ -21,6 +22,7 @@ import styled from "@emotion/styled";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 
 import { BounceType } from "components/BouncingDotsLoader/BouncingDotsLoader";
+import { SuperHeader } from "components";
 
 export type ShowSuccess = "deposit" | "withdraw";
 
@@ -53,8 +55,7 @@ const Pool: FC = () => {
 
   const wrongNetwork =
     provider &&
-    (error instanceof UnsupportedChainIdError ||
-      chainId !== DEFAULT_TO_CHAIN_ID);
+    (error instanceof UnsupportedChainIdError || chainId !== ChainId.MAINNET);
 
   // Update pool info when token changes
   useEffect(() => {
@@ -82,6 +83,16 @@ const Pool: FC = () => {
 
   return (
     <Layout>
+      {wrongNetwork && (
+        <SuperHeader>
+          <div>
+            You are on an incorrect network. Please{" "}
+            <button onClick={() => switchChain(provider, ChainId.MAINNET)}>
+              switch to {CHAINS[ChainId.MAINNET].name}
+            </button>
+          </div>
+        </SuperHeader>
+      )}
       {!showSuccess ? (
         <Wrapper>
           <PoolSelection

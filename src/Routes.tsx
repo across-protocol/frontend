@@ -3,68 +3,36 @@ import { Switch, Route, useLocation } from "react-router-dom";
 import { Send, Pool, About, Transactions } from "views";
 import { Header, SuperHeader } from "components";
 import { useConnection } from "state/hooks";
-import { CHAINS, UnsupportedChainIdError, switchChain, ChainId } from "utils";
-
-import { useAppSelector } from "state/hooks";
+import { WrongNetworkError } from "utils";
 import { useError } from "hooks";
 import styled from "@emotion/styled";
 import Sidebar from "components/Sidebar";
 
+function useRoutes() {
+  const [openSidebar, setOpenSidebar] = useState(false);
+  const { provider } = useConnection();
+  const location = useLocation();
+  const { error, removeError } = useError();
+
+  return {
+    openSidebar,
+    setOpenSidebar,
+    provider,
+    error,
+    removeError,
+    location,
+  };
+}
 // Need this component for useLocation hook
 const Routes: React.FC = () => {
-  const [openSidebar, setOpenSidebar] = useState(false);
-  const { provider, chainId, error } = useConnection();
-  const location = useLocation();
-  const sendState = useAppSelector((state) => state.send);
-  const { error: globalError, removeError } = useError();
-
-  const wrongNetworkSend =
-    provider &&
-    chainId &&
-    location.pathname === "/" &&
-    (error instanceof UnsupportedChainIdError ||
-      chainId !== sendState.currentlySelectedFromChain.chainId);
-  const wrongNetworkPool =
-    provider &&
-    !!chainId &&
-    location.pathname === "/pool" &&
-    (error instanceof UnsupportedChainIdError || chainId !== ChainId.MAINNET);
+  const { openSidebar, setOpenSidebar, error, removeError } = useRoutes();
 
   return (
     <>
-      {globalError && (
+      {error && !(error instanceof WrongNetworkError) && (
         <SuperHeader>
-          <div>{globalError}</div>
+          <div>{error.message}</div>
           <RemoveErrorSpan onClick={() => removeError()}>X</RemoveErrorSpan>
-        </SuperHeader>
-      )}
-      {wrongNetworkSend && location.pathname === "/" && (
-        <SuperHeader>
-          <div>
-            You are on an incorrect network. Please{" "}
-            <button
-              onClick={() =>
-                switchChain(
-                  provider,
-                  sendState.currentlySelectedFromChain.chainId
-                )
-              }
-            >
-              switch to{" "}
-              {CHAINS[sendState.currentlySelectedFromChain.chainId].name}
-            </button>
-          </div>
-        </SuperHeader>
-      )}
-
-      {wrongNetworkPool && (
-        <SuperHeader>
-          <div>
-            You are on an incorrect network. Please{" "}
-            <button onClick={() => switchChain(provider, ChainId.MAINNET)}>
-              switch to {CHAINS[ChainId.MAINNET].name}
-            </button>
-          </div>
         </SuperHeader>
       )}
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />

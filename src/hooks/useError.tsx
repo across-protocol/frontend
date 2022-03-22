@@ -24,6 +24,7 @@ function useErrorManager() {
 }
 
 const ErrorContext = createContext<ErrorContextValue | undefined>(undefined);
+ErrorContext.displayName = "ErrorContext";
 export const ErrorProvider: React.FC = ({ children }) => {
   const value = useErrorManager();
   return (

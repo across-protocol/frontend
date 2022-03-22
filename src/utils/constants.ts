@@ -619,7 +619,7 @@ export function getChainName(chainId: ChainId): string {
   }
 }
 
-export const DEFAULT_FROM_CHAIN_ID = ChainId.ARBITRUM;
+export const DEFAULT_FROM_CHAIN_ID = ChainId.OPTIMISM;
 export const DEFAULT_TO_CHAIN_ID = ChainId.MAINNET;
 
 /* Onboard config */
