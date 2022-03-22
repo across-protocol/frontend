@@ -43,11 +43,6 @@ const SuperHeader: React.FC = ({ children }) => {
       root.insertBefore(div, root.firstChild);
       container.current = div;
     }
-    return () => {
-      if (container.current) {
-        container.current.remove();
-      }
-    };
   }, []);
   if (!container.current) {
     return null;
