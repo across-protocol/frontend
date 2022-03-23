@@ -9,9 +9,12 @@ import {
   Title,
 } from "./TransactionsTable.styles";
 import { ICell, IRow } from "components/Table/Table";
+interface TxTableIRow extends IRow {
+  onClick?: () => void;
+}
 
 interface Props {
-  rows: IRow[];
+  rows: TxTableIRow[];
   headers: ICell[];
   title: string;
 }

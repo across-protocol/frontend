@@ -12,12 +12,28 @@ import {
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
-import createTransactionTableJSX from "./createTransactionTableJSX";
-import { headers } from "./createTransactionTableJSX";
+import createTransactionTableJSX, {
+  headers,
+} from "./TransactionsTable/createTransactionTableJSX";
+
+import MobileTransactionsTable from "./TransactionsTable/MobileTransactionsTable";
+import createMobileTransactionTableJSX, {
+  mobileHeaders,
+} from "./TransactionsTable/createMobileTransactionTableJSX";
+import { BREAKPOINTS } from "utils";
 
 const Transactions = () => {
-  const { isConnected, initOnboard, account, transactions } =
-    useTransactionsView();
+  const {
+    isConnected,
+    initOnboard,
+    account,
+    transactions,
+    width,
+    openFilledRow,
+    setOpenFilledRow,
+    openOngoingRow,
+    setOpenOngoingRow,
+  } = useTransactionsView();
 
   const ongoingTx = useMemo(
     () => createTransactionTableJSX(transactions.filter((x) => x.filled < 100)),
@@ -28,6 +44,24 @@ const Transactions = () => {
     () =>
       createTransactionTableJSX(transactions.filter((x) => x.filled >= 100)),
     [transactions]
+  );
+
+  const mobileFilledTx = useMemo(
+    () =>
+      createMobileTransactionTableJSX(
+        transactions.filter((x) => x.filled >= 100),
+        setOpenFilledRow
+      ),
+    [transactions, setOpenFilledRow]
+  );
+
+  const mobileOngoingTx = useMemo(
+    () =>
+      createMobileTransactionTableJSX(
+        transactions.filter((x) => x.filled < 100),
+        setOpenOngoingRow
+      ),
+    [transactions, setOpenOngoingRow]
   );
 
   return (
@@ -60,20 +94,38 @@ const Transactions = () => {
                   <Account>({shortenAddress(account, "......", 6)})</Account>
                 )}
               </Title>
-              <TransactionsTable
-                title="Ongoing"
-                headers={headers}
-                rows={ongoingTx}
-              />
+              {width >= BREAKPOINTS.laptopMin ? (
+                <TransactionsTable
+                  title="Ongoing"
+                  headers={headers}
+                  rows={ongoingTx}
+                />
+              ) : (
+                <MobileTransactionsTable
+                  title="History"
+                  headers={mobileHeaders}
+                  rows={mobileOngoingTx}
+                  openIndex={openOngoingRow}
+                />
+              )}
             </TopRow>
           )}
 
           <BottomRow>
-            <TransactionsTable
-              title="History"
-              headers={headers}
-              rows={filledTx}
-            />
+            {width >= BREAKPOINTS.laptopMin ? (
+              <TransactionsTable
+                title="History"
+                headers={headers}
+                rows={filledTx}
+              />
+            ) : (
+              <MobileTransactionsTable
+                title="History"
+                headers={mobileHeaders}
+                rows={mobileFilledTx}
+                openIndex={openFilledRow}
+              />
+            )}
           </BottomRow>
         </>
       )}

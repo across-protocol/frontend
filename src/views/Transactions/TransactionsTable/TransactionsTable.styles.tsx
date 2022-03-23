@@ -69,3 +69,83 @@ export const TableLink = styled.a`
     opacity: 0.7;
   }
 `;
+
+export const MobileWrapper = styled(Wrapper)`
+  max-width: 100%;
+  width: 100%;
+`;
+
+export const StyledMobileHeadRow = styled(StyledHeadRow)`
+  width: 100%;
+`;
+
+export const StyledMobileRow = styled(StyledRow)`
+  width: 100%;
+  cursor: pointer;
+  &:first-of-type {
+    margin-bottom: 0px;
+  }
+  &:not(:first-of-type) {
+    margin: 1px 0;
+  }
+`;
+
+export const MobileCell = styled(StyledCell)`
+  &.header-cell {
+    font-size: ${16 / 16}rem;
+    font-weight: 500;
+  }
+
+  &:not(:first-of-type) {
+    min-width: 100px;
+  }
+`;
+
+export const MobileChevron = styled.div`
+  text-align: right;
+  margin-right: 24px;
+  cursor: pointer;
+  svg {
+    color: var(--color-primary);
+  }
+`;
+
+export const AccordionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+export const AccordionRow = styled.div`
+  display: flex;
+  > div {
+    padding: 8px 0;
+  }
+  &:first-of-type {
+    div:first-of-type {
+      border-top: 1px solid #2c2f33;
+    }
+    div:nth-of-type(2) {
+      border-top: 1px solid #2c2f33;
+    }
+  }
+  > div:first-of-type {
+    flex: 1 0 60px;
+    background-color: var(--color-black);
+    border-bottom: 1px solid #2c2f33;
+    text-indent: 24px;
+  }
+  > div:nth-of-type(2) {
+    flex: 3 0 130px;
+    background: rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid #2c2f33;
+    text-indent: 12px;
+  }
+  &:nth-of-type(5) > div {
+    border-bottom: none;
+  }
+`;
+
+export const MobileTableLink = styled(TableLink)`
+  border-bottom: none;
+`;

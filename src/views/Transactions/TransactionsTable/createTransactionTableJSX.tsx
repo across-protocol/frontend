@@ -1,9 +1,6 @@
 import { DateTime } from "luxon";
 import { ethers } from "ethers";
-import {
-  TableLogo,
-  TableLink,
-} from "./TransactionsTable/TransactionsTable.styles";
+import { TableLogo, TableLink } from "./TransactionsTable.styles";
 import { shortenTransactionHash } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 import { Transaction } from "./createTransactionModel";
@@ -18,27 +15,20 @@ export default function createTransactionTableJSX(transactions: Transaction[]) {
 // Will take a TransactionsArg
 function formatTransactionRows(transactions: Transaction[]): IRow[] {
   return transactions.map((tx) => {
-    const row: IRow = {
-      cells: [],
-    };
-
     const timestamp: ICell = {
       size: "lg",
       value: DateTime.fromSeconds(tx.timestamp).toFormat("d MMM yyyy - t"),
     };
-    row.cells.push(timestamp);
 
     const status: ICell = {
       size: "sm",
       value: tx.filled < 100 ? "Pending" : "Filled",
     };
-    row.cells.push(status);
 
     const filled: ICell = {
       size: "sm",
       value: `${tx.filled}%`,
     };
-    row.cells.push(filled);
 
     const fromChainName = CHAINS[tx.fromChain].name;
     const fromLogo = CHAINS[tx.fromChain].logoURI;
@@ -51,10 +41,9 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
         </>
       ),
     };
-    row.cells.push(fromChain);
 
     const toChainName = CHAINS[tx.toChain].name;
-    const toLogo = CHAINS[tx.fromChain].logoURI;
+    const toLogo = CHAINS[tx.toChain].logoURI;
     const toChain: ICell = {
       size: "sm",
       value: (
@@ -63,11 +52,11 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
         </>
       ),
     };
-    row.cells.push(toChain);
 
     const token = TOKENS_LIST[1].find(
       (x) => x.address === tx.assetContractAddress
     );
+
     const symbol: ICell = {
       size: "sm",
       value: (
@@ -77,13 +66,11 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
         </>
       ),
     };
-    row.cells.push(symbol);
 
     const amount: ICell = {
       size: "sm",
       value: ethers.utils.formatEther(tx.amount),
     };
-    row.cells.push(amount);
 
     // TODO: change href to proper url when we get real TX data
     const txHash: ICell = {
@@ -98,9 +85,19 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
         </TableLink>
       ),
     };
-    row.cells.push(txHash);
 
-    return row;
+    return {
+      cells: [
+        timestamp,
+        status,
+        filled,
+        fromChain,
+        toChain,
+        symbol,
+        amount,
+        txHash,
+      ],
+    } as IRow;
   });
 }
 
