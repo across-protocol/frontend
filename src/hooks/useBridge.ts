@@ -10,7 +10,6 @@ import {
   getDepositBox,
   TOKENS_LIST,
   FEE_ESTIMATION,
-  ETH_ADDRESS,
   InsufficientBalanceError,
   FeeTooHighError,
   InsufficientLiquidityError,
@@ -18,6 +17,7 @@ import {
   MAX_APPROVAL_AMOUNT,
   WrongNetworkError,
   ChainId,
+  CHAINS,
 } from "utils";
 
 
@@ -156,7 +156,7 @@ function computeStatus({
   }
   if (balance) {
     const adjustedBalance =
-      token === ETH_ADDRESS
+      token === CHAINS[fromChain].ETHAddress
         ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION))
         : balance;
     if (adjustedBalance.lt(amount)) {

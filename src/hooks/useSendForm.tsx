@@ -14,7 +14,7 @@ import {
   getAddress,
   ParsingError,
   InsufficientBalanceError,
-  ETH_ADDRESS,
+  CHAINS,
 } from "utils";
 import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
@@ -153,7 +153,7 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
         fromChain: chainId,
         toChain,
         amount: ethers.constants.Zero,
-        token: ETH_ADDRESS,
+        token: CHAINS[chainId].ETHAddress,
         error: undefined,
       };
     default:
@@ -177,7 +177,7 @@ function toChainReducer(state: FormState, chainId: ChainId): FormState {
         toChain: chainId,
         fromChain,
         amount: ethers.constants.Zero,
-        token: ETH_ADDRESS,
+        token: CHAINS[state.fromChain].ETHAddress,
         error: undefined,
       };
     default:

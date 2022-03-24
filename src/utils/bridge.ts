@@ -11,7 +11,6 @@ import {
   TOKENS_LIST,
   MAX_RELAY_FEE_PERCENT,
   Token,
-  ETH_ADDRESS,
 } from "./constants";
 
 import { isValidString, parseEther, tagAddress } from "./format";
@@ -290,7 +289,7 @@ async function sendArbitrumDeposit(
   const provider = PROVIDERS[ChainId.ARBITRUM]();
   const account = await signer.getAddress();
   const bridge = await Bridge.init(signer, provider.getSigner(account));
-  if (token === ETH_ADDRESS) {
+  if (token === CHAINS[ChainId.ARBITRUM].ETHAddress) {
     return bridge.depositETH(amount);
   } else {
     const depositParams = await bridge.getDepositTxParams({
@@ -333,7 +332,7 @@ async function sendOptimismDeposit(
   { token, amount }: OptimismDepositArgs
 ): Promise<ethers.providers.TransactionResponse> {
   const bridge = new OptimismBridgeClient();
-  if (token === ETH_ADDRESS) {
+  if (token === CHAINS[ChainId.OPTIMISM].ETHAddress) {
     return bridge.depositEth(signer, amount);
   } else {
     const pairToken = optimismErc20Pairs()[token];
@@ -371,7 +370,7 @@ async function sendBobaDeposit(
   signer: ethers.Signer,
   { token, amount }: BobaDepositArgs
 ): Promise<ethers.providers.TransactionResponse> {
-  if (token === ETH_ADDRESS) {
+  if (token === CHAINS[ChainId.BOBA].ETHAddress) {
     return bobaClient.depositEth(signer, amount);
   } else {
     const pairToken = bobaErc20Pairs()[token];
@@ -424,7 +423,7 @@ async function sendAcrossDeposit(
   }: AcrossDepositArgs
 ): Promise<ethers.providers.TransactionResponse> {
   const depositBox = getDepositBox(fromChain);
-  const isETH = token === ETH_ADDRESS;
+  const isETH = token === CHAINS[fromChain].ETHAddress;
   const value = isETH ? amount : ethers.constants.Zero;
   const l2Token = isETH ? TOKENS_LIST[fromChain][0].address : token;
 

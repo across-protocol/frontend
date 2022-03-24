@@ -1,4 +1,4 @@
-import { PROVIDERS, ChainId, ETH_ADDRESS } from "utils/constants";
+import { PROVIDERS, ChainId, CHAINS } from "utils/constants";
 import { clients } from "@uma/sdk";
 import { ethers } from "ethers";
 
@@ -17,7 +17,7 @@ export function getBalance(
   blockNumber?: number
 ): Promise<ethers.BigNumber> {
   const provider = PROVIDERS[chainId]();
-  if (token === ETH_ADDRESS) {
+  if (token === CHAINS[chainId].ETHAddress) {
     return provider.getBalance(account, blockNumber ?? "latest");
   }
   const contract = clients.erc20.connect(token, provider);
@@ -62,7 +62,7 @@ export async function getAllowance(
 ): Promise<ethers.BigNumber> {
   const provider = PROVIDERS[chainId]();
   // For ETH, allowance does not make sense
-  if (token === ETH_ADDRESS) {
+  if (token === CHAINS[chainId].ETHAddress) {
     return ethers.constants.MaxUint256;
   }
   const contract = clients.erc20.connect(token, provider);
