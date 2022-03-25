@@ -77,7 +77,10 @@ export enum ChainId {
   KOVAN_OPTIMISM = 69,
   ARBITRUM_RINKEBY = 421611,
 }
-export type L2ChainId = Exclude<ChainId, ChainId.MAINNET | ChainId.RINKEBY | ChainId.KOVAN>;
+export type L2ChainId = Exclude<
+  ChainId,
+  ChainId.MAINNET | ChainId.RINKEBY | ChainId.KOVAN
+>;
 
 export type Token = {
   address: string;
@@ -135,7 +138,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
     },
     {
       address: getAddress("0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828"),
-      name: "UMA Token",
+      name: "UMA",
       symbol: "UMA",
       decimals: 18,
       logoURI: umaLogo,
@@ -540,10 +543,7 @@ export const CHAINS_SELECTION = [
   ChainId.MAINNET,
 ];
 
-export const ADDRESSES: Record<
-  L2ChainId,
-  { BRIDGE?: string }
-> = {
+export const ADDRESSES: Record<L2ChainId, { BRIDGE?: string }> = {
   [ChainId.OPTIMISM]: {
     BRIDGE: getAddress("0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96"),
   },
@@ -561,15 +561,16 @@ export const ADDRESSES: Record<
   },
 };
 // FIXME: This is a temporary hack. Those addresses can change in the future, and have to be fetched asynchroneously.
-export const CANONICAL_BRIDGES: Record<
-  L2ChainId,
-  string
-> = {
+export const CANONICAL_BRIDGES: Record<L2ChainId, string> = {
   [ChainId.OPTIMISM]: getAddress("0x99C9fc46f92E8a1c0deC1b1747d010903E884bE1"),
   [ChainId.BOBA]: getAddress("0xdc1664458d2f0b6090bea60a8793a4e66c2f1c00"),
   [ChainId.ARBITRUM]: getAddress("0xcEe284F754E854890e311e3280b767F80797180d"),
-  [ChainId.ARBITRUM_RINKEBY]: getAddress("0x917dc9a69F65dC3082D518192cd3725E1Fa96cA2"),
-  [ChainId.KOVAN_OPTIMISM]: getAddress("0x22F24361D548e5FaAfb36d1437839f080363982B"),
+  [ChainId.ARBITRUM_RINKEBY]: getAddress(
+    "0x917dc9a69F65dC3082D518192cd3725E1Fa96cA2"
+  ),
+  [ChainId.KOVAN_OPTIMISM]: getAddress(
+    "0x22F24361D548e5FaAfb36d1437839f080363982B"
+  ),
 };
 
 type GetProvider = () => ethers.providers.JsonRpcProvider;
