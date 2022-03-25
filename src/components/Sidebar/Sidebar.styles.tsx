@@ -87,7 +87,7 @@ interface IStyledMenuItem {
 export const StyledMenuItem = styled(MenuItem)<IStyledMenuItem>`
   color: var(--color-white);
   font-weight: ${({ selected }) => (selected ? "600" : "400")};
-  padding-left: 1rem;
+  padding-left: 0;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--color-gray-550);
