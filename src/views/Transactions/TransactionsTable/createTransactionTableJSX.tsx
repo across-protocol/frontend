@@ -16,17 +16,16 @@ export default function createTransactionTableJSX(transactions: Transaction[]) {
 function formatTransactionRows(transactions: Transaction[]): IRow[] {
   return transactions.map((tx) => {
     const timestamp: ICell = {
-      size: "lg",
       value: DateTime.fromSeconds(tx.timestamp).toFormat("d MMM yyyy - t"),
     };
 
     const status: ICell = {
-      size: "sm",
+      size: "xs",
       value: tx.filled < 100 ? "Pending" : "Filled",
     };
 
     const filled: ICell = {
-      size: "sm",
+      size: "xs",
       value: `${tx.filled}%`,
     };
 
@@ -103,17 +102,16 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
 
 export const headers: ICell[] = [
   {
-    size: "lg",
     value: "Deposit time",
     cellClassName: "header-cell",
   },
   {
-    size: "sm",
+    size: "xs",
     value: "Status",
     cellClassName: "header-cell",
   },
   {
-    size: "sm",
+    size: "xs",
     value: "Filled %",
     cellClassName: "header-cell",
   },

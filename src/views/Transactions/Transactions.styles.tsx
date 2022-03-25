@@ -10,7 +10,7 @@ export const Title = styled.div`
   line-height: ${32 / 16}rem;
   font-weight: 700;
   margin: 0 auto;
-  max-width: 1900px;
+  max-width: 1700px;
 `;
 
 export const Account = styled.span`
@@ -28,7 +28,7 @@ export const ConnectButton = styled(PrimaryButton)`
 
 export const ButtonWrapper = styled.div`
   margin: 0 auto;
-  max-width: 1900px;
+  max-width: 1700px;
 `;
 
 export const TopRow = styled.div`
