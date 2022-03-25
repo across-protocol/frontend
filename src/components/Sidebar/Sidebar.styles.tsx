@@ -51,6 +51,7 @@ export const CloseButton = styled.div`
   font-weight: 700;
   cursor: pointer;
   margin-left: auto;
+  margin-right: 16px;
   img {
     height: 20px;
   }
@@ -111,4 +112,5 @@ export const ConnectText = styled.div`
 
 export const TopHeaderRow = styled.div`
   display: flex;
+  margin-top: 16px;
 `;
