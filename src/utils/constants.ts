@@ -298,6 +298,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
 
 export type ChainInfo = {
   name: string;
+  fullName?: string;
   chainId: ChainId;
   ETHAddress: string;
   logoURI: string;
@@ -321,7 +322,8 @@ export const isProduction = () =>
 
 export const CHAINS: Record<ChainId, ChainInfo> = {
   [ChainId.MAINNET]: {
-    name: "Ethereum Mainnet",
+    name: "Ethereum",
+    fullName: "Ethereum Mainnet",
     chainId: ChainId.MAINNET,
     logoURI: ethereumLogo,
     explorerUrl: "https://etherscan.io",
@@ -349,7 +351,8 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
     ETHAddress: ethers.constants.AddressZero,
   },
   [ChainId.ARBITRUM]: {
-    name: "Arbitrum One",
+    name: "Arbitrum",
+    fullName: "Arbitrum One",
     chainId: ChainId.ARBITRUM,
     logoURI: arbitrumLogo,
     rpcUrl: "https://arb1.arbitrum.io/rpc",
@@ -379,6 +382,14 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
     ETHAddress: ethers.constants.AddressZero,
   },
 };
+/** Chains as they appear in dropdowns */
+export const CHAINS_SELECTION = [
+  ChainId.OPTIMISM,
+  ChainId.ARBITRUM,
+  ChainId.BOBA,
+  ChainId.MAINNET,
+];
+
 
 export const ADDRESSES: Record<ChainId, { BRIDGE?: string }> = {
   [ChainId.MAINNET]: {
@@ -470,95 +481,7 @@ export function onboardBaseConfig(): Initialization {
 
 // this client requires multicall2 be accessible on the chain. This is the address for mainnet.
 export const multicallTwoAddress = "0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696";
-export interface IChainSelection {
-  name: string;
-  chainId: ChainId;
-  logoURI: string;
-  rpcUrl: string;
-  explorerUrl: string;
-  constructExplorerLink: (txHash: string) => string;
-  nativeCurrency: {
-    name: string;
-    symbol: string;
-    decimals: number;
-  };
-}
 
-interface EthChainInfo {
-  name: "Ethereum";
-  chainId: ChainId.MAINNET;
-  logoURI: string;
-  rpcUrl: string;
-  explorerUrl: string;
-  constructExplorerLink: (txHash: string) => string;
-  nativeCurrency: {
-    name: "Ether";
-    symbol: "ETH";
-    decimals: 18;
-  };
-}
-
-type ChainsSelection = [...IChainSelection[], EthChainInfo];
-export const CHAINS_SELECTION: ChainsSelection = [
-  {
-    name: "Optimism",
-    chainId: ChainId.OPTIMISM,
-    logoURI: optimismLogo,
-    rpcUrl: "https://mainnet.optimism.io",
-    explorerUrl: "https://optimistic.etherscan.io",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://optimistic.etherscan.io"
-    ),
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "OETH",
-      decimals: 18,
-    },
-  },
-  {
-    name: "Arbitrum",
-    chainId: ChainId.ARBITRUM,
-    logoURI: arbitrumLogo,
-    rpcUrl: "https://arb1.arbitrum.io/rpc",
-    explorerUrl: "https://arbiscan.io",
-    constructExplorerLink: (txHash: string) =>
-      `https://arbiscan.io/tx/${txHash}`,
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "AETH",
-      decimals: 18,
-    },
-  },
-  {
-    name: "Boba",
-    chainId: ChainId.BOBA,
-    logoURI: bobaLogo,
-    rpcUrl: "https://mainnet.boba.network",
-    explorerUrl: "https://blockexplorer.boba.network",
-    constructExplorerLink: (txHash: string) =>
-      `https://blockexplorer.boba.network/tx/${txHash}`,
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "ETH",
-      decimals: 18,
-    },
-  },
-  {
-    name: "Ethereum",
-    chainId: ChainId.MAINNET,
-    logoURI: ethereumLogo,
-    // Doesn't have an RPC on Infura. Need to know how to handle this
-    rpcUrl: "https://mainnet.infura.io/v3/",
-    explorerUrl: "https://etherscan.io",
-    constructExplorerLink: (txHash: string) =>
-      `https://etherscan.io/tx/${txHash}`,
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "ETH",
-      decimals: 18,
-    },
-  },
-];
 
 export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
 export const FEE_ESTIMATION = ".004";

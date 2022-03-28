@@ -17,17 +17,17 @@ export async function switchChain(
         await provider.send("wallet_addEthereumChain", [
           {
             chainId: ethers.utils.hexValue(chainId),
-            chainName: CHAINS[chainId].name,
+            chainName: CHAINS[chainId].fullName ?? CHAINS[chainId].name,
             rpcUrls: [CHAINS[chainId].rpcUrl],
             blockExplorerUrls: [CHAINS[chainId].explorerUrl],
             nativeCurrency: CHAINS[chainId].nativeCurrency,
           },
         ]);
       } catch (addError) {
-        console.error(`Failed to add ${CHAINS[chainId].name}`);
+        console.error(`Failed to add ${CHAINS[chainId].fullName ?? CHAINS[chainId].name}`, addError);
       }
     } else {
-      console.error(`Failed to switch to ${CHAINS[chainId].name}`);
+      console.error(`Failed to switch to ${CHAINS[chainId].fullName ?? CHAINS[chainId].name}`, switchError);
     }
   }
 }

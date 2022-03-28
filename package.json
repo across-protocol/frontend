@@ -23,7 +23,6 @@
     "@uma/contracts-frontend": "^0.1.17",
     "@uma/contracts-node": "^0.1.17",
     "@uma/sdk": "^0.19.0",
-    "@use-it/interval": "^1.0.0",
     "arb-ts": "^1.0.2",
     "bnc-notify": "^1.9.1",
     "bnc-onboard": "^1.37.0",

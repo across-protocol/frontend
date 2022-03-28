@@ -276,19 +276,17 @@ function useSendFormManager(): SendFormManagerContext {
   useEffect(() => {
     // The user has just connected to the app.
     if (chainId && previousChainId === undefined) {
-      const connectedChain = CHAINS_SELECTION.find(
-        (x) => x.chainId === chainId
-      );
-      const otherChains = CHAINS_SELECTION.filter((x) => x.chainId !== chainId);
+      const connectedChainId = CHAINS_SELECTION.find((x) => x === chainId);
+      const otherChains = CHAINS_SELECTION.filter((x) => x !== chainId);
 
-      if (connectedChain && otherChains) {
+      if (connectedChainId && otherChains) {
         dispatch({
           type: ActionType.SET_FROM_CHAIN,
-          payload: connectedChain.chainId,
+          payload: connectedChainId,
         });
         dispatch({
           type: ActionType.SET_TO_CHAIN,
-          payload: otherChains[otherChains.length - 1].chainId,
+          payload: otherChains[otherChains.length - 1],
         });
       }
     }
