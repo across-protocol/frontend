@@ -65,7 +65,6 @@ export const COLORS = {
 };
 
 /* Chains and Tokens section */
-
 export enum ChainId {
   MAINNET = 1,
   OPTIMISM = 10,
@@ -391,21 +390,23 @@ export const CHAINS_SELECTION = [
 ];
 
 
-export const ADDRESSES: Record<ChainId, { BRIDGE?: string }> = {
-  [ChainId.MAINNET]: {
-    // Stubbed value.
-    BRIDGE: "0xB524735356985D2f267FA010D681f061DfF03715",
-  },
+export const ADDRESSES: Record<Exclude<ChainId, ChainId.MAINNET>, { BRIDGE?: string }> = {
   [ChainId.OPTIMISM]: {
-    BRIDGE: "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+    BRIDGE: getAddress("0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96"),
   },
   [ChainId.BOBA]: {
-    BRIDGE: "0xCD43CEa89DF8fE39031C03c24BC24480e942470B",
+    BRIDGE: getAddress("0xCD43CEa89DF8fE39031C03c24BC24480e942470B"),
   },
   [ChainId.ARBITRUM]: {
-    BRIDGE: "0xD8c6dD978a3768F7DDfE3A9aAD2c3Fd75Fa9B6Fd",
+    BRIDGE: getAddress("0xD8c6dD978a3768F7DDfE3A9aAD2c3Fd75Fa9B6Fd"),
   },
 };
+// FIXME: This is a temporary hack. Those addresses can change in the future, and have to be fetched asynchroneously.
+export const CANONICAL_BRIDGES: Record<Exclude<ChainId, ChainId.MAINNET>, string> = {
+  [ChainId.OPTIMISM]: getAddress("0x99C9fc46f92E8a1c0deC1b1747d010903E884bE1"),
+  [ChainId.BOBA]: getAddress("0xdc1664458d2f0b6090bea60a8793a4e66c2f1c00"),
+  [ChainId.ARBITRUM]: getAddress("0xcEe284F754E854890e311e3280b767F80797180d"),
+}
 
 type GetProvider = () => ethers.providers.JsonRpcProvider;
 export const PROVIDERS: Record<ChainId, GetProvider> = {

@@ -35,3 +35,6 @@ export async function switchChain(
 export function isSupportedChainId(chainId: number): chainId is ChainId {
   return chainId in ChainId;
 }
+export function isL2(chainId: ChainId): chainId is Exclude<ChainId, ChainId.MAINNET> {
+  return chainId !== ChainId.MAINNET;
+}

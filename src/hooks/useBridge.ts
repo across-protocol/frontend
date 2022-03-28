@@ -18,6 +18,8 @@ import {
   WrongNetworkError,
   ChainId,
   CHAINS,
+  isL2,
+  CANONICAL_BRIDGES,
 } from "utils";
 
 
@@ -47,12 +49,12 @@ export function useBridge() {
 
   const { block } = useBlock(fromChain);
   const { balance } = useBalance(token, fromChain, account);
-  const depositBox = getDepositBox(fromChain);
+  const depositBox = isL2(fromChain) ? getDepositBox(fromChain) : undefined;
   const { allowance } = useAllowance(
     token,
     chainId,
     account,
-    depositBox.address,
+    !!depositBox ? depositBox.address : CANONICAL_BRIDGES[toChain as Exclude<ChainId, ChainId.MAINNET>],
     block?.number
   );
   const tokenSymbol = TOKENS_LIST[fromChain].find(
