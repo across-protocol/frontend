@@ -52,6 +52,7 @@ export const StyledRow = styled(Row)`
 `;
 
 export const StyledCell = styled(Cell)`
+  word-wrap: break-word;
   &:first-of-type {
     min-width: 170px;
     flex: 0 0 60px;
