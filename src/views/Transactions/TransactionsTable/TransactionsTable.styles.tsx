@@ -9,7 +9,7 @@ import {
 
 export const Wrapper = styled.div`
   margin: 2rem auto;
-  max-width: 1700px;
+  max-width: 1200px;
   overflow-x: auto;
 `;
 
@@ -28,7 +28,7 @@ export const StyledTableWrapper = styled(TableWrapper)`
 
 export const StyledHeadRow = styled(HeadRow)`
   background-color: var(--color-black);
-  width: 1700px;
+  width: 1200px;
   overflow-x: auto;
 `;
 
@@ -36,7 +36,7 @@ export const StyledBody = styled(Body)``;
 
 export const StyledRow = styled(Row)`
   background: rgba(255, 255, 255, 0.08);
-  width: 1700px;
+  width: 1200px;
   overflow-x: auto;
   margin: 0 auto;
   /* Don't do zebra */
@@ -52,8 +52,12 @@ export const StyledRow = styled(Row)`
 `;
 
 export const StyledCell = styled(Cell)`
+  &:first-of-type {
+    min-width: 170px;
+    flex: 0 0 60px;
+  }
   &:not(:first-of-type) {
-    min-width: 100px;
+    min-width: 120px;
   }
   &.header-cell {
     font-size: ${16 / 16}rem;

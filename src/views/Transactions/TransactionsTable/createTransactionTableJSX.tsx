@@ -16,6 +16,7 @@ export default function createTransactionTableJSX(transactions: Transaction[]) {
 function formatTransactionRows(transactions: Transaction[]): IRow[] {
   return transactions.map((tx) => {
     const timestamp: ICell = {
+      size: "sm",
       value: DateTime.fromSeconds(tx.timestamp).toFormat("d MMM yyyy - t"),
     };
 
@@ -32,7 +33,7 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
     const fromChainName = CHAINS[tx.fromChain].name;
     const fromLogo = CHAINS[tx.fromChain].logoURI;
     const fromChain: ICell = {
-      size: "sm",
+      size: "xs",
       value: (
         <>
           <TableLogo src={fromLogo} alt={`${fromChainName}_logo`} />{" "}
@@ -44,7 +45,7 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
     const toChainName = CHAINS[tx.toChain].name;
     const toLogo = CHAINS[tx.toChain].logoURI;
     const toChain: ICell = {
-      size: "sm",
+      size: "xs",
       value: (
         <>
           <TableLogo src={toLogo} alt={`${toChainName}_logo`} /> {toChainName}
@@ -57,7 +58,7 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
     );
 
     const symbol: ICell = {
-      size: "sm",
+      size: "xs",
       value: (
         <>
           <TableLogo src={token?.logoURI} alt={`${token?.name}_logo`} />{" "}
@@ -67,13 +68,13 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
     };
 
     const amount: ICell = {
-      size: "sm",
+      size: "xs",
       value: ethers.utils.formatEther(tx.amount),
     };
 
     // TODO: change href to proper url when we get real TX data
     const txHash: ICell = {
-      size: "sm",
+      size: "xs",
       value: (
         <TableLink
           href={`https://etherscan.io/tx/${tx.txHash}`}
@@ -102,6 +103,7 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
 
 export const headers: ICell[] = [
   {
+    size: "sm",
     value: "Deposit time",
     cellClassName: "header-cell",
   },
@@ -116,27 +118,27 @@ export const headers: ICell[] = [
     cellClassName: "header-cell",
   },
   {
-    size: "sm",
+    size: "xs",
     value: "Source",
     cellClassName: "header-cell",
   },
   {
-    size: "sm",
+    size: "xs",
     value: "Destination",
     cellClassName: "header-cell",
   },
   {
-    size: "sm",
+    size: "xs",
     value: "Asset",
     cellClassName: "header-cell",
   },
   {
-    size: "sm",
+    size: "xs",
     value: "Amount",
     cellClassName: "header-cell",
   },
   {
-    size: "sm",
+    size: "xs",
     value: "Deposit tx",
     cellClassName: "header-cell",
   },
