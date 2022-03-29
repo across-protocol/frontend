@@ -10,7 +10,7 @@ export const Title = styled.div`
   line-height: ${32 / 16}rem;
   font-weight: 700;
   margin: 0 auto;
-  max-width: 1700px;
+  max-width: 1200px;
 `;
 
 export const Account = styled.span`
