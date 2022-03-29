@@ -1,2 +1,2 @@
-import SendForm from './SendForm';
+import SendForm from "./SendForm";
 export default SendForm;

@@ -11,19 +11,20 @@ import {
   TOKENS_LIST,
   MAX_RELAY_FEE_PERCENT,
   Token,
+  L2ChainId,
 } from "./constants";
 
 import { isValidString, parseEther, tagAddress } from "./format";
+import { isL2 } from "./chains";
 
 const lpFeeCalculator = new across.LpFeeCalculator(
   PROVIDERS[ChainId.MAINNET]()
 );
 
 export function getDepositBox(
-  chainId: Exclude<ChainId, ChainId.MAINNET>,
+  chainId: L2ChainId,
   signer?: ethers.Signer
 ): clients.bridgeDepositBox.Instance {
-
   const maybeAddress = ADDRESSES[chainId].BRIDGE;
   if (!isValidString(maybeAddress)) {
     throw new Error(
@@ -423,8 +424,10 @@ async function sendAcrossDeposit(
     referrer,
   }: AcrossDepositArgs
 ): Promise<ethers.providers.TransactionResponse> {
-  if (fromChain === ChainId.MAINNET) {
-    throw new Error('Across does not support mainnet deposits. The canonical bridge should be used instead.');
+  if (!isL2(fromChain)) {
+    throw new Error(
+      "Across does not support mainnet deposits. The canonical bridge should be used instead."
+    );
   }
   const depositBox = getDepositBox(fromChain);
   const isETH = token === CHAINS[fromChain].ETHAddress;
@@ -454,8 +457,10 @@ async function sendAcrossApproval(
   signer: ethers.Signer,
   { token, amount, chainId }: AcrossApprovalArgs
 ): Promise<ethers.providers.TransactionResponse> {
-  if (chainId === ChainId.MAINNET) {
-    throw new Error('Across does not support mainnet deposits. The canonical bridge should be used instead.');
+  if (!isL2(chainId)) {
+    throw new Error(
+      "Across does not support mainnet deposits. The canonical bridge should be used instead."
+    );
   }
   const bridge = getDepositBox(chainId, signer);
   const tokenContract = clients.erc20.connect(token, signer);

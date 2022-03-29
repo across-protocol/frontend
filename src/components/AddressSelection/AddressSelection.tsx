@@ -25,6 +25,7 @@ import {
   ToggleChainName,
   Address,
   ItemWarning,
+  LayerType,
 } from "./AddressSelection.styles";
 import { CHAINS_SELECTION, DEFAULT_TO_CHAIN_ID } from "utils/constants";
 import { AnimatePresence } from "framer-motion";
@@ -36,7 +37,7 @@ const AddressSelection: React.FC = () => {
     getLabelProps,
     getMenuProps,
     getToggleButtonProps,
-    selectedItem: maybeSelectedItem,
+    selectedItem,
     isOpen,
     toChain,
     toAddress,
@@ -51,7 +52,7 @@ const AddressSelection: React.FC = () => {
     address,
   } = useAddressSelection();
 
-  const selectedItem = maybeSelectedItem ?? DEFAULT_TO_CHAIN_ID;
+  const selectedChain = CHAINS[selectedItem ?? DEFAULT_TO_CHAIN_ID];
   return (
     <AnimatePresence>
       <LastSection>
@@ -60,15 +61,12 @@ const AddressSelection: React.FC = () => {
           <InputGroup>
             <RoundBox as="label" {...getLabelProps()}>
               <ToggleButton type="button" {...getToggleButtonProps()}>
-                <Logo
-                  src={CHAINS[selectedItem].logoURI}
-                  alt={CHAINS[selectedItem].name}
-                />
+                <Logo src={selectedChain.logoURI} alt={selectedChain.name} />
                 <div>
                   <ToggleChainName>
-                    {CHAINS[selectedItem].name === "Ether"
+                    {selectedChain.name === "Ether"
                       ? "Mainnet"
-                      : CHAINS[selectedItem].name}
+                      : selectedChain.name}
                   </ToggleChainName>
                   {toAddress && (
                     <Address>{shortenAddress(toAddress, "...", 4)}</Address>
@@ -91,9 +89,9 @@ const AddressSelection: React.FC = () => {
                     >
                       <Logo src={CHAINS[t].logoURI} alt={CHAINS[t].name} />
                       <div>{CHAINS[t].name}</div>
-                      <span className="layer-type">
+                      <LayerType>
                         {t !== ChainId.MAINNET ? "L2" : "L1"}
-                      </span>
+                      </LayerType>
                     </Item>
                   );
                 })}

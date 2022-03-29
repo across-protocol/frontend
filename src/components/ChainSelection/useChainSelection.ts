@@ -23,8 +23,8 @@ export default function useChainSelection() {
   const buttonText = wrongNetworkSend
     ? `Switch to ${CHAINS[fromChain].name}`
     : !isConnected
-      ? "Connect Wallet"
-      : null;
+    ? "Connect Wallet"
+    : null;
 
   const handleClick = () => {
     if (!provider) {

@@ -1,26 +1,14 @@
 import { useMemo } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
-
 import { ethers } from "ethers";
 import { bindActionCreators } from "redux";
-import {
-
-  TOKENS_LIST,
-
-  ChainId,
-
-} from "utils";
+import { TOKENS_LIST, ChainId } from "utils";
 import type { RootState, AppDispatch } from "./";
 import { update, disconnect, error as errorAction } from "./connection";
 
 import chainApi from "./chainApi";
 import { add } from "./transactions";
-
-
-
-
-
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
@@ -52,7 +40,6 @@ export function useConnection() {
   };
 }
 
-
 export function useTransactions() {
   const { transactions } = useAppSelector((state) => state.transactions);
   const dispatch = useAppDispatch();
@@ -62,8 +49,6 @@ export function useTransactions() {
     addTransaction: actions.add,
   };
 }
-
-
 
 export {
   useAllowance,
@@ -101,4 +86,3 @@ export function useBalance({
     refetch,
   };
 }
-

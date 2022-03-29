@@ -11,7 +11,11 @@ import { useBlock } from "./useBlock";
  * @param tokenSymbol - The token symbol to check bridge fees for.
  * @returns The bridge fees for the given amount and token symbol and the UseQueryResult object.
  */
-export function useBridgeFees(amount: ethers.BigNumber, fromChain: ChainId, tokenSymbol?: string) {
+export function useBridgeFees(
+  amount: ethers.BigNumber,
+  fromChain: ChainId,
+  tokenSymbol?: string
+) {
   const { block } = useBlock(fromChain);
   const enabledQuery = !!fromChain && !!block && !!tokenSymbol && amount.gt(0);
   const queryKey = enabledQuery
