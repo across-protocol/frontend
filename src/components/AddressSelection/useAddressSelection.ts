@@ -13,11 +13,11 @@ export default function useAddressSelection() {
 
   const downshiftState = useSelect({
     items: CHAINS_SELECTION,
-    defaultSelectedItem: CHAINS_SELECTION.find((x) => x.chainId === toChain),
-    selectedItem: CHAINS_SELECTION.find((x) => x.chainId === toChain),
+    defaultSelectedItem: CHAINS_SELECTION.find((x) => x === toChain),
+    selectedItem: CHAINS_SELECTION.find((x) => x === toChain),
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
-        setToChain(selectedItem.chainId);
+        setToChain(selectedItem);
       }
     },
   });

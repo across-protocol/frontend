@@ -10,7 +10,6 @@ import {
   getDepositBox,
   TOKENS_LIST,
   FEE_ESTIMATION,
-  ETH_ADDRESS,
   InsufficientBalanceError,
   FeeTooHighError,
   InsufficientLiquidityError,
@@ -18,8 +17,11 @@ import {
   MAX_APPROVAL_AMOUNT,
   WrongNetworkError,
   ChainId,
+  CHAINS,
+  isL2,
+  CANONICAL_BRIDGES,
+  L2ChainId,
 } from "utils";
-
 
 enum SendStatus {
   IDLE = "idle",
@@ -47,12 +49,14 @@ export function useBridge() {
 
   const { block } = useBlock(fromChain);
   const { balance } = useBalance(token, fromChain, account);
-  const depositBox = getDepositBox(fromChain);
+  const depositBox = isL2(fromChain) ? getDepositBox(fromChain) : undefined;
   const { allowance } = useAllowance(
     token,
     chainId,
     account,
-    depositBox.address,
+    !!depositBox
+      ? depositBox.address
+      : CANONICAL_BRIDGES[toChain as L2ChainId],
     block?.number
   );
   const tokenSymbol = TOKENS_LIST[fromChain].find(
@@ -67,7 +71,7 @@ export function useBridge() {
     hasToSwitchChain,
     balance,
     fees,
-    fromChain
+    fromChain,
   });
 
   const hasToApprove = !!allowance && amount.gt(allowance);
@@ -146,26 +150,35 @@ function computeStatus({
   balance,
   fees,
   token,
-  fromChain
+  fromChain,
 }: ComputeStatusArgs): { status: SendStatus; error?: SendError } {
   if (formStatus !== FormStatus.VALID) {
     return { status: SendStatus.IDLE };
   }
   if (hasToSwitchChain) {
-    return { status: SendStatus.ERROR, error: new WrongNetworkError(fromChain) };
+    return {
+      status: SendStatus.ERROR,
+      error: new WrongNetworkError(fromChain),
+    };
   }
   if (balance) {
     const adjustedBalance =
-      token === ETH_ADDRESS
+      token === CHAINS[fromChain].ETHAddress
         ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION))
         : balance;
     if (adjustedBalance.lt(amount)) {
-      return { status: SendStatus.ERROR, error: new InsufficientBalanceError() };
+      return {
+        status: SendStatus.ERROR,
+        error: new InsufficientBalanceError(),
+      };
     }
   }
   if (fees) {
     if (fees.isLiquidityInsufficient) {
-      return { status: SendStatus.ERROR, error: new InsufficientLiquidityError(token) };
+      return {
+        status: SendStatus.ERROR,
+        error: new InsufficientLiquidityError(token),
+      };
     }
     if (fees.isAmountTooLow) {
       return { status: SendStatus.ERROR, error: new FeeTooHighError() };

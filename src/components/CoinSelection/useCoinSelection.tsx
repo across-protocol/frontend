@@ -8,10 +8,10 @@ import {
   TOKENS_LIST,
   ParsingError,
   filterTokensByDestinationChain,
-  ETH_ADDRESS,
   max,
   InsufficientBalanceError,
   FEE_ESTIMATION,
+  CHAINS,
 } from "utils";
 
 export default function useCoinSelection() {
@@ -110,7 +110,7 @@ export default function useCoinSelection() {
   }, [balance, balances, selectedItem, setAmount, tokenList]);
   // checks for insufficient balance errors
   let error: InsufficientBalanceError | ParsingError | undefined = formError;
-  const isEth = token === ETH_ADDRESS;
+  const isEth = token === CHAINS[fromChain].ETHAddress;
   if (
     balance &&
     amount.gt(

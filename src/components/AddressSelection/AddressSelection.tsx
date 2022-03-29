@@ -25,8 +25,9 @@ import {
   ToggleChainName,
   Address,
   ItemWarning,
+  LayerType,
 } from "./AddressSelection.styles";
-import { CHAINS_SELECTION } from "utils/constants";
+import { CHAINS_SELECTION, DEFAULT_TO_CHAIN_ID } from "utils/constants";
 import { AnimatePresence } from "framer-motion";
 import useAddressSelection from "./useAddressSelection";
 
@@ -50,6 +51,8 @@ const AddressSelection: React.FC = () => {
     open,
     address,
   } = useAddressSelection();
+
+  const selectedChain = CHAINS[selectedItem ?? DEFAULT_TO_CHAIN_ID];
   return (
     <AnimatePresence>
       <LastSection>
@@ -58,12 +61,12 @@ const AddressSelection: React.FC = () => {
           <InputGroup>
             <RoundBox as="label" {...getLabelProps()}>
               <ToggleButton type="button" {...getToggleButtonProps()}>
-                <Logo src={selectedItem?.logoURI} alt={selectedItem?.name} />
+                <Logo src={selectedChain.logoURI} alt={selectedChain.name} />
                 <div>
                   <ToggleChainName>
-                    {selectedItem?.name === "Ether"
+                    {selectedChain.name === "Ether"
                       ? "Mainnet"
-                      : selectedItem?.name}
+                      : selectedChain.name}
                   </ToggleChainName>
                   {toAddress && (
                     <Address>{shortenAddress(toAddress, "...", 4)}</Address>
@@ -79,18 +82,16 @@ const AddressSelection: React.FC = () => {
                   return (
                     <Item
                       className={
-                        t.chainId === toChain || t.chainId === ChainId.MAINNET
-                          ? "disabled"
-                          : ""
+                        t === toChain || t === ChainId.MAINNET ? "disabled" : ""
                       }
                       {...getItemProps({ item: t, index })}
-                      key={t.chainId}
+                      key={t}
                     >
-                      <Logo src={t.logoURI} alt={t.name} />
-                      <div>{t.name}</div>
-                      <span className="layer-type">
-                        {t.chainId !== ChainId.MAINNET ? "L2" : "L1"}
-                      </span>
+                      <Logo src={CHAINS[t].logoURI} alt={CHAINS[t].name} />
+                      <div>{CHAINS[t].name}</div>
+                      <LayerType>
+                        {t !== ChainId.MAINNET ? "L2" : "L1"}
+                      </LayerType>
                     </Item>
                   );
                 })}
@@ -110,13 +111,13 @@ const AddressSelection: React.FC = () => {
                       <Item
                         className={"disabled"}
                         {...getItemProps({ item: t, index })}
-                        key={t.chainId}
+                        key={t}
                         initial={{ y: -10 }}
                         animate={{ y: 0 }}
                         exit={{ y: -10 }}
                       >
-                        <Logo src={t.logoURI} alt={t.name} />
-                        <div>{t.name}</div>
+                        <Logo src={CHAINS[t].logoURI} alt={CHAINS[t].name} />
+                        <div>{CHAINS[t].name}</div>
                         <span className="layer-type">
                           {index !== CHAINS_SELECTION.length - 1 ? "L2" : "L1"}
                         </span>

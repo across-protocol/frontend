@@ -10,6 +10,7 @@ import umaLogo from "assets/UMA-round.svg";
 import bobaLogo from "assets/Across-Boba-Color30x30.svg";
 import badgerLogo from "assets/badger.svg";
 import wbtcLogo from "assets/wbtc-logo.svg";
+import daiLogo from "assets/dai-logo.png";
 import { getAddress } from "./address";
 /* Colors and Media Queries section */
 
@@ -65,17 +66,18 @@ export const COLORS = {
 };
 
 /* Chains and Tokens section */
-
 export enum ChainId {
   MAINNET = 1,
+  OPTIMISM = 10,
+  ARBITRUM = 42161,
+  BOBA = 288,
+  // testnets
   RINKEBY = 4,
   KOVAN = 42,
-  OPTIMISM = 10,
   KOVAN_OPTIMISM = 69,
-  ARBITRUM = 42161,
   ARBITRUM_RINKEBY = 421611,
-  BOBA = 288,
 }
+export type L2ChainId = Exclude<ChainId, ChainId.MAINNET | ChainId.RINKEBY | ChainId.KOVAN>;
 
 export type Token = {
   address: string;
@@ -156,50 +158,6 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: getAddress("0x4841572daA1f8E4Ce0f62570877c2D0CC18C9535"),
     },
   ],
-  [ChainId.RINKEBY]: [
-    {
-      address: getAddress("0xc778417E063141139Fce010982780140Aa0cD5Ab"),
-      name: "Wrapped Ether",
-      symbol: "WETH",
-      decimals: 18,
-      logoURI: wethLogo,
-      bridgePool: getAddress("0xf42bB7EC88d065dF48D60cb672B88F8330f9f764"),
-    },
-    {
-      address: ethers.constants.AddressZero,
-      name: "Ether",
-      symbol: "ETH",
-      decimals: 18,
-      logoURI: ethereumLogo,
-      bridgePool: "",
-    },
-  ],
-  [ChainId.KOVAN]: [
-    {
-      address: getAddress("0xd0a1e359811322d97991e03f863a0c30c2cf029c"),
-      name: "Wrapped Ether",
-      symbol: "WETH",
-      decimals: 18,
-      logoURI: wethLogo,
-      bridgePool: "i",
-    },
-    {
-      address: getAddress("0x08ae34860fbfe73e223596e65663683973c72dd3"),
-      name: "DAI Stablecoin",
-      symbol: "DAI",
-      decimals: 18,
-      logoURI: usdcLogo,
-      bridgePool: "f",
-    },
-    {
-      address: ethers.constants.AddressZero,
-      name: "Ether",
-      symbol: "ETH",
-      decimals: 18,
-      logoURI: ethereumLogo,
-      bridgePool: "d",
-    },
-  ],
   [ChainId.OPTIMISM]: [
     {
       address: getAddress("0x4200000000000000000000000000000000000006"),
@@ -240,32 +198,6 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       decimals: 18,
       logoURI: ethereumLogo,
       bridgePool: getAddress("0x7355Efc63Ae731f584380a9838292c7046c1e433"),
-    },
-  ],
-  [ChainId.KOVAN_OPTIMISM]: [
-    {
-      address: getAddress("0x4200000000000000000000000000000000000006"),
-      name: "Wrapped Ether",
-      symbol: "WETH",
-      decimals: 18,
-      logoURI: wethLogo,
-      bridgePool: "m",
-    },
-    {
-      address: getAddress("0x2a41F55E25EfEE3E53834140c0bD81dBF3464831"),
-      name: "DAI (L2 Dai)",
-      symbol: "DAI",
-      decimals: 18,
-      logoURI: usdcLogo,
-      bridgePool: "",
-    },
-    {
-      address: ethers.constants.AddressZero,
-      name: "Ether",
-      symbol: "ETH",
-      decimals: 18,
-      logoURI: ethereumLogo,
-      bridgePool: "",
     },
   ],
   [ChainId.ARBITRUM]: [
@@ -318,24 +250,6 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: getAddress("0x43298F9f91a4545dF64748e78a2c777c580573d6"),
     },
   ],
-  [ChainId.ARBITRUM_RINKEBY]: [
-    {
-      address: getAddress("0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681"),
-      name: "Wrapped Ether",
-      symbol: "WETH",
-      decimals: 18,
-      logoURI: wethLogo,
-      bridgePool: "",
-    },
-    {
-      address: ethers.constants.AddressZero,
-      name: "Ether",
-      symbol: "ETH",
-      decimals: 18,
-      logoURI: ethereumLogo,
-      bridgePool: "",
-    },
-  ],
   [ChainId.BOBA]: [
     {
       address: getAddress("0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000"),
@@ -386,11 +300,93 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
       bridgePool: "",
     },
   ],
+  [ChainId.RINKEBY]: [
+    {
+      address: getAddress("0xc778417E063141139Fce010982780140Aa0cD5Ab"),
+      name: "Wrapped Ether",
+      symbol: "WETH",
+      decimals: 18,
+      logoURI: wethLogo,
+      bridgePool: getAddress("0xf42bB7EC88d065dF48D60cb672B88F8330f9f764"),
+    },
+    {
+      address: ethers.constants.AddressZero,
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+      logoURI: ethereumLogo,
+      bridgePool: "",
+    },
+  ],
+  [ChainId.KOVAN]: [
+    {
+      address: getAddress("0xd0a1e359811322d97991e03f863a0c30c2cf029c"),
+      name: "Wrapped Ether",
+      symbol: "WETH",
+      decimals: 18,
+      logoURI: wethLogo,
+      bridgePool: "i",
+    },
+    {
+      address: getAddress("0x08ae34860fbfe73e223596e65663683973c72dd3"),
+      name: "DAI Stablecoin",
+      symbol: "DAI",
+      decimals: 18,
+      logoURI: daiLogo,
+      bridgePool: "f",
+    },
+    {
+      address: ethers.constants.AddressZero,
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+      logoURI: ethereumLogo,
+      bridgePool: "d",
+    },
+  ],
+  [ChainId.KOVAN_OPTIMISM]: [
+    {
+      address: getAddress("0x4200000000000000000000000000000000000006"),
+      name: "Wrapped Ether",
+      symbol: "WETH",
+      decimals: 18,
+      logoURI: wethLogo,
+      bridgePool: "m",
+    },
+    {
+      address: ethers.constants.AddressZero,
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+      logoURI: ethereumLogo,
+      bridgePool: "",
+    },
+  ],
+  [ChainId.ARBITRUM_RINKEBY]: [
+    {
+      address: getAddress("0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681"),
+      name: "Wrapped Ether",
+      symbol: "WETH",
+      decimals: 18,
+      logoURI: wethLogo,
+      bridgePool: "",
+    },
+    {
+      address: ethers.constants.AddressZero,
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+      logoURI: ethereumLogo,
+      bridgePool: "",
+    },
+  ],
 };
 
 export type ChainInfo = {
   name: string;
+  fullName?: string;
   chainId: ChainId;
+  ETHAddress: string;
   logoURI: string;
   rpcUrl?: string;
   explorerUrl: string;
@@ -412,7 +408,8 @@ export const isProduction = () =>
 
 export const CHAINS: Record<ChainId, ChainInfo> = {
   [ChainId.MAINNET]: {
-    name: "Ethereum Mainnet",
+    name: "Ethereum",
+    fullName: "Ethereum Mainnet",
     chainId: ChainId.MAINNET,
     logoURI: ethereumLogo,
     explorerUrl: "https://etherscan.io",
@@ -422,34 +419,7 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "ETH",
       decimals: 18,
     },
-  },
-  [ChainId.RINKEBY]: {
-    name: "Rinkeby Testnet",
-    chainId: ChainId.RINKEBY,
-    logoURI: ethereumLogo,
-    explorerUrl: "https://rinkeby.etherscan.io",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://rinkeby.etherscan.io"
-    ),
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "ETH",
-      decimals: 18,
-    },
-  },
-  [ChainId.KOVAN]: {
-    name: "Ethereum Testnet Kovan",
-    chainId: ChainId.KOVAN,
-    logoURI: ethereumLogo,
-    explorerUrl: "https://kovan.etherscan.io",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://kovan.etherscan.io"
-    ),
-    nativeCurrency: {
-      name: "Kovan Ethereum",
-      symbol: "KOV",
-      decimals: 18,
-    },
+    ETHAddress: ethers.constants.AddressZero,
   },
   [ChainId.OPTIMISM]: {
     name: "Optimism",
@@ -464,23 +434,11 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "OETH",
       decimals: 18,
     },
-  },
-  [ChainId.KOVAN_OPTIMISM]: {
-    name: "Optimism Testnet Kovan",
-    chainId: ChainId.KOVAN_OPTIMISM,
-    logoURI: optimismLogo,
-    rpcUrl: "https://kovan.optimism.io",
-    explorerUrl: "https://kovan-optimistic.etherscan.io",
-    constructExplorerLink: (txHash: string) =>
-      `https://kovan-optimistic.etherscan.io/tx/${txHash}`,
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "KOR",
-      decimals: 18,
-    },
+    ETHAddress: ethers.constants.AddressZero,
   },
   [ChainId.ARBITRUM]: {
-    name: "Arbitrum One",
+    name: "Arbitrum",
+    fullName: "Arbitrum One",
     chainId: ChainId.ARBITRUM,
     logoURI: arbitrumLogo,
     rpcUrl: "https://arb1.arbitrum.io/rpc",
@@ -492,20 +450,7 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "AETH",
       decimals: 18,
     },
-  },
-  [ChainId.ARBITRUM_RINKEBY]: {
-    name: "Arbitrum Testnet Rinkeby",
-    chainId: ChainId.ARBITRUM_RINKEBY,
-    logoURI: arbitrumLogo,
-    explorerUrl: "https://rinkeby-explorer.arbitrum.io",
-    constructExplorerLink: (txHash: string) =>
-      `https://rinkeby-explorer.arbitrum.io/tx/${txHash}`,
-    rpcUrl: "https://rinkeby.arbitrum.io/rpc",
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "ARETH",
-      decimals: 18,
-    },
+    ETHAddress: ethers.constants.AddressZero,
   },
   [ChainId.BOBA]: {
     name: "Boba",
@@ -520,31 +465,111 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "ETH",
       decimals: 18,
     },
+    ETHAddress: ethers.constants.AddressZero,
   },
-};
-
-export const ADDRESSES: Record<ChainId, { BRIDGE?: string }> = {
-  [ChainId.MAINNET]: {
-    // Stubbed value.
-    BRIDGE: "0xB524735356985D2f267FA010D681f061DfF03715",
+  [ChainId.RINKEBY]: {
+    name: "Rinkeby",
+    fullName: "Rinkeby Testnet",
+    chainId: ChainId.RINKEBY,
+    logoURI: ethereumLogo,
+    explorerUrl: "https://rinkeby.etherscan.io",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://rinkeby.etherscan.io"
+    ),
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    ETHAddress: ethers.constants.AddressZero,
   },
-  [ChainId.RINKEBY]: {},
-  [ChainId.KOVAN]: {},
-  [ChainId.OPTIMISM]: {
-    BRIDGE: "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
-  },
-  [ChainId.BOBA]: {
-    BRIDGE: "0xCD43CEa89DF8fE39031C03c24BC24480e942470B",
+  [ChainId.KOVAN]: {
+    name: "Kovan",
+    fullName: "Ethereum Testnet Kovan",
+    chainId: ChainId.KOVAN,
+    logoURI: ethereumLogo,
+    explorerUrl: "https://kovan.etherscan.io",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://kovan.etherscan.io"
+    ),
+    nativeCurrency: {
+      name: "Kovan Ethereum",
+      symbol: "KOV",
+      decimals: 18,
+    },
+    ETHAddress: ethers.constants.AddressZero,
   },
   [ChainId.KOVAN_OPTIMISM]: {
-    BRIDGE: "0x2271a5E74eA8A29764ab10523575b41AA52455f0",
+    name: "Optimism Kovan",
+    fullName: "Optimism Testnet Kovan",
+    chainId: ChainId.KOVAN_OPTIMISM,
+    logoURI: optimismLogo,
+    rpcUrl: "https://kovan.optimism.io",
+    explorerUrl: "https://kovan-optimistic.etherscan.io",
+    constructExplorerLink: (txHash: string) =>
+      `https://kovan-optimistic.etherscan.io/tx/${txHash}`,
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "KOR",
+      decimals: 18,
+    },
+    ETHAddress: ethers.constants.AddressZero,
+  },
+  [ChainId.ARBITRUM_RINKEBY]: {
+    name: "Arbitrum Rinkeby",
+    fullName: "Arbitrum Testnet Rinkeby",
+    chainId: ChainId.ARBITRUM_RINKEBY,
+    logoURI: arbitrumLogo,
+    explorerUrl: "https://rinkeby-explorer.arbitrum.io",
+    constructExplorerLink: (txHash: string) =>
+      `https://rinkeby-explorer.arbitrum.io/tx/${txHash}`,
+    rpcUrl: "https://rinkeby.arbitrum.io/rpc",
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "ARETH",
+      decimals: 18,
+    },
+    ETHAddress: ethers.constants.AddressZero,
+  },
+};
+/** Chains as they appear in dropdowns */
+export const CHAINS_SELECTION = [
+  ChainId.OPTIMISM,
+  ChainId.ARBITRUM,
+  ChainId.BOBA,
+  ChainId.MAINNET,
+];
+
+export const ADDRESSES: Record<
+  L2ChainId,
+  { BRIDGE?: string }
+> = {
+  [ChainId.OPTIMISM]: {
+    BRIDGE: getAddress("0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96"),
+  },
+  [ChainId.BOBA]: {
+    BRIDGE: getAddress("0xCD43CEa89DF8fE39031C03c24BC24480e942470B"),
   },
   [ChainId.ARBITRUM]: {
-    BRIDGE: "0xD8c6dD978a3768F7DDfE3A9aAD2c3Fd75Fa9B6Fd",
+    BRIDGE: getAddress("0xD8c6dD978a3768F7DDfE3A9aAD2c3Fd75Fa9B6Fd"),
   },
   [ChainId.ARBITRUM_RINKEBY]: {
     BRIDGE: "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
   },
+  [ChainId.KOVAN_OPTIMISM]: {
+    BRIDGE: "0x2271a5E74eA8A29764ab10523575b41AA52455f0",
+  },
+};
+// FIXME: This is a temporary hack. Those addresses can change in the future, and have to be fetched asynchroneously.
+export const CANONICAL_BRIDGES: Record<
+  L2ChainId,
+  string
+> = {
+  [ChainId.OPTIMISM]: getAddress("0x99C9fc46f92E8a1c0deC1b1747d010903E884bE1"),
+  [ChainId.BOBA]: getAddress("0xdc1664458d2f0b6090bea60a8793a4e66c2f1c00"),
+  [ChainId.ARBITRUM]: getAddress("0xcEe284F754E854890e311e3280b767F80797180d"),
+  [ChainId.ARBITRUM_RINKEBY]: getAddress("0x917dc9a69F65dC3082D518192cd3725E1Fa96cA2"),
+  [ChainId.KOVAN_OPTIMISM]: getAddress("0x22F24361D548e5FaAfb36d1437839f080363982B"),
 };
 
 type GetProvider = () => ethers.providers.JsonRpcProvider;
@@ -554,6 +579,23 @@ export const PROVIDERS: Record<ChainId, GetProvider> = {
       new ethers.providers.StaticJsonRpcProvider(
         `https://mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
+  ),
+  [ChainId.OPTIMISM]: memoize(
+    () =>
+      new ethers.providers.StaticJsonRpcProvider(
+        `https://optimism-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
+      )
+  ),
+  [ChainId.ARBITRUM]: memoize(
+    () =>
+      new ethers.providers.StaticJsonRpcProvider(
+        `https://arbitrum-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
+      )
+  ),
+  // Doesn't have an rpc on infura.
+  [ChainId.BOBA]: memoize(
+    () =>
+      new ethers.providers.StaticJsonRpcProvider(`https://mainnet.boba.network`)
   ),
   [ChainId.RINKEBY]: memoize(
     () =>
@@ -567,22 +609,10 @@ export const PROVIDERS: Record<ChainId, GetProvider> = {
         `https://kovan.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
   ),
-  [ChainId.OPTIMISM]: memoize(
-    () =>
-      new ethers.providers.StaticJsonRpcProvider(
-        `https://optimism-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
-      )
-  ),
   [ChainId.KOVAN_OPTIMISM]: memoize(
     () =>
       new ethers.providers.StaticJsonRpcProvider(
         `https://optimism-kovan.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
-      )
-  ),
-  [ChainId.ARBITRUM]: memoize(
-    () =>
-      new ethers.providers.StaticJsonRpcProvider(
-        `https://arbitrum-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
   ),
   [ChainId.ARBITRUM_RINKEBY]: memoize(
@@ -591,31 +621,16 @@ export const PROVIDERS: Record<ChainId, GetProvider> = {
         `https://arbitrum-rinkeby.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
   ),
-  // Doesn't have an rpc on infura.
-  [ChainId.BOBA]: memoize(
-    () =>
-      new ethers.providers.StaticJsonRpcProvider(`https://mainnet.boba.network`)
-  ),
 };
 
 export function getChainName(chainId: ChainId): string {
   switch (chainId) {
     case ChainId.MAINNET:
       return CHAINS[ChainId.MAINNET].name;
-    case ChainId.RINKEBY:
-      return CHAINS[ChainId.RINKEBY].name;
-    case ChainId.KOVAN:
-      return CHAINS[ChainId.KOVAN].name;
-    case ChainId.OPTIMISM:
-      return CHAINS[ChainId.OPTIMISM].name;
-    case ChainId.KOVAN_OPTIMISM:
-      return CHAINS[ChainId.KOVAN_OPTIMISM].name;
     case ChainId.ARBITRUM:
       return CHAINS[ChainId.ARBITRUM].name;
-    case ChainId.ARBITRUM_RINKEBY:
-      return CHAINS[ChainId.ARBITRUM_RINKEBY].name;
     default:
-      return "unkwown";
+      return "unknown";
   }
 }
 
@@ -655,99 +670,8 @@ export function onboardBaseConfig(): Initialization {
 
 // this client requires multicall2 be accessible on the chain. This is the address for mainnet.
 export const multicallTwoAddress = "0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696";
-export interface IChainSelection {
-  name: string;
-  chainId: ChainId;
-  logoURI: string;
-  rpcUrl: string;
-  explorerUrl: string;
-  constructExplorerLink: (txHash: string) => string;
-  nativeCurrency: {
-    name: string;
-    symbol: string;
-    decimals: number;
-  };
-}
-
-interface EthChainInfo {
-  name: "Ethereum";
-  chainId: ChainId.MAINNET;
-  logoURI: string;
-  rpcUrl: string;
-  explorerUrl: string;
-  constructExplorerLink: (txHash: string) => string;
-  nativeCurrency: {
-    name: "Ether";
-    symbol: "ETH";
-    decimals: 18;
-  };
-}
-
-type ChainsSelection = [...IChainSelection[], EthChainInfo];
-export const CHAINS_SELECTION: ChainsSelection = [
-  {
-    name: "Optimism",
-    chainId: ChainId.OPTIMISM,
-    logoURI: optimismLogo,
-    rpcUrl: "https://mainnet.optimism.io",
-    explorerUrl: "https://optimistic.etherscan.io",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://optimistic.etherscan.io"
-    ),
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "OETH",
-      decimals: 18,
-    },
-  },
-  {
-    name: "Arbitrum",
-    chainId: ChainId.ARBITRUM,
-    logoURI: arbitrumLogo,
-    rpcUrl: "https://arb1.arbitrum.io/rpc",
-    explorerUrl: "https://arbiscan.io",
-    constructExplorerLink: (txHash: string) =>
-      `https://arbiscan.io/tx/${txHash}`,
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "AETH",
-      decimals: 18,
-    },
-  },
-  {
-    name: "Boba",
-    chainId: ChainId.BOBA,
-    logoURI: bobaLogo,
-    rpcUrl: "https://mainnet.boba.network",
-    explorerUrl: "https://blockexplorer.boba.network",
-    constructExplorerLink: (txHash: string) =>
-      `https://blockexplorer.boba.network/tx/${txHash}`,
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "ETH",
-      decimals: 18,
-    },
-  },
-  {
-    name: "Ethereum",
-    chainId: ChainId.MAINNET,
-    logoURI: ethereumLogo,
-    // Doesn't have an RPC on Infura. Need to know how to handle this
-    rpcUrl: "https://mainnet.infura.io/v3/",
-    explorerUrl: "https://etherscan.io",
-    constructExplorerLink: (txHash: string) =>
-      `https://etherscan.io/tx/${txHash}`,
-    nativeCurrency: {
-      name: "Ether",
-      symbol: "ETH",
-      decimals: 18,
-    },
-  },
-];
 
 export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
-// FIXME: https://github.com/across-protocol/frontend-v2/pull/2#discussion_r822100493
-export const ETH_ADDRESS = ethers.constants.AddressZero;
 export const FEE_ESTIMATION = ".004";
 export const CONFIRMATIONS =
   Number(process.env.REACT_APP_PUBLIC_CONFIRMATIONS) || 1;

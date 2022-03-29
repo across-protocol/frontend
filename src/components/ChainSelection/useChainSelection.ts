@@ -7,6 +7,7 @@ import {
   CHAINS_SELECTION,
   switchChain,
   onboard,
+  DEFAULT_FROM_CHAIN_ID,
 } from "utils";
 
 export default function useChainSelection() {
@@ -35,11 +36,11 @@ export default function useChainSelection() {
 
   const downshiftState = useSelect({
     items: CHAINS_SELECTION,
-    defaultSelectedItem: CHAINS_SELECTION.find((x) => x.chainId === fromChain),
-    selectedItem: CHAINS_SELECTION.find((x) => x.chainId === fromChain),
+    defaultSelectedItem: DEFAULT_FROM_CHAIN_ID,
+    selectedItem: fromChain,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
-        setFromChain(selectedItem.chainId);
+        setFromChain(selectedItem);
       }
     },
   });

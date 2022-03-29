@@ -14,7 +14,7 @@ import {
   getAddress,
   ParsingError,
   InsufficientBalanceError,
-  ETH_ADDRESS,
+  CHAINS,
 } from "utils";
 import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
@@ -153,7 +153,7 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
         fromChain: chainId,
         toChain,
         amount: ethers.constants.Zero,
-        token: ETH_ADDRESS,
+        token: CHAINS[chainId].ETHAddress,
         error: undefined,
       };
     default:
@@ -177,7 +177,7 @@ function toChainReducer(state: FormState, chainId: ChainId): FormState {
         toChain: chainId,
         fromChain,
         amount: ethers.constants.Zero,
-        token: ETH_ADDRESS,
+        token: CHAINS[state.fromChain].ETHAddress,
         error: undefined,
       };
     default:
@@ -276,19 +276,17 @@ function useSendFormManager(): SendFormManagerContext {
   useEffect(() => {
     // The user has just connected to the app.
     if (chainId && previousChainId === undefined) {
-      const connectedChain = CHAINS_SELECTION.find(
-        (x) => x.chainId === chainId
-      );
-      const otherChains = CHAINS_SELECTION.filter((x) => x.chainId !== chainId);
+      const connectedChainId = CHAINS_SELECTION.find((x) => x === chainId);
+      const otherChains = CHAINS_SELECTION.filter((x) => x !== chainId);
 
-      if (connectedChain && otherChains) {
+      if (connectedChainId && otherChains) {
         dispatch({
           type: ActionType.SET_FROM_CHAIN,
-          payload: connectedChain.chainId,
+          payload: connectedChainId,
         });
         dispatch({
           type: ActionType.SET_TO_CHAIN,
-          payload: otherChains[otherChains.length - 1].chainId,
+          payload: otherChains[otherChains.length - 1],
         });
       }
     }
