@@ -22,7 +22,7 @@ export const Wrapper = styled.header`
 export const Navigation = styled.nav`
   height: 100%;
   display: none;
-  @media ${QUERIES.laptopAndUp} {
+  @media ${QUERIES.tabletAndUp} {
     display: revert;
   }
 `;
@@ -70,13 +70,13 @@ export const LogoLink = styled(UnstyledLink)`
 `;
 export const Logo = styled(UnstyledDesktopLogo)`
   display: none;
-  @media ${QUERIES.desktopAndUp} {
+  @media ${QUERIES.tabletAndUp} {
     display: revert;
   }
 `;
 
 export const MobileLogo = styled(UnstyledMobileLogo)`
-  @media ${QUERIES.desktopAndUp} {
+  @media ${QUERIES.tabletAndUp} {
     display: none;
   }
 `;
