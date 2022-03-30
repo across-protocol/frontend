@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { CHAINS, ChainId, L2ChainId } from "./constants";
+import { CHAINS, ChainId, L2ChainId, TESTNET_CHAINS_SELECTION } from "./constants";
 
 export async function switchChain(
   provider: ethers.providers.JsonRpcProvider,
@@ -46,4 +46,7 @@ export function isL2(
   chainId: ChainId
 ): chainId is L2ChainId {
   return ![ChainId.MAINNET, ChainId.RINKEBY, ChainId.KOVAN].includes(chainId);
+}
+export function isTestnet(chainId: ChainId): boolean {
+  return TESTNET_CHAINS_SELECTION.includes(chainId);
 }

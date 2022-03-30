@@ -1,6 +1,13 @@
 import React from "react";
 import { XOctagon } from "react-feather";
-import { CHAINS, shortenAddress, isL2, getReacheableChains } from "utils";
+import {
+  CHAINS,
+  shortenAddress,
+  isL2,
+  getReacheableChains,
+  CHAINS_SELECTION,
+  DEFAULT_TO_CHAIN_ID,
+} from "utils";
 import { SectionTitle } from "../Section";
 import Dialog from "../Dialog";
 import { SecondaryButton } from "../Buttons";
@@ -26,7 +33,6 @@ import {
   Address,
   LayerType,
 } from "./AddressSelection.styles";
-import { DEFAULT_TO_CHAIN_ID } from "utils/constants";
 import { AnimatePresence } from "framer-motion";
 import useAddressSelection from "./useAddressSelection";
 
@@ -53,7 +59,7 @@ const AddressSelection: React.FC = () => {
   } = useAddressSelection();
 
   const selectedChain = CHAINS[selectedItem ?? DEFAULT_TO_CHAIN_ID];
-  const chains = getReacheableChains(fromChain);
+  const reacheableChains = getReacheableChains(fromChain);
   return (
     <AnimatePresence>
       <LastSection>
@@ -74,18 +80,22 @@ const AddressSelection: React.FC = () => {
             </RoundBox>
             <Menu isOpen={isOpen} {...getMenuProps()}>
               {isOpen &&
-                chains.map((t, index) => {
+                CHAINS_SELECTION.map((t, index) => {
                   return (
                     <Item
                       className={
-                        t === toChain || t === fromChain ? "disabled" : ""
+                        t === toChain ||
+                        t === fromChain ||
+                        !reacheableChains.includes(t)
+                          ? "disabled"
+                          : ""
                       }
                       {...getItemProps({ item: t, index })}
                       key={t}
                     >
                       <Logo src={CHAINS[t].logoURI} alt={CHAINS[t].name} />
                       <div>{CHAINS[t].name}</div>
-                      <LayerType>{isL2(toChain) ? "L2" : "L1"}</LayerType>
+                      <LayerType>{isL2(t) ? "L2" : "L1"}</LayerType>
                     </Item>
                   );
                 })}

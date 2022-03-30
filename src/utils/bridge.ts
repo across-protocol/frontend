@@ -18,6 +18,7 @@ import {
 
 import { isValidString, parseEther, tagAddress } from "./format";
 import { isL2 } from "./chains";
+import { isTestnet } from "utils";
 
 const lpFeeCalculator = new across.LpFeeCalculator(
   PROVIDERS[ChainId.MAINNET]()
@@ -234,8 +235,8 @@ export const bobaErc20Pairs = () => {
 
 /**
  * Returns the list of tokens that can be sent from chain A to chain B, by computing their tokenList intersection and taking care of additional chain specific quirks.
- * @param chainA - the chain to bridge from, that is, the chain that tokens are sent from.
- * @param chainB - the destination chain, that is, where tokens will be sent.
+ * @param chainA  the chain to bridge from, that is, the chain that tokens are sent from.
+ * @param chainB  the destination chain, that is, where tokens will be sent.
  * @returns Returns a list of tokens that can be sent from chain A to chain B.
  */
 export function filterTokensByDestinationChain(
@@ -254,9 +255,39 @@ export function filterTokensByDestinationChain(
   return TOKENS_LIST[chainA].filter(filterByToChain);
 }
 
-export function getReacheableChains(fromChain: ChainId) {
-  return CHAINS_SELECTION.filter((toChain) => filterTokensByDestinationChain(fromChain, toChain).length > 0);
+/**
+  * Checks if its possible to bridge from chain A to chain B.
+  * @param chainA  the chain to bridge from, that is, the chain that tokens are sent from.
+  * @param chainB  the destination chain, that is, where tokens will be sent.
+  * @returns Returns `true` if it is possible to bridge from chain A to chain B, `false` otherwise.
+*/
+function canBridge(chainA: ChainId, chainB: ChainId): boolean {
+  // can't bridge to itself
+  if (chainA === chainB) {
+    return false;
+  }
+  // can't bridge between testnets and prod chains
+  if ((isTestnet(chainA) && !isTestnet(chainB)) || (!isTestnet(chainA) && isTestnet(chainB))) {
+    return false;
+  }
+  // can't bridge between L1s 
+  if (!isL2(chainA) && !isL2(chainB)) {
+    return false;
+  }
+  // check if they have at least one token in common
+  return filterTokensByDestinationChain(chainA, chainB).length > 0;
 }
+
+/**
+ * 
+ * @param fromChain the chain to bridge from, that is, the chain that tokens are sent from.
+ * @returns The list of chains that can be bridged to from the given `fromChain`.
+ */
+export function getReacheableChains(fromChain: ChainId): ChainId[] {
+  return CHAINS_SELECTION.filter((toChain) => canBridge(fromChain, toChain));
+}
+
+
 
 const { OptimismBridgeClient } = across.clients.optimismBridge;
 const { BobaBridgeClient } = across.clients.bobaBridge;

@@ -532,13 +532,22 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
     ETHAddress: ethers.constants.AddressZero,
   },
 };
-/** Chains as they appear in dropdowns */
-export const CHAINS_SELECTION = [
+
+
+const PRODUCTION_CHAINS_SELECTION = [
   ChainId.OPTIMISM,
   ChainId.ARBITRUM,
   ChainId.BOBA,
   ChainId.MAINNET,
-];
+]
+export const TESTNET_CHAINS_SELECTION = [
+  ChainId.RINKEBY,
+  ChainId.KOVAN,
+  ChainId.KOVAN_OPTIMISM,
+  ChainId.ARBITRUM_RINKEBY,
+]
+/** Chains as they appear in dropdowns */
+export const CHAINS_SELECTION = isProduction() ? PRODUCTION_CHAINS_SELECTION : [...PRODUCTION_CHAINS_SELECTION, ...TESTNET_CHAINS_SELECTION];
 
 /** FIXME:  use the actual spoke pool addresses!!!! */
 export const SPOKES_ADDRESSES: Record<
