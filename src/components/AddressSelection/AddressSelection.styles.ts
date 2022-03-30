@@ -168,7 +168,7 @@ export const Item = motion(styled.li`
   }
 `);
 export const LayerType = styled.span`
-  color: var(color-gray-500);
+  color: var(--color-gray);
   flex-basis: 75%;
   text-align: right;
   padding-right: 8px;
@@ -201,13 +201,4 @@ export const InputGroup = styled.div`
 export const ToggleChainName = styled.div`
   width: 85px;
   text-align: left;
-`;
-
-export const ItemWarning = styled(Item)`
-  background-color: #6cf9d8;
-  color: #000000;
-  &:hover {
-    background-color: #6cf9d8;
-    cursor: not-allowed;
-  }
 `;

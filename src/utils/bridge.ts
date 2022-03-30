@@ -13,6 +13,7 @@ import {
   MAX_RELAY_FEE_PERCENT,
   Token,
   L2ChainId,
+  CHAINS_SELECTION,
 } from "./constants";
 
 import { isValidString, parseEther, tagAddress } from "./format";
@@ -251,6 +252,10 @@ export function filterTokensByDestinationChain(
       .filter(filterByToChain);
   }
   return TOKENS_LIST[chainA].filter(filterByToChain);
+}
+
+export function getReacheableChains(fromChain: ChainId) {
+  return CHAINS_SELECTION.filter((toChain) => filterTokensByDestinationChain(fromChain, toChain).length > 0);
 }
 
 const { OptimismBridgeClient } = across.clients.optimismBridge;
