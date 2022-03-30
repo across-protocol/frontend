@@ -54,7 +54,6 @@ export {
   useAllowance,
   useBalances,
   useETHBalance,
-  useBridgeFees,
 } from "./chainApi";
 
 type useBalanceParams = {

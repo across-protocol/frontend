@@ -2,9 +2,10 @@ import { clients, across, utils } from "@uma/sdk";
 import { BridgePoolEthers__factory } from "@uma/contracts-frontend";
 import { ethers, BigNumber } from "ethers";
 import { Bridge } from "arb-ts";
+import { SpokePool, SpokePool__factory } from '@across-protocol/contracts-v2';
 
 import {
-  ADDRESSES,
+  SPOKES_ADDRESSES,
   CHAINS,
   ChainId,
   PROVIDERS,
@@ -21,22 +22,22 @@ const lpFeeCalculator = new across.LpFeeCalculator(
   PROVIDERS[ChainId.MAINNET]()
 );
 
-export function getDepositBox(
+
+export function getSpokePool(
   chainId: L2ChainId,
   signer?: ethers.Signer
-): clients.bridgeDepositBox.Instance {
-  const maybeAddress = ADDRESSES[chainId].BRIDGE;
+): SpokePool {
+  const maybeAddress = SPOKES_ADDRESSES[chainId];
   if (!isValidString(maybeAddress)) {
     throw new Error(
-      `Deposit Box not supported on ${CHAINS[chainId].name} with chainId: ${chainId}`
+      `No SpokePool supported on ${CHAINS[chainId].name} with chainId: ${chainId}`
     );
   }
-  return clients.bridgeDepositBox.connect(
+  return SpokePool__factory.connect(
     maybeAddress,
     signer ?? PROVIDERS[chainId]()
   );
 }
-
 const { gasFeeCalculator } = across;
 
 export type Fee = {
@@ -44,21 +45,15 @@ export type Fee = {
   pct: ethers.BigNumber;
 };
 
-type RelayFees = {
-  instantRelayFee: Fee;
-  slowRelayFee: Fee;
-};
-
 export type BridgeFees = {
-  instantRelayFee: Fee;
-  slowRelayFee: Fee;
+  relayerFee: Fee;
   lpFee: Fee;
 };
 
-export async function getRelayFees(
+export async function getRelayerFee(
   token: string,
   amount: ethers.BigNumber
-): Promise<RelayFees & { isAmountTooLow: boolean }> {
+): Promise<{ relayerFee: Fee, isAmountTooLow: boolean }> {
   const l1Equivalent = TOKENS_LIST[ChainId.MAINNET].find(
     (t) => t.symbol === token
   )?.address;
@@ -66,7 +61,7 @@ export async function getRelayFees(
     throw new Error(`Token ${token} not found in TOKENS_LIST`);
   }
   const provider = PROVIDERS[ChainId.MAINNET]();
-  const { instant, slow, isAmountTooLow } =
+  const { instant, isAmountTooLow } =
     await gasFeeCalculator.getDepositFeesDetails(
       provider,
       amount,
@@ -75,13 +70,9 @@ export async function getRelayFees(
     );
 
   return {
-    instantRelayFee: {
+    relayerFee: {
       pct: ethers.BigNumber.from(instant.pct),
       total: ethers.BigNumber.from(instant.total),
-    },
-    slowRelayFee: {
-      pct: ethers.BigNumber.from(slow.pct),
-      total: ethers.BigNumber.from(slow.total),
     },
     isAmountTooLow,
   };
@@ -154,14 +145,14 @@ type GetBridgeFeesResult = BridgeFees & {
  * @param amount - amount to bridge
  * @param tokenSymbol - symbol of the token to bridge
  * @param blockTimestamp - timestamp of the block to use for calculating fees on
- * @returns Returns the `slowRelayFee`, `instantRelayFee`, and `lpFee` fees for bridging the given amount of tokens, along with an `isAmountTooLow` flag indicating whether the amount is too low to bridge and an `isLiquidityInsufficient` flag indicating whether the liquidity is insufficient.
+ * @returns Returns the `relayerFee` and `lpFee` fees for bridging the given amount of tokens, along with an `isAmountTooLow` flag indicating whether the amount is too low to bridge and an `isLiquidityInsufficient` flag indicating whether the liquidity is insufficient.
  */
 export async function getBridgeFees({
   amount,
   tokenSymbol,
   blockTimestamp,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
-  const { instantRelayFee, slowRelayFee, isAmountTooLow } = await getRelayFees(
+  const { relayerFee, isAmountTooLow } = await getRelayerFee(
     tokenSymbol,
     amount
   );
@@ -173,8 +164,7 @@ export async function getBridgeFees({
   );
 
   return {
-    instantRelayFee,
-    slowRelayFee,
+    relayerFee,
     lpFee,
     isAmountTooLow,
     isLiquidityInsufficient,
@@ -397,9 +387,12 @@ function sendBobaApproval(
 
 type AcrossDepositArgs = BaseDepositArgs & {
   fromChain: ChainId;
+  toChain: ChainId;
+  toAddress: string;
+  amount: ethers.BigNumber;
+  token: string;
+  relayerFeePct: ethers.BigNumber;
   timestamp: number;
-  slowRelayFeePct: ethers.BigNumber;
-  instantRelayFeePct: ethers.BigNumber;
   referrer?: string;
 };
 type AcrossApprovalArgs = BaseApprovalArgs & {
@@ -413,34 +406,24 @@ type AcrossApprovalArgs = BaseApprovalArgs & {
  */
 async function sendAcrossDeposit(
   signer: ethers.Signer,
-  {
-    toAddress: l1Recipient,
-    fromChain,
-    amount,
-    token,
-    timestamp,
-    slowRelayFeePct,
-    instantRelayFeePct,
-    referrer,
-  }: AcrossDepositArgs
+  { fromChain, token, amount, toAddress: recipient, toChain: destinationChainId, relayerFeePct, timestamp: quoteTimestamp, referrer }: AcrossDepositArgs
 ): Promise<ethers.providers.TransactionResponse> {
   if (!isL2(fromChain)) {
     throw new Error(
       "Across does not support mainnet deposits. The canonical bridge should be used instead."
     );
   }
-  const depositBox = getDepositBox(fromChain);
+  const spokePool = getSpokePool(fromChain);
   const isETH = token === CHAINS[fromChain].ETHAddress;
   const value = isETH ? amount : ethers.constants.Zero;
-  const l2Token = isETH ? TOKENS_LIST[fromChain][0].address : token;
-
-  const tx = await depositBox.populateTransaction.deposit(
-    l1Recipient,
-    l2Token,
+  const originToken = isETH ? TOKENS_LIST[fromChain][0].address : token;
+  const tx = await spokePool.populateTransaction.deposit(
+    recipient,
+    originToken,
     amount,
-    slowRelayFeePct,
-    instantRelayFeePct,
-    timestamp,
+    destinationChainId,
+    relayerFeePct,
+    quoteTimestamp,
     { value }
   );
 
@@ -462,9 +445,9 @@ async function sendAcrossApproval(
       "Across does not support mainnet deposits. The canonical bridge should be used instead."
     );
   }
-  const bridge = getDepositBox(chainId, signer);
+  const spoke = getSpokePool(chainId, signer);
   const tokenContract = clients.erc20.connect(token, signer);
-  return tokenContract.approve(bridge.address, amount);
+  return tokenContract.approve(spoke.address, amount);
 }
 type Route = {
   approve: (

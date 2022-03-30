@@ -7,7 +7,7 @@ import { useAllowance } from "./useAllowance";
 import { useConnection } from "state/hooks";
 import { useBlock } from "./useBlock";
 import {
-  getDepositBox,
+  getSpokePool,
   TOKENS_LIST,
   FEE_ESTIMATION,
   InsufficientBalanceError,
@@ -49,7 +49,7 @@ export function useBridge() {
 
   const { block } = useBlock(fromChain);
   const { balance } = useBalance(token, fromChain, account);
-  const depositBox = isL2(fromChain) ? getDepositBox(fromChain) : undefined;
+  const depositBox = isL2(fromChain) ? getSpokePool(fromChain) : undefined;
   const { allowance } = useAllowance(
     token,
     chainId,
@@ -88,9 +88,9 @@ export function useBridge() {
       amount,
       token,
       fromChain,
+      toChain,
+      relayerFeePct: fees.relayerFee.pct,
       timestamp: block.timestamp,
-      slowRelayFeePct: fees.instantRelayFee.pct,
-      instantRelayFeePct: fees.instantRelayFee.pct,
       referrer,
     });
   };

@@ -540,25 +540,16 @@ export const CHAINS_SELECTION = [
   ChainId.MAINNET,
 ];
 
-export const ADDRESSES: Record<
+/** FIXME:  use the actual spoke pool addresses!!!! */
+export const SPOKES_ADDRESSES: Record<
   L2ChainId,
-  { BRIDGE?: string }
+  string
 > = {
-  [ChainId.OPTIMISM]: {
-    BRIDGE: getAddress("0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96"),
-  },
-  [ChainId.BOBA]: {
-    BRIDGE: getAddress("0xCD43CEa89DF8fE39031C03c24BC24480e942470B"),
-  },
-  [ChainId.ARBITRUM]: {
-    BRIDGE: getAddress("0xD8c6dD978a3768F7DDfE3A9aAD2c3Fd75Fa9B6Fd"),
-  },
-  [ChainId.ARBITRUM_RINKEBY]: {
-    BRIDGE: "0x6999526e507Cc3b03b180BbE05E1Ff938259A874",
-  },
-  [ChainId.KOVAN_OPTIMISM]: {
-    BRIDGE: "0x2271a5E74eA8A29764ab10523575b41AA52455f0",
-  },
+  [ChainId.OPTIMISM]: getAddress("0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96"),
+  [ChainId.BOBA]: getAddress("0xCD43CEa89DF8fE39031C03c24BC24480e942470B"),
+  [ChainId.ARBITRUM]: getAddress("0xD8c6dD978a3768F7DDfE3A9aAD2c3Fd75Fa9B6Fd"),
+  [ChainId.ARBITRUM_RINKEBY]: getAddress("0x6999526e507Cc3b03b180BbE05E1Ff938259A874"),
+  [ChainId.KOVAN_OPTIMISM]: getAddress("0x2271a5E74eA8A29764ab10523575b41AA52455f0"),
 };
 // FIXME: This is a temporary hack. Those addresses can change in the future, and have to be fetched asynchroneously.
 export const CANONICAL_BRIDGES: Record<

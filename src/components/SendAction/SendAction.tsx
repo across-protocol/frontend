@@ -47,10 +47,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
               <div>Ethereum Gas Fee</div>
               {showFees && (
                 <div>
-                  {formatUnits(
-                    fees.instantRelayFee.total.add(fees.slowRelayFee.total),
-                    tokenInfo.decimals
-                  )}{" "}
+                  {formatUnits(fees.relayerFee.total, tokenInfo.decimals)}{" "}
                   {tokenInfo.symbol}
                 </div>
               )}
