@@ -21,6 +21,7 @@ import createMobileTransactionTableJSX, {
   mobileHeaders,
 } from "./TransactionsTable/createMobileTransactionTableJSX";
 import { BREAKPOINTS } from "utils";
+import Pagination from "components/Pagination";
 
 const Transactions = () => {
   const {
@@ -127,6 +128,7 @@ const Transactions = () => {
               />
             )}
           </BottomRow>
+          <Pagination />
         </>
       )}
     </Wrapper>
