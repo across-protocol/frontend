@@ -37,7 +37,6 @@ export const TopRow = styled.div`
 `;
 export const BottomRow = styled.div`
   background-color: var(--color-gray-500);
-
   padding: 2rem;
 `;
 
