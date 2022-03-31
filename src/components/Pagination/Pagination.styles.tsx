@@ -7,7 +7,7 @@ export const Wrapper = styled.div`
 
 export const PaginationElements = styled.div`
   display: flex;
-  width: 200px;
+  /* width: 200px; */
   margin: 0 auto;
   align-items: center;
   justify-content: center;
