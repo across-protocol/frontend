@@ -36,17 +36,45 @@ const Pagination: React.FC<Props> = ({
         >
           <FontAwesomeIcon icon={faChevronLeft} />
         </ElementWrapper>
-        {pagesToCreate.map((el, i) => {
-          return (
-            <ElementWrapper
-              active={currentPage === i}
-              key={i}
-              onClick={() => setCurrentPage(el - 1)}
-            >
-              {el}
-            </ElementWrapper>
-          );
-        })}
+        {/* Show 6 numbers on page */}
+        {pagesToCreate.length > 0 &&
+          pagesToCreate.length < 6 &&
+          pagesToCreate.map((el, i) => {
+            return (
+              <ElementWrapper
+                active={currentPage === i}
+                key={i}
+                onClick={() => setCurrentPage(el - 1)}
+              >
+                {el}
+              </ElementWrapper>
+            );
+          })}
+        {pagesToCreate.length >= 6 &&
+          pagesToCreate.map((el, i) => {
+            console.log(
+              "              (pagesToCreate.length - i <= 5 && currentPage - i <= 5)",
+              pagesToCreate.length - i <= 5 && currentPage - i <= 5,
+              "     (i - currentPage < 5 && i - currentPage >= 0)",
+              i - currentPage < 5 && i - currentPage >= 0
+            );
+            if (
+              (i - currentPage < 5 && i - currentPage >= 0) ||
+              (pagesToCreate.length - i <= 5 && currentPage - i <= 5)
+            ) {
+              return (
+                <ElementWrapper
+                  active={currentPage === i}
+                  key={i}
+                  onClick={() => setCurrentPage(el - 1)}
+                >
+                  {el}
+                </ElementWrapper>
+              );
+            } else {
+              return null;
+            }
+          })}
         <ElementWrapper
           onClick={() =>
             setCurrentPage((pv) => (pv >= maxPage ? maxPage : pv + 1))

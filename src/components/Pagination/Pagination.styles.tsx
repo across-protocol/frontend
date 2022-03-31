@@ -18,10 +18,8 @@ interface IElementWrapper {
 }
 
 export const ElementWrapper = styled.div<IElementWrapper>`
-  /* background-color: #2c2e32; */
   background-color: ${({ active }) =>
     active ? "var(--color-primary)" : "var(--color-gray-250)"};
-  /* color: #6df8d8; */
   color: ${({ active }) =>
     active ? "var(--color-gray-250)" : "var(--color-primary)"};
   border: 1px solid var(--color-primary);
