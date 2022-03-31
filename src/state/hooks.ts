@@ -50,11 +50,7 @@ export function useTransactions() {
   };
 }
 
-export {
-  useAllowance,
-  useBalances,
-  useETHBalance,
-} from "./chainApi";
+export { useAllowance, useBalances, useETHBalance } from "./chainApi";
 
 type useBalanceParams = {
   chainId: ChainId;

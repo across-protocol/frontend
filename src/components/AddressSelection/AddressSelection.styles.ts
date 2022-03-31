@@ -167,12 +167,6 @@ export const Item = motion(styled.li`
     }
   }
 `);
-export const LayerType = styled.span`
-  color: var(--color-gray);
-  flex-basis: 75%;
-  text-align: right;
-  padding-right: 8px;
-`;
 
 export const ToggleIcon = styled(ChevronDown)`
   margin-left: auto;

@@ -2,7 +2,6 @@ import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ethers, BigNumber } from "ethers";
 import { PROVIDERS, ChainId, TOKENS_LIST } from "utils";
 
-
 import { clients } from "@uma/sdk";
 import { ERC20Ethers__factory } from "@uma/contracts-frontend";
 
@@ -18,10 +17,6 @@ type AllowanceQueryArgs = {
   token: string;
   amount: ethers.BigNumber;
 };
-
-
-
-
 
 const api = createApi({
   baseQuery: fakeBaseQuery(),

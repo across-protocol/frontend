@@ -13,14 +13,12 @@ import {
   InsufficientBalanceError,
   FeeTooHighError,
   InsufficientLiquidityError,
-  getRoute,
   MAX_APPROVAL_AMOUNT,
   WrongNetworkError,
   ChainId,
   CHAINS,
-  isL2,
-  CANONICAL_BRIDGES,
-  L2ChainId,
+  sendAcrossDeposit,
+  sendAcrossApproval,
 } from "utils";
 
 enum SendStatus {
@@ -49,14 +47,12 @@ export function useBridge() {
 
   const { block } = useBlock(fromChain);
   const { balance } = useBalance(token, fromChain, account);
-  const depositBox = isL2(fromChain) ? getSpokePool(fromChain) : undefined;
+  const spokePool = getSpokePool(fromChain);
   const { allowance } = useAllowance(
     token,
     chainId,
     account,
-    !!depositBox
-      ? depositBox.address
-      : CANONICAL_BRIDGES[toChain as L2ChainId],
+    spokePool.address,
     block?.number
   );
   const tokenSymbol = TOKENS_LIST[fromChain].find(
@@ -76,14 +72,12 @@ export function useBridge() {
 
   const hasToApprove = !!allowance && amount.gt(allowance);
 
-  const route = getRoute(fromChain, toChain);
-
   const send = async () => {
     // NOTE: the `toAddress` check is redundant, as status won't be "ready" if `toAddress` is not set, but it's here to make TS happy. The same applies for `block` and `fees`.
     if (!signer || status !== "ready" || !toAddress || !block || !fees) {
       return;
     }
-    return route.deposit(signer, {
+    return sendAcrossDeposit(signer, {
       toAddress,
       amount,
       token,
@@ -100,7 +94,7 @@ export function useBridge() {
     if (!signer || status !== "ready") {
       return;
     }
-    return route.approve(signer, {
+    return sendAcrossApproval(signer, {
       token,
       amount: MAX_APPROVAL_AMOUNT,
       chainId: fromChain,
@@ -131,11 +125,11 @@ type ComputeStatusArgs = {
   balance: ethers.BigNumber | undefined;
   fromChain: ChainId;
   fees:
-  | {
-    isLiquidityInsufficient: boolean;
-    isAmountTooLow: boolean;
-  }
-  | undefined;
+    | {
+        isLiquidityInsufficient: boolean;
+        isAmountTooLow: boolean;
+      }
+    | undefined;
 };
 /**
  * Computes the current send tab status.

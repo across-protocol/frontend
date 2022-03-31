@@ -3,7 +3,6 @@ import { XOctagon } from "react-feather";
 import {
   CHAINS,
   shortenAddress,
-  isL2,
   getReacheableChains,
   CHAINS_SELECTION,
   DEFAULT_TO_CHAIN_ID,
@@ -31,7 +30,6 @@ import {
   RoundBox,
   ToggleChainName,
   Address,
-  LayerType,
 } from "./AddressSelection.styles";
 import { AnimatePresence } from "framer-motion";
 import useAddressSelection from "./useAddressSelection";
@@ -47,7 +45,6 @@ const AddressSelection: React.FC = () => {
     toChain,
     fromChain,
     toAddress,
-    isL1toL2,
     isValid,
     isConnected,
     toggle,
@@ -84,9 +81,7 @@ const AddressSelection: React.FC = () => {
                   return (
                     <Item
                       className={
-                        t === toChain ||
-                        t === fromChain ||
-                        !reacheableChains.includes(t)
+                        t === toChain || !reacheableChains.includes(t)
                           ? "disabled"
                           : ""
                       }
@@ -95,19 +90,16 @@ const AddressSelection: React.FC = () => {
                     >
                       <Logo src={CHAINS[t].logoURI} alt={CHAINS[t].name} />
                       <div>{CHAINS[t].name}</div>
-                      <LayerType>{isL2(t) ? "L2" : "L1"}</LayerType>
                     </Item>
                   );
                 })}
             </Menu>
           </InputGroup>
-          {!isL1toL2 && (
-            <ChangeWrapper onClick={toggle}>
-              <ChangeButton className={!isConnected ? "disabled" : ""}>
-                Change account
-              </ChangeButton>
-            </ChangeWrapper>
-          )}
+          <ChangeWrapper onClick={toggle}>
+            <ChangeButton className={!isConnected ? "disabled" : ""}>
+              Change account
+            </ChangeButton>
+          </ChangeWrapper>
         </Wrapper>
         <Dialog isOpen={open} onClose={toggle}>
           <h3>Send To</h3>

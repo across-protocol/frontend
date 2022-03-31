@@ -2,7 +2,7 @@ import { useSelect } from "downshift";
 import { useState, useEffect } from "react";
 import { useConnection } from "state/hooks";
 import { useSendForm } from "hooks";
-import { CHAINS_SELECTION, isValidAddress, isL2 } from "utils";
+import { CHAINS_SELECTION, isValidAddress } from "utils";
 
 export default function useAddressSelection() {
   const { isConnected } = useConnection();
@@ -49,14 +49,11 @@ export default function useAddressSelection() {
     }
   };
 
-  const isL1toL2 = !isL2(fromChain);
-
   return {
     ...downshiftState,
     handleSubmit,
     handleAddressChange,
     clearInput,
-    isL1toL2,
     isValid,
     toAddress,
     toChain,

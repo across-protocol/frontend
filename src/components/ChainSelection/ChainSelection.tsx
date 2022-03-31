@@ -13,7 +13,7 @@ import {
   ToggleChainName,
 } from "./ChainSelection.styles";
 import useChainSelection from "./useChainSelection";
-import { CHAINS, CHAINS_SELECTION, DEFAULT_FROM_CHAIN_ID, isL2 } from "utils";
+import { CHAINS, CHAINS_SELECTION, DEFAULT_FROM_CHAIN_ID } from "utils";
 
 const ChainSelection: React.FC = () => {
   const {
@@ -56,7 +56,6 @@ const ChainSelection: React.FC = () => {
                   >
                     <Logo src={CHAINS[t].logoURI} alt={CHAINS[t].name} />
                     <div>{CHAINS[t].name}</div>
-                    <span className="layer-type">{isL2(t) ? "L2" : "L1"}</span>
                   </Item>
                 );
               })}

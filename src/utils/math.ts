@@ -6,14 +6,8 @@ export function max(a: BigNumberish, b: BigNumberish) {
   return BigNumber.from(b);
 }
 
-
 export function receiveAmount(amount: BigNumber, fees?: BridgeFees) {
-  if (amount.lte(0)) return BigNumber.from(0);
+  if (amount.eq(0)) return BigNumber.from(0);
   if (!fees) return amount;
-  return max(
-    amount
-      .sub(fees.relayerFee.total)
-      .sub(fees.lpFee.total),
-    0
-  );
+  return max(amount.sub(fees.relayerFee.total).sub(fees.lpFee.total), 0);
 }

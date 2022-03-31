@@ -77,7 +77,6 @@ export enum ChainId {
   KOVAN_OPTIMISM = 69,
   ARBITRUM_RINKEBY = 421611,
 }
-export type L2ChainId = Exclude<ChainId, ChainId.MAINNET | ChainId.RINKEBY | ChainId.KOVAN>;
 
 export type Token = {
   address: string;
@@ -533,43 +532,37 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
   },
 };
 
-
 const PRODUCTION_CHAINS_SELECTION = [
   ChainId.OPTIMISM,
   ChainId.ARBITRUM,
   ChainId.BOBA,
   ChainId.MAINNET,
-]
+];
 export const TESTNET_CHAINS_SELECTION = [
   ChainId.RINKEBY,
   ChainId.KOVAN,
   ChainId.KOVAN_OPTIMISM,
   ChainId.ARBITRUM_RINKEBY,
-]
+];
 /** Chains as they appear in dropdowns */
-export const CHAINS_SELECTION = isProduction() ? PRODUCTION_CHAINS_SELECTION : [...PRODUCTION_CHAINS_SELECTION, ...TESTNET_CHAINS_SELECTION];
+export const CHAINS_SELECTION = isProduction()
+  ? PRODUCTION_CHAINS_SELECTION
+  : [...PRODUCTION_CHAINS_SELECTION, ...TESTNET_CHAINS_SELECTION];
 
 /** FIXME:  use the actual spoke pool addresses!!!! */
-export const SPOKES_ADDRESSES: Record<
-  L2ChainId,
-  string
-> = {
+export const SPOKE_ADDRESSES: Record<ChainId, string> = {
+  [ChainId.MAINNET]: getAddress("0x0"),
   [ChainId.OPTIMISM]: getAddress("0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96"),
   [ChainId.BOBA]: getAddress("0xCD43CEa89DF8fE39031C03c24BC24480e942470B"),
   [ChainId.ARBITRUM]: getAddress("0xD8c6dD978a3768F7DDfE3A9aAD2c3Fd75Fa9B6Fd"),
-  [ChainId.ARBITRUM_RINKEBY]: getAddress("0x6999526e507Cc3b03b180BbE05E1Ff938259A874"),
-  [ChainId.KOVAN_OPTIMISM]: getAddress("0x2271a5E74eA8A29764ab10523575b41AA52455f0"),
-};
-// FIXME: This is a temporary hack. Those addresses can change in the future, and have to be fetched asynchroneously.
-export const CANONICAL_BRIDGES: Record<
-  L2ChainId,
-  string
-> = {
-  [ChainId.OPTIMISM]: getAddress("0x99C9fc46f92E8a1c0deC1b1747d010903E884bE1"),
-  [ChainId.BOBA]: getAddress("0xdc1664458d2f0b6090bea60a8793a4e66c2f1c00"),
-  [ChainId.ARBITRUM]: getAddress("0xcEe284F754E854890e311e3280b767F80797180d"),
-  [ChainId.ARBITRUM_RINKEBY]: getAddress("0x917dc9a69F65dC3082D518192cd3725E1Fa96cA2"),
-  [ChainId.KOVAN_OPTIMISM]: getAddress("0x22F24361D548e5FaAfb36d1437839f080363982B"),
+  [ChainId.RINKEBY]: getAddress("0x0"),
+  [ChainId.KOVAN]: getAddress("0x0"),
+  [ChainId.KOVAN_OPTIMISM]: getAddress(
+    "0x2271a5E74eA8A29764ab10523575b41AA52455f0"
+  ),
+  [ChainId.ARBITRUM_RINKEBY]: getAddress(
+    "0x6999526e507Cc3b03b180BbE05E1Ff938259A874"
+  ),
 };
 
 type GetProvider = () => ethers.providers.JsonRpcProvider;

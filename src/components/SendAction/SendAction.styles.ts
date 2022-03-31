@@ -42,8 +42,3 @@ export const Info = styled.div`
   }
 `;
 export const InfoWrapper = motion.div;
-
-export const L1Info = styled(Info)`
-  justify-content: space-around;
-  margin-top: 1rem;
-`;
