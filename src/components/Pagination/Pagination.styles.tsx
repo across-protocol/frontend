@@ -19,10 +19,12 @@ interface IElementWrapper {
 
 export const ElementWrapper = styled.div<IElementWrapper>`
   /* background-color: #2c2e32; */
-  background-color: ${({ active }) => (active ? "#6DF8D8" : "#2c2e32")};
+  background-color: ${({ active }) =>
+    active ? "var(--color-primary)" : "var(--color-gray-250)"};
   /* color: #6df8d8; */
-  color: ${({ active }) => (active ? "#2c2e32" : "#6DF8D8")};
-  border: 1px solid #6df8d8;
+  color: ${({ active }) =>
+    active ? "var(--color-gray-250)" : "var(--color-primary)"};
+  border: 1px solid var(--color-primary);
   height: 30px;
   width: 30px;
   border-radius: 6px;

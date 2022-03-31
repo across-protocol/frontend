@@ -34,6 +34,7 @@ const variables = css`
     --color-gray-600: hsla(${COLORS.gray[600]});
     --color-gray-550: hsla(${COLORS.gray[550]});
     --color-gray-300: hsla(${COLORS.gray[300]});
+    --color-gray-250: hsla(${COLORS.gray[250]});
     --color-gray-200: hsla(${COLORS.gray[200]});
     --color-gray-175: hsla(${COLORS.gray[175]});
     --color-gray-150: hsla(${COLORS.gray[150]});
