@@ -135,6 +135,7 @@ const Transactions = () => {
             )}
           </BottomRow>
           <Pagination
+            currentPage={currentPage}
             setCurrentPage={setCurrentPage}
             elements={filledTx}
             totalPerPage={totalPerPage}

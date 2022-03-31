@@ -13,15 +13,21 @@ export const PaginationElements = styled.div`
   justify-content: center;
 `;
 
-export const ElementWrapper = styled.div`
-  background-color: #2c2e32;
+interface IElementWrapper {
+  active?: boolean;
+}
+
+export const ElementWrapper = styled.div<IElementWrapper>`
+  /* background-color: #2c2e32; */
+  background-color: ${({ active }) => (active ? "#6DF8D8" : "#2c2e32")};
+  /* color: #6df8d8; */
+  color: ${({ active }) => (active ? "#2c2e32" : "#6DF8D8")};
+  border: 1px solid #6df8d8;
   height: 30px;
   width: 30px;
   border-radius: 6px;
-  color: #6df8d8;
   text-align: center;
   margin: 0 3px;
-  border: 1px solid #6df8d8;
   font-size: ${16 / 16}rem;
   align-items: center;
   &:first-of-type {

@@ -13,10 +13,12 @@ import usePagination from "./usePagination";
 interface Props {
   elements: any[];
   totalPerPage: number;
+  currentPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const Pagination: React.FC<Props> = ({
+  currentPage,
   setCurrentPage,
   elements,
   totalPerPage,
@@ -36,7 +38,11 @@ const Pagination: React.FC<Props> = ({
         </ElementWrapper>
         {pagesToCreate.map((el, i) => {
           return (
-            <ElementWrapper key={i} onClick={() => setCurrentPage(el - 1)}>
+            <ElementWrapper
+              active={currentPage === i}
+              key={i}
+              onClick={() => setCurrentPage(el - 1)}
+            >
               {el}
             </ElementWrapper>
           );
