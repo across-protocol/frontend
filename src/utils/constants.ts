@@ -134,7 +134,7 @@ export const TOKENS_LIST: Record<ChainId, TokenList> = {
     },
     {
       address: getAddress("0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828"),
-      name: "UMA Token",
+      name: "UMA",
       symbol: "UMA",
       decimals: 18,
       logoURI: umaLogo,
@@ -548,6 +548,7 @@ export const TESTNET_CHAINS_SELECTION = [
 export const CHAINS_SELECTION = isProduction()
   ? PRODUCTION_CHAINS_SELECTION
   : [...PRODUCTION_CHAINS_SELECTION, ...TESTNET_CHAINS_SELECTION];
+
 
 /** FIXME:  use the actual spoke pool addresses!!!! */
 export const SPOKE_ADDRESSES: Record<ChainId, string> = {
