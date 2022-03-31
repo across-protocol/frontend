@@ -52,15 +52,10 @@ const Pagination: React.FC<Props> = ({
           })}
         {pagesToCreate.length >= 6 &&
           pagesToCreate.map((el, i) => {
-            console.log(
-              "              (pagesToCreate.length - i <= 5 && currentPage - i <= 5)",
-              pagesToCreate.length - i <= 5 && currentPage - i <= 5,
-              "     (i - currentPage < 5 && i - currentPage >= 0)",
-              i - currentPage < 5 && i - currentPage >= 0
-            );
             if (
-              (i - currentPage < 5 && i - currentPage >= 0) ||
-              (pagesToCreate.length - i <= 5 && currentPage - i <= 5)
+              i - currentPage < 5 &&
+              i - currentPage >= 0 &&
+              maxPage - currentPage + 1 > 6
             ) {
               return (
                 <ElementWrapper
@@ -71,9 +66,23 @@ const Pagination: React.FC<Props> = ({
                   {el}
                 </ElementWrapper>
               );
-            } else {
-              return null;
             }
+            if (
+              maxPage - currentPage >= 0 &&
+              maxPage - currentPage <= 5 &&
+              maxPage - i <= 5
+            ) {
+              return (
+                <ElementWrapper
+                  active={currentPage === i}
+                  key={i}
+                  onClick={() => setCurrentPage(el - 1)}
+                >
+                  {el}
+                </ElementWrapper>
+              );
+            }
+            return null;
           })}
         <ElementWrapper
           onClick={() =>
