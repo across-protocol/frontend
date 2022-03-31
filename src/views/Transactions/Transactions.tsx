@@ -129,7 +129,10 @@ const Transactions = () => {
               <MobileTransactionsTable
                 title="History"
                 headers={mobileHeaders}
-                rows={mobileFilledTx}
+                rows={mobileFilledTx.slice(
+                  currentPage * totalPerPage,
+                  currentPage * totalPerPage + totalPerPage
+                )}
                 openIndex={openFilledRow}
               />
             )}
