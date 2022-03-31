@@ -8,8 +8,15 @@ import {
   faChevronLeft,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
+import usePagination from "./usePagination";
 
-const Pagination = () => {
+interface Props {
+  elements: any[];
+  totalPerPage: number;
+}
+
+const Pagination: React.FC<Props> = ({ elements, totalPerPage }) => {
+  usePagination(elements.length, totalPerPage);
   return (
     <Wrapper>
       <PaginationElements>

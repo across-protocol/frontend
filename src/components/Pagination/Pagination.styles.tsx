@@ -15,18 +15,20 @@ export const PaginationElements = styled.div`
 
 export const ElementWrapper = styled.div`
   background-color: #2c2e32;
-  height: 25px;
-  width: 25px;
+  height: 30px;
+  width: 30px;
   border-radius: 6px;
   color: #6df8d8;
   text-align: center;
   margin: 0 3px;
   border: 1px solid #6df8d8;
+  font-size: ${16 / 16}rem;
+  align-items: center;
   &:first-of-type {
-    margin-right: 8px;
+    margin-right: 12px;
   }
   &:last-of-type {
-    margin-left: 8px;
+    margin-left: 12px;
   }
   &:hover {
     background-color: #364c4c;

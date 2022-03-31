@@ -128,7 +128,7 @@ const Transactions = () => {
               />
             )}
           </BottomRow>
-          <Pagination />
+          <Pagination elements={filledTx} totalPerPage={15} />
         </>
       )}
     </Wrapper>
