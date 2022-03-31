@@ -15,6 +15,7 @@ interface Props {
   totalPerPage: number;
   currentPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  numOnPage?: number;
 }
 
 const Pagination: React.FC<Props> = ({
@@ -22,6 +23,7 @@ const Pagination: React.FC<Props> = ({
   setCurrentPage,
   elements,
   totalPerPage,
+  numOnPage = 6,
 }) => {
   const { maxPage, pagesToCreate } = usePagination(
     elements.length,
@@ -38,7 +40,7 @@ const Pagination: React.FC<Props> = ({
         </ElementWrapper>
         {/* Show 6 numbers on page */}
         {pagesToCreate.length > 0 &&
-          pagesToCreate.length < 6 &&
+          pagesToCreate.length < numOnPage &&
           pagesToCreate.map((el, i) => {
             return (
               <ElementWrapper
@@ -53,9 +55,9 @@ const Pagination: React.FC<Props> = ({
         {pagesToCreate.length >= 6 &&
           pagesToCreate.map((el, i) => {
             if (
-              i - currentPage < 5 &&
+              i - currentPage < numOnPage &&
               i - currentPage >= 0 &&
-              maxPage - currentPage + 1 > 6
+              maxPage - currentPage + 1 > numOnPage
             ) {
               return (
                 <ElementWrapper
@@ -69,8 +71,8 @@ const Pagination: React.FC<Props> = ({
             }
             if (
               maxPage - currentPage >= 0 &&
-              maxPage - currentPage <= 5 &&
-              maxPage - i <= 5
+              maxPage - currentPage <= numOnPage &&
+              maxPage - i <= numOnPage
             ) {
               return (
                 <ElementWrapper
