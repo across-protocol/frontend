@@ -1,24 +1,18 @@
-import { ethers } from "ethers";
-import { multicallTwoAddress } from "utils";
-import * as umaSDK from "@uma/sdk";
+import * as acrossSdk from "@across-protocol/sdk-v2";
 import { update } from "./pools";
 import { store } from "../state";
+import { POOL_CONFIG, POOL_CHAINID, PROVIDERS } from "utils";
 
-const { Client } = umaSDK.across.clients.bridgePool;
+const provider = PROVIDERS[POOL_CHAINID]();
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `https://mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
-);
+const { Client } = acrossSdk.pool;
 
 export function poolEventHandler(path: string[], data: any) {
   store.dispatch(update({ path, data }));
 }
 
 export const poolClient = new Client(
-  {
-    multicall2Address: multicallTwoAddress,
-    confirmations: 1,
-  },
+  POOL_CONFIG,
   {
     provider,
   },

@@ -15,8 +15,6 @@ import {
 
 import { isValidString, parseEther, tagAddress } from "./format";
 
-
-
 export function getSpokePool(
   chainId: ChainId,
   signer?: ethers.Signer
@@ -77,27 +75,11 @@ export async function getLpFee(
   amount: ethers.BigNumber,
   blockTime?: number
 ): Promise<Fee & { isLiquidityInsufficient: boolean }> {
-  // eth and weth can be treated the sasme same in this case, but the rate model only currently supports weth address
-  // TODO: add address 0 to sdk rate model ( duplicate weth)
-  if (tokenSymbol === "ETH") tokenSymbol = "WETH";
-
-  const l1EqInfo = TOKENS_LIST[ChainId.MAINNET].find(
-    (t) => t.symbol === tokenSymbol
-  );
-
-  if (!l1EqInfo) {
-    throw new Error(`Token ${tokenSymbol} not found in TOKENS_LIST`);
-  }
-  if (amount.lte(0)) {
-    throw new Error(`Amount must be greater than 0.`);
-  }
-
   const result = {
     pct: parseEther("1"),
     total: BigNumber.from(0),
     isLiquidityInsufficient: false,
   };
-
   result.total = amount.mul(result.pct).div(parseEther("1"));
   return result;
 }

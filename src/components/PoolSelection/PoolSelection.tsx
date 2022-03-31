@@ -3,7 +3,7 @@ import { AnimatePresence } from "framer-motion";
 import { useSelect } from "downshift";
 
 import { useBalances, useConnection } from "state/hooks";
-import { formatUnits, TOKENS_LIST, ChainId, Token } from "utils";
+import { formatUnits, TokenList, ChainId, Token } from "utils";
 import { SectionTitle } from "../Section";
 
 import {
@@ -19,11 +19,12 @@ import {
 
 interface Props {
   token: Token;
+  tokenList: TokenList;
   setToken: Dispatch<SetStateAction<Token>>;
   wrongNetwork?: boolean;
 }
 
-const PoolSelection: FC<Props> = ({ token, setToken }) => {
+const PoolSelection: FC<Props> = ({ token, setToken, tokenList }) => {
   const { account } = useConnection();
 
   const { data: balances } = useBalances(
@@ -42,7 +43,7 @@ const PoolSelection: FC<Props> = ({ token, setToken }) => {
     getItemProps,
     getMenuProps,
   } = useSelect({
-    items: TOKENS_LIST[ChainId.MAINNET],
+    items: tokenList,
     defaultSelectedItem: token,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
@@ -65,11 +66,11 @@ const PoolSelection: FC<Props> = ({ token, setToken }) => {
           </RoundBox>
           <Menu {...getMenuProps()} isOpen={isOpen}>
             {isOpen &&
-              TOKENS_LIST[ChainId.MAINNET].map((t, index) => {
+              tokenList.map((t, index) => {
                 return (
                   <Item
                     {...getItemProps({ item: t, index })}
-                    key={t.address}
+                    key={t.name}
                     initial={{ y: -10 }}
                     animate={{ y: 0 }}
                     exit={{ y: -10 }}

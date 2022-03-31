@@ -30,7 +30,7 @@ interface Props {
   error: Error | undefined;
   amount: string;
   onChange: (value: string) => void;
-  bridgeAddress: string;
+  hubPoolAddress: string;
   decimals: number;
   symbol: string;
   tokenAddress: string;
@@ -49,7 +49,7 @@ const AddLiquidityForm: FC<Props> = ({
   error,
   amount,
   onChange,
-  bridgeAddress,
+  hubPoolAddress,
   decimals,
   symbol,
   tokenAddress,
@@ -73,14 +73,14 @@ const AddLiquidityForm: FC<Props> = ({
   const [updateEthBalance] = api.endpoints.ethBalance.useLazyQuery();
 
   const updateAllowance = useCallback(async () => {
-    if (!account || !provider) return;
+    if (!account || !provider || symbol === "ETH") return;
     const allowance = await getAllowance({
       account,
-      spender: bridgeAddress,
+      spender: hubPoolAddress,
       provider,
     });
     setAllowance(allowance.toString());
-  }, [setAllowance, getAllowance, provider, account, bridgeAddress]);
+  }, [setAllowance, getAllowance, provider, account, hubPoolAddress, symbol]);
 
   // trigger update allowance, only if bridge/token changes. ignore eth.
   useEffect(() => {
@@ -90,9 +90,13 @@ const AddLiquidityForm: FC<Props> = ({
   // check if user needs to approve based on amount entered in form or a change in allowance
   useEffect(() => {
     try {
-      const weiAmount = toWeiSafe(amount, decimals);
-      const hasToApprove = weiAmount.gt(allowance);
-      setUserNeedsToApprove(hasToApprove);
+      if (symbol === "ETH") {
+        setUserNeedsToApprove(false);
+      } else {
+        const weiAmount = toWeiSafe(amount, decimals);
+        const hasToApprove = weiAmount.gt(allowance);
+        setUserNeedsToApprove(hasToApprove);
+      }
     } catch (err) {
       // do nothing. this happens when users input is not a number and causes toWei to throw. if we dont
       // catch here, app will crash when user enters something like "0."
@@ -103,7 +107,7 @@ const AddLiquidityForm: FC<Props> = ({
     try {
       const tx = await approve({
         amount: INFINITE_APPROVAL_AMOUNT,
-        spender: bridgeAddress,
+        spender: hubPoolAddress,
         signer,
       });
 
@@ -149,20 +153,16 @@ const AddLiquidityForm: FC<Props> = ({
       try {
         let txId;
         if (symbol === "ETH") {
-          txId = await poolClient.addEthLiquidity(
-            signer,
-            bridgeAddress,
-            weiAmount
-          );
+          txId = await poolClient.addEthLiquidity(signer, weiAmount);
         } else {
           txId = await poolClient.addTokenLiquidity(
             signer,
-            bridgeAddress,
+            tokenAddress,
             weiAmount
           );
         }
 
-        const transaction = poolClient.getTx(txId);
+        const transaction = poolClient.getTxState(txId);
 
         if (transaction.hash) {
           setTxSubmitted(true);

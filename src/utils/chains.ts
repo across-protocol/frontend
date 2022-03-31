@@ -31,15 +31,14 @@ export async function switchChain(
       }
     } else {
       console.error(
-        `Failed to switch to ${CHAINS[chainId].fullName ?? CHAINS[chainId].name
+        `Failed to switch to ${
+          CHAINS[chainId].fullName ?? CHAINS[chainId].name
         }`,
         switchError
       );
     }
   }
 }
-
-
 
 export function isTestnet(chainId: ChainId): boolean {
   return TESTNET_CHAINS_SELECTION.includes(chainId);

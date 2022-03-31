@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ethers } from "ethers";
+import { POOL_CHAINID } from "utils";
 import {
   ChainId,
   UnsupportedChainIdError,
@@ -25,7 +26,7 @@ type ErrorUpdate = Required<Pick<State, "error">>;
 const initialState: State = {
   notify: Notify({
     dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY, // [String] The API key created by step one above
-    networkId: 1, // [Integer] The Ethereum network ID your Dapp uses.
+    networkId: POOL_CHAINID,
     desktopPosition: "topRight",
   }),
 };

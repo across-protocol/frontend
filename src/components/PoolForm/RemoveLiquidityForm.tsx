@@ -39,10 +39,10 @@ const toBN = ethers.BigNumber.from;
 interface Props {
   removeAmount: number;
   setRemoveAmount: Dispatch<SetStateAction<number>>;
-  bridgeAddress: string;
   lpTokens: ethers.BigNumber;
   decimals: number;
   symbol: string;
+  tokenAddress: string;
   setShowSuccess: React.Dispatch<React.SetStateAction<ShowSuccess | undefined>>;
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
   balance: string;
@@ -56,10 +56,10 @@ interface Props {
 const RemoveLiqudityForm: FC<Props> = ({
   removeAmount,
   setRemoveAmount,
-  bridgeAddress,
   lpTokens,
   decimals,
   symbol,
+  tokenAddress,
   setShowSuccess,
   setDepositUrl,
   position,
@@ -99,19 +99,15 @@ const RemoveLiqudityForm: FC<Props> = ({
       try {
         let txId;
         if (symbol === "ETH") {
-          txId = await poolClient.removeEthliquidity(
-            signer,
-            bridgeAddress,
-            weiAmount
-          );
+          txId = await poolClient.removeEthliquidity(signer, weiAmount);
         } else {
           txId = await poolClient.removeTokenLiquidity(
             signer,
-            bridgeAddress,
+            tokenAddress,
             weiAmount
           );
         }
-        const transaction = poolClient.getTx(txId);
+        const transaction = poolClient.getTxState(txId);
 
         if (transaction.hash) {
           setTxSubmitted(true);
