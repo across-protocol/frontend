@@ -34,6 +34,9 @@ const Transactions = () => {
     setOpenFilledRow,
     openOngoingRow,
     setOpenOngoingRow,
+    currentPage,
+    setCurrentPage,
+    totalPerPage,
   } = useTransactionsView();
 
   const ongoingTx = useMemo(
@@ -117,7 +120,10 @@ const Transactions = () => {
               <TransactionsTable
                 title="History"
                 headers={headers}
-                rows={filledTx}
+                rows={filledTx.slice(
+                  currentPage * totalPerPage,
+                  currentPage * totalPerPage + totalPerPage
+                )}
               />
             ) : (
               <MobileTransactionsTable
@@ -128,7 +134,11 @@ const Transactions = () => {
               />
             )}
           </BottomRow>
-          <Pagination elements={filledTx} totalPerPage={15} />
+          <Pagination
+            setCurrentPage={setCurrentPage}
+            elements={filledTx}
+            totalPerPage={totalPerPage}
+          />
         </>
       )}
     </Wrapper>

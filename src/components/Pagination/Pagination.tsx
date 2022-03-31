@@ -13,20 +13,39 @@ import usePagination from "./usePagination";
 interface Props {
   elements: any[];
   totalPerPage: number;
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const Pagination: React.FC<Props> = ({ elements, totalPerPage }) => {
-  usePagination(elements.length, totalPerPage);
+const Pagination: React.FC<Props> = ({
+  setCurrentPage,
+  elements,
+  totalPerPage,
+}) => {
+  const { maxPage, pagesToCreate } = usePagination(
+    elements.length,
+    totalPerPage
+  );
+
   return (
     <Wrapper>
       <PaginationElements>
-        <ElementWrapper>
+        <ElementWrapper
+          onClick={() => setCurrentPage((pv) => (pv <= 0 ? 0 : pv - 1))}
+        >
           <FontAwesomeIcon icon={faChevronLeft} />
         </ElementWrapper>
-        <ElementWrapper>1</ElementWrapper>
-        <ElementWrapper>2</ElementWrapper>
-        <ElementWrapper>3</ElementWrapper>
-        <ElementWrapper>
+        {pagesToCreate.map((el, i) => {
+          return (
+            <ElementWrapper key={i} onClick={() => setCurrentPage(el - 1)}>
+              {el}
+            </ElementWrapper>
+          );
+        })}
+        <ElementWrapper
+          onClick={() =>
+            setCurrentPage((pv) => (pv >= maxPage ? maxPage : pv + 1))
+          }
+        >
           <FontAwesomeIcon icon={faChevronRight} />
         </ElementWrapper>
       </PaginationElements>
