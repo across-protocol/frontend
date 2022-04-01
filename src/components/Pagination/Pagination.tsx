@@ -38,7 +38,6 @@ const Pagination: React.FC<Props> = ({
         >
           <FontAwesomeIcon icon={faChevronLeft} />
         </ElementWrapper>
-        {/* Show 6 numbers on page */}
         {pagesToCreate.length > 0 &&
           pagesToCreate.length < numOnPage &&
           pagesToCreate.map((el, i) => {

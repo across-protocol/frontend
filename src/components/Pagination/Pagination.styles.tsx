@@ -7,7 +7,6 @@ export const Wrapper = styled.div`
 
 export const PaginationElements = styled.div`
   display: flex;
-  /* width: 200px; */
   margin: 0 auto;
   align-items: center;
   justify-content: center;
@@ -37,7 +36,8 @@ export const ElementWrapper = styled.div<IElementWrapper>`
     margin-left: 12px;
   }
   &:hover {
-    background-color: #364c4c;
+    background-color: var(--color-primary-hover);
+    color: var(--color-primary);
     cursor: pointer;
   }
 `;

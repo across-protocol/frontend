@@ -50,6 +50,7 @@ export const COLORS = {
   primary: {
     // #6df8d8
     500: "166deg 92% 70%",
+
     700: "180deg 15% 25%",
   },
   secondary: {

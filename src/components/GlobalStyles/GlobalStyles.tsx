@@ -43,6 +43,7 @@ const variables = css`
     --color-black: hsl(${COLORS.black});
     --color-primary: hsl(${COLORS.primary[500]});
     --color-primary-dark: hsl(${COLORS.primary[700]});
+    --color-primary-hover: hsla(${COLORS.primary[500]} / 0.15);
     --color-secondary: hsl(${COLORS.secondary[500]});
     --color-error: hsl(${COLORS.error[500]});
     --color-error-light: hsl(${COLORS.error[300]});
