@@ -22,7 +22,7 @@ import createMobileTransactionTableJSX, {
 } from "./TransactionsTable/createMobileTransactionTableJSX";
 import { BREAKPOINTS } from "utils";
 import { TransactionsTableWithPagination } from "./TransactionsTable";
-import Pagination from "components/Pagination";
+import { MobileTransactionsTableWithPagination } from "./TransactionsTable";
 const Transactions = () => {
   const {
     isConnected,
@@ -130,23 +130,19 @@ const Transactions = () => {
                 totalPerPage={totalPerPage}
               />
             ) : (
-              <>
-                <MobileTransactionsTable
-                  title="History"
-                  headers={mobileHeaders}
-                  rows={mobileFilledTx.slice(
-                    currentPage * totalPerPage,
-                    currentPage * totalPerPage + totalPerPage
-                  )}
-                  openIndex={openFilledRow}
-                />
-                <Pagination
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
-                  elements={mobileFilledTx}
-                  totalPerPage={totalPerPage}
-                />
-              </>
+              <MobileTransactionsTableWithPagination
+                title="History"
+                headers={mobileHeaders}
+                rows={mobileFilledTx.slice(
+                  currentPage * totalPerPage,
+                  currentPage * totalPerPage + totalPerPage
+                )}
+                openIndex={openFilledRow}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                elements={mobileFilledTx}
+                totalPerPage={totalPerPage}
+              />
             )}
           </BottomRow>
         </>
