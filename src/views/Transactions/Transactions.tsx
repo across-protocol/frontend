@@ -21,8 +21,7 @@ import createMobileTransactionTableJSX, {
   mobileHeaders,
 } from "./TransactionsTable/createMobileTransactionTableJSX";
 import { BREAKPOINTS } from "utils";
-import Pagination from "components/Pagination";
-
+import { TransactionsTableWithPagination } from "./TransactionsTable";
 const Transactions = () => {
   const {
     isConnected,
@@ -117,13 +116,17 @@ const Transactions = () => {
 
           <BottomRow>
             {width >= BREAKPOINTS.laptopMin ? (
-              <TransactionsTable
+              <TransactionsTableWithPagination
                 title="History"
                 headers={headers}
                 rows={filledTx.slice(
                   currentPage * totalPerPage,
                   currentPage * totalPerPage + totalPerPage
                 )}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                elements={filledTx}
+                totalPerPage={totalPerPage}
               />
             ) : (
               <MobileTransactionsTable
@@ -137,12 +140,6 @@ const Transactions = () => {
               />
             )}
           </BottomRow>
-          <Pagination
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            elements={filledTx}
-            totalPerPage={totalPerPage}
-          />
         </>
       )}
     </Wrapper>
