@@ -1,10 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useSendForm, useBridgeFees, useBridge } from "hooks";
 import {
   onboard,
   TOKENS_LIST,
-  ChainId,
-  receiveAmount,
   Token,
   CONFIRMATIONS,
 } from "utils";
@@ -13,13 +11,13 @@ import { useConnection } from "state/hooks";
 
 type TokenInfo =
   | {
-      address: string;
-      symbol: "WETH";
-      name: "Wrapped Ether";
-      decimals: 18;
-      logoURI: string;
-      bridgePool: string;
-    }
+    address: string;
+    symbol: "WETH";
+    name: "Wrapped Ether";
+    decimals: 18;
+    logoURI: string;
+    bridgePool: string;
+  }
   | Token;
 
 export default function useSendAction(
@@ -35,13 +33,6 @@ export default function useSendAction(
   const { fees } = useBridgeFees(amount, fromChain, tokenInfo?.symbol);
   const { status, hasToApprove, send, approve } = useBridge();
   const { account } = useConnection();
-
-  const amountMinusFees = useMemo(() => {
-    if (fromChain === ChainId.MAINNET) {
-      return amount;
-    }
-    return receiveAmount(amount, fees);
-  }, [amount, fees, fromChain]);
 
   const handleActionClick = async () => {
     if (status !== "ready") {
@@ -98,7 +89,6 @@ export default function useSendAction(
     tokenInfo,
     isWETH,
     handleActionClick,
-    amountMinusFees,
     buttonMsg,
     buttonDisabled,
     isInfoModalOpen,

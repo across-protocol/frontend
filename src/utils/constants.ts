@@ -552,17 +552,17 @@ export const CHAINS_SELECTION = isProduction()
 
 /** FIXME:  use the actual spoke pool addresses!!!! */
 export const SPOKE_ADDRESSES: Record<ChainId, string> = {
-  [ChainId.MAINNET]: getAddress("0x0"),
-  [ChainId.OPTIMISM]: getAddress("0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96"),
-  [ChainId.BOBA]: getAddress("0xCD43CEa89DF8fE39031C03c24BC24480e942470B"),
-  [ChainId.ARBITRUM]: getAddress("0xD8c6dD978a3768F7DDfE3A9aAD2c3Fd75Fa9B6Fd"),
-  [ChainId.RINKEBY]: getAddress("0x0"),
-  [ChainId.KOVAN]: getAddress("0x0"),
+  [ChainId.MAINNET]: ethers.constants.AddressZero,
+  [ChainId.OPTIMISM]: ethers.constants.AddressZero,
+  [ChainId.BOBA]: ethers.constants.AddressZero,
+  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
+  [ChainId.RINKEBY]: getAddress("0x90743806D7A66b37F31FAfd7b3447210aB55640f"),
+  [ChainId.KOVAN]: getAddress("0x73549B5639B04090033c1E77a22eE9Aa44C2eBa0"),
   [ChainId.KOVAN_OPTIMISM]: getAddress(
-    "0x2271a5E74eA8A29764ab10523575b41AA52455f0"
+    "0x2b7b7bAE341089103dD22fa4e8D7E4FA63E11084"
   ),
   [ChainId.ARBITRUM_RINKEBY]: getAddress(
-    "0x6999526e507Cc3b03b180BbE05E1Ff938259A874"
+    "0x3BED21dAe767e4Df894B31b14aD32369cE4bad8b"
   ),
 };
 

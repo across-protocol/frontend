@@ -1,5 +1,11 @@
 import React from "react";
-import { CHAINS, formatUnits, getEstimatedDepositTime, ChainId } from "utils";
+import {
+  CHAINS,
+  formatUnits,
+  getEstimatedDepositTime,
+  ChainId,
+  receiveAmount,
+} from "utils";
 import { PrimaryButton } from "../Buttons";
 import {
   Wrapper,
@@ -23,7 +29,6 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
     tokenInfo,
     toChain,
     fromChain,
-    amountMinusFees,
     isWETH,
     handleActionClick,
     buttonDisabled,
@@ -32,6 +37,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
     buttonMsg,
   } = useSendAction(onDeposit);
   const showFees = amount.gt(0) && !!fees;
+  const amountMinusFees = showFees ? receiveAmount(amount, fees) : undefined;
 
   return (
     <AccentSection>
@@ -63,7 +69,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
           </Info>
           <Info>
             <div>You will receive</div>
-            {showFees && (
+            {showFees && amountMinusFees && (
               <div>
                 {formatUnits(amountMinusFees, tokenInfo.decimals)}{" "}
                 {isWETH ? "ETH" : tokenInfo.symbol}
