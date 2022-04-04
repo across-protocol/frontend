@@ -79,8 +79,8 @@ export const TableLink = styled.a`
 `;
 
 export const MobileWrapper = styled(Wrapper)`
-  max-width: 100%;
   width: 100%;
+  min-width: 300px;
 `;
 
 export const StyledMobileHeadRow = styled(StyledHeadRow)`
@@ -109,7 +109,7 @@ export const MobileCell = styled(StyledCell)`
     flex: 0 0 60px;
   }
   &:not(:first-of-type) {
-    min-width: 80px;
+    min-width: 60px;
   }
 `;
 
