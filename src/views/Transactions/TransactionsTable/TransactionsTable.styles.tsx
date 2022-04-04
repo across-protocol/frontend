@@ -104,8 +104,12 @@ export const MobileCell = styled(StyledCell)`
     font-weight: 500;
   }
 
+  &:first-of-type {
+    min-width: 120px;
+    flex: 0 0 60px;
+  }
   &:not(:first-of-type) {
-    min-width: 100px;
+    min-width: 80px;
   }
 `;
 
