@@ -1,12 +1,17 @@
 import React from "react";
-import { CHAINS, formatUnits, getEstimatedDepositTime, ChainId } from "utils";
+import {
+  CHAINS,
+  formatUnits,
+  getEstimatedDepositTime,
+  ChainId,
+  receiveAmount,
+} from "utils";
 import { PrimaryButton } from "../Buttons";
 import {
   Wrapper,
   Info,
   AccentSection,
   InfoIcon,
-  L1Info,
   InfoWrapper,
 } from "./SendAction.styles";
 
@@ -24,7 +29,6 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
     tokenInfo,
     toChain,
     fromChain,
-    amountMinusFees,
     isWETH,
     handleActionClick,
     buttonDisabled,
@@ -33,6 +37,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
     buttonMsg,
   } = useSendAction(onDeposit);
   const showFees = amount.gt(0) && !!fees;
+  const amountMinusFees = showFees ? receiveAmount(amount, fees) : undefined;
 
   return (
     <AccentSection>
@@ -47,33 +52,24 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
               <div>Ethereum Gas Fee</div>
               {showFees && (
                 <div>
-                  {formatUnits(
-                    fees.instantRelayFee.total.add(fees.slowRelayFee.total),
-                    tokenInfo.decimals
-                  )}{" "}
+                  {formatUnits(fees.relayerFee.total, tokenInfo.decimals)}{" "}
                   {tokenInfo.symbol}
                 </div>
               )}
             </Info>
           )}
           <Info>
-            <div>
-              {fromChain === ChainId.MAINNET
-                ? "Native Bridge Fee"
-                : "Bridge Fee"}
-            </div>
+            <div>Bridge Fee</div>
             {showFees && (
               <div>
-                {fromChain === ChainId.MAINNET
-                  ? "Free"
-                  : `${formatUnits(fees.lpFee.total, tokenInfo.decimals)}
+                {`${formatUnits(fees.lpFee.total, tokenInfo.decimals)}
                   ${tokenInfo.symbol}`}
               </div>
             )}
           </Info>
           <Info>
             <div>You will receive</div>
-            {showFees && (
+            {showFees && amountMinusFees && (
               <div>
                 {formatUnits(amountMinusFees, tokenInfo.decimals)}{" "}
                 {isWETH ? "ETH" : tokenInfo.symbol}
@@ -85,11 +81,6 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
         <PrimaryButton onClick={handleActionClick} disabled={buttonDisabled}>
           {buttonMsg}
         </PrimaryButton>
-        {fromChain === ChainId.MAINNET && (
-          <L1Info>
-            <div>L1 to L2 transfers use the destination’s native bridge</div>
-          </L1Info>
-        )}
       </Wrapper>
       <InformationDialog isOpen={isInfoModalOpen} onClose={toggleInfoModal} />
     </AccentSection>

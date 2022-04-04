@@ -1,7 +1,6 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ethers, BigNumber } from "ethers";
-import { PROVIDERS, getRelayFees, ChainId, TOKENS_LIST, getLpFee } from "utils";
-import type { BridgeFees } from "utils";
+import { PROVIDERS, ChainId, TOKENS_LIST } from "utils";
 
 import { clients } from "@uma/sdk";
 import { ERC20Ethers__factory } from "@uma/contracts-frontend";
@@ -17,17 +16,6 @@ type AllowanceQueryArgs = {
   chainId: ChainId;
   token: string;
   amount: ethers.BigNumber;
-};
-
-type BridgeFeesQueryArgs = {
-  amount: ethers.BigNumber;
-  tokenSymbol: string;
-  blockTime: number;
-};
-
-type BridgeFeesQueryResult = BridgeFees & {
-  isAmountTooLow: boolean;
-  isLiquidityInsufficient: boolean;
 };
 
 const api = createApi({
@@ -101,35 +89,6 @@ const api = createApi({
         }
       },
     }),
-    bridgeFees: build.query<BridgeFeesQueryResult, BridgeFeesQueryArgs>({
-      // We want to re-run the fee query on each block change
-      queryFn: async ({ amount, tokenSymbol, blockTime }) => {
-        try {
-          const { instantRelayFee, slowRelayFee, isAmountTooLow } =
-            await getRelayFees(tokenSymbol, amount);
-
-          const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
-            tokenSymbol,
-            amount,
-            blockTime
-          );
-
-          return {
-            data: {
-              instantRelayFee,
-              slowRelayFee,
-              lpFee,
-              isAmountTooLow,
-              isLiquidityInsufficient,
-            },
-          };
-        } catch (error) {
-          console.error("bridge fee calculation failed");
-          console.error(error);
-          return { error };
-        }
-      },
-    }),
   }),
 });
 
@@ -137,6 +96,5 @@ export const {
   useBalancesQuery: useBalances,
   useEthBalanceQuery: useETHBalance,
   useAllowanceQuery: useAllowance,
-  useBridgeFeesQuery: useBridgeFees,
 } = api;
 export default api;

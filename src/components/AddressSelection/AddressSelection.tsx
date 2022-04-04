@@ -1,6 +1,12 @@
 import React from "react";
 import { XOctagon } from "react-feather";
-import { CHAINS, shortenAddress, ChainId } from "utils";
+import {
+  CHAINS,
+  shortenAddress,
+  getReacheableChains,
+  CHAINS_SELECTION,
+  DEFAULT_TO_CHAIN_ID,
+} from "utils";
 import { SectionTitle } from "../Section";
 import Dialog from "../Dialog";
 import { SecondaryButton } from "../Buttons";
@@ -24,10 +30,7 @@ import {
   RoundBox,
   ToggleChainName,
   Address,
-  ItemWarning,
-  LayerType,
 } from "./AddressSelection.styles";
-import { CHAINS_SELECTION, DEFAULT_TO_CHAIN_ID } from "utils/constants";
 import { AnimatePresence } from "framer-motion";
 import useAddressSelection from "./useAddressSelection";
 
@@ -40,8 +43,8 @@ const AddressSelection: React.FC = () => {
     selectedItem,
     isOpen,
     toChain,
+    fromChain,
     toAddress,
-    isL1toL2,
     isValid,
     isConnected,
     toggle,
@@ -53,6 +56,7 @@ const AddressSelection: React.FC = () => {
   } = useAddressSelection();
 
   const selectedChain = CHAINS[selectedItem ?? DEFAULT_TO_CHAIN_ID];
+  const reacheableChains = getReacheableChains(fromChain);
   return (
     <AnimatePresence>
       <LastSection>
@@ -63,11 +67,7 @@ const AddressSelection: React.FC = () => {
               <ToggleButton type="button" {...getToggleButtonProps()}>
                 <Logo src={selectedChain.logoURI} alt={selectedChain.name} />
                 <div>
-                  <ToggleChainName>
-                    {selectedChain.name === "Ether"
-                      ? "Mainnet"
-                      : selectedChain.name}
-                  </ToggleChainName>
+                  <ToggleChainName>{selectedChain.name}</ToggleChainName>
                   {toAddress && (
                     <Address>{shortenAddress(toAddress, "...", 4)}</Address>
                   )}
@@ -77,64 +77,29 @@ const AddressSelection: React.FC = () => {
             </RoundBox>
             <Menu isOpen={isOpen} {...getMenuProps()}>
               {isOpen &&
-                toChain !== ChainId.MAINNET &&
                 CHAINS_SELECTION.map((t, index) => {
                   return (
                     <Item
                       className={
-                        t === toChain || t === ChainId.MAINNET ? "disabled" : ""
+                        t === toChain || !reacheableChains.includes(t)
+                          ? "disabled"
+                          : ""
                       }
                       {...getItemProps({ item: t, index })}
                       key={t}
                     >
                       <Logo src={CHAINS[t].logoURI} alt={CHAINS[t].name} />
                       <div>{CHAINS[t].name}</div>
-                      <LayerType>
-                        {t !== ChainId.MAINNET ? "L2" : "L1"}
-                      </LayerType>
                     </Item>
                   );
                 })}
-              {isOpen && toChain === ChainId.MAINNET && (
-                <>
-                  <ItemWarning
-                    initial={{ y: -10 }}
-                    animate={{ y: 0 }}
-                    exit={{ y: -10 }}
-                  >
-                    <p>
-                      Transfers between L2 chains is not possible at this time
-                    </p>
-                  </ItemWarning>
-                  {CHAINS_SELECTION.map((t, index) => {
-                    return (
-                      <Item
-                        className={"disabled"}
-                        {...getItemProps({ item: t, index })}
-                        key={t}
-                        initial={{ y: -10 }}
-                        animate={{ y: 0 }}
-                        exit={{ y: -10 }}
-                      >
-                        <Logo src={CHAINS[t].logoURI} alt={CHAINS[t].name} />
-                        <div>{CHAINS[t].name}</div>
-                        <span className="layer-type">
-                          {index !== CHAINS_SELECTION.length - 1 ? "L2" : "L1"}
-                        </span>
-                      </Item>
-                    );
-                  })}
-                </>
-              )}
             </Menu>
           </InputGroup>
-          {!isL1toL2 && (
-            <ChangeWrapper onClick={toggle}>
-              <ChangeButton className={!isConnected ? "disabled" : ""}>
-                Change account
-              </ChangeButton>
-            </ChangeWrapper>
-          )}
+          <ChangeWrapper onClick={toggle}>
+            <ChangeButton className={!isConnected ? "disabled" : ""}>
+              Change account
+            </ChangeButton>
+          </ChangeWrapper>
         </Wrapper>
         <Dialog isOpen={open} onClose={toggle}>
           <h3>Send To</h3>

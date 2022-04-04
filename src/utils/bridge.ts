@@ -1,42 +1,40 @@
 import { clients, across, utils } from "@uma/sdk";
 import { BridgePoolEthers__factory } from "@uma/contracts-frontend";
 import { ethers, BigNumber } from "ethers";
-import { Bridge } from "arb-ts";
+import { SpokePool, SpokePool__factory } from "@across-protocol/contracts-v2";
 
 import {
-  ADDRESSES,
   CHAINS,
   ChainId,
   PROVIDERS,
   TOKENS_LIST,
   MAX_RELAY_FEE_PERCENT,
   Token,
-  L2ChainId,
+  CHAINS_SELECTION,
+  SPOKE_ADDRESSES,
 } from "./constants";
 
 import { isValidString, parseEther, tagAddress } from "./format";
-import { isL2 } from "./chains";
 
 const lpFeeCalculator = new across.LpFeeCalculator(
   PROVIDERS[ChainId.MAINNET]()
 );
 
-export function getDepositBox(
-  chainId: L2ChainId,
+export function getSpokePool(
+  chainId: ChainId,
   signer?: ethers.Signer
-): clients.bridgeDepositBox.Instance {
-  const maybeAddress = ADDRESSES[chainId].BRIDGE;
+): SpokePool {
+  const maybeAddress = SPOKE_ADDRESSES[chainId];
   if (!isValidString(maybeAddress)) {
     throw new Error(
-      `Deposit Box not supported on ${CHAINS[chainId].name} with chainId: ${chainId}`
+      `No SpokePool supported on ${CHAINS[chainId].name} with chainId: ${chainId}`
     );
   }
-  return clients.bridgeDepositBox.connect(
+  return SpokePool__factory.connect(
     maybeAddress,
     signer ?? PROVIDERS[chainId]()
   );
 }
-
 const { gasFeeCalculator } = across;
 
 export type Fee = {
@@ -44,21 +42,15 @@ export type Fee = {
   pct: ethers.BigNumber;
 };
 
-type RelayFees = {
-  instantRelayFee: Fee;
-  slowRelayFee: Fee;
-};
-
 export type BridgeFees = {
-  instantRelayFee: Fee;
-  slowRelayFee: Fee;
+  relayerFee: Fee;
   lpFee: Fee;
 };
 
-export async function getRelayFees(
+export async function getRelayerFee(
   token: string,
   amount: ethers.BigNumber
-): Promise<RelayFees & { isAmountTooLow: boolean }> {
+): Promise<{ relayerFee: Fee; isAmountTooLow: boolean }> {
   const l1Equivalent = TOKENS_LIST[ChainId.MAINNET].find(
     (t) => t.symbol === token
   )?.address;
@@ -66,7 +58,7 @@ export async function getRelayFees(
     throw new Error(`Token ${token} not found in TOKENS_LIST`);
   }
   const provider = PROVIDERS[ChainId.MAINNET]();
-  const { instant, slow, isAmountTooLow } =
+  const { instant, isAmountTooLow } =
     await gasFeeCalculator.getDepositFeesDetails(
       provider,
       amount,
@@ -75,13 +67,9 @@ export async function getRelayFees(
     );
 
   return {
-    instantRelayFee: {
+    relayerFee: {
       pct: ethers.BigNumber.from(instant.pct),
       total: ethers.BigNumber.from(instant.total),
-    },
-    slowRelayFee: {
-      pct: ethers.BigNumber.from(slow.pct),
-      total: ethers.BigNumber.from(slow.total),
     },
     isAmountTooLow,
   };
@@ -154,14 +142,14 @@ type GetBridgeFeesResult = BridgeFees & {
  * @param amount - amount to bridge
  * @param tokenSymbol - symbol of the token to bridge
  * @param blockTimestamp - timestamp of the block to use for calculating fees on
- * @returns Returns the `slowRelayFee`, `instantRelayFee`, and `lpFee` fees for bridging the given amount of tokens, along with an `isAmountTooLow` flag indicating whether the amount is too low to bridge and an `isLiquidityInsufficient` flag indicating whether the liquidity is insufficient.
+ * @returns Returns the `relayerFee` and `lpFee` fees for bridging the given amount of tokens, along with an `isAmountTooLow` flag indicating whether the amount is too low to bridge and an `isLiquidityInsufficient` flag indicating whether the liquidity is insufficient.
  */
 export async function getBridgeFees({
   amount,
   tokenSymbol,
   blockTimestamp,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
-  const { instantRelayFee, slowRelayFee, isAmountTooLow } = await getRelayFees(
+  const { relayerFee, isAmountTooLow } = await getRelayerFee(
     tokenSymbol,
     amount
   );
@@ -173,8 +161,7 @@ export async function getBridgeFees({
   );
 
   return {
-    instantRelayFee,
-    slowRelayFee,
+    relayerFee,
     lpFee,
     isAmountTooLow,
     isLiquidityInsufficient,
@@ -243,8 +230,8 @@ export const bobaErc20Pairs = () => {
 
 /**
  * Returns the list of tokens that can be sent from chain A to chain B, by computing their tokenList intersection and taking care of additional chain specific quirks.
- * @param chainA - the chain to bridge from, that is, the chain that tokens are sent from.
- * @param chainB - the destination chain, that is, where tokens will be sent.
+ * @param chainA  the chain to bridge from, that is, the chain that tokens are sent from.
+ * @param chainB  the destination chain, that is, where tokens will be sent.
  * @returns Returns a list of tokens that can be sent from chain A to chain B.
  */
 export function filterTokensByDestinationChain(
@@ -263,147 +250,44 @@ export function filterTokensByDestinationChain(
   return TOKENS_LIST[chainA].filter(filterByToChain);
 }
 
-const { OptimismBridgeClient } = across.clients.optimismBridge;
-const { BobaBridgeClient } = across.clients.bobaBridge;
-
-type BaseDepositArgs = {
-  token: string;
-  amount: ethers.BigNumber;
-  toAddress: string;
-};
-type BaseApprovalArgs = {
-  token: string;
-  amount: ethers.BigNumber;
-};
-
-// ARBITRUM
-type ArbitrumDepositArgs = BaseDepositArgs;
 /**
- * Makes a deposit on Arbitrum canonical bridge.
- * @param signer A valid signer, must be connected to a provider.
- * @param depositArgs - An object containing the {@link ArbitrumDepositArgs arguments} to pass to the deposit function of the bridge contract.
- * @returns The transaction response obtained after sending the transaction.
+ * Checks if its possible to bridge from chain A to chain B.
+ * @param chainA  the chain to bridge from, that is, the chain that tokens are sent from.
+ * @param chainB  the destination chain, that is, where tokens will be sent.
+ * @returns Returns `true` if it is possible to bridge from chain A to chain B, `false` otherwise.
  */
-async function sendArbitrumDeposit(
-  signer: ethers.Signer,
-  { toAddress, token, amount }: ArbitrumDepositArgs
-): Promise<ethers.providers.TransactionResponse> {
-  const provider = PROVIDERS[ChainId.ARBITRUM]();
-  const account = await signer.getAddress();
-  const bridge = await Bridge.init(signer, provider.getSigner(account));
-  if (token === CHAINS[ChainId.ARBITRUM].ETHAddress) {
-    return bridge.depositETH(amount);
-  } else {
-    const depositParams = await bridge.getDepositTxParams({
-      erc20L1Address: token,
-      amount,
-      destinationAddress: toAddress,
-    });
-    return bridge.deposit(depositParams);
+function canBridge(chainA: ChainId, chainB: ChainId): boolean {
+  // can't bridge to itself
+  if (chainA === chainB) {
+    return false;
   }
-}
-type ArbitrumApprovalArgs = BaseApprovalArgs;
-/**
- * Approves the Arbitrum Bridge for `token` and `amount`.
- * @param signer A valid signer, must be connected to a provider.
- * @param approvalArgs An object containing the {@link ArbitrumApprovalArgs arguments} to pass to the approve function of the bridge contract.
- * @returns The transaction response obtained after sending the transaction.
- */
-async function sendArbitrumApproval(
-  signer: ethers.Signer,
-  { token, amount }: ArbitrumApprovalArgs
-): Promise<ethers.providers.TransactionResponse> {
-  const provider = PROVIDERS[ChainId.ARBITRUM]();
-  const account = await signer.getAddress();
-  const bridge = await Bridge.init(signer, provider.getSigner(account));
-  return bridge.approveToken(token, amount);
+  // check if they have at least one token in common
+  return filterTokensByDestinationChain(chainA, chainB).length > 0;
 }
 
-// OPTIMISM
-const optimismClient = new OptimismBridgeClient();
-type OptimismDepositArgs = BaseDepositArgs;
-type OptimismApprovalArgs = BaseApprovalArgs;
 /**
- * Makes a deposit on Optimism canonical bridge.
- * @param signer A valid signer, must be connected to a provider.
- * @param depositArgs - An object containing the {@link OptimismDepositArgs arguments} to pass to the deposit function of the bridge contract.
- * @returns The transaction response obtained after sending the transaction.
+ *
+ * @param fromChain the chain to bridge from, that is, the chain that tokens are sent from.
+ * @returns The list of chains that can be bridged to from the given `fromChain`.
  */
-async function sendOptimismDeposit(
-  signer: ethers.Signer,
-  { token, amount }: OptimismDepositArgs
-): Promise<ethers.providers.TransactionResponse> {
-  const bridge = new OptimismBridgeClient();
-  if (token === CHAINS[ChainId.OPTIMISM].ETHAddress) {
-    return bridge.depositEth(signer, amount);
-  } else {
-    const pairToken = optimismErc20Pairs()[token];
-    if (!pairToken) {
-      throw new Error(`Token ${token} not supported.`);
-    }
-    return bridge.depositERC20(signer, token, pairToken, amount);
-  }
-}
-/**
- * Approves the Optimism Bridge for `token` and `amount`.
- * @param signer A valid signer, must be connected to a provider.
- * @param approvalArgs An object containing the {@link BobaApproval arguments} to pass to the approve function of the bridge contract.
- * @returns The transaction response obtained after sending the transaction.
- */
-function sendOptimismApproval(
-  signer: ethers.Signer,
-  { token, amount }: OptimismApprovalArgs
-): Promise<ethers.providers.TransactionResponse> {
-  return optimismClient.approve(signer, token, amount);
+export function getReacheableChains(fromChain: ChainId): ChainId[] {
+  return CHAINS_SELECTION.filter((toChain) => canBridge(fromChain, toChain));
 }
 
-// BOBA
-
-const bobaClient = new BobaBridgeClient();
-type BobaDepositArgs = BaseDepositArgs;
-type BobaApprovalArgs = BaseApprovalArgs;
-/**
- * Makes a deposit on Boba canonical bridge.
- * @param signer A valid signer, must be connected to a provider.
- * @param depositArgs - An object containing the {@link BobaDepositArgs arguments} to pass to the deposit function of the bridge contract.
- * @returns The transaction response obtained after sending the transaction.
- */
-async function sendBobaDeposit(
-  signer: ethers.Signer,
-  { token, amount }: BobaDepositArgs
-): Promise<ethers.providers.TransactionResponse> {
-  if (token === CHAINS[ChainId.BOBA].ETHAddress) {
-    return bobaClient.depositEth(signer, amount);
-  } else {
-    const pairToken = bobaErc20Pairs()[token];
-    if (!pairToken) {
-      throw new Error(`Token ${token} not supported.`);
-    }
-    return bobaClient.depositERC20(signer, token, pairToken, amount);
-  }
-}
-/**
- * Approves the Boba Bridge for `token` and `amount`.
- * @param signer A valid signer, must be connected to a provider.
- * @param approvalArgs An object containing the {@link BobaApproval arguments} to pass to the approve function of the bridge contract.
- * @returns The transaction response obtained after sending the transaction.
- */
-function sendBobaApproval(
-  signer: ethers.Signer,
-  { token, amount }: BobaApprovalArgs
-): Promise<ethers.providers.TransactionResponse> {
-  return bobaClient.approve(signer, token, amount);
-}
-
-type AcrossDepositArgs = BaseDepositArgs & {
+type AcrossDepositArgs = {
   fromChain: ChainId;
+  toChain: ChainId;
+  toAddress: string;
+  amount: ethers.BigNumber;
+  token: string;
+  relayerFeePct: ethers.BigNumber;
   timestamp: number;
-  slowRelayFeePct: ethers.BigNumber;
-  instantRelayFeePct: ethers.BigNumber;
   referrer?: string;
 };
-type AcrossApprovalArgs = BaseApprovalArgs & {
+type AcrossApprovalArgs = {
   chainId: ChainId;
+  token: string;
+  amount: ethers.BigNumber;
 };
 /**
  * Makes a deposit on Across.
@@ -411,36 +295,30 @@ type AcrossApprovalArgs = BaseApprovalArgs & {
  * @param depositArgs - An object containing the {@link AcrossSendArgs arguments} to pass to the deposit function of the bridge contract.
  * @returns The transaction response obtained after sending the transaction.
  */
-async function sendAcrossDeposit(
+export async function sendAcrossDeposit(
   signer: ethers.Signer,
   {
-    toAddress: l1Recipient,
     fromChain,
-    amount,
     token,
-    timestamp,
-    slowRelayFeePct,
-    instantRelayFeePct,
+    amount,
+    toAddress: recipient,
+    toChain: destinationChainId,
+    relayerFeePct,
+    timestamp: quoteTimestamp,
     referrer,
   }: AcrossDepositArgs
 ): Promise<ethers.providers.TransactionResponse> {
-  if (!isL2(fromChain)) {
-    throw new Error(
-      "Across does not support mainnet deposits. The canonical bridge should be used instead."
-    );
-  }
-  const depositBox = getDepositBox(fromChain);
+  const spokePool = getSpokePool(fromChain);
   const isETH = token === CHAINS[fromChain].ETHAddress;
   const value = isETH ? amount : ethers.constants.Zero;
-  const l2Token = isETH ? TOKENS_LIST[fromChain][0].address : token;
-
-  const tx = await depositBox.populateTransaction.deposit(
-    l1Recipient,
-    l2Token,
+  const originToken = isETH ? TOKENS_LIST[fromChain][0].address : token;
+  const tx = await spokePool.populateTransaction.deposit(
+    recipient,
+    originToken,
     amount,
-    slowRelayFeePct,
-    instantRelayFeePct,
-    timestamp,
+    destinationChainId,
+    relayerFeePct,
+    quoteTimestamp,
     { value }
   );
 
@@ -453,53 +331,11 @@ async function sendAcrossDeposit(
   return signer.sendTransaction(tx);
 }
 
-async function sendAcrossApproval(
+export async function sendAcrossApproval(
   signer: ethers.Signer,
   { token, amount, chainId }: AcrossApprovalArgs
 ): Promise<ethers.providers.TransactionResponse> {
-  if (!isL2(chainId)) {
-    throw new Error(
-      "Across does not support mainnet deposits. The canonical bridge should be used instead."
-    );
-  }
-  const bridge = getDepositBox(chainId, signer);
+  const spoke = getSpokePool(chainId, signer);
   const tokenContract = clients.erc20.connect(token, signer);
-  return tokenContract.approve(bridge.address, amount);
-}
-type Route = {
-  approve: (
-    signer: ethers.Signer,
-    args: AcrossApprovalArgs
-  ) => Promise<ethers.providers.TransactionResponse>;
-  deposit: (
-    signer: ethers.Signer,
-    args: AcrossDepositArgs
-  ) => Promise<ethers.providers.TransactionResponse>;
-};
-/**
- * Returns the correct deposit and approval function to go from (and approve tokens) chain `fromChain` to chain `toChain`. Uses canonical bridges for going from Mainnet to an L2, and Across for everything else.
- * @param fromChain - the chain to bridge from, that is, the chain that tokens are sent from.
- * @param toChain - the destination chain, that is, where tokens will be sent.
- * @returns A {@link Route} object containing the deposit and approval functions.
- */
-export function getRoute(fromChain: ChainId, toChain: ChainId): Route {
-  if (fromChain !== ChainId.MAINNET) {
-    return {
-      approve: sendAcrossApproval,
-      deposit: sendAcrossDeposit,
-    };
-  }
-
-  switch (toChain) {
-    case ChainId.OPTIMISM:
-      return { approve: sendOptimismApproval, deposit: sendOptimismDeposit };
-
-    case ChainId.BOBA:
-      return { approve: sendBobaApproval, deposit: sendBobaDeposit };
-
-    case ChainId.ARBITRUM:
-      return { approve: sendArbitrumApproval, deposit: sendArbitrumDeposit };
-    default:
-      throw new Error(`Unsupported bridge ${toChain}`);
-  }
+  return tokenContract.approve(spoke.address, amount);
 }

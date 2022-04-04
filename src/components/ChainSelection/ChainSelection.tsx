@@ -56,9 +56,6 @@ const ChainSelection: React.FC = () => {
                   >
                     <Logo src={CHAINS[t].logoURI} alt={CHAINS[t].name} />
                     <div>{CHAINS[t].name}</div>
-                    <span className="layer-type">
-                      {index !== CHAINS_SELECTION.length - 1 ? "L2" : "L1"}
-                    </span>
                   </Item>
                 );
               })}
