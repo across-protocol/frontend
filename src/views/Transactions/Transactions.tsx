@@ -36,7 +36,6 @@ const Transactions = () => {
     setOpenOngoingRow,
     currentPage,
     setCurrentPage,
-    totalPerPage,
   } = useTransactionsView();
 
   const ongoingTx = useMemo(
@@ -124,21 +123,16 @@ const Transactions = () => {
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 elements={filledTx}
-                totalPerPage={totalPerPage}
               />
             ) : (
               <MobileTransactionsTableWithPagination
                 title="History"
                 headers={mobileHeaders}
-                rows={mobileFilledTx.slice(
-                  currentPage * totalPerPage,
-                  currentPage * totalPerPage + totalPerPage
-                )}
+                rows={mobileFilledTx}
                 openIndex={openFilledRow}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 elements={mobileFilledTx}
-                totalPerPage={totalPerPage}
               />
             )}
           </BottomRow>

@@ -28,10 +28,7 @@ export default function useTransactionsView() {
     setOpenOngoingRow,
     currentPage,
     setCurrentPage,
-    totalPerPage,
   };
 }
-
-const totalPerPage = 15;
 
 export const CLOSED_DROPDOWN_INDEX = -1;

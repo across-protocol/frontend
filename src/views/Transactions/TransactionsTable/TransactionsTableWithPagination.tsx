@@ -13,7 +13,6 @@ interface Props {
   headers: ICell[];
   title: string;
   elements: any[];
-  totalPerPage: number;
   currentPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }

@@ -3,6 +3,7 @@ import { ICell } from "components/Table/Table";
 import MobileTransactionsTable from "./MobileTransactionsTable";
 import Pagination from "components/Pagination";
 import { IMobileRow } from "./createMobileTransactionTableJSX";
+import paginate from "components/Pagination/paginate";
 
 interface Props {
   rows: IMobileRow[];
@@ -10,7 +11,6 @@ interface Props {
   title: string;
   elements: any[];
   openIndex: number;
-  totalPerPage: number;
   currentPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -23,22 +23,29 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
   elements,
   currentPage,
   setCurrentPage,
-  totalPerPage,
 }) => {
+  const elementCount = elements.length;
+
+  const paginateState = paginate({
+    elementCount,
+    currentPage,
+    maxNavigationCount: 5,
+  });
+
+  const paginatedRows = rows.slice(
+    paginateState.startIndex,
+    paginateState.endIndex
+  );
+
   return (
     <>
       <MobileTransactionsTable
-        rows={rows}
+        rows={paginatedRows}
         headers={headers}
         title={title}
         openIndex={openIndex}
       />
-      {/* <Pagination
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        elements={elements}
-        totalPerPage={totalPerPage}
-      /> */}
+      <Pagination onPageChange={setCurrentPage} {...paginateState} />
     </>
   );
 };
