@@ -1,5 +1,4 @@
 import { clients, across, utils } from "@uma/sdk";
-import { BridgePoolEthers__factory } from "@uma/contracts-frontend";
 import { ethers, BigNumber } from "ethers";
 import { SpokePool, SpokePool__factory } from "@across-protocol/contracts-v2";
 
@@ -16,9 +15,7 @@ import {
 
 import { isValidString, parseEther, tagAddress } from "./format";
 
-const lpFeeCalculator = new across.LpFeeCalculator(
-  PROVIDERS[ChainId.MAINNET]()
-);
+
 
 export function getSpokePool(
   chainId: ChainId,
@@ -94,35 +91,14 @@ export async function getLpFee(
   if (amount.lte(0)) {
     throw new Error(`Amount must be greater than 0.`);
   }
-  const { address: tokenAddress, bridgePool: bridgePoolAddress } = l1EqInfo;
 
   const result = {
-    pct: BigNumber.from(0),
+    pct: parseEther("1"),
     total: BigNumber.from(0),
     isLiquidityInsufficient: false,
   };
 
-  result.pct = await lpFeeCalculator.getLpFeePct(
-    tokenAddress,
-    bridgePoolAddress,
-    amount,
-    blockTime
-  );
   result.total = amount.mul(result.pct).div(parseEther("1"));
-
-  // TODO: move this into the sdk lp fee client
-  const provider = PROVIDERS[ChainId.MAINNET]();
-  const bridgePool = BridgePoolEthers__factory.connect(
-    bridgePoolAddress,
-    provider
-  );
-  const liquidityReserves = await bridgePool.liquidReserves();
-  const pendingReserves = await bridgePool.pendingReserves();
-
-  const isLiquidityInsufficient = liquidityReserves
-    .sub(pendingReserves)
-    .lte(amount);
-  result.isLiquidityInsufficient = isLiquidityInsufficient;
   return result;
 }
 
