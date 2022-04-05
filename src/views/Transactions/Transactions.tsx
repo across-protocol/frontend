@@ -120,10 +120,7 @@ const Transactions = () => {
               <TransactionsTableWithPagination
                 title="History"
                 headers={headers}
-                rows={filledTx.slice(
-                  currentPage * totalPerPage,
-                  currentPage * totalPerPage + totalPerPage
-                )}
+                rows={filledTx}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 elements={filledTx}

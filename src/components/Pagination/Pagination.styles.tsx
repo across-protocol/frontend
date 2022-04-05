@@ -41,3 +41,19 @@ export const ElementWrapper = styled.div<IElementWrapper>`
     cursor: pointer;
   }
 `;
+
+interface INextWrapper {
+  disabled?: boolean;
+}
+
+export const NextElement = styled.div<INextWrapper>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #565656;
+  height: 32px;
+  width: 32px;
+  &:hover {
+    cursor: pointer;
+  }
+`;

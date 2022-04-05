@@ -2,6 +2,8 @@ import { FC } from "react";
 import { ICell, IRow } from "components/Table/Table";
 import TransactionsTable from "./TransactionsTable";
 import Pagination from "components/Pagination";
+import paginate from "components/Pagination/paginate";
+
 interface TxTableIRow extends IRow {
   onClick?: () => void;
 }
@@ -23,17 +25,24 @@ const TransactionsTableWithPagination: FC<Props> = ({
   elements,
   currentPage,
   setCurrentPage,
-  totalPerPage,
 }) => {
+  const elementCount = elements.length;
+
+  const paginateState = paginate({
+    elementCount,
+    currentPage,
+    maxNavigationCount: 5,
+  });
+
+  const paginatedRows = rows.slice(
+    paginateState.startIndex,
+    paginateState.endIndex
+  );
+
   return (
     <>
-      <TransactionsTable rows={rows} headers={headers} title={title} />
-      <Pagination
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        elements={elements}
-        totalPerPage={totalPerPage}
-      />
+      <TransactionsTable rows={paginatedRows} headers={headers} title={title} />
+      <Pagination onPageChange={setCurrentPage} {...paginateState} />
     </>
   );
 };

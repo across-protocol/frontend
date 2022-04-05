@@ -33,12 +33,12 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
         title={title}
         openIndex={openIndex}
       />
-      <Pagination
+      {/* <Pagination
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         elements={elements}
         totalPerPage={totalPerPage}
-      />
+      /> */}
     </>
   );
 };
