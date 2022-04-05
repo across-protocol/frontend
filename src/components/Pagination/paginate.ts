@@ -1,16 +1,21 @@
 import assert from "assert";
-interface PartialNavbarProps {
-  list: number[];
-  maxLength: number;
-  index: number;
-}
-type PartialNavbarResult = PartialNavbarProps;
+import {
+  PartialNavbarArgs,
+  PartialNavbarResult,
+  NavigateArgs,
+  NavigateResult,
+  PageArgs,
+  PageResult,
+  PaginateArgs,
+  PaginateValues,
+} from "./paginate.d";
+
 // Utility to turn a full list of pages 1-N to a subset of pages around the current page
 function partialNavbar({
   list,
   maxLength,
   index,
-}: PartialNavbarProps): PartialNavbarResult {
+}: PartialNavbarArgs): PartialNavbarResult {
   const length = Math.min(list.length, maxLength);
   const sliceStart = index - Math.floor(length / 2);
   const sliceEnd = Math.ceil(length / 2) + index;
@@ -29,22 +34,12 @@ function partialNavbar({
   };
 }
 
-interface PageProps {
-  elementCount: number;
-  elementsPerPage: number;
-  currentPage: number;
-}
-
-export interface PageResult {
-  startIndex: number;
-  endIndex: number;
-}
 // calculate the rows or elements you need to slice from the main array for this page
-export function page({
+function page({
   elementCount,
   elementsPerPage,
   currentPage,
-}: PageProps): PageResult {
+}: PageArgs): PageResult {
   assert(currentPage >= 0, "Invalid current page, below 0");
 
   const startIndex = Math.min(currentPage * elementsPerPage, elementCount);
@@ -59,27 +54,13 @@ export function page({
   };
 }
 
-interface NavigateProps {
-  totalPages: number;
-  lastPage: number;
-  currentPage: number;
-  maxNavigationCount: number;
-}
-interface NavigateResult {
-  pageList: number[];
-  activeIndex: number;
-  hideStart: boolean;
-  hideEnd: boolean;
-  disableForward: boolean;
-  disableBack: boolean;
-}
 // calculates the state of the page navigation numbers only
-export function navigate({
+function navigate({
   totalPages,
   lastPage,
   currentPage,
   maxNavigationCount,
-}: NavigateProps): NavigateResult {
+}: NavigateArgs): NavigateResult {
   const navigationList = [...Array(totalPages).keys()];
   const partialNavigation = partialNavbar({
     list: navigationList,
@@ -111,25 +92,13 @@ export function navigate({
   };
 }
 
-interface PaginateProps {
-  elementCount: number;
-  elementsPerPage?: number;
-  currentPage: number;
-  maxNavigationCount: number;
-}
-
-interface PaginateValues extends PaginateProps, NavigateResult, PageResult {
-  totalPages: number;
-  lastPage: number;
-}
-
 // the main interface to paginating both the page and the page navigation state
 export default function paginate({
   elementCount,
   elementsPerPage = 25,
   currentPage = 0,
   maxNavigationCount = 5,
-}: PaginateProps): PaginateValues {
+}: PaginateArgs): PaginateValues {
   const totalPages = Math.ceil(elementCount / elementsPerPage);
   const lastPage = Math.max(totalPages - 1, 0);
   if (currentPage < 0) currentPage = 0;
