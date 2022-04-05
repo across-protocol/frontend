@@ -17,11 +17,9 @@ interface IElementWrapper {
 }
 
 export const ElementWrapper = styled.div<IElementWrapper>`
-  background-color: ${({ active }) =>
-    active ? "var(--color-primary)" : "var(--color-gray-250)"};
-  color: ${({ active }) =>
-    active ? "var(--color-gray-250)" : "var(--color-primary)"};
-  border: 1px solid var(--color-primary);
+  background-color: ${({ active }) => (active ? "#565757" : "#2C2F33")};
+  color: #fffefe;
+  border: 1px solid #565757;
   height: 30px;
   width: 30px;
   border-radius: 6px;
@@ -36,8 +34,8 @@ export const ElementWrapper = styled.div<IElementWrapper>`
     margin-left: 12px;
   }
   &:hover {
-    background-color: var(--color-primary-hover);
-    color: var(--color-primary);
+    opacity: 0.7;
+    background-color: #565757;
     cursor: pointer;
   }
 `;
@@ -50,7 +48,7 @@ export const NextElement = styled.div<INextWrapper>`
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #565656;
+  color: #fffefe;
   height: 32px;
   width: 32px;
   &:hover {
