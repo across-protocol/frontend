@@ -121,7 +121,7 @@ function processRawTokens(tokens: typeof rawTokens): Record<ChainId, TokenList> 
     }, {} as Record<ChainId, TokenList>);
 }
 export const TOKENS_LIST: Record<ChainId, TokenList> = processRawTokens(rawTokens);
-//superstruct.assert(TOKENS_LIST, TokensList);
+
 export type ChainInfo = {
   name: string;
   fullName?: string;
