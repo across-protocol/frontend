@@ -20,7 +20,7 @@ export const ElementWrapper = styled.div<IElementWrapper>`
   background-color: ${({ active }) =>
     active ? "var(--color-pagination)" : "var(--color-gray-160"};
   color: var(--color-white);
-  border: 1px solid #565757;
+  border: 1px solid var(--color-pagination);
   height: 30px;
   width: 30px;
   border-radius: 6px;
