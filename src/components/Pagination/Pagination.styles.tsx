@@ -17,8 +17,9 @@ interface IElementWrapper {
 }
 
 export const ElementWrapper = styled.div<IElementWrapper>`
-  background-color: ${({ active }) => (active ? "#565757" : "#2C2F33")};
-  color: #fffefe;
+  background-color: ${({ active }) =>
+    active ? "var(--color-pagination)" : "var(--color-gray-160"};
+  color: var(--color-white);
   border: 1px solid #565757;
   height: 30px;
   width: 30px;
@@ -35,7 +36,7 @@ export const ElementWrapper = styled.div<IElementWrapper>`
   }
   &:hover {
     opacity: 0.7;
-    background-color: #565757;
+    background-color: var(--color-pagination);
     cursor: pointer;
   }
 `;
@@ -48,7 +49,7 @@ export const NextElement = styled.div<INextWrapper>`
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #fffefe;
+  color: var(--color-white);
   height: 32px;
   width: 32px;
   &:hover {

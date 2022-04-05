@@ -33,6 +33,9 @@ export const COLORS = {
     100: "0deg 0% 89%",
     // Hex: #F5F5F5
     150: "0deg 0% 96%",
+
+    // #2C2F33
+    160: "214.3deg 7.4% 18.6%",
     // #27292c
     175: "216deg 6% 16.3%",
     // hsl(214.3,7.4%,18.6%)
@@ -50,7 +53,8 @@ export const COLORS = {
   primary: {
     // #6df8d8
     500: "166deg 92% 70%",
-
+    // #565757
+    600: "180deg 0.6% 33.9%",
     700: "180deg 15% 25%",
   },
   secondary: {
@@ -293,7 +297,6 @@ export const TESTNET_CHAINS_SELECTION = [
 export const CHAINS_SELECTION = isProduction()
   ? PRODUCTION_CHAINS_SELECTION
   : [...PRODUCTION_CHAINS_SELECTION, ...TESTNET_CHAINS_SELECTION];
-
 
 /** FIXME:  use the actual spoke pool addresses!!!! */
 export const SPOKE_ADDRESSES: Record<ChainId, string> = {
