@@ -31,8 +31,7 @@ export async function switchChain(
       }
     } else {
       console.error(
-        `Failed to switch to ${
-          CHAINS[chainId].fullName ?? CHAINS[chainId].name
+        `Failed to switch to ${CHAINS[chainId].fullName ?? CHAINS[chainId].name
         }`,
         switchError
       );
@@ -40,9 +39,7 @@ export async function switchChain(
   }
 }
 
-export function isSupportedChainId(chainId: number): chainId is ChainId {
-  return chainId in ChainId;
-}
+
 
 export function isTestnet(chainId: ChainId): boolean {
   return TESTNET_CHAINS_SELECTION.includes(chainId);

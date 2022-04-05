@@ -8,7 +8,7 @@ import memoize from "lodash-es/memoize";
 import bobaLogo from "assets/boba-logo.svg";
 import { getAddress } from "./address";
 import rawTokens from "../data/tokens.json";
-//import * as superstruct from 'superstruct';
+import * as superstruct from 'superstruct';
 
 /* Colors and Media Queries section */
 
@@ -82,7 +82,6 @@ export type Token = {
   symbol: string;
   decimals: number;
   logoURI: string;
-  bridgePool: string;
 };
 // enforce weth to be first so we can use it as a guarantee in other parts of the app
 type TokenList = [
@@ -92,20 +91,32 @@ type TokenList = [
     name: "Wrapped Ether";
     decimals: 18;
     logoURI: typeof wethLogo;
-    bridgePool: string;
   },
   ...Token[]
 ];
-//const SuperStructChainId = superstruct.define<ChainId>("ChainId", (v: unknown) => typeof v === "number" && ChainId[v])
-//const TokensList = superstruct.record(SuperStructChainId as any, superstruct.array(superstruct.any()));
+
+const TokensList = superstruct.array(superstruct.object({
+  address: superstruct.string(),
+  symbol: superstruct.string(),
+  name: superstruct.string(),
+  decimals: superstruct.number(),
+  logoURI: superstruct.string(),
+}));
+export function isSupportedChainId(chainId: number): chainId is ChainId {
+  return chainId in ChainId;
+}
 function processRawTokens(tokens: typeof rawTokens): Record<ChainId, TokenList> {
   return Object.entries(tokens)
     .reduce((record, [rawChainId, rawTokens]) => {
       const chainId: ChainId = Number(rawChainId);
+      if (!isSupportedChainId(chainId)) {
+        throw new Error(`Unsupported chainId: ${chainId}`);
+      }
       const tokens = rawTokens.map(token => ({
         ...token,
         logoURI: process.env.PUBLIC_URL + token.logoURI,
-      }))
+      }));
+      superstruct.assert(tokens, TokensList);
       return { ...record, [chainId]: tokens };
     }, {} as Record<ChainId, TokenList>);
 }

@@ -46,7 +46,7 @@ const PoolSelection: FC<Props> = ({ token, setToken }) => {
     defaultSelectedItem: token,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
-        setToken(selectedItem);
+        setToken(selectedItem as any);
       }
     },
   });

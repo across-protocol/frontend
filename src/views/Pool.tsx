@@ -7,7 +7,6 @@ import DepositSuccess from "components/PoolForm/DepositSuccess";
 import {
   TOKENS_LIST,
   ChainId,
-  Token,
   UnsupportedChainIdError,
   COLORS,
   QUERIES,
@@ -27,7 +26,7 @@ import { SuperHeader } from "components";
 export type ShowSuccess = "deposit" | "withdraw";
 
 const Pool: FC = () => {
-  const [token, setToken] = useState<Token>(TOKENS_LIST[ChainId.MAINNET][2]);
+  const [token, setToken] = useState<any>(TOKENS_LIST[ChainId.MAINNET][2]);
   const [showSuccess, setShowSuccess] = useState<ShowSuccess | undefined>();
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);
