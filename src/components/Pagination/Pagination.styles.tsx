@@ -18,7 +18,7 @@ interface IElementWrapper {
 
 export const ElementWrapper = styled.div<IElementWrapper>`
   background-color: ${({ active }) =>
-    active ? "var(--color-pagination)" : "var(--color-gray-160"};
+    active ? "var(--color-pagination)" : "var(--color-gray-160)"};
   color: var(--color-white);
   border: 1px solid var(--color-pagination);
   height: 30px;
@@ -28,12 +28,6 @@ export const ElementWrapper = styled.div<IElementWrapper>`
   margin: 0 3px;
   font-size: ${16 / 16}rem;
   align-items: center;
-  &:first-of-type {
-    margin-right: 12px;
-  }
-  &:last-of-type {
-    margin-left: 12px;
-  }
   &:hover {
     opacity: 0.7;
     background-color: var(--color-pagination);
