@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@across-protocol/contracts-v2": "^0.0.34",
+    "@across-protocol/sdk-v2": "^0.0.2",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@eth-optimism/contracts": "^0.5.5",

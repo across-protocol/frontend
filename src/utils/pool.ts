@@ -1,7 +1,6 @@
-import assert from "assert";
-import { clients } from "@uma/sdk";
 import { ethers, Signer, BigNumberish, BigNumber } from "ethers";
 import { toWeiSafe } from "./weiMath";
+import { poolClient } from "state/poolsApi";
 
 export const DEFAULT_GAS_PRICE = toWeiSafe(
   process.env.REACT_APP_DEFAULT_GAS_PRICE || "400",
@@ -44,22 +43,23 @@ export async function getGasPrice(
 // calculate exact amount of gas needed for tx
 export async function gasForAddEthLiquidity(
   signer: Signer,
-  bridgeAddress: string,
+  tokenAddress: string,
   balance: BigNumberish
 ) {
-  return clients.bridgePool
-    .connect(bridgeAddress, signer)
-    .estimateGas.addLiquidity(balance, { value: balance });
+  const contract = poolClient.createHubPoolContract(signer);
+  return contract.estimateGas.addLiquidity(tokenAddress, balance, {
+    value: balance,
+  });
 }
 
 // combine all gas values to get a good gas estimate
 export async function estimateGasForAddEthLiquidity(
   signer: Signer,
-  bridgeAddress: string,
+  tokenAddress: string,
   balance: BigNumberish = BigNumber.from("1")
 ) {
-  assert(signer.provider, "requires signer with provider");
-  const gasPrice = await getGasPrice(signer.provider);
-  const gas = await gasForAddEthLiquidity(signer, bridgeAddress, balance);
+  const { provider } = poolClient.deps;
+  const gasPrice = await getGasPrice(provider);
+  const gas = await gasForAddEthLiquidity(signer, tokenAddress, balance);
   return estimateGas(gas, gasPrice, GAS_PRICE_BUFFER);
 }

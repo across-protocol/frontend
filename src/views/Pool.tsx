@@ -13,6 +13,7 @@ import {
   max,
   switchChain,
   CHAINS,
+  Token,
 } from "utils";
 import { useAppSelector, useConnection, useBalance } from "state/hooks";
 import get from "lodash/get";
@@ -26,50 +27,69 @@ import { SuperHeader } from "components";
 export type ShowSuccess = "deposit" | "withdraw";
 
 const Pool: FC = () => {
-  const [token, setToken] = useState<any>(TOKENS_LIST[ChainId.MAINNET][2]);
+  // casting chainId to ChainId as the pool client does not share that type. We validate it before setting the config in client.
+  const { chainId = 1, hubPoolAddress } = poolClient.config as {
+    chainId: ChainId;
+    hubPoolAddress: string;
+  };
+  const tokenList = TOKENS_LIST[chainId as ChainId];
+  const [token, setToken] = useState<Token>(tokenList[2]);
   const [showSuccess, setShowSuccess] = useState<ShowSuccess | undefined>();
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);
   const [defaultTab, setDefaultTab] = useState("Add");
-  const pool = useAppSelector((state) => state.pools.pools[token.bridgePool]);
+  const pool = useAppSelector((state) => state.pools.pools[token.address]);
   const connection = useAppSelector((state) => state.connection);
   const userPosition = useAppSelector((state) =>
     get(state, [
       "pools",
       "users",
       state?.connection?.account || "",
-      token.bridgePool,
+      token.address,
     ])
   );
 
-  const { isConnected, account, provider, error, chainId } = useConnection();
+  const {
+    isConnected,
+    account,
+    provider,
+    error,
+    chainId: activeChainId,
+  } = useConnection();
 
   const queries = useAppSelector((state) => state.api.queries);
 
   const { balance, refetch: refetchBalance } = useBalance({
-    chainId: ChainId.MAINNET,
+    chainId,
     account,
     tokenAddress: token.address,
   });
 
   const wrongNetwork =
     provider &&
-    (error instanceof UnsupportedChainIdError || chainId !== ChainId.MAINNET);
+    (error instanceof UnsupportedChainIdError || chainId !== activeChainId);
 
   // Update pool info when token changes
   useEffect(() => {
     setLoadingPoolState(true);
 
-    poolClient.updatePool(token.bridgePool).then((res) => {
-      setLoadingPoolState(false);
-    });
+    poolClient
+      .updatePool(token.address)
+      .catch((err) => {
+        console.error("Unable to load pool info", err);
+      })
+      .finally(() => {
+        setLoadingPoolState(false);
+      });
   }, [token, setLoadingPoolState]);
 
   useEffect(() => {
-    if (isConnected && connection.account && token.bridgePool) {
-      poolClient.updateUser(connection.account, token.bridgePool);
+    if (isConnected && connection.account && token.address) {
+      poolClient
+        .updateUser(connection.account, token.address)
+        .catch((err) => console.error("error loading user", err));
     }
-  }, [isConnected, connection.account, token.bridgePool]);
+  }, [isConnected, connection.account, token.address]);
 
   useEffect(() => {
     // Recheck for balances. note: Onboard provider is faster than ours.
@@ -86,8 +106,8 @@ const Pool: FC = () => {
         <SuperHeader>
           <div>
             You are on an incorrect network. Please{" "}
-            <button onClick={() => switchChain(provider, ChainId.MAINNET)}>
-              switch to {CHAINS[ChainId.MAINNET].name}
+            <button onClick={() => switchChain(provider, chainId)}>
+              switch to {CHAINS[chainId].name}
             </button>
           </div>
         </SuperHeader>
@@ -95,6 +115,7 @@ const Pool: FC = () => {
       {!showSuccess ? (
         <Wrapper>
           <PoolSelection
+            tokenList={tokenList}
             wrongNetwork={wrongNetwork}
             token={token}
             setToken={setToken}
@@ -141,7 +162,7 @@ const Pool: FC = () => {
                   ? ethers.BigNumber.from(userPosition.lpTokens)
                   : ethers.BigNumber.from("0")
               }
-              bridgeAddress={token.bridgePool}
+              hubPoolAddress={hubPoolAddress}
               ethBalance={
                 account
                   ? // Very odd key assigned to these values.

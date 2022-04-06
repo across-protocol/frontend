@@ -1,5 +1,7 @@
 import { ethers } from "ethers";
+import assert from "assert";
 import { Initialization } from "bnc-onboard/dist/src/interfaces";
+import * as acrossSdk from "@across-protocol/sdk-v2";
 import ethereumLogo from "assets/ethereum-logo.svg";
 import optimismLogo from "assets/optimism-alt-logo.svg";
 import wethLogo from "assets/weth-logo.svg";
@@ -8,7 +10,7 @@ import memoize from "lodash-es/memoize";
 import bobaLogo from "assets/boba-logo.svg";
 import { getAddress } from "./address";
 import rawTokens from "../data/tokens.json";
-import * as superstruct from 'superstruct';
+import * as superstruct from "superstruct";
 
 /* Colors and Media Queries section */
 
@@ -84,7 +86,7 @@ export type Token = {
   logoURI: string;
 };
 // enforce weth to be first so we can use it as a guarantee in other parts of the app
-type TokenList = [
+export type TokenList = [
   {
     address: string;
     symbol: "WETH";
@@ -95,32 +97,37 @@ type TokenList = [
   ...Token[]
 ];
 
-const TokensList = superstruct.array(superstruct.object({
-  address: superstruct.string(),
-  symbol: superstruct.string(),
-  name: superstruct.string(),
-  decimals: superstruct.number(),
-  logoURI: superstruct.string(),
-}));
+const TokensList = superstruct.array(
+  superstruct.object({
+    address: superstruct.string(),
+    symbol: superstruct.string(),
+    name: superstruct.string(),
+    decimals: superstruct.number(),
+    logoURI: superstruct.string(),
+  })
+);
 export function isSupportedChainId(chainId: number): chainId is ChainId {
   return chainId in ChainId;
 }
-function processRawTokens(tokens: typeof rawTokens): Record<ChainId, TokenList> {
-  return Object.entries(tokens)
-    .reduce((record, [rawChainId, rawTokens]) => {
-      const chainId: ChainId = Number(rawChainId);
-      if (!isSupportedChainId(chainId)) {
-        throw new Error(`Unsupported chainId: ${chainId}`);
-      }
-      const tokens = rawTokens.map(token => ({
-        ...token,
-        logoURI: process.env.PUBLIC_URL + token.logoURI,
-      }));
-      superstruct.assert(tokens, TokensList);
-      return { ...record, [chainId]: tokens };
-    }, {} as Record<ChainId, TokenList>);
+function processRawTokens(
+  tokens: typeof rawTokens
+): Record<ChainId, TokenList> {
+  return Object.entries(tokens).reduce((record, [rawChainId, rawTokens]) => {
+    const chainId: ChainId = Number(rawChainId);
+    if (!isSupportedChainId(chainId)) {
+      throw new Error(`Unsupported chainId: ${chainId}`);
+    }
+    const tokens = rawTokens.map((token) => ({
+      ...token,
+      logoURI: process.env.PUBLIC_URL + token.logoURI,
+    }));
+    superstruct.assert(tokens, TokensList);
+    return { ...record, [chainId]: tokens };
+  }, {} as Record<ChainId, TokenList>);
 }
-export const TOKENS_LIST: Record<ChainId, TokenList> = processRawTokens(rawTokens);
+
+export const TOKENS_LIST: Record<ChainId, TokenList> =
+  processRawTokens(rawTokens);
 
 export type ChainInfo = {
   name: string;
@@ -290,7 +297,6 @@ export const CHAINS_SELECTION = isProduction()
   ? PRODUCTION_CHAINS_SELECTION
   : [...PRODUCTION_CHAINS_SELECTION, ...TESTNET_CHAINS_SELECTION];
 
-
 /** FIXME:  use the actual spoke pool addresses!!!! */
 export const SPOKE_ADDRESSES: Record<ChainId, string> = {
   [ChainId.MAINNET]: ethers.constants.AddressZero,
@@ -305,6 +311,28 @@ export const SPOKE_ADDRESSES: Record<ChainId, string> = {
   [ChainId.ARBITRUM_RINKEBY]: getAddress(
     "0x3BED21dAe767e4Df894B31b14aD32369cE4bad8b"
   ),
+};
+// Update once addresses are known
+export const HUBPOOL_ADDRESSES: Record<ChainId, string> = {
+  [ChainId.MAINNET]: ethers.constants.AddressZero,
+  [ChainId.OPTIMISM]: ethers.constants.AddressZero,
+  [ChainId.BOBA]: ethers.constants.AddressZero,
+  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
+  [ChainId.RINKEBY]: ethers.constants.AddressZero,
+  [ChainId.KOVAN]: getAddress("0xD449Af45a032Df413b497A709EeD3E8C112EbcE3"),
+  [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
+  [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
+};
+// Update once addresses are known
+export const RATEMODEL_ADDRESSES: Record<ChainId, string> = {
+  [ChainId.MAINNET]: ethers.constants.AddressZero,
+  [ChainId.OPTIMISM]: ethers.constants.AddressZero,
+  [ChainId.BOBA]: ethers.constants.AddressZero,
+  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
+  [ChainId.RINKEBY]: ethers.constants.AddressZero,
+  [ChainId.KOVAN]: getAddress("0x5923929DF7A2D6E038bb005B167c1E8a86cd13C8"),
+  [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
+  [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
 };
 
 type GetProvider = () => ethers.providers.JsonRpcProvider;
@@ -410,3 +438,44 @@ export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
 export const FEE_ESTIMATION = ".004";
 export const CONFIRMATIONS =
   Number(process.env.REACT_APP_PUBLIC_CONFIRMATIONS) || 1;
+
+export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
+  const weth = TOKENS_LIST[chainId].find((x: Token) => x.symbol === "WETH");
+  assert(weth, "WETH address not found on chain " + chainId);
+  assert(
+    weth.address !== ethers.constants.AddressZero,
+    "WETH address not set on chain " + chainId
+  );
+
+  const hubPoolAddress = ethers.utils.getAddress(HUBPOOL_ADDRESSES[chainId]);
+  assert(
+    hubPoolAddress,
+    "hubPoolAddress address not found on chain " + chainId
+  );
+  assert(
+    hubPoolAddress !== ethers.constants.AddressZero,
+    "hubPoolAddress address not set on chain " + chainId
+  );
+
+  const rateModelStoreAddress = ethers.utils.getAddress(
+    RATEMODEL_ADDRESSES[chainId]
+  );
+  assert(
+    rateModelStoreAddress,
+    "rateModelStoreAddress address not found on chain " + chainId
+  );
+  assert(
+    rateModelStoreAddress !== ethers.constants.AddressZero,
+    "rateModelStoreAddress address not set on chain " + chainId
+  );
+
+  return {
+    chainId,
+    hubPoolAddress,
+    wethAddress: ethers.utils.getAddress(weth.address),
+    rateModelStoreAddress,
+  };
+}
+// default to kovan when testing
+export const HUBPOOL_CHAINID = isProduction() ? ChainId.MAINNET : ChainId.KOVAN;
+export const HUBPOOL_CONFIG = makePoolClientConfig(HUBPOOL_CHAINID);

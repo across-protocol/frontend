@@ -2,6 +2,20 @@
 # yarn lockfile v1
 
 
+"@across-protocol/contracts-v2@^0.0.29":
+  version "0.0.29"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-0.0.29.tgz#4b2b3ba0f0d300af1b783ba604e5298cdd6007dc"
+  integrity sha512-TQFv5D3VIKuMQFBm89tBkaCY9HqFJmMr6rBk7YwkAF18donLb5/hUUg8BJvvAeCiF8O0OrouOjkO27WjZrVY0Q==
+  dependencies:
+    "@defi-wonderland/smock" "^2.0.7"
+    "@eth-optimism/contracts" "^0.5.11"
+    "@openzeppelin/contracts" "^4.4.2"
+    "@uma/common" "^2.17.0"
+    "@uma/contracts-node" "^0.2.0"
+    "@uma/core" "^2.24.0"
+    arb-bridge-eth "^0.7.4"
+    arb-bridge-peripherals "^1.0.5"
+
 "@across-protocol/contracts-v2@^0.0.34":
   version "0.0.34"
   resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-0.0.34.tgz#e36b5a641e5fe75bd5c08706082750abd489968c"
@@ -24,6 +38,18 @@
     "@eth-optimism/contracts" "^0.5.5"
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
+
+"@across-protocol/sdk-v2@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.0.2.tgz#822903dd68a359cd316f85f46265c18266a875be"
+  integrity sha512-xyVlzuRbBrDV0E9WzdZUewUzEpEmip3gtor9zfUpD07KIBMW/qcdVam5PvGsD8GnYl8i/2vNdiW81m9jLTz6gg==
+  dependencies:
+    "@across-protocol/contracts-v2" "^0.0.29"
+    "@uma/sdk" "^0.22.1"
+    decimal.js "^10.3.1"
+    ethers "^5.6.1"
+    hardhat-deploy "^0.11.2"
+    hardhat-gas-reporter "^1.0.8"
 
 "@apocentre/alias-sampling@^0.5.3":
   version "0.5.3"
@@ -1783,7 +1809,7 @@
   dependencies:
     "@ethersproject/bignumber" "^5.5.0"
 
-"@ethersproject/constants@5.6.0", "@ethersproject/constants@^5.0.8", "@ethersproject/constants@^5.6.0":
+"@ethersproject/constants@5.6.0", "@ethersproject/constants@^5.0.8", "@ethersproject/constants@^5.4.0", "@ethersproject/constants@^5.6.0":
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/constants/-/constants-5.6.0.tgz#55e3eb0918584d3acc0688e9958b0cedef297088"
   integrity sha512-SrdaJx2bK0WQl23nSpV/b1aq293Lh0sUaZT/yYKPDKn4tlAbkH96SPJwIhwSwTsoQQZxuh1jnqsKwyymoiBdWA==
@@ -4888,6 +4914,11 @@
   resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.2.0.tgz#34fc2be643153a18fcdbe6572002cf54d8e58692"
   integrity sha512-ZF9ooxXhcdO+H1Zkl5VzMT3ccUqDfgpIc3f4yle+vXWshiFuFdEyW2PMnnyRozZ1NihSMkNkcl45zpH0dFnoUw==
 
+"@uma/contracts-frontend@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.3.2.tgz#97b187d017f8c2dc6f66924ad31cdea5a3dc5aa0"
+  integrity sha512-WwTrmF+11EKT6Um+JfrqZOajeGNExdiOXZO4iIolUpTG4xBYI0D1KAGzUc2BNvkWAxD6ZdNuRqnQIvCX7+ySvQ==
+
 "@uma/contracts-node@^0.1.17":
   version "0.1.17"
   resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.1.17.tgz#c69af7bc849efed1750476c74282c06366635ebe"
@@ -4897,6 +4928,11 @@
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.2.0.tgz#81c76c9100a2a1d94eea59b04e091eecb0fb29cb"
   integrity sha512-Z8x3UcpPbjplFlWNMV+qKzcxvbnQD6PTWIW5l05J9YwbN7lbxjt3fK+ns6RTHkfKJwHifQeSbJ8nzqV4zo/b1Q==
+
+"@uma/contracts-node@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.3.2.tgz#884b00b2c6bf983c9f136d5f8a0749c5ff4e08cd"
+  integrity sha512-Ncl7Kv2nxuY/wV5oczH2Nf6XCS7dJLad9DlzMI3jwPMPU98YT8ChHydcDe6ZiL0SAVTg7FgpIyh7lX0B7nV9Aw==
 
 "@uma/core@^2.18.0", "@uma/core@^2.24.0":
   version "2.25.1"
@@ -4920,6 +4956,22 @@
     "@types/lodash-es" "^4.17.5"
     "@uma/contracts-frontend" "^0.2.0"
     "@uma/contracts-node" "^0.2.0"
+    axios "^0.24.0"
+    bn.js "^4.11.9"
+    decimal.js "^10.3.1"
+    highland "^2.13.5"
+    immer "^9.0.7"
+    lodash-es "^4.17.21"
+
+"@uma/sdk@^0.22.1":
+  version "0.22.2"
+  resolved "https://registry.yarnpkg.com/@uma/sdk/-/sdk-0.22.2.tgz#260ca268ae54084d0bae45e38affc2043c79b902"
+  integrity sha512-mgfRW8ZH4WuzoYgiEB5JWWEQjzYgaD5hCdY/mleq2r0GS17RpHslWy0y/xfCoDpAhVlsidMWn2QknmSeQc/z9Q==
+  dependencies:
+    "@google-cloud/datastore" "^6.6.0"
+    "@types/lodash-es" "^4.17.5"
+    "@uma/contracts-frontend" "^0.3.2"
+    "@uma/contracts-node" "^0.3.2"
     axios "^0.24.0"
     bn.js "^4.11.9"
     decimal.js "^10.3.1"
@@ -11054,7 +11106,7 @@ ethers@^5.0.13, ethers@^5.0.31, ethers@^5.4.5, ethers@^5.4.7, ethers@^5.5.0:
     "@ethersproject/web" "5.5.1"
     "@ethersproject/wordlists" "5.5.0"
 
-ethers@^5.5.4, ethers@^5.6.0:
+ethers@^5.5.4, ethers@^5.6.0, ethers@^5.6.1:
   version "5.6.2"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.6.2.tgz#e75bac7f038c5e0fdde667dba62fc223924143a2"
   integrity sha512-EzGCbns24/Yluu7+ToWnMca3SXJ1Jk1BvWB7CCmVNxyOeM4LLvw2OLuIHhlkhQk1dtOcj9UMsdkxUh8RiG1dxQ==
@@ -12492,7 +12544,35 @@ hardhat-deploy@0.9.1:
     murmur-128 "^0.2.1"
     qs "^6.9.4"
 
-hardhat-gas-reporter@^1.0.4:
+hardhat-deploy@^0.11.2:
+  version "0.11.4"
+  resolved "https://registry.yarnpkg.com/hardhat-deploy/-/hardhat-deploy-0.11.4.tgz#39b06d3b0ad25195071cc1f2f71649b1f9f030d0"
+  integrity sha512-BNMwWqaxrwb8XKrYzmCwnUzOSKzicUBk+fwd28doUNoAGFFh8kpoypkcHMzKDVdLhnamAardcfqJet73zrZoTA==
+  dependencies:
+    "@ethersproject/abi" "^5.4.0"
+    "@ethersproject/abstract-signer" "^5.4.1"
+    "@ethersproject/address" "^5.4.0"
+    "@ethersproject/bignumber" "^5.4.1"
+    "@ethersproject/bytes" "^5.4.0"
+    "@ethersproject/constants" "^5.4.0"
+    "@ethersproject/contracts" "^5.4.1"
+    "@ethersproject/providers" "^5.4.4"
+    "@ethersproject/solidity" "^5.4.0"
+    "@ethersproject/transactions" "^5.4.0"
+    "@ethersproject/wallet" "^5.4.0"
+    "@types/qs" "^6.9.7"
+    axios "^0.21.1"
+    chalk "^4.1.2"
+    chokidar "^3.5.2"
+    debug "^4.3.2"
+    enquirer "^2.3.6"
+    form-data "^4.0.0"
+    fs-extra "^10.0.0"
+    match-all "^1.2.6"
+    murmur-128 "^0.2.1"
+    qs "^6.9.4"
+
+hardhat-gas-reporter@^1.0.4, hardhat-gas-reporter@^1.0.8:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/hardhat-gas-reporter/-/hardhat-gas-reporter-1.0.8.tgz#93ce271358cd748d9c4185dbb9d1d5525ec145e0"
   integrity sha512-1G5thPnnhcwLHsFnl759f2tgElvuwdkzxlI65fC9PwxYMEe9cmjkVAAWTf3/3y8uP6ZSPiUiOW8PgZnykmZe0g==

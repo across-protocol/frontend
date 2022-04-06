@@ -37,7 +37,7 @@ interface Props {
   totalPosition: ethers.BigNumber;
   position: ethers.BigNumber;
   feesEarned: ethers.BigNumber;
-  bridgeAddress: string;
+  hubPoolAddress: string;
   lpTokens: ethers.BigNumber;
   tokenAddress: string;
   ethBalance: QuerySubState<any> | null | undefined;
@@ -63,7 +63,7 @@ const PoolForm: FC<Props> = ({
   apy,
   position,
   feesEarned,
-  bridgeAddress,
+  hubPoolAddress,
   lpTokens,
   tokenAddress,
   setShowSuccess,
@@ -87,9 +87,9 @@ const PoolForm: FC<Props> = ({
 
   // update our add-liquidity to contract call gas usage on an interval for eth only
   useEffect(() => {
-    if (!signer || !bridgeAddress || !isConnected || symbol !== "ETH") return;
+    if (!signer || !isConnected || symbol !== "ETH") return;
 
-    estimateGasForAddEthLiquidity(signer, bridgeAddress)
+    estimateGasForAddEthLiquidity(signer, tokenAddress)
       .then(setAddLiquidityGas)
       .catch((err) => {
         console.error("Error getting estimating gas usage", err);
@@ -97,7 +97,7 @@ const PoolForm: FC<Props> = ({
 
     // get gas estimate on an interval
     const handle = setInterval(() => {
-      estimateGasForAddEthLiquidity(signer, bridgeAddress)
+      estimateGasForAddEthLiquidity(signer, tokenAddress)
         .then(setAddLiquidityGas)
         .catch((err) => {
           console.error("Error getting estimating gas usage", err);
@@ -105,7 +105,7 @@ const PoolForm: FC<Props> = ({
     }, UPDATE_GAS_INTERVAL_MS);
 
     return () => clearInterval(handle);
-  }, [signer, isConnected, bridgeAddress, symbol]);
+  }, [signer, isConnected, tokenAddress, symbol]);
 
   // Validate input on change
   useEffect(() => {
@@ -148,7 +148,7 @@ const PoolForm: FC<Props> = ({
     setInputAmount("");
     setFormError("");
     setRemoveAmount(0);
-  }, [bridgeAddress]);
+  }, [tokenAddress]);
 
   return (
     <Wrapper>
@@ -205,7 +205,7 @@ const PoolForm: FC<Props> = ({
             formError={formError}
             amount={inputAmount}
             onChange={setInputAmount}
-            bridgeAddress={bridgeAddress}
+            hubPoolAddress={hubPoolAddress}
             decimals={decimals}
             symbol={symbol}
             tokenAddress={tokenAddress}
@@ -222,10 +222,10 @@ const PoolForm: FC<Props> = ({
             wrongNetwork={wrongNetwork}
             removeAmount={removeAmount}
             setRemoveAmount={setRemoveAmount}
-            bridgeAddress={bridgeAddress}
             lpTokens={lpTokens}
             decimals={decimals}
             symbol={symbol}
+            tokenAddress={tokenAddress}
             setShowSuccess={setShowSuccess}
             setDepositUrl={setDepositUrl}
             balance={balance}
