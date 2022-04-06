@@ -18,6 +18,7 @@ import {
 import InformationDialog from "components/InformationDialog";
 import useSendAction from "./useSendAction";
 import type { Deposit } from "views/Confirmation";
+import BouncingDotsLoader from "components/BouncingDotsLoader";
 
 type Props = {
   onDeposit: (deposit: Deposit) => void;
@@ -35,6 +36,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
     isInfoModalOpen,
     toggleInfoModal,
     buttonMsg,
+    txPending,
   } = useSendAction(onDeposit);
   const showFees = amount.gt(0) && !!fees;
   const amountMinusFees = showFees ? receiveAmount(amount, fees) : undefined;
@@ -80,6 +82,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
         </InfoWrapper>
         <PrimaryButton onClick={handleActionClick} disabled={buttonDisabled}>
           {buttonMsg}
+          {txPending && <BouncingDotsLoader />}
         </PrimaryButton>
       </Wrapper>
       <InformationDialog isOpen={isInfoModalOpen} onClose={toggleInfoModal} />

@@ -25,6 +25,7 @@ export default function useSendAction(
 ) {
   const { init } = onboard;
   const [isInfoModalOpen, setOpenInfoModal] = useState(false);
+  const [txPending, setTxPending] = useState(false);
   const toggleInfoModal = () => setOpenInfoModal((oldOpen) => !oldOpen);
   const { fromChain, toChain, amount, token, toAddress } = useSendForm();
   const tokenInfo = TOKENS_LIST[fromChain].find(
@@ -38,32 +39,41 @@ export default function useSendAction(
     if (status !== "ready") {
       return;
     }
-    if (hasToApprove) {
-      const tx = await approve();
-      return tx;
-    } else {
-      // We save the fees here, in case they change between here and when we save the deposit.
-      const feesUsed = fees;
-      const tx = await send();
-      // NOTE: This check is redundant, as if `status` is `ready`, all of those are defined.
-      if (tx && toAddress && account && feesUsed) {
-        tx.wait(CONFIRMATIONS)
-          .then((tx) => {
-            onDepositConfirmed({
-              txHash: tx.transactionHash,
-              amount,
-              token,
-              fromChain,
-              toChain,
-              to: toAddress,
-              from: account,
-              fees: feesUsed,
-            });
-          })
-          .catch(console.error);
-        // TODO: we should invalidate and refetch any queries of the transaction tab, so when a user switches to it, they see the new transaction immediately.
+    try {
+      setTxPending(true);
+
+      if (hasToApprove) {
+        const tx = await approve();
+        return tx;
+      } else {
+        // We save the fees here, in case they change between here and when we save the deposit.
+        const feesUsed = fees;
+        const tx = await send();
+        // NOTE: This check is redundant, as if `status` is `ready`, all of those are defined.
+        if (tx && toAddress && account && feesUsed) {
+          tx.wait(CONFIRMATIONS)
+            .then((tx) => {
+              onDepositConfirmed({
+                txHash: tx.transactionHash,
+                amount,
+                token,
+                fromChain,
+                toChain,
+                to: toAddress,
+                from: account,
+                fees: feesUsed,
+              });
+            })
+            .catch(console.error);
+          // TODO: we should invalidate and refetch any queries of the transaction tab, so when a user switches to it, they see the new transaction immediately.
+        }
+
+        setTxPending(false);
+        return tx;
       }
-      return tx;
+    } catch (error) {
+      setTxPending(false);
+      throw error;
     }
   };
 
@@ -93,5 +103,6 @@ export default function useSendAction(
     buttonDisabled,
     isInfoModalOpen,
     toggleInfoModal,
+    txPending,
   };
 }
