@@ -150,6 +150,7 @@ export const Input = styled.input`
 
 export const ErrorBox = motion(styled(UnstyledErrorBox)`
   margin-top: 10px;
+  display: none;
 `);
 
 export const BalanceLabel = styled.span`
