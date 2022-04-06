@@ -586,17 +586,44 @@ interface txHistoryConfig {
   providerUrl: string;
   spokePoolContractAddr: string;
 }
+// Chains currently in SDK v2
+/*  
+const SPOKE_CHAINS = {
+  [ChainId.ARBITRUM_RINKEBY]: { lowerBoundBlockNumber: 9828565 },
+  [ChainId.KOVAN_OPTIMISM]: { lowerBoundBlockNumber: 0 },
+  [ChainId.RINKEBY]: { lowerBoundBlockNumber: 0 },
+  [ChainId.KOVAN]: { lowerBoundBlockNumber: 0 },
+  [ChainId.MAINNET]: { lowerBoundBlockNumber: 0 },
+};
+*/
 export function createTxHistoryClient() {
-  const txHistoryConfigs: txHistoryConfig[] = [];
-
-  Object.values(CHAINS).forEach((x) => {
-    const config = {
-      chainId: x.chainId as number,
-      providerUrl: PROVIDER_URLS[x.chainId],
-      spokePoolContractAddr: SPOKE_ADDRESSES[x.chainId],
-    };
-    txHistoryConfigs.push(config);
-  });
+  const txHistoryConfigs: txHistoryConfig[] = [
+    {
+      chainId: ChainId.ARBITRUM_RINKEBY,
+      providerUrl: PROVIDER_URLS[ChainId.ARBITRUM_RINKEBY],
+      spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.ARBITRUM_RINKEBY],
+    },
+    {
+      chainId: ChainId.KOVAN_OPTIMISM,
+      providerUrl: PROVIDER_URLS[ChainId.KOVAN_OPTIMISM],
+      spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.KOVAN_OPTIMISM],
+    },
+    {
+      chainId: ChainId.RINKEBY,
+      providerUrl: PROVIDER_URLS[ChainId.RINKEBY],
+      spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.RINKEBY],
+    },
+    {
+      chainId: ChainId.KOVAN,
+      providerUrl: PROVIDER_URLS[ChainId.KOVAN],
+      spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.KOVAN],
+    },
+    {
+      chainId: ChainId.MAINNET,
+      providerUrl: PROVIDER_URLS[ChainId.MAINNET],
+      spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.MAINNET],
+    },
+  ];
 
   return txHistoryConfigs;
 }

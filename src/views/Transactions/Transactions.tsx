@@ -36,7 +36,12 @@ const Transactions = () => {
     setOpenOngoingRow,
     currentPage,
     setCurrentPage,
+    txHistoryClient,
   } = useTransactionsView();
+
+  if (account) {
+    console.log("txHistoryClient", txHistoryClient.getFilledTransfers(account));
+  }
 
   const ongoingTx = useMemo(
     () => createTransactionTableJSX(transactions.filter((x) => x.filled < 100)),

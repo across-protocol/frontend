@@ -1,6 +1,8 @@
 import { transfersHistory } from "@across-protocol/sdk-v2";
 import { createTxHistoryClient } from "utils/constants";
-
+export enum TransfersHistoryEvent {
+  TransfersUpdated = "TransfersUpdated",
+}
 const { TransfersHistoryClient } = transfersHistory;
 
 const chainConfigs = createTxHistoryClient();
@@ -12,6 +14,10 @@ const client = new TransfersHistoryClient({
 });
 // optional
 client.setLogLevel("debug");
+
+console.log("chainConfigs", chainConfigs);
+
+export default client;
 // await client.startFetchingTransfers(<depositor_addr>);
 // client.on(TransfersHistoryEvent.TransfersUpdated, data => {
 //   const { depositorAddr, filledTransfersCount, pendingTransfersCount } = data;
