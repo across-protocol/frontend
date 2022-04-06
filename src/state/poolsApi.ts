@@ -1,9 +1,9 @@
 import * as acrossSdk from "@across-protocol/sdk-v2";
 import { update } from "./pools";
 import { store } from "../state";
-import { POOL_CONFIG, POOL_CHAINID, PROVIDERS } from "utils";
+import { HUBPOOL_CONFIG, HUBPOOL_CHAINID, PROVIDERS } from "utils";
 
-const provider = PROVIDERS[POOL_CHAINID]();
+const provider = PROVIDERS[HUBPOOL_CHAINID]();
 
 const { Client } = acrossSdk.pool;
 
@@ -12,7 +12,7 @@ export function poolEventHandler(path: string[], data: any) {
 }
 
 export const poolClient = new Client(
-  POOL_CONFIG,
+  HUBPOOL_CONFIG,
   {
     provider,
   },

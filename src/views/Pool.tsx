@@ -75,11 +75,11 @@ const Pool: FC = () => {
 
     poolClient
       .updatePool(token.address)
-      .then((res) => {
-        setLoadingPoolState(false);
-      })
       .catch((err) => {
         console.error("Unable to load pool info", err);
+      })
+      .finally(() => {
+        setLoadingPoolState(false);
       });
   }, [token, setLoadingPoolState]);
 

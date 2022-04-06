@@ -477,5 +477,5 @@ export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
   };
 }
 // default to kovan when testing
-export const POOL_CHAINID = isProduction() ? ChainId.MAINNET : ChainId.KOVAN;
-export const POOL_CONFIG = makePoolClientConfig(POOL_CHAINID);
+export const HUBPOOL_CHAINID = isProduction() ? ChainId.MAINNET : ChainId.KOVAN;
+export const HUBPOOL_CONFIG = makePoolClientConfig(HUBPOOL_CHAINID);
