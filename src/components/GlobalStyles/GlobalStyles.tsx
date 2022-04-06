@@ -34,14 +34,18 @@ const variables = css`
     --color-gray-600: hsla(${COLORS.gray[600]});
     --color-gray-550: hsla(${COLORS.gray[550]});
     --color-gray-300: hsla(${COLORS.gray[300]});
+    --color-gray-250: hsla(${COLORS.gray[250]});
     --color-gray-200: hsla(${COLORS.gray[200]});
     --color-gray-175: hsla(${COLORS.gray[175]});
+    --color-gray-160: hsla(${COLORS.gray[160]});
     --color-gray-150: hsla(${COLORS.gray[150]});
     --color-gray-100: hsla(${COLORS.gray[100]});
     --color-white: hsl(${COLORS.white});
     --color-black: hsl(${COLORS.black});
     --color-primary: hsl(${COLORS.primary[500]});
     --color-primary-dark: hsl(${COLORS.primary[700]});
+    --color-primary-hover: hsla(${COLORS.primary[500]} / 0.15);
+    --color-pagination: hsl(${COLORS.primary[600]});
     --color-secondary: hsl(${COLORS.secondary[500]});
     --color-error: hsl(${COLORS.error[500]});
     --color-error-light: hsl(${COLORS.error[300]});

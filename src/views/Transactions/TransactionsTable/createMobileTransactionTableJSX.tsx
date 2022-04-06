@@ -47,11 +47,6 @@ function formatTransactionRows(
       value: tx.filled < 100 ? "Pending" : "Filled",
     };
 
-    const filled: ICell = {
-      size: "sm",
-      value: `${tx.filled}%`,
-    };
-
     const downChevron: ICell = {
       size: "xs",
       value: (
@@ -101,7 +96,7 @@ function formatTransactionRows(
     );
 
     return {
-      cells: [timestamp, status, filled, downChevron],
+      cells: [timestamp, status, downChevron],
       fromChain,
       toChain,
       symbol,
@@ -118,18 +113,13 @@ function formatTransactionRows(
 
 export const mobileHeaders: ICell[] = [
   {
-    size: "md",
+    size: "sm",
     value: "Deposit time",
     cellClassName: "header-cell",
   },
   {
     size: "sm",
     value: "Status",
-    cellClassName: "header-cell",
-  },
-  {
-    size: "sm",
-    value: "Filled %",
     cellClassName: "header-cell",
   },
   {

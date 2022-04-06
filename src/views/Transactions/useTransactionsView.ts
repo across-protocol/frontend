@@ -12,7 +12,7 @@ export default function useTransactionsView() {
   const { width } = useWindowSize();
   const [openFilledRow, setOpenFilledRow] = useState<number>(-1);
   const [openOngoingRow, setOpenOngoingRow] = useState<number>(-1);
-
+  const [currentPage, setCurrentPage] = useState(0);
   return {
     provider,
     chainId,
@@ -26,6 +26,8 @@ export default function useTransactionsView() {
     setOpenFilledRow,
     openOngoingRow,
     setOpenOngoingRow,
+    currentPage,
+    setCurrentPage,
   };
 }
 

@@ -21,7 +21,8 @@ import createMobileTransactionTableJSX, {
   mobileHeaders,
 } from "./TransactionsTable/createMobileTransactionTableJSX";
 import { BREAKPOINTS } from "utils";
-
+import { TransactionsTableWithPagination } from "./TransactionsTable";
+import { MobileTransactionsTableWithPagination } from "./TransactionsTable";
 const Transactions = () => {
   const {
     isConnected,
@@ -33,6 +34,8 @@ const Transactions = () => {
     setOpenFilledRow,
     openOngoingRow,
     setOpenOngoingRow,
+    currentPage,
+    setCurrentPage,
   } = useTransactionsView();
 
   const ongoingTx = useMemo(
@@ -113,17 +116,23 @@ const Transactions = () => {
 
           <BottomRow>
             {width >= BREAKPOINTS.laptopMin ? (
-              <TransactionsTable
+              <TransactionsTableWithPagination
                 title="History"
                 headers={headers}
                 rows={filledTx}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                elements={filledTx}
               />
             ) : (
-              <MobileTransactionsTable
+              <MobileTransactionsTableWithPagination
                 title="History"
                 headers={mobileHeaders}
                 rows={mobileFilledTx}
                 openIndex={openFilledRow}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                elements={mobileFilledTx}
               />
             )}
           </BottomRow>

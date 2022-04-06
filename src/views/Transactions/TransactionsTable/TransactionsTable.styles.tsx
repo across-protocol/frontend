@@ -79,8 +79,8 @@ export const TableLink = styled.a`
 `;
 
 export const MobileWrapper = styled(Wrapper)`
-  max-width: 100%;
   width: 100%;
+  min-width: 300px;
 `;
 
 export const StyledMobileHeadRow = styled(StyledHeadRow)`
@@ -104,8 +104,12 @@ export const MobileCell = styled(StyledCell)`
     font-weight: 500;
   }
 
+  &:first-of-type {
+    min-width: 120px;
+    flex: 0 0 60px;
+  }
   &:not(:first-of-type) {
-    min-width: 100px;
+    min-width: 60px;
   }
 `;
 
@@ -156,4 +160,8 @@ export const AccordionRow = styled.div`
 
 export const MobileTableLink = styled(TableLink)`
   border-bottom: none;
+`;
+
+export const PaginationWrapper = styled.div`
+  max-width: 1315px;
 `;
