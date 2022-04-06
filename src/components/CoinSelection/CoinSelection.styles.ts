@@ -154,7 +154,7 @@ export const ErrorBox = motion(styled(UnstyledErrorBox)`
 
 export const BalanceLabel = styled.span`
   display: block;
-  margin: 10px 0 0;
+  margin: 10px 25px 0 0;
   height: ${16 / 16}rem;
   font-size: ${12 / 16}rem;
   line-height: ${16 / 16}rem;
