@@ -562,3 +562,22 @@ export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
 export const HUBPOOL_CHAINID = isProduction() ? ChainId.KOVAN : ChainId.KOVAN;
 export const HUBPOOL_CONFIG = makePoolClientConfig(HUBPOOL_CHAINID);
 export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;
+interface txHistoryConfig {
+  chainId: number;
+  providerUrl: ethers.providers.JsonRpcProvider;
+  spokePoolContractAddr: string;
+}
+export function createTxHistoryClient() {
+  const txHistoryConfigs: txHistoryConfig[] = [];
+
+  Object.values(CHAINS).forEach((x) => {
+    const config = {
+      chainId: x.chainId,
+      providerUrl: PROVIDERS[x.chainId](),
+      spokePoolContractAddr: SPOKE_ADDRESSES[x.chainId],
+    };
+    txHistoryConfigs.push(config);
+  });
+
+  return txHistoryConfigs as any[];
+}
