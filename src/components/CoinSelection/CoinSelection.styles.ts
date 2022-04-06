@@ -151,3 +151,13 @@ export const Input = styled.input`
 export const ErrorBox = motion(styled(UnstyledErrorBox)`
   margin-top: 10px;
 `);
+
+export const BalanceLabel = styled.span`
+  display: block;
+  margin: 10px 0 0;
+  height: ${16 / 16}rem;
+  font-size: ${12 / 16}rem;
+  line-height: ${16 / 16}rem;
+  font-weight: 400;
+  text-align: right;
+`
