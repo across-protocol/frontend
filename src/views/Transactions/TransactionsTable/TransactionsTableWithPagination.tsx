@@ -3,7 +3,7 @@ import { ICell, IRow } from "components/Table/Table";
 import TransactionsTable from "./TransactionsTable";
 import Pagination from "components/Pagination";
 import paginate from "components/Pagination/paginate";
-
+import { PaginationWrapper } from "./TransactionsTable.styles";
 interface TxTableIRow extends IRow {
   onClick?: () => void;
 }
@@ -41,7 +41,9 @@ const TransactionsTableWithPagination: FC<Props> = ({
   return (
     <>
       <TransactionsTable rows={paginatedRows} headers={headers} title={title} />
-      <Pagination onPageChange={setCurrentPage} {...paginateState} />
+      <PaginationWrapper>
+        <Pagination onPageChange={setCurrentPage} {...paginateState} />
+      </PaginationWrapper>
     </>
   );
 };

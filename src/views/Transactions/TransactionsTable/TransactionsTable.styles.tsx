@@ -161,3 +161,7 @@ export const AccordionRow = styled.div`
 export const MobileTableLink = styled(TableLink)`
   border-bottom: none;
 `;
+
+export const PaginationWrapper = styled.div`
+  max-width: 1315px;
+`;
