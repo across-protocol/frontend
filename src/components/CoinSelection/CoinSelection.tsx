@@ -14,6 +14,7 @@ import {
   MaxButton,
   Input,
   ErrorBox,
+  BalanceLabel,
 } from "./CoinSelection.styles";
 import useCoinSelection from "./useCoinSelection";
 import { AnimatePresence } from "framer-motion";
@@ -35,6 +36,7 @@ const CoinSelection = () => {
     error,
     showError,
     balances,
+    balance,
   } = useCoinSelection();
   return (
     <AnimatePresence>
@@ -95,8 +97,19 @@ const CoinSelection = () => {
                 ))}
             </Menu>
           </InputGroup>
-
-          <ErrorBox animate={{ opacity: showError ? 1 : 0 }}>
+          <BalanceLabel>
+            {balance &&
+              selectedItem &&
+              `Balance ${formatUnits(balance, selectedItem.decimals)} ${
+                selectedItem.symbol
+              }`}
+          </BalanceLabel>
+          <ErrorBox
+            animate={{
+              opacity: showError ? 1 : 0,
+              display: showError ? "block" : "none",
+            }}
+          >
             {showError && errorMsg}
           </ErrorBox>
         </Wrapper>

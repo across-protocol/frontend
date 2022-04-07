@@ -193,6 +193,5 @@ export const InputGroup = styled.div`
 `;
 
 export const ToggleChainName = styled.div`
-  width: 85px;
   text-align: left;
 `;
