@@ -15,8 +15,6 @@ const client = new TransfersHistoryClient({
 // optional
 client.setLogLevel("debug");
 
-console.log("chainConfigs", chainConfigs);
-
 export default client;
 // await client.startFetchingTransfers(<depositor_addr>);
 // client.on(TransfersHistoryEvent.TransfersUpdated, data => {

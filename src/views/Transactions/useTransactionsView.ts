@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useConnection } from "state/hooks";
 import { onboard } from "utils";
-import createTransactionModel from "./TransactionsTable/createTransactionModel";
 import useWindowSize from "hooks/useWindowsSize";
 import txHistoryClient from "state/transferHistory";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
@@ -9,7 +8,6 @@ import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 export default function useTransactionsView() {
   const { provider, chainId, isConnected, account } = useConnection();
   const { init } = onboard;
-  const transactions = createTransactionModel();
 
   const { width } = useWindowSize();
   const [openFilledRow, setOpenFilledRow] = useState<number>(-1);
@@ -45,7 +43,6 @@ export default function useTransactionsView() {
     isConnected,
     account,
     initOnboard: init,
-    transactions,
     // windowSize can return undefined -- default to 0 for easier typing.
     width: width || 0,
     openFilledRow,

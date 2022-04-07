@@ -34,8 +34,7 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
 
     const status: ICell = {
       size: "xs",
-      // value: tx.filled < 100 ? "Pending" : "Filled",
-      value: "Filled",
+      value: tx.status,
     };
 
     const filled: ICell = {

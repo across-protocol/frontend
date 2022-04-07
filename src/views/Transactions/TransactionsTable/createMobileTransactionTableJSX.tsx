@@ -7,11 +7,11 @@ import {
 } from "./TransactionsTable.styles";
 import { shortenTransactionHash } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
-import { Transaction } from "./createTransactionModel";
-import { CHAINS, TOKENS_LIST } from "utils/constants";
+import { CHAINS, TOKENS_LIST, ChainId } from "utils/constants";
 import { CLOSED_DROPDOWN_INDEX } from "../useTransactionsView";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 
 export interface IMobileRow extends IRow {
   toChain: React.ReactElement;
@@ -22,9 +22,22 @@ export interface IMobileRow extends IRow {
   onClick?: () => void;
 }
 
+/*  
+Transfer:
+  amount: BigNumber {_hex: '0x058d15e176280000', _isBigNumber: true}
+  assetAddr: "0x4200000000000000000000000000000000000006"
+  depositId: 30
+  depositTime: 1649250685
+  depositTxHash: "0xee6cb6d715cba27bba9aed66bdb12edc3086a8012047ebcf24e7cea2cf85c558"
+  destinationChainId: 42
+  filled: BigNumber {_hex: '0x00', _isBigNumber: true}
+  sourceChainId: 69
+  status: "pending"
+*/
+
 // Will take View Model Transaction as arg
 export default function createMobileTransactionTableJSX(
-  transactions: Transaction[],
+  transactions: Transfer[],
   setOpenIndex: React.Dispatch<React.SetStateAction<number>>
 ) {
   const rows = formatTransactionRows(transactions, setOpenIndex);
@@ -33,18 +46,18 @@ export default function createMobileTransactionTableJSX(
 
 // Will take a TransactionsArg
 function formatTransactionRows(
-  transactions: Transaction[],
+  transactions: Transfer[],
   setOpenIndex: React.Dispatch<React.SetStateAction<number>>
 ): IMobileRow[] {
   return transactions.map((tx, index) => {
     const timestamp: ICell = {
       size: "md",
-      value: DateTime.fromSeconds(tx.timestamp).toFormat("d MMM yyyy - t"),
+      value: DateTime.fromSeconds(tx.depositTime).toFormat("d MMM yyyy - t"),
     };
 
     const status: ICell = {
       size: "sm",
-      value: tx.filled < 100 ? "Pending" : "Filled",
+      value: tx.status,
     };
 
     const downChevron: ICell = {
@@ -56,25 +69,29 @@ function formatTransactionRows(
       ),
     };
 
-    const fromChainName = CHAINS[tx.fromChain].name;
-    const fromLogo = CHAINS[tx.fromChain].logoURI;
+    const sourceChainId = tx.sourceChainId as ChainId;
+
+    const fromChainName = CHAINS[sourceChainId].name;
+    const fromLogo = CHAINS[sourceChainId].logoURI;
     const fromChain = (
       <>
         <TableLogo src={fromLogo} alt={`${fromChainName}_logo`} />{" "}
         {fromChainName}
       </>
     );
-    const toChainName = CHAINS[tx.toChain].name;
-    const toLogo = CHAINS[tx.toChain].logoURI;
+
+    const destinationChainId = tx.destinationChainId as ChainId;
+
+    const toChainName = CHAINS[destinationChainId].name;
+    const toLogo = CHAINS[destinationChainId].logoURI;
     const toChain = (
       <>
         <TableLogo src={toLogo} alt={`${toChainName}_logo`} /> {toChainName}
       </>
     );
 
-    const token = TOKENS_LIST[1].find(
-      (x) => x.address === tx.assetContractAddress
-    );
+    const token = TOKENS_LIST[1].find((x) => x.address === tx.assetAddr);
+
     const symbol = (
       <>
         <TableLogo src={token?.logoURI} alt={`${token?.name}_logo`} />{" "}
@@ -87,11 +104,11 @@ function formatTransactionRows(
     // TODO: change href to proper url when we get real TX data
     const txHash = (
       <MobileTableLink
-        href={`https://etherscan.io/tx/${tx.txHash}`}
+        href={`https://etherscan.io/tx/${tx.depositTxHash}`}
         target="_blank"
         rel="noreferrer"
       >
-        {shortenTransactionHash(tx.txHash)}
+        {shortenTransactionHash(tx.depositTxHash)}
       </MobileTableLink>
     );
 

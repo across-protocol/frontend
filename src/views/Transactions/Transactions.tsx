@@ -28,7 +28,6 @@ const Transactions = () => {
     isConnected,
     initOnboard,
     account,
-    transactions,
     width,
     openFilledRow,
     setOpenFilledRow,
@@ -53,21 +52,13 @@ const Transactions = () => {
   );
 
   const mobileFilledTx = useMemo(
-    () =>
-      createMobileTransactionTableJSX(
-        transactions.filter((x) => x.filled >= 100),
-        setOpenFilledRow
-      ),
-    [transactions, setOpenFilledRow]
+    () => createMobileTransactionTableJSX(rawFilledTx, setOpenFilledRow),
+    [rawFilledTx, setOpenFilledRow]
   );
 
   const mobileOngoingTx = useMemo(
-    () =>
-      createMobileTransactionTableJSX(
-        transactions.filter((x) => x.filled < 100),
-        setOpenOngoingRow
-      ),
-    [transactions, setOpenOngoingRow]
+    () => createMobileTransactionTableJSX(rawOngoingTx, setOpenOngoingRow),
+    [rawOngoingTx, setOpenOngoingRow]
   );
 
   return (
