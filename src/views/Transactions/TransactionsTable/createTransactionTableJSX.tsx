@@ -3,26 +3,39 @@ import { ethers } from "ethers";
 import { TableLogo, TableLink } from "./TransactionsTable.styles";
 import { shortenTransactionHash } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
-import { Transaction } from "./createTransactionModel";
 import { CHAINS, TOKENS_LIST } from "utils/constants";
+import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
+import { ChainId } from "utils";
+/* 
+amount: BigNumber {_hex: '0x058d15e176280000', _isBigNumber: true}
+assetAddr: "0x4200000000000000000000000000000000000006"
+depositId: 30
+depositTime: 1649250685
+depositTxHash: "0xee6cb6d715cba27bba9aed66bdb12edc3086a8012047ebcf24e7cea2cf85c558"
+destinationChainId: 42
+filled: BigNumber {_hex: '0x00', _isBigNumber: true}
+sourceChainId: 69
+status: "pending"
+*/
 
 // Will take View Model Transaction as arg
-export default function createTransactionTableJSX(transactions: Transaction[]) {
+export default function createTransactionTableJSX(transactions: Transfer[]) {
   const rows = formatTransactionRows(transactions);
   return rows;
 }
 
 // Will take a TransactionsArg
-function formatTransactionRows(transactions: Transaction[]): IRow[] {
+function formatTransactionRows(transactions: Transfer[]): IRow[] {
   return transactions.map((tx) => {
     const timestamp: ICell = {
       size: "sm",
-      value: DateTime.fromSeconds(tx.timestamp).toFormat("d MMM yyyy - t"),
+      value: DateTime.fromSeconds(tx.depositTime).toFormat("d MMM yyyy - t"),
     };
 
     const status: ICell = {
       size: "xs",
-      value: tx.filled < 100 ? "Pending" : "Filled",
+      // value: tx.filled < 100 ? "Pending" : "Filled",
+      value: "Filled",
     };
 
     const filled: ICell = {
@@ -30,8 +43,10 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
       value: `${tx.filled}%`,
     };
 
-    const fromChainName = CHAINS[tx.fromChain].name;
-    const fromLogo = CHAINS[tx.fromChain].logoURI;
+    const sourceChainId = tx.sourceChainId as ChainId;
+
+    const fromChainName = CHAINS[sourceChainId].name;
+    const fromLogo = CHAINS[sourceChainId].logoURI;
     const fromChain: ICell = {
       size: "xs",
       value: (
@@ -42,8 +57,10 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
       ),
     };
 
-    const toChainName = CHAINS[tx.toChain].name;
-    const toLogo = CHAINS[tx.toChain].logoURI;
+    const destinationChainId = tx.destinationChainId as ChainId;
+
+    const toChainName = CHAINS[destinationChainId].name;
+    const toLogo = CHAINS[destinationChainId].logoURI;
     const toChain: ICell = {
       size: "xs",
       value: (
@@ -53,8 +70,8 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
       ),
     };
 
-    const token = TOKENS_LIST[1].find(
-      (x) => x.address === tx.assetContractAddress
+    const token = TOKENS_LIST[sourceChainId].find(
+      (x) => x.address === tx.assetAddr
     );
 
     const symbol: ICell = {
@@ -77,11 +94,11 @@ function formatTransactionRows(transactions: Transaction[]): IRow[] {
       size: "xs",
       value: (
         <TableLink
-          href={`https://etherscan.io/tx/${tx.txHash}`}
+          href={`https://etherscan.io/tx/${tx.depositTxHash}`}
           target="_blank"
           rel="noreferrer"
         >
-          {shortenTransactionHash(tx.txHash)}
+          {shortenTransactionHash(tx.depositTxHash)}
         </TableLink>
       ),
     };

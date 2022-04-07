@@ -36,22 +36,18 @@ const Transactions = () => {
     setOpenOngoingRow,
     currentPage,
     setCurrentPage,
-    txHistoryClient,
+    rawFilledTx,
+    rawOngoingTx,
   } = useTransactionsView();
 
-  if (account) {
-    console.log("txHistoryClient", txHistoryClient.getFilledTransfers(account));
-  }
-
   const ongoingTx = useMemo(
-    () => createTransactionTableJSX(transactions.filter((x) => x.filled < 100)),
-    [transactions]
+    () => createTransactionTableJSX(rawOngoingTx),
+    [rawOngoingTx]
   );
 
   const filledTx = useMemo(
-    () =>
-      createTransactionTableJSX(transactions.filter((x) => x.filled >= 100)),
-    [transactions]
+    () => createTransactionTableJSX(rawFilledTx),
+    [rawFilledTx]
   );
 
   const mobileFilledTx = useMemo(

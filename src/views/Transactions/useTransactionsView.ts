@@ -4,7 +4,7 @@ import { onboard } from "utils";
 import createTransactionModel from "./TransactionsTable/createTransactionModel";
 import useWindowSize from "hooks/useWindowsSize";
 import txHistoryClient from "state/transferHistory";
-import { transfersHistory } from "@across-protocol/sdk-v2";
+import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 
 export default function useTransactionsView() {
   const { provider, chainId, isConnected, account } = useConnection();
@@ -15,29 +15,22 @@ export default function useTransactionsView() {
   const [openFilledRow, setOpenFilledRow] = useState<number>(-1);
   const [openOngoingRow, setOpenOngoingRow] = useState<number>(-1);
   const [currentPage, setCurrentPage] = useState(0);
+  const [rawFilledTx, setRawFilledTx] = useState<Transfer[]>([]);
+  const [rawOngoingTx, setRawOngoingTx] = useState<Transfer[]>([]);
+
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (account) {
-      console.log("account", account);
-      const started = startFetchingTransfers(account).then((res) => {
+      startFetchingTransfers(account).then((res) => {
         if (res) {
           interval = setInterval(() => {
-            console.log(
-              "txHistoryClient",
-              txHistoryClient.getFilledTransfers(account)
-            );
+            const nextFilledTx = txHistoryClient.getFilledTransfers(account);
+            const nextOngoingTx = txHistoryClient.getPendingTransfers(account);
+            setRawFilledTx(nextFilledTx);
+            setRawOngoingTx(nextOngoingTx);
           }, 10000);
         }
       });
-
-      txHistoryClient.on(
-        transfersHistory.TransfersHistoryEvent.TransfersUpdated,
-        (data) => {
-          const { depositorAddr, filledTransfersCount, pendingTransfersCount } =
-            data;
-          console.log("hello?", data);
-        }
-      );
     }
     return () => {
       clearInterval(interval);
@@ -62,6 +55,8 @@ export default function useTransactionsView() {
     currentPage,
     setCurrentPage,
     txHistoryClient,
+    rawFilledTx,
+    rawOngoingTx,
   };
 }
 
