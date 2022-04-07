@@ -67,17 +67,14 @@ export default function useSendAction(
             .catch(console.error);
           // TODO: we should invalidate and refetch any queries of the transaction tab, so when a user switches to it, they see the new transaction immediately.
         }
-
-        setTxPending(false);
         return tx;
       }
-    } catch (error) {
+    } finally {
       setTxPending(false);
-      throw error;
     }
   };
 
-  const buttonDisabled = status !== "ready";
+  const buttonDisabled = status !== "ready" || txPending;
 
   let buttonMsg: string = "Send";
   if (status === "ready") {
