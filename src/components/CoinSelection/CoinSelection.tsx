@@ -97,8 +97,19 @@ const CoinSelection = () => {
                 ))}
             </Menu>
           </InputGroup>
-          <BalanceLabel>{balance && selectedItem && `Balance ${formatUnits(balance, selectedItem.decimals)} ${selectedItem.symbol}`}</BalanceLabel>
-          <ErrorBox animate={{ opacity: showError ? 1 : 0, display: showError ? "block" : "none" }}>
+          <BalanceLabel>
+            {balance &&
+              selectedItem &&
+              `Balance ${formatUnits(balance, selectedItem.decimals)} ${
+                selectedItem.symbol
+              }`}
+          </BalanceLabel>
+          <ErrorBox
+            animate={{
+              opacity: showError ? 1 : 0,
+              display: showError ? "block" : "none",
+            }}
+          >
             {showError && errorMsg}
           </ErrorBox>
         </Wrapper>

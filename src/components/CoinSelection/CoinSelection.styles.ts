@@ -161,4 +161,4 @@ export const BalanceLabel = styled.span`
   line-height: ${16 / 16}rem;
   font-weight: 400;
   text-align: right;
-`
+`;
