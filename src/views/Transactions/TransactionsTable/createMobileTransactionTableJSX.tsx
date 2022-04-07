@@ -40,8 +40,7 @@ export default function createMobileTransactionTableJSX(
   transactions: Transfer[],
   setOpenIndex: React.Dispatch<React.SetStateAction<number>>
 ) {
-  const rows = formatTransactionRows(transactions, setOpenIndex);
-  return rows;
+  return formatTransactionRows(transactions, setOpenIndex);
 }
 
 // Will take a TransactionsArg

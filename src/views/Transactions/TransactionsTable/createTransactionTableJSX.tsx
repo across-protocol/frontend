@@ -37,10 +37,10 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
       value: tx.status,
     };
 
+    const fp = tx.filled.div(tx.amount).mul(100);
     const filled: ICell = {
       size: "xs",
-      // value: `${tx.filled}%`,
-      value: "%",
+      value: `${fp.toNumber() > 100 ? "100" : fp}%`,
     };
 
     const sourceChainId = tx.sourceChainId as ChainId;
