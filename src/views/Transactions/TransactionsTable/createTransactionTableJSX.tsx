@@ -40,7 +40,8 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
 
     const filled: ICell = {
       size: "xs",
-      value: `${tx.filled}%`,
+      // value: `${tx.filled}%`,
+      value: "%",
     };
 
     const sourceChainId = tx.sourceChainId as ChainId;

@@ -585,6 +585,7 @@ interface txHistoryConfig {
   chainId: number;
   providerUrl: string;
   spokePoolContractAddr: string;
+  lowerBoundBlockNumber?: number;
 }
 // Chains currently in SDK v2
 /*  
@@ -602,11 +603,13 @@ export function createTxHistoryClient() {
       chainId: ChainId.ARBITRUM_RINKEBY,
       providerUrl: PROVIDER_URLS[ChainId.ARBITRUM_RINKEBY],
       spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.ARBITRUM_RINKEBY],
+      lowerBoundBlockNumber: 10523275,
     },
     {
       chainId: ChainId.KOVAN_OPTIMISM,
       providerUrl: PROVIDER_URLS[ChainId.KOVAN_OPTIMISM],
       spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.KOVAN_OPTIMISM],
+      lowerBoundBlockNumber: 1618630,
     },
     {
       chainId: ChainId.RINKEBY,
@@ -617,6 +620,7 @@ export function createTxHistoryClient() {
       chainId: ChainId.KOVAN,
       providerUrl: PROVIDER_URLS[ChainId.KOVAN],
       spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.KOVAN],
+      lowerBoundBlockNumber: 30475937,
     },
     {
       chainId: ChainId.MAINNET,

@@ -40,6 +40,8 @@ const Transactions = () => {
     rawOngoingTx,
   } = useTransactionsView();
 
+  console.log("rawongoingTx", rawOngoingTx);
+  console.log("rawFilledtx", rawFilledTx);
   const ongoingTx = useMemo(
     () => createTransactionTableJSX(rawOngoingTx),
     [rawOngoingTx]

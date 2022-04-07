@@ -41,9 +41,11 @@ const TransactionsTableWithPagination: FC<Props> = ({
   return (
     <>
       <TransactionsTable rows={paginatedRows} headers={headers} title={title} />
-      <PaginationWrapper>
-        <Pagination onPageChange={setCurrentPage} {...paginateState} />
-      </PaginationWrapper>
+      {paginatedRows.length > 25 && (
+        <PaginationWrapper>
+          <Pagination onPageChange={setCurrentPage} {...paginateState} />
+        </PaginationWrapper>
+      )}
     </>
   );
 };
