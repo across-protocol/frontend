@@ -19,7 +19,9 @@ import {
   CHAINS,
   sendAcrossDeposit,
   sendAcrossApproval,
+  getHubPool,
 } from "utils";
+
 
 enum SendStatus {
   IDLE = "idle",
@@ -71,22 +73,28 @@ export function useBridge() {
   });
 
   const hasToApprove = !!allowance && amount.gt(allowance);
+  const hubPool = getHubPool(fromChain);
 
   const send = async () => {
     // NOTE: the `toAddress` check is redundant, as status won't be "ready" if `toAddress` is not set, but it's here to make TS happy. The same applies for `block` and `fees`.
     if (!signer || status !== "ready" || !toAddress || !block || !fees) {
       return;
     }
-    return sendAcrossDeposit(signer, {
-      toAddress,
-      amount,
-      token,
-      fromChain,
-      toChain,
-      relayerFeePct: fees.relayerFee.pct,
-      timestamp: block.timestamp,
-      referrer,
-    });
+    try {
+      return sendAcrossDeposit(signer, {
+        toAddress,
+        amount,
+        token,
+        fromChain,
+        toChain,
+        relayerFeePct: fees.relayerFee.pct,
+        timestamp: await hubPool.getCurrentTime(),
+        referrer,
+      });
+    } catch (e) {
+      console.error("Something went wrong when depositing.")
+    }
+
   };
 
   const approve = async () => {
@@ -125,11 +133,11 @@ type ComputeStatusArgs = {
   balance: ethers.BigNumber | undefined;
   fromChain: ChainId;
   fees:
-    | {
-        isLiquidityInsufficient: boolean;
-        isAmountTooLow: boolean;
-      }
-    | undefined;
+  | {
+    isLiquidityInsufficient: boolean;
+    isAmountTooLow: boolean;
+  }
+  | undefined;
 };
 /**
  * Computes the current send tab status.

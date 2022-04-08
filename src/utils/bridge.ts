@@ -1,6 +1,6 @@
 import { clients, across, utils } from "@uma/sdk";
 import { ethers, BigNumber } from "ethers";
-import { SpokePool, SpokePool__factory } from "@across-protocol/contracts-v2";
+import { HubPool, HubPool__factory, SpokePool, SpokePool__factory } from "@across-protocol/contracts-v2";
 
 import {
   CHAINS,
@@ -11,9 +11,11 @@ import {
   Token,
   CHAINS_SELECTION,
   SPOKE_ADDRESSES,
+  HUBPOOL_ADDRESSES,
 } from "./constants";
 
 import { isValidString, parseEther, tagAddress } from "./format";
+import { isValidAddress } from "./address";
 
 export function getSpokePool(
   chainId: ChainId,
@@ -29,6 +31,28 @@ export function getSpokePool(
     maybeAddress,
     signer ?? PROVIDERS[chainId]()
   );
+}
+
+function getHubPoolChainId(sendingChain: ChainId): ChainId {
+  switch (sendingChain) {
+    case ChainId.ARBITRUM_RINKEBY:
+      return ChainId.RINKEBY;
+    case ChainId.KOVAN_OPTIMISM:
+      return ChainId.KOVAN;
+    default:
+      return ChainId.MAINNET
+  }
+}
+
+export function getHubPool(fromChain: ChainId, signer?: ethers.Signer): HubPool {
+  const hubPoolChainId = getHubPoolChainId(fromChain);
+  const maybeAddress = HUBPOOL_ADDRESSES[hubPoolChainId];
+  if (!isValidAddress(maybeAddress) || maybeAddress === ethers.constants.AddressZero) {
+    throw new Error(
+      `No HubPool supported on ${CHAINS[hubPoolChainId].name} with chainId: ${hubPoolChainId}`
+    );
+  }
+  return HubPool__factory.connect(maybeAddress, signer ?? PROVIDERS[hubPoolChainId]());
 }
 const { gasFeeCalculator } = across;
 
@@ -239,7 +263,7 @@ type AcrossDepositArgs = {
   amount: ethers.BigNumber;
   token: string;
   relayerFeePct: ethers.BigNumber;
-  timestamp: number;
+  timestamp: ethers.BigNumber;
   referrer?: string;
 };
 type AcrossApprovalArgs = {
@@ -250,7 +274,7 @@ type AcrossApprovalArgs = {
 /**
  * Makes a deposit on Across.
  * @param signer A valid signer, must be connected to a provider.
- * @param depositArgs - An object containing the {@link AcrossSendArgs arguments} to pass to the deposit function of the bridge contract.
+ * @param depositArgs - An object containing the {@link AcrossDepositArgs arguments} to pass to the deposit function of the bridge contract.
  * @returns The transaction response obtained after sending the transaction.
  */
 export async function sendAcrossDeposit(
