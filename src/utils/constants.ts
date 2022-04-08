@@ -322,7 +322,6 @@ export const SPOKE_ADDRESSES: Record<ChainId, string> = {
 };
 // Update once addresses are known
 export const HUBPOOL_ADDRESSES: Record<ChainId, string> = {
-  // FIXME: THIS IS WRONG, CHANGE BACK ONCE WE HAVE THE MAINNET ADDRESS
   [ChainId.MAINNET]: getAddress("0xD449Af45a032Df413b497A709EeD3E8C112EbcE3"),
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.BOBA]: ethers.constants.AddressZero,

@@ -291,6 +291,11 @@ export async function sendAcrossDeposit(
   }: AcrossDepositArgs
 ): Promise<ethers.providers.TransactionResponse> {
   const spokePool = getSpokePool(fromChain);
+  const provider = PROVIDERS[fromChain]();
+  const code = await provider.getCode(spokePool.address);
+  if (!code) {
+    throw new Error(`SpokePool not deployed at ${spokePool.address}`);
+  }
   const isETH = token === CHAINS[fromChain].ETHAddress;
   const value = isETH ? amount : ethers.constants.Zero;
   const originToken = isETH ? TOKENS_LIST[fromChain][0].address : token;
@@ -317,7 +322,12 @@ export async function sendAcrossApproval(
   signer: ethers.Signer,
   { token, amount, chainId }: AcrossApprovalArgs
 ): Promise<ethers.providers.TransactionResponse> {
-  const spoke = getSpokePool(chainId, signer);
+  const spokePool = getSpokePool(chainId, signer);
+  const provider = PROVIDERS[chainId]();
+  const code = await provider.getCode(spokePool.address);
+  if (!code) {
+    throw new Error(`SpokePool not deployed at ${spokePool.address}`);
+  }
   const tokenContract = clients.erc20.connect(token, signer);
-  return tokenContract.approve(spoke.address, amount);
+  return tokenContract.approve(spokePool.address, amount);
 }
