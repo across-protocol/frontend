@@ -103,3 +103,7 @@ export function tagAddress(dataHex: string, address: string) {
 export function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export const formatNumberTwoSigDigits = new Intl.NumberFormat("en-US", {
+  maximumSignificantDigits: 2,
+}).format;

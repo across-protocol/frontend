@@ -1,7 +1,11 @@
 import { DateTime } from "luxon";
 import { ethers } from "ethers";
 import { TableLogo, TableLink } from "./TransactionsTable.styles";
-import { shortenTransactionHash, capitalizeFirstLetter } from "utils/format";
+import {
+  shortenTransactionHash,
+  capitalizeFirstLetter,
+  formatNumberTwoSigDigits,
+} from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 import { CHAINS, TOKENS_LIST } from "utils/constants";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
@@ -40,7 +44,9 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
     const fp = tx.filled.div(tx.amount).mul(100);
     const filled: ICell = {
       size: "xs",
-      value: `${fp.toNumber() > 100 ? "100" : fp}%`,
+      value: `${
+        fp.toNumber() > 100 ? "100" : formatNumberTwoSigDigits(fp.toNumber())
+      }%`,
     };
 
     const sourceChainId = tx.sourceChainId as ChainId;
