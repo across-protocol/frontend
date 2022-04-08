@@ -296,9 +296,9 @@ export async function sendAcrossDeposit(
   if (!code) {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
-  const isETH = token === CHAINS[fromChain].ETHAddress;
-  const value = isETH ? amount : ethers.constants.Zero;
-  const originToken = isETH ? TOKENS_LIST[fromChain][0].address : token;
+  const isNativeCurrency = token === CHAINS[fromChain].nativeCurrencyAddress;
+  const value = isNativeCurrency ? amount : ethers.constants.Zero;
+  const originToken = isNativeCurrency ? TOKENS_LIST[fromChain][0].address : token;
   const tx = await spokePool.populateTransaction.deposit(
     recipient,
     originToken,

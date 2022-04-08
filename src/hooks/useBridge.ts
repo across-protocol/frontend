@@ -166,7 +166,7 @@ function computeStatus({
   }
   if (balance) {
     const adjustedBalance =
-      token === CHAINS[fromChain].ETHAddress
+      token === CHAINS[fromChain].nativeCurrencyAddress
         ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION))
         : balance;
     if (adjustedBalance.lt(amount)) {

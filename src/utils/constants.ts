@@ -8,6 +8,7 @@ import wethLogo from "assets/weth-logo.svg";
 import arbitrumLogo from "assets/arbitrum-logo.svg";
 import memoize from "lodash-es/memoize";
 import bobaLogo from "assets/boba-logo.svg";
+import polygonLogo from "assets/polygon-logo.svg";
 import { getAddress } from "./address";
 import rawTokens from "../data/tokens.json";
 import * as superstruct from "superstruct";
@@ -79,11 +80,15 @@ export enum ChainId {
   OPTIMISM = 10,
   ARBITRUM = 42161,
   BOBA = 288,
+  POLYGON = 137,
   // testnets
   RINKEBY = 4,
   KOVAN = 42,
   KOVAN_OPTIMISM = 69,
   ARBITRUM_RINKEBY = 421611,
+  GOERLI = 5,
+  // Polygon testnet
+  MUMBAI = 80001
 }
 
 export type Token = {
@@ -141,7 +146,7 @@ export type ChainInfo = {
   name: string;
   fullName?: string;
   chainId: ChainId;
-  ETHAddress: string;
+  nativeCurrencyAddress: string;
   logoURI: string;
   rpcUrl?: string;
   explorerUrl: string;
@@ -174,7 +179,7 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "ETH",
       decimals: 18,
     },
-    ETHAddress: ethers.constants.AddressZero,
+    nativeCurrencyAddress: ethers.constants.AddressZero,
   },
   [ChainId.OPTIMISM]: {
     name: "Optimism",
@@ -189,7 +194,7 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "OETH",
       decimals: 18,
     },
-    ETHAddress: ethers.constants.AddressZero,
+    nativeCurrencyAddress: ethers.constants.AddressZero,
   },
   [ChainId.ARBITRUM]: {
     name: "Arbitrum",
@@ -205,7 +210,7 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "AETH",
       decimals: 18,
     },
-    ETHAddress: ethers.constants.AddressZero,
+    nativeCurrencyAddress: ethers.constants.AddressZero,
   },
   [ChainId.BOBA]: {
     name: "Boba",
@@ -220,7 +225,22 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "ETH",
       decimals: 18,
     },
-    ETHAddress: ethers.constants.AddressZero,
+    nativeCurrencyAddress: ethers.constants.AddressZero,
+  },
+  [ChainId.POLYGON]: {
+    name: "Polygon",
+    fullName: "Polygon Network",
+    chainId: ChainId.POLYGON,
+    logoURI: polygonLogo,
+    rpcUrl: "https://rpc.ankr.com/polygon",
+    explorerUrl: "https://polygonscan.com",
+    constructExplorerLink: defaultConstructExplorerLink("https://polygonscan.com"),
+    nativeCurrency: {
+      name: "Matic",
+      symbol: "MATIC",
+      decimals: 18,
+    },
+    nativeCurrencyAddress: ethers.constants.AddressZero,
   },
   [ChainId.RINKEBY]: {
     name: "Rinkeby",
@@ -236,7 +256,7 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "ETH",
       decimals: 18,
     },
-    ETHAddress: ethers.constants.AddressZero,
+    nativeCurrencyAddress: ethers.constants.AddressZero,
   },
   [ChainId.KOVAN]: {
     name: "Kovan",
@@ -252,7 +272,7 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "KOV",
       decimals: 18,
     },
-    ETHAddress: ethers.constants.AddressZero,
+    nativeCurrencyAddress: ethers.constants.AddressZero,
   },
   [ChainId.KOVAN_OPTIMISM]: {
     name: "Optimism Kovan",
@@ -268,7 +288,7 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "KOR",
       decimals: 18,
     },
-    ETHAddress: ethers.constants.AddressZero,
+    nativeCurrencyAddress: ethers.constants.AddressZero,
   },
   [ChainId.ARBITRUM_RINKEBY]: {
     name: "Arbitrum Rinkeby",
@@ -284,14 +304,46 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
       symbol: "ARETH",
       decimals: 18,
     },
-    ETHAddress: ethers.constants.AddressZero,
+    nativeCurrencyAddress: ethers.constants.AddressZero,
   },
+  [ChainId.GOERLI]: {
+    name: "Goerli",
+    fullName: "Goerli Testnet",
+    chainId: ChainId.GOERLI,
+    logoURI: ethereumLogo,
+    explorerUrl: "https://goerli.etherscan.io/",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://goerli.etherscan.io/"
+    ),
+    nativeCurrency: {
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    nativeCurrencyAddress: ethers.constants.AddressZero,
+  },
+  [ChainId.MUMBAI]: {
+    name: "Mumbai",
+    chainId: ChainId.MUMBAI,
+    logoURI: polygonLogo,
+    rpcUrl: "https://matic-mumbai.chainstacklabs.com",
+    explorerUrl: "https://mumbai.polygonscan.com",
+    constructExplorerLink: defaultConstructExplorerLink("https://mumbai.polygonscan.com"),
+    nativeCurrency: {
+      name: "Matic",
+      symbol: "MATIC",
+      decimals: 18,
+    },
+    nativeCurrencyAddress: ethers.constants.AddressZero,
+
+  }
 };
 
 const PRODUCTION_CHAINS_SELECTION = [
   ChainId.OPTIMISM,
   ChainId.ARBITRUM,
   ChainId.BOBA,
+  ChainId.POLYGON,
   ChainId.MAINNET,
 ];
 export const TESTNET_CHAINS_SELECTION = [
@@ -299,6 +351,8 @@ export const TESTNET_CHAINS_SELECTION = [
   ChainId.KOVAN,
   ChainId.KOVAN_OPTIMISM,
   ChainId.ARBITRUM_RINKEBY,
+  ChainId.GOERLI,
+  ChainId.MUMBAI
 ];
 /** Chains as they appear in dropdowns */
 export const CHAINS_SELECTION = isProduction()
@@ -308,9 +362,10 @@ export const CHAINS_SELECTION = isProduction()
 /** FIXME:  use the actual spoke pool addresses!!!! */
 export const SPOKE_ADDRESSES: Record<ChainId, string> = {
   [ChainId.MAINNET]: ethers.constants.AddressZero,
+  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.BOBA]: ethers.constants.AddressZero,
-  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
+  [ChainId.POLYGON]: ethers.constants.AddressZero,
   [ChainId.RINKEBY]: getAddress("0x90743806D7A66b37F31FAfd7b3447210aB55640f"),
   [ChainId.KOVAN]: getAddress("0x73549B5639B04090033c1E77a22eE9Aa44C2eBa0"),
   [ChainId.KOVAN_OPTIMISM]: getAddress(
@@ -319,6 +374,8 @@ export const SPOKE_ADDRESSES: Record<ChainId, string> = {
   [ChainId.ARBITRUM_RINKEBY]: getAddress(
     "0x3BED21dAe767e4Df894B31b14aD32369cE4bad8b"
   ),
+  [ChainId.GOERLI]: ethers.constants.AddressZero,
+  [ChainId.MUMBAI]: ethers.constants.AddressZero,
 };
 // Update once addresses are known
 export const HUBPOOL_ADDRESSES: Record<ChainId, string> = {
@@ -327,20 +384,26 @@ export const HUBPOOL_ADDRESSES: Record<ChainId, string> = {
   [ChainId.BOBA]: ethers.constants.AddressZero,
   [ChainId.ARBITRUM]: ethers.constants.AddressZero,
   [ChainId.RINKEBY]: getAddress("0xa1b6DA4AaE90fA16F3A3338c8d1Dc70B4926FCa7"),
+  [ChainId.POLYGON]: ethers.constants.AddressZero,
   [ChainId.KOVAN]: getAddress("0xD449Af45a032Df413b497A709EeD3E8C112EbcE3"),
   [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
+  [ChainId.GOERLI]: ethers.constants.AddressZero,
+  [ChainId.MUMBAI]: ethers.constants.AddressZero
 };
 // Update once addresses are known
 export const RATEMODEL_ADDRESSES: Record<ChainId, string> = {
   [ChainId.MAINNET]: ethers.constants.AddressZero,
+  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.BOBA]: ethers.constants.AddressZero,
-  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
+  [ChainId.POLYGON]: ethers.constants.AddressZero,
   [ChainId.RINKEBY]: ethers.constants.AddressZero,
   [ChainId.KOVAN]: getAddress("0x5923929DF7A2D6E038bb005B167c1E8a86cd13C8"),
   [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
+  [ChainId.GOERLI]: ethers.constants.AddressZero,
+  [ChainId.MUMBAI]: ethers.constants.AddressZero
 };
 
 type GetProvider = () => ethers.providers.JsonRpcProvider;
@@ -368,6 +431,12 @@ export const PROVIDERS: Record<ChainId, GetProvider> = {
     () =>
       new ethers.providers.StaticJsonRpcProvider(`https://mainnet.boba.network`)
   ),
+  [ChainId.POLYGON]: memoize(
+    () =>
+      new ethers.providers.StaticJsonRpcProvider(
+        `https://polygon-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
+      )
+  ),
   [ChainId.RINKEBY]: memoize(
     () =>
       new ethers.providers.StaticJsonRpcProvider(
@@ -392,18 +461,21 @@ export const PROVIDERS: Record<ChainId, GetProvider> = {
         `https://arbitrum-rinkeby.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
   ),
+  [ChainId.GOERLI]: memoize(
+    () =>
+      new ethers.providers.StaticJsonRpcProvider(
+        `https://goerli.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
+      )
+  ),
+  [ChainId.MUMBAI]: memoize(
+    () =>
+      new ethers.providers.StaticJsonRpcProvider(
+        `https://polygon-mumbai.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
+      )
+  )
 };
 
-export function getChainName(chainId: ChainId): string {
-  switch (chainId) {
-    case ChainId.MAINNET:
-      return CHAINS[ChainId.MAINNET].name;
-    case ChainId.ARBITRUM:
-      return CHAINS[ChainId.ARBITRUM].name;
-    default:
-      return "unknown";
-  }
-}
+
 
 export const DEFAULT_FROM_CHAIN_ID = ChainId.OPTIMISM;
 export const DEFAULT_TO_CHAIN_ID = ChainId.MAINNET;

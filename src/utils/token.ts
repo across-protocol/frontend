@@ -17,7 +17,7 @@ export function getBalance(
   blockNumber?: number
 ): Promise<ethers.BigNumber> {
   const provider = PROVIDERS[chainId]();
-  if (token === CHAINS[chainId].ETHAddress) {
+  if (token === CHAINS[chainId].nativeCurrencyAddress) {
     return provider.getBalance(account, blockNumber ?? "latest");
   }
   const contract = clients.erc20.connect(token, provider);
@@ -62,7 +62,7 @@ export async function getAllowance(
 ): Promise<ethers.BigNumber> {
   const provider = PROVIDERS[chainId]();
   // For ETH, allowance does not make sense
-  if (token === CHAINS[chainId].ETHAddress) {
+  if (token === CHAINS[chainId].nativeCurrencyAddress) {
     return ethers.constants.MaxUint256;
   }
   const contract = clients.erc20.connect(token, provider);
