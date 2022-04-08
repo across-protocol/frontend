@@ -16,27 +16,36 @@ export default function useTransactionsView() {
   const [rawFilledTx, setRawFilledTx] = useState<Transfer[]>([]);
   const [rawOngoingTx, setRawOngoingTx] = useState<Transfer[]>([]);
 
+  // Start the tracking / stopping of the TX in the client.
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
     if (account) {
-      startFetchingTransfers(account).then((res) => {
-        if (res) {
-          interval = setInterval(() => {
-            const nextFilledTx = txHistoryClient.getFilledTransfers(account);
-            const nextOngoingTx = txHistoryClient.getPendingTransfers(account);
-            setRawFilledTx(nextFilledTx);
-            setRawOngoingTx(nextOngoingTx);
-          }, 10000);
-        }
-      });
+      startFetchingTransfers(account);
     }
     return () => {
-      clearInterval(interval);
       if (account) {
         txHistoryClient.stopFetchingTransfers(account);
       }
     };
   }, [account]);
+
+  // Create interval to update transactions.
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (account) {
+      interval = setInterval(() => {
+        const nextFilledTx = txHistoryClient.getFilledTransfers(account);
+        const nextOngoingTx = txHistoryClient.getPendingTransfers(account);
+        setRawFilledTx(nextFilledTx);
+        setRawOngoingTx(nextOngoingTx);
+      }, 10000);
+    }
+    return () => {
+      setRawFilledTx([]);
+      setRawOngoingTx([]);
+      clearInterval(interval);
+    };
+  }, [account]);
+
   return {
     provider,
     chainId,
