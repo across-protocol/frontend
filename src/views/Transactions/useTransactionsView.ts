@@ -37,7 +37,7 @@ export default function useTransactionsView() {
         const nextOngoingTx = txHistoryClient.getPendingTransfers(account);
         setRawFilledTx(nextFilledTx);
         setRawOngoingTx(nextOngoingTx);
-      }, 10000);
+      }, 5000);
     }
     return () => {
       setRawFilledTx([]);

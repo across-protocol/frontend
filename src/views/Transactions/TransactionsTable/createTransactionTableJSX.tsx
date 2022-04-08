@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { ethers } from "ethers";
 import { TableLogo, TableLink } from "./TransactionsTable.styles";
-import { shortenTransactionHash } from "utils/format";
+import { shortenTransactionHash, capitalizeFirstLetter } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 import { CHAINS, TOKENS_LIST } from "utils/constants";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
@@ -34,7 +34,7 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
 
     const status: ICell = {
       size: "xs",
-      value: tx.status,
+      value: capitalizeFirstLetter(tx.status),
     };
 
     const fp = tx.filled.div(tx.amount).mul(100);

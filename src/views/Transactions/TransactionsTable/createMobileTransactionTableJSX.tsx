@@ -5,7 +5,7 @@ import {
   MobileTableLink,
   MobileChevron,
 } from "./TransactionsTable.styles";
-import { shortenTransactionHash } from "utils/format";
+import { shortenTransactionHash, capitalizeFirstLetter } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 import { CHAINS, TOKENS_LIST, ChainId } from "utils/constants";
 import { CLOSED_DROPDOWN_INDEX } from "../useTransactionsView";
@@ -56,7 +56,7 @@ function formatTransactionRows(
 
     const status: ICell = {
       size: "sm",
-      value: tx.status,
+      value: capitalizeFirstLetter(tx.status),
     };
 
     const downChevron: ICell = {
