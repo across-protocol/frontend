@@ -80,16 +80,21 @@ export function useBridge() {
     if (!signer || status !== "ready" || !toAddress || !block || !fees) {
       return;
     }
-    return sendAcrossDeposit(signer, {
-      toAddress,
-      amount,
-      token,
-      fromChain,
-      toChain,
-      relayerFeePct: fees.relayerFee.pct,
-      timestamp: await hubPool.getCurrentTime(),
-      referrer,
-    });
+    try {
+      return sendAcrossDeposit(signer, {
+        toAddress,
+        amount,
+        token,
+        fromChain,
+        toChain,
+        relayerFeePct: fees.relayerFee.pct,
+        timestamp: await hubPool.getCurrentTime(),
+        referrer,
+      });
+    } catch (e) {
+      console.error("Something went wrong when depositing.")
+    }
+
   };
 
   const approve = async () => {
