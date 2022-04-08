@@ -19,7 +19,12 @@ export default function useTransactionsView() {
   // Start the tracking / stopping of the TX in the client.
   useEffect(() => {
     if (account) {
-      startFetchingTransfers(account);
+      txHistoryClient.startFetchingTransfers(account).catch((err) => {
+        console.error(
+          "Error in startFetchingTransfers call in txHistoryClient",
+          err
+        );
+      });
     }
     return () => {
       if (account) {
@@ -64,16 +69,6 @@ export default function useTransactionsView() {
     rawFilledTx,
     rawOngoingTx,
   };
-}
-
-async function startFetchingTransfers(account: string) {
-  try {
-    await txHistoryClient.startFetchingTransfers(account);
-    return true;
-  } catch (err) {
-    console.log("err", err);
-    return null;
-  }
 }
 
 export const CLOSED_DROPDOWN_INDEX = -1;
