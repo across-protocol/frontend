@@ -92,7 +92,8 @@ export function useBridge() {
         referrer,
       });
     } catch (e) {
-      console.error("Something went wrong when depositing.")
+      console.error(e);
+      console.error("Something went wrong when depositing.");
     }
 
   };
