@@ -89,7 +89,9 @@ function formatTransactionRows(
       </>
     );
 
-    const token = TOKENS_LIST[1].find((x) => x.address === tx.assetAddr);
+    const token = TOKENS_LIST[sourceChainId].find(
+      (x) => x.address === tx.assetAddr
+    );
 
     const symbol = (
       <>
