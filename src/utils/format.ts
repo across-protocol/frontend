@@ -104,6 +104,9 @@ export function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export const formatNumberTwoSigDigits = new Intl.NumberFormat("en-US", {
+const twoSigFormatter = new Intl.NumberFormat("en-US", {
   maximumSignificantDigits: 2,
-}).format;
+});
+
+export const formatNumberTwoSigDigits =
+  twoSigFormatter.format.bind(twoSigFormatter);
