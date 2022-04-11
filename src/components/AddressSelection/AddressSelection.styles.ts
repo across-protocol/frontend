@@ -125,6 +125,7 @@ export const Menu = styled.ul<MenuProps>`
   z-index: 10000;
   width: 95%;
   margin: 0 auto;
+  overflow: auto;
   box-shadow: inset 0 8px 8% rgba(45, 46, 51, 0.2);
 `;
 

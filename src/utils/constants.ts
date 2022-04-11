@@ -375,7 +375,7 @@ export const SPOKE_ADDRESSES: Record<ChainId, string> = {
     "0x3BED21dAe767e4Df894B31b14aD32369cE4bad8b"
   ),
   [ChainId.GOERLI]: ethers.constants.AddressZero,
-  [ChainId.MUMBAI]: ethers.constants.AddressZero,
+  [ChainId.MUMBAI]: getAddress("0xFd9e2642a170aDD10F53Ee14a93FcF2F31924944"),
 };
 // Update once addresses are known
 export const HUBPOOL_ADDRESSES: Record<ChainId, string> = {
@@ -388,7 +388,7 @@ export const HUBPOOL_ADDRESSES: Record<ChainId, string> = {
   [ChainId.KOVAN]: getAddress("0xD449Af45a032Df413b497A709EeD3E8C112EbcE3"),
   [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
-  [ChainId.GOERLI]: ethers.constants.AddressZero,
+  [ChainId.GOERLI]: getAddress("0x69CA24D3084a2eea77E061E2D7aF9b76D107b4f6"),
   [ChainId.MUMBAI]: ethers.constants.AddressZero
 };
 // Update once addresses are known

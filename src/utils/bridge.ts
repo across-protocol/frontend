@@ -39,6 +39,8 @@ function getHubPoolChainId(sendingChain: ChainId): ChainId {
       return ChainId.RINKEBY;
     case ChainId.KOVAN_OPTIMISM:
       return ChainId.KOVAN;
+    case ChainId.MUMBAI:
+      return ChainId.GOERLI;
     default:
       return ChainId.MAINNET
   }
