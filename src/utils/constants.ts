@@ -486,5 +486,6 @@ export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
   };
 }
 // default to kovan when testing
-export const HUBPOOL_CHAINID = isProduction() ? ChainId.MAINNET : ChainId.KOVAN;
+// FIXME: Switch to Mainnet in prod, when we have a mainnet hub pool
+export const HUBPOOL_CHAINID = isProduction() ? ChainId.KOVAN : ChainId.KOVAN;
 export const HUBPOOL_CONFIG = makePoolClientConfig(HUBPOOL_CHAINID);
