@@ -36,10 +36,13 @@ export function getSpokePool(
 function getHubPoolChainId(sendingChain: ChainId): ChainId {
   switch (sendingChain) {
     case ChainId.ARBITRUM_RINKEBY:
+    case ChainId.RINKEBY:
       return ChainId.RINKEBY;
     case ChainId.KOVAN_OPTIMISM:
+    case ChainId.KOVAN:
       return ChainId.KOVAN;
     case ChainId.MUMBAI:
+    case ChainId.GOERLI:
       return ChainId.GOERLI;
     default:
       return ChainId.MAINNET
