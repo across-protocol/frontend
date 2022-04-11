@@ -10,33 +10,9 @@ const chainConfigs = createTxHistoryClient();
 const client = new TransfersHistoryClient({
   chains: chainConfigs,
   // optional
-  pollingIntervalSeconds: 60000,
+  pollingIntervalSeconds: 60,
 });
 // optional
 client.setLogLevel("debug");
 
 export default client;
-// await client.startFetchingTransfers(<depositor_addr>);
-// client.on(TransfersHistoryEvent.TransfersUpdated, data => {
-//   const { depositorAddr, filledTransfersCount, pendingTransfersCount } = data;
-//   // do whatever you need with the data
-// });
-
-// const pendingTransfers = client.getPendingTransfers(<depositor_addr>, <limit>, <offset>);
-// /**
-//  *
-//  * Transfers type:
-//  * {
-//  *   depositId: number;
-//  *   depositTime: number;
-//  *   status: TransferStatus;
-//  *   filled: BigNumber;
-//  *   sourceChainId: ChainId;
-//  *   destinationChainId: number;
-//  *   assetAddr: string;
-//  *   amount: BigNumber;
-//  *   depositTxHash: string;
-//  * }[]
-//  */
-// const filledTransfers = client.getFilledTransfers(<depositor_addr>, <limit>, <offset>);
-// client.stopFetchingTransfers(<depositor_addr>);

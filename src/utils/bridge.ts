@@ -60,11 +60,14 @@ export function getHubPool(
 ): HubPool {
   const hubPoolChainId = getHubPoolChainId(fromChain);
   const maybeAddress = HUBPOOL_ADDRESSES[hubPoolChainId];
-  // if (!isValidAddress(maybeAddress) || maybeAddress === ethers.constants.AddressZero) {
-  //   throw new Error(
-  //     `No HubPool supported on ${CHAINS[hubPoolChainId].name} with chainId: ${hubPoolChainId}`
-  //   );
-  // }
+  if (
+    !isValidAddress(maybeAddress) ||
+    maybeAddress === ethers.constants.AddressZero
+  ) {
+    throw new Error(
+      `No HubPool supported on ${CHAINS[hubPoolChainId].name} with chainId: ${hubPoolChainId}`
+    );
+  }
   return HubPool__factory.connect(
     maybeAddress,
     signer ?? PROVIDERS[hubPoolChainId]()

@@ -4,6 +4,7 @@ import { onboard } from "utils";
 import useWindowSize from "hooks/useWindowsSize";
 import txHistoryClient from "state/transferHistory";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
+import { transfersHistory } from "@across-protocol/sdk-v2";
 
 export default function useTransactionsView() {
   const { provider, chainId, isConnected, account } = useConnection();
@@ -25,6 +26,15 @@ export default function useTransactionsView() {
           err
         );
       });
+      txHistoryClient.on(
+        transfersHistory.TransfersHistoryEvent.TransfersUpdated,
+        () => {
+          const nextFilledTx = txHistoryClient.getFilledTransfers(account);
+          const nextOngoingTx = txHistoryClient.getPendingTransfers(account);
+          setRawFilledTx(nextFilledTx);
+          setRawOngoingTx(nextOngoingTx);
+        }
+      );
     }
     return () => {
       if (account) {
@@ -33,23 +43,23 @@ export default function useTransactionsView() {
     };
   }, [account]);
 
-  // Create interval to update transactions.
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-    if (account) {
-      interval = setInterval(() => {
-        const nextFilledTx = txHistoryClient.getFilledTransfers(account);
-        const nextOngoingTx = txHistoryClient.getPendingTransfers(account);
-        setRawFilledTx(nextFilledTx);
-        setRawOngoingTx(nextOngoingTx);
-      }, 5000);
-    }
-    return () => {
-      setRawFilledTx([]);
-      setRawOngoingTx([]);
-      clearInterval(interval);
-    };
-  }, [account]);
+  // // Create interval to update transactions.
+  // useEffect(() => {
+  //   let interval: ReturnType<typeof setInterval>;
+  //   if (account) {
+  //     interval = setInterval(() => {
+  //       const nextFilledTx = txHistoryClient.getFilledTransfers(account);
+  //       const nextOngoingTx = txHistoryClient.getPendingTransfers(account);
+  //       setRawFilledTx(nextFilledTx);
+  //       setRawOngoingTx(nextOngoingTx);
+  //     }, 5000);
+  //   }
+  //   return () => {
+  //     setRawFilledTx([]);
+  //     setRawOngoingTx([]);
+  //     clearInterval(interval);
+  //   };
+  // }, [account]);
 
   return {
     provider,
