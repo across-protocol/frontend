@@ -6,6 +6,8 @@ import txHistoryClient from "state/transferHistory";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 import { transfersHistory } from "@across-protocol/sdk-v2";
 
+import { usePrevious } from "hooks";
+
 export default function useTransactionsView() {
   const { provider, chainId, isConnected, account } = useConnection();
   const { init } = onboard;
@@ -18,8 +20,17 @@ export default function useTransactionsView() {
   const [rawOngoingTx, setRawOngoingTx] = useState<Transfer[]>([]);
 
   // Start the tracking / stopping of the TX in the client.
+  const previousAccount = usePrevious(account);
   useEffect(() => {
+    if (!account && previousAccount) {
+      console.log("in no account cond");
+      txHistoryClient.stopFetchingTransfers(previousAccount);
+    }
     if (account) {
+      if (previousAccount && previousAccount !== account) {
+        console.log("in diff account cond");
+        txHistoryClient.stopFetchingTransfers(previousAccount);
+      }
       txHistoryClient.startFetchingTransfers(account).catch((err) => {
         console.error(
           "Error in startFetchingTransfers call in txHistoryClient",
@@ -29,37 +40,16 @@ export default function useTransactionsView() {
       txHistoryClient.on(
         transfersHistory.TransfersHistoryEvent.TransfersUpdated,
         () => {
+          console.log("does this fire", account);
           const nextFilledTx = txHistoryClient.getFilledTransfers(account);
           const nextOngoingTx = txHistoryClient.getPendingTransfers(account);
+
           setRawFilledTx(nextFilledTx);
           setRawOngoingTx(nextOngoingTx);
         }
       );
     }
-    return () => {
-      if (account) {
-        txHistoryClient.stopFetchingTransfers(account);
-      }
-    };
-  }, [account]);
-
-  // // Create interval to update transactions.
-  // useEffect(() => {
-  //   let interval: ReturnType<typeof setInterval>;
-  //   if (account) {
-  //     interval = setInterval(() => {
-  //       const nextFilledTx = txHistoryClient.getFilledTransfers(account);
-  //       const nextOngoingTx = txHistoryClient.getPendingTransfers(account);
-  //       setRawFilledTx(nextFilledTx);
-  //       setRawOngoingTx(nextOngoingTx);
-  //     }, 5000);
-  //   }
-  //   return () => {
-  //     setRawFilledTx([]);
-  //     setRawOngoingTx([]);
-  //     clearInterval(interval);
-  //   };
-  // }, [account]);
+  }, [account, previousAccount]);
 
   return {
     provider,
