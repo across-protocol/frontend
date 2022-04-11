@@ -8,8 +8,6 @@ interface TxTableIRow extends IRow {
   onClick?: () => void;
 }
 
-const MIN_ELEMENTS_TO_SHOW_PAGINATION = 25;
-
 interface Props {
   rows: TxTableIRow[];
   headers: ICell[];
@@ -40,16 +38,14 @@ const TransactionsTableWithPagination: FC<Props> = ({
     paginateState.endIndex
   );
 
-  const showPagination = paginatedRows.length > MIN_ELEMENTS_TO_SHOW_PAGINATION;
-
   return (
     <>
       <TransactionsTable rows={paginatedRows} headers={headers} title={title} />
-      {showPagination && (
+      {paginateState.totalPages > 1 ? (
         <PaginationWrapper>
           <Pagination onPageChange={setCurrentPage} {...paginateState} />
         </PaginationWrapper>
-      )}
+      ) : null}
     </>
   );
 };

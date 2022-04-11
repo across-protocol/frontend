@@ -10,7 +10,7 @@ const chainConfigs = createTxHistoryClient();
 const client = new TransfersHistoryClient({
   chains: chainConfigs,
   // optional
-  pollingIntervalSeconds: 60,
+  pollingIntervalSeconds: 5,
 });
 // optional
 client.setLogLevel("debug");
