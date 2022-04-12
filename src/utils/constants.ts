@@ -88,7 +88,7 @@ export enum ChainId {
   ARBITRUM_RINKEBY = 421611,
   GOERLI = 5,
   // Polygon testnet
-  MUMBAI = 80001
+  MUMBAI = 80001,
 }
 
 export type Token = {
@@ -234,7 +234,9 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
     logoURI: polygonLogo,
     rpcUrl: "https://rpc.ankr.com/polygon",
     explorerUrl: "https://polygonscan.com",
-    constructExplorerLink: defaultConstructExplorerLink("https://polygonscan.com"),
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://polygonscan.com"
+    ),
     nativeCurrency: {
       name: "Matic",
       symbol: "MATIC",
@@ -328,15 +330,16 @@ export const CHAINS: Record<ChainId, ChainInfo> = {
     logoURI: polygonLogo,
     rpcUrl: "https://matic-mumbai.chainstacklabs.com",
     explorerUrl: "https://mumbai.polygonscan.com",
-    constructExplorerLink: defaultConstructExplorerLink("https://mumbai.polygonscan.com"),
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://mumbai.polygonscan.com"
+    ),
     nativeCurrency: {
       name: "Matic",
       symbol: "MATIC",
       decimals: 18,
     },
     nativeCurrencyAddress: ethers.constants.AddressZero,
-
-  }
+  },
 };
 
 const PRODUCTION_CHAINS_SELECTION = [
@@ -352,7 +355,7 @@ export const TESTNET_CHAINS_SELECTION = [
   ChainId.KOVAN_OPTIMISM,
   ChainId.ARBITRUM_RINKEBY,
   ChainId.GOERLI,
-  ChainId.MUMBAI
+  ChainId.MUMBAI,
 ];
 /** Chains as they appear in dropdowns */
 export const CHAINS_SELECTION = isProduction()
@@ -389,7 +392,7 @@ export const HUBPOOL_ADDRESSES: Record<ChainId, string> = {
   [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
   [ChainId.GOERLI]: getAddress("0x69CA24D3084a2eea77E061E2D7aF9b76D107b4f6"),
-  [ChainId.MUMBAI]: ethers.constants.AddressZero
+  [ChainId.MUMBAI]: ethers.constants.AddressZero,
 };
 // Update once addresses are known
 export const RATEMODEL_ADDRESSES: Record<ChainId, string> = {
@@ -403,7 +406,7 @@ export const RATEMODEL_ADDRESSES: Record<ChainId, string> = {
   [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
   [ChainId.GOERLI]: ethers.constants.AddressZero,
-  [ChainId.MUMBAI]: ethers.constants.AddressZero
+  [ChainId.MUMBAI]: ethers.constants.AddressZero,
 };
 
 type GetProvider = () => ethers.providers.JsonRpcProvider;
@@ -472,10 +475,8 @@ export const PROVIDERS: Record<ChainId, GetProvider> = {
       new ethers.providers.StaticJsonRpcProvider(
         `https://polygon-mumbai.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`
       )
-  )
+  ),
 };
-
-
 
 export const DEFAULT_FROM_CHAIN_ID = ChainId.OPTIMISM;
 export const DEFAULT_TO_CHAIN_ID = ChainId.MAINNET;
@@ -560,3 +561,4 @@ export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
 // FIXME: Switch to Mainnet in prod, when we have a mainnet hub pool
 export const HUBPOOL_CHAINID = isProduction() ? ChainId.KOVAN : ChainId.KOVAN;
 export const HUBPOOL_CONFIG = makePoolClientConfig(HUBPOOL_CHAINID);
+export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;

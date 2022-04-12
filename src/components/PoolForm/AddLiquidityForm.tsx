@@ -17,7 +17,12 @@ import { useERC20 } from "hooks";
 import { ethers } from "ethers";
 import { addEtherscan } from "utils/notify";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
-import { DEFAULT_TO_CHAIN_ID, CHAINS, switchChain } from "utils";
+import {
+  DEFAULT_TO_CHAIN_ID,
+  CHAINS,
+  switchChain,
+  disableDeposits,
+} from "utils";
 import api from "state/chainApi";
 import type { ShowSuccess } from "views/Pool";
 import { useError } from "hooks";
@@ -246,13 +251,18 @@ const AddLiquidityForm: FC<Props> = ({
       ) : (
         <FormButton
           disabled={
-            (!provider || !!formError || Number(amount) <= 0) && isConnected
+            (!!disableDeposits ||
+              !provider ||
+              !!formError ||
+              Number(amount) <= 0) &&
+            isConnected
           }
-          onClick={() =>
-            approveOrPoolTransactionHandler().catch((err) =>
+          onClick={() => {
+            if (disableDeposits) return false;
+            return approveOrPoolTransactionHandler().catch((err) =>
               console.error("Error on click to approve or pool tx", err)
-            )
-          }
+            );
+          }}
         >
           {buttonMessage()}
           {txSubmitted ? <BouncingDotsLoader /> : null}
