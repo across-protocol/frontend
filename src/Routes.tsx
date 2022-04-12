@@ -29,18 +29,19 @@ const Routes: React.FC = () => {
 
   return (
     <>
-      {disableDeposits ? (
+      {disableDeposits && (
         <SuperHeader>
           Across is experiencing issues. Deposits are currently disabled into
           the pools. Please try again later
         </SuperHeader>
-      ) : null}
+      )}
       {error && !(error instanceof WrongNetworkError) && (
         <SuperHeader>
           <div>{error.message}</div>
           <RemoveErrorSpan onClick={() => removeError()}>X</RemoveErrorSpan>
         </SuperHeader>
       )}
+
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
