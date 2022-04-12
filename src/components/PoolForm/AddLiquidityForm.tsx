@@ -151,7 +151,9 @@ const AddLiquidityForm: FC<Props> = ({
     if (!provider) {
       return init();
     }
+    if (disableDeposits) return false;
     if (isConnected && userNeedsToApprove) return handleApprove();
+
     if (isConnected && Number(amount) > 0 && signer) {
       const weiAmount = toWeiSafe(amount, decimals);
 
@@ -251,14 +253,13 @@ const AddLiquidityForm: FC<Props> = ({
       ) : (
         <FormButton
           disabled={
-            (!!disableDeposits ||
+            ((provider && !!disableDeposits) ||
               !provider ||
               !!formError ||
               Number(amount) <= 0) &&
             isConnected
           }
           onClick={() => {
-            if (disableDeposits) return false;
             return approveOrPoolTransactionHandler().catch((err) =>
               console.error("Error on click to approve or pool tx", err)
             );
