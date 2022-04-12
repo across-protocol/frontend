@@ -36,9 +36,14 @@ export function getSpokePool(
 function getHubPoolChainId(sendingChain: ChainId): ChainId {
   switch (sendingChain) {
     case ChainId.ARBITRUM_RINKEBY:
+    case ChainId.RINKEBY:
       return ChainId.RINKEBY;
     case ChainId.KOVAN_OPTIMISM:
+    case ChainId.KOVAN:
       return ChainId.KOVAN;
+    case ChainId.MUMBAI:
+    case ChainId.GOERLI:
+      return ChainId.GOERLI;
     default:
       return ChainId.MAINNET
   }
@@ -296,9 +301,9 @@ export async function sendAcrossDeposit(
   if (!code) {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
-  const isETH = token === CHAINS[fromChain].ETHAddress;
-  const value = isETH ? amount : ethers.constants.Zero;
-  const originToken = isETH ? TOKENS_LIST[fromChain][0].address : token;
+  const isNativeCurrency = token === CHAINS[fromChain].nativeCurrencyAddress;
+  const value = isNativeCurrency ? amount : ethers.constants.Zero;
+  const originToken = isNativeCurrency ? TOKENS_LIST[fromChain][0].address : token;
   const tx = await spokePool.populateTransaction.deposit(
     recipient,
     originToken,

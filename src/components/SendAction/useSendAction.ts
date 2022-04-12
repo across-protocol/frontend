@@ -6,13 +6,13 @@ import { useConnection } from "state/hooks";
 
 type TokenInfo =
   | {
-      address: string;
-      symbol: "WETH";
-      name: "Wrapped Ether";
-      decimals: 18;
-      logoURI: string;
-      bridgePool: string;
-    }
+    address: string;
+    symbol: "WETH";
+    name: "Wrapped Ether";
+    decimals: 18;
+    logoURI: string;
+    bridgePool: string;
+  }
   | Token;
 
 export default function useSendAction(
@@ -79,6 +79,7 @@ export default function useSendAction(
   } else if (status === "error") {
     buttonMsg = "Send";
   }
+
   const isWETH = tokenInfo.symbol === "WETH";
 
   return {

@@ -110,11 +110,13 @@ export default function useCoinSelection() {
   }, [balance, balances, selectedItem, setAmount, tokenList]);
   // checks for insufficient balance errors
   let error: InsufficientBalanceError | ParsingError | undefined = formError;
-  const isEth = token === CHAINS[fromChain].ETHAddress;
+  const isNativeCurrency = token === CHAINS[fromChain].nativeCurrencyAddress;
   if (
     balance &&
     amount.gt(
-      isEth ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION)) : balance
+      isNativeCurrency
+        ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION))
+        : balance
     )
   ) {
     error = new InsufficientBalanceError();

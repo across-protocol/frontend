@@ -15,6 +15,8 @@ import {
   ParsingError,
   InsufficientBalanceError,
   CHAINS,
+  filterTokensByDestinationChain,
+  getReacheableChains,
 } from "utils";
 import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
@@ -135,12 +137,15 @@ function amountReducer(state: FormState, amount: ethers.BigNumber): FormState {
 
 function fromChainReducer(state: FormState, chainId: ChainId): FormState {
   let toChain = state.toChain;
-  if (chainId === ChainId.MAINNET) {
-    toChain = ChainId.OPTIMISM;
+  if (toChain === chainId) {
+    toChain = getReacheableChains(chainId)[0];
   }
-  if (chainId !== ChainId.MAINNET && toChain !== ChainId.MAINNET) {
-    toChain = ChainId.MAINNET;
-  }
+  const bridgeableTokens = filterTokensByDestinationChain(chainId, toChain);
+  // Prefer the native currency if it exist and is shared (ex: ETH between rollups), otherwise take the first token available
+  const token =
+    bridgeableTokens.find(
+      (t) => t.address === CHAINS[chainId].nativeCurrencyAddress
+    )?.address ?? bridgeableTokens[0].address;
 
   switch (state.status) {
     case FormStatus.IDLE:
@@ -153,7 +158,7 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
         fromChain: chainId,
         toChain,
         amount: ethers.constants.Zero,
-        token: CHAINS[chainId].ETHAddress,
+        token,
         error: undefined,
       };
     default:
@@ -163,9 +168,13 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
 
 function toChainReducer(state: FormState, chainId: ChainId): FormState {
   let fromChain = state.fromChain;
-  if (chainId === ChainId.MAINNET) {
-    fromChain = ChainId.OPTIMISM;
-  }
+  const bridgeableTokens = filterTokensByDestinationChain(fromChain, chainId);
+  // Prefer the native currency if it exist and is shared (ex: ETH between rollups), otherwise take the first token available
+  const token =
+    bridgeableTokens.find(
+      (t) => t.address === CHAINS[fromChain].nativeCurrencyAddress
+    )?.address ?? bridgeableTokens[0].address;
+
   switch (state.status) {
     case FormStatus.IDLE:
     case FormStatus.TOUCHED:
@@ -177,7 +186,7 @@ function toChainReducer(state: FormState, chainId: ChainId): FormState {
         toChain: chainId,
         fromChain,
         amount: ethers.constants.Zero,
-        token: CHAINS[state.fromChain].ETHAddress,
+        token,
         error: undefined,
       };
     default:
@@ -277,16 +286,10 @@ function useSendFormManager(): SendFormManagerContext {
     // The user has just connected to the app.
     if (chainId && previousChainId === undefined) {
       const connectedChainId = CHAINS_SELECTION.find((x) => x === chainId);
-      const otherChains = CHAINS_SELECTION.filter((x) => x !== chainId);
-
-      if (connectedChainId && otherChains) {
+      if (connectedChainId) {
         dispatch({
           type: ActionType.SET_FROM_CHAIN,
           payload: connectedChainId,
-        });
-        dispatch({
-          type: ActionType.SET_TO_CHAIN,
-          payload: otherChains[otherChains.length - 1],
         });
       }
     }
