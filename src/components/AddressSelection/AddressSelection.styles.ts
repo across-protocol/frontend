@@ -92,6 +92,8 @@ export const InputError = styled.div`
 `;
 
 export const ClearButton = styled(BaseButton)`
+  display: flex;
+  align-items: center;
   padding: 0;
 `;
 export const CancelButton = styled(PrimaryButton)`

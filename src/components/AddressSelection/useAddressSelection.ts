@@ -5,7 +5,7 @@ import { useSendForm } from "hooks";
 import { CHAINS_SELECTION, isValidAddress } from "utils";
 
 export default function useAddressSelection() {
-  const { isConnected } = useConnection();
+  const { isConnected, account } = useConnection();
   const { toChain, toAddress, fromChain, setToChain, setToAddress } =
     useSendForm();
   const [address, setAddress] = useState("");
@@ -43,8 +43,12 @@ export default function useAddressSelection() {
   };
   const isValid = !address || isValidAddress(address);
   const handleSubmit = () => {
-    if (isValid && address) {
-      setToAddress(address);
+    if (isValid) {
+      if (address) {
+        setToAddress(address);
+      } else if (account) {
+        setToAddress(account);
+      }
       toggle();
     }
   };
