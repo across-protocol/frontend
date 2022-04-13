@@ -7,7 +7,7 @@ import { WrongNetworkError } from "utils";
 import { useError } from "hooks";
 import styled from "@emotion/styled";
 import Sidebar from "components/Sidebar";
-
+import { disableDeposits } from "utils";
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider } = useConnection();
@@ -29,12 +29,19 @@ const Routes: React.FC = () => {
 
   return (
     <>
+      {disableDeposits && (
+        <SuperHeader>
+          Across is experiencing issues. Deposits are currently disabled into
+          the pools. Please try again later
+        </SuperHeader>
+      )}
       {error && !(error instanceof WrongNetworkError) && (
         <SuperHeader>
           <div>{error.message}</div>
           <RemoveErrorSpan onClick={() => removeError()}>X</RemoveErrorSpan>
         </SuperHeader>
       )}
+
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
