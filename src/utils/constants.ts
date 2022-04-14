@@ -11,6 +11,7 @@ import bobaLogo from "assets/boba-logo.svg";
 import polygonLogo from "assets/polygon-logo.svg";
 import { getAddress } from "./address";
 import rawTokens from "../data/tokens.json";
+import PREFERRED_TOKEN_ORDER from "../data/token-order.json";
 import * as superstruct from "superstruct";
 
 /* Colors and Media Queries section */
@@ -122,6 +123,8 @@ const TokensList = superstruct.array(
 export function isSupportedChainId(chainId: number): chainId is ChainId {
   return chainId in ChainId;
 }
+
+
 function processRawTokens(
   tokens: typeof rawTokens
 ): Record<ChainId, TokenList> {
@@ -130,10 +133,13 @@ function processRawTokens(
     if (!isSupportedChainId(chainId)) {
       throw new Error(`Unsupported chainId: ${chainId}`);
     }
-    const tokens = rawTokens.map((token) => ({
-      ...token,
-      logoURI: process.env.PUBLIC_URL + token.logoURI,
-    }));
+    let tokens = [];
+    for (let rawToken of rawTokens) {
+      const token = { ...rawToken, logoURI: process.env.PUBLIC_URL + rawToken.logoURI };
+      tokens[PREFERRED_TOKEN_ORDER.indexOf(token.symbol)] = token;
+    }
+    // if a token is not present on this chain, the array might be sparse. We collapse it here
+    tokens = tokens.filter(Boolean);
     superstruct.assert(tokens, TokensList);
     return { ...record, [chainId]: tokens };
   }, {} as Record<ChainId, TokenList>);
