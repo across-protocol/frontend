@@ -12,6 +12,7 @@ import polygonLogo from "assets/polygon-logo.svg";
 import { getAddress } from "./address";
 import rawTokens from "../data/tokens.json";
 import * as superstruct from "superstruct";
+import { Provider } from "@across-protocol/sdk-v2/dist/pool";
 
 /* Colors and Media Queries section */
 
@@ -586,7 +587,7 @@ export const PROVIDER_URLS: Record<ChainId, string> = {
 
 interface txHistoryConfig {
   chainId: number;
-  providerUrl: string;
+  provider: Provider;
   spokePoolContractAddr: string;
   lowerBoundBlockNumber?: number;
 }
@@ -604,30 +605,30 @@ export function createTxHistoryClient() {
   const txHistoryConfigs: txHistoryConfig[] = [
     {
       chainId: ChainId.ARBITRUM_RINKEBY,
-      providerUrl: PROVIDER_URLS[ChainId.ARBITRUM_RINKEBY],
+      provider: PROVIDERS[ChainId.ARBITRUM_RINKEBY](),
       spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.ARBITRUM_RINKEBY],
       lowerBoundBlockNumber: 10523275,
     },
     {
       chainId: ChainId.KOVAN_OPTIMISM,
-      providerUrl: PROVIDER_URLS[ChainId.KOVAN_OPTIMISM],
+      provider: PROVIDERS[ChainId.KOVAN_OPTIMISM](),
       spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.KOVAN_OPTIMISM],
       lowerBoundBlockNumber: 1618630,
     },
     {
       chainId: ChainId.RINKEBY,
-      providerUrl: PROVIDER_URLS[ChainId.RINKEBY],
+      provider: PROVIDERS[ChainId.RINKEBY](),
       spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.RINKEBY],
     },
     {
       chainId: ChainId.KOVAN,
-      providerUrl: PROVIDER_URLS[ChainId.KOVAN],
+      provider: PROVIDERS[ChainId.KOVAN](),
       spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.KOVAN],
       lowerBoundBlockNumber: 30475937,
     },
     {
       chainId: ChainId.MAINNET,
-      providerUrl: PROVIDER_URLS[ChainId.MAINNET],
+      provider: PROVIDERS[ChainId.MAINNET](),
       spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.MAINNET],
     },
   ];
