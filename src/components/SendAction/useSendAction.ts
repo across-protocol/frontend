@@ -36,9 +36,13 @@ export default function useSendAction(
     }
     try {
       setTxPending(true);
-
       if (hasToApprove) {
         const tx = await approve();
+        if (tx) {
+          tx.wait(CONFIRMATIONS).then(() => {
+            setTxPending(false);
+          });
+        }
         return tx;
       } else {
         // We save the fees here, in case they change between here and when we save the deposit.
@@ -58,21 +62,25 @@ export default function useSendAction(
                 from: account,
                 fees: feesUsed,
               });
+              setTxPending(false);
             })
             .catch(console.error);
           // TODO: we should invalidate and refetch any queries of the transaction tab, so when a user switches to it, they see the new transaction immediately.
         }
         return tx;
       }
-    } finally {
-      setTxPending(false);
+    } catch (error) {
+      console.error(error);
+      console.error(`Something went wrong sending the transaction`)
     }
   };
 
   const buttonDisabled = status !== "ready" || txPending;
 
   let buttonMsg: string = "Send";
-  if (status === "ready") {
+  if (txPending) {
+    buttonMsg = hasToApprove ? "Approving" : "Sending";
+  } else if (status === "ready") {
     buttonMsg = hasToApprove ? "Approve" : "Send";
   } else if (status === "validating") {
     buttonMsg = "Loading...";
