@@ -34,9 +34,9 @@ export function useBalance(
   const queryKey = enabledQuery
     ? balanceQueryKey(chainIdToQuery, token, accountToQuery, blockNumberToQuery)
     : [
-        "DISABLED_BALANCE_QUERY",
-        { chainIdToQuery, token, accountToQuery, blockNumberToQuery },
-      ];
+      "DISABLED_BALANCE_QUERY",
+      { chainIdToQuery, token, accountToQuery, blockNumberToQuery },
+    ];
   const { data: balance, ...delegated } = useQuery(
     queryKey,
     async () => {
@@ -87,15 +87,15 @@ export function useBalances(
     !!blockNumberToQuery;
   const queryKey = enabledQuery
     ? balancesQueryKey(
-        chainIdToQuery,
-        tokens,
-        accountToQuery,
-        blockNumberToQuery
-      )
+      chainIdToQuery,
+      tokens,
+      accountToQuery,
+      blockNumberToQuery
+    )
     : [
-        "DISABLED_BALANCES_QUERY",
-        { chainIdToQuery, tokens, accountToQuery, blockNumberToQuery },
-      ];
+      "DISABLED_BALANCES_QUERY",
+      { chainIdToQuery, tokens, accountToQuery, blockNumberToQuery },
+    ];
   const { data: balances, ...delegated } = useQuery(
     queryKey,
     async () => {
@@ -111,6 +111,9 @@ export function useBalances(
       enabled: enabledQuery,
       // We already re-fetch when the block change, so we don't need to re-fetch.
       staleTime: Infinity,
+      // Old balances can be garbage collected immediately
+      cacheTime: 0,
+      keepPreviousData: true,
     }
   );
   return {
