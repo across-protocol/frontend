@@ -116,10 +116,7 @@ const AddressSelection: React.FC = () => {
           </InputWrapper>
           <ButtonGroup>
             <CancelButton onClick={toggle}>Cancel</CancelButton>
-            <SecondaryButton
-              onClick={handleSubmit}
-              disabled={!isValid || !address}
-            >
+            <SecondaryButton onClick={handleSubmit} disabled={!isValid}>
               Save Changes
             </SecondaryButton>
           </ButtonGroup>
