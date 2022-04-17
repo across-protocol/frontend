@@ -115,8 +115,12 @@ export const Menu = styled.ul<MenuProps>`
   left: 0;
   bottom: 0;
   right: 0;
-  padding-top: 10px;
-  transform: translateY(100%);
+  // HACK: we use this as padding, to prevent elements overflowing into the label when scrolling up
+  border-top: 10px solid transparent;
+  transform: translateY(60px);
+  height: fit-content;
+  max-height: 50vh;
+  overflow-y: auto;
   list-style: none;
   display: ${(props) => (props.isOpen ? "flex" : "none")};
   pointer-events: ${({ isOpen }) => (isOpen ? "auto" : "none")};
@@ -125,7 +129,6 @@ export const Menu = styled.ul<MenuProps>`
   z-index: 10000;
   width: 95%;
   margin: 0 auto;
-  overflow: auto;
   box-shadow: inset 0 8px 8% rgba(45, 46, 51, 0.2);
 `;
 
