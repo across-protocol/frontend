@@ -1,6 +1,11 @@
 import { clients, across, utils } from "@uma/sdk";
 import { ethers, BigNumber } from "ethers";
-import { HubPool, HubPool__factory, SpokePool, SpokePool__factory } from "@across-protocol/contracts-v2";
+import {
+  HubPool,
+  HubPool__factory,
+  SpokePool,
+  SpokePool__factory,
+} from "@across-protocol/contracts-v2";
 
 import {
   CHAINS,
@@ -45,19 +50,28 @@ function getHubPoolChainId(sendingChain: ChainId): ChainId {
     case ChainId.GOERLI:
       return ChainId.GOERLI;
     default:
-      return ChainId.MAINNET
+      return ChainId.MAINNET;
   }
 }
 
-export function getHubPool(fromChain: ChainId, signer?: ethers.Signer): HubPool {
+export function getHubPool(
+  fromChain: ChainId,
+  signer?: ethers.Signer
+): HubPool {
   const hubPoolChainId = getHubPoolChainId(fromChain);
   const maybeAddress = HUBPOOL_ADDRESSES[hubPoolChainId];
-  if (!isValidAddress(maybeAddress) || maybeAddress === ethers.constants.AddressZero) {
+  if (
+    !isValidAddress(maybeAddress) ||
+    maybeAddress === ethers.constants.AddressZero
+  ) {
     throw new Error(
       `No HubPool supported on ${CHAINS[hubPoolChainId].name} with chainId: ${hubPoolChainId}`
     );
   }
-  return HubPool__factory.connect(maybeAddress, signer ?? PROVIDERS[hubPoolChainId]());
+  return HubPool__factory.connect(
+    maybeAddress,
+    signer ?? PROVIDERS[hubPoolChainId]()
+  );
 }
 const { gasFeeCalculator } = across;
 

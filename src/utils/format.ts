@@ -99,3 +99,14 @@ export function tagAddress(dataHex: string, address: string) {
   assert(ethers.utils.isAddress(address), "Data must be a valid address");
   return tagHex(dataHex, address);
 }
+
+export function capitalizeFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+const twoSigFormatter = new Intl.NumberFormat("en-US", {
+  maximumSignificantDigits: 2,
+});
+
+export const formatNumberTwoSigDigits =
+  twoSigFormatter.format.bind(twoSigFormatter);

@@ -45,7 +45,9 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
         title={title}
         openIndex={openIndex}
       />
-      <Pagination onPageChange={setCurrentPage} {...paginateState} />
+      {paginatedRows.length > 25 && (
+        <Pagination onPageChange={setCurrentPage} {...paginateState} />
+      )}
     </>
   );
 };

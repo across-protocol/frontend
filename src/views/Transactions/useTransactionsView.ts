@@ -1,25 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useConnection } from "state/hooks";
 import { onboard } from "utils";
-import createTransactionModel from "./TransactionsTable/createTransactionModel";
 import useWindowSize from "hooks/useWindowsSize";
+import txHistoryClient from "state/transferHistory";
+import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
+import { transfersHistory } from "@across-protocol/sdk-v2";
 
 export default function useTransactionsView() {
   const { provider, chainId, isConnected, account } = useConnection();
   const { init } = onboard;
-  const transactions = createTransactionModel();
 
   const { width } = useWindowSize();
   const [openFilledRow, setOpenFilledRow] = useState<number>(-1);
   const [openOngoingRow, setOpenOngoingRow] = useState<number>(-1);
   const [currentPage, setCurrentPage] = useState(0);
+  const [rawFilledTx, setRawFilledTx] = useState<Transfer[]>([]);
+  const [rawOngoingTx, setRawOngoingTx] = useState<Transfer[]>([]);
+
+  // Start the tracking / stopping of the TX in the client.
+  useEffect(() => {
+    if (account) {
+      txHistoryClient.startFetchingTransfers(account).catch((err) => {
+        console.error(
+          "Error in startFetchingTransfers call in txHistoryClient",
+          err
+        );
+      });
+      txHistoryClient.on(
+        transfersHistory.TransfersHistoryEvent.TransfersUpdated,
+        (data) => {
+          const nextFilledTx = txHistoryClient.getFilledTransfers(
+            data.depositorAddr
+          );
+          const nextOngoingTx = txHistoryClient.getPendingTransfers(
+            data.depositorAddr
+          );
+
+          setRawFilledTx(nextFilledTx);
+          setRawOngoingTx(nextOngoingTx);
+        }
+      );
+      return () => {
+        txHistoryClient.stopFetchingTransfers(account);
+        setRawFilledTx([]);
+        setRawOngoingTx([]);
+      };
+    }
+  }, [account]);
+
   return {
     provider,
     chainId,
     isConnected,
     account,
     initOnboard: init,
-    transactions,
     // windowSize can return undefined -- default to 0 for easier typing.
     width: width || 0,
     openFilledRow,
@@ -28,6 +62,9 @@ export default function useTransactionsView() {
     setOpenOngoingRow,
     currentPage,
     setCurrentPage,
+    txHistoryClient,
+    rawFilledTx,
+    rawOngoingTx,
   };
 }
 

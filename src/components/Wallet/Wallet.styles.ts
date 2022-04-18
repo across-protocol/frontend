@@ -6,11 +6,15 @@ import { SecondaryButton } from "../Buttons";
 export const Wrapper = styled(RoundBox)`
   background-color: inherit;
   width: 100%;
-  display: grid;
   grid-template-columns: 1fr 1fr;
   padding: 0;
+  display: none;
+
   &:hover {
     cursor: pointer;
+  }
+  @media ${QUERIES.laptopAndUp} {
+    display: grid;
   }
 `;
 
