@@ -564,27 +564,6 @@ export const HUBPOOL_CHAINID = isProduction() ? ChainId.KOVAN : ChainId.KOVAN;
 export const HUBPOOL_CONFIG = makePoolClientConfig(HUBPOOL_CHAINID);
 export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;
 
-export const PROVIDER_URLS: Record<ChainId, string> = {
-  [ChainId.MAINNET]: `https://mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
-
-  [ChainId.OPTIMISM]: `https://optimism-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
-
-  [ChainId.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
-
-  // Doesn't have an rpc on infura.
-  [ChainId.BOBA]: `https://mainnet.boba.network`,
-  [ChainId.RINKEBY]: `https://rinkeby.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
-
-  [ChainId.KOVAN]: `https://kovan.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
-
-  [ChainId.KOVAN_OPTIMISM]: `https://optimism-kovan.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
-
-  [ChainId.ARBITRUM_RINKEBY]: `https://arbitrum-rinkeby.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
-  [ChainId.POLYGON]: `https://polygon-mainnet.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
-  [ChainId.GOERLI]: `https://goerli.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
-  [ChainId.MUMBAI]: `https://polygon-mumbai.infura.io/v3/${process.env.REACT_APP_PUBLIC_INFURA_ID}`,
-};
-
 interface txHistoryConfig {
   chainId: number;
   provider: Provider;
