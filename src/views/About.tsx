@@ -6,9 +6,9 @@ import { ReactComponent as UnstyledUmaLogo } from "assets/Across-Powered-UMA.svg
 import { COLORS, QUERIES } from "utils";
 
 const NAV_LINKS = [
-  { 
+  {
     name: "Read our articles on Medium",
-    url: "https://medium.com/across-protocol"
+    url: "https://medium.com/across-protocol",
   },
   {
     name: "Stay up to date on our Twitter",
