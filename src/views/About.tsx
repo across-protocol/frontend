@@ -6,9 +6,9 @@ import { ReactComponent as UnstyledUmaLogo } from "assets/Across-Powered-UMA.svg
 import { COLORS, QUERIES } from "utils";
 
 const NAV_LINKS = [
-  { 
+  {
     name: "Read our articles on Medium",
-    url: "https://medium.com/across-protocol"
+    url: "https://medium.com/across-protocol",
   },
   {
     name: "Stay up to date on our Twitter",
@@ -24,12 +24,8 @@ const About: FC = () => {
   return (
     <Wrapper>
       <HeroBg>
-        <HeroHeader>
-          What is Across?
-        </HeroHeader>
-        <p>
-          A cross-chain bridging solution to send assets between L1 and L2. 
-        </p>
+        <HeroHeader>What is Across?</HeroHeader>
+        <p>A cross-chain bridging solution to send assets between L1 and L2.</p>
       </HeroBg>
       <Body>
         <Bullet>
@@ -47,7 +43,7 @@ const About: FC = () => {
               <Link
                 href="https://medium.com/across-protocol/how-is-across-protocol-so-fast-d77b4e7481c9"
                 target="_blank"
-                rel="noopener noreferrer"  
+                rel="noopener noreferrer"
               >
                 here
               </Link>
@@ -75,7 +71,7 @@ const About: FC = () => {
               <Link
                 href="https://medium.com/across-protocol/a-deep-dive-into-across-protocols-security-c9b46a217b3b"
                 target="_blank"
-                rel="noopener noreferrer"  
+                rel="noopener noreferrer"
               >
                 here
               </Link>
@@ -280,9 +276,7 @@ const FooterLink = styled.a`
   }
 `;
 
-const NavLinks = styled.div`
-  
-`
+const NavLinks = styled.div``;
 
 const UmaLink = styled(FooterLink)`
   margin: 45px 0 0;
