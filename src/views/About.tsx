@@ -3,116 +3,127 @@ import styled from "@emotion/styled";
 import heroBg from "assets/hero-across-bg.png";
 import BulletImg from "assets/Across-logo-bullet.svg";
 import { ReactComponent as UnstyledUmaLogo } from "assets/Across-Powered-UMA.svg";
-import { ReactComponent as DiscordLogo } from "assets/disc-logo.svg";
-import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
-import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
 import { COLORS, QUERIES } from "utils";
 
 const NAV_LINKS = [
-  {
-    name: "FAQ",
-    url: "https://docs.across.to/bridge/faq",
+  { 
+    name: "Read our articles on Medium",
+    url: "https://medium.com/across-protocol"
   },
   {
-    name: "Docs",
+    name: "Stay up to date on our Twitter",
+    url: "https://twitter.com/AcrossProtocol",
+  },
+  {
+    name: "Deep dive into our docs site",
     url: "https://docs.across.to/bridge/",
   },
 ];
-const DISCORD_LINK = {
-  name: "Discord",
-  url: "https://discord.gg/across",
-  logo: DiscordLogo,
-};
-const TWITTER_LINK = {
-  name: "Twitter",
-  url: "https://twitter.com/AcrossProtocol",
-};
-const GITHUB_LINK = {
-  name: "Github",
-  url: "https://github.com/across-protocol",
-};
 
 const About: FC = () => {
   return (
     <Wrapper>
       <HeroBg>
         <HeroHeader>
-          Instantly Send Assets from Layer 2 Rollups to Ethereum
+          What is Across?
         </HeroHeader>
+        <p>
+          A cross-chain bridging solution to send assets between L1 and L2. 
+        </p>
       </HeroBg>
       <Body>
         <Bullet>
           <Image src={BulletImg} alt="across_logo" />
           <TextWrapper>
-            <BulletHeader>Instantaneous Liquidity</BulletHeader>
+            <BulletHeader>FAST</BulletHeader>
             <BulletText>
-              Assets are bridged and available for use on mainnet almost
-              instantly.
+              Using Across means that assets are bridged and available for use
+              on mainnet almost instantly. You can typically expect to receive
+              your funds within 1-2 minutes.
+              <br />
+              <br />
+              You can learn more about how Across protocol executes
+              near-instantaneous transfers{" "}
+              <Link
+                href="https://medium.com/across-protocol/how-is-across-protocol-so-fast-d77b4e7481c9"
+                target="_blank"
+                rel="noopener noreferrer"  
+              >
+                here
+              </Link>
+              .
             </BulletText>
           </TextWrapper>
         </Bullet>
         <Bullet>
           <Image src={BulletImg} alt="across_logo" />
           <TextWrapper>
-            <BulletHeader>Secure</BulletHeader>
+            <BulletHeader>SECURE</BulletHeader>
             <BulletText>
-              Powered By UMA protocol. Transfers are secured by UMA's Optimistic
-              Oracle, which is audited by OpenZeppelin and trusted by top teams
-              to protect hundreds of millions of dollars in value.
+              Secured by UMA's optimistic oracle. This optimistic oracle has
+              been audited by OpenZeppelin and is trusted by top teams to
+              protect hundreds of millions of dollars in value.
+              <br />
+              <br />
+              Across contracts have also been audited by OpenZeppelin. Our
+              bridge's smart contracts have been extensively tested — proven by
+              our audits, TVL in Across bridge and our contracts standing the
+              test of time.
+              <br />
+              <br />
+              You can read more about our security{" "}
+              <Link
+                href="https://medium.com/across-protocol/a-deep-dive-into-across-protocols-security-c9b46a217b3b"
+                target="_blank"
+                rel="noopener noreferrer"  
+              >
+                here
+              </Link>
+              .
             </BulletText>
           </TextWrapper>
         </Bullet>
         <Bullet>
           <Image src={BulletImg} alt="across_logo" />
           <TextWrapper>
-            <BulletHeader>Cheap</BulletHeader>
+            <BulletHeader>COST-EFFICIENT</BulletHeader>
             <BulletText>
-              Relayers and liquidity providers are compensated with fees from
-              users initiating transfers, but this fee is less than any other
-              solution on the market.
+              Across Protocol is highly cost-efficient.
+              <br />
+              <br />
+              Especially for large transfers, Across is the cheapest cross-chain
+              bridge in regards to fees.
+              <br />
+              <br />
+              Across does not use AMMs to transfer funds between chains. This
+              means <b>slippage-free transfers</b>.
+              <br />
+              <br />
+              You can read more about our low fees{" "}
+              <Link
+                href="https://medium.com/across-protocol/how-does-across-protocol-bridgeforless-2b972d7d9c85"
+                target="_blank"
+                rel="noreferrer"
+              >
+                here
+              </Link>
             </BulletText>
-            <Link
-              href="https://across.gitbook.io/bridge/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Read more
-            </Link>
           </TextWrapper>
         </Bullet>
       </Body>
       <Footer>
-        {NAV_LINKS.map((link) => (
-          <FooterLink
-            key={link.name}
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {link.name}
-          </FooterLink>
-        ))}
-        <FooterLink
-          href={DISCORD_LINK.url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <DiscordLogo />
-        </FooterLink>
-        <FooterLink
-          href={TWITTER_LINK.url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <TwitterLogo />
-        </FooterLink>
-        <FooterLink
-          href={GITHUB_LINK.url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <GithubLogo />
-        </FooterLink>
+        <NavLinks>
+          {NAV_LINKS.map((link) => (
+            <FooterLink
+              key={link.name}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {link.name}
+            </FooterLink>
+          ))}
+        </NavLinks>
         <UmaLink
           href="https://umaproject.org"
           target="_blank"
@@ -149,11 +160,14 @@ const HeroBg = styled.div`
   padding: 0 var(--horinzontal-padding);
   margin: 0 calc(-1 * var(--horinzontal-padding));
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
   min-height: var(--heroHeight);
 `;
 
 const HeroHeader = styled.h1`
+  margin: 0 0 1rem;
+  display: block;
   color: var(--color-primary);
   // will change the font from 24px to 56px fluidly
   font-size: clamp(1.5rem, 2.9vw + 1rem, 3.5rem);
@@ -175,8 +189,8 @@ const Body = styled.section`
 
 const Link = styled.a`
   display: inline-block;
-  font-size: ${14 / 16}rem;
-  margin-top: 20px;
+  font-size: ${16 / 16}rem;
+  margin: 0;
   text-decoration: underline;
   color: var(--color-primary);
   transition: color 100ms linear;
@@ -203,6 +217,7 @@ const Image = styled.img`
   width: 35px;
   object-fit: cover;
   margin-right: 45px;
+  margin-top: -5px;
   display: none;
   @media ${QUERIES.laptopAndUp} {
     display: revert;
@@ -229,31 +244,27 @@ const BulletHeader = styled.h4`
 
 const Footer = styled.footer`
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
   margin-top: auto;
   padding: 35px 0;
   color: hsla(${COLORS.white} / 0.5);
+  border-top: 1px solid currentColor;
+
   @media ${QUERIES.tabletAndUp} {
-    border-top: 1px solid currentColor;
+    flex-direction: row;
   }
 `;
 
 const FooterLink = styled.a`
+  display: block;
+  font-size: ${15 / 16}rem;
   color: inherit;
   text-decoration: none;
   transition: color 100ms linear;
-  display: none;
-
-  & svg {
-    width: 25px;
-    height: 25px;
-    & path {
-      fill: currentColor;
-    }
-  }
 
   &:not(:last-of-type) {
-    margin-right: 45px;
+    margin-bottom: 15px;
   }
 
   &:hover {
@@ -261,22 +272,27 @@ const FooterLink = styled.a`
   }
 
   @media ${QUERIES.tabletAndUp} {
-    display: revert;
+    font-size: ${16 / 16}rem;
+
+    &:not(:last-of-type) {
+      margin-bottom: 20px;
+    }
   }
 `;
 
+const NavLinks = styled.div`
+  
+`
+
 const UmaLink = styled(FooterLink)`
-  margin-left: auto;
-  display: revert;
-  & svg {
-    width: revert;
-    height: 15px;
-    & path {
-      fill: currentColor;
-    }
-  }
+  margin: 45px 0 0;
+
   &:hover {
     color: var(--color-uma-red);
+  }
+
+  @media ${QUERIES.tabletAndUp} {
+    margin: 0;
   }
 `;
 
