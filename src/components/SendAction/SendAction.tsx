@@ -51,7 +51,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
           </Info>
           {fromChain !== ChainId.MAINNET && (
             <Info>
-              <div>Ethereum Gas Fee</div>
+              <div>{CHAINS[toChain].name} Gas Fee</div>
               {showFees && (
                 <div>
                   {formatUnits(fees.relayerFee.total, tokenInfo.decimals)}{" "}
