@@ -1,4 +1,13 @@
-import { clients, across, utils } from "@uma/sdk";
+import assert from "assert";
+import { clients, across, utils, BlockFinder } from "@uma/sdk";
+import { Coingecko } from "@uma/sdk";
+import {
+  relayFeeCalculator,
+  lpFeeCalculator,
+  pool,
+  utils as acrossUtils,
+} from "@across-protocol/sdk-v2";
+import { Provider, Block } from "@ethersproject/providers";
 import { ethers, BigNumber } from "ethers";
 import {
   HubPool,
@@ -12,11 +21,16 @@ import {
   ChainId,
   PROVIDERS,
   TOKENS_LIST,
-  MAX_RELAY_FEE_PERCENT,
   Token,
   CHAINS_SELECTION,
   SPOKE_ADDRESSES,
   HUBPOOL_ADDRESSES,
+  HUBPOOL_CONFIG,
+  HUBPOOL_CHAINID,
+  RATEMODEL_ADDRESSES,
+  MAX_RELAY_FEE_PERCENT,
+  isProduction,
+  TokenList,
 } from "./constants";
 
 import { isValidString, parseEther, tagAddress } from "./format";
@@ -73,7 +87,6 @@ export function getHubPool(
     signer ?? PROVIDERS[hubPoolChainId]()
   );
 }
-const { gasFeeCalculator } = across;
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -86,30 +99,20 @@ export type BridgeFees = {
 };
 
 export async function getRelayerFee(
-  token: string,
-  amount: ethers.BigNumber
+  tokenSymbol: string,
+  amount: ethers.BigNumber,
+  toChainId: ChainId
 ): Promise<{ relayerFee: Fee; isAmountTooLow: boolean }> {
-  const l1Equivalent = TOKENS_LIST[ChainId.MAINNET].find(
-    (t) => t.symbol === token
-  )?.address;
-  if (!l1Equivalent) {
-    throw new Error(`Token ${token} not found in TOKENS_LIST`);
-  }
-  const provider = PROVIDERS[ChainId.MAINNET]();
-  const { instant, isAmountTooLow } =
-    await gasFeeCalculator.getDepositFeesDetails(
-      provider,
-      amount,
-      l1Equivalent,
-      MAX_RELAY_FEE_PERCENT
-    );
+  const config = relayFeeCalculatorConfig(toChainId);
+  const calculator = new relayFeeCalculator.RelayFeeCalculator(config);
+  const result = await calculator.relayerFeeDetails(amount, tokenSymbol);
 
   return {
     relayerFee: {
-      pct: ethers.BigNumber.from(instant.pct),
-      total: ethers.BigNumber.from(instant.total),
+      pct: ethers.BigNumber.from(result.relayFeePercent),
+      total: ethers.BigNumber.from(result.relayFeeTotal),
     },
-    isAmountTooLow,
+    isAmountTooLow: result.isAmountTooLow,
   };
 }
 
@@ -118,12 +121,44 @@ export async function getLpFee(
   amount: ethers.BigNumber,
   blockTime?: number
 ): Promise<Fee & { isLiquidityInsufficient: boolean }> {
+  // eth and weth can be treated the sasme same in this case, but the rate model only currently supports weth address
+  // TODO: add address 0 to sdk rate model ( duplicate weth)
+  if (tokenSymbol === "ETH") tokenSymbol = "WETH";
+
+  const tokenInfo = TOKENS_LIST[HUBPOOL_CHAINID].find(
+    (t) => t.symbol === tokenSymbol
+  );
+
+  if (!tokenInfo) {
+    throw new Error(`Token ${tokenSymbol} not found in TOKENS_LIST`);
+  }
+  if (amount.lte(0)) {
+    throw new Error(`Amount must be greater than 0.`);
+  }
+  const { address: tokenAddress } = tokenInfo;
+  const provider = PROVIDERS[HUBPOOL_CHAINID]();
+  const hubPoolAddress = HUBPOOL_CONFIG.hubPoolAddress;
+  const rateModelStoreAddress = RATEMODEL_ADDRESSES[HUBPOOL_CHAINID];
+
   const result = {
-    pct: parseEther("1"),
+    pct: BigNumber.from(0),
     total: BigNumber.from(0),
     isLiquidityInsufficient: false,
   };
+
+  const lpFeeCalculator = new LpFeeCalculator(
+    provider,
+    hubPoolAddress,
+    rateModelStoreAddress
+  );
+  result.pct = await lpFeeCalculator.getLpFeePct(
+    tokenAddress,
+    hubPoolAddress,
+    amount,
+    blockTime
+  );
   result.total = amount.mul(result.pct).div(parseEther("1"));
+  result.isLiquidityInsufficient = false;
   return result;
 }
 
@@ -131,6 +166,7 @@ type GetBridgeFeesArgs = {
   amount: ethers.BigNumber;
   tokenSymbol: string;
   blockTimestamp: number;
+  toChainId: ChainId;
 };
 
 type GetBridgeFeesResult = BridgeFees & {
@@ -149,17 +185,31 @@ export async function getBridgeFees({
   amount,
   tokenSymbol,
   blockTimestamp,
+  toChainId,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const { relayerFee, isAmountTooLow } = await getRelayerFee(
     tokenSymbol,
-    amount
+    amount,
+    toChainId
   );
 
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
     tokenSymbol,
     amount,
     blockTimestamp
-  );
+  ).catch((err) => {
+    if (isProduction()) {
+      throw err;
+    }
+    // we catch this because it will always error when we have testnets enabled for coins not suppored
+    // on a testnet. in production though all tokens should be supported.
+    console.error("Error getting lp fee", err);
+    return {
+      pct: BigNumber.from(0),
+      total: BigNumber.from(0),
+      isLiquidityInsufficient: false,
+    };
+  });
 
   return {
     relayerFee,
@@ -317,7 +367,9 @@ export async function sendAcrossDeposit(
   }
   const isNativeCurrency = token === CHAINS[fromChain].nativeCurrencyAddress;
   const value = isNativeCurrency ? amount : ethers.constants.Zero;
-  const originToken = isNativeCurrency ? TOKENS_LIST[fromChain][0].address : token;
+  const originToken = isNativeCurrency
+    ? TOKENS_LIST[fromChain][0].address
+    : token;
   const tx = await spokePool.populateTransaction.deposit(
     recipient,
     originToken,
@@ -349,4 +401,128 @@ export async function sendAcrossApproval(
   }
   const tokenContract = clients.erc20.connect(token, signer);
   return tokenContract.approve(spokePool.address, amount);
+}
+
+const { exists } = utils;
+const { parseAndReturnRateModelFromString } = across.rateModel;
+const { calculateRealizedLpFeePct } = lpFeeCalculator;
+const { rateModelStore } = clients;
+
+export default class LpFeeCalculator {
+  private blockFinder: BlockFinder<Block>;
+  private hubPoolInstance: pool.hubPool.Instance;
+  private rateModelStoreInstance: clients.rateModelStore.Instance;
+  constructor(
+    private provider: Provider,
+    hubPoolAddress: string,
+    rateModelStoreAddress: string
+  ) {
+    this.blockFinder = new BlockFinder<Block>(provider.getBlock.bind(provider));
+    this.hubPoolInstance = pool.hubPool.connect(hubPoolAddress, provider);
+    this.rateModelStoreInstance = rateModelStore.connect(
+      rateModelStoreAddress,
+      provider
+    );
+  }
+  async getLpFeePct(
+    tokenAddress: string,
+    hubPoolAddress: string,
+    amount: utils.BigNumberish,
+    timestamp?: number
+  ) {
+    amount = BigNumber.from(amount);
+    assert(amount.gt(0), "Amount must be greater than 0");
+    const { blockFinder, hubPoolInstance, rateModelStoreInstance, provider } =
+      this;
+
+    const targetBlock = exists(timestamp)
+      ? await blockFinder.getBlockForTimestamp(timestamp)
+      : await provider.getBlock("latest");
+    assert(
+      exists(targetBlock),
+      "Unable to find target block for timestamp: " + timestamp || "latest"
+    );
+    const blockTag = targetBlock.number;
+
+    const [currentUt, nextUt, rateModelForBlockHeight] = await Promise.all([
+      hubPoolInstance.callStatic.liquidityUtilizationCurrent(tokenAddress, {
+        blockTag,
+      } as any),
+      hubPoolInstance.callStatic.liquidityUtilizationPostRelay(
+        tokenAddress,
+        amount,
+        { blockTag } as any
+      ),
+      rateModelStoreInstance.callStatic.l1TokenRateModels(tokenAddress, {
+        blockTag,
+      } as any),
+    ]);
+
+    // Parsing stringified rate model will error if the rate model doesn't contain exactly the expect ed keys or isn't
+    // a JSON object.
+    const rateModel = parseAndReturnRateModelFromString(
+      rateModelForBlockHeight
+    );
+
+    return calculateRealizedLpFeePct(rateModel, currentUt, nextUt);
+  }
+}
+
+class Queries implements relayFeeCalculator.QueryInterface {
+  private coingecko: Coingecko;
+  constructor(
+    private provider: Provider,
+    private tokens: TokenList,
+    private mainnetTokens: TokenList,
+    private priceSymbol = "eth",
+    private defaultGas = "305572"
+  ) {
+    this.coingecko = new Coingecko();
+  }
+  getMainnetTokenInfo(tokenSymbol: string) {
+    const info = this.mainnetTokens.find((x) => x.symbol === tokenSymbol);
+    assert(info, `No token found in mainnet tokens for ${tokenSymbol}`);
+    return info;
+  }
+  getTokenInfo(tokenSymbol: string) {
+    const info = this.tokens.find((x) => x.symbol === tokenSymbol);
+    assert(info, `No token found in tochain for ${tokenSymbol}`);
+    return info;
+  }
+  async getTokenPrice(tokenSymbol: string): Promise<string | number> {
+    console.log({ tokenSymbol });
+    if (tokenSymbol.toLowerCase() === "eth") return 1;
+    const { address } = this.getMainnetTokenInfo(tokenSymbol);
+    const [, tokenPrice] = await this.coingecko.getCurrentPriceByContract(
+      address,
+      this.priceSymbol.toLowerCase()
+    );
+    return tokenPrice;
+  }
+  async getTokenDecimals(tokenSymbol: string): Promise<number> {
+    const info = this.getTokenInfo(tokenSymbol);
+    return info.decimals;
+  }
+  async getGasCosts(): Promise<acrossUtils.BigNumberish> {
+    const { gasPrice, maxFeePerGas } = await this.provider.getFeeData();
+    const price = maxFeePerGas || gasPrice;
+    assert(price, "Unable to get gas price");
+    return acrossUtils.gasCost(this.defaultGas, price);
+  }
+}
+
+export function relayFeeCalculatorConfig(
+  chainId: ChainId
+): relayFeeCalculator.RelayFeeCalculatorConfig {
+  const provider = PROVIDERS[chainId]();
+  const chainInfo = CHAINS[chainId];
+  const tokens = TOKENS_LIST[chainId];
+  // coingecko needs the mainnet token addresses to look up price
+  const mainnetTokens = TOKENS_LIST[ChainId.MAINNET];
+  const queries = new Queries(provider, tokens, mainnetTokens);
+  return {
+    nativeTokenDecimals: chainInfo.nativeCurrency.decimals,
+    feeLimitPercent: MAX_RELAY_FEE_PERCENT,
+    queries,
+  };
 }

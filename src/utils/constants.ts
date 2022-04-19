@@ -17,6 +17,7 @@ import { Provider } from "@across-protocol/sdk-v2/dist/pool";
 
 /* Colors and Media Queries section */
 
+export const AddressZero = ethers.constants.AddressZero;
 export const BREAKPOINTS = {
   tabletMin: 550,
   laptopMin: 1100,

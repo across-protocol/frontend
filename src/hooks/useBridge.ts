@@ -22,7 +22,6 @@ import {
   getHubPool,
 } from "utils";
 
-
 enum SendStatus {
   IDLE = "idle",
   VALIDATING = "validating",
@@ -60,7 +59,7 @@ export function useBridge() {
   const tokenSymbol = TOKENS_LIST[fromChain].find(
     (t) => t.address === token
   )?.symbol;
-  const { fees } = useBridgeFees(amount, fromChain, tokenSymbol);
+  const { fees } = useBridgeFees(amount, toChain, tokenSymbol);
   const hasToSwitchChain = chainId !== fromChain;
   let { status, error } = computeStatus({
     token,
@@ -95,7 +94,6 @@ export function useBridge() {
       console.error(e);
       console.error("Something went wrong when depositing.");
     }
-
   };
 
   const approve = async () => {
@@ -134,11 +132,11 @@ type ComputeStatusArgs = {
   balance: ethers.BigNumber | undefined;
   fromChain: ChainId;
   fees:
-  | {
-    isLiquidityInsufficient: boolean;
-    isAmountTooLow: boolean;
-  }
-  | undefined;
+    | {
+        isLiquidityInsufficient: boolean;
+        isAmountTooLow: boolean;
+      }
+    | undefined;
 };
 /**
  * Computes the current send tab status.
