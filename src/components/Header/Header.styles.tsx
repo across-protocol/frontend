@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { Link as UnstyledLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import { COLORS, QUERIES } from "utils";
-import { ReactComponent as UnstyledDesktopLogo } from "assets/logo.svg";
+import { ReactComponent as UnstyledDesktopLogo } from "assets/across-logo-v2.svg";
 import { ReactComponent as UnstyledMobileLogo } from "assets/logo-mobile.svg";
 export const Wrapper = styled.header`
   height: var(--header-height);
