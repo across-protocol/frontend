@@ -56,7 +56,7 @@ export const LoadingWrapper = styled.div`
   }
   > div {
     margin-top: 6px;
-    font-size: ${12 / 16}rem;
+    font-size: ${14 / 16}rem;
   }
 `;
 
