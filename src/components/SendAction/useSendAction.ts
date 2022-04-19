@@ -69,7 +69,8 @@ export default function useSendAction(
       }
     } catch (error) {
       console.error(error);
-      console.error(`Something went wrong sending the transaction`)
+      console.error(`Something went wrong sending the transaction`);
+      setTxPending(false);
     }
   };
 
