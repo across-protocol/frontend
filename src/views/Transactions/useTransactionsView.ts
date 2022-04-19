@@ -53,6 +53,8 @@ export default function useTransactionsView() {
 
     if (!account || (previousAccount && previousAccount !== account)) {
       setInitialLoading(true);
+      setRawFilledTx([]);
+      setRawOngoingTx([]);
     }
   }, [account, initialLoading, setInitialLoading, previousAccount]);
 
