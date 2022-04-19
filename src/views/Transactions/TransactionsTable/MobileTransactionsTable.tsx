@@ -17,6 +17,7 @@ import { IMobileRow } from "./createMobileTransactionTableJSX";
 import { MobileChevron } from "./TransactionsTable.styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleNotch, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import emptyClouds from "assets/across-emptystate-clouds.svg";
 
 interface Props {
   rows: IMobileRow[];
@@ -45,8 +46,8 @@ const MobileTransactionsTable: FC<Props> = ({
       )}
       {!rows.length && !initialLoading && (
         <NotFoundWrapper>
-          No transactions found. Data is loading or no transactions have been
-          made.
+          <img src={emptyClouds} alt="empty_state" />
+          No transactions found.
         </NotFoundWrapper>
       )}
       {rows.length && !initialLoading ? (
