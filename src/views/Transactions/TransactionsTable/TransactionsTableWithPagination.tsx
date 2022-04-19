@@ -15,6 +15,7 @@ interface Props {
   elements: any[];
   currentPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  initialLoading: boolean;
 }
 
 const TransactionsTableWithPagination: FC<Props> = ({
@@ -24,6 +25,7 @@ const TransactionsTableWithPagination: FC<Props> = ({
   elements,
   currentPage,
   setCurrentPage,
+  initialLoading,
 }) => {
   const elementCount = elements.length;
 
@@ -40,7 +42,12 @@ const TransactionsTableWithPagination: FC<Props> = ({
 
   return (
     <>
-      <TransactionsTable rows={paginatedRows} headers={headers} title={title} />
+      <TransactionsTable
+        rows={paginatedRows}
+        headers={headers}
+        title={title}
+        initialLoading={initialLoading}
+      />
       {paginateState.totalPages > 1 ? (
         <PaginationWrapper>
           <Pagination onPageChange={setCurrentPage} {...paginateState} />

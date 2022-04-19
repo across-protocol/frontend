@@ -16,6 +16,7 @@ export default function useTransactionsView() {
   const [currentPage, setCurrentPage] = useState(0);
   const [rawFilledTx, setRawFilledTx] = useState<Transfer[]>([]);
   const [rawOngoingTx, setRawOngoingTx] = useState<Transfer[]>([]);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   // Start the tracking / stopping of the TX in the client.
   useEffect(() => {
@@ -29,6 +30,8 @@ export default function useTransactionsView() {
       txHistoryClient.on(
         transfersHistory.TransfersHistoryEvent.TransfersUpdated,
         (data) => {
+          // if (initialLoading) setInitialLoading(false);
+
           const nextFilledTx = txHistoryClient.getFilledTransfers(
             data.depositorAddr
           );
@@ -44,9 +47,13 @@ export default function useTransactionsView() {
         txHistoryClient.stopFetchingTransfers(account);
         setRawFilledTx([]);
         setRawOngoingTx([]);
+        setInitialLoading(true);
       };
     }
-  }, [account]);
+    if (!account) {
+      setInitialLoading(true);
+    }
+  }, [account, initialLoading, setInitialLoading]);
 
   return {
     provider,
@@ -65,6 +72,7 @@ export default function useTransactionsView() {
     txHistoryClient,
     rawFilledTx,
     rawOngoingTx,
+    initialLoading,
   };
 }
 

@@ -37,6 +37,7 @@ const Transactions = () => {
     setCurrentPage,
     rawFilledTx,
     rawOngoingTx,
+    initialLoading,
   } = useTransactionsView();
 
   const ongoingTx = useMemo(
@@ -94,6 +95,7 @@ const Transactions = () => {
                   title="Ongoing"
                   headers={headers}
                   rows={ongoingTx}
+                  initialLoading={initialLoading}
                 />
               ) : (
                 <MobileTransactionsTable
@@ -101,6 +103,7 @@ const Transactions = () => {
                   headers={mobileHeaders}
                   rows={mobileOngoingTx}
                   openIndex={openOngoingRow}
+                  initialLoading={initialLoading}
                 />
               )}
             </TopRow>
@@ -115,6 +118,7 @@ const Transactions = () => {
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 elements={filledTx}
+                initialLoading={initialLoading}
               />
             ) : (
               <MobileTransactionsTableWithPagination
@@ -125,6 +129,7 @@ const Transactions = () => {
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 elements={mobileFilledTx}
+                initialLoading={initialLoading}
               />
             )}
           </BottomRow>
