@@ -5,7 +5,6 @@ import React, { useMemo, useEffect, useCallback } from "react";
 import { useConnection } from "state/hooks";
 import { useBalance, useBalances, useBridgeFees, useSendForm } from "hooks";
 import {
-  TOKENS_LIST,
   ParsingError,
   filterTokensByDestinationChain,
   max,
@@ -34,7 +33,7 @@ export default function useCoinSelection() {
   );
 
   const { balances } = useBalances(
-    TOKENS_LIST[fromChain].map((t) => t.address),
+    tokenList.map((t) => t.address),
     fromChain,
     account
   );
