@@ -48,7 +48,7 @@ const Routes: React.FC = () => {
         <Route exact path="/transactions" component={Transactions} />
         <Route exact path="/pool" component={Pool} />
         <Route exact path="/about" component={About} />
-        <Route exact path="/" component={Send} />
+        <Route path="/" component={Send} />
       </Switch>
     </>
   );

@@ -17,9 +17,11 @@ import {
   CHAINS,
   filterTokensByDestinationChain,
   getReacheableChains,
+  canBridge,
 } from "utils";
 import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
+import { useQueryParams } from "./useQueryParams";
 
 export enum FormStatus {
   IDLE = "idle",
@@ -267,6 +269,24 @@ type SendFormManagerContext = FormState & {
 function useSendFormManager(): SendFormManagerContext {
   const [state, dispatch] = useReducer(formReducer, initialFormState);
   const { account: connectedAccount, chainId } = useConnection();
+  const params = useQueryParams();
+
+  useEffect(() => {
+    const fromChain = Number(params.from);
+    const toChain = Number(params.to);
+    const areSupportedChains = [fromChain, toChain].every((p) =>
+      CHAINS_SELECTION.includes(Number(p))
+    );
+    if (!areSupportedChains) {
+      return;
+    }
+    if (canBridge(fromChain, toChain)) {
+      dispatch({ type: ActionType.SET_FROM_CHAIN, payload: fromChain });
+      dispatch({ type: ActionType.SET_TO_CHAIN, payload: toChain });
+    } else {
+      dispatch({ type: ActionType.SET_FROM_CHAIN, payload: fromChain });
+    }
+  }, [params.from, params.to]);
 
   // Keep the connected account and the toAddress in sync. If a user switches account, the toAddress should be updated to this new account.
   useEffect(() => {

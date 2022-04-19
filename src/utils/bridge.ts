@@ -257,7 +257,7 @@ export function filterTokensByDestinationChain(
  * @param chainB  the destination chain, that is, where tokens will be sent.
  * @returns Returns `true` if it is possible to bridge from chain A to chain B, `false` otherwise.
  */
-function canBridge(chainA: ChainId, chainB: ChainId): boolean {
+export function canBridge(chainA: ChainId, chainB: ChainId): boolean {
   // can't bridge to itself
   if (chainA === chainB) {
     return false;
