@@ -8,6 +8,7 @@ import {
   balancesQueryKey,
   ChainId,
 } from "utils";
+import { usePrevious } from "hooks";
 
 /**
  * @param token - The token to fetch the balance of.
@@ -96,6 +97,11 @@ export function useBalances(
       "DISABLED_BALANCES_QUERY",
       { chainIdToQuery, tokens, accountToQuery, blockNumberToQuery },
     ];
+  const prevAccount = usePrevious(accountToQuery);
+  const prevChain = usePrevious(chainIdToQuery);
+  const prevTokens = usePrevious(tokens);
+  // Keep the previous data only when blockNumberToQuery changes.
+  const keepPreviousData = prevAccount === accountToQuery && prevChain === chainIdToQuery && JSON.stringify(prevTokens) === JSON.stringify(tokens);
   const { data: balances, ...delegated } = useQuery(
     queryKey,
     async () => {
@@ -113,7 +119,7 @@ export function useBalances(
       staleTime: Infinity,
       // Old balances can be garbage collected immediately
       cacheTime: 0,
-      keepPreviousData: true,
+      keepPreviousData,
     }
   );
   return {
