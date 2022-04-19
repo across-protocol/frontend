@@ -181,3 +181,20 @@ export const LoadingWrapper = styled.div`
     font-size: ${12 / 16}rem;
   }
 `;
+
+export const NotFoundWrapper = styled.div`
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-primary);
+  img {
+    height: 150px;
+    width: 150px;
+    margin: 0 auto;
+  }
+  > div {
+    margin-top: 6px;
+    font-size: ${12 / 16}rem;
+  }
+`;

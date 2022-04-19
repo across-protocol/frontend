@@ -8,10 +8,12 @@ import {
   Wrapper,
   Title,
   LoadingWrapper,
+  NotFoundWrapper,
 } from "./TransactionsTable.styles";
 import { ICell, IRow } from "components/Table/Table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
+import emptyClouds from "assets/across-emptystate-clouds.svg";
 
 interface TxTableIRow extends IRow {
   onClick?: () => void;
@@ -34,17 +36,17 @@ const TransactionsTable: FC<Props> = ({
     <Wrapper>
       {initialLoading && (
         <LoadingWrapper>
-          <FontAwesomeIcon icon={faCircleNotch} className="fa-spin" size="lg" />
+          <FontAwesomeIcon icon={faCircleNotch} className="fa-spin" size="2x" />
           <div>Loading...</div>
         </LoadingWrapper>
       )}
       {!rows.length && !initialLoading && (
-        <div>
-          No transactions found. Data is loading or no transactions have been
-          made.
-        </div>
+        <NotFoundWrapper>
+          <img src={emptyClouds} alt="empty_state" />
+          No transactions found.
+        </NotFoundWrapper>
       )}
-      {!rows.length && !initialLoading ? (
+      {rows.length && !initialLoading ? (
         <>
           <Title>{title}</Title>
 

@@ -4,6 +4,7 @@ import TransactionsTable from "./TransactionsTable";
 import Pagination from "components/Pagination";
 import paginate from "components/Pagination/paginate";
 import { PaginationWrapper } from "./TransactionsTable.styles";
+
 interface TxTableIRow extends IRow {
   onClick?: () => void;
 }

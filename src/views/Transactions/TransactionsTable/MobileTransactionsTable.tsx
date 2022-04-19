@@ -10,6 +10,7 @@ import {
   AccordionWrapper,
   AccordionRow,
   LoadingWrapper,
+  NotFoundWrapper,
 } from "./TransactionsTable.styles";
 import { ICell } from "components/Table/Table";
 import { IMobileRow } from "./createMobileTransactionTableJSX";
@@ -38,15 +39,15 @@ const MobileTransactionsTable: FC<Props> = ({
     <MobileWrapper>
       {initialLoading && (
         <LoadingWrapper>
-          <FontAwesomeIcon icon={faCircleNotch} className="fa-spin" size="lg" />
+          <FontAwesomeIcon icon={faCircleNotch} className="fa-spin" size="2x" />
           <div>Loading...</div>
         </LoadingWrapper>
       )}
       {!rows.length && !initialLoading && (
-        <div>
+        <NotFoundWrapper>
           No transactions found. Data is loading or no transactions have been
           made.
-        </div>
+        </NotFoundWrapper>
       )}
       {rows.length && !initialLoading ? (
         <>
