@@ -9,15 +9,12 @@ import {
   Title,
   AccordionWrapper,
   AccordionRow,
-  LoadingWrapper,
-  NotFoundWrapper,
 } from "./TransactionsTable.styles";
 import { ICell } from "components/Table/Table";
 import { IMobileRow } from "./createMobileTransactionTableJSX";
 import { MobileChevron } from "./TransactionsTable.styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleNotch, faChevronUp } from "@fortawesome/free-solid-svg-icons";
-import emptyClouds from "assets/across-emptystate-clouds.svg";
+import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   rows: IMobileRow[];
@@ -38,18 +35,6 @@ const MobileTransactionsTable: FC<Props> = ({
 }) => {
   return (
     <MobileWrapper>
-      {initialLoading && (
-        <LoadingWrapper>
-          <FontAwesomeIcon icon={faCircleNotch} className="fa-spin" size="2x" />
-          <div>Loading...</div>
-        </LoadingWrapper>
-      )}
-      {!rows.length && !initialLoading && (
-        <NotFoundWrapper>
-          <img src={emptyClouds} alt="empty_state" />
-          No transactions found.
-        </NotFoundWrapper>
-      )}
       {rows.length && !initialLoading ? (
         <>
           <Title>{title}</Title>

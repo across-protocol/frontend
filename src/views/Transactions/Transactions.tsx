@@ -8,6 +8,8 @@ import {
   TopRow,
   TitleRow,
   ButtonWrapper,
+  LoadingWrapper,
+  NotFoundWrapper,
 } from "./Transactions.styles";
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
@@ -23,6 +25,10 @@ import createMobileTransactionTableJSX, {
 import { BREAKPOINTS } from "utils";
 import { TransactionsTableWithPagination } from "./TransactionsTable";
 import { MobileTransactionsTableWithPagination } from "./TransactionsTable";
+import emptyClouds from "assets/across-emptystate-clouds.svg";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
+
 const Transactions = () => {
   const {
     isConnected,
@@ -108,6 +114,22 @@ const Transactions = () => {
           )}
 
           <BottomRow>
+            {initialLoading && (
+              <LoadingWrapper>
+                <FontAwesomeIcon
+                  icon={faCircleNotch}
+                  className="fa-spin"
+                  size="2x"
+                />
+                <div>Loading...</div>
+              </LoadingWrapper>
+            )}
+            {!filledTx.length && !ongoingTx.length && !initialLoading && (
+              <NotFoundWrapper>
+                <img src={emptyClouds} alt="empty_state" />
+                No transactions found.
+              </NotFoundWrapper>
+            )}
             {width >= BREAKPOINTS.laptopMin ? (
               <TransactionsTableWithPagination
                 title="History"

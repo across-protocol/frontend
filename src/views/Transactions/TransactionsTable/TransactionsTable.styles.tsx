@@ -165,36 +165,3 @@ export const MobileTableLink = styled(TableLink)`
 export const PaginationWrapper = styled.div`
   max-width: 1315px;
 `;
-
-export const LoadingWrapper = styled.div`
-  width: 100%;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  color: var(--color-primary);
-
-  svg {
-    color: var(--color-primary);
-  }
-  > div {
-    margin-top: 6px;
-    font-size: ${12 / 16}rem;
-  }
-`;
-
-export const NotFoundWrapper = styled.div`
-  width: 100%;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  color: var(--color-primary);
-  img {
-    height: 150px;
-    width: 150px;
-    margin: 0 auto;
-  }
-  > div {
-    margin-top: 6px;
-    font-size: ${12 / 16}rem;
-  }
-`;
