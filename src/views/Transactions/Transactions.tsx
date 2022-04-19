@@ -95,7 +95,6 @@ const Transactions = () => {
                   title="Ongoing"
                   headers={headers}
                   rows={ongoingTx}
-                  initialLoading={initialLoading}
                 />
               ) : (
                 <MobileTransactionsTable
@@ -103,7 +102,6 @@ const Transactions = () => {
                   headers={mobileHeaders}
                   rows={mobileOngoingTx}
                   openIndex={openOngoingRow}
-                  initialLoading={initialLoading}
                 />
               )}
             </TopRow>

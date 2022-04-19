@@ -23,7 +23,7 @@ interface Props {
   headers: ICell[];
   title: string;
   openIndex: number;
-  initialLoading: boolean;
+  initialLoading?: boolean;
 }
 
 const CHEVRON_INDEX = 3;
