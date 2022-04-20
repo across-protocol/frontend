@@ -49,7 +49,7 @@ const TransactionsTableWithPagination: FC<Props> = ({
         title={title}
         initialLoading={initialLoading}
       />
-      {paginateState.totalPages > 1 ? (
+      {paginateState.totalPages > 1 && !initialLoading ? (
         <PaginationWrapper>
           <Pagination onPageChange={setCurrentPage} {...paginateState} />
         </PaginationWrapper>

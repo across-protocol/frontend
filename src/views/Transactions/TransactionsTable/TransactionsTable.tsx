@@ -20,15 +20,10 @@ interface Props {
   initialLoading?: boolean;
 }
 
-const TransactionsTable: FC<Props> = ({
-  rows,
-  headers,
-  title,
-  initialLoading,
-}) => {
+const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
   return (
     <Wrapper>
-      {rows.length && !initialLoading ? (
+      {rows.length ? (
         <>
           <Title>{title}</Title>
 
