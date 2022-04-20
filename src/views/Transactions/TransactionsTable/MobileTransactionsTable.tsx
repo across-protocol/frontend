@@ -21,7 +21,6 @@ interface Props {
   headers: ICell[];
   title: string;
   openIndex: number;
-  initialLoading?: boolean;
 }
 
 const CHEVRON_INDEX = 3;
@@ -31,11 +30,10 @@ const MobileTransactionsTable: FC<Props> = ({
   headers,
   title,
   openIndex,
-  initialLoading,
 }) => {
   return (
     <MobileWrapper>
-      {rows.length && !initialLoading ? (
+      {rows.length ? (
         <>
           <Title>{title}</Title>
 

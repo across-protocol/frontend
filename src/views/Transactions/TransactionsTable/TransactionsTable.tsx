@@ -17,7 +17,6 @@ interface Props {
   rows: TxTableIRow[];
   headers: ICell[];
   title: string;
-  initialLoading?: boolean;
 }
 
 const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {

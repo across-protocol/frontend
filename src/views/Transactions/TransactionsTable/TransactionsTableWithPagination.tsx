@@ -40,16 +40,12 @@ const TransactionsTableWithPagination: FC<Props> = ({
     paginateState.startIndex,
     paginateState.endIndex
   );
+  if (initialLoading) return null;
 
   return (
     <>
-      <TransactionsTable
-        rows={paginatedRows}
-        headers={headers}
-        title={title}
-        initialLoading={initialLoading}
-      />
-      {paginateState.totalPages > 1 && !initialLoading ? (
+      <TransactionsTable rows={paginatedRows} headers={headers} title={title} />
+      {paginateState.totalPages > 1 ? (
         <PaginationWrapper>
           <Pagination onPageChange={setCurrentPage} {...paginateState} />
         </PaginationWrapper>

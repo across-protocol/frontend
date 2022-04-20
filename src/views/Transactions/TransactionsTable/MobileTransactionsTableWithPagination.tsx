@@ -39,6 +39,7 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
     paginateState.endIndex
   );
 
+  if (initialLoading) return null;
   return (
     <>
       <MobileTransactionsTable
@@ -46,9 +47,8 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
         headers={headers}
         title={title}
         openIndex={openIndex}
-        initialLoading={initialLoading}
       />
-      {paginateState.totalPages > 1 && !initialLoading ? (
+      {paginateState.totalPages > 1 ? (
         <Pagination onPageChange={setCurrentPage} {...paginateState} />
       ) : null}
     </>
