@@ -66,6 +66,7 @@ const Transactions = () => {
     [rawOngoingTx, setOpenOngoingRow]
   );
 
+  const isTxPresent = !filledTx.length && !ongoingTx.length && !initialLoading;
   return (
     <Wrapper>
       {(ongoingTx.length === 0 || !isConnected) && (
@@ -124,7 +125,7 @@ const Transactions = () => {
                 <div>Loading...</div>
               </LoadingWrapper>
             )}
-            {!filledTx.length && !ongoingTx.length && !initialLoading && (
+            {isTxPresent && (
               <NotFoundWrapper>
                 <img src={emptyClouds} alt="empty_state" />
                 No transactions found.
