@@ -133,13 +133,11 @@ function processRawTokens(
     if (!isSupportedChainId(chainId)) {
       throw new Error(`Unsupported chainId: ${chainId}`);
     }
-    let tokens = [];
-    for (let rawToken of rawTokens) {
-      const token = { ...rawToken, logoURI: process.env.PUBLIC_URL + rawToken.logoURI };
-      tokens[PREFERRED_TOKEN_ORDER.indexOf(token.symbol)] = token;
-    }
-    // if a token is not present on this chain, the array might be sparse. We collapse it here
-    tokens = tokens.filter(Boolean);
+    const tokens = PREFERRED_TOKEN_ORDER.map(symbol => {
+      const rawToken = rawTokens.find(token => token.symbol === symbol);
+      if (!rawToken) { return null };
+      return { ...rawToken, logoURI: process.env.PUBLIC_URL + rawToken.logoURI };
+    }).filter(Boolean);
     superstruct.assert(tokens, TokensList);
     return { ...record, [chainId]: tokens };
   }, {} as Record<ChainId, TokenList>);
