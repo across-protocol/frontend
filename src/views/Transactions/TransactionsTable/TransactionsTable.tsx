@@ -22,50 +22,47 @@ interface Props {
 const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
   return (
     <Wrapper>
-      <Title>{title}</Title>
-      {!rows.length && (
-        <div>
-          No transactions found. Data is loading or no transactions have been
-          made.
-        </div>
-      )}
       {rows.length ? (
-        <StyledTableWrapper>
-          <StyledHeadRow>
-            {headers.map((cell, index) => {
-              return (
-                <StyledCell
-                  key={index}
-                  className={cell.cellClassName ?? ""}
-                  size={cell.size}
-                >
-                  {cell.value}
-                </StyledCell>
-              );
-            })}
-          </StyledHeadRow>
-          <StyledBody>
-            {rows.length
-              ? rows.map((row, ridx) => {
-                  return (
-                    <StyledRow key={ridx}>
-                      {row.cells.map((cell, cidx) => {
-                        return (
-                          <StyledCell
-                            className={cell.cellClassName ?? ""}
-                            key={cidx}
-                            size={cell.size}
-                          >
-                            {cell.value}
-                          </StyledCell>
-                        );
-                      })}
-                    </StyledRow>
-                  );
-                })
-              : null}
-          </StyledBody>
-        </StyledTableWrapper>
+        <>
+          <Title>{title}</Title>
+
+          <StyledTableWrapper>
+            <StyledHeadRow>
+              {headers.map((cell, index) => {
+                return (
+                  <StyledCell
+                    key={index}
+                    className={cell.cellClassName ?? ""}
+                    size={cell.size}
+                  >
+                    {cell.value}
+                  </StyledCell>
+                );
+              })}
+            </StyledHeadRow>
+            <StyledBody>
+              {rows.length
+                ? rows.map((row, ridx) => {
+                    return (
+                      <StyledRow key={ridx}>
+                        {row.cells.map((cell, cidx) => {
+                          return (
+                            <StyledCell
+                              className={cell.cellClassName ?? ""}
+                              key={cidx}
+                              size={cell.size}
+                            >
+                              {cell.value}
+                            </StyledCell>
+                          );
+                        })}
+                      </StyledRow>
+                    );
+                  })
+                : null}
+            </StyledBody>
+          </StyledTableWrapper>
+        </>
       ) : null}
     </Wrapper>
   );

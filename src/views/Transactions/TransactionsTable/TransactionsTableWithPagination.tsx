@@ -4,6 +4,7 @@ import TransactionsTable from "./TransactionsTable";
 import Pagination from "components/Pagination";
 import paginate from "components/Pagination/paginate";
 import { PaginationWrapper } from "./TransactionsTable.styles";
+
 interface TxTableIRow extends IRow {
   onClick?: () => void;
 }
@@ -15,6 +16,7 @@ interface Props {
   elements: any[];
   currentPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  initialLoading: boolean;
 }
 
 const TransactionsTableWithPagination: FC<Props> = ({
@@ -24,6 +26,7 @@ const TransactionsTableWithPagination: FC<Props> = ({
   elements,
   currentPage,
   setCurrentPage,
+  initialLoading,
 }) => {
   const elementCount = elements.length;
 
@@ -37,6 +40,7 @@ const TransactionsTableWithPagination: FC<Props> = ({
     paginateState.startIndex,
     paginateState.endIndex
   );
+  if (initialLoading) return null;
 
   return (
     <>

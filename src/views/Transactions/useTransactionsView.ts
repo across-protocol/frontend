@@ -5,7 +5,7 @@ import useWindowSize from "hooks/useWindowsSize";
 import txHistoryClient from "state/transferHistory";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 import { transfersHistory } from "@across-protocol/sdk-v2";
-
+import { usePrevious } from "hooks";
 export default function useTransactionsView() {
   const { provider, chainId, isConnected, account } = useConnection();
   const { init } = onboard;
@@ -16,10 +16,12 @@ export default function useTransactionsView() {
   const [currentPage, setCurrentPage] = useState(0);
   const [rawFilledTx, setRawFilledTx] = useState<Transfer[]>([]);
   const [rawOngoingTx, setRawOngoingTx] = useState<Transfer[]>([]);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   // Start the tracking / stopping of the TX in the client.
+  const previousAccount = usePrevious(account);
   useEffect(() => {
-    if (account) {
+    if (account && initialLoading) {
       txHistoryClient.startFetchingTransfers(account).catch((err) => {
         console.error(
           "Error in startFetchingTransfers call in txHistoryClient",
@@ -29,6 +31,8 @@ export default function useTransactionsView() {
       txHistoryClient.on(
         transfersHistory.TransfersHistoryEvent.TransfersUpdated,
         (data) => {
+          if (initialLoading) setInitialLoading(false);
+
           const nextFilledTx = txHistoryClient.getFilledTransfers(
             data.depositorAddr
           );
@@ -46,7 +50,13 @@ export default function useTransactionsView() {
         setRawOngoingTx([]);
       };
     }
-  }, [account]);
+
+    if (!account || (previousAccount && previousAccount !== account)) {
+      setInitialLoading(true);
+      setRawFilledTx([]);
+      setRawOngoingTx([]);
+    }
+  }, [account, initialLoading, setInitialLoading, previousAccount]);
 
   return {
     provider,
@@ -65,6 +75,7 @@ export default function useTransactionsView() {
     txHistoryClient,
     rawFilledTx,
     rawOngoingTx,
+    initialLoading,
   };
 }
 

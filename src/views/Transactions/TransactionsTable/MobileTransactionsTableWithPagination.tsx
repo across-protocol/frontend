@@ -13,6 +13,7 @@ interface Props {
   openIndex: number;
   currentPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  initialLoading: boolean;
 }
 
 const MobileTransactionsTableWithPagination: FC<Props> = ({
@@ -23,6 +24,7 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
   elements,
   currentPage,
   setCurrentPage,
+  initialLoading,
 }) => {
   const elementCount = elements.length;
 
@@ -37,6 +39,7 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
     paginateState.endIndex
   );
 
+  if (initialLoading) return null;
   return (
     <>
       <MobileTransactionsTable
@@ -45,9 +48,9 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
         title={title}
         openIndex={openIndex}
       />
-      {paginatedRows.length > 25 && (
+      {paginateState.totalPages > 1 ? (
         <Pagination onPageChange={setCurrentPage} {...paginateState} />
-      )}
+      ) : null}
     </>
   );
 };
