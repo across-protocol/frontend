@@ -105,7 +105,7 @@ function formatTransactionRows(
     // TODO: change href to proper url when we get real TX data
     const txHash = (
       <MobileTableLink
-        href={`https://etherscan.io/tx/${tx.depositTxHash}`}
+        href={`${CHAINS[sourceChainId].explorerUrl}/tx/${tx.depositTxHash}`}
         target="_blank"
         rel="noreferrer"
       >
