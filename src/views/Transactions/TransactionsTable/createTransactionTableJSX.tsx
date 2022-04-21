@@ -101,7 +101,7 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
       size: "xs",
       value: (
         <TableLink
-          href={`${CHAINS[sourceChainId].explorerUrl}/tx/${tx.depositTxHash}`}
+          href={CHAINS[sourceChainId].constructExplorerLink(tx.depositTxHash)}
           target="_blank"
           rel="noreferrer"
         >
