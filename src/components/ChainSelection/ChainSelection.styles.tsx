@@ -49,8 +49,12 @@ export const Menu = styled.ul<MenuProps>`
   left: 0;
   bottom: 0;
   right: 0;
-  padding-top: 10px;
-  transform: translateY(100%);
+  // HACK: we use this as padding, to prevent elements overflowing into the label when scrolling up
+  border-top: 10px solid transparent;
+  transform: translateY(60px);
+  height: fit-content;
+  max-height: 50vh;
+  overflow-y: auto;
   box-shadow: 0px 160px 8px 8px hsla(${COLORS.gray[500]} / 0.2);
   list-style: none;
   display: ${(props) => (props.isOpen ? "flex" : "none")};
