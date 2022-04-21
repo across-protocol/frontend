@@ -136,6 +136,7 @@ const Pool: FC = () => {
             wrongNetwork={wrongNetwork}
             token={token}
             setToken={setToken}
+            chainId={chainId}
           />
           {!loadingPoolState ? (
             <PoolForm
