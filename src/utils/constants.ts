@@ -17,6 +17,7 @@ import { Provider } from "@across-protocol/sdk-v2/dist/pool";
 
 /* Colors and Media Queries section */
 
+export const AddressZero = ethers.constants.AddressZero;
 export const BREAKPOINTS = {
   tabletMin: 550,
   laptopMin: 1100,
@@ -125,7 +126,6 @@ export function isSupportedChainId(chainId: number): chainId is ChainId {
   return chainId in ChainId;
 }
 
-
 function processRawTokens(
   tokens: typeof rawTokens
 ): Record<ChainId, TokenList> {
@@ -134,10 +134,15 @@ function processRawTokens(
     if (!isSupportedChainId(chainId)) {
       throw new Error(`Unsupported chainId: ${chainId}`);
     }
-    const tokens = PREFERRED_TOKEN_ORDER.map(symbol => {
-      const rawToken = rawTokens.find(token => token.symbol === symbol);
-      if (!rawToken) { return null };
-      return { ...rawToken, logoURI: process.env.PUBLIC_URL + rawToken.logoURI };
+    const tokens = PREFERRED_TOKEN_ORDER.map((symbol) => {
+      const rawToken = rawTokens.find((token) => token.symbol === symbol);
+      if (!rawToken) {
+        return null;
+      }
+      return {
+        ...rawToken,
+        logoURI: process.env.PUBLIC_URL + rawToken.logoURI,
+      };
     }).filter(Boolean);
     superstruct.assert(tokens, TokensList);
     return { ...record, [chainId]: tokens };

@@ -39,10 +39,10 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.0.4.tgz#00404cf8d6fc27676f6693586a5628c943822004"
-  integrity sha512-jsHii8zTZSCErcydo2pD9c1tNw+mpHOipJqcITs0f6LzfrdLRMAqMsy/tFJDndHgV+eXfjLz2ONAHIwkv6oVVA==
+"@across-protocol/sdk-v2@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.0.5.tgz#67aafda466e550ee1097cbb22869ddab8d05856f"
+  integrity sha512-CUYQ+49mfPQQYA6SQP5wXmIvjbIHInl4c4RE3wbQbwEeRublu8DjwP+gtU0xK+qiLRE6hGqXUZde2HBTJV8qhA==
   dependencies:
     "@across-protocol/contracts-v2" "^0.0.29"
     "@uma/sdk" "^0.22.1"
@@ -4909,11 +4909,6 @@
   resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.1.17.tgz#141760bf6d783ddfbe94ce5cfeff410d2e73311a"
   integrity sha512-sRWCFEC56DyBd+QcCPGoJghG9lAE8VQvcYpW9CSvyOLmSz+eugy1pxbOBg6v6qkGqexO1vCp608TkG71vaQqUg==
 
-"@uma/contracts-frontend@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.2.0.tgz#34fc2be643153a18fcdbe6572002cf54d8e58692"
-  integrity sha512-ZF9ooxXhcdO+H1Zkl5VzMT3ccUqDfgpIc3f4yle+vXWshiFuFdEyW2PMnnyRozZ1NihSMkNkcl45zpH0dFnoUw==
-
 "@uma/contracts-frontend@^0.3.2":
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.3.2.tgz#97b187d017f8c2dc6f66924ad31cdea5a3dc5aa0"
@@ -4947,23 +4942,7 @@
     "@uniswap/v3-core" "^1.0.0-rc.2"
     "@uniswap/v3-periphery" "^1.0.0-beta.23"
 
-"@uma/sdk@^0.19.0":
-  version "0.19.0"
-  resolved "https://registry.yarnpkg.com/@uma/sdk/-/sdk-0.19.0.tgz#e0a935cf7131232ba62234b13d362ae859a34827"
-  integrity sha512-685w9lDvWD50yVH5B4tlqRMnDjnGVhjB88yTl/Zvg2Kt6pSh7RpDBZaOQK5LxX5WlAM3ZaTuxH0gxPsty9KMQQ==
-  dependencies:
-    "@google-cloud/datastore" "^6.6.0"
-    "@types/lodash-es" "^4.17.5"
-    "@uma/contracts-frontend" "^0.2.0"
-    "@uma/contracts-node" "^0.2.0"
-    axios "^0.24.0"
-    bn.js "^4.11.9"
-    decimal.js "^10.3.1"
-    highland "^2.13.5"
-    immer "^9.0.7"
-    lodash-es "^4.17.21"
-
-"@uma/sdk@^0.22.1":
+"@uma/sdk@^0.22.1", "@uma/sdk@^0.22.2":
   version "0.22.2"
   resolved "https://registry.yarnpkg.com/@uma/sdk/-/sdk-0.22.2.tgz#260ca268ae54084d0bae45e38affc2043c79b902"
   integrity sha512-mgfRW8ZH4WuzoYgiEB5JWWEQjzYgaD5hCdY/mleq2r0GS17RpHslWy0y/xfCoDpAhVlsidMWn2QknmSeQc/z9Q==

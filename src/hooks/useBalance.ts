@@ -35,9 +35,9 @@ export function useBalance(
   const queryKey = enabledQuery
     ? balanceQueryKey(chainIdToQuery, token, accountToQuery, blockNumberToQuery)
     : [
-      "DISABLED_BALANCE_QUERY",
-      { chainIdToQuery, token, accountToQuery, blockNumberToQuery },
-    ];
+        "DISABLED_BALANCE_QUERY",
+        { chainIdToQuery, token, accountToQuery, blockNumberToQuery },
+      ];
   const { data: balance, ...delegated } = useQuery(
     queryKey,
     async () => {
@@ -88,20 +88,23 @@ export function useBalances(
     !!blockNumberToQuery;
   const queryKey = enabledQuery
     ? balancesQueryKey(
-      chainIdToQuery,
-      tokens,
-      accountToQuery,
-      blockNumberToQuery
-    )
+        chainIdToQuery,
+        tokens,
+        accountToQuery,
+        blockNumberToQuery
+      )
     : [
-      "DISABLED_BALANCES_QUERY",
-      { chainIdToQuery, tokens, accountToQuery, blockNumberToQuery },
-    ];
+        "DISABLED_BALANCES_QUERY",
+        { chainIdToQuery, tokens, accountToQuery, blockNumberToQuery },
+      ];
   const prevAccount = usePrevious(accountToQuery);
   const prevChain = usePrevious(chainIdToQuery);
   const prevTokens = usePrevious(tokens);
   // Keep the previous data only when blockNumberToQuery changes.
-  const keepPreviousData = prevAccount === accountToQuery && prevChain === chainIdToQuery && JSON.stringify(prevTokens) === JSON.stringify(tokens);
+  const keepPreviousData =
+    prevAccount === accountToQuery &&
+    prevChain === chainIdToQuery &&
+    JSON.stringify(prevTokens) === JSON.stringify(tokens);
   const { data: balances, ...delegated } = useQuery(
     queryKey,
     async () => {

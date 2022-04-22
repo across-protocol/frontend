@@ -6,13 +6,13 @@ import { useConnection } from "state/hooks";
 
 type TokenInfo =
   | {
-    address: string;
-    symbol: "WETH";
-    name: "Wrapped Ether";
-    decimals: 18;
-    logoURI: string;
-    bridgePool: string;
-  }
+      address: string;
+      symbol: "WETH";
+      name: "Wrapped Ether";
+      decimals: 18;
+      logoURI: string;
+      bridgePool: string;
+    }
   | Token;
 
 export default function useSendAction(
@@ -26,7 +26,7 @@ export default function useSendAction(
   const tokenInfo = TOKENS_LIST[fromChain].find(
     (t) => t.address === token
   ) as TokenInfo;
-  const { fees } = useBridgeFees(amount, fromChain, tokenInfo?.symbol);
+  const { fees } = useBridgeFees(amount, toChain, tokenInfo?.symbol);
   const { status, hasToApprove, send, approve } = useBridge();
   const { account } = useConnection();
 
@@ -39,7 +39,11 @@ export default function useSendAction(
       if (hasToApprove) {
         const tx = await approve();
         if (tx) {
-          tx.wait(CONFIRMATIONS).catch(console.error).finally(() => { setTxPending(false); });
+          tx.wait(CONFIRMATIONS)
+            .catch(console.error)
+            .finally(() => {
+              setTxPending(false);
+            });
         }
         return tx;
       } else {
@@ -62,7 +66,9 @@ export default function useSendAction(
               });
             })
             .catch(console.error)
-            .finally(() => { setTxPending(false); });
+            .finally(() => {
+              setTxPending(false);
+            });
           // TODO: we should invalidate and refetch any queries of the transaction tab, so when a user switches to it, they see the new transaction immediately.
         }
         return tx;
