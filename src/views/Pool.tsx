@@ -294,7 +294,7 @@ const BigLoadingPositionWrapper = styled(LoadingPositionWrapper)`
   margin-top: 32px;
 `;
 
-export const MigrationWarning = styled.div`
+const MigrationWarning = styled.div`
   z-index: 1000;
   display: flex;
   padding: 1rem 0;
