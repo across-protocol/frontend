@@ -23,6 +23,7 @@ import BouncingDotsLoader from "components/BouncingDotsLoader";
 
 import { BounceType } from "components/BouncingDotsLoader/BouncingDotsLoader";
 import { SuperHeader } from "components";
+import { migrationPoolV2Warning } from "utils";
 
 export type ShowSuccess = "deposit" | "withdraw";
 
@@ -133,6 +134,14 @@ const Pool: FC = () => {
       )}
       {!showSuccess ? (
         <Wrapper>
+          {migrationPoolV2Warning && (
+            <MigrationWarning>
+              <div>
+                You still have liquidity on v1 and some more text plus link to
+                these instructions
+              </div>
+            </MigrationWarning>
+          )}
           <PoolSelection
             tokenList={tokenList}
             wrongNetwork={wrongNetwork}
@@ -283,4 +292,22 @@ const LoadingPositionWrapper = styled.div`
 const BigLoadingPositionWrapper = styled(LoadingPositionWrapper)`
   min-height: 320px;
   margin-top: 32px;
+`;
+
+export const MigrationWarning = styled.div`
+  z-index: 1000;
+  display: flex;
+  padding: 1rem 0;
+  > div {
+    text-align: center;
+    border-radius: 5px;
+    background-color: var(--color-error);
+    color: var(--color-gray);
+    width: 90%;
+    height: 70px;
+    margin: 0 auto;
+    padding: 1rem 0.5rem;
+    font-size: ${14 / 16}rem;
+    line-height: ${19 / 16}rem;
+  }
 `;
