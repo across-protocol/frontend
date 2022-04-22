@@ -39,7 +39,11 @@ export default function useSendAction(
       if (hasToApprove) {
         const tx = await approve();
         if (tx) {
-          tx.wait(CONFIRMATIONS).catch(console.error).finally(() => { setTxPending(false); });
+          tx.wait(CONFIRMATIONS)
+            .catch(console.error)
+            .finally(() => {
+              setTxPending(false);
+            });
         }
         return tx;
       } else {
@@ -62,7 +66,9 @@ export default function useSendAction(
               });
             })
             .catch(console.error)
-            .finally(() => { setTxPending(false); });
+            .finally(() => {
+              setTxPending(false);
+            });
           // TODO: we should invalidate and refetch any queries of the transaction tab, so when a user switches to it, they see the new transaction immediately.
         }
         return tx;

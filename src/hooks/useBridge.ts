@@ -124,6 +124,10 @@ export function useBridge() {
   };
 }
 
+type Fees = {
+  isLiquidityInsufficient: boolean;
+  isAmountTooLow: boolean;
+};
 type ComputeStatusArgs = {
   token: string;
   amount: ethers.BigNumber;
@@ -131,12 +135,7 @@ type ComputeStatusArgs = {
   hasToSwitchChain: boolean;
   balance: ethers.BigNumber | undefined;
   fromChain: ChainId;
-  fees:
-    | {
-        isLiquidityInsufficient: boolean;
-        isAmountTooLow: boolean;
-      }
-    | undefined;
+  fees: Fees | undefined;
 };
 /**
  * Computes the current send tab status.

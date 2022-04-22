@@ -490,7 +490,6 @@ class Queries implements relayFeeCalculator.QueryInterface {
     return info;
   }
   async getTokenPrice(tokenSymbol: string): Promise<string | number> {
-    console.log({ tokenSymbol });
     if (tokenSymbol.toLowerCase() === "eth") return 1;
     const { address } = this.getMainnetTokenInfo(tokenSymbol);
     const [, tokenPrice] = await this.coingecko.getCurrentPriceByContract(
