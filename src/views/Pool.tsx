@@ -14,6 +14,7 @@ import {
   switchChain,
   CHAINS,
   Token,
+  AddressZero,
 } from "utils";
 import { useAppSelector, useConnection, useBalance } from "state/hooks";
 import get from "lodash/get";
@@ -38,14 +39,23 @@ const Pool: FC = () => {
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);
   const [defaultTab, setDefaultTab] = useState("Add");
-  const pool = useAppSelector((state) => state.pools.pools[token.address]);
+  const pool = useAppSelector(
+    (state) =>
+      state.pools.pools[
+        token.address === AddressZero
+          ? poolClient.config.wethAddress
+          : token.address
+      ]
+  );
   const connection = useAppSelector((state) => state.connection);
   const userPosition = useAppSelector((state) =>
     get(state, [
       "pools",
       "users",
       state?.connection?.account || "",
-      token.address,
+      token.address === AddressZero
+        ? poolClient.config.wethAddress
+        : token.address,
     ])
   );
 
@@ -72,9 +82,12 @@ const Pool: FC = () => {
   // Update pool info when token changes
   useEffect(() => {
     setLoadingPoolState(true);
-
+    const address =
+      token.address === AddressZero
+        ? poolClient.config.wethAddress
+        : token.address;
     poolClient
-      .updatePool(token.address)
+      .updatePool(address)
       .catch((err) => {
         console.error("Unable to load pool info", err);
       })
@@ -85,8 +98,12 @@ const Pool: FC = () => {
 
   useEffect(() => {
     if (isConnected && connection.account && token.address) {
+      const address =
+        token.address === AddressZero
+          ? poolClient.config.wethAddress
+          : token.address;
       poolClient
-        .updateUser(connection.account, token.address)
+        .updateUser(connection.account, address)
         .catch((err) => console.error("error loading user", err));
     }
   }, [isConnected, connection.account, token.address]);

@@ -4,6 +4,7 @@ import Tabs from "../Tabs";
 import AddLiquidityForm from "./AddLiquidityForm";
 import RemoveLiquidityForm from "./RemoveLiquidityForm";
 import { QuerySubState } from "@reduxjs/toolkit/dist/query/core/apiState";
+import { poolClient } from "state/poolsApi";
 import {
   Wrapper,
   Info,
@@ -89,7 +90,8 @@ const PoolForm: FC<Props> = ({
   useEffect(() => {
     if (!signer || !isConnected || symbol !== "ETH") return;
 
-    estimateGasForAddEthLiquidity(signer, tokenAddress)
+    const wethAddress = poolClient.config.wethAddress;
+    estimateGasForAddEthLiquidity(signer, wethAddress)
       .then(setAddLiquidityGas)
       .catch((err) => {
         console.error("Error getting estimating gas usage", err);
@@ -97,7 +99,7 @@ const PoolForm: FC<Props> = ({
 
     // get gas estimate on an interval
     const handle = setInterval(() => {
-      estimateGasForAddEthLiquidity(signer, tokenAddress)
+      estimateGasForAddEthLiquidity(signer, wethAddress)
         .then(setAddLiquidityGas)
         .catch((err) => {
           console.error("Error getting estimating gas usage", err);
@@ -105,7 +107,7 @@ const PoolForm: FC<Props> = ({
     }, UPDATE_GAS_INTERVAL_MS);
 
     return () => clearInterval(handle);
-  }, [signer, isConnected, tokenAddress, symbol]);
+  }, [signer, isConnected, symbol]);
 
   // Validate input on change
   useEffect(() => {
