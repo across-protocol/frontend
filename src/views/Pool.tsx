@@ -34,6 +34,7 @@ const Pool: FC = () => {
     hubPoolAddress: string;
   };
   const tokenList = TOKENS_LIST[chainId as ChainId];
+  const chainInfo = CHAINS[chainId];
   const [token, setToken] = useState<Token>(tokenList[2]);
   const [showSuccess, setShowSuccess] = useState<ShowSuccess | undefined>();
   const [depositUrl, setDepositUrl] = useState("");
@@ -124,7 +125,7 @@ const Pool: FC = () => {
           <div>
             You are on an incorrect network. Please{" "}
             <button onClick={() => switchChain(provider, chainId)}>
-              switch to {CHAINS[chainId].name}
+              switch to {chainInfo.name}
             </button>
           </div>
         </SuperHeader>
@@ -140,6 +141,7 @@ const Pool: FC = () => {
           />
           {!loadingPoolState ? (
             <PoolForm
+              chainId={chainId}
               wrongNetwork={wrongNetwork}
               symbol={token.symbol}
               icon={token.logoURI}

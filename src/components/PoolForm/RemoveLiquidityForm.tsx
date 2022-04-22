@@ -24,9 +24,9 @@ import {
   addEtherscan,
   max,
   onboard,
-  DEFAULT_TO_CHAIN_ID,
   CHAINS,
   switchChain,
+  ChainId,
 } from "utils";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import api from "state/chainApi";
@@ -52,6 +52,7 @@ interface Props {
   wrongNetwork?: boolean;
   // refetch balance
   refetchBalance: () => void;
+  chainId: ChainId;
 }
 const RemoveLiqudityForm: FC<Props> = ({
   removeAmount,
@@ -66,14 +67,16 @@ const RemoveLiqudityForm: FC<Props> = ({
   feesEarned,
   wrongNetwork,
   totalPosition,
+  chainId,
 }) => {
   const { init } = onboard;
   const { isConnected, provider, signer, notify, account } = useConnection();
   const [txSubmitted, setTxSubmitted] = useState(false);
   const [updateEthBalance] = api.endpoints.ethBalance.useLazyQuery();
+  const chainName = CHAINS[chainId].name;
   function buttonMessage() {
     if (!isConnected) return "Connect wallet";
-    if (wrongNetwork) return "Switch to Ethereum Mainnet";
+    if (wrongNetwork) return `Switch to ${chainName}`;
     return "Remove liquidity";
   }
   const [errorMessage, setErrorMessage] = useState("");
@@ -227,10 +230,8 @@ const RemoveLiqudityForm: FC<Props> = ({
           </RemoveFormErrorBox>
         )}
         {wrongNetwork && provider ? (
-          <RemoveFormButton
-            onClick={() => switchChain(provider, DEFAULT_TO_CHAIN_ID)}
-          >
-            Switch to {CHAINS[DEFAULT_TO_CHAIN_ID].name}
+          <RemoveFormButton onClick={() => switchChain(provider, chainId)}>
+            Switch to {chainName}
           </RemoveFormButton>
         ) : (
           <RemoveFormButton
