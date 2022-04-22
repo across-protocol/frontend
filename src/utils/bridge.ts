@@ -121,7 +121,7 @@ export async function getLpFee(
   amount: ethers.BigNumber,
   blockTime?: number
 ): Promise<Fee & { isLiquidityInsufficient: boolean }> {
-  // eth and weth can be treated the sasme same in this case, but the rate model only currently supports weth address
+  // eth and weth can be treated the same in this case, but the rate model only currently supports weth address
   // TODO: add address 0 to sdk rate model ( duplicate weth)
   if (tokenSymbol === "ETH") tokenSymbol = "WETH";
 
