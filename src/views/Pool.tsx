@@ -137,8 +137,8 @@ const Pool: FC = () => {
           {migrationPoolV2Warning && (
             <MigrationWarning>
               <div>
-                You still have liquidity on v1 and some more text plus link to
-                these instructions
+                If you have not migrated liquidity from Across v1 to Across v2,
+                please follow these instruction
               </div>
             </MigrationWarning>
           )}
