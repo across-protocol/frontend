@@ -45,7 +45,6 @@ export const TitleRow = styled.div`
 `;
 
 export const LoadingWrapper = styled.div`
-  /* width: 100%; */
   width: 150px;
   margin: 0 auto;
   text-align: center;
