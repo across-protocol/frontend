@@ -89,7 +89,7 @@ const Transactions = () => {
 
       {isConnected && (
         <>
-          {ongoingTx.length > 0 && (
+          {!initialLoading && ongoingTx.length > 0 && (
             <TopRow>
               <Title>
                 Transactions
@@ -131,27 +131,31 @@ const Transactions = () => {
                 No transactions found.
               </NotFoundWrapper>
             )}
-            {width >= BREAKPOINTS.laptopMin ? (
-              <TransactionsTableWithPagination
-                title="History"
-                headers={headers}
-                rows={filledTx}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                elements={filledTx}
-                initialLoading={initialLoading}
-              />
-            ) : (
-              <MobileTransactionsTableWithPagination
-                title="History"
-                headers={mobileHeaders}
-                rows={mobileFilledTx}
-                openIndex={openFilledRow}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                elements={mobileFilledTx}
-                initialLoading={initialLoading}
-              />
+            {!initialLoading && (
+              <>
+                {width >= BREAKPOINTS.laptopMin ? (
+                  <TransactionsTableWithPagination
+                    title="History"
+                    headers={headers}
+                    rows={filledTx}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    elements={filledTx}
+                    initialLoading={initialLoading}
+                  />
+                ) : (
+                  <MobileTransactionsTableWithPagination
+                    title="History"
+                    headers={mobileHeaders}
+                    rows={mobileFilledTx}
+                    openIndex={openFilledRow}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    elements={mobileFilledTx}
+                    initialLoading={initialLoading}
+                  />
+                )}
+              </>
             )}
           </BottomRow>
         </>
