@@ -22,15 +22,16 @@ interface Props {
   tokenList: TokenList;
   setToken: Dispatch<SetStateAction<Token>>;
   wrongNetwork?: boolean;
+  chainId: ChainId;
 }
 
-const PoolSelection: FC<Props> = ({ token, setToken, tokenList }) => {
+const PoolSelection: FC<Props> = ({ token, setToken, tokenList, chainId }) => {
   const { account } = useConnection();
 
   const { data: balances } = useBalances(
     {
       account: account!,
-      chainId: ChainId.MAINNET,
+      chainId,
     },
     { skip: !account }
   );
