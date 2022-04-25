@@ -25,6 +25,7 @@ import {
   DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE,
   UPDATE_GAS_INTERVAL_MS,
   toWeiSafe,
+  ChainId,
 } from "utils";
 import { useConnection } from "state/hooks";
 import type { ShowSuccess } from "views/Pool";
@@ -53,6 +54,7 @@ interface Props {
   setDefaultTab: React.Dispatch<React.SetStateAction<string>>;
   utilization: string;
   projectedApr: string;
+  chainId: ChainId;
 }
 
 const PoolForm: FC<Props> = ({
@@ -76,6 +78,7 @@ const PoolForm: FC<Props> = ({
   setDefaultTab,
   utilization,
   projectedApr,
+  chainId,
 }) => {
   const [inputAmount, setInputAmount] = useState("");
   const [removeAmount, setRemoveAmount] = useState(0);
@@ -217,6 +220,7 @@ const PoolForm: FC<Props> = ({
             setAmount={setInputAmount}
             refetchBalance={refetchBalance}
             onMaxClick={handleMaxClick}
+            chainId={chainId}
           />
         </TabContentWrapper>
         <TabContentWrapper data-label="Remove">
@@ -235,6 +239,7 @@ const PoolForm: FC<Props> = ({
             feesEarned={feesEarned}
             totalPosition={totalPosition}
             refetchBalance={refetchBalance}
+            chainId={chainId}
           />
         </TabContentWrapper>
       </Tabs>

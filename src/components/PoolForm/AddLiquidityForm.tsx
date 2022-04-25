@@ -22,6 +22,7 @@ import {
   CHAINS,
   switchChain,
   disableDeposits,
+  ChainId,
 } from "utils";
 import api from "state/chainApi";
 import type { ShowSuccess } from "views/Pool";
@@ -48,6 +49,7 @@ interface Props {
   // refetch balance
   refetchBalance: () => void;
   onMaxClick: () => void;
+  chainId: ChainId;
 }
 
 const AddLiquidityForm: FC<Props> = ({
@@ -65,6 +67,7 @@ const AddLiquidityForm: FC<Props> = ({
   wrongNetwork,
   formError,
   onMaxClick,
+  chainId,
 }) => {
   const { addError } = useError();
 
@@ -76,6 +79,7 @@ const AddLiquidityForm: FC<Props> = ({
   const [userNeedsToApprove, setUserNeedsToApprove] = useState(false);
   const [txSubmitted, setTxSubmitted] = useState(false);
   const [updateEthBalance] = api.endpoints.ethBalance.useLazyQuery();
+  const chainName = CHAINS[chainId].name;
 
   const updateAllowance = useCallback(async () => {
     if (!account || !provider || symbol === "ETH") return;
@@ -247,8 +251,8 @@ const AddLiquidityForm: FC<Props> = ({
       )}
       {formError && <LiquidityErrorBox>{formError}</LiquidityErrorBox>}
       {wrongNetwork && provider ? (
-        <FormButton onClick={() => switchChain(provider, DEFAULT_TO_CHAIN_ID)}>
-          Switch to {CHAINS[DEFAULT_TO_CHAIN_ID].name}
+        <FormButton onClick={() => switchChain(provider, chainId)}>
+          Switch to {chainName}
         </FormButton>
       ) : (
         <FormButton
