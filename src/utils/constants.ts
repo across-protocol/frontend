@@ -248,6 +248,38 @@ export const chainInfoTable: ChainInfoTable = Object.fromEntries(
     return [chain.chainId, chain];
   }, [])
 );
+/** FIXME:  use the actual spoke pool addresses!!!! */
+export const SPOKE_ADDRESSES: Record<ChainId, string> = {
+  [ChainId.MAINNET]: ethers.constants.AddressZero,
+  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
+  [ChainId.OPTIMISM]: ethers.constants.AddressZero,
+  [ChainId.BOBA]: ethers.constants.AddressZero,
+  [ChainId.POLYGON]: ethers.constants.AddressZero,
+  [ChainId.RINKEBY]: getAddress("0xB078bBb35f8E24c2431b9d2a88C0bC0c26CC1F92"),
+  [ChainId.KOVAN]: getAddress("0x73549B5639B04090033c1E77a22eE9Aa44C2eBa0"),
+  [ChainId.KOVAN_OPTIMISM]: getAddress(
+    "0x2b7b7bAE341089103dD22fa4e8D7E4FA63E11084"
+  ),
+  [ChainId.ARBITRUM_RINKEBY]: getAddress(
+    "0x3BED21dAe767e4Df894B31b14aD32369cE4bad8b"
+  ),
+  [ChainId.GOERLI]: ethers.constants.AddressZero,
+  [ChainId.MUMBAI]: getAddress("0xFd9e2642a170aDD10F53Ee14a93FcF2F31924944"),
+};
+// Update once addresses are known
+export const HUBPOOL_ADDRESSES: Record<ChainId, string> = {
+  [ChainId.MAINNET]: getAddress("0xD449Af45a032Df413b497A709EeD3E8C112EbcE3"),
+  [ChainId.OPTIMISM]: ethers.constants.AddressZero,
+  [ChainId.BOBA]: ethers.constants.AddressZero,
+  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
+  [ChainId.RINKEBY]: getAddress("0xa1b6DA4AaE90fA16F3A3338c8d1Dc70B4926FCa7"),
+  [ChainId.POLYGON]: ethers.constants.AddressZero,
+  [ChainId.KOVAN]: getAddress("0xD449Af45a032Df413b497A709EeD3E8C112EbcE3"),
+  [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
+  [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
+  [ChainId.GOERLI]: getAddress("0x69CA24D3084a2eea77E061E2D7aF9b76D107b4f6"),
+  [ChainId.MUMBAI]: ethers.constants.AddressZero,
+};
 
 export type TokenInfo = {
   name: string;
