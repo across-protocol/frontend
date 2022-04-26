@@ -623,3 +623,6 @@ export function createTxHistoryClient() {
 
   return txHistoryConfigs;
 }
+
+export const enableReactQueryDevTools =
+  process.env.REACT_APP_ENABLE_REACT_QUERY_DEV_TOOLS;

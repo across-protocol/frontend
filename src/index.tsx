@@ -9,6 +9,7 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import App from "./App";
 import "./onboard-override.css";
 import { ErrorProvider } from "hooks";
+import { enableReactQueryDevTools } from "utils";
 
 const client = new QueryClient();
 ReactDOM.render(
@@ -19,7 +20,7 @@ ReactDOM.render(
         <ErrorProvider>
           <App />
         </ErrorProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {enableReactQueryDevTools && <ReactQueryDevtools />}
       </QueryClientProvider>
     </Provider>
   </React.StrictMode>,
