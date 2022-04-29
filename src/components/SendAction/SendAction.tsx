@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  CHAINS,
-  formatUnits,
-  getEstimatedDepositTime,
-  ChainId,
-  receiveAmount,
-} from "utils";
+import { CHAINS, formatUnits, ChainId, receiveAmount } from "utils";
 import { PrimaryButton } from "../Buttons";
 import {
   Wrapper,
@@ -47,7 +41,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
         <InfoWrapper animate={{ opacity: showFees ? 1 : 0 }}>
           <Info>
             <div>Time to {CHAINS[toChain].name}</div>
-            <div>{getEstimatedDepositTime(toChain)}</div>
+            <div>~1-3 minutes</div>
           </Info>
           {fromChain !== ChainId.MAINNET && (
             <Info>

@@ -219,18 +219,6 @@ export async function getBridgeFees({
   };
 }
 
-export const getEstimatedDepositTime = (chainId: ChainId) => {
-  switch (chainId) {
-    case ChainId.OPTIMISM:
-    case ChainId.BOBA:
-      return "~20 minutes";
-    case ChainId.ARBITRUM:
-      return "~10 minutes";
-    case ChainId.MAINNET:
-      return "~1-3 minutes";
-  }
-};
-
 export const getConfirmationDepositTime = (chainId: ChainId) => {
   switch (chainId) {
     case ChainId.OPTIMISM:
