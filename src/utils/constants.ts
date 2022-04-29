@@ -380,7 +380,8 @@ export const SPOKE_ADDRESSES: Record<ChainId, string> = {
   [ChainId.BOBA]: ethers.constants.AddressZero,
   [ChainId.POLYGON]: ethers.constants.AddressZero,
   [ChainId.RINKEBY]: getAddress("0x90743806D7A66b37F31FAfd7b3447210aB55640f"),
-  [ChainId.KOVAN]: getAddress("0x73549B5639B04090033c1E77a22eE9Aa44C2eBa0"),
+  [ChainId.KOVAN]: getAddress("0x42Be973223aE6b29e67655c808a995eaE9f84534"),
+
   [ChainId.KOVAN_OPTIMISM]: getAddress(
     "0x2b7b7bAE341089103dD22fa4e8D7E4FA63E11084"
   ),
