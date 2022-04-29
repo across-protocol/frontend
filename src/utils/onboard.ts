@@ -1,6 +1,6 @@
 // import React from "react";
 import Onboard from "bnc-onboard";
-import { Wallet, Initialization } from "bnc-onboard/dist/src/interfaces";
+import { Wallet, Initialization, Ens } from "bnc-onboard/dist/src/interfaces";
 import { ethers } from "ethers";
 import {
   onboardApiKey,
@@ -88,6 +88,14 @@ export function OnboardEthers(config: Initialization, emit: Emit) {
           });
         }
       },
+      ens: (ens: Ens) => {
+        const ensName = ens?.name;
+        if (savedWallet?.provider) {
+          emit("update", {
+            ensName
+          });
+        }
+      }
     },
   });
   async function init() {

@@ -24,8 +24,9 @@ interface Props {
 }
 
 const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
-  const { account, isConnected, chainId, location, className } =
+  const { account, ensName, isConnected, chainId, location, className } =
     useSidebar(openSidebar);
+  const addrOrEns = ensName ?? account;
 
   return (
     <>
@@ -47,7 +48,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               <img src={closeIcon} alt="close_button" />
             </CloseButton>
           </TopHeaderRow>
-          {account && <HeaderText>{account}</HeaderText>}
+          {addrOrEns && <HeaderText>{addrOrEns}</HeaderText>}
           {chainId && isConnected && (
             <HeaderText>{getChainInfo(chainId).name}</HeaderText>
           )}
