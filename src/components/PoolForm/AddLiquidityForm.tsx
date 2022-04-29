@@ -17,7 +17,7 @@ import { useERC20 } from "hooks";
 import { ethers } from "ethers";
 import { addEtherscan } from "utils/notify";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
-import { CHAINS, switchChain, disableDeposits, ChainId } from "utils";
+import { getChainInfo, switchChain, disableDeposits, ChainId } from "utils";
 import api from "state/chainApi";
 import type { ShowSuccess } from "views/Pool";
 import { useError } from "hooks";
@@ -73,7 +73,7 @@ const AddLiquidityForm: FC<Props> = ({
   const [userNeedsToApprove, setUserNeedsToApprove] = useState(false);
   const [txSubmitted, setTxSubmitted] = useState(false);
   const [updateEthBalance] = api.endpoints.ethBalance.useLazyQuery();
-  const chainName = CHAINS[chainId].name;
+  const chainName = getChainInfo(chainId).name;
 
   const updateAllowance = useCallback(async () => {
     if (!account || !provider || symbol === "ETH") return;

@@ -3,25 +3,27 @@ import { useConnection } from "state/hooks";
 import { useSendForm } from "hooks";
 import {
   UnsupportedChainIdError,
-  CHAINS,
-  CHAINS_SELECTION,
   switchChain,
   onboard,
-  DEFAULT_FROM_CHAIN_ID,
+  getConfig,
+  getChainInfo,
 } from "utils";
 
 export default function useChainSelection() {
   const { init } = onboard;
   const { isConnected, provider, chainId, error } = useConnection();
   const { fromChain, setFromChain } = useSendForm();
+  const config = getConfig();
 
+  const availableChains = config.getSpokeChains();
   const wrongNetworkSend =
+    fromChain &&
     provider &&
     chainId &&
     (error instanceof UnsupportedChainIdError || chainId !== fromChain);
 
   const buttonText = wrongNetworkSend
-    ? `Switch to ${CHAINS[fromChain].name}`
+    ? `Switch to ${getChainInfo(fromChain).name}`
     : !isConnected
     ? "Connect Wallet"
     : null;
@@ -35,8 +37,8 @@ export default function useChainSelection() {
   };
 
   const downshiftState = useSelect({
-    items: CHAINS_SELECTION,
-    defaultSelectedItem: DEFAULT_FROM_CHAIN_ID,
+    items: config.getSpokeChainIds(),
+    defaultSelectedItem: fromChain,
     selectedItem: fromChain,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
@@ -51,5 +53,6 @@ export default function useChainSelection() {
     isConnected,
     wrongNetworkSend,
     fromChain,
+    availableChains,
   };
 }

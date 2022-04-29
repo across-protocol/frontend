@@ -1,57 +1,52 @@
 import { useSelect } from "downshift";
 import { ethers } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
-import React, { useMemo, useEffect, useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useConnection } from "state/hooks";
-import { useBalance, useBalances, useBridgeFees, useSendForm } from "hooks";
+import { useBalancesBySymbols, useBridgeFees, useSendForm } from "hooks";
 import {
   ParsingError,
-  filterTokensByDestinationChain,
   max,
   InsufficientBalanceError,
   FEE_ESTIMATION,
-  CHAINS,
 } from "utils";
 
 export default function useCoinSelection() {
   const { account, isConnected } = useConnection();
   const {
     setAmount,
-    setToken,
+    setTokenSymbol,
     amount,
-    token,
+    tokenSymbol,
     toChain,
     fromChain,
     error: formError,
     setError: setFormError,
     status: formStatus,
+    availableTokens,
   } = useSendForm();
 
-  const tokenList = useMemo(
-    () => filterTokensByDestinationChain(fromChain, toChain),
-    [fromChain, toChain]
-  );
-
-  const { balances } = useBalances(
-    tokenList.map((t) => t.address),
+  const { balances = [] } = useBalancesBySymbols(
+    availableTokens.map((t) => t.symbol),
     fromChain,
     account
   );
-
-  const { balance } = useBalance(token, fromChain, account);
-
   const { selectedItem, ...downshiftState } = useSelect({
-    items: tokenList,
-    defaultSelectedItem: tokenList.find((t) => t.address === token),
-    selectedItem: tokenList.find((t) => t.address === token),
+    items: availableTokens,
+    defaultSelectedItem: availableTokens[0],
+    selectedItem: availableTokens.find((t) => t.symbol === tokenSymbol),
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
         setInputAmount("");
-        setToken(selectedItem.address);
+        setTokenSymbol(selectedItem.symbol);
       }
     },
   });
-  const { fees } = useBridgeFees(amount, toChain, selectedItem!.symbol);
+  const selectedIndex = availableTokens.findIndex(
+    (token) => token.symbol === selectedItem?.symbol
+  );
+  const balance = balances[selectedIndex];
+  const { fees } = useBridgeFees(amount, toChain, selectedItem?.symbol);
   const [inputAmount, setInputAmount] = React.useState<string>(
     selectedItem && amount.gt("0")
       ? formatUnits(amount, selectedItem.decimals)
@@ -73,7 +68,7 @@ export default function useCoinSelection() {
         return;
       }
       try {
-        const amount = parseUnits(value, selectedItem!.decimals);
+        const amount = parseUnits(value, selectedItem?.decimals);
         setAmount(amount);
       } catch (e) {
         setFormError(new ParsingError());
@@ -84,14 +79,10 @@ export default function useCoinSelection() {
 
   const handleMaxClick = useCallback(() => {
     if (balances && selectedItem) {
-      const selectedIndex = tokenList.findIndex(
-        ({ address }) => address === selectedItem.address
-      );
-      const isEth = tokenList[selectedIndex].symbol === "ETH";
       let adjustedBalance = balance;
 
       if (adjustedBalance) {
-        if (isEth) {
+        if (selectedItem.isNative) {
           adjustedBalance = max(
             adjustedBalance.sub(ethers.utils.parseEther(FEE_ESTIMATION)),
             0
@@ -106,14 +97,14 @@ export default function useCoinSelection() {
         );
       }
     }
-  }, [balance, balances, selectedItem, setAmount, tokenList]);
+  }, [balance, balances, selectedItem, setAmount]);
   // checks for insufficient balance errors
   let error: InsufficientBalanceError | ParsingError | undefined = formError;
-  const isNativeCurrency = token === CHAINS[fromChain].nativeCurrencyAddress;
   if (
+    selectedItem &&
     balance &&
     amount.gt(
-      isNativeCurrency
+      selectedItem.isNative
         ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION))
         : balance
     )
@@ -145,7 +136,7 @@ export default function useCoinSelection() {
     inputAmount,
     setInputAmount,
     selectedItem,
-    tokenList,
+    availableTokens,
     error,
   };
 }

@@ -1,14 +1,12 @@
 import { ethers } from "ethers";
 import { useQueryParams } from "./useQueryParams";
 import { FormStatus, useSendForm } from "./useSendForm";
-import { useBalance } from "./useBalance";
+import { useBalanceBySymbol } from "./useBalance";
 import { useBridgeFees } from "./useBridgeFees";
 import { useAllowance } from "./useAllowance";
 import { useConnection } from "state/hooks";
 import { useBlock } from "./useBlock";
 import {
-  getSpokePool,
-  TOKENS_LIST,
   FEE_ESTIMATION,
   InsufficientBalanceError,
   FeeTooHighError,
@@ -16,10 +14,9 @@ import {
   MAX_APPROVAL_AMOUNT,
   WrongNetworkError,
   ChainId,
-  CHAINS,
   sendAcrossDeposit,
   sendAcrossApproval,
-  getHubPool,
+  getConfig,
 } from "utils";
 
 enum SendStatus {
@@ -35,34 +32,39 @@ type SendError =
   | WrongNetworkError;
 
 export function useBridge() {
+  const config = getConfig();
   const { referrer } = useQueryParams();
   const { chainId, account, signer } = useConnection();
   const {
     amount,
     fromChain,
     toChain,
-    token,
+    tokenSymbol,
     toAddress,
     status: formStatus,
+    selectedRoute,
   } = useSendForm();
 
   const { block } = useBlock(fromChain);
-  const { balance } = useBalance(token, fromChain, account);
-  const spokePool = getSpokePool(fromChain);
+  const { balance } = useBalanceBySymbol(tokenSymbol, fromChain, account);
+  const spokePool = fromChain ? config.getSpokePool(fromChain) : undefined;
   const { allowance } = useAllowance(
-    token,
+    tokenSymbol,
     chainId,
     account,
-    spokePool.address,
+    spokePool?.address,
     block?.number
   );
-  const tokenSymbol = TOKENS_LIST[fromChain].find(
-    (t) => t.address === token
-  )?.symbol;
+  const tokenInfo =
+    fromChain && tokenSymbol
+      ? config.getTokenInfoBySymbol(fromChain, tokenSymbol)
+      : undefined;
   const { fees } = useBridgeFees(amount, toChain, tokenSymbol);
-  const hasToSwitchChain = chainId !== fromChain;
+  const hasToSwitchChain = Boolean(
+    fromChain && chainId && chainId !== fromChain
+  );
   let { status, error } = computeStatus({
-    token,
+    tokenAddress: tokenInfo?.address,
     amount,
     formStatus,
     hasToSwitchChain,
@@ -72,20 +74,28 @@ export function useBridge() {
   });
 
   const hasToApprove = !!allowance && amount.gt(allowance);
-  const hubPool = getHubPool(fromChain);
+  const hubPool = config.getHubPool();
 
   const send = async () => {
     // NOTE: the `toAddress` check is redundant, as status won't be "ready" if `toAddress` is not set, but it's here to make TS happy. The same applies for `block` and `fees`.
-    if (!signer || status !== "ready" || !toAddress || !block || !fees) {
+    if (
+      !signer ||
+      status !== "ready" ||
+      !toAddress ||
+      !block ||
+      !fees ||
+      !selectedRoute
+    ) {
       return;
     }
     try {
       return sendAcrossDeposit(signer, {
         toAddress,
         amount,
-        token,
-        fromChain,
-        toChain,
+        tokenAddress: selectedRoute.fromTokenAddress,
+        fromChain: selectedRoute.fromChain,
+        toChain: selectedRoute.toChain,
+        isNative: selectedRoute.isNative,
         relayerFeePct: fees.relayerFee.pct,
         timestamp: await hubPool.getCurrentTime(),
         referrer,
@@ -98,13 +108,13 @@ export function useBridge() {
 
   const approve = async () => {
     // NOTE: Since status will only be "ready" if `hasToSwitchChain` is false, we don't need to check that the `signer` has the same `chainId` as `fromChain`.
-    if (!signer || status !== "ready") {
+    if (!signer || status !== "ready" || !selectedRoute) {
       return;
     }
     return sendAcrossApproval(signer, {
-      token,
+      tokenAddress: selectedRoute.fromTokenAddress,
       amount: MAX_APPROVAL_AMOUNT,
-      chainId: fromChain,
+      chainId: selectedRoute.fromChain,
     });
   };
 
@@ -113,7 +123,7 @@ export function useBridge() {
     toChain,
     toAddress,
     amount,
-    token,
+    tokenSymbol,
     error,
     hasToApprove,
     hasToSwitchChain,
@@ -129,12 +139,12 @@ type Fees = {
   isAmountTooLow: boolean;
 };
 type ComputeStatusArgs = {
-  token: string;
+  tokenAddress?: string;
   amount: ethers.BigNumber;
   formStatus: FormStatus;
   hasToSwitchChain: boolean;
   balance: ethers.BigNumber | undefined;
-  fromChain: ChainId;
+  fromChain?: ChainId;
   fees: Fees | undefined;
 };
 /**
@@ -149,9 +159,16 @@ function computeStatus({
   amount,
   balance,
   fees,
-  token,
+  tokenAddress,
   fromChain,
 }: ComputeStatusArgs): { status: SendStatus; error?: SendError } {
+  const config = getConfig();
+  if (!tokenAddress) {
+    return { status: SendStatus.IDLE };
+  }
+  if (!fromChain) {
+    return { status: SendStatus.IDLE };
+  }
   if (formStatus !== FormStatus.VALID) {
     return { status: SendStatus.IDLE };
   }
@@ -161,11 +178,11 @@ function computeStatus({
       error: new WrongNetworkError(fromChain),
     };
   }
+  const isNative = config.isTokenNative(fromChain, tokenAddress);
   if (balance) {
-    const adjustedBalance =
-      token === CHAINS[fromChain].nativeCurrencyAddress
-        ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION))
-        : balance;
+    const adjustedBalance = isNative
+      ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION))
+      : balance;
     if (adjustedBalance.lt(amount)) {
       return {
         status: SendStatus.ERROR,
@@ -177,7 +194,7 @@ function computeStatus({
     if (fees.isLiquidityInsufficient) {
       return {
         status: SendStatus.ERROR,
-        error: new InsufficientLiquidityError(token),
+        error: new InsufficientLiquidityError(tokenAddress),
       };
     }
     if (fees.isAmountTooLow) {

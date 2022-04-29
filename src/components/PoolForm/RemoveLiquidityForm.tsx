@@ -24,7 +24,7 @@ import {
   addEtherscan,
   max,
   onboard,
-  CHAINS,
+  getChainInfo,
   switchChain,
   ChainId,
 } from "utils";
@@ -73,7 +73,7 @@ const RemoveLiqudityForm: FC<Props> = ({
   const { isConnected, provider, signer, notify, account } = useConnection();
   const [txSubmitted, setTxSubmitted] = useState(false);
   const [updateEthBalance] = api.endpoints.ethBalance.useLazyQuery();
-  const chainName = CHAINS[chainId].name;
+  const chainName = getChainInfo(chainId).name;
   function buttonMessage() {
     if (!isConnected) return "Connect wallet";
     if (wrongNetwork) return `Switch to ${chainName}`;

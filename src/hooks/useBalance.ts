@@ -3,12 +3,15 @@ import { useConnection } from "state/hooks";
 import { useBlock } from "./useBlock";
 import {
   getBalance,
-  getBalances,
+  getNativeBalance,
+  getBalancesBySymbols,
   balanceQueryKey,
   balancesQueryKey,
   ChainId,
+  getConfig,
 } from "utils";
 import { usePrevious } from "hooks";
+import { BigNumber } from "ethers";
 
 /**
  * @param token - The token to fetch the balance of.
@@ -18,36 +21,56 @@ import { usePrevious } from "hooks";
  * @remarks Passing the zero address as token will return the ETH balance. Passing no account will return the balance of the connected account.
  * @returns The balance of the account and the UseQueryResult object
  */
-export function useBalance(
-  token: string,
+export function useBalanceBySymbol(
+  tokenSymbol?: string,
   chainId?: ChainId,
   account?: string,
   blockNumber?: number
 ) {
-  const { chainId: connectedChainId, account: connectedAccount } =
-    useConnection();
-  const chainIdToQuery = chainId ?? connectedChainId;
+  const { account: connectedAccount } = useConnection();
+  const chainIdToQuery = chainId;
+  const tokenSymbolToQuery = tokenSymbol;
   const accountToQuery = account ?? connectedAccount;
   const { block: latestBlock } = useBlock(chainId);
   const blockNumberToQuery = blockNumber ?? latestBlock?.number;
   const enabledQuery =
     !!chainIdToQuery && !!accountToQuery && !!blockNumberToQuery;
   const queryKey = enabledQuery
-    ? balanceQueryKey(chainIdToQuery, token, accountToQuery, blockNumberToQuery)
+    ? balanceQueryKey(
+        accountToQuery,
+        blockNumberToQuery,
+        chainIdToQuery,
+        tokenSymbolToQuery
+      )
     : [
         "DISABLED_BALANCE_QUERY",
-        { chainIdToQuery, token, accountToQuery, blockNumberToQuery },
+        {
+          chainIdToQuery,
+          tokenSymbolToQuery,
+          accountToQuery,
+          blockNumberToQuery,
+        },
       ];
+  const config = getConfig();
   const { data: balance, ...delegated } = useQuery(
     queryKey,
     async () => {
-      const balance = await getBalance(
-        chainId!,
-        token,
-        accountToQuery!,
-        blockNumberToQuery
+      if (!chainIdToQuery) return BigNumber.from(0);
+      if (!tokenSymbolToQuery) return BigNumber.from(0);
+      const tokenInfo = config.getTokenInfoBySymbol(
+        chainIdToQuery,
+        tokenSymbolToQuery
       );
-      return balance;
+      if (tokenInfo.isNative) {
+        return getNativeBalance(chainId, accountToQuery!, blockNumberToQuery);
+      } else {
+        return getBalance(
+          chainId,
+          accountToQuery!,
+          tokenInfo.address,
+          blockNumberToQuery
+        );
+      }
     },
     {
       enabled: enabledQuery,
@@ -68,15 +91,14 @@ export function useBalance(
  * @param account - The account to query the balances of.
  * @param blockNumber - The block number to execute the query on, if not specified, defaults to the latest block. Note, past blocks require an archive node.
  */
-export function useBalances(
-  tokens: string[],
+export function useBalancesBySymbols(
+  tokenSymbols: string[],
   chainId?: ChainId,
   account?: string,
   blockNumber?: number
 ) {
-  const { chainId: connectedChainId, account: connectedAccount } =
-    useConnection();
-  const chainIdToQuery = chainId ?? connectedChainId;
+  const { account: connectedAccount } = useConnection();
+  const chainIdToQuery = chainId;
   const accountToQuery = account ?? connectedAccount;
   const { block: latestBlock } = useBlock(chainId);
   const blockNumberToQuery = blockNumber ?? latestBlock?.number;
@@ -84,37 +106,36 @@ export function useBalances(
   const enabledQuery =
     !!chainIdToQuery &&
     !!accountToQuery &&
-    tokens.length > 0 &&
+    tokenSymbols.length > 0 &&
     !!blockNumberToQuery;
   const queryKey = enabledQuery
     ? balancesQueryKey(
-        chainIdToQuery,
-        tokens,
+        tokenSymbols,
         accountToQuery,
-        blockNumberToQuery
+        blockNumberToQuery,
+        chainIdToQuery
       )
     : [
         "DISABLED_BALANCES_QUERY",
-        { chainIdToQuery, tokens, accountToQuery, blockNumberToQuery },
+        { chainIdToQuery, tokenSymbols, accountToQuery, blockNumberToQuery },
       ];
   const prevAccount = usePrevious(accountToQuery);
   const prevChain = usePrevious(chainIdToQuery);
-  const prevTokens = usePrevious(tokens);
+  const prevTokens = usePrevious(tokenSymbols);
   // Keep the previous data only when blockNumberToQuery changes.
   const keepPreviousData =
     prevAccount === accountToQuery &&
     prevChain === chainIdToQuery &&
-    JSON.stringify(prevTokens) === JSON.stringify(tokens);
+    JSON.stringify(prevTokens) === JSON.stringify(tokenSymbols);
   const { data: balances, ...delegated } = useQuery(
     queryKey,
     async () => {
-      const balances = await getBalances(
+      return getBalancesBySymbols(
         chainId!,
-        tokens,
+        tokenSymbols,
         accountToQuery!,
         blockNumberToQuery
       );
-      return balances;
     },
     {
       enabled: enabledQuery,

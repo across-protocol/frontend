@@ -1,18 +1,50 @@
+import assert from "assert";
 import * as acrossSdk from "@across-protocol/sdk-v2";
 import { update } from "./pools";
 import { store } from "../state";
-import { HUBPOOL_CONFIG, HUBPOOL_CHAINID, PROVIDERS } from "utils";
+import {
+  getProvider,
+  getRateModelAddress,
+  ChainId,
+  hubPoolAddress,
+  wethAddress,
+  hubPoolChainId,
+} from "utils";
+import { ethers } from "ethers";
 
-const provider = PROVIDERS[HUBPOOL_CHAINID]();
+const provider = getProvider();
 
 const { Client } = acrossSdk.pool;
+
+export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
+  const rateModelStoreAddress = ethers.utils.getAddress(
+    getRateModelAddress(chainId)
+  );
+  assert(
+    rateModelStoreAddress,
+    "rateModelStoreAddress address not found on chain " + chainId
+  );
+  assert(
+    rateModelStoreAddress !== ethers.constants.AddressZero,
+    "rateModelStoreAddress address not set on chain " + chainId
+  );
+
+  return {
+    chainId,
+    hubPoolAddress,
+    wethAddress,
+    rateModelStoreAddress,
+  };
+}
+
+export const hubPoolConfig = makePoolClientConfig(hubPoolChainId);
 
 export function poolEventHandler(path: string[], data: any) {
   store.dispatch(update({ path, data }));
 }
 
 export const poolClient = new Client(
-  HUBPOOL_CONFIG,
+  hubPoolConfig,
   {
     provider,
   },

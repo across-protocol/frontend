@@ -8,7 +8,7 @@ import {
   SuperHeader,
 } from "components";
 import type { Deposit } from "views/Confirmation";
-import { CHAINS, switchChain } from "utils";
+import { getChainInfo, switchChain } from "utils";
 import useSendFormComponent from "./useSendFormComponent";
 
 type Props = {
@@ -19,12 +19,12 @@ const SendForm: React.FC<Props> = ({ onDepositConfirmed }) => {
 
   return (
     <>
-      {wrongNetwork && provider && (
+      {wrongNetwork && provider && fromChain && (
         <SuperHeader>
           <div>
             You are on an incorrect network. Please{" "}
             <button onClick={() => switchChain(provider, fromChain)}>
-              switch to {CHAINS[fromChain].name}
+              switch to {getChainInfo(fromChain).name}
             </button>
           </div>
         </SuperHeader>

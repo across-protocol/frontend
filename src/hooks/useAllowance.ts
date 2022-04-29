@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 import { useConnection } from "state/hooks";
 import { allowanceQueryKey, getAllowance, ChainId } from "utils";
 import { useBlock } from "./useBlock";
+import { BigNumber } from "ethers";
 
 /**
  *
@@ -14,43 +15,52 @@ import { useBlock } from "./useBlock";
  * @returns The allowance of tokens granted by the `owner` to the `spender` and the and the UseQueryResult object
  */
 export function useAllowance(
-  token: string,
+  tokenSymbol?: string,
   chainId?: ChainId,
   owner?: string,
   spender?: string,
   blockNumber?: number
 ) {
-  const { chainId: connectedChainId, account: connectedAccount } =
-    useConnection();
-  const chainIdToQuery = chainId ?? connectedChainId;
+  const { account: connectedAccount } = useConnection();
+  const chainIdToQuery = chainId;
   const ownerToQuery = owner ?? connectedAccount;
   const { block: latestBlock } = useBlock(chainId);
   const blockNumberToQuery = blockNumber ?? latestBlock?.number;
   const enabledQuery =
-    !!chainIdToQuery && !!ownerToQuery && !!spender && !!blockNumberToQuery;
+    !!chainIdToQuery &&
+    !!ownerToQuery &&
+    !!spender &&
+    !!blockNumberToQuery &&
+    !!tokenSymbol;
   const queryKey = enabledQuery
     ? allowanceQueryKey(
-        chainIdToQuery,
-        token,
         ownerToQuery,
         spender,
-        blockNumberToQuery
+        blockNumberToQuery,
+        chainIdToQuery,
+        tokenSymbol
       )
     : [
         "DISABLED_ALLOWANCE_QUERY",
-        { chainIdToQuery, token, ownerToQuery, spender, blockNumberToQuery },
+        {
+          chainIdToQuery,
+          tokenSymbol,
+          ownerToQuery,
+          spender,
+          blockNumberToQuery,
+        },
       ];
   const { data: allowance, ...delegated } = useQuery(
     queryKey,
     async () => {
-      const allowance = await getAllowance(
-        chainId!,
-        token,
+      if (!chainIdToQuery || !tokenSymbol) return BigNumber.from(0);
+      return getAllowance(
+        chainIdToQuery,
         ownerToQuery!,
         spender!,
+        tokenSymbol,
         blockNumberToQuery
       );
-      return allowance;
     },
     {
       enabled: enabledQuery,

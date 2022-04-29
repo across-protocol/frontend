@@ -7,7 +7,8 @@ import {
 } from "./TransactionsTable.styles";
 import { shortenTransactionHash, capitalizeFirstLetter } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
-import { CHAINS, TOKENS_LIST, ChainId } from "utils/constants";
+import { getChainInfo, ChainId } from "utils/constants";
+import { getConfig } from "utils/config";
 import { CLOSED_DROPDOWN_INDEX } from "../useTransactionsView";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
@@ -48,6 +49,8 @@ function formatTransactionRows(
   transactions: Transfer[],
   setOpenIndex: React.Dispatch<React.SetStateAction<number>>
 ): IMobileRow[] {
+  const config = getConfig();
+
   return transactions.map((tx, index) => {
     const timestamp: ICell = {
       size: "md",
@@ -69,9 +72,8 @@ function formatTransactionRows(
     };
 
     const sourceChainId = tx.sourceChainId as ChainId;
-
-    const fromChainName = CHAINS[sourceChainId].name;
-    const fromLogo = CHAINS[sourceChainId].logoURI;
+    const fromChainInfo = getChainInfo(sourceChainId);
+    const { name: fromChainName, logoURI: fromLogo } = fromChainInfo;
     const fromChain = (
       <>
         <TableLogo src={fromLogo} alt={`${fromChainName}_logo`} />{" "}
@@ -80,18 +82,15 @@ function formatTransactionRows(
     );
 
     const destinationChainId = tx.destinationChainId as ChainId;
-
-    const toChainName = CHAINS[destinationChainId].name;
-    const toLogo = CHAINS[destinationChainId].logoURI;
+    const destinationChainInfo = getChainInfo(destinationChainId);
+    const { name: toChainName, logoURI: toLogo } = destinationChainInfo;
     const toChain = (
       <>
         <TableLogo src={toLogo} alt={`${toChainName}_logo`} /> {toChainName}
       </>
     );
 
-    const token = TOKENS_LIST[sourceChainId].find(
-      (x) => x.address === tx.assetAddr
-    );
+    const token = config.getTokenInfoByAddress(sourceChainId, tx.assetAddr);
 
     const symbol = (
       <>
@@ -105,7 +104,9 @@ function formatTransactionRows(
     // TODO: change href to proper url when we get real TX data
     const txHash = (
       <MobileTableLink
-        href={CHAINS[sourceChainId].constructExplorerLink(tx.depositTxHash)}
+        href={getChainInfo(sourceChainId).constructExplorerLink(
+          tx.depositTxHash
+        )}
         target="_blank"
         rel="noreferrer"
       >

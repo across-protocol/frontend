@@ -2,17 +2,24 @@ import { useSelect } from "downshift";
 import { useState, useEffect } from "react";
 import { useConnection } from "state/hooks";
 import { useSendForm } from "hooks";
-import { CHAINS_SELECTION, isValidAddress } from "utils";
+import { isValidAddress, getChainInfo } from "utils";
 
 export default function useAddressSelection() {
   const { isConnected, account } = useConnection();
-  const { toChain, toAddress, fromChain, setToChain, setToAddress } =
-    useSendForm();
+  const {
+    toChain,
+    fromChain,
+    setToChain,
+    setToAddress,
+    availableToChains,
+    toAddress,
+  } = useSendForm();
   const [address, setAddress] = useState("");
   const [open, setOpen] = useState(false);
 
+  const selectedToChainInfo = toChain ? getChainInfo(toChain) : undefined;
   const downshiftState = useSelect({
-    items: CHAINS_SELECTION,
+    items: availableToChains.map((chain) => chain.chainId),
     defaultSelectedItem: toChain,
     selectedItem: toChain,
     onSelectedItemChange: ({ selectedItem }) => {
@@ -66,5 +73,7 @@ export default function useAddressSelection() {
     open,
     address,
     isConnected,
+    availableToChains,
+    selectedToChainInfo,
   };
 }

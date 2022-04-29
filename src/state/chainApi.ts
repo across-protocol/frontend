@@ -1,6 +1,6 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ethers, BigNumber } from "ethers";
-import { PROVIDERS, ChainId, TOKENS_LIST } from "utils";
+import { getProvider, ChainId, getConfig } from "utils";
 
 import { clients } from "@uma/sdk";
 import { ERC20Ethers__factory } from "@uma/contracts-frontend";
@@ -24,9 +24,11 @@ const api = createApi({
     balances: build.query<ethers.BigNumber[], BalancesQueryArgs>({
       queryFn: async ({ account, chainId }) => {
         try {
-          const provider = PROVIDERS[chainId]();
+          const provider = getProvider(chainId);
+          const config = getConfig();
+          const tokenList = config.getTokenList(chainId);
           const balances = await Promise.all(
-            TOKENS_LIST[chainId].map(async (token) => {
+            tokenList.map(async (token) => {
               try {
                 // If it is ETH, use getBalance from the provider
                 if (token.address === ethers.constants.AddressZero) {
@@ -58,7 +60,7 @@ const api = createApi({
     >({
       queryFn: async ({ owner, spender, chainId, token, amount }) => {
         try {
-          const provider = PROVIDERS[chainId]();
+          const provider = getProvider(chainId);
           // For ETH, allowance does not make sense
           if (token === ethers.constants.AddressZero) {
             return {
@@ -81,7 +83,7 @@ const api = createApi({
     ethBalance: build.query<ethers.BigNumber, BalancesQueryArgs>({
       queryFn: async ({ account, chainId }) => {
         try {
-          const provider = PROVIDERS[chainId]();
+          const provider = getProvider(chainId);
           const balance = await provider.getBalance(account);
           return { data: balance };
         } catch (error) {

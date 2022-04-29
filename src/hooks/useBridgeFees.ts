@@ -13,7 +13,7 @@ import { useBlock } from "./useBlock";
  */
 export function useBridgeFees(
   amount: ethers.BigNumber,
-  toChainId: ChainId,
+  toChainId?: ChainId,
   tokenSymbol?: string
 ) {
   const { block } = useBlock(toChainId);
@@ -28,7 +28,7 @@ export function useBridgeFees(
         amount,
         tokenSymbol: tokenSymbol!,
         blockTimestamp: block!.timestamp,
-        toChainId,
+        toChainId: toChainId!,
       });
     },
     {

@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { useConnection } from "state/hooks";
 import { onboard } from "utils";
 import useWindowSize from "hooks/useWindowsSize";
-import txHistoryClient from "state/transferHistory";
+import getTxClient from "state/transferHistory";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 import { transfersHistory } from "@across-protocol/sdk-v2";
 import { usePrevious } from "hooks";
 export default function useTransactionsView() {
+  const txHistoryClient = getTxClient();
   const { provider, chainId, isConnected, account } = useConnection();
   const { init } = onboard;
 
@@ -56,7 +57,13 @@ export default function useTransactionsView() {
       setRawFilledTx([]);
       setRawOngoingTx([]);
     }
-  }, [account, initialLoading, setInitialLoading, previousAccount]);
+  }, [
+    account,
+    initialLoading,
+    setInitialLoading,
+    previousAccount,
+    txHistoryClient,
+  ]);
 
   return {
     provider,

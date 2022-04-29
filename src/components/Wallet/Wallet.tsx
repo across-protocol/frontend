@@ -1,13 +1,9 @@
 import { onboard } from "utils";
 import { FC } from "react";
-import { useConnection, useETHBalance } from "state/hooks";
+import { useConnection } from "state/hooks";
+import { useBalanceBySymbol } from "hooks";
 
-import {
-  DEFAULT_FROM_CHAIN_ID,
-  CHAINS,
-  shortenAddress,
-  formatEther,
-} from "utils";
+import { getChainInfo, shortenAddress, formatEther, getConfig } from "utils";
 
 import {
   Wrapper,
@@ -25,11 +21,11 @@ interface Props {
 
 const Wallet: FC<Props> = ({ setOpenSidebar }) => {
   const { account, isConnected, chainId } = useConnection();
+  const config = getConfig();
+  const nativeToken = chainId ? config.getNativeTokenInfo(chainId) : undefined;
+  const chain = chainId ? getChainInfo(chainId) : undefined;
 
-  const { data: balance } = useETHBalance(
-    { account: account ?? "", chainId: chainId ?? DEFAULT_FROM_CHAIN_ID },
-    { skip: !isConnected }
-  );
+  const { balance } = useBalanceBySymbol(nativeToken?.symbol, chainId, account);
 
   if (account && !isConnected && !chainId) {
     return (
@@ -42,21 +38,19 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
   if (!isConnected) {
     return <ConnectButton onClick={init}>Connect Wallet</ConnectButton>;
   }
-
   return (
     <Wrapper onClick={() => setOpenSidebar(true)}>
       <Info>
-        {chainId && (
+        {nativeToken && chain && (
           <>
             <div>
-              {formatEther(balance ?? "0")}{" "}
-              {CHAINS[chainId].nativeCurrency.symbol}
+              {formatEther(balance ?? "0")} {nativeToken.symbol}
             </div>
-            <div>{CHAINS[chainId].name}</div>
+            <div>{chain.name}</div>
           </>
         )}
       </Info>
-      <Account>{shortenAddress(account ?? "", "...", 4)}</Account>
+      {account && <Account>{shortenAddress(account, "...", 4)}</Account>}
     </Wrapper>
   );
 };
