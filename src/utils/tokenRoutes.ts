@@ -1,4 +1,4 @@
-import { PROVIDERS, ChainId, GetEventType, Provider } from "utils";
+import { PROVIDERS, ChainId, GetEventType, Provider, Event } from "utils";
 import {
   ERC20__factory,
   HubPool,
@@ -39,6 +39,35 @@ export interface Route {
 }
 export type Routes = Route[];
 
+// type the hub pool events
+export function isSetEnableDepositRoute(
+  event: Event
+): event is SetEnableDepositRoute {
+  return event.event === "SetEnableDepositRoute";
+}
+export function isCrossChainContractsSet(
+  event: Event
+): event is CrossChainContractsSet {
+  return event.event === "CrossChainContractsSet";
+}
+export function isL1TokenEnabledForLiquidityProvision(
+  event: Event
+): event is L1TokenEnabledForLiquidityProvision {
+  return event.event === "L1TokenEnabledForLiquidityProvision";
+}
+export function isL2TokenDisabledForLiquidityProvision(
+  event: Event
+): event is L2TokenDisabledForLiquidityProvision {
+  return event.event === "L2TokenDisabledForLiquidityProvision";
+}
+
+// type the spoke pool events
+export function isEnabledDepositRoute(
+  event: Event
+): event is EnabledDepositRoute {
+  return event.event === "EnabledDepositRoute";
+}
+
 export class SpokePoolUtils {
   private contract: SpokePool;
   private events: SpokePoolEvent[] = [];
@@ -50,9 +79,7 @@ export class SpokePoolUtils {
   }
   async fetchEvents(): Promise<Array<SpokePoolEvent>> {
     const queries = [
-      this.contract.queryFilter(
-        (this.contract.filters as any).EnabledDepositRoute()
-      ),
+      this.contract.queryFilter(this.contract.filters.EnabledDepositRoute()),
     ];
     this.events = (await Promise.all(queries)).flat();
     return this.events;
@@ -60,9 +87,8 @@ export class SpokePoolUtils {
   routesEnabled(): Record<string, string[]> {
     const init: Record<string, Set<string>> = {};
     const result = this.events.reduce((result, event) => {
-      if (event.event !== "EnabledDepositRoute") return result;
-      const typedEvent = event as EnabledDepositRoute;
-      const { destinationChainId, originToken, enabled } = typedEvent.args;
+      if (!isEnabledDepositRoute(event)) return result;
+      const { destinationChainId, originToken, enabled } = event.args;
       if (!result[destinationChainId.toString()])
         result[destinationChainId.toString()] = new Set();
       if (enabled) {
@@ -102,51 +128,41 @@ export class HubPoolUtils {
   async fetchEvents(): Promise<HubPoolEvent[]> {
     const queries = [
       this.contract.queryFilter(
-        (this.contract.filters as any).L1TokenEnabledForLiquidityProvision()
+        this.contract.filters.L1TokenEnabledForLiquidityProvision()
       ),
       this.contract.queryFilter(
-        (this.contract.filters as any).L2TokenDisabledForLiquidityProvision()
+        this.contract.filters.L2TokenDisabledForLiquidityProvision()
       ),
-      this.contract.queryFilter(
-        (this.contract.filters as any).SetEnableDepositRoute()
-      ),
-      this.contract.queryFilter(
-        (this.contract.filters as any).CrossChainContractsSet()
-      ),
+      this.contract.queryFilter(this.contract.filters.SetEnableDepositRoute()),
+      this.contract.queryFilter(this.contract.filters.CrossChainContractsSet()),
     ];
     this.events = (await Promise.all(queries)).flat().sort((a, b) => {
       if (a.blockNumber !== b.blockNumber) return a.blockNumber - b.blockNumber;
       if (a.transactionIndex !== b.transactionIndex)
         return a.transactionIndex - b.transactionIndex;
       if (a.logIndex !== b.logIndex) return a.logIndex - b.logIndex;
-      // if everything is the same, return a, ie maintain order of array
-      return -1;
+      throw new Error(
+        "Duplicate events found on transaction: " + a.transactionHash
+      );
     });
     return this.events;
   }
   getSpokePoolAddresses(): Record<number, string> {
     const init: Record<number, string> = {};
     return this.events.reduce((result, event) => {
-      if (event.event !== "CrossChainContractsSet") return result;
-      const typedEvent = event as CrossChainContractsSet;
-      result[typedEvent.args.l2ChainId.toNumber()] = typedEvent.args.spokePool;
+      if (!isCrossChainContractsSet(event)) return result;
+      result[event.args.l2ChainId.toNumber()] = event.args.spokePool;
       return result;
     }, init);
   }
   getL1LpTokenTable(): Record<string, string> {
     const init: Record<string, string> = {};
     return this.events.reduce((result, event) => {
-      switch (event.event) {
-        case "L1TokenEnabledForLiquidityProvision": {
-          const typedEvent = event as L1TokenEnabledForLiquidityProvision;
-          result[typedEvent.args.l1Token] = typedEvent.args.lpToken;
-          break;
-        }
-        case "L2TokenDisabledForLiquidityProvision": {
-          const typedEvent = event as L2TokenDisabledForLiquidityProvision;
-          delete result[typedEvent.args.l1Token];
-          break;
-        }
+      if (isL1TokenEnabledForLiquidityProvision(event)) {
+        result[event.args.l1Token] = event.args.lpToken;
+      }
+      if (isL2TokenDisabledForLiquidityProvision(event)) {
+        delete result[event.args.l1Token];
       }
       return result;
     }, init);
@@ -160,14 +176,13 @@ export class HubPoolUtils {
   getRoutes(): Record<number, Record<number, Record<string, boolean>>> {
     const result: Record<number, Record<number, Record<string, boolean>>> = {};
     this.events.forEach((event) => {
-      if (event.event !== "SetEnableDepositRoute") return;
-      const typedEvent = event as SetEnableDepositRoute;
+      if (!isSetEnableDepositRoute(event)) return;
       const {
         destinationChainId,
         originChainId,
         originToken,
         depositsEnabled,
-      } = typedEvent.args;
+      } = event.args;
       if (!result[originChainId]) result[originChainId] = {};
       if (!result[originChainId][destinationChainId])
         result[originChainId][destinationChainId] = {};
@@ -178,9 +193,7 @@ export class HubPoolUtils {
 }
 
 // fetch info we need for all routes
-async function getSpokePoolState(
-  spoke: SpokePoolUtils
-): Promise<{
+async function getSpokePoolState(spoke: SpokePoolUtils): Promise<{
   routes: ReturnType<SpokePoolUtils["routesEnabled"]>;
   symbols: Record<string, string>;
 }> {

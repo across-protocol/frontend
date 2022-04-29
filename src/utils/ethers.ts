@@ -1,4 +1,5 @@
 import { Contract, ethers } from "ethers";
+import type { Event } from "ethers";
 import type {
   TypedEventFilterEthers as TypedEventFilter,
   TypedEventEthers as TypedEvent,
@@ -6,7 +7,7 @@ import type {
 import { Provider } from "@ethersproject/providers";
 import { Signer } from "@ethersproject/abstract-signer";
 
-export { Provider, Signer, Contract, TypedEventFilter, TypedEvent };
+export { Provider, Signer, Contract, TypedEventFilter, TypedEvent, Event };
 
 export type Result = ethers.utils.Result;
 
