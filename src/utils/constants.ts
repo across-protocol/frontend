@@ -615,11 +615,6 @@ export function createTxHistoryClient() {
       spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.KOVAN],
       lowerBoundBlockNumber: 30475937,
     },
-    {
-      chainId: ChainId.MAINNET,
-      provider: PROVIDERS[ChainId.MAINNET](),
-      spokePoolContractAddr: SPOKE_ADDRESSES[ChainId.MAINNET],
-    },
   ];
 
   return txHistoryConfigs;
