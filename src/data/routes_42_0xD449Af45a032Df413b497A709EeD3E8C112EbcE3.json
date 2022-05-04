@@ -1,0 +1,60 @@
+{
+  "hubPoolChain": 42,
+  "hubPoolAddress": "0xD449Af45a032Df413b497A709EeD3E8C112EbcE3",
+  "routes": [
+    {
+      "fromChain": 42,
+      "toChain": 69,
+      "fromTokenAddress": "0xd0A1E359811322d97991E03f863a0C30C2cF029C",
+      "fromSpokeAddress": "0x42Be973223aE6b29e67655c808a995eaE9f84534",
+      "fromTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xd0A1E359811322d97991E03f863a0C30C2cF029C"
+    },
+    {
+      "fromChain": 42,
+      "toChain": 69,
+      "fromTokenAddress": "0xd0A1E359811322d97991E03f863a0C30C2cF029C",
+      "fromSpokeAddress": "0x42Be973223aE6b29e67655c808a995eaE9f84534",
+      "fromTokenSymbol": "KOV",
+      "isNative": true,
+      "l1TokenAddress": "0xd0A1E359811322d97991E03f863a0C30C2cF029C"
+    },
+    {
+      "fromChain": 42,
+      "toChain": 69,
+      "fromTokenAddress": "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa",
+      "fromSpokeAddress": "0x42Be973223aE6b29e67655c808a995eaE9f84534",
+      "fromTokenSymbol": "DAI",
+      "isNative": false,
+      "l1TokenAddress": "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa"
+    },
+    {
+      "fromChain": 69,
+      "toChain": 42,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x2b7b7bAE341089103dD22fa4e8D7E4FA63E11084",
+      "fromTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xd0A1E359811322d97991E03f863a0C30C2cF029C"
+    },
+    {
+      "fromChain": 69,
+      "toChain": 42,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x2b7b7bAE341089103dD22fa4e8D7E4FA63E11084",
+      "fromTokenSymbol": "KOR",
+      "isNative": true,
+      "l1TokenAddress": "0xd0A1E359811322d97991E03f863a0C30C2cF029C"
+    },
+    {
+      "fromChain": 69,
+      "toChain": 42,
+      "fromTokenAddress": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+      "fromSpokeAddress": "0x2b7b7bAE341089103dD22fa4e8D7E4FA63E11084",
+      "fromTokenSymbol": "DAI",
+      "isNative": false,
+      "l1TokenAddress": "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa"
+    }
+  ]
+}
