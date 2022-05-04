@@ -77,3 +77,12 @@ export const NotFoundWrapper = styled.div`
     font-size: ${12 / 16}rem;
   }
 `;
+
+export const EthNoteWrapper = styled.div`
+  img {
+    height: 12px;
+    width: 12px;
+  }
+  span {
+  }
+`;
