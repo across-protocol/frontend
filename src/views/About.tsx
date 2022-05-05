@@ -25,7 +25,7 @@ const About: FC = () => {
     <Wrapper>
       <HeroBg>
         <HeroHeader>What is Across?</HeroHeader>
-        <p>A cross-chain bridging solution to send assets between L1 and L2.</p>
+        <HeroSubheader>A cross-chain bridging solution that supports fast, secure and cost-efficient transfers.</HeroSubheader>
       </HeroBg>
       <Body>
         <Bullet>
@@ -33,9 +33,9 @@ const About: FC = () => {
           <TextWrapper>
             <BulletHeader>FAST</BulletHeader>
             <BulletText>
-              Using Across means that assets are bridged and available for use
-              on mainnet almost instantly. You can typically expect to receive
-              your funds within 1-2 minutes.
+              Using Across means that assets are bridged and available for use 
+              on mainnet and L2s almost instantly. You can typically expect to 
+              receive your funds within 1-2 minutes.
               <br />
               <br />
               You can learn more about how Across protocol executes
@@ -61,9 +61,9 @@ const About: FC = () => {
               protect hundreds of millions of dollars in value.
               <br />
               <br />
-              Across contracts have also been audited by OpenZeppelin. Our
+              Across` contracts have also been audited by OpenZeppelin. Our
               bridge's smart contracts have been extensively tested — proven by
-              our audits, TVL in Across bridge and our contracts standing the
+              our audits, TVL in Across` bridge and our contracts standing the
               test of time.
               <br />
               <br />
@@ -103,6 +103,7 @@ const About: FC = () => {
               >
                 here
               </Link>
+              .
             </BulletText>
           </TextWrapper>
         </Bullet>
@@ -296,6 +297,14 @@ const PoweredByUMA = styled(UnstyledUmaLogo)`
   transition: fill linear 100ms;
   & path {
     fill: currentColor;
+  }
+`;
+
+const HeroSubheader = styled.p`
+  font-size: ${16 / 16}rem;
+
+  @media ${QUERIES.tabletAndUp} {
+    font-size: ${18 / 16}rem;
   }
 `;
 
