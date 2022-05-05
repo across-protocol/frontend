@@ -15,6 +15,7 @@ export async function switchChain(
       },
     ]);
   } catch (switchError: any) {
+    // 4902 = Unrecognized chain ID -32603 = Internal JSON-RPC error
     if (switchError.code === 4902 || switchError.code === -32603) {
       try {
         const { name, symbol, decimals } = config.getNativeTokenInfo(chainId);
