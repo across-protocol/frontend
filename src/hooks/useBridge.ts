@@ -17,6 +17,7 @@ import {
   sendAcrossDeposit,
   sendAcrossApproval,
   getConfig,
+  parseUnits,
 } from "utils";
 
 enum SendStatus {
@@ -180,10 +181,10 @@ function computeStatus({
       error: new WrongNetworkError(fromChain),
     };
   }
-  const isNative = config.isTokenNative(fromChain, tokenAddress);
+  const {isNative,decimals} = config.getTokenInfoByAddress(fromChain, tokenAddress);
   if (balance) {
     const adjustedBalance = isNative
-      ? balance.sub(ethers.utils.parseEther(FEE_ESTIMATION))
+      ? balance.sub(parseUnits(FEE_ESTIMATION,decimals))
       : balance;
     if (adjustedBalance.lt(amount)) {
       return {

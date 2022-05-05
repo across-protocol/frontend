@@ -114,11 +114,6 @@ export class ConfigClient {
     );
     return token;
   }
-  isTokenNative(chainId: number, address: string): boolean {
-    const tokenInfo = this.getTokenInfoByAddress(chainId, address);
-    const nativeCurrencySymbol = this.getNativeCurrencySymbol(chainId);
-    return nativeCurrencySymbol === tokenInfo.symbol;
-  }
   getNativeCurrencySymbol(chainId: number): string {
     const chainInfo = constants.getChainInfo(chainId);
     return chainInfo.nativeCurrencySymbol;
