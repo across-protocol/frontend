@@ -78,16 +78,18 @@ export function useBridge() {
 
   const send = async () => {
     // NOTE: the `toAddress` check is redundant, as status won't be "ready" if `toAddress` is not set, but it's here to make TS happy. The same applies for `block` and `fees`.
-    if (
+    const disableSend =
       !signer ||
       status !== "ready" ||
       !toAddress ||
       !block ||
       !fees ||
-      !selectedRoute
-    ) {
+      !selectedRoute;
+
+    if (disableSend) {
       return;
     }
+
     try {
       return sendAcrossDeposit(signer, {
         toAddress,

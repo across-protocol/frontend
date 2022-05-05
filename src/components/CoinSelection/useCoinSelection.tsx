@@ -78,26 +78,22 @@ export default function useCoinSelection() {
   );
 
   const handleMaxClick = useCallback(() => {
-    if (balances && selectedItem) {
-      let adjustedBalance = balance;
-
-      if (adjustedBalance) {
-        if (selectedItem.isNative) {
-          adjustedBalance = max(
-            adjustedBalance.sub(ethers.utils.parseEther(FEE_ESTIMATION)),
-            0
-          );
-        }
-        setAmount(adjustedBalance);
-        setInputAmount(formatUnits(adjustedBalance, selectedItem.decimals));
-      } else {
-        setAmount(ethers.constants.Zero);
-        setInputAmount(
-          formatUnits(ethers.constants.Zero, selectedItem.decimals)
-        );
-      }
+    if (!balance || !selectedItem) {
+      setAmount(ethers.constants.Zero);
+      setInputAmount(formatUnits(ethers.constants.Zero));
+      return;
     }
-  }, [balance, balances, selectedItem, setAmount]);
+    let adjustedBalance = balance;
+    // adjust balance if this is a native token, accounting for gas fees
+    if (selectedItem.isNative) {
+      adjustedBalance = max(
+        adjustedBalance.sub(ethers.utils.parseEther(FEE_ESTIMATION)),
+        0
+      );
+    }
+    setAmount(adjustedBalance);
+    setInputAmount(formatUnits(adjustedBalance, selectedItem.decimals));
+  }, [balance, selectedItem, setAmount]);
   // checks for insufficient balance errors
   let error: InsufficientBalanceError | ParsingError | undefined = formError;
   if (

@@ -55,8 +55,7 @@ export function useBalanceBySymbol(
   const { data: balance, ...delegated } = useQuery(
     queryKey,
     async () => {
-      if (!chainIdToQuery) return BigNumber.from(0);
-      if (!tokenSymbolToQuery) return BigNumber.from(0);
+      if (!chainIdToQuery || !tokenSymbolToQuery) return BigNumber.from(0);
       const tokenInfo = config.getTokenInfoBySymbol(
         chainIdToQuery,
         tokenSymbolToQuery
@@ -104,10 +103,7 @@ export function useBalancesBySymbols(
   const blockNumberToQuery = blockNumber ?? latestBlock?.number;
   // To fetch balances, we need a list of tokens, an account to get balances of, and a specified chainId.
   const enabledQuery =
-    !!chainIdToQuery &&
-    !!accountToQuery &&
-    tokenSymbols.length > 0 &&
-    !!blockNumberToQuery;
+    !!chainIdToQuery && !!accountToQuery && !!blockNumberToQuery;
   const queryKey = enabledQuery
     ? balancesQueryKey(
         tokenSymbols,
