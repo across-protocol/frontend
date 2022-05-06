@@ -7,8 +7,8 @@ import {
   getRateModelAddress,
   ChainId,
   hubPoolAddress,
-  wethAddress,
   hubPoolChainId,
+  getConfig,
 } from "utils";
 import { ethers } from "ethers";
 
@@ -17,6 +17,7 @@ const provider = getProvider();
 const { Client } = acrossSdk.pool;
 
 export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
+  const config = getConfig()
   const rateModelStoreAddress = ethers.utils.getAddress(
     getRateModelAddress(chainId)
   );
@@ -32,24 +33,30 @@ export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
   return {
     chainId,
     hubPoolAddress,
-    wethAddress,
+    wethAddress:config.getWethAddress(),
     rateModelStoreAddress,
   };
 }
 
-export const hubPoolConfig = makePoolClientConfig(hubPoolChainId);
 
 export function poolEventHandler(path: string[], data: any) {
   store.dispatch(update({ path, data }));
 }
 
-export const poolClient = new Client(
-  hubPoolConfig,
-  {
-    provider,
-  },
-  poolEventHandler
-);
+export let poolClient: undefined | acrossSdk.pool.Client; 
 
-// Checks every 10 seconds for new Pool data on new transactions
-poolClient.startInterval(10000);
+export function getPoolClient():acrossSdk.pool.Client{
+  if(poolClient) return poolClient
+  const hubPoolConfig = makePoolClientConfig(hubPoolChainId);
+  poolClient = new Client(
+    hubPoolConfig,
+    {
+      provider,
+    },
+    poolEventHandler
+  );                      
+  // Checks every 10 seconds for new Pool data on new transactions
+  poolClient.startInterval(10000);
+  return poolClient
+}
+

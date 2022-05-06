@@ -17,7 +17,7 @@ import {
 } from "utils";
 import { useAppSelector, useConnection, useBalance } from "state/hooks";
 import get from "lodash/get";
-import { poolClient } from "state/poolsApi";
+import { getPoolClient } from "state/poolsApi";
 import styled from "@emotion/styled";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 
@@ -27,6 +27,7 @@ import { SuperHeader } from "components";
 export type ShowSuccess = "deposit" | "withdraw";
 
 const Pool: FC = () => {
+  const poolClient = getPoolClient()
   // casting chainId to ChainId as the pool client does not share that type. We validate it before setting the config in client.
   const { chainId = 1, hubPoolAddress } = poolClient.config as {
     chainId: ChainId;
@@ -95,7 +96,7 @@ const Pool: FC = () => {
       .finally(() => {
         setLoadingPoolState(false);
       });
-  }, [token, setLoadingPoolState]);
+  }, [token, setLoadingPoolState, poolClient]);
 
   useEffect(() => {
     if (isConnected && connection.account && token.address) {
@@ -107,7 +108,7 @@ const Pool: FC = () => {
         .updateUser(connection.account, address)
         .catch((err) => console.error("error loading user", err));
     }
-  }, [isConnected, connection.account, token.address]);
+  }, [isConnected, connection.account, token.address, poolClient]);
 
   useEffect(() => {
     // Recheck for balances. note: Onboard provider is faster than ours.

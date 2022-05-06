@@ -16,7 +16,7 @@ import {
   RemoveFormErrorBox,
 } from "./RemoveLiquidityForm.styles";
 import { ethers } from "ethers";
-import { poolClient } from "state/poolsApi";
+import { getPoolClient } from "state/poolsApi";
 import * as umaSdk from "@uma/sdk";
 import {
   formatUnits,
@@ -69,6 +69,7 @@ const RemoveLiqudityForm: FC<Props> = ({
   totalPosition,
   chainId,
 }) => {
+  const poolClient = getPoolClient()
   const { init } = onboard;
   const { isConnected, provider, signer, notify, account } = useConnection();
   const [txSubmitted, setTxSubmitted] = useState(false);
