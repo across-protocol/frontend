@@ -24,12 +24,13 @@ interface Props {
 }
 
 const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
-  const { account, isConnected, chainId, location } = useSidebar();
+  const { account, isConnected, chainId, location, className } =
+    useSidebar(openSidebar);
 
   return (
     <>
       {openSidebar && <Overlay />}
-      <StyledSidebar className={openSidebar ? "open" : ""}>
+      <StyledSidebar className={className}>
         <StyledHeader>
           <TopHeaderRow>
             {!isConnected && (
