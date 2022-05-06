@@ -11,6 +11,7 @@ import * as superstruct from "superstruct";
 
 // all routes should be pre imported to be able to switch based on chain id
 import KovanRoutes from "data/routes_42_0xD449Af45a032Df413b497A709EeD3E8C112EbcE3.json";
+import MainnetRoutes from "data/routes_1_0x6Bb9910c5529Cb3b32c4f0e13E8bC38F903b2534.json";
 
 /* Chains and Tokens section */
 export enum ChainId {
@@ -89,7 +90,7 @@ export const COLORS = {
 
 // Update once addresses are known
 export const RATEMODEL_ADDRESSES: Record<ChainId, string> = {
-  [ChainId.MAINNET]: ethers.constants.AddressZero,
+  [ChainId.MAINNET]: getAddress("0xd18fFeb5fdd1F2e122251eA7Bf357D8Af0B60B50"),
   [ChainId.ARBITRUM]: ethers.constants.AddressZero,
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.BOBA]: ethers.constants.AddressZero,
@@ -495,6 +496,10 @@ export function getRoutes(chainId: ChainId): RouteConfig {
   if (chainId === ChainId.KOVAN) {
     superstruct.assert(KovanRoutes, RouteConfig);
     return KovanRoutes;
+  }
+  if (chainId === ChainId.MAINNET) {
+    superstruct.assert(MainnetRoutes, RouteConfig);
+    return MainnetRoutes;
   }
   throw new Error("No routes defined for chainId: " + chainId);
 }
