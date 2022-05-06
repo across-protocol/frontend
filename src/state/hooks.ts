@@ -3,7 +3,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 import { ethers } from "ethers";
 import { bindActionCreators } from "redux";
-import { TOKENS_LIST, ChainId } from "utils";
+import { ChainId, getConfig } from "utils";
 import type { RootState, AppDispatch } from "./";
 import { update, disconnect, error as errorAction } from "./connection";
 
@@ -62,6 +62,8 @@ export function useBalance({
   account,
   tokenAddress,
 }: useBalanceParams) {
+  const config = getConfig();
+  const tokenList = config.getTokenList(chainId);
   const { data: allBalances, refetch } = chainApi.endpoints.balances.useQuery(
     {
       account: account ?? "",
@@ -70,9 +72,8 @@ export function useBalance({
     { skip: !account }
   );
   const selectedIndex = useMemo(
-    () =>
-      TOKENS_LIST[chainId].findIndex(({ address }) => address === tokenAddress),
-    [chainId, tokenAddress]
+    () => tokenList.findIndex(({ address }) => address === tokenAddress),
+    [tokenAddress, tokenList]
   );
   const balance = allBalances?.[selectedIndex] ?? ethers.BigNumber.from(0);
 

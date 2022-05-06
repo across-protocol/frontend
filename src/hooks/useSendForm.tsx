@@ -8,16 +8,16 @@ import {
 import { ethers } from "ethers";
 import {
   ChainId,
-  DEFAULT_FROM_CHAIN_ID,
-  DEFAULT_TO_CHAIN_ID,
-  CHAINS_SELECTION,
   getAddress,
   ParsingError,
   InsufficientBalanceError,
-  CHAINS,
-  filterTokensByDestinationChain,
-  getReacheableChains,
-  canBridge,
+  chainInfoList,
+  getConfig,
+  Routes,
+  Route,
+  TokenList,
+  ChainInfo,
+  ChainInfoList,
 } from "utils";
 import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
@@ -32,20 +32,16 @@ export enum FormStatus {
 
 type FormState = {
   status: FormStatus;
-  token: string;
   amount: ethers.BigNumber;
-  toChain: ChainId;
-  fromChain: ChainId;
+  tokenSymbol?: string;
+  toChain?: ChainId;
+  fromChain?: ChainId;
   toAddress?: string;
   error?: ParsingError;
-};
-
-const initialFormState: FormState = {
-  status: FormStatus.IDLE,
-  token: ethers.constants.AddressZero,
-  amount: ethers.constants.Zero,
-  toChain: DEFAULT_TO_CHAIN_ID,
-  fromChain: DEFAULT_FROM_CHAIN_ID,
+  availableRoutes: Routes;
+  selectedRoute?: Route;
+  availableToChains: Array<ChainInfo & { disabled?: boolean }>;
+  availableTokens: TokenList;
 };
 
 enum ActionType {
@@ -82,7 +78,44 @@ type Action =
       payload: ParsingError | InsufficientBalanceError | undefined;
     };
 
-function tokenReducer(state: FormState, token: string): FormState {
+// given an from chain, return list of chains and mark unavailalbe ones as disabled
+export function calculateAvailableToChains(
+  fromChain: ChainId,
+  routes: Routes,
+  availableChains: ChainInfoList = chainInfoList
+) {
+  const routeLookup: Record<number, boolean> = {};
+  routes.forEach((route) => {
+    routeLookup[route.toChain] = fromChain !== route.toChain;
+  });
+  return availableChains.map((chain) => {
+    return {
+      ...chain,
+      disabled: Boolean(!routeLookup[chain.chainId]),
+    };
+  });
+}
+
+function tokenReducer(state: FormState, tokenSymbol: string): FormState {
+  const config = getConfig();
+  let fromChain = state.fromChain;
+  let toChain = state.toChain;
+  let availableRoutes = config.filterRoutes({
+    toChain,
+    fromChain,
+    fromTokenSymbol: tokenSymbol,
+  });
+
+  // we have from, to, symbols that produce no routes, so reset the form to the first valid route
+  if (!availableRoutes.length) {
+    availableRoutes = config.filterRoutes({ fromTokenSymbol: tokenSymbol });
+    const [firstRoute] = availableRoutes;
+    fromChain = firstRoute.fromChain;
+    toChain = firstRoute.toChain;
+  }
+  const selectedRoute =
+    availableRoutes.length === 1 ? availableRoutes[0] : undefined;
+
   switch (state.status) {
     case FormStatus.IDLE:
     case FormStatus.TOUCHED:
@@ -91,9 +124,13 @@ function tokenReducer(state: FormState, token: string): FormState {
       return {
         ...state,
         status: FormStatus.IDLE,
-        token,
+        tokenSymbol,
+        fromChain,
+        toChain,
         amount: ethers.constants.Zero,
         error: undefined,
+        availableRoutes,
+        selectedRoute,
       };
 
     default:
@@ -137,17 +174,33 @@ function amountReducer(state: FormState, amount: ethers.BigNumber): FormState {
   }
 }
 
+// this has highest priority
 function fromChainReducer(state: FormState, chainId: ChainId): FormState {
+  const config = getConfig();
+  let fromChain = chainId;
   let toChain = state.toChain;
-  if (toChain === chainId) {
-    toChain = getReacheableChains(chainId)[0];
+  let tokenSymbol = state.tokenSymbol;
+  let availableRoutes = config.filterRoutes({
+    toChain,
+    fromChain,
+    fromTokenSymbol: tokenSymbol,
+  });
+
+  // we have from, to, symbols that produce no routes, so reset the form to the first valid route
+  if (!availableRoutes.length) {
+    availableRoutes = config.filterRoutes({ fromChain });
+    const [firstRoute] = availableRoutes;
+    toChain = firstRoute.toChain;
+    tokenSymbol = firstRoute.fromTokenSymbol;
   }
-  const bridgeableTokens = filterTokensByDestinationChain(chainId, toChain);
-  // Prefer the native currency if it exist and is shared (ex: ETH between rollups), otherwise take the first token available
-  const token =
-    bridgeableTokens.find(
-      (t) => t.address === CHAINS[chainId].nativeCurrencyAddress
-    )?.address ?? bridgeableTokens[0].address;
+  const availableToChains = calculateAvailableToChains(
+    chainId,
+    availableRoutes,
+    config.getSpokeChains()
+  );
+  const availableTokens = config.filterReachableTokens(fromChain, toChain);
+  const selectedRoute =
+    availableRoutes.length === 1 ? availableRoutes[0] : undefined;
 
   switch (state.status) {
     case FormStatus.IDLE:
@@ -157,25 +210,44 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
       return {
         ...state,
         status: FormStatus.IDLE,
-        fromChain: chainId,
+        fromChain,
         toChain,
+        tokenSymbol,
         amount: ethers.constants.Zero,
-        token,
-        error: undefined,
+        availableRoutes,
+        availableToChains,
+        availableTokens,
+        selectedRoute,
       };
     default:
       throw new Error("unreachable");
   }
 }
 
+// second priority
 function toChainReducer(state: FormState, chainId: ChainId): FormState {
+  const config = getConfig();
   let fromChain = state.fromChain;
-  const bridgeableTokens = filterTokensByDestinationChain(fromChain, chainId);
-  // Prefer the native currency if it exist and is shared (ex: ETH between rollups), otherwise take the first token available
-  const token =
-    bridgeableTokens.find(
-      (t) => t.address === CHAINS[fromChain].nativeCurrencyAddress
-    )?.address ?? bridgeableTokens[0].address;
+  let tokenSymbol = state.tokenSymbol;
+  let toChain = chainId;
+  let availableRoutes = config.filterRoutes({
+    toChain,
+    fromChain,
+    fromTokenSymbol: tokenSymbol,
+  });
+
+  // we have from, to, symbols that produce no routes, so reset the form to the first valid route
+  if (!availableRoutes.length) {
+    availableRoutes = config.filterRoutes({ toChain });
+    const [firstRoute] = availableRoutes;
+    fromChain = firstRoute.fromChain;
+    tokenSymbol = firstRoute.fromTokenSymbol;
+  }
+  const availableTokens = fromChain
+    ? config.filterReachableTokens(fromChain, toChain)
+    : state.availableTokens;
+  const selectedRoute =
+    availableRoutes.length === 1 ? availableRoutes[0] : undefined;
 
   switch (state.status) {
     case FormStatus.IDLE:
@@ -185,11 +257,14 @@ function toChainReducer(state: FormState, chainId: ChainId): FormState {
       return {
         ...state,
         status: FormStatus.IDLE,
-        toChain: chainId,
+        toChain,
         fromChain,
+        tokenSymbol,
         amount: ethers.constants.Zero,
-        token,
         error: undefined,
+        availableRoutes,
+        selectedRoute,
+        availableTokens,
       };
     default:
       throw new Error("unreachable");
@@ -260,13 +335,33 @@ function formReducer(state: FormState, action: Action) {
 type SendFormManagerContext = FormState & {
   setFromChain: (fromChain: ChainId) => void;
   setToChain: (toChain: ChainId) => void;
-  setToken: (token: string) => void;
+  setTokenSymbol: (tokenSymbol: string) => void;
   setAmount: (amount: ethers.BigNumber) => void;
   setToAddress: (toAddress: string) => void;
   setError: (error: ParsingError | undefined) => void;
 };
 
 function useSendFormManager(): SendFormManagerContext {
+  const config = getConfig();
+  const [firstRoute] = config.getRoutes();
+
+  const initialFormState: FormState = {
+    status: FormStatus.IDLE,
+    amount: ethers.constants.Zero,
+    availableRoutes: config.getRoutes(),
+    availableToChains: calculateAvailableToChains(
+      firstRoute.fromChain,
+      config.getRoutes(),
+      config.getSpokeChains()
+    ),
+    availableTokens: config.filterReachableTokens(
+      firstRoute.fromChain,
+      firstRoute.toChain
+    ),
+    tokenSymbol: firstRoute.fromTokenSymbol,
+    toChain: firstRoute.toChain,
+    fromChain: firstRoute.fromChain,
+  };
   const [state, dispatch] = useReducer(formReducer, initialFormState);
   const { account: connectedAccount, chainId } = useConnection();
   const params = useQueryParams();
@@ -274,19 +369,19 @@ function useSendFormManager(): SendFormManagerContext {
   useEffect(() => {
     const fromChain = Number(params.from);
     const toChain = Number(params.to);
-    const areSupportedChains = [fromChain, toChain].every((p) =>
-      CHAINS_SELECTION.includes(Number(p))
+    const areSupportedChains = [fromChain, toChain].every(
+      config.isSupportedChainId
     );
     if (!areSupportedChains) {
       return;
     }
-    if (canBridge(fromChain, toChain)) {
+    if (config.canBridge(fromChain, toChain)) {
       dispatch({ type: ActionType.SET_FROM_CHAIN, payload: fromChain });
       dispatch({ type: ActionType.SET_TO_CHAIN, payload: toChain });
     } else {
       dispatch({ type: ActionType.SET_FROM_CHAIN, payload: fromChain });
     }
-  }, [params.from, params.to]);
+  }, [params.from, params.to, config]);
 
   // Keep the connected account and the toAddress in sync. If a user switches account, the toAddress should be updated to this new account.
   useEffect(() => {
@@ -305,20 +400,19 @@ function useSendFormManager(): SendFormManagerContext {
   useEffect(() => {
     // The user has just connected to the app.
     if (chainId && previousChainId === undefined) {
-      const connectedChainId = CHAINS_SELECTION.find((x) => x === chainId);
-      if (connectedChainId) {
+      if (config.isSupportedChainId(chainId)) {
         dispatch({
           type: ActionType.SET_FROM_CHAIN,
-          payload: connectedChainId,
+          payload: chainId,
         });
       }
     }
-  }, [chainId, previousChainId]);
+  }, [chainId, previousChainId, config]);
 
-  const setToken = useCallback((token: string) => {
+  const setTokenSymbol = useCallback((tokenSymbol: string) => {
     dispatch({
       type: ActionType.SET_TOKEN,
-      payload: token,
+      payload: tokenSymbol,
     });
   }, []);
   const setAmount = useCallback((amount: ethers.BigNumber) => {
@@ -354,7 +448,7 @@ function useSendFormManager(): SendFormManagerContext {
 
   return {
     ...state,
-    setToken,
+    setTokenSymbol,
     setAmount,
     setToChain,
     setFromChain,

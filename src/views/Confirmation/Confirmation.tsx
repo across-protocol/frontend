@@ -1,13 +1,13 @@
 import React from "react";
 import { Check, ArrowUpRight } from "react-feather";
 import {
-  TOKENS_LIST,
-  CHAINS,
   ChainId,
   formatUnits,
-  getConfirmationDepositTime,
   shortenAddress,
   receiveAmount,
+  getConfig,
+  getChainInfo,
+  getToken,
 } from "utils";
 import type { BridgeFees } from "utils";
 import { Layout } from "components";
@@ -27,15 +27,12 @@ import {
 } from "./Confirmation.styles";
 import { ethers } from "ethers";
 
-const MAINNET_ETH = TOKENS_LIST[ChainId.MAINNET].find(
-  (t) => t.symbol === "ETH"
-);
 export type Deposit = {
   txHash: string;
   amount: ethers.BigNumber;
   to: string;
   from: string;
-  token: string;
+  tokenAddress: string;
   fromChain: ChainId;
   toChain: ChainId;
   fees: BridgeFees;
@@ -46,30 +43,30 @@ type Props = {
 };
 const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
   if (!deposit) return null;
+  const config = getConfig();
   const amountMinusFees = receiveAmount(deposit.amount, deposit.fees);
-  const tokenInfo = TOKENS_LIST[deposit.fromChain].find(
-    (t) => t.address === deposit.token
+  const fromTokenInfo = config.getTokenInfoByAddress(
+    deposit.fromChain,
+    deposit.tokenAddress
   );
-  const isWETH = tokenInfo?.symbol === "WETH";
+  const ethInfo = getToken("ETH");
+  const fromChainInfo = getChainInfo(deposit.fromChain);
+  const toChainInfo = getChainInfo(deposit.toChain);
+  const isWETH = fromTokenInfo?.symbol === "WETH";
 
   return (
     <Layout>
       <Wrapper>
         <Header>
           <Heading>Deposit succeeded</Heading>
-          <SubHeading>
-            Your funds will arrive in{" "}
-            {getConfirmationDepositTime(deposit.toChain)}
-          </SubHeading>
+          <SubHeading>Your funds will arrive in 1 - 5 minutes</SubHeading>
           <SuccessIcon>
             <Check strokeWidth={4} />
           </SuccessIcon>
         </Header>
         <InfoSection>
           <Link
-            href={CHAINS[deposit.fromChain].constructExplorerLink(
-              deposit.txHash
-            )}
+            href={fromChainInfo.constructExplorerLink(deposit.txHash)}
             target="_blank"
             rel="noopener norefferrer"
           >
@@ -81,12 +78,12 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
                 <h3>Sending</h3>
                 <div>
                   <Logo
-                    src={tokenInfo?.logoURI}
-                    alt={`${tokenInfo?.symbol} logo`}
+                    src={fromTokenInfo.logoURI}
+                    alt={`${fromTokenInfo.symbol} logo`}
                   />
                   <div>
-                    {formatUnits(deposit.amount, tokenInfo?.decimals ?? 18)}{" "}
-                    {tokenInfo?.symbol}
+                    {formatUnits(deposit.amount, fromTokenInfo.decimals)}{" "}
+                    {fromTokenInfo.symbol}
                   </div>
                 </div>
               </Info>
@@ -95,18 +92,17 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
                 <h3>Receiving</h3>
                 <div>
                   <Logo
-                    src={isWETH ? MAINNET_ETH?.logoURI : tokenInfo?.logoURI}
+                    src={isWETH ? ethInfo.logoURI : fromTokenInfo.logoURI}
                     alt={`${
-                      isWETH ? MAINNET_ETH?.symbol : tokenInfo?.symbol
+                      isWETH ? ethInfo.symbol : fromTokenInfo.symbol
                     } logo`}
                   />
                   <div>
                     {formatUnits(
                       amountMinusFees,
-                      (isWETH ? MAINNET_ETH?.decimals : tokenInfo?.decimals) ??
-                        18
+                      isWETH ? ethInfo.decimals : fromTokenInfo.decimals
                     )}{" "}
-                    {isWETH ? MAINNET_ETH?.symbol : tokenInfo?.symbol}
+                    {isWETH ? ethInfo.symbol : fromTokenInfo?.symbol}
                   </div>
                 </div>
               </Info>
@@ -115,14 +111,12 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
               <h3>From</h3>
               <div>
                 <Logo
-                  src={CHAINS[deposit.fromChain].logoURI}
-                  alt={`${CHAINS[deposit.fromChain].name} logo`}
+                  src={fromChainInfo.logoURI}
+                  alt={`${fromChainInfo.name} logo`}
                 />
                 <div>
                   <SecondaryLink
-                    href={`${CHAINS[deposit.fromChain].explorerUrl}/address/${
-                      deposit.from
-                    }`}
+                    href={`${fromChainInfo.explorerUrl}/address/${deposit.from}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -136,14 +130,12 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
               <h3>To</h3>
               <div>
                 <Logo
-                  src={CHAINS[deposit.toChain].logoURI}
-                  alt={`${CHAINS[deposit.toChain].name} logo`}
+                  src={toChainInfo.logoURI}
+                  alt={`${toChainInfo.name} logo`}
                 />
                 <div>
                   <SecondaryLink
-                    href={`${CHAINS[deposit.toChain].explorerUrl}/address/${
-                      deposit.to
-                    }`}
+                    href={`${toChainInfo.explorerUrl}/address/${deposit.to}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -156,7 +148,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
             <Info>
               <h3>Estimated time of arrival</h3>
               <div>
-                <div>{getConfirmationDepositTime(deposit.toChain)}</div>
+                <div>1 to 5 minutes</div>
               </div>
             </Info>
           </div>

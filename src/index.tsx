@@ -12,6 +12,7 @@ import { ErrorProvider } from "hooks";
 import { enableReactQueryDevTools } from "utils";
 
 const client = new QueryClient();
+
 ReactDOM.render(
   <React.StrictMode>
     <GlobalStyles />

@@ -1,4 +1,12 @@
-import { PROVIDERS, ChainId, GetEventType, Provider, Event } from "utils";
+import assert from "assert";
+import {
+  getProvider,
+  ChainId,
+  GetEventType,
+  Provider,
+  Event,
+  isSupportedChainId,
+} from "utils";
 import {
   ERC20__factory,
   HubPool,
@@ -29,13 +37,12 @@ type SpokePoolEvent = EnabledDepositRoute;
 
 // return object
 export interface Route {
-  hubPoolAddress: string;
-  hubPoolChain: number;
   fromChain: number;
   toChain: number;
   tokenAddress: string;
   spokeAddress: string;
   symbol: string;
+  isNative: boolean;
 }
 export type Routes = Route[];
 
@@ -69,13 +76,22 @@ export function isEnabledDepositRoute(
 }
 
 export class SpokePoolUtils {
-  private contract: SpokePool;
+  public readonly contract: SpokePool;
   private events: SpokePoolEvent[] = [];
+  public wrappedNativeToken: string | void = undefined;
   constructor(
     public readonly address: string,
     public readonly provider: Provider
   ) {
     this.contract = SpokePool__factory.connect(address, provider);
+  }
+  async update() {
+    await this.fetchEvents();
+    try {
+      this.wrappedNativeToken = await this.contract.wrappedNativeToken();
+    } catch {
+      this.wrappedNativeToken = "0x4200000000000000000000000000000000000006";
+    }
   }
   async fetchEvents(): Promise<Array<SpokePoolEvent>> {
     const queries = [
@@ -120,7 +136,7 @@ export class SpokePoolUtils {
 }
 
 export class HubPoolUtils {
-  private contract: HubPool;
+  public readonly contract: HubPool;
   private events: HubPoolEvent[] = [];
   constructor(private address: string, private provider: Provider) {
     this.contract = HubPool__factory.connect(address, provider);
@@ -196,10 +212,13 @@ export class HubPoolUtils {
 async function getSpokePoolState(spoke: SpokePoolUtils): Promise<{
   routes: ReturnType<SpokePoolUtils["routesEnabled"]>;
   symbols: Record<string, string>;
+  wrappedNativeToken: string;
 }> {
-  await spoke.fetchEvents();
+  await spoke.update();
   const routes = spoke.routesEnabled();
   const supportedTokens = spoke.getSupportedTokens();
+  const { wrappedNativeToken } = spoke;
+  assert(wrappedNativeToken, "Spoke pool missing wrapped native token address");
   const symbols = Object.fromEntries(
     await Promise.all(
       supportedTokens.map(async (tokenAddress) => {
@@ -212,24 +231,40 @@ async function getSpokePoolState(spoke: SpokePoolUtils): Promise<{
   return {
     routes,
     symbols,
+    wrappedNativeToken,
   };
+}
+
+interface RouteConfig {
+  hubPoolAddress: string;
+  hubPoolChain: number;
+  routes: Routes;
+  wrappedNativeTokens: Record<number, string>;
 }
 
 // main function to return route list
 export async function fetchRoutes(
   hubPoolChain: ChainId,
   hubPoolAddress: string
-): Promise<Routes> {
-  const provider = PROVIDERS[hubPoolChain]();
+): Promise<RouteConfig> {
+  const provider = getProvider(hubPoolChain);
   const hubPool = new HubPoolUtils(hubPoolAddress, provider);
   await hubPool.fetchEvents();
   const spokePoolAddresses = await hubPool.getSpokePoolAddresses();
 
   const allRoutes: Routes = [];
+  const wrappedNativeTokens: Record<number, string> = {};
   for (const [fromChain, spokeAddress] of Object.entries(spokePoolAddresses)) {
-    const provider = PROVIDERS[Number(fromChain) as ChainId]();
+    assert(
+      isSupportedChainId(Number(fromChain)),
+      "Missing supported chain id: " + fromChain
+    );
+    const provider = getProvider(Number(fromChain));
     const pool = new SpokePoolUtils(spokeAddress, provider);
-    const { routes, symbols } = await getSpokePoolState(pool);
+    const { routes, symbols, wrappedNativeToken } = await getSpokePoolState(
+      pool
+    );
+    wrappedNativeTokens[Number(fromChain)] = wrappedNativeToken;
     Object.entries(routes).forEach(([toChain, tokenAddresses]) => {
       tokenAddresses.forEach((tokenAddress) => {
         const symbol = symbols[tokenAddress];
@@ -239,11 +274,15 @@ export async function fetchRoutes(
           fromChain: Number(fromChain),
           toChain: Number(toChain),
           symbol,
-          hubPoolAddress,
-          hubPoolChain: Number(hubPoolChain),
+          isNative: false,
         });
       });
     });
   }
-  return allRoutes;
+  return {
+    hubPoolChain,
+    hubPoolAddress,
+    routes: allRoutes,
+    wrappedNativeTokens,
+  };
 }

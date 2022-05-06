@@ -1,5 +1,5 @@
 import React from "react";
-import { CHAINS, formatUnits, ChainId, receiveAmount } from "utils";
+import { formatUnits, receiveAmount, getChainInfo, getToken } from "utils";
 import { PrimaryButton } from "../Buttons";
 import {
   Wrapper,
@@ -21,10 +21,8 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
   const {
     amount,
     fees,
-    tokenInfo,
+    tokenSymbol,
     toChain,
-    fromChain,
-    isWETH,
     handleActionClick,
     buttonDisabled,
     isInfoModalOpen,
@@ -34,18 +32,20 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
   } = useSendAction(onDeposit);
   const showFees = amount.gt(0) && !!fees;
   const amountMinusFees = showFees ? receiveAmount(amount, fees) : undefined;
+  const toChainInfo = toChain ? getChainInfo(toChain) : undefined;
+  const tokenInfo = tokenSymbol ? getToken(tokenSymbol) : undefined;
 
   return (
     <AccentSection>
       <Wrapper>
-        <InfoWrapper animate={{ opacity: showFees ? 1 : 0 }}>
-          <Info>
-            <div>Time to {CHAINS[toChain].name}</div>
-            <div>~1-3 minutes</div>
-          </Info>
-          {fromChain !== ChainId.MAINNET && (
+        {toChainInfo && tokenInfo && (
+          <InfoWrapper animate={{ opacity: showFees ? 1 : 0 }}>
             <Info>
-              <div>{CHAINS[toChain].name} Gas Fee</div>
+              <div>Time to {toChainInfo.name}</div>
+              <div>~1-3 minutes</div>
+            </Info>
+            <Info>
+              <div>{toChainInfo.name} Gas Fee</div>
               {showFees && (
                 <div>
                   {formatUnits(fees.relayerFee.total, tokenInfo.decimals)}{" "}
@@ -53,27 +53,27 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
                 </div>
               )}
             </Info>
-          )}
-          <Info>
-            <div>Bridge Fee</div>
-            {showFees && (
-              <div>
-                {`${formatUnits(fees.lpFee.total, tokenInfo.decimals)}
-                  ${tokenInfo.symbol}`}
-              </div>
-            )}
-          </Info>
-          <Info>
-            <div>You will receive</div>
-            {showFees && amountMinusFees && (
-              <div>
-                {formatUnits(amountMinusFees, tokenInfo.decimals)}{" "}
-                {isWETH ? "ETH" : tokenInfo.symbol}
-              </div>
-            )}
-          </Info>
-          <InfoIcon aria-label="info dialog" onClick={toggleInfoModal} />
-        </InfoWrapper>
+            <Info>
+              <div>Bridge Fee</div>
+              {showFees && (
+                <div>
+                  {`${formatUnits(fees.lpFee.total, tokenInfo.decimals)}
+                    ${tokenInfo.symbol}`}
+                </div>
+              )}
+            </Info>
+            <Info>
+              <div>You will receive</div>
+              {showFees && amountMinusFees && (
+                <div>
+                  {formatUnits(amountMinusFees, tokenInfo.decimals)}{" "}
+                  {tokenInfo.symbol}
+                </div>
+              )}
+            </Info>
+            <InfoIcon aria-label="info dialog" onClick={toggleInfoModal} />
+          </InfoWrapper>
+        )}
         <PrimaryButton onClick={handleActionClick} disabled={buttonDisabled}>
           {buttonMsg}
           {txPending && <BouncingDotsLoader />}

@@ -1,19 +1,8 @@
 import { useState } from "react";
 import { useSendForm, useBridgeFees, useBridge } from "hooks";
-import { onboard, TOKENS_LIST, Token, CONFIRMATIONS } from "utils";
+import { onboard, confirmations } from "utils";
 import { Deposit } from "views/Confirmation";
 import { useConnection } from "state/hooks";
-
-type TokenInfo =
-  | {
-      address: string;
-      symbol: "WETH";
-      name: "Wrapped Ether";
-      decimals: 18;
-      logoURI: string;
-      bridgePool: string;
-    }
-  | Token;
 
 export default function useSendAction(
   onDepositConfirmed: (deposit: Deposit) => void
@@ -22,16 +11,14 @@ export default function useSendAction(
   const [isInfoModalOpen, setOpenInfoModal] = useState(false);
   const [txPending, setTxPending] = useState(false);
   const toggleInfoModal = () => setOpenInfoModal((oldOpen) => !oldOpen);
-  const { fromChain, toChain, amount, token, toAddress } = useSendForm();
-  const tokenInfo = TOKENS_LIST[fromChain].find(
-    (t) => t.address === token
-  ) as TokenInfo;
-  const { fees } = useBridgeFees(amount, toChain, tokenInfo?.symbol);
+  const { fromChain, toChain, amount, tokenSymbol, toAddress, selectedRoute } =
+    useSendForm();
+  const { fees } = useBridgeFees(amount, toChain, tokenSymbol);
   const { status, hasToApprove, send, approve } = useBridge();
   const { account } = useConnection();
 
   const handleActionClick = async () => {
-    if (status !== "ready") {
+    if (status !== "ready" || !selectedRoute) {
       return;
     }
     try {
@@ -39,7 +26,7 @@ export default function useSendAction(
       if (hasToApprove) {
         const tx = await approve();
         if (tx) {
-          tx.wait(CONFIRMATIONS)
+          tx.wait(confirmations)
             .catch(console.error)
             .finally(() => {
               setTxPending(false);
@@ -52,14 +39,14 @@ export default function useSendAction(
         const tx = await send();
         // NOTE: This check is redundant, as if `status` is `ready`, all of those are defined.
         if (tx && toAddress && account && feesUsed) {
-          tx.wait(CONFIRMATIONS)
+          tx.wait(confirmations)
             .then((tx) => {
               onDepositConfirmed({
                 txHash: tx.transactionHash,
                 amount,
-                token,
-                fromChain,
-                toChain,
+                tokenAddress: selectedRoute.fromTokenAddress,
+                fromChain: selectedRoute.fromChain,
+                toChain: selectedRoute.toChain,
                 to: toAddress,
                 from: account,
                 fees: feesUsed,
@@ -80,7 +67,7 @@ export default function useSendAction(
     }
   };
 
-  const buttonDisabled = status !== "ready" || txPending;
+  const buttonDisabled = status !== "ready" || txPending || !selectedRoute;
 
   let buttonMsg: string = "Send";
   if (txPending) {
@@ -93,16 +80,15 @@ export default function useSendAction(
     buttonMsg = "Send";
   }
 
-  const isWETH = tokenInfo.symbol === "WETH";
+  const isWETH = tokenSymbol === "WETH";
 
   return {
     init,
     fromChain,
     toChain,
     amount,
-    token,
     fees,
-    tokenInfo,
+    tokenSymbol,
     isWETH,
     handleActionClick,
     buttonMsg,

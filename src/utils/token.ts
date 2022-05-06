@@ -1,7 +1,15 @@
-import { PROVIDERS, ChainId, CHAINS } from "utils/constants";
+import { getProvider, ChainId, getConfig } from "utils";
 import { clients } from "@uma/sdk";
 import { ethers } from "ethers";
 
+export function getNativeBalance(
+  chainId: ChainId,
+  account: string,
+  blockNumber: number | "latest" = "latest"
+) {
+  const provider = getProvider(chainId);
+  return provider.getBalance(account, blockNumber);
+}
 /**
  *
  * @param chainId The chain Id of the chain to query
@@ -12,16 +20,13 @@ import { ethers } from "ethers";
  */
 export function getBalance(
   chainId: ChainId,
-  token: string,
   account: string,
-  blockNumber?: number
+  tokenAddress: string,
+  blockNumber: number | "latest" = "latest"
 ): Promise<ethers.BigNumber> {
-  const provider = PROVIDERS[chainId]();
-  if (token === CHAINS[chainId].nativeCurrencyAddress) {
-    return provider.getBalance(account, blockNumber ?? "latest");
-  }
-  const contract = clients.erc20.connect(token, provider);
-  return contract.balanceOf(account, { blockTag: blockNumber ?? "latest" });
+  const provider = getProvider(chainId);
+  const contract = clients.erc20.connect(tokenAddress, provider);
+  return contract.balanceOf(account, { blockTag: blockNumber });
 }
 
 // TODO: switch to a multicall implementation
@@ -33,14 +38,22 @@ export function getBalance(
  * @param blockNumber The block number to execute the query.
  * @returns A Promise that resolves to an array of balances of the account
  */
-export function getBalances(
+export function getBalancesBySymbols(
   chainId: ChainId,
-  tokens: string[],
+  tokenSymbols: string[],
   account: string,
   blockNumber?: number
 ): Promise<ethers.BigNumber[]> {
+  const config = getConfig();
   return Promise.all(
-    tokens.map((token) => getBalance(chainId, token, account, blockNumber))
+    tokenSymbols.map((tokenSymbol) => {
+      const tokenInfo = config.getTokenInfoBySymbol(chainId, tokenSymbol);
+      if (tokenInfo.isNative) {
+        return getNativeBalance(chainId, account, blockNumber);
+      } else {
+        return getBalance(chainId, account, tokenInfo.address, blockNumber);
+      }
+    })
   );
 }
 
@@ -55,18 +68,21 @@ export function getBalances(
  */
 export async function getAllowance(
   chainId: ChainId,
-  token: string,
   owner: string,
   spender: string,
-  blockNumber?: number
+  tokenSymbol: string,
+  blockNumber: number | "latest" = "latest"
 ): Promise<ethers.BigNumber> {
-  const provider = PROVIDERS[chainId]();
-  // For ETH, allowance does not make sense
-  if (token === CHAINS[chainId].nativeCurrencyAddress) {
+  const provider = getProvider(chainId);
+  const config = getConfig();
+  const { isNative, address } = config.getTokenInfoBySymbol(
+    chainId,
+    tokenSymbol
+  );
+  // For a native gas token, allowance does not make sense
+  if (isNative) {
     return ethers.constants.MaxUint256;
   }
-  const contract = clients.erc20.connect(token, provider);
-  return contract.allowance(owner, spender, {
-    blockTag: blockNumber ?? "latest",
-  });
+  const contract = clients.erc20.connect(address, provider);
+  return contract.allowance(owner, spender, { blockTag: blockNumber });
 }

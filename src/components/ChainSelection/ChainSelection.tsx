@@ -13,7 +13,7 @@ import {
   ToggleChainName,
 } from "./ChainSelection.styles";
 import useChainSelection from "./useChainSelection";
-import { CHAINS, CHAINS_SELECTION, DEFAULT_FROM_CHAIN_ID } from "utils";
+import { getChainInfo } from "utils";
 
 const ChainSelection: React.FC = () => {
   const {
@@ -28,8 +28,11 @@ const ChainSelection: React.FC = () => {
     handleClick,
     buttonText,
     fromChain,
+    availableChains,
   } = useChainSelection();
-  const selectedChain = CHAINS[selectedItem ?? DEFAULT_FROM_CHAIN_ID];
+
+  const selectedChain = selectedItem ? getChainInfo(selectedItem) : undefined;
+
   return (
     <Section>
       <Wrapper>
@@ -37,25 +40,29 @@ const ChainSelection: React.FC = () => {
         <InputGroup>
           <RoundBox as="label" {...getLabelProps()}>
             <ToggleButton type="button" {...getToggleButtonProps()}>
-              <Logo src={selectedChain.logoURI} alt={selectedChain.name} />
-              <ToggleChainName>{selectedChain.name}</ToggleChainName>
-              <ToggleIcon />
+              {selectedChain && (
+                <>
+                  <Logo src={selectedChain.logoURI} alt={selectedChain.name} />
+                  <ToggleChainName>{selectedChain.name}</ToggleChainName>
+                  <ToggleIcon />
+                </>
+              )}
             </ToggleButton>
           </RoundBox>
           <Menu isOpen={isOpen} {...getMenuProps()}>
             {isOpen &&
-              CHAINS_SELECTION.map((t, index) => {
+              availableChains.map(({ chainId, name, logoURI }, index) => {
                 return (
                   <Item
-                    className={t === fromChain ? "disabled" : ""}
-                    {...getItemProps({ item: t, index })}
+                    className={chainId === fromChain ? "disabled" : ""}
+                    {...getItemProps({ item: chainId, index })}
                     initial={{ y: -10 }}
                     animate={{ y: 0 }}
                     exit={{ y: -10 }}
-                    key={t}
+                    key={chainId}
                   >
-                    <Logo src={CHAINS[t].logoURI} alt={CHAINS[t].name} />
-                    <div>{CHAINS[t].name}</div>
+                    <Logo src={logoURI} alt={name} />
+                    <div>{name}</div>
                   </Item>
                 );
               })}

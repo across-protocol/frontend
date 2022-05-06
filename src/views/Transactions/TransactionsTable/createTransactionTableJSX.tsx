@@ -1,13 +1,14 @@
 import { DateTime } from "luxon";
 import { ethers } from "ethers";
 import { TableLogo, TableLink } from "./TransactionsTable.styles";
+import { getConfig } from "utils/config";
 import {
   shortenTransactionHash,
   capitalizeFirstLetter,
   formatNumberTwoSigDigits,
 } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
-import { CHAINS, TOKENS_LIST } from "utils/constants";
+import { getChainInfo } from "utils/constants";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 import { ChainId } from "utils";
 
@@ -31,6 +32,7 @@ export default function createTransactionTableJSX(transactions: Transfer[]) {
 
 // Will take a TransactionsArg
 function formatTransactionRows(transactions: Transfer[]): IRow[] {
+  const config = getConfig();
   return transactions.map((tx) => {
     const timestamp: ICell = {
       size: "sm",
@@ -51,9 +53,9 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
     };
 
     const sourceChainId = tx.sourceChainId as ChainId;
+    const fromChainInfo = getChainInfo(sourceChainId);
+    const { name: fromChainName, logoURI: fromLogo } = fromChainInfo;
 
-    const fromChainName = CHAINS[sourceChainId].name;
-    const fromLogo = CHAINS[sourceChainId].logoURI;
     const fromChain: ICell = {
       size: "xs",
       value: (
@@ -65,9 +67,8 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
     };
 
     const destinationChainId = tx.destinationChainId as ChainId;
-
-    const toChainName = CHAINS[destinationChainId].name;
-    const toLogo = CHAINS[destinationChainId].logoURI;
+    const destinationChainInfo = getChainInfo(destinationChainId);
+    const { name: toChainName, logoURI: toLogo } = destinationChainInfo;
     const toChain: ICell = {
       size: "xs",
       value: (
@@ -77,9 +78,7 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
       ),
     };
 
-    const token = TOKENS_LIST[sourceChainId].find(
-      (x) => x.address === tx.assetAddr
-    );
+    const token = config.getTokenInfoByAddress(sourceChainId, tx.assetAddr);
 
     const symbol: ICell = {
       size: "xs",
@@ -101,7 +100,9 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
       size: "xs",
       value: (
         <TableLink
-          href={CHAINS[sourceChainId].constructExplorerLink(tx.depositTxHash)}
+          href={getChainInfo(sourceChainId).constructExplorerLink(
+            tx.depositTxHash
+          )}
           target="_blank"
           rel="noreferrer"
         >

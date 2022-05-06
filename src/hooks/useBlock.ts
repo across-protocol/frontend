@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { useQuery } from "react-query";
-import { PROVIDERS, ChainId, CHAINS, latestBlockQueryKey } from "utils";
+import { getProvider, ChainId, getChainInfo, latestBlockQueryKey } from "utils";
 
 const DEFAULT_BLOCK_POLLING_INTERVAL = 5 * 1000;
 /**
@@ -14,7 +14,7 @@ export function useBlock(chainId?: ChainId) {
     ? latestBlockQueryKey(chainId)
     : "DISABLED_BLOCK_QUERY";
   const refetchInterval = enabledQuery
-    ? CHAINS[chainId].pollingInterval ?? DEFAULT_BLOCK_POLLING_INTERVAL
+    ? getChainInfo(chainId).pollingInterval ?? DEFAULT_BLOCK_POLLING_INTERVAL
     : undefined;
   const { data: block, ...delegated } = useQuery(
     queryKey,
@@ -42,6 +42,6 @@ async function getBlock(
   chainId: ChainId,
   blockHashOrBlockTag: ethers.providers.BlockTag = "latest"
 ): Promise<ethers.providers.Block> {
-  const provider = PROVIDERS[chainId]();
+  const provider = getProvider(chainId);
   return provider.getBlock(blockHashOrBlockTag);
 }

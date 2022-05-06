@@ -13,7 +13,7 @@ import {
   ConnectText,
   TopHeaderRow,
 } from "./Sidebar.styles";
-import { onboard, CHAINS } from "utils";
+import { onboard, getChainInfo } from "utils";
 import useSidebar from "./useSidebar";
 import closeIcon from "assets/across-close-button.svg";
 const { init, reset } = onboard;
@@ -46,7 +46,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
           </TopHeaderRow>
           {account && <HeaderText>{account}</HeaderText>}
           {chainId && isConnected && (
-            <HeaderText>{CHAINS[chainId].name}</HeaderText>
+            <HeaderText>{getChainInfo(chainId).name}</HeaderText>
           )}
           {isConnected && (
             <DisconnectButton onClick={() => reset()}>

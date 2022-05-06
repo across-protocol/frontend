@@ -19,10 +19,10 @@ export function latestBlockQueryKey(chainId: ChainId) {
  * @returns An array of query keys for react-query `useQuery` hook.
  */
 export function balanceQueryKey(
-  chainId: ChainId,
-  token: string,
   account: string,
-  blockNumber: number
+  blockNumber: number,
+  chainId?: ChainId,
+  token?: string
 ) {
   return ["balance", chainId, token, account, blockNumber];
 }
@@ -36,12 +36,12 @@ export function balanceQueryKey(
  * @returns An array of query keys for react-query `useQuery` hook.
  */
 export function balancesQueryKey(
-  chainId: ChainId,
-  tokens: string[],
+  tokenSymbols: string[],
   account: string,
-  blockNumber: number
+  blockNumber: number,
+  chainId?: ChainId
 ) {
-  return ["balances", chainId, tokens, account, blockNumber];
+  return ["balances", chainId, tokenSymbols, account, blockNumber];
 }
 /**
  * @param tokenSymbol  The token symbol to check bridge fees for.
@@ -67,11 +67,11 @@ export function bridgeFeesQueryKey(
  * @returns An array of query keys for react-query `useQuery` hook.
  */
 export function allowanceQueryKey(
-  chainId: ChainId,
-  token: string,
   owner: string,
   spender: string,
-  blockNumber: number
+  blockNumber: number,
+  chainId?: ChainId,
+  tokenSymbol?: string
 ) {
-  return ["allowance", chainId, token, owner, spender, blockNumber];
+  return ["allowance", chainId, tokenSymbol, owner, spender, blockNumber];
 }

@@ -9,84 +9,19 @@ import {
 } from "@across-protocol/sdk-v2";
 import { Provider, Block } from "@ethersproject/providers";
 import { ethers, BigNumber } from "ethers";
-import {
-  HubPool,
-  HubPool__factory,
-  SpokePool,
-  SpokePool__factory,
-} from "@across-protocol/contracts-v2";
 
 import {
-  CHAINS,
-  ChainId,
-  PROVIDERS,
-  TOKENS_LIST,
-  Token,
-  CHAINS_SELECTION,
-  SPOKE_ADDRESSES,
-  HUBPOOL_ADDRESSES,
-  HUBPOOL_CONFIG,
-  HUBPOOL_CHAINID,
-  RATEMODEL_ADDRESSES,
   MAX_RELAY_FEE_PERCENT,
-  isProduction,
-  TokenList,
+  ChainId,
+  hubPoolChainId,
+  hubPoolAddress,
+  getToken,
+  getProvider,
+  getRateModelAddress,
 } from "./constants";
 
-import { isValidString, parseEther, tagAddress } from "./format";
-import { isValidAddress } from "./address";
-
-export function getSpokePool(
-  chainId: ChainId,
-  signer?: ethers.Signer
-): SpokePool {
-  const maybeAddress = SPOKE_ADDRESSES[chainId];
-  if (!isValidString(maybeAddress)) {
-    throw new Error(
-      `No SpokePool supported on ${CHAINS[chainId].name} with chainId: ${chainId}`
-    );
-  }
-  return SpokePool__factory.connect(
-    maybeAddress,
-    signer ?? PROVIDERS[chainId]()
-  );
-}
-
-function getHubPoolChainId(sendingChain: ChainId): ChainId {
-  switch (sendingChain) {
-    case ChainId.ARBITRUM_RINKEBY:
-    case ChainId.RINKEBY:
-      return ChainId.RINKEBY;
-    case ChainId.KOVAN_OPTIMISM:
-    case ChainId.KOVAN:
-      return ChainId.KOVAN;
-    case ChainId.MUMBAI:
-    case ChainId.GOERLI:
-      return ChainId.GOERLI;
-    default:
-      return ChainId.MAINNET;
-  }
-}
-
-export function getHubPool(
-  fromChain: ChainId,
-  signer?: ethers.Signer
-): HubPool {
-  const hubPoolChainId = getHubPoolChainId(fromChain);
-  const maybeAddress = HUBPOOL_ADDRESSES[hubPoolChainId];
-  if (
-    !isValidAddress(maybeAddress) ||
-    maybeAddress === ethers.constants.AddressZero
-  ) {
-    throw new Error(
-      `No HubPool supported on ${CHAINS[hubPoolChainId].name} with chainId: ${hubPoolChainId}`
-    );
-  }
-  return HubPool__factory.connect(
-    maybeAddress,
-    signer ?? PROVIDERS[hubPoolChainId]()
-  );
-}
+import { parseEther, tagAddress } from "./format";
+import { getConfig } from "utils";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -117,28 +52,15 @@ export async function getRelayerFee(
 }
 
 export async function getLpFee(
-  tokenSymbol: string,
+  l1TokenAddress: string,
   amount: ethers.BigNumber,
   blockTime?: number
 ): Promise<Fee & { isLiquidityInsufficient: boolean }> {
-  // eth and weth can be treated the same in this case, but the rate model only currently supports weth address
-  // TODO: add address 0 to sdk rate model ( duplicate weth)
-  if (tokenSymbol === "ETH") tokenSymbol = "WETH";
-
-  const tokenInfo = TOKENS_LIST[HUBPOOL_CHAINID].find(
-    (t) => t.symbol === tokenSymbol
-  );
-
-  if (!tokenInfo) {
-    throw new Error(`Token ${tokenSymbol} not found in TOKENS_LIST`);
-  }
   if (amount.lte(0)) {
     throw new Error(`Amount must be greater than 0.`);
   }
-  const { address: tokenAddress } = tokenInfo;
-  const provider = PROVIDERS[HUBPOOL_CHAINID]();
-  const hubPoolAddress = HUBPOOL_CONFIG.hubPoolAddress;
-  const rateModelStoreAddress = RATEMODEL_ADDRESSES[HUBPOOL_CHAINID];
+  const provider = getProvider(hubPoolChainId);
+  const rateModelStoreAddress = getRateModelAddress(hubPoolChainId);
 
   const result = {
     pct: BigNumber.from(0),
@@ -152,7 +74,7 @@ export async function getLpFee(
     rateModelStoreAddress
   );
   result.pct = await lpFeeCalculator.getLpFeePct(
-    tokenAddress,
+    l1TokenAddress,
     hubPoolAddress,
     amount,
     blockTime
@@ -187,6 +109,8 @@ export async function getBridgeFees({
   blockTimestamp,
   toChainId,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
+  const config = getConfig();
+  const l1TokenAddress = config.getL1TokenAddressBySymbol(tokenSymbol);
   const { relayerFee, isAmountTooLow } = await getRelayerFee(
     tokenSymbol,
     amount,
@@ -194,21 +118,12 @@ export async function getBridgeFees({
   );
 
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
-    tokenSymbol,
+    l1TokenAddress,
     amount,
     blockTimestamp
   ).catch((err) => {
-    if (isProduction()) {
-      throw err;
-    }
-    // we catch this because it will always error when we have testnets enabled for coins not suppored
-    // on a testnet. in production though all tokens should be supported.
     console.error("Error getting lp fee", err);
-    return {
-      pct: BigNumber.from(0),
-      total: BigNumber.from(0),
-      isLiquidityInsufficient: false,
-    };
+    throw err;
   });
 
   return {
@@ -219,113 +134,24 @@ export async function getBridgeFees({
   };
 }
 
-export const getConfirmationDepositTime = (chainId: ChainId) => {
-  switch (chainId) {
-    case ChainId.OPTIMISM:
-    case ChainId.BOBA:
-      return "~20 minutes";
-    case ChainId.ARBITRUM:
-      return "~10 minutes";
-    case ChainId.MAINNET:
-      return "~2 minutes";
-  }
+export const getConfirmationDepositTime = () => {
+  return "~2 minutes";
 };
-
-// General function to pull a token mapping from adress fromChain -> toChain with an optional list of symbols to exclude.
-function getTokenPairMapping(
-  fromChain: ChainId,
-  toChain: ChainId,
-  symbolsToExclude: string[] = []
-): Record<string, string> {
-  return Object.fromEntries(
-    TOKENS_LIST[fromChain]
-      .map((fromChainElement) => {
-        if (symbolsToExclude.includes(fromChainElement.symbol)) return null;
-        const toChainElement = TOKENS_LIST[toChain].find(
-          ({ symbol }) => symbol === fromChainElement.symbol
-        );
-        if (!toChainElement) {
-          return null;
-        } else {
-          return [fromChainElement.address, toChainElement.address];
-        }
-      })
-      .filter(utils.exists)
-  );
-}
-
-// This will be moved inside the SDK in the near future
-export const optimismErc20Pairs = () => {
-  return getTokenPairMapping(ChainId.MAINNET, ChainId.OPTIMISM, [
-    "WETH",
-    "ETH",
-  ]);
-};
-
-// This will be moved inside the SDK in the near future
-export const bobaErc20Pairs = () => {
-  return getTokenPairMapping(ChainId.MAINNET, ChainId.BOBA, ["WETH", "ETH"]);
-};
-
-/**
- * Returns the list of tokens that can be sent from chain A to chain B, by computing their tokenList intersection and taking care of additional chain specific quirks.
- * @param chainA  the chain to bridge from, that is, the chain that tokens are sent from.
- * @param chainB  the destination chain, that is, where tokens will be sent.
- * @returns Returns a list of tokens that can be sent from chain A to chain B.
- */
-export function filterTokensByDestinationChain(
-  chainA: ChainId,
-  chainB: ChainId
-) {
-  const filterByToChain = (token: Token) =>
-    TOKENS_LIST[chainB].some((element) => element.symbol === token.symbol);
-
-  if (chainA === ChainId.MAINNET && chainB === ChainId.OPTIMISM) {
-    // Note: because of how Optimism treats WETH, it must not be sent over their canonical bridge.
-    return TOKENS_LIST[chainA]
-      .filter((element) => element.symbol !== "WETH")
-      .filter(filterByToChain);
-  }
-  return TOKENS_LIST[chainA].filter(filterByToChain);
-}
-
-/**
- * Checks if its possible to bridge from chain A to chain B.
- * @param chainA  the chain to bridge from, that is, the chain that tokens are sent from.
- * @param chainB  the destination chain, that is, where tokens will be sent.
- * @returns Returns `true` if it is possible to bridge from chain A to chain B, `false` otherwise.
- */
-export function canBridge(chainA: ChainId, chainB: ChainId): boolean {
-  // can't bridge to itself
-  if (chainA === chainB) {
-    return false;
-  }
-  // check if they have at least one token in common
-  return filterTokensByDestinationChain(chainA, chainB).length > 0;
-}
-
-/**
- *
- * @param fromChain the chain to bridge from, that is, the chain that tokens are sent from.
- * @returns The list of chains that can be bridged to from the given `fromChain`.
- */
-export function getReacheableChains(fromChain: ChainId): ChainId[] {
-  return CHAINS_SELECTION.filter((toChain) => canBridge(fromChain, toChain));
-}
 
 type AcrossDepositArgs = {
   fromChain: ChainId;
   toChain: ChainId;
   toAddress: string;
   amount: ethers.BigNumber;
-  token: string;
+  tokenAddress: string;
   relayerFeePct: ethers.BigNumber;
   timestamp: ethers.BigNumber;
   referrer?: string;
+  isNative: boolean;
 };
 type AcrossApprovalArgs = {
   chainId: ChainId;
-  token: string;
+  tokenAddress: string;
   amount: ethers.BigNumber;
 };
 /**
@@ -338,29 +164,27 @@ export async function sendAcrossDeposit(
   signer: ethers.Signer,
   {
     fromChain,
-    token,
+    tokenAddress,
     amount,
     toAddress: recipient,
     toChain: destinationChainId,
     relayerFeePct,
     timestamp: quoteTimestamp,
+    isNative,
     referrer,
   }: AcrossDepositArgs
 ): Promise<ethers.providers.TransactionResponse> {
-  const spokePool = getSpokePool(fromChain);
-  const provider = PROVIDERS[fromChain]();
+  const config = getConfig();
+  const spokePool = config.getSpokePool(fromChain);
+  const provider = getProvider(fromChain);
   const code = await provider.getCode(spokePool.address);
   if (!code) {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
-  const isNativeCurrency = token === CHAINS[fromChain].nativeCurrencyAddress;
-  const value = isNativeCurrency ? amount : ethers.constants.Zero;
-  const originToken = isNativeCurrency
-    ? TOKENS_LIST[fromChain][0].address
-    : token;
+  const value = isNative ? amount : ethers.constants.Zero;
   const tx = await spokePool.populateTransaction.deposit(
     recipient,
-    originToken,
+    tokenAddress,
     amount,
     destinationChainId,
     relayerFeePct,
@@ -379,15 +203,16 @@ export async function sendAcrossDeposit(
 
 export async function sendAcrossApproval(
   signer: ethers.Signer,
-  { token, amount, chainId }: AcrossApprovalArgs
+  { tokenAddress, amount, chainId }: AcrossApprovalArgs
 ): Promise<ethers.providers.TransactionResponse> {
-  const spokePool = getSpokePool(chainId, signer);
-  const provider = PROVIDERS[chainId]();
+  const config = getConfig();
+  const spokePool = config.getSpokePool(chainId, signer);
+  const provider = getProvider(chainId);
   const code = await provider.getCode(spokePool.address);
   if (!code) {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
-  const tokenContract = clients.erc20.connect(token, signer);
+  const tokenContract = clients.erc20.connect(tokenAddress, signer);
   return tokenContract.approve(spokePool.address, amount);
 }
 
@@ -460,28 +285,27 @@ class Queries implements relayFeeCalculator.QueryInterface {
   private coingecko: Coingecko;
   constructor(
     private provider: Provider,
-    private tokens: TokenList,
-    private mainnetTokens: TokenList,
+    private chainId: ChainId,
     private priceSymbol = "eth",
     private defaultGas = "305572"
   ) {
     this.coingecko = new Coingecko();
   }
   getMainnetTokenInfo(tokenSymbol: string) {
-    const info = this.mainnetTokens.find((x) => x.symbol === tokenSymbol);
-    assert(info, `No token found in mainnet tokens for ${tokenSymbol}`);
-    return info;
+    return getToken(tokenSymbol);
   }
   getTokenInfo(tokenSymbol: string) {
-    const info = this.tokens.find((x) => x.symbol === tokenSymbol);
-    assert(info, `No token found in tochain for ${tokenSymbol}`);
-    return info;
+    return getToken(tokenSymbol);
   }
   async getTokenPrice(tokenSymbol: string): Promise<string | number> {
     if (tokenSymbol.toLowerCase() === "eth") return 1;
-    const { address } = this.getMainnetTokenInfo(tokenSymbol);
+    const { mainnetAddress } = this.getMainnetTokenInfo(tokenSymbol);
+    assert(
+      mainnetAddress,
+      "requires mainnet address for token: " + tokenSymbol
+    );
     const [, tokenPrice] = await this.coingecko.getCurrentPriceByContract(
-      address,
+      mainnetAddress,
       this.priceSymbol.toLowerCase()
     );
     return tokenPrice;
@@ -501,14 +325,13 @@ class Queries implements relayFeeCalculator.QueryInterface {
 export function relayFeeCalculatorConfig(
   chainId: ChainId
 ): relayFeeCalculator.RelayFeeCalculatorConfig {
-  const provider = PROVIDERS[chainId]();
-  const chainInfo = CHAINS[chainId];
-  const tokens = TOKENS_LIST[chainId];
+  const config = getConfig();
+  const provider = getProvider(chainId);
+  const token = config.getNativeTokenInfo(chainId);
   // coingecko needs the mainnet token addresses to look up price
-  const mainnetTokens = TOKENS_LIST[ChainId.MAINNET];
-  const queries = new Queries(provider, tokens, mainnetTokens);
+  const queries = new Queries(provider, chainId);
   return {
-    nativeTokenDecimals: chainInfo.nativeCurrency.decimals,
+    nativeTokenDecimals: token.decimals,
     feeLimitPercent: MAX_RELAY_FEE_PERCENT,
     queries,
   };

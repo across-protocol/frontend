@@ -29,7 +29,7 @@ const CoinSelection = () => {
     getMenuProps,
     selectedItem,
     handleMaxClick,
-    tokenList,
+    availableTokens,
     inputAmount,
     handleInputChange,
     errorMsg,
@@ -76,22 +76,19 @@ const CoinSelection = () => {
             </RoundBox>
             <Menu {...getMenuProps()} isOpen={isOpen}>
               {isOpen &&
-                tokenList.map((token, index) => (
+                availableTokens.map((token, index) => (
                   <Item
                     {...getItemProps({ item: token, index })}
                     initial={{ y: -10 }}
                     animate={{ y: 0 }}
                     exit={{ y: -10 }}
-                    key={token.address}
+                    key={token.symbol}
                   >
                     <Logo src={token.logoURI} alt={token.name} />
                     <div>{token.name}</div>
                     <div>
                       {balances &&
-                        formatUnits(
-                          balances[index] || "0",
-                          tokenList[index].decimals
-                        )}
+                        formatUnits(balances[index] || "0", token.decimals)}
                     </div>
                   </Item>
                 ))}

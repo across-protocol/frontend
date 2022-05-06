@@ -5,16 +5,15 @@ import PoolSelection from "components/PoolSelection";
 import PoolForm from "components/PoolForm";
 import DepositSuccess from "components/PoolForm/DepositSuccess";
 import {
-  TOKENS_LIST,
   ChainId,
   UnsupportedChainIdError,
   COLORS,
   QUERIES,
   max,
   switchChain,
-  CHAINS,
-  Token,
+  getChainInfo,
   AddressZero,
+  getConfig,
 } from "utils";
 import { useAppSelector, useConnection, useBalance } from "state/hooks";
 import get from "lodash/get";
@@ -33,9 +32,10 @@ const Pool: FC = () => {
     chainId: ChainId;
     hubPoolAddress: string;
   };
-  const tokenList = TOKENS_LIST[chainId as ChainId];
-  const chainInfo = CHAINS[chainId];
-  const [token, setToken] = useState<Token>(tokenList[2]);
+  const config = getConfig();
+  const tokenList = config.getTokenList(chainId);
+  const chainInfo = getChainInfo(chainId);
+  const [token, setToken] = useState(tokenList[2]);
   const [showSuccess, setShowSuccess] = useState<ShowSuccess | undefined>();
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);

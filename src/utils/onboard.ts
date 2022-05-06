@@ -2,10 +2,44 @@
 import Onboard from "bnc-onboard";
 import { Wallet, Initialization } from "bnc-onboard/dist/src/interfaces";
 import { ethers } from "ethers";
-import { onboardBaseConfig } from "utils";
+import {
+  onboardApiKey,
+  hubPoolChainId,
+  ChainId,
+  providerUrlsTable,
+} from "utils";
 import { update, disconnect, error } from "state/connection";
 import { store } from "state";
 
+/* Onboard config */
+export function onboardBaseConfig(): Initialization {
+  return {
+    dappId: onboardApiKey,
+    networkId: hubPoolChainId,
+    hideBranding: true,
+    walletSelect: {
+      wallets: [
+        { walletName: "metamask", preferred: true },
+        {
+          walletName: "walletConnect",
+          rpc: {
+            [ChainId.MAINNET]: providerUrlsTable[ChainId.MAINNET],
+            [ChainId.OPTIMISM]: providerUrlsTable[ChainId.OPTIMISM],
+            [ChainId.BOBA]: providerUrlsTable[ChainId.BOBA],
+            [ChainId.ARBITRUM]: providerUrlsTable[ChainId.ARBITRUM],
+            [hubPoolChainId]: providerUrlsTable[hubPoolChainId],
+          },
+          preferred: true,
+        },
+        // { walletName: "coinbase", preferred: true },
+        { walletName: "tally", preferred: true },
+      ],
+    },
+    walletCheck: [{ checkName: "connect" }, { checkName: "accounts" }],
+    // To prevent providers from requesting block numbers every 4 seconds (see https://github.com/WalletConnect/walletconnect-monorepo/issues/357)
+    blockPollingInterval: 1000 * 60 * 60,
+  };
+}
 export type Emit = (event: string, data?: any) => void;
 export function OnboardEthers(config: Initialization, emit: Emit) {
   let savedWallet: Wallet | undefined;
