@@ -181,10 +181,13 @@ function computeStatus({
       error: new WrongNetworkError(fromChain),
     };
   }
-  const {isNative,decimals} = config.getTokenInfoByAddress(fromChain, tokenAddress);
+  const { isNative, decimals } = config.getTokenInfoByAddress(
+    fromChain,
+    tokenAddress
+  );
   if (balance) {
     const adjustedBalance = isNative
-      ? balance.sub(parseUnits(FEE_ESTIMATION,decimals))
+      ? balance.sub(parseUnits(FEE_ESTIMATION, decimals))
       : balance;
     if (adjustedBalance.lt(amount)) {
       return {

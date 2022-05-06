@@ -20,9 +20,6 @@ export class ConfigClient {
   public readonly spokeAddresses: Record<number, string> = {};
   public readonly spokeChains: Set<number> = new Set();
   constructor(private config: constants.RouteConfig) {
-    this.init();
-  }
-  private init(): void {
     this.config.routes.forEach((route) => {
       this.spokeAddresses[route.fromChain] = route.fromSpokeAddress;
       this.spokeChains.add(route.fromChain);
@@ -50,7 +47,7 @@ export class ConfigClient {
   }
   getL1TokenAddressBySymbol(symbol: string) {
     // all routes have an l1Token address, so just find the first symbol that matches
-    const route = this.config.routes.find((x) => x.fromTokenSymbol);
+    const route = this.config.routes.find((x) => x.fromTokenSymbol === symbol);
     assert(route, `Unsupported l1 address lookup by symbol: ${symbol}`);
     return route.l1TokenAddress;
   }
@@ -78,12 +75,9 @@ export class ConfigClient {
       .filter(constants.isSupportedChainId);
   }
   isSupportedChainId(chainId: number): boolean {
-    if (!constants.isSupportedChainId(chainId)) return false;
-    return this.spokeChains.has(chainId);
-  }
-  getTokenAddressesByChain(chainId: number): string[] {
-    const routes = this.filterRoutes({ fromChain: chainId });
-    return routes.map((route) => route.fromTokenAddress);
+    return (
+      constants.isSupportedChainId(chainId) && this.spokeChains.has(chainId)
+    );
   }
   // returns token list in order specified by constants, but adds in token address for the chain specified
   getTokenList(chainId: number): TokenList {
@@ -114,10 +108,6 @@ export class ConfigClient {
     );
     return token;
   }
-  getNativeCurrencySymbol(chainId: number): string {
-    const chainInfo = constants.getChainInfo(chainId);
-    return chainInfo.nativeCurrencySymbol;
-  }
   getTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getTokenList(chainId);
     const token = tokens.find((token) => token.symbol === symbol);
@@ -137,18 +127,6 @@ export class ConfigClient {
   canBridge(fromChain: number, toChain: number): boolean {
     const routes = this.filterRoutes({ fromChain, toChain });
     return routes.length > 0;
-  }
-  getReachableChainIds(fromChain: number): number[] {
-    const routes = this.filterRoutes({ fromChain });
-    const result = new Set<number>();
-    routes.forEach((route) => result.add(route.toChain));
-    return [...result.values()].map(Number);
-  }
-  getReachableChains(fromChain: number): constants.ChainInfoList {
-    const routes = this.filterRoutes({ fromChain });
-    const result = new Set<number>();
-    routes.forEach((route) => result.add(route.toChain));
-    return [...result.values()].map(constants.getChainInfo);
   }
   filterReachableTokens(fromChain: number, toChain?: number): TokenList {
     const routes = this.filterRoutes({ fromChain, toChain });
