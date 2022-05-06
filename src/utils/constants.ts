@@ -90,7 +90,7 @@ export const COLORS = {
 
 // Update once addresses are known
 export const RATEMODEL_ADDRESSES: Record<ChainId, string> = {
-  [ChainId.MAINNET]: getAddress("0xd18fFeb5fdd1F2e122251eA7Bf357D8Af0B60B50"),
+  [ChainId.MAINNET]: getAddress("0x3B03509645713718B78951126E0A6de6f10043f5"),
   [ChainId.ARBITRUM]: ethers.constants.AddressZero,
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.BOBA]: ethers.constants.AddressZero,
