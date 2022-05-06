@@ -8,6 +8,7 @@ import { useError } from "hooks";
 import styled from "@emotion/styled";
 import Sidebar from "components/Sidebar";
 import { disableDeposits } from "utils";
+import Drawer from "components/Sidebar/NewSidebar";
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider } = useConnection();
@@ -43,7 +44,8 @@ const Routes: React.FC = () => {
       )}
 
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
-      <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
+      {/* <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} /> */}
+      <Drawer show={openSidebar} setShow={setOpenSidebar} />
       <Switch>
         <Route exact path="/transactions" component={Transactions} />
         <Route exact path="/pool" component={Pool} />
