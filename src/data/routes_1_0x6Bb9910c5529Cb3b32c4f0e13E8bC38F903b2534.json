@@ -1,0 +1,186 @@
+{
+  "hubPoolChain": 1,
+  "hubPoolAddress": "0x6Bb9910c5529Cb3b32c4f0e13E8bC38F903b2534",
+  "routes": [
+    {
+      "fromChain": 1,
+      "toChain": 10,
+      "fromTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "fromSpokeAddress": "0x931A43528779034ac9eb77df799d133557406176",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 1,
+      "toChain": 137,
+      "fromTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "fromSpokeAddress": "0x931A43528779034ac9eb77df799d133557406176",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 1,
+      "toChain": 288,
+      "fromTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "fromSpokeAddress": "0x931A43528779034ac9eb77df799d133557406176",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 1,
+      "toChain": 42161,
+      "fromTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "fromSpokeAddress": "0x931A43528779034ac9eb77df799d133557406176",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 10,
+      "toChain": 1,
+      "fromTokenAddress": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+      "fromSpokeAddress": "0x59485d57EEcc4058F7831f46eE83a7078276b4AE",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 10,
+      "toChain": 137,
+      "fromTokenAddress": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+      "fromSpokeAddress": "0x59485d57EEcc4058F7831f46eE83a7078276b4AE",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 10,
+      "toChain": 288,
+      "fromTokenAddress": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+      "fromSpokeAddress": "0x59485d57EEcc4058F7831f46eE83a7078276b4AE",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 10,
+      "toChain": 42161,
+      "fromTokenAddress": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+      "fromSpokeAddress": "0x59485d57EEcc4058F7831f46eE83a7078276b4AE",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 137,
+      "toChain": 1,
+      "fromTokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "fromSpokeAddress": "0xD3ddAcAe5aFb00F9B9cD36EF0Ed7115d7f0b584c",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 137,
+      "toChain": 10,
+      "fromTokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "fromSpokeAddress": "0xD3ddAcAe5aFb00F9B9cD36EF0Ed7115d7f0b584c",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 137,
+      "toChain": 288,
+      "fromTokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "fromSpokeAddress": "0xD3ddAcAe5aFb00F9B9cD36EF0Ed7115d7f0b584c",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 137,
+      "toChain": 42161,
+      "fromTokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "fromSpokeAddress": "0xD3ddAcAe5aFb00F9B9cD36EF0Ed7115d7f0b584c",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 288,
+      "toChain": 1,
+      "fromTokenAddress": "0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc",
+      "fromSpokeAddress": "0x7229405a2f0c550Ce35182EE1658302B65672443",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 288,
+      "toChain": 10,
+      "fromTokenAddress": "0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc",
+      "fromSpokeAddress": "0x7229405a2f0c550Ce35182EE1658302B65672443",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 288,
+      "toChain": 137,
+      "fromTokenAddress": "0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc",
+      "fromSpokeAddress": "0x7229405a2f0c550Ce35182EE1658302B65672443",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 288,
+      "toChain": 42161,
+      "fromTokenAddress": "0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc",
+      "fromSpokeAddress": "0x7229405a2f0c550Ce35182EE1658302B65672443",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 42161,
+      "toChain": 1,
+      "fromTokenAddress": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+      "fromSpokeAddress": "0xe1C367e2b576Ac421a9f46C9cC624935730c36aa",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 42161,
+      "toChain": 10,
+      "fromTokenAddress": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+      "fromSpokeAddress": "0xe1C367e2b576Ac421a9f46C9cC624935730c36aa",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 42161,
+      "toChain": 137,
+      "fromTokenAddress": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+      "fromSpokeAddress": "0xe1C367e2b576Ac421a9f46C9cC624935730c36aa",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 42161,
+      "toChain": 288,
+      "fromTokenAddress": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+      "fromSpokeAddress": "0xe1C367e2b576Ac421a9f46C9cC624935730c36aa",
+      "fromTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    }
+  ]
+}
