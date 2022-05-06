@@ -20,18 +20,22 @@ export const Overlay = styled.div`
 
 export const StyledSidebar = styled(ProSidebar)`
   position: absolute;
-  transition: all 0.5s ease-in-out;
-  right: -450px;
+  transition: all 1s ease-in-out;
   top: 0;
   width: 450px;
-  display: none;
+  transform: translateX(100%);
+  right: 0;
+  display: block;
+  &.closed {
+    display: none;
+  }
   @media ${QUERIES.tabletAndDown} {
     width: 100%;
     right: -100%;
     height: 100%;
   }
   &.open {
-    display: block;
+    right: -450px;
     transform: translateX(-100%);
   }
   .pro-sidebar-inner > .pro-sidebar-layout {
