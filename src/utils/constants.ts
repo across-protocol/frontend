@@ -386,15 +386,8 @@ assert(
   process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
   "Missing process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY"
 );
-assert(
-  process.env.REACT_APP_WETH_ADDRESS,
-  "Missing process.env.REACT_APP_WETH_ADDRESS"
-);
 
 export const hubPoolChainId = Number(process.env.REACT_APP_HUBPOOL_CHAINID);
-export const wethAddress = ethers.utils.getAddress(
-  process.env.REACT_APP_WETH_ADDRESS
-);
 export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;
 export const enableReactQueryDevTools =
   process.env.REACT_APP_ENABLE_REACT_QUERY_DEV_TOOLS;
@@ -486,6 +479,7 @@ const Route = superstruct.object({
 const Routes = superstruct.array(Route);
 const RouteConfig = superstruct.type({
   routes: Routes,
+  hubPoolWethAddress: superstruct.string(),
   hubPoolChain: superstruct.number(),
   hubPoolAddress: superstruct.string(),
 });

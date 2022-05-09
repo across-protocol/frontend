@@ -4,7 +4,7 @@ import Tabs from "../Tabs";
 import AddLiquidityForm from "./AddLiquidityForm";
 import RemoveLiquidityForm from "./RemoveLiquidityForm";
 import { QuerySubState } from "@reduxjs/toolkit/dist/query/core/apiState";
-import { poolClient } from "state/poolsApi";
+import { getPoolClient } from "state/poolsApi";
 import {
   Wrapper,
   Info,
@@ -80,6 +80,7 @@ const PoolForm: FC<Props> = ({
   projectedApr,
   chainId,
 }) => {
+  const poolClient = getPoolClient();
   const [inputAmount, setInputAmount] = useState("");
   const [removeAmount, setRemoveAmount] = useState(0);
   const [error] = useState<Error>();
@@ -110,7 +111,7 @@ const PoolForm: FC<Props> = ({
     }, UPDATE_GAS_INTERVAL_MS);
 
     return () => clearInterval(handle);
-  }, [signer, isConnected, symbol]);
+  }, [signer, isConnected, symbol,poolClient]);
 
   // Validate input on change
   useEffect(() => {

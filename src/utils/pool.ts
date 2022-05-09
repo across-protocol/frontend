@@ -1,6 +1,6 @@
 import { ethers, Signer, BigNumberish, BigNumber } from "ethers";
 import { toWeiSafe } from "./weiMath";
-import { poolClient } from "state/poolsApi";
+import { getPoolClient } from "state/poolsApi";
 
 export const DEFAULT_GAS_PRICE = toWeiSafe(
   process.env.REACT_APP_DEFAULT_GAS_PRICE || "400",
@@ -46,6 +46,7 @@ export async function gasForAddEthLiquidity(
   tokenAddress: string,
   balance: BigNumberish
 ) {
+  const poolClient = getPoolClient()
   const contract = poolClient.createHubPoolContract(signer);
   return contract.estimateGas.addLiquidity(tokenAddress, balance, {
     value: balance,
@@ -58,6 +59,7 @@ export async function estimateGasForAddEthLiquidity(
   tokenAddress: string,
   balance: BigNumberish = BigNumber.from("1")
 ) {
+  const poolClient = getPoolClient()
   const { provider } = poolClient.deps;
   const gasPrice = await getGasPrice(provider);
   const gas = await gasForAddEthLiquidity(signer, tokenAddress, balance);
