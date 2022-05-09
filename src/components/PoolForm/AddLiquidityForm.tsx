@@ -11,7 +11,7 @@ import {
   Balance,
   LiquidityErrorBox,
 } from "./AddLiquidityForm.styles";
-import { poolClient } from "state/poolsApi";
+import { getPoolClient } from "state/poolsApi";
 import { toWeiSafe } from "utils/weiMath";
 import { useERC20 } from "hooks";
 import { ethers } from "ethers";
@@ -63,6 +63,7 @@ const AddLiquidityForm: FC<Props> = ({
   onMaxClick,
   chainId,
 }) => {
+  const poolClient = getPoolClient();
   const { addError } = useError();
 
   const { init } = onboard;

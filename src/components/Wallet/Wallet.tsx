@@ -1,7 +1,7 @@
 import { onboard } from "utils";
 import { FC } from "react";
 import { useConnection } from "state/hooks";
-import { useBalanceBySymbol } from "hooks";
+import { useNativeBalance } from "hooks";
 
 import { getChainInfo, shortenAddress, formatEther, getConfig } from "utils";
 
@@ -25,7 +25,7 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
   const nativeToken = chainId ? config.getNativeTokenInfo(chainId) : undefined;
   const chain = chainId ? getChainInfo(chainId) : undefined;
 
-  const { balance } = useBalanceBySymbol(nativeToken?.symbol, chainId, account);
+  const { balance } = useNativeBalance(nativeToken?.symbol, chainId, account);
 
   if (account && !isConnected && !chainId) {
     return (

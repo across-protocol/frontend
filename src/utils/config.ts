@@ -26,6 +26,9 @@ export class ConfigClient {
       this.spokeChains.add(route.toChain);
     });
   }
+  getWethAddress(): string {
+    return this.config.hubPoolWethAddress;
+  }
   getRoutes(): constants.Routes {
     return this.config.routes;
   }

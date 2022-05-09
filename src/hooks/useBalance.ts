@@ -13,6 +13,53 @@ import {
 import { usePrevious } from "hooks";
 import { BigNumber } from "ethers";
 
+export function useNativeBalance(
+  tokenSymbol?: string,
+  chainId?: ChainId,
+  account?: string,
+  blockNumber?: number
+) {
+  const { account: connectedAccount } = useConnection();
+  const chainIdToQuery = chainId;
+  const tokenSymbolToQuery = tokenSymbol;
+  const accountToQuery = account ?? connectedAccount;
+  const { block: latestBlock } = useBlock(chainId);
+  const blockNumberToQuery = blockNumber ?? latestBlock?.number;
+  const enabledQuery =
+    !!chainIdToQuery && !!accountToQuery && !!blockNumberToQuery;
+  const queryKey = enabledQuery
+    ? balanceQueryKey(
+        accountToQuery,
+        blockNumberToQuery,
+        chainIdToQuery,
+        tokenSymbolToQuery
+      )
+    : [
+        "DISABLED_BALANCE_QUERY",
+        {
+          chainIdToQuery,
+          tokenSymbolToQuery,
+          accountToQuery,
+          blockNumberToQuery,
+        },
+      ];
+  const { data: balance, ...delegated } = useQuery(
+    queryKey,
+    async () => {
+      if (!chainIdToQuery) return BigNumber.from(0);
+      return getNativeBalance(chainId, accountToQuery!, blockNumberToQuery);
+    },
+    {
+      enabled: enabledQuery,
+      // We already re-fetch when the block number changes, so we don't need to re-fetch.
+      staleTime: Infinity,
+    }
+  );
+  return {
+    balance,
+    ...delegated,
+  };
+}
 /**
  * @param token - The token to fetch the balance of.
  * @param chainId - The chain Id of the chain to execute the query on. If not specified, defaults to the chainId the user is connected to or undefined.

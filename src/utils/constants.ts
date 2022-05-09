@@ -11,6 +11,7 @@ import * as superstruct from "superstruct";
 
 // all routes should be pre imported to be able to switch based on chain id
 import KovanRoutes from "data/routes_42_0xD449Af45a032Df413b497A709EeD3E8C112EbcE3.json";
+import MainnetRoutes from "data/routes_1_0x6Bb9910c5529Cb3b32c4f0e13E8bC38F903b2534.json";
 
 /* Chains and Tokens section */
 export enum ChainId {
@@ -89,7 +90,7 @@ export const COLORS = {
 
 // Update once addresses are known
 export const RATEMODEL_ADDRESSES: Record<ChainId, string> = {
-  [ChainId.MAINNET]: ethers.constants.AddressZero,
+  [ChainId.MAINNET]: getAddress("0xd18fFeb5fdd1F2e122251eA7Bf357D8Af0B60B50"),
   [ChainId.ARBITRUM]: ethers.constants.AddressZero,
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.BOBA]: ethers.constants.AddressZero,
@@ -385,15 +386,8 @@ assert(
   process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
   "Missing process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY"
 );
-assert(
-  process.env.REACT_APP_WETH_ADDRESS,
-  "Missing process.env.REACT_APP_WETH_ADDRESS"
-);
 
 export const hubPoolChainId = Number(process.env.REACT_APP_HUBPOOL_CHAINID);
-export const wethAddress = ethers.utils.getAddress(
-  process.env.REACT_APP_WETH_ADDRESS
-);
 export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;
 export const enableReactQueryDevTools =
   process.env.REACT_APP_ENABLE_REACT_QUERY_DEV_TOOLS;
@@ -485,6 +479,7 @@ const RouteSS = superstruct.object({
 const RoutesSS = superstruct.array(RouteSS);
 const RouteConfigSS = superstruct.type({
   routes: RoutesSS,
+  hubPoolWethAddress: superstruct.string(),
   hubPoolChain: superstruct.number(),
   hubPoolAddress: superstruct.string(),
 });
@@ -495,6 +490,10 @@ export function getRoutes(chainId: ChainId): RouteConfig {
   if (chainId === ChainId.KOVAN) {
     superstruct.assert(KovanRoutes, RouteConfigSS);
     return KovanRoutes;
+  }
+  if (chainId === ChainId.MAINNET) {
+    superstruct.assert(MainnetRoutes, RouteConfigSS);
+    return MainnetRoutes;
   }
   throw new Error("No routes defined for chainId: " + chainId);
 }

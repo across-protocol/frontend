@@ -51,7 +51,7 @@ export function useBridge() {
   const spokePool = fromChain ? config.getSpokePool(fromChain) : undefined;
   const { allowance } = useAllowance(
     tokenSymbol,
-    chainId,
+    fromChain,
     account,
     spokePool?.address,
     block?.number

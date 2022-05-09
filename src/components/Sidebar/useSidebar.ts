@@ -13,7 +13,6 @@ export default function useSidebar(openSidebar: boolean) {
   const [className, setClassName] = useState<SidebarWrapperClasses>("closed");
   const prevOpenSidebar = usePrevious(openSidebar);
   useEffect(() => {
-    console.log("openSidebar?", openSidebar);
     if (openSidebar && openSidebar !== prevOpenSidebar) {
       setClassName("transition");
       setTimeout(() => {
