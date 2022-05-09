@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useConnection } from "state/hooks";
 import { useLocation } from "react-router-dom";
-
+import { usePrevious } from "hooks";
 type SidebarWrapperClasses = "open" | "closed" | "transition";
 export default function useSidebar(openSidebar: boolean) {
   const { account, isConnected, chainId } = useConnection();
@@ -11,20 +11,22 @@ export default function useSidebar(openSidebar: boolean) {
   // This is because we want the element when closed to take up no space, but it needs a moment to render on the DOM before it can
   // Properly translateX.
   const [className, setClassName] = useState<SidebarWrapperClasses>("closed");
+  const prevOpenSidebar = usePrevious(openSidebar);
   useEffect(() => {
-    if (openSidebar) {
+    console.log("openSidebar?", openSidebar);
+    if (openSidebar && openSidebar !== prevOpenSidebar) {
       setClassName("transition");
       setTimeout(() => {
         setClassName("open");
       }, 100);
     }
-    if (!openSidebar) {
+    if (!openSidebar && openSidebar !== prevOpenSidebar) {
       setClassName("transition");
       setTimeout(() => {
         setClassName("closed");
       }, 1000);
     }
-  }, [openSidebar]);
+  }, [openSidebar, prevOpenSidebar]);
   return {
     account,
     isConnected,

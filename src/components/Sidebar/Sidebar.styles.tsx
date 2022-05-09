@@ -31,12 +31,14 @@ export const StyledSidebar = styled(ProSidebar)`
   }
   @media ${QUERIES.tabletAndDown} {
     width: 100%;
-    right: -100%;
     height: 100%;
   }
   &.open {
     right: -450px;
     transform: translateX(-100%);
+    @media ${QUERIES.tabletAndDown} {
+      right: -100%;
+    }
   }
   .pro-sidebar-inner > .pro-sidebar-layout {
     background-color: var(--color-gray-600);
