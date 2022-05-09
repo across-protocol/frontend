@@ -18,10 +18,9 @@ export default function useAddressSelection() {
   const [open, setOpen] = useState(false);
 
   const selectedToChainInfo = toChain ? getChainInfo(toChain) : undefined;
+
   const downshiftState = useSelect({
     items: availableToChains.map((chain) => chain.chainId),
-    defaultSelectedItem: toChain,
-    selectedItem: toChain,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
         setToChain(selectedItem);

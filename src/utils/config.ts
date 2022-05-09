@@ -60,7 +60,12 @@ export class ConfigClient {
     return HubPool__factory.connect(address, provider);
   }
   filterRoutes(query: Partial<constants.Route>): constants.Routes {
-    return filter(this.config.routes, query);
+    const cleanQuery: Partial<constants.Route> = Object.fromEntries(
+      Object.entries(query).filter((entry) => {
+        return entry[1] !== undefined;
+      })
+    );
+    return filter(this.config.routes, cleanQuery);
   }
   // this maintains order specified in the constants file in the chainInfoList
   getSpokeChains(): constants.ChainInfoList {
@@ -83,7 +88,7 @@ export class ConfigClient {
     );
   }
   // returns token list in order specified by constants, but adds in token address for the chain specified
-  getTokenList(chainId: number): TokenList {
+  getTokenList(chainId?: number): TokenList {
     const routeTable = Object.fromEntries(
       this.filterRoutes({ fromChain: chainId }).map((route) => {
         return [route.fromTokenSymbol, route];

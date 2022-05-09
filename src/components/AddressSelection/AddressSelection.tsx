@@ -54,25 +54,27 @@ const AddressSelection: React.FC = () => {
         <Wrapper>
           <SectionTitle>To</SectionTitle>
           <InputGroup>
-            {selectedToChainInfo && (
-              <RoundBox as="label" {...getLabelProps()}>
-                <ToggleButton type="button" {...getToggleButtonProps()}>
+            <RoundBox as="label" {...getLabelProps()}>
+              <ToggleButton type="button" {...getToggleButtonProps()}>
+                {selectedToChainInfo && (
                   <Logo
                     src={selectedToChainInfo?.logoURI}
                     alt={selectedToChainInfo?.name}
                   />
-                  <div>
-                    <ToggleChainName>
-                      {selectedToChainInfo?.name}
-                    </ToggleChainName>
-                    {toAddress && (
-                      <Address>{shortenAddress(toAddress, "...", 4)}</Address>
-                    )}
-                  </div>
-                  <ToggleIcon />
-                </ToggleButton>
-              </RoundBox>
-            )}
+                )}
+                <div>
+                  <ToggleChainName>
+                    {selectedToChainInfo
+                      ? selectedToChainInfo.name
+                      : "Select Chain"}
+                  </ToggleChainName>
+                  {toAddress && (
+                    <Address>{shortenAddress(toAddress, "...", 4)}</Address>
+                  )}
+                </div>
+                <ToggleIcon />
+              </ToggleButton>
+            </RoundBox>
             <Menu isOpen={isOpen} {...getMenuProps()}>
               {isOpen &&
                 availableToChains.map(

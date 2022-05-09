@@ -5,17 +5,14 @@ import {
   UnsupportedChainIdError,
   switchChain,
   onboard,
-  getConfig,
   getChainInfo,
 } from "utils";
 
 export default function useChainSelection() {
   const { init } = onboard;
   const { isConnected, provider, chainId, error } = useConnection();
-  const { fromChain, setFromChain } = useSendForm();
-  const config = getConfig();
+  const { fromChain, setFromChain, availableFromChains } = useSendForm();
 
-  const availableChains = config.getSpokeChains();
   const wrongNetworkSend =
     fromChain &&
     provider &&
@@ -37,9 +34,7 @@ export default function useChainSelection() {
   };
 
   const downshiftState = useSelect({
-    items: config.getSpokeChainIds(),
-    defaultSelectedItem: fromChain,
-    selectedItem: fromChain,
+    items: availableFromChains.map((chain) => chain.chainId),
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
         setFromChain(selectedItem);
@@ -53,6 +48,6 @@ export default function useChainSelection() {
     isConnected,
     wrongNetworkSend,
     fromChain,
-    availableChains,
+    availableFromChains,
   };
 }
