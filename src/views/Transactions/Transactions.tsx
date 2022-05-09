@@ -10,6 +10,7 @@ import {
   ButtonWrapper,
   LoadingWrapper,
   NotFoundWrapper,
+  EthNoteWrapper,
 } from "./Transactions.styles";
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
@@ -28,7 +29,8 @@ import { MobileTransactionsTableWithPagination } from "./TransactionsTable";
 import emptyClouds from "assets/across-emptystate-clouds.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
-
+import ethLogo from "assets/ethereum-logo.svg";
+import wethLogo from "assets/weth-logo.svg";
 const Transactions = () => {
   const {
     isConnected,
@@ -97,6 +99,14 @@ const Transactions = () => {
                   <Account>({shortenAddress(account, "......", 6)})</Account>
                 )}
               </Title>
+              <EthNoteWrapper>
+                <img src={ethLogo} alt="ethereum_logo" />
+                <img src={wethLogo} alt="weth_logo" />
+                <span>
+                  Note - ETH transfers will appear as WETH but you will receive
+                  ETH
+                </span>
+              </EthNoteWrapper>
               {width >= BREAKPOINTS.laptopMin ? (
                 <TransactionsTable
                   title="Ongoing"

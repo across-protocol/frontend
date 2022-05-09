@@ -77,3 +77,17 @@ export const NotFoundWrapper = styled.div`
     font-size: ${12 / 16}rem;
   }
 `;
+
+export const EthNoteWrapper = styled.div`
+  margin: 1.5rem auto 0;
+  max-width: 1200px;
+  img {
+    height: 14px;
+    width: 14px;
+    &:nth-of-type(2) {
+      margin-right: 1rem;
+    }
+  }
+  span {
+  }
+`;
