@@ -111,7 +111,7 @@ const PoolForm: FC<Props> = ({
     }, UPDATE_GAS_INTERVAL_MS);
 
     return () => clearInterval(handle);
-  }, [signer, isConnected, symbol,poolClient]);
+  }, [signer, isConnected, symbol, poolClient]);
 
   // Validate input on change
   useEffect(() => {

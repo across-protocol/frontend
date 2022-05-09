@@ -25,7 +25,10 @@ const About: FC = () => {
     <Wrapper>
       <HeroBg>
         <HeroHeader>What is Across?</HeroHeader>
-        <HeroSubheader>A cross-chain bridging solution that supports fast, secure and cost-efficient transfers.</HeroSubheader>
+        <HeroSubheader>
+          A cross-chain bridging solution that supports fast, secure and
+          cost-efficient transfers.
+        </HeroSubheader>
       </HeroBg>
       <Body>
         <Bullet>
@@ -33,8 +36,8 @@ const About: FC = () => {
           <TextWrapper>
             <BulletHeader>FAST</BulletHeader>
             <BulletText>
-              Using Across means that assets are bridged and available for use 
-              on mainnet and L2s almost instantly. You can typically expect to 
+              Using Across means that assets are bridged and available for use
+              on mainnet and L2s almost instantly. You can typically expect to
               receive your funds within 1-2 minutes.
               <br />
               <br />

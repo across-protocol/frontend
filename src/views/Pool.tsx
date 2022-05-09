@@ -27,7 +27,7 @@ import { SuperHeader } from "components";
 export type ShowSuccess = "deposit" | "withdraw";
 
 const Pool: FC = () => {
-  const poolClient = getPoolClient()
+  const poolClient = getPoolClient();
   // casting chainId to ChainId as the pool client does not share that type. We validate it before setting the config in client.
   const { chainId = 1, hubPoolAddress } = poolClient.config as {
     chainId: ChainId;
