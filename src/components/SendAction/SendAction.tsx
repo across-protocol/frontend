@@ -1,18 +1,22 @@
 import React from "react";
-import { formatUnits, receiveAmount, getChainInfo, getToken } from "utils";
+import { formatUnits, receiveAmount, getChainInfo, getToken, ChainId } from "utils";
 import { PrimaryButton } from "../Buttons";
 import {
   Wrapper,
   Info,
   AccentSection,
-  InfoIcon,
-  InfoWrapper,
+  InfoHeadlineContainer,
+  SlippageDisclaimer,
+  FeesButton,
+  InfoContainer,
+  AmountToReceive,
 } from "./SendAction.styles";
 
 import InformationDialog from "components/InformationDialog";
 import useSendAction from "./useSendAction";
 import type { Deposit } from "views/Confirmation";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
+import { ReactComponent as ConfettiIcon } from "assets/confetti.svg";
 
 type Props = {
   onDeposit: (deposit: Deposit) => void;
@@ -29,50 +33,58 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
     toggleInfoModal,
     buttonMsg,
     txPending,
+    fromChain,
   } = useSendAction(onDeposit);
   const showFees = amount.gt(0) && !!fees;
   const amountMinusFees = showFees ? receiveAmount(amount, fees) : undefined;
   const toChainInfo = toChain ? getChainInfo(toChain) : undefined;
+  const fromChainInfo = fromChain ? getChainInfo(fromChain) : undefined;
   const tokenInfo = tokenSymbol ? getToken(tokenSymbol) : undefined;
+  const isWETH = tokenInfo?.symbol === "WETH";
 
   return (
     <AccentSection>
       <Wrapper>
-        {toChainInfo && tokenInfo && (
-          <InfoWrapper animate={{ opacity: showFees ? 1 : 0 }}>
-            <Info>
-              <div>Time to {toChainInfo.name}</div>
-              <div>~1-3 minutes</div>
-            </Info>
-            <Info>
-              <div>{toChainInfo.name} Gas Fee</div>
-              {showFees && (
+        {toChainInfo && fromChainInfo && tokenInfo && amount.gt(0) && (
+          <>
+            <InfoHeadlineContainer>
+              <SlippageDisclaimer>
+                <ConfettiIcon />
+                All transfers are slippage free!
+              </SlippageDisclaimer>
+              <FeesButton onClick={toggleInfoModal}>Fees info</FeesButton>
+            </InfoHeadlineContainer>
+            <InfoContainer>
+              <Info>
+                {`Time to ${toChainInfo.name}`}
+                <div>~1-3 minutes</div>
+              </Info>
+              <Info>
+                <div>Ethereum Network Gas</div>
                 <div>
-                  {formatUnits(fees.relayerFee.total, tokenInfo.decimals)}{" "}
-                  {tokenInfo.symbol}
+                  {showFees ? `${formatUnits(fees.relayerFee.total, tokenInfo.decimals)} ${
+                    tokenInfo.symbol
+                  }` : "loading"}
                 </div>
-              )}
-            </Info>
-            <Info>
-              <div>Bridge Fee</div>
-              {showFees && (
-                <div>
-                  {`${formatUnits(fees.lpFee.total, tokenInfo.decimals)}
-                    ${tokenInfo.symbol}`}
-                </div>
-              )}
-            </Info>
-            <Info>
-              <div>You will receive</div>
-              {showFees && amountMinusFees && (
-                <div>
-                  {formatUnits(amountMinusFees, tokenInfo.decimals)}{" "}
-                  {tokenInfo.symbol}
-                </div>
-              )}
-            </Info>
-            <InfoIcon aria-label="info dialog" onClick={toggleInfoModal} />
-          </InfoWrapper>
+              </Info>
+              <Info>
+                <div>Across Bridge Fee</div>
+                <div>{fees ? `${formatUnits(fees.lpFee.total, tokenInfo.decimals)} ${
+                  tokenInfo.symbol
+                }` : "loading"}</div>
+              </Info>
+            </InfoContainer>
+            <AmountToReceive>
+              You will receive
+              <span>
+                {amountMinusFees
+                  ? `${formatUnits(amountMinusFees, tokenInfo.decimals)} ${
+                      isWETH ? "ETH" : tokenInfo.symbol
+                    }`
+                  : "loading"}
+              </span>
+            </AmountToReceive>
+          </>
         )}
         <PrimaryButton onClick={handleActionClick} disabled={buttonDisabled}>
           {buttonMsg}
