@@ -41,14 +41,20 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
         <List>
           {LINKS.map(({ href, name }) => (
             <Item key={href} aria-selected={location.pathname === href}>
-              <Link to={href}>{name}</Link>
+              <Link
+                to={{
+                  pathname: href,
+                  search: location.search,
+                }}
+              >
+                {name}
+              </Link>
             </Item>
           ))}
         </List>
       </Navigation>
       <WalletWrapper>
         <Wallet setOpenSidebar={setOpenSidebar} />
-
         <MobileNavigation animate={openSidebar ? "open" : "closed"}>
           <MenuToggle toggle={toggleMenu} />
         </MobileNavigation>
