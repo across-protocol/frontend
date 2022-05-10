@@ -46,7 +46,7 @@ export async function gasForAddEthLiquidity(
   tokenAddress: string,
   balance: BigNumberish
 ) {
-  const poolClient = getPoolClient()
+  const poolClient = getPoolClient();
   const contract = poolClient.createHubPoolContract(signer);
   return contract.estimateGas.addLiquidity(tokenAddress, balance, {
     value: balance,
@@ -59,7 +59,7 @@ export async function estimateGasForAddEthLiquidity(
   tokenAddress: string,
   balance: BigNumberish = BigNumber.from("1")
 ) {
-  const poolClient = getPoolClient()
+  const poolClient = getPoolClient();
   const { provider } = poolClient.deps;
   const gasPrice = await getGasPrice(provider);
   const gas = await gasForAddEthLiquidity(signer, tokenAddress, balance);

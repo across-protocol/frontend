@@ -69,7 +69,7 @@ const RemoveLiqudityForm: FC<Props> = ({
   totalPosition,
   chainId,
 }) => {
-  const poolClient = getPoolClient()
+  const poolClient = getPoolClient();
   const { init } = onboard;
   const { isConnected, provider, signer, notify, account } = useConnection();
   const [txSubmitted, setTxSubmitted] = useState(false);

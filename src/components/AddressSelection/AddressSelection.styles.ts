@@ -159,10 +159,6 @@ export const Item = motion(styled.li`
     color: #2d2e33;
   }
 
-  div {
-    flex-basis: 15%;
-  }
-
   &.disabled {
     background-color: var(--color-white);
     color: rgba(255, 255, 255, 0.65);

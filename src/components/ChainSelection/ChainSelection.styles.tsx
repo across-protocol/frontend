@@ -90,11 +90,6 @@ export const Item = motion(styled.li`
     margin-left: 0.25rem;
     color: #2d2e33;
   }
-
-  div {
-    flex-basis: 15%;
-  }
-
   span {
     color: #2d2e33;
     flex-basis: 75%;
@@ -137,6 +132,5 @@ export const InputGroup = styled.div`
 `;
 
 export const ToggleChainName = styled.div`
-  width: 85px;
   text-align: left;
 `;

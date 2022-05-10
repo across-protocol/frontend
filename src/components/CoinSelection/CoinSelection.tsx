@@ -46,8 +46,10 @@ const CoinSelection = () => {
           <InputGroup>
             <RoundBox as="label" {...getLabelProps()}>
               <ToggleButton type="button" {...getToggleButtonProps()}>
-                <Logo src={selectedItem?.logoURI} alt={selectedItem?.name} />
-                <div>{selectedItem?.symbol}</div>
+                {selectedItem && (
+                  <Logo src={selectedItem.logoURI} alt={selectedItem.name} />
+                )}
+                <div>{selectedItem ? selectedItem.symbol : "Select Chain"}</div>
                 <ToggleIcon />
               </ToggleButton>
             </RoundBox>

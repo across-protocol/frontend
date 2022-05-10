@@ -41,6 +41,7 @@ type FormState = {
   availableRoutes: Routes;
   selectedRoute?: Route;
   availableToChains: Array<ChainInfo & { disabled?: boolean }>;
+  availableFromChains: Array<ChainInfo & { disabled?: boolean }>;
   availableTokens: TokenList;
 };
 
@@ -180,6 +181,7 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
   let fromChain = chainId;
   let toChain = state.toChain;
   let tokenSymbol = state.tokenSymbol;
+
   let availableRoutes = config.filterRoutes({
     toChain,
     fromChain,
@@ -193,11 +195,20 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
     toChain = firstRoute.toChain;
     tokenSymbol = firstRoute.fromTokenSymbol;
   }
+
+  if (tokenSymbol === undefined) {
+    tokenSymbol = availableRoutes[0].fromTokenSymbol;
+  }
+  if (toChain === undefined) {
+    toChain = availableRoutes[0].toChain;
+  }
+
   const availableToChains = calculateAvailableToChains(
     chainId,
     availableRoutes,
     config.getSpokeChains()
   );
+
   const availableTokens = config.filterReachableTokens(fromChain, toChain);
   const selectedRoute =
     availableRoutes.length === 1 ? availableRoutes[0] : undefined;
@@ -343,24 +354,13 @@ type SendFormManagerContext = FormState & {
 
 function useSendFormManager(): SendFormManagerContext {
   const config = getConfig();
-  const [firstRoute] = config.getRoutes();
-
   const initialFormState: FormState = {
     status: FormStatus.IDLE,
     amount: ethers.constants.Zero,
     availableRoutes: config.getRoutes(),
-    availableToChains: calculateAvailableToChains(
-      firstRoute.fromChain,
-      config.getRoutes(),
-      config.getSpokeChains()
-    ),
-    availableTokens: config.filterReachableTokens(
-      firstRoute.fromChain,
-      firstRoute.toChain
-    ),
-    tokenSymbol: firstRoute.fromTokenSymbol,
-    toChain: firstRoute.toChain,
-    fromChain: firstRoute.fromChain,
+    availableFromChains: config.getSpokeChains(),
+    availableToChains: [],
+    availableTokens: [],
   };
   const [state, dispatch] = useReducer(formReducer, initialFormState);
   const { account: connectedAccount, chainId } = useConnection();

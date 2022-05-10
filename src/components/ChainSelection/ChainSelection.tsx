@@ -28,7 +28,7 @@ const ChainSelection: React.FC = () => {
     handleClick,
     buttonText,
     fromChain,
-    availableChains,
+    availableFromChains,
   } = useChainSelection();
 
   const selectedChain = selectedItem ? getChainInfo(selectedItem) : undefined;
@@ -41,17 +41,31 @@ const ChainSelection: React.FC = () => {
           <RoundBox as="label" {...getLabelProps()}>
             <ToggleButton type="button" {...getToggleButtonProps()}>
               {selectedChain && (
-                <>
-                  <Logo src={selectedChain.logoURI} alt={selectedChain.name} />
-                  <ToggleChainName>{selectedChain.name}</ToggleChainName>
-                  <ToggleIcon />
-                </>
+                <Logo src={selectedChain.logoURI} alt={selectedChain.name} />
               )}
+              <ToggleChainName>
+                {selectedChain ? selectedChain.name : "Select Chain"}
+              </ToggleChainName>
+              <ToggleIcon />
             </ToggleButton>
           </RoundBox>
           <Menu isOpen={isOpen} {...getMenuProps()}>
             {isOpen &&
-              availableChains.map(({ chainId, name, logoURI }, index) => {
+              availableFromChains.map((chain, index) => {
+                if (!chain) {
+                  return (
+                    <Item
+                      className={"disabled"}
+                      initial={{ y: -10 }}
+                      animate={{ y: 0 }}
+                      exit={{ y: -10 }}
+                      key={"none"}
+                    >
+                      <div>{"Select Chain"}</div>
+                    </Item>
+                  );
+                }
+                const { chainId, name, logoURI } = chain;
                 return (
                   <Item
                     className={chainId === fromChain ? "disabled" : ""}
