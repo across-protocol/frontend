@@ -18,6 +18,7 @@ type Params = {
 }[];
 export function createTxHistoryClientConfig(params: Params): {
   chains: txHistoryConfig[];
+  pollingIntervalSeconds?: number;
 } {
   const chains = params.map(({ chainId, spokeAddress }) => {
     return {
@@ -27,7 +28,7 @@ export function createTxHistoryClientConfig(params: Params): {
       lowerBoundBlockNumber: lowerBounds[chainId],
     };
   });
-  return { chains };
+  return { chains, pollingIntervalSeconds: 0 };
 }
 
 let client: transfersHistory.TransfersHistoryClient | undefined;
@@ -42,7 +43,5 @@ export default function getClient() {
     };
   });
   client = new TransfersHistoryClient(createTxHistoryClientConfig(params));
-  // optional
-  client.setLogLevel("debug");
   return client;
 }
