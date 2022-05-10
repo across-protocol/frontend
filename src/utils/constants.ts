@@ -111,12 +111,15 @@ export type ChainInfo = {
   rpcUrl?: string;
   explorerUrl: string;
   constructExplorerLink: (txHash: string) => string;
-  pollingInterval?: number;
+  pollingInterval: number;
   nativeCurrencySymbol: string;
 };
 
 export type ChainInfoList = ChainInfo[];
 export type ChainInfoTable = Record<number, ChainInfo>;
+export const defaultBlockPollingInterval = Number(
+  process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL || 30 * 1000
+);
 
 const defaultConstructExplorerLink =
   (explorerUrl: string) => (txHash: string) =>
@@ -131,6 +134,7 @@ export const chainInfoList: ChainInfoList = [
     explorerUrl: "https://etherscan.io",
     constructExplorerLink: defaultConstructExplorerLink("https://etherscan.io"),
     nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
   },
   {
     name: "Optimism",
@@ -141,6 +145,7 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: (txHash: string) =>
       `https://optimistic.etherscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "OETH",
+    pollingInterval: defaultBlockPollingInterval,
   },
   {
     name: "Arbitrum",
@@ -152,6 +157,7 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: (txHash: string) =>
       `https://arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "AETH",
+    pollingInterval: defaultBlockPollingInterval,
   },
   {
     name: "Boba",
@@ -162,6 +168,7 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: (txHash: string) =>
       `https://blockexplorer.boba.network/tx/${txHash}`,
     nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
   },
   {
     name: "Polygon",
@@ -174,6 +181,7 @@ export const chainInfoList: ChainInfoList = [
       "https://polygonscan.com"
     ),
     nativeCurrencySymbol: "MATIC",
+    pollingInterval: defaultBlockPollingInterval,
   },
   {
     name: "Rinkeby",
@@ -185,6 +193,7 @@ export const chainInfoList: ChainInfoList = [
       "https://rinkeby.etherscan.io"
     ),
     nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
   },
   {
     name: "Kovan",
@@ -196,6 +205,7 @@ export const chainInfoList: ChainInfoList = [
       "https://kovan.etherscan.io"
     ),
     nativeCurrencySymbol: "KOV",
+    pollingInterval: defaultBlockPollingInterval,
   },
   {
     name: "Optimism Kovan",
@@ -207,6 +217,7 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: (txHash: string) =>
       `https://kovan-optimistic.etherscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "KOR",
+    pollingInterval: defaultBlockPollingInterval,
   },
   {
     name: "Arbitrum Rinkeby",
@@ -218,6 +229,7 @@ export const chainInfoList: ChainInfoList = [
       `https://rinkeby-explorer.arbitrum.io/tx/${txHash}`,
     rpcUrl: "https://rinkeby.arbitrum.io/rpc",
     nativeCurrencySymbol: "ARETH",
+    pollingInterval: defaultBlockPollingInterval,
   },
   {
     name: "Goerli",
@@ -229,6 +241,7 @@ export const chainInfoList: ChainInfoList = [
       "https://goerli.etherscan.io/"
     ),
     nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
   },
   {
     name: "Mumbai",
@@ -240,6 +253,7 @@ export const chainInfoList: ChainInfoList = [
       "https://mumbai.polygonscan.com"
     ),
     nativeCurrencySymbol: "MATIC",
+    pollingInterval: defaultBlockPollingInterval,
   },
 ];
 
