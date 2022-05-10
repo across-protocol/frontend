@@ -47,7 +47,7 @@ export const StyledSidebar = styled(ProSidebar)`
 
 export const StyledHeader = styled(SidebarHeader)`
   background-color: var(--color-primary);
-  padding: 1.35rem;
+  padding: 1.5rem;
 `;
 
 export const CloseButton = styled.div`
@@ -59,6 +59,7 @@ export const CloseButton = styled.div`
   margin-left: auto;
   margin-right: 16px;
   img {
+    margin-top: 16px;
     height: 20px;
   }
 `;
@@ -68,11 +69,17 @@ export const HeaderText = styled.div`
 `;
 
 export const ConnectButton = styled(SecondaryButton)`
-  padding: 6px 16px;
-  height: 40px;
-  width: 154px;
+  border: none;
+  background-color: inherit;
+  cursor: pointer;
+  padding: 16px;
+  font-size: 1rem;
+  border-radius: var(--radius);
+  position: relative;
+  background-color: var(--color-gray);
+  color: var(--color-white);
+  padding: 12px 16px;
   border: 1px solid transparent;
-  font-size: ${14 / 16}rem;
 `;
 
 export const DisconnectButton = styled(ConnectButton)`
@@ -118,5 +125,4 @@ export const ConnectText = styled.div`
 
 export const TopHeaderRow = styled.div`
   display: flex;
-  margin-top: 16px;
 `;
