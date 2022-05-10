@@ -47,7 +47,7 @@ export const StyledSidebar = styled(ProSidebar)`
 
 export const StyledHeader = styled(SidebarHeader)`
   background-color: var(--color-primary);
-  padding: 1rem;
+  padding: 1.35rem;
 `;
 
 export const CloseButton = styled.div`

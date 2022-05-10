@@ -1,5 +1,5 @@
 import React from "react";
-import { formatUnits, receiveAmount, getChainInfo, getToken, ChainId } from "utils";
+import { formatUnits, receiveAmount, getChainInfo, getToken } from "utils";
 import { PrimaryButton } from "../Buttons";
 import {
   Wrapper,
@@ -62,16 +62,23 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
               <Info>
                 <div>Ethereum Network Gas</div>
                 <div>
-                  {showFees ? `${formatUnits(fees.relayerFee.total, tokenInfo.decimals)} ${
-                    tokenInfo.symbol
-                  }` : "loading"}
+                  {showFees
+                    ? `${formatUnits(
+                        fees.relayerFee.total,
+                        tokenInfo.decimals
+                      )} ${tokenInfo.symbol}`
+                    : "loading"}
                 </div>
               </Info>
               <Info>
                 <div>Across Bridge Fee</div>
-                <div>{fees ? `${formatUnits(fees.lpFee.total, tokenInfo.decimals)} ${
-                  tokenInfo.symbol
-                }` : "loading"}</div>
+                <div>
+                  {fees
+                    ? `${formatUnits(fees.lpFee.total, tokenInfo.decimals)} ${
+                        tokenInfo.symbol
+                      }`
+                    : "loading"}
+                </div>
               </Info>
             </InfoContainer>
             <AmountToReceive>
