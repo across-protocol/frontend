@@ -50,7 +50,7 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
         <li>
           Click{" "}
           <Link
-            href="https://across.gitbook.io/bridge/how-does-across-work-1/architecture-process-walkthrough"
+            href="https://docs.across.to/bridge/how-does-across-work-1/architecture-process-walkthrough"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -61,7 +61,7 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
         <li>
           Click{" "}
           <Link
-            href="https://across.gitbook.io/bridge/how-does-across-work-1/fees"
+            href="https://docs.across.to/bridge/how-does-across-work-1/fees"
             target="_blank"
             rel="noopener noreferrer"
           >
