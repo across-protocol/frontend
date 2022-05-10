@@ -467,7 +467,7 @@ export const getToken = (symbol: string): TokenInfo => {
   return token;
 };
 
-const Route = superstruct.object({
+const RouteSS = superstruct.object({
   fromChain: superstruct.number(),
   toChain: superstruct.number(),
   fromTokenAddress: superstruct.string(),
@@ -476,23 +476,23 @@ const Route = superstruct.object({
   isNative: superstruct.boolean(),
   l1TokenAddress: superstruct.string(),
 });
-const Routes = superstruct.array(Route);
-const RouteConfig = superstruct.type({
-  routes: Routes,
+const RoutesSS = superstruct.array(RouteSS);
+const RouteConfigSS = superstruct.type({
+  routes: RoutesSS,
   hubPoolWethAddress: superstruct.string(),
   hubPoolChain: superstruct.number(),
   hubPoolAddress: superstruct.string(),
 });
-export type RouteConfig = superstruct.Infer<typeof RouteConfig>;
-export type Route = superstruct.Infer<typeof Route>;
-export type Routes = superstruct.Infer<typeof Routes>;
+export type RouteConfig = superstruct.Infer<typeof RouteConfigSS>;
+export type Route = superstruct.Infer<typeof RouteSS>;
+export type Routes = superstruct.Infer<typeof RoutesSS>;
 export function getRoutes(chainId: ChainId): RouteConfig {
   if (chainId === ChainId.KOVAN) {
-    superstruct.assert(KovanRoutes, RouteConfig);
+    superstruct.assert(KovanRoutes, RouteConfigSS);
     return KovanRoutes;
   }
   if (chainId === ChainId.MAINNET) {
-    superstruct.assert(MainnetRoutes, RouteConfig);
+    superstruct.assert(MainnetRoutes, RouteConfigSS);
     return MainnetRoutes;
   }
   throw new Error("No routes defined for chainId: " + chainId);
