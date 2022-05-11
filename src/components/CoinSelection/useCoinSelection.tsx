@@ -134,5 +134,6 @@ export default function useCoinSelection() {
     selectedItem,
     availableTokens,
     error,
+    fromChain,
   };
 }

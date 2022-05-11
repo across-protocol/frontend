@@ -1,4 +1,3 @@
-import React from "react";
 import { formatUnits } from "utils";
 import { Section, SectionTitle } from "../Section";
 
@@ -37,6 +36,7 @@ const CoinSelection = () => {
     showError,
     balances,
     balance,
+    fromChain,
   } = useCoinSelection();
   return (
     <AnimatePresence>
@@ -44,8 +44,16 @@ const CoinSelection = () => {
         <Wrapper>
           <SectionTitle>Asset</SectionTitle>
           <InputGroup>
-            <RoundBox as="label" {...getLabelProps()}>
-              <ToggleButton type="button" {...getToggleButtonProps()}>
+            <RoundBox
+              as="label"
+              {...getLabelProps()}
+              disabled={fromChain === undefined}
+            >
+              <ToggleButton
+                type="button"
+                {...getToggleButtonProps()}
+                disabled={fromChain === undefined}
+              >
                 {selectedItem && (
                   <Logo src={selectedItem.logoURI} alt={selectedItem.name} />
                 )}
