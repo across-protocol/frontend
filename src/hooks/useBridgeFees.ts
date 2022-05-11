@@ -16,7 +16,7 @@ export function useBridgeFees(
   toChainId?: ChainId,
   tokenSymbol?: string
 ) {
-  const { block, isLoading } = useBlock(toChainId);
+  const { block } = useBlock(toChainId);
   const enabledQuery = !!toChainId && !!block && !!tokenSymbol && amount.gt(0);
   const queryKey = enabledQuery
     ? bridgeFeesQueryKey(tokenSymbol, amount, toChainId, block.number)
