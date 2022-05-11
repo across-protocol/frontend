@@ -13,7 +13,11 @@ export const Wrapper = styled.div`
   flex-direction: column;
 `;
 
-export const RoundBox = styled(UnstyledBox)`
+interface IStyledRoundBox {
+  disabled?: boolean;
+}
+
+export const RoundBox = styled(UnstyledBox)<IStyledRoundBox>`
   --color: var(--color-white);
   --outline-color: var(--color-primary);
   background-color: var(--color);
@@ -22,6 +26,7 @@ export const RoundBox = styled(UnstyledBox)`
   margin-top: 16px;
   margin-right: auto;
   margin-left: auto;
+  opacity: ${(props) => (props.disabled ? "0.7" : "1")};
   &:not(:first-of-type):focus-within {
     outline: var(--outline-color) solid 1px;
   }
@@ -174,7 +179,10 @@ export const ToggleIcon = styled(ChevronDown)`
   margin-left: auto;
 `;
 
-export const ToggleButton = styled.button`
+interface IStyledToggleButton {
+  disabled?: boolean;
+}
+export const ToggleButton = styled.button<IStyledToggleButton>`
   --radius: 30px;
   width: 100%;
   color: var(--color-gray);
@@ -186,7 +194,8 @@ export const ToggleButton = styled.button`
   outline: none;
   display: flex;
   align-items: center;
-  cursor: pointer;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  opacity: ${(props) => (props.disabled ? "0.7" : "1")};
 `;
 
 export const InputGroup = styled.div`
