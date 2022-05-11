@@ -90,17 +90,17 @@ export const COLORS = {
 };
 
 // Update once addresses are known
-export const RATEMODEL_ADDRESSES: Record<ChainId, string> = {
-  [ChainId.MAINNET]: getAddress("0xd18fFeb5fdd1F2e122251eA7Bf357D8Af0B60B50"),
+export const configStoreAddresses: Record<ChainId, string> = {
+  [ChainId.MAINNET]: getAddress("0x3B03509645713718B78951126E0A6de6f10043f5"),
   [ChainId.ARBITRUM]: ethers.constants.AddressZero,
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.BOBA]: ethers.constants.AddressZero,
   [ChainId.POLYGON]: ethers.constants.AddressZero,
-  [ChainId.RINKEBY]: getAddress("0x18a200A2427e243154EC8217890Bc08062afc5A2"),
-  [ChainId.KOVAN]: getAddress("0x5923929DF7A2D6E038bb005B167c1E8a86cd13C8"),
+  [ChainId.RINKEBY]: ethers.constants.AddressZero,
+  [ChainId.KOVAN]: getAddress("0xDd74f7603e3fDA6435aEc91F8960a6b8b40415f3"),
   [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
-  [ChainId.GOERLI]: ethers.constants.AddressZero,
+  [ChainId.GOERLI]: getAddress("0x3215e3C91f87081757d0c41EF0CB77738123Be83"),
   [ChainId.MUMBAI]: ethers.constants.AddressZero,
 };
 
@@ -503,13 +503,15 @@ export function getProvider(
   return providersTable[chainId];
 }
 
-export function getRateModelAddress(chainId: ChainId = hubPoolChainId): string {
-  const rateModelAddress = RATEMODEL_ADDRESSES[chainId];
+export function getConfigStoreAddress(
+  chainId: ChainId = hubPoolChainId
+): string {
+  const configStoreAddress = configStoreAddresses[chainId];
   assert(
-    rateModelAddress !== AddressZero,
-    "Rate model address not set for chain: " + chainId
+    configStoreAddress !== AddressZero,
+    "Config Store address not set for chain: " + chainId
   );
-  return rateModelAddress;
+  return configStoreAddress;
 }
 
 export function getChainInfo(chainId: number): ChainInfo {

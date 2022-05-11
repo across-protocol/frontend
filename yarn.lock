@@ -39,10 +39,10 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.0.7.tgz#ccf05fbddc3ea93c64f041d8c813aed4b7e11624"
-  integrity sha512-ydBfH9kfeuC0fZG0fAgqaiwRJvspPnji09Gzmem0/Cs39Gnie3tKyMDVKGXlLgMncaajknsMH+BHi29TzqvIdA==
+"@across-protocol/sdk-v2@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.1.0.tgz#6c1abd0658d771e315e0f6394d4a639fe8126b6f"
+  integrity sha512-EIMDzoUcY+FcGch8fV+5vx8SRaT5NJWJjXGCSZT7jirlrUiPMj5Znf3zz/XNgQrDWdRhbXuQMmNNBSkdPaGalw==
   dependencies:
     "@across-protocol/contracts-v2" "^0.0.50"
     "@uma/sdk" "^0.22.1"
@@ -52,6 +52,7 @@
     hardhat-deploy "^0.11.2"
     hardhat-gas-reporter "^1.0.8"
     lodash.get "^4.4.2"
+    superstruct "^0.15.4"
 
 "@apocentre/alias-sampling@^0.5.3":
   version "0.5.3"

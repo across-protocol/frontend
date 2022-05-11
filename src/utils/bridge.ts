@@ -1,11 +1,11 @@
 import assert from "assert";
-import { clients, across, utils, BlockFinder } from "@uma/sdk";
+import { clients, utils, BlockFinder } from "@uma/sdk";
 import { Coingecko } from "@uma/sdk";
 import {
   relayFeeCalculator,
   lpFeeCalculator,
-  pool,
   utils as acrossUtils,
+  contracts,
 } from "@across-protocol/sdk-v2";
 import { Provider, Block } from "@ethersproject/providers";
 import { ethers, BigNumber } from "ethers";
@@ -17,7 +17,7 @@ import {
   hubPoolAddress,
   getToken,
   getProvider,
-  getRateModelAddress,
+  getConfigStoreAddress,
 } from "./constants";
 
 import { parseEther, tagAddress } from "./format";
@@ -60,7 +60,7 @@ export async function getLpFee(
     throw new Error(`Amount must be greater than 0.`);
   }
   const provider = getProvider(hubPoolChainId);
-  const rateModelStoreAddress = getRateModelAddress(hubPoolChainId);
+  const configStoreAddress = getConfigStoreAddress(hubPoolChainId);
 
   const result = {
     pct: BigNumber.from(0),
@@ -71,7 +71,7 @@ export async function getLpFee(
   const lpFeeCalculator = new LpFeeCalculator(
     provider,
     hubPoolAddress,
-    rateModelStoreAddress
+    configStoreAddress
   );
   result.pct = await lpFeeCalculator.getLpFeePct(
     l1TokenAddress,
@@ -217,23 +217,21 @@ export async function sendAcrossApproval(
 }
 
 const { exists } = utils;
-const { parseAndReturnRateModelFromString } = across.rateModel;
 const { calculateRealizedLpFeePct } = lpFeeCalculator;
-const { rateModelStore } = clients;
 
 export default class LpFeeCalculator {
   private blockFinder: BlockFinder<Block>;
-  private hubPoolInstance: pool.hubPool.Instance;
-  private rateModelStoreInstance: clients.rateModelStore.Instance;
+  private hubPoolInstance: contracts.hubPool.Instance;
+  private configStoreClient: contracts.acrossConfigStore.Client;
   constructor(
     private provider: Provider,
     hubPoolAddress: string,
-    rateModelStoreAddress: string
+    configStoreAddress: string
   ) {
     this.blockFinder = new BlockFinder<Block>(provider.getBlock.bind(provider));
-    this.hubPoolInstance = pool.hubPool.connect(hubPoolAddress, provider);
-    this.rateModelStoreInstance = rateModelStore.connect(
-      rateModelStoreAddress,
+    this.hubPoolInstance = contracts.hubPool.connect(hubPoolAddress, provider);
+    this.configStoreClient = new contracts.acrossConfigStore.Client(
+      configStoreAddress,
       provider
     );
   }
@@ -254,8 +252,7 @@ export default class LpFeeCalculator {
   ) {
     amount = BigNumber.from(amount);
     assert(amount.gt(0), "Amount must be greater than 0");
-    const { blockFinder, hubPoolInstance, rateModelStoreInstance, provider } =
-      this;
+    const { blockFinder, hubPoolInstance, configStoreClient, provider } = this;
 
     const targetBlock = exists(timestamp)
       ? await blockFinder.getBlockForTimestamp(timestamp)
@@ -266,7 +263,7 @@ export default class LpFeeCalculator {
     );
     const blockTag = targetBlock.number;
 
-    const [currentUt, nextUt, rateModelForBlockHeight] = await Promise.all([
+    const [currentUt, nextUt, rateModel] = await Promise.all([
       hubPoolInstance.callStatic.liquidityUtilizationCurrent(tokenAddress, {
         blockTag,
       }),
@@ -275,17 +272,10 @@ export default class LpFeeCalculator {
         amount,
         { blockTag }
       ),
-      rateModelStoreInstance.callStatic.l1TokenRateModels(tokenAddress, {
+      configStoreClient.getRateModel(tokenAddress, {
         blockTag,
       }),
     ]);
-
-    // Parsing stringified rate model will error if the rate model doesn't contain exactly the expect ed keys or isn't
-    // a JSON object.
-    const rateModel = parseAndReturnRateModelFromString(
-      rateModelForBlockHeight
-    );
-
     return calculateRealizedLpFeePct(rateModel, currentUt, nextUt);
   }
 }
