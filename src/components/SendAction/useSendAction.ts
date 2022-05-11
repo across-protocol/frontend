@@ -13,7 +13,11 @@ export default function useSendAction(
   const toggleInfoModal = () => setOpenInfoModal((oldOpen) => !oldOpen);
   const { fromChain, toChain, amount, tokenSymbol, toAddress, selectedRoute } =
     useSendForm();
-  const { fees } = useBridgeFees(amount, toChain, tokenSymbol);
+  const { fees, isLoading, error } = useBridgeFees(
+    amount,
+    toChain,
+    tokenSymbol
+  );
   const { status, hasToApprove, send, approve } = useBridge();
   const { account } = useConnection();
 

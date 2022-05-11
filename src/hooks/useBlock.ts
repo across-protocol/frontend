@@ -2,7 +2,6 @@ import { ethers } from "ethers";
 import { useQuery } from "react-query";
 import { getProvider, ChainId, getChainInfo, latestBlockQueryKey } from "utils";
 
-const DEFAULT_BLOCK_POLLING_INTERVAL = 5 * 1000;
 /**
  * Fetches the latest block from a given chain Id on an interval.
  * @param chainId The chain Id of the chain to poll for new blocks.
@@ -14,7 +13,7 @@ export function useBlock(chainId?: ChainId) {
     ? latestBlockQueryKey(chainId)
     : "DISABLED_BLOCK_QUERY";
   const refetchInterval = enabledQuery
-    ? getChainInfo(chainId).pollingInterval ?? DEFAULT_BLOCK_POLLING_INTERVAL
+    ? getChainInfo(chainId).pollingInterval
     : undefined;
   const { data: block, ...delegated } = useQuery(
     queryKey,
