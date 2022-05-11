@@ -15,6 +15,8 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 - REACT_APP_DISABLE_DEPOSITS: Displays a maintenance banner and disables the AddLiquidityForm in the Pool view.
 - REACT_APP_ENABLE_REACT_QUERY_DEV_TOOLS: Display React-Query dev tools if set to `true`.
 - REACT_APP_MATOMO_URL: Enable matomo by setting the matomo url, app will ignore events if not defined.
+- REACT_APP_CHAIN_137_PROVIDER_URL: custom provider for Polygon node
+- REACT_APP_CHAIN_42161_PROVIDER_URL: custom provider for Arbitrum node
 
 ## Internal Contributions
 

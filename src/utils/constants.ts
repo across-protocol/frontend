@@ -265,7 +265,7 @@ export const chainInfoTable: ChainInfoTable = Object.fromEntries(
 );
 /** FIXME:  use the actual spoke pool addresses!!!! */
 export const SPOKE_ADDRESSES: Record<ChainId, string> = {
-  [ChainId.MAINNET]: ethers.constants.AddressZero,
+  [ChainId.MAINNET]: getAddress("0x931A43528779034ac9eb77df799d133557406176"),
   [ChainId.ARBITRUM]: getAddress("0xe1C367e2b576Ac421a9f46C9cC624935730c36aa"),
   [ChainId.OPTIMISM]: getAddress("0x59485d57EEcc4058F7831f46eE83a7078276b4AE"),
   [ChainId.BOBA]: getAddress("0x7229405a2f0c550Ce35182EE1658302B65672443"),
@@ -294,6 +294,21 @@ export const HUBPOOL_ADDRESSES: Record<ChainId, string> = {
   [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
   [ChainId.GOERLI]: getAddress("0x69CA24D3084a2eea77E061E2D7aF9b76D107b4f6"),
   [ChainId.MUMBAI]: ethers.constants.AddressZero,
+};
+
+// Don't fetch blocks below these values for getting SpokePool events
+export const lowerBounds = {
+  [ChainId.ARBITRUM_RINKEBY]: 10523275,
+  [ChainId.KOVAN_OPTIMISM]: 2537971,
+  [ChainId.KOVAN]: 31457386,
+  [ChainId.MAINNET]: 14704425,
+  [ChainId.ARBITRUM]: 11102271,
+  [ChainId.OPTIMISM]: 6979967,
+  [ChainId.BOBA]: 551955,
+  [ChainId.POLYGON]: 27875891,
+  [ChainId.RINKEBY]: 10485193,
+  [ChainId.GOERLI]: 6586188,
+  [ChainId.MUMBAI]: 25751326,
 };
 
 export type TokenInfo = {
@@ -414,20 +429,6 @@ export const tokenList: TokenInfoList = [
   },
 ];
 
-export const lowerBounds = {
-  [ChainId.ARBITRUM_RINKEBY]: 10523275,
-  [ChainId.KOVAN_OPTIMISM]: 1618630,
-  [ChainId.KOVAN]: 30475937,
-  [ChainId.MAINNET]: 0,
-  [ChainId.ARBITRUM]: 0,
-  [ChainId.OPTIMISM]: 0,
-  [ChainId.BOBA]: 0,
-  [ChainId.POLYGON]: 0,
-  [ChainId.RINKEBY]: 0,
-  [ChainId.GOERLI]: 0,
-  [ChainId.MUMBAI]: 0,
-};
-
 assert(
   process.env.REACT_APP_HUBPOOL_CHAINID,
   "Missing process.env.REACT_APP_HUBPOOL_CHAINID"
@@ -454,6 +455,12 @@ export const matomoUrl = process.env.REACT_APP_MATOMO_URL;
 export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
 export const FEE_ESTIMATION = ".004";
 export const AddressZero = ethers.constants.AddressZero;
+export const ArbitrumProviderUrl =
+  process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
+  `https://arbitrum-mainnet.infura.io/v3/${infuraId}`;
+export const PolygonProviderUrl =
+  process.env.REACT_APP_CHAIN_137_PROVIDER_URL ||
+  `https://polygon-mainnet.infura.io/v3/${infuraId}`;
 
 assert(
   isSupportedChainId(hubPoolChainId),
@@ -464,10 +471,10 @@ export function isSupportedChainId(chainId: number): chainId is ChainId {
 }
 export const providerUrls: [ChainId, string][] = [
   [ChainId.MAINNET, `https://mainnet.infura.io/v3/${infuraId}`],
+  [ChainId.ARBITRUM, ArbitrumProviderUrl],
+  [ChainId.POLYGON, PolygonProviderUrl],
   [ChainId.OPTIMISM, `https://optimism-mainnet.infura.io/v3/${infuraId}`],
-  [ChainId.ARBITRUM, `https://arbitrum-mainnet.infura.io/v3/${infuraId}`],
   [ChainId.BOBA, `https://mainnet.boba.network`],
-  [ChainId.POLYGON, `https://polygon-mainnet.infura.io/v3/${infuraId}`],
   [ChainId.RINKEBY, `https://rinkeby.infura.io/v3/${infuraId}`],
   [ChainId.KOVAN, `https://kovan.infura.io/v3/${infuraId}`],
   [ChainId.KOVAN_OPTIMISM, `https://optimism-kovan.infura.io/v3/${infuraId}`],
