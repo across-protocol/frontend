@@ -8,6 +8,7 @@ import {
   ParsingError,
   max,
   InsufficientBalanceError,
+  trackEvent,
   FEE_ESTIMATION,
 } from "utils";
 
@@ -39,6 +40,12 @@ export default function useCoinSelection() {
       if (selectedItem) {
         setInputAmount("");
         setTokenSymbol(selectedItem.symbol);
+        // Matomo track token selection
+        trackEvent({
+          category: "send",
+          action: "setAsset",
+          name: selectedItem.symbol,
+        });
       }
     },
   });

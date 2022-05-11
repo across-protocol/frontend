@@ -6,6 +6,7 @@ import {
   switchChain,
   onboard,
   getChainInfo,
+  trackEvent,
 } from "utils";
 
 export default function useChainSelection() {
@@ -37,6 +38,12 @@ export default function useChainSelection() {
     items: availableFromChains.map((chain) => chain.chainId),
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
+        // Matomo track fromChain
+        trackEvent({
+          category: "send",
+          action: "setFromChain",
+          name: selectedItem.toString(),
+        });
         setFromChain(selectedItem);
       }
     },

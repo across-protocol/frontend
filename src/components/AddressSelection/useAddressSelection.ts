@@ -2,7 +2,7 @@ import { useSelect } from "downshift";
 import { useState, useEffect } from "react";
 import { useConnection } from "state/hooks";
 import { useSendForm } from "hooks";
-import { isValidAddress, getChainInfo } from "utils";
+import { isValidAddress, getChainInfo, trackEvent } from "utils";
 
 export default function useAddressSelection() {
   const { isConnected, account } = useConnection();
@@ -23,6 +23,12 @@ export default function useAddressSelection() {
     items: availableToChains.map((chain) => chain.chainId),
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
+        // matomo tracking
+        trackEvent({
+          category: "send",
+          action: "setToChain",
+          name: selectedItem.toString(),
+        });
         setToChain(selectedItem);
       }
     },

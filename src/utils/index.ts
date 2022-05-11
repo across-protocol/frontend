@@ -13,3 +13,4 @@ export * from "./token";
 export * from "./query-keys";
 export * from "./ethers";
 export * from "./config";
+export * from "./matomo";
