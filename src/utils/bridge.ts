@@ -75,12 +75,12 @@ export async function getLpFee(
   );
   result.pct = await lpFeeCalculator.getLpFeePct(
     l1TokenAddress,
-    hubPoolAddress,
     amount,
     blockTime
   );
+  result.isLiquidityInsufficient =
+    await lpFeeCalculator.isLiquidityInsufficient(l1TokenAddress, amount);
   result.total = amount.mul(result.pct).div(parseEther("1"));
-  result.isLiquidityInsufficient = false;
   return result;
 }
 
@@ -237,9 +237,18 @@ export default class LpFeeCalculator {
       provider
     );
   }
+  async isLiquidityInsufficient(
+    tokenAddress: string,
+    amount: utils.BigNumberish
+  ): Promise<boolean> {
+    const [, pooledTokens] = await Promise.all([
+      this.hubPoolInstance.callStatic.sync(tokenAddress),
+      this.hubPoolInstance.callStatic.pooledTokens(tokenAddress),
+    ]);
+    return pooledTokens.liquidReserves.lt(amount);
+  }
   async getLpFeePct(
     tokenAddress: string,
-    hubPoolAddress: string,
     amount: utils.BigNumberish,
     timestamp?: number
   ) {
@@ -260,15 +269,15 @@ export default class LpFeeCalculator {
     const [currentUt, nextUt, rateModelForBlockHeight] = await Promise.all([
       hubPoolInstance.callStatic.liquidityUtilizationCurrent(tokenAddress, {
         blockTag,
-      } as any),
+      }),
       hubPoolInstance.callStatic.liquidityUtilizationPostRelay(
         tokenAddress,
         amount,
-        { blockTag } as any
+        { blockTag }
       ),
       rateModelStoreInstance.callStatic.l1TokenRateModels(tokenAddress, {
         blockTag,
-      } as any),
+      }),
     ]);
 
     // Parsing stringified rate model will error if the rate model doesn't contain exactly the expect ed keys or isn't
