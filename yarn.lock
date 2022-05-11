@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@across-protocol/contracts-v2@^0.0.29":
-  version "0.0.29"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-0.0.29.tgz#4b2b3ba0f0d300af1b783ba604e5298cdd6007dc"
-  integrity sha512-TQFv5D3VIKuMQFBm89tBkaCY9HqFJmMr6rBk7YwkAF18donLb5/hUUg8BJvvAeCiF8O0OrouOjkO27WjZrVY0Q==
+"@across-protocol/contracts-v2@^0.0.34":
+  version "0.0.34"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-0.0.34.tgz#e36b5a641e5fe75bd5c08706082750abd489968c"
+  integrity sha512-/ugs0BvdmDcuCyJkIJz3QXjWH+Uhu01d7yPUeulc+bpb99LrjtYytYbiPw3LYSBTrUJ05wyRgeqPej/sDDiOqg==
   dependencies:
     "@defi-wonderland/smock" "^2.0.7"
     "@eth-optimism/contracts" "^0.5.11"
@@ -16,10 +16,10 @@
     arb-bridge-eth "^0.7.4"
     arb-bridge-peripherals "^1.0.5"
 
-"@across-protocol/contracts-v2@^0.0.34":
-  version "0.0.34"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-0.0.34.tgz#e36b5a641e5fe75bd5c08706082750abd489968c"
-  integrity sha512-/ugs0BvdmDcuCyJkIJz3QXjWH+Uhu01d7yPUeulc+bpb99LrjtYytYbiPw3LYSBTrUJ05wyRgeqPej/sDDiOqg==
+"@across-protocol/contracts-v2@^0.0.50":
+  version "0.0.50"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-0.0.50.tgz#0f2509291fc3b4158c60212f560ef2d0094afde7"
+  integrity sha512-CScmgv0c9ZgG2p4Id9b0FhhR9PKsge2xvc7oSgHGIRjMRF5Xofr18MdjbfVnO06hS99g7D1ngDZNgaAdJKbrXg==
   dependencies:
     "@defi-wonderland/smock" "^2.0.7"
     "@eth-optimism/contracts" "^0.5.11"
@@ -39,17 +39,19 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.0.6.tgz#326872addbb8f8e5d064cc6ee3680cf8a065ea20"
-  integrity sha512-MnOA3Xv1s7eUCcM11Eg0RFEi8t3tJ72TFL6QWE1VAxPMUMfbFKUFCg10WYYJSAyhpor14AejTFZpyzLOsOCG8Q==
+"@across-protocol/sdk-v2@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.0.7.tgz#ccf05fbddc3ea93c64f041d8c813aed4b7e11624"
+  integrity sha512-ydBfH9kfeuC0fZG0fAgqaiwRJvspPnji09Gzmem0/Cs39Gnie3tKyMDVKGXlLgMncaajknsMH+BHi29TzqvIdA==
   dependencies:
-    "@across-protocol/contracts-v2" "^0.0.29"
+    "@across-protocol/contracts-v2" "^0.0.50"
     "@uma/sdk" "^0.22.1"
+    axios "^0.27.2"
     decimal.js "^10.3.1"
     ethers "^5.6.1"
     hardhat-deploy "^0.11.2"
     hardhat-gas-reporter "^1.0.8"
+    lodash.get "^4.4.2"
 
 "@apocentre/alias-sampling@^0.5.3":
   version "0.5.3"
@@ -6140,6 +6142,14 @@ axios@^0.24.0:
   dependencies:
     follow-redirects "^1.14.4"
 
+axios@^0.27.2:
+  version "0.27.2"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.27.2.tgz#207658cc8621606e586c85db4b41a750e756d972"
+  integrity sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==
+  dependencies:
+    follow-redirects "^1.14.9"
+    form-data "^4.0.0"
+
 axobject-query@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/axobject-query/-/axobject-query-2.2.0.tgz#943d47e10c0b704aa42275e20edf3722648989be"
@@ -11808,6 +11818,11 @@ follow-redirects@^1.14.4:
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.7.tgz#2004c02eb9436eee9a21446a6477debf17e81685"
   integrity sha512-+hbxoLbFMbRKDwohX8GkTataGqO6Jb7jGwpAlwgy2bIz25XtRm7KEzJM76R1WiNT5SwZkX4Y75SwBolkpmE7iQ==
 
+follow-redirects@^1.14.9:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.0.tgz#06441868281c86d0dda4ad8bdaead2d02dca89d4"
+  integrity sha512-aExlJShTV4qOUOL7yF1U5tvLCB0xQuudbf6toyYA0E/acBNw71mvjFTnLaRp50aQaYocMR0a/RMMBIHeZnGyjQ==
+
 for-each@^0.3.3, for-each@~0.3.3:
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/for-each/-/for-each-0.3.3.tgz#69b447e88a0a5d32c3e7084f3f1710034b21376e"
@@ -15325,6 +15340,11 @@ lodash.flatmap@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.flatmap/-/lodash.flatmap-4.5.0.tgz#ef8cbf408f6e48268663345305c6acc0b778702e"
   integrity sha1-74y/QI9uSCaGYzRTBcaswLd4cC4=
+
+lodash.get@^4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
+  integrity sha1-LRd/ZS+jHpObRDjVNBSZ36OCXpk=
 
 lodash.isequal@^4.5.0:
   version "4.5.0"

@@ -31,10 +31,7 @@ export function createTxHistoryClientConfig(params: Params): {
   return { chains, pollingIntervalSeconds: 0 };
 }
 
-let client: transfersHistory.TransfersHistoryClient | undefined;
-
 export default function getClient() {
-  if (client) return client;
   const config = getConfig();
   const params = config.getSpokeChainIds().map((chainId) => {
     return {
@@ -42,6 +39,10 @@ export default function getClient() {
       spokeAddress: config.getSpokePoolAddress(chainId),
     };
   });
-  client = new TransfersHistoryClient(createTxHistoryClientConfig(params));
+  const client = new TransfersHistoryClient(
+    createTxHistoryClientConfig(params)
+  );
+  // Uncomment this only for debugging
+  // client.setLogLevel("debug");
   return client;
 }
