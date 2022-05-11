@@ -206,7 +206,7 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
   const availableToChains = calculateAvailableToChains(
     chainId,
     availableRoutes,
-    config.getSpokeChains()
+    config.listToChains()
   );
 
   const availableTokens = config.filterReachableTokens(fromChain, toChain);
@@ -358,7 +358,7 @@ function useSendFormManager(): SendFormManagerContext {
     status: FormStatus.IDLE,
     amount: ethers.constants.Zero,
     availableRoutes: config.getRoutes(),
-    availableFromChains: config.getSpokeChains(),
+    availableFromChains: config.listFromChains(),
     availableToChains: [],
     availableTokens: [],
   };

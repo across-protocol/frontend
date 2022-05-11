@@ -19,11 +19,15 @@ export type TokenList = Token[];
 export class ConfigClient {
   public readonly spokeAddresses: Record<number, string> = {};
   public readonly spokeChains: Set<number> = new Set();
+  public readonly fromChains: Set<number> = new Set();
+  public readonly toChains: Set<number> = new Set();
   constructor(private config: constants.RouteConfig) {
     this.config.routes.forEach((route) => {
       this.spokeAddresses[route.fromChain] = route.fromSpokeAddress;
       this.spokeChains.add(route.fromChain);
       this.spokeChains.add(route.toChain);
+      this.toChains.add(route.toChain);
+      this.fromChains.add(route.fromChain);
     });
   }
   getWethAddress(): string {
@@ -66,6 +70,24 @@ export class ConfigClient {
       })
     );
     return filter(this.config.routes, cleanQuery);
+  }
+  listToChains(): constants.ChainInfoList {
+    const result: constants.ChainInfoList = [];
+    constants.chainInfoList.forEach((chain) => {
+      if (this.toChains.has(chain.chainId)) {
+        result.push(chain);
+      }
+    });
+    return result;
+  }
+  listFromChains(): constants.ChainInfoList {
+    const result: constants.ChainInfoList = [];
+    constants.chainInfoList.forEach((chain) => {
+      if (this.fromChains.has(chain.chainId)) {
+        result.push(chain);
+      }
+    });
+    return result;
   }
   // this maintains order specified in the constants file in the chainInfoList
   getSpokeChains(): constants.ChainInfoList {

@@ -10,8 +10,9 @@ import { getAddress } from "./address";
 import * as superstruct from "superstruct";
 
 // all routes should be pre imported to be able to switch based on chain id
-import KovanRoutes from "data/routes_42_0xD449Af45a032Df413b497A709EeD3E8C112EbcE3.json";
+import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
 import MainnetRoutes from "data/routes_1_0x6Bb9910c5529Cb3b32c4f0e13E8bC38F903b2534.json";
+import GoerliRoutes from "data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
 
 /* Chains and Tokens section */
 export enum ChainId {
@@ -95,7 +96,7 @@ export const RATEMODEL_ADDRESSES: Record<ChainId, string> = {
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.BOBA]: ethers.constants.AddressZero,
   [ChainId.POLYGON]: ethers.constants.AddressZero,
-  [ChainId.RINKEBY]: ethers.constants.AddressZero,
+  [ChainId.RINKEBY]: getAddress("0x18a200A2427e243154EC8217890Bc08062afc5A2"),
   [ChainId.KOVAN]: getAddress("0x5923929DF7A2D6E038bb005B167c1E8a86cd13C8"),
   [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
@@ -252,7 +253,7 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: defaultConstructExplorerLink(
       "https://mumbai.polygonscan.com"
     ),
-    nativeCurrencySymbol: "MATIC",
+    nativeCurrencySymbol: "WMATIC",
     pollingInterval: defaultBlockPollingInterval,
   },
 ];
@@ -375,6 +376,13 @@ export const tokenList: TokenInfoList = [
     decimals: 18,
     logoURI: "/logos/ethereum-logo.svg",
     mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
+  },
+  {
+    name: "Matic",
+    symbol: "WMATIC",
+    decimals: 18,
+    logoURI: "/logos/ethereum-logo.svg",
+    mainnetAddress: getAddress("0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"),
   },
   {
     name: "Matic",
@@ -540,6 +548,10 @@ export function getRoutes(chainId: ChainId): RouteConfig {
   if (chainId === ChainId.MAINNET) {
     superstruct.assert(MainnetRoutes, RouteConfigSS);
     return MainnetRoutes;
+  }
+  if (chainId === ChainId.GOERLI) {
+    superstruct.assert(GoerliRoutes, RouteConfigSS);
+    return GoerliRoutes;
   }
   throw new Error("No routes defined for chainId: " + chainId);
 }
