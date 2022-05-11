@@ -34,7 +34,9 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
         <StyledHeader>
           <TopHeaderRow>
             {!isConnected && (
-              <ConnectButton onClick={() => init()}>Connect</ConnectButton>
+              <ConnectButton onClick={() => init()}>
+                Connect Wallet
+              </ConnectButton>
             )}
             {isConnected && (
               <ConnectText>
