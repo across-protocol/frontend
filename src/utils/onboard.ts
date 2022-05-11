@@ -7,6 +7,7 @@ import {
   hubPoolChainId,
   ChainId,
   providerUrlsTable,
+  trackEvent,
 } from "utils";
 import { update, disconnect, error } from "state/connection";
 import { store } from "state";
@@ -110,11 +111,15 @@ export function OnboardEthers(config: Initialization, emit: Emit) {
   };
 }
 export const onboard = OnboardEthers(onboardBaseConfig(), (event, data) => {
+  if (event === "init") {
+    trackEvent({ category: "wallet", action: "connect", name: "null" });
+  }
   if (event === "update") {
     store.dispatch(update(data));
   }
   if (event === "disconnect") {
     store.dispatch(disconnect());
+    trackEvent({ category: "wallet", action: "disconnect", name: "null" });
   }
   if (event === "error") {
     store.dispatch(error(data));

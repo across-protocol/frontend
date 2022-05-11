@@ -18,6 +18,8 @@ import {
   sendAcrossApproval,
   getConfig,
   parseUnits,
+  trackEvent,
+  formatUnits,
 } from "utils";
 
 enum SendStatus {
@@ -85,6 +87,7 @@ export function useBridge() {
       !toAddress ||
       !block ||
       !fees ||
+      !tokenInfo ||
       !selectedRoute;
 
     if (disableSend) {
@@ -92,7 +95,7 @@ export function useBridge() {
     }
 
     try {
-      return sendAcrossDeposit(signer, {
+      const tx = sendAcrossDeposit(signer, {
         toAddress,
         amount,
         tokenAddress: selectedRoute.fromTokenAddress,
@@ -103,6 +106,18 @@ export function useBridge() {
         timestamp: await hubPool.getCurrentTime(),
         referrer,
       });
+      // matomo track bridge
+      trackEvent({
+        category: "send",
+        action: "bridge",
+        name: JSON.stringify({
+          symbol: selectedRoute.fromTokenSymbol,
+          from: selectedRoute.fromChain,
+          to: selectedRoute.toChain,
+        }),
+        value: Number(formatUnits(amount, tokenInfo.decimals)),
+      });
+      return tx;
     } catch (e) {
       console.error(e);
       console.error("Something went wrong when depositing.");

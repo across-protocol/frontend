@@ -449,6 +449,7 @@ export const infuraId = process.env.REACT_APP_PUBLIC_INFURA_ID;
 export const confirmations =
   Number(process.env.REACT_APP_PUBLIC_CONFIRMATIONS) || 1;
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
+export const matomoUrl = process.env.REACT_APP_MATOMO_URL;
 
 export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
 export const FEE_ESTIMATION = ".004";
