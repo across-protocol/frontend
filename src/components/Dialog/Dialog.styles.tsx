@@ -11,12 +11,13 @@ export const Wrapper = styled(DialogContent)`
   border-radius: 12px;
   max-width: 440px;
   width: min(440px, calc(100% - 20px));
-  top: 10%;
+  top: 25%;
   overflow: auto;
-  min-height: 60vh;
+  min-height: 30vh;
   max-height: 80vh;
   @media ${QUERIES.tabletAndUp} {
-    top: 17%;
+    top: 30%;
+    min-height: 20vh;
   }
 `;
 
