@@ -49,7 +49,7 @@ export default function useTransactionsView() {
           err
         );
       });
-      // start timer to stop fetching events after a certain time
+      // start timer that stops fetching events after a certain time
       const timeout = setTimeout(() => {
         txClient.stopFetchingTransfers(account);
         setTimer(undefined);
@@ -68,6 +68,8 @@ export default function useTransactionsView() {
 
   useEffect(() => {
     return () => {
+      // inside the cleanup function make sure that the old timer
+      // is cleared after setting up a new timer
       if (timer) {
         clearInterval(timer);
       }
