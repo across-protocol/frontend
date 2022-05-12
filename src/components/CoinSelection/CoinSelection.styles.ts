@@ -14,7 +14,11 @@ export const Wrapper = styled.div`
 const isSafari =
   navigator.userAgent.search("Safari") >= 0 &&
   navigator.userAgent.search("Chrome") < 0;
-export const RoundBox = styled(UnstyledBox)`
+
+interface IStyledRoundBox {
+  disabled?: boolean;
+}
+export const RoundBox = styled(UnstyledBox)<IStyledRoundBox>`
   --color: var(--color-white);
   --outline-color: var(--color-primary);
   background-color: var(--color);
@@ -22,6 +26,7 @@ export const RoundBox = styled(UnstyledBox)`
   padding: 10px 15px;
   margin-top: 16px;
   display: flex;
+  opacity: ${(props) => (props.disabled ? "0.7" : "1")};
   @media ${QUERIES.tabletAndUp} {
     flex: 2;
 
@@ -44,7 +49,10 @@ export const InputGroup = styled.div`
   }
 `;
 
-export const ToggleButton = styled.button`
+interface IStyledToggleButton {
+  disabled?: boolean;
+}
+export const ToggleButton = styled.button<IStyledToggleButton>`
   --radius: 30px;
   width: 100%;
   padding: 0;
@@ -56,7 +64,8 @@ export const ToggleButton = styled.button`
   outline: none;
   display: flex;
   align-items: center;
-  cursor: pointer;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  opacity: ${(props) => (props.disabled ? "0.7" : "1")};
 `;
 
 export const Logo = styled.img`

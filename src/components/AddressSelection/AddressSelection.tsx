@@ -46,6 +46,7 @@ const AddressSelection: React.FC = () => {
     address,
     availableToChains,
     selectedToChainInfo,
+    fromChain,
   } = useAddressSelection();
 
   return (
@@ -54,8 +55,16 @@ const AddressSelection: React.FC = () => {
         <Wrapper>
           <SectionTitle>To</SectionTitle>
           <InputGroup>
-            <RoundBox as="label" {...getLabelProps()}>
-              <ToggleButton type="button" {...getToggleButtonProps()}>
+            <RoundBox
+              as="label"
+              {...getLabelProps()}
+              disabled={fromChain === undefined}
+            >
+              <ToggleButton
+                type="button"
+                {...getToggleButtonProps()}
+                disabled={fromChain === undefined}
+              >
                 {selectedToChainInfo && (
                   <Logo
                     src={selectedToChainInfo?.logoURI}
