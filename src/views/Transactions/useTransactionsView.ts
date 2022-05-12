@@ -6,6 +6,8 @@ import getTxClient from "state/transferHistory";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 import { transfersHistory } from "@across-protocol/sdk-v2";
 
+const MAX_TIME_FOR_FETCHING_TX = 5 * 60 * 1000;
+
 export default function useTransactionsView() {
   const { provider, chainId, isConnected, account } = useConnection();
   const { init } = onboard;
@@ -19,6 +21,7 @@ export default function useTransactionsView() {
   const [initialLoading, setInitialLoading] = useState(false);
   const [txClient] = useState(getTxClient);
   // Start the tracking / stopping of the TX in the client.
+  const [timer, setTimer] = useState<NodeJS.Timeout | undefined>();
 
   useEffect(() => {
     if (txClient) {
@@ -46,6 +49,12 @@ export default function useTransactionsView() {
           err
         );
       });
+      // start timer to stop fetching events after a certain time
+      const timeout = setTimeout(() => {
+        txClient.stopFetchingTransfers(account);
+        setTimer(undefined);
+      }, MAX_TIME_FOR_FETCHING_TX);
+      setTimer(timeout);
     }
 
     return () => {
@@ -56,6 +65,14 @@ export default function useTransactionsView() {
       }
     };
   }, [account, txClient]);
+
+  useEffect(() => {
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    };
+  }, [timer]);
 
   return {
     provider,

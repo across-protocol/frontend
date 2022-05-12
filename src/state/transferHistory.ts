@@ -28,7 +28,7 @@ export function createTxHistoryClientConfig(params: Params): {
       lowerBoundBlockNumber: lowerBounds[chainId],
     };
   });
-  return { chains, pollingIntervalSeconds: 0 };
+  return { chains, pollingIntervalSeconds: 10 };
 }
 
 export default function getClient() {
