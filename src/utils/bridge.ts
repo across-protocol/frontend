@@ -298,7 +298,7 @@ class Queries implements relayFeeCalculator.QueryInterface {
   }
   async getTokenPrice(tokenSymbol: string): Promise<string | number> {
     if (tokenSymbol.toLowerCase() === "eth") return 1;
-    const { mainnetAddress } = this.getMainnetTokenInfo(tokenSymbol);
+    const { mainnetAddress, decimals } = this.getMainnetTokenInfo(tokenSymbol);
     assert(
       mainnetAddress,
       "requires mainnet address for token: " + tokenSymbol
@@ -309,7 +309,7 @@ class Queries implements relayFeeCalculator.QueryInterface {
         mainnetAddress,
         this.priceSymbol.toLowerCase()
       );
-      return tokenPrice;
+      return tokenPrice.toFixed(decimals);
     } else {
       const { mainnetAddress: gasTokenAddress } = this.getMainnetTokenInfo(
         this.priceSymbol
@@ -325,7 +325,7 @@ class Queries implements relayFeeCalculator.QueryInterface {
         this.coingecko.getCurrentPriceByContract(gasTokenAddress, "usd"),
       ]);
 
-      return tokenPrice / gasTokenPrice;
+      return (tokenPrice / gasTokenPrice).toFixed(decimals);
     }
   }
   async getTokenDecimals(tokenSymbol: string): Promise<number> {
