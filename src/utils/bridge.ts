@@ -286,7 +286,7 @@ class Queries implements relayFeeCalculator.QueryInterface {
     private provider: Provider,
     private chainId: ChainId,
     private priceSymbol = "eth",
-    private defaultGas = "305572"
+    private defaultGas = "120000"
   ) {
     this.coingecko = new Coingecko();
   }
@@ -303,11 +303,30 @@ class Queries implements relayFeeCalculator.QueryInterface {
       mainnetAddress,
       "requires mainnet address for token: " + tokenSymbol
     );
-    const [, tokenPrice] = await this.coingecko.getCurrentPriceByContract(
-      mainnetAddress,
-      this.priceSymbol.toLowerCase()
-    );
-    return tokenPrice;
+
+    if (this.priceSymbol.toLowerCase() === "eth") {
+      const [, tokenPrice] = await this.coingecko.getCurrentPriceByContract(
+        mainnetAddress,
+        this.priceSymbol.toLowerCase()
+      );
+      return tokenPrice;
+    } else {
+      const { mainnetAddress: gasTokenAddress } = this.getMainnetTokenInfo(
+        this.priceSymbol
+      );
+
+      assert(
+        gasTokenAddress,
+        "requires gas token address for token: " + this.priceSymbol
+      );
+
+      const [[, tokenPrice], [, gasTokenPrice]] = await Promise.all([
+        this.coingecko.getCurrentPriceByContract(mainnetAddress, "usd"),
+        this.coingecko.getCurrentPriceByContract(gasTokenAddress, "usd"),
+      ]);
+
+      return tokenPrice / gasTokenPrice;
+    }
   }
   async getTokenDecimals(tokenSymbol: string): Promise<number> {
     const info = this.getTokenInfo(tokenSymbol);
@@ -328,7 +347,7 @@ export function relayFeeCalculatorConfig(
   const provider = getProvider(chainId);
   const token = config.getNativeTokenInfo(chainId);
   // coingecko needs the mainnet token addresses to look up price
-  const queries = new Queries(provider, chainId);
+  const queries = new Queries(provider, chainId, token.symbol);
   return {
     nativeTokenDecimals: token.decimals,
     feeLimitPercent: MAX_RELAY_FEE_PERCENT,
