@@ -21,6 +21,7 @@ export default function useAddressSelection() {
 
   const downshiftState = useSelect({
     items: availableToChains.map((chain) => chain.chainId),
+    selectedItem: toChain,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
         // matomo tracking
