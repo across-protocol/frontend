@@ -36,6 +36,7 @@ export default function useChainSelection() {
 
   const downshiftState = useSelect({
     items: availableFromChains.map((chain) => chain.chainId),
+    selectedItem: fromChain,
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
         // Matomo track fromChain
