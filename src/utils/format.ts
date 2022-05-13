@@ -52,9 +52,11 @@ export function shortenTransactionHash(hash: string): string {
 }
 
 // this actually will round up in some cases
-export const numberFormatter = new Intl.NumberFormat("en-US", {
-  minimumFractionDigits: 4,
-}).format;
+export const numberFormatter = (num: number) =>
+  new Intl.NumberFormat("en-US", {
+    minimumSignificantDigits: 1,
+    maximumSignificantDigits: 4,
+  }).format(num);
 
 export function formatUnits(
   wei: ethers.BigNumberish,
