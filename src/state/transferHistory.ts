@@ -1,5 +1,12 @@
 import { transfersHistory } from "@across-protocol/sdk-v2";
-import { getConfig, getProvider, ChainId, Provider, lowerBounds } from "utils";
+import {
+  getConfig,
+  getProvider,
+  getChainInfo,
+  ChainId,
+  Provider,
+  debug,
+} from "utils";
 
 export enum TransfersHistoryEvent {
   TransfersUpdated = "TransfersUpdated",
@@ -15,17 +22,18 @@ interface txHistoryConfig {
 type Params = {
   chainId: ChainId;
   spokeAddress: string;
+  earliestBlock: number;
 }[];
 export function createTxHistoryClientConfig(params: Params): {
   chains: txHistoryConfig[];
   pollingIntervalSeconds?: number;
 } {
-  const chains = params.map(({ chainId, spokeAddress }) => {
+  const chains = params.map(({ chainId, spokeAddress, earliestBlock }) => {
     return {
       chainId,
       spokePoolContractAddr: spokeAddress,
       provider: getProvider(chainId),
-      lowerBoundBlockNumber: lowerBounds[chainId],
+      lowerBoundBlockNumber: earliestBlock,
     };
   });
   return { chains, pollingIntervalSeconds: 0 };
@@ -37,12 +45,12 @@ export default function getClient() {
     return {
       chainId,
       spokeAddress: config.getSpokePoolAddress(chainId),
+      earliestBlock: getChainInfo(chainId).earliestBlock,
     };
   });
   const client = new TransfersHistoryClient(
     createTxHistoryClientConfig(params)
   );
-  // Uncomment this only for debugging
-  // client.setLogLevel("debug");
+  if (debug) client.setLogLevel("debug");
   return client;
 }

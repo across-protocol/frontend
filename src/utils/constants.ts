@@ -114,6 +114,7 @@ export type ChainInfo = {
   constructExplorerLink: (txHash: string) => string;
   pollingInterval: number;
   nativeCurrencySymbol: string;
+  earliestBlock: number;
 };
 
 export type ChainInfoList = ChainInfo[];
@@ -136,6 +137,7 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: defaultConstructExplorerLink("https://etherscan.io"),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 14704425,
   },
   {
     name: "Optimism",
@@ -147,6 +149,7 @@ export const chainInfoList: ChainInfoList = [
       `https://optimistic.etherscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "OETH",
     pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 6979967,
   },
   {
     name: "Arbitrum",
@@ -159,6 +162,7 @@ export const chainInfoList: ChainInfoList = [
       `https://arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "AETH",
     pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 11102271,
   },
   {
     name: "Boba",
@@ -170,6 +174,7 @@ export const chainInfoList: ChainInfoList = [
       `https://blockexplorer.boba.network/tx/${txHash}`,
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 551955,
   },
   {
     name: "Polygon",
@@ -183,6 +188,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "MATIC",
     pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 27875891,
   },
   {
     name: "Rinkeby",
@@ -195,6 +201,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 10485193,
   },
   {
     name: "Kovan",
@@ -207,6 +214,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "KOV",
     pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 31457386,
   },
   {
     name: "Optimism Kovan",
@@ -219,6 +227,7 @@ export const chainInfoList: ChainInfoList = [
       `https://kovan-optimistic.etherscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "KOR",
     pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 2537971,
   },
   {
     name: "Arbitrum Rinkeby",
@@ -231,6 +240,7 @@ export const chainInfoList: ChainInfoList = [
     rpcUrl: "https://rinkeby.arbitrum.io/rpc",
     nativeCurrencySymbol: "ARETH",
     pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 10523275,
   },
   {
     name: "Goerli",
@@ -243,6 +253,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 6586188,
   },
   {
     name: "Mumbai",
@@ -255,6 +266,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "WMATIC",
     pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 25751326,
   },
 ];
 
@@ -263,53 +275,6 @@ export const chainInfoTable: ChainInfoTable = Object.fromEntries(
     return [chain.chainId, chain];
   }, [])
 );
-/** FIXME:  use the actual spoke pool addresses!!!! */
-export const SPOKE_ADDRESSES: Record<ChainId, string> = {
-  [ChainId.MAINNET]: getAddress("0x931A43528779034ac9eb77df799d133557406176"),
-  [ChainId.ARBITRUM]: getAddress("0xe1C367e2b576Ac421a9f46C9cC624935730c36aa"),
-  [ChainId.OPTIMISM]: getAddress("0x59485d57EEcc4058F7831f46eE83a7078276b4AE"),
-  [ChainId.BOBA]: getAddress("0x7229405a2f0c550Ce35182EE1658302B65672443"),
-  [ChainId.POLYGON]: getAddress("0xD3ddAcAe5aFb00F9B9cD36EF0Ed7115d7f0b584c"),
-  [ChainId.RINKEBY]: getAddress("0xB078bBb35f8E24c2431b9d2a88C0bC0c26CC1F92"),
-  [ChainId.KOVAN]: getAddress("0x90bab3160d417B4cd791Db5f8C4E79704e67bd49"),
-  [ChainId.KOVAN_OPTIMISM]: getAddress(
-    "0x1954D4A36ac4fD8BEde42E59368565A92290E705"
-  ),
-  [ChainId.ARBITRUM_RINKEBY]: getAddress(
-    "0x3BED21dAe767e4Df894B31b14aD32369cE4bad8b"
-  ),
-  [ChainId.GOERLI]: getAddress("0xb2b5C1b17B19d92CC4fC1f026B2133259e3ccd41"),
-  [ChainId.MUMBAI]: getAddress("0xFd9e2642a170aDD10F53Ee14a93FcF2F31924944"),
-};
-// Update once addresses are known
-export const HUBPOOL_ADDRESSES: Record<ChainId, string> = {
-  [ChainId.MAINNET]: getAddress("0xD449Af45a032Df413b497A709EeD3E8C112EbcE3"),
-  [ChainId.OPTIMISM]: ethers.constants.AddressZero,
-  [ChainId.BOBA]: ethers.constants.AddressZero,
-  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
-  [ChainId.RINKEBY]: getAddress("0xa1b6DA4AaE90fA16F3A3338c8d1Dc70B4926FCa7"),
-  [ChainId.POLYGON]: ethers.constants.AddressZero,
-  [ChainId.KOVAN]: getAddress("0x8d84F51710dfa9D409027B167371bBd79e0539e5"),
-  [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
-  [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
-  [ChainId.GOERLI]: getAddress("0x69CA24D3084a2eea77E061E2D7aF9b76D107b4f6"),
-  [ChainId.MUMBAI]: ethers.constants.AddressZero,
-};
-
-// Don't fetch blocks below these values for getting SpokePool events
-export const lowerBounds = {
-  [ChainId.ARBITRUM_RINKEBY]: 10523275,
-  [ChainId.KOVAN_OPTIMISM]: 2537971,
-  [ChainId.KOVAN]: 31457386,
-  [ChainId.MAINNET]: 14704425,
-  [ChainId.ARBITRUM]: 11102271,
-  [ChainId.OPTIMISM]: 6979967,
-  [ChainId.BOBA]: 551955,
-  [ChainId.POLYGON]: 27875891,
-  [ChainId.RINKEBY]: 10485193,
-  [ChainId.GOERLI]: 6586188,
-  [ChainId.MUMBAI]: 25751326,
-};
 
 export type TokenInfo = {
   name: string;
@@ -451,6 +416,7 @@ export const confirmations =
   Number(process.env.REACT_APP_PUBLIC_CONFIRMATIONS) || 1;
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
 export const matomoUrl = process.env.REACT_APP_MATOMO_URL;
+export const debug = Boolean(process.env.REACT_APP_DEBUG);
 
 export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
 export const FEE_ESTIMATION = ".004";
