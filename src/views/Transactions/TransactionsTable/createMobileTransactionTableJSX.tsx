@@ -8,7 +8,7 @@ import {
 import { shortenTransactionHash, capitalizeFirstLetter } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 import { getChainInfo, ChainId } from "utils/constants";
-import { getConfig } from "utils/config";
+import { getConfig, Token } from "utils/config";
 import { CLOSED_DROPDOWN_INDEX } from "../useTransactionsView";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
@@ -51,7 +51,21 @@ function formatTransactionRows(
 ): IMobileRow[] {
   const config = getConfig();
 
-  return transactions.map((tx, index) => {
+  const supportedTransactions = transactions.reduce((supported, tx) => {
+    try {
+      // this can error out if there are transactions with new tokens not added to routes, ie we cant lookup by address
+      const token = config.getTokenInfoByAddress(
+        tx.sourceChainId,
+        tx.assetAddr
+      );
+      supported.push([token, tx]);
+    } catch (err) {
+      console.warn("transaction with unknown token", err, tx);
+    }
+    return supported;
+  }, [] as [token: Token, tx: Transfer][]);
+
+  return supportedTransactions.map(([token, tx], index) => {
     const timestamp: ICell = {
       size: "md",
       value: DateTime.fromSeconds(tx.depositTime).toFormat("d MMM yyyy - t"),
@@ -89,8 +103,6 @@ function formatTransactionRows(
         <TableLogo src={toLogo} alt={`${toChainName}_logo`} /> {toChainName}
       </>
     );
-
-    const token = config.getTokenInfoByAddress(sourceChainId, tx.assetAddr);
 
     const symbol = (
       <>

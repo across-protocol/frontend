@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { ethers } from "ethers";
 import { TableLogo, TableLink } from "./TransactionsTable.styles";
-import { getConfig } from "utils/config";
+import { getConfig, Token } from "utils/config";
 import {
   shortenTransactionHash,
   capitalizeFirstLetter,
@@ -33,7 +33,21 @@ export default function createTransactionTableJSX(transactions: Transfer[]) {
 // Will take a TransactionsArg
 function formatTransactionRows(transactions: Transfer[]): IRow[] {
   const config = getConfig();
-  return transactions.map((tx) => {
+  const supportedTransactions = transactions.reduce((supported, tx) => {
+    try {
+      // this can error out if there are transactions with new tokens not added to routes, ie we cant lookup by address
+      const token = config.getTokenInfoByAddress(
+        tx.sourceChainId,
+        tx.assetAddr
+      );
+      supported.push([token, tx]);
+    } catch (err) {
+      console.warn("transaction with unknown token", err, tx);
+    }
+    return supported;
+  }, [] as [token: Token, tx: Transfer][]);
+
+  return supportedTransactions.map(([token, tx]) => {
     const timestamp: ICell = {
       size: "sm",
       value: DateTime.fromSeconds(tx.depositTime).toFormat("d MMM yyyy - t"),
@@ -77,8 +91,6 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
         </>
       ),
     };
-
-    const token = config.getTokenInfoByAddress(sourceChainId, tx.assetAddr);
 
     const symbol: ICell = {
       size: "xs",
