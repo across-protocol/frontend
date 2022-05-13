@@ -48,13 +48,6 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
   const tokenInfo = tokenSymbol ? getToken(tokenSymbol) : undefined;
   const isWETH = tokenInfo?.symbol === "WETH";
 
-  console.log({
-    amount: amount?.toString(),
-    lpFee: fees?.lpFee?.total?.toString(),
-    relayerFee: fees?.relayerFee?.total?.toString(),
-    amountMinusFees: amountMinusFees?.toString(),
-  });
-
   return (
     <AccentSection>
       <Wrapper>
