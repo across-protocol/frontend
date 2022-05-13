@@ -3,7 +3,13 @@ import { AnimatePresence } from "framer-motion";
 import { useSelect } from "downshift";
 
 import { useBalances, useConnection } from "state/hooks";
-import { formatUnits, TokenList, ChainId, Token } from "utils";
+import {
+  formatUnits,
+  TokenList,
+  ChainId,
+  Token,
+  showMigrationPage,
+} from "utils";
 import { SectionTitle } from "../Section";
 
 import {
@@ -15,6 +21,7 @@ import {
   ToggleButton,
   Logo,
   ToggleIcon,
+  MigrationWarning,
 } from "./PoolSelection.styles";
 
 interface Props {
@@ -56,6 +63,22 @@ const PoolSelection: FC<Props> = ({ token, setToken, tokenList, chainId }) => {
   return (
     <AnimatePresence>
       <Wrapper>
+        {showMigrationPage ? (
+          <MigrationWarning>
+            <div>
+              If you have not migrated liquidity from Across v1 to Across v2,
+              please follow{" "}
+              <a
+                href="https://medium.com/across-protocol/lps-migrate-liquidity-from-v1-to-v2-screenshots-and-faqs-8616150b3396"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {" "}
+                these instructions
+              </a>{" "}
+            </div>
+          </MigrationWarning>
+        ) : null}
         <SectionTitle>Select pool</SectionTitle>
         <InputGroup>
           <RoundBox as="label" {...getLabelProps()}>

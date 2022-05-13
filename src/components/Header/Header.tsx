@@ -13,12 +13,15 @@ import {
   WalletWrapper,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
+import { showMigrationPage } from "utils";
 
-const LINKS = [
-  { href: "/", name: "Bridge" },
-  { href: "/pool", name: "Pool" },
-  { href: "/transactions", name: "Transactions" },
-];
+const LINKS = !showMigrationPage
+  ? [
+      { href: "/", name: "Bridge" },
+      { href: "/pool", name: "Pool" },
+      { href: "/about", name: "About" },
+    ]
+  : [];
 
 interface Props {
   openSidebar: boolean;
