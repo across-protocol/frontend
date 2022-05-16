@@ -13,12 +13,15 @@ import {
   WalletWrapper,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
+import { migrationPoolV2Warning } from "utils";
 
-const LINKS = [
-  { href: "/", name: "Bridge" },
-  { href: "/pool", name: "Pool" },
-  { href: "/transactions", name: "Transactions" },
-];
+const LINKS = !migrationPoolV2Warning
+  ? [
+      { href: "/", name: "Bridge" },
+      { href: "/pool", name: "Pool" },
+      { href: "/transactions", name: "Transactions" },
+    ]
+  : [];
 
 interface Props {
   openSidebar: boolean;

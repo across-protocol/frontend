@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Switch, Route, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Switch, Route, useLocation, useHistory } from "react-router-dom";
 import { Send, Pool, About, Transactions } from "views";
 import { Header, SuperHeader } from "components";
 import { useConnection } from "state/hooks";
@@ -8,11 +8,20 @@ import { useError } from "hooks";
 import styled from "@emotion/styled";
 import Sidebar from "components/Sidebar";
 import { disableDeposits } from "utils";
+import { migrationPoolV2Warning } from "utils";
+
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider } = useConnection();
   const location = useLocation();
+  const history = useHistory();
   const { error, removeError } = useError();
+  // force the user on /pool page if showMigrationPage is active.
+  useEffect(() => {
+    if (migrationPoolV2Warning && location.pathname !== "/pool") {
+      history.push("/pool");
+    }
+  }, [location.pathname, history]);
 
   return {
     openSidebar,

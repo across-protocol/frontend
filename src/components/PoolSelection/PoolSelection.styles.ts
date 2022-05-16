@@ -59,6 +59,24 @@ export const Menu = styled.ul<MenuProps>`
   z-index: 1;
 `;
 
+export const MigrationWarning = styled.div`
+  z-index: 1000;
+  display: flex;
+  padding: 1rem 0;
+  > div {
+    text-align: center;
+    border-radius: 5px;
+    background-color: var(--color-error);
+    color: var(--color-gray);
+    width: 90%;
+    height: 70px;
+    margin: 0 auto;
+    padding: 1rem 0.5rem;
+    font-size: ${14 / 16}rem;
+    line-height: ${19 / 16}rem;
+  }
+`;
+
 export const Item = motion(styled.li`
   padding: 15px 10px 10px;
   display: flex;

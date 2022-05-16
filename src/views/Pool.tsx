@@ -138,7 +138,15 @@ const Pool: FC = () => {
             <MigrationWarning>
               <div>
                 If you have not migrated liquidity from Across v1 to Across v2,
-                please follow these instruction
+                please follow{" "}
+                <a
+                  href="https://medium.com/across-protocol/lps-migrate-liquidity-from-v1-to-v2-screenshots-and-faqs-8616150b3396"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {" "}
+                  these instructions
+                </a>{" "}
               </div>
             </MigrationWarning>
           )}
