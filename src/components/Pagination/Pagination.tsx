@@ -37,13 +37,13 @@ export const PageSizeSelect: React.FC<PageSizeProps> = (props) => {
   };
 
   return (
-    <PageSizeSelectWrapper>
+    <PageSizeSelectWrapper ref={ref}>
       <PageSizeSelectButton onClick={onSelectClick}>
         {`${props.pageSize} results`}
         <RightIcon />
       </PageSizeSelectButton>
       {showDropdown && (
-        <PageSizeSelectDropdown ref={ref}>
+        <PageSizeSelectDropdown>
           {props.pageSizes.map((s) => (
             <PageSizeOptiontButton
               onClick={() => {
