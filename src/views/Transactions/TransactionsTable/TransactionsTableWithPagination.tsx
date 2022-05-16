@@ -51,7 +51,7 @@ const TransactionsTableWithPagination: FC<Props> = ({
   return (
     <>
       <TransactionsTable rows={paginatedRows} headers={headers} title={title} />
-      {paginateState.totalPages >= 1 ? (
+      {paginateState.totalPages > 1 ? (
         <PaginationWrapper>
           <Pagination
             onPageSizeChange={setPageSize}
