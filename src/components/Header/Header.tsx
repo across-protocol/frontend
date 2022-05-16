@@ -13,13 +13,13 @@ import {
   WalletWrapper,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
-import { showMigrationPage } from "utils";
+import { migrationPoolV2Warning } from "utils";
 
-const LINKS = !showMigrationPage
+const LINKS = !migrationPoolV2Warning
   ? [
       { href: "/", name: "Bridge" },
       { href: "/pool", name: "Pool" },
-      { href: "/about", name: "About" },
+      { href: "/transactions", name: "Transactions" },
     ]
   : [];
 

@@ -8,7 +8,7 @@ import { useError } from "hooks";
 import styled from "@emotion/styled";
 import Sidebar from "components/Sidebar";
 import { disableDeposits } from "utils";
-import { showMigrationPage } from "utils";
+import { migrationPoolV2Warning } from "utils";
 
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
@@ -18,7 +18,7 @@ function useRoutes() {
   const { error, removeError } = useError();
   // force the user on /pool page if showMigrationPage is active.
   useEffect(() => {
-    if (showMigrationPage && location.pathname !== "/pool") {
+    if (migrationPoolV2Warning && location.pathname !== "/pool") {
       history.push("/pool");
     }
   }, [location.pathname, history]);

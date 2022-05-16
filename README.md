@@ -19,7 +19,6 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 - REACT_APP_CHAIN_42161_PROVIDER_URL: custom provider for Arbitrum node
 - REACT_APP_MIGRATION_POOL_V2_WARNING: Warns user to check liquidity on V1 on Pool tab when set to `true`.
 - REACT_APP_DEBUG: set to 1 (or any value) to enable debug logs. Leave undefined to disable logs.
-- REACT_APP_SHOW_MIGRATION_PAGE: Only allows /pool route and shows a banner.
 
 ## Internal Contributions
 
