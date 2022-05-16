@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { ethers } from "ethers";
-import { TableLogo, TableLink } from "./TransactionsTable.styles";
+import { TableLogo, TableLink, StyledPlus } from "./TransactionsTable.styles";
 import { getConfig, Token } from "utils/config";
 import {
   shortenTransactionHash,
@@ -156,6 +156,7 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
           >
             {shortenTransactionHash(tx.depositTxHash)}
           </TableLink>
+          <StyledPlus />
         </>
       ) : (
         <TableLink

@@ -6,6 +6,7 @@ import {
   Row,
   Cell,
 } from "components/Table/Table.styles";
+import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 
 export const Wrapper = styled.div`
   margin: 2rem auto;
@@ -165,4 +166,9 @@ export const MobileTableLink = styled(TableLink)`
 export const PaginationWrapper = styled.div`
   max-width: 1200px;
   margin: auto;
+`;
+
+export const StyledPlus = styled(AcrossPlusIcon)`
+  cursor: pointer;
+  margin-left: 8px;
 `;
