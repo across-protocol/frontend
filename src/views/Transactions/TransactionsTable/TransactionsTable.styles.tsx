@@ -10,7 +10,7 @@ import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 
 export const Wrapper = styled.div`
   margin: 2rem auto;
-  max-width: 1400px;
+  max-width: 1425px;
   overflow-x: auto;
 `;
 
@@ -29,7 +29,7 @@ export const StyledTableWrapper = styled(TableWrapper)`
 
 export const StyledHeadRow = styled(HeadRow)`
   background-color: var(--color-black);
-  width: 1400px;
+  width: 1425px;
   overflow-x: auto;
 `;
 
@@ -37,7 +37,7 @@ export const StyledBody = styled(Body)``;
 
 export const StyledRow = styled(Row)`
   background: rgba(255, 255, 255, 0.08);
-  width: 1400px;
+  width: 1425px;
   overflow-x: auto;
   margin: 0 auto;
   /* Don't do zebra */
@@ -170,5 +170,5 @@ export const PaginationWrapper = styled.div`
 
 export const StyledPlus = styled(AcrossPlusIcon)`
   cursor: pointer;
-  margin-left: 8px;
+  margin-left: 16px;
 `;

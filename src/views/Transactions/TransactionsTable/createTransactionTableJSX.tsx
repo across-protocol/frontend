@@ -11,6 +11,7 @@ import { ICell, IRow } from "components/Table/Table";
 import { getChainInfo } from "utils/constants";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 import { ChainId } from "utils";
+import { TxLink } from "../useTransactionsView";
 
 // Will take View Model Transaction as arg
 // Example of TX View Model:
@@ -25,13 +26,21 @@ import { ChainId } from "utils";
   sourceChainId: 69
   status: "pending"
 */
-export default function createTransactionTableJSX(transactions: Transfer[]) {
-  const rows = formatTransactionRows(transactions);
+export default function createTransactionTableJSX(
+  transactions: Transfer[],
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>,
+  setModalData: React.Dispatch<React.SetStateAction<TxLink[]>>
+) {
+  const rows = formatTransactionRows(transactions, setOpenModal, setModalData);
   return rows;
 }
 
 // Will take a TransactionsArg
-function formatTransactionRows(transactions: Transfer[]): IRow[] {
+function formatTransactionRows(
+  transactions: Transfer[],
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>,
+  setModalData: React.Dispatch<React.SetStateAction<TxLink[]>>
+): IRow[] {
   const config = getConfig();
   const supportedTransactions = transactions.reduce((supported, tx) => {
     try {
@@ -156,7 +165,31 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
           >
             {shortenTransactionHash(tx.depositTxHash)}
           </TableLink>
-          <StyledPlus />
+          <StyledPlus
+            onClick={() => {
+              setOpenModal(true);
+              setModalData([
+                {
+                  url: getChainInfo(sourceChainId).constructExplorerLink(
+                    tx.depositTxHash
+                  ),
+                  text: tx.depositTxHash,
+                },
+                {
+                  url: getChainInfo(sourceChainId).constructExplorerLink(
+                    tx.depositTxHash
+                  ),
+                  text: tx.depositTxHash,
+                },
+                {
+                  url: getChainInfo(sourceChainId).constructExplorerLink(
+                    tx.depositTxHash
+                  ),
+                  text: tx.depositTxHash,
+                },
+              ]);
+            }}
+          />
         </>
       ) : (
         <TableLink

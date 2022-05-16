@@ -31,6 +31,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 import ethLogo from "assets/ethereum-logo.svg";
 import wethLogo from "assets/weth-logo.svg";
+import TransactionsTableModal from "./TransactionsTableModal";
 const Transactions = () => {
   const {
     isConnected,
@@ -49,16 +50,20 @@ const Transactions = () => {
     pageSize,
     pageSizes,
     setPageSize,
+    openModal,
+    setOpenModal,
+    modalData,
+    setModalData,
   } = useTransactionsView();
 
   const ongoingTx = useMemo(
-    () => createTransactionTableJSX(rawOngoingTx),
-    [rawOngoingTx]
+    () => createTransactionTableJSX(rawOngoingTx, setOpenModal, setModalData),
+    [rawOngoingTx, setOpenModal, setModalData]
   );
 
   const filledTx = useMemo(
-    () => createTransactionTableJSX(rawFilledTx),
-    [rawFilledTx]
+    () => createTransactionTableJSX(rawFilledTx, setOpenModal, setModalData),
+    [rawFilledTx, setOpenModal, setModalData]
   );
 
   const mobileFilledTx = useMemo(
@@ -175,6 +180,11 @@ const Transactions = () => {
           </BottomRow>
         </>
       )}
+      <TransactionsTableModal
+        isOpen={openModal}
+        onClose={() => setOpenModal(false)}
+        txLinks={modalData}
+      />
     </Wrapper>
   );
 };
