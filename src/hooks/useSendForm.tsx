@@ -179,7 +179,8 @@ function amountReducer(state: FormState, amount: ethers.BigNumber): FormState {
 function fromChainReducer(state: FormState, chainId: ChainId): FormState {
   const config = getConfig();
   let fromChain = chainId;
-  let toChain = state.toChain;
+  // reset toChain
+  let toChain = undefined;
   let tokenSymbol = state.tokenSymbol;
 
   let availableRoutes = config.filterRoutes({
