@@ -5,9 +5,10 @@ import useWindowSize from "hooks/useWindowsSize";
 import getTxClient from "state/transferHistory";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 import { transfersHistory } from "@across-protocol/sdk-v2";
+import { getTxHistoryPageSize, setTxHistoryPageSize } from "utils/localStorage";
 
 const MAX_TIME_FOR_FETCHING_TX = 5 * 60 * 1000;
-const TX_HISTORY_PAGE_SIZE_KEY = "txHistoryPageSize";
+const DEFAULT_TX_HISTORY_PAGE_SIZE = 10;
 
 export default function useTransactionsView() {
   const { provider, chainId, isConnected, account } = useConnection();
@@ -17,9 +18,7 @@ export default function useTransactionsView() {
   const [openOngoingRow, setOpenOngoingRow] = useState<number>(-1);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(
-    localStorage.getItem(TX_HISTORY_PAGE_SIZE_KEY)
-      ? Number(localStorage.getItem(TX_HISTORY_PAGE_SIZE_KEY))
-      : 10
+    getTxHistoryPageSize() || DEFAULT_TX_HISTORY_PAGE_SIZE
   );
   const [rawFilledTx, setRawFilledTx] = useState<Transfer[]>([]);
   const [rawOngoingTx, setRawOngoingTx] = useState<Transfer[]>([]);
@@ -84,7 +83,7 @@ export default function useTransactionsView() {
 
   function onPageSizeChange(value: number) {
     setPageSize(value);
-    localStorage.setItem(TX_HISTORY_PAGE_SIZE_KEY, value.toString());
+    setTxHistoryPageSize(value);
   }
 
   return {
