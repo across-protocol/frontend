@@ -27,7 +27,7 @@ export default function useTransactionsView() {
   const [txClient] = useState(getTxClient);
   // Start the tracking / stopping of the TX in the client.
   const [timer, setTimer] = useState<NodeJS.Timeout | undefined>();
-  const pageSizes = useMemo(() => [10, 25, 50, 1000], []);
+  const pageSizes = useMemo(() => [10, 25, 50], []);
 
   useEffect(() => {
     if (txClient) {
