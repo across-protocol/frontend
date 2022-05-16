@@ -135,7 +135,7 @@ export async function getBridgeFees({
 }
 
 export const getConfirmationDepositTime = () => {
-  return "~2 minutes";
+  return "~1-3 minutes";
 };
 
 type AcrossDepositArgs = {

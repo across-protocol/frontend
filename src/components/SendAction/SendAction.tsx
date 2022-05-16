@@ -1,5 +1,11 @@
 import React from "react";
-import { formatUnits, receiveAmount, getChainInfo, getToken } from "utils";
+import {
+  formatUnits,
+  receiveAmount,
+  getChainInfo,
+  getToken,
+  getConfirmationDepositTime,
+} from "utils";
 import { PrimaryButton } from "../Buttons";
 import {
   Wrapper,
@@ -57,7 +63,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
             <InfoContainer>
               <Info>
                 {`Time to ${toChainInfo.name}`}
-                <div>~1-3 minutes</div>
+                <div>{getConfirmationDepositTime()}</div>
               </Info>
               <Info>
                 <div>Ethereum Network Gas</div>
