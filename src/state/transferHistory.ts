@@ -12,6 +12,7 @@ export enum TransfersHistoryEvent {
   TransfersUpdated = "TransfersUpdated",
 }
 const { TransfersHistoryClient } = transfersHistory;
+const POLLING_INTERVAL_SECONDS = 10;
 
 interface txHistoryConfig {
   chainId: number;
@@ -36,7 +37,7 @@ export function createTxHistoryClientConfig(params: Params): {
       lowerBoundBlockNumber: earliestBlock,
     };
   });
-  return { chains, pollingIntervalSeconds: 0 };
+  return { chains, pollingIntervalSeconds: POLLING_INTERVAL_SECONDS };
 }
 
 export default function getClient() {
