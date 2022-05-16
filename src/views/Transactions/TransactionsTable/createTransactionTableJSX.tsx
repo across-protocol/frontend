@@ -123,6 +123,22 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
       ),
     };
 
+    // TODO: change href to proper url when we get real TX data
+    const filledTxHashCell: ICell = {
+      size: "xs",
+      value: (
+        <TableLink
+          href={getChainInfo(sourceChainId).constructExplorerLink(
+            tx.depositTxHash
+          )}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {shortenTransactionHash(tx.depositTxHash)}
+        </TableLink>
+      ),
+    };
+
     return {
       cells: [
         timestamp,
@@ -133,6 +149,7 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
         symbol,
         amount,
         txHash,
+        filledTxHashCell,
       ],
     } as IRow;
   });
@@ -177,6 +194,11 @@ export const headers: ICell[] = [
   {
     size: "xs",
     value: "Deposit tx",
+    cellClassName: "header-cell",
+  },
+  {
+    size: "xs",
+    value: "Fill tx(s)",
     cellClassName: "header-cell",
   },
 ];
