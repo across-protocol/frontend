@@ -47,7 +47,7 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
     return supported;
   }, [] as [token: Token, tx: Transfer][]);
 
-  return supportedTransactions.map(([token, tx]) => {
+  return supportedTransactions.map(([token, tx], index) => {
     const timestamp: ICell = {
       size: "sm",
       value: DateTime.fromSeconds(tx.depositTime).toFormat("d MMM yyyy - t"),
@@ -124,9 +124,40 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
     };
 
     // TODO: change href to proper url when we get real TX data
-    const filledTxHashCell: ICell = {
-      size: "xs",
-      value: (
+    const testFilledValue =
+      index === 0 ? (
+        <>
+          <TableLink
+            href={getChainInfo(sourceChainId).constructExplorerLink(
+              tx.depositTxHash
+            )}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {shortenTransactionHash(tx.depositTxHash)}
+          </TableLink>
+          ,{" "}
+          <TableLink
+            href={getChainInfo(sourceChainId).constructExplorerLink(
+              tx.depositTxHash
+            )}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {shortenTransactionHash(tx.depositTxHash)}
+          </TableLink>
+          ,{" "}
+          <TableLink
+            href={getChainInfo(sourceChainId).constructExplorerLink(
+              tx.depositTxHash
+            )}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {shortenTransactionHash(tx.depositTxHash)}
+          </TableLink>
+        </>
+      ) : (
         <TableLink
           href={getChainInfo(sourceChainId).constructExplorerLink(
             tx.depositTxHash
@@ -136,7 +167,10 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
         >
           {shortenTransactionHash(tx.depositTxHash)}
         </TableLink>
-      ),
+      );
+    const filledTxHashCell: ICell = {
+      size: "md",
+      value: testFilledValue,
     };
 
     return {
@@ -197,7 +231,7 @@ export const headers: ICell[] = [
     cellClassName: "header-cell",
   },
   {
-    size: "xs",
+    size: "md",
     value: "Fill tx(s)",
     cellClassName: "header-cell",
   },

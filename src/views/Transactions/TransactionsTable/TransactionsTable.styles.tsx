@@ -9,7 +9,7 @@ import {
 
 export const Wrapper = styled.div`
   margin: 2rem auto;
-  max-width: 1350px;
+  max-width: 1400px;
   overflow-x: auto;
 `;
 
@@ -28,7 +28,7 @@ export const StyledTableWrapper = styled(TableWrapper)`
 
 export const StyledHeadRow = styled(HeadRow)`
   background-color: var(--color-black);
-  width: 1350px;
+  width: 1400px;
   overflow-x: auto;
 `;
 
@@ -36,7 +36,7 @@ export const StyledBody = styled(Body)``;
 
 export const StyledRow = styled(Row)`
   background: rgba(255, 255, 255, 0.08);
-  width: 1350px;
+  width: 1400px;
   overflow-x: auto;
   margin: 0 auto;
   /* Don't do zebra */
