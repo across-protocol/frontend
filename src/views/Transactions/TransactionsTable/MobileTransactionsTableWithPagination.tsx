@@ -38,6 +38,7 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
     elementCount,
     currentPage,
     maxNavigationCount: 5,
+    elementsPerPage: pageSize,
   });
 
   const paginatedRows = rows.slice(
