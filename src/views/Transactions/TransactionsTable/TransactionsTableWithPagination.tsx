@@ -17,6 +17,9 @@ interface Props {
   currentPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
   initialLoading: boolean;
+  pageSize: number;
+  setPageSize: (value: number) => void;
+  pageSizes: number[];
 }
 
 const TransactionsTableWithPagination: FC<Props> = ({
@@ -27,13 +30,16 @@ const TransactionsTableWithPagination: FC<Props> = ({
   currentPage,
   setCurrentPage,
   initialLoading,
+  pageSize,
+  pageSizes,
+  setPageSize,
 }) => {
   const elementCount = elements.length;
-
   const paginateState = paginate({
     elementCount,
     currentPage,
     maxNavigationCount: 5,
+    elementsPerPage: pageSize,
   });
 
   const paginatedRows = rows.slice(
@@ -45,9 +51,15 @@ const TransactionsTableWithPagination: FC<Props> = ({
   return (
     <>
       <TransactionsTable rows={paginatedRows} headers={headers} title={title} />
-      {paginateState.totalPages > 1 ? (
+      {paginateState.totalPages >= 1 ? (
         <PaginationWrapper>
-          <Pagination onPageChange={setCurrentPage} {...paginateState} />
+          <Pagination
+            onPageSizeChange={setPageSize}
+            pageSize={pageSize}
+            pageSizes={pageSizes}
+            onPageChange={setCurrentPage}
+            {...paginateState}
+          />
         </PaginationWrapper>
       ) : null}
     </>

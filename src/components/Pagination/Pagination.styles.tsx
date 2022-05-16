@@ -1,8 +1,76 @@
+import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
+import { BaseButton } from "components/Buttons";
 
 export const Wrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
   width: 100%;
-  padding-bottom: 2rem;
+  padding-bottom: 8rem;
+`;
+
+export const PageSizeSelectWrapper = styled.div`
+  position: relative;
+`;
+
+export const PageSizeSelectButton = styled(BaseButton)`
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: var(--color-white);
+  line-height: 24px;
+  border: 1px solid var(--color-pagination);
+  border-radius: 6px;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    transform: rotate(90deg);
+  }
+`;
+
+const PageSelectDropdownRevealAnimation = keyframes`
+  from {
+    opacity: 0;
+    top: 30px;
+  }
+
+  to {
+    opacity: 1;
+    top: 40px;
+  }
+`;
+
+export const PageSizeSelectDropdown = styled.div`
+  position: absolute;
+  top: 40px;
+  left: 0%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-pagination);
+  border-radius: 6px;
+  overflow: hidden;
+  animation: ${PageSelectDropdownRevealAnimation} 0.1s ease-out forwards;
+`;
+
+export const PageSizeOptiontButton = styled(BaseButton)`
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: var(--color-white);
+  line-height: 24px;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background-color 0.1s ease-out, color 0.1s ease-out;
+
+  :hover {
+    background-color: var(--color-primary);
+    color: var(--color-gray);
+  }
 `;
 
 export const PaginationElements = styled.div`
