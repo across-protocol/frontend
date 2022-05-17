@@ -8,6 +8,7 @@ import {
   ChainId,
   providerUrlsTable,
   trackEvent,
+  debug,
 } from "utils";
 import { update, disconnect, error } from "state/connection";
 import { store } from "state";
@@ -116,6 +117,7 @@ export function OnboardEthers(config: Initialization, emit: Emit) {
   };
 }
 export const onboard = OnboardEthers(onboardBaseConfig(), (event, data) => {
+  if (debug) console.log("onboard event", event, data);
   if (event === "init") {
     trackEvent({ category: "wallet", action: "connect", name: "null" });
   }
