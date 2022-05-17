@@ -49,6 +49,11 @@ export function OnboardEthers(config: Initialization, emit: Emit) {
     subscriptions: {
       address: (address: string) => {
         emit("update", { account: address });
+        if (!address) {
+          // if we dont call reset here when account is undefined, we wont be able to reconnect
+          // this can happen if user locks their wallet.
+          reset();
+        }
       },
       network: (chainIdInHex) => {
         if (chainIdInHex == null) {
