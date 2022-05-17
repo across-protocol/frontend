@@ -182,7 +182,10 @@ const Transactions = () => {
       )}
       <TransactionsTableModal
         isOpen={openModal}
-        onClose={() => setOpenModal(false)}
+        onClose={() => {
+          setOpenModal(false);
+          setModalData([]);
+        }}
         txLinks={modalData}
       />
     </Wrapper>
