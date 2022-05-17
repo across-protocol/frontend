@@ -21,6 +21,8 @@ interface Props {
   headers: ICell[];
   title: string;
   openIndex: number;
+  currentPage?: number;
+  elementsPerPage?: number;
 }
 
 const CHEVRON_INDEX = 3;
@@ -30,8 +32,9 @@ const MobileTransactionsTable: FC<Props> = ({
   headers,
   title,
   openIndex,
+  currentPage = 0,
+  elementsPerPage = 0,
 }) => {
-  console.log("openIndex", openIndex);
   return (
     <MobileWrapper>
       {rows.length ? (
@@ -76,7 +79,8 @@ const MobileTransactionsTable: FC<Props> = ({
                         );
                       })}
                     </StyledMobileRow>
-                    {openIndex === ridx && (
+                    {/* Need to consider pagination for comparing these two indexes */}
+                    {openIndex === ridx + currentPage * elementsPerPage && (
                       <AccordionWrapper key={ridx + 1}>
                         <AccordionRow>
                           <div>Source</div>
