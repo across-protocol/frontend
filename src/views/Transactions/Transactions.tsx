@@ -67,13 +67,25 @@ const Transactions = () => {
   );
 
   const mobileFilledTx = useMemo(
-    () => createMobileTransactionTableJSX(rawFilledTx, setOpenFilledRow),
-    [rawFilledTx, setOpenFilledRow]
+    () =>
+      createMobileTransactionTableJSX(
+        rawFilledTx,
+        setOpenFilledRow,
+        setOpenModal,
+        setModalData
+      ),
+    [rawFilledTx, setOpenFilledRow, setOpenModal, setModalData]
   );
 
   const mobileOngoingTx = useMemo(
-    () => createMobileTransactionTableJSX(rawOngoingTx, setOpenOngoingRow),
-    [rawOngoingTx, setOpenOngoingRow]
+    () =>
+      createMobileTransactionTableJSX(
+        rawOngoingTx,
+        setOpenOngoingRow,
+        setOpenModal,
+        setModalData
+      ),
+    [rawOngoingTx, setOpenOngoingRow, setOpenModal, setModalData]
   );
 
   const isTxPresent = !filledTx.length && !ongoingTx.length && !initialLoading;

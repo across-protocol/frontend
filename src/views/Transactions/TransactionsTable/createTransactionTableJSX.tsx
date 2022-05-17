@@ -116,7 +116,6 @@ function formatTransactionRows(
       value: ethers.utils.formatUnits(tx.amount, token.decimals),
     };
 
-    // TODO: change href to proper url when we get real TX data
     const txHash: ICell = {
       size: "xs",
       value: (

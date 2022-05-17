@@ -4,12 +4,14 @@ import {
   TableLogo,
   MobileTableLink,
   MobileChevron,
+  StyledPlus,
+  TableLink,
 } from "./TransactionsTable.styles";
 import { shortenTransactionHash, capitalizeFirstLetter } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 import { getChainInfo, ChainId } from "utils/constants";
 import { getConfig, Token } from "utils/config";
-import { CLOSED_DROPDOWN_INDEX } from "../useTransactionsView";
+import { CLOSED_DROPDOWN_INDEX, TxLink } from "../useTransactionsView";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
@@ -39,15 +41,24 @@ Transfer:
 // Will take View Model Transaction as arg
 export default function createMobileTransactionTableJSX(
   transactions: Transfer[],
-  setOpenIndex: React.Dispatch<React.SetStateAction<number>>
+  setOpenIndex: React.Dispatch<React.SetStateAction<number>>,
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>,
+  setModalData: React.Dispatch<React.SetStateAction<TxLink[]>>
 ) {
-  return formatTransactionRows(transactions, setOpenIndex);
+  return formatTransactionRows(
+    transactions,
+    setOpenIndex,
+    setOpenModal,
+    setModalData
+  );
 }
 
 // Will take a TransactionsArg
 function formatTransactionRows(
   transactions: Transfer[],
-  setOpenIndex: React.Dispatch<React.SetStateAction<number>>
+  setOpenIndex: React.Dispatch<React.SetStateAction<number>>,
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>,
+  setModalData: React.Dispatch<React.SetStateAction<TxLink[]>>
 ): IMobileRow[] {
   const config = getConfig();
 
@@ -113,7 +124,6 @@ function formatTransactionRows(
 
     const amount = ethers.utils.formatEther(tx.amount);
 
-    // TODO: change href to proper url when we get real TX data
     const txHash = (
       <MobileTableLink
         href={getChainInfo(sourceChainId).constructExplorerLink(
@@ -125,6 +135,63 @@ function formatTransactionRows(
         {shortenTransactionHash(tx.depositTxHash)}
       </MobileTableLink>
     );
+
+    let filledTableValue = <div>-</div>;
+    if (tx.fillTxs.length) {
+      const filledTxElements = tx.fillTxs.map((fillTxHash) => {
+        return (
+          <TableLink
+            href={getChainInfo(sourceChainId).constructExplorerLink(fillTxHash)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {shortenTransactionHash(fillTxHash)}
+          </TableLink>
+        );
+      });
+
+      if (filledTxElements.length > 3) {
+        const md = tx.fillTxs.map((x) => {
+          return {
+            url: getChainInfo(sourceChainId).constructExplorerLink(x),
+            text: x,
+          };
+        });
+        filledTableValue = (
+          <>
+            {filledTxElements
+              .map<React.ReactNode>((t, i) => {
+                if (i < 3) return t;
+                return null;
+              })
+              .reduce((prev, curr) => [prev, ", ", curr])}
+            <StyledPlus
+              onClick={() => {
+                setOpenModal(true);
+                setModalData(md);
+              }}
+            />
+          </>
+        );
+      }
+
+      if (filledTxElements.length > 1 && filledTxElements.length <= 3) {
+        filledTableValue = (
+          <>
+            {filledTxElements
+              .map<React.ReactNode>((t) => t)
+              .reduce((prev, curr) => [prev, ", ", curr])}
+          </>
+        );
+      }
+
+      if (filledTxElements.length === 1) filledTableValue = filledTxElements[0];
+    }
+
+    const filledTxHashCell: ICell = {
+      size: "md",
+      value: filledTableValue,
+    };
 
     return {
       cells: [timestamp, status, downChevron],
@@ -138,6 +205,7 @@ function formatTransactionRows(
           prevValue !== index ? index : CLOSED_DROPDOWN_INDEX
         );
       },
+      filledTxHashCell,
     } as IMobileRow;
   });
 }
