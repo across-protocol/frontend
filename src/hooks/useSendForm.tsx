@@ -175,7 +175,7 @@ function amountReducer(state: FormState, amount: ethers.BigNumber): FormState {
   }
 }
 
-// this has highest priority
+// this has highest priority, this drives the rest of the components when selected
 function fromChainReducer(state: FormState, chainId: ChainId): FormState {
   const config = getConfig();
   let fromChain = chainId;
@@ -197,12 +197,9 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
     tokenSymbol = firstRoute.fromTokenSymbol;
   }
 
-  if (tokenSymbol === undefined) {
-    tokenSymbol = availableRoutes[0].fromTokenSymbol;
-  }
-  if (toChain === undefined) {
-    toChain = availableRoutes[0].toChain;
-  }
+  const selectedRoute = availableRoutes[0];
+  tokenSymbol = selectedRoute.fromTokenSymbol;
+  toChain = selectedRoute.toChain;
 
   const availableToChains = calculateAvailableToChains(
     chainId,
@@ -211,8 +208,6 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
   );
 
   const availableTokens = config.filterReachableTokens(fromChain, toChain);
-  const selectedRoute =
-    availableRoutes.length === 1 ? availableRoutes[0] : undefined;
 
   switch (state.status) {
     case FormStatus.IDLE:

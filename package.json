@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@across-protocol/contracts-v2": "^0.0.34",
-    "@across-protocol/sdk-v2": "^0.1.0",
+    "@across-protocol/sdk-v2": "^0.1.2",
     "@datapunt/matomo-tracker-js": "^0.5.1",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
@@ -29,7 +29,7 @@
     "bnc-notify": "^1.9.1",
     "bnc-onboard": "^1.37.0",
     "downshift": "^6.1.7",
-    "ethers": "^5.4.7",
+    "ethers": "^5.6.1",
     "framer-motion": "4.1.17",
     "lodash-es": "^4.17.21",
     "luxon": "^2.3.1",
