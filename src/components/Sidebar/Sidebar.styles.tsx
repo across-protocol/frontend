@@ -20,7 +20,7 @@ export const Overlay = styled.div`
 
 export const StyledSidebar = styled(ProSidebar)`
   position: fixed;
-  transition: all 1s ease-in-out;
+  transition: all 0.25s ease-in-out;
   top: 0;
   width: 450px;
   transform: translateX(100%);
