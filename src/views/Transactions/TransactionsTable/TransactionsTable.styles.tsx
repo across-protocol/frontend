@@ -170,5 +170,7 @@ export const PaginationWrapper = styled.div`
 
 export const StyledPlus = styled(AcrossPlusIcon)`
   cursor: pointer;
-  margin-left: 16px;
+  float: right;
+  margin-top: 8px;
+  margin-right: 4px;
 `;

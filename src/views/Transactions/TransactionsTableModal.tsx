@@ -64,7 +64,7 @@ const Info = styled.article`
 `;
 
 const Link = styled.a`
-  color: var(--color-secondary);
+  color: var(--color-gray);
   text-decoration: none;
   transform: opacity 100ms linear;
 
@@ -94,14 +94,18 @@ const Wrapper = styled(DialogContent)`
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 12px;
+  right: 6px;
   color: var(--color-gray);
   background-color: transparent;
   padding: 8px;
   border: none;
   outline: none;
   cursor: pointer;
+  > svg {
+    height: 32px;
+    width: 32px;
+  }
 `;
 
 const Overlay = styled(DialogOverlay)`

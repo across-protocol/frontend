@@ -132,79 +132,61 @@ function formatTransactionRows(
       ),
     };
 
-    // TODO: change href to proper url when we get real TX data
-    const testFilledValue =
-      index === 0 ? (
-        <>
+    let filledTableValue = <div>-</div>;
+    if (tx.fillTxs.length) {
+      const filledTxElements = tx.fillTxs.map((fillTxHash) => {
+        return (
           <TableLink
-            href={getChainInfo(sourceChainId).constructExplorerLink(
-              tx.depositTxHash
-            )}
+            href={getChainInfo(sourceChainId).constructExplorerLink(fillTxHash)}
             target="_blank"
             rel="noreferrer"
           >
-            {shortenTransactionHash(tx.depositTxHash)}
+            {shortenTransactionHash(fillTxHash)}
           </TableLink>
-          ,{" "}
-          <TableLink
-            href={getChainInfo(sourceChainId).constructExplorerLink(
-              tx.depositTxHash
-            )}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {shortenTransactionHash(tx.depositTxHash)}
-          </TableLink>
-          ,{" "}
-          <TableLink
-            href={getChainInfo(sourceChainId).constructExplorerLink(
-              tx.depositTxHash
-            )}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {shortenTransactionHash(tx.depositTxHash)}
-          </TableLink>
-          <StyledPlus
-            onClick={() => {
-              setOpenModal(true);
-              setModalData([
-                {
-                  url: getChainInfo(sourceChainId).constructExplorerLink(
-                    tx.depositTxHash
-                  ),
-                  text: tx.depositTxHash,
-                },
-                {
-                  url: getChainInfo(sourceChainId).constructExplorerLink(
-                    tx.depositTxHash
-                  ),
-                  text: tx.depositTxHash,
-                },
-                {
-                  url: getChainInfo(sourceChainId).constructExplorerLink(
-                    tx.depositTxHash
-                  ),
-                  text: tx.depositTxHash,
-                },
-              ]);
-            }}
-          />
-        </>
-      ) : (
-        <TableLink
-          href={getChainInfo(sourceChainId).constructExplorerLink(
-            tx.depositTxHash
-          )}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {shortenTransactionHash(tx.depositTxHash)}
-        </TableLink>
-      );
+        );
+      });
+
+      if (filledTxElements.length > 3) {
+        const md = tx.fillTxs.map((x) => {
+          return {
+            url: getChainInfo(sourceChainId).constructExplorerLink(x),
+            text: x,
+          };
+        });
+        filledTableValue = (
+          <>
+            {filledTxElements
+              .map<React.ReactNode>((t, i) => {
+                if (i < 3) return t;
+                return null;
+              })
+              .reduce((prev, curr) => [prev, ", ", curr])}
+            <StyledPlus
+              onClick={() => {
+                setOpenModal(true);
+                setModalData(md);
+              }}
+            />
+          </>
+        );
+      }
+
+      if (filledTxElements.length > 1 && filledTxElements.length <= 3) {
+        filledTableValue = (
+          <>
+            {filledTxElements
+              .map<React.ReactNode>((t) => t)
+              .reduce((prev, curr) => [prev, ", ", curr])}
+          </>
+        );
+      }
+
+      if (filledTxElements.length === 1) filledTableValue = filledTxElements[0];
+    }
+
     const filledTxHashCell: ICell = {
       size: "md",
-      value: testFilledValue,
+      value: filledTableValue,
     };
 
     return {
