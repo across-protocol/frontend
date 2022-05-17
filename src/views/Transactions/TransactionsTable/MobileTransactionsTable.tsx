@@ -31,6 +31,7 @@ const MobileTransactionsTable: FC<Props> = ({
   title,
   openIndex,
 }) => {
+  console.log("openIndex", openIndex);
   return (
     <MobileWrapper>
       {rows.length ? (
@@ -96,6 +97,10 @@ const MobileTransactionsTable: FC<Props> = ({
                         <AccordionRow>
                           <div>Deposit tx</div>
                           <div>{row.txHash}</div>
+                        </AccordionRow>
+                        <AccordionRow>
+                          <div>Filled tx</div>
+                          <div>{row.filledTableValue}</div>
                         </AccordionRow>
                       </AccordionWrapper>
                     )}

@@ -4,7 +4,6 @@ import {
   TableLogo,
   MobileTableLink,
   MobileChevron,
-  StyledPlus,
   TableLink,
 } from "./TransactionsTable.styles";
 import { shortenTransactionHash, capitalizeFirstLetter } from "utils/format";
@@ -23,6 +22,7 @@ export interface IMobileRow extends IRow {
   amount: string;
   txHash: React.ReactElement;
   onClick?: () => void;
+  filledTableValue: JSX.Element;
 }
 
 /*  
@@ -77,6 +77,7 @@ function formatTransactionRows(
   }, [] as [token: Token, tx: Transfer][]);
 
   return supportedTransactions.map(([token, tx], index) => {
+    console.log("index", index);
     const timestamp: ICell = {
       size: "md",
       value: DateTime.fromSeconds(tx.depositTime).toFormat("d MMM yyyy - t"),
@@ -140,58 +141,28 @@ function formatTransactionRows(
     if (tx.fillTxs.length) {
       const filledTxElements = tx.fillTxs.map((fillTxHash) => {
         return (
-          <TableLink
-            href={getChainInfo(sourceChainId).constructExplorerLink(fillTxHash)}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {shortenTransactionHash(fillTxHash)}
-          </TableLink>
+          <div>
+            <TableLink
+              href={getChainInfo(sourceChainId).constructExplorerLink(
+                fillTxHash
+              )}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {shortenTransactionHash(fillTxHash)}
+            </TableLink>
+          </div>
         );
       });
 
-      if (filledTxElements.length > 3) {
-        const md = tx.fillTxs.map((x) => {
-          return {
-            url: getChainInfo(sourceChainId).constructExplorerLink(x),
-            text: x,
-          };
-        });
+      if (filledTxElements.length > 1) {
         filledTableValue = (
-          <>
-            {filledTxElements
-              .map<React.ReactNode>((t, i) => {
-                if (i < 3) return t;
-                return null;
-              })
-              .reduce((prev, curr) => [prev, ", ", curr])}
-            <StyledPlus
-              onClick={() => {
-                setOpenModal(true);
-                setModalData(md);
-              }}
-            />
-          </>
-        );
-      }
-
-      if (filledTxElements.length > 1 && filledTxElements.length <= 3) {
-        filledTableValue = (
-          <>
-            {filledTxElements
-              .map<React.ReactNode>((t) => t)
-              .reduce((prev, curr) => [prev, ", ", curr])}
-          </>
+          <>{filledTxElements.map<React.ReactNode>((t) => t)}</>
         );
       }
 
       if (filledTxElements.length === 1) filledTableValue = filledTxElements[0];
     }
-
-    const filledTxHashCell: ICell = {
-      size: "md",
-      value: filledTableValue,
-    };
 
     return {
       cells: [timestamp, status, downChevron],
@@ -205,7 +176,7 @@ function formatTransactionRows(
           prevValue !== index ? index : CLOSED_DROPDOWN_INDEX
         );
       },
-      filledTxHashCell,
+      filledTableValue,
     } as IMobileRow;
   });
 }
