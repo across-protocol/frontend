@@ -163,5 +163,6 @@ export const MobileTableLink = styled(TableLink)`
 `;
 
 export const PaginationWrapper = styled.div`
-  max-width: 1315px;
+  max-width: 1200px;
+  margin: auto;
 `;

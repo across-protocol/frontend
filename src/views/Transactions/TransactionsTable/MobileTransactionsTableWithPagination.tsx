@@ -14,6 +14,9 @@ interface Props {
   currentPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
   initialLoading: boolean;
+  pageSize: number;
+  setPageSize: (value: number) => void;
+  pageSizes: number[];
 }
 
 const MobileTransactionsTableWithPagination: FC<Props> = ({
@@ -25,6 +28,9 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
   currentPage,
   setCurrentPage,
   initialLoading,
+  pageSize,
+  pageSizes,
+  setPageSize,
 }) => {
   const elementCount = elements.length;
 
@@ -32,6 +38,7 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
     elementCount,
     currentPage,
     maxNavigationCount: 5,
+    elementsPerPage: pageSize,
   });
 
   const paginatedRows = rows.slice(
@@ -49,7 +56,13 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
         openIndex={openIndex}
       />
       {paginateState.totalPages > 1 ? (
-        <Pagination onPageChange={setCurrentPage} {...paginateState} />
+        <Pagination
+          onPageChange={setCurrentPage}
+          {...paginateState}
+          onPageSizeChange={setPageSize}
+          pageSize={pageSize}
+          pageSizes={pageSizes}
+        />
       ) : null}
     </>
   );
