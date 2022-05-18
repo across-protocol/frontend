@@ -60,18 +60,18 @@ export default function useCoinSelection() {
   );
 
   useEffect(() => {
-    if (inputAmount === "" || inputAmount === "0") {
+    if (!selectedItem || inputAmount === "" || inputAmount === "0") {
       setAmount(ethers.constants.Zero);
-      return;
-    }
-    try {
-      const amount = parseUnits(inputAmount, selectedItem?.decimals);
-      setAmount(amount);
-    } catch (e) {
-      // if we have a parsing error, we have to set this to 0 otherwise we might get fee calculation issues
-      setAmount(BigNumber.from(0));
-      // this can throw an error if parseUnits fails for an input amount that has more decimals than token decimals
-      setFormError(new ParsingError());
+    } else {
+      try {
+        const amount = parseUnits(inputAmount, selectedItem.decimals);
+        setAmount(amount);
+      } catch (e) {
+        // if we have a parsing error, we have to set this to 0 otherwise we might get fee calculation issues
+        setAmount(BigNumber.from(0));
+        // this can throw an error if parseUnits fails for an input amount that has more decimals than token decimals
+        setFormError(new ParsingError());
+      }
     }
   }, [inputAmount, selectedItem, setAmount, setFormError, tokenSymbol]);
 

@@ -190,7 +190,7 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
     fromTokenSymbol: tokenSymbol,
   });
   // if no valid routes found with user selection, de-prioritize the toChain to maintain token symbol.
-  if (!selectedRoutes.length) {
+  if (selectedRoutes.length === 0) {
     selectedRoutes = config.filterRoutes({
       fromChain,
       fromTokenSymbol: tokenSymbol,
