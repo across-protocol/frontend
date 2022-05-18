@@ -41,8 +41,6 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
     elementsPerPage: pageSize,
   });
 
-  console.log("paginationState", paginateState);
-
   const paginatedRows = rows.slice(
     paginateState.startIndex,
     paginateState.endIndex

@@ -77,7 +77,6 @@ function formatTransactionRows(
   }, [] as [token: Token, tx: Transfer][]);
 
   return supportedTransactions.map(([token, tx], index) => {
-    console.log("index", index);
     const timestamp: ICell = {
       size: "md",
       value: DateTime.fromSeconds(tx.depositTime).toFormat("d MMM yyyy - t"),
@@ -127,7 +126,7 @@ function formatTransactionRows(
 
     const txHash = (
       <MobileTableLink
-        href={getChainInfo(sourceChainId).constructExplorerLink(
+        href={getChainInfo(destinationChainId).constructExplorerLink(
           tx.depositTxHash
         )}
         target="_blank"
@@ -143,7 +142,7 @@ function formatTransactionRows(
         return (
           <div>
             <TableLink
-              href={getChainInfo(sourceChainId).constructExplorerLink(
+              href={getChainInfo(destinationChainId).constructExplorerLink(
                 fillTxHash
               )}
               target="_blank"

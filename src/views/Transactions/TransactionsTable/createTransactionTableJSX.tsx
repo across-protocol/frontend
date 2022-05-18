@@ -120,7 +120,7 @@ function formatTransactionRows(
       size: "xs",
       value: (
         <TableLink
-          href={getChainInfo(sourceChainId).constructExplorerLink(
+          href={getChainInfo(destinationChainId).constructExplorerLink(
             tx.depositTxHash
           )}
           target="_blank"
@@ -136,7 +136,9 @@ function formatTransactionRows(
       const filledTxElements = tx.fillTxs.map((fillTxHash) => {
         return (
           <TableLink
-            href={getChainInfo(sourceChainId).constructExplorerLink(fillTxHash)}
+            href={getChainInfo(destinationChainId).constructExplorerLink(
+              fillTxHash
+            )}
             target="_blank"
             rel="noreferrer"
           >
@@ -148,7 +150,7 @@ function formatTransactionRows(
       if (filledTxElements.length > 3) {
         const md = tx.fillTxs.map((x) => {
           return {
-            url: getChainInfo(sourceChainId).constructExplorerLink(x),
+            url: getChainInfo(destinationChainId).constructExplorerLink(x),
             text: x,
           };
         });
