@@ -8,6 +8,7 @@ import {
   SpokePool__factory,
 } from "@across-protocol/contracts-v2";
 import filter from "lodash/filter";
+import sortBy from "lodash/sortBy";
 
 export type Token = constants.TokenInfo & {
   l1TokenAddress: string;
@@ -21,6 +22,9 @@ export class ConfigClient {
   public readonly spokeChains: Set<number> = new Set();
   public readonly fromChains: Set<number> = new Set();
   public readonly toChains: Set<number> = new Set();
+  public tokenOrder: Record<string, number> = {};
+  public chainOrder: Record<string, number> = {};
+  public routes: constants.Routes = [];
   constructor(private config: constants.RouteConfig) {
     this.config.routes.forEach((route) => {
       this.spokeAddresses[route.fromChain] = route.fromSpokeAddress;
@@ -29,12 +33,34 @@ export class ConfigClient {
       this.toChains.add(route.toChain);
       this.fromChains.add(route.fromChain);
     });
+    // this lets us sort arbitrary array of tokens
+    this.tokenOrder = Object.fromEntries(
+      Object.entries(constants.tokenList).map(([index, token]) => [
+        token.symbol,
+        Number(index),
+      ])
+    );
+    // this lets us sort arbitrary list of chains
+    constants.chainInfoList.forEach((chain, index) => {
+      const { chainId } = chain;
+      assert(
+        constants.isSupportedChainId(chainId),
+        "Unsupported chainId: " + chainId
+      );
+      this.chainOrder[chainId] = Number(index);
+    });
+    // prioritize routes based on token symbol and tochain. This just gives us better route prioritization when filtering a fromChain
+    this.routes = sortBy(this.config.routes, (route) => {
+      return (
+        this.tokenOrder[route.fromTokenSymbol] + this.chainOrder[route.toChain]
+      );
+    });
   }
   getWethAddress(): string {
     return this.config.hubPoolWethAddress;
   }
   getRoutes(): constants.Routes {
-    return this.config.routes;
+    return this.routes;
   }
   getSpokePoolAddress(chainId: constants.ChainId): string {
     const address = this.spokeAddresses[chainId];
@@ -54,7 +80,7 @@ export class ConfigClient {
   }
   getL1TokenAddressBySymbol(symbol: string) {
     // all routes have an l1Token address, so just find the first symbol that matches
-    const route = this.config.routes.find((x) => x.fromTokenSymbol === symbol);
+    const route = this.getRoutes().find((x) => x.fromTokenSymbol === symbol);
     assert(route, `Unsupported l1 address lookup by symbol: ${symbol}`);
     return route.l1TokenAddress;
   }
@@ -69,7 +95,7 @@ export class ConfigClient {
         return entry[1] !== undefined;
       })
     );
-    return filter(this.config.routes, cleanQuery);
+    return filter(this.getRoutes(), cleanQuery);
   }
   listToChains(): constants.ChainInfoList {
     const result: constants.ChainInfoList = [];
@@ -160,9 +186,11 @@ export class ConfigClient {
   }
   filterReachableTokens(fromChain: number, toChain?: number): TokenList {
     const routes = this.filterRoutes({ fromChain, toChain });
-    return routes.map((route) =>
+    const reachableTokens = routes.map((route) =>
       this.getTokenInfoBySymbol(fromChain, route.fromTokenSymbol)
     );
+    // use token sorting when returning reachable tokens
+    return sortBy(reachableTokens, (token) => this.tokenOrder[token.symbol]);
   }
 }
 

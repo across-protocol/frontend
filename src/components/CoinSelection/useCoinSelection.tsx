@@ -1,5 +1,5 @@
 import { useSelect } from "downshift";
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import React, { useEffect, useCallback } from "react";
 import { useConnection } from "state/hooks";
@@ -23,7 +23,6 @@ export default function useCoinSelection() {
     fromChain,
     error: formError,
     setError: setFormError,
-    status: formStatus,
     availableTokens,
   } = useSendForm();
 
@@ -38,7 +37,6 @@ export default function useCoinSelection() {
     selectedItem: availableTokens.find((t) => t.symbol === tokenSymbol),
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
-        setInputAmount("");
         setTokenSymbol(selectedItem.symbol);
         // Matomo track token selection
         trackEvent({
@@ -54,6 +52,7 @@ export default function useCoinSelection() {
   );
   const balance = balances[selectedIndex];
   const { fees } = useBridgeFees(amount, toChain, selectedItem?.symbol);
+
   const [inputAmount, setInputAmount] = React.useState<string>(
     selectedItem && amount.gt("0")
       ? formatUnits(amount, selectedItem.decimals)
@@ -61,32 +60,31 @@ export default function useCoinSelection() {
   );
 
   useEffect(() => {
-    if (formStatus === "idle") {
-      setInputAmount("");
+    if (inputAmount === "" || inputAmount === "0") {
+      setAmount(ethers.constants.Zero);
+      return;
     }
-  }, [formStatus]);
+    try {
+      const amount = parseUnits(inputAmount, selectedItem?.decimals);
+      setAmount(amount);
+    } catch (e) {
+      // if we have a parsing error, we have to set this to 0 otherwise we might get fee calculation issues
+      setAmount(BigNumber.from(0));
+      // this can throw an error if parseUnits fails for an input amount that has more decimals than token decimals
+      setFormError(new ParsingError());
+    }
+  }, [inputAmount, selectedItem, setAmount, setFormError, tokenSymbol]);
 
   const handleInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value;
       setInputAmount(value);
-      if (value === "") {
-        setAmount(ethers.constants.Zero);
-        return;
-      }
-      try {
-        const amount = parseUnits(value, selectedItem?.decimals);
-        setAmount(amount);
-      } catch (e) {
-        setFormError(new ParsingError());
-      }
     },
-    [selectedItem, setAmount, setFormError]
+    [setInputAmount]
   );
 
   const handleMaxClick = useCallback(() => {
     if (!balance || !selectedItem) {
-      setAmount(ethers.constants.Zero);
       setInputAmount(formatUnits(ethers.constants.Zero));
       return;
     }
@@ -98,9 +96,8 @@ export default function useCoinSelection() {
         0
       );
     }
-    setAmount(adjustedBalance);
     setInputAmount(formatUnits(adjustedBalance, selectedItem.decimals));
-  }, [balance, selectedItem, setAmount]);
+  }, [balance, selectedItem]);
   // checks for insufficient balance errors
   let error: InsufficientBalanceError | ParsingError | undefined = formError;
   if (

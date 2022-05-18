@@ -110,12 +110,11 @@ function tokenReducer(state: FormState, tokenSymbol: string): FormState {
   // we have from, to, symbols that produce no routes, so reset the form to the first valid route
   if (!availableRoutes.length) {
     availableRoutes = config.filterRoutes({ fromTokenSymbol: tokenSymbol });
-    const [firstRoute] = availableRoutes;
-    fromChain = firstRoute.fromChain;
-    toChain = firstRoute.toChain;
   }
-  const selectedRoute =
-    availableRoutes.length === 1 ? availableRoutes[0] : undefined;
+  const [firstRoute] = availableRoutes;
+  fromChain = firstRoute.fromChain;
+  toChain = firstRoute.toChain;
+  const selectedRoute = firstRoute;
 
   switch (state.status) {
     case FormStatus.IDLE:
@@ -128,7 +127,6 @@ function tokenReducer(state: FormState, tokenSymbol: string): FormState {
         tokenSymbol,
         fromChain,
         toChain,
-        amount: ethers.constants.Zero,
         error: undefined,
         availableRoutes,
         selectedRoute,
@@ -180,24 +178,27 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
   const config = getConfig();
   let fromChain = chainId;
   // reset toChain
-  let toChain = undefined;
+  let toChain = state.toChain;
   let tokenSymbol = state.tokenSymbol;
 
-  let availableRoutes = config.filterRoutes({
-    toChain,
+  // availble routes are all possible routes with this from chain selected
+  const availableRoutes = config.filterRoutes({ fromChain });
+  // selected routes are all possible chains given the users selection from chain and token symbol.
+  let selectedRoutes = config.filterRoutes({
     fromChain,
+    toChain,
     fromTokenSymbol: tokenSymbol,
   });
-
-  // we have from, to, symbols that produce no routes, so reset the form to the first valid route
-  if (!availableRoutes.length) {
-    availableRoutes = config.filterRoutes({ fromChain });
-    const [firstRoute] = availableRoutes;
-    toChain = firstRoute.toChain;
-    tokenSymbol = firstRoute.fromTokenSymbol;
+  // if no valid routes found with user selection, de-prioritize the toChain to maintain token symbol.
+  if (!selectedRoutes.length) {
+    selectedRoutes = config.filterRoutes({
+      fromChain,
+      fromTokenSymbol: tokenSymbol,
+    });
   }
-
-  const selectedRoute = availableRoutes[0];
+  // prioritize selected routes, otherwise use first available route
+  const selectedRoute = selectedRoutes[0] || availableRoutes[0];
+  fromChain = selectedRoute.fromChain;
   tokenSymbol = selectedRoute.fromTokenSymbol;
   toChain = selectedRoute.toChain;
 
@@ -220,7 +221,6 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
         fromChain,
         toChain,
         tokenSymbol,
-        amount: ethers.constants.Zero,
         availableRoutes,
         availableToChains,
         availableTokens,
@@ -246,15 +246,16 @@ function toChainReducer(state: FormState, chainId: ChainId): FormState {
   // we have from, to, symbols that produce no routes, so reset the form to the first valid route
   if (!availableRoutes.length) {
     availableRoutes = config.filterRoutes({ toChain });
-    const [firstRoute] = availableRoutes;
-    fromChain = firstRoute.fromChain;
-    tokenSymbol = firstRoute.fromTokenSymbol;
   }
+
+  const [firstRoute] = availableRoutes;
+  fromChain = firstRoute.fromChain;
+  tokenSymbol = firstRoute.fromTokenSymbol;
+  const selectedRoute = firstRoute;
+
   const availableTokens = fromChain
     ? config.filterReachableTokens(fromChain, toChain)
     : state.availableTokens;
-  const selectedRoute =
-    availableRoutes.length === 1 ? availableRoutes[0] : undefined;
 
   switch (state.status) {
     case FormStatus.IDLE:
@@ -267,7 +268,6 @@ function toChainReducer(state: FormState, chainId: ChainId): FormState {
         toChain,
         fromChain,
         tokenSymbol,
-        amount: ethers.constants.Zero,
         error: undefined,
         availableRoutes,
         selectedRoute,
