@@ -8,6 +8,7 @@ import bobaLogo from "assets/boba-logo.svg";
 import polygonLogo from "assets/polygon-logo.svg";
 import { getAddress } from "./address";
 import * as superstruct from "superstruct";
+import { relayFeeCalculator } from "@across-protocol/sdk-v2";
 
 // all routes should be pre imported to be able to switch based on chain id
 import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
@@ -536,3 +537,43 @@ export const routeConfig = getRoutes(hubPoolChainId);
 export const hubPoolAddress = routeConfig.hubPoolAddress;
 export const migrationPoolV2Warning =
   process.env.REACT_APP_MIGRATION_POOL_V2_WARNING;
+
+export const queriesTable: Record<
+  ChainId,
+  (provider: ethers.providers.Provider) => relayFeeCalculator.QueryInterface
+> = {
+  [ChainId.MAINNET]: (provider: ethers.providers.Provider) =>
+    new relayFeeCalculator.EthereumQueries(provider),
+  [ChainId.ARBITRUM]: (provider: ethers.providers.Provider) =>
+    new relayFeeCalculator.ArbitrumQueries(provider),
+  [ChainId.OPTIMISM]: (provider: ethers.providers.Provider) =>
+    new relayFeeCalculator.OptimismQueries(provider),
+  [ChainId.BOBA]: (provider: ethers.providers.Provider) =>
+    new relayFeeCalculator.BobaQueries(provider),
+  [ChainId.POLYGON]: (provider: ethers.providers.Provider) =>
+    new relayFeeCalculator.PolygonQueries(provider),
+  [ChainId.KOVAN]: (provider: ethers.providers.Provider) =>
+    new relayFeeCalculator.EthereumQueries(provider),
+  [ChainId.RINKEBY]: (provider: ethers.providers.Provider) =>
+    new relayFeeCalculator.EthereumQueries(provider),
+  [ChainId.GOERLI]: (provider: ethers.providers.Provider) =>
+    new relayFeeCalculator.EthereumQueries(provider),
+  [ChainId.MUMBAI]: (provider: ethers.providers.Provider) =>
+    new relayFeeCalculator.PolygonQueries(provider),
+  // Use hardcoded DAI address instead of USDC because DAI is enabled here.
+  [ChainId.KOVAN_OPTIMISM]: (provider: ethers.providers.Provider) =>
+    new relayFeeCalculator.OptimismQueries(
+      provider,
+      undefined,
+      "0x1954D4A36ac4fD8BEde42E59368565A92290E705",
+      "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"
+    ),
+  // USe hardcoded WETH address instead of USDC because WETH is enabled here.
+  [ChainId.ARBITRUM_RINKEBY]: (provider: ethers.providers.Provider) =>
+    new relayFeeCalculator.ArbitrumQueries(
+      provider,
+      undefined,
+      "0x3BED21dAe767e4Df894B31b14aD32369cE4bad8b",
+      "0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681"
+    ),
+};
