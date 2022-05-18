@@ -41,7 +41,7 @@ export function balancesQueryKey(
   blockNumber: number,
   chainId?: ChainId
 ) {
-  return ["balances", chainId, tokenSymbols, account, blockNumber];
+  return ["balances", chainId, tokenSymbols.join(","), account, blockNumber];
 }
 /**
  * @param tokenSymbol  The token symbol to check bridge fees for.

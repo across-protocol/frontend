@@ -10,7 +10,6 @@ import {
   ChainId,
   getConfig,
 } from "utils";
-import { usePrevious } from "hooks";
 import { BigNumber } from "ethers";
 
 export function useNativeBalance(
@@ -162,14 +161,6 @@ export function useBalancesBySymbols(
         "DISABLED_BALANCES_QUERY",
         { chainIdToQuery, tokenSymbols, accountToQuery, blockNumberToQuery },
       ];
-  const prevAccount = usePrevious(accountToQuery);
-  const prevChain = usePrevious(chainIdToQuery);
-  const prevTokens = usePrevious(tokenSymbols);
-  // Keep the previous data only when blockNumberToQuery changes.
-  const keepPreviousData =
-    prevAccount === accountToQuery &&
-    prevChain === chainIdToQuery &&
-    JSON.stringify(prevTokens) === JSON.stringify(tokenSymbols);
   const { data: balances, ...delegated } = useQuery(
     queryKey,
     async () => {
@@ -184,9 +175,6 @@ export function useBalancesBySymbols(
       enabled: enabledQuery,
       // We already re-fetch when the block change, so we don't need to re-fetch.
       staleTime: Infinity,
-      // Old balances can be garbage collected immediately
-      cacheTime: 0,
-      keepPreviousData,
     }
   );
   return {
