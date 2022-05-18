@@ -120,7 +120,7 @@ function formatTransactionRows(
       size: "xs",
       value: (
         <TableLink
-          href={getChainInfo(destinationChainId).constructExplorerLink(
+          href={getChainInfo(sourceChainId).constructExplorerLink(
             tx.depositTxHash
           )}
           target="_blank"

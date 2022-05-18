@@ -126,7 +126,7 @@ function formatTransactionRows(
 
     const txHash = (
       <MobileTableLink
-        href={getChainInfo(destinationChainId).constructExplorerLink(
+        href={getChainInfo(sourceChainId).constructExplorerLink(
           tx.depositTxHash
         )}
         target="_blank"
