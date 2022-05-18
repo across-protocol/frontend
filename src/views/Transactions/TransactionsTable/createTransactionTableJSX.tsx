@@ -172,7 +172,7 @@ function formatTransactionRows(
         );
       }
 
-      if (filledTxElements.length > 1 && filledTxElements.length <= 3) {
+      if (filledTxElements.length <= 3) {
         filledTableValue = (
           <>
             {filledTxElements
@@ -181,8 +181,6 @@ function formatTransactionRows(
           </>
         );
       }
-
-      if (filledTxElements.length === 1) filledTableValue = filledTxElements[0];
     }
 
     const filledTxHashCell: ICell = {
