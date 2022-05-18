@@ -154,13 +154,7 @@ function formatTransactionRows(
         );
       });
 
-      if (filledTxElements.length > 1) {
-        filledTableValue = (
-          <>{filledTxElements.map<React.ReactNode>((t) => t)}</>
-        );
-      }
-
-      if (filledTxElements.length === 1) filledTableValue = filledTxElements[0];
+      filledTableValue = <>{filledTxElements.map<React.ReactNode>((t) => t)}</>;
     }
 
     return {
