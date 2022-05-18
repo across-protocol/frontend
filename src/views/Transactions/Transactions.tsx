@@ -31,6 +31,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 import ethLogo from "assets/ethereum-logo.svg";
 import wethLogo from "assets/weth-logo.svg";
+import TransactionsTableModal from "./TransactionsTableModal";
 const Transactions = () => {
   const {
     isConnected,
@@ -49,26 +50,42 @@ const Transactions = () => {
     pageSize,
     pageSizes,
     setPageSize,
+    openModal,
+    setOpenModal,
+    modalData,
+    setModalData,
   } = useTransactionsView();
 
   const ongoingTx = useMemo(
-    () => createTransactionTableJSX(rawOngoingTx),
-    [rawOngoingTx]
+    () => createTransactionTableJSX(rawOngoingTx, setOpenModal, setModalData),
+    [rawOngoingTx, setOpenModal, setModalData]
   );
 
   const filledTx = useMemo(
-    () => createTransactionTableJSX(rawFilledTx),
-    [rawFilledTx]
+    () => createTransactionTableJSX(rawFilledTx, setOpenModal, setModalData),
+    [rawFilledTx, setOpenModal, setModalData]
   );
 
   const mobileFilledTx = useMemo(
-    () => createMobileTransactionTableJSX(rawFilledTx, setOpenFilledRow),
-    [rawFilledTx, setOpenFilledRow]
+    () =>
+      createMobileTransactionTableJSX(
+        rawFilledTx,
+        setOpenFilledRow,
+        setOpenModal,
+        setModalData
+      ),
+    [rawFilledTx, setOpenFilledRow, setOpenModal, setModalData]
   );
 
   const mobileOngoingTx = useMemo(
-    () => createMobileTransactionTableJSX(rawOngoingTx, setOpenOngoingRow),
-    [rawOngoingTx, setOpenOngoingRow]
+    () =>
+      createMobileTransactionTableJSX(
+        rawOngoingTx,
+        setOpenOngoingRow,
+        setOpenModal,
+        setModalData
+      ),
+    [rawOngoingTx, setOpenOngoingRow, setOpenModal, setModalData]
   );
 
   const isTxPresent = !filledTx.length && !ongoingTx.length && !initialLoading;
@@ -175,6 +192,14 @@ const Transactions = () => {
           </BottomRow>
         </>
       )}
+      <TransactionsTableModal
+        isOpen={openModal}
+        onClose={() => {
+          setOpenModal(false);
+          setModalData([]);
+        }}
+        txLinks={modalData}
+      />
     </Wrapper>
   );
 };

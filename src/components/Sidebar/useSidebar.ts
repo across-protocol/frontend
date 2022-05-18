@@ -23,7 +23,7 @@ export default function useSidebar(openSidebar: boolean) {
       setClassName("transition");
       setTimeout(() => {
         setClassName("closed");
-      }, 1000);
+      }, 250);
     }
   }, [openSidebar, prevOpenSidebar]);
   return {

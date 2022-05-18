@@ -10,6 +10,11 @@ import { getTxHistoryPageSize, setTxHistoryPageSize } from "utils/localStorage";
 const MAX_TIME_FOR_FETCHING_TX = 5 * 60 * 1000;
 const DEFAULT_TX_HISTORY_PAGE_SIZE = 10;
 
+export interface TxLink {
+  text: string;
+  url: string;
+}
+
 export default function useTransactionsView() {
   const { provider, chainId, isConnected, account } = useConnection();
   const { init } = onboard;
@@ -27,6 +32,8 @@ export default function useTransactionsView() {
   // Start the tracking / stopping of the TX in the client.
   const [timer, setTimer] = useState<NodeJS.Timeout | undefined>();
   const pageSizes = useMemo(() => [10, 25, 50], []);
+  const [openModal, setOpenModal] = useState(false);
+  const [modalData, setModalData] = useState<TxLink[]>([]);
 
   useEffect(() => {
     if (txClient) {
@@ -106,6 +113,10 @@ export default function useTransactionsView() {
     rawFilledTx,
     rawOngoingTx,
     initialLoading,
+    modalData,
+    setModalData,
+    openModal,
+    setOpenModal,
   };
 }
 

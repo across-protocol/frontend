@@ -10,7 +10,7 @@ export const Title = styled.div`
   line-height: ${32 / 16}rem;
   font-weight: 700;
   margin: 0 auto;
-  max-width: 1200px;
+  max-width: 1425px;
 `;
 
 export const Account = styled.span`
@@ -28,7 +28,7 @@ export const ConnectButton = styled(PrimaryButton)`
 
 export const ButtonWrapper = styled.div`
   margin: 0 auto;
-  max-width: 1200px;
+  max-width: 1425px;
 `;
 
 export const TopRow = styled.div`
@@ -80,7 +80,7 @@ export const NotFoundWrapper = styled.div`
 
 export const EthNoteWrapper = styled.div`
   margin: 1.5rem auto 0;
-  max-width: 1200px;
+  max-width: 1425px;
   img {
     height: 14px;
     width: 14px;
