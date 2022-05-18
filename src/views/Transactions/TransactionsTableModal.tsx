@@ -12,17 +12,6 @@ interface Props {
   txLinks: TxLink[];
 }
 
-/*
-const Dialog: React.FC<Props> = ({ isOpen, onClose, children }) => (
-  <Overlay isOpen={isOpen}>
-    <Wrapper aria-label="dialog">
-      <CloseButton onClick={onClose}>
-        <X />
-      </CloseButton>
-      <div>{children}</div>
-    </Wrapper>
-  </Overlay>
-*/
 const TransactionsTableModal: React.FC<Props> = ({
   isOpen,
   onClose,
