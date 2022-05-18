@@ -154,7 +154,7 @@ function formatTransactionRows(
         );
       });
 
-      filledTableValue = <>{filledTxElements.map<React.ReactNode>((t) => t)}</>;
+      filledTableValue = <>{filledTxElements}</>;
     }
 
     return {
