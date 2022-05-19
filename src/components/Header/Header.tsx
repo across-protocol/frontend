@@ -13,9 +13,9 @@ import {
   WalletWrapper,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
-import { migrationPoolV2Warning } from "utils";
+import { enableMigration } from "utils";
 
-const LINKS = !migrationPoolV2Warning
+const LINKS = !enableMigration
   ? [
       { href: "/", name: "Bridge" },
       { href: "/pool", name: "Pool" },
