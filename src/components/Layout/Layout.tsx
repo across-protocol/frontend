@@ -5,8 +5,6 @@ import { ReactComponent as UnstyledUmaLogo } from "assets/Across-Powered-UMA.svg
 import { ReactComponent as SupportLogo } from "assets/support-logo.svg";
 import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
 import { ReactComponent as DocsLogo } from "assets/docs-logo.svg";
-import { ReactComponent as MediumLogo } from "assets/Across-Medium-white.svg";
-import { ReactComponent as DiscourseLogo } from "assets/Across-Discourse-white.svg";
 
 const NAV_LINKS = [
   {
@@ -24,18 +22,6 @@ const NAV_LINKS = [
     url: "https://github.com/across-protocol",
     icon: GithubLogo,
   },
-  {
-    name: "Medium",
-    url: "https://medium.com/across-protocol",
-    icon: MediumLogo,
-    className: "nav-link",
-  },
-  {
-    name: "Discourse",
-    url: "https://forum.across.to",
-    icon: DiscourseLogo,
-    className: "nav-link",
-  },
 ];
 
 const Layout: React.FC = ({ children }) => (
@@ -47,7 +33,6 @@ const Layout: React.FC = ({ children }) => (
           href={link.url}
           target="_blank"
           rel="noopener noreferrer"
-          className={link.className ?? ""}
         >
           <link.icon />
           <LinkText>{link.name}</LinkText>

@@ -24,6 +24,7 @@ import {
   Header,
   Row,
   SubHeading,
+  RouterLink,
 } from "./Confirmation.styles";
 import { ethers } from "ethers";
 
@@ -60,6 +61,10 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
         <Header>
           <Heading>Deposit succeeded</Heading>
           <SubHeading>Your funds will arrive in 1 - 5 minutes</SubHeading>
+          <SubHeading>
+            To monitor progress, go to the
+            <RouterLink to="/transactions">transactions page</RouterLink>
+          </SubHeading>
           <SuccessIcon>
             <Check strokeWidth={4} />
           </SuccessIcon>
