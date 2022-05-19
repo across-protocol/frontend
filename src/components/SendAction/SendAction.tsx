@@ -66,11 +66,11 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
                 <div>{getConfirmationDepositTime()}</div>
               </Info>
               <Info>
-                <div>Ethereum Network Gas</div>
+                <div>Destination Gas Fees</div>
                 <div>
                   {showFees
                     ? `${formatUnits(
-                        fees.relayerFee.total,
+                        fees.relayerGasFee.total,
                         tokenInfo.decimals
                       )} ${tokenInfo.symbol}`
                     : "loading"}
@@ -80,9 +80,10 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
                 <div>Across Bridge Fee</div>
                 <div>
                   {fees
-                    ? `${formatUnits(fees.lpFee.total, tokenInfo.decimals)} ${
-                        tokenInfo.symbol
-                      }`
+                    ? `${formatUnits(
+                        fees.lpFee.total.add(fees.relayerCapitalFee.total),
+                        tokenInfo.decimals
+                      )} ${tokenInfo.symbol}`
                     : "loading"}
                 </div>
               </Info>

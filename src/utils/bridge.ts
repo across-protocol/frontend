@@ -1,10 +1,8 @@
 import assert from "assert";
 import { clients, utils, BlockFinder } from "@uma/sdk";
-import { Coingecko } from "@uma/sdk";
 import {
   relayFeeCalculator,
   lpFeeCalculator,
-  utils as acrossUtils,
   contracts,
 } from "@across-protocol/sdk-v2";
 import { Provider, Block } from "@ethersproject/providers";
@@ -15,9 +13,9 @@ import {
   ChainId,
   hubPoolChainId,
   hubPoolAddress,
-  getToken,
   getProvider,
   getConfigStoreAddress,
+  queriesTable,
 } from "./constants";
 
 import { parseEther, tagAddress } from "./format";
@@ -31,13 +29,21 @@ export type Fee = {
 export type BridgeFees = {
   relayerFee: Fee;
   lpFee: Fee;
+  // Note: relayerGasFee and relayerCapitalFee are components of relayerFee.
+  relayerGasFee: Fee;
+  relayerCapitalFee: Fee;
 };
 
 export async function getRelayerFee(
   tokenSymbol: string,
   amount: ethers.BigNumber,
   toChainId: ChainId
-): Promise<{ relayerFee: Fee; isAmountTooLow: boolean }> {
+): Promise<{
+  relayerFee: Fee;
+  relayerGasFee: Fee;
+  relayerCapitalFee: Fee;
+  isAmountTooLow: boolean;
+}> {
   const config = relayFeeCalculatorConfig(toChainId);
   const calculator = new relayFeeCalculator.RelayFeeCalculator(config);
   const result = await calculator.relayerFeeDetails(amount, tokenSymbol);
@@ -46,6 +52,14 @@ export async function getRelayerFee(
     relayerFee: {
       pct: ethers.BigNumber.from(result.relayFeePercent),
       total: ethers.BigNumber.from(result.relayFeeTotal),
+    },
+    relayerGasFee: {
+      pct: ethers.BigNumber.from(result.gasFeePercent),
+      total: ethers.BigNumber.from(result.gasFeeTotal),
+    },
+    relayerCapitalFee: {
+      pct: ethers.BigNumber.from(result.capitalFeePercent),
+      total: ethers.BigNumber.from(result.capitalFeeTotal),
     },
     isAmountTooLow: result.isAmountTooLow,
   };
@@ -111,11 +125,8 @@ export async function getBridgeFees({
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const config = getConfig();
   const l1TokenAddress = config.getL1TokenAddressBySymbol(tokenSymbol);
-  const { relayerFee, isAmountTooLow } = await getRelayerFee(
-    tokenSymbol,
-    amount,
-    toChainId
-  );
+  const { relayerFee, relayerGasFee, relayerCapitalFee, isAmountTooLow } =
+    await getRelayerFee(tokenSymbol, amount, toChainId);
 
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
     l1TokenAddress,
@@ -128,6 +139,8 @@ export async function getBridgeFees({
 
   return {
     relayerFee,
+    relayerGasFee,
+    relayerCapitalFee,
     lpFee,
     isAmountTooLow,
     isLiquidityInsufficient,
@@ -280,74 +293,17 @@ export default class LpFeeCalculator {
   }
 }
 
-class Queries implements relayFeeCalculator.QueryInterface {
-  private coingecko: Coingecko;
-  constructor(
-    private provider: Provider,
-    private chainId: ChainId,
-    private priceSymbol = "eth",
-    private defaultGas = "120000"
-  ) {
-    this.coingecko = new Coingecko();
-  }
-  getMainnetTokenInfo(tokenSymbol: string) {
-    return getToken(tokenSymbol);
-  }
-  getTokenInfo(tokenSymbol: string) {
-    return getToken(tokenSymbol);
-  }
-  async getTokenPrice(tokenSymbol: string): Promise<string | number> {
-    if (tokenSymbol.toLowerCase() === "eth") return 1;
-    const { mainnetAddress, decimals } = this.getMainnetTokenInfo(tokenSymbol);
-    assert(
-      mainnetAddress,
-      "requires mainnet address for token: " + tokenSymbol
-    );
-
-    if (this.priceSymbol.toLowerCase() === "eth") {
-      const [, tokenPrice] = await this.coingecko.getCurrentPriceByContract(
-        mainnetAddress,
-        this.priceSymbol.toLowerCase()
-      );
-      return tokenPrice.toFixed(decimals);
-    } else {
-      const { mainnetAddress: gasTokenAddress } = this.getMainnetTokenInfo(
-        this.priceSymbol
-      );
-
-      assert(
-        gasTokenAddress,
-        "requires gas token address for token: " + this.priceSymbol
-      );
-
-      const [[, tokenPrice], [, gasTokenPrice]] = await Promise.all([
-        this.coingecko.getCurrentPriceByContract(mainnetAddress, "usd"),
-        this.coingecko.getCurrentPriceByContract(gasTokenAddress, "usd"),
-      ]);
-
-      return (tokenPrice / gasTokenPrice).toFixed(decimals);
-    }
-  }
-  async getTokenDecimals(tokenSymbol: string): Promise<number> {
-    const info = this.getTokenInfo(tokenSymbol);
-    return info.decimals;
-  }
-  async getGasCosts(): Promise<acrossUtils.BigNumberish> {
-    const { gasPrice, maxFeePerGas } = await this.provider.getFeeData();
-    const price = maxFeePerGas || gasPrice;
-    assert(price, "Unable to get gas price");
-    return acrossUtils.gasCost(this.defaultGas, price);
-  }
-}
-
 export function relayFeeCalculatorConfig(
   chainId: ChainId
 ): relayFeeCalculator.RelayFeeCalculatorConfig {
   const config = getConfig();
   const provider = getProvider(chainId);
   const token = config.getNativeTokenInfo(chainId);
-  // coingecko needs the mainnet token addresses to look up price
-  const queries = new Queries(provider, chainId, token.symbol);
+
+  if (!queriesTable[chainId])
+    throw new Error(`No queries in queriesTable for chainId ${chainId}!`);
+
+  const queries = queriesTable[chainId](provider);
   return {
     nativeTokenDecimals: token.decimals,
     feeLimitPercent: MAX_RELAY_FEE_PERCENT,
