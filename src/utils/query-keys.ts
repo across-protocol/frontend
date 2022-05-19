@@ -20,29 +20,13 @@ export function latestBlockQueryKey(chainId: ChainId) {
  */
 export function balanceQueryKey(
   account: string,
-  blockNumber: number,
+  blockNumber?: number,
   chainId?: ChainId,
   token?: string
 ) {
   return ["balance", chainId, token, account, blockNumber];
 }
 
-/**
- * Generates query keys for react-query `useQuery` hook, used in the `useBalances` hook.
- * @param chainId  The chain Id of the chain to execute the query on.
- * @param tokens  The tokens to fetch the balance of.
- * @param account  The account to query the balances of.
- * @param blockNumber  The block number to execute the query on.
- * @returns An array of query keys for react-query `useQuery` hook.
- */
-export function balancesQueryKey(
-  tokenSymbols: string[],
-  account: string,
-  blockNumber: number,
-  chainId?: ChainId
-) {
-  return ["balances", chainId, tokenSymbols, account, blockNumber];
-}
 /**
  * @param tokenSymbol  The token symbol to check bridge fees for.
  * @param amount  The amount to check bridge fees for.

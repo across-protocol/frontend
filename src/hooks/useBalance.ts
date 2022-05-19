@@ -1,16 +1,15 @@
-import { useQuery } from "react-query";
+import { useQuery, useQueries } from "react-query";
 import { useConnection } from "state/hooks";
 import { useBlock } from "./useBlock";
+import { usePrevious } from "hooks";
 import {
   getBalance,
   getNativeBalance,
-  getBalancesBySymbols,
   balanceQueryKey,
-  balancesQueryKey,
   ChainId,
   getConfig,
+  ConfigClient,
 } from "utils";
-import { usePrevious } from "hooks";
 import { BigNumber } from "ethers";
 
 export function useNativeBalance(
@@ -36,12 +35,10 @@ export function useNativeBalance(
       )
     : [
         "DISABLED_BALANCE_QUERY",
-        {
-          chainIdToQuery,
-          tokenSymbolToQuery,
-          accountToQuery,
-          blockNumberToQuery,
-        },
+        chainIdToQuery,
+        tokenSymbolToQuery,
+        accountToQuery,
+        blockNumberToQuery,
       ];
   const { data: balance, ...delegated } = useQuery(
     queryKey,
@@ -60,6 +57,50 @@ export function useNativeBalance(
     ...delegated,
   };
 }
+
+// Shared logic for querying by symbol using parameters which might not be available.
+const QueryBalanceBySymbol =
+  (params: {
+    accountToQuery?: string;
+    chainIdToQuery?: ChainId;
+    tokenSymbolToQuery?: string;
+    blockNumberToQuery?: number;
+    config: ConfigClient;
+  }) =>
+  async () => {
+    const {
+      accountToQuery,
+      chainIdToQuery,
+      tokenSymbolToQuery,
+      blockNumberToQuery,
+      config,
+    } = params;
+    if (
+      !chainIdToQuery ||
+      !tokenSymbolToQuery ||
+      !blockNumberToQuery ||
+      !accountToQuery
+    )
+      return BigNumber.from(0);
+    const tokenInfo = config.getTokenInfoBySymbol(
+      chainIdToQuery,
+      tokenSymbolToQuery
+    );
+    if (tokenInfo.isNative) {
+      return getNativeBalance(
+        chainIdToQuery,
+        accountToQuery,
+        blockNumberToQuery
+      );
+    } else {
+      return getBalance(
+        chainIdToQuery,
+        accountToQuery,
+        tokenInfo.address,
+        blockNumberToQuery
+      );
+    }
+  };
 /**
  * @param token - The token to fetch the balance of.
  * @param chainId - The chain Id of the chain to execute the query on. If not specified, defaults to the chainId the user is connected to or undefined.
@@ -91,33 +132,21 @@ export function useBalanceBySymbol(
       )
     : [
         "DISABLED_BALANCE_QUERY",
-        {
-          chainIdToQuery,
-          tokenSymbolToQuery,
-          accountToQuery,
-          blockNumberToQuery,
-        },
+        chainIdToQuery,
+        tokenSymbolToQuery,
+        accountToQuery,
+        blockNumberToQuery,
       ];
   const config = getConfig();
   const { data: balance, ...delegated } = useQuery(
     queryKey,
-    async () => {
-      if (!chainIdToQuery || !tokenSymbolToQuery) return BigNumber.from(0);
-      const tokenInfo = config.getTokenInfoBySymbol(
-        chainIdToQuery,
-        tokenSymbolToQuery
-      );
-      if (tokenInfo.isNative) {
-        return getNativeBalance(chainId, accountToQuery!, blockNumberToQuery);
-      } else {
-        return getBalance(
-          chainId,
-          accountToQuery!,
-          tokenInfo.address,
-          blockNumberToQuery
-        );
-      }
-    },
+    QueryBalanceBySymbol({
+      config,
+      chainIdToQuery,
+      tokenSymbolToQuery,
+      blockNumberToQuery,
+      accountToQuery,
+    }),
     {
       enabled: enabledQuery,
       // We already re-fetch when the block number changes, so we don't need to re-fetch.
@@ -143,25 +172,12 @@ export function useBalancesBySymbols(
   account?: string,
   blockNumber?: number
 ) {
+  const config = getConfig();
   const { account: connectedAccount } = useConnection();
   const chainIdToQuery = chainId;
   const accountToQuery = account ?? connectedAccount;
   const { block: latestBlock } = useBlock(chainId);
   const blockNumberToQuery = blockNumber ?? latestBlock?.number;
-  // To fetch balances, we need a list of tokens, an account to get balances of, and a specified chainId.
-  const enabledQuery =
-    !!chainIdToQuery && !!accountToQuery && !!blockNumberToQuery;
-  const queryKey = enabledQuery
-    ? balancesQueryKey(
-        tokenSymbols,
-        accountToQuery,
-        blockNumberToQuery,
-        chainIdToQuery
-      )
-    : [
-        "DISABLED_BALANCES_QUERY",
-        { chainIdToQuery, tokenSymbols, accountToQuery, blockNumberToQuery },
-      ];
   const prevAccount = usePrevious(accountToQuery);
   const prevChain = usePrevious(chainIdToQuery);
   const prevTokens = usePrevious(tokenSymbols);
@@ -170,27 +186,40 @@ export function useBalancesBySymbols(
     prevAccount === accountToQuery &&
     prevChain === chainIdToQuery &&
     JSON.stringify(prevTokens) === JSON.stringify(tokenSymbols);
-  const { data: balances, ...delegated } = useQuery(
-    queryKey,
-    async () => {
-      return getBalancesBySymbols(
-        chainId!,
-        tokenSymbols,
-        accountToQuery!,
-        blockNumberToQuery
-      );
-    },
-    {
-      enabled: enabledQuery,
-      // We already re-fetch when the block change, so we don't need to re-fetch.
+  const enabled = !!chainIdToQuery && !!accountToQuery && !!blockNumberToQuery;
+  // we use useQueries instead of useQuery so we can share cache values with the singular balance query
+  const queries = tokenSymbols.map((tokenSymbolToQuery) => {
+    const queryKey = enabled
+      ? balanceQueryKey(
+          accountToQuery,
+          blockNumberToQuery,
+          chainIdToQuery,
+          tokenSymbolToQuery
+        )
+      : [
+          "DISABLED_BALANCE_QUERY",
+          chainIdToQuery,
+          tokenSymbolToQuery,
+          accountToQuery,
+          blockNumberToQuery,
+        ];
+    const queryFn = QueryBalanceBySymbol({
+      config,
+      chainIdToQuery,
+      tokenSymbolToQuery,
+      blockNumberToQuery,
+      accountToQuery,
+    });
+    return {
+      queryKey,
+      queryFn,
       staleTime: Infinity,
-      // Old balances can be garbage collected immediately
-      cacheTime: 0,
       keepPreviousData,
-    }
-  );
+      enabled,
+    };
+  });
+  const result = useQueries(queries);
   return {
-    balances,
-    ...delegated,
+    balances: result.map((result) => result.data),
   };
 }

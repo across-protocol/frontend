@@ -119,9 +119,8 @@ export type ChainInfo = {
 
 export type ChainInfoList = ChainInfo[];
 export type ChainInfoTable = Record<number, ChainInfo>;
-export const defaultBlockPollingInterval = Number(
-  process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL || 30 * 1000
-);
+export const defaultBlockPollingInterval =
+  Number(process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL_S || 30) * 1000;
 
 const defaultConstructExplorerLink =
   (explorerUrl: string) => (txHash: string) =>
