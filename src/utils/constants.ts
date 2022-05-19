@@ -536,6 +536,7 @@ export const routeConfig = getRoutes(hubPoolChainId);
 export const hubPoolAddress = routeConfig.hubPoolAddress;
 export const migrationPoolV2Warning =
   process.env.REACT_APP_MIGRATION_POOL_V2_WARNING;
+export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
 
 export const queriesTable: Record<
   ChainId,
