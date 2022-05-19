@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { ethers } from "ethers";
-import { TableLogo, TableLink } from "./TransactionsTable.styles";
+import { TableLogo, TableLink, StyledPlus } from "./TransactionsTable.styles";
 import { getConfig, Token } from "utils/config";
 import {
   shortenTransactionHash,
@@ -11,6 +11,7 @@ import { ICell, IRow } from "components/Table/Table";
 import { getChainInfo } from "utils/constants";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 import { ChainId } from "utils";
+import { TxLink } from "../useTransactionsView";
 
 // Will take View Model Transaction as arg
 // Example of TX View Model:
@@ -25,13 +26,21 @@ import { ChainId } from "utils";
   sourceChainId: 69
   status: "pending"
 */
-export default function createTransactionTableJSX(transactions: Transfer[]) {
-  const rows = formatTransactionRows(transactions);
+export default function createTransactionTableJSX(
+  transactions: Transfer[],
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>,
+  setModalData: React.Dispatch<React.SetStateAction<TxLink[]>>
+) {
+  const rows = formatTransactionRows(transactions, setOpenModal, setModalData);
   return rows;
 }
 
 // Will take a TransactionsArg
-function formatTransactionRows(transactions: Transfer[]): IRow[] {
+function formatTransactionRows(
+  transactions: Transfer[],
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>,
+  setModalData: React.Dispatch<React.SetStateAction<TxLink[]>>
+): IRow[] {
   const config = getConfig();
   const supportedTransactions = transactions.reduce((supported, tx) => {
     try {
@@ -47,7 +56,7 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
     return supported;
   }, [] as [token: Token, tx: Transfer][]);
 
-  return supportedTransactions.map(([token, tx]) => {
+  return supportedTransactions.map(([token, tx], index) => {
     const timestamp: ICell = {
       size: "sm",
       value: DateTime.fromSeconds(tx.depositTime).toFormat("d MMM yyyy - t"),
@@ -107,7 +116,6 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
       value: ethers.utils.formatUnits(tx.amount, token.decimals),
     };
 
-    // TODO: change href to proper url when we get real TX data
     const txHash: ICell = {
       size: "xs",
       value: (
@@ -123,6 +131,63 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
       ),
     };
 
+    let filledTableValue = <div>-</div>;
+    if (tx.fillTxs.length) {
+      const filledTxElements = tx.fillTxs.map((fillTxHash) => {
+        return (
+          <TableLink
+            href={getChainInfo(destinationChainId).constructExplorerLink(
+              fillTxHash
+            )}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {shortenTransactionHash(fillTxHash)}
+          </TableLink>
+        );
+      });
+
+      if (filledTxElements.length > 3) {
+        const md = tx.fillTxs.map((x) => {
+          return {
+            url: getChainInfo(destinationChainId).constructExplorerLink(x),
+            text: x,
+          };
+        });
+        filledTableValue = (
+          <>
+            {filledTxElements
+              .map<React.ReactNode>((t, i) => {
+                if (i < 3) return t;
+                return null;
+              })
+              .reduce((prev, curr) => [prev, ", ", curr])}
+            <StyledPlus
+              onClick={() => {
+                setOpenModal(true);
+                setModalData(md);
+              }}
+            />
+          </>
+        );
+      }
+
+      if (filledTxElements.length <= 3) {
+        filledTableValue = (
+          <>
+            {filledTxElements
+              .map<React.ReactNode>((t) => t)
+              .reduce((prev, curr) => [prev, ", ", curr])}
+          </>
+        );
+      }
+    }
+
+    const filledTxHashCell: ICell = {
+      size: "md",
+      value: filledTableValue,
+    };
+
     return {
       cells: [
         timestamp,
@@ -133,6 +198,7 @@ function formatTransactionRows(transactions: Transfer[]): IRow[] {
         symbol,
         amount,
         txHash,
+        filledTxHashCell,
       ],
     } as IRow;
   });
@@ -177,6 +243,11 @@ export const headers: ICell[] = [
   {
     size: "xs",
     value: "Deposit tx",
+    cellClassName: "header-cell",
+  },
+  {
+    size: "md",
+    value: "Fill tx(s)",
     cellClassName: "header-cell",
   },
 ];

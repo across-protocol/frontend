@@ -54,6 +54,8 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
         headers={headers}
         title={title}
         openIndex={openIndex}
+        currentPage={currentPage}
+        elementsPerPage={pageSize}
       />
       {paginateState.totalPages > 1 ? (
         <Pagination

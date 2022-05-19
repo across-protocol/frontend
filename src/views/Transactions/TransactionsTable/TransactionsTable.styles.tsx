@@ -6,10 +6,11 @@ import {
   Row,
   Cell,
 } from "components/Table/Table.styles";
+import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 
 export const Wrapper = styled.div`
   margin: 2rem auto;
-  max-width: 1200px;
+  max-width: 1425px;
   overflow-x: auto;
 `;
 
@@ -28,7 +29,7 @@ export const StyledTableWrapper = styled(TableWrapper)`
 
 export const StyledHeadRow = styled(HeadRow)`
   background-color: var(--color-black);
-  width: 1200px;
+  width: 1425px;
   overflow-x: auto;
 `;
 
@@ -36,7 +37,7 @@ export const StyledBody = styled(Body)``;
 
 export const StyledRow = styled(Row)`
   background: rgba(255, 255, 255, 0.08);
-  width: 1200px;
+  width: 1425px;
   overflow-x: auto;
   margin: 0 auto;
   /* Don't do zebra */
@@ -54,8 +55,8 @@ export const StyledRow = styled(Row)`
 export const StyledCell = styled(Cell)`
   word-wrap: break-word;
   &:first-of-type {
-    min-width: 170px;
-    flex: 0 0 60px;
+    min-width: 175px;
+    flex: 0 0 65px;
   }
   &:not(:first-of-type) {
     min-width: 120px;
@@ -153,7 +154,7 @@ export const AccordionRow = styled.div`
     border-bottom: 1px solid #2c2f33;
     text-indent: 12px;
   }
-  &:nth-of-type(5) > div {
+  &:nth-of-type(6) > div {
     border-bottom: none;
   }
 `;
@@ -165,4 +166,11 @@ export const MobileTableLink = styled(TableLink)`
 export const PaginationWrapper = styled.div`
   max-width: 1200px;
   margin: auto;
+`;
+
+export const StyledPlus = styled(AcrossPlusIcon)`
+  cursor: pointer;
+  float: right;
+  margin-top: 8px;
+  margin-right: 4px;
 `;
