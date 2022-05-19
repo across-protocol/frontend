@@ -29,13 +29,21 @@ export type Fee = {
 export type BridgeFees = {
   relayerFee: Fee;
   lpFee: Fee;
+  // Note: relayerGasFee and relayerCapitalFee are components of relayerFee.
+  relayerGasFee: Fee;
+  relayerCapitalFee: Fee;
 };
 
 export async function getRelayerFee(
   tokenSymbol: string,
   amount: ethers.BigNumber,
   toChainId: ChainId
-): Promise<{ relayerFee: Fee; isAmountTooLow: boolean }> {
+): Promise<{
+  relayerFee: Fee;
+  relayerGasFee: Fee;
+  relayerCapitalFee: Fee;
+  isAmountTooLow: boolean;
+}> {
   const config = relayFeeCalculatorConfig(toChainId);
   const calculator = new relayFeeCalculator.RelayFeeCalculator(config);
   const result = await calculator.relayerFeeDetails(amount, tokenSymbol);
@@ -44,6 +52,14 @@ export async function getRelayerFee(
     relayerFee: {
       pct: ethers.BigNumber.from(result.relayFeePercent),
       total: ethers.BigNumber.from(result.relayFeeTotal),
+    },
+    relayerGasFee: {
+      pct: ethers.BigNumber.from(result.gasFeePercent),
+      total: ethers.BigNumber.from(result.gasFeeTotal),
+    },
+    relayerCapitalFee: {
+      pct: ethers.BigNumber.from(result.capitalFeePercent),
+      total: ethers.BigNumber.from(result.capitalFeeTotal),
     },
     isAmountTooLow: result.isAmountTooLow,
   };
@@ -109,11 +125,8 @@ export async function getBridgeFees({
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const config = getConfig();
   const l1TokenAddress = config.getL1TokenAddressBySymbol(tokenSymbol);
-  const { relayerFee, isAmountTooLow } = await getRelayerFee(
-    tokenSymbol,
-    amount,
-    toChainId
-  );
+  const { relayerFee, relayerGasFee, relayerCapitalFee, isAmountTooLow } =
+    await getRelayerFee(tokenSymbol, amount, toChainId);
 
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
     l1TokenAddress,
@@ -126,6 +139,8 @@ export async function getBridgeFees({
 
   return {
     relayerFee,
+    relayerGasFee,
+    relayerCapitalFee,
     lpFee,
     isAmountTooLow,
     isLiquidityInsufficient,
