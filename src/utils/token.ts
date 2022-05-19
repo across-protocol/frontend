@@ -29,34 +29,6 @@ export function getBalance(
   return contract.balanceOf(account, { blockTag: blockNumber });
 }
 
-// TODO: switch to a multicall implementation
-/**
- *
- * @param chainId The chain Id of the chain to query
- * @param tokens An array of tokens to fetch the balances of.
- * @param account The account to query the balances of.
- * @param blockNumber The block number to execute the query.
- * @returns A Promise that resolves to an array of balances of the account
- */
-export function getBalancesBySymbols(
-  chainId: ChainId,
-  tokenSymbols: string[],
-  account: string,
-  blockNumber?: number
-): Promise<ethers.BigNumber[]> {
-  const config = getConfig();
-  return Promise.all(
-    tokenSymbols.map((tokenSymbol) => {
-      const tokenInfo = config.getTokenInfoBySymbol(chainId, tokenSymbol);
-      if (tokenInfo.isNative) {
-        return getNativeBalance(chainId, account, blockNumber);
-      } else {
-        return getBalance(chainId, account, tokenInfo.address, blockNumber);
-      }
-    })
-  );
-}
-
 /**
  *
  * @param chainId  The chain Id of the chain to query

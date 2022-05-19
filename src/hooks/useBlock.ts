@@ -18,7 +18,7 @@ export function useBlock(chainId?: ChainId) {
   const { data: block, ...delegated } = useQuery(
     queryKey,
     async () => {
-      return await getBlock(chainId!);
+      return getBlock(chainId!);
     },
     {
       // refetch based on the chain polling interval
