@@ -67,7 +67,7 @@ function formatTransactionRows(
       value: capitalizeFirstLetter(tx.status),
     };
 
-    const fp = tx.filled.div(tx.amount).mul(100);
+    const fp = tx.filled.mul(100).div(tx.amount);
     const filled: ICell = {
       size: "xs",
       value: `${
