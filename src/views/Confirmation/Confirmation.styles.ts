@@ -6,6 +6,7 @@ import {
   AccentSection,
 } from "components";
 import { QUERIES } from "utils";
+import { Link as UnstyledLink } from "react-router-dom";
 
 export const Wrapper = styled.div`
   padding-top: 50px;
@@ -105,4 +106,17 @@ export const Logo = styled.img`
   height: 30px;
   border-radius: 99px;
   margin-right: 10px;
+`;
+
+export const RouterLink = styled(UnstyledLink)`
+  color: var(--color-primary);
+  cursor: pointer;
+  display: block;
+  width: fit-content;
+  margin: auto;
+  transition: opacity 100ms linear;
+  &:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+  }
 `;
