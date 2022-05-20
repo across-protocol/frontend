@@ -20,6 +20,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 - REACT_APP_MIGRATION_POOL_V2_WARNING: Warns user to check liquidity on V1 on Pool tab when set to `true`.
 - REACT_APP_DEBUG: set to 1 (or any value) to enable debug logs. Leave undefined to disable logs.
 - REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL_S: How quickly to poll blocks on chain, default 30 seconds if not supplied.
+- REACT_APP_FLAT_RELAY_CAPITAL_FEE: The flat percentage fee that users should pay relayers for their capital. Value of 1 = 1%.
 
 ## Internal Contributions
 

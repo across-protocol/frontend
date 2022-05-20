@@ -66,7 +66,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
                 <div>{getConfirmationDepositTime()}</div>
               </Info>
               <Info>
-                <div>Destination Gas Fees</div>
+                <div>Destination Gas Fee</div>
                 <div>
                   {showFees
                     ? `${formatUnits(
