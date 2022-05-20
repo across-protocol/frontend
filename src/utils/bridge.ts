@@ -16,6 +16,7 @@ import {
   getProvider,
   getConfigStoreAddress,
   queriesTable,
+  FLAT_RELAY_CAPITAL_FEE,
 } from "./constants";
 
 import { parseEther, tagAddress } from "./format";
@@ -307,6 +308,7 @@ export function relayFeeCalculatorConfig(
   return {
     nativeTokenDecimals: token.decimals,
     feeLimitPercent: MAX_RELAY_FEE_PERCENT,
+    capitalCostsPercent: FLAT_RELAY_CAPITAL_FEE,
     queries,
   };
 }

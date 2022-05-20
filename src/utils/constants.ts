@@ -420,6 +420,10 @@ export const debug = Boolean(process.env.REACT_APP_DEBUG);
 
 export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
 export const FEE_ESTIMATION = ".004";
+export const FLAT_RELAY_CAPITAL_FEE = process.env
+  .REACT_APP_FLAT_RELAY_CAPITAL_FEE
+  ? Number(process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE)
+  : 0;
 export const AddressZero = ethers.constants.AddressZero;
 export const ArbitrumProviderUrl =
   process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
