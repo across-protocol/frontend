@@ -12,7 +12,7 @@ import { relayFeeCalculator } from "@across-protocol/sdk-v2";
 
 // all routes should be pre imported to be able to switch based on chain id
 import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
-import MainnetRoutes from "data/routes_1_0x6Bb9910c5529Cb3b32c4f0e13E8bC38F903b2534.json";
+import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import GoerliRoutes from "data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
 
 /* Chains and Tokens section */
