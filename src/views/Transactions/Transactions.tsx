@@ -6,11 +6,11 @@ import {
   Account,
   BottomRow,
   TopRow,
-  TitleRow,
   ButtonWrapper,
   LoadingWrapper,
   NotFoundWrapper,
   EthNoteWrapper,
+  TableWrapper,
 } from "./Transactions.styles";
 import useTransactionsView from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
@@ -91,42 +91,29 @@ const Transactions = () => {
   const isTxPresent = !filledTx.length && !ongoingTx.length && !initialLoading;
   return (
     <Wrapper>
-      {(ongoingTx.length === 0 || !isConnected) && (
-        <TitleRow>
-          <Title>
-            Transactions
-            {isConnected && account && (
-              <Account>({shortenAddress(account, "......", 6)})</Account>
-            )}
-          </Title>
-          {!isConnected && (
-            <ButtonWrapper>
-              <ConnectButton onClick={initOnboard}>
-                Connect Wallet
-              </ConnectButton>
-            </ButtonWrapper>
+      <TopRow dark={isConnected && ongoingTx.length > 0}>
+        <Title>
+          Transactions
+          {account && (
+            <Account>({shortenAddress(account, "......", 6)})</Account>
           )}
-        </TitleRow>
-      )}
-
-      {isConnected && (
-        <>
-          {ongoingTx.length > 0 && (
-            <TopRow>
-              <Title>
-                Transactions
-                {account && (
-                  <Account>({shortenAddress(account, "......", 6)})</Account>
-                )}
-              </Title>
-              <EthNoteWrapper>
-                <img src={ethLogo} alt="ethereum_logo" />
-                <img src={wethLogo} alt="weth_logo" />
-                <span>
-                  Note - ETH transfers will appear as WETH but you will receive
-                  ETH
-                </span>
-              </EthNoteWrapper>
+        </Title>
+        {!isConnected && (
+          <ButtonWrapper>
+            <ConnectButton onClick={initOnboard}>Connect Wallet</ConnectButton>
+          </ButtonWrapper>
+        )}
+        {isConnected && ongoingTx.length > 0 && (
+          <>
+            <EthNoteWrapper>
+              <img src={ethLogo} alt="ethereum_logo" />
+              <img src={wethLogo} alt="weth_logo" />
+              <span>
+                Note - ETH transfers will appear as WETH but you will receive
+                ETH
+              </span>
+            </EthNoteWrapper>
+            <TableWrapper>
               {width >= BREAKPOINTS.laptopMin ? (
                 <TransactionsTable
                   title="Ongoing"
@@ -135,15 +122,18 @@ const Transactions = () => {
                 />
               ) : (
                 <MobileTransactionsTable
-                  title="History"
+                  title="Ongoing"
                   headers={mobileHeaders}
                   rows={mobileOngoingTx}
                   openIndex={openOngoingRow}
                 />
               )}
-            </TopRow>
-          )}
-
+            </TableWrapper>
+          </>
+        )}
+      </TopRow>
+      {isConnected && (
+        <>
           <BottomRow>
             {initialLoading && (
               <LoadingWrapper>
@@ -161,34 +151,36 @@ const Transactions = () => {
                 No transactions found.
               </NotFoundWrapper>
             )}
-            {width >= BREAKPOINTS.laptopMin ? (
-              <TransactionsTableWithPagination
-                title="History"
-                headers={headers}
-                rows={filledTx}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                elements={filledTx}
-                initialLoading={initialLoading}
-                pageSize={pageSize}
-                setPageSize={setPageSize}
-                pageSizes={pageSizes}
-              />
-            ) : (
-              <MobileTransactionsTableWithPagination
-                title="History"
-                headers={mobileHeaders}
-                rows={mobileFilledTx}
-                openIndex={openFilledRow}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                elements={mobileFilledTx}
-                initialLoading={initialLoading}
-                pageSize={pageSize}
-                setPageSize={setPageSize}
-                pageSizes={pageSizes}
-              />
-            )}
+            <TableWrapper>
+              {width >= BREAKPOINTS.laptopMin ? (
+                <TransactionsTableWithPagination
+                  title="History"
+                  headers={headers}
+                  rows={filledTx}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  elements={filledTx}
+                  initialLoading={initialLoading}
+                  pageSize={pageSize}
+                  setPageSize={setPageSize}
+                  pageSizes={pageSizes}
+                />
+              ) : (
+                <MobileTransactionsTableWithPagination
+                  title="History"
+                  headers={mobileHeaders}
+                  rows={mobileFilledTx}
+                  openIndex={openFilledRow}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  elements={mobileFilledTx}
+                  initialLoading={initialLoading}
+                  pageSize={pageSize}
+                  setPageSize={setPageSize}
+                  pageSizes={pageSizes}
+                />
+              )}
+            </TableWrapper>
           </BottomRow>
         </>
       )}
