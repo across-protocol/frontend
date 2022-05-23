@@ -75,7 +75,7 @@ const Pool: FC = () => {
   const { balance, refetch: refetchBalance } = useBalance({
     chainId,
     account,
-    tokenAddress: token.address,
+    token,
   });
 
   const wrongNetwork =
