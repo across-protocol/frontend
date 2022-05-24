@@ -672,6 +672,15 @@
     {
       "fromChain": 288,
       "toChain": 1,
+      "fromTokenAddress": "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000",
+      "fromSpokeAddress": "0xcA5BcA331b8137fD15c2fa6BA34655FA58de5a0B",
+      "fromTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "fromChain": 288,
+      "toChain": 1,
       "fromTokenAddress": "0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc",
       "fromSpokeAddress": "0xcA5BcA331b8137fD15c2fa6BA34655FA58de5a0B",
       "fromTokenSymbol": "USDC",
@@ -726,6 +735,15 @@
     {
       "fromChain": 288,
       "toChain": 10,
+      "fromTokenAddress": "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000",
+      "fromSpokeAddress": "0xcA5BcA331b8137fD15c2fa6BA34655FA58de5a0B",
+      "fromTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "fromChain": 288,
+      "toChain": 10,
       "fromTokenAddress": "0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc",
       "fromSpokeAddress": "0xcA5BcA331b8137fD15c2fa6BA34655FA58de5a0B",
       "fromTokenSymbol": "USDC",
@@ -771,6 +789,15 @@
     {
       "fromChain": 288,
       "toChain": 137,
+      "fromTokenAddress": "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000",
+      "fromSpokeAddress": "0xcA5BcA331b8137fD15c2fa6BA34655FA58de5a0B",
+      "fromTokenSymbol": "ETH",
+      "isNative": true,
+      "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "fromChain": 288,
+      "toChain": 137,
       "fromTokenAddress": "0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc",
       "fromSpokeAddress": "0xcA5BcA331b8137fD15c2fa6BA34655FA58de5a0B",
       "fromTokenSymbol": "USDC",
@@ -811,6 +838,16 @@
       "fromSpokeAddress": "0xcA5BcA331b8137fD15c2fa6BA34655FA58de5a0B",
       "fromTokenSymbol": "WETH",
       "isNative": false,
+      "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+
+    {
+      "fromChain": 288,
+      "toChain": 42161,
+      "fromTokenAddress": "0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000",
+      "fromSpokeAddress": "0xcA5BcA331b8137fD15c2fa6BA34655FA58de5a0B",
+      "fromTokenSymbol": "ETH",
+      "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
     {
