@@ -11,6 +11,7 @@ import Notify, { API as NotifyAPI } from "bnc-notify";
 
 type State = {
   account?: string;
+  ensName?: string;
   chainId?: ChainId;
   provider?: ethers.providers.Web3Provider;
   signer?: ethers.Signer;
@@ -36,8 +37,9 @@ const connectionSlice = createSlice({
   initialState,
   reducers: {
     update: (state, action: PayloadAction<Update>) => {
-      const { account, chainId, provider, signer } = action.payload;
+      const { account, ensName, chainId, provider, signer } = action.payload;
       state.account = account ? getAddress(account) : state.account;
+      state.ensName = ensName
       state.provider = provider ?? state.provider;
       // theres a potential problem with this: if onboard says a signer is undefined, we default them back
       // to the previous signer. This means we get out of sync with onboard and could have serious consequences.

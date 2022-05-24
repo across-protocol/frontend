@@ -20,7 +20,7 @@ interface Props {
 }
 
 const Wallet: FC<Props> = ({ setOpenSidebar }) => {
-  const { account, isConnected, chainId } = useConnection();
+  const { account, ensName, isConnected, chainId } = useConnection();
   const config = getConfig();
   const nativeToken = chainId ? config.getNativeTokenInfo(chainId) : undefined;
   const chain = chainId ? getChainInfo(chainId) : undefined;
@@ -50,7 +50,7 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
           </>
         )}
       </Info>
-      {account && <Account>{shortenAddress(account, "...", 4)}</Account>}
+      {account && <Account>{ensName ?? shortenAddress(account, "...", 4)}</Account>}
     </Wrapper>
   );
 };

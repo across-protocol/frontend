@@ -15,7 +15,7 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function useConnection() {
-  const { account, signer, provider, error, chainId, notify } = useAppSelector(
+  const { account, ensName, signer, provider, error, chainId, notify } = useAppSelector(
     (state) => state.connection
   );
 
@@ -28,6 +28,7 @@ export function useConnection() {
   const isConnected = !!chainId && !!signer && !!account;
   return {
     account,
+    ensName,
     chainId,
     provider,
     signer,

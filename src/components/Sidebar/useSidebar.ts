@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { usePrevious } from "hooks";
 type SidebarWrapperClasses = "open" | "closed" | "transition";
 export default function useSidebar(openSidebar: boolean) {
-  const { account, isConnected, chainId } = useConnection();
+  const { account, ensName, isConnected, chainId } = useConnection();
   const location = useLocation();
 
   // Note: to avoid a UI issue, we need to transition classes between open -> transition -> closed or vice versa.
@@ -28,6 +28,7 @@ export default function useSidebar(openSidebar: boolean) {
   }, [openSidebar, prevOpenSidebar]);
   return {
     account,
+    ensName,
     isConnected,
     chainId,
     location,
