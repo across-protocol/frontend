@@ -27,22 +27,23 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
         </Text>
       </Info>
       <Info>
-        <ArticleTitle>Native Bridge Fee</ArticleTitle>
+        <ArticleTitle>Destination Gas Fee</ArticleTitle>
         <Text>
-          For transfers from L2 to L1, assets are sent near instantly by
-          utilizing funds from a liquidity pool. The fee is for rewarding
-          liquidity providers on Across. Transfers from L1 to L2 rely on the
-          L2's canonical bridge whereby fees are free for transferring assets.
+          In order for Across to deliver the tokens to the user on the
+          destination chain, a transaction needs to be submitted on behalf of
+          the user on the destination chain. The destination gas fee encompasses
+          the gas costs associated with this transaction.
         </Text>
       </Info>
       <Info>
-        <ArticleTitle>Gas Fee</ArticleTitle>
+        <ArticleTitle>Bridge Fee</ArticleTitle>
         <Text>
-          Across sends funds by default via an instant relay. If an instant
-          relay is unavailable, a slow relay will occur. Instant and slow
-          relayers charge a fee for performing the relay. These fees are
-          dependent on Ethereum Gas fees. View here to learn more about Ethereum
-          gas fees.
+          The bridge fee paid by the user consists of two components: <br />{" "}
+          <br />
+          1. LP fee: A fee that is paid to liquidity providers for providing
+          passive liquidity in the unified L1 pools <br />
+          2. Relayer fee: A fee that is paid to bridge relayers to incentivize
+          them to promptly relay a bridge transaction
         </Text>
       </Info>
 
@@ -50,24 +51,24 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
         <li>
           Click{" "}
           <Link
-            href="https://docs.across.to/bridge/how-does-across-work-1/architecture-process-walkthrough"
+            href="https://docs.across.to/v2/how-does-across-work/overview/overview-more-details"
             target="_blank"
             rel="noopener noreferrer"
           >
             here
           </Link>{" "}
-          to learn more about instant and slow relayers.
+          to learn more about the role of relayers
         </li>
         <li>
           Click{" "}
           <Link
-            href="https://docs.across.to/bridge/how-does-across-work-1/fees"
+            href="https://docs.across.to/v2/how-does-across-work/fees"
             target="_blank"
             rel="noopener noreferrer"
           >
             here
           </Link>{" "}
-          or more information on Across fees.
+          for more information about fees
         </li>
         <li>
           Click{" "}
@@ -78,7 +79,7 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
           >
             here
           </Link>{" "}
-          to learn more about Ethereum gas fees.
+          to learn more about gas fees
         </li>
       </List>
     </Dialog>
