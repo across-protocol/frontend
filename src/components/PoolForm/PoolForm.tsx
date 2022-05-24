@@ -191,18 +191,16 @@ const PoolForm: FC<Props> = ({
         <ROIItem>
           <div>Current APY:</div>
           <div>
-            {formatNumberThreeSigDigits(
-              Number(Number(apy).toFixed(3))
-            ).replaceAll(",", "")}
-            %
+            {formatNumberThreeSigDigits(Number(apy)).replaceAll(",", "")}%
           </div>
         </ROIItem>
         <ROIItem>
           <div>Projected APY:</div>
           <div>
-            {formatNumberThreeSigDigits(
-              Number(Number(projectedApr).toFixed(3))
-            ).replaceAll(",", "")}
+            {formatNumberThreeSigDigits(Number(projectedApr)).replaceAll(
+              ",",
+              ""
+            )}
             %
           </div>
         </ROIItem>
