@@ -44,40 +44,6 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
           passive liquidity in the unified L1 pools <br />
           2. Relayer fee: A fee that is paid to bridge relayers to incentivize
           them to promptly relay a bridge transaction Click{" "}
-          <div>
-            Click{" "}
-            <Link
-              href="https://docs.across.to/v2/how-does-across-work/overview/overview-more-details"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              here
-            </Link>{" "}
-            to learn more about the role of relayers
-          </div>{" "}
-          <div>
-            {" "}
-            Click{" "}
-            <Link
-              href="https://docs.across.to/v2/how-does-across-work/fees"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              here
-            </Link>{" "}
-            for more information about fees
-          </div>{" "}
-          <div>
-            Click{" "}
-            <Link
-              href="https://ethereum.org/en/developers/docs/gas/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              here
-            </Link>{" "}
-            to learn more about gas fees
-          </div>
         </Text>
       </Info>
 
@@ -85,24 +51,24 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
         <li>
           Click{" "}
           <Link
-            href="https://docs.across.to/bridge/how-does-across-work-1/architecture-process-walkthrough"
+            href="https://docs.across.to/v2/how-does-across-work/overview/overview-more-details"
             target="_blank"
             rel="noopener noreferrer"
           >
             here
           </Link>{" "}
-          to learn more about instant and slow relayers.
+          to learn more about the role of relayers
         </li>
         <li>
           Click{" "}
           <Link
-            href="https://docs.across.to/bridge/how-does-across-work-1/fees"
+            href="https://docs.across.to/v2/how-does-across-work/fees"
             target="_blank"
             rel="noopener noreferrer"
           >
             here
           </Link>{" "}
-          or more information on Across fees.
+          for more information about fees
         </li>
         <li>
           Click{" "}
@@ -113,7 +79,7 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
           >
             here
           </Link>{" "}
-          to learn more about Ethereum gas fees.
+          to learn more about gas fees
         </li>
       </List>
     </Dialog>
