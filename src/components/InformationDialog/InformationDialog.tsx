@@ -43,7 +43,7 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
           1. LP fee: A fee that is paid to liquidity providers for providing
           passive liquidity in the unified L1 pools <br />
           2. Relayer fee: A fee that is paid to bridge relayers to incentivize
-          them to promptly relay a bridge transaction Click{" "}
+          them to promptly relay a bridge transaction
         </Text>
       </Info>
 
