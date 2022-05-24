@@ -27,6 +27,7 @@ import {
   RouterLink,
 } from "./Confirmation.styles";
 import { ethers } from "ethers";
+import { getConfirmationDepositTime } from "utils";
 
 export type Deposit = {
   txHash: string;
@@ -60,7 +61,9 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
       <Wrapper>
         <Header>
           <Heading>Deposit succeeded</Heading>
-          <SubHeading>Your funds will arrive in 1 - 5 minutes</SubHeading>
+          <SubHeading>
+            Your funds will arrive in {getConfirmationDepositTime()}
+          </SubHeading>
           <SubHeading>
             To monitor progress, go to the
             <RouterLink to="/transactions">transactions page</RouterLink>
@@ -153,7 +156,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
             <Info>
               <h3>Estimated time of arrival</h3>
               <div>
-                <div>1 to 5 minutes</div>
+                <div>{getConfirmationDepositTime()}</div>
               </div>
             </Info>
           </div>
