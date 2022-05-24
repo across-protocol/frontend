@@ -260,7 +260,7 @@
       "toChain": 1,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "fromSpokeAddress": "0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9",
-      "fromTokenSymbol": "OETH",
+      "fromTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
@@ -314,7 +314,7 @@
       "toChain": 137,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "fromSpokeAddress": "0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9",
-      "fromTokenSymbol": "OETH",
+      "fromTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
@@ -368,7 +368,7 @@
       "toChain": 288,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "fromSpokeAddress": "0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9",
-      "fromTokenSymbol": "OETH",
+      "fromTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
@@ -422,7 +422,7 @@
       "toChain": 42161,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "fromSpokeAddress": "0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9",
-      "fromTokenSymbol": "OETH",
+      "fromTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
@@ -918,7 +918,7 @@
       "toChain": 1,
       "fromTokenAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
       "fromSpokeAddress": "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
-      "fromTokenSymbol": "AETH",
+      "fromTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
@@ -981,7 +981,7 @@
       "toChain": 10,
       "fromTokenAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
       "fromSpokeAddress": "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
-      "fromTokenSymbol": "AETH",
+      "fromTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
@@ -1035,7 +1035,7 @@
       "toChain": 137,
       "fromTokenAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
       "fromSpokeAddress": "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
-      "fromTokenSymbol": "AETH",
+      "fromTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
@@ -1098,7 +1098,7 @@
       "toChain": 288,
       "fromTokenAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
       "fromSpokeAddress": "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
-      "fromTokenSymbol": "AETH",
+      "fromTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     },
