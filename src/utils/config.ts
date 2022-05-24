@@ -130,11 +130,11 @@ export class ConfigClient {
       .map((chain) => chain.chainId)
       .filter(constants.isSupportedChainId);
   }
-  isSupportedChainId(chainId: number): boolean {
+  isSupportedChainId = (chainId: number): boolean => {
     return (
       constants.isSupportedChainId(chainId) && this.spokeChains.has(chainId)
     );
-  }
+  };
   // returns token list in order specified by constants, but adds in token address for the chain specified
   getTokenList(chainId?: number): TokenList {
     const routeTable = Object.fromEntries(
