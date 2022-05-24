@@ -114,7 +114,7 @@ export const formatNumberTwoSigDigits =
   twoSigFormatter.format.bind(twoSigFormatter);
 
 const threeSigFormatter = new Intl.NumberFormat("en-US", {
-  maximumSignificantDigits: 3,
+  maximumFractionDigits: 3,
 });
 
 export const formatNumberThreeSigDigits =
