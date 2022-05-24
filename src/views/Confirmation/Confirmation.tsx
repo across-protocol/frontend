@@ -156,7 +156,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
             <Info>
               <h3>Estimated time of arrival</h3>
               <div>
-                <div>1 to 5 minutes</div>
+                <div>{getConfirmationDepositTime()}</div>
               </div>
             </Info>
           </div>
