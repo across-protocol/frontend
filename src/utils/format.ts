@@ -112,3 +112,19 @@ const twoSigFormatter = new Intl.NumberFormat("en-US", {
 
 export const formatNumberTwoSigDigits =
   twoSigFormatter.format.bind(twoSigFormatter);
+
+const threeSigFormatter = new Intl.NumberFormat("en-US", {
+  maximumSignificantDigits: 3,
+});
+
+export const formatNumberThreeSigDigits =
+  threeSigFormatter.format.bind(threeSigFormatter);
+
+export function formatPoolAPY(
+  wei: ethers.BigNumberish,
+  decimals: number
+): string {
+  return formatNumberThreeSigDigits(
+    Number(ethers.utils.formatUnits(wei, decimals))
+  );
+}

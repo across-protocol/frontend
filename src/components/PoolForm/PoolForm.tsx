@@ -20,12 +20,13 @@ import {
   formatUnits,
   formatEtherRaw,
   max,
-  numberFormatter,
   estimateGasForAddEthLiquidity,
   DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE,
   UPDATE_GAS_INTERVAL_MS,
   toWeiSafe,
   ChainId,
+  formatPoolAPY,
+  formatNumberThreeSigDigits,
 } from "utils";
 import { useConnection } from "state/hooks";
 import type { ShowSuccess } from "views/Pool";
@@ -180,21 +181,27 @@ const PoolForm: FC<Props> = ({
         <ROIItem>
           <div>Total pool size:</div>
           <div>
-            {formatUnits(totalPoolSize, decimals)} {symbol}
+            {formatPoolAPY(totalPoolSize, decimals)} {symbol}
           </div>
         </ROIItem>
         <ROIItem>
           <div>Pool utilization:</div>
-          <div>{formatUnits(utilization, 16)}%</div>
+          <div>{formatPoolAPY(utilization, 16)}%</div>
         </ROIItem>
         <ROIItem>
           <div>Current APY:</div>
-          <div>{numberFormatter(Number(apy)).replaceAll(",", "")}%</div>
+          <div>
+            {formatNumberThreeSigDigits(Number(apy)).replaceAll(",", "")}%
+          </div>
         </ROIItem>
         <ROIItem>
           <div>Projected APY:</div>
           <div>
-            {numberFormatter(Number(projectedApr)).replaceAll(",", "")}%
+            {formatNumberThreeSigDigits(Number(projectedApr)).replaceAll(
+              ",",
+              ""
+            )}
+            %
           </div>
         </ROIItem>
       </ROI>

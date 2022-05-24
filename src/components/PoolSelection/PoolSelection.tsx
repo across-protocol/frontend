@@ -16,7 +16,6 @@ import {
   Logo,
   ToggleIcon,
 } from "./PoolSelection.styles";
-
 interface Props {
   token: Token;
   tokenList: TokenList;
