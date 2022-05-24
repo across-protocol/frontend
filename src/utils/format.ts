@@ -113,18 +113,19 @@ const twoSigFormatter = new Intl.NumberFormat("en-US", {
 export const formatNumberTwoSigDigits =
   twoSigFormatter.format.bind(twoSigFormatter);
 
-const threeSigFormatter = new Intl.NumberFormat("en-US", {
+const threeMaxFracFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 3,
 });
 
-export const formatNumberThreeSigDigits =
-  threeSigFormatter.format.bind(threeSigFormatter);
+export const formatNumberMaxFracDigits = threeMaxFracFormatter.format.bind(
+  threeMaxFracFormatter
+);
 
 export function formatPoolAPY(
   wei: ethers.BigNumberish,
   decimals: number
 ): string {
-  return formatNumberThreeSigDigits(
+  return formatNumberMaxFracDigits(
     Number(ethers.utils.formatUnits(wei, decimals))
   );
 }

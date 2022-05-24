@@ -26,7 +26,7 @@ import {
   toWeiSafe,
   ChainId,
   formatPoolAPY,
-  formatNumberThreeSigDigits,
+  formatNumberMaxFracDigits,
 } from "utils";
 import { useConnection } from "state/hooks";
 import type { ShowSuccess } from "views/Pool";
@@ -191,13 +191,13 @@ const PoolForm: FC<Props> = ({
         <ROIItem>
           <div>Current APY:</div>
           <div>
-            {formatNumberThreeSigDigits(Number(apy)).replaceAll(",", "")}%
+            {formatNumberMaxFracDigits(Number(apy)).replaceAll(",", "")}%
           </div>
         </ROIItem>
         <ROIItem>
           <div>Projected APY:</div>
           <div>
-            {formatNumberThreeSigDigits(Number(projectedApr)).replaceAll(
+            {formatNumberMaxFracDigits(Number(projectedApr)).replaceAll(
               ",",
               ""
             )}
