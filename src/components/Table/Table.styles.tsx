@@ -4,10 +4,14 @@ import { QUERIES } from "utils";
 
 export const TableWrapper = styled.div`
   width: 100%;
-  font-size: clamp(0.75rem, 1.2vw + 0.4rem, 1.125rem);
+  font-size: 16px;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.4);
   @media ${QUERIES.tabletAndDown} {
     overflow: auto;
+  }
+
+  @media ${QUERIES.mobileAndDown} {
+    font-size: 12px;
   }
 `;
 
@@ -49,6 +53,10 @@ export const Row = styled.div`
   &:nth-of-type(2n) {
     background-color: var(--color-white);
   }
+
+  @media ${QUERIES.mobileAndDown} {
+    padding: 11px 0;
+  }
 `;
 
 export const HeadRow = styled(Row)`
@@ -56,6 +64,10 @@ export const HeadRow = styled(Row)`
   cursor: default;
   background: var(--color-white);
   margin-bottom: 0;
+
+  @media ${QUERIES.mobileAndDown} {
+    padding: 6px 0;
+  }
 `;
 
 interface ICellStyled {

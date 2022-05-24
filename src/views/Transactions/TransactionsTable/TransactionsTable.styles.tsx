@@ -7,11 +7,24 @@ import {
   Cell,
 } from "components/Table/Table.styles";
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
+import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
-  margin: 2rem auto;
+  margin: auto;
   max-width: 1425px;
   overflow-x: auto;
+
+  ::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--color-gray);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-gray-600);
+  }
 `;
 
 export const Title = styled.h2`
@@ -19,6 +32,14 @@ export const Title = styled.h2`
   font-size: ${20 / 16}rem;
   font-weight: 600;
   margin-bottom: 1rem;
+
+  @media ${QUERIES.mobileAndDown} {
+    padding: 0 ${20 / 16}rem;
+    font-weight: 600;
+    font-size: ${13 / 16}rem;
+    line-height: ${16 / 16}rem;
+    text-transform: uppercase;
+  }
 `;
 
 export const StyledTableWrapper = styled(TableWrapper)`
@@ -101,7 +122,6 @@ export const StyledMobileRow = styled(StyledRow)`
 
 export const MobileCell = styled(StyledCell)`
   &.header-cell {
-    font-size: ${16 / 16}rem;
     font-weight: 500;
   }
 
@@ -111,6 +131,12 @@ export const MobileCell = styled(StyledCell)`
   }
   &:not(:first-of-type) {
     min-width: 60px;
+  }
+
+  @media ${QUERIES.mobileAndDown} {
+    &.header-cell {
+      font-size: ${12 / 16}rem;
+    }
   }
 `;
 
@@ -134,14 +160,6 @@ export const AccordionRow = styled.div`
   > div {
     padding: 8px 0;
   }
-  &:first-of-type {
-    div:first-of-type {
-      border-top: 1px solid #2c2f33;
-    }
-    div:nth-of-type(2) {
-      border-top: 1px solid #2c2f33;
-    }
-  }
   > div:first-of-type {
     flex: 1 0 60px;
     background-color: var(--color-black);
@@ -164,8 +182,12 @@ export const MobileTableLink = styled(TableLink)`
 `;
 
 export const PaginationWrapper = styled.div`
-  max-width: 1200px;
+  max-width: 1425px;
   margin: auto;
+
+  @media ${QUERIES.mobileAndDown} {
+    padding: 0 ${20 / 16}rem;
+  }
 `;
 
 export const StyledPlus = styled(AcrossPlusIcon)`

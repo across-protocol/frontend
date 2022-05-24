@@ -6,7 +6,11 @@ import {
   MobileChevron,
   TableLink,
 } from "./TransactionsTable.styles";
-import { shortenTransactionHash, capitalizeFirstLetter } from "utils/format";
+import {
+  capitalizeFirstLetter,
+  formatNumberTwoSigDigits,
+  shortenString,
+} from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 import { getChainInfo, ChainId } from "utils/constants";
 import { getConfig, Token } from "utils/config";
@@ -87,6 +91,14 @@ function formatTransactionRows(
       value: capitalizeFirstLetter(tx.status),
     };
 
+    const fp = tx.filled.mul(100).div(tx.amount);
+    const filled: ICell = {
+      size: "sm",
+      value: `${
+        fp.toNumber() > 100 ? "100" : formatNumberTwoSigDigits(fp.toNumber())
+      }%`,
+    };
+
     const downChevron: ICell = {
       size: "xs",
       value: (
@@ -132,7 +144,7 @@ function formatTransactionRows(
         target="_blank"
         rel="noreferrer"
       >
-        {shortenTransactionHash(tx.depositTxHash)}
+        {shortenString(tx.depositTxHash, "...", 8)}
       </MobileTableLink>
     );
 
@@ -148,7 +160,7 @@ function formatTransactionRows(
               target="_blank"
               rel="noreferrer"
             >
-              {shortenTransactionHash(fillTxHash)}
+              {shortenString(fillTxHash, "...", 8)}
             </TableLink>
           </div>
         );
@@ -158,7 +170,7 @@ function formatTransactionRows(
     }
 
     return {
-      cells: [timestamp, status, downChevron],
+      cells: [timestamp, status, filled, downChevron],
       fromChain,
       toChain,
       symbol,
@@ -183,6 +195,11 @@ export const mobileHeaders: ICell[] = [
   {
     size: "sm",
     value: "Status",
+    cellClassName: "header-cell",
+  },
+  {
+    size: "sm",
+    value: "Filled %",
     cellClassName: "header-cell",
   },
   {

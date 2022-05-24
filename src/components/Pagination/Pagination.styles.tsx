@@ -1,16 +1,27 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { BaseButton } from "components/Buttons";
+import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
   display: flex;
   justify-content: space-between;
   width: 100%;
-  padding-bottom: 8rem;
+  margin: 2rem 0 8rem;
+
+  @media ${QUERIES.mobileAndDown} {
+    flex-direction: column;
+    align-items: flex-end;
+    margin: 2rem 0 4rem;
+  }
 `;
 
 export const PageSizeSelectWrapper = styled.div`
   position: relative;
+
+  @media ${QUERIES.mobileAndDown} {
+    margin-bottom: 1.5rem;
+  }
 `;
 
 export const PageSizeSelectButton = styled(BaseButton)`
@@ -54,6 +65,7 @@ export const PageSizeSelectDropdown = styled.div`
   border-radius: 6px;
   overflow: hidden;
   animation: ${PageSelectDropdownRevealAnimation} 0.1s ease-out forwards;
+  background-color: var(--color-gray);
 `;
 
 export const PageSizeOptiontButton = styled(BaseButton)`

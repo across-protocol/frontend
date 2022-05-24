@@ -4,6 +4,7 @@ import MobileTransactionsTable from "./MobileTransactionsTable";
 import Pagination from "components/Pagination";
 import { IMobileRow } from "./createMobileTransactionTableJSX";
 import paginate from "components/Pagination/paginate";
+import { PaginationWrapper } from "./TransactionsTable.styles";
 
 interface Props {
   rows: IMobileRow[];
@@ -58,13 +59,15 @@ const MobileTransactionsTableWithPagination: FC<Props> = ({
         elementsPerPage={pageSize}
       />
       {paginateState.totalPages > 1 ? (
-        <Pagination
-          onPageChange={setCurrentPage}
-          {...paginateState}
-          onPageSizeChange={setPageSize}
-          pageSize={pageSize}
-          pageSizes={pageSizes}
-        />
+        <PaginationWrapper>
+          <Pagination
+            onPageChange={setCurrentPage}
+            {...paginateState}
+            onPageSizeChange={setPageSize}
+            pageSize={pageSize}
+            pageSizes={pageSizes}
+          />
+        </PaginationWrapper>
       ) : null}
     </>
   );
