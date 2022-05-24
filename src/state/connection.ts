@@ -39,7 +39,7 @@ const connectionSlice = createSlice({
     update: (state, action: PayloadAction<Update>) => {
       const { account, ensName, chainId, provider, signer } = action.payload;
       state.account = account ? getAddress(account) : state.account;
-      state.ensName = ensName
+      state.ensName = ensName;
       state.provider = provider ?? state.provider;
       // theres a potential problem with this: if onboard says a signer is undefined, we default them back
       // to the previous signer. This means we get out of sync with onboard and could have serious consequences.

@@ -92,10 +92,10 @@ export function OnboardEthers(config: Initialization, emit: Emit) {
         const ensName = ens?.name;
         if (savedWallet?.provider) {
           emit("update", {
-            ensName
+            ensName,
           });
         }
-      }
+      },
     },
   });
   async function init() {
