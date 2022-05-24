@@ -140,18 +140,6 @@ export const chainInfoList: ChainInfoList = [
     earliestBlock: 14704425,
   },
   {
-    name: "Optimism",
-    chainId: ChainId.OPTIMISM,
-    logoURI: optimismLogo,
-    rpcUrl: "https://mainnet.optimism.io",
-    explorerUrl: "https://optimistic.etherscan.io",
-    constructExplorerLink: (txHash: string) =>
-      `https://optimistic.etherscan.io/tx/${txHash}`,
-    nativeCurrencySymbol: "OETH",
-    pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 6979967,
-  },
-  {
     name: "Arbitrum",
     fullName: "Arbitrum One",
     chainId: ChainId.ARBITRUM,
@@ -177,6 +165,18 @@ export const chainInfoList: ChainInfoList = [
     earliestBlock: 551955,
   },
   {
+    name: "Optimism",
+    chainId: ChainId.OPTIMISM,
+    logoURI: optimismLogo,
+    rpcUrl: "https://mainnet.optimism.io",
+    explorerUrl: "https://optimistic.etherscan.io",
+    constructExplorerLink: (txHash: string) =>
+      `https://optimistic.etherscan.io/tx/${txHash}`,
+    nativeCurrencySymbol: "OETH",
+    pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 6979967,
+  },
+  {
     name: "Polygon",
     fullName: "Polygon Network",
     chainId: ChainId.POLYGON,
@@ -191,17 +191,17 @@ export const chainInfoList: ChainInfoList = [
     earliestBlock: 27875891,
   },
   {
-    name: "Rinkeby",
-    fullName: "Rinkeby Testnet",
-    chainId: ChainId.RINKEBY,
+    name: "Goerli",
+    fullName: "Goerli Testnet",
+    chainId: ChainId.GOERLI,
     logoURI: ethereumLogo,
-    explorerUrl: "https://rinkeby.etherscan.io",
+    explorerUrl: "https://goerli.etherscan.io/",
     constructExplorerLink: defaultConstructExplorerLink(
-      "https://rinkeby.etherscan.io"
+      "https://goerli.etherscan.io/"
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 10485193,
+    earliestBlock: 6586188,
   },
   {
     name: "Kovan",
@@ -230,6 +230,19 @@ export const chainInfoList: ChainInfoList = [
     earliestBlock: 2537971,
   },
   {
+    name: "Mumbai",
+    chainId: ChainId.MUMBAI,
+    logoURI: polygonLogo,
+    rpcUrl: "https://matic-mumbai.chainstacklabs.com",
+    explorerUrl: "https://mumbai.polygonscan.com",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://mumbai.polygonscan.com"
+    ),
+    nativeCurrencySymbol: "WMATIC",
+    pollingInterval: defaultBlockPollingInterval,
+    earliestBlock: 25751326,
+  },
+  {
     name: "Arbitrum Rinkeby",
     fullName: "Arbitrum Testnet Rinkeby",
     chainId: ChainId.ARBITRUM_RINKEBY,
@@ -243,30 +256,17 @@ export const chainInfoList: ChainInfoList = [
     earliestBlock: 10523275,
   },
   {
-    name: "Goerli",
-    fullName: "Goerli Testnet",
-    chainId: ChainId.GOERLI,
+    name: "Rinkeby",
+    fullName: "Rinkeby Testnet",
+    chainId: ChainId.RINKEBY,
     logoURI: ethereumLogo,
-    explorerUrl: "https://goerli.etherscan.io/",
+    explorerUrl: "https://rinkeby.etherscan.io",
     constructExplorerLink: defaultConstructExplorerLink(
-      "https://goerli.etherscan.io/"
+      "https://rinkeby.etherscan.io"
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 6586188,
-  },
-  {
-    name: "Mumbai",
-    chainId: ChainId.MUMBAI,
-    logoURI: polygonLogo,
-    rpcUrl: "https://matic-mumbai.chainstacklabs.com",
-    explorerUrl: "https://mumbai.polygonscan.com",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://mumbai.polygonscan.com"
-    ),
-    nativeCurrencySymbol: "WMATIC",
-    pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 25751326,
+    earliestBlock: 10485193,
   },
 ];
 
