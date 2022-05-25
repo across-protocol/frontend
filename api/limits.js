@@ -9,6 +9,7 @@ const {
   isString,
   getRelayerFeeDetails,
   maxRelayFeePct,
+  getTokenDetails,
 } = require("./utils");
 
 const handler = async (request, response) => {
@@ -18,9 +19,18 @@ const handler = async (request, response) => {
       `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`
     );
 
-    let { l1Token, destinationChainId } = request.query;
-    if (!isString(l1Token) || !isString(destinationChainId))
-      throw new InputError("Must provide l1Token");
+    let { token, destinationChainId, chainId } = request.query;
+    if (!isString(token) || !isString(destinationChainId))
+      throw new InputError(
+        "Must provide token and destinationChainId as query params"
+      );
+
+    const { l1Token } = await getTokenDetails(
+      provider,
+      undefined,
+      token,
+      chainId
+    );
 
     const hubPool = HubPool__factory.connect(
       "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
@@ -41,7 +51,7 @@ const handler = async (request, response) => {
       hubPool.callStatic.multicall(multicallInput),
     ]);
 
-    const [{ liquidReserves }] = hubPool.interface.decodeFunctionResult(
+    const { liquidReserves } = hubPool.interface.decodeFunctionResult(
       "pooledTokens",
       multicallOutput[1]
     );
@@ -51,10 +61,10 @@ const handler = async (request, response) => {
       .sub(relayerFeeDetails.capitalFeePercent);
 
     const responseJson = {
-      minDeposit: relayerFeeDetails.gasFeeTotal
-        .mul(ethers.parseEther("1"))
+      minDeposit: ethers.BigNumber.from(relayerFeeDetails.gasFeeTotal)
+        .mul(ethers.utils.parseEther("1"))
         .div(maxGasFee)
-        .toString(), // Max fee pct is 25%
+        .toString(),
       maxDeposit: liquidReserves.toString(),
     };
 

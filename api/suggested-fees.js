@@ -17,16 +17,11 @@ const handler = async (request, response) => {
   try {
     const provider = infuraProvider("mainnet");
 
-    let { amount, l2Token, chainId, timestamp, destinationChainId } =
+    let { amount, token, timestamp, destinationChainId, chainId } =
       request.query;
-    if (
-      !isString(amount) ||
-      !isString(l2Token) ||
-      !isString(chainId) ||
-      !isString(destinationChainId)
-    )
+    if (!isString(amount) || !isString(token) || !isString(destinationChainId))
       throw new InputError(
-        "Must provide amount, chainId, and l2Token as query params"
+        "Must provide amount, token, and destinationChainId as query params"
       );
     const parsedTimestamp = isString(timestamp)
       ? Number(timestamp)
@@ -37,7 +32,7 @@ const handler = async (request, response) => {
     let { l1Token, hubPool } = await getTokenDetails(
       provider,
       undefined, // Search by l2Token only.
-      l2Token,
+      token,
       chainId
     );
 
@@ -77,7 +72,7 @@ const handler = async (request, response) => {
       throw new InputError("Sent amount is too low relative to fees");
 
     const responseJson = {
-      slowFeePct: relayerFeeDetails.relayFeePercent,
+      relayFeePct: relayerFeeDetails.relayFeePercent,
       lpFeePct: realizedLPFeePct.toString(),
       timestamp: parsedTimestamp.toString(),
     };
