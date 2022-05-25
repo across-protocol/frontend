@@ -23,6 +23,9 @@ const handler = async (request, response) => {
       throw new InputError(
         "Must provide amount, token, and destinationChainId as query params"
       );
+    
+    token = ethers.utils.getAddress(l1Token);
+    
     const parsedTimestamp = isString(timestamp)
       ? Number(timestamp)
       : (await provider.getBlock("latest")).timestamp;
