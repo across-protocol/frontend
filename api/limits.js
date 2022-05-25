@@ -24,6 +24,8 @@ const handler = async (request, response) => {
       throw new InputError(
         "Must provide token and destinationChainId as query params"
       );
+    
+    token = ethers.utils.getAddress(l1Token);
 
     const { l1Token } = await getTokenDetails(
       provider,
