@@ -23,6 +23,7 @@ import {
 import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
 import { useQueryParams } from "./useQueryParams";
+import { useHistory } from "react-router-dom";
 export enum FormStatus {
   IDLE = "idle",
   TOUCHED = "touched",
@@ -361,7 +362,7 @@ function useSendFormManager(): SendFormManagerContext {
   const [state, dispatch] = useReducer(formReducer, initialFormState);
   const { account: connectedAccount, chainId } = useConnection();
   const params = useQueryParams();
-
+  const history = useHistory();
   /**
    * This will set the Send Form values from a pre-defined state for the user.
     URL Params available --
@@ -397,12 +398,15 @@ function useSendFormManager(): SendFormManagerContext {
           }
         } catch (err) {
           console.error("err", err);
+          history.replace({
+            search: "",
+          });
         }
       }
     } else {
       dispatch({ type: ActionType.SET_FROM_CHAIN, payload: fromChain });
     }
-  }, [params.from, params.to, params.asset, params.amount, config]);
+  }, [params.from, params.to, params.asset, params.amount, config, history]);
 
   // Keep the connected account and the toAddress in sync. If a user switches account, the toAddress should be updated to this new account.
   useEffect(() => {
