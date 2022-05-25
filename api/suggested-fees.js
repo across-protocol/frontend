@@ -24,7 +24,7 @@ const handler = async (request, response) => {
         "Must provide amount, token, and destinationChainId as query params"
       );
     
-    token = ethers.utils.getAddress(l1Token);
+    token = ethers.utils.getAddress(token);
     
     const parsedTimestamp = isString(timestamp)
       ? Number(timestamp)
