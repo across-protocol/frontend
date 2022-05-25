@@ -362,6 +362,12 @@ function useSendFormManager(): SendFormManagerContext {
   const { account: connectedAccount, chainId } = useConnection();
   const params = useQueryParams();
 
+  /**
+    URL Params available --
+    Required: to, from.
+    Optional: asset, amount.
+    Because we need the asset's decimal value, you need to define **both** asset and amount for the optional params.
+   */
   useEffect(() => {
     const fromChain = Number(params.from);
     const toChain = Number(params.to);
