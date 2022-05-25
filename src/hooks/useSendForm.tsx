@@ -18,11 +18,11 @@ import {
   TokenList,
   ChainInfo,
   ChainInfoList,
+  toWeiSafe,
 } from "utils";
 import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
 import { useQueryParams } from "./useQueryParams";
-
 export enum FormStatus {
   IDLE = "idle",
   TOUCHED = "touched",
@@ -374,10 +374,21 @@ function useSendFormManager(): SendFormManagerContext {
     if (config.canBridge(fromChain, toChain)) {
       dispatch({ type: ActionType.SET_FROM_CHAIN, payload: fromChain });
       dispatch({ type: ActionType.SET_TO_CHAIN, payload: toChain });
+
+      if (params.asset) {
+        const token = config.getTokenInfoBySymbol(fromChain, params.asset);
+        if (token) {
+          dispatch({ type: ActionType.SET_TOKEN, payload: token.symbol });
+          if (params.amount && Number(params.amount)) {
+            const amount = toWeiSafe(params.amount, token.decimals);
+            dispatch({ type: ActionType.SET_AMOUNT, payload: amount });
+          }
+        }
+      }
     } else {
       dispatch({ type: ActionType.SET_FROM_CHAIN, payload: fromChain });
     }
-  }, [params.from, params.to, config]);
+  }, [params.from, params.to, params.asset, params.amount, config]);
 
   // Keep the connected account and the toAddress in sync. If a user switches account, the toAddress should be updated to this new account.
   useEffect(() => {
