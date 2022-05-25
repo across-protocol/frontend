@@ -363,6 +363,7 @@ function useSendFormManager(): SendFormManagerContext {
   const params = useQueryParams();
 
   /**
+   * This will set the Send Form values from a pre-defined state for the user.
     URL Params available --
     Required: to, from.
     Optional: asset, amount.
