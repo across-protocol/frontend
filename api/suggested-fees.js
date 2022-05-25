@@ -1,27 +1,83 @@
 // Note: ideally this would be written in ts as vercel claims they support it natively.
 // However, when written in ts, the imports seem to fail, so this is in js for now.
 
-
-const sdk = require("@uma/sdk");
-const { BridgeAdminEthers__factory } = require("@uma/contracts-node");
+const sdk = require("@across-protocol/sdk-v2");
+const { BlockFinder } = require("@uma/sdk");
 const ethers = require("ethers");
+
+const {
+  getTokenDetails,
+  InputError,
+  isString,
+  infuraProvider,
+  getRelayerFeeDetails,
+} = require("./utils");
 
 const handler = async (request, response) => {
   try {
-    const { REACT_APP_PUBLIC_INFURA_ID } = process.env;
-    const provider = new ethers.providers.StaticJsonRpcProvider(`https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`);
+    const provider = infuraProvider("mainnet");
 
-    let { amount, l2Token, chainId } = request.query;
-    if (!isString(amount) || !isString(l2Token) || !isString(chainId)) throw new InputError("Must provide amount and token as query params");
-
-    let { l1Token } = await getTokenDetails(provider, l2Token, chainId);
-    if (l1Token === sdk.across.constants.ADDRESSES.WETH) l1Token = sdk.across.constants.ADDRESSES.WETH;
-    const depositFeeDetails = await sdk.across.gasFeeCalculator.getDepositFeesDetails(provider, amount, l1Token === sdk.across.constants.ADDRESSES.WETH ? sdk.across.constants.ADDRESSES.ETH : l1Token);
-    if (depositFeeDetails.isAmountTooLow) throw new InputError("Sent amount is too low relative to fees");
+    let { amount, token, timestamp, destinationChainId, chainId } =
+      request.query;
+    if (!isString(amount) || !isString(token) || !isString(destinationChainId))
+      throw new InputError(
+        "Must provide amount, token, and destinationChainId as query params"
+      );
     
+    token = ethers.utils.getAddress(token);
+    
+    const parsedTimestamp = isString(timestamp)
+      ? Number(timestamp)
+      : (await provider.getBlock("latest")).timestamp;
+
+    amount = ethers.BigNumber.from(amount);
+
+    let { l1Token, hubPool } = await getTokenDetails(
+      provider,
+      undefined, // Search by l2Token only.
+      token,
+      chainId
+    );
+
+    const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
+    const { number: blockTag } = await blockFinder.getBlockForTimestamp(
+      parsedTimestamp
+    );
+    const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
+      "0x3B03509645713718B78951126E0A6de6f10043f5",
+      provider
+    );
+
+    const [currentUt, nextUt, rateModel] = await Promise.all([
+      hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
+        blockTag,
+      }),
+      hubPool.callStatic.liquidityUtilizationPostRelay(l1Token, amount, {
+        blockTag,
+      }),
+      configStoreClient.getRateModel(l1Token, {
+        blockTag,
+      }),
+    ]);
+
+    const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
+      rateModel,
+      currentUt,
+      nextUt
+    );
+    const relayerFeeDetails = await getRelayerFeeDetails(
+      l1Token,
+      amount,
+      destinationChainId
+    );
+
+    if (relayerFeeDetails.isAmountTooLow)
+      throw new InputError("Sent amount is too low relative to fees");
+
     const responseJson = {
-      slowFeePct: depositFeeDetails.slow.pct,
-      instantFeePct: depositFeeDetails.instant.pct
+      relayFeePct: relayerFeeDetails.relayFeePercent,
+      lpFeePct: realizedLPFeePct.toString(),
+      timestamp: parsedTimestamp.toString(),
     };
 
     response.status(200).json(responseJson);
@@ -35,33 +91,5 @@ const handler = async (request, response) => {
     response.status(status).send(error.message);
   }
 };
-
-
-const getTokenDetails = async (provider, l2Token, chainId) => {
-  const bridgeAdmin = BridgeAdminEthers__factory.connect("0x30B44C676A05F1264d1dE9cC31dB5F2A945186b6", provider);
-
-  // 2 queries: treating the token as the l1Token or treating the token as the L2 token.
-  const l2TokenFilter = bridgeAdmin.filters.WhitelistToken(undefined, undefined, l2Token);
-
-  // Filter events by chainId.
-  const events = (await bridgeAdmin.queryFilter(l2TokenFilter, 0, "latest")).filter((event) => event.args.chainId.toString() === chainId);
-
-  if (events.length === 0) throw new InputError("No whitelisted token found");
-
-  // Sorting from most recent to oldest.
-  events.sort((a, b) => {
-    if (b.blockNumber !== a.blockNumber) return b.blockNumber - a.blockNumber;
-    if (b.transactionIndex !== a.transactionIndex) return b.transactionIndex - a.transactionIndex;
-    return b.logIndex - a.logIndex;
-  });
-  
-  const event = events[0];
-
-  return event.args;
-}
-
-const isString = (input) => typeof input === "string";
-
-class InputError extends Error {}
 
 module.exports = handler;
