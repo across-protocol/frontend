@@ -383,16 +383,20 @@ function useSendFormManager(): SendFormManagerContext {
       dispatch({ type: ActionType.SET_TO_CHAIN, payload: toChain });
 
       if (params.asset) {
-        const token = config.getTokenInfoBySymbol(
-          fromChain,
-          params.asset.toUpperCase()
-        );
-        if (token) {
-          dispatch({ type: ActionType.SET_TOKEN, payload: token.symbol });
-          if (params.amount && Number(params.amount)) {
-            const amount = toWeiSafe(params.amount, token.decimals);
-            dispatch({ type: ActionType.SET_AMOUNT, payload: amount });
+        try {
+          const token = config.getTokenInfoBySymbol(
+            fromChain,
+            params.asset.toUpperCase()
+          );
+          if (token) {
+            dispatch({ type: ActionType.SET_TOKEN, payload: token.symbol });
+            if (params.amount && Number(params.amount)) {
+              const amount = toWeiSafe(params.amount, token.decimals);
+              dispatch({ type: ActionType.SET_AMOUNT, payload: amount });
+            }
           }
+        } catch (err) {
+          console.error("err", err);
         }
       }
     } else {
