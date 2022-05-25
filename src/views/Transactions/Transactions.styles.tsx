@@ -1,17 +1,32 @@
 import styled from "@emotion/styled";
-import { PrimaryButton } from "components/Buttons";
+import { PrimaryButton, BaseButton } from "components/Buttons";
 import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
   background-color: transparent;
 `;
 
-export const Title = styled.div`
+export const TitleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 1425px;
+
+  @media ${QUERIES.tabletAndDown} {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`;
+
+export const Title = styled.h1`
   font-size: ${30 / 16}rem;
   line-height: ${32 / 16}rem;
   font-weight: 700;
-  margin: 0 auto;
-  max-width: 1425px;
+
+  @media ${QUERIES.tabletAndDown} {
+    order: 2;
+  }
 
   @media ${QUERIES.mobileAndDown} {
     font-size: ${18 / 16}rem;
@@ -126,4 +141,46 @@ export const TableWrapper = styled.div`
   @media ${QUERIES.mobileAndDown} {
     margin: 0 -${20 / 16}rem;
   }
+`;
+
+export const SwitchContainer = styled.div`
+  position: relative;
+  display: flex;
+  border: 1px solid var(--color-black);
+  border-radius: 6px;
+  overflow: hidden;
+
+  @media ${QUERIES.tabletAndDown} {
+    margin: 0 0 ${24 / 16}rem;
+  }
+`;
+
+export const SwitchButton = styled(BaseButton)`
+  flex-basis: 50%;
+  height: 40px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  color: var(--color-white);
+  z-index: 1;
+  font-size: ${14 / 16}rem;
+
+  @media ${QUERIES.mobileAndDown} {
+    line-height: ${16 / 16}rem;
+    padding: 0 16px;
+    height: 32px;
+  }
+`;
+
+export const SwitchOverlay = styled.div<{ position: number }>`
+  position: absolute;
+  top: 0;
+  left: ${({ position }) => `${position * 50}%`};
+  height: 100%;
+  width: 50%;
+  background-color: var(--color-black);
+  pointer-events: none;
+  transition: left 0.2s ease-out;
 `;

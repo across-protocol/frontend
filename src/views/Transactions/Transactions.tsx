@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Wrapper,
   Title,
@@ -11,8 +11,12 @@ import {
   NotFoundWrapper,
   EthNoteWrapper,
   TableWrapper,
+  SwitchContainer,
+  SwitchButton,
+  SwitchOverlay,
+  TitleContainer,
 } from "./Transactions.styles";
-import useTransactionsView from "./useTransactionsView";
+import useTransactionsView, { TableMode } from "./useTransactionsView";
 import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
 import createTransactionTableJSX, {
@@ -36,7 +40,6 @@ const Transactions = () => {
   const {
     isConnected,
     initOnboard,
-    account,
     width,
     openFilledRow,
     setOpenFilledRow,
@@ -54,6 +57,10 @@ const Transactions = () => {
     setOpenModal,
     modalData,
     setModalData,
+    mode,
+    setMode,
+    account,
+    shouldRenderTable,
   } = useTransactionsView();
 
   const ongoingTx = useMemo(
@@ -91,19 +98,22 @@ const Transactions = () => {
   const isTxPresent = !filledTx.length && !ongoingTx.length && !initialLoading;
   return (
     <Wrapper>
-      <TopRow dark={isConnected && ongoingTx.length > 0}>
-        <Title>
-          Transactions
-          {account && (
-            <Account>({shortenAddress(account, "......", 6)})</Account>
-          )}
-        </Title>
-        {!isConnected && (
+      <TopRow dark={shouldRenderTable && ongoingTx.length > 0}>
+        <TitleContainer>
+          <Title>
+            Transactions
+            {mode !== TableMode.ALL && account && (
+              <Account>({shortenAddress(account, "......", 6)})</Account>
+            )}
+          </Title>
+          <TableSwitch mode={mode} setMode={setMode} />
+        </TitleContainer>
+        {!shouldRenderTable && (
           <ButtonWrapper>
             <ConnectButton onClick={initOnboard}>Connect Wallet</ConnectButton>
           </ButtonWrapper>
         )}
-        {isConnected && ongoingTx.length > 0 && (
+        {shouldRenderTable && ongoingTx.length > 0 && (
           <>
             <EthNoteWrapper>
               <img src={ethLogo} alt="ethereum_logo" />
@@ -132,7 +142,7 @@ const Transactions = () => {
           </>
         )}
       </TopRow>
-      {isConnected && (
+      {shouldRenderTable && (
         <>
           <BottomRow>
             {initialLoading && (
@@ -197,3 +207,46 @@ const Transactions = () => {
 };
 
 export default Transactions;
+
+const TableSwitch: React.FC<{
+  mode: TableMode;
+  setMode: (mode: TableMode) => void;
+}> = ({ mode, setMode }) => {
+  const [hovered, setHovered] = useState<number | undefined>(0);
+  const overlayed = useMemo(() => {
+    if (typeof hovered === "number") return hovered;
+    if (mode === TableMode.ALL) return 1;
+    return 0;
+  }, [hovered, mode]);
+  return (
+    <SwitchContainer>
+      <SwitchButton
+        onMouseEnter={() => {
+          setHovered(0);
+        }}
+        onMouseLeave={() => {
+          setHovered(undefined);
+        }}
+        onClick={() => {
+          setMode(TableMode.MY);
+        }}
+      >
+        My Transactions
+      </SwitchButton>
+      <SwitchButton
+        onMouseEnter={() => {
+          setHovered(1);
+        }}
+        onMouseLeave={() => {
+          setHovered(undefined);
+        }}
+        onClick={() => {
+          setMode(TableMode.ALL);
+        }}
+      >
+        All Transactions
+      </SwitchButton>
+      <SwitchOverlay position={overlayed} />
+    </SwitchContainer>
+  );
+};

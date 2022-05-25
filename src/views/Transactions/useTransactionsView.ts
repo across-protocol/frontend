@@ -15,6 +15,11 @@ export interface TxLink {
   url: string;
 }
 
+export enum TableMode {
+  ALL,
+  MY,
+}
+
 export default function useTransactionsView() {
   const { provider, chainId, isConnected, account } = useConnection();
   const { init } = onboard;
@@ -34,12 +39,23 @@ export default function useTransactionsView() {
   const pageSizes = useMemo(() => [10, 25, 50], []);
   const [openModal, setOpenModal] = useState(false);
   const [modalData, setModalData] = useState<TxLink[]>([]);
+  const [mode, setMode] = useState<TableMode>(TableMode.MY);
+  const monitoredAccount = useMemo(() => {
+    if (mode === TableMode.MY) {
+      return account;
+    }
+    return "all";
+  }, [mode, account]);
+  const shouldRenderTable = useMemo(() => {
+    if (mode === TableMode.ALL) return true;
+    return isConnected;
+  }, [mode, isConnected]);
 
   useEffect(() => {
     if (txClient) {
       txClient.on(
         transfersHistory.TransfersHistoryEvent.TransfersUpdated,
-        (data) => {
+        (data: transfersHistory.TransfersUpdatedEventListenerParams) => {
           setInitialLoading(false);
           const nextFilledTx = txClient.getFilledTransfers(data.depositorAddr);
           const nextOngoingTx = txClient.getPendingTransfers(
@@ -53,30 +69,25 @@ export default function useTransactionsView() {
   }, [txClient]);
 
   useEffect(() => {
-    if (account && txClient) {
+    if (monitoredAccount && txClient) {
       setInitialLoading(true);
-      txClient.startFetchingTransfers(account).catch((err) => {
-        console.error(
-          "Error in txHistoryClient::startFetchingTransfers call",
-          err
-        );
-      });
+      txClient.startFetchingTransfers(monitoredAccount);
       // start timer that stops fetching events after a certain time
       const timeout = setTimeout(() => {
-        txClient.stopFetchingTransfers(account);
+        txClient.stopFetchingTransfers(monitoredAccount);
         setTimer(undefined);
       }, MAX_TIME_FOR_FETCHING_TX);
       setTimer(timeout);
     }
 
     return () => {
-      if (account && txClient) {
-        txClient.stopFetchingTransfers(account);
+      if (monitoredAccount && txClient) {
+        txClient.stopFetchingTransfers(monitoredAccount);
         setRawFilledTx([]);
         setRawOngoingTx([]);
       }
     };
-  }, [account, txClient]);
+  }, [monitoredAccount, txClient]);
 
   useEffect(() => {
     return () => {
@@ -97,7 +108,6 @@ export default function useTransactionsView() {
     provider,
     chainId,
     isConnected,
-    account,
     initOnboard: init,
     // windowSize can return undefined -- default to 0 for easier typing.
     width: width || 0,
@@ -117,6 +127,10 @@ export default function useTransactionsView() {
     setModalData,
     openModal,
     setOpenModal,
+    mode,
+    setMode,
+    account,
+    shouldRenderTable,
   };
 }
 
