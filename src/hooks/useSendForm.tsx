@@ -383,7 +383,10 @@ function useSendFormManager(): SendFormManagerContext {
       dispatch({ type: ActionType.SET_TO_CHAIN, payload: toChain });
 
       if (params.asset) {
-        const token = config.getTokenInfoBySymbol(fromChain, params.asset);
+        const token = config.getTokenInfoBySymbol(
+          fromChain,
+          params.asset.toUpperCase()
+        );
         if (token) {
           dispatch({ type: ActionType.SET_TOKEN, payload: token.symbol });
           if (params.amount && Number(params.amount)) {
