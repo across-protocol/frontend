@@ -97,7 +97,12 @@ const Pool: FC = () => {
       .finally(() => {
         setLoadingPoolState(false);
       });
-  }, [token, setLoadingPoolState, poolClient]);
+    // lazily load other pools
+    const otherPools = tokenList.filter((x) => x.address !== address);
+    otherPools.forEach((x) => {
+      poolClient.updatePool(x.address);
+    });
+  }, [token, setLoadingPoolState, poolClient, tokenList]);
 
   useEffect(() => {
     if (isConnected && connection.account && token.address) {
