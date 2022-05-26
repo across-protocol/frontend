@@ -18,8 +18,8 @@ import {
   TokenList,
   ChainInfo,
   ChainInfoList,
-  toWeiSafe,
 } from "utils";
+
 import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
 import { useQueryParams } from "./useQueryParams";
@@ -391,10 +391,6 @@ function useSendFormManager(): SendFormManagerContext {
           );
           if (token) {
             dispatch({ type: ActionType.SET_TOKEN, payload: token.symbol });
-            if (params.amount && Number(params.amount)) {
-              const amount = toWeiSafe(params.amount, token.decimals);
-              dispatch({ type: ActionType.SET_AMOUNT, payload: amount });
-            }
           }
         } catch (err) {
           console.error("err", err);
