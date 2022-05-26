@@ -96,13 +96,14 @@ const Pool: FC = () => {
       })
       .finally(() => {
         setLoadingPoolState(false);
+        // lazily load other pools
+        const otherPools = tokenList.filter((x) => x.address !== address);
+        otherPools.forEach((x) => {
+          poolClient.updatePool(x.address);
+        });
       });
-    // lazily load other pools
-    const otherPools = tokenList.filter((x) => x.address !== address);
-    otherPools.forEach((x) => {
-      poolClient.updatePool(x.address);
-    });
-  }, [token, setLoadingPoolState, poolClient, tokenList]);
+    // eslint-disable-next-line
+  }, [token, setLoadingPoolState, poolClient]);
 
   useEffect(() => {
     if (isConnected && connection.account && token.address) {
