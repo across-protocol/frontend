@@ -23,14 +23,13 @@ import {
   estimateGasForAddEthLiquidity,
   DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE,
   UPDATE_GAS_INTERVAL_MS,
-  toWeiSafe,
   ChainId,
   formatPoolAPY,
   formatNumberMaxFracDigits,
 } from "utils";
 import { useConnection } from "state/hooks";
 import type { ShowSuccess } from "views/Pool";
-
+import useSetLiquidityFormErrors from "./useSetLiquidityFormErrors";
 interface Props {
   symbol: string;
   icon: string;
@@ -86,6 +85,7 @@ const PoolForm: FC<Props> = ({
   const [removeAmount, setRemoveAmount] = useState(0);
   const [error] = useState<Error>();
   const [formError, setFormError] = useState("");
+  const [removeFormError, setRemoveFormError] = useState("");
   const [addLiquidityGas, setAddLiquidityGas] = useState<ethers.BigNumber>(
     DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE
   );
@@ -115,31 +115,14 @@ const PoolForm: FC<Props> = ({
   }, [signer, isConnected, symbol, poolClient]);
 
   // Validate input on change
-  useEffect(() => {
-    const value = inputAmount;
-    try {
-      // liquidity button should be disabled if value is 0, so we dont actually need an error.
-      if (Number(value) === 0) return setFormError("");
-      if (Number(value) < 0) return setFormError("Cannot be less than 0.");
-      if (value && balance) {
-        const valueToWei = toWeiSafe(value, decimals);
-        if (valueToWei.gt(balance)) {
-          return setFormError("Liquidity amount greater than balance.");
-        }
-      }
-
-      if (value && symbol === "ETH") {
-        const valueToWei = toWeiSafe(value, decimals);
-        if (valueToWei.add(addLiquidityGas).gt(balance)) {
-          return setFormError("Transaction may fail due to insufficient gas.");
-        }
-      }
-    } catch (e) {
-      return setFormError("Invalid number.");
-    }
-    // clear form if no errors were presented. All errors should return early.
-    setFormError("");
-  }, [inputAmount, balance, decimals, symbol, addLiquidityGas]);
+  useSetLiquidityFormErrors(
+    inputAmount,
+    balance,
+    decimals,
+    symbol,
+    addLiquidityGas,
+    setFormError
+  );
 
   const handleMaxClick = useCallback(() => {
     let value = ethers.utils.formatUnits(balance, decimals);
@@ -154,6 +137,7 @@ const PoolForm: FC<Props> = ({
   useEffect(() => {
     setInputAmount("");
     setFormError("");
+    setRemoveFormError("");
     setRemoveAmount(0);
   }, [tokenAddress]);
 
@@ -248,6 +232,7 @@ const PoolForm: FC<Props> = ({
             totalPosition={totalPosition}
             refetchBalance={refetchBalance}
             chainId={chainId}
+            error={removeFormError}
           />
         </TabContentWrapper>
       </Tabs>

@@ -34,5 +34,5 @@ export default function useLiquidityInputValue(
     }
     // clear form if no errors were presented. All errors should return early.
     setFormError("");
-  }, [value, balance, decimals, symbol, addLiquidityGas]);
+  }, [value, balance, decimals, symbol, addLiquidityGas, setFormError]);
 }

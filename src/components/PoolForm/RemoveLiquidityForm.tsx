@@ -57,6 +57,7 @@ interface Props {
   // refetch balance
   refetchBalance: () => void;
   chainId: ChainId;
+  error: string;
 }
 const RemoveLiqudityForm: FC<Props> = ({
   removeAmount,
@@ -72,6 +73,7 @@ const RemoveLiqudityForm: FC<Props> = ({
   wrongNetwork,
   totalPosition,
   chainId,
+  error,
 }) => {
   const [amount, setAmount] = useState("");
   const poolClient = getPoolClient();
@@ -160,7 +162,6 @@ const RemoveLiqudityForm: FC<Props> = ({
       )
     : null;
 
-  const error = undefined;
   return (
     <>
       <InputGroup>
