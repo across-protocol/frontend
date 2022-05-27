@@ -41,8 +41,10 @@ const { previewRemoval } = umaSdk.across.clients.bridgePool;
 const toBN = ethers.BigNumber.from;
 
 interface Props {
-  removeAmount: number;
-  setRemoveAmount: Dispatch<SetStateAction<number>>;
+  removeAmount: string;
+  setRemoveAmount: React.Dispatch<React.SetStateAction<string>>;
+  removeAmountSlider: number;
+  setRemoveAmountSlider: Dispatch<SetStateAction<number>>;
   lpTokens: ethers.BigNumber;
   decimals: number;
   symbol: string;
@@ -62,6 +64,8 @@ interface Props {
 const RemoveLiqudityForm: FC<Props> = ({
   removeAmount,
   setRemoveAmount,
+  removeAmountSlider,
+  setRemoveAmountSlider,
   lpTokens,
   decimals,
   symbol,
@@ -90,18 +94,18 @@ const RemoveLiqudityForm: FC<Props> = ({
   const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => {
     setErrorMessage("");
-  }, [removeAmount]);
+  }, [removeAmountSlider]);
 
   const handleButtonClick = async () => {
     if (!provider) {
       init();
     }
-    if (isConnected && removeAmount > 0 && signer) {
+    if (isConnected && removeAmountSlider > 0 && signer) {
       setErrorMessage("");
       const scaler = toBN("10").pow(decimals);
 
       const removeAmountToWei = toWeiSafe(
-        (removeAmount / 100).toString(),
+        (removeAmountSlider / 100).toString(),
         decimals
       );
 
@@ -158,7 +162,7 @@ const RemoveLiqudityForm: FC<Props> = ({
           feesEarned: max(feesEarned, 0),
           positionValue: totalPosition,
         },
-        removeAmount / 100
+        removeAmountSlider / 100
       )
     : null;
 
@@ -194,20 +198,23 @@ const RemoveLiqudityForm: FC<Props> = ({
         </RoundBox>
       </InputGroup>
       <RemoveAmount>
-        Amount: <span>{removeAmount}%</span>
+        Amount: <span>{removeAmountSlider}%</span>
       </RemoveAmount>
-      <PoolFormSlider value={removeAmount} setValue={setRemoveAmount} />
+      <PoolFormSlider
+        value={removeAmountSlider}
+        setValue={setRemoveAmountSlider}
+      />
       <RemovePercentButtonsWrapper>
-        <RemovePercentButton onClick={() => setRemoveAmount(25)}>
+        <RemovePercentButton onClick={() => setRemoveAmountSlider(25)}>
           25%
         </RemovePercentButton>
-        <RemovePercentButton onClick={() => setRemoveAmount(50)}>
+        <RemovePercentButton onClick={() => setRemoveAmountSlider(50)}>
           50%
         </RemovePercentButton>
-        <RemovePercentButton onClick={() => setRemoveAmount(75)}>
+        <RemovePercentButton onClick={() => setRemoveAmountSlider(75)}>
           75%
         </RemovePercentButton>
-        <RemovePercentButton onClick={() => setRemoveAmount(100)}>
+        <RemovePercentButton onClick={() => setRemoveAmountSlider(100)}>
           MAX
         </RemovePercentButton>
       </RemovePercentButtonsWrapper>
@@ -217,7 +224,7 @@ const RemoveLiqudityForm: FC<Props> = ({
           <FeesBlockWrapper>
             <FeesBlock>
               <FeesBoldInfo>
-                Remove amount <FeesPercent>({removeAmount}%)</FeesPercent>
+                Remove amount <FeesPercent>({removeAmountSlider}%)</FeesPercent>
               </FeesBoldInfo>
               <FeesInfo>Left in pool</FeesInfo>
             </FeesBlock>

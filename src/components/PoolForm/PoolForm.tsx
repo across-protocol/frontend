@@ -82,7 +82,8 @@ const PoolForm: FC<Props> = ({
 }) => {
   const poolClient = getPoolClient();
   const [inputAmount, setInputAmount] = useState("");
-  const [removeAmount, setRemoveAmount] = useState(0);
+  const [removeAmount, setRemoveAmount] = useState("");
+  const [removeAmountSlider, setRemoveAmountSlider] = useState(0);
   const [error] = useState<Error>();
   const [formError, setFormError] = useState("");
   const [removeFormError, setRemoveFormError] = useState("");
@@ -138,7 +139,7 @@ const PoolForm: FC<Props> = ({
     setInputAmount("");
     setFormError("");
     setRemoveFormError("");
-    setRemoveAmount(0);
+    setRemoveAmountSlider(0);
   }, [tokenAddress]);
 
   return (
@@ -218,8 +219,8 @@ const PoolForm: FC<Props> = ({
         <TabContentWrapper data-label="Remove">
           <RemoveLiquidityForm
             wrongNetwork={wrongNetwork}
-            removeAmount={removeAmount}
-            setRemoveAmount={setRemoveAmount}
+            removeAmountSlider={removeAmountSlider}
+            setRemoveAmountSlider={setRemoveAmountSlider}
             lpTokens={lpTokens}
             decimals={decimals}
             symbol={symbol}
@@ -233,6 +234,8 @@ const PoolForm: FC<Props> = ({
             refetchBalance={refetchBalance}
             chainId={chainId}
             error={removeFormError}
+            removeAmount={removeAmount}
+            setRemoveAmount={setRemoveAmount}
           />
         </TabContentWrapper>
       </Tabs>
