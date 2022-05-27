@@ -14,6 +14,10 @@ import {
   FeesInfo,
   FeesPercent,
   RemoveFormErrorBox,
+  InputGroup,
+  RoundBox,
+  MaxButton,
+  Input,
 } from "./RemoveLiquidityForm.styles";
 import { ethers } from "ethers";
 import { getPoolClient } from "state/poolsApi";
@@ -69,6 +73,7 @@ const RemoveLiqudityForm: FC<Props> = ({
   totalPosition,
   chainId,
 }) => {
+  const [amount, setAmount] = useState("");
   const poolClient = getPoolClient();
   const { init } = onboard;
   const { isConnected, provider, signer, notify, account } = useConnection();
@@ -155,8 +160,38 @@ const RemoveLiqudityForm: FC<Props> = ({
       )
     : null;
 
+  const error = undefined;
   return (
     <>
+      <InputGroup>
+        <RoundBox
+          as="label"
+          htmlFor="amount"
+          style={{
+            // @ts-expect-error TS does not likes custom CSS vars
+            "--color": error
+              ? "var(--color-error-light)"
+              : "var(--color-white)",
+            "--outline-color": error
+              ? "var(--color-error)"
+              : "var(--color-primary)",
+          }}
+        >
+          <MaxButton
+            // onClick={onMaxClick}
+            disabled={!isConnected}
+          >
+            max
+          </MaxButton>
+          <Input
+            placeholder="0.00"
+            id="amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            disabled={!isConnected}
+          />
+        </RoundBox>
+      </InputGroup>
       <RemoveAmount>
         Amount: <span>{removeAmount}%</span>
       </RemoveAmount>

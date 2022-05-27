@@ -1,6 +1,11 @@
 import styled from "@emotion/styled";
-import { BaseButton, PrimaryButton } from "../Buttons";
-import { ErrorBox } from "../Box";
+import {
+  BaseButton,
+  PrimaryButton,
+  SecondaryButtonWithoutShadow,
+} from "../Buttons";
+import { RoundBox as UnstyledBox, ErrorBox } from "../Box";
+
 export const RemoveFormButton = styled(PrimaryButton)`
   margin-top: 32px;
   width: 90%;
@@ -103,4 +108,49 @@ export const FeesValues = styled.div`
 export const RemoveFormErrorBox = styled(ErrorBox)`
   margin-right: 1.5rem;
   margin-left: 1.5rem;
+`;
+
+export const InputGroup = styled.div`
+  position: relative;
+  display: flex;
+`;
+
+export const RoundBox = styled(UnstyledBox)`
+  --color: var(--color-white);
+  --outline-color: var(--color-primary);
+  background-color: var(--color);
+  font-size: ${16 / 16}rem;
+  padding: 10px 15px;
+  margin-top: 4px;
+  flex: 2;
+  display: flex;
+  &:not(:first-of-type):focus-within {
+    outline: 1px solid var(--outline-color);
+  }
+`;
+
+export const MaxButton = styled(SecondaryButtonWithoutShadow)`
+  text-transform: uppercase;
+  padding: 10px 20px;
+  font-size: ${14 / 16}rem;
+  transition: background-color 100ms linear;
+
+  &:hover {
+    background-color: var(--color-gray-300);
+  }
+`;
+
+export const Input = styled.input`
+  border: none;
+  font-size: inherit;
+  background-color: inherit;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: right;
+  outline: none;
+
+  &::placeholder {
+    color: var(--color-gray-300);
+  }
 `;
