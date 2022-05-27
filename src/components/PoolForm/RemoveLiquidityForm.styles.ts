@@ -121,7 +121,7 @@ export const RoundBox = styled(UnstyledBox)`
   background-color: var(--color);
   font-size: ${16 / 16}rem;
   padding: 10px 15px;
-  margin-top: 4px;
+  margin: 1rem 0 2rem;
   flex: 2;
   display: flex;
   &:not(:first-of-type):focus-within {
