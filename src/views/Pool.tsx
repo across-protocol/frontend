@@ -96,14 +96,9 @@ const Pool: FC = () => {
       })
       .finally(() => {
         setLoadingPoolState(false);
-        // lazily load other pools
-        const otherPools = tokenList.filter((x) => x.address !== address);
-        otherPools.forEach((x) => {
-          poolClient.updatePool(x.address);
-        });
+        refetchBalance();
       });
-    // eslint-disable-next-line
-  }, [token, setLoadingPoolState, poolClient]);
+  }, [token, setLoadingPoolState, poolClient, refetchBalance]);
 
   useEffect(() => {
     if (isConnected && connection.account && token.address) {
