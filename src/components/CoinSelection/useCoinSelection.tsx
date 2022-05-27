@@ -10,10 +10,15 @@ import {
   InsufficientBalanceError,
   trackEvent,
   FEE_ESTIMATION,
+  toWeiSafe,
+  getConfig,
 } from "utils";
+
+import { useQueryParams } from "hooks";
 
 export default function useCoinSelection() {
   const { account, isConnected } = useConnection();
+  const params = useQueryParams();
   const {
     setAmount,
     setTokenSymbol,
@@ -58,6 +63,27 @@ export default function useCoinSelection() {
       ? formatUnits(amount, selectedItem.decimals)
       : ""
   );
+
+  // Change the input if amount and asset exists.
+  // We do a check to see if the amount is valid by calling toWeiSafe.
+  const config = getConfig();
+
+  useEffect(() => {
+    if (params.amount && params.asset && params.from) {
+      try {
+        // Check if Token exists and amount is convertable to Wei
+        config.getTokenInfoBySymbol(
+          Number(params.from),
+          params.asset.toUpperCase()
+        );
+        toWeiSafe(params.amount);
+
+        setInputAmount(params.amount);
+      } catch (err) {
+        console.error("err", err);
+      }
+    }
+  }, [params.amount, params.asset, params.to, params.from, config]);
 
   useEffect(() => {
     if (!selectedItem || inputAmount === "" || inputAmount === "0") {

@@ -19,10 +19,11 @@ import {
   ChainInfo,
   ChainInfoList,
 } from "utils";
+
 import { usePrevious } from "hooks";
 import { useConnection } from "state/hooks";
 import { useQueryParams } from "./useQueryParams";
-
+import { useHistory } from "react-router-dom";
 export enum FormStatus {
   IDLE = "idle",
   TOUCHED = "touched",
@@ -361,7 +362,14 @@ function useSendFormManager(): SendFormManagerContext {
   const [state, dispatch] = useReducer(formReducer, initialFormState);
   const { account: connectedAccount, chainId } = useConnection();
   const params = useQueryParams();
-
+  const history = useHistory();
+  /**
+   * This will set the Send Form values from a pre-defined state for the user.
+    URL Params available --
+    Required: to, from.
+    Optional: asset, amount.
+    Because we need the asset's decimal value, you need to define **both** asset and amount for the optional params.
+   */
   useEffect(() => {
     const fromChain = Number(params.from);
     const toChain = Number(params.to);
@@ -374,10 +382,27 @@ function useSendFormManager(): SendFormManagerContext {
     if (config.canBridge(fromChain, toChain)) {
       dispatch({ type: ActionType.SET_FROM_CHAIN, payload: fromChain });
       dispatch({ type: ActionType.SET_TO_CHAIN, payload: toChain });
+
+      if (params.asset) {
+        try {
+          const token = config.getTokenInfoBySymbol(
+            fromChain,
+            params.asset.toUpperCase()
+          );
+          if (token) {
+            dispatch({ type: ActionType.SET_TOKEN, payload: token.symbol });
+          }
+        } catch (err) {
+          console.error("err", err);
+          history.replace({
+            search: "",
+          });
+        }
+      }
     } else {
       dispatch({ type: ActionType.SET_FROM_CHAIN, payload: fromChain });
     }
-  }, [params.from, params.to, config]);
+  }, [params.from, params.to, params.asset, params.amount, config, history]);
 
   // Keep the connected account and the toAddress in sync. If a user switches account, the toAddress should be updated to this new account.
   useEffect(() => {
