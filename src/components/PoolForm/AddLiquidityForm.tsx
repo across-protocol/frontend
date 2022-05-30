@@ -57,7 +57,6 @@ const AddLiquidityForm: FC<Props> = ({
   setShowSuccess,
   setDepositUrl,
   balance,
-  setAmount,
   wrongNetwork,
   formError,
   onMaxClick,

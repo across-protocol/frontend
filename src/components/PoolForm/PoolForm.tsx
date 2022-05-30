@@ -1,5 +1,5 @@
-import { FC, useState, useEffect, useCallback } from "react";
-import { ethers, BigNumber } from "ethers";
+import { FC, useState, useEffect } from "react";
+import { ethers } from "ethers";
 import Tabs from "../Tabs";
 import AddLiquidityForm from "./AddLiquidityForm";
 import RemoveLiquidityForm from "./RemoveLiquidityForm";
@@ -18,8 +18,6 @@ import {
 } from "./PoolForm.styles";
 import {
   formatUnits,
-  formatEtherRaw,
-  max,
   estimateGasForAddEthLiquidity,
   DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE,
   UPDATE_GAS_INTERVAL_MS,
@@ -30,6 +28,8 @@ import {
 import { useConnection } from "state/hooks";
 import type { ShowSuccess } from "views/Pool";
 import useSetLiquidityFormErrors from "./useSetLiquidityFormErrors";
+import maxClickHandler from "./maxClickHandler";
+
 interface Props {
   symbol: string;
   icon: string;
@@ -125,15 +125,6 @@ const PoolForm: FC<Props> = ({
     setFormError
   );
 
-  const handleMaxClick = useCallback(() => {
-    let value = ethers.utils.formatUnits(balance, decimals);
-    if (symbol !== "ETH") return setInputAmount(value);
-    value = formatEtherRaw(
-      max("0", BigNumber.from(balance).sub(addLiquidityGas))
-    );
-    setInputAmount(value);
-  }, [balance, decimals, symbol, addLiquidityGas]);
-
   // if pool changes, set input value to "".
   useEffect(() => {
     setInputAmount("");
@@ -212,7 +203,15 @@ const PoolForm: FC<Props> = ({
             balance={balance}
             setAmount={setInputAmount}
             refetchBalance={refetchBalance}
-            onMaxClick={handleMaxClick}
+            onMaxClick={() =>
+              maxClickHandler(
+                balance,
+                symbol,
+                decimals,
+                setInputAmount,
+                addLiquidityGas
+              )
+            }
             chainId={chainId}
           />
         </TabContentWrapper>
@@ -236,6 +235,14 @@ const PoolForm: FC<Props> = ({
             error={removeFormError}
             removeAmount={removeAmount}
             setRemoveAmount={setRemoveAmount}
+            onMaxClick={() =>
+              maxClickHandler(
+                position.toString(),
+                symbol,
+                decimals,
+                setRemoveAmount
+              )
+            }
           />
         </TabContentWrapper>
       </Tabs>

@@ -60,6 +60,7 @@ interface Props {
   refetchBalance: () => void;
   chainId: ChainId;
   error: string;
+  onMaxClick: () => void;
 }
 const RemoveLiqudityForm: FC<Props> = ({
   removeAmount,
@@ -78,8 +79,8 @@ const RemoveLiqudityForm: FC<Props> = ({
   totalPosition,
   chainId,
   error,
+  onMaxClick,
 }) => {
-  const [amount, setAmount] = useState("");
   const poolClient = getPoolClient();
   const { init } = onboard;
   const { isConnected, provider, signer, notify, account } = useConnection();
@@ -182,17 +183,14 @@ const RemoveLiqudityForm: FC<Props> = ({
               : "var(--color-primary)",
           }}
         >
-          <MaxButton
-            // onClick={onMaxClick}
-            disabled={!isConnected}
-          >
+          <MaxButton onClick={onMaxClick} disabled={!isConnected}>
             max
           </MaxButton>
           <Input
             placeholder="0.00"
             id="amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={removeAmount}
+            onChange={(e) => setRemoveAmount(e.target.value)}
             disabled={!isConnected}
           />
         </RoundBox>
