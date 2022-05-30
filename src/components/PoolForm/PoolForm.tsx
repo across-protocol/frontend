@@ -136,16 +136,18 @@ const PoolForm: FC<Props> = ({
   }, [tokenAddress]);
 
   useEffect(() => {
-    const wei = Number(toWeiSafe(removeAmount, decimals).toString());
-    const pos = Number(position.toString());
-    const percent = (wei / pos) * 100;
-    if (percent >= 100) {
-      setRemoveAmountSlider(100);
-      // Don't round up to 100% unless they max out.
-    } else if (percent >= 99.5 && percent < 100) {
-      setRemoveAmountSlider(99);
-    } else {
-      setRemoveAmountSlider(Math.round(percent));
+    if (Number(removeAmount) || removeAmount === "0") {
+      const wei = Number(toWeiSafe(removeAmount, decimals).toString());
+      const pos = Number(position.toString());
+      const percent = (wei / pos) * 100;
+      if (percent >= 100) {
+        setRemoveAmountSlider(100);
+        // Don't round up to 100% unless they max out.
+      } else if (percent >= 99.5 && percent < 100) {
+        setRemoveAmountSlider(99);
+      } else {
+        setRemoveAmountSlider(Math.round(percent));
+      }
     }
   }, [removeAmount]); // eslint-disable-line
 
