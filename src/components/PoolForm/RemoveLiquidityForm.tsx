@@ -243,7 +243,7 @@ const RemoveLiqudityForm: FC<Props> = ({
         <RemovePercentButton
           onClick={() => {
             setRemoveAmountSlider(100);
-            setRemoveAmount(calculateRemoveAmount(100, position, decimals));
+            setRemoveAmount(formatUnits(position.toString(), decimals));
           }}
         >
           MAX
