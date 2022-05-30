@@ -131,6 +131,7 @@ const PoolForm: FC<Props> = ({
     setFormError("");
     setRemoveFormError("");
     setRemoveAmountSlider(0);
+    setRemoveAmount("");
   }, [tokenAddress]);
 
   return (

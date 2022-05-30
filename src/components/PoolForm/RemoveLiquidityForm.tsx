@@ -167,6 +167,19 @@ const RemoveLiqudityForm: FC<Props> = ({
       )
     : null;
 
+  const calculateRemoveAmount = (
+    percent: number,
+    position: ethers.BigNumber,
+    decimals: number
+  ) => {
+    const scaler = toBN("10").pow(decimals);
+
+    const removeAmountToWei = toWeiSafe((percent / 100).toString(), decimals);
+
+    const weiAmount = position.mul(removeAmountToWei).div(scaler);
+    return formatUnits(weiAmount, decimals);
+  };
+
   return (
     <>
       <InputGroup>
@@ -203,16 +216,36 @@ const RemoveLiqudityForm: FC<Props> = ({
         setValue={setRemoveAmountSlider}
       />
       <RemovePercentButtonsWrapper>
-        <RemovePercentButton onClick={() => setRemoveAmountSlider(25)}>
+        <RemovePercentButton
+          onClick={() => {
+            setRemoveAmountSlider(25);
+            setRemoveAmount(calculateRemoveAmount(25, position, decimals));
+          }}
+        >
           25%
         </RemovePercentButton>
-        <RemovePercentButton onClick={() => setRemoveAmountSlider(50)}>
+        <RemovePercentButton
+          onClick={() => {
+            setRemoveAmountSlider(50);
+            setRemoveAmount(calculateRemoveAmount(50, position, decimals));
+          }}
+        >
           50%
         </RemovePercentButton>
-        <RemovePercentButton onClick={() => setRemoveAmountSlider(75)}>
+        <RemovePercentButton
+          onClick={() => {
+            setRemoveAmountSlider(75);
+            setRemoveAmount(calculateRemoveAmount(75, position, decimals));
+          }}
+        >
           75%
         </RemovePercentButton>
-        <RemovePercentButton onClick={() => setRemoveAmountSlider(100)}>
+        <RemovePercentButton
+          onClick={() => {
+            setRemoveAmountSlider(100);
+            setRemoveAmount(calculateRemoveAmount(100, position, decimals));
+          }}
+        >
           MAX
         </RemovePercentButton>
       </RemovePercentButtonsWrapper>
