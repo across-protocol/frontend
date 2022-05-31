@@ -96,8 +96,9 @@ const Pool: FC = () => {
       })
       .finally(() => {
         setLoadingPoolState(false);
+        refetchBalance();
       });
-  }, [token, setLoadingPoolState, poolClient]);
+  }, [token, setLoadingPoolState, poolClient, refetchBalance]);
 
   useEffect(() => {
     if (isConnected && connection.account && token.address) {
