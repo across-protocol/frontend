@@ -125,14 +125,6 @@ const PoolForm: FC<Props> = ({
     addLiquidityGas
   );
 
-  useSetLiquidityFormErrors(
-    removeAmount,
-    position.toString(),
-    decimals,
-    symbol,
-    setRemoveFormError
-  );
-
   // if pool changes, set input value to "".
   useEffect(() => {
     setInputAmount("");
