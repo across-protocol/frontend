@@ -103,15 +103,8 @@ const RemoveLiqudityForm: FC<Props> = ({
       init();
     }
     if (isConnected && removeAmountSlider > 0 && signer) {
-      const weiAmount = toWeiSafe(removeAmount, decimals);
-      console.log(
-        "weiAmount",
-        weiAmount.toString(),
-        "position",
-        position.toString(),
-        position.toString() === weiAmount.toString(),
-        lpTokens.toString()
-      );
+      // Need to use lpTokens under the hood.
+      const weiAmount = lpTokens;
       try {
         let txId;
         if (symbol === "ETH") {
@@ -156,17 +149,16 @@ const RemoveLiqudityForm: FC<Props> = ({
     }
   };
 
-  const preview =
-    isConnected && position.toString() !== "0"
-      ? previewRemoval(
-          {
-            totalDeposited: position,
-            feesEarned: max(feesEarned, 0),
-            positionValue: totalPosition,
-          },
-          removeAmountSlider / 100
-        )
-      : null;
+  const preview = isConnected
+    ? previewRemoval(
+        {
+          totalDeposited: position,
+          feesEarned: max(feesEarned, 0),
+          positionValue: totalPosition,
+        },
+        removeAmountSlider / 100
+      )
+    : null;
 
   return (
     <>
