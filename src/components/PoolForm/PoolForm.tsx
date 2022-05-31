@@ -261,6 +261,7 @@ const PoolForm: FC<Props> = ({
             error={removeFormError}
             removeAmount={removeAmount}
             setRemoveAmount={setRemoveAmount}
+            setError={setRemoveFormError}
             onMaxClick={() =>
               maxClickHandler(
                 position.toString(),

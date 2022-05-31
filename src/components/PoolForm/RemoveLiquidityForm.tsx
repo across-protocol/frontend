@@ -1,4 +1,4 @@
-import { FC, Dispatch, SetStateAction, useState, useEffect } from "react";
+import { FC, Dispatch, SetStateAction, useState } from "react";
 import PoolFormSlider from "./PoolFormSlider";
 import { useConnection } from "state/hooks";
 import {
@@ -13,7 +13,6 @@ import {
   FeesBoldInfo,
   FeesInfo,
   FeesPercent,
-  RemoveFormErrorBox,
   InputGroup,
   RoundBox,
   MaxButton,
@@ -32,14 +31,13 @@ import {
   getChainInfo,
   switchChain,
   ChainId,
+  calculateRemoveAmount,
 } from "utils";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import api from "state/chainApi";
 import { ShowSuccess } from "views/Pool";
 
 const { previewRemoval } = umaSdk.across.clients.bridgePool;
-
-const toBN = ethers.BigNumber.from;
 
 interface Props {
   removeAmount: string;
@@ -61,6 +59,7 @@ interface Props {
   refetchBalance: () => void;
   chainId: ChainId;
   error: string;
+  setError: React.Dispatch<React.SetStateAction<string>>;
   onMaxClick: () => void;
 }
 const RemoveLiqudityForm: FC<Props> = ({
@@ -80,6 +79,7 @@ const RemoveLiqudityForm: FC<Props> = ({
   totalPosition,
   chainId,
   error,
+  setError,
   onMaxClick,
 }) => {
   const poolClient = getPoolClient();
@@ -93,19 +93,20 @@ const RemoveLiqudityForm: FC<Props> = ({
     if (wrongNetwork) return `Switch to ${chainName}`;
     return "Remove liquidity";
   }
-  const [errorMessage, setErrorMessage] = useState("");
-  useEffect(() => {
-    setErrorMessage("");
-  }, [removeAmountSlider]);
-
   const handleButtonClick = async () => {
     if (!provider) {
       init();
     }
     if (isConnected && removeAmountSlider > 0 && signer) {
-      setErrorMessage("");
+      setError("");
       const weiAmount = toWeiSafe(removeAmount, decimals);
-
+      console.log(
+        "weiAmount",
+        weiAmount.toString(),
+        "position",
+        position.toString(),
+        position.toString() === weiAmount.toString()
+      );
       try {
         let txId;
         if (symbol === "ETH") {
@@ -144,7 +145,7 @@ const RemoveLiqudityForm: FC<Props> = ({
         }
         return transaction;
       } catch (err: any) {
-        setErrorMessage(err.message);
+        setError(err.message);
         console.error("err in RemoveLiquidity call", err);
       }
     }
@@ -161,19 +162,6 @@ const RemoveLiqudityForm: FC<Props> = ({
           removeAmountSlider / 100
         )
       : null;
-
-  const calculateRemoveAmount = (
-    percent: number,
-    position: ethers.BigNumber,
-    decimals: number
-  ) => {
-    const scaler = toBN("10").pow(decimals);
-
-    const removeAmountToWei = toWeiSafe((percent / 100).toString(), decimals);
-
-    const weiAmount = position.mul(removeAmountToWei).div(scaler);
-    return formatUnits(weiAmount, decimals);
-  };
 
   return (
     <>
@@ -303,11 +291,6 @@ const RemoveLiqudityForm: FC<Props> = ({
         </>
       )}
       <RemoveFormButtonWrapper>
-        {errorMessage && (
-          <RemoveFormErrorBox>
-            <div>{errorMessage}</div>
-          </RemoveFormErrorBox>
-        )}
         {wrongNetwork && provider ? (
           <RemoveFormButton onClick={() => switchChain(provider, chainId)}>
             Switch to {chainName}
@@ -315,7 +298,7 @@ const RemoveLiqudityForm: FC<Props> = ({
         ) : (
           <RemoveFormButton
             onClick={handleButtonClick}
-            disabled={wrongNetwork && !provider}
+            disabled={wrongNetwork && !provider && !!error}
           >
             {buttonMessage()}
             {txSubmitted ? <BouncingDotsLoader /> : null}
