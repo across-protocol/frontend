@@ -30,7 +30,6 @@ import { useConnection } from "state/hooks";
 import type { ShowSuccess } from "views/Pool";
 import useSetLiquidityFormErrors from "./useSetLiquidityFormErrors";
 import maxClickHandler from "./maxClickHandler";
-
 interface Props {
   symbol: string;
   icon: string;
@@ -122,8 +121,16 @@ const PoolForm: FC<Props> = ({
     balance,
     decimals,
     symbol,
-    addLiquidityGas,
-    setFormError
+    setFormError,
+    addLiquidityGas
+  );
+
+  useSetLiquidityFormErrors(
+    removeAmount,
+    position.toString(),
+    decimals,
+    symbol,
+    setRemoveFormError
   );
 
   // if pool changes, set input value to "".
@@ -136,7 +143,7 @@ const PoolForm: FC<Props> = ({
   }, [tokenAddress]);
 
   useEffect(() => {
-    if (Number(removeAmount) || removeAmount === "0") {
+    if (position.toString() && Number(removeAmount)) {
       const wei = Number(toWeiSafe(removeAmount, decimals).toString());
       const pos = Number(position.toString());
       const percent = (wei / pos) * 100;
@@ -148,9 +155,10 @@ const PoolForm: FC<Props> = ({
       } else {
         setRemoveAmountSlider(Math.round(percent));
       }
+    } else {
+      setRemoveAmountSlider(0);
     }
   }, [removeAmount]); // eslint-disable-line
-
   return (
     <Wrapper>
       <Info>

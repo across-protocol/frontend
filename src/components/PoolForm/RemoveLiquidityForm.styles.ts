@@ -154,3 +154,7 @@ export const Input = styled.input`
     color: var(--color-gray-300);
   }
 `;
+
+export const LiquidityErrorBox = styled(ErrorBox)`
+  margin-top: 10px;
+`;

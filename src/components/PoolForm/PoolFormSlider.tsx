@@ -1,12 +1,12 @@
 import { FC, Dispatch, SetStateAction } from "react";
 import ReactSlider from "react-slider";
 import styled from "@emotion/styled";
-
 interface Props {
   value: number;
   setValue: Dispatch<SetStateAction<number>>;
+  setRA: (v: number) => void;
 }
-const PoolFormSlider: FC<Props> = ({ value, setValue }) => {
+const PoolFormSlider: FC<Props> = ({ value, setValue, setRA }) => {
   return (
     <Slider
       className="PoolForm-slider"
@@ -15,7 +15,10 @@ const PoolFormSlider: FC<Props> = ({ value, setValue }) => {
       thumbClassName="PoolForm-thumb"
       trackClassName="PoolForm-track"
       onChange={(v) => {
-        if (typeof v === "number") setValue(v);
+        if (typeof v === "number") {
+          setValue(v);
+          setRA(v);
+        }
       }}
       renderThumb={(props, state) => <div {...props} />}
     />

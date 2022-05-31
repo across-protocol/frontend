@@ -7,8 +7,8 @@ export default function useLiquidityInputValue(
   balance: string,
   decimals: number,
   symbol: string,
-  addLiquidityGas: ethers.BigNumber,
-  setFormError: React.Dispatch<React.SetStateAction<string>>
+  setFormError: React.Dispatch<React.SetStateAction<string>>,
+  addLiquidityGas: ethers.BigNumber = ethers.BigNumber.from("0")
 ) {
   // Validate input on change
   useEffect(() => {

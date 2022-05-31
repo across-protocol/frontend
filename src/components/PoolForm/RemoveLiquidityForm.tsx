@@ -18,6 +18,7 @@ import {
   RoundBox,
   MaxButton,
   Input,
+  LiquidityErrorBox,
 } from "./RemoveLiquidityForm.styles";
 import { ethers } from "ethers";
 import { getPoolClient } from "state/poolsApi";
@@ -156,16 +157,17 @@ const RemoveLiqudityForm: FC<Props> = ({
     }
   };
 
-  const preview = isConnected
-    ? previewRemoval(
-        {
-          totalDeposited: position,
-          feesEarned: max(feesEarned, 0),
-          positionValue: totalPosition,
-        },
-        removeAmountSlider / 100
-      )
-    : null;
+  const preview =
+    isConnected && position.toString() !== "0"
+      ? previewRemoval(
+          {
+            totalDeposited: position,
+            feesEarned: max(feesEarned, 0),
+            positionValue: totalPosition,
+          },
+          removeAmountSlider / 100
+        )
+      : null;
 
   const calculateRemoveAmount = (
     percent: number,
@@ -208,12 +210,21 @@ const RemoveLiqudityForm: FC<Props> = ({
           />
         </RoundBox>
       </InputGroup>
+      {error && <LiquidityErrorBox>{error}</LiquidityErrorBox>}
+
       <RemoveAmount>
         Amount: <span>{removeAmountSlider}%</span>
       </RemoveAmount>
       <PoolFormSlider
         value={removeAmountSlider}
         setValue={setRemoveAmountSlider}
+        setRA={(value) => {
+          if (value < 100) {
+            setRemoveAmount(calculateRemoveAmount(value, position, decimals));
+          } else {
+            onMaxClick();
+          }
+        }}
       />
       <RemovePercentButtonsWrapper>
         <RemovePercentButton
@@ -243,7 +254,7 @@ const RemoveLiqudityForm: FC<Props> = ({
         <RemovePercentButton
           onClick={() => {
             setRemoveAmountSlider(100);
-            setRemoveAmount(formatUnits(position.toString(), decimals));
+            onMaxClick();
           }}
         >
           MAX
