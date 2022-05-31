@@ -156,9 +156,9 @@ const PoolForm: FC<Props> = ({
         setRemoveAmountSlider(Math.round(percent));
       }
     } else {
-      setRemoveAmountSlider(0);
+      if (isConnected) setRemoveAmountSlider(0);
     }
-  }, [removeAmount]); // eslint-disable-line
+  }, [removeAmount, isConnected]); // eslint-disable-line
   return (
     <Wrapper>
       <Info>

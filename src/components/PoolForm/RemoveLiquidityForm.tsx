@@ -104,14 +104,7 @@ const RemoveLiqudityForm: FC<Props> = ({
     }
     if (isConnected && removeAmountSlider > 0 && signer) {
       setErrorMessage("");
-      const scaler = toBN("10").pow(decimals);
-
-      const removeAmountToWei = toWeiSafe(
-        (removeAmountSlider / 100).toString(),
-        decimals
-      );
-
-      const weiAmount = lpTokens.mul(removeAmountToWei).div(scaler);
+      const weiAmount = toWeiSafe(removeAmount, decimals);
 
       try {
         let txId;
