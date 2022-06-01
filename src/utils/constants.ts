@@ -543,42 +543,78 @@ export const migrationPoolV2Warning =
   process.env.REACT_APP_MIGRATION_POOL_V2_WARNING;
 export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
 
-export const queriesTable: Record<
-  ChainId,
-  (provider: ethers.providers.Provider) => relayFeeCalculator.QueryInterface
-> = {
-  [ChainId.MAINNET]: (provider: ethers.providers.Provider) =>
-    new relayFeeCalculator.EthereumQueries(provider),
-  [ChainId.ARBITRUM]: (provider: ethers.providers.Provider) =>
-    new relayFeeCalculator.ArbitrumQueries(provider),
-  [ChainId.OPTIMISM]: (provider: ethers.providers.Provider) =>
-    new relayFeeCalculator.OptimismQueries(provider),
-  [ChainId.BOBA]: (provider: ethers.providers.Provider) =>
-    new relayFeeCalculator.BobaQueries(provider),
-  [ChainId.POLYGON]: (provider: ethers.providers.Provider) =>
-    new relayFeeCalculator.PolygonQueries(provider),
-  [ChainId.KOVAN]: (provider: ethers.providers.Provider) =>
-    new relayFeeCalculator.EthereumQueries(provider),
-  [ChainId.RINKEBY]: (provider: ethers.providers.Provider) =>
-    new relayFeeCalculator.EthereumQueries(provider),
-  [ChainId.GOERLI]: (provider: ethers.providers.Provider) =>
-    new relayFeeCalculator.EthereumQueries(provider),
-  [ChainId.MUMBAI]: (provider: ethers.providers.Provider) =>
-    new relayFeeCalculator.PolygonQueries(provider),
-  // Use hardcoded DAI address instead of USDC because DAI is enabled here.
-  [ChainId.KOVAN_OPTIMISM]: (provider: ethers.providers.Provider) =>
-    new relayFeeCalculator.OptimismQueries(
-      provider,
-      undefined,
-      "0x1954D4A36ac4fD8BEde42E59368565A92290E705",
-      "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"
-    ),
-  // USe hardcoded WETH address instead of USDC because WETH is enabled here.
-  [ChainId.ARBITRUM_RINKEBY]: (provider: ethers.providers.Provider) =>
-    new relayFeeCalculator.ArbitrumQueries(
-      provider,
-      undefined,
-      "0x3BED21dAe767e4Df894B31b14aD32369cE4bad8b",
-      "0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681"
-    ),
+const getRoute = (
+  mainnetChainId: ChainId,
+  fromChainId: number,
+  symbol: string
+) => {
+  const routes = getRoutes(mainnetChainId);
+  const route = routes.routes.find((route) => route.fromTokenSymbol === symbol);
+  if (!route)
+    throw new Error(
+      `Couldn't find route for mainnet chain ${mainnetChainId}, fromChain: ${fromChainId}, and symbol ${symbol}`
+    );
+  return route;
 };
+
+const getQueriesTable = () => {
+  const optimismUsdcRoute = getRoute(1, 10, "USDC");
+  const arbitrumUsdcRoute = getRoute(1, 42161, "USDC");
+
+  // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
+  // gas estimates require a live estimate and not a pre-configured gas amount. This address has been pre-loaded with
+  // a USDC approval for the _current_ spoke pools on Optimism (0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9) and Arbitrum
+  // (0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C). It also has a small amount of USDC ($0.10) used for estimations.
+  const dummyFromAddress = "0x893d0d70ad97717052e3aa8903d9615804167759";
+
+  return {
+    [ChainId.MAINNET]: (provider: ethers.providers.Provider) =>
+      new relayFeeCalculator.EthereumQueries(provider),
+    [ChainId.ARBITRUM]: (provider: ethers.providers.Provider) =>
+      new relayFeeCalculator.ArbitrumQueries(
+        provider,
+        undefined,
+        optimismUsdcRoute.fromSpokeAddress,
+        optimismUsdcRoute.fromTokenAddress,
+        dummyFromAddress
+      ),
+    [ChainId.OPTIMISM]: (provider: ethers.providers.Provider) =>
+      new relayFeeCalculator.OptimismQueries(
+        provider,
+        undefined,
+        arbitrumUsdcRoute.fromSpokeAddress,
+        arbitrumUsdcRoute.fromTokenAddress,
+        dummyFromAddress
+      ),
+    [ChainId.BOBA]: (provider: ethers.providers.Provider) =>
+      new relayFeeCalculator.BobaQueries(provider),
+    [ChainId.POLYGON]: (provider: ethers.providers.Provider) =>
+      new relayFeeCalculator.PolygonQueries(provider),
+    [ChainId.KOVAN]: (provider: ethers.providers.Provider) =>
+      new relayFeeCalculator.EthereumQueries(provider),
+    [ChainId.RINKEBY]: (provider: ethers.providers.Provider) =>
+      new relayFeeCalculator.EthereumQueries(provider),
+    [ChainId.GOERLI]: (provider: ethers.providers.Provider) =>
+      new relayFeeCalculator.EthereumQueries(provider),
+    [ChainId.MUMBAI]: (provider: ethers.providers.Provider) =>
+      new relayFeeCalculator.PolygonQueries(provider),
+    // Use hardcoded DAI address instead of USDC because DAI is enabled here.
+    [ChainId.KOVAN_OPTIMISM]: (provider: ethers.providers.Provider) =>
+      new relayFeeCalculator.OptimismQueries(
+        provider,
+        undefined,
+        "0x1954D4A36ac4fD8BEde42E59368565A92290E705",
+        "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"
+      ),
+    // USe hardcoded WETH address instead of USDC because WETH is enabled here.
+    [ChainId.ARBITRUM_RINKEBY]: (provider: ethers.providers.Provider) =>
+      new relayFeeCalculator.ArbitrumQueries(
+        provider,
+        undefined,
+        "0x3BED21dAe767e4Df894B31b14aD32369cE4bad8b",
+        "0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681"
+      ),
+  };
+};
+
+export const queriesTable = getQueriesTable();
