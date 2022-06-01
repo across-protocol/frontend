@@ -310,7 +310,7 @@ const RemoveLiqudityForm: FC<Props> = ({
         ) : (
           <RemoveFormButton
             onClick={handleButtonClick}
-            disabled={wrongNetwork && !provider && !!error}
+            disabled={(wrongNetwork && !provider) || !!error}
           >
             {buttonMessage()}
             {txSubmitted ? <BouncingDotsLoader /> : null}
@@ -349,8 +349,6 @@ const validateForm = (
   } catch (e) {
     return setFormError("Invalid number.");
   }
-  // clear form if no errors were presented. All errors should return early.
-  // setFormError("");
 };
 
 export default RemoveLiqudityForm;

@@ -16,6 +16,9 @@ export const RemoveFormButton = styled(PrimaryButton)`
   padding: 16px 8px;
   margin-left: 24px;
   margin-right: 24px;
+  opacity: ${(props) => {
+    return props.disabled ? "0.25" : "1";
+  }};
 `;
 
 export const RemoveFormButtonWrapper = styled.div`
@@ -51,6 +54,7 @@ export const RemovePercentButton = styled(BaseButton)`
   padding: 0.5rem;
   font-weight: 500;
   border-radius: ${32 / 16}rem;
+
   &:hover {
     background-color: #6cf9d8;
   }
