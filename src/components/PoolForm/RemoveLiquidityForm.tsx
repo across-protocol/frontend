@@ -103,8 +103,15 @@ const RemoveLiqudityForm: FC<Props> = ({
       init();
     }
     if (isConnected && removeAmountSlider > 0 && signer) {
-      // Need to use lpTokens under the hood.
-      const weiAmount = lpTokens;
+      const scaler = ethers.BigNumber.from("10").pow(decimals);
+
+      const removeAmountToWei = toWeiSafe(
+        (removeAmountSlider / 100).toString(),
+        decimals
+      );
+
+      const weiAmount = lpTokens.mul(removeAmountToWei).div(scaler);
+
       try {
         let txId;
         if (symbol === "ETH") {
@@ -191,7 +198,7 @@ const RemoveLiqudityForm: FC<Props> = ({
       {error && <LiquidityErrorBox>{error}</LiquidityErrorBox>}
 
       <RemoveAmount>
-        Amount: <span>{removeAmountSlider}%</span>
+        Amount: <span>{removeAmountSlider.toFixed(2)}%</span>
       </RemoveAmount>
       <PoolFormSlider
         value={removeAmountSlider}
