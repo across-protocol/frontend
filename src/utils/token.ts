@@ -67,8 +67,8 @@ export const calculateRemoveAmount = (
   if (position.toString() === "0") return "0";
   const scaler = ethers.BigNumber.from("10").pow(decimals);
 
-  const removeAmountToWei = toWeiSafe((percent / 100).toString(), decimals);
+  const removeAmountToWei = toWeiSafe(percent.toString(), decimals);
 
-  const weiAmount = position.mul(removeAmountToWei).div(scaler);
+  const weiAmount = position.mul(removeAmountToWei).div(scaler.mul(100));
   return formatUnits(weiAmount, decimals);
 };
