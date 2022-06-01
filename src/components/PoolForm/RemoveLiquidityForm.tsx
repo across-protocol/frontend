@@ -258,7 +258,8 @@ const RemoveLiqudityForm: FC<Props> = ({
           <FeesBlockWrapper>
             <FeesBlock>
               <FeesBoldInfo>
-                Remove amount <FeesPercent>({removeAmountSlider}%)</FeesPercent>
+                Remove amount{" "}
+                <FeesPercent>({removeAmountSlider.toFixed(2)}%)</FeesPercent>
               </FeesBoldInfo>
               <FeesInfo>Left in pool</FeesInfo>
             </FeesBlock>
