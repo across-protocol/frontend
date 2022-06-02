@@ -8,6 +8,7 @@ import {
   trackEvent,
   ChainId,
   getCode,
+  noContractCode,
 } from "utils";
 
 export default function useAddressSelection() {
@@ -45,20 +46,22 @@ export default function useAddressSelection() {
 
   // keep the address in sync with the form address
   useEffect(() => {
-    setShowContractAddressWarning(false);
     if (toAddress) {
       setAddress(toAddress);
-      if (toChain === ChainId.MAINNET) {
-        getCode(toAddress)
-          .then((res) => {
-            console.log("res", res);
-          })
-          .catch((err) => {
-            console.log("err in getCode call", err);
-          });
-      }
+    }
+
+    setShowContractAddressWarning(false);
+    if (toAddress && toChain === ChainId.MAINNET) {
+      getCode(toAddress)
+        .then((addr) => {
+          if (addr !== noContractCode) setShowContractAddressWarning(true);
+        })
+        .catch((err) => {
+          console.log("err in getCode call", err);
+        });
     }
   }, [toAddress, toChain]);
+
   // modal is closing, reset address to the current toAddress
   const toggle = () => {
     if (!isConnected) return;
@@ -74,13 +77,29 @@ export default function useAddressSelection() {
   };
   const isValid = !address || isValidAddress(address);
   const handleSubmit = () => {
+    setShowContractAddressWarning(false);
     if (isValid) {
       if (address) {
-        setToAddress(address);
+        // Check to see if the toAddress they are inputting is a Contract on Mainnet
+        // If so, warn user because we send WETH and this could cause loss of funds.
+        if (address && toChain === ChainId.MAINNET) {
+          getCode(address)
+            .then((addr) => {
+              if (addr !== noContractCode) {
+                setShowContractAddressWarning(true);
+              } else {
+                setToAddress(address);
+                toggle();
+              }
+            })
+            .catch((err) => {
+              console.log("err in getCode call", err);
+            });
+        }
       } else if (account) {
         setToAddress(account);
+        toggle();
       }
-      toggle();
     }
   };
 
@@ -99,5 +118,6 @@ export default function useAddressSelection() {
     isConnected,
     availableToChains,
     selectedToChainInfo,
+    showContractAddressWarning,
   };
 }

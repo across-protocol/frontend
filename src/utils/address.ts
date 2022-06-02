@@ -9,7 +9,7 @@ export function getAddress(address: string) {
 }
 
 const defaultProvider = ethers.getDefaultProvider();
-
+export const noContractCode = "0x";
 export async function getCode(address: string) {
   return await defaultProvider.getCode(address);
 }

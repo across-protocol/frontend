@@ -3,7 +3,7 @@ import { Section } from "../Section";
 import { PrimaryButton, BaseButton } from "../Buttons";
 import { ChevronDown } from "react-feather";
 import { motion } from "framer-motion";
-import { RoundBox as UnstyledBox } from "../Box";
+import { RoundBox as UnstyledBox, ErrorBox } from "../Box";
 
 export const LastSection = styled(Section)`
   border-bottom: none;
@@ -137,6 +137,10 @@ export const Menu = styled.ul<MenuProps>`
   width: 95%;
   margin: 0 auto;
   box-shadow: inset 0 8px 8% rgba(45, 46, 51, 0.2);
+`;
+
+export const WarningBox = styled(ErrorBox)`
+  margin-top: 20px;
 `;
 
 export const Item = motion(styled.li`
