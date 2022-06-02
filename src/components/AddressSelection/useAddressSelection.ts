@@ -77,11 +77,6 @@ export default function useAddressSelection() {
   };
   const isValid = !address || isValidAddress(address);
   const handleSubmit = () => {
-    // Override save func is they click it twice.
-    if (showContractAddressWarning && address) {
-      setToAddress(address);
-    }
-
     setShowContractAddressWarning(false);
     if (isValid) {
       if (address) {
@@ -108,6 +103,12 @@ export default function useAddressSelection() {
     }
   };
 
+  const overrideAddress = () => {
+    setToAddress(address);
+    toggle();
+    setShowContractAddressWarning(false);
+  };
+
   return {
     ...downshiftState,
     handleSubmit,
@@ -124,5 +125,6 @@ export default function useAddressSelection() {
     availableToChains,
     selectedToChainInfo,
     showContractAddressWarning,
+    overrideAddress,
   };
 }

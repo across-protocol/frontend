@@ -143,6 +143,15 @@ export const WarningBox = styled(ErrorBox)`
   margin-top: 20px;
 `;
 
+export const WarningButton = styled(PrimaryButton)`
+  display: block;
+  margin: 0 auto;
+  background-color: var(--color-gray);
+  color: var(--color-white);
+  margin-top: 12px;
+  margin-bottom: 16px;
+`;
+
 export const Item = motion(styled.li`
   padding: 15px 10px 10px;
   display: flex;

@@ -25,6 +25,7 @@ import {
   ToggleChainName,
   Address,
   WarningBox,
+  WarningButton,
 } from "./AddressSelection.styles";
 import { AnimatePresence } from "framer-motion";
 import useAddressSelection from "./useAddressSelection";
@@ -49,6 +50,7 @@ const AddressSelection: React.FC = () => {
     selectedToChainInfo,
     fromChain,
     showContractAddressWarning,
+    overrideAddress,
   } = useAddressSelection();
 
   return (
@@ -137,6 +139,9 @@ const AddressSelection: React.FC = () => {
                 {`
               Warning --- Address you inputted is a contract address. When sending ETH from L2 -> L1 WETH will arrive. Ensure the contract address will properly handle WETH or this may result in loss of funds.
             `}
+                <WarningButton onClick={overrideAddress}>
+                  Save Contract Address
+                </WarningButton>
               </WarningBox>
             )}
           </Dialog>
