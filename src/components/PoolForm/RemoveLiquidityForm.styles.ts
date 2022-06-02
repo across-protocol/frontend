@@ -161,4 +161,5 @@ export const Input = styled.input`
 
 export const LiquidityErrorBox = styled(ErrorBox)`
   margin-top: 10px;
+  text-align: center;
 `;
