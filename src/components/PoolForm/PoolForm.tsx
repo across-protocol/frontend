@@ -142,6 +142,8 @@ const PoolForm: FC<Props> = ({
       if (percent >= 100) {
         setRemoveAmountSlider(100);
         // Don't round up to 100% unless they max out.
+      } else if (percent < 0) {
+        setRemoveAmountSlider(0);
       } else {
         setRemoveAmountSlider(percent);
       }
