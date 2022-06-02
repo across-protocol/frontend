@@ -77,6 +77,11 @@ export default function useAddressSelection() {
   };
   const isValid = !address || isValidAddress(address);
   const handleSubmit = () => {
+    // Override save func is they click it twice.
+    if (showContractAddressWarning && address) {
+      setToAddress(address);
+    }
+
     setShowContractAddressWarning(false);
     if (isValid) {
       if (address) {
