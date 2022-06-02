@@ -7,3 +7,9 @@ export function isValidAddress(address: string) {
 export function getAddress(address: string) {
   return ethers.utils.getAddress(address);
 }
+
+const defaultProvider = ethers.getDefaultProvider();
+
+export async function getCode(address: string) {
+  return await defaultProvider.getCode(address);
+}

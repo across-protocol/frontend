@@ -2,7 +2,13 @@ import { useSelect } from "downshift";
 import { useState, useEffect } from "react";
 import { useConnection } from "state/hooks";
 import { useSendForm } from "hooks";
-import { isValidAddress, getChainInfo, trackEvent } from "utils";
+import {
+  isValidAddress,
+  getChainInfo,
+  trackEvent,
+  ChainId,
+  getCode,
+} from "utils";
 
 export default function useAddressSelection() {
   const { isConnected, account } = useConnection();
@@ -16,6 +22,8 @@ export default function useAddressSelection() {
   } = useSendForm();
   const [address, setAddress] = useState("");
   const [open, setOpen] = useState(false);
+  const [showContractAddressWarning, setShowContractAddressWarning] =
+    useState(false);
 
   const selectedToChainInfo = toChain ? getChainInfo(toChain) : undefined;
 
@@ -37,10 +45,20 @@ export default function useAddressSelection() {
 
   // keep the address in sync with the form address
   useEffect(() => {
+    setShowContractAddressWarning(false);
     if (toAddress) {
       setAddress(toAddress);
+      if (toChain === ChainId.MAINNET) {
+        getCode(toAddress)
+          .then((res) => {
+            console.log("res", res);
+          })
+          .catch((err) => {
+            console.log("err in getCode call", err);
+          });
+      }
     }
-  }, [toAddress]);
+  }, [toAddress, toChain]);
   // modal is closing, reset address to the current toAddress
   const toggle = () => {
     if (!isConnected) return;
