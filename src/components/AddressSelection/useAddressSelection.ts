@@ -6,7 +6,6 @@ import {
   isValidAddress,
   getChainInfo,
   trackEvent,
-  ChainId,
   getCode,
   noContractCode,
 } from "utils";
@@ -20,6 +19,7 @@ export default function useAddressSelection() {
     setToAddress,
     availableToChains,
     toAddress,
+    tokenSymbol,
   } = useSendForm();
   const [address, setAddress] = useState("");
   const [open, setOpen] = useState(false);
@@ -51,15 +51,6 @@ export default function useAddressSelection() {
     }
 
     setShowContractAddressWarning(false);
-    if (toAddress && toChain === ChainId.MAINNET) {
-      getCode(toAddress)
-        .then((addr) => {
-          if (addr !== noContractCode) setShowContractAddressWarning(true);
-        })
-        .catch((err) => {
-          console.log("err in getCode call", err);
-        });
-    }
   }, [toAddress, toChain]);
 
   // modal is closing, reset address to the current toAddress
@@ -78,23 +69,29 @@ export default function useAddressSelection() {
   const isValid = !address || isValidAddress(address);
   const handleSubmit = () => {
     setShowContractAddressWarning(false);
+    console.log("tokenSymbol", tokenSymbol);
     if (isValid) {
       if (address) {
-        // Check to see if the toAddress they are inputting is a Contract on Mainnet
-        // If so, warn user because we send WETH and this could cause loss of funds.
-        if (address && toChain === ChainId.MAINNET) {
-          getCode(address)
-            .then((addr) => {
-              if (addr !== noContractCode) {
-                setShowContractAddressWarning(true);
-              } else {
-                setToAddress(address);
-                toggle();
-              }
-            })
-            .catch((err) => {
-              console.log("err in getCode call", err);
-            });
+        if (address && toChain) {
+          // Check to see if the toAddress they are inputting is a Contract on Mainnet
+          // If so, warn user because we send WETH and this could cause loss of funds.
+          if (tokenSymbol === "ETH" || tokenSymbol === "WETH") {
+            getCode(address, toChain)
+              .then((addr) => {
+                if (addr !== noContractCode) {
+                  setShowContractAddressWarning(true);
+                } else {
+                  setToAddress(address);
+                  toggle();
+                }
+              })
+              .catch((err) => {
+                console.log("err in getCode call", err);
+              });
+          } else {
+            setToAddress(address);
+            toggle();
+          }
         }
       } else if (account) {
         setToAddress(account);

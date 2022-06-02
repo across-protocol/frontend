@@ -429,6 +429,8 @@ export const AddressZero = ethers.constants.AddressZero;
 export const ArbitrumProviderUrl =
   process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
   `https://arbitrum-mainnet.infura.io/v3/${infuraId}`;
+
+console.log(ArbitrumProviderUrl);
 export const PolygonProviderUrl =
   process.env.REACT_APP_CHAIN_137_PROVIDER_URL ||
   `https://polygon-mainnet.infura.io/v3/${infuraId}`;
