@@ -69,7 +69,7 @@ export default function useAddressSelection() {
   const isValid = !address || isValidAddress(address);
   const handleSubmit = () => {
     setShowContractAddressWarning(false);
-    console.log("tokenSymbol", tokenSymbol);
+
     if (isValid) {
       if (address) {
         if (address && toChain) {
