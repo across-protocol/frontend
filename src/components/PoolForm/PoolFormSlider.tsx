@@ -36,8 +36,12 @@ const Slider = styled(ReactSlider)`
     border: 3px solid var(--color-white);
     margin-bottom: -8px;
     top: -17px;
+    cursor: pointer;
     &:focus {
       outline: none;
+    }
+    &:hover {
+      background-color: var(--color-uma-red);
     }
   }
   .PoolForm-track {
