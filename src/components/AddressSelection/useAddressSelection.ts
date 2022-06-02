@@ -71,27 +71,25 @@ export default function useAddressSelection() {
     setShowContractAddressWarning(false);
 
     if (isValid) {
-      if (address) {
-        if (address && toChain) {
-          // Check to see if the toAddress they are inputting is a Contract on Mainnet
-          // If so, warn user because we send WETH and this could cause loss of funds.
-          if (tokenSymbol === "ETH" || tokenSymbol === "WETH") {
-            getCode(address, toChain)
-              .then((addr) => {
-                if (addr !== noContractCode) {
-                  setShowContractAddressWarning(true);
-                } else {
-                  setToAddress(address);
-                  toggle();
-                }
-              })
-              .catch((err) => {
-                console.log("err in getCode call", err);
-              });
-          } else {
-            setToAddress(address);
-            toggle();
-          }
+      if (address && toChain) {
+        // Check to see if the toAddress they are inputting is a Contract on Mainnet
+        // If so, warn user because we send WETH and this could cause loss of funds.
+        if (tokenSymbol === "ETH" || tokenSymbol === "WETH") {
+          getCode(address, toChain)
+            .then((addr) => {
+              if (addr !== noContractCode) {
+                setShowContractAddressWarning(true);
+              } else {
+                setToAddress(address);
+                toggle();
+              }
+            })
+            .catch((err) => {
+              console.log("err in getCode call", err);
+            });
+        } else {
+          setToAddress(address);
+          toggle();
         }
       } else if (account) {
         setToAddress(account);
