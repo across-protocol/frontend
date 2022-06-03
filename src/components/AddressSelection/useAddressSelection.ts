@@ -23,6 +23,7 @@ export default function useAddressSelection() {
   } = useSendForm();
   const [address, setAddress] = useState("");
   const [open, setOpen] = useState(false);
+  const [checked, setChecked] = useState(false);
   const [showContractAddressWarning, setShowContractAddressWarning] =
     useState(false);
 
@@ -121,5 +122,7 @@ export default function useAddressSelection() {
     selectedToChainInfo,
     showContractAddressWarning,
     overrideAddress,
+    checked,
+    setChecked,
   };
 }

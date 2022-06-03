@@ -141,15 +141,45 @@ export const Menu = styled.ul<MenuProps>`
 
 export const WarningBox = styled(ErrorBox)`
   margin-top: 20px;
-`;
+  div {
+    margin-top: 4px;
+    cursor: pointer;
+  }
 
-export const WarningButton = styled(PrimaryButton)`
-  display: block;
-  margin: 0 auto;
-  background-color: var(--color-gray);
-  color: var(--color-white);
-  margin-top: 12px;
-  margin-bottom: 16px;
+  input[type="checkbox"] {
+    display: none;
+    margin-left: 0;
+  }
+  input[type="checkbox"] + span {
+    display: inline-block;
+    position: relative;
+    width: 14px;
+    height: 14px;
+    margin: -1px 6px 0 0;
+    vertical-align: middle;
+    background: #f5f4f4 left top no-repeat;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    > span {
+      display: none;
+    }
+  }
+  input[type="checkbox"]:checked + span {
+    background: #0073cd -19px top no-repeat;
+    span:first-of-type {
+      position: absolute;
+      display: block;
+      left: 4px;
+      top: 0px;
+      width: 5px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 3px 3px 0;
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      transform: rotate(45deg);
+    }
+  }
 `;
 
 export const Item = motion(styled.li`

@@ -25,7 +25,6 @@ import {
   ToggleChainName,
   Address,
   WarningBox,
-  WarningButton,
 } from "./AddressSelection.styles";
 import { AnimatePresence } from "framer-motion";
 import useAddressSelection from "./useAddressSelection";
@@ -52,6 +51,8 @@ const AddressSelection: React.FC = () => {
     fromChain,
     showContractAddressWarning,
     overrideAddress,
+    checked,
+    setChecked,
   } = useAddressSelection();
 
   return (
@@ -131,16 +132,34 @@ const AddressSelection: React.FC = () => {
             </InputWrapper>
             <ButtonGroup>
               <CancelButton onClick={toggle}>Cancel</CancelButton>
-              <SecondaryButton onClick={handleSubmit} disabled={!isValid}>
-                Save Changes
-              </SecondaryButton>
+              {!showContractAddressWarning ? (
+                <SecondaryButton onClick={handleSubmit} disabled={!isValid}>
+                  Save Changes
+                </SecondaryButton>
+              ) : (
+                <SecondaryButton onClick={overrideAddress} disabled={!checked}>
+                  Override Address
+                </SecondaryButton>
+              )}
             </ButtonGroup>
             {showContractAddressWarning && (
               <WarningBox>
                 {warningMessage}
-                <WarningButton onClick={overrideAddress}>
-                  Save Contract Address
-                </WarningButton>
+                <div onClick={() => setChecked((pv) => !pv)}>
+                  <input
+                    checked={checked}
+                    type="checkbox"
+                    onChange={(event) => {
+                      console.log("clicked?");
+                      setChecked(event.target.checked);
+                    }}
+                  />
+                  <span>
+                    <span />
+                    <span />
+                  </span>
+                  I understand the risks
+                </div>
               </WarningBox>
             )}
           </Dialog>
