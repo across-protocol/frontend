@@ -62,10 +62,16 @@ export default function useAddressSelection() {
   };
   const clearInput = () => {
     setAddress("");
+    setShowContractAddressWarning(false);
+    setChecked(false);
   };
 
   const handleAddressChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     setAddress(evt.target.value);
+    if (showContractAddressWarning) {
+      setShowContractAddressWarning(false);
+      setChecked(false);
+    }
   };
   const isValid = !address || isValidAddress(address);
   const handleSubmit = () => {
@@ -99,6 +105,7 @@ export default function useAddressSelection() {
     setToAddress(address);
     toggle();
     setShowContractAddressWarning(false);
+    setChecked(false);
   };
 
   return {
