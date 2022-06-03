@@ -27,6 +27,7 @@ export default function useSendAction(
       if (hasToApprove) {
         const tx = await approve();
         if (tx) {
+          setTxHash(tx.hash);
           tx.wait(confirmations)
             .catch(console.error)
             .finally(() => {
@@ -39,9 +40,9 @@ export default function useSendAction(
         // We save the fees here, in case they change between here and when we save the deposit.
         const feesUsed = fees;
         const tx = await send();
-        console.log("tx", tx);
         // NOTE: This check is redundant, as if `status` is `ready`, all of those are defined.
         if (tx && toAddress && account && feesUsed) {
+          setTxHash(tx.hash);
           tx.wait(confirmations)
             .then((tx) => {
               onDepositConfirmed({
@@ -100,5 +101,6 @@ export default function useSendAction(
     isInfoModalOpen,
     toggleInfoModal,
     txPending,
+    txHash,
   };
 }

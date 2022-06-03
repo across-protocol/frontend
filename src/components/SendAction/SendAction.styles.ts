@@ -82,3 +82,14 @@ export const AmountToReceive = styled.div`
     font: inherit;
   }
 `;
+
+export const PendingTxWrapper = styled.div`
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  a {
+    margin-left: auto;
+    color: var(--color-primary);
+    cursor: pointer;
+  }
+`;
