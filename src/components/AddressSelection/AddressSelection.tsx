@@ -150,7 +150,6 @@ const AddressSelection: React.FC = () => {
                     checked={checked}
                     type="checkbox"
                     onChange={(event) => {
-                      console.log("clicked?");
                       setChecked(event.target.checked);
                     }}
                   />
