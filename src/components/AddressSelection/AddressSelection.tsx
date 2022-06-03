@@ -103,8 +103,11 @@ const AddressSelection: React.FC = () => {
             </Menu>
           </InputGroup>
           {selectedToChainInfo && (
-            <ChangeWrapper onClick={toggle}>
-              <ChangeButton className={!isConnected ? "disabled" : ""}>
+            <ChangeWrapper>
+              <ChangeButton
+                onClick={toggle}
+                className={!isConnected ? "disabled" : ""}
+              >
                 Change account
               </ChangeButton>
             </ChangeWrapper>
