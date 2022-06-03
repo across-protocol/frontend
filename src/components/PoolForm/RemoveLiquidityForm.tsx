@@ -13,7 +13,11 @@ import {
   FeesBoldInfo,
   FeesInfo,
   FeesPercent,
-  RemoveFormErrorBox,
+  InputGroup,
+  RoundBox,
+  MaxButton,
+  Input,
+  LiquidityErrorBox,
 } from "./RemoveLiquidityForm.styles";
 import { ethers } from "ethers";
 import { getPoolClient } from "state/poolsApi";
@@ -27,6 +31,7 @@ import {
   getChainInfo,
   switchChain,
   ChainId,
+  calculateRemoveAmount,
 } from "utils";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import api from "state/chainApi";
@@ -34,11 +39,11 @@ import { ShowSuccess } from "views/Pool";
 
 const { previewRemoval } = umaSdk.across.clients.bridgePool;
 
-const toBN = ethers.BigNumber.from;
-
 interface Props {
-  removeAmount: number;
-  setRemoveAmount: Dispatch<SetStateAction<number>>;
+  removeAmount: string;
+  setRemoveAmount: React.Dispatch<React.SetStateAction<string>>;
+  removeAmountSlider: number;
+  setRemoveAmountSlider: Dispatch<SetStateAction<number>>;
   lpTokens: ethers.BigNumber;
   decimals: number;
   symbol: string;
@@ -53,10 +58,15 @@ interface Props {
   // refetch balance
   refetchBalance: () => void;
   chainId: ChainId;
+  error: string;
+  setError: React.Dispatch<React.SetStateAction<string>>;
+  onMaxClick: () => void;
 }
 const RemoveLiqudityForm: FC<Props> = ({
   removeAmount,
   setRemoveAmount,
+  removeAmountSlider,
+  setRemoveAmountSlider,
   lpTokens,
   decimals,
   symbol,
@@ -68,6 +78,9 @@ const RemoveLiqudityForm: FC<Props> = ({
   wrongNetwork,
   totalPosition,
   chainId,
+  error,
+  setError,
+  onMaxClick,
 }) => {
   const poolClient = getPoolClient();
   const { init } = onboard;
@@ -80,21 +93,20 @@ const RemoveLiqudityForm: FC<Props> = ({
     if (wrongNetwork) return `Switch to ${chainName}`;
     return "Remove liquidity";
   }
-  const [errorMessage, setErrorMessage] = useState("");
+
   useEffect(() => {
-    setErrorMessage("");
-  }, [removeAmount]);
+    validateForm(removeAmount, position.toString(), decimals, symbol, setError);
+  }, [removeAmount, removeAmountSlider, position, decimals, symbol, setError]);
 
   const handleButtonClick = async () => {
     if (!provider) {
       init();
     }
-    if (isConnected && removeAmount > 0 && signer) {
-      setErrorMessage("");
-      const scaler = toBN("10").pow(decimals);
+    if (isConnected && removeAmountSlider > 0 && signer) {
+      const scaler = ethers.BigNumber.from("10").pow(decimals);
 
       const removeAmountToWei = toWeiSafe(
-        (removeAmount / 100).toString(),
+        (removeAmountSlider / 100).toString(),
         decimals
       );
 
@@ -131,14 +143,14 @@ const RemoveLiqudityForm: FC<Props> = ({
                 15000
               );
           });
-          emitter.on("txFailed", () => {
+          emitter.on("txFailed", (x) => {
             if (transaction.hash) notify.unsubscribe(transaction.hash);
             setTxSubmitted(false);
           });
         }
         return transaction;
       } catch (err: any) {
-        setErrorMessage(err.message);
+        setError(err.message);
         console.error("err in RemoveLiquidity call", err);
       }
     }
@@ -151,27 +163,92 @@ const RemoveLiqudityForm: FC<Props> = ({
           feesEarned: max(feesEarned, 0),
           positionValue: totalPosition,
         },
-        removeAmount / 100
+        removeAmountSlider / 100
       )
     : null;
 
   return (
     <>
+      <InputGroup>
+        <RoundBox
+          as="label"
+          htmlFor="amount"
+          style={{
+            // @ts-expect-error TS does not likes custom CSS vars
+            "--color": error
+              ? "var(--color-error-light)"
+              : "var(--color-white)",
+            "--outline-color": error
+              ? "var(--color-error)"
+              : "var(--color-primary)",
+          }}
+        >
+          <MaxButton onClick={onMaxClick} disabled={!isConnected}>
+            max
+          </MaxButton>
+          <Input
+            placeholder="0.00"
+            id="amount"
+            value={removeAmount}
+            onChange={(e) => setRemoveAmount(e.target.value)}
+            disabled={!isConnected}
+          />
+        </RoundBox>
+      </InputGroup>
+      {error && <LiquidityErrorBox>{error}</LiquidityErrorBox>}
+
       <RemoveAmount>
-        Amount: <span>{removeAmount}%</span>
+        Amount: <span>{removeAmountSlider.toFixed(2)}%</span>
       </RemoveAmount>
-      <PoolFormSlider value={removeAmount} setValue={setRemoveAmount} />
+      <PoolFormSlider
+        value={removeAmountSlider}
+        setValue={setRemoveAmountSlider}
+        setRA={(value) => {
+          if (value < 100) {
+            setRemoveAmount(calculateRemoveAmount(value, position, decimals));
+          } else {
+            onMaxClick();
+          }
+        }}
+      />
       <RemovePercentButtonsWrapper>
-        <RemovePercentButton onClick={() => setRemoveAmount(25)}>
+        <RemovePercentButton
+          onClick={() => {
+            setError("");
+            setRemoveAmountSlider(25);
+            setRemoveAmount(calculateRemoveAmount(25, position, decimals));
+          }}
+        >
           25%
         </RemovePercentButton>
-        <RemovePercentButton onClick={() => setRemoveAmount(50)}>
+        <RemovePercentButton
+          onClick={() => {
+            setError("");
+
+            setRemoveAmountSlider(50);
+            setRemoveAmount(calculateRemoveAmount(50, position, decimals));
+          }}
+        >
           50%
         </RemovePercentButton>
-        <RemovePercentButton onClick={() => setRemoveAmount(75)}>
+        <RemovePercentButton
+          onClick={() => {
+            setError("");
+
+            setRemoveAmountSlider(75);
+            setRemoveAmount(calculateRemoveAmount(75, position, decimals));
+          }}
+        >
           75%
         </RemovePercentButton>
-        <RemovePercentButton onClick={() => setRemoveAmount(100)}>
+        <RemovePercentButton
+          onClick={() => {
+            setError("");
+
+            setRemoveAmountSlider(100);
+            onMaxClick();
+          }}
+        >
           MAX
         </RemovePercentButton>
       </RemovePercentButtonsWrapper>
@@ -181,7 +258,8 @@ const RemoveLiqudityForm: FC<Props> = ({
           <FeesBlockWrapper>
             <FeesBlock>
               <FeesBoldInfo>
-                Remove amount <FeesPercent>({removeAmount}%)</FeesPercent>
+                Remove amount{" "}
+                <FeesPercent>({removeAmountSlider.toFixed(2)}%)</FeesPercent>
               </FeesBoldInfo>
               <FeesInfo>Left in pool</FeesInfo>
             </FeesBlock>
@@ -225,11 +303,6 @@ const RemoveLiqudityForm: FC<Props> = ({
         </>
       )}
       <RemoveFormButtonWrapper>
-        {errorMessage && (
-          <RemoveFormErrorBox>
-            <div>{errorMessage}</div>
-          </RemoveFormErrorBox>
-        )}
         {wrongNetwork && provider ? (
           <RemoveFormButton onClick={() => switchChain(provider, chainId)}>
             Switch to {chainName}
@@ -237,7 +310,7 @@ const RemoveLiqudityForm: FC<Props> = ({
         ) : (
           <RemoveFormButton
             onClick={handleButtonClick}
-            disabled={wrongNetwork && !provider}
+            disabled={(wrongNetwork && !provider) || !!error}
           >
             {buttonMessage()}
             {txSubmitted ? <BouncingDotsLoader /> : null}
@@ -246,6 +319,36 @@ const RemoveLiqudityForm: FC<Props> = ({
       </RemoveFormButtonWrapper>
     </>
   );
+};
+
+const validateForm = (
+  value: string,
+  balance: string,
+  decimals: number,
+  symbol: string,
+  setFormError: React.Dispatch<React.SetStateAction<string>>,
+  addLiquidityGas: ethers.BigNumber = ethers.BigNumber.from("0")
+) => {
+  try {
+    // liquidity button should be disabled if value is 0, so we dont actually need an error.
+    if (Number(value) === 0) return setFormError("");
+    if (Number(value) < 0) return setFormError("Cannot be less than 0.");
+    if (value && balance) {
+      const valueToWei = toWeiSafe(value, decimals);
+      if (valueToWei.gt(balance)) {
+        return setFormError("Liquidity amount greater than balance.");
+      }
+    }
+
+    if (value && symbol === "ETH") {
+      const valueToWei = toWeiSafe(value, decimals);
+      if (valueToWei.add(addLiquidityGas).gt(balance)) {
+        return setFormError("Transaction may fail due to insufficient gas.");
+      }
+    }
+  } catch (e) {
+    return setFormError("Invalid number.");
+  }
 };
 
 export default RemoveLiqudityForm;

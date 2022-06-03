@@ -1,5 +1,5 @@
-import { FC, useState, useEffect, useCallback } from "react";
-import { ethers, BigNumber } from "ethers";
+import { FC, useState, useEffect } from "react";
+import { ethers } from "ethers";
 import Tabs from "../Tabs";
 import AddLiquidityForm from "./AddLiquidityForm";
 import RemoveLiquidityForm from "./RemoveLiquidityForm";
@@ -18,19 +18,18 @@ import {
 } from "./PoolForm.styles";
 import {
   formatUnits,
-  formatEtherRaw,
-  max,
   estimateGasForAddEthLiquidity,
   DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE,
   UPDATE_GAS_INTERVAL_MS,
-  toWeiSafe,
   ChainId,
   formatPoolAPY,
   formatNumberMaxFracDigits,
+  toWeiSafe,
 } from "utils";
 import { useConnection } from "state/hooks";
 import type { ShowSuccess } from "views/Pool";
-
+import useSetLiquidityFormErrors from "./useSetLiquidityFormErrors";
+import maxClickHandler from "./maxClickHandler";
 interface Props {
   symbol: string;
   icon: string;
@@ -83,9 +82,11 @@ const PoolForm: FC<Props> = ({
 }) => {
   const poolClient = getPoolClient();
   const [inputAmount, setInputAmount] = useState("");
-  const [removeAmount, setRemoveAmount] = useState(0);
+  const [removeAmount, setRemoveAmount] = useState("");
+  const [removeAmountSlider, setRemoveAmountSlider] = useState(0);
   const [error] = useState<Error>();
   const [formError, setFormError] = useState("");
+  const [removeFormError, setRemoveFormError] = useState("");
   const [addLiquidityGas, setAddLiquidityGas] = useState<ethers.BigNumber>(
     DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE
   );
@@ -115,48 +116,39 @@ const PoolForm: FC<Props> = ({
   }, [signer, isConnected, symbol, poolClient]);
 
   // Validate input on change
-  useEffect(() => {
-    const value = inputAmount;
-    try {
-      // liquidity button should be disabled if value is 0, so we dont actually need an error.
-      if (Number(value) === 0) return setFormError("");
-      if (Number(value) < 0) return setFormError("Cannot be less than 0.");
-      if (value && balance) {
-        const valueToWei = toWeiSafe(value, decimals);
-        if (valueToWei.gt(balance)) {
-          return setFormError("Liquidity amount greater than balance.");
-        }
-      }
-
-      if (value && symbol === "ETH") {
-        const valueToWei = toWeiSafe(value, decimals);
-        if (valueToWei.add(addLiquidityGas).gt(balance)) {
-          return setFormError("Transaction may fail due to insufficient gas.");
-        }
-      }
-    } catch (e) {
-      return setFormError("Invalid number.");
-    }
-    // clear form if no errors were presented. All errors should return early.
-    setFormError("");
-  }, [inputAmount, balance, decimals, symbol, addLiquidityGas]);
-
-  const handleMaxClick = useCallback(() => {
-    let value = ethers.utils.formatUnits(balance, decimals);
-    if (symbol !== "ETH") return setInputAmount(value);
-    value = formatEtherRaw(
-      max("0", BigNumber.from(balance).sub(addLiquidityGas))
-    );
-    setInputAmount(value);
-  }, [balance, decimals, symbol, addLiquidityGas]);
+  useSetLiquidityFormErrors(
+    inputAmount,
+    balance,
+    decimals,
+    symbol,
+    setFormError,
+    addLiquidityGas
+  );
 
   // if pool changes, set input value to "".
   useEffect(() => {
     setInputAmount("");
     setFormError("");
-    setRemoveAmount(0);
+    setRemoveFormError("");
+    setRemoveAmountSlider(0);
+    setRemoveAmount("");
   }, [tokenAddress]);
 
+  useEffect(() => {
+    if (position.toString() && Number(removeAmount)) {
+      const wei = Number(toWeiSafe(removeAmount, decimals).toString());
+      const pos = Number(position.toString());
+      const percent = (wei / pos) * 100;
+      if (percent >= 100) {
+        setRemoveAmountSlider(100);
+        // Don't round up to 100% unless they max out.
+      } else if (percent < 0) {
+        setRemoveAmountSlider(0);
+      } else {
+        setRemoveAmountSlider(percent);
+      }
+    }
+  }, [removeAmount, isConnected]); // eslint-disable-line
   return (
     <Wrapper>
       <Info>
@@ -227,15 +219,23 @@ const PoolForm: FC<Props> = ({
             balance={balance}
             setAmount={setInputAmount}
             refetchBalance={refetchBalance}
-            onMaxClick={handleMaxClick}
+            onMaxClick={() =>
+              maxClickHandler(
+                balance,
+                symbol,
+                decimals,
+                setInputAmount,
+                addLiquidityGas
+              )
+            }
             chainId={chainId}
           />
         </TabContentWrapper>
         <TabContentWrapper data-label="Remove">
           <RemoveLiquidityForm
             wrongNetwork={wrongNetwork}
-            removeAmount={removeAmount}
-            setRemoveAmount={setRemoveAmount}
+            removeAmountSlider={removeAmountSlider}
+            setRemoveAmountSlider={setRemoveAmountSlider}
             lpTokens={lpTokens}
             decimals={decimals}
             symbol={symbol}
@@ -248,6 +248,18 @@ const PoolForm: FC<Props> = ({
             totalPosition={totalPosition}
             refetchBalance={refetchBalance}
             chainId={chainId}
+            error={removeFormError}
+            removeAmount={removeAmount}
+            setRemoveAmount={setRemoveAmount}
+            setError={setRemoveFormError}
+            onMaxClick={() =>
+              maxClickHandler(
+                position.toString(),
+                symbol,
+                decimals,
+                setRemoveAmount
+              )
+            }
           />
         </TabContentWrapper>
       </Tabs>

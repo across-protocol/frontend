@@ -127,7 +127,7 @@ const Wrapper = styled.div`
   display: grid;
   padding: 0 10px;
   grid-template-columns: 1fr min(var(--central-content), 100%) 1fr;
-  min-height: 100%;
+  min-height: 92%;
   height: fit-content;
   @media ${QUERIES.tabletAndUp} {
     padding: 0 30px;
