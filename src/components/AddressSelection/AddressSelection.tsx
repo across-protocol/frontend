@@ -29,7 +29,7 @@ import {
 import { AnimatePresence } from "framer-motion";
 import useAddressSelection from "./useAddressSelection";
 
-const warningMessage = `Warning --- Address you inputted is a contract address. When sending ETH across chains WETH will arrive. Ensure the contract address will properly handle WETH or send to a different EOA and convert your WETH to ETH and send to the contract address, or this may result in loss of funds.`;
+const warningMessage = `Warning --- You've inputted a contract address. When bridging ETH to a contract address, ETH will be wrapped into WETH. Ensure the contract address can receive WETH. If you are not sure whether it can, then you should send to a non-contract address to be safe and receive ETH to prevent any chance of a loss of funds.`;
 const AddressSelection: React.FC = () => {
   const {
     getItemProps,
