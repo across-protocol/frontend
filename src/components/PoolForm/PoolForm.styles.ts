@@ -8,7 +8,7 @@ export const Wrapper = styled.div`
   border-radius: 12px 12px 0 0;
   padding: 0 10px;
   @media ${QUERIES.tabletAndUp} {
-    padding: 0 30px;
+    padding: 0 30px 20px;
   }
 `;
 
