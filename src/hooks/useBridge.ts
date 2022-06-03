@@ -67,7 +67,7 @@ export function useBridge() {
     fromChain && chainId && chainId !== fromChain
   );
   let { status, error } = computeStatus({
-    tokenAddress: tokenInfo?.address,
+    tokenSymbol: tokenInfo?.symbol,
     amount,
     formStatus,
     hasToSwitchChain,
@@ -157,7 +157,7 @@ type Fees = {
   isAmountTooLow: boolean;
 };
 type ComputeStatusArgs = {
-  tokenAddress?: string;
+  tokenSymbol?: string;
   amount: ethers.BigNumber;
   formStatus: FormStatus;
   hasToSwitchChain: boolean;
@@ -177,11 +177,11 @@ function computeStatus({
   amount,
   balance,
   fees,
-  tokenAddress,
+  tokenSymbol,
   fromChain,
 }: ComputeStatusArgs): { status: SendStatus; error?: SendError } {
   const config = getConfig();
-  if (!tokenAddress) {
+  if (!tokenSymbol) {
     return { status: SendStatus.IDLE };
   }
   if (!fromChain) {
@@ -196,9 +196,9 @@ function computeStatus({
       error: new WrongNetworkError(fromChain),
     };
   }
-  const { isNative, decimals } = config.getTokenInfoByAddress(
+  const { isNative, decimals } = config.getTokenInfoBySymbol(
     fromChain,
-    tokenAddress
+    tokenSymbol
   );
   if (balance) {
     const adjustedBalance = isNative
@@ -215,7 +215,7 @@ function computeStatus({
     if (fees.isLiquidityInsufficient) {
       return {
         status: SendStatus.ERROR,
-        error: new InsufficientLiquidityError(tokenAddress),
+        error: new InsufficientLiquidityError(tokenSymbol),
       };
     }
     if (fees.isAmountTooLow) {
