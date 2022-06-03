@@ -19,8 +19,8 @@ export default function useAddressSelection() {
     setToAddress,
     availableToChains,
     toAddress,
-    tokenSymbol,
   } = useSendForm();
+
   const [address, setAddress] = useState("");
   const [open, setOpen] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -75,23 +75,19 @@ export default function useAddressSelection() {
       if (address && toChain) {
         // Check to see if the toAddress they are inputting is a Contract on Mainnet
         // If so, warn user because we send WETH and this could cause loss of funds.
-        if (tokenSymbol === "ETH" || tokenSymbol === "WETH") {
-          getCode(address, toChain)
-            .then((addr) => {
-              if (addr !== noContractCode) {
-                setShowContractAddressWarning(true);
-              } else {
-                setToAddress(address);
-                toggle();
-              }
-            })
-            .catch((err) => {
-              console.log("err in getCode call", err);
-            });
-        } else {
-          setToAddress(address);
-          toggle();
-        }
+        // Note: Removed check for WETH and ETH because they can change tokens outside of this modal.
+        getCode(address, toChain)
+          .then((addr) => {
+            if (addr !== noContractCode) {
+              setShowContractAddressWarning(true);
+            } else {
+              setToAddress(address);
+              toggle();
+            }
+          })
+          .catch((err) => {
+            console.log("err in getCode call", err);
+          });
       } else if (account) {
         setToAddress(account);
         toggle();
