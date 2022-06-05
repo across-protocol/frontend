@@ -45,8 +45,6 @@ export const QUERIES = {
   mobileAndDown: `(max-width: ${(BREAKPOINTS.tabletMin - 1) / 16}rem)`,
 };
 
-export const MAX_RELAY_FEE_PERCENT = 25;
-
 export const COLORS = {
   gray: {
     100: "0deg 0% 89%",
@@ -421,6 +419,9 @@ export const debug = Boolean(process.env.REACT_APP_DEBUG);
 
 export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
 export const FEE_ESTIMATION = ".004";
+export const MAX_RELAY_FEE_PERCENT = Number(
+  process.env.REACT_APP_MAX_RELAY_FEE_PERCENT || 50
+);
 export const FLAT_RELAY_CAPITAL_FEE = process.env
   .REACT_APP_FLAT_RELAY_CAPITAL_FEE
   ? Number(process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE)
