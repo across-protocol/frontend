@@ -74,7 +74,10 @@ export const StyledRow = styled(Row)`
 `;
 
 export const StyledCell = styled(Cell)`
+  display: flex;
+  align-items: center;
   word-wrap: break-word;
+
   &:first-of-type {
     min-width: 175px;
     flex: 0 0 65px;
@@ -90,7 +93,7 @@ export const StyledCell = styled(Cell)`
 
 export const TableLogo = styled.img`
   height: 15px;
-  margin-right: 4px;
+  margin-right: 8px;
 `;
 
 export const TableLink = styled.a`

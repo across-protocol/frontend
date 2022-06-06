@@ -100,9 +100,12 @@ export const ElementWrapper = styled.div<IElementWrapper>`
   background-color: ${({ active }) =>
     active ? "var(--color-pagination)" : "var(--color-gray-160)"};
   color: var(--color-white);
+  display: flex;
+  align-items: center;
   border: 1px solid var(--color-pagination);
   height: 30px;
-  width: 30px;
+  min-width: 30px;
+  padding: 0 10px;
   border-radius: 6px;
   text-align: center;
   margin: 0 3px;

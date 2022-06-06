@@ -106,7 +106,7 @@ function formatTransactionRows(
       value: (
         <>
           <TableLogo src={token?.logoURI} alt={`${token?.name}_logo`} />{" "}
-          {token?.name === "Wrapped Ether" ? "WETH" : token?.name}
+          {token?.name === "Wrapped Ether" ? "WETH" : token?.symbol}
         </>
       ),
     };
