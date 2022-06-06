@@ -71,7 +71,12 @@ export default function useTransactionsView() {
   useEffect(() => {
     if (monitoredAccount && txClient) {
       setInitialLoading(true);
-      txClient.startFetchingTransfers(monitoredAccount);
+      txClient
+        .startFetchingTransfers(monitoredAccount)
+        .then(() => {})
+        .catch((error) => {
+          console.error(error);
+        });
       // start timer that stops fetching events after a certain time
       const timeout = setTimeout(() => {
         txClient.stopFetchingTransfers(monitoredAccount);
@@ -85,6 +90,7 @@ export default function useTransactionsView() {
         txClient.stopFetchingTransfers(monitoredAccount);
         setRawFilledTx([]);
         setRawOngoingTx([]);
+        setCurrentPage(0);
       }
     };
   }, [monitoredAccount, txClient]);

@@ -134,7 +134,9 @@ function formatTransactionRows(
       </>
     );
 
-    const amount = ethers.utils.formatEther(tx.amount);
+    const amount = Number(ethers.utils.formatUnits(tx.amount, token.decimals))
+      .toFixed(4)
+      .replace(/\.*0*$/, "");
 
     const txHash = (
       <MobileTableLink

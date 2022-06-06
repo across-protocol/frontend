@@ -148,7 +148,7 @@ export const chainInfoList: ChainInfoList = [
       `https://arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "AETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 11102271,
+    earliestBlock: 12741972,
   },
   {
     name: "Boba",
@@ -160,7 +160,7 @@ export const chainInfoList: ChainInfoList = [
       `https://blockexplorer.boba.network/tx/${txHash}`,
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 551955,
+    earliestBlock: 619993,
   },
   {
     name: "Optimism",
@@ -172,7 +172,7 @@ export const chainInfoList: ChainInfoList = [
       `https://optimistic.etherscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "OETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 6979967,
+    earliestBlock: 8747136,
   },
   {
     name: "Polygon",
@@ -186,7 +186,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "MATIC",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 27875891,
+    earliestBlock: 28604263,
   },
   {
     name: "Goerli",
