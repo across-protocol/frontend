@@ -16,6 +16,7 @@ export default function useSendAction(
   const { fees } = useBridgeFees(amount, toChain, tokenSymbol);
   const { status, hasToApprove, send, approve } = useBridge();
   const { account } = useConnection();
+  const [txHash, setTxHash] = useState("");
 
   const handleActionClick = async () => {
     if (status !== "ready" || !selectedRoute) {
@@ -26,10 +27,12 @@ export default function useSendAction(
       if (hasToApprove) {
         const tx = await approve();
         if (tx) {
+          setTxHash(tx.hash);
           tx.wait(confirmations)
             .catch(console.error)
             .finally(() => {
               setTxPending(false);
+              setTxHash("");
             });
         }
         return tx;
@@ -39,6 +42,7 @@ export default function useSendAction(
         const tx = await send();
         // NOTE: This check is redundant, as if `status` is `ready`, all of those are defined.
         if (tx && toAddress && account && feesUsed) {
+          setTxHash(tx.hash);
           tx.wait(confirmations)
             .then((tx) => {
               onDepositConfirmed({
@@ -55,6 +59,7 @@ export default function useSendAction(
             .catch(console.error)
             .finally(() => {
               setTxPending(false);
+              setTxHash("");
             });
           // TODO: we should invalidate and refetch any queries of the transaction tab, so when a user switches to it, they see the new transaction immediately.
         }
@@ -96,5 +101,6 @@ export default function useSendAction(
     isInfoModalOpen,
     toggleInfoModal,
     txPending,
+    txHash,
   };
 }

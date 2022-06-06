@@ -16,6 +16,7 @@ import {
   FeesButton,
   InfoContainer,
   AmountToReceive,
+  PendingTxWrapper,
 } from "./SendAction.styles";
 
 import InformationDialog from "components/InformationDialog";
@@ -23,7 +24,6 @@ import useSendAction from "./useSendAction";
 import type { Deposit } from "views/Confirmation";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { ReactComponent as ConfettiIcon } from "assets/confetti.svg";
-
 type Props = {
   onDeposit: (deposit: Deposit) => void;
 };
@@ -40,6 +40,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
     buttonMsg,
     txPending,
     fromChain,
+    txHash,
   } = useSendAction(onDeposit);
   const showFees = amount.gt(0) && !!fees;
   const amountMinusFees = showFees ? receiveAmount(amount, fees) : undefined;
@@ -104,6 +105,17 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
           {buttonMsg}
           {txPending && <BouncingDotsLoader />}
         </PrimaryButton>
+        {txHash && fromChain ? (
+          <PendingTxWrapper>
+            <a
+              href={getChainInfo(fromChain).constructExplorerLink(txHash)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Transaction Explorer
+            </a>
+          </PendingTxWrapper>
+        ) : null}
       </Wrapper>
       <InformationDialog isOpen={isInfoModalOpen} onClose={toggleInfoModal} />
     </AccentSection>
