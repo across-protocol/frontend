@@ -24,10 +24,12 @@ import {
   RoundBox,
   ToggleChainName,
   Address,
+  WarningBox,
 } from "./AddressSelection.styles";
 import { AnimatePresence } from "framer-motion";
 import useAddressSelection from "./useAddressSelection";
 
+const warningMessage = `Warning --- You've inputted a contract address. When bridging ETH to a contract address, ETH will be wrapped into WETH. Ensure the contract address can receive WETH. If you are not sure whether it can, then you should send to a non-contract address to be safe and receive ETH to prevent any chance of a loss of funds.`;
 const AddressSelection: React.FC = () => {
   const {
     getItemProps,
@@ -47,6 +49,10 @@ const AddressSelection: React.FC = () => {
     availableToChains,
     selectedToChainInfo,
     fromChain,
+    showContractAddressWarning,
+    overrideAddress,
+    checked,
+    setChecked,
   } = useAddressSelection();
 
   return (
@@ -129,10 +135,35 @@ const AddressSelection: React.FC = () => {
             </InputWrapper>
             <ButtonGroup>
               <CancelButton onClick={toggle}>Cancel</CancelButton>
-              <SecondaryButton onClick={handleSubmit} disabled={!isValid}>
-                Save Changes
-              </SecondaryButton>
+              {!showContractAddressWarning ? (
+                <SecondaryButton onClick={handleSubmit} disabled={!isValid}>
+                  Save Changes
+                </SecondaryButton>
+              ) : (
+                <SecondaryButton onClick={overrideAddress} disabled={!checked}>
+                  Override Address
+                </SecondaryButton>
+              )}
             </ButtonGroup>
+            {showContractAddressWarning && (
+              <WarningBox>
+                {warningMessage}
+                <div onClick={() => setChecked((pv) => !pv)}>
+                  <input
+                    checked={checked}
+                    type="checkbox"
+                    onChange={(event) => {
+                      setChecked(event.target.checked);
+                    }}
+                  />
+                  <span>
+                    <span />
+                    <span />
+                  </span>
+                  I understand the risks
+                </div>
+              </WarningBox>
+            )}
           </Dialog>
         )}
       </LastSection>
