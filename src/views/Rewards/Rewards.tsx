@@ -1,5 +1,7 @@
+import { Wrapper } from "./Rewards.styles";
+
 const Rewards = () => {
-  return <div>Rewards Stub</div>;
+  return <Wrapper>Rewards Stub</Wrapper>;
 };
 
 export default Rewards;
