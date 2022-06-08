@@ -1,10 +1,11 @@
 <!--
 If you need QA on your PR include the following section in your code. This will alert the QA team
-that they should be testing.  As an engineer use github emojis to :heart: :+1: if the QA comments are productive
-or :-1: if the QA comments are hindering productivity.
+that they should be testing.  Engineers should use github emojis to :heart: :+1: if the QA comments are productive
+or :-1: if the QA comments are hindering productivity. Its up to your own discretion to award emojis, but its encouraged
+to do so since we can use this information to incentivise and reward QA testers.
 -->
 
-## QA
+## Needs QA
 
 **Overview**
 
@@ -20,34 +21,38 @@ This change only affects the transfer tab, so do not expect changes in the app e
 
 
 **Acceptance Criteria**
-
 <!--
-Try to describe what the tester should be testing and what the expected behavior is. Enumerate them if possible
-so that testers can respond to the numbers directly if there are issues.
+Acceptance criteria should be composed of 2 parts, the first part is how to test, if its not obvious, the second part
+is what they should be expect to be observing as the correct behavior.
+
+It may not always be obvious how to test your changes, the more direction you can give the better, such as directing
+the tester to particular parts of the app need testing, or specific actions to be taken using specific browsers or devices. 
+
+The second part is to Describe what the tester should be testing and what the expected behavior is. Enumerate them so that testers
+can respond to the numbers directly if there are issues.
 
 Example:
+Use the generated kovan link and first send a transaction between any chains, then go to transfer tab.
+You should see your active transfer, and the new speedup button.
+
 1. See that you can send a transfer and then speed it up.  
 2. See that transfer shows a speedup transaction hash after speeding it up.
 3. See that there were no regressions with the transfer table.
 -->
 
-**How to test**
-<!--
-If particular parts of the app need testing, or you need specific actions to be taken, browsers to be used
-please direct the testers on how to test the changes here. 
 
-Example:
-Use the generated kovan link and first send a transaction between any chains, then go to transfer tab.
-You should see your active transfer, and the new speedup button.
--->
-
-### For QA Testers
+<!-- If requesting QA DO NOT remove the following section, this is meant to direct QA Testers responses to your PR -->
+### How To Report QA
+Testers, use the following templates to pass the pull request or to report issues that require a resolution.
+Following these guidelines will help the developer respond more quickly to issues, but you are free to comment
+in any way as needed to help resolve issues.
 
 **Reporting QA Issues**
 
-As a tester use github comments to report issues with the PR. Use screenshots if relevant, you can also
-check the developer console to see if there are any logs which might be related. Use the following template
-when reporting a problem. You submit multiple comments if there are multiple issues.
+Testers should use Github comments to report issues with the PR. Use screenshots if relevant, you can also
+check the [developer console](https://support.airtable.com/hc/en-us/articles/232313848-How-to-open-the-developer-console)
+to see if there are any logs which might be related. Use the following template when reporting a problem or issue with the PR.
+You submit multiple comments using this template if there are multiple issues.
 
 ```
 **QA Issue**
@@ -74,10 +79,20 @@ Example:
 Optionally include anything about your testing environment, ie phone, tablet, chrome or safari, if you used
 metamask or a different wallet, etc. This will let other testers know if there are configurations they could
 test differently from yours.
+
+Example:
+Used Metamask and the latest version of Safari on a Macbook. 
 -->
 
 
 ```
+
+**Reporting QA Regression**
+
+A regression is something that was working, but now is no longer working due to the new code changes. The breakage
+may seem completely unrelated to the pull request, which is why they can go unnoticed during testing.
+If you find a regression, or arent sure, report it anyway as an issue and the engineer can decide how to resolve it. 
+
 
 **Reporting QA Passed**
 
@@ -89,22 +104,25 @@ template to signal that QA passed your testing.
 **QA Pass**
 
 <!--
-Describe how you tested, if you tested beyond what was originally specified, or any other parts of the app.
-Sometimes changes can cause what are called "regressions" (something was working, and now doesnt after this change)
-and its good to know that none happened even if outside of the scope of the original QA testing.
+Describe what you tested, if you tested beyond what was originally specified, or any other parts of the app.
+This will help others decide how to do their testing, and let the engineer know the testing coverage of the app.
 
 Example:
-Tested sending eth and weth between optimism and arbitrum on kovan and back again. Both cases i was able to see my 
-transaction and speed it up. No issues with the UI but i wasnt sure if the transaction actually was faster.
+Tested sending eth and weth between optimism and arbitrum on kovan and back again. Both cases I was able to see my 
+transaction and speed it up. No issues with the UI but I wasnt sure if the transaction actually was faster. Also
+tested adding and removing liquidity from the pool tab which worked as expected. 
 
 -->
 
 **Testing Environment**
 
 <!--
-Optionally include anything about your testing environment, ie phone, tablet, chrome or safari, if you used
-metamask or a different wallet, etc. This will let other testers know if there are configurations they could
+Optionally include anything unique about your testing environment, ie phone, tablet, chrome or safari, if you used
+Metamask or a different wallet, etc. This will let other testers know if there are configurations they could
 test differently from yours.
+
+Example:
+Used Metamask and the latest version of Safari on a Macbook. 
 -->
 
 ```
