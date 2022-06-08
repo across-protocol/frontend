@@ -17,6 +17,7 @@ import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
 import createTransactionTableJSX, {
   headers,
+  createPendingHeaders,
 } from "./TransactionsTable/createTransactionTableJSX";
 
 import MobileTransactionsTable from "./TransactionsTable/MobileTransactionsTable";
@@ -89,6 +90,10 @@ const Transactions = () => {
   );
 
   const isTxPresent = !filledTx.length && !ongoingTx.length && !initialLoading;
+  const pendingOnClick = () => {
+    return null;
+  };
+
   return (
     <Wrapper>
       <TopRow dark={isConnected && ongoingTx.length > 0}>
@@ -117,7 +122,7 @@ const Transactions = () => {
               {width >= BREAKPOINTS.laptopMin ? (
                 <TransactionsTable
                   title="Ongoing"
-                  headers={headers}
+                  headers={createPendingHeaders(pendingOnClick)}
                   rows={ongoingTx}
                 />
               ) : (

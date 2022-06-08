@@ -12,7 +12,8 @@ import { getChainInfo } from "utils/constants";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 import { ChainId } from "utils";
 import { TxLink } from "../useTransactionsView";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 // Will take View Model Transaction as arg
 // Example of TX View Model:
 /* 
@@ -251,3 +252,27 @@ export const headers: ICell[] = [
     cellClassName: "header-cell",
   },
 ];
+
+export function createPendingHeaders(
+  onClick: React.MouseEventHandler<SVGSVGElement> | undefined
+) {
+  const h = headers;
+  h[2] = {
+    size: "xs",
+    value: (
+      <>
+        Filled %{" "}
+        <FontAwesomeIcon
+          style={{
+            color: "#6CF9D7",
+            cursor: "pointer",
+          }}
+          onClick={onClick}
+          icon={faCircleInfo}
+        />
+      </>
+    ),
+    cellClassName: "header-cell",
+  };
+  return h;
+}
