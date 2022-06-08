@@ -16,7 +16,7 @@ import { getChainInfo, ChainId } from "utils/constants";
 import { getConfig, Token } from "utils/config";
 import { CLOSED_DROPDOWN_INDEX, TxLink } from "../useTransactionsView";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 
 export interface IMobileRow extends IRow {
@@ -208,3 +208,28 @@ export const mobileHeaders: ICell[] = [
     cellClassName: "header-cell",
   },
 ];
+
+export function createPendingMobileHeaders(
+  onClick: React.MouseEventHandler<SVGSVGElement>
+) {
+  const mh = mobileHeaders;
+  mh[2] = {
+    size: "sm",
+    value: (
+      <>
+        Filled %{" "}
+        <FontAwesomeIcon
+          style={{
+            color: "#6CF9D7",
+            cursor: "pointer",
+          }}
+          onClick={onClick}
+          icon={faCircleInfo}
+        />
+      </>
+    ),
+    cellClassName: "header-cell",
+  };
+
+  return mh;
+}

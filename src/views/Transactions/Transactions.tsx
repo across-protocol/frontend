@@ -23,6 +23,7 @@ import createTransactionTableJSX, {
 import MobileTransactionsTable from "./TransactionsTable/MobileTransactionsTable";
 import createMobileTransactionTableJSX, {
   mobileHeaders,
+  createPendingMobileHeaders,
 } from "./TransactionsTable/createMobileTransactionTableJSX";
 import { BREAKPOINTS } from "utils";
 import { TransactionsTableWithPagination } from "./TransactionsTable";
@@ -131,7 +132,7 @@ const Transactions = () => {
               ) : (
                 <MobileTransactionsTable
                   title="Ongoing"
-                  headers={mobileHeaders}
+                  headers={createPendingMobileHeaders(openInfoModal)}
                   rows={mobileOngoingTx}
                   openIndex={openOngoingRow}
                 />
