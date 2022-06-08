@@ -33,6 +33,7 @@ import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 import ethLogo from "assets/ethereum-logo.svg";
 import wethLogo from "assets/weth-logo.svg";
 import TransactionsTableModal from "./TransactionsTableModal";
+import FillTxInfoModal from "./TransactionsTable/FillTxInfoModal";
 const Transactions = () => {
   const {
     isConnected,
@@ -55,6 +56,8 @@ const Transactions = () => {
     setOpenModal,
     modalData,
     setModalData,
+    infoModalOpen,
+    setInfoModalOpen,
   } = useTransactionsView();
 
   const ongoingTx = useMemo(
@@ -90,8 +93,8 @@ const Transactions = () => {
   );
 
   const isTxPresent = !filledTx.length && !ongoingTx.length && !initialLoading;
-  const pendingOnClick = () => {
-    return null;
+  const openInfoModal = () => {
+    return setInfoModalOpen(true);
   };
 
   return (
@@ -122,7 +125,7 @@ const Transactions = () => {
               {width >= BREAKPOINTS.laptopMin ? (
                 <TransactionsTable
                   title="Ongoing"
-                  headers={createPendingHeaders(pendingOnClick)}
+                  headers={createPendingHeaders(openInfoModal)}
                   rows={ongoingTx}
                 />
               ) : (
@@ -196,6 +199,12 @@ const Transactions = () => {
           setModalData([]);
         }}
         txLinks={modalData}
+      />
+      <FillTxInfoModal
+        isOpen={infoModalOpen}
+        onClose={() => {
+          setInfoModalOpen(false);
+        }}
       />
     </Wrapper>
   );
