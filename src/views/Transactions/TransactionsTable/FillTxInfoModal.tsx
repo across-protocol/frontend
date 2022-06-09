@@ -31,7 +31,7 @@ const FillTxInfoModal: React.FC<Props> = ({ isOpen, onClose }) => {
               target="_blank"
               rel="noreferrer"
             >
-              Discord support channel.
+              Discord.
             </Link>
           </Info>
         </div>
