@@ -19,13 +19,12 @@ const FillTxInfoModal: React.FC<Props> = ({ isOpen, onClose }) => {
         <div>
           <Title>Information on Partially Filled Transactions</Title>
           <Info>
-            Subject to the state of relayer capital within Across, it is
-            possible for a transaction to be only partially filled. Don't worry,
-            your funds are safe. Although unlikely, it could take 2-4hrs for
-            your transaction to complete.
+            Depending on the state of relayer capital on Across, transactions
+            might be only partially filled. Rest assured that while transactions
+            may take up to 2-4 hours, your funds are safe.
           </Info>
           <Info>
-            If you have concerns, please submit a ticket in our{" "}
+            If you have any concerns, feel free to submit a ticket on{" "}
             <Link
               href="https://discord.gg/across"
               target="_blank"
