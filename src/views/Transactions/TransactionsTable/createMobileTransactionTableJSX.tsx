@@ -212,7 +212,7 @@ export const mobileHeaders: ICell[] = [
 export function createPendingMobileHeaders(
   onClick: React.MouseEventHandler<SVGSVGElement>
 ) {
-  const mh = mobileHeaders;
+  const mh = [...mobileHeaders];
   mh[2] = {
     size: "sm",
     value: (

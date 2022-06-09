@@ -256,7 +256,7 @@ export const headers: ICell[] = [
 export function createPendingHeaders(
   onClick: React.MouseEventHandler<SVGSVGElement>
 ) {
-  const h = headers;
+  const h = [...headers];
   h[2] = {
     size: "xs",
     value: (
