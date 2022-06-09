@@ -19,24 +19,20 @@ const FillTxInfoModal: React.FC<Props> = ({ isOpen, onClose }) => {
         <div>
           <Title>Information on Partially Filled Transactions</Title>
           <Info>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin in
-            lectus purus. Nulla molestie neque vitae felis rhoncus hendrerit.
-            Nunc sed sem volutpat, scelerisque ipsum vitae, semper tortor.
-            Aliquam ultrices nec neque nec pretium. Suspendisse sit amet lacus
-            vel dolor vestibulum convallis. Nunc egestas metus eget metus
-            auctor, ut vehicula diam lobortis. Donec vel ligula ultricies,
-            condimentum ante a, luctus lorem. Pellentesque nec nisl id felis
-            eleifend commodo a ac metus.
+            Subject to the state of relayer capital within Across, it is
+            possible for a transaction to be only partially filled. Don't worry,
+            your funds are safe. Although unlikely, it could take 2-4hrs for
+            your transaction to complete.
           </Info>
           <Info>
-            Quisque malesuada justo non ligula aliquam viverra. Duis
-            sollicitudin risus sit amet nulla bibendum fermentum. Nunc sem
-            lacus, porttitor et mattis sagittis, dignissim vel sem. Vestibulum
-            pretium sem purus, et suscipit mi condimentum sit amet. Pellentesque
-            volutpat lectus et efficitur auctor. Duis molestie orci sit amet
-            nulla pulvinar, non vehicula diam mattis. Lorem ipsum dolor sit
-            amet, consectetur adipiscing elit. Donec lacus mi, vehicula at nisi
-            sed, scelerisque accumsan velit. In eu libero nisi.
+            If you have concerns, please submit a ticket in our{" "}
+            <Link
+              href="https://discord.gg/across"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Discord support channel.
+            </Link>
           </Info>
         </div>
       </Wrapper>
@@ -101,4 +97,14 @@ const Overlay = styled(DialogOverlay)`
   display: flex;
   justify-content: center;
   align-items: flex-start;
+`;
+
+const Link = styled.a`
+  color: var(--color-gray);
+  text-decoration: none;
+  transform: opacity 100ms linear;
+  font-weight: 600;
+  &:hover {
+    text-decoration: revert;
+  }
 `;
