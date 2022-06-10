@@ -1,9 +1,10 @@
 import styled from "@emotion/styled";
 import { Link as UnstyledLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import { COLORS, QUERIES } from "utils";
+import { QUERIES } from "utils";
 import { ReactComponent as UnstyledDesktopLogo } from "assets/across-logo-v2.svg";
 import { ReactComponent as UnstyledMobileLogo } from "assets/logo-mobile.svg";
+
 export const Wrapper = styled.header`
   height: var(--header-height);
   padding: 0 20px;
@@ -41,13 +42,12 @@ export const List = styled.ul`
 export const Item = styled.li`
   flex: 1 0 165px;
   background-color: inherit;
-  color: var(--color-primary);
+  color: #c5d5e0;
   text-transform: capitalize;
   cursor: pointer;
   &[aria-selected="true"] {
     color: var(--color-primary);
     background-color: var(--color-gray);
-    font-weight: bold;
     &::after {
       content: ".";
       color: var(--color-primary);
@@ -59,8 +59,8 @@ export const Item = styled.li`
       font-size: 2rem;
     }
   }
-  &:hover:not([aria-selected="true"]) {
-    color: hsla(${COLORS.gray[500]} / 0.5);
+  &:hover {
+    color: var(--color-primary);
   }
 `;
 export const BaseLink = styled(UnstyledLink)`

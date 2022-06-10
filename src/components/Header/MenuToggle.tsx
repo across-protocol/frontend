@@ -53,7 +53,7 @@ const Slice = styled(motion.div)`
   position: absolute;
   left: 0;
   right: 0;
-  min-height: 2px;
+  min-height: 1px;
   background-color: var(--color-primary);
   width: 50%;
   margin: 0 auto;

@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { QUERIES } from "utils";
 import { RoundBox } from "../Box";
 import { SecondaryButton } from "../Buttons";
+import { ReactComponent as LgLogo } from "assets/lg-across-logo.svg";
 
 export const Wrapper = styled(RoundBox)`
   background-color: inherit;
@@ -62,4 +63,17 @@ export const Info = styled.div`
 export const UnsupportedNetwork = styled.div`
   background-color: rgba(45, 46, 51, 0.25);
   padding: 1rem 0.5rem;
+`;
+
+export const BalanceButton = styled(SecondaryButton)`
+  width: 175px;
+  border: 1px solid #4d4f56;
+  display: flex;
+  align-content: center;
+`;
+
+export const Logo = styled(LgLogo)`
+  height: 20px;
+  width: 20px;
+  margin-right: 4px;
 `;
