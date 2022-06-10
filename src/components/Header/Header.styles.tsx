@@ -48,6 +48,16 @@ export const Item = styled.li`
     color: var(--color-primary);
     background-color: var(--color-gray);
     font-weight: bold;
+    &::after {
+      content: ".";
+      color: var(--color-primary);
+      display: block;
+      text-align: center;
+      position: absolute;
+      top: 50px;
+      margin-left: 80px;
+      font-size: 2rem;
+    }
   }
   &:hover:not([aria-selected="true"]) {
     color: hsla(${COLORS.gray[500]} / 0.5);
@@ -68,10 +78,9 @@ export const Link = styled(BaseLink)`
 `;
 export const LogoLink = styled(UnstyledLink)`
   padding-left: 10px;
-  @media ${QUERIES.desktopAndUp} {
-    /* padding-left: 45px; */
-  }
   line-height: 0;
+  @media ${QUERIES.desktopAndUp} {
+  }
 `;
 export const Logo = styled(UnstyledDesktopLogo)`
   display: none;
