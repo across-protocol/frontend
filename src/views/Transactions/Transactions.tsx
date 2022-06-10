@@ -17,11 +17,13 @@ import TransactionsTable from "./TransactionsTable";
 import { shortenAddress } from "utils/format";
 import createTransactionTableJSX, {
   headers,
+  createPendingHeaders,
 } from "./TransactionsTable/createTransactionTableJSX";
 
 import MobileTransactionsTable from "./TransactionsTable/MobileTransactionsTable";
 import createMobileTransactionTableJSX, {
   mobileHeaders,
+  createPendingMobileHeaders,
 } from "./TransactionsTable/createMobileTransactionTableJSX";
 import { BREAKPOINTS } from "utils";
 import { TransactionsTableWithPagination } from "./TransactionsTable";
@@ -32,6 +34,7 @@ import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 import ethLogo from "assets/ethereum-logo.svg";
 import wethLogo from "assets/weth-logo.svg";
 import TransactionsTableModal from "./TransactionsTableModal";
+import FillTxInfoModal from "./TransactionsTable/FillTxInfoModal";
 const Transactions = () => {
   const {
     isConnected,
@@ -54,6 +57,8 @@ const Transactions = () => {
     setOpenModal,
     modalData,
     setModalData,
+    infoModalOpen,
+    setInfoModalOpen,
   } = useTransactionsView();
 
   const ongoingTx = useMemo(
@@ -89,6 +94,10 @@ const Transactions = () => {
   );
 
   const isTxPresent = !filledTx.length && !ongoingTx.length && !initialLoading;
+  const openInfoModal = () => {
+    return setInfoModalOpen(true);
+  };
+
   return (
     <Wrapper>
       <TopRow dark={isConnected && ongoingTx.length > 0}>
@@ -117,13 +126,13 @@ const Transactions = () => {
               {width >= BREAKPOINTS.laptopMin ? (
                 <TransactionsTable
                   title="Ongoing"
-                  headers={headers}
+                  headers={createPendingHeaders(openInfoModal)}
                   rows={ongoingTx}
                 />
               ) : (
                 <MobileTransactionsTable
                   title="Ongoing"
-                  headers={mobileHeaders}
+                  headers={createPendingMobileHeaders(openInfoModal)}
                   rows={mobileOngoingTx}
                   openIndex={openOngoingRow}
                 />
@@ -191,6 +200,12 @@ const Transactions = () => {
           setModalData([]);
         }}
         txLinks={modalData}
+      />
+      <FillTxInfoModal
+        isOpen={infoModalOpen}
+        onClose={() => {
+          setInfoModalOpen(false);
+        }}
       />
     </Wrapper>
   );

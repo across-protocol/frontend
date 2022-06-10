@@ -34,6 +34,7 @@ export default function useTransactionsView() {
   const pageSizes = useMemo(() => [10, 25, 50], []);
   const [openModal, setOpenModal] = useState(false);
   const [modalData, setModalData] = useState<TxLink[]>([]);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
 
   useEffect(() => {
     if (txClient) {
@@ -117,6 +118,8 @@ export default function useTransactionsView() {
     setModalData,
     openModal,
     setOpenModal,
+    infoModalOpen,
+    setInfoModalOpen,
   };
 }
 
