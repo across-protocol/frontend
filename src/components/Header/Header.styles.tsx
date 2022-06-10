@@ -11,7 +11,7 @@ export const Wrapper = styled.header`
   grid-template-columns: min-content 1fr min-content;
   gap: 15px;
   align-items: center;
-  background-color: var(--color-primary);
+  background-color: var(--color-gray);
   color: var(--color-gray);
   @media ${QUERIES.laptopAndUp} {
     padding: 0 30px;
@@ -41,11 +41,11 @@ export const List = styled.ul`
 export const Item = styled.li`
   flex: 1 0 165px;
   background-color: inherit;
-  color: var(--color-gray);
+  color: var(--color-primary);
   text-transform: capitalize;
   cursor: pointer;
   &[aria-selected="true"] {
-    color: var(--color-white);
+    color: var(--color-primary);
     background-color: var(--color-gray);
     font-weight: bold;
   }
@@ -75,6 +75,9 @@ export const LogoLink = styled(UnstyledLink)`
 `;
 export const Logo = styled(UnstyledDesktopLogo)`
   display: none;
+  height: 60px;
+  width: 130px;
+  align-self: baseline;
   @media ${QUERIES.laptopAndUp} {
     display: revert;
   }
