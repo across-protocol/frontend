@@ -20,7 +20,9 @@ export const Wrapper = styled(RoundBox)`
 
 export const ConnectButton = styled(SecondaryButton)`
   padding: 12px 16px;
-  border: 1px solid transparent;
+  border: 1px solid var(--color-primary);
+  background-color: var(--color-gray);
+  color: var(--color-primary);
 `;
 
 export const Account = styled.div`
