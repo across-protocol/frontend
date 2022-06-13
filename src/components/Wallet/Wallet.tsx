@@ -8,7 +8,10 @@ import {
   UnsupportedNetwork,
   BalanceButton,
   Logo,
+  BalanceWallet,
+  Account,
 } from "./Wallet.styles";
+import { shortenAddress } from "utils";
 
 const { init } = onboard;
 
@@ -17,7 +20,7 @@ interface Props {
 }
 
 const Wallet: FC<Props> = ({ setOpenSidebar }) => {
-  const { account, isConnected, chainId } = useConnection();
+  const { account, ensName, isConnected, chainId } = useConnection();
 
   if (account && !isConnected && !chainId) {
     return (
@@ -30,12 +33,27 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
   if (!isConnected) {
     return <ConnectButton onClick={init}>Connect Wallet</ConnectButton>;
   }
+
+  if (account && !isConnected && !chainId) {
+    return (
+      <UnsupportedNetwork>
+        Unsupported network. Please change networks.
+      </UnsupportedNetwork>
+    );
+  }
   return (
     <Wrapper onClick={() => setOpenSidebar(true)}>
       <BalanceButton>
-        <Logo />
+        <div>
+          <Logo />
+          <BalanceWallet>0 ACX</BalanceWallet>
+        </div>
+        {/* <div>
 
-        <span>Balance: 0 ACX</span>
+        </div> */}
+        {account && (
+          <Account>{ensName ?? shortenAddress(account, "...", 4)}</Account>
+        )}
       </BalanceButton>
     </Wrapper>
   );
