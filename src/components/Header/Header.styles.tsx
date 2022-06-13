@@ -8,23 +8,27 @@ import { ReactComponent as UnstyledMobileLogo } from "assets/logo-mobile.svg";
 export const Wrapper = styled.header`
   height: var(--header-height);
   padding: 0 20px;
-  display: grid;
-  grid-template-columns: min-content 1fr min-content;
+  display: flex;
   gap: 15px;
+  justify-content: space-between;
   align-items: center;
   background-color: var(--color-gray);
   color: var(--color-gray);
   @media ${QUERIES.laptopAndUp} {
     padding: 0 30px;
-    grid-template-columns: 1fr min(100%, var(--central-content)) 1fr;
+    &:first-of-type {
+      flex-grow: 1;
+    }
   }
 `;
 
 export const Navigation = styled.nav`
   height: 100%;
   display: none;
+  flex-grow: 2;
   @media ${QUERIES.tabletAndUp} {
     display: revert;
+    justify-content: space-evenly;
   }
   svg,
   path {
@@ -33,10 +37,15 @@ export const Navigation = styled.nav`
 `;
 
 export const List = styled.ul`
-  display: flex;
+  display: none;
   list-style: none;
   height: 100%;
   font-size: ${18 / 16}rem;
+  max-width: 800px;
+  margin: 0 auto;
+  @media ${QUERIES.laptopAndUp} {
+    display: flex;
+  }
 `;
 
 export const Item = styled.li`
@@ -55,7 +64,7 @@ export const Item = styled.li`
       text-align: center;
       position: absolute;
       top: 50px;
-      margin-left: 80px;
+      margin-left: 96px;
       font-size: 2rem;
     }
   }

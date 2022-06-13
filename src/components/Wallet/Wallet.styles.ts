@@ -7,7 +7,6 @@ import { ReactComponent as LgLogo } from "assets/lg-across-logo.svg";
 export const Wrapper = styled(RoundBox)`
   background-color: inherit;
   width: 100%;
-  grid-template-columns: 1fr 1fr;
   padding: 0;
   display: none;
 
