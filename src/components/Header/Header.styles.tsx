@@ -3,7 +3,7 @@ import { Link as UnstyledLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import { QUERIES } from "utils";
 import { ReactComponent as UnstyledDesktopLogo } from "assets/across-logo-v2.svg";
-import { ReactComponent as UnstyledMobileLogo } from "assets/logo-mobile.svg";
+import { ReactComponent as UnstyledMobileLogo } from "assets/across-mobile-logo.svg";
 
 export const Wrapper = styled.header`
   height: var(--header-height);
@@ -41,7 +41,7 @@ export const List = styled.ul`
   list-style: none;
   height: 100%;
   font-size: ${18 / 16}rem;
-  max-width: 800px;
+  max-width: 600px;
   margin: 0 auto;
   @media ${QUERIES.laptopAndUp} {
     display: flex;
@@ -49,7 +49,7 @@ export const List = styled.ul`
 `;
 
 export const Item = styled.li`
-  flex: 1 0 165px;
+  flex: 1 0 145px;
   background-color: inherit;
   color: #c5d5e0;
   text-transform: capitalize;
@@ -64,7 +64,7 @@ export const Item = styled.li`
       text-align: center;
       position: absolute;
       top: 50px;
-      margin-left: 96px;
+      margin-left: 70px;
       font-size: 2rem;
     }
   }
