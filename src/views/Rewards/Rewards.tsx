@@ -6,6 +6,9 @@ import {
   RewardsDollarSignLogo,
   BreakdownButton,
   RewardBlockItemTopRow,
+  RewardBlockBottomRow,
+  RewardAmountLarge,
+  RewardAmountSmall,
 } from "./Rewards.styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
@@ -29,9 +32,26 @@ const Rewards = () => {
                 </BreakdownButton>
               </div>
             </RewardBlockItemTopRow>
+            <RewardBlockBottomRow>
+              <RewardAmountLarge>$321.24</RewardAmountLarge>
+              <RewardAmountSmall>82.431 ACX</RewardAmountSmall>
+            </RewardBlockBottomRow>
           </RewardBlockItem>
           <RewardBlockItem>
-            <RewardsDollarSignLogo />
+            <RewardBlockItemTopRow>
+              <div>
+                <RewardsDollarSignLogo /> <span>Staked LP Tokens</span>
+              </div>
+              <div>
+                <RewardsDollarSignLogo />
+              </div>
+            </RewardBlockItemTopRow>
+            <RewardBlockBottomRow>
+              <RewardAmountLarge>$15.125.54</RewardAmountLarge>
+              <RewardAmountSmall>
+                12,142.24 USDC, 1.2424 ETH +1
+              </RewardAmountSmall>
+            </RewardBlockBottomRow>
           </RewardBlockItem>
         </RewardBlockWrapper>
       </RewardBreakdownSection>

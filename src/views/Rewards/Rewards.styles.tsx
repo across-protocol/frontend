@@ -20,7 +20,6 @@ export const RewardBlockWrapper = styled.div`
 `;
 
 export const RewardBlockItem = styled.div`
-  min-height: 200px;
   background-color: #3e4047;
   flex-basis: 45%;
   padding: 1rem 1.5rem;
@@ -38,14 +37,14 @@ export const RewardBlockItemTopRow = styled.div`
   > div:first-of-type {
     svg {
       margin-bottom: -6px;
-      height: 24px;
-      width: 20px;
+      height: 26px;
+      width: 26px;
       margin-right: 8px;
     }
     span {
       display: inline-block;
       height: 100%;
-      font-size: 0.875rem;
+      font-size: 1.125rem;
     }
   }
 `;
@@ -63,4 +62,21 @@ export const BreakdownButton = styled(SecondaryButtonWithoutShadow)`
   &:hover {
     color: var(--color-white);
   }
+`;
+
+export const RewardBlockBottomRow = styled.div`
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  column-gap: 10px;
+`;
+
+export const RewardAmountLarge = styled.div`
+  font-size: 2rem;
+  color: var(--color-primary);
+`;
+
+export const RewardAmountSmall = styled.div`
+  font-size: 1rem;
+  color: #9daab2;
 `;
