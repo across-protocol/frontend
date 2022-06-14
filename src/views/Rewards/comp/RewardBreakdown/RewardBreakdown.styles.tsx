@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
+import { QUERIES } from "utils";
 
 export const RewardBreakdownSection = styled.section`
   min-height: 30vh;
@@ -13,12 +14,22 @@ export const RewardBlockWrapper = styled.div`
   display: flex;
   width: 100%;
   gap: 24px;
+  flex-direction: row;
+  width: 100%;
+  @media ${QUERIES.tabletAndDown} {
+    flex-direction: column;
+    margin: 0 auto;
+    width: 95%;
+  }
 `;
 
 export const RewardBlockItem = styled.div`
   background-color: #3e4047;
   flex-basis: 45%;
   padding: 1rem 1.5rem;
+  @media ${QUERIES.tabletAndDown} {
+    flex-basis: 85%;
+  }
 `;
 
 export const RewardsDollarSignLogo = styled(GithubLogo)`
@@ -81,6 +92,12 @@ export const InfoButtonRow = styled.div`
   display: flex;
   margin-top: 1rem;
   gap: 0px 10px;
+  flex-wrap: wrap;
+  @media ${QUERIES.tabletAndDown} {
+    row-gap: 15px;
+    width: 95%;
+    margin: 1rem auto;
+  }
 `;
 
 export const InfoButton = styled(BreakdownButton)`
@@ -95,6 +112,10 @@ export const InfoButton = styled(BreakdownButton)`
       color: var(--color-white);
     }
   }
+  @media ${QUERIES.tabletAndDown} {
+    flex-basis: 49%;
+    margin: 0 auto;
+  }
 `;
 
 export const AllQuestionsButton = styled(BreakdownButton)`
@@ -103,5 +124,9 @@ export const AllQuestionsButton = styled(BreakdownButton)`
     span {
       color: var(--color-white);
     }
+  }
+  @media ${QUERIES.tabletAndDown} {
+    flex-basis: 49%;
+    margin: 0 auto;
   }
 `;
