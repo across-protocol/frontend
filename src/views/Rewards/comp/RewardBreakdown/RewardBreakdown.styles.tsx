@@ -7,7 +7,7 @@ export const RewardBreakdownSection = styled.section`
   min-height: 30vh;
   width: 100%;
   max-width: 1400px;
-  margin: 0 auto;
+  margin: 1rem auto;
 `;
 
 export const RewardBlockWrapper = styled.div`
