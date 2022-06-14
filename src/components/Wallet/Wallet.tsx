@@ -48,9 +48,6 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
           <Logo />
           <BalanceWallet>0 ACX</BalanceWallet>
         </div>
-        {/* <div>
-
-        </div> */}
         {account && (
           <Account>{ensName ?? shortenAddress(account, "...", 4)}</Account>
         )}

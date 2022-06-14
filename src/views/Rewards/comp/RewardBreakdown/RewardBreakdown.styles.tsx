@@ -1,28 +1,35 @@
 import styled from "@emotion/styled";
 import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
-
-export const Wrapper = styled.div`
-  background-color: transparent;
-`;
+import { QUERIES } from "utils";
 
 export const RewardBreakdownSection = styled.section`
   min-height: 30vh;
   width: 100%;
   max-width: 1400px;
-  margin: 0 auto;
+  margin: 1rem auto;
 `;
 
 export const RewardBlockWrapper = styled.div`
   display: flex;
   width: 100%;
   gap: 24px;
+  flex-direction: row;
+  width: 100%;
+  @media ${QUERIES.tabletAndDown} {
+    flex-direction: column;
+    margin: 0 auto;
+    width: 95%;
+  }
 `;
 
 export const RewardBlockItem = styled.div`
   background-color: #3e4047;
   flex-basis: 45%;
   padding: 1rem 1.5rem;
+  @media ${QUERIES.tabletAndDown} {
+    flex-basis: 85%;
+  }
 `;
 
 export const RewardsDollarSignLogo = styled(GithubLogo)`
@@ -79,4 +86,58 @@ export const RewardAmountLarge = styled.div`
 export const RewardAmountSmall = styled.div`
   font-size: 1rem;
   color: #9daab2;
+`;
+
+export const InfoButtonRow = styled.div`
+  display: flex;
+  margin-top: 1rem;
+  gap: 0px 10px;
+  flex-wrap: wrap;
+  @media ${QUERIES.tabletAndDown} {
+    row-gap: 15px;
+    width: 95%;
+    margin: 1rem auto;
+  }
+`;
+
+export const InfoButton = styled(BreakdownButton)`
+  border: 1px solid #9daab2;
+
+  svg {
+    margin-left: 0;
+    margin-right: 8px;
+  }
+  &:hover {
+    span {
+      color: var(--color-white);
+    }
+  }
+  @media ${QUERIES.tabletAndDown} {
+    flex-basis: 49%;
+    margin: 0 auto;
+  }
+  @media ${QUERIES.mobileAndDown} {
+    flex-basis: 95%;
+    height: 50px;
+  }
+`;
+
+export const AllQuestionsButton = styled(BreakdownButton)`
+  border: 1px solid #9daab2;
+  &:hover {
+    span {
+      color: var(--color-white);
+    }
+  }
+  @media ${QUERIES.tabletAndDown} {
+    flex-basis: 49%;
+    margin: 0 auto;
+    svg {
+      margin-left: auto;
+    }
+  }
+  @media ${QUERIES.mobileAndDown} {
+    flex-basis: 95%;
+    height: 50px;
+  }
 `;
