@@ -116,6 +116,10 @@ export const InfoButton = styled(BreakdownButton)`
     flex-basis: 49%;
     margin: 0 auto;
   }
+  @media ${QUERIES.mobileAndDown} {
+    flex-basis: 95%;
+    height: 50px;
+  }
 `;
 
 export const AllQuestionsButton = styled(BreakdownButton)`
@@ -128,5 +132,12 @@ export const AllQuestionsButton = styled(BreakdownButton)`
   @media ${QUERIES.tabletAndDown} {
     flex-basis: 49%;
     margin: 0 auto;
+    svg {
+      margin-left: auto;
+    }
+  }
+  @media ${QUERIES.mobileAndDown} {
+    flex-basis: 95%;
+    height: 50px;
   }
 `;
