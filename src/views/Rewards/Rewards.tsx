@@ -1,9 +1,10 @@
 import { Wrapper } from "./Rewards.styles";
-import { RewardBreakdown } from "./comp";
+import { RewardBreakdown, RewardHero } from "./comp";
 
 const Rewards = () => {
   return (
     <Wrapper>
+      <RewardHero />
       <RewardBreakdown />
     </Wrapper>
   );

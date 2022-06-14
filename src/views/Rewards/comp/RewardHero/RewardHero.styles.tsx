@@ -1,0 +1,39 @@
+import styled from "@emotion/styled";
+import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
+import { SecondaryButtonWithoutShadow } from "components/Buttons";
+
+export const Wrapper = styled.div`
+  width: 100%;
+  max-width: 1400px;
+  margin: 1rem auto 1.5rem;
+  min-height: 30vh;
+  background-color: var(--color-primary);
+  padding: 1.5rem 2rem;
+`;
+
+export const GiftIcon = styled(GithubLogo)`
+  height: 32px;
+  width: 32px;
+  path {
+    fill: var(--color-gray);
+  }
+`;
+
+export const Header = styled.h2`
+  color: var(--color-gray);
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-top: 1rem;
+`;
+
+export const SubHeader = styled.h3`
+  color: var(--color-gray);
+  font-size: 1rem;
+  margin-top: 1rem;
+`;
+
+export const HeroButton = styled(SecondaryButtonWithoutShadow)`
+  background-color: #2d2e33;
+  color: var(--color-primary);
+  margin-top: 1.5rem;
+`;

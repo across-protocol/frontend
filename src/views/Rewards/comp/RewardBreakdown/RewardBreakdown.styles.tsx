@@ -16,6 +16,7 @@ export const RewardBlockWrapper = styled.div`
   gap: 24px;
   flex-direction: row;
   width: 100%;
+  justify-content: space-between;
   @media ${QUERIES.tabletAndDown} {
     flex-direction: column;
     margin: 0 auto;
@@ -25,7 +26,7 @@ export const RewardBlockWrapper = styled.div`
 
 export const RewardBlockItem = styled.div`
   background-color: #3e4047;
-  flex-basis: 45%;
+  flex-basis: 49%;
   padding: 1rem 1.5rem;
   @media ${QUERIES.tabletAndDown} {
     flex-basis: 85%;
