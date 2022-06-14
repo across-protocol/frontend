@@ -76,3 +76,32 @@ export const RewardAmountSmall = styled.div`
   font-size: 1rem;
   color: #9daab2;
 `;
+
+export const InfoButtonRow = styled.div`
+  display: flex;
+  margin-top: 1rem;
+  gap: 0px 10px;
+`;
+
+export const InfoButton = styled(BreakdownButton)`
+  border: 1px solid #9daab2;
+
+  svg {
+    margin-left: 0;
+    margin-right: 8px;
+  }
+  &:hover {
+    span {
+      color: var(--color-white);
+    }
+  }
+`;
+
+export const AllQuestionsButton = styled(BreakdownButton)`
+  border: 1px solid #9daab2;
+  &:hover {
+    span {
+      color: var(--color-white);
+    }
+  }
+`;

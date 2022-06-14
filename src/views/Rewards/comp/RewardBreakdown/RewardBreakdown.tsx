@@ -8,9 +8,15 @@ import {
   RewardBlockBottomRow,
   RewardAmountLarge,
   RewardAmountSmall,
+  InfoButtonRow,
+  InfoButton,
+  AllQuestionsButton,
 } from "./RewardBreakdown.styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronRight,
+  faInfoCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 const RewardBreakdown = () => {
   return (
@@ -50,6 +56,25 @@ const RewardBreakdown = () => {
           </RewardBlockBottomRow>
         </RewardBlockItem>
       </RewardBlockWrapper>
+      {/* Note: these will be links. Design / PM to provide links later. */}
+      <InfoButtonRow>
+        <InfoButton>
+          <FontAwesomeIcon icon={faInfoCircle} />
+          <span>How do I earn more ACX?</span>
+        </InfoButton>
+        <InfoButton>
+          <FontAwesomeIcon icon={faInfoCircle} />
+          <span>How do multipliers work?</span>
+        </InfoButton>
+        <InfoButton>
+          <FontAwesomeIcon icon={faInfoCircle} />
+          <span>How is the reward APY calculated?</span>
+        </InfoButton>
+        <AllQuestionsButton>
+          <span>All questions</span>
+          <FontAwesomeIcon icon={faChevronRight} />
+        </AllQuestionsButton>
+      </InfoButtonRow>
     </RewardBreakdownSection>
   );
 };
