@@ -4,7 +4,6 @@ import { SecondaryButtonWithoutShadow } from "components/Buttons";
 import { QUERIES } from "utils";
 
 export const RewardBreakdownSection = styled.section`
-  min-height: 30vh;
   width: 100%;
   max-width: 1400px;
   margin: 1rem auto;
@@ -16,6 +15,7 @@ export const RewardBlockWrapper = styled.div`
   gap: 24px;
   flex-direction: row;
   width: 100%;
+  justify-content: space-between;
   @media ${QUERIES.tabletAndDown} {
     flex-direction: column;
     margin: 0 auto;
@@ -25,7 +25,7 @@ export const RewardBlockWrapper = styled.div`
 
 export const RewardBlockItem = styled.div`
   background-color: #3e4047;
-  flex-basis: 45%;
+  flex-basis: 49%;
   padding: 1rem 1.5rem;
   @media ${QUERIES.tabletAndDown} {
     flex-basis: 85%;
@@ -89,20 +89,22 @@ export const RewardAmountSmall = styled.div`
 `;
 
 export const InfoButtonRow = styled.div`
-  display: flex;
-  margin-top: 1rem;
-  gap: 0px 10px;
-  flex-wrap: wrap;
-  @media ${QUERIES.tabletAndDown} {
-    row-gap: 15px;
-    width: 95%;
-    margin: 1rem auto;
+  display: block;
+  margin: 1rem auto;
+  overflow-x: scroll;
+  width: 100%;
+  white-space: nowrap;
+  max-width: 1400px;
+  ::-webkit-scrollbar {
+    height: 6px;
   }
 `;
 
 export const InfoButton = styled(BreakdownButton)`
   border: 1px solid #9daab2;
-
+  display: inline-block;
+  margin: 0 6px;
+  padding: 8px;
   svg {
     margin-left: 0;
     margin-right: 8px;
@@ -112,32 +114,17 @@ export const InfoButton = styled(BreakdownButton)`
       color: var(--color-white);
     }
   }
-  @media ${QUERIES.tabletAndDown} {
-    flex-basis: 49%;
-    margin: 0 auto;
-  }
-  @media ${QUERIES.mobileAndDown} {
-    flex-basis: 95%;
-    height: 50px;
-  }
 `;
 
 export const AllQuestionsButton = styled(BreakdownButton)`
   border: 1px solid #9daab2;
+  display: inline-block;
+  margin: 0 6px;
+  padding: 8px;
+
   &:hover {
     span {
       color: var(--color-white);
     }
-  }
-  @media ${QUERIES.tabletAndDown} {
-    flex-basis: 49%;
-    margin: 0 auto;
-    svg {
-      margin-left: auto;
-    }
-  }
-  @media ${QUERIES.mobileAndDown} {
-    flex-basis: 95%;
-    height: 50px;
   }
 `;
