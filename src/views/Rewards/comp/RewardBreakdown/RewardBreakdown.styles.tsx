@@ -90,10 +90,11 @@ export const RewardAmountSmall = styled.div`
 
 export const InfoButtonRow = styled.div`
   display: block;
-  margin-top: 1rem;
+  margin: 1rem auto;
   overflow-x: scroll;
   width: 100%;
   white-space: nowrap;
+  max-width: 1400px;
   ::-webkit-scrollbar {
     height: 6px;
   }
