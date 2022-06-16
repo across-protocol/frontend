@@ -618,6 +618,12 @@ export const relayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("2000000").toString(),
     decimals: 6,
   },
+  UMA: {
+    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
+    upperBound: ethers.utils.parseUnits("0.001").toString(),
+    cutoff: ethers.utils.parseUnits("5000").toString(),
+    decimals: 18,
+  },
   BADGER: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.001").toString(),
