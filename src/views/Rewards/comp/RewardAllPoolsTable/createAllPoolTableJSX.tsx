@@ -37,7 +37,7 @@ function formatAllPoolsRows(): IRow[] {
         {
           value: (
             <MultiplierCellValue>
-              <ProgressBar percent={100} />{" "}
+              <ProgressBar percent={97} />{" "}
               <MutliplierValue>2.00x </MutliplierValue>
             </MultiplierCellValue>
           ),
