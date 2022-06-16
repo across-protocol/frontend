@@ -50,7 +50,6 @@ export const StyledTableWrapper = styled(TableWrapper)`
   background-color: inherit;
   margin: 0 auto;
   box-shadow: none;
-  /* border: 1px solid #3e4047; */
   border-radius: 16px;
 `;
 
@@ -72,9 +71,9 @@ export const StyledRow = styled(Row)`
   overflow-x: auto;
   margin: 0 auto;
   border: 1px solid #3e4047;
-  /* Don't do zebra */
   &:first-of-type {
     margin-bottom: 2px;
+    border-bottom: 0;
   }
   &:last-of-type {
     border-bottom-left-radius: 12px;
@@ -83,8 +82,9 @@ export const StyledRow = styled(Row)`
   &:not(:first-of-type) {
     margin: 2px 0;
   }
+  /* Don't do zebra */
   &:nth-of-type(2n) {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: #2d2e33;
   }
 `;
 

@@ -37,7 +37,7 @@ function formatAllPoolsRows(): IRow[] {
         {
           value: (
             <MultiplierCellValue>
-              <ProgressBar percent={25} />{" "}
+              <ProgressBar percent={100} />{" "}
               <MutliplierValue>2.00x </MutliplierValue>
             </MultiplierCellValue>
           ),
@@ -55,6 +55,54 @@ function formatAllPoolsRows(): IRow[] {
         },
         {
           value: "414.14 ACX",
+        },
+        {
+          value: (
+            <StakeButton>
+              <div>Stake</div>
+            </StakeButton>
+          ),
+        },
+      ],
+    },
+    {
+      cells: [
+        {
+          value: (
+            <PoolCellValue>
+              <StyledWETHIcon /> <div>UNI</div>
+            </PoolCellValue>
+          ),
+        },
+        {
+          value: (
+            <>
+              <div>0 / 132.23</div>
+              <div>UNI-LP</div>
+            </>
+          ),
+        },
+        {
+          value: (
+            <MultiplierCellValue>
+              <ProgressBar percent={50} />{" "}
+              <MutliplierValue>1.5x </MutliplierValue>
+            </MultiplierCellValue>
+          ),
+        },
+        {
+          value: (
+            <>
+              <div>3.00%</div>
+              <div>Base 2.00%</div>
+            </>
+          ),
+        },
+        {
+          value: "25 days",
+        },
+        {
+          value: "235.66 ACX",
         },
         {
           value: (
