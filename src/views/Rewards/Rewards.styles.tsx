@@ -3,7 +3,7 @@ import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
 
 export const Wrapper = styled.div`
-  background-color: transparent;
+  background-color: #2d2e33;
 `;
 
 export const RewardBreakdownSection = styled.section`

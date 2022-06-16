@@ -8,12 +8,16 @@ import {
 } from "components/Table/Table.styles";
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+import { ReactComponent as WethLogo } from "assets/weth-logo.svg";
 
 export const Wrapper = styled.div`
   margin: auto;
   max-width: 1425px;
   overflow-x: auto;
-
+  box-shadow: inset 0px -1px 0px #3e4047;
+  border-radius: 5px;
   ::-webkit-scrollbar {
     height: 6px;
   }
@@ -49,7 +53,7 @@ export const StyledTableWrapper = styled(TableWrapper)`
 `;
 
 export const StyledHeadRow = styled(HeadRow)`
-  background-color: var(--color-black);
+  background-color: #34353b;
   width: 1425px;
   overflow-x: auto;
 `;
@@ -57,7 +61,8 @@ export const StyledHeadRow = styled(HeadRow)`
 export const StyledBody = styled(Body)``;
 
 export const StyledRow = styled(Row)`
-  background: rgba(255, 255, 255, 0.08);
+  /* background: rgba(255, 255, 255, 0.08); */
+  background-color: var(--color-black);
   width: 1425px;
   overflow-x: auto;
   margin: 0 auto;
@@ -86,6 +91,7 @@ export const StyledCell = styled(Cell)`
   &.header-cell {
     font-size: ${16 / 16}rem;
     font-weight: 500;
+    color: #9daab2;
   }
 `;
 
@@ -196,4 +202,34 @@ export const StyledPlus = styled(AcrossPlusIcon)`
   float: right;
   margin-top: 8px;
   margin-right: 4px;
+`;
+
+const StyledCircleInfo = styled(FontAwesomeIcon)`
+  path {
+    fill: #9daab2;
+  }
+  margin-left: 4px;
+  border: 1px solid #9daab2;
+  border-radius: 16px;
+`;
+
+export const CircleInfo = () => (
+  <StyledCircleInfo icon={faCircleInfo} style={{ color: "white" }} />
+);
+
+export const StyledWETHIcon = styled(WethLogo)`
+  height: 24px;
+  width: 24px;
+`;
+
+export const PoolCellValue = styled.div`
+  font-weight: bold;
+  display: flex;
+  column-gap: 16px;
+  align-items: center;
+  div {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #e0f3ff;
+  }
 `;

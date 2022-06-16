@@ -1,5 +1,9 @@
 import { ICell, IRow } from "components/Table/Table";
-
+import {
+  CircleInfo,
+  StyledWETHIcon,
+  PoolCellValue,
+} from "./RewardAllPoolsTable.styles";
 /* 
 export interface ICell {
   // if undefined, defaults to "sm"
@@ -24,10 +28,19 @@ function formatAllPoolsRows(): IRow[] {
     {
       cells: [
         {
-          value: "one",
+          value: (
+            <PoolCellValue>
+              <StyledWETHIcon /> <div>ETH</div>
+            </PoolCellValue>
+          ),
         },
         {
-          value: "two",
+          value: (
+            <>
+              <div>5 / 100</div>
+              <div>ETH-LP</div>
+            </>
+          ),
         },
         {
           value: "three",
@@ -60,7 +73,11 @@ export const headers: ICell[] = [
   },
   {
     size: "xs",
-    value: "Multiplier",
+    value: (
+      <>
+        Multiplier <CircleInfo />
+      </>
+    ),
     cellClassName: "header-cell",
   },
   {
@@ -70,7 +87,11 @@ export const headers: ICell[] = [
   },
   {
     size: "xs",
-    value: "Age of capital",
+    value: (
+      <>
+        Age of capital <CircleInfo />
+      </>
+    ),
     cellClassName: "header-cell",
   },
   {
