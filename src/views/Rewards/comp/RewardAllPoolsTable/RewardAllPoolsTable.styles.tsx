@@ -14,9 +14,8 @@ import { ReactComponent as WethLogo } from "assets/weth-logo.svg";
 
 export const Wrapper = styled.div`
   margin: auto;
-  max-width: 1425px;
+  max-width: 1400px;
   overflow-x: auto;
-  box-shadow: inset 0px -1px 0px #3e4047;
   border-radius: 5px;
   ::-webkit-scrollbar {
     height: 6px;
@@ -50,12 +49,16 @@ export const StyledTableWrapper = styled(TableWrapper)`
   background-color: inherit;
   margin: 0 auto;
   box-shadow: none;
+  /* border: 1px solid #3e4047; */
+  border-radius: 16px;
 `;
 
 export const StyledHeadRow = styled(HeadRow)`
   background-color: #34353b;
-  width: 1425px;
+  width: 1400px;
   overflow-x: auto;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 `;
 
 export const StyledBody = styled(Body)`
@@ -64,14 +67,17 @@ export const StyledBody = styled(Body)`
 
 export const StyledRow = styled(Row)`
   background-color: #2d2e33;
-  width: 1425px;
+  width: 1400px;
   overflow-x: auto;
   margin: 0 auto;
-  border: 0;
-
+  border: 1px solid #3e4047;
   /* Don't do zebra */
   &:first-of-type {
     margin-bottom: 2px;
+  }
+  &:last-of-type {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
   }
   &:not(:first-of-type) {
     margin: 2px 0;
