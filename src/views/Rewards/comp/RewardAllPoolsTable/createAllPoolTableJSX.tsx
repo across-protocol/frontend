@@ -44,7 +44,7 @@ function formatAllPoolsRows(): IRow[] {
           ),
         },
         {
-          value: <ProgressBar />,
+          value: <ProgressBar percent={25} />,
         },
         {
           value: "four",
