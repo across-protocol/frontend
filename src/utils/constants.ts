@@ -584,3 +584,20 @@ export const queriesTable: Record<
       "0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681"
     ),
 };
+
+export const relayerFeeCapitalCostConfig: {
+  [token: string]: relayFeeCalculator.CapitalCostConfig;
+} = {
+  WBTC: {
+    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
+    upperBound: ethers.utils.parseUnits("0.002").toString(),
+    cutoff: ethers.utils.parseUnits("15").toString(),
+    decimals: 8,
+  },
+  DAI: {
+    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
+    upperBound: ethers.utils.parseUnits("0.0015").toString(),
+    cutoff: ethers.utils.parseUnits("500000").toString(),
+    decimals: 18,
+  },
+};
