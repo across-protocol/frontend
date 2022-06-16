@@ -588,16 +588,46 @@ export const queriesTable: Record<
 export const relayerFeeCapitalCostConfig: {
   [token: string]: relayFeeCalculator.CapitalCostConfig;
 } = {
+  ETH: {
+    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
+    upperBound: ethers.utils.parseUnits("0.0015").toString(),
+    cutoff: ethers.utils.parseUnits("1000").toString(),
+    decimals: 18,
+  },
+  WETH: {
+    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
+    upperBound: ethers.utils.parseUnits("0.0015").toString(),
+    cutoff: ethers.utils.parseUnits("1000").toString(),
+    decimals: 18,
+  },
   WBTC: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.002").toString(),
-    cutoff: ethers.utils.parseUnits("15").toString(),
+    cutoff: ethers.utils.parseUnits("50").toString(),
     decimals: 8,
   },
   DAI: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.0015").toString(),
-    cutoff: ethers.utils.parseUnits("500000").toString(),
+    cutoff: ethers.utils.parseUnits("1000000").toString(),
+    decimals: 18,
+  },
+  USDC: {
+    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
+    upperBound: ethers.utils.parseUnits("0.001").toString(),
+    cutoff: ethers.utils.parseUnits("2000000").toString(),
+    decimals: 6,
+  },
+  BADGER: {
+    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
+    upperBound: ethers.utils.parseUnits("0.001").toString(),
+    cutoff: ethers.utils.parseUnits("5000").toString(),
+    decimals: 18,
+  },
+  BOBA: {
+    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
+    upperBound: ethers.utils.parseUnits("0.001").toString(),
+    cutoff: ethers.utils.parseUnits("100000").toString(),
     decimals: 18,
   },
 };
