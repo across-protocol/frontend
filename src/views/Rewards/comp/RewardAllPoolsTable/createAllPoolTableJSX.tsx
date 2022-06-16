@@ -24,13 +24,22 @@ function formatAllPoolsRows(): IRow[] {
     {
       cells: [
         {
-          value: "test",
+          value: "one",
         },
         {
           value: "two",
         },
         {
           value: "three",
+        },
+        {
+          value: "four",
+        },
+        {
+          value: "five",
+        },
+        {
+          value: "six",
         },
       ],
     },
@@ -41,47 +50,32 @@ function formatAllPoolsRows(): IRow[] {
 export const headers: ICell[] = [
   {
     size: "sm",
-    value: "Deposit time",
+    value: "Pool",
     cellClassName: "header-cell",
   },
   {
     size: "xs",
-    value: "Status",
+    value: "Staked LP Tokens",
     cellClassName: "header-cell",
   },
   {
     size: "xs",
-    value: "Filled %",
+    value: "Multiplier",
     cellClassName: "header-cell",
   },
-  // {
-  //   size: "xs",
-  //   value: "Source",
-  //   cellClassName: "header-cell",
-  // },
-  // {
-  //   size: "xs",
-  //   value: "Destination",
-  //   cellClassName: "header-cell",
-  // },
-  // {
-  //   size: "xs",
-  //   value: "Asset",
-  //   cellClassName: "header-cell",
-  // },
-  // {
-  //   size: "xs",
-  //   value: "Amount",
-  //   cellClassName: "header-cell",
-  // },
-  // {
-  //   size: "xs",
-  //   value: "Deposit tx",
-  //   cellClassName: "header-cell",
-  // },
-  // {
-  //   size: "md",
-  //   value: "Fill tx(s)",
-  //   cellClassName: "header-cell",
-  // },
+  {
+    size: "xs",
+    value: "Reward APY",
+    cellClassName: "header-cell",
+  },
+  {
+    size: "xs",
+    value: "Age of capital",
+    cellClassName: "header-cell",
+  },
+  {
+    size: "xs",
+    value: "Rewards",
+    cellClassName: "header-cell",
+  },
 ];
