@@ -61,11 +61,11 @@ export const StyledHeadRow = styled(HeadRow)`
 export const StyledBody = styled(Body)``;
 
 export const StyledRow = styled(Row)`
-  /* background: rgba(255, 255, 255, 0.08); */
-  background-color: var(--color-black);
+  background-color: #2d2e33;
   width: 1425px;
   overflow-x: auto;
   margin: 0 auto;
+  border: 0;
   /* Don't do zebra */
   &:first-of-type {
     margin-bottom: 2px;
@@ -81,6 +81,7 @@ export const StyledRow = styled(Row)`
 export const StyledCell = styled(Cell)`
   word-wrap: break-word;
   flex: 1 0 65px;
+  background-color: #2d2e33;
   &:first-of-type {
     /* min-width: 175px; */
     /* flex: 0 0 65px; */
@@ -92,6 +93,7 @@ export const StyledCell = styled(Cell)`
     font-size: ${16 / 16}rem;
     font-weight: 500;
     color: #9daab2;
+    background-color: #34353b;
   }
 `;
 

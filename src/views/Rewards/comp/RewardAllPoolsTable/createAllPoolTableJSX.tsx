@@ -4,6 +4,7 @@ import {
   StyledWETHIcon,
   PoolCellValue,
 } from "./RewardAllPoolsTable.styles";
+import ProgressBar from "components/ProgressBar";
 /* 
 export interface ICell {
   // if undefined, defaults to "sm"
@@ -43,7 +44,7 @@ function formatAllPoolsRows(): IRow[] {
           ),
         },
         {
-          value: "three",
+          value: <ProgressBar />,
         },
         {
           value: "four",
