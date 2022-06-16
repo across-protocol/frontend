@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { SecondaryButtonWithoutShadow } from "components/Buttons";
 import {
   TableWrapper,
   HeadRow,
@@ -255,4 +256,20 @@ export const MultiplierCellValue = styled.div`
 export const MutliplierValue = styled.div`
   font-weight: 500;
   font-size: 1rem;
+`;
+
+export const StakeButton = styled(SecondaryButtonWithoutShadow)`
+  color: var(--color-primary);
+  height: 40px;
+  padding: 1rem;
+  border: 1px solid var(--color-primary);
+  display: flex;
+  align-items: center;
+  width: 100px;
+  justify-content: center;
+  font-weight: 500;
+  &:hover {
+    color: #ffffff;
+    border: 1px solid #ffffff;
+  }
 `;

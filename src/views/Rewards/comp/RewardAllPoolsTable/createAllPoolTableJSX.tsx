@@ -5,20 +5,9 @@ import {
   PoolCellValue,
   MultiplierCellValue,
   MutliplierValue,
+  StakeButton,
 } from "./RewardAllPoolsTable.styles";
 import ProgressBar from "components/ProgressBar";
-/* 
-export interface ICell {
-  // if undefined, defaults to "sm"
-  size?: CellSize;
-  value: string | ReactElement;
-  cellClassName?: string;
-}
-
-export interface IRow {
-  cells: ICell[];
-}
-*/
 
 export default function createAllPoolTableJSX() {
   const rows = formatAllPoolsRows();
@@ -54,13 +43,25 @@ function formatAllPoolsRows(): IRow[] {
           ),
         },
         {
-          value: "four",
+          value: (
+            <>
+              <div>2.78%</div>
+              <div>Base 1.39%</div>
+            </>
+          ),
         },
         {
-          value: "five",
+          value: "50 days",
         },
         {
-          value: "six",
+          value: "414.14 ACX",
+        },
+        {
+          value: (
+            <StakeButton>
+              <div>Stake</div>
+            </StakeButton>
+          ),
         },
       ],
     },
@@ -105,6 +106,11 @@ export const headers: ICell[] = [
   {
     size: "xs",
     value: "Rewards",
+    cellClassName: "header-cell",
+  },
+  {
+    size: "xs",
+    value: " ",
     cellClassName: "header-cell",
   },
 ];
