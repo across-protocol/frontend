@@ -3,6 +3,8 @@ import {
   CircleInfo,
   StyledWETHIcon,
   PoolCellValue,
+  MultiplierCellValue,
+  MutliplierValue,
 } from "./RewardAllPoolsTable.styles";
 import ProgressBar from "components/ProgressBar";
 /* 
@@ -44,7 +46,12 @@ function formatAllPoolsRows(): IRow[] {
           ),
         },
         {
-          value: <ProgressBar percent={25} />,
+          value: (
+            <MultiplierCellValue>
+              <ProgressBar percent={25} />{" "}
+              <MutliplierValue>2.00x </MutliplierValue>
+            </MultiplierCellValue>
+          ),
         },
         {
           value: "four",

@@ -58,7 +58,9 @@ export const StyledHeadRow = styled(HeadRow)`
   overflow-x: auto;
 `;
 
-export const StyledBody = styled(Body)``;
+export const StyledBody = styled(Body)`
+  column-gap: 15px;
+`;
 
 export const StyledRow = styled(Row)`
   background-color: #2d2e33;
@@ -66,6 +68,7 @@ export const StyledRow = styled(Row)`
   overflow-x: auto;
   margin: 0 auto;
   border: 0;
+
   /* Don't do zebra */
   &:first-of-type {
     margin-bottom: 2px;
@@ -234,4 +237,16 @@ export const PoolCellValue = styled.div`
     font-weight: 500;
     color: #e0f3ff;
   }
+`;
+
+export const MultiplierCellValue = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  column-gap: 16px;
+`;
+
+export const MutliplierValue = styled.div`
+  font-weight: 500;
+  font-size: 1rem;
 `;
