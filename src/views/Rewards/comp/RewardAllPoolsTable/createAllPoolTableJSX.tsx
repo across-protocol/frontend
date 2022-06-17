@@ -6,8 +6,8 @@ import {
   MultiplierCellValue,
   MutliplierValue,
   StakeButton,
+  StyledProgressBar,
 } from "./RewardAllPoolsTable.styles";
-import ProgressBar from "components/ProgressBar";
 
 export default function createAllPoolTableJSX() {
   const rows = formatAllPoolsRows();
@@ -37,7 +37,7 @@ function formatAllPoolsRows(): IRow[] {
         {
           value: (
             <MultiplierCellValue>
-              <ProgressBar percent={97} />{" "}
+              <StyledProgressBar className="pool-progress-bar" percent={97} />{" "}
               <MutliplierValue>2.00x </MutliplierValue>
             </MultiplierCellValue>
           ),
@@ -85,7 +85,7 @@ function formatAllPoolsRows(): IRow[] {
         {
           value: (
             <MultiplierCellValue>
-              <ProgressBar percent={50} />{" "}
+              <StyledProgressBar className="pool-progress-bar" percent={50} />{" "}
               <MutliplierValue>1.5x </MutliplierValue>
             </MultiplierCellValue>
           ),

@@ -12,7 +12,7 @@ import { QUERIES } from "utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { ReactComponent as WethLogo } from "assets/weth-logo.svg";
-
+import ProgressBar from "components/ProgressBar";
 export const Wrapper = styled.div`
   margin: auto;
   max-width: 1400px;
@@ -271,5 +271,14 @@ export const StakeButton = styled(SecondaryButtonWithoutShadow)`
   &:hover {
     color: #ffffff;
     border: 1px solid #ffffff;
+  }
+`;
+
+interface IStyledProgressBar {
+  className?: string;
+}
+export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
+  &.pool-progress-bar {
+    max-width: 120px;
   }
 `;

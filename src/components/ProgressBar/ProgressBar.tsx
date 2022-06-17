@@ -2,11 +2,12 @@ import { Wrapper, StyledProgress } from "./ProgressBar.styles";
 
 interface Props {
   percent: number;
+  className?: string;
 }
 
-const ProgressBar: React.FC<Props> = ({ percent }) => {
+const ProgressBar: React.FC<Props> = ({ percent, className }) => {
   return (
-    <Wrapper>
+    <Wrapper className={className ?? ""}>
       <StyledProgress width={percent} />
     </Wrapper>
   );
