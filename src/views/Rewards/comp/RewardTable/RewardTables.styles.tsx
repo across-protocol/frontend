@@ -21,6 +21,7 @@ export const Wrapper = styled.div`
   max-width: 1400px;
   overflow-x: auto;
   border-radius: 5px;
+  padding: 1rem 0 2rem;
   ::-webkit-scrollbar {
     height: 6px;
   }
