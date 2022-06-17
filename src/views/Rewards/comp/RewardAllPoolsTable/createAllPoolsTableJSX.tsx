@@ -39,7 +39,7 @@ function formatMyPoolsRows(): IRow[] {
           value: (
             <MultiplierCellValue>
               <StyledProgressBar className="pool-progress-bar" percent={0} />{" "}
-              <MutliplierValue>2.00x </MutliplierValue>
+              <MutliplierValue>1.0x </MutliplierValue>
             </MultiplierCellValue>
           ),
         },

@@ -21,6 +21,8 @@ export const StyledProgress = styled.div<IStyledProgress>`
   background-color: #ffffff;
   border-radius: 20px;
   text-align: right;
-  padding: 2px;
+  padding: ${({ width }) => {
+    return width > 0 ? "2px" : "0px";
+  }};
   margin: 2px;
 `;

@@ -11,7 +11,7 @@ import createAllPoolsTableJSX, {
 
 import createMyPoolsTableJSX, {
   headers as myPoolsHeaders,
-} from "./comp/RewardMyPoolsTable/createMyPoolsTableJSX";
+} from "./comp/RewardAllPoolsTable/createAllPoolsTableJSX";
 const Rewards = () => {
   const rowsAllPools = createAllPoolsTableJSX();
   const rowsMyPools = createMyPoolsTableJSX();
