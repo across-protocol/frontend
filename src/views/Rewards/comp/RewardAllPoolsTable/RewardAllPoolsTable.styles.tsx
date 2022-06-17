@@ -95,10 +95,7 @@ export const StyledCell = styled(Cell)`
   word-wrap: break-word;
   flex: 1 0 65px;
   background-color: #2d2e33;
-  &:first-of-type {
-    /* min-width: 175px; */
-    /* flex: 0 0 65px; */
-  }
+
   &:not(:first-of-type) {
     min-width: 120px;
   }
