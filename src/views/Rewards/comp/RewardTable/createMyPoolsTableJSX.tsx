@@ -5,12 +5,12 @@ import {
   PoolCellValue,
   MultiplierCellValue,
   MutliplierValue,
-  AddButton,
+  StakeButton,
   StyledProgressBar,
   ArrowUpRight,
-} from "./RewardAllPoolsTable.styles";
+} from "./RewardTables.styles";
 
-export default function createAllPoolsTableJSX() {
+export default function createMyPoolsTableJSX() {
   const rows = formatMyPoolsRows();
   return rows;
 }
@@ -30,7 +30,7 @@ function formatMyPoolsRows(): IRow[] {
         {
           value: (
             <>
-              <div>0 / 0</div>
+              <div>5 / 100</div>
               <div>ETH-LP</div>
             </>
           ),
@@ -38,16 +38,16 @@ function formatMyPoolsRows(): IRow[] {
         {
           value: (
             <MultiplierCellValue>
-              <StyledProgressBar className="pool-progress-bar" percent={0} />{" "}
-              <MutliplierValue>1.0x </MutliplierValue>
+              <StyledProgressBar className="pool-progress-bar" percent={97} />{" "}
+              <MutliplierValue>2.00x </MutliplierValue>
             </MultiplierCellValue>
           ),
         },
         {
           value: (
             <>
-              <div>1.2%</div>
-              <div>Base 1.2%</div>
+              <div>2.78%</div>
+              <div>Base 1.39%</div>
             </>
           ),
         },
@@ -59,11 +59,11 @@ function formatMyPoolsRows(): IRow[] {
         },
         {
           value: (
-            <AddButton>
+            <StakeButton>
               <div>
-                Add <ArrowUpRight />
+                Stake <ArrowUpRight />
               </div>
-            </AddButton>
+            </StakeButton>
           ),
         },
       ],
@@ -88,15 +88,15 @@ function formatMyPoolsRows(): IRow[] {
         {
           value: (
             <MultiplierCellValue>
-              <StyledProgressBar className="pool-progress-bar" percent={0} />{" "}
-              <MutliplierValue>1.0x </MutliplierValue>
+              <StyledProgressBar className="pool-progress-bar" percent={50} />{" "}
+              <MutliplierValue>1.5x </MutliplierValue>
             </MultiplierCellValue>
           ),
         },
         {
           value: (
             <>
-              <div>2.00%</div>
+              <div>3.00%</div>
               <div>Base 2.00%</div>
             </>
           ),
@@ -109,9 +109,9 @@ function formatMyPoolsRows(): IRow[] {
         },
         {
           value: (
-            <AddButton>
-              <div>Add</div>
-            </AddButton>
+            <StakeButton>
+              <div>Stake</div>
+            </StakeButton>
           ),
         },
       ],

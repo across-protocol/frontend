@@ -7,7 +7,7 @@ import {
   StyledCell,
   Wrapper,
   Title,
-} from "./RewardAllPoolsTable.styles";
+} from "./RewardTables.styles";
 import { ICell, IRow } from "components/Table/Table";
 interface TxTableIRow extends IRow {
   onClick?: () => void;
