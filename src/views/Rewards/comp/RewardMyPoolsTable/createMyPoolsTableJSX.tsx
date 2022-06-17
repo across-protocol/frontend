@@ -8,15 +8,15 @@ import {
   StakeButton,
   StyledProgressBar,
   ArrowUpRight,
-} from "./RewardAllPoolsTable.styles";
+} from "./RewardMyPoolsTable.styles";
 
-export default function createAllPoolTableJSX() {
-  const rows = formatAllPoolsRows();
+export default function createMyPoolsTableJSX() {
+  const rows = formatMyPoolsRows();
   return rows;
 }
 
 // Will take a TransactionsArg
-function formatAllPoolsRows(): IRow[] {
+function formatMyPoolsRows(): IRow[] {
   const fr = [
     {
       cells: [

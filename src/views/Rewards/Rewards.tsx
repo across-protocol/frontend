@@ -1,17 +1,17 @@
 import { Wrapper } from "./Rewards.styles";
-import { RewardBreakdown, RewardHero, RewardAllPoolsTable } from "./comp";
-import createAllPoolTableJSX, {
+import { RewardBreakdown, RewardHero, RewardMyPoolsTable } from "./comp";
+import createAllPoolsTableJSX, {
   headers,
-} from "./comp/RewardAllPoolsTable/createAllPoolTableJSX";
+} from "./comp/RewardMyPoolsTable/createMyPoolsTableJSX";
 
 const Rewards = () => {
-  const rows = createAllPoolTableJSX();
+  const rows = createAllPoolsTableJSX();
 
   return (
     <Wrapper>
       <RewardHero />
       <RewardBreakdown />
-      <RewardAllPoolsTable title="All pools" headers={headers} rows={rows} />
+      <RewardMyPoolsTable title="All pools" headers={headers} rows={rows} />
     </Wrapper>
   );
 };

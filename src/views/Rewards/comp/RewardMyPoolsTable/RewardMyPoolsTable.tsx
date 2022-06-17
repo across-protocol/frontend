@@ -7,7 +7,7 @@ import {
   StyledCell,
   Wrapper,
   Title,
-} from "./RewardAllPoolsTable.styles";
+} from "./RewardMyPoolsTable.styles";
 import { ICell, IRow } from "components/Table/Table";
 interface TxTableIRow extends IRow {
   onClick?: () => void;
@@ -19,7 +19,7 @@ interface Props {
   title: string;
 }
 
-const RewardAllPoolsTable: FC<Props> = ({ rows, headers, title }) => {
+const RewardMyPoolsTable: FC<Props> = ({ rows, headers, title }) => {
   return (
     <Wrapper>
       {rows.length ? (
@@ -68,4 +68,4 @@ const RewardAllPoolsTable: FC<Props> = ({ rows, headers, title }) => {
   );
 };
 
-export default RewardAllPoolsTable;
+export default RewardMyPoolsTable;
