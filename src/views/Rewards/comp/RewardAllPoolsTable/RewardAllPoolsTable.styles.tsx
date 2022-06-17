@@ -10,7 +10,10 @@ import {
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCircleInfo,
+  faSquareArrowUpRight,
+} from "@fortawesome/free-solid-svg-icons";
 import { ReactComponent as WethLogo } from "assets/weth-logo.svg";
 import ProgressBar from "components/ProgressBar";
 export const Wrapper = styled.div`
@@ -265,7 +268,7 @@ export const StakeButton = styled(SecondaryButtonWithoutShadow)`
   border: 1px solid var(--color-primary);
   display: flex;
   align-items: center;
-  width: 100px;
+  min-width: 100px;
   justify-content: center;
   font-weight: 500;
   &:hover {
@@ -282,3 +285,14 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
     max-width: 120px;
   }
 `;
+
+const StyledArrowUpRight = styled(FontAwesomeIcon)`
+  path {
+    fill: var(--color-primary);
+  }
+  margin-left: 8px;
+`;
+
+export const ArrowUpRight = () => (
+  <StyledArrowUpRight icon={faSquareArrowUpRight} />
+);

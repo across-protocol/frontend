@@ -7,6 +7,7 @@ import {
   MutliplierValue,
   StakeButton,
   StyledProgressBar,
+  ArrowUpRight,
 } from "./RewardAllPoolsTable.styles";
 
 export default function createAllPoolTableJSX() {
@@ -59,7 +60,9 @@ function formatAllPoolsRows(): IRow[] {
         {
           value: (
             <StakeButton>
-              <div>Stake</div>
+              <div>
+                Stake <ArrowUpRight />
+              </div>
             </StakeButton>
           ),
         },
