@@ -17,10 +17,11 @@ import {
 import { ReactComponent as WethLogo } from "assets/weth-logo.svg";
 import ProgressBar from "components/ProgressBar";
 export const Wrapper = styled.div`
-  margin: auto;
+  margin: 2rem auto;
   max-width: 1400px;
   overflow-x: auto;
   border-radius: 5px;
+  padding-bottom: 2rem;
   ::-webkit-scrollbar {
     height: 6px;
   }
@@ -258,7 +259,7 @@ export const MutliplierValue = styled.div`
   font-size: 1rem;
 `;
 
-export const StakeButton = styled(SecondaryButtonWithoutShadow)`
+export const AddButton = styled(SecondaryButtonWithoutShadow)`
   color: var(--color-primary);
   height: 40px;
   padding: 1rem;
