@@ -7,9 +7,12 @@ import {
   CopyRow,
   ReferralUrl,
   CopyButton,
+  TwitterRow,
+  StyledTwitterLogo,
+  ShareTwitterText,
 } from "./RewardReferral.styles";
 const referralUrl = "www.across.to/ref=acx0x7612B823";
-
+const referralText = "Across blurb www.across.to/ref=acx0x7612B823";
 const RewardReferral = () => {
   return (
     <Wrapper>
@@ -27,6 +30,15 @@ const RewardReferral = () => {
           Copy link
         </CopyButton>
       </CopyRow>
+      <TwitterRow>
+        <StyledTwitterLogo />
+        <ShareTwitterText
+          href={`https://twitter.com/intent/tweet?button_hashtag=${referralText}&ref_src=twsrc%5Etfw`}
+          data-show-count="false"
+        >
+          Share on Twitter
+        </ShareTwitterText>
+      </TwitterRow>
     </Wrapper>
   );
 };

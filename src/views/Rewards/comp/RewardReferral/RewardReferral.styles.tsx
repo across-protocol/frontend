@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { ReactComponent as ReferralSVG } from "assets/streamline-share.svg";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
+import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
 
 export const Wrapper = styled.div`
   width: 100%;
@@ -63,5 +64,28 @@ export const CopyButton = styled(SecondaryButtonWithoutShadow)`
   &:hover {
     color: var(--color-white);
     border-color: var(--color-white);
+  }
+`;
+
+export const TwitterRow = styled.div`
+  display: flex;
+  justify-content: center;
+  column-gap: 8px;
+  align-items: center;
+`;
+
+export const StyledTwitterLogo = styled(TwitterLogo)`
+  height: 16px;
+  path {
+    fill: var(--color-primary);
+  }
+`;
+
+export const ShareTwitterText = styled.a`
+  color: var(--color-primary);
+  font-size: ${14 / 16}rem;
+  font-weight: 600;
+  &:hover {
+    cursor: pointer;
   }
 `;
