@@ -1,5 +1,10 @@
 import { Wrapper } from "./Rewards.styles";
-import { RewardBreakdown, RewardHero, RewardTable } from "./comp";
+import {
+  RewardBreakdown,
+  RewardHero,
+  RewardTable,
+  RewardReferral,
+} from "./comp";
 import createAllPoolsTableJSX, {
   headers as allPoolsHeaders,
 } from "./comp/RewardTable/createMyPoolsTableJSX";
@@ -24,6 +29,7 @@ const Rewards = () => {
         headers={myPoolsHeaders}
         rows={rowsMyPools}
       />
+      <RewardReferral />
     </Wrapper>
   );
 };
