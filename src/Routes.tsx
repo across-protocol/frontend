@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
-import { Send, Pool, About, Transactions } from "views";
+import { Send, Pool, About, Transactions, Rewards } from "views";
 import { Header, SuperHeader } from "components";
 import { useConnection } from "state/hooks";
 import { WrongNetworkError } from "utils";
@@ -57,6 +57,7 @@ const Routes: React.FC = () => {
         <Route exact path="/transactions" component={Transactions} />
         <Route exact path="/pool" component={Pool} />
         <Route exact path="/about" component={About} />
+        <Route exact path="/rewards" component={Rewards} />
         <Route path="/" component={Send} />
       </Switch>
     </>
