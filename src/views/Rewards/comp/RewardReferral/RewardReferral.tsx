@@ -11,7 +11,6 @@ import {
   StyledTwitterLogo,
   ShareTwitterText,
 } from "./RewardReferral.styles";
-import Footer from "components/Footer";
 
 const referralUrl = "www.across.to/ref=acx0x7612B823";
 const referralText = "Across blurb www.across.to/ref=acx0x7612B823";
@@ -41,7 +40,6 @@ const RewardReferral = () => {
           Share on Twitter
         </ShareTwitterText>
       </TwitterRow>
-      <Footer />
     </Wrapper>
   );
 };

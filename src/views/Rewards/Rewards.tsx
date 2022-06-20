@@ -12,6 +12,8 @@ import createAllPoolsTableJSX, {
 import createMyPoolsTableJSX, {
   headers as myPoolsHeaders,
 } from "./comp/RewardTable/createAllPoolsTableJSX";
+import Footer from "components/Footer";
+
 const Rewards = () => {
   const rowsAllPools = createAllPoolsTableJSX();
   const rowsMyPools = createMyPoolsTableJSX();
@@ -30,6 +32,7 @@ const Rewards = () => {
         rows={rowsMyPools}
       />
       <RewardReferral />
+      <Footer />
     </Wrapper>
   );
 };
