@@ -5,6 +5,7 @@ import { ReactComponent as UnstyledUmaLogo } from "assets/Across-Powered-UMA.svg
 export const Wrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  padding: 0 1.5rem;
 `;
 const BaseFooter = styled.footer`
   position: sticky;
@@ -49,7 +50,14 @@ export const Link = styled.a`
   gap: 5px;
   font-size: ${14 / 16}rem;
   opacity: 0.75;
+  align-items: center;
 
+  > svg {
+    height: 20px;
+    path {
+      fill: var(--color-white);
+    }
+  }
   &:not(:last-of-type) {
     margin-right: 45px;
   }

@@ -7,25 +7,33 @@ import {
   AccentLink,
   PoweredByUMA,
 } from "./Footer.styles";
-import { ReactComponent as SupportLogo } from "assets/support-logo.svg";
-import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
-import { ReactComponent as DocsLogo } from "assets/docs-logo.svg";
+import { ReactComponent as DiscordLogo } from "assets/disc-logo.svg";
+import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
 
 const NAV_LINKS = [
   {
+    key: "faq",
+    name: "FAQ",
+    url: "",
+    icon: "",
+  },
+  {
+    key: "docs",
     name: "Docs",
     url: "https://docs.across.to/bridge/",
-    icon: DocsLogo,
+    icon: "",
   },
   {
-    name: "Support",
+    key: "discord",
+    name: "",
     url: "https://discord.gg/across",
-    icon: SupportLogo,
+    icon: DiscordLogo,
   },
   {
-    name: "Github",
-    url: "https://github.com/across-protocol",
-    icon: GithubLogo,
+    key: "twitter",
+    name: "",
+    url: "https://twitter.com/AcrossProtocol",
+    icon: TwitterLogo,
   },
 ];
 
@@ -35,12 +43,12 @@ const Footer = () => {
       <LinkFooter>
         {NAV_LINKS.map((link) => (
           <Link
-            key={link.name}
+            key={link.key}
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <link.icon />
+            {link.icon ? <link.icon /> : null}
             <LinkText>{link.name}</LinkText>
           </Link>
         ))}
