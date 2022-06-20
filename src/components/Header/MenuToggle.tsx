@@ -53,19 +53,22 @@ const Slice = styled(motion.div)`
   position: absolute;
   left: 0;
   right: 0;
-  min-height: 2px;
-  background-color: var(--color-gray);
+  min-height: 1px;
+  background-color: var(--color-primary);
+  width: 50%;
+  margin: 0 auto;
 `;
 
 const CloseButton = styled.button`
   position: relative;
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   padding: 0;
   margin: 0;
-  border: none;
   outline: none;
   background-color: transparent;
   cursor: pointer;
   outline: none;
+  border: 1px solid #4c4e57;
+  border-radius: 24px;
 `;

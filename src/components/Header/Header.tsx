@@ -19,6 +19,7 @@ const LINKS = !enableMigration
   ? [
       { href: "/", name: "Bridge" },
       { href: "/pool", name: "Pool" },
+      { href: "/rewards", name: "Rewards" },
       { href: "/transactions", name: "Transactions" },
     ]
   : [];
