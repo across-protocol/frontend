@@ -1,29 +1,34 @@
 import styled from "@emotion/styled";
 import { Link as UnstyledLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import { COLORS, QUERIES } from "utils";
+import { QUERIES } from "utils";
 import { ReactComponent as UnstyledDesktopLogo } from "assets/across-logo-v2.svg";
-import { ReactComponent as UnstyledMobileLogo } from "assets/logo-mobile.svg";
+import { ReactComponent as UnstyledMobileLogo } from "assets/across-mobile-logo.svg";
+
 export const Wrapper = styled.header`
   height: var(--header-height);
   padding: 0 20px;
-  display: grid;
-  grid-template-columns: min-content 1fr min-content;
+  display: flex;
   gap: 15px;
+  justify-content: space-between;
   align-items: center;
-  background-color: var(--color-primary);
+  background-color: var(--color-gray);
   color: var(--color-gray);
   @media ${QUERIES.laptopAndUp} {
     padding: 0 30px;
-    grid-template-columns: 1fr min(100%, var(--central-content)) 1fr;
+    &:first-of-type {
+      flex-grow: 1;
+    }
   }
 `;
 
 export const Navigation = styled.nav`
   height: 100%;
   display: none;
+  flex-grow: 2;
   @media ${QUERIES.tabletAndUp} {
     display: revert;
+    justify-content: space-evenly;
   }
   svg,
   path {
@@ -32,25 +37,39 @@ export const Navigation = styled.nav`
 `;
 
 export const List = styled.ul`
-  display: flex;
+  display: none;
   list-style: none;
   height: 100%;
   font-size: ${18 / 16}rem;
+  max-width: 600px;
+  margin: 0 auto;
+  @media ${QUERIES.laptopAndUp} {
+    display: flex;
+  }
 `;
 
 export const Item = styled.li`
-  flex: 1 0 165px;
+  flex: 1 0 145px;
   background-color: inherit;
-  color: var(--color-gray);
+  color: #c5d5e0;
   text-transform: capitalize;
   cursor: pointer;
   &[aria-selected="true"] {
-    color: var(--color-white);
+    color: var(--color-primary);
     background-color: var(--color-gray);
-    font-weight: bold;
+    &::after {
+      content: ".";
+      color: var(--color-primary);
+      display: block;
+      text-align: center;
+      position: absolute;
+      top: 50px;
+      margin-left: 70px;
+      font-size: 2rem;
+    }
   }
-  &:hover:not([aria-selected="true"]) {
-    color: hsla(${COLORS.gray[500]} / 0.5);
+  &:hover {
+    color: var(--color-primary);
   }
 `;
 export const BaseLink = styled(UnstyledLink)`
@@ -68,13 +87,15 @@ export const Link = styled(BaseLink)`
 `;
 export const LogoLink = styled(UnstyledLink)`
   padding-left: 10px;
-  @media ${QUERIES.desktopAndUp} {
-    /* padding-left: 45px; */
-  }
   line-height: 0;
+  @media ${QUERIES.desktopAndUp} {
+  }
 `;
 export const Logo = styled(UnstyledDesktopLogo)`
   display: none;
+  height: 60px;
+  width: 130px;
+  align-self: baseline;
   @media ${QUERIES.laptopAndUp} {
     display: revert;
   }
