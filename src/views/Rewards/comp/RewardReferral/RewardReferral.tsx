@@ -4,7 +4,12 @@ import {
   ReferralImage,
   Header,
   SubHeader,
+  CopyRow,
+  ReferralUrl,
+  CopyButton,
 } from "./RewardReferral.styles";
+const referralUrl = "www.across.to/ref=acx0x7612B823";
+
 const RewardReferral = () => {
   return (
     <Wrapper>
@@ -16,6 +21,12 @@ const RewardReferral = () => {
         This feature is still in development, but you can start collecting
         referrals by sharing the link below.
       </SubHeader>
+      <CopyRow>
+        <ReferralUrl>{referralUrl}</ReferralUrl>
+        <CopyButton onClick={() => navigator.clipboard.writeText(referralUrl)}>
+          Copy link
+        </CopyButton>
+      </CopyRow>
     </Wrapper>
   );
 };

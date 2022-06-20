@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { ReactComponent as ReferralSVG } from "assets/streamline-share.svg";
+import { SecondaryButtonWithoutShadow } from "components/Buttons";
 
 export const Wrapper = styled.div`
   width: 100%;
@@ -34,4 +35,33 @@ export const SubHeader = styled.h3`
   text-align: center;
   font-weight: 400;
   margin: 0 auto;
+`;
+
+export const CopyRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 15px;
+`;
+
+export const ReferralUrl = styled.div`
+  color: #9daab2;
+  border: 1px solid #4c4e57;
+  font-size: ${16 / 16}rem;
+  text-align: center;
+  border-radius: 32px;
+  padding: 1rem 1.25rem;
+`;
+
+export const CopyButton = styled(SecondaryButtonWithoutShadow)`
+  background-color: #2d2e33;
+  color: var(--color-primary);
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-primary);
+  width: 125px;
+  &:hover {
+    color: var(--color-white);
+    border-color: var(--color-white);
+  }
 `;
