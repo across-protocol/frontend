@@ -7,7 +7,6 @@ export const Wrapper = styled.div`
   width: 100%;
   max-width: 1400px;
   margin: 1rem auto 1.5rem;
-  /* background-color: var(--color-primary); */
   padding: 1.5rem 2rem;
 `;
 
@@ -27,6 +26,8 @@ export const Header = styled.h2`
   margin: 0 auto;
   font-weight: 400;
   padding-bottom: 1rem;
+  max-width: 500px;
+  text-align: center;
 `;
 
 export const SubHeader = styled.h3`
