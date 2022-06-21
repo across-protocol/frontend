@@ -1,6 +1,6 @@
 import React from "react";
 import { X } from "react-feather";
-import { Overlay, Wrapper, CloseButton } from "./Dialog.styles";
+import { Overlay, Wrapper, CloseButton, Content } from "./Dialog.styles";
 
 type Props = {
   isOpen: boolean;
@@ -13,7 +13,7 @@ const Dialog: React.FC<Props> = ({ isOpen, onClose, children }) => (
       <CloseButton onClick={onClose}>
         <X />
       </CloseButton>
-      <div>{children}</div>
+      <Content>{children}</Content>
     </Wrapper>
   </Overlay>
 );
