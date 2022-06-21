@@ -126,13 +126,16 @@ const Transactions = () => {
               {width >= BREAKPOINTS.laptopMin ? (
                 <TransactionsTable
                   title="Ongoing"
-                  headers={createPendingHeaders(openInfoModal)}
+                  headers={createPendingHeaders(openInfoModal, rawOngoingTx)}
                   rows={ongoingTx}
                 />
               ) : (
                 <MobileTransactionsTable
                   title="Ongoing"
-                  headers={createPendingMobileHeaders(openInfoModal)}
+                  headers={createPendingMobileHeaders(
+                    openInfoModal,
+                    rawOngoingTx
+                  )}
                   rows={mobileOngoingTx}
                   openIndex={openOngoingRow}
                 />

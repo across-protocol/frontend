@@ -254,22 +254,30 @@ export const headers: ICell[] = [
 ];
 
 export function createPendingHeaders(
-  onClick: React.MouseEventHandler<SVGSVGElement>
+  onClick: React.MouseEventHandler<SVGSVGElement>,
+  ongoingTX: Transfer[]
 ) {
   const h = [...headers];
+  const anyPartialFills = ongoingTX.find((x) => {
+    const num = x.filled.toNumber();
+    if (num > 0 && num <= 100) return x;
+    return null;
+  });
   h[2] = {
     size: "xs",
     value: (
       <>
         Filled %{" "}
-        <FontAwesomeIcon
-          style={{
-            color: "#6CF9D7",
-            cursor: "pointer",
-          }}
-          onClick={onClick}
-          icon={faCircleInfo}
-        />
+        {anyPartialFills ? (
+          <FontAwesomeIcon
+            style={{
+              color: "#6CF9D7",
+              cursor: "pointer",
+            }}
+            onClick={onClick}
+            icon={faCircleInfo}
+          />
+        ) : null}
       </>
     ),
     cellClassName: "header-cell",
