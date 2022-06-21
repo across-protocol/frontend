@@ -17,15 +17,15 @@ const handler = async (request, response) => {
   try {
     const provider = infuraProvider("mainnet");
 
-    let { amount, token, timestamp, destinationChainId, chainId } =
+    let { amount, token, timestamp, destinationChainId, originChainId } =
       request.query;
     if (!isString(amount) || !isString(token) || !isString(destinationChainId))
       throw new InputError(
         "Must provide amount, token, and destinationChainId as query params"
       );
-    
+
     token = ethers.utils.getAddress(token);
-    
+
     const parsedTimestamp = isString(timestamp)
       ? Number(timestamp)
       : (await provider.getBlock("latest")).timestamp;
@@ -36,7 +36,7 @@ const handler = async (request, response) => {
       provider,
       undefined, // Search by l2Token only.
       token,
-      chainId
+      originChainId
     );
 
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
