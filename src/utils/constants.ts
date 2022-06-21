@@ -543,6 +543,16 @@ export const migrationPoolV2Warning =
   process.env.REACT_APP_MIGRATION_POOL_V2_WARNING;
 export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
 
+// Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
+// gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
+// a USDC approval for the _current_ spoke pools on Optimism (0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9) and Arbitrum
+// (0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C). It also has a small amount of USDC ($0.10) used for estimations.
+// If this address lacks either of these, estimations will fail and relays to optimism and arbitrum will hang when
+// estimating gas. Defaults to 0x893d0d70ad97717052e3aa8903d9615804167759 so the app can technically run without this.
+export const dummyFromAddress =
+  process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
+  "0x893d0d70ad97717052e3aa8903d9615804167759";
+
 const getRoute = (
   mainnetChainId: ChainId,
   fromChainId: number,
@@ -560,12 +570,6 @@ const getRoute = (
 const getQueriesTable = () => {
   const optimismUsdcRoute = getRoute(1, 10, "USDC");
   const arbitrumUsdcRoute = getRoute(1, 42161, "USDC");
-
-  // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
-  // gas estimates require a live estimate and not a pre-configured gas amount. This address has been pre-loaded with
-  // a USDC approval for the _current_ spoke pools on Optimism (0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9) and Arbitrum
-  // (0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C). It also has a small amount of USDC ($0.10) used for estimations.
-  const dummyFromAddress = "0x893d0d70ad97717052e3aa8903d9615804167759";
 
   return {
     [ChainId.MAINNET]: (provider: ethers.providers.Provider) =>
