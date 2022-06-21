@@ -12,7 +12,7 @@ import {
   ShareTwitterText,
 } from "./RewardReferral.styles";
 
-const referralUrl = "www.across.to/ref=acx0x7612B823";
+const referralUrl = "www.across.to/referrer=acx0x7612B823";
 const referralText = "Across blurb www.across.to/ref=acx0x7612B823";
 const RewardReferral = () => {
   return (
