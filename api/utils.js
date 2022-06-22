@@ -1,6 +1,7 @@
 const {
   HubPool__factory,
   ERC20__factory,
+  SpokePool__factory,
 } = require("@across-protocol/contracts-v2");
 const sdk = require("@across-protocol/sdk-v2");
 const ethers = require("ethers");
@@ -117,6 +118,45 @@ const getProvider = (_chainId) => {
   return providerCache[chainId];
 };
 
+const getSpokePool = (_chainId) => {
+  const chainId = _chainId.toString();
+  const provider = getProvider(chainId);
+  switch (chainId.toString()) {
+    case "1":
+      return SpokePool__factory.connect(
+        "0x4D9079Bb4165aeb4084c526a32695dCfd2F77381",
+        provider
+      );
+    case "10":
+      return SpokePool__factory.connect(
+        "0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9",
+        provider
+      );
+    case "137":
+      return SpokePool__factory.connect(
+        "0x69B5c72837769eF1e7C164Abc6515DcFf217F920",
+        provider
+      );
+    case "288":
+      return SpokePool__factory.connect(
+        "0xBbc6009fEfFc27ce705322832Cb2068F8C1e0A58",
+        provider
+      );
+    case "42161":
+      return SpokePool__factory.connect(
+        "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
+        provider
+      );
+    default:
+      throw new Error(`Invalid chainId provided: ${chainId}`);
+  }
+};
+
+const isRouteEnabled = (fromChainId, toChainId, fromToken) => {
+  const spokePool = getSpokePool(fromChainId.toString());
+  return spokePool.enabledDepositRoutes(fromToken, toChainId.toString());
+};
+
 const getBalance = (chainId, token, account) => {
   return ERC20__factory.connect(token, getProvider(chainId)).balanceOf(account);
 };
@@ -150,4 +190,5 @@ module.exports = {
   getBalance,
   maxBN,
   minBN,
+  isRouteEnabled,
 };

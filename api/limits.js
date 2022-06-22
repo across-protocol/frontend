@@ -13,6 +13,7 @@ const {
   getBalance,
   maxBN,
   minBN,
+  isRouteEnabled,
 } = require("./utils");
 
 const handler = async (request, response) => {
@@ -25,9 +26,6 @@ const handler = async (request, response) => {
     const provider = new ethers.providers.StaticJsonRpcProvider(
       `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`
     );
-
-    console.log(REACT_APP_FULL_RELAYERS);
-    console.log(REACT_APP_TRANSFER_RESTRICTED_RELAYERS);
 
     const fullRelayers = JSON.parse(REACT_APP_FULL_RELAYERS).map((relayer) => {
       return ethers.utils.getAddress(relayer);
@@ -47,20 +45,28 @@ const handler = async (request, response) => {
 
     token = ethers.utils.getAddress(token);
 
-    const { l1Token } = await getTokenDetails(
+    const { l1Token, chainId: computedOriginChainId } = await getTokenDetails(
       provider,
       undefined,
       token,
       originChainId
     );
 
-    const { l2Token: destinationToken } = await getTokenDetails(
-      provider,
-      l1Token,
-      undefined,
-      destinationChainId
-    );
+    const [tokenDetailsResult, routeEnabledResult] = await Promise.allSettled([
+      getTokenDetails(provider, l1Token, undefined, destinationChainId),
+      isRouteEnabled(computedOriginChainId, destinationChainId, token),
+    ]);
 
+    if (
+      tokenDetailsResult.status === "rejected" ||
+      routeEnabledResult.status === "rejected" ||
+      !routeEnabledResult.value
+    )
+      throw new Error(
+        `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled.`
+      );
+
+    const { l2Token: destinationToken } = tokenDetailsResult.value;
     const hubPool = HubPool__factory.connect(
       "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
       provider
@@ -122,11 +128,11 @@ const handler = async (request, response) => {
         .div(maxGasFee)
         .toString(),
       maxDeposit: liquidReserves.toString(),
-      maxDepositInstantRelay: minBN(
+      maxDepositInstant: minBN(
         maxBN(...fullRelayerBalances, ...transferRestrictedBalances),
         liquidReserves
       ).toString(),
-      maxTransferDelayedRelay: minBN(
+      maxDepositShortDelay: minBN(
         maxBN(...transferBalances, ...transferRestrictedBalances),
         liquidReserves
       ).toString(),
