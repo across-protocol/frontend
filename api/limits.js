@@ -20,22 +20,24 @@ const handler = async (request, response) => {
   try {
     const {
       REACT_APP_PUBLIC_INFURA_ID,
-      REACT_APP_FULL_RELAYERS,
-      REACT_APP_TRANSFER_RESTRICTED_RELAYERS,
+      REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
+      REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
     } = process.env;
     const provider = new ethers.providers.StaticJsonRpcProvider(
       `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`
     );
 
-    const fullRelayers = JSON.parse(REACT_APP_FULL_RELAYERS).map((relayer) => {
-      return ethers.utils.getAddress(relayer);
-    });
+    const fullRelayers = !REACT_APP_FULL_RELAYERS
+      ? []
+      : JSON.parse(REACT_APP_FULL_RELAYERS).map((relayer) => {
+          return ethers.utils.getAddress(relayer);
+        });
 
-    const transferRestrictedRelayers = JSON.parse(
-      REACT_APP_TRANSFER_RESTRICTED_RELAYERS
-    ).map((relayer) => {
-      return ethers.utils.getAddress(relayer);
-    });
+    const transferRestrictedRelayers = !REACT_APP_TRANSFER_RESTRICTED_RELAYERS
+      ? []
+      : JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS).map((relayer) => {
+          return ethers.utils.getAddress(relayer);
+        });
 
     let { token, destinationChainId, originChainId } = request.query;
     if (!isString(token) || !isString(destinationChainId))
@@ -57,14 +59,21 @@ const handler = async (request, response) => {
       isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
 
+    // If any of the above fails or the route is not enabled, we assume that the
     if (
       tokenDetailsResult.status === "rejected" ||
       routeEnabledResult.status === "rejected" ||
       !routeEnabledResult.value
-    )
+    ) {
+      // Add the raw error (if any) to ensure that the user sees the real error if it's something unexpected, like a provider issue.
+      const rawError = tokenDetailsResult.reason || routeEnabledResult.reason;
+      const errorString = rawError
+        ? `Raw Error: ${rawError.stack || rawError.toString()}`
+        : "";
       throw new Error(
-        `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled.`
+        `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled. ${errorString}`
       );
+    }
 
     const { l2Token: destinationToken } = tokenDetailsResult.value;
     const hubPool = HubPool__factory.connect(
@@ -128,10 +137,12 @@ const handler = async (request, response) => {
         .div(maxGasFee)
         .toString(),
       maxDeposit: liquidReserves.toString(),
+      // Note: max is used here rather than sum because relayers currently do not partial fill.
       maxDepositInstant: minBN(
         maxBN(...fullRelayerBalances, ...transferRestrictedBalances),
         liquidReserves
       ).toString(),
+      // Same as above.
       maxDepositShortDelay: minBN(
         maxBN(...transferBalances, ...transferRestrictedBalances),
         liquidReserves
