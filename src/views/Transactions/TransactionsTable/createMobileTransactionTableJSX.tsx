@@ -210,22 +210,30 @@ export const mobileHeaders: ICell[] = [
 ];
 
 export function createPendingMobileHeaders(
-  onClick: React.MouseEventHandler<SVGSVGElement>
+  onClick: React.MouseEventHandler<SVGSVGElement>,
+  ongoingTX: Transfer[]
 ) {
   const mh = [...mobileHeaders];
+  const anyPartialFills = ongoingTX.find((x) => {
+    const num = x.filled.toNumber();
+    if (num > 0 && num <= 100) return x;
+    return null;
+  });
   mh[2] = {
     size: "sm",
     value: (
       <>
         Filled %{" "}
-        <FontAwesomeIcon
-          style={{
-            color: "#6CF9D7",
-            cursor: "pointer",
-          }}
-          onClick={onClick}
-          icon={faCircleInfo}
-        />
+        {anyPartialFills ? (
+          <FontAwesomeIcon
+            style={{
+              color: "#6CF9D7",
+              cursor: "pointer",
+            }}
+            onClick={onClick}
+            icon={faCircleInfo}
+          />
+        ) : null}
       </>
     ),
     cellClassName: "header-cell",
