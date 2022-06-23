@@ -9,6 +9,7 @@ import polygonLogo from "assets/polygon-logo.svg";
 import { getAddress } from "./address";
 import * as superstruct from "superstruct";
 import { relayFeeCalculator } from "@across-protocol/sdk-v2";
+import * as apiConstants from "../../api/constants";
 
 // all routes should be pre imported to be able to switch based on chain id
 import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
@@ -572,54 +573,14 @@ const getRoute = (
 export const relayerFeeCapitalCostConfig: {
   [token: string]: relayFeeCalculator.CapitalCostConfig;
 } = {
-  ETH: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.0006").toString(),
-    cutoff: ethers.utils.parseUnits("750").toString(),
-    decimals: 18,
-  },
-  WETH: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.0006").toString(),
-    cutoff: ethers.utils.parseUnits("750").toString(),
-    decimals: 18,
-  },
-  WBTC: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.0025").toString(),
-    cutoff: ethers.utils.parseUnits("10").toString(),
-    decimals: 8,
-  },
-  DAI: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.002").toString(),
-    cutoff: ethers.utils.parseUnits("250000").toString(),
-    decimals: 18,
-  },
-  USDC: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.00075").toString(),
-    cutoff: ethers.utils.parseUnits("1500000").toString(),
-    decimals: 6,
-  },
-  UMA: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.00075").toString(),
-    cutoff: ethers.utils.parseUnits("5000").toString(),
-    decimals: 18,
-  },
-  BADGER: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.001").toString(),
-    cutoff: ethers.utils.parseUnits("5000").toString(),
-    decimals: 18,
-  },
-  BOBA: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.001").toString(),
-    cutoff: ethers.utils.parseUnits("100000").toString(),
-    decimals: 18,
-  },
+  ETH: apiConstants.relayerFeeCapitalCostConfig["ETH"],
+  WETH: apiConstants.relayerFeeCapitalCostConfig["WETH"],
+  WBTC: apiConstants.relayerFeeCapitalCostConfig["WBTC"],
+  DAI: apiConstants.relayerFeeCapitalCostConfig["DAI"],
+  USDC: apiConstants.relayerFeeCapitalCostConfig["USDC"],
+  UMA: apiConstants.relayerFeeCapitalCostConfig["UMA"],
+  BADGER: apiConstants.relayerFeeCapitalCostConfig["BADGER"],
+  BOBA: apiConstants.relayerFeeCapitalCostConfig["BOBA"],
 };
 
 const getQueriesTable = () => {
