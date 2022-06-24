@@ -77,15 +77,15 @@ export const ReferralUrl = styled.div`
 `;
 
 export const CopyButton = styled(SecondaryButtonWithoutShadow)`
-  background-color: #2d2e33;
-  color: var(--color-primary);
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--color-primary);
-  width: 125px;
+  padding: 0.33rem 0.75rem;
+  font-size: ${12 / 16}rem;
+  margin-left: 1rem;
+  color: #34353b;
+  background-color: var(--color-primary);
+  text-transform: uppercase;
+  font-weight: 600;
   &:hover {
-    color: var(--color-white);
-    border-color: var(--color-white);
+    opacity: 0.7;
   }
 `;
 
