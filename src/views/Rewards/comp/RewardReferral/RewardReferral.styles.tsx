@@ -10,6 +10,21 @@ export const Wrapper = styled.div`
   padding: 1.5rem 2rem;
 `;
 
+export const ReferralRow = styled.div`
+  display: flex;
+  gap: 10px 15px;
+`;
+
+const ReferralRowBlock = styled.div`
+  background-color: #34353b;
+  border: 1px solid #3e4047;
+  border-radius: 10px;
+`;
+
+export const ReferralLinkBlock = styled(ReferralRowBlock)``;
+
+export const ReferralTierBlock = styled(ReferralRowBlock)``;
+
 export const ReferralImageWrapper = styled.div`
   text-align: center;
   margin-bottom: 1rem;
@@ -76,7 +91,7 @@ export const TwitterRow = styled.div`
 `;
 
 export const StyledTwitterLogo = styled(TwitterLogo)`
-  height: 16px;
+  height: 40px;
   path {
     fill: var(--color-primary);
   }
