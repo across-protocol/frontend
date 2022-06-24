@@ -3,10 +3,6 @@ import {
   CircleInfo,
   StyledWETHIcon,
   PoolCellValue,
-  MultiplierCellValue,
-  MutliplierValue,
-  StakeButton,
-  StyledProgressBar,
   ArrowUpRight,
 } from "./RewardTables.styles";
 
@@ -30,40 +26,31 @@ function formatMyReferralsRows(): IRow[] {
         {
           value: (
             <>
-              <div>0 / 0</div>
-              <div>ETH-LP</div>
+              <div>Ethereum Mainnet</div>
+              <div>Optimism</div>
             </>
           ),
         },
         {
-          value: (
-            <MultiplierCellValue>
-              <StyledProgressBar className="pool-progress-bar" percent={0} />{" "}
-              <MutliplierValue>1.0x </MutliplierValue>
-            </MultiplierCellValue>
-          ),
+          value: "0x123...4567",
         },
+        { value: "$1234.56" },
         {
           value: (
             <>
-              <div>1.2%</div>
-              <div>Base 1.2%</div>
+              <div>80%</div>
+              <div>12.24 ACX</div>
             </>
           ),
-        },
-        {
-          value: "50 days",
         },
         {
           value: "414.14 ACX",
         },
         {
           value: (
-            <StakeButton>
-              <div>
-                Add <ArrowUpRight />
-              </div>
-            </StakeButton>
+            <div style={{ textAlign: "right" }}>
+              <ArrowUpRight />
+            </div>
           ),
         },
       ],
@@ -80,38 +67,31 @@ function formatMyReferralsRows(): IRow[] {
         {
           value: (
             <>
-              <div>0 / 132.23</div>
-              <div>UNI-LP</div>
+              <div>Ethereum Mainnet</div>
+              <div>Optimism</div>
             </>
           ),
         },
         {
-          value: (
-            <MultiplierCellValue>
-              <StyledProgressBar className="pool-progress-bar" percent={0} />{" "}
-              <MutliplierValue>1.0x </MutliplierValue>
-            </MultiplierCellValue>
-          ),
+          value: "0x123...4567",
         },
+        { value: "$1234.56" },
         {
           value: (
             <>
-              <div>2.00%</div>
-              <div>Base 2.00%</div>
+              <div>80%</div>
+              <div>12.24 ACX</div>
             </>
           ),
         },
         {
-          value: "25 days",
-        },
-        {
-          value: "235.66 ACX",
+          value: "414.14 ACX",
         },
         {
           value: (
-            <StakeButton>
-              <div>Add</div>
-            </StakeButton>
+            <div style={{ textAlign: "right" }}>
+              <ArrowUpRight />
+            </div>
           ),
         },
       ],
@@ -123,35 +103,31 @@ function formatMyReferralsRows(): IRow[] {
 export const headers: ICell[] = [
   {
     size: "sm",
-    value: "Pool",
-    cellClassName: "header-cell",
-  },
-  {
-    size: "xs",
-    value: "Staked LP Tokens",
+    value: "Asset",
     cellClassName: "header-cell",
   },
   {
     size: "xs",
     value: (
       <>
-        Multiplier <CircleInfo />
+        From <CircleInfo /> To
       </>
     ),
     cellClassName: "header-cell",
   },
   {
     size: "xs",
-    value: "Reward APY",
+    value: "Address",
     cellClassName: "header-cell",
   },
   {
     size: "xs",
-    value: (
-      <>
-        Age of capital <CircleInfo />
-      </>
-    ),
+    value: "Bridge fee",
+    cellClassName: "header-cell",
+  },
+  {
+    size: "xs",
+    value: "Referral rate",
     cellClassName: "header-cell",
   },
   {
