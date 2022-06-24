@@ -14,6 +14,8 @@ import {
   ReferralLinkBlock,
   ReferralTierBlock,
   IconWrapper,
+  TierSmHeader,
+  TierHeader,
 } from "./RewardReferral.styles";
 
 const referralUrl = "across.to/referrer=0xa1..a234";
@@ -33,11 +35,21 @@ const RewardReferral = () => {
           </SubHeader>
           <CopyRow>
             <ReferralUrl>
-              {referralUrl} <CopyButton>Copy</CopyButton>
+              {referralUrl}{" "}
+              <CopyButton
+                onClick={() => {
+                  navigator.clipboard.writeText(referralText);
+                }}
+              >
+                Copy
+              </CopyButton>
             </ReferralUrl>
           </CopyRow>
         </ReferralLinkBlock>
-        <ReferralTierBlock></ReferralTierBlock>
+        <ReferralTierBlock>
+          <TierSmHeader>Current referral tier</TierSmHeader>
+          <TierHeader>Platinum</TierHeader>
+        </ReferralTierBlock>
       </ReferralRow>
     </Wrapper>
   );
