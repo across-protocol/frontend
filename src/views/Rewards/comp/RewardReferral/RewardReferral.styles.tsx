@@ -19,11 +19,16 @@ const ReferralRowBlock = styled.div`
   background-color: #34353b;
   border: 1px solid #3e4047;
   border-radius: 10px;
+  padding: 2rem;
 `;
 
 export const ReferralLinkBlock = styled(ReferralRowBlock)``;
 
 export const ReferralTierBlock = styled(ReferralRowBlock)``;
+
+export const IconWrapper = styled.div`
+  text-align: center;
+`;
 
 export const ReferralImageWrapper = styled.div`
   text-align: center;
@@ -36,8 +41,8 @@ export const ReferralImage = styled(ReferralSVG)`
 `;
 
 export const Header = styled.h2`
-  color: var(--color-primary);
-  font-size: ${27 / 16}rem;
+  color: #e0f3ff;
+  font-size: ${26 / 16}rem;
   margin: 0 auto;
   font-weight: 400;
   padding-bottom: 1rem;
@@ -48,7 +53,7 @@ export const Header = styled.h2`
 export const SubHeader = styled.h3`
   color: #c5d5e0;
   font-size: ${18 / 16}rem;
-  max-width: 450px;
+  max-width: 300px;
   text-align: center;
   font-weight: 400;
   margin: 0 auto;
@@ -68,6 +73,7 @@ export const ReferralUrl = styled.div`
   text-align: center;
   border-radius: 32px;
   padding: 1rem 1.25rem;
+  margin-top: 1rem;
 `;
 
 export const CopyButton = styled(SecondaryButtonWithoutShadow)`
