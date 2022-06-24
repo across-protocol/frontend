@@ -24,7 +24,10 @@ const ReferralRowBlock = styled.div`
 
 export const ReferralLinkBlock = styled(ReferralRowBlock)``;
 
-export const ReferralTierBlock = styled(ReferralRowBlock)``;
+export const ReferralTierBlock = styled(ReferralRowBlock)`
+  padding-top: 1rem;
+  flex-grow: 2;
+`;
 
 export const IconWrapper = styled.div`
   text-align: center;
@@ -57,6 +60,18 @@ export const SubHeader = styled.h3`
   text-align: center;
   font-weight: 400;
   margin: 0 auto;
+`;
+
+export const TierSmHeader = styled.h4`
+  color: #9daab2;
+  font-size: ${16 / 16}rem;
+  font-weight: 400;
+`;
+
+export const TierHeader = styled.div`
+  color: #e0f3ff;
+  font-size: ${26 / 16}rem;
+  font-weight: 400;
 `;
 
 export const CopyRow = styled.div`
