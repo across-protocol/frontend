@@ -16,8 +16,8 @@ import {
   IconWrapper,
 } from "./RewardReferral.styles";
 
-const referralUrl = "www.across.to/referrer=acx0x7612B823....";
-const referralText = "Across blurb www.across.to/referrer=acx0x7612B823....";
+const referralUrl = "across.to/referrer=0xa1..a234";
+const referralText = "Across blurb www.across.to/referrer=0x....";
 const RewardReferral = () => {
   return (
     <Wrapper>
@@ -32,7 +32,9 @@ const RewardReferral = () => {
             transfer made from your referral.
           </SubHeader>
           <CopyRow>
-            <ReferralUrl>{referralUrl}</ReferralUrl>
+            <ReferralUrl>
+              {referralUrl} <CopyButton>Copy</CopyButton>
+            </ReferralUrl>
           </CopyRow>
         </ReferralLinkBlock>
         <ReferralTierBlock></ReferralTierBlock>
