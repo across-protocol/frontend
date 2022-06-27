@@ -28,6 +28,7 @@ import {
 } from "./Confirmation.styles";
 import { ethers } from "ethers";
 import { getConfirmationDepositTime } from "utils";
+import { useBridgeLimits } from "hooks";
 
 export type Deposit = {
   txHash: string;
@@ -44,6 +45,11 @@ type Props = {
   deposit?: Deposit;
 };
 const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
+  const { limits } = useBridgeLimits(
+    deposit?.tokenAddress,
+    deposit?.fromChain,
+    deposit?.toChain
+  );
   if (!deposit) return null;
   const config = getConfig();
   const amountMinusFees = receiveAmount(deposit.amount, deposit.fees);
@@ -55,6 +61,9 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
   const fromChainInfo = getChainInfo(deposit.fromChain);
   const toChainInfo = getChainInfo(deposit.toChain);
   const isWETH = fromTokenInfo?.symbol === "WETH";
+  const confirmationTime = limits
+    ? getConfirmationDepositTime(deposit.amount, limits, deposit.toChain)
+    : undefined;
 
   return (
     <Layout>
@@ -62,7 +71,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
         <Header>
           <Heading>Deposit succeeded</Heading>
           <SubHeading>
-            Your funds will arrive in {getConfirmationDepositTime()}
+            Your funds will arrive in {confirmationTime || "loading"}
           </SubHeading>
           <SubHeading>
             To monitor progress, go to the
@@ -156,7 +165,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
             <Info>
               <h3>Estimated time of arrival</h3>
               <div>
-                <div>{getConfirmationDepositTime()}</div>
+                <div>{confirmationTime || "loading"}</div>
               </div>
             </Info>
           </div>

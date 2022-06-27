@@ -41,6 +41,15 @@ export function bridgeFeesQueryKey(
 ) {
   return ["bridgeFees", tokenSymbol, amount, chainId, blockNumber];
 }
+
+export function bridgeLimitsQueryKey(
+  token: string,
+  fromChainId: ChainId,
+  toChainId: ChainId
+) {
+  return ["bridgeLimits", token, fromChainId, toChainId];
+}
+
 /**
  * Generates query keys for react-query `useQuery` hook, used in the `useAllowance` hook.
  * @param chainId  The chain Id of the chain to execute the query on.

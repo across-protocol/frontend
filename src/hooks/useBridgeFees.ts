@@ -5,7 +5,6 @@ import { useBlock } from "./useBlock";
 
 /**
  * This hook calculates the bridge fees for a given token and amount.
- * @remarks This hook **SHOULD NOT** be used to calculate the fees for a L1 to L2 transfer, as those use canonical bridges instead.
  * @param amount - The amount to check bridge fees for.
  * @param toChainId The chain Id of the receiving chain, its timestamp will be used to calculate the fees.
  * @param tokenSymbol - The token symbol to check bridge fees for.

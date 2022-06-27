@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSendForm, useBridgeFees, useBridge } from "hooks";
+import { useSendForm, useBridgeFees, useBridge, useBridgeLimits } from "hooks";
 import { onboard, confirmations } from "utils";
 import { Deposit } from "views/Confirmation";
 import { useConnection } from "state/hooks";
@@ -14,6 +14,11 @@ export default function useSendAction(
   const { fromChain, toChain, amount, tokenSymbol, toAddress, selectedRoute } =
     useSendForm();
   const { fees } = useBridgeFees(amount, toChain, tokenSymbol);
+  const { limits } = useBridgeLimits(
+    selectedRoute?.fromTokenAddress,
+    fromChain,
+    toChain
+  );
   const { status, hasToApprove, send, approve } = useBridge();
   const { account } = useConnection();
   const [txHash, setTxHash] = useState("");
@@ -102,5 +107,6 @@ export default function useSendAction(
     toggleInfoModal,
     txPending,
     txHash,
+    limits,
   };
 }

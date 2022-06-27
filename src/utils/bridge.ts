@@ -7,6 +7,7 @@ import {
 } from "@across-protocol/sdk-v2";
 import { Provider, Block } from "@ethersproject/providers";
 import { ethers, BigNumber } from "ethers";
+import { BridgeLimits } from "hooks";
 
 import {
   MAX_RELAY_FEE_PERCENT,
@@ -148,8 +149,30 @@ export async function getBridgeFees({
   };
 }
 
-export const getConfirmationDepositTime = () => {
-  return "~1-3 minutes";
+export const getConfirmationDepositTime = (
+  amount: BigNumber,
+  limits: BridgeLimits,
+  toChain: ChainId
+) => {
+  if (amount.lte(limits.maxDepositInstant)) {
+    // 1 bot run, assuming it runs every 2 minutes.
+    return "~1-4 minutes";
+  } else if (amount.lte(limits.maxDepositShortDelay)) {
+    // This is just a rough estimate of how long 2 bot runs (1-4 minutes allocated for each) + an arbitrum transfer of 3-10 minutes would take.
+    if (toChain === 42161) return "~5-15 minutes";
+
+    // Optimism transfers take about 10-20 minutes anecdotally. Boba is presumed to be similar.
+    if (toChain === 10 || toChain === 288) return "~12-25 minutes";
+
+    // Polygon transfers take 20-30 minutes anecdotally.
+    if (toChain === 137) return "~20-35 minutes";
+
+    // Typical numbers for an arbitrary L2.
+    return "~10-30 minutes";
+  }
+
+  // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.
+  return "~2-4 hours";
 };
 
 type AcrossDepositArgs = {
