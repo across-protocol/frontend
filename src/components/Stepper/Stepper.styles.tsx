@@ -8,20 +8,36 @@ export const StyledStepperItem = styled.div`
   flex: 1;
   justify-content: space-evenly;
   .step-counter {
+    color: #2d2e33;
+
     position: relative;
     z-index: 5;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 35px;
-    height: 35px;
+    width: 32px;
+    height: 32px;
     padding: 10px;
-    border-radius: 5px;
-    background: #ccc;
+    border-radius: 10px;
+    background: #e0f3ff;
     margin-bottom: 6px;
+    font-size: ${14 / 16}rem;
   }
 
   &::after {
+    position: absolute;
+    content: "";
+    border-bottom: 2px solid #4c4e57;
+    width: 88%;
+    top: 17px;
+    left: 50%;
+    z-index: 2;
+  }
+  &.completed::after {
+    border-bottom: 2px solid #e0f3ff;
+  }
+
+  &.completed::before {
     position: absolute;
     content: "";
     border-bottom: 2px solid #ccc;
@@ -60,17 +76,27 @@ export const StyledStepperItem = styled.div`
   }
 
   &.completed {
-    .step-counter {
-      background-color: #4bb543;
+    .step-counter.checkmark {
+      background-color: #3e4047;
+      border: 1px solid #e0f3ff;
+      svg {
+        height: 12px;
+      }
+      path {
+        fill: #e0f3ff;
+      }
     }
-    &::before {
-      position: absolute;
-      content: "";
-      border-bottom: 2px solid #4bb543;
-      width: 100%;
-      top: 17px;
-      left: -50%;
-      z-index: 3;
+
+    &.before-middle::before {
+      left: 47%;
+    }
+
+    &.middle::before {
+      left: 67%;
+    }
+
+    &.after-middle::before {
+      left: 86%;
     }
   }
 
