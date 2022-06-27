@@ -22,7 +22,9 @@ const ReferralRowBlock = styled.div`
   padding: 2rem;
 `;
 
-export const ReferralLinkBlock = styled(ReferralRowBlock)``;
+export const ReferralLinkBlock = styled(ReferralRowBlock)`
+  width: 500px;
+`;
 
 export const ReferralTierBlock = styled(ReferralRowBlock)`
   padding-top: 1rem;
@@ -124,5 +126,22 @@ export const ShareTwitterText = styled.a`
   font-weight: 600;
   &:hover {
     cursor: pointer;
+  }
+`;
+
+export const TierInfo = styled.div`
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #3e4047;
+  flex-wrap: wrap;
+  row-gap: 5px;
+  margin-top: 1rem;
+`;
+
+export const TierInfoItem = styled.div`
+  padding-top: 8px;
+  flex-basis: 40%;
+  &:nth-of-type(2n) {
+    text-align: right;
   }
 `;
