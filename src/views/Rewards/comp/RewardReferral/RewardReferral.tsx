@@ -1,3 +1,4 @@
+import { Stepper } from "components";
 import {
   Wrapper,
   ReferralImageWrapper,
@@ -49,6 +50,7 @@ const RewardReferral = () => {
         <ReferralTierBlock>
           <TierSmHeader>Current referral tier</TierSmHeader>
           <TierHeader>Platinum</TierHeader>
+          <Stepper numSteps={5} />
         </ReferralTierBlock>
       </ReferralRow>
     </Wrapper>

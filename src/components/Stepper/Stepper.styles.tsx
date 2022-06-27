@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-export const StyledStepperHeaderItem = styled.div`
+export const StyledStepperItem = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -63,7 +63,7 @@ export const StyledStepperHeaderItem = styled.div`
   }
 `;
 
-export const StyledStepperHeader = styled.div`
+export const StyledStepper = styled.div`
   margin-top: auto;
   display: flex;
   justify-content: space-between;
