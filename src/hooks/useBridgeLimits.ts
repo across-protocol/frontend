@@ -35,7 +35,6 @@ export function useBridgeLimits(
           `/api/limits?token=${token}&originChainId=${fromChainId}&destinationChainId=${toChainId}`
         )
       ).data;
-      console.log(response);
       return {
         minDeposit: BigNumber.from(response.minDeposit),
         maxDeposit: BigNumber.from(response.maxDeposit),
