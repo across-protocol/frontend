@@ -612,7 +612,7 @@ const getQueriesTable = () => {
         "0x1954D4A36ac4fD8BEde42E59368565A92290E705",
         "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"
       ),
-    // USe hardcoded WETH address instead of USDC because WETH is enabled here.
+    // Use hardcoded WETH address instead of USDC because WETH is enabled here.
     [ChainId.ARBITRUM_RINKEBY]: (provider: ethers.providers.Provider) =>
       new relayFeeCalculator.ArbitrumQueries(
         provider,

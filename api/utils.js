@@ -58,12 +58,26 @@ const infuraProvider = (name) =>
 const bobaProvider = () =>
   new ethers.providers.StaticJsonRpcProvider("https://mainnet.boba.network");
 
+// Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
+// gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
+// a USDC approval for the _current_ spoke pools on Optimism (0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9) and Arbitrum
+// (0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C). It also has a small amount of USDC ($0.10) used for estimations.
+// If this address lacks either of these, estimations will fail and relays to optimism and arbitrum will hang when
+// estimating gas. Defaults to 0x893d0d70ad97717052e3aa8903d9615804167759 so the app can technically run without this.
+export const dummyFromAddress =
+  process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
+  "0x893d0d70ad97717052e3aa8903d9615804167759";
+
 const queries = {
   1: () =>
     new sdk.relayFeeCalculator.EthereumQueries(infuraProvider("mainnet")),
   10: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
-      infuraProvider("optimism-mainnet")
+      infuraProvider("optimism-mainnet"),
+      undefined,
+      undefined,
+      undefined,
+      dummyFromAddress
     ),
   137: () =>
     new sdk.relayFeeCalculator.PolygonQueries(
@@ -72,7 +86,11 @@ const queries = {
   288: () => new sdk.relayFeeCalculator.BobaQueries(bobaProvider()),
   42161: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
-      infuraProvider("arbitrum-mainnet")
+      infuraProvider("arbitrum-mainnet"),
+      undefined,
+      undefined,
+      undefined,
+      dummyFromAddress
     ),
 };
 
