@@ -10,11 +10,10 @@ import {
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCircleInfo,
-  faSquareArrowUpRight,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { ReactComponent as WethLogo } from "assets/weth-logo.svg";
+import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
+
 import ProgressBar from "components/ProgressBar";
 export const Wrapper = styled.div`
   margin: auto;
@@ -284,13 +283,6 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
   }
 `;
 
-const StyledArrowUpRight = styled(FontAwesomeIcon)`
-  path {
-    fill: var(--color-primary);
-  }
-  margin-left: 8px;
+export const ArrowUpRight = styled(RightUpArrow)`
+  margin-right: 8px;
 `;
-
-export const ArrowUpRight = () => (
-  <StyledArrowUpRight icon={faSquareArrowUpRight} />
-);
