@@ -3,18 +3,18 @@ import { StyledStepperItem } from "./Stepper.styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 
-/*
-  note: Index currentStep to -1 (IE: 1 is 0, 2 is 1...)
-*/
-
 export default function useStepper(currentStep: number, numSteps: number) {
   const [stepItems, setStepItems] = useState<JSX.Element[]>([]);
   const createStepsItems = useCallback(() => {
     const items: JSX.Element[] = [];
     const midPoint = Math.round(numSteps / 2);
     for (let i = 0; i < numSteps; i++) {
-      const completed = i + 1 <= currentStep;
-      let className = completed ? "completed" : "";
+      const completed = i + 1 < currentStep;
+      let className = completed
+        ? "completed"
+        : i + 1 === currentStep
+        ? ""
+        : "next-step";
       const isNotStartOrFinalStep =
         (i + 1 > 1 && i + 1 !== numSteps) || (i + 1 < numSteps && i + 1 !== 1);
 
