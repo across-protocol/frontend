@@ -5,7 +5,7 @@ interface Props {
   numSteps: number;
 }
 const Stepper: React.FC<Props> = ({ numSteps }) => {
-  const { stepItems } = useStepper(numSteps);
+  const { stepItems } = useStepper(1, numSteps);
 
   return (
     <StyledStepper>
