@@ -75,7 +75,7 @@ const queries = {
     new sdk.relayFeeCalculator.OptimismQueries(
       infuraProvider("optimism-mainnet"),
       undefined,
-      undefined,
+      "0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9",
       undefined,
       dummyFromAddress
     ),
@@ -88,7 +88,7 @@ const queries = {
     new sdk.relayFeeCalculator.ArbitrumQueries(
       infuraProvider("arbitrum-mainnet"),
       undefined,
-      undefined,
+      "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
       undefined,
       dummyFromAddress
     ),
