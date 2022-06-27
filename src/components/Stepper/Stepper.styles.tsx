@@ -6,7 +6,7 @@ export const StyledStepperItem = styled.div`
   flex-direction: column;
   align-items: center;
   flex: 1;
-
+  justify-content: space-evenly;
   .step-counter {
     position: relative;
     z-index: 5;
@@ -16,7 +16,7 @@ export const StyledStepperItem = styled.div`
     width: 35px;
     height: 35px;
     padding: 10px;
-    border-radius: 50%;
+    border-radius: 5px;
     background: #ccc;
     margin-bottom: 6px;
   }
@@ -25,10 +25,38 @@ export const StyledStepperItem = styled.div`
     position: absolute;
     content: "";
     border-bottom: 2px solid #ccc;
-    width: 100%;
+    width: 88%;
     top: 17px;
     left: 50%;
     z-index: 2;
+  }
+
+  &.start::after {
+    left: 27%;
+  }
+
+  &.before-middle::after {
+    left: 47%;
+  }
+
+  &.middle::after {
+    left: 67%;
+  }
+
+  &.after-middle::after {
+    left: 86%;
+  }
+
+  &.before-middle {
+    .step-counter {
+      margin-right: 35%;
+    }
+  }
+
+  &.after-middle {
+    .step-counter {
+      margin-left: 40%;
+    }
   }
 
   &.completed {
@@ -46,13 +74,25 @@ export const StyledStepperItem = styled.div`
     }
   }
 
-  &:first-child {
+  &:first-of-type {
+    justify-content: flex-start;
+    align-items: flex-start;
+
     &::before {
       content: none;
     }
   }
 
-  &:last-child {
+  .after-middle {
+    .step-counter {
+      margin-left: 30%;
+    }
+  }
+
+  &:last-of-type {
+    justify-content: flex-end;
+    align-items: flex-end;
+
     &::after {
       content: none;
     }
@@ -64,7 +104,7 @@ export const StyledStepperItem = styled.div`
 `;
 
 export const StyledStepper = styled.div`
-  margin-top: auto;
+  margin-top: 1rem;
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
