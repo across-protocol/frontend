@@ -23,6 +23,13 @@ export const StyledStepperItem = styled.div`
     margin-bottom: 6px;
     font-size: ${14 / 16}rem;
   }
+  &.next-step {
+    .step-counter {
+      background-color: #35343b;
+      color: #9daab2;
+      border: 1px solid #9daab2;
+    }
+  }
 
   &::after {
     position: absolute;
