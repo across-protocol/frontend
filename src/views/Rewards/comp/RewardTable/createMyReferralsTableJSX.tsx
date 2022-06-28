@@ -3,6 +3,8 @@ import {
   StyledWETHIcon,
   PoolCellValue,
   ArrowUpRight,
+  GrayText,
+  LinkDiv,
 } from "./RewardTables.styles";
 
 export default function createMyReferralsTableJSX() {
@@ -26,7 +28,7 @@ function formatMyReferralsRows(): IRow[] {
           value: (
             <>
               <div>Ethereum Mainnet</div>
-              <div>Optimism</div>
+              <GrayText>&rarr; Optimism</GrayText>
             </>
           ),
         },
@@ -38,7 +40,7 @@ function formatMyReferralsRows(): IRow[] {
           value: (
             <>
               <div>80%</div>
-              <div>12.24 ACX</div>
+              <GrayText>12.24 ACX</GrayText>
             </>
           ),
         },
@@ -47,9 +49,11 @@ function formatMyReferralsRows(): IRow[] {
         },
         {
           value: (
-            <div style={{ textAlign: "right" }}>
-              <ArrowUpRight />
-            </div>
+            <LinkDiv>
+              <div>
+                <ArrowUpRight />
+              </div>
+            </LinkDiv>
           ),
         },
       ],
@@ -67,7 +71,7 @@ function formatMyReferralsRows(): IRow[] {
           value: (
             <>
               <div>Ethereum Mainnet</div>
-              <div>Optimism</div>
+              <GrayText>&rarr; Optimism</GrayText>
             </>
           ),
         },
@@ -79,7 +83,7 @@ function formatMyReferralsRows(): IRow[] {
           value: (
             <>
               <div>80%</div>
-              <div>12.24 ACX</div>
+              <GrayText>12.24 ACX</GrayText>
             </>
           ),
         },
@@ -88,9 +92,11 @@ function formatMyReferralsRows(): IRow[] {
         },
         {
           value: (
-            <div style={{ textAlign: "right" }}>
-              <ArrowUpRight />
-            </div>
+            <LinkDiv>
+              <div>
+                <ArrowUpRight />
+              </div>
+            </LinkDiv>
           ),
         },
       ],

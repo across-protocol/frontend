@@ -286,3 +286,26 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
 export const ArrowUpRight = styled(RightUpArrow)`
   margin-right: 8px;
 `;
+
+export const GrayText = styled.div`
+  color: #9daab2;
+`;
+
+export const LinkDiv = styled.div`
+  text-align: right;
+  > div {
+    border: 1px solid #4c4e57;
+    border-radius: 32px;
+    height: 36px;
+    width: 36px;
+    margin-left: auto;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  svg {
+    height: 14px;
+    width: 14px;
+  }
+`;
