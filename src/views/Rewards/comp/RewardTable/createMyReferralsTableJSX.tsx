@@ -7,7 +7,8 @@ import {
   LinkDiv,
 } from "./RewardTables.styles";
 
-export default function createMyReferralsTableJSX() {
+export default function createMyReferralsTableJSX(isConnected: boolean) {
+  if (!isConnected) return DISCONNECTED_ROWS;
   const rows = formatMyReferralsRows();
   return rows;
 }
@@ -82,8 +83,8 @@ function formatMyReferralsRows(): IRow[] {
         {
           value: (
             <>
-              <div>80%</div>
-              <GrayText>12.24 ACX</GrayText>
+              <div>20%</div>
+              <GrayText>10 ACX</GrayText>
             </>
           ),
         },
@@ -140,5 +141,94 @@ export const headers: ICell[] = [
     size: "xs",
     value: " ",
     cellClassName: "header-cell",
+  },
+];
+
+const DISCONNECTED_ROWS: IRow[] = [
+  {
+    cells: [
+      {
+        value: (
+          <PoolCellValue>
+            <StyledWETHIcon /> <div>ETH</div>
+          </PoolCellValue>
+        ),
+      },
+      {
+        value: (
+          <>
+            <div>Ethereum Mainnet</div>
+            <GrayText>&rarr; Optimism</GrayText>
+          </>
+        ),
+      },
+      {
+        value: "0x123...4567",
+      },
+      { value: "$1234.56" },
+      {
+        value: (
+          <>
+            <div>80%</div>
+            <GrayText>12.24 ACX</GrayText>
+          </>
+        ),
+      },
+      {
+        value: "414.14 ACX",
+      },
+      {
+        value: (
+          <LinkDiv>
+            <div>
+              <ArrowUpRight />
+            </div>
+          </LinkDiv>
+        ),
+      },
+    ],
+  },
+  {
+    cells: [
+      {
+        value: (
+          <PoolCellValue>
+            <StyledWETHIcon /> <div>UNI</div>
+          </PoolCellValue>
+        ),
+      },
+      {
+        value: (
+          <>
+            <div>Ethereum Mainnet</div>
+            <GrayText>&rarr; Optimism</GrayText>
+          </>
+        ),
+      },
+      {
+        value: "0x123...4567",
+      },
+      { value: "$1234.56" },
+      {
+        value: (
+          <>
+            <div>80%</div>
+            <GrayText>12.24 ACX</GrayText>
+          </>
+        ),
+      },
+      {
+        value: "414.14 ACX",
+      },
+      {
+        value: (
+          <LinkDiv>
+            <div>
+              <ArrowUpRight />
+            </div>
+          </LinkDiv>
+        ),
+      },
+    ],
   },
 ];
