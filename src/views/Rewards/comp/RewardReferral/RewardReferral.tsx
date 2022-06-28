@@ -19,6 +19,9 @@ import {
   TierHeader,
   TierInfo,
   TierInfoItem,
+  LightGrayItemText,
+  GreenItemText,
+  WarningInfoItem,
 } from "./RewardReferral.styles";
 
 const referralUrl = "across.to/referrer=0xa1..a234";
@@ -38,7 +41,7 @@ const RewardReferral = () => {
           </SubHeader>
           <CopyRow>
             <ReferralUrl>
-              {referralUrl}{" "}
+              <span>{referralUrl}</span>{" "}
               <CopyButton
                 onClick={() => {
                   navigator.clipboard.writeText(referralText);
@@ -51,19 +54,26 @@ const RewardReferral = () => {
         </ReferralLinkBlock>
         <ReferralTierBlock>
           <TierSmHeader>Current referral tier</TierSmHeader>
-          <TierHeader>Platinum</TierHeader>
-          <Stepper numSteps={5} />
+          <TierHeader>Bronze</TierHeader>
+          <Stepper currentStep={2} numSteps={5} />
           <TierInfo>
             <TierInfoItem>Referee wallets</TierInfoItem>
             <TierInfoItem>3</TierInfoItem>
             <TierInfoItem>Transfers</TierInfoItem>
-            <TierInfoItem>5 Transfers 5 to next tier</TierInfoItem>
+            <TierInfoItem>
+              5 Transfers <LightGrayItemText>5 to next tier </LightGrayItemText>
+            </TierInfoItem>
             <TierInfoItem>Volume transfers</TierInfoItem>
-            <TierInfoItem>$54,321.24</TierInfoItem>
+            <TierInfoItem>
+              $54,321.24{" "}
+              <LightGrayItemText>$25,000.00 to next tier</LightGrayItemText>
+            </TierInfoItem>
             <TierInfoItem>Tier bonus</TierInfoItem>
-            <TierInfoItem>50% referral fee</TierInfoItem>
+            <TierInfoItem>
+              <GreenItemText>50% referral fee</GreenItemText>
+            </TierInfoItem>
             <TierInfoItem>Rewards from transfers</TierInfoItem>
-            <TierInfoItem>Not claimable yet ~2210.012 ACX</TierInfoItem>
+            <WarningInfoItem>Not claimable yet ~2210.012 ACX</WarningInfoItem>
           </TierInfo>
         </ReferralTierBlock>
       </ReferralRow>
