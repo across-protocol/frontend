@@ -570,8 +570,8 @@ const getRoute = (
 };
 
 const getQueriesTable = () => {
-  const optimismUsdcRoute = getRoute(1, 10, "USDC");
-  const arbitrumUsdcRoute = getRoute(1, 42161, "USDC");
+  const optimismUsdcRoute = getRoute(ChainId.MAINNET, ChainId.OPTIMISM, "USDC");
+  const arbitrumUsdcRoute = getRoute(ChainId.MAINNET, ChainId.ARBITRUM, "USDC");
 
   return {
     [ChainId.MAINNET]: (provider: ethers.providers.Provider) =>
@@ -580,16 +580,16 @@ const getQueriesTable = () => {
       new relayFeeCalculator.ArbitrumQueries(
         provider,
         undefined,
-        optimismUsdcRoute.fromSpokeAddress,
-        optimismUsdcRoute.fromTokenAddress,
+        arbitrumUsdcRoute.fromSpokeAddress,
+        arbitrumUsdcRoute.fromTokenAddress,
         dummyFromAddress
       ),
     [ChainId.OPTIMISM]: (provider: ethers.providers.Provider) =>
       new relayFeeCalculator.OptimismQueries(
         provider,
         undefined,
-        arbitrumUsdcRoute.fromSpokeAddress,
-        arbitrumUsdcRoute.fromTokenAddress,
+        optimismUsdcRoute.fromSpokeAddress,
+        optimismUsdcRoute.fromTokenAddress,
         dummyFromAddress
       ),
     [ChainId.BOBA]: (provider: ethers.providers.Provider) =>
