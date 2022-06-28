@@ -28,6 +28,7 @@ import {
 } from "./Confirmation.styles";
 import { ethers } from "ethers";
 import { getConfirmationDepositTime } from "utils";
+import { useBridgeLimits } from "hooks";
 
 export type Deposit = {
   txHash: string;
@@ -44,6 +45,11 @@ type Props = {
   deposit?: Deposit;
 };
 const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
+  const { limits, isError } = useBridgeLimits(
+    deposit?.tokenAddress,
+    deposit?.fromChain,
+    deposit?.toChain
+  );
   if (!deposit) return null;
   const config = getConfig();
   const amountMinusFees = receiveAmount(deposit.amount, deposit.fees);
@@ -56,14 +62,26 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
   const toChainInfo = getChainInfo(deposit.toChain);
   const isWETH = fromTokenInfo?.symbol === "WETH";
 
+  let fundsArrivalText = "Loading time estimate";
+  let timeEstimate = "loading";
+  if (limits) {
+    timeEstimate = getConfirmationDepositTime(
+      deposit.amount,
+      limits,
+      deposit.toChain
+    );
+    fundsArrivalText = `Your funds will arrive in ${timeEstimate}`;
+  } else if (isError) {
+    fundsArrivalText = "Time estimation failed";
+    timeEstimate = "estimation failed";
+  }
+
   return (
     <Layout>
       <Wrapper>
         <Header>
           <Heading>Deposit succeeded</Heading>
-          <SubHeading>
-            Your funds will arrive in {getConfirmationDepositTime()}
-          </SubHeading>
+          <SubHeading>{fundsArrivalText}</SubHeading>
           <SubHeading>
             To monitor progress, go to the
             <RouterLink to="/transactions">transactions page</RouterLink>
@@ -156,7 +174,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
             <Info>
               <h3>Estimated time of arrival</h3>
               <div>
-                <div>{getConfirmationDepositTime()}</div>
+                <div>{timeEstimate}</div>
               </div>
             </Info>
           </div>
