@@ -91,6 +91,7 @@ export const ReferralUrl = styled.div`
   border-radius: 32px;
   padding: 1rem 1.25rem;
   margin-top: 1rem;
+  display: flex;
 `;
 
 export const CopyButton = styled(SecondaryButtonWithoutShadow)`
@@ -141,7 +142,21 @@ export const TierInfo = styled.div`
 export const TierInfoItem = styled.div`
   padding-top: 8px;
   flex-basis: 40%;
+  color: #e0f3ff;
   &:nth-of-type(2n) {
     text-align: right;
   }
+`;
+
+export const LightGrayItemText = styled.span`
+  color: #9daab2;
+  margin-left: 2px;
+`;
+
+export const GreenItemText = styled.span`
+  color: var(--color-primary);
+`;
+
+export const WarningInfoItem = styled(TierInfoItem)`
+  color: #f9d26c;
 `;

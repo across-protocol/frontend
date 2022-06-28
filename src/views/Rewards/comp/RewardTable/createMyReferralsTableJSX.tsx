@@ -1,6 +1,5 @@
 import { ICell, IRow } from "components/Table/Table";
 import {
-  CircleInfo,
   StyledWETHIcon,
   PoolCellValue,
   ArrowUpRight,
@@ -108,11 +107,7 @@ export const headers: ICell[] = [
   },
   {
     size: "xs",
-    value: (
-      <>
-        From <CircleInfo /> To
-      </>
-    ),
+    value: <>From &rarr; To</>,
     cellClassName: "header-cell",
   },
   {
