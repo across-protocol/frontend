@@ -7,7 +7,7 @@ export const Wrapper = styled.div`
   width: 100%;
   max-width: 1400px;
   margin: 1rem auto 1.5rem;
-  padding: 1.5rem 2rem;
+  padding: 1.5rem 0 1rem;
 `;
 
 export const ReferralRow = styled.div`
