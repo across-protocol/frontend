@@ -5,6 +5,8 @@ import createMyReferralsTableJSX, {
   headers,
 } from "./comp/RewardTable/createMyReferralsTableJSX";
 import { useConnection } from "state/hooks";
+import ConnectTableOverlay from "./comp/ConnectTableOverlay";
+
 const Rewards = () => {
   const { isConnected } = useConnection();
 
@@ -13,6 +15,7 @@ const Rewards = () => {
     <Wrapper>
       <RewardReferral />
       <RewardTable title="My referrals" rows={rows} headers={headers} />
+      {!isConnected ? <ConnectTableOverlay /> : null}
       <Footer />
     </Wrapper>
   );
