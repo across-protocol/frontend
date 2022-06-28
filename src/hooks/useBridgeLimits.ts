@@ -46,6 +46,7 @@ export function useBridgeLimits(
       enabled: enabledQuery,
       // 5 mins.
       staleTime: 300000,
+      retry: 2,
     }
   );
   return {

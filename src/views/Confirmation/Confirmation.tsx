@@ -45,7 +45,7 @@ type Props = {
   deposit?: Deposit;
 };
 const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
-  const { limits } = useBridgeLimits(
+  const { limits, isError } = useBridgeLimits(
     deposit?.tokenAddress,
     deposit?.fromChain,
     deposit?.toChain
@@ -61,18 +61,24 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
   const fromChainInfo = getChainInfo(deposit.fromChain);
   const toChainInfo = getChainInfo(deposit.toChain);
   const isWETH = fromTokenInfo?.symbol === "WETH";
-  const confirmationTime = limits
-    ? getConfirmationDepositTime(deposit.amount, limits, deposit.toChain)
-    : undefined;
+
+  let fundsArrivalText = "Loading time estimate";
+  if (limits) {
+    fundsArrivalText = `Your funds will arrive in ${getConfirmationDepositTime(
+      deposit.amount,
+      limits,
+      deposit.toChain
+    )}`;
+  } else if (isError) {
+    fundsArrivalText = "Time estimation failed";
+  }
 
   return (
     <Layout>
       <Wrapper>
         <Header>
           <Heading>Deposit succeeded</Heading>
-          <SubHeading>
-            Your funds will arrive in {confirmationTime || "loading"}
-          </SubHeading>
+          <SubHeading>{fundsArrivalText}</SubHeading>
           <SubHeading>
             To monitor progress, go to the
             <RouterLink to="/transactions">transactions page</RouterLink>

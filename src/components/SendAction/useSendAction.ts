@@ -14,7 +14,7 @@ export default function useSendAction(
   const { fromChain, toChain, amount, tokenSymbol, toAddress, selectedRoute } =
     useSendForm();
   const { fees } = useBridgeFees(amount, toChain, tokenSymbol);
-  const { limits } = useBridgeLimits(
+  const { limits, isError } = useBridgeLimits(
     selectedRoute?.fromTokenAddress,
     fromChain,
     toChain
@@ -108,5 +108,6 @@ export default function useSendAction(
     txPending,
     txHash,
     limits,
+    limitsError: isError,
   };
 }

@@ -42,6 +42,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
     fromChain,
     txHash,
     limits,
+    limitsError,
   } = useSendAction(onDeposit);
   const showFees = amount.gt(0) && !!fees;
   const amountMinusFees = showFees ? receiveAmount(amount, fees) : undefined;
@@ -49,10 +50,12 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
   const fromChainInfo = fromChain ? getChainInfo(fromChain) : undefined;
   const tokenInfo = tokenSymbol ? getToken(tokenSymbol) : undefined;
   const isWETH = tokenInfo?.symbol === "WETH";
-  const timeToRelay =
-    limits && toChain
-      ? getConfirmationDepositTime(amount, limits, toChain)
-      : undefined;
+  let timeToRelay = "loading";
+  if (limits && toChain) {
+    timeToRelay = getConfirmationDepositTime(amount, limits, toChain);
+  } else if (limitsError) {
+    timeToRelay = "estimation failed";
+  }
 
   return (
     <AccentSection>
@@ -69,7 +72,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
             <InfoContainer>
               <Info>
                 {`Time to ${toChainInfo.name}`}
-                <div>{timeToRelay || "loading"}</div>
+                <div>{timeToRelay}</div>
               </Info>
               <Info>
                 <div>Destination Gas Fee</div>
