@@ -1,16 +1,12 @@
 import { Stepper } from "components";
 import {
   Wrapper,
-  // ReferralImageWrapper,
-  // ReferralImage,
-  // ShareTwitterText,
-  // TwitterRow,
   Header,
   SubHeader,
   CopyRow,
   ReferralUrl,
   CopyButton,
-  StyledTwitterLogo,
+  StyledReferralLogo,
   ReferralRow,
   ReferralLinkBlock,
   ReferralTierBlock,
@@ -22,35 +18,58 @@ import {
   LightGrayItemText,
   GreenItemText,
   WarningInfoItem,
+  ConnectRow,
+  ConnectButton,
+  LearnMoreText,
+  ArrowUpRight,
 } from "./RewardReferral.styles";
+
+import { onboard } from "utils";
+
+const { init } = onboard;
 
 const referralUrl = "across.to/referrer=0xa1..a234";
 const referralText = "Across blurb www.across.to/referrer=0x....";
-const RewardReferral = () => {
+interface Props {
+  isConnected: boolean;
+}
+const RewardReferral: React.FC<Props> = ({ isConnected }) => {
   return (
     <Wrapper>
       <ReferralRow>
         <ReferralLinkBlock>
           <IconWrapper>
-            <StyledTwitterLogo />
+            <StyledReferralLogo />
           </IconWrapper>
-          <Header>My referral link</Header>
+          <Header>{isConnected ? "My referral link" : "Refer and earn"}</Header>
           <SubHeader>
-            Share your unique referral link and collect ACX rewards for every
-            transfer made from your referral.
+            {isConnected
+              ? "Share your unique referral link and collect ACX rewards for every transfer made from your referral."
+              : "Join the referral program, earn fee rewards and collect ACX for transfers made from your unique referral link."}
           </SubHeader>
-          <CopyRow>
-            <ReferralUrl>
-              <span>{referralUrl}</span>{" "}
-              <CopyButton
-                onClick={() => {
-                  navigator.clipboard.writeText(referralText);
-                }}
-              >
-                Copy
-              </CopyButton>
-            </ReferralUrl>
-          </CopyRow>
+          {isConnected ? (
+            <CopyRow>
+              <ReferralUrl>
+                <span>{referralUrl}</span>{" "}
+                <CopyButton
+                  onClick={() => {
+                    navigator.clipboard.writeText(referralText);
+                  }}
+                >
+                  Copy
+                </CopyButton>
+              </ReferralUrl>
+            </CopyRow>
+          ) : (
+            <ConnectRow>
+              <ConnectButton onClick={() => init()}>
+                Connect to get started
+              </ConnectButton>
+              <LearnMoreText>
+                Learn more <ArrowUpRight />
+              </LearnMoreText>
+            </ConnectRow>
+          )}
         </ReferralLinkBlock>
         <ReferralTierBlock>
           <TierSmHeader>Current referral tier</TierSmHeader>
