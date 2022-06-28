@@ -11,38 +11,50 @@ const {
   isString,
   infuraProvider,
   getRelayerFeeDetails,
+  isRouteEnabled,
 } = require("./utils");
 
 const handler = async (request, response) => {
   try {
     const provider = infuraProvider("mainnet");
 
-    let { amount, token, timestamp, destinationChainId, chainId } =
+    let { amount, token, timestamp, destinationChainId, originChainId } =
       request.query;
     if (!isString(amount) || !isString(token) || !isString(destinationChainId))
       throw new InputError(
         "Must provide amount, token, and destinationChainId as query params"
       );
-    
+
     token = ethers.utils.getAddress(token);
-    
+
     const parsedTimestamp = isString(timestamp)
       ? Number(timestamp)
       : (await provider.getBlock("latest")).timestamp;
 
     amount = ethers.BigNumber.from(amount);
 
-    let { l1Token, hubPool } = await getTokenDetails(
+    let {
+      l1Token,
+      hubPool,
+      chainId: computedOriginChainId,
+    } = await getTokenDetails(
       provider,
       undefined, // Search by l2Token only.
       token,
-      chainId
+      originChainId
     );
 
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
-    const { number: blockTag } = await blockFinder.getBlockForTimestamp(
-      parsedTimestamp
-    );
+    const [{ number: blockTag }, routeEnabled] = await Promise.all([
+      blockFinder.getBlockForTimestamp(parsedTimestamp),
+      isRouteEnabled(computedOriginChainId, destinationChainId, token),
+    ]);
+
+    if (!routeEnabled)
+      throw new Error(
+        `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled.`
+      );
+
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       "0x3B03509645713718B78951126E0A6de6f10043f5",
       provider
