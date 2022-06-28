@@ -92,7 +92,11 @@ const RewardReferral: React.FC<Props> = ({ isConnected }) => {
               <GreenItemText>50% referral fee</GreenItemText>
             </TierInfoItem>
             <TierInfoItem>Rewards from transfers</TierInfoItem>
-            <WarningInfoItem>Not claimable yet ~2210.012 ACX</WarningInfoItem>
+            {isConnected ? (
+              <WarningInfoItem>Not claimable yet ~2210.012 ACX</WarningInfoItem>
+            ) : (
+              <TierInfoItem>-</TierInfoItem>
+            )}
           </TierInfo>
         </ReferralTierBlock>
       </ReferralRow>
