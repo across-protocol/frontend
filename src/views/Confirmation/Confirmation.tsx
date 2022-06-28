@@ -63,14 +63,17 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
   const isWETH = fromTokenInfo?.symbol === "WETH";
 
   let fundsArrivalText = "Loading time estimate";
+  let timeEstimate = "loading";
   if (limits) {
-    fundsArrivalText = `Your funds will arrive in ${getConfirmationDepositTime(
+    timeEstimate = getConfirmationDepositTime(
       deposit.amount,
       limits,
       deposit.toChain
-    )}`;
+    );
+    fundsArrivalText = `Your funds will arrive in ${timeEstimate}`;
   } else if (isError) {
     fundsArrivalText = "Time estimation failed";
+    timeEstimate = "estimation failed";
   }
 
   return (
@@ -171,7 +174,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
             <Info>
               <h3>Estimated time of arrival</h3>
               <div>
-                <div>{confirmationTime || "loading"}</div>
+                <div>{timeEstimate}</div>
               </div>
             </Info>
           </div>
