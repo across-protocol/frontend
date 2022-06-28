@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
-import { ReactComponent as ReferralSVG } from "assets/streamline-share.svg";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
-import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
+import { ReactComponent as ReferralSVG } from "assets/across-referrals.svg";
+import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
 
 export const Wrapper = styled.div`
   width: 100%;
@@ -33,16 +33,6 @@ export const ReferralTierBlock = styled(ReferralRowBlock)`
 
 export const IconWrapper = styled.div`
   text-align: center;
-`;
-
-export const ReferralImageWrapper = styled.div`
-  text-align: center;
-  margin-bottom: 1rem;
-`;
-export const ReferralImage = styled(ReferralSVG)`
-  height: 400px;
-  width: 400px;
-  margin: 0 auto;
 `;
 
 export const Header = styled.h2`
@@ -107,27 +97,8 @@ export const CopyButton = styled(SecondaryButtonWithoutShadow)`
   }
 `;
 
-export const TwitterRow = styled.div`
-  display: flex;
-  justify-content: center;
-  column-gap: 8px;
-  align-items: center;
-`;
-
-export const StyledTwitterLogo = styled(TwitterLogo)`
-  height: 40px;
-  path {
-    fill: var(--color-primary);
-  }
-`;
-
-export const ShareTwitterText = styled.a`
-  color: var(--color-primary);
-  font-size: ${14 / 16}rem;
-  font-weight: 600;
-  &:hover {
-    cursor: pointer;
-  }
+export const StyledReferralLogo = styled(ReferralSVG)`
+  height: 60px;
 `;
 
 export const TierInfo = styled.div`
@@ -159,4 +130,33 @@ export const GreenItemText = styled.span`
 
 export const WarningInfoItem = styled(TierInfoItem)`
   color: #f9d26c;
+`;
+
+export const ConnectRow = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  row-gap: 20px;
+`;
+
+export const ConnectButton = styled(SecondaryButtonWithoutShadow)`
+  background-color: var(--color-primary);
+  color: #2d2e33;
+  height: 40px;
+  font-size: ${14 / 16}rem;
+  padding: 10px;
+  width: 180px;
+  font-weight: 500;
+`;
+
+export const LearnMoreText = styled.div`
+  color: #c5d5e0;
+  font-weight: 500;
+  font-size: ${16 / 16}rem;
+`;
+export const ArrowUpRight = styled(RightUpArrow)`
+  margin-left: 4px;
 `;

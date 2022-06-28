@@ -13,7 +13,7 @@ const Rewards = () => {
   const rows = createMyReferralsTableJSX(isConnected);
   return (
     <Wrapper>
-      <RewardReferral />
+      <RewardReferral isConnected={isConnected} />
       <RewardTable title="My referrals" rows={rows} headers={headers} />
       {!isConnected ? <ConnectTableOverlay /> : null}
       <Footer />
