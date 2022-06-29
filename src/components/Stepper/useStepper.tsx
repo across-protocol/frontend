@@ -12,7 +12,7 @@ export default function useStepper(currentStep: number, numSteps: number) {
   const createStepsItems = useCallback(() => {
     const items: JSX.Element[] = [];
     const midPoint = Math.round(numSteps / 2);
-    for (let i = 1; i < numSteps; i++) {
+    for (let i = 1; i <= numSteps; i++) {
       const completed = i < currentStep;
       let className = completed
         ? "completed"

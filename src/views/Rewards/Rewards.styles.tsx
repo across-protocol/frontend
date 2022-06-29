@@ -1,10 +1,15 @@
 import styled from "@emotion/styled";
 import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
+import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
   background-color: #2d2e33;
   padding: 2rem;
+  @media ${QUERIES.tabletAndDown} {
+    flex-direction: column;
+    padding: 1rem 2rem;
+  }
 `;
 
 export const RewardBreakdownSection = styled.section`

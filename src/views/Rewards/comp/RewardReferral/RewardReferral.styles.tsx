@@ -2,17 +2,25 @@ import styled from "@emotion/styled";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
 import { ReactComponent as ReferralSVG } from "assets/across-referrals.svg";
 import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
+import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
   width: 100%;
   max-width: 1400px;
   margin: 1rem auto 1.5rem;
   padding: 1.5rem 0 1rem;
+  @media ${QUERIES.tabletAndDown} {
+    padding-top: 0.5rem;
+    margin-top: 0;
+  }
 `;
 
 export const ReferralRow = styled.div`
   display: flex;
   gap: 10px 15px;
+  @media ${QUERIES.tabletAndDown} {
+    flex-direction: column;
+  }
 `;
 
 const ReferralRowBlock = styled.div`
@@ -24,6 +32,11 @@ const ReferralRowBlock = styled.div`
 
 export const ReferralLinkBlock = styled(ReferralRowBlock)`
   width: 500px;
+  @media ${QUERIES.tabletAndDown} {
+    width: 100%;
+    background-color: transparent;
+    border: none;
+  }
 `;
 
 export const ReferralTierBlock = styled(ReferralRowBlock)`
@@ -52,6 +65,9 @@ export const SubHeader = styled.h3`
   text-align: center;
   font-weight: 400;
   margin: 0 auto;
+  @media ${QUERIES.tabletAndDown} {
+    max-width: 66%;
+  }
 `;
 
 export const TierSmHeader = styled.h4`
@@ -108,14 +124,25 @@ export const TierInfo = styled.div`
   flex-wrap: wrap;
   row-gap: 5px;
   margin-top: 1rem;
+  @media ${QUERIES.mobileAndDown} {
+    flex-direction: column;
+    row-gap: 0;
+  }
 `;
 
 export const TierInfoItem = styled.div`
   padding-top: 8px;
   flex-basis: 40%;
-  color: #e0f3ff;
+  color: #9daab2;
   &:nth-of-type(2n) {
     text-align: right;
+    color: #e0f3ff;
+  }
+  @media ${QUERIES.mobileAndDown} {
+    flex-basis: 100%;
+    &:nth-of-type(2n) {
+      text-align: left;
+    }
   }
 `;
 
