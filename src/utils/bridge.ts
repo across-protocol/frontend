@@ -18,6 +18,7 @@ import {
   getConfigStoreAddress,
   queriesTable,
   FLAT_RELAY_CAPITAL_FEE,
+  relayerFeeCapitalCostConfig,
 } from "./constants";
 
 import { parseEther, tagAddress } from "./format";
@@ -47,6 +48,9 @@ export async function getRelayerFee(
   isAmountTooLow: boolean;
 }> {
   const config = relayFeeCalculatorConfig(toChainId);
+
+  // Construction of a new RelayFeeCalculator will throw if any props in the config are incorrectly set. For example,
+  // if the capital cost config is incorrectly set for a token, construction will throw.
   const calculator = new relayFeeCalculator.RelayFeeCalculator(config);
   const result = await calculator.relayerFeeDetails(amount, tokenSymbol);
 
@@ -333,6 +337,7 @@ export function relayFeeCalculatorConfig(
     nativeTokenDecimals: token.decimals,
     feeLimitPercent: MAX_RELAY_FEE_PERCENT,
     capitalCostsPercent: FLAT_RELAY_CAPITAL_FEE,
+    capitalCostsConfig: relayerFeeCapitalCostConfig,
     queries,
   };
 }
