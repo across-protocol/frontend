@@ -5,8 +5,7 @@ import { COLORS } from "utils";
 export const Overlay = styled.div`
   position: absolute;
   width: 100%;
-  max-width: 1406px;
-  margin-top: -200px;
+  max-width: 1400px;
   left: 11%;
   text-align: center;
   height: 200px;
@@ -14,6 +13,12 @@ export const Overlay = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  position: absolute;
+  top: 500px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
 `;
 
 export const ConnectButton = styled(SecondaryButtonWithoutShadow)`

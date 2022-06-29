@@ -4,6 +4,7 @@ import { SecondaryButtonWithoutShadow } from "components/Buttons";
 
 export const Wrapper = styled.div`
   background-color: #2d2e33;
+  padding: 2rem;
 `;
 
 export const RewardBreakdownSection = styled.section`
