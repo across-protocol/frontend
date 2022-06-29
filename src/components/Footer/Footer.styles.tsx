@@ -6,10 +6,6 @@ export const Wrapper = styled.div`
   justify-content: space-between;
   padding: 0 1.5rem;
   margin-top: 10vh;
-  @media ${QUERIES.tabletAndDown} {
-    flex-direction: column;
-    flex-wrap: wrap;
-  }
 `;
 const BaseFooter = styled.footer`
   position: sticky;
@@ -31,6 +27,7 @@ export const LinkFooter = styled(BaseFooter)`
   }
   @media ${QUERIES.laptopAndUp} {
     display: flex;
+    align-content: center;
   }
 `;
 
@@ -53,13 +50,13 @@ export const Link = styled.a`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  font-size: ${14 / 16}rem;
+  gap: 14px;
+  font-size: ${16 / 16}rem;
   opacity: 0.75;
   align-items: center;
 
   > svg {
-    height: 20px;
+    margin-bottom: -12px;
     path {
       fill: var(--color-white);
     }
@@ -72,11 +69,28 @@ export const Link = styled.a`
     color: var(--color-white);
     opacity: 1;
   }
+  @media ${QUERIES.tabletAndDown} {
+    margin-bottom: 0;
+    > svg {
+      height: 24px;
+      width: 24px;
+    }
+    &:not(:last-of-type) {
+      margin-right: 0px;
+    }
+    margin: 0 30px;
+  }
 `;
 
 export const AccentLink = styled(Link)`
   &:hover {
     color: var(--color-uma-red);
+  }
+  @media ${QUERIES.tabletAndDown} {
+    svg {
+      height: 40px;
+      width: 100px;
+    }
   }
 `;
 
@@ -91,3 +105,18 @@ export const PoweredByUMA = styled(UnstyledUmaLogo)`
 export const LinkText = styled.div`
   color: var(--color-white);
 `;
+
+export const MobileWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-top: 1rem;
+`;
+
+export const MobileLinkRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+`;
+
+export const MobileAccentRow = styled.div``;
