@@ -27,12 +27,12 @@ import {
 import { onboard } from "utils";
 
 const { init } = onboard;
-
 const referralUrl = "across.to/referrer=0xa1..a234";
-const referralText = "Across blurb www.across.to/referrer=0x....";
+
 interface Props {
   isConnected: boolean;
 }
+
 const RewardReferral: React.FC<Props> = ({ isConnected }) => {
   return (
     <Wrapper>
@@ -53,7 +53,7 @@ const RewardReferral: React.FC<Props> = ({ isConnected }) => {
                 <span>{referralUrl}</span>{" "}
                 <CopyButton
                   onClick={() => {
-                    navigator.clipboard.writeText(referralText);
+                    navigator.clipboard.writeText(referralUrl);
                   }}
                 >
                   Copy
