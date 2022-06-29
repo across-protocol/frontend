@@ -1,12 +1,15 @@
 import styled from "@emotion/styled";
 import { COLORS, QUERIES } from "utils";
 import { ReactComponent as UnstyledUmaLogo } from "assets/Across-Powered-UMA.svg";
-
 export const Wrapper = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 0 1.5rem;
   margin-top: 10vh;
+  @media ${QUERIES.tabletAndDown} {
+    flex-direction: column;
+    flex-wrap: wrap;
+  }
 `;
 const BaseFooter = styled.footer`
   position: sticky;
@@ -34,7 +37,9 @@ export const LinkFooter = styled(BaseFooter)`
 export const LogoFooter = styled(BaseFooter)`
   position: absolute;
   right: 10px;
+  display: none;
   @media ${QUERIES.tabletAndUp} {
+    display: block;
     position: sticky;
     right: revert;
     margin-left: auto;

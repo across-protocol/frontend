@@ -9,7 +9,7 @@ import {
 } from "./Footer.styles";
 import { ReactComponent as DiscordLogo } from "assets/disc-logo.svg";
 import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
-
+import useWindowSize from "hooks/useWindowsSize";
 const NAV_LINKS = [
   {
     key: "faq",
