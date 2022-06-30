@@ -10,8 +10,8 @@ const RewardTableWithOverlay = () => {
   const rows = createMyReferralsTableJSX(isConnected);
   return (
     <div>
-      <RewardTable title="My referrals" rows={rows} headers={headers} />
       {!isConnected ? <ConnectTableOverlay /> : null}
+      <RewardTable title="My referrals" rows={rows} headers={headers} />
     </div>
   );
 };
