@@ -1,29 +1,22 @@
 import styled from "@emotion/styled";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
-import { COLORS, QUERIES } from "utils";
+import { COLORS } from "utils";
 
 export const Overlay = styled.div`
   position: absolute;
   width: 100%;
   max-width: 1400px;
   text-align: center;
-  height: 160px;
+  height: 60%;
   background-color: hsla(${COLORS.gray[500]} / 0.9);
   display: flex;
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 490px;
   left: 0;
   right: 0;
   bottom: 0;
   margin: auto;
-  @media ${QUERIES.tabletAndDown} {
-    top: 1110px;
-  }
-  @media ${QUERIES.mobileAndDown} {
-    top: 1350px;
-  }
 `;
 
 export const ConnectButton = styled(SecondaryButtonWithoutShadow)`
