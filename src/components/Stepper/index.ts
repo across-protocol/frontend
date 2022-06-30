@@ -1,1 +1,1 @@
-export { default } from "./SimpleStepper";
+export { default } from "./Stepper";

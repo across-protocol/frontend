@@ -1,6 +1,6 @@
-import { Wrapper } from "./SimpleStepper.styles";
+import { Wrapper } from "./Stepper.styles";
 
-import useSimpleStepper from "./useSimpleStepper";
+import useSimpleStepper from "./useStepper";
 interface Props {
   currentStep: number;
   numSteps: number;

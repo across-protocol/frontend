@@ -5,14 +5,11 @@ import {
   StepItemComplete,
   SeperatorComplete,
   NextStepItem,
-} from "./SimpleStepper.styles";
+} from "./Stepper.styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 
-export default function useSimpleStepper(
-  currentStep: number,
-  numSteps: number
-) {
+export default function useStepper(currentStep: number, numSteps: number) {
   const [stepItems, setStepItems] = useState<JSX.Element[]>([]);
   const createStepsItems = useCallback(() => {
     const items: JSX.Element[] = [];
