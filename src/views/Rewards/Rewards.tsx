@@ -1,21 +1,15 @@
 import { Wrapper } from "./Rewards.styles";
-import { RewardReferral, RewardTable } from "./comp";
+import { RewardReferral, RewardTableWithOverlay } from "./comp";
 import Footer from "components/Footer";
-import createMyReferralsTableJSX, {
-  headers,
-} from "./comp/RewardTable/createMyReferralsTableJSX";
 import { useConnection } from "state/hooks";
-import ConnectTableOverlay from "./comp/ConnectTableOverlay";
 
 const Rewards = () => {
   const { isConnected } = useConnection();
 
-  const rows = createMyReferralsTableJSX(isConnected);
   return (
     <Wrapper>
       <RewardReferral isConnected={isConnected} />
-      <RewardTable title="My referrals" rows={rows} headers={headers} />
-      {!isConnected ? <ConnectTableOverlay /> : null}
+      <RewardTableWithOverlay />
       <Footer />
     </Wrapper>
   );
