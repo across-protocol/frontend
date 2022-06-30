@@ -1,5 +1,4 @@
 import { Stepper } from "components";
-import SimpleStepper from "components/Stepper/SimpleStepper";
 import {
   Wrapper,
   Header,
@@ -76,7 +75,6 @@ const RewardReferral: React.FC<Props> = ({ isConnected }) => {
           <TierSmHeader>Current referral tier</TierSmHeader>
           <TierHeader>Bronze</TierHeader>
           <Stepper currentStep={2} numSteps={5} />
-          <SimpleStepper currentStep={2} numSteps={5} />
           <TierInfo>
             <TierInfoItem>Referee wallets</TierInfoItem>
             <TierInfoItem>3</TierInfoItem>
