@@ -1,33 +1,18 @@
-import {
-  Wrapper,
-  StepItem,
-  Seperator,
-  StepItemComplete,
-  SeperatorComplete,
-  NextStepItem,
-} from "./SimpleStepper.styles";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { Wrapper } from "./SimpleStepper.styles";
 
+import useSimpleStepper from "./useSimpleStepper";
 interface Props {
   currentStep: number;
   numSteps: number;
 }
 
-const SimpleStepper: React.FC<Props> = () => {
+const SimpleStepper: React.FC<Props> = ({ currentStep, numSteps }) => {
+  const { stepItems } = useSimpleStepper(currentStep, numSteps);
   return (
     <Wrapper>
-      <StepItemComplete>
-        <FontAwesomeIcon icon={faCheck} />
-      </StepItemComplete>
-      <SeperatorComplete />
-      <StepItem>2</StepItem>
-      <Seperator />
-      <NextStepItem>3</NextStepItem>
-      <Seperator />
-      <NextStepItem>4</NextStepItem>
-      <Seperator />
-      <NextStepItem>5</NextStepItem>
+      {stepItems.map((el) => {
+        return el;
+      })}
     </Wrapper>
   );
 };
