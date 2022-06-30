@@ -13,7 +13,7 @@ export const Overlay = styled.div`
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 500px;
+  top: 490px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -23,7 +23,6 @@ export const Overlay = styled.div`
   }
   @media ${QUERIES.mobileAndDown} {
     top: 1350px;
-    height: 120px;
   }
 `;
 
