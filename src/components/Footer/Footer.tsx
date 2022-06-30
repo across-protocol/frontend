@@ -6,10 +6,13 @@ import {
   LinkText,
   AccentLink,
   PoweredByUMA,
+  MobileWrapper,
+  MobileLinkRow,
+  MobileAccentRow,
 } from "./Footer.styles";
 import { ReactComponent as DiscordLogo } from "assets/disc-logo.svg";
 import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
-
+import useWindowSize from "hooks/useWindowsSize";
 const NAV_LINKS = [
   {
     key: "faq",
@@ -38,6 +41,35 @@ const NAV_LINKS = [
 ];
 
 const Footer = () => {
+  const { width } = useWindowSize();
+  if (width && width < 1100) {
+    return (
+      <MobileWrapper>
+        <MobileLinkRow>
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.key}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {link.icon ? <link.icon /> : null}
+              <LinkText>{link.name}</LinkText>
+            </Link>
+          ))}
+        </MobileLinkRow>
+        <MobileAccentRow>
+          <AccentLink
+            href="https://umaproject.org"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <PoweredByUMA />
+          </AccentLink>
+        </MobileAccentRow>
+      </MobileWrapper>
+    );
+  }
   return (
     <Wrapper>
       <LinkFooter>
