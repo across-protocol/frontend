@@ -124,7 +124,7 @@ export const Menu = styled.ul<MenuProps>`
   right: 0;
   // HACK: we use this as padding, to prevent elements overflowing into the label when scrolling up
   border-top: 10px solid transparent;
-  transform: translateY(60px);
+  transform: translateY(80px);
   height: fit-content;
   max-height: 50vh;
   overflow-y: auto;
