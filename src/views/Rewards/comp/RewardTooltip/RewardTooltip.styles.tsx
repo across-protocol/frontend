@@ -18,3 +18,14 @@ export const Body = styled.div`
   color: #c5d5e0;
   font-size: ${14 / 16}rem;
 `;
+
+export const ToolTips = styled.div`
+  display: inline-block;
+  svg {
+    margin: 0;
+    &:last-of-type {
+      margin-left: -2px;
+      margin-right: 8px;
+    }
+  }
+`;

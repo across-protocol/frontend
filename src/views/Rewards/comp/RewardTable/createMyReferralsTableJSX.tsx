@@ -51,6 +51,7 @@ function determineReferralIcon(
         data-html={true}
         data-tip={ReactDOMServer.renderToString(
           <RewardTooltip
+            icon="user"
             title="Referree transfer"
             body="This transfer was made from your wallet address using an external referral link."
           />
@@ -69,6 +70,7 @@ function determineReferralIcon(
         data-html={true}
         data-tip={ReactDOMServer.renderToString(
           <RewardTooltip
+            icon="users"
             title="Referral transfer"
             body="This transfer was made by someone using your unique referral link."
           />
