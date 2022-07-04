@@ -2,6 +2,7 @@ import { Wrapper } from "./Rewards.styles";
 import { RewardReferral, RewardTableWithOverlay } from "./comp";
 import Footer from "components/Footer";
 import { useRewardsView } from "./useRewardsView";
+import ReactTooltip from "react-tooltip";
 
 const Rewards = () => {
   const {
@@ -14,6 +15,7 @@ const Rewards = () => {
 
   return (
     <Wrapper>
+      <ReactTooltip id="rewards" />
       <RewardReferral
         loading={isReferalSummaryLoading}
         referrer={account}

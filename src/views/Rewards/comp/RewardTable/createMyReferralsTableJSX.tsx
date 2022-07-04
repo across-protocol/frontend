@@ -15,6 +15,7 @@ import {
 import { ReactComponent as UserIcon } from "assets/user.svg";
 import { ReactComponent as ArrowUserIcon } from "assets/corner-down-right.svg";
 import { ReactComponent as UsersIcon } from "assets/users.svg";
+import ReactDOMSever from "react-dom/server";
 
 export default function createMyReferralsTableJSX(
   referrals: Referral[],
@@ -37,17 +38,37 @@ function determineIcon(symbol: string) {
   }
 }
 
+const UserTip = (
+  <div>
+    <p>Testing</p>
+    <p>123</p>
+  </div>
+);
+
+const UsersTip = (
+  <div>
+    <p>users tip</p>
+  </div>
+);
 function determineReferralIcon(account: string, depositAddr: string) {
   if (depositAddr !== account) {
     return (
-      <ReferralDiv>
+      <ReferralDiv
+        data-html={true}
+        data-tip={ReactDOMSever.renderToString(UserTip)}
+        data-for="rewards"
+      >
         <ArrowUserIcon />
         <UserIcon />
       </ReferralDiv>
     );
   } else {
     return (
-      <ReferralDiv>
+      <ReferralDiv
+        data-html={true}
+        data-tip={ReactDOMSever.renderToString(UsersTip)}
+        data-for="rewards"
+      >
         <UsersIcon />
       </ReferralDiv>
     );
