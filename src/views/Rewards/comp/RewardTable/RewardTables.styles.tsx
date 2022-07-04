@@ -11,7 +11,10 @@ import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
-import { ReactComponent as WethLogo } from "assets/weth-logo.svg";
+import { ReactComponent as EthLogo } from "assets/eth.svg";
+import { ReactComponent as UniLogo } from "assets/uni.svg";
+import { ReactComponent as USDCLogo } from "assets/usdc.svg";
+
 import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
 
 import ProgressBar from "components/ProgressBar";
@@ -226,11 +229,10 @@ export const CircleInfo = () => (
   <StyledCircleInfo icon={faCircleInfo} style={{ color: "white" }} />
 );
 
-export const StyledWETHIcon = styled(WethLogo)`
-  height: 24px;
-  width: 24px;
-`;
+export const StyledETHIcon = styled(EthLogo)``;
 
+export const StyledUniLogo = styled(UniLogo)``;
+export const StyledUSDCLogo = styled(USDCLogo)``;
 export const PoolCellValue = styled.div`
   font-weight: bold;
   display: flex;

@@ -1,7 +1,7 @@
 import { ICell, IRow } from "components/Table/Table";
 import {
   CircleInfo,
-  StyledWETHIcon,
+  StyledETHIcon,
   PoolCellValue,
   MultiplierCellValue,
   MutliplierValue,
@@ -23,7 +23,7 @@ function formatMyPoolsRows(): IRow[] {
         {
           value: (
             <PoolCellValue>
-              <StyledWETHIcon /> <div>ETH</div>
+              <StyledETHIcon /> <div>ETH</div>
             </PoolCellValue>
           ),
         },
@@ -73,7 +73,7 @@ function formatMyPoolsRows(): IRow[] {
         {
           value: (
             <PoolCellValue>
-              <StyledWETHIcon /> <div>UNI</div>
+              <StyledETHIcon /> <div>UNI</div>
             </PoolCellValue>
           ),
         },

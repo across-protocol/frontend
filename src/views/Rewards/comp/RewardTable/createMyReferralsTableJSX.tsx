@@ -3,11 +3,13 @@ import { ethers } from "ethers";
 import { ICell, IRow } from "components/Table/Table";
 import { Referral } from "views/Rewards/useRewardsView";
 import {
-  StyledWETHIcon,
+  StyledETHIcon,
   PoolCellValue,
   ArrowUpRight,
   GrayText,
   LinkDiv,
+  StyledUniLogo,
+  StyledUSDCLogo,
 } from "./RewardTables.styles";
 
 export default function createMyReferralsTableJSX(
@@ -19,6 +21,17 @@ export default function createMyReferralsTableJSX(
   return rows;
 }
 
+function determineIcon(symbol: string) {
+  switch (symbol) {
+    case "USDC":
+      return <StyledUSDCLogo />;
+    case "UNI":
+      return <StyledUniLogo />;
+    default:
+      return <StyledETHIcon />;
+  }
+}
+
 // Will take a TransactionsArg
 function formatMyReferralsRows(referrals: Referral[]): IRow[] {
   const fr = referrals.map((r) => {
@@ -27,7 +40,7 @@ function formatMyReferralsRows(referrals: Referral[]): IRow[] {
         {
           value: (
             <PoolCellValue>
-              <StyledWETHIcon /> <div>{r.symbol}</div>
+              {determineIcon(r.symbol)} <div>{r.symbol}</div>
             </PoolCellValue>
           ),
         },
@@ -122,7 +135,7 @@ const DISCONNECTED_ROWS: IRow[] = [
       {
         value: (
           <PoolCellValue>
-            <StyledWETHIcon /> <div>ETH</div>
+            <StyledETHIcon /> <div>ETH</div>
           </PoolCellValue>
         ),
       },
@@ -165,7 +178,7 @@ const DISCONNECTED_ROWS: IRow[] = [
       {
         value: (
           <PoolCellValue>
-            <StyledWETHIcon /> <div>UNI</div>
+            <StyledUniLogo /> <div>UNI</div>
           </PoolCellValue>
         ),
       },

@@ -1,13 +1,14 @@
 import { ICell, IRow } from "components/Table/Table";
 import {
   CircleInfo,
-  StyledWETHIcon,
+  StyledETHIcon,
   PoolCellValue,
   MultiplierCellValue,
   MutliplierValue,
   StakeButton,
   StyledProgressBar,
   ArrowUpRight,
+  StyledUniLogo,
 } from "./RewardTables.styles";
 
 export default function createMyPoolsTableJSX() {
@@ -23,7 +24,7 @@ function formatMyPoolsRows(): IRow[] {
         {
           value: (
             <PoolCellValue>
-              <StyledWETHIcon /> <div>ETH</div>
+              <StyledETHIcon /> <div>ETH</div>
             </PoolCellValue>
           ),
         },
@@ -73,7 +74,7 @@ function formatMyPoolsRows(): IRow[] {
         {
           value: (
             <PoolCellValue>
-              <StyledWETHIcon /> <div>UNI</div>
+              <StyledUniLogo /> <div>UNI</div>
             </PoolCellValue>
           ),
         },
