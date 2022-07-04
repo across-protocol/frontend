@@ -1,9 +1,10 @@
 import styled from "@emotion/styled";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
+import { QUERIES } from "utils";
 import { ReactComponent as ReferralSVG } from "assets/across-referrals.svg";
 import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
-import { QUERIES } from "utils";
 import { ReactComponent as LinkIcon } from "assets/link.svg";
+import { ReactComponent as II } from "assets/info.svg";
 
 export const Wrapper = styled.div`
   width: 100%;
@@ -202,5 +203,10 @@ export const ArrowUpRight = styled(RightUpArrow)`
 
 export const CopyIcon = styled(LinkIcon)`
   margin-left: 8px;
+  cursor: pointer;
+`;
+
+export const InfoIcon = styled(II)`
+  margin-left: 4px;
   cursor: pointer;
 `;

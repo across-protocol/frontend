@@ -22,6 +22,7 @@ import {
   LearnMoreText,
   ArrowUpRight,
   CopyIcon,
+  InfoIcon,
 } from "./RewardReferral.styles";
 
 import { onboard, shortenAddress } from "utils";
@@ -108,9 +109,13 @@ const RewardReferral: React.FC<Props> = ({
           <TierHeader>{tiers[referralsSummary.tier].name}</TierHeader>
           <Stepper currentStep={referralsSummary.tier} numSteps={5} />
           <TierInfo>
-            <TierInfoItem>Referee wallets</TierInfoItem>
+            <TierInfoItem>
+              Referee wallets <InfoIcon />
+            </TierInfoItem>
             <TierInfoItem>{referralsSummary.referreeWallets}</TierInfoItem>
-            <TierInfoItem>Transfers</TierInfoItem>
+            <TierInfoItem>
+              Transfers <InfoIcon />
+            </TierInfoItem>
             <TierInfoItem>
               {`${referralsSummary.transfers} Transfers `}
               {referralsSummary.tier < 5 && (
@@ -123,7 +128,7 @@ const RewardReferral: React.FC<Props> = ({
                 </LightGrayItemText>
               )}
             </TierInfoItem>
-            <TierInfoItem>Volume transfers</TierInfoItem>
+            <TierInfoItem>Volume from transfers</TierInfoItem>
             <TierInfoItem>
               {referralsSummary.volume.toLocaleString("en-US", {
                 style: "currency",
@@ -142,7 +147,9 @@ const RewardReferral: React.FC<Props> = ({
                 </LightGrayItemText>
               )}
             </TierInfoItem>
-            <TierInfoItem>Tier bonus</TierInfoItem>
+            <TierInfoItem>
+              Referral rate <InfoIcon />
+            </TierInfoItem>
             <TierInfoItem>
               <GreenItemText>{`${
                 referralsSummary.referralRate * 100
