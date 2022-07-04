@@ -8,6 +8,7 @@ import { RoundBox as UnstyledBox, ErrorBox } from "../Box";
 export const LastSection = styled(Section)`
   border-bottom: none;
 `;
+
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
