@@ -44,6 +44,7 @@ export const Info = styled.div`
     line-height: 1;
   }
 `;
+
 export const Address = styled.div`
   font-size: ${14 / 16}rem;
   text-align: left;
@@ -80,6 +81,7 @@ export const InputWrapper = styled(RoundBox)`
     outline: var(--color-primary-dark) solid 1px;
   }
 `;
+
 export const Input = styled.input`
   width: 100%;
   border: none;
@@ -101,9 +103,11 @@ export const ClearButton = styled(BaseButton)`
   align-items: center;
   padding: 0;
 `;
+
 export const CancelButton = styled(PrimaryButton)`
   border: 1px solid var(--color-gray-300);
 `;
+
 export const ButtonGroup = styled.div`
   display: flex;
   gap: 20px;
