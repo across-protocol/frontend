@@ -155,8 +155,19 @@ export const GreenItemText = styled.span`
   color: var(--color-primary);
 `;
 
-export const WarningInfoItem = styled(TierInfoItem)`
+export const WarningInfoItem = styled.div`
+  padding-top: 8px;
+  flex-basis: 40%;
   color: #f9d26c;
+  &:nth-of-type(2n) {
+    text-align: right;
+  }
+  @media ${QUERIES.mobileAndDown} {
+    flex-basis: 100%;
+    &:nth-of-type(2n) {
+      text-align: left;
+    }
+  }
 `;
 
 export const ConnectRow = styled.div`

@@ -117,6 +117,7 @@ const RewardReferral: React.FC<Props> = ({
               {`${referralsSummary.transfers} Transfers `}
               {referralsSummary.tier < 5 && (
                 <LightGrayItemText>
+                  &rarr;{" "}
                   {`${
                     tiers[referralsSummary.tier + 1].referrals -
                     referralsSummary.transfers
@@ -132,6 +133,7 @@ const RewardReferral: React.FC<Props> = ({
               })}
               {referralsSummary.tier < 5 && (
                 <LightGrayItemText>
+                  &rarr;{" "}
                   {`${(
                     tiers[referralsSummary.tier + 1].volume -
                     referralsSummary.volume
