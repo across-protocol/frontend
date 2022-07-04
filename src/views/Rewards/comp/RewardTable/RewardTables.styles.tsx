@@ -290,7 +290,7 @@ export const GrayText = styled.div`
 
 export const LinkDiv = styled.div`
   text-align: right;
-  > div {
+  > a {
     border: 1px solid #4c4e57;
     border-radius: 32px;
     height: 36px;

@@ -132,9 +132,15 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
         {
           value: (
             <LinkDiv>
-              <div>
+              <a
+                href={getChainInfo(r.destinationChainId).constructExplorerLink(
+                  r.depositTxHash
+                )}
+                target="_blank"
+                rel="noreferrer"
+              >
                 <ArrowUpRight />
-              </div>
+              </a>
             </LinkDiv>
           ),
         },
