@@ -1,13 +1,16 @@
 import { RewardTable, ConnectTableOverlay } from "../";
-import { useConnection } from "state/hooks";
 import createMyReferralsTableJSX, {
   headers,
 } from "../RewardTable/createMyReferralsTableJSX";
 import { Wrapper } from "./RewardTableWithOverlay.styles";
-const RewardTableWithOverlay = () => {
-  const { isConnected } = useConnection();
+import { Referral } from "views/Rewards/useRewardsView";
 
-  const rows = createMyReferralsTableJSX(isConnected);
+const RewardTableWithOverlay: React.FC<{
+  isConnected: boolean;
+  referrals: Referral[];
+}> = ({ isConnected, referrals }) => {
+  const rows = createMyReferralsTableJSX(referrals, isConnected);
+
   return (
     <Wrapper>
       {!isConnected ? <ConnectTableOverlay /> : null}

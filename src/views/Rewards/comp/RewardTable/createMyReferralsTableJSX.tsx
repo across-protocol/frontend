@@ -1,4 +1,7 @@
+import { getChainInfo, shortenAddress } from "utils";
+import { ethers } from "ethers";
 import { ICell, IRow } from "components/Table/Table";
+import { Referral } from "views/Rewards/useRewardsView";
 import {
   StyledWETHIcon,
   PoolCellValue,
@@ -7,46 +10,58 @@ import {
   LinkDiv,
 } from "./RewardTables.styles";
 
-export default function createMyReferralsTableJSX(isConnected: boolean) {
+export default function createMyReferralsTableJSX(
+  referrals: Referral[],
+  isConnected: boolean
+) {
   if (!isConnected) return DISCONNECTED_ROWS;
-  const rows = formatMyReferralsRows();
+  const rows = formatMyReferralsRows(referrals);
   return rows;
 }
 
 // Will take a TransactionsArg
-function formatMyReferralsRows(): IRow[] {
-  const fr = [
-    {
+function formatMyReferralsRows(referrals: Referral[]): IRow[] {
+  const fr = referrals.map((r) => {
+    return {
       cells: [
         {
           value: (
             <PoolCellValue>
-              <StyledWETHIcon /> <div>ETH</div>
+              <StyledWETHIcon /> <div>{r.symbol}</div>
             </PoolCellValue>
           ),
         },
         {
           value: (
             <>
-              <div>Ethereum Mainnet</div>
-              <GrayText>&rarr; Optimism</GrayText>
+              <div>{getChainInfo(r.sourceChainId).name}</div>
+              <GrayText>
+                &rarr; {getChainInfo(r.destinationChainId).name}
+              </GrayText>
             </>
           ),
         },
         {
-          value: "0x123...4567",
+          value: shortenAddress(r.depositorAddr, "...", 4),
         },
-        { value: "$1234.56" },
+        {
+          value: r.realizedLpFeeUsd.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+            minimumFractionDigits: 4,
+          }),
+        },
         {
           value: (
             <>
-              <div>80%</div>
-              <GrayText>12.24 ACX</GrayText>
+              <div>{`${r.referralRate * 100}%`}</div>
             </>
           ),
         },
         {
-          value: "414.14 ACX",
+          value: `${Number(ethers.utils.formatUnits(r.acxRewards, 18)).toFixed(
+            4
+          )} ACX`,
         },
         {
           value: (
@@ -58,51 +73,8 @@ function formatMyReferralsRows(): IRow[] {
           ),
         },
       ],
-    },
-    {
-      cells: [
-        {
-          value: (
-            <PoolCellValue>
-              <StyledWETHIcon /> <div>UNI</div>
-            </PoolCellValue>
-          ),
-        },
-        {
-          value: (
-            <>
-              <div>Ethereum Mainnet</div>
-              <GrayText>&rarr; Optimism</GrayText>
-            </>
-          ),
-        },
-        {
-          value: "0x123...4567",
-        },
-        { value: "$1234.56" },
-        {
-          value: (
-            <>
-              <div>20%</div>
-              <GrayText>10 ACX</GrayText>
-            </>
-          ),
-        },
-        {
-          value: "414.14 ACX",
-        },
-        {
-          value: (
-            <LinkDiv>
-              <div>
-                <ArrowUpRight />
-              </div>
-            </LinkDiv>
-          ),
-        },
-      ],
-    },
-  ];
+    };
+  });
   return fr;
 }
 

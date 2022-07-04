@@ -1,15 +1,26 @@
 import { Wrapper } from "./Rewards.styles";
 import { RewardReferral, RewardTableWithOverlay } from "./comp";
 import Footer from "components/Footer";
-import { useConnection } from "state/hooks";
+import { useRewardsView } from "./useRewardsView";
 
 const Rewards = () => {
-  const { isConnected } = useConnection();
+  const {
+    account,
+    isConnected,
+    isReferalSummaryLoading,
+    referralsSummary,
+    referrals,
+  } = useRewardsView();
 
   return (
     <Wrapper>
-      <RewardReferral isConnected={isConnected} />
-      <RewardTableWithOverlay />
+      <RewardReferral
+        loading={isReferalSummaryLoading}
+        referrer={account}
+        referralsSummary={referralsSummary}
+        isConnected={isConnected}
+      />
+      <RewardTableWithOverlay isConnected={isConnected} referrals={referrals} />
       <Footer />
     </Wrapper>
   );

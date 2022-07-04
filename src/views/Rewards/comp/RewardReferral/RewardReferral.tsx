@@ -24,16 +24,50 @@ import {
   ArrowUpRight,
 } from "./RewardReferral.styles";
 
-import { onboard } from "utils";
+import { onboard, shortenAddress } from "utils";
+import { useMemo } from "react";
+import { ReferralsSummary } from "views/Rewards/useRewardsView";
+import { ethers } from "ethers";
 
 const { init } = onboard;
-const referralUrl = "across.to/referrer=0xa1..a234";
 
 interface Props {
   isConnected: boolean;
+  referrer: string | undefined;
+  loading: boolean;
+  referralsSummary: ReferralsSummary;
 }
 
-const RewardReferral: React.FC<Props> = ({ isConnected }) => {
+const tiers: Record<
+  number,
+  { name: string; referralRate: number; referrals: number; volume: number }
+> = {
+  "1": { name: "Copper", referralRate: 0.4, referrals: 0, volume: 0 },
+  "2": { name: "Bronze", referralRate: 0.5, referrals: 3, volume: 50000 },
+  "3": { name: "Silver", referralRate: 0.6, referrals: 5, volume: 100000 },
+  "4": { name: "Gold", referralRate: 0.7, referrals: 10, volume: 250000 },
+  "5": { name: "Platinum", referralRate: 0.8, referrals: 20, volume: 500000 },
+};
+
+const RewardReferral: React.FC<Props> = ({
+  isConnected,
+  loading,
+  referrer,
+  referralsSummary,
+}) => {
+  const referralUrl = useMemo(() => {
+    if (referrer) {
+      return `across.to/referrer=${referrer}`;
+    }
+    return "";
+  }, [referrer]);
+  const displayedReferralUrl = useMemo(() => {
+    if (referrer) {
+      return `across.to/referrer=${shortenAddress(referrer, "...", 4)}`;
+    }
+    return "";
+  }, [referrer]);
+
   return (
     <Wrapper>
       <ReferralRow>
@@ -50,7 +84,7 @@ const RewardReferral: React.FC<Props> = ({ isConnected }) => {
           {isConnected ? (
             <CopyRow>
               <ReferralUrl>
-                <span>{referralUrl}</span>{" "}
+                <span>{displayedReferralUrl}</span>{" "}
                 <CopyButton
                   onClick={() => {
                     navigator.clipboard.writeText(referralUrl);
@@ -73,27 +107,61 @@ const RewardReferral: React.FC<Props> = ({ isConnected }) => {
         </ReferralLinkBlock>
         <ReferralTierBlock>
           <TierSmHeader>Current referral tier</TierSmHeader>
-          <TierHeader>Bronze</TierHeader>
-          <Stepper currentStep={2} numSteps={5} />
+          <TierHeader>{tiers[referralsSummary.tier].name}</TierHeader>
+          <Stepper currentStep={referralsSummary.tier} numSteps={5} />
           <TierInfo>
             <TierInfoItem>Referee wallets</TierInfoItem>
-            <TierInfoItem>3</TierInfoItem>
+            <TierInfoItem>{referralsSummary.referreeWallets}</TierInfoItem>
             <TierInfoItem>Transfers</TierInfoItem>
             <TierInfoItem>
-              5 Transfers <LightGrayItemText>5 to next tier </LightGrayItemText>
+              {`${referralsSummary.transfers} Transfers `}
+              {referralsSummary.tier < 5 && (
+                <LightGrayItemText>
+                  {`${
+                    tiers[referralsSummary.tier + 1].referrals -
+                    referralsSummary.transfers
+                  } to next tier`}
+                </LightGrayItemText>
+              )}
             </TierInfoItem>
             <TierInfoItem>Volume transfers</TierInfoItem>
             <TierInfoItem>
-              $54,321.24{" "}
-              <LightGrayItemText>$25,000.00 to next tier</LightGrayItemText>
+              {referralsSummary.volume.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+              })}
+              {referralsSummary.tier < 5 && (
+                <LightGrayItemText>
+                  {`${(
+                    tiers[referralsSummary.tier + 1].volume -
+                    referralsSummary.volume
+                  ).toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })} to next tier`}
+                </LightGrayItemText>
+              )}
             </TierInfoItem>
             <TierInfoItem>Tier bonus</TierInfoItem>
             <TierInfoItem>
-              <GreenItemText>50% referral fee</GreenItemText>
+              <GreenItemText>{`${
+                referralsSummary.referralRate * 100
+              }% referral fee`}</GreenItemText>
             </TierInfoItem>
             <TierInfoItem>Rewards from transfers</TierInfoItem>
             {isConnected ? (
-              <WarningInfoItem>Not claimable yet ~2210.012 ACX</WarningInfoItem>
+              <WarningInfoItem>{`Not claimable yet ~${
+                referralsSummary.rewardsAmount
+                  ? Number(
+                      ethers.utils.formatUnits(
+                        referralsSummary.rewardsAmount,
+                        18
+                      )
+                    ).toFixed(4)
+                  : 0
+              }
+                
+              ACX`}</WarningInfoItem>
             ) : (
               <TierInfoItem>-</TierInfoItem>
             )}
