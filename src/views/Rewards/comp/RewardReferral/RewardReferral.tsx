@@ -5,7 +5,6 @@ import {
   SubHeader,
   CopyRow,
   ReferralUrl,
-  CopyButton,
   StyledReferralLogo,
   ReferralRow,
   ReferralLinkBlock,
@@ -22,6 +21,7 @@ import {
   ConnectButton,
   LearnMoreText,
   ArrowUpRight,
+  CopyIcon,
 } from "./RewardReferral.styles";
 
 import { onboard, shortenAddress } from "utils";
@@ -85,13 +85,11 @@ const RewardReferral: React.FC<Props> = ({
             <CopyRow>
               <ReferralUrl>
                 <span>{displayedReferralUrl}</span>{" "}
-                <CopyButton
+                <CopyIcon
                   onClick={() => {
                     navigator.clipboard.writeText(referralUrl);
                   }}
-                >
-                  Copy
-                </CopyButton>
+                />
               </ReferralUrl>
             </CopyRow>
           ) : (
