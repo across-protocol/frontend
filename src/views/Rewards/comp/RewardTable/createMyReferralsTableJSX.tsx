@@ -1,3 +1,4 @@
+import ReactDOMServer from "react-dom/server";
 import { getChainInfo, shortenAddress } from "utils";
 import { ethers } from "ethers";
 import { ICell, IRow } from "components/Table/Table";
@@ -15,8 +16,8 @@ import {
 import { ReactComponent as UserIcon } from "assets/user.svg";
 import { ReactComponent as ArrowUserIcon } from "assets/corner-down-right.svg";
 import { ReactComponent as UsersIcon } from "assets/users.svg";
-import ReactDOMSever from "react-dom/server";
 
+import RewardTooltip from "../RewardTooltip";
 export default function createMyReferralsTableJSX(
   referrals: Referral[],
   isConnected: boolean,
@@ -38,25 +39,24 @@ function determineIcon(symbol: string) {
   }
 }
 
-const UserTip = (
-  <div>
-    <p>Testing</p>
-    <p>123</p>
-  </div>
-);
-
-const UsersTip = (
-  <div>
-    <p>users tip</p>
-  </div>
-);
-function determineReferralIcon(account: string, depositAddr: string) {
+function determineReferralIcon(
+  account: string,
+  depositAddr: string,
+  key: number
+) {
   if (depositAddr !== account) {
     return (
       <ReferralDiv
+        key={key}
         data-html={true}
-        data-tip={ReactDOMSever.renderToString(UserTip)}
+        data-tip={ReactDOMServer.renderToString(
+          <RewardTooltip
+            title="Referree transfer"
+            body="This transfer was made from your wallet address using an external referral link."
+          />
+        )}
         data-for="rewards"
+        data-place="right"
       >
         <ArrowUserIcon />
         <UserIcon />
@@ -65,9 +65,16 @@ function determineReferralIcon(account: string, depositAddr: string) {
   } else {
     return (
       <ReferralDiv
+        key={key}
         data-html={true}
-        data-tip={ReactDOMSever.renderToString(UsersTip)}
+        data-tip={ReactDOMServer.renderToString(
+          <RewardTooltip
+            title="Referral transfer"
+            body="This transfer was made by someone using your unique referral link."
+          />
+        )}
         data-for="rewards"
+        data-place="right"
       >
         <UsersIcon />
       </ReferralDiv>
@@ -77,14 +84,14 @@ function determineReferralIcon(account: string, depositAddr: string) {
 
 // Will take a TransactionsArg
 function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
-  const fr = referrals.map((r) => {
+  const fr = referrals.map((r, i) => {
     return {
       cells: [
         {
           value: (
             <PoolCellValue>
               {determineIcon(r.symbol)} <div>{r.symbol}</div>{" "}
-              {determineReferralIcon(account, r.depositorAddr)}
+              {determineReferralIcon(account, r.depositorAddr, i)}
             </PoolCellValue>
           ),
         },

@@ -69,7 +69,6 @@ export const useRewardsView = () => {
         })
         .finally(() => {
           setIsReferalSummaryLoading(false);
-          ReactTooltip.rebuild();
         });
     }
   }, [account]);
@@ -92,6 +91,10 @@ export const useRewardsView = () => {
         });
     }
   }, [account]);
+
+  useEffect(() => {
+    ReactTooltip.rebuild();
+  });
 
   return {
     referralsSummary: referralsSummary || defaultReferralsSummary,
