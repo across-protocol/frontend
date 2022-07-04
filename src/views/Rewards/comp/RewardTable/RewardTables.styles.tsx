@@ -11,8 +11,8 @@ import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
-import { ReactComponent as EthLogo } from "assets/eth.svg";
-import { ReactComponent as UniLogo } from "assets/uni.svg";
+import { ReactComponent as ETHLogo } from "assets/eth.svg";
+import { ReactComponent as UNILogo } from "assets/uni.svg";
 import { ReactComponent as USDCLogo } from "assets/usdc.svg";
 
 import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
@@ -229,9 +229,9 @@ export const CircleInfo = () => (
   <StyledCircleInfo icon={faCircleInfo} style={{ color: "white" }} />
 );
 
-export const StyledETHIcon = styled(EthLogo)``;
+export const StyledETHIcon = styled(ETHLogo)``;
 
-export const StyledUniLogo = styled(UniLogo)``;
+export const StyledUNILogo = styled(UNILogo)``;
 export const StyledUSDCLogo = styled(USDCLogo)``;
 export const PoolCellValue = styled.div`
   font-weight: bold;
@@ -282,9 +282,7 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
   }
 `;
 
-export const ArrowUpRight = styled(RightUpArrow)`
-  margin-right: 8px;
-`;
+export const ArrowUpRight = styled(RightUpArrow)``;
 
 export const GrayText = styled.div`
   color: #9daab2;
@@ -307,4 +305,8 @@ export const LinkDiv = styled.div`
     height: 14px;
     width: 14px;
   }
+`;
+
+export const ReferralDiv = styled.div`
+  margin-left: auto;
 `;

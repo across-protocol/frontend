@@ -20,7 +20,11 @@ const Rewards = () => {
         referralsSummary={referralsSummary}
         isConnected={isConnected}
       />
-      <RewardTableWithOverlay isConnected={isConnected} referrals={referrals} />
+      <RewardTableWithOverlay
+        isConnected={isConnected}
+        referrals={referrals}
+        account={account || ""}
+      />
       <Footer />
     </Wrapper>
   );

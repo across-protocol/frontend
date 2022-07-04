@@ -8,16 +8,21 @@ import {
   ArrowUpRight,
   GrayText,
   LinkDiv,
-  StyledUniLogo,
+  StyledUNILogo,
   StyledUSDCLogo,
+  ReferralDiv,
 } from "./RewardTables.styles";
+import { ReactComponent as UserIcon } from "assets/user.svg";
+import { ReactComponent as ArrowUserIcon } from "assets/corner-down-right.svg";
+import { ReactComponent as UsersIcon } from "assets/users.svg";
 
 export default function createMyReferralsTableJSX(
   referrals: Referral[],
-  isConnected: boolean
+  isConnected: boolean,
+  account: string
 ) {
   if (!isConnected) return DISCONNECTED_ROWS;
-  const rows = formatMyReferralsRows(referrals);
+  const rows = formatMyReferralsRows(referrals, account);
   return rows;
 }
 
@@ -26,21 +31,39 @@ function determineIcon(symbol: string) {
     case "USDC":
       return <StyledUSDCLogo />;
     case "UNI":
-      return <StyledUniLogo />;
+      return <StyledUNILogo />;
     default:
       return <StyledETHIcon />;
   }
 }
 
+function determineReferralIcon(account: string, depositAddr: string) {
+  if (depositAddr !== account) {
+    return (
+      <ReferralDiv>
+        <ArrowUserIcon />
+        <UserIcon />
+      </ReferralDiv>
+    );
+  } else {
+    return (
+      <ReferralDiv>
+        <UsersIcon />
+      </ReferralDiv>
+    );
+  }
+}
+
 // Will take a TransactionsArg
-function formatMyReferralsRows(referrals: Referral[]): IRow[] {
+function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
   const fr = referrals.map((r) => {
     return {
       cells: [
         {
           value: (
             <PoolCellValue>
-              {determineIcon(r.symbol)} <div>{r.symbol}</div>
+              {determineIcon(r.symbol)} <div>{r.symbol}</div>{" "}
+              {determineReferralIcon(account, r.depositorAddr)}
             </PoolCellValue>
           ),
         },
@@ -178,7 +201,7 @@ const DISCONNECTED_ROWS: IRow[] = [
       {
         value: (
           <PoolCellValue>
-            <StyledUniLogo /> <div>UNI</div>
+            <StyledUNILogo /> <div>UNI</div>
           </PoolCellValue>
         ),
       },

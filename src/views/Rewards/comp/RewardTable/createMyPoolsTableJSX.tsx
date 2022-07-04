@@ -8,7 +8,7 @@ import {
   StakeButton,
   StyledProgressBar,
   ArrowUpRight,
-  StyledUniLogo,
+  StyledUNILogo,
 } from "./RewardTables.styles";
 
 export default function createMyPoolsTableJSX() {
@@ -74,7 +74,7 @@ function formatMyPoolsRows(): IRow[] {
         {
           value: (
             <PoolCellValue>
-              <StyledUniLogo /> <div>UNI</div>
+              <StyledUNILogo /> <div>UNI</div>
             </PoolCellValue>
           ),
         },
