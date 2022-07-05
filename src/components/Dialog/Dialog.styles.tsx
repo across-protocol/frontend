@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { DialogContent, DialogOverlay } from "@reach/dialog";
-import { COLORS, QUERIES } from "utils";
+import { COLORS } from "utils";
 
 export const Overlay = styled(DialogOverlay)`
   position: fixed;
