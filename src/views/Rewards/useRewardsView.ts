@@ -59,7 +59,7 @@ export const useRewardsView = () => {
       setIsReferalSummaryLoading(true);
       axios
         .get<ReferralsSummary>(
-          `http://34.148.101.148:3000/referrals/summary?address=${account}`
+          `${process.env.REACT_APP_REWARDS_API_URL}/referrals/summary?address=${account}`
         )
         .then((response) => {
           setReferralsSummary(response.data);
@@ -78,7 +78,7 @@ export const useRewardsView = () => {
       setIsTableLoading(true);
       axios
         .get<GetReferralsResponse>(
-          `http://34.148.101.148:3000/referrals/details?address=${account}&limit=30&offset=0`
+          `${process.env.REACT_APP_REWARDS_API_URL}/referrals/details?address=${account}&limit=30&offset=0`
         )
         .then((response) => {
           setReferrals(response.data.referrals);
