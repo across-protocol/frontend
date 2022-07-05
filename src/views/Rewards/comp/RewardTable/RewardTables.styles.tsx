@@ -310,3 +310,12 @@ export const LinkDiv = styled.div`
 export const ReferralDiv = styled.div`
   margin-left: auto;
 `;
+
+export const EmptyRow = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  border: 1px solid #3f4047;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+`;
