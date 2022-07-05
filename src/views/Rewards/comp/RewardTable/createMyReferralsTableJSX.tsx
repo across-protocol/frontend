@@ -44,7 +44,25 @@ function determineReferralIcon(
   depositAddr: string,
   key: number
 ) {
-  if (depositAddr !== account) {
+  if (depositAddr === account) {
+    return (
+      <ReferralDiv
+        key={key}
+        data-html={true}
+        data-tip={ReactDOMServer.renderToString(
+          <RewardTooltip
+            icon="users"
+            title="Referral transfer"
+            body="This transfer was made by someone using your unique referral link."
+          />
+        )}
+        data-for="rewards"
+        data-place="right"
+      >
+        <UsersIcon />
+      </ReferralDiv>
+    );
+  } else {
     return (
       <ReferralDiv
         key={key}
@@ -61,24 +79,6 @@ function determineReferralIcon(
       >
         <ArrowUserIcon />
         <UserIcon />
-      </ReferralDiv>
-    );
-  } else {
-    return (
-      <ReferralDiv
-        key={key}
-        data-html={true}
-        data-tip={ReactDOMServer.renderToString(
-          <RewardTooltip
-            icon="users"
-            title="Referral transfer"
-            body="This transfer was made by someone using your unique referral link."
-          />
-        )}
-        data-for="rewards"
-        data-place="right"
-      >
-        <UsersIcon />
       </ReferralDiv>
     );
   }
