@@ -5,6 +5,8 @@ import { ReactComponent as ReferralSVG } from "assets/across-referrals.svg";
 import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
 import { ReactComponent as LinkIcon } from "assets/link.svg";
 import { ReactComponent as II } from "assets/info.svg";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 
 export const Wrapper = styled.div`
   width: 100%;
@@ -210,3 +212,12 @@ export const InfoIcon = styled(II)`
   margin-left: 4px;
   cursor: pointer;
 `;
+
+const CM = styled(FontAwesomeIcon)`
+  margin-top: 4px;
+  margin-left: 8px;
+  path {
+    fill: var(--color-primary);
+  }
+`;
+export const CopyCheckmark = () => <CM icon={faCheckCircle} />;

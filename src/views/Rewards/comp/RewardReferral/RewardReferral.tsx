@@ -1,3 +1,6 @@
+import { useMemo, useState } from "react";
+import { ethers } from "ethers";
+
 import { Stepper } from "components";
 import {
   Wrapper,
@@ -23,12 +26,11 @@ import {
   ArrowUpRight,
   CopyIcon,
   InfoIcon,
+  CopyCheckmark,
 } from "./RewardReferral.styles";
 
 import { onboard, shortenAddress } from "utils";
-import { useMemo } from "react";
 import { ReferralsSummary } from "views/Rewards/useRewardsView";
-import { ethers } from "ethers";
 
 const { init } = onboard;
 
@@ -56,6 +58,7 @@ const RewardReferral: React.FC<Props> = ({
   referrer,
   referralsSummary,
 }) => {
+  const [showCheck, setShowCheck] = useState(false);
   const referralUrl = useMemo(() => {
     if (referrer) {
       return `across.to/referrer=${referrer}`;
@@ -86,11 +89,17 @@ const RewardReferral: React.FC<Props> = ({
             <CopyRow>
               <ReferralUrl>
                 <span>{displayedReferralUrl}</span>{" "}
-                <CopyIcon
-                  onClick={() => {
-                    navigator.clipboard.writeText(referralUrl);
-                  }}
-                />
+                {!showCheck ? (
+                  <CopyIcon
+                    onClick={() => {
+                      navigator.clipboard.writeText(referralUrl);
+                      setShowCheck(true);
+                      setTimeout(() => setShowCheck(false), 1500);
+                    }}
+                  />
+                ) : (
+                  <CopyCheckmark />
+                )}
               </ReferralUrl>
             </CopyRow>
           ) : (
