@@ -108,6 +108,14 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
           ),
         },
         {
+          value: (
+            <>
+              <div>{r.depositDate}</div>
+              <GrayText>{r.depositDate}</GrayText>
+            </>
+          ),
+        },
+        {
           value: shortenAddress(r.depositorAddr, "...", 4),
         },
         {
@@ -163,6 +171,11 @@ export const headers: ICell[] = [
   },
   {
     size: "xs",
+    value: "Date",
+    cellClassName: "header-cell",
+  },
+  {
+    size: "xs",
     value: "Address",
     cellClassName: "header-cell",
   },
@@ -207,6 +220,14 @@ const DISCONNECTED_ROWS: IRow[] = [
         ),
       },
       {
+        value: (
+          <>
+            <div>30 Jun, 2022</div>
+            <GrayText>12:41 PM</GrayText>
+          </>
+        ),
+      },
+      {
         value: "0x123...4567",
       },
       { value: "$1234.56" },
@@ -246,6 +267,14 @@ const DISCONNECTED_ROWS: IRow[] = [
           <>
             <div>Ethereum Mainnet</div>
             <GrayText>&rarr; Optimism</GrayText>
+          </>
+        ),
+      },
+      {
+        value: (
+          <>
+            <div>30 Jun, 2022</div>
+            <GrayText>1:41 PM</GrayText>
           </>
         ),
       },
