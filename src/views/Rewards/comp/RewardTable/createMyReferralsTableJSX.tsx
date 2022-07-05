@@ -1,4 +1,5 @@
 import ReactDOMServer from "react-dom/server";
+import { DateTime } from "luxon";
 import { getChainInfo, shortenAddress } from "utils";
 import { ethers } from "ethers";
 import { ICell, IRow } from "components/Table/Table";
@@ -110,8 +111,14 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
         {
           value: (
             <>
-              <div>{r.depositDate}</div>
-              <GrayText>{r.depositDate}</GrayText>
+              <div>
+                {DateTime.fromSeconds(Number(r.depositDate)).toFormat(
+                  "dd LLL yyyy"
+                )}
+              </div>
+              <GrayText>
+                {DateTime.fromSeconds(Number(r.depositDate)).toFormat("t")}
+              </GrayText>
             </>
           ),
         },
