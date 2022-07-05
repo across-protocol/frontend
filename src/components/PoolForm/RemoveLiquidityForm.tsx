@@ -330,18 +330,20 @@ const validateForm = (
   addLiquidityGas: ethers.BigNumber = ethers.BigNumber.from("0")
 ) => {
   try {
+    const v = value.replaceAll(",", "");
+
     // liquidity button should be disabled if value is 0, so we dont actually need an error.
-    if (Number(value) === 0) return setFormError("");
-    if (Number(value) < 0) return setFormError("Cannot be less than 0.");
-    if (value && balance) {
-      const valueToWei = toWeiSafe(value, decimals);
+    if (Number(v) === 0) return setFormError("");
+    if (Number(v) < 0) return setFormError("Cannot be less than 0.");
+    if (v && balance) {
+      const valueToWei = toWeiSafe(v, decimals);
       if (valueToWei.gt(balance)) {
         return setFormError("Liquidity amount greater than balance.");
       }
     }
 
-    if (value && symbol === "ETH") {
-      const valueToWei = toWeiSafe(value, decimals);
+    if (v && symbol === "ETH") {
+      const valueToWei = toWeiSafe(v, decimals);
       if (valueToWei.add(addLiquidityGas).gt(balance)) {
         return setFormError("Transaction may fail due to insufficient gas.");
       }
