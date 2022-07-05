@@ -11,7 +11,7 @@ export const Wrapper = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 40px 0 65px;
+  padding: 40px 0 160px;
 `;
 
 export const InfoHeadlineContainer = styled.div`

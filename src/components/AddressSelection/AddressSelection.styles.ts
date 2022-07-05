@@ -8,6 +8,7 @@ import { RoundBox as UnstyledBox, ErrorBox } from "../Box";
 export const LastSection = styled(Section)`
   border-bottom: none;
 `;
+
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -44,6 +45,7 @@ export const Info = styled.div`
     line-height: 1;
   }
 `;
+
 export const Address = styled.div`
   font-size: ${14 / 16}rem;
   text-align: left;
@@ -80,6 +82,7 @@ export const InputWrapper = styled(RoundBox)`
     outline: var(--color-primary-dark) solid 1px;
   }
 `;
+
 export const Input = styled.input`
   width: 100%;
   border: none;
@@ -101,9 +104,11 @@ export const ClearButton = styled(BaseButton)`
   align-items: center;
   padding: 0;
 `;
+
 export const CancelButton = styled(PrimaryButton)`
   border: 1px solid var(--color-gray-300);
 `;
+
 export const ButtonGroup = styled.div`
   display: flex;
   gap: 20px;
@@ -124,7 +129,7 @@ export const Menu = styled.ul<MenuProps>`
   right: 0;
   // HACK: we use this as padding, to prevent elements overflowing into the label when scrolling up
   border-top: 10px solid transparent;
-  transform: translateY(60px);
+  transform: translateY(80px);
   height: fit-content;
   max-height: 50vh;
   overflow-y: auto;
