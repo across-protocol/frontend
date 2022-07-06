@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import assert from "assert";
+import { referrerDelimitterHex } from "./constants";
 
 export function isValidString(s: string | null | undefined | ""): s is string {
   if (s != null && typeof s === "string" && s !== "") {
@@ -88,7 +89,7 @@ export function stringToHex(value: string) {
 // appends hex tag to data
 export function tagHex(dataHex: string, tagHex: string) {
   assert(ethers.utils.isHexString(dataHex), "Data must be valid hex string");
-  return ethers.utils.hexConcat([dataHex, tagHex]);
+  return ethers.utils.hexConcat([dataHex, referrerDelimitterHex, tagHex]);
 }
 
 // converts a string tag to hex and appends, currently not in use

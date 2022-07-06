@@ -677,3 +677,5 @@ const getQueriesTable = () => {
 };
 
 export const queriesTable = getQueriesTable();
+
+export const referrerDelimitterHex = "0xaaaabbbbccccdddd";
