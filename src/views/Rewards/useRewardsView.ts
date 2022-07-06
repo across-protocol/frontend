@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useConnection } from "state/hooks";
 import ReactTooltip from "react-tooltip";
-
+import { useReferrals } from "hooks/useReferrals";
 export interface ReferralsSummary {
   referreeWallets: number;
   transfers: number;
@@ -51,9 +51,7 @@ export const useRewardsView = () => {
   const [referralsSummary, setReferralsSummary] = useState<
     ReferralsSummary | undefined
   >();
-  const [isTableLoading, setIsTableLoading] = useState(false);
-  const [referrals, setReferrals] = useState<Referral[]>([]);
-
+  const { referrals } = useReferrals(account || "");
   useEffect(() => {
     if (account) {
       setIsReferalSummaryLoading(true);
@@ -74,25 +72,6 @@ export const useRewardsView = () => {
   }, [account]);
 
   useEffect(() => {
-    if (account) {
-      setIsTableLoading(true);
-      axios
-        .get<GetReferralsResponse>(
-          `${process.env.REACT_APP_REWARDS_API_URL}/referrals/details?address=${account}&limit=30&offset=0`
-        )
-        .then((response) => {
-          setReferrals(response.data.referrals);
-        })
-        .catch((error) => {
-          console.error(error);
-        })
-        .finally(() => {
-          setIsTableLoading(false);
-        });
-    }
-  }, [account]);
-
-  useEffect(() => {
     ReactTooltip.rebuild();
   });
 
@@ -101,7 +80,6 @@ export const useRewardsView = () => {
     isReferalSummaryLoading,
     isConnected,
     account,
-    isTableLoading,
     referrals,
   };
 };

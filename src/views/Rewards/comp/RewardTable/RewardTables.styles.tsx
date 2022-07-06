@@ -330,7 +330,10 @@ export const StyledETHIcon = styled(ETHLogo)``;
 export const StyledUNILogo = styled(UNILogo)``;
 export const StyledUSDCLogo = styled(USDCLogo)``;
 export const StyledWETHLogo = styled(WETHLogo)``;
-export const StyledDaiLogo = styled(DaiLogo)``;
+export const StyledDaiLogo = styled(DaiLogo)`
+  width: 32px;
+  height: 32px;
+`;
 export const StyledWBTCLogo = styled(WBTCLogo)``;
 export const StyledUmaLogo = styled(UmaLogo)``;
 export const StyledBadgerLogo = styled(BadgerLogo)``;
