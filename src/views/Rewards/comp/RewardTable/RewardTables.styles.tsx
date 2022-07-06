@@ -310,7 +310,6 @@ export const LinkDiv = styled.div`
 export const ReferralDiv = styled.div`
   margin-left: auto;
   svg {
-    display: block !important;
   }
 `;
 
