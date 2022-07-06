@@ -52,9 +52,8 @@ export function useReferrals(account: string) {
 }
 
 /**
- * @param chainId The chain Id of the chain to fetch the latest block from.
- * @param blockHashOrBlockTag The block hash or block tag to fetch, defaults to "latest".
- * @returns A promise resolving to the requested block.
+ * @param account Address of logged in user.
+ * @returns A promise resolving to the referral data of the user
  */
 async function getReferrals(account: string) {
   return axios.get<GetReferralsResponse>(

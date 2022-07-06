@@ -3,7 +3,7 @@ import createMyReferralsTableJSX, {
   headers,
 } from "../RewardTable/createMyReferralsTableJSX";
 import { Wrapper } from "./RewardTableWithOverlay.styles";
-import { Referral } from "views/Rewards/useRewardsView";
+import { Referral } from "hooks/useReferrals";
 
 const RewardTableWithOverlay: React.FC<{
   isConnected: boolean;
