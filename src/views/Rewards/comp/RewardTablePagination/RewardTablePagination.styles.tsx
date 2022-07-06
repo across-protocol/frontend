@@ -7,7 +7,8 @@ export const Wrapper = styled.div`
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin: 2rem 0 8rem;
+  margin: 2rem auto 4rem;
+  max-width: 1390px;
 
   @media ${QUERIES.mobileAndDown} {
     flex-direction: column;
@@ -25,14 +26,14 @@ export const PageSizeSelectWrapper = styled.div`
 `;
 
 export const PageSizeSelectButton = styled(BaseButton)`
-  padding: 4px 12px;
+  padding: 8px 16px;
   display: flex;
   align-items: center;
   font-size: 16px;
   color: var(--color-white);
   line-height: 24px;
   border: 1px solid var(--color-pagination);
-  border-radius: 6px;
+  border-radius: 16px;
 
   svg {
     width: 16px;
