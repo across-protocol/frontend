@@ -43,12 +43,11 @@ function determineIcon(symbol: string) {
 function determineReferralIcon(
   account: string,
   depositAddr: string,
-  key: number
+  referralAddr: string
 ) {
-  if (depositAddr === account) {
+  if (account === referralAddr) {
     return (
       <ReferralDiv
-        key={key}
         data-html={true}
         data-tip={ReactDOMServer.renderToString(
           <RewardTooltip
@@ -63,10 +62,10 @@ function determineReferralIcon(
         <UsersIcon />
       </ReferralDiv>
     );
-  } else {
+  }
+  if (account === depositAddr) {
     return (
       <ReferralDiv
-        key={key}
         data-html={true}
         data-tip={ReactDOMServer.renderToString(
           <RewardTooltip
@@ -83,6 +82,8 @@ function determineReferralIcon(
       </ReferralDiv>
     );
   }
+
+  return null;
 }
 
 // Will take a TransactionsArg
@@ -94,7 +95,11 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
           value: (
             <PoolCellValue>
               {determineIcon(r.symbol)} <div>{r.symbol}</div>{" "}
-              {determineReferralIcon(account, r.depositorAddr, i)}
+              {determineReferralIcon(
+                account,
+                r.depositorAddr,
+                r.referralAddress
+              )}
             </PoolCellValue>
           ),
         },

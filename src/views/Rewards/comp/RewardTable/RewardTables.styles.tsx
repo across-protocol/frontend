@@ -320,4 +320,5 @@ export const EmptyRow = styled.div`
   border: 1px solid #3f4047;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
+  margin: 0 auto;
 `;
