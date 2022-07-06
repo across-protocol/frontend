@@ -88,6 +88,8 @@ function determineReferralIcon(
 // Will take a TransactionsArg
 function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
   const fr = referrals.map((r, i) => {
+    console.log("deposit date", r.depositDate);
+
     return {
       cells: [
         {
@@ -112,12 +114,10 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
           value: (
             <>
               <div>
-                {DateTime.fromSeconds(Number(r.depositDate)).toFormat(
-                  "dd LLL yyyy"
-                )}
+                {DateTime.fromISO(r.depositDate).toFormat("dd LLL yyyy")}
               </div>
               <GrayText>
-                {DateTime.fromSeconds(Number(r.depositDate)).toFormat("t")}
+                {DateTime.fromISO(r.depositDate).toFormat("t")}
               </GrayText>
             </>
           ),
