@@ -11,7 +11,10 @@ import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
-import { ReactComponent as WethLogo } from "assets/weth-logo.svg";
+import { ReactComponent as ETHLogo } from "assets/eth.svg";
+import { ReactComponent as UNILogo } from "assets/uni.svg";
+import { ReactComponent as USDCLogo } from "assets/usdc.svg";
+
 import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
 
 import ProgressBar from "components/ProgressBar";
@@ -226,11 +229,10 @@ export const CircleInfo = () => (
   <StyledCircleInfo icon={faCircleInfo} style={{ color: "white" }} />
 );
 
-export const StyledWETHIcon = styled(WethLogo)`
-  height: 24px;
-  width: 24px;
-`;
+export const StyledETHIcon = styled(ETHLogo)``;
 
+export const StyledUNILogo = styled(UNILogo)``;
+export const StyledUSDCLogo = styled(USDCLogo)``;
 export const PoolCellValue = styled.div`
   font-weight: bold;
   display: flex;
@@ -280,9 +282,7 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
   }
 `;
 
-export const ArrowUpRight = styled(RightUpArrow)`
-  margin-right: 8px;
-`;
+export const ArrowUpRight = styled(RightUpArrow)``;
 
 export const GrayText = styled.div`
   color: #9daab2;
@@ -290,7 +290,7 @@ export const GrayText = styled.div`
 
 export const LinkDiv = styled.div`
   text-align: right;
-  > div {
+  > a {
     border: 1px solid #4c4e57;
     border-radius: 32px;
     height: 36px;
@@ -305,4 +305,21 @@ export const LinkDiv = styled.div`
     height: 14px;
     width: 14px;
   }
+`;
+
+export const ReferralDiv = styled.div`
+  margin-left: auto;
+  svg {
+  }
+`;
+
+export const EmptyRow = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  border: 1px solid #3f4047;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  margin: 0 auto;
+  width: 1400px;
 `;
