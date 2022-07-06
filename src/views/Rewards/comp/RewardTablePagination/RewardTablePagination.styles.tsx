@@ -8,7 +8,7 @@ export const Wrapper = styled.div`
   justify-content: space-between;
   width: 100%;
   margin: 2rem auto 4rem;
-  max-width: 1390px;
+  max-width: 1380px;
 
   @media ${QUERIES.mobileAndDown} {
     flex-direction: column;
@@ -88,9 +88,9 @@ export const PageSizeOptiontButton = styled(BaseButton)`
 
 export const PaginationElements = styled.div`
   display: flex;
-  /* margin: 0 auto; */
   align-items: center;
   justify-content: right;
+  gap: 6px;
 `;
 
 interface IElementWrapper {
@@ -98,20 +98,19 @@ interface IElementWrapper {
 }
 
 export const ElementWrapper = styled.div<IElementWrapper>`
-  background-color: ${({ active }) =>
-    active ? "var(--color-pagination)" : "var(--color-gray-160)"};
+  background-color: var(--color-gray-160);
   color: var(--color-white);
-  border: 1px solid var(--color-pagination);
-  height: 30px;
-  width: 30px;
-  border-radius: 6px;
+  border: ${({ active }) =>
+    active ? "1px solid #ffffff" : "1px solid var(--color-pagination)"};
+  height: 32px;
+  width: 40px;
+  border-radius: 20px;
   text-align: center;
   margin: 0 3px;
-  font-size: ${16 / 16}rem;
+  font-size: ${18 / 16}rem;
   align-items: center;
   &:hover {
     opacity: 0.7;
-    background-color: var(--color-pagination);
     cursor: pointer;
   }
 `;
@@ -124,10 +123,11 @@ export const NextElement = styled.div<INextWrapper>`
   display: flex;
   justify-content: center;
   align-items: center;
-  color: var(--color-white);
+  color: #9daab2;
   height: 32px;
   width: 32px;
   &:hover {
     cursor: pointer;
+    color: var(--color-white);
   }
 `;
