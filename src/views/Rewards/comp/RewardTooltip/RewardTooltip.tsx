@@ -1,4 +1,5 @@
 import { Wrapper, TitleRow, Body } from "./RewardTooltip.styles";
+import "./rewards.scss";
 
 interface Props {
   icon: "user" | "users";

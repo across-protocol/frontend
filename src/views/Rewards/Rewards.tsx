@@ -15,7 +15,7 @@ const Rewards = () => {
 
   return (
     <Wrapper>
-      <ReactTooltip effect="solid" id="rewards" />
+      <ReactTooltip clickable effect="solid" id="rewards" />
       <RewardReferral
         loading={isReferalSummaryLoading}
         referrer={account}

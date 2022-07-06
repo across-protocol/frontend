@@ -1,12 +1,6 @@
 import styled from "@emotion/styled";
 
-export const Wrapper = styled.div`
-  background-color: #212025;
-  padding: 1rem;
-  max-width: 350px;
-  border: 1px solid #3f4047;
-  border-radius: 16px;
-`;
+export const Wrapper = styled.div``;
 
 export const TitleRow = styled.div`
   color: #e0f3ff;
