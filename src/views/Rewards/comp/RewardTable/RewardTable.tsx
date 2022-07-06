@@ -7,6 +7,7 @@ import {
   StyledCell,
   Wrapper,
   Title,
+  EmptyRow,
 } from "./RewardTables.styles";
 import { ICell, IRow } from "components/Table/Table";
 interface TxTableIRow extends IRow {
@@ -22,48 +23,46 @@ interface Props {
 const RewardMyPoolsTable: FC<Props> = ({ rows, headers, title }) => {
   return (
     <Wrapper>
-      {rows.length ? (
-        <>
-          <Title>{title}</Title>
+      <Title>{title}</Title>
 
-          <StyledTableWrapper>
-            <StyledHeadRow>
-              {headers.map((cell, index) => {
-                return (
-                  <StyledCell
-                    key={index}
-                    className={cell.cellClassName ?? ""}
-                    size={cell.size}
-                  >
-                    {cell.value}
-                  </StyledCell>
-                );
-              })}
-            </StyledHeadRow>
-            <StyledBody>
-              {rows.length
-                ? rows.map((row, ridx) => {
+      <StyledTableWrapper>
+        <StyledHeadRow>
+          {headers.map((cell, index) => {
+            return (
+              <StyledCell
+                key={index}
+                className={cell.cellClassName ?? ""}
+                size={cell.size}
+              >
+                {cell.value}
+              </StyledCell>
+            );
+          })}
+        </StyledHeadRow>
+        <StyledBody>
+          {rows.length ? (
+            rows.map((row, ridx) => {
+              return (
+                <StyledRow key={ridx}>
+                  {row.cells.map((cell, cidx) => {
                     return (
-                      <StyledRow key={ridx}>
-                        {row.cells.map((cell, cidx) => {
-                          return (
-                            <StyledCell
-                              className={cell.cellClassName ?? ""}
-                              key={cidx}
-                              size={cell.size}
-                            >
-                              {cell.value}
-                            </StyledCell>
-                          );
-                        })}
-                      </StyledRow>
+                      <StyledCell
+                        className={cell.cellClassName ?? ""}
+                        key={cidx}
+                        size={cell.size}
+                      >
+                        {cell.value}
+                      </StyledCell>
                     );
-                  })
-                : null}
-            </StyledBody>
-          </StyledTableWrapper>
-        </>
-      ) : null}
+                  })}
+                </StyledRow>
+              );
+            })
+          ) : (
+            <EmptyRow>You have no referral transfers yet</EmptyRow>
+          )}
+        </StyledBody>
+      </StyledTableWrapper>
     </Wrapper>
   );
 };

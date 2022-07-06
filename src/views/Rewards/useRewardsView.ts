@@ -1,17 +1,18 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useConnection } from "state/hooks";
+import ReactTooltip from "react-tooltip";
 
-export type ReferralsSummary = {
+export interface ReferralsSummary {
   referreeWallets: number;
   transfers: number;
   volume: number;
   referralRate: number;
   rewardsAmount: string;
   tier: number;
-};
+}
 
-export type Referral = {
+export interface Referral {
   depositTxHash: string;
   sourceChainId: number;
   destinationChainId: number;
@@ -24,16 +25,16 @@ export type Referral = {
   realizedLpFeeUsd: number;
   referralRate: number;
   acxRewards: string;
-};
+}
 
-export type GetReferralsResponse = {
+export interface GetReferralsResponse {
   pagination: {
     total: number;
     limit: number;
     offset: number;
   };
   referrals: Referral[];
-};
+}
 
 const defaultReferralsSummary: ReferralsSummary = {
   referralRate: 0.4,
@@ -58,7 +59,7 @@ export const useRewardsView = () => {
       setIsReferalSummaryLoading(true);
       axios
         .get<ReferralsSummary>(
-          `http://34.148.101.148:3000/referrals/summary?address=${account}`
+          `${process.env.REACT_APP_REWARDS_API_URL}/referrals/summary?address=${account}`
         )
         .then((response) => {
           setReferralsSummary(response.data);
@@ -77,7 +78,7 @@ export const useRewardsView = () => {
       setIsTableLoading(true);
       axios
         .get<GetReferralsResponse>(
-          `http://34.148.101.148:3000/referrals/details?address=${account}&limit=30&offset=0`
+          `${process.env.REACT_APP_REWARDS_API_URL}/referrals/details?address=${account}&limit=30&offset=0`
         )
         .then((response) => {
           setReferrals(response.data.referrals);
@@ -90,6 +91,10 @@ export const useRewardsView = () => {
         });
     }
   }, [account]);
+
+  useEffect(() => {
+    ReactTooltip.rebuild();
+  });
 
   return {
     referralsSummary: referralsSummary || defaultReferralsSummary,

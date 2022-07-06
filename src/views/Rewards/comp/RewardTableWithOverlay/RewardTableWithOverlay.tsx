@@ -8,8 +8,9 @@ import { Referral } from "views/Rewards/useRewardsView";
 const RewardTableWithOverlay: React.FC<{
   isConnected: boolean;
   referrals: Referral[];
-}> = ({ isConnected, referrals }) => {
-  const rows = createMyReferralsTableJSX(referrals, isConnected);
+  account: string;
+}> = ({ isConnected, referrals, account }) => {
+  const rows = createMyReferralsTableJSX(referrals, isConnected, account);
 
   return (
     <Wrapper>

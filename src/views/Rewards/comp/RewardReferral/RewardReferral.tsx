@@ -1,3 +1,6 @@
+import { useMemo, useState } from "react";
+import { ethers } from "ethers";
+
 import { Stepper } from "components";
 import {
   Wrapper,
@@ -5,7 +8,6 @@ import {
   SubHeader,
   CopyRow,
   ReferralUrl,
-  CopyButton,
   StyledReferralLogo,
   ReferralRow,
   ReferralLinkBlock,
@@ -22,12 +24,13 @@ import {
   ConnectButton,
   LearnMoreText,
   ArrowUpRight,
+  CopyIcon,
+  InfoIcon,
+  CopyCheckmark,
 } from "./RewardReferral.styles";
 
 import { onboard, shortenAddress } from "utils";
-import { useMemo } from "react";
 import { ReferralsSummary } from "views/Rewards/useRewardsView";
-import { ethers } from "ethers";
 
 const { init } = onboard;
 
@@ -55,6 +58,7 @@ const RewardReferral: React.FC<Props> = ({
   referrer,
   referralsSummary,
 }) => {
+  const [showCheck, setShowCheck] = useState(false);
   const referralUrl = useMemo(() => {
     if (referrer) {
       return `across.to/referrer=${referrer}`;
@@ -85,13 +89,17 @@ const RewardReferral: React.FC<Props> = ({
             <CopyRow>
               <ReferralUrl>
                 <span>{displayedReferralUrl}</span>{" "}
-                <CopyButton
-                  onClick={() => {
-                    navigator.clipboard.writeText(referralUrl);
-                  }}
-                >
-                  Copy
-                </CopyButton>
+                {!showCheck ? (
+                  <CopyIcon
+                    onClick={() => {
+                      navigator.clipboard.writeText(referralUrl);
+                      setShowCheck(true);
+                      setTimeout(() => setShowCheck(false), 1500);
+                    }}
+                  />
+                ) : (
+                  <CopyCheckmark />
+                )}
               </ReferralUrl>
             </CopyRow>
           ) : (
@@ -110,13 +118,18 @@ const RewardReferral: React.FC<Props> = ({
           <TierHeader>{tiers[referralsSummary.tier].name}</TierHeader>
           <Stepper currentStep={referralsSummary.tier} numSteps={5} />
           <TierInfo>
-            <TierInfoItem>Referee wallets</TierInfoItem>
+            <TierInfoItem>
+              Referee wallets <InfoIcon />
+            </TierInfoItem>
             <TierInfoItem>{referralsSummary.referreeWallets}</TierInfoItem>
-            <TierInfoItem>Transfers</TierInfoItem>
+            <TierInfoItem>
+              Transfers <InfoIcon />
+            </TierInfoItem>
             <TierInfoItem>
               {`${referralsSummary.transfers} Transfers `}
               {referralsSummary.tier < 5 && (
                 <LightGrayItemText>
+                  &rarr;{" "}
                   {`${
                     tiers[referralsSummary.tier + 1].referrals -
                     referralsSummary.transfers
@@ -124,7 +137,7 @@ const RewardReferral: React.FC<Props> = ({
                 </LightGrayItemText>
               )}
             </TierInfoItem>
-            <TierInfoItem>Volume transfers</TierInfoItem>
+            <TierInfoItem>Volume from transfers</TierInfoItem>
             <TierInfoItem>
               {referralsSummary.volume.toLocaleString("en-US", {
                 style: "currency",
@@ -132,6 +145,7 @@ const RewardReferral: React.FC<Props> = ({
               })}
               {referralsSummary.tier < 5 && (
                 <LightGrayItemText>
+                  &rarr;{" "}
                   {`${(
                     tiers[referralsSummary.tier + 1].volume -
                     referralsSummary.volume
@@ -142,7 +156,9 @@ const RewardReferral: React.FC<Props> = ({
                 </LightGrayItemText>
               )}
             </TierInfoItem>
-            <TierInfoItem>Tier bonus</TierInfoItem>
+            <TierInfoItem>
+              Referral rate <InfoIcon />
+            </TierInfoItem>
             <TierInfoItem>
               <GreenItemText>{`${
                 referralsSummary.referralRate * 100
