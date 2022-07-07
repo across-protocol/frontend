@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import assert from "assert";
-import { referrerDelimitterHex } from "./constants";
 
 export function isValidString(s: string | null | undefined | ""): s is string {
   if (s != null && typeof s === "string" && s !== "") {
@@ -105,10 +104,10 @@ export function tagString(dataHex: string, tagString: string) {
 export function tagAddress(
   dataHex: string,
   address: string,
-  delimitterHex: string = ""
+  delimiterHex: string = ""
 ) {
   assert(ethers.utils.isAddress(address), "Data must be a valid address");
-  return tagHex(dataHex, address, delimitterHex);
+  return tagHex(dataHex, address, delimiterHex);
 }
 
 export function capitalizeFirstLetter(str: string) {

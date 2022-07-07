@@ -19,7 +19,7 @@ import {
   queriesTable,
   FLAT_RELAY_CAPITAL_FEE,
   relayerFeeCapitalCostConfig,
-  referrerDelimitterHex,
+  referrerDelimiterHex,
 } from "./constants";
 
 import { parseEther, tagAddress } from "./format";
@@ -238,7 +238,7 @@ export async function sendAcrossDeposit(
   // do not tag a referrer if data is not provided as a hex string.
   tx.data =
     referrer && ethers.utils.isAddress(referrer)
-      ? tagAddress(tx.data!, referrer, referrerDelimitterHex)
+      ? tagAddress(tx.data!, referrer, referrerDelimiterHex)
       : tx.data;
 
   return signer.sendTransaction(tx);
