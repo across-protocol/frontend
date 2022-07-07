@@ -1,8 +1,8 @@
 import { cloneElement } from "react";
-import { Wrapper } from "./Stepper.styles";
+import { Wrapper } from "./StepperWithTooltips.styles";
 
 import useStepperWithTooltips from "./useStepperWithTooltips";
-import { TooltipProps } from "views/Rewards/comp/RewardTooltip/RewardTooltip";
+import { TooltipProps } from "../RewardTooltip/RewardTooltip";
 interface Props {
   currentStep: number;
   numSteps: number;

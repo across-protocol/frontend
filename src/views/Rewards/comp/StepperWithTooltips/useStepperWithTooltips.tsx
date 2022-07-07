@@ -6,7 +6,7 @@ import {
   StepItemComplete,
   SeperatorComplete,
   NextStepItem,
-} from "./Stepper.styles";
+} from "./StepperWithTooltips.styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { TooltipProps } from "views/Rewards/comp/RewardTooltip/RewardTooltip";
