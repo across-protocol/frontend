@@ -6,7 +6,7 @@ import { ReactComponent as RightArrow } from "assets/corner-down-right-tooltip.s
 import "./rewards.scss";
 
 interface Props {
-  icon: "user" | "users";
+  icon?: "user" | "users";
   title: string;
   body: string;
 }
@@ -20,11 +20,9 @@ const ReferralTooltip: React.FC<Props> = ({ icon, title, body }) => {
             <>
               <RightArrow /> <User />
             </>
-          ) : (
-            <>
-              <Users />
-            </>
-          )}
+          ) : icon === "users" ? (
+            <Users />
+          ) : null}
         </ToolTips>
         {title}
       </TitleRow>

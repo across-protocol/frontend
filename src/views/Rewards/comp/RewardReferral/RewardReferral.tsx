@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import ReactDOMServer from "react-dom/server";
 import { ethers } from "ethers";
 
 import { Stepper } from "components";
@@ -27,10 +28,12 @@ import {
   CopyIcon,
   InfoIcon,
   CopyCheckmark,
+  InlineTooltipWrapper,
 } from "./RewardReferral.styles";
 
 import { onboard, shortenAddress } from "utils";
 import { ReferralsSummary } from "hooks/useReferralSummary";
+import RewardTooltip from "../RewardTooltip";
 
 const { init } = onboard;
 
@@ -119,7 +122,20 @@ const RewardReferral: React.FC<Props> = ({
           <Stepper currentStep={referralsSummary.tier} numSteps={5} />
           <TierInfo>
             <TierInfoItem>
-              Referee wallets <InfoIcon />
+              Referee wallets{" "}
+              <InlineTooltipWrapper
+                data-html={true}
+                data-tip={ReactDOMServer.renderToString(
+                  <RewardTooltip
+                    title="Active referree wallet"
+                    body="Number of unique wallets that have used your referral link."
+                  />
+                )}
+                data-for="rewards"
+                data-place="right"
+              >
+                <InfoIcon />
+              </InlineTooltipWrapper>
             </TierInfoItem>
             <TierInfoItem>{referralsSummary.referreeWallets}</TierInfoItem>
             <TierInfoItem>

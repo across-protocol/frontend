@@ -221,3 +221,7 @@ const CM = styled(FontAwesomeIcon)`
   }
 `;
 export const CopyCheckmark = () => <CM icon={faCheckCircle} />;
+
+export const InlineTooltipWrapper = styled.div`
+  display: inline-block;
+`;
