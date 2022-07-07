@@ -11,13 +11,13 @@ import { ReactComponent as RightArrow } from "assets/corner-down-right-tooltip.s
 
 import "./rewards.scss";
 
-interface Props {
+export interface TooltipProps {
   icon?: "user" | "users" | "green-checkmark";
   title: string;
   body: string;
 }
 
-const ReferralTooltip: React.FC<Props> = ({ icon, title, body }) => {
+const ReferralTooltip: React.FC<TooltipProps> = ({ icon, title, body }) => {
   return (
     <Wrapper>
       <TitleRow>
