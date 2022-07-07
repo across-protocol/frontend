@@ -52,6 +52,6 @@ export function useReferralSummary(account: string) {
  */
 async function getReferrals(account: string) {
   return axios.get<ReferralsSummary>(
-    `${rewardsApiUrl}/referrals/summary?address=${account}`
+    `${rewardsApiUrl}referrals/summary?address=${account}`
   );
 }
