@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import { getChainInfo, shortenAddress } from "utils";
 import { ethers } from "ethers";
 import { ICell, IRow } from "components/Table/Table";
-import { Referral } from "views/Rewards/useRewardsView";
+import { Referral } from "hooks/useReferrals";
 import {
   StyledETHIcon,
   PoolCellValue,
@@ -13,6 +13,11 @@ import {
   StyledUNILogo,
   StyledUSDCLogo,
   ReferralDiv,
+  StyledWETHLogo,
+  StyledDaiLogo,
+  StyledWBTCLogo,
+  StyledUmaLogo,
+  StyledBadgerLogo,
 } from "./RewardTables.styles";
 import { ReactComponent as UserIcon } from "assets/user.svg";
 import { ReactComponent as ArrowUserIcon } from "assets/corner-down-right.svg";
@@ -35,6 +40,16 @@ function determineIcon(symbol: string) {
       return <StyledUSDCLogo />;
     case "UNI":
       return <StyledUNILogo />;
+    case "WBTC":
+      return <StyledWBTCLogo />;
+    case "WETH":
+      return <StyledWETHLogo />;
+    case "DAI":
+      return <StyledDaiLogo />;
+    case "UMA":
+      return <StyledUmaLogo />;
+    case "BADGER":
+      return <StyledBadgerLogo />;
     default:
       return <StyledETHIcon />;
   }

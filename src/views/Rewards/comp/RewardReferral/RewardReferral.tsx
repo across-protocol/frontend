@@ -30,7 +30,7 @@ import {
 } from "./RewardReferral.styles";
 
 import { onboard, shortenAddress } from "utils";
-import { ReferralsSummary } from "views/Rewards/useRewardsView";
+import { ReferralsSummary } from "hooks/useReferralSummary";
 
 const { init } = onboard;
 

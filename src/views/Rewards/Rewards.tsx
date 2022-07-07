@@ -11,6 +11,11 @@ const Rewards = () => {
     isReferalSummaryLoading,
     referralsSummary,
     referrals,
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    pageSizes,
   } = useRewardsView();
 
   return (
@@ -26,6 +31,11 @@ const Rewards = () => {
         isConnected={isConnected}
         referrals={referrals}
         account={account || ""}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
+        pageSizes={pageSizes}
       />
       <Footer />
     </Wrapper>
