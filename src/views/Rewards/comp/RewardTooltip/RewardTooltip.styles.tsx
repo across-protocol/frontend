@@ -1,4 +1,6 @@
 import styled from "@emotion/styled";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 
 export const Wrapper = styled.div``;
 
@@ -25,3 +27,12 @@ export const ToolTips = styled.div`
     }
   }
 `;
+
+const GC = styled(FontAwesomeIcon)`
+  margin-top: 4px;
+  margin-left: 8px;
+  path {
+    fill: var(--color-primary);
+  }
+`;
+export const GreenCheckmark = () => <GC icon={faCheckCircle} />;
