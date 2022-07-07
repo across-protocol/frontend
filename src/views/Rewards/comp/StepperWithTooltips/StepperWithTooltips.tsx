@@ -3,6 +3,7 @@ import { Wrapper } from "./StepperWithTooltips.styles";
 
 import useStepperWithTooltips from "./useStepperWithTooltips";
 import { TooltipProps } from "../RewardTooltip/RewardTooltip";
+import ReactTooltip from "react-tooltip";
 interface Props {
   currentStep: number;
   numSteps: number;
@@ -27,6 +28,7 @@ const StepperWithTooltips: React.FC<Props> = ({
       {stepItems.map((el, i) => {
         return cloneElement(el, { key: i });
       })}
+      <ReactTooltip id={tooltipId} />
     </Wrapper>
   );
 };

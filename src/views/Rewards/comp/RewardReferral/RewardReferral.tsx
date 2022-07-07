@@ -1,8 +1,6 @@
 import { useMemo, useState } from "react";
 import ReactDOMServer from "react-dom/server";
 import { ethers } from "ethers";
-
-import { Stepper } from "components";
 import {
   Wrapper,
   Header,
@@ -34,6 +32,7 @@ import {
 import { onboard, shortenAddress } from "utils";
 import { ReferralsSummary } from "hooks/useReferralSummary";
 import RewardTooltip from "../RewardTooltip";
+import StepperWithTooltips from "../StepperWithTooltips";
 
 const { init } = onboard;
 
@@ -119,7 +118,33 @@ const RewardReferral: React.FC<Props> = ({
         <ReferralTierBlock>
           <TierSmHeader>Current referral tier</TierSmHeader>
           <TierHeader>{tiers[referralsSummary.tier].name}</TierHeader>
-          <Stepper currentStep={referralsSummary.tier} numSteps={5} />
+          <StepperWithTooltips
+            currentStep={referralsSummary.tier}
+            numSteps={5}
+            tooltipId="referral"
+            tooltips={[
+              {
+                title: "Copper tier",
+                body: "This is the starting tier and doesn’t require any bridge volume or referrals to reach.",
+              },
+              {
+                title: "Bronzer tier",
+                body: "Requires a bridge volume of more than $50,000 or 3 unique referrals. ",
+              },
+              {
+                title: "Silver tier",
+                body: "Stub for silver tier",
+              },
+              {
+                title: "Gold tier",
+                body: "Stub for gold tier",
+              },
+              {
+                title: "Platinum tier",
+                body: "Stub for platinum tier",
+              },
+            ]}
+          />
           <TierInfo>
             <TierInfoItem>
               Referee wallets{" "}

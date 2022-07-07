@@ -6,11 +6,14 @@ import {
   StepItemComplete,
   SeperatorComplete,
   NextStepItem,
+  TooltipWrapper,
 } from "./StepperWithTooltips.styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { TooltipProps } from "views/Rewards/comp/RewardTooltip/RewardTooltip";
 import RewardTooltip from "views/Rewards/comp/RewardTooltip";
+import ReactTooltip from "react-tooltip";
+
 export default function useStepperWithTooltips(
   currentStep: number,
   numSteps: number,
@@ -26,37 +29,12 @@ export default function useStepperWithTooltips(
       let item: JSX.Element;
       if (completed) {
         item = (
-          <div
-            data-html={true}
-            data-tip={ReactDOMServer.renderToString(
-              <RewardTooltip
-                icon="green-checkmark"
-                title={tooltips[i - 1].title}
-                body={tooltips[i - 1].body}
-              />
-            )}
-            data-for={tooltipId}
-            data-place="right"
-          >
-            <StepItemComplete>
-              <FontAwesomeIcon icon={faCheck} />
-            </StepItemComplete>
-            <SeperatorComplete />
-          </div>
-        );
-      } else if (current) {
-        if (currentStep === numSteps) {
-          item = (
-            <>
-              <StepItem>{i}</StepItem>
-            </>
-          );
-        } else {
-          item = (
-            <div
+          <>
+            <StepItemComplete
               data-html={true}
               data-tip={ReactDOMServer.renderToString(
                 <RewardTooltip
+                  icon="green-checkmark"
                   title={tooltips[i - 1].title}
                   body={tooltips[i - 1].body}
                 />
@@ -64,45 +42,75 @@ export default function useStepperWithTooltips(
               data-for={tooltipId}
               data-place="right"
             >
+              <FontAwesomeIcon icon={faCheck} />
+            </StepItemComplete>
+            <SeperatorComplete />
+          </>
+        );
+      } else if (current) {
+        if (currentStep === numSteps) {
+          item = (
+            <TooltipWrapper>
               <StepItem>{i}</StepItem>
+            </TooltipWrapper>
+          );
+        } else {
+          item = (
+            <>
+              <StepItem
+                data-html={true}
+                data-tip={ReactDOMServer.renderToString(
+                  <RewardTooltip
+                    title={tooltips[i - 1].title}
+                    body={tooltips[i - 1].body}
+                  />
+                )}
+                data-for={tooltipId}
+                data-place="right"
+              >
+                {i}
+              </StepItem>
               <Seperator />
-            </div>
+            </>
           );
         }
       } else {
         if (i === numSteps) {
           item = (
-            <div
-              data-html={true}
-              data-tip={ReactDOMServer.renderToString(
-                <RewardTooltip
-                  title={tooltips[i - 1].title}
-                  body={tooltips[i - 1].body}
-                />
-              )}
-              data-for={tooltipId}
-              data-place="right"
-            >
-              <NextStepItem>{i}</NextStepItem>
-            </div>
+            <>
+              <NextStepItem
+                data-html={true}
+                data-tip={ReactDOMServer.renderToString(
+                  <RewardTooltip
+                    title={tooltips[i - 1].title}
+                    body={tooltips[i - 1].body}
+                  />
+                )}
+                data-for={tooltipId}
+                data-place="right"
+              >
+                {i}
+              </NextStepItem>
+            </>
           );
         } else {
           item = (
-            <div
-              data-html={true}
-              data-tip={ReactDOMServer.renderToString(
-                <RewardTooltip
-                  title={tooltips[i - 1].title}
-                  body={tooltips[i - 1].body}
-                />
-              )}
-              data-for={tooltipId}
-              data-place="right"
-            >
-              {" "}
-              <NextStepItem>{i}</NextStepItem>
+            <>
+              <NextStepItem
+                data-html={true}
+                data-tip={ReactDOMServer.renderToString(
+                  <RewardTooltip
+                    title={tooltips[i - 1].title}
+                    body={tooltips[i - 1].body}
+                  />
+                )}
+                data-for={tooltipId}
+                data-place="right"
+              >
+                {i}
+              </NextStepItem>
               <Seperator />
-            </div>
+            </>
           );
         }
       }
@@ -110,11 +118,15 @@ export default function useStepperWithTooltips(
       items.push(item);
     }
     setStepItems(items);
-  }, [numSteps, currentStep]);
+  }, [numSteps, currentStep, tooltipId, tooltips]);
 
   useEffect(() => {
     createStepsItems();
   }, [numSteps, createStepsItems]);
+
+  useEffect(() => {
+    ReactTooltip.rebuild();
+  });
 
   return {
     stepItems,
