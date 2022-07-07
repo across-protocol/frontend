@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useQuery } from "react-query";
+import { rewardsApiUrl } from "utils";
 
 /**
  * Fetches the latest block from a given chain Id on an interval.
@@ -51,6 +52,6 @@ export function useReferralSummary(account: string) {
  */
 async function getReferrals(account: string) {
   return axios.get<ReferralsSummary>(
-    `${process.env.REACT_APP_REWARDS_API_URL}/referrals/summary?address=${account}`
+    `${rewardsApiUrl}/referrals/summary?address=${account}`
   );
 }
