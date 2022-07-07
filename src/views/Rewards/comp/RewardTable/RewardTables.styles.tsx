@@ -14,6 +14,11 @@ import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { ReactComponent as ETHLogo } from "assets/eth.svg";
 import { ReactComponent as UNILogo } from "assets/uni.svg";
 import { ReactComponent as USDCLogo } from "assets/usdc.svg";
+import { ReactComponent as WETHLogo } from "assets/weth.svg";
+import { ReactComponent as BadgerLogo } from "assets/badger.svg";
+import { ReactComponent as DaiLogo } from "assets/dai.svg";
+import { ReactComponent as UmaLogo } from "assets/uma.svg";
+import { ReactComponent as WBTCLogo } from "assets/wbtc.svg";
 
 import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
 
@@ -229,10 +234,6 @@ export const CircleInfo = () => (
   <StyledCircleInfo icon={faCircleInfo} style={{ color: "white" }} />
 );
 
-export const StyledETHIcon = styled(ETHLogo)``;
-
-export const StyledUNILogo = styled(UNILogo)``;
-export const StyledUSDCLogo = styled(USDCLogo)``;
 export const PoolCellValue = styled.div`
   font-weight: bold;
   display: flex;
@@ -323,3 +324,16 @@ export const EmptyRow = styled.div`
   margin: 0 auto;
   width: 1400px;
 `;
+
+export const StyledETHIcon = styled(ETHLogo)``;
+
+export const StyledUNILogo = styled(UNILogo)``;
+export const StyledUSDCLogo = styled(USDCLogo)``;
+export const StyledWETHLogo = styled(WETHLogo)``;
+export const StyledDaiLogo = styled(DaiLogo)`
+  width: 32px;
+  height: 32px;
+`;
+export const StyledWBTCLogo = styled(WBTCLogo)``;
+export const StyledUmaLogo = styled(UmaLogo)``;
+export const StyledBadgerLogo = styled(BadgerLogo)``;
