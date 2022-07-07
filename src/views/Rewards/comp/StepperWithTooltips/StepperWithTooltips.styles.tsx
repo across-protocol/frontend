@@ -47,7 +47,3 @@ export const NextStepItem = styled(StepItem)`
   color: #9daab2;
   border: 1px solid #9daab2;
 `;
-
-export const TooltipWrapper = styled.div`
-  display: flex;
-`;

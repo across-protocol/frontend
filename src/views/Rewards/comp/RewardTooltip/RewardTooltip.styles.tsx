@@ -1,6 +1,5 @@
 import styled from "@emotion/styled";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import { ReactComponent as UnstyledCheckmark } from "assets/checkmark.svg";
 
 export const Wrapper = styled.div``;
 
@@ -28,11 +27,21 @@ export const ToolTips = styled.div`
   }
 `;
 
-const GC = styled(FontAwesomeIcon)`
-  margin-top: 4px;
-  margin-left: 8px;
+export const Checkmark = styled(UnstyledCheckmark)`
+  border: 1px solid #4c4e57;
+
+  height: 16px;
+  width: 16px;
+  border-radius: 8px;
+  padding: 2px;
   path {
-    fill: var(--color-primary);
+    stroke: #4c4e57;
   }
 `;
-export const GreenCheckmark = () => <GC icon={faCheckCircle} />;
+
+export const GreenCheckmark = styled(Checkmark)`
+  border-color: var(--color-primary);
+  path {
+    stroke: var(--color-primary);
+  }
+`;
