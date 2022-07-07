@@ -1,14 +1,14 @@
 import { cloneElement } from "react";
 import { Wrapper } from "./Stepper.styles";
 
-import useSimpleStepper from "./useStepper";
+import useStepper from "./useStepper";
 interface Props {
   currentStep: number;
   numSteps: number;
 }
 
 const Stepper: React.FC<Props> = ({ currentStep, numSteps }) => {
-  const { stepItems } = useSimpleStepper(currentStep, numSteps);
+  const { stepItems } = useStepper(currentStep, numSteps);
   return (
     <Wrapper>
       {stepItems.map((el, i) => {
