@@ -1,4 +1,4 @@
-import { Wrapper } from "./RewardMediumBlock.styles";
+import { Wrapper, UpRightArrow } from "./RewardMediumBlock.styles";
 import { mediumUrl } from "utils";
 
 const RewardMediumBlock = () => {
@@ -12,7 +12,7 @@ const RewardMediumBlock = () => {
         <span>
           <a href={mediumUrl} target="_blank" rel="noreferrer">
             {" "}
-            Read more
+            Read more <UpRightArrow />
           </a>
         </span>
       </div>
