@@ -58,6 +58,6 @@ export function useReferrals(account: string) {
  */
 async function getReferrals(account: string) {
   return axios.get<GetReferralsResponse>(
-    `${rewardsApiUrl}referrals/details?address=${account}&limit=30&offset=0`
+    `${rewardsApiUrl}/referrals/details?address=${account}&limit=30&offset=0`
   );
 }

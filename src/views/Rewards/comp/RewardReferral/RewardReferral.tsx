@@ -124,24 +124,24 @@ const RewardReferral: React.FC<Props> = ({
             tooltipId="referral"
             tooltips={[
               {
-                title: "Copper tier",
-                body: "This is the starting tier and doesn’t require any bridge volume or referrals to reach.",
+                title: "Copper tier - 40% referral rate",
+                body: "Starting tier with no requirements to join.",
               },
               {
-                title: "Bronzer tier",
-                body: "Requires a bridge volume of more than $50,000 or 3 unique referrals. ",
+                title: "Bronzer tier - 50% referral rate",
+                body: "Requires over $50,000 of bridge volume or 3 unique referral transfers.",
               },
               {
-                title: "Silver tier",
-                body: "Stub for silver tier",
+                title: "Silver tier - 60% referral rate",
+                body: "Requires over $100,000 of bridge volume or 5 unique referral transfers.",
               },
               {
-                title: "Gold tier",
-                body: "Stub for gold tier",
+                title: "Gold tier - 70% referral rate",
+                body: "Requires over $250,000 of bridge volume or 10 unique referral transfers.",
               },
               {
-                title: "Platinum tier",
-                body: "Stub for platinum tier",
+                title: "Platinum tier - 80% referral rate",
+                body: "Requires over $500,000 of bridge volume or 20 unique referral transfers.",
               },
             ]}
           />
