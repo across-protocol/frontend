@@ -86,9 +86,13 @@ export function stringToHex(value: string) {
 }
 
 // appends hex tag to data
-export function tagHex(dataHex: string, tagHex: string) {
+export function tagHex(
+  dataHex: string,
+  tagHex: string,
+  delimitterHex: string = ""
+) {
   assert(ethers.utils.isHexString(dataHex), "Data must be valid hex string");
-  return ethers.utils.hexConcat([dataHex, tagHex]);
+  return ethers.utils.hexConcat([dataHex, delimitterHex, tagHex]);
 }
 
 // converts a string tag to hex and appends, currently not in use
@@ -97,9 +101,13 @@ export function tagString(dataHex: string, tagString: string) {
 }
 
 // tags only an address
-export function tagAddress(dataHex: string, address: string) {
+export function tagAddress(
+  dataHex: string,
+  address: string,
+  delimiterHex: string = ""
+) {
   assert(ethers.utils.isAddress(address), "Data must be a valid address");
-  return tagHex(dataHex, address);
+  return tagHex(dataHex, address, delimiterHex);
 }
 
 export function capitalizeFirstLetter(str: string) {
