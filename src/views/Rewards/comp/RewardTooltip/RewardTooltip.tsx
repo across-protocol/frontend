@@ -1,17 +1,24 @@
-import { Wrapper, TitleRow, Body, ToolTips } from "./RewardTooltip.styles";
+import {
+  Wrapper,
+  TitleRow,
+  Body,
+  ToolTips,
+  GreenCheckmark,
+  Checkmark,
+} from "./RewardTooltip.styles";
 import { ReactComponent as User } from "assets/user-tooltip.svg";
 import { ReactComponent as Users } from "assets/users-tooltip.svg";
 import { ReactComponent as RightArrow } from "assets/corner-down-right-tooltip.svg";
 
 import "./rewards.scss";
 
-interface Props {
-  icon: "user" | "users";
+export interface TooltipProps {
+  icon?: "user" | "users" | "green-checkmark" | "checkmark";
   title: string;
   body: string;
 }
 
-const ReferralTooltip: React.FC<Props> = ({ icon, title, body }) => {
+const ReferralTooltip: React.FC<TooltipProps> = ({ icon, title, body }) => {
   return (
     <Wrapper>
       <TitleRow>
@@ -20,11 +27,13 @@ const ReferralTooltip: React.FC<Props> = ({ icon, title, body }) => {
             <>
               <RightArrow /> <User />
             </>
-          ) : (
-            <>
-              <Users />
-            </>
-          )}
+          ) : icon === "users" ? (
+            <Users />
+          ) : icon === "green-checkmark" ? (
+            <GreenCheckmark />
+          ) : icon === "checkmark" ? (
+            <Checkmark />
+          ) : null}
         </ToolTips>
         {title}
       </TitleRow>

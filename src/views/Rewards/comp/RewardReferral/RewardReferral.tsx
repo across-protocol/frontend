@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
+import ReactDOMServer from "react-dom/server";
 import { ethers } from "ethers";
-
-import { Stepper } from "components";
 import {
   Wrapper,
   Header,
@@ -27,10 +26,13 @@ import {
   CopyIcon,
   InfoIcon,
   CopyCheckmark,
+  InlineTooltipWrapper,
 } from "./RewardReferral.styles";
 
 import { onboard, shortenAddress } from "utils";
 import { ReferralsSummary } from "hooks/useReferralSummary";
+import RewardTooltip from "../RewardTooltip";
+import StepperWithTooltips from "../StepperWithTooltips";
 
 const { init } = onboard;
 
@@ -116,10 +118,49 @@ const RewardReferral: React.FC<Props> = ({
         <ReferralTierBlock>
           <TierSmHeader>Current referral tier</TierSmHeader>
           <TierHeader>{tiers[referralsSummary.tier].name}</TierHeader>
-          <Stepper currentStep={referralsSummary.tier} numSteps={5} />
+          <StepperWithTooltips
+            currentStep={referralsSummary.tier}
+            numSteps={5}
+            tooltipId="referral"
+            tooltips={[
+              {
+                title: "Copper tier - 40% referral rate",
+                body: "Starting tier with no requirements to join.",
+              },
+              {
+                title: "Bronzer tier - 50% referral rate",
+                body: "Requires over $50,000 of bridge volume or 3 unique referral transfers.",
+              },
+              {
+                title: "Silver tier - 60% referral rate",
+                body: "Requires over $100,000 of bridge volume or 5 unique referral transfers.",
+              },
+              {
+                title: "Gold tier - 70% referral rate",
+                body: "Requires over $250,000 of bridge volume or 10 unique referral transfers.",
+              },
+              {
+                title: "Platinum tier - 80% referral rate",
+                body: "Requires over $500,000 of bridge volume or 20 unique referral transfers.",
+              },
+            ]}
+          />
           <TierInfo>
             <TierInfoItem>
-              Referee wallets <InfoIcon />
+              Referee wallets{" "}
+              <InlineTooltipWrapper
+                data-html={true}
+                data-tip={ReactDOMServer.renderToString(
+                  <RewardTooltip
+                    title="Active referree wallet"
+                    body="Number of unique wallets that have used your referral link."
+                  />
+                )}
+                data-for="rewards"
+                data-place="right"
+              >
+                <InfoIcon />
+              </InlineTooltipWrapper>
             </TierInfoItem>
             <TierInfoItem>{referralsSummary.referreeWallets}</TierInfoItem>
             <TierInfoItem>
