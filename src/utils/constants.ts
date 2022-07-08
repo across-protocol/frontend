@@ -678,4 +678,4 @@ const getQueriesTable = () => {
 
 export const queriesTable = getQueriesTable();
 
-export const referrerDelimiterHex = "0xdoodfeeddeadbeef";
+export const referrerDelimiterHex = "0xd00dfeeddeadbeef";
