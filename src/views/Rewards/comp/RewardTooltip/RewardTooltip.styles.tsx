@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { ReactComponent as UnstyledCheckmark } from "assets/checkmark.svg";
 
 export const Wrapper = styled.div``;
 
@@ -23,5 +24,24 @@ export const ToolTips = styled.div`
       margin-left: -2px;
       margin-right: 8px;
     }
+  }
+`;
+
+export const Checkmark = styled(UnstyledCheckmark)`
+  border: 1px solid #4c4e57;
+
+  height: 16px;
+  width: 16px;
+  border-radius: 8px;
+  padding: 2px;
+  path {
+    stroke: #4c4e57;
+  }
+`;
+
+export const GreenCheckmark = styled(Checkmark)`
+  border-color: var(--color-primary);
+  path {
+    stroke: var(--color-primary);
   }
 `;
