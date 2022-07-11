@@ -1,9 +1,13 @@
 import { Wrapper } from "./Rewards.styles";
-import { RewardReferral, RewardTableWithOverlay } from "./comp";
+import {
+  RewardReferral,
+  RewardTableWithOverlay,
+  RewardMediumBlock,
+} from "./comp";
 import Footer from "components/Footer";
 import { useRewardsView } from "./useRewardsView";
 import ReactTooltip from "react-tooltip";
-
+import { mediumUrl } from "utils";
 const Rewards = () => {
   const {
     account,
@@ -27,6 +31,7 @@ const Rewards = () => {
         referralsSummary={referralsSummary}
         isConnected={isConnected}
       />
+      {mediumUrl && <RewardMediumBlock />}
       <RewardTableWithOverlay
         isConnected={isConnected}
         referrals={referrals}
