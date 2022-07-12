@@ -5,8 +5,6 @@ import { QUERIES } from "utils";
 
 export const RewardBreakdownSection = styled.section`
   width: 100%;
-  max-width: 1400px;
-  margin: 1rem auto;
 `;
 
 export const RewardBlockWrapper = styled.div`
@@ -90,11 +88,10 @@ export const RewardAmountSmall = styled.div`
 
 export const InfoButtonRow = styled.div`
   display: block;
-  margin: 1rem auto;
   overflow-x: scroll;
   width: 100%;
   white-space: nowrap;
-  max-width: 1400px;
+
   ::-webkit-scrollbar {
     height: 6px;
   }

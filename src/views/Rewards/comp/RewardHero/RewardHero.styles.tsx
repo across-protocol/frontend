@@ -5,13 +5,9 @@ import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
   width: 100%;
-  max-width: 1400px;
-  margin: 1rem auto 1.5rem;
   background-color: var(--color-primary);
-  padding: 1.5rem 2rem;
+
   @media ${QUERIES.tabletAndDown} {
-    margin-bottom: 1rem;
-    width: 95%;
   }
 `;
 
