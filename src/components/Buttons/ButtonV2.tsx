@@ -7,7 +7,7 @@ export const ButtonV2 = styled.button<{ size: "sm" | "md" | "lg" }>`
   font-size: ${({ size }) => {
     if (size === "lg") return "18px";
     if (size === "md") return "16px";
-    if (size === "sm") return "14";
+    if (size === "sm") return "14px";
   }};
   line-height: ${({ size }) => {
     if (size === "lg") return "26px";
@@ -17,7 +17,7 @@ export const ButtonV2 = styled.button<{ size: "sm" | "md" | "lg" }>`
   padding: ${({ size }) => {
     if (size === "lg") return "19px 40px";
     if (size === "md") return "10px 20px";
-    if (size === "sm") return "7px 12px";
+    if (size === "sm") return "11px 16px";
   }};
   color: #2d2e33;
   background-color: #6cf9d8;

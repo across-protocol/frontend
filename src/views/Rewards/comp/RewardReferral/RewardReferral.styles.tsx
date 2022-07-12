@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { ButtonV2, SecondaryButtonWithoutShadow } from "components/Buttons";
 import { ReactComponent as ReferralSVG } from "assets/across-referrals.svg";
-import { ReactComponent as ExternalLink16Icon } from "assets/icons/external-link-16.svg";
+import { ReactComponent as ExternalLink12Icon } from "assets/icons/external-link-12.svg";
 import { ReactComponent as LinkIcon } from "assets/link.svg";
 import { ReactComponent as II } from "assets/info.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -220,10 +220,16 @@ export const ReferralLinkButtonsRow = styled.div`
   }
 `;
 
-export const ConnectButton = styled(ButtonV2)``;
+export const ConnectButton = styled(ButtonV2)`
+  @media screen and (max-width: 428px) {
+    font-size: 14px;
+    line-height: 18px;
+    padding: 11px 16px;
+  }
+`;
 
-export const ExternalLinkIcon = styled(ExternalLink16Icon)`
-  margin-left: 6px;
+export const ExternalLinkIcon = styled(ExternalLink12Icon)`
+  margin: 2px 0 0 4px;
 `;
 
 export const CopyIcon = styled(LinkIcon)`
@@ -262,6 +268,11 @@ export const ExternalLink = styled.a`
 
   &:hover {
     opacity: 0.8;
+  }
+
+  @media (max-width: 428px) {
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
   }
 `;
 
