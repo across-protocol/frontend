@@ -348,6 +348,8 @@ const validateForm = (
         return setFormError("Transaction may fail due to insufficient gas.");
       }
     }
+    // make sure any previous errors are cleared, for instance when typing .7.
+    setFormError("");
   } catch (e) {
     return setFormError("Invalid number.");
   }
