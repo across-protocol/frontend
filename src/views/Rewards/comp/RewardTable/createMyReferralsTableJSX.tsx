@@ -6,10 +6,7 @@ import { ICell, IRow } from "components/Table/Table";
 import { Referral } from "hooks/useReferrals";
 import {
   StyledETHIcon,
-  PoolCellValue,
-  ArrowUpRight,
   GrayText,
-  LinkDiv,
   StyledUNILogo,
   StyledUSDCLogo,
   ReferralDiv,
@@ -18,9 +15,25 @@ import {
   StyledWBTCLogo,
   StyledUmaLogo,
   StyledBadgerLogo,
+  AssetHeadCell,
+  AssetCell,
+  ChainsCell,
+  ChainsHeadCell,
+  DateCell,
+  DateHeadCell,
+  AddressCell,
+  AddressHeadCell,
+  BridgeFeeCell,
+  BridgeFeeHeadCell,
+  ReferralRateCell,
+  ReferralRateHeadCell,
+  RewardsCell,
+  RewardsHeadCell,
+  ExplorerLinkContainer,
 } from "./RewardTables.styles";
 import { ReactComponent as UserIcon } from "assets/user.svg";
 import { ReactComponent as ArrowUserIcon } from "assets/corner-down-right.svg";
+import { ReactComponent as ExternalLink16 } from "assets/icons/external-link-16.svg";
 import { ReactComponent as UsersIcon } from "assets/users.svg";
 
 import RewardTooltip from "../RewardTooltip";
@@ -108,76 +121,84 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
       cells: [
         {
           value: (
-            <PoolCellValue>
+            <AssetCell>
               {determineIcon(r.symbol)} <div>{r.symbol}</div>{" "}
               {determineReferralIcon(
                 account,
                 r.depositorAddr,
                 r.referralAddress
               )}
-            </PoolCellValue>
+            </AssetCell>
           ),
         },
         {
           value: (
-            <>
+            <ChainsCell>
               <div>{getChainInfo(r.sourceChainId).name}</div>
               <GrayText>
                 &rarr; {getChainInfo(r.destinationChainId).name}
               </GrayText>
-            </>
+            </ChainsCell>
           ),
         },
         {
           value: (
-            <>
+            <DateCell>
               <div>
-                {DateTime.fromISO(r.depositDate).toFormat("dd LLL yyyy")}
+                {DateTime.fromISO(r.depositDate).toFormat("dd LLL, yyyy")}
               </div>
               <GrayText>
                 {DateTime.fromISO(r.depositDate).toFormat("t")}
               </GrayText>
-            </>
+            </DateCell>
           ),
         },
         {
-          value: shortenAddress(r.depositorAddr, "...", 4),
-        },
-        {
-          value: r.realizedLpFeeUsd.toLocaleString("en-US", {
-            style: "currency",
-            currency: "USD",
-            minimumFractionDigits: 4,
-          }),
-        },
-        {
           value: (
-            <>
-              <div>{`${r.referralRate * 100}%`}</div>
-            </>
+            <AddressCell>
+              {shortenAddress(r.depositorAddr, "...", 4)}
+            </AddressCell>
           ),
         },
         {
-          value: `${Number(ethers.utils.formatUnits(r.acxRewards, 18)).toFixed(
-            4
-          )} ACX`,
+          value: (
+            <BridgeFeeCell>
+              {r.realizedLpFeeUsd.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+                minimumFractionDigits: 4,
+              })}
+            </BridgeFeeCell>
+          ),
         },
         {
           value: (
-            <LinkDiv>
-              <a
-                href={getChainInfo(r.sourceChainId).constructExplorerLink(
-                  r.depositTxHash
-                )}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <ArrowUpRight />
-              </a>
-            </LinkDiv>
+            <ReferralRateCell>{`${r.referralRate * 100}%`}</ReferralRateCell>
+          ),
+        },
+        {
+          value: (
+            <RewardsCell>
+              {`${Number(ethers.utils.formatUnits(r.acxRewards, 18)).toFixed(
+                4
+              )} ACX`}
+            </RewardsCell>
           ),
         },
       ],
+      explorerLink: (
+        <ExplorerLinkContainer>
+          <a
+            href={getChainInfo(r.sourceChainId).constructExplorerLink(
+              r.depositTxHash
+            )}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <ExternalLink16 />
+          </a>
+        </ExplorerLinkContainer>
+      ),
     };
   });
   return fr;
@@ -185,148 +206,73 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
 
 export const headers: ICell[] = [
   {
-    size: "sm",
-    value: "Asset",
-    cellClassName: "header-cell",
+    value: <AssetHeadCell>Asset</AssetHeadCell>,
   },
   {
-    size: "xs",
-    value: <>From &rarr; To</>,
-    cellClassName: "header-cell",
+    value: <ChainsHeadCell>From &rarr; To</ChainsHeadCell>,
   },
   {
-    size: "xs",
-    value: "Date",
-    cellClassName: "header-cell",
+    value: <DateHeadCell>Date</DateHeadCell>,
   },
   {
-    size: "xs",
-    value: "Address",
-    cellClassName: "header-cell",
+    value: <AddressHeadCell>Address</AddressHeadCell>,
   },
   {
-    size: "xs",
-    value: "Bridge fee",
-    cellClassName: "header-cell",
+    value: <BridgeFeeHeadCell>Bridge fee</BridgeFeeHeadCell>,
   },
   {
-    size: "xs",
-    value: "Referral rate",
-    cellClassName: "header-cell",
+    value: <ReferralRateHeadCell>Referral rate</ReferralRateHeadCell>,
   },
   {
-    size: "xs",
-    value: "Rewards",
-    cellClassName: "header-cell",
-  },
-  {
-    size: "xs",
-    value: " ",
-    cellClassName: "header-cell",
+    value: <RewardsHeadCell>Rewards</RewardsHeadCell>,
   },
 ];
 
-const DISCONNECTED_ROWS: IRow[] = [
-  {
-    cells: [
-      {
-        value: (
-          <PoolCellValue>
-            <StyledETHIcon /> <div>ETH</div>
-          </PoolCellValue>
-        ),
-      },
-      {
-        value: (
-          <>
-            <div>Ethereum Mainnet</div>
-            <GrayText>&rarr; Optimism</GrayText>
-          </>
-        ),
-      },
-      {
-        value: (
-          <>
-            <div>30 Jun, 2022</div>
-            <GrayText>12:41 PM</GrayText>
-          </>
-        ),
-      },
-      {
-        value: "0x123...4567",
-      },
-      { value: "$1234.56" },
-      {
-        value: (
-          <>
-            <div>80%</div>
-            <GrayText>12.24 ACX</GrayText>
-          </>
-        ),
-      },
-      {
-        value: "414.14 ACX",
-      },
-      {
-        value: (
-          <LinkDiv>
-            <div>
-              <ArrowUpRight />
-            </div>
-          </LinkDiv>
-        ),
-      },
-    ],
-  },
-  {
-    cells: [
-      {
-        value: (
-          <PoolCellValue>
-            <StyledUNILogo /> <div>UNI</div>
-          </PoolCellValue>
-        ),
-      },
-      {
-        value: (
-          <>
-            <div>Ethereum Mainnet</div>
-            <GrayText>&rarr; Optimism</GrayText>
-          </>
-        ),
-      },
-      {
-        value: (
-          <>
-            <div>30 Jun, 2022</div>
-            <GrayText>1:41 PM</GrayText>
-          </>
-        ),
-      },
-      {
-        value: "0x123...4567",
-      },
-      { value: "$1234.56" },
-      {
-        value: (
-          <>
-            <div>80%</div>
-            <GrayText>12.24 ACX</GrayText>
-          </>
-        ),
-      },
-      {
-        value: "414.14 ACX",
-      },
-      {
-        value: (
-          <LinkDiv>
-            <div>
-              <ArrowUpRight />
-            </div>
-          </LinkDiv>
-        ),
-      },
-    ],
-  },
-];
+const DISCONNECTED_ROWS: IRow[] = Array(2).fill({
+  cells: [
+    {
+      value: (
+        <AssetCell>
+          <StyledETHIcon /> <div>ETH</div>
+        </AssetCell>
+      ),
+    },
+    {
+      value: (
+        <ChainsCell>
+          <div>Ethereum Mainnet</div>
+          <GrayText>&rarr; Optimism</GrayText>
+        </ChainsCell>
+      ),
+    },
+    {
+      value: (
+        <DateCell>
+          <div>30 Jun, 2022</div>
+          <GrayText>12:41 PM</GrayText>
+        </DateCell>
+      ),
+    },
+    {
+      value: <AddressCell>0x123...4567</AddressCell>,
+    },
+    { value: <BridgeFeeCell>$1234.56</BridgeFeeCell> },
+    {
+      value: (
+        <ReferralRateCell>
+          <div>80%</div>
+        </ReferralRateCell>
+      ),
+    },
+    {
+      value: <RewardsCell>414.14 ACX</RewardsCell>,
+    },
+  ],
+  explorerLink: (
+    <ExplorerLinkContainer disabled={true}>
+      <a href="">
+        <ExternalLink16 />
+      </a>
+    </ExplorerLinkContainer>
+  ),
+});

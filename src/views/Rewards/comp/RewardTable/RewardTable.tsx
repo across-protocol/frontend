@@ -1,13 +1,12 @@
 import { FC } from "react";
 import {
-  StyledTableWrapper,
-  StyledHeadRow,
-  StyledBody,
-  StyledRow,
-  StyledCell,
+  TableWrapper,
   Wrapper,
   Title,
   EmptyRow,
+  TableHeadRow,
+  TableBody,
+  TableRow,
 } from "./RewardTables.styles";
 import { ICell, IRow } from "components/Table/Table";
 interface TxTableIRow extends IRow {
@@ -24,45 +23,23 @@ const RewardMyPoolsTable: FC<Props> = ({ rows, headers, title }) => {
   return (
     <Wrapper>
       <Title>{title}</Title>
-
-      <StyledTableWrapper>
-        <StyledHeadRow>
-          {headers.map((cell, index) => {
-            return (
-              <StyledCell
-                key={index}
-                className={cell.cellClassName ?? ""}
-                size={cell.size}
-              >
-                {cell.value}
-              </StyledCell>
-            );
-          })}
-        </StyledHeadRow>
-        <StyledBody>
-          {rows.length ? (
+      <TableWrapper scrollable={rows.length > 0}>
+        <TableHeadRow>{headers.map((cell, idx) => cell.value)}</TableHeadRow>
+        <TableBody>
+          {rows.length > 0 ? (
             rows.map((row, ridx) => {
               return (
-                <StyledRow key={ridx}>
-                  {row.cells.map((cell, cidx) => {
-                    return (
-                      <StyledCell
-                        className={cell.cellClassName ?? ""}
-                        key={cidx}
-                        size={cell.size}
-                      >
-                        {cell.value}
-                      </StyledCell>
-                    );
-                  })}
-                </StyledRow>
+                <TableRow key={ridx}>
+                  {row.cells.map((cell) => cell.value)}
+                  {(row as any).explorerLink}
+                </TableRow>
               );
             })
           ) : (
             <EmptyRow>You have no referral transfers yet</EmptyRow>
           )}
-        </StyledBody>
-      </StyledTableWrapper>
+        </TableBody>
+      </TableWrapper>
     </Wrapper>
   );
 };

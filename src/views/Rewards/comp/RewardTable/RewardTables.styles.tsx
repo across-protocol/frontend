@@ -1,12 +1,5 @@
 import styled from "@emotion/styled";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
-import {
-  TableWrapper,
-  HeadRow,
-  Body,
-  Row,
-  Cell,
-} from "components/Table/Table.styles";
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -26,11 +19,37 @@ import ProgressBar from "components/ProgressBar";
 
 export const Wrapper = styled.div`
   margin: auto;
-  overflow-x: auto;
-  border-radius: 5px;
-  padding: 1rem 0 2rem;
+  padding: ${64 / 16}rem 0 0;
+
+  @media (max-width: 1024px) {
+    padding: ${48 / 16}rem 0 0;
+  }
+
+  @media (max-width: 428px) {
+    padding: ${32 / 16}rem 0 0;
+  }
+`;
+
+export const Title = styled.h2`
+  margin: 0 ${16 / 16}rem ${16 / 16}rem;
+  color: #e0f3ff;
+  font-size: ${18 / 16}rem;
+  line-height: ${26 / 16}rem;
+  font-weight: 400;
+
+  @media (max-width: 428px) {
+    font-size: ${16 / 16}rem;
+    line-height: ${20 / 16}rem;
+  }
+`;
+
+export const TableWrapper = styled.div<{ scrollable?: boolean }>`
+  border: 1px solid #3e4047;
+  border-radius: 8px;
+  overflow-x: ${({ scrollable }) => (scrollable ? "auto" : "hidden")};
+
   ::-webkit-scrollbar {
-    height: 6px;
+    height: 0;
   }
 
   ::-webkit-scrollbar-track {
@@ -39,77 +58,116 @@ export const Wrapper = styled.div`
 
   ::-webkit-scrollbar-thumb {
     background-color: var(--color-gray-600);
+    border-radius: 6px;
+    border: 2px solid #2d2e33;
   }
 `;
 
-export const Title = styled.h2`
-  color: var(--color-white);
-  font-size: ${20 / 16}rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+export const TableHeadRow = styled.div`
+  display: flex;
+`;
 
-  @media ${QUERIES.mobileAndDown} {
-    padding: 0 ${20 / 16}rem;
-    font-weight: 600;
-    font-size: ${13 / 16}rem;
-    line-height: ${16 / 16}rem;
-    text-transform: uppercase;
+export const TableBody = styled.div``;
+
+export const TableRow = styled.div`
+  display: flex;
+  position: relative;
+  background-color: #2d2e33;
+`;
+
+export const TableCell = styled.div`
+  padding: ${15 / 16}rem 0 ${15 / 16}rem ${16 / 16}rem;
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  font-size: ${16 / 16}rem;
+  line-height: ${20 / 16}rem;
+  font-weight: 400;
+  color: #e0f3ff;
+  white-space: nowrap;
+  background-color: #2d2e33;
+  border-top: 1px solid #3e4047;
+
+  @media (max-width: 428px) {
+    padding: ${13 / 16}rem 0 ${13 / 16}rem ${12 / 16}rem;
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
   }
 `;
 
-export const StyledTableWrapper = styled(TableWrapper)`
-  background-color: inherit;
-  margin: 0 auto;
-  box-shadow: none;
-  border-radius: 16px;
-`;
-
-export const StyledHeadRow = styled(HeadRow)`
+export const HeadCell = styled(TableCell)`
+  padding: ${10 / 16}rem 0 ${10 / 16}rem ${16 / 16}rem;
+  color: #9daab2;
   background-color: #34353b;
-  width: 1400px;
-  overflow-x: auto;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-`;
+  border: none;
 
-export const StyledBody = styled(Body)`
-  column-gap: 15px;
-`;
-
-export const StyledRow = styled(Row)`
-  background-color: #2d2e33;
-  width: 1400px;
-  overflow-x: auto;
-  margin: 0 auto;
-  border: 1px solid #3e4047;
-  &:first-of-type {
-    border-bottom: 0;
-  }
-  &:last-of-type {
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-  }
-
-  /* Don't do zebra */
-  &:nth-of-type(2n) {
-    background-color: #2d2e33;
+  @media (max-width: 428px) {
+    padding: ${7 / 16}rem 0 ${7 / 16}rem ${12 / 16}rem;
   }
 `;
 
-export const StyledCell = styled(Cell)`
-  word-wrap: break-word;
-  flex: 1 0 65px;
-  background-color: #2d2e33;
+export const AssetCell = styled(TableCell)`
+  flex: 0 0 172px;
+  column-gap: 24px;
+  font-weight: 500;
+`;
 
-  &:not(:first-of-type) {
-    min-width: 120px;
-  }
-  &.header-cell {
-    font-size: ${16 / 16}rem;
-    font-weight: 500;
-    color: #9daab2;
-    background-color: #34353b;
-  }
+export const AssetHeadCell = styled(HeadCell)`
+  flex: 0 0 172px;
+`;
+
+export const ChainsCell = styled(TableCell)`
+  flex: 0 0 168px;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+export const ChainsHeadCell = styled(HeadCell)`
+  flex: 0 0 168px;
+`;
+
+export const DateCell = styled(TableCell)`
+  flex: 0 0 136px;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+export const DateHeadCell = styled(HeadCell)`
+  flex: 0 0 136px;
+`;
+
+export const AddressCell = styled(TableCell)`
+  flex: 0 0 136px;
+`;
+
+export const AddressHeadCell = styled(HeadCell)`
+  flex: 0 0 136px;
+`;
+
+export const BridgeFeeCell = styled(TableCell)`
+  flex: 0 0 144px;
+`;
+
+export const BridgeFeeHeadCell = styled(HeadCell)`
+  flex: 0 0 144px;
+`;
+
+export const ReferralRateCell = styled(TableCell)`
+  flex: 0 0 136px;
+`;
+
+export const ReferralRateHeadCell = styled(HeadCell)`
+  flex: 0 0 136px;
+`;
+
+export const RewardsCell = styled(TableCell)`
+  /* flex: 0 0 130px; */
+  min-width: 120px;
+`;
+
+export const RewardsHeadCell = styled(HeadCell)`
+  /* flex: 0 0 130px; */
+  min-width: 202px;
 `;
 
 export const TableLogo = styled.img`
@@ -129,11 +187,11 @@ export const MobileWrapper = styled(Wrapper)`
   min-width: 300px;
 `;
 
-export const StyledMobileHeadRow = styled(StyledHeadRow)`
+export const StyledMobileHeadRow = styled(TableCell)`
   width: 100%;
 `;
 
-export const StyledMobileRow = styled(StyledRow)`
+export const StyledMobileRow = styled(TableCell)`
   width: 100%;
   cursor: pointer;
   &:first-of-type {
@@ -141,35 +199,6 @@ export const StyledMobileRow = styled(StyledRow)`
   }
   &:not(:first-of-type) {
     margin: 1px 0;
-  }
-`;
-
-export const MobileCell = styled(StyledCell)`
-  &.header-cell {
-    font-weight: 500;
-  }
-
-  &:first-of-type {
-    min-width: 120px;
-    flex: 0 0 60px;
-  }
-  &:not(:first-of-type) {
-    min-width: 60px;
-  }
-
-  @media ${QUERIES.mobileAndDown} {
-    &.header-cell {
-      font-size: ${12 / 16}rem;
-    }
-  }
-`;
-
-export const MobileChevron = styled.div`
-  text-align: right;
-  margin-right: 24px;
-  cursor: pointer;
-  svg {
-    color: var(--color-primary);
   }
 `;
 
@@ -286,25 +315,45 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
 export const ArrowUpRight = styled(RightUpArrow)``;
 
 export const GrayText = styled.div`
+  font-size: ${14 / 16}rem;
+  line-height: ${18 / 16}rem;
   color: #9daab2;
 `;
 
-export const LinkDiv = styled.div`
-  text-align: right;
-  > a {
-    border: 1px solid #4c4e57;
-    border-radius: 32px;
-    height: 36px;
-    width: 36px;
-    margin-left: auto;
-    margin-right: 8px;
+export const ExplorerLinkContainer = styled.div<{ disabled?: boolean }>`
+  position: sticky;
+  right: 0;
+  flex: 0 0 82px;
+  align-self: stretch;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background: linear-gradient(
+    to right,
+    rgba(45, 46, 51, 0) 0%,
+    rgba(45, 46, 51, 1) 30%
+  );
+  border-top: 1px solid #3e4047;
+
+  a {
+    height: 40px;
+    width: 40px;
+    margin-right: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-  svg {
-    height: 14px;
-    width: 14px;
+    border-radius: 20px;
+    border: 1px solid #4c4e57;
+    transition: border 0.1s;
+    pointer-events: ${({ disabled }) => (disabled ? "none" : "all")};
+
+    :hover {
+      border: 1px solid #e0f3ff;
+
+      svg path {
+        fill: #e0f3ff;
+      }
+    }
   }
 `;
 
@@ -315,14 +364,18 @@ export const ReferralDiv = styled.div`
 `;
 
 export const EmptyRow = styled.div`
+  padding: ${26 / 16}rem ${16 / 16}rem;
   display: flex;
   justify-content: center;
-  padding: 2rem;
-  border: 1px solid #3f4047;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  margin: 0 auto;
-  width: 1400px;
+  border-top: 1px solid #3f4047;
+  font-size: ${16 / 16}rem;
+  line-height: ${20 / 16}rem;
+
+  @media (max-width: 428px) {
+    padding: ${22 / 16}rem ${16 / 16}rem;
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
+  }
 `;
 
 export const StyledETHIcon = styled(ETHLogo)``;
