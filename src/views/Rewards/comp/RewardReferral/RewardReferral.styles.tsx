@@ -146,8 +146,8 @@ export const CopyButton = styled(SecondaryButtonWithoutShadow)`
 
 export const StyledReferralLogo = styled(ReferralSVG)`
   margin: auto;
-  height: 72px;
-  width: 72px;
+  height: 64px;
+  width: 64px;
 `;
 
 export const TierInfo = styled.div`

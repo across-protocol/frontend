@@ -7,9 +7,9 @@ import {
   PageSizeSelectButton,
   PageSizeSelectDropdown,
   PageSizeOptiontButton,
+  PagesPlaceholder,
 } from "./RewardTablePagination.styles";
-import { ReactComponent as LeftIcon } from "assets/pagination-left-arrow.svg";
-import { ReactComponent as RightIcon } from "assets/pagination-right-arrow.svg";
+import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
 import { useRef, useState } from "react";
 import useClickOutsideModal from "hooks/useClickOutsideModal";
 
@@ -40,7 +40,7 @@ export const PageSizeSelect: React.FC<PageSizeProps> = (props) => {
     <PageSizeSelectWrapper ref={ref}>
       <PageSizeSelectButton onClick={onSelectClick}>
         {`${props.pageSize} results`}
-        <RightIcon />
+        <ArrowIcon />
       </PageSizeSelectButton>
       {showDropdown && (
         <PageSizeSelectDropdown>
@@ -113,7 +113,7 @@ export const Pagination = ({
         })}
         {!hideEnd && (
           <>
-            &nbsp; ... &nbsp;
+            <PagesPlaceholder>...</PagesPlaceholder>
             <ElementWrapper onClick={() => onPageChange(lastPage)}>
               {lastPage + 1}
             </ElementWrapper>
@@ -123,13 +123,13 @@ export const Pagination = ({
           disabled={disableBack}
           onClick={() => onPageChange(currentPage - 1)}
         >
-          <LeftIcon />
+          <ArrowIcon />
         </NextElement>
         <NextElement
           disabled={disableForward}
           onClick={() => onPageChange(currentPage + 1)}
         >
-          <RightIcon />
+          <ArrowIcon />
         </NextElement>
       </PaginationElements>
     </Wrapper>

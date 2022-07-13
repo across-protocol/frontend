@@ -14,7 +14,8 @@ export type CellSize = "xs" | "sm" | "md" | "lg";
 export interface ICell {
   // if undefined, defaults to "sm"
   size?: CellSize;
-  value: string | ReactElement;
+  // clean after tables refactor
+  value: string | JSX.Element;
   cellClassName?: string;
 }
 

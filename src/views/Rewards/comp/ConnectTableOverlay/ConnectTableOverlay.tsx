@@ -6,7 +6,7 @@ const { init } = onboard;
 const ConnectTableOverlay = () => {
   return (
     <Overlay>
-      <ConnectButton onClick={() => init()}>
+      <ConnectButton size="md" onClick={() => init()}>
         Connect to track your referral transfers
       </ConnectButton>
     </Overlay>
