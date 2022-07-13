@@ -2,24 +2,22 @@
 // However, when written in ts, the imports seem to fail, so this is in js for now.
 
 const sdk = require("@across-protocol/sdk-v2");
-const { BlockFinder } = require("@uma/sdk");
 const ethers = require("ethers");
+const { HubPool__factory } = require("@across-protocol/contracts-v2");
 
 const {
-  getTokenDetails,
   InputError,
   isString,
   infuraProvider,
   getRelayerFeeDetails,
-  isRouteEnabled,
-} = require("./utils");
+  findRoute,
+} = require("./_utils");
 
 const handler = async (request, response) => {
   try {
     const provider = infuraProvider("mainnet");
 
-    let { amount, token, timestamp, destinationChainId, originChainId } =
-      request.query;
+    let { amount, token, destinationChainId, originChainId } = request.query;
     if (!isString(amount) || !isString(token) || !isString(destinationChainId))
       throw new InputError(
         "Must provide amount, token, and destinationChainId as query params"
@@ -27,60 +25,41 @@ const handler = async (request, response) => {
 
     token = ethers.utils.getAddress(token);
 
-    const parsedTimestamp = isString(timestamp)
-      ? Number(timestamp)
-      : (await provider.getBlock("latest")).timestamp;
-
     amount = ethers.BigNumber.from(amount);
 
-    let {
-      l1Token,
-      hubPool,
-      chainId: computedOriginChainId,
-    } = await getTokenDetails(
-      provider,
-      undefined, // Search by l2Token only.
+    const route = findRoute(
       token,
-      originChainId
+      parseInt(destinationChainId),
+      originChainId && parseInt(originChainId)
     );
 
-    const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
-    const [{ number: blockTag }, routeEnabled] = await Promise.all([
-      blockFinder.getBlockForTimestamp(parsedTimestamp),
-      isRouteEnabled(computedOriginChainId, destinationChainId, token),
-    ]);
+    if (!route) throw new Error(`Route not enabled.`);
 
-    if (!routeEnabled)
-      throw new Error(
-        `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled.`
-      );
+    const hubPool = HubPool__factory.connect(
+      "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
+      provider
+    );
 
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       "0x3B03509645713718B78951126E0A6de6f10043f5",
       provider
     );
 
-    const [currentUt, nextUt, rateModel] = await Promise.all([
-      hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
-        blockTag,
-      }),
-      hubPool.callStatic.liquidityUtilizationPostRelay(l1Token, amount, {
-        blockTag,
-      }),
-      configStoreClient.getRateModel(l1Token, {
-        blockTag,
-      }),
-    ]);
+    const { l1TokenAddress: l1Token } = route;
+
+    const [currentUt, nextUt, rateModel, relayerFeeDetails, latestBlock] =
+      await Promise.all([
+        hubPool.callStatic.liquidityUtilizationCurrent(l1Token),
+        hubPool.callStatic.liquidityUtilizationPostRelay(l1Token, amount),
+        configStoreClient.getRateModel(l1Token),
+        getRelayerFeeDetails(l1Token, amount, destinationChainId),
+        provider.getBlock("latest"),
+      ]);
 
     const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
       nextUt
-    );
-    const relayerFeeDetails = await getRelayerFeeDetails(
-      l1Token,
-      amount,
-      destinationChainId
     );
 
     if (relayerFeeDetails.isAmountTooLow)
@@ -89,7 +68,7 @@ const handler = async (request, response) => {
     const responseJson = {
       relayFeePct: relayerFeeDetails.relayFeePercent,
       lpFeePct: realizedLPFeePct.toString(),
-      timestamp: parsedTimestamp.toString(),
+      timestamp: latestBlock.timestamp,
     };
 
     response.status(200).json(responseJson);

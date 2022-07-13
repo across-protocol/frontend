@@ -1,5 +1,4 @@
 const {
-  HubPool__factory,
   ERC20__factory,
   SpokePool__factory,
 } = require("@across-protocol/contracts-v2");
@@ -7,43 +6,36 @@ const sdk = require("@across-protocol/sdk-v2");
 const ethers = require("ethers");
 
 const { REACT_APP_PUBLIC_INFURA_ID } = process.env;
-const { relayerFeeCapitalCostConfig } = require("./constants");
+const { relayerFeeCapitalCostConfig } = require("./_constants");
 
-const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
-  const hubPool = HubPool__factory.connect(
-    "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
-    provider
-  );
+const {
+  routes,
+} = require("../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json");
 
-  // 2 queries: treating the token as the l1Token or treating the token as the L2 token.
-  const l2TokenFilter = hubPool.filters.SetPoolRebalanceRoute(
-    undefined,
-    l1Token,
-    l2Token
-  );
-
-  // Filter events by chainId.
-  const events = (await hubPool.queryFilter(l2TokenFilter, 0, "latest")).filter(
-    (event) => !chainId || event.args.destinationChainId.toString() === chainId
-  );
-
-  if (events.length === 0) throw new InputError("No whitelisted token found");
-
-  // Sorting from most recent to oldest.
-  events.sort((a, b) => {
-    if (b.blockNumber !== a.blockNumber) return b.blockNumber - a.blockNumber;
-    if (b.transactionIndex !== a.transactionIndex)
-      return b.transactionIndex - a.transactionIndex;
-    return b.logIndex - a.logIndex;
+const findRoute = (originToken, destinationChainId, originChainId) => {
+  const route = routes.find((routeElement) => {
+    if (
+      routeElement.fromTokenAddress !== originToken ||
+      routeElement.toChain !== destinationChainId
+    )
+      return false;
+    if (originChainId === undefined) return true;
+    return originChainId === routeElement.fromChain;
   });
 
-  const event = events[0];
+  if (!route) return;
+
+  const destinationRoute = routes.find(
+    (routeElement) =>
+      route.l1TokenAddress === routeElement.l1TokenAddress &&
+      routeElement.fromChain === destinationChainId
+  );
+
+  if (!destinationRoute) return;
 
   return {
-    hubPool,
-    chainId: event.args.destinationChainId.toNumber(),
-    l1Token: event.args.l1Token,
-    l2Token: event.args.destinationToken,
+    ...route,
+    destinationTokenAddress: destinationRoute.fromTokenAddress,
   };
 };
 
@@ -172,11 +164,6 @@ const getSpokePool = (_chainId) => {
   }
 };
 
-const isRouteEnabled = (fromChainId, toChainId, fromToken) => {
-  const spokePool = getSpokePool(fromChainId.toString());
-  return spokePool.enabledDepositRoutes(fromToken, toChainId.toString());
-};
-
 const getBalance = (chainId, token, account) => {
   return ERC20__factory.connect(token, getProvider(chainId)).balanceOf(account);
 };
@@ -198,7 +185,6 @@ const minBN = (...arr) => {
 };
 
 module.exports = {
-  getTokenDetails,
   isString,
   InputError,
   queries,
@@ -210,5 +196,5 @@ module.exports = {
   getBalance,
   maxBN,
   minBN,
-  isRouteEnabled,
+  findRoute,
 };

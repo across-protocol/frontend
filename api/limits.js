@@ -9,12 +9,11 @@ const {
   isString,
   getRelayerFeeDetails,
   maxRelayFeePct,
-  getTokenDetails,
   getBalance,
   maxBN,
   minBN,
-  isRouteEnabled,
-} = require("./utils");
+  findRoute,
+} = require("./_utils");
 
 const handler = async (request, response) => {
   try {
@@ -25,6 +24,11 @@ const handler = async (request, response) => {
     } = process.env;
     const provider = new ethers.providers.StaticJsonRpcProvider(
       `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`
+    );
+
+    const hubPool = HubPool__factory.connect(
+      "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
+      provider
     );
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
@@ -47,39 +51,18 @@ const handler = async (request, response) => {
 
     token = ethers.utils.getAddress(token);
 
-    const { l1Token, chainId: computedOriginChainId } = await getTokenDetails(
-      provider,
-      undefined,
+    const route = findRoute(
       token,
-      originChainId
+      parseInt(destinationChainId),
+      originChainId && parseInt(originChainId)
     );
 
-    const [tokenDetailsResult, routeEnabledResult] = await Promise.allSettled([
-      getTokenDetails(provider, l1Token, undefined, destinationChainId),
-      isRouteEnabled(computedOriginChainId, destinationChainId, token),
-    ]);
+    if (!route) throw new Error(`Route not enabled.`);
 
-    // If any of the above fails or the route is not enabled, we assume that the
-    if (
-      tokenDetailsResult.status === "rejected" ||
-      routeEnabledResult.status === "rejected" ||
-      !routeEnabledResult.value
-    ) {
-      // Add the raw error (if any) to ensure that the user sees the real error if it's something unexpected, like a provider issue.
-      const rawError = tokenDetailsResult.reason || routeEnabledResult.reason;
-      const errorString = rawError
-        ? `Raw Error: ${rawError.stack || rawError.toString()}`
-        : "";
-      throw new Error(
-        `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled. ${errorString}`
-      );
-    }
-
-    const { l2Token: destinationToken } = tokenDetailsResult.value;
-    const hubPool = HubPool__factory.connect(
-      "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
-      provider
-    );
+    const {
+      l1TokenAddress: l1Token,
+      destinationTokenAddress: destinationToken,
+    } = route;
 
     const multicallInput = [
       hubPool.interface.encodeFunctionData("sync", [l1Token]),
@@ -148,6 +131,8 @@ const handler = async (request, response) => {
         liquidReserves
       ).toString(),
     };
+
+    // response.setHeader('s-maxage', '300');
 
     response.status(200).json(responseJson);
   } catch (error) {
