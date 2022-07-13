@@ -1,4 +1,4 @@
-import { Wrapper } from "./Rewards.styles";
+import { Content, Wrapper } from "./Rewards.styles";
 import {
   RewardReferral,
   RewardTableWithOverlay,
@@ -8,6 +8,7 @@ import Footer from "components/Footer";
 import { useRewardsView } from "./useRewardsView";
 import ReactTooltip from "react-tooltip";
 import { mediumUrl } from "utils";
+
 const Rewards = () => {
   const {
     account,
@@ -24,24 +25,26 @@ const Rewards = () => {
 
   return (
     <Wrapper>
-      <ReactTooltip clickable effect="solid" id="rewards" />
-      <RewardReferral
-        loading={isReferalSummaryLoading}
-        referrer={account}
-        referralsSummary={referralsSummary}
-        isConnected={isConnected}
-      />
-      {mediumUrl && <RewardMediumBlock />}
-      <RewardTableWithOverlay
-        isConnected={isConnected}
-        referrals={referrals}
-        account={account || ""}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        pageSize={pageSize}
-        setPageSize={setPageSize}
-        pageSizes={pageSizes}
-      />
+      <Content>
+        <ReactTooltip clickable effect="solid" id="rewards" />
+        <RewardReferral
+          loading={isReferalSummaryLoading}
+          referrer={account}
+          referralsSummary={referralsSummary}
+          isConnected={isConnected}
+        />
+        {mediumUrl && <RewardMediumBlock />}
+        <RewardTableWithOverlay
+          isConnected={isConnected}
+          referrals={referrals}
+          account={account || ""}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          pageSizes={pageSizes}
+        />
+      </Content>
       <Footer />
     </Wrapper>
   );

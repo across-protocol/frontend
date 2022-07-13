@@ -23,9 +23,9 @@ import { ReactComponent as WBTCLogo } from "assets/wbtc.svg";
 import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
 
 import ProgressBar from "components/ProgressBar";
+
 export const Wrapper = styled.div`
   margin: auto;
-  max-width: 1400px;
   overflow-x: auto;
   border-radius: 5px;
   padding: 1rem 0 2rem;

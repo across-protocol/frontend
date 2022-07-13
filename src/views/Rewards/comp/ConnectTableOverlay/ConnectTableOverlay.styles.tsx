@@ -5,7 +5,6 @@ import { COLORS } from "utils";
 export const Overlay = styled.div`
   position: absolute;
   width: 100%;
-  max-width: 1400px;
   text-align: center;
   height: 60%;
   background-color: hsla(${COLORS.gray[500]} / 0.9);

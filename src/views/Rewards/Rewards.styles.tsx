@@ -1,21 +1,33 @@
 import styled from "@emotion/styled";
 import { ReactComponent as GithubLogo } from "assets/github-logo.svg";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
-import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
   background-color: #2d2e33;
-  padding: 2rem;
-  @media ${QUERIES.tabletAndDown} {
-    flex-direction: column;
-    padding: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: calc(100% - 100px);
+`;
+
+export const Content = styled.div`
+  width: 100%;
+  max-width: calc(1140px + 80px);
+  padding: ${64 / 16}rem ${40 / 16}rem;
+  margin: 0 auto;
+
+  @media screen and (max-width: 1024px) {
+    padding: ${44 / 16}rem ${24 / 16}rem ${64 / 16}rem;
+  }
+
+  @media screen and (max-width: 428px) {
+    padding: ${36 / 16}rem ${12 / 16}rem ${64 / 16}rem;
   }
 `;
 
 export const RewardBreakdownSection = styled.section`
   min-height: 30vh;
   width: 100%;
-  max-width: 1400px;
   margin: 0 auto;
 `;
 
