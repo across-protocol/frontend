@@ -77,8 +77,9 @@ function determineReferralIcon(
   let icon: TooltipIcon;
 
   if (account === depositAddr && account === referralAddr) {
-    title = "TBD Title";
-    body = "TBD Body";
+    title = "Self-referral transfer";
+    body =
+      "This transfer was made from your wallet address using your own referral link.";
     icon = "self-referral";
   } else if (account === referralAddr) {
     title = "Referral transfer";
