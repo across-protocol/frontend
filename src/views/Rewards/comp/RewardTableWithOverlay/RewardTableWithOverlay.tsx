@@ -45,7 +45,7 @@ const RewardTableWithOverlay: React.FC<{
     <Wrapper>
       {!isConnected ? <ConnectTableOverlay /> : null}
       <RewardTable
-        title="My referrals"
+        title="My transfers"
         rows={paginatedRows}
         headers={headers}
       />

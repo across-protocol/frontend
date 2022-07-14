@@ -273,9 +273,15 @@ export const ExternalLink = styled.a`
   line-height: ${20 / 16}rem;
   font-weight: 500;
   text-decoration: none;
-  color: #c5d5e0;
+  color: #e0f3ff;
   transition: opacity 0.1s;
   cursor: pointer;
+
+  svg {
+    path {
+      fill: #e0f3ff;
+    }
+  }
 
   &:hover {
     opacity: 0.8;

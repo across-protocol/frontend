@@ -1,21 +1,16 @@
-import { Wrapper, UpRightArrow } from "./RewardMediumBlock.styles";
+import { Wrapper, ExternalLinkIcon } from "./RewardMediumBlock.styles";
 import { mediumUrl } from "utils";
 
 const RewardMediumBlock = () => {
   return (
     <Wrapper>
-      <div>
-        <span>
-          For a limited amount of time, all rewards from transfers will be
-          increased by 4x.
-        </span>
-        <span>
-          <a href={mediumUrl} target="_blank" rel="noreferrer">
-            {" "}
-            Read more <UpRightArrow />
-          </a>
-        </span>
-      </div>
+      <span>
+        For a limited amount of time, all rewards from transfers will be
+        increased by 4x.
+      </span>
+      <a href={mediumUrl} target="_blank" rel="noreferrer">
+        Read more <ExternalLinkIcon />
+      </a>
     </Wrapper>
   );
 };
