@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { ReactComponent as UmaLogo } from "assets/icons/powered-by-logo.svg";
 
 export const Wrapper = styled.div``;
 
@@ -55,5 +56,11 @@ export const AccentLink = styled(Link)`
     svg path {
       fill: var(--color-uma-red);
     }
+  }
+`;
+
+export const FooterLogo = styled(UmaLogo)`
+  @media (max-width: 428px) {
+    height: 18px;
   }
 `;

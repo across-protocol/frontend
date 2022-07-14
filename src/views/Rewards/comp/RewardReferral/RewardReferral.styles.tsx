@@ -3,7 +3,7 @@ import { ButtonV2, SecondaryButtonWithoutShadow } from "components/Buttons";
 import { ReactComponent as ReferralSVG } from "assets/across-referrals.svg";
 import { ReactComponent as ExternalLink12Icon } from "assets/icons/external-link-12.svg";
 import { ReactComponent as LinkIcon } from "assets/link.svg";
-import { ReactComponent as II } from "assets/info.svg";
+import { ReactComponent as II } from "assets/icons/info-16.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 
@@ -194,12 +194,23 @@ export const TierInfoItem = styled.div`
   }
 `;
 
-export const LightGrayItemText = styled.span`
+export const LightGrayItemText = styled.span<{ margin?: number }>`
   color: #9daab2;
+  margin: ${({ margin }) => (margin ? `0 ${margin}px` : 0)};
 `;
 
 export const WarningInfoItem = styled(TierInfoItem)`
   color: #f9d26c !important;
+`;
+
+export const RewardsInfo = styled.span`
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+
+  svg path {
+    stroke: #f9d26c;
+  }
 `;
 
 export const ReferralLinkButtonsRow = styled.div`
@@ -238,7 +249,7 @@ export const CopyIcon = styled(LinkIcon)`
 `;
 
 export const InfoIcon = styled(II)`
-  margin-left: 4px;
+  margin-left: 8px;
   cursor: pointer;
 `;
 

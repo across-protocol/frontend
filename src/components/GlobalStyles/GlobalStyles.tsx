@@ -1,7 +1,6 @@
-import React from "react";
 import { Global, css } from "@emotion/react";
 import { reset } from "./reset";
-import { COLORS, QUERIES } from "utils";
+import { COLORS } from "utils";
 
 export const typography = css`
   /* only take latin chars to reduce bundle size */

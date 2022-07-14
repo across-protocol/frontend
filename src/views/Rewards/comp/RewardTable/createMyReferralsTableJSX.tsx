@@ -1,4 +1,3 @@
-import ReactDOMServer from "react-dom/server";
 import { DateTime } from "luxon";
 import { getChainInfo, shortenAddress } from "utils";
 import { ethers } from "ethers";
@@ -9,7 +8,7 @@ import {
   GrayText,
   StyledUNILogo,
   StyledUSDCLogo,
-  ReferralDiv,
+  ReferralIconContainer,
   StyledWETHLogo,
   StyledDaiLogo,
   StyledWBTCLogo,
@@ -31,12 +30,12 @@ import {
   RewardsHeadCell,
   ExplorerLinkContainer,
 } from "./RewardTables.styles";
-import { ReactComponent as UserIcon } from "assets/user.svg";
-import { ReactComponent as ArrowUserIcon } from "assets/corner-down-right.svg";
 import { ReactComponent as ExternalLink16 } from "assets/icons/external-link-16.svg";
-import { ReactComponent as UsersIcon } from "assets/users.svg";
+import { ReactComponent as ReferreeIcon } from "assets/icons/referree.svg";
+import { ReactComponent as ReferrerIcon } from "assets/icons/referrer.svg";
+import { ReactComponent as SelfReferralIcon } from "assets/icons/self-referral.svg";
+import { PopperTooltip, TooltipIcon } from "components/Tooltip";
 
-import RewardTooltip from "../RewardTooltip";
 export default function createMyReferralsTableJSX(
   referrals: Referral[],
   isConnected: boolean,
@@ -73,45 +72,45 @@ function determineReferralIcon(
   depositAddr: string,
   referralAddr: string
 ) {
-  if (account === referralAddr) {
-    return (
-      <ReferralDiv
-        data-html={true}
-        data-tip={ReactDOMServer.renderToString(
-          <RewardTooltip
-            icon="users"
-            title="Referral transfer"
-            body="This transfer was made by someone using your unique referral link."
-          />
-        )}
-        data-for="rewards"
-        data-place="right"
-      >
-        <UsersIcon />
-      </ReferralDiv>
-    );
-  }
-  if (account === depositAddr) {
-    return (
-      <ReferralDiv
-        data-html={true}
-        data-tip={ReactDOMServer.renderToString(
-          <RewardTooltip
-            icon="user"
-            title="Referree transfer"
-            body="This transfer was made from your wallet address using an external referral link."
-          />
-        )}
-        data-for="rewards"
-        data-place="right"
-      >
-        <ArrowUserIcon />
-        <UserIcon />
-      </ReferralDiv>
-    );
+  let title;
+  let body;
+  let icon: TooltipIcon;
+
+  if (account === depositAddr && account === referralAddr) {
+    title = "TBD Title";
+    body = "TBD Body";
+    icon = "self-referral";
+  } else if (account === referralAddr) {
+    title = "Referral transfer";
+    body = "This transfer was made by someone using your unique referral link.";
+    icon = "referral";
+  } else {
+    title = "Referree transfer";
+    body =
+      "This transfer was made from your wallet address using an external referral link.";
+    icon = "referree";
   }
 
-  return null;
+  return (
+    <PopperTooltip
+      title={title}
+      body={body}
+      icon={icon}
+      placement="bottom-start"
+    >
+      <ReferralIconContainer>
+        {(() => {
+          if (account === depositAddr && account === referralAddr) {
+            return <SelfReferralIcon />;
+          } else if (account === referralAddr) {
+            return <ReferrerIcon />;
+          } else {
+            return <ReferreeIcon />;
+          }
+        })()}
+      </ReferralIconContainer>
+    </PopperTooltip>
+  );
 }
 
 // Will take a TransactionsArg
@@ -122,7 +121,8 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
         {
           value: (
             <AssetCell>
-              {determineIcon(r.symbol)} <div>{r.symbol}</div>{" "}
+              {determineIcon(r.symbol)}
+              <div>{r.symbol}</div>
               {determineReferralIcon(
                 account,
                 r.depositorAddr,
@@ -232,14 +232,14 @@ const DISCONNECTED_ROWS: IRow[] = Array(2).fill({
   cells: [
     {
       value: (
-        <AssetCell>
+        <AssetCell key={1}>
           <StyledETHIcon /> <div>ETH</div>
         </AssetCell>
       ),
     },
     {
       value: (
-        <ChainsCell>
+        <ChainsCell key={2}>
           <div>Ethereum Mainnet</div>
           <GrayText>&rarr; Optimism</GrayText>
         </ChainsCell>
@@ -247,30 +247,30 @@ const DISCONNECTED_ROWS: IRow[] = Array(2).fill({
     },
     {
       value: (
-        <DateCell>
+        <DateCell key={3}>
           <div>30 Jun, 2022</div>
           <GrayText>12:41 PM</GrayText>
         </DateCell>
       ),
     },
     {
-      value: <AddressCell>0x123...4567</AddressCell>,
+      value: <AddressCell key={4}>0x123...4567</AddressCell>,
     },
-    { value: <BridgeFeeCell>$1234.56</BridgeFeeCell> },
+    { value: <BridgeFeeCell key={5}>$1234.56</BridgeFeeCell> },
     {
       value: (
-        <ReferralRateCell>
+        <ReferralRateCell key={6}>
           <div>80%</div>
         </ReferralRateCell>
       ),
     },
     {
-      value: <RewardsCell>414.14 ACX</RewardsCell>,
+      value: <RewardsCell key={7}>414.14 ACX</RewardsCell>,
     },
   ],
   explorerLink: (
     <ExplorerLinkContainer disabled={true}>
-      <a href="">
+      <a href="https://across.to">
         <ExternalLink16 />
       </a>
     </ExplorerLinkContainer>

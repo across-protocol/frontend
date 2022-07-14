@@ -7,7 +7,11 @@ export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: calc(100% - 100px);
+  min-height: calc(100% - 72px);
+
+  @media (max-width: 428px) {
+    min-height: calc(100% - 64px);
+  }
 `;
 
 export const Content = styled.div`
