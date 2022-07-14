@@ -1,19 +1,20 @@
 import { useLocation } from "react-router";
+import { Link as UnstyledLink } from "react-router-dom";
 import Wallet from "../Wallet";
 import {
   Wrapper,
   Navigation,
   Link,
-  LogoLink,
-  Logo,
-  MobileLogo,
   MobileNavigation,
   List,
   Item,
   WalletWrapper,
+  Content,
+  Spacing,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
 import { enableMigration } from "utils";
+import { ReactComponent as Logo } from "assets/across-mobile-logo.svg";
 
 const LINKS = !enableMigration
   ? [
@@ -37,32 +38,34 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
 
   return (
     <Wrapper>
-      <LogoLink to="/">
-        <Logo />
-        <MobileLogo />
-      </LogoLink>
-      <Navigation>
-        <List>
-          {LINKS.map(({ href, name }) => (
-            <Item key={href} aria-selected={location.pathname === href}>
-              <Link
-                to={{
-                  pathname: href,
-                  search: location.search,
-                }}
-              >
-                {name}
-              </Link>
-            </Item>
-          ))}
-        </List>
-      </Navigation>
-      <WalletWrapper>
-        <Wallet setOpenSidebar={setOpenSidebar} />
-        <MobileNavigation animate={openSidebar ? "open" : "closed"}>
-          <MenuToggle toggle={toggleMenu} />
-        </MobileNavigation>
-      </WalletWrapper>
+      <Content>
+        <UnstyledLink to="/" style={{ display: "flex" }}>
+          <Logo />
+        </UnstyledLink>
+        <Navigation>
+          <List>
+            {LINKS.map(({ href, name }) => (
+              <Item key={href} aria-selected={location.pathname === href}>
+                <Link
+                  to={{
+                    pathname: href,
+                    search: location.search,
+                  }}
+                >
+                  {name}
+                </Link>
+              </Item>
+            ))}
+          </List>
+        </Navigation>
+        <Spacing />
+        <WalletWrapper>
+          <Wallet setOpenSidebar={setOpenSidebar} />
+          <MobileNavigation animate={openSidebar ? "open" : "closed"}>
+            <MenuToggle toggle={toggleMenu} />
+          </MobileNavigation>
+        </WalletWrapper>
+      </Content>
     </Wrapper>
   );
 };

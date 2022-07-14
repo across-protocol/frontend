@@ -1,41 +1,21 @@
 import styled from "@emotion/styled";
 import { QUERIES } from "utils";
-import { RoundBox } from "../Box";
-import { SecondaryButton } from "../Buttons";
-import { ReactComponent as LgLogo } from "assets/lg-across-logo.svg";
+import { ReactComponent as AcrossLogo } from "assets/across-mobile-logo.svg";
 
-export const Wrapper = styled(RoundBox)`
-  background-color: inherit;
-  width: 100%;
-  padding: 0;
-  display: none;
-
-  &:hover {
-    cursor: pointer;
-  }
-  @media ${QUERIES.laptopAndUp} {
-    display: grid;
-  }
-`;
-
-export const ConnectButton = styled(SecondaryButton)`
-  padding: 12px 16px;
+export const ConnectButton = styled.button`
+  font-size: 16px;
+  line-height: 20px;
+  padding: 9px 20px;
+  font-weight: 500;
   border: 1px solid var(--color-primary);
-  background-color: var(--color-gray);
-  color: var(--color-primary);
-`;
+  border-radius: 32px;
+  background-color: #2d2e33;
+  color: #6cf9d8;
+  cursor: pointer;
+  transition: opacity 0.1s;
 
-export const Account = styled.div`
-  background-color: var(--color-gray);
-  color: var(--color-white);
-  display: grid;
-  place-items: center;
-  padding: 0 10px;
-  border-radius: 0 var(--radius) var(--radius) 0;
-  border: 1px solid var(--color-gray);
-  > div {
-    flex-basis: 40%;
-    height: 80%;
+  :hover {
+    opacity: 0.8;
   }
 `;
 
@@ -65,27 +45,40 @@ export const UnsupportedNetwork = styled.div`
   padding: 1rem 0.5rem;
 `;
 
-export const BalanceButton = styled(SecondaryButton)`
-  min-width: 160px;
-  border: 1px solid #4d4f56;
+export const BalanceButton = styled.button`
+  height: 40px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
+  font-size: 16px;
+  line-height: 20px;
+  color: #9daab2;
+  font-weight: 500;
+  border: 1px solid #4d4f56;
   border-radius: 32px;
-  height: 36px;
-  > div {
-    flex-grow: 1;
+  background-color: #2d2e33;
+  outline: none;
+  cursor: pointer;
+
+  :hover {
+    color: #e0f3ff;
+    border: 1px solid #e0f3ff;
   }
 `;
 
 export const BalanceWallet = styled.div`
-  display: inline-block;
+  padding-right: 12px;
   border-right: 1px solid #4d4f56;
-  padding-right: 8px;
-  height: 80%;
+  color: #e0f3ff;
 `;
 
-export const Logo = styled(LgLogo)`
-  height: 12px;
-  width: 12px;
-  margin-right: 8px;
+export const Logo = styled(AcrossLogo)`
+  height: 16px;
+  width: 16px;
+  margin-right: 6px;
+`;
+
+export const Account = styled.div`
+  padding-left: 12px;
+  border: 1px solid var(--color-gray);
 `;

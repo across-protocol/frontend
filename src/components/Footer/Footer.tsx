@@ -1,18 +1,13 @@
 import {
   Wrapper,
-  LinkFooter,
   Link,
-  LogoFooter,
-  LinkText,
   AccentLink,
-  PoweredByUMA,
-  MobileWrapper,
-  MobileLinkRow,
-  MobileAccentRow,
+  Content,
+  LinksContainer,
 } from "./Footer.styles";
-import { ReactComponent as DiscordLogo } from "assets/disc-logo.svg";
-import { ReactComponent as TwitterLogo } from "assets/icon-twitter.svg";
-import useWindowSize from "hooks/useWindowsSize";
+import { ReactComponent as DiscordLogo } from "assets/icons/discord-24.svg";
+import { ReactComponent as TwitterLogo } from "assets/icons/twitter-24.svg";
+import { ReactComponent as UmaLogo } from "assets/icons/powered-by-logo.svg";
 const NAV_LINKS = [
   {
     key: "faq",
@@ -41,11 +36,10 @@ const NAV_LINKS = [
 ];
 
 const Footer = () => {
-  const { width } = useWindowSize();
-  if (width && width < 1100) {
-    return (
-      <MobileWrapper>
-        <MobileLinkRow>
+  return (
+    <Wrapper>
+      <Content>
+        <LinksContainer>
           {NAV_LINKS.map((link) => (
             <Link
               key={link.key}
@@ -54,46 +48,18 @@ const Footer = () => {
               rel="noopener noreferrer"
             >
               {link.icon ? <link.icon /> : null}
-              <LinkText>{link.name}</LinkText>
+              {link.name}
             </Link>
           ))}
-        </MobileLinkRow>
-        <MobileAccentRow>
-          <AccentLink
-            href="https://umaproject.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <PoweredByUMA />
-          </AccentLink>
-        </MobileAccentRow>
-      </MobileWrapper>
-    );
-  }
-  return (
-    <Wrapper>
-      <LinkFooter>
-        {NAV_LINKS.map((link) => (
-          <Link
-            key={link.key}
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {link.icon ? <link.icon /> : null}
-            <LinkText>{link.name}</LinkText>
-          </Link>
-        ))}
-      </LinkFooter>
-      <LogoFooter>
+        </LinksContainer>
         <AccentLink
           href="https://umaproject.org"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <PoweredByUMA />
+          <UmaLogo />
         </AccentLink>
-      </LogoFooter>
+      </Content>
     </Wrapper>
   );
 };

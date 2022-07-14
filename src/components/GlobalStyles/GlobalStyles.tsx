@@ -76,10 +76,6 @@ const variables = css`
     Keep a consistent width between the middle section and the headers
   */
     --central-content: 500px;
-    --header-height: 60px;
-    @media ${QUERIES.tabletAndUp} {
-      --header-height: 100px;
-    }
   }
 `;
 

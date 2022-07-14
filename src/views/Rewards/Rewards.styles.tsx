@@ -17,11 +17,11 @@ export const Content = styled.div`
   margin: 0 auto;
 
   @media screen and (max-width: 1024px) {
-    padding: ${44 / 16}rem ${24 / 16}rem ${64 / 16}rem;
+    padding: ${44 / 16}rem ${24 / 16}rem ${48 / 16}rem;
   }
 
   @media screen and (max-width: 428px) {
-    padding: ${36 / 16}rem ${12 / 16}rem ${64 / 16}rem;
+    padding: ${36 / 16}rem ${12 / 16}rem ${48 / 16}rem;
   }
 `;
 
