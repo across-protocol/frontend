@@ -1,75 +1,75 @@
 import styled from "@emotion/styled";
 import { Link as UnstyledLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import { QUERIES } from "utils";
-import { ReactComponent as UnstyledDesktopLogo } from "assets/across-logo-v2.svg";
-import { ReactComponent as UnstyledMobileLogo } from "assets/across-mobile-logo.svg";
 
 export const Wrapper = styled.header`
-  height: var(--header-height);
-  padding: 0 20px;
+  background-color: #2d2e33;
+`;
+
+export const Content = styled.div`
+  height: 72px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
   display: flex;
-  gap: 15px;
-  justify-content: space-between;
   align-items: center;
-  background-color: var(--color-gray);
-  color: var(--color-gray);
-  @media ${QUERIES.laptopAndUp} {
-    padding: 0 30px;
-    &:first-of-type {
-      flex-grow: 1;
-    }
+  color: #c5d5e0;
+
+  @media (max-width: 428px) {
+    height: 64px;
+    padding: 0 12px;
   }
 `;
 
 export const Navigation = styled.nav`
   height: 100%;
-  display: none;
-  flex-grow: 2;
-  @media ${QUERIES.tabletAndUp} {
-    display: revert;
-    justify-content: space-evenly;
+  display: flex;
+  margin-left: 48px;
+
+  @media (max-width: 1024px) {
+    display: none;
   }
-  svg,
-  path {
-    line-height: 0 !important;
-  }
+`;
+
+export const Spacing = styled.div`
+  flex-grow: 1;
 `;
 
 export const List = styled.ul`
-  display: none;
+  display: flex;
   list-style: none;
-  height: 100%;
   font-size: ${18 / 16}rem;
-  max-width: 600px;
-  margin: 0 auto;
-  @media ${QUERIES.laptopAndUp} {
-    display: flex;
-  }
 `;
 
 export const Item = styled.li`
-  flex: 1 0 145px;
-  background-color: inherit;
+  position: relative;
+  margin: 0 24px 0 0;
+  font-size: ${16 / 16}rem;
+  line-height: ${20 / 16}rem;
+  font-weight: 400;
   color: #c5d5e0;
-  text-transform: capitalize;
+  background-color: inherit;
   cursor: pointer;
+
   &[aria-selected="true"] {
-    color: var(--color-primary);
-    background-color: var(--color-gray);
-    &::after {
-      content: ".";
-      color: var(--color-primary);
-      display: block;
-      text-align: center;
+    font-weight: 500;
+    color: #e0f3ff;
+
+    ::after {
+      content: "";
       position: absolute;
-      top: 50px;
-      margin-left: 70px;
-      font-size: 2rem;
+      top: 56px;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      border-radius: 2px;
+      background-color: #e0f3ff;
+      transform: translateX(-50%);
     }
   }
-  &:hover {
-    color: var(--color-primary);
+
+  :hover {
+    color: #e0f3ff;
   }
 `;
 export const BaseLink = styled(UnstyledLink)`
@@ -85,30 +85,8 @@ export const Link = styled(BaseLink)`
   display: grid;
   place-items: center;
 `;
-export const LogoLink = styled(UnstyledLink)`
-  padding-left: 10px;
-  line-height: 0;
-  @media ${QUERIES.desktopAndUp} {
-  }
-`;
-export const Logo = styled(UnstyledDesktopLogo)`
-  display: none;
-  height: 60px;
-  width: 130px;
-  align-self: baseline;
-  @media ${QUERIES.laptopAndUp} {
-    display: revert;
-  }
-`;
-
-export const MobileLogo = styled(UnstyledMobileLogo)`
-  @media ${QUERIES.laptopAndUp} {
-    display: none;
-  }
-`;
 
 export const WalletWrapper = styled.div`
-  justify-self: flex-end;
   display: flex;
   align-items: center;
 `;

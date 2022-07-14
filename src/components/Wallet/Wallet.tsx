@@ -3,7 +3,6 @@ import { FC } from "react";
 import { useConnection } from "state/hooks";
 
 import {
-  Wrapper,
   ConnectButton,
   UnsupportedNetwork,
   BalanceButton,
@@ -31,7 +30,7 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
   }
 
   if (!isConnected) {
-    return <ConnectButton onClick={init}>Connect Wallet</ConnectButton>;
+    return <ConnectButton onClick={init}>Connect</ConnectButton>;
   }
 
   if (account && !isConnected && !chainId) {
@@ -41,18 +40,15 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
       </UnsupportedNetwork>
     );
   }
+
   return (
-    <Wrapper onClick={() => setOpenSidebar(true)}>
-      <BalanceButton>
-        <div>
-          <Logo />
-          <BalanceWallet>0 ACX</BalanceWallet>
-        </div>
-        {account && (
-          <Account>{ensName ?? shortenAddress(account, "...", 4)}</Account>
-        )}
-      </BalanceButton>
-    </Wrapper>
+    <BalanceButton onClick={() => setOpenSidebar(true)}>
+      <Logo />
+      <BalanceWallet>0 ACX</BalanceWallet>
+      {account && (
+        <Account>{ensName ?? shortenAddress(account, "...", 4)}</Account>
+      )}
+    </BalanceButton>
   );
 };
 export default Wallet;
