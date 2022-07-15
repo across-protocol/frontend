@@ -14,7 +14,7 @@ const {
   maxBN,
   minBN,
   isRouteEnabled,
-} = require("./utils");
+} = require("./_utils");
 
 const handler = async (request, response) => {
   try {
