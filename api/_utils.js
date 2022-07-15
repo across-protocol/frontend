@@ -7,7 +7,7 @@ const sdk = require("@across-protocol/sdk-v2");
 const ethers = require("ethers");
 
 const { REACT_APP_PUBLIC_INFURA_ID } = process.env;
-const { relayerFeeCapitalCostConfig } = require("./constants");
+const { relayerFeeCapitalCostConfig } = require("./_constants");
 
 const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   const hubPool = HubPool__factory.connect(
