@@ -12,7 +12,7 @@ const {
   infuraProvider,
   getRelayerFeeDetails,
   isRouteEnabled,
-} = require("./utils");
+} = require("./_utils");
 
 const handler = async (request, response) => {
   try {
