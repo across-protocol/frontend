@@ -57,12 +57,12 @@ export const StepItemComplete = styled(StepItem)`
   }
 `;
 
-export const SeperatorComplete = styled(Seperator)`
-  background-color: #e0f3ff;
-`;
-
-export const NextStepItem = styled(StepItem)`
+export const StepItemNext = styled(StepItem)`
   background-color: #35343b;
   color: #9daab2;
   border: 1px solid #4c4e57;
+`;
+
+export const SeperatorComplete = styled(Seperator)`
+  background-color: #e0f3ff;
 `;

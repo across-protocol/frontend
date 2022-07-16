@@ -1,5 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
-import ReactTooltip from "react-tooltip";
+import { useState, useMemo } from "react";
 
 import { useConnection } from "state/hooks";
 import { useReferrals } from "hooks/useReferrals";
@@ -15,10 +14,6 @@ export const useRewardsView = () => {
   const { summary, isLoading: isReferalSummaryLoading } = useReferralSummary(
     account || ""
   );
-
-  useEffect(() => {
-    ReactTooltip.rebuild();
-  });
 
   return {
     referralsSummary: summary,

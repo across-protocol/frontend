@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import ReactDOMServer from "react-dom/server";
 import { ethers } from "ethers";
 import {
   Wrapper,
@@ -21,14 +20,14 @@ import {
   CopyIcon,
   InfoIcon,
   CopyCheckmark,
-  InlineTooltipWrapper,
   ExternalLinkIcon,
   ArrowSeparator,
+  RewardsInfo,
 } from "./RewardReferral.styles";
 
 import { onboard, shortenAddress } from "utils";
 import { ReferralsSummary } from "hooks/useReferralSummary";
-import RewardTooltip from "../RewardTooltip";
+import { PopperTooltip } from "../../../../components/Tooltip";
 import StepperWithTooltips from "../StepperWithTooltips";
 
 const { init } = onboard;
@@ -130,14 +129,22 @@ const ReferralTierComponent: React.FC<{
   referralsSummary: ReferralsSummary;
   isConnected: boolean;
 }> = ({ referralsSummary, isConnected }) => {
+  const rewardsAmount = useMemo(() => {
+    if (referralsSummary.rewardsAmount) {
+      return Number(
+        ethers.utils.formatUnits(referralsSummary.rewardsAmount, 18)
+      ).toFixed(4);
+    }
+    return 0;
+  }, [referralsSummary.rewardsAmount]);
+
   return (
     <ReferralTierBlock>
       <TierSmHeader>Current referral tier</TierSmHeader>
       <TierHeader>{tiers[referralsSummary.tier].name}</TierHeader>
       <StepperWithTooltips
-        currentStep={referralsSummary.tier}
+        currentStep={referralsSummary.tier - 1}
         numSteps={5}
-        tooltipId="referral"
         tooltips={[
           {
             title: "Copper tier - 40% referral rate",
@@ -163,24 +170,25 @@ const ReferralTierComponent: React.FC<{
       />
       <TierInfo>
         <TierInfoItem>
-          Referee wallets
-          <InlineTooltipWrapper
-            data-html={true}
-            data-tip={ReactDOMServer.renderToString(
-              <RewardTooltip
-                title="Active referree wallet"
-                body="Number of unique wallets that have used your referral link."
-              />
-            )}
-            data-for="rewards"
-            data-place="right"
+          Referree wallets
+          <PopperTooltip
+            title="Active referree wallets"
+            body="Number of unique wallets that have used your referral link."
+            placement="bottom-start"
           >
             <InfoIcon />
-          </InlineTooltipWrapper>
+          </PopperTooltip>
         </TierInfoItem>
         <TierInfoItem>{referralsSummary.referreeWallets}</TierInfoItem>
         <TierInfoItem>
-          Transfers <InfoIcon />
+          Transfers
+          <PopperTooltip
+            title="Transfers"
+            body="TBD Body"
+            placement="bottom-start"
+          >
+            <InfoIcon />
+          </PopperTooltip>
         </TierInfoItem>
         <TierInfoItem>
           {referralsSummary.tier < 5 && (
@@ -217,27 +225,30 @@ const ReferralTierComponent: React.FC<{
             currency: "USD",
           })}
         </TierInfoItem>
+        <TierInfoItem>Referral rate</TierInfoItem>
         <TierInfoItem>
-          Referral rate <InfoIcon />
-        </TierInfoItem>
-        <TierInfoItem>
-          <LightGrayItemText>{`${
+          <LightGrayItemText margin={8}>{`${
             referralsSummary.referralRate * 100 * 0.25
           }% for referree`}</LightGrayItemText>
-          <ArrowSeparator>&rarr;</ArrowSeparator>
           {`${referralsSummary.referralRate * 100 * 0.75}%`}
         </TierInfoItem>
         <TierInfoItem>Rewards from transfers</TierInfoItem>
         {isConnected ? (
-          <WarningInfoItem>{`Not claimable yet ~${
-            referralsSummary.rewardsAmount
-              ? Number(
-                  ethers.utils.formatUnits(referralsSummary.rewardsAmount, 18)
-                ).toFixed(4)
-              : 0
-          }
-                
-              ACX`}</WarningInfoItem>
+          <>
+            <WarningInfoItem>
+              <RewardsInfo>
+                Not claimable yet
+                <PopperTooltip
+                  title={"Not claimable"}
+                  body={"The ACX token is not live yet."}
+                  placement="bottom"
+                >
+                  <InfoIcon />
+                </PopperTooltip>
+              </RewardsInfo>
+              {`~${rewardsAmount} ACX`}
+            </WarningInfoItem>
+          </>
         ) : (
           <TierInfoItem>-</TierInfoItem>
         )}

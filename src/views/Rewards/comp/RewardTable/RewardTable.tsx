@@ -1,4 +1,4 @@
-import { FC } from "react";
+import React, { FC } from "react";
 import {
   TableWrapper,
   Wrapper,
@@ -24,13 +24,19 @@ const RewardMyPoolsTable: FC<Props> = ({ rows, headers, title }) => {
     <Wrapper>
       <Title>{title}</Title>
       <TableWrapper scrollable={rows.length > 0}>
-        <TableHeadRow>{headers.map((cell, idx) => cell.value)}</TableHeadRow>
+        <TableHeadRow>
+          {headers.map((cell, idx) =>
+            React.cloneElement(cell.value as any, { key: idx })
+          )}
+        </TableHeadRow>
         <TableBody>
           {rows.length > 0 ? (
             rows.map((row, ridx) => {
               return (
                 <TableRow key={ridx}>
-                  {row.cells.map((cell) => cell.value)}
+                  {row.cells.map((cell, idx) =>
+                    React.cloneElement(cell.value as any, { key: idx })
+                  )}
                   {(row as any).explorerLink}
                 </TableRow>
               );

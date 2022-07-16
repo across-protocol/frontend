@@ -6,7 +6,6 @@ import {
 } from "./comp";
 import Footer from "components/Footer";
 import { useRewardsView } from "./useRewardsView";
-import ReactTooltip from "react-tooltip";
 import { mediumUrl } from "utils";
 
 const Rewards = () => {
@@ -26,7 +25,6 @@ const Rewards = () => {
   return (
     <Wrapper>
       <Content>
-        <ReactTooltip clickable effect="solid" id="rewards" />
         <RewardReferral
           loading={isReferalSummaryLoading}
           referrer={account}

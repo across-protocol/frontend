@@ -357,10 +357,9 @@ export const ExplorerLinkContainer = styled.div<{ disabled?: boolean }>`
   }
 `;
 
-export const ReferralDiv = styled.div`
+export const ReferralIconContainer = styled.div`
   margin-left: auto;
-  svg {
-  }
+  cursor: pointer;
 `;
 
 export const EmptyRow = styled.div`

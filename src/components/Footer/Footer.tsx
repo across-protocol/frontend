@@ -4,10 +4,11 @@ import {
   AccentLink,
   Content,
   LinksContainer,
+  FooterLogo,
 } from "./Footer.styles";
 import { ReactComponent as DiscordLogo } from "assets/icons/discord-24.svg";
 import { ReactComponent as TwitterLogo } from "assets/icons/twitter-24.svg";
-import { ReactComponent as UmaLogo } from "assets/icons/powered-by-logo.svg";
+
 const NAV_LINKS = [
   {
     key: "faq",
@@ -57,7 +58,7 @@ const Footer = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <UmaLogo />
+          <FooterLogo />
         </AccentLink>
       </Content>
     </Wrapper>
