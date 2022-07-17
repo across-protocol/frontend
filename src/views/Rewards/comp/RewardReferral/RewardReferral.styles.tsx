@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ButtonV2, SecondaryButtonWithoutShadow } from "components/Buttons";
+import { ButtonV2 } from "components/Buttons";
 import { ReactComponent as ReferralSVG } from "assets/across-referrals.svg";
 import { ReactComponent as ExternalLink12Icon } from "assets/icons/external-link-12.svg";
 import { ReactComponent as CopyIcon16 } from "assets/icons/copy-16.svg";
