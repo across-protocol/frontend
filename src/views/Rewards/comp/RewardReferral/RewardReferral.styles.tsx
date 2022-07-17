@@ -2,7 +2,8 @@ import styled from "@emotion/styled";
 import { ButtonV2, SecondaryButtonWithoutShadow } from "components/Buttons";
 import { ReactComponent as ReferralSVG } from "assets/across-referrals.svg";
 import { ReactComponent as ExternalLink12Icon } from "assets/icons/external-link-12.svg";
-import { ReactComponent as LinkIcon } from "assets/link.svg";
+import { ReactComponent as CopyIcon16 } from "assets/icons/copy-16.svg";
+import { ReactComponent as CopyIcon24 } from "assets/icons/copy-24.svg";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
@@ -102,13 +103,13 @@ export const TierHeader = styled.div`
   }
 `;
 
-export const ReferralUrl = styled.div`
+export const ReferralUrl = styled.button`
   margin: 0 0 8px;
   width: 100%;
-  max-width: 310px;
   display: flex;
   justify-content: space-between;
-  padding: ${18 / 16}rem ${14 / 16}rem;
+  align-items: center;
+  padding: ${18 / 16}rem ${18 / 16}rem;
   font-size: ${18 / 16}rem;
   line-height: ${28 / 16}rem;
   font-weight: 400;
@@ -117,30 +118,23 @@ export const ReferralUrl = styled.div`
   background-color: #2d2e33;
   border: 1px solid #4c4e57;
   border-radius: 32px;
+  outline: none;
+  cursor: pointer;
 
   @media screen and (max-width: 1024px) {
     padding: ${18 / 16}rem ${24 / 16}rem;
-    max-width: 320px;
+    max-width: fit-content;
     margin: 0;
   }
 
   @media screen and (max-width: 428px) {
-    max-width: 300px;
-    padding: ${10 / 16}rem ${24 / 16}rem;
+    padding: ${10 / 16}rem ${16 / 16}rem;
     font-size: ${16 / 16}rem;
     line-height: ${20 / 16}rem;
   }
-`;
 
-export const CopyButton = styled(SecondaryButtonWithoutShadow)`
-  padding: 0.33rem 0.75rem;
-  font-size: ${12 / 16}rem;
-  color: #34353b;
-  background-color: var(--color-primary);
-  text-transform: uppercase;
-  font-weight: 600;
-  &:hover {
-    opacity: 0.7;
+  :hover {
+    border: 1px solid #e0f3ff;
   }
 `;
 
@@ -157,9 +151,12 @@ export const TierInfo = styled.div`
   border-top: 1px solid #3e4047;
   flex-wrap: wrap;
 
+  @media (max-width: 568px) {
+    flex-direction: column;
+  }
+
   @media (max-width: 428px) {
     padding: 4px 0 0;
-    flex-direction: column;
   }
 `;
 
@@ -167,21 +164,20 @@ export const TierInfoItem = styled.div`
   display: flex;
   align-items: center;
   padding-top: 12px;
-  width: 50%;
+  width: 40%;
   color: #9daab2;
   font-size: ${16 / 16}rem;
   line-height: ${20 / 16}rem;
   font-weight: 400;
 
   &:nth-of-type(2n) {
+    width: 60%;
     justify-content: flex-end;
     color: #e0f3ff;
   }
 
-  @media (max-width: 428px) {
-    width: 100%;
-    font-size: ${14 / 16}rem;
-    line-height: ${18 / 16}rem;
+  @media (max-width: 568px) {
+    width: 100% !important;
 
     &:nth-of-type(2n) {
       flex-direction: row-reverse;
@@ -191,6 +187,11 @@ export const TierInfoItem = styled.div`
     &:nth-of-type(2n + 1) {
       padding-top: 16px;
     }
+  }
+
+  @media (max-width: 428px) {
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
   }
 `;
 
@@ -206,7 +207,7 @@ export const WarningInfoItem = styled(TierInfoItem)`
 export const RewardsInfo = styled.span`
   display: flex;
   align-items: center;
-  margin-right: 12px;
+  margin: 0 12px;
 
   svg path {
     stroke: #f9d26c;
@@ -243,24 +244,54 @@ export const ExternalLinkIcon = styled(ExternalLink12Icon)`
   margin: 2px 0 0 4px;
 `;
 
-export const CopyIcon = styled(LinkIcon)`
+export const CopyIconDesktop = styled(CopyIcon24)`
+  display: block;
   margin-left: 8px;
-  cursor: pointer;
+
+  path {
+    stroke: var(--color-primary);
+  }
+
+  @media (max-width: 1024px) {
+    margin-left: 16px;
+  }
+
+  @media (max-width: 428px) {
+    display: none;
+  }
 `;
+
+export const CopyIconMobile = styled(CopyIcon16)`
+  display: none;
+  margin-left: 16px;
+
+  path {
+    stroke: var(--color-primary);
+  }
+
+  @media (max-width: 428px) {
+    display: block;
+  }
+`;
+
+const CM = styled(FontAwesomeIcon)`
+  margin-left: 8px;
+
+  @media (max-width: 1024px) {
+    margin-left: 16px;
+  }
+
+  path {
+    fill: var(--color-primary);
+  }
+`;
+
+export const CopyCheckmark = () => <CM icon={faCheckCircle} />;
 
 export const InfoIcon = styled(II)`
   margin-left: 8px;
   cursor: pointer;
 `;
-
-const CM = styled(FontAwesomeIcon)`
-  margin-top: 4px;
-  margin-left: 8px;
-  path {
-    fill: var(--color-primary);
-  }
-`;
-export const CopyCheckmark = () => <CM icon={faCheckCircle} />;
 
 export const InlineTooltipWrapper = styled.div`
   display: inline-block;

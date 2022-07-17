@@ -9,6 +9,7 @@ import {
   Logo,
   BalanceWallet,
   Account,
+  Separator,
 } from "./Wallet.styles";
 import { shortenAddress } from "utils";
 
@@ -46,7 +47,10 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
       <Logo />
       <BalanceWallet>0 ACX</BalanceWallet>
       {account && (
-        <Account>{ensName ?? shortenAddress(account, "...", 4)}</Account>
+        <>
+          <Separator />
+          <Account>{ensName ?? shortenAddress(account, "..", 4)}</Account>
+        </>
       )}
     </BalanceButton>
   );

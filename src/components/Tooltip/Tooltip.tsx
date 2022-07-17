@@ -8,14 +8,14 @@ import {
   GreyRoundedCheckmark16,
 } from "./Tooltip.styles";
 import { ReactComponent as RoundedCheckmark16 } from "assets/icons/rounded-checkmark-16.svg";
-import { ReactComponent as ReferreeIcon } from "assets/icons/referree.svg";
+import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
 import { ReactComponent as ReferrerIcon } from "assets/icons/referrer.svg";
 import { ReactComponent as SelfReferralIcon } from "assets/icons/self-referral.svg";
 
 export type TooltipIcon =
   | "green-checkmark"
   | "grey-checkmark"
-  | "referree"
+  | "referee"
   | "referral"
   | "self-referral";
 export interface TooltipProps {
@@ -41,7 +41,11 @@ export const PopperTooltip: React.FC<{
     strategy: "fixed",
     modifiers: [
       { name: "offset", options: { offset: [0, 12] } },
-      { name: "preventOverflow", options: { padding: 12, altAxis: true } },
+      { name: "preventOverflow", options: { padding: 12 } },
+      {
+        name: "flip",
+        options: { fallbackPlacements: [placement || "bottom"] },
+      },
     ],
   });
 
@@ -85,7 +89,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ icon, title, body }) => {
         {icon === "grey-checkmark" && <GreyRoundedCheckmark16 />}
         {icon === "self-referral" && <SelfReferralIcon />}
         {icon === "referral" && <ReferrerIcon />}
-        {icon === "referree" && <ReferreeIcon />}
+        {icon === "referee" && <RefereeIcon />}
         {title}
       </TitleRow>
       <Body>{body}</Body>

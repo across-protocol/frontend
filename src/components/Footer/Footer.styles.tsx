@@ -1,11 +1,7 @@
 import styled from "@emotion/styled";
 import { ReactComponent as UmaLogo } from "assets/icons/powered-by-logo.svg";
 
-export const Wrapper = styled.div``;
-
-export const Content = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
+export const Wrapper = styled.div`
   padding: 25px 16px;
   display: flex;
   justify-content: space-between;

@@ -9,7 +9,6 @@ import {
   List,
   Item,
   WalletWrapper,
-  Content,
   Spacing,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
@@ -38,34 +37,32 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
 
   return (
     <Wrapper>
-      <Content>
-        <UnstyledLink to="/" style={{ display: "flex" }}>
-          <Logo />
-        </UnstyledLink>
-        <Navigation>
-          <List>
-            {LINKS.map(({ href, name }) => (
-              <Item key={href} aria-selected={location.pathname === href}>
-                <Link
-                  to={{
-                    pathname: href,
-                    search: location.search,
-                  }}
-                >
-                  {name}
-                </Link>
-              </Item>
-            ))}
-          </List>
-        </Navigation>
-        <Spacing />
-        <WalletWrapper>
-          <Wallet setOpenSidebar={setOpenSidebar} />
-          <MobileNavigation animate={openSidebar ? "open" : "closed"}>
-            <MenuToggle toggle={toggleMenu} />
-          </MobileNavigation>
-        </WalletWrapper>
-      </Content>
+      <UnstyledLink to="/" style={{ display: "flex" }}>
+        <Logo />
+      </UnstyledLink>
+      <Navigation>
+        <List>
+          {LINKS.map(({ href, name }) => (
+            <Item key={href} aria-selected={location.pathname === href}>
+              <Link
+                to={{
+                  pathname: href,
+                  search: location.search,
+                }}
+              >
+                {name}
+              </Link>
+            </Item>
+          ))}
+        </List>
+      </Navigation>
+      <Spacing />
+      <WalletWrapper>
+        <Wallet setOpenSidebar={setOpenSidebar} />
+        <MobileNavigation animate={openSidebar ? "open" : "closed"}>
+          <MenuToggle toggle={toggleMenu} />
+        </MobileNavigation>
+      </WalletWrapper>
     </Wrapper>
   );
 };

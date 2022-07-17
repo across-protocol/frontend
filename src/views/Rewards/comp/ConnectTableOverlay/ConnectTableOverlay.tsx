@@ -7,7 +7,7 @@ const ConnectTableOverlay = () => {
   return (
     <Overlay>
       <ConnectButton size="md" onClick={() => init()}>
-        Connect to track your referral transfers
+        Connect to track referral transfers
       </ConnectButton>
     </Overlay>
   );

@@ -9,6 +9,10 @@ export const Wrapper = styled.div`
   box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.32);
   border-radius: 10px;
   z-index: 5;
+
+  @media (max-width: 428px) {
+    padding: 12px;
+  }
 `;
 
 export const TitleRow = styled.div`
@@ -22,6 +26,11 @@ export const TitleRow = styled.div`
   svg {
     margin-right: 8px;
   }
+
+  @media (max-width: 428) {
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
+  }
 `;
 
 export const Body = styled.div`
@@ -29,6 +38,11 @@ export const Body = styled.div`
   font-size: ${14 / 16}rem;
   line-height: ${18 / 16}rem;
   white-space: normal;
+
+  @media (max-width: 428) {
+    font-size: ${12 / 16}rem;
+    line-height: ${16 / 16}rem;
+  }
 `;
 
 export const GreyRoundedCheckmark16 = styled(RoundedCheckmark16)`

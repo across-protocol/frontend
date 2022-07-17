@@ -17,7 +17,8 @@ import {
   WarningInfoItem,
   ConnectButton,
   ExternalLink,
-  CopyIcon,
+  CopyIconDesktop,
+  CopyIconMobile,
   InfoIcon,
   CopyCheckmark,
   ExternalLinkIcon,
@@ -80,7 +81,7 @@ const ReferralLinkComponent: React.FC<{
   }, [referrer]);
   const displayedReferralUrl = useMemo(() => {
     if (referrer) {
-      return `across.to?referrer=${shortenAddress(referrer, "...", 3)}`;
+      return `across.to?referrer=${shortenAddress(referrer, "..", 3)}`;
     }
     return "";
   }, [referrer]);
@@ -96,16 +97,19 @@ const ReferralLinkComponent: React.FC<{
       </SubHeader>
       {isConnected ? (
         <ReferralLinkButtonsRow>
-          <ReferralUrl>
+          <ReferralUrl
+            onClick={() => {
+              navigator.clipboard.writeText(referralUrl);
+              setShowCheck(true);
+              setTimeout(() => setShowCheck(false), 1500);
+            }}
+          >
             <span>{displayedReferralUrl}</span>
             {!showCheck ? (
-              <CopyIcon
-                onClick={() => {
-                  navigator.clipboard.writeText(referralUrl);
-                  setShowCheck(true);
-                  setTimeout(() => setShowCheck(false), 1500);
-                }}
-              />
+              <>
+                <CopyIconDesktop />
+                <CopyIconMobile />
+              </>
             ) : (
               <CopyCheckmark />
             )}
@@ -170,21 +174,10 @@ const ReferralTierComponent: React.FC<{
       />
       <TierInfo>
         <TierInfoItem>
-          Referree wallets
+          Active referee wallets
           <PopperTooltip
-            title="Active referree wallets"
+            title="Active referee wallets"
             body="Number of unique wallets that have used your referral link."
-            placement="bottom-start"
-          >
-            <InfoIcon />
-          </PopperTooltip>
-        </TierInfoItem>
-        <TierInfoItem>{referralsSummary.referreeWallets}</TierInfoItem>
-        <TierInfoItem>
-          Transfers
-          <PopperTooltip
-            title="Transfers"
-            body="TBD Body"
             placement="bottom-start"
           >
             <InfoIcon />
@@ -196,14 +189,16 @@ const ReferralTierComponent: React.FC<{
               <LightGrayItemText>
                 {`${
                   tiers[referralsSummary.tier + 1].referrals -
-                  referralsSummary.transfers
+                  referralsSummary.referreeWallets
                 } to next tier`}
               </LightGrayItemText>
               <ArrowSeparator>&rarr;</ArrowSeparator>
             </>
           )}
-          {`${referralsSummary.transfers} Transfers `}
+          {referralsSummary.referreeWallets}
         </TierInfoItem>
+        <TierInfoItem>Total referee wallets</TierInfoItem>
+        <TierInfoItem>{`${referralsSummary.transfers}`}</TierInfoItem>
         <TierInfoItem>Volume from transfers</TierInfoItem>
         <TierInfoItem>
           {referralsSummary.tier < 5 && (
@@ -229,7 +224,7 @@ const ReferralTierComponent: React.FC<{
         <TierInfoItem>
           <LightGrayItemText margin={8}>{`${
             referralsSummary.referralRate * 100 * 0.25
-          }% for referree`}</LightGrayItemText>
+          }% for referee`}</LightGrayItemText>
           {`${referralsSummary.referralRate * 100 * 0.75}%`}
         </TierInfoItem>
         <TierInfoItem>Rewards from transfers</TierInfoItem>

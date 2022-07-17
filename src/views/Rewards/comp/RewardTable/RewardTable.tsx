@@ -17,13 +17,19 @@ interface Props {
   rows: TxTableIRow[];
   headers: ICell[];
   title: string;
+  scrollable: boolean;
 }
 
-const RewardMyPoolsTable: FC<Props> = ({ rows, headers, title }) => {
+const RewardMyPoolsTable: FC<Props> = ({
+  rows,
+  headers,
+  title,
+  scrollable = true,
+}) => {
   return (
     <Wrapper>
       <Title>{title}</Title>
-      <TableWrapper scrollable={rows.length > 0}>
+      <TableWrapper scrollable={scrollable}>
         <TableHeadRow>
           {headers.map((cell, idx) =>
             React.cloneElement(cell.value as any, { key: idx })

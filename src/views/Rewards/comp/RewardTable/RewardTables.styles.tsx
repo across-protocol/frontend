@@ -369,6 +369,7 @@ export const EmptyRow = styled.div`
   border-top: 1px solid #3f4047;
   font-size: ${16 / 16}rem;
   line-height: ${20 / 16}rem;
+  color: #c5d5e0;
 
   @media (max-width: 428px) {
     padding: ${22 / 16}rem ${16 / 16}rem;
