@@ -329,4 +329,9 @@ export const ArrowSeparator = styled.span`
   margin: 4px 8px 0;
   color: #9daab2;
   transform: rotate(180deg);
+
+  @media (max-width: 568px) {
+    margin: 0 8px 0;
+    transform: rotate(0);
+  }
 `;

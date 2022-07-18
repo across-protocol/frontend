@@ -19,7 +19,7 @@ export const StepItem = styled.div`
   background-color: #e0f3ff;
   font-size: ${12 / 16}rem;
   line-height: ${14 / 16}rem;
-  font-weight: 400;
+  font-weight: 500;
   color: #2d2e33;
   border: 1px solid #e0f3ff;
   border-radius: 10px;

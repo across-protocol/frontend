@@ -6,6 +6,7 @@ import {
   TitleRow,
   Body,
   GreyRoundedCheckmark16,
+  TitleSecondary,
 } from "./Tooltip.styles";
 import { ReactComponent as RoundedCheckmark16 } from "assets/icons/rounded-checkmark-16.svg";
 import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
@@ -21,6 +22,7 @@ export type TooltipIcon =
 export interface TooltipProps {
   icon?: TooltipIcon;
   title: string;
+  titleSecondary?: string;
   body: string;
 }
 
@@ -29,7 +31,8 @@ export const PopperTooltip: React.FC<{
   body: string;
   icon?: TooltipIcon;
   placement?: Placement;
-}> = ({ body, title, children, icon, placement }) => {
+  titleSecondary?: string;
+}> = ({ body, title, children, icon, placement, titleSecondary }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
@@ -74,14 +77,24 @@ export const PopperTooltip: React.FC<{
           style={{ ...styles.popper, zIndex: 5 }}
           {...attributes.popper}
         >
-          <Tooltip title={title} body={body} icon={icon} />
+          <Tooltip
+            title={title}
+            titleSecondary={titleSecondary}
+            body={body}
+            icon={icon}
+          />
         </div>
       )}
     </>
   );
 };
 
-export const Tooltip: React.FC<TooltipProps> = ({ icon, title, body }) => {
+export const Tooltip: React.FC<TooltipProps> = ({
+  icon,
+  title,
+  body,
+  titleSecondary,
+}) => {
   return (
     <Wrapper>
       <TitleRow>
@@ -91,6 +104,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ icon, title, body }) => {
         {icon === "referral" && <ReferrerIcon />}
         {icon === "referee" && <RefereeIcon />}
         {title}
+        {titleSecondary && <TitleSecondary>{titleSecondary}</TitleSecondary>}
       </TitleRow>
       <Body>{body}</Body>
     </Wrapper>

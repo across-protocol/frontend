@@ -20,6 +20,7 @@ export const TitleRow = styled.div`
   display: flex;
   align-items: center;
   font-size: ${16 / 16}rem;
+  font-weight: 400;
   line-height: ${20 / 16}rem;
   color: #e0f3ff;
 
@@ -33,9 +34,15 @@ export const TitleRow = styled.div`
   }
 `;
 
+export const TitleSecondary = styled.span`
+  margin-left: 12px;
+  color: #9daab2;
+`;
+
 export const Body = styled.div`
   color: #c5d5e0;
   font-size: ${14 / 16}rem;
+  font-weight: 400;
   line-height: ${18 / 16}rem;
   white-space: normal;
 
