@@ -19,7 +19,7 @@ export const StepItem = styled.div`
   background-color: #e0f3ff;
   font-size: ${12 / 16}rem;
   line-height: ${14 / 16}rem;
-  font-weight: 600;
+  font-weight: 500;
   color: #2d2e33;
   border: 1px solid #e0f3ff;
   border-radius: 10px;
@@ -58,7 +58,7 @@ export const StepItemComplete = styled(StepItem)`
 `;
 
 export const StepItemNext = styled(StepItem)`
-  background-color: #35343b;
+  background-color: #34353b;
   color: #9daab2;
   border: 1px solid #4c4e57;
 `;

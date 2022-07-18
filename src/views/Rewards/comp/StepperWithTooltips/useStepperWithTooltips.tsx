@@ -30,12 +30,14 @@ export const StepFactory = forwardRef<
 
 export const StepItemComponent: React.FC<{
   title: string;
+  titleSecondary?: string;
   body: string;
   type: "completed" | "current" | "next";
-}> = ({ body, title, children, type }) => {
+}> = ({ body, title, children, type, titleSecondary }) => {
   return (
     <PopperTooltip
       title={title}
+      titleSecondary={titleSecondary}
       body={body}
       icon={
         type === "current" || type === "completed"
@@ -68,6 +70,7 @@ export default function useStepperWithTooltips(
           <StepItemComponent
             key={i}
             title={tooltips[i].title}
+            titleSecondary={tooltips[i].titleSecondary}
             body={tooltips[i].body}
             type="completed"
           >
@@ -82,6 +85,7 @@ export default function useStepperWithTooltips(
           <StepItemComponent
             key={i}
             title={tooltips[i].title}
+            titleSecondary={tooltips[i].titleSecondary}
             body={tooltips[i].body}
             type="current"
           >
@@ -96,6 +100,7 @@ export default function useStepperWithTooltips(
           <StepItemComponent
             key={i}
             title={tooltips[i].title}
+            titleSecondary={tooltips[i].titleSecondary}
             body={tooltips[i].body}
             type="next"
           >

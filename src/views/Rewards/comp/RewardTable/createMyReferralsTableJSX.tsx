@@ -31,7 +31,7 @@ import {
   ExplorerLinkContainer,
 } from "./RewardTables.styles";
 import { ReactComponent as ExternalLink16 } from "assets/icons/external-link-16.svg";
-import { ReactComponent as ReferreeIcon } from "assets/icons/referree.svg";
+import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
 import { ReactComponent as ReferrerIcon } from "assets/icons/referrer.svg";
 import { ReactComponent as SelfReferralIcon } from "assets/icons/self-referral.svg";
 import { PopperTooltip, TooltipIcon } from "components/Tooltip";
@@ -86,10 +86,10 @@ function determineReferralIcon(
     body = "This transfer was made by someone using your unique referral link.";
     icon = "referral";
   } else {
-    title = "Referree transfer";
+    title = "Referee transfer";
     body =
       "This transfer was made from your wallet address using an external referral link.";
-    icon = "referree";
+    icon = "referee";
   }
 
   return (
@@ -106,7 +106,7 @@ function determineReferralIcon(
           } else if (account === referralAddr) {
             return <ReferrerIcon />;
           } else {
-            return <ReferreeIcon />;
+            return <RefereeIcon />;
           }
         })()}
       </ReferralIconContainer>
@@ -157,7 +157,7 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
         {
           value: (
             <AddressCell>
-              {shortenAddress(r.depositorAddr, "...", 4)}
+              {shortenAddress(r.depositorAddr, "..", 4)}
             </AddressCell>
           ),
         },
@@ -174,7 +174,21 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
         },
         {
           value: (
-            <ReferralRateCell>{`${r.referralRate * 100}%`}</ReferralRateCell>
+            <ReferralRateCell>{`${(() => {
+              let referralRate = 0;
+              if (
+                account === r.depositorAddr &&
+                account === r.referralAddress
+              ) {
+                referralRate = r.referralRate * 100;
+              } else if (account === r.referralAddress) {
+                referralRate = r.referralRate * 100 * 0.75;
+              } else {
+                referralRate = r.referralRate * 100 * 0.25;
+              }
+
+              return `${referralRate}%`;
+            })()}`}</ReferralRateCell>
           ),
         },
         {

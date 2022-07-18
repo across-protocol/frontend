@@ -9,6 +9,10 @@ export const Wrapper = styled.div`
   box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.32);
   border-radius: 10px;
   z-index: 5;
+
+  @media (max-width: 428px) {
+    padding: 12px;
+  }
 `;
 
 export const TitleRow = styled.div`
@@ -16,19 +20,36 @@ export const TitleRow = styled.div`
   display: flex;
   align-items: center;
   font-size: ${16 / 16}rem;
+  font-weight: 400;
   line-height: ${20 / 16}rem;
   color: #e0f3ff;
 
   svg {
     margin-right: 8px;
   }
+
+  @media (max-width: 428) {
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
+  }
+`;
+
+export const TitleSecondary = styled.span`
+  margin-left: 12px;
+  color: #9daab2;
 `;
 
 export const Body = styled.div`
   color: #c5d5e0;
   font-size: ${14 / 16}rem;
+  font-weight: 400;
   line-height: ${18 / 16}rem;
   white-space: normal;
+
+  @media (max-width: 428) {
+    font-size: ${12 / 16}rem;
+    line-height: ${16 / 16}rem;
+  }
 `;
 
 export const GreyRoundedCheckmark16 = styled(RoundedCheckmark16)`

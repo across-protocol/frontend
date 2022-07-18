@@ -2,7 +2,6 @@ import {
   Wrapper,
   Link,
   AccentLink,
-  Content,
   LinksContainer,
   FooterLogo,
 } from "./Footer.styles";
@@ -39,28 +38,26 @@ const NAV_LINKS = [
 const Footer = () => {
   return (
     <Wrapper>
-      <Content>
-        <LinksContainer>
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.key}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {link.icon ? <link.icon /> : null}
-              {link.name}
-            </Link>
-          ))}
-        </LinksContainer>
-        <AccentLink
-          href="https://umaproject.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <FooterLogo />
-        </AccentLink>
-      </Content>
+      <LinksContainer>
+        {NAV_LINKS.map((link) => (
+          <Link
+            key={link.key}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {link.icon ? <link.icon /> : null}
+            {link.name}
+          </Link>
+        ))}
+      </LinksContainer>
+      <AccentLink
+        href="https://umaproject.org"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <FooterLogo />
+      </AccentLink>
     </Wrapper>
   );
 };

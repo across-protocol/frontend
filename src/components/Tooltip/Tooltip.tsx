@@ -6,21 +6,23 @@ import {
   TitleRow,
   Body,
   GreyRoundedCheckmark16,
+  TitleSecondary,
 } from "./Tooltip.styles";
 import { ReactComponent as RoundedCheckmark16 } from "assets/icons/rounded-checkmark-16.svg";
-import { ReactComponent as ReferreeIcon } from "assets/icons/referree.svg";
+import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
 import { ReactComponent as ReferrerIcon } from "assets/icons/referrer.svg";
 import { ReactComponent as SelfReferralIcon } from "assets/icons/self-referral.svg";
 
 export type TooltipIcon =
   | "green-checkmark"
   | "grey-checkmark"
-  | "referree"
+  | "referee"
   | "referral"
   | "self-referral";
 export interface TooltipProps {
   icon?: TooltipIcon;
   title: string;
+  titleSecondary?: string;
   body: string;
 }
 
@@ -29,7 +31,8 @@ export const PopperTooltip: React.FC<{
   body: string;
   icon?: TooltipIcon;
   placement?: Placement;
-}> = ({ body, title, children, icon, placement }) => {
+  titleSecondary?: string;
+}> = ({ body, title, children, icon, placement, titleSecondary }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
@@ -41,7 +44,11 @@ export const PopperTooltip: React.FC<{
     strategy: "fixed",
     modifiers: [
       { name: "offset", options: { offset: [0, 12] } },
-      { name: "preventOverflow", options: { padding: 12, altAxis: true } },
+      { name: "preventOverflow", options: { padding: 12 } },
+      {
+        name: "flip",
+        options: { fallbackPlacements: [placement || "bottom"] },
+      },
     ],
   });
 
@@ -70,14 +77,24 @@ export const PopperTooltip: React.FC<{
           style={{ ...styles.popper, zIndex: 5 }}
           {...attributes.popper}
         >
-          <Tooltip title={title} body={body} icon={icon} />
+          <Tooltip
+            title={title}
+            titleSecondary={titleSecondary}
+            body={body}
+            icon={icon}
+          />
         </div>
       )}
     </>
   );
 };
 
-export const Tooltip: React.FC<TooltipProps> = ({ icon, title, body }) => {
+export const Tooltip: React.FC<TooltipProps> = ({
+  icon,
+  title,
+  body,
+  titleSecondary,
+}) => {
   return (
     <Wrapper>
       <TitleRow>
@@ -85,8 +102,9 @@ export const Tooltip: React.FC<TooltipProps> = ({ icon, title, body }) => {
         {icon === "grey-checkmark" && <GreyRoundedCheckmark16 />}
         {icon === "self-referral" && <SelfReferralIcon />}
         {icon === "referral" && <ReferrerIcon />}
-        {icon === "referree" && <ReferreeIcon />}
+        {icon === "referee" && <RefereeIcon />}
         {title}
+        {titleSecondary && <TitleSecondary>{titleSecondary}</TitleSecondary>}
       </TitleRow>
       <Body>{body}</Body>
     </Wrapper>

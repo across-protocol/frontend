@@ -17,7 +17,8 @@ import {
   WarningInfoItem,
   ConnectButton,
   ExternalLink,
-  CopyIcon,
+  CopyIconDesktop,
+  CopyIconMobile,
   InfoIcon,
   CopyCheckmark,
   ExternalLinkIcon,
@@ -80,7 +81,7 @@ const ReferralLinkComponent: React.FC<{
   }, [referrer]);
   const displayedReferralUrl = useMemo(() => {
     if (referrer) {
-      return `across.to?referrer=${shortenAddress(referrer, "...", 3)}`;
+      return `across.to?referrer=${shortenAddress(referrer, "..", 3)}`;
     }
     return "";
   }, [referrer]);
@@ -96,16 +97,19 @@ const ReferralLinkComponent: React.FC<{
       </SubHeader>
       {isConnected ? (
         <ReferralLinkButtonsRow>
-          <ReferralUrl>
+          <ReferralUrl
+            onClick={() => {
+              navigator.clipboard.writeText(referralUrl);
+              setShowCheck(true);
+              setTimeout(() => setShowCheck(false), 1500);
+            }}
+          >
             <span>{displayedReferralUrl}</span>
             {!showCheck ? (
-              <CopyIcon
-                onClick={() => {
-                  navigator.clipboard.writeText(referralUrl);
-                  setShowCheck(true);
-                  setTimeout(() => setShowCheck(false), 1500);
-                }}
-              />
+              <>
+                <CopyIconDesktop />
+                <CopyIconMobile />
+              </>
             ) : (
               <CopyCheckmark />
             )}
@@ -147,44 +151,38 @@ const ReferralTierComponent: React.FC<{
         numSteps={5}
         tooltips={[
           {
-            title: "Copper tier - 40% referral rate",
+            title: "Copper tier",
+            titleSecondary: "40% referral rate",
             body: "Starting tier with no requirements to join.",
           },
           {
-            title: "Bronzer tier - 50% referral rate",
+            title: "Bronzer tier",
+            titleSecondary: "50% referral rate",
             body: "Requires over $50,000 of bridge volume or 3 unique referral transfers.",
           },
           {
-            title: "Silver tier - 60% referral rate",
+            title: "Silver tier",
+            titleSecondary: "60% referral rate",
             body: "Requires over $100,000 of bridge volume or 5 unique referral transfers.",
           },
           {
-            title: "Gold tier - 70% referral rate",
+            title: "Gold tier",
+            titleSecondary: "70% referral rate",
             body: "Requires over $250,000 of bridge volume or 10 unique referral transfers.",
           },
           {
-            title: "Platinum tier - 80% referral rate",
+            title: "Platinum tier",
+            titleSecondary: "80% referral rate",
             body: "Requires over $500,000 of bridge volume or 20 unique referral transfers.",
           },
         ]}
       />
       <TierInfo>
         <TierInfoItem>
-          Referree wallets
+          Total referee wallets
           <PopperTooltip
-            title="Active referree wallets"
+            title="Total referee wallets"
             body="Number of unique wallets that have used your referral link."
-            placement="bottom-start"
-          >
-            <InfoIcon />
-          </PopperTooltip>
-        </TierInfoItem>
-        <TierInfoItem>{referralsSummary.referreeWallets}</TierInfoItem>
-        <TierInfoItem>
-          Transfers
-          <PopperTooltip
-            title="Transfers"
-            body="TBD Body"
             placement="bottom-start"
           >
             <InfoIcon />
@@ -196,14 +194,16 @@ const ReferralTierComponent: React.FC<{
               <LightGrayItemText>
                 {`${
                   tiers[referralsSummary.tier + 1].referrals -
-                  referralsSummary.transfers
+                  referralsSummary.referreeWallets
                 } to next tier`}
               </LightGrayItemText>
               <ArrowSeparator>&rarr;</ArrowSeparator>
             </>
           )}
-          {`${referralsSummary.transfers} Transfers `}
+          {referralsSummary.referreeWallets}
         </TierInfoItem>
+        <TierInfoItem>Transfers</TierInfoItem>
+        <TierInfoItem>{`${referralsSummary.transfers}`}</TierInfoItem>
         <TierInfoItem>Volume from transfers</TierInfoItem>
         <TierInfoItem>
           {referralsSummary.tier < 5 && (
@@ -229,7 +229,7 @@ const ReferralTierComponent: React.FC<{
         <TierInfoItem>
           <LightGrayItemText margin={8}>{`${
             referralsSummary.referralRate * 100 * 0.25
-          }% for referree`}</LightGrayItemText>
+          }% for referee`}</LightGrayItemText>
           {`${referralsSummary.referralRate * 100 * 0.75}%`}
         </TierInfoItem>
         <TierInfoItem>Rewards from transfers</TierInfoItem>

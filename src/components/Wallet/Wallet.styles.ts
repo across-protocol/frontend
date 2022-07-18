@@ -3,8 +3,8 @@ import { QUERIES } from "utils";
 import { ReactComponent as AcrossLogo } from "assets/across-mobile-logo.svg";
 
 export const ConnectButton = styled.button`
-  font-size: 16px;
-  line-height: 20px;
+  font-size: ${16 / 16}rem;
+  line-height: ${20 / 16}rem;
   padding: 9px 20px;
   font-weight: 500;
   border: 1px solid var(--color-primary);
@@ -16,6 +16,12 @@ export const ConnectButton = styled.button`
 
   :hover {
     opacity: 0.8;
+  }
+
+  @media (max-width: 428px) {
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
+    padding: 10px 16px;
   }
 `;
 
@@ -64,21 +70,45 @@ export const BalanceButton = styled.button`
     color: #e0f3ff;
     border: 1px solid #e0f3ff;
   }
+
+  @media (max-width: 428px) {
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
+  }
 `;
 
 export const BalanceWallet = styled.div`
+  font: inherit;
   padding-right: 12px;
-  border-right: 1px solid #4d4f56;
   color: #e0f3ff;
+
+  @media (max-width: 428px) {
+    display: none;
+  }
+`;
+
+export const Separator = styled.div`
+  height: 16px;
+  width: 1px;
+  margin-right: 12px;
+  background-color: #4d4f56;
+
+  @media (max-width: 428px) {
+    display: none;
+  }
 `;
 
 export const Logo = styled(AcrossLogo)`
   height: 16px;
   width: 16px;
   margin-right: 6px;
+
+  @media (max-width: 428px) {
+    display: none;
+  }
 `;
 
 export const Account = styled.div`
-  padding-left: 12px;
-  border: 1px solid var(--color-gray);
+  font: inherit;
+  /* border: 1px solid var(--color-gray); */
 `;

@@ -4,12 +4,7 @@ import { motion } from "framer-motion";
 
 export const Wrapper = styled.header`
   background-color: #2d2e33;
-`;
-
-export const Content = styled.div`
   height: 72px;
-  max-width: 1440px;
-  margin: 0 auto;
   padding: 0 24px;
   display: flex;
   align-items: center;
@@ -93,4 +88,8 @@ export const WalletWrapper = styled.div`
 
 export const MobileNavigation = styled(motion.nav)`
   margin-left: 16px;
+
+  @media (max-width: 428px) {
+    margin-left: 8px;
+  }
 `;
