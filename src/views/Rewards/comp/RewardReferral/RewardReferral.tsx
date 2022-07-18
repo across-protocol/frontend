@@ -174,9 +174,9 @@ const ReferralTierComponent: React.FC<{
       />
       <TierInfo>
         <TierInfoItem>
-          Active referee wallets
+          Total referee wallets
           <PopperTooltip
-            title="Active referee wallets"
+            title="Total referee wallets"
             body="Number of unique wallets that have used your referral link."
             placement="bottom-start"
           >
@@ -197,7 +197,7 @@ const ReferralTierComponent: React.FC<{
           )}
           {referralsSummary.referreeWallets}
         </TierInfoItem>
-        <TierInfoItem>Total referee wallets</TierInfoItem>
+        <TierInfoItem>Transfers</TierInfoItem>
         <TierInfoItem>{`${referralsSummary.transfers}`}</TierInfoItem>
         <TierInfoItem>Volume from transfers</TierInfoItem>
         <TierInfoItem>
