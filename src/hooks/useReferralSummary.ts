@@ -15,6 +15,7 @@ export interface ReferralsSummary {
   referralRate: number;
   rewardsAmount: string;
   tier: number;
+  activeRefereesCount: number;
 }
 
 const queryKey = "FETCH_REFERRAL_SUMMARY";
@@ -25,6 +26,7 @@ const defaultReferralsSummary: ReferralsSummary = {
   tier: 1,
   transfers: 0,
   volume: 0,
+  activeRefereesCount: 0,
 };
 
 export function useReferralSummary(account: string) {

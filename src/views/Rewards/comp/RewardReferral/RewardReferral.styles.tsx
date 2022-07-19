@@ -28,6 +28,7 @@ export const ReferralLinkBlock = styled(ReferralRowBlock)`
   padding: 32px 24px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 
   @media screen and (max-width: 1024px) {
     flex: none;
@@ -139,7 +140,7 @@ export const ReferralUrl = styled.button`
 `;
 
 export const StyledReferralLogo = styled(ReferralSVG)`
-  margin: auto;
+  margin: 0 auto;
   height: 64px;
   width: 64px;
 `;

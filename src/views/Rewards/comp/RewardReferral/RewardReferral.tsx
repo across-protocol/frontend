@@ -178,8 +178,10 @@ const ReferralTierComponent: React.FC<{
         ]}
       />
       <TierInfo>
+        <TierInfoItem>Referee wallets</TierInfoItem>
+        <TierInfoItem>{referralsSummary.activeRefereesCount}</TierInfoItem>
         <TierInfoItem>
-          Total referee wallets
+          Unique referral transfers
           <PopperTooltip
             title="Total referee wallets"
             body="Number of unique wallets that have used your referral link."
