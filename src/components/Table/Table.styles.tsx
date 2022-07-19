@@ -5,7 +5,7 @@ import { QUERIES } from "utils";
 export const TableWrapper = styled.div`
   width: 100%;
   font-size: 16px;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.4);
+
   @media ${QUERIES.tabletAndDown} {
     overflow: auto;
   }
@@ -83,9 +83,11 @@ export const Cell = styled.div<ICellStyled>`
     return "1 0 60px";
   }};
   margin: 0 8px;
+
   &:first-of-type {
     margin-left: 24px;
   }
+
   &:not(:first-of-type) {
     min-width: 150px;
   }

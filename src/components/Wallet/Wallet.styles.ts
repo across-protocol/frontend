@@ -1,38 +1,27 @@
 import styled from "@emotion/styled";
 import { QUERIES } from "utils";
-import { RoundBox } from "../Box";
-import { SecondaryButton } from "../Buttons";
+import { ReactComponent as AcrossLogo } from "assets/across-mobile-logo.svg";
 
-export const Wrapper = styled(RoundBox)`
-  background-color: inherit;
-  width: 100%;
-  grid-template-columns: 1fr 1fr;
-  padding: 0;
-  display: none;
+export const ConnectButton = styled.button`
+  font-size: ${16 / 16}rem;
+  line-height: ${20 / 16}rem;
+  padding: 9px 20px;
+  font-weight: 500;
+  border: 1px solid var(--color-primary);
+  border-radius: 32px;
+  background-color: #2d2e33;
+  color: #6cf9d8;
+  cursor: pointer;
+  transition: opacity 0.1s;
 
-  &:hover {
-    cursor: pointer;
+  :hover {
+    opacity: 0.8;
   }
-  @media ${QUERIES.laptopAndUp} {
-    display: grid;
-  }
-`;
 
-export const ConnectButton = styled(SecondaryButton)`
-  padding: 12px 16px;
-  border: 1px solid transparent;
-`;
-
-export const Account = styled.div`
-  background-color: var(--color-gray);
-  color: var(--color-white);
-  display: grid;
-  place-items: center;
-  padding: 0 10px;
-  border-radius: 0 var(--radius) var(--radius) 0;
-  border: 1px solid var(--color-gray);
-  @media ${QUERIES.tabletAndUp} {
-    padding: 0 30px;
+  @media (max-width: 428px) {
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
+    padding: 10px 16px;
   }
 `;
 
@@ -42,7 +31,7 @@ export const Info = styled.div`
   align-items: flex-end;
   text-transform: capitalize;
   border-radius: var(--radius) 0 0 var(--radius);
-  border: 1px solid var(--color-gray);
+  border: 1px solid var(--color-primary);
   padding: 5px 10px;
   white-space: nowrap;
   & > div {
@@ -60,4 +49,66 @@ export const Info = styled.div`
 export const UnsupportedNetwork = styled.div`
   background-color: rgba(45, 46, 51, 0.25);
   padding: 1rem 0.5rem;
+`;
+
+export const BalanceButton = styled.button`
+  height: 40px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  line-height: 20px;
+  color: #9daab2;
+  font-weight: 500;
+  border: 1px solid #4d4f56;
+  border-radius: 32px;
+  background-color: #2d2e33;
+  outline: none;
+  cursor: pointer;
+
+  :hover {
+    color: #e0f3ff;
+    border: 1px solid #e0f3ff;
+  }
+
+  @media (max-width: 428px) {
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
+  }
+`;
+
+export const BalanceWallet = styled.div`
+  font: inherit;
+  padding-right: 12px;
+  color: #e0f3ff;
+
+  @media (max-width: 428px) {
+    display: none;
+  }
+`;
+
+export const Separator = styled.div`
+  height: 16px;
+  width: 1px;
+  margin-right: 12px;
+  background-color: #4d4f56;
+
+  @media (max-width: 428px) {
+    display: none;
+  }
+`;
+
+export const Logo = styled(AcrossLogo)`
+  height: 16px;
+  width: 16px;
+  margin-right: 6px;
+
+  @media (max-width: 428px) {
+    display: none;
+  }
+`;
+
+export const Account = styled.div`
+  font: inherit;
+  /* border: 1px solid var(--color-gray); */
 `;

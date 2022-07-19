@@ -1,56 +1,70 @@
 import styled from "@emotion/styled";
 import { Link as UnstyledLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import { COLORS, QUERIES } from "utils";
-import { ReactComponent as UnstyledDesktopLogo } from "assets/across-logo-v2.svg";
-import { ReactComponent as UnstyledMobileLogo } from "assets/logo-mobile.svg";
+
 export const Wrapper = styled.header`
-  height: var(--header-height);
-  padding: 0 20px;
-  display: grid;
-  grid-template-columns: min-content 1fr min-content;
-  gap: 15px;
+  background-color: #2d2e33;
+  height: 72px;
+  padding: 0 24px;
+  display: flex;
   align-items: center;
-  background-color: var(--color-primary);
-  color: var(--color-gray);
-  @media ${QUERIES.laptopAndUp} {
-    padding: 0 30px;
-    grid-template-columns: 1fr min(100%, var(--central-content)) 1fr;
+  color: #c5d5e0;
+
+  @media (max-width: 428px) {
+    height: 64px;
+    padding: 0 12px;
   }
 `;
 
 export const Navigation = styled.nav`
   height: 100%;
-  display: none;
-  @media ${QUERIES.tabletAndUp} {
-    display: revert;
+  display: flex;
+  margin-left: 48px;
+
+  @media (max-width: 1024px) {
+    display: none;
   }
-  svg,
-  path {
-    line-height: 0 !important;
-  }
+`;
+
+export const Spacing = styled.div`
+  flex-grow: 1;
 `;
 
 export const List = styled.ul`
   display: flex;
   list-style: none;
-  height: 100%;
   font-size: ${18 / 16}rem;
 `;
 
 export const Item = styled.li`
-  flex: 1 0 165px;
+  position: relative;
+  margin: 0 24px 0 0;
+  font-size: ${16 / 16}rem;
+  line-height: ${20 / 16}rem;
+  font-weight: 400;
+  color: #c5d5e0;
   background-color: inherit;
-  color: var(--color-gray);
-  text-transform: capitalize;
   cursor: pointer;
+
   &[aria-selected="true"] {
-    color: var(--color-white);
-    background-color: var(--color-gray);
-    font-weight: bold;
+    font-weight: 500;
+    color: #e0f3ff;
+
+    ::after {
+      content: "";
+      position: absolute;
+      top: 56px;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      border-radius: 2px;
+      background-color: #e0f3ff;
+      transform: translateX(-50%);
+    }
   }
-  &:hover:not([aria-selected="true"]) {
-    color: hsla(${COLORS.gray[500]} / 0.5);
+
+  :hover {
+    color: #e0f3ff;
   }
 `;
 export const BaseLink = styled(UnstyledLink)`
@@ -66,32 +80,16 @@ export const Link = styled(BaseLink)`
   display: grid;
   place-items: center;
 `;
-export const LogoLink = styled(UnstyledLink)`
-  padding-left: 10px;
-  @media ${QUERIES.desktopAndUp} {
-    /* padding-left: 45px; */
-  }
-  line-height: 0;
-`;
-export const Logo = styled(UnstyledDesktopLogo)`
-  display: none;
-  @media ${QUERIES.laptopAndUp} {
-    display: revert;
-  }
-`;
-
-export const MobileLogo = styled(UnstyledMobileLogo)`
-  @media ${QUERIES.laptopAndUp} {
-    display: none;
-  }
-`;
 
 export const WalletWrapper = styled.div`
-  justify-self: flex-end;
   display: flex;
   align-items: center;
 `;
 
 export const MobileNavigation = styled(motion.nav)`
   margin-left: 16px;
+
+  @media (max-width: 428px) {
+    margin-left: 8px;
+  }
 `;

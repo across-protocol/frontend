@@ -406,6 +406,13 @@ assert(
   "Missing process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY"
 );
 
+assert(
+  process.env.REACT_APP_REWARDS_API_URL,
+  "Missing process.env.REACT_APP_REWARDS_API_URL"
+);
+
+export const rewardsApiUrl = process.env.REACT_APP_REWARDS_API_URL;
+export const mediumUrl = process.env.REACT_APP_MEDIUM_URL;
 export const hubPoolChainId = Number(process.env.REACT_APP_HUBPOOL_CHAINID);
 export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;
 export const enableReactQueryDevTools =

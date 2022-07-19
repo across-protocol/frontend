@@ -1,24 +1,25 @@
 import { useLocation } from "react-router";
+import { Link as UnstyledLink } from "react-router-dom";
 import Wallet from "../Wallet";
 import {
   Wrapper,
   Navigation,
   Link,
-  LogoLink,
-  Logo,
-  MobileLogo,
   MobileNavigation,
   List,
   Item,
   WalletWrapper,
+  Spacing,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
 import { enableMigration } from "utils";
+import { ReactComponent as Logo } from "assets/across-mobile-logo.svg";
 
 const LINKS = !enableMigration
   ? [
       { href: "/", name: "Bridge" },
       { href: "/pool", name: "Pool" },
+      { href: "/rewards", name: "Rewards" },
       { href: "/transactions", name: "Transactions" },
     ]
   : [];
@@ -36,10 +37,9 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
 
   return (
     <Wrapper>
-      <LogoLink to="/">
+      <UnstyledLink to="/" style={{ display: "flex" }}>
         <Logo />
-        <MobileLogo />
-      </LogoLink>
+      </UnstyledLink>
       <Navigation>
         <List>
           {LINKS.map(({ href, name }) => (
@@ -56,6 +56,7 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
           ))}
         </List>
       </Navigation>
+      <Spacing />
       <WalletWrapper>
         <Wallet setOpenSidebar={setOpenSidebar} />
         <MobileNavigation animate={openSidebar ? "open" : "closed"}>

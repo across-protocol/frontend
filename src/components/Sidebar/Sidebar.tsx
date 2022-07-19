@@ -28,6 +28,10 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
     useSidebar(openSidebar);
   const addrOrEns = ensName ?? account;
 
+  const onClickLink = () => {
+    setOpenSidebar(false);
+  };
+
   return (
     <>
       {openSidebar && <Overlay />}
@@ -60,22 +64,27 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
         </StyledHeader>
         <StyledMenu>
           <StyledMenuItem selected={location.pathname === "/"}>
-            <Link onClick={() => setOpenSidebar(false)} to="/">
+            <Link onClick={() => onClickLink()} to="/">
               Bridge
             </Link>
           </StyledMenuItem>
           <StyledMenuItem selected={location.pathname === "/pool"}>
-            <Link onClick={() => setOpenSidebar(false)} to="/pool">
+            <Link onClick={() => onClickLink()} to="/pool">
               Pool
             </Link>
           </StyledMenuItem>
           <StyledMenuItem selected={location.pathname === "/transactions"}>
-            <Link onClick={() => setOpenSidebar(false)} to="/transactions">
+            <Link onClick={() => onClickLink()} to="/transactions">
               Transactions
             </Link>
           </StyledMenuItem>
+          <StyledMenuItem selected={location.pathname === "/rewards"}>
+            <Link onClick={() => onClickLink()} to="/rewards">
+              Rewards
+            </Link>
+          </StyledMenuItem>
           <StyledMenuItem selected={location.pathname === "/about"}>
-            <Link onClick={() => setOpenSidebar(false)} to="/about">
+            <Link onClick={() => onClickLink()} to="/about">
               About
             </Link>
           </StyledMenuItem>
@@ -84,7 +93,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               href="https://docs.across.to/bridge/"
               target="_blank"
               rel="noreferrer"
-              onClick={() => setOpenSidebar(false)}
+              onClick={() => onClickLink()}
             >
               Docs
             </a>
@@ -94,7 +103,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               href="https://discord.com/invite/across"
               target="_blank"
               rel="noreferrer"
-              onClick={() => setOpenSidebar(false)}
+              onClick={() => onClickLink()}
             >
               Support (Discord)
             </a>
@@ -104,7 +113,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               href="https://github.com/across-protocol"
               target="_blank"
               rel="noreferrer"
-              onClick={() => setOpenSidebar(false)}
+              onClick={() => onClickLink()}
             >
               Github
             </a>
@@ -114,7 +123,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               href="https://twitter.com/AcrossProtocol/"
               target="_blank"
               rel="noreferrer"
-              onClick={() => setOpenSidebar(false)}
+              onClick={() => onClickLink()}
             >
               Twitter
             </a>
@@ -124,7 +133,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               href="https://medium.com/across-protocol"
               target="_blank"
               rel="noreferrer"
-              onClick={() => setOpenSidebar(false)}
+              onClick={() => onClickLink()}
             >
               Medium
             </a>
@@ -134,7 +143,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               href="https://forum.across.to/"
               target="_blank"
               rel="noreferrer"
-              onClick={() => setOpenSidebar(false)}
+              onClick={() => onClickLink()}
             >
               Discourse
             </a>
