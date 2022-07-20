@@ -286,7 +286,28 @@ export default class LpFeeCalculator {
       this.hubPoolInstance.callStatic.sync(tokenAddress),
       this.hubPoolInstance.callStatic.pooledTokens(tokenAddress),
     ]);
-    return pooledTokens.liquidReserves.lt(amount);
+
+    let liquidReserves = pooledTokens.liquidReserves;
+
+    if (
+      ethers.utils.getAddress(tokenAddress) ===
+      ethers.utils.getAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
+    ) {
+      // Add a 2500 WETH cushion to LP liquidity.
+      liquidReserves = pooledTokens.liquidReserves.sub(
+        ethers.utils.parseEther("2500")
+      );
+    } else if (
+      ethers.utils.getAddress(tokenAddress) ===
+      ethers.utils.getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
+    ) {
+      // Add a 5MM USDC cushion to LP liquidity.
+      liquidReserves = pooledTokens.liquidReserves.sub(
+        ethers.utils.parseUnits("5000000", 6)
+      );
+    }
+
+    return liquidReserves.lt(amount);
   }
   async getLpFeePct(
     tokenAddress: string,
