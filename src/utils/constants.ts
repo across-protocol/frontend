@@ -689,3 +689,5 @@ export const referrerDelimiterHex = "0xd00dfeeddeadbeef";
 
 export const usdcLpCushion = process.env.REACT_APP_USDC_LP_CUSHION || "0";
 export const wethLpCushion = process.env.REACT_APP_WETH_LP_CUSHION || "0";
+export const wbtcLpCushion = process.env.REACT_APP_WBTC_LP_CUSHION || "0";
+export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
