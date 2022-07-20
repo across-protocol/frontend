@@ -22,6 +22,8 @@ import {
   referrerDelimiterHex,
   usdcLpCushion,
   wethLpCushion,
+  wbtcLpCushion,
+  daiLpCushion,
 } from "./constants";
 
 import { parseEther, tagAddress } from "./format";
@@ -295,7 +297,7 @@ export default class LpFeeCalculator {
       ethers.utils.getAddress(tokenAddress) ===
       ethers.utils.getAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
     ) {
-      // Add a 2500 WETH cushion to LP liquidity.
+      // Add WETH cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
         ethers.utils.parseEther(wethLpCushion)
       );
@@ -303,9 +305,25 @@ export default class LpFeeCalculator {
       ethers.utils.getAddress(tokenAddress) ===
       ethers.utils.getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
     ) {
-      // Add a 5MM USDC cushion to LP liquidity.
+      // Add USDC cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
         ethers.utils.parseUnits(usdcLpCushion, 6)
+      );
+    } else if (
+      ethers.utils.getAddress(tokenAddress) ===
+      ethers.utils.getAddress("0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599")
+    ) {
+      // Add WBTC cushion to LP liquidity.
+      liquidReserves = pooledTokens.liquidReserves.sub(
+        ethers.utils.parseUnits(wbtcLpCushion || "0", 8)
+      );
+    } else if (
+      ethers.utils.getAddress(tokenAddress) ===
+      ethers.utils.getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F")
+    ) {
+      // Add DAI cushion to LP liquidity.
+      liquidReserves = pooledTokens.liquidReserves.sub(
+        ethers.utils.parseUnits(daiLpCushion || "0", 18)
       );
     }
 
