@@ -118,10 +118,28 @@ const handler = async (request, response) => {
       ),
     ]);
 
-    const { liquidReserves } = hubPool.interface.decodeFunctionResult(
+    let { liquidReserves } = hubPool.interface.decodeFunctionResult(
       "pooledTokens",
       multicallOutput[1]
     );
+
+    if (
+      ethers.utils.getAddress(l1Token) ===
+      ethers.utils.getAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
+    ) {
+      // Add a 2500 WETH cushion to LP liquidity.
+      liquidReserves = liquidReserves.sub(ethers.utils.parseEther("2500"));
+    } else if (
+      ethers.utils.getAddress(l1Token) ===
+      ethers.utils.getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
+    ) {
+      // Add a 5MM USDC cushion to LP liquidity.
+      liquidReserves = liquidReserves.sub(
+        ethers.utils.parseUnits("5000000", 6)
+      );
+    }
+
+    if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
 
     const maxGasFee = ethers.utils
       .parseEther(maxRelayFeePct.toString())
@@ -150,10 +168,10 @@ const handler = async (request, response) => {
     };
 
     // Instruct Vercel to cache limit data for this token for 5 minutes. Caching can be used to limit number of
-    // Vercel invocations and run time for this serverless function and trades off potential inaccuracy in times of 
+    // Vercel invocations and run time for this serverless function and trades off potential inaccuracy in times of
     // high volume. "max-age=0" instructs browsers not to cache, while s-maxage instructs Vercel edge caching
     // to cache the responses and invalidate when deployments update.
-    response.setHeader("Cache-Control", 's-maxage=300')
+    response.setHeader("Cache-Control", "s-maxage=300");
     response.status(200).json(responseJson);
   } catch (error) {
     let status;
