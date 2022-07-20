@@ -1,16 +1,6 @@
-const healthHandler = require("../../api/health");
 const limitsHandler = require("../../api/limits");
 const feesHandler = require("../../api/suggested-fees");
 
-test("serverless function is alive", async () => {
-  const response = {};
-  response.status = jest.fn().mockReturnValue(response);
-  response.send = jest.fn();
-  const request = {};
-  await healthHandler(request, response);
-  expect(response.status).toHaveBeenCalledWith(200);
-  expect(response.send).toHaveBeenCalledWith("Ok");
-});
 test("limits is alive", async () => {
   // Public infura key published in @umaprotocol/packages/common/ProviderUtils
   process.env.REACT_APP_PUBLIC_INFURA_ID = "e34138b2db5b496ab5cc52319d2f0299";
