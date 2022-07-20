@@ -41,7 +41,8 @@ export function useReferrals(account: string) {
     },
     {
       // refetch based on the chain polling interval
-      refetchInterval: 60000,
+      // disable this temporary
+      // refetchInterval: 60000,
       enabled: !!account,
     }
   );
