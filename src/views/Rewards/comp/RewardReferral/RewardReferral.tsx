@@ -120,7 +120,11 @@ const ReferralLinkComponent: React.FC<{
           <ConnectButton size="md" onClick={() => init()}>
             Connect to get started
           </ConnectButton>
-          <ExternalLink>
+          <ExternalLink
+            href="https://docs.across.to/v2/how-to-use-across/referral-program"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Learn more <ExternalLinkIcon />
           </ExternalLink>
         </ReferralLinkButtonsRow>
