@@ -7,5 +7,11 @@ export function max(a: BigNumberish, b: BigNumberish) {
 }
 
 export function receiveAmount(amount: BigNumber, fees: BridgeFees) {
-  return max(amount.sub(fees.relayerFee.total).sub(fees.lpFee.total), 0);
+  return max(
+    amount
+      .sub(fees.relayerCapitalFee.total)
+      .sub(fees.lpFee.total)
+      .sub(fees.relayerGasFee.total),
+    0
+  );
 }
