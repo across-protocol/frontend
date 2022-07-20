@@ -22,6 +22,8 @@ const handler = async (request, response) => {
       REACT_APP_PUBLIC_INFURA_ID,
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
+      REACT_APP_USDC_LP_CUSHION,
+      REACT_APP_WETH_LP_CUSHION,
     } = process.env;
     const provider = new ethers.providers.StaticJsonRpcProvider(
       `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`
@@ -128,14 +130,16 @@ const handler = async (request, response) => {
       ethers.utils.getAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
     ) {
       // Add a 2500 WETH cushion to LP liquidity.
-      liquidReserves = liquidReserves.sub(ethers.utils.parseEther("2500"));
+      liquidReserves = liquidReserves.sub(
+        ethers.utils.parseEther(REACT_APP_WETH_LP_CUSHION || "0")
+      );
     } else if (
       ethers.utils.getAddress(l1Token) ===
       ethers.utils.getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
     ) {
       // Add a 5MM USDC cushion to LP liquidity.
       liquidReserves = liquidReserves.sub(
-        ethers.utils.parseUnits("5000000", 6)
+        ethers.utils.parseUnits(REACT_APP_USDC_LP_CUSHION || "0", 6)
       );
     }
 

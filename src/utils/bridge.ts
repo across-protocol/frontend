@@ -20,6 +20,8 @@ import {
   FLAT_RELAY_CAPITAL_FEE,
   relayerFeeCapitalCostConfig,
   referrerDelimiterHex,
+  usdcLpCushion,
+  wethLpCushion,
 } from "./constants";
 
 import { parseEther, tagAddress } from "./format";
@@ -295,7 +297,7 @@ export default class LpFeeCalculator {
     ) {
       // Add a 2500 WETH cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseEther("2500")
+        ethers.utils.parseEther(wethLpCushion)
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
@@ -303,7 +305,7 @@ export default class LpFeeCalculator {
     ) {
       // Add a 5MM USDC cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits("5000000", 6)
+        ethers.utils.parseUnits(usdcLpCushion, 6)
       );
     }
 
