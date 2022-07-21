@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "react-router";
 import { Check, ArrowUpRight } from "react-feather";
 import {
   ChainId,
@@ -50,6 +51,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
     deposit?.fromChain,
     deposit?.toChain
   );
+  const location = useLocation();
   if (!deposit) return null;
   const config = getConfig();
   const amountMinusFees = receiveAmount(deposit.amount, deposit.fees);
@@ -84,7 +86,11 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
           <SubHeading>{fundsArrivalText}</SubHeading>
           <SubHeading>
             To monitor progress, go to the
-            <RouterLink to="/transactions">transactions page</RouterLink>
+            <RouterLink
+              to={{ pathname: "/transactions", search: location.search }}
+            >
+              transactions page
+            </RouterLink>
           </SubHeading>
           <SuccessIcon>
             <Check strokeWidth={4} />
