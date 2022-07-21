@@ -26,11 +26,6 @@ export const useRewardsView = () => {
   const { summary, isLoading: isReferalSummaryLoading } =
     useReferralSummary(account);
 
-  console.log("pageSize", pageSize);
-  console.log("total count", summary);
-  console.log("current page", currentPage);
-  console.log("refs", referrals);
-
   return {
     referralsSummary: summary,
     isReferalSummaryLoading,
