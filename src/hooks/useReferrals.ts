@@ -1,13 +1,6 @@
 import axios from "axios";
 import { useQuery } from "react-query";
-import { rewardsApiUrl } from "utils";
-
-/**
- * Fetches the latest block from a given chain Id on an interval.
- * @param chainId The chain Id of the chain to poll for new blocks.
- * @returns The latest block, and the useQueryResult object.
- */
-const queryKey = "FETCH_REFERRALS";
+import { rewardsApiUrl, referralsQueryKey } from "utils";
 
 export interface Referral {
   depositTxHash: string;
@@ -24,31 +17,49 @@ export interface Referral {
   acxRewards: string;
 }
 
+export interface Pagination {
+  total: number;
+  limit: number;
+  offset: number;
+}
+
 export interface GetReferralsResponse {
-  pagination: {
-    total: number;
-    limit: number;
-    offset: number;
-  };
+  pagination: Pagination;
   referrals: Referral[];
 }
 
-export function useReferrals(account: string) {
+const defaultPagination: Pagination = { total: 0, limit: 0, offset: 0 };
+
+export function useReferrals(
+  account?: string,
+  limit?: number,
+  offset?: number
+) {
+  const enabledQuery =
+    account !== undefined && limit !== undefined && offset !== undefined;
+
+  const queryKey = enabledQuery
+    ? referralsQueryKey(account, limit, offset)
+    : "DISABLED_REFERRALS_KEY";
+
   const { data: referrals, ...other } = useQuery(
     queryKey,
     async () => {
-      return getReferrals(account!);
+      return getReferrals(account!, limit!, offset!);
     },
     {
       // refetch based on the chain polling interval
       // disable this temporary
       // refetchInterval: 60000,
-      enabled: !!account,
+      enabled: enabledQuery,
     }
   );
 
   return {
     referrals: referrals?.data.referrals || [],
+    // Note: returning all 0s is a little hacky, but it means that the app won't let the user with the pages while
+    // loading. There may be better ways to manage this, maybe with a loading indicator that disables all pagination.
+    pagination: referrals?.data.pagination || defaultPagination,
     ...other,
   };
 }
@@ -57,8 +68,8 @@ export function useReferrals(account: string) {
  * @param account Address of logged in user.
  * @returns A promise resolving to the referral data of the user
  */
-async function getReferrals(account: string) {
+async function getReferrals(account: string, limit: number, offset: number) {
   return axios.get<GetReferralsResponse>(
-    `${rewardsApiUrl}/referrals/details?address=${account}&limit=30&offset=0`
+    `${rewardsApiUrl}/referrals/details?address=${account}&limit=${limit}&offset=${offset}`
   );
 }

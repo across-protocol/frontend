@@ -29,17 +29,19 @@ const defaultReferralsSummary: ReferralsSummary = {
   activeRefereesCount: 0,
 };
 
-export function useReferralSummary(account: string) {
+export function useReferralSummary(account?: string) {
+  const enabledQuery = account !== undefined;
+
   const { data: summary, ...other } = useQuery(
     queryKey,
     async () => {
-      return getReferrals(account!);
+      return getReferralSummary(account!);
     },
     {
       // refetch based on the chain polling interval
       // disable this temporary
       // refetchInterval: 60000,
-      enabled: !!account,
+      enabled: enabledQuery,
     }
   );
 
@@ -53,7 +55,7 @@ export function useReferralSummary(account: string) {
  * @param account Address of logged in user.
  * @returns A promise resolving to the referral summary of the user
  */
-async function getReferrals(account: string) {
+async function getReferralSummary(account: string) {
   return axios.get<ReferralsSummary>(
     `${rewardsApiUrl}/referrals/summary?address=${account}`
   );

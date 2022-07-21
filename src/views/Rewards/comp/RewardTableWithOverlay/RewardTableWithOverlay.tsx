@@ -16,6 +16,7 @@ const RewardTableWithOverlay: React.FC<{
   pageSize: number;
   setPageSize: (value: number) => void;
   pageSizes: number[];
+  totalReferralCount: number;
 }> = ({
   isConnected,
   referrals,
@@ -25,21 +26,18 @@ const RewardTableWithOverlay: React.FC<{
   pageSize,
   setPageSize,
   pageSizes,
+  totalReferralCount,
 }) => {
   const rows = createMyReferralsTableJSX(referrals, isConnected, account);
-  const elementCount = rows.length;
 
   const paginateState = paginate({
-    elementCount,
+    elementCount: totalReferralCount,
     currentPage,
     maxNavigationCount: 5,
     elementsPerPage: pageSize,
   });
 
-  const paginatedRows = rows.slice(
-    paginateState.startIndex,
-    paginateState.endIndex
-  );
+  const paginatedRows = rows;
 
   return (
     <Wrapper>
@@ -50,17 +48,15 @@ const RewardTableWithOverlay: React.FC<{
         rows={paginatedRows}
         headers={headers}
       />
-      {paginateState.totalPages > 1 ? (
-        <div>
-          <Pagination
-            onPageSizeChange={setPageSize}
-            pageSize={pageSize}
-            pageSizes={pageSizes}
-            onPageChange={setCurrentPage}
-            {...paginateState}
-          />
-        </div>
-      ) : null}
+      <div>
+        <Pagination
+          onPageSizeChange={setPageSize}
+          pageSize={pageSize}
+          pageSizes={pageSizes}
+          onPageChange={setCurrentPage}
+          {...paginateState}
+        />
+      </div>
     </Wrapper>
   );
 };

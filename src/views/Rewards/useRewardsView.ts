@@ -7,13 +7,29 @@ const DEFAULT_PAGE_SIZE = 10;
 
 export const useRewardsView = () => {
   const { isConnected, account } = useConnection();
-  const { referrals } = useReferrals(account || "");
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [pageSize, setPageSizeState] = useState(DEFAULT_PAGE_SIZE);
+
+  // Note: we need to reset the page to 0 whenever we change the size to avoid going off the end.
+  const setPageSize = (newPageSize: number) => {
+    // Reset current page to 0 when resetting the page size.
+    setCurrentPage(0);
+    setPageSizeState(newPageSize);
+  };
+
   const pageSizes = useMemo(() => [10, 25, 50], []);
-  const { summary, isLoading: isReferalSummaryLoading } = useReferralSummary(
-    account || ""
+  const { referrals, pagination } = useReferrals(
+    account,
+    pageSize,
+    pageSize * currentPage
   );
+  const { summary, isLoading: isReferalSummaryLoading } =
+    useReferralSummary(account);
+
+  console.log("pageSize", pageSize);
+  console.log("total count", summary);
+  console.log("current page", currentPage);
+  console.log("refs", referrals);
 
   return {
     referralsSummary: summary,
@@ -26,5 +42,6 @@ export const useRewardsView = () => {
     pageSize,
     setPageSize,
     pageSizes,
+    totalReferralCount: pagination.total,
   };
 };

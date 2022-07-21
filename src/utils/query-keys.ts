@@ -68,3 +68,27 @@ export function allowanceQueryKey(
 ) {
   return ["allowance", chainId, tokenSymbol, owner, spender, blockNumber];
 }
+
+/**
+ * Generates query keys for react-query `useQuery` hook, used in the `useReferrals` hook.
+ * @param account  The address that referrals are being queried for.
+ * @param limit The limit on the number of results that are returned (page size).
+ * @param offset The number of elements to omit before returning results.
+ * @returns An array of query keys for react-query `useQuery` hook.
+ */
+export function referralsQueryKey(
+  account: string,
+  limit: number,
+  offset: number
+) {
+  return ["referrals", account, limit, offset];
+}
+
+/**
+ * Generates query keys for react-query `useQuery` hook, used in the `useReferralSummary` hook.
+ * @param account  The address that referral summary is being queried for.
+ * @returns An array of query keys for react-query `useQuery` hook.
+ */
+export function referralSummaryQueryKey(account: string) {
+  return ["referralSummary", account];
+}

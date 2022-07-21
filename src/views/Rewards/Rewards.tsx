@@ -20,6 +20,7 @@ const Rewards = () => {
     pageSize,
     setPageSize,
     pageSizes,
+    totalReferralCount,
   } = useRewardsView();
 
   return (
@@ -41,6 +42,7 @@ const Rewards = () => {
           pageSize={pageSize}
           setPageSize={setPageSize}
           pageSizes={pageSizes}
+          totalReferralCount={totalReferralCount}
         />
       </Content>
       <Footer />
