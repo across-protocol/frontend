@@ -51,18 +51,26 @@ export function shortenTransactionHash(hash: string): string {
   return `${hash.substring(0, 5)}...`;
 }
 
-// this actually will round up in some cases
-export const numberFormatter = (num: number) =>
+export const smallNumberFormatter = (num: number) =>
   new Intl.NumberFormat("en-US", {
     minimumSignificantDigits: 1,
-    maximumSignificantDigits: 4,
+    maximumSignificantDigits: 3,
+  }).format(num);
+
+export const largeNumberFormatter = (num: number) =>
+  new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 3,
   }).format(num);
 
 export function formatUnits(
   wei: ethers.BigNumberish,
   decimals: number
 ): string {
-  return numberFormatter(Number(ethers.utils.formatUnits(wei, decimals)));
+  const value = Number(ethers.utils.formatUnits(wei, decimals));
+  if (value > 1) {
+    return largeNumberFormatter(value);
+  }
+  return smallNumberFormatter(value);
 }
 
 export function formatEther(wei: ethers.BigNumberish): string {
