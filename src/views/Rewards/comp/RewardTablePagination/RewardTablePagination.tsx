@@ -86,6 +86,7 @@ export const Pagination = ({
   pageSize,
   pageSizes,
 }: Props) => {
+  const pageSelectorEnabled = lastPage !== 0;
   return (
     <Wrapper>
       <PageSizeSelect
@@ -93,45 +94,52 @@ export const Pagination = ({
         pageSizes={pageSizes}
         onPageSizeChange={onPageSizeChange}
       />
-      <PaginationElements>
-        {!hideStart && (
-          <>
-            <ElementWrapper onClick={() => onPageChange(0)}> 1 </ElementWrapper>
-            &nbsp; ... &nbsp;
-          </>
-        )}
-        {pageList.map((page, index) => {
-          return (
-            <ElementWrapper
-              active={index === activeIndex}
-              key={page}
-              onClick={() => onPageChange(page)}
+      {pageSelectorEnabled && (
+        <>
+          <PaginationElements>
+            {!hideStart && (
+              <>
+                <ElementWrapper onClick={() => onPageChange(0)}>
+                  {" "}
+                  1{" "}
+                </ElementWrapper>
+                &nbsp; ... &nbsp;
+              </>
+            )}
+            {pageList.map((page, index) => {
+              return (
+                <ElementWrapper
+                  active={index === activeIndex}
+                  key={page}
+                  onClick={() => onPageChange(page)}
+                >
+                  {page + 1}
+                </ElementWrapper>
+              );
+            })}
+            {!hideEnd && (
+              <>
+                <PagesPlaceholder>...</PagesPlaceholder>
+                <ElementWrapper onClick={() => onPageChange(lastPage)}>
+                  {lastPage + 1}
+                </ElementWrapper>
+              </>
+            )}
+            <NextElement
+              disabled={disableBack}
+              onClick={() => onPageChange(currentPage - 1)}
             >
-              {page + 1}
-            </ElementWrapper>
-          );
-        })}
-        {!hideEnd && (
-          <>
-            <PagesPlaceholder>...</PagesPlaceholder>
-            <ElementWrapper onClick={() => onPageChange(lastPage)}>
-              {lastPage + 1}
-            </ElementWrapper>
-          </>
-        )}
-        <NextElement
-          disabled={disableBack}
-          onClick={() => onPageChange(currentPage - 1)}
-        >
-          <ArrowIcon />
-        </NextElement>
-        <NextElement
-          disabled={disableForward}
-          onClick={() => onPageChange(currentPage + 1)}
-        >
-          <ArrowIcon />
-        </NextElement>
-      </PaginationElements>
+              <ArrowIcon />
+            </NextElement>
+            <NextElement
+              disabled={disableForward}
+              onClick={() => onPageChange(currentPage + 1)}
+            >
+              <ArrowIcon />
+            </NextElement>
+          </PaginationElements>
+        </>
+      )}
     </Wrapper>
   );
 };
