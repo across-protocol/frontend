@@ -1,11 +1,11 @@
 import { DateTime } from "luxon";
-import { ethers } from "ethers";
 import { TableLogo, TableLink, StyledPlus } from "./TransactionsTable.styles";
 import { getConfig, Token } from "utils/config";
 import {
   shortenTransactionHash,
   capitalizeFirstLetter,
   formatNumberTwoSigDigits,
+  formatUnits,
 } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 import { getChainInfo } from "utils/constants";
@@ -114,7 +114,7 @@ function formatTransactionRows(
 
     const amount: ICell = {
       size: "xs",
-      value: ethers.utils.formatUnits(tx.amount, token.decimals),
+      value: formatUnits(tx.amount, token.decimals).toString(),
     };
 
     const txHash: ICell = {

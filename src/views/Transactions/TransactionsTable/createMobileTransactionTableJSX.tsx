@@ -10,6 +10,7 @@ import {
   capitalizeFirstLetter,
   formatNumberTwoSigDigits,
   shortenString,
+  formatUnits,
 } from "utils/format";
 import { ICell, IRow } from "components/Table/Table";
 import { getChainInfo, ChainId } from "utils/constants";
@@ -134,7 +135,7 @@ function formatTransactionRows(
       </>
     );
 
-    const amount = ethers.utils.formatEther(tx.amount);
+    const amount = formatUnits(tx.amount, token.decimals).toString();
 
     const txHash = (
       <MobileTableLink
