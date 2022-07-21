@@ -37,7 +37,10 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
 
   return (
     <Wrapper>
-      <UnstyledLink to="/" style={{ display: "flex" }}>
+      <UnstyledLink
+        to={{ pathname: "/", search: location.search }}
+        style={{ display: "flex" }}
+      >
         <Logo />
       </UnstyledLink>
       <Navigation>

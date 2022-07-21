@@ -64,27 +64,42 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
         </StyledHeader>
         <StyledMenu>
           <StyledMenuItem selected={location.pathname === "/"}>
-            <Link onClick={() => onClickLink()} to="/">
+            <Link
+              onClick={() => onClickLink()}
+              to={{ pathname: "/", search: location.search }}
+            >
               Bridge
             </Link>
           </StyledMenuItem>
           <StyledMenuItem selected={location.pathname === "/pool"}>
-            <Link onClick={() => onClickLink()} to="/pool">
+            <Link
+              onClick={() => onClickLink()}
+              to={{ pathname: "/pool", search: location.search }}
+            >
               Pool
             </Link>
           </StyledMenuItem>
           <StyledMenuItem selected={location.pathname === "/transactions"}>
-            <Link onClick={() => onClickLink()} to="/transactions">
+            <Link
+              onClick={() => onClickLink()}
+              to={{ pathname: "/transactions", search: location.search }}
+            >
               Transactions
             </Link>
           </StyledMenuItem>
           <StyledMenuItem selected={location.pathname === "/rewards"}>
-            <Link onClick={() => onClickLink()} to="/rewards">
+            <Link
+              onClick={() => onClickLink()}
+              to={{ pathname: "/rewards", search: location.search }}
+            >
               Rewards
             </Link>
           </StyledMenuItem>
           <StyledMenuItem selected={location.pathname === "/about"}>
-            <Link onClick={() => onClickLink()} to="/about">
+            <Link
+              onClick={() => onClickLink()}
+              to={{ pathname: "/about", search: location.search }}
+            >
               About
             </Link>
           </StyledMenuItem>
