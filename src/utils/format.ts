@@ -51,15 +51,23 @@ export function shortenTransactionHash(hash: string): string {
   return `${hash.substring(0, 5)}...`;
 }
 
+// for number less than 1, this will ensure at least 1 digit is shown ( not rounded to 0)
 export const smallNumberFormatter = (num: number) =>
   new Intl.NumberFormat("en-US", {
     minimumSignificantDigits: 1,
     maximumSignificantDigits: 3,
   }).format(num);
 
+// for numbers 1 or greater, this will ensure we never round down and lose values > 1, while minimizing decimals to max of 3
 export const largeNumberFormatter = (num: number) =>
   new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 3,
+  }).format(num);
+
+// for numbers 1000 or greater, this will remove any fractional component to make it a bit cleaner
+export const veryLargeNumberFormatter = (num: number) =>
+  new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 0,
   }).format(num);
 
 export function formatUnits(
@@ -67,7 +75,10 @@ export function formatUnits(
   decimals: number
 ): string {
   const value = Number(ethers.utils.formatUnits(wei, decimals));
-  if (value > 1) {
+  if (value >= 1000) {
+    return veryLargeNumberFormatter(value);
+  }
+  if (value >= 1) {
     return largeNumberFormatter(value);
   }
   return smallNumberFormatter(value);
