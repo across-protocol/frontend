@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useQuery } from "react-query";
-import { rewardsApiUrl } from "utils";
+import { rewardsApiUrl, referralSummaryQueryKey } from "utils";
 
 /**
  * Fetches the latest block from a given chain Id on an interval.
@@ -18,7 +18,6 @@ export interface ReferralsSummary {
   activeRefereesCount: number;
 }
 
-const queryKey = "FETCH_REFERRAL_SUMMARY";
 const defaultReferralsSummary: ReferralsSummary = {
   referralRate: 0.4,
   referreeWallets: 0,
@@ -31,6 +30,10 @@ const defaultReferralsSummary: ReferralsSummary = {
 
 export function useReferralSummary(account?: string) {
   const enabledQuery = account !== undefined;
+
+  const queryKey = enabledQuery
+    ? referralSummaryQueryKey(account)
+    : "DISABLED_REFERRAL_SUMMARY_KEY";
 
   const { data: summary, ...other } = useQuery(
     queryKey,
