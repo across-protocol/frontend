@@ -6,7 +6,7 @@ const RewardMediumBlock = () => {
     <Wrapper>
       <span>
         For a limited amount of time, all rewards from transfers will be
-        increased by 3x.
+        increased by 2x.
       </span>
       <a href={mediumUrl} target="_blank" rel="noreferrer">
         Read more <ExternalLinkIcon />
