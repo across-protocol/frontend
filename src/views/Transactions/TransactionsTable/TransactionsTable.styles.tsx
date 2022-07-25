@@ -4,6 +4,7 @@ import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
+  max-width: 1425px;
   margin: auto;
   padding: ${64 / 16}rem 0 0;
 
@@ -77,6 +78,9 @@ export const TableCell = styled.div`
   background-color: #2d2e33;
   border-top: 1px solid #3e4047;
 
+  &:first-of-type {
+    min-width: 160px;
+  }
   @media (max-width: 428px) {
     padding: ${13 / 16}rem 0 ${13 / 16}rem ${12 / 16}rem;
     font-size: ${14 / 16}rem;
