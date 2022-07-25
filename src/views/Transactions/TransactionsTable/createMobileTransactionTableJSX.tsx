@@ -1,5 +1,4 @@
 import { DateTime } from "luxon";
-import { ethers } from "ethers";
 import {
   TableLogo,
   MobileTableLink,
