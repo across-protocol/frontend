@@ -1,7 +1,7 @@
 import { FC } from "react";
 import {
-  StyledTableWrapper,
-  StyledMobileHeadRow,
+  TableWrapper,
+  MobileTableHeadRow,
   StyledBody,
   MobileTableRow,
   MobileCell,
@@ -9,6 +9,7 @@ import {
   Title,
   AccordionWrapper,
   AccordionRow,
+  HeadCell,
 } from "./TransactionsTable.styles";
 import { ICell } from "components/Table/Table";
 import { IMobileRow } from "./createMobileTransactionTableJSX";
@@ -41,20 +42,12 @@ const MobileTransactionsTable: FC<Props> = ({
         <>
           <Title>{title}</Title>
 
-          <StyledTableWrapper>
-            <StyledMobileHeadRow>
+          <TableWrapper>
+            <MobileTableHeadRow>
               {headers.map((cell, index) => {
-                return (
-                  <MobileCell
-                    key={index}
-                    className={cell.cellClassName ?? ""}
-                    size={cell.size}
-                  >
-                    {cell.value}
-                  </MobileCell>
-                );
+                return <HeadCell key={index}>{cell.value}</HeadCell>;
               })}
-            </StyledMobileHeadRow>
+            </MobileTableHeadRow>
             <StyledBody>
               {rows.map((row, ridx) => {
                 return (
@@ -62,11 +55,7 @@ const MobileTransactionsTable: FC<Props> = ({
                     <MobileTableRow key={ridx} onClick={row.onClick}>
                       {row.cells.map((cell, cidx) => {
                         return (
-                          <MobileCell
-                            className={cell.cellClassName ?? ""}
-                            key={cidx}
-                            size={cell.size}
-                          >
+                          <MobileCell key={cidx}>
                             {/* ChevronDown is 4th cell of row; replace the down arrow with up if they click it */}
                             {cidx === CHEVRON_INDEX && openIndex === ridx ? (
                               <MobileChevron>
@@ -112,7 +101,7 @@ const MobileTransactionsTable: FC<Props> = ({
                 );
               })}
             </StyledBody>
-          </StyledTableWrapper>
+          </TableWrapper>
         </>
       ) : null}
     </MobileWrapper>

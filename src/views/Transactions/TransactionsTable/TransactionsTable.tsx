@@ -1,7 +1,7 @@
 import { FC } from "react";
 import {
-  StyledTableWrapper,
-  StyledHeadRow,
+  TableWrapper,
+  TableHeadRow,
   StyledBody,
   TableRow,
   TableCell,
@@ -27,8 +27,8 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
         <>
           <Title>{title}</Title>
 
-          <StyledTableWrapper>
-            <StyledHeadRow>
+          <TableWrapper>
+            <TableHeadRow>
               {headers.map((cell, index) => {
                 return (
                   <HeadCell key={index} className={cell.cellClassName ?? ""}>
@@ -36,7 +36,7 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
                   </HeadCell>
                 );
               })}
-            </StyledHeadRow>
+            </TableHeadRow>
             <StyledBody>
               {rows.length
                 ? rows.map((row, ridx) => {
@@ -57,7 +57,7 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
                   })
                 : null}
             </StyledBody>
-          </StyledTableWrapper>
+          </TableWrapper>
         </>
       ) : null}
     </Wrapper>

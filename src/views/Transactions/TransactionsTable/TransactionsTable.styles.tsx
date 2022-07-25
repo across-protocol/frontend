@@ -1,10 +1,5 @@
 import styled from "@emotion/styled";
-import {
-  TableWrapper,
-  HeadRow,
-  Body,
-  Cell,
-} from "components/Table/Table.styles";
+import { Body, Cell } from "components/Table/Table.styles";
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
 
@@ -37,7 +32,7 @@ export const Title = styled.h2`
 interface ITableWrapper {
   scrollable?: boolean;
 }
-export const StyledTableWrapper = styled(TableWrapper)<ITableWrapper>`
+export const TableWrapper = styled.div<ITableWrapper>`
   border: 1px solid #3e4047;
   border-radius: 8px;
   overflow-x: ${({ scrollable }) => (scrollable ? "auto" : "hidden")};
@@ -57,7 +52,7 @@ export const StyledTableWrapper = styled(TableWrapper)<ITableWrapper>`
   }
 `;
 
-export const StyledHeadRow = styled(HeadRow)`
+export const TableHeadRow = styled.div`
   display: flex;
 `;
 
@@ -117,7 +112,7 @@ export const MobileWrapper = styled(Wrapper)`
   min-width: 300px;
 `;
 
-export const StyledMobileHeadRow = styled(StyledHeadRow)`
+export const MobileTableHeadRow = styled(TableHeadRow)`
   width: 100%;
 `;
 
@@ -147,25 +142,7 @@ export const StyledCell = styled(Cell)`
   }
 `;
 
-export const MobileCell = styled(StyledCell)`
-  &.header-cell {
-    font-weight: 500;
-  }
-
-  &:first-of-type {
-    min-width: 120px;
-    flex: 0 0 60px;
-  }
-  &:not(:first-of-type) {
-    min-width: 60px;
-  }
-
-  @media ${QUERIES.mobileAndDown} {
-    &.header-cell {
-      font-size: ${12 / 16}rem;
-    }
-  }
-`;
+export const MobileCell = styled(TableCell)``;
 
 export const MobileChevron = styled.div`
   text-align: right;
