@@ -79,7 +79,7 @@ export const TableCell = styled.div`
   border-top: 1px solid #3e4047;
 
   &:first-of-type {
-    min-width: 160px;
+    min-width: 175px;
   }
   @media (max-width: 428px) {
     padding: ${13 / 16}rem 0 ${13 / 16}rem ${12 / 16}rem;
@@ -93,6 +93,9 @@ export const HeadCell = styled(TableCell)`
   color: #9daab2;
   background-color: #34353b;
   border: none;
+  &:first-of-type {
+    min-width: 175px;
+  }
 
   @media (max-width: 428px) {
     padding: ${7 / 16}rem 0 ${7 / 16}rem ${12 / 16}rem;
