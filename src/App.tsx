@@ -12,6 +12,16 @@ assert(
   "REACT_APP_PUBLIC_INFURA_ID must be defined."
 );
 
+assert(
+  process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
+  "REACT_APP_CHAIN_137_PROVIDER_URL must be defined."
+);
+
+assert(
+  process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
+  "REACT_APP_CHAIN_42161_PROVIDER_URL must be defined."
+);
+
 function App() {
   return (
     <Router>
