@@ -59,13 +59,33 @@ const infuraProvider = (name) =>
 const bobaProvider = () =>
   new ethers.providers.StaticJsonRpcProvider("https://mainnet.boba.network");
 
+const makeHubPoolClientConfig = () => {
+  return {
+    chainId: 1,
+    hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
+    wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
+  };
+};
+
+const getHubPoolClient = () => {
+  const hubPoolConfig = makeHubPoolClientConfig();
+  return new sdk.pool.Client(
+    hubPoolConfig,
+    {
+      provider: infuraProvider("mainnet"),
+    },
+    (_, __) => {} // Dummy function that does nothing and is needed to construct this client.
+  );
+};
+
 // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
 // gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
 // a USDC approval for the _current_ spoke pools on Optimism (0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9) and Arbitrum
 // (0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C). It also has a small amount of USDC ($0.10) used for estimations.
 // If this address lacks either of these, estimations will fail and relays to optimism and arbitrum will hang when
 // estimating gas. Defaults to 0x893d0d70ad97717052e3aa8903d9615804167759 so the app can technically run without this.
-export const dummyFromAddress =
+const dummyFromAddress =
   process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
   "0x893d0d70ad97717052e3aa8903d9615804167759";
 
@@ -211,4 +231,6 @@ module.exports = {
   maxBN,
   minBN,
   isRouteEnabled,
+  getHubPoolClient,
+  dummyFromAddress,
 };
