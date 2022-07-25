@@ -4,9 +4,10 @@ import {
   StyledHeadRow,
   StyledBody,
   StyledRow,
-  StyledCell,
+  TableCell,
   Wrapper,
   Title,
+  HeadCell,
 } from "./TransactionsTable.styles";
 import { ICell, IRow } from "components/Table/Table";
 interface TxTableIRow extends IRow {
@@ -30,13 +31,9 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
             <StyledHeadRow>
               {headers.map((cell, index) => {
                 return (
-                  <StyledCell
-                    key={index}
-                    className={cell.cellClassName ?? ""}
-                    size={cell.size}
-                  >
+                  <HeadCell key={index} className={cell.cellClassName ?? ""}>
                     {cell.value}
-                  </StyledCell>
+                  </HeadCell>
                 );
               })}
             </StyledHeadRow>
@@ -47,13 +44,12 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
                       <StyledRow key={ridx}>
                         {row.cells.map((cell, cidx) => {
                           return (
-                            <StyledCell
+                            <TableCell
                               className={cell.cellClassName ?? ""}
                               key={cidx}
-                              size={cell.size}
                             >
                               {cell.value}
-                            </StyledCell>
+                            </TableCell>
                           );
                         })}
                       </StyledRow>
