@@ -19,12 +19,9 @@ const handler = async (request, response) => {
     // high volume. "max-age=0" instructs browsers not to cache, while s-maxage instructs Vercel edge caching
     // to cache the responses and invalidate when deployments update.
     response.setHeader("Cache-Control", "s-maxage=300");
-    response
-      .status(200)
-      .json({
-        estimatedApy: hubPoolClient.state.pools[token].estimatedApy,
-        projectedApr: hubPoolClient.state.pools[token].projectedApr,
-      });
+    response.status(200).json({
+      currentApy: hubPoolClient.state.pools[token].estimatedApy,
+    });
   } catch (error) {
     let status;
     if (error instanceof InputError) {
