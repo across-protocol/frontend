@@ -20,7 +20,7 @@ const handler = async (request, response) => {
     // to cache the responses and invalidate when deployments update.
     response.setHeader("Cache-Control", "s-maxage=300");
     response.status(200).json({
-      currentApy: hubPoolClient.state.pools[token].estimatedApy,
+      pool: hubPoolClient.getPoolState(token),
     });
   } catch (error) {
     let status;
