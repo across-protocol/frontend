@@ -3,7 +3,6 @@ import {
   TableWrapper,
   HeadRow,
   Body,
-  Row,
   Cell,
 } from "components/Table/Table.styles";
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
@@ -11,19 +10,14 @@ import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
   margin: auto;
-  max-width: 1425px;
-  overflow-x: auto;
+  padding: ${64 / 16}rem 0 0;
 
-  ::-webkit-scrollbar {
-    height: 6px;
+  @media (max-width: 1024px) {
+    padding: ${48 / 16}rem 0 0;
   }
 
-  ::-webkit-scrollbar-track {
-    background-color: var(--color-gray);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: var(--color-gray-600);
+  @media (max-width: 428px) {
+    padding: ${32 / 16}rem 0 0;
   }
 `;
 
@@ -69,21 +63,10 @@ export const StyledHeadRow = styled(HeadRow)`
 
 export const StyledBody = styled(Body)``;
 
-export const StyledRow = styled(Row)`
-  background: rgba(255, 255, 255, 0.08);
-  width: 1425px;
-  overflow-x: auto;
-  margin: 0 auto;
-  /* Don't do zebra */
-  &:first-of-type {
-    margin-bottom: 2px;
-  }
-  &:not(:first-of-type) {
-    margin: 2px 0;
-  }
-  &:nth-of-type(2n) {
-    background-color: rgba(255, 255, 255, 0.08);
-  }
+export const TableRow = styled.div`
+  display: flex;
+  position: relative;
+  background-color: #2d2e33;
 `;
 
 export const TableCell = styled.div`
@@ -138,7 +121,7 @@ export const StyledMobileHeadRow = styled(StyledHeadRow)`
   width: 100%;
 `;
 
-export const StyledMobileRow = styled(StyledRow)`
+export const MobileTableRow = styled(TableRow)`
   width: 100%;
   cursor: pointer;
   &:first-of-type {

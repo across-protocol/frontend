@@ -3,7 +3,7 @@ import {
   StyledTableWrapper,
   StyledHeadRow,
   StyledBody,
-  StyledRow,
+  TableRow,
   TableCell,
   Wrapper,
   Title,
@@ -41,7 +41,7 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
               {rows.length
                 ? rows.map((row, ridx) => {
                     return (
-                      <StyledRow key={ridx}>
+                      <TableRow key={ridx}>
                         {row.cells.map((cell, cidx) => {
                           return (
                             <TableCell
@@ -52,7 +52,7 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
                             </TableCell>
                           );
                         })}
-                      </StyledRow>
+                      </TableRow>
                     );
                   })
                 : null}

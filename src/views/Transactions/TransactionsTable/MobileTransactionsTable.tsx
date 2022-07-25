@@ -3,7 +3,7 @@ import {
   StyledTableWrapper,
   StyledMobileHeadRow,
   StyledBody,
-  StyledMobileRow,
+  MobileTableRow,
   MobileCell,
   MobileWrapper,
   Title,
@@ -59,7 +59,7 @@ const MobileTransactionsTable: FC<Props> = ({
               {rows.map((row, ridx) => {
                 return (
                   <>
-                    <StyledMobileRow key={ridx} onClick={row.onClick}>
+                    <MobileTableRow key={ridx} onClick={row.onClick}>
                       {row.cells.map((cell, cidx) => {
                         return (
                           <MobileCell
@@ -78,7 +78,7 @@ const MobileTransactionsTable: FC<Props> = ({
                           </MobileCell>
                         );
                       })}
-                    </StyledMobileRow>
+                    </MobileTableRow>
                     {/* Need to consider pagination for comparing these two indexes */}
                     {openIndex === ridx + currentPage * elementsPerPage && (
                       <AccordionWrapper key={ridx + 1}>
