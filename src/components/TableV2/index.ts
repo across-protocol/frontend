@@ -7,4 +7,6 @@ export {
   BaseTableHeadRow,
   BaseTableBody,
   BaseTableRow,
+  BaseHeadCell,
+  BaseTableCell,
 } from "./Table.styles";

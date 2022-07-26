@@ -9,8 +9,9 @@ import {
   BaseTableHeadRow,
   BaseTableBody,
   BaseTableRow,
+  BaseHeadCell,
+  BaseTableCell,
 } from "components/TableV2";
-import { BaseHeadCell, BaseTableCell } from "components/TableV2/Table.styles";
 
 export const Wrapper = styled(BaseWrapper)`
   max-width: 1425px;
