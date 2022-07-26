@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "./Table.styles";
 import { ICell, IRow } from "components/Table/Table";
+
 interface TxTableIRow extends IRow {
   onClick?: () => void;
 }
@@ -18,9 +19,16 @@ interface Props {
   headers: ICell[];
   title: string;
   scrollable: boolean;
+  emptyMsg: string;
 }
 
-const Table: FC<Props> = ({ rows, headers, title, scrollable = true }) => {
+const Table: FC<Props> = ({
+  rows,
+  headers,
+  title,
+  scrollable = true,
+  emptyMsg,
+}) => {
   return (
     <Wrapper>
       <Title>{title}</Title>
@@ -43,7 +51,7 @@ const Table: FC<Props> = ({ rows, headers, title, scrollable = true }) => {
               );
             })
           ) : (
-            <EmptyRow>You have no referral transfers yet</EmptyRow>
+            <EmptyRow>{emptyMsg}</EmptyRow>
           )}
         </TableBody>
       </TableWrapper>
