@@ -1,4 +1,5 @@
 export { default, PageSizeSelect } from "./PaginationExample";
+export { default as paginate } from "./paginate";
 export {
   Wrapper,
   PaginationElements,
