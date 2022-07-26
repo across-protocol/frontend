@@ -2,7 +2,7 @@ import { FC } from "react";
 import {
   TableWrapper,
   TableHeadRow,
-  StyledBody,
+  TableBody,
   TableRow,
   TableCell,
   Wrapper,
@@ -37,7 +37,7 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
                 );
               })}
             </TableHeadRow>
-            <StyledBody>
+            <TableBody>
               {rows.length
                 ? rows.map((row, ridx) => {
                     return (
@@ -56,7 +56,7 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
                     );
                   })
                 : null}
-            </StyledBody>
+            </TableBody>
           </TableWrapper>
         </>
       ) : null}

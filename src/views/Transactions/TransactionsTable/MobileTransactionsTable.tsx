@@ -2,7 +2,7 @@ import { FC } from "react";
 import {
   TableWrapper,
   MobileTableHeadRow,
-  StyledBody,
+  TableBody,
   MobileTableRow,
   MobileCell,
   MobileWrapper,
@@ -48,7 +48,7 @@ const MobileTransactionsTable: FC<Props> = ({
                 return <HeadCell key={index}>{cell.value}</HeadCell>;
               })}
             </MobileTableHeadRow>
-            <StyledBody>
+            <TableBody>
               {rows.map((row, ridx) => {
                 return (
                   <>
@@ -100,7 +100,7 @@ const MobileTransactionsTable: FC<Props> = ({
                   </>
                 );
               })}
-            </StyledBody>
+            </TableBody>
           </TableWrapper>
         </>
       ) : null}

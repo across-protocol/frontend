@@ -1,12 +1,12 @@
 import React, { FC } from "react";
 import {
-  TableWrapper,
-  Wrapper,
-  Title,
-  EmptyRow,
-  TableHeadRow,
-  TableBody,
-  TableRow,
+  BaseTableWrapper,
+  BaseWrapper,
+  BaseTitle,
+  BaseEmptyRow,
+  BaseTableHeadRow,
+  BaseTableBody,
+  BaseTableRow,
 } from "./Table.styles";
 import { ICell, IRow } from "components/Table/Table";
 
@@ -30,32 +30,32 @@ const Table: FC<Props> = ({
   emptyMsg,
 }) => {
   return (
-    <Wrapper>
-      <Title>{title}</Title>
-      <TableWrapper scrollable={scrollable}>
-        <TableHeadRow>
+    <BaseWrapper>
+      <BaseTitle>{title}</BaseTitle>
+      <BaseTableWrapper scrollable={scrollable}>
+        <BaseTableHeadRow>
           {headers.map((cell, idx) =>
             React.cloneElement(cell.value as any, { key: idx })
           )}
-        </TableHeadRow>
-        <TableBody>
+        </BaseTableHeadRow>
+        <BaseTableBody>
           {rows.length > 0 ? (
             rows.map((row, ridx) => {
               return (
-                <TableRow key={ridx}>
+                <BaseTableRow key={ridx}>
                   {row.cells.map((cell, idx) =>
                     React.cloneElement(cell.value as any, { key: idx })
                   )}
                   {(row as any).explorerLink}
-                </TableRow>
+                </BaseTableRow>
               );
             })
           ) : (
-            <EmptyRow>{emptyMsg}</EmptyRow>
+            <BaseEmptyRow>{emptyMsg}</BaseEmptyRow>
           )}
-        </TableBody>
-      </TableWrapper>
-    </Wrapper>
+        </BaseTableBody>
+      </BaseTableWrapper>
+    </BaseWrapper>
   );
 };
 

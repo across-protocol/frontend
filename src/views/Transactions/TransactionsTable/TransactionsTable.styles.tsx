@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
-import { Body, Cell } from "components/Table/Table.styles";
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
+import { BaseTableBody } from "components/TableV2";
 
 export const Wrapper = styled.div`
   max-width: 1425px;
@@ -53,11 +53,11 @@ export const TableWrapper = styled.div<ITableWrapper>`
   }
 `;
 
+export const TableBody = styled(BaseTableBody)``;
+
 export const TableHeadRow = styled.div`
   display: flex;
 `;
-
-export const StyledBody = styled(Body)``;
 
 export const TableRow = styled.div`
   display: flex;
@@ -131,21 +131,6 @@ export const MobileTableRow = styled(TableRow)`
   }
   &:not(:first-of-type) {
     margin: 1px 0;
-  }
-`;
-
-export const StyledCell = styled(Cell)`
-  word-wrap: break-word;
-  &:first-of-type {
-    min-width: 175px;
-    flex: 0 0 65px;
-  }
-  &:not(:first-of-type) {
-    min-width: 120px;
-  }
-  &.header-cell {
-    font-size: ${16 / 16}rem;
-    font-weight: 500;
   }
 `;
 

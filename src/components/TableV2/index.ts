@@ -1,10 +1,10 @@
 export { default } from "./TableExample";
 export {
-  TableWrapper,
-  Wrapper,
-  Title,
-  EmptyRow,
-  TableHeadRow,
-  TableBody,
-  TableRow,
+  BaseTableWrapper,
+  BaseWrapper,
+  BaseTitle,
+  BaseEmptyRow,
+  BaseTableHeadRow,
+  BaseTableBody,
+  BaseTableRow,
 } from "./Table.styles";
