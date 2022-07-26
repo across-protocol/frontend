@@ -1,104 +1,42 @@
 import styled from "@emotion/styled";
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
-import { BaseTableBody } from "components/TableV2";
+import {
+  BaseTableWrapper,
+  BaseWrapper,
+  BaseTitle,
+  BaseEmptyRow,
+  BaseTableHeadRow,
+  BaseTableBody,
+  BaseTableRow,
+} from "components/TableV2";
+import { BaseHeadCell, BaseTableCell } from "components/TableV2/Table.styles";
 
-export const Wrapper = styled.div`
+export const Wrapper = styled(BaseWrapper)`
   max-width: 1425px;
-  margin: auto;
-  padding: ${64 / 16}rem 0 0;
-
-  @media (max-width: 1024px) {
-    padding: ${48 / 16}rem 0 0;
-  }
-
-  @media (max-width: 428px) {
-    padding: ${32 / 16}rem 0 0;
-  }
 `;
 
-export const Title = styled.h2`
-  margin: 0 ${16 / 16}rem ${16 / 16}rem;
-  color: #e0f3ff;
-  font-size: ${18 / 16}rem;
-  line-height: ${26 / 16}rem;
-  font-weight: 400;
+export const Title = BaseTitle;
 
-  @media (max-width: 428px) {
-    font-size: ${16 / 16}rem;
-    line-height: ${20 / 16}rem;
-  }
-`;
+export const TableWrapper = BaseTableWrapper;
 
-interface ITableWrapper {
-  scrollable?: boolean;
-}
-export const TableWrapper = styled.div<ITableWrapper>`
-  border: 1px solid #3e4047;
-  border-radius: 8px;
-  overflow-x: ${({ scrollable }) => (scrollable ? "auto" : "hidden")};
+export const TableBody = BaseTableBody;
 
-  ::-webkit-scrollbar {
-    height: 0;
-  }
+export const TableHeadRow = BaseTableHeadRow;
 
-  ::-webkit-scrollbar-track {
-    background-color: var(--color-gray);
-  }
+export const TableRow = BaseTableRow;
 
-  ::-webkit-scrollbar-thumb {
-    background-color: var(--color-gray-600);
-    border-radius: 6px;
-    border: 2px solid #2d2e33;
-  }
-`;
+export const EmptyRow = BaseEmptyRow;
 
-export const TableBody = styled(BaseTableBody)``;
-
-export const TableHeadRow = styled.div`
-  display: flex;
-`;
-
-export const TableRow = styled.div`
-  display: flex;
-  position: relative;
-  background-color: #2d2e33;
-`;
-
-export const TableCell = styled.div`
-  padding: ${15 / 16}rem 0 ${15 / 16}rem ${16 / 16}rem;
-  flex: 1 1 0;
-  display: flex;
-  align-items: center;
-  font-size: ${16 / 16}rem;
-  line-height: ${20 / 16}rem;
-  font-weight: 400;
-  color: #e0f3ff;
-  white-space: nowrap;
-  background-color: #2d2e33;
-  border-top: 1px solid #3e4047;
-
+export const TableCell = styled(BaseTableCell)`
   &:first-of-type {
     min-width: 175px;
   }
-  @media (max-width: 428px) {
-    padding: ${13 / 16}rem 0 ${13 / 16}rem ${12 / 16}rem;
-    font-size: ${14 / 16}rem;
-    line-height: ${18 / 16}rem;
-  }
 `;
 
-export const HeadCell = styled(TableCell)`
-  padding: ${10 / 16}rem 0 ${10 / 16}rem ${16 / 16}rem;
-  color: #9daab2;
-  background-color: #34353b;
-  border: none;
+export const HeadCell = styled(BaseHeadCell)`
   &:first-of-type {
     min-width: 175px;
-  }
-
-  @media (max-width: 428px) {
-    padding: ${7 / 16}rem 0 ${7 / 16}rem ${12 / 16}rem;
   }
 `;
 

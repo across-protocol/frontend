@@ -8,6 +8,7 @@ import {
   Wrapper,
   Title,
   HeadCell,
+  EmptyRow,
 } from "./TransactionsTable.styles";
 import { ICell, IRow } from "components/Table/Table";
 interface TxTableIRow extends IRow {
@@ -38,24 +39,26 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
               })}
             </TableHeadRow>
             <TableBody>
-              {rows.length
-                ? rows.map((row, ridx) => {
-                    return (
-                      <TableRow key={ridx}>
-                        {row.cells.map((cell, cidx) => {
-                          return (
-                            <TableCell
-                              className={cell.cellClassName ?? ""}
-                              key={cidx}
-                            >
-                              {cell.value}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })
-                : null}
+              {rows.length ? (
+                rows.map((row, ridx) => {
+                  return (
+                    <TableRow key={ridx}>
+                      {row.cells.map((cell, cidx) => {
+                        return (
+                          <TableCell
+                            className={cell.cellClassName ?? ""}
+                            key={cidx}
+                          >
+                            {cell.value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <EmptyRow>No transactions found.</EmptyRow>
+              )}
             </TableBody>
           </TableWrapper>
         </>
