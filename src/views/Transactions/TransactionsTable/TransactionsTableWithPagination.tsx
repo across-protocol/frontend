@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { ICell, IRow } from "components/Table/Table";
 import TransactionsTable from "./TransactionsTable";
-import Pagination, { paginate } from "components/PaginationV2";
+import Pagination, { paginate } from "components/Pagination";
 import { PaginationWrapper } from "./TransactionsTable.styles";
 
 interface TxTableIRow extends IRow {

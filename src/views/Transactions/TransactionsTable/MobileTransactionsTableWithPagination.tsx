@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { ICell } from "components/Table/Table";
 import MobileTransactionsTable from "./MobileTransactionsTable";
-import Pagination, { paginate } from "components/PaginationV2";
+import Pagination, { paginate } from "components/Pagination";
 import { IMobileRow } from "./createMobileTransactionTableJSX";
 import { PaginationWrapper } from "./TransactionsTable.styles";
 
