@@ -149,7 +149,11 @@ export const StyledCell = styled(Cell)`
   }
 `;
 
-export const MobileCell = styled(TableCell)``;
+export const MobileCell = styled(TableCell)`
+  &:nth-of-type(4) {
+    justify-content: right;
+  }
+`;
 
 export const MobileChevron = styled.div`
   text-align: right;
