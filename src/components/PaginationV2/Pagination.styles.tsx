@@ -2,6 +2,7 @@ import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { BaseButton } from "components/Buttons";
 import { QUERIES } from "utils";
+import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
 
 export const Wrapper = styled.div`
   display: flex;
@@ -148,3 +149,5 @@ export const NextElement = styled.div<INextWrapper>`
 export const PagesPlaceholder = styled.span`
   margin: 0 8px;
 `;
+
+export { ArrowIcon };

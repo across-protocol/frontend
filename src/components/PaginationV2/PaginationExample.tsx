@@ -8,8 +8,8 @@ import {
   PageSizeSelectDropdown,
   PageSizeOptiontButton,
   PagesPlaceholder,
+  ArrowIcon,
 } from "./Pagination.styles";
-import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
 import { useRef, useState } from "react";
 import useClickOutsideModal from "hooks/useClickOutsideModal";
 
