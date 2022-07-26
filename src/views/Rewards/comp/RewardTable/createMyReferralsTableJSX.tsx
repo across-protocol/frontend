@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { getChainInfo, shortenAddress } from "utils";
 import { ethers } from "ethers";
-import { ICell, IRow } from "components/Table/Table";
+import { ICell, IRow } from "components/Table/Table.d";
 import { Referral } from "hooks/useReferrals";
 import {
   StyledETHIcon,

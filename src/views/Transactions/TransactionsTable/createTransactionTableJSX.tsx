@@ -59,18 +59,15 @@ function formatTransactionRows(
 
   return supportedTransactions.map(([token, tx], index) => {
     const timestamp: ICell = {
-      size: "sm",
       value: DateTime.fromSeconds(tx.depositTime).toFormat("d MMM yyyy - t"),
     };
 
     const status: ICell = {
-      size: "xs",
       value: capitalizeFirstLetter(tx.status),
     };
 
     const fp = tx.filled.mul(100).div(tx.amount);
     const filled: ICell = {
-      size: "xs",
       value: `${
         fp.toNumber() > 100 ? "100" : formatNumberTwoSigDigits(fp.toNumber())
       }%`,
@@ -81,7 +78,6 @@ function formatTransactionRows(
     const { name: fromChainName, logoURI: fromLogo } = fromChainInfo;
 
     const fromChain: ICell = {
-      size: "xs",
       value: (
         <>
           <TableLogo src={fromLogo} alt={`${fromChainName}_logo`} />{" "}
@@ -94,7 +90,6 @@ function formatTransactionRows(
     const destinationChainInfo = getChainInfo(destinationChainId);
     const { name: toChainName, logoURI: toLogo } = destinationChainInfo;
     const toChain: ICell = {
-      size: "xs",
       value: (
         <>
           <TableLogo src={toLogo} alt={`${toChainName}_logo`} /> {toChainName}
@@ -103,7 +98,6 @@ function formatTransactionRows(
     };
 
     const symbol: ICell = {
-      size: "xs",
       value: (
         <>
           <TableLogo src={token?.logoURI} alt={`${token?.name}_logo`} />{" "}
@@ -113,12 +107,10 @@ function formatTransactionRows(
     };
 
     const amount: ICell = {
-      size: "xs",
       value: formatUnits(tx.amount, token.decimals).toString(),
     };
 
     const txHash: ICell = {
-      size: "xs",
       value: (
         <TableLink
           href={getChainInfo(sourceChainId).constructExplorerLink(
@@ -185,7 +177,6 @@ function formatTransactionRows(
     }
 
     const filledTxHashCell: ICell = {
-      size: "md",
       value: filledTableValue,
     };
 
@@ -207,49 +198,31 @@ function formatTransactionRows(
 
 export const headers: ICell[] = [
   {
-    size: "sm",
     value: "Deposit time",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: "Status",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: "Filled %",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: "Source",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: "Destination",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: "Asset",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: "Amount",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: "Deposit tx",
-    cellClassName: "header-cell",
   },
   {
-    size: "md",
     value: "Fill tx(s)",
-    cellClassName: "header-cell",
   },
 ];
 
@@ -264,7 +237,6 @@ export function createPendingHeaders(
     return null;
   });
   h[2] = {
-    size: "xs",
     value: (
       <>
         Filled %{" "}
@@ -280,7 +252,6 @@ export function createPendingHeaders(
         ) : null}
       </>
     ),
-    cellClassName: "header-cell",
   };
   return h;
 }

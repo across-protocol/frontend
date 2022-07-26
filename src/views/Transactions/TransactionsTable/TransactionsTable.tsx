@@ -10,7 +10,8 @@ import {
   HeadCell,
   EmptyRow,
 } from "./TransactionsTable.styles";
-import { ICell, IRow } from "components/Table/Table";
+import { ICell, IRow } from "components/Table/Table.d";
+
 interface TxTableIRow extends IRow {
   onClick?: () => void;
 }
@@ -31,11 +32,7 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
           <TableWrapper>
             <TableHeadRow>
               {headers.map((cell, index) => {
-                return (
-                  <HeadCell key={index} className={cell.cellClassName ?? ""}>
-                    {cell.value}
-                  </HeadCell>
-                );
+                return <HeadCell key={index}>{cell.value}</HeadCell>;
               })}
             </TableHeadRow>
             <TableBody>
@@ -44,14 +41,7 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
                   return (
                     <TableRow key={ridx}>
                       {row.cells.map((cell, cidx) => {
-                        return (
-                          <TableCell
-                            className={cell.cellClassName ?? ""}
-                            key={cidx}
-                          >
-                            {cell.value}
-                          </TableCell>
-                        );
+                        return <TableCell key={cidx}>{cell.value}</TableCell>;
                       })}
                     </TableRow>
                   );

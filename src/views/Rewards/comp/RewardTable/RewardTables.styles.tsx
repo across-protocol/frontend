@@ -25,7 +25,7 @@ import {
   BaseTableRow,
   BaseHeadCell,
   BaseTableCell,
-} from "components/TableV2";
+} from "components/Table";
 
 export const Wrapper = BaseWrapper;
 

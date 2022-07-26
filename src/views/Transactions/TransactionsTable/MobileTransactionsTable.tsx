@@ -11,7 +11,7 @@ import {
   AccordionRow,
   HeadCell,
 } from "./TransactionsTable.styles";
-import { ICell } from "components/Table/Table";
+import { ICell } from "components/Table/Table.d";
 import { IMobileRow } from "./createMobileTransactionTableJSX";
 import { MobileChevron } from "./TransactionsTable.styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

@@ -11,7 +11,7 @@ import {
   BaseTableRow,
   BaseHeadCell,
   BaseTableCell,
-} from "components/TableV2";
+} from "components/Table";
 
 export const Wrapper = styled(BaseWrapper)`
   max-width: 1425px;
