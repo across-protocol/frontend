@@ -53,7 +53,7 @@ const PageSelectDropdownRevealAnimation = keyframes`
 
 export const PageSizeSelectDropdown = styled.div`
   position: absolute;
-  padding: 4px 0;
+  padding: 0;
   top: 40px;
   left: 0%;
   width: 100%;
