@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { ICell, IRow } from "components/Table/Table";
 import TransactionsTable from "./TransactionsTable";
-import Pagination from "components/Pagination";
+import Pagination from "components/PaginationV2";
 import paginate from "components/Pagination/paginate";
 import { PaginationWrapper } from "./TransactionsTable.styles";
 
