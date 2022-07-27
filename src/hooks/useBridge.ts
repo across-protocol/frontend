@@ -36,7 +36,13 @@ type SendError =
 
 export function useBridge() {
   const config = getConfig();
-  const { referrer } = useQueryParams();
+  const { referrer, ref: refParam } = useQueryParams();
+  let r: string | undefined = undefined;
+  // If ref and referrer params exist, prefer referrer param.
+  // Not likely to happen but should have a catch if we get a bad link.
+  // TODO? Test which of these is a good value?
+  if (refParam) r = refParam;
+  if (referrer) r = referrer;
   const { chainId, account, signer } = useConnection();
   const {
     amount,
@@ -104,7 +110,7 @@ export function useBridge() {
         isNative: selectedRoute.isNative,
         relayerFeePct: fees.relayerFee.pct,
         timestamp: await hubPool.getCurrentTime(),
-        referrer,
+        referrer: r,
       });
       // matomo track bridge
       trackEvent({
