@@ -2,13 +2,23 @@ import styled from "@emotion/styled";
 import { Link as UnstyledLink } from "react-router-dom";
 import { motion } from "framer-motion";
 
-export const Wrapper = styled.header`
+interface IWrapper {
+  scrollPosition: number;
+}
+export const Wrapper = styled.header<IWrapper>`
   background-color: #2d2e33;
   height: 72px;
   padding: 0 24px;
   display: flex;
   align-items: center;
   color: #c5d5e0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  border-bottom: ${({ scrollPosition }) => {
+    return scrollPosition > 0 ? "1px solid #4d4f56" : "none";
+  }};
 
   @media (max-width: 428px) {
     height: 64px;

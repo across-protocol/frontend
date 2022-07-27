@@ -9,3 +9,4 @@ export * from "./useBridge";
 export * from "./useQueryParams";
 export * from "./useError";
 export * from "./useWindowsSize";
+export * from "./useScrollPosition";
