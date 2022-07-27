@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-import { useQueryParams } from "./useQueryParams";
 import { FormStatus, useSendForm } from "./useSendForm";
 import { useBalanceBySymbol } from "./useBalance";
 import { useBridgeFees } from "./useBridgeFees";
@@ -21,6 +20,7 @@ import {
   trackEvent,
   formatUnits,
 } from "utils";
+import useReferrer from "./useReferrer";
 
 enum SendStatus {
   IDLE = "idle",
@@ -36,7 +36,8 @@ type SendError =
 
 export function useBridge() {
   const config = getConfig();
-  const { referrer } = useQueryParams();
+  const referrer = useReferrer();
+
   const { chainId, account, signer } = useConnection();
   const {
     amount,
