@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-import { useQueryParams } from "./useQueryParams";
 import { FormStatus, useSendForm } from "./useSendForm";
 import { useBalanceBySymbol } from "./useBalance";
 import { useBridgeFees } from "./useBridgeFees";
@@ -21,6 +20,7 @@ import {
   trackEvent,
   formatUnits,
 } from "utils";
+import useReferrer from "./useReferrer";
 
 enum SendStatus {
   IDLE = "idle",
@@ -36,11 +36,7 @@ type SendError =
 
 export function useBridge() {
   const config = getConfig();
-  const { referrer, ref: refParam } = useQueryParams();
-  // If ref and referrer params exist, prefer referrer param.
-  // Not likely to happen but should have a catch if we get a bad link.
-  // TODO? Test which of these is a good value?
-  let r = referrer || refParam;
+  const referrer = useReferrer();
 
   const { chainId, account, signer } = useConnection();
   const {
@@ -109,7 +105,7 @@ export function useBridge() {
         isNative: selectedRoute.isNative,
         relayerFeePct: fees.relayerFee.pct,
         timestamp: await hubPool.getCurrentTime(),
-        referrer: r,
+        referrer,
       });
       // matomo track bridge
       trackEvent({
