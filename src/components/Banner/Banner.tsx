@@ -4,7 +4,7 @@ import { Wrapper } from "./Banner.styles";
 /**
  * React component that renders its children in a super header on top of the page.
  */
-const SuperHeader: React.FC = ({ children }) => {
+const Banner: React.FC = ({ children }) => {
   const container = useRef(document.getElementById("banner"));
   // We create the "super-header" element and insert it into the DOM, if it does not exist already
   useLayoutEffect(() => {
@@ -22,4 +22,5 @@ const SuperHeader: React.FC = ({ children }) => {
   }
   return createPortal(<Wrapper>{children}</Wrapper>, container.current);
 };
-export default SuperHeader;
+
+export default Banner;
