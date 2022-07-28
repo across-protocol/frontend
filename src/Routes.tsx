@@ -10,6 +10,7 @@ import Sidebar from "components/Sidebar";
 import { disableDeposits } from "utils";
 import { enableMigration } from "utils";
 import Banner from "components/Banner";
+import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
@@ -55,6 +56,7 @@ const Routes: React.FC = () => {
       )}
       {location.pathname === "/rewards" && (
         <Banner>
+          <InfoLogo />
           Due to maintenance, rewards will not be visually updated for a few
           hours. This does not impact your reward earnings.
         </Banner>

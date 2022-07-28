@@ -5,23 +5,12 @@ export const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   padding: 0 30px;
-  height: 60px;
-  color: var(--color-gray);
-  background-color: var(--color-error);
-  border-bottom: 1px solid var(--color-gray);
-
-  & button {
-    background-color: inherit;
-    font-size: inherit;
-    color: var(--color-gray);
-    text-decoration: underline;
-    cursor: pointer;
-    border: none;
-    padding: 0;
-    margin: 0;
-    display: inline-flex;
-    &:hover {
-      color: var(--color-black);
-    }
+  height: 72px;
+  color: #e0f3ff;
+  background-color: #202024;
+  border-bottom: 1px solid #3e4047;
+  font-size: ${16 / 16}rem;
+  svg {
+    margin-right: 16px;
   }
 `;
