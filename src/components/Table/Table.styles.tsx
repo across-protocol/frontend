@@ -1,105 +1,134 @@
 import styled from "@emotion/styled";
-import { CellSize } from "./Table";
-import { QUERIES } from "utils";
 
-export const TableWrapper = styled.div`
-  width: 100%;
-  font-size: 16px;
+export const BaseWrapper = styled.div`
+  margin: auto;
+  padding: ${64 / 16}rem 0 0;
 
-  @media ${QUERIES.tabletAndDown} {
-    overflow: auto;
+  @media (max-width: 1024px) {
+    padding: ${48 / 16}rem 0 0;
   }
 
-  @media ${QUERIES.mobileAndDown} {
-    font-size: 12px;
+  @media (max-width: 428px) {
+    padding: ${32 / 16}rem 0 0;
   }
 `;
 
-export const NameHeading = styled.h6`
-  font-weight: bold;
+export const BaseTitle = styled.h2`
+  margin: 0 ${16 / 16}rem ${16 / 16}rem;
+  color: #e0f3ff;
+  font-size: ${18 / 16}rem;
+  line-height: ${26 / 16}rem;
+  font-weight: 400;
+
+  @media (max-width: 428px) {
+    font-size: ${16 / 16}rem;
+    line-height: ${20 / 16}rem;
+  }
+`;
+
+export const BaseTableWrapper = styled.div<{ scrollable?: boolean }>`
+  border: 1px solid #3e4047;
+  border-radius: 8px;
+  overflow-x: ${({ scrollable }) => (scrollable ? "auto" : "hidden")};
+
+  ::-webkit-scrollbar {
+    height: 0;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--color-gray);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-gray-600);
+    border-radius: 6px;
+    border: 2px solid #2d2e33;
+  }
+`;
+
+export const BaseTableHeadRow = styled.div`
   display: flex;
-  align-items: baseline;
-  margin: 0;
-  width: fit-content;
-  & > svg {
-    margin-left: 5px;
-    display: none;
-    @media ${QUERIES.tabletAndUp} {
-      display: revert;
-    }
-    @media ${QUERIES.laptopAndUp} {
-      margin-left: 30px;
-    }
-  }
-  & ~ span {
-    font-style: italic;
-    font-weight: 300;
-    font-size: ${14 / 16}rem;
-    display: none;
-    @media ${QUERIES.tabletAndUp} {
-      max-width: 45ch;
-      display: block;
-    }
-  }
 `;
 
-export const Row = styled.div`
-  width: 100%;
-  background-color: var(--color-gray-150);
+export const BaseTableBody = styled.div``;
+
+export const BaseTableRow = styled.div`
+  display: flex;
+  position: relative;
+  background-color: #2d2e33;
+`;
+
+export const BaseTableCell = styled.div`
+  padding: ${15 / 16}rem 0 ${15 / 16}rem ${16 / 16}rem;
+  flex: 1 1 0;
   display: flex;
   align-items: center;
-  padding: 15px 0;
-  transition: all linear 0.2s;
-  &:nth-of-type(2n) {
-    background-color: var(--color-white);
-  }
+  font-size: ${16 / 16}rem;
+  line-height: ${20 / 16}rem;
+  font-weight: 400;
+  color: #e0f3ff;
+  white-space: nowrap;
+  background-color: #2d2e33;
+  border-top: 1px solid #3e4047;
 
-  @media ${QUERIES.mobileAndDown} {
-    padding: 11px 0;
-  }
-`;
-
-export const HeadRow = styled(Row)`
-  font-weight: 600;
-  cursor: default;
-  background: var(--color-white);
-  margin-bottom: 0;
-
-  @media ${QUERIES.mobileAndDown} {
-    padding: 6px 0;
+  @media (max-width: 428px) {
+    padding: ${13 / 16}rem 0 ${13 / 16}rem ${12 / 16}rem;
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
   }
 `;
 
-interface ICellStyled {
-  size?: CellSize;
-}
+export const BaseHeadCell = styled(BaseTableCell)`
+  padding: ${10 / 16}rem 0 ${10 / 16}rem ${16 / 16}rem;
+  color: #9daab2;
+  background-color: #34353b;
+  border: none;
 
-export const Cell = styled.div<ICellStyled>`
-  flex: ${({ size = "sm" }) => {
-    if (size === "xs") return "0 0 30px";
-    if (size === "md") return "1 0 130px";
-    if (size === "lg") return "1 1 250px";
-    if (size === "sm" || size === undefined) return "1 0 60px";
-    return "1 0 60px";
-  }};
-  margin: 0 8px;
-
-  &:first-of-type {
-    margin-left: 24px;
-  }
-
-  &:not(:first-of-type) {
-    min-width: 150px;
+  @media (max-width: 428px) {
+    padding: ${7 / 16}rem 0 ${7 / 16}rem ${12 / 16}rem;
   }
 `;
 
-export const Body = styled.div`
-  background-color: var(--gray-300);
+export const BaseEmptyRow = styled.div`
+  padding: ${26 / 16}rem ${16 / 16}rem;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid #3f4047;
+  font-size: ${16 / 16}rem;
+  line-height: ${20 / 16}rem;
+  color: #c5d5e0;
+
+  @media (max-width: 428px) {
+    padding: ${22 / 16}rem ${16 / 16}rem;
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
+  }
 `;
 
-export const Title = styled.h3`
-  background-color: var(--color-white);
-  margin-bottom: 0;
-  padding-top: 1rem;
-  padding-left: 0.75rem;
+export const AccordionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+export const AccordionRow = styled.div`
+  display: flex;
+  > div {
+    padding: 8px 0;
+  }
+  > div:first-of-type {
+    flex: 1 0 60px;
+    background-color: var(--color-black);
+    border-bottom: 1px solid #2c2f33;
+    text-indent: 24px;
+  }
+  > div:nth-of-type(2) {
+    flex: 3 0 130px;
+    background: rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid #2c2f33;
+    text-indent: 12px;
+  }
+  &:nth-of-type(6) > div {
+    border-bottom: none;
+  }
 `;

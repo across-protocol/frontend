@@ -12,99 +12,38 @@ import { ReactComponent as BadgerLogo } from "assets/badger.svg";
 import { ReactComponent as DaiLogo } from "assets/dai.svg";
 import { ReactComponent as UmaLogo } from "assets/uma.svg";
 import { ReactComponent as WBTCLogo } from "assets/wbtc.svg";
-
 import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
 
 import ProgressBar from "components/ProgressBar";
+import {
+  BaseTableWrapper,
+  BaseWrapper,
+  BaseTitle,
+  BaseEmptyRow,
+  BaseTableHeadRow,
+  BaseTableBody,
+  BaseTableRow,
+  BaseHeadCell,
+  BaseTableCell,
+} from "components/Table";
 
-export const Wrapper = styled.div`
-  margin: auto;
-  padding: ${64 / 16}rem 0 0;
+export const Wrapper = BaseWrapper;
 
-  @media (max-width: 1024px) {
-    padding: ${48 / 16}rem 0 0;
-  }
+export const Title = BaseTitle;
 
-  @media (max-width: 428px) {
-    padding: ${32 / 16}rem 0 0;
-  }
-`;
+export const TableWrapper = BaseTableWrapper;
 
-export const Title = styled.h2`
-  margin: 0 ${16 / 16}rem ${16 / 16}rem;
-  color: #e0f3ff;
-  font-size: ${18 / 16}rem;
-  line-height: ${26 / 16}rem;
-  font-weight: 400;
+export const TableBody = BaseTableBody;
 
-  @media (max-width: 428px) {
-    font-size: ${16 / 16}rem;
-    line-height: ${20 / 16}rem;
-  }
-`;
+export const TableHeadRow = BaseTableHeadRow;
 
-export const TableWrapper = styled.div<{ scrollable?: boolean }>`
-  border: 1px solid #3e4047;
-  border-radius: 8px;
-  overflow-x: ${({ scrollable }) => (scrollable ? "auto" : "hidden")};
+export const TableRow = BaseTableRow;
 
-  ::-webkit-scrollbar {
-    height: 0;
-  }
+export const EmptyRow = BaseEmptyRow;
 
-  ::-webkit-scrollbar-track {
-    background-color: var(--color-gray);
-  }
+export const TableCell = BaseTableCell;
 
-  ::-webkit-scrollbar-thumb {
-    background-color: var(--color-gray-600);
-    border-radius: 6px;
-    border: 2px solid #2d2e33;
-  }
-`;
-
-export const TableHeadRow = styled.div`
-  display: flex;
-`;
-
-export const TableBody = styled.div``;
-
-export const TableRow = styled.div`
-  display: flex;
-  position: relative;
-  background-color: #2d2e33;
-`;
-
-export const TableCell = styled.div`
-  padding: ${15 / 16}rem 0 ${15 / 16}rem ${16 / 16}rem;
-  flex: 1 1 0;
-  display: flex;
-  align-items: center;
-  font-size: ${16 / 16}rem;
-  line-height: ${20 / 16}rem;
-  font-weight: 400;
-  color: #e0f3ff;
-  white-space: nowrap;
-  background-color: #2d2e33;
-  border-top: 1px solid #3e4047;
-
-  @media (max-width: 428px) {
-    padding: ${13 / 16}rem 0 ${13 / 16}rem ${12 / 16}rem;
-    font-size: ${14 / 16}rem;
-    line-height: ${18 / 16}rem;
-  }
-`;
-
-export const HeadCell = styled(TableCell)`
-  padding: ${10 / 16}rem 0 ${10 / 16}rem ${16 / 16}rem;
-  color: #9daab2;
-  background-color: #34353b;
-  border: none;
-
-  @media (max-width: 428px) {
-    padding: ${7 / 16}rem 0 ${7 / 16}rem ${12 / 16}rem;
-  }
-`;
+export const HeadCell = BaseHeadCell;
 
 export const AssetCell = styled(TableCell)`
   flex: 0 0 172px;
@@ -161,12 +100,10 @@ export const ReferralRateHeadCell = styled(HeadCell)`
 `;
 
 export const RewardsCell = styled(TableCell)`
-  /* flex: 0 0 130px; */
   min-width: 120px;
 `;
 
 export const RewardsHeadCell = styled(HeadCell)`
-  /* flex: 0 0 130px; */
   min-width: 202px;
 `;
 
@@ -199,34 +136,6 @@ export const StyledMobileRow = styled(TableCell)`
   }
   &:not(:first-of-type) {
     margin: 1px 0;
-  }
-`;
-
-export const AccordionWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-`;
-
-export const AccordionRow = styled.div`
-  display: flex;
-  > div {
-    padding: 8px 0;
-  }
-  > div:first-of-type {
-    flex: 1 0 60px;
-    background-color: var(--color-black);
-    border-bottom: 1px solid #2c2f33;
-    text-indent: 24px;
-  }
-  > div:nth-of-type(2) {
-    flex: 3 0 130px;
-    background: rgba(255, 255, 255, 0.08);
-    border-bottom: 1px solid #2c2f33;
-    text-indent: 12px;
-  }
-  &:nth-of-type(6) > div {
-    border-bottom: none;
   }
 `;
 
@@ -360,22 +269,6 @@ export const ExplorerLinkContainer = styled.div<{ disabled?: boolean }>`
 export const ReferralIconContainer = styled.div`
   margin-left: auto;
   cursor: pointer;
-`;
-
-export const EmptyRow = styled.div`
-  padding: ${26 / 16}rem ${16 / 16}rem;
-  display: flex;
-  justify-content: center;
-  border-top: 1px solid #3f4047;
-  font-size: ${16 / 16}rem;
-  line-height: ${20 / 16}rem;
-  color: #c5d5e0;
-
-  @media (max-width: 428px) {
-    padding: ${22 / 16}rem ${16 / 16}rem;
-    font-size: ${14 / 16}rem;
-    line-height: ${18 / 16}rem;
-  }
 `;
 
 export const StyledETHIcon = styled(ETHLogo)``;

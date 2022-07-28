@@ -1,16 +1,17 @@
 import { FC } from "react";
 import {
-  StyledTableWrapper,
-  StyledMobileHeadRow,
-  StyledBody,
-  StyledMobileRow,
+  TableWrapper,
+  MobileTableHeadRow,
+  TableBody,
+  MobileTableRow,
   MobileCell,
   MobileWrapper,
   Title,
   AccordionWrapper,
   AccordionRow,
+  HeadCell,
 } from "./TransactionsTable.styles";
-import { ICell } from "components/Table/Table";
+import { ICell } from "components/Table/Table.d";
 import { IMobileRow } from "./createMobileTransactionTableJSX";
 import { MobileChevron } from "./TransactionsTable.styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -41,32 +42,20 @@ const MobileTransactionsTable: FC<Props> = ({
         <>
           <Title>{title}</Title>
 
-          <StyledTableWrapper>
-            <StyledMobileHeadRow>
+          <TableWrapper>
+            <MobileTableHeadRow>
               {headers.map((cell, index) => {
-                return (
-                  <MobileCell
-                    key={index}
-                    className={cell.cellClassName ?? ""}
-                    size={cell.size}
-                  >
-                    {cell.value}
-                  </MobileCell>
-                );
+                return <HeadCell key={index}>{cell.value}</HeadCell>;
               })}
-            </StyledMobileHeadRow>
-            <StyledBody>
+            </MobileTableHeadRow>
+            <TableBody>
               {rows.map((row, ridx) => {
                 return (
                   <>
-                    <StyledMobileRow key={ridx} onClick={row.onClick}>
+                    <MobileTableRow key={ridx} onClick={row.onClick}>
                       {row.cells.map((cell, cidx) => {
                         return (
-                          <MobileCell
-                            className={cell.cellClassName ?? ""}
-                            key={cidx}
-                            size={cell.size}
-                          >
+                          <MobileCell key={cidx}>
                             {/* ChevronDown is 4th cell of row; replace the down arrow with up if they click it */}
                             {cidx === CHEVRON_INDEX && openIndex === ridx ? (
                               <MobileChevron>
@@ -78,7 +67,7 @@ const MobileTransactionsTable: FC<Props> = ({
                           </MobileCell>
                         );
                       })}
-                    </StyledMobileRow>
+                    </MobileTableRow>
                     {/* Need to consider pagination for comparing these two indexes */}
                     {openIndex === ridx + currentPage * elementsPerPage && (
                       <AccordionWrapper key={ridx + 1}>
@@ -111,8 +100,8 @@ const MobileTransactionsTable: FC<Props> = ({
                   </>
                 );
               })}
-            </StyledBody>
-          </StyledTableWrapper>
+            </TableBody>
+          </TableWrapper>
         </>
       ) : null}
     </MobileWrapper>

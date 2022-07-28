@@ -1,4 +1,4 @@
-import { ICell, IRow } from "components/Table/Table";
+import { ICell, IRow } from "components/Table/Table.d";
 import {
   CircleInfo,
   StyledETHIcon,
@@ -123,46 +123,32 @@ function formatMyPoolsRows(): IRow[] {
 
 export const headers: ICell[] = [
   {
-    size: "sm",
     value: "Pool",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: "Staked LP Tokens",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: (
       <>
         Multiplier <CircleInfo />
       </>
     ),
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: "Reward APY",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: (
       <>
         Age of capital <CircleInfo />
       </>
     ),
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: "Rewards",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: " ",
-    cellClassName: "header-cell",
   },
 ];

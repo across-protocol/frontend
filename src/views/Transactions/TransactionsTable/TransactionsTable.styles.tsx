@@ -1,90 +1,44 @@
 import styled from "@emotion/styled";
-import {
-  TableWrapper,
-  HeadRow,
-  Body,
-  Row,
-  Cell,
-} from "components/Table/Table.styles";
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
+import {
+  BaseTableWrapper,
+  BaseWrapper,
+  BaseTitle,
+  BaseEmptyRow,
+  BaseTableHeadRow,
+  BaseTableBody,
+  BaseTableRow,
+  BaseHeadCell,
+  BaseTableCell,
+} from "components/Table";
 
-export const Wrapper = styled.div`
-  margin: auto;
+export const Wrapper = styled(BaseWrapper)`
   max-width: 1425px;
-  overflow-x: auto;
-
-  ::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background-color: var(--color-gray);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: var(--color-gray-600);
-  }
+  padding-bottom: 4rem;
 `;
 
-export const Title = styled.h2`
-  color: var(--color-white);
-  font-size: ${20 / 16}rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+export const Title = BaseTitle;
 
-  @media ${QUERIES.mobileAndDown} {
-    padding: 0 ${20 / 16}rem;
-    font-weight: 600;
-    font-size: ${13 / 16}rem;
-    line-height: ${16 / 16}rem;
-    text-transform: uppercase;
-  }
-`;
+export const TableWrapper = BaseTableWrapper;
 
-export const StyledTableWrapper = styled(TableWrapper)`
-  background-color: inherit;
-  margin: 0 auto;
-  box-shadow: none;
-`;
+export const TableBody = BaseTableBody;
 
-export const StyledHeadRow = styled(HeadRow)`
-  background-color: var(--color-black);
-  width: 1425px;
-  overflow-x: auto;
-`;
+export const TableHeadRow = BaseTableHeadRow;
 
-export const StyledBody = styled(Body)``;
+export const TableRow = BaseTableRow;
 
-export const StyledRow = styled(Row)`
-  background: rgba(255, 255, 255, 0.08);
-  width: 1425px;
-  overflow-x: auto;
-  margin: 0 auto;
-  /* Don't do zebra */
-  &:first-of-type {
-    margin-bottom: 2px;
-  }
-  &:not(:first-of-type) {
-    margin: 2px 0;
-  }
-  &:nth-of-type(2n) {
-    background-color: rgba(255, 255, 255, 0.08);
-  }
-`;
+export const EmptyRow = BaseEmptyRow;
 
-export const StyledCell = styled(Cell)`
-  word-wrap: break-word;
+export const TableCell = styled(BaseTableCell)`
   &:first-of-type {
     min-width: 175px;
-    flex: 0 0 65px;
   }
-  &:not(:first-of-type) {
-    min-width: 120px;
-  }
-  &.header-cell {
-    font-size: ${16 / 16}rem;
-    font-weight: 500;
+`;
+
+export const HeadCell = styled(BaseHeadCell)`
+  &:first-of-type {
+    min-width: 175px;
   }
 `;
 
@@ -105,11 +59,11 @@ export const MobileWrapper = styled(Wrapper)`
   min-width: 300px;
 `;
 
-export const StyledMobileHeadRow = styled(StyledHeadRow)`
+export const MobileTableHeadRow = styled(TableHeadRow)`
   width: 100%;
 `;
 
-export const StyledMobileRow = styled(StyledRow)`
+export const MobileTableRow = styled(TableRow)`
   width: 100%;
   cursor: pointer;
   &:first-of-type {
@@ -120,23 +74,9 @@ export const StyledMobileRow = styled(StyledRow)`
   }
 `;
 
-export const MobileCell = styled(StyledCell)`
-  &.header-cell {
-    font-weight: 500;
-  }
-
-  &:first-of-type {
-    min-width: 120px;
-    flex: 0 0 60px;
-  }
-  &:not(:first-of-type) {
-    min-width: 60px;
-  }
-
-  @media ${QUERIES.mobileAndDown} {
-    &.header-cell {
-      font-size: ${12 / 16}rem;
-    }
+export const MobileCell = styled(TableCell)`
+  &:nth-of-type(4) {
+    justify-content: right;
   }
 `;
 

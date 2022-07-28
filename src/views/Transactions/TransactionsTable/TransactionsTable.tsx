@@ -1,14 +1,17 @@
 import { FC } from "react";
 import {
-  StyledTableWrapper,
-  StyledHeadRow,
-  StyledBody,
-  StyledRow,
-  StyledCell,
+  TableWrapper,
+  TableHeadRow,
+  TableBody,
+  TableRow,
+  TableCell,
   Wrapper,
   Title,
+  HeadCell,
+  EmptyRow,
 } from "./TransactionsTable.styles";
-import { ICell, IRow } from "components/Table/Table";
+import { ICell, IRow } from "components/Table/Table.d";
+
 interface TxTableIRow extends IRow {
   onClick?: () => void;
 }
@@ -26,42 +29,28 @@ const TransactionsTable: FC<Props> = ({ rows, headers, title }) => {
         <>
           <Title>{title}</Title>
 
-          <StyledTableWrapper>
-            <StyledHeadRow>
+          <TableWrapper>
+            <TableHeadRow>
               {headers.map((cell, index) => {
-                return (
-                  <StyledCell
-                    key={index}
-                    className={cell.cellClassName ?? ""}
-                    size={cell.size}
-                  >
-                    {cell.value}
-                  </StyledCell>
-                );
+                return <HeadCell key={index}>{cell.value}</HeadCell>;
               })}
-            </StyledHeadRow>
-            <StyledBody>
-              {rows.length
-                ? rows.map((row, ridx) => {
-                    return (
-                      <StyledRow key={ridx}>
-                        {row.cells.map((cell, cidx) => {
-                          return (
-                            <StyledCell
-                              className={cell.cellClassName ?? ""}
-                              key={cidx}
-                              size={cell.size}
-                            >
-                              {cell.value}
-                            </StyledCell>
-                          );
-                        })}
-                      </StyledRow>
-                    );
-                  })
-                : null}
-            </StyledBody>
-          </StyledTableWrapper>
+            </TableHeadRow>
+            <TableBody>
+              {rows.length ? (
+                rows.map((row, ridx) => {
+                  return (
+                    <TableRow key={ridx}>
+                      {row.cells.map((cell, cidx) => {
+                        return <TableCell key={cidx}>{cell.value}</TableCell>;
+                      })}
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <EmptyRow>No transactions found.</EmptyRow>
+              )}
+            </TableBody>
+          </TableWrapper>
         </>
       ) : null}
     </Wrapper>

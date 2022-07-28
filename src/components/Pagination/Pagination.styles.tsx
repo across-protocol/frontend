@@ -2,17 +2,17 @@ import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { BaseButton } from "components/Buttons";
 import { QUERIES } from "utils";
+import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
 
 export const Wrapper = styled.div`
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin: 2rem 0 8rem;
+  padding: ${16 / 16}rem ${16 / 16}rem 0;
 
   @media ${QUERIES.mobileAndDown} {
     flex-direction: column;
     align-items: flex-end;
-    margin: 2rem 0 4rem;
   }
 `;
 
@@ -20,25 +20,23 @@ export const PageSizeSelectWrapper = styled.div`
   position: relative;
 
   @media ${QUERIES.mobileAndDown} {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
 `;
 
 export const PageSizeSelectButton = styled(BaseButton)`
-  padding: 4px 12px;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
-  font-size: 16px;
-  color: var(--color-white);
-  line-height: 24px;
+  color: #e0f3ff;
+  font-weight: 500;
+  font-size: ${16 / 16}rem;
+  line-height: ${20 / 16}rem;
   border: 1px solid var(--color-pagination);
-  border-radius: 6px;
+  border-radius: 20px;
 
   svg {
-    width: 16px;
-    height: 16px;
-    margin-left: 8px;
-    transform: rotate(90deg);
+    margin-left: 6px;
   }
 `;
 
@@ -50,33 +48,35 @@ const PageSelectDropdownRevealAnimation = keyframes`
 
   to {
     opacity: 1;
-    top: 40px;
+    top: 48px;
   }
 `;
 
 export const PageSizeSelectDropdown = styled.div`
   position: absolute;
+  padding: 0;
   top: 40px;
   left: 0%;
   width: 100%;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--color-pagination);
-  border-radius: 6px;
+  border-radius: 12px;
   overflow: hidden;
   animation: ${PageSelectDropdownRevealAnimation} 0.1s ease-out forwards;
   background-color: var(--color-gray);
 `;
 
 export const PageSizeOptiontButton = styled(BaseButton)`
-  padding: 4px 12px;
+  padding: 6px 20px;
   display: flex;
   align-items: center;
-  font-size: 16px;
-  color: var(--color-white);
-  line-height: 24px;
-  cursor: pointer;
+  font-size: ${16 / 16}rem;
+  line-height: ${20 / 16}rem;
+  font-weight: 500;
+  color: #e0f3ff;
   border-radius: 0;
+  cursor: pointer;
   transition: background-color 0.1s ease-out, color 0.1s ease-out;
 
   :hover {
@@ -87,9 +87,10 @@ export const PageSizeOptiontButton = styled(BaseButton)`
 
 export const PaginationElements = styled.div`
   display: flex;
-  /* margin: 0 auto; */
   align-items: center;
   justify-content: right;
+  gap: 6px;
+  font-weight: 500;
 `;
 
 interface IElementWrapper {
@@ -97,21 +98,21 @@ interface IElementWrapper {
 }
 
 export const ElementWrapper = styled.div<IElementWrapper>`
-  background-color: ${({ active }) =>
-    active ? "var(--color-pagination)" : "var(--color-gray-160)"};
-  color: var(--color-white);
-  border: 1px solid var(--color-pagination);
-  height: 30px;
-  width: 30px;
-  border-radius: 6px;
-  text-align: center;
-  margin: 0 3px;
+  min-width: 40px;
+  padding: 8px 14px;
   font-size: ${16 / 16}rem;
-  align-items: center;
-  &:hover {
-    opacity: 0.7;
-    background-color: var(--color-pagination);
-    cursor: pointer;
+  line-height: ${20 / 16}rem;
+  font-weight: 500;
+  color: #e0f3ff;
+  text-align: center;
+  border: ${({ active }) =>
+    active ? "1px solid #ffffff" : "1px solid var(--color-pagination)"};
+  border-radius: 20px;
+  background-color: var(--color-gray-160);
+  cursor: pointer;
+
+  :hover {
+    opacity: 0.8;
   }
 `;
 
@@ -123,10 +124,30 @@ export const NextElement = styled.div<INextWrapper>`
   display: flex;
   justify-content: center;
   align-items: center;
-  color: var(--color-white);
+  color: #9daab2;
   height: 32px;
   width: 32px;
-  &:hover {
-    cursor: pointer;
+  cursor: pointer;
+  pointer-events: ${({ disabled }) => (disabled ? "none" : "all")};
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+
+  :nth-last-of-type(2) {
+    transform: rotate(90deg);
+  }
+
+  :last-of-type {
+    transform: rotate(-90deg);
+  }
+
+  :hover {
+    svg path {
+      stroke: #e0f3ff;
+    }
   }
 `;
+
+export const PagesPlaceholder = styled.span`
+  margin: 0 8px;
+`;
+
+export { ArrowIcon };

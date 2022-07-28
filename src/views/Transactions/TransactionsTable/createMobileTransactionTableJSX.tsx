@@ -1,5 +1,4 @@
 import { DateTime } from "luxon";
-import { ethers } from "ethers";
 import {
   TableLogo,
   MobileTableLink,
@@ -12,7 +11,7 @@ import {
   shortenString,
   formatUnits,
 } from "utils/format";
-import { ICell, IRow } from "components/Table/Table";
+import { ICell, IRow } from "components/Table/Table.d";
 import { getChainInfo, ChainId } from "utils/constants";
 import { getConfig, Token } from "utils/config";
 import { CLOSED_DROPDOWN_INDEX, TxLink } from "../useTransactionsView";
@@ -83,25 +82,21 @@ function formatTransactionRows(
 
   return supportedTransactions.map(([token, tx], index) => {
     const timestamp: ICell = {
-      size: "md",
       value: DateTime.fromSeconds(tx.depositTime).toFormat("d MMM yyyy - t"),
     };
 
     const status: ICell = {
-      size: "sm",
       value: capitalizeFirstLetter(tx.status),
     };
 
     const fp = tx.filled.mul(100).div(tx.amount);
     const filled: ICell = {
-      size: "sm",
       value: `${
         fp.toNumber() > 100 ? "100" : formatNumberTwoSigDigits(fp.toNumber())
       }%`,
     };
 
     const downChevron: ICell = {
-      size: "xs",
       value: (
         <MobileChevron>
           <FontAwesomeIcon icon={faChevronDown} />
@@ -131,7 +126,7 @@ function formatTransactionRows(
     const symbol = (
       <>
         <TableLogo src={token?.logoURI} alt={`${token?.name}_logo`} />{" "}
-        {token?.name === "Wrapped Ether" ? "WETH" : token?.name}
+        {token?.name === "Wrapped Ether" ? "WETH" : token?.symbol}
       </>
     );
 
@@ -189,24 +184,16 @@ function formatTransactionRows(
 
 export const mobileHeaders: ICell[] = [
   {
-    size: "sm",
     value: "Deposit time",
-    cellClassName: "header-cell",
   },
   {
-    size: "sm",
     value: "Status",
-    cellClassName: "header-cell",
   },
   {
-    size: "sm",
     value: "Filled %",
-    cellClassName: "header-cell",
   },
   {
-    size: "xs",
     value: " ",
-    cellClassName: "header-cell",
   },
 ];
 
@@ -221,7 +208,6 @@ export function createPendingMobileHeaders(
     return null;
   });
   mh[2] = {
-    size: "sm",
     value: (
       <>
         Filled %{" "}
@@ -237,7 +223,6 @@ export function createPendingMobileHeaders(
         ) : null}
       </>
     ),
-    cellClassName: "header-cell",
   };
 
   return mh;

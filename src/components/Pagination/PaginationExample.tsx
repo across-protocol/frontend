@@ -8,8 +8,8 @@ import {
   PageSizeSelectDropdown,
   PageSizeOptiontButton,
   PagesPlaceholder,
-} from "./RewardTablePagination.styles";
-import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
+  ArrowIcon,
+} from "./Pagination.styles";
 import { useRef, useState } from "react";
 import useClickOutsideModal from "hooks/useClickOutsideModal";
 
@@ -95,50 +95,48 @@ export const Pagination = ({
         onPageSizeChange={onPageSizeChange}
       />
       {pageSelectorEnabled && (
-        <>
-          <PaginationElements>
-            {!hideStart && (
-              <>
-                <ElementWrapper onClick={() => onPageChange(0)}>
-                  {" "}
-                  1{" "}
-                </ElementWrapper>
-                &nbsp; ... &nbsp;
-              </>
-            )}
-            {pageList.map((page, index) => {
-              return (
-                <ElementWrapper
-                  active={index === activeIndex}
-                  key={page}
-                  onClick={() => onPageChange(page)}
-                >
-                  {page + 1}
-                </ElementWrapper>
-              );
-            })}
-            {!hideEnd && (
-              <>
-                <PagesPlaceholder>...</PagesPlaceholder>
-                <ElementWrapper onClick={() => onPageChange(lastPage)}>
-                  {lastPage + 1}
-                </ElementWrapper>
-              </>
-            )}
-            <NextElement
-              disabled={disableBack}
-              onClick={() => onPageChange(currentPage - 1)}
-            >
-              <ArrowIcon />
-            </NextElement>
-            <NextElement
-              disabled={disableForward}
-              onClick={() => onPageChange(currentPage + 1)}
-            >
-              <ArrowIcon />
-            </NextElement>
-          </PaginationElements>
-        </>
+        <PaginationElements>
+          {!hideStart && (
+            <>
+              <ElementWrapper onClick={() => onPageChange(0)}>
+                {" "}
+                1{" "}
+              </ElementWrapper>
+              &nbsp; ... &nbsp;
+            </>
+          )}
+          {pageList.map((page, index) => {
+            return (
+              <ElementWrapper
+                active={index === activeIndex}
+                key={page}
+                onClick={() => onPageChange(page)}
+              >
+                {page + 1}
+              </ElementWrapper>
+            );
+          })}
+          {!hideEnd && (
+            <>
+              <PagesPlaceholder>...</PagesPlaceholder>
+              <ElementWrapper onClick={() => onPageChange(lastPage)}>
+                {lastPage + 1}
+              </ElementWrapper>
+            </>
+          )}
+          <NextElement
+            disabled={disableBack}
+            onClick={() => onPageChange(currentPage - 1)}
+          >
+            <ArrowIcon />
+          </NextElement>
+          <NextElement
+            disabled={disableForward}
+            onClick={() => onPageChange(currentPage + 1)}
+          >
+            <ArrowIcon />
+          </NextElement>
+        </PaginationElements>
       )}
     </Wrapper>
   );

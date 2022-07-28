@@ -4,7 +4,7 @@ import createMyReferralsTableJSX, {
 } from "../RewardTable/createMyReferralsTableJSX";
 import { Wrapper } from "./RewardTableWithOverlay.styles";
 import { Referral } from "hooks/useReferrals";
-import Pagination from "../RewardTablePagination";
+import Pagination from "components/Pagination";
 import paginate from "components/Pagination/paginate";
 
 const RewardTableWithOverlay: React.FC<{
