@@ -7,7 +7,6 @@ import {
 import Footer from "components/Footer";
 import { useRewardsView } from "./useRewardsView";
 import { mediumUrl } from "utils";
-
 const Rewards = () => {
   const {
     account,

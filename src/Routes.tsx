@@ -9,6 +9,7 @@ import styled from "@emotion/styled";
 import Sidebar from "components/Sidebar";
 import { disableDeposits } from "utils";
 import { enableMigration } from "utils";
+import Banner from "components/Banner";
 
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
@@ -34,8 +35,10 @@ function useRoutes() {
 }
 // Need this component for useLocation hook
 const Routes: React.FC = () => {
-  const { openSidebar, setOpenSidebar, error, removeError } = useRoutes();
+  const { openSidebar, setOpenSidebar, error, removeError, location } =
+    useRoutes();
 
+  console.log(location.pathname);
   return (
     <>
       {disableDeposits && (
@@ -50,7 +53,12 @@ const Routes: React.FC = () => {
           <RemoveErrorSpan onClick={() => removeError()}>X</RemoveErrorSpan>
         </SuperHeader>
       )}
-
+      {location.pathname === "/rewards" && (
+        <Banner>
+          Due to maintenance, rewards will not be visually updated for a few
+          hours. This does not impact your reward earnings.
+        </Banner>
+      )}
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>

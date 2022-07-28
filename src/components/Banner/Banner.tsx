@@ -1,33 +1,6 @@
-import styled from "@emotion/styled";
 import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-
-const Wrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0 30px;
-  height: 60px;
-  color: var(--color-gray);
-  background-color: var(--color-error);
-  border-bottom: 1px solid var(--color-gray);
-
-  & button {
-    background-color: inherit;
-    font-size: inherit;
-    color: var(--color-gray);
-    text-decoration: underline;
-    cursor: pointer;
-    border: none;
-    padding: 0;
-    margin: 0;
-    display: inline-flex;
-    &:hover {
-      color: var(--color-black);
-    }
-  }
-`;
-
+import { Wrapper } from "./Banner.styles";
 /**
  * React component that renders its children in a super header on top of the page.
  */
