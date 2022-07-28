@@ -57,8 +57,10 @@ const Routes: React.FC = () => {
       {rewardsBannerWarning && location.pathname === "/rewards" && (
         <Banner>
           <InfoLogo />
-          Due to maintenance, rewards will not be visually updated for a few
-          hours. This does not impact your reward earnings.
+          <span>
+            Due to maintenance, rewards will not be visually updated for a few
+            hours. This does not impact your reward earnings.
+          </span>
         </Banner>
       )}
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
