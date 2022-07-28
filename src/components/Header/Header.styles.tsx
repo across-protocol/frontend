@@ -17,7 +17,7 @@ export const Wrapper = styled.header<IWrapper>`
   width: 100%;
   z-index: 1000;
   border-bottom: ${({ scrollPosition }) => {
-    return scrollPosition > 0 ? "1px solid #4d4f56" : "none";
+    return scrollPosition > 0 ? "1px solid #4d4f56" : "1px solid transparent";
   }};
 
   @media (max-width: 428px) {
