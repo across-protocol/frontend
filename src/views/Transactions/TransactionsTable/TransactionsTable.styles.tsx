@@ -15,6 +15,7 @@ import {
 
 export const Wrapper = styled(BaseWrapper)`
   max-width: 1425px;
+  padding-bottom: 4rem;
 `;
 
 export const Title = BaseTitle;
