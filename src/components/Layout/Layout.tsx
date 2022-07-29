@@ -139,7 +139,6 @@ const Main = styled.main`
   grid-column: 2;
   box-shadow: 0 0 120px hsla(${COLORS.primary[500]} / 0.25);
   clip-path: inset(0px -160px 0px -160px);
-  padding-top: 72px;
 `;
 
 const LinkText = styled.div`

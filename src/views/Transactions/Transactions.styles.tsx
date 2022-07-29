@@ -3,7 +3,6 @@ import { PrimaryButton } from "components/Buttons";
 import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
-  padding-top: 72px;
   background-color: transparent;
 `;
 
