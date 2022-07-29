@@ -14,6 +14,7 @@ import {
 import MenuToggle from "./MenuToggle";
 import { enableMigration } from "utils";
 import { ReactComponent as Logo } from "assets/across-mobile-logo.svg";
+import useScrollPosition from "hooks/useScrollPosition";
 
 const LINKS = !enableMigration
   ? [
@@ -30,13 +31,14 @@ interface Props {
 }
 const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
   const location = useLocation();
+  const scrollPosition = useScrollPosition();
 
   const toggleMenu = () => {
     setOpenSidebar((prevValue) => !prevValue);
   };
 
   return (
-    <Wrapper>
+    <Wrapper scrollPosition={scrollPosition}>
       <UnstyledLink
         to={{ pathname: "/", search: location.search }}
         style={{ display: "flex" }}

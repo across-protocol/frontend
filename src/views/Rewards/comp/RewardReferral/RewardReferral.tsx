@@ -75,13 +75,13 @@ const ReferralLinkComponent: React.FC<{
   const [showCheck, setShowCheck] = useState(false);
   const referralUrl = useMemo(() => {
     if (referrer) {
-      return `across.to?referrer=${referrer}`;
+      return `across.to?ref=${referrer}`;
     }
     return "";
   }, [referrer]);
   const displayedReferralUrl = useMemo(() => {
     if (referrer) {
-      return `across.to?referrer=${shortenAddress(referrer, "..", 3)}`;
+      return `across.to?ref=${shortenAddress(referrer, "..", 3)}`;
     }
     return "";
   }, [referrer]);

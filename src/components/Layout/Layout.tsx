@@ -127,7 +127,7 @@ const Wrapper = styled.div`
   display: grid;
   padding: 0 10px;
   grid-template-columns: 1fr min(var(--central-content), 100%) 1fr;
-  min-height: 92%;
+  min-height: 100%;
   height: fit-content;
   @media ${QUERIES.tabletAndUp} {
     padding: 0 30px;
@@ -139,6 +139,7 @@ const Main = styled.main`
   grid-column: 2;
   box-shadow: 0 0 120px hsla(${COLORS.primary[500]} / 0.25);
   clip-path: inset(0px -160px 0px -160px);
+  padding-top: 72px;
 `;
 
 const LinkText = styled.div`

@@ -8,6 +8,7 @@ export const Wrapper = styled.div`
   flex-direction: column;
   justify-content: space-between;
   min-height: calc(100% - 72px);
+  padding-top: 72px;
 
   @media (max-width: 428px) {
     min-height: calc(100% - 64px);

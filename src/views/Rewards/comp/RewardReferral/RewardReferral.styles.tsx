@@ -108,7 +108,7 @@ export const ReferralUrl = styled.button`
   margin: 0 0 8px;
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: inherit;
   align-items: center;
   padding: ${18 / 16}rem ${18 / 16}rem;
   font-size: ${18 / 16}rem;
