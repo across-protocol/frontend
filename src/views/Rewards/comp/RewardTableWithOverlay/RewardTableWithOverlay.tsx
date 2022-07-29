@@ -48,15 +48,17 @@ const RewardTableWithOverlay: React.FC<{
         rows={paginatedRows}
         headers={headers}
       />
-      <div>
-        <Pagination
-          onPageSizeChange={setPageSize}
-          pageSize={pageSize}
-          pageSizes={pageSizes}
-          onPageChange={setCurrentPage}
-          {...paginateState}
-        />
-      </div>
+      {isConnected && (
+        <div>
+          <Pagination
+            onPageSizeChange={setPageSize}
+            pageSize={pageSize}
+            pageSizes={pageSizes}
+            onPageChange={setCurrentPage}
+            {...paginateState}
+          />
+        </div>
+      )}
     </Wrapper>
   );
 };
