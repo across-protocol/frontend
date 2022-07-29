@@ -12,7 +12,7 @@ export const Wrapper = styled.header<IWrapper>`
   display: flex;
   align-items: center;
   color: #c5d5e0;
-  position: fixed;
+  position: sticky;
   top: 0;
   width: 100%;
   z-index: 1000;

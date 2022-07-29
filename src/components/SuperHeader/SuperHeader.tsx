@@ -11,7 +11,11 @@ const Wrapper = styled.div`
   color: var(--color-gray);
   background-color: var(--color-error);
   border-bottom: 1px solid var(--color-gray);
-
+  position: sticky;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1100;
   & button {
     background-color: inherit;
     font-size: inherit;
