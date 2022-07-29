@@ -10,6 +10,12 @@ export const Wrapper = styled.div`
   background-color: #202024;
   border-bottom: 1px solid #3e4047;
   font-size: ${16 / 16}rem;
+  position: sticky;
+  width: 100%;
+  margin-bottom: 2rem;
+  top: 0;
+  left: 0;
+  z-index: 1100;
   @media ${QUERIES.tabletAndDown} {
     padding: 0 10px;
   }
@@ -19,10 +25,8 @@ export const Wrapper = styled.div`
 
   span {
     padding: 10px 0;
-    @media ${QUERIES.tabletAndDown} {
-      font-size: ${13 / 16}rem;
-    }
-    @media ${QUERIES.mobileAndDown} {
+    @media screen and (max-width: 428px) {
+      font-size: ${14 / 16}rem;
       width: 85%;
     }
   }
