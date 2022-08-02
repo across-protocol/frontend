@@ -371,13 +371,6 @@ export const tokenList: TokenInfoList = [
     mainnetAddress: getAddress("0x42bbfa2e77757c645eeaad1655e0911a7553efbc"),
   },
   {
-    name: "Badger",
-    symbol: "BADGER",
-    decimals: 18,
-    logoURI: "/logos/badger-logo.svg",
-    mainnetAddress: getAddress("0x3472A5A71965499acd81997a54BBA8D852C6E53d"),
-  },
-  {
     name: "UMA",
     symbol: "UMA",
     decimals: 18,
@@ -616,12 +609,6 @@ export const relayerFeeCapitalCostConfig: {
   UMA: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.00075").toString(),
-    cutoff: ethers.utils.parseUnits("5000").toString(),
-    decimals: 18,
-  },
-  BADGER: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.001").toString(),
     cutoff: ethers.utils.parseUnits("5000").toString(),
     decimals: 18,
   },
