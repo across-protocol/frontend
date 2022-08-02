@@ -164,11 +164,14 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
         {
           value: (
             <BridgeFeeCell>
-              {r.realizedLpFeeUsd.toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-                minimumFractionDigits: 4,
-              })}
+              {(r.realizedLpFeeUsd || r.bridgeFeeUsd || 0).toLocaleString(
+                "en-US",
+                {
+                  style: "currency",
+                  currency: "USD",
+                  minimumFractionDigits: 4,
+                }
+              )}
             </BridgeFeeCell>
           ),
         },
