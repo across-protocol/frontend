@@ -12,7 +12,8 @@ export interface Referral {
   depositorAddr: string;
   referralAddress: string;
   depositDate: string;
-  realizedLpFeeUsd: number;
+  realizedLpFeeUsd?: number;
+  bridgeFeeUsd?: number;
   referralRate: number;
   acxRewards: string;
 }
