@@ -12,6 +12,7 @@ const {
   infuraProvider,
   getRelayerFeeDetails,
   isRouteEnabled,
+  disabledL1Tokens,
 } = require("./_utils");
 
 const handler = async (request, response) => {
@@ -50,7 +51,7 @@ const handler = async (request, response) => {
       isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
 
-    if (!routeEnabled)
+    if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
       throw new Error(
         `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled.`
       );

@@ -14,6 +14,7 @@ const {
   maxBN,
   minBN,
   isRouteEnabled,
+  disabledL1Tokens,
 } = require("./_utils");
 
 const handler = async (request, response) => {
@@ -65,6 +66,7 @@ const handler = async (request, response) => {
 
     // If any of the above fails or the route is not enabled, we assume that the
     if (
+      disabledL1Tokens.includes(l1Token.toLowerCase()) ||
       tokenDetailsResult.status === "rejected" ||
       routeEnabledResult.status === "rejected" ||
       !routeEnabledResult.value
