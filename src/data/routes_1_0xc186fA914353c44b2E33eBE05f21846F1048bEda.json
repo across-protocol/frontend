@@ -113,15 +113,6 @@
     },
     {
       "fromChain": 1,
-      "toChain": 137,
-      "fromTokenAddress": "0x3472A5A71965499acd81997a54BBA8D852C6E53d",
-      "fromSpokeAddress": "0x4D9079Bb4165aeb4084c526a32695dCfd2F77381",
-      "fromTokenSymbol": "BADGER",
-      "isNative": false,
-      "l1TokenAddress": "0x3472A5A71965499acd81997a54BBA8D852C6E53d"
-    },
-    {
-      "fromChain": 1,
       "toChain": 288,
       "fromTokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "fromSpokeAddress": "0x4D9079Bb4165aeb4084c526a32695dCfd2F77381",
@@ -238,15 +229,6 @@
       "l1TokenAddress": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
     },
     {
-      "fromChain": 1,
-      "toChain": 42161,
-      "fromTokenAddress": "0x3472A5A71965499acd81997a54BBA8D852C6E53d",
-      "fromSpokeAddress": "0x4D9079Bb4165aeb4084c526a32695dCfd2F77381",
-      "fromTokenSymbol": "BADGER",
-      "isNative": false,
-      "l1TokenAddress": "0x3472A5A71965499acd81997a54BBA8D852C6E53d"
-    },
-    {
       "fromChain": 10,
       "toChain": 1,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
@@ -470,15 +452,6 @@
       "fromTokenSymbol": "DAI",
       "isNative": false,
       "l1TokenAddress": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
-    },
-    {
-      "fromChain": 137,
-      "toChain": 1,
-      "fromTokenAddress": "0x1FcbE5937B0cc2adf69772D228fA4205aCF4D9b2",
-      "fromSpokeAddress": "0x69B5c72837769eF1e7C164Abc6515DcFf217F920",
-      "fromTokenSymbol": "BADGER",
-      "isNative": false,
-      "l1TokenAddress": "0x3472A5A71965499acd81997a54BBA8D852C6E53d"
     },
     {
       "fromChain": 137,
@@ -623,15 +596,6 @@
       "fromTokenSymbol": "DAI",
       "isNative": false,
       "l1TokenAddress": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
-    },
-    {
-      "fromChain": 137,
-      "toChain": 42161,
-      "fromTokenAddress": "0x1FcbE5937B0cc2adf69772D228fA4205aCF4D9b2",
-      "fromSpokeAddress": "0x69B5c72837769eF1e7C164Abc6515DcFf217F920",
-      "fromTokenSymbol": "BADGER",
-      "isNative": false,
-      "l1TokenAddress": "0x3472A5A71965499acd81997a54BBA8D852C6E53d"
     },
     {
       "fromChain": 137,
@@ -942,15 +906,6 @@
     },
     {
       "fromChain": 42161,
-      "toChain": 1,
-      "fromTokenAddress": "0xBfa641051Ba0a0Ad1b0AcF549a89536A0D76472E",
-      "fromSpokeAddress": "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
-      "fromTokenSymbol": "BADGER",
-      "isNative": false,
-      "l1TokenAddress": "0x3472A5A71965499acd81997a54BBA8D852C6E53d"
-    },
-    {
-      "fromChain": 42161,
       "toChain": 10,
       "fromTokenAddress": "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
       "fromSpokeAddress": "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
@@ -1056,15 +1011,6 @@
       "fromTokenSymbol": "DAI",
       "isNative": false,
       "l1TokenAddress": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
-    },
-    {
-      "fromChain": 42161,
-      "toChain": 137,
-      "fromTokenAddress": "0xBfa641051Ba0a0Ad1b0AcF549a89536A0D76472E",
-      "fromSpokeAddress": "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
-      "fromTokenSymbol": "BADGER",
-      "isNative": false,
-      "l1TokenAddress": "0x3472A5A71965499acd81997a54BBA8D852C6E53d"
     },
     {
       "fromChain": 42161,
