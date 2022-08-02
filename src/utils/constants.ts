@@ -411,6 +411,7 @@ assert(
   "Missing process.env.REACT_APP_REWARDS_API_URL"
 );
 
+// PROCESS.ENV variables
 export const rewardsApiUrl = process.env.REACT_APP_REWARDS_API_URL;
 export const mediumUrl = process.env.REACT_APP_MEDIUM_URL;
 export const hubPoolChainId = Number(process.env.REACT_APP_HUBPOOL_CHAINID);
@@ -423,6 +424,9 @@ export const confirmations =
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
 export const matomoUrl = process.env.REACT_APP_MATOMO_URL;
 export const debug = Boolean(process.env.REACT_APP_DEBUG);
+
+export const rewardsBannerWarning =
+  process.env.REACT_APP_REWARDS_BANNER_WARNING;
 
 export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
 export const FEE_ESTIMATION = ".004";

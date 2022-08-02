@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
 import { Send, Pool, About, Transactions, Rewards } from "views";
-import { Header, SuperHeader } from "components";
+import { Header, SuperHeader, Banner, Sidebar } from "components";
 import { useConnection } from "state/hooks";
-import { WrongNetworkError } from "utils";
 import { useError } from "hooks";
 import styled from "@emotion/styled";
-import Sidebar from "components/Sidebar";
-import { disableDeposits } from "utils";
-import { enableMigration } from "utils";
+import {
+  disableDeposits,
+  enableMigration,
+  WrongNetworkError,
+  rewardsBannerWarning,
+} from "utils";
+import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
@@ -34,7 +37,8 @@ function useRoutes() {
 }
 // Need this component for useLocation hook
 const Routes: React.FC = () => {
-  const { openSidebar, setOpenSidebar, error, removeError } = useRoutes();
+  const { openSidebar, setOpenSidebar, error, removeError, location } =
+    useRoutes();
 
   return (
     <>
@@ -50,7 +54,15 @@ const Routes: React.FC = () => {
           <RemoveErrorSpan onClick={() => removeError()}>X</RemoveErrorSpan>
         </SuperHeader>
       )}
-
+      {rewardsBannerWarning && location.pathname === "/rewards" && (
+        <Banner>
+          <InfoLogo />
+          <span>
+            Due to maintenance, rewards will not be visually updated for a few
+            hours. This does not impact your reward earnings.
+          </span>
+        </Banner>
+      )}
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
