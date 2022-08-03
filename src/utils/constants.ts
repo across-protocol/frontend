@@ -398,10 +398,17 @@ assert(
   process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
   "Missing process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY"
 );
-
 assert(
   process.env.REACT_APP_REWARDS_API_URL,
   "Missing process.env.REACT_APP_REWARDS_API_URL"
+);
+assert(
+  process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
+  "REACT_APP_CHAIN_137_PROVIDER_URL must be defined."
+);
+assert(
+  process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
+  "REACT_APP_CHAIN_42161_PROVIDER_URL must be defined."
 );
 
 // PROCESS.ENV variables
