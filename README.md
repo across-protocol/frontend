@@ -10,21 +10,39 @@ Web UI for V2 of the Across Protocol.
 - Docs: https://docs.across.to/v2
 - Medium: https://medium.com/across-protocol
 
-## Getting started
+## Development
 
-Clone this repository, install deps and create an `.env` file by running:
+### Local setup
+
+Clone this repository, install deps and create an `.env.local` file by running:
 
 ```bash
 yarn
 cp .env.example .env.local
 ```
 
-Add or change some values in `.env.local` accordingly and run:
+Adjust values in the created `.env.local` accordingly.
+
+### Start dev server
+
+Start the frontend with a dev server by running:
 
 ```bash
 yarn start
 ```
 
+### Build production bundle
+
+```bash
+yarn build
+```
+
+### Important CSS values
+
+#### Z-index
+
+Navbar - 1000
+
 ## Contributing
 
-Have a look at [CONTRIBUTING](./CONTRIBUTING.md) to get more information on local development, contributions and best practices.
+Have a look at [CONTRIBUTING](./CONTRIBUTING.md) to get more information on contributions and best practices.
