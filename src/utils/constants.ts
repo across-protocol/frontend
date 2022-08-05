@@ -387,10 +387,6 @@ export const tokenList: TokenInfoList = [
 ];
 
 assert(
-  process.env.REACT_APP_HUBPOOL_CHAINID,
-  "Missing process.env.REACT_APP_HUBPOOL_CHAINID"
-);
-assert(
   process.env.REACT_APP_PUBLIC_INFURA_ID,
   "Missing process.env.REACT_APP_PUBLIC_INFURA_ID"
 );
@@ -398,16 +394,25 @@ assert(
   process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
   "Missing process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY"
 );
-
 assert(
   process.env.REACT_APP_REWARDS_API_URL,
   "Missing process.env.REACT_APP_REWARDS_API_URL"
+);
+assert(
+  process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
+  "REACT_APP_CHAIN_137_PROVIDER_URL must be defined."
+);
+assert(
+  process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
+  "REACT_APP_CHAIN_42161_PROVIDER_URL must be defined."
 );
 
 // PROCESS.ENV variables
 export const rewardsApiUrl = process.env.REACT_APP_REWARDS_API_URL;
 export const mediumUrl = process.env.REACT_APP_MEDIUM_URL;
-export const hubPoolChainId = Number(process.env.REACT_APP_HUBPOOL_CHAINID);
+export const hubPoolChainId = Number(
+  process.env.REACT_APP_HUBPOOL_CHAINID || 1
+);
 export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;
 export const enableReactQueryDevTools =
   process.env.REACT_APP_ENABLE_REACT_QUERY_DEV_TOOLS;
