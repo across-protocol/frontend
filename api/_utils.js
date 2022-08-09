@@ -17,6 +17,9 @@ const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
     "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
     provider
   );
+  console.log(
+    `INFO: Fetching token details for ${l1Token} ${l2Token} on chain ${chainId}`
+  );
 
   // 2 queries: treating the token as the l1Token or treating the token as the L2 token.
   const l2TokenFilter = hubPool.filters.SetPoolRebalanceRoute(
@@ -41,6 +44,7 @@ const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   });
 
   const event = events[0];
+  console.log(`INFO: Found pool rebalance route event ${event}`);
 
   return {
     hubPool,
@@ -54,10 +58,11 @@ const isString = (input) => typeof input === "string";
 
 class InputError extends Error {}
 
-const infuraProvider = (name) =>
-  new ethers.providers.StaticJsonRpcProvider(
-    `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`
-  );
+const infuraProvider = (name) => {
+  const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
+  console.log(`INFO: Using infura provider at ${url}`);
+  return new ethers.providers.StaticJsonRpcProvider(url);
+};
 
 const bobaProvider = () =>
   new ethers.providers.StaticJsonRpcProvider("https://mainnet.boba.network");
@@ -122,14 +127,22 @@ const maxRelayFeePct = 0.25;
 
 const getRelayerFeeDetails = (l1Token, amount, destinationChainId) => {
   const tokenSymbol = Object.entries(sdk.relayFeeCalculator.SymbolMapping).find(
-    ([symbol, { address }]) => address.toLowerCase() === l1Token.toLowerCase()
+    ([_symbol, { address }]) => address.toLowerCase() === l1Token.toLowerCase()
   )[0];
-  const relayFeeCalculator = new sdk.relayFeeCalculator.RelayFeeCalculator({
+  console.log(`INFO(getRelayerFeeDetails): Token symbol ${tokenSymbol}`);
+
+  const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     capitalCostsPercent: 0.04,
     queries: queries[destinationChainId](),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
-  });
+  };
+  console.log(
+    `INFO(getRelayerFeeDetails): relayer fee calculator config ${relayerFeeCalculatorConfig}`
+  );
+  const relayFeeCalculator = new sdk.relayFeeCalculator.RelayFeeCalculator(
+    relayerFeeCalculatorConfig
+  );
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol);
 };
 
