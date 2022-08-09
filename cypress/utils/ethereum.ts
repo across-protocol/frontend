@@ -7,8 +7,11 @@ export type MockProviderOptions = {
 };
 
 export const DEFAULT_ACCOUNT = {
-  address: "0xB98bD7C7f656290071E52D1aA617D9cB4467Fd6D",
+  address:
+    Cypress.env("DEFAULT_ACCOUNT_ADDRESS") ||
+    "0xB98bD7C7f656290071E52D1aA617D9cB4467Fd6D",
   privateKey:
+    Cypress.env("DEFAULT_ACCOUNT_PK") ||
     "de926db3012af759b4f24b5a51ef6afa397f04670f634aa4f48d4480417007f3",
 };
 
