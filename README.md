@@ -64,6 +64,13 @@ If you want to run the tests from the CLI, run:
 yarn cypress:run
 ```
 
+Per default cypress expects the frontend running on `http://localhost:3000`.
+To change that run:
+
+```bash
+CYPRESS_BASE_URL=http://localhost:3333 yarn cypress:run
+```
+
 ### Important CSS values
 
 #### Z-index
