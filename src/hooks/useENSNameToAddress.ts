@@ -15,6 +15,9 @@ export default function useENSNameToAddress(
         console.log("error resolving name", e);
         setAddress(null);
       }
+    } else {
+      // Catch in case the provider is not set
+      setAddress(null);
     }
   }, [referrer, provider]);
 
