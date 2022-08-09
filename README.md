@@ -37,6 +37,33 @@ yarn start
 yarn build
 ```
 
+### Run unit tests
+
+```bash
+yarn test
+```
+
+### Run integration tests
+
+We use [cypress](https://docs.cypress.io/guides/overview/why-cypress) for handling integration tests.
+To run the tests locally, first make sure to have a local dev sever running:
+
+```bash
+yarn start
+```
+
+If you want to start the cypress UI run:
+
+```bash
+yarn cypress:open
+```
+
+If you want to run the tests from the CLI, run:
+
+```bash
+yarn cypress:run
+```
+
 ### Important CSS values
 
 #### Z-index

@@ -61,7 +61,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
     <AccentSection>
       <Wrapper>
         {toChainInfo && fromChainInfo && tokenInfo && amount.gt(0) && (
-          <>
+          <div data-cy="fees-box">
             <InfoHeadlineContainer>
               <SlippageDisclaimer>
                 <ConfettiIcon />
@@ -107,9 +107,13 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
                   : "loading"}
               </span>
             </AmountToReceive>
-          </>
+          </div>
         )}
-        <PrimaryButton onClick={handleActionClick} disabled={buttonDisabled}>
+        <PrimaryButton
+          onClick={handleActionClick}
+          disabled={buttonDisabled}
+          data-cy="send"
+        >
           {buttonMsg}
           {txPending && <BouncingDotsLoader />}
         </PrimaryButton>

@@ -29,7 +29,7 @@
     "@uma/sdk": "^0.22.2",
     "axios": "^0.27.2",
     "bnc-notify": "^1.9.1",
-    "bnc-onboard": "^1.37.0",
+    "bnc-onboard": "^1.39.0",
     "downshift": "^6.1.7",
     "ethers": "^5.6.1",
     "framer-motion": "4.1.17",
@@ -60,7 +60,9 @@
     "lint-check": "prettier ./src",
     "predeploy": "yarn sitemap",
     "sitemap": "babel-node src/sitemap-generator.js",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "cypress:open": "cypress open --browser chrome --e2e",
+    "cypress:run": "cypress run --browser chrome --e2e"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts,json}": "yarn lint"
@@ -85,6 +87,7 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.18.6",
+    "@rsksmart/mock-web3-provider": "^1.0.1",
     "@types/luxon": "^2.3.0",
     "@types/react-slider": "^1.3.1",
     "babel-cli": "^6.26.0",
@@ -92,6 +95,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babel-register": "^6.26.0",
+    "cypress": "^10.4.0",
     "husky": "^8.0.0",
     "lint-staged": "^12.4.1",
     "prettier": "^2.4.1"

@@ -262,6 +262,7 @@ const AddLiquidityForm: FC<Props> = ({
               console.error("Error on click to approve or pool tx", err)
             );
           }}
+          data-cy="add-liquidity-button"
         >
           {buttonMessage()}
           {txSubmitted ? <BouncingDotsLoader /> : null}
