@@ -16,6 +16,9 @@ const {
 } = require("./_utils");
 
 const handler = async (request, response) => {
+  console.log(
+    `INFO(suggested-fees): Handling request to /suggested-fees ${request}`
+  );
   try {
     const provider = infuraProvider("mainnet");
 
@@ -45,11 +48,15 @@ const handler = async (request, response) => {
       originChainId
     );
 
+    console.log(
+      `INFO(suggested-fees): Checking route from chain ${computedOriginChainId} to ${destinationChainId} for token ${token}`
+    );
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
     const [{ number: blockTag }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
       isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
+    console.log(`INFO(suggested-fees): Using block ${blockTag}`);
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
       throw new Error(
@@ -72,16 +79,25 @@ const handler = async (request, response) => {
         blockTag,
       }),
     ]);
+    console.log(
+      `INFO(suggested-fees): Fetched current utilization ${currentUt}, post relay utilization ${nextUt}, rate model ${rateModel}`
+    );
 
     const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
       nextUt
     );
+    console.log(
+      `INFO(suggested-fees): Calculated realizedLPFeePct ${realizedLPFeePct}`
+    );
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
       destinationChainId
+    );
+    console.log(
+      `INFO(suggested-fees): Calculated relayerFeeDetails ${relayerFeeDetails}`
     );
 
     if (relayerFeeDetails.isAmountTooLow)
@@ -95,6 +111,7 @@ const handler = async (request, response) => {
 
     response.status(200).json(responseJson);
   } catch (error) {
+    console.log(`ERROR(suggested-fees): Error found ${error}`);
     let status;
     if (error instanceof InputError) {
       status = 400;

@@ -3,6 +3,8 @@ const ethers = require("ethers");
 const { InputError, isString, getHubPoolClient } = require("./_utils");
 
 const handler = async (request, response) => {
+  console.log(`INFO(pools): Handling request to /pools ${request}`);
+
   try {
     const hubPoolClient = await getHubPoolClient();
 
@@ -21,6 +23,8 @@ const handler = async (request, response) => {
     response.setHeader("Cache-Control", "s-maxage=300");
     response.status(200).json(hubPoolClient.getPoolState(token));
   } catch (error) {
+    console.log(`ERROR(pools): Error found: ${error}`);
+
     let status;
     if (error instanceof InputError) {
       status = 400;
