@@ -5,18 +5,13 @@ export default function useENSNameToAddress(
   referrer: string,
   provider: ethers.providers.Provider | undefined
 ) {
-  const [address, setAddress] = useState<string | null>(null);
+  const [address, setAddress] = useState<string | null | undefined>(null);
   const lookupAddress = useCallback(async () => {
-    if (provider) {
-      try {
-        const resolvedAddress = await provider?.resolveName(referrer);
-        setAddress(resolvedAddress);
-      } catch (e) {
-        console.log("error resolving name", e);
-        setAddress(null);
-      }
-    } else {
-      // Catch in case the provider is not set
+    try {
+      const resolvedAddress = await provider?.resolveName(referrer);
+      setAddress(resolvedAddress);
+    } catch (e) {
+      console.log("error resolving name", e);
       setAddress(null);
     }
   }, [referrer, provider]);
