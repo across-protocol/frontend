@@ -19,7 +19,7 @@ export default function useSendAction(
     fromChain,
     toChain
   );
-  const { status, hasToApprove, send, approve } = useBridge();
+  const { status, hasToApprove, send, approve, referrerError } = useBridge();
   const { account } = useConnection();
   const [txHash, setTxHash] = useState("");
 
@@ -109,5 +109,6 @@ export default function useSendAction(
     txHash,
     limits,
     limitsError: isError,
+    referrerError,
   };
 }

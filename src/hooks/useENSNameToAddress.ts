@@ -15,12 +15,17 @@ export default function useENSNameToAddress(
           .resolveName(referrer)
           .then((ra) => {
             setAddress(ra || "");
-            setReferrerError("");
+            if (ra) {
+              setReferrerError("");
+            } else {
+              setReferrerError("Invalid address or ENS name");
+            }
           })
           .catch((e) => {
+            // Error here would imply an issue with the provider call, not with the ENS name necessarily.
             console.warn("error resolving name", e);
             setAddress("");
-            setReferrerError("Invalid address or ENS name");
+            setReferrerError("");
           });
       }
     }

@@ -12,7 +12,8 @@ import {
   rewardsBannerWarning,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
-
+import useENSNameToAddress from "hooks/useENSNameToAddress";
+import useReferrer from "hooks/useReferrer";
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider } = useConnection();
@@ -37,11 +38,19 @@ function useRoutes() {
 }
 // Need this component for useLocation hook
 const Routes: React.FC = () => {
-  const { openSidebar, setOpenSidebar, error, removeError, location } =
-    useRoutes();
-
+  const {
+    openSidebar,
+    setOpenSidebar,
+    error,
+    removeError,
+    location,
+    provider,
+  } = useRoutes();
+  const referrer = useReferrer();
+  const { referrerError } = useENSNameToAddress(referrer, provider);
   return (
     <>
+      {referrerError && <SuperHeader>{referrerError}</SuperHeader>}
       {disableDeposits && (
         <SuperHeader>
           Across is experiencing issues. Deposits are currently disabled into
