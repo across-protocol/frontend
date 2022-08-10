@@ -55,10 +55,17 @@ const handler = async (request, response) => {
       `INFO(suggested-fees): Checking route from chain ${computedOriginChainId} to ${destinationChainId} for token ${token}`
     );
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
-    const [{ number: blockTag }, routeEnabled] = await Promise.all([
+    const [{ number: rawBlockTag }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
       isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
+
+    // If the query was supplied a timestamp, lets use the most
+    // recent block before the timestamp. If the timestamp is
+    // not specified, we can use the default variant of blockTag
+    // to be "latest"
+    const blockTag = isString(timestamp) ? rawBlockTag : "latest";
+
     console.log(`INFO(suggested-fees): Using block ${blockTag}`);
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
