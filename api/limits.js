@@ -9,6 +9,7 @@ const {
   InputError,
   isString,
   getRelayerFeeDetails,
+  getTokenPriceFromOwnFunction,
   maxRelayFeePct,
   getTokenDetails,
   getBalance,
@@ -107,13 +108,19 @@ const handler = async (request, response) => {
       hubPool.interface.encodeFunctionData("pooledTokens", [l1Token]),
     ];
 
-    // TODO: Get token price first from /coingecko route, which we'll use as input to getRelayerFeeDetails
+    let tokenPrice = await getTokenPriceFromOwnFunction(l1Token);
+    logger.debug({
+      at: "limits",
+      message: "Got token price from /coingecko",
+      tokenPrice,
+    });
     logger.debug({
       at: "limits",
       message:
         "Sending several requests to HubPool and fetching relayer balances",
       multicallInput,
     });
+
     const [
       relayerFeeDetails,
       multicallOutput,
@@ -124,7 +131,8 @@ const handler = async (request, response) => {
       getRelayerFeeDetails(
         l1Token,
         ethers.BigNumber.from("10").pow(18),
-        Number(destinationChainId)
+        Number(destinationChainId),
+        tokenPrice
       ),
       hubPool.callStatic.multicall(multicallInput),
       Promise.all(

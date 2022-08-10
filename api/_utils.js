@@ -3,6 +3,7 @@ const {
   ERC20__factory,
   SpokePool__factory,
 } = require("@across-protocol/contracts-v2");
+const axios = require("axios");
 const sdk = require("@across-protocol/sdk-v2");
 const ethers = require("ethers");
 const { Logging } = require("@google-cloud/logging");
@@ -230,16 +231,28 @@ const getTokenSymbol = (tokenAddress) => {
       address.toLowerCase() === tokenAddress.toLowerCase()
   )[0];
 };
-const getRelayerFeeDetails = (l1Token, amount, destinationChainId) => {
+const getRelayerFeeDetails = (
+  l1Token,
+  amount,
+  destinationChainId,
+  tokenPrice
+) => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
-  return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol);
+  return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
 };
 
 const getTokenPrice = (l1Token, destinationChainId) => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.getTokenPrice(tokenSymbol);
+};
+
+const getTokenPriceFromOwnFunction = async (l1Token) => {
+  return Number(
+    (await axios(`https://across.to/api/coingecko`, { params: { l1Token } }))
+      .data.price
+  );
 };
 
 const providerCache = {};
@@ -339,6 +352,7 @@ module.exports = {
   bobaProvider,
   getRelayerFeeDetails,
   getTokenPrice,
+  getTokenPriceFromOwnFunction,
   maxRelayFeePct,
   getProvider,
   getBalance,

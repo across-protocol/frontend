@@ -13,6 +13,7 @@ const {
   getRelayerFeeDetails,
   isRouteEnabled,
   disabledL1Tokens,
+  getTokenPriceFromOwnFunction,
 } = require("./_utils");
 
 const handler = async (request, response) => {
@@ -72,7 +73,7 @@ const handler = async (request, response) => {
       provider
     );
 
-    const [currentUt, nextUt, rateModel] = await Promise.all([
+    const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
       hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
         blockTag,
       }),
@@ -82,6 +83,7 @@ const handler = async (request, response) => {
       configStoreClient.getRateModel(l1Token, {
         blockTag,
       }),
+      getTokenPriceFromOwnFunction(l1Token),
     ]);
     logger.debug({
       at: "suggested-fees",
@@ -101,10 +103,17 @@ const handler = async (request, response) => {
       message: "Calculated realizedLPFeePct",
       realizedLPFeePct,
     });
+    logger.debug({
+      at: "suggested-fees",
+      message: "Got token price from /coingecko",
+      tokenPrice,
+    });
+
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
-      destinationChainId
+      destinationChainId,
+      tokenPrice
     );
     logger.debug({
       at: "suggested-fees",
