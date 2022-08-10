@@ -104,14 +104,8 @@ const handler = async (request, response) => {
       hubPool.interface.encodeFunctionData("pooledTokens", [l1Token]),
     ];
 
-    // If we're unable to get a token price from the /coingecko route, then the relayerFeeCalculator will fetch
-    // its price directly from the Coingecko Pro API endpoint. We try to use the /coingecko route to take
-    // advantage of Vercel Edge caching https://vercel.com/docs/concepts/edge-network/caching
     let tokenPrice = await getTokenPriceFromOwnFunction(l1Token);
-    if (tokenPrice !== undefined)
-      console.log(
-        `INFO(limits): Got token price from /coingecko: ${tokenPrice}`
-      );
+    console.log(`INFO(limits): Got token price from /coingecko: ${tokenPrice}`);
 
     console.log(
       `INFO(limits): Sending several requests to HubPool ${multicallInput} and fetching relayer balances`

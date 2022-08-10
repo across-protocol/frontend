@@ -189,15 +189,10 @@ const getTokenPrice = (l1Token, destinationChainId) => {
 };
 
 const getTokenPriceFromOwnFunction = async (l1Token) => {
-  try {
-    return Number(
-      (await axios(`https://across.to/api/coingecko`, { params: { l1Token } }))
-        .data.price
-    );
-  } catch (err) {
-    console.error(`ERROR(limits): Failed to fetch token price from /coingecko`);
-  }
-  return undefined;
+  return Number(
+    (await axios(`https://across.to/api/coingecko`, { params: { l1Token } }))
+      .data.price
+  );
 };
 
 const providerCache = {};

@@ -98,13 +98,7 @@ const handler = async (request, response) => {
       `INFO(suggested-fees): Calculated realizedLPFeePct ${realizedLPFeePct}`
     );
 
-    // If we're unable to get a token price from the /coingecko route, then the relayerFeeCalculator will fetch
-    // its price directly from the Coingecko Pro API endpoint. We try to use the /coingecko route to take
-    // advantage of Vercel Edge caching https://vercel.com/docs/concepts/edge-network/caching
-    if (tokenPrice !== undefined)
-      console.log(
-        `INFO(limits): Got token price from /coingecko: ${tokenPrice}`
-      );
+    console.log(`INFO(limits): Got token price from /coingecko: ${tokenPrice}`);
 
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
