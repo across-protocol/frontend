@@ -6,7 +6,8 @@ const {
 const sdk = require("@across-protocol/sdk-v2");
 const ethers = require("ethers");
 
-const { REACT_APP_PUBLIC_INFURA_ID } = process.env;
+const { REACT_APP_PUBLIC_INFURA_ID, REACT_APP_COINGECKO_PRO_API_KEY } =
+  process.env;
 const {
   relayerFeeCapitalCostConfig,
   disabledL1Tokens,
@@ -99,27 +100,49 @@ const dummyFromAddress =
 
 const queries = {
   1: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(infuraProvider("mainnet")),
+    new sdk.relayFeeCalculator.EthereumQueries(
+      infuraProvider("mainnet"),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY
+    ),
   10: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
       infuraProvider("optimism-mainnet"),
       undefined,
-      "0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9",
       undefined,
-      dummyFromAddress
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY
     ),
   137: () =>
     new sdk.relayFeeCalculator.PolygonQueries(
-      infuraProvider("polygon-mainnet")
+      infuraProvider("polygon-mainnet"),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY
     ),
-  288: () => new sdk.relayFeeCalculator.BobaQueries(bobaProvider()),
+  288: () =>
+    new sdk.relayFeeCalculator.BobaQueries(
+      bobaProvider(),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY
+    ),
   42161: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
       infuraProvider("arbitrum-mainnet"),
       undefined,
-      "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
       undefined,
-      dummyFromAddress
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY
     ),
 };
 
