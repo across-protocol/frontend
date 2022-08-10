@@ -51,6 +51,7 @@ const getLogger = () => {
     },
   }).log(VERCEL_ENV, { removeCircular: true });
   return {
+    debug: (data) => log(gcpLogger, "DEBUG", data),
     info: (data) => log(gcpLogger, "INFO", data),
     warn: (data) => log(gcpLogger, "WARN", data),
     error: (data) => log(gcpLogger, "ERROR", data),
