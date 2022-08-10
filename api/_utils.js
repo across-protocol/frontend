@@ -162,19 +162,21 @@ const getRelayerFeeCalculator = (destinationChainId) => {
     relayerFeeCalculatorConfig
   );
 };
-const getRelayerFeeDetails = (l1Token, amount, destinationChainId) => {
-  const tokenSymbol = Object.entries(sdk.relayFeeCalculator.SymbolMapping).find(
-    ([_symbol, { address }]) => address.toLowerCase() === l1Token.toLowerCase()
+const getTokenSymbol = (tokenAddress) => {
+  return Object.entries(sdk.relayFeeCalculator.SymbolMapping).find(
+    ([_symbol, { address }]) =>
+      address.toLowerCase() === tokenAddress.toLowerCase()
   )[0];
+};
+const getRelayerFeeDetails = (l1Token, amount, destinationChainId) => {
+  const tokenSymbol = getTokenSymbol(l1Token);
   console.log(`INFO(getRelayerFeeDetails): Token symbol ${tokenSymbol}`);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol);
 };
 
 const getTokenPrice = (l1Token, destinationChainId) => {
-  const tokenSymbol = Object.entries(sdk.relayFeeCalculator.SymbolMapping).find(
-    ([_symbol, { address }]) => address.toLowerCase() === l1Token.toLowerCase()
-  )[0];
+  const tokenSymbol = getTokenSymbol(l1Token);
   console.log(`INFO(getTokenPrice): Token symbol ${tokenSymbol}`);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.getTokenPrice(tokenSymbol);
