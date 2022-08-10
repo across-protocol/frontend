@@ -39,7 +39,10 @@ export function useBridge() {
   const config = getConfig();
   const referrer = useReferrer();
   const { chainId, account, signer, provider } = useConnection();
-  const resolvedAddress = useENSNameToAddress(referrer, provider);
+  const { address: resolvedAddress, referrerError } = useENSNameToAddress(
+    referrer,
+    provider
+  );
   const {
     amount,
     fromChain,
@@ -151,6 +154,7 @@ export function useBridge() {
     status,
     send,
     approve,
+    referrerError,
   };
 }
 
