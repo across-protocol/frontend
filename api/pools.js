@@ -3,7 +3,7 @@ const ethers = require("ethers");
 const { InputError, isString, getHubPoolClient } = require("./_utils");
 
 const handler = async (request, response) => {
-  console.log(`INFO(pools): Handling request to /pools`, request);
+  console.log(`INFO(pools): Handling request to /pools`, request.query);
 
   try {
     const hubPoolClient = await getHubPoolClient();

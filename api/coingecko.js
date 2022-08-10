@@ -3,7 +3,7 @@ const ethers = require("ethers");
 const { InputError, isString, getTokenPrice } = require("./_utils");
 
 const handler = async (request, response) => {
-  console.log(`INFO(coingecko): Handling request to /coingecko`, request);
+  console.log(`INFO(coingecko): Handling request to /coingecko`, request.query);
 
   try {
     let { l1Token } = request.query;
