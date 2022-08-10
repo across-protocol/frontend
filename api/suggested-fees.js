@@ -4,8 +4,8 @@
 const sdk = require("@across-protocol/sdk-v2");
 const { BlockFinder } = require("@uma/sdk");
 const ethers = require("ethers");
-
 const {
+  logger,
   getTokenDetails,
   InputError,
   isString,
@@ -16,10 +16,6 @@ const {
 } = require("./_utils");
 
 const handler = async (request, response) => {
-  console.log(
-    `INFO(suggested-fees): Handling request to /suggested-fees`,
-    request
-  );
   try {
     const provider = infuraProvider("mainnet");
 
@@ -52,15 +48,17 @@ const handler = async (request, response) => {
       originChainId
     );
 
-    console.log(
-      `INFO(suggested-fees): Checking route from chain ${computedOriginChainId} to ${destinationChainId} for token ${token}`
-    );
+    logger.info("suggested-fees", "Checking route", {
+      computedOriginChainId,
+      destinationChainId,
+      token,
+    });
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
     const [{ number: blockTag }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
       isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
-    console.log(`INFO(suggested-fees): Using block ${blockTag}`);
+    logger.info("suggested-fees", `Using block ${blockTag}`, {});
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
       throw new InputError(
@@ -83,26 +81,28 @@ const handler = async (request, response) => {
         blockTag,
       }),
     ]);
-    console.log(
-      `INFO(suggested-fees): Fetched current utilization ${currentUt}, post relay utilization ${nextUt}, rate model ${rateModel}`
-    );
+    logger.info("suggested-fees", "Fetched utilization data", {
+      currentUt,
+      nextUt,
+      rateModel,
+    });
 
     const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
       nextUt
     );
-    console.log(
-      `INFO(suggested-fees): Calculated realizedLPFeePct ${realizedLPFeePct}`
-    );
+    logger.info("suggested-fees", "Calculated realizedLPFeePct", {
+      realizedLPFeePct,
+    });
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
       destinationChainId
     );
-    console.log(
-      `INFO(suggested-fees): Calculated relayerFeeDetails ${relayerFeeDetails}`
-    );
+    logger.info("suggested-fees", "Calculated relayerFeeDetails", {
+      relayerFeeDetails,
+    });
 
     if (relayerFeeDetails.isAmountTooLow)
       throw new InputError("Sent amount is too low relative to fees");
@@ -115,13 +115,12 @@ const handler = async (request, response) => {
 
     response.status(200).json(responseJson);
   } catch (error) {
-    console.log(`ERROR(suggested-fees): Error found ${error}`);
     let status;
     if (error instanceof InputError) {
-      console.warn(`ERROR(suggested-fees): 400 input error: ${error}`);
+      logger.warn("suggested-fees", "400 input error", { error });
       status = 400;
     } else {
-      console.error(`ERROR(suggested-fees): 500 server error: ${error}`);
+      logger.error("suggested-fees", "500 server error", { error });
       status = 500;
     }
     response.status(status).send(error.message);

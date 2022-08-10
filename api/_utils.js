@@ -5,22 +5,64 @@ const {
 } = require("@across-protocol/contracts-v2");
 const sdk = require("@across-protocol/sdk-v2");
 const ethers = require("ethers");
+const { Logging } = require("@google-cloud/logging");
 
-const { REACT_APP_PUBLIC_INFURA_ID, REACT_APP_COINGECKO_PRO_API_KEY } =
-  process.env;
+const {
+  REACT_APP_PUBLIC_INFURA_ID,
+  REACT_APP_COINGECKO_PRO_API_KEY,
+  REACT_APP_GOOGLE_SERVICE_ACCOUNT,
+  VERCEL_ENV,
+} = process.env;
 const {
   relayerFeeCapitalCostConfig,
   disabledL1Tokens,
 } = require("./_constants");
+
+const log = (gcpLogger, severity, at, message, extraData) => {
+  gcpLogger.write(
+    this.log.entry(
+      {
+        resource: {
+          type: "global",
+        },
+        labels: { at },
+        severity: severity,
+      },
+      { message, ...extraData }
+    )
+  );
+};
+
+const getLogger = () => {
+  const gcpLogger = new Logging({
+    projectId: JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT).project_id,
+    credentials: {
+      client_email: JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT).client_email,
+      private_key: JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT).private_key,
+    },
+  }).log(VERCEL_ENV, { removeCircular: true });
+  return {
+    info: (at, message, extraData) =>
+      log(gcpLogger, "INFO", at, message, extraData),
+    warn: (at, message, extraData) =>
+      log(gcpLogger, "WARN", at, message, extraData),
+    error: (at, message, extraData) =>
+      log(gcpLogger, "ERROR", at, message, extraData),
+  };
+};
+// Singleton logger so we don't create multiples.
+const logger = getLogger();
 
 const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   const hubPool = HubPool__factory.connect(
     "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
     provider
   );
-  console.log(
-    `INFO: Fetching token details for ${l1Token} ${l2Token} on chain ${chainId}`
-  );
+  logger.info("getTokenDetails", "Fetching token details", {
+    l1Token,
+    l2Token,
+    chainId,
+  });
 
   // 2 queries: treating the token as the l1Token or treating the token as the L2 token.
   const l2TokenFilter = hubPool.filters.SetPoolRebalanceRoute(
@@ -45,7 +87,9 @@ const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   });
 
   const event = events[0];
-  console.log(`INFO: Found pool rebalance route event ${event}`);
+  logger.info("getTokenDetails", "Fetched pool rebalance route event", {
+    event,
+  });
 
   return {
     hubPool,
@@ -61,7 +105,7 @@ class InputError extends Error {}
 
 const infuraProvider = (name) => {
   const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
-  console.log(`INFO: Using infura provider at ${url}`);
+  logger.info("infuraProvider", "Using an Infura provider", url);
   return new ethers.providers.StaticJsonRpcProvider(url);
 };
 
@@ -155,11 +199,12 @@ const getRelayerFeeCalculator = (destinationChainId) => {
     queries: queries[destinationChainId](),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
-  console.log(
-    `INFO(getRelayerFeeDetails): relayer fee calculator config ${relayerFeeCalculatorConfig}`
-  );
+  logger.info("getRelayerFeeDetails", "Relayer fee calculator config", {
+    relayerFeeCalculatorConfig,
+  });
   return new sdk.relayFeeCalculator.RelayFeeCalculator(
-    relayerFeeCalculatorConfig
+    relayerFeeCalculatorConfig,
+    logger
   );
 };
 const getTokenSymbol = (tokenAddress) => {
@@ -170,14 +215,12 @@ const getTokenSymbol = (tokenAddress) => {
 };
 const getRelayerFeeDetails = (l1Token, amount, destinationChainId) => {
   const tokenSymbol = getTokenSymbol(l1Token);
-  console.log(`INFO(getRelayerFeeDetails): Token symbol ${tokenSymbol}`);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol);
 };
 
 const getTokenPrice = (l1Token, destinationChainId) => {
   const tokenSymbol = getTokenSymbol(l1Token);
-  console.log(`INFO(getTokenPrice): Token symbol ${tokenSymbol}`);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.getTokenPrice(tokenSymbol);
 };

@@ -1,10 +1,8 @@
 const ethers = require("ethers");
 
-const { InputError, isString, getTokenPrice } = require("./_utils");
+const { logger, InputError, isString, getTokenPrice } = require("./_utils");
 
 const handler = async (request, response) => {
-  console.log(`INFO(coingecko): Handling request to /coingecko`, request);
-
   try {
     let { l1Token } = request.query;
     if (!isString(l1Token))
@@ -35,12 +33,12 @@ const handler = async (request, response) => {
     );
     response.status(200).json({ price });
   } catch (error) {
-    console.log(`ERROR(coingecko): Error found: ${error}`);
-
     let status;
     if (error instanceof InputError) {
+      logger.warn("logger", "400 input error", { error });
       status = 400;
     } else {
+      logger.error("logger", "500 server error", { error });
       status = 500;
     }
     response.status(status).send(error.message);
