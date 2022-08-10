@@ -18,7 +18,7 @@ const {
 } = require("./_utils");
 
 const handler = async (request, response) => {
-  console.log(`INFO(limits): Handling request to /limits ${request}`);
+  console.log(`INFO(limits): Handling request to /limits`, request);
 
   try {
     const {
@@ -102,6 +102,8 @@ const handler = async (request, response) => {
       hubPool.interface.encodeFunctionData("sync", [l1Token]),
       hubPool.interface.encodeFunctionData("pooledTokens", [l1Token]),
     ];
+
+    // TODO: Get token price first from /coingecko route, which we'll use as input to getRelayerFeeDetails
 
     console.log(
       `INFO(limits): Sending several requests to HubPool ${multicallInput} and fetching relayer balances`

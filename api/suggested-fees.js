@@ -17,7 +17,8 @@ const {
 
 const handler = async (request, response) => {
   console.log(
-    `INFO(suggested-fees): Handling request to /suggested-fees ${request}`
+    `INFO(suggested-fees): Handling request to /suggested-fees`,
+    request
   );
   try {
     const provider = infuraProvider("mainnet");
