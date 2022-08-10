@@ -1,14 +1,11 @@
 /// <reference types="cypress" />
 
-import {
-  MockWeb3Provider,
-  MockProviderOptions,
-  DEFAULT_ACCOUNT,
-} from "../utils/ethereum";
+import { InjectedEip1193Bridge } from "../utils/ethereum";
 
 /**
- * Overwrite default `visit` command to allow injecting web3 provider to
- * `window.ethereum`.
+ * Overwrite default `visit` command to inject web3 provider to `window.ethereum`.
+ * Per default a mocked provider is injected. To inject a JSON RPC provider pass the
+ * option `jsonRpcUrl`.
  */
 Cypress.Commands.overwrite(
   "visit",
@@ -21,14 +18,10 @@ Cypress.Commands.overwrite(
       ...options,
       url: url as string,
       onBeforeLoad: (win) => {
-        if (options?.withInjectedMockProvider) {
-          win.localStorage.clear();
-          (win as any).ethereum = MockWeb3Provider.createDefault({
-            chainId: options?.chainId || 1,
-            privateKey: options?.privateKey || DEFAULT_ACCOUNT.privateKey,
-            address: options?.address || DEFAULT_ACCOUNT.address,
-          });
-        }
+        win.localStorage.clear();
+        (win as any).ethereum = options?.jsonRpcUrl
+          ? InjectedEip1193Bridge.withJsonRpcProvider(options)
+          : InjectedEip1193Bridge.withMockProvider(options);
       },
     });
   }
@@ -45,12 +38,29 @@ Cypress.Commands.add("dataCy", (value) => {
 /**
  * Inject mocked web3 provider to `window.ethereum`.
  */
-Cypress.Commands.add("injectMockProvider", (options: MockProviderOptions) => {
-  cy.on("window:before:load", (win) => {
-    win.localStorage.clear();
-    (win as any).ethereum = MockWeb3Provider.createDefault(options);
-  });
-});
+Cypress.Commands.add(
+  "injectMockProvider",
+  (options: Partial<{ chainId: number; privateKey: string }>) => {
+    cy.on("window:before:load", (win) => {
+      win.localStorage.clear();
+      (win as any).ethereum = InjectedEip1193Bridge.withMockProvider(options);
+    });
+  }
+);
+
+/**
+ * Inject JSON RPC provider to `window.ethereum`.
+ */
+Cypress.Commands.add(
+  "injectJsonRpcProvider",
+  (options: Partial<{ jsonRpcUrl: string; privateKey: string }>) => {
+    cy.on("window:before:load", (win) => {
+      win.localStorage.clear();
+      (win as any).ethereum =
+        InjectedEip1193Bridge.withJsonRpcProvider(options);
+    });
+  }
+);
 
 /**
  * Connect detected wallet via bnc-onboard.

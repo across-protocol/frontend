@@ -1,6 +1,6 @@
 describe("bridge", () => {
   beforeEach(() => {
-    cy.visit("/", { withInjectedMockProvider: true });
+    cy.visit("/");
   });
 
   it("render in initial state", () => {

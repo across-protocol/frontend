@@ -4,18 +4,17 @@ declare namespace Cypress {
   }
 
   interface VisitOptions {
-    withInjectedMockProvider?: boolean;
+    jsonRpcUrl?: string;
     chainId?: number;
-    address?: string;
     privateKey?: string;
   }
 
   interface Chainable {
     dataCy(value: string): Chainable<Element>;
-    injectMockProvider(options: {
-      chainId?: number;
-      address: string;
-      privateKey: string;
+    injectMockProvider(options: { chainId?: number; privateKey?: string });
+    injectJsonRpcProvider(options: {
+      jsonRpcUrl?: string;
+      privateKey?: string;
     });
     connectInjectedWallet(connectWalletDataId: string);
   }

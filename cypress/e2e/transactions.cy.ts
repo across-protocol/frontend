@@ -1,6 +1,6 @@
 describe("transactions", () => {
   beforeEach(() => {
-    cy.visit("/transactions", { withInjectedMockProvider: true });
+    cy.visit("/transactions");
   });
 
   it("render in initial state", () => {
