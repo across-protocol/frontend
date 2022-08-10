@@ -8,28 +8,17 @@ export default function useENSNameToAddress(
   const [address, setAddress] = useState<string>("");
   useEffect(() => {
     if (provider && referrer) {
-      lookupAddress(referrer, provider).then(setAddress);
+      provider
+        .resolveName(referrer)
+        .then((ra) => {
+          setAddress(ra || "");
+        })
+        .catch((e) => {
+          console.warn("error resolving name", e);
+          setAddress("");
+        });
     }
   }, [referrer, provider]);
 
   return address;
-}
-
-/**
- *
- * @param referrer
- * @param provider
- * @returns Promise<string>, resolves to the address of the ENS name if it exists
- */
-async function lookupAddress(
-  referrer: string,
-  provider: ethers.providers.Provider
-) {
-  try {
-    const resolvedAddress = await provider.resolveName(referrer);
-    return resolvedAddress || "";
-  } catch (e) {
-    console.log("error resolving name", e);
-    return "";
-  }
 }
