@@ -39,7 +39,7 @@ const log = (gcpLogger, severity, data) => {
 
 const getLogger = () => {
   // Use the default logger which logs to console if no GCP service account is configured.
-  if (!GOOGLE_SERVICE_ACCOUNT) {
+  if (Object.keys(GOOGLE_SERVICE_ACCOUNT).length === 0) {
     return sdk.relayFeeCalculator.DEFAULT_LOGGER;
   }
 
@@ -330,6 +330,7 @@ const minBN = (...arr) => {
 };
 
 module.exports = {
+  logger,
   getTokenDetails,
   isString,
   InputError,
