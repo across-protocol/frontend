@@ -56,6 +56,10 @@ const handler = async (request, response) => {
         "Must provide token and destinationChainId as query params"
       );
 
+    if (originChainId === destinationChainId) {
+      throw new InputError("Origin and destination chains cannot be the same");
+    }
+
     token = ethers.utils.getAddress(token);
 
     const { l1Token, chainId: computedOriginChainId } = await getTokenDetails(
@@ -83,7 +87,7 @@ const handler = async (request, response) => {
       const errorString = rawError
         ? `Raw Error: ${rawError.stack || rawError.toString()}`
         : "";
-      throw new Error(
+      throw new InputError(
         `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled. ${errorString}`
       );
     }
@@ -234,11 +238,12 @@ const handler = async (request, response) => {
     response.setHeader("Cache-Control", "s-maxage=300");
     response.status(200).json(responseJson);
   } catch (error) {
-    console.log(`ERROR(limits): Error found: ${error}`);
     let status;
     if (error instanceof InputError) {
+      console.warn(`ERROR(limits): 400 input error: ${error}`);
       status = 400;
     } else {
+      console.error(`ERROR(limits): 500 server error: ${error}`);
       status = 500;
     }
     response.status(status).send(error.message);

@@ -29,6 +29,9 @@ const handler = async (request, response) => {
       throw new InputError(
         "Must provide amount, token, and destinationChainId as query params"
       );
+    if (originChainId === destinationChainId) {
+      throw new InputError("Origin and destination chains cannot be the same");
+    }
 
     token = ethers.utils.getAddress(token);
 
@@ -60,7 +63,7 @@ const handler = async (request, response) => {
     console.log(`INFO(suggested-fees): Using block ${blockTag}`);
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
-      throw new Error(
+      throw new InputError(
         `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled.`
       );
 
@@ -115,8 +118,10 @@ const handler = async (request, response) => {
     console.log(`ERROR(suggested-fees): Error found ${error}`);
     let status;
     if (error instanceof InputError) {
+      console.warn(`ERROR(suggested-fees): 400 input error: ${error}`);
       status = 400;
     } else {
+      console.error(`ERROR(suggested-fees): 500 server error: ${error}`);
       status = 500;
     }
     response.status(status).send(error.message);
