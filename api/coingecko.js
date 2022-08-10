@@ -3,7 +3,7 @@ const ethers = require("ethers");
 const { InputError, isString, getTokenPrice } = require("./_utils");
 
 const handler = async (request, response) => {
-  console.log(`INFO(pools): Handling request to /coingecko ${request}`);
+  console.log(`INFO(pools): Handling request to /coingecko`, request);
 
   try {
     let { l1Token } = request.query;
@@ -12,7 +12,7 @@ const handler = async (request, response) => {
 
     l1Token = ethers.utils.getAddress(l1Token);
 
-    const price = await getTokenPrice(l1Token);
+    const price = await getTokenPrice(l1Token, 1);
 
     // This tells our CDN the value is fresh for one second. If a request is repeated within the next second,
     // the previously cached value is still fresh. The header x-vercel-cache present in the response will show the

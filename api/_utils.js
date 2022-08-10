@@ -148,12 +148,7 @@ const queries = {
 
 const maxRelayFeePct = 0.25;
 
-const getRelayerFeeDetails = (l1Token, amount, destinationChainId) => {
-  const tokenSymbol = Object.entries(sdk.relayFeeCalculator.SymbolMapping).find(
-    ([_symbol, { address }]) => address.toLowerCase() === l1Token.toLowerCase()
-  )[0];
-  console.log(`INFO(getRelayerFeeDetails): Token symbol ${tokenSymbol}`);
-
+const getRelayerFeeCalculator = (destinationChainId) => {
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     capitalCostsPercent: 0.04,
@@ -163,10 +158,26 @@ const getRelayerFeeDetails = (l1Token, amount, destinationChainId) => {
   console.log(
     `INFO(getRelayerFeeDetails): relayer fee calculator config ${relayerFeeCalculatorConfig}`
   );
-  const relayFeeCalculator = new sdk.relayFeeCalculator.RelayFeeCalculator(
+  return new sdk.relayFeeCalculator.RelayFeeCalculator(
     relayerFeeCalculatorConfig
   );
+};
+const getRelayerFeeDetails = (l1Token, amount, destinationChainId) => {
+  const tokenSymbol = Object.entries(sdk.relayFeeCalculator.SymbolMapping).find(
+    ([_symbol, { address }]) => address.toLowerCase() === l1Token.toLowerCase()
+  )[0];
+  console.log(`INFO(getRelayerFeeDetails): Token symbol ${tokenSymbol}`);
+  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol);
+};
+
+const getTokenPrice = (l1Token, destinationChainId) => {
+  const tokenSymbol = Object.entries(sdk.relayFeeCalculator.SymbolMapping).find(
+    ([_symbol, { address }]) => address.toLowerCase() === l1Token.toLowerCase()
+  )[0];
+  console.log(`INFO(getTokenPrice): Token symbol ${tokenSymbol}`);
+  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
+  return relayFeeCalculator.getTokenPrice(tokenSymbol);
 };
 
 const providerCache = {};
@@ -264,6 +275,7 @@ module.exports = {
   infuraProvider,
   bobaProvider,
   getRelayerFeeDetails,
+  getTokenPrice,
   maxRelayFeePct,
   getProvider,
   getBalance,

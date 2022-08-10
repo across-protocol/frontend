@@ -18,7 +18,7 @@ const {
 } = require("./_utils");
 
 const handler = async (request, response) => {
-  console.log(`INFO(limits): Handling request to /limits ${request}`);
+  console.log(`INFO(limits): Handling request to /limits`, request);
 
   try {
     const {
