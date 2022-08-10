@@ -195,9 +195,7 @@ const getTokenPriceFromOwnFunction = async (l1Token) => {
         .data.price
     );
   } catch (err) {
-    console.error(
-      `ERROR(limits): Failed to fetch token price from ${`https://across.to/api/coingecko`}`
-    );
+    console.error(`ERROR(limits): Failed to fetch token price from /coingecko`);
   }
   return undefined;
 };

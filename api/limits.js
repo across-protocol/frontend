@@ -19,7 +19,7 @@ const {
 } = require("./_utils");
 
 const handler = async (request, response) => {
-  console.log(`INFO(limits): Handling request to /limits`, request);
+  console.log(`INFO(limits): Handling request to /limits`, request.query);
 
   try {
     const {
@@ -107,7 +107,7 @@ const handler = async (request, response) => {
     let tokenPrice = await getTokenPriceFromOwnFunction(l1Token);
     if (tokenPrice !== undefined)
       console.log(
-        `INFO(limits): Got token price from${`https://across.to/api/coingecko`}: ${tokenPrice}`
+        `INFO(limits): Got token price from /coingecko: ${tokenPrice}`
       );
 
     console.log(

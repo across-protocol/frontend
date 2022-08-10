@@ -19,7 +19,7 @@ const {
 const handler = async (request, response) => {
   console.log(
     `INFO(suggested-fees): Handling request to /suggested-fees`,
-    request
+    request.query
   );
   try {
     const provider = infuraProvider("mainnet");
@@ -100,7 +100,7 @@ const handler = async (request, response) => {
 
     if (tokenPrice !== undefined)
       console.log(
-        `INFO(limits): Got token price from${`https://across.to/api/coingecko`}: ${tokenPrice}`
+        `INFO(limits): Got token price from /coingecko: ${tokenPrice}`
       );
 
     const relayerFeeDetails = await getRelayerFeeDetails(
