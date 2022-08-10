@@ -23,10 +23,10 @@ const handler = async (request, response) => {
   } catch (error) {
     let status;
     if (error instanceof InputError) {
-      logger.warn("pools", "400 input error", { error });
+      logger.warn({ at: "pools", message: "400 input error", error });
       status = 400;
     } else {
-      logger.error("pools", "500 server error", { error });
+      logger.error({ at: "pools", message: "500 server error", error });
       status = 500;
     }
     response.status(status).send(error.message);

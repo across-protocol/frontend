@@ -18,17 +18,16 @@ const {
   disabledL1Tokens,
 } = require("./_constants");
 
-const log = (gcpLogger, severity, at, message, extraData) => {
+const log = (gcpLogger, severity, data) => {
   gcpLogger.write(
-    this.log.entry(
+    gcpLogger.entry(
       {
         resource: {
           type: "global",
         },
-        labels: { at },
         severity: severity,
       },
-      { message, ...extraData }
+      data
     )
   );
 };
@@ -42,12 +41,9 @@ const getLogger = () => {
     },
   }).log(VERCEL_ENV, { removeCircular: true });
   return {
-    info: (at, message, extraData) =>
-      log(gcpLogger, "INFO", at, message, extraData),
-    warn: (at, message, extraData) =>
-      log(gcpLogger, "WARN", at, message, extraData),
-    error: (at, message, extraData) =>
-      log(gcpLogger, "ERROR", at, message, extraData),
+    info: (data) => log(gcpLogger, "INFO", data),
+    warn: (data) => log(gcpLogger, "WARN", data),
+    error: (data) => log(gcpLogger, "ERROR", data),
   };
 };
 // Singleton logger so we don't create multiples.
@@ -58,7 +54,9 @@ const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
     "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
     provider
   );
-  logger.info("getTokenDetails", "Fetching token details", {
+  logger.debug({
+    at: "getTokenDetails",
+    message: "Fetching token details",
     l1Token,
     l2Token,
     chainId,
@@ -87,7 +85,9 @@ const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   });
 
   const event = events[0];
-  logger.info("getTokenDetails", "Fetched pool rebalance route event", {
+  logger.debug({
+    at: "getTokenDetails",
+    message: "Fetched pool rebalance route event",
     event,
   });
 
@@ -105,7 +105,11 @@ class InputError extends Error {}
 
 const infuraProvider = (name) => {
   const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
-  logger.info("infuraProvider", "Using an Infura provider", url);
+  logger.info({
+    at: "infuraProvider",
+    message: "Using an Infura provider",
+    url,
+  });
   return new ethers.providers.StaticJsonRpcProvider(url);
 };
 
@@ -199,7 +203,9 @@ const getRelayerFeeCalculator = (destinationChainId) => {
     queries: queries[destinationChainId](),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
-  logger.info("getRelayerFeeDetails", "Relayer fee calculator config", {
+  logger.info({
+    at: "getRelayerFeeDetails",
+    message: "Relayer fee calculator config",
     relayerFeeCalculatorConfig,
   });
   return new sdk.relayFeeCalculator.RelayFeeCalculator(

@@ -35,10 +35,10 @@ const handler = async (request, response) => {
   } catch (error) {
     let status;
     if (error instanceof InputError) {
-      logger.warn("logger", "400 input error", { error });
+      logger.warn({ at: "coingecko", message: "400 input error", error });
       status = 400;
     } else {
-      logger.error("logger", "500 server error", { error });
+      logger.error({ at: "coingecko", message: "500 server error", error });
       status = 500;
     }
     response.status(status).send(error.message);

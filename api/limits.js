@@ -31,7 +31,7 @@ const handler = async (request, response) => {
     } = process.env;
     const providerUrl = `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
     const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl);
-    logger.info("limits", `Using provider at ${providerUrl}`, {});
+    logger.debug({ at: "limits", message: `Using provider at ${providerUrl}` });
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
       ? []
@@ -43,7 +43,9 @@ const handler = async (request, response) => {
       : JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS).map((relayer) => {
           return ethers.utils.getAddress(relayer);
         });
-    logger.info("limits", "Using relayers", {
+    logger.debug({
+      at: "limits",
+      message: "Using relayers",
       fullRelayers,
       transferRestrictedRelayers,
     });
@@ -71,7 +73,11 @@ const handler = async (request, response) => {
       getTokenDetails(provider, l1Token, undefined, destinationChainId),
       isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
-    logger.info("limits", "Checked enabled routes", { isRouteEnabled });
+    logger.debug({
+      at: "limits",
+      message: "Checked enabled routes",
+      isRouteEnabled,
+    });
 
     // If any of the above fails or the route is not enabled, we assume that the
     if (
@@ -102,11 +108,12 @@ const handler = async (request, response) => {
     ];
 
     // TODO: Get token price first from /coingecko route, which we'll use as input to getRelayerFeeDetails
-    logger.info(
-      "limits",
-      "Sending several requests to HubPool and fetching relayer balances",
-      { multicallInput }
-    );
+    logger.debug({
+      at: "limits",
+      message:
+        "Sending several requests to HubPool and fetching relayer balances",
+      multicallInput,
+    });
     const [
       relayerFeeDetails,
       multicallOutput,
@@ -138,7 +145,9 @@ const handler = async (request, response) => {
         )
       ),
     ]);
-    logger.info("limits", "Fetched balances", {
+    logger.debug({
+      at: "limits",
+      message: "Fetched balances",
       fullRelayerBalances,
       transferRestrictedBalances,
       fullRelayerMainnetBalances,
@@ -157,7 +166,9 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseEther(REACT_APP_WETH_LP_CUSHION || "0")
       );
-      logger.info("limits", "Adding WETH cushioning to LP liquidity", {
+      logger.info({
+        at: "limits",
+        message: "Adding WETH cushioning to LP liquidity",
         liquidReserves,
       });
     } else if (
@@ -168,7 +179,9 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseUnits(REACT_APP_USDC_LP_CUSHION || "0", 6)
       );
-      logger.info("limits", "Adding USDC cushioning to LP liquidity", {
+      logger.info({
+        at: "limits",
+        message: "Adding USDC cushioning to LP liquidity",
         liquidReserves,
       });
     } else if (
@@ -179,7 +192,9 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseUnits(REACT_APP_WBTC_LP_CUSHION || "0", 8)
       );
-      logger.info("limits", "Adding WBTC cushioning to LP liquidity", {
+      logger.info({
+        at: "limits",
+        message: "Adding WBTC cushioning to LP liquidity",
         liquidReserves,
       });
     } else if (
@@ -190,7 +205,9 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseUnits(REACT_APP_DAI_LP_CUSHION || "0", 18)
       );
-      logger.info("limits", "Adding DAI cushioning to LP liquidity", {
+      logger.info({
+        at: "limits",
+        message: "Adding DAI cushioning to LP liquidity",
         liquidReserves,
       });
     }
@@ -200,7 +217,7 @@ const handler = async (request, response) => {
     const maxGasFee = ethers.utils
       .parseEther(maxRelayFeePct.toString())
       .sub(relayerFeeDetails.capitalFeePercent);
-    logger.info("limits", "Computed maxGasFee", { maxGasFee });
+    logger.debug({ at: "limits", message: "Computed maxGasFee", maxGasFee });
 
     const transferBalances = fullRelayerBalances.map((balance, i) =>
       balance.add(fullRelayerMainnetBalances[i])
@@ -233,10 +250,10 @@ const handler = async (request, response) => {
   } catch (error) {
     let status;
     if (error instanceof InputError) {
-      logger.warn("limits", "400 input error", { error });
+      logger.warn({ at: "limits", message: "400 input error", error });
       status = 400;
     } else {
-      logger.error("limits", "500 server error", { error });
+      logger.error({ at: "limits", message: "500 server error", error });
       status = 500;
     }
     response.status(status).send(error.message);

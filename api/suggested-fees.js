@@ -48,7 +48,9 @@ const handler = async (request, response) => {
       originChainId
     );
 
-    logger.info("suggested-fees", "Checking route", {
+    logger.debug({
+      at: "suggested-fees",
+      message: "Checking route",
       computedOriginChainId,
       destinationChainId,
       token,
@@ -58,7 +60,7 @@ const handler = async (request, response) => {
       blockFinder.getBlockForTimestamp(parsedTimestamp),
       isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
-    logger.info("suggested-fees", `Using block ${blockTag}`, {});
+    logger.debug({ at: "suggested-fees", message: `Using block ${blockTag}` });
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
       throw new InputError(
@@ -81,7 +83,9 @@ const handler = async (request, response) => {
         blockTag,
       }),
     ]);
-    logger.info("suggested-fees", "Fetched utilization data", {
+    logger.debug({
+      at: "suggested-fees",
+      message: "Fetched utilization data",
       currentUt,
       nextUt,
       rateModel,
@@ -92,7 +96,9 @@ const handler = async (request, response) => {
       currentUt,
       nextUt
     );
-    logger.info("suggested-fees", "Calculated realizedLPFeePct", {
+    logger.debug({
+      at: "suggested-fees",
+      message: "Calculated realizedLPFeePct",
       realizedLPFeePct,
     });
     const relayerFeeDetails = await getRelayerFeeDetails(
@@ -100,7 +106,9 @@ const handler = async (request, response) => {
       amount,
       destinationChainId
     );
-    logger.info("suggested-fees", "Calculated relayerFeeDetails", {
+    logger.debug({
+      at: "suggested-fees",
+      message: "Calculated relayerFeeDetails",
       relayerFeeDetails,
     });
 
@@ -117,10 +125,14 @@ const handler = async (request, response) => {
   } catch (error) {
     let status;
     if (error instanceof InputError) {
-      logger.warn("suggested-fees", "400 input error", { error });
+      logger.warn({ at: "suggested-fees", message: "400 input error", error });
       status = 400;
     } else {
-      logger.error("suggested-fees", "500 server error", { error });
+      logger.error({
+        at: "suggested-fees",
+        message: "500 server error",
+        error,
+      });
       status = 500;
     }
     response.status(status).send(error.message);
