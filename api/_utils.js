@@ -5,6 +5,7 @@ const {
 } = require("@across-protocol/contracts-v2");
 const sdk = require("@across-protocol/sdk-v2");
 const ethers = require("ethers");
+const axios = require("axios");
 
 const { REACT_APP_PUBLIC_INFURA_ID, REACT_APP_COINGECKO_PRO_API_KEY } =
   process.env;
@@ -168,11 +169,16 @@ const getTokenSymbol = (tokenAddress) => {
       address.toLowerCase() === tokenAddress.toLowerCase()
   )[0];
 };
-const getRelayerFeeDetails = (l1Token, amount, destinationChainId) => {
+const getRelayerFeeDetails = (
+  l1Token,
+  amount,
+  destinationChainId,
+  tokenPrice
+) => {
   const tokenSymbol = getTokenSymbol(l1Token);
   console.log(`INFO(getRelayerFeeDetails): Token symbol ${tokenSymbol}`);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
-  return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol);
+  return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
 };
 
 const getTokenPrice = (l1Token, destinationChainId) => {
@@ -180,6 +186,20 @@ const getTokenPrice = (l1Token, destinationChainId) => {
   console.log(`INFO(getTokenPrice): Token symbol ${tokenSymbol}`);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.getTokenPrice(tokenSymbol);
+};
+
+const getTokenPriceFromOwnFunction = async (l1Token) => {
+  try {
+    return Number(
+      (await axios(`https://across.to/api/coingecko`, { params: { l1Token } }))
+        .data.price
+    );
+  } catch (err) {
+    console.error(
+      `ERROR(limits): Failed to fetch token price from ${`https://across.to/api/coingecko`}`
+    );
+  }
+  return undefined;
 };
 
 const providerCache = {};
@@ -278,6 +298,7 @@ module.exports = {
   bobaProvider,
   getRelayerFeeDetails,
   getTokenPrice,
+  getTokenPriceFromOwnFunction,
   maxRelayFeePct,
   getProvider,
   getBalance,
