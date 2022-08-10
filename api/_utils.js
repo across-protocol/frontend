@@ -13,6 +13,11 @@ const {
   REACT_APP_GOOGLE_SERVICE_ACCOUNT,
   VERCEL_ENV,
 } = process.env;
+
+const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
+  ? JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT)
+  : {};
+
 const {
   relayerFeeCapitalCostConfig,
   disabledL1Tokens,
@@ -33,11 +38,16 @@ const log = (gcpLogger, severity, data) => {
 };
 
 const getLogger = () => {
+  // Use the default logger which logs to console if no GCP service account is configured.
+  if (!GOOGLE_SERVICE_ACCOUNT) {
+    return sdk.relayFeeCalculator.DEFAULT_LOGGER;
+  }
+
   const gcpLogger = new Logging({
-    projectId: JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT).project_id,
+    projectId: GOOGLE_SERVICE_ACCOUNT.project_id,
     credentials: {
-      client_email: JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT).client_email,
-      private_key: JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT).private_key,
+      client_email: GOOGLE_SERVICE_ACCOUNT.client_email,
+      private_key: GOOGLE_SERVICE_ACCOUNT.private_key,
     },
   }).log(VERCEL_ENV, { removeCircular: true });
   return {
