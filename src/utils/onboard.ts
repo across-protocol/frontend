@@ -35,6 +35,7 @@ export function onboardBaseConfig(): Initialization {
         },
         // { walletName: "coinbase", preferred: true },
         { walletName: "tally", preferred: true },
+        { walletName: "detectedwallet" },
       ],
     },
     walletCheck: [{ checkName: "connect" }, { checkName: "accounts" }],

@@ -27,7 +27,7 @@ const RewardMyPoolsTable: FC<Props> = ({
   scrollable = true,
 }) => {
   return (
-    <Wrapper>
+    <Wrapper data-cy="rewards-table">
       <Title>{title}</Title>
       <TableWrapper scrollable={scrollable}>
         <TableHeadRow>

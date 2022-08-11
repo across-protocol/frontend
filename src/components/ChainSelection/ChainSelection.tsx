@@ -37,7 +37,7 @@ const ChainSelection: React.FC = () => {
     <Section>
       <Wrapper>
         <SectionTitle>From</SectionTitle>
-        <InputGroup>
+        <InputGroup data-cy="select-from-chain">
           <RoundBox as="label" {...getLabelProps()}>
             <ToggleButton type="button" {...getToggleButtonProps()}>
               {selectedChain && (
@@ -74,6 +74,7 @@ const ChainSelection: React.FC = () => {
                     animate={{ y: 0 }}
                     exit={{ y: -10 }}
                     key={chainId}
+                    data-cy={`from-chain-${chainId}`}
                   >
                     <Logo src={logoURI} alt={name} />
                     <div>{name}</div>
@@ -83,7 +84,9 @@ const ChainSelection: React.FC = () => {
           </Menu>
         </InputGroup>
         {(wrongNetworkSend || !isConnected) && (
-          <ConnectButton onClick={handleClick}>{buttonText}</ConnectButton>
+          <ConnectButton onClick={handleClick} data-cy="connect-wallet">
+            {buttonText}
+          </ConnectButton>
         )}
       </Wrapper>
     </Section>

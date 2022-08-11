@@ -82,6 +82,7 @@ const CoinSelection = () => {
                 id="amount"
                 value={inputAmount}
                 onChange={handleInputChange}
+                data-cy="amount-input"
               />
             </RoundBox>
             <Menu {...getMenuProps()} isOpen={isOpen}>
@@ -104,7 +105,7 @@ const CoinSelection = () => {
                 ))}
             </Menu>
           </InputGroup>
-          <BalanceLabel>
+          <BalanceLabel data-cy="balance">
             {balance &&
               selectedItem &&
               `Balance ${formatUnits(balance, selectedItem.decimals)} ${
