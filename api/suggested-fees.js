@@ -87,7 +87,7 @@ const handler = async (request, response) => {
     ]);
     logger.debug({
       at: "suggested-fees",
-      message: "Fetched utilization data",
+      message: "Fetched utilization",
       currentUt,
       nextUt,
       rateModel,
