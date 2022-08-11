@@ -22,14 +22,18 @@ export default function useReferrer() {
             if (ra) {
               setReferrerError("");
             } else {
-              setReferrerError("Invalid address or ENS name");
+              setReferrerError("Invalid ENS name");
             }
           })
           .catch((e) => {
             // Error here would imply an issue with the provider call, not with the ENS name necessarily.
             console.warn("error resolving name", e);
             setAddress("");
-            setReferrerError("");
+            if (!ethers.utils.isAddress(r)) {
+              setReferrerError("Invalid referral address");
+            } else {
+              setReferrerError("");
+            }
           });
       }
     }
