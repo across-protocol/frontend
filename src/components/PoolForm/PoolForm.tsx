@@ -155,7 +155,7 @@ const PoolForm: FC<Props> = ({
         <Logo src={icon} />
         <InfoText>{symbol} Pool</InfoText>
       </Info>
-      <Position>
+      <Position data-cy="position-info-box">
         <PositionItem>
           <div>Position Size</div>
           <div>
@@ -169,7 +169,7 @@ const PoolForm: FC<Props> = ({
           </div>
         </PositionItem>
       </Position>
-      <ROI>
+      <ROI data-cy="pool-info-box">
         <ROIItem>
           <div>Total pool size:</div>
           <div>
@@ -203,7 +203,7 @@ const PoolForm: FC<Props> = ({
           setDefaultTab(tab);
         }}
       >
-        <TabContentWrapper data-label="Add">
+        <TabContentWrapper data-label="Add" data-cy="add-liquidity-form">
           <AddLiquidityForm
             wrongNetwork={wrongNetwork}
             error={error}
@@ -231,7 +231,7 @@ const PoolForm: FC<Props> = ({
             chainId={chainId}
           />
         </TabContentWrapper>
-        <TabContentWrapper data-label="Remove">
+        <TabContentWrapper data-label="Remove" data-cy="remove-liquidity-form">
           <RemoveLiquidityForm
             wrongNetwork={wrongNetwork}
             removeAmountSlider={removeAmountSlider}

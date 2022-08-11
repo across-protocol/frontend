@@ -56,7 +56,7 @@ const PoolSelection: FC<Props> = ({ token, setToken, tokenList, chainId }) => {
     <AnimatePresence>
       <Wrapper>
         <SectionTitle>Select pool</SectionTitle>
-        <InputGroup>
+        <InputGroup data-cy="select-pool">
           <RoundBox as="label" {...getLabelProps()}>
             <ToggleButton type="button" {...getToggleButtonProps()}>
               <Logo src={selectedItem?.logoURI} alt={selectedItem?.name} />
@@ -74,6 +74,7 @@ const PoolSelection: FC<Props> = ({ token, setToken, tokenList, chainId }) => {
                     initial={{ y: -10 }}
                     animate={{ y: 0 }}
                     exit={{ y: -10 }}
+                    data-cy={`pool-${t.symbol.toLowerCase()}`}
                   >
                     <Logo src={t.logoURI} alt={t.name} />
                     <div>{t.name}</div>
