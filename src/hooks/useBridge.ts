@@ -21,7 +21,6 @@ import {
   formatUnits,
 } from "utils";
 import useReferrer from "./useReferrer";
-import useENSNameToAddress from "./useENSNameToAddress";
 
 enum SendStatus {
   IDLE = "idle",
@@ -37,12 +36,9 @@ type SendError =
 
 export function useBridge() {
   const config = getConfig();
-  const referrer = useReferrer();
-  const { chainId, account, signer, provider } = useConnection();
-  const { address: resolvedAddress, referrerError } = useENSNameToAddress(
-    referrer,
-    provider
-  );
+  const { referrer } = useReferrer();
+  const { chainId, account, signer } = useConnection();
+
   const {
     amount,
     fromChain,
@@ -109,7 +105,7 @@ export function useBridge() {
         isNative: selectedRoute.isNative,
         relayerFeePct: fees.relayerFee.pct,
         timestamp: await hubPool.getCurrentTime(),
-        referrer: resolvedAddress || referrer,
+        referrer,
       });
       // matomo track bridge
       trackEvent({
@@ -154,7 +150,6 @@ export function useBridge() {
     status,
     send,
     approve,
-    referrerError,
   };
 }
 
