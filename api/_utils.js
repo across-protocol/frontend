@@ -76,6 +76,19 @@ const getLogger = () => {
   return logger;
 };
 
+const resolveVercelEndpoint = () => {
+  const url = process.env.VERCEL_URL ?? "across.to";
+  const env = process.env.VERCEL_ENV ?? "development";
+  switch (env) {
+    case "preview":
+    case "production":
+      return `https://${url}`;
+    case "development":
+    default:
+      return `http://localhost:3000`;
+  }
+};
+
 const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   const hubPool = HubPool__factory.connect(
     "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
@@ -263,10 +276,17 @@ const getTokenPrice = (l1Token, destinationChainId) => {
   return relayFeeCalculator.getTokenPrice(tokenSymbol);
 };
 
-const getTokenPriceFromOwnFunction = async (l1Token) => {
+const getCachedTokenPrice = async (l1Token) => {
+  getLogger().debug({
+    at: "getCachedTokenPrice",
+    message: `Resolving price from ${resolveVercelEndpoint()}/api/coingecko`,
+  });
   return Number(
-    (await axios(`https://across.to/api/coingecko`, { params: { l1Token } }))
-      .data.price
+    (
+      await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
+        params: { l1Token },
+      })
+    ).data.price
   );
 };
 
@@ -367,7 +387,7 @@ module.exports = {
   bobaProvider,
   getRelayerFeeDetails,
   getTokenPrice,
-  getTokenPriceFromOwnFunction,
+  getCachedTokenPrice,
   maxRelayFeePct,
   getProvider,
   getBalance,
@@ -377,4 +397,5 @@ module.exports = {
   getHubPoolClient,
   dummyFromAddress,
   disabledL1Tokens,
+  resolveVercelEndpoint,
 };
