@@ -3,10 +3,17 @@ import { useState, useEffect } from "react";
 import "./Toast.css";
 
 interface ToastProps {
-  toastList: any[];
+  toastList: ToastProperties[];
   position: string;
   autoDelete?: boolean;
   autoDeleteTime?: number;
+}
+
+export interface ToastProperties {
+  icon: string;
+  title: string;
+  body: string;
+  id: number;
 }
 
 const Toast: React.FC<ToastProps> = (props) => {
@@ -43,18 +50,14 @@ const Toast: React.FC<ToastProps> = (props) => {
     <>
       <div className={`notification-container ${position}`}>
         {list.map((toast, i) => (
-          <div
-            key={i}
-            className={`notification toast ${position}`}
-            style={{ backgroundColor: toast.backgroundColor }}
-          >
+          <div key={i} className={`notification toast ${position}`}>
             <button onClick={() => deleteToast(toast.id)}>X</button>
             <div className="notification-image">
               <img src={toast.icon} alt="" />
             </div>
             <div>
               <p className="notification-title">{toast.title}</p>
-              <p className="notification-message">{toast.description}</p>
+              <p className="notification-message">{toast.body}</p>
             </div>
           </div>
         ))}
