@@ -43,7 +43,7 @@ let logger;
 const getLogger = () => {
   // Use the default logger which logs to console if no GCP service account is configured.
   if (Object.keys(GOOGLE_SERVICE_ACCOUNT).length === 0) {
-    return sdk.relayFeeCalculator.DEFAULT_LOGGER;
+    logger = sdk.relayFeeCalculator.DEFAULT_LOGGER;
   }
 
   if (!logger) {
