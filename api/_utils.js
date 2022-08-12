@@ -17,10 +17,13 @@ const {
 const resolveVercelEndpoint = () => {
   const url = process.env.VERCEL_URL ?? "across.to";
   const env = process.env.VERCEL_ENV ?? "development";
-  if (env === "preview" || env === "production") {
-    return `https://${url}`;
-  } else {
-    return `http://localhost:3000`;
+  switch (env) {
+    case "preview":
+    case "production":
+      return `https://${url}`;
+    case "development":
+    default:
+      return `http://localhost:3000`;
   }
 };
 
