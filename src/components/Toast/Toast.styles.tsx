@@ -12,7 +12,10 @@ export const Wrapper = styled.div<IWrapper>`
   z-index: 999999;
   color: #ffffff;
   width: 400px;
-
+  border: 1px solid #3e4047;
+  background-color: #202024;
+  box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.24);
+  border-radius: 10px;
   top: ${({ position }) => {
     if (position === "top-right" || position === "top-left") {
       return "12px";
@@ -52,16 +55,11 @@ export const ToastElement = styled.div`
   transition: 0.3s ease;
   position: relative;
   pointer-events: auto;
-  overflow: hidden;
-  margin: 0 0 6px;
-  margin-bottom: 15px;
-  border-radius: 3px 3px 3px 3px;
-  box-shadow: 0 0 10px #999;
-  color: #ffffff;
+  color: #e0f3ff;
   opacity: 0.9;
   background-position: 15px;
   background-repeat: no-repeat;
-  padding: 20px 15px 10px 10px;
+  padding: 22px;
   width: 100%;
 `;
 
@@ -73,7 +71,11 @@ export const ImageWrapper = styled.div`
   }
 `;
 
-export const Main = styled.div``;
+export const Main = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+`;
 
 export const Title = styled.div`
   font-weight: 700;
@@ -88,10 +90,8 @@ export const Title = styled.div`
 export const Body = styled.div`
   margin: 0;
   text-align: left;
-  height: 18px;
-  margin-left: -1px;
-  text-overflow: wrap;
   white-space: nowrap;
+  color: #c5d5e0;
 `;
 
 export const TitleRow = styled.div`
@@ -101,6 +101,8 @@ export const TitleRow = styled.div`
 
 export const CloseButton = styled.img`
   cursor: pointer;
+  align-self: baseline;
+  margin-top: 4px;
 `;
 
 const toastInRight = keyframes`

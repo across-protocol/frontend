@@ -28,16 +28,16 @@ const Toast: React.FC<ToastProps> = ({ position }) => {
               <ImageWrapper>
                 <img src={infoIcon} alt={`toast_icon_${i}`} />
               </ImageWrapper>
-              <Title>{toast.title}</Title>
+              <Main>
+                <Title>{toast.title}</Title>
+                <Body>{toast.body}</Body>
+              </Main>
               <CloseButton
                 src={closeIcon}
                 onClick={() => deleteToast(toast.id)}
                 alt="close_icon"
               />
             </TitleRow>
-            <Main>
-              <Body>{toast.body}</Body>
-            </Main>
           </ToastElement>
         ))}
       </Wrapper>
