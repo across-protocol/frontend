@@ -1,21 +1,21 @@
 import styled from "@emotion/styled";
 import { css, keyframes } from "@emotion/react";
-import { ToastPosition } from "./toast.d";
+import { ToastPosition, ToastType } from "./toast.d";
+import { ReactComponent as CloseIcon } from "assets/icons/cross.svg";
+import { ReactComponent as UnstyledInfoIcon } from "assets/icons/info-24.svg";
 
 interface IWrapper {
   position: ToastPosition;
 }
-export const Wrapper = styled.div<IWrapper>`
+export const ToastContainer = styled.div<IWrapper>`
   font-size: 14px;
-  box-sizing: border-box;
   position: fixed;
   z-index: 999999;
-  color: #ffffff;
   width: 400px;
-  border: 1px solid #3e4047;
-  background-color: #202024;
+  background-color: transparent;
   box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.24);
-  border-radius: 10px;
+  border-radius: 16px;
+  overflow: hidden;
   top: ${({ position }) => {
     if (position === "top-right" || position === "top-left") {
       return "12px";
@@ -50,41 +50,70 @@ export const Wrapper = styled.div<IWrapper>`
   }};
 `;
 
+interface IToastWrapper {
+  type: ToastType;
+}
+
+export const ToastWrapper = styled.div<IToastWrapper>`
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  border: ${({ type }) => {
+    if (type === "info") {
+      return "1px solid #3e4047";
+    } else if (type === "warning") {
+      return "1px solid #F9D26C";
+    } else if (type === "error") {
+      return "1px solid #F96C6C";
+    } else {
+      // Success case. not defined yet.
+      return "1px solid #3e4047";
+    }
+  }};
+`;
+
 export const ToastElement = styled.div`
+  overflow: hidden;
   background-color: #000;
   transition: 0.3s ease;
   position: relative;
   pointer-events: auto;
   color: #e0f3ff;
-  opacity: 0.9;
-  background-position: 15px;
-  background-repeat: no-repeat;
   padding: 22px;
   width: 100%;
 `;
 
 export const ImageWrapper = styled.div`
   margin-right: 15px;
-  img {
-    width: 24px;
-    height: 24px;
-  }
 `;
 
 export const Main = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: 5px;
+  row-gap: 10px;
 `;
 
-export const Title = styled.div`
+interface ITitle {
+  type: ToastType;
+}
+export const Title = styled.div<ITitle>`
   font-weight: 700;
   font-size: 16px;
   text-align: left;
-  margin-top: 0;
-  margin-bottom: 6px;
   width: 300px;
   height: 18px;
+  color: ${({ type }) => {
+    if (type === "info") {
+      return "#3e4047";
+    } else if (type === "warning") {
+      return "#F9D26C";
+    } else if (type === "error") {
+      return "#F96C6C";
+    } else {
+      // Success case. not defined yet.
+      return "#3e4047";
+    }
+  }};
 `;
 
 export const Body = styled.div`
@@ -99,12 +128,33 @@ export const TitleRow = styled.div`
   justify-content: space-between;
 `;
 
-export const CloseButton = styled.img`
+export const CloseButton = styled(CloseIcon)`
   cursor: pointer;
   align-self: baseline;
   margin-top: 4px;
 `;
 
+interface IInfoIcon {
+  type: ToastType;
+}
+export const InfoIcon = styled(UnstyledInfoIcon)<IInfoIcon>`
+  width: 24px;
+  height: 24px;
+  path {
+    stroke: ${({ type }) => {
+      if (type === "info") {
+        return "#3e4047";
+      } else if (type === "warning") {
+        return "#F9D26C";
+      } else if (type === "error") {
+        return "#F96C6C";
+      } else {
+        // Success case. not defined yet.
+        return "#3e4047";
+      }
+    }};
+  }
+`;
 const toastInRight = keyframes`
   
   from {

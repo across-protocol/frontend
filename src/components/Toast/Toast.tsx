@@ -1,6 +1,6 @@
-import infoIcon from "assets/icons/info-24.svg";
 import {
-  Wrapper,
+  ToastContainer,
+  ToastWrapper,
   ToastElement,
   ImageWrapper,
   Main,
@@ -8,10 +8,10 @@ import {
   Body,
   TitleRow,
   CloseButton,
+  InfoIcon,
 } from "./Toast.styles";
 import { useToast } from "./useToast";
 import { ToastPosition } from "./toast.d";
-import closeIcon from "assets/icons/cross.svg";
 interface ToastProps {
   position: ToastPosition;
 }
@@ -21,26 +21,26 @@ const Toast: React.FC<ToastProps> = ({ position }) => {
 
   return (
     <>
-      <Wrapper position={position}>
-        {toastList.map((toast, i) => (
-          <ToastElement key={i}>
-            <TitleRow>
-              <ImageWrapper>
-                <img src={infoIcon} alt={`toast_icon_${i}`} />
-              </ImageWrapper>
-              <Main>
-                <Title>{toast.title}</Title>
-                <Body>{toast.body}</Body>
-              </Main>
-              <CloseButton
-                src={closeIcon}
-                onClick={() => deleteToast(toast.id)}
-                alt="close_icon"
-              />
-            </TitleRow>
-          </ToastElement>
+      <ToastContainer position={position}>
+        {toastList.map(({ type, title, body, id }, i) => (
+          <ToastWrapper key={i} type={type}>
+            <ToastElement>
+              <TitleRow>
+                <ImageWrapper>
+                  <InfoIcon type={type} />
+                </ImageWrapper>
+                <Main>
+                  <Title type={type}>{title}</Title>
+                  <Body>{body}</Body>
+                </Main>
+                <div onClick={() => deleteToast(id)}>
+                  <CloseButton type={type} />
+                </div>
+              </TitleRow>
+            </ToastElement>
+          </ToastWrapper>
         ))}
-      </Wrapper>
+      </ToastContainer>
     </>
   );
 };
