@@ -15,7 +15,11 @@ export default function useReferrer() {
   const [address, setAddress] = useState<string>("");
   useEffect(() => {
     if (provider && r) {
-      if (!ethers.utils.isAddress(r)) {
+      if (ethers.utils.isAddress(r)) {
+        return setAddress(r);
+      }
+
+      if (r.slice(-4) === ".eth") {
         provider
           .resolveName(r)
           .then((ra) => {
@@ -41,7 +45,11 @@ export default function useReferrer() {
             }
           });
       } else {
-        setAddress(r);
+        return addToast({
+          type: "error",
+          title: "Error",
+          body: "Invalid referral address",
+        });
       }
     }
     // eslint-disable-next-line
