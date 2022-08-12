@@ -5,6 +5,7 @@ const coingeckoHandler = require("../../api/coingecko");
 
 // Public infura key published in @umaprotocol/packages/common/ProviderUtils
 process.env.REACT_APP_PUBLIC_INFURA_ID = "e34138b2db5b496ab5cc52319d2f0299";
+process.env.REACT_APP_GOOGLE_SERVICE_ACCOUNT = "{}";
 
 // Create mocked response object:
 let response;
