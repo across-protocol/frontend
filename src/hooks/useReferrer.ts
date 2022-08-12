@@ -2,27 +2,30 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useQueryParams } from "./useQueryParams";
 import { useConnection } from "state/hooks";
-
+import { useToast } from "components/ToastContainer/useToast";
+import infoIcon from "assets/icons/info-24.svg";
 export default function useReferrer() {
   const { provider } = useConnection();
   const { referrer, ref: refParam } = useQueryParams();
+  const { addToast } = useToast();
+
   // Default to referrer if query ref isn't provided.
   const r = refParam || referrer;
 
   const [address, setAddress] = useState<string>("");
-  const [referrerError, setReferrerError] = useState<string>("");
   useEffect(() => {
     if (provider && r) {
-      setReferrerError("");
       if (!ethers.utils.isAddress(r)) {
         provider
           .resolveName(r)
           .then((ra) => {
             setAddress(ra || "");
-            if (ra) {
-              setReferrerError("");
-            } else {
-              setReferrerError("Invalid referral ENS name");
+            if (!ra) {
+              addToast({
+                icon: infoIcon,
+                title: "Error",
+                body: "Invalid referral ENS name",
+              });
             }
           })
           .catch((e) => {
@@ -30,18 +33,20 @@ export default function useReferrer() {
             console.warn("error resolving name", e);
             setAddress("");
             if (!ethers.utils.isAddress(r)) {
-              setReferrerError("Invalid referral address");
-            } else {
-              setReferrerError("");
+              addToast({
+                icon: infoIcon,
+                title: "Error",
+                body: "Invalid referral address",
+              });
             }
           });
       } else {
         setAddress(r);
       }
     }
-  }, [provider, r]);
+  }, [provider, r, addToast]);
   // If ref and referrer params exist, prefer referrer param.
   // Not likely to happen but should have a catch if we get a bad link.
   // TODO? Test which of these is a good value?
-  return { referrer: address, referrerError };
+  return { referrer: address };
 }
