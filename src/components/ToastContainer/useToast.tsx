@@ -1,5 +1,5 @@
 import { useState, useCallback, createContext } from "react";
-import { ToastProperties } from "./Toast";
+import { ToastProperties, ToastType } from "./toast.d";
 
 import { useContext } from "react";
 
@@ -10,7 +10,7 @@ interface ToastContextValue {
 }
 
 interface PartialToast {
-  type: "warning" | "error" | "info";
+  type: ToastType;
   title: string;
   body: string;
 }

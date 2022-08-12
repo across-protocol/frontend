@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { css, keyframes } from "@emotion/react";
+import { ToastPosition } from "./toast.d";
 
 export const Wrapper = styled.div`
   font-size: 14px;
@@ -10,8 +11,9 @@ export const Wrapper = styled.div`
 `;
 
 interface IToastElement {
-  position: "top-right" | "top-left" | "bottom-right" | "bottom-left";
+  position: ToastPosition;
 }
+
 export const ToastElement = styled.div<IToastElement>`
   background-color: #000;
   transition: 0.3s ease;
