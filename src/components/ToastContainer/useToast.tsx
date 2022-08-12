@@ -17,10 +17,13 @@ interface PartialToast {
 function useToastManager() {
   const [list, setList] = useState<ToastProperties[]>([]);
   const [id, setId] = useState(0);
-  const addToast = useCallback((item: PartialToast) => {
-    setList([...list, { ...item, id }]);
-    setId((pv) => pv + 1);
-  }, []);
+  const addToast = useCallback(
+    (item: PartialToast) => {
+      setList([...list, { ...item, id }]);
+      setId((pv) => pv + 1);
+    },
+    [id, list]
+  );
 
   return {
     toastList: list,
