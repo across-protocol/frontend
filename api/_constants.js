@@ -64,8 +64,6 @@ const resolvedVercelEndpoint = ["production", "preview"].includes(
   ? `https://${process.env.VERCEL_URL ?? "across.to"}`
   : "http://localhost:3000";
 
-console.log(resolvedVercelEndpoint);
-
 module.exports = {
   relayerFeeCapitalCostConfig,
   disabledL1Tokens,

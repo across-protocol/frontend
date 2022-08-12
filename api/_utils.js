@@ -190,6 +190,9 @@ const getTokenPrice = (l1Token, destinationChainId) => {
 };
 
 const getTokenPriceFromOwnFunction = async (l1Token) => {
+  console.log(
+    `INFO(getTokenPriceFromOwnFunction): Resolving price from ${resolvedVercelEndpoint}/api/coingecko`
+  );
   return Number(
     (
       await axios(`${resolvedVercelEndpoint}/api/coingecko`, {
