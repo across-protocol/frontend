@@ -3,7 +3,7 @@ import Toast, { ToastProperties } from "./Toast";
 import infoIcon from "assets/icons/info-24.svg";
 
 const ToastContainer = () => {
-  const [list, setList] = useState<ToastProperties[]>([
+  const [list] = useState<ToastProperties[]>([
     {
       icon: infoIcon,
       title: "Error",
