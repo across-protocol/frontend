@@ -9,7 +9,9 @@ import {
   TitleRow,
   CloseButton,
   InfoIcon,
+  CloseWrapper,
 } from "./Toast.styles";
+
 import { useToast } from "./useToast";
 import { ToastPosition } from "./toast.d";
 interface ToastProps {
@@ -33,9 +35,9 @@ const Toast: React.FC<ToastProps> = ({ position }) => {
                   <Title type={type}>{title}</Title>
                   <Body>{body}</Body>
                 </Main>
-                <div onClick={() => deleteToast(id)}>
+                <CloseWrapper onClick={() => deleteToast(id)}>
                   <CloseButton type={type} />
-                </div>
+                </CloseWrapper>
               </TitleRow>
             </ToastElement>
           </ToastWrapper>

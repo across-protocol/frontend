@@ -48,6 +48,10 @@ export const ToastContainer = styled.div<IWrapper>`
       `;
     }
   }};
+  @media screen and (max-width: 428px) {
+    width: 95%;
+    margin-left: 12px;
+  }
 `;
 
 interface IToastWrapper {
@@ -74,7 +78,7 @@ export const ToastWrapper = styled.div<IToastWrapper>`
 
 export const ToastElement = styled.div`
   overflow: hidden;
-  background-color: #000;
+  background-color: #202024;
   transition: 0.3s ease;
   position: relative;
   pointer-events: auto;
@@ -101,7 +105,6 @@ export const Title = styled.div<ITitle>`
   font-size: 16px;
   text-align: left;
   width: 300px;
-  height: 18px;
   color: ${({ type }) => {
     if (type === "info") {
       return "#3e4047";
@@ -114,6 +117,9 @@ export const Title = styled.div<ITitle>`
       return "#3e4047";
     }
   }};
+  @media screen and (max-width: 428px) {
+    width: 100%;
+  }
 `;
 
 export const Body = styled.div`
@@ -153,6 +159,13 @@ export const InfoIcon = styled(UnstyledInfoIcon)<IInfoIcon>`
         return "#3e4047";
       }
     }};
+  }
+`;
+
+export const CloseWrapper = styled.div`
+  margin-left: none;
+  @media screen and (max-width: 428px) {
+    margin-left: auto;
   }
 `;
 const toastInRight = keyframes`
