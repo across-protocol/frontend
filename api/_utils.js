@@ -20,7 +20,7 @@ const resolveVercelEndpoint = () => {
   if (env === "preview" || env === "production") {
     return `https://${url}`;
   } else {
-    return `https://localhost:3000`;
+    return `http://localhost:3000`;
   }
 };
 
