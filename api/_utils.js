@@ -198,9 +198,9 @@ const getTokenPrice = (l1Token, destinationChainId) => {
   return relayFeeCalculator.getTokenPrice(tokenSymbol);
 };
 
-const getTokenPriceFromOwnFunction = async (l1Token) => {
+const getCachedTokenPrice = async (l1Token) => {
   console.log(
-    `INFO(getTokenPriceFromOwnFunction): Resolving price from ${resolveVercelEndpoint()}/api/coingecko`
+    `INFO(getCachedTokenPrice): Resolving price from ${resolveVercelEndpoint()}/api/coingecko`
   );
   return Number(
     (
@@ -307,7 +307,7 @@ module.exports = {
   bobaProvider,
   getRelayerFeeDetails,
   getTokenPrice,
-  getTokenPriceFromOwnFunction,
+  getCachedTokenPrice,
   maxRelayFeePct,
   getProvider,
   getBalance,
