@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import { useQueryParams } from "./useQueryParams";
 import { useConnection } from "state/hooks";
 import { useToast } from "components/ToastContainer/useToast";
-import infoIcon from "assets/icons/info-24.svg";
+
 export default function useReferrer() {
   const { provider } = useConnection();
   const { referrer, ref: refParam } = useQueryParams();
@@ -22,7 +22,7 @@ export default function useReferrer() {
             setAddress(ra || "");
             if (!ra) {
               addToast({
-                icon: infoIcon,
+                type: "error",
                 title: "Error",
                 body: "Invalid referral ENS name",
               });
@@ -34,7 +34,7 @@ export default function useReferrer() {
             setAddress("");
             if (!ethers.utils.isAddress(r)) {
               addToast({
-                icon: infoIcon,
+                type: "error",
                 title: "Error",
                 body: "Invalid referral address",
               });
@@ -44,7 +44,8 @@ export default function useReferrer() {
         setAddress(r);
       }
     }
-  }, [provider, r, addToast]);
+    // eslint-disable-next-line
+  }, [provider, r]);
   // If ref and referrer params exist, prefer referrer param.
   // Not likely to happen but should have a catch if we get a bad link.
   // TODO? Test which of these is a good value?

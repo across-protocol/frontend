@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-
+import infoIcon from "assets/icons/info-24.svg";
+import { Wrapper, ToastElement } from "./Toast.styles";
 import "./Toast.css";
 
 interface ToastProps {
@@ -10,10 +11,10 @@ interface ToastProps {
 }
 
 export interface ToastProperties {
-  icon: string;
+  id: number;
+  type: "info" | "error" | "warning";
   title: string;
   body: string;
-  id: number;
 }
 
 const Toast: React.FC<ToastProps> = ({
@@ -52,20 +53,20 @@ const Toast: React.FC<ToastProps> = ({
 
   return (
     <>
-      <div className={`notification-container ${position}`}>
+      <Wrapper className={`notification-container ${position}`}>
         {list.map((toast, i) => (
-          <div key={i} className={`notification toast ${position}`}>
+          <ToastElement key={i} position="top-right">
             <button onClick={() => deleteToast(toast.id)}>X</button>
             <div className="notification-image">
-              <img src={toast.icon} alt="" />
+              <img src={infoIcon} alt="" />
             </div>
             <div>
               <p className="notification-title">{toast.title}</p>
               <p className="notification-message">{toast.body}</p>
             </div>
-          </div>
+          </ToastElement>
         ))}
-      </div>
+      </Wrapper>
     </>
   );
 };

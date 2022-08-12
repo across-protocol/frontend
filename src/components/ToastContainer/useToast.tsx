@@ -9,7 +9,7 @@ interface ToastContextValue {
 }
 
 interface PartialToast {
-  icon: string;
+  type: "warning" | "error" | "info";
   title: string;
   body: string;
 }
