@@ -175,7 +175,7 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseEther(REACT_APP_WETH_LP_CUSHION || "0")
       );
-      logger.info({
+      logger.debug({
         at: "limits",
         message: "Adding WETH cushioning to LP liquidity",
         liquidReserves,
@@ -188,7 +188,7 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseUnits(REACT_APP_USDC_LP_CUSHION || "0", 6)
       );
-      logger.info({
+      logger.debug({
         at: "limits",
         message: "Adding USDC cushioning to LP liquidity",
         liquidReserves,
@@ -201,7 +201,7 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseUnits(REACT_APP_WBTC_LP_CUSHION || "0", 8)
       );
-      logger.info({
+      logger.debug({
         at: "limits",
         message: "Adding WBTC cushioning to LP liquidity",
         liquidReserves,
@@ -214,7 +214,7 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseUnits(REACT_APP_DAI_LP_CUSHION || "0", 18)
       );
-      logger.info({
+      logger.debug({
         at: "limits",
         message: "Adding DAI cushioning to LP liquidity",
         liquidReserves,
