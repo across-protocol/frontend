@@ -1,8 +1,9 @@
 const ethers = require("ethers");
 
-const { logger, InputError, isString, getTokenPrice } = require("./_utils");
+const { getLogger, InputError, isString, getTokenPrice } = require("./_utils");
 
 const handler = async (request, response) => {
+  const logger = getLogger();
   try {
     let { l1Token } = request.query;
     if (!isString(l1Token))

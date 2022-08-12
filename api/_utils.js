@@ -38,28 +38,31 @@ const log = (gcpLogger, severity, data) => {
   );
 };
 
+// Singleton logger so we don't create multiple.
+let logger;
 const getLogger = () => {
   // Use the default logger which logs to console if no GCP service account is configured.
   if (Object.keys(GOOGLE_SERVICE_ACCOUNT).length === 0) {
     return sdk.relayFeeCalculator.DEFAULT_LOGGER;
   }
 
-  const gcpLogger = new Logging({
-    projectId: GOOGLE_SERVICE_ACCOUNT.project_id,
-    credentials: {
-      client_email: GOOGLE_SERVICE_ACCOUNT.client_email,
-      private_key: GOOGLE_SERVICE_ACCOUNT.private_key,
-    },
-  }).log(VERCEL_ENV, { removeCircular: true });
-  return {
-    debug: (data) => log(gcpLogger, "DEBUG", data),
-    info: (data) => log(gcpLogger, "INFO", data),
-    warn: (data) => log(gcpLogger, "WARN", data),
-    error: (data) => log(gcpLogger, "ERROR", data),
-  };
+  if (!logger) {
+    const gcpLogger = new Logging({
+      projectId: GOOGLE_SERVICE_ACCOUNT.project_id,
+      credentials: {
+        client_email: GOOGLE_SERVICE_ACCOUNT.client_email,
+        private_key: GOOGLE_SERVICE_ACCOUNT.private_key,
+      },
+    }).log(VERCEL_ENV, { removeCircular: true });
+    logger = {
+      debug: (data) => log(gcpLogger, "DEBUG", data),
+      info: (data) => log(gcpLogger, "INFO", data),
+      warn: (data) => log(gcpLogger, "WARN", data),
+      error: (data) => log(gcpLogger, "ERROR", data),
+    };
+  }
+  return logger;
 };
-// Singleton logger so we don't create multiples.
-const logger = getLogger();
 
 const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   const hubPool = HubPool__factory.connect(
@@ -343,7 +346,7 @@ const minBN = (...arr) => {
 };
 
 module.exports = {
-  logger,
+  getLogger,
   getTokenDetails,
   isString,
   InputError,

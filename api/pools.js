@@ -1,8 +1,14 @@
 const ethers = require("ethers");
 
-const { logger, InputError, isString, getHubPoolClient } = require("./_utils");
+const {
+  getLogger,
+  InputError,
+  isString,
+  getHubPoolClient,
+} = require("./_utils");
 
 const handler = async (request, response) => {
+  const logger = getLogger();
   try {
     const hubPoolClient = await getHubPoolClient();
 

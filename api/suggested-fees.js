@@ -5,7 +5,7 @@ const sdk = require("@across-protocol/sdk-v2");
 const { BlockFinder } = require("@uma/sdk");
 const ethers = require("ethers");
 const {
-  logger,
+  getLogger,
   getTokenDetails,
   InputError,
   isString,
@@ -14,9 +14,11 @@ const {
   isRouteEnabled,
   disabledL1Tokens,
   getTokenPriceFromOwnFunction,
+  getLogger,
 } = require("./_utils");
 
 const handler = async (request, response) => {
+  const logger = getLogger();
   try {
     const provider = infuraProvider("mainnet");
 

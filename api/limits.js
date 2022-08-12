@@ -5,7 +5,7 @@ const { HubPool__factory } = require("@across-protocol/contracts-v2");
 const ethers = require("ethers");
 
 const {
-  logger,
+  getLogger,
   InputError,
   isString,
   getRelayerFeeDetails,
@@ -20,6 +20,7 @@ const {
 } = require("./_utils");
 
 const handler = async (request, response) => {
+  const logger = getLogger();
   try {
     const {
       REACT_APP_PUBLIC_INFURA_ID,
