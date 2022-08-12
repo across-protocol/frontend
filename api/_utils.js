@@ -69,7 +69,7 @@ const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
     "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
     provider
   );
-  logger.debug({
+  getLogger().debug({
     at: "getTokenDetails",
     message: "Fetching token details",
     l1Token,
@@ -100,7 +100,7 @@ const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   });
 
   const event = events[0];
-  logger.debug({
+  getLogger().debug({
     at: "getTokenDetails",
     message: "Fetched pool rebalance route event",
     event,
@@ -120,7 +120,7 @@ class InputError extends Error {}
 
 const infuraProvider = (name) => {
   const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
-  logger.info({
+  getLogger().info({
     at: "infuraProvider",
     message: "Using an Infura provider",
     url,
@@ -218,7 +218,7 @@ const getRelayerFeeCalculator = (destinationChainId) => {
     queries: queries[destinationChainId](),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
-  logger.info({
+  getLogger().info({
     at: "getRelayerFeeDetails",
     message: "Relayer fee calculator config",
     relayerFeeCalculatorConfig,

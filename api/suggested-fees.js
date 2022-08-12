@@ -14,7 +14,6 @@ const {
   isRouteEnabled,
   disabledL1Tokens,
   getTokenPriceFromOwnFunction,
-  getLogger,
 } = require("./_utils");
 
 const handler = async (request, response) => {
