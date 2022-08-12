@@ -12,6 +12,7 @@ const { REACT_APP_PUBLIC_INFURA_ID, REACT_APP_COINGECKO_PRO_API_KEY } =
 const {
   relayerFeeCapitalCostConfig,
   disabledL1Tokens,
+  resolvedVercelEndpoint,
 } = require("./_constants");
 
 const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
@@ -190,8 +191,11 @@ const getTokenPrice = (l1Token, destinationChainId) => {
 
 const getTokenPriceFromOwnFunction = async (l1Token) => {
   return Number(
-    (await axios(`https://across.to/api/coingecko`, { params: { l1Token } }))
-      .data.price
+    (
+      await axios(`${resolvedVercelEndpoint}/api/coingecko`, {
+        params: { l1Token },
+      })
+    ).data.price
   );
 };
 
