@@ -13,7 +13,7 @@ const {
   getRelayerFeeDetails,
   isRouteEnabled,
   disabledL1Tokens,
-  getTokenPriceFromOwnFunction,
+  getCachedTokenPrice,
 } = require("./_utils");
 
 const handler = async (request, response) => {
@@ -83,7 +83,7 @@ const handler = async (request, response) => {
       configStoreClient.getRateModel(l1Token, {
         blockTag,
       }),
-      getTokenPriceFromOwnFunction(l1Token),
+      getCachedTokenPrice(l1Token),
     ]);
     console.log(
       `INFO(suggested-fees): Fetched current utilization ${currentUt}, post relay utilization ${nextUt}, rate model ${rateModel}`

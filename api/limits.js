@@ -8,7 +8,7 @@ const {
   InputError,
   isString,
   getRelayerFeeDetails,
-  getTokenPriceFromOwnFunction,
+  getCachedTokenPrice,
   maxRelayFeePct,
   getTokenDetails,
   getBalance,
@@ -104,7 +104,7 @@ const handler = async (request, response) => {
       hubPool.interface.encodeFunctionData("pooledTokens", [l1Token]),
     ];
 
-    let tokenPrice = await getTokenPriceFromOwnFunction(l1Token);
+    let tokenPrice = await getCachedTokenPrice(l1Token);
     console.log(`INFO(limits): Got token price from /coingecko: ${tokenPrice}`);
 
     console.log(
