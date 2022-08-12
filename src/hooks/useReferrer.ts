@@ -7,7 +7,7 @@ export default function useReferrer() {
   const { provider } = useConnection();
   const { referrer, ref: refParam } = useQueryParams();
   // Default to referrer if query ref isn't provided.
-  let r = refParam || referrer;
+  const r = refParam || referrer;
 
   const [address, setAddress] = useState<string>("");
   const [referrerError, setReferrerError] = useState<string>("");
@@ -22,7 +22,7 @@ export default function useReferrer() {
             if (ra) {
               setReferrerError("");
             } else {
-              setReferrerError("Invalid ENS name");
+              setReferrerError("Invalid referral ENS name");
             }
           })
           .catch((e) => {
@@ -35,6 +35,8 @@ export default function useReferrer() {
               setReferrerError("");
             }
           });
+      } else {
+        setAddress(r);
       }
     }
   }, [provider, r]);
