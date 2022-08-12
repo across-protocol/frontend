@@ -25,10 +25,9 @@ const {
 } = require("./_constants");
 
 const log = (gcpLogger, severity, data) => {
-  // Ensure API doesn't fail if logging to GCP fails.
-  try {
-    // Fire and forget. we don't wait for this to finish.
-    gcpLogger.write(
+  // Fire and forget. we don't wait for this to finish.
+  gcpLogger
+    .write(
       gcpLogger.entry(
         {
           resource: {
@@ -38,14 +37,16 @@ const log = (gcpLogger, severity, data) => {
         },
         data
       )
-    );
-  } catch (error) {
-    sdk.relayFeeCalculator.DEFAULT_LOGGER.error({
-      at: "GCP logger",
-      message: "Failed to log to GCP",
-      error,
+    )
+    .catch((error) => {
+      // Ensure API doesn't fail if logging to GCP fails.
+      sdk.relayFeeCalculator.DEFAULT_LOGGER.error({
+        at: "GCP logger",
+        message: "Failed to log to GCP",
+        error,
+        data,
+      });
     });
-  }
 };
 
 // Singleton logger so we don't create multiple.
