@@ -36,9 +36,9 @@ type SendError =
 
 export function useBridge() {
   const config = getConfig();
-  const referrer = useReferrer();
-
+  const { referrer } = useReferrer();
   const { chainId, account, signer } = useConnection();
+
   const {
     amount,
     fromChain,
