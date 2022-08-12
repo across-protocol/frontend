@@ -23,19 +23,32 @@ const {
   relayerFeeCapitalCostConfig,
   disabledL1Tokens,
 } = require("./_constants");
+const {
+  DEFAULT_LOGGER,
+} = require("@across-protocol/sdk-v2/dist/relayFeeCalculator");
 
 const log = (gcpLogger, severity, data) => {
-  gcpLogger.write(
-    gcpLogger.entry(
-      {
-        resource: {
-          type: "global",
+  // Ensure API doesn't fail if logging to GCP fails.
+  try {
+    // Fire and forget. We don't wait for this to finish.
+    gcpLogger.write(
+      gcpLogger.entry(
+        {
+          resource: {
+            type: "global",
+          },
+          severity: severity,
         },
-        severity: severity,
-      },
-      data
-    )
-  );
+        data
+      )
+    );
+  } catch (error) {
+    DEFAULT_LOGGER.error({
+      at: "GCP logger",
+      message: "Failed to log to GCP",
+      error,
+    });
+  }
 };
 
 // Singleton logger so we don't create multiple.
