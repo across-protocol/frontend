@@ -9,7 +9,7 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import App from "./App";
 import "./onboard-override.css";
 import { ErrorProvider } from "hooks";
-import { ToastProvider } from "components/ToastContainer/useToast";
+import { ToastProvider } from "components/Toast/useToast";
 import { enableReactQueryDevTools } from "utils";
 
 const client = new QueryClient();

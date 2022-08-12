@@ -66,7 +66,6 @@ export const ToastElement = styled.div`
 `;
 
 export const ImageWrapper = styled.div`
-  float: left;
   margin-right: 15px;
   img {
     width: 24px;
@@ -93,6 +92,15 @@ export const Body = styled.div`
   margin-left: -1px;
   text-overflow: wrap;
   white-space: nowrap;
+`;
+
+export const TitleRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
+export const CloseButton = styled.img`
+  cursor: pointer;
 `;
 
 const toastInRight = keyframes`

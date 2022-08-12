@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useQueryParams } from "./useQueryParams";
 import { useConnection } from "state/hooks";
-import { useToast } from "components/ToastContainer/useToast";
+import { useToast } from "components/Toast/useToast";
 
 export default function useReferrer() {
   const { provider } = useConnection();
