@@ -12,8 +12,17 @@ const { REACT_APP_PUBLIC_INFURA_ID, REACT_APP_COINGECKO_PRO_API_KEY } =
 const {
   relayerFeeCapitalCostConfig,
   disabledL1Tokens,
-  resolvedVercelEndpoint,
 } = require("./_constants");
+
+const resolveVercelEndpoint = () => {
+  const url = process.env.VERCEL_URL ?? "across.to";
+  const env = process.env.VERCEL_ENV ?? "development";
+  if (env === "preview" || env === "production") {
+    return `https://${url}`;
+  } else {
+    return `https://localhost:3000`;
+  }
+};
 
 const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   const hubPool = HubPool__factory.connect(
@@ -191,11 +200,11 @@ const getTokenPrice = (l1Token, destinationChainId) => {
 
 const getTokenPriceFromOwnFunction = async (l1Token) => {
   console.log(
-    `INFO(getTokenPriceFromOwnFunction): Resolving price from ${resolvedVercelEndpoint}/api/coingecko`
+    `INFO(getTokenPriceFromOwnFunction): Resolving price from ${resolveVercelEndpoint()}/api/coingecko`
   );
   return Number(
     (
-      await axios(`${resolvedVercelEndpoint}/api/coingecko`, {
+      await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
         params: { l1Token },
       })
     ).data.price
@@ -308,4 +317,5 @@ module.exports = {
   getHubPoolClient,
   dummyFromAddress,
   disabledL1Tokens,
+  resolveVercelEndpoint,
 };

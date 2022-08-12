@@ -55,17 +55,7 @@ const relayerFeeCapitalCostConfig = {
   },
 };
 
-// In the event of a vercel deployment (on prod or preview) this will use the injected
-// system variables to point to the correct vercel URL. This variable falls back to dev
-// if vercel does not populate the ENV variable.
-const resolvedVercelEndpoint = ["production", "preview"].includes(
-  process.env.VERCEL_ENV ?? "development"
-)
-  ? `https://${process.env.VERCEL_URL ?? "across.to"}`
-  : "http://localhost:3000";
-
 module.exports = {
   relayerFeeCapitalCostConfig,
   disabledL1Tokens,
-  resolvedVercelEndpoint,
 };
