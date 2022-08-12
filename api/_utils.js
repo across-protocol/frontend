@@ -25,6 +25,10 @@ const {
 } = require("./_constants");
 
 const log = (gcpLogger, severity, data) => {
+  let message = `At ${data.at}: ${data.message}`;
+  if (data.extraData) {
+    message += `\n Extra data: ${JSON.stringify(data.extraData)}`;
+  }
   // Fire and forget. we don't wait for this to finish.
   gcpLogger
     .write(
@@ -35,7 +39,7 @@ const log = (gcpLogger, severity, data) => {
           },
           severity: severity,
         },
-        data
+        message
       )
     )
     .catch((error) => {
