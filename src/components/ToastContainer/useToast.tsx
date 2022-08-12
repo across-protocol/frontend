@@ -27,6 +27,8 @@ function useToastManager() {
     [cid, list]
   );
 
+  console.log("list", list);
+
   const deleteToast = useCallback(
     (id: number) => {
       const listItemIndex = list.findIndex((e) => e.id === id);

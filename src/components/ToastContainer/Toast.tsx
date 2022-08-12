@@ -20,9 +20,9 @@ const Toast: React.FC<ToastProps> = ({ position }) => {
 
   return (
     <>
-      <Wrapper>
+      <Wrapper position={position}>
         {toastList.map((toast, i) => (
-          <ToastElement key={i} position={position}>
+          <ToastElement key={i}>
             <button onClick={() => deleteToast(toast.id)}>X</button>
             <ImageWrapper>
               <img src={infoIcon} alt={`toast_icon_${i}`} />
