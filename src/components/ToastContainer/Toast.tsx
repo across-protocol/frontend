@@ -16,8 +16,12 @@ export interface ToastProperties {
   id: number;
 }
 
-const Toast: React.FC<ToastProps> = (props) => {
-  const { toastList, position, autoDelete, autoDeleteTime } = props;
+const Toast: React.FC<ToastProps> = ({
+  toastList,
+  position,
+  autoDelete,
+  autoDeleteTime,
+}) => {
   const [list, setList] = useState(toastList);
 
   useEffect(() => {
