@@ -6,6 +6,7 @@ export const Wrapper = styled.div`
   box-sizing: border-box;
   position: fixed;
   z-index: 999999;
+  color: #ffffff;
 `;
 
 interface IToastElement {
@@ -59,6 +60,36 @@ export const ToastElement = styled.div<IToastElement>`
       `;
     }
   }};
+`;
+
+export const ImageWrapper = styled.div`
+  float: left;
+  margin-right: 15px;
+  img {
+    width: 24px;
+    height: 24px;
+  }
+`;
+
+export const Main = styled.div``;
+
+export const Title = styled.div`
+  font-weight: 700;
+  font-size: 16px;
+  text-align: left;
+  margin-top: 0;
+  margin-bottom: 6px;
+  width: 300px;
+  height: 18px;
+`;
+
+export const Body = styled.div`
+  margin: 0;
+  text-align: left;
+  height: 18px;
+  margin-left: -1px;
+  text-overflow: wrap;
+  white-space: nowrap;
 `;
 
 const toastInRight = keyframes`
