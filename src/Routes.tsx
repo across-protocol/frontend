@@ -13,6 +13,8 @@ import {
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import useReferrer from "hooks/useReferrer";
+import ToastContainer from "components/ToastContainer";
+
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider } = useConnection();
@@ -73,6 +75,7 @@ const Routes: React.FC = () => {
         <Route exact path="/rewards" component={Rewards} />
         <Route path="/" component={Send} />
       </Switch>
+      <ToastContainer />
     </>
   );
 };

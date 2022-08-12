@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Toast, { ToastProperties } from "./Toast";
-import infoIcon from "assets/icon.svg";
+import infoIcon from "assets/icons/info-24.svg";
+
 const ToastContainer = () => {
   const [list, setList] = useState<ToastProperties[]>([
     {

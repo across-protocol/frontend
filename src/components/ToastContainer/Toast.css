@@ -34,7 +34,7 @@
 }
 
 .notification {
-  background: #fff;
+  background-color: #000;
   transition: 0.3s ease;
   position: relative;
   pointer-events: auto;
@@ -46,7 +46,7 @@
   max-height: 100px;
   border-radius: 3px 3px 3px 3px;
   box-shadow: 0 0 10px #999;
-  color: #000;
+  color: #ffffff;
   opacity: 0.9;
   background-position: 15px;
   background-repeat: no-repeat;
@@ -89,7 +89,6 @@
 }
 
 .toast {
-  height: 50px;
   width: 365px;
   color: #fff;
   padding: 20px 15px 10px 10px;
