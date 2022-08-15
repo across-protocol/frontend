@@ -2,12 +2,10 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useQueryParams } from "./useQueryParams";
 import { useConnection } from "state/hooks";
-// import { useToast } from "components/Toast/useToast";
 
 export default function useReferrer() {
   const { provider } = useConnection();
   const { referrer, ref: refParam } = useQueryParams();
-  // const { addToast } = useToast();
 
   // Default to referrer if query ref isn't provided.
   const r = refParam || referrer;
@@ -28,12 +26,6 @@ export default function useReferrer() {
             setAddress(ra || "");
             if (!ra) {
               setError("Invalid referral ENS name");
-
-              // addToast({
-              //   type: "error",
-              //   title: "Error",
-              //   body: "Invalid referral ENS name",
-              // });
             }
           })
           .catch((e) => {
@@ -42,20 +34,10 @@ export default function useReferrer() {
             setAddress("");
             if (!ethers.utils.isAddress(r)) {
               setError("Invalid referral address");
-              // addToast({
-              //   type: "error",
-              //   title: "Error",
-              //   body: "Invalid referral address",
-              // });
             }
           });
       } else {
         setError("Invalid referral address");
-        // return addToast({
-        //   type: "error",
-        //   title: "Error",
-        //   body: "Invalid referral address",
-        // });
       }
     }
     // eslint-disable-next-line

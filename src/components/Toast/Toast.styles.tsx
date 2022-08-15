@@ -64,7 +64,7 @@ export const ToastWrapper = styled.div<IToastWrapper>`
   margin: 1rem 0;
   border: ${({ type }) => {
     if (type === "info") {
-      return "1px solid #3e4047";
+      return "1px solid #E0F3FF";
     } else if (type === "warning") {
       return "1px solid #F9D26C";
     } else if (type === "error") {
@@ -86,6 +86,7 @@ export const ToastElement = styled.div`
   padding: 22px;
   width: 100%;
   box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.24);
+  font-weight: 400;
 `;
 
 export const ImageWrapper = styled.div`
@@ -108,7 +109,7 @@ export const Title = styled.div<ITitle>`
   width: 300px;
   color: ${({ type }) => {
     if (type === "info") {
-      return "#3e4047";
+      return "#E0F3FF";
     } else if (type === "warning") {
       return "#F9D26C";
     } else if (type === "error") {
@@ -150,7 +151,7 @@ export const InfoIcon = styled(UnstyledInfoIcon)<IInfoIcon>`
   path {
     stroke: ${({ type }) => {
       if (type === "info") {
-        return "#3e4047";
+        return "#9DAAB2";
       } else if (type === "warning") {
         return "#F9D26C";
       } else if (type === "error") {
