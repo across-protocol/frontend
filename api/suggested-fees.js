@@ -4,6 +4,7 @@
 const sdk = require("@across-protocol/sdk-v2");
 const { BlockFinder } = require("@uma/sdk");
 const ethers = require("ethers");
+const { BLOCK_TAG_LAG } = require("./_constants");
 const {
   getLogger,
   getTokenDetails,
@@ -67,7 +68,7 @@ const handler = async (request, response) => {
     // recent block before the timestamp. If the timestamp is
     // not specified, we can use the default variant of blockTag
     // to be "latest"
-    const blockTag = isString(timestamp) ? rawBlockTag : -1;
+    const blockTag = isString(timestamp) ? rawBlockTag : BLOCK_TAG_LAG;
 
     logger.debug({ at: "suggested-fees", message: `Using block ${blockTag}` });
 
