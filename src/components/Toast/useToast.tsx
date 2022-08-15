@@ -1,4 +1,4 @@
-import { useState, useCallback, createContext } from "react";
+import { useState, useEffect, useCallback, createContext } from "react";
 import { ToastProperties, ToastType } from "./toast.d";
 
 import { useContext } from "react";
@@ -16,7 +16,26 @@ interface PartialToast {
 }
 
 function useToastManager() {
-  const [list, setList] = useState<ToastProperties[]>([]);
+  const [list, setList] = useState<ToastProperties[]>([
+    {
+      id: -4,
+      type: "info",
+      title: "Info",
+      body: "This is an info toast",
+    },
+    {
+      id: -3,
+      type: "warning",
+      title: "Warning",
+      body: "This is an warning toast",
+    },
+    {
+      id: -2,
+      type: "error",
+      title: "Error",
+      body: "This is an error toast",
+    },
+  ]);
   // Current id for toast
   const [cid, setCid] = useState(0);
   const addToast = useCallback(
@@ -47,7 +66,6 @@ function useToastManager() {
 
 const ToastContext = createContext<ToastContextValue>({} as ToastContextValue);
 ToastContext.displayName = "ToastContext";
-
 export const ToastProvider: React.FC = ({ children }) => {
   const value = useToastManager();
   return (
@@ -55,10 +73,30 @@ export const ToastProvider: React.FC = ({ children }) => {
   );
 };
 
-export function useToast() {
+export function useToast({
+  autoDelete = true,
+  autoDeleteTime = 30000,
+}: {
+  autoDelete?: boolean;
+  autoDeleteTime?: number;
+} = {}) {
   const context = useContext(ToastContext);
   if (!context) {
     throw new Error("useToast must be used within an <ToastProvider>");
   }
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (autoDelete && context.toastList.length) {
+        context.deleteToast(context.toastList[0].id);
+      }
+    }, autoDeleteTime);
+
+    return () => {
+      clearInterval(interval);
+    };
+
+    // eslint-disable-next-line
+  }, [context.toastList, autoDelete, autoDeleteTime]);
+
   return context;
 }

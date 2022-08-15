@@ -13,7 +13,6 @@ export const ToastContainer = styled.div<IWrapper>`
   z-index: 999999;
   width: 400px;
   background-color: transparent;
-  box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.24);
   border-radius: 16px;
   overflow: hidden;
   top: ${({ position }) => {
@@ -62,6 +61,7 @@ export const ToastWrapper = styled.div<IToastWrapper>`
   width: 100%;
   border-radius: 16px;
   overflow: hidden;
+  margin: 1rem 0;
   border: ${({ type }) => {
     if (type === "info") {
       return "1px solid #3e4047";
@@ -85,6 +85,7 @@ export const ToastElement = styled.div`
   color: #e0f3ff;
   padding: 22px;
   width: 100%;
+  box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.24);
 `;
 
 export const ImageWrapper = styled.div`

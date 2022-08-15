@@ -76,6 +76,7 @@ CYPRESS_BASE_URL=http://localhost:3333 yarn cypress:run
 #### Z-index
 
 Navbar - 1000
+Toast - 99999
 
 ## Contributing
 
