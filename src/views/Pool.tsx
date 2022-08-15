@@ -37,6 +37,7 @@ const Pool: FC = () => {
   const config = getConfig();
   const tokenList = config.getTokenList(chainId);
   const chainInfo = getChainInfo(chainId);
+  console.log("tokenList", tokenList);
   const [token, setToken] = useState(tokenList[0]);
   const [showSuccess, setShowSuccess] = useState<ShowSuccess | undefined>();
   const [depositUrl, setDepositUrl] = useState("");
