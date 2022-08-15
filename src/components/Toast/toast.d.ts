@@ -5,10 +5,12 @@ export type ToastPosition =
   | "bottom-left";
 
 export type ToastType = "success" | "info" | "warning" | "error";
+export type IconSize = "sm" | "md" | undefined;
 
 export interface ToastProperties {
   id: number;
   type: ToastType;
   title: string;
   body: string;
+  iconSize?: IconSize;
 }

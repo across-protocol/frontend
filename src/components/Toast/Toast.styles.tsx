@@ -3,6 +3,7 @@ import { css, keyframes } from "@emotion/react";
 import { ToastPosition, ToastType } from "./toast.d";
 import { ReactComponent as CloseIcon } from "assets/icons/cross.svg";
 import { ReactComponent as UnstyledInfoIcon } from "assets/icons/info-24.svg";
+import { ReactComponent as UnstyledSmInfoIcon } from "assets/icons/info-sm.svg";
 
 interface IWrapper {
   position: ToastPosition;
@@ -155,8 +156,6 @@ interface IInfoIcon {
   type: ToastType;
 }
 export const InfoIcon = styled(UnstyledInfoIcon)<IInfoIcon>`
-  width: 24px;
-  height: 24px;
   path {
     stroke: ${({ type }) => {
       if (type === "info") {
@@ -173,6 +172,22 @@ export const InfoIcon = styled(UnstyledInfoIcon)<IInfoIcon>`
   }
 `;
 
+export const SmInfoIcon = styled(UnstyledSmInfoIcon)<IInfoIcon>`
+  path {
+    stroke: ${({ type }) => {
+      if (type === "info") {
+        return "#9DAAB2";
+      } else if (type === "warning") {
+        return "#F9D26C";
+      } else if (type === "error") {
+        return "#F96C6C";
+      } else {
+        // Success case. not defined yet.
+        return "#3e4047";
+      }
+    }};
+  }
+`;
 export const CloseWrapper = styled.div`
   margin-left: none;
   @media screen and (max-width: 428px) {

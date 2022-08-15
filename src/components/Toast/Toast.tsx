@@ -9,6 +9,7 @@ import {
   TitleRow,
   CloseButton,
   InfoIcon,
+  SmInfoIcon,
   CloseWrapper,
 } from "./Toast.styles";
 
@@ -19,17 +20,21 @@ interface ToastProps {
 }
 
 const Toast: React.FC<ToastProps> = ({ position }) => {
-  const { toastList, deleteToast } = useToast();
+  const { toastList, deleteToast } = useToast({ autoDeleteTime: 50000 });
 
   return (
     <>
       <ToastContainer position={position}>
-        {toastList.map(({ type, title, body, id }, i) => (
+        {toastList.map(({ type, title, body, id, iconSize }, i) => (
           <ToastWrapper key={i} type={type}>
             <ToastElement>
               <TitleRow>
                 <ImageWrapper>
-                  <InfoIcon type={type} />
+                  {iconSize === "sm" ? (
+                    <SmInfoIcon type={type} />
+                  ) : (
+                    <InfoIcon type={type} />
+                  )}
                 </ImageWrapper>
                 <Main>
                   <Title type={type}>{title}</Title>

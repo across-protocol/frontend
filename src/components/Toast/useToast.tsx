@@ -22,6 +22,7 @@ function useToastManager() {
       type: "info",
       title: "Info",
       body: "This is an info toast",
+      iconSize: "sm",
     },
     {
       id: 2,
