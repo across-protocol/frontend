@@ -13,7 +13,6 @@ export const ToastContainer = styled.div<IWrapper>`
   z-index: 999999;
   width: 400px;
   background-color: transparent;
-  border-radius: 16px;
   overflow: hidden;
   top: ${({ position }) => {
     if (position === "top-right" || position === "top-left") {
@@ -48,8 +47,9 @@ export const ToastContainer = styled.div<IWrapper>`
     }
   }};
   @media screen and (max-width: 428px) {
-    width: 95%;
-    margin-left: 12px;
+    width: 100%;
+    right: 0;
+    left: 0;
   }
 `;
 
@@ -74,6 +74,10 @@ export const ToastWrapper = styled.div<IToastWrapper>`
       return "1px solid #3e4047";
     }
   }};
+  @media screen and (max-width: 428px) {
+    width: 95%;
+    margin-left: 8px;
+  }
 `;
 
 export const ToastElement = styled.div`
