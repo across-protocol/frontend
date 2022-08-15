@@ -96,7 +96,7 @@ const ReferralLinkComponent: React.FC<{
           : "Join the referral program and earn a portion of fees in ACX for transfers made from your unique referral link."}
       </SubHeader>
       {isConnected ? (
-        <ReferralLinkButtonsRow>
+        <ReferralLinkButtonsRow data-cy="referral-links">
           <ReferralUrl
             onClick={() => {
               navigator.clipboard.writeText(referralUrl);
@@ -117,7 +117,11 @@ const ReferralLinkComponent: React.FC<{
         </ReferralLinkButtonsRow>
       ) : (
         <ReferralLinkButtonsRow>
-          <ConnectButton size="md" onClick={() => init()}>
+          <ConnectButton
+            size="md"
+            onClick={() => init()}
+            data-cy="connect-wallet"
+          >
             Connect to get started
           </ConnectButton>
           <ExternalLink

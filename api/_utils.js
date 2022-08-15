@@ -3,24 +3,104 @@ const {
   ERC20__factory,
   SpokePool__factory,
 } = require("@across-protocol/contracts-v2");
+const axios = require("axios");
 const sdk = require("@across-protocol/sdk-v2");
 const ethers = require("ethers");
+const { Logging } = require("@google-cloud/logging");
 
-const { REACT_APP_PUBLIC_INFURA_ID, REACT_APP_COINGECKO_PRO_API_KEY } =
-  process.env;
+const {
+  REACT_APP_PUBLIC_INFURA_ID,
+  REACT_APP_COINGECKO_PRO_API_KEY,
+  REACT_APP_GOOGLE_SERVICE_ACCOUNT,
+  VERCEL_ENV,
+} = process.env;
+
+const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
+  ? JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT)
+  : {};
+
 const {
   relayerFeeCapitalCostConfig,
   disabledL1Tokens,
 } = require("./_constants");
+
+const log = (gcpLogger, severity, data) => {
+  let message = JSON.stringify(data, null, 4);
+  // Fire and forget. we don't wait for this to finish.
+  gcpLogger
+    .write(
+      gcpLogger.entry(
+        {
+          resource: {
+            type: "global",
+          },
+          severity: severity,
+        },
+        message
+      )
+    )
+    .catch((error) => {
+      // Ensure API doesn't fail if logging to GCP fails.
+      sdk.relayFeeCalculator.DEFAULT_LOGGER.error({
+        at: "GCP logger",
+        message: "Failed to log to GCP",
+        error,
+        data,
+      });
+    });
+};
+
+// Singleton logger so we don't create multiple.
+let logger;
+const getLogger = () => {
+  // Use the default logger which logs to console if no GCP service account is configured.
+  if (Object.keys(GOOGLE_SERVICE_ACCOUNT).length === 0) {
+    logger = sdk.relayFeeCalculator.DEFAULT_LOGGER;
+  }
+
+  if (!logger) {
+    const gcpLogger = new Logging({
+      projectId: GOOGLE_SERVICE_ACCOUNT.project_id,
+      credentials: {
+        client_email: GOOGLE_SERVICE_ACCOUNT.client_email,
+        private_key: GOOGLE_SERVICE_ACCOUNT.private_key,
+      },
+    }).log(VERCEL_ENV, { removeCircular: true });
+    logger = {
+      debug: (data) => log(gcpLogger, "DEBUG", data),
+      info: (data) => log(gcpLogger, "INFO", data),
+      warn: (data) => log(gcpLogger, "WARN", data),
+      error: (data) => log(gcpLogger, "ERROR", data),
+    };
+  }
+  return logger;
+};
+
+const resolveVercelEndpoint = () => {
+  const url = process.env.VERCEL_URL ?? "across.to";
+  const env = process.env.VERCEL_ENV ?? "development";
+  switch (env) {
+    case "preview":
+    case "production":
+      return `https://${url}`;
+    case "development":
+    default:
+      return `http://localhost:3000`;
+  }
+};
 
 const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   const hubPool = HubPool__factory.connect(
     "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
     provider
   );
-  console.log(
-    `INFO: Fetching token details for ${l1Token} ${l2Token} on chain ${chainId}`
-  );
+  getLogger().debug({
+    at: "getTokenDetails",
+    message: "Fetching token details",
+    l1Token,
+    l2Token,
+    chainId,
+  });
 
   // 2 queries: treating the token as the l1Token or treating the token as the L2 token.
   const l2TokenFilter = hubPool.filters.SetPoolRebalanceRoute(
@@ -45,7 +125,11 @@ const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   });
 
   const event = events[0];
-  console.log(`INFO: Found pool rebalance route event ${event}`);
+  getLogger().debug({
+    at: "getTokenDetails",
+    message: "Fetched pool rebalance route event",
+    event,
+  });
 
   return {
     hubPool,
@@ -61,7 +145,11 @@ class InputError extends Error {}
 
 const infuraProvider = (name) => {
   const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
-  console.log(`INFO: Using infura provider at ${url}`);
+  getLogger().info({
+    at: "infuraProvider",
+    message: "Using an Infura provider",
+    url,
+  });
   return new ethers.providers.StaticJsonRpcProvider(url);
 };
 
@@ -148,25 +236,58 @@ const queries = {
 
 const maxRelayFeePct = 0.25;
 
-const getRelayerFeeDetails = (l1Token, amount, destinationChainId) => {
-  const tokenSymbol = Object.entries(sdk.relayFeeCalculator.SymbolMapping).find(
-    ([_symbol, { address }]) => address.toLowerCase() === l1Token.toLowerCase()
-  )[0];
-  console.log(`INFO(getRelayerFeeDetails): Token symbol ${tokenSymbol}`);
-
+const getRelayerFeeCalculator = (destinationChainId) => {
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     capitalCostsPercent: 0.04,
     queries: queries[destinationChainId](),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
-  console.log(
-    `INFO(getRelayerFeeDetails): relayer fee calculator config ${relayerFeeCalculatorConfig}`
+  getLogger().info({
+    at: "getRelayerFeeDetails",
+    message: "Relayer fee calculator config",
+    relayerFeeCalculatorConfig,
+  });
+  return new sdk.relayFeeCalculator.RelayFeeCalculator(
+    relayerFeeCalculatorConfig,
+    logger
   );
-  const relayFeeCalculator = new sdk.relayFeeCalculator.RelayFeeCalculator(
-    relayerFeeCalculatorConfig
+};
+const getTokenSymbol = (tokenAddress) => {
+  return Object.entries(sdk.relayFeeCalculator.SymbolMapping).find(
+    ([_symbol, { address }]) =>
+      address.toLowerCase() === tokenAddress.toLowerCase()
+  )[0];
+};
+const getRelayerFeeDetails = (
+  l1Token,
+  amount,
+  destinationChainId,
+  tokenPrice
+) => {
+  const tokenSymbol = getTokenSymbol(l1Token);
+  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
+  return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
+};
+
+const getTokenPrice = (l1Token, destinationChainId) => {
+  const tokenSymbol = getTokenSymbol(l1Token);
+  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
+  return relayFeeCalculator.getTokenPrice(tokenSymbol);
+};
+
+const getCachedTokenPrice = async (l1Token) => {
+  getLogger().debug({
+    at: "getCachedTokenPrice",
+    message: `Resolving price from ${resolveVercelEndpoint()}/api/coingecko`,
+  });
+  return Number(
+    (
+      await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
+        params: { l1Token },
+      })
+    ).data.price
   );
-  return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol);
 };
 
 const providerCache = {};
@@ -260,6 +381,7 @@ const minBN = (...arr) => {
 };
 
 module.exports = {
+  getLogger,
   getTokenDetails,
   isString,
   InputError,
@@ -267,6 +389,8 @@ module.exports = {
   infuraProvider,
   bobaProvider,
   getRelayerFeeDetails,
+  getTokenPrice,
+  getCachedTokenPrice,
   maxRelayFeePct,
   getProvider,
   getBalance,
@@ -276,4 +400,5 @@ module.exports = {
   getHubPoolClient,
   dummyFromAddress,
   disabledL1Tokens,
+  resolveVercelEndpoint,
 };

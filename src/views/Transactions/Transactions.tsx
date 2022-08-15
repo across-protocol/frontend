@@ -109,7 +109,9 @@ const Transactions = () => {
         </Title>
         {!isConnected && (
           <ButtonWrapper>
-            <ConnectButton onClick={initOnboard}>Connect Wallet</ConnectButton>
+            <ConnectButton onClick={initOnboard} data-cy="connect-wallet">
+              Connect Wallet
+            </ConnectButton>
           </ButtonWrapper>
         )}
         {isConnected && ongoingTx.length > 0 && (

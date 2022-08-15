@@ -24,7 +24,7 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
 
   if (account && !isConnected && !chainId) {
     return (
-      <UnsupportedNetwork>
+      <UnsupportedNetwork data-cy="unsupported-network">
         Unsupported network. Please change networks.
       </UnsupportedNetwork>
     );
@@ -34,16 +34,8 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
     return <ConnectButton onClick={init}>Connect</ConnectButton>;
   }
 
-  if (account && !isConnected && !chainId) {
-    return (
-      <UnsupportedNetwork>
-        Unsupported network. Please change networks.
-      </UnsupportedNetwork>
-    );
-  }
-
   return (
-    <BalanceButton onClick={() => setOpenSidebar(true)}>
+    <BalanceButton onClick={() => setOpenSidebar(true)} data-cy="acx-balance">
       <Logo />
       <BalanceWallet>0 ACX</BalanceWallet>
       {account && (
