@@ -109,9 +109,11 @@ interface ITitle {
 }
 export const Title = styled.div<ITitle>`
   font-weight: 700;
-  font-size: 16px;
+  font-size: ${14 / 16}rem;
   text-align: left;
   width: 300px;
+  line-height: 18px;
+
   color: ${({ type }) => {
     if (type === "info") {
       return "#E0F3FF";
@@ -134,6 +136,8 @@ export const Body = styled.div`
   text-align: left;
   white-space: nowrap;
   color: #c5d5e0;
+  line-height: 16px;
+  font-size: ${12 / 16}rem;
 `;
 
 export const TitleRow = styled.div`

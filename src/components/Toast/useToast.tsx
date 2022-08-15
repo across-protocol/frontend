@@ -18,19 +18,25 @@ interface PartialToast {
 function useToastManager() {
   const [list, setList] = useState<ToastProperties[]>([
     {
-      id: -4,
+      id: 1,
       type: "info",
       title: "Info",
       body: "This is an info toast",
     },
     {
-      id: -3,
+      id: 2,
       type: "warning",
       title: "Warning",
       body: "This is an warning toast",
     },
     {
-      id: -2,
+      id: 3,
+      type: "error",
+      title: "Error",
+      body: "This is an error toast",
+    },
+    {
+      id: 4,
       type: "error",
       title: "Error",
       body: "This is an error toast",
@@ -49,10 +55,9 @@ function useToastManager() {
   const deleteToast = useCallback(
     (id: number) => {
       const listItemIndex = list.findIndex((e) => e.id === id);
-      const toastListItem = list.findIndex((e) => e.id === id);
-      list.splice(listItemIndex, 1);
-      list.splice(toastListItem, 1);
-      setList([...list]);
+      const newList = [...list];
+      newList.splice(listItemIndex, 1);
+      setList(newList);
     },
     [list]
   );
