@@ -357,7 +357,7 @@ const isRouteEnabled = (fromChainId, toChainId, fromToken) => {
   return spokePool.enabledDepositRoutes(fromToken, toChainId.toString());
 };
 
-const getBalance = (chainId, token, account, blockTag = undefined) => {
+const getBalance = (chainId, token, account, blockTag = "latest") => {
   return ERC20__factory.connect(token, getProvider(chainId)).balanceOf(
     account,
     { blockTag }
