@@ -64,7 +64,7 @@ const handler = async (request, response) => {
     // recent block before the timestamp. If the timestamp is
     // not specified, we can use the default variant of blockTag
     // to be "latest"
-    const blockTag = isString(timestamp) ? rawBlockTag : "latest";
+    const blockTag = isString(timestamp) ? rawBlockTag : -1;
 
     console.log(`INFO(suggested-fees): Using block ${blockTag}`);
 

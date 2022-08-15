@@ -118,22 +118,22 @@ const handler = async (request, response) => {
         ethers.BigNumber.from("10").pow(18),
         Number(destinationChainId)
       ),
-      hubPool.callStatic.multicall(multicallInput),
+      hubPool.callStatic.multicall(multicallInput, { blockTag: -1 }),
       Promise.all(
         fullRelayers.map((relayer) =>
-          getBalance(destinationChainId, destinationToken, relayer)
+          getBalance(destinationChainId, destinationToken, relayer, -1)
         )
       ),
       Promise.all(
         transferRestrictedRelayers.map((relayer) =>
-          getBalance(destinationChainId, destinationToken, relayer)
+          getBalance(destinationChainId, destinationToken, relayer, -1)
         )
       ),
       Promise.all(
         fullRelayers.map((relayer) =>
           destinationChainId === "1"
             ? ethers.BigNumber.from("0")
-            : getBalance("1", l1Token, relayer)
+            : getBalance("1", l1Token, relayer, -1)
         )
       ),
     ]);
