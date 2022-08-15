@@ -61,7 +61,7 @@ export const ToastWrapper = styled.div<IToastWrapper>`
   width: 100%;
   border-radius: 16px;
   overflow: hidden;
-  margin: 1rem 0;
+  margin: 0.66rem 0;
   border: ${({ type }) => {
     if (type === "info") {
       return "1px solid #E0F3FF";
@@ -75,8 +75,10 @@ export const ToastWrapper = styled.div<IToastWrapper>`
     }
   }};
   @media screen and (max-width: 428px) {
-    width: 95%;
-    margin-left: 8px;
+    width: calc(100% - 24px);
+    /* margin-left: 8px; */
+    margin-left: auto;
+    margin-right: auto;
   }
 `;
 
