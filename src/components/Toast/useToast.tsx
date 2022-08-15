@@ -75,7 +75,7 @@ export const ToastProvider: React.FC = ({ children }) => {
 
 export function useToast({
   autoDelete = true,
-  autoDeleteTime = 50000,
+  autoDeleteTime = 3000,
 }: {
   autoDelete?: boolean;
   autoDeleteTime?: number;

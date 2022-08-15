@@ -76,7 +76,6 @@ export const ToastWrapper = styled.div<IToastWrapper>`
   }};
   @media screen and (max-width: 428px) {
     width: calc(100% - 24px);
-    /* margin-left: 8px; */
     margin-left: auto;
     margin-right: auto;
   }
