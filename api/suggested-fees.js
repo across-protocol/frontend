@@ -59,7 +59,7 @@ const handler = async (request, response) => {
       token,
     });
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
-    const [{ number: rawBlockTag }, routeEnabled] = await Promise.all([
+    const [{ number: latestBlock }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
       isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
@@ -68,7 +68,7 @@ const handler = async (request, response) => {
     // recent block before the timestamp. If the timestamp is
     // not specified, we can use the default variant of blockTag
     // to be "latest"
-    const blockTag = isString(timestamp) ? rawBlockTag : BLOCK_TAG_LAG;
+    const blockTag = isString(timestamp) ? latestBlock : BLOCK_TAG_LAG;
 
     logger.debug({ at: "suggested-fees", message: `Using block ${blockTag}` });
 
