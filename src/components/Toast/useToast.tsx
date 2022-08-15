@@ -27,8 +27,6 @@ function useToastManager() {
     [cid, list]
   );
 
-  console.log("list", list);
-
   const deleteToast = useCallback(
     (id: number) => {
       const listItemIndex = list.findIndex((e) => e.id === id);
@@ -49,6 +47,7 @@ function useToastManager() {
 
 const ToastContext = createContext<ToastContextValue>({} as ToastContextValue);
 ToastContext.displayName = "ToastContext";
+
 export const ToastProvider: React.FC = ({ children }) => {
   const value = useToastManager();
   return (
