@@ -32,6 +32,11 @@ const handler = async (request, response) => {
       throw new InputError("Origin and destination chains cannot be the same");
     }
 
+    const amountAsValue = Number(amount);
+    if (Number.isNaN(amountAsValue) || amountAsValue === 0) {
+      throw new InputError("Value provided in amount parameter is not valid.");
+    }
+
     token = ethers.utils.getAddress(token);
 
     const parsedTimestamp = isString(timestamp)
