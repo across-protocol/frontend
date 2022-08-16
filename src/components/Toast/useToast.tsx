@@ -23,6 +23,11 @@ function useToastManager() {
       title: "Info",
       body: "This is an info toast",
       iconSize: "sm",
+      comp: (
+        <div>
+          <button>Read more</button>
+        </div>
+      ),
     },
     {
       id: "warning-time",

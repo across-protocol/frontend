@@ -25,7 +25,7 @@ const Toast: React.FC<ToastProps> = ({ position }) => {
   return (
     <>
       <ToastContainer position={position}>
-        {toastList.map(({ type, title, body, id, iconSize }, i) => (
+        {toastList.map(({ type, title, body, id, iconSize, comp }, i) => (
           <ToastWrapper key={i} type={type}>
             <ToastElement>
               <TitleRow>
@@ -39,6 +39,7 @@ const Toast: React.FC<ToastProps> = ({ position }) => {
                 <Main>
                   <Title type={type}>{title}</Title>
                   <Body>{body}</Body>
+                  {comp}
                 </Main>
                 <CloseWrapper onClick={() => deleteToast(id)}>
                   <CloseButton type={type} />

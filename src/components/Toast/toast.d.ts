@@ -13,4 +13,5 @@ export interface ToastProperties {
   title: string;
   body: string;
   iconSize?: IconSize;
+  comp?: React.ReactElement;
 }
