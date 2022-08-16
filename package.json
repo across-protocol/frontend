@@ -58,8 +58,8 @@
     "serve": "serve -s build",
     "test-api": "jest",
     "eject": "react-scripts eject",
-    "lint": "prettier --write ./src",
-    "lint-check": "prettier ./src",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint --fix ./src",
     "predeploy": "yarn sitemap",
     "sitemap": "babel-node src/sitemap-generator.js",
     "prepare": "husky install",
@@ -67,13 +67,7 @@
     "cypress:run": "cypress run --e2e"
   },
   "lint-staged": {
-    "*.{jsx,tsx,js,ts,json}": "yarn lint"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "*.{jsx,tsx,js,ts}": "yarn lint:fix"
   },
   "browserslist": {
     "production": [
@@ -98,6 +92,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-register": "^6.26.0",
     "cypress": "^10.4.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.0",
     "lint-staged": "^12.4.1",
     "prettier": "^2.4.1",

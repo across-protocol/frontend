@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
-      - run: yarn lint-check
+      - run: yarn lint
 
   cypress-tests:
     runs-on: ubuntu-latest
