@@ -6,7 +6,7 @@ import { useContext } from "react";
 interface ToastContextValue {
   toastList: ToastProperties[];
   addToast: (item: PartialToast) => void;
-  deleteToast: (id: number) => void;
+  deleteToast: (id: number | string) => void;
 }
 
 interface PartialToast {
@@ -18,20 +18,20 @@ interface PartialToast {
 function useToastManager() {
   const [list, setList] = useState<ToastProperties[]>([
     {
-      id: 1,
+      id: "info-test",
       type: "info",
       title: "Info",
       body: "This is an info toast",
       iconSize: "sm",
     },
     {
-      id: 2,
+      id: "warning-time",
       type: "warning",
       title: "Warning",
       body: "This is an warning toast",
     },
     {
-      id: 3,
+      id: "erorr-123",
       type: "error",
       title: "Error",
       body: "This is an error toast",
@@ -54,7 +54,7 @@ function useToastManager() {
   );
 
   const deleteToast = useCallback(
-    (id: number) => {
+    (id: number | string) => {
       const listItemIndex = list.findIndex((e) => e.id === id);
       const newList = [...list];
       newList.splice(listItemIndex, 1);

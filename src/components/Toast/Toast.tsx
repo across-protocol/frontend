@@ -20,7 +20,7 @@ interface ToastProps {
 }
 
 const Toast: React.FC<ToastProps> = ({ position }) => {
-  const { toastList, deleteToast } = useToast({ autoDeleteTime: 50000 });
+  const { toastList, deleteToast } = useToast();
 
   return (
     <>
