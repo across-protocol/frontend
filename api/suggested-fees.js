@@ -33,7 +33,7 @@ const handler = async (request, response) => {
     }
 
     const amountAsValue = Number(amount);
-    if (Number.isNaN(amountAsValue) || amountAsValue === 0) {
+    if (Number.isNaN(amountAsValue) || amountAsValue <= 0) {
       throw new InputError("Value provided in amount parameter is not valid.");
     }
 
