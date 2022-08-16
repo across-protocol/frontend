@@ -192,9 +192,7 @@ const dummyFromAddress =
   "0x893d0d70ad97717052e3aa8903d9615804167759";
 
 const getGasMarkup = (chainId) => {
-  return gasMarkup[chainId] !== undefined
-    ? gasMarkup[chainId]
-    : DEFAULT_GAS_MARKUP;
+  return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
 const queries = {
