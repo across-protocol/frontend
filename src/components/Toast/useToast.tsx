@@ -6,13 +6,15 @@ import { useContext } from "react";
 interface ToastContextValue {
   toastList: ToastProperties[];
   addToast: (item: PartialToast) => void;
-  deleteToast: (id: number | string) => void;
+  deleteToast: (id: string[]) => void;
 }
 
 interface PartialToast {
   type: ToastType;
   title: string;
   body: string;
+  createdAt: number;
+  id: string;
 }
 
 function useToastManager() {
@@ -22,6 +24,7 @@ function useToastManager() {
       type: "info",
       title: "Info",
       body: "This is an info toast",
+      createdAt: Date.now(),
       iconSize: "sm",
       comp: (
         <div>
@@ -33,37 +36,39 @@ function useToastManager() {
       id: "warning-time",
       type: "warning",
       title: "Warning",
+      createdAt: Date.now(),
+
       body: "This is an warning toast",
     },
     {
       id: "erorr-123",
       type: "error",
       title: "Error",
+      createdAt: Date.now(),
+
       body: "This is an error toast",
     },
     {
-      id: 4,
+      id: "success-456",
       type: "error",
       title: "Error",
+      createdAt: Date.now() + 3000,
+
       body: "This is an error toast",
     },
   ]);
-  // Current id for toast
-  const [cid, setCid] = useState(0);
+
   const addToast = useCallback(
     (item: PartialToast) => {
-      setList([...list, { ...item, id: cid }]);
-      setCid((pv) => pv + 1);
+      setList([...list, { ...item }]);
     },
-    [cid, list]
+    [list]
   );
 
   const deleteToast = useCallback(
-    (id: number | string) => {
-      const listItemIndex = list.findIndex((e) => e.id === id);
-      const newList = [...list];
-      newList.splice(listItemIndex, 1);
-      setList(newList);
+    (ids: string[]) => {
+      const nextList = list.filter((item) => !ids.includes(item.id));
+      setList(nextList);
     },
     [list]
   );
@@ -98,7 +103,13 @@ export function useToast({
   useEffect(() => {
     const interval = setInterval(() => {
       if (autoDelete && context.toastList.length) {
-        context.deleteToast(context.toastList[0].id);
+        const idsToDelete: string[] = [];
+        context.toastList.forEach((el) => {
+          if (el.createdAt + autoDeleteTime < Date.now()) {
+            idsToDelete.push(el.id);
+          }
+          context.deleteToast(idsToDelete);
+        });
       }
     }, autoDeleteTime);
 

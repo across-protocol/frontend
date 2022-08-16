@@ -41,7 +41,7 @@ const Toast: React.FC<ToastProps> = ({ position }) => {
                   <Body>{body}</Body>
                   {comp}
                 </Main>
-                <CloseWrapper onClick={() => deleteToast(id)}>
+                <CloseWrapper onClick={() => deleteToast([id])}>
                   <CloseButton type={type} />
                 </CloseWrapper>
               </TitleRow>

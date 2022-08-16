@@ -47,6 +47,8 @@ export function useBridge() {
         type: "error",
         title: "Error",
         body: referrerError,
+        createdAt: Date.now(),
+        id: "referrer-error",
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
