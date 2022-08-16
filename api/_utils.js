@@ -13,11 +13,16 @@ const {
   REACT_APP_COINGECKO_PRO_API_KEY,
   REACT_APP_GOOGLE_SERVICE_ACCOUNT,
   VERCEL_ENV,
+  GAS_MARKUP,
 } = process.env;
 
 const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
   ? JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT)
   : {};
+
+const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
+// Default to no markup.
+const DEFAULT_GAS_MARKUP = 0;
 
 const {
   relayerFeeCapitalCostConfig,
@@ -186,6 +191,10 @@ const dummyFromAddress =
   process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
   "0x893d0d70ad97717052e3aa8903d9615804167759";
 
+const getGasMarkup = (chainId) => {
+  return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
+};
+
 const queries = {
   1: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
@@ -194,7 +203,9 @@ const queries = {
       undefined,
       undefined,
       undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(1)
     ),
   10: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
@@ -203,7 +214,9 @@ const queries = {
       undefined,
       undefined,
       undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(10)
     ),
   137: () =>
     new sdk.relayFeeCalculator.PolygonQueries(
@@ -212,7 +225,9 @@ const queries = {
       undefined,
       undefined,
       undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(137)
     ),
   288: () =>
     new sdk.relayFeeCalculator.BobaQueries(
@@ -221,7 +236,9 @@ const queries = {
       undefined,
       undefined,
       undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(288)
     ),
   42161: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
@@ -230,7 +247,9 @@ const queries = {
       undefined,
       undefined,
       undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(42161)
     ),
 };
 
