@@ -4,6 +4,7 @@
 const sdk = require("@across-protocol/sdk-v2");
 const { BlockFinder } = require("@uma/sdk");
 const ethers = require("ethers");
+const { BLOCK_TAG_LAG } = require("./_constants");
 const {
   getLogger,
   getTokenDetails,
@@ -58,10 +59,17 @@ const handler = async (request, response) => {
       token,
     });
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
-    const [{ number: blockTag }, routeEnabled] = await Promise.all([
+    const [{ number: latestBlock }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
       isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
+
+    // If the query was supplied a timestamp, lets use the most
+    // recent block before the timestamp. If the timestamp is
+    // not specified, we can use the default variant of blockTag
+    // to be "latest"
+    const blockTag = isString(timestamp) ? latestBlock : BLOCK_TAG_LAG;
+
     logger.debug({ at: "suggested-fees", message: `Using block ${blockTag}` });
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))

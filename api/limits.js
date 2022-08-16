@@ -3,6 +3,7 @@
 
 const { HubPool__factory } = require("@across-protocol/contracts-v2");
 const ethers = require("ethers");
+const { BLOCK_TAG_LAG } = require("./_constants");
 
 const {
   getLogger,
@@ -135,22 +136,32 @@ const handler = async (request, response) => {
         Number(destinationChainId),
         tokenPrice
       ),
-      hubPool.callStatic.multicall(multicallInput),
+      hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
         fullRelayers.map((relayer) =>
-          getBalance(destinationChainId, destinationToken, relayer)
+          getBalance(
+            destinationChainId,
+            destinationToken,
+            relayer,
+            BLOCK_TAG_LAG
+          )
         )
       ),
       Promise.all(
         transferRestrictedRelayers.map((relayer) =>
-          getBalance(destinationChainId, destinationToken, relayer)
+          getBalance(
+            destinationChainId,
+            destinationToken,
+            relayer,
+            BLOCK_TAG_LAG
+          )
         )
       ),
       Promise.all(
         fullRelayers.map((relayer) =>
           destinationChainId === "1"
             ? ethers.BigNumber.from("0")
-            : getBalance("1", l1Token, relayer)
+            : getBalance("1", l1Token, relayer, BLOCK_TAG_LAG)
         )
       ),
     ]);

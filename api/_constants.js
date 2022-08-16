@@ -55,7 +55,10 @@ const relayerFeeCapitalCostConfig = {
   },
 };
 
+const BLOCK_TAG_LAG = -1;
+
 module.exports = {
   relayerFeeCapitalCostConfig,
   disabledL1Tokens,
+  BLOCK_TAG_LAG,
 };
