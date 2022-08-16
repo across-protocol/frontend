@@ -1,0 +1,60 @@
+name: Lint and Test
+
+on:
+  # manual trigger
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
+      - run: yarn lint-check
+
+  cypress-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
+      - uses: actions/cache@v3
+        id: cypress-cache
+        with:
+          path: /home/runner/.cache/Cypress
+          key: ${{ runner.os }}-cypress-${{ hashFiles('node_modules/cypress') }}
+      - if: steps.cypress-cache.outputs.cache-hit != 'true'
+        run: yarn cypress install
+      - name: Build app
+        env:
+          REACT_APP_PUBLIC_INFURA_ID: ${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
+          REACT_APP_PUBLIC_ONBOARD_API_KEY: ${{ secrets.CYPRESS_PUBLIC_ONBOARD_API_KEY }}
+          REACT_APP_REWARDS_API_URL: ${{ secrets.CYPRESS_REWARDS_API_URL }}
+          REACT_APP_CHAIN_137_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_137_PROVIDER_URL }}
+          REACT_APP_CHAIN_42161_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_42161_PROVIDER_URL }}
+        run: yarn build
+      - name: Cypress run Chrome
+        uses: cypress-io/github-action@v4
+        with:
+          install: false
+          browser: chrome
+          start: yarn serve -l 3000
+          wait-on: "http://localhost:3000"
+          wait-on-timeout: 300
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v2
+        if: failure() # only upload screenshots if tests fail
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      - name: Upload videos
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
