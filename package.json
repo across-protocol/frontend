@@ -54,7 +54,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "serve": "serve build",
+    "serve": "serve -s build",
     "test-api": "jest",
     "eject": "react-scripts eject",
     "lint": "prettier --write ./src",
