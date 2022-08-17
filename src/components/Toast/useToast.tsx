@@ -18,45 +18,7 @@ interface PartialToast {
 }
 
 function useToastManager() {
-  const [list, setList] = useState<ToastProperties[]>([
-    {
-      id: "info-test",
-      type: "info",
-      title: "Info",
-      body: "This is an info toast",
-      createdAt: Date.now(),
-      iconSize: "sm",
-      comp: (
-        <div>
-          <button>Read more</button>
-        </div>
-      ),
-    },
-    {
-      id: "warning-time",
-      type: "warning",
-      title: "Warning",
-      createdAt: Date.now(),
-
-      body: "This is an warning toast",
-    },
-    {
-      id: "erorr-123",
-      type: "error",
-      title: "Error",
-      createdAt: Date.now(),
-
-      body: "This is an error toast",
-    },
-    {
-      id: "success-456",
-      type: "error",
-      title: "Error",
-      createdAt: Date.now() + 3000,
-
-      body: "This is an error toast",
-    },
-  ]);
+  const [list, setList] = useState<ToastProperties[]>([]);
 
   const addToast = useCallback(
     (item: PartialToast) => {

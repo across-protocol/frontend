@@ -19,26 +19,22 @@ export default function useReferrer() {
         return setAddress(r);
       }
 
-      if (r.slice(-4) === ".eth") {
-        provider
-          .resolveName(r)
-          .then((ra) => {
-            setAddress(ra || "");
-            if (!ra) {
-              setError("Invalid referral ENS name");
-            }
-          })
-          .catch((e) => {
-            // Error here would imply an issue with the provider call, not with the ENS name necessarily.
-            console.warn("error resolving name", e);
-            setAddress("");
-            if (!ethers.utils.isAddress(r)) {
-              setError("Invalid referral address");
-            }
-          });
-      } else {
-        setError("Invalid referral address");
-      }
+      provider
+        .resolveName(r)
+        .then((ra) => {
+          setAddress(ra || "");
+          if (!ra) {
+            setError("Invalid referral ENS name");
+          }
+        })
+        .catch((e) => {
+          // Error here would imply an issue with the provider call, not with the ENS name necessarily.
+          console.warn("error resolving name", e);
+          setAddress("");
+          if (!ethers.utils.isAddress(r)) {
+            setError("Invalid referral address");
+          }
+        });
     }
     // eslint-disable-next-line
   }, [provider, r]);
