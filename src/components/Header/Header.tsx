@@ -53,10 +53,9 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
         <List>
           {LINKS.map(({ href, name }) => {
             const subRoute = parentRoutes.includes(href);
-            let ariaSelected = location.pathname === href;
-
-            if (subRoute && location.pathname.includes(href))
-              ariaSelected = true;
+            const ariaSelected =
+              location.pathname === href ||
+              (subRoute && location.pathname.includes(href));
             return (
               <Item key={href} aria-selected={ariaSelected}>
                 <Link
