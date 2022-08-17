@@ -122,7 +122,7 @@ const handler = async (request, response) => {
     // If no request happened during that period, the cache became stale and the next request will revalidate normally.
     response.setHeader(
       "Cache-Control",
-      "s-maxage=600, stale-while-revalidate=600"
+      "s-maxage=21600, stale-while-revalidate=21600"
     );
     response.status(200).json(enabledRoutes);
   } catch (error) {
