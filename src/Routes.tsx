@@ -70,7 +70,7 @@ const Routes: React.FC = () => {
         <Route exact path="/pool" component={Pool} />
         <Route exact path="/about" component={About} />
         <Route exact path="/rewards" component={Rewards} />
-        <Route exact path="/claim" component={Claim} />
+        <Route exact path="/rewards/claim" component={Claim} />
         <Route path="/" component={Send} />
       </Switch>
       <Toast position="top-right" />

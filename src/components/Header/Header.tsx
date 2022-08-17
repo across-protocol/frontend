@@ -48,7 +48,16 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
       <Navigation>
         <List>
           {LINKS.map(({ href, name }) => (
-            <Item key={href} aria-selected={location.pathname === href}>
+            <Item
+              key={href}
+              aria-selected={
+                location.pathname.includes("/rewards") && href === "/rewards"
+                  ? true
+                  : location.pathname === href
+                  ? true
+                  : false
+              }
+            >
               <Link
                 to={{
                   pathname: href,
