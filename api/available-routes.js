@@ -5,6 +5,13 @@ const { getLogger, InputError, getProvider } = require("./_utils");
 const handler = async (request, response) => {
   const logger = getLogger();
   try {
+    let { originChainId, destinationChainId, originToken, destinationToken } =
+      request.query;
+    originChainId = (originChainId ?? "").toLowerCase();
+    destinationChainId = (destinationChainId ?? "").toLowerCase();
+    originToken = (originToken ?? "").toLowerCase();
+    destinationToken = (destinationToken ?? "").toLowerCase();
+
     const hubPool = HubPool__factory.connect(
       "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
       getProvider("1")
@@ -18,7 +25,7 @@ const handler = async (request, response) => {
     });
     // Replay all events in block order to determine the token/chain pairs
     // that are currently enabled for deposits.
-    const enabledRoutes = Object.values(
+    let enabledRoutes = Object.values(
       // Leverage lookup times of a hashmap to quickly add routes to this
       // search / update them if their enabled status changes
       result.reduce((accumulator, event) => {
@@ -78,6 +85,25 @@ const handler = async (request, response) => {
         }
       }
     });
+
+    // Filter out elements from the request query parameters
+    if (
+      !!originToken ||
+      !!originChainId ||
+      !!destinationChainId ||
+      !!destinationToken
+    ) {
+      enabledRoutes = enabledRoutes.filter(
+        (route) =>
+          (!originToken || originToken === route.originToken.toLowerCase()) &&
+          (!originChainId ||
+            originChainId === route.originChainId.toLowerCase()) &&
+          (!destinationChainId ||
+            destinationChainId === route.destinationChainId.toLowerCase()) &&
+          (!destinationToken ||
+            destinationToken === route.destinationToken.toLowerCase())
+      );
+    }
 
     // Two different explanations for how `stale-while-revalidate` works:
 
