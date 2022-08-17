@@ -12,7 +12,8 @@ import {
   rewardsBannerWarning,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
-import useReferrer from "hooks/useReferrer";
+import Toast from "components/Toast";
+
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider } = useConnection();
@@ -39,10 +40,8 @@ function useRoutes() {
 const Routes: React.FC = () => {
   const { openSidebar, setOpenSidebar, error, removeError, location } =
     useRoutes();
-  const { referrerError } = useReferrer();
   return (
     <>
-      {referrerError && <SuperHeader>{referrerError}</SuperHeader>}
       {disableDeposits && (
         <SuperHeader>
           Across is experiencing issues. Deposits are currently disabled into
@@ -73,6 +72,7 @@ const Routes: React.FC = () => {
         <Route exact path="/rewards" component={Rewards} />
         <Route path="/" component={Send} />
       </Switch>
+      <Toast position="top-right" />
     </>
   );
 };
