@@ -6,6 +6,7 @@ const limitsHandler = require("../../api/limits");
 const feesHandler = require("../../api/suggested-fees");
 const poolsHandler = require("../../api/pools");
 const coingeckoHandler = require("../../api/coingecko");
+const availableRouteHandler = require("../../api/available-routes");
 
 // Create mocked response object:
 let response;
@@ -55,4 +56,10 @@ test("coingecko has no load-time errors", async () => {
   expect(response.send).toHaveBeenCalledWith(
     "Must provide l1Token as query param"
   );
+});
+
+test("available-routes has no load-time errors", async () => {
+  await availableRouteHandler(request, response);
+  expect(response.status).toHaveBeenCalledWith(200);
+  expect(response.json).toHaveBeenCalled();
 });
