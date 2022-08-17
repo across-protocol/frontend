@@ -30,9 +30,6 @@ interface Props {
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-// This is to check for the aria-selected below. Add any route that has a subroute to this array.
-const parentRoutes = ["/rewards"];
-
 const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
   const location = useLocation();
   const scrollPosition = useScrollPosition();
@@ -51,24 +48,21 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
       </UnstyledLink>
       <Navigation>
         <List>
-          {LINKS.map(({ href, name }) => {
-            const subRoute = parentRoutes.includes(href);
-            const ariaSelected =
-              location.pathname === href ||
-              (subRoute && location.pathname.includes(href));
-            return (
-              <Item key={href} aria-selected={ariaSelected}>
-                <Link
-                  to={{
-                    pathname: href,
-                    search: location.search,
-                  }}
-                >
-                  {name}
-                </Link>
-              </Item>
-            );
-          })}
+          {LINKS.map(({ href, name }) => (
+            <Item
+              key={href}
+              aria-selected={isLinkSelected(location.pathname, href)}
+            >
+              <Link
+                to={{
+                  pathname: href,
+                  search: location.search,
+                }}
+              >
+                {name}
+              </Link>
+            </Item>
+          ))}
         </List>
       </Navigation>
       <Spacing />
@@ -81,4 +75,9 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
     </Wrapper>
   );
 };
+
 export default Header;
+
+function isLinkSelected(pathname: string, href: string) {
+  return pathname.split("/")[1] === href.split("/")[1];
+}

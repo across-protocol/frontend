@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
-import { Send, Pool, About, MyTransactions, Rewards, Claim } from "views";
+import {
+  Send,
+  Pool,
+  About,
+  MyTransactions,
+  AllTransactions,
+  Rewards,
+  Claim,
+} from "views";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
 import { useConnection } from "state/hooks";
 import { useError } from "hooks";
@@ -67,6 +75,7 @@ const Routes: React.FC = () => {
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
         <Route exact path="/transactions" component={MyTransactions} />
+        <Route exact path="/transactions/all" component={AllTransactions} />
         <Route exact path="/pool" component={Pool} />
         <Route exact path="/about" component={About} />
         <Route exact path="/rewards" component={Rewards} />

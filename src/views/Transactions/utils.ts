@@ -1,8 +1,11 @@
+import { DateTime } from "luxon";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history";
 
+import { Deposit } from "hooks/useDeposits";
 import { getConfig } from "utils";
 
 import { SupportedTxTuple } from "./types";
+import { BigNumber } from "ethers";
 
 export function getSupportedTxTuples(
   transactions: Transfer[]
@@ -28,4 +31,19 @@ export function doPartialFillsExist(pendingTransferTuples: SupportedTxTuple[]) {
     const filledAmount = transfer.filled;
     return filledAmount.gt(0) && filledAmount.lte(100);
   });
+}
+
+export function formatToTransfer(deposit: Deposit): Transfer {
+  return {
+    depositId: deposit.depositId,
+    depositTime: DateTime.fromISO(deposit.createdAt).toSeconds(),
+    status: deposit.status,
+    filled: BigNumber.from(deposit.filled),
+    sourceChainId: deposit.sourceChainId,
+    destinationChainId: deposit.destinationChainId,
+    assetAddr: deposit.tokenAddr,
+    amount: BigNumber.from(deposit.amount),
+    depositTxHash: deposit.depositTxHash,
+    fillTxs: deposit.fillTxs.map(({ hash }) => hash),
+  };
 }

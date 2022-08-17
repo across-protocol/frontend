@@ -27,6 +27,7 @@ import {
   NotFoundWrapper,
   TitleContainer,
 } from "./Transactions.styles";
+import { TableSwitch } from "./components/TableSwitch";
 
 export function MyTransactions() {
   const {
@@ -66,6 +67,7 @@ export function MyTransactions() {
               <Account>({shortenAddress(account, "......", 6)})</Account>
             )}
           </Title>
+          <TableSwitch />
         </TitleContainer>
         {!isConnected && (
           <ButtonWrapper>
