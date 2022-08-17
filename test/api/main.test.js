@@ -13,6 +13,8 @@ const getMockedResponse = () => {
   const response = {};
   response.status = jest.fn().mockReturnValue(response);
   response.send = jest.fn();
+  response.setHeader = jest.fn();
+  response.json = jest.fn();
   return response;
 };
 
