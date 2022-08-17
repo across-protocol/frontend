@@ -182,7 +182,7 @@ export const getConfirmationDepositTime = (
   }
 
   // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.
-  return "~2-4 hours";
+  return "~3-7 hours";
 };
 
 type AcrossDepositArgs = {
