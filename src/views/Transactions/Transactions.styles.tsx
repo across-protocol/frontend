@@ -6,17 +6,28 @@ export const Wrapper = styled.div`
   background-color: transparent;
 `;
 
+export const TitleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 1425px;
+  @media ${QUERIES.tabletAndDown} {
+    flex-direction: column;
+    /* align-items: flex-start; */
+  }
+`;
+
 export const Title = styled.div`
   font-size: ${30 / 16}rem;
   line-height: ${32 / 16}rem;
   font-weight: 700;
-  margin: 0 auto;
-  max-width: 1425px;
 
   @media ${QUERIES.mobileAndDown} {
     font-size: ${18 / 16}rem;
     line-height: ${22 / 16}rem;
     font-weight: 400;
+    margin-bottom: 8px;
   }
 `;
 
@@ -36,6 +47,11 @@ export const ConnectButton = styled(PrimaryButton)`
 export const ButtonWrapper = styled.div`
   margin: 0 auto;
   max-width: 1425px;
+  @media ${QUERIES.tabletAndDown} {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
 `;
 
 export const TopRow = styled.div<{ dark?: boolean }>`

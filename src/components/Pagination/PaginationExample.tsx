@@ -46,6 +46,7 @@ export const PageSizeSelect: React.FC<PageSizeProps> = (props) => {
         <PageSizeSelectDropdown>
           {props.pageSizes.map((s) => (
             <PageSizeOptiontButton
+              key={s}
               onClick={() => {
                 onChangePageSize(s);
               }}

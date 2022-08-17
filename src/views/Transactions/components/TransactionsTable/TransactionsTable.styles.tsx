@@ -45,6 +45,9 @@ export const HeadCell = styled(BaseHeadCell)`
 export const TableLogo = styled.img`
   height: 15px;
   margin-right: 4px;
+  @media ${QUERIES.mobileAndDown} {
+    margin-left: 16px;
+  }
 `;
 
 export const TableLink = styled.a`
@@ -135,4 +138,5 @@ export const StyledPlus = styled(AcrossPlusIcon)`
   float: right;
   margin-top: 8px;
   margin-right: 4px;
+  margin-left: 8px;
 `;

@@ -9,7 +9,7 @@ interface Props {
   onClose: () => void;
 }
 
-const FillTxInfoModal: React.FC<Props> = ({ isOpen, onClose }) => {
+export const FillTxInfoModal: React.FC<Props> = ({ isOpen, onClose }) => {
   return (
     <Overlay isOpen={isOpen}>
       <Wrapper aria-label="dialog">
@@ -38,6 +38,7 @@ const FillTxInfoModal: React.FC<Props> = ({ isOpen, onClose }) => {
     </Overlay>
   );
 };
+
 export default FillTxInfoModal;
 
 const Title = styled.h1`
