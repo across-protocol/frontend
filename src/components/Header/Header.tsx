@@ -29,6 +29,9 @@ interface Props {
   openSidebar: boolean;
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+const parentRoutes = ["/rewards"];
+
 const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
   const location = useLocation();
   const scrollPosition = useScrollPosition();
@@ -47,27 +50,25 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
       </UnstyledLink>
       <Navigation>
         <List>
-          {LINKS.map(({ href, name }) => (
-            <Item
-              key={href}
-              aria-selected={
-                location.pathname.includes("/rewards") && href === "/rewards"
-                  ? true
-                  : location.pathname === href
-                  ? true
-                  : false
-              }
-            >
-              <Link
-                to={{
-                  pathname: href,
-                  search: location.search,
-                }}
-              >
-                {name}
-              </Link>
-            </Item>
-          ))}
+          {LINKS.map(({ href, name }) => {
+            const subRoute = parentRoutes.includes(href);
+            let ariaSelected = location.pathname === href ? true : false;
+
+            if (subRoute && location.pathname.includes(href))
+              ariaSelected = true;
+            return (
+              <Item key={href} aria-selected={ariaSelected}>
+                <Link
+                  to={{
+                    pathname: href,
+                    search: location.search,
+                  }}
+                >
+                  {name}
+                </Link>
+              </Item>
+            );
+          })}
         </List>
       </Navigation>
       <Spacing />
