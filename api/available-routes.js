@@ -108,9 +108,9 @@ const handler = async (request, response) => {
     // Two different explanations for how `stale-while-revalidate` works:
 
     // https://vercel.com/docs/concepts/edge-network/caching#stale-while-revalidate
-    // This tells our CDN the value is fresh for 10 seconds. If a request is repeated within the next 10 seconds,
+    // This tells our CDN the value is fresh for 6 hours. If a request is repeated within the next 6 hours,
     // the previously cached value is still fresh. The header x-vercel-cache present in the response will show the
-    // value HIT. If the request is repeated between 1 and 20 seconds later, the cached value will be stale but
+    // value HIT. If the request is repeated up to 6 hours later, the cached value will be stale but
     // still render. In the background, a revalidation request will be made to populate the cache with a fresh value.
     // x-vercel-cache will have the value STALE until the cache is refreshed.
 
