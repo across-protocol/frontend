@@ -1,9 +1,7 @@
 describe("bridge", () => {
-  beforeEach(() => {
-    cy.visit("/");
-  });
-
   it("render in initial state", () => {
+    cy.wait(5000);
+    cy.visit("/");
     cy.dataCy("connect-wallet").should("be.visible");
     cy.dataCy("send").should("be.disabled");
   });
