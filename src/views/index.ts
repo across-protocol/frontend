@@ -5,4 +5,4 @@ export { default as Confirmation } from "./Confirmation";
 export { default as MyTransactions } from "./Transactions";
 export { default as Rewards } from "./Rewards";
 export { default as Claim } from "./Claim";
-export { default as PoolRewards } from "./PoolRewards";
+export { default as Staking } from "./Staking";
