@@ -23,11 +23,14 @@ export const Title = styled.div`
   line-height: ${32 / 16}rem;
   font-weight: 700;
 
+  @media ${QUERIES.tabletAndDown} {
+    margin-bottom: 8px;
+  }
+
   @media ${QUERIES.mobileAndDown} {
     font-size: ${18 / 16}rem;
     line-height: ${22 / 16}rem;
     font-weight: 400;
-    margin-bottom: 8px;
   }
 `;
 

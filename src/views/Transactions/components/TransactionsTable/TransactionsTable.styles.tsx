@@ -45,7 +45,7 @@ export const HeadCell = styled(BaseHeadCell)`
 export const TableLogo = styled.img`
   height: 15px;
   margin-right: 4px;
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIES.tabletAndDown} {
     margin-left: 16px;
   }
 `;
