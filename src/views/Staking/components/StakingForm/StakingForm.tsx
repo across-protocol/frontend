@@ -1,8 +1,18 @@
 import { useState } from "react";
 
-import { Wrapper, Tabs, Tab } from "./StakingForm.styles";
+import {
+  Wrapper,
+  Tabs,
+  Tab,
+  InputRow,
+  InputWrapper,
+  Input,
+  ButtonWrapper,
+  StakeButton,
+} from "./StakingForm.styles";
 export const StakingForm = () => {
   const [activeTab, setActiveTab] = useState(0);
+  const [stakeAmount, setStakeAmount] = useState("");
   return (
     <Wrapper>
       <Tabs>
@@ -13,6 +23,19 @@ export const StakingForm = () => {
           Unstake
         </Tab>
       </Tabs>
+      <InputRow>
+        <InputWrapper>
+          <Input
+            placeholder="Enter amount"
+            value={stakeAmount}
+            type="text"
+            onChange={(e) => setStakeAmount(e.target.value)}
+          />
+        </InputWrapper>
+        <ButtonWrapper>
+          <StakeButton>Stake</StakeButton>
+        </ButtonWrapper>
+      </InputRow>
     </Wrapper>
   );
 };
