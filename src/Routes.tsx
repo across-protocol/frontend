@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
+
 import {
   Send,
   Pool,
@@ -7,6 +8,7 @@ import {
   MyTransactions,
   AllTransactions,
   Rewards,
+  Staking,
   Claim,
   NotFound,
 } from "views";
@@ -20,6 +22,8 @@ import {
   WrongNetworkError,
   rewardsBannerWarning,
   generalMaintenanceMessage,
+  stringValueInArray,
+  getConfig,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
@@ -36,6 +40,7 @@ function useRoutes() {
   const location = useLocation();
   const history = useHistory();
   const { error, removeError } = useError();
+  const config = getConfig();
   // force the user on /pool page if showMigrationPage is active.
   useEffect(() => {
     if (enableMigration && location.pathname !== "/pool") {
@@ -51,6 +56,7 @@ function useRoutes() {
     removeError,
     location,
     isContractAddress,
+    config,
   };
 }
 // Need this component for useLocation hook
@@ -61,6 +67,7 @@ const Routes: React.FC = () => {
     error,
     removeError,
     location,
+    config,
     isContractAddress,
   } = useRoutes();
 
@@ -105,7 +112,23 @@ const Routes: React.FC = () => {
         <Route exact path="/pool" component={Pool} />
         <Route exact path="/about" component={About} />
         <Route exact path="/rewards" component={Rewards} />
-        <Route exact path="/rewards/claim" component={Claim} />
+        <Route exact path="/airdrop" component={Claim} />
+        <Route
+          exact
+          path="/rewards/staking/:poolId"
+          render={({ match }) => {
+            const poolIdFound = stringValueInArray(
+              match.params.poolId.toLowerCase(),
+              config.getPoolSymbols()
+            );
+
+            if (poolIdFound) {
+              return <Staking />;
+            } else {
+              return <NotFound custom404Message="Pool not found." />;
+            }
+          }}
+        />
         <Route exact path="/" component={Send} />
         <Route path="*" component={NotFound} />
       </Switch>

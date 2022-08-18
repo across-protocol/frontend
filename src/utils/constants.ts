@@ -14,6 +14,7 @@ import { relayFeeCalculator } from "@across-protocol/sdk-v2";
 import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import GoerliRoutes from "data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
+import { parseEtherLike } from "./format";
 
 /* Chains and Tokens section */
 export enum ChainId {
@@ -43,6 +44,11 @@ export const QUERIES = {
   desktopAndUp: `(min-width: ${BREAKPOINTS.desktopMin / 16}rem)`,
   tabletAndDown: `(max-width: ${(BREAKPOINTS.laptopMin - 1) / 16}rem)`,
   mobileAndDown: `(max-width: ${(BREAKPOINTS.tabletMin - 1) / 16}rem)`,
+};
+
+export const QUERIESV2 = {
+  xs: `(max-width: 400px)`,
+  sm: `(max-width: 576px)`,
 };
 
 export const COLORS = {
@@ -708,6 +714,8 @@ const getQueriesTable = () => {
   };
 };
 
+export const fixedPointAdjustment = parseEtherLike("1.0");
+
 export const queriesTable = getQueriesTable();
 
 export const referrerDelimiterHex = "0xd00dfeeddeadbeef";
@@ -716,3 +724,7 @@ export const usdcLpCushion = process.env.REACT_APP_USDC_LP_CUSHION || "0";
 export const wethLpCushion = process.env.REACT_APP_WETH_LP_CUSHION || "0";
 export const wbtcLpCushion = process.env.REACT_APP_WBTC_LP_CUSHION || "0";
 export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
+
+export function stringValueInArray(value: string, arr: string[]) {
+  return arr.indexOf(value) !== -1;
+}

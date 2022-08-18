@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumber, BigNumberish, ethers } from "ethers";
 import assert from "assert";
 
 export function isValidString(s: string | null | undefined | ""): s is string {
@@ -84,6 +84,13 @@ export function formatUnits(
   return smallNumberFormatter(value);
 }
 
+export function formatUnitsFnBuilder(decimals: number) {
+  function closure(wei: ethers.BigNumberish) {
+    return formatUnits(wei, decimals);
+  }
+  return closure;
+}
+
 export function formatEther(wei: ethers.BigNumberish): string {
   return formatUnits(wei, 18);
 }
@@ -96,8 +103,46 @@ export function parseUnits(value: string, decimals: number): ethers.BigNumber {
   return ethers.utils.parseUnits(value, decimals);
 }
 
-export function parseEther(value: string): ethers.BigNumber {
+export function parseUnitsFnBuilder(decimals: number) {
+  function closure(value: string) {
+    return parseUnits(value, decimals);
+  }
+  return closure;
+}
+
+export function parseEtherLike(value: string): ethers.BigNumber {
   return parseUnits(value, 18);
+}
+
+/**
+ * Checks if a given input is parseable
+ * @param amount A bignumberish value that will be attempted to be parsed
+ * @returns A boolean if this value can be parsed
+ */
+export function isNumberEthersParseable(amount: BigNumberish): boolean {
+  try {
+    parseEtherLike(amount.toString());
+    return true;
+  } catch (_e) {
+    return false;
+  }
+}
+
+/**
+ * Returns the formatted number version of a BigNumber value
+ * @param value A bignumber to be converted via `formatEther` and returned
+ * @param decimals The number of units to format `value` with. Default: 18
+ * @returns `formatEther(value)` as a Number, or NaN if impossible
+ */
+export function formattedBigNumberToNumber(
+  value: BigNumber,
+  decimals: number = 18
+): number {
+  try {
+    return Number(formatUnits(value, decimals));
+  } catch (_e) {
+    return Number.NaN;
+  }
 }
 
 export function stringToHex(value: string) {

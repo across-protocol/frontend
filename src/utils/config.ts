@@ -9,6 +9,10 @@ import {
 } from "@across-protocol/contracts-v2";
 import filter from "lodash/filter";
 import sortBy from "lodash/sortBy";
+import {
+  AcceleratingDistributor,
+  AcceleratingDistributor__factory,
+} from "@across-protocol/across-token";
 
 export type Token = constants.TokenInfo & {
   l1TokenAddress: string;
@@ -78,6 +82,9 @@ export class ConfigClient {
   getHubPoolAddress(): string {
     return this.config.hubPoolAddress;
   }
+  getAcceleratingDistributorAddress(): string {
+    return "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4";
+  }
   getL1TokenAddressBySymbol(symbol: string) {
     // all routes have an l1Token address, so just find the first symbol that matches
     const route = this.getRoutes().find((x) => x.fromTokenSymbol === symbol);
@@ -88,6 +95,11 @@ export class ConfigClient {
     const address = this.getHubPoolAddress();
     const provider = signer ?? constants.getProvider(this.getHubPoolChainId());
     return HubPool__factory.connect(address, provider);
+  }
+  getAcceleratingDistributor(signer?: Signer): AcceleratingDistributor {
+    const address = this.getAcceleratingDistributorAddress();
+    const provider = signer ?? constants.getProvider(this.getHubPoolChainId());
+    return AcceleratingDistributor__factory.connect(address, provider);
   }
   filterRoutes(query: Partial<constants.Route>): constants.Routes {
     const cleanQuery: Partial<constants.Route> = Object.fromEntries(
@@ -192,6 +204,11 @@ export class ConfigClient {
     );
     // use token sorting when returning reachable tokens
     return sortBy(reachableTokens, (token) => this.tokenOrder[token.symbol]);
+  }
+  getPoolSymbols(): string[] {
+    const tokenList = this.getTokenList(1);
+    const poolSymbols = tokenList.map((token) => token.symbol.toLowerCase());
+    return poolSymbols;
   }
 }
 

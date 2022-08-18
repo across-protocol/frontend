@@ -10,7 +10,7 @@ import { useMyTransactionsView } from "./hooks/useMyTransactionsView";
 import { ConnectButton, Account, ButtonWrapper } from "./Transactions.styles";
 import { TransactionsLayout } from "./components/TransactionsLayout";
 
-export function MyTransactions() {
+export default function MyTransactions() {
   const {
     connectWallet,
     account,

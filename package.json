@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@across-protocol/across-token": "^0.0.1",
     "@across-protocol/contracts-v2": "^0.0.34",
     "@across-protocol/sdk-v2": "^0.1.24",
     "@datapunt/matomo-tracker-js": "^0.5.1",

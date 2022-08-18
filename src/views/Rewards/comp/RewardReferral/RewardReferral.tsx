@@ -16,19 +16,18 @@ import {
   LightGrayItemText,
   WarningInfoItem,
   ConnectButton,
-  ExternalLink,
   CopyIconDesktop,
   CopyIconMobile,
   InfoIcon,
   CopyCheckmark,
-  ExternalLinkIcon,
   ArrowSeparator,
   RewardsInfo,
 } from "./RewardReferral.styles";
 
 import { shortenAddress } from "utils";
 import { ReferralsSummary } from "hooks/useReferralSummary";
-import { PopperTooltip } from "../../../../components/Tooltip";
+import { PopperTooltip } from "components/Tooltip";
+import { ExternalLink } from "components/ExternalLink";
 import StepperWithTooltips from "../StepperWithTooltips";
 import { useConnection } from "state/hooks";
 
@@ -126,11 +125,8 @@ const ReferralLinkComponent: React.FC<{
           </ConnectButton>
           <ExternalLink
             href="https://docs.across.to/v2/how-to-use-across/referral-program"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn more <ExternalLinkIcon />
-          </ExternalLink>
+            text="Learn more"
+          />
         </ReferralLinkButtonsRow>
       )}
     </ReferralLinkBlock>

@@ -26,7 +26,7 @@ import {
   daiLpCushion,
 } from "./constants";
 
-import { parseEther, tagAddress } from "./format";
+import { parseEtherLike, tagAddress } from "./format";
 import { getConfig } from "utils";
 
 export type Fee = {
@@ -105,7 +105,7 @@ export async function getLpFee(
   );
   result.isLiquidityInsufficient =
     await lpFeeCalculator.isLiquidityInsufficient(l1TokenAddress, amount);
-  result.total = amount.mul(result.pct).div(parseEther("1"));
+  result.total = amount.mul(result.pct).div(parseEtherLike("1"));
   return result;
 }
 

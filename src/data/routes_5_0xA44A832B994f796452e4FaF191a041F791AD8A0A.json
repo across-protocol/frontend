@@ -1,6 +1,6 @@
 {
   "hubPoolChain": 5,
-  "hubPoolAddress": "0xA44A832B994f796452e4FaF191a041F791AD8A0A",
+  "hubPoolAddress": "0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d",
   "hubPoolWethAddress": "0x60D4dB9b534EF9260a88b0BED6c486fe13E604Fc",
   "routes": [
     {
