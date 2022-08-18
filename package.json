@@ -56,7 +56,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "serve": "serve -s build",
-    "test-api": "jest",
+    "test-api": "jest test/api",
     "eject": "react-scripts eject",
     "lint": "eslint ./src",
     "lint:fix": "eslint --fix ./src",
