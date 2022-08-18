@@ -33,15 +33,17 @@ export const Tab = styled.div<ITab>`
   text-align: center;
   padding: 24px 0 20px;
   border-bottom: ${(props) =>
-    props.active ? "2px solid #e0f3ff" : "2px solid transparent"};
+    props.active ? "2px solid #e0f3ff" : "1px solid #3E4047"};
   cursor: pointer;
 `;
 
 export const InputRow = styled.div`
   display: flex;
   width: calc(100% - 48px);
-  margin: 0 auto;
+  margin: 0 auto 24px;
   gap: 16px;
+  border-bottom: 1px solid #3e4047;
+  padding-bottom: 24px;
 `;
 
 export const InputWrapper = styled.div`
@@ -49,7 +51,12 @@ export const InputWrapper = styled.div`
 `;
 
 export const Input = styled.input`
+  height: 64px;
   padding: 9px 24px;
+  width: 100%;
+  background: #2d2e33;
+  border: 1px solid #4c4e57;
+  border-radius: 32px;
 `;
 
 export const ButtonWrapper = styled.div`
@@ -58,8 +65,7 @@ export const ButtonWrapper = styled.div`
 export const StakeButton = styled(UnstyledButton)`
   background: #6cf9d8;
   padding: 0px 40px;
-  gap: 4px;
   height: 64px;
   color: #2d2e33;
-  flex-grow: 1;
+  width: 125px;
 `;
