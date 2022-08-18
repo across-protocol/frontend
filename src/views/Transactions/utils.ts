@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history";
 
 import { Deposit } from "hooks/useDeposits";
@@ -35,15 +34,8 @@ export function doPartialFillsExist(pendingTransferTuples: SupportedTxTuple[]) {
 
 export function formatToTransfer(deposit: Deposit): Transfer {
   return {
-    depositId: deposit.depositId,
-    depositTime: DateTime.fromISO(deposit.createdAt).toSeconds(),
-    status: deposit.status,
+    ...deposit,
     filled: BigNumber.from(deposit.filled),
-    sourceChainId: deposit.sourceChainId,
-    destinationChainId: deposit.destinationChainId,
-    assetAddr: deposit.tokenAddr,
     amount: BigNumber.from(deposit.amount),
-    depositTxHash: deposit.depositTxHash,
-    fillTxs: deposit.fillTxs.map(({ hash }) => hash),
   };
 }

@@ -2,39 +2,19 @@ import axios from "axios";
 import { useQuery } from "react-query";
 import { rewardsApiUrl, depositsQueryKey } from "utils";
 
-export type FillTx = {
-  hash: string;
-  fillAmount: string;
-  realizedLpFeePct: string;
-  totalFilledAmount: string;
-  appliedRelayerFeePct: string;
-};
-
 export type DepositStatus = "pending" | "filled";
 
 export type Deposit = {
-  id: number;
   depositId: number;
+  depositTime: number;
+  status: DepositStatus;
+  filled: string;
   sourceChainId: number;
   destinationChainId: number;
-  depositDate: null | string;
-  depositorAddr: string;
-  status: DepositStatus;
+  assetAddr: string;
   amount: string;
-  filled: string;
-  realizedLpFeePct: string;
-  realizedLpFeePctCapped: string;
-  bridgeFeePct: string;
-  tokenAddr: string;
-  tokenId: null | number;
-  priceId: null | number;
   depositTxHash: string;
-  fillTxs: FillTx[];
-  blockNumber: number;
-  referralAddress: null | string;
-  stickyReferralAddress: null | string;
-  createdAt: string;
-  updatedAt: string;
+  fillTxs: string[];
 };
 
 type Pagination = {
