@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 
@@ -9,6 +10,12 @@ type Props = {
   onClickPartialFillInfoIcon: () => void;
 };
 
+const InfoIcon = styled(FontAwesomeIcon)`
+  color: #6cf9d7;
+  cursor: pointer;
+  margin-left: 8px;
+`;
+
 export function HeadRow(props: Props) {
   return (
     <TableHeadRow>
@@ -17,11 +24,7 @@ export function HeadRow(props: Props) {
       <HeadCell>
         Filled %
         {props.showPartialFillInfoIcon ? (
-          <FontAwesomeIcon
-            style={{
-              color: "#6CF9D7",
-              cursor: "pointer",
-            }}
+          <InfoIcon
             onClick={props.onClickPartialFillInfoIcon}
             icon={faCircleInfo}
           />
