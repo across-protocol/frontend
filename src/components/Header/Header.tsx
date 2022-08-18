@@ -15,6 +15,7 @@ import MenuToggle from "./MenuToggle";
 import { enableMigration } from "utils";
 import { ReactComponent as Logo } from "assets/across-mobile-logo.svg";
 import useScrollPosition from "hooks/useScrollPosition";
+import { isChildPath } from "./utils";
 
 const LINKS = !enableMigration
   ? [
@@ -51,7 +52,7 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
           {LINKS.map(({ href, name }) => (
             <Item
               key={href}
-              aria-selected={isLinkSelected(location.pathname, href)}
+              aria-selected={isChildPath(location.pathname, href)}
             >
               <Link
                 to={{
@@ -77,7 +78,3 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
 };
 
 export default Header;
-
-function isLinkSelected(pathname: string, href: string) {
-  return pathname.split("/")[1] === href.split("/")[1];
-}
