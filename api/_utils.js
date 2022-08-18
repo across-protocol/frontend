@@ -428,4 +428,5 @@ module.exports = {
   dummyFromAddress,
   disabledL1Tokens,
   resolveVercelEndpoint,
+  getSpokePool,
 };
