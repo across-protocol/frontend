@@ -32,7 +32,7 @@ export function AllTransactions() {
       showPendingTransactions={showPendingTransactions}
       showLoading={isLoading}
       ethNoteWrapperText={
-        "Note - ETH transfers will appear as WETH but you will receive ETH"
+        "Note - ETH transfers will appear as WETH but the depositor will receive ETH"
       }
       TitleContent={"All Transactions"}
       PendingTransactionsTable={
