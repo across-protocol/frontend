@@ -123,11 +123,11 @@
     {
       "fromChain": 1,
       "toChain": 137,
-      "fromTokenAddress": "0xba100000625a3754423978a60c9317c58a424e3d",
+      "fromTokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D",
       "fromSpokeAddress": "0x4D9079Bb4165aeb4084c526a32695dCfd2F77381",
       "fromTokenSymbol": "BAL",
       "isNative": false,
-      "l1TokenAddress": "0xba100000625a3754423978a60c9317c58a424e3d"
+      "l1TokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D"
     },
     {
       "fromChain": 1,

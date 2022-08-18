@@ -158,9 +158,7 @@ export class ConfigClient {
   // this has a chance to mix up eth/weth which can be a problem. prefer token by symbol.
   getTokenInfoByAddress(chainId: number, address: string): Token {
     const tokens = this.getTokenList(chainId);
-    const token = tokens.find(
-      (token) => token.address.toLowerCase() === address.toLowerCase()
-    );
+    const token = tokens.find((token) => token.address === address);
     assert(
       token,
       `Token not found on chain: ${chainId} and address ${address}`
