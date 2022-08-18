@@ -9,6 +9,10 @@ import {
   Input,
   ButtonWrapper,
   StakeButton,
+  StakeInfo,
+  StakeInfoItem,
+  StakeInfoItemSmall,
+  LightGrayItemText,
 } from "./StakingForm.styles";
 export const StakingForm = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -36,6 +40,20 @@ export const StakingForm = () => {
           <StakeButton>Stake</StakeButton>
         </ButtonWrapper>
       </InputRow>
+      <StakeInfo>
+        <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
+        <StakeInfoItem>
+          10,000.00
+          <LightGrayItemText margin={4}>/ 32,424.24 USDC-LP</LightGrayItemText>
+        </StakeInfoItem>
+        <StakeInfoItem>Age of capital</StakeInfoItem>
+        <StakeInfoItem>50 days</StakeInfoItem>
+        <StakeInfoItem>Multiplier</StakeInfoItem>
+        <StakeInfoItem>2.00x</StakeInfoItem>
+        <StakeInfoItemSmall>
+          Note: Multipliers of previously staked tokens are not impacted
+        </StakeInfoItemSmall>
+      </StakeInfo>
     </Wrapper>
   );
 };

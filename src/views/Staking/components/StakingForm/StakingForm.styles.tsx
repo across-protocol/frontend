@@ -40,7 +40,7 @@ export const Tab = styled.div<ITab>`
 export const InputRow = styled.div`
   display: flex;
   width: calc(100% - 48px);
-  margin: 0 auto 24px;
+  margin: 0 auto;
   gap: 16px;
   border-bottom: 1px solid #3e4047;
   padding-bottom: 24px;
@@ -68,4 +68,66 @@ export const StakeButton = styled(UnstyledButton)`
   height: 64px;
   color: #2d2e33;
   width: 125px;
+`;
+
+export const StakeInfo = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  flex-wrap: wrap;
+  width: calc(100% - 48px);
+  border-bottom: 1px solid #3e4047;
+
+  @media (max-width: 568px) {
+    flex-direction: column;
+  }
+
+  @media (max-width: 428px) {
+    padding: 4px 0 0;
+  }
+`;
+
+export const StakeInfoItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding-top: 12px;
+  width: 40%;
+  color: #9daab2;
+  font-size: ${16 / 16}rem;
+  line-height: ${20 / 16}rem;
+  font-weight: 400;
+
+  &:nth-of-type(2n) {
+    width: 60%;
+    justify-content: flex-end;
+    color: #e0f3ff;
+  }
+
+  @media (max-width: 568px) {
+    width: 100% !important;
+
+    &:nth-of-type(2n) {
+      flex-direction: row-reverse;
+      padding-top: 4px;
+    }
+
+    &:nth-of-type(2n + 1) {
+      padding-top: 16px;
+    }
+  }
+
+  @media (max-width: 428px) {
+    font-size: ${14 / 16}rem;
+    line-height: ${18 / 16}rem;
+  }
+`;
+
+export const LightGrayItemText = styled.span<{ margin?: number }>`
+  color: #9daab2;
+  margin: ${({ margin }) => (margin ? `0 ${margin}px` : 0)};
+`;
+
+export const StakeInfoItemSmall = styled(StakeInfoItem)`
+  font-size: ${14 / 16}rem;
+  width: 80%;
 `;
