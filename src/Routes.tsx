@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
+
 import {
   Send,
   Pool,
@@ -8,6 +9,7 @@ import {
   Rewards,
   Claim,
   NotFound,
+  PoolRewards,
 } from "views";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
 import { useConnection } from "state/hooks";
@@ -79,6 +81,7 @@ const Routes: React.FC = () => {
         <Route exact path="/about" component={About} />
         <Route exact path="/rewards" component={Rewards} />
         <Route exact path="/rewards/claim" component={Claim} />
+        <Route path="/rewards/:poolId" component={PoolRewards} />
         <Route exact path="/" component={Send} />
         <Route path="*" component={NotFound} />
       </Switch>
