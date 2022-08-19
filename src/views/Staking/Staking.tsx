@@ -1,10 +1,15 @@
 import { useStakingView } from "./useStakingView";
 import { Wrapper } from "./Staking.styles";
+import { StakingExitAction } from "./components";
 
 const Staking = () => {
-  const { poolId } = useStakingView();
+  const { poolId, exitLinkURI } = useStakingView();
 
-  return <Wrapper>{poolId}</Wrapper>;
+  return (
+    <Wrapper>
+      <StakingExitAction poolId={poolId} exitLinkURI={exitLinkURI} />
+    </Wrapper>
+  );
 };
 
 export default Staking;

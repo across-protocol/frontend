@@ -9,5 +9,6 @@ export const useStakingView = () => {
 
   return {
     poolId,
+    exitLinkURI: "/rewards",
   };
 };
