@@ -1,10 +1,12 @@
-import { useStakingView } from "./useStakingView";
 import { Wrapper } from "./Staking.styles";
+import { StakingReward } from "./components";
 
 const Staking = () => {
-  const { poolId } = useStakingView();
-
-  return <Wrapper>{poolId}</Wrapper>;
+  return (
+    <Wrapper>
+      <StakingReward />
+    </Wrapper>
+  );
 };
 
 export default Staking;
