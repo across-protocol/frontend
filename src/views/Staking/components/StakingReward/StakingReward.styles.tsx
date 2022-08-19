@@ -140,7 +140,6 @@ export const StakingClaimAmountInnerWrapper = styled.div`
   justify-content: center;
   padding: 0px;
   gap: 6px;
-  width: 67px;
   height: 20px;
   border-radius: 4px;
   flex: none;
