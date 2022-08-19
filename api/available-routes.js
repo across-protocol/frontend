@@ -1,6 +1,7 @@
 const { HubPool__factory } = require("@across-protocol/contracts-v2");
 
 const { getLogger, InputError, getProvider } = require("./_utils");
+const enabledRoutesAsJson = require("../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json");
 
 const handler = async (request, response) => {
   const logger = getLogger();
@@ -17,35 +18,11 @@ const handler = async (request, response) => {
       getProvider("1")
     );
 
-    // Find events from the SetEnableDepositRoute in block-sorted order
-    const result = (
-      await hubPool.queryFilter(hubPool.filters.SetEnableDepositRoute())
-    ).sort((a, b) => {
-      return a.blockNumber - b.blockNumber;
-    });
-    // Replay all events in block order to determine the token/chain pairs
-    // that are currently enabled for deposits.
-    let enabledRoutes = Object.values(
-      // Leverage lookup times of a hashmap to quickly add routes to this
-      // search / update them if their enabled status changes
-      result.reduce((accumulator, event) => {
-        const {
-          originChainId,
-          originToken,
-          destinationChainId,
-          depositsEnabled: enabled,
-        } = event.args;
-        accumulator[`${originChainId}:${originToken}:${destinationChainId}`] = {
-          enabled,
-          originToken,
-          destinationChainId: destinationChainId.toString(),
-          originChainId: originChainId.toString(),
-        };
-        return accumulator;
-      }, {})
-    )
-      // Filter the set to only include enabled routes
-      .filter((event) => event.enabled);
+    let enabledRoutes = enabledRoutesAsJson.routes.map((route) => ({
+      originChainId: route.fromChain,
+      originToken: route.fromTokenAddress,
+      destinationChainId: route.toChain,
+    }));
 
     // Generate a mapping that contains similar tokens on each chain
     // Note:  The key in this dictionary represents an l1Token address, and
