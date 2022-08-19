@@ -7,6 +7,11 @@ import {
   InnerWrapper,
   Divider,
   AlertInfoWrapper,
+  StakingClaimAmountWrapper,
+  StakingClaimAmountText,
+  StakingClaimAmountTitle,
+  StakingClaimAmountInnerWrapper,
+  PresentIcon,
 } from "./StakingReward.styles";
 
 export const StakingReward = () => {
@@ -30,7 +35,15 @@ export const StakingReward = () => {
       <InnerWrapper>
         <Divider />
       </InnerWrapper>
-      <InnerWrapper></InnerWrapper>
+      <InnerWrapper>
+        <StakingClaimAmountWrapper>
+          <StakingClaimAmountTitle>Claimable</StakingClaimAmountTitle>
+          <StakingClaimAmountInnerWrapper>
+            <PresentIcon />
+            <StakingClaimAmountText>320.19</StakingClaimAmountText>
+          </StakingClaimAmountInnerWrapper>
+        </StakingClaimAmountWrapper>
+      </InnerWrapper>
     </Wrapper>
   );
 };

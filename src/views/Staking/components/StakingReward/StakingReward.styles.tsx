@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { AlertCircle } from "react-feather";
+import { AlertCircle, Gift } from "react-feather";
 
 export const Wrapper = styled.div`
   box-sizing: border-box;
@@ -10,7 +10,6 @@ export const Wrapper = styled.div`
   gap: 24px;
 
   width: 600px;
-  height: 263px;
 
   /* Tints & Shades/Grey/23 */
 
@@ -99,5 +98,52 @@ export const Divider = styled.div`
   flex: none;
   order: 0;
   align-self: stretch;
+  flex-grow: 0;
+`;
+
+export const StakingClaimAmountWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px;
+  gap: 6px;
+
+  width: 552px;
+  height: 20px;
+`;
+
+export const StakingClaimAmountText = styled.div`
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+
+  color: #e0f3ff;
+`;
+
+export const StakingClaimAmountTitle = styled(StakingClaimAmountText)`
+  color: #9daab2;
+`;
+
+export const PresentIcon = styled(Gift)`
+  color: var(--color-primary);
+  width: 16px;
+  height: 16px;
+`;
+
+export const StakingClaimAmountInnerWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0px;
+  gap: 6px;
+  width: 67px;
+  height: 20px;
+  border-radius: 4px;
+  flex: none;
+  order: 1;
   flex-grow: 0;
 `;
