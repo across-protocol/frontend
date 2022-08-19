@@ -16,16 +16,26 @@ import {
   MutliplierValue,
   StyledProgressBar,
 } from "./StakingForm.styles";
+import { capitalizeFirstLetter } from "utils/format";
+
+type StakeTab = "stake" | "unstake";
+
 export const StakingForm = () => {
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [stakeAmount, setStakeAmount] = useState("");
   return (
     <Wrapper>
       <Tabs>
-        <Tab onClick={() => setActiveTab(0)} active={activeTab === 0}>
+        <Tab
+          onClick={() => setActiveTab("stake")}
+          active={activeTab === "stake"}
+        >
           Stake
         </Tab>
-        <Tab onClick={() => setActiveTab(1)} active={activeTab === 1}>
+        <Tab
+          onClick={() => setActiveTab("unstake")}
+          active={activeTab === "unstake"}
+        >
           Unstake
         </Tab>
       </Tabs>
@@ -39,7 +49,7 @@ export const StakingForm = () => {
           />
         </InputWrapper>
         <ButtonWrapper>
-          <StakeButton>Stake</StakeButton>
+          <StakeButton>{capitalizeFirstLetter(activeTab)}</StakeButton>
         </ButtonWrapper>
       </InputRow>
       <StakeInfo>

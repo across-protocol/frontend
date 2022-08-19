@@ -69,7 +69,6 @@ export const StakeButton = styled(UnstyledButton)`
   padding: 0px 40px;
   height: 64px;
   color: #2d2e33;
-  width: 125px;
 `;
 
 export const StakeInfo = styled.div`
