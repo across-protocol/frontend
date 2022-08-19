@@ -4,6 +4,7 @@ import ProgressBar from "components/ProgressBar";
 import { ReactComponent as UnstyedUsdcLogo } from "assets/icons/usdc-green-16.svg";
 import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
 import { QUERIESV2 } from "utils";
+
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;

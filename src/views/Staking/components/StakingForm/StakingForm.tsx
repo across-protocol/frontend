@@ -1,33 +1,32 @@
 import { useState } from "react";
-
 import {
   Wrapper,
   Tabs,
   Tab,
-  InputRow,
-  InputWrapper,
-  Input,
-  ButtonWrapper,
-  StakeButton,
   StakeInfo,
   StakeInfoItem,
   StakeInfoItemSmall,
   LightGrayItemText,
   MutliplierValue,
   StyledProgressBar,
-  UsdcLogo,
-  MaxButton,
   APYInfo,
   APYInfoItem,
   ArrowIcon,
 } from "./StakingForm.styles";
-import { capitalizeFirstLetter } from "utils/format";
+
+import StakingInputBlock from "./StakingInputBlock";
 
 type StakeTab = "stake" | "unstake";
 
 export const StakingForm = () => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [stakeAmount, setStakeAmount] = useState("");
+
+  // Stub data for form
+  function validateStakeAmount(amount: string) {
+    return amount.length > 0;
+  }
+
   return (
     <Wrapper>
       <Tabs>
@@ -44,23 +43,12 @@ export const StakingForm = () => {
           Unstake
         </Tab>
       </Tabs>
-      <InputRow>
-        <InputWrapper>
-          <UsdcLogo />
-          <Input
-            placeholder="Enter amount"
-            value={stakeAmount}
-            type="text"
-            onChange={(e) => setStakeAmount(e.target.value)}
-          />
-          <MaxButton>Max</MaxButton>
-        </InputWrapper>
-        <ButtonWrapper>
-          <StakeButton valid={!!stakeAmount}>
-            {capitalizeFirstLetter(activeTab)}
-          </StakeButton>
-        </ButtonWrapper>
-      </InputRow>
+      <StakingInputBlock
+        value={stakeAmount}
+        setValue={setStakeAmount}
+        valid={validateStakeAmount(stakeAmount)}
+        buttonText={activeTab}
+      />
       <StakeInfo>
         <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
         <StakeInfoItem>
