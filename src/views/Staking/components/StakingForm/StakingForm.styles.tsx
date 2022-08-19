@@ -3,7 +3,7 @@ import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Butto
 import ProgressBar from "components/ProgressBar";
 import { ReactComponent as UnstyedUsdcLogo } from "assets/icons/usdc-green-16.svg";
 import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
-
+import { QUERIESV2 } from "utils";
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -48,6 +48,10 @@ export const InputRow = styled.div`
   gap: 16px;
   border-bottom: 1px solid #3e4047;
   padding-bottom: 24px;
+  flex-direction: row;
+  @media ${QUERIESV2.sm} {
+    flex-direction: column;
+  }
 `;
 
 export const UsdcLogo = styled(UnstyedUsdcLogo)`
@@ -100,11 +104,23 @@ export const MaxButton = styled(UnstyledButton)`
 export const ButtonWrapper = styled.div`
   flex-grow: 1;
 `;
-export const StakeButton = styled(UnstyledButton)`
+
+interface IStakeButton {
+  valid: boolean;
+}
+export const StakeButton = styled(UnstyledButton)<IStakeButton>`
   background: #6cf9d8;
   padding: 0px 40px;
   height: 64px;
   color: #2d2e33;
+  opacity: ${({ valid }) => (valid ? 1 : 0.25)};
+  @media ${QUERIESV2.sm} {
+    text-align: center;
+    width: 100%;
+    height: 40px;
+    padding: 0px 20px;
+    border-radius: 20px;
+  }
 `;
 
 export const StakeInfo = styled.div`
@@ -176,6 +192,7 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
   max-width: 60px;
   margin-right: 7px;
   height: 14px;
+  margin-top: 5px;
   > div {
     height: 8px;
   }
@@ -184,20 +201,40 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
 export const MutliplierValue = styled.div`
   font-weight: 400;
   font-size: 1rem;
-  color: #e0f3ff; ;
+  color: #e0f3ff;
+  display: inline-flex;
+  flex-grow: 2;
+  justify-content: flex-end;
+  @media ${QUERIESV2.sm} {
+    justify-content: flex-start;
+  }
 `;
 
 export const APYInfo = styled(StakeInfo)`
   padding-bottom: 24px;
+  @media ${QUERIESV2.sm} {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
 `;
 
 export const APYInfoItem = styled(StakeInfoItem)`
   padding-top: 0;
   color: #c5d5e0;
+  @media ${QUERIESV2.sm} {
+    &:nth-of-type(2n) {
+      padding-top: 0;
+    }
+    &:nth-of-type(2n + 1) {
+      padding-top: 0;
+    }
+    width: 40% !important;
+  }
 `;
 
 export const ArrowIcon = styled(UnstyledArrowIcon)`
   margin-right: 11px;
+  cursor: pointer;
   path {
     stroke: #9daab2;
   }

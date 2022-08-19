@@ -56,7 +56,9 @@ export const StakingForm = () => {
           <MaxButton>Max</MaxButton>
         </InputWrapper>
         <ButtonWrapper>
-          <StakeButton>{capitalizeFirstLetter(activeTab)}</StakeButton>
+          <StakeButton valid={!!stakeAmount}>
+            {capitalizeFirstLetter(activeTab)}
+          </StakeButton>
         </ButtonWrapper>
       </InputRow>
       <StakeInfo>
@@ -69,8 +71,10 @@ export const StakingForm = () => {
         <StakeInfoItem>50 days</StakeInfoItem>
         <StakeInfoItem>Multiplier</StakeInfoItem>
         <StakeInfoItem>
-          <StyledProgressBar percent={50} />
-          <MutliplierValue>1.5x</MutliplierValue>
+          <MutliplierValue>
+            <StyledProgressBar percent={50} />
+            1.5x
+          </MutliplierValue>
         </StakeInfoItem>
         <StakeInfoItemSmall>
           Note: Multipliers of previously staked tokens are not impacted
