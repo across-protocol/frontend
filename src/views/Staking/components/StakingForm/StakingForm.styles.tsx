@@ -3,6 +3,8 @@ import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Butto
 import ProgressBar from "components/ProgressBar";
 import { ReactComponent as UnstyedUsdcLogo } from "assets/icons/usdc-green-16.svg";
 import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
+import { ReactComponent as II } from "assets/icons/info-16.svg";
+
 import { QUERIESV2 } from "utils";
 
 export const Wrapper = styled.div`
@@ -244,4 +246,9 @@ export const ArrowIcon = styled(UnstyledArrowIcon)`
   path {
     stroke: #9daab2;
   }
+`;
+
+export const InfoIcon = styled(II)`
+  margin-left: 8px;
+  cursor: pointer;
 `;

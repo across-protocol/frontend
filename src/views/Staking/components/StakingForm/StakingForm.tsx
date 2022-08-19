@@ -13,9 +13,11 @@ import {
   APYInfoItem,
   ArrowIcon,
   UsdcLogo,
+  InfoIcon,
 } from "./StakingForm.styles";
 
 import StakingInputBlock from "./StakingInputBlock";
+import { PopperTooltip } from "components/Tooltip";
 
 type StakeTab = "stake" | "unstake";
 
@@ -57,9 +59,27 @@ export const StakingForm = () => {
           10,000.00
           <LightGrayItemText margin={4}>/ 32,424.24 USDC-LP</LightGrayItemText>
         </StakeInfoItem>
-        <StakeInfoItem>Age of capital</StakeInfoItem>
+        <StakeInfoItem>
+          Age of capital
+          <PopperTooltip
+            title="Age of capital"
+            body="The age of capital is the time since the last time you staked LP tokens."
+            placement="bottom-start"
+          >
+            <InfoIcon />
+          </PopperTooltip>
+        </StakeInfoItem>
         <StakeInfoItem>50 days</StakeInfoItem>
-        <StakeInfoItem>Multiplier</StakeInfoItem>
+        <StakeInfoItem>
+          Multiplier
+          <PopperTooltip
+            title="Multiplier"
+            body="The multiplier is the amount of LP tokens you get for staking."
+            placement="bottom-start"
+          >
+            <InfoIcon />
+          </PopperTooltip>
+        </StakeInfoItem>
         <StakeInfoItem>
           <MutliplierValue>
             <StyledProgressBar percent={50} />
