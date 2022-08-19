@@ -2,7 +2,7 @@ export { default as Send } from "./Send";
 export { default as Pool } from "./Pool";
 export { default as About } from "./About";
 export { default as Confirmation } from "./Confirmation";
-export { default as MyTransactions } from "./Transactions";
 export { default as Rewards } from "./Rewards";
 export { default as Claim } from "./Claim";
 export { default as Staking } from "./Staking";
+export { default as MyTransactions } from "./Transactions";
