@@ -56,8 +56,6 @@ export const InfoTextWrapper = styled.div`
   width: 552px;
   height: 20px;
 
-  /* Inside auto layout */
-
   flex: none;
   order: 0;
   align-self: stretch;
@@ -72,7 +70,6 @@ export const AlertInfoWrapper = styled(InfoTextWrapper)`
 `;
 
 export const InfoText = styled.p`
-  /* Body/Body SM/Regular */
   font-family: "Barlow";
   font-style: normal;
   font-weight: 400;
@@ -89,11 +86,7 @@ export const Divider = styled.div`
   width: 552px;
   height: 1px;
 
-  /* Tints & Shades/Grey/28 */
-
   background: #3e4047;
-
-  /* Inside auto layout */
 
   flex: none;
   order: 0;
