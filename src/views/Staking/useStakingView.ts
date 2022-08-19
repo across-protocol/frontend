@@ -12,5 +12,6 @@ export const useStakingView = () => {
     poolId,
     exitLinkURI: "/rewards",
     poolLogoURI: tokenList[0].logoURI,
+    poolName: poolId.toUpperCase(),
   };
 };

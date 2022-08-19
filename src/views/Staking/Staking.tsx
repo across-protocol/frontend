@@ -3,12 +3,12 @@ import { Wrapper } from "./Staking.styles";
 import { StakingExitAction } from "./components";
 
 const Staking = () => {
-  const { poolId, exitLinkURI, poolLogoURI } = useStakingView();
+  const { poolName, exitLinkURI, poolLogoURI } = useStakingView();
 
   return (
     <Wrapper>
       <StakingExitAction
-        poolId={poolId}
+        poolName={poolName}
         exitLinkURI={exitLinkURI}
         poolLogoURI={poolLogoURI}
       />

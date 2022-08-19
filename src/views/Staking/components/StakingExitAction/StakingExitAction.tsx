@@ -8,13 +8,13 @@ import {
 } from "./StakingExitAction.styles";
 
 type StakingExitActionAttributes = {
-  poolId: string;
+  poolName: string;
   exitLinkURI: string;
   poolLogoURI: string;
 };
 
 export const StakingExitAction = ({
-  poolId,
+  poolName,
   exitLinkURI,
   poolLogoURI,
 }: StakingExitActionAttributes) => {
@@ -24,7 +24,7 @@ export const StakingExitAction = ({
         <ExitIcon icon={faChevronLeft} />
       </StylizedLink>
       <Logo src={poolLogoURI} />
-      <Text>{poolId.toUpperCase()} Pool</Text>
+      <Text>{poolName} Pool</Text>
     </Wrapper>
   );
 };
