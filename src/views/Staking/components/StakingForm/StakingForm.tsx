@@ -56,8 +56,12 @@ export const StakingForm = () => {
       <StakeInfo>
         <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
         <StakeInfoItem>
-          10,000.00
-          <LightGrayItemText margin={4}>/ 32,424.24 USDC-LP</LightGrayItemText>
+          <div>
+            10,000.00
+            <LightGrayItemText margin={4}>
+              / 32,424.24 USDC-LP
+            </LightGrayItemText>
+          </div>
         </StakeInfoItem>
         <StakeInfoItem>
           Age of capital
