@@ -1,4 +1,5 @@
 import { useParams } from "react-router";
+import { tokenList } from "utils";
 
 type StakingPathParams = {
   poolId: string;
@@ -10,5 +11,6 @@ export const useStakingView = () => {
   return {
     poolId,
     exitLinkURI: "/rewards",
+    poolLogoURI: tokenList[0].logoURI,
   };
 };
