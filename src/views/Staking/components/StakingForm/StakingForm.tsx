@@ -15,6 +15,7 @@ import {
   LightGrayItemText,
   MutliplierValue,
   StyledProgressBar,
+  UsdcLogo,
 } from "./StakingForm.styles";
 import { capitalizeFirstLetter } from "utils/format";
 
@@ -41,6 +42,7 @@ export const StakingForm = () => {
       </Tabs>
       <InputRow>
         <InputWrapper>
+          <UsdcLogo />
           <Input
             placeholder="Enter amount"
             value={stakeAmount}

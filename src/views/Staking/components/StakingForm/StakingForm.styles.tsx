@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 import ProgressBar from "components/ProgressBar";
+import { ReactComponent as UnstyedUsdcLogo } from "assets/icons/usdc-green-16.svg";
 
 export const Wrapper = styled.div`
   display: flex;
@@ -48,17 +49,25 @@ export const InputRow = styled.div`
   padding-bottom: 24px;
 `;
 
+export const UsdcLogo = styled(UnstyedUsdcLogo)`
+  position: absolute;
+  left: 24px;
+  top: 20px;
+`;
+
 export const InputWrapper = styled.div`
   flex-grow: 8;
+  position: relative;
 `;
 
 export const Input = styled.input`
   height: 64px;
-  padding: 9px 24px;
+  padding: 9px 64px;
   width: 100%;
   background: #2d2e33;
   border: 1px solid #4c4e57;
   border-radius: 32px;
+  color: #e0f3ff;
 `;
 
 export const ButtonWrapper = styled.div`
