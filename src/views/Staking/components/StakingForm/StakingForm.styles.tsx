@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 import ProgressBar from "components/ProgressBar";
 import { ReactComponent as UnstyedUsdcLogo } from "assets/icons/usdc-green-16.svg";
+import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
 
 export const Wrapper = styled.div`
   display: flex;
@@ -184,4 +185,20 @@ export const MutliplierValue = styled.div`
   font-weight: 400;
   font-size: 1rem;
   color: #e0f3ff; ;
+`;
+
+export const APYInfo = styled(StakeInfo)`
+  padding-bottom: 24px;
+`;
+
+export const APYInfoItem = styled(StakeInfoItem)`
+  padding-top: 0;
+  color: #c5d5e0;
+`;
+
+export const ArrowIcon = styled(UnstyledArrowIcon)`
+  margin-right: 11px;
+  path {
+    stroke: #9daab2;
+  }
 `;

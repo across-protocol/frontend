@@ -17,6 +17,9 @@ import {
   StyledProgressBar,
   UsdcLogo,
   MaxButton,
+  APYInfo,
+  APYInfoItem,
+  ArrowIcon,
 } from "./StakingForm.styles";
 import { capitalizeFirstLetter } from "utils/format";
 
@@ -73,6 +76,13 @@ export const StakingForm = () => {
           Note: Multipliers of previously staked tokens are not impacted
         </StakeInfoItemSmall>
       </StakeInfo>
+      <APYInfo>
+        <APYInfoItem>
+          <ArrowIcon />
+          Your total APY
+        </APYInfoItem>
+        <APYInfoItem>2.81%</APYInfoItem>
+      </APYInfo>
     </Wrapper>
   );
 };
