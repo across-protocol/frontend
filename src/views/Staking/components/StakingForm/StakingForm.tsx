@@ -16,6 +16,7 @@ import {
   MutliplierValue,
   StyledProgressBar,
   UsdcLogo,
+  MaxButton,
 } from "./StakingForm.styles";
 import { capitalizeFirstLetter } from "utils/format";
 
@@ -49,6 +50,7 @@ export const StakingForm = () => {
             type="text"
             onChange={(e) => setStakeAmount(e.target.value)}
           />
+          <MaxButton>Max</MaxButton>
         </InputWrapper>
         <ButtonWrapper>
           <StakeButton>{capitalizeFirstLetter(activeTab)}</StakeButton>

@@ -70,6 +70,32 @@ export const Input = styled.input`
   color: #e0f3ff;
 `;
 
+export const MaxButton = styled(UnstyledButton)`
+  height: 24px;
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #c5d5e0;
+  position: absolute;
+  right: 24px;
+  top: 20px;
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #4c4e57;
+  border-radius: 24px;
+  &:hover {
+    color: #e0f3ff;
+    border-color: #e0f3ff;
+  }
+`;
+
 export const ButtonWrapper = styled.div`
   flex-grow: 1;
 `;
