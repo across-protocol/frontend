@@ -1,5 +1,7 @@
 import styled from "@emotion/styled";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
+import ProgressBar from "components/ProgressBar";
+
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -130,4 +132,22 @@ export const LightGrayItemText = styled.span<{ margin?: number }>`
 export const StakeInfoItemSmall = styled(StakeInfoItem)`
   font-size: ${14 / 16}rem;
   width: 80%;
+`;
+
+interface IStyledProgressBar {
+  className?: string;
+}
+export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
+  max-width: 60px;
+  margin-right: 7px;
+  height: 14px;
+  > div {
+    height: 8px;
+  }
+`;
+
+export const MutliplierValue = styled.div`
+  font-weight: 400;
+  font-size: 1rem;
+  color: #e0f3ff; ;
 `;

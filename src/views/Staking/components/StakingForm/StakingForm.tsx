@@ -13,6 +13,8 @@ import {
   StakeInfoItem,
   StakeInfoItemSmall,
   LightGrayItemText,
+  MutliplierValue,
+  StyledProgressBar,
 } from "./StakingForm.styles";
 export const StakingForm = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -49,7 +51,10 @@ export const StakingForm = () => {
         <StakeInfoItem>Age of capital</StakeInfoItem>
         <StakeInfoItem>50 days</StakeInfoItem>
         <StakeInfoItem>Multiplier</StakeInfoItem>
-        <StakeInfoItem>2.00x</StakeInfoItem>
+        <StakeInfoItem>
+          <StyledProgressBar percent={50} />
+          <MutliplierValue>1.5x</MutliplierValue>
+        </StakeInfoItem>
         <StakeInfoItemSmall>
           Note: Multipliers of previously staked tokens are not impacted
         </StakeInfoItemSmall>
