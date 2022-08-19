@@ -11,15 +11,10 @@ export const Wrapper = styled.div`
 
   width: 600px;
 
-  /* Tints & Shades/Grey/23 */
-
   background: #34353b;
-  /* Tints & Shades/Grey/28 */
 
   border: 1px solid #3e4047;
   border-radius: 10px;
-
-  /* Inside auto layout */
 
   flex: none;
   order: 1;
@@ -30,23 +25,16 @@ export const Wrapper = styled.div`
 export const InnerWrapper = styled.div``;
 
 export const Title = styled.p`
-  /* Body/Body LG/Regular */
-
   font-family: "Barlow";
   font-style: normal;
   font-weight: 400;
   font-size: 18px;
   line-height: 26px;
-  /* identical to box height, or 144% */
-
-  /* Tints & Shades/White/88 */
 
   color: #c5d5e0;
 `;
 
 export const InfoTextWrapper = styled.div`
-  /* Auto layout */
-
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -61,7 +49,6 @@ export const InfoTextWrapper = styled.div`
   align-self: stretch;
   flex-grow: 0;
 
-  /* Font color */
   color: #9daab2;
 `;
 
