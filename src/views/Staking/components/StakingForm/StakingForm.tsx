@@ -12,6 +12,7 @@ import {
   APYInfo,
   APYInfoItem,
   ArrowIcon,
+  UsdcLogo,
 } from "./StakingForm.styles";
 
 import StakingInputBlock from "./StakingInputBlock";
@@ -48,6 +49,7 @@ export const StakingForm = () => {
         setValue={setStakeAmount}
         valid={validateStakeAmount(stakeAmount)}
         buttonText={activeTab}
+        Logo={UsdcLogo}
       />
       <StakeInfo>
         <StakeInfoItem>Staked LP Tokens</StakeInfoItem>

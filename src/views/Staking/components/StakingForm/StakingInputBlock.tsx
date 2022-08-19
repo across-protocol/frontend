@@ -4,27 +4,41 @@ import {
   Input,
   ButtonWrapper,
   StakeButton,
-  UsdcLogo,
   MaxButton,
 } from "./StakingForm.styles";
 import { capitalizeFirstLetter } from "utils/format";
+import { StyledComponent } from "@emotion/styled";
+import { Theme } from "@emotion/react";
 
 interface Props {
   value: string;
   setValue: React.Dispatch<React.SetStateAction<string>>;
   valid: boolean;
   buttonText: string;
+  Logo: StyledComponent<
+    React.SVGProps<SVGSVGElement> & {
+      title?: string | undefined;
+    } & {
+      children?: React.ReactNode;
+    } & {
+      theme?: Theme | undefined;
+    },
+    {},
+    {}
+  >;
 }
+
 const StakingInputWrapper: React.FC<Props> = ({
   value,
   setValue,
   valid,
   buttonText,
+  Logo,
 }) => {
   return (
     <InputRow>
       <InputWrapper>
-        <UsdcLogo />
+        <Logo />
         <Input
           placeholder="Enter amount"
           value={value}
