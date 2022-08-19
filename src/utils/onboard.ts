@@ -33,7 +33,7 @@ export function onboardBaseConfig(): Initialization {
           },
           preferred: true,
         },
-        // { walletName: "coinbase", preferred: true },
+        { walletName: "coinbase", preferred: true },
         { walletName: "tally", preferred: true },
         { walletName: "detectedwallet" },
       ],
