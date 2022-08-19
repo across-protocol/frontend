@@ -1,3 +1,4 @@
+import { formatNumberMaxFracDigits } from "utils";
 import {
   InfoText,
   InfoTextWrapper,
@@ -41,10 +42,12 @@ export const StakingReward = ({ claimableAmount }: StakingRewardPropType) => {
       </InnerWrapper>
       <InnerWrapper>
         <StakingClaimAmountWrapper>
-          <StakingClaimAmountTitle>Claimable</StakingClaimAmountTitle>
+          <StakingClaimAmountTitle>Claimable Rewards</StakingClaimAmountTitle>
           <StakingClaimAmountInnerWrapper>
             <PresentIcon />
-            <StakingClaimAmountText>{claimableAmount}</StakingClaimAmountText>
+            <StakingClaimAmountText>
+              {formatNumberMaxFracDigits(claimableAmount)}
+            </StakingClaimAmountText>
           </StakingClaimAmountInnerWrapper>
         </StakingClaimAmountWrapper>
       </InnerWrapper>

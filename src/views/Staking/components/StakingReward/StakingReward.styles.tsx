@@ -6,48 +6,50 @@ export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 24px;
-  gap: 24px;
-
-  width: 600px;
 
   background: #34353b;
 
   border: 1px solid #3e4047;
   border-radius: 10px;
 
-  flex: none;
-  order: 1;
-  align-self: stretch;
-  flex-grow: 0;
+  flex-wrap: nowrap;
+
+  padding: 24px;
+  gap: 24px;
+  @media (max-width: 576px) {
+    margin: 0 auto;
+    width: calc(100% - 24px);
+    padding: 12px 16px;
+    gap: 16px;
+  }
 `;
 
-export const InnerWrapper = styled.div``;
+export const InnerWrapper = styled.div`
+  width: 100%;
+`;
 
 export const Title = styled.p`
   font-family: "Barlow";
   font-style: normal;
   font-weight: 400;
-  font-size: 18px;
   line-height: 26px;
-
   color: #c5d5e0;
+
+  font-size: 18px;
+  @media (max-width: 576px) {
+    font-size: 16px;
+  }
 `;
 
 export const InfoTextWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: center;
+  /* align-items: center; */
+  align-items: stretch;
   padding: 0px;
   gap: 6px;
 
-  width: 552px;
-  height: 20px;
-
-  flex: none;
-  order: 0;
-  align-self: stretch;
-  flex-grow: 0;
+  width: 100%;
 
   color: #9daab2;
 `;
@@ -56,7 +58,7 @@ export const AlertInfoWrapper = styled(InfoTextWrapper)`
   color: #f96c6c;
 `;
 
-export const InfoText = styled.p`
+export const InfoText = styled.span`
   font-family: "Barlow";
   font-style: normal;
   font-weight: 400;
@@ -65,12 +67,14 @@ export const InfoText = styled.p`
 `;
 
 export const InfoIcon = styled(AlertCircle)`
+  flex-shrink: 0;
+  margin-top: 3px;
   width: 13.5px;
   height: 13.5px;
 `;
 
 export const Divider = styled.div`
-  width: 552px;
+  width: 100%;
   height: 1px;
 
   background: #3e4047;
@@ -88,8 +92,7 @@ export const StakingClaimAmountWrapper = styled.div`
   align-items: center;
   padding: 0px;
   gap: 6px;
-
-  width: 552px;
+  width: 100%;
   height: 20px;
 `;
 
@@ -101,6 +104,11 @@ export const StakingClaimAmountText = styled.div`
   line-height: 20px;
 
   color: #e0f3ff;
+
+  @media (max-width: 576px) {
+    font-size: 14px;
+    line-height: 18px;
+  }
 `;
 
 export const StakingClaimAmountTitle = styled(StakingClaimAmountText)`
