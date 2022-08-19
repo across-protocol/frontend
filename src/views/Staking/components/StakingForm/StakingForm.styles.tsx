@@ -13,6 +13,10 @@ export const Wrapper = styled.div`
   border: 1px solid #3e4047;
   border-radius: 10px;
   box-sizing: border-box;
+  @media ${QUERIESV2.sm} {
+    width: calc(100% - 24px);
+    margin: 0 auto;
+  }
 `;
 
 export const Tabs = styled.div`
@@ -216,6 +220,7 @@ export const APYInfo = styled(StakeInfo)`
     flex-direction: row;
     justify-content: flex-start;
   }
+  margin-bottom: 24px;
 `;
 
 export const APYInfoItem = styled(StakeInfoItem)`
