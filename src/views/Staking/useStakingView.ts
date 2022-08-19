@@ -9,5 +9,6 @@ export const useStakingView = () => {
 
   return {
     poolId,
+    amountOfRewardsClaimable: 320.19,
   };
 };

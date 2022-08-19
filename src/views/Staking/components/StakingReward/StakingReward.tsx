@@ -14,7 +14,11 @@ import {
   PresentIcon,
 } from "./StakingReward.styles";
 
-export const StakingReward = () => {
+type StakingRewardPropType = {
+  claimableAmount: number;
+};
+
+export const StakingReward = ({ claimableAmount }: StakingRewardPropType) => {
   return (
     <Wrapper>
       <InnerWrapper>
@@ -40,7 +44,7 @@ export const StakingReward = () => {
           <StakingClaimAmountTitle>Claimable</StakingClaimAmountTitle>
           <StakingClaimAmountInnerWrapper>
             <PresentIcon />
-            <StakingClaimAmountText>320.19</StakingClaimAmountText>
+            <StakingClaimAmountText>{claimableAmount}</StakingClaimAmountText>
           </StakingClaimAmountInnerWrapper>
         </StakingClaimAmountWrapper>
       </InnerWrapper>
