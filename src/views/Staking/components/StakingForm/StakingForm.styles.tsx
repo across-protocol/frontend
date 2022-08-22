@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 import ProgressBar from "components/ProgressBar";
-import { ReactComponent as UnstyedUsdcLogo } from "assets/icons/usdc-green-16.svg";
+import { ReactComponent as UnstyedUsdcLogo } from "assets/icons/usdc-24.svg";
 import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
 
