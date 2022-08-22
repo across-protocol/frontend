@@ -9,8 +9,7 @@ export const Wrapper = styled.div`
   justify-content: start;
 
   @media (max-width: 576px) {
-    margin: 0px 0px 16px 19px;
-    width: 404px;
+    margin: 0px 0px 17px 19px;
   }
 `;
 
@@ -28,9 +27,9 @@ export const Logo = styled.img`
   height: 32px;
   width: 32px;
 
-  margin: 0px 12px 0px 21px;
+  margin: 0px 12px 0px 18px;
   @media (max-width: 576px) {
-    margin: 0px 8px 0px 18px;
+    margin-right: 8px;
     height: 24px;
     width: 24px;
   }
