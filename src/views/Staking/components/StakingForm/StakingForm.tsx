@@ -54,6 +54,7 @@ export const StakingForm = () => {
           valid={validateStakeAmount(stakeAmount)}
           buttonText={activeTab}
           Logo={UsdcLogo}
+          maxValue="0"
         />
       </InputBlockWrapper>
       <StakeInfo>
