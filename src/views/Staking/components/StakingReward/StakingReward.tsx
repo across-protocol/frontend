@@ -1,8 +1,6 @@
 import { formatNumberMaxFracDigits } from "utils";
+import { AlertInfo } from "./AlertInfo";
 import {
-  InfoText,
-  InfoTextWrapper,
-  InfoIcon,
   Title,
   Wrapper,
   InnerWrapper,
@@ -26,16 +24,11 @@ export const StakingReward = ({ claimableAmount }: StakingRewardPropType) => {
         <Title>Rewards</Title>
       </InnerWrapper>
       <InnerWrapper>
-        <InfoTextWrapper>
-          <InfoIcon />
-          <InfoText>
-            Claiming tokens will reset your multiplier and decrease your ACX APY
-          </InfoText>
-        </InfoTextWrapper>
-        <AlertInfoWrapper>
-          <InfoIcon />
-          <InfoText>The amount entered exceeds your claimable amount</InfoText>
-        </AlertInfoWrapper>
+        <AlertInfo text="Claiming tokens will reset your multiplier and decrease your ACX APY" />
+        <AlertInfo
+          text="The amount entered exceeds your claimable amount"
+          danger={true}
+        />
       </InnerWrapper>
       <InnerWrapper>
         <Divider />
