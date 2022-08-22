@@ -124,7 +124,7 @@ export const StakingClaimAmountTitle = styled(StakingClaimAmountText)`
 `;
 
 export const PresentIcon = styled(Gift)`
-  color: var(--color-primary);
+  color: #6cf9d8;
   width: 16px;
   height: 16px;
 `;
