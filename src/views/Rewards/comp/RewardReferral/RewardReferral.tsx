@@ -28,7 +28,7 @@ import {
 
 import { onboard, shortenAddress } from "utils";
 import { ReferralsSummary } from "hooks/useReferralSummary";
-import { PopperTooltip } from "../../../../components/Tooltip";
+import { PopperTooltip } from "components/Tooltip";
 import StepperWithTooltips from "../StepperWithTooltips";
 
 const { init } = onboard;
