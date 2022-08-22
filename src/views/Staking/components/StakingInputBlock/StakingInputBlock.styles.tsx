@@ -9,6 +9,18 @@ export const InputRow = styled.div`
   @media ${QUERIESV2.sm} {
     flex-direction: column;
   }
+
+  & svg {
+    height: 24px;
+    width: 24px;
+    position: absolute;
+    left: 24px;
+    top: 20px;
+    @media ${QUERIESV2.sm} {
+      top: 12px;
+      left: 12px;
+    }
+  }
 `;
 
 export const InputWrapper = styled.div`

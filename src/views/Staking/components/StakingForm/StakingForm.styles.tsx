@@ -61,11 +61,7 @@ export const InputRow = styled.div`
   }
 `;
 
-export const UsdcLogo = styled(UnstyedUsdcLogo)`
-  position: absolute;
-  left: 24px;
-  top: 20px;
-`;
+export const UsdcLogo = styled(UnstyedUsdcLogo)``;
 
 export const InputWrapper = styled.div`
   flex-grow: 8;

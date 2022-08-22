@@ -142,10 +142,4 @@ export const StakingClaimAmountInnerWrapper = styled.div`
   flex-grow: 0;
 `;
 
-export const StyledAcrossLogo = styled(AcrossLogo)`
-  position: absolute;
-  left: 24px;
-  top: 20px;
-  height: 24px;
-  width: 24px;
-`;
+export const StyledAcrossLogo = styled(AcrossLogo)``;
