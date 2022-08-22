@@ -45,6 +45,11 @@ export const QUERIES = {
   mobileAndDown: `(max-width: ${(BREAKPOINTS.tabletMin - 1) / 16}rem)`,
 };
 
+export const QUERIESV2 = {
+  xs: `(max-width: 400px)`,
+  sm: `(max-width: 576px)`,
+};
+
 export const COLORS = {
   gray: {
     100: "0deg 0% 89%",
