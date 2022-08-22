@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
+
 import {
   Send,
   Pool,
   About,
-  Transactions,
+  MyTransactions,
   Rewards,
   Staking,
   Claim,
@@ -74,7 +75,7 @@ const Routes: React.FC = () => {
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
-        <Route exact path="/transactions" component={Transactions} />
+        <Route exact path="/transactions" component={MyTransactions} />
         <Route exact path="/pool" component={Pool} />
         <Route exact path="/about" component={About} />
         <Route exact path="/rewards" component={Rewards} />
