@@ -5,7 +5,7 @@ import {
   ButtonWrapper,
   StakeButton,
   MaxButton,
-} from "./StakingForm.styles";
+} from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
 import { StyledComponent } from "@emotion/styled";
 import { Theme } from "@emotion/react";
@@ -28,7 +28,7 @@ interface Props {
   >;
 }
 
-const StakingInputWrapper: React.FC<Props> = ({
+const StakingInputBlock: React.FC<Props> = ({
   value,
   setValue,
   valid,
@@ -56,4 +56,4 @@ const StakingInputWrapper: React.FC<Props> = ({
   );
 };
 
-export default StakingInputWrapper;
+export default StakingInputBlock;

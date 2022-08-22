@@ -14,10 +14,11 @@ import {
   ArrowIcon,
   UsdcLogo,
   InfoIcon,
+  InputBlockWrapper,
 } from "./StakingForm.styles";
 
-import StakingInputBlock from "./StakingInputBlock";
 import { PopperTooltip } from "components/Tooltip";
+import StakingInputBlock from "../StakingInputBlock";
 
 type StakeTab = "stake" | "unstake";
 
@@ -46,13 +47,15 @@ export const StakingForm = () => {
           Unstake
         </Tab>
       </Tabs>
-      <StakingInputBlock
-        value={stakeAmount}
-        setValue={setStakeAmount}
-        valid={validateStakeAmount(stakeAmount)}
-        buttonText={activeTab}
-        Logo={UsdcLogo}
-      />
+      <InputBlockWrapper>
+        <StakingInputBlock
+          value={stakeAmount}
+          setValue={setStakeAmount}
+          valid={validateStakeAmount(stakeAmount)}
+          buttonText={activeTab}
+          Logo={UsdcLogo}
+        />
+      </InputBlockWrapper>
       <StakeInfo>
         <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
         <StakeInfoItem>
