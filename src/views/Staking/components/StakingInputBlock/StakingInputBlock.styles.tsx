@@ -28,14 +28,20 @@ export const InputWrapper = styled.div`
   position: relative;
 `;
 
-export const Input = styled.input`
+interface IStakeInput {
+  valid: boolean;
+}
+export const Input = styled.input<IStakeInput>`
   height: 64px;
   padding: 9px 64px;
   width: 100%;
   background: #2d2e33;
-  border: 1px solid #4c4e57;
   border-radius: 32px;
-  color: #e0f3ff;
+  border: 1px solid ${({ valid }) => (valid ? "#4c4e57" : "#f96c6c")};
+  color: ${({ valid }) => (valid ? "#e0f3ff" : "#f96c6c")};
+  &:focus {
+    outline: 0;
+  }
   @media ${QUERIESV2.sm} {
     height: 48px;
     padding: 9px 48px;
