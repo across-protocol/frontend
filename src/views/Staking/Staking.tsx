@@ -7,12 +7,12 @@ const Staking = () => {
 
   return (
     <Wrapper>
-      <StakingForm />
       <StakingExitAction
         poolName={poolName}
         exitLinkURI={exitLinkURI}
         poolLogoURI={poolLogoURI}
       />
+      <StakingForm />
     </Wrapper>
   );
 };
