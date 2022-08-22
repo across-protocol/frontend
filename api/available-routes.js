@@ -19,9 +19,9 @@ const handler = async (request, response) => {
     );
 
     let enabledRoutes = enabledRoutesAsJson.routes.map((route) => ({
-      originChainId: route.fromChain,
-      originToken: route.fromTokenAddress,
-      destinationChainId: route.toChain,
+      originChainId: String(route.fromChain),
+      originToken: String(route.fromTokenAddress),
+      destinationChainId: String(route.toChain),
     }));
 
     // Generate a mapping that contains similar tokens on each chain
@@ -72,13 +72,11 @@ const handler = async (request, response) => {
     ) {
       enabledRoutes = enabledRoutes.filter(
         (route) =>
-          (!originToken || originToken === route.originToken.toLowerCase()) &&
-          (!originChainId ||
-            originChainId === route.originChainId.toLowerCase()) &&
+          (!originToken || originToken === route.originToken) &&
+          (!originChainId || originChainId === route.originChainId) &&
           (!destinationChainId ||
-            destinationChainId === route.destinationChainId.toLowerCase()) &&
-          (!destinationToken ||
-            destinationToken === route.destinationToken.toLowerCase())
+            destinationChainId === route.destinationChainId) &&
+          (!destinationToken || destinationToken === route.destinationToken)
       );
     }
 
