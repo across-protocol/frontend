@@ -7,7 +7,7 @@ const Staking = () => {
   return (
     <Wrapper>
       <StakingForm />
-      <StakingReward claimableAmount={amountOfRewardsClaimable} />
+      <StakingReward maximumClaimableAmount={amountOfRewardsClaimable} />
     </Wrapper>
   );
 };

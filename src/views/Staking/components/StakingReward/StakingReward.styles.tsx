@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { AlertCircle, Gift } from "react-feather";
+import { ReactComponent as AcrossLogo } from "assets/Across-logo-bullet.svg";
 
 export const Wrapper = styled.div`
   box-sizing: border-box;
@@ -26,6 +27,12 @@ export const Wrapper = styled.div`
 
 export const InnerWrapper = styled.div`
   width: 100%;
+`;
+
+export const StakingInputBlockWrapper = styled(InnerWrapper)`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 `;
 
 export const Title = styled.p`
@@ -133,4 +140,12 @@ export const StakingClaimAmountInnerWrapper = styled.div`
   flex: none;
   order: 1;
   flex-grow: 0;
+`;
+
+export const StyledAcrossLogo = styled(AcrossLogo)`
+  position: absolute;
+  left: 24px;
+  top: 20px;
+  height: 24px;
+  width: 24px;
 `;

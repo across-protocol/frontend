@@ -1,35 +1,66 @@
+import { useState } from "react";
 import { formatNumberMaxFracDigits } from "utils";
+import StakingInputBlock from "../StakingInputBlock";
 import { AlertInfo } from "./AlertInfo";
 import {
   Title,
   Wrapper,
   InnerWrapper,
   Divider,
-  AlertInfoWrapper,
   StakingClaimAmountWrapper,
   StakingClaimAmountText,
   StakingClaimAmountTitle,
   StakingClaimAmountInnerWrapper,
   PresentIcon,
+  StyledAcrossLogo,
+  StakingInputBlockWrapper,
 } from "./StakingReward.styles";
 
 type StakingRewardPropType = {
-  claimableAmount: number;
+  maximumClaimableAmount: number;
 };
 
-export const StakingReward = ({ claimableAmount }: StakingRewardPropType) => {
+export const StakingReward = ({
+  maximumClaimableAmount,
+}: StakingRewardPropType) => {
+  const [amountToClaim, setAmountToClaim] = useState("");
+
+  const stakingAmountValidationHandler = (value: string): boolean => {
+    const numericValue = Number(value);
+    return (
+      !Number.isNaN(numericValue) &&
+      numericValue > 0 &&
+      numericValue <= maximumClaimableAmount
+    );
+  };
+
+  const isAmountExceeded = (value: string): boolean => {
+    const numericValue = Number(value);
+    return !Number.isNaN(numericValue) && numericValue > maximumClaimableAmount;
+  };
+
   return (
     <Wrapper>
       <InnerWrapper>
         <Title>Rewards</Title>
       </InnerWrapper>
-      <InnerWrapper>
+      <StakingInputBlockWrapper>
         <AlertInfo text="Claiming tokens will reset your multiplier and decrease your ACX APY" />
-        <AlertInfo
-          text="The amount entered exceeds your claimable amount"
-          danger={true}
+        <StakingInputBlock
+          value={amountToClaim}
+          setValue={setAmountToClaim}
+          Logo={StyledAcrossLogo}
+          buttonText="Claim"
+          valid={stakingAmountValidationHandler(amountToClaim)}
+          maxValue={String(maximumClaimableAmount)}
         />
-      </InnerWrapper>
+        {isAmountExceeded(amountToClaim) && (
+          <AlertInfo
+            text="The amount entered exceeds your claimable amount"
+            danger={true}
+          />
+        )}
+      </StakingInputBlockWrapper>
       <InnerWrapper>
         <Divider />
       </InnerWrapper>
@@ -39,7 +70,7 @@ export const StakingReward = ({ claimableAmount }: StakingRewardPropType) => {
           <StakingClaimAmountInnerWrapper>
             <PresentIcon />
             <StakingClaimAmountText>
-              {formatNumberMaxFracDigits(claimableAmount)}
+              {formatNumberMaxFracDigits(maximumClaimableAmount)}
             </StakingClaimAmountText>
           </StakingClaimAmountInnerWrapper>
         </StakingClaimAmountWrapper>
