@@ -25,6 +25,7 @@ export const StakingReward = ({
 }: StakingRewardPropType) => {
   const [amountToClaim, setAmountToClaim] = useState("");
 
+  // Stub Function
   const stakingAmountValidationHandler = (value: string): boolean => {
     const numericValue = Number(value);
     return (
@@ -34,6 +35,7 @@ export const StakingReward = ({
     );
   };
 
+  // Stub Function
   const isAmountExceeded = (value: string): boolean => {
     const numericValue = Number(value);
     return !Number.isNaN(numericValue) && numericValue > maximumClaimableAmount;
