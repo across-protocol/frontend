@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { AlertCircle, Gift } from "react-feather";
 import { ReactComponent as AcrossLogo } from "assets/Across-logo-bullet.svg";
+import { QUERIESV2 } from "utils";
 
 export const Wrapper = styled.div`
   box-sizing: border-box;
@@ -17,7 +18,7 @@ export const Wrapper = styled.div`
 
   padding: 24px;
   gap: 24px;
-  @media (max-width: 576px) {
+  @media ${QUERIESV2.sm} {
     margin: 0 auto;
     width: calc(100% - 24px);
     padding: 12px 16px;
@@ -43,7 +44,7 @@ export const Title = styled.p`
   color: #c5d5e0;
 
   font-size: 18px;
-  @media (max-width: 576px) {
+  @media ${QUERIESV2.sm} {
     font-size: 16px;
   }
 `;
@@ -112,7 +113,7 @@ export const StakingClaimAmountText = styled.div`
 
   color: #e0f3ff;
 
-  @media (max-width: 576px) {
+  @media ${QUERIESV2.sm} {
     font-size: 14px;
     line-height: 18px;
   }
