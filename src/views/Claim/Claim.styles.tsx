@@ -1,15 +1,87 @@
 import styled from "@emotion/styled";
 
+import { ButtonV2 } from "components";
+import { QUERIES } from "utils/constants";
+
 export const Wrapper = styled.div`
-  background-color: transparent;
+  color: #e0f3ff;
+
   max-width: 600px;
-  margin: 64px auto 30px;
+  margin: 64px auto;
+
+  @media ${QUERIES.tabletAndDown} {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p {
+    font-family: "Barlow";
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  h1 {
+    font-size: ${26 / 16}rem;
+    line-height: ${31 / 16}rem;
+
+    @media ${QUERIES.mobileAndDown} {
+      font-size: ${22 / 16}rem;
+      line-height: ${26 / 16}rem;
+    }
+  }
+
+  h2 {
+    font-size: ${22 / 16}rem;
+    line-height: ${26 / 16}rem;
+
+    @media ${QUERIES.mobileAndDown} {
+      font-size: ${18 / 16}rem;
+      line-height: ${26 / 16}rem;
+    }
+  }
+
+  h6 {
+    font-size: ${18 / 16}rem;
+    line-height: ${26 / 16}rem;
+
+    @media ${QUERIES.mobileAndDown} {
+      font-size: ${16 / 16}rem;
+      line-height: ${20 / 16}rem;
+    }
+  }
+
+  p {
+    @media ${QUERIES.mobileAndDown} {
+      font-size: ${14 / 16}rem;
+      line-height: ${18 / 16}rem;
+    }
+  }
+
+  a {
+    :hover {
+      cursor: pointer;
+    }
+
+    :visited {
+      color: inherit;
+    }
+  }
 `;
 
 export const Title = styled.h2`
-  font-family: "Barlow";
-  font-style: normal;
-  font-weight: 400;
-  font-size: ${22 / 16} rem;
-  line-height: ${26 / 16} rem;
+  padding-bottom: ${24 / 16}rem;
+`;
+
+export const Button = styled(ButtonV2)`
+  @media ${QUERIES.mobileAndDown} {
+    font-size: ${16 / 16}rem;
+    line-height: ${20 / 16}rem;
+    padding: 10px 20px;
+  }
 `;

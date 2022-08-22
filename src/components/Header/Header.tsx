@@ -10,10 +10,12 @@ import {
   Item,
   WalletWrapper,
   Spacing,
+  TextWithIcon,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
 import { enableMigration } from "utils";
 import { ReactComponent as Logo } from "assets/across-mobile-logo.svg";
+import { ReactComponent as GiftBoxIcon } from "assets/icons/gift.svg";
 import useScrollPosition from "hooks/useScrollPosition";
 
 const LINKS = !enableMigration
@@ -22,6 +24,14 @@ const LINKS = !enableMigration
       { href: "/pool", name: "Pool" },
       { href: "/rewards", name: "Rewards" },
       { href: "/transactions", name: "Transactions" },
+      {
+        href: "/airdrop",
+        name: (
+          <TextWithIcon>
+            Airdrop <GiftBoxIcon />
+          </TextWithIcon>
+        ),
+      },
     ]
   : [];
 

@@ -71,6 +71,10 @@ export const Item = styled.li`
       background-color: #e0f3ff;
       transform: translateX(-50%);
     }
+
+    svg path {
+      stroke-width: 1px;
+    }
   }
 
   :hover {
@@ -102,4 +106,12 @@ export const MobileNavigation = styled(motion.nav)`
   @media (max-width: 428px) {
     margin-left: 8px;
   }
+`;
+
+export const TextWithIcon = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
 `;

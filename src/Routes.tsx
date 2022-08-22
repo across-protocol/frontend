@@ -79,7 +79,7 @@ const Routes: React.FC = () => {
         <Route exact path="/pool" component={Pool} />
         <Route exact path="/about" component={About} />
         <Route exact path="/rewards" component={Rewards} />
-        <Route exact path="/rewards/claim" component={Claim} />
+        <Route exact path="/airdrop" component={Claim} />
         <Route exact path="/rewards/staking/:poolId" component={Staking} />
         <Route path="/" component={Send} />
       </Switch>
