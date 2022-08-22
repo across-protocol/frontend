@@ -1,5 +1,8 @@
 import Onboard from "@web3-onboard/core";
 import injectedModule from "@web3-onboard/injected-wallets";
+import walletConnectModule from "@web3-onboard/walletconnect";
+import gnosisModule from "@web3-onboard/gnosis";
+import coinbaseModule from "@web3-onboard/coinbase";
 import { ethers } from "ethers";
 import {
   onboardApiKey,
@@ -11,10 +14,13 @@ import {
 } from "utils";
 
 const injected = injectedModule();
+const gnosis = gnosisModule();
+const walletConnect = walletConnectModule();
+const coinbase = coinbaseModule();
 
-const onboard = Onboard({
+export const onboard = Onboard({
   apiKey: onboardApiKey,
-  wallets: [injected],
+  wallets: [injected, coinbase, walletConnect, gnosis],
   /* 
   export interface Chain {
     namespace?: 'evm';
