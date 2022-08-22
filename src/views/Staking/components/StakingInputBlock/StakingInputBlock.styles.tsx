@@ -41,8 +41,6 @@ export const MaxButton = styled(UnstyledButton)`
   text-transform: uppercase;
   color: #c5d5e0;
   position: absolute;
-  right: 24px;
-  top: 20px;
   padding: 8px 10px 10px;
   display: flex;
   flex-direction: row;
