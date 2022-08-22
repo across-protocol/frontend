@@ -5,7 +5,6 @@ import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Butto
 export const InputRow = styled.div`
   display: flex;
   gap: 16px;
-  padding-bottom: 24px;
   flex-direction: row;
   @media ${QUERIESV2.sm} {
     flex-direction: column;

@@ -257,4 +257,5 @@ export const InputBlockWrapper = styled.div`
   border-bottom: 1px solid #3e4047;
   width: calc(100% - 48px);
   margin: 0 auto;
+  padding-bottom: 24px;
 `;
