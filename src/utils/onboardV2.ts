@@ -1,19 +1,64 @@
 import Onboard from "@web3-onboard/core";
 import injectedModule from "@web3-onboard/injected-wallets";
 import { ethers } from "ethers";
-
-const MAINNET_RPC_URL = "https://mainnet.infura.io/v3/<INFURA_KEY>";
+import {
+  onboardApiKey,
+  hubPoolChainId,
+  ChainId,
+  providerUrlsTable,
+  trackEvent,
+  debug,
+} from "utils";
 
 const injected = injectedModule();
 
 const onboard = Onboard({
+  apiKey: onboardApiKey,
   wallets: [injected],
+  /* 
+  export interface Chain {
+    namespace?: 'evm';
+    id: ChainId;
+    rpcUrl: string;
+    label: string;
+    token: TokenSymbol;
+    color?: string;
+    icon?: string;
+    providerConnectionInfo?: ConnectionInfo;
+    publicRpcUrl?: string;
+    blockExplorerUrl?: string;
+}
+  */
   chains: [
     {
-      id: "0x1",
+      id: 1,
       token: "ETH",
       label: "Ethereum Mainnet",
-      rpcUrl: MAINNET_RPC_URL,
+      rpcUrl: providerUrlsTable[ChainId.MAINNET],
+    },
+    {
+      id: 10,
+      token: "OP",
+      label: "Optimism Mainnet",
+      rpcUrl: providerUrlsTable[ChainId.OPTIMISM],
+    },
+    {
+      id: 137,
+      token: "MATIC",
+      label: "Polygon Mainnet",
+      rpcUrl: providerUrlsTable[ChainId.POLYGON],
+    },
+    {
+      id: 288,
+      token: "BOBA",
+      label: "BOBA Mainnet",
+      rpcUrl: providerUrlsTable[ChainId.BOBA],
+    },
+    {
+      id: 42161,
+      token: "ETH",
+      label: "Arbitrum Mainnet",
+      rpcUrl: providerUrlsTable[ChainId.ARBITRUM],
     },
   ],
 });
