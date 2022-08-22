@@ -7,6 +7,7 @@ const axios = require("axios");
 const sdk = require("@across-protocol/sdk-v2");
 const ethers = require("ethers");
 const { Logging } = require("@google-cloud/logging");
+const enabledRoutesAsJson = require("../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json");
 
 const {
   REACT_APP_PUBLIC_INFURA_ID,
@@ -372,8 +373,15 @@ const getSpokePool = (_chainId) => {
 };
 
 const isRouteEnabled = (fromChainId, toChainId, fromToken) => {
-  const spokePool = getSpokePool(fromChainId.toString());
-  return spokePool.enabledDepositRoutes(fromToken, toChainId.toString());
+  fromChainId = Number(fromChainId);
+  toChainId = Number(toChainId);
+  const enabled = enabledRoutesAsJson.routes.some(
+    ({ fromTokenAddress, fromChain, toChain }) =>
+      fromChainId === fromChain &&
+      toChainId === toChain &&
+      fromToken === fromTokenAddress
+  );
+  return enabled;
 };
 
 const getBalance = (chainId, token, account, blockTag = "latest") => {
@@ -420,4 +428,5 @@ module.exports = {
   dummyFromAddress,
   disabledL1Tokens,
   resolveVercelEndpoint,
+  getSpokePool,
 };
