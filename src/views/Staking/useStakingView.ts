@@ -6,7 +6,7 @@ type StakingPathParams = {
 };
 
 export const useStakingView = () => {
-  let { poolId } = useParams<StakingPathParams>();
+  const { poolId } = useParams<StakingPathParams>();
 
   return {
     poolId,
