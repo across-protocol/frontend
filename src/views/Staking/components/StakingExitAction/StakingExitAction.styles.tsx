@@ -17,6 +17,7 @@ export const Wrapper = styled.div`
 export const ExitIcon = styled(FontAwesomeIcon)`
   color: #9daab2;
   font-size: 16px;
+  cursor: pointer;
   @media ${QUERIESV2.sm} {
     font-size: 17px;
   }
