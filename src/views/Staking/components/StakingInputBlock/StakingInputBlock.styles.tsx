@@ -24,6 +24,10 @@ export const Input = styled.input`
   border: 1px solid #4c4e57;
   border-radius: 32px;
   color: #e0f3ff;
+  @media ${QUERIESV2.sm} {
+    height: 48px;
+    padding: 9px 48px;
+  }
 `;
 
 export const MaxButton = styled(UnstyledButton)`
@@ -49,6 +53,13 @@ export const MaxButton = styled(UnstyledButton)`
   &:hover {
     color: #e0f3ff;
     border-color: #e0f3ff;
+  }
+
+  top: 20px;
+  right: 24px;
+  @media ${QUERIESV2.sm} {
+    top: 12px;
+    right: 12px;
   }
 `;
 
