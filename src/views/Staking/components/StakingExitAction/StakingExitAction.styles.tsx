@@ -1,8 +1,7 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-const INTERNAL_BREAKPOINT = "(max-width: 576px)";
+import { QUERIESV2 } from "utils";
 
 export const Wrapper = styled.div`
   margin: 0px 0px 24px 23px;
@@ -10,7 +9,7 @@ export const Wrapper = styled.div`
   align-items: center;
   justify-content: start;
 
-  @media ${INTERNAL_BREAKPOINT} {
+  @media ${QUERIESV2.sm} {
     margin: 0px 0px 17px 19px;
   }
 `;
@@ -18,7 +17,7 @@ export const Wrapper = styled.div`
 export const ExitIcon = styled(FontAwesomeIcon)`
   color: #9daab2;
   font-size: 16px;
-  @media ${INTERNAL_BREAKPOINT} {
+  @media ${QUERIESV2.sm} {
     font-size: 17px;
   }
 `;
@@ -30,7 +29,7 @@ export const Logo = styled.img`
   width: 32px;
 
   margin: 0px 12px 0px 18px;
-  @media ${INTERNAL_BREAKPOINT} {
+  @media ${QUERIESV2.sm} {
     margin-right: 8px;
     height: 24px;
     width: 24px;
@@ -45,7 +44,7 @@ export const Text = styled.p`
   color: #e0f3ff;
 
   font-size: 22px;
-  @media ${INTERNAL_BREAKPOINT} {
+  @media ${QUERIESV2.sm} {
     font-size: 18px;
   }
 `;
