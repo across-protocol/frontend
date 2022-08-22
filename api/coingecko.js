@@ -23,14 +23,14 @@ const handler = async (request, response) => {
     // x-vercel-cache will have the value STALE until the cache is refreshed.
 
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-    // The response is fresh for 10s. After 10s it becomes stale, but the cache is allowed to reuse it
-    // for any requests that are made in the following 20s, provided that they revalidate the response in the background.
+    // The response is fresh for 150s. After 150s it becomes stale, but the cache is allowed to reuse it
+    // for any requests that are made in the following 150s, provided that they revalidate the response in the background.
     // Revalidation will make the cache be fresh again, so it appears to clients that it was always fresh during
     // that period — effectively hiding the latency penalty of revalidation from them.
     // If no request happened during that period, the cache became stale and the next request will revalidate normally.
     response.setHeader(
       "Cache-Control",
-      "s-maxage=10, stale-while-revalidate=20"
+      "s-maxage=150, stale-while-revalidate=150"
     );
     response.status(200).json({ price });
   } catch (error) {

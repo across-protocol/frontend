@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
-import { Send, Pool, About, Transactions, Rewards } from "views";
+import { Send, Pool, About, MyTransactions, Rewards, Claim } from "views";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
 import { useConnection } from "state/hooks";
 import { useError } from "hooks";
@@ -12,7 +12,8 @@ import {
   rewardsBannerWarning,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
-import useReferrer from "hooks/useReferrer";
+import Toast from "components/Toast";
+
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider } = useConnection();
@@ -39,10 +40,8 @@ function useRoutes() {
 const Routes: React.FC = () => {
   const { openSidebar, setOpenSidebar, error, removeError, location } =
     useRoutes();
-  const { referrerError } = useReferrer();
   return (
     <>
-      {referrerError && <SuperHeader>{referrerError}</SuperHeader>}
       {disableDeposits && (
         <SuperHeader>
           Across is experiencing issues. Deposits are currently disabled into
@@ -67,12 +66,14 @@ const Routes: React.FC = () => {
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
-        <Route exact path="/transactions" component={Transactions} />
+        <Route exact path="/transactions" component={MyTransactions} />
         <Route exact path="/pool" component={Pool} />
         <Route exact path="/about" component={About} />
         <Route exact path="/rewards" component={Rewards} />
+        <Route exact path="/rewards/claim" component={Claim} />
         <Route path="/" component={Send} />
       </Switch>
+      <Toast position="top-right" />
     </>
   );
 };

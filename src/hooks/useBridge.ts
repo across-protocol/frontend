@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ethers } from "ethers";
 import { FormStatus, useSendForm } from "./useSendForm";
 import { useBalanceBySymbol } from "./useBalance";
@@ -21,6 +22,7 @@ import {
   formatUnits,
 } from "utils";
 import useReferrer from "./useReferrer";
+import { useToast } from "components/Toast/useToast";
 
 enum SendStatus {
   IDLE = "idle",
@@ -36,8 +38,21 @@ type SendError =
 
 export function useBridge() {
   const config = getConfig();
-  const { referrer } = useReferrer();
+  const { referrer, error: referrerError } = useReferrer();
   const { chainId, account, signer } = useConnection();
+  const { addToast } = useToast();
+  useEffect(() => {
+    if (referrerError) {
+      addToast({
+        type: "error",
+        title: "Error",
+        body: referrerError,
+        createdAt: Date.now(),
+        id: "referrer-error",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [referrerError]);
 
   const {
     amount,

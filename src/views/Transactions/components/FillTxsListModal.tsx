@@ -4,7 +4,7 @@ import { X } from "react-feather";
 import { DialogContent, DialogOverlay } from "@reach/dialog";
 import { COLORS, QUERIES } from "utils";
 
-import { TxLink } from "./useTransactionsView";
+import { TxLink } from "../types";
 
 interface Props {
   isOpen: boolean;
@@ -12,7 +12,7 @@ interface Props {
   txLinks: TxLink[];
 }
 
-const TransactionsTableModal: React.FC<Props> = ({
+export const FillTxsListModal: React.FC<Props> = ({
   isOpen,
   onClose,
   txLinks,
@@ -25,11 +25,11 @@ const TransactionsTableModal: React.FC<Props> = ({
         </CloseButton>
         <div>
           <Title>Fill transactions</Title>
-          {txLinks.map((el) => {
+          {txLinks.map((txLink) => {
             return (
-              <Info>
-                <Link href={el.url} target="_blank" rel="noreferrer">
-                  {el.text}
+              <Info key={txLink.url}>
+                <Link href={txLink.url} target="_blank" rel="noreferrer">
+                  {txLink.text}
                 </Link>
               </Info>
             );
@@ -39,7 +39,8 @@ const TransactionsTableModal: React.FC<Props> = ({
     </Overlay>
   );
 };
-export default TransactionsTableModal;
+
+export default FillTxsListModal;
 
 const Title = styled.h1`
   font-size: ${20 / 16}rem;
