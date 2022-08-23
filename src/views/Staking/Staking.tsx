@@ -1,12 +1,17 @@
-// import { useStakingView } from "./useStakingView";
+import { useStakingView } from "./useStakingView";
 import { Wrapper } from "./Staking.styles";
-import { StakingForm } from "./components";
+import { StakingForm, StakingExitAction } from "./components";
 
 const Staking = () => {
-  // const { poolId } = useStakingView();
+  const { poolName, exitLinkURI, poolLogoURI } = useStakingView();
 
   return (
     <Wrapper>
+      <StakingExitAction
+        poolName={poolName}
+        exitLinkURI={exitLinkURI}
+        poolLogoURI={poolLogoURI}
+      />
       <StakingForm />
     </Wrapper>
   );
