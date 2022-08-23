@@ -1,11 +1,5 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
-import {
-  Wrapper,
-  Text,
-  StylizedLink,
-  Logo,
-  ExitIcon,
-} from "./StakingExitAction.styles";
+import { Wrapper, Text, Logo, ExitIcon } from "./StakingExitAction.styles";
 
 type StakingExitActionAttributes = {
   poolName: string;
@@ -19,10 +13,8 @@ export const StakingExitAction = ({
   poolLogoURI,
 }: StakingExitActionAttributes) => {
   return (
-    <Wrapper>
-      <StylizedLink to={exitLinkURI}>
-        <ExitIcon icon={faChevronLeft} />
-      </StylizedLink>
+    <Wrapper to={exitLinkURI}>
+      <ExitIcon icon={faChevronLeft} />
       <Logo src={poolLogoURI} />
       <Text>{poolName} Pool</Text>
     </Wrapper>

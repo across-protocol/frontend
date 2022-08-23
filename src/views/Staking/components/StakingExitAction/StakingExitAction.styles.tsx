@@ -3,11 +3,15 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { QUERIESV2 } from "utils";
 
-export const Wrapper = styled.div`
+export const Wrapper = styled(Link)`
   margin: 0px 0px 24px 23px;
   display: flex;
   align-items: center;
   justify-content: start;
+
+  text-decoration: none;
+
+  width: fit-content;
 
   @media ${QUERIESV2.sm} {
     margin: 0px 0px 17px 19px;
@@ -23,8 +27,6 @@ export const ExitIcon = styled(FontAwesomeIcon)`
   }
 `;
 
-export const StylizedLink = styled(Link)``;
-
 export const Logo = styled.img`
   height: 32px;
   width: 32px;
@@ -37,7 +39,7 @@ export const Logo = styled.img`
   }
 `;
 
-export const Text = styled.p`
+export const Text = styled.span`
   font-family: "Barlow";
   font-style: "normal";
   font-weight: 400;
