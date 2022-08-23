@@ -13,5 +13,6 @@ export const useStakingView = () => {
     exitLinkURI: "/rewards",
     poolLogoURI: tokenList[8].logoURI,
     poolName: "USDC",
+    amountOfRewardsClaimable: 320.13,
   };
 };

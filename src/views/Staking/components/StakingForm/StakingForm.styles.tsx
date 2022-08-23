@@ -61,11 +61,7 @@ export const InputRow = styled.div`
   }
 `;
 
-export const UsdcLogo = styled(UnstyedUsdcLogo)`
-  position: absolute;
-  left: 24px;
-  top: 20px;
-`;
+export const UsdcLogo = styled(UnstyedUsdcLogo)``;
 
 export const InputWrapper = styled.div`
   flex-grow: 8;
@@ -251,4 +247,11 @@ export const ArrowIcon = styled(UnstyledArrowIcon)`
 export const InfoIcon = styled(II)`
   margin-left: 8px;
   cursor: pointer;
+`;
+
+export const InputBlockWrapper = styled.div`
+  border-bottom: 1px solid #3e4047;
+  width: calc(100% - 48px);
+  margin: 0 auto;
+  padding-bottom: 24px;
 `;
