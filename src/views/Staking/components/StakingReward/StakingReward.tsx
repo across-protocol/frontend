@@ -47,7 +47,9 @@ export const StakingReward = ({
         <Title>Rewards</Title>
       </InnerWrapper>
       <StakingInputBlockWrapper>
-        <AlertInfo text="Claiming tokens will reset your multiplier and decrease your ACX APY" />
+        <AlertInfo>
+          Claiming tokens will reset your multiplier and decrease your ACX APY
+        </AlertInfo>
         <StakingInputBlock
           value={amountToClaim}
           setValue={setAmountToClaim}
@@ -57,10 +59,9 @@ export const StakingReward = ({
           maxValue={String(maximumClaimableAmount)}
         />
         {isAmountExceeded(amountToClaim) && (
-          <AlertInfo
-            text="The amount entered exceeds your claimable amount"
-            danger
-          />
+          <AlertInfo danger>
+            The amount entered exceeds your claimable amount
+          </AlertInfo>
         )}
       </StakingInputBlockWrapper>
       <InnerWrapper>

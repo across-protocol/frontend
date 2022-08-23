@@ -7,15 +7,17 @@ import {
 
 type AlertInfoPropType = {
   danger?: boolean;
-  text: string;
 };
 
-export const AlertInfo = ({ danger, text }: AlertInfoPropType) => {
+export const AlertInfo: React.FC<AlertInfoPropType> = ({
+  danger,
+  children,
+}) => {
   const Wrapper = !!danger ? AlertInfoWrapper : InfoTextWrapper;
   return (
     <Wrapper>
       <InfoIcon />
-      <InfoText>{text}</InfoText>
+      <InfoText>{children}</InfoText>
     </Wrapper>
   );
 };
