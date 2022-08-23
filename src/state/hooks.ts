@@ -14,6 +14,7 @@ import { add } from "./transactions";
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
+const NULL_ENS_NAME = "0x0000000000000000000000000000000000000000";
 export function useConnection() {
   const { account, ensName, signer, provider, error, chainId, notify } =
     useAppSelector((state) => state.connection);
@@ -27,7 +28,7 @@ export function useConnection() {
   const isConnected = !!chainId && !!signer && !!account;
   return {
     account,
-    ensName,
+    ensName: ensName === NULL_ENS_NAME ? undefined : ensName,
     chainId,
     provider,
     signer,

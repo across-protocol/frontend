@@ -18,10 +18,10 @@ export function onboardBaseConfig(): Initialization {
   return {
     dappId: onboardApiKey,
     networkId: hubPoolChainId,
-    hideBranding: true,
+    // hideBranding: true,
     walletSelect: {
       wallets: [
-        { walletName: "metamask", preferred: true },
+        { walletName: "metamask", preferred: true, label: "Metamask" },
         {
           walletName: "walletConnect",
           rpc: {
@@ -33,7 +33,8 @@ export function onboardBaseConfig(): Initialization {
           },
           preferred: true,
         },
-        { walletName: "coinbase", preferred: true },
+        { walletName: "coinbase", preferred: true, label: "Coinbase" },
+        { walletName: "walletLink", preferred: true, label: "Coinbase" },
         { walletName: "tally", preferred: true },
         { walletName: "detectedwallet" },
       ],
