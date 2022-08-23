@@ -2,15 +2,23 @@ import Footer from "components/Footer";
 
 import { DisconnectedWallet } from "./components/DisconnectedWallet";
 import { NotEligibleWallet } from "./components/NotEligibleWallet";
+import { EligibleWallet } from "./components/EligibleWallet";
 import { useClaimView } from "./hooks/useClaimView";
 
 import { PageContainer, BodyContainer, Title } from "./Claim.styles";
 
 export function Claim() {
-  const { isConnected, connectWallet, eligibleState } = useClaimView();
+  const {
+    isConnected,
+    isEligibleQuery,
+    claimableTokensQuery,
+    handleClaim,
+    handleConnectWallet,
+  } = useClaimView();
 
-  const isEligible =
-    eligibleState.status === "success" && eligibleState.data.isEligible;
+  const isEligible = !isEligibleQuery.isLoading && isEligibleQuery.data;
+
+  const activeClaimStepIndex = 0;
 
   return (
     <PageContainer>
@@ -18,12 +26,18 @@ export function Claim() {
         <Title>Airdrop</Title>
         {!isConnected ? (
           <DisconnectedWallet
-            onClickConnect={connectWallet}
-            isLoading={["loading"].includes(eligibleState.status)}
+            onClickConnect={handleConnectWallet}
+            isLoading={isEligibleQuery.isLoading}
           />
         ) : !isEligible ? (
           <NotEligibleWallet />
-        ) : null}
+        ) : (
+          <EligibleWallet
+            onClickClaim={handleClaim}
+            claimable={claimableTokensQuery.data}
+            activeStepIndex={activeClaimStepIndex}
+          />
+        )}
       </BodyContainer>
       <Footer />
     </PageContainer>

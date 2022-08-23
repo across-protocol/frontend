@@ -19,6 +19,7 @@ export const BodyContainer = styled.div`
   max-width: 600px;
   width: 100%;
   margin: 64px auto;
+  padding-bottom: 128px;
 
   @media ${QUERIESV2.sm} {
     padding-left: 16px;
@@ -99,4 +100,11 @@ export const Button = styled(ButtonV2)`
     line-height: ${20 / 16}rem;
     padding: 10px 20px;
   }
+`;
+
+export const FullWidthButton = styled(Button)`
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
 `;

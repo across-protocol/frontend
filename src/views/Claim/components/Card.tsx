@@ -7,7 +7,7 @@ export const Card = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: ${24 / 16}rem;
+  padding: 24px;
 
   background: #34353b;
 
@@ -15,8 +15,8 @@ export const Card = styled.div`
   border-radius: 10px;
 
   @media ${QUERIESV2.sm} {
-    padding-left: ${12 / 16}rem;
-    padding-right: ${12 / 16}rem;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 `;
 

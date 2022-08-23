@@ -4,14 +4,9 @@ import { ReactComponent as AirdropXIcon } from "assets/airdrop-x.svg";
 import { ReactComponent as AirdropWavesBackground } from "assets/airdrop-waves-bg.svg";
 
 import { Card } from "./Card";
-import { WaysToEarnCard } from "./WaysToEarnCard";
+import { WaysToEarn } from "./WaysToEarn";
 
-type Props = {
-  onClickConnect?: () => void;
-  isLoading?: boolean;
-};
-
-export function NotEligibleWallet(props: Props) {
+export function NotEligibleWallet() {
   return (
     <Container>
       <InfoCard>
@@ -25,7 +20,9 @@ export function NotEligibleWallet(props: Props) {
           distributed by <a href="/">visiting our FAQ</a>.
         </Text>
       </InfoCard>
-      <WaysToEarnCard />
+      <WaysToEarnCard>
+        <WaysToEarn />
+      </WaysToEarnCard>
     </Container>
   );
 }
@@ -58,4 +55,8 @@ const Container = styled.div`
   flex-direction: column;
   display: flex;
   gap: 24px;
+`;
+
+const WaysToEarnCard = styled(Card)`
+  padding-top: 46px;
 `;
