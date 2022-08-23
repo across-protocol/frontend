@@ -75,6 +75,7 @@ export const Wrapper = styled.div`
 `;
 
 export const Title = styled.h2`
+  padding-left: 16px;
   padding-bottom: 24px;
 
   @media ${QUERIESV2.sm} {
