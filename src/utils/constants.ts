@@ -389,6 +389,13 @@ export const tokenList: TokenInfoList = [
     logoURI: "/logos/ethereum-logo.svg",
     mainnetAddress: getAddress("0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"),
   },
+  {
+    name: "Balancer",
+    symbol: "BAL",
+    decimals: 18,
+    logoURI: "/logos/bal.svg",
+    mainnetAddress: getAddress("0xba100000625a3754423978a60c9317c58a424e3D"),
+  },
 ];
 
 assert(
