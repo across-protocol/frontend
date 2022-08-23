@@ -8,10 +8,6 @@ const handler = async (request, response) => {
   try {
     let { originChainId, destinationChainId, originToken, destinationToken } =
       request.query;
-    originChainId = (originChainId ?? "").toLowerCase();
-    destinationChainId = (destinationChainId ?? "").toLowerCase();
-    originToken = (originToken ?? "").toLowerCase();
-    destinationToken = (destinationToken ?? "").toLowerCase();
 
     const hubPool = HubPool__factory.connect(
       "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
