@@ -1,5 +1,6 @@
 import { useLocation } from "react-router";
 import { Link as UnstyledLink } from "react-router-dom";
+import { Gift } from "react-feather";
 import Wallet from "../Wallet";
 import {
   Wrapper,
@@ -15,7 +16,6 @@ import {
 import MenuToggle from "./MenuToggle";
 import { enableMigration } from "utils";
 import { ReactComponent as Logo } from "assets/across-mobile-logo.svg";
-import { ReactComponent as GiftBoxIcon } from "assets/icons/gift.svg";
 import useScrollPosition from "hooks/useScrollPosition";
 
 const LINKS = !enableMigration
@@ -28,7 +28,7 @@ const LINKS = !enableMigration
         href: "/airdrop",
         name: (
           <TextWithIcon>
-            Airdrop <GiftBoxIcon />
+            Airdrop <Gift size={16} strokeWidth="1" />
           </TextWithIcon>
         ),
       },

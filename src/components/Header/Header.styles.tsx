@@ -72,8 +72,8 @@ export const Item = styled.li`
       transform: translateX(-50%);
     }
 
-    svg path {
-      stroke-width: 1px;
+    svg {
+      stroke-width: 2px;
     }
   }
 
