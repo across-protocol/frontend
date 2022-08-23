@@ -2,6 +2,7 @@ import React from "react";
 import styled from "@emotion/styled";
 
 import { IconPair } from "components/IconPair";
+import { PopperTooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/info.svg";
 
 import { LightCard } from "./Card";
@@ -29,7 +30,10 @@ export function EarnOptionCard(props: {
       </EarnOptionTopContainer>
       <FullWidthButton size="lg">{props.buttonLabel}</FullWidthButton>
       <ApyContainer>
-        APY: {props.apyRange[0]} — {props.apyRange[1]}% <InfoIcon />
+        APY: {props.apyRange[0]} — {props.apyRange[1]}%{" "}
+        <PopperTooltip title="APY" body="APY info text" placement="top">
+          <InfoIcon />
+        </PopperTooltip>
       </ApyContainer>
     </Container>
   );
