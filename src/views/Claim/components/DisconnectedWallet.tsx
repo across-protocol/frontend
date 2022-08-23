@@ -5,7 +5,7 @@ import { ReactComponent as ArrowTopRightIcon } from "assets/arrow-top-right.svg"
 
 import { Card } from "./Card";
 import { Button } from "../Claim.styles";
-import { QUERIES } from "utils";
+import { QUERIESV2 } from "utils";
 
 type Props = {
   onClickConnect?: () => void;
@@ -44,7 +44,7 @@ const ContainerCard = styled(Card)`
   flex-direction: column;
   justify-content: flex-end;
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm} {
     height: 280px;
   }
 `;

@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { QUERIES } from "utils/constants";
+import { QUERIESV2 } from "utils/constants";
 
 export const Card = styled.div`
   display: flex;
@@ -14,7 +14,7 @@ export const Card = styled.div`
   border: 1px solid #3e4047;
   border-radius: 10px;
 
-  @media ${QUERIES.tabletAndDown} {
+  @media ${QUERIESV2.sm} {
     padding-left: ${12 / 16}rem;
     padding-right: ${12 / 16}rem;
   }

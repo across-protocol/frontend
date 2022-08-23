@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 
 import { ButtonV2 } from "components";
-import { QUERIES } from "utils/constants";
+import { QUERIESV2 } from "utils/constants";
 
 export const Wrapper = styled.div`
   color: #e0f3ff;
@@ -9,7 +9,7 @@ export const Wrapper = styled.div`
   max-width: 600px;
   margin: 64px auto;
 
-  @media ${QUERIES.tabletAndDown} {
+  @media ${QUERIESV2.sm} {
     padding-left: 16px;
     padding-right: 16px;
   }
@@ -30,7 +30,7 @@ export const Wrapper = styled.div`
     font-size: ${26 / 16}rem;
     line-height: ${31 / 16}rem;
 
-    @media ${QUERIES.mobileAndDown} {
+    @media ${QUERIESV2.sm} {
       font-size: ${22 / 16}rem;
       line-height: ${26 / 16}rem;
     }
@@ -40,7 +40,7 @@ export const Wrapper = styled.div`
     font-size: ${22 / 16}rem;
     line-height: ${26 / 16}rem;
 
-    @media ${QUERIES.mobileAndDown} {
+    @media ${QUERIESV2.sm} {
       font-size: ${18 / 16}rem;
       line-height: ${26 / 16}rem;
     }
@@ -50,14 +50,14 @@ export const Wrapper = styled.div`
     font-size: ${18 / 16}rem;
     line-height: ${26 / 16}rem;
 
-    @media ${QUERIES.mobileAndDown} {
+    @media ${QUERIESV2.sm} {
       font-size: ${16 / 16}rem;
       line-height: ${20 / 16}rem;
     }
   }
 
   p {
-    @media ${QUERIES.mobileAndDown} {
+    @media ${QUERIESV2.sm} {
       font-size: ${14 / 16}rem;
       line-height: ${18 / 16}rem;
     }
@@ -75,11 +75,15 @@ export const Wrapper = styled.div`
 `;
 
 export const Title = styled.h2`
-  padding-bottom: ${24 / 16}rem;
+  padding-bottom: 24px;
+
+  @media ${QUERIESV2.sm} {
+    padding-bottom: 12px;
+  }
 `;
 
 export const Button = styled(ButtonV2)`
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm} {
     font-size: ${16 / 16}rem;
     line-height: ${20 / 16}rem;
     padding: 10px 20px;
