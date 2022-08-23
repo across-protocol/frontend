@@ -13,6 +13,7 @@ import {
 } from "utils";
 import { update, disconnect, error } from "state/connection";
 import { store } from "state";
+import logo from "assets/across-logo-v2.svg";
 
 const injected = injectedModule();
 const gnosis = gnosisModule();
@@ -58,7 +59,7 @@ export interface InitOptions {
 //  gas?: typeof gas;
 //  }
 
-export function onboardBaseConfig() {
+export function onboardInit() {
   return Onboard({
     apiKey: onboardApiKey,
     wallets: [injected, coinbase, walletConnect, gnosis],
@@ -108,6 +109,24 @@ export function onboardBaseConfig() {
         rpcUrl: providerUrlsTable[ChainId.ARBITRUM],
       },
     ],
+    appMetadata: {
+      name: "Across Bridge",
+      icon: logo,
+      description:
+        "Across is the fastest, cheapest and most secure cross-chain bridge for Ethereum, Arbitrum, Optimism, Polygon, Boba and other Layer 1 and Layer 2 networks. Transfer tokens with Across.",
+      recommendedInjectedWallets: [
+        { name: "Metamask", url: "https://metamask.io" },
+        { name: "Coinbase", url: "https://wallet.coinbase.com/" },
+      ],
+    },
+    accountCenter: {
+      desktop: {
+        enabled: false,
+      },
+      mobile: {
+        enabled: false,
+      },
+    },
   });
 }
 

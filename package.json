@@ -32,6 +32,7 @@
     "@web3-onboard/core": "^2.8.0",
     "@web3-onboard/gnosis": "^2.1.0",
     "@web3-onboard/injected-wallets": "^2.1.0",
+    "@web3-onboard/react": "^2.3.0",
     "@web3-onboard/walletconnect": "^2.1.0",
     "axios": "^0.27.2",
     "bnc-notify": "^1.9.1",

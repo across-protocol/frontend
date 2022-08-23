@@ -6461,6 +6461,15 @@
     joi "^17.4.2"
     lodash.uniqby "^4.7.0"
 
+"@web3-onboard/react@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@web3-onboard/react/-/react-2.3.0.tgz#dcf903e1c528dfa202aad1b4b532d92acb2720ff"
+  integrity sha512-owemlqrgt1LWbznA/s8GfI5inofE/JnJ+J3mP6IF9/XQHulDGCTQuSLIIlKHZeYEpUlNZQJvkhKoQ5c5Kdiu4Q==
+  dependencies:
+    "@web3-onboard/common" "^2.2.0"
+    "@web3-onboard/core" "^2.8.0"
+    use-sync-external-store "1.0.0"
+
 "@web3-onboard/walletconnect@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@web3-onboard/walletconnect/-/walletconnect-2.1.0.tgz#a2cc16c7e637ea500c8bbc93d63e021feb8a5262"
@@ -24511,6 +24520,11 @@ use-sidecar@^1.0.1, use-sidecar@^1.0.5:
   dependencies:
     detect-node-es "^1.1.0"
     tslib "^1.9.3"
+
+use-sync-external-store@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.0.0.tgz#d98f4a9c2e73d0f958e7e2d2c2bfb5f618cbd8fd"
+  integrity sha512-AFVsxg5GkFg8GDcxnl+Z0lMAz9rE8DGJCc28qnBuQF7lac57B5smLcT37aXpXIIPz75rW4g3eXHPjhHwdGskOw==
 
 use@^3.1.0:
   version "3.1.1"
