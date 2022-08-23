@@ -18,7 +18,7 @@ export function onboardBaseConfig(): Initialization {
   return {
     dappId: onboardApiKey,
     networkId: hubPoolChainId,
-    // hideBranding: true,
+    hideBranding: true,
     walletSelect: {
       wallets: [
         { walletName: "metamask", preferred: true, label: "Metamask" },
