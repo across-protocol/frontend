@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { QUERIESV2 } from "utils";
 
 export const Wrapper = styled(Link)`
-  margin: 0px 0px 24px 23px;
+  margin: 0px 0px 8px 23px;
   display: flex;
   align-items: center;
   justify-content: start;
@@ -14,7 +14,7 @@ export const Wrapper = styled(Link)`
   width: fit-content;
 
   @media ${QUERIESV2.sm} {
-    margin: 0px 0px 17px 19px;
+    margin: 0px 0px 0px 31px;
   }
 `;
 

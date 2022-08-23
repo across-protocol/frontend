@@ -10,6 +10,6 @@ export const Wrapper = styled.div`
   gap: 16px;
   @media ${QUERIESV2.sm} {
     margin: 16px auto 122px;
-    width: 404px;
+    max-width: 404px;
   }
 `;
