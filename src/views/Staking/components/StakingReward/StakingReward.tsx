@@ -59,7 +59,7 @@ export const StakingReward = ({
         {isAmountExceeded(amountToClaim) && (
           <AlertInfo
             text="The amount entered exceeds your claimable amount"
-            danger={true}
+            danger
           />
         )}
       </StakingInputBlockWrapper>
