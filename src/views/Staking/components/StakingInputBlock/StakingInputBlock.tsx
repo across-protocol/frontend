@@ -26,7 +26,7 @@ interface Props {
     {},
     {}
   >;
-  maxValue?: string;
+  maxValue: string;
 }
 
 const StakingInputBlock: React.FC<Props> = ({
@@ -48,9 +48,7 @@ const StakingInputBlock: React.FC<Props> = ({
           onChange={(e) => setValue(e.target.value)}
           valid={!value || valid}
         />
-        {!!maxValue && (
-          <MaxButton onClick={() => setValue(maxValue ?? "")}>Max</MaxButton>
-        )}
+        <MaxButton onClick={() => setValue(maxValue ?? "")}>Max</MaxButton>
       </InputWrapper>
       <ButtonWrapper>
         <StakeButton valid={valid}>
