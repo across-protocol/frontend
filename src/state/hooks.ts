@@ -26,6 +26,7 @@ export function useConnection() {
     notify,
     account,
     chainId,
+    wallet,
   } = useOnboard();
 
   const dispatch = useAppDispatch();
@@ -47,6 +48,7 @@ export function useConnection() {
     error,
     setUpdate: actions.update,
     setError: actions.errorAction,
+    wallet,
   };
 }
 
