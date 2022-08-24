@@ -7,25 +7,14 @@ import {
   MaxButton,
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
-import { StyledComponent } from "@emotion/styled";
-import { Theme } from "@emotion/react";
+import { StylizedSVG } from "../../types";
 
 interface Props {
   value: string;
   setValue: React.Dispatch<React.SetStateAction<string>>;
   valid: boolean;
   buttonText: string;
-  Logo: StyledComponent<
-    React.SVGProps<SVGSVGElement> & {
-      title?: string | undefined;
-    } & {
-      children?: React.ReactNode;
-    } & {
-      theme?: Theme | undefined;
-    },
-    {},
-    {}
-  >;
+  Logo: StylizedSVG;
   maxValue: string;
 }
 
