@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 
 import { ReactComponent as AirdropGiftBackground } from "assets/airdrop-gift-bg.svg";
-import { ReactComponent as ArrowTopRightIcon } from "assets/arrow-top-right.svg";
+import { ExternalLink } from "components/ExternalLink";
 
 import { Card } from "./Card";
 import { Button } from "../Claim.styles";
@@ -23,9 +23,9 @@ export function DisconnectedWallet(props: Props) {
           ? "Checking your eligibility..."
           : "Connect to checkout your airdrop eligibility"}
       </Button>
-      <LearnMoreLink href="/">
-        Learn more about the airdrop <ExternalIcon />
-      </LearnMoreLink>
+      <LinkContainer>
+        <ExternalLink href="/" text="Learn more about the airdrop" />
+      </LinkContainer>
     </ContainerCard>
   );
 }
@@ -49,16 +49,8 @@ const ContainerCard = styled(Card)`
   }
 `;
 
-const LearnMoreLink = styled.a`
+const LinkContainer = styled.div`
   margin-top: 24px;
   margin-bottom: 24px;
-  font-weight: 500;
-  font-size: ${16 / 16}rem;
-  line-height: 20px;
   z-index: 10;
-`;
-
-const ExternalIcon = styled(ArrowTopRightIcon)`
-  height: 12px;
-  width: 12px;
 `;
