@@ -62,11 +62,14 @@ const handler = async (request, response) => {
     ) {
       enabledRoutes = enabledRoutes.filter(
         (route) =>
-          (!originToken || originToken === route.originToken) &&
+          (!originToken ||
+            originToken.toLowerCase() === route.originToken.toLowerCase()) &&
           (!originChainId || originChainId === route.originChainId) &&
           (!destinationChainId ||
             destinationChainId === route.destinationChainId) &&
-          (!destinationToken || destinationToken === route.destinationToken)
+          (!destinationToken ||
+            destinationToken.toLowerCase() ===
+              route.destinationToken.toLowerCase())
       );
     }
 
