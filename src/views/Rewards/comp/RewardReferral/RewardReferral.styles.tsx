@@ -1,7 +1,6 @@
 import styled from "@emotion/styled";
 import { ButtonV2 } from "components/Buttons";
 import { ReactComponent as ReferralSVG } from "assets/across-referrals.svg";
-import { ReactComponent as ExternalLink12Icon } from "assets/icons/external-link-12.svg";
 import { ReactComponent as CopyIcon16 } from "assets/icons/copy-16.svg";
 import { ReactComponent as CopyIcon24 } from "assets/icons/copy-24.svg";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
@@ -239,10 +238,6 @@ export const ConnectButton = styled(ButtonV2)`
     line-height: 18px;
     padding: 11px 16px;
   }
-`;
-
-export const ExternalLinkIcon = styled(ExternalLink12Icon)`
-  margin: 2px 0 0 4px;
 `;
 
 export const CopyIconDesktop = styled(CopyIcon24)`
