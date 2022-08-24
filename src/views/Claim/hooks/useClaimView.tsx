@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useConnection } from "state/hooks";
 import { onboard } from "utils";
 
+import { AsyncState } from "../types";
+
 export function useClaimView() {
   const { init } = onboard;
   const { isConnected } = useConnection();
@@ -19,20 +21,7 @@ function useIsEligible() {
   const { isConnected, account } = useConnection();
 
   const [eligibleState, setEligibleState] = useState<
-    | {
-        status: "idle";
-      }
-    | {
-        status: "loading";
-      }
-    | {
-        status: "success";
-        isEligible: boolean;
-      }
-    | {
-        status: "error";
-        error: Error;
-      }
+    AsyncState<{ isEligible: boolean }>
   >({ status: "idle" });
 
   useEffect(() => {
@@ -41,7 +30,7 @@ function useIsEligible() {
         .then((isEligible) => {
           setEligibleState({
             status: "success",
-            isEligible,
+            data: { isEligible },
           });
         })
         .catch((error) => {
