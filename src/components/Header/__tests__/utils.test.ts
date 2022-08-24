@@ -17,4 +17,11 @@ describe("#isChildPath()", () => {
   test("do not match root path", () => {
     expect(isChildPath("/parent/child", "/")).toBeFalsy();
   });
+
+  test("do not match nested parent path", () => {
+    expect(isChildPath("/transactions/a/all", "/transactions/b")).toBeFalsy();
+    expect(
+      isChildPath("/transactions/all", "/transactions/all/test/subpath")
+    ).toBeFalsy();
+  });
 });

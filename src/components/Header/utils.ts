@@ -5,5 +5,8 @@
  * @returns Match result.
  */
 export function isChildPath(pathname: string, parentPath: string) {
-  return pathname.split("/")[1] === parentPath.split("/")[1];
+  const splitParentPath = parentPath.split("/");
+  return splitParentPath.every(
+    (parentPathElement, i) => pathname.split("/")[i] === parentPathElement
+  );
 }
