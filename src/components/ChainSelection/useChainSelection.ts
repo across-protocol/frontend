@@ -32,6 +32,8 @@ export default function useChainSelection() {
     }
   };
 
+  console.log("chainId", chainId);
+
   const downshiftState = useSelect({
     items: availableFromChains.map((chain) => chain.chainId),
     selectedItem: fromChain,

@@ -39,6 +39,12 @@ type OnboardContextValue = {
   chainId: ChainId;
 };
 
+const notify = Notify({
+  dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY, // [String] The API key created by step one above
+  networkId: 1,
+  desktopPosition: "topRight",
+});
+
 function useOnboardManager() {
   const [onboard, setOnboard] = useState<OnboardAPI | null>(null);
   const [provider, setProvider] =
@@ -88,11 +94,7 @@ function useOnboardManager() {
     isConnected: !!connectedChain,
     signer,
     provider,
-    notify: Notify({
-      dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY, // [String] The API key created by step one above
-      networkId: 1,
-      desktopPosition: "topRight",
-    }),
+    notify,
     account,
     chainId: (Number(wallet?.chains[0].id) as ChainId) || 0,
   };
