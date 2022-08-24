@@ -46,7 +46,7 @@ export function useConnection() {
     ensName,
     chainId: Number(w?.chains[0].id) as ChainId,
     provider,
-    signer,
+    signer: oc.signer,
     error,
     isConnected: oc.isConnected,
     setUpdate: actions.update,

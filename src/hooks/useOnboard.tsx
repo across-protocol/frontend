@@ -26,23 +26,28 @@ type OnboardContextValue = {
   setChain: (options: SetChainOptions) => Promise<boolean>;
   wallet: WalletState | null;
   isConnected: boolean;
-  // signer: ethers.providers.JsonRpcSigner | undefined;
+  signer: ethers.providers.JsonRpcSigner | undefined;
 };
 
 function useOnboardManager() {
   const [onboard, setOnboard] = useState<OnboardAPI | null>(null);
+  const [signer, setSigner] = useState<
+    ethers.providers.JsonRpcSigner | undefined
+  >(undefined);
   useEffect(() => {
     if (!onboard) setOnboard(onboardInit());
   }, [onboard]);
 
   const [{ wallet }, connect, disconnect] = useConnectWallet();
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
-  // const connectedWallets = useWallets()
-  // let signer: ethers.providers.JsonRpcSigner | undefined;
-  // if (wallet) {
-  //   const provider = new ethers.providers.Web3Provider(wallet.provider);
-  //   signer = provider.getSigner();
-  // }
+
+  useEffect(() => {
+    if (wallet?.provider) {
+      setSigner(new ethers.providers.Web3Provider(wallet.provider).getSigner());
+    } else {
+      setSigner(undefined);
+    }
+  }, [wallet]);
 
   return {
     onboard,
@@ -54,7 +59,7 @@ function useOnboardManager() {
     setChain,
     wallet,
     isConnected: !!connectedChain,
-    // signer,
+    signer,
   };
 }
 
