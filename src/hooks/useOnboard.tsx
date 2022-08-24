@@ -12,6 +12,8 @@ import {
 } from "@web3-onboard/core";
 import { Chain } from "@web3-onboard/common";
 import { ethers } from "ethers";
+import Notify, { API as NotifyAPI } from "bnc-notify";
+
 export type SetChainOptions = {
   chainId: string;
   chainNamespace?: string;
@@ -29,6 +31,7 @@ type OnboardContextValue = {
   isConnected: boolean;
   signer: ethers.providers.JsonRpcSigner | undefined;
   provider: ethers.providers.Web3Provider | null;
+  notify: NotifyAPI;
 };
 
 function useOnboardManager() {
@@ -73,6 +76,11 @@ function useOnboardManager() {
     isConnected: !!connectedChain,
     signer,
     provider,
+    notify: Notify({
+      dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY, // [String] The API key created by step one above
+      networkId: 1,
+      desktopPosition: "topRight",
+    }),
   };
 }
 

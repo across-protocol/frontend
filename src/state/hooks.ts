@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 import { bindActionCreators } from "redux";
 import { ChainId, getConfig, Token } from "utils";
 import type { RootState, AppDispatch } from "./";
-import { update, disconnect, error as errorAction } from "./connection";
+import { update, error as errorAction } from "./connection";
 
 import chainApi from "./chainApi";
 import { add } from "./transactions";
@@ -16,34 +16,32 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function useConnection() {
-  const { ensName, error, notify } = useAppSelector(
-    (state) => state.connection
-  );
-  const oc = useOnboard();
-  console.log(">>>>onboardContext", oc);
+  const { ensName, error } = useAppSelector((state) => state.connection);
+  const { provider, signer, isConnected, connect, disconnect, notify, wallet } =
+    useOnboard();
 
   const dispatch = useAppDispatch();
   const actions = useMemo(
-    () => bindActionCreators({ update, disconnect, errorAction }, dispatch),
+    () => bindActionCreators({ update, errorAction }, dispatch),
     [dispatch]
   );
 
-  const w = oc.wallet;
+  const w = wallet;
 
   // const isConnected = !!chainId && !!signer && !!account;
   return {
     account: w?.accounts[0].address,
     ensName,
     chainId: Number(w?.chains[0].id) as ChainId,
-    provider: oc.provider,
-    signer: oc.signer,
-    error,
-    isConnected: oc.isConnected,
-    setUpdate: actions.update,
-    disconnect: actions.disconnect,
-    setError: actions.errorAction,
+    provider,
+    signer,
+    isConnected,
     notify,
-    connect: oc.connect,
+    connect,
+    disconnect,
+    error,
+    setUpdate: actions.update,
+    setError: actions.errorAction,
   };
 }
 

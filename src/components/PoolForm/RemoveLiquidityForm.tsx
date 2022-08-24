@@ -54,7 +54,7 @@ interface Props {
   position: ethers.BigNumber;
   totalPosition: ethers.BigNumber;
   feesEarned: ethers.BigNumber;
-  wrongNetwork?: boolean;
+  wrongNetwork?: boolean | null;
   // refetch balance
   refetchBalance: () => void;
   chainId: ChainId;
