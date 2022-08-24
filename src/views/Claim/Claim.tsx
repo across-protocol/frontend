@@ -14,20 +14,23 @@ export function Claim() {
     claimableTokensQuery,
     handleClaim,
     handleConnectWallet,
+    handleAddTokenToWallet,
+    alreadyClaimed,
+    claimState,
   } = useClaimView();
 
   const isEligible = !isEligibleQuery.isLoading && isEligibleQuery.data;
 
-  const activeClaimStepIndex = 0;
+  const activeClaimStepIndex = alreadyClaimed ? 1 : 0;
 
   return (
     <PageContainer>
       <BodyContainer>
         <Title>Airdrop</Title>
-        {!isConnected ? (
+        {!isConnected || isEligibleQuery.isLoading ? (
           <DisconnectedWallet
             onClickConnect={handleConnectWallet}
-            isLoading={isEligibleQuery.isLoading}
+            isCheckingEligibility={isEligibleQuery.isLoading}
           />
         ) : !isEligible ? (
           <NotEligibleWallet />
@@ -36,6 +39,8 @@ export function Claim() {
             onClickClaim={handleClaim}
             claimable={claimableTokensQuery.data}
             activeStepIndex={activeClaimStepIndex}
+            onClickAddToken={handleAddTokenToWallet}
+            isClaiming={claimState.status.includes("pending")}
           />
         )}
       </BodyContainer>

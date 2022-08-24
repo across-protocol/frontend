@@ -15,7 +15,7 @@ export function useClaimableTokens() {
   );
 }
 
-// TODO: use correct function
+// TODO: use correct functions
 async function getClaimableTokens(account: string) {
   await new Promise((resolve) => setTimeout(() => resolve(true), 5_000));
   return {
@@ -23,5 +23,6 @@ async function getClaimableTokens(account: string) {
     bridgingClaim: utils.parseEther("22.012"),
     communityClaim: utils.parseEther("41.124"),
     totalClaim: utils.parseEther("73.458"),
+    claimedAmount: utils.parseEther("0"),
   };
 }

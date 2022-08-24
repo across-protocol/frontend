@@ -1,9 +1,9 @@
 import styled from "@emotion/styled";
 import { BigNumberish, utils } from "ethers";
-import { Loader } from "react-feather";
 
 import { ReactComponent as ClaimHeartWave } from "assets/claim-heart-wave.svg";
 import { ReactComponent as AcrossIcon } from "assets/acx.svg";
+import { Loader } from "components/Loader";
 
 import { LightCard } from "./Card";
 import { Button, FullWidthButton } from "../Claim.styles";
@@ -11,7 +11,7 @@ import { QUERIESV2 } from "utils";
 
 export type Props = {
   isClaiming?: boolean;
-  isFetchingClaimable?: boolean;
+  isLoading?: boolean;
   alreadyClaimed?: boolean;
   claimable?: {
     liquidityClaim: BigNumberish;
@@ -20,6 +20,7 @@ export type Props = {
     totalClaim: BigNumberish;
   };
   onClickClaim: () => void;
+  onClickAddToken: () => void;
 };
 
 export function ClaimAirdrop(props: Props) {
@@ -67,7 +68,9 @@ export function ClaimAirdrop(props: Props) {
             <h6>Claimed tokens</h6>
             <h2>{utils.formatUnits(props.claimable?.totalClaim || 0)} ACX</h2>
           </ClaimedTokensContainer>
-          <InverseButton size="lg">Add token to wallet</InverseButton>
+          <InverseButton size="lg" onClick={props.onClickAddToken}>
+            Add token to wallet
+          </InverseButton>
         </AddTokenToWalletContainer>
       ) : (
         <FullWidthButton
@@ -77,7 +80,7 @@ export function ClaimAirdrop(props: Props) {
         >
           {props.isClaiming ? (
             <>
-              Claiming airdrop... <Spinner />
+              Claiming airdrop... <Loader />
             </>
           ) : (
             "Claim airdrop"
@@ -106,22 +109,6 @@ const TextContainer = styled.div`
   h6 {
     margin-top: 16px;
     color: #c5d5e0;
-  }
-`;
-
-const Spinner = styled(Loader)`
-  width: 24px;
-  height: 24px;
-  animation: rotation 2s infinite linear;
-  align-self: flex-end;
-
-  @keyframes rotation {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(359deg);
-    }
   }
 `;
 

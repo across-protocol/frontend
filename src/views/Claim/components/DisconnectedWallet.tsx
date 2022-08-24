@@ -9,7 +9,7 @@ import { QUERIESV2 } from "utils";
 
 type Props = {
   onClickConnect?: () => void;
-  isLoading?: boolean;
+  isCheckingEligibility?: boolean;
 };
 
 export function DisconnectedWallet(props: Props) {
@@ -18,8 +18,12 @@ export function DisconnectedWallet(props: Props) {
       <BackgroundContainer>
         <AirdropGiftBackground />
       </BackgroundContainer>
-      <Button size="lg" onClick={props.onClickConnect}>
-        {props.isLoading
+      <Button
+        size="lg"
+        onClick={props.onClickConnect}
+        disabled={props.isCheckingEligibility}
+      >
+        {props.isCheckingEligibility
           ? "Checking your eligibility..."
           : "Connect to checkout your airdrop eligibility"}
       </Button>
