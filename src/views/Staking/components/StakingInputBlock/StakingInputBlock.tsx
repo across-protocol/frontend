@@ -48,7 +48,7 @@ const StakingInputBlock: React.FC<Props> = ({
           onChange={(e) => setValue(e.target.value)}
           valid={!value || valid}
         />
-        <MaxButton onClick={() => setValue(maxValue ?? "")}>Max</MaxButton>
+        <MaxButton onClick={() => setValue(maxValue)}>Max</MaxButton>
       </InputWrapper>
       <ButtonWrapper>
         <StakeButton valid={valid}>
