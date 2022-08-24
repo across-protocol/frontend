@@ -1,6 +1,4 @@
-const { HubPool__factory } = require("@across-protocol/contracts-v2");
-
-const { getLogger, InputError, getProvider } = require("./_utils");
+const { getLogger, InputError } = require("./_utils");
 const enabledRoutesAsJson = require("../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json");
 
 const handler = async (request, response) => {
@@ -8,11 +6,6 @@ const handler = async (request, response) => {
   try {
     let { originChainId, destinationChainId, originToken, destinationToken } =
       request.query;
-
-    const hubPool = HubPool__factory.connect(
-      "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
-      getProvider("1")
-    );
 
     let enabledRoutes = enabledRoutesAsJson.routes.map((route) => ({
       originChainId: String(route.fromChain),
@@ -25,14 +18,15 @@ const handler = async (request, response) => {
     //        the corresponding value is a nested hashmap containing a key
     //        value pair of {chainId: l2TokenEquivalent}
     let l1TokensToDestinationTokens = {};
-    const poolRebalanceRouteEvents = await hubPool.queryFilter(
-      hubPool.filters.SetPoolRebalanceRoute()
-    );
-    for (const event of poolRebalanceRouteEvents) {
-      const { l1Token, destinationChainId, destinationToken } = event.args;
-      const obj = l1TokensToDestinationTokens[l1Token] ?? {};
-      obj[destinationChainId] = destinationToken;
-      l1TokensToDestinationTokens[l1Token] = obj;
+    for (const {
+      l1TokenAddress,
+      fromChain,
+      fromTokenAddress,
+    } of enabledRoutesAsJson.routes) {
+      l1TokensToDestinationTokens[l1TokenAddress] = {
+        ...l1TokensToDestinationTokens[l1TokenAddress],
+        [fromChain]: fromTokenAddress,
+      };
     }
 
     // Convert this map to an array for convenience in the following logic
