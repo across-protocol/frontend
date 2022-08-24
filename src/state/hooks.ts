@@ -16,9 +16,17 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function useConnection() {
-  const { ensName, error } = useAppSelector((state) => state.connection);
-  const { provider, signer, isConnected, connect, disconnect, notify, wallet } =
-    useOnboard();
+  const { error } = useAppSelector((state) => state.connection);
+  const {
+    provider,
+    signer,
+    isConnected,
+    connect,
+    disconnect,
+    notify,
+    account,
+    chainId,
+  } = useOnboard();
 
   const dispatch = useAppDispatch();
   const actions = useMemo(
@@ -26,13 +34,10 @@ export function useConnection() {
     [dispatch]
   );
 
-  const w = wallet;
-
-  // const isConnected = !!chainId && !!signer && !!account;
   return {
-    account: w?.accounts[0].address,
-    ensName,
-    chainId: Number(w?.chains[0].id) as ChainId,
+    account: account?.address || undefined,
+    ensName: account?.ens || undefined,
+    chainId,
     provider,
     signer,
     isConnected,
