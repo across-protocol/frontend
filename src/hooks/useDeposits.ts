@@ -40,7 +40,7 @@ export function useDeposits(
     async () => {
       return getDeposits(status, limit, offset);
     },
-    { keepPreviousData: true }
+    { keepPreviousData: true, refetchInterval: 15_000 }
   );
 
   return {
