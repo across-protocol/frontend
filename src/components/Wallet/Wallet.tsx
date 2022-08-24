@@ -20,7 +20,7 @@ interface Props {
 }
 
 const Wallet: FC<Props> = ({ setOpenSidebar }) => {
-  const { account, ensName, isConnected, chainId } = useConnection();
+  const { account, ensName, isConnected, chainId, connect } = useConnection();
 
   if (account && !isConnected && !chainId) {
     return (
@@ -31,7 +31,7 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
   }
 
   if (!isConnected) {
-    return <ConnectButton onClick={init}>Connect</ConnectButton>;
+    return <ConnectButton onClick={() => connect()}>Connect</ConnectButton>;
   }
 
   return (

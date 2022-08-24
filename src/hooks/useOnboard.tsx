@@ -1,19 +1,38 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useState, useCallback, createContext } from "react";
 import { onboardInit } from "utils/onboardV2";
 import { OnboardAPI } from "@web3-onboard/core";
+import { useConnectWallet, useSetChain, useWallets } from "@web3-onboard/react";
 import {
-  useConnectWallet,
-  useSetChain,
-  // useWallets
-} from "@web3-onboard/react";
+  ConnectOptions,
+  WalletState,
+  DisconnectOptions,
+  ConnectedChain,
+} from "@web3-onboard/core";
+import { Chain } from "@web3-onboard/common";
+
+export type SetChainOptions = {
+  chainId: string;
+  chainNamespace?: string;
+};
 
 type OnboardContextValue = {
-  onboard: OnboardAPI;
+  onboard: OnboardAPI | null;
+  connect: (options?: ConnectOptions | undefined) => Promise<WalletState[]>;
+  disconnect: (wallet: DisconnectOptions) => Promise<WalletState[]>;
+  chains: Chain[];
+  connectedChain: ConnectedChain | null;
+  settingChain: boolean;
+  setChain: (options: SetChainOptions) => Promise<boolean>;
+  wallet: WalletState | null;
+  isConnected: boolean;
 };
 
 function useOnboardManager() {
-  const [onboard] = useState<OnboardAPI>(onboardInit());
+  const [onboard, setOnboard] = useState<OnboardAPI | null>(null);
+  useEffect(() => {
+    if (!onboard) setOnboard(onboardInit());
+  }, [onboard]);
 
   const [{ wallet }, connect, disconnect] = useConnectWallet();
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();

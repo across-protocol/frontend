@@ -9,6 +9,7 @@ import { update, disconnect, error as errorAction } from "./connection";
 
 import chainApi from "./chainApi";
 import { add } from "./transactions";
+import { useOnboard } from "hooks/useOnboard";
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
@@ -17,6 +18,8 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 export function useConnection() {
   const { account, ensName, signer, provider, error, chainId, notify } =
     useAppSelector((state) => state.connection);
+  const onboardContext = useOnboard();
+  console.log(">>>>onboardContext", onboardContext);
 
   const dispatch = useAppDispatch();
   const actions = useMemo(
@@ -37,6 +40,7 @@ export function useConnection() {
     disconnect: actions.disconnect,
     setError: actions.errorAction,
     notify,
+    connect: onboardContext.connect,
   };
 }
 

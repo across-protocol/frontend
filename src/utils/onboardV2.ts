@@ -1,9 +1,8 @@
-import Onboard, { OnboardAPI } from "@web3-onboard/core";
+import { init } from "@web3-onboard/react";
 import injectedModule from "@web3-onboard/injected-wallets";
 import walletConnectModule from "@web3-onboard/walletconnect";
 import gnosisModule from "@web3-onboard/gnosis";
 import coinbaseModule from "@web3-onboard/coinbase";
-import { ethers } from "ethers";
 import {
   onboardApiKey,
   ChainId,
@@ -11,8 +10,6 @@ import {
   trackEvent,
   debug,
 } from "utils";
-import { update, disconnect, error } from "state/connection";
-import { store } from "state";
 import logo from "assets/across-logo-v2.svg";
 
 const injected = injectedModule();
@@ -60,7 +57,7 @@ export interface InitOptions {
 //  }
 
 export function onboardInit() {
-  return Onboard({
+  return init({
     apiKey: onboardApiKey,
     wallets: [injected, coinbase, walletConnect, gnosis],
     /* 
