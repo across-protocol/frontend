@@ -28,7 +28,6 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
     useSidebar(openSidebar);
   const { connect, disconnect, wallet } = useConnection();
   const addrOrEns = ensName ?? account;
-  console.log("ensName", ensName, "account", account);
 
   const onClickLink = () => {
     setOpenSidebar(false);
