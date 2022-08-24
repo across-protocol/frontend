@@ -113,5 +113,5 @@ export const TextWithIcon = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 `;

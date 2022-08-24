@@ -3,10 +3,21 @@ import styled from "@emotion/styled";
 import { ButtonV2 } from "components";
 import { QUERIESV2 } from "utils/constants";
 
-export const Wrapper = styled.div`
+export const PageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: calc(100% - 72px);
+  @media (max-width: 428px) {
+    min-height: calc(100% - 64px);
+  }
+`;
+
+export const BodyContainer = styled.div`
   color: #e0f3ff;
 
   max-width: 600px;
+  width: 100%;
   margin: 64px auto;
 
   @media ${QUERIESV2.sm} {
@@ -21,7 +32,6 @@ export const Wrapper = styled.div`
   h5,
   h6,
   p {
-    font-family: "Barlow";
     font-style: normal;
     font-weight: 400;
   }

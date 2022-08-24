@@ -29,7 +29,12 @@ const MainIconContainer = styled.div`
 const SmallIconContainer = styled.div`
   position: absolute;
   right: -8px;
-  bottom: 4px;
-  height: 16px;
-  width: 16px;
+  bottom: -1px;
+  height: 18px;
+  width: 18px;
+
+  svg {
+    border: 2px solid #3e4047;
+    border-radius: 50%;
+  }
 `;
