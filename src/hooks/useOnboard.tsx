@@ -2,19 +2,33 @@ import { useContext } from "react";
 import { useState, useCallback, createContext } from "react";
 import { onboardInit } from "utils/onboardV2";
 import { OnboardAPI } from "@web3-onboard/core";
+import {
+  useConnectWallet,
+  useSetChain,
+  // useWallets
+} from "@web3-onboard/react";
+
 type OnboardContextValue = {
   onboard: OnboardAPI;
 };
 
 function useOnboardManager() {
   const [onboard] = useState<OnboardAPI>(onboardInit());
-  const connect = useCallback(async () => {
-    await onboard.connectWallet();
-  }, [onboard]);
+
+  const [{ wallet }, connect, disconnect] = useConnectWallet();
+  const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
+  // const connectedWallets = useWallets()
 
   return {
     onboard,
     connect,
+    disconnect,
+    chains,
+    connectedChain,
+    settingChain,
+    setChain,
+    wallet,
+    isConnected: !!connectedChain,
   };
 }
 
