@@ -379,7 +379,7 @@ const isRouteEnabled = (fromChainId, toChainId, fromToken) => {
     ({ fromTokenAddress, fromChain, toChain }) =>
       fromChainId === fromChain &&
       toChainId === toChain &&
-      fromToken === fromTokenAddress
+      fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
   );
   return enabled;
 };
