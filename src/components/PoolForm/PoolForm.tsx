@@ -47,7 +47,7 @@ interface Props {
   setShowSuccess: React.Dispatch<React.SetStateAction<ShowSuccess | undefined>>;
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
   balance: string;
-  wrongNetwork?: boolean;
+  wrongNetwork: boolean | null;
   // refetch balance
   refetchBalance: () => void;
   defaultTab: string;

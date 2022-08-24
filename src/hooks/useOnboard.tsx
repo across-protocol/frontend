@@ -10,7 +10,7 @@ import {
   ConnectedChain,
 } from "@web3-onboard/core";
 import { Chain } from "@web3-onboard/common";
-
+import { ethers } from "ethers";
 export type SetChainOptions = {
   chainId: string;
   chainNamespace?: string;
@@ -26,6 +26,7 @@ type OnboardContextValue = {
   setChain: (options: SetChainOptions) => Promise<boolean>;
   wallet: WalletState | null;
   isConnected: boolean;
+  // signer: ethers.providers.JsonRpcSigner | undefined;
 };
 
 function useOnboardManager() {
@@ -37,6 +38,11 @@ function useOnboardManager() {
   const [{ wallet }, connect, disconnect] = useConnectWallet();
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
   // const connectedWallets = useWallets()
+  // let signer: ethers.providers.JsonRpcSigner | undefined;
+  // if (wallet) {
+  //   const provider = new ethers.providers.Web3Provider(wallet.provider);
+  //   signer = provider.getSigner();
+  // }
 
   return {
     onboard,
@@ -48,6 +54,7 @@ function useOnboardManager() {
     setChain,
     wallet,
     isConnected: !!connectedChain,
+    // signer,
   };
 }
 

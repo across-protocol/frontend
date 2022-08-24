@@ -10,8 +10,7 @@ import {
 } from "utils";
 
 export default function useChainSelection() {
-  const { init } = onboard;
-  const { isConnected, provider, chainId, error } = useConnection();
+  const { isConnected, provider, chainId, error, connect } = useConnection();
   const { fromChain, setFromChain, availableFromChains } = useSendForm();
 
   const wrongNetworkSend =
@@ -26,9 +25,10 @@ export default function useChainSelection() {
     ? "Connect Wallet"
     : null;
 
+  console.log("provider", provider);
   const handleClick = () => {
     if (!provider) {
-      init();
+      connect();
     } else if (wrongNetworkSend) {
       switchChain(provider, fromChain);
     }

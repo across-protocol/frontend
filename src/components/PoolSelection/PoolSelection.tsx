@@ -20,7 +20,7 @@ interface Props {
   token: Token;
   tokenList: TokenList;
   setToken: Dispatch<SetStateAction<Token>>;
-  wrongNetwork?: boolean;
+  wrongNetwork: boolean | null;
   chainId: ChainId;
 }
 
