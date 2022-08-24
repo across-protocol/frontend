@@ -38,7 +38,7 @@ interface Props {
   setDepositUrl: React.Dispatch<React.SetStateAction<string>>;
   balance: string;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
-  wrongNetwork: boolean | null;
+  wrongNetwork?: boolean;
   formError: string;
   // refetch balance
   refetchBalance: () => void;

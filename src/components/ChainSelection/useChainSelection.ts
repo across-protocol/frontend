@@ -4,7 +4,6 @@ import { useSendForm } from "hooks";
 import {
   UnsupportedChainIdError,
   switchChain,
-  onboard,
   getChainInfo,
   trackEvent,
 } from "utils";
@@ -25,7 +24,6 @@ export default function useChainSelection() {
     ? "Connect Wallet"
     : null;
 
-  console.log("provider", provider);
   const handleClick = () => {
     if (!provider) {
       connect();

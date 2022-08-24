@@ -1,9 +1,9 @@
-import { useMemo, useEffect, useState } from "react";
+import { useMemo } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 import { ethers } from "ethers";
 import { bindActionCreators } from "redux";
-import { ChainId, getConfig, onboard, Token } from "utils";
+import { ChainId, getConfig, Token } from "utils";
 import type { RootState, AppDispatch } from "./";
 import { update, disconnect, error as errorAction } from "./connection";
 
@@ -16,9 +16,7 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function useConnection() {
-  const [provider, setProvider] =
-    useState<ethers.providers.Web3Provider | null>(null);
-  const { account, ensName, signer, error, chainId, notify } = useAppSelector(
+  const { ensName, error, notify } = useAppSelector(
     (state) => state.connection
   );
   const oc = useOnboard();
@@ -31,21 +29,13 @@ export function useConnection() {
   );
 
   const w = oc.wallet;
-  console.log("chainid?", Number(w?.chains[0].id));
-  console.log(oc.onboard?.state.get());
 
-  useEffect(() => {
-    if (oc.wallet?.provider) {
-      setProvider(new ethers.providers.Web3Provider(oc.wallet.provider, "any"));
-    }
-  }, [oc.wallet]);
-
-  const isConnected = !!chainId && !!signer && !!account;
+  // const isConnected = !!chainId && !!signer && !!account;
   return {
     account: w?.accounts[0].address,
     ensName,
     chainId: Number(w?.chains[0].id) as ChainId,
-    provider,
+    provider: oc.provider,
     signer: oc.signer,
     error,
     isConnected: oc.isConnected,

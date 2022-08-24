@@ -1,4 +1,3 @@
-import { onboard } from "utils";
 import { FC } from "react";
 import { useConnection } from "state/hooks";
 
@@ -12,8 +11,6 @@ import {
   Separator,
 } from "./Wallet.styles";
 import { shortenAddress } from "utils";
-
-const { init } = onboard;
 
 interface Props {
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;

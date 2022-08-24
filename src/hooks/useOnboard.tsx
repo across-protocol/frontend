@@ -1,8 +1,9 @@
 import { useContext, useEffect } from "react";
-import { useState, useCallback, createContext } from "react";
+import { useState, createContext } from "react";
+import { trackEvent } from "utils";
 import { onboardInit } from "utils/onboardV2";
 import { OnboardAPI } from "@web3-onboard/core";
-import { useConnectWallet, useSetChain, useWallets } from "@web3-onboard/react";
+import { useConnectWallet, useSetChain } from "@web3-onboard/react";
 import {
   ConnectOptions,
   WalletState,
@@ -27,10 +28,13 @@ type OnboardContextValue = {
   wallet: WalletState | null;
   isConnected: boolean;
   signer: ethers.providers.JsonRpcSigner | undefined;
+  provider: ethers.providers.Web3Provider | null;
 };
 
 function useOnboardManager() {
   const [onboard, setOnboard] = useState<OnboardAPI | null>(null);
+  const [provider, setProvider] =
+    useState<ethers.providers.Web3Provider | null>(null);
   const [signer, setSigner] = useState<
     ethers.providers.JsonRpcSigner | undefined
   >(undefined);
@@ -43,16 +47,24 @@ function useOnboardManager() {
 
   useEffect(() => {
     if (wallet?.provider) {
+      setProvider(new ethers.providers.Web3Provider(wallet.provider, "any"));
       setSigner(new ethers.providers.Web3Provider(wallet.provider).getSigner());
     } else {
+      setProvider(null);
       setSigner(undefined);
     }
   }, [wallet]);
 
   return {
     onboard,
-    connect,
-    disconnect,
+    connect: (options?: ConnectOptions | undefined) => {
+      trackEvent({ category: "wallet", action: "connect", name: "null" });
+      return connect(options);
+    },
+    disconnect: (wallet: DisconnectOptions) => {
+      trackEvent({ category: "wallet", action: "disconnect", name: "null" });
+      return disconnect(wallet);
+    },
     chains,
     connectedChain,
     settingChain,
@@ -60,6 +72,7 @@ function useOnboardManager() {
     wallet,
     isConnected: !!connectedChain,
     signer,
+    provider,
   };
 }
 
