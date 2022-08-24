@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import { tokenList } from "utils";
+import { onboard, parseEther, TokenInfo, tokenList } from "utils";
 
 type StakingPathParams = {
   poolId: string;
@@ -7,12 +7,23 @@ type StakingPathParams = {
 
 export const useStakingView = () => {
   const { poolId } = useParams<StakingPathParams>();
+  let resolvedToken = determineRoute(poolId);
+
+  // Trigger a re-route to 404
+  if (!resolvedToken) {
+    resolvedToken = tokenList[0];
+  }
 
   return {
     poolId,
     exitLinkURI: "/rewards",
-    poolLogoURI: tokenList[8].logoURI,
-    poolName: "USDC",
-    amountOfRewardsClaimable: 320.13,
+    poolLogoURI: resolvedToken.logoURI,
+    poolName: resolvedToken.symbol.toUpperCase(),
   };
 };
+
+function determineRoute(poolId: string): TokenInfo | undefined {
+  return tokenList.filter(
+    (token) => token.symbol.toLowerCase() === poolId.toLowerCase()
+  )[0];
+}
