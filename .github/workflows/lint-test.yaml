@@ -24,6 +24,8 @@ jobs:
     services:
       hardhat:
         image: umaprotocol/protocol
+        env:
+          COMMAND: "cd protocol && yarn hardhat --fork https://mainnet.infura.io/v3/${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}"
         ports:
           - 8545:8545
 
