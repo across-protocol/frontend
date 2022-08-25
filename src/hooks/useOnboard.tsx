@@ -60,6 +60,18 @@ function useOnboardManager() {
   const [{ wallet }, connect, disconnect] = useConnectWallet();
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
 
+  console.log(
+    "provider",
+    provider,
+    "signer",
+    signer,
+    "account",
+    account,
+    "wallet",
+    wallet,
+    "onboard",
+    onboard
+  );
   useEffect(() => {
     if (wallet?.accounts) {
       setAccount(wallet.accounts[0]);

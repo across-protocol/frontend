@@ -9,6 +9,7 @@ describe("pool", () => {
   it("update info boxes on pool change", () => {
     cy.dataCy("select-pool").click();
     cy.dataCy("pool-weth").click();
+    cy.wait(5000);
 
     cy.dataCy("position-info-box").should("be.visible");
     cy.dataCy("pool-info-box").should("be.visible");

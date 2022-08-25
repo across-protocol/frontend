@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 
 import { InjectedEip1193Bridge } from "../utils/ethereum";
+import createCustomizedBridge from "../utils/CustomizedBridge";
 
 /**
  * Overwrite default `visit` command to inject web3 provider to `window.ethereum`.
@@ -17,11 +18,18 @@ Cypress.Commands.overwrite(
     return original({
       ...options,
       url: url as string,
-      onBeforeLoad: (win) => {
+      // onBeforeLoad: (win) => {
+      //   win.localStorage.clear();
+      //   (win as any).ethereum = options?.jsonRpcUrl
+      //     ? InjectedEip1193Bridge.withJsonRpcProvider(options)
+      //     : InjectedEip1193Bridge.withMockProvider(options);
+      // },
+      onBeforeLoad(win) {
+        options && options.onBeforeLoad && options.onBeforeLoad(win);
         win.localStorage.clear();
-        (win as any).ethereum = options?.jsonRpcUrl
-          ? InjectedEip1193Bridge.withJsonRpcProvider(options)
-          : InjectedEip1193Bridge.withMockProvider(options);
+        win.localStorage.setItem("cypress-testing", "true");
+
+        win.ethereum = createCustomizedBridge();
       },
     });
   }
