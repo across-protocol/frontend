@@ -1,4 +1,5 @@
 import { useParams } from "react-router";
+import { useConnection } from "state/hooks";
 import { onboard, parseEther, TokenInfo, tokenList } from "utils";
 
 type StakingPathParams = {
@@ -7,6 +8,7 @@ type StakingPathParams = {
 
 export const useStakingView = () => {
   const { poolId } = useParams<StakingPathParams>();
+  const { isConnected, provider } = useConnection();
   let resolvedToken = determineRoute(poolId);
 
   // Trigger a re-route to 404
@@ -19,6 +21,10 @@ export const useStakingView = () => {
     exitLinkURI: "/rewards",
     poolLogoURI: resolvedToken.logoURI,
     poolName: resolvedToken.symbol.toUpperCase(),
+    amountOfRewardsClaimable: parseEther("320.19"),
+    isConnected: isConnected,
+    provider: provider,
+    connectWalletHandler: onboard.init,
   };
 };
 
