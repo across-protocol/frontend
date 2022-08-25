@@ -9,13 +9,14 @@ import {
   LightGrayItemText,
   MutliplierValue,
   StyledProgressBar,
-  APYInfo,
   APYInfoItem,
   ArrowIcon,
   UsdcLogo,
   InfoIcon,
   InputBlockWrapper,
   Divider,
+  StakeInfoRow,
+  StakeAPYInfoRow,
 } from "./StakingForm.styles";
 
 import { PopperTooltip } from "components/Tooltip";
@@ -59,54 +60,72 @@ export const StakingForm = () => {
         />
       </InputBlockWrapper>
       <Divider />
+
       <StakeInfo>
-        <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
-        <StakeInfoItem>
-          <div>
-            10,000.00
-            <LightGrayItemText margin={4}>
-              / 32,424.24 USDC-LP
-            </LightGrayItemText>
-          </div>
-        </StakeInfoItem>
-        <StakeInfoItem>
-          Age of capital
-          <PopperTooltip
-            title="Age of capital"
-            body="The age of capital is the time since the last time you staked LP tokens."
-            placement="bottom-start"
-          >
-            <InfoIcon />
-          </PopperTooltip>
-        </StakeInfoItem>
-        <StakeInfoItem>50 days</StakeInfoItem>
-        <StakeInfoItem>
-          Multiplier
-          <PopperTooltip
-            title="Multiplier"
-            body="The multiplier is the amount of LP tokens you get for staking."
-            placement="bottom-start"
-          >
-            <InfoIcon />
-          </PopperTooltip>
-        </StakeInfoItem>
-        <StakeInfoItem>
-          <MutliplierValue>
-            <StyledProgressBar percent={50} />
-            1.5x
-          </MutliplierValue>
-        </StakeInfoItem>
-        <StakeInfoItemSmall>
-          Note: Multipliers of previously staked tokens are not impacted
-        </StakeInfoItemSmall>
+        <StakeInfoRow>
+          <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
+          <StakeInfoItem>
+            <div>
+              <LightGrayItemText margin={4}>10,000.00 /</LightGrayItemText>
+              32,424.24 USDC-LP
+            </div>
+          </StakeInfoItem>
+        </StakeInfoRow>
+        <StakeInfoRow>
+          <StakeInfoItem>
+            Age of capital
+            <PopperTooltip
+              title="Age of capital"
+              body="The age of capital is the time since the last time you staked LP tokens."
+              placement="bottom-start"
+            >
+              <InfoIcon />
+            </PopperTooltip>
+          </StakeInfoItem>
+          <StakeInfoItem>
+            <LightGrayItemText>50 days</LightGrayItemText>
+          </StakeInfoItem>
+        </StakeInfoRow>
+        <StakeInfoRow>
+          <StakeInfoItem>
+            Multiplier
+            <PopperTooltip
+              title="Multiplier"
+              body="The multiplier is the amount of LP tokens you get for staking."
+              placement="bottom-start"
+            >
+              <InfoIcon />
+            </PopperTooltip>
+          </StakeInfoItem>
+          <StakeInfoItem>
+            <MutliplierValue>
+              <StyledProgressBar percent={75} />
+              2.00x
+            </MutliplierValue>
+          </StakeInfoItem>
+        </StakeInfoRow>
+        <StakeInfoRow>
+          <StakeInfoItem>
+            <StakeInfoItemSmall>
+              Note: Multipliers of previously staked tokens are not impacted
+            </StakeInfoItemSmall>
+          </StakeInfoItem>
+        </StakeInfoRow>
+        <StakeInfoRow>
+          <Divider />
+        </StakeInfoRow>
+        <StakeAPYInfoRow>
+          <StakeInfoItem>
+            <APYInfoItem>
+              <ArrowIcon />
+              Your total APY
+            </APYInfoItem>
+          </StakeInfoItem>
+          <StakeInfoItem>
+            <LightGrayItemText>2.81%</LightGrayItemText>
+          </StakeInfoItem>
+        </StakeAPYInfoRow>
       </StakeInfo>
-      <APYInfo>
-        <APYInfoItem>
-          <ArrowIcon />
-          Your total APY
-        </APYInfoItem>
-        <APYInfoItem>2.81%</APYInfoItem>
-      </APYInfo>
     </Card>
   );
 };

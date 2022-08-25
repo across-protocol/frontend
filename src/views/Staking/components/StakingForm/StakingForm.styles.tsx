@@ -60,72 +60,76 @@ export const InputWrapper = styled.div`
 
 export const StakeInfo = styled.div`
   display: flex;
-  justify-content: space-between;
-  padding-bottom: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 16px;
   width: 100%;
-  border-bottom: 1px solid #3e4047;
-
-  @media (max-width: 568px) {
-    flex-direction: column;
-  }
-
-  @media (max-width: 428px) {
-    padding: 4px 0 0;
-  }
 `;
 
 export const StakeInfoItem = styled.div`
   display: flex;
   align-items: center;
-  padding-top: 12px;
-  width: 40%;
-  color: #9daab2;
   font-size: ${16 / 16}rem;
   line-height: ${20 / 16}rem;
   font-weight: 400;
 
+  width: 100%;
+  color: #9daab2;
+
+  justify-content: start;
   &:nth-of-type(2n) {
-    width: 60%;
     justify-content: flex-end;
-    color: #e0f3ff;
   }
 
-  @media (max-width: 568px) {
-    width: 100% !important;
-
+  @media ${QUERIESV2.sm} {
     &:nth-of-type(2n) {
-      flex-direction: row-reverse;
-      padding-top: 4px;
+      justify-content: start;
     }
-
-    &:nth-of-type(2n + 1) {
-      padding-top: 16px;
-    }
-  }
-
-  @media (max-width: 428px) {
     font-size: ${14 / 16}rem;
-    line-height: ${18 / 16}rem;
+    flex-shrink: 0;
+    width: fit-content;
+  }
+`;
+
+export const StakeInfoRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex-shrink: 0;
+
+  @media ${QUERIESV2.sm} {
+    flex-direction: column;
+    gap: 6px;
+  }
+`;
+
+export const StakeAPYInfoRow = styled(StakeInfoRow)`
+  @media ${QUERIESV2.sm} {
+    flex-direction: row;
+    width: fit-content;
+    gap: 12px;
+    & > {
+      width: fit-content;
+    }
   }
 `;
 
 export const LightGrayItemText = styled.span<{ margin?: number }>`
-  color: #9daab2;
-  margin: ${({ margin }) => (margin ? `0 ${margin}px` : 0)};
+  color: #e0f3ff;
+  margin-right: ${({ margin }) => (margin ? `${margin}px` : 0)};
 `;
 
 export const StakeInfoItemSmall = styled(StakeInfoItem)`
   font-size: ${14 / 16}rem;
-  width: 80%;
+
+  @media ${QUERIESV2.sm} {
+    font-size: ${12 / 16}rem;
+  }
 `;
 
 interface IStyledProgressBar {
   className?: string;
 }
 export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
-  max-width: 60px;
-  margin-right: 7px;
+  width: 80px;
   height: 14px;
   margin-top: 5px;
   > div {
@@ -135,10 +139,9 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
 
 export const MutliplierValue = styled.div`
   font-weight: 400;
-  font-size: 1rem;
+  gap: 12px;
   color: #e0f3ff;
   display: inline-flex;
-  flex-grow: 2;
   justify-content: flex-end;
   @media ${QUERIESV2.sm} {
     justify-content: flex-start;
@@ -155,17 +158,7 @@ export const APYInfo = styled(StakeInfo)`
 `;
 
 export const APYInfoItem = styled(StakeInfoItem)`
-  padding-top: 0;
   color: #c5d5e0;
-  @media ${QUERIESV2.sm} {
-    &:nth-of-type(2n) {
-      padding-top: 0;
-    }
-    &:nth-of-type(2n + 1) {
-      padding-top: 0;
-    }
-    width: 40% !important;
-  }
 `;
 
 export const ArrowIcon = styled(UnstyledArrowIcon)`
