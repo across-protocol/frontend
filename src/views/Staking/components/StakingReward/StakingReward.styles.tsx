@@ -19,8 +19,6 @@ export const Wrapper = styled.div`
   padding: 24px;
   gap: 24px;
   @media ${QUERIESV2.sm} {
-    margin: 0 auto;
-    width: calc(100% - 24px);
     padding: 12px 16px;
     gap: 16px;
   }
