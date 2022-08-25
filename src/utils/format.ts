@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumberish, ethers } from "ethers";
 import assert from "assert";
 
 export function isValidString(s: string | null | undefined | ""): s is string {
@@ -98,6 +98,20 @@ export function parseUnits(value: string, decimals: number): ethers.BigNumber {
 
 export function parseEther(value: string): ethers.BigNumber {
   return parseUnits(value, 18);
+}
+
+/**
+ * Checks if a given input is parseable
+ * @param amount A bignumberish value that will be attempted to be parsed
+ * @returns A boolean if this value can be parsed
+ */
+export function isNumberEthersParseable(amount: BigNumberish): boolean {
+  try {
+    parseEther(amount.toString());
+    return true;
+  } catch (_e) {
+    return false;
+  }
 }
 
 export function stringToHex(value: string) {
