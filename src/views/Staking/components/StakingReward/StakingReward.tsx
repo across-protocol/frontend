@@ -1,5 +1,6 @@
+import { BigNumberish } from "ethers";
 import { useState } from "react";
-import { formatNumberMaxFracDigits } from "utils";
+import { formatEther, isNumberEthersParseable, parseEther } from "utils";
 import StakingInputBlock from "../StakingInputBlock";
 import { AlertInfo } from "./AlertInfo";
 import {
@@ -17,28 +18,38 @@ import {
 } from "./StakingReward.styles";
 
 type StakingRewardPropType = {
-  maximumClaimableAmount: number;
+  maximumClaimableAmount: BigNumberish;
+  isConnected: boolean;
+  connectWalletHandler: () => void;
 };
 
-export const StakingReward = ({
-  maximumClaimableAmount,
-}: StakingRewardPropType) => {
+export const StakingReward = (props: StakingRewardPropType) => {
   const [amountToClaim, setAmountToClaim] = useState("");
+
+  const buttonHandler = props.isConnected
+    ? // Default do nothing
+      () => {}
+    : props.connectWalletHandler;
 
   // Stub Function
   const stakingAmountValidationHandler = (value: string): boolean => {
-    const numericValue = Number(value);
-    return (
-      !Number.isNaN(numericValue) &&
-      numericValue > 0 &&
-      numericValue <= maximumClaimableAmount
-    );
+    if (isNumberEthersParseable(value)) {
+      const numericalValue = parseEther(value);
+      return (
+        numericalValue.gt("0") &&
+        numericalValue.lte(props.maximumClaimableAmount)
+      );
+    } else {
+      return false;
+    }
   };
 
   // Stub Function
   const isAmountExceeded = (value: string): boolean => {
-    const numericValue = Number(value);
-    return !Number.isNaN(numericValue) && numericValue > maximumClaimableAmount;
+    return (
+      isNumberEthersParseable(value) &&
+      parseEther(value).gt(props.maximumClaimableAmount)
+    );
   };
 
   return (
@@ -54,9 +65,12 @@ export const StakingReward = ({
           value={amountToClaim}
           setValue={setAmountToClaim}
           Logo={StyledAcrossLogo}
-          buttonText="Claim"
-          valid={stakingAmountValidationHandler(amountToClaim)}
-          maxValue={String(maximumClaimableAmount)}
+          buttonText={props.isConnected ? "Claim" : "Connect"}
+          valid={
+            !props.isConnected || stakingAmountValidationHandler(amountToClaim)
+          }
+          maxValue={formatEther(props.maximumClaimableAmount)}
+          onClickHandler={buttonHandler}
         />
         {isAmountExceeded(amountToClaim) && (
           <AlertInfo danger>
@@ -73,7 +87,7 @@ export const StakingReward = ({
           <StakingClaimAmountInnerWrapper>
             <PresentIcon />
             <StakingClaimAmountText>
-              {formatNumberMaxFracDigits(maximumClaimableAmount)}
+              {formatEther(props.maximumClaimableAmount)}
             </StakingClaimAmountText>
           </StakingClaimAmountInnerWrapper>
         </StakingClaimAmountWrapper>

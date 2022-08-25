@@ -16,6 +16,7 @@ interface Props {
   buttonText: string;
   Logo: StylizedSVG;
   maxValue: string;
+  onClickHandler: () => void;
 }
 
 const StakingInputBlock: React.FC<Props> = ({
@@ -25,6 +26,7 @@ const StakingInputBlock: React.FC<Props> = ({
   buttonText,
   Logo,
   maxValue,
+  onClickHandler,
 }) => {
   return (
     <InputRow>
@@ -40,7 +42,7 @@ const StakingInputBlock: React.FC<Props> = ({
         <MaxButton onClick={() => setValue(maxValue)}>Max</MaxButton>
       </InputWrapper>
       <ButtonWrapper>
-        <StakeButton valid={valid}>
+        <StakeButton valid={valid} disabled={!valid} onClick={onClickHandler}>
           {capitalizeFirstLetter(buttonText)}
         </StakeButton>
       </ButtonWrapper>

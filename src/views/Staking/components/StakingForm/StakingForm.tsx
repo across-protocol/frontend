@@ -55,6 +55,7 @@ export const StakingForm = () => {
           buttonText={activeTab}
           Logo={UsdcLogo}
           maxValue="0"
+          onClickHandler={() => {}}
         />
       </InputBlockWrapper>
       <StakeInfo>
