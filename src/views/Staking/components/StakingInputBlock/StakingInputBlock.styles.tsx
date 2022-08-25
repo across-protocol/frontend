@@ -58,6 +58,7 @@ export const Input = styled.input`
   font-size: 16px;
   border: none;
   width: 100%;
+  padding: 0;
 
   &:focus {
     outline: 0;
