@@ -4,6 +4,7 @@ import { ButtonV2 } from "components";
 import { QUERIESV2 } from "utils/constants";
 
 export const PageContainer = styled.div`
+  background-color: #2d2e33;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -19,11 +20,14 @@ export const BodyContainer = styled.div`
   max-width: 600px;
   width: 100%;
   margin: 64px auto;
-  padding-bottom: 128px;
 
-  @media ${QUERIESV2.sm} {
+  @media (max-width: 630px) {
     padding-left: 16px;
     padding-right: 16px;
+  }
+
+  @media ${QUERIESV2.sm} {
+    margin: 48px auto;
   }
 
   h1,

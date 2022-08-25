@@ -1,11 +1,13 @@
 import styled from "@emotion/styled";
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { ChevronUp, ChevronDown } from "react-feather";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { ReactComponent as CheckIcon } from "assets/check-star-ring.svg";
 import { ReactComponent as CheckFilledIcon } from "assets/check-star-ring-filled.svg";
 
 import { Card } from "./Card";
+import { QUERIESV2 } from "utils";
 
 type Props = {
   children: React.ReactElement;
@@ -17,14 +19,30 @@ type Props = {
 };
 
 export function StepCard(props: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+
   const isExpanded = props.expandedStepIndex === props.stepIndex;
   const isStepCompleted = props.activeStepIndex > props.stepIndex;
 
   const Chevron = isExpanded ? ChevronUp : ChevronDown;
 
+  const handleClickTopRow = () => {
+    props.onClickTopRow(props.stepIndex);
+  };
+
+  useEffect(() => {
+    if (isExpanded) {
+      setTimeout(() => {
+        ref.current?.scrollIntoView({
+          block: "center",
+        });
+      }, 350);
+    }
+  }, [ref, isExpanded]);
+
   return (
     <Container>
-      <TopRow onClick={() => props.onClickTopRow(props.stepIndex)}>
+      <TopRow onClick={handleClickTopRow} ref={ref}>
         <CheckIconContainer>
           {isStepCompleted ? <CheckFilledIcon /> : <CheckIcon />}
         </CheckIconContainer>
@@ -34,7 +52,23 @@ export function StepCard(props: Props) {
         </TopRowTextContainer>
         <Chevron stroke="#9daab2" strokeWidth="1" />
       </TopRow>
-      {isExpanded && <BodyContainer>{props.children}</BodyContainer>}
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            key="content"
+            initial="collapsed"
+            animate="open"
+            exit="collapsed"
+            variants={{
+              open: { height: "auto", opacity: 1 },
+              collapsed: { height: 0, opacity: 0 },
+            }}
+            transition={{ ease: "easeInOut", duration: 0.3 }}
+          >
+            <BodyContainer>{props.children}</BodyContainer>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Container>
   );
 }
@@ -51,11 +85,31 @@ const TopRow = styled.div`
   align-self: stretch;
   gap: 12px;
   cursor: pointer;
+
+  h6 {
+    margin-bottom: 4px;
+  }
+
+  @media ${QUERIESV2.sm} {
+    h6 {
+      margin-bottom: 0;
+    }
+
+    > svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
 `;
 
 const CheckIconContainer = styled.div`
   height: 48px;
   width: 48px;
+
+  @media ${QUERIESV2.sm} {
+    height: 40px;
+    width: 40px;
+  }
 `;
 
 const TopRowTextContainer = styled.div`
@@ -68,6 +122,9 @@ const TopRowTextContainer = styled.div`
 
 const BodyContainer = styled.div`
   border-top: 1px solid #3e4047;
-  align-self: stretch;
   margin-top: 24px;
+
+  @media ${QUERIESV2.sm} {
+    margin-top: 16px;
+  }
 `;

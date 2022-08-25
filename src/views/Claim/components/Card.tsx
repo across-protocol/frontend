@@ -12,11 +12,10 @@ export const Card = styled.div`
   background: #34353b;
 
   border: 1px solid #3e4047;
-  border-radius: 10px;
+  border-radius: 16px;
 
   @media ${QUERIESV2.sm} {
-    padding-left: 12px;
-    padding-right: 12px;
+    padding: 16px;
   }
 `;
 

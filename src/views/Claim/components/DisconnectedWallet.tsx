@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { ReactComponent as AirdropGiftBackground } from "assets/airdrop-gift-bg.svg";
+import AirdropBackground from "assets/airdrop-gift-bg.svg";
 import { ExternalLink } from "components/ExternalLink";
 
 import { Card } from "./Card";
@@ -15,9 +15,6 @@ type Props = {
 export function DisconnectedWallet(props: Props) {
   return (
     <ContainerCard>
-      <BackgroundContainer>
-        <AirdropGiftBackground />
-      </BackgroundContainer>
       <Button
         size="lg"
         onClick={props.onClickConnect}
@@ -25,7 +22,7 @@ export function DisconnectedWallet(props: Props) {
       >
         {props.isCheckingEligibility
           ? "Checking your eligibility..."
-          : "Connect to checkout your airdrop eligibility"}
+          : "Connect to check eligibility"}
       </Button>
       <LinkContainer>
         <ExternalLink href="/" text="Learn more about the airdrop" />
@@ -34,15 +31,11 @@ export function DisconnectedWallet(props: Props) {
   );
 }
 
-const BackgroundContainer = styled.div`
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-`;
-
 const ContainerCard = styled(Card)`
-  position: relative;
+  background-position: center;
+  background-image: url(${AirdropBackground});
+  background-size: cover;
+
   height: 348px;
   display: flex;
   flex-direction: column;

@@ -96,6 +96,10 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 48px;
+
+  @media ${QUERIESV2.sm} {
+    gap: 32px;
+  }
 `;
 
 const ClaimHeartImage = styled(ClaimHeartWave)`

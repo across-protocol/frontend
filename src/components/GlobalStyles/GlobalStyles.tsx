@@ -89,9 +89,11 @@ const globalStyles = css`
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: auto;
   }
-  html,
-  body {
+  html {
     height: 100%;
+  }
+  body {
+    height: fit-content;
   }
   body {
     background-color: var(--color-gray);

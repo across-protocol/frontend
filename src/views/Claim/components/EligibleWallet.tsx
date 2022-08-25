@@ -9,21 +9,29 @@ import { WaysToEarn } from "./WaysToEarn";
 
 type Props = ClaimAirdropProps;
 
+const StepIndex = {
+  CLAIM: 0,
+  EARN: 1,
+};
+const totalNumSteps = Object.keys(StepIndex).length;
+
 export function EligibleWallet(props: Props) {
-  const [expandedStepIndex, setExpandedStepIndex] = useState(0);
+  const [expandedStepIndex, setExpandedStepIndex] = useState(StepIndex.CLAIM);
 
   const toggleExpandedStep = (stepIndex: number) => {
     setExpandedStepIndex((expandedStepIndex) =>
-      expandedStepIndex === stepIndex ? -1 : stepIndex
+      expandedStepIndex === stepIndex
+        ? (stepIndex + 1) % totalNumSteps
+        : stepIndex
     );
   };
 
-  const activeStepIndex = props.hasClaimed ? 1 : 0;
+  const activeStepIndex = props.hasClaimed ? StepIndex.EARN : StepIndex.CLAIM;
 
   return (
     <Container>
       <StepCard
-        stepIndex={0}
+        stepIndex={StepIndex.CLAIM}
         onClickTopRow={toggleExpandedStep}
         title="Claim airdrop"
         activeStepIndex={activeStepIndex}
@@ -32,7 +40,7 @@ export function EligibleWallet(props: Props) {
         <ClaimAirdrop {...props} />
       </StepCard>
       <StepCard
-        stepIndex={1}
+        stepIndex={StepIndex.EARN}
         onClickTopRow={toggleExpandedStep}
         title="Earn more ACX"
         activeStepIndex={activeStepIndex}
@@ -52,7 +60,7 @@ export function EligibleWallet(props: Props) {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 `;
 
 const Step2ImageContainer = styled.div`
