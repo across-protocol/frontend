@@ -1,5 +1,4 @@
 import { FC, useState, useCallback, useEffect } from "react";
-import { onboard } from "utils";
 import { useConnection } from "state/hooks";
 import {
   RoundBox,
@@ -65,8 +64,8 @@ const AddLiquidityForm: FC<Props> = ({
   const poolClient = getPoolClient();
   const { addError } = useError();
 
-  const { init } = onboard;
-  const { isConnected, provider, signer, notify, account } = useConnection();
+  const { isConnected, provider, signer, notify, account, connect } =
+    useConnection();
   const { approve, allowance: getAllowance } = useERC20(tokenAddress);
 
   const [allowance, setAllowance] = useState("0");
@@ -147,7 +146,7 @@ const AddLiquidityForm: FC<Props> = ({
 
   const approveOrPoolTransactionHandler = async () => {
     if (!provider) {
-      return init();
+      return connect();
     }
     if (disableDeposits) return false;
     if (isConnected && userNeedsToApprove) return handleApprove();

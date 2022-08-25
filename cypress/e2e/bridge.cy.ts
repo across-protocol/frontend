@@ -9,10 +9,8 @@ describe("bridge", () => {
   it("render fees box on input", () => {
     cy.dataCy("select-from-chain").click();
     cy.dataCy("from-chain-1").click();
-    cy.wait(3000);
     cy.dataCy("amount-input").type("1");
 
-    // cy.dataCy("connect-wallet").should("be.visible");
     cy.dataCy("send").should("be.disabled");
     cy.dataCy("fees-box").should("be.visible");
   });
