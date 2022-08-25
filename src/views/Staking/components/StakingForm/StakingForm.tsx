@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Wrapper,
+  Card,
   Tabs,
   Tab,
   StakeInfo,
@@ -15,6 +15,7 @@ import {
   UsdcLogo,
   InfoIcon,
   InputBlockWrapper,
+  Divider,
 } from "./StakingForm.styles";
 
 import { PopperTooltip } from "components/Tooltip";
@@ -32,7 +33,7 @@ export const StakingForm = () => {
   }
 
   return (
-    <Wrapper>
+    <Card>
       <Tabs>
         <Tab
           onClick={() => setActiveTab("stake")}
@@ -57,6 +58,7 @@ export const StakingForm = () => {
           maxValue="0"
         />
       </InputBlockWrapper>
+      <Divider />
       <StakeInfo>
         <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
         <StakeInfoItem>
@@ -105,7 +107,7 @@ export const StakingForm = () => {
         </APYInfoItem>
         <APYInfoItem>2.81%</APYInfoItem>
       </APYInfo>
-    </Wrapper>
+    </Card>
   );
 };
 

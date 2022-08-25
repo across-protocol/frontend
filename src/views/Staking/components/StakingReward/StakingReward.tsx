@@ -3,8 +3,8 @@ import { formatNumberMaxFracDigits } from "utils";
 import StakingInputBlock from "../StakingInputBlock";
 import { AlertInfo } from "./AlertInfo";
 import {
+  Card,
   Title,
-  Wrapper,
   InnerWrapper,
   Divider,
   StakingClaimAmountWrapper,
@@ -51,7 +51,7 @@ export const StakingReward = ({
   };
 
   return (
-    <Wrapper>
+    <Card>
       <InnerWrapper>
         <Title>Rewards</Title>
       </InnerWrapper>
@@ -83,7 +83,7 @@ export const StakingReward = ({
           </StakingClaimAmountInnerWrapper>
         </StakingClaimAmountWrapper>
       </InnerWrapper>
-    </Wrapper>
+    </Card>
   );
 };
 

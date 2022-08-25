@@ -3,8 +3,14 @@ import ProgressBar from "components/ProgressBar";
 import { ReactComponent as UnstyedUsdcLogo } from "assets/icons/usdc-24.svg";
 import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
+import {
+  Card as ExternalCard,
+  Divider as ExternalDivider,
+} from "../../Staking.styles";
 
 import { QUERIESV2 } from "utils";
+
+export const Card = styled(ExternalCard)``;
 
 export const Wrapper = styled.div`
   display: flex;
@@ -20,10 +26,12 @@ export const Wrapper = styled.div`
 export const Tabs = styled.div`
   display: flex;
   justify-content: center;
-  width: calc(100% - 48px);
-  margin: 0 auto 24px;
+  width: 100%;
+  margin: 0 auto 0px;
   justify-items: center;
 `;
+
+export const Divider = ExternalDivider;
 
 interface ITab {
   active: boolean;
@@ -55,7 +63,7 @@ export const StakeInfo = styled.div`
   justify-content: space-between;
   padding-bottom: 16px;
   flex-wrap: wrap;
-  width: calc(100% - 48px);
+  width: 100%;
   border-bottom: 1px solid #3e4047;
 
   @media (max-width: 568px) {
@@ -174,8 +182,6 @@ export const InfoIcon = styled(II)`
 `;
 
 export const InputBlockWrapper = styled.div`
-  border-bottom: 1px solid #3e4047;
-  width: calc(100% - 48px);
+  width: 100%;
   margin: 0 auto;
-  padding-bottom: 24px;
 `;
