@@ -2,6 +2,12 @@ import styled from "@emotion/styled";
 import { QUERIESV2 } from "utils";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
 export const InputRow = styled.div`
   display: flex;
   gap: 16px;

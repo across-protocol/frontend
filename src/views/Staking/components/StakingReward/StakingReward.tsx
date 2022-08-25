@@ -41,6 +41,15 @@ export const StakingReward = ({
     return !Number.isNaN(numericValue) && numericValue > maximumClaimableAmount;
   };
 
+  // Stub
+  const errorMessage = (): string => {
+    if (isAmountExceeded(amountToClaim)) {
+      return "The amount entered exceeds your claimable amount";
+    } else {
+      return "";
+    }
+  };
+
   return (
     <Wrapper>
       <InnerWrapper>
@@ -57,12 +66,8 @@ export const StakingReward = ({
           buttonText="Claim"
           valid={stakingAmountValidationHandler(amountToClaim)}
           maxValue={String(maximumClaimableAmount)}
+          errorMessage={errorMessage()}
         />
-        {isAmountExceeded(amountToClaim) && (
-          <AlertInfo danger>
-            The amount entered exceeds your claimable amount
-          </AlertInfo>
-        )}
       </StakingInputBlockWrapper>
       <InnerWrapper>
         <Divider />
