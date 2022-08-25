@@ -1,9 +1,6 @@
 describe("pool", () => {
-  beforeEach(() => {
-    cy.visit("/pool");
-  });
-
   it("render in initial state", () => {
+    cy.visit("/pool");
     cy.dataCy("position-info-box").should("be.visible");
     cy.dataCy("pool-info-box").should("be.visible");
     cy.dataCy("add-liquidity-form").should("be.visible");
@@ -20,7 +17,7 @@ describe("pool", () => {
 
   it("enable input on connected wallet", () => {
     cy.connectInjectedWallet("add-liquidity-button");
-
+    cy.wait(3000);
     cy.get("#amount").should("not.be.disabled");
   });
 });
