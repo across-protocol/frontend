@@ -15,13 +15,11 @@ export function Claim() {
     handleClaim,
     handleConnectWallet,
     handleAddTokenToWallet,
-    alreadyClaimed,
+    hasClaimed,
     claimState,
   } = useClaimView();
 
   const isEligible = !isEligibleQuery.isLoading && isEligibleQuery.data;
-
-  const activeClaimStepIndex = alreadyClaimed ? 1 : 0;
 
   return (
     <PageContainer>
@@ -38,7 +36,7 @@ export function Claim() {
           <EligibleWallet
             onClickClaim={handleClaim}
             claimable={claimableTokensQuery.data}
-            activeStepIndex={activeClaimStepIndex}
+            hasClaimed={hasClaimed}
             onClickAddToken={handleAddTokenToWallet}
             isClaiming={claimState.status.includes("pending")}
           />

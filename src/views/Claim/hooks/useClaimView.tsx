@@ -1,7 +1,7 @@
 import { useConnection } from "state/hooks";
 import { onboard } from "utils";
 
-import { useClaim } from "./useClaim";
+import { useMerkleDistributor } from "./useMerkleDistributor";
 import { useClaimableTokens } from "./useClaimableTokens";
 import { useIsEligible } from "./useIsEligible";
 
@@ -11,7 +11,7 @@ export function useClaimView() {
 
   const isEligibleQuery = useIsEligible();
   const claimableTokensQuery = useClaimableTokens();
-  const { handleClaim, claimState } = useClaim();
+  const { handleClaim, claimState, hasClaimed } = useMerkleDistributor();
 
   const handleAddTokenToWallet = async () => {
     if (provider) {
@@ -27,12 +27,6 @@ export function useClaimView() {
     }
   };
 
-  const alreadyClaimed = claimableTokensQuery.data
-    ? claimableTokensQuery.data.claimedAmount.gte(
-        claimableTokensQuery.data.totalClaim
-      )
-    : false;
-
   return {
     handleConnectWallet: init,
     handleAddTokenToWallet,
@@ -41,6 +35,6 @@ export function useClaimView() {
     claimableTokensQuery,
     handleClaim,
     claimState,
-    alreadyClaimed,
+    hasClaimed,
   };
 }

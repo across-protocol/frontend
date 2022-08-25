@@ -7,14 +7,10 @@ import { StepCard } from "./StepCard";
 import { ClaimAirdrop, Props as ClaimAirdropProps } from "./ClaimAirdrop";
 import { WaysToEarn } from "./WaysToEarn";
 
-type Props = ClaimAirdropProps & {
-  activeStepIndex: number;
-};
+type Props = ClaimAirdropProps;
 
 export function EligibleWallet(props: Props) {
-  const [expandedStepIndex, setExpandedStepIndex] = useState(
-    props.activeStepIndex
-  );
+  const [expandedStepIndex, setExpandedStepIndex] = useState(0);
 
   const toggleExpandedStep = (stepIndex: number) => {
     setExpandedStepIndex((expandedStepIndex) =>
@@ -22,13 +18,15 @@ export function EligibleWallet(props: Props) {
     );
   };
 
+  const activeStepIndex = props.hasClaimed ? 1 : 0;
+
   return (
     <Container>
       <StepCard
         stepIndex={0}
         onClickTopRow={toggleExpandedStep}
         title="Claim airdrop"
-        activeStepIndex={props.activeStepIndex}
+        activeStepIndex={activeStepIndex}
         expandedStepIndex={expandedStepIndex}
       >
         <ClaimAirdrop {...props} />
@@ -37,7 +35,7 @@ export function EligibleWallet(props: Props) {
         stepIndex={1}
         onClickTopRow={toggleExpandedStep}
         title="Earn more ACX"
-        activeStepIndex={props.activeStepIndex}
+        activeStepIndex={activeStepIndex}
         expandedStepIndex={expandedStepIndex}
       >
         <>

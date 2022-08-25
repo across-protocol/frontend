@@ -12,7 +12,7 @@ import { QUERIESV2 } from "utils";
 export type Props = {
   isClaiming?: boolean;
   isLoading?: boolean;
-  alreadyClaimed?: boolean;
+  hasClaimed?: boolean;
   claimable?: {
     liquidityClaim: BigNumberish;
     bridgingClaim: BigNumberish;
@@ -61,7 +61,7 @@ export function ClaimAirdrop(props: Props) {
           </BreakdownTotalRow>
         </BreakdownStats>
       </BreakdownCardContainer>
-      {props.alreadyClaimed ? (
+      {props.hasClaimed ? (
         <AddTokenToWalletContainer>
           <AcrossIcon />
           <ClaimedTokensContainer>
