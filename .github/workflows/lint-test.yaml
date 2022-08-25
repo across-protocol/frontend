@@ -30,7 +30,7 @@ jobs:
           key: ${{ runner.os }}-cypress-${{ hashFiles('node_modules/cypress') }}
       - if: steps.cypress-cache.outputs.cache-hit != 'true'
         run: yarn cypress install
-      - name: Build app
+      - name: Build app + hardhat
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
           REACT_APP_PUBLIC_INFURA_ID: ${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
@@ -38,9 +38,7 @@ jobs:
           REACT_APP_REWARDS_API_URL: ${{ secrets.CYPRESS_REWARDS_API_URL }}
           REACT_APP_CHAIN_137_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_137_PROVIDER_URL }}
           REACT_APP_CHAIN_42161_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_42161_PROVIDER_URL }}
-        run: yarn build
-      - name: Start hardhat
-        run: yarn hardhat node --fork https://mainnet.infura.io/v3/${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
+        run: yarn build, yarn hardhat node --fork https://mainnet.infura.io/v3/${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
       - name: Cypress run Chrome
         uses: cypress-io/github-action@v4
         with:
