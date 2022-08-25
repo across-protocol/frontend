@@ -51,10 +51,11 @@ export const StakingForm = () => {
         <StakingInputBlock
           value={stakeAmount}
           setValue={setStakeAmount}
-          valid={validateStakeAmount(stakeAmount)}
-          buttonText={activeTab}
+          valid={true || validateStakeAmount(stakeAmount)}
+          buttonText={`Connect wallet to ${activeTab}`}
           Logo={UsdcLogo}
           maxValue="0"
+          omitInput={true}
         />
       </InputBlockWrapper>
       <StakeInfo>
