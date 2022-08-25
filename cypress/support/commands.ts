@@ -67,6 +67,14 @@ Cypress.Commands.add(
  */
 Cypress.Commands.add("connectInjectedWallet", (connectWalletElementDataId) => {
   cy.dataCy(connectWalletElementDataId).click();
-  cy.contains("Show More").click();
-  cy.contains("Detected Wallet").click();
+  cy.get("onboard-v2")
+    .shadow()
+    .find(".wallets-container")
+    .contains("Detected Wallet")
+    .click();
+
+  cy.get("onboard-v2")
+    .shadow()
+    .find(".button-container.absolute.svelte-ro440k")
+    .click();
 });

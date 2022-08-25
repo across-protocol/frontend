@@ -110,6 +110,8 @@ export function onboardInit() {
       recommendedInjectedWallets: [
         { name: "Metamask", url: "https://metamask.io" },
         { name: "Coinbase", url: "https://wallet.coinbase.com/" },
+        { name: "WalletConnect", url: "https://walletconnect.org/" },
+        { name: "Gnosis Safe", url: "https://gnosis.safe/" },
       ],
     },
     accountCenter: {
