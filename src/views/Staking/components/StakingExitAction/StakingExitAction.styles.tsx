@@ -1,53 +1,47 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { QUERIESV2 } from "utils";
+import { ReactComponent as ChevronLeft } from "assets/icons/chevron-left-vector.svg";
 
 export const Wrapper = styled(Link)`
-  margin: 0px 0px 8px 23px;
   display: flex;
+  flex-direction: row;
+  gap: 8px;
   align-items: center;
-  justify-content: start;
 
-  text-decoration: none;
-
+  padding: 0px 16px;
   width: fit-content;
 
-  @media ${QUERIESV2.sm} {
-    margin: 0px 0px 0px 31px;
-  }
+  text-decoration: none;
 `;
 
-export const ExitIcon = styled(FontAwesomeIcon)`
-  color: #9daab2;
-  font-size: 16px;
-  cursor: pointer;
-  @media ${QUERIESV2.sm} {
-    font-size: 17px;
-  }
+export const ExitIcon = styled(ChevronLeft)`
+  height: 24px;
+  width: 24px;
 `;
 
 export const Logo = styled.img`
   height: 32px;
   width: 32px;
 
-  margin: 0px 12px 0px 18px;
   @media ${QUERIESV2.sm} {
-    margin-right: 8px;
     height: 24px;
     width: 24px;
   }
 `;
 
 export const Text = styled.span`
-  font-family: "Barlow";
-  font-style: "normal";
-  font-weight: 400;
-  line-height: 26px;
   color: #e0f3ff;
 
   font-size: 22px;
   @media ${QUERIESV2.sm} {
     font-size: 18px;
   }
+`;
+
+export const TitleLogo = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
 `;
