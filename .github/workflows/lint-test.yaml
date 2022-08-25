@@ -24,9 +24,9 @@ jobs:
     services:
       hardhat:
         image: umaprotocol/protocol
-          run: yarn && yarn hardhat node --fork https://mainnet.infura.io/v3/${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
-          ports: 8545:8545
-            
+        run: yarn && yarn hardhat node --fork https://mainnet.infura.io/v3/${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
+        ports: 8545:8545
+
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
