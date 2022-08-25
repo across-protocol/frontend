@@ -39,11 +39,12 @@ jobs:
           REACT_APP_CHAIN_42161_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_42161_PROVIDER_URL }}
         run: yarn build
       - name: Cypress run Chrome
+      env: 
         uses: cypress-io/github-action@v4
         with:
           install: false
           browser: chrome
-          start: yarn serve -l 3000
+          start: yarn hardhat node --fork https://mainnet.infura.io/v3/${{ secrets.CYPRESS_PUBLIC_INFURA_ID}},  yarn serve -l 3000
           wait-on: "http://localhost:3000"
           wait-on-timeout: 300
       - name: Upload screenshots
