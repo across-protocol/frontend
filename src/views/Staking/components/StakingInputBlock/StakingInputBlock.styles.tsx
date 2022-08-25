@@ -55,7 +55,7 @@ interface IStakeInput {
 export const Input = styled.input`
   background: transparent;
   color: #9daab2;
-  font-size: 18px;
+  font-size: 16px;
   border: none;
   width: 100%;
 
