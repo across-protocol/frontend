@@ -27,6 +27,7 @@ interface Props {
     {}
   >;
   maxValue: string;
+  omitInput?: boolean;
 }
 
 const StakingInputBlock: React.FC<Props> = ({
@@ -36,22 +37,25 @@ const StakingInputBlock: React.FC<Props> = ({
   buttonText,
   Logo,
   maxValue,
+  omitInput,
 }) => {
   return (
     <InputRow>
-      <InputWrapper>
-        <Logo />
-        <Input
-          placeholder="Enter amount"
-          value={value}
-          type="text"
-          onChange={(e) => setValue(e.target.value)}
-          valid={!value || valid}
-        />
-        <MaxButton onClick={() => setValue(maxValue ?? "")}>Max</MaxButton>
-      </InputWrapper>
+      {!omitInput && (
+        <InputWrapper>
+          <Logo />
+          <Input
+            placeholder="Enter amount"
+            value={value}
+            type="text"
+            onChange={(e) => setValue(e.target.value)}
+            valid={!value || valid}
+          />
+          <MaxButton onClick={() => setValue(maxValue ?? "")}>Max</MaxButton>
+        </InputWrapper>
+      )}
       <ButtonWrapper>
-        <StakeButton valid={valid}>
+        <StakeButton valid={valid} fullWidth={omitInput}>
           {capitalizeFirstLetter(buttonText)}
         </StakeButton>
       </ButtonWrapper>
