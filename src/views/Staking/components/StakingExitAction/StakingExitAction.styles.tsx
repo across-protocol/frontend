@@ -13,6 +13,10 @@ export const Wrapper = styled(Link)`
   width: fit-content;
 
   text-decoration: none;
+
+  @media ${QUERIESV2.sm} {
+    padding: 0px 12px;
+  }
 `;
 
 export const ExitIcon = styled(ChevronLeft)`
@@ -32,6 +36,7 @@ export const Logo = styled.img`
 
 export const Text = styled.span`
   color: #e0f3ff;
+  line-height: 26px;
 
   font-size: 22px;
   @media ${QUERIESV2.sm} {
@@ -44,4 +49,8 @@ export const TitleLogo = styled.div`
   flex-direction: row;
   align-items: center;
   gap: 12px;
+
+  @media ${QUERIESV2.sm} {
+    gap: 8px;
+  }
 `;
