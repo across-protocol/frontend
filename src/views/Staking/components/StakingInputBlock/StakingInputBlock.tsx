@@ -39,14 +39,13 @@ const StakingInputBlock: React.FC<Props> = ({
 }) => {
   return (
     <InputRow>
-      <InputWrapper>
+      <InputWrapper valid={!value || valid}>
         <Logo />
         <Input
           placeholder="Enter amount"
           value={value}
           type="text"
           onChange={(e) => setValue(e.target.value)}
-          valid={!value || valid}
         />
         <MaxButton onClick={() => setValue(maxValue ?? "")}>Max</MaxButton>
       </InputWrapper>

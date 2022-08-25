@@ -6,60 +6,68 @@ export const InputRow = styled.div`
   display: flex;
   gap: 16px;
   flex-direction: row;
-  @media ${QUERIESV2.sm} {
-    flex-direction: column;
-  }
+  align-items: center;
 
   & svg {
     height: 24px;
     width: 24px;
-    position: absolute;
-    left: 24px;
-    top: 20px;
-    @media ${QUERIESV2.sm} {
-      top: 12px;
-      left: 12px;
-    }
+    flex-shrink: 0;
+  }
+
+  @media ${QUERIESV2.sm} {
+    flex-direction: column;
+    gap: 12px;
   }
 `;
 
-export const InputWrapper = styled.div`
-  flex-grow: 8;
-  position: relative;
+export const InputWrapper = styled.div<IStakeInput>`
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  background: #2d2e33;
+  border-radius: 32px;
+
+  height: 64px;
+
+  padding: 0px 24px;
+
+  border: 1px solid ${({ valid }) => (valid ? "#4c4e57" : "#f96c6c")};
+  color: ${({ valid }) => (valid ? "#e0f3ff" : "#f96c6c")};
+
+  @media ${QUERIESV2.sm} {
+    padding: 0px 12px;
+    height: 48px;
+  }
 `;
 
 interface IStakeInput {
   valid: boolean;
 }
-export const Input = styled.input<IStakeInput>`
-  height: 64px;
-  padding: 9px 64px;
+export const Input = styled.input`
+  background: transparent;
+  color: #9daab2;
+  font-size: 18px;
+  border: none;
   width: 100%;
-  background: #2d2e33;
-  border-radius: 32px;
-  border: 1px solid ${({ valid }) => (valid ? "#4c4e57" : "#f96c6c")};
-  color: ${({ valid }) => (valid ? "#e0f3ff" : "#f96c6c")};
+
   &:focus {
     outline: 0;
   }
   @media ${QUERIESV2.sm} {
-    height: 48px;
-    padding: 9px 48px;
+    font-size: 16px;
   }
 `;
 
 export const MaxButton = styled(UnstyledButton)`
-  height: 24px;
-  font-family: "Barlow";
-  font-style: normal;
-  font-weight: 400;
   font-size: 12px;
   line-height: 14px;
+
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #c5d5e0;
-  position: absolute;
-  padding: 8px 10px 10px;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -71,16 +79,18 @@ export const MaxButton = styled(UnstyledButton)`
     border-color: #e0f3ff;
   }
 
-  top: 20px;
-  right: 24px;
+  padding: 8px 16px;
   @media ${QUERIESV2.sm} {
-    top: 12px;
-    right: 12px;
+    height: 24px;
+    padding: 0px 10px;
   }
 `;
 
 export const ButtonWrapper = styled.div`
   flex-grow: 1;
+  @media ${QUERIESV2.sm} {
+    width: 100%;
+  }
 `;
 
 interface IStakeButton {
