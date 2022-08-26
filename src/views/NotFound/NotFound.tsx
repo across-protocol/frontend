@@ -1,4 +1,11 @@
-import { Wrapper, Title, Body, Link } from "./NotFound.styles";
+import {
+  Wrapper,
+  Title,
+  Body,
+  Link,
+  CloudWrapper,
+  StyledEmptyCloud,
+} from "./NotFound.styles";
 
 interface Props {
   custom404Message?: string;
@@ -6,6 +13,9 @@ interface Props {
 const NotFound: React.FC<Props> = ({ custom404Message }) => {
   return (
     <Wrapper>
+      <CloudWrapper>
+        <StyledEmptyCloud />
+      </CloudWrapper>
       <Title>404</Title>
       <Body>{custom404Message || "Page not found"}</Body>
       <Link to="/">Go back to Across</Link>
