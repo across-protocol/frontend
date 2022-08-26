@@ -12,24 +12,28 @@ import { StyledComponent } from "@emotion/styled";
 import { Theme } from "@emotion/react";
 import { AlertInfo } from "../StakingReward/AlertInfo";
 
+type StylizedSVGComponent = StyledComponent<
+  React.SVGProps<SVGSVGElement> & {
+    title?: string | undefined;
+  } & {
+    children?: React.ReactNode;
+  } & {
+    theme?: Theme | undefined;
+  },
+  {},
+  {}
+>;
+
 interface Props {
   value: string;
   setValue: React.Dispatch<React.SetStateAction<string>>;
   valid: boolean;
   buttonText: string;
-  Logo: StyledComponent<
-    React.SVGProps<SVGSVGElement> & {
-      title?: string | undefined;
-    } & {
-      children?: React.ReactNode;
-    } & {
-      theme?: Theme | undefined;
-    },
-    {},
-    {}
-  >;
+  Logo: StylizedSVGComponent;
   maxValue: string;
   errorMessage?: string;
+  omitInput?: boolean;
+  onClickHandler: () => void;
 }
 
 const StakingInputBlock: React.FC<Props> = ({
@@ -39,23 +43,31 @@ const StakingInputBlock: React.FC<Props> = ({
   buttonText,
   Logo,
   maxValue,
+  omitInput,
+  onClickHandler,
   errorMessage,
 }) => {
   return (
     <Wrapper>
       <InputRow>
-        <InputWrapper valid={!value || valid}>
-          <Logo />
-          <Input
-            placeholder="Enter amount"
-            value={value}
-            type="text"
-            onChange={(e) => setValue(e.target.value)}
-          />
-          <MaxButton onClick={() => setValue(maxValue ?? "")}>Max</MaxButton>
-        </InputWrapper>
+        {!omitInput && (
+          <InputWrapper valid={!value || valid}>
+            <Logo />
+            <Input
+              placeholder="Enter amount"
+              value={value}
+              type="text"
+              onChange={(e) => setValue(e.target.value)}
+            />
+            <MaxButton onClick={() => setValue(maxValue ?? "")}>Max</MaxButton>
+          </InputWrapper>
+        )}
         <ButtonWrapper>
-          <StakeButton valid={valid}>
+          <StakeButton
+            valid={valid}
+            fullWidth={omitInput}
+            onClick={onClickHandler}
+          >
             {capitalizeFirstLetter(buttonText)}
           </StakeButton>
         </ButtonWrapper>

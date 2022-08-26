@@ -4,8 +4,14 @@ import { useStakingView } from "./useStakingView";
 import Footer from "components/Footer";
 
 const Staking = () => {
-  const { amountOfRewardsClaimable, poolName, exitLinkURI, poolLogoURI } =
-    useStakingView();
+  const {
+    amountOfRewardsClaimable,
+    poolName,
+    exitLinkURI,
+    poolLogoURI,
+    isConnected,
+    walletConnectionHandler,
+  } = useStakingView();
   return (
     <>
       <Wrapper>
@@ -14,8 +20,15 @@ const Staking = () => {
           exitLinkURI={exitLinkURI}
           poolLogoURI={poolLogoURI}
         />
-        <StakingForm />
-        <StakingReward maximumClaimableAmount={amountOfRewardsClaimable} />
+        <StakingForm
+          isConnected={isConnected}
+          walletConnectionHandler={walletConnectionHandler}
+        />
+        <StakingReward
+          maximumClaimableAmount={amountOfRewardsClaimable}
+          isConnected={isConnected}
+          walletConnectionHandler={walletConnectionHandler}
+        />
       </Wrapper>
       <Footer />
     </>
