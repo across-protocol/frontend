@@ -17,7 +17,7 @@ export const useStakingView = () => {
     poolLogoURI: tokenList[8].logoURI,
     poolName: "USDC",
     amountOfRewardsClaimable: 320.13,
-    isConnected: isConnected,
+    isConnected,
     walletConnectionHandler: init,
   };
 };
