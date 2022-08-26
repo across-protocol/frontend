@@ -34,4 +34,7 @@ export const Link = styled(UnstyledLink)`
 `;
 
 export const CloudWrapper = styled.div``;
-export const StyledEmptyCloud = styled(EmptyCloud)``;
+export const StyledEmptyCloud = styled(EmptyCloud)`
+  height: 200px;
+  width: 300px;
+`;
