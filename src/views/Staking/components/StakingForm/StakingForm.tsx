@@ -23,14 +23,22 @@ import { StakingFormPropType } from "../../types";
 
 type StakeTab = "stake" | "unstake";
 
-export const StakingForm = () => {
+export const StakingForm = ({
+  isConnected,
+  walletConnectionHandler,
+}: StakingFormPropType) => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [stakeAmount, setStakeAmount] = useState("");
+
+  const buttonHandler = isConnected ? () => {} : walletConnectionHandler;
+  const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
 
   // Stub data for form
   function validateStakeAmount(amount: string) {
     return amount.length > 0;
   }
+
+  const valueOrFill = (value: any) => (isConnected ? value : "-");
 
   return (
     <Wrapper>
@@ -52,22 +60,25 @@ export const StakingForm = () => {
         <StakingInputBlock
           value={stakeAmount}
           setValue={setStakeAmount}
-          valid={true || validateStakeAmount(stakeAmount)}
-          buttonText={`Connect wallet to ${activeTab}`}
+          valid={!isConnected || validateStakeAmount(stakeAmount)}
+          buttonText={`${buttonTextPrefix} ${activeTab}`}
           Logo={UsdcLogo}
           maxValue="0"
-          omitInput={true}
+          omitInput={!isConnected}
+          onClickHandler={buttonHandler}
         />
       </InputBlockWrapper>
       <StakeInfo>
         <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
         <StakeInfoItem>
-          <div>
-            10,000.00
-            <LightGrayItemText margin={4}>
-              / 32,424.24 USDC-LP
-            </LightGrayItemText>
-          </div>
+          {valueOrFill(
+            <div>
+              10,000.00
+              <LightGrayItemText margin={4}>
+                / 32,424.24 USDC-LP
+              </LightGrayItemText>
+            </div>
+          )}
         </StakeInfoItem>
         <StakeInfoItem>
           Age of capital
@@ -79,7 +90,7 @@ export const StakingForm = () => {
             <InfoIcon />
           </PopperTooltip>
         </StakeInfoItem>
-        <StakeInfoItem>50 days</StakeInfoItem>
+        <StakeInfoItem>{valueOrFill("50 days")}</StakeInfoItem>
         <StakeInfoItem>
           Multiplier
           <PopperTooltip
@@ -91,10 +102,12 @@ export const StakingForm = () => {
           </PopperTooltip>
         </StakeInfoItem>
         <StakeInfoItem>
-          <MutliplierValue>
-            <StyledProgressBar percent={50} />
-            1.5x
-          </MutliplierValue>
+          {valueOrFill(
+            <MutliplierValue>
+              <StyledProgressBar percent={50} />
+              1.5x
+            </MutliplierValue>
+          )}
         </StakeInfoItem>
         <StakeInfoItemSmall>
           Note: Multipliers of previously staked tokens are not impacted
@@ -105,7 +118,7 @@ export const StakingForm = () => {
           <ArrowIcon />
           Your total APY
         </APYInfoItem>
-        <APYInfoItem>2.81%</APYInfoItem>
+        <APYInfoItem>{valueOrFill("2.81%")}</APYInfoItem>
       </APYInfo>
     </Wrapper>
   );

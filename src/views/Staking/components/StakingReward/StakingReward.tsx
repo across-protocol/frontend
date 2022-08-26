@@ -17,14 +17,17 @@ import {
   StakingInputBlockWrapper,
 } from "./StakingReward.styles";
 
-type StakingRewardPropType = {
-  maximumClaimableAmount: number;
-};
-
 export const StakingReward = ({
   maximumClaimableAmount,
+  isConnected,
+  walletConnectionHandler,
 }: StakingRewardPropType) => {
   const [amountToClaim, setAmountToClaim] = useState("");
+
+  const buttonHandler = isConnected ? () => {} : walletConnectionHandler;
+  const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
+
+  const valueOrFill = (value: any) => (isConnected ? value : "-");
 
   // Stub Function
   const stakingAmountValidationHandler = (value: string): boolean => {
@@ -48,16 +51,20 @@ export const StakingReward = ({
         <Title>Rewards</Title>
       </InnerWrapper>
       <StakingInputBlockWrapper>
-        <AlertInfo>
-          Claiming tokens will reset your multiplier and decrease your ACX APY
-        </AlertInfo>
+        {isConnected && (
+          <AlertInfo>
+            Claiming tokens will reset your multiplier and decrease your ACX APY
+          </AlertInfo>
+        )}
         <StakingInputBlock
           value={amountToClaim}
           setValue={setAmountToClaim}
           Logo={StyledAcrossLogo}
-          buttonText="Claim"
-          valid={stakingAmountValidationHandler(amountToClaim)}
+          buttonText={`${buttonTextPrefix} claim`}
+          valid={!isConnected || stakingAmountValidationHandler(amountToClaim)}
           maxValue={String(maximumClaimableAmount)}
+          omitInput={!isConnected}
+          onClickHandler={buttonHandler}
         />
         {isAmountExceeded(amountToClaim) && (
           <AlertInfo danger>
@@ -71,12 +78,14 @@ export const StakingReward = ({
       <InnerWrapper>
         <StakingClaimAmountWrapper>
           <StakingClaimAmountTitle>Claimable Rewards</StakingClaimAmountTitle>
-          <StakingClaimAmountInnerWrapper>
-            <PresentIcon />
-            <StakingClaimAmountText>
-              {formatNumberMaxFracDigits(maximumClaimableAmount)}
-            </StakingClaimAmountText>
-          </StakingClaimAmountInnerWrapper>
+          {valueOrFill(
+            <StakingClaimAmountInnerWrapper>
+              <PresentIcon />
+              <StakingClaimAmountText>
+                {formatNumberMaxFracDigits(maximumClaimableAmount)}
+              </StakingClaimAmountText>
+            </StakingClaimAmountInnerWrapper>
+          )}
         </StakingClaimAmountWrapper>
       </InnerWrapper>
     </Wrapper>
