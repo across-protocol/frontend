@@ -25,8 +25,10 @@ jobs:
       hardhat:
         image: umaprotocol/protocol
         env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+          HARDHAT_CHAIN_ID: "1"
           WORKDIR: "/protocol"
-          COMMAND: "[HARDHAT_CHAIN_ID=1 yarn hardhat node --fork https://mainnet.infura.io/v3/${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}]"
+          COMMAND: "yarn hardhat node --fork https://mainnet.infura.io/v3/${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}"
         ports:
           - 8545:8545
 
