@@ -1,13 +1,16 @@
 import styled from "@emotion/styled";
-import { BigNumberish, utils } from "ethers";
+import { BigNumberish } from "ethers";
 
 import { ReactComponent as ClaimHeartWave } from "assets/claim-heart-wave.svg";
 import { ReactComponent as AcrossIcon } from "assets/acx.svg";
 import { Loader } from "components/Loader";
+import { formatUnits } from "utils/format";
 
 import { LightCard } from "./Card";
 import { Button, FullWidthButton } from "../Claim.styles";
 import { QUERIESV2 } from "utils";
+
+const DECIMALS = 18;
 
 export type Props = {
   isClaiming?: boolean;
@@ -46,19 +49,19 @@ export function ClaimAirdrop({
         <BreakdownStats>
           <BreakdownRow>
             <h6>Liquidity providing</h6>
-            <h6>{utils.formatUnits(claimable?.liquidityClaim || 0)} ACX</h6>
+            <h6>{formatUnits(claimable?.liquidityClaim || 0, DECIMALS)} ACX</h6>
           </BreakdownRow>
           <BreakdownRow>
             <h6>Bridging activity</h6>
-            <h6>{utils.formatUnits(claimable?.bridgingClaim || 0)} ACX</h6>
+            <h6>{formatUnits(claimable?.bridgingClaim || 0, DECIMALS)} ACX</h6>
           </BreakdownRow>
           <BreakdownRow>
             <h6>Community reward</h6>
-            <h6>{utils.formatUnits(claimable?.communityClaim || 0)} ACX</h6>
+            <h6>{formatUnits(claimable?.communityClaim || 0, DECIMALS)} ACX</h6>
           </BreakdownRow>
           <BreakdownTotalRow>
             <h6>Total reward</h6>
-            <h6>{utils.formatUnits(claimable?.totalClaim || 0)} ACX</h6>
+            <h6>{formatUnits(claimable?.totalClaim || 0, DECIMALS)} ACX</h6>
           </BreakdownTotalRow>
         </BreakdownStats>
       </BreakdownCardContainer>
@@ -67,7 +70,7 @@ export function ClaimAirdrop({
           <AcrossIcon />
           <ClaimedTokensContainer>
             <h6>Claimed tokens</h6>
-            <h2>{utils.formatUnits(claimable?.totalClaim || 0)} ACX</h2>
+            <h2>{formatUnits(claimable?.totalClaim || 0, DECIMALS)} ACX</h2>
           </ClaimedTokensContainer>
           <InverseButton size="lg" onClick={onClickAddToken}>
             Add token to wallet
