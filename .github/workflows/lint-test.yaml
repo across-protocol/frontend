@@ -26,10 +26,7 @@ jobs:
         image: umaprotocol/protocol
         env:
           WORKDIR: "/protocol"
-          COMMAND:
-            [
-              "cd protocol && HARDHAT_CHAIN_ID=1 yarn hardhat node --fork https://mainnet.infura.io/v3/${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}",
-            ]
+          COMMAND: "[HARDHAT_CHAIN_ID=1 yarn hardhat node --fork https://mainnet.infura.io/v3/${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}]"
         ports:
           - 8545:8545
 
