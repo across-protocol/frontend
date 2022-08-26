@@ -19,6 +19,7 @@ import {
 
 import { PopperTooltip } from "components/Tooltip";
 import StakingInputBlock from "../StakingInputBlock";
+import { StakingFormPropType } from "../../types";
 
 type StakeTab = "stake" | "unstake";
 

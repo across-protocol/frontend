@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { formatNumberMaxFracDigits } from "utils";
+import { StakingRewardPropType } from "../../types";
 import StakingInputBlock from "../StakingInputBlock";
 import { AlertInfo } from "./AlertInfo";
 import {
