@@ -12,6 +12,7 @@ type ResolvedDataType =
       cumulativeStaked: BigNumberish;
       maxMultiplier: BigNumberish;
       outstandingRewards: BigNumberish;
+      currentUserRewardMultiplier: BigNumberish;
     }
   | undefined;
 
@@ -49,29 +50,37 @@ const resolveRequestedData = async (
   const config = getConfig();
   const hubPool = config.getHubPool();
   const acceleratingDistributor = config.getAcceleratingDistributor();
+
   // Get the corresponding LP token from the hub pool directly
-  const { lpToken: lpTokenAddress } = await hubPool.pooledTokens(tokenAddress);
   // Resolve the ACX reward token address from the AcceleratingDistributor
-  const acrossTokenAddress =
-    (await acceleratingDistributor.rewardToken()) as string;
+  const [{ lpToken: lpTokenAddress }, acrossTokenAddress] = await Promise.all([
+    hubPool.pooledTokens(tokenAddress),
+    acceleratingDistributor.rewardToken() as Promise<string>,
+  ]);
+
   // Check information about this LP token on the AcceleratingDistributor contract
-  const {
-    enabled: poolEnabled,
-    cumulativeStaked,
-    maxMultiplier,
-  } = (await acceleratingDistributor.stakingTokens(lpTokenAddress)) as {
-    enabled: boolean;
-    baseEmissionRate: BigNumber;
-    maxMultiplier: BigNumber;
-    cumulativeStaked: BigNumber;
-  };
   // Resolve the provided account's outstanding rewards (if an account is connected)
-  let outstandingRewards: BigNumberish = !!account
-    ? await acceleratingDistributor.getOutstandingRewards(
-        lpTokenAddress,
-        account
-      )
-    : "0";
+  const [
+    { enabled: poolEnabled, cumulativeStaked, maxMultiplier },
+    outstandingRewards,
+    currentUserRewardMultiplier,
+  ] = await Promise.all([
+    acceleratingDistributor.stakingTokens(lpTokenAddress) as Promise<{
+      enabled: boolean;
+      baseEmissionRate: BigNumber;
+      maxMultiplier: BigNumber;
+      cumulativeStaked: BigNumber;
+    }>,
+    acceleratingDistributor.getOutstandingRewards(
+      lpTokenAddress,
+      account
+    ) as Promise<BigNumber>,
+    acceleratingDistributor.getUserRewardMultiplier(
+      lpTokenAddress,
+      account!
+    ) as Promise<BigNumber>,
+  ]);
+
   return {
     lpTokenAddress,
     acrossTokenAddress,
@@ -79,5 +88,6 @@ const resolveRequestedData = async (
     cumulativeStaked,
     maxMultiplier,
     outstandingRewards,
+    currentUserRewardMultiplier,
   };
 };
