@@ -1,3 +1,14 @@
+
+/* Override root variables to style the Onboard modal */
+:root {
+  --onboard-connect-header-background: #2d2e33;
+  --onboard-connect-header-color: #e0f3ff;
+  --onboard-connect-sidebar-color: #e0f3ff;
+  --onboard-connect-sidebar-background: #2d2e33;
+   /* --onboard-main-scroll-container-background: hsl(166deg 92% 70%); */
+   /* --onboard-wallet-button-background: #2d2e33; */
+}
+
 /* Onboard custom CSS */
 .bn-onboard-custom.bn-onboard-modal {
   background: rgba(0, 0, 0, 0.9);
