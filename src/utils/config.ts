@@ -9,6 +9,10 @@ import {
 } from "@across-protocol/contracts-v2";
 import filter from "lodash/filter";
 import sortBy from "lodash/sortBy";
+import {
+  AcceleratingDistributor,
+  createAcceleratingDistributor,
+} from "./acceleratingDistributor.temp";
 
 export type Token = constants.TokenInfo & {
   l1TokenAddress: string;
@@ -78,6 +82,9 @@ export class ConfigClient {
   getHubPoolAddress(): string {
     return this.config.hubPoolAddress;
   }
+  getAcceleratingDistributorAddress(): string {
+    return this.config.acceleratingDistributorAddress;
+  }
   getL1TokenAddressBySymbol(symbol: string) {
     // all routes have an l1Token address, so just find the first symbol that matches
     const route = this.getRoutes().find((x) => x.fromTokenSymbol === symbol);
@@ -88,6 +95,11 @@ export class ConfigClient {
     const address = this.getHubPoolAddress();
     const provider = signer ?? constants.getProvider(this.getHubPoolChainId());
     return HubPool__factory.connect(address, provider);
+  }
+  getAcceleratingDistributor(signer?: Signer): AcceleratingDistributor {
+    const address = this.getAcceleratingDistributorAddress();
+    const provider = signer ?? constants.getProvider(this.getHubPoolChainId());
+    return createAcceleratingDistributor(address, provider);
   }
   filterRoutes(query: Partial<constants.Route>): constants.Routes {
     const cleanQuery: Partial<constants.Route> = Object.fromEntries(

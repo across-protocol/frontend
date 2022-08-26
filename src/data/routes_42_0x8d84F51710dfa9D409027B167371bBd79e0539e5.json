@@ -2,6 +2,7 @@
   "hubPoolChain": 42,
   "hubPoolAddress": "0x8d84F51710dfa9D409027B167371bBd79e0539e5",
   "hubPoolWethAddress": "0xd0A1E359811322d97991E03f863a0C30C2cF029C",
+  "acceleratingDistributorAddress": "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4",
   "routes": [
     {
       "fromChain": 42,
