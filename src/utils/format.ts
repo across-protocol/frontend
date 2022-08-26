@@ -156,3 +156,18 @@ export function formatPoolAPY(
     Number(ethers.utils.formatUnits(wei, decimals))
   );
 }
+
+/**
+ * An encapsulated ternary operator for choosing one or two strings based on a logic expression
+ * @param text The text that will appear if useText is set to true
+ * @param useText Determines if text or backupText will be returned
+ * @param backupText The text that will appear if useText is false
+ * @returns text if useText is true, else, backupText
+ */
+export function valueOrFill(
+  text: string,
+  useText: boolean,
+  backupText: string = "-"
+): string {
+  return useText ? text : backupText;
+}
