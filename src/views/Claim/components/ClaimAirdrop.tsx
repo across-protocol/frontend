@@ -23,7 +23,14 @@ export type Props = {
   onClickAddToken: () => void;
 };
 
-export function ClaimAirdrop(props: Props) {
+export function ClaimAirdrop({
+  isClaiming,
+  isLoading,
+  hasClaimed,
+  claimable,
+  onClickAddToken,
+  onClickClaim,
+}: Props) {
   return (
     <Container>
       <ClaimHeartImage />
@@ -39,46 +46,36 @@ export function ClaimAirdrop(props: Props) {
         <BreakdownStats>
           <BreakdownRow>
             <h6>Liquidity providing</h6>
-            <h6>
-              {utils.formatUnits(props.claimable?.liquidityClaim || 0)} ACX
-            </h6>
+            <h6>{utils.formatUnits(claimable?.liquidityClaim || 0)} ACX</h6>
           </BreakdownRow>
           <BreakdownRow>
             <h6>Bridging activity</h6>
-            <h6>
-              {utils.formatUnits(props.claimable?.bridgingClaim || 0)} ACX
-            </h6>
+            <h6>{utils.formatUnits(claimable?.bridgingClaim || 0)} ACX</h6>
           </BreakdownRow>
           <BreakdownRow>
             <h6>Community reward</h6>
-            <h6>
-              {utils.formatUnits(props.claimable?.communityClaim || 0)} ACX
-            </h6>
+            <h6>{utils.formatUnits(claimable?.communityClaim || 0)} ACX</h6>
           </BreakdownRow>
           <BreakdownTotalRow>
             <h6>Total reward</h6>
-            <h6>{utils.formatUnits(props.claimable?.totalClaim || 0)} ACX</h6>
+            <h6>{utils.formatUnits(claimable?.totalClaim || 0)} ACX</h6>
           </BreakdownTotalRow>
         </BreakdownStats>
       </BreakdownCardContainer>
-      {props.hasClaimed ? (
+      {hasClaimed ? (
         <AddTokenToWalletContainer>
           <AcrossIcon />
           <ClaimedTokensContainer>
             <h6>Claimed tokens</h6>
-            <h2>{utils.formatUnits(props.claimable?.totalClaim || 0)} ACX</h2>
+            <h2>{utils.formatUnits(claimable?.totalClaim || 0)} ACX</h2>
           </ClaimedTokensContainer>
-          <InverseButton size="lg" onClick={props.onClickAddToken}>
+          <InverseButton size="lg" onClick={onClickAddToken}>
             Add token to wallet
           </InverseButton>
         </AddTokenToWalletContainer>
       ) : (
-        <FullWidthButton
-          size="lg"
-          disabled={props.isClaiming}
-          onClick={props.onClickClaim}
-        >
-          {props.isClaiming ? (
+        <FullWidthButton size="lg" disabled={isClaiming} onClick={onClickClaim}>
+          {isClaiming ? (
             <>
               Claiming airdrop... <Loader />
             </>

@@ -5,9 +5,9 @@ type Props = {
   size?: number;
 };
 
-export const Loader = styled(LoaderIcon)`
-  width: ${(props: Props) => props.size || 24}px;
-  height: ${(props: Props) => props.size || 24}px;
+export const Loader = styled(LoaderIcon)<Props>`
+  width: ${({ size = 24 }) => size}px;
+  height: ${({ size = 24 }) => size}px;
   animation: rotation 2s infinite linear;
   align-self: flex-end;
 
