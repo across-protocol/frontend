@@ -1,3 +1,5 @@
+import { ReactElement } from "react";
+
 /**
  * Creates a reusable ternary operation function.
  * @param expression The logical expression to test the ternary. For example, the variable A in -> A ? B : C
@@ -6,14 +8,14 @@
  */
 export function repeatableTernaryBuilder(
   expression: boolean,
-  fallbackValue: any
+  fallbackValue: ReactElement
 ) {
   /**
    * Represents a ternary operation.
    * @param value The returned in a ternary if the expression is true. For example, the variable B in -> A ? B : C
    * @returns `value` if `expression` is true, else `fallbackValue`
    */
-  function closure(value: any): any {
+  function closure(value: ReactElement): ReactElement {
     return expression ? value : fallbackValue;
   }
   return closure;

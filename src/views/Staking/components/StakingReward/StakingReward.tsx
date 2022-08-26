@@ -28,7 +28,7 @@ export const StakingReward = ({
   const buttonHandler = isConnected ? () => {} : walletConnectionHandler;
   const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
 
-  const valueOrEmpty = repeatableTernaryBuilder(isConnected, "-");
+  const valueOrEmpty = repeatableTernaryBuilder(isConnected, <>-</>);
 
   // Stub Function
   const stakingAmountValidationHandler = (value: string): boolean => {

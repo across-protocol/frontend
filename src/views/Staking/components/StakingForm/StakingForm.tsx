@@ -39,7 +39,7 @@ export const StakingForm = ({
     return amount.length > 0;
   }
 
-  const valueOrEmpty = repeatableTernaryBuilder(isConnected, "-");
+  const valueOrEmpty = repeatableTernaryBuilder(isConnected, <>-</>);
 
   return (
     <Wrapper>
@@ -91,7 +91,7 @@ export const StakingForm = ({
             <InfoIcon />
           </PopperTooltip>
         </StakeInfoItem>
-        <StakeInfoItem>{valueOrEmpty("50 days")}</StakeInfoItem>
+        <StakeInfoItem>{valueOrEmpty(<>50 days</>)}</StakeInfoItem>
         <StakeInfoItem>
           Multiplier
           <PopperTooltip
@@ -119,7 +119,7 @@ export const StakingForm = ({
           <ArrowIcon />
           Your total APY
         </APYInfoItem>
-        <APYInfoItem>{valueOrEmpty("2.81%")}</APYInfoItem>
+        <APYInfoItem>{valueOrEmpty(<>2.81%</>)}</APYInfoItem>
       </APYInfo>
     </Wrapper>
   );
