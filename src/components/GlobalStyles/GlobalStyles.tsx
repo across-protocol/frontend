@@ -89,18 +89,16 @@ const globalStyles = css`
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: auto;
   }
-  html {
-    height: 100%;
-  }
+  html,
   body {
-    height: fit-content;
+    min-height: 100vh;
   }
   body {
     background-color: var(--color-gray);
     color: var(--color-white);
   }
   #root {
-    height: 100%;
+    min-height: 100vh;
     isolation: isolate;
   }
   // iphone query
