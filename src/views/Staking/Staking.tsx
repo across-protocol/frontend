@@ -1,16 +1,16 @@
 import { Wrapper } from "./Staking.styles";
 import { StakingReward, StakingForm, StakingExitAction } from "./components";
-import { useStakingView } from "./useStakingView";
+import { useStakingView } from "./hooks/useStakingView";
 import Footer from "components/Footer";
 
 const Staking = () => {
   const {
-    amountOfRewardsClaimable,
     poolName,
     exitLinkURI,
     poolLogoURI,
     isConnected,
     connectWalletHandler,
+    stakingData,
   } = useStakingView();
   return (
     <>
@@ -22,7 +22,7 @@ const Staking = () => {
         />
         <StakingForm />
         <StakingReward
-          maximumClaimableAmount={amountOfRewardsClaimable}
+          maximumClaimableAmount={stakingData?.outstandingRewards ?? "0"}
           isConnected={isConnected}
           connectWalletHandler={connectWalletHandler}
         />
