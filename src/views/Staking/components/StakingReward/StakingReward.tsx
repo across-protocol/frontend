@@ -25,10 +25,13 @@ type StakingRewardPropType = {
 
 export const StakingReward = (props: StakingRewardPropType) => {
   const [amountToClaim, setAmountToClaim] = useState("");
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const buttonHandler = props.isConnected
     ? // Default do nothing
-      () => {}
+      () => {
+        setIsTransitioning(true);
+      }
     : props.connectWalletHandler;
 
   // Stub Function
@@ -65,12 +68,13 @@ export const StakingReward = (props: StakingRewardPropType) => {
           value={amountToClaim}
           setValue={setAmountToClaim}
           Logo={StyledAcrossLogo}
-          buttonText={props.isConnected ? "Claim" : "Connect"}
+          buttonText="Claim"
           valid={
             !props.isConnected || stakingAmountValidationHandler(amountToClaim)
           }
           maxValue={formatEther(props.maximumClaimableAmount)}
           onClickHandler={buttonHandler}
+          displayLoader={isTransitioning}
         />
         {isAmountExceeded(amountToClaim) && (
           <AlertInfo danger>
