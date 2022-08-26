@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { formatNumberMaxFracDigits } from "utils";
+import { repeatableTernaryBuilder } from "utils/ternary";
 import { StakingRewardPropType } from "../../types";
 import StakingInputBlock from "../StakingInputBlock";
 import { AlertInfo } from "./AlertInfo";
@@ -27,7 +28,7 @@ export const StakingReward = ({
   const buttonHandler = isConnected ? () => {} : walletConnectionHandler;
   const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
 
-  const valueOrFill = (value: any) => (isConnected ? value : "-");
+  const valueOrEmpty = repeatableTernaryBuilder(isConnected, "-");
 
   // Stub Function
   const stakingAmountValidationHandler = (value: string): boolean => {
@@ -78,7 +79,7 @@ export const StakingReward = ({
       <InnerWrapper>
         <StakingClaimAmountWrapper>
           <StakingClaimAmountTitle>Claimable Rewards</StakingClaimAmountTitle>
-          {valueOrFill(
+          {valueOrEmpty(
             <StakingClaimAmountInnerWrapper>
               <PresentIcon />
               <StakingClaimAmountText>

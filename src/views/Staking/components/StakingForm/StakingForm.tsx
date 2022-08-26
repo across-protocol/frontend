@@ -20,6 +20,7 @@ import {
 import { PopperTooltip } from "components/Tooltip";
 import StakingInputBlock from "../StakingInputBlock";
 import { StakingFormPropType } from "../../types";
+import { repeatableTernaryBuilder } from "utils/ternary";
 
 type StakeTab = "stake" | "unstake";
 
@@ -38,7 +39,7 @@ export const StakingForm = ({
     return amount.length > 0;
   }
 
-  const valueOrFill = (value: any) => (isConnected ? value : "-");
+  const valueOrEmpty = repeatableTernaryBuilder(isConnected, "-");
 
   return (
     <Wrapper>
@@ -71,7 +72,7 @@ export const StakingForm = ({
       <StakeInfo>
         <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
         <StakeInfoItem>
-          {valueOrFill(
+          {valueOrEmpty(
             <div>
               10,000.00
               <LightGrayItemText margin={4}>
@@ -90,7 +91,7 @@ export const StakingForm = ({
             <InfoIcon />
           </PopperTooltip>
         </StakeInfoItem>
-        <StakeInfoItem>{valueOrFill("50 days")}</StakeInfoItem>
+        <StakeInfoItem>{valueOrEmpty("50 days")}</StakeInfoItem>
         <StakeInfoItem>
           Multiplier
           <PopperTooltip
@@ -102,7 +103,7 @@ export const StakingForm = ({
           </PopperTooltip>
         </StakeInfoItem>
         <StakeInfoItem>
-          {valueOrFill(
+          {valueOrEmpty(
             <MutliplierValue>
               <StyledProgressBar percent={50} />
               1.5x
@@ -118,7 +119,7 @@ export const StakingForm = ({
           <ArrowIcon />
           Your total APY
         </APYInfoItem>
-        <APYInfoItem>{valueOrFill("2.81%")}</APYInfoItem>
+        <APYInfoItem>{valueOrEmpty("2.81%")}</APYInfoItem>
       </APYInfo>
     </Wrapper>
   );
