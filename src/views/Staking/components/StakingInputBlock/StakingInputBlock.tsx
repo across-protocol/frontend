@@ -10,24 +10,27 @@ import { capitalizeFirstLetter } from "utils/format";
 import { StyledComponent } from "@emotion/styled";
 import { Theme } from "@emotion/react";
 
+type StylizedSVGComponent = StyledComponent<
+  React.SVGProps<SVGSVGElement> & {
+    title?: string | undefined;
+  } & {
+    children?: React.ReactNode;
+  } & {
+    theme?: Theme | undefined;
+  },
+  {},
+  {}
+>;
+
 interface Props {
   value: string;
   setValue: React.Dispatch<React.SetStateAction<string>>;
   valid: boolean;
   buttonText: string;
-  Logo: StyledComponent<
-    React.SVGProps<SVGSVGElement> & {
-      title?: string | undefined;
-    } & {
-      children?: React.ReactNode;
-    } & {
-      theme?: Theme | undefined;
-    },
-    {},
-    {}
-  >;
+  Logo: StylizedSVGComponent;
   maxValue: string;
   omitInput?: boolean;
+  onClickHandler: () => void;
 }
 
 const StakingInputBlock: React.FC<Props> = ({
@@ -38,6 +41,7 @@ const StakingInputBlock: React.FC<Props> = ({
   Logo,
   maxValue,
   omitInput,
+  onClickHandler,
 }) => {
   return (
     <InputRow>
@@ -55,7 +59,11 @@ const StakingInputBlock: React.FC<Props> = ({
         </InputWrapper>
       )}
       <ButtonWrapper>
-        <StakeButton valid={valid} fullWidth={omitInput}>
+        <StakeButton
+          valid={valid}
+          fullWidth={omitInput}
+          onClick={onClickHandler}
+        >
           {capitalizeFirstLetter(buttonText)}
         </StakeButton>
       </ButtonWrapper>
