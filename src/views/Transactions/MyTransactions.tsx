@@ -69,7 +69,10 @@ export function MyTransactions() {
         </TitleContainer>
         {!isConnected && (
           <ButtonWrapper>
-            <ConnectButton onClick={connectWallet} data-cy="connect-wallet">
+            <ConnectButton
+              onClick={() => connectWallet()}
+              data-cy="connect-wallet"
+            >
               Connect Wallet
             </ConnectButton>
           </ButtonWrapper>

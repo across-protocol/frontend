@@ -9,7 +9,7 @@ import {
 } from "utils";
 import Notify, { API as NotifyAPI } from "bnc-notify";
 import { OnboardAPI } from "@web3-onboard/core";
-import { onboardInit } from "utils/onboardV2";
+import { onboardInit } from "utils/onboard";
 
 type State = {
   account?: string;

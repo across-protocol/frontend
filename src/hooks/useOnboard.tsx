@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
 import { useState, createContext } from "react";
 import { trackEvent, ChainId } from "utils";
-import { onboardInit } from "utils/onboardV2";
+import { onboardInit } from "utils/onboard";
 import {
   OnboardAPI,
   ConnectOptions,
