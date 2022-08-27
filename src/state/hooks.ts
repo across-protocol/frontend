@@ -16,7 +16,8 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function useConnection() {
-  const { error } = useAppSelector((state) => state.connection);
+  // const { error } = useAppSelector((state) => state.connection);
+  // const e: Error | undefined = error;
   const {
     provider,
     signer,
@@ -27,6 +28,7 @@ export function useConnection() {
     account,
     chainId,
     wallet,
+    error,
   } = useOnboard();
 
   const dispatch = useAppDispatch();

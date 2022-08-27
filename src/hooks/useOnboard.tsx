@@ -1,6 +1,11 @@
 import { useContext, useEffect } from "react";
 import { useState, createContext } from "react";
-import { trackEvent, ChainId } from "utils";
+import {
+  trackEvent,
+  ChainId,
+  UnsupportedChainIdError,
+  isSupportedChainId,
+} from "utils";
 import { onboardInit } from "utils/onboard";
 import {
   OnboardAPI,
@@ -37,6 +42,7 @@ type OnboardContextValue = {
   notify: NotifyAPI;
   account: Account | null;
   chainId: ChainId;
+  error?: Error;
 };
 
 const notify = Notify({
@@ -53,6 +59,7 @@ function useOnboardManager() {
     ethers.providers.JsonRpcSigner | undefined
   >(undefined);
   const [account, setAccount] = useState<Account | null>(null);
+  const [error, setError] = useState<Error | undefined>(undefined);
   useEffect(() => {
     if (!onboard) setOnboard(onboardInit());
   }, [onboard]);
@@ -72,6 +79,7 @@ function useOnboardManager() {
     "onboard",
     onboard
   );
+
   useEffect(() => {
     if (wallet?.accounts) {
       setAccount(wallet.accounts[0]);
@@ -86,7 +94,21 @@ function useOnboardManager() {
       setProvider(null);
       setSigner(undefined);
     }
+
+    if (wallet?.chains) {
+      const chainId = Number(wallet.chains[0].id);
+      console.log("chainId", chainId, !isSupportedChainId(chainId));
+      if (!isSupportedChainId(chainId)) {
+        setError(new UnsupportedChainIdError(chainId));
+      } else {
+        setError(undefined);
+      }
+    } else {
+      setError(undefined);
+    }
   }, [wallet]);
+
+  console.log("error", error);
 
   return {
     onboard,
@@ -109,6 +131,7 @@ function useOnboardManager() {
     notify,
     account,
     chainId: (Number(wallet?.chains[0].id) as ChainId) || 0,
+    error,
   };
 }
 

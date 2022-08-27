@@ -18,6 +18,7 @@ import {
   TokenList,
   ChainInfo,
   ChainInfoList,
+  isSupportedChainId,
 } from "utils";
 
 import { usePrevious } from "hooks";
@@ -411,10 +412,12 @@ function useSendFormManager(): SendFormManagerContext {
         type: ActionType.SET_TO_ADDRESS,
         payload: getAddress(connectedAccount),
       });
-      dispatch({
-        type: ActionType.SET_FROM_CHAIN,
-        payload: chainId,
-      });
+      if (isSupportedChainId(chainId)) {
+        dispatch({
+          type: ActionType.SET_FROM_CHAIN,
+          payload: chainId,
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectedAccount]);

@@ -13,7 +13,7 @@ import {
   ConnectText,
   TopHeaderRow,
 } from "./Sidebar.styles";
-import { getChainInfo } from "utils";
+import { getChainInfo, isSupportedChainId } from "utils";
 import useSidebar from "./useSidebar";
 import closeIcon from "assets/across-close-button.svg";
 import { useConnection } from "state/hooks";
@@ -54,9 +54,11 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
             </CloseButton>
           </TopHeaderRow>
           {addrOrEns && <HeaderText>{addrOrEns}</HeaderText>}
-          {chainId && isConnected ? (
+          {isSupportedChainId(chainId) && isConnected ? (
             <HeaderText>{getChainInfo(chainId).name}</HeaderText>
-          ) : null}
+          ) : (
+            <HeaderText>Unsupported Network</HeaderText>
+          )}
           {isConnected && wallet ? (
             <DisconnectButton onClick={() => disconnect(wallet)}>
               Disconnect
