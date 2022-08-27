@@ -5,7 +5,6 @@ import { ethers } from "ethers";
 import { bindActionCreators } from "redux";
 import { ChainId, getConfig, Token } from "utils";
 import type { RootState, AppDispatch } from "./";
-import { update, error as errorAction } from "./connection";
 
 import chainApi from "./chainApi";
 import { add } from "./transactions";
@@ -16,8 +15,6 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function useConnection() {
-  // const { error } = useAppSelector((state) => state.connection);
-  // const e: Error | undefined = error;
   const {
     provider,
     signer,
@@ -31,12 +28,6 @@ export function useConnection() {
     error,
   } = useOnboard();
 
-  const dispatch = useAppDispatch();
-  const actions = useMemo(
-    () => bindActionCreators({ update, errorAction }, dispatch),
-    [dispatch]
-  );
-
   return {
     account: account?.address || undefined,
     ensName: account?.ens || undefined,
@@ -48,8 +39,6 @@ export function useConnection() {
     connect,
     disconnect,
     error,
-    setUpdate: actions.update,
-    setError: actions.errorAction,
     wallet,
   };
 }
