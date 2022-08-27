@@ -67,19 +67,6 @@ function useOnboardManager() {
   const [{ wallet }, connect, disconnect] = useConnectWallet();
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
 
-  console.log(
-    "provider",
-    provider,
-    "signer",
-    signer,
-    "account",
-    account,
-    "wallet",
-    wallet,
-    "onboard",
-    onboard
-  );
-
   useEffect(() => {
     if (wallet?.accounts) {
       setAccount(wallet.accounts[0]);
@@ -97,7 +84,6 @@ function useOnboardManager() {
 
     if (wallet?.chains) {
       const chainId = Number(wallet.chains[0].id);
-      console.log("chainId", chainId, !isSupportedChainId(chainId));
       if (!isSupportedChainId(chainId)) {
         setError(new UnsupportedChainIdError(chainId));
       } else {
@@ -107,8 +93,6 @@ function useOnboardManager() {
       setError(undefined);
     }
   }, [wallet]);
-
-  console.log("error", error);
 
   return {
     onboard,
