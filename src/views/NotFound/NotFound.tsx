@@ -5,7 +5,9 @@ import {
   Link,
   CloudWrapper,
   StyledEmptyCloud,
+  Content,
 } from "./NotFound.styles";
+import Footer from "components/Footer";
 
 interface Props {
   custom404Message?: string;
@@ -13,12 +15,15 @@ interface Props {
 const NotFound: React.FC<Props> = ({ custom404Message }) => {
   return (
     <Wrapper>
-      <CloudWrapper>
-        <StyledEmptyCloud />
-      </CloudWrapper>
-      <Title>404</Title>
-      <Body>{custom404Message || "Page not found"}</Body>
-      <Link to="/">Go back to Across</Link>
+      <Content>
+        <CloudWrapper>
+          <StyledEmptyCloud />
+        </CloudWrapper>
+        <Title>404</Title>
+        <Body>{custom404Message || "Page not found"}</Body>
+        <Link to="/">Go back to Across</Link>
+      </Content>
+      <Footer />
     </Wrapper>
   );
 };
