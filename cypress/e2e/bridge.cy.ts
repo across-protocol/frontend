@@ -1,7 +1,7 @@
 describe("bridge", () => {
   it("render in initial state", () => {
     cy.wait(5000);
-    cy.visit("/");
+    cy.visit("/", { jsonRpcUrl: "http://localhost:8545" });
     cy.dataCy("connect-wallet").should("be.visible");
     cy.dataCy("send").should("be.disabled");
   });
