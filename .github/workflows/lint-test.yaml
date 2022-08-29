@@ -44,7 +44,6 @@ jobs:
         run: yarn cypress install
       - name: Build app
         env:
-          NODE_OPTIONS: "--max-old-space-size=4096"
           REACT_APP_PUBLIC_INFURA_ID: ${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
           REACT_APP_PUBLIC_ONBOARD_API_KEY: ${{ secrets.CYPRESS_PUBLIC_ONBOARD_API_KEY }}
           REACT_APP_REWARDS_API_URL: ${{ secrets.CYPRESS_REWARDS_API_URL }}
