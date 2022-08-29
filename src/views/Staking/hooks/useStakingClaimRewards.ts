@@ -8,6 +8,7 @@ import { ERC20__factory } from "@across-protocol/contracts-v2";
 type ResolvedDataType =
   | {
       lpTokenAddress: string;
+      lpTokenSymbolName: string;
       acrossTokenAddress: string;
       poolEnabled: boolean;
       globalAmountOfLPStaked: BigNumberish;
@@ -86,6 +87,7 @@ const resolveRequestedData = async (
       averageDepositTime,
     },
     availableLPTokenBalance,
+    lpTokenSymbolName,
   ] = await Promise.all([
     acceleratingDistributor.stakingTokens(lpTokenAddress) as Promise<{
       enabled: boolean;
@@ -103,6 +105,7 @@ const resolveRequestedData = async (
       rewardsOutstanding: BigNumber;
     }>,
     lpTokenERC20.balanceOf(account),
+    Promise.resolve((await lpTokenERC20.symbol()).slice(4)),
   ]);
 
   return {
@@ -116,5 +119,6 @@ const resolveRequestedData = async (
     currentUserRewardMultiplier,
     availableLPTokenBalance,
     averageDepositTime,
+    lpTokenSymbolName,
   };
 };
