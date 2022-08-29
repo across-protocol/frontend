@@ -4,7 +4,7 @@ const enabledRoutesAsJson = require("../src/data/routes_1_0xc186fA914353c44b2E33
 const handler = async (request, response) => {
   const logger = getLogger();
   try {
-    let { originChainId, destinationChainId, originToken, destinationToken } =
+    const { originChainId, destinationChainId, originToken, destinationToken } =
       request.query;
 
     let enabledRoutes = enabledRoutesAsJson.routes.map((route) => ({
