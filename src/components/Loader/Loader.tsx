@@ -9,7 +9,6 @@ export const Loader = styled(LoaderIcon)<Props>`
   width: ${({ size = 24 }) => size}px;
   height: ${({ size = 24 }) => size}px;
   animation: rotation 2s infinite linear;
-  align-self: flex-end;
 
   @keyframes rotation {
     from {

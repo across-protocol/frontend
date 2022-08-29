@@ -2,16 +2,14 @@ import { useConnection } from "state/hooks";
 import { onboard } from "utils";
 
 import { useMerkleDistributor } from "./useMerkleDistributor";
-import { useClaimableTokens } from "./useClaimableTokens";
-import { useIsEligible } from "./useIsEligible";
+import { useAirdropRecipient } from "./useAirdropRecipient";
 
 export function useClaimView() {
   const { init } = onboard;
   const { isConnected, provider } = useConnection();
 
-  const isEligibleQuery = useIsEligible();
-  const claimableTokensQuery = useClaimableTokens();
-  const { handleClaim, claimState, hasClaimed } = useMerkleDistributor();
+  const airdropRecipientQuery = useAirdropRecipient();
+  const { handleClaim, claimState, hasClaimedState } = useMerkleDistributor();
 
   const handleAddTokenToWallet = async () => {
     if (provider) {
@@ -31,10 +29,9 @@ export function useClaimView() {
     handleConnectWallet: init,
     handleAddTokenToWallet,
     isConnected,
-    isEligibleQuery,
-    claimableTokensQuery,
+    airdropRecipientQuery,
     handleClaim,
     claimState,
-    hasClaimed,
+    hasClaimedState,
   };
 }

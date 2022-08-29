@@ -10,33 +10,39 @@ import { PageContainer, BodyContainer, Title } from "./Claim.styles";
 export function Claim() {
   const {
     isConnected,
-    isEligibleQuery,
-    claimableTokensQuery,
+    airdropRecipientQuery,
     handleClaim,
     handleConnectWallet,
     handleAddTokenToWallet,
-    hasClaimed,
+    hasClaimedState,
     claimState,
   } = useClaimView();
 
-  const isEligible = !isEligibleQuery.isLoading && isEligibleQuery.data;
+  const isEligible =
+    !airdropRecipientQuery.isLoading && airdropRecipientQuery.data;
 
   return (
     <PageContainer>
       <BodyContainer>
         <Title>Airdrop</Title>
-        {!isConnected || isEligibleQuery.isLoading ? (
+        {!isConnected || airdropRecipientQuery.isLoading ? (
           <DisconnectedWallet
             onClickConnect={handleConnectWallet}
-            isCheckingEligibility={isEligibleQuery.isLoading}
+            isCheckingEligibility={airdropRecipientQuery.isLoading}
           />
         ) : !isEligible ? (
           <NotEligibleWallet />
         ) : (
           <EligibleWallet
             onClickClaim={handleClaim}
-            claimable={claimableTokensQuery.data}
-            hasClaimed={hasClaimed}
+            amount={airdropRecipientQuery.data?.amount}
+            amountBreakdown={
+              airdropRecipientQuery.data?.metadata.amountBreakdown
+            }
+            isLoading={hasClaimedState.status === "pending"}
+            hasClaimed={
+              hasClaimedState.status === "success" && hasClaimedState.hasClaimed
+            }
             onClickAddToken={handleAddTokenToWallet}
             isClaiming={claimState.status.includes("pending")}
           />

@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { BigNumberish } from "ethers";
 
 import { ReactComponent as ClaimHeartWave } from "assets/claim-heart-wave.svg";
 import { ReactComponent as AcrossIcon } from "assets/acx.svg";
@@ -16,11 +15,11 @@ export type Props = {
   isClaiming?: boolean;
   isLoading?: boolean;
   hasClaimed?: boolean;
-  claimable?: {
-    liquidityClaim: BigNumberish;
-    bridgingClaim: BigNumberish;
-    communityClaim: BigNumberish;
-    totalClaim: BigNumberish;
+  amount?: string;
+  amountBreakdown?: {
+    liquidity: string;
+    bridging: string;
+    community: string;
   };
   onClickClaim: () => void;
   onClickAddToken: () => void;
@@ -30,7 +29,8 @@ export function ClaimAirdrop({
   isClaiming,
   isLoading,
   hasClaimed,
-  claimable,
+  amount,
+  amountBreakdown,
   onClickAddToken,
   onClickClaim,
 }: Props) {
@@ -49,28 +49,36 @@ export function ClaimAirdrop({
         <BreakdownStats>
           <BreakdownRow>
             <h6>Liquidity providing</h6>
-            <h6>{formatUnits(claimable?.liquidityClaim || 0, DECIMALS)} ACX</h6>
+            <h6>
+              {formatUnits(amountBreakdown?.liquidity || 0, DECIMALS)} ACX
+            </h6>
           </BreakdownRow>
           <BreakdownRow>
             <h6>Bridging activity</h6>
-            <h6>{formatUnits(claimable?.bridgingClaim || 0, DECIMALS)} ACX</h6>
+            <h6>{formatUnits(amountBreakdown?.bridging || 0, DECIMALS)} ACX</h6>
           </BreakdownRow>
           <BreakdownRow>
             <h6>Community reward</h6>
-            <h6>{formatUnits(claimable?.communityClaim || 0, DECIMALS)} ACX</h6>
+            <h6>
+              {formatUnits(amountBreakdown?.community || 0, DECIMALS)} ACX
+            </h6>
           </BreakdownRow>
           <BreakdownTotalRow>
             <h6>Total reward</h6>
-            <h6>{formatUnits(claimable?.totalClaim || 0, DECIMALS)} ACX</h6>
+            <h6>{formatUnits(amount || 0, DECIMALS)} ACX</h6>
           </BreakdownTotalRow>
         </BreakdownStats>
       </BreakdownCardContainer>
-      {hasClaimed ? (
+      {isLoading ? (
+        <CenteredLoaderContainer>
+          <Loader />
+        </CenteredLoaderContainer>
+      ) : hasClaimed ? (
         <AddTokenToWalletContainer>
           <AcrossIcon />
           <ClaimedTokensContainer>
             <h6>Claimed tokens</h6>
-            <h2>{formatUnits(claimable?.totalClaim || 0, DECIMALS)} ACX</h2>
+            <h2>{formatUnits(amount || 0, DECIMALS)} ACX</h2>
           </ClaimedTokensContainer>
           <InverseButton size="lg" onClick={onClickAddToken}>
             Add token to wallet
@@ -195,4 +203,12 @@ const ClaimedTokensContainer = styled.div`
   h2 {
     color: inherit;
   }
+`;
+
+const CenteredLoaderContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 66px;
 `;

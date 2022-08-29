@@ -23,6 +23,22 @@ type ClaimState =
       error: Error;
     };
 
+type HasClaimedState =
+  | {
+      status: "idle";
+    }
+  | {
+      status: "pending";
+    }
+  | {
+      status: "success";
+      hasClaimed: boolean;
+    }
+  | {
+      status: "error";
+      error: Error;
+    };
+
 // const merkleDistributorContract = new Contract(
 //   process.env.MERKLE_DISTRIBUTOR_ADDRESS || "",
 //   [
@@ -37,15 +53,25 @@ export function useMerkleDistributor() {
   const [claimState, setClaimState] = useState<ClaimState>({
     status: "idle",
   });
-  const [hasClaimed, setHasClaimed] = useState(false);
+  const [hasClaimedState, setHasClaimedState] = useState<HasClaimedState>({
+    status: "idle",
+  });
 
   useEffect(() => {
     if (account && provider) {
+      setHasClaimedState({ status: "pending" });
       // merkleDistributorContract
       //   .connect(provider)
       //   .hasClaimed(account)
-      //   .then(setHasClaimed);
-      mockedHasClaimed().then(setHasClaimed);
+      //   .then((hasClaimed) =>
+      //     setHasClaimedState({ status: "success", hasClaimed })
+      //   )
+      //   .catch((error) => setHasClaimedState({ status: "error", error }));
+      mockedHasClaimed()
+        .then((hasClaimed) =>
+          setHasClaimedState({ status: "success", hasClaimed })
+        )
+        .catch((error) => setHasClaimedState({ status: "error", error }));
     }
   }, [provider, account]);
 
@@ -67,12 +93,13 @@ export function useMerkleDistributor() {
       const txReceipt = await txResponse.wait();
 
       setClaimState({ status: "success", txHash: txReceipt.transactionHash });
+      setHasClaimedState({ status: "success", hasClaimed: true });
     } catch (error) {
       setClaimState({ status: "error", error: error as Error });
     }
   };
 
-  return { handleClaim, claimState, hasClaimed };
+  return { handleClaim, claimState, hasClaimedState };
 }
 
 // TODO: implement
@@ -95,5 +122,5 @@ async function mockedClaim() {
 
 async function mockedHasClaimed() {
   await new Promise((resolve) => setTimeout(() => resolve(true), 5_000));
-  return true;
+  return false;
 }
