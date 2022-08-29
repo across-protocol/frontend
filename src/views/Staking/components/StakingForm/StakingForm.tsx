@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Wrapper,
   Tabs,
@@ -34,12 +34,16 @@ export const StakingForm = ({
   usersMultiplierPercentage,
   usersTotalLPTokens,
   ageOfCapital,
+  availableLPTokenBalance,
 }: StakingFormPropType) => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [stakeAmount, setStakeAmount] = useState("");
 
   const buttonHandler = isConnected ? () => {} : walletConnectionHandler;
   const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
+  const buttonMaxValue = formatEther(
+    activeTab === "stake" ? availableLPTokenBalance : userCumulativeStake
+  );
 
   // Stub data for form
   function validateStakeAmount(amount: string) {
@@ -47,6 +51,10 @@ export const StakingForm = ({
   }
 
   const valueOrEmpty = repeatableTernaryBuilder(isConnected, <>-</>);
+
+  useEffect(() => {
+    setStakeAmount("");
+  }, [activeTab]);
 
   return (
     <Wrapper>
@@ -71,7 +79,7 @@ export const StakingForm = ({
           valid={!isConnected || validateStakeAmount(stakeAmount)}
           buttonText={`${buttonTextPrefix} ${activeTab}`}
           Logo={UsdcLogo}
-          maxValue="0"
+          maxValue={buttonMaxValue}
           omitInput={!isConnected}
           onClickHandler={buttonHandler}
         />

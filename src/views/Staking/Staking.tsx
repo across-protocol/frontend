@@ -55,6 +55,9 @@ const Staking = () => {
             stakingData?.globalAmountOfLPStaked
           )}
           ageOfCapital={numberTernary(stakingData?.elapsedTimeSinceAvgDeposit)}
+          availableLPTokenBalance={numericTernary(
+            stakingData?.availableLPTokenBalance
+          )}
         />
         <StakingReward
           maximumClaimableAmount={numericTernary(
