@@ -7,13 +7,6 @@ const handler = async (request, response) => {
     const { originChainId, destinationChainId, originToken, destinationToken } =
       request.query;
 
-    let enabledRoutes = enabledRoutesAsJson.routes.map((route) => ({
-      originChainId: String(route.fromChain),
-      originToken: String(route.fromTokenAddress),
-      destinationChainId: String(route.toChain),
-      l1TokenAddress: String(route.l1TokenAddress),
-    }));
-
     // Generate a mapping that contains similar tokens on each chain
     // Note:  The key in this dictionary represents an l1Token address, and
     //        the corresponding value is a nested hashmap containing a key
@@ -30,39 +23,30 @@ const handler = async (request, response) => {
       };
     }
 
-    // Create a mapping of enabled routes to
-    // a route with the destination token resolved.
-    enabledRoutes = enabledRoutes.map((route) => ({
-      originChainId: route.originChainId,
-      originToken: route.originToken,
-      destinationChainId: route.destinationChainId,
-      // Resolve destination chain directly from the
-      // l1TokensToDestinationTokens map
-      destinationToken:
-        l1TokensToDestinationTokens[route.l1TokenAddress][
-          route.destinationChainId
-        ],
-    }));
-
-    // Filter out elements from the request query parameters
-    if (
-      !!originToken ||
-      !!originChainId ||
-      !!destinationChainId ||
-      !!destinationToken
-    ) {
-      enabledRoutes = enabledRoutes.filter(
+    const enabledRoutes = enabledRoutesAsJson.routes
+      // Create a mapping of enabled routes to
+      // a route with the destination token resolved.
+      .map((route) => ({
+        originChainId: route.fromChain,
+        originToken: route.fromTokenAddress,
+        destinationChainId: route.toChain,
+        // Resolve destination chain directly from the
+        // l1TokensToDestinationTokens map
+        destinationToken:
+          l1TokensToDestinationTokens[route.l1TokenAddress][route.toChain],
+      }))
+      // Filter out elements from the request query parameters
+      .filter(
         (route) =>
           (!originToken ||
             originToken.toLowerCase() === route.originToken.toLowerCase()) &&
-          (!originChainId || originChainId === route.originChainId) &&
+          (!originChainId || originChainId === String(route.originChainId)) &&
           (!destinationChainId ||
-            destinationChainId === route.destinationChainId) &&
+            destinationChainId === String(route.destinationChainId)) &&
           (!destinationToken ||
             destinationToken.toLowerCase() ===
               route.destinationToken.toLowerCase())
       );
-    }
 
     // Two different explanations for how `stale-while-revalidate` works:
 
