@@ -29,8 +29,8 @@ export function useConnection() {
   } = useOnboard();
 
   return {
-    account: account?.address || undefined,
-    ensName: account?.ens || undefined,
+    account: account?.address,
+    ensName: account?.ens,
     chainId,
     provider,
     signer,
