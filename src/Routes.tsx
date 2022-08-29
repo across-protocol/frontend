@@ -20,6 +20,7 @@ import {
   enableMigration,
   WrongNetworkError,
   rewardsBannerWarning,
+  poolUrls,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
@@ -81,7 +82,21 @@ const Routes: React.FC = () => {
         <Route exact path="/about" component={About} />
         <Route exact path="/rewards" component={Rewards} />
         <Route exact path="/airdrop" component={Claim} />
-        <Route exact path="/rewards/staking/:poolId" component={Staking} />
+        <Route
+          exact
+          path="/rewards/staking/:poolId"
+          render={({ match }) => {
+            const matchingId = poolUrls.includes(
+              match.params.poolId.toLowerCase()
+            );
+            console.log(match.params.poolId, matchingId);
+            if (matchingId) {
+              return <Staking />;
+            } else {
+              return <NotFound custom404Message="Pool not found." />;
+            }
+          }}
+        />
         <Route exact path="/" component={Send} />
         <Route path="*" component={NotFound} />
       </Switch>
