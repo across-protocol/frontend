@@ -86,11 +86,10 @@ const Routes: React.FC = () => {
           exact
           path="/rewards/staking/:poolId"
           render={({ match }) => {
-            const matchingId = poolUrls.includes(
+            const poolIdFound = poolUrls.includes(
               match.params.poolId.toLowerCase()
             );
-            console.log(match.params.poolId, matchingId);
-            if (matchingId) {
+            if (poolIdFound) {
               return <Staking />;
             } else {
               return <NotFound custom404Message="Pool not found." />;
