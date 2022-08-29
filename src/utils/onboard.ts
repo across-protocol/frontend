@@ -11,60 +11,6 @@ const gnosis = gnosisModule();
 const walletConnect = walletConnectModule();
 const coinbase = coinbaseModule();
 
-/* 
-export interface InitOptions {
-    /**
-     * Wallet modules to be initialized and added to wallet selection modal
-     */
-//  wallets: WalletInit[];
-/**
- * The chains that your app works with
- */
-//  chains: Chain[] | ChainWithDecimalId[];
-/**
- * Additional metadata about your app to be displayed in the Onboard UI
- */
-//  appMetadata?: AppMetadata;
-/**
- * Define custom copy for the 'en' locale or add locales to i18n your app
- */
-//  i18n?: i18nOptions;
-/**
- * Customize the connect modal
- */
-//  connect?: ConnectModalOptions;
-/**
- * Customize the account center UI
- */
-//  accountCenter?: AccountCenterOptions;
-/**
- * Opt in to Blocknative value add services (transaction updates) by providing
- * your Blocknative API key, head to https://explorer.blocknative.com/account
- */
-//  apiKey?: string;
-/**
- * Transaction notification options
- */
-//  notify?: Partial<NotifyOptions> | Partial<Notify>;
-/**Gas module */
-//  gas?: typeof gas;
-//  }
-
-/* 
-    export interface Chain {
-      namespace?: 'evm';
-      id: ChainId;
-      rpcUrl: string;
-      label: string;
-      token: TokenSymbol;
-      color?: string;
-      icon?: string;
-      providerConnectionInfo?: ConnectionInfo;
-      publicRpcUrl?: string;
-      blockExplorerUrl?: string;
-  }
-    */
-
 export function onboardInit() {
   return init({
     apiKey: onboardApiKey,

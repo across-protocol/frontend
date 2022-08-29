@@ -1,3 +1,6 @@
+/* 
+  This defines a testing wallet used in e2e tests. 
+*/
 import { Wallet } from "@ethersproject/wallet";
 import { Eip1193Bridge } from "@ethersproject/experimental";
 import { ethers } from "@ethersproject/experimental/node_modules/ethers";
@@ -15,8 +18,6 @@ export const TEST_ADDRESS_NEVER_USE_SHORTENED = `${TEST_ADDRESS_NEVER_USE.substr
 )}...${TEST_ADDRESS_NEVER_USE.substr(-4, 4)}`;
 
 class CustomizedBridge extends Eip1193Bridge {
-  // chainId = 4;
-
   async sendAsync(...args) {
     console.debug("sendAsync called", ...args);
     return this.send(...args);
