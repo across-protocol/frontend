@@ -416,20 +416,21 @@ const minBN = (...arr) => {
  * @returns {any[]} A copy of the `array`, but filtered and mapped
  */
 const filterMapArray = (array, filterFn, mappingFn, mapFirst) => {
-  const result = array.reduce((accumulator, currentValue) => {
-    if (mapFirst) {
-      const currentValueMapping = mappingFn(currentValue);
-      if (filterFn(currentValueMapping)) {
-        accumulator.push(currentValueMapping);
+  const reducerFn = mapFirst
+    ? (accumulator, currentValue) => {
+        const currentValueMapping = mappingFn(currentValue);
+        if (filterFn(currentValueMapping)) {
+          accumulator.push(currentValueMapping);
+        }
+        return accumulator;
       }
-    } else {
-      if (filterFn(currentValue)) {
-        accumulator.push(mappingFn(currentValue));
-      }
-    }
-    return accumulator;
-  }, []);
-  return result;
+    : (accumulator, currentValue) => {
+        if (filterFn(currentValue)) {
+          accumulator.push(mappingFn(currentValue));
+        }
+        return accumulator;
+      };
+  return array.reduce(reducerFn, []);
 };
 
 module.exports = {
