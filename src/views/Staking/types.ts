@@ -23,4 +23,11 @@ export type StakingRewardPropType = GenericStakingComponentProps & {
   maximumClaimableAmount: BigNumberish;
 };
 
-export type StakingFormPropType = GenericStakingComponentProps & {};
+export type StakingFormPropType = GenericStakingComponentProps & {
+  lpTokenName: string;
+  userCumulativeStake: BigNumberish;
+  globalCumulativeStake: BigNumberish;
+  ageOfCapital: BigNumberish;
+  maxMultiplier: BigNumberish;
+  currentMultiplier: BigNumberish;
+};
