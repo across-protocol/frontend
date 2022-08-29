@@ -716,3 +716,7 @@ export const poolUrls = [
   "uma",
   "bal",
 ];
+
+export function stringValueInArray(value: string, arr: string[]) {
+  return arr.indexOf(value) !== -1;
+}

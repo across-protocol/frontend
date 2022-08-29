@@ -21,6 +21,7 @@ import {
   WrongNetworkError,
   rewardsBannerWarning,
   poolUrls,
+  stringValueInArray,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
@@ -86,9 +87,11 @@ const Routes: React.FC = () => {
           exact
           path="/rewards/staking/:poolId"
           render={({ match }) => {
-            const poolIdFound = poolUrls.includes(
-              match.params.poolId.toLowerCase()
+            const poolIdFound = stringValueInArray(
+              match.params.poolId,
+              poolUrls
             );
+
             if (poolIdFound) {
               return <Staking />;
             } else {
