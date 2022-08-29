@@ -91,14 +91,14 @@ const globalStyles = css`
   }
   html,
   body {
-    height: 100%;
+    min-height: 100vh;
   }
   body {
     background-color: var(--color-gray);
     color: var(--color-white);
   }
   #root {
-    height: 100%;
+    min-height: 100vh;
     isolation: isolate;
   }
   // iphone query
