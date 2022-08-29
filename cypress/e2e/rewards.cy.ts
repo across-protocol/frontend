@@ -1,6 +1,6 @@
 describe("rewards", () => {
   beforeEach(() => {
-    cy.visit("/rewards", { jsonRpcUrl: "http://localhost:8545" });
+    cy.visit("/rewards");
   });
 
   it("render in initial state", () => {

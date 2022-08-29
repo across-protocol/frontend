@@ -1,6 +1,6 @@
 describe("pool", () => {
   it("render in initial state", () => {
-    cy.visit("/pool", { jsonRpcUrl: "http://localhost:8545" });
+    cy.visit("/pool");
     cy.dataCy("position-info-box").should("be.visible");
     cy.dataCy("pool-info-box").should("be.visible");
     cy.dataCy("add-liquidity-form").should("be.visible");
