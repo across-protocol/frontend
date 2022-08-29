@@ -18,7 +18,7 @@ const handler = async (request, response) => {
     // Note:  The key in this dictionary represents an l1Token address, and
     //        the corresponding value is a nested hashmap containing a key
     //        value pair of {chainId: l2TokenEquivalent}
-    let l1TokensToDestinationTokens = {};
+    const l1TokensToDestinationTokens = {};
     for (const {
       l1TokenAddress,
       fromChain,
