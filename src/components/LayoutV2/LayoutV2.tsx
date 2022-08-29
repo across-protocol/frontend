@@ -17,10 +17,10 @@ const Wrapper = styled.div`
   justify-content: space-between;
 
   /* Subtract to account for header */
-  min-height: calc(100% - 72px);
+  min-height: calc(100vh - 72px);
   @media ${QUERIESV2.sm} {
     /* Subtract to account for header */
-    min-height: calc(100% - 64px);
+    min-height: calc(100vh - 64px);
   } ;
 `;
 
