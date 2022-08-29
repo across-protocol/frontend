@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import { ChevronUp, ChevronDown } from "react-feather";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -19,8 +19,6 @@ type Props = {
 };
 
 export function StepCard(props: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-
   const isExpanded = props.expandedStepIndex === props.stepIndex;
   const isStepCompleted = props.activeStepIndex > props.stepIndex;
 
@@ -30,19 +28,9 @@ export function StepCard(props: Props) {
     props.onClickTopRow(props.stepIndex);
   };
 
-  useEffect(() => {
-    if (isExpanded) {
-      setTimeout(() => {
-        ref.current?.scrollIntoView({
-          block: "center",
-        });
-      }, 350);
-    }
-  }, [ref, isExpanded]);
-
   return (
     <Container>
-      <TopRow onClick={handleClickTopRow} ref={ref}>
+      <TopRow onClick={handleClickTopRow}>
         <CheckIconContainer>
           {isStepCompleted ? <CheckFilledIcon /> : <CheckIcon />}
         </CheckIconContainer>
