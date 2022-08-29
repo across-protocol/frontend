@@ -55,7 +55,6 @@ const Pool: FC = () => {
       "pools",
       "users",
       state?.connection?.account || "",
-      // "",
       token.address === AddressZero
         ? poolClient.config.wethAddress
         : token.address,
