@@ -20,7 +20,7 @@ export const useStakingView = () => {
     poolLogoURI,
     poolName,
     mainnetAddress,
-    isStakingDataLoading,
+    isStakingDataLoading: isStakingDataLoading && !!stakingData,
     stakingData,
     isConnected: isConnected,
     provider: provider,
