@@ -41,13 +41,16 @@ const Staking = () => {
           isConnected={isConnected}
           walletConnectionHandler={connectWalletHandler}
           lpTokenName={stringTernary(stakingData?.lpTokenSymbolName)}
+          usersTotalLPTokens={numericTernary(stakingData?.usersTotalLPTokens)}
           userCumulativeStake={numericTernary(
             stakingData?.userAmountOfLPStaked
           )}
           currentMultiplier={numericTernary(
             stakingData?.currentUserRewardMultiplier
           )}
-          maxMultiplier={numericTernary(stakingData?.maxMultiplier)}
+          usersMultiplierPercentage={numberTernary(
+            stakingData?.usersMultiplierPercentage
+          )}
           globalCumulativeStake={numericTernary(
             stakingData?.globalAmountOfLPStaked
           )}

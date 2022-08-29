@@ -28,6 +28,7 @@ export type StakingFormPropType = GenericStakingComponentProps & {
   userCumulativeStake: BigNumberish;
   globalCumulativeStake: BigNumberish;
   ageOfCapital: BigNumberish;
-  maxMultiplier: BigNumberish;
+  usersMultiplierPercentage: number;
   currentMultiplier: BigNumberish;
+  usersTotalLPTokens: BigNumberish;
 };
