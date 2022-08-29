@@ -1,23 +1,15 @@
 import styled from "@emotion/styled";
 
 import { ReactComponent as AirdropXIcon } from "assets/airdrop-x.svg";
-import { ReactComponent as AirdropWavesBackground } from "assets/airdrop-waves-bg.svg";
+import AirdropWavesBackground from "assets/airdrop-waves-bg.svg";
 
 import { Card } from "./Card";
-import { WaysToEarnCard } from "./WaysToEarnCard";
+import { WaysToEarn } from "./WaysToEarn";
 
-type Props = {
-  onClickConnect?: () => void;
-  isLoading?: boolean;
-};
-
-export function NotEligibleWallet(props: Props) {
+export function NotEligibleWallet() {
   return (
     <Container>
       <InfoCard>
-        <BackgroundContainer>
-          <AirdropWavesBackground />
-        </BackgroundContainer>
         <Icon />
         <Text>
           This wallet hasn't executed any of the required actions to earn an
@@ -25,7 +17,9 @@ export function NotEligibleWallet(props: Props) {
           distributed by <a href="/">visiting our FAQ</a>.
         </Text>
       </InfoCard>
-      <WaysToEarnCard />
+      <WaysToEarnCard>
+        <WaysToEarn />
+      </WaysToEarnCard>
     </Container>
   );
 }
@@ -35,15 +29,11 @@ const Text = styled.h6`
   text-align: center;
 `;
 
-const BackgroundContainer = styled.div`
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-`;
-
 const InfoCard = styled(Card)`
-  position: relative;
+  background-position: center;
+  background-image: url(${AirdropWavesBackground});
+  background-size: cover;
+
   height: 302px;
   display: flex;
   flex-direction: column;
@@ -58,4 +48,8 @@ const Container = styled.div`
   flex-direction: column;
   display: flex;
   gap: 24px;
+`;
+
+const WaysToEarnCard = styled(Card)`
+  padding-top: 46px;
 `;

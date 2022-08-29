@@ -20,11 +20,14 @@ const Staking = () => {
           exitLinkURI={exitLinkURI}
           poolLogoURI={poolLogoURI}
         />
-        <StakingForm />
+        <StakingForm
+          isConnected={isConnected}
+          walletConnectionHandler={connectWalletHandler}
+        />
         <StakingReward
           maximumClaimableAmount={stakingData?.outstandingRewards ?? "0"}
           isConnected={isConnected}
-          connectWalletHandler={connectWalletHandler}
+          walletConnectionHandler={connectWalletHandler}
         />
       </Wrapper>
       <Footer />

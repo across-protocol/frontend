@@ -3,7 +3,6 @@ import styled from "@emotion/styled";
 import { ReactComponent as EthIcon } from "assets/eth-white.svg";
 import { ReactComponent as AcxIcon } from "assets/acx.svg";
 
-import { Card } from "./Card";
 import { EarnOptionCard } from "./EarnOptionCard";
 
 const OPTIONS = [
@@ -26,9 +25,9 @@ const OPTIONS = [
   },
 ];
 
-export function WaysToEarnCard() {
+export function WaysToEarn() {
   return (
-    <Container>
+    <>
       <Title>More ways to earn ACX</Title>
       <SubTitle>
         Did you know that you can provide liquidity to earn ACX? Across offers
@@ -40,13 +39,9 @@ export function WaysToEarnCard() {
           <EarnOptionCard key={option.title} {...option} />
         ))}
       </OptionsContainer>
-    </Container>
+    </>
   );
 }
-
-const Container = styled(Card)`
-  padding-top: ${46 / 16}rem;
-`;
 
 const Title = styled.h1`
   text-align: center;

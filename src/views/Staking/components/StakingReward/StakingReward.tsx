@@ -1,6 +1,7 @@
-import { BigNumberish } from "ethers";
 import { useState } from "react";
 import { formatEther, isNumberEthersParseable, parseEther } from "utils";
+import { repeatableTernaryBuilder } from "utils/ternary";
+import { StakingRewardPropType } from "../../types";
 import StakingInputBlock from "../StakingInputBlock";
 import { AlertInfo } from "./AlertInfo";
 import {
@@ -17,30 +18,31 @@ import {
   StakingInputBlockWrapper,
 } from "./StakingReward.styles";
 
-type StakingRewardPropType = {
-  maximumClaimableAmount: BigNumberish;
-  isConnected: boolean;
-  connectWalletHandler: () => void;
-};
-
-export const StakingReward = (props: StakingRewardPropType) => {
+export const StakingReward = ({
+  maximumClaimableAmount,
+  isConnected,
+  walletConnectionHandler,
+}: StakingRewardPropType) => {
   const [amountToClaim, setAmountToClaim] = useState("");
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const buttonHandler = props.isConnected
+  const buttonHandler = isConnected
     ? // Default do nothing
       () => {
         setIsTransitioning(true);
       }
-    : props.connectWalletHandler;
+    : walletConnectionHandler;
+
+  const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
+
+  const valueOrEmpty = repeatableTernaryBuilder(isConnected, <>-</>);
 
   // Stub Function
   const stakingAmountValidationHandler = (value: string): boolean => {
     if (isNumberEthersParseable(value)) {
       const numericalValue = parseEther(value);
       return (
-        numericalValue.gt("0") &&
-        numericalValue.lte(props.maximumClaimableAmount)
+        numericalValue.gt("0") && numericalValue.lte(maximumClaimableAmount)
       );
     } else {
       return false;
@@ -51,7 +53,7 @@ export const StakingReward = (props: StakingRewardPropType) => {
   const isAmountExceeded = (value: string): boolean => {
     return (
       isNumberEthersParseable(value) &&
-      parseEther(value).gt(props.maximumClaimableAmount)
+      parseEther(value).gt(maximumClaimableAmount)
     );
   };
 
@@ -61,18 +63,19 @@ export const StakingReward = (props: StakingRewardPropType) => {
         <Title>Rewards</Title>
       </InnerWrapper>
       <StakingInputBlockWrapper>
-        <AlertInfo>
-          Claiming tokens will reset your multiplier and decrease your ACX APY
-        </AlertInfo>
+        {isConnected && (
+          <AlertInfo>
+            Claiming tokens will reset your multiplier and decrease your ACX APY
+          </AlertInfo>
+        )}
         <StakingInputBlock
           value={amountToClaim}
           setValue={setAmountToClaim}
           Logo={StyledAcrossLogo}
-          buttonText="Claim"
-          valid={
-            !props.isConnected || stakingAmountValidationHandler(amountToClaim)
-          }
-          maxValue={formatEther(props.maximumClaimableAmount)}
+          buttonText={`${buttonTextPrefix} claim`}
+          valid={!isConnected || stakingAmountValidationHandler(amountToClaim)}
+          maxValue={formatEther(maximumClaimableAmount)}
+          omitInput={!isConnected}
           onClickHandler={buttonHandler}
           displayLoader={isTransitioning}
         />
@@ -88,12 +91,14 @@ export const StakingReward = (props: StakingRewardPropType) => {
       <InnerWrapper>
         <StakingClaimAmountWrapper>
           <StakingClaimAmountTitle>Claimable Rewards</StakingClaimAmountTitle>
-          <StakingClaimAmountInnerWrapper>
-            <PresentIcon />
-            <StakingClaimAmountText>
-              {formatEther(props.maximumClaimableAmount)}
-            </StakingClaimAmountText>
-          </StakingClaimAmountInnerWrapper>
+          {valueOrEmpty(
+            <StakingClaimAmountInnerWrapper>
+              <PresentIcon />
+              <StakingClaimAmountText>
+                {formatEther(maximumClaimableAmount)}
+              </StakingClaimAmountText>
+            </StakingClaimAmountInnerWrapper>
+          )}
         </StakingClaimAmountWrapper>
       </InnerWrapper>
     </Wrapper>

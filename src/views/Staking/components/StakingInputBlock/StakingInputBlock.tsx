@@ -16,6 +16,7 @@ interface Props {
   buttonText: string;
   Logo: StylizedSVG;
   maxValue: string;
+  omitInput?: boolean;
   onClickHandler: () => void;
   displayLoader?: boolean;
 }
@@ -27,30 +28,37 @@ const StakingInputBlock: React.FC<Props> = ({
   buttonText,
   Logo,
   maxValue,
-  onClickHandler,
   displayLoader,
+  omitInput,
+  onClickHandler,
 }) => {
   return (
     <InputRow>
-      <InputWrapper>
-        <Logo />
-        <Input
-          placeholder="Enter amount"
-          value={value}
-          type="text"
-          onChange={(e) => setValue(e.target.value)}
-          valid={!value || valid}
-          disabled={displayLoader}
-        />
-        <MaxButton disabled={displayLoader} onClick={() => setValue(maxValue)}>
-          Max
-        </MaxButton>
-      </InputWrapper>
+      {!omitInput && (
+        <InputWrapper>
+          <Logo />
+          <Input
+            placeholder="Enter amount"
+            value={value}
+            type="text"
+            onChange={(e) => setValue(e.target.value)}
+            valid={!value || valid}
+            disabled={displayLoader}
+          />
+          <MaxButton
+            disabled={displayLoader}
+            onClick={() => setValue(maxValue ?? "")}
+          >
+            Max
+          </MaxButton>
+        </InputWrapper>
+      )}
       <ButtonWrapper>
         <StakeButton
           valid={valid}
-          disabled={!valid || displayLoader}
+          fullWidth={omitInput}
           onClick={onClickHandler}
+          disabled={!valid || displayLoader}
         >
           {capitalizeFirstLetter(buttonText)}
         </StakeButton>
