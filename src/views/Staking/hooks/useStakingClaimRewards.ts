@@ -17,7 +17,7 @@ type ResolvedDataType =
       outstandingRewards: BigNumberish;
       currentUserRewardMultiplier: BigNumberish;
       availableLPTokenBalance: BigNumberish;
-      averageDepositTime: BigNumberish;
+      elapsedTimeSinceAvgDeposit: number;
       usersMultiplierPercentage: number;
       usersTotalLPTokens: BigNumberish;
     }
@@ -110,9 +110,13 @@ const resolveRequestedData = async (
     Promise.resolve((await lpTokenERC20.symbol()).slice(4)),
   ]);
 
+  // Average Deposit Time retrieves the # seconds since the last deposit, weighted
+  // by all the deposits in a user's account.
+  const daysElapsed = averageDepositTime.toNumber() / 86400;
+
   const usersMultiplierPercentage = currentUserRewardMultiplier
-    .div(maxMultiplier)
     .mul(100)
+    .div(maxMultiplier)
     .toNumber();
 
   const usersTotalLPTokens = availableLPTokenBalance.add(userAmountOfLPStaked);
@@ -127,7 +131,7 @@ const resolveRequestedData = async (
     outstandingRewards,
     currentUserRewardMultiplier,
     availableLPTokenBalance,
-    averageDepositTime,
+    elapsedTimeSinceAvgDeposit: daysElapsed,
     lpTokenSymbolName,
     usersMultiplierPercentage,
     usersTotalLPTokens,

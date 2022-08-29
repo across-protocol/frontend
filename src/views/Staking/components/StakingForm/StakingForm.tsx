@@ -21,12 +21,19 @@ import { PopperTooltip } from "components/Tooltip";
 import StakingInputBlock from "../StakingInputBlock";
 import { StakingFormPropType } from "../../types";
 import { repeatableTernaryBuilder } from "utils/ternary";
+import { formatEther, formatNumberMaxFracDigits } from "utils";
 
 type StakeTab = "stake" | "unstake";
 
 export const StakingForm = ({
   isConnected,
   walletConnectionHandler,
+  userCumulativeStake,
+  lpTokenName,
+  currentMultiplier,
+  usersMultiplierPercentage,
+  usersTotalLPTokens,
+  ageOfCapital,
 }: StakingFormPropType) => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [stakeAmount, setStakeAmount] = useState("");
@@ -74,9 +81,9 @@ export const StakingForm = ({
         <StakeInfoItem>
           {valueOrEmpty(
             <div>
-              10,000.00
+              {formatEther(userCumulativeStake)}
               <LightGrayItemText margin={4}>
-                / 32,424.24 USDC-LP
+                / {formatEther(usersTotalLPTokens)} {lpTokenName}
               </LightGrayItemText>
             </div>
           )}
@@ -91,7 +98,15 @@ export const StakingForm = ({
             <InfoIcon />
           </PopperTooltip>
         </StakeInfoItem>
-        <StakeInfoItem>{valueOrEmpty(<>50 days</>)}</StakeInfoItem>
+        <StakeInfoItem>
+          {valueOrEmpty(
+            <>
+              {ageOfCapital <= 0
+                ? "-"
+                : `${formatNumberMaxFracDigits(ageOfCapital)} Days`}
+            </>
+          )}
+        </StakeInfoItem>
         <StakeInfoItem>
           Multiplier
           <PopperTooltip
@@ -105,8 +120,8 @@ export const StakingForm = ({
         <StakeInfoItem>
           {valueOrEmpty(
             <MutliplierValue>
-              <StyledProgressBar percent={50} />
-              1.5x
+              <StyledProgressBar percent={usersMultiplierPercentage} />
+              {formatEther(currentMultiplier)} x
             </MutliplierValue>
           )}
         </StakeInfoItem>
