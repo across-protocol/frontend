@@ -17,11 +17,15 @@ const Staking = () => {
   } = useStakingView();
 
   const numericTernary = repeatableTernaryBuilder<BigNumberish>(
-    !isStakingDataLoading || !stakingData,
+    !isStakingDataLoading,
     "0"
   );
+  const numberTernary = repeatableTernaryBuilder<number>(
+    !isStakingDataLoading,
+    0
+  );
   const stringTernary = repeatableTernaryBuilder<string>(
-    !isStakingDataLoading || !stakingData,
+    !isStakingDataLoading,
     ""
   );
 
