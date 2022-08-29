@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import React, { useRef } from "react";
+import React from "react";
 import { ChevronUp, ChevronDown } from "react-feather";
 import { motion, AnimatePresence } from "framer-motion";
 
