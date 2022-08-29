@@ -2,28 +2,45 @@ import Footer from "components/Footer";
 
 import { DisconnectedWallet } from "./components/DisconnectedWallet";
 import { NotEligibleWallet } from "./components/NotEligibleWallet";
+import { EligibleWallet } from "./components/EligibleWallet";
 import { useClaimView } from "./hooks/useClaimView";
 
 import { PageContainer, BodyContainer, Title } from "./Claim.styles";
 
 export function Claim() {
-  const { isConnected, connectWallet, eligibleState } = useClaimView();
+  const {
+    isConnected,
+    isEligibleQuery,
+    claimableTokensQuery,
+    handleClaim,
+    handleConnectWallet,
+    handleAddTokenToWallet,
+    hasClaimed,
+    claimState,
+  } = useClaimView();
 
-  const isEligible =
-    eligibleState.status === "success" && eligibleState.data.isEligible;
+  const isEligible = !isEligibleQuery.isLoading && isEligibleQuery.data;
 
   return (
     <PageContainer>
       <BodyContainer>
         <Title>Airdrop</Title>
-        {!isConnected ? (
+        {!isConnected || isEligibleQuery.isLoading ? (
           <DisconnectedWallet
-            onClickConnect={connectWallet}
-            isLoading={["loading"].includes(eligibleState.status)}
+            onClickConnect={handleConnectWallet}
+            isCheckingEligibility={isEligibleQuery.isLoading}
           />
         ) : !isEligible ? (
           <NotEligibleWallet />
-        ) : null}
+        ) : (
+          <EligibleWallet
+            onClickClaim={handleClaim}
+            claimable={claimableTokensQuery.data}
+            hasClaimed={hasClaimed}
+            onClickAddToken={handleAddTokenToWallet}
+            isClaiming={claimState.status.includes("pending")}
+          />
+        )}
       </BodyContainer>
       <Footer />
     </PageContainer>
