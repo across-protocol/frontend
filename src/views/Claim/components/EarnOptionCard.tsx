@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 import { IconPair } from "components/IconPair";
 import { PopperTooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/info.svg";
+import { QUERIESV2 } from "utils/constants";
 
 import { LightCard } from "./Card";
 import { Button } from "../Claim.styles";
@@ -44,6 +45,10 @@ const Container = styled(LightCard)`
   display: flex;
   flex-direction: column;
   gap: 32px;
+
+  @media ${QUERIESV2.sm} {
+    gap: 24px;
+  }
 `;
 
 const EarnOptionTopContainer = styled.div`

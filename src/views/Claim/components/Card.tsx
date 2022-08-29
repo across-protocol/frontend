@@ -12,7 +12,7 @@ export const Card = styled.div`
   background: #34353b;
 
   border: 1px solid #3e4047;
-  border-radius: 16px;
+  border-radius: 10px;
 
   @media ${QUERIESV2.sm} {
     padding: 16px;
