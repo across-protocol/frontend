@@ -18,6 +18,8 @@ type ResolvedDataType =
       currentUserRewardMultiplier: BigNumberish;
       availableLPTokenBalance: BigNumberish;
       averageDepositTime: BigNumberish;
+      usersMultiplierPercentage: number;
+      usersTotalLPTokens: BigNumberish;
     }
   | undefined;
 
@@ -108,6 +110,13 @@ const resolveRequestedData = async (
     Promise.resolve((await lpTokenERC20.symbol()).slice(4)),
   ]);
 
+  const usersMultiplierPercentage = currentUserRewardMultiplier
+    .div(maxMultiplier)
+    .mul(100)
+    .toNumber();
+
+  const usersTotalLPTokens = availableLPTokenBalance.add(userAmountOfLPStaked);
+
   return {
     lpTokenAddress,
     acrossTokenAddress,
@@ -120,5 +129,7 @@ const resolveRequestedData = async (
     availableLPTokenBalance,
     averageDepositTime,
     lpTokenSymbolName,
+    usersMultiplierPercentage,
+    usersTotalLPTokens,
   };
 };
