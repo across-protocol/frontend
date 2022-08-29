@@ -2,22 +2,26 @@ import { useConnection } from "state/hooks";
 import { useEffect, useState } from "react";
 import { getConfig } from "utils";
 import { useStakingPoolResolver } from "./useStakingPoolResolver";
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber, BigNumberish, providers } from "ethers";
+import { ERC20__factory } from "@across-protocol/contracts-v2";
 
 type ResolvedDataType =
   | {
       lpTokenAddress: string;
       acrossTokenAddress: string;
       poolEnabled: boolean;
-      cumulativeStaked: BigNumberish;
+      globalAmountOfLPStaked: BigNumberish;
+      userAmountOfLPStaked: BigNumberish;
       maxMultiplier: BigNumberish;
       outstandingRewards: BigNumberish;
       currentUserRewardMultiplier: BigNumberish;
+      availableLPTokenBalance: BigNumberish;
+      averageDepositTime: BigNumberish;
     }
   | undefined;
 
 export const useStakingClaimRewards = () => {
-  const { account } = useConnection();
+  const { account, provider } = useConnection();
   const { mainnetAddress } = useStakingPoolResolver();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -25,11 +29,17 @@ export const useStakingClaimRewards = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    resolveRequestedData(mainnetAddress!, account).then((resolvedData) => {
-      setStakingData(resolvedData);
+    if (!mainnetAddress || !provider || !account) {
       setIsLoading(false);
-    });
-  }, [mainnetAddress, account]);
+    } else {
+      resolveRequestedData(mainnetAddress, provider, account).then(
+        (resolvedData) => {
+          setStakingData(resolvedData);
+          setIsLoading(false);
+        }
+      );
+    }
+  }, [mainnetAddress, account, provider]);
 
   return {
     isStakingDataLoading: isLoading,
@@ -45,7 +55,8 @@ export const useStakingClaimRewards = () => {
  */
 const resolveRequestedData = async (
   tokenAddress: string,
-  account?: string
+  provider: providers.Provider,
+  account: string
 ): Promise<ResolvedDataType> => {
   const config = getConfig();
   const hubPool = config.getHubPool();
@@ -58,12 +69,23 @@ const resolveRequestedData = async (
     acceleratingDistributor.rewardToken() as Promise<string>,
   ]);
 
+  const lpTokenERC20 = ERC20__factory.connect(lpTokenAddress, provider);
+
   // Check information about this LP token on the AcceleratingDistributor contract
   // Resolve the provided account's outstanding rewards (if an account is connected)
   const [
-    { enabled: poolEnabled, cumulativeStaked, maxMultiplier },
-    outstandingRewards,
+    {
+      enabled: poolEnabled,
+      cumulativeStaked: globalAmountOfLPStaked,
+      maxMultiplier,
+    },
     currentUserRewardMultiplier,
+    {
+      rewardsOutstanding: outstandingRewards,
+      cumulativeBalance: userAmountOfLPStaked,
+      averageDepositTime,
+    },
+    availableLPTokenBalance,
   ] = await Promise.all([
     acceleratingDistributor.stakingTokens(lpTokenAddress) as Promise<{
       enabled: boolean;
@@ -71,23 +93,28 @@ const resolveRequestedData = async (
       maxMultiplier: BigNumber;
       cumulativeStaked: BigNumber;
     }>,
-    acceleratingDistributor.getOutstandingRewards(
+    acceleratingDistributor.getUserRewardMultiplier(
       lpTokenAddress,
       account
     ) as Promise<BigNumber>,
-    acceleratingDistributor.getUserRewardMultiplier(
-      lpTokenAddress,
-      account!
-    ) as Promise<BigNumber>,
+    acceleratingDistributor.getUserStake(lpTokenAddress, account) as Promise<{
+      cumulativeBalance: BigNumber;
+      averageDepositTime: BigNumber;
+      rewardsOutstanding: BigNumber;
+    }>,
+    lpTokenERC20.balanceOf(account),
   ]);
 
   return {
     lpTokenAddress,
     acrossTokenAddress,
     poolEnabled,
-    cumulativeStaked,
+    globalAmountOfLPStaked,
+    userAmountOfLPStaked,
     maxMultiplier,
     outstandingRewards,
     currentUserRewardMultiplier,
+    availableLPTokenBalance,
+    averageDepositTime,
   };
 };

@@ -5,17 +5,23 @@ import { useStakingPoolResolver } from "./useStakingPoolResolver";
 
 export const useStakingView = () => {
   const { isConnected, provider } = useConnection();
-  const poolInformation = useStakingPoolResolver();
+  const { poolId, exitLinkURI, poolLogoURI, poolName, mainnetAddress } =
+    useStakingPoolResolver();
 
   //FIXME: Redirect to 404 prior to continuing
 
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  const stakingData = useStakingClaimRewards();
+  const { isStakingDataLoading, stakingData } = useStakingClaimRewards();
 
   return {
-    ...poolInformation,
-    ...stakingData,
+    poolId,
+    exitLinkURI,
+    poolLogoURI,
+    poolName,
+    mainnetAddress,
+    isStakingDataLoading,
+    stakingData,
     isConnected: isConnected,
     provider: provider,
     connectWalletHandler: onboard.init,
