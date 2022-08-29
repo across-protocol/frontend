@@ -11,10 +11,10 @@ export function repeatableTernaryBuilder<Type>(
   /**
    * Represents a ternary operation.
    * @param value The returned in a ternary if the expression is true. For example, the variable B in -> A ? B : C
-   * @returns `value` if `expression` is true, else `fallbackValue`
+   * @returns `value` if `expression` is true and `value` is defined, else `fallbackValue`
    */
-  function closure(value: Type): Type {
-    return expression ? value : fallbackValue;
+  function closure(value?: Type): Type {
+    return expression && !!value ? value : fallbackValue;
   }
   return closure;
 }
