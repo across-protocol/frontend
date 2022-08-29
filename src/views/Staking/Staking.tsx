@@ -54,7 +54,7 @@ const Staking = () => {
           globalCumulativeStake={numericTernary(
             stakingData?.globalAmountOfLPStaked
           )}
-          ageOfCapital={numericTernary(stakingData?.averageDepositTime)}
+          ageOfCapital={numberTernary(stakingData?.elapsedTimeSinceAvgDeposit)}
         />
         <StakingReward
           maximumClaimableAmount={numericTernary(
