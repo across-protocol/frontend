@@ -407,6 +407,31 @@ const minBN = (...arr) => {
   })[0];
 };
 
+/**
+ * Performs a filter-map operation in O(n) time
+ * @param {any[]} array An array of elements to apply this transform
+ * @param {(any) => boolean} filterFn A function which resolves a boolean. A true return will appear in the final output array
+ * @param {(any) => any} mappingFn A function to transform an array element into the mapping
+ * @param {boolean} mapFirst If true, the element will be transformed prior to being filtered
+ * @returns {any[]} A copy of the `array`, but filtered and mapped
+ */
+const filterMapArray = (array, filterFn, mappingFn, mapFirst) => {
+  const result = array.reduce((accumulator, currentValue) => {
+    if (mapFirst) {
+      const currentValueMapping = mappingFn(currentValue);
+      if (filterFn(currentValueMapping)) {
+        accumulator.push(currentValueMapping);
+      }
+    } else {
+      if (filterFn(currentValue)) {
+        accumulator.push(mappingFn(currentValue));
+      }
+    }
+    return accumulator;
+  }, []);
+  return result;
+};
+
 module.exports = {
   getLogger,
   getTokenDetails,
@@ -429,4 +454,5 @@ module.exports = {
   disabledL1Tokens,
   resolveVercelEndpoint,
   getSpokePool,
+  filterMapArray,
 };

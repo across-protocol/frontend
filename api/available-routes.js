@@ -1,4 +1,4 @@
-const { getLogger, InputError } = require("./_utils");
+const { getLogger, InputError, filterMapArray } = require("./_utils");
 const enabledRoutesAsJson = require("../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json");
 
 const handler = async (request, response) => {
@@ -23,22 +23,20 @@ const handler = async (request, response) => {
       };
     }
 
-    const enabledRoutes = enabledRoutesAsJson.routes
+    const enabledRoutes = filterMapArray(
+      enabledRoutesAsJson.routes,
       // Filter out elements from the request query parameters
-      .filter(
-        (route) =>
-          (!originToken ||
-            originToken.toLowerCase() === route.originToken.toLowerCase()) &&
-          (!originChainId || originChainId === String(route.originChainId)) &&
-          (!destinationChainId ||
-            destinationChainId === String(route.destinationChainId)) &&
-          (!destinationToken ||
-            destinationToken.toLowerCase() ===
-              route.destinationToken.toLowerCase())
-      )
-      // Create a mapping of enabled routes to
-      // a route with the destination token resolved.
-      .map((route) => ({
+      (route) =>
+        (!originToken ||
+          originToken.toLowerCase() === route.originToken.toLowerCase()) &&
+        (!originChainId || originChainId === String(route.originChainId)) &&
+        (!destinationChainId ||
+          destinationChainId === String(route.destinationChainId)) &&
+        (!destinationToken ||
+          destinationToken.toLowerCase() ===
+            route.destinationToken.toLowerCase()),
+      // Create a mapping of enabled routes to a route with the destination token resolved.
+      (route) => ({
         originChainId: route.fromChain,
         originToken: route.fromTokenAddress,
         destinationChainId: route.toChain,
@@ -46,7 +44,9 @@ const handler = async (request, response) => {
         // l1TokensToDestinationTokens map
         destinationToken:
           l1TokensToDestinationTokens[route.l1TokenAddress][route.toChain],
-      }));
+      }),
+      true
+    );
 
     // Two different explanations for how `stale-while-revalidate` works:
 
