@@ -196,6 +196,7 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
   margin-right: 7px;
   height: 14px;
   margin-top: 5px;
+  padding-right: 4px;
   > div {
     height: 8px;
   }
