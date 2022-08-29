@@ -11,6 +11,7 @@ const handler = async (request, response) => {
       originChainId: String(route.fromChain),
       originToken: String(route.fromTokenAddress),
       destinationChainId: String(route.toChain),
+      l1TokenAddress: String(route.l1TokenAddress),
     }));
 
     // Generate a mapping that contains similar tokens on each chain
@@ -29,29 +30,19 @@ const handler = async (request, response) => {
       };
     }
 
-    // Convert this map to an array for convenience in the following logic
-    l1TokensToDestinationTokens = Object.values(l1TokensToDestinationTokens);
-
-    // Loop through each enabled route with the intention of setting the
-    // destination token address
-    enabledRoutes.forEach((route) => {
-      // Iterate over each token mapping
-      for (const tokenSet of l1TokensToDestinationTokens) {
-        // Check to see if the origin ChainId for this event is
-        // a set-member of the tokenSet
-        if (tokenSet[route.originChainId] === route.originToken) {
-          // Further check if the destinationChainId has a mapping
-          // to a valid destination token
-          const destinationToken = tokenSet[route.destinationChainId];
-          if (destinationToken !== undefined) {
-            // If a valid destinationToken is found, let's update
-            // the route and leave this loop
-            route["destinationToken"] = destinationToken;
-            break;
-          }
-        }
-      }
-    });
+    // Create a mapping of enabled routes to
+    // a route with the destination token resolved.
+    enabledRoutes = enabledRoutes.map((route) => ({
+      originChainId: route.originChainId,
+      originToken: route.originToken,
+      destinationChainId: route.destinationChainId,
+      // Resolve destination chain directly from the
+      // l1TokensToDestinationTokens map
+      destinationToken:
+        l1TokensToDestinationTokens[route.l1TokenAddress][
+          route.destinationChainId
+        ],
+    }));
 
     // Filter out elements from the request query parameters
     if (
