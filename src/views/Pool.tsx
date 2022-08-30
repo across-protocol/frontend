@@ -42,6 +42,14 @@ const Pool: FC = () => {
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);
   const [defaultTab, setDefaultTab] = useState("Add");
+
+  const {
+    isConnected,
+    account,
+    provider,
+    error,
+    chainId: activeChainId,
+  } = useConnection();
   const pool = useAppSelector(
     (state) =>
       state.pools.pools[
@@ -54,20 +62,12 @@ const Pool: FC = () => {
     get(state, [
       "pools",
       "users",
-      state?.connection?.account || "",
+      account || "",
       token.address === AddressZero
         ? poolClient.config.wethAddress
         : token.address,
     ])
   );
-
-  const {
-    isConnected,
-    account,
-    provider,
-    error,
-    chainId: activeChainId,
-  } = useConnection();
 
   const queries = useAppSelector((state) => state.api.queries);
 
