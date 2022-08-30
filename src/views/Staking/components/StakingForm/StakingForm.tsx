@@ -19,7 +19,6 @@ import {
   InnerPoolStakeInfo,
   ArrowIconUp,
   ArrowIconDown,
-  ArrowDiv,
 } from "./StakingForm.styles";
 
 import { PopperTooltip } from "components/Tooltip";
