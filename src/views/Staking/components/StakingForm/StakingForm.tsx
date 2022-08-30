@@ -197,6 +197,22 @@ export const StakingForm = ({
               )}
             </StakeInfoItem>
           </StakeInfoRow>
+          <StakeInfoRow>
+            <StakeInfoItem>Pool APY</StakeInfoItem>
+            <StakeInfoItem>
+              {valueOrEmpty(
+                <LightGrayItemText margin={4}>2.16%</LightGrayItemText>
+              )}
+            </StakeInfoItem>
+          </StakeInfoRow>
+          <StakeInfoRow>
+            <StakeInfoItem>Share of pool</StakeInfoItem>
+            <StakeInfoItem>
+              {valueOrEmpty(
+                <LightGrayItemText margin={4}>0.029%</LightGrayItemText>
+              )}
+            </StakeInfoItem>
+          </StakeInfoRow>
         </InnerPoolStakeInfo>
       </StakeInfo>
     </Card>
