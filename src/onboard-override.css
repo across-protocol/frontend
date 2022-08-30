@@ -1,8 +1,15 @@
 
 /* Override root variables to style the Onboard modal */
 :root {
-  --onboard-connect-header-background: #2d2e33;
+  --onboard-connect-header-background: #34353b;
   --onboard-connect-header-color: #e0f3ff;
   --onboard-connect-sidebar-color: #e0f3ff;
   --onboard-connect-sidebar-background: #2d2e33;
+  --onboard-modal-background: #34353b;
+  --onboard-wallet-button-background: var(--color-primary);
+  --onboard-wallet-app-icon-border-color: none;
+  /* --onboard-wallet-button-background-hover: var(--color-primary); */
+  --onboard-main-scroll-container-background: #34353b;
+  --onboard-close-button-color:#2d2e33;
+  --onboard-close-button-background:var(--color-primary);
 }
