@@ -65,6 +65,13 @@ export const StakeInfo = styled.div`
   width: 100%;
 `;
 
+interface IInnerPoolStakeInfo {
+  visible: boolean;
+}
+export const InnerPoolStakeInfo = styled(StakeInfo)<IInnerPoolStakeInfo>`
+  display: ${({ visible }) => (visible ? `flex` : `none`)};
+`;
+
 export const StakeInfoItem = styled.div`
   display: flex;
   align-items: center;
@@ -162,12 +169,20 @@ export const APYInfoItem = styled(StakeInfoItem)`
   color: #c5d5e0;
 `;
 
-export const ArrowIcon = styled(UnstyledArrowIcon)`
+export const ArrowIconDown = styled(UnstyledArrowIcon)`
   margin-right: 11px;
-  cursor: pointer;
   path {
     stroke: #9daab2;
   }
+`;
+
+export const ArrowIconUp = styled(ArrowIconDown)`
+  rotate: 180deg;
+  margin-bottom: -4px;
+`;
+
+export const ArrowDiv = styled.div`
+  cursor: pointer;
 `;
 
 export const InfoIcon = styled(II)`

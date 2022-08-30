@@ -10,13 +10,16 @@ import {
   MutliplierValue,
   StyledProgressBar,
   APYInfoItem,
-  ArrowIcon,
   UsdcLogo,
   InfoIcon,
   Divider,
   InputBlockWrapper,
   StakeInfoRow,
   StakeAPYInfoRow,
+  InnerPoolStakeInfo,
+  ArrowIconUp,
+  ArrowIconDown,
+  ArrowDiv,
 } from "./StakingForm.styles";
 
 import { PopperTooltip } from "components/Tooltip";
@@ -37,8 +40,10 @@ export const StakingForm = ({
   usersTotalLPTokens,
   ageOfCapital,
   availableLPTokenBalance,
+  globalCumulativeStake,
 }: StakingFormPropType) => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
+  const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(true);
   const [stakeAmount, setStakeAmount] = useState("");
 
   const buttonHandler = isConnected ? () => {} : walletConnectionHandler;
@@ -46,6 +51,7 @@ export const StakingForm = ({
   const buttonMaxValue = formatEther(
     activeTab === "stake" ? availableLPTokenBalance : userCumulativeStake
   );
+  const ArrowIcon = isPoolInfoVisible ? ArrowIconDown : ArrowIconUp;
 
   // Stub data for form
   function validateStakeAmount(amount: string) {
@@ -57,6 +63,10 @@ export const StakingForm = ({
   useEffect(() => {
     setStakeAmount("");
   }, [activeTab]);
+
+  useEffect(() => {
+    setIsPoolInfoVisible(false);
+  }, [isConnected]);
 
   return (
     <Card>
@@ -151,7 +161,13 @@ export const StakingForm = ({
         <StakeAPYInfoRow>
           <StakeInfoItem>
             <APYInfoItem>
-              <ArrowIcon />
+              <ArrowDiv
+                onClick={() => {
+                  setIsPoolInfoVisible((value) => !value);
+                }}
+              >
+                <ArrowIcon />
+              </ArrowDiv>
               Your total APY
             </APYInfoItem>
           </StakeInfoItem>
@@ -159,6 +175,32 @@ export const StakingForm = ({
             {valueOrEmpty(<LightGrayItemText>2.81%</LightGrayItemText>)}
           </StakeInfoItem>
         </StakeAPYInfoRow>
+        <InnerPoolStakeInfo visible={isPoolInfoVisible}>
+          <Divider />
+          <StakeInfoRow>
+            <StakeInfoItem>Your Rewards APY</StakeInfoItem>
+            <StakeInfoItem>
+              {valueOrEmpty(
+                <div>
+                  <LightGrayItemText margin={4}>2.43%</LightGrayItemText>
+                  Base 2.11%
+                </div>
+              )}
+            </StakeInfoItem>
+          </StakeInfoRow>
+          <StakeInfoRow>
+            <StakeInfoItem>Pool liquidity</StakeInfoItem>
+            <StakeInfoItem>
+              {valueOrEmpty(
+                <div>
+                  <LightGrayItemText margin={4}>
+                    ${formatEther(globalCumulativeStake)}
+                  </LightGrayItemText>
+                </div>
+              )}
+            </StakeInfoItem>
+          </StakeInfoRow>
+        </InnerPoolStakeInfo>
       </StakeInfo>
     </Card>
   );
