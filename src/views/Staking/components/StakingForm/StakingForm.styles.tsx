@@ -45,7 +45,7 @@ export const Tab = styled.div<ITab>`
   line-height: ${20 / 16}rem;
   color: ${({ active }) => (active ? "#e0f3ff" : "#9DAAB2")};
   text-align: center;
-  padding: 24px 0 20px;
+  padding: 0 0 20px;
   border-bottom: ${(props) =>
     props.active ? "2px solid #e0f3ff" : "1px solid #3E4047"};
   cursor: pointer;
@@ -132,6 +132,7 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
   width: 80px;
   height: 14px;
   margin-top: 5px;
+  padding-right: 4px;
   > div {
     height: 8px;
   }

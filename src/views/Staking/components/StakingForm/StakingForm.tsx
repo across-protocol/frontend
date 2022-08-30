@@ -147,6 +147,7 @@ export const StakingForm = ({
             Note: Multipliers of previously staked tokens are not impacted
           </StakeInfoItemSmall>
         </StakeInfoRow>
+        <Divider />
         <StakeAPYInfoRow>
           <StakeInfoItem>
             <APYInfoItem>

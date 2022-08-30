@@ -106,6 +106,7 @@ interface IStakeButton {
 }
 export const StakeButton = styled(UnstyledButton)<IStakeButton>`
   width: ${({ fullWidth }) => (fullWidth ? "100%" : "inherit")};
+  text-transform: capitalize;
   background: #6cf9d8;
   padding: 0px 40px;
   height: 64px;
