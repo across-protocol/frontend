@@ -27,7 +27,6 @@ import {
   toWeiSafe,
   addEtherscan,
   max,
-  onboard,
   getChainInfo,
   switchChain,
   ChainId,
@@ -54,7 +53,7 @@ interface Props {
   position: ethers.BigNumber;
   totalPosition: ethers.BigNumber;
   feesEarned: ethers.BigNumber;
-  wrongNetwork?: boolean;
+  wrongNetwork?: boolean | null;
   // refetch balance
   refetchBalance: () => void;
   chainId: ChainId;
@@ -83,8 +82,8 @@ const RemoveLiqudityForm: FC<Props> = ({
   onMaxClick,
 }) => {
   const poolClient = getPoolClient();
-  const { init } = onboard;
-  const { isConnected, provider, signer, notify, account } = useConnection();
+  const { isConnected, provider, signer, notify, account, connect } =
+    useConnection();
   const [txSubmitted, setTxSubmitted] = useState(false);
   const [updateEthBalance] = api.endpoints.ethBalance.useLazyQuery();
   const chainName = getChainInfo(chainId).name;
@@ -100,7 +99,7 @@ const RemoveLiqudityForm: FC<Props> = ({
 
   const handleButtonClick = async () => {
     if (!provider) {
-      init();
+      connect();
     }
     if (isConnected && removeAmountSlider > 0 && signer) {
       const scaler = ethers.BigNumber.from("10").pow(decimals);

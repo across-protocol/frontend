@@ -8,6 +8,8 @@ import {
   getAddress,
 } from "utils";
 import Notify, { API as NotifyAPI } from "bnc-notify";
+import { OnboardAPI } from "@web3-onboard/core";
+import { onboardInit } from "utils/onboard";
 
 type State = {
   account?: string;
@@ -17,6 +19,7 @@ type State = {
   signer?: ethers.Signer;
   error?: Error;
   notify: NotifyAPI;
+  onboard: OnboardAPI;
 };
 
 export type Update = Omit<State, "error" | "chainId" | "notify"> & {
@@ -30,6 +33,7 @@ const initialState: State = {
     networkId: hubPoolChainId,
     desktopPosition: "topRight",
   }),
+  onboard: onboardInit(),
 };
 
 const connectionSlice = createSlice({

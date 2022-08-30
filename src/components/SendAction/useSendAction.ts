@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useSendForm, useBridgeFees, useBridge, useBridgeLimits } from "hooks";
-import { onboard, confirmations } from "utils";
+import { confirmations } from "utils";
 import { Deposit } from "views/Confirmation";
 import { useConnection } from "state/hooks";
 
 export default function useSendAction(
   onDepositConfirmed: (deposit: Deposit) => void
 ) {
-  const { init } = onboard;
   const [isInfoModalOpen, setOpenInfoModal] = useState(false);
   const [txPending, setTxPending] = useState(false);
   const toggleInfoModal = () => setOpenInfoModal((oldOpen) => !oldOpen);
@@ -20,7 +19,7 @@ export default function useSendAction(
     toChain
   );
   const { status, hasToApprove, send, approve } = useBridge();
-  const { account } = useConnection();
+  const { account, connect } = useConnection();
   const [txHash, setTxHash] = useState("");
 
   const handleActionClick = async () => {
@@ -93,7 +92,7 @@ export default function useSendAction(
   const isWETH = tokenSymbol === "WETH";
 
   return {
-    init,
+    connect,
     fromChain,
     toChain,
     amount,

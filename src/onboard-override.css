@@ -1,143 +1,15 @@
-/* Onboard custom CSS */
-.bn-onboard-custom.bn-onboard-modal {
-  background: rgba(0, 0, 0, 0.9);
-}
-.bn-onboard-custom .bn-onboard-modal-content {
-  background-color: var(--color-primary);
-  color: var(--color-gray);
-  border-radius: 12px;
-  padding: 1rem 1rem 0;
-}
 
-.bn-onboard-custom .bn-onboard-modal-select-wallets {
-  border-radius: 48px;
-  color: var(--color-white);
-  margin: 1.25rem 0 0.67rem !important;
-}
-
-.bn-onboard-custom.bn-onboard-icon-button span {
-  margin-left: 25px;
-}
-@media (min-width: 34.375rem) {
-  .bn-onboard-custom .bn-onboard-modal-select-wallets {
-    width: auto;
-  }
-  .bn-onboard-custom.bn-onboard-icon-button span {
-    margin-left: 18%;
-    display: block;
-    text-align: center;
-  }
-}
-
-.bn-onboard-custom .bn-onboard-modal-content-header-icon {
-  display: none;
-}
-
-.bn-onboard-custom .bn-onboard-modal-content-header-heading {
-  visibility: hidden;
-  margin-bottom: -1rem !important;
-}
-
-.bn-onboard-custom .bn-onboard-modal-content-header-heading::before {
-  content: "Choose wallet provider";
-  visibility: visible;
-}
-
-.bn-onboard-custom .bn-onboard-icon-button {
-  margin: 12px 0;
-}
-
-.bn-onboard-custom .bn-onboard-select-description {
-  display: none;
-}
-
-.bn-onboard-custom .bn-onboard-select-wallet-info {
-  display: none;
-}
-
-.bn-onboard-custom .bn-onboard-modal-content-close {
-  height: 35px;
-}
-
-.bn-onboard-custom .bn-onboard-modal-content-close:hover {
-  background-color: var(--color-primary);
-  cursor: pointer;
-}
-
-.bn-onboard-custom .bn-onboard-modal-content-close svg {
-  height: 16px;
-  width: 16px;
-}
-.bn-onboard-custom .bn-onboard-modal-content-close svg path {
-  fill: var(--color-gray);
-}
-
-.bn-onboard-custom.bn-onboard-icon-button {
-  height: 50px;
-}
-
-.bn-onboard-custom.bn-onboard-modal-select-wallets {
-  width: 100%;
-  display: inline-block !important;
-  text-align: center;
-}
-
-.bn-onboard-custom.bn-onboard-modal-select-wallets ul li {
-  width: 100%;
-}
-
-.bn-onboard-custom.bn-onboard-modal-select-wallets li {
-  background-color: var(--color-gray);
-}
-
-@media screen and (min-width: 768px) {
-  .bn-onboard-custom.bn-onboard-modal-select-wallets li {
-    border-radius: 40px;
-  }
-}
-
-.bn-onboard-custom.bn-onboard-icon-button span {
-  margin-left: 18%;
-  display: block;
-  text-align: center;
-}
-
-.bn-onboard-custom.bn-onboard-icon-button div {
-  margin-left: 8px;
-}
-
-.bn-notify-custom.bn-notify-notifications {
-  font-family: "Barlow";
-  border-radius: 5px !important;
-}
-
-.bn-notify-custom.bn-notify-notification-status-icon g circle,
-.bn-notify-custom.bn-notify-notification-status-icon g g {
-  stroke: var(--color-gray) !important;
-}
-.bn-onboard-custom .bn-onboard-modal-content-close {
-  top: 1rem;
-}
-
-.bn-notify-custom.bn-notify-notification-info {
-  font-family: "Barlow";
-}
-
-.bn-notify-custom.bn-notify-notification-info-message {
-  font-weight: 500;
-  color: var(--color-gray);
-}
-
-.bn-notify-custom.bn-notify-notification-close-icon {
-  opacity: 0.8;
-}
-
-.bn-notify-custom.bn-notify-notification-close-icon svg {
-  margin-top: 4px;
-  opacity: 0.8;
-}
-
-.bn-notify-custom.bn-notify-notification-close-icon svg g {
-  stroke: var(--color-gray);
-  margin-top: 4px;
+/* Override root variables to style the Onboard modal */
+:root {
+  --onboard-connect-header-background: #34353b;
+  --onboard-connect-header-color: #e0f3ff;
+  --onboard-connect-sidebar-color: #e0f3ff;
+  --onboard-connect-sidebar-background: #2d2e33;
+  --onboard-modal-background: #34353b;
+  --onboard-wallet-button-background: var(--color-primary);
+  --onboard-wallet-app-icon-border-color: none;
+  --onboard-main-scroll-container-background: #34353b;
+  --onboard-close-button-color:#2d2e33;
+  --onboard-close-button-background:var(--color-primary);
+  --onboard-font-family-normal: "Barlow";
 }

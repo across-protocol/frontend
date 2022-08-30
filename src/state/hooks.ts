@@ -5,38 +5,41 @@ import { ethers } from "ethers";
 import { bindActionCreators } from "redux";
 import { ChainId, getConfig, Token } from "utils";
 import type { RootState, AppDispatch } from "./";
-import { update, disconnect, error as errorAction } from "./connection";
 
 import chainApi from "./chainApi";
 import { add } from "./transactions";
+import { useOnboard } from "hooks/useOnboard";
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function useConnection() {
-  const { account, ensName, signer, provider, error, chainId, notify } =
-    useAppSelector((state) => state.connection);
-
-  const dispatch = useAppDispatch();
-  const actions = useMemo(
-    () => bindActionCreators({ update, disconnect, errorAction }, dispatch),
-    [dispatch]
-  );
-
-  const isConnected = !!chainId && !!signer && !!account;
-  return {
+  const {
+    provider,
+    signer,
+    isConnected,
+    connect,
+    disconnect,
+    notify,
     account,
-    ensName,
+    chainId,
+    wallet,
+    error,
+  } = useOnboard();
+
+  return {
+    account: account?.address,
+    ensName: account?.ens,
     chainId,
     provider,
     signer,
-    error,
     isConnected,
-    setUpdate: actions.update,
-    disconnect: actions.disconnect,
-    setError: actions.errorAction,
     notify,
+    connect,
+    disconnect,
+    error,
+    wallet,
   };
 }
 

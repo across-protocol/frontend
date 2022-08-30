@@ -26,12 +26,11 @@ import {
   RewardsInfo,
 } from "./RewardReferral.styles";
 
-import { onboard, shortenAddress } from "utils";
+import { shortenAddress } from "utils";
 import { ReferralsSummary } from "hooks/useReferralSummary";
 import { PopperTooltip } from "../../../../components/Tooltip";
 import StepperWithTooltips from "../StepperWithTooltips";
-
-const { init } = onboard;
+import { useConnection } from "state/hooks";
 
 interface Props {
   isConnected: boolean;
@@ -72,6 +71,7 @@ const ReferralLinkComponent: React.FC<{
   isConnected: boolean;
   referrer: string | undefined;
 }> = ({ isConnected, referrer }) => {
+  const { connect } = useConnection();
   const [showCheck, setShowCheck] = useState(false);
   const referralUrl = useMemo(() => {
     if (referrer) {
@@ -119,7 +119,7 @@ const ReferralLinkComponent: React.FC<{
         <ReferralLinkButtonsRow>
           <ConnectButton
             size="md"
-            onClick={() => init()}
+            onClick={() => connect()}
             data-cy="connect-wallet"
           >
             Connect to get started
