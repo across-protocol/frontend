@@ -1,6 +1,11 @@
 import { useConnection } from "state/hooks";
 import { useEffect, useState } from "react";
-import { BASIS_SHIFT, formattedBigNumberToNumber, getConfig } from "utils";
+import {
+  BASIS_SHIFT,
+  formattedBigNumberToNumber,
+  formatUnitsFnBuilder,
+  getConfig,
+} from "utils";
 import { useStakingPoolResolver } from "./useStakingPoolResolver";
 import { BigNumber, BigNumberish, providers } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
@@ -20,6 +25,8 @@ type ResolvedDataType =
       elapsedTimeSinceAvgDeposit: number;
       usersMultiplierPercentage: number;
       usersTotalLPTokens: BigNumberish;
+      shareOfPool: BigNumberish;
+      lpTokenFormatter: (wei: BigNumberish) => string;
     }
   | undefined;
 
@@ -89,6 +96,7 @@ const resolveRequestedData = async (
       averageDepositTime,
     },
     availableLPTokenBalance,
+    lpTokenDecimalCount,
     lpTokenSymbolName,
   ] = await Promise.all([
     acceleratingDistributor.stakingTokens(lpTokenAddress) as Promise<{
@@ -107,6 +115,7 @@ const resolveRequestedData = async (
       rewardsOutstanding: BigNumber;
     }>,
     lpTokenERC20.balanceOf(account),
+    lpTokenERC20.decimals(),
     Promise.resolve((await lpTokenERC20.symbol()).slice(4)),
   ]);
 
@@ -122,6 +131,14 @@ const resolveRequestedData = async (
 
   const usersTotalLPTokens = availableLPTokenBalance.add(userAmountOfLPStaked);
 
+  const shareOfPool = userAmountOfLPStaked
+    .add("10")
+    .mul(BASIS_SHIFT)
+    .div(globalAmountOfLPStaked.add("1050"))
+    .mul(100);
+
+  const lpTokenFormatter = formatUnitsFnBuilder(lpTokenDecimalCount);
+
   return {
     lpTokenAddress,
     acrossTokenAddress,
@@ -136,5 +153,7 @@ const resolveRequestedData = async (
     lpTokenSymbolName,
     usersMultiplierPercentage,
     usersTotalLPTokens,
+    shareOfPool,
+    lpTokenFormatter,
   };
 };

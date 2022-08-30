@@ -84,6 +84,13 @@ export function formatUnits(
   return smallNumberFormatter(value);
 }
 
+export function formatUnitsFnBuilder(decimals: number) {
+  function closure(wei: ethers.BigNumberish) {
+    return formatUnits(wei, decimals);
+  }
+  return closure;
+}
+
 export function formatEther(wei: ethers.BigNumberish): string {
   return formatUnits(wei, 18);
 }

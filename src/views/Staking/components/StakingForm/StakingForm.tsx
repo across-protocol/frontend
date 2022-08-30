@@ -40,6 +40,8 @@ export const StakingForm = ({
   ageOfCapital,
   availableLPTokenBalance,
   globalCumulativeStake,
+  shareOfPool,
+  lpTokenFormatter: formatLPToken,
 }: StakingFormPropType) => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
@@ -47,7 +49,7 @@ export const StakingForm = ({
 
   const buttonHandler = isConnected ? () => {} : walletConnectionHandler;
   const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
-  const buttonMaxValue = formatEther(
+  const buttonMaxValue = formatLPToken(
     activeTab === "stake" ? availableLPTokenBalance : userCumulativeStake
   );
   const ArrowIcon = isPoolInfoVisible ? ArrowIconDown : ArrowIconUp;
@@ -103,9 +105,9 @@ export const StakingForm = ({
             {valueOrEmpty(
               <div>
                 <LightGrayItemText margin={4}>
-                  {formatEther(userCumulativeStake)} /
+                  {formatLPToken(userCumulativeStake)} /
                 </LightGrayItemText>
-                {formatEther(usersTotalLPTokens)} {lpTokenName}
+                {formatLPToken(usersTotalLPTokens)} {lpTokenName}
               </div>
             )}
           </StakeInfoItem>
@@ -209,7 +211,9 @@ export const StakingForm = ({
             <StakeInfoItem>Share of pool</StakeInfoItem>
             <StakeInfoItem>
               {valueOrEmpty(
-                <LightGrayItemText margin={4}>0.029%</LightGrayItemText>
+                <LightGrayItemText margin={4}>
+                  {formatEther(shareOfPool)}%
+                </LightGrayItemText>
               )}
             </StakeInfoItem>
           </StakeInfoRow>

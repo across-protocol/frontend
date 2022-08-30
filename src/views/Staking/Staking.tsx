@@ -40,6 +40,7 @@ const Staking = () => {
         <StakingForm
           isConnected={isConnected}
           walletConnectionHandler={connectWalletHandler}
+          lpTokenFormatter={stakingData?.lpTokenFormatter ?? (() => "0")}
           lpTokenName={stringTernary(stakingData?.lpTokenSymbolName)}
           usersTotalLPTokens={numericTernary(stakingData?.usersTotalLPTokens)}
           userCumulativeStake={numericTernary(
@@ -58,6 +59,7 @@ const Staking = () => {
           availableLPTokenBalance={numericTernary(
             stakingData?.availableLPTokenBalance
           )}
+          shareOfPool={numericTernary(stakingData?.shareOfPool)}
         />
         <StakingReward
           maximumClaimableAmount={numericTernary(

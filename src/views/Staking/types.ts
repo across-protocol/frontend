@@ -32,4 +32,6 @@ export type StakingFormPropType = GenericStakingComponentProps & {
   currentMultiplier: BigNumberish;
   usersTotalLPTokens: BigNumberish;
   availableLPTokenBalance: BigNumberish;
+  shareOfPool: BigNumberish;
+  lpTokenFormatter: (wei: BigNumberish) => string;
 };
