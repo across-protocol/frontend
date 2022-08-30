@@ -109,6 +109,7 @@ export const StakeInfoRow = styled.div`
 `;
 
 export const StakeAPYInfoRow = styled(StakeInfoRow)`
+  cursor: pointer;
   @media ${QUERIESV2.sm} {
     flex-direction: row;
     width: fit-content;

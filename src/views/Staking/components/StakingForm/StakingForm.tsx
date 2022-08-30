@@ -43,7 +43,7 @@ export const StakingForm = ({
   globalCumulativeStake,
 }: StakingFormPropType) => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
-  const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(true);
+  const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
   const [stakeAmount, setStakeAmount] = useState("");
 
   const buttonHandler = isConnected ? () => {} : walletConnectionHandler;
@@ -158,16 +158,14 @@ export const StakingForm = ({
           </StakeInfoItemSmall>
         </StakeInfoRow>
         <Divider />
-        <StakeAPYInfoRow>
+        <StakeAPYInfoRow
+          onClick={() => {
+            setIsPoolInfoVisible((value) => !value);
+          }}
+        >
           <StakeInfoItem>
             <APYInfoItem>
-              <ArrowDiv
-                onClick={() => {
-                  setIsPoolInfoVisible((value) => !value);
-                }}
-              >
-                <ArrowIcon />
-              </ArrowDiv>
+              <ArrowIcon />
               Your total APY
             </APYInfoItem>
           </StakeInfoItem>
