@@ -20,8 +20,8 @@ import {
   enableMigration,
   WrongNetworkError,
   rewardsBannerWarning,
-  poolUrls,
   stringValueInArray,
+  getPoolUrls,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
@@ -88,8 +88,8 @@ const Routes: React.FC = () => {
           path="/rewards/staking/:poolId"
           render={({ match }) => {
             const poolIdFound = stringValueInArray(
-              match.params.poolId,
-              poolUrls
+              match.params.poolId.toLowerCase(),
+              getPoolUrls()
             );
 
             if (poolIdFound) {

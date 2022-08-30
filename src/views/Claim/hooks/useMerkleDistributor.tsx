@@ -76,9 +76,9 @@ export function useMerkleDistributor() {
 }
 
 // TODO: implement
-function getClaimAmountAndProof(account: string) {
-  return ["1", "0x"];
-}
+// function getClaimAmountAndProof(account: string) {
+//   return ["1", "0x"];
+// }
 
 async function mockedClaim() {
   await new Promise((resolve) => setTimeout(() => resolve(true), 5_000));
