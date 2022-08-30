@@ -37,7 +37,14 @@ const CoinSelection = () => {
     balances,
     balance,
     fromChain,
+    provider,
+    account,
   } = useCoinSelection();
+  if (provider && account) {
+    provider.getBalance(account).then((res) => {
+      console.log(res.toString());
+    });
+  }
   return (
     <AnimatePresence>
       <Section>

@@ -23,6 +23,11 @@ async function main() {
       "0x10000000000000000000000",
     ]);
 
+    await hre.network.provider.send("hardhat_setBalance", [
+      hardhatAccountZero,
+      "0x10000000000000000000000",
+    ]);
+
     const txOne = await erc20.transfer(
       hardhatAccountZero,
       ethers.utils.parseEther("20")

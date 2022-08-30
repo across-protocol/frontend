@@ -13,6 +13,12 @@ module.exports = {
       hardfork: "london",
       gasPrice: "auto",
       initialBaseFeePerGas: 1_000_000_000,
+      chainId: 1,
+      accounts: {
+        hardhatAccountZero: {
+          balance: "0x10000000000000000000000000",
+        },
+      },
     },
   },
 };

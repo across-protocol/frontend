@@ -2,7 +2,7 @@
 describe("Fund UMA to test wallet", () => {
   it("Seeds tokens to accounts", () => {
     cy.exec(
-      "HARDHAT_NETWORK=localhost node ./hardhat-scripts/seedUmaToAccounts.js"
+      "HARDHAT_NETWORK=localhost node ./hardhat-scripts/seedAccount.js"
     ).then((res) => {
       // Should be no error.
       expect(res.stderr).to.eq("");
