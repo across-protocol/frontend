@@ -9,6 +9,7 @@ import {
   Rewards,
   Staking,
   Claim,
+  NotFound,
 } from "views";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
 import { useConnection } from "state/hooks";
@@ -81,7 +82,8 @@ const Routes: React.FC = () => {
         <Route exact path="/rewards" component={Rewards} />
         <Route exact path="/airdrop" component={Claim} />
         <Route exact path="/rewards/staking/:poolId" component={Staking} />
-        <Route path="/" component={Send} />
+        <Route exact path="/" component={Send} />
+        <Route path="*" component={NotFound} />
       </Switch>
       <Toast position="top-right" />
     </>

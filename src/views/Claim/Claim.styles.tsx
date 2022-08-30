@@ -4,12 +4,13 @@ import { ButtonV2 } from "components";
 import { QUERIESV2 } from "utils/constants";
 
 export const PageContainer = styled.div`
+  background-color: #2d2e33;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: calc(100% - 72px);
+  min-height: calc(100vh - 72px);
   @media (max-width: 428px) {
-    min-height: calc(100% - 64px);
+    min-height: calc(100vh - 64px);
   }
 `;
 
@@ -20,9 +21,13 @@ export const BodyContainer = styled.div`
   width: 100%;
   margin: 64px auto;
 
-  @media ${QUERIESV2.sm} {
+  @media (max-width: 630px) {
     padding-left: 16px;
     padding-right: 16px;
+  }
+
+  @media ${QUERIESV2.sm} {
+    margin: 48px auto;
   }
 
   h1,
@@ -99,4 +104,11 @@ export const Button = styled(ButtonV2)`
     line-height: ${20 / 16}rem;
     padding: 10px 20px;
   }
+`;
+
+export const FullWidthButton = styled(Button)`
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
 `;
