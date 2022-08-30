@@ -8,8 +8,8 @@
   --onboard-modal-background: #34353b;
   --onboard-wallet-button-background: var(--color-primary);
   --onboard-wallet-app-icon-border-color: none;
-  /* --onboard-wallet-button-background-hover: var(--color-primary); */
   --onboard-main-scroll-container-background: #34353b;
   --onboard-close-button-color:#2d2e33;
   --onboard-close-button-background:var(--color-primary);
+  --onboard-font-family-normal: "Barlow";
 }
