@@ -79,7 +79,7 @@ const Routes: React.FC = () => {
             Arbitrum Nitro upgrade. Once the upgrade is over, these routes will
             be re-enabled. Note:{" "}
             <a
-              href="https://twitter.com/arbitrum/status/1564370880880381952?s=20&t=xQLXaObGP5RDF78D966FHw"
+              href="https://twitter.com/arbitrum/status/1564370880880381952"
               target="_blank"
               rel="noreferrer"
             >
