@@ -29,7 +29,7 @@ export function useConnection() {
   } = useOnboard();
 
   return {
-    account: account?.address,
+    account: account ? ethers.utils.getAddress(account.address) : undefined,
     ensName: account?.ens,
     chainId,
     provider,
