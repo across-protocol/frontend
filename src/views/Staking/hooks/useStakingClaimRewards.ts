@@ -1,6 +1,6 @@
 import { useConnection } from "state/hooks";
 import { useEffect, useState } from "react";
-import { getConfig } from "utils";
+import { BASIS_SHIFT, formattedBigNumberToNumber, getConfig } from "utils";
 import { useStakingPoolResolver } from "./useStakingPoolResolver";
 import { BigNumber, BigNumberish, providers } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
@@ -112,12 +112,13 @@ const resolveRequestedData = async (
 
   // Average Deposit Time retrieves the # seconds since the last deposit, weighted
   // by all the deposits in a user's account.
-  const daysElapsed = averageDepositTime.toNumber() / 86400;
+  const daysElapsed = formattedBigNumberToNumber(
+    averageDepositTime.add("10500").mul(BASIS_SHIFT).div(86400)
+  );
 
-  const usersMultiplierPercentage = currentUserRewardMultiplier
-    .mul(100)
-    .div(maxMultiplier)
-    .toNumber();
+  const usersMultiplierPercentage = formattedBigNumberToNumber(
+    currentUserRewardMultiplier.mul(BASIS_SHIFT).div(maxMultiplier).mul(100)
+  );
 
   const usersTotalLPTokens = availableLPTokenBalance.add(userAmountOfLPStaked);
 

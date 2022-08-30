@@ -14,6 +14,7 @@ import { relayFeeCalculator } from "@across-protocol/sdk-v2";
 import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import GoerliRoutes from "data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
+import { parseEther } from "./format";
 
 /* Chains and Tokens section */
 export enum ChainId {
@@ -697,6 +698,8 @@ const getQueriesTable = () => {
       ),
   };
 };
+
+export const BASIS_SHIFT = parseEther("1.0");
 
 export const queriesTable = getQueriesTable();
 

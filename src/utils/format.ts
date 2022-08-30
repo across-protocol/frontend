@@ -1,4 +1,4 @@
-import { BigNumberish, ethers } from "ethers";
+import { BigNumber, BigNumberish, ethers } from "ethers";
 import assert from "assert";
 
 export function isValidString(s: string | null | undefined | ""): s is string {
@@ -111,6 +111,19 @@ export function isNumberEthersParseable(amount: BigNumberish): boolean {
     return true;
   } catch (_e) {
     return false;
+  }
+}
+
+/**
+ * Returns the formatted number version of a BigNumber value
+ * @param value A bignumber to be converted via `formatEther` and returned
+ * @returns `formatEther(value)` as a Number, or NaN if impossible
+ */
+export function formattedBigNumberToNumber(value: BigNumber): number {
+  try {
+    return Number(formatEther(value));
+  } catch (_e) {
+    return Number.NaN;
   }
 }
 
