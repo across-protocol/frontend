@@ -21,7 +21,7 @@ import {
   WrongNetworkError,
   rewardsBannerWarning,
   stringValueInArray,
-  getPoolUrls,
+  getConfig,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
@@ -32,6 +32,7 @@ function useRoutes() {
   const location = useLocation();
   const history = useHistory();
   const { error, removeError } = useError();
+  const config = getConfig();
   // force the user on /pool page if showMigrationPage is active.
   useEffect(() => {
     if (enableMigration && location.pathname !== "/pool") {
@@ -46,11 +47,12 @@ function useRoutes() {
     error,
     removeError,
     location,
+    config,
   };
 }
 // Need this component for useLocation hook
 const Routes: React.FC = () => {
-  const { openSidebar, setOpenSidebar, error, removeError, location } =
+  const { openSidebar, setOpenSidebar, error, removeError, location, config } =
     useRoutes();
   return (
     <>
@@ -89,7 +91,7 @@ const Routes: React.FC = () => {
           render={({ match }) => {
             const poolIdFound = stringValueInArray(
               match.params.poolId.toLowerCase(),
-              getPoolUrls()
+              config.getPoolSymbols()
             );
 
             if (poolIdFound) {

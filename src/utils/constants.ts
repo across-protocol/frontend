@@ -15,8 +15,6 @@ import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import GoerliRoutes from "data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
 
-import { getConfig } from "./config";
-
 /* Chains and Tokens section */
 export enum ChainId {
   MAINNET = 1,
@@ -707,11 +705,6 @@ export const usdcLpCushion = process.env.REACT_APP_USDC_LP_CUSHION || "0";
 export const wethLpCushion = process.env.REACT_APP_WETH_LP_CUSHION || "0";
 export const wbtcLpCushion = process.env.REACT_APP_WBTC_LP_CUSHION || "0";
 export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
-
-export function getPoolUrls() {
-  const config = getConfig();
-  return config.getPoolSymbols();
-}
 
 export function stringValueInArray(value: string, arr: string[]) {
   return arr.indexOf(value) !== -1;
