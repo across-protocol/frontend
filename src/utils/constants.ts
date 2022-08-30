@@ -710,9 +710,7 @@ export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
 
 export function getPoolUrls() {
   const config = getConfig();
-  const tokenList = config.getTokenList(1);
-  const poolUrls = tokenList.map((token) => token.symbol.toLowerCase());
-  return poolUrls;
+  return config.getPoolSymbols();
 }
 
 export function stringValueInArray(value: string, arr: string[]) {

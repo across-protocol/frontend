@@ -193,6 +193,11 @@ export class ConfigClient {
     // use token sorting when returning reachable tokens
     return sortBy(reachableTokens, (token) => this.tokenOrder[token.symbol]);
   }
+  getPoolSymbols(): string[] {
+    const tokenList = this.getTokenList(1);
+    const poolSymbols = tokenList.map((token) => token.symbol.toLowerCase());
+    return poolSymbols;
+  }
 }
 
 // singleton
