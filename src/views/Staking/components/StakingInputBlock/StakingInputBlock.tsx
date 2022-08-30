@@ -5,9 +5,11 @@ import {
   ButtonWrapper,
   StakeButton,
   MaxButton,
+  Wrapper,
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
 import { StylizedSVG } from "../../types";
+import { AlertInfo } from "../StakingReward/AlertInfo";
 
 interface Props {
   value: string;
@@ -19,6 +21,7 @@ interface Props {
   omitInput?: boolean;
   onClickHandler: () => void;
   displayLoader?: boolean;
+  errorMessage?: string;
 }
 
 const StakingInputBlock: React.FC<Props> = ({
@@ -31,39 +34,44 @@ const StakingInputBlock: React.FC<Props> = ({
   displayLoader,
   omitInput,
   onClickHandler,
+  errorMessage,
 }) => {
   return (
-    <InputRow>
-      {!omitInput && (
-        <InputWrapper>
-          <Logo />
-          <Input
-            placeholder="Enter amount"
-            value={value}
-            type="text"
-            onChange={(e) => setValue(e.target.value)}
-            valid={!value || valid}
-            disabled={displayLoader}
-          />
-          <MaxButton
-            disabled={displayLoader}
-            onClick={() => setValue(maxValue ?? "")}
+    <Wrapper>
+      <InputRow>
+        {!omitInput && (
+          <InputWrapper valid={!value || valid}>
+            <Logo />
+            <Input
+              placeholder="Enter amount"
+              value={value}
+              type="text"
+              onChange={(e) => setValue(e.target.value)}
+              disabled={displayLoader}
+            />
+            <MaxButton
+              disabled={displayLoader}
+              onClick={() => setValue(maxValue ?? "")}
+            >
+              Max
+            </MaxButton>
+          </InputWrapper>
+        )}
+        <ButtonWrapper>
+          <StakeButton
+            valid={valid}
+            fullWidth={omitInput}
+            onClick={onClickHandler}
+            disabled={!valid || displayLoader}
           >
-            Max
-          </MaxButton>
-        </InputWrapper>
+            {capitalizeFirstLetter(buttonText)}
+          </StakeButton>
+        </ButtonWrapper>
+      </InputRow>
+      {!!value && !valid && !!errorMessage && (
+        <AlertInfo danger>{errorMessage}</AlertInfo>
       )}
-      <ButtonWrapper>
-        <StakeButton
-          valid={valid}
-          fullWidth={omitInput}
-          onClick={onClickHandler}
-          disabled={!valid || displayLoader}
-        >
-          {capitalizeFirstLetter(buttonText)}
-        </StakeButton>
-      </ButtonWrapper>
-    </InputRow>
+    </Wrapper>
   );
 };
 

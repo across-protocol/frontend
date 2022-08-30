@@ -1,11 +1,16 @@
 import styled from "@emotion/styled";
-import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 import ProgressBar from "components/ProgressBar";
 import { ReactComponent as UnstyedUsdcLogo } from "assets/icons/usdc-24.svg";
 import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
+import {
+  Card as ExternalCard,
+  Divider as ExternalDivider,
+} from "../../Staking.styles";
 
 import { QUERIESV2 } from "utils";
+
+export const Card = styled(ExternalCard)``;
 
 export const Wrapper = styled.div`
   display: flex;
@@ -16,19 +21,17 @@ export const Wrapper = styled.div`
   border: 1px solid #3e4047;
   border-radius: 10px;
   box-sizing: border-box;
-  @media ${QUERIESV2.sm} {
-    width: calc(100% - 24px);
-    margin: 0 auto;
-  }
 `;
 
 export const Tabs = styled.div`
   display: flex;
   justify-content: center;
-  width: calc(100% - 48px);
-  margin: 0 auto 24px;
+  width: 100%;
+  margin: 0 auto 0px;
   justify-items: center;
 `;
+
+export const Divider = ExternalDivider;
 
 interface ITab {
   active: boolean;
@@ -48,19 +51,6 @@ export const Tab = styled.div<ITab>`
   cursor: pointer;
 `;
 
-export const InputRow = styled.div`
-  display: flex;
-  width: calc(100% - 48px);
-  margin: 0 auto;
-  gap: 16px;
-  border-bottom: 1px solid #3e4047;
-  padding-bottom: 24px;
-  flex-direction: row;
-  @media ${QUERIESV2.sm} {
-    flex-direction: column;
-  }
-`;
-
 export const UsdcLogo = styled(UnstyedUsdcLogo)``;
 
 export const InputWrapper = styled.div`
@@ -68,135 +58,80 @@ export const InputWrapper = styled.div`
   position: relative;
 `;
 
-export const Input = styled.input`
-  height: 64px;
-  padding: 9px 64px;
-  width: 100%;
-  background: #2d2e33;
-  border: 1px solid #4c4e57;
-  border-radius: 32px;
-  color: #e0f3ff;
-`;
-
-export const MaxButton = styled(UnstyledButton)`
-  height: 24px;
-  font-family: "Barlow";
-  font-style: normal;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 14px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #c5d5e0;
-  position: absolute;
-  right: 24px;
-  top: 20px;
-  padding: 8px 10px 10px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid #4c4e57;
-  border-radius: 24px;
-  &:hover {
-    color: #e0f3ff;
-    border-color: #e0f3ff;
-  }
-`;
-
-export const ButtonWrapper = styled.div`
-  flex-grow: 1;
-`;
-
-interface IStakeButton {
-  valid: boolean;
-}
-export const StakeButton = styled(UnstyledButton)<IStakeButton>`
-  background: #6cf9d8;
-  padding: 0px 40px;
-  height: 64px;
-  color: #2d2e33;
-  opacity: ${({ valid }) => (valid ? 1 : 0.25)};
-  @media ${QUERIESV2.sm} {
-    text-align: center;
-    width: 100%;
-    height: 40px;
-    padding: 0px 20px;
-    border-radius: 20px;
-  }
-`;
-
 export const StakeInfo = styled.div`
   display: flex;
-  justify-content: space-between;
-  padding-bottom: 16px;
-  flex-wrap: wrap;
-  width: calc(100% - 48px);
-  border-bottom: 1px solid #3e4047;
-
-  @media (max-width: 568px) {
-    flex-direction: column;
-  }
-
-  @media (max-width: 428px) {
-    padding: 4px 0 0;
-  }
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
 `;
 
 export const StakeInfoItem = styled.div`
   display: flex;
   align-items: center;
-  padding-top: 12px;
-  width: 40%;
-  color: #9daab2;
   font-size: ${16 / 16}rem;
   line-height: ${20 / 16}rem;
   font-weight: 400;
 
+  width: 100%;
+  color: #9daab2;
+
+  justify-content: start;
   &:nth-of-type(2n) {
-    width: 60%;
     justify-content: flex-end;
-    color: #e0f3ff;
   }
 
-  @media (max-width: 568px) {
-    width: 100% !important;
-
+  @media ${QUERIESV2.sm} {
     &:nth-of-type(2n) {
-      flex-direction: row-reverse;
-      padding-top: 4px;
+      justify-content: start;
     }
-
-    &:nth-of-type(2n + 1) {
-      padding-top: 16px;
-    }
-  }
-
-  @media (max-width: 428px) {
     font-size: ${14 / 16}rem;
-    line-height: ${18 / 16}rem;
+    flex-shrink: 0;
+    width: fit-content;
+  }
+`;
+
+export const StakeInfoRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex-shrink: 0;
+
+  @media ${QUERIESV2.sm} {
+    flex-direction: column;
+    gap: 6px;
+  }
+`;
+
+export const StakeAPYInfoRow = styled(StakeInfoRow)`
+  @media ${QUERIESV2.sm} {
+    flex-direction: row;
+    width: fit-content;
+    gap: 12px;
+    & > {
+      width: fit-content;
+    }
   }
 `;
 
 export const LightGrayItemText = styled.span<{ margin?: number }>`
-  color: #9daab2;
-  margin: ${({ margin }) => (margin ? `0 ${margin}px` : 0)};
+  color: #e0f3ff;
+  margin-right: ${({ margin }) => (margin ? `${margin}px` : 0)};
 `;
 
 export const StakeInfoItemSmall = styled(StakeInfoItem)`
   font-size: ${14 / 16}rem;
-  width: 80%;
+
+  @media ${QUERIESV2.sm} {
+    font-size: ${12 / 16}rem;
+  }
 `;
 
 interface IStyledProgressBar {
   className?: string;
 }
 export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
-  max-width: 60px;
-  margin-right: 7px;
+  width: 80px;
   height: 14px;
   margin-top: 5px;
-  padding-right: 4px;
   > div {
     height: 8px;
   }
@@ -204,10 +139,9 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
 
 export const MutliplierValue = styled.div`
   font-weight: 400;
-  font-size: 1rem;
+  gap: 12px;
   color: #e0f3ff;
   display: inline-flex;
-  flex-grow: 2;
   justify-content: flex-end;
   @media ${QUERIESV2.sm} {
     justify-content: flex-start;
@@ -224,17 +158,7 @@ export const APYInfo = styled(StakeInfo)`
 `;
 
 export const APYInfoItem = styled(StakeInfoItem)`
-  padding-top: 0;
   color: #c5d5e0;
-  @media ${QUERIESV2.sm} {
-    &:nth-of-type(2n) {
-      padding-top: 0;
-    }
-    &:nth-of-type(2n + 1) {
-      padding-top: 0;
-    }
-    width: 40% !important;
-  }
 `;
 
 export const ArrowIcon = styled(UnstyledArrowIcon)`
@@ -251,8 +175,6 @@ export const InfoIcon = styled(II)`
 `;
 
 export const InputBlockWrapper = styled.div`
-  border-bottom: 1px solid #3e4047;
-  width: calc(100% - 48px);
+  width: 100%;
   margin: 0 auto;
-  padding-bottom: 24px;
 `;

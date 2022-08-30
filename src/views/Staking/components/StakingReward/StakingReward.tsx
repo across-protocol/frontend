@@ -6,7 +6,7 @@ import StakingInputBlock from "../StakingInputBlock";
 import { AlertInfo } from "./AlertInfo";
 import {
   Title,
-  Wrapper,
+  Card,
   InnerWrapper,
   Divider,
   StakingClaimAmountWrapper,
@@ -24,15 +24,9 @@ export const StakingReward = ({
   walletConnectionHandler,
 }: StakingRewardPropType) => {
   const [amountToClaim, setAmountToClaim] = useState("");
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isTransitioning] = useState(false);
 
-  const buttonHandler = isConnected
-    ? // Default do nothing
-      () => {
-        setIsTransitioning(true);
-      }
-    : walletConnectionHandler;
-
+  const buttonHandler = isConnected ? () => {} : walletConnectionHandler;
   const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
 
   const valueOrEmpty = repeatableTernaryBuilder(isConnected, <>-</>);
@@ -57,8 +51,17 @@ export const StakingReward = ({
     );
   };
 
+  // Stub
+  const errorMessage = (): string => {
+    if (isAmountExceeded(amountToClaim)) {
+      return "The amount entered exceeds your claimable amount";
+    } else {
+      return "";
+    }
+  };
+
   return (
-    <Wrapper>
+    <Card>
       <InnerWrapper>
         <Title>Rewards</Title>
       </InnerWrapper>
@@ -78,12 +81,8 @@ export const StakingReward = ({
           omitInput={!isConnected}
           onClickHandler={buttonHandler}
           displayLoader={isTransitioning}
+          errorMessage={errorMessage()}
         />
-        {isAmountExceeded(amountToClaim) && (
-          <AlertInfo danger>
-            The amount entered exceeds your claimable amount
-          </AlertInfo>
-        )}
       </StakingInputBlockWrapper>
       <InnerWrapper>
         <Divider />
@@ -101,7 +100,7 @@ export const StakingReward = ({
           )}
         </StakingClaimAmountWrapper>
       </InnerWrapper>
-    </Wrapper>
+    </Card>
   );
 };
 

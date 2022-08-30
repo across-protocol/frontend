@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Wrapper,
+  Card,
   Tabs,
   Tab,
   StakeInfo,
@@ -9,12 +9,14 @@ import {
   LightGrayItemText,
   MutliplierValue,
   StyledProgressBar,
-  APYInfo,
   APYInfoItem,
   ArrowIcon,
   UsdcLogo,
   InfoIcon,
+  Divider,
   InputBlockWrapper,
+  StakeInfoRow,
+  StakeAPYInfoRow,
 } from "./StakingForm.styles";
 
 import { PopperTooltip } from "components/Tooltip";
@@ -57,7 +59,7 @@ export const StakingForm = ({
   }, [activeTab]);
 
   return (
-    <Wrapper>
+    <Card>
       <Tabs>
         <Tab
           onClick={() => setActiveTab("stake")}
@@ -84,67 +86,80 @@ export const StakingForm = ({
           onClickHandler={buttonHandler}
         />
       </InputBlockWrapper>
+      <Divider />
       <StakeInfo>
-        <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
-        <StakeInfoItem>
-          {valueOrEmpty(
-            <div>
-              {formatEther(userCumulativeStake)}
-              <LightGrayItemText margin={4}>
-                / {formatEther(usersTotalLPTokens)} {lpTokenName}
-              </LightGrayItemText>
-            </div>
-          )}
-        </StakeInfoItem>
-        <StakeInfoItem>
-          Age of capital
-          <PopperTooltip
-            title="Age of capital"
-            body="The age of capital is the time since the last time you staked LP tokens."
-            placement="bottom-start"
-          >
-            <InfoIcon />
-          </PopperTooltip>
-        </StakeInfoItem>
-        <StakeInfoItem>
-          {valueOrEmpty(
-            <>
-              {ageOfCapital <= 0
-                ? "-"
-                : `${formatNumberMaxFracDigits(ageOfCapital)} Days`}
-            </>
-          )}
-        </StakeInfoItem>
-        <StakeInfoItem>
-          Multiplier
-          <PopperTooltip
-            title="Multiplier"
-            body="The multiplier is the amount of LP tokens you get for staking."
-            placement="bottom-start"
-          >
-            <InfoIcon />
-          </PopperTooltip>
-        </StakeInfoItem>
-        <StakeInfoItem>
-          {valueOrEmpty(
-            <MutliplierValue>
-              <StyledProgressBar percent={usersMultiplierPercentage} />
-              {formatEther(currentMultiplier)} x
-            </MutliplierValue>
-          )}
-        </StakeInfoItem>
-        <StakeInfoItemSmall>
-          Note: Multipliers of previously staked tokens are not impacted
-        </StakeInfoItemSmall>
+        <StakeInfoRow>
+          <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
+          <StakeInfoItem>
+            {valueOrEmpty(
+              <div>
+                <LightGrayItemText margin={4}>
+                  {formatEther(userCumulativeStake)} /
+                </LightGrayItemText>
+                {formatEther(usersTotalLPTokens)} {lpTokenName}
+              </div>
+            )}
+          </StakeInfoItem>
+        </StakeInfoRow>
+        <StakeInfoRow>
+          <StakeInfoItem>
+            Age of capital
+            <PopperTooltip
+              title="Age of capital"
+              body="The age of capital is the time since the last time you staked LP tokens."
+              placement="bottom-start"
+            >
+              <InfoIcon />
+            </PopperTooltip>
+          </StakeInfoItem>
+          <StakeInfoItem>
+            {valueOrEmpty(
+              <>
+                {ageOfCapital <= 0
+                  ? "-"
+                  : `${formatNumberMaxFracDigits(ageOfCapital)} Days`}
+              </>
+            )}
+          </StakeInfoItem>
+        </StakeInfoRow>
+        <StakeInfoRow>
+          <StakeInfoItem>
+            Multiplier
+            <PopperTooltip
+              title="Multiplier"
+              body="The multiplier is the amount of LP tokens you get for staking."
+              placement="bottom-start"
+            >
+              <InfoIcon />
+            </PopperTooltip>
+          </StakeInfoItem>
+          <StakeInfoItem>
+            {valueOrEmpty(
+              <MutliplierValue>
+                <StyledProgressBar percent={usersMultiplierPercentage} />
+                {formatEther(currentMultiplier)} x
+              </MutliplierValue>
+            )}
+          </StakeInfoItem>
+        </StakeInfoRow>
+        <StakeInfoRow>
+          <StakeInfoItemSmall>
+            Note: Multipliers of previously staked tokens are not impacted
+          </StakeInfoItemSmall>
+        </StakeInfoRow>
+        <StakeAPYInfoRow>
+          <StakeInfoItem>
+            <APYInfoItem>
+              <ArrowIcon />
+              Your total APY
+            </APYInfoItem>
+          </StakeInfoItem>
+          <StakeInfoItem>
+            {valueOrEmpty(<LightGrayItemText>2.81%</LightGrayItemText>)}
+          </StakeInfoItem>
+        </StakeAPYInfoRow>
       </StakeInfo>
-      <APYInfo>
-        <APYInfoItem>
-          <ArrowIcon />
-          Your total APY
-        </APYInfoItem>
-        <APYInfoItem>{valueOrEmpty(<>2.81%</>)}</APYInfoItem>
-      </APYInfo>
-    </Wrapper>
+    </Card>
   );
 };
 

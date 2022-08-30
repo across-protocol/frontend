@@ -547,7 +547,7 @@
     {
       "fromChain": 137,
       "toChain": 1,
-      "fromTokenAddress": "0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3",
+      "fromTokenAddress": "0x9a71012B13CA4d3D0Cdc72A177DF3ef03b0E76A3",
       "fromSpokeAddress": "0x69B5c72837769eF1e7C164Abc6515DcFf217F920",
       "fromTokenSymbol": "BAL",
       "isNative": false,
@@ -601,7 +601,7 @@
     {
       "fromChain": 137,
       "toChain": 10,
-      "fromTokenAddress": "0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3",
+      "fromTokenAddress": "0x9a71012B13CA4d3D0Cdc72A177DF3ef03b0E76A3",
       "fromSpokeAddress": "0x69B5c72837769eF1e7C164Abc6515DcFf217F920",
       "fromTokenSymbol": "BAL",
       "isNative": false,
@@ -700,7 +700,7 @@
     {
       "fromChain": 137,
       "toChain": 42161,
-      "fromTokenAddress": "0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3",
+      "fromTokenAddress": "0x9a71012B13CA4d3D0Cdc72A177DF3ef03b0E76A3",
       "fromSpokeAddress": "0x69B5c72837769eF1e7C164Abc6515DcFf217F920",
       "fromTokenSymbol": "BAL",
       "isNative": false,
@@ -989,7 +989,7 @@
     {
       "fromChain": 42161,
       "toChain": 1,
-      "fromTokenAddress": "0x040d1edc9569d4bab2d15287dc5a4f10f56a56b8",
+      "fromTokenAddress": "0x040d1EdC9569d4Bab2D15287Dc5A4F10F56a56B8",
       "fromSpokeAddress": "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
       "fromTokenSymbol": "BAL",
       "isNative": false,
@@ -1052,7 +1052,7 @@
     {
       "fromChain": 42161,
       "toChain": 10,
-      "fromTokenAddress": "0x040d1edc9569d4bab2d15287dc5a4f10f56a56b8",
+      "fromTokenAddress": "0x040d1EdC9569d4Bab2D15287Dc5A4F10F56a56B8",
       "fromSpokeAddress": "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
       "fromTokenSymbol": "BAL",
       "isNative": false,
@@ -1115,7 +1115,7 @@
     {
       "fromChain": 42161,
       "toChain": 137,
-      "fromTokenAddress": "0x040d1edc9569d4bab2d15287dc5a4f10f56a56b8",
+      "fromTokenAddress": "0x040d1EdC9569d4Bab2D15287Dc5A4F10F56a56B8",
       "fromSpokeAddress": "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
       "fromTokenSymbol": "BAL",
       "isNative": false,
