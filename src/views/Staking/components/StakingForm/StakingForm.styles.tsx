@@ -182,10 +182,6 @@ export const ArrowIconUp = styled(ArrowIconDown)`
   margin-bottom: -4px;
 `;
 
-export const ArrowDiv = styled.div`
-  cursor: pointer;
-`;
-
 export const InfoIcon = styled(II)`
   margin-left: 8px;
   cursor: pointer;
