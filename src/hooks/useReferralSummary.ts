@@ -29,7 +29,7 @@ const defaultReferralsSummary: ReferralsSummary = {
 };
 
 export function useReferralSummary(account?: string) {
-  const enabledQuery = account !== undefined;
+  const enabledQuery = account !== undefined && account !== "";
 
   const queryKey = enabledQuery
     ? referralSummaryQueryKey(account)
