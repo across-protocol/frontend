@@ -18,6 +18,7 @@ import {
   enableMigration,
   WrongNetworkError,
   rewardsBannerWarning,
+  arbitrumDisabled,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
@@ -71,6 +72,22 @@ const Routes: React.FC = () => {
           </span>
         </Banner>
       )}
+      {arbitrumDisabled && (
+        <SuperHeader>
+          <div>
+            Routes to and from Arbitrum are temporarily disabled due to the
+            Arbitrum Nitro upgrade. Once the upgrade is over, these routes will
+            be re-enabled. Note:{" "}
+            <a
+              href="https://twitter.com/arbitrum/status/1564370880880381952?s=20&t=xQLXaObGP5RDF78D966FHw"
+              target="_blank"
+              rel="noreferrer"
+            >
+              According to the Arbitrum team this process should last 2-4 hours.
+            </a>
+          </div>
+        </SuperHeader>
+      )}{" "}
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>

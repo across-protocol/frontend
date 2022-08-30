@@ -462,6 +462,8 @@ assert(
   isSupportedChainId(hubPoolChainId),
   "Hubpool chain is not supported: " + hubPoolChainId
 );
+
+export const arbitrumDisabled = process.env.REACT_APP_ARBITRUM_DISABLED;
 export function isSupportedChainId(chainId: number): chainId is ChainId {
   return chainId in ChainId;
 }
