@@ -18,6 +18,7 @@ import {
   TokenList,
   ChainInfo,
   ChainInfoList,
+  isSupportedChainId,
 } from "utils";
 
 import { usePrevious } from "hooks";
@@ -176,12 +177,12 @@ function amountReducer(state: FormState, amount: ethers.BigNumber): FormState {
 
 // this has highest priority, this drives the rest of the components when selected
 function fromChainReducer(state: FormState, chainId: ChainId): FormState {
+  if (!isSupportedChainId(chainId)) return state;
   const config = getConfig();
   let fromChain = chainId;
   // reset toChain
   let toChain = state.toChain;
   let tokenSymbol = state.tokenSymbol;
-
   // availble routes are all possible routes with this from chain selected
   const availableRoutes = config.filterRoutes({ fromChain });
   // selected routes are all possible chains given the users selection from chain and token symbol.
@@ -199,6 +200,7 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
   }
   // prioritize selected routes, otherwise use first available route
   const selectedRoute = selectedRoutes[0] || availableRoutes[0];
+  if (!selectedRoute) return state;
   fromChain = selectedRoute.fromChain;
   tokenSymbol = selectedRoute.fromTokenSymbol;
   toChain = selectedRoute.toChain;
@@ -234,6 +236,8 @@ function fromChainReducer(state: FormState, chainId: ChainId): FormState {
 
 // second priority
 function toChainReducer(state: FormState, chainId: ChainId): FormState {
+  if (!isSupportedChainId(chainId)) return state;
+
   const config = getConfig();
   let fromChain = state.fromChain;
   let tokenSymbol = state.tokenSymbol;
@@ -411,7 +415,14 @@ function useSendFormManager(): SendFormManagerContext {
         type: ActionType.SET_TO_ADDRESS,
         payload: getAddress(connectedAccount),
       });
+      if (isSupportedChainId(chainId)) {
+        dispatch({
+          type: ActionType.SET_FROM_CHAIN,
+          payload: chainId,
+        });
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectedAccount]);
   /*
 	  The following block will change `fromChain` and `toChain` when the user first connects to the app.

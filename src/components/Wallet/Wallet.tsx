@@ -1,4 +1,3 @@
-import { onboard } from "utils";
 import { FC } from "react";
 import { useConnection } from "state/hooks";
 
@@ -11,18 +10,16 @@ import {
   Account,
   Separator,
 } from "./Wallet.styles";
-import { shortenAddress } from "utils";
-
-const { init } = onboard;
+import { shortenAddress, isSupportedChainId } from "utils";
 
 interface Props {
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Wallet: FC<Props> = ({ setOpenSidebar }) => {
-  const { account, ensName, isConnected, chainId } = useConnection();
+  const { account, ensName, isConnected, chainId, connect } = useConnection();
 
-  if (account && !isConnected && !chainId) {
+  if (account && !isSupportedChainId(chainId)) {
     return (
       <UnsupportedNetwork data-cy="unsupported-network">
         Unsupported network. Please change networks.
@@ -31,7 +28,7 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
   }
 
   if (!isConnected) {
-    return <ConnectButton onClick={init}>Connect</ConnectButton>;
+    return <ConnectButton onClick={() => connect()}>Connect</ConnectButton>;
   }
 
   return (

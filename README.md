@@ -81,3 +81,14 @@ Toast - 99999
 ## Contributing
 
 Have a look at [CONTRIBUTING](./CONTRIBUTING.md) to get more information on contributions and best practices.
+
+## E2E Testing with Cypress + Hardhat
+
+In order to run Cypress e2e tests locally, you must do the following:
+
+1. Define HARDHAT_INFURA_ID to your desired infura project ID in .env.
+2. Run the following:
+
+```bash
+docker compose -f hardhat-node.yml up
+```

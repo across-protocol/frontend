@@ -1,0 +1,10 @@
+services:
+  hardhat:
+    image: umaprotocol/protocol
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=4096"
+      HARDHAT_CHAIN_ID: "1"
+      WORKDIR: "/protocol"
+      COMMAND: "yarn hardhat node --fork https://mainnet.infura.io/v3/${HARDHAT_INFURA_ID}"
+    ports:
+      - 8545:8545

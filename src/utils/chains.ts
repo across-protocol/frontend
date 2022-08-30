@@ -3,7 +3,7 @@ import { getChainInfo, ChainId } from "./constants";
 import { getConfig } from "utils";
 
 export async function switchChain(
-  provider: ethers.providers.JsonRpcProvider,
+  provider: ethers.providers.Web3Provider,
   chainId: ChainId
 ) {
   const config = getConfig();
