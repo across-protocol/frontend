@@ -2,6 +2,12 @@ import styled from "@emotion/styled";
 import { AlertCircle, Gift } from "react-feather";
 import { ReactComponent as AcrossLogo } from "assets/Across-logo-bullet.svg";
 import { QUERIESV2 } from "utils";
+import {
+  Card as ExternalCard,
+  Divider as ExternalDivider,
+} from "../../Staking.styles";
+
+export const Card = ExternalCard;
 
 export const Wrapper = styled.div`
   box-sizing: border-box;
@@ -19,8 +25,6 @@ export const Wrapper = styled.div`
   padding: 24px;
   gap: 24px;
   @media ${QUERIESV2.sm} {
-    margin: 0 auto;
-    width: calc(100% - 24px);
     padding: 12px 16px;
     gap: 16px;
   }
@@ -81,17 +85,7 @@ export const InfoIcon = styled(AlertCircle)`
   height: 13.5px;
 `;
 
-export const Divider = styled.div`
-  width: 100%;
-  height: 1px;
-
-  background: #3e4047;
-
-  flex: none;
-  order: 0;
-  align-self: stretch;
-  flex-grow: 0;
-`;
+export const Divider = ExternalDivider;
 
 export const StakingClaimAmountWrapper = styled.div`
   display: flex;

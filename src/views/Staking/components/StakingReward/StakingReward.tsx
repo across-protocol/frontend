@@ -5,8 +5,8 @@ import { StakingRewardPropType } from "../../types";
 import StakingInputBlock from "../StakingInputBlock";
 import { AlertInfo } from "./AlertInfo";
 import {
+  Card,
   Title,
-  Wrapper,
   InnerWrapper,
   Divider,
   StakingClaimAmountWrapper,
@@ -46,8 +46,17 @@ export const StakingReward = ({
     return !Number.isNaN(numericValue) && numericValue > maximumClaimableAmount;
   };
 
+  // Stub
+  const errorMessage = (): string => {
+    if (isAmountExceeded(amountToClaim)) {
+      return "The amount entered exceeds your claimable amount";
+    } else {
+      return "";
+    }
+  };
+
   return (
-    <Wrapper>
+    <Card>
       <InnerWrapper>
         <Title>Rewards</Title>
       </InnerWrapper>
@@ -66,12 +75,8 @@ export const StakingReward = ({
           maxValue={String(maximumClaimableAmount)}
           omitInput={!isConnected}
           onClickHandler={buttonHandler}
+          errorMessage={errorMessage()}
         />
-        {isAmountExceeded(amountToClaim) && (
-          <AlertInfo danger>
-            The amount entered exceeds your claimable amount
-          </AlertInfo>
-        )}
       </StakingInputBlockWrapper>
       <InnerWrapper>
         <Divider />
@@ -89,7 +94,7 @@ export const StakingReward = ({
           )}
         </StakingClaimAmountWrapper>
       </InnerWrapper>
-    </Wrapper>
+    </Card>
   );
 };
 
