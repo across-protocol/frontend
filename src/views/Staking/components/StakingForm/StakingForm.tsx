@@ -81,7 +81,7 @@ export const StakingForm = ({
           valid={!isConnected || validateStakeAmount(stakeAmount)}
           buttonText={`${buttonTextPrefix} ${activeTab}`}
           Logo={UsdcLogo}
-          maxValue={buttonMaxValue}
+          maxValue={buttonMaxValue === "0" ? "" : buttonMaxValue}
           omitInput={!isConnected}
           onClickHandler={buttonHandler}
         />

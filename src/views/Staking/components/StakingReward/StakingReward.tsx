@@ -28,6 +28,7 @@ export const StakingReward = ({
 
   const buttonHandler = isConnected ? () => {} : walletConnectionHandler;
   const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
+  const buttonMaxValue = formatEther(maximumClaimableAmount);
 
   const valueOrEmpty = repeatableTernaryBuilder(isConnected, <>-</>);
 
@@ -77,7 +78,7 @@ export const StakingReward = ({
           Logo={StyledAcrossLogo}
           buttonText={`${buttonTextPrefix} claim`}
           valid={!isConnected || stakingAmountValidationHandler(amountToClaim)}
-          maxValue={formatEther(maximumClaimableAmount)}
+          maxValue={buttonMaxValue === "0" ? "" : buttonMaxValue}
           omitInput={!isConnected}
           onClickHandler={buttonHandler}
           displayLoader={isTransitioning}

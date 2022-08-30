@@ -50,7 +50,7 @@ const StakingInputBlock: React.FC<Props> = ({
               disabled={displayLoader}
             />
             <MaxButton
-              disabled={displayLoader}
+              disabled={displayLoader || !maxValue}
               onClick={() => setValue(maxValue ?? "")}
             >
               Max
