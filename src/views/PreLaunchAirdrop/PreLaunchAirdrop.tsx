@@ -4,7 +4,7 @@ import { ContentWrapper, Wrapper } from "./PreLaunchAirdrop.styles";
 const PreLaunchAirdrop = () => {
   return (
     <Wrapper>
-      <ContentWrapper>hi</ContentWrapper>
+      <ContentWrapper></ContentWrapper>
       <Footer />
     </Wrapper>
   );
