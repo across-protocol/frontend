@@ -236,7 +236,6 @@ export function useBalancesBySymbols({
     };
   });
   const result = useQueries(queries);
-  console.log("result", result);
   return {
     balances: result.map((result) => result.data),
   };

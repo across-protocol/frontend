@@ -37,14 +37,7 @@ const CoinSelection = () => {
     balances,
     balance,
     fromChain,
-    provider,
-    account,
   } = useCoinSelection();
-  if (provider && account) {
-    provider.getBalance(account).then((res) => {
-      console.log(res.toString());
-    });
-  }
   return (
     <AnimatePresence>
       <Section>
@@ -89,7 +82,7 @@ const CoinSelection = () => {
                 id="amount"
                 value={inputAmount}
                 onChange={handleInputChange}
-                data-cy="amount-input"
+                data-cy="bridge-amount-input"
               />
             </RoundBox>
             <Menu {...getMenuProps()} isOpen={isOpen}>
