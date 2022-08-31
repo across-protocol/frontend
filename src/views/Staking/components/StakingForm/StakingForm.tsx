@@ -42,12 +42,23 @@ export const StakingForm = ({
   globalCumulativeStake,
   shareOfPool,
   lpTokenFormatter: formatLPToken,
+  lpTokenParser: parseLPToken,
+  stakeActionFn,
+  unstakeActionFn,
 }: StakingFormPropType) => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
   const [stakeAmount, setStakeAmount] = useState("");
 
-  const buttonHandler = isConnected ? () => {} : walletConnectionHandler;
+  const buttonHandler = isConnected
+    ? () => {
+        console.log(parseLPToken(stakeAmount).toString());
+        (activeTab === "stake" ? stakeActionFn : unstakeActionFn)(
+          parseLPToken(stakeAmount)
+        );
+      }
+    : walletConnectionHandler;
+
   const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
   const buttonMaxValue = formatLPToken(
     activeTab === "stake" ? availableLPTokenBalance : userCumulativeStake

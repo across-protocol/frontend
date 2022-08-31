@@ -3,7 +3,11 @@ import { StakingReward, StakingForm, StakingExitAction } from "./components";
 import { useStakingView } from "./hooks/useStakingView";
 import Footer from "components/Footer";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import { BigNumberish } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
+import {
+  StakingActionFunctionType,
+  stakingActionNOOPFn,
+} from "./hooks/useStakingClaimRewards";
 
 const Staking = () => {
   const {
@@ -29,6 +33,11 @@ const Staking = () => {
     ""
   );
 
+  const stakingFnTernary = repeatableTernaryBuilder<StakingActionFunctionType>(
+    !isStakingDataLoading,
+    stakingActionNOOPFn
+  );
+
   return (
     <>
       <Wrapper>
@@ -41,7 +50,12 @@ const Staking = () => {
           isConnected={isConnected}
           walletConnectionHandler={connectWalletHandler}
           lpTokenFormatter={stakingData?.lpTokenFormatter ?? (() => "0")}
+          lpTokenParser={
+            stakingData?.lpTokenParser ?? (() => BigNumber.from("0"))
+          }
           lpTokenName={stringTernary(stakingData?.lpTokenSymbolName)}
+          stakeActionFn={stakingFnTernary(stakingData?.stakeActionFn)}
+          unstakeActionFn={stakingFnTernary(stakingData?.unstakeActionFn)}
           usersTotalLPTokens={numericTernary(stakingData?.usersTotalLPTokens)}
           userCumulativeStake={numericTernary(
             stakingData?.userAmountOfLPStaked

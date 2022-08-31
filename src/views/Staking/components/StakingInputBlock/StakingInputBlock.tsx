@@ -6,10 +6,13 @@ import {
   StakeButton,
   MaxButton,
   Wrapper,
+  LoaderWrapper,
+  StakeButtonContentWrapper,
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
 import { StylizedSVG } from "../../types";
 import { AlertInfo } from "../StakingReward/AlertInfo";
+import { Loader } from "components/Loader";
 
 interface Props {
   value: string;
@@ -19,7 +22,7 @@ interface Props {
   Logo: StylizedSVG;
   maxValue: string;
   omitInput?: boolean;
-  onClickHandler: () => void;
+  onClickHandler: () => void | Promise<void>;
   displayLoader?: boolean;
   errorMessage?: string;
 }
@@ -64,7 +67,14 @@ const StakingInputBlock: React.FC<Props> = ({
             onClick={onClickHandler}
             disabled={!valid || displayLoader}
           >
-            {capitalizeFirstLetter(buttonText)}
+            <StakeButtonContentWrapper>
+              <span>{capitalizeFirstLetter(buttonText)}</span>
+              {displayLoader && (
+                <LoaderWrapper>
+                  <Loader />
+                </LoaderWrapper>
+              )}
+            </StakeButtonContentWrapper>
           </StakeButton>
         </ButtonWrapper>
       </InputRow>

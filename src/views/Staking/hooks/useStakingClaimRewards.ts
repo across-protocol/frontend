@@ -5,10 +5,15 @@ import {
   formattedBigNumberToNumber,
   formatUnitsFnBuilder,
   getConfig,
+  parseUnitsFnBuilder,
 } from "utils";
 import { useStakingPoolResolver } from "./useStakingPoolResolver";
-import { BigNumber, BigNumberish, providers } from "ethers";
+import { BigNumber, BigNumberish, providers, Signer } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
+
+export type StakingActionFunctionType = (amount: BigNumber) => Promise<void>;
+export type FormatterFnType = (wei: BigNumberish) => string;
+export type ParserFnType = (wei: string) => BigNumber;
 
 type ResolvedDataType =
   | {
@@ -26,12 +31,17 @@ type ResolvedDataType =
       usersMultiplierPercentage: number;
       usersTotalLPTokens: BigNumberish;
       shareOfPool: BigNumberish;
-      lpTokenFormatter: (wei: BigNumberish) => string;
+      lpTokenFormatter: FormatterFnType;
+      lpTokenParser: ParserFnType;
+      stakeActionFn: StakingActionFunctionType;
+      unstakeActionFn: StakingActionFunctionType;
     }
   | undefined;
 
+export const stakingActionNOOPFn: StakingActionFunctionType = async () => {};
+
 export const useStakingClaimRewards = () => {
-  const { account, provider } = useConnection();
+  const { account, provider, signer } = useConnection();
   const { mainnetAddress } = useStakingPoolResolver();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -39,17 +49,17 @@ export const useStakingClaimRewards = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    if (!mainnetAddress || !provider || !account) {
+    if (!mainnetAddress || !provider || !account || !signer) {
       setIsLoading(false);
     } else {
-      resolveRequestedData(mainnetAddress, provider, account).then(
+      resolveRequestedData(mainnetAddress, provider, signer, account).then(
         (resolvedData) => {
           setStakingData(resolvedData);
           setIsLoading(false);
         }
       );
     }
-  }, [mainnetAddress, account, provider]);
+  }, [mainnetAddress, account, provider, signer]);
 
   return {
     isStakingDataLoading: isLoading,
@@ -66,6 +76,7 @@ export const useStakingClaimRewards = () => {
 const resolveRequestedData = async (
   tokenAddress: string,
   provider: providers.Provider,
+  signer: Signer,
   account: string
 ): Promise<ResolvedDataType> => {
   const config = getConfig();
@@ -138,6 +149,17 @@ const resolveRequestedData = async (
     .mul(100);
 
   const lpTokenFormatter = formatUnitsFnBuilder(lpTokenDecimalCount);
+  const lpTokenParser = parseUnitsFnBuilder(lpTokenDecimalCount);
+  const stakeActionFn = performStakingActionBuilderFn(
+    lpTokenAddress,
+    signer,
+    "stake"
+  );
+  const unstakeActionFn = performStakingActionBuilderFn(
+    lpTokenAddress,
+    signer,
+    "unstake"
+  );
 
   return {
     lpTokenAddress,
@@ -155,5 +177,28 @@ const resolveRequestedData = async (
     usersTotalLPTokens,
     shareOfPool,
     lpTokenFormatter,
+    lpTokenParser,
+    stakeActionFn,
+    unstakeActionFn,
+  };
+};
+
+const performStakingActionBuilderFn = (
+  lpTokenAddress: string,
+  signer: Signer,
+  action: "stake" | "unstake"
+) => {
+  return async (amount: BigNumber): Promise<void> => {
+    const acceleratingDistributor = getConfig()
+      .getAcceleratingDistributor()
+      .connect(signer);
+    const callingFn = acceleratingDistributor[action];
+    try {
+      const amountAsBigNumber = BigNumber.from(amount);
+      const result = await callingFn(lpTokenAddress, amountAsBigNumber);
+      console.log(result);
+    } catch (e) {
+      console.log(e);
+    }
   };
 };

@@ -1,6 +1,11 @@
 import { BigNumberish } from "ethers";
 import { Theme } from "@emotion/react";
 import { StyledComponent } from "@emotion/styled";
+import {
+  FormatterFnType,
+  ParserFnType,
+  StakingActionFunctionType,
+} from "./hooks/useStakingClaimRewards";
 
 export type StylizedSVG = StyledComponent<
   React.SVGProps<SVGSVGElement> & {
@@ -33,5 +38,8 @@ export type StakingFormPropType = GenericStakingComponentProps & {
   usersTotalLPTokens: BigNumberish;
   availableLPTokenBalance: BigNumberish;
   shareOfPool: BigNumberish;
-  lpTokenFormatter: (wei: BigNumberish) => string;
+  lpTokenFormatter: FormatterFnType;
+  lpTokenParser: ParserFnType;
+  stakeActionFn: StakingActionFunctionType;
+  unstakeActionFn: StakingActionFunctionType;
 };

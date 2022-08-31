@@ -120,3 +120,14 @@ export const StakeButton = styled(UnstyledButton)<IStakeButton>`
     border-radius: 20px;
   }
 `;
+
+export const StakeButtonContentWrapper = styled.div`
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-direction: row;
+`;
+
+export const LoaderWrapper = styled.div`
+  height: fit-content;
+`;
