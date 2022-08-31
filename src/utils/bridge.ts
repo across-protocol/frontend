@@ -28,6 +28,7 @@ import {
 
 import { parseEther, tagAddress } from "./format";
 import { getConfig } from "utils";
+import { suggestedFeesApiCall } from "./api";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -45,7 +46,8 @@ export type BridgeFees = {
 export async function getRelayerFee(
   tokenSymbol: string,
   amount: ethers.BigNumber,
-  toChainId: ChainId
+  toChainId: ChainId,
+  fromChainid: ChainId
 ): Promise<{
   relayerFee: Fee;
   relayerGasFee: Fee;
@@ -54,10 +56,19 @@ export async function getRelayerFee(
 }> {
   const config = relayFeeCalculatorConfig(toChainId);
 
+  const address = getConfig().getTokenInfoBySymbol(
+    fromChainid,
+    tokenSymbol
+  ).address;
+
+  await suggestedFeesApiCall(amount, address, toChainId);
+
   // Construction of a new RelayFeeCalculator will throw if any props in the config are incorrectly set. For example,
   // if the capital cost config is incorrectly set for a token, construction will throw.
   const calculator = new relayFeeCalculator.RelayFeeCalculator(config);
   const result = await calculator.relayerFeeDetails(amount, tokenSymbol);
+
+  console.log(result);
 
   return {
     relayerFee: {
@@ -114,6 +125,7 @@ type GetBridgeFeesArgs = {
   tokenSymbol: string;
   blockTimestamp: number;
   toChainId: ChainId;
+  fromChainId: ChainId;
 };
 
 type GetBridgeFeesResult = BridgeFees & {
@@ -133,11 +145,12 @@ export async function getBridgeFees({
   tokenSymbol,
   blockTimestamp,
   toChainId,
+  fromChainId,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const config = getConfig();
   const l1TokenAddress = config.getL1TokenAddressBySymbol(tokenSymbol);
   const { relayerFee, relayerGasFee, relayerCapitalFee, isAmountTooLow } =
-    await getRelayerFee(tokenSymbol, amount, toChainId);
+    await getRelayerFee(tokenSymbol, amount, toChainId, fromChainId);
 
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
     l1TokenAddress,

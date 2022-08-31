@@ -37,9 +37,10 @@ export function bridgeFeesQueryKey(
   tokenSymbol: string,
   amount: ethers.BigNumber,
   chainId: ChainId,
+  fromChainId: ChainId,
   blockNumber: number
 ) {
-  return ["bridgeFees", tokenSymbol, amount, chainId, blockNumber];
+  return ["bridgeFees", tokenSymbol, amount, chainId, fromChainId, blockNumber];
 }
 
 export function bridgeLimitsQueryKey(

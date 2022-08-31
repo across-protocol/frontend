@@ -78,7 +78,7 @@ export function useBridge() {
     fromChain && tokenSymbol
       ? config.getTokenInfoBySymbol(fromChain, tokenSymbol)
       : undefined;
-  const { fees } = useBridgeFees(amount, toChain, tokenSymbol);
+  const { fees } = useBridgeFees(amount, toChain, fromChain, tokenSymbol);
   const hasToSwitchChain = Boolean(
     fromChain && chainId && chainId !== fromChain
   );
