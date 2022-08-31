@@ -191,7 +191,6 @@ export function useBalancesBySymbols({
   const chainIdToQuery = chainId;
   const accountToQuery = account ?? connectedAccount;
   const { block: latestBlock } = useBlock(chainId, testProvider);
-  console.log("LB", latestBlock);
   const blockNumberToQuery = blockNumber ?? latestBlock?.number;
   const prevAccount = usePrevious(accountToQuery);
   const prevChain = usePrevious(chainIdToQuery);

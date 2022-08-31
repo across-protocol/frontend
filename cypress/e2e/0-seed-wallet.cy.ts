@@ -1,3 +1,5 @@
+/* IGNORE FOR NOW, UNSURE IF NEEDED */
+
 // Fund 20 UMA to test account before running other tests.
 describe("Fund UMA to test wallet", () => {
   it("Seeds tokens to accounts", () => {
