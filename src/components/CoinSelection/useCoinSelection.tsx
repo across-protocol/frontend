@@ -18,7 +18,6 @@ import { useQueryParams } from "hooks";
 
 export default function useCoinSelection() {
   const { account, isConnected, provider } = useConnection();
-  console.log("<<< PROVIDER >>>", provider);
   const params = useQueryParams();
   const {
     setAmount,
@@ -39,7 +38,6 @@ export default function useCoinSelection() {
     provider,
   });
 
-  console.log("balances", balances);
   const { selectedItem, ...downshiftState } = useSelect({
     items: availableTokens,
     defaultSelectedItem: availableTokens[0],
