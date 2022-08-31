@@ -20,10 +20,16 @@ describe("bridge", () => {
     cy.dataCy("fees-box").should("be.visible");
   });
 
-  it("Clicks send and submits a tx", () => {
+  it("Clicks send and submits a tx and shows the success page", () => {
     cy.wait(6000);
     cy.dataCy("send").click();
     cy.wait(5000);
     cy.dataCy("transaction-submitted").should("be.visible");
+  });
+
+  it("Closes the success page and goes back to main bridge", () => {
+    cy.dataCy("bridge-success-button").click();
+    cy.wait(1000);
+    cy.dataCy("bridge-amount-input").should("be.visible");
   });
 });

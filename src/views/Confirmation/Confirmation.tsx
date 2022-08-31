@@ -184,7 +184,9 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
               </div>
             </Info>
           </div>
-          <Button onClick={onClose}>Close</Button>
+          <Button data-cy="bridge-success-button" onClick={onClose}>
+            Close
+          </Button>
         </InfoSection>
       </Wrapper>
     </Layout>
