@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import Background from "assets/prelaunch-background.png";
+import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`
   background: url(${Background});
@@ -14,6 +15,10 @@ export const Wrapper = styled.div`
   min-height: calc(100vh);
   margin-top: -72px;
   padding-top: 72px;
+  @media ${QUERIES.mobileAndDown} {
+    margin-top: -64px;
+    padding-top: 64px;
+  }
 `;
 
 export const ContentWrapper = styled.div``;
