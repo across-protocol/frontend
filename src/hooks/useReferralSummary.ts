@@ -29,9 +29,7 @@ const defaultReferralsSummary: ReferralsSummary = {
 };
 
 export function useReferralSummary(account?: string) {
-  const enabledQuery = account !== undefined;
-
-  const queryKey = enabledQuery
+  const queryKey = !!account
     ? referralSummaryQueryKey(account)
     : "DISABLED_REFERRAL_SUMMARY_KEY";
 
@@ -44,7 +42,7 @@ export function useReferralSummary(account?: string) {
       // refetch based on the chain polling interval
       // disable this temporary
       // refetchInterval: 60000,
-      enabled: enabledQuery,
+      enabled: !!account,
     }
   );
 

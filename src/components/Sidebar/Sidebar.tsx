@@ -13,10 +13,10 @@ import {
   ConnectText,
   TopHeaderRow,
 } from "./Sidebar.styles";
-import { onboard, getChainInfo } from "utils";
+import { getChainInfo, isSupportedChainId } from "utils";
 import useSidebar from "./useSidebar";
 import closeIcon from "assets/across-close-button.svg";
-const { init, reset } = onboard;
+import { useConnection } from "state/hooks";
 
 interface Props {
   openSidebar: boolean;
@@ -26,6 +26,7 @@ interface Props {
 const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
   const { account, ensName, isConnected, chainId, location, className } =
     useSidebar(openSidebar);
+  const { connect, disconnect, wallet } = useConnection();
   const addrOrEns = ensName ?? account;
 
   const onClickLink = () => {
@@ -39,7 +40,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
         <StyledHeader>
           <TopHeaderRow>
             {!isConnected && (
-              <ConnectButton onClick={() => init()}>
+              <ConnectButton onClick={() => connect()}>
                 Connect Wallet
               </ConnectButton>
             )}
@@ -53,14 +54,16 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
             </CloseButton>
           </TopHeaderRow>
           {addrOrEns && <HeaderText>{addrOrEns}</HeaderText>}
-          {chainId && isConnected && (
+          {isSupportedChainId(chainId) && isConnected ? (
             <HeaderText>{getChainInfo(chainId).name}</HeaderText>
+          ) : (
+            <HeaderText>Unsupported Network</HeaderText>
           )}
-          {isConnected && (
-            <DisconnectButton onClick={() => reset()}>
+          {isConnected && wallet ? (
+            <DisconnectButton onClick={() => disconnect(wallet)}>
               Disconnect
             </DisconnectButton>
-          )}
+          ) : null}
         </StyledHeader>
         <StyledMenu>
           <StyledMenuItem selected={location.pathname === "/"}>

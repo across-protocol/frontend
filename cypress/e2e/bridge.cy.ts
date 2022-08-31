@@ -11,7 +11,6 @@ describe("bridge", () => {
     cy.dataCy("from-chain-1").click();
     cy.dataCy("amount-input").type("1");
 
-    cy.dataCy("connect-wallet").should("be.visible");
     cy.dataCy("send").should("be.disabled");
     cy.dataCy("fees-box").should("be.visible");
   });

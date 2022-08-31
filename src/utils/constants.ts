@@ -391,6 +391,13 @@ export const tokenList: TokenInfoList = [
     logoURI: "/logos/bal.svg",
     mainnetAddress: getAddress("0xba100000625a3754423978a60c9317c58a424e3D"),
   },
+  {
+    name: "USDT",
+    symbol: "USDT",
+    decimals: 6,
+    logoURI: "/logos/usdt-logo.svg",
+    mainnetAddress: getAddress("0xdAC17F958D2ee523a2206206994597C13D831ec7"),
+  },
 ];
 
 assert(

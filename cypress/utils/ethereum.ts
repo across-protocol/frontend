@@ -8,10 +8,9 @@ import { Wallet } from "@ethersproject/wallet";
 
 export const DEFAULT_TEST_PK =
   Cypress.env("DEFAULT_TEST_PK") ||
-  "0xde926db3012af759b4f24b5a51ef6afa397f04670f634aa4f48d4480417007f3";
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
 export const DEFAULT_TEST_ADDRESS = new Wallet(DEFAULT_TEST_PK).address;
-
 /**
  * Customized EIP1193 bridge provider that gets injected to `window.ethereum` to cypress
  * tests. Can be used with a `MockProvider` or with a `JsonRpcProvider`.

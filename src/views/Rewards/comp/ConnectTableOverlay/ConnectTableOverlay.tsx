@@ -1,12 +1,11 @@
 import { Overlay, ConnectButton } from "./ConnectTableOverlay.styles";
-import { onboard } from "utils";
-
-const { init } = onboard;
+import { useConnection } from "state/hooks";
 
 const ConnectTableOverlay = () => {
+  const { connect } = useConnection();
   return (
     <Overlay>
-      <ConnectButton size="md" onClick={() => init()}>
+      <ConnectButton size="md" onClick={() => connect()}>
         Connect to track referral transfers
       </ConnectButton>
     </Overlay>

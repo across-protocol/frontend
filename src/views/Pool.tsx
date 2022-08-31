@@ -42,25 +42,6 @@ const Pool: FC = () => {
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);
   const [defaultTab, setDefaultTab] = useState("Add");
-  const pool = useAppSelector(
-    (state) =>
-      state.pools.pools[
-        token.address === AddressZero
-          ? poolClient.config.wethAddress
-          : token.address
-      ]
-  );
-  const connection = useAppSelector((state) => state.connection);
-  const userPosition = useAppSelector((state) =>
-    get(state, [
-      "pools",
-      "users",
-      state?.connection?.account || "",
-      token.address === AddressZero
-        ? poolClient.config.wethAddress
-        : token.address,
-    ])
-  );
 
   const {
     isConnected,
@@ -69,6 +50,24 @@ const Pool: FC = () => {
     error,
     chainId: activeChainId,
   } = useConnection();
+  const pool = useAppSelector(
+    (state) =>
+      state.pools.pools[
+        token.address === AddressZero
+          ? poolClient.config.wethAddress
+          : token.address
+      ]
+  );
+  const userPosition = useAppSelector((state) =>
+    get(state, [
+      "pools",
+      "users",
+      account || "",
+      token.address === AddressZero
+        ? poolClient.config.wethAddress
+        : token.address,
+    ])
+  );
 
   const queries = useAppSelector((state) => state.api.queries);
 
@@ -101,16 +100,16 @@ const Pool: FC = () => {
   }, [token, setLoadingPoolState, poolClient, refetchBalance]);
 
   useEffect(() => {
-    if (isConnected && connection.account && token.address) {
+    if (isConnected && account && token.address) {
       const address =
         token.address === AddressZero
           ? poolClient.config.wethAddress
           : token.address;
       poolClient
-        .updateUser(connection.account, address)
+        .updateUser(account, address)
         .catch((err) => console.error("error loading user", err));
     }
-  }, [isConnected, connection.account, token.address, poolClient]);
+  }, [isConnected, account, token.address, poolClient]);
 
   useEffect(() => {
     // Recheck for balances. note: Onboard provider is faster than ours.
