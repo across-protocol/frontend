@@ -40,6 +40,13 @@ const AllTransactions = lazy(
     )
 );
 
+const PreLaunchAirdrop = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "PreLaunchAirdrop" */ "./views/PreLaunchAirdrop/PreLaunchAirdrop"
+    )
+);
+
 const warningMessage = `
   We noticed that you have connected from a contract address.
   We recommend that you change the destination of the transfer (by clicking the "Change account" text below the To dropdown)
@@ -47,16 +54,21 @@ const warningMessage = `
 `;
 
 function useRoutes() {
+  const [transparentHeader, setTransparentHeader] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider, isContractAddress } = useConnection();
   const location = useLocation();
   const history = useHistory();
   const { error, removeError } = useError();
-  // force the user on /pool page if showMigrationPage is active.
+
+  // This UseEffect performs the following operations:
+  //    1. Force the user to /pool if showMigrationPage is active
+  //    2. If the pathname is /airdrop set the transparent header
   useEffect(() => {
     if (enableMigration && location.pathname !== "/pool") {
       history.push("/pool");
     }
+    setTransparentHeader(location.pathname === "/airdrop");
   }, [location.pathname, history]);
 
   return {
@@ -66,6 +78,7 @@ function useRoutes() {
     error,
     removeError,
     location,
+    transparentHeader,
     isContractAddress,
   };
 }
@@ -78,6 +91,7 @@ const Routes: React.FC = () => {
     removeError,
     location,
     isContractAddress,
+    transparentHeader,
   } = useRoutes();
 
   return (
@@ -109,7 +123,11 @@ const Routes: React.FC = () => {
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
-      <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
+      <Header
+        openSidebar={openSidebar}
+        setOpenSidebar={setOpenSidebar}
+        transparentHeader={transparentHeader}
+      />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
         <Suspense fallback={<BouncingDotsLoader />}>
@@ -119,6 +137,7 @@ const Routes: React.FC = () => {
           <Route exact path="/about" component={About} />
           <Route exact path="/rewards" component={Rewards} />
           <Route exact path="/rewards/claim" component={Claim} />
+          <Route exact path="/airdrop" component={PreLaunchAirdrop} />
           <Route exact path="/" component={Send} />
         </Suspense>
 
