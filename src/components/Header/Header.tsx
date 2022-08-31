@@ -22,6 +22,7 @@ const LINKS = !enableMigration
       { href: "/pool", name: "Pool" },
       { href: "/rewards", name: "Rewards" },
       { href: "/transactions", name: "Transactions" },
+      { href: "/airdrop", name: "Airdrop" },
     ]
   : [];
 
