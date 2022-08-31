@@ -103,6 +103,13 @@ export function parseUnits(value: string, decimals: number): ethers.BigNumber {
   return ethers.utils.parseUnits(value, decimals);
 }
 
+export function parseUnitsFnBuilder(decimals: number) {
+  function closure(value: string) {
+    return parseUnits(value, decimals);
+  }
+  return closure;
+}
+
 export function parseEther(value: string): ethers.BigNumber {
   return parseUnits(value, 18);
 }
