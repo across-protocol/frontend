@@ -23,15 +23,21 @@ const LINKS = !enableMigration
       { href: "/pool", name: "Pool" },
       { href: "/rewards", name: "Rewards" },
       { href: "/transactions", name: "Transactions" },
+      { href: "/airdrop", name: "Airdrop" },
     ]
   : [];
 
 interface Props {
   openSidebar: boolean;
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  transparentHeader?: boolean;
 }
 
-const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
+const Header: React.FC<Props> = ({
+  openSidebar,
+  setOpenSidebar,
+  transparentHeader,
+}) => {
   const location = useLocation();
   const scrollPosition = useScrollPosition();
 
@@ -40,7 +46,10 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
   };
 
   return (
-    <Wrapper scrollPosition={scrollPosition}>
+    <Wrapper
+      transparentHeader={transparentHeader}
+      scrollPosition={scrollPosition}
+    >
       <UnstyledLink
         to={{ pathname: "/", search: location.search }}
         style={{ display: "flex" }}
