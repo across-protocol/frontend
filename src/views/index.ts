@@ -6,3 +6,4 @@ export { MyTransactions } from "./Transactions";
 export { default as Rewards } from "./Rewards";
 export { default as Claim } from "./Claim";
 export { default as NotFound } from "./NotFound";
+export { default as PreLaunchAirdrop } from "./PreLaunchAirdrop";
