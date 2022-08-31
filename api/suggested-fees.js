@@ -38,8 +38,6 @@ const handler = async (request, response) => {
       throw new InputError("Origin and destination chains cannot be the same");
     }
 
-    const skipAmountTooLow = !!skipAmountLimit;
-
     const amountAsValue = Number(amount);
     if (Number.isNaN(amountAsValue) || amountAsValue <= 0) {
       throw new InputError("Value provided in amount parameter is not valid.");
@@ -143,7 +141,7 @@ const handler = async (request, response) => {
       relayerFeeDetails,
     });
 
-    if (!skipAmountTooLow && relayerFeeDetails.isAmountTooLow)
+    if (!!skipAmountLimit && relayerFeeDetails.isAmountTooLow)
       throw new InputError("Sent amount is too low relative to fees");
 
     const responseJson = {
@@ -152,7 +150,7 @@ const handler = async (request, response) => {
       timestamp: parsedTimestamp.toString(),
     };
 
-    if (skipAmountTooLow) {
+    if (!!skipAmountLimit) {
       responseJson["isAmountTooLow"] = relayerFeeDetails.isAmountTooLow;
     }
 
