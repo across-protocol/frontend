@@ -49,6 +49,7 @@ const PreLaunchAirdrop = () => {
           />
         </TestDiv>
       </ContentWrapper>
+      <ContentWrapper></ContentWrapper>
       <Footer />
     </Wrapper>
   );
