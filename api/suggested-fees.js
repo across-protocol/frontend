@@ -141,7 +141,9 @@ const handler = async (request, response) => {
       relayerFeeDetails,
     });
 
-    if (!!skipAmountLimit && relayerFeeDetails.isAmountTooLow)
+    const skipAmountLimitEnabled = skipAmountLimit !== undefined;
+
+    if (skipAmountLimitEnabled && relayerFeeDetails.isAmountTooLow)
       throw new InputError("Sent amount is too low relative to fees");
 
     const responseJson = {
@@ -150,7 +152,7 @@ const handler = async (request, response) => {
       timestamp: parsedTimestamp.toString(),
     };
 
-    if (!!skipAmountLimit) {
+    if (skipAmountLimitEnabled) {
       responseJson["isAmountTooLow"] = relayerFeeDetails.isAmountTooLow;
     }
 
