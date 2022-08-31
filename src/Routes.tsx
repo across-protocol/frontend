@@ -24,16 +24,21 @@ import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
 
 function useRoutes() {
+  const [transparentHeader, setTransparentHeader] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider } = useConnection();
   const location = useLocation();
   const history = useHistory();
   const { error, removeError } = useError();
-  // force the user on /pool page if showMigrationPage is active.
+
+  // This UseEffect performs the following operations:
+  //    1. Force the user to /pool if showMigrationPage is active
+  //    2. If the pathname is /airdrop set the transparent header
   useEffect(() => {
     if (enableMigration && location.pathname !== "/pool") {
       history.push("/pool");
     }
+    setTransparentHeader(location.pathname === "/airdrop");
   }, [location.pathname, history]);
 
   return {
@@ -43,12 +48,19 @@ function useRoutes() {
     error,
     removeError,
     location,
+    transparentHeader,
   };
 }
 // Need this component for useLocation hook
 const Routes: React.FC = () => {
-  const { openSidebar, setOpenSidebar, error, removeError, location } =
-    useRoutes();
+  const {
+    openSidebar,
+    setOpenSidebar,
+    error,
+    removeError,
+    location,
+    transparentHeader,
+  } = useRoutes();
   return (
     <>
       {disableDeposits && (
@@ -88,7 +100,11 @@ const Routes: React.FC = () => {
           </div>
         </SuperHeader>
       )}{" "}
-      <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
+      <Header
+        transparentHeader={transparentHeader}
+        openSidebar={openSidebar}
+        setOpenSidebar={setOpenSidebar}
+      />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
         <Route exact path="/transactions" component={MyTransactions} />

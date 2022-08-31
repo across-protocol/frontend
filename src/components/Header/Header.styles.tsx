@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 
 interface IWrapper {
   scrollPosition: number;
+  transparentHeader?: boolean;
 }
 export const Wrapper = styled.header<IWrapper>`
-  background-color: #2d2e33;
+  background-color: ${({ transparentHeader }) =>
+    transparentHeader ? "transparent" : "#2d2e33"};
   height: 72px;
   padding: 0 24px;
   display: flex;
