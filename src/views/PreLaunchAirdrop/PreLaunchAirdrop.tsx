@@ -1,9 +1,14 @@
 import Footer from "components/Footer";
-import { ContentWrapper, Wrapper } from "./PreLaunchAirdrop.styles";
+import {
+  BackgroundLayer,
+  ContentWrapper,
+  Wrapper,
+} from "./PreLaunchAirdrop.styles";
 
 const PreLaunchAirdrop = () => {
   return (
     <Wrapper>
+      <BackgroundLayer />
       <ContentWrapper></ContentWrapper>
       <Footer />
     </Wrapper>
