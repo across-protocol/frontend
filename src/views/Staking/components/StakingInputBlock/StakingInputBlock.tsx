@@ -38,51 +38,49 @@ const StakingInputBlock: React.FC<Props> = ({
   omitInput,
   onClickHandler,
   errorMessage,
-}) => {
-  return (
-    <Wrapper>
-      <InputRow>
-        {!omitInput && (
-          <InputWrapper valid={!value || valid}>
-            <Logo />
-            <Input
-              placeholder="Enter amount"
-              value={value}
-              type="text"
-              onChange={(e) => setValue(e.target.value)}
-              disabled={displayLoader}
-            />
-            <MaxButton
-              disabled={displayLoader || !maxValue}
-              onClick={() => setValue(maxValue ?? "")}
-            >
-              Max
-            </MaxButton>
-          </InputWrapper>
-        )}
-        <ButtonWrapper>
-          <StakeButton
-            valid={valid}
-            fullWidth={omitInput}
-            onClick={onClickHandler}
-            disabled={!valid || displayLoader}
+}) => (
+  <Wrapper>
+    <InputRow>
+      {!omitInput && (
+        <InputWrapper valid={!value || valid}>
+          <Logo />
+          <Input
+            placeholder="Enter amount"
+            value={value}
+            type="text"
+            onChange={(e) => setValue(e.target.value)}
+            disabled={displayLoader}
+          />
+          <MaxButton
+            disabled={displayLoader || !maxValue}
+            onClick={() => setValue(maxValue ?? "")}
           >
-            <StakeButtonContentWrapper>
-              <span>{capitalizeFirstLetter(buttonText)}</span>
-              {displayLoader && (
-                <LoaderWrapper>
-                  <Loader />
-                </LoaderWrapper>
-              )}
-            </StakeButtonContentWrapper>
-          </StakeButton>
-        </ButtonWrapper>
-      </InputRow>
-      {!!value && !valid && !!errorMessage && (
-        <AlertInfo danger>{errorMessage}</AlertInfo>
+            Max
+          </MaxButton>
+        </InputWrapper>
       )}
-    </Wrapper>
-  );
-};
+      <ButtonWrapper>
+        <StakeButton
+          valid={valid}
+          fullWidth={omitInput}
+          onClick={onClickHandler}
+          disabled={!valid || displayLoader || value === "0"}
+        >
+          <StakeButtonContentWrapper>
+            <span>{capitalizeFirstLetter(buttonText)}</span>
+            {displayLoader && (
+              <LoaderWrapper>
+                <Loader />
+              </LoaderWrapper>
+            )}
+          </StakeButtonContentWrapper>
+        </StakeButton>
+      </ButtonWrapper>
+    </InputRow>
+    {!!value && !valid && !!errorMessage && (
+      <AlertInfo danger>{errorMessage}</AlertInfo>
+    )}
+  </Wrapper>
+);
 
 export default StakingInputBlock;

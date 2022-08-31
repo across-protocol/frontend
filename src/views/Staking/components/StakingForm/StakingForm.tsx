@@ -25,7 +25,11 @@ import { PopperTooltip } from "components/Tooltip";
 import StakingInputBlock from "../StakingInputBlock";
 import { StakingFormPropType } from "../../types";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import { formatEther, formatNumberMaxFracDigits } from "utils";
+import {
+  formatEther,
+  formatNumberMaxFracDigits,
+  isNumberEthersParseable,
+} from "utils";
 
 type StakeTab = "stake" | "unstake";
 
@@ -67,7 +71,14 @@ export const StakingForm = ({
 
   // Stub data for form
   function validateStakeAmount(amount: string) {
-    return amount.length > 0;
+    if (!isNumberEthersParseable(amount)) {
+      return false;
+    }
+    const requestedAmount = parseLPToken(amount);
+    return (
+      requestedAmount.gte("0") &&
+      requestedAmount.lte(parseLPToken(buttonMaxValue))
+    );
   }
 
   const valueOrEmpty = repeatableTernaryBuilder(isConnected, <>-</>);
