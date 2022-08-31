@@ -18,6 +18,7 @@ import { useQueryParams } from "hooks";
 
 export default function useCoinSelection() {
   const { account, isConnected, provider } = useConnection();
+  console.log("<<< PROVIDER >>>", provider);
   const params = useQueryParams();
   const {
     setAmount,
@@ -31,11 +32,14 @@ export default function useCoinSelection() {
     availableTokens,
   } = useSendForm();
 
-  const { balances = [] } = useBalancesBySymbols(
-    availableTokens.map((t) => t.symbol),
-    fromChain,
-    account
-  );
+  const { balances = [] } = useBalancesBySymbols({
+    tokenSymbols: availableTokens.map((t) => t.symbol),
+    chainId: fromChain,
+    account,
+    provider,
+  });
+
+  console.log("balances", balances);
   const { selectedItem, ...downshiftState } = useSelect({
     items: availableTokens,
     defaultSelectedItem: availableTokens[0],

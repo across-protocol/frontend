@@ -10,7 +10,7 @@ import {
   getConfig,
   ConfigClient,
 } from "utils";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 
 export function useNativeBalance(
   tokenSymbol?: string,
@@ -66,6 +66,7 @@ const QueryBalanceBySymbol =
     tokenSymbolToQuery?: string;
     blockNumberToQuery?: number;
     config: ConfigClient;
+    testProvider?: ethers.providers.Web3Provider;
   }) =>
   async () => {
     const {
@@ -74,6 +75,7 @@ const QueryBalanceBySymbol =
       tokenSymbolToQuery,
       blockNumberToQuery,
       config,
+      testProvider,
     } = params;
     if (
       !chainIdToQuery ||
@@ -90,14 +92,16 @@ const QueryBalanceBySymbol =
       return getNativeBalance(
         chainIdToQuery,
         accountToQuery,
-        blockNumberToQuery
+        blockNumberToQuery,
+        testProvider
       );
     } else {
       return getBalance(
         chainIdToQuery,
         accountToQuery,
         tokenInfo.address,
-        blockNumberToQuery
+        blockNumberToQuery,
+        testProvider
       );
     }
   };
@@ -166,17 +170,28 @@ export function useBalanceBySymbol(
  * @param account - The account to query the balances of.
  * @param blockNumber - The block number to execute the query on, if not specified, defaults to the latest block. Note, past blocks require an archive node.
  */
-export function useBalancesBySymbols(
-  tokenSymbols: string[],
-  chainId?: ChainId,
-  account?: string,
-  blockNumber?: number
-) {
+export function useBalancesBySymbols({
+  tokenSymbols,
+  chainId,
+  account,
+  blockNumber,
+  provider,
+}: {
+  tokenSymbols: string[];
+  chainId?: ChainId;
+  account?: string;
+  blockNumber?: number;
+  provider?: ethers.providers.Web3Provider | null;
+}) {
+  // Needed for Cypress testing. Pass in the provider to use instead of the infura provider.
+  const testProvider =
+    provider && provider.connection.url === "eip-1193:" ? provider : undefined;
   const config = getConfig();
   const { account: connectedAccount } = useConnection();
   const chainIdToQuery = chainId;
   const accountToQuery = account ?? connectedAccount;
-  const { block: latestBlock } = useBlock(chainId);
+  const { block: latestBlock } = useBlock(chainId, testProvider);
+  console.log("LB", latestBlock);
   const blockNumberToQuery = blockNumber ?? latestBlock?.number;
   const prevAccount = usePrevious(accountToQuery);
   const prevChain = usePrevious(chainIdToQuery);
@@ -187,6 +202,7 @@ export function useBalancesBySymbols(
     prevChain === chainIdToQuery &&
     JSON.stringify(prevTokens) === JSON.stringify(tokenSymbols);
   const enabled = !!chainIdToQuery && !!accountToQuery && !!blockNumberToQuery;
+
   // we use useQueries instead of useQuery so we can share cache values with the singular balance query
   const queries = tokenSymbols.map((tokenSymbolToQuery) => {
     const queryKey = enabled
@@ -209,6 +225,7 @@ export function useBalancesBySymbols(
       tokenSymbolToQuery,
       blockNumberToQuery,
       accountToQuery,
+      testProvider,
     });
     return {
       queryKey,
@@ -219,6 +236,7 @@ export function useBalancesBySymbols(
     };
   });
   const result = useQueries(queries);
+  console.log("result", result);
   return {
     balances: result.map((result) => result.data),
   };

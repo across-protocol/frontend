@@ -5,9 +5,17 @@ import { ethers } from "ethers";
 export function getNativeBalance(
   chainId: ChainId,
   account: string,
-  blockNumber: number | "latest" = "latest"
+  blockNumber: number | "latest" = "latest",
+  testProvider?: ethers.providers.Web3Provider
 ) {
-  const provider = getProvider(chainId);
+  const provider = testProvider ?? getProvider(chainId);
+  console.log(
+    "getNativeBalance",
+    provider
+      .getBalance(account, blockNumber)
+      .then((balance) => balance.toString())
+  );
+
   return provider.getBalance(account, blockNumber);
 }
 /**
@@ -22,9 +30,11 @@ export function getBalance(
   chainId: ChainId,
   account: string,
   tokenAddress: string,
-  blockNumber: number | "latest" = "latest"
+  blockNumber: number | "latest" = "latest",
+  testProvider?: ethers.providers.Web3Provider
 ): Promise<ethers.BigNumber> {
-  const provider = getProvider(chainId);
+  const provider = testProvider ?? getProvider(chainId);
+  console.log("provider", provider);
   const contract = clients.erc20.connect(tokenAddress, provider);
   return contract.balanceOf(account, { blockTag: blockNumber });
 }
