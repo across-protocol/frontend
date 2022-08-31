@@ -139,6 +139,8 @@ const handler = async (request, response) => {
       throw new InputError("Sent amount is too low relative to fees");
 
     const responseJson = {
+      capitalFeePct: relayerFeeDetails.capitalFeePercent,
+      relayGasFeePct: relayerFeeDetails.gasFeePercent,
       relayFeePct: relayerFeeDetails.relayFeePercent,
       lpFeePct: realizedLPFeePct.toString(),
       timestamp: parsedTimestamp.toString(),
