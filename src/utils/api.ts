@@ -37,6 +37,7 @@ export async function suggestedFeesApiCall(
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
 }> {
+  console.log(originToken, toChainid);
   const result = await apiCall("suggested-fees", {
     token: originToken,
     destinationChainId: toChainid,
@@ -53,6 +54,8 @@ export async function suggestedFeesApiCall(
   const relayGasFeePct = BigNumber.from(result["relayGasFeePct"]);
   const relayGasFeeTotal = BigNumber.from(result["relayGasFeeTotal"]);
 
+  const isAmountTooLow = result["isAmountTooLow"];
+
   return {
     relayerFee: {
       pct: relayFeePct,
@@ -62,10 +65,10 @@ export async function suggestedFeesApiCall(
       pct: capitalFeePct,
       total: capitalFeeTotal,
     },
-    isAmountTooLow: false,
     relayerGasFee: {
       pct: relayGasFeePct,
       total: relayGasFeeTotal,
     },
+    isAmountTooLow,
   };
 }
