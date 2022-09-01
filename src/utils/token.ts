@@ -5,10 +5,9 @@ import { ethers } from "ethers";
 export function getNativeBalance(
   chainId: ChainId,
   account: string,
-  blockNumber: number | "latest" = "latest",
-  testProvider?: ethers.providers.Web3Provider
+  blockNumber: number | "latest" = "latest"
 ) {
-  const provider = testProvider ?? getProvider(chainId);
+  const provider = getProvider(chainId);
 
   return provider.getBalance(account, blockNumber);
 }
@@ -24,10 +23,9 @@ export function getBalance(
   chainId: ChainId,
   account: string,
   tokenAddress: string,
-  blockNumber: number | "latest" = "latest",
-  testProvider?: ethers.providers.Web3Provider
+  blockNumber: number | "latest" = "latest"
 ): Promise<ethers.BigNumber> {
-  const provider = testProvider ?? getProvider(chainId);
+  const provider = getProvider(chainId);
   const contract = clients.erc20.connect(tokenAddress, provider);
   return contract.balanceOf(account, { blockTag: blockNumber });
 }

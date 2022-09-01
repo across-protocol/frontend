@@ -7,10 +7,7 @@ import { getProvider, ChainId, getChainInfo, latestBlockQueryKey } from "utils";
  * @param chainId The chain Id of the chain to poll for new blocks.
  * @returns The latest block, and the useQueryResult object.
  */
-export function useBlock(
-  chainId?: ChainId,
-  testProvider?: ethers.providers.Web3Provider
-) {
+export function useBlock(chainId?: ChainId) {
   const enabledQuery = !!chainId;
   const queryKey = enabledQuery
     ? latestBlockQueryKey(chainId)
@@ -21,7 +18,7 @@ export function useBlock(
   const { data: block, ...delegated } = useQuery(
     queryKey,
     async () => {
-      return getBlock(chainId!, "latest", testProvider);
+      return getBlock(chainId!);
     },
     {
       // refetch based on the chain polling interval
@@ -42,9 +39,8 @@ export function useBlock(
  */
 async function getBlock(
   chainId: ChainId,
-  blockHashOrBlockTag: ethers.providers.BlockTag = "latest",
-  testProvider?: ethers.providers.Web3Provider
+  blockHashOrBlockTag: ethers.providers.BlockTag = "latest"
 ): Promise<ethers.providers.Block> {
-  const provider = testProvider ?? getProvider(chainId);
+  const provider = getProvider(chainId);
   return provider.getBlock(blockHashOrBlockTag);
 }

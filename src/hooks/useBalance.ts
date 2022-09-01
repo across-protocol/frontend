@@ -66,7 +66,6 @@ const QueryBalanceBySymbol =
     tokenSymbolToQuery?: string;
     blockNumberToQuery?: number;
     config: ConfigClient;
-    testProvider?: ethers.providers.Web3Provider;
   }) =>
   async () => {
     const {
@@ -75,7 +74,6 @@ const QueryBalanceBySymbol =
       tokenSymbolToQuery,
       blockNumberToQuery,
       config,
-      testProvider,
     } = params;
     if (
       !chainIdToQuery ||
@@ -92,16 +90,14 @@ const QueryBalanceBySymbol =
       return getNativeBalance(
         chainIdToQuery,
         accountToQuery,
-        blockNumberToQuery,
-        testProvider
+        blockNumberToQuery
       );
     } else {
       return getBalance(
         chainIdToQuery,
         accountToQuery,
         tokenInfo.address,
-        blockNumberToQuery,
-        testProvider
+        blockNumberToQuery
       );
     }
   };
@@ -183,14 +179,11 @@ export function useBalancesBySymbols({
   blockNumber?: number;
   provider?: ethers.providers.Web3Provider | null;
 }) {
-  // Needed for Cypress testing. Pass in the provider to use instead of the infura provider.
-  const testProvider =
-    provider && provider.connection.url === "eip-1193:" ? provider : undefined;
   const config = getConfig();
   const { account: connectedAccount } = useConnection();
   const chainIdToQuery = chainId;
   const accountToQuery = account ?? connectedAccount;
-  const { block: latestBlock } = useBlock(chainId, testProvider);
+  const { block: latestBlock } = useBlock(chainId);
   const blockNumberToQuery = blockNumber ?? latestBlock?.number;
   const prevAccount = usePrevious(accountToQuery);
   const prevChain = usePrevious(chainIdToQuery);
@@ -224,7 +217,6 @@ export function useBalancesBySymbols({
       tokenSymbolToQuery,
       blockNumberToQuery,
       accountToQuery,
-      testProvider,
     });
     return {
       queryKey,

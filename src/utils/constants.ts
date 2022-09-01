@@ -496,6 +496,12 @@ export const providersTable: Record<
 export function getProvider(
   chainId: ChainId = hubPoolChainId
 ): ethers.providers.StaticJsonRpcProvider {
+  if ((window as any).isCypress) {
+    const provider: ethers.providers.JsonRpcProvider = (window as any).ethereum
+      .provider;
+
+    return provider;
+  }
   return providersTable[chainId];
 }
 
