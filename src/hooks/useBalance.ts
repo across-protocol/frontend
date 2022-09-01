@@ -10,7 +10,7 @@ import {
   getConfig,
   ConfigClient,
 } from "utils";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber } from "ethers";
 
 export function useNativeBalance(
   tokenSymbol?: string,
@@ -171,13 +171,11 @@ export function useBalancesBySymbols({
   chainId,
   account,
   blockNumber,
-  provider,
 }: {
   tokenSymbols: string[];
   chainId?: ChainId;
   account?: string;
   blockNumber?: number;
-  provider?: ethers.providers.Web3Provider | null;
 }) {
   const config = getConfig();
   const { account: connectedAccount } = useConnection();

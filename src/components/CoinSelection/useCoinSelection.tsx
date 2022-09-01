@@ -17,7 +17,7 @@ import {
 import { useQueryParams } from "hooks";
 
 export default function useCoinSelection() {
-  const { account, isConnected, provider } = useConnection();
+  const { account, isConnected } = useConnection();
   const params = useQueryParams();
   const {
     setAmount,
@@ -35,7 +35,6 @@ export default function useCoinSelection() {
     tokenSymbols: availableTokens.map((t) => t.symbol),
     chainId: fromChain,
     account,
-    provider,
   });
 
   const { selectedItem, ...downshiftState } = useSelect({
@@ -167,7 +166,6 @@ export default function useCoinSelection() {
     availableTokens,
     error,
     fromChain,
-    provider,
     account,
   };
 }
