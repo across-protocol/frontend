@@ -22,8 +22,14 @@ const handler = async (request, response) => {
   try {
     const provider = infuraProvider("mainnet");
 
-    let { amount, token, timestamp, destinationChainId, originChainId } =
-      request.query;
+    let {
+      amount,
+      token,
+      timestamp,
+      destinationChainId,
+      originChainId,
+      skipAmountLimit,
+    } = request.query;
     if (!isString(amount) || !isString(token) || !isString(destinationChainId))
       throw new InputError(
         "Must provide amount, token, and destinationChainId as query params"
@@ -135,7 +141,9 @@ const handler = async (request, response) => {
       relayerFeeDetails,
     });
 
-    if (relayerFeeDetails.isAmountTooLow)
+    const skipAmountLimitEnabled = skipAmountLimit === "true";
+
+    if (!skipAmountLimitEnabled && relayerFeeDetails.isAmountTooLow)
       throw new InputError("Sent amount is too low relative to fees");
 
     const responseJson = {
@@ -147,6 +155,7 @@ const handler = async (request, response) => {
       relayFeeTotal: relayerFeeDetails.relayFeeTotal,
       lpFeePct: realizedLPFeePct.toString(),
       timestamp: parsedTimestamp.toString(),
+      isAmountTooLow: relayerFeeDetails.isAmountTooLow,
     };
 
     response.status(200).json(responseJson);

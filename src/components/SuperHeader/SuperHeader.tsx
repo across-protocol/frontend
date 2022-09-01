@@ -2,14 +2,18 @@ import styled from "@emotion/styled";
 import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
-const Wrapper = styled.div`
+interface IWrapper {
+  darkMode?: boolean;
+}
+const Wrapper = styled.div<IWrapper>`
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 0 30px;
   height: 60px;
-  color: var(--color-gray);
-  background-color: var(--color-error);
+  color: ${({ darkMode }) => (darkMode ? "#fff" : "var(--color-gray)")};
+  background-color: ${({ darkMode }) =>
+    darkMode ? "#202024" : "var(--color-error)"};
   border-bottom: 1px solid var(--color-gray);
   position: sticky;
   width: 100%;
@@ -35,7 +39,11 @@ const Wrapper = styled.div`
 /**
  * React component that renders its children in a super header on top of the page.
  */
-const SuperHeader: React.FC = ({ children }) => {
+
+interface Props {
+  darkMode?: boolean;
+}
+const SuperHeader: React.FC<Props> = ({ children, darkMode }) => {
   const container = useRef(document.getElementById("super-header"));
   // We create the "super-header" element and insert it into the DOM, if it does not exist already
   useLayoutEffect(() => {
@@ -51,6 +59,9 @@ const SuperHeader: React.FC = ({ children }) => {
   if (!container.current) {
     return null;
   }
-  return createPortal(<Wrapper>{children}</Wrapper>, container.current);
+  return createPortal(
+    <Wrapper darkMode={darkMode}>{children}</Wrapper>,
+    container.current
+  );
 };
 export default SuperHeader;
