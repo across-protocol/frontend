@@ -53,11 +53,13 @@ export const StakingForm = ({
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
   const [stakeAmount, setStakeAmount] = useState("");
+  const [isTransitioning, setTransitioning] = useState(false);
 
   const buttonHandler = isConnected
     ? () => {
         (activeTab === "stake" ? stakeActionFn : unstakeActionFn)(
-          parseLPToken(stakeAmount)
+          parseLPToken(stakeAmount),
+          setTransitioning
         );
       }
     : walletConnectionHandler;
@@ -116,6 +118,7 @@ export const StakingForm = ({
           maxValue={buttonMaxValue === "0" ? "" : buttonMaxValue}
           omitInput={!isConnected}
           onClickHandler={buttonHandler}
+          displayLoader={isTransitioning}
         />
       </InputBlockWrapper>
       <Divider />

@@ -12,7 +12,10 @@ import { useStakingPoolResolver } from "./useStakingPoolResolver";
 import { BigNumber, BigNumberish, providers, Signer } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 
-export type StakingActionFunctionType = (amount: BigNumber) => Promise<void>;
+export type StakingActionFunctionType = (
+  amount: BigNumber,
+  setTransition: React.Dispatch<React.SetStateAction<boolean>>
+) => Promise<void>;
 export type FormatterFnType = (wei: BigNumberish) => string;
 export type ParserFnType = (wei: string) => BigNumber;
 
@@ -200,28 +203,33 @@ const performStakingActionBuilderFn = (
   // Use this inner inner local to track whether a
   // successful approavl has been emitted.
   let innerApprovalRequired = requiresApproval;
-  return async (amount: BigNumber): Promise<void> => {
-    const acceleratingDistributor = getConfig()
-      .getAcceleratingDistributor()
-      .connect(signer);
-    if (innerApprovalRequired) {
-      const lpER20 = ERC20__factory.connect(lpTokenAddress, signer);
-      console.log(lpER20, MAX_APPROVAL_AMOUNT);
-      innerApprovalRequired = false;
-      // const approvalResult = await lpER20.approve(
-      //   acceleratingDistributor.address,
-      //   MAX_APPROVAL_AMOUNT
-      // );
-      // console.log(approvalResult);
-    } else {
-      const callingFn = acceleratingDistributor[action];
-      try {
-        const amountAsBigNumber = BigNumber.from(amount);
-        const result = await callingFn(lpTokenAddress, amountAsBigNumber);
-        console.log(result);
-      } catch (e) {
-        console.log(e);
+  return async (
+    amount: BigNumber,
+    setTransition: React.Dispatch<React.SetStateAction<boolean>>
+  ): Promise<void> => {
+    try {
+      setTransition(true);
+      const acceleratingDistributor = getConfig()
+        .getAcceleratingDistributor()
+        .connect(signer);
+      if (innerApprovalRequired) {
+        const lpER20 = ERC20__factory.connect(lpTokenAddress, signer);
+        console.log(lpER20, MAX_APPROVAL_AMOUNT);
+        const approvalResult = await lpER20.approve(
+          acceleratingDistributor.address,
+          1
+        );
+        console.log(approvalResult);
+        innerApprovalRequired = false;
       }
+      const callingFn = acceleratingDistributor[action];
+      const amountAsBigNumber = BigNumber.from(amount);
+      const result = await callingFn(lpTokenAddress, amountAsBigNumber);
+      console.log(result);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setTransition(false);
     }
   };
 };
