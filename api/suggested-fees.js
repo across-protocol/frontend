@@ -141,7 +141,7 @@ const handler = async (request, response) => {
       relayerFeeDetails,
     });
 
-    const skipAmountLimitEnabled = skipAmountLimit !== undefined;
+    const skipAmountLimitEnabled = skipAmountLimit === "true";
 
     if (skipAmountLimitEnabled && relayerFeeDetails.isAmountTooLow)
       throw new InputError("Sent amount is too low relative to fees");
