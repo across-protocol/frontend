@@ -158,7 +158,7 @@ const resolveRequestedData = async (
   const lpTokenFormatter = formatUnitsFnBuilder(lpTokenDecimalCount);
   const lpTokenParser = parseUnitsFnBuilder(lpTokenDecimalCount);
 
-  const requiresApproval = lpTokenAllowance.lte(0);
+  const requiresApproval = lpTokenAllowance.lte(availableLPTokenBalance);
   const stakeActionFn = performStakingActionBuilderFn(
     lpTokenAddress,
     signer,
