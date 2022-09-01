@@ -140,8 +140,11 @@ const handler = async (request, response) => {
 
     const responseJson = {
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
+      capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
+      relayGasFeeTotal: relayerFeeDetails.gasFeeTotal,
       relayFeePct: relayerFeeDetails.relayFeePercent,
+      relayFeeTotal: relayerFeeDetails.relayFeeTotal,
       lpFeePct: realizedLPFeePct.toString(),
       timestamp: parsedTimestamp.toString(),
     };
