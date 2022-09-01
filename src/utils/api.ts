@@ -3,9 +3,18 @@ import { BigNumber, ethers } from "ethers";
 import { Fee } from "./bridge";
 import { ChainId } from "./constants";
 
+/**
+ * A current list of API endpoints supported by this function
+ */
 export type APIEndpoint = "limits" | "suggested-fees";
 type EndpointMethods = "get" | "post";
 
+/**
+ * Creates a call to the Across Serverless API to the specified endpoint
+ * @param endpoint The endpoint to make an HTTP request to
+ * @param payload The content of the information transmitted to the endpoint. Note: query params if this method is a GET and data body if this method is POST/PUT
+ * @returns The JSON/text content of the API call
+ */
 export async function apiCall(
   endpoint: APIEndpoint,
   payload: any
@@ -27,6 +36,13 @@ export async function apiCall(
   return data;
 }
 
+/**
+ * Creates an HTTP call to the `suggested-fees` API endpoint
+ * @param amount The amount of fees to calculate
+ * @param originToken The ERC20 token address from the origin chain
+ * @param toChainid The destination chain number. The chain `amount` of `originToken` will be bridged to
+ * @returns The result of the HTTP call to `api/suggested-fees`
+ */
 export async function suggestedFeesApiCall(
   amount: ethers.BigNumber,
   originToken: string,
