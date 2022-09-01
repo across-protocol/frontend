@@ -132,8 +132,7 @@ const handler = async (request, response) => {
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
-      destinationChainId,
-      tokenPrice
+      destinationChainId
     );
     logger.debug({
       at: "suggested-fees",
