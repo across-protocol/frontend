@@ -52,6 +52,9 @@ export async function suggestedFeesApiCall(
   const relayGasFeePct = BigNumber.from(result["relayGasFeePct"]);
   const relayGasFeeTotal = amount.mul(relayGasFeePct);
 
+  console.log(relayGasFeePct.toString());
+  console.log(relayGasFeeTotal.toString());
+
   return {
     relayerFee: {
       pct: relayFeePct,
