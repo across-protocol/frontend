@@ -158,7 +158,7 @@ const PoolForm: FC<Props> = ({
       <Position data-cy="position-info-box">
         <PositionItem>
           <div>Position Size</div>
-          <div>
+          <div data-cy="pool-position">
             {formatUnits(totalPosition, decimals).replace("-", "")} {symbol}
           </div>
         </PositionItem>
