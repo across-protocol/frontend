@@ -71,6 +71,9 @@ const Routes: React.FC = () => {
           </span>
         </Banner>
       )}
+      <SuperHeader>
+        USDT currently disabled for Across contract upgrade.
+      </SuperHeader>
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
