@@ -5,6 +5,7 @@ import {
   formattedBigNumberToNumber,
   formatUnitsFnBuilder,
   getConfig,
+  MAX_APPROVAL_AMOUNT,
   parseUnitsFnBuilder,
 } from "utils";
 import { useStakingPoolResolver } from "./useStakingPoolResolver";
@@ -82,6 +83,7 @@ const resolveRequestedData = async (
   const config = getConfig();
   const hubPool = config.getHubPool();
   const acceleratingDistributor = config.getAcceleratingDistributor();
+  const acceleratingDistributorAddress = acceleratingDistributor.address;
 
   // Get the corresponding LP token from the hub pool directly
   // Resolve the ACX reward token address from the AcceleratingDistributor
@@ -108,6 +110,7 @@ const resolveRequestedData = async (
     },
     availableLPTokenBalance,
     lpTokenDecimalCount,
+    lpTokenAllowance,
     lpTokenSymbolName,
   ] = await Promise.all([
     acceleratingDistributor.stakingTokens(lpTokenAddress) as Promise<{
@@ -127,6 +130,7 @@ const resolveRequestedData = async (
     }>,
     lpTokenERC20.balanceOf(account),
     lpTokenERC20.decimals(),
+    lpTokenERC20.allowance(account, acceleratingDistributorAddress),
     Promise.resolve((await lpTokenERC20.symbol()).slice(4)),
   ]);
 
@@ -150,15 +154,19 @@ const resolveRequestedData = async (
 
   const lpTokenFormatter = formatUnitsFnBuilder(lpTokenDecimalCount);
   const lpTokenParser = parseUnitsFnBuilder(lpTokenDecimalCount);
+
+  const requiresApproval = lpTokenAllowance.lte(0);
   const stakeActionFn = performStakingActionBuilderFn(
     lpTokenAddress,
     signer,
-    "stake"
+    "stake",
+    requiresApproval
   );
   const unstakeActionFn = performStakingActionBuilderFn(
     lpTokenAddress,
     signer,
-    "unstake"
+    "unstake",
+    requiresApproval
   );
 
   return {
@@ -186,19 +194,34 @@ const resolveRequestedData = async (
 const performStakingActionBuilderFn = (
   lpTokenAddress: string,
   signer: Signer,
-  action: "stake" | "unstake"
+  action: "stake" | "unstake",
+  requiresApproval: boolean
 ) => {
+  // Use this inner inner local to track whether a
+  // successful approavl has been emitted.
+  let innerApprovalRequired = requiresApproval;
   return async (amount: BigNumber): Promise<void> => {
     const acceleratingDistributor = getConfig()
       .getAcceleratingDistributor()
       .connect(signer);
-    const callingFn = acceleratingDistributor[action];
-    try {
-      const amountAsBigNumber = BigNumber.from(amount);
-      const result = await callingFn(lpTokenAddress, amountAsBigNumber);
-      console.log(result);
-    } catch (e) {
-      console.log(e);
+    if (innerApprovalRequired) {
+      const lpER20 = ERC20__factory.connect(lpTokenAddress, signer);
+      console.log(lpER20, MAX_APPROVAL_AMOUNT);
+      innerApprovalRequired = false;
+      // const approvalResult = await lpER20.approve(
+      //   acceleratingDistributor.address,
+      //   MAX_APPROVAL_AMOUNT
+      // );
+      // console.log(approvalResult);
+    } else {
+      const callingFn = acceleratingDistributor[action];
+      try {
+        const amountAsBigNumber = BigNumber.from(amount);
+        const result = await callingFn(lpTokenAddress, amountAsBigNumber);
+        console.log(result);
+      } catch (e) {
+        console.log(e);
+      }
     }
   };
 };
