@@ -150,9 +150,8 @@ const handler = async (request, response) => {
       relayFeePct: relayerFeeDetails.relayFeePercent,
       lpFeePct: realizedLPFeePct.toString(),
       timestamp: parsedTimestamp.toString(),
+      isAmountTooLow: relayerFeeDetails.isAmountTooLow,
     };
-
-    responseJson["isAmountTooLow"] = relayerFeeDetails.isAmountTooLow;
 
     response.status(200).json(responseJson);
   } catch (error) {
