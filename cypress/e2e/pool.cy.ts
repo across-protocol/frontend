@@ -43,7 +43,19 @@ describe("pool", () => {
     cy.dataCy("pool-position").contains("100");
   });
 
-  // it("removes liquidity", () => {
-  //   cy.dataCy("add-tab").click();
-  // });
+  it("removes liquidity", () => {
+    cy.dataCy("remove-tab").click();
+    cy.dataCy("remove-max-button").click();
+    cy.dataCy("remove-amount-preview").contains("100 ETH");
+    cy.dataCy("remove-liquidity-button").click();
+    cy.wait(4000);
+    cy.dataCy("bouncing-loader").should("be.visible");
+    cy.wait(30000);
+    // TX won't resolve to non-loading state because of dependency on NotifyJS.
+    cy.visit("/pool");
+    cy.wait(4000);
+    cy.connectInjectedWallet("add-liquidity-button");
+    cy.wait(3000);
+    cy.dataCy("pool-position").contains("0");
+  });
 });
