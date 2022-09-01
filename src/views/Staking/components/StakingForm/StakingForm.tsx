@@ -56,7 +56,6 @@ export const StakingForm = ({
 
   const buttonHandler = isConnected
     ? () => {
-        console.log(parseLPToken(stakeAmount).toString());
         (activeTab === "stake" ? stakeActionFn : unstakeActionFn)(
           parseLPToken(stakeAmount)
         );
