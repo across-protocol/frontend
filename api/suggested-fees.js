@@ -152,9 +152,7 @@ const handler = async (request, response) => {
       timestamp: parsedTimestamp.toString(),
     };
 
-    if (skipAmountLimitEnabled) {
-      responseJson["isAmountTooLow"] = relayerFeeDetails.isAmountTooLow;
-    }
+    responseJson["isAmountTooLow"] = relayerFeeDetails.isAmountTooLow;
 
     response.status(200).json(responseJson);
   } catch (error) {
