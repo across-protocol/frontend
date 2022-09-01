@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Card,
   Tabs,
@@ -54,12 +54,14 @@ export const StakingForm = ({
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
   const [stakeAmount, setStakeAmount] = useState("");
   const [isTransitioning, setTransitioning] = useState(false);
+  const isRendered = useRef(false);
 
   const buttonHandler = isConnected
     ? () => {
         (activeTab === "stake" ? stakeActionFn : unstakeActionFn)(
           parseLPToken(stakeAmount),
-          setTransitioning
+          setTransitioning,
+          isRendered
         );
       }
     : walletConnectionHandler;
@@ -91,6 +93,13 @@ export const StakingForm = ({
   useEffect(() => {
     setIsPoolInfoVisible(false);
   }, [isConnected]);
+
+  useEffect(() => {
+    isRendered.current = true;
+    return () => {
+      isRendered.current = false;
+    };
+  }, []);
 
   return (
     <Card>

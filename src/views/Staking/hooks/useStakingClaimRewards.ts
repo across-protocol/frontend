@@ -1,6 +1,7 @@
 import { useConnection } from "state/hooks";
 import { useEffect, useState } from "react";
 import {
+  addEtherscan,
   BASIS_SHIFT,
   formattedBigNumberToNumber,
   formatUnitsFnBuilder,
@@ -11,10 +12,12 @@ import {
 import { useStakingPoolResolver } from "./useStakingPoolResolver";
 import { BigNumber, BigNumberish, providers, Signer } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
+import { API } from "bnc-notify";
 
 export type StakingActionFunctionType = (
   amount: BigNumber,
-  setTransition: React.Dispatch<React.SetStateAction<boolean>>
+  setTransition: React.Dispatch<React.SetStateAction<boolean>>,
+  isRendered: React.MutableRefObject<boolean>
 ) => Promise<void>;
 export type FormatterFnType = (wei: BigNumberish) => string;
 export type ParserFnType = (wei: string) => BigNumber;
@@ -45,7 +48,7 @@ type ResolvedDataType =
 export const stakingActionNOOPFn: StakingActionFunctionType = async () => {};
 
 export const useStakingClaimRewards = () => {
-  const { account, provider, signer } = useConnection();
+  const { account, provider, signer, notify } = useConnection();
   const { mainnetAddress } = useStakingPoolResolver();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -56,14 +59,18 @@ export const useStakingClaimRewards = () => {
     if (!mainnetAddress || !provider || !account || !signer) {
       setIsLoading(false);
     } else {
-      resolveRequestedData(mainnetAddress, provider, signer, account).then(
-        (resolvedData) => {
-          setStakingData(resolvedData);
-          setIsLoading(false);
-        }
-      );
+      resolveRequestedData(
+        mainnetAddress,
+        provider,
+        signer,
+        account,
+        notify
+      ).then((resolvedData) => {
+        setStakingData(resolvedData);
+        setIsLoading(false);
+      });
     }
-  }, [mainnetAddress, account, provider, signer]);
+  }, [mainnetAddress, account, provider, signer, notify]);
 
   return {
     isStakingDataLoading: isLoading,
@@ -81,7 +88,8 @@ const resolveRequestedData = async (
   tokenAddress: string,
   provider: providers.Provider,
   signer: Signer,
-  account: string
+  account: string,
+  notify: API
 ): Promise<ResolvedDataType> => {
   const config = getConfig();
   const hubPool = config.getHubPool();
@@ -163,13 +171,15 @@ const resolveRequestedData = async (
     lpTokenAddress,
     signer,
     "stake",
-    requiresApproval
+    requiresApproval,
+    notify
   );
   const unstakeActionFn = performStakingActionBuilderFn(
     lpTokenAddress,
     signer,
     "unstake",
-    requiresApproval
+    requiresApproval,
+    notify
   );
 
   return {
@@ -198,38 +208,69 @@ const performStakingActionBuilderFn = (
   lpTokenAddress: string,
   signer: Signer,
   action: "stake" | "unstake",
-  requiresApproval: boolean
+  requiresApproval: boolean,
+  notify: API
 ) => {
   // Use this inner inner local to track whether a
   // successful approavl has been emitted.
   let innerApprovalRequired = requiresApproval;
   return async (
     amount: BigNumber,
-    setTransition: React.Dispatch<React.SetStateAction<boolean>>
+    setTransition: React.Dispatch<React.SetStateAction<boolean>>,
+    isRendered: React.MutableRefObject<boolean>
   ): Promise<void> => {
     try {
-      setTransition(true);
+      if (isRendered.current) {
+        setTransition(true);
+      }
       const acceleratingDistributor = getConfig()
         .getAcceleratingDistributor()
         .connect(signer);
       if (innerApprovalRequired) {
         const lpER20 = ERC20__factory.connect(lpTokenAddress, signer);
-        console.log(lpER20, MAX_APPROVAL_AMOUNT);
+        console.log(MAX_APPROVAL_AMOUNT);
         const approvalResult = await lpER20.approve(
           acceleratingDistributor.address,
           1
         );
-        console.log(approvalResult);
+        await notificationEmitter(approvalResult.hash, notify);
         innerApprovalRequired = false;
       }
       const callingFn = acceleratingDistributor[action];
       const amountAsBigNumber = BigNumber.from(amount);
-      const result = await callingFn(lpTokenAddress, amountAsBigNumber);
-      console.log(result);
+      // Ensure that the user is within the rendered function
+      // before executing this stake command
+      if (isRendered.current) {
+        console.log(callingFn, amountAsBigNumber);
+        // const result = await callingFn(lpTokenAddress, amountAsBigNumber);
+        // console.log(result);
+      }
     } catch (e) {
       console.log(e);
     } finally {
-      setTransition(false);
+      if (isRendered.current) {
+        setTransition(false);
+      }
     }
   };
+};
+
+const notificationEmitter = async (
+  txHash: string,
+  notify: API
+): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
+    const { emitter } = notify.hash(txHash, "5");
+    emitter.on("all", addEtherscan);
+    emitter.on("txConfirmed", () => {
+      notify.unsubscribe(txHash);
+      setTimeout(() => {
+        resolve();
+      }, 5000);
+    });
+    emitter.on("txFailed", () => {
+      notify.unsubscribe(txHash);
+      reject();
+    });
+  });
 };
