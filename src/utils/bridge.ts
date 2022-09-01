@@ -54,37 +54,12 @@ export async function getRelayerFee(
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
 }> {
-  const config = relayFeeCalculatorConfig(toChainId);
-
   const address = getConfig().getTokenInfoBySymbol(
     fromChainid,
     tokenSymbol
   ).address;
 
-  await suggestedFeesApiCall(amount, address, toChainId);
-
-  // Construction of a new RelayFeeCalculator will throw if any props in the config are incorrectly set. For example,
-  // if the capital cost config is incorrectly set for a token, construction will throw.
-  const calculator = new relayFeeCalculator.RelayFeeCalculator(config);
-  const result = await calculator.relayerFeeDetails(amount, tokenSymbol);
-
-  console.log(result);
-
-  return {
-    relayerFee: {
-      pct: ethers.BigNumber.from(result.relayFeePercent),
-      total: ethers.BigNumber.from(result.relayFeeTotal),
-    },
-    relayerGasFee: {
-      pct: ethers.BigNumber.from(result.gasFeePercent),
-      total: ethers.BigNumber.from(result.gasFeeTotal),
-    },
-    relayerCapitalFee: {
-      pct: ethers.BigNumber.from(result.capitalFeePercent),
-      total: ethers.BigNumber.from(result.capitalFeeTotal),
-    },
-    isAmountTooLow: result.isAmountTooLow,
-  };
+  return suggestedFeesApiCall(amount, address, toChainId);
 }
 
 export async function getLpFee(

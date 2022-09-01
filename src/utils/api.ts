@@ -1,8 +1,7 @@
 import axios from "axios";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { Fee } from "./bridge";
 import { ChainId } from "./constants";
-import { parseEther } from "./format";
 
 export type APIEndpoint = "limits" | "suggested-fees";
 type EndpointMethods = "get" | "post";
@@ -43,24 +42,29 @@ export async function suggestedFeesApiCall(
     destinationChainId: toChainid,
     amount: amount.toString(),
   });
-  const relayFeePct = parseEther(result["relayFeePct"]);
-  const lpFeePct = parseEther(result["lpFeePct"]);
-  const relayerFee = relayFeePct.mul(amount);
-  const lpFee = lpFeePct.mul(amount);
+
+  const relayFeePct = BigNumber.from(result["relayFeePct"]);
+  const relayFeeTotal = amount.mul(relayFeePct);
+
+  const capitalFeePct = BigNumber.from(result["capitalFeePct"]);
+  const capitalFeeTotal = amount.mul(capitalFeePct);
+
+  const relayGasFeePct = BigNumber.from(result["relayGasFeePct"]);
+  const relayGasFeeTotal = amount.mul(relayGasFeePct);
 
   return {
     relayerFee: {
       pct: relayFeePct,
-      total: relayerFee,
+      total: relayFeeTotal,
     },
     relayerCapitalFee: {
-      pct: lpFeePct,
-      total: lpFee,
+      pct: capitalFeePct,
+      total: capitalFeeTotal,
     },
     isAmountTooLow: false,
     relayerGasFee: {
-      pct: relayFeePct,
-      total: relayerFee,
+      pct: relayGasFeePct,
+      total: relayGasFeeTotal,
     },
   };
 }
