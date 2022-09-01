@@ -2,7 +2,6 @@ import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { Fee } from "./bridge";
 import { ChainId } from "./constants";
-import { parseUnits } from "./format";
 
 export type APIEndpoint = "limits" | "suggested-fees";
 type EndpointMethods = "get" | "post";
@@ -42,19 +41,17 @@ export async function suggestedFeesApiCall(
     token: originToken,
     destinationChainId: toChainid,
     amount: amount.toString(),
+    skipAmountLimit: true,
   });
 
   const relayFeePct = BigNumber.from(result["relayFeePct"]);
-  const relayFeeTotal = amount.mul(relayFeePct).div(parseUnits("1", 18));
+  const relayFeeTotal = BigNumber.from(result["relayFeeTotal"]);
 
   const capitalFeePct = BigNumber.from(result["capitalFeePct"]);
-  const capitalFeeTotal = amount.mul(capitalFeePct).div(parseUnits("1", 18));
+  const capitalFeeTotal = BigNumber.from(result["capitalFeeTotal"]);
 
   const relayGasFeePct = BigNumber.from(result["relayGasFeePct"]);
-  const relayGasFeeTotal = amount.mul(relayGasFeePct).div(parseUnits("1", 18));
-
-  console.log(relayGasFeePct.toString());
-  console.log(relayGasFeeTotal.toString());
+  const relayGasFeeTotal = BigNumber.from(result["relayGasFeeTotal"]);
 
   return {
     relayerFee: {
