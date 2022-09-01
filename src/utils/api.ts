@@ -53,7 +53,6 @@ export async function suggestedFeesApiCall(
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
 }> {
-  console.log(originToken, toChainid);
   const result = await apiCall("suggested-fees", {
     token: originToken,
     destinationChainId: toChainid,
