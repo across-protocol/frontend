@@ -34,13 +34,9 @@ export function useConnection() {
     setShowContractAddressWarning(false);
     if (account && chainId) {
       const addr = ethers.utils.getAddress(account.address);
-      // Check to see if the toAddress they are inputting is a Contract on Mainnet
-      // If so, warn user because we send WETH and this could cause loss of funds.
-      // Note: Removed check for WETH and ETH because they can change tokens outside of this modal.
       getCode(addr, chainId)
         .then((addr) => {
           if (addr !== noContractCode) {
-            console.log("in here?", addr);
             setShowContractAddressWarning(true);
           } else {
             setShowContractAddressWarning(false);
