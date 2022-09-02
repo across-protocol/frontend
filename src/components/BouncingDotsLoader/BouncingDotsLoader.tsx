@@ -5,19 +5,20 @@ export type BounceType = "default | big";
 
 interface Props {
   type?: BounceType;
+  dataCy?: string;
 }
 
-const BouncingDotsLoader: FC<Props> = ({ type = "default" }) => {
+const BouncingDotsLoader: FC<Props> = ({ type = "default", dataCy }) => {
   if (type === "big")
     return (
-      <BigBouncingWrapper>
+      <BigBouncingWrapper data-cy={dataCy}>
         <div />
         <div />
         <div />
       </BigBouncingWrapper>
     );
   return (
-    <BouncingWrapper>
+    <BouncingWrapper data-cy={dataCy}>
       <div />
       <div />
       <div />

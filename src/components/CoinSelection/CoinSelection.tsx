@@ -82,7 +82,7 @@ const CoinSelection = () => {
                 id="amount"
                 value={inputAmount}
                 onChange={handleInputChange}
-                data-cy="amount-input"
+                data-cy="bridge-amount-input"
               />
             </RoundBox>
             <Menu {...getMenuProps()} isOpen={isOpen}>

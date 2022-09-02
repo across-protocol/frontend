@@ -166,12 +166,17 @@ export function useBalanceBySymbol(
  * @param account - The account to query the balances of.
  * @param blockNumber - The block number to execute the query on, if not specified, defaults to the latest block. Note, past blocks require an archive node.
  */
-export function useBalancesBySymbols(
-  tokenSymbols: string[],
-  chainId?: ChainId,
-  account?: string,
-  blockNumber?: number
-) {
+export function useBalancesBySymbols({
+  tokenSymbols,
+  chainId,
+  account,
+  blockNumber,
+}: {
+  tokenSymbols: string[];
+  chainId?: ChainId;
+  account?: string;
+  blockNumber?: number;
+}) {
   const config = getConfig();
   const { account: connectedAccount } = useConnection();
   const chainIdToQuery = chainId;
@@ -187,6 +192,7 @@ export function useBalancesBySymbols(
     prevChain === chainIdToQuery &&
     JSON.stringify(prevTokens) === JSON.stringify(tokenSymbols);
   const enabled = !!chainIdToQuery && !!accountToQuery && !!blockNumberToQuery;
+
   // we use useQueries instead of useQuery so we can share cache values with the singular balance query
   const queries = tokenSymbols.map((tokenSymbolToQuery) => {
     const queryKey = enabled
