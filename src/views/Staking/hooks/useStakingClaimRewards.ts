@@ -161,9 +161,8 @@ const resolveRequestedData = async (
   const usersTotalLPTokens = availableLPTokenBalance.add(userAmountOfLPStaked);
 
   const shareOfPool = userAmountOfLPStaked
-    .add("10")
     .mul(BASIS_SHIFT)
-    .div(globalAmountOfLPStaked.add("1050"))
+    .div(globalAmountOfLPStaked)
     .mul(100);
 
   const lpTokenFormatter = formatUnitsFnBuilder(lpTokenDecimalCount);
