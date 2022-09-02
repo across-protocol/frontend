@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { QUERIES } from "utils";
 
 interface IWrapper {
   darkMode?: boolean;
@@ -34,7 +35,8 @@ const Wrapper = styled.div<IWrapper>`
       color: var(--color-black);
     }
   }
-  @media screen and (max-width: 768px) {
+
+  @media ${QUERIES.tabletAndDown} {
     height: inherit;
     padding-top: 10px;
     padding-bottom: 10px;

@@ -36,11 +36,7 @@ export function useConnection() {
       const addr = ethers.utils.getAddress(account.address);
       getCode(addr, chainId)
         .then((addr) => {
-          if (addr !== noContractCode) {
-            setShowContractAddressWarning(true);
-          } else {
-            setShowContractAddressWarning(false);
-          }
+          setShowContractAddressWarning(addr !== noContractCode);
         })
         .catch((err) => {
           console.log("err in getCode call", err);
