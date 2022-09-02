@@ -87,8 +87,10 @@ export const StakingForm = ({
   const valueOrEmpty = repeatableTernaryBuilder(isConnected, <>-</>);
 
   useEffect(() => {
-    setStakeAmount("");
-  }, [activeTab]);
+    if (!isTransitioning) {
+      setStakeAmount("");
+    }
+  }, [activeTab, isTransitioning]);
 
   useEffect(() => {
     setIsPoolInfoVisible(false);
