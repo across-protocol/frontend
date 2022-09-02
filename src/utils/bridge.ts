@@ -46,7 +46,7 @@ export type BridgeFees = {
 export async function getRelayerFee(
   tokenSymbol: string,
   amount: ethers.BigNumber,
-  fromChainid: ChainId,
+  fromChainId: ChainId,
   toChainId: ChainId
 ): Promise<{
   relayerFee: Fee;
@@ -55,7 +55,7 @@ export async function getRelayerFee(
   isAmountTooLow: boolean;
 }> {
   const address = getConfig().getTokenInfoBySymbol(
-    fromChainid,
+    fromChainId,
     tokenSymbol
   ).address;
 
