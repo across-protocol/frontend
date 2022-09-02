@@ -257,6 +257,11 @@ const queries = {
 const maxRelayFeePct = 0.25;
 
 const getRelayerFeeCalculator = (destinationChainId) => {
+  const queryFn = queries[destinationChainId];
+  if (queryFn === undefined) {
+    throw new InputError("Invalid destination chain Id");
+  }
+
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     capitalCostsPercent: 0.04,
