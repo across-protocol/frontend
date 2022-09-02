@@ -235,10 +235,9 @@ const performStakingActionBuilderFn = (
         .connect(signer);
       if (innerApprovalRequired) {
         const lpER20 = ERC20__factory.connect(lpTokenAddress, signer);
-        console.log(MAX_APPROVAL_AMOUNT);
         const approvalResult = await lpER20.approve(
           acceleratingDistributor.address,
-          1
+          MAX_APPROVAL_AMOUNT
         );
         await notificationEmitter(approvalResult.hash, notify);
         innerApprovalRequired = false;
