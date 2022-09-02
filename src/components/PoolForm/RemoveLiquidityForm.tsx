@@ -213,6 +213,7 @@ const RemoveLiqudityForm: FC<Props> = ({
       />
       <RemovePercentButtonsWrapper>
         <RemovePercentButton
+          data-cy="remove-25"
           onClick={() => {
             setError("");
             setRemoveAmountSlider(25);
@@ -222,6 +223,7 @@ const RemoveLiqudityForm: FC<Props> = ({
           25%
         </RemovePercentButton>
         <RemovePercentButton
+          data-cy="remove-50"
           onClick={() => {
             setError("");
 
@@ -232,6 +234,7 @@ const RemoveLiqudityForm: FC<Props> = ({
           50%
         </RemovePercentButton>
         <RemovePercentButton
+          data-cy="remove-75"
           onClick={() => {
             setError("");
 

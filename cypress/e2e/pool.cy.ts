@@ -41,6 +41,12 @@ describe("pool", () => {
 
   it("removes liquidity", () => {
     cy.dataCy("remove-tab").click();
+    cy.dataCy("remove-25").click();
+    cy.dataCy("remove-amount-preview").contains("25 ETH");
+    cy.dataCy("remove-50").click();
+    cy.dataCy("remove-amount-preview").contains("50 ETH");
+    cy.dataCy("remove-75").click();
+    cy.dataCy("remove-amount-preview").contains("75 ETH");
     cy.dataCy("remove-max-button").click();
     cy.dataCy("remove-amount-preview").contains("100 ETH");
     cy.dataCy("remove-liquidity-button").click();
