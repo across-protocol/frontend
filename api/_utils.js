@@ -433,6 +433,15 @@ const filterMapArray = (array, filterFn, mappingFn, mapFirst) => {
   return array.reduce(reducerFn, []);
 };
 
+/**
+ * Tests if input value is a numeric string
+ * @param {string} value The value that will be tested
+ * @returns A boolean if value matches a string of numeric digits from 0 - 9
+ */
+const isStringNumeric = (value) => {
+  return isString(value) && /^[0-9]+$/.test(String(value));
+};
+
 module.exports = {
   getLogger,
   getTokenDetails,
@@ -456,4 +465,5 @@ module.exports = {
   resolveVercelEndpoint,
   getSpokePool,
   filterMapArray,
+  isStringNumeric,
 };
