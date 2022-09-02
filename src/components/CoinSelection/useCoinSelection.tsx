@@ -58,8 +58,8 @@ export default function useCoinSelection() {
   const balance = balances[selectedIndex];
   const { fees } = useBridgeFees(
     amount,
-    toChain,
     fromChain,
+    toChain,
     selectedItem?.symbol
   );
 

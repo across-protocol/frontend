@@ -46,8 +46,8 @@ export type BridgeFees = {
 export async function getRelayerFee(
   tokenSymbol: string,
   amount: ethers.BigNumber,
-  toChainId: ChainId,
-  fromChainid: ChainId
+  fromChainid: ChainId,
+  toChainId: ChainId
 ): Promise<{
   relayerFee: Fee;
   relayerGasFee: Fee;
@@ -113,19 +113,21 @@ type GetBridgeFeesResult = BridgeFees & {
  * @param amount - amount to bridge
  * @param tokenSymbol - symbol of the token to bridge
  * @param blockTimestamp - timestamp of the block to use for calculating fees on
+ * @param fromChain The origin chain of this bridge action
+ * @param toChain The destination chain of this bridge action
  * @returns Returns the `relayerFee` and `lpFee` fees for bridging the given amount of tokens, along with an `isAmountTooLow` flag indicating whether the amount is too low to bridge and an `isLiquidityInsufficient` flag indicating whether the liquidity is insufficient.
  */
 export async function getBridgeFees({
   amount,
   tokenSymbol,
   blockTimestamp,
-  toChainId,
   fromChainId,
+  toChainId,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const config = getConfig();
   const l1TokenAddress = config.getL1TokenAddressBySymbol(tokenSymbol);
   const { relayerFee, relayerGasFee, relayerCapitalFee, isAmountTooLow } =
-    await getRelayerFee(tokenSymbol, amount, toChainId, fromChainId);
+    await getRelayerFee(tokenSymbol, amount, fromChainId, toChainId);
 
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
     l1TokenAddress,

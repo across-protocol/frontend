@@ -6,14 +6,15 @@ import { useBlock } from "./useBlock";
 /**
  * This hook calculates the bridge fees for a given token and amount.
  * @param amount - The amount to check bridge fees for.
+ * @param fromChainId The chain Id of the origin chain
  * @param toChainId The chain Id of the receiving chain, its timestamp will be used to calculate the fees.
  * @param tokenSymbol - The token symbol to check bridge fees for.
  * @returns The bridge fees for the given amount and token symbol and the UseQueryResult object.
  */
 export function useBridgeFees(
   amount: ethers.BigNumber,
-  toChainId?: ChainId,
   fromChainId?: ChainId,
+  toChainId?: ChainId,
   tokenSymbol?: string
 ) {
   const { block } = useBlock(toChainId);
