@@ -265,7 +265,7 @@ const getRelayerFeeCalculator = (destinationChainId) => {
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     capitalCostsPercent: 0.04,
-    queries: queries[destinationChainId](),
+    queries: queryFn(),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
   getLogger().info({
