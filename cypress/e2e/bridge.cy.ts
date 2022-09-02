@@ -25,6 +25,7 @@ describe("bridge", () => {
 
   it("Closes the success page and goes back to main bridge", () => {
     cy.dataCy("bridge-success-button").click();
+    cy.wait(1000);
     cy.dataCy("bridge-amount-input").should("be.visible");
   });
 });

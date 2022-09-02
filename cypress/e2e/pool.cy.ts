@@ -7,7 +7,6 @@ describe("pool", () => {
   });
 
   it("update info boxes on pool change", () => {
-    // { defaultCommandTimeout: 10000 },
     cy.dataCy("select-pool").click();
     cy.dataCy("pool-weth").click();
 
@@ -17,7 +16,6 @@ describe("pool", () => {
   });
 
   it("enable input on connected wallet", () => {
-    // { defaultCommandTimeout: 10000 },
     cy.connectInjectedWallet("add-liquidity-button");
     cy.get("#amount").should("not.be.disabled");
   });
@@ -34,7 +32,6 @@ describe("pool", () => {
     cy.wait(30000);
     // TX won't resolve to non-loading state because of dependency on NotifyJS.
     cy.visit("/pool");
-    cy.wait(4000);
     cy.connectInjectedWallet("wallet-connect-button");
     cy.dataCy("pool-position").contains("100");
   });
@@ -54,7 +51,6 @@ describe("pool", () => {
     cy.wait(30000);
     // TX won't resolve to non-loading state because of dependency on NotifyJS.
     cy.visit("/pool");
-    cy.wait(4000);
     cy.connectInjectedWallet("wallet-connect-button");
     cy.dataCy("pool-position").contains("0");
   });
