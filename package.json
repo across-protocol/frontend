@@ -28,6 +28,7 @@
     "@uma/contracts-frontend": "^0.1.17",
     "@uma/contracts-node": "^0.1.17",
     "@uma/sdk": "^0.22.2",
+    "@vercel/node": "^2.5.13",
     "@web3-onboard/coinbase": "^2.1.0",
     "@web3-onboard/core": "^2.8.0",
     "@web3-onboard/gnosis": "^2.1.0",
