@@ -99,8 +99,8 @@ type GetBridgeFeesArgs = {
   amount: ethers.BigNumber;
   tokenSymbol: string;
   blockTimestamp: number;
-  toChainId: ChainId;
   fromChainId: ChainId;
+  toChainId: ChainId;
 };
 
 type GetBridgeFeesResult = BridgeFees & {
