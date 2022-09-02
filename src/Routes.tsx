@@ -21,10 +21,11 @@ import {
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
+const warningMessage = `Warning --- You've inputted a contract address. When bridging ETH to a contract address, ETH will be wrapped into WETH. Ensure the contract address can receive WETH. If you are not sure whether it can, then you should send to a non-contract address to be safe and receive ETH to prevent any chance of a loss of funds.`;
 
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
-  const { provider } = useConnection();
+  const { provider, showContractAddressWarning } = useConnection();
   const location = useLocation();
   const history = useHistory();
   const { error, removeError } = useError();
@@ -42,12 +43,20 @@ function useRoutes() {
     error,
     removeError,
     location,
+    showContractAddressWarning,
   };
 }
 // Need this component for useLocation hook
 const Routes: React.FC = () => {
-  const { openSidebar, setOpenSidebar, error, removeError, location } =
-    useRoutes();
+  const {
+    openSidebar,
+    setOpenSidebar,
+    error,
+    removeError,
+    location,
+    showContractAddressWarning,
+  } = useRoutes();
+
   return (
     <>
       {disableDeposits && (
@@ -70,6 +79,9 @@ const Routes: React.FC = () => {
             hours. This does not impact your reward earnings.
           </span>
         </Banner>
+      )}
+      {showContractAddressWarning && (
+        <SuperHeader>{warningMessage}</SuperHeader>
       )}
       <SuperHeader darkMode>
         <i>USDT currently disabled for Across contract upgrade.</i>
