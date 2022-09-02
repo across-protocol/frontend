@@ -1,17 +1,19 @@
-const { getLogger, InputError, filterMapArray } = require("./_utils");
-const enabledRoutesAsJson = require("../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json");
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { getLogger, InputError, filterMapArray } from "./_utils";
+import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
+import { AvailableRoutesInputQuery, L1TokenMapRouting } from "./_types";
 
-const handler = async (request, response) => {
+const handler = async (request: VercelRequest, response: VercelResponse) => {
   const logger = getLogger();
   try {
     const { originChainId, destinationChainId, originToken, destinationToken } =
-      request.query;
+      request.query as AvailableRoutesInputQuery;
 
     // Generate a mapping that contains similar tokens on each chain
     // Note:  The key in this dictionary represents an l1Token address, and
     //        the corresponding value is a nested hashmap containing a key
     //        value pair of {chainId: l2TokenEquivalent}
-    const l1TokensToDestinationTokens = {};
+    const l1TokensToDestinationTokens: L1TokenMapRouting = {};
     for (const {
       l1TokenAddress,
       fromChain,
@@ -69,7 +71,7 @@ const handler = async (request, response) => {
     );
     response.status(200).json(enabledRoutes);
   } catch (error) {
-    let status;
+    let status: number;
     if (error instanceof InputError) {
       logger.warn({
         at: "available-routes",
@@ -85,7 +87,7 @@ const handler = async (request, response) => {
       });
       status = 500;
     }
-    response.status(status).send(error.message);
+    response.status(status).send((error as Error).message);
   }
 };
 
