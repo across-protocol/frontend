@@ -24,8 +24,8 @@ export function useBridgeFees(
     ? bridgeFeesQueryKey(
         tokenSymbol,
         amount,
-        toChainId,
         fromChainId,
+        toChainId,
         block.number
       )
     : "DISABLED_BRIDGE_FEE_QUERY";

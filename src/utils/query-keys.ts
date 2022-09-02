@@ -30,17 +30,26 @@ export function balanceQueryKey(
 /**
  * @param tokenSymbol  The token symbol to check bridge fees for.
  * @param amount  The amount to check bridge fees for.
+ * @param fromChainId The origin chain of this bridge action
+ * @param toChainId The destination chain of this bridge action
  * @param blockNumber  The block number to execute the query on.
  * @returns An array of query keys for react-query `useQuery` hook.
  */
 export function bridgeFeesQueryKey(
   tokenSymbol: string,
   amount: ethers.BigNumber,
-  chainId: ChainId,
   fromChainId: ChainId,
+  toChainId: ChainId,
   blockNumber: number
 ) {
-  return ["bridgeFees", tokenSymbol, amount, chainId, fromChainId, blockNumber];
+  return [
+    "bridgeFees",
+    tokenSymbol,
+    amount,
+    fromChainId,
+    toChainId,
+    blockNumber,
+  ];
 }
 
 export function bridgeLimitsQueryKey(
