@@ -34,6 +34,11 @@ const Wrapper = styled.div<IWrapper>`
       color: var(--color-black);
     }
   }
+  @media screen and (max-width: 768px) {
+    height: inherit;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
 `;
 
 /**
