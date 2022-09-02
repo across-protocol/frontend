@@ -1,17 +1,27 @@
 const ethers = require("ethers");
 
-const { getLogger, InputError, isString, getTokenPrice } = require("./_utils");
+const {
+  getLogger,
+  InputError,
+  isString,
+  getTokenPrice,
+  isStringNumeric,
+} = require("./_utils");
 
 const handler = async (request, response) => {
   const logger = getLogger();
   try {
-    let { l1Token } = request.query;
+    let { l1Token, destinationId } = request.query;
     if (!isString(l1Token))
       throw new InputError("Must provide l1Token as query param");
 
+    if (!isStringNumeric((destinationId = destinationId ?? "1"))) {
+      throw new InputError("Destination must a non-negative integer");
+    }
+
     l1Token = ethers.utils.getAddress(l1Token);
 
-    const price = await getTokenPrice(l1Token, 1);
+    const price = await getTokenPrice(l1Token, Number(destinationId));
 
     // Two different explanations for how `stale-while-revalidate` works:
 
