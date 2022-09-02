@@ -17,7 +17,7 @@ import { API } from "bnc-notify";
 export type StakingActionFunctionType = (
   amount: BigNumber,
   setTransition: React.Dispatch<React.SetStateAction<boolean>>,
-  isRendered: React.MutableRefObject<boolean>
+  isRelevantComponentRende: React.MutableRefObject<boolean>
 ) => Promise<void>;
 export type FormatterFnType = (wei: BigNumberish) => string;
 export type ParserFnType = (wei: string) => BigNumber;
@@ -53,6 +53,7 @@ export const useStakingClaimRewards = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [stakingData, setStakingData] = useState<ResolvedDataType>(undefined);
+  const [reloadData, setReloadData] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -64,13 +65,14 @@ export const useStakingClaimRewards = () => {
         provider,
         signer,
         account,
-        notify
+        notify,
+        setReloadData
       ).then((resolvedData) => {
         setStakingData(resolvedData);
         setIsLoading(false);
       });
     }
-  }, [mainnetAddress, account, provider, signer, notify]);
+  }, [mainnetAddress, account, provider, signer, notify, reloadData]);
 
   return {
     isStakingDataLoading: isLoading,
@@ -89,7 +91,8 @@ const resolveRequestedData = async (
   provider: providers.Provider,
   signer: Signer,
   account: string,
-  notify: API
+  notify: API,
+  setReloadData: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<ResolvedDataType> => {
   const config = getConfig();
   const hubPool = config.getHubPool();
@@ -167,19 +170,22 @@ const resolveRequestedData = async (
   const lpTokenParser = parseUnitsFnBuilder(lpTokenDecimalCount);
 
   const requiresApproval = lpTokenAllowance.lte(availableLPTokenBalance);
+
   const stakeActionFn = performStakingActionBuilderFn(
     lpTokenAddress,
     signer,
     "stake",
     requiresApproval,
-    notify
+    notify,
+    setReloadData
   );
   const unstakeActionFn = performStakingActionBuilderFn(
     lpTokenAddress,
     signer,
     "unstake",
     requiresApproval,
-    notify
+    notify,
+    setReloadData
   );
 
   return {
@@ -209,7 +215,8 @@ const performStakingActionBuilderFn = (
   signer: Signer,
   action: "stake" | "unstake",
   requiresApproval: boolean,
-  notify: API
+  notify: API,
+  setReloadData: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
   // Use this inner inner local to track whether a
   // successful approavl has been emitted.
@@ -217,10 +224,10 @@ const performStakingActionBuilderFn = (
   return async (
     amount: BigNumber,
     setTransition: React.Dispatch<React.SetStateAction<boolean>>,
-    isRendered: React.MutableRefObject<boolean>
+    isRelevantComponentRendered: React.MutableRefObject<boolean>
   ): Promise<void> => {
     try {
-      if (isRendered.current) {
+      if (isRelevantComponentRendered.current) {
         setTransition(true);
       }
       const acceleratingDistributor = getConfig()
@@ -240,16 +247,16 @@ const performStakingActionBuilderFn = (
       const amountAsBigNumber = BigNumber.from(amount);
       // Ensure that the user is within the rendered function
       // before executing this stake command
-      if (isRendered.current) {
-        console.log(callingFn, amountAsBigNumber);
-        // const result = await callingFn(lpTokenAddress, amountAsBigNumber);
-        // console.log(result);
+      if (isRelevantComponentRendered.current) {
+        const result = await callingFn(lpTokenAddress, amountAsBigNumber);
+        await notificationEmitter(result.hash, notify);
       }
     } catch (e) {
       console.log(e);
     } finally {
-      if (isRendered.current) {
+      if (isRelevantComponentRendered.current) {
         setTransition(false);
+        setReloadData((data) => !data);
       }
     }
   };
