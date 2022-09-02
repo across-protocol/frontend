@@ -15,7 +15,7 @@ const Wrapper = styled.div<IWrapper>`
   background-color: ${({ darkMode }) =>
     darkMode ? "#202024" : "var(--color-error)"};
   border-bottom: 1px solid var(--color-gray);
-  position: sticky;
+  position: unset;
   width: 100%;
   top: 0;
   left: 0;

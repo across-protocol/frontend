@@ -21,7 +21,7 @@ import {
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
-const warningMessage = `Warning --- You've inputted a contract address. When bridging ETH to a contract address, ETH will be wrapped into WETH. Ensure the contract address can receive WETH. If you are not sure whether it can, then you should send to a non-contract address to be safe and receive ETH to prevent any chance of a loss of funds.`;
+const warningMessage = `Warning --- Your connected account is a contract address. When bridging ETH to a contract address, ETH will be wrapped into WETH. Ensure the contract address can receive WETH. If you are not sure whether it can, then you should send to a non-contract address to be safe and receive ETH to prevent any chance of a loss of funds.`;
 
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
