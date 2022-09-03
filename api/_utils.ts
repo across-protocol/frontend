@@ -4,12 +4,12 @@ import {
   SpokePool__factory,
 } from "@across-protocol/contracts-v2";
 import axios from "axios";
-import sdk from "@across-protocol/sdk-v2";
+import * as sdk from "@across-protocol/sdk-v2";
 import ethers from "ethers";
 import { Logging } from "@google-cloud/logging";
 import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 
-import { relayerFeeCapitalCostConfig, disabledL1Tokens } from "./_constants";
+import { relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 const {
@@ -24,11 +24,11 @@ const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
   ? JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT)
   : {};
 
-const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
+export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 // Default to no markup.
-const DEFAULT_GAS_MARKUP = 0;
+export const DEFAULT_GAS_MARKUP = 0;
 
-const log = (gcpLogger: any, severity: any, data: any) => {
+export const log = (gcpLogger: any, severity: any, data: any) => {
   let message = JSON.stringify(data, null, 4);
   // Fire and forget. we don't wait for this to finish.
   gcpLogger
@@ -56,7 +56,7 @@ const log = (gcpLogger: any, severity: any, data: any) => {
 
 // Singleton logger so we don't create multiple.
 let logger: any;
-const getLogger = () => {
+export const getLogger = () => {
   // Use the default logger which logs to console if no GCP service account is configured.
   if (Object.keys(GOOGLE_SERVICE_ACCOUNT).length === 0) {
     logger = sdk.relayFeeCalculator.DEFAULT_LOGGER;
@@ -80,7 +80,7 @@ const getLogger = () => {
   return logger;
 };
 
-const resolveVercelEndpoint = () => {
+export const resolveVercelEndpoint = () => {
   const url = process.env.VERCEL_URL ?? "across.to";
   const env = process.env.VERCEL_ENV ?? "development";
   switch (env) {
@@ -93,7 +93,7 @@ const resolveVercelEndpoint = () => {
   }
 };
 
-const getTokenDetails = async (
+export const getTokenDetails = async (
   provider: any,
   l1Token: any,
   l2Token: any,
@@ -148,11 +148,11 @@ const getTokenDetails = async (
   };
 };
 
-const isString = (input: any) => typeof input === "string";
+export const isString = (input: any) => typeof input === "string";
 
-class InputError extends Error {}
+export class InputError extends Error {}
 
-const infuraProvider = (name: any) => {
+export const infuraProvider = (name: any) => {
   const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
   getLogger().info({
     at: "infuraProvider",
@@ -162,10 +162,10 @@ const infuraProvider = (name: any) => {
   return new ethers.providers.StaticJsonRpcProvider(url);
 };
 
-const bobaProvider = () =>
+export const bobaProvider = () =>
   new ethers.providers.StaticJsonRpcProvider("https://mainnet.boba.network");
 
-const makeHubPoolClientConfig = () => {
+export const makeHubPoolClientConfig = () => {
   return {
     chainId: 1,
     hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
@@ -174,7 +174,7 @@ const makeHubPoolClientConfig = () => {
   };
 };
 
-const getHubPoolClient = () => {
+export const getHubPoolClient = () => {
   const hubPoolConfig = makeHubPoolClientConfig();
   return new sdk.pool.Client(
     hubPoolConfig,
@@ -191,15 +191,15 @@ const getHubPoolClient = () => {
 // (0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C). It also has a small amount of USDC ($0.10) used for estimations.
 // If this address lacks either of these, estimations will fail and relays to optimism and arbitrum will hang when
 // estimating gas. Defaults to 0x893d0d70ad97717052e3aa8903d9615804167759 so the app can technically run without this.
-const dummyFromAddress =
+export const dummyFromAddress =
   process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
   "0x893d0d70ad97717052e3aa8903d9615804167759";
 
-const getGasMarkup = (chainId: any) => {
+export const getGasMarkup = (chainId: any) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
-const queries = {
+export const queries = {
   1: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
       infuraProvider("mainnet"),
@@ -257,9 +257,9 @@ const queries = {
     ),
 };
 
-const maxRelayFeePct = 0.25;
+export const maxRelayFeePct = 0.25;
 
-const getRelayerFeeCalculator = (destinationChainId: number) => {
+export const getRelayerFeeCalculator = (destinationChainId: number) => {
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     capitalCostsPercent: 0.04,
@@ -276,13 +276,13 @@ const getRelayerFeeCalculator = (destinationChainId: number) => {
     logger
   );
 };
-const getTokenSymbol = (tokenAddress: string): any | undefined => {
+export const getTokenSymbol = (tokenAddress: string): any | undefined => {
   return Object.entries(sdk.relayFeeCalculator.SymbolMapping)?.find(
     ([_symbol, { address }]) =>
       address.toLowerCase() === tokenAddress.toLowerCase()
   )?.[0];
 };
-const getRelayerFeeDetails = (
+export const getRelayerFeeDetails = (
   l1Token: any,
   amount: any,
   destinationChainId: any,
@@ -293,13 +293,13 @@ const getRelayerFeeDetails = (
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
 };
 
-const getTokenPrice = (l1Token: any, destinationChainId: any) => {
+export const getTokenPrice = (l1Token: any, destinationChainId: any) => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.getTokenPrice(tokenSymbol);
 };
 
-const getCachedTokenPrice = async (l1Token: any) => {
+export const getCachedTokenPrice = async (l1Token: any) => {
   getLogger().debug({
     at: "getCachedTokenPrice",
     message: `Resolving price from ${resolveVercelEndpoint()}/api/coingecko`,
@@ -313,9 +313,9 @@ const getCachedTokenPrice = async (l1Token: any) => {
   );
 };
 
-const providerCache: Record<string, StaticJsonRpcProvider> = {};
+export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 
-const getProvider = (_chainId: string) => {
+export const getProvider = (_chainId: string) => {
   const chainId = _chainId.toString();
   if (!providerCache[chainId]) {
     switch (chainId.toString()) {
@@ -341,7 +341,7 @@ const getProvider = (_chainId: string) => {
   return providerCache[chainId];
 };
 
-const getSpokePool = (_chainId: any) => {
+export const getSpokePool = (_chainId: any) => {
   const chainId = _chainId.toString();
   const provider = getProvider(chainId);
   switch (chainId.toString()) {
@@ -375,7 +375,11 @@ const getSpokePool = (_chainId: any) => {
   }
 };
 
-const isRouteEnabled = (fromChainId: any, toChainId: any, fromToken: any) => {
+export const isRouteEnabled = (
+  fromChainId: any,
+  toChainId: any,
+  fromToken: any
+) => {
   fromChainId = Number(fromChainId);
   toChainId = Number(toChainId);
   const enabled = enabledRoutesAsJson.routes.some(
@@ -387,7 +391,7 @@ const isRouteEnabled = (fromChainId: any, toChainId: any, fromToken: any) => {
   return enabled;
 };
 
-const getBalance = (
+export const getBalance = (
   chainId: string,
   token: string,
   account: string,
@@ -399,7 +403,7 @@ const getBalance = (
   );
 };
 
-const maxBN = (...arr: any[]) => {
+export const maxBN = (...arr: any[]) => {
   return [...arr].sort((a, b) => {
     if (b.gt(a)) return 1;
     if (a.gt(b)) return -1;
@@ -407,7 +411,7 @@ const maxBN = (...arr: any[]) => {
   })[0];
 };
 
-const minBN = (...arr: any[]) => {
+export const minBN = (...arr: any[]) => {
   return [...arr].sort((a, b) => {
     if (a.gt(b)) return 1;
     if (b.gt(a)) return -1;
@@ -423,7 +427,7 @@ const minBN = (...arr: any[]) => {
  * @param {boolean} mapFirst If true, the element will be transformed prior to being filtered
  * @returns {any[]} A copy of the `array`, but filtered and mapped
  */
-const filterMapArray = (
+export const filterMapArray = (
   array: any[],
   filterFn: (arg: any) => boolean,
   mappingFn: (arg: any) => any,
@@ -444,29 +448,4 @@ const filterMapArray = (
         return accumulator;
       };
   return array.reduce(reducerFn, []);
-};
-
-module.exports = {
-  getLogger,
-  getTokenDetails,
-  isString,
-  InputError,
-  queries,
-  infuraProvider,
-  bobaProvider,
-  getRelayerFeeDetails,
-  getTokenPrice,
-  getCachedTokenPrice,
-  maxRelayFeePct,
-  getProvider,
-  getBalance,
-  maxBN,
-  minBN,
-  isRouteEnabled,
-  getHubPoolClient,
-  dummyFromAddress,
-  disabledL1Tokens,
-  resolveVercelEndpoint,
-  getSpokePool,
-  filterMapArray,
 };
