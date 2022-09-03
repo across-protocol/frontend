@@ -395,7 +395,7 @@ export const getBalance = (
   chainId: string,
   token: string,
   account: string,
-  blockTag = "latest"
+  blockTag: number | "latest" = "latest"
 ) => {
   return ERC20__factory.connect(token, getProvider(chainId)).balanceOf(
     account,
