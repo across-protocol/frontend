@@ -1,12 +1,12 @@
-const ethers = require("ethers");
+import { VercelRequest, VercelResponse } from "@vercel/node";
+import { ethers } from "ethers";
+import { getLogger, InputError, isString, getTokenPrice } from "./_utils";
 
-const { getLogger, InputError, isString, getTokenPrice } = require("./_utils");
-
-const handler = async (request, response) => {
+const handler = async (request: VercelRequest, response: VercelResponse) => {
   const logger = getLogger();
   try {
-    let { l1Token } = request.query;
-    if (!isString(l1Token))
+    let { l1Token } = request.query as { l1Token?: string };
+    if (!l1Token || !isString(l1Token))
       throw new InputError("Must provide l1Token as query param");
 
     l1Token = ethers.utils.getAddress(l1Token);
@@ -34,7 +34,7 @@ const handler = async (request, response) => {
     );
     response.status(200).json({ price });
   } catch (error) {
-    let status;
+    let status: number;
     if (error instanceof InputError) {
       logger.warn({ at: "coingecko", message: "400 input error", error });
       status = 400;
@@ -46,4 +46,4 @@ const handler = async (request, response) => {
   }
 };
 
-module.exports = handler;
+export default handler;
