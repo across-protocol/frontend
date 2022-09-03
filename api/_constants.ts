@@ -55,4 +55,4 @@ export const relayerFeeCapitalCostConfig = {
   },
 };
 
-export const BLOCK_TAG_LAG = -1;
+export const BLOCK_TAG_LAG = "-1";

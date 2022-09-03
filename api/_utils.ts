@@ -5,7 +5,7 @@ import {
 } from "@across-protocol/contracts-v2";
 import axios from "axios";
 import * as sdk from "@across-protocol/sdk-v2";
-import ethers from "ethers";
+import { ethers } from "ethers";
 import { Logging } from "@google-cloud/logging";
 import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 

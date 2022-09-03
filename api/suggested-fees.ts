@@ -1,11 +1,12 @@
 // Note: ideally this would be written in ts as vercel claims they support it natively.
 // However, when written in ts, the imports seem to fail, so this is in js for now.
 
-const sdk = require("@across-protocol/sdk-v2");
-const { BlockFinder } = require("@uma/sdk");
-const ethers = require("ethers");
-const { BLOCK_TAG_LAG } = require("./_constants");
-const {
+import * as sdk from "@across-protocol/sdk-v2";
+import { BlockFinder } from "@uma/sdk";
+import { VercelRequest, VercelResponse } from "@vercel/node";
+import { ethers } from "ethers";
+import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
+import {
   getLogger,
   getTokenDetails,
   InputError,
@@ -13,24 +14,40 @@ const {
   infuraProvider,
   getRelayerFeeDetails,
   isRouteEnabled,
-  disabledL1Tokens,
   getCachedTokenPrice,
-} = require("./_utils");
+} from "./_utils";
 
-const handler = async (request, response) => {
+type HandlerType = {
+  amount?: string;
+  token?: string;
+  timestamp?: string;
+  destinationChainId?: string;
+  originChainId?: string;
+  skipAmountLimit?: string;
+};
+
+const handler = async (request: VercelRequest, response: VercelResponse) => {
   const logger = getLogger();
   try {
     const provider = infuraProvider("mainnet");
 
     let {
-      amount,
+      amount: amountInput,
       token,
       timestamp,
       destinationChainId,
       originChainId,
       skipAmountLimit,
-    } = request.query;
-    if (!isString(amount) || !isString(token) || !isString(destinationChainId))
+    } = request.query as HandlerType;
+
+    if (
+      !amountInput ||
+      !token ||
+      !destinationChainId ||
+      !isString(amountInput) ||
+      !isString(token) ||
+      !isString(destinationChainId)
+    )
       throw new InputError(
         "Must provide amount, token, and destinationChainId as query params"
       );
@@ -38,7 +55,7 @@ const handler = async (request, response) => {
       throw new InputError("Origin and destination chains cannot be the same");
     }
 
-    const amountAsValue = Number(amount);
+    const amountAsValue = Number(amountInput);
     if (Number.isNaN(amountAsValue) || amountAsValue <= 0) {
       throw new InputError("Value provided in amount parameter is not valid.");
     }
@@ -49,7 +66,7 @@ const handler = async (request, response) => {
       ? Number(timestamp)
       : (await provider.getBlock("latest")).timestamp;
 
-    amount = ethers.BigNumber.from(amount);
+    const amount = ethers.BigNumber.from(amountInput);
 
     let {
       l1Token,
@@ -157,6 +174,7 @@ const handler = async (request, response) => {
 
     response.status(200).json(responseJson);
   } catch (error) {
+    console.log(error);
     let status;
     if (error instanceof InputError) {
       logger.warn({ at: "suggested-fees", message: "400 input error", error });
@@ -169,8 +187,8 @@ const handler = async (request, response) => {
       });
       status = 500;
     }
-    response.status(status).send(error.message);
+    response.status(status).send((error as Error).message);
   }
 };
 
-module.exports = handler;
+export default handler;

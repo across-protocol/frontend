@@ -31,28 +31,28 @@ beforeEach(() => {
   response = getMockedResponse();
 });
 test("limits has no load-time errors", async () => {
-  await limitsHandler(request, response);
+  await limitsHandler(request as VercelRequest, response as VercelResponse);
   expect(response.status).toHaveBeenCalledWith(400);
   expect(response.send).toHaveBeenCalledWith(
     "Must provide token and destinationChainId as query params"
   );
 });
 test("suggested-fees has no load-time errors", async () => {
-  await feesHandler(request, response);
+  await feesHandler(request as VercelRequest, response as VercelResponse);
   expect(response.status).toHaveBeenCalledWith(400);
   expect(response.send).toHaveBeenCalledWith(
     "Must provide amount, token, and destinationChainId as query params"
   );
 });
 test("pools has no load-time errors", async () => {
-  await poolsHandler(request, response);
+  await poolsHandler(request as VercelRequest, response as VercelResponse);
   expect(response.status).toHaveBeenCalledWith(400);
   expect(response.send).toHaveBeenCalledWith(
     "Must provide token as query param"
   );
 });
 test("coingecko has no load-time errors", async () => {
-  await coingeckoHandler(request, response);
+  await coingeckoHandler(request as VercelRequest, response as VercelResponse);
   expect(response.status).toHaveBeenCalledWith(400);
   expect(response.send).toHaveBeenCalledWith(
     "Must provide l1Token as query param"

@@ -104,8 +104,7 @@
     "lint-staged": "^12.4.1",
     "prettier": "^2.4.1",
     "serve": "^14.0.1",
-    "jest": "^29.0.1",
-    "ts-jest": "^28.0.8"
+    "ts-jest": "^26.5.6"
   },
   "babel": {
     "env": {

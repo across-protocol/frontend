@@ -42,7 +42,7 @@ const handler = async (request: VercelRequest, response: VercelResponse) => {
       logger.error({ at: "coingecko", message: "500 server error", error });
       status = 500;
     }
-    response.status(status).send(error.message);
+    response.status(status).send((error as any).message);
   }
 };
 

@@ -1,11 +1,12 @@
 // Note: ideally this would be written in ts as vercel claims they support it natively.
 // However, when written in ts, the imports seem to fail, so this is in js for now.
 
-const { HubPool__factory } = require("@across-protocol/contracts-v2");
-const ethers = require("ethers");
-const { BLOCK_TAG_LAG } = require("./_constants");
+import { HubPool__factory } from "@across-protocol/contracts-v2";
+import { VercelRequest, VercelResponse } from "@vercel/node";
+import { ethers } from "ethers";
+import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
 
-const {
+import {
   getLogger,
   InputError,
   isString,
@@ -17,10 +18,9 @@ const {
   maxBN,
   minBN,
   isRouteEnabled,
-  disabledL1Tokens,
-} = require("./_utils");
+} from "./_utils";
 
-const handler = async (request, response) => {
+const handler = async (request: VercelRequest, response: VercelResponse) => {
   const logger = getLogger();
   try {
     const {
@@ -38,14 +38,16 @@ const handler = async (request, response) => {
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
       ? []
-      : JSON.parse(REACT_APP_FULL_RELAYERS).map((relayer) => {
+      : JSON.parse(REACT_APP_FULL_RELAYERS).map((relayer: any) => {
           return ethers.utils.getAddress(relayer);
         });
     const transferRestrictedRelayers = !REACT_APP_TRANSFER_RESTRICTED_RELAYERS
       ? []
-      : JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS).map((relayer) => {
-          return ethers.utils.getAddress(relayer);
-        });
+      : JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS).map(
+          (relayer: any) => {
+            return ethers.utils.getAddress(relayer);
+          }
+        );
     logger.debug({
       at: "limits",
       message: "Using relayers",
@@ -53,8 +55,17 @@ const handler = async (request, response) => {
       transferRestrictedRelayers,
     });
 
-    let { token, destinationChainId, originChainId } = request.query;
-    if (!isString(token) || !isString(destinationChainId))
+    let { token, destinationChainId, originChainId } = request.query as {
+      token?: string;
+      destinationChainId?: string;
+      originChainId?: string;
+    };
+    if (
+      !token ||
+      !destinationChainId ||
+      !isString(token) ||
+      !isString(destinationChainId)
+    )
       throw new InputError(
         "Must provide token and destinationChainId as query params"
       );
@@ -90,7 +101,9 @@ const handler = async (request, response) => {
       !routeEnabledResult.value
     ) {
       // Add the raw error (if any) to ensure that the user sees the real error if it's something unexpected, like a provider issue.
-      const rawError = tokenDetailsResult.reason || routeEnabledResult.reason;
+      const rawError =
+        (tokenDetailsResult as any).reason ||
+        (routeEnabledResult as any).reason;
       const errorString = rawError
         ? `Raw Error: ${rawError.stack || rawError.toString()}`
         : "";
@@ -138,9 +151,9 @@ const handler = async (request, response) => {
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
-        fullRelayers.map((relayer) =>
+        fullRelayers.map((relayer: any) =>
           getBalance(
-            destinationChainId,
+            destinationChainId!,
             destinationToken,
             relayer,
             BLOCK_TAG_LAG
@@ -148,9 +161,9 @@ const handler = async (request, response) => {
         )
       ),
       Promise.all(
-        transferRestrictedRelayers.map((relayer) =>
+        transferRestrictedRelayers.map((relayer: any) =>
           getBalance(
-            destinationChainId,
+            destinationChainId!,
             destinationToken,
             relayer,
             BLOCK_TAG_LAG
@@ -158,7 +171,7 @@ const handler = async (request, response) => {
         )
       ),
       Promise.all(
-        fullRelayers.map((relayer) =>
+        fullRelayers.map((relayer: any) =>
           destinationChainId === "1"
             ? ethers.BigNumber.from("0")
             : getBalance("1", l1Token, relayer, BLOCK_TAG_LAG)
@@ -276,8 +289,8 @@ const handler = async (request, response) => {
       logger.error({ at: "limits", message: "500 server error", error });
       status = 500;
     }
-    response.status(status).send(error.message);
+    response.status(status).send((error as any).message);
   }
 };
 
-module.exports = handler;
+export default handler;
