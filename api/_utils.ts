@@ -1,13 +1,16 @@
-const {
+import {
   HubPool__factory,
   ERC20__factory,
   SpokePool__factory,
-} = require("@across-protocol/contracts-v2");
-const axios = require("axios");
-const sdk = require("@across-protocol/sdk-v2");
-const ethers = require("ethers");
-const { Logging } = require("@google-cloud/logging");
-const enabledRoutesAsJson = require("../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json");
+} from "@across-protocol/contracts-v2";
+import axios from "axios";
+import sdk from "@across-protocol/sdk-v2";
+import ethers from "ethers";
+import { Logging } from "@google-cloud/logging";
+import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
+
+import { relayerFeeCapitalCostConfig, disabledL1Tokens } from "./_constants";
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 const {
   REACT_APP_PUBLIC_INFURA_ID,
@@ -25,12 +28,7 @@ const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 // Default to no markup.
 const DEFAULT_GAS_MARKUP = 0;
 
-const {
-  relayerFeeCapitalCostConfig,
-  disabledL1Tokens,
-} = require("./_constants");
-
-const log = (gcpLogger, severity, data) => {
+const log = (gcpLogger: any, severity: any, data: any) => {
   let message = JSON.stringify(data, null, 4);
   // Fire and forget. we don't wait for this to finish.
   gcpLogger
@@ -45,7 +43,7 @@ const log = (gcpLogger, severity, data) => {
         message
       )
     )
-    .catch((error) => {
+    .catch((error: Error) => {
       // Ensure API doesn't fail if logging to GCP fails.
       sdk.relayFeeCalculator.DEFAULT_LOGGER.error({
         at: "GCP logger",
@@ -57,7 +55,7 @@ const log = (gcpLogger, severity, data) => {
 };
 
 // Singleton logger so we don't create multiple.
-let logger;
+let logger: any;
 const getLogger = () => {
   // Use the default logger which logs to console if no GCP service account is configured.
   if (Object.keys(GOOGLE_SERVICE_ACCOUNT).length === 0) {
@@ -71,12 +69,12 @@ const getLogger = () => {
         client_email: GOOGLE_SERVICE_ACCOUNT.client_email,
         private_key: GOOGLE_SERVICE_ACCOUNT.private_key,
       },
-    }).log(VERCEL_ENV, { removeCircular: true });
+    }).log(VERCEL_ENV ?? "", { removeCircular: true });
     logger = {
-      debug: (data) => log(gcpLogger, "DEBUG", data),
-      info: (data) => log(gcpLogger, "INFO", data),
-      warn: (data) => log(gcpLogger, "WARN", data),
-      error: (data) => log(gcpLogger, "ERROR", data),
+      debug: (data: any) => log(gcpLogger, "DEBUG", data),
+      info: (data: any) => log(gcpLogger, "INFO", data),
+      warn: (data: any) => log(gcpLogger, "WARN", data),
+      error: (data: any) => log(gcpLogger, "ERROR", data),
     };
   }
   return logger;
@@ -95,7 +93,12 @@ const resolveVercelEndpoint = () => {
   }
 };
 
-const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
+const getTokenDetails = async (
+  provider: any,
+  l1Token: any,
+  l2Token: any,
+  chainId: any
+) => {
   const hubPool = HubPool__factory.connect(
     "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
     provider
@@ -145,11 +148,11 @@ const getTokenDetails = async (provider, l1Token, l2Token, chainId) => {
   };
 };
 
-const isString = (input) => typeof input === "string";
+const isString = (input: any) => typeof input === "string";
 
 class InputError extends Error {}
 
-const infuraProvider = (name) => {
+const infuraProvider = (name: any) => {
   const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
   getLogger().info({
     at: "infuraProvider",
@@ -192,7 +195,7 @@ const dummyFromAddress =
   process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
   "0x893d0d70ad97717052e3aa8903d9615804167759";
 
-const getGasMarkup = (chainId) => {
+const getGasMarkup = (chainId: any) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
@@ -256,11 +259,11 @@ const queries = {
 
 const maxRelayFeePct = 0.25;
 
-const getRelayerFeeCalculator = (destinationChainId) => {
+const getRelayerFeeCalculator = (destinationChainId: number) => {
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     capitalCostsPercent: 0.04,
-    queries: queries[destinationChainId](),
+    queries: (queries as any)[destinationChainId](),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
   getLogger().info({
@@ -273,30 +276,30 @@ const getRelayerFeeCalculator = (destinationChainId) => {
     logger
   );
 };
-const getTokenSymbol = (tokenAddress) => {
-  return Object.entries(sdk.relayFeeCalculator.SymbolMapping).find(
+const getTokenSymbol = (tokenAddress: string): any | undefined => {
+  return Object.entries(sdk.relayFeeCalculator.SymbolMapping)?.find(
     ([_symbol, { address }]) =>
       address.toLowerCase() === tokenAddress.toLowerCase()
-  )[0];
+  )?.[0];
 };
 const getRelayerFeeDetails = (
-  l1Token,
-  amount,
-  destinationChainId,
-  tokenPrice
+  l1Token: any,
+  amount: any,
+  destinationChainId: any,
+  tokenPrice: any
 ) => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
 };
 
-const getTokenPrice = (l1Token, destinationChainId) => {
+const getTokenPrice = (l1Token: any, destinationChainId: any) => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.getTokenPrice(tokenSymbol);
 };
 
-const getCachedTokenPrice = async (l1Token) => {
+const getCachedTokenPrice = async (l1Token: any) => {
   getLogger().debug({
     at: "getCachedTokenPrice",
     message: `Resolving price from ${resolveVercelEndpoint()}/api/coingecko`,
@@ -310,9 +313,9 @@ const getCachedTokenPrice = async (l1Token) => {
   );
 };
 
-const providerCache = {};
+const providerCache: Record<string, StaticJsonRpcProvider> = {};
 
-const getProvider = (_chainId) => {
+const getProvider = (_chainId: string) => {
   const chainId = _chainId.toString();
   if (!providerCache[chainId]) {
     switch (chainId.toString()) {
@@ -338,7 +341,7 @@ const getProvider = (_chainId) => {
   return providerCache[chainId];
 };
 
-const getSpokePool = (_chainId) => {
+const getSpokePool = (_chainId: any) => {
   const chainId = _chainId.toString();
   const provider = getProvider(chainId);
   switch (chainId.toString()) {
@@ -372,7 +375,7 @@ const getSpokePool = (_chainId) => {
   }
 };
 
-const isRouteEnabled = (fromChainId, toChainId, fromToken) => {
+const isRouteEnabled = (fromChainId: any, toChainId: any, fromToken: any) => {
   fromChainId = Number(fromChainId);
   toChainId = Number(toChainId);
   const enabled = enabledRoutesAsJson.routes.some(
@@ -384,14 +387,19 @@ const isRouteEnabled = (fromChainId, toChainId, fromToken) => {
   return enabled;
 };
 
-const getBalance = (chainId, token, account, blockTag = "latest") => {
+const getBalance = (
+  chainId: string,
+  token: string,
+  account: string,
+  blockTag = "latest"
+) => {
   return ERC20__factory.connect(token, getProvider(chainId)).balanceOf(
     account,
     { blockTag }
   );
 };
 
-const maxBN = (...arr) => {
+const maxBN = (...arr: any[]) => {
   return [...arr].sort((a, b) => {
     if (b.gt(a)) return 1;
     if (a.gt(b)) return -1;
@@ -399,7 +407,7 @@ const maxBN = (...arr) => {
   })[0];
 };
 
-const minBN = (...arr) => {
+const minBN = (...arr: any[]) => {
   return [...arr].sort((a, b) => {
     if (a.gt(b)) return 1;
     if (b.gt(a)) return -1;
@@ -415,16 +423,21 @@ const minBN = (...arr) => {
  * @param {boolean} mapFirst If true, the element will be transformed prior to being filtered
  * @returns {any[]} A copy of the `array`, but filtered and mapped
  */
-const filterMapArray = (array, filterFn, mappingFn, mapFirst) => {
+const filterMapArray = (
+  array: any[],
+  filterFn: (arg: any) => boolean,
+  mappingFn: (arg: any) => any,
+  mapFirst: boolean
+): any[] => {
   const reducerFn = mapFirst
-    ? (accumulator, currentValue) => {
+    ? (accumulator: any, currentValue: any) => {
         const currentValueMapping = mappingFn(currentValue);
         if (filterFn(currentValueMapping)) {
           accumulator.push(currentValueMapping);
         }
         return accumulator;
       }
-    : (accumulator, currentValue) => {
+    : (accumulator: any, currentValue: any) => {
         if (filterFn(currentValue)) {
           accumulator.push(mappingFn(currentValue));
         }

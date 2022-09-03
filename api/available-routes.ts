@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 import { getLogger, InputError, filterMapArray } from "./_utils";
 import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import { AvailableRoutesInputQuery, L1TokenMapRouting } from "./_types";
@@ -91,4 +91,4 @@ const handler = async (request: VercelRequest, response: VercelResponse) => {
   }
 };
 
-module.exports = handler;
+export default handler;

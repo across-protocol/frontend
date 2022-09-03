@@ -1,17 +1,18 @@
 // Public infura key published in @umaprotocol/packages/common/ProviderUtils
+import limitsHandler from "../../api/limits";
+import feesHandler from "../../api/suggested-fees";
+import poolsHandler from "../../api/pools";
+import coingeckoHandler from "../../api/coingecko";
+import availableRouteHandler from "../../api/available-routes";
+import { VercelRequest, VercelResponse } from "@vercel/node";
+
 process.env.REACT_APP_PUBLIC_INFURA_ID = "e34138b2db5b496ab5cc52319d2f0299";
 process.env.REACT_APP_GOOGLE_SERVICE_ACCOUNT = "{}";
 
-const limitsHandler = require("../../api/limits");
-const feesHandler = require("../../api/suggested-fees");
-const poolsHandler = require("../../api/pools");
-const coingeckoHandler = require("../../api/coingecko");
-const availableRouteHandler = require("../../api/available-routes");
-
 // Create mocked response object:
-let response;
+let response: any;
 const getMockedResponse = () => {
-  const response = {};
+  const response: any = {};
   response.status = jest.fn().mockReturnValue(response);
   response.send = jest.fn();
   response.setHeader = jest.fn();
@@ -59,7 +60,10 @@ test("coingecko has no load-time errors", async () => {
 });
 
 test("available-routes has no load-time errors", async () => {
-  await availableRouteHandler(request, response);
+  await availableRouteHandler(
+    request as VercelRequest,
+    response as VercelResponse
+  );
   expect(response.status).toHaveBeenCalledWith(200);
   expect(response.json).toHaveBeenCalled();
 });
