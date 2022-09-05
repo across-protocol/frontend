@@ -151,7 +151,7 @@ const resolveRequestedData = async (
   // Average Deposit Time retrieves the # seconds since the last deposit, weighted
   // by all the deposits in a user's account.
   const daysElapsed = formattedBigNumberToNumber(
-    averageDepositTime.add("10500").mul(BASIS_SHIFT).div(86400)
+    averageDepositTime.mul(BASIS_SHIFT).div(86400)
   );
 
   const usersMultiplierPercentage = formattedBigNumberToNumber(

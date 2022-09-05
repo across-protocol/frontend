@@ -12,7 +12,7 @@ import {
 import { capitalizeFirstLetter } from "utils/format";
 import { StylizedSVG } from "../../types";
 import { AlertInfo } from "../StakingReward/AlertInfo";
-import { Loader } from "components/Loader";
+import BouncingDotsLoader from "components/BouncingDotsLoader";
 
 interface Props {
   value: string;
@@ -70,7 +70,7 @@ const StakingInputBlock: React.FC<Props> = ({
             <span>{capitalizeFirstLetter(buttonText)}</span>
             {displayLoader && (
               <LoaderWrapper>
-                <Loader />
+                <BouncingDotsLoader />
               </LoaderWrapper>
             )}
           </StakeButtonContentWrapper>

@@ -69,7 +69,7 @@ export const StakingForm = ({
   const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
   const buttonMaxValue = formatLPToken(
     activeTab === "stake" ? availableLPTokenBalance : userCumulativeStake
-  );
+  ).replaceAll(",", "");
   const ArrowIcon = isPoolInfoVisible ? ArrowIconDown : ArrowIconUp;
 
   // Stub data for form
