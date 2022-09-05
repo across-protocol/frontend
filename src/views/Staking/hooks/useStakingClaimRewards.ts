@@ -8,6 +8,7 @@ import {
   getConfig,
   hubPoolChainId,
   MAX_APPROVAL_AMOUNT,
+  parseEther,
   parseUnitsFnBuilder,
   safeDivide,
   switchChain,
@@ -42,6 +43,7 @@ type ResolvedDataType =
       usersMultiplierPercentage: number;
       usersTotalLPTokens: BigNumberish;
       shareOfPool: BigNumberish;
+      estimatedApy: BigNumberish;
       lpTokenFormatter: FormatterFnType;
       lpTokenParser: ParserFnType;
       stakeActionFn: StakingActionFunctionType;
@@ -125,11 +127,7 @@ const resolveRequestedData = async (
   // Check information about this LP token on the AcceleratingDistributor contract
   // Resolve the provided account's outstanding rewards (if an account is connected)
   const [
-    {
-      enabled: poolEnabled,
-      cumulativeStaked: globalAmountOfLPStaked,
-      maxMultiplier,
-    },
+    { enabled: poolEnabled, maxMultiplier },
     currentUserRewardMultiplier,
     {
       rewardsOutstanding: outstandingRewards,
@@ -166,7 +164,11 @@ const resolveRequestedData = async (
     }),
   ]);
 
-  console.log(poolQuery);
+  const { estimatedApy: estimatedApyFromQuery, totalPoolSize } =
+    poolQuery.data as {
+      estimatedApy: string;
+      totalPoolSize: BigNumberish;
+    };
 
   // Average Deposit Time retrieves the # seconds since the last deposit, weighted
   // by all the deposits in a user's account.
@@ -182,8 +184,10 @@ const resolveRequestedData = async (
 
   const shareOfPool = safeDivide(
     userAmountOfLPStaked.mul(BASIS_SHIFT),
-    globalAmountOfLPStaked
+    BigNumber.from(totalPoolSize)
   ).mul(100);
+
+  const estimatedApy = parseEther(estimatedApyFromQuery).mul(100);
 
   const lpTokenFormatter = formatUnitsFnBuilder(lpTokenDecimalCount);
   const lpTokenParser = parseUnitsFnBuilder(lpTokenDecimalCount);
@@ -211,7 +215,7 @@ const resolveRequestedData = async (
     lpTokenAddress,
     acrossTokenAddress,
     poolEnabled,
-    globalAmountOfLPStaked,
+    globalAmountOfLPStaked: totalPoolSize,
     userAmountOfLPStaked,
     maxMultiplier,
     outstandingRewards,
@@ -222,6 +226,7 @@ const resolveRequestedData = async (
     usersMultiplierPercentage,
     usersTotalLPTokens,
     shareOfPool,
+    estimatedApy,
     lpTokenFormatter,
     lpTokenParser,
     stakeActionFn,

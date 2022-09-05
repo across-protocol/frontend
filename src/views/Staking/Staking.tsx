@@ -68,6 +68,7 @@ const Staking = () => {
           lpTokenParser={
             stakingData?.lpTokenParser ?? (() => BigNumber.from("0"))
           }
+          estimatedPoolApy={numericTernary(stakingData?.estimatedApy)}
           lpTokenName={stringTernary(stakingData?.lpTokenSymbolName)}
           stakeActionFn={stakingFnTernary(stakingData?.stakeActionFn)}
           unstakeActionFn={stakingFnTernary(stakingData?.unstakeActionFn)}

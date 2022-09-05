@@ -50,6 +50,7 @@ export const StakingForm = ({
   stakeActionFn,
   unstakeActionFn,
   isWrongNetwork,
+  estimatedPoolApy,
 }: StakingFormPropType) => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
@@ -234,7 +235,7 @@ export const StakingForm = ({
               {valueOrEmpty(
                 <div>
                   <LightGrayItemText margin={4}>
-                    ${formatEther(globalCumulativeStake)}
+                    ${formatLPToken(globalCumulativeStake)}
                   </LightGrayItemText>
                 </div>
               )}
@@ -244,7 +245,9 @@ export const StakingForm = ({
             <StakeInfoItem>Pool APY</StakeInfoItem>
             <StakeInfoItem>
               {valueOrEmpty(
-                <LightGrayItemText margin={4}>2.16%</LightGrayItemText>
+                <LightGrayItemText margin={4}>
+                  {formatEther(estimatedPoolApy)}%
+                </LightGrayItemText>
               )}
             </StakeInfoItem>
           </StakeInfoRow>
