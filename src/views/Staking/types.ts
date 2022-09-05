@@ -5,7 +5,7 @@ import {
   FormatterFnType,
   ParserFnType,
   StakingActionFunctionType,
-} from "./hooks/useStakingClaimRewards";
+} from "./hooks/useStakingActionsResolver";
 
 export type StylizedSVG = StyledComponent<
   React.SVGProps<SVGSVGElement> & {

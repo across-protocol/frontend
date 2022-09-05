@@ -7,7 +7,7 @@ import { BigNumber, BigNumberish } from "ethers";
 import {
   StakingActionFunctionType,
   stakingActionNOOPFn,
-} from "./hooks/useStakingClaimRewards";
+} from "./hooks/useStakingActionsResolver";
 import { SuperHeader } from "components";
 import { getChainInfo, hubPoolChainId } from "utils";
 
