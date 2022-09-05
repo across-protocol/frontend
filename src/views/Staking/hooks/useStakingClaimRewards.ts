@@ -2,7 +2,7 @@ import { useConnection } from "state/hooks";
 import { useEffect, useState } from "react";
 import {
   addEtherscan,
-  BASIS_SHIFT,
+  fixedPointAdjustment,
   formattedBigNumberToNumber,
   formatUnitsFnBuilder,
   getConfig,
@@ -173,17 +173,20 @@ const resolveRequestedData = async (
   // Average Deposit Time retrieves the # seconds since the last deposit, weighted
   // by all the deposits in a user's account.
   const daysElapsed = formattedBigNumberToNumber(
-    averageDepositTime.mul(BASIS_SHIFT).div(86400)
+    averageDepositTime.mul(fixedPointAdjustment).div(86400)
   );
 
   const usersMultiplierPercentage = formattedBigNumberToNumber(
-    currentUserRewardMultiplier.mul(BASIS_SHIFT).div(maxMultiplier).mul(100)
+    currentUserRewardMultiplier
+      .mul(fixedPointAdjustment)
+      .div(maxMultiplier)
+      .mul(100)
   );
 
   const usersTotalLPTokens = availableLPTokenBalance.add(userAmountOfLPStaked);
 
   const shareOfPool = safeDivide(
-    userAmountOfLPStaked.mul(BASIS_SHIFT),
+    userAmountOfLPStaked.mul(fixedPointAdjustment),
     BigNumber.from(totalPoolSize)
   ).mul(100);
 

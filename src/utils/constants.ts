@@ -699,7 +699,7 @@ const getQueriesTable = () => {
   };
 };
 
-export const BASIS_SHIFT = parseEther("1.0");
+export const fixedPointAdjustment = parseEther("1.0");
 
 export const queriesTable = getQueriesTable();
 
