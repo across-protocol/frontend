@@ -49,6 +49,7 @@ export const StakingForm = ({
   lpTokenParser: parseLPToken,
   stakeActionFn,
   unstakeActionFn,
+  isWrongNetwork,
 }: StakingFormPropType) => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
@@ -56,7 +57,9 @@ export const StakingForm = ({
   const [isTransitioning, setTransitioning] = useState(false);
   const isRendered = useRef(false);
 
-  const buttonHandler = isConnected
+  const buttonHandler = isWrongNetwork
+    ? () => {}
+    : isConnected
     ? () => {
         (activeTab === "stake" ? stakeActionFn : unstakeActionFn)(
           parseLPToken(stakeAmount),
@@ -84,7 +87,10 @@ export const StakingForm = ({
     );
   }
 
-  const valueOrEmpty = repeatableTernaryBuilder(isConnected, <>-</>);
+  const valueOrEmpty = repeatableTernaryBuilder(
+    isConnected && !isWrongNetwork,
+    <>-</>
+  );
 
   useEffect(() => {
     if (!isTransitioning) {

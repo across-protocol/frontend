@@ -38,6 +38,7 @@ export type StakingFormPropType = GenericStakingComponentProps & {
   usersTotalLPTokens: BigNumberish;
   availableLPTokenBalance: BigNumberish;
   shareOfPool: BigNumberish;
+  isWrongNetwork: boolean;
   lpTokenFormatter: FormatterFnType;
   lpTokenParser: ParserFnType;
   stakeActionFn: StakingActionFunctionType;

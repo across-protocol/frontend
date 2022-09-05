@@ -8,6 +8,8 @@ import {
   StakingActionFunctionType,
   stakingActionNOOPFn,
 } from "./hooks/useStakingClaimRewards";
+import { SuperHeader } from "components";
+import { getChainInfo } from "utils";
 
 const Staking = () => {
   const {
@@ -18,6 +20,8 @@ const Staking = () => {
     connectWalletHandler,
     stakingData,
     isStakingDataLoading,
+    isWrongNetwork,
+    isWrongNetworkHandler,
   } = useStakingView();
 
   const numericTernary = repeatableTernaryBuilder<BigNumberish>(
@@ -40,6 +44,16 @@ const Staking = () => {
 
   return (
     <>
+      {isWrongNetwork && (
+        <SuperHeader>
+          <div>
+            You are on an incorrect network. Please{" "}
+            <button onClick={isWrongNetworkHandler}>
+              switch to {getChainInfo(1).name}
+            </button>
+          </div>
+        </SuperHeader>
+      )}
       <Wrapper>
         <StakingExitAction
           poolName={poolName}
@@ -47,6 +61,7 @@ const Staking = () => {
           poolLogoURI={poolLogoURI}
         />
         <StakingForm
+          isWrongNetwork={isWrongNetwork}
           isConnected={isConnected}
           walletConnectionHandler={connectWalletHandler}
           lpTokenFormatter={stakingData?.lpTokenFormatter ?? (() => "0")}

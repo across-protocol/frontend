@@ -12,7 +12,12 @@ export const useStakingView = () => {
 
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  const { isStakingDataLoading, stakingData } = useStakingClaimRewards();
+  const {
+    isStakingDataLoading,
+    stakingData,
+    isWrongNetwork,
+    isWrongNetworkHandler,
+  } = useStakingClaimRewards();
 
   return {
     poolId,
@@ -21,6 +26,8 @@ export const useStakingView = () => {
     poolName,
     mainnetAddress,
     isStakingDataLoading: isStakingDataLoading && !!stakingData,
+    isWrongNetwork,
+    isWrongNetworkHandler,
     stakingData,
     isConnected: isConnected,
     provider: provider,

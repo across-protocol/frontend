@@ -6,13 +6,17 @@ import {
   formattedBigNumberToNumber,
   formatUnitsFnBuilder,
   getConfig,
+  hubPoolChainId,
   MAX_APPROVAL_AMOUNT,
   parseUnitsFnBuilder,
+  safeDivide,
+  switchChain,
 } from "utils";
 import { useStakingPoolResolver } from "./useStakingPoolResolver";
 import { BigNumber, BigNumberish, providers, Signer } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 import { API } from "bnc-notify";
+import axios from "axios";
 
 export type StakingActionFunctionType = (
   amount: BigNumber,
@@ -48,18 +52,23 @@ type ResolvedDataType =
 export const stakingActionNOOPFn: StakingActionFunctionType = async () => {};
 
 export const useStakingClaimRewards = () => {
-  const { account, provider, signer, notify } = useConnection();
+  const { account, provider, signer, notify, chainId } = useConnection();
   const { mainnetAddress } = useStakingPoolResolver();
 
   const [isLoading, setIsLoading] = useState(false);
   const [stakingData, setStakingData] = useState<ResolvedDataType>(undefined);
   const [reloadData, setReloadData] = useState(false);
+  const [isWrongNetwork, setIsWrongNetwork] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
-    if (!mainnetAddress || !provider || !account || !signer) {
+    if (!mainnetAddress || !provider || !account || !signer || !chainId) {
+      setIsLoading(false);
+    } else if (String(chainId) !== String(hubPoolChainId)) {
+      setIsWrongNetwork(true);
       setIsLoading(false);
     } else {
+      setIsWrongNetwork(false);
       resolveRequestedData(
         mainnetAddress,
         provider,
@@ -72,11 +81,16 @@ export const useStakingClaimRewards = () => {
         setIsLoading(false);
       });
     }
-  }, [mainnetAddress, account, provider, signer, notify, reloadData]);
+  }, [mainnetAddress, account, provider, signer, notify, reloadData, chainId]);
+
+  const isWrongNetworkHandler = () =>
+    provider && switchChain(provider, hubPoolChainId);
 
   return {
     isStakingDataLoading: isLoading,
     stakingData,
+    isWrongNetwork,
+    isWrongNetworkHandler,
   };
 };
 
@@ -126,6 +140,7 @@ const resolveRequestedData = async (
     lpTokenDecimalCount,
     lpTokenAllowance,
     lpTokenSymbolName,
+    poolQuery,
   ] = await Promise.all([
     acceleratingDistributor.stakingTokens(lpTokenAddress) as Promise<{
       enabled: boolean;
@@ -146,7 +161,12 @@ const resolveRequestedData = async (
     lpTokenERC20.decimals(),
     lpTokenERC20.allowance(account, acceleratingDistributorAddress),
     Promise.resolve((await lpTokenERC20.symbol()).slice(4)),
+    axios.get(`/api/pools`, {
+      params: { token: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" },
+    }),
   ]);
+
+  console.log(poolQuery);
 
   // Average Deposit Time retrieves the # seconds since the last deposit, weighted
   // by all the deposits in a user's account.
@@ -160,10 +180,10 @@ const resolveRequestedData = async (
 
   const usersTotalLPTokens = availableLPTokenBalance.add(userAmountOfLPStaked);
 
-  const shareOfPool = userAmountOfLPStaked
-    .mul(BASIS_SHIFT)
-    .div(globalAmountOfLPStaked)
-    .mul(100);
+  const shareOfPool = safeDivide(
+    userAmountOfLPStaked.mul(BASIS_SHIFT),
+    globalAmountOfLPStaked
+  ).mul(100);
 
   const lpTokenFormatter = formatUnitsFnBuilder(lpTokenDecimalCount);
   const lpTokenParser = parseUnitsFnBuilder(lpTokenDecimalCount);
