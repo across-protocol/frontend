@@ -10,7 +10,7 @@ Web UI for V2 of the Across Protocol.
 - Docs: https://docs.across.to/v2
 - Medium: https://medium.com/across-protocol
 
-## Development
+## Development 
 
 ### Local setup
 
