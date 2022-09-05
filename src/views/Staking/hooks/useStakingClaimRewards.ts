@@ -293,7 +293,7 @@ const notificationEmitter = async (
   notify: API
 ): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
-    const { emitter } = notify.hash(txHash, "5");
+    const { emitter } = notify.hash(txHash, String(hubPoolChainId));
     emitter.on("all", addEtherscan);
     emitter.on("txConfirmed", () => {
       notify.unsubscribe(txHash);

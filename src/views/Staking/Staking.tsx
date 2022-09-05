@@ -9,7 +9,7 @@ import {
   stakingActionNOOPFn,
 } from "./hooks/useStakingClaimRewards";
 import { SuperHeader } from "components";
-import { getChainInfo } from "utils";
+import { getChainInfo, hubPoolChainId } from "utils";
 
 const Staking = () => {
   const {
@@ -49,7 +49,7 @@ const Staking = () => {
           <div>
             You are on an incorrect network. Please{" "}
             <button onClick={isWrongNetworkHandler}>
-              switch to {getChainInfo(1).name}
+              switch to {getChainInfo(hubPoolChainId).name}
             </button>
           </div>
         </SuperHeader>
