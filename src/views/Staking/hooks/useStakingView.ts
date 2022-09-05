@@ -8,10 +8,6 @@ export const useStakingView = () => {
   const { poolId, exitLinkURI, poolLogoURI, poolName, mainnetAddress } =
     useStakingPoolResolver();
 
-  //FIXME: Redirect to 404 prior to continuing
-
-  // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
   const {
     isStakingDataLoading,
     stakingData,
