@@ -1,6 +1,6 @@
 import { useConnection } from "state/hooks";
 import { onboard } from "utils";
-import { useStakingClaimRewards } from "./useStakingClaimRewards";
+import { useStakingActionsResolver } from "./useStakingActionsResolver";
 import { useStakingPoolResolver } from "./useStakingPoolResolver";
 
 export const useStakingView = () => {
@@ -13,7 +13,7 @@ export const useStakingView = () => {
     stakingData,
     isWrongNetwork,
     isWrongNetworkHandler,
-  } = useStakingClaimRewards();
+  } = useStakingActionsResolver();
 
   return {
     poolId,
