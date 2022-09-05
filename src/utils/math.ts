@@ -9,3 +9,8 @@ export function max(a: BigNumberish, b: BigNumberish) {
 export function receiveAmount(amount: BigNumber, fees: BridgeFees) {
   return max(amount.sub(fees.relayerFee.total).sub(fees.lpFee.total), 0);
 }
+
+export function safeDivide(numerator: BigNumber, divisor: BigNumber) {
+  let modifiedDivisor = divisor.isZero() ? BigNumber.from(1) : divisor;
+  return numerator.div(modifiedDivisor);
+}
