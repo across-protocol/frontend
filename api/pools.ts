@@ -1,14 +1,17 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
+import { PoolInputRequest } from "./_types";
 
 import { getLogger, InputError, isString, getHubPoolClient } from "./_utils";
 
-const handler = async (request: VercelRequest, response: VercelResponse) => {
+const handler = async (
+  { query: { token } }: PoolInputRequest,
+  response: VercelResponse
+) => {
   const logger = getLogger();
   try {
     const hubPoolClient = await getHubPoolClient();
 
-    let { token } = request.query as { token?: string };
     if (!token || !isString(token))
       throw new InputError("Must provide token as query param");
 

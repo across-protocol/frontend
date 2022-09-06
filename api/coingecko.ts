@@ -1,11 +1,14 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
+import { CoinGeckoInputRequest } from "./_types";
 import { getLogger, InputError, isString, getTokenPrice } from "./_utils";
 
-const handler = async (request: VercelRequest, response: VercelResponse) => {
+const handler = async (
+  { query: { l1Token } }: CoinGeckoInputRequest,
+  response: VercelResponse
+) => {
   const logger = getLogger();
   try {
-    let { l1Token } = request.query as { l1Token?: string };
     if (!l1Token || !isString(l1Token))
       throw new InputError("Must provide l1Token as query param");
 

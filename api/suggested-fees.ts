@@ -3,9 +3,10 @@
 
 import * as sdk from "@across-protocol/sdk-v2";
 import { BlockFinder } from "@uma/sdk";
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
+import { SuggestedFeesInputRequest } from "./_types";
 import {
   getLogger,
   getTokenDetails,
@@ -17,28 +18,22 @@ import {
   getCachedTokenPrice,
 } from "./_utils";
 
-type HandlerType = {
-  amount?: string;
-  token?: string;
-  timestamp?: string;
-  destinationChainId?: string;
-  originChainId?: string;
-  skipAmountLimit?: string;
-};
-
-const handler = async (request: VercelRequest, response: VercelResponse) => {
-  const logger = getLogger();
-  try {
-    const provider = infuraProvider("mainnet");
-
-    let {
+const handler = async (
+  {
+    query: {
       amount: amountInput,
       token,
       timestamp,
       destinationChainId,
       originChainId,
       skipAmountLimit,
-    } = request.query as HandlerType;
+    },
+  }: SuggestedFeesInputRequest,
+  response: VercelResponse
+) => {
+  const logger = getLogger();
+  try {
+    const provider = infuraProvider("mainnet");
 
     if (
       !amountInput ||

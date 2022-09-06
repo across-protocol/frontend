@@ -1,1 +1,2 @@
-export * from "./available-routes.types";
+export * from "./generic.types";
+export * from "./routes";

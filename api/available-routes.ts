@@ -1,14 +1,16 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelResponse } from "@vercel/node";
 import { getLogger, InputError, filterMapArray } from "./_utils";
 import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
-import { AvailableRoutesInputQuery, L1TokenMapRouting } from "./_types";
+import { AvailableRoutesInputRequest, L1TokenMapRouting } from "./_types";
 
-const handler = async (request: VercelRequest, response: VercelResponse) => {
+const handler = async (
+  {
+    query: { originChainId, destinationChainId, originToken, destinationToken },
+  }: AvailableRoutesInputRequest,
+  response: VercelResponse
+) => {
   const logger = getLogger();
   try {
-    const { originChainId, destinationChainId, originToken, destinationToken } =
-      request.query as AvailableRoutesInputQuery;
-
     // Generate a mapping that contains similar tokens on each chain
     // Note:  The key in this dictionary represents an l1Token address, and
     //        the corresponding value is a nested hashmap containing a key

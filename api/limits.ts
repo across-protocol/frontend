@@ -2,9 +2,10 @@
 // However, when written in ts, the imports seem to fail, so this is in js for now.
 
 import { HubPool__factory } from "@across-protocol/contracts-v2";
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
+import { LimitsInputRequest } from "./_types";
 
 import {
   getLogger,
@@ -20,7 +21,10 @@ import {
   isRouteEnabled,
 } from "./_utils";
 
-const handler = async (request: VercelRequest, response: VercelResponse) => {
+const handler = async (
+  { query: { token, destinationChainId, originChainId } }: LimitsInputRequest,
+  response: VercelResponse
+) => {
   const logger = getLogger();
   try {
     const {
@@ -54,12 +58,6 @@ const handler = async (request: VercelRequest, response: VercelResponse) => {
       fullRelayers,
       transferRestrictedRelayers,
     });
-
-    let { token, destinationChainId, originChainId } = request.query as {
-      token?: string;
-      destinationChainId?: string;
-      originChainId?: string;
-    };
     if (
       !token ||
       !destinationChainId ||
