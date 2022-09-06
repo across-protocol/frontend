@@ -1,9 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 import { ethers } from "ethers";
 import { bindActionCreators } from "redux";
-import { ChainId, getConfig, Token } from "utils";
+import { ChainId, getConfig, Token, getCode, noContractCode } from "utils";
 import type { RootState, AppDispatch } from "./";
 
 import chainApi from "./chainApi";
@@ -15,6 +15,7 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function useConnection() {
+  const [isContractAddress, setIsContractAddress] = useState(false);
   const {
     provider,
     signer,
@@ -28,6 +29,20 @@ export function useConnection() {
     error,
   } = useOnboard();
 
+  useEffect(() => {
+    setIsContractAddress(false);
+    if (account && chainId) {
+      const addr = ethers.utils.getAddress(account.address);
+      getCode(addr, chainId)
+        .then((res) => {
+          setIsContractAddress(res !== noContractCode);
+        })
+        .catch((err) => {
+          console.log("err in getCode call", err);
+        });
+    }
+  }, [account, chainId]);
+
   return {
     account: account ? ethers.utils.getAddress(account.address) : undefined,
     ensName: account?.ens,
@@ -40,6 +55,7 @@ export function useConnection() {
     disconnect,
     error,
     wallet,
+    isContractAddress,
   };
 }
 
