@@ -1,12 +1,6 @@
 const ethers = require("ethers");
 
-const {
-  getLogger,
-  InputError,
-  isString,
-  getTokenPrice,
-  isStringNumeric,
-} = require("./_utils");
+const { getLogger, InputError, isString, getTokenPrice } = require("./_utils");
 
 const handler = async (request, response) => {
   const logger = getLogger();
@@ -15,7 +9,8 @@ const handler = async (request, response) => {
     if (!isString(l1Token))
       throw new InputError("Must provide l1Token as query param");
 
-    if (!isStringNumeric((destinationId = destinationId ?? "1"))) {
+    destinationId = Number(destinationId ?? "1");
+    if (!Number.isInteger(destinationId) || destinationId <= 0) {
       throw new InputError("Destination must a non-negative integer");
     }
 
