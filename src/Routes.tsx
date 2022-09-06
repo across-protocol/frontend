@@ -88,7 +88,7 @@ const Routes: React.FC = () => {
         </Banner>
       )}
       {isContractAddress && <SuperHeader>{warningMessage}</SuperHeader>}
-      <SuperHeader darkMode>
+      <SuperHeader darkMode size="lg">
         <i>USDT currently disabled for Across contract upgrade.</i>
       </SuperHeader>
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />

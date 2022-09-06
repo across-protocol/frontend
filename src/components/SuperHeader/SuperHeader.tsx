@@ -3,14 +3,16 @@ import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { QUERIES } from "utils";
 
+type Size = "sm" | "md" | "lg";
 interface IWrapper {
   darkMode?: boolean;
+  size?: Size;
 }
 const Wrapper = styled.div<IWrapper>`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0 30px;
+  padding: ${({ size }) => (size === "lg" ? "0 30px" : "50px 30px")};
   height: 60px;
   color: ${({ darkMode }) => (darkMode ? "#fff" : "var(--color-gray)")};
   background-color: ${({ darkMode }) =>
@@ -49,8 +51,9 @@ const Wrapper = styled.div<IWrapper>`
 
 interface Props {
   darkMode?: boolean;
+  size?: Size;
 }
-const SuperHeader: React.FC<Props> = ({ children, darkMode }) => {
+const SuperHeader: React.FC<Props> = ({ children, darkMode, size }) => {
   const container = useRef(document.getElementById("super-header"));
   // We create the "super-header" element and insert it into the DOM, if it does not exist already
   useLayoutEffect(() => {
@@ -67,7 +70,9 @@ const SuperHeader: React.FC<Props> = ({ children, darkMode }) => {
     return null;
   }
   return createPortal(
-    <Wrapper darkMode={darkMode}>{children}</Wrapper>,
+    <Wrapper darkMode={darkMode} size={size}>
+      {children}
+    </Wrapper>,
     container.current
   );
 };
