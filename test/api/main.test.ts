@@ -25,14 +25,14 @@ describe("API Test", () => {
   // Query params must be strings or server should return 400. In these tests we purposefully trigger 400 errors because
   // we want to test that the handler is importing all files and building correctly. We don't attempt to trigger 200
   // successful responses because its difficult to replicate the production server.
-  let request: TypedVercelRequest<any>;
+  let request = { query: {} as any };
 
   beforeEach(() => {
     response = getMockedResponse();
   });
 
   test("limits has no load-time errors", async () => {
-    await limitsHandler(request, response);
+    await limitsHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
       "Must provide token and destinationChainId as query params"
@@ -40,7 +40,7 @@ describe("API Test", () => {
   });
 
   test("suggested-fees has no load-time errors", async () => {
-    await feesHandler(request, response);
+    await feesHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
       "Must provide amount, token, and destinationChainId as query params"
@@ -48,7 +48,7 @@ describe("API Test", () => {
   });
 
   test("pools has no load-time errors", async () => {
-    await poolsHandler(request, response);
+    await poolsHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
       "Must provide token as query param"
@@ -56,7 +56,7 @@ describe("API Test", () => {
   });
 
   test("coingecko has no load-time errors", async () => {
-    await coingeckoHandler(request, response);
+    await coingeckoHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
       "Must provide l1Token as query param"
@@ -64,7 +64,7 @@ describe("API Test", () => {
   });
 
   test("available-routes has no load-time errors", async () => {
-    await availableRouteHandler(request, response);
+    await availableRouteHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(200);
     expect(response.json).toHaveBeenCalled();
   });
