@@ -27,6 +27,7 @@ export function useConnection() {
     chainId,
     wallet,
     error,
+    setChain,
   } = useOnboard();
 
   useEffect(() => {
@@ -55,6 +56,7 @@ export function useConnection() {
     disconnect,
     error,
     wallet,
+    setChain,
     isContractAddress,
   };
 }

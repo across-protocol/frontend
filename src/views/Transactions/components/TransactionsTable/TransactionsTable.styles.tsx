@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
 import {
@@ -139,4 +140,28 @@ export const StyledPlus = styled(AcrossPlusIcon)`
   margin-top: 8px;
   margin-right: 4px;
   margin-left: 8px;
+`;
+
+export const SpeedUpHeadCell = styled(HeadCell)`
+  flex: 0.3;
+`;
+
+export const SpeedUpCell = styled(TableCell)`
+  cursor: pointer;
+  flex: 0.3;
+
+  svg {
+    opacity: 0;
+    height: 16px;
+    width: 16px;
+  }
+
+  :hover {
+    svg {
+      opacity: 1;
+      transition: opacity 0.3s ease-in-out;
+      fill: #44d2ff;
+      stroke: #44d2ff;
+    }
+  }
 `;

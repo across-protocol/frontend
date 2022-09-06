@@ -156,3 +156,12 @@ export function formatPoolAPY(
     Number(ethers.utils.formatUnits(wei, decimals))
   );
 }
+
+export function formatWeiPct(
+  wei: ethers.BigNumberish,
+  maxFractions: number = 3
+) {
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: maxFractions,
+  }).format(Number(ethers.utils.formatEther(wei)) * 100);
+}
