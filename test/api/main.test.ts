@@ -4,7 +4,6 @@ import feesHandler from "../../api/suggested-fees";
 import poolsHandler from "../../api/pools";
 import coingeckoHandler from "../../api/coingecko";
 import availableRouteHandler from "../../api/available-routes";
-import { VercelRequest, VercelResponse } from "@vercel/node";
 import { TypedVercelRequest } from "../../api/_types";
 
 process.env.REACT_APP_PUBLIC_INFURA_ID = "e34138b2db5b496ab5cc52319d2f0299";
@@ -33,7 +32,7 @@ describe("API Test", () => {
   });
 
   test("limits has no load-time errors", async () => {
-    await limitsHandler(request as VercelRequest, response as VercelResponse);
+    await limitsHandler(request, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
       "Must provide token and destinationChainId as query params"
@@ -41,7 +40,7 @@ describe("API Test", () => {
   });
 
   test("suggested-fees has no load-time errors", async () => {
-    await feesHandler(request as VercelRequest, response as VercelResponse);
+    await feesHandler(request, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
       "Must provide amount, token, and destinationChainId as query params"
@@ -49,7 +48,7 @@ describe("API Test", () => {
   });
 
   test("pools has no load-time errors", async () => {
-    await poolsHandler(request as VercelRequest, response as VercelResponse);
+    await poolsHandler(request, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
       "Must provide token as query param"
@@ -57,10 +56,7 @@ describe("API Test", () => {
   });
 
   test("coingecko has no load-time errors", async () => {
-    await coingeckoHandler(
-      request as VercelRequest,
-      response as VercelResponse
-    );
+    await coingeckoHandler(request, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
       "Must provide l1Token as query param"
@@ -68,10 +64,7 @@ describe("API Test", () => {
   });
 
   test("available-routes has no load-time errors", async () => {
-    await availableRouteHandler(
-      request as VercelRequest,
-      response as VercelResponse
-    );
+    await availableRouteHandler(request, response);
     expect(response.status).toHaveBeenCalledWith(200);
     expect(response.json).toHaveBeenCalled();
   });
