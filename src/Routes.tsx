@@ -21,13 +21,11 @@ import {
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
-const warningMessage = `Warning --- We noticed your connected account is a contract address.
 
-1. Usually the same contract will not exist on the destination. You must change the destination address to avoid loss of funds. If not, your funds may be locked or stolen.
-
-2. When bridging ETH to a contract address, ETH will be wrapped into WETH. Ensure the contract address can receive WETH. If you are not sure whether it can, then you should send to a non-contract address to be safe and receive ETH to prevent any chance of a loss of funds.
-
-To change the destination address, click the Change account button below the To dropdown and paste in the address that you would like to receive the funds on the other chain.
+const warningMessage = `
+  We noticed that you have connected from a contract address.
+  We recommend that you change the destination of the transfer (by clicking the "Change account" text below the To dropdown)
+  to a non-contract wallet you control on the destination chain to avoid having your funds lost or stolen.
 `;
 
 function useRoutes() {
@@ -87,8 +85,10 @@ const Routes: React.FC = () => {
           </span>
         </Banner>
       )}
-      {isContractAddress && <SuperHeader>{warningMessage}</SuperHeader>}
-      <SuperHeader darkMode size="lg">
+      {isContractAddress && (
+        <SuperHeader size="lg">{warningMessage}</SuperHeader>
+      )}
+      <SuperHeader darkMode>
         <i>USDT currently disabled for Across contract upgrade.</i>
       </SuperHeader>
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />

@@ -12,7 +12,7 @@ const Wrapper = styled.div<IWrapper>`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: ${({ size }) => (size === "lg" ? "0 30px" : "50px 30px")};
+  padding: ${({ size }) => (size === "lg" ? "20px 30px" : "0 30px")};
   height: 60px;
   color: ${({ darkMode }) => (darkMode ? "#fff" : "var(--color-gray)")};
   background-color: ${({ darkMode }) =>
