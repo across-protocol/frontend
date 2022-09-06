@@ -15,8 +15,7 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function useConnection() {
-  const [showContractAddressWarning, setShowContractAddressWarning] =
-    useState(false);
+  const [isContractAddress, setIsContractAddress] = useState(false);
   const {
     provider,
     signer,
@@ -31,12 +30,12 @@ export function useConnection() {
   } = useOnboard();
 
   useEffect(() => {
-    setShowContractAddressWarning(false);
+    setIsContractAddress(false);
     if (account && chainId) {
       const addr = ethers.utils.getAddress(account.address);
       getCode(addr, chainId)
         .then((res) => {
-          setShowContractAddressWarning(res !== noContractCode);
+          setIsContractAddress(res !== noContractCode);
         })
         .catch((err) => {
           console.log("err in getCode call", err);
@@ -56,7 +55,7 @@ export function useConnection() {
     disconnect,
     error,
     wallet,
-    showContractAddressWarning,
+    isContractAddress,
   };
 }
 

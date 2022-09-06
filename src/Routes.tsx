@@ -32,7 +32,7 @@ To change the destination address, click the Change account button below the To 
 
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
-  const { provider, showContractAddressWarning } = useConnection();
+  const { provider, isContractAddress } = useConnection();
   const location = useLocation();
   const history = useHistory();
   const { error, removeError } = useError();
@@ -50,7 +50,7 @@ function useRoutes() {
     error,
     removeError,
     location,
-    showContractAddressWarning,
+    isContractAddress,
   };
 }
 // Need this component for useLocation hook
@@ -61,7 +61,7 @@ const Routes: React.FC = () => {
     error,
     removeError,
     location,
-    showContractAddressWarning,
+    isContractAddress,
   } = useRoutes();
 
   return (
@@ -87,9 +87,7 @@ const Routes: React.FC = () => {
           </span>
         </Banner>
       )}
-      {showContractAddressWarning && (
-        <SuperHeader>{warningMessage}</SuperHeader>
-      )}
+      {isContractAddress && <SuperHeader>{warningMessage}</SuperHeader>}
       <SuperHeader darkMode>
         <i>USDT currently disabled for Across contract upgrade.</i>
       </SuperHeader>
