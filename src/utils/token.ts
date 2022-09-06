@@ -8,6 +8,7 @@ export function getNativeBalance(
   blockNumber: number | "latest" = "latest"
 ) {
   const provider = getProvider(chainId);
+
   return provider.getBalance(account, blockNumber);
 }
 /**

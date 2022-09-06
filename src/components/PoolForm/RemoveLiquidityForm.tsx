@@ -186,6 +186,7 @@ const RemoveLiqudityForm: FC<Props> = ({
             max
           </MaxButton>
           <Input
+            data-cy="remove-input"
             placeholder="0.00"
             id="amount"
             value={removeAmount}
@@ -212,6 +213,7 @@ const RemoveLiqudityForm: FC<Props> = ({
       />
       <RemovePercentButtonsWrapper>
         <RemovePercentButton
+          data-cy="remove-25"
           onClick={() => {
             setError("");
             setRemoveAmountSlider(25);
@@ -221,6 +223,7 @@ const RemoveLiqudityForm: FC<Props> = ({
           25%
         </RemovePercentButton>
         <RemovePercentButton
+          data-cy="remove-50"
           onClick={() => {
             setError("");
 
@@ -231,6 +234,7 @@ const RemoveLiqudityForm: FC<Props> = ({
           50%
         </RemovePercentButton>
         <RemovePercentButton
+          data-cy="remove-75"
           onClick={() => {
             setError("");
 
@@ -241,6 +245,7 @@ const RemoveLiqudityForm: FC<Props> = ({
           75%
         </RemovePercentButton>
         <RemovePercentButton
+          data-cy="remove-max-button"
           onClick={() => {
             setError("");
 
@@ -263,7 +268,7 @@ const RemoveLiqudityForm: FC<Props> = ({
               <FeesInfo>Left in pool</FeesInfo>
             </FeesBlock>
             <FeesBlock>
-              <FeesValues>
+              <FeesValues data-cy="remove-amount-preview">
                 {preview && formatUnits(preview.position.recieve, decimals)}{" "}
                 {symbol}
               </FeesValues>
@@ -308,11 +313,14 @@ const RemoveLiqudityForm: FC<Props> = ({
           </RemoveFormButton>
         ) : (
           <RemoveFormButton
+            data-cy="remove-liquidity-button"
             onClick={handleButtonClick}
             disabled={(wrongNetwork && !provider) || !!error}
           >
             {buttonMessage()}
-            {txSubmitted ? <BouncingDotsLoader /> : null}
+            {txSubmitted ? (
+              <BouncingDotsLoader dataCy="bouncing-loader" />
+            ) : null}
           </RemoveFormButton>
         )}
       </RemoveFormButtonWrapper>

@@ -28,7 +28,11 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
   }
 
   if (!isConnected) {
-    return <ConnectButton onClick={() => connect()}>Connect</ConnectButton>;
+    return (
+      <ConnectButton data-cy="wallet-connect-button" onClick={() => connect()}>
+        Connect
+      </ConnectButton>
+    );
   }
 
   return (
