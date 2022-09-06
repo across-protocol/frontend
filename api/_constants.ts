@@ -1,5 +1,7 @@
 import { ethers } from "ethers";
 
+export const maxRelayFeePct = 0.25;
+
 export const disabledL1Tokens = [
   "0x3472A5A71965499acd81997a54BBA8D852C6E53d",
 ].map((x) => x.toLowerCase());

@@ -2,15 +2,19 @@ import {
   HubPool__factory,
   ERC20__factory,
   SpokePool__factory,
+  SpokePool,
 } from "@across-protocol/contracts-v2";
 import axios from "axios";
 import * as sdk from "@across-protocol/sdk-v2";
-import { ethers } from "ethers";
-import { Logging } from "@google-cloud/logging";
+import { BigNumber, ethers, providers } from "ethers";
+import { Log, Logging } from "@google-cloud/logging";
 import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 
-import { relayerFeeCapitalCostConfig } from "./_constants";
+import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
+import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
+
+type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
 const {
   REACT_APP_PUBLIC_INFURA_ID,
@@ -28,7 +32,17 @@ export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 // Default to no markup.
 export const DEFAULT_GAS_MARKUP = 0;
 
-export const log = (gcpLogger: any, severity: any, data: any) => {
+/**
+ * Writes a log using the google cloud logging utility
+ * @param gcpLogger A defined google cloud logging instance
+ * @param severity A string opcode for severity
+ * @param data an arbitrary data input that will be logged to the cloud utility
+ */
+export const log = (
+  gcpLogger: Log,
+  severity: "DEBUG" | "INFO" | "WARN" | "ERROR",
+  data: LogType
+) => {
   let message = JSON.stringify(data, null, 4);
   // Fire and forget. we don't wait for this to finish.
   gcpLogger
@@ -54,9 +68,14 @@ export const log = (gcpLogger: any, severity: any, data: any) => {
     });
 };
 
+type LogType = any;
 // Singleton logger so we don't create multiple.
-let logger: any;
-export const getLogger = () => {
+let logger: LoggingUtility;
+/**
+ * Resolves a logging utility to be used. This instance caches its responses
+ * @returns A valid Logging utility that can be used throughout the runtime
+ */
+export const getLogger = (): LoggingUtility => {
   // Use the default logger which logs to console if no GCP service account is configured.
   if (Object.keys(GOOGLE_SERVICE_ACCOUNT).length === 0) {
     logger = sdk.relayFeeCalculator.DEFAULT_LOGGER;
@@ -71,15 +90,19 @@ export const getLogger = () => {
       },
     }).log(VERCEL_ENV ?? "", { removeCircular: true });
     logger = {
-      debug: (data: any) => log(gcpLogger, "DEBUG", data),
-      info: (data: any) => log(gcpLogger, "INFO", data),
-      warn: (data: any) => log(gcpLogger, "WARN", data),
-      error: (data: any) => log(gcpLogger, "ERROR", data),
+      debug: (data: LogType) => log(gcpLogger, "DEBUG", data),
+      info: (data: LogType) => log(gcpLogger, "INFO", data),
+      warn: (data: LogType) => log(gcpLogger, "WARN", data),
+      error: (data: LogType) => log(gcpLogger, "ERROR", data),
     };
   }
   return logger;
 };
 
+/**
+ * Resolves the current vercel endpoint dynamically
+ * @returns A valid URL of the current endpoint in vercel
+ */
 export const resolveVercelEndpoint = () => {
   const url = process.env.VERCEL_URL ?? "across.to";
   const env = process.env.VERCEL_ENV ?? "development";
@@ -94,10 +117,10 @@ export const resolveVercelEndpoint = () => {
 };
 
 export const getTokenDetails = async (
-  provider: any,
-  l1Token: any,
-  l2Token: any,
-  chainId: any
+  provider: providers.Provider,
+  l1Token: string,
+  l2Token: string,
+  chainId: string
 ) => {
   const hubPool = HubPool__factory.connect(
     "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
@@ -148,11 +171,21 @@ export const getTokenDetails = async (
   };
 };
 
-export const isString = (input: any) => typeof input === "string";
+/**
+ * Determines if a given input is a string
+ * @param input An unknown argument that will test against the type of a string
+ * @returns A boolean. `true` if the input is a string, `false` otherwise
+ */
+export const isString = (input: unknown) => typeof input === "string";
 
 export class InputError extends Error {}
 
-export const infuraProvider = (name: any) => {
+/**
+ * Resolves an Infura provider given the name of the ETH network
+ * @param name The name of an ethereum network
+ * @returns A valid Ethers RPC provider
+ */
+export const infuraProvider = (name: string) => {
   const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
   getLogger().info({
     at: "infuraProvider",
@@ -162,9 +195,17 @@ export const infuraProvider = (name: any) => {
   return new ethers.providers.StaticJsonRpcProvider(url);
 };
 
-export const bobaProvider = () =>
+/**
+ * Resolves a fixed Static RPC provider
+ * @returns A valid Boba Provider that can be used to query the Boba blockchain
+ */
+export const bobaProvider = (): providers.StaticJsonRpcProvider =>
   new ethers.providers.StaticJsonRpcProvider("https://mainnet.boba.network");
 
+/**
+ * Generates a fixed HubPoolClientConfig object
+ * @returns A fixed constant
+ */
 export const makeHubPoolClientConfig = () => {
   return {
     chainId: 1,
@@ -174,6 +215,10 @@ export const makeHubPoolClientConfig = () => {
   };
 };
 
+/**
+ * Resolves the current HubPoolClient
+ * @returns A HubPool client that can query the blockchain
+ */
 export const getHubPoolClient = () => {
   const hubPoolConfig = makeHubPoolClientConfig();
   return new sdk.pool.Client(
@@ -195,11 +240,11 @@ export const dummyFromAddress =
   process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
   "0x893d0d70ad97717052e3aa8903d9615804167759";
 
-export const getGasMarkup = (chainId: any) => {
+export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
-export const queries = {
+export const queries: Record<number, () => QueryBase> = {
   1: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
       infuraProvider("mainnet"),
@@ -257,13 +302,16 @@ export const queries = {
     ),
 };
 
-export const maxRelayFeePct = 0.25;
-
+/**
+ * Retrieves an isntance of the Across SDK RelayFeeCalculator
+ * @param destinationChainId The destination chain that a bridge operation will transfer to
+ * @returns An instance of the `RelayFeeCalculator` for the specific chain specified by `destinationChainId`
+ */
 export const getRelayerFeeCalculator = (destinationChainId: number) => {
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     capitalCostsPercent: 0.04,
-    queries: (queries as any)[destinationChainId](),
+    queries: queries[destinationChainId](),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
   getLogger().info({
@@ -276,30 +324,63 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
     logger
   );
 };
-export const getTokenSymbol = (tokenAddress: string): any | undefined => {
-  return Object.entries(sdk.relayFeeCalculator.SymbolMapping)?.find(
+
+/**
+ * Resolves a tokenAddress to a given textual symbol
+ * @param tokenAddress The token address to convert into a symbol
+ * @returns A corresponding symbol to the given `tokenAddress`
+ */
+export const getTokenSymbol = (tokenAddress: string): string => {
+  const symbol = Object.entries(sdk.relayFeeCalculator.SymbolMapping)?.find(
     ([_symbol, { address }]) =>
       address.toLowerCase() === tokenAddress.toLowerCase()
   )?.[0];
+  if (!symbol) {
+    throw new InputError("Token address provided was not whitelisted.");
+  }
+  return symbol;
 };
+
+/**
+ * Retrieves the results of the `relayFeeCalculator` SDK function: `relayerFeeDetails`
+ * @param l1Token A valid L1 ERC-20 token address
+ * @param amount  The amount of funds that are requesting to be transferred
+ * @param destinationChainId The destination chain that this token will be transferred to
+ * @param tokenPrice An optional overred price to prevent the SDK from creating its own call
+ * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
+ */
 export const getRelayerFeeDetails = (
-  l1Token: any,
-  amount: any,
-  destinationChainId: any,
-  tokenPrice: any
+  l1Token: string,
+  amount: string,
+  destinationChainId: number,
+  tokenPrice?: number
 ) => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
 };
 
-export const getTokenPrice = (l1Token: any, destinationChainId: any) => {
+/**
+ * Constructs an internal call to the CoinGecko API directly
+ * @param l1Token The ERC20 token address of the coin to find the cached price of
+ * @param destinationChainId The blockchain where this request originates from
+ * @returns A promise to the current price of the `l1Token` on `destinationChainId`
+ */
+export const getTokenPrice = (
+  l1Token: string,
+  destinationChainId: number
+): Promise<number> => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.getTokenPrice(tokenSymbol);
 };
 
-export const getCachedTokenPrice = async (l1Token: any) => {
+/**
+ * Creates an HTTP call to the `/api/coingecko` endpoint to resolve a CoinGecko price
+ * @param l1Token The ERC20 token address of the coin to find the cached price of
+ * @returns The price of the `l1Token` token.
+ */
+export const getCachedTokenPrice = async (l1Token: string): Promise<number> => {
   getLogger().debug({
     at: "getCachedTokenPrice",
     message: `Resolving price from ${resolveVercelEndpoint()}/api/coingecko`,
@@ -315,7 +396,12 @@ export const getCachedTokenPrice = async (l1Token: any) => {
 
 export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 
-export const getProvider = (_chainId: string) => {
+/**
+ * Generates a relevant provider for the given input chainId
+ * @param _chainId A valid chain identifier where an AcrossV2 contract is deployed
+ * @returns A provider object to query the requested blockchain
+ */
+export const getProvider = (_chainId: number): providers.Provider => {
   const chainId = _chainId.toString();
   if (!providerCache[chainId]) {
     switch (chainId.toString()) {
@@ -341,9 +427,14 @@ export const getProvider = (_chainId: string) => {
   return providerCache[chainId];
 };
 
-export const getSpokePool = (_chainId: any) => {
+/**
+ * Generates a relevant SpokePool given the input chain ID
+ * @param _chainId A valid chain Id that corresponds to an available AcrossV2 Spoke Pool
+ * @returns The corresponding SpokePool for the given `_chainId`
+ */
+export const getSpokePool = (_chainId: number): SpokePool => {
   const chainId = _chainId.toString();
-  const provider = getProvider(chainId);
+  const provider = getProvider(_chainId);
   switch (chainId.toString()) {
     case "1":
       return SpokePool__factory.connect(
@@ -375,35 +466,55 @@ export const getSpokePool = (_chainId: any) => {
   }
 };
 
+/**
+ * Determines if a given route is enabled to support an AcrossV2 bridge
+ * @param _fromChainId The chain id of the origin bridge action
+ * @param _toChainId The chain id of the destination bridge action.
+ * @param _fromToken The originating token address. Note: is a valid ERC-20 address
+ * @returns A boolean representing if a route with these parameters is available
+ */
 export const isRouteEnabled = (
-  fromChainId: any,
-  toChainId: any,
-  fromToken: any
-) => {
-  fromChainId = Number(fromChainId);
-  toChainId = Number(toChainId);
+  _fromChainId: string,
+  _toChainId: string,
+  _fromToken: string
+): boolean => {
+  let fromChainId = Number(_fromChainId);
+  let toChainId = Number(_toChainId);
   const enabled = enabledRoutesAsJson.routes.some(
     ({ fromTokenAddress, fromChain, toChain }) =>
       fromChainId === fromChain &&
       toChainId === toChain &&
-      fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
+      _fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
   );
   return enabled;
 };
 
+/**
+ * Resolves the balance of a given ERC20 token at a provided address
+ * @param chainId The blockchain Id to query against
+ * @param token The valid ERC20 token address on the given `chainId`
+ * @param account A valid Web3 wallet address
+ * @param blockTag A blockTag to specify a historical balance date
+ * @returns A promise that resolves to the BigNumber of the balance
+ */
 export const getBalance = (
-  chainId: string,
+  chainId: string | number,
   token: string,
   account: string,
   blockTag: number | "latest" = "latest"
-) => {
-  return ERC20__factory.connect(token, getProvider(chainId)).balanceOf(
+): Promise<BigNumber> => {
+  return ERC20__factory.connect(token, getProvider(Number(chainId))).balanceOf(
     account,
     { blockTag }
   );
 };
 
-export const maxBN = (...arr: any[]) => {
+/**
+ * Finds the largest number in an array of `BigNumber` values
+ * @param arr The array to find the largest number
+ * @returns The largest bigNumber
+ */
+export const maxBN = (...arr: BigNumber[]): BigNumber => {
   return [...arr].sort((a, b) => {
     if (b.gt(a)) return 1;
     if (a.gt(b)) return -1;
@@ -411,7 +522,12 @@ export const maxBN = (...arr: any[]) => {
   })[0];
 };
 
-export const minBN = (...arr: any[]) => {
+/**
+ * Finds the smallest number in an array of `BigNumber` values
+ * @param arr The array to find the smallest number
+ * @returns The Smallest bigNumber
+ */
+export const minBN = (...arr: BigNumber[]): BigNumber => {
   return [...arr].sort((a, b) => {
     if (a.gt(b)) return 1;
     if (b.gt(a)) return -1;
@@ -421,31 +537,31 @@ export const minBN = (...arr: any[]) => {
 
 /**
  * Performs a filter-map operation in O(n) time
- * @param {any[]} array An array of elements to apply this transform
- * @param {(any) => boolean} filterFn A function which resolves a boolean. A true return will appear in the final output array
- * @param {(any) => any} mappingFn A function to transform an array element into the mapping
- * @param {boolean} mapFirst If true, the element will be transformed prior to being filtered
- * @returns {any[]} A copy of the `array`, but filtered and mapped
+ * @param array array An array of elements to apply this transform
+ * @param filterFn A function which resolves a boolean. A true return will appear in the final output array
+ * @param mappingFn A function to transform an array element into the mapping
+ * @param mapFirst If true, the element will be transformed prior to being filtered
+ * @returns A copy of the `array`, but filtered and mapped
  */
-export const filterMapArray = (
-  array: any[],
-  filterFn: (arg: any) => boolean,
-  mappingFn: (arg: any) => any,
+export function filterMapArray<InputType, MapType>(
+  array: InputType[],
+  filterFn: (arg: InputType | MapType) => boolean,
+  mappingFn: (arg: InputType) => MapType,
   mapFirst: boolean
-): any[] => {
+): MapType[] {
   const reducerFn = mapFirst
-    ? (accumulator: any, currentValue: any) => {
+    ? (accumulator: MapType[], currentValue: InputType) => {
         const currentValueMapping = mappingFn(currentValue);
         if (filterFn(currentValueMapping)) {
           accumulator.push(currentValueMapping);
         }
         return accumulator;
       }
-    : (accumulator: any, currentValue: any) => {
+    : (accumulator: MapType[], currentValue: InputType) => {
         if (filterFn(currentValue)) {
           accumulator.push(mappingFn(currentValue));
         }
         return accumulator;
       };
   return array.reduce(reducerFn, []);
-};
+}
