@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: Across Public API
+  version: 2.0.0
+  description: Represents the
+  license:
+    name: GNU Affero General Public License v3.0
+    url: https://github.com/across-protocol/frontend-v2/blob/master/LICENSE
+servers:
+  - url: https://across.to/api
+    description: Production Server Endpoints
+paths:
+  /available-routes:
+    summary: Lists all the available bridge routes in the Across V2 protocol
+    get:
+      summary: List all available AcrossV2 bridge routes
+      description: >-
+        This endpoint provides the ability to query all active Across V2 routes.
+        This list can be optionally filtered further by providing optional query
+        parameters.
+      operationId: ''
+      parameters:
+        - in: query
+          name: originChainId
+          required: false
+          schema:
+            $ref: '#/components/schemas/ChainId'
+          description: >
+            The chain ID of the originating chain to a bridge transfer. 
+
+
+            Note: This is an optional query parameter. This parameter will
+            filter the response JSON based. This filter can be used in addition
+            to additional parameters to create a custom filter.
+          example: 1
+        - in: query
+          name: destinationChainId
+          required: false
+          schema:
+            $ref: '#/components/schemas/ChainId'
+          description: >
+            The chain ID of the destination chain to a bridge transfer. 
+
+
+            Note: This is an optional query parameter. This parameter will
+            filter the response JSON based. This filter can be used in addition
+            to additional parameters to create a custom filter.
+          example: 10
+        - in: query
+          name: originToken
+          required: false
+          schema:
+            $ref: '#/components/schemas/Web3Address'
+          description: >
+            The token address of the originating bridge transfer. 
+
+            Must be a valid ERC-20 token address. 
+
+
+            Note: This is an optional query parameter. This parameter will
+            filter the response JSON based. This filter can be used in addition
+            to additional parameters to create a custom filter.
+          example: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+        - in: query
+          name: destinationToken
+          required: false
+          schema:
+            $ref: '#/components/schemas/Web3Address'
+          description: >
+            The token address that funds will be transferred to at the
+            destination chain. Must be a valid ERC-20 token address. 
+
+
+            Note: This is an optional query parameter. This parameter will
+            filter the response JSON based. This filter can be used in addition
+            to additional parameters to create a custom filter.
+          example: '0x4200000000000000000000000000000000000006'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: "#/components/schemas/AvailableRoute"
+        '400':
+          description: '400: invalid user input.'
+        '500':
+          description: '500: an unexpected error within the API.'
+components:
+  schemas:
+    AvailableRoute:
+      type: object
+      properties:
+        originChainId:
+          type: number
+          description: |
+            The chain ID of the originating chain to a bridge transfer. 
+          example: "1"
+        destinationChainId:
+          type: number
+          description: |
+            The chain ID of the destination chain to a bridge transfer. 
+          example: "10"      
+        originToken:
+          type: string
+          description: |
+            The token address of the originating bridge transfer. 
+
+            Note: this will be a valid ERC-20 token address. 
+          example: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'         
+        destinationToken:
+          type: string
+          description: |
+            The token address that funds will be transferred to at the destination chain.
+
+            Note: this will be a valid ERC-20 token address. 
+          example: '0x4200000000000000000000000000000000000006'  
+          
+    ChainId:
+      type: number
+      enum:
+        - 1
+        - 10
+        - 137
+        - 288
+        - 42161
+      description: A valid chain identifier for a blockchain.
+      
+    Web3Address:
+      type: string
+      pattern: /^0x[a-fA-F0-9]{40}$/
+      description: A valid EVM-compatible Web3 wallet address.
