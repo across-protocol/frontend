@@ -61,6 +61,7 @@ export function DataRow({
       />
       {enableSpeedUp && (
         <SpeedUpCell
+          id="speed-up-cell"
           onClick={() => onClickSpeedUp && onClickSpeedUp([token, transfer])}
         >
           <Zap />

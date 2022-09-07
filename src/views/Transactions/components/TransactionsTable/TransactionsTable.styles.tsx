@@ -27,7 +27,18 @@ export const TableBody = BaseTableBody;
 
 export const TableHeadRow = BaseTableHeadRow;
 
-export const TableRow = BaseTableRow;
+export const TableRow = styled(BaseTableRow)`
+  :hover {
+    #speed-up-cell {
+      svg {
+        opacity: 1;
+        transition: opacity 0.3s ease-in-out;
+        fill: #44d2ff;
+        stroke: #44d2ff;
+      }
+    }
+  }
+`;
 
 export const EmptyRow = BaseEmptyRow;
 
@@ -154,14 +165,5 @@ export const SpeedUpCell = styled(TableCell)`
     opacity: 0;
     height: 16px;
     width: 16px;
-  }
-
-  :hover {
-    svg {
-      opacity: 1;
-      transition: opacity 0.3s ease-in-out;
-      fill: #44d2ff;
-      stroke: #44d2ff;
-    }
   }
 `;
