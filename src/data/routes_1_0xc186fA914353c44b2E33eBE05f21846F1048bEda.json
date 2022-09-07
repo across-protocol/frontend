@@ -2,7 +2,6 @@
   "hubPoolChain": 1,
   "hubPoolAddress": "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
   "hubPoolWethAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-  "acceleratingDistributorAddress": "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4",
   "routes": [
     {
       "fromChain": 1,

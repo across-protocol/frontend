@@ -541,7 +541,6 @@ const RouteConfigSS = superstruct.type({
   hubPoolWethAddress: superstruct.string(),
   hubPoolChain: superstruct.number(),
   hubPoolAddress: superstruct.string(),
-  acceleratingDistributorAddress: superstruct.string(),
 });
 export type RouteConfig = superstruct.Infer<typeof RouteConfigSS>;
 export type Route = superstruct.Infer<typeof RouteSS>;

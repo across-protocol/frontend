@@ -11,8 +11,8 @@ import filter from "lodash/filter";
 import sortBy from "lodash/sortBy";
 import {
   AcceleratingDistributor,
-  createAcceleratingDistributor,
-} from "./acceleratingDistributor.temp";
+  AcceleratingDistributor__factory,
+} from "@across-protocol/across-token";
 
 export type Token = constants.TokenInfo & {
   l1TokenAddress: string;
@@ -83,7 +83,7 @@ export class ConfigClient {
     return this.config.hubPoolAddress;
   }
   getAcceleratingDistributorAddress(): string {
-    return this.config.acceleratingDistributorAddress;
+    return "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4";
   }
   getL1TokenAddressBySymbol(symbol: string) {
     // all routes have an l1Token address, so just find the first symbol that matches
@@ -99,7 +99,7 @@ export class ConfigClient {
   getAcceleratingDistributor(signer?: Signer): AcceleratingDistributor {
     const address = this.getAcceleratingDistributorAddress();
     const provider = signer ?? constants.getProvider(this.getHubPoolChainId());
-    return createAcceleratingDistributor(address, provider);
+    return AcceleratingDistributor__factory.connect(address, provider);
   }
   filterRoutes(query: Partial<constants.Route>): constants.Routes {
     const cleanQuery: Partial<constants.Route> = Object.fromEntries(
