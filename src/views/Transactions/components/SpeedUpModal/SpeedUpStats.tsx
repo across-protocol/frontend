@@ -11,9 +11,6 @@ type Props = {
   inputError?: string;
 };
 
-// TODO: replace with `currentRelayerFee` of transfer if sdk is updated
-const mockedCurrentRelayFeeWei = utils.parseEther("0.01"); // 1 %
-
 export function SpeedUpStats({
   transferTokenTuple,
   inputError,
@@ -43,13 +40,13 @@ export function SpeedUpStats({
       </StatRow>
       <StatRow>
         <div>Current fee %</div>
-        <div>{formatWeiPct(mockedCurrentRelayFeeWei)}%</div>
+        <div>{formatWeiPct(transfer.currentRelayerFeePct)}%</div>
       </StatRow>
       <StatRow>
         <div>Current fee in {token.symbol}</div>
         <div>
           {formatUnits(
-            mockedCurrentRelayFeeWei
+            transfer.currentRelayerFeePct
               .mul(transfer.amount)
               .div(utils.parseEther("1")),
             token.decimals

@@ -25,8 +25,6 @@ type Props = {
   txTuple: SupportedTxTuple;
 };
 
-// TODO: replace with `currentRelayerFee` of transfer if sdk is updated
-const mockedCurrentRelayFeeWei = utils.parseEther("0.01"); // 1 %
 const maxRelayFee = "49.999%";
 
 export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
@@ -66,14 +64,14 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
     }
   };
 
-  const isRelayerFeeFairlyPriced = mockedCurrentRelayFeeWei.gte(
+  const isRelayerFeeFairlyPriced = transfer.currentRelayerFeePct.gte(
     fees?.relayerFee.pct || 0
   );
   const isSpeedUpPending = status === "pending";
 
   return (
     <Overlay isOpen={isOpen} onDismiss={onClose}>
-      <Content>
+      <Content aria-label="speed-up-modal">
         <Title>Speed up transaction</Title>
         {isRelayerFeeFairlyPriced && (
           <InfoBox>
