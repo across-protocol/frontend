@@ -5,7 +5,7 @@ import { HubPool__factory } from "@across-protocol/contracts-v2";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { BLOCK_TAG_LAG, disabledL1Tokens, maxRelayFeePct } from "./_constants";
-import { isString } from "./_typeguards";
+import { isPromiseRejectedResult, isString } from "./_typeguards";
 import { LimitsInputRequest } from "./_types";
 
 import {
@@ -42,13 +42,13 @@ const handler = async (
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
       ? []
-      : JSON.parse(REACT_APP_FULL_RELAYERS).map((relayer: any) => {
+      : (JSON.parse(REACT_APP_FULL_RELAYERS) as string[]).map((relayer) => {
           return ethers.utils.getAddress(relayer);
         });
     const transferRestrictedRelayers = !REACT_APP_TRANSFER_RESTRICTED_RELAYERS
       ? []
-      : JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS).map(
-          (relayer: any) => {
+      : (JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS) as string[]).map(
+          (relayer) => {
             return ethers.utils.getAddress(relayer);
           }
         );
@@ -95,8 +95,10 @@ const handler = async (
     ) {
       // Add the raw error (if any) to ensure that the user sees the real error if it's something unexpected, like a provider issue.
       const rawError =
-        (tokenDetailsResult as any).reason ||
-        (routeEnabledResult as any).reason;
+        (isPromiseRejectedResult(tokenDetailsResult) &&
+          tokenDetailsResult.reason) ||
+        (isPromiseRejectedResult(routeEnabledResult) && routeEnabledResult);
+
       const errorString = rawError
         ? `Raw Error: ${rawError.stack || rawError.toString()}`
         : "";
@@ -144,7 +146,7 @@ const handler = async (
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
-        fullRelayers.map((relayer: any) =>
+        fullRelayers.map((relayer) =>
           getBalance(
             destinationChainId!,
             destinationToken,
@@ -154,7 +156,7 @@ const handler = async (
         )
       ),
       Promise.all(
-        transferRestrictedRelayers.map((relayer: any) =>
+        transferRestrictedRelayers.map((relayer) =>
           getBalance(
             destinationChainId!,
             destinationToken,
@@ -164,7 +166,7 @@ const handler = async (
         )
       ),
       Promise.all(
-        fullRelayers.map((relayer: any) =>
+        fullRelayers.map((relayer) =>
           destinationChainId === "1"
             ? ethers.BigNumber.from("0")
             : getBalance("1", l1Token, relayer, BLOCK_TAG_LAG)
