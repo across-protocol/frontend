@@ -78,7 +78,7 @@ export const StakingReward = ({
           Logo={StyledAcrossLogo}
           buttonText={`${buttonTextPrefix} claim`}
           valid={!isConnected || stakingAmountValidationHandler(amountToClaim)}
-          maxValue={buttonMaxValue === "0" ? "" : buttonMaxValue}
+          maxValue={buttonMaxValue}
           omitInput={!isConnected}
           onClickHandler={buttonHandler}
           displayLoader={isTransitioning}
