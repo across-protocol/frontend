@@ -33,7 +33,6 @@ export const TableRow = styled(BaseTableRow)`
       svg {
         opacity: 1;
         transition: opacity 0.3s ease-in-out;
-        fill: #44d2ff;
         stroke: #44d2ff;
       }
     }
