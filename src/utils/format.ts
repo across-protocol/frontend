@@ -131,11 +131,15 @@ export function isNumberEthersParseable(amount: BigNumberish): boolean {
 /**
  * Returns the formatted number version of a BigNumber value
  * @param value A bignumber to be converted via `formatEther` and returned
+ * @param decimals The number of units to format `value` with. Default: 18
  * @returns `formatEther(value)` as a Number, or NaN if impossible
  */
-export function formattedBigNumberToNumber(value: BigNumber): number {
+export function formattedBigNumberToNumber(
+  value: BigNumber,
+  decimals: number = 18
+): number {
   try {
-    return Number(formatEther(value));
+    return Number(formatUnits(value, decimals));
   } catch (_e) {
     return Number.NaN;
   }
