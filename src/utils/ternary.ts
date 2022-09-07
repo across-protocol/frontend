@@ -14,7 +14,11 @@ export function repeatableTernaryBuilder<Type>(
    * @returns `value` if `expression` is true and `value` is defined, else `fallbackValue`
    */
   function closure(value?: Type): Type {
-    return expression && !!value ? value : fallbackValue;
+    if (expression && value) {
+      return value;
+    } else {
+      return fallbackValue;
+    }
   }
   return closure;
 }
