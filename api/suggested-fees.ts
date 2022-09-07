@@ -6,16 +6,17 @@ import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
+import { isString } from "./_typeguards";
 import { SuggestedFeesInputRequest } from "./_types";
 import {
   getLogger,
   getTokenDetails,
   InputError,
-  isString,
   infuraProvider,
   getRelayerFeeDetails,
   isRouteEnabled,
   getCachedTokenPrice,
+  handleErrorCondition,
 } from "./_utils";
 
 const handler = async (
@@ -36,9 +37,6 @@ const handler = async (
     const provider = infuraProvider("mainnet");
 
     if (
-      !amountInput ||
-      !token ||
-      !destinationChainId ||
       !isString(amountInput) ||
       !isString(token) ||
       !isString(destinationChainId)
@@ -84,7 +82,7 @@ const handler = async (
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
     const [{ number: latestBlock }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
-      isRouteEnabled(computedOriginChainId, destinationChainId, token),
+      isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
     ]);
 
     // If the query was supplied a timestamp, lets use the most
@@ -144,7 +142,7 @@ const handler = async (
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
-      destinationChainId,
+      Number(destinationChainId),
       tokenPrice
     );
     logger.debug({
@@ -169,20 +167,7 @@ const handler = async (
 
     response.status(200).json(responseJson);
   } catch (error) {
-    console.log(error);
-    let status;
-    if (error instanceof InputError) {
-      logger.warn({ at: "suggested-fees", message: "400 input error", error });
-      status = 400;
-    } else {
-      logger.error({
-        at: "suggested-fees",
-        message: "500 server error",
-        error,
-      });
-      status = 500;
-    }
-    response.status(status).send((error as Error).message);
+    return handleErrorCondition("suggested-fees", response, logger, error);
   }
 };
 

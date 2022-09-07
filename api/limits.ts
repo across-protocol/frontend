@@ -4,21 +4,21 @@
 import { HubPool__factory } from "@across-protocol/contracts-v2";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
+import { BLOCK_TAG_LAG, disabledL1Tokens, maxRelayFeePct } from "./_constants";
+import { isString } from "./_typeguards";
 import { LimitsInputRequest } from "./_types";
 
 import {
   getLogger,
   InputError,
-  isString,
   getRelayerFeeDetails,
   getCachedTokenPrice,
-  maxRelayFeePct,
   getTokenDetails,
   getBalance,
   maxBN,
   minBN,
   isRouteEnabled,
+  handleErrorCondition,
 } from "./_utils";
 
 const handler = async (
@@ -58,12 +58,7 @@ const handler = async (
       fullRelayers,
       transferRestrictedRelayers,
     });
-    if (
-      !token ||
-      !destinationChainId ||
-      !isString(token) ||
-      !isString(destinationChainId)
-    )
+    if (!isString(token) || !isString(destinationChainId))
       throw new InputError(
         "Must provide token and destinationChainId as query params"
       );
@@ -83,7 +78,7 @@ const handler = async (
 
     const [tokenDetailsResult, routeEnabledResult] = await Promise.allSettled([
       getTokenDetails(provider, l1Token, undefined, destinationChainId),
-      isRouteEnabled(computedOriginChainId, destinationChainId, token),
+      isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
     ]);
     logger.debug({
       at: "limits",
@@ -278,16 +273,8 @@ const handler = async (
     // to cache the responses and invalidate when deployments update.
     response.setHeader("Cache-Control", "s-maxage=300");
     response.status(200).json(responseJson);
-  } catch (error) {
-    let status;
-    if (error instanceof InputError) {
-      logger.warn({ at: "limits", message: "400 input error", error });
-      status = 400;
-    } else {
-      logger.error({ at: "limits", message: "500 server error", error });
-      status = 500;
-    }
-    response.status(status).send((error as any).message);
+  } catch (error: unknown) {
+    return handleErrorCondition("limits", response, logger, error);
   }
 };
 

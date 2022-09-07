@@ -1,8 +1,14 @@
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
+import { isString } from "./_typeguards";
 import { PoolInputRequest } from "./_types";
 
-import { getLogger, InputError, isString, getHubPoolClient } from "./_utils";
+import {
+  getLogger,
+  InputError,
+  getHubPoolClient,
+  handleErrorCondition,
+} from "./_utils";
 
 const handler = async (
   { query: { token } }: PoolInputRequest,
@@ -12,7 +18,7 @@ const handler = async (
   try {
     const hubPoolClient = await getHubPoolClient();
 
-    if (!token || !isString(token))
+    if (!isString(token))
       throw new InputError("Must provide token as query param");
 
     token = ethers.utils.getAddress(token);
@@ -25,16 +31,8 @@ const handler = async (
     // to cache the responses and invalidate when deployments update.
     response.setHeader("Cache-Control", "s-maxage=300");
     response.status(200).json(hubPoolClient.getPoolState(token));
-  } catch (error) {
-    let status;
-    if (error instanceof InputError) {
-      logger.warn({ at: "pools", message: "400 input error", error });
-      status = 400;
-    } else {
-      logger.error({ at: "pools", message: "500 server error", error });
-      status = 500;
-    }
-    response.status(status).send((error as Error).message);
+  } catch (error: unknown) {
+    return handleErrorCondition("pools", response, logger, error);
   }
 };
 

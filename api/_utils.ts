@@ -13,6 +13,7 @@ import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE0
 import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
+import { VercelResponse } from "@vercel/node";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -118,9 +119,9 @@ export const resolveVercelEndpoint = () => {
 
 export const getTokenDetails = async (
   provider: providers.Provider,
-  l1Token: string,
-  l2Token: string,
-  chainId: string
+  l1Token?: string,
+  l2Token?: string,
+  chainId?: string
 ) => {
   const hubPool = HubPool__factory.connect(
     "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
@@ -170,13 +171,6 @@ export const getTokenDetails = async (
     l2Token: event.args.destinationToken,
   };
 };
-
-/**
- * Determines if a given input is a string
- * @param input An unknown argument that will test against the type of a string
- * @returns A boolean. `true` if the input is a string, `false` otherwise
- */
-export const isString = (input: unknown) => typeof input === "string";
 
 export class InputError extends Error {}
 
@@ -351,7 +345,7 @@ export const getTokenSymbol = (tokenAddress: string): string => {
  */
 export const getRelayerFeeDetails = (
   l1Token: string,
-  amount: string,
+  amount: sdk.utils.BigNumberish,
   destinationChainId: number,
   tokenPrice?: number
 ) => {
@@ -474,17 +468,15 @@ export const getSpokePool = (_chainId: number): SpokePool => {
  * @returns A boolean representing if a route with these parameters is available
  */
 export const isRouteEnabled = (
-  _fromChainId: string,
-  _toChainId: string,
-  _fromToken: string
+  fromChainId: number,
+  toChainId: number,
+  fromToken: string
 ): boolean => {
-  let fromChainId = Number(_fromChainId);
-  let toChainId = Number(_toChainId);
   const enabled = enabledRoutesAsJson.routes.some(
     ({ fromTokenAddress, fromChain, toChain }) =>
       fromChainId === fromChain &&
       toChainId === toChain &&
-      _fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
+      fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
   );
   return enabled;
 };
@@ -536,32 +528,71 @@ export const minBN = (...arr: BigNumber[]): BigNumber => {
 };
 
 /**
- * Performs a filter-map operation in O(n) time
+ * Performs an O(n) time filter-then-map
+ * @param array array An array of elements to apply this transform
+ * @param filterFn A function which resolves a boolean. A true return will appear in the final output array
+ * @param mappingFn A function to transform an array element into the mapping
+ * @returns A copy of the `array`, but filtered and mapped
+ */
+export function applyFilterMap<InputType, MapType>(
+  array: InputType[],
+  filterFn: (arg: InputType) => boolean,
+  mappingFn: (arg: InputType) => MapType
+): MapType[] {
+  return array.reduce((accumulator: MapType[], currentValue: InputType) => {
+    if (filterFn(currentValue)) {
+      accumulator.push(mappingFn(currentValue));
+    }
+    return accumulator;
+  }, []);
+}
+
+/**
+ * Performs a filter after amapping operation in O(n) time
  * @param array array An array of elements to apply this transform
  * @param filterFn A function which resolves a boolean. A true return will appear in the final output array
  * @param mappingFn A function to transform an array element into the mapping
  * @param mapFirst If true, the element will be transformed prior to being filtered
  * @returns A copy of the `array`, but filtered and mapped
  */
-export function filterMapArray<InputType, MapType>(
+export function applyMapFilter<InputType, MapType>(
   array: InputType[],
-  filterFn: (arg: InputType | MapType) => boolean,
-  mappingFn: (arg: InputType) => MapType,
-  mapFirst: boolean
-): MapType[] {
-  const reducerFn = mapFirst
-    ? (accumulator: MapType[], currentValue: InputType) => {
-        const currentValueMapping = mappingFn(currentValue);
-        if (filterFn(currentValueMapping)) {
-          accumulator.push(currentValueMapping);
-        }
-        return accumulator;
-      }
-    : (accumulator: MapType[], currentValue: InputType) => {
-        if (filterFn(currentValue)) {
-          accumulator.push(mappingFn(currentValue));
-        }
-        return accumulator;
-      };
-  return array.reduce(reducerFn, []);
+  filterFn: (arg: MapType) => boolean,
+  mappingFn: (arg: InputType) => MapType
+) {
+  return array.reduce((accumulator: MapType[], currentValue: InputType) => {
+    const currentValueMapping = mappingFn(currentValue);
+    if (filterFn(currentValueMapping)) {
+      accumulator.push(currentValueMapping);
+    }
+    return accumulator;
+  }, []);
+}
+
+/**
+ * Handles the recurring case of error handling
+ * @param endpoint A string numeric to indicate to the logging utility where this error occurs
+ * @param response A VercelResponse object that is used to interract with the returning reponse
+ * @param logger A logging utility to write to a cloud logging provider
+ * @param error The error that will be returned to the user
+ * @returns The `response` input with a status/send sent. Note: using this object again will cause an exception
+ */
+export function handleErrorCondition(
+  endpoint: string,
+  response: VercelResponse,
+  logger: LoggingUtility,
+  error: unknown
+): VercelResponse {
+  if (!(error instanceof Error)) {
+    return response.status(500).send("Error could not be defined.");
+  }
+  let status: number;
+  if (error instanceof InputError) {
+    logger.warn({ at: endpoint, message: "400 input error", error });
+    status = 400;
+  } else {
+    logger.error({ at: endpoint, message: "500 server error", error });
+    status = 500;
+  }
+  return response.status(status).send(error.message);
 }

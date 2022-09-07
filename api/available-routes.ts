@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { getLogger, InputError, filterMapArray } from "./_utils";
+import { getLogger, handleErrorCondition, applyMapFilter } from "./_utils";
 import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import { AvailableRoutesInputRequest, L1TokenMapRouting } from "./_types";
 
@@ -27,10 +27,15 @@ const handler = async (
       };
     }
 
-    const enabledRoutes = filterMapArray(
+    const enabledRoutes = applyMapFilter(
       enabledRoutesAsJson.routes,
       // Filter out elements from the request query parameters
-      (route) =>
+      (route: {
+        originToken: string;
+        originChainId: number;
+        destinationChainId: number;
+        destinationToken: string;
+      }) =>
         (!originToken ||
           originToken.toLowerCase() === route.originToken.toLowerCase()) &&
         (!originChainId || originChainId === String(route.originChainId)) &&
@@ -48,8 +53,7 @@ const handler = async (
         // l1TokensToDestinationTokens map
         destinationToken:
           l1TokensToDestinationTokens[route.l1TokenAddress][route.toChain],
-      }),
-      true
+      })
     );
 
     // Two different explanations for how `stale-while-revalidate` works:
@@ -73,23 +77,7 @@ const handler = async (
     );
     response.status(200).json(enabledRoutes);
   } catch (error) {
-    let status: number;
-    if (error instanceof InputError) {
-      logger.warn({
-        at: "available-routes",
-        message: "400 input error",
-        error,
-      });
-      status = 400;
-    } else {
-      logger.error({
-        at: "available-routes",
-        message: "500 server error",
-        error,
-      });
-      status = 500;
-    }
-    response.status(status).send((error as Error).message);
+    return handleErrorCondition("available-routes", response, logger, error);
   }
 };
 

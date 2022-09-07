@@ -1,7 +1,13 @@
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
+import { isString } from "./_typeguards";
 import { CoinGeckoInputRequest } from "./_types";
-import { getLogger, InputError, isString, getTokenPrice } from "./_utils";
+import {
+  getLogger,
+  InputError,
+  getTokenPrice,
+  handleErrorCondition,
+} from "./_utils";
 
 const handler = async (
   { query: { l1Token } }: CoinGeckoInputRequest,
@@ -9,7 +15,7 @@ const handler = async (
 ) => {
   const logger = getLogger();
   try {
-    if (!l1Token || !isString(l1Token))
+    if (!isString(l1Token))
       throw new InputError("Must provide l1Token as query param");
 
     l1Token = ethers.utils.getAddress(l1Token);
@@ -36,16 +42,8 @@ const handler = async (
       "s-maxage=150, stale-while-revalidate=150"
     );
     response.status(200).json({ price });
-  } catch (error) {
-    let status: number;
-    if (error instanceof InputError) {
-      logger.warn({ at: "coingecko", message: "400 input error", error });
-      status = 400;
-    } else {
-      logger.error({ at: "coingecko", message: "500 server error", error });
-      status = 500;
-    }
-    response.status(status).send((error as any).message);
+  } catch (error: unknown) {
+    return handleErrorCondition("coingecko", response, logger, error);
   }
 };
 
