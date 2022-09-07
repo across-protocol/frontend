@@ -11,6 +11,10 @@ export function receiveAmount(amount: BigNumber, fees: BridgeFees) {
 }
 
 export function safeDivide(numerator: BigNumber, divisor: BigNumber) {
-  let modifiedDivisor = divisor.isZero() ? BigNumber.from(1) : divisor;
-  return numerator.div(modifiedDivisor);
+  if (divisor.isZero()) {
+    throw new Error(
+      `Cannot divide by zero. Attempting to divide ${numerator.toString()} by 0`
+    );
+  }
+  return numerator.div(divisor);
 }
