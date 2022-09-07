@@ -28,7 +28,7 @@ import {
   TitleContainer,
 } from "./Transactions.styles";
 
-export default function MyTransactions() {
+const MyTransactions = () => {
   const {
     connectWallet,
     account,
@@ -137,4 +137,6 @@ export default function MyTransactions() {
       )}
     </Wrapper>
   );
-}
+};
+
+export default MyTransactions;

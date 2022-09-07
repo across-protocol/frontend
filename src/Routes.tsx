@@ -16,15 +16,11 @@ import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
 
-const Pool = React.lazy(
-  () => import(/* webpackChunkName: "Pool" */ "./views/Pool")
-);
+const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
 const Rewards = lazy(
   () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
 );
-const Send = lazy(
-  () => import(/* webpackChunkName: "Send" */ "./views/Send/Send")
-);
+const Send = lazy(() => import(/* webpackChunkName: "Send" */ "./views/Send"));
 const About = lazy(
   () => import(/* webpackChunkName: "About" */ "./views/About")
 );
