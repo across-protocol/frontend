@@ -10,9 +10,9 @@ import {
   StakeButtonContentWrapper,
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
-import { StylizedSVG } from "../../types";
 import { AlertInfo } from "../StakingReward/AlertInfo";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
+import { StylizedSVG } from "utils/types";
 
 interface Props {
   value: string;
