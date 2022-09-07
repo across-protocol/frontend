@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
 import { Info } from "react-feather";
-import { utils } from "ethers";
 import { DialogContent, DialogOverlay } from "@reach/dialog";
 
-import { formatWeiPct } from "utils";
-import { useBridgeFees } from "hooks";
+import { formatWeiPct, getChainInfo } from "utils";
 import { ButtonV2 } from "components/Buttons";
 
 import { InputWithButton } from "./InputWithButton";
@@ -34,19 +32,23 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
   const [didSetInitialFee, setDidSetInitialFee] = useState(false);
   const [inputError, setInputError] = useState("");
 
-  const { fees, isLoading } = useBridgeFees(
-    transfer.amount,
-    transfer.destinationChainId,
-    token.symbol
-  );
-  const { handleSpeedUp, status } = useSpeedUp();
+  const {
+    handleSpeedUp,
+    speedUpStatus,
+    isCorrectChain,
+    setChain,
+    suggestedRelayerFeePct,
+    isFetchingFees,
+  } = useSpeedUp(transfer, token);
 
   useEffect(() => {
-    if (fees && !didSetInitialFee) {
+    if (suggestedRelayerFeePct && !didSetInitialFee) {
       setDidSetInitialFee(true);
-      setRelayFeeInput(appendPercentageSign(formatWeiPct(fees.relayerFee.pct)));
+      setRelayFeeInput(
+        appendPercentageSign(formatWeiPct(suggestedRelayerFeePct))
+      );
     }
-  }, [fees, didSetInitialFee]);
+  }, [suggestedRelayerFeePct, didSetInitialFee]);
 
   const handleInputChange = (e: React.FormEvent<HTMLInputElement>) => {
     const input = e.currentTarget.value;
@@ -64,25 +66,47 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
     }
   };
 
-  const isRelayerFeeFairlyPriced = transfer.currentRelayerFeePct.gte(
-    fees?.relayerFee.pct || 0
-  );
-  const isSpeedUpPending = status === "pending";
+  const isRelayerFeeFairlyPriced = suggestedRelayerFeePct
+    ? transfer.currentRelayerFeePct.gte(suggestedRelayerFeePct)
+    : false;
+  const isSpeedUpPending = speedUpStatus === "pending";
+  const isConfirmDisabled =
+    !relayFeeInput || !!inputError || isSpeedUpPending || !isCorrectChain;
 
   return (
     <Overlay isOpen={isOpen} onDismiss={onClose}>
       <Content aria-label="speed-up-modal">
         <Title>Speed up transaction</Title>
-        {isRelayerFeeFairlyPriced && (
-          <InfoBox>
+        {isCorrectChain ? (
+          isRelayerFeeFairlyPriced && (
+            <InfoBox>
+              <div>
+                <Info />
+              </div>
+              <p>
+                Note: The relay is already fairly priced compared to other
+                transactions with similar characteristics.
+              </p>
+            </InfoBox>
+          )
+        ) : (
+          <ErrorBox>
             <div>
               <Info />
             </div>
             <p>
-              Note: The relay is already fairly priced compared to other
-              transactions with similar characteristics.
+              You are on an incorrect network. Please{" "}
+              <button
+                onClick={() =>
+                  setChain({
+                    chainId: `0x${transfer.sourceChainId.toString(16)}`,
+                  })
+                }
+              >
+                switch to {getChainInfo(transfer.sourceChainId).name}
+              </button>
             </p>
-          </InfoBox>
+          </ErrorBox>
         )}
         <InputWithButton
           label="Relay fee"
@@ -94,7 +118,7 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
           onFocus={() => setRelayFeeInput((prev) => removePercentageSign(prev))}
           onBlur={() => setRelayFeeInput((prev) => appendPercentageSign(prev))}
           error={inputError}
-          disabled={isLoading}
+          disabled={isFetchingFees}
         />
         <SpeedUpStats
           transferTokenTuple={txTuple}
@@ -107,11 +131,9 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
           </CancelButton>
           <ConfirmButton
             size="md"
-            disabled={!relayFeeInput || !!inputError || isSpeedUpPending}
+            disabled={isConfirmDisabled}
             warning={isRelayerFeeFairlyPriced}
-            onClick={() =>
-              handleSpeedUp(transfer, feeInputToBigNumberPct(relayFeeInput))
-            }
+            onClick={() => handleSpeedUp(feeInputToBigNumberPct(relayFeeInput))}
           >
             {isSpeedUpPending ? "Confirming..." : "Confirm"}
           </ConfirmButton>
@@ -159,6 +181,7 @@ const Overlay = styled(DialogOverlay)`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 100000;
 `;
 
 const Content = styled(DialogContent)`
@@ -199,6 +222,30 @@ const InfoBox = styled.div`
     line-height: ${20 / 16}rem;
     font-weight: 400;
     color: #f9d26c;
+  }
+`;
+
+const ErrorBox = styled(InfoBox)`
+  background-color: #f96c6c25;
+  border: 1px solid #f96c6c5a;
+
+  button {
+    background-color: inherit;
+    font-size: inherit;
+    color: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  svg {
+    stroke: #f96c6c;
+  }
+
+  p {
+    color: #f96c6c;
   }
 `;
 

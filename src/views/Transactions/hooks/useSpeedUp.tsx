@@ -2,118 +2,94 @@ import { useState, useEffect } from "react";
 import { BigNumber, utils } from "ethers";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history";
 import { JsonRpcSigner } from "@uma/sdk/dist/types/oracle/types/ethers";
-import { SetChainOptions } from "hooks/useOnboard";
 
 import { useConnection } from "state/hooks";
-import { useError } from "hooks";
-import { getConfig, getChainInfo } from "utils";
+import { getConfig, getChainInfo, Token } from "utils";
+import { useBridgeFees } from "hooks";
 
 type SpeedUpStatus = "idle" | "pending" | "success" | "error";
 
-export function useSpeedUp() {
+export function useSpeedUp(transfer: Transfer, token: Token) {
   const config = getConfig();
   const { chainId, signer, setChain, notify } = useConnection();
-  const { addError } = useError();
+  const { fees, isLoading } = useBridgeFees(
+    transfer.amount,
+    transfer.destinationChainId,
+    token.symbol
+  );
 
-  const [status, setStatus] = useState<SpeedUpStatus>("idle");
-  const [txHashWithLink, setTxHashWithLink] = useState<
-    | {
-        link: string;
-        txHash: string;
-      }
-    | undefined
+  const [isCorrectChain, setIsCorrectChain] = useState(false);
+  const [speedUpStatus, setSpeedUpStatus] = useState<SpeedUpStatus>("idle");
+  const [speedUpErrorMsg, setSpeedUpErrorMsg] = useState<string>("");
+  const [suggestedRelayerFeePct, setSuggestedRelayerFeePct] = useState<
+    BigNumber | undefined
   >();
 
   useEffect(() => {
-    if (status === "pending" && txHashWithLink) {
-      const { emitter } = notify.hash(txHashWithLink.txHash);
-      emitter.on("txSent", () => {
-        return {
-          link: txHashWithLink.link,
-        };
-      });
-      emitter.on("txConfirmed", () => {
-        setStatus("success");
-        notify.unsubscribe(txHashWithLink.txHash);
-      });
-      emitter.on("txFailed", (state) => {
-        setStatus("error");
-        notify.unsubscribe(txHashWithLink.txHash);
-      });
+    setIsCorrectChain(chainId === transfer.sourceChainId);
+  }, [chainId, transfer.sourceChainId]);
 
-      return () => notify.unsubscribe(txHashWithLink.txHash);
+  useEffect(() => {
+    if (fees) {
+      setSuggestedRelayerFeePct(fees.relayerFee.pct);
     }
-  }, [status, txHashWithLink, notify]);
+  }, [fees]);
 
-  const handleSpeedUp = async (
-    depositToSpeedUp: Transfer,
-    newRelayerFeePct: BigNumber
-  ) => {
+  const handleSpeedUp = async (newRelayerFeePct: BigNumber) => {
     try {
-      setStatus("pending");
+      setSpeedUpStatus("pending");
 
       if (!signer) {
         throw new Error(`Wallet is not connected`);
       }
 
-      await assertCorrectChain(
-        chainId,
-        depositToSpeedUp.sourceChainId,
-        setChain
-      );
-
       const depositorSignature = await getDepositorSignature(signer, {
-        originChainId: depositToSpeedUp.sourceChainId,
+        originChainId: transfer.sourceChainId,
         newRelayerFeePct,
-        depositId: depositToSpeedUp.depositId,
+        depositId: transfer.depositId,
       });
 
-      const spokePool = config.getSpokePool(
-        depositToSpeedUp.sourceChainId,
-        signer
-      );
+      const spokePool = config.getSpokePool(transfer.sourceChainId, signer);
       const txResponse = await spokePool.speedUpDeposit(
         await signer.getAddress(),
         newRelayerFeePct,
-        depositToSpeedUp.depositId,
+        transfer.depositId,
         depositorSignature
       );
 
-      setTxHashWithLink({
-        txHash: txResponse.hash,
-        link: getChainInfo(
-          depositToSpeedUp.sourceChainId
-        ).constructExplorerLink(txResponse.hash),
+      const { emitter } = notify.hash(txResponse.hash);
+      emitter.on("txSent", () => {
+        return {
+          link: getChainInfo(transfer.sourceChainId).constructExplorerLink(
+            txResponse.hash
+          ),
+        };
+      });
+      emitter.on("txConfirmed", () => {
+        setSpeedUpStatus("success");
+        notify.unsubscribe(txResponse.hash);
+      });
+      emitter.on("txFailed", (state) => {
+        setSpeedUpStatus("error");
+        setSpeedUpErrorMsg("Tx failed");
+        notify.unsubscribe(txResponse.hash);
       });
     } catch (error) {
-      setStatus("error");
+      setSpeedUpStatus("error");
+      setSpeedUpErrorMsg((error as Error).message);
       console.error(error);
-      addError(error as Error);
     }
   };
 
   return {
     handleSpeedUp,
-    status,
+    speedUpStatus,
+    speedUpErrorMsg,
+    isCorrectChain,
+    setChain,
+    isFetchingFees: isLoading,
+    suggestedRelayerFeePct,
   };
-}
-
-async function assertCorrectChain(
-  connectedChainId: number,
-  requiredChainId: number,
-  setChain: (opts: SetChainOptions) => Promise<boolean>
-) {
-  if (connectedChainId !== requiredChainId) {
-    const didChange = await setChain({
-      chainId: `0x${requiredChainId.toString(16)}`,
-    });
-
-    if (!didChange) {
-      throw new Error(
-        `Wallet needs to be connected to chain with id "${requiredChainId}"`
-      );
-    }
-  }
 }
 
 async function getDepositorSignature(
