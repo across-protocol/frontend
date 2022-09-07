@@ -25,8 +25,8 @@ export const useStakingView = () => {
     isWrongNetwork,
     isWrongNetworkHandler,
     stakingData,
-    isConnected: isConnected,
-    provider: provider,
+    isConnected,
+    provider,
     connectWalletHandler: onboard.init,
   };
 };
