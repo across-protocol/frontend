@@ -24,8 +24,15 @@ interface Props {
 }
 
 const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
-  const { account, ensName, isConnected, chainId, location, className } =
-    useSidebar(openSidebar);
+  const {
+    appMenu,
+    account,
+    ensName,
+    isConnected,
+    chainId,
+    location,
+    className,
+  } = useSidebar(openSidebar);
   const { connect, disconnect, wallet } = useConnection();
   const addrOrEns = ensName ?? account;
 
@@ -33,9 +40,13 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
     setOpenSidebar(false);
   };
 
+  const onClickOverlay = () => {
+    setOpenSidebar(false);
+  };
+
   return (
     <>
-      {openSidebar && <Overlay />}
+      {openSidebar && <Overlay onClick={() => onClickOverlay()} />}
       <StyledSidebar className={className}>
         <StyledHeader>
           <TopHeaderRow>
@@ -66,106 +77,27 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
           ) : null}
         </StyledHeader>
         <StyledMenu>
-          <StyledMenuItem selected={location.pathname === "/"}>
-            <Link
-              onClick={() => onClickLink()}
-              to={{ pathname: "/", search: location.search }}
-            >
-              Bridge
-            </Link>
-          </StyledMenuItem>
-          <StyledMenuItem selected={location.pathname === "/pool"}>
-            <Link
-              onClick={() => onClickLink()}
-              to={{ pathname: "/pool", search: location.search }}
-            >
-              Pool
-            </Link>
-          </StyledMenuItem>
-          <StyledMenuItem selected={location.pathname === "/transactions"}>
-            <Link
-              onClick={() => onClickLink()}
-              to={{ pathname: "/transactions", search: location.search }}
-            >
-              Transactions
-            </Link>
-          </StyledMenuItem>
-          <StyledMenuItem selected={location.pathname === "/rewards"}>
-            <Link
-              onClick={() => onClickLink()}
-              to={{ pathname: "/rewards", search: location.search }}
-            >
-              Rewards
-            </Link>
-          </StyledMenuItem>
-          <StyledMenuItem selected={location.pathname === "/about"}>
-            <Link
-              onClick={() => onClickLink()}
-              to={{ pathname: "/about", search: location.search }}
-            >
-              About
-            </Link>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://docs.across.to/bridge/"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Docs
-            </a>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://discord.com/invite/across"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Support (Discord)
-            </a>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://github.com/across-protocol"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Github
-            </a>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://twitter.com/AcrossProtocol/"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Twitter
-            </a>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://medium.com/across-protocol"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Medium
-            </a>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://forum.across.to/"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Discourse
-            </a>
-          </StyledMenuItem>
+          {appMenu.map((item) => (
+            <StyledMenuItem selected={location.pathname === item.pathName}>
+              {item.isExternalLink ? (
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => onClickLink()}
+                >
+                  {item.title}
+                </a>
+              ) : (
+                <Link
+                  onClick={() => onClickLink()}
+                  to={{ pathname: item.pathName, search: location.search }}
+                >
+                  {item.title}
+                </Link>
+              )}
+            </StyledMenuItem>
+          ))}
         </StyledMenu>
       </StyledSidebar>
     </>
