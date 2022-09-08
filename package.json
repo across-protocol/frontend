@@ -37,6 +37,7 @@
     "axios": "^0.27.2",
     "bnc-notify": "^1.9.1",
     "bnc-onboard": "^1.39.0",
+    "buffer": "^6.0.3",
     "downshift": "^6.1.7",
     "ethers": "^5.6.1",
     "framer-motion": "4.1.17",
@@ -128,7 +129,7 @@
     }
   },
   "resolutions": {
-    "//": "See https://github.com/facebook/create-react-app/issues/11773",
+    "//": "See https://github.com/facebook/create-react-app/issues/11773 ",
     "react-error-overlay": "6.0.9",
     "babel-loader": "8.1.0"
   },
