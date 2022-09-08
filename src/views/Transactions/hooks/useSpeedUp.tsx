@@ -35,9 +35,10 @@ export function useSpeedUp(transfer: Transfer, token: Token) {
     }
   }, [fees]);
 
-  const handleSpeedUp = async (newRelayerFeePct: BigNumber) => {
+  const speedUp = async (newRelayerFeePct: BigNumber) => {
     try {
       setSpeedUpStatus("pending");
+      setSpeedUpErrorMsg("");
 
       if (!signer) {
         throw new Error(`Wallet is not connected`);
@@ -71,7 +72,7 @@ export function useSpeedUp(transfer: Transfer, token: Token) {
       });
       emitter.on("txFailed", (state) => {
         setSpeedUpStatus("error");
-        setSpeedUpErrorMsg("Tx failed");
+        setSpeedUpErrorMsg(`Tx failed`);
         notify.unsubscribe(txResponse.hash);
       });
     } catch (error) {
@@ -82,7 +83,7 @@ export function useSpeedUp(transfer: Transfer, token: Token) {
   };
 
   return {
-    handleSpeedUp,
+    speedUp,
     speedUpStatus,
     speedUpErrorMsg,
     isCorrectChain,
