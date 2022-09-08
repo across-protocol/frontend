@@ -73,7 +73,8 @@
     "cypress:open": "cypress open --e2e",
     "cypress:run": "cypress run --e2e",
     "storybook": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public"
+    "build-storybook": "build-storybook -s public",
+    "chromatic": "npx chromatic"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": "yarn lint:fix"
@@ -144,5 +145,7 @@
         }
       }
     ]
-  }
+  },
+  "readme": "ERROR: No README data found!",
+  "_id": "across@0.1.0"
 }
