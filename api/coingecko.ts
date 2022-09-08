@@ -46,28 +46,37 @@ const handler = async (
     } else {
       // No match, so we try to look up the base currency directly.
       const baseCurrencyToken = SymbolMapping[baseCurrency];
+
       if (!baseCurrencyToken)
         throw new InputError(
           "baseCurrency not supported in Coingecko and not found in address mapping"
         );
 
-      // Always use usd as the base currency for the purpose of conversion.
-      const [price1, price2] = await coingeckoClient.getContractPrices(
-        [l1Token, baseCurrencyToken.address],
-        "usd"
-      );
+      // Special case: token and base are the same. Coingecko class returns a single result in this case, so it must
+      // be handled separately.
+      if (l1Token.toLowerCase() === baseCurrencyToken.address.toLowerCase())
+        price = 1;
+      else {
+        // Always use usd as the base currency for the purpose of conversion.
+        const [price1, price2] = await coingeckoClient.getContractPrices(
+          [l1Token, baseCurrencyToken.address],
+          "usd"
+        );
 
-      // The ordering of the returned values are not guaranteed, so determine the ordering of the two values by
-      // comparing to the l1Token value.
-      const [tokenPriceUsd, basePriceUsd] =
-        price1.address.toLowerCase() === l1Token.toLowerCase()
-          ? [price1.price, price2.price]
-          : [price2.price, price1.price];
+        console.log(price1, price2);
 
-      // Drop any decimals beyond the number of decimals for this token.
-      price = Number(
-        (tokenPriceUsd / basePriceUsd).toFixed(baseCurrencyToken.decimals)
-      );
+        // The ordering of the returned values are not guaranteed, so determine the ordering of the two values by
+        // comparing to the l1Token value.
+        const [tokenPriceUsd, basePriceUsd] =
+          price1.address.toLowerCase() === l1Token.toLowerCase()
+            ? [price1.price, price2.price]
+            : [price2.price, price1.price];
+
+        // Drop any decimals beyond the number of decimals for this token.
+        price = Number(
+          (tokenPriceUsd / basePriceUsd).toFixed(baseCurrencyToken.decimals)
+        );
+      }
     }
 
     // Two different explanations for how `stale-while-revalidate` works:
