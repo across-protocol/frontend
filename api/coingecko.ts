@@ -38,7 +38,6 @@ const handler = async (
     let price: number;
 
     if (SUPPORTED_CG_BASE_CURRENCIES.has(cgBaseCurrency)) {
-      console.log(l1Token, cgBaseCurrency);
       // This base matches a supported base currency for CG.
       [, price] = await coingeckoClient.getCurrentPriceByContract(
         l1Token,
