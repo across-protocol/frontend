@@ -12,7 +12,7 @@ const { SymbolMapping } = relayFeeCalculator;
 const { REACT_APP_COINGECKO_PRO_API_KEY } = process.env;
 
 const handler = async (
-  { query: { l1Token, baseCurrencySymbol } }: CoinGeckoInputRequest,
+  { query: { l1Token, baseCurrency } }: CoinGeckoInputRequest,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -21,14 +21,14 @@ const handler = async (
       throw new InputError("Must provide l1Token as query param");
 
     // Start with the symbol being strictly upper-case, as that's how symbols are typically represented.
-    if (!isString(baseCurrencySymbol)) baseCurrencySymbol = "ETH";
-    else baseCurrencySymbol = baseCurrencySymbol.toUpperCase();
+    if (!isString(baseCurrency)) baseCurrency = "ETH";
+    else baseCurrency = baseCurrency.toUpperCase();
 
     l1Token = ethers.utils.getAddress(l1Token);
 
     // Coingecko doesn't seem to be case sensitive, but there doesn't seem to be anything in their documentation
     // guaranteeing this, so to be safe, we lower case before sending to CG.
-    const cgBaseCurrency = baseCurrencySymbol.toLowerCase();
+    const cgBaseCurrency = baseCurrency.toLowerCase();
 
     const coingeckoClient = Coingecko.get(
       logger,
@@ -38,6 +38,7 @@ const handler = async (
     let price: number;
 
     if (SUPPORTED_CG_BASE_CURRENCIES.has(cgBaseCurrency)) {
+      console.log(l1Token, cgBaseCurrency);
       // This base matches a supported base currency for CG.
       [, price] = await coingeckoClient.getCurrentPriceByContract(
         l1Token,
@@ -45,10 +46,10 @@ const handler = async (
       );
     } else {
       // No match, so we try to look up the base currency directly.
-      const baseCurrencyToken = SymbolMapping[baseCurrencySymbol];
+      const baseCurrencyToken = SymbolMapping[baseCurrency];
       if (!baseCurrencyToken)
         throw new InputError(
-          "baseCurrencySymbol not supported in Coingecko and not found in address mapping"
+          "baseCurrency not supported in Coingecko and not found in address mapping"
         );
 
       // Always use usd as the base currency for the purpose of conversion.
