@@ -1,11 +1,20 @@
-const ethers = require("ethers");
+import { VercelResponse } from "@vercel/node";
+import { ethers } from "ethers";
+import { isString } from "./_typeguards";
+import { CoinGeckoInputRequest } from "./_types";
+import {
+  getLogger,
+  InputError,
+  getTokenPrice,
+  handleErrorCondition,
+} from "./_utils";
 
-const { getLogger, InputError, isString, getTokenPrice } = require("./_utils");
-
-const handler = async (request, response) => {
+const handler = async (
+  { query: { l1Token } }: CoinGeckoInputRequest,
+  response: VercelResponse
+) => {
   const logger = getLogger();
   try {
-    let { l1Token } = request.query;
     if (!isString(l1Token))
       throw new InputError("Must provide l1Token as query param");
 
@@ -33,17 +42,9 @@ const handler = async (request, response) => {
       "s-maxage=150, stale-while-revalidate=150"
     );
     response.status(200).json({ price });
-  } catch (error) {
-    let status;
-    if (error instanceof InputError) {
-      logger.warn({ at: "coingecko", message: "400 input error", error });
-      status = 400;
-    } else {
-      logger.error({ at: "coingecko", message: "500 server error", error });
-      status = 500;
-    }
-    response.status(status).send(error.message);
+  } catch (error: unknown) {
+    return handleErrorCondition("coingecko", response, logger, error);
   }
 };
 
-module.exports = handler;
+export default handler;

@@ -102,7 +102,9 @@
     "husky": "^8.0.0",
     "lint-staged": "^12.4.1",
     "prettier": "^2.4.1",
-    "serve": "^14.0.1"
+    "serve": "^14.0.1",
+    "ts-jest": "^26.5.6",
+    "@vercel/node": "^2.5.13"
   },
   "babel": {
     "env": {
