@@ -126,7 +126,7 @@ export const AccordionRow = styled.div`
     border-bottom: 1px solid #2c2f33;
     text-indent: 12px;
   }
-  &:nth-of-type(6) > div {
+  &:nth-of-type(7) > div {
     border-bottom: none;
   }
 `;
