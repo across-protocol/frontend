@@ -1,4 +1,6 @@
 import styled from "@emotion/styled";
+import { Link } from "react-router-dom";
+import { ReactComponent as ArrowIcon } from "assets/icons/arrow-right-16.svg";
 
 const TitleSection = () => {
   return (
@@ -8,6 +10,10 @@ const TitleSection = () => {
         The token launch is almost here and as a community member you will have
         the opportunity to make your claim for a piece of the official airdrop.
       </PageSubHeader>
+      <EligibilityLink to={"/"}>
+        <InnerLinkText>Read about airdrop eligibility</InnerLinkText>
+        <StyledArrowIcon />
+      </EligibilityLink>
     </Wrapper>
   );
 };
@@ -42,4 +48,26 @@ const PageSubHeader = styled.h2`
   font-weight: 400;
   font-size: 18px;
   line-height: 26px;
+`;
+
+const EligibilityLink = styled(Link)`
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 26px;
+  color: #e0f3ff;
+  text-decoration: none;
+
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+`;
+
+const InnerLinkText = styled.span``;
+
+const StyledArrowIcon = styled(ArrowIcon)`
+  color: #e0f3ff;
+  & * {
+    stroke: #e0f3ff;
+  }
 `;
