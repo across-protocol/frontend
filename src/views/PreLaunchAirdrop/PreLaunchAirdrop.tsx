@@ -1,4 +1,5 @@
 import Footer from "components/Footer";
+import { TitleSection } from "./components";
 import {
   BackgroundLayer,
   ContentWrapper,
@@ -9,7 +10,9 @@ const PreLaunchAirdrop = () => {
   return (
     <Wrapper>
       <BackgroundLayer />
-      <ContentWrapper></ContentWrapper>
+      <ContentWrapper>
+        <TitleSection />
+      </ContentWrapper>
       <Footer />
     </Wrapper>
   );
