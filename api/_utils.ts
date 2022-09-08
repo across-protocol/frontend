@@ -360,21 +360,6 @@ export const getRelayerFeeDetails = (
 };
 
 /**
- * Constructs an internal call to the CoinGecko API directly
- * @param l1Token The ERC20 token address of the coin to find the cached price of
- * @param destinationChainId The blockchain where this request originates from
- * @returns A promise to the current price of the `l1Token` on `destinationChainId`
- */
-export const getTokenPrice = (
-  l1Token: string,
-  destinationChainId: number
-): Promise<number> => {
-  const tokenSymbol = getTokenSymbol(l1Token);
-  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
-  return relayFeeCalculator.getTokenPrice(tokenSymbol);
-};
-
-/**
  * Creates an HTTP call to the `/api/coingecko` endpoint to resolve a CoinGecko price
  * @param l1Token The ERC20 token address of the coin to find the cached price of
  * @returns The price of the `l1Token` token.
