@@ -20,6 +20,9 @@ export const Wrapper = styled.div`
   justify-content: space-between;
   flex-direction: column;
 
+  padding: 96px 0px 0px;
+  gap: 64px;
+
   min-height: calc(100vh - 72px);
   @media ${QUERIES.mobileAndDown} {
     min-height: calc(100vh - 64px);
