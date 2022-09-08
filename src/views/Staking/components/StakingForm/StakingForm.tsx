@@ -74,7 +74,7 @@ export const StakingForm = ({
   const buttonMaxValue = formatLPToken(
     activeTab === "stake" ? availableLPTokenBalance : userCumulativeStake
   ).replaceAll(",", "");
-  const ArrowIcon = isPoolInfoVisible ? ArrowIconDown : ArrowIconUp;
+  const ArrowIcon = isPoolInfoVisible ? ArrowIconUp : ArrowIconDown;
 
   // Stub data for form
   function validateStakeAmount(amount: string) {
