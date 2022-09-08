@@ -10,7 +10,7 @@ export const Wrapper = styled.div`
   background-color: #202024;
   border-bottom: 1px solid #3e4047;
   font-size: ${16 / 16}rem;
-  position: sticky;
+  position: unset;
   width: 100%;
   margin-bottom: 2rem;
   top: 0;
