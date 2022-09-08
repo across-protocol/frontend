@@ -30,4 +30,9 @@ export const Wrapper = styled.div`
   }
 `;
 
-export const ContentWrapper = styled.div``;
+export const ContentWrapper = styled.div`
+  display: flex;
+  justify-content: start;
+  flex-direction: column;
+  align-items: center;
+`;
