@@ -1,8 +1,7 @@
 # Workflow name
-name: "Chromatic"
+name: Chromatic
 
-# Event for the workflow
-on: push
+on:
   # manual trigger
   workflow_dispatch:
   push:
