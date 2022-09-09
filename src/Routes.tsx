@@ -18,6 +18,7 @@ import {
   enableMigration,
   WrongNetworkError,
   rewardsBannerWarning,
+  generalMaintenanceMessage,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
@@ -64,6 +65,9 @@ const Routes: React.FC = () => {
 
   return (
     <>
+      {generalMaintenanceMessage && (
+        <SuperHeader size="lg">{generalMaintenanceMessage}</SuperHeader>
+      )}
       {disableDeposits && (
         <SuperHeader>
           Across is experiencing issues. Deposits are currently disabled into
@@ -88,6 +92,7 @@ const Routes: React.FC = () => {
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
+
       <SuperHeader darkMode>
         <i>USDT currently disabled for Across contract upgrade.</i>
       </SuperHeader>
