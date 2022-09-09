@@ -61,4 +61,4 @@ export const BLOCK_TAG_LAG = -1;
 
 // Note: this is a small subset of all the supported base currencies, but since we don't expect to use the others,
 // we've decided to keep this list small for now.
-export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["btc", "eth", "usd"]);
+export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);

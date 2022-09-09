@@ -46,9 +46,7 @@ const handler = async (
       const baseCurrencyToken = SymbolMapping[baseCurrency.toUpperCase()];
 
       if (!baseCurrencyToken)
-        throw new InputError(
-          `base currency ${baseCurrency} not supported in Coingecko and not found in address mapping`
-        );
+        throw new InputError(`Base currency ${baseCurrency} not supported`);
 
       // Special case: token and base are the same. Coingecko class returns a single result in this case, so it must
       // be handled separately.
