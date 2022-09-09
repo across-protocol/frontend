@@ -74,7 +74,7 @@
     "cypress:run": "cypress run --e2e",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
-    "chromatic": "npx chromatic"
+    "chromatic": "chromatic"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": "yarn lint:fix"
@@ -112,6 +112,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babel-register": "^6.26.0",
+    "chromatic": "^6.9.0",
     "cypress": "^10.4.0",
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.0",
