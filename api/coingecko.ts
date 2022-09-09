@@ -20,15 +20,13 @@ const handler = async (
     if (!isString(l1Token))
       throw new InputError("Must provide l1Token as query param");
 
-    // Start with the symbol being strictly upper-case, as that's how symbols are typically represented.
-    if (!isString(baseCurrency)) baseCurrency = "ETH";
-    else baseCurrency = baseCurrency.toUpperCase();
+    // Start the symbol as lower case for CG.
+    // This isn't explicitly required, but there's nothing in their docs that guarantee that upper-case symbols will
+    // work.
+    if (!isString(baseCurrency)) baseCurrency = "eth";
+    else baseCurrency = baseCurrency.toLowerCase();
 
     l1Token = ethers.utils.getAddress(l1Token);
-
-    // Coingecko doesn't seem to be case sensitive, but there doesn't seem to be anything in their documentation
-    // guaranteeing this, so to be safe, we lower case before sending to CG.
-    const cgBaseCurrency = baseCurrency.toLowerCase();
 
     const coingeckoClient = Coingecko.get(
       logger,
@@ -37,15 +35,15 @@ const handler = async (
 
     let price: number;
 
-    if (SUPPORTED_CG_BASE_CURRENCIES.has(cgBaseCurrency)) {
+    if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
       // This base matches a supported base currency for CG.
       [, price] = await coingeckoClient.getCurrentPriceByContract(
         l1Token,
-        cgBaseCurrency
+        baseCurrency
       );
     } else {
       // No match, so we try to look up the base currency directly.
-      const baseCurrencyToken = SymbolMapping[baseCurrency];
+      const baseCurrencyToken = SymbolMapping[baseCurrency.toUpperCase()];
 
       if (!baseCurrencyToken)
         throw new InputError(
@@ -62,8 +60,6 @@ const handler = async (
           [l1Token, baseCurrencyToken.address],
           "usd"
         );
-
-        console.log(price1, price2);
 
         // The ordering of the returned values are not guaranteed, so determine the ordering of the two values by
         // comparing to the l1Token value.
