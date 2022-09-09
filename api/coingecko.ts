@@ -2,15 +2,17 @@ import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { isString } from "./_typeguards";
 import { CoinGeckoInputRequest } from "./_types";
-import {
-  getLogger,
-  InputError,
-  getTokenPrice,
-  handleErrorCondition,
-} from "./_utils";
+import { getLogger, InputError, handleErrorCondition } from "./_utils";
+import { SUPPORTED_CG_BASE_CURRENCIES } from "./_constants";
+
+import { coingecko, relayFeeCalculator } from "@across-protocol/sdk-v2";
+
+const { Coingecko } = coingecko;
+const { SymbolMapping } = relayFeeCalculator;
+const { REACT_APP_COINGECKO_PRO_API_KEY } = process.env;
 
 const handler = async (
-  { query: { l1Token } }: CoinGeckoInputRequest,
+  { query: { l1Token, baseCurrency } }: CoinGeckoInputRequest,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -18,9 +20,58 @@ const handler = async (
     if (!isString(l1Token))
       throw new InputError("Must provide l1Token as query param");
 
+    // Start the symbol as lower case for CG.
+    // This isn't explicitly required, but there's nothing in their docs that guarantee that upper-case symbols will
+    // work.
+    if (!isString(baseCurrency)) baseCurrency = "eth";
+    else baseCurrency = baseCurrency.toLowerCase();
+
     l1Token = ethers.utils.getAddress(l1Token);
 
-    const price = await getTokenPrice(l1Token, 1);
+    const coingeckoClient = Coingecko.get(
+      logger,
+      REACT_APP_COINGECKO_PRO_API_KEY
+    );
+
+    let price: number;
+
+    if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
+      // This base matches a supported base currency for CG.
+      [, price] = await coingeckoClient.getCurrentPriceByContract(
+        l1Token,
+        baseCurrency
+      );
+    } else {
+      // No match, so we try to look up the base currency directly.
+      const baseCurrencyToken = SymbolMapping[baseCurrency.toUpperCase()];
+
+      if (!baseCurrencyToken)
+        throw new InputError(`Base currency ${baseCurrency} not supported`);
+
+      // Special case: token and base are the same. Coingecko class returns a single result in this case, so it must
+      // be handled separately.
+      if (l1Token.toLowerCase() === baseCurrencyToken.address.toLowerCase())
+        price = 1;
+      else {
+        // Always use usd as the base currency for the purpose of conversion.
+        const [price1, price2] = await coingeckoClient.getContractPrices(
+          [l1Token, baseCurrencyToken.address],
+          "usd"
+        );
+
+        // The ordering of the returned values are not guaranteed, so determine the ordering of the two values by
+        // comparing to the l1Token value.
+        const [tokenPriceUsd, basePriceUsd] =
+          price1.address.toLowerCase() === l1Token.toLowerCase()
+            ? [price1.price, price2.price]
+            : [price2.price, price1.price];
+
+        // Drop any decimals beyond the number of decimals for this token.
+        price = Number(
+          (tokenPriceUsd / basePriceUsd).toFixed(baseCurrencyToken.decimals)
+        );
+      }
+    }
 
     // Two different explanations for how `stale-while-revalidate` works:
 

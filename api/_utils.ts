@@ -302,10 +302,15 @@ export const queries: Record<number, () => QueryBase> = {
  * @returns An instance of the `RelayFeeCalculator` for the specific chain specified by `destinationChainId`
  */
 export const getRelayerFeeCalculator = (destinationChainId: number) => {
+  const queryFn = queries[destinationChainId];
+  if (queryFn === undefined) {
+    throw new InputError(`Invalid destination chain Id: ${destinationChainId}`);
+  }
+
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     capitalCostsPercent: 0.04,
-    queries: queries[destinationChainId](),
+    queries: queryFn(),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
   getLogger().info({
@@ -352,21 +357,6 @@ export const getRelayerFeeDetails = (
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
-};
-
-/**
- * Constructs an internal call to the CoinGecko API directly
- * @param l1Token The ERC20 token address of the coin to find the cached price of
- * @param destinationChainId The blockchain where this request originates from
- * @returns A promise to the current price of the `l1Token` on `destinationChainId`
- */
-export const getTokenPrice = (
-  l1Token: string,
-  destinationChainId: number
-): Promise<number> => {
-  const tokenSymbol = getTokenSymbol(l1Token);
-  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
-  return relayFeeCalculator.getTokenPrice(tokenSymbol);
 };
 
 /**
