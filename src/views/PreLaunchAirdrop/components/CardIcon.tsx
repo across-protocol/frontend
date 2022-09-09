@@ -3,6 +3,8 @@ import styled from "@emotion/styled";
 import { ReactComponent as CheckMark } from "assets/icons/filled-checkmark-16.svg";
 import { ReactComponent as InvalidMark } from "assets/icons/solid-times-16.svg";
 
+export type CheckIconState = "eligible" | "ineligible" | "undetermined";
+
 type CardIconProps = {
   Icon: React.FunctionComponent;
   checkIconState?: CheckIconState;
@@ -89,8 +91,7 @@ const IneligibleStyledCheckMark = styled(InvalidMark)`
   border-radius: 42px;
 `;
 
-type CheckIconState = "eligible" | "ineligible" | "undetermined";
-const CheckIconMapping: Record<
+export const CheckIconMapping: Record<
   CheckIconState,
   { color: string; CheckIcon: React.FunctionComponent }
 > = {
