@@ -49,7 +49,7 @@ const handler = async (
 
       if (!baseCurrencyToken)
         throw new InputError(
-          "baseCurrency not supported in Coingecko and not found in address mapping"
+          `base currency ${baseCurrency} not supported in Coingecko and not found in address mapping`
         );
 
       // Special case: token and base are the same. Coingecko class returns a single result in this case, so it must

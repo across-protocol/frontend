@@ -303,8 +303,8 @@ export const queries: Record<number, () => QueryBase> = {
  */
 export const getRelayerFeeCalculator = (destinationChainId: number) => {
   const queryFn = queries[destinationChainId];
-  if (typeof queryFn === undefined) {
-    throw new InputError("Invalid destination chain Id");
+  if (queryFn === undefined) {
+    throw new InputError(`Invalid destination chain Id: ${chainId}`);
   }
 
   const relayerFeeCalculatorConfig = {
