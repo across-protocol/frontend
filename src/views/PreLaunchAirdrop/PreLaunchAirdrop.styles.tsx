@@ -6,7 +6,7 @@ export const BackgroundLayer = styled.div`
   background: url(${Background});
   background-repeat: no-repeat;
   background-size: cover;
-  position: absolute;
+  position: fixed;
   right: 0;
   top: 0;
   width: 100%;
