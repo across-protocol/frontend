@@ -496,6 +496,13 @@ export const providersTable: Record<
 export function getProvider(
   chainId: ChainId = hubPoolChainId
 ): ethers.providers.StaticJsonRpcProvider {
+  // Requires for Cypress testing. Only use the injected test provider if isCypress flag has been added to the window object..
+  if ((window as any).isCypress) {
+    const provider: ethers.providers.JsonRpcProvider = (window as any).ethereum
+      .provider;
+
+    return provider;
+  }
   return providersTable[chainId];
 }
 
@@ -567,6 +574,8 @@ export const hubPoolAddress = routeConfig.hubPoolAddress;
 export const migrationPoolV2Warning =
   process.env.REACT_APP_MIGRATION_POOL_V2_WARNING;
 export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
+export const generalMaintenanceMessage =
+  process.env.REACT_APP_GENERAL_MAINTENANCE_MESSAGE;
 
 // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
 // gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with

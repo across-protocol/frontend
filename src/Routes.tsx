@@ -18,13 +18,20 @@ import {
   enableMigration,
   WrongNetworkError,
   rewardsBannerWarning,
+  generalMaintenanceMessage,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
 
+const warningMessage = `
+  We noticed that you have connected from a contract address.
+  We recommend that you change the destination of the transfer (by clicking the "Change account" text below the To dropdown)
+  to a non-contract wallet you control on the destination chain to avoid having your funds lost or stolen.
+`;
+
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
-  const { provider } = useConnection();
+  const { provider, isContractAddress } = useConnection();
   const location = useLocation();
   const history = useHistory();
   const { error, removeError } = useError();
@@ -42,14 +49,25 @@ function useRoutes() {
     error,
     removeError,
     location,
+    isContractAddress,
   };
 }
 // Need this component for useLocation hook
 const Routes: React.FC = () => {
-  const { openSidebar, setOpenSidebar, error, removeError, location } =
-    useRoutes();
+  const {
+    openSidebar,
+    setOpenSidebar,
+    error,
+    removeError,
+    location,
+    isContractAddress,
+  } = useRoutes();
+
   return (
     <>
+      {generalMaintenanceMessage && (
+        <SuperHeader size="lg">{generalMaintenanceMessage}</SuperHeader>
+      )}
       {disableDeposits && (
         <SuperHeader>
           Across is experiencing issues. Deposits are currently disabled into
@@ -71,6 +89,10 @@ const Routes: React.FC = () => {
           </span>
         </Banner>
       )}
+      {isContractAddress && (
+        <SuperHeader size="lg">{warningMessage}</SuperHeader>
+      )}
+
       <SuperHeader darkMode>
         <i>USDT currently disabled for Across contract upgrade.</i>
       </SuperHeader>

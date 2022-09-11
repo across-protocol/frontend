@@ -24,7 +24,12 @@ const Tab: FC<TabProps> = ({ onClick, "data-label": label, activeTab }) => {
   }
 
   return (
-    <TabListItem id={`${label}Tab`} className={className} onClick={changeLabel}>
+    <TabListItem
+      id={`${label}Tab`}
+      className={className}
+      onClick={changeLabel}
+      data-cy={`${label.toLowerCase()}-tab`}
+    >
       {label}
     </TabListItem>
   );

@@ -31,11 +31,12 @@ export default function useCoinSelection() {
     availableTokens,
   } = useSendForm();
 
-  const { balances = [] } = useBalancesBySymbols(
-    availableTokens.map((t) => t.symbol),
-    fromChain,
-    account
-  );
+  const { balances = [] } = useBalancesBySymbols({
+    tokenSymbols: availableTokens.map((t) => t.symbol),
+    chainId: fromChain,
+    account,
+  });
+
   const { selectedItem, ...downshiftState } = useSelect({
     items: availableTokens,
     defaultSelectedItem: availableTokens[0],
@@ -170,5 +171,6 @@ export default function useCoinSelection() {
     availableTokens,
     error,
     fromChain,
+    account,
   };
 }

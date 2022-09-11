@@ -1,10 +1,12 @@
-const ethers = require("ethers");
+import { ethers } from "ethers";
 
-const disabledL1Tokens = ["0x3472A5A71965499acd81997a54BBA8D852C6E53d"].map(
-  (x) => x.toLowerCase()
-);
+export const maxRelayFeePct = 0.25;
 
-const relayerFeeCapitalCostConfig = {
+export const disabledL1Tokens = [
+  "0x3472A5A71965499acd81997a54BBA8D852C6E53d",
+].map((x) => x.toLowerCase());
+
+export const relayerFeeCapitalCostConfig = {
   ETH: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.0006").toString(),
@@ -55,10 +57,8 @@ const relayerFeeCapitalCostConfig = {
   },
 };
 
-const BLOCK_TAG_LAG = -1;
+export const BLOCK_TAG_LAG = -1;
 
-module.exports = {
-  relayerFeeCapitalCostConfig,
-  disabledL1Tokens,
-  BLOCK_TAG_LAG,
-};
+// Note: this is a small subset of all the supported base currencies, but since we don't expect to use the others,
+// we've decided to keep this list small for now.
+export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);

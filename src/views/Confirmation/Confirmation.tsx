@@ -82,7 +82,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
     <Layout>
       <Wrapper>
         <Header>
-          <Heading>Deposit succeeded</Heading>
+          <Heading data-cy="transaction-submitted">Deposit succeeded</Heading>
           <SubHeading>{fundsArrivalText}</SubHeading>
           <SubHeading>
             To monitor progress, go to the
@@ -184,7 +184,9 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
               </div>
             </Info>
           </div>
-          <Button onClick={onClose}>Close</Button>
+          <Button data-cy="bridge-success-button" onClick={onClose}>
+            Close
+          </Button>
         </InfoSection>
       </Wrapper>
     </Layout>

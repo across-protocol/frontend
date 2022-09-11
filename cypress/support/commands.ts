@@ -24,12 +24,13 @@ Cypress.Commands.overwrite(
       //     ? InjectedEip1193Bridge.withJsonRpcProvider(options)
       //     : InjectedEip1193Bridge.withMockProvider(options);
       // },
-      onBeforeLoad(win) {
+      onBeforeLoad(win: any) {
         options && options.onBeforeLoad && options.onBeforeLoad(win);
         win.localStorage.clear();
         win.localStorage.setItem("cypress-testing", "true");
 
         win.ethereum = createCustomizedBridge();
+        win.isCypress = true;
       },
     });
   }

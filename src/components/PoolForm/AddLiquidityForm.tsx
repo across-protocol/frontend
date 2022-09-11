@@ -227,6 +227,7 @@ const AddLiquidityForm: FC<Props> = ({
             max
           </MaxButton>
           <Input
+            data-cy="add-liquidty-input"
             placeholder="0.00"
             id="amount"
             value={amount}
@@ -264,7 +265,7 @@ const AddLiquidityForm: FC<Props> = ({
           data-cy="add-liquidity-button"
         >
           {buttonMessage()}
-          {txSubmitted ? <BouncingDotsLoader /> : null}
+          {txSubmitted ? <BouncingDotsLoader dataCy="bouncing-loader" /> : null}
         </FormButton>
       )}
     </>
