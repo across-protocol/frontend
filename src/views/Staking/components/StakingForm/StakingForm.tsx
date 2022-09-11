@@ -28,7 +28,7 @@ import { repeatableTernaryBuilder } from "utils/ternary";
 import {
   formatEther,
   formatNumberMaxFracDigits,
-  isNumberEthersParseable,
+  isNumericWithinRange,
 } from "utils";
 
 type StakeTab = "stake" | "unstake";
@@ -72,22 +72,14 @@ export const StakingForm = ({
     : walletConnectionHandler;
 
   const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
-  const buttonMaxValue = formatLPToken(
-    activeTab === "stake" ? availableLPTokenBalance : userCumulativeStake
-  ).replaceAll(",", "");
+  const buttonMaxValue =
+    activeTab === "stake" ? availableLPTokenBalance : userCumulativeStake;
+  const buttonMaxValueText = formatLPToken(buttonMaxValue).replaceAll(",", "");
+
   const ArrowIcon = isPoolInfoVisible ? ArrowIconUp : ArrowIconDown;
 
-  // Stub data for form
-  function validateStakeAmount(amount: string) {
-    if (!isNumberEthersParseable(amount)) {
-      return false;
-    }
-    const requestedAmount = parseLPToken(amount);
-    return (
-      requestedAmount.gte("0") &&
-      requestedAmount.lte(parseLPToken(buttonMaxValue))
-    );
-  }
+  const validateStakeAmount = (amount: string) =>
+    isNumericWithinRange(amount, true, "0", buttonMaxValue, parseLPToken);
 
   const valueOrEmpty = repeatableTernaryBuilder(
     isConnected && !isWrongNetwork && !isDataLoading,
@@ -134,7 +126,7 @@ export const StakingForm = ({
           valid={!isConnected || validateStakeAmount(stakeAmount)}
           buttonText={`${buttonTextPrefix} ${activeTab}`}
           Logo={UsdcLogo}
-          maxValue={buttonMaxValue === "0" ? "" : buttonMaxValue}
+          maxValue={buttonMaxValueText}
           omitInput={!isConnected}
           onClickHandler={buttonHandler}
           displayLoader={isTransitioning}

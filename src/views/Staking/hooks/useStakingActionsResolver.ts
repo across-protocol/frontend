@@ -8,10 +8,10 @@ import {
   getConfig,
   hubPoolChainId,
   MAX_APPROVAL_AMOUNT,
-  parseEther,
-  parseUnitsFnBuilder,
+  parseEtherLike,
   safeDivide,
   switchChain,
+  toWeiSafe,
 } from "utils";
 import { useStakingPoolResolver } from "./useStakingPoolResolver";
 import { BigNumber, BigNumberish, providers, Signer } from "ethers";
@@ -199,12 +199,13 @@ const resolveRequestedData = async (
     BigNumber.from(totalPoolSize)
   ).mul(100);
 
-  const estimatedApy = parseEther(estimatedApyFromQuery).mul(100);
+  const estimatedApy = parseEtherLike(estimatedApyFromQuery).mul(100);
 
   // We can resolve custom formatter & parsers for the current LP
   // token that we are working with.
   const lpTokenFormatter = formatUnitsFnBuilder(lpTokenDecimalCount);
-  const lpTokenParser = parseUnitsFnBuilder(lpTokenDecimalCount);
+  const lpTokenParser = (wei: BigNumberish) =>
+    toWeiSafe(wei.toString(), lpTokenDecimalCount);
 
   // Determine if the contract has an allowance of at least the current
   // user's entire balance.

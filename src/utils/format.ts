@@ -110,7 +110,7 @@ export function parseUnitsFnBuilder(decimals: number) {
   return closure;
 }
 
-export function parseEther(value: string): ethers.BigNumber {
+export function parseEtherLike(value: string): ethers.BigNumber {
   return parseUnits(value, 18);
 }
 
@@ -121,7 +121,7 @@ export function parseEther(value: string): ethers.BigNumber {
  */
 export function isNumberEthersParseable(amount: BigNumberish): boolean {
   try {
-    parseEther(amount.toString());
+    parseEtherLike(amount.toString());
     return true;
   } catch (_e) {
     return false;

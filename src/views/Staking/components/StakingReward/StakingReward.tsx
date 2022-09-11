@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { formatEther, isNumberEthersParseable, parseEther } from "utils";
+import { formatEther, isNumericWithinRange, parseEtherLike } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { StakingRewardPropType } from "../../types";
 import StakingInputBlock from "../StakingInputBlock";
@@ -33,24 +33,24 @@ export const StakingReward = ({
   const valueOrEmpty = repeatableTernaryBuilder(isConnected, <>-</>);
 
   // Stub Function
-  const stakingAmountValidationHandler = (value: string): boolean => {
-    if (isNumberEthersParseable(value)) {
-      const numericalValue = parseEther(value);
-      return (
-        numericalValue.gt("0") && numericalValue.lte(maximumClaimableAmount)
-      );
-    } else {
-      return false;
-    }
-  };
+  const stakingAmountValidationHandler = (value: string): boolean =>
+    isNumericWithinRange(
+      value,
+      true,
+      "0",
+      maximumClaimableAmount,
+      parseEtherLike
+    );
 
   // Stub Function
-  const isAmountExceeded = (value: string): boolean => {
-    return (
-      isNumberEthersParseable(value) &&
-      parseEther(value).gt(maximumClaimableAmount)
+  const isAmountExceeded = (value: string): boolean =>
+    isNumericWithinRange(
+      value,
+      false,
+      maximumClaimableAmount,
+      undefined,
+      parseEtherLike
     );
-  };
 
   // Stub
   const errorMessage = (): string => {
