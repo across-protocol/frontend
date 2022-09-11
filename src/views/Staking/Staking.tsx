@@ -61,6 +61,7 @@ const Staking = () => {
           poolLogoURI={poolLogoURI}
         />
         <StakingForm
+          isDataLoading={isStakingDataLoading}
           isWrongNetwork={isWrongNetwork}
           isConnected={isConnected}
           walletConnectionHandler={connectWalletHandler}

@@ -51,6 +51,7 @@ export const StakingForm = ({
   unstakeActionFn,
   isWrongNetwork,
   estimatedPoolApy,
+  isDataLoading,
 }: StakingFormPropType) => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
@@ -89,7 +90,7 @@ export const StakingForm = ({
   }
 
   const valueOrEmpty = repeatableTernaryBuilder(
-    isConnected && !isWrongNetwork,
+    isConnected && !isWrongNetwork && !isDataLoading,
     <>-</>
   );
 

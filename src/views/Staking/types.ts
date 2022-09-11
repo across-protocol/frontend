@@ -30,4 +30,5 @@ export type StakingFormPropType = GenericStakingComponentProps & {
   lpTokenParser: ParserFnType;
   stakeActionFn: StakingActionFunctionType;
   unstakeActionFn: StakingActionFunctionType;
+  isDataLoading: boolean;
 };
