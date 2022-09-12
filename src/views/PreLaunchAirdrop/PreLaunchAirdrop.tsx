@@ -9,8 +9,9 @@ import {
   Wrapper,
 } from "./PreLaunchAirdrop.styles";
 import AirdropCard from "./components/AirdropCard";
-
+import usePreLaunchAirdrop from "./usePreLaunchAirdrop";
 const PreLaunchAirdrop = () => {
+  const { showTravellerFlow } = usePreLaunchAirdrop();
   return (
     <Wrapper>
       <BackgroundLayer />
