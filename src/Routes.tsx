@@ -5,6 +5,7 @@ import {
   Pool,
   About,
   MyTransactions,
+  AllTransactions,
   Rewards,
   Claim,
   NotFound,
@@ -100,6 +101,7 @@ const Routes: React.FC = () => {
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
         <Route exact path="/transactions" component={MyTransactions} />
+        <Route exact path="/transactions/all" component={AllTransactions} />
         <Route exact path="/pool" component={Pool} />
         <Route exact path="/about" component={About} />
         <Route exact path="/rewards" component={Rewards} />
