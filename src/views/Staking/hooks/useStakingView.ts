@@ -1,10 +1,9 @@
 import { useConnection } from "state/hooks";
-import { onboard } from "utils";
 import { useStakingActionsResolver } from "./useStakingActionsResolver";
 import { useStakingPoolResolver } from "./useStakingPoolResolver";
 
 export const useStakingView = () => {
-  const { isConnected, provider } = useConnection();
+  const { isConnected, provider, connect } = useConnection();
   const { poolId, exitLinkURI, poolLogoURI, poolName, mainnetAddress } =
     useStakingPoolResolver();
 
@@ -27,6 +26,6 @@ export const useStakingView = () => {
     stakingData,
     isConnected,
     provider,
-    connectWalletHandler: onboard.init,
+    connectWalletHandler: () => connect(),
   };
 };
