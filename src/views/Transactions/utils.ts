@@ -1,8 +1,10 @@
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history";
 
+import { Deposit } from "hooks/useDeposits";
 import { getConfig } from "utils";
 
 import { SupportedTxTuple } from "./types";
+import { BigNumber } from "ethers";
 
 export function getSupportedTxTuples(
   transactions: Transfer[]
@@ -28,4 +30,12 @@ export function doPartialFillsExist(pendingTransferTuples: SupportedTxTuple[]) {
     const filledAmount = transfer.filled;
     return filledAmount.gt(0) && filledAmount.lte(100);
   });
+}
+
+export function formatToTransfer(deposit: Deposit): Transfer {
+  return {
+    ...deposit,
+    filled: BigNumber.from(deposit.filled),
+    amount: BigNumber.from(deposit.amount),
+  };
 }
