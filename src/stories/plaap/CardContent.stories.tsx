@@ -4,7 +4,7 @@ import AirdropCard from "views/PreLaunchAirdrop/components/AirdropCard";
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-  title: "PLAAP/CardIcon",
+  title: "PLAAP/CardContent",
   component: AirdropCard,
   // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
   argTypes: {},
@@ -26,7 +26,8 @@ export const NoCheckMark = Template.bind({});
 NoCheckMark.args = {
   check: undefined,
   Icon: IIcon,
-  description: "Example",
-  title: "Title Example",
+  description:
+    "This wallet isn’t eligible for the airdrop. If you have multiple wallets you could try connecting to a different one.",
+  title: "Bridge Traveler Program",
   externalLink: undefined,
 };
