@@ -51,6 +51,10 @@ const Wrapper = styled.div`
 
   border-bottom: 1px solid #3e4047;
   background: #2d2e33;
+
+  & * {
+    z-index: 1;
+  }
 `;
 
 const TextStack = styled.div`
