@@ -55,7 +55,7 @@ jobs:
         with:
           install: false
           browser: chrome
-          start: yarn serve -l 3000
+          start: yarn vercel dev --yes --listen 3000
           wait-on: "http://localhost:3000"
           wait-on-timeout: 300
       - name: Upload screenshots
