@@ -32,10 +32,18 @@ export function doPartialFillsExist(pendingTransferTuples: SupportedTxTuple[]) {
   });
 }
 
+/**
+ * @todo Use proper values for `initialRelayerFeePct`, `currentRelayerFeePct`
+ * and `speedUps` instead of placeholders.
+ */
 export function formatToTransfer(deposit: Deposit): Transfer {
   return {
     ...deposit,
     filled: BigNumber.from(deposit.filled),
     amount: BigNumber.from(deposit.amount),
+    // replace with proper values if scraper-api supports relayer fee
+    initialRelayerFeePct: BigNumber.from(0),
+    currentRelayerFeePct: BigNumber.from(0),
+    speedUps: [],
   };
 }
