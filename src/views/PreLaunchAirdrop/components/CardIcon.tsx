@@ -15,8 +15,8 @@ const CardIcon = ({ Icon, checkIconState }: CardIconProps) => {
   const CheckIcon = CheckIconMapping[resolvedIconState].CheckIcon;
   const isCheckIconPresent = Boolean(checkIconState);
   return (
-    <Wrapper addPadding={isCheckIconPresent}>
-      <IconWrapper state={resolvedIconState}>
+    <Wrapper>
+      <IconWrapper addPadding={isCheckIconPresent} state={resolvedIconState}>
         <Icon />
       </IconWrapper>
       {isCheckIconPresent && <CheckIcon />}
@@ -26,26 +26,17 @@ const CardIcon = ({ Icon, checkIconState }: CardIconProps) => {
 
 export default React.memo(CardIcon);
 
-type WrapperType = {
-  addPadding: boolean;
-};
-const Wrapper = styled.div<WrapperType>`
+const Wrapper = styled.div`
   height: 64px;
   width: 64px;
 
   position: relative;
 
-  padding-right: ${({ addPadding }) => (addPadding ? "2px" : "0")};
-  padding-bottom: ${({ addPadding }) => (addPadding ? "2px" : "0")};
-
   isolation: isolate;
 `;
 
-type IconWrapperType = { state: CheckIconState };
+type IconWrapperType = { state: CheckIconState; addPadding: boolean };
 const IconWrapper = styled.div<IconWrapperType>`
-  height: 100%;
-  width: 100%;
-
   padding: 3px;
   background-color: #2d2e33;
 
@@ -57,6 +48,9 @@ const IconWrapper = styled.div<IconWrapperType>`
   justify-content: center;
 
   overflow: clip;
+
+  height: ${({ addPadding }) => (addPadding ? "calc(100% - 2px)" : "100%")};
+  width: ${({ addPadding }) => (addPadding ? "calc(100% - 2px)" : "100%")};
 `;
 
 const UndeterminedStyledCheckMark = styled(CheckMark)`
