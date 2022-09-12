@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-right-16.svg";
+import React from "react";
 
 const TitleSection = () => {
   return (
@@ -17,7 +18,7 @@ const TitleSection = () => {
     </Wrapper>
   );
 };
-export default TitleSection;
+export default React.memo(TitleSection);
 
 const Wrapper = styled.div`
   display: flex;
