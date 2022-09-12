@@ -103,6 +103,8 @@ const handler = async (
       provider
     );
 
+    const baseCurrency = destinationChainId === "137" ? "matic" : "eth";
+
     const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
       hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
         blockTag,
@@ -113,7 +115,7 @@ const handler = async (
       configStoreClient.getRateModel(l1Token, {
         blockTag,
       }),
-      getCachedTokenPrice(l1Token),
+      getCachedTokenPrice(l1Token, baseCurrency),
     ]);
     logger.debug({
       at: "suggested-fees",
