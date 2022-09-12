@@ -8,7 +8,8 @@ type AirdropCardContentProps = {
   check?: CheckIconState;
   Icon: React.FunctionComponent;
   title: string;
-  description: string;
+  acxTokenAmount?: string;
+  description?: string;
   externalLink?: string;
 };
 
@@ -18,6 +19,7 @@ const AirdropCard = ({
   title,
   description,
   externalLink,
+  acxTokenAmount,
 }: AirdropCardContentProps) => (
   <Wrapper eligible={check ?? "undetermined"}>
     <WrapperBackground />
@@ -26,6 +28,7 @@ const AirdropCard = ({
       check={check}
       title={title}
       description={description}
+      acxTokenAmount={acxTokenAmount}
       externalLink={externalLink}
     />
   </Wrapper>
