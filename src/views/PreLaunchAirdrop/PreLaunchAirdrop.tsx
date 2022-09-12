@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import Footer from "components/Footer";
 import {
   BackgroundLayer,
@@ -42,5 +43,16 @@ const PreLaunchAirdrop = () => {
     </Wrapper>
   );
 };
+
+const TestIcon = styled(IIcon)`
+  height: 200px;
+  width: 200px;
+`;
+const TestDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+  padding: 64px 0;
+`;
 
 export default PreLaunchAirdrop;
