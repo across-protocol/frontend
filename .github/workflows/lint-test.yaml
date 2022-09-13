@@ -59,6 +59,9 @@ jobs:
         run: yarn build
       - name: Cypress run Chrome
         uses: cypress-io/github-action@v4
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         with:
           install: false
           browser: chrome
