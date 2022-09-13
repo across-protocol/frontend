@@ -1,9 +1,11 @@
 import { Buffer } from "buffer";
 import { addDecorator } from "@storybook/react";
 import { GlobalStyles } from "components";
+import { MemoryRouter } from "react-router";
 
 window.Buffer = Buffer;
-addDecorator(s => <><GlobalStyles />{s()}</>);
+addDecorator(story => <><GlobalStyles />{story()}</>);
+addDecorator(story => <MemoryRouter initialEntries={['/']}>{story()}</MemoryRouter>);
 
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
