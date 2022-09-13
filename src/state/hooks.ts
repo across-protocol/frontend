@@ -28,6 +28,7 @@ export function useConnection() {
     wallet,
     error,
     setChain,
+    createNotify,
   } = useOnboard();
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export function useConnection() {
     signer,
     isConnected,
     notify,
+    createNotify,
     connect,
     disconnect,
     error,

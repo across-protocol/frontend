@@ -11,7 +11,7 @@ type SpeedUpStatus = "idle" | "pending" | "success" | "error";
 
 export function useSpeedUp(transfer: Transfer, token: Token) {
   const config = getConfig();
-  const { chainId, signer, setChain, notify } = useConnection();
+  const { chainId, signer, setChain, createNotify } = useConnection();
   const { fees, isLoading } = useBridgeFees(
     transfer.amount,
     transfer.destinationChainId,
@@ -58,6 +58,9 @@ export function useSpeedUp(transfer: Transfer, token: Token) {
         depositorSignature
       );
 
+      const notify = createNotify({
+        networkId: transfer.sourceChainId,
+      });
       const { emitter } = notify.hash(txResponse.hash);
       emitter.on("txSent", () => {
         return {
