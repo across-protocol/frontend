@@ -400,24 +400,26 @@ export const tokenList: TokenInfoList = [
   },
 ];
 
+const PUBLISHING_VIA_STORYBOOK = Boolean(process.env.PUBLISHING_STORYBOOK);
+
 assert(
-  process.env.REACT_APP_PUBLIC_INFURA_ID,
+  PUBLISHING_VIA_STORYBOOK || process.env.REACT_APP_PUBLIC_INFURA_ID,
   "Missing process.env.REACT_APP_PUBLIC_INFURA_ID"
 );
 assert(
-  process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
+  PUBLISHING_VIA_STORYBOOK || process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
   "Missing process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY"
 );
 assert(
-  process.env.REACT_APP_REWARDS_API_URL,
+  PUBLISHING_VIA_STORYBOOK || process.env.REACT_APP_REWARDS_API_URL,
   "Missing process.env.REACT_APP_REWARDS_API_URL"
 );
 assert(
-  process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
+  PUBLISHING_VIA_STORYBOOK || process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
   "REACT_APP_CHAIN_137_PROVIDER_URL must be defined."
 );
 assert(
-  process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
+  PUBLISHING_VIA_STORYBOOK || process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
   "REACT_APP_CHAIN_42161_PROVIDER_URL must be defined."
 );
 
