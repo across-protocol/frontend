@@ -2,7 +2,11 @@ import styled from "@emotion/styled";
 import { utils } from "ethers";
 import { formatWeiPct, getChainInfo, formatUnits } from "utils";
 
-import { appendPercentageSign, feeInputToBigNumberPct } from "./utils";
+import {
+  appendPercentageSign,
+  removePercentageSign,
+  feeInputToBigNumberPct,
+} from "./utils";
 import { SupportedTxTuple } from "../../types";
 
 type Props = {
@@ -19,6 +23,8 @@ export function SpeedUpStats({
   isInitiallyFetchingFees,
 }: Props) {
   const [token, transfer] = transferTokenTuple;
+
+  const isInputInvalid = isNaN(Number(removePercentageSign(feeInput)));
 
   return (
     <StatsBox>
@@ -59,7 +65,7 @@ export function SpeedUpStats({
       <StatRow highlightValue>
         <div>New fee %</div>
         <div>
-          {inputError || isInitiallyFetchingFees
+          {inputError || isInitiallyFetchingFees || isInputInvalid
             ? "-"
             : appendPercentageSign(feeInput)}
         </div>
@@ -67,7 +73,7 @@ export function SpeedUpStats({
       <StatRow highlightValue>
         <div>New fee in {token.symbol}</div>
         <div>
-          {inputError || isInitiallyFetchingFees
+          {inputError || isInitiallyFetchingFees || isInputInvalid
             ? "-"
             : formatUnits(
                 feeInputToBigNumberPct(feeInput || "0")

@@ -57,7 +57,7 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
       if (relayFeeInput) {
         const currentFeePct =
           Number(formatWeiPct(transfer.currentRelayerFeePct, 3)) / 100;
-        validateFeeInput(relayFeeInput, currentFeePct, {
+        validateFeeInput(relayFeeInput, {
           maxFeePct: maxRelayFee,
           minFeePct: Math.max(minRelayFee, currentFeePct),
           maxDecimals: 3,
@@ -226,7 +226,6 @@ function SuccessContent({ onClose }: Pick<Props, "onClose">) {
 
 function validateFeeInput(
   input: string,
-  currentFeePct: number,
   opts: {
     maxFeePct: number;
     minFeePct: number;
