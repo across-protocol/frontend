@@ -1,5 +1,12 @@
+import { Wrapper, HeroBlock, StyledRotate } from "./TravellerFlow.styles";
 const TravellerFlow = () => {
-  return <div />;
+  return (
+    <Wrapper>
+      <HeroBlock>
+        <StyledRotate />
+      </HeroBlock>
+    </Wrapper>
+  );
 };
 
 export default TravellerFlow;
