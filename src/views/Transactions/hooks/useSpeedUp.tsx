@@ -11,8 +11,7 @@ type SpeedUpStatus = "idle" | "pending" | "success" | "error";
 
 export function useSpeedUp(transfer: Transfer, token: Token) {
   const config = getConfig();
-  const { chainId, signer, setChain, notify, setNotifyConfig } =
-    useConnection();
+  const { chainId, signer, setChain } = useConnection();
   const { fees, isLoading } = useBridgeFees(
     transfer.amount,
     transfer.destinationChainId,
@@ -22,6 +21,7 @@ export function useSpeedUp(transfer: Transfer, token: Token) {
   const [isCorrectChain, setIsCorrectChain] = useState(false);
   const [speedUpStatus, setSpeedUpStatus] = useState<SpeedUpStatus>("idle");
   const [speedUpErrorMsg, setSpeedUpErrorMsg] = useState<string>("");
+  const [speedUpTxLink, setSpeedUpTxLink] = useState<string>("");
   const [suggestedRelayerFeePct, setSuggestedRelayerFeePct] = useState<
     BigNumber | undefined
   >();
@@ -58,33 +58,13 @@ export function useSpeedUp(transfer: Transfer, token: Token) {
         transfer.depositId,
         depositorSignature
       );
-
-      setNotifyConfig({
-        networkId: transfer.sourceChainId,
-      });
-      const { emitter } = notify.hash(txResponse.hash);
-      emitter.on("txSent", () => {
-        return {
-          link: getChainInfo(transfer.sourceChainId).constructExplorerLink(
-            txResponse.hash
-          ),
-        };
-      });
-      emitter.on("txConfirmed", () => {
-        setSpeedUpStatus("success");
-        notify.unsubscribe(txResponse.hash);
-        setNotifyConfig({
-          networkId: 1,
-        });
-      });
-      emitter.on("txFailed", (state) => {
-        setSpeedUpStatus("error");
-        setSpeedUpErrorMsg(`Tx failed`);
-        notify.unsubscribe(txResponse.hash);
-        setNotifyConfig({
-          networkId: 1,
-        });
-      });
+      setSpeedUpTxLink(
+        getChainInfo(transfer.sourceChainId).constructExplorerLink(
+          txResponse.hash
+        )
+      );
+      await txResponse.wait();
+      setSpeedUpStatus("success");
     } catch (error) {
       setSpeedUpStatus("error");
       setSpeedUpErrorMsg((error as Error).message);
@@ -100,6 +80,7 @@ export function useSpeedUp(transfer: Transfer, token: Token) {
     setChain,
     isFetchingFees: isLoading,
     suggestedRelayerFeePct,
+    speedUpTxLink,
   };
 }
 

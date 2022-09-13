@@ -41,6 +41,7 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
     setChain,
     suggestedRelayerFeePct,
     isFetchingFees,
+    speedUpTxLink,
   } = useSpeedUp(transfer, token);
 
   useEffect(() => {
@@ -144,6 +145,13 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
               </ConfirmButton>
             </ButtonsRow>
           </>
+        )}
+        {speedUpTxLink && (
+          <SpeedUpTxLinkContainer>
+            <a href={speedUpTxLink} target="_blank" rel="noreferrer">
+              View transaction
+            </a>
+          </SpeedUpTxLinkContainer>
         )}
       </Content>
     </Overlay>
@@ -367,5 +375,16 @@ const CancelButton = styled(ButtonV2)`
     ::after {
       border: none;
     }
+  }
+`;
+
+const SpeedUpTxLinkContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+
+  a {
+    text-decoration: underline;
+    color: #9daab2;
   }
 `;
