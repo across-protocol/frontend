@@ -7,6 +7,9 @@ window.Buffer = Buffer;
 addDecorator(story => <><GlobalStyles />{story()}</>);
 addDecorator(story => <MemoryRouter initialEntries={['/']}>{story()}</MemoryRouter>);
 
+addDecorator(story => <><GlobalStyles />{story()}</>);
+addDecorator(story => <MemoryRouter initialEntries={['/']}>{story()}</MemoryRouter>);
+
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
   controls: {
