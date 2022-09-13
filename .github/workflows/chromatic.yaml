@@ -14,6 +14,8 @@ on:
 # List of jobs
 jobs:
   chromatic-deployment:
+    env:
+      PUBLISHING_STORYBOOK: "true"
     # Operating System
     runs-on: ubuntu-latest
     # Job steps
@@ -28,5 +30,3 @@ jobs:
         with:
           # 👇 Chromatic projectToken, refer to the manage page to obtain it.
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-        env:
-          PUBLISHING_STORYBOOK: "true"
