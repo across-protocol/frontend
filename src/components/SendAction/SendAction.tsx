@@ -5,6 +5,7 @@ import {
   getChainInfo,
   getToken,
   getConfirmationDepositTime,
+  bridgeDisabled,
 } from "utils";
 import { PrimaryButton } from "../Buttons";
 import {
@@ -111,7 +112,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
         )}
         <PrimaryButton
           onClick={handleActionClick}
-          disabled={buttonDisabled}
+          disabled={buttonDisabled || Boolean(bridgeDisabled)}
           data-cy="send"
         >
           {buttonMsg}
