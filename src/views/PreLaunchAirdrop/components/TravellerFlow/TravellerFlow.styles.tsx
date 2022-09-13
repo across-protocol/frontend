@@ -45,3 +45,11 @@ export const Subtitle = styled.h3`
   text-align: center;
   color: #c5d5e0;
 `;
+
+export const DotStepWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-top: 42px;
+  justify-content: center;
+`;

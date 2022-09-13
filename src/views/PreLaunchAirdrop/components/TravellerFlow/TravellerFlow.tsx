@@ -1,9 +1,11 @@
+import { DotStepper } from "components";
 import {
   Wrapper,
   HeroBlock,
   Rotate,
   Title,
   Subtitle,
+  DotStepWrapper,
 } from "./TravellerFlow.styles";
 const TravellerFlow = () => {
   return (
@@ -15,6 +17,9 @@ const TravellerFlow = () => {
       <Subtitle>
         Hello. We detect that you’ve traveled far from home. Welcome to Across.
       </Subtitle>
+      <DotStepWrapper>
+        <DotStepper numDots={4} selected={1} />
+      </DotStepWrapper>
     </Wrapper>
   );
 };
