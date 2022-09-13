@@ -462,13 +462,7 @@ export const isRouteEnabled = (
   toChainId: number,
   fromToken: string
 ): boolean => {
-  const enabled = enabledRoutesAsJson.routes.some(
-    ({ fromTokenAddress, fromChain, toChain }) =>
-      fromChainId === fromChain &&
-      toChainId === toChain &&
-      fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
-  );
-  return enabled;
+  return false;
 };
 
 /**
