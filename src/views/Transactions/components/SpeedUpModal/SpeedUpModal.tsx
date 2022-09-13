@@ -52,23 +52,26 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
     }
   }, [suggestedRelayerFeePct, didSetInitialFee]);
 
-  const handleInputChange = (e: React.FormEvent<HTMLInputElement>) => {
-    const input = e.currentTarget.value;
-    setRelayFeeInput(input);
-
+  useEffect(() => {
     try {
-      validateFeeInput(input, {
-        maxFeePct: maxRelayFee,
-        minFeePct: Math.max(
-          minRelayFee,
-          Number(formatWeiPct(transfer.currentRelayerFeePct, 3)) / 100
-        ),
-        maxDecimals: 3,
-      });
-      setInputError("");
+      if (relayFeeInput) {
+        const currentFeePct =
+          Number(formatWeiPct(transfer.currentRelayerFeePct, 3)) / 100;
+        validateFeeInput(relayFeeInput, currentFeePct, {
+          maxFeePct: maxRelayFee,
+          minFeePct: Math.max(minRelayFee, currentFeePct),
+          maxDecimals: 3,
+        });
+        setInputError("");
+      }
     } catch (error) {
       setInputError((error as Error).message);
     }
+  }, [relayFeeInput, transfer.currentRelayerFeePct]);
+
+  const handleInputChange = (e: React.FormEvent<HTMLInputElement>) => {
+    const input = e.currentTarget.value;
+    setRelayFeeInput(input);
   };
 
   const isRelayerFeeFairlyPriced = suggestedRelayerFeePct
@@ -125,6 +128,7 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
               transferTokenTuple={txTuple}
               inputError={inputError}
               feeInput={relayFeeInput}
+              isInitiallyFetchingFees={isFetchingFees && !didSetInitialFee}
             />
             <ButtonsRow>
               <CancelButton size="md" onClick={onClose}>
@@ -222,6 +226,7 @@ function SuccessContent({ onClose }: Pick<Props, "onClose">) {
 
 function validateFeeInput(
   input: string,
+  currentFeePct: number,
   opts: {
     maxFeePct: number;
     minFeePct: number;
@@ -235,7 +240,7 @@ function validateFeeInput(
   }
 
   const inputPct = inputNum / 100;
-  if (inputPct > opts.maxFeePct || inputPct <= opts.minFeePct) {
+  if (inputPct > opts.maxFeePct || inputPct < opts.minFeePct) {
     throw new Error(
       `Fee must be between ${opts.minFeePct * 100}% and ${
         opts.maxFeePct * 100

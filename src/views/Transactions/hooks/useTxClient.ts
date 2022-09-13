@@ -104,5 +104,13 @@ function getUpdatedTransferTuples(
     return nextTransferTuples;
   }
 
+  const didSpeedUpsChange = prevTransferTuples.some(
+    ([, prevTransfer], i) =>
+      prevTransfer.speedUps.length !== nextTransferTuples[i][1].speedUps.length
+  );
+  if (didSpeedUpsChange) {
+    return nextTransferTuples;
+  }
+
   return prevTransferTuples;
 }

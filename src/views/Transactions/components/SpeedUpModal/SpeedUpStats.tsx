@@ -9,12 +9,14 @@ type Props = {
   transferTokenTuple: SupportedTxTuple;
   feeInput: string;
   inputError?: string;
+  isInitiallyFetchingFees: boolean;
 };
 
 export function SpeedUpStats({
   transferTokenTuple,
   inputError,
   feeInput,
+  isInitiallyFetchingFees,
 }: Props) {
   const [token, transfer] = transferTokenTuple;
 
@@ -56,13 +58,17 @@ export function SpeedUpStats({
       <Divider />
       <StatRow highlightValue>
         <div>New fee %</div>
-        <div>{inputError ? "invalid " : appendPercentageSign(feeInput)}</div>
+        <div>
+          {inputError || isInitiallyFetchingFees
+            ? "-"
+            : appendPercentageSign(feeInput)}
+        </div>
       </StatRow>
       <StatRow highlightValue>
         <div>New fee in {token.symbol}</div>
         <div>
-          {inputError
-            ? "invalid"
+          {inputError || isInitiallyFetchingFees
+            ? "-"
             : formatUnits(
                 feeInputToBigNumberPct(feeInput || "0")
                   .mul(transfer.amount)
