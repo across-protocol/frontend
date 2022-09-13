@@ -23,7 +23,8 @@ type Props = {
   txTuple: SupportedTxTuple;
 };
 
-const maxRelayFee = "49.999%";
+const maxRelayFee = 0.25; // 25%
+const minRelayFee = 0.0003; // 0.03%
 
 export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
   const [token, transfer] = txTuple;
@@ -57,8 +58,11 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
 
     try {
       validateFeeInput(input, {
-        maxFeeInput: Number(removePercentageSign(maxRelayFee)),
-        minFeeInput: 0.001,
+        maxFeePct: maxRelayFee,
+        minFeePct: Math.max(
+          minRelayFee,
+          Number(formatWeiPct(transfer.currentRelayerFeePct, 3)) / 100
+        ),
         maxDecimals: 3,
       });
       setInputError("");
@@ -96,7 +100,13 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
             <InputWithButton
               label="Relay fee"
               Button={
-                <button onClick={() => setRelayFeeInput(maxRelayFee)}>
+                <button
+                  onClick={() =>
+                    setRelayFeeInput(
+                      appendPercentageSign(String(maxRelayFee * 100))
+                    )
+                  }
+                >
                   MAX
                 </button>
               }
@@ -213,8 +223,8 @@ function SuccessContent({ onClose }: Pick<Props, "onClose">) {
 function validateFeeInput(
   input: string,
   opts: {
-    maxFeeInput: number;
-    minFeeInput: number;
+    maxFeePct: number;
+    minFeePct: number;
     maxDecimals: number;
   }
 ) {
@@ -224,9 +234,12 @@ function validateFeeInput(
     throw new Error("Invalid number");
   }
 
-  if (inputNum > opts.maxFeeInput || inputNum <= opts.minFeeInput) {
+  const inputPct = inputNum / 100;
+  if (inputPct > opts.maxFeePct || inputPct <= opts.minFeePct) {
     throw new Error(
-      `Fee must be between ${opts.minFeeInput}% and ${opts.maxFeeInput}%`
+      `Fee must be between ${opts.minFeePct * 100}% and ${
+        opts.maxFeePct * 100
+      }%`
     );
   }
 

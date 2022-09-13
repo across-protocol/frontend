@@ -157,11 +157,8 @@ export function formatPoolAPY(
   );
 }
 
-export function formatWeiPct(
-  wei: ethers.BigNumberish,
-  maxFractions: number = 3
-) {
+export function formatWeiPct(wei: ethers.BigNumberish, precision: number = 3) {
   return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: maxFractions,
+    maximumFractionDigits: precision,
   }).format(Number(ethers.utils.formatEther(wei)) * 100);
 }
