@@ -165,7 +165,7 @@ export const getConfirmationDepositTime = (
 ) => {
   // Add this estimate for Ethereum 2.0
   if (toChain === ChainId.MAINNET) {
-    return "~4-7 minutes";
+    return "~6-7 minutes";
   }
   if (amount.lte(limits.maxDepositInstant)) {
     // 1 bot run, assuming it runs every 2 minutes.
