@@ -15,25 +15,20 @@ type CardContentProps = {
   externalLink?: string;
 };
 
-const CardContent = ({
+const CardContent: React.FC<CardContentProps> = ({
   check,
   Icon,
   title,
   description,
   externalLink,
   acxTokenAmount,
-}: CardContentProps) => {
+  children,
+}) => {
   const isPillDisplayed = check && check !== "undetermined";
 
   return (
     <Wrapper>
-      {check ? (
-        <CardIcon Icon={Icon} checkIconState={check} />
-      ) : (
-        <RegularIcon>
-          <Icon />
-        </RegularIcon>
-      )}
+      <CardIcon Icon={Icon} checkIconState={check} />
       <TextStack>
         {isPillDisplayed && <EligibilityPill eligible={check === "eligible"} />}
         <Title>{title}</Title>
@@ -43,6 +38,7 @@ const CardContent = ({
           </TokenAmountWrapper>
         )}
         {description && <Description>{description}</Description>}
+        {children}
       </TextStack>
       {externalLink && (
         <ExternalLink to={externalLink}>
@@ -53,17 +49,15 @@ const CardContent = ({
   );
 };
 
-export default React.memo(CardContent);
+export default CardContent;
 
 const Wrapper = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
 
-  padding: 32px;
   gap: 24px;
 
-  border-bottom: 1px solid #3e4047;
   background: #2d2e33;
 
   & * {
@@ -112,11 +106,4 @@ const TokenAmountWrapper = styled.div`
 const StyledAcrossLogo = styled(AcrossLogo)`
   height: 16px;
   width: 16px;
-`;
-
-const RegularIcon = styled.div`
-  & svg {
-    height: 56px;
-    width: 56px;
-  }
 `;

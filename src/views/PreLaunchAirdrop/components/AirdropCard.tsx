@@ -11,16 +11,19 @@ type AirdropCardContentProps = {
   acxTokenAmount?: string;
   description?: string;
   externalLink?: string;
+  contentStackChildren?: React.FC;
 };
 
-const AirdropCard = ({
+const AirdropCard: React.FC<AirdropCardContentProps> = ({
   check,
   Icon,
   title,
   description,
   externalLink,
   acxTokenAmount,
-}: AirdropCardContentProps) => (
+  children,
+  contentStackChildren,
+}) => (
   <Wrapper eligible={check ?? "undetermined"}>
     <WrapperBackground />
     <CardContent
@@ -30,11 +33,14 @@ const AirdropCard = ({
       description={description}
       acxTokenAmount={acxTokenAmount}
       externalLink={externalLink}
-    />
+    >
+      {contentStackChildren}
+    </CardContent>
+    {children}
   </Wrapper>
 );
 
-export default React.memo(AirdropCard);
+export default AirdropCard;
 
 type WrapperType = {
   eligible: CheckIconState;
@@ -47,6 +53,11 @@ const Wrapper = styled.div<WrapperType>`
   border: 1px solid ${({ eligible }) => CheckIconMapping[eligible].color};
   box-shadow: 0px 24px 160px rgba(0, 0, 0, 0.45);
   border-radius: 16px;
+
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 
   overflow: clip;
 `;
