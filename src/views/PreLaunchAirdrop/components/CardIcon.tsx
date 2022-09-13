@@ -14,17 +14,28 @@ const CardIcon = ({ Icon, checkIconState }: CardIconProps) => {
   const resolvedIconState = checkIconState ?? "undetermined";
   const CheckIcon = CheckIconMapping[resolvedIconState].CheckIcon;
   const isCheckIconPresent = Boolean(checkIconState);
-  return (
+  return isCheckIconPresent ? (
     <Wrapper>
       <IconWrapper addPadding={isCheckIconPresent} state={resolvedIconState}>
         <Icon />
       </IconWrapper>
       {isCheckIconPresent && <CheckIcon />}
     </Wrapper>
+  ) : (
+    <BaseWrapper>
+      <Icon />
+    </BaseWrapper>
   );
 };
 
 export default React.memo(CardIcon);
+
+const BaseWrapper = styled.div`
+  & svg {
+    height: 56px;
+    width: 56px;
+  }
+`;
 
 const Wrapper = styled.div`
   height: 64px;
