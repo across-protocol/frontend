@@ -161,10 +161,11 @@ export async function getBridgeFees({
 export const getConfirmationDepositTime = (
   amount: BigNumber,
   limits: BridgeLimits,
-  toChain: ChainId
+  toChain: ChainId,
+  fromChain: ChainId
 ) => {
   // Add this estimate for Ethereum 2.0
-  if (toChain === ChainId.MAINNET) {
+  if (fromChain === ChainId.MAINNET) {
     return "~6-7 minutes";
   }
   if (amount.lte(limits.maxDepositInstant)) {
