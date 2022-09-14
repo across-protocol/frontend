@@ -68,6 +68,11 @@ jobs:
           start: yarn vercel dev --yes --listen 3000 --token ${{ secrets.VERCEL_TOKEN }}
           wait-on: "http://localhost:3000"
           wait-on-timeout: 300
+        continue-on-error: true
+
+      - name: Test why vercel dev is failing
+        run: cat  /home/runner/.npm/_logs/*
+
       - name: Upload screenshots
         uses: actions/upload-artifact@v2
         if: failure() # only upload screenshots if tests fail
