@@ -165,14 +165,14 @@ export const getConfirmationDepositTime = (
   fromChain: ChainId
 ) => {
   const config = getConfig();
-  console.log(config.depositDelays());
-  // Add this estimate for Ethereum 2.0
-  if (fromChain === ChainId.MAINNET) {
-    return "~6-7 minutes";
-  }
+  const depositDelays = config.depositDelays();
+  const timeRange = calculateBridgeTimeRangeInMinutes(
+    fromChain,
+    depositDelays[fromChain]
+  );
+
   if (amount.lte(limits.maxDepositInstant)) {
-    // 1 bot run, assuming it runs every 2 minutes.
-    return "~1-4 minutes";
+    return `~${timeRange[0]}-${timeRange[1]} minutes`;
   } else if (amount.lte(limits.maxDepositShortDelay)) {
     // This is just a rough estimate of how long 2 bot runs (1-4 minutes allocated for each) + an arbitrum transfer of 3-10 minutes would take.
     if (toChain === ChainId.ARBITRUM) return "~5-15 minutes";
@@ -184,8 +184,7 @@ export const getConfirmationDepositTime = (
     // Polygon transfers take 20-30 minutes anecdotally.
     if (toChain === ChainId.POLYGON) return "~20-35 minutes";
 
-    // Typical numbers for an arbitrary L2.
-    return "~10-30 minutes";
+    return `~${timeRange[0]}-${timeRange[1]} minutes`;
   }
 
   // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.
@@ -391,7 +390,10 @@ export function relayFeeCalculatorConfig(
   };
 }
 
-export const MIN_DEPOSIT_CONFIRMATIONS = {
+const MIN_DEPOSIT_CONFIRMATIONS: Record<
+  number,
+  { blocks: number; averageBlockTime: number }
+> = {
   [ChainId.MAINNET]: {
     blocks: 6,
     averageBlockTime: 13.5,
@@ -400,9 +402,26 @@ export const MIN_DEPOSIT_CONFIRMATIONS = {
     blocks: 240,
     averageBlockTime: 13,
   },
-  [ChainId.POLYGON]: { blocks: 100 },
-  [ChainId.BOBA]: { blocks: 4 },
-  [ChainId.ARBITRUM]: { blocks: 240 },
+  [ChainId.POLYGON]: { blocks: 100, averageBlockTime: 2.5 },
+  [ChainId.BOBA]: { blocks: 4, averageBlockTime: 120 },
+  [ChainId.ARBITRUM]: { blocks: 240, averageBlockTime: 13 },
 };
 
-function calculateBridgeTimeRange(fromChain: ChainId, additionalDelay = 0) {}
+/**
+ *
+ * @param fromChain ChainID (enum)
+ * @param additionalDelay (optional) Additional delay in seconds, if defined in config
+ */
+
+// Calculation of range: max = (averageBlockTime * blocks + additionalDelay) / 60, min = (0.25 * averageBlockTime * blocks + additionalDelay) / 60
+function calculateBridgeTimeRangeInMinutes(
+  fromChain: ChainId,
+  additionalDelay = 0
+): number[] {
+  const { blocks, averageBlockTime } = MIN_DEPOSIT_CONFIRMATIONS[fromChain];
+  const max = Math.round((averageBlockTime * blocks + additionalDelay) / 60);
+  const min = Math.round(
+    (0.25 * averageBlockTime * blocks + additionalDelay) / 60
+  );
+  return [min, max];
+}

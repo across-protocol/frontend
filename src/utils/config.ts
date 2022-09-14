@@ -218,6 +218,5 @@ let config: ConfigClient | undefined;
 export function getConfig(): ConfigClient {
   if (config) return config;
   config = new ConfigClient(constants.routeConfig);
-  console.log(config.depositDelays());
   return config;
 }
