@@ -127,13 +127,6 @@ export const getTokenDetails = async (
     "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
     provider
   );
-  getLogger().debug({
-    at: "getTokenDetails",
-    message: "Fetching token details",
-    l1Token,
-    l2Token,
-    chainId,
-  });
 
   // 2 queries: treating the token as the l1Token or treating the token as the L2 token.
   const l2TokenFilter = hubPool.filters.SetPoolRebalanceRoute(
@@ -158,11 +151,6 @@ export const getTokenDetails = async (
   });
 
   const event = events[0];
-  getLogger().debug({
-    at: "getTokenDetails",
-    message: "Fetched pool rebalance route event",
-    event,
-  });
 
   return {
     hubPool,
@@ -181,11 +169,6 @@ export class InputError extends Error {}
  */
 export const infuraProvider = (name: string) => {
   const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
-  getLogger().info({
-    at: "infuraProvider",
-    message: "Using an Infura provider",
-    url,
-  });
   return new ethers.providers.StaticJsonRpcProvider(url);
 };
 
@@ -313,11 +296,6 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
     queries: queryFn(),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
-  getLogger().info({
-    at: "getRelayerFeeDetails",
-    message: "Relayer fee calculator config",
-    relayerFeeCalculatorConfig,
-  });
   return new sdk.relayFeeCalculator.RelayFeeCalculator(
     relayerFeeCalculatorConfig,
     logger
@@ -365,10 +343,6 @@ export const getRelayerFeeDetails = (
  * @returns The price of the `l1Token` token.
  */
 export const getCachedTokenPrice = async (l1Token: string): Promise<number> => {
-  getLogger().debug({
-    at: "getCachedTokenPrice",
-    message: `Resolving price from ${resolveVercelEndpoint()}/api/coingecko`,
-  });
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
