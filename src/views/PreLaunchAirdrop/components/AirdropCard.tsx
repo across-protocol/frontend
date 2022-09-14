@@ -11,7 +11,7 @@ type AirdropCardContentProps = {
   acxTokenAmount?: string;
   description?: string;
   externalLink?: string;
-  contentStackChildren?: React.FC;
+  contentStackChildren?: React.ReactElement;
 };
 
 const AirdropCard: React.FC<AirdropCardContentProps> = ({
