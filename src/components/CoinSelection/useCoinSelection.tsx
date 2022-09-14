@@ -139,18 +139,19 @@ export default function useCoinSelection() {
   ) {
     error = new InsufficientBalanceError();
   }
-  const errorMsg = bridgeDisabled
-    ? "Bridge currently disabled"
-    : error
-    ? error.message
-    : fees?.isAmountTooLow
-    ? "Bridge fee is high for this amount. Send a larger amount."
-    : fees?.isLiquidityInsufficient
-    ? `Insufficient liquidity for ${selectedItem?.symbol}.`
-    : undefined;
+  const errorMsg =
+    bridgeDisabled === "true"
+      ? "Bridge currently disabled"
+      : error
+      ? error.message
+      : fees?.isAmountTooLow
+      ? "Bridge fee is high for this amount. Send a larger amount."
+      : fees?.isLiquidityInsufficient
+      ? `Insufficient liquidity for ${selectedItem?.symbol}.`
+      : undefined;
 
   const showError =
-    bridgeDisabled ||
+    bridgeDisabled === "true" ||
     error ||
     (fees?.isAmountTooLow && amount.gt(0)) ||
     (fees?.isLiquidityInsufficient && amount.gt(0));

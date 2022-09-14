@@ -23,7 +23,7 @@ export default function useSendAction(
   const [txHash, setTxHash] = useState("");
 
   const handleActionClick = async () => {
-    if (status !== "ready" || !selectedRoute || bridgeDisabled) {
+    if (status !== "ready" || !selectedRoute || bridgeDisabled === "true") {
       return;
     }
     try {
@@ -77,7 +77,10 @@ export default function useSendAction(
   };
 
   const buttonDisabled =
-    status !== "ready" || txPending || !selectedRoute || bridgeDisabled;
+    status !== "ready" ||
+    txPending ||
+    !selectedRoute ||
+    bridgeDisabled === "true";
 
   let buttonMsg: string = "Send";
   if (txPending) {
