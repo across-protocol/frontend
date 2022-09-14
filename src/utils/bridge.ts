@@ -164,6 +164,8 @@ export const getConfirmationDepositTime = (
   toChain: ChainId,
   fromChain: ChainId
 ) => {
+  const config = getConfig();
+  console.log(config.depositDelays());
   // Add this estimate for Ethereum 2.0
   if (fromChain === ChainId.MAINNET) {
     return "~6-7 minutes";
@@ -388,3 +390,19 @@ export function relayFeeCalculatorConfig(
     queries,
   };
 }
+
+export const MIN_DEPOSIT_CONFIRMATIONS = {
+  [ChainId.MAINNET]: {
+    blocks: 6,
+    averageBlockTime: 13.5,
+  },
+  [ChainId.OPTIMISM]: {
+    blocks: 240,
+    averageBlockTime: 13,
+  },
+  [ChainId.POLYGON]: { blocks: 100 },
+  [ChainId.BOBA]: { blocks: 4 },
+  [ChainId.ARBITRUM]: { blocks: 240 },
+};
+
+function calculateBridgeTimeRange(fromChain: ChainId, additionalDelay = 0) {}
