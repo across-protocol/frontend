@@ -168,7 +168,8 @@ export const getConfirmationDepositTime = (
   const depositDelays = config.depositDelays();
   const timeRange = calculateBridgeTimeRangeInMinutes(
     fromChain,
-    depositDelays[fromChain]
+    // Pass in 0 if depositDelay value undefined for that ChainId.
+    depositDelays[fromChain] || 0
   );
 
   if (amount.lte(limits.maxDepositInstant)) {
