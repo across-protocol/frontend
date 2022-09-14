@@ -27,7 +27,34 @@ const handler = async (
       };
     }
 
-    const enabledRoutes: never[] = [];
+    const enabledRoutes = applyMapFilter(
+      enabledRoutesAsJson.routes,
+      // Filter out elements from the request query parameters
+      (route: {
+        originToken: string;
+        originChainId: number;
+        destinationChainId: number;
+        destinationToken: string;
+      }) =>
+        (!originToken ||
+          originToken.toLowerCase() === route.originToken.toLowerCase()) &&
+        (!originChainId || originChainId === String(route.originChainId)) &&
+        (!destinationChainId ||
+          destinationChainId === String(route.destinationChainId)) &&
+        (!destinationToken ||
+          destinationToken.toLowerCase() ===
+            route.destinationToken.toLowerCase()),
+      // Create a mapping of enabled routes to a route with the destination token resolved.
+      (route) => ({
+        originChainId: route.fromChain,
+        originToken: route.fromTokenAddress,
+        destinationChainId: route.toChain,
+        // Resolve destination chain directly from the
+        // l1TokensToDestinationTokens map
+        destinationToken:
+          l1TokensToDestinationTokens[route.l1TokenAddress][route.toChain],
+      })
+    );
 
     // Two different explanations for how `stale-while-revalidate` works:
 
