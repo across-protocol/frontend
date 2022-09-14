@@ -77,10 +77,7 @@ export default function useSendAction(
   };
 
   const buttonDisabled =
-    status !== "ready" ||
-    txPending ||
-    !selectedRoute ||
-    Boolean(bridgeDisabled);
+    status !== "ready" || txPending || !selectedRoute || bridgeDisabled;
 
   let buttonMsg: string = "Send";
   if (txPending) {
