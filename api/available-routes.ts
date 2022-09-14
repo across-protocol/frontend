@@ -75,7 +75,8 @@ const handler = async (
       "Cache-Control",
       "s-maxage=21600, stale-while-revalidate=21600"
     );
-    response.status(200).json(enabledRoutes);
+    //FIXME: remove false after merge
+    response.status(200).json(enabledRoutes.filter(() => false));
   } catch (error) {
     return handleErrorCondition("available-routes", response, logger, error);
   }
