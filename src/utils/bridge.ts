@@ -166,21 +166,37 @@ export const getConfirmationDepositTime = (
 ) => {
   const config = getConfig();
   const depositDelay = config.depositDelays()[fromChain] || 0;
-  const timeRange = calculateBridgeTimeRangeInMinutes(fromChain, depositDelay);
+  const calculateBridgeTimeRangeInMinutes = (
+    lowEstimate: number,
+    highEstimate: number
+  ): [number, number] => {
+    return [lowEstimate + depositDelay, highEstimate + depositDelay];
+  };
 
   if (amount.lte(limits.maxDepositInstant)) {
+    const timeRange = calculateBridgeTimeRangeInMinutes(1, 4);
     return `~${timeRange[0]}-${timeRange[1]} minutes`;
   } else if (amount.lte(limits.maxDepositShortDelay)) {
     // This is just a rough estimate of how long 2 bot runs (1-4 minutes allocated for each) + an arbitrum transfer of 3-10 minutes would take.
-    if (toChain === ChainId.ARBITRUM) return "~5-15 minutes";
+    if (toChain === ChainId.ARBITRUM) {
+      const timeRange = calculateBridgeTimeRangeInMinutes(5, 15);
+      return `~${timeRange[0]}-${timeRange[1]} minutes`;
+    }
 
     // Optimism transfers take about 10-20 minutes anecdotally. Boba is presumed to be similar.
-    if (toChain === ChainId.OPTIMISM || toChain === ChainId.BOBA)
-      return "~12-25 minutes";
+    if (toChain === ChainId.OPTIMISM || toChain === ChainId.BOBA) {
+      const timeRange = calculateBridgeTimeRangeInMinutes(12, 25);
+      return `~${timeRange[0]}-${timeRange[1]} minutes`;
+    }
 
     // Polygon transfers take 20-30 minutes anecdotally.
-    if (toChain === ChainId.POLYGON) return "~20-35 minutes";
+    if (toChain === ChainId.POLYGON) {
+      const timeRange = calculateBridgeTimeRangeInMinutes(20, 35);
+      return `~${timeRange[0]}-${timeRange[1]} minutes`;
+    }
 
+    // Typical numbers for an arbitrary L2.
+    const timeRange = calculateBridgeTimeRangeInMinutes(10, 30);
     return `~${timeRange[0]}-${timeRange[1]} minutes`;
   }
 
@@ -385,39 +401,4 @@ export function relayFeeCalculatorConfig(
     capitalCostsConfig: relayerFeeCapitalCostConfig,
     queries,
   };
-}
-
-const MIN_DEPOSIT_CONFIRMATIONS: Record<
-  number,
-  { blocks: number; averageBlockTime: number }
-> = {
-  [ChainId.MAINNET]: {
-    blocks: 6,
-    averageBlockTime: 13.5,
-  },
-  [ChainId.OPTIMISM]: {
-    blocks: 240,
-    averageBlockTime: 1,
-  },
-  [ChainId.POLYGON]: { blocks: 100, averageBlockTime: 2.5 },
-  [ChainId.BOBA]: { blocks: 4, averageBlockTime: 30 },
-  [ChainId.ARBITRUM]: { blocks: 240, averageBlockTime: 1 },
-};
-
-/**
- *
- * @param fromChain ChainID (enum)
- * @param additionalDelay (optional) Additional delay in seconds, if defined in config
- */
-
-// Calculation of range: max = (averageBlockTime * blocks + additionalDelay) / 60, min = (0.25 * averageBlockTime * blocks + additionalDelay) / 60
-function calculateBridgeTimeRangeInMinutes(
-  fromChain: ChainId,
-  additionalDelay = 0
-): number[] {
-  const { blocks, averageBlockTime } = MIN_DEPOSIT_CONFIRMATIONS[fromChain];
-  const calc = (averageBlockTime * blocks + additionalDelay) / 60;
-  const max = Math.round(calc);
-  const min = Math.round(0.25 * calc);
-  return [min, max];
 }
