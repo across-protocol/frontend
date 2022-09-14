@@ -420,9 +420,8 @@ function calculateBridgeTimeRangeInMinutes(
   additionalDelay = 0
 ): number[] {
   const { blocks, averageBlockTime } = MIN_DEPOSIT_CONFIRMATIONS[fromChain];
-  const max = Math.round((averageBlockTime * blocks + additionalDelay) / 60);
-  const min = Math.round(
-    (0.25 * averageBlockTime * blocks + additionalDelay) / 60
-  );
+  const calc = (averageBlockTime * blocks + additionalDelay) / 60;
+  const max = Math.round(calc);
+  const min = Math.round(0.25 * calc);
   return [min, max];
 }
