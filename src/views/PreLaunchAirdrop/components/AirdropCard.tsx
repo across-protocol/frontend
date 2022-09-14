@@ -64,6 +64,8 @@ const Wrapper = styled.div<WrapperType>`
 
 const ChildrenWrapper = styled.div`
   z-index: 1;
+  isolation: isolate;
+  position: relative;
 `;
 
 const WrapperBackground = styled(BackgroundVector)`

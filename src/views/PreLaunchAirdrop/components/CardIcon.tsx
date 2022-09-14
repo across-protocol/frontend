@@ -28,7 +28,7 @@ const CardIcon = ({ Icon, checkIconState }: CardIconProps) => {
   );
 };
 
-export default React.memo(CardIcon);
+export default CardIcon;
 
 const BaseWrapper = styled.div`
   & svg {
