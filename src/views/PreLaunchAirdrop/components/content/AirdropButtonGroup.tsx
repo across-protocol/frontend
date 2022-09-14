@@ -6,22 +6,22 @@ type buttonAttrib = {
   text: string;
   link: string;
 };
-type AirdropDoubleButtonGroupProps = {
+type AirdropButtonGroupProps = {
   left: buttonAttrib;
-  right: buttonAttrib;
+  right?: buttonAttrib;
 };
 
-const AirdropDoubleButtonGroup: React.FC<AirdropDoubleButtonGroupProps> = ({
+const AirdropButtonGroup: React.FC<AirdropButtonGroupProps> = ({
   left,
   right,
 }) => (
   <Wrapper>
     <StyledLink to={left.link}>{left.text}</StyledLink>
-    <StyledLinkAlt to={right.link}>{right.text}</StyledLinkAlt>
+    {right && <StyledLinkAlt to={right.link}>{right.text}</StyledLinkAlt>}
   </Wrapper>
 );
 
-export default AirdropDoubleButtonGroup;
+export default AirdropButtonGroup;
 
 const StyledLink = styled(Link)`
   display: flex;
