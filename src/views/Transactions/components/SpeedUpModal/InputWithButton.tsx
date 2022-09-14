@@ -23,7 +23,7 @@ export function InputWithButton({
         {label && <label>{label}</label>}
         <InputWithButtonContainer
           isInputFocused={isInputFocused}
-          hasError={!!error}
+          hasError={Boolean(error)}
         >
           <input
             onFocus={(e) => {

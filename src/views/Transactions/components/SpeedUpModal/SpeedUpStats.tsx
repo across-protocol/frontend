@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { utils } from "ethers";
-import { formatWeiPct, getChainInfo, formatUnits } from "utils";
+import { formatWeiPct, getChainInfo, makeFormatUnits } from "utils";
 
 import {
   appendPercentageSign,
@@ -24,6 +24,8 @@ export function SpeedUpStats({
 }: Props) {
   const [token, transfer] = transferTokenTuple;
 
+  const formatTokenUnits = makeFormatUnits(token.decimals);
+
   const isInputInvalid = isNaN(Number(removePercentageSign(feeInput)));
 
   return (
@@ -44,7 +46,7 @@ export function SpeedUpStats({
       </StatRow>
       <StatRow>
         <div>Amount</div>
-        <div>{formatUnits(transfer.amount, token.decimals).toString()}</div>
+        <div>{formatTokenUnits(transfer.amount).toString()}</div>
       </StatRow>
       <StatRow>
         <div>Current fee %</div>
@@ -53,11 +55,10 @@ export function SpeedUpStats({
       <StatRow>
         <div>Current fee in {token.symbol}</div>
         <div>
-          {formatUnits(
+          {formatTokenUnits(
             transfer.currentRelayerFeePct
               .mul(transfer.amount)
-              .div(utils.parseEther("1")),
-            token.decimals
+              .div(utils.parseEther("1"))
           ).toString()}
         </div>
       </StatRow>
@@ -75,11 +76,10 @@ export function SpeedUpStats({
         <div>
           {inputError || isInitiallyFetchingFees || isInputInvalid
             ? "-"
-            : formatUnits(
+            : formatTokenUnits(
                 feeInputToBigNumberPct(feeInput || "0")
                   .mul(transfer.amount)
-                  .div(utils.parseEther("1")),
-                token.decimals
+                  .div(utils.parseEther("1"))
               ).toString()}
         </div>
       </StatRow>

@@ -185,9 +185,7 @@ function AlertBox({
         </p>
       </ErrorBox>
     );
-  }
-
-  if (speedUpError) {
+  } else if (speedUpError) {
     return (
       <ErrorBox>
         <div>
@@ -196,9 +194,7 @@ function AlertBox({
         <p>{speedUpError}</p>
       </ErrorBox>
     );
-  }
-
-  if (isRelayerFeeFairlyPriced) {
+  } else if (isRelayerFeeFairlyPriced) {
     return (
       <InfoBox>
         <div>
@@ -361,10 +357,10 @@ const ButtonsRow = styled.div`
 `;
 
 const ConfirmButton = styled(ButtonV2)<{ warning?: boolean }>`
-  border: 1px solid ${({ warning }) => (warning ? "#F9D26C" : "#6cf9d8")};
+  border: 1px solid ${({ warning }) => (warning ? "#f9d26c" : "#6cf9d8")};
   border-radius: 20px;
   background-color: transparent;
-  color: ${({ warning }) => (warning ? "#F9D26C" : "#6cf9d8")};
+  color: ${({ warning }) => (warning ? "#f9d26c" : "#6cf9d8")};
 `;
 
 const CancelButton = styled(ButtonV2)`

@@ -86,7 +86,7 @@ export function TransactionsTable({
       />
       {enableSpeedUps && txTupleToSpeedUp && (
         <SpeedUpModal
-          isOpen={!!txTupleToSpeedUp}
+          isOpen={Boolean(txTupleToSpeedUp)}
           onClose={() => setTxTupleToSpeedUp(undefined)}
           txTuple={txTupleToSpeedUp}
         />
