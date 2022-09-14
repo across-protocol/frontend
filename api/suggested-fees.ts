@@ -72,13 +72,6 @@ const handler = async (
       originChainId
     );
 
-    logger.debug({
-      at: "suggested-fees",
-      message: "Checking route",
-      computedOriginChainId,
-      destinationChainId,
-      token,
-    });
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
     const [{ number: latestBlock }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
@@ -90,8 +83,6 @@ const handler = async (
     // not specified, we can use the default variant of blockTag
     // to be "latest"
     const blockTag = isString(timestamp) ? latestBlock : BLOCK_TAG_LAG;
-
-    logger.debug({ at: "suggested-fees", message: `Using block ${blockTag}` });
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
       throw new InputError(
@@ -117,41 +108,17 @@ const handler = async (
       }),
       getCachedTokenPrice(l1Token, baseCurrency),
     ]);
-    logger.debug({
-      at: "suggested-fees",
-      message: "Fetched utilization",
-      currentUt,
-      nextUt,
-      rateModel,
-    });
-
     const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
       nextUt
     );
-    logger.debug({
-      at: "suggested-fees",
-      message: "Calculated realizedLPFeePct",
-      realizedLPFeePct,
-    });
-    logger.debug({
-      at: "suggested-fees",
-      message: "Got token price from /coingecko",
-      tokenPrice,
-    });
-
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
       Number(destinationChainId),
       tokenPrice
     );
-    logger.debug({
-      at: "suggested-fees",
-      message: "Calculated relayerFeeDetails",
-      relayerFeeDetails,
-    });
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";
 
