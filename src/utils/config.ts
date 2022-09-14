@@ -201,7 +201,7 @@ export class ConfigClient {
     try {
       const dd = process.env.REACT_APP_DEPOSIT_DELAY;
       if (dd) {
-        console.log("deposit delay", dd);
+        console.log("deposit delay", dd, JSON.parse(dd));
         return JSON.parse(dd) as DepositDelays;
       } else {
         return {};
@@ -218,5 +218,6 @@ let config: ConfigClient | undefined;
 export function getConfig(): ConfigClient {
   if (config) return config;
   config = new ConfigClient(constants.routeConfig);
+  console.log(config.depositDelays());
   return config;
 }
