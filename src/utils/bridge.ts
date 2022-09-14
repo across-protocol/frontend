@@ -165,12 +165,8 @@ export const getConfirmationDepositTime = (
   fromChain: ChainId
 ) => {
   const config = getConfig();
-  const depositDelays = config.depositDelays();
-  const timeRange = calculateBridgeTimeRangeInMinutes(
-    fromChain,
-    // Pass in 0 if depositDelay value undefined for that ChainId.
-    depositDelays[fromChain] || 0
-  );
+  const depositDelay = config.depositDelays()[fromChain] || 0;
+  const timeRange = calculateBridgeTimeRangeInMinutes(fromChain, depositDelay);
 
   if (amount.lte(limits.maxDepositInstant)) {
     return `~${timeRange[0]}-${timeRange[1]} minutes`;
@@ -401,11 +397,11 @@ const MIN_DEPOSIT_CONFIRMATIONS: Record<
   },
   [ChainId.OPTIMISM]: {
     blocks: 240,
-    averageBlockTime: 13,
+    averageBlockTime: 1,
   },
   [ChainId.POLYGON]: { blocks: 100, averageBlockTime: 2.5 },
-  [ChainId.BOBA]: { blocks: 4, averageBlockTime: 120 },
-  [ChainId.ARBITRUM]: { blocks: 240, averageBlockTime: 13 },
+  [ChainId.BOBA]: { blocks: 4, averageBlockTime: 30 },
+  [ChainId.ARBITRUM]: { blocks: 240, averageBlockTime: 1 },
 };
 
 /**
