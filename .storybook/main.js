@@ -16,6 +16,8 @@ module.exports = {
   //       instance can run.
   //
   //       This clears an error in which storybook cannot publish to Chromatic
+  //
+  //       Relevant Storybook Docs: https://storybook.js.org/docs/react/configure/environment-variables
   env: (config) => ({
     ...config,
     ...Object.keys(process.env).reduce((accumulator, envKey) => {
