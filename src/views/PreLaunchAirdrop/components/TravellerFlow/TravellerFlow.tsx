@@ -33,7 +33,7 @@ const TravellerFlow = () => {
         </TertiaryButton>
         <SecondaryButtonV2
           disabled={step === numDots}
-          onClick={() => setStep((pv) => Math.min(pv+1, numDots))}
+          onClick={() => setStep((pv) => Math.min(pv + 1, numDots))}
           size="md"
         >
           Next
