@@ -10,4 +10,17 @@ module.exports = {
   core: {
     builder: "webpack4",
   },
+  // Note: by default, storybook only forwards environment variables that 
+  //       take the form /^STORYBOOK_/ . The code below creates a 1:1 mapping
+  //       of the /^REACT_APP_/ environment variables so that this Storybook
+  //       instance can run.
+  //
+  //       This clears an error in which storybook cannot publish to Chromatic
+  env: (config) => ({
+    ...config,
+    ...Object.keys(process.env).reduce((accumulator, envKey) => {
+      if (/^REACT_APP_/.test(envKey)) accumulator[envKey] = process.env[envKey];
+      return accumulator;
+    }, {}),
+  }),
 };
