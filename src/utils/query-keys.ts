@@ -92,3 +92,11 @@ export function referralsQueryKey(
 export function referralSummaryQueryKey(account: string) {
   return ["referralSummary", account];
 }
+
+export function depositsQueryKey(
+  status: "filled" | "pending",
+  limit: number,
+  offset: number
+) {
+  return ["deposits", status, limit, offset];
+}

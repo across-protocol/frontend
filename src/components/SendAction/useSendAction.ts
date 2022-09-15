@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSendForm, useBridgeFees, useBridge, useBridgeLimits } from "hooks";
-import { confirmations } from "utils";
+import { confirmations, bridgeDisabled } from "utils";
 import { Deposit } from "views/Confirmation";
 import { useConnection } from "state/hooks";
 
@@ -23,7 +23,7 @@ export default function useSendAction(
   const [txHash, setTxHash] = useState("");
 
   const handleActionClick = async () => {
-    if (status !== "ready" || !selectedRoute) {
+    if (status !== "ready" || !selectedRoute || bridgeDisabled) {
       return;
     }
     try {
@@ -76,7 +76,8 @@ export default function useSendAction(
     }
   };
 
-  const buttonDisabled = status !== "ready" || txPending || !selectedRoute;
+  const buttonDisabled =
+    status !== "ready" || txPending || !selectedRoute || bridgeDisabled;
 
   let buttonMsg: string = "Send";
   if (txPending) {

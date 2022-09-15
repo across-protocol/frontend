@@ -17,6 +17,10 @@ export type Token = constants.TokenInfo & {
 };
 export type TokenList = Token[];
 
+export interface DepositDelays {
+  [chainId: string]: number;
+}
+
 export class ConfigClient {
   public readonly spokeAddresses: Record<number, string> = {};
   public readonly spokeChains: Set<number> = new Set();
@@ -192,6 +196,19 @@ export class ConfigClient {
     );
     // use token sorting when returning reachable tokens
     return sortBy(reachableTokens, (token) => this.tokenOrder[token.symbol]);
+  }
+  depositDelays() {
+    try {
+      const dd = process.env.REACT_APP_DEPOSIT_DELAY;
+      if (dd) {
+        return JSON.parse(dd) as DepositDelays;
+      } else {
+        return {};
+      }
+    } catch (err) {
+      console.error(err);
+      return {};
+    }
   }
 }
 

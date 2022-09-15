@@ -54,11 +54,11 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
             </CloseButton>
           </TopHeaderRow>
           {addrOrEns && <HeaderText>{addrOrEns}</HeaderText>}
-          {isSupportedChainId(chainId) && isConnected ? (
+          {isSupportedChainId(chainId) ? (
             <HeaderText>{getChainInfo(chainId).name}</HeaderText>
-          ) : (
+          ) : isConnected ? (
             <HeaderText>Unsupported Network</HeaderText>
-          )}
+          ) : null}
           {isConnected && wallet ? (
             <DisconnectButton onClick={() => disconnect(wallet)}>
               Disconnect

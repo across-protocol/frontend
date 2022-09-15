@@ -1,18 +1,23 @@
-const ethers = require("ethers");
+import { VercelResponse } from "@vercel/node";
+import { ethers } from "ethers";
+import { isString } from "./_typeguards";
+import { PoolInputRequest } from "./_types";
 
-const {
+import {
   getLogger,
   InputError,
-  isString,
   getHubPoolClient,
-} = require("./_utils");
+  handleErrorCondition,
+} from "./_utils";
 
-const handler = async (request, response) => {
+const handler = async (
+  { query: { token } }: PoolInputRequest,
+  response: VercelResponse
+) => {
   const logger = getLogger();
   try {
     const hubPoolClient = await getHubPoolClient();
 
-    let { token } = request.query;
     if (!isString(token))
       throw new InputError("Must provide token as query param");
 
@@ -26,17 +31,9 @@ const handler = async (request, response) => {
     // to cache the responses and invalidate when deployments update.
     response.setHeader("Cache-Control", "s-maxage=300");
     response.status(200).json(hubPoolClient.getPoolState(token));
-  } catch (error) {
-    let status;
-    if (error instanceof InputError) {
-      logger.warn({ at: "pools", message: "400 input error", error });
-      status = 400;
-    } else {
-      logger.error({ at: "pools", message: "500 server error", error });
-      status = 500;
-    }
-    response.status(status).send(error.message);
+  } catch (error: unknown) {
+    return handleErrorCondition("pools", response, logger, error);
   }
 };
 
-module.exports = handler;
+export default handler;

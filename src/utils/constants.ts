@@ -574,6 +574,10 @@ export const hubPoolAddress = routeConfig.hubPoolAddress;
 export const migrationPoolV2Warning =
   process.env.REACT_APP_MIGRATION_POOL_V2_WARNING;
 export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
+export const generalMaintenanceMessage =
+  process.env.REACT_APP_GENERAL_MAINTENANCE_MESSAGE;
+
+export const bridgeDisabled = process.env.REACT_APP_BRIDGE_DISABLED === "true";
 
 // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
 // gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
