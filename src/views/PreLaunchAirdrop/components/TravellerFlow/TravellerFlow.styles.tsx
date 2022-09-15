@@ -50,6 +50,13 @@ export const DotStepWrapper = styled.div`
   width: 100%;
   display: flex;
   align-items: center;
-  margin-top: 42px;
+  margin-top: 36px;
   justify-content: center;
+`;
+
+export const ButtonWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 36px;
 `;

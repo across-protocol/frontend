@@ -21,8 +21,8 @@ const DotWrapper = styled.div`
   display: inline-flex;
 
   > div {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     margin: 2px 4px;
     border-radius: 50%;
     background-color: #636a70;
