@@ -9,7 +9,10 @@ import {
   ButtonWrapper,
 } from "./TravellerFlow.styles";
 import { SecondaryButtonV2, TertiaryButton } from "components/Buttons/ButtonV2";
+import useTravellerFlow from "./useTravellerFlow";
+const numDots = 4;
 const TravellerFlow = () => {
+  const { step, setStep } = useTravellerFlow();
   return (
     <Wrapper>
       <HeroBlock>
@@ -20,11 +23,30 @@ const TravellerFlow = () => {
         Hello. We detect that you’ve traveled far from home. Welcome to Across.
       </Subtitle>
       <ButtonWrapper>
-        <TertiaryButton size="md">Back to Home</TertiaryButton>
-        <SecondaryButtonV2 size="md">Next</SecondaryButtonV2>
+        <TertiaryButton
+          onClick={() => {
+            // Return back to view, not sure where yet.
+            if (step <= 1) {
+              setStep(1);
+              return null;
+            } else {
+              setStep((pv) => pv - 1);
+            }
+          }}
+          size="md"
+        >
+          {step === 1 ? "Back to Home" : "Back"}
+        </TertiaryButton>
+        <SecondaryButtonV2
+          disabled={step === numDots}
+          onClick={() => setStep((pv) => (pv === numDots ? numDots : pv + 1))}
+          size="md"
+        >
+          Next
+        </SecondaryButtonV2>
       </ButtonWrapper>
       <DotStepWrapper>
-        <DotStepper numDots={4} selected={1} />
+        <DotStepper numDots={numDots} step={step} />
       </DotStepWrapper>
     </Wrapper>
   );
