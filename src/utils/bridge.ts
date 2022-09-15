@@ -166,33 +166,30 @@ export const getConfirmationDepositTime = (
 ) => {
   const config = getConfig();
   const depositDelay = config.depositDelays()[fromChain] || 0;
-  const calculateBridgeTimeRangeInMinutes = (
+  const getTimeEstimateString = (
     lowEstimate: number,
     highEstimate: number
-  ): [number, number] => {
-    return [lowEstimate + depositDelay, highEstimate + depositDelay];
-  };
-  const getTimeEstimateString = (estimates: [number, number]): string => {
-    return `~${estimates[0]}-${estimates[1]} minutes`;
+  ): string => {
+    return `~${lowEstimate + depositDelay}-${
+      highEstimate + depositDelay
+    } minutes`;
   };
 
   if (amount.lte(limits.maxDepositInstant)) {
-    return getTimeEstimateString(calculateBridgeTimeRangeInMinutes(1, 4));
+    return getTimeEstimateString(1, 4);
   } else if (amount.lte(limits.maxDepositShortDelay)) {
     // This is just a rough estimate of how long 2 bot runs (1-4 minutes allocated for each) + an arbitrum transfer of 3-10 minutes would take.
-    if (toChain === ChainId.ARBITRUM)
-      return getTimeEstimateString(calculateBridgeTimeRangeInMinutes(5, 15));
+    if (toChain === ChainId.ARBITRUM) return getTimeEstimateString(5, 15);
 
     // Optimism transfers take about 10-20 minutes anecdotally. Boba is presumed to be similar.
     if (toChain === ChainId.OPTIMISM || toChain === ChainId.BOBA)
-      return getTimeEstimateString(calculateBridgeTimeRangeInMinutes(12, 25));
+      return getTimeEstimateString(12, 25);
 
     // Polygon transfers take 20-30 minutes anecdotally.
-    if (toChain === ChainId.POLYGON)
-      return getTimeEstimateString(calculateBridgeTimeRangeInMinutes(20, 35));
+    if (toChain === ChainId.POLYGON) return getTimeEstimateString(20, 35);
 
     // Typical numbers for an arbitrary L2.
-    return getTimeEstimateString(calculateBridgeTimeRangeInMinutes(10, 30));
+    return getTimeEstimateString(10, 30);
   }
 
   // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.
