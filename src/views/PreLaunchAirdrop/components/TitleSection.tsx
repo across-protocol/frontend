@@ -72,3 +72,17 @@ const StyledArrowIcon = styled(ArrowIcon)`
     stroke: #e0f3ff;
   }
 `;
+
+const StyledAcrossLogo = styled.img`
+  margin: -160px -100px;
+`;
+
+const StyledButton = styled(ButtonV2)`
+  width: 293px;
+  height: 64px;
+
+  background: linear-gradient(264.97deg, #6cf9d8 24.16%, #c4fff1 61.61%);
+  box-shadow: 0px 0px 24px rgba(109, 250, 217, 0.25);
+  border-radius: 32px;
+  padding: 0px 40px;
+`;
