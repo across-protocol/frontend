@@ -5,7 +5,7 @@ import { JsonRpcSigner } from "@uma/sdk/dist/types/oracle/types/ethers";
 
 import { useConnection } from "state/hooks";
 import { getConfig, getChainInfo, Token } from "utils";
-import { useBridgeFees } from "hooks";
+import { useBridgeFees, useNotify } from "hooks";
 
 type SpeedUpStatus = "idle" | "pending" | "success" | "error";
 
@@ -17,6 +17,7 @@ export function useSpeedUp(transfer: Transfer, token: Token) {
     transfer.destinationChainId,
     token.symbol
   );
+  const { setChainId, setTxResponse, txStatus, txErrorMsg } = useNotify();
 
   const [isCorrectChain, setIsCorrectChain] = useState(false);
   const [speedUpStatus, setSpeedUpStatus] = useState<SpeedUpStatus>("idle");
@@ -35,6 +36,14 @@ export function useSpeedUp(transfer: Transfer, token: Token) {
       setSuggestedRelayerFeePct(fees.relayerFee.pct);
     }
   }, [fees]);
+
+  useEffect(() => {
+    setSpeedUpStatus(txStatus);
+
+    if (txErrorMsg) {
+      setSpeedUpErrorMsg(txErrorMsg);
+    }
+  }, [txStatus, txErrorMsg]);
 
   const speedUp = async (newRelayerFeePct: BigNumber) => {
     try {
@@ -58,13 +67,13 @@ export function useSpeedUp(transfer: Transfer, token: Token) {
         transfer.depositId,
         depositorSignature
       );
+      setChainId(transfer.sourceChainId);
+      setTxResponse(txResponse);
       setSpeedUpTxLink(
         getChainInfo(transfer.sourceChainId).constructExplorerLink(
           txResponse.hash
         )
       );
-      await txResponse.wait();
-      setSpeedUpStatus("success");
     } catch (error) {
       setSpeedUpStatus("error");
       setSpeedUpErrorMsg((error as Error).message);
