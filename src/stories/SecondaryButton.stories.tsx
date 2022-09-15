@@ -1,19 +1,18 @@
-import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { ButtonV2, SecondaryButtonV2 } from "components/Buttons/ButtonV2";
+import { SecondaryButtonV2 } from "components/Buttons/ButtonV2";
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-  title: "ButtonV2",
-  component: ButtonV2,
+  title: "SecondaryButtonV2",
+  component: SecondaryButtonV2,
   // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
   argTypes: {},
-} as ComponentMeta<typeof ButtonV2>;
+} as ComponentMeta<typeof SecondaryButtonV2>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof ButtonV2> = (args) => (
-  <ButtonV2 {...args}>{args.children}</ButtonV2>
+const Template: ComponentStory<typeof SecondaryButtonV2> = (args) => (
+  <SecondaryButtonV2 {...args}>{args.children}</SecondaryButtonV2>
 );
 
 export const Primary = Template.bind({});

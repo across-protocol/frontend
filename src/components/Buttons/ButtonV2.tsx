@@ -52,3 +52,9 @@ export const ButtonV2 = styled.button<{ size: "sm" | "md" | "lg" }>`
     cursor: not-allowed;
   }
 `;
+
+export const SecondaryButtonV2 = styled(ButtonV2)`
+  color: #6cf9d8;
+  border: 1px solid #6cf9d8;
+  background-color: #2d2e33;
+`;
