@@ -342,11 +342,14 @@ export const getRelayerFeeDetails = (
  * @param l1Token The ERC20 token address of the coin to find the cached price of
  * @returns The price of the `l1Token` token.
  */
-export const getCachedTokenPrice = async (l1Token: string): Promise<number> => {
+export const getCachedTokenPrice = async (
+  l1Token: string,
+  baseCurrency: string = "eth"
+): Promise<number> => {
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
-        params: { l1Token },
+        params: { l1Token, baseCurrency },
       })
     ).data.price
   );

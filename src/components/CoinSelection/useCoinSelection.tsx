@@ -58,7 +58,12 @@ export default function useCoinSelection() {
     (token) => token.symbol === selectedItem?.symbol
   );
   const balance = balances[selectedIndex];
-  const { fees } = useBridgeFees(amount, toChain, selectedItem?.symbol);
+  const { fees } = useBridgeFees(
+    amount,
+    fromChain,
+    toChain,
+    selectedItem?.symbol
+  );
 
   const [inputAmount, setInputAmount] = React.useState<string>(
     selectedItem && amount.gt("0")
