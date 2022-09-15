@@ -2,13 +2,13 @@ import styled from "@emotion/styled";
 import React from "react";
 import { Link } from "react-router-dom";
 
-type buttonAttrib = {
+type ButtonProps = {
   text: string;
   link: string;
 };
 type AirdropButtonGroupProps = {
-  left: buttonAttrib;
-  right?: buttonAttrib;
+  left: ButtonProps;
+  right?: ButtonProps;
 };
 
 const AirdropButtonGroup: React.FC<AirdropButtonGroupProps> = ({
