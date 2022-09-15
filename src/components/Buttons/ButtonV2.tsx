@@ -58,3 +58,9 @@ export const SecondaryButtonV2 = styled(ButtonV2)`
   border: 1px solid #6cf9d8;
   background-color: #2d2e33;
 `;
+
+export const TertiaryButton = styled(ButtonV2)`
+  color: #e0f3ff;
+  border: 1px solid transparent;
+  background-color: #2d2e33;
+`;
