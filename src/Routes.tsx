@@ -28,10 +28,16 @@ const Claim = lazy(
   () => import(/* webpackChunkName: "Claim" */ "./views/Claim")
 );
 const MyTransactions = lazy(
-  () => import(/* webpackChunkName: "MyTransactions" */ "./views/Transactions")
+  () =>
+    import(
+      /* webpackChunkName: "MyTransactions" */ "./views/Transactions/myTransactions"
+    )
 );
 const AllTransactions = lazy(
-  () => import(/* webpackChunkName: "AllTransactions" */ "./views/Transactions")
+  () =>
+    import(
+      /* webpackChunkName: "AllTransactions" */ "./views/Transactions/allTransactions"
+    )
 );
 
 const warningMessage = `
