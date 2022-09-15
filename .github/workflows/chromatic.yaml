@@ -5,17 +5,18 @@ on:
   # manual trigger
   workflow_dispatch:
   pull_request:
+    types: [labeled]
 
 # List of jobs
 jobs:
   chromatic-deployment:
-    if: ${{ contains( github.event.pull_request.labels.*.name, 'storybook') }} 
+    if: ${{ contains( github.event.pull_request.labels.*.name, 'storybook') }}
     # Operating System
     runs-on: ubuntu-latest
     # Job steps
     steps:
       - uses: actions/checkout@v3
-        with: 
+        with:
           fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
