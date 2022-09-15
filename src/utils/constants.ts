@@ -716,3 +716,6 @@ export const usdcLpCushion = process.env.REACT_APP_USDC_LP_CUSHION || "0";
 export const wethLpCushion = process.env.REACT_APP_WETH_LP_CUSHION || "0";
 export const wbtcLpCushion = process.env.REACT_APP_WBTC_LP_CUSHION || "0";
 export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
+
+// Chains where Blocknative Notify can be used. See https://docs.blocknative.com/notify#initialization
+export const supportedNotifyChainIds = [1, 3, 4, 5, 42, 56, 100, 137, 250];
