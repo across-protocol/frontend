@@ -1,7 +1,7 @@
 import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { Fee } from "./bridge";
-import { ChainId } from "./constants";
+import { ChainId, mockServerlessAPI } from "./constants";
 
 /**
  * Creates an HTTP call to the `suggested-fees` API endpoint
@@ -20,39 +20,57 @@ export async function suggestedFeesApiCall(
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
 }> {
-  const response = await axios.get(`/api/suggested-fees`, {
-    params: {
-      token: originToken,
-      destinationChainId: toChainid,
-      amount: amount.toString(),
-      skipAmountLimit: true,
-    },
-  });
-  const result = response.data;
-  const relayFeePct = BigNumber.from(result["relayFeePct"]);
-  const relayFeeTotal = BigNumber.from(result["relayFeeTotal"]);
+  if (mockServerlessAPI) {
+    return {
+      relayerFee: {
+        pct: BigNumber.from("1"),
+        total: BigNumber.from("1"),
+      },
+      relayerCapitalFee: {
+        pct: BigNumber.from("1"),
+        total: BigNumber.from("1"),
+      },
+      relayerGasFee: {
+        pct: BigNumber.from("1"),
+        total: BigNumber.from("1"),
+      },
+      isAmountTooLow: false,
+    };
+  } else {
+    const response = await axios.get(`/api/suggested-fees`, {
+      params: {
+        token: originToken,
+        destinationChainId: toChainid,
+        amount: amount.toString(),
+        skipAmountLimit: true,
+      },
+    });
+    const result = response.data;
+    const relayFeePct = BigNumber.from(result["relayFeePct"]);
+    const relayFeeTotal = BigNumber.from(result["relayFeeTotal"]);
 
-  const capitalFeePct = BigNumber.from(result["capitalFeePct"]);
-  const capitalFeeTotal = BigNumber.from(result["capitalFeeTotal"]);
+    const capitalFeePct = BigNumber.from(result["capitalFeePct"]);
+    const capitalFeeTotal = BigNumber.from(result["capitalFeeTotal"]);
 
-  const relayGasFeePct = BigNumber.from(result["relayGasFeePct"]);
-  const relayGasFeeTotal = BigNumber.from(result["relayGasFeeTotal"]);
+    const relayGasFeePct = BigNumber.from(result["relayGasFeePct"]);
+    const relayGasFeeTotal = BigNumber.from(result["relayGasFeeTotal"]);
 
-  const isAmountTooLow = result["isAmountTooLow"];
+    const isAmountTooLow = result["isAmountTooLow"];
 
-  return {
-    relayerFee: {
-      pct: relayFeePct,
-      total: relayFeeTotal,
-    },
-    relayerCapitalFee: {
-      pct: capitalFeePct,
-      total: capitalFeeTotal,
-    },
-    relayerGasFee: {
-      pct: relayGasFeePct,
-      total: relayGasFeeTotal,
-    },
-    isAmountTooLow,
-  };
+    return {
+      relayerFee: {
+        pct: relayFeePct,
+        total: relayFeeTotal,
+      },
+      relayerCapitalFee: {
+        pct: capitalFeePct,
+        total: capitalFeeTotal,
+      },
+      relayerGasFee: {
+        pct: relayGasFeePct,
+        total: relayGasFeeTotal,
+      },
+      isAmountTooLow,
+    };
+  }
 }
