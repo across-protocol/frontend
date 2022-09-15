@@ -72,13 +72,6 @@ const handler = async (
       originChainId
     );
 
-    logger.debug({
-      at: "suggested-fees",
-      message: "Checking route",
-      computedOriginChainId,
-      destinationChainId,
-      token,
-    });
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
     const [{ number: latestBlock }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
@@ -91,8 +84,6 @@ const handler = async (
     // to be "latest"
     const blockTag = isString(timestamp) ? latestBlock : BLOCK_TAG_LAG;
 
-    logger.debug({ at: "suggested-fees", message: `Using block ${blockTag}` });
-
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
       throw new InputError(
         `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled.`
@@ -102,6 +93,8 @@ const handler = async (
       "0x3B03509645713718B78951126E0A6de6f10043f5",
       provider
     );
+
+    const baseCurrency = destinationChainId === "137" ? "matic" : "eth";
 
     const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
       hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
@@ -113,43 +106,19 @@ const handler = async (
       configStoreClient.getRateModel(l1Token, {
         blockTag,
       }),
-      getCachedTokenPrice(l1Token),
+      getCachedTokenPrice(l1Token, baseCurrency),
     ]);
-    logger.debug({
-      at: "suggested-fees",
-      message: "Fetched utilization",
-      currentUt,
-      nextUt,
-      rateModel,
-    });
-
     const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
       nextUt
     );
-    logger.debug({
-      at: "suggested-fees",
-      message: "Calculated realizedLPFeePct",
-      realizedLPFeePct,
-    });
-    logger.debug({
-      at: "suggested-fees",
-      message: "Got token price from /coingecko",
-      tokenPrice,
-    });
-
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
       Number(destinationChainId),
       tokenPrice
     );
-    logger.debug({
-      at: "suggested-fees",
-      message: "Calculated relayerFeeDetails",
-      relayerFeeDetails,
-    });
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";
 
@@ -158,8 +127,11 @@ const handler = async (
 
     const responseJson = {
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
+      capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
+      relayGasFeeTotal: relayerFeeDetails.gasFeeTotal,
       relayFeePct: relayerFeeDetails.relayFeePercent,
+      relayFeeTotal: relayerFeeDetails.relayFeeTotal,
       lpFeePct: realizedLPFeePct.toString(),
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,

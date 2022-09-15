@@ -577,6 +577,8 @@ export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
 export const generalMaintenanceMessage =
   process.env.REACT_APP_GENERAL_MAINTENANCE_MESSAGE;
 
+export const bridgeDisabled = process.env.REACT_APP_BRIDGE_DISABLED === "true";
+
 // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
 // gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
 // a USDC approval for the _current_ spoke pools on Optimism (0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9) and Arbitrum
@@ -716,3 +718,6 @@ export const usdcLpCushion = process.env.REACT_APP_USDC_LP_CUSHION || "0";
 export const wethLpCushion = process.env.REACT_APP_WETH_LP_CUSHION || "0";
 export const wbtcLpCushion = process.env.REACT_APP_WBTC_LP_CUSHION || "0";
 export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
+
+export const mockServerlessAPI =
+  process.env.REACT_APP_MOCK_SERVERLESS === "true";
