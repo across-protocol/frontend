@@ -2,9 +2,8 @@ import { DotStepper } from "components";
 import {
   Wrapper,
   HeroBlock,
-  Rotate,
   Title,
-  Subtitle,
+  Description,
   DotStepWrapper,
   ButtonWrapper,
 } from "./TravellerFlow.styles";
@@ -12,16 +11,15 @@ import { SecondaryButtonV2, TertiaryButton } from "components/Buttons/ButtonV2";
 import useTravellerFlow from "./useTravellerFlow";
 const numDots = 4;
 const TravellerFlow = () => {
-  const { step, setStep } = useTravellerFlow();
+  const { step, setStep, view } = useTravellerFlow();
+  const Icon = view.Icon;
   return (
     <Wrapper>
       <HeroBlock>
-        <Rotate />
+        <Icon />
       </HeroBlock>
-      <Title>Welcome, Bridge Traveller.</Title>
-      <Subtitle>
-        Hello. We detect that you’ve traveled far from home. Welcome to Across.
-      </Subtitle>
+      <Title>{view.title}</Title>
+      <Description>{view.description}</Description>
       <ButtonWrapper>
         <TertiaryButton
           onClick={() => {

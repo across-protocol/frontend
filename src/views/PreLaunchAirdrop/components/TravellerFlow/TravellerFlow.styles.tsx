@@ -2,6 +2,9 @@ import styled from "@emotion/styled";
 import heroBg from "assets/prelaunch/morphs.png";
 
 import { ReactComponent as UnstyledRotate } from "assets/prelaunch/rotate-3d.svg";
+import { ReactComponent as UnstyledBolt } from "assets/prelaunch/bolt.svg";
+import { ReactComponent as UnstyledPresent } from "assets/prelaunch/present.svg";
+import { ReactComponent as UnstyledHeart } from "assets/prelaunch/heart.svg";
 
 export const Wrapper = styled.div`
   min-height: calc(100% - 72px);
@@ -25,6 +28,10 @@ export const Rotate = styled(UnstyledRotate)`
   height: 100px;
 `;
 
+export const Bolt = UnstyledBolt;
+export const Present = UnstyledPresent;
+export const Heart = UnstyledHeart;
+
 export const Title = styled.h2`
   margin-top: 56px;
   font-family: "Barlow";
@@ -35,8 +42,7 @@ export const Title = styled.h2`
   text-align: center;
 `;
 
-export const Subtitle = styled.h3`
-  margin-top: 16px;
+export const Description = styled.h3`
   font-family: "Barlow";
   font-style: normal;
   font-weight: 400;
@@ -44,6 +50,8 @@ export const Subtitle = styled.h3`
   line-height: ${20 / 16}rem;
   text-align: center;
   color: #c5d5e0;
+  max-width: 500px;
+  margin: 16px auto 0;
 `;
 
 export const DotStepWrapper = styled.div`
