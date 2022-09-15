@@ -28,7 +28,7 @@ import {
 
 import { parseEther, tagAddress } from "./format";
 import { getConfig } from "utils";
-import { suggestedFeesApiCall } from "./api";
+import getApiEndpoint from "./serverless-api";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -59,7 +59,7 @@ export async function getRelayerFee(
     tokenSymbol
   ).address;
 
-  return suggestedFeesApiCall(amount, address, toChainId);
+  return getApiEndpoint().suggestedFees(amount, address, toChainId);
 }
 
 export async function getLpFee(
