@@ -114,8 +114,9 @@ const Routes: React.FC = () => {
           <Route exact path="/rewards" component={Rewards} />
           <Route exact path="/rewards/claim" component={Claim} />
           <Route exact path="/" component={Send} />
-          <Route path="*" component={NotFound} />
         </Suspense>
+
+        <Route path="*" component={NotFound} />
       </Switch>
       <Toast position="top-right" />
     </>
