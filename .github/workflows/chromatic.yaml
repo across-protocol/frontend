@@ -4,29 +4,31 @@ name: Chromatic
 on:
   # manual trigger
   workflow_dispatch:
-  push:
-    branches:
-      - master
   pull_request:
-    branches:
-      - master
+    types: [ labeled ]
 
 # List of jobs
 jobs:
   chromatic-deployment:
+    if: ${{ github.event.label.name == 'component-related' }}
     env:
-      PUBLISHING_STORYBOOK: "true"
+      REACT_APP_PUBLIC_INFURA_ID: ${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
+      REACT_APP_PUBLIC_ONBOARD_API_KEY: ${{ secrets.CYPRESS_PUBLIC_ONBOARD_API_KEY }}
+      REACT_APP_REWARDS_API_URL: ${{ secrets.CYPRESS_REWARDS_API_URL }}
+      REACT_APP_CHAIN_137_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_137_PROVIDER_URL }}
+      REACT_APP_CHAIN_42161_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_42161_PROVIDER_URL }}
     # Operating System
     runs-on: ubuntu-latest
     # Job steps
     steps:
       - uses: actions/checkout@v1
-      # - name: Install dependencies
-      #   run: yarn
-      #   # 👇 Adds Chromatic as a step in the workflow
-      # - name: Publish to Chromatic
-      #   uses: chromaui/action@v1
-      #   # Chromatic GitHub Action options
-      #   with:
-      #     # 👇 Chromatic projectToken, refer to the manage page to obtain it.
-      #     projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+      - name: Install dependencies
+        run: yarn
+        # 👇 Adds Chromatic as a step in the workflow
+      - name: Publish to Chromatic
+        uses: chromaui/action@v1
+        # Chromatic GitHub Action options
+        with:
+          # 👇 Chromatic projectToken, refer to the manage page to obtain it.
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          exitZeroOnChanges: true
