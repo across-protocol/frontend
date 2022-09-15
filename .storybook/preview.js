@@ -9,11 +9,14 @@ addDecorator((story) => (
 ));
 
 window.Buffer = Buffer;
-addDecorator((s) => (
+addDecorator((story) => (
   <>
     <GlobalStyles />
-    {s()}
+    {story()}
   </>
+));
+addDecorator((story) => (
+  <MemoryRouter initialEntries={["/"]}>{story()}</MemoryRouter>
 ));
 
 const OnboardDecorator = (storyFn) => {
