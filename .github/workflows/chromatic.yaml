@@ -9,7 +9,7 @@ on:
 # List of jobs
 jobs:
   chromatic-deployment:
-    if: ${{ github.event.label.name == 'component-related' }}
+    if: ${{ contains( github.event.pull_request.labels.*.name, 'component-related') }}
     env:
       REACT_APP_PUBLIC_INFURA_ID: ${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
       REACT_APP_PUBLIC_ONBOARD_API_KEY: ${{ secrets.CYPRESS_PUBLIC_ONBOARD_API_KEY }}
