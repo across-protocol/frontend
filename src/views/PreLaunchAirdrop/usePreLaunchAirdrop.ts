@@ -1,7 +1,8 @@
 import { useState } from "react";
 
 export default function usePreLaunchAirdrop() {
-  const [showTravellerFlow, setShowTravellerFlow] = useState(true);
+  // TODO: Determine when to show this flow.
+  const [showTravellerFlow, setShowTravellerFlow] = useState(false);
 
   return {
     showTravellerFlow,
