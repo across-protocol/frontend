@@ -162,5 +162,7 @@ export function formatPoolAPY(
 }
 
 export function formatWeiPct(wei: ethers.BigNumberish, precision: number = 3) {
-  return (Number(ethers.utils.formatEther(wei)) * 100).toFixed(precision);
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: precision,
+  }).format(Number(ethers.utils.formatEther(wei)) * 100);
 }

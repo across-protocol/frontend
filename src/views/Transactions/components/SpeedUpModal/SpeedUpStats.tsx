@@ -1,11 +1,11 @@
 import styled from "@emotion/styled";
-import { utils } from "ethers";
 import { formatWeiPct, getChainInfo, makeFormatUnits } from "utils";
 
 import {
   appendPercentageSign,
   removePercentageSign,
   feeInputToBigNumberPct,
+  calcPctOfTokenAmount,
 } from "./utils";
 import { SupportedTxTuple } from "../../types";
 
@@ -27,6 +27,7 @@ export function SpeedUpStats({
   const formatTokenUnits = makeFormatUnits(token.decimals);
 
   const isInputInvalid = isNaN(Number(removePercentageSign(feeInput)));
+  const hideNewFee = inputError || isInitiallyFetchingFees || isInputInvalid;
 
   return (
     <StatsBox>
@@ -46,7 +47,7 @@ export function SpeedUpStats({
       </StatRow>
       <StatRow>
         <div>Amount</div>
-        <div>{formatTokenUnits(transfer.amount).toString()}</div>
+        <div>{formatTokenUnits(transfer.amount)}</div>
       </StatRow>
       <StatRow>
         <div>Current fee %</div>
@@ -56,31 +57,26 @@ export function SpeedUpStats({
         <div>Current fee in {token.symbol}</div>
         <div>
           {formatTokenUnits(
-            transfer.currentRelayerFeePct
-              .mul(transfer.amount)
-              .div(utils.parseEther("1"))
-          ).toString()}
+            calcPctOfTokenAmount(transfer.currentRelayerFeePct, transfer.amount)
+          )}
         </div>
       </StatRow>
       <Divider />
       <StatRow highlightValue>
         <div>New fee %</div>
-        <div>
-          {inputError || isInitiallyFetchingFees || isInputInvalid
-            ? "-"
-            : appendPercentageSign(feeInput)}
-        </div>
+        <div>{hideNewFee ? "-" : appendPercentageSign(feeInput)}</div>
       </StatRow>
       <StatRow highlightValue>
         <div>New fee in {token.symbol}</div>
         <div>
-          {inputError || isInitiallyFetchingFees || isInputInvalid
+          {hideNewFee
             ? "-"
             : formatTokenUnits(
-                feeInputToBigNumberPct(feeInput || "0")
-                  .mul(transfer.amount)
-                  .div(utils.parseEther("1"))
-              ).toString()}
+                calcPctOfTokenAmount(
+                  feeInputToBigNumberPct(feeInput || "0"),
+                  transfer.amount
+                )
+              )}
         </div>
       </StatRow>
     </StatsBox>
