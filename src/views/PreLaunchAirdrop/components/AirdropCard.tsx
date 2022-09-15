@@ -36,7 +36,7 @@ const AirdropCard: React.FC<AirdropCardContentProps> = ({
     >
       {contentStackChildren}
     </CardContent>
-    <ChildrenWrapper>{children}</ChildrenWrapper>
+    {children && <ChildrenWrapper>{children}</ChildrenWrapper>}
   </Wrapper>
 );
 
@@ -60,6 +60,8 @@ const Wrapper = styled.div<WrapperType>`
   gap: 32px;
 
   overflow: clip;
+
+  background-color: #2d2e33;
 `;
 
 const ChildrenWrapper = styled.div`

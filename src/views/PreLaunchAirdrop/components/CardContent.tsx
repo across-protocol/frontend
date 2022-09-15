@@ -58,7 +58,7 @@ const Wrapper = styled.div`
 
   gap: 24px;
 
-  background: #2d2e33;
+  background: transparent;
 
   & * {
     z-index: 1;
