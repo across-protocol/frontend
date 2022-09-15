@@ -25,12 +25,7 @@ const TravellerFlow = () => {
           onClick={() => {
             // Return back to view, not sure where yet.
             // Change when integrating this into regular view.
-            if (step <= 1) {
-              setStep(1);
-              return null;
-            } else {
-              setStep((pv) => pv - 1);
-            }
+            setStep((pv) => Math.max(1, pv - 1));
           }}
           size="md"
         >
