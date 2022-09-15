@@ -442,7 +442,8 @@ export const isRouteEnabled = (
       toChainId === toChain &&
       fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
   );
-  return enabled;
+  //FIXME: remove false after merge
+  return false && enabled;
 };
 
 /**
