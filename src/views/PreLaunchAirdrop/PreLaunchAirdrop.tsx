@@ -8,11 +8,12 @@ import {
 import usePreLaunchAirdrop, { FlowSelector } from "./usePreLaunchAirdrop";
 import TravellerFlow from "./components/TravellerFlow";
 import { SplashFlow } from "./components/SplashFlow";
+import { EligibilityFlow } from "./components/EligibilityFlow";
 const PreLaunchAirdrop = () => {
   const { activePageFlow } = usePreLaunchAirdrop();
 
   const pageFlowOptions: Record<FlowSelector, JSX.Element> = {
-    eligibility: <></>,
+    eligibility: <EligibilityFlow />,
     traveller: <TravellerFlow />,
     splash: <SplashFlow />,
   };
