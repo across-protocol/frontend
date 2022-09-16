@@ -11,3 +11,4 @@ export * from "./useError";
 export * from "./useWindowsSize";
 export * from "./useScrollPosition";
 export * from "./useNotify";
+export * from "./useIsInCenterOfViewport";
