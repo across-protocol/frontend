@@ -1,7 +1,8 @@
 import { Buffer } from "buffer";
 import { addDecorator } from "@storybook/react";
 import { default as GlobalStyles } from "components/GlobalStyles/GlobalStyles";
-// import { OnboardProvider } from "hooks/useOnboard";
+import { OnboardContext, useOnboardManager } from "hooks/useOnboard";
+
 import { MemoryRouter } from "react-router";
 addDecorator((story) => (
   <MemoryRouter initialEntries={["/"]}>{story()}</MemoryRouter>
@@ -14,8 +15,15 @@ addDecorator((s) => (
     {s()}
   </>
 ));
-// addDecorator((s) => <OnboardProvider>{s()}</OnboardProvider>);
 
+const OnboardDecorator = (storyFn) => {
+  const value = useOnboardManager();
+  return (
+    <OnboardContext.Provider value={value}>{storyFn()}</OnboardContext.Provider>
+  );
+};
+
+addDecorator(OnboardDecorator);
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
   controls: {

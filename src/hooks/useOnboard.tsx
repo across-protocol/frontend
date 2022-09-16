@@ -52,7 +52,7 @@ const notify = Notify({
   desktopPosition: "topRight",
 });
 
-function useOnboardManager() {
+export function useOnboardManager() {
   const [onboard, setOnboard] = useState<OnboardAPI | null>(null);
   const [provider, setProvider] =
     useState<ethers.providers.Web3Provider | null>(null);
