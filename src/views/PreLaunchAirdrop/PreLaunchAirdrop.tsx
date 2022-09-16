@@ -1,5 +1,4 @@
 import Footer from "components/Footer";
-
 import {
   BackgroundLayer,
   ContentWrapper,
@@ -9,6 +8,7 @@ import usePreLaunchAirdrop from "./usePreLaunchAirdrop";
 import TravellerFlow from "./components/TravellerFlow";
 import { SplashFlow } from "./components/SplashFlow";
 import { EligibilityFlow } from "./components/EligibilityFlow";
+
 const PreLaunchAirdrop = () => {
   const { activePageFlow } = usePreLaunchAirdrop();
 

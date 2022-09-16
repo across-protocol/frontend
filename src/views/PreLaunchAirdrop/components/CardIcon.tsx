@@ -2,6 +2,7 @@ import React from "react";
 import styled from "@emotion/styled";
 import { ReactComponent as CheckMark } from "assets/icons/filled-checkmark-16.svg";
 import { ReactComponent as InvalidMark } from "assets/icons/solid-times-16.svg";
+import { QUERIES } from "utils";
 
 export type CheckIconState = "eligible" | "ineligible" | "undetermined";
 
@@ -38,12 +39,16 @@ const BaseWrapper = styled.div`
 `;
 
 const Wrapper = styled.div`
+  position: relative;
+  isolation: isolate;
+
   height: 64px;
   width: 64px;
 
-  position: relative;
-
-  isolation: isolate;
+  @media ${QUERIES.tabletAndDown} {
+    height: 54px;
+    width: 54px;
+  }
 `;
 
 type IconWrapperType = { state: CheckIconState; addPadding: boolean };
