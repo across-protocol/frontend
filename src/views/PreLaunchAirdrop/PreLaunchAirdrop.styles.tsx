@@ -3,15 +3,16 @@ import Background from "assets/prelaunch-background.png";
 import { QUERIES } from "utils";
 
 export const BackgroundLayer = styled.div`
-  background: url(${Background});
-  background-repeat: no-repeat;
-  background-size: cover;
   position: fixed;
   right: 0;
   top: 0;
   width: 100%;
   height: 100%;
   z-index: 0 !important;
+  background: linear-gradient(72.13deg, #34353b 0%, rgba(52, 53, 59, 0.75) 100%),
+    url(${Background}), #34353b;
+  background-blend-mode: normal, luminosity, normal;
+  transform: matrix(-1, 0, 0, 1, 0, 0);
 `;
 
 export const Wrapper = styled.div`
