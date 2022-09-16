@@ -1,11 +1,12 @@
 import { useState } from "react";
 
+export type FlowSelector = "splash" | "traveller" | "eligibility";
+
 export default function usePreLaunchAirdrop() {
-  // TODO: Determine when to show this flow.
-  const [showTravellerFlow, setShowTravellerFlow] = useState(false);
+  const [activePageFlow, setActivePageFlow] = useState<FlowSelector>("splash");
 
   return {
-    showTravellerFlow,
-    setShowTravellerFlow,
+    activePageFlow,
+    setActivePageFlow,
   };
 }
