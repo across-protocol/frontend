@@ -9,46 +9,56 @@ import {
   Wrapper,
 } from "./PreLaunchAirdrop.styles";
 import AirdropCard from "./components/AirdropCard";
-
+import usePreLaunchAirdrop from "./usePreLaunchAirdrop";
+import TravellerFlow from "./components/TravellerFlow";
 const PreLaunchAirdrop = () => {
+  const { showTravellerFlow } = usePreLaunchAirdrop();
   return (
     <Wrapper>
       <BackgroundLayer />
-      <ContentWrapper>
-        <TitleSection />
-        <TestDiv>
-          <AirdropCard
-            Icon={TestIcon}
-            check={"undetermined"}
-            title="Across Community Member"
-            description="Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet."
-          />
-          <AirdropCard
-            Icon={TestIcon}
-            check={"undetermined"}
-            title="Across Liquidity Provider"
-            description="Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet."
-            externalLink="/"
-          />
-          <AirdropCard
-            Icon={TestIcon}
-            check={"eligible"}
-            title="Across Community Member"
-            description="Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet."
-          />
-          <AirdropCard
-            Icon={TestIcon}
-            check={"ineligible"}
-            title="Across Community Member"
-            description="Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet."
-          />
-          <AirdropCard
-            Icon={TestIcon}
-            title="Across Community Member"
-            description="Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet."
-          />
-        </TestDiv>
-      </ContentWrapper>
+
+      {!showTravellerFlow && (
+        <ContentWrapper>
+          <TitleSection />
+          <TestDiv>
+            <AirdropCard
+              Icon={TestIcon}
+              check={"undetermined"}
+              title="Across Community Member"
+              description="Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet."
+            />
+            <AirdropCard
+              Icon={TestIcon}
+              check={"undetermined"}
+              title="Across Liquidity Provider"
+              description="Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet."
+              externalLink="/"
+            />
+            <AirdropCard
+              Icon={TestIcon}
+              check={"eligible"}
+              title="Across Community Member"
+              description="Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet."
+            />
+            <AirdropCard
+              Icon={TestIcon}
+              check={"ineligible"}
+              title="Across Community Member"
+              description="Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet."
+            />
+            <AirdropCard
+              Icon={TestIcon}
+              title="Across Community Member"
+              description="Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet."
+            />
+          </TestDiv>
+        </ContentWrapper>
+      )}
+      {showTravellerFlow && (
+        <ContentWrapper>
+          <TravellerFlow />
+        </ContentWrapper>
+      )}
       <Footer />
     </Wrapper>
   );
