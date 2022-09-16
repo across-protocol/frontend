@@ -1,6 +1,6 @@
 import { FC, Dispatch, SetStateAction, useState, useEffect } from "react";
 import PoolFormSlider from "./PoolFormSlider";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import {
   RemoveAmount,
   RemovePercentButtonsWrapper,

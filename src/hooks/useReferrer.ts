@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useQueryParams } from "./useQueryParams";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 
 export default function useReferrer() {
   const { provider } = useConnection();

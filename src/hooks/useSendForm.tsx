@@ -21,8 +21,7 @@ import {
   isSupportedChainId,
 } from "utils";
 
-import { usePrevious } from "hooks";
-import { useConnection } from "state/hooks";
+import { usePrevious, useConnection } from "hooks";
 import { useQueryParams } from "./useQueryParams";
 import { useHistory } from "react-router-dom";
 export enum FormStatus {

@@ -4,7 +4,7 @@ import { FormStatus, useSendForm } from "./useSendForm";
 import { useBalanceBySymbol } from "./useBalance";
 import { useBridgeFees } from "./useBridgeFees";
 import { useAllowance } from "./useAllowance";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import { useBlock } from "./useBlock";
 import {
   FEE_ESTIMATION,

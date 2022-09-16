@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { ContractTransaction } from "ethers";
 
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import { supportedNotifyChainIds } from "utils/constants";
 import { getChainInfo } from "utils";
 

@@ -3,7 +3,7 @@ import { BigNumber, utils } from "ethers";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history";
 import { JsonRpcSigner } from "@uma/sdk/dist/types/oracle/types/ethers";
 
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import { getConfig, getChainInfo, Token } from "utils";
 import { useBridgeFees, useNotify } from "hooks";
 

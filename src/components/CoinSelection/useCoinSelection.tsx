@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from "react";
 import { useSelect } from "downshift";
 import { ethers, BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import { useBalancesBySymbols, useBridgeFees, useSendForm } from "hooks";
 import {
   ParsingError,

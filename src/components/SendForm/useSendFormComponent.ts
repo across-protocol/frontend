@@ -1,5 +1,4 @@
-import { useSendForm } from "hooks";
-import { useConnection } from "state/hooks";
+import { useSendForm, useConnection } from "hooks";
 
 export default function useSendFormComponent() {
   const { fromChain } = useSendForm();

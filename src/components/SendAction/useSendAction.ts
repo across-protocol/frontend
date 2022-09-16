@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSendForm, useBridgeFees, useBridge, useBridgeLimits } from "hooks";
 import { confirmations, bridgeDisabled } from "utils";
 import { Deposit } from "views/Confirmation";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 
 export default function useSendAction(
   onDepositConfirmed: (deposit: Deposit) => void
