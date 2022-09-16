@@ -719,5 +719,10 @@ export const wethLpCushion = process.env.REACT_APP_WETH_LP_CUSHION || "0";
 export const wbtcLpCushion = process.env.REACT_APP_WBTC_LP_CUSHION || "0";
 export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
 
+export const maxRelayFee = 0.25; // 25%
+export const minRelayFee = 0.0003; // 0.03%
+// Chains where Blocknative Notify can be used. See https://docs.blocknative.com/notify#initialization
+export const supportedNotifyChainIds = [1, 3, 4, 5, 42, 56, 100, 137, 250];
+
 export const mockServerlessAPI =
   process.env.REACT_APP_MOCK_SERVERLESS === "true";

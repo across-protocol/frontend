@@ -84,6 +84,10 @@ export function formatUnits(
   return smallNumberFormatter(value);
 }
 
+export function makeFormatUnits(decimals: number) {
+  return (wei: ethers.BigNumberish) => formatUnits(wei, decimals);
+}
+
 export function formatEther(wei: ethers.BigNumberish): string {
   return formatUnits(wei, 18);
 }
@@ -155,4 +159,10 @@ export function formatPoolAPY(
   return formatNumberMaxFracDigits(
     Number(ethers.utils.formatUnits(wei, decimals))
   );
+}
+
+export function formatWeiPct(wei: ethers.BigNumberish, precision: number = 3) {
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: precision,
+  }).format(Number(ethers.utils.formatEther(wei)) * 100);
 }
