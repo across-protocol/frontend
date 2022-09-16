@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { Header, Sidebar } from "components";
-// import { OnboardContext, OnboardProvider } from "hooks/useOnboard";
+
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
   title: "Header",
