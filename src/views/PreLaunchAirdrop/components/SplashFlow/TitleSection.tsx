@@ -1,9 +1,12 @@
 import styled from "@emotion/styled";
-import { Link } from "react-router-dom";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-right-16.svg";
 import React from "react";
 
-const TitleSection = () => {
+type TitleSectionParams = {
+  eligibilityLinkHandler: () => void;
+};
+
+const TitleSection = ({ eligibilityLinkHandler }: TitleSectionParams) => {
   return (
     <Wrapper>
       <PageHeader>ACX is about to launch.</PageHeader>
@@ -11,7 +14,7 @@ const TitleSection = () => {
         The token launch is almost here and as a community member you will have
         the opportunity to make your claim for a piece of the official airdrop.
       </PageSubHeader>
-      <EligibilityLink to={"/"}>
+      <EligibilityLink onClick={eligibilityLinkHandler}>
         <InnerLinkText>Read about airdrop eligibility</InnerLinkText>
         <StyledArrowIcon />
       </EligibilityLink>
@@ -51,12 +54,14 @@ const PageSubHeader = styled.h2`
   line-height: 26px;
 `;
 
-const EligibilityLink = styled(Link)`
+const EligibilityLink = styled.a`
   font-weight: 500;
   font-size: 18px;
   line-height: 26px;
   color: #e0f3ff;
   text-decoration: none;
+
+  cursor: pointer;
 
   display: flex;
   flex-direction: row;
