@@ -40,32 +40,3 @@ export const ContentWrapper = styled.div`
   flex-direction: column;
   align-items: center;
 `;
-
-export const CardTableWrapper = styled.div`
-  margin-top: 108px;
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-
-  @media ${QUERIES.tabletAndDown} {
-    flex-direction: column;
-    margin-top: 64px;
-  }
-
-  @media ${QUERIES.mobileAndDown} {
-    margin-top: 84px;
-  }
-`;
-
-export const CardWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-
-  &:last-of-type {
-    margin-top: 44px;
-    @media ${QUERIES.tabletAndDown} {
-      margin-top: 0;
-    }
-  }
-`;
