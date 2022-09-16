@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { Header, Sidebar } from "components";
 // import { OnboardContext, OnboardProvider } from "hooks/useOnboard";
@@ -8,7 +8,19 @@ export default {
   component: Header,
   decorators: [],
   // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
-  argTypes: {},
+  argTypes: {
+    openSidebar: {
+      control: {
+        type: "boolean",
+      },
+      defaultValue: false,
+    },
+    setOpenSidebar: {
+      control: {
+        type: null,
+      },
+    },
+  },
   parameters: {
     reactRouter: {
       routePath: "/",
@@ -20,6 +32,10 @@ export default {
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof Header> = (args) => {
   const [openSidebar, setOpenSidebar] = useState(false);
+  useEffect(() => {
+    setOpenSidebar(args.openSidebar);
+  }, [args.openSidebar]);
+
   return (
     <div>
       <Header
