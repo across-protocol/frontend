@@ -12,7 +12,7 @@ type TitleSectionProps = {
 const TitleSection = ({ isConnected }: TitleSectionProps) => {
   return (
     <Wrapper>
-      <AcrossRingLogo />
+      <StyledAcrossLogo />
       <TextStack>
         <PageHeader>ACX is about to launch.</PageHeader>
         <PageSubHeader>
@@ -64,6 +64,7 @@ const PageHeader = styled.h1`
 
   @media ${QUERIES.mobileAndDown} {
     font-size: 32px;
+    line-height: 38px;
   }
 `;
 
@@ -76,6 +77,8 @@ const ButtonStack = styled.div`
   @media ${QUERIES.tabletAndDown} {
     flex-direction: column;
     gap: 24px;
+    align-items: center;
+    justify-content: center;
   }
 `;
 
@@ -96,6 +99,7 @@ const PageSubHeader = styled.h2`
   @media ${QUERIES.mobileAndDown} {
     font-size: 16px;
     font-weight: 500;
+    line-height: 20px;
   }
 `;
 
@@ -110,6 +114,11 @@ const EligibilityLink = styled(Link)`
   flex-direction: row;
   gap: 4px;
   align-items: center;
+
+  @media ${QUERIES.mobileAndDown} {
+    font-size: 14px;
+    line-height: 18px;
+  }
 `;
 
 const InnerLinkText = styled.span``;
@@ -118,6 +127,11 @@ const StyledArrowIcon = styled(ArrowIcon)`
   color: #e0f3ff;
   & * {
     stroke: #e0f3ff;
+  }
+
+  @media ${QUERIES.mobileAndDown} {
+    height: 16px;
+    width: 16px;
   }
 `;
 
@@ -129,4 +143,24 @@ const StyledButton = styled(ButtonV2)`
   box-shadow: 0px 0px 24px rgba(109, 250, 217, 0.25);
   border-radius: 32px;
   padding: 0px 40px;
+
+  @media ${QUERIES.mobileAndDown} {
+    height: 40px;
+    width: 198px;
+    padding: 0px 16px 1px;
+    font-size: 14px;
+    line-height: 18px;
+  }
+`;
+
+const StyledAcrossLogo = styled(AcrossRingLogo)`
+  filter: drop-shadow(0px 3.63936px 94.6234px #6dfad9);
+
+  height: 186px;
+  width: 280px;
+
+  @media ${QUERIES.mobileAndDown} {
+    width: 168px;
+    height: 112px;
+  }
 `;
