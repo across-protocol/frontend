@@ -1,0 +1,24 @@
+name: Is Contributor ACX Contributor
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened, edited, labeled, unlabeled, synchronize, ready_for_review, converted_to_draft]
+jobs:
+  stale-approvals:
+    name: Enforce External Approvals to Stale
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if organization member
+        id: is_organization_member
+        uses: jamessingleton/is-organization-member@v1
+        with:
+          organization: across-protocol
+          username: ${{ github.event.pull_request.user.login }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce commit signoff
+        if: |
+          steps.is_organization_member.outputs.result == false
+        uses: artis3n/signoff-new-commit@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
