@@ -1,20 +1,35 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-right-16.svg";
+import { ButtonV2 } from "components";
 import React from "react";
+import { QUERIES } from "utils";
+import { ReactComponent as AcrossRingLogo } from "assets/across-logo-with-rings.svg";
 
-const TitleSection = () => {
+type TitleSectionProps = {
+  isConnected?: boolean;
+};
+const TitleSection = ({ isConnected }: TitleSectionProps) => {
   return (
     <Wrapper>
-      <PageHeader>ACX is about to launch.</PageHeader>
-      <PageSubHeader>
-        The token launch is almost here and as a community member you will have
-        the opportunity to make your claim for a piece of the official airdrop.
-      </PageSubHeader>
-      <EligibilityLink to={"/"}>
-        <InnerLinkText>Read about airdrop eligibility</InnerLinkText>
-        <StyledArrowIcon />
-      </EligibilityLink>
+      <AcrossRingLogo />
+      <TextStack>
+        <PageHeader>ACX is about to launch.</PageHeader>
+        <PageSubHeader>
+          The token launch is almost here and as a community member you will
+          have the opportunity to make your claim for a piece of the official
+          airdrop.
+        </PageSubHeader>
+      </TextStack>
+      <ButtonStack>
+        {!isConnected && (
+          <StyledButton size="lg">Connect to check eligibility</StyledButton>
+        )}
+        <EligibilityLink to={"/"}>
+          <InnerLinkText>Airdrop details</InnerLinkText>
+          <StyledArrowIcon />
+        </EligibilityLink>
+      </ButtonStack>
     </Wrapper>
   );
 };
@@ -24,10 +39,15 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  max-width: 560px;
+  gap: 32px;
   width: 100%;
   text-align: center;
+
+  width: calc(100% - 24px);
+
+  @media ${QUERIES.tabletAndUp} {
+    max-width: calc(560px + 24px);
+  }
 `;
 
 const PageHeader = styled.h1`
@@ -41,6 +61,29 @@ const PageHeader = styled.h1`
     linear-gradient(0deg, #e0f3ff, #e0f3ff);
   background-clip: text;
   -webkit-text-fill-color: transparent;
+
+  @media ${QUERIES.mobileAndDown} {
+    font-size: 32px;
+  }
+`;
+
+const ButtonStack = styled.div`
+  display: flex;
+
+  gap: 32px;
+
+  flex-direction: row;
+  @media ${QUERIES.tabletAndDown} {
+    flex-direction: column;
+    gap: 24px;
+  }
+`;
+
+const TextStack = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
 `;
 
 const PageSubHeader = styled.h2`
@@ -49,6 +92,11 @@ const PageSubHeader = styled.h2`
   font-weight: 400;
   font-size: 18px;
   line-height: 26px;
+
+  @media ${QUERIES.mobileAndDown} {
+    font-size: 16px;
+    font-weight: 500;
+  }
 `;
 
 const EligibilityLink = styled(Link)`
@@ -71,10 +119,6 @@ const StyledArrowIcon = styled(ArrowIcon)`
   & * {
     stroke: #e0f3ff;
   }
-`;
-
-const StyledAcrossLogo = styled.img`
-  margin: -160px -100px;
 `;
 
 const StyledButton = styled(ButtonV2)`
