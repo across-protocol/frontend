@@ -4,29 +4,44 @@ name: Chromatic
 on:
   # manual trigger
   workflow_dispatch:
-  push:
-    branches:
-      - master
   pull_request:
-    branches:
-      - master
 
 # List of jobs
 jobs:
   chromatic-deployment:
-    env:
-      PUBLISHING_STORYBOOK: "true"
+    if: ${{ contains( github.event.pull_request.labels.*.name, 'storybook') }} 
     # Operating System
     runs-on: ubuntu-latest
     # Job steps
     steps:
-      - uses: actions/checkout@v1
-      # - name: Install dependencies
-      #   run: yarn
-      #   # 👇 Adds Chromatic as a step in the workflow
-      # - name: Publish to Chromatic
-      #   uses: chromaui/action@v1
-      #   # Chromatic GitHub Action options
-      #   with:
-      #     # 👇 Chromatic projectToken, refer to the manage page to obtain it.
-      #     projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+      - uses: actions/checkout@v3
+        with: 
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: https://registry.npmjs.org
+          cache: yarn
+
+      - uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: node_modules/
+          key: ${{ runner.os }}-install-${{ hashFiles('**/yarn.lock') }}
+
+      - if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile --ignore-scripts
+        shell: bash
+      - name: Publish to Chromatic
+        uses: chromaui/action@v1
+        env:
+          REACT_APP_PUBLIC_INFURA_ID: ${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
+          REACT_APP_PUBLIC_ONBOARD_API_KEY: ${{ secrets.CYPRESS_PUBLIC_ONBOARD_API_KEY }}
+          REACT_APP_REWARDS_API_URL: ${{ secrets.CYPRESS_REWARDS_API_URL }}
+          REACT_APP_CHAIN_137_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_137_PROVIDER_URL }}
+          REACT_APP_CHAIN_42161_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_42161_PROVIDER_URL }}
+        # Chromatic GitHub Action options
+        with:
+          # 👇 Chromatic projectToken, refer to the manage page to obtain it.
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          exitZeroOnChanges: true
