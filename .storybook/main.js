@@ -5,12 +5,13 @@ module.exports = {
     "@storybook/addon-essentials",
     "@storybook/addon-interactions",
     "@storybook/preset-create-react-app",
+    "storybook-addon-react-router-v6",
   ],
   framework: "@storybook/react",
   core: {
     builder: "webpack4",
   },
-  // Note: by default, storybook only forwards environment variables that 
+  // Note: by default, storybook only forwards environment variables that
   //       take the form /^STORYBOOK_/ . The code below creates a 1:1 mapping
   //       of the /^REACT_APP_/ environment variables so that this Storybook
   //       instance can run.
