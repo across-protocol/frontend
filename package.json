@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@across-protocol/contracts-v2": "^0.0.34",
-    "@across-protocol/sdk-v2": "^0.1.24",
+    "@across-protocol/sdk-v2": "^0.1.26",
     "@datapunt/matomo-tracker-js": "^0.5.1",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
@@ -74,7 +74,7 @@
     "cypress:run": "cypress run --e2e",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
-    "chromatic": "chromatic"
+    "chromatic": "chromatic --exit-zero-on-changes"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": "yarn lint:fix"

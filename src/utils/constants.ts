@@ -577,6 +577,8 @@ export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
 export const generalMaintenanceMessage =
   process.env.REACT_APP_GENERAL_MAINTENANCE_MESSAGE;
 
+export const bridgeDisabled = process.env.REACT_APP_BRIDGE_DISABLED === "true";
+
 // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
 // gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
 // a USDC approval for the _current_ spoke pools on Optimism (0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9) and Arbitrum
@@ -721,3 +723,6 @@ export const maxRelayFee = 0.25; // 25%
 export const minRelayFee = 0.0003; // 0.03%
 // Chains where Blocknative Notify can be used. See https://docs.blocknative.com/notify#initialization
 export const supportedNotifyChainIds = [1, 3, 4, 5, 42, 56, 100, 137, 250];
+
+export const mockServerlessAPI =
+  process.env.REACT_APP_MOCK_SERVERLESS === "true";
