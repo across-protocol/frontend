@@ -14,6 +14,7 @@ export function useSpeedUp(transfer: Transfer, token: Token) {
   const { chainId, signer, setChain } = useConnection();
   const { fees, isLoading } = useBridgeFees(
     transfer.amount,
+    transfer.sourceChainId,
     transfer.destinationChainId,
     token.symbol
   );
