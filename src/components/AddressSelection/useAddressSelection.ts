@@ -1,6 +1,6 @@
 import { useSelect } from "downshift";
 import { useState, useEffect } from "react";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import { useSendForm } from "hooks";
 import {
   isValidAddress,

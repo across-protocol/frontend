@@ -52,7 +52,7 @@ const notify = Notify({
   desktopPosition: "topRight",
 });
 
-function useOnboardManager() {
+export function useOnboardManager() {
   const [onboard, setOnboard] = useState<OnboardAPI | null>(null);
   const [provider, setProvider] =
     useState<ethers.providers.Web3Provider | null>(null);
@@ -121,7 +121,7 @@ function useOnboardManager() {
   };
 }
 
-const OnboardContext = createContext<OnboardContextValue | undefined>(
+export const OnboardContext = createContext<OnboardContextValue | undefined>(
   undefined
 );
 OnboardContext.displayName = "OnboardContext";
@@ -131,6 +131,8 @@ export const OnboardProvider: React.FC = ({ children }) => {
     <OnboardContext.Provider value={value}>{children}</OnboardContext.Provider>
   );
 };
+
+OnboardProvider.displayName = "OnboardProvider";
 
 export function useOnboard() {
   const context = useContext(OnboardContext);

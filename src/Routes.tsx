@@ -11,7 +11,7 @@ import {
   NotFound,
 } from "views";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import { useError } from "hooks";
 import styled from "@emotion/styled";
 import {

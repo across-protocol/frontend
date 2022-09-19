@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { transfersHistory } from "@across-protocol/sdk-v2";
 
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import getTxClient from "state/transferHistory";
 import { getSupportedTxTuples } from "../utils";
 

@@ -26,7 +26,7 @@ import {
   formatNumberMaxFracDigits,
   toWeiSafe,
 } from "utils";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import type { ShowSuccess } from "views/Pool";
 import useSetLiquidityFormErrors from "./useSetLiquidityFormErrors";
 import maxClickHandler from "./maxClickHandler";
