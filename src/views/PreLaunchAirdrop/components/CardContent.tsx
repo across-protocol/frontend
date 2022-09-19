@@ -5,7 +5,7 @@ import { CheckIconState } from "./CardIcon";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-external-link-16.svg";
 import { ReactComponent as AcrossLogo } from "assets/across.svg";
 import { Link } from "react-router-dom";
-import { QUERIES } from "utils";
+import { QUERIESV2 } from "utils";
 
 type CardContentProps = {
   check?: CheckIconState;
@@ -72,7 +72,7 @@ const TextStack = styled.div`
   width: 100%;
 
   gap: 12px;
-  @media ${QUERIES.tabletAndDown} {
+  @media ${QUERIESV2.tb.andDown} {
     gap: 8px;
   }
 `;
@@ -81,7 +81,7 @@ const Title = styled.p`
   font-size: 22px;
   line-height: 26px;
 
-  @media ${QUERIES.tabletAndDown} {
+  @media ${QUERIESV2.tb.andDown} {
     font-size: 18px;
   }
 `;
@@ -91,7 +91,7 @@ const Description = styled.p`
   font-size: 16px;
   line-height: 20px;
 
-  @media ${QUERIES.tabletAndDown} {
+  @media ${QUERIESV2.tb.andDown} {
     font-size: 14px;
   }
 `;

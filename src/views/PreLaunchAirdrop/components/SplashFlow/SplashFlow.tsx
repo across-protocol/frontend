@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { QUERIES } from "utils";
+import { QUERIESV2 } from "utils";
 import AirdropCard from "../AirdropCard";
 import TitleSection from "./TitleSection";
 import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
@@ -55,12 +55,12 @@ const CardTableWrapper = styled.div`
   flex-direction: row;
   gap: 20px;
 
-  @media ${QUERIES.tabletAndDown} {
+  @media ${QUERIESV2.tb.andDown} {
     flex-direction: column;
     margin-top: 64px;
   }
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm.andUp} {
     margin-top: 84px;
   }
 `;
@@ -72,7 +72,7 @@ const CardWrapper = styled.div`
 
   &:last-of-type {
     margin-top: 44px;
-    @media ${QUERIES.tabletAndDown} {
+    @media ${QUERIESV2.tb.andDown} {
       margin-top: 0;
     }
   }

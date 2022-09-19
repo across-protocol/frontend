@@ -2,7 +2,7 @@ import React from "react";
 import styled from "@emotion/styled";
 import { ReactComponent as CheckMark } from "assets/icons/filled-checkmark-16.svg";
 import { ReactComponent as InvalidMark } from "assets/icons/solid-times-16.svg";
-import { QUERIES } from "utils";
+import { QUERIESV2 } from "utils";
 
 export type CheckIconState = "eligible" | "ineligible" | "undetermined";
 
@@ -45,7 +45,7 @@ const Wrapper = styled.div`
   height: 64px;
   width: 64px;
 
-  @media ${QUERIES.tabletAndDown} {
+  @media ${QUERIESV2.tb.andDown} {
     height: 54px;
     width: 54px;
   }
