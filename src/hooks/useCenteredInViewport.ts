@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 
-export function useIsInCenterOfViewport(ref: any) {
+export function useCenteredInViewport(
+  ref: React.MutableRefObject<Element | null>
+) {
   const [isIntersecting, setIsIntersecting] = useState(false);
 
   const observer = useMemo(
@@ -19,7 +21,9 @@ export function useIsInCenterOfViewport(ref: any) {
   );
 
   useEffect(() => {
-    observer.observe(ref.current);
+    if (ref.current !== null) {
+      observer.observe(ref.current);
+    }
 
     return () => {
       observer.disconnect();

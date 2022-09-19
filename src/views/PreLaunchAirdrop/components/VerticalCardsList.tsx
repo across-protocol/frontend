@@ -2,7 +2,7 @@ import { useRef } from "react";
 import styled from "@emotion/styled";
 import { motion } from "framer-motion";
 
-import { useIsInCenterOfViewport } from "hooks";
+import { useCenteredInViewport } from "hooks";
 
 type Props = {
   cards: React.ReactElement[];
@@ -21,7 +21,7 @@ export function VerticalCardsList({ cards }: Props) {
 function CardListItem({ Card }: { Card: React.ReactElement }) {
   const slideRef = useRef<HTMLDivElement>(null);
 
-  const isInCenterOfViewport = useIsInCenterOfViewport(slideRef);
+  const centeredInViewport = useCenteredInViewport(slideRef);
 
   return (
     <motion.div
@@ -30,10 +30,10 @@ function CardListItem({ Card }: { Card: React.ReactElement }) {
         opacity: 0.5,
       }}
       animate={{
-        opacity: isInCenterOfViewport ? 1 : 0.5,
+        opacity: centeredInViewport ? 1 : 0.5,
       }}
       style={{
-        boxShadow: isInCenterOfViewport
+        boxShadow: centeredInViewport
           ? "0px 40px 96px rgba(0, 0, 0, 0.45)"
           : "",
         borderRadius: 16,
