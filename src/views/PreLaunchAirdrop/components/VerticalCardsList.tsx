@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import { motion } from "framer-motion";
 
 import { useCenteredInViewport } from "hooks";
+import { QUERIESV2 } from "utils/constants";
 
 type Props = {
   cards: React.ReactElement[];
@@ -61,16 +62,26 @@ const Wrapper = styled.div`
   align-items: center;
   width: 100%;
   height: 100%;
-  padding-top: 20%;
-  padding-bottom: 20%;
+  padding: 40vh 100px;
   overflow-y: scroll;
   gap: 16px;
   scroll-snap-type: y mandatory;
+  background-color: transparent;
 
   // hide scrollbar
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
   ::-webkit-scrollbar {
     display: none; /* Chrome, Safari and Opera */
+  }
+
+  @media ${QUERIESV2.tb.andDown} {
+    padding-top: 64px;
+    padding-bottom: 128px;
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 16px;
+    padding-bottom: 128px;
   }
 `;
