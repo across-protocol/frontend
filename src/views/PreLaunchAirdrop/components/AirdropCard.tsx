@@ -3,6 +3,7 @@ import React from "react";
 import { CheckIconMapping, CheckIconState } from "./CardIcon";
 import { ReactComponent as BackgroundVector } from "assets/prelaunch-card-background-vector.svg";
 import { CardContent } from ".";
+import { QUERIES } from "utils";
 
 type AirdropCardContentProps = {
   check?: CheckIconState;
@@ -49,7 +50,6 @@ type WrapperType = {
   hideBoxShadow?: boolean;
 };
 const Wrapper = styled.div<WrapperType>`
-  max-width: 560px;
   width: 100%;
   position: relative;
 
@@ -59,7 +59,6 @@ const Wrapper = styled.div<WrapperType>`
       hideBoxShadow ? "transparent" : "rgba(0, 0, 0, 0.45)"};
   border-radius: 16px;
 
-  padding: 32px;
   display: flex;
   flex-direction: column;
   gap: 32px;
@@ -67,6 +66,16 @@ const Wrapper = styled.div<WrapperType>`
   overflow: clip;
 
   background-color: #2d2e33;
+
+  padding: 32px;
+  max-width: 560px;
+  @media ${QUERIES.tabletAndDown} {
+    padding: 24px;
+
+    max-width: calc(808px + 32px);
+    width: calc(100% - 32px);
+    margin: 0 auto;
+  }
 `;
 
 const ChildrenWrapper = styled.div`
