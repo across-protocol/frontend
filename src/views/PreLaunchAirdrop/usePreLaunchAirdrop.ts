@@ -8,5 +8,9 @@ export default function usePreLaunchAirdrop() {
   return {
     activePageFlow,
     setActivePageFlow,
+
+    switchToSplash: () => setActivePageFlow("splash"),
+    switchToTraveller: () => setActivePageFlow("traveller"),
+    switchToEligibility: () => setActivePageFlow("eligibility"),
   };
 }
