@@ -32,7 +32,6 @@ const warningMessage = `
 `;
 
 function useRoutes() {
-  const [transparentHeader, setTransparentHeader] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider, isContractAddress } = useConnection();
   const location = useLocation();
@@ -46,7 +45,6 @@ function useRoutes() {
     if (enableMigration && location.pathname !== "/pool") {
       history.push("/pool");
     }
-    setTransparentHeader(location.pathname === "/airdrop");
   }, [location.pathname, history]);
 
   return {
@@ -56,7 +54,6 @@ function useRoutes() {
     error,
     removeError,
     location,
-    transparentHeader,
     isContractAddress,
   };
 }
@@ -69,7 +66,6 @@ const Routes: React.FC = () => {
     removeError,
     location,
     isContractAddress,
-    transparentHeader,
   } = useRoutes();
 
   return (
@@ -101,11 +97,7 @@ const Routes: React.FC = () => {
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
-      <Header
-        openSidebar={openSidebar}
-        setOpenSidebar={setOpenSidebar}
-        transparentHeader={transparentHeader}
-      />
+      <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
         <Route exact path="/transactions" component={MyTransactions} />
