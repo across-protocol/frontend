@@ -14,12 +14,18 @@ interface Rewards {
 }
 
 export default async function prelaunchRewardsMockedCall(
-  _address: string
+  _address: string,
+  _userName?: string,
+  _password?: string
 ): Promise<Rewards> {
+  let cr: string | undefined;
+  if (_userName && _password) {
+    cr = ethers.BigNumber.from("15").toString();
+  }
   return {
     welcomeTravellerRewards: ethers.BigNumber.from("1").toString(),
     earlyUserRewards: ethers.BigNumber.from("2").toString(),
     liquidityProviderRewards: ethers.BigNumber.from("5").toString(),
-    communityRewards: undefined,
+    communityRewards: cr,
   };
 }
