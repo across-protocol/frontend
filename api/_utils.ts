@@ -45,7 +45,7 @@ export const log = (
   severity: "DEBUG" | "INFO" | "WARN" | "ERROR",
   data: LogType
 ) => {
-  if (DISABLE_DEBUG_LOGS === "true") return;
+  if (DISABLE_DEBUG_LOGS === "true" && severity === "DEBUG") return;
   let message = JSON.stringify(data, null, 4);
   // Fire and forget. we don't wait for this to finish.
   gcpLogger
