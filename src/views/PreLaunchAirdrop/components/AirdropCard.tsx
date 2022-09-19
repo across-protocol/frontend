@@ -12,6 +12,7 @@ type AirdropCardContentProps = {
   description?: string;
   externalLink?: string;
   contentStackChildren?: React.ReactElement;
+  hideBoxShadow?: boolean;
 };
 
 const AirdropCard: React.FC<AirdropCardContentProps> = ({
@@ -23,8 +24,9 @@ const AirdropCard: React.FC<AirdropCardContentProps> = ({
   acxTokenAmount,
   children,
   contentStackChildren,
+  hideBoxShadow,
 }) => (
-  <Wrapper eligible={check ?? "undetermined"}>
+  <Wrapper eligible={check ?? "undetermined"} hideBoxShadow={hideBoxShadow}>
     <WrapperBackground />
     <CardContent
       Icon={Icon}
@@ -44,6 +46,7 @@ export default AirdropCard;
 
 type WrapperType = {
   eligible: CheckIconState;
+  hideBoxShadow?: boolean;
 };
 const Wrapper = styled.div<WrapperType>`
   max-width: 560px;
@@ -51,7 +54,9 @@ const Wrapper = styled.div<WrapperType>`
   position: relative;
 
   border: 1px solid ${({ eligible }) => CheckIconMapping[eligible].color};
-  box-shadow: 0px 24px 160px rgba(0, 0, 0, 0.45);
+  box-shadow: 0px 24px 160px
+    ${({ hideBoxShadow }) =>
+      hideBoxShadow ? "transparent" : "rgba(0, 0, 0, 0.45)"};
   border-radius: 16px;
 
   padding: 32px;
