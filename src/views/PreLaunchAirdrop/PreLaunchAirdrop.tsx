@@ -1,16 +1,18 @@
 import Footer from "components/Footer";
-
 import {
   BackgroundLayer,
   ContentWrapper,
+  OpacityLayer,
   Wrapper,
 } from "./PreLaunchAirdrop.styles";
+import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
 import usePreLaunchAirdrop from "./usePreLaunchAirdrop";
 import TravellerFlow from "./components/TravellerFlow";
 import { SplashFlow } from "./components/SplashFlow";
 import { EligibilityFlow } from "./components/EligibilityFlow";
+
 const PreLaunchAirdrop = () => {
-  const { activePageFlow } = usePreLaunchAirdrop();
+  const { activePageFlow, switchToEligibility } = usePreLaunchAirdrop();
 
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
@@ -21,7 +23,9 @@ const PreLaunchAirdrop = () => {
       activePageComponent = <TravellerFlow />;
       break;
     case "splash":
-      activePageComponent = <SplashFlow />;
+      activePageComponent = (
+        <SplashFlow eligibilityLinkHandler={switchToEligibility} />
+      );
       break;
     default:
       activePageComponent = <></>;
@@ -29,7 +33,10 @@ const PreLaunchAirdrop = () => {
 
   return (
     <Wrapper>
-      <BackgroundLayer />
+      <BackgroundLayer autoPlay loop muted>
+        <source src={VideoBackground} type="video/mp4" />
+      </BackgroundLayer>
+      <OpacityLayer />
       <ContentWrapper>{activePageComponent}</ContentWrapper>
       <Footer />
     </Wrapper>
