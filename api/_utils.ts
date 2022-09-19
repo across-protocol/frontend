@@ -23,6 +23,7 @@ const {
   REACT_APP_GOOGLE_SERVICE_ACCOUNT,
   VERCEL_ENV,
   GAS_MARKUP,
+  DISABLE_DEBUG_LOGS,
 } = process.env;
 
 const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
@@ -44,6 +45,7 @@ export const log = (
   severity: "DEBUG" | "INFO" | "WARN" | "ERROR",
   data: LogType
 ) => {
+  if (DISABLE_DEBUG_LOGS === "true") return;
   let message = JSON.stringify(data, null, 4);
   // Fire and forget. we don't wait for this to finish.
   gcpLogger
