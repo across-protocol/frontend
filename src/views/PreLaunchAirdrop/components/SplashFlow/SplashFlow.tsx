@@ -7,9 +7,13 @@ import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
 import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
 
-const SplashFlow = () => (
+type SplashFlowParams = {
+  eligibilityLinkHandler: () => void;
+};
+
+const SplashFlow = ({ eligibilityLinkHandler }: SplashFlowParams) => (
   <>
-    <TitleSection />
+    <TitleSection eligibilityLinkHandler={eligibilityLinkHandler} />
     <CardTableWrapper>
       <CardWrapper>
         <AirdropCard

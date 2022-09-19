@@ -1,15 +1,18 @@
 import styled from "@emotion/styled";
-import { Link } from "react-router-dom";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-right-16.svg";
 import { ButtonV2 } from "components";
 import React from "react";
 import { QUERIESV2 } from "utils";
 import { ReactComponent as AcrossRingLogo } from "assets/across-logo-with-rings.svg";
 
-type TitleSectionProps = {
+type TitleSectionParams = {
+  eligibilityLinkHandler: () => void;
   isConnected?: boolean;
 };
-const TitleSection = ({ isConnected }: TitleSectionProps) => {
+const TitleSection = ({
+  eligibilityLinkHandler,
+  isConnected,
+}: TitleSectionParams) => {
   return (
     <Wrapper>
       <StyledAcrossLogo />
@@ -25,7 +28,7 @@ const TitleSection = ({ isConnected }: TitleSectionProps) => {
         {!isConnected && (
           <StyledButton size="lg">Connect to check eligibility</StyledButton>
         )}
-        <EligibilityLink to={"/"}>
+        <EligibilityLink onClick={eligibilityLinkHandler}>
           <InnerLinkText>Airdrop details</InnerLinkText>
           <StyledArrowIcon />
         </EligibilityLink>
@@ -103,12 +106,14 @@ const PageSubHeader = styled.h2`
   }
 `;
 
-const EligibilityLink = styled(Link)`
+const EligibilityLink = styled.a`
   font-weight: 500;
   font-size: 18px;
   line-height: 26px;
   color: #e0f3ff;
   text-decoration: none;
+
+  cursor: pointer;
 
   display: flex;
   flex-direction: row;
