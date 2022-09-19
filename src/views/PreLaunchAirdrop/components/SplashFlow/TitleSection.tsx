@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-right-16.svg";
 import { ButtonV2 } from "components";
 import React from "react";
-import { QUERIES } from "utils";
+import { QUERIESV2 } from "utils";
 import { ReactComponent as AcrossRingLogo } from "assets/across-logo-with-rings.svg";
 
 type TitleSectionProps = {
@@ -45,7 +45,7 @@ const Wrapper = styled.div`
 
   width: calc(100% - 24px);
 
-  @media ${QUERIES.tabletAndUp} {
+  @media ${QUERIESV2.tb.andUp} {
     max-width: calc(560px + 24px);
   }
 `;
@@ -62,7 +62,7 @@ const PageHeader = styled.h1`
   background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm.andDown} {
     font-size: 32px;
     line-height: 38px;
   }
@@ -74,7 +74,7 @@ const ButtonStack = styled.div`
   gap: 32px;
 
   flex-direction: row;
-  @media ${QUERIES.tabletAndDown} {
+  @media ${QUERIESV2.tb.andDown} {
     flex-direction: column;
     gap: 24px;
     align-items: center;
@@ -96,7 +96,7 @@ const PageSubHeader = styled.h2`
   font-size: 18px;
   line-height: 26px;
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm.andDown} {
     font-size: 16px;
     font-weight: 500;
     line-height: 20px;
@@ -115,7 +115,7 @@ const EligibilityLink = styled(Link)`
   gap: 4px;
   align-items: center;
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm.andDown} {
     font-size: 14px;
     line-height: 18px;
   }
@@ -129,7 +129,7 @@ const StyledArrowIcon = styled(ArrowIcon)`
     stroke: #e0f3ff;
   }
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm.andDown} {
     height: 16px;
     width: 16px;
   }
@@ -144,7 +144,7 @@ const StyledButton = styled(ButtonV2)`
   border-radius: 32px;
   padding: 0px 40px;
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm.andDown} {
     height: 40px;
     width: 198px;
     padding: 0px 16px 1px;
@@ -159,7 +159,7 @@ const StyledAcrossLogo = styled(AcrossRingLogo)`
   height: 186px;
   width: 280px;
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm.andDown} {
     width: 168px;
     height: 112px;
   }
