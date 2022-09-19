@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import Background from "assets/prelaunch-background.png";
-import { QUERIES } from "utils";
+import { QUERIESV2 } from "utils";
 
 export const BackgroundLayer = styled.div`
   position: fixed;
@@ -24,8 +24,12 @@ export const Wrapper = styled.div`
   padding: 96px 0px 0px;
   gap: 64px;
 
+  @media ${QUERIESV2.tb.andDown} {
+    padding-top: 48px;
+  }
+
   min-height: calc(100vh - 72px);
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm.andDown} {
     min-height: calc(100vh - 64px);
   }
 
