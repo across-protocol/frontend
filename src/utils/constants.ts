@@ -726,3 +726,14 @@ export const supportedNotifyChainIds = [1, 3, 4, 5, 42, 56, 100, 137, 250];
 
 export const mockServerlessAPI =
   process.env.REACT_APP_MOCK_SERVERLESS === "true";
+
+// Configures the V2 endpoints
+const breakpoint = (width: number) => ({
+  andDown: `(min-width: ${width + 1}px)`,
+  andUp: `(max-width: ${width}px)`,
+});
+export const QUERIESV2 = {
+  xs: breakpoint(400),
+  sm: breakpoint(576),
+  tb: breakpoint(1024),
+};
