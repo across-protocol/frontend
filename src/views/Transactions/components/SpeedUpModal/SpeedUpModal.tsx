@@ -111,17 +111,6 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
             />
             <InputWithButton
               label="Relay fee"
-              Button={
-                <button
-                  onClick={() =>
-                    setRelayFeeInput(
-                      appendPercentageSign(String(maxRelayFee * 100))
-                    )
-                  }
-                >
-                  MAX
-                </button>
-              }
               value={relayFeeInput}
               onChange={handleInputChange}
               onFocus={() =>

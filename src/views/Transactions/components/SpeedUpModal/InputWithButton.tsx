@@ -4,7 +4,7 @@ import styled from "@emotion/styled";
 type Props = React.HTMLProps<HTMLInputElement> & {
   label?: string;
   error?: string;
-  Button: React.ReactElement;
+  Button?: React.ReactElement;
 };
 
 export function InputWithButton({
@@ -36,7 +36,7 @@ export function InputWithButton({
             }}
             {...inputProps}
           />
-          {Button}
+          {Button && Button}
         </InputWithButtonContainer>
       </InputContainer>
       {error && <ErrorContainer>{error}</ErrorContainer>}
