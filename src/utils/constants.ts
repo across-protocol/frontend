@@ -698,8 +698,8 @@ export const mockServerlessAPI =
 
 // Configures the V2 endpoints
 const breakpoint = (width: number) => ({
-  andDown: `(min-width: ${width + 1}px)`,
-  andUp: `(max-width: ${width}px)`,
+  andDown: `(max-width: ${width}px)`,
+  andUp: `(min-width: ${width}px)`,
 });
 export const QUERIESV2 = {
   xs: breakpoint(400),
