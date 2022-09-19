@@ -75,6 +75,7 @@ const MyTransactions = () => {
           transferTuples={pendingTransferTuples}
           enablePartialFillInfoIcon
           isMobile={isMobile}
+          enableSpeedUps
         />
       }
       FilledTransactionsTable={

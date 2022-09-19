@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import { useError } from "hooks";
 import styled from "@emotion/styled";
 import {

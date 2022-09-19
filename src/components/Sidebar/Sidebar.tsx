@@ -16,7 +16,7 @@ import {
 import { getChainInfo, isSupportedChainId } from "utils";
 import useSidebar from "./useSidebar";
 import closeIcon from "assets/across-close-button.svg";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 
 interface Props {
   openSidebar: boolean;

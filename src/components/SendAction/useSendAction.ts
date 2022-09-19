@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSendForm, useBridgeFees, useBridge, useBridgeLimits } from "hooks";
 import { confirmations, bridgeDisabled } from "utils";
 import { Deposit } from "views/Confirmation";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 
 export default function useSendAction(
   onDepositConfirmed: (deposit: Deposit) => void
@@ -12,7 +12,7 @@ export default function useSendAction(
   const toggleInfoModal = () => setOpenInfoModal((oldOpen) => !oldOpen);
   const { fromChain, toChain, amount, tokenSymbol, toAddress, selectedRoute } =
     useSendForm();
-  const { fees } = useBridgeFees(amount, toChain, tokenSymbol);
+  const { fees } = useBridgeFees(amount, fromChain, toChain, tokenSymbol);
   const { limits, isError } = useBridgeLimits(
     selectedRoute?.fromTokenAddress,
     fromChain,

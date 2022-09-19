@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from "react";
 import { useSelect } from "downshift";
 import { ethers, BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import { useBalancesBySymbols, useBridgeFees, useSendForm } from "hooks";
 import {
   ParsingError,
@@ -58,7 +58,12 @@ export default function useCoinSelection() {
     (token) => token.symbol === selectedItem?.symbol
   );
   const balance = balances[selectedIndex];
-  const { fees } = useBridgeFees(amount, toChain, selectedItem?.symbol);
+  const { fees } = useBridgeFees(
+    amount,
+    fromChain,
+    toChain,
+    selectedItem?.symbol
+  );
 
   const [inputAmount, setInputAmount] = React.useState<string>(
     selectedItem && amount.gt("0")

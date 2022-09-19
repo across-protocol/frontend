@@ -94,6 +94,8 @@ const handler = async (
       provider
     );
 
+    const baseCurrency = destinationChainId === "137" ? "matic" : "eth";
+
     const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
       hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
         blockTag,
@@ -104,7 +106,7 @@ const handler = async (
       configStoreClient.getRateModel(l1Token, {
         blockTag,
       }),
-      getCachedTokenPrice(l1Token),
+      getCachedTokenPrice(l1Token, baseCurrency),
     ]);
     const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
@@ -125,8 +127,11 @@ const handler = async (
 
     const responseJson = {
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
+      capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
+      relayGasFeeTotal: relayerFeeDetails.gasFeeTotal,
       relayFeePct: relayerFeeDetails.relayFeePercent,
+      relayFeeTotal: relayerFeeDetails.relayFeeTotal,
       lpFeePct: realizedLPFeePct.toString(),
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
