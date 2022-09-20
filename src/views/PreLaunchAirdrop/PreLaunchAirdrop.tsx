@@ -12,7 +12,8 @@ import { SplashFlow } from "./components/SplashFlow";
 import { EligibilityFlow } from "./components/EligibilityFlow";
 
 const PreLaunchAirdrop = () => {
-  const { activePageFlow, switchToEligibility } = usePreLaunchAirdrop();
+  const { activePageFlow, switchToEligibility, redirectToAuth } =
+    usePreLaunchAirdrop();
 
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
@@ -30,6 +31,8 @@ const PreLaunchAirdrop = () => {
     default:
       activePageComponent = <></>;
   }
+
+  redirectToAuth();
 
   return (
     <Wrapper>
