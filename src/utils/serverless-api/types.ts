@@ -4,7 +4,20 @@ import { ChainId } from "utils/constants";
 
 export type ServerlessAPIEndpoints = {
   suggestedFees: SuggestedApiFeeType;
+  prelaunchRewards: RewardsApiFunction;
 };
+
+export type RewardsApiFunction =
+  | ((address: string, jwt: string) => Promise<RewardsApiInterface>)
+  // temp fix for the prod
+  | (() => null);
+
+export interface RewardsApiInterface {
+  welcomeTravellerRewards: string;
+  earlyUserRewards: string;
+  liquidityProviderRewards: string;
+  communityRewards?: string;
+}
 
 export type SuggestedApiFeeType = (
   amount: ethers.BigNumber,

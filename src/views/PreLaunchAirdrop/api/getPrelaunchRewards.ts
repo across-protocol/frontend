@@ -1,5 +1,5 @@
 import * as jose from "jose";
-
+import getApiEndpoint from "utils/serverless-api";
 export default async function getPrelaunchRewards(address: string) {
   // garbage JWT
   const jwt = await new jose.EncryptJWT({
@@ -11,7 +11,7 @@ export default async function getPrelaunchRewards(address: string) {
     .setIssuer("urn:example:issuer")
     .setAudience("urn:example:audience")
     .setExpirationTime("2h")
-    .encrypt(new Uint8Array(2));
+    .encrypt(new Uint8Array(32));
 
-  console.log(jwt);
+  return getApiEndpoint().prelaunchRewards(address, jwt);
 }
