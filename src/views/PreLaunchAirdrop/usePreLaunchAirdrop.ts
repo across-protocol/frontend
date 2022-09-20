@@ -12,11 +12,15 @@ export default function usePreLaunchAirdrop() {
   );
   useEffect(() => {
     if (isConnected && account) {
-      getPrelaunchRewards(account).then((res) => {
-        if (res) {
-          setRewardsData(res);
-        }
-      });
+      getPrelaunchRewards(account)
+        .then((res) => {
+          if (res) {
+            setRewardsData(res);
+          }
+        })
+        .finally(() => {
+          setActivePageFlow("eligibility");
+        });
     }
   }, [isConnected, account]);
 

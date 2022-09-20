@@ -17,7 +17,9 @@ const PreLaunchAirdrop = () => {
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
     case "eligibility":
-      activePageComponent = <EligibilityFlow />;
+      activePageComponent = (
+        <EligibilityFlow eligibilityLinkHandler={switchToEligibility} />
+      );
       break;
     case "traveller":
       activePageComponent = <TravellerFlow />;
