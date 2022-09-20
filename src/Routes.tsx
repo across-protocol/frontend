@@ -24,6 +24,7 @@ import {
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
+import { DiscordAuth } from "views/DiscordAuth";
 
 const warningMessage = `
   We noticed that you have connected from a contract address.
@@ -115,6 +116,7 @@ const Routes: React.FC = () => {
         <Route exact path="/rewards" component={Rewards} />
         <Route exact path="/rewards/claim" component={Claim} />
         <Route exact path="/airdrop" component={PreLaunchAirdrop} />
+        <Route exact path="/auth/discord" component={DiscordAuth} />
         <Route exact path="/" component={Send} />
         <Route path="*" component={NotFound} />
       </Switch>
