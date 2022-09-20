@@ -28,14 +28,14 @@ function CardListItem({ Card }: { Card: React.ReactElement }) {
     <motion.div
       ref={slideRef}
       initial={{
-        opacity: 0.5,
+        opacity: 0.2,
       }}
       animate={{
-        opacity: centeredInViewport ? 1 : 0.5,
+        opacity: centeredInViewport ? 1 : 0.2,
       }}
       style={{
         boxShadow: centeredInViewport
-          ? "0px 40px 96px rgba(0, 0, 0, 0.45)"
+          ? "0px 40px 96px 0px rgba(0, 0, 0, 0.45)"
           : "",
         borderRadius: 16,
         scrollSnapAlign: "center",
@@ -83,5 +83,16 @@ const Wrapper = styled.div`
   @media ${QUERIESV2.sm.andDown} {
     padding: 16px;
     padding-bottom: 128px;
+  }
+
+  > div {
+    :hover {
+      box-shadow: 0px 16px 32px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    @media ${QUERIESV2.tb.andDown} {
+      opacity: 1 !important;
+      box-shadow: 0px 16px 32px 0px rgba(0, 0, 0, 0.2);
+    }
   }
 `;

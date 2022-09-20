@@ -136,6 +136,7 @@ const TitleContainer = styled.div`
   @media ${QUERIESV2.sm.andDown} {
     margin-left: 16px;
     margin-right: 16px;
+    margin-bottom: 8px;
   }
 `;
 
