@@ -12,13 +12,18 @@ export type RewardsApiFunction =
   // temp fix for the prod
   | (() => null);
 
-export interface RewardsApiInterface {
-  welcomeTravellerRewards: string;
-  earlyUserRewards: string;
-  liquidityProviderRewards: string;
-  communityRewards?: string;
+export interface RewardInterface {
+  walletEligible: boolean;
+  completed: boolean;
+  payout: string;
 }
 
+export interface RewardsApiInterface {
+  welcomeTravellerRewards: RewardInterface;
+  earlyUserRewards: RewardInterface;
+  liquidityProviderRewards: RewardInterface;
+  communityRewards?: RewardInterface;
+}
 export type SuggestedApiFeeType = (
   amount: ethers.BigNumber,
   originToken: string,
