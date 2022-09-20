@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2, shortenAddress } from "utils";
 import AirdropCard from "../AirdropCard";
 import CardStepper from "../content/CardStepper";
 import TitleSection from "../SplashFlow/TitleSection";
@@ -8,16 +8,19 @@ import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
 import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
+import { ReactComponent as DefaultUserIcon } from "assets/icons/plaap/default-user-icon.svg";
 
 import { RewardsApiInterface } from "utils/serverless-api/types";
 interface Props {
   eligibilityLinkHandler: () => void;
   rewardsData: RewardsApiInterface;
+  account: string | undefined;
 }
 
 const EligibilityFlow: React.FC<Props> = ({
   eligibilityLinkHandler,
   rewardsData,
+  account,
 }) => {
   return (
     <>
@@ -39,15 +42,17 @@ const EligibilityFlow: React.FC<Props> = ({
                   {
                     buttonContent: <>Learn about Across</>,
                     buttonHandler: () => {},
-                    stepProgress: "awaiting",
+                    stepProgress: "completed",
                     stepTitle: "Connect Discord",
                     stepIcon: <WalletIcon />,
+                    completedText: "Eligible wallet",
                   },
                   {
-                    buttonContent: <>Link +</>,
+                    buttonContent: <>Go to Bridge</>,
                     buttonHandler: () => {},
-                    stepProgress: "awaiting",
-                    stepTitle: "Link to Ethereum wallet",
+                    stepProgress: "completed",
+                    stepTitle: "Bridge on Across",
+                    completedText: "Completed",
                   },
                 ]}
               />
@@ -80,15 +85,18 @@ const EligibilityFlow: React.FC<Props> = ({
                   {
                     buttonContent: <>Disconnect Discord</>,
                     buttonHandler: () => {},
-                    stepProgress: "awaiting",
+                    stepProgress: "completed",
                     stepTitle: "Connect Discord",
-                    stepIcon: <WalletIcon />,
+                    stepIcon: <DefaultUserIcon />,
+                    completedText: "Eligible account",
                   },
                   {
-                    buttonContent: <>Link +</>,
+                    buttonContent: <>Unlink wallet</>,
                     buttonHandler: () => {},
-                    stepProgress: "awaiting",
-                    stepTitle: "Link to Ethereum wallet",
+                    stepProgress: "completed",
+                    stepTitle: shortenAddress(account || "", "...", 4),
+                    stepIcon: <WalletIcon />,
+                    completedText: "Linked wallet",
                   },
                 ]}
               />

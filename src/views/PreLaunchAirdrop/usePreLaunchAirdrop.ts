@@ -32,5 +32,6 @@ export default function usePreLaunchAirdrop() {
     switchToTraveller: () => setActivePageFlow("traveller"),
     switchToEligibility: () => setActivePageFlow("eligibility"),
     rewardsData,
+    account,
   };
 }
