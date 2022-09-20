@@ -1,11 +1,14 @@
 import styled from "@emotion/styled";
 import { QUERIESV2 } from "utils";
 import AirdropCard from "../AirdropCard";
+import CardStepper from "../content/CardStepper";
 import TitleSection from "../SplashFlow/TitleSection";
 import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
 import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
 import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
+import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
+
 import { RewardsApiInterface } from "utils/serverless-api/types";
 interface Props {
   eligibilityLinkHandler: () => void;
@@ -30,6 +33,25 @@ const EligibilityFlow: React.FC<Props> = ({
                 ? "eligible"
                 : "ineligible"
             }
+            children={
+              <CardStepper
+                steps={[
+                  {
+                    buttonContent: <>Learn about Across</>,
+                    buttonHandler: () => {},
+                    stepProgress: "awaiting",
+                    stepTitle: "Connect Discord",
+                    stepIcon: <WalletIcon />,
+                  },
+                  {
+                    buttonContent: <>Link +</>,
+                    buttonHandler: () => {},
+                    stepProgress: "awaiting",
+                    stepTitle: "Link to Ethereum wallet",
+                  },
+                ]}
+              />
+            }
           />
           <AirdropCard
             title="Early Bridge User"
@@ -51,6 +73,25 @@ const EligibilityFlow: React.FC<Props> = ({
               rewardsData?.communityRewards?.walletEligible
                 ? "eligible"
                 : "ineligible"
+            }
+            children={
+              <CardStepper
+                steps={[
+                  {
+                    buttonContent: <>Disconnect Discord</>,
+                    buttonHandler: () => {},
+                    stepProgress: "awaiting",
+                    stepTitle: "Connect Discord",
+                    stepIcon: <WalletIcon />,
+                  },
+                  {
+                    buttonContent: <>Link +</>,
+                    buttonHandler: () => {},
+                    stepProgress: "awaiting",
+                    stepTitle: "Link to Ethereum wallet",
+                  },
+                ]}
+              />
             }
           />
           <AirdropCard

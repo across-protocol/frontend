@@ -8,7 +8,11 @@ export type ServerlessAPIEndpoints = {
 };
 
 export type RewardsApiFunction =
-  | ((address: string, jwt: string) => Promise<RewardsApiInterface>)
+  | ((
+      address: string,
+      jwt?: string,
+      returnValue?: RewardsApiInterface
+    ) => Promise<RewardsApiInterface>)
   // temp fix for the prod
   | (() => null);
 

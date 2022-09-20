@@ -13,5 +13,26 @@ export default async function getPrelaunchRewards(address: string) {
     .setExpirationTime("2h")
     .encrypt(new Uint8Array(32));
 
-  return getApiEndpoint().prelaunchRewards(address, jwt);
+  return getApiEndpoint().prelaunchRewards(address, jwt, {
+    welcomeTravellerRewards: {
+      walletEligible: true,
+      completed: false,
+      payout: "1",
+    },
+    earlyUserRewards: {
+      walletEligible: true,
+      completed: false,
+      payout: "2",
+    },
+    liquidityProviderRewards: {
+      walletEligible: true,
+      completed: false,
+      payout: "5",
+    },
+    communityRewards: {
+      walletEligible: true,
+      completed: false,
+      payout: "10",
+    },
+  });
 }
