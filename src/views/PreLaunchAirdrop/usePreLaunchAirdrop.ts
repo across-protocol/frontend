@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export type FlowSelector = "splash" | "traveller" | "eligibility" | "info";
+export type FlowSelector = "splash" | "traveller" | "info";
 
 export default function usePreLaunchAirdrop() {
   const [activePageFlow, setActivePageFlow] = useState<FlowSelector>("splash");
@@ -11,7 +11,6 @@ export default function usePreLaunchAirdrop() {
 
     switchToSplash: () => setActivePageFlow("splash"),
     switchToTraveller: () => setActivePageFlow("traveller"),
-    switchToEligibility: () => setActivePageFlow("eligibility"),
     switchToInfo: () => setActivePageFlow("info"),
   };
 }

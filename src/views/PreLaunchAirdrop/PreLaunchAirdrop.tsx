@@ -9,7 +9,6 @@ import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
 import usePreLaunchAirdrop from "./usePreLaunchAirdrop";
 import TravellerFlow from "./components/TravellerFlow";
 import { SplashFlow } from "./components/SplashFlow";
-import { EligibilityFlow } from "./components/EligibilityFlow";
 import { MoreInfoFlow } from "./components/MoreInfoFlow";
 const PreLaunchAirdrop = () => {
   const { activePageFlow, switchToSplash, switchToInfo } =
@@ -17,9 +16,6 @@ const PreLaunchAirdrop = () => {
 
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
-    case "eligibility":
-      activePageComponent = <EligibilityFlow />;
-      break;
     case "traveller":
       activePageComponent = <TravellerFlow />;
       break;
