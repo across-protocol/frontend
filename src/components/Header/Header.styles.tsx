@@ -7,8 +7,18 @@ interface IWrapper {
   transparentHeader?: boolean;
 }
 export const Wrapper = styled.header<IWrapper>`
-  background-color: ${({ transparentHeader }) =>
-    transparentHeader ? "transparent" : "#2d2e33"};
+  /* 
+    Note: This code segment utilizes the scroll position to create
+          a dynamic fade that increases to a maximum of 94% opacity
+          as the user scrolls down the page. 
+
+          The opacity function is set as O = MIN(0.94, 2*{pixels_from_top}/255)
+  */
+  background-color: ${({ transparentHeader, scrollPosition }) =>
+    transparentHeader
+      ? `#2d2e33${Math.min(240, 2.5 * scrollPosition).toString(16)}`
+      : "#2d2e33"};
+
   height: 72px;
   padding: 0 24px;
   display: flex;
