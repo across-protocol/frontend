@@ -10,7 +10,7 @@ export function useDiscord() {
       scope: "identify",
     }).toString();
     const url = `https://discord.com/api/oauth2/authorize?${queryString}`;
-    window.location.href = url;
+    window.location.replace(url);
   }, []);
 
   return {
