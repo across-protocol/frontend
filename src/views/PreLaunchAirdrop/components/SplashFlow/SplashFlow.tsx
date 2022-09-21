@@ -1,32 +1,83 @@
 import styled from "@emotion/styled";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2, shortenAddress } from "utils";
 import AirdropCard from "../AirdropCard";
 import TitleSection from "./TitleSection";
 import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
 import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
 import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
+import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
+import { ReactComponent as DefaultUserIcon } from "assets/icons/plaap/default-user-icon.svg";
+
+import { RewardsApiInterface } from "utils/serverless-api/types";
+import CardStepper from "../content/CardStepper";
+import RewardsCard from "../content/RewardsCard";
 
 type SplashFlowParams = {
-  eligibilityLinkHandler: () => void;
+  airdropDetailsLinkHandler: () => void;
+  rewardsData: RewardsApiInterface;
+  account: string | undefined;
 };
 
-const SplashFlow = ({ eligibilityLinkHandler }: SplashFlowParams) => (
+const SplashFlow = ({
+  airdropDetailsLinkHandler,
+  account,
+  rewardsData,
+}: SplashFlowParams) => (
   <>
-    <TitleSection eligibilityLinkHandler={eligibilityLinkHandler} />
+    <TitleSection airdropDetailsLinkHandler={airdropDetailsLinkHandler} />
     <CardTableWrapper>
       <CardWrapper>
         <AirdropCard
           title="Bridge Traveler Program"
           description="Have you bridged before but have yet to use Across? Connect your wallet to check if you’re eligible for an airdrop through the Bridge Traveler Program."
           Icon={TravellerIcon}
-          check="undetermined"
+          check={
+            rewardsData?.welcomeTravellerRewards?.walletEligible
+              ? "eligible"
+              : "ineligible"
+          }
+          children={
+            <CardStepper
+              steps={[
+                {
+                  buttonContent: <>Learn about Across</>,
+                  buttonHandler: () => {},
+                  stepProgress: "completed",
+                  stepTitle: "Connect Discord",
+                  stepIcon: <WalletIcon />,
+                  completedText: "Eligible wallet",
+                },
+                {
+                  buttonContent: <>Go to Bridge</>,
+                  buttonHandler: () => {},
+                  stepProgress: "completed",
+                  stepTitle: "Bridge on Across",
+                  completedText: "Completed",
+                },
+              ]}
+            />
+          }
         />
         <AirdropCard
           title="Early Bridge User"
           description="Users who bridge assets on Across before the Across Referral Program launch (July 18th, 2022) may be eligible for the $ACX airdrop."
           Icon={BridgeIcon}
-          check="undetermined"
+          check={
+            rewardsData?.earlyUserRewards?.walletEligible
+              ? "eligible"
+              : "ineligible"
+          }
+          children={
+            <RewardsCard
+              label="Eligible wallet"
+              address={shortenAddress(account || "", "...", 4)}
+              Icon={<WalletIcon />}
+              bottomText="Rewards are estimated as of September 1, 2022 and are subject to
+            change."
+              amount="182.3445"
+            />
+          }
         />
       </CardWrapper>
       <CardWrapper>
@@ -34,13 +85,52 @@ const SplashFlow = ({ eligibilityLinkHandler }: SplashFlowParams) => (
           title="Community Member"
           description="Community members can check eligibility for the ACX airdrop by connecting their Discord account. Connected members can link an Ethereum wallet to claim the airdrop."
           Icon={DiscordIcon}
-          check="undetermined"
+          check={
+            rewardsData?.communityRewards?.walletEligible
+              ? "eligible"
+              : "ineligible"
+          }
+          children={
+            <CardStepper
+              steps={[
+                {
+                  buttonContent: <>Disconnect Discord</>,
+                  buttonHandler: () => {},
+                  stepProgress: "completed",
+                  stepTitle: "Connect Discord",
+                  stepIcon: <DefaultUserIcon />,
+                  completedText: "Eligible account",
+                },
+                {
+                  buttonContent: <>Unlink wallet</>,
+                  buttonHandler: () => {},
+                  stepProgress: "completed",
+                  stepTitle: shortenAddress(account || "", "...", 4),
+                  stepIcon: <WalletIcon />,
+                  completedText: "Linked wallet",
+                },
+              ]}
+            />
+          }
         />
         <AirdropCard
           title="Liquidity Provider"
           description="Liquidity providers who pool ETH, USDC, WBTC, and DAI into Across protocol before the token launch may be eligible for the $ACX airdrop."
           Icon={MoneyIcon}
-          check="undetermined"
+          check={
+            rewardsData?.liquidityProviderRewards?.walletEligible
+              ? "eligible"
+              : "ineligible"
+          }
+          children={
+            <RewardsCard
+              label="Eligible wallet"
+              address={shortenAddress(account || "", "...", 4)}
+              Icon={<WalletIcon />}
+              bottomText="Rewards are estimated as of September 1, 2022 and are subject to change.  Liquidity providers continue to earn ACX up to token launch."
+              amount="2056.112"
+            />
+          }
         />
       </CardWrapper>
     </CardTableWrapper>
@@ -75,5 +165,10 @@ const CardWrapper = styled.div`
     @media ${QUERIESV2.tb.andDown} {
       margin-top: 0;
     }
+  }
+
+  @media ${QUERIESV2.tb.andDown} {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 `;

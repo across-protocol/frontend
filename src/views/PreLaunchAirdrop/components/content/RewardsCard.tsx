@@ -23,7 +23,7 @@ const RewardsCard: React.FC<Props> = ({
             <IconContainer>{Icon}</IconContainer>
             <TextWrapper>
               <Label>{label}</Label>
-              <Address>{address}</Address>
+              <Address>{address || "Wallet Address"}</Address>
             </TextWrapper>
           </EligibleWallet>
         </EligibleWalletWrapper>

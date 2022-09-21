@@ -3,7 +3,8 @@ import getPrelaunchRewards from "./api/getPrelaunchRewards";
 import { useConnection } from "hooks";
 import { RewardsApiInterface } from "utils/serverless-api/types";
 
-export type FlowSelector = "splash" | "traveller" | "eligibility";
+export type FlowSelector = "splash" | "traveller" | "info";
+
 export default function usePreLaunchAirdrop() {
   const [activePageFlow, setActivePageFlow] = useState<FlowSelector>("splash");
   const { isConnected, account } = useConnection();
@@ -19,7 +20,7 @@ export default function usePreLaunchAirdrop() {
           }
         })
         .finally(() => {
-          setActivePageFlow("eligibility");
+          setActivePageFlow("splash");
         });
     }
   }, [isConnected, account]);
@@ -30,7 +31,7 @@ export default function usePreLaunchAirdrop() {
 
     switchToSplash: () => setActivePageFlow("splash"),
     switchToTraveller: () => setActivePageFlow("traveller"),
-    switchToEligibility: () => setActivePageFlow("eligibility"),
+    switchToInfo: () => setActivePageFlow("info"),
     rewardsData,
     account,
   };
