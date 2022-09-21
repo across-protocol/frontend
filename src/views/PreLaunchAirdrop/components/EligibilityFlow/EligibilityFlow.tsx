@@ -3,6 +3,7 @@ import { QUERIESV2, shortenAddress } from "utils";
 import AirdropCard from "../AirdropCard";
 import CardStepper from "../content/CardStepper";
 import TitleSection from "../SplashFlow/TitleSection";
+import RewardsCard from "../content/RewardsCard";
 import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
 import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
@@ -66,6 +67,13 @@ const EligibilityFlow: React.FC<Props> = ({
               rewardsData?.earlyUserRewards.walletEligible
                 ? "eligible"
                 : "ineligible"
+            }
+            children={
+              <RewardsCard
+                subHeader="Eligible wallet"
+                title={shortenAddress(account || "", "...", 4)}
+                Icon={<WalletIcon />}
+              />
             }
           />
         </CardWrapper>
