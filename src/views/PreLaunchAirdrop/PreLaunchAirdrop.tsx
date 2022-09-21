@@ -35,7 +35,7 @@ const PreLaunchAirdrop = () => {
           discordLogoutHandler={discordLogoutHandler}
           connectWalletHandler={connectWallet}
           isConnected={isConnected}
-          eligibilityLinkHandler={switchToInfo}
+          airdropDetailsLinkHandler={switchToInfo}
         />
       );
       break;

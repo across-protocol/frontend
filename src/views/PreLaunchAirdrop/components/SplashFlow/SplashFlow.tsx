@@ -6,6 +6,7 @@ import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
 import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
 import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
+import { ReactComponent as PlusIcon } from "assets/icons/plus-icon-16.svg";
 import CardStepper, { CardStepType } from "../content/CardStepper";
 
 type SplashFlowParams = {
@@ -38,8 +39,12 @@ const SplashFlow = ({
         stepTitle: "Connect Discord",
       },
       {
-        buttonContent: "Link +",
-        buttonHandler: discordLoginHandler,
+        buttonContent: (
+          <>
+            Link <PlusIcon />
+          </>
+        ),
+        buttonHandler: () => {},
         stepProgress: "awaiting",
         stepTitle: "Link to Ethereum wallet",
       },
