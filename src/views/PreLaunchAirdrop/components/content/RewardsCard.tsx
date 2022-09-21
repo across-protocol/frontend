@@ -24,6 +24,12 @@ const RewardsCard: React.FC<Props> = ({ Icon, subHeader, title }) => {
           <AcrossLogo />
         </TokenAmountWrapper>
       </TopRow>
+      <BottomRow>
+        <BottomRowText>
+          Rewards are estimated as of September 1, 2022 and are subject to
+          change.{" "}
+        </BottomRowText>
+      </BottomRow>
     </Wrapper>
   );
 };
@@ -156,4 +162,27 @@ const TokenAmount = styled.h3`
 const TopRow = styled.div`
   display: flex;
   justify-content: space-between;
+`;
+
+const BottomRow = styled.div`
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+`;
+
+const BottomRowText = styled.h3`
+  /* Body/Body SM/Regular */
+
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18px;
+  /* identical to box height, or 129% */
+
+  text-align: center;
+
+  /* Tints & Shades/White/70 */
+
+  color: #9daab2;
 `;
