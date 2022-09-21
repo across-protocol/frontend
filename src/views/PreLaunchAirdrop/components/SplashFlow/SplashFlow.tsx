@@ -8,12 +8,12 @@ import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.sv
 import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
 
 type SplashFlowParams = {
-  eligibilityLinkHandler: () => void;
+  airdropDetailsLinkHandler: () => void;
 };
 
-const SplashFlow = ({ eligibilityLinkHandler }: SplashFlowParams) => (
+const SplashFlow = ({ airdropDetailsLinkHandler }: SplashFlowParams) => (
   <>
-    <TitleSection eligibilityLinkHandler={eligibilityLinkHandler} />
+    <TitleSection airdropDetailsLinkHandler={airdropDetailsLinkHandler} />
     <CardTableWrapper>
       <CardWrapper>
         <AirdropCard
@@ -75,5 +75,10 @@ const CardWrapper = styled.div`
     @media ${QUERIESV2.tb.andDown} {
       margin-top: 0;
     }
+  }
+
+  @media ${QUERIESV2.tb.andDown} {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 `;
