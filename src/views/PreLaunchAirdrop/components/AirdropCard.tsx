@@ -73,8 +73,6 @@ const Wrapper = styled.div<WrapperType>`
     padding: 24px;
 
     max-width: calc(808px + 32px);
-    width: calc(100% - 32px);
-    margin: 0 auto;
   }
 `;
 
