@@ -1,11 +1,11 @@
-import { TransactionsLayout } from "./components/TransactionsLayout";
-import { TransactionsTableWithPagination } from "./components/TransactionsTable";
+import { TransactionsLayout } from "../components/TransactionsLayout";
+import { TransactionsTableWithPagination } from "../components/TransactionsTable";
 
-import { useAllTransactionsView } from "./hooks/useAllTransactionsView";
+import { useAllTransactionsView } from "../hooks/useAllTransactionsView";
 
-import { getSupportedTxTuples } from "./utils";
+import { getSupportedTxTuples } from "../utils";
 
-export function AllTransactions() {
+const AllTransactions = () => {
   const {
     paginatedFillDeposits,
     paginatedPendingDeposits,
@@ -64,4 +64,6 @@ export function AllTransactions() {
       }
     />
   );
-}
+};
+
+export default AllTransactions;
