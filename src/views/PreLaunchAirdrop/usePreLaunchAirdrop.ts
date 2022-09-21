@@ -2,7 +2,7 @@ import { useDiscord } from "hooks/useDiscord";
 import { useOnboard } from "hooks/useOnboard";
 import { useState } from "react";
 
-export type FlowSelector = "splash" | "traveller" | "eligibility";
+export type FlowSelector = "splash" | "traveller" | "info";
 
 export default function usePreLaunchAirdrop() {
   const [activePageFlow, setActivePageFlow] = useState<FlowSelector>("splash");
@@ -21,7 +21,7 @@ export default function usePreLaunchAirdrop() {
     // Fns related to setting page flow
     switchToSplash: () => setActivePageFlow("splash"),
     switchToTraveller: () => setActivePageFlow("traveller"),
-    switchToEligibility: () => setActivePageFlow("eligibility"),
+    switchToInfo: () => setActivePageFlow("info"),
 
     // Vars related to Onboard connection
     isConnected,

@@ -9,7 +9,7 @@ import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
 import CardStepper, { CardStepType } from "../content/CardStepper";
 
 type SplashFlowParams = {
-  eligibilityLinkHandler: () => void;
+  airdropDetailsLinkHandler: () => void;
   connectWalletHandler: () => void;
   discordLoginHandler: () => void;
   discordLogoutHandler: () => void;
@@ -18,7 +18,7 @@ type SplashFlowParams = {
 };
 
 const SplashFlow = ({
-  eligibilityLinkHandler,
+  airdropDetailsLinkHandler,
   isConnected,
   connectWalletHandler,
   discordLoginHandler,
@@ -51,7 +51,7 @@ const SplashFlow = ({
       <TitleSection
         isConnected={isConnected}
         walletConnectionHandler={connectWalletHandler}
-        eligibilityLinkHandler={eligibilityLinkHandler}
+        airdropDetailsLinkHandler={airdropDetailsLinkHandler}
       />
       <CardTableWrapper>
         <CardWrapper>
@@ -117,5 +117,10 @@ const CardWrapper = styled.div`
     @media ${QUERIESV2.tb.andDown} {
       margin-top: 0;
     }
+  }
+
+  @media ${QUERIESV2.tb.andDown} {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 `;
