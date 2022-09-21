@@ -14,7 +14,7 @@ export default function usePreLaunchAirdrop() {
   useEffect(() => {
     if (isConnected && account) {
       getPrelaunchRewards(account)
-        .then((res) => {
+        .then((res: RewardsApiInterface | null) => {
           if (res) {
             setRewardsData(res);
           }
