@@ -12,8 +12,15 @@ import { SplashFlow } from "./components/SplashFlow";
 import { EligibilityFlow } from "./components/EligibilityFlow";
 
 const PreLaunchAirdrop = () => {
-  const { activePageFlow, switchToEligibility, isConnected, connectWallet } =
-    usePreLaunchAirdrop();
+  const {
+    activePageFlow,
+    switchToEligibility,
+    isConnected,
+    connectWallet,
+    discordLoginHandler,
+    discordLogoutHandler,
+    isDiscordAuthenticated,
+  } = usePreLaunchAirdrop();
 
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
@@ -26,6 +33,9 @@ const PreLaunchAirdrop = () => {
     case "splash":
       activePageComponent = (
         <SplashFlow
+          isDiscordAuthenticated={isDiscordAuthenticated}
+          discordLoginHandler={discordLoginHandler}
+          discordLogoutHandler={discordLogoutHandler}
           connectWalletHandler={connectWallet}
           isConnected={isConnected}
           eligibilityLinkHandler={switchToEligibility}
