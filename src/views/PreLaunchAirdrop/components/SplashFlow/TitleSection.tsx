@@ -6,11 +6,11 @@ import { QUERIESV2 } from "utils";
 import { ReactComponent as AcrossRingLogo } from "assets/across-logo-with-rings.svg";
 
 type TitleSectionParams = {
-  eligibilityLinkHandler: () => void;
+  airdropDetailsLinkHandler: () => void;
   isConnected?: boolean;
 };
 const TitleSection = ({
-  eligibilityLinkHandler,
+  airdropDetailsLinkHandler,
   isConnected,
 }: TitleSectionParams) => {
   return (
@@ -28,7 +28,7 @@ const TitleSection = ({
         {!isConnected && (
           <StyledButton size="lg">Connect to check eligibility</StyledButton>
         )}
-        <EligibilityLink onClick={eligibilityLinkHandler}>
+        <EligibilityLink onClick={airdropDetailsLinkHandler}>
           <InnerLinkText>Airdrop details</InnerLinkText>
           <StyledArrowIcon />
         </EligibilityLink>
