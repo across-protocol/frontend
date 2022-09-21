@@ -9,11 +9,21 @@ import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
 
 type SplashFlowParams = {
   eligibilityLinkHandler: () => void;
+  connectWalletHandler: () => void;
+  isConnected: boolean;
 };
 
-const SplashFlow = ({ eligibilityLinkHandler }: SplashFlowParams) => (
+const SplashFlow = ({
+  eligibilityLinkHandler,
+  isConnected,
+  connectWalletHandler,
+}: SplashFlowParams) => (
   <>
-    <TitleSection eligibilityLinkHandler={eligibilityLinkHandler} />
+    <TitleSection
+      isConnected={isConnected}
+      walletConnectionHandler={connectWalletHandler}
+      eligibilityLinkHandler={eligibilityLinkHandler}
+    />
     <CardTableWrapper>
       <CardWrapper>
         <AirdropCard

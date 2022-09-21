@@ -12,7 +12,8 @@ import { SplashFlow } from "./components/SplashFlow";
 import { EligibilityFlow } from "./components/EligibilityFlow";
 
 const PreLaunchAirdrop = () => {
-  const { activePageFlow, switchToEligibility } = usePreLaunchAirdrop();
+  const { activePageFlow, switchToEligibility, isConnected, connectWallet } =
+    usePreLaunchAirdrop();
 
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
@@ -24,7 +25,11 @@ const PreLaunchAirdrop = () => {
       break;
     case "splash":
       activePageComponent = (
-        <SplashFlow eligibilityLinkHandler={switchToEligibility} />
+        <SplashFlow
+          connectWalletHandler={connectWallet}
+          isConnected={isConnected}
+          eligibilityLinkHandler={switchToEligibility}
+        />
       );
       break;
     default:
