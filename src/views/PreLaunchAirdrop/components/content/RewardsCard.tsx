@@ -1,12 +1,20 @@
 import styled from "@emotion/styled";
 import { ReactComponent as AcrossLogo } from "assets/icons/plaap/across-tiny.svg";
-
+import { formatNumberMaxFracDigits } from "utils";
 interface Props {
   Icon?: React.ReactElement;
   subHeader: string;
   title: string;
+  bottomText: string;
+  amount: string;
 }
-const RewardsCard: React.FC<Props> = ({ Icon, subHeader, title }) => {
+const RewardsCard: React.FC<Props> = ({
+  Icon,
+  subHeader,
+  title,
+  bottomText,
+  amount,
+}) => {
   return (
     <Wrapper>
       <TopRow>
@@ -20,15 +28,14 @@ const RewardsCard: React.FC<Props> = ({ Icon, subHeader, title }) => {
           </StepIconTextWrapper>
         </ProgressIconTextWrapper>
         <TokenAmountWrapper>
-          <TokenAmount>1000 $ACX</TokenAmount>
+          <TokenAmount>
+            {formatNumberMaxFracDigits(Number(amount))} $ACX
+          </TokenAmount>
           <AcrossLogo />
         </TokenAmountWrapper>
       </TopRow>
       <BottomRow>
-        <BottomRowText>
-          Rewards are estimated as of September 1, 2022 and are subject to
-          change.{" "}
-        </BottomRowText>
+        <BottomRowText>{bottomText}</BottomRowText>
       </BottomRow>
     </Wrapper>
   );
@@ -128,7 +135,6 @@ const TokenAmountWrapper = styled.div`
   padding: 6px 16px;
   gap: 8px;
 
-  width: 153px;
   height: 48px;
 
   /* Primary/Across Dark Grey */

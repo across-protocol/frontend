@@ -73,6 +73,9 @@ const EligibilityFlow: React.FC<Props> = ({
                 subHeader="Eligible wallet"
                 title={shortenAddress(account || "", "...", 4)}
                 Icon={<WalletIcon />}
+                bottomText="Rewards are estimated as of September 1, 2022 and are subject to
+                change."
+                amount="182.3445"
               />
             }
           />
@@ -118,6 +121,15 @@ const EligibilityFlow: React.FC<Props> = ({
               rewardsData?.liquidityProviderRewards?.walletEligible
                 ? "eligible"
                 : "ineligible"
+            }
+            children={
+              <RewardsCard
+                subHeader="Eligible wallet"
+                title={shortenAddress(account || "", "...", 4)}
+                Icon={<WalletIcon />}
+                bottomText="Rewards are estimated as of September 1, 2022 and are subject to change.  Liquidity providers continue to earn ACX up to token launch."
+                amount="2056.112"
+              />
             }
           />
         </CardWrapper>
