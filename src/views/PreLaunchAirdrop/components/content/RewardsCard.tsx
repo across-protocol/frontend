@@ -3,30 +3,30 @@ import { ReactComponent as AcrossLogo } from "assets/icons/plaap/across-tiny.svg
 import { formatNumberMaxFracDigits } from "utils";
 interface Props {
   Icon?: React.ReactElement;
-  subHeader: string;
-  title: string;
+  label: string;
+  address: string;
   bottomText: string;
   amount: string;
 }
 const RewardsCard: React.FC<Props> = ({
   Icon,
-  subHeader,
-  title,
+  label,
+  address,
   bottomText,
   amount,
 }) => {
   return (
     <Wrapper>
       <TopRow>
-        <ProgressIconTextWrapper>
-          <StepIconTextWrapper>
-            <CustomIconContainer>{Icon}</CustomIconContainer>
+        <EligibleWalletWrapper>
+          <EligibleWallet>
+            <IconContainer>{Icon}</IconContainer>
             <TextWrapper>
-              <TextSubHeader>{subHeader}</TextSubHeader>
-              <TextHeader>{title}</TextHeader>
+              <Label>{label}</Label>
+              <Address>{address}</Address>
             </TextWrapper>
-          </StepIconTextWrapper>
-        </ProgressIconTextWrapper>
+          </EligibleWallet>
+        </EligibleWalletWrapper>
         <TokenAmountWrapper>
           <TokenAmount>
             {formatNumberMaxFracDigits(Number(amount))} $ACX
@@ -63,7 +63,7 @@ const Wrapper = styled.div`
   }
 `;
 
-const ProgressIconTextWrapper = styled.div`
+const EligibleWalletWrapper = styled.div`
   display: flex;
   flex-direction: row;
   gap: 42px;
@@ -71,7 +71,7 @@ const ProgressIconTextWrapper = styled.div`
   align-items: center;
 `;
 
-const StepIconTextWrapper = styled.div`
+const EligibleWallet = styled.div`
   display: flex;
   flex-direction: row;
   gap: 16px;
@@ -80,7 +80,7 @@ const StepIconTextWrapper = styled.div`
   align-items: flex-start;
 `;
 
-const CustomIconContainer = styled.div`
+const IconContainer = styled.div`
   padding: 2px;
   border-radius: 50%;
   border: 1px solid #6cf9d8;
@@ -108,7 +108,7 @@ const TextWrapper = styled.div`
   width: 100%;
 `;
 
-const TextSubHeader = styled.p`
+const Label = styled.p`
   font-weight: 400;
   font-size: 14px;
   line-height: 18px;
@@ -116,7 +116,7 @@ const TextSubHeader = styled.p`
   color: #9daab2;
 `;
 
-const TextHeader = styled.p`
+const Address = styled.p`
   font-weight: 400;
   font-size: 18px;
   line-height: 26px;
@@ -125,22 +125,15 @@ const TextHeader = styled.p`
 
 const TokenAmountWrapper = styled.div`
   box-sizing: border-box;
-
-  /* Auto layout */
-
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   padding: 6px 16px;
   gap: 8px;
-
   height: 48px;
 
-  /* Primary/Across Dark Grey */
-
   background: #2d2e33;
-  /* Tints & Shades/Grey/28 */
 
   border: 1px solid #3e4047;
   border-radius: 8px;
@@ -151,17 +144,11 @@ const TokenAmountWrapper = styled.div`
 `;
 
 const TokenAmount = styled.h3`
-  /* Body/Body MD/Regular */
-
   font-family: "Barlow";
   font-style: normal;
   font-weight: 400;
   font-size: 16px;
   line-height: 20px;
-  /* identical to box height, or 125% */
-
-  /* Primary/Across Aqua */
-
   color: #6cf9d8;
 `;
 
@@ -177,18 +164,11 @@ const BottomRow = styled.div`
 `;
 
 const BottomRowText = styled.h3`
-  /* Body/Body SM/Regular */
-
   font-family: "Barlow";
   font-style: normal;
   font-weight: 400;
   font-size: 14px;
   line-height: 18px;
-  /* identical to box height, or 129% */
-
   text-align: center;
-
-  /* Tints & Shades/White/70 */
-
   color: #9daab2;
 `;
