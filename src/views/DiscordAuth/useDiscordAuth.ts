@@ -51,6 +51,8 @@ const handleDiscordAuthHookLogic = async (
         // Call to scraper API and resolve the JWT
         // FIXME: Call the API data to resolve the JWT token
         const jwt = await Promise.resolve("JWT_PLACEHOLDER");
+        // Simulate a 5 second load
+        await new Promise((r) => setTimeout(r, 5000));
         authenticate(jwt);
       } else {
         // NOOP do nothing.
