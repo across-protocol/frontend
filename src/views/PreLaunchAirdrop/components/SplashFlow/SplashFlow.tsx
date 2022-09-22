@@ -25,7 +25,6 @@ const SplashFlow = ({
   account,
   rewardsData,
 }: SplashFlowParams) => (
-
   <>
     <TitleSection airdropDetailsLinkHandler={airdropDetailsLinkHandler} />
     <CardTableWrapper>
