@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 import { prelaunchDataQueryKey } from "utils";
+import { RewardsApiInterface } from "utils/serverless-api/types";
 import getPrelaunchRewards from "./getPrelaunchRewards";
 
 export function useGetPrelaunchRewards(address?: string) {
@@ -20,9 +21,8 @@ export function useGetPrelaunchRewards(address?: string) {
     }
   );
 
-  console.log("data", data);
   return {
-    rewarsData: data || {},
+    rewardsData: data || ({} as RewardsApiInterface),
     ...other,
   };
 }

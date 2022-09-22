@@ -1,29 +1,18 @@
 import { useState, useEffect } from "react";
-import getPrelaunchRewards from "./api/getPrelaunchRewards";
 import { useConnection } from "hooks";
-import { RewardsApiInterface } from "utils/serverless-api/types";
-
+import { useGetPrelaunchRewards } from "./api/useGetPrelaunchRewards";
 export type FlowSelector = "splash" | "traveller" | "info";
 
 export default function usePreLaunchAirdrop() {
   const [activePageFlow, setActivePageFlow] = useState<FlowSelector>("splash");
   const { isConnected, account } = useConnection();
-  const [rewardsData, setRewardsData] = useState<RewardsApiInterface>(
-    {} as RewardsApiInterface
-  );
+
+  const { rewardsData } = useGetPrelaunchRewards(account);
   useEffect(() => {
-    if (isConnected && account) {
-      getPrelaunchRewards(account)
-        .then((res: RewardsApiInterface | null) => {
-          if (res) {
-            setRewardsData(res);
-          }
-        })
-        .finally(() => {
-          setActivePageFlow("splash");
-        });
+    if (Object.keys(rewardsData).length && account && isConnected) {
+      setActivePageFlow("splash");
     }
-  }, [isConnected, account]);
+  }, [rewardsData, account, isConnected]);
 
   return {
     activePageFlow,
