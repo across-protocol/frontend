@@ -43,6 +43,7 @@ const SplashFlow = ({
                 {
                   buttonContent: <>Learn about Across</>,
                   buttonHandler: () => {},
+                  // TODO: This flow needs to be composed to walk through these states.
                   stepProgress: "completed",
                   stepTitle: "Connect Discord",
                   stepIcon: <WalletIcon />,
@@ -51,6 +52,7 @@ const SplashFlow = ({
                 {
                   buttonContent: <>Go to Bridge</>,
                   buttonHandler: () => {},
+                  // TODO: This flow needs to be composed to walk through these states.
                   stepProgress: "completed",
                   stepTitle: "Bridge on Across",
                   completedText: "Completed",
@@ -96,6 +98,7 @@ const SplashFlow = ({
                 {
                   buttonContent: <>Disconnect Discord</>,
                   buttonHandler: () => {},
+                  // TODO: This flow needs to be composed to walk through these states.
                   stepProgress: "completed",
                   stepTitle: "Connect Discord",
                   stepIcon: <DefaultUserIcon />,
@@ -104,6 +107,7 @@ const SplashFlow = ({
                 {
                   buttonContent: <>Unlink wallet</>,
                   buttonHandler: () => {},
+                  // TODO: This flow needs to be composed to walk through these states.
                   stepProgress: "completed",
                   stepTitle: shortenAddress(account || "", "...", 4),
                   stepIcon: <WalletIcon />,
