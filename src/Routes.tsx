@@ -1,16 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
-import {
-  Send,
-  Pool,
-  About,
-  MyTransactions,
-  AllTransactions,
-  Rewards,
-  Claim,
-  NotFound,
-  PreLaunchAirdrop,
-} from "views";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
 import { useConnection } from "hooks";
 import { useError } from "hooks";
@@ -24,7 +13,39 @@ import {
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
-import { DiscordAuth } from "views/DiscordAuth";
+import BouncingDotsLoader from "components/BouncingDotsLoader";
+import NotFound from "./views/NotFound";
+
+const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
+const Rewards = lazy(
+  () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
+);
+const Send = lazy(() => import(/* webpackChunkName: "Send" */ "./views/Send"));
+const About = lazy(
+  () => import(/* webpackChunkName: "About" */ "./views/About")
+);
+const Claim = lazy(
+  () => import(/* webpackChunkName: "Claim" */ "./views/Claim")
+);
+const MyTransactions = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "MyTransactions" */ "./views/Transactions/myTransactions"
+    )
+);
+const AllTransactions = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "AllTransactions" */ "./views/Transactions/allTransactions"
+    )
+);
+
+const PreLaunchAirdrop = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "PreLaunchAirdrop" */ "./views/PreLaunchAirdrop/PreLaunchAirdrop"
+    )
+);
 
 const warningMessage = `
   We noticed that you have connected from a contract address.
@@ -109,15 +130,17 @@ const Routes: React.FC = () => {
       />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
-        <Route exact path="/transactions" component={MyTransactions} />
-        <Route exact path="/transactions/all" component={AllTransactions} />
-        <Route exact path="/pool" component={Pool} />
-        <Route exact path="/about" component={About} />
-        <Route exact path="/rewards" component={Rewards} />
-        <Route exact path="/rewards/claim" component={Claim} />
-        <Route exact path="/airdrop" component={PreLaunchAirdrop} />
-        <Route exact path="/auth/discord" component={DiscordAuth} />
-        <Route exact path="/" component={Send} />
+        <Suspense fallback={<BouncingDotsLoader />}>
+          <Route exact path="/transactions" component={MyTransactions} />
+          <Route exact path="/transactions/all" component={AllTransactions} />
+          <Route exact path="/pool" component={Pool} />
+          <Route exact path="/about" component={About} />
+          <Route exact path="/rewards" component={Rewards} />
+          <Route exact path="/rewards/claim" component={Claim} />
+          <Route exact path="/airdrop" component={PreLaunchAirdrop} />
+          <Route exact path="/" component={Send} />
+        </Suspense>
+
         <Route path="*" component={NotFound} />
       </Switch>
       <Toast position="top-right" />

@@ -45,6 +45,7 @@ const PreLaunchAirdrop = () => {
     default:
       activePageComponent = <></>;
   }
+
   return (
     <Wrapper>
       <BackgroundLayer autoPlay loop muted>

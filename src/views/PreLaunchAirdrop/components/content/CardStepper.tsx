@@ -2,19 +2,18 @@ import styled from "@emotion/styled";
 import CardStepperItem from "./CardStepperItem";
 
 export type Progress = "completed" | "awaiting" | "failed";
-export type CardStepType = {
-  buttonContent: React.ReactElement | string;
-  buttonHandler: () => void;
-
-  stepTitle: string;
-  stepIcon?: React.ReactElement;
-  completedText?: string;
-
-  stepProgress: Progress;
-};
 
 type CardStepperParams = {
-  steps: CardStepType[];
+  steps: {
+    buttonContent: React.ReactElement;
+    buttonHandler: () => void;
+
+    stepTitle: string;
+    stepIcon?: React.ReactElement;
+    completedText?: string;
+
+    stepProgress: Progress;
+  }[];
 };
 
 const CardStepper = ({ steps }: CardStepperParams) => {
