@@ -7,7 +7,6 @@ import { RewardsApiInterface } from "../types";
  * @header (optional) HTTP header - Authorization: Bearer <JWT_TOKEN>
  * @returns The result of the HTTP call to `api/suggested-fees`
  */
-
 export default async function prelaunchRewardsMockedCall(
   _address: string,
   _jwt?: string,
