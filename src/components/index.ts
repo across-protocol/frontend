@@ -12,6 +12,7 @@ export { default as Banner } from "./Banner";
 export { default as Sidebar } from "./Sidebar";
 export { default as DotStepper } from "./DotStepper";
 export { default as Modal } from "./Modal";
+export { default as Alert } from "./Alert";
 
 export * from "./Box";
 export * from "./Buttons";
