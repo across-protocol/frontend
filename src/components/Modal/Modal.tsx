@@ -74,6 +74,7 @@ const Modal: React.FC<ModalProps> = ({
           <Title>{title}</Title>
           <StyledExitIcon onClick={() => exitHandler()} />
         </TitleAndExitWrapper>
+        {children}
       </ModalContentWrapper>
     </Wrapper>
   );
