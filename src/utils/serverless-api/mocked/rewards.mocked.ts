@@ -12,7 +12,7 @@ export default async function prelaunchRewardsMockedCall(
   _jwt?: string,
   _returnValue?: RewardsApiInterface
 ): Promise<RewardsApiInterface> {
-  const rv = _returnValue || {
+  const rv = {
     welcomeTravellerRewards: {
       walletEligible: false,
       completed: false,
@@ -39,6 +39,7 @@ export default async function prelaunchRewardsMockedCall(
           completed: false,
           payout: ethers.BigNumber.from("0").toString(),
         },
+    ..._returnValue,
   };
   mockAdapter
     .onGet("/rewards", {
@@ -48,7 +49,7 @@ export default async function prelaunchRewardsMockedCall(
     })
     .reply(200, rv);
 
-  return axios.get(`/rewards`).then((res) => {
-    return res.data;
-  });
+  const res = await axios.get(`/rewards`);
+
+  return res.data;
 }
