@@ -27,7 +27,7 @@ export type SetChainOptions = {
   chainNamespace?: string;
 };
 
-const CONNECTED_WALLET_KEY = "previous-wallet-service";
+const CACHED_WALLET_KEY = "previous-wallet-service";
 
 type OnboardContextValue = {
   onboard: OnboardAPI | null;
@@ -109,10 +109,7 @@ export function useOnboardManager() {
         // If a wallet label is present, update the browser state
         // so that this information is preserved on refresh
         if (connectedWallets.length > 0) {
-          window.localStorage.setItem(
-            CONNECTED_WALLET_KEY,
-            connectedWallets[0]
-          );
+          window.localStorage.setItem(CACHED_WALLET_KEY, connectedWallets[0]);
         }
       });
       // Unsubscribe to the observer when this component is
@@ -129,7 +126,7 @@ export function useOnboardManager() {
       trackEvent({ category: "wallet", action: "connect", name: "null" });
       // Resolve the last wallet type if this user has connected before
       const previousConnnection =
-        window.localStorage.getItem(CONNECTED_WALLET_KEY);
+        window.localStorage.getItem(CACHED_WALLET_KEY);
       // Test the user was connected before a browser refresh and that
       // the calling code did not specify an autoSelect parameter
       if (previousConnnection && !options?.autoSelect) {
@@ -148,7 +145,7 @@ export function useOnboardManager() {
     disconnect: (wallet: DisconnectOptions) => {
       // User requested to be disconnected, let's clear out the wallet type
       // for the event that they're trying to connect using a different wallet
-      window.localStorage.removeItem(CONNECTED_WALLET_KEY);
+      window.localStorage.removeItem(CACHED_WALLET_KEY);
       trackEvent({ category: "wallet", action: "disconnect", name: "null" });
       return disconnect(wallet);
     },
