@@ -110,3 +110,7 @@ export function depositsQueryKey(
 ) {
   return ["deposits", status, limit, offset];
 }
+
+export function prelaunchDataQueryKey(address: string) {
+  return ["prelaunch-data", address];
+}
