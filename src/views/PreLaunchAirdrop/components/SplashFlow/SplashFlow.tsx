@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { QUERIESV2, shortenAddress } from "utils";
 import AirdropCard from "../AirdropCard";
 import TitleSection from "../TitleSection";
+
 import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
 import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
@@ -24,6 +25,7 @@ const SplashFlow = ({
   account,
   rewardsData,
 }: SplashFlowParams) => (
+
   <>
     <TitleSection airdropDetailsLinkHandler={airdropDetailsLinkHandler} />
     <CardTableWrapper>
