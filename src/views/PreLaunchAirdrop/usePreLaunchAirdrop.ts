@@ -1,11 +1,14 @@
+import { useDiscord } from "hooks/useDiscord";
 import { useState, useEffect } from "react";
 import { useConnection } from "hooks";
 import { useGetPrelaunchRewards } from "./api/useGetPrelaunchRewards";
+
 export type FlowSelector = "splash" | "traveller" | "info";
 
 export default function usePreLaunchAirdrop() {
   const [activePageFlow, setActivePageFlow] = useState<FlowSelector>("splash");
-  const { isConnected, account } = useConnection();
+  const { redirectToAuth, unauthenticate, isAuthenticated } = useDiscord();
+  const { isConnected, account, connect } = useConnection();
 
   const { rewardsData } = useGetPrelaunchRewards(account);
   useEffect(() => {
@@ -18,9 +21,18 @@ export default function usePreLaunchAirdrop() {
     activePageFlow,
     setActivePageFlow,
 
+    discordLoginHandler: redirectToAuth,
+    discordLogoutHandler: unauthenticate,
+    isDiscordAuthenticated: isAuthenticated,
+
+    // Fns related to setting page flow
     switchToSplash: () => setActivePageFlow("splash"),
     switchToTraveller: () => setActivePageFlow("traveller"),
     switchToInfo: () => setActivePageFlow("info"),
+
+    // Vars related to Onboard connection
+    isConnected,
+    connectWallet: () => connect(),
     rewardsData,
     account,
   };
