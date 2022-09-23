@@ -11,8 +11,18 @@ import TravellerFlow from "./components/TravellerFlow";
 import { SplashFlow } from "./components/SplashFlow";
 import { MoreInfoFlow } from "./components/MoreInfoFlow";
 const PreLaunchAirdrop = () => {
-  const { activePageFlow, switchToSplash, switchToInfo, rewardsData, account } =
-    usePreLaunchAirdrop();
+  const {
+    activePageFlow,
+    switchToSplash,
+    switchToInfo,
+    isConnected,
+    connectWallet,
+    discordLoginHandler,
+    discordLogoutHandler,
+    isDiscordAuthenticated,
+    rewardsData,
+    account,
+  } = usePreLaunchAirdrop();
 
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
@@ -22,6 +32,11 @@ const PreLaunchAirdrop = () => {
     case "splash":
       activePageComponent = (
         <SplashFlow
+          isDiscordAuthenticated={isDiscordAuthenticated}
+          discordLoginHandler={discordLoginHandler}
+          discordLogoutHandler={discordLogoutHandler}
+          connectWalletHandler={connectWallet}
+          isConnected={isConnected}
           airdropDetailsLinkHandler={switchToInfo}
           account={account}
           rewardsData={rewardsData}
