@@ -140,7 +140,6 @@ const Routes: React.FC = () => {
           <Route exact path="/airdrop" component={PreLaunchAirdrop} />
           <Route exact path="/" component={Send} />
         </Suspense>
-
         <Route path="*" component={NotFound} />
       </Switch>
       <Toast position="top-right" />
