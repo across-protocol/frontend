@@ -26,7 +26,7 @@ const PreLaunchAirdrop = () => {
     isDiscordAuthenticated,
     rewardsData,
   } = usePreLaunchAirdrop();
-  const [displayModal, setDisplayModal] = useState(true);
+  const [displayModal, setDisplayModal] = useState(false);
 
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
@@ -40,6 +40,7 @@ const PreLaunchAirdrop = () => {
           discordLoginHandler={discordLoginHandler}
           discordLogoutHandler={discordLogoutHandler}
           connectWalletHandler={connectWalletHandler}
+          displayLinkModal={() => setDisplayModal(true)}
           isConnected={isConnected}
           airdropDetailsLinkHandler={switchToInfo}
           account={account}
