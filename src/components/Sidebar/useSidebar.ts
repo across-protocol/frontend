@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { useConnection } from "state/hooks";
 import { useLocation } from "react-router-dom";
 import { usePrevious } from "hooks";
+
 type SidebarWrapperClasses = "open" | "closed" | "transition";
+
 export default function useSidebar(openSidebar: boolean) {
   const { account, ensName, isConnected, chainId } = useConnection();
   const location = useLocation();
@@ -27,7 +29,7 @@ export default function useSidebar(openSidebar: boolean) {
     }
   }, [openSidebar, prevOpenSidebar]);
 
-  const appMenu = [
+  const sidebarNavigationLinks = [
     {
       pathName: "/",
       title: "Bridge",
@@ -87,6 +89,6 @@ export default function useSidebar(openSidebar: boolean) {
     location,
     className,
     setClassName,
-    appMenu,
+    sidebarNavigationLinks,
   };
 }

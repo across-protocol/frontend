@@ -25,7 +25,7 @@ interface Props {
 
 const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
   const {
-    appMenu,
+    sidebarNavigationLinks,
     account,
     ensName,
     isConnected,
@@ -77,8 +77,11 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
           ) : null}
         </StyledHeader>
         <StyledMenu>
-          {appMenu.map((item) => (
-            <StyledMenuItem selected={location.pathname === item.pathName}>
+          {sidebarNavigationLinks.map((item, idx) => (
+            <StyledMenuItem
+              selected={location.pathname === item.pathName}
+              key={idx}
+            >
               {item.isExternalLink ? (
                 <a
                   href={item.link}
