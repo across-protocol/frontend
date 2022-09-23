@@ -7,10 +7,12 @@ import { ReactComponent as AcrossRingLogo } from "assets/across-logo-with-rings.
 
 type TitleSectionParams = {
   airdropDetailsLinkHandler: () => void;
+  walletConnectionHandler: () => void;
   isConnected?: boolean;
 };
 const TitleSection = ({
   airdropDetailsLinkHandler,
+  walletConnectionHandler,
   isConnected,
 }: TitleSectionParams) => {
   return (
@@ -26,7 +28,9 @@ const TitleSection = ({
       </TextStack>
       <ButtonStack>
         {!isConnected && (
-          <StyledButton size="lg">Connect to check eligibility</StyledButton>
+          <StyledButton onClick={walletConnectionHandler} size="lg">
+            Connect to check eligibility
+          </StyledButton>
         )}
         <EligibilityLink onClick={airdropDetailsLinkHandler}>
           <InnerLinkText>Airdrop details</InnerLinkText>
@@ -36,7 +40,7 @@ const TitleSection = ({
     </Wrapper>
   );
 };
-export default React.memo(TitleSection);
+export default TitleSection;
 
 const Wrapper = styled.div`
   display: flex;

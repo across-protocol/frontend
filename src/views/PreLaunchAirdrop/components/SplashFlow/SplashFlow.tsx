@@ -7,26 +7,41 @@ import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
 import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
 import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
+import { ReactComponent as PlusIcon } from "assets/icons/plus-icon-16.svg";
+import CardStepper from "../content/CardStepper";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
 import { ReactComponent as DefaultUserIcon } from "assets/icons/plaap/default-user-icon.svg";
 
 import { RewardsApiInterface } from "utils/serverless-api/types";
-import CardStepper from "../content/CardStepper";
 import RewardsCard from "../content/RewardsCard";
 
 type SplashFlowParams = {
   airdropDetailsLinkHandler: () => void;
+  connectWalletHandler: () => void;
+  discordLoginHandler: () => void;
+  discordLogoutHandler: () => void;
+  isDiscordAuthenticated: boolean;
+  isConnected: boolean;
   rewardsData: RewardsApiInterface;
   account: string | undefined;
 };
 
 const SplashFlow = ({
   airdropDetailsLinkHandler,
+  isConnected,
+  connectWalletHandler,
+  discordLoginHandler,
+  discordLogoutHandler,
+  isDiscordAuthenticated,
   account,
   rewardsData,
 }: SplashFlowParams) => (
   <>
-    <TitleSection airdropDetailsLinkHandler={airdropDetailsLinkHandler} />
+    <TitleSection
+      isConnected={isConnected}
+      walletConnectionHandler={connectWalletHandler}
+      airdropDetailsLinkHandler={airdropDetailsLinkHandler}
+    />
     <CardTableWrapper>
       <CardWrapper>
         <AirdropCard
@@ -97,22 +112,29 @@ const SplashFlow = ({
             <CardStepper
               steps={[
                 {
-                  buttonContent: <>Disconnect Discord</>,
-                  buttonHandler: () => {},
-                  // TODO: This flow needs to be composed to walk through these states.
-                  stepProgress: "completed",
+                  buttonContent: isDiscordAuthenticated
+                    ? "Disconnect"
+                    : "Connect Discord",
+                  buttonHandler: isDiscordAuthenticated
+                    ? discordLogoutHandler
+                    : discordLoginHandler,
+                  stepProgress: isDiscordAuthenticated
+                    ? "completed"
+                    : "awaiting",
                   stepTitle: "Connect Discord",
-                  stepIcon: <DefaultUserIcon />,
-                  completedText: "Eligible account",
+                  stepIcon: isDiscordAuthenticated ? (
+                    <DefaultUserIcon />
+                  ) : undefined,
                 },
                 {
-                  buttonContent: <>Unlink wallet</>,
+                  buttonContent: (
+                    <>
+                      Link <PlusIcon />
+                    </>
+                  ),
                   buttonHandler: () => {},
-                  // TODO: This flow needs to be composed to walk through these states.
-                  stepProgress: "completed",
-                  stepTitle: shortenAddress(account || "", "...", 4),
-                  stepIcon: <WalletIcon />,
-                  completedText: "Linked wallet",
+                  stepProgress: "awaiting",
+                  stepTitle: "Link to Ethereum wallet",
                 },
               ]}
             />

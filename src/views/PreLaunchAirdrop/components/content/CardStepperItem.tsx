@@ -8,7 +8,7 @@ import { ButtonV2 } from "components";
 type ProgressWithAfterState = Progress | "not_reached";
 
 type CardStepperItemParams = {
-  buttonContent: React.ReactElement;
+  buttonContent: React.ReactElement | string;
   buttonHandler: () => void;
 
   title: string;

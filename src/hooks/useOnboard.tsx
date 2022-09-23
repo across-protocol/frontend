@@ -27,6 +27,8 @@ export type SetChainOptions = {
   chainNamespace?: string;
 };
 
+const CACHED_WALLET_KEY = "previous-wallet-service";
+
 type OnboardContextValue = {
   onboard: OnboardAPI | null;
   connect: (options?: ConnectOptions | undefined) => Promise<WalletState[]>;
@@ -95,13 +97,55 @@ export function useOnboardManager() {
     }
   }, [wallet]);
 
+  useEffect(() => {
+    // Only acknowledge the state where onboard is defined
+    if (onboard) {
+      // Retrieve the list of onboard's wallet connections
+      const walletState = onboard?.state.select("wallets");
+      // Subscribe to the state for any changes
+      const { unsubscribe } = walletState.subscribe((wallets) => {
+        // Iterate over all wallets and extract their label
+        const connectedWallets = wallets.map(({ label }) => label);
+        // If a wallet label is present, update the browser state
+        // so that this information is preserved on refresh
+        if (connectedWallets.length > 0) {
+          window.localStorage.setItem(CACHED_WALLET_KEY, connectedWallets[0]);
+        }
+      });
+      // Unsubscribe to the observer when this component is
+      // unmounted
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, [onboard]);
+
   return {
     onboard,
     connect: (options?: ConnectOptions | undefined) => {
       trackEvent({ category: "wallet", action: "connect", name: "null" });
+      // Resolve the last wallet type if this user has connected before
+      const previousConnnection =
+        window.localStorage.getItem(CACHED_WALLET_KEY);
+      // Test the user was connected before a browser refresh and that
+      // the calling code did not specify an autoSelect parameter
+      if (previousConnnection && !options?.autoSelect) {
+        // Append the autoSelect option to include the previous connection
+        // type
+        options = {
+          ...options,
+          autoSelect: {
+            label: previousConnnection,
+            disableModals: true,
+          },
+        };
+      }
       return connect(options);
     },
     disconnect: (wallet: DisconnectOptions) => {
+      // User requested to be disconnected, let's clear out the wallet type
+      // for the event that they're trying to connect using a different wallet
+      window.localStorage.removeItem(CACHED_WALLET_KEY);
       trackEvent({ category: "wallet", action: "disconnect", name: "null" });
       return disconnect(wallet);
     },
