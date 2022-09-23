@@ -8,40 +8,10 @@ import type { RootState, AppDispatch } from "./";
 
 import chainApi from "./chainApi";
 import { add } from "./transactions";
-import { useOnboard } from "hooks/useOnboard";
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-
-export function useConnection() {
-  const {
-    provider,
-    signer,
-    isConnected,
-    connect,
-    disconnect,
-    notify,
-    account,
-    chainId,
-    wallet,
-    error,
-  } = useOnboard();
-
-  return {
-    account: account ? ethers.utils.getAddress(account.address) : undefined,
-    ensName: account?.ens,
-    chainId,
-    provider,
-    signer,
-    isConnected,
-    notify,
-    connect,
-    disconnect,
-    error,
-    wallet,
-  };
-}
 
 export function useTransactions() {
   const { transactions } = useAppSelector((state) => state.transactions);

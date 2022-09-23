@@ -1,4 +1,4 @@
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import useWindowSize from "hooks/useWindowsSize";
 import { BREAKPOINTS } from "utils";
 

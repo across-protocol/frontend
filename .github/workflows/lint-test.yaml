@@ -18,6 +18,13 @@ jobs:
       - uses: ./.github/actions/setup
       - run: yarn lint
 
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
+      - run: yarn test
+
   cypress-tests:
     runs-on: ubuntu-latest
 
@@ -49,6 +56,7 @@ jobs:
           REACT_APP_REWARDS_API_URL: ${{ secrets.CYPRESS_REWARDS_API_URL }}
           REACT_APP_CHAIN_137_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_137_PROVIDER_URL }}
           REACT_APP_CHAIN_42161_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_42161_PROVIDER_URL }}
+          REACT_APP_MOCK_SERVERLESS: true
         run: yarn build
       - name: Cypress run Chrome
         uses: cypress-io/github-action@v4

@@ -30,7 +30,7 @@ import { shortenAddress } from "utils";
 import { ReferralsSummary } from "hooks/useReferralSummary";
 import { PopperTooltip } from "../../../../components/Tooltip";
 import StepperWithTooltips from "../StepperWithTooltips";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 
 interface Props {
   isConnected: boolean;

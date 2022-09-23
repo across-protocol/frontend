@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import { useConnection } from "state/hooks";
 import { useLocation } from "react-router-dom";
-import { usePrevious } from "hooks";
-
+import { usePrevious, useConnection } from "hooks";
 type SidebarWrapperClasses = "open" | "closed" | "transition";
 
 export default function useSidebar(openSidebar: boolean) {

@@ -1,5 +1,5 @@
 import { Overlay, ConnectButton } from "./ConnectTableOverlay.styles";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 
 const ConnectTableOverlay = () => {
   const { connect } = useConnection();

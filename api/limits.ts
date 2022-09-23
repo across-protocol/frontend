@@ -1,26 +1,30 @@
 // Note: ideally this would be written in ts as vercel claims they support it natively.
 // However, when written in ts, the imports seem to fail, so this is in js for now.
 
-const { HubPool__factory } = require("@across-protocol/contracts-v2");
-const ethers = require("ethers");
-const { BLOCK_TAG_LAG } = require("./_constants");
+import { HubPool__factory } from "@across-protocol/contracts-v2";
+import { VercelResponse } from "@vercel/node";
+import { ethers } from "ethers";
+import { BLOCK_TAG_LAG, disabledL1Tokens, maxRelayFeePct } from "./_constants";
+import { isPromiseRejectedResult, isString } from "./_typeguards";
+import { LimitsInputRequest } from "./_types";
 
-const {
+import {
   getLogger,
   InputError,
-  isString,
   getRelayerFeeDetails,
   getCachedTokenPrice,
-  maxRelayFeePct,
   getTokenDetails,
   getBalance,
   maxBN,
   minBN,
   isRouteEnabled,
-  disabledL1Tokens,
-} = require("./_utils");
+  handleErrorCondition,
+} from "./_utils";
 
-const handler = async (request, response) => {
+const handler = async (
+  { query: { token, destinationChainId, originChainId } }: LimitsInputRequest,
+  response: VercelResponse
+) => {
   const logger = getLogger();
   try {
     const {
@@ -38,22 +42,16 @@ const handler = async (request, response) => {
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
       ? []
-      : JSON.parse(REACT_APP_FULL_RELAYERS).map((relayer) => {
+      : (JSON.parse(REACT_APP_FULL_RELAYERS) as string[]).map((relayer) => {
           return ethers.utils.getAddress(relayer);
         });
     const transferRestrictedRelayers = !REACT_APP_TRANSFER_RESTRICTED_RELAYERS
       ? []
-      : JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS).map((relayer) => {
-          return ethers.utils.getAddress(relayer);
-        });
-    logger.debug({
-      at: "limits",
-      message: "Using relayers",
-      fullRelayers,
-      transferRestrictedRelayers,
-    });
-
-    let { token, destinationChainId, originChainId } = request.query;
+      : (JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS) as string[]).map(
+          (relayer) => {
+            return ethers.utils.getAddress(relayer);
+          }
+        );
     if (!isString(token) || !isString(destinationChainId))
       throw new InputError(
         "Must provide token and destinationChainId as query params"
@@ -74,14 +72,8 @@ const handler = async (request, response) => {
 
     const [tokenDetailsResult, routeEnabledResult] = await Promise.allSettled([
       getTokenDetails(provider, l1Token, undefined, destinationChainId),
-      isRouteEnabled(computedOriginChainId, destinationChainId, token),
+      isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
     ]);
-    logger.debug({
-      at: "limits",
-      message: "Checked enabled routes",
-      isRouteEnabled,
-    });
-
     // If any of the above fails or the route is not enabled, we assume that the
     if (
       disabledL1Tokens.includes(l1Token.toLowerCase()) ||
@@ -90,7 +82,11 @@ const handler = async (request, response) => {
       !routeEnabledResult.value
     ) {
       // Add the raw error (if any) to ensure that the user sees the real error if it's something unexpected, like a provider issue.
-      const rawError = tokenDetailsResult.reason || routeEnabledResult.reason;
+      const rawError =
+        (isPromiseRejectedResult(tokenDetailsResult) &&
+          tokenDetailsResult.reason) ||
+        (isPromiseRejectedResult(routeEnabledResult) && routeEnabledResult);
+
       const errorString = rawError
         ? `Raw Error: ${rawError.stack || rawError.toString()}`
         : "";
@@ -111,17 +107,6 @@ const handler = async (request, response) => {
     ];
 
     let tokenPrice = await getCachedTokenPrice(l1Token);
-    logger.debug({
-      at: "limits",
-      message: "Got token price from /coingecko",
-      tokenPrice,
-    });
-    logger.debug({
-      at: "limits",
-      message:
-        "Sending several requests to HubPool and fetching relayer balances",
-      multicallInput,
-    });
 
     const [
       relayerFeeDetails,
@@ -140,7 +125,7 @@ const handler = async (request, response) => {
       Promise.all(
         fullRelayers.map((relayer) =>
           getBalance(
-            destinationChainId,
+            destinationChainId!,
             destinationToken,
             relayer,
             BLOCK_TAG_LAG
@@ -150,7 +135,7 @@ const handler = async (request, response) => {
       Promise.all(
         transferRestrictedRelayers.map((relayer) =>
           getBalance(
-            destinationChainId,
+            destinationChainId!,
             destinationToken,
             relayer,
             BLOCK_TAG_LAG
@@ -165,13 +150,6 @@ const handler = async (request, response) => {
         )
       ),
     ]);
-    logger.debug({
-      at: "limits",
-      message: "Fetched balances",
-      fullRelayerBalances,
-      transferRestrictedBalances,
-      fullRelayerMainnetBalances,
-    });
 
     let { liquidReserves } = hubPool.interface.decodeFunctionResult(
       "pooledTokens",
@@ -186,11 +164,6 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseEther(REACT_APP_WETH_LP_CUSHION || "0")
       );
-      logger.debug({
-        at: "limits",
-        message: "Adding WETH cushioning to LP liquidity",
-        liquidReserves,
-      });
     } else if (
       ethers.utils.getAddress(l1Token) ===
       ethers.utils.getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
@@ -199,11 +172,6 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseUnits(REACT_APP_USDC_LP_CUSHION || "0", 6)
       );
-      logger.debug({
-        at: "limits",
-        message: "Adding USDC cushioning to LP liquidity",
-        liquidReserves,
-      });
     } else if (
       ethers.utils.getAddress(l1Token) ===
       ethers.utils.getAddress("0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599")
@@ -212,11 +180,6 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseUnits(REACT_APP_WBTC_LP_CUSHION || "0", 8)
       );
-      logger.debug({
-        at: "limits",
-        message: "Adding WBTC cushioning to LP liquidity",
-        liquidReserves,
-      });
     } else if (
       ethers.utils.getAddress(l1Token) ===
       ethers.utils.getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F")
@@ -225,11 +188,6 @@ const handler = async (request, response) => {
       liquidReserves = liquidReserves.sub(
         ethers.utils.parseUnits(REACT_APP_DAI_LP_CUSHION || "0", 18)
       );
-      logger.debug({
-        at: "limits",
-        message: "Adding DAI cushioning to LP liquidity",
-        liquidReserves,
-      });
     }
 
     if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
@@ -237,7 +195,6 @@ const handler = async (request, response) => {
     const maxGasFee = ethers.utils
       .parseEther(maxRelayFeePct.toString())
       .sub(relayerFeeDetails.capitalFeePercent);
-    logger.debug({ at: "limits", message: "Computed maxGasFee", maxGasFee });
 
     const transferBalances = fullRelayerBalances.map((balance, i) =>
       balance.add(fullRelayerMainnetBalances[i])
@@ -267,17 +224,9 @@ const handler = async (request, response) => {
     // to cache the responses and invalidate when deployments update.
     response.setHeader("Cache-Control", "s-maxage=300");
     response.status(200).json(responseJson);
-  } catch (error) {
-    let status;
-    if (error instanceof InputError) {
-      logger.warn({ at: "limits", message: "400 input error", error });
-      status = 400;
-    } else {
-      logger.error({ at: "limits", message: "500 server error", error });
-      status = 500;
-    }
-    response.status(status).send(error.message);
+  } catch (error: unknown) {
+    return handleErrorCondition("limits", response, logger, error);
   }
 };
 
-module.exports = handler;
+export default handler;

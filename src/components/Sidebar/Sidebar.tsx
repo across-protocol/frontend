@@ -16,7 +16,7 @@ import {
 import { getChainInfo, isSupportedChainId } from "utils";
 import useSidebar from "./useSidebar";
 import closeIcon from "assets/across-close-button.svg";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 
 interface Props {
   openSidebar: boolean;
@@ -65,11 +65,11 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
             </CloseButton>
           </TopHeaderRow>
           {addrOrEns && <HeaderText>{addrOrEns}</HeaderText>}
-          {isSupportedChainId(chainId) && isConnected ? (
+          {isSupportedChainId(chainId) ? (
             <HeaderText>{getChainInfo(chainId).name}</HeaderText>
-          ) : (
+          ) : isConnected ? (
             <HeaderText>Unsupported Network</HeaderText>
-          )}
+          ) : null}
           {isConnected && wallet ? (
             <DisconnectButton onClick={() => disconnect(wallet)}>
               Disconnect

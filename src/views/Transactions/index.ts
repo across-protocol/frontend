@@ -1,1 +1,0 @@
-export { MyTransactions } from "./MyTransactions";
