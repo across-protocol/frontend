@@ -15,6 +15,7 @@ import LinkWalletModal from "./components/LinkWalletModal";
 const PreLaunchAirdrop = () => {
   const {
     activePageFlow,
+    setActivePageFlow,
     switchToSplash,
     switchToInfo,
     isConnected,
@@ -45,6 +46,7 @@ const PreLaunchAirdrop = () => {
           airdropDetailsLinkHandler={switchToInfo}
           account={account}
           rewardsData={rewardsData}
+          setActivePageFlow={setActivePageFlow}
         />
       );
       break;

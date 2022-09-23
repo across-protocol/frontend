@@ -14,6 +14,7 @@ import { ReactComponent as DefaultUserIcon } from "assets/icons/plaap/default-us
 
 import { RewardsApiInterface } from "utils/serverless-api/types";
 import RewardsCard from "../content/RewardsCard";
+import { FlowSelector } from "views/PreLaunchAirdrop/usePreLaunchAirdrop";
 
 type SplashFlowParams = {
   airdropDetailsLinkHandler: () => void;
@@ -25,6 +26,7 @@ type SplashFlowParams = {
   isConnected: boolean;
   rewardsData: RewardsApiInterface;
   account: string | undefined;
+  setActivePageFlow: React.Dispatch<React.SetStateAction<FlowSelector>>;
 };
 
 const SplashFlow = ({
@@ -37,6 +39,7 @@ const SplashFlow = ({
   isDiscordAuthenticated,
   account,
   rewardsData,
+  setActivePageFlow,
 }: SplashFlowParams) => (
   <>
     <TitleSection
@@ -60,7 +63,9 @@ const SplashFlow = ({
               steps={[
                 {
                   buttonContent: <>Learn about Across</>,
-                  buttonHandler: () => {},
+                  buttonHandler: () => {
+                    setActivePageFlow("traveller");
+                  },
                   // TODO: This flow needs to be composed to walk through these states.
                   stepProgress: "completed",
                   stepTitle: "Connect Discord",
