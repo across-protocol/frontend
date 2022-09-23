@@ -20,7 +20,7 @@ const Template: ComponentStory<typeof SplashFlow> = (args) => {
   const [rewardsData, setRewardsData] = useState<RewardsApiInterface>(
     {} as RewardsApiInterface
   );
-  const [_, setActivePageFlow] = useState<FlowSelector>("traveller");
+  const [, setActivePageFlow] = useState<FlowSelector>("traveller");
   useEffect(() => {
     getPrelaunchRewards(account).then((res) => {
       if (res) {
