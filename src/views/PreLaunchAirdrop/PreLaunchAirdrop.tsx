@@ -20,6 +20,8 @@ const PreLaunchAirdrop = () => {
     discordLoginHandler,
     discordLogoutHandler,
     isDiscordAuthenticated,
+    rewardsData,
+    account,
   } = usePreLaunchAirdrop();
 
   let activePageComponent: JSX.Element;
@@ -36,6 +38,8 @@ const PreLaunchAirdrop = () => {
           connectWalletHandler={connectWallet}
           isConnected={isConnected}
           airdropDetailsLinkHandler={switchToInfo}
+          account={account}
+          rewardsData={rewardsData}
         />
       );
       break;

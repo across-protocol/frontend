@@ -1,7 +1,7 @@
+import React from "react";
 import styled from "@emotion/styled";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-right-16.svg";
 import { ButtonV2 } from "components";
-import React from "react";
 import { QUERIESV2 } from "utils";
 import { ReactComponent as AcrossRingLogo } from "assets/across-logo-with-rings.svg";
 

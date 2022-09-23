@@ -148,7 +148,6 @@ const Routes: React.FC = () => {
           <Route exact path="/auth/discord" component={DiscordAuth} />
           <Route exact path="/" component={Send} />
         </Suspense>
-
         <Route path="*" component={NotFound} />
       </Switch>
       <Toast position="top-right" />
