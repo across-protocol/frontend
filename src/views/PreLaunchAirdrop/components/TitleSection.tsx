@@ -1,16 +1,18 @@
+import React from "react";
 import styled from "@emotion/styled";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-right-16.svg";
 import { ButtonV2 } from "components";
-import React from "react";
 import { QUERIESV2 } from "utils";
 import { ReactComponent as AcrossRingLogo } from "assets/across-logo-with-rings.svg";
 
 type TitleSectionParams = {
   airdropDetailsLinkHandler: () => void;
+  walletConnectionHandler: () => void;
   isConnected?: boolean;
 };
 const TitleSection = ({
   airdropDetailsLinkHandler,
+  walletConnectionHandler,
   isConnected,
 }: TitleSectionParams) => {
   return (
@@ -26,7 +28,9 @@ const TitleSection = ({
       </TextStack>
       <ButtonStack>
         {!isConnected && (
-          <StyledButton size="lg">Connect to check eligibility</StyledButton>
+          <StyledButton onClick={walletConnectionHandler} size="lg">
+            Connect to check eligibility
+          </StyledButton>
         )}
         <EligibilityLink onClick={airdropDetailsLinkHandler}>
           <InnerLinkText>Airdrop details</InnerLinkText>
@@ -36,7 +40,7 @@ const TitleSection = ({
     </Wrapper>
   );
 };
-export default React.memo(TitleSection);
+export default TitleSection;
 
 const Wrapper = styled.div`
   display: flex;

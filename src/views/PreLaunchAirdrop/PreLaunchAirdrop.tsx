@@ -21,8 +21,11 @@ const PreLaunchAirdrop = () => {
     connectWalletHandler,
     account,
     linkWalletHandler,
+    discordLoginHandler,
+    discordLogoutHandler,
+    isDiscordAuthenticated,
+    rewardsData,
   } = usePreLaunchAirdrop();
-
   const [displayModal, setDisplayModal] = useState(true);
 
   let activePageComponent: JSX.Element;
@@ -32,7 +35,16 @@ const PreLaunchAirdrop = () => {
       break;
     case "splash":
       activePageComponent = (
-        <SplashFlow airdropDetailsLinkHandler={switchToInfo} />
+        <SplashFlow
+          isDiscordAuthenticated={isDiscordAuthenticated}
+          discordLoginHandler={discordLoginHandler}
+          discordLogoutHandler={discordLogoutHandler}
+          connectWalletHandler={connectWalletHandler}
+          isConnected={isConnected}
+          airdropDetailsLinkHandler={switchToInfo}
+          account={account}
+          rewardsData={rewardsData}
+        />
       );
       break;
     case "info":
@@ -58,7 +70,7 @@ const PreLaunchAirdrop = () => {
         connectWalletHandler={connectWalletHandler}
         displayModal={displayModal}
         exitModalHandler={() => setDisplayModal(false)}
-        address={account?.address}
+        address={account}
       />
     </>
   );

@@ -1,25 +1,42 @@
-import { useOnboard } from "hooks/useOnboard";
-import { useState } from "react";
+import { useDiscord } from "hooks/useDiscord";
+import { useState, useEffect } from "react";
+import { useConnection } from "hooks";
+import { useGetPrelaunchRewards } from "./api/useGetPrelaunchRewards";
 
 export type FlowSelector = "splash" | "traveller" | "info";
 
 export default function usePreLaunchAirdrop() {
   const [activePageFlow, setActivePageFlow] = useState<FlowSelector>("splash");
+  const { redirectToAuth, unauthenticate, isAuthenticated } = useDiscord();
+  const { isConnected, account, connect } = useConnection();
 
-  const { isConnected, connect, account } = useOnboard();
+  const { rewardsData } = useGetPrelaunchRewards(account);
+  useEffect(() => {
+    if (Object.keys(rewardsData).length && account && isConnected) {
+      setActivePageFlow("splash");
+    }
+  }, [rewardsData, account, isConnected]);
 
   return {
     activePageFlow,
     setActivePageFlow,
 
+    discordLoginHandler: redirectToAuth,
+    discordLogoutHandler: unauthenticate,
+    isDiscordAuthenticated: isAuthenticated,
+
+    // Fns related to setting page flow
     switchToSplash: () => setActivePageFlow("splash"),
     switchToTraveller: () => setActivePageFlow("traveller"),
     switchToInfo: () => setActivePageFlow("info"),
 
+    // Vars related to Onboard connection
     isConnected,
-    connectWalletHandler: () => connect(),
     account,
+    connectWalletHandler: () => connect(),
 
+    // Vars related to state management & modification
     linkWalletHandler: async () => {},
+    rewardsData,
   };
 }
