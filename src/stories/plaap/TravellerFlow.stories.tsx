@@ -15,8 +15,10 @@ export default {
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof TravellerFlow> = (args) => {
   const [_, setActivePageFlow] = useState<FlowSelector>("traveller");
-
-  return <TravellerFlow setActivePageFlow={setActivePageFlow} />;
+  const account = "0x1234567890123456789012345678901234567890";
+  return (
+    <TravellerFlow account={account} setActivePageFlow={setActivePageFlow} />
+  );
 };
 
 export const Primary = Template.bind({});

@@ -15,7 +15,7 @@ import { ReactComponent as DefaultUserIcon } from "assets/icons/plaap/default-us
 import { RewardsApiInterface } from "utils/serverless-api/types";
 import RewardsCard from "../content/RewardsCard";
 import { FlowSelector } from "views/PreLaunchAirdrop/usePreLaunchAirdrop";
-
+import { getAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
 type SplashFlowParams = {
   airdropDetailsLinkHandler: () => void;
   connectWalletHandler: () => void;
@@ -64,7 +64,14 @@ const SplashFlow = ({
                 {
                   buttonContent: <>Learn about Across</>,
                   buttonHandler: () => {
-                    setActivePageFlow("traveller");
+                    // Check if user has seen traveller flow before
+                    // TODO: Connect to data flow in different PR.
+                    if (
+                      account &&
+                      !getAccountSeenWelcomeTravellerFlow(account)
+                    ) {
+                      setActivePageFlow("traveller");
+                    }
                   },
                   // TODO: This flow needs to be composed to walk through these states.
                   stepProgress: "completed",

@@ -14,11 +14,13 @@ import {
 } from "components/Buttons/ButtonV2";
 import useTravellerFlow from "./useTravellerFlow";
 import { FlowSelector } from "views/PreLaunchAirdrop/usePreLaunchAirdrop";
+import { setAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
 interface Props {
+  account: string;
   setActivePageFlow: React.Dispatch<React.SetStateAction<FlowSelector>>;
 }
 const numDots = 4;
-const TravellerFlow: React.FC<Props> = ({ setActivePageFlow }) => {
+const TravellerFlow: React.FC<Props> = ({ account, setActivePageFlow }) => {
   const { step, setStep, view } = useTravellerFlow();
   const Icon = view.Icon;
   return (
@@ -49,7 +51,13 @@ const TravellerFlow: React.FC<Props> = ({ setActivePageFlow }) => {
             Next
           </SecondaryButtonV2>
         ) : (
-          <ButtonV2 size="md" onClick={() => setActivePageFlow("splash")}>
+          <ButtonV2
+            size="md"
+            onClick={() => {
+              setActivePageFlow("splash");
+              setAccountSeenWelcomeTravellerFlow(account);
+            }}
+          >
             Go to Bridge
           </ButtonV2>
         )}
