@@ -1,3 +1,4 @@
+import usePageScrollLock from "hooks/usePageScrollLock";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ModalContentWrapper,
@@ -28,6 +29,7 @@ const Modal: React.FC<ModalProps> = ({
   const modalContentRef = useRef<HTMLDivElement>(null);
   const exitAnimationTimeoutId = useRef<NodeJS.Timeout>();
   const [forwardAnimation, setForwardAnimation] = useState<boolean>(true);
+  const { lockScroll, unlockScroll } = usePageScrollLock();
 
   const exitHandler = () => {
     setForwardAnimation(false);
@@ -48,12 +50,9 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   useEffect(() => {
-    // Disable scrolling while modal is rendered
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, []);
+    lockScroll();
+    return () => unlockScroll();
+  }, [lockScroll, unlockScroll]);
 
   useEffect(() => {
     return () => {
