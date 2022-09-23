@@ -47,6 +47,13 @@ const PreLaunchAirdrop = lazy(
     )
 );
 
+const DiscordAuth = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "DiscordAuth" */ "./views/DiscordAuth/DiscordAuth"
+    )
+);
+
 const warningMessage = `
   We noticed that you have connected from a contract address.
   We recommend that you change the destination of the transfer (by clicking the "Change account" text below the To dropdown)
@@ -138,6 +145,7 @@ const Routes: React.FC = () => {
           <Route exact path="/rewards" component={Rewards} />
           <Route exact path="/rewards/claim" component={Claim} />
           <Route exact path="/airdrop" component={PreLaunchAirdrop} />
+          <Route exact path="/auth/discord" component={DiscordAuth} />
           <Route exact path="/" component={Send} />
         </Suspense>
 
