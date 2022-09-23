@@ -11,7 +11,7 @@ import TravellerFlow from "./components/TravellerFlow";
 import { SplashFlow } from "./components/SplashFlow";
 import { MoreInfoFlow } from "./components/MoreInfoFlow";
 const PreLaunchAirdrop = () => {
-  const { activePageFlow, switchToSplash, switchToInfo } =
+  const { activePageFlow, switchToSplash, switchToInfo, rewardsData, account } =
     usePreLaunchAirdrop();
 
   let activePageComponent: JSX.Element;
@@ -21,7 +21,11 @@ const PreLaunchAirdrop = () => {
       break;
     case "splash":
       activePageComponent = (
-        <SplashFlow airdropDetailsLinkHandler={switchToInfo} />
+        <SplashFlow
+          airdropDetailsLinkHandler={switchToInfo}
+          account={account}
+          rewardsData={rewardsData}
+        />
       );
       break;
     case "info":
