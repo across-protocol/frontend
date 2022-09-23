@@ -32,12 +32,7 @@ const PreLaunchAirdrop = () => {
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
     case "traveller":
-      activePageComponent = (
-        <TravellerFlow
-          account={account || ""}
-          setActivePageFlow={setActivePageFlow}
-        />
-      );
+      activePageComponent = <TravellerFlow account={account || ""} />;
       break;
     case "splash":
       activePageComponent = (
