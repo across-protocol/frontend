@@ -20,6 +20,7 @@ type SplashFlowParams = {
   connectWalletHandler: () => void;
   discordLoginHandler: () => void;
   discordLogoutHandler: () => void;
+  displayLinkModal: () => void;
   isDiscordAuthenticated: boolean;
   isConnected: boolean;
   rewardsData: RewardsApiInterface;
@@ -32,6 +33,7 @@ const SplashFlow = ({
   connectWalletHandler,
   discordLoginHandler,
   discordLogoutHandler,
+  displayLinkModal,
   isDiscordAuthenticated,
   account,
   rewardsData,
@@ -132,7 +134,7 @@ const SplashFlow = ({
                       Link <PlusIcon />
                     </>
                   ),
-                  buttonHandler: () => {},
+                  buttonHandler: displayLinkModal,
                   stepProgress: "awaiting",
                   stepTitle: "Link to Ethereum wallet",
                 },
