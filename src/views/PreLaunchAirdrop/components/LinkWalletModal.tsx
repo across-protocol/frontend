@@ -94,9 +94,7 @@ const LinkWalletModal = ({
         </ButtonStack>
       </ButtonTextStack>
     </Modal>
-  ) : (
-    <></>
-  );
+  ) : null;
 };
 
 export default LinkWalletModal;
