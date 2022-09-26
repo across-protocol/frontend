@@ -5,6 +5,7 @@ import {
   ChainId,
   UnsupportedChainIdError,
   isSupportedChainId,
+  insideStorybookRuntime,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
@@ -99,7 +100,8 @@ export function useOnboardManager() {
 
   useEffect(() => {
     // Only acknowledge the state where onboard is defined
-    if (onboard) {
+    // Also disable for when running inside of storybook
+    if (onboard && !insideStorybookRuntime) {
       // Retrieve the list of onboard's wallet connections
       const walletState = onboard?.state.select("wallets");
       // Subscribe to the state for any changes
