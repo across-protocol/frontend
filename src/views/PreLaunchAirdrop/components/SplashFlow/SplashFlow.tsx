@@ -5,7 +5,6 @@ import TitleSection from "../TitleSection";
 
 import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
-import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
 import { ReactComponent as PlusIcon } from "assets/icons/plus-icon-16.svg";
 import CardStepper from "../content/CardStepper";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
@@ -14,8 +13,9 @@ import { ReactComponent as DefaultUserIcon } from "assets/icons/plaap/default-us
 import { RewardsApiInterface } from "utils/serverless-api/types";
 import { FlowSelector } from "views/PreLaunchAirdrop/usePreLaunchAirdrop";
 import { getAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
-import RewardsCard from "../cards/RewardsCard";
 import LiquidityProviderCard from "../cards/LiquidityProviderCard";
+import BridgeUserCard from "../cards/BridgeUserCard";
+
 type SplashFlowParams = {
   airdropDetailsLinkHandler: () => void;
   connectWalletHandler: () => void;
@@ -91,25 +91,7 @@ const SplashFlow = ({
             />
           }
         />
-        <AirdropCard
-          title="Early Bridge User"
-          description="Users who bridge assets on Across before the Across Referral Program launch (July 18th, 2022) may be eligible for the $ACX airdrop."
-          Icon={BridgeIcon}
-          check={
-            rewardsData?.earlyUserRewards?.walletEligible
-              ? "eligible"
-              : "ineligible"
-          }
-          children={
-            <RewardsCard
-              label="Eligible wallet"
-              address={account ?? ""}
-              Icon={<WalletIcon />}
-              bottomText="Rewards are estimated as of September 1, 2022 and are subject to
-            change."
-            />
-          }
-        />
+        <BridgeUserCard account={account} rewardsData={rewardsData} />
       </CardWrapper>
       <CardWrapper>
         <AirdropCard
