@@ -29,12 +29,16 @@ const LiquidityProviderCard: React.FC<Props> = ({ account, rewardsData }) => {
       check={check}
       acxTokenAmount={rewardsData?.liquidityProviderRewards?.payout}
       children={
-        <RewardsCard
-          label={check === "eligible" ? "Eligible wallet" : "Ineligible wallet"}
-          address={account ?? ""}
-          Icon={<WalletIcon />}
-          bottomText="Rewards are estimated as of September 1, 2022 and are subject to change.  Liquidity providers continue to earn ACX up to token launch."
-        />
+        check === "eligible" && (
+          <RewardsCard
+            label={
+              check === "eligible" ? "Eligible wallet" : "Ineligible wallet"
+            }
+            address={account ?? ""}
+            Icon={<WalletIcon />}
+            bottomText="Rewards are estimated as of September 1, 2022 and are subject to change.  Liquidity providers continue to earn ACX up to token launch."
+          />
+        )
       }
     />
   );

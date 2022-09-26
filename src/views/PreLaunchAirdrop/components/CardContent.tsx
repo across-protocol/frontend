@@ -114,7 +114,7 @@ const TokenAmountWrapper = styled.div`
   padding: 6px 16px;
   gap: 8px;
   height: 48px;
-  min-width: 145px;
+  min-width: 135px;
   background: #2d2e33;
 
   border: 1px solid #3e4047;

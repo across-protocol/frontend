@@ -29,13 +29,15 @@ const BridgeUserCard: React.FC<Props> = ({ rewardsData, account }) => {
       check={check}
       acxTokenAmount={rewardsData?.earlyUserRewards?.payout}
       children={
-        <RewardsCard
-          label="Eligible wallet"
-          address={account ?? ""}
-          Icon={<WalletIcon />}
-          bottomText="Rewards are estimated as of September 1, 2022 and are subject to
+        check === "eligible" && (
+          <RewardsCard
+            label="Eligible wallet"
+            address={account ?? ""}
+            Icon={<WalletIcon />}
+            bottomText="Rewards are estimated as of September 1, 2022 and are subject to
     change."
-        />
+          />
+        )
       }
     />
   );
