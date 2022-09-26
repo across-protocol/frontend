@@ -8,7 +8,7 @@ import { CheckIconState } from "../CardIcon";
 
 interface Props {
   rewardsData: RewardsApiInterface;
-  account: string | undefined;
+  account?: string;
 }
 
 function useLiquidityProviderCard(rewardsData: RewardsApiInterface) {

@@ -22,12 +22,12 @@ export default async function getPrelaunchRewards(address: string) {
       payout: "1",
     },
     earlyUserRewards: {
-      walletEligible: true,
+      walletEligible: false,
       completed: false,
       payout: "2",
     },
     liquidityProviderRewards: {
-      walletEligible: true,
+      walletEligible: false,
       completed: false,
       payout: "5.123412341242314",
     },

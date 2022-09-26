@@ -8,7 +8,7 @@ import { CheckIconState } from "../CardIcon";
 
 interface Props {
   rewardsData: RewardsApiInterface;
-  account: string | undefined;
+  account?: string;
 }
 
 function useBridgeUserCard(rewardsData: RewardsApiInterface) {
@@ -20,7 +20,6 @@ function useBridgeUserCard(rewardsData: RewardsApiInterface) {
 
 const BridgeUserCard: React.FC<Props> = ({ rewardsData, account }) => {
   const { check } = useBridgeUserCard(rewardsData);
-  console.log("rewardsData", rewardsData);
   return (
     <AirdropCard
       title="Early Bridge User"
