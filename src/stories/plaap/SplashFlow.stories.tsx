@@ -31,9 +31,10 @@ const Template: ComponentStory<typeof SplashFlow> = (args) => {
       <SplashFlow
         isConnected={true}
         isDiscordAuthenticated={true}
-        connectWalletHandler={() => {}}
-        discordLoginHandler={() => {}}
-        discordLogoutHandler={() => {}}
+        connectWalletHandler={() => false}
+        discordLoginHandler={() => false}
+        discordLogoutHandler={() => false}
+        displayLinkModal={() => false}
         airdropDetailsLinkHandler={() => false}
         account={account}
         rewardsData={rewardsData}
