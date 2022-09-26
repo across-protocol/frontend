@@ -6,6 +6,7 @@ import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-external-
 import { ReactComponent as AcrossLogo } from "assets/across.svg";
 import { Link } from "react-router-dom";
 import { QUERIESV2 } from "utils";
+import { formatNumberMaxFracDigits } from "utils";
 
 type CardContentProps = {
   check?: CheckIconState;
@@ -33,11 +34,6 @@ const CardContent: React.FC<CardContentProps> = ({
       <TextStack>
         {isPillDisplayed && <EligibilityPill eligible={check === "eligible"} />}
         <Title>{title}</Title>
-        {acxTokenAmount && (
-          <TokenAmountWrapper>
-            <StyledAcrossLogo /> {acxTokenAmount} $ACX
-          </TokenAmountWrapper>
-        )}
         {description && <Description>{description}</Description>}
         {children}
       </TextStack>
@@ -45,6 +41,14 @@ const CardContent: React.FC<CardContentProps> = ({
         <ExternalLink to={externalLink}>
           <ExternalLinkIcon />
         </ExternalLink>
+      )}
+      {acxTokenAmount && (
+        <TokenAmountWrapper>
+          <TokenAmount>
+            {formatNumberMaxFracDigits(Number(acxTokenAmount))} $ACX
+          </TokenAmount>
+          <AcrossLogo />
+        </TokenAmountWrapper>
       )}
     </Wrapper>
   );
@@ -102,21 +106,30 @@ const ExternalLink = styled(Link)`
 `;
 
 const TokenAmountWrapper = styled.div`
-  margin-top: -4px;
-
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  padding: 6px 16px;
   gap: 8px;
+  height: 48px;
+  min-width: 145px;
+  background: #2d2e33;
 
+  border: 1px solid #3e4047;
+  border-radius: 8px;
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const TokenAmount = styled.h3`
+  font-family: "Barlow";
+  font-style: normal;
   font-weight: 400;
   font-size: 16px;
   line-height: 20px;
   color: #6cf9d8;
-`;
-
-const StyledAcrossLogo = styled(AcrossLogo)`
-  height: 16px;
-  width: 16px;
 `;

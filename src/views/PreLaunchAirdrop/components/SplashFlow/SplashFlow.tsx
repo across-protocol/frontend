@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { QUERIESV2, shortenAddress } from "utils";
+import { QUERIESV2 } from "utils";
 import AirdropCard from "../AirdropCard";
 import TitleSection from "../TitleSection";
 
@@ -12,9 +12,9 @@ import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
 import { ReactComponent as DefaultUserIcon } from "assets/icons/plaap/default-user-icon.svg";
 
 import { RewardsApiInterface } from "utils/serverless-api/types";
-import RewardsCard from "../content/RewardsCard";
 import { FlowSelector } from "views/PreLaunchAirdrop/usePreLaunchAirdrop";
 import { getAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
+import RewardsCard from "../cards/RewardsCard";
 import LiquidityProviderCard from "../cards/LiquidityProviderCard";
 type SplashFlowParams = {
   airdropDetailsLinkHandler: () => void;
@@ -103,11 +103,10 @@ const SplashFlow = ({
           children={
             <RewardsCard
               label="Eligible wallet"
-              address={shortenAddress(account || "", "...", 4)}
+              address={account ?? ""}
               Icon={<WalletIcon />}
               bottomText="Rewards are estimated as of September 1, 2022 and are subject to
             change."
-              amount="182.3445"
             />
           }
         />
