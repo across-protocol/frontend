@@ -24,7 +24,7 @@ export const Wrapper = styled.div<WrapperType>`
   width: 100vw;
   height: 100vh;
 
-  z-index: 1000000000;
+  z-index: 99998;
 
   animation: ${fadeBackground} 0.5s linear;
   animation-fill-mode: forwards;
