@@ -32,8 +32,11 @@ export default function usePreLaunchAirdrop() {
 
     // Vars related to Onboard connection
     isConnected,
-    connectWallet: () => connect(),
-    rewardsData,
     account,
+    connectWalletHandler: () => connect(),
+
+    // Vars related to state management & modification
+    linkWalletHandler: async () => {},
+    rewardsData,
   };
 }
