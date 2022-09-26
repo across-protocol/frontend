@@ -4,7 +4,6 @@ import AirdropCard from "../AirdropCard";
 import TitleSection from "../TitleSection";
 
 import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
-import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
 import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
 import { ReactComponent as PlusIcon } from "assets/icons/plus-icon-16.svg";
@@ -16,6 +15,7 @@ import { RewardsApiInterface } from "utils/serverless-api/types";
 import RewardsCard from "../content/RewardsCard";
 import { FlowSelector } from "views/PreLaunchAirdrop/usePreLaunchAirdrop";
 import { getAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
+import LiquidityProviderCard from "../cards/LiquidityProviderCard";
 type SplashFlowParams = {
   airdropDetailsLinkHandler: () => void;
   connectWalletHandler: () => void;
@@ -154,25 +154,7 @@ const SplashFlow = ({
             />
           }
         />
-        <AirdropCard
-          title="Liquidity Provider"
-          description="Liquidity providers who pool ETH, USDC, WBTC, and DAI into Across protocol before the token launch may be eligible for the $ACX airdrop."
-          Icon={MoneyIcon}
-          check={
-            rewardsData?.liquidityProviderRewards?.walletEligible
-              ? "eligible"
-              : "ineligible"
-          }
-          children={
-            <RewardsCard
-              label="Eligible wallet"
-              address={shortenAddress(account || "", "...", 4)}
-              Icon={<WalletIcon />}
-              bottomText="Rewards are estimated as of September 1, 2022 and are subject to change.  Liquidity providers continue to earn ACX up to token launch."
-              amount="2056.112"
-            />
-          }
-        />
+        <LiquidityProviderCard account={account} rewardsData={rewardsData} />
       </CardWrapper>
     </CardTableWrapper>
   </>
