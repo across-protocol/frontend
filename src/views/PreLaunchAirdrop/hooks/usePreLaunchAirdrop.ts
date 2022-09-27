@@ -8,10 +8,11 @@ export type FlowSelector = "splash" | "traveller" | "info";
 
 export default function usePreLaunchAirdrop() {
   const [activePageFlow, setActivePageFlow] = useState<FlowSelector>("splash");
-  const { redirectToAuth, unauthenticate, isAuthenticated } = useDiscord();
+  const { redirectToAuth, unauthenticate, isAuthenticated, discordJWT } =
+    useDiscord();
   const { isConnected, account, connect } = useConnection();
 
-  const { rewardsData } = useGetPrelaunchRewards(account);
+  const { rewardsData } = useGetPrelaunchRewards(account, discordJWT);
   const {
     discordAvatar,
     discordId,
@@ -54,5 +55,6 @@ export default function usePreLaunchAirdrop() {
     discordName,
     linkedWallet,
     discordDetailsError,
+    discordJWT,
   };
 }
