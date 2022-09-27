@@ -41,7 +41,6 @@ const CommunityRewardCard = ({
   walletIsLinked,
 }: CommunityRewardCardProps) => {
   const [displayModal, setDisplayModal] = useState(false);
-  console.log(walletIsLinked);
   const children = isConnected ? (
     <CardStepper
       steps={[
