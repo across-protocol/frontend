@@ -6,12 +6,11 @@ import {
   Wrapper,
 } from "./PreLaunchAirdrop.styles";
 import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
-import usePreLaunchAirdrop from "./usePreLaunchAirdrop";
+import usePreLaunchAirdrop from "./hooks/usePreLaunchAirdrop";
 import TravellerFlow from "./components/TravellerFlow";
 import { SplashFlow } from "./components/SplashFlow";
 import { MoreInfoFlow } from "./components/MoreInfoFlow";
-import { useState } from "react";
-import LinkWalletModal from "./components/LinkWalletModal";
+
 const PreLaunchAirdrop = () => {
   const {
     activePageFlow,
@@ -25,9 +24,11 @@ const PreLaunchAirdrop = () => {
     discordLogoutHandler,
     isDiscordAuthenticated,
     rewardsData,
+    discordAvatar,
+    discordId,
+    discordName,
+    walletIsLinked,
   } = usePreLaunchAirdrop();
-  const [displayModal, setDisplayModal] = useState(false);
-
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
     case "traveller":
@@ -40,11 +41,15 @@ const PreLaunchAirdrop = () => {
           discordLoginHandler={discordLoginHandler}
           discordLogoutHandler={discordLogoutHandler}
           connectWalletHandler={connectWalletHandler}
-          displayLinkModal={() => setDisplayModal(true)}
+          linkWalletHandler={linkWalletHandler}
           isConnected={isConnected}
           airdropDetailsLinkHandler={switchToInfo}
           account={account}
           rewardsData={rewardsData}
+          discordAvatar={discordAvatar}
+          discordId={discordId}
+          discordName={discordName}
+          walletIsLinked={walletIsLinked}
         />
       );
       break;
@@ -54,7 +59,6 @@ const PreLaunchAirdrop = () => {
     default:
       activePageComponent = <></>;
   }
-
   return (
     <>
       <Wrapper>
@@ -65,14 +69,6 @@ const PreLaunchAirdrop = () => {
         <ContentWrapper>{activePageComponent}</ContentWrapper>
         <Footer />
       </Wrapper>
-      <LinkWalletModal
-        linkWalletHandler={linkWalletHandler}
-        isConnected={isConnected}
-        connectWalletHandler={connectWalletHandler}
-        displayModal={displayModal}
-        exitModalHandler={() => setDisplayModal(false)}
-        address={account}
-      />
     </>
   );
 };

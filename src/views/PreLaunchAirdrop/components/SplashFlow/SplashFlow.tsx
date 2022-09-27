@@ -3,28 +3,31 @@ import { QUERIESV2, shortenAddress } from "utils";
 import AirdropCard from "../AirdropCard";
 import TitleSection from "../TitleSection";
 
-import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
 import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
 import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
-import { ReactComponent as PlusIcon } from "assets/icons/plus-icon-16.svg";
 import CardStepper from "../content/CardStepper";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
-import { ReactComponent as DefaultUserIcon } from "assets/icons/plaap/default-user-icon.svg";
 
 import { RewardsApiInterface } from "utils/serverless-api/types";
 import RewardsCard from "../content/RewardsCard";
+import CommunityRewardCard from "../cards/CommunityRewardCard";
 
 type SplashFlowParams = {
   airdropDetailsLinkHandler: () => void;
   connectWalletHandler: () => void;
   discordLoginHandler: () => void;
   discordLogoutHandler: () => void;
-  displayLinkModal: () => void;
   isDiscordAuthenticated: boolean;
   isConnected: boolean;
   rewardsData: RewardsApiInterface;
   account: string | undefined;
+  linkWalletHandler: () => Promise<void>;
+
+  discordAvatar?: string;
+  discordId?: string;
+  discordName?: string;
+  walletIsLinked?: boolean;
 };
 
 const SplashFlow = ({
@@ -33,10 +36,14 @@ const SplashFlow = ({
   connectWalletHandler,
   discordLoginHandler,
   discordLogoutHandler,
-  displayLinkModal,
   isDiscordAuthenticated,
   account,
   rewardsData,
+  linkWalletHandler,
+  discordAvatar,
+  discordId,
+  discordName,
+  walletIsLinked,
 }: SplashFlowParams) => (
   <>
     <TitleSection
@@ -101,46 +108,19 @@ const SplashFlow = ({
         />
       </CardWrapper>
       <CardWrapper>
-        <AirdropCard
-          title="Community Member"
-          description="Community members can check eligibility for the ACX airdrop by connecting their Discord account. Connected members can link an Ethereum wallet to claim the airdrop."
-          Icon={DiscordIcon}
-          check={
-            rewardsData?.communityRewards?.walletEligible
-              ? "eligible"
-              : "ineligible"
-          }
-          children={
-            <CardStepper
-              steps={[
-                {
-                  buttonContent: isDiscordAuthenticated
-                    ? "Disconnect"
-                    : "Connect Discord",
-                  buttonHandler: isDiscordAuthenticated
-                    ? discordLogoutHandler
-                    : discordLoginHandler,
-                  stepProgress: isDiscordAuthenticated
-                    ? "completed"
-                    : "awaiting",
-                  stepTitle: "Connect Discord",
-                  stepIcon: isDiscordAuthenticated ? (
-                    <DefaultUserIcon />
-                  ) : undefined,
-                },
-                {
-                  buttonContent: (
-                    <>
-                      Link <PlusIcon />
-                    </>
-                  ),
-                  buttonHandler: displayLinkModal,
-                  stepProgress: "awaiting",
-                  stepTitle: "Link to Ethereum wallet",
-                },
-              ]}
-            />
-          }
+        <CommunityRewardCard
+          connectWalletHandler={connectWalletHandler}
+          account={account}
+          isConnected={isConnected}
+          discordLoginHandler={discordLoginHandler}
+          discordLogoutHandler={discordLogoutHandler}
+          isDiscordAuthenticated={isDiscordAuthenticated}
+          rewardsData={rewardsData}
+          linkWalletHandler={linkWalletHandler}
+          discordAvatar={discordAvatar}
+          discordId={discordId}
+          discordName={discordName}
+          walletIsLinked={walletIsLinked}
         />
         <AirdropCard
           title="Liquidity Provider"
