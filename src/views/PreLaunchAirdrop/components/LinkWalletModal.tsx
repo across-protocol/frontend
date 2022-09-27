@@ -27,6 +27,8 @@ const LinkWalletModal = ({
     "success" | "failure" | undefined
   >(undefined);
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   useEffect(() => {
     if (!displayModal) {
       setConfirmed(undefined);
@@ -45,9 +47,14 @@ const LinkWalletModal = ({
     connectedNotLinked: {
       buttonText: "Link wallet",
       buttonHandler: () => {
-        linkWalletHandler().then((success) => {
-          setConfirmed(success ? "success" : "failure");
-        });
+        setIsLoading(true);
+        linkWalletHandler()
+          .then((success) => {
+            setConfirmed(success ? "success" : "failure");
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
       },
       infoText:
         "By linking this wallet you approve it to be the recipient of the Bridge Traveler Program airdrop.",
@@ -77,6 +84,7 @@ const LinkWalletModal = ({
       width={550}
       height={450}
       exitOnOutsideClick
+      disableExitOverride={isLoading}
     >
       <Alert status="warn">
         The linked wallet can be changed up until the official token launch on
@@ -103,8 +111,12 @@ const LinkWalletModal = ({
               )}
             </ConfirmationTextWrapper>
           ) : (
-            <StyledLinkButton size="lg" onClick={currentFlow.buttonHandler}>
-              {currentFlow.buttonText}
+            <StyledLinkButton
+              size="lg"
+              disabled={isLoading}
+              onClick={currentFlow.buttonHandler}
+            >
+              {isLoading ? "Linking..." : currentFlow.buttonText}
             </StyledLinkButton>
           )}
         </ButtonStack>
