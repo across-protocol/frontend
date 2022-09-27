@@ -1,21 +1,21 @@
 import styled from "@emotion/styled";
-import { QUERIESV2, shortenAddress } from "utils";
+import { QUERIESV2 } from "utils";
 import AirdropCard from "../AirdropCard";
 import TitleSection from "../TitleSection";
 
 import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
-import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
-import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
 import { ReactComponent as PlusIcon } from "assets/icons/plus-icon-16.svg";
 import CardStepper from "../content/CardStepper";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
 import { ReactComponent as DefaultUserIcon } from "assets/icons/plaap/default-user-icon.svg";
 
 import { RewardsApiInterface } from "utils/serverless-api/types";
-import RewardsCard from "../content/RewardsCard";
 import { FlowSelector } from "views/PreLaunchAirdrop/usePreLaunchAirdrop";
 import { getAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
+import LiquidityProviderCard from "../cards/LiquidityProviderCard";
+import BridgeUserCard from "../cards/BridgeUserCard";
+
 type SplashFlowParams = {
   airdropDetailsLinkHandler: () => void;
   connectWalletHandler: () => void;
@@ -91,26 +91,7 @@ const SplashFlow = ({
             />
           }
         />
-        <AirdropCard
-          title="Early Bridge User"
-          description="Users who bridge assets on Across before the Across Referral Program launch (July 18th, 2022) may be eligible for the $ACX airdrop."
-          Icon={BridgeIcon}
-          check={
-            rewardsData?.earlyUserRewards?.walletEligible
-              ? "eligible"
-              : "ineligible"
-          }
-          children={
-            <RewardsCard
-              label="Eligible wallet"
-              address={shortenAddress(account || "", "...", 4)}
-              Icon={<WalletIcon />}
-              bottomText="Rewards are estimated as of September 1, 2022 and are subject to
-            change."
-              amount="182.3445"
-            />
-          }
-        />
+        <BridgeUserCard account={account} rewardsData={rewardsData} />
       </CardWrapper>
       <CardWrapper>
         <AirdropCard
@@ -154,25 +135,7 @@ const SplashFlow = ({
             />
           }
         />
-        <AirdropCard
-          title="Liquidity Provider"
-          description="Liquidity providers who pool ETH, USDC, WBTC, and DAI into Across protocol before the token launch may be eligible for the $ACX airdrop."
-          Icon={MoneyIcon}
-          check={
-            rewardsData?.liquidityProviderRewards?.walletEligible
-              ? "eligible"
-              : "ineligible"
-          }
-          children={
-            <RewardsCard
-              label="Eligible wallet"
-              address={shortenAddress(account || "", "...", 4)}
-              Icon={<WalletIcon />}
-              bottomText="Rewards are estimated as of September 1, 2022 and are subject to change.  Liquidity providers continue to earn ACX up to token launch."
-              amount="2056.112"
-            />
-          }
-        />
+        <LiquidityProviderCard account={account} rewardsData={rewardsData} />
       </CardWrapper>
     </CardTableWrapper>
   </>
