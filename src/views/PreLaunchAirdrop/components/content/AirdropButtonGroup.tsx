@@ -1,10 +1,11 @@
 import styled from "@emotion/styled";
+import { ButtonV2 } from "components";
 import React from "react";
-import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 type ButtonProps = {
   text: string;
-  link: string;
+  link: string | (() => void);
 };
 type AirdropButtonGroupProps = {
   left: ButtonProps;
@@ -14,16 +15,32 @@ type AirdropButtonGroupProps = {
 const AirdropButtonGroup: React.FC<AirdropButtonGroupProps> = ({
   left,
   right,
-}) => (
-  <Wrapper>
-    <StyledLink to={left.link}>{left.text}</StyledLink>
-    {right && <StyledLinkAlt to={right.link}>{right.text}</StyledLinkAlt>}
-  </Wrapper>
-);
+}) => {
+  const history = useHistory();
+  const onClick = (val: string | (() => void)) => {
+    if (typeof val === "string") {
+      history.push(val);
+    } else {
+      val();
+    }
+  };
+  return (
+    <Wrapper>
+      <StyledLink size="lg" onClick={() => onClick(left.link)}>
+        {left.text}
+      </StyledLink>
+      {right && (
+        <StyledLinkAlt size="lg" onClick={() => onClick(left.link)}>
+          {right.text}
+        </StyledLinkAlt>
+      )}
+    </Wrapper>
+  );
+};
 
 export default AirdropButtonGroup;
 
-const StyledLink = styled(Link)`
+const StyledLink = styled(ButtonV2)`
   display: flex;
   flex-direction: row;
   align-items: center;
