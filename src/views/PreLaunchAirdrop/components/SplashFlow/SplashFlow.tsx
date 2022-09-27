@@ -22,7 +22,7 @@ type SplashFlowParams = {
   isConnected: boolean;
   rewardsData: RewardsApiInterface;
   account: string | undefined;
-  linkWalletHandler: () => Promise<void>;
+  linkWalletHandler: () => Promise<boolean>;
 
   discordAvatar?: string;
   discordId?: string;

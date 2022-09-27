@@ -13,7 +13,7 @@ type CommunityRewardCardProps = {
   account: string | undefined;
   connectWalletHandler: () => void;
   isConnected: boolean;
-  linkWalletHandler: () => Promise<void>;
+  linkWalletHandler: () => Promise<boolean>;
 
   discordLoginHandler: () => void;
   discordLogoutHandler: () => void;

@@ -15,7 +15,6 @@ export function useDiscordDetails() {
   );
   const [discordDetailsLoading, setDiscordDetailsLoading] = useState(false);
   const [discordDetailsError, setDiscordDetailsError] = useState(false);
-  const [walletLinkingError, setWalletLinkingError] = useState(false);
 
   useEffect(() => {
     setDiscordDetailsLoading(true);
@@ -39,18 +38,27 @@ export function useDiscordDetails() {
   }, [discordJWT]);
 
   const linkWallet = useCallback(async () => {
+    let successfullyLinked = true;
     if (signer && discordJWT && id) {
       setDiscordDetailsLoading(true);
       try {
-        await getApiEndpoint().prelaunch.connectWallet(discordJWT, id, signer);
-        setWalletLinked(await signer.getAddress());
-        setWalletLinkingError(false);
+        const linked = await getApiEndpoint().prelaunch.connectWallet(
+          discordJWT,
+          id,
+          signer
+        );
+        if (linked) {
+          setWalletLinked(await signer.getAddress());
+        } else {
+          successfullyLinked = false;
+        }
       } catch (_e) {
-        setWalletLinkingError(true);
+        successfullyLinked = false;
       } finally {
         setDiscordDetailsLoading(false);
       }
     }
+    return successfullyLinked;
   }, [signer, discordJWT, id]);
 
   return {
@@ -61,6 +69,5 @@ export function useDiscordDetails() {
     linkedWallet: walletLinked,
     discordDetailsLoading,
     discordDetailsError,
-    walletLinkingError,
   };
 }
