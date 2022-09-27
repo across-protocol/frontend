@@ -13,8 +13,13 @@ export function useDiscordDetails() {
   const [walletLinked, setWalletLinked] = useState<string | undefined>(
     undefined
   );
+  const [discordDetailsLoading, setDiscordDetailsLoading] = useState(false);
+  const [discordDetailsError, setDiscordDetailsError] = useState(false);
+  const [walletLinkingError, setWalletLinkingError] = useState(false);
 
   useEffect(() => {
+    setDiscordDetailsLoading(true);
+    setDiscordDetailsError(false);
     if (discordJWT) {
       getApiEndpoint()
         .prelaunch.discordUserDetails(discordJWT)
@@ -23,14 +28,28 @@ export function useDiscordDetails() {
           setName(data.discordName);
           setAvatar(data.discordAvatar);
           setWalletLinked(data.walletLinked);
+        })
+        .catch(() => {
+          setDiscordDetailsError(true);
+        })
+        .finally(() => {
+          setDiscordDetailsLoading(false);
         });
     }
   }, [discordJWT]);
 
   const linkWallet = useCallback(async () => {
     if (signer && discordJWT && id) {
-      await getApiEndpoint().prelaunch.connectWallet(discordJWT, id, signer);
-      setWalletLinked(await signer.getAddress());
+      setDiscordDetailsLoading(true);
+      try {
+        await getApiEndpoint().prelaunch.connectWallet(discordJWT, id, signer);
+        setWalletLinked(await signer.getAddress());
+        setWalletLinkingError(false);
+      } catch (_e) {
+        setWalletLinkingError(true);
+      } finally {
+        setDiscordDetailsLoading(false);
+      }
     }
   }, [signer, discordJWT, id]);
 
@@ -39,6 +58,9 @@ export function useDiscordDetails() {
     discordName: name,
     discordAvatar: avatar,
     linkWalletHandler: linkWallet,
-    walletIsLinked: walletLinked,
+    linkedWallet: walletLinked,
+    discordDetailsLoading,
+    discordDetailsError,
+    walletLinkingError,
   };
 }

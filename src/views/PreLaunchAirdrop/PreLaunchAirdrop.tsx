@@ -27,7 +27,7 @@ const PreLaunchAirdrop = () => {
     discordAvatar,
     discordId,
     discordName,
-    walletIsLinked,
+    linkedWallet,
   } = usePreLaunchAirdrop();
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
@@ -49,7 +49,7 @@ const PreLaunchAirdrop = () => {
           discordAvatar={discordAvatar}
           discordId={discordId}
           discordName={discordName}
-          walletIsLinked={walletIsLinked}
+          linkedWallet={linkedWallet}
         />
       );
       break;

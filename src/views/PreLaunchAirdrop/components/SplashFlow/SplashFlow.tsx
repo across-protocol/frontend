@@ -27,7 +27,7 @@ type SplashFlowParams = {
   discordAvatar?: string;
   discordId?: string;
   discordName?: string;
-  walletIsLinked?: boolean;
+  linkedWallet?: string;
 };
 
 const SplashFlow = ({
@@ -43,7 +43,7 @@ const SplashFlow = ({
   discordAvatar,
   discordId,
   discordName,
-  walletIsLinked,
+  linkedWallet,
 }: SplashFlowParams) => (
   <>
     <TitleSection
@@ -120,7 +120,7 @@ const SplashFlow = ({
           discordAvatar={discordAvatar}
           discordId={discordId}
           discordName={discordName}
-          walletIsLinked={walletIsLinked}
+          linkedWallet={linkedWallet}
         />
         <AirdropCard
           title="Liquidity Provider"

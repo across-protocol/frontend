@@ -24,7 +24,7 @@ type CommunityRewardCardProps = {
   discordAvatar?: string;
   discordId?: string;
   discordName?: string;
-  walletIsLinked?: boolean;
+  linkedWallet?: string;
 };
 
 const CommunityRewardCard = ({
@@ -38,9 +38,17 @@ const CommunityRewardCard = ({
   account,
   discordAvatar,
   discordName,
-  walletIsLinked,
+  linkedWallet,
 }: CommunityRewardCardProps) => {
   const [displayModal, setDisplayModal] = useState(false);
+
+  const isWalletTheSame =
+    account && linkedWallet
+      ? account.toLowerCase() === linkedWallet.toLowerCase()
+      : false;
+
+  const walletIsLinked = linkedWallet !== undefined;
+
   const children = isConnected ? (
     <CardStepper
       steps={[
@@ -69,8 +77,12 @@ const CommunityRewardCard = ({
             : undefined,
         },
         {
-          buttonContent: walletIsLinked ? (
-            "Change wallet"
+          buttonContent: linkedWallet ? (
+            isWalletTheSame ? (
+              "Linked"
+            ) : (
+              "Change wallet"
+            )
           ) : (
             <>
               Link <PlusIcon />
@@ -82,7 +94,12 @@ const CommunityRewardCard = ({
             walletIsLinked && account
               ? shortenAddress(account, "...", 4)
               : "Link to Ethereum wallet",
-          completedText: walletIsLinked ? "Linked wallet" : undefined,
+          completedText: walletIsLinked
+            ? isWalletTheSame
+              ? "Linked wallet"
+              : "Different wallet linked"
+            : undefined,
+          disableButton: walletIsLinked && isWalletTheSame,
         },
       ]}
     />
@@ -109,8 +126,8 @@ const CommunityRewardCard = ({
         description={cardDescription}
         Icon={DiscordIcon}
         check={
-          isConnected
-            ? rewardsData?.communityRewards?.walletEligible
+          isConnected && rewardsData?.communityRewards
+            ? rewardsData.communityRewards.walletEligible
               ? "eligible"
               : "ineligible"
             : "undetermined"
