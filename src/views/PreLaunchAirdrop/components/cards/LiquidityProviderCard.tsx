@@ -27,7 +27,7 @@ const LiquidityProviderCard: React.FC<Props> = ({ account, rewardsData }) => {
       description="Liquidity providers who pool ETH, USDC, WBTC, and DAI into Across protocol before the token launch may be eligible for the $ACX airdrop."
       Icon={MoneyIcon}
       check={check}
-      acxTokenAmount={rewardsData?.liquidityProviderRewards?.payout}
+      rewardAmount={rewardsData?.liquidityProviderRewards?.payout}
       children={
         check === "eligible" && (
           <RewardsCard

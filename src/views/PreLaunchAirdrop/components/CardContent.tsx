@@ -15,6 +15,7 @@ type CardContentProps = {
   description?: string;
   acxTokenAmount?: string;
   externalLink?: string;
+  rewardAmount?: string;
 };
 
 const CardContent: React.FC<CardContentProps> = ({
@@ -24,6 +25,7 @@ const CardContent: React.FC<CardContentProps> = ({
   description,
   externalLink,
   acxTokenAmount,
+  rewardAmount,
   children,
 }) => {
   const isPillDisplayed = check && check !== "undetermined";
@@ -36,19 +38,24 @@ const CardContent: React.FC<CardContentProps> = ({
         <Title>{title}</Title>
         {description && <Description>{description}</Description>}
         {children}
+        {acxTokenAmount && (
+          <TokenAmountWrapper>
+            <StyledAcrossLogo /> {acxTokenAmount} $ACX
+          </TokenAmountWrapper>
+        )}
       </TextStack>
       {externalLink && (
         <ExternalLink to={externalLink}>
           <ExternalLinkIcon />
         </ExternalLink>
       )}
-      {acxTokenAmount && (
-        <TokenAmountWrapper>
-          <TokenAmount>
+      {rewardAmount && (
+        <RewardAmountWrapper>
+          <RewardAmount>
             {formatNumberMaxFracDigits(Number(acxTokenAmount))} $ACX
-          </TokenAmount>
+          </RewardAmount>
           <AcrossLogo />
-        </TokenAmountWrapper>
+        </RewardAmountWrapper>
       )}
     </Wrapper>
   );
@@ -105,7 +112,7 @@ const ExternalLink = styled(Link)`
   width: 40px;
 `;
 
-const TokenAmountWrapper = styled.div`
+const RewardAmountWrapper = styled.div`
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -127,11 +134,29 @@ const TokenAmountWrapper = styled.div`
   }
 `;
 
-const TokenAmount = styled.h3`
+const RewardAmount = styled.h3`
   font-family: "Barlow";
   font-style: normal;
   font-weight: 400;
   font-size: 16px;
   line-height: 20px;
   color: #6cf9d8;
+`;
+
+const TokenAmountWrapper = styled.div`
+  margin-top: -4px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+  color: #6cf9d8;
+`;
+
+const StyledAcrossLogo = styled(AcrossLogo)`
+  height: 16px;
+  width: 16px;
 `;

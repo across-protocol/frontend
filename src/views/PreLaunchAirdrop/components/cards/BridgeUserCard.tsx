@@ -26,7 +26,7 @@ const BridgeUserCard: React.FC<Props> = ({ rewardsData, account }) => {
       description="Users who bridge assets on Across before the Across Referral Program launch (July 18th, 2022) may be eligible for the $ACX airdrop."
       Icon={BridgeIcon}
       check={check}
-      acxTokenAmount={rewardsData?.earlyUserRewards?.payout}
+      rewardAmount={rewardsData?.earlyUserRewards?.payout}
       children={
         check === "eligible" && (
           <RewardsCard
