@@ -21,6 +21,7 @@ function useLiquidityProviderCard(rewardsData: RewardsApiInterface) {
 
 const LiquidityProviderCard: React.FC<Props> = ({ account, rewardsData }) => {
   const { check } = useLiquidityProviderCard(rewardsData);
+  console.log("rewardsData", rewardsData);
   return (
     <AirdropCard
       title="Liquidity Provider"

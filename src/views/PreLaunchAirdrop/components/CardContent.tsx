@@ -52,7 +52,7 @@ const CardContent: React.FC<CardContentProps> = ({
       {rewardAmount && (
         <RewardAmountWrapper>
           <RewardAmount>
-            {formatNumberMaxFracDigits(Number(acxTokenAmount))} $ACX
+            {formatNumberMaxFracDigits(Number(rewardAmount))} $ACX
           </RewardAmount>
           <AcrossLogo />
         </RewardAmountWrapper>
