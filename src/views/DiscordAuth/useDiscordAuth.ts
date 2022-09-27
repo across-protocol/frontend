@@ -1,6 +1,8 @@
+import axios from "axios";
 import { useDiscord } from "hooks/useDiscord";
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import { rewardsApiUrl } from "utils";
 
 export default function useDiscordAuth() {
   const [errorAuthenticating, setErrorAuthenticating] =
@@ -49,11 +51,17 @@ const handleDiscordAuthHookLogic = async (
     if (hasOAuthToken) {
       if (discordOAuthToken) {
         // Call to scraper API and resolve the JWT
-        // FIXME: Call the API data to resolve the JWT token
-        const jwt = await Promise.resolve("JWT_PLACEHOLDER");
-        // Simulate a 5 second load
-        await new Promise((r) => setTimeout(r, 5000));
-        authenticate(jwt);
+        const jwtResolver = await axios.get<{ jwt: string }>(
+          `${rewardsApiUrl}/auth/discord`,
+          {
+            params: {
+              code: discordOAuthToken,
+            },
+          }
+        );
+        authenticate(jwtResolver.data.jwt);
+        // Simulate a 3 second load
+        await new Promise((r) => setTimeout(r, 3000));
       } else {
         // NOOP do nothing.
         return false;

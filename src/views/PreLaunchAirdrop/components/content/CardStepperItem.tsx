@@ -10,6 +10,7 @@ type ProgressWithAfterState = Progress | "not_reached";
 type CardStepperItemParams = {
   buttonContent: React.ReactElement | string;
   buttonHandler: () => void;
+  disableButton?: boolean;
 
   title: string;
   Icon?: React.ReactElement;
@@ -29,6 +30,7 @@ const CardStepperItem = ({
   title,
   previousProgress,
   Icon: StepIcon,
+  disableButton,
 }: CardStepperItemParams) => {
   const modifiedProgress = afterCurrent ? "not_reached" : progress;
   const isResolvedStep =
@@ -68,7 +70,7 @@ const CardStepperItem = ({
         hidden={useHiddenButton}
         size="lg"
         onClick={buttonHandler}
-        disabled={useHiddenButton}
+        disabled={disableButton || useHiddenButton}
       >
         {buttonContent}
       </StyledButton>

@@ -3,29 +3,33 @@ import { QUERIESV2 } from "utils";
 import AirdropCard from "../AirdropCard";
 import TitleSection from "../TitleSection";
 
-import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
-import { ReactComponent as PlusIcon } from "assets/icons/plus-icon-16.svg";
 import CardStepper from "../content/CardStepper";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
-import { ReactComponent as DefaultUserIcon } from "assets/icons/plaap/default-user-icon.svg";
 
 import { RewardsApiInterface } from "utils/serverless-api/types";
-import { FlowSelector } from "views/PreLaunchAirdrop/usePreLaunchAirdrop";
+import CommunityRewardCard from "../cards/CommunityRewardCard";
 import { getAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
 import LiquidityProviderCard from "../cards/LiquidityProviderCard";
 import BridgeUserCard from "../cards/BridgeUserCard";
+import { FlowSelector } from "views/PreLaunchAirdrop/hooks/usePreLaunchAirdrop";
 
 type SplashFlowParams = {
   airdropDetailsLinkHandler: () => void;
   connectWalletHandler: () => void;
   discordLoginHandler: () => void;
   discordLogoutHandler: () => void;
-  displayLinkModal: () => void;
   isDiscordAuthenticated: boolean;
   isConnected: boolean;
   rewardsData: RewardsApiInterface;
   account: string | undefined;
+  linkWalletHandler: () => Promise<boolean>;
+
+  discordAvatar?: string;
+  discordId?: string;
+  discordName?: string;
+  linkedWallet?: string;
+  discordDetailsError: boolean;
   setActivePageFlow: React.Dispatch<React.SetStateAction<FlowSelector>>;
 };
 
@@ -35,10 +39,15 @@ const SplashFlow = ({
   connectWalletHandler,
   discordLoginHandler,
   discordLogoutHandler,
-  displayLinkModal,
   isDiscordAuthenticated,
   account,
   rewardsData,
+  linkWalletHandler,
+  discordAvatar,
+  discordId,
+  discordName,
+  linkedWallet,
+  discordDetailsError,
   setActivePageFlow,
 }: SplashFlowParams) => (
   <>
@@ -94,46 +103,20 @@ const SplashFlow = ({
         <BridgeUserCard account={account} rewardsData={rewardsData} />
       </CardWrapper>
       <CardWrapper>
-        <AirdropCard
-          title="Community Member"
-          description="Community members can check eligibility for the ACX airdrop by connecting their Discord account. Connected members can link an Ethereum wallet to claim the airdrop."
-          Icon={DiscordIcon}
-          check={
-            rewardsData?.communityRewards?.walletEligible
-              ? "eligible"
-              : "ineligible"
-          }
-          children={
-            <CardStepper
-              steps={[
-                {
-                  buttonContent: isDiscordAuthenticated
-                    ? "Disconnect"
-                    : "Connect Discord",
-                  buttonHandler: isDiscordAuthenticated
-                    ? discordLogoutHandler
-                    : discordLoginHandler,
-                  stepProgress: isDiscordAuthenticated
-                    ? "completed"
-                    : "awaiting",
-                  stepTitle: "Connect Discord",
-                  stepIcon: isDiscordAuthenticated ? (
-                    <DefaultUserIcon />
-                  ) : undefined,
-                },
-                {
-                  buttonContent: (
-                    <>
-                      Link <PlusIcon />
-                    </>
-                  ),
-                  buttonHandler: displayLinkModal,
-                  stepProgress: "awaiting",
-                  stepTitle: "Link to Ethereum wallet",
-                },
-              ]}
-            />
-          }
+        <CommunityRewardCard
+          connectWalletHandler={connectWalletHandler}
+          account={account}
+          isConnected={isConnected}
+          discordLoginHandler={discordLoginHandler}
+          discordLogoutHandler={discordLogoutHandler}
+          isDiscordAuthenticated={isDiscordAuthenticated}
+          rewardsData={rewardsData}
+          linkWalletHandler={linkWalletHandler}
+          discordAvatar={discordAvatar}
+          discordId={discordId}
+          discordName={discordName}
+          linkedWallet={linkedWallet}
+          discordDetailsError={discordDetailsError}
         />
         <LiquidityProviderCard account={account} rewardsData={rewardsData} />
       </CardWrapper>
