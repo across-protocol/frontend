@@ -55,10 +55,14 @@ const CommunityRewardCard = ({
     <CardStepper
       steps={[
         {
-          buttonContent: isDiscordAuthenticated
+          buttonContent: discordDetailsError
+            ? "Reconnect"
+            : isDiscordAuthenticated
             ? "Disconnect"
             : "Connect Discord",
-          buttonHandler: isDiscordAuthenticated
+          buttonHandler: discordDetailsError
+            ? discordLoginHandler
+            : isDiscordAuthenticated
             ? discordLogoutHandler
             : discordLoginHandler,
           stepProgress: discordDetailsError
