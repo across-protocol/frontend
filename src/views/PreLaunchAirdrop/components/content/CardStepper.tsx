@@ -6,6 +6,7 @@ export type Progress = "completed" | "awaiting" | "failed";
 export type CardStepType = {
   buttonContent: React.ReactElement | string;
   buttonHandler: () => void;
+  disableButton?: boolean;
 
   stepTitle: string;
   stepIcon?: React.ReactElement;
@@ -38,6 +39,7 @@ const CardStepper = ({ steps }: CardStepperParams) => {
         subHeader={subHeader}
         buttonContent={step.buttonContent}
         buttonHandler={step.buttonHandler}
+        disableButton={step.disableButton}
         title={step.stepTitle}
         progress={step.stepProgress}
         afterCurrent={pastCurrentStep}

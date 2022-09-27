@@ -16,6 +16,8 @@ type ModalProps = {
 
   exitOnOutsideClick?: boolean;
   exitModalHandler: () => void;
+
+  disableExitOverride?: boolean;
 };
 
 const Modal: React.FC<ModalProps> = ({
@@ -24,6 +26,7 @@ const Modal: React.FC<ModalProps> = ({
   width,
   exitOnOutsideClick,
   exitModalHandler: externalModalExitHandler,
+  disableExitOverride,
   children,
 }) => {
   const modalContentRef = useRef<HTMLDivElement>(null);
@@ -32,11 +35,13 @@ const Modal: React.FC<ModalProps> = ({
   const { lockScroll, unlockScroll } = usePageScrollLock();
 
   const exitHandler = () => {
-    setForwardAnimation(false);
-    const id = setTimeout(() => {
-      externalModalExitHandler();
-    }, 500);
-    exitAnimationTimeoutId.current = id;
+    if (!disableExitOverride) {
+      setForwardAnimation(false);
+      const id = setTimeout(() => {
+        externalModalExitHandler();
+      }, 500);
+      exitAnimationTimeoutId.current = id;
+    }
   };
 
   const offModalClickHandler = (event: React.MouseEvent<HTMLElement>) => {
