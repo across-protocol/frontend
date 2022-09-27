@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { ethers, providers } from "ethers";
 import { Fee } from "utils/bridge";
 import { ChainId } from "utils/constants";
 
@@ -7,6 +7,8 @@ export type ServerlessAPIEndpoints = {
   prelaunch: {
     rewards: RewardsApiFunction;
     linkedWallet: RetrieveLinkedWalletType;
+    connectWallet: ConnectLinkedWalletType;
+    discordUserDetails: RetrieveDiscordUserDetailsType;
   };
 };
 
@@ -45,3 +47,16 @@ export type SuggestedApiFeeType = (
 export type RetrieveLinkedWalletType = (
   backendJWT: string
 ) => Promise<string | undefined>;
+
+export type ConnectLinkedWalletType = (
+  backendJWT: string,
+  discordId: string,
+  signer: providers.JsonRpcSigner
+) => Promise<boolean>;
+
+export type RetrieveDiscordUserDetailsType = (backendJWT: string) => Promise<{
+  discordId: string;
+  discordName: string;
+  discordAvatar: string;
+  walletLinked?: string;
+}>;
