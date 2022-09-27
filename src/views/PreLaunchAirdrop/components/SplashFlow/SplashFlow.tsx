@@ -1,17 +1,18 @@
 import styled from "@emotion/styled";
-import { QUERIESV2, shortenAddress } from "utils";
+import { QUERIESV2 } from "utils";
 import AirdropCard from "../AirdropCard";
 import TitleSection from "../TitleSection";
 
-import { ReactComponent as MoneyIcon } from "assets/icons/plaap/money.svg";
 import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
-import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
 import CardStepper from "../content/CardStepper";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
 
 import { RewardsApiInterface } from "utils/serverless-api/types";
-import RewardsCard from "../content/RewardsCard";
 import CommunityRewardCard from "../cards/CommunityRewardCard";
+import { getAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
+import LiquidityProviderCard from "../cards/LiquidityProviderCard";
+import BridgeUserCard from "../cards/BridgeUserCard";
+import { FlowSelector } from "views/PreLaunchAirdrop/hooks/usePreLaunchAirdrop";
 
 type SplashFlowParams = {
   airdropDetailsLinkHandler: () => void;
@@ -29,6 +30,7 @@ type SplashFlowParams = {
   discordName?: string;
   linkedWallet?: string;
   discordDetailsError: boolean;
+  setActivePageFlow: React.Dispatch<React.SetStateAction<FlowSelector>>;
 };
 
 const SplashFlow = ({
@@ -46,6 +48,7 @@ const SplashFlow = ({
   discordName,
   linkedWallet,
   discordDetailsError,
+  setActivePageFlow,
 }: SplashFlowParams) => (
   <>
     <TitleSection
@@ -69,7 +72,16 @@ const SplashFlow = ({
               steps={[
                 {
                   buttonContent: <>Learn about Across</>,
-                  buttonHandler: () => {},
+                  buttonHandler: () => {
+                    // Check if user has seen traveller flow before
+                    // TODO: Connect to data flow in different PR.
+                    if (
+                      account &&
+                      !getAccountSeenWelcomeTravellerFlow(account)
+                    ) {
+                      setActivePageFlow("traveller");
+                    }
+                  },
                   // TODO: This flow needs to be composed to walk through these states.
                   stepProgress: "completed",
                   stepTitle: "Connect Discord",
@@ -88,26 +100,7 @@ const SplashFlow = ({
             />
           }
         />
-        <AirdropCard
-          title="Early Bridge User"
-          description="Users who bridge assets on Across before the Across Referral Program launch (July 18th, 2022) may be eligible for the $ACX airdrop."
-          Icon={BridgeIcon}
-          check={
-            rewardsData?.earlyUserRewards?.walletEligible
-              ? "eligible"
-              : "ineligible"
-          }
-          children={
-            <RewardsCard
-              label="Eligible wallet"
-              address={shortenAddress(account || "", "...", 4)}
-              Icon={<WalletIcon />}
-              bottomText="Rewards are estimated as of September 1, 2022 and are subject to
-            change."
-              amount="182.3445"
-            />
-          }
-        />
+        <BridgeUserCard account={account} rewardsData={rewardsData} />
       </CardWrapper>
       <CardWrapper>
         <CommunityRewardCard
@@ -125,25 +118,7 @@ const SplashFlow = ({
           linkedWallet={linkedWallet}
           discordDetailsError={discordDetailsError}
         />
-        <AirdropCard
-          title="Liquidity Provider"
-          description="Liquidity providers who pool ETH, USDC, WBTC, and DAI into Across protocol before the token launch may be eligible for the $ACX airdrop."
-          Icon={MoneyIcon}
-          check={
-            rewardsData?.liquidityProviderRewards?.walletEligible
-              ? "eligible"
-              : "ineligible"
-          }
-          children={
-            <RewardsCard
-              label="Eligible wallet"
-              address={shortenAddress(account || "", "...", 4)}
-              Icon={<WalletIcon />}
-              bottomText="Rewards are estimated as of September 1, 2022 and are subject to change.  Liquidity providers continue to earn ACX up to token launch."
-              amount="2056.112"
-            />
-          }
-        />
+        <LiquidityProviderCard account={account} rewardsData={rewardsData} />
       </CardWrapper>
     </CardTableWrapper>
   </>

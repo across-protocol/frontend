@@ -7,11 +7,19 @@ import {
   DotStepWrapper,
   ButtonWrapper,
 } from "./TravellerFlow.styles";
-import { SecondaryButtonV2, TertiaryButton } from "components/Buttons/ButtonV2";
+import {
+  SecondaryButtonV2,
+  TertiaryButton,
+  ButtonV2,
+} from "components/Buttons/ButtonV2";
 import useTravellerFlow from "./useTravellerFlow";
+import { setAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
+interface Props {
+  account: string;
+}
 const numDots = 4;
-const TravellerFlow = () => {
-  const { step, setStep, view } = useTravellerFlow();
+const TravellerFlow: React.FC<Props> = ({ account }) => {
+  const { step, setStep, view, history } = useTravellerFlow();
   const Icon = view.Icon;
   return (
     <Wrapper>
@@ -31,13 +39,26 @@ const TravellerFlow = () => {
         >
           {step === 1 ? "Back to Home" : "Back"}
         </TertiaryButton>
-        <SecondaryButtonV2
-          disabled={step === numDots}
-          onClick={() => setStep((pv) => Math.min(pv + 1, numDots))}
-          size="md"
-        >
-          Next
-        </SecondaryButtonV2>
+        {step < numDots ? (
+          <SecondaryButtonV2
+            onClick={() => {
+              setStep((pv) => Math.min(pv + 1, numDots));
+            }}
+            size="md"
+          >
+            Next
+          </SecondaryButtonV2>
+        ) : (
+          <ButtonV2
+            size="md"
+            onClick={() => {
+              history.push("/");
+              setAccountSeenWelcomeTravellerFlow(account);
+            }}
+          >
+            Go to Bridge
+          </ButtonV2>
+        )}
       </ButtonWrapper>
       <DotStepWrapper>
         <DotStepper numDots={numDots} step={step} />

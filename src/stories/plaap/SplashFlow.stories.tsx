@@ -5,6 +5,8 @@ import { SplashFlow } from "views/PreLaunchAirdrop/components/SplashFlow";
 import getPrelaunchRewards from "views/PreLaunchAirdrop/api/getPrelaunchRewards";
 import { RewardsApiInterface } from "utils/serverless-api/types";
 import { Wrapper } from "views/PreLaunchAirdrop/PreLaunchAirdrop.styles";
+import { FlowSelector } from "views/PreLaunchAirdrop/hooks/usePreLaunchAirdrop";
+
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
   title: "SplashFlow",
@@ -19,6 +21,7 @@ const Template: ComponentStory<typeof SplashFlow> = (args) => {
   const [rewardsData, setRewardsData] = useState<RewardsApiInterface>(
     {} as RewardsApiInterface
   );
+  const [, setActivePageFlow] = useState<FlowSelector>("traveller");
   useEffect(() => {
     getPrelaunchRewards(account).then((res) => {
       if (res) {
@@ -39,6 +42,7 @@ const Template: ComponentStory<typeof SplashFlow> = (args) => {
         account={account}
         rewardsData={rewardsData}
         discordDetailsError={false}
+        setActivePageFlow={setActivePageFlow}
       />
     </Wrapper>
   );

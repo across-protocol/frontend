@@ -14,6 +14,7 @@ import { MoreInfoFlow } from "./components/MoreInfoFlow";
 const PreLaunchAirdrop = () => {
   const {
     activePageFlow,
+    setActivePageFlow,
     switchToSplash,
     switchToInfo,
     isConnected,
@@ -33,7 +34,7 @@ const PreLaunchAirdrop = () => {
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
     case "traveller":
-      activePageComponent = <TravellerFlow />;
+      activePageComponent = <TravellerFlow account={account || ""} />;
       break;
     case "splash":
       activePageComponent = (
@@ -52,6 +53,7 @@ const PreLaunchAirdrop = () => {
           discordId={discordId}
           discordName={discordName}
           linkedWallet={linkedWallet}
+          setActivePageFlow={setActivePageFlow}
         />
       );
       break;

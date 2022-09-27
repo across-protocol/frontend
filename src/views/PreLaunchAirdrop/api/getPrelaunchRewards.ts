@@ -29,7 +29,7 @@ export default async function getPrelaunchRewards(address: string) {
     liquidityProviderRewards: {
       walletEligible: true,
       completed: false,
-      payout: "5",
+      payout: "5.123412341242314",
     },
     communityRewards: {
       walletEligible: true,

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Rotate, Bolt, Heart, Present } from "./TravellerFlow.styles";
+import { useHistory } from "react-router-dom";
 const TRAVELLER_FLOW_DATA = [
   {
     title: "Welcome, Bridge Traveller.",
@@ -28,5 +29,6 @@ const TRAVELLER_FLOW_DATA = [
 ];
 export default function useTravellerFlow() {
   const [step, setStep] = useState(1);
-  return { step, setStep, view: TRAVELLER_FLOW_DATA[step - 1] };
+  const history = useHistory();
+  return { step, setStep, view: TRAVELLER_FLOW_DATA[step - 1], history };
 }
