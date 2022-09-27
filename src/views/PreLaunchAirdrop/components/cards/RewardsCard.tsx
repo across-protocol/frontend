@@ -1,20 +1,12 @@
 import styled from "@emotion/styled";
-import { ReactComponent as AcrossLogo } from "assets/icons/plaap/across-tiny.svg";
-import { formatNumberMaxFracDigits } from "utils";
+
 interface Props {
   Icon?: React.ReactElement;
   label: string;
   address: string;
   bottomText: string;
-  amount: string;
 }
-const RewardsCard: React.FC<Props> = ({
-  Icon,
-  label,
-  address,
-  bottomText,
-  amount,
-}) => {
+const RewardsCard: React.FC<Props> = ({ Icon, label, address, bottomText }) => {
   return (
     <Wrapper>
       <TopRow>
@@ -27,12 +19,6 @@ const RewardsCard: React.FC<Props> = ({
             </TextWrapper>
           </EligibleWallet>
         </EligibleWalletWrapper>
-        <TokenAmountWrapper>
-          <TokenAmount>
-            {formatNumberMaxFracDigits(Number(amount))} $ACX
-          </TokenAmount>
-          <AcrossLogo />
-        </TokenAmountWrapper>
       </TopRow>
       <BottomRow>
         <BottomRowText>{bottomText}</BottomRowText>
@@ -121,35 +107,6 @@ const Address = styled.p`
   font-size: 18px;
   line-height: 26px;
   color: #e0f3ff;
-`;
-
-const TokenAmountWrapper = styled.div`
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 16px;
-  gap: 8px;
-  height: 48px;
-
-  background: #2d2e33;
-
-  border: 1px solid #3e4047;
-  border-radius: 8px;
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-`;
-
-const TokenAmount = styled.h3`
-  font-family: "Barlow";
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 20px;
-  color: #6cf9d8;
 `;
 
 const TopRow = styled.div`

@@ -6,6 +6,7 @@ import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-external-
 import { ReactComponent as AcrossLogo } from "assets/across.svg";
 import { Link } from "react-router-dom";
 import { QUERIESV2 } from "utils";
+import { formatNumberMaxFracDigits } from "utils";
 
 type CardContentProps = {
   check?: CheckIconState;
@@ -14,6 +15,7 @@ type CardContentProps = {
   description?: string;
   acxTokenAmount?: string;
   externalLink?: string;
+  rewardAmount?: string;
 };
 
 const CardContent: React.FC<CardContentProps> = ({
@@ -23,6 +25,7 @@ const CardContent: React.FC<CardContentProps> = ({
   description,
   externalLink,
   acxTokenAmount,
+  rewardAmount,
   children,
 }) => {
   const isPillDisplayed = check && check !== "undetermined";
@@ -33,18 +36,26 @@ const CardContent: React.FC<CardContentProps> = ({
       <TextStack>
         {isPillDisplayed && <EligibilityPill eligible={check === "eligible"} />}
         <Title>{title}</Title>
+        {description && <Description>{description}</Description>}
+        {children}
         {acxTokenAmount && (
           <TokenAmountWrapper>
             <StyledAcrossLogo /> {acxTokenAmount} $ACX
           </TokenAmountWrapper>
         )}
-        {description && <Description>{description}</Description>}
-        {children}
       </TextStack>
       {externalLink && (
         <ExternalLink to={externalLink}>
           <ExternalLinkIcon />
         </ExternalLink>
+      )}
+      {rewardAmount && (
+        <RewardAmountWrapper>
+          <RewardAmount>
+            {formatNumberMaxFracDigits(Number(rewardAmount))} $ACX
+          </RewardAmount>
+          <AcrossLogo />
+        </RewardAmountWrapper>
       )}
     </Wrapper>
   );
@@ -101,15 +112,44 @@ const ExternalLink = styled(Link)`
   width: 40px;
 `;
 
+const RewardAmountWrapper = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+  gap: 8px;
+  height: 40px;
+  background: #2d2e33;
+  width: fit-content;
+  flex-shrink: 0;
+  border: 1px solid #3e4047;
+  border-radius: 8px;
+  svg {
+    flex-shrink: 0;
+
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const RewardAmount = styled.h3`
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+  color: #6cf9d8;
+`;
+
 const TokenAmountWrapper = styled.div`
   margin-top: -4px;
-
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
-
   font-weight: 400;
   font-size: 16px;
   line-height: 20px;
