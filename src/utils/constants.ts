@@ -739,3 +739,5 @@ export const QUERIESV2 = {
   sm: breakpoint(576),
   tb: breakpoint(1024),
 };
+
+export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);
