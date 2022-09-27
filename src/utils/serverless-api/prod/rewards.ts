@@ -5,7 +5,7 @@ import { rewardsApiUrl } from "utils";
 export default async function rewardsApiCall(
   address: string,
   jwt?: string
-): Promise<RewardsApiInterface> {
+): Promise<RewardsApiInterface | null> {
   try {
     const response = await axios.get(`${rewardsApiUrl}/airdrop/rewards`, {
       headers: {
@@ -18,10 +18,10 @@ export default async function rewardsApiCall(
     if (response.data) {
       return response.data;
     } else {
-      return {} as RewardsApiInterface;
+      return null;
     }
   } catch (err) {
     console.error(err);
-    return {} as RewardsApiInterface;
+    return null;
   }
 }

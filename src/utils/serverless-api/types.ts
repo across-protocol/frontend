@@ -17,7 +17,7 @@ export type RewardsApiFunction =
       address: string,
       jwt?: string,
       returnValue?: RewardsApiInterface
-    ) => Promise<RewardsApiInterface>)
+    ) => Promise<RewardsApiInterface | null>)
   // temp fix for the prod
   | (() => null);
 
