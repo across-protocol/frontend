@@ -23,7 +23,7 @@ const LinkWalletModal = ({
   connectWalletHandler,
   address,
 }: LinkWalletModalType) => {
-  const [isConfirmed, setConfirmed] = useState<
+  const [isConfirmed, setIsConfirmed] = useState<
     "success" | "failure" | undefined
   >(undefined);
 
@@ -31,7 +31,7 @@ const LinkWalletModal = ({
 
   useEffect(() => {
     if (!displayModal) {
-      setConfirmed(undefined);
+      setIsConfirmed(undefined);
     }
   }, [displayModal]);
 
@@ -50,7 +50,7 @@ const LinkWalletModal = ({
         setIsLoading(true);
         linkWalletHandler()
           .then((success) => {
-            setConfirmed(success ? "success" : "failure");
+            setIsConfirmed(success ? "success" : "failure");
           })
           .finally(() => {
             setIsLoading(false);
