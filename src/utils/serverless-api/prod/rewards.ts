@@ -7,16 +7,19 @@ export default async function rewardsApiCall(
   jwt?: string
 ): Promise<RewardsApiInterface> {
   try {
-    const response = await axios.get(
-      `${rewardsApiUrl}/airdrop/rewards?address=${address}`,
-      {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      }
-    );
-
-    return response.data;
+    const response = await axios.get(`${rewardsApiUrl}/airdrop/rewards`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+      params: {
+        address,
+      },
+    });
+    if (response.data) {
+      return response.data;
+    } else {
+      return {} as RewardsApiInterface;
+    }
   } catch (err) {
     console.error(err);
     return {} as RewardsApiInterface;
