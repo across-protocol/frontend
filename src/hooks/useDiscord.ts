@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { discordClientId } from "utils";
 import { useQueryParams } from "./useQueryParams";
 
-const STORAGE_KEY = "discord_JWT";
+const STORAGE_KEY = "backend_JWT";
 
 export function useDiscord() {
   const params = useQueryParams();
@@ -34,7 +34,7 @@ export function useDiscord() {
       client_id: discordClientId,
       redirect_uri: `${window.location.origin}/auth/discord`,
       response_type: "code",
-      scope: "identify",
+      scope: "guilds.members.read identify",
     }).toString();
     const url = `https://discord.com/api/oauth2/authorize?${queryString}`;
     window.location.replace(url);

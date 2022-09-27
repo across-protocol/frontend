@@ -1,13 +1,13 @@
 import styled from "@emotion/styled";
 import { Alert, ButtonV2, Modal } from "components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ReactComponent as CheckmarkIcon } from "assets/icons/rounded-checkmark-16.svg";
 
 type LinkWalletModalType = {
   displayModal: boolean;
   exitModalHandler: () => void;
 
-  linkWalletHandler: () => Promise<void>;
+  linkWalletHandler: () => Promise<boolean>;
 
   isConnected: boolean;
   connectWalletHandler: () => void;
@@ -23,7 +23,17 @@ const LinkWalletModal = ({
   connectWalletHandler,
   address,
 }: LinkWalletModalType) => {
-  const [isConfirmed, setConfirmed] = useState<boolean>(false);
+  const [isConfirmed, setIsConfirmed] = useState<
+    "success" | "failure" | undefined
+  >(undefined);
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!displayModal) {
+      setIsConfirmed(undefined);
+    }
+  }, [displayModal]);
 
   const walletFlow = {
     disconnected: {
@@ -37,9 +47,14 @@ const LinkWalletModal = ({
     connectedNotLinked: {
       buttonText: "Link wallet",
       buttonHandler: () => {
-        linkWalletHandler().then(() => {
-          setConfirmed(true);
-        });
+        setIsLoading(true);
+        linkWalletHandler()
+          .then((success) => {
+            setIsConfirmed(success ? "success" : "failure");
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
       },
       infoText:
         "By linking this wallet you approve it to be the recipient of the Bridge Traveler Program airdrop.",
@@ -69,6 +84,7 @@ const LinkWalletModal = ({
       width={550}
       height={450}
       exitOnOutsideClick
+      disableExitOverride={isLoading}
     >
       <Alert status="warn">
         The linked wallet can be changed up until the official token launch on
@@ -78,17 +94,29 @@ const LinkWalletModal = ({
         <InfoText>{currentFlow.infoText}</InfoText>
         <ButtonStack>
           {currentFlow.address && (
-            <UserAddressInput success={currentFlow.displaySuccess}>
+            <UserAddressInput
+              success={currentFlow.displaySuccess ? isConfirmed : undefined}
+            >
               {currentFlow.address}
             </UserAddressInput>
           )}
           {currentFlow.displaySuccess ? (
-            <SuccessTextWrapper>
-              Wallet successfully linked <StyledCheckmark />
-            </SuccessTextWrapper>
+            <ConfirmationTextWrapper success={isConfirmed === "success"}>
+              {isConfirmed === "success" ? (
+                <>
+                  Wallet successfully linked <StyledCheckmark />
+                </>
+              ) : (
+                "Wallet could not be linked. Please retry."
+              )}
+            </ConfirmationTextWrapper>
           ) : (
-            <StyledLinkButton size="lg" onClick={currentFlow.buttonHandler}>
-              {currentFlow.buttonText}
+            <StyledLinkButton
+              size="lg"
+              disabled={isLoading}
+              onClick={currentFlow.buttonHandler}
+            >
+              {isLoading ? "Linking..." : currentFlow.buttonText}
             </StyledLinkButton>
           )}
         </ButtonStack>
@@ -134,7 +162,7 @@ const StyledLinkButton = styled(ButtonV2)`
   text-transform: capitalize;
 `;
 
-const UserAddressInput = styled.div<{ success: boolean }>`
+const UserAddressInput = styled.div<{ success?: string }>`
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -154,14 +182,19 @@ const UserAddressInput = styled.div<{ success: boolean }>`
   line-height: 26px;
   color: #9daab2;
 
-  border-color: ${({ success }) => (success ? "#6CF9D8" : "#3e4047")};
+  border-color: ${({ success }) =>
+    success === "success"
+      ? "#6CF9D8"
+      : success === "failure"
+      ? "#f96c6c"
+      : "#3e4047"};
 `;
 
-const SuccessTextWrapper = styled.div`
+const ConfirmationTextWrapper = styled.div<{ success: boolean }>`
   font-size: 16px;
   line-height: 20px;
 
-  color: #6cf9d8;
+  color: ${({ success }) => (success ? "#6cf9d8" : "#f96c6c")};
 
   display: flex;
   flex-direction: row;
@@ -171,6 +204,10 @@ const SuccessTextWrapper = styled.div`
   gap: 8px;
 
   width: 100%;
+
+  & svg * {
+    stroke: ${({ success }) => (success ? "#6cf9d8" : "#f96c6c")};
+  }
 `;
 
 const StyledCheckmark = styled(CheckmarkIcon)``;
