@@ -2,9 +2,7 @@ import styled from "@emotion/styled";
 import React from "react";
 import { CardIcon, EligibilityPill } from ".";
 import { CheckIconState } from "./CardIcon";
-import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-external-link-16.svg";
 import { ReactComponent as AcrossLogo } from "assets/across.svg";
-import { Link } from "react-router-dom";
 import { QUERIESV2 } from "utils";
 import { formatNumberMaxFracDigits } from "utils";
 
@@ -23,7 +21,6 @@ const CardContent: React.FC<CardContentProps> = ({
   Icon,
   title,
   description,
-  externalLink,
   acxTokenAmount,
   rewardAmount,
   children,
@@ -44,11 +41,6 @@ const CardContent: React.FC<CardContentProps> = ({
           </TokenAmountWrapper>
         )}
       </TextStack>
-      {externalLink && (
-        <ExternalLink to={externalLink}>
-          <ExternalLinkIcon />
-        </ExternalLink>
-      )}
       {rewardAmount && (
         <RewardAmountWrapper>
           <RewardAmount>
@@ -71,6 +63,8 @@ const Wrapper = styled.div`
   gap: 24px;
 
   background: transparent;
+
+  position: relative;
 
   & * {
     z-index: 1;
@@ -107,11 +101,6 @@ const Description = styled.p`
   }
 `;
 
-const ExternalLink = styled(Link)`
-  height: 40px;
-  width: 40px;
-`;
-
 const RewardAmountWrapper = styled.div`
   box-sizing: border-box;
   display: flex;
@@ -132,6 +121,10 @@ const RewardAmountWrapper = styled.div`
     width: 16px;
     height: 16px;
   }
+
+  position: absolute;
+  right: 0;
+  top: 0;
 `;
 
 const RewardAmount = styled.h3`
