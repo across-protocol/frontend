@@ -25,6 +25,7 @@ type CommunityRewardCardProps = {
   discordId?: string;
   discordName?: string;
   linkedWallet?: string;
+  discordDetailsError: boolean;
 };
 
 const CommunityRewardCard = ({
@@ -39,6 +40,7 @@ const CommunityRewardCard = ({
   discordAvatar,
   discordName,
   linkedWallet,
+  discordDetailsError,
 }: CommunityRewardCardProps) => {
   const [displayModal, setDisplayModal] = useState(false);
 
@@ -59,12 +61,16 @@ const CommunityRewardCard = ({
           buttonHandler: isDiscordAuthenticated
             ? discordLogoutHandler
             : discordLoginHandler,
-          stepProgress:
-            isConnected && isDiscordAuthenticated ? "completed" : "awaiting",
-          stepTitle:
-            isDiscordAuthenticated && discordName
-              ? discordName
-              : "Connect Discord",
+          stepProgress: discordDetailsError
+            ? "failed"
+            : isConnected && isDiscordAuthenticated
+            ? "completed"
+            : "awaiting",
+          stepTitle: discordDetailsError
+            ? "Retry connection..."
+            : isDiscordAuthenticated && discordName
+            ? discordName
+            : "Connect Discord",
           stepIcon: isDiscordAuthenticated ? (
             discordAvatar ? (
               <CustomAvatar src={discordAvatar} />
@@ -72,7 +78,9 @@ const CommunityRewardCard = ({
               <DefaultUserIcon />
             )
           ) : undefined,
-          completedText: isDiscordAuthenticated
+          completedText: discordDetailsError
+            ? "Failure to load details"
+            : isDiscordAuthenticated
             ? "Eligible account"
             : undefined,
         },
@@ -126,7 +134,9 @@ const CommunityRewardCard = ({
         description={cardDescription}
         Icon={DiscordIcon}
         check={
-          isConnected && rewardsData?.communityRewards
+          discordDetailsError
+            ? "undetermined"
+            : isConnected && rewardsData?.communityRewards
             ? rewardsData.communityRewards.walletEligible
               ? "eligible"
               : "ineligible"

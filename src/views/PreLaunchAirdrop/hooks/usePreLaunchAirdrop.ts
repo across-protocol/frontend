@@ -18,6 +18,7 @@ export default function usePreLaunchAirdrop() {
     discordName,
     linkWalletHandler,
     linkedWallet,
+    discordDetailsError,
   } = useDiscordDetails();
 
   useEffect(() => {
@@ -52,5 +53,6 @@ export default function usePreLaunchAirdrop() {
     discordId,
     discordName,
     linkedWallet,
+    discordDetailsError,
   };
 }

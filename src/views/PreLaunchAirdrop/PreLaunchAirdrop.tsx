@@ -28,6 +28,7 @@ const PreLaunchAirdrop = () => {
     discordId,
     discordName,
     linkedWallet,
+    discordDetailsError,
   } = usePreLaunchAirdrop();
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
@@ -37,6 +38,7 @@ const PreLaunchAirdrop = () => {
     case "splash":
       activePageComponent = (
         <SplashFlow
+          discordDetailsError={discordDetailsError}
           isDiscordAuthenticated={isDiscordAuthenticated}
           discordLoginHandler={discordLoginHandler}
           discordLogoutHandler={discordLogoutHandler}

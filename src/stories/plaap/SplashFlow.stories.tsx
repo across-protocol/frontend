@@ -38,6 +38,7 @@ const Template: ComponentStory<typeof SplashFlow> = (args) => {
         airdropDetailsLinkHandler={() => false}
         account={account}
         rewardsData={rewardsData}
+        discordDetailsError={false}
       />
     </Wrapper>
   );
