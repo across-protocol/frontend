@@ -4,7 +4,10 @@ import { ChainId } from "utils/constants";
 
 export type ServerlessAPIEndpoints = {
   suggestedFees: SuggestedApiFeeType;
-  prelaunchRewards: RewardsApiFunction;
+  prelaunch: {
+    rewards: RewardsApiFunction;
+    linkedWallet: RetrieveLinkedWalletType;
+  };
 };
 
 export type RewardsApiFunction =
@@ -38,3 +41,7 @@ export type SuggestedApiFeeType = (
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
 }>;
+
+export type RetrieveLinkedWalletType = (
+  backendJWT: string
+) => Promise<string | undefined>;
