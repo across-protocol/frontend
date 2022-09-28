@@ -16,9 +16,10 @@ import useTravellerFlow from "./useTravellerFlow";
 import { setAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
 interface Props {
   account: string;
+  switchToSplash: () => void;
 }
 const numDots = 4;
-const TravellerFlow: React.FC<Props> = ({ account }) => {
+const TravellerFlow: React.FC<Props> = ({ account, switchToSplash }) => {
   const { step, setStep, view, history } = useTravellerFlow();
   const Icon = view.Icon;
   return (
@@ -33,7 +34,11 @@ const TravellerFlow: React.FC<Props> = ({ account }) => {
           onClick={() => {
             // Return back to view, not sure where yet.
             // Change when integrating this into regular view.
-            setStep((pv) => Math.max(1, pv - 1));
+            if (step === 1) {
+              switchToSplash();
+            } else {
+              setStep((pv) => Math.max(1, pv - 1));
+            }
           }}
           size="md"
         >
