@@ -59,7 +59,7 @@ const Wrapper = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-
+  flex-direction: column;
   gap: 24px;
 
   background: transparent;
