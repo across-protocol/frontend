@@ -31,7 +31,7 @@ const LinkWalletModal = ({
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const breakpoints = useCurrentBreakpoint();
+  const { isMobile } = useCurrentBreakpoint();
 
   useEffect(() => {
     if (!displayModal) {
@@ -105,11 +105,9 @@ const LinkWalletModal = ({
             <UserAddressInput
               success={currentFlow.displaySuccess ? isConfirmed : undefined}
             >
-              {shortenAddress(
-                currentFlow.address,
-                "...",
-                breakpoints.helpers.tabletAndDown ? 10 : 30
-              )}
+              {!isMobile
+                ? currentFlow.address
+                : shortenAddress(currentFlow.address, "...", 10)}
             </UserAddressInput>
           )}
           {currentFlow.displaySuccess ? (

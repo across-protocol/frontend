@@ -28,6 +28,9 @@ const useCurrentBreakpoint = () => {
       tabletAndUp,
       tabletAndDown,
     },
+    isMobile: breakpoint === "mobile",
+    isTablet: breakpoint === "tablet",
+    isDesktop: breakpoint === "desktop",
   };
 };
 
