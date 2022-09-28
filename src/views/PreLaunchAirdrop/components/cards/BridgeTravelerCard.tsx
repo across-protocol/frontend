@@ -10,19 +10,10 @@ import CardStepper from "../content/CardStepper";
 import { shortenAddress } from "utils";
 import { useHistory } from "react-router-dom";
 
-interface Props {
-  rewardsData: RewardsApiInterface;
-  account?: string;
-  isConnected: boolean;
-  setActivePageFlow: React.Dispatch<React.SetStateAction<FlowSelector>>;
-}
-
-const BridgeTravelerCard: React.FC<Props> = ({
-  isConnected,
-  account,
-  rewardsData,
-  setActivePageFlow,
-}) => {
+function useBridgeTravelerCard(
+  isConnected: boolean,
+  rewardsData: RewardsApiInterface
+) {
   const history = useHistory();
 
   let isWalletEligible: boolean | undefined =
@@ -54,7 +45,30 @@ const BridgeTravelerCard: React.FC<Props> = ({
         "This wallet isn’t eligible for the airdrop. If you have multiple wallets you could try connecting to a different one.";
     }
   }
+  return {
+    cardDescription,
+    check,
+    isWalletEligible,
+    isCompleted,
+    navigateToLink: (link: string) => history.push(link),
+  };
+}
 
+interface Props {
+  rewardsData: RewardsApiInterface;
+  account?: string;
+  isConnected: boolean;
+  setActivePageFlow: React.Dispatch<React.SetStateAction<FlowSelector>>;
+}
+
+const BridgeTravelerCard: React.FC<Props> = ({
+  isConnected,
+  account,
+  rewardsData,
+  setActivePageFlow,
+}) => {
+  const { cardDescription, check, isCompleted, navigateToLink } =
+    useBridgeTravelerCard(isConnected, rewardsData);
   return (
     <AirdropCard
       title="Bridge Traveler Program"
@@ -79,7 +93,7 @@ const BridgeTravelerCard: React.FC<Props> = ({
                   },
                   {
                     buttonContent: "Go to Bridge",
-                    buttonHandler: () => history.push("/"),
+                    buttonHandler: () => navigateToLink("/"),
                     stepTitle: "Bridge on Across",
                     stepProgress: isCompleted ? "completed" : "awaiting",
                   },
