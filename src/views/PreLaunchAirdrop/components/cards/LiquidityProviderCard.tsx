@@ -12,8 +12,7 @@ interface Props {
 }
 
 function useLiquidityProviderCard(rewardsData: RewardsApiInterface) {
-  const check: CheckIconState = rewardsData?.liquidityProviderRewards
-    ?.walletEligible
+  const check: CheckIconState = rewardsData?.liquidityProviderRewards?.eligible
     ? "eligible"
     : "ineligible";
   return { check };

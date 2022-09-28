@@ -18,12 +18,7 @@ export async function retrieveLinkedWallet(
   } catch (e: unknown) {
     // Test for the case where this function returns a 404
     // and if this is not that error, then propagate `e`
-    if (
-      !(
-        e instanceof AxiosError &&
-        e.response?.data.error === "WalletNotFoundException"
-      )
-    ) {
+    if (!(e instanceof AxiosError) || e?.response?.status !== 404) {
       throw e;
     }
   }

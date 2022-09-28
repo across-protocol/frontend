@@ -12,7 +12,7 @@ interface Props {
 }
 
 function useBridgeUserCard(rewardsData: RewardsApiInterface) {
-  const check: CheckIconState = rewardsData?.earlyUserRewards?.walletEligible
+  const check: CheckIconState = rewardsData?.earlyUserRewards?.eligible
     ? "eligible"
     : "ineligible";
   return { check };
