@@ -13,22 +13,22 @@ export default async function getPrelaunchRewards(
     mockServerlessAPI
       ? {
           welcomeTravellerRewards: {
-            walletEligible: true,
+            eligible: true,
             completed: false,
             payout: "1",
           },
           earlyUserRewards: {
-            walletEligible: true,
+            eligible: true,
             completed: false,
             payout: "2",
           },
           liquidityProviderRewards: {
-            walletEligible: true,
+            eligible: true,
             completed: false,
             payout: "5.123412341242314",
           },
           communityRewards: {
-            walletEligible: true,
+            eligible: true,
             completed: false,
             payout: "10",
           },

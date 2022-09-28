@@ -49,7 +49,10 @@ const CommunityRewardCard = ({
       ? account.toLowerCase() === linkedWallet.toLowerCase()
       : false;
 
+  const rewards = rewardsData?.communityRewards;
   const walletIsLinked = linkedWallet !== undefined;
+  const isEligible = rewards?.eligible ?? true;
+  const payout = rewards?.completed ? rewards?.payout : undefined;
 
   const children = isConnected ? (
     <CardStepper
@@ -57,7 +60,7 @@ const CommunityRewardCard = ({
         {
           buttonContent: discordDetailsError
             ? "Reconnect"
-            : isDiscordAuthenticated
+            : isDiscordAuthenticated || !isEligible
             ? "Disconnect"
             : "Connect Discord",
           buttonHandler: discordDetailsError
@@ -65,11 +68,12 @@ const CommunityRewardCard = ({
             : isDiscordAuthenticated
             ? discordLogoutHandler
             : discordLoginHandler,
-          stepProgress: discordDetailsError
-            ? "failed"
-            : isConnected && isDiscordAuthenticated
-            ? "completed"
-            : "awaiting",
+          stepProgress:
+            discordDetailsError || !isEligible
+              ? "failed"
+              : isConnected && isDiscordAuthenticated
+              ? "completed"
+              : "awaiting",
           stepTitle: discordDetailsError
             ? "Retry connection..."
             : isDiscordAuthenticated && discordName
@@ -85,7 +89,9 @@ const CommunityRewardCard = ({
           completedText: discordDetailsError
             ? "Failure to load details"
             : isDiscordAuthenticated
-            ? "Eligible account"
+            ? isEligible
+              ? "Eligible account"
+              : "Ineligible account"
             : undefined,
         },
         {
@@ -119,8 +125,8 @@ const CommunityRewardCard = ({
 
   let cardDescription =
     "Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet.";
-  if (isDiscordAuthenticated && rewardsData?.communityRewards) {
-    if (rewardsData.communityRewards.walletEligible) {
+  if (isDiscordAuthenticated && rewards) {
+    if (isEligible) {
       if (walletIsLinked) {
         cardDescription =
           "Congratulations! You are now eligible for the Across Community Member airdrop.";
@@ -140,12 +146,13 @@ const CommunityRewardCard = ({
         check={
           discordDetailsError
             ? "undetermined"
-            : isConnected && rewardsData?.communityRewards
-            ? rewardsData.communityRewards.walletEligible
+            : isConnected && rewards
+            ? isEligible
               ? "eligible"
               : "ineligible"
             : "undetermined"
         }
+        rewardAmount={payout}
         children={children}
       />
       <LinkWalletModal

@@ -17,7 +17,7 @@ function useBridgeTravelerCard(
   const history = useHistory();
 
   let isWalletEligible: boolean | undefined =
-    rewardsData?.welcomeTravellerRewards?.walletEligible;
+    rewardsData?.welcomeTravellerRewards?.eligible;
 
   let isCompleted: boolean | undefined =
     rewardsData?.welcomeTravellerRewards?.completed;
