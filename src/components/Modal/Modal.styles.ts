@@ -1,6 +1,8 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
+import { QUERIESV2 } from "utils";
+import { ModalDirection } from "./Modal";
 
 const fadeBackground = keyframes`
   from {background-color: rgba(0, 0, 0, 0)}
@@ -9,6 +11,7 @@ const fadeBackground = keyframes`
 
 type WrapperType = {
   reverseAnimation?: boolean;
+  direction: ModalDirection;
 };
 export const Wrapper = styled.div<WrapperType>`
   position: fixed;
@@ -19,7 +22,6 @@ export const Wrapper = styled.div<WrapperType>`
 
   display: flex;
   justify-content: center;
-  align-items: center;
 
   width: 100vw;
   height: 100vh;
@@ -31,6 +33,52 @@ export const Wrapper = styled.div<WrapperType>`
 
   opacity: ${({ reverseAnimation }) => (reverseAnimation ? 0 : 1)};
   transition: opacity 0.5s;
+
+  align-items: ${({ direction }) =>
+    direction.desktop === "middle"
+      ? "center"
+      : direction.desktop === "bottom"
+      ? "flex-end"
+      : "flex-start"};
+  padding: ${({ direction }) =>
+      direction.desktop === "middle"
+        ? "0px"
+        : direction.desktop === "bottom"
+        ? "16px"
+        : "calc(72px+16px)"}
+    0px;
+
+  @media ${QUERIESV2.tb.andDown} {
+    align-items: ${({ direction }) =>
+      direction.tablet === "middle"
+        ? "center"
+        : direction.tablet === "bottom"
+        ? "flex-end"
+        : "flex-start"};
+    padding: ${({ direction }) =>
+        direction.tablet === "middle"
+          ? "0px"
+          : direction.tablet === "bottom"
+          ? "16px"
+          : "calc(72px+16px)"}
+      0px;
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    align-items: ${({ direction }) =>
+      direction.tablet === "middle"
+        ? "center"
+        : direction.tablet === "bottom"
+        ? "flex-end"
+        : "flex-start"};
+    padding: ${({ direction }) =>
+        direction.tablet === "middle"
+          ? "0px"
+          : direction.tablet === "bottom"
+          ? "16px"
+          : "calc(72px+16px)"}
+      0px;
+  }
 `;
 
 type ModalWrapperType = {
@@ -42,7 +90,7 @@ export const ModalContentWrapper = styled.div<ModalWrapperType>`
   max-width: ${({ width }) => width ?? 800}px;
 
   height: fit-content;
-  width: calc(100% - 30px);
+  width: calc(100% - 32px);
 
   display: flex;
   flex-direction: column;
@@ -75,6 +123,11 @@ export const Title = styled.p`
   font-size: 22px;
   line-height: 26px;
   color: #e0f3ff;
+
+  @media ${QUERIESV2.tb.andDown} {
+    font-size: 18px;
+    line-height: 26px;
+  }
 `;
 
 export const StyledExitIcon = styled(CrossIcon)`

@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { AlertStatusType } from "./Alert";
 import { ReactComponent as InfoIcon } from "assets/icons/info-24.svg";
+import { QUERIESV2 } from "utils";
 
 const AlertColors: Record<
   AlertStatusType,
@@ -35,6 +36,11 @@ export const Wrapper = styled.div<IncludeStatusType>`
   background-color: ${({ status }) => AlertColors[status].bgColor};
   color: ${({ status }) => AlertColors[status].fontColor};
   border-color: ${({ status }) => AlertColors[status].borderColor};
+
+  @media ${QUERIESV2.tb.andDown} {
+    font-size: 14px;
+    line-height: 18px;
+  }
 `;
 
 export const ChildrenWrapper = styled.div``;
@@ -44,5 +50,12 @@ export const StyledInfoIcon = styled(InfoIcon)<IncludeStatusType>`
 
   & path {
     stroke: ${({ status }) => AlertColors[status].fontColor};
+  }
+
+  height: 24px;
+  width: 24px;
+  @media ${QUERIESV2.tb.andDown} {
+    height: 20px;
+    width: 20px;
   }
 `;

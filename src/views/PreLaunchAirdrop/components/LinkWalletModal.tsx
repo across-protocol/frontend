@@ -2,6 +2,8 @@ import styled from "@emotion/styled";
 import { Alert, ButtonV2, Modal } from "components";
 import { useEffect, useState } from "react";
 import { ReactComponent as CheckmarkIcon } from "assets/icons/rounded-checkmark-16.svg";
+import { QUERIESV2, shortenAddress } from "utils";
+import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 
 type LinkWalletModalType = {
   displayModal: boolean;
@@ -28,6 +30,8 @@ const LinkWalletModal = ({
   >(undefined);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const { isMobile } = useCurrentBreakpoint();
 
   useEffect(() => {
     if (!displayModal) {
@@ -85,6 +89,10 @@ const LinkWalletModal = ({
       height={450}
       exitOnOutsideClick
       disableExitOverride={isLoading}
+      verticalLocation={{
+        tablet: "bottom",
+        mobile: "bottom",
+      }}
     >
       <Alert status="warn">
         The linked wallet can be changed up until the official token launch on
@@ -97,7 +105,9 @@ const LinkWalletModal = ({
             <UserAddressInput
               success={currentFlow.displaySuccess ? isConfirmed : undefined}
             >
-              {currentFlow.address}
+              {!isMobile
+                ? currentFlow.address
+                : shortenAddress(currentFlow.address, "...", 10)}
             </UserAddressInput>
           )}
           {currentFlow.displaySuccess ? (
@@ -154,12 +164,27 @@ const InfoText = styled.p`
   color: #9daab2;
 
   text-align: center;
+
+  @media ${QUERIESV2.tb.andDown} {
+    font-size: 16px;
+    line-height: 20px;
+  }
 `;
 
 const StyledLinkButton = styled(ButtonV2)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   width: 100%;
 
   text-transform: capitalize;
+
+  @media ${QUERIESV2.tb.andDown} {
+    height: 40px;
+    font-size: 14px;
+    line-height: 18px;
+  }
 `;
 
 const UserAddressInput = styled.div<{ success?: string }>`
@@ -188,6 +213,12 @@ const UserAddressInput = styled.div<{ success?: string }>`
       : success === "failure"
       ? "#f96c6c"
       : "#3e4047"};
+
+  @media ${QUERIESV2.tb.andDown} {
+    height: 40px;
+    font-size: 14px;
+    line-height: 18px;
+  }
 `;
 
 const ConfirmationTextWrapper = styled.div<{ success: boolean }>`
@@ -207,6 +238,18 @@ const ConfirmationTextWrapper = styled.div<{ success: boolean }>`
 
   & svg * {
     stroke: ${({ success }) => (success ? "#6cf9d8" : "#f96c6c")};
+  }
+
+  & svg {
+    @media ${QUERIESV2.tb.andDown} {
+      height: 14px;
+      width: 14px;
+    }
+  }
+
+  @media ${QUERIESV2.tb.andDown} {
+    font-size: 14px;
+    line-height: 18px;
   }
 `;
 
