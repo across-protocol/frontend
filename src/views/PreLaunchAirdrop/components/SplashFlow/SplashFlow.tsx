@@ -1,18 +1,13 @@
 import styled from "@emotion/styled";
 import { QUERIESV2 } from "utils";
-import AirdropCard from "../AirdropCard";
 import TitleSection from "../TitleSection";
-
-import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.svg";
-import CardStepper from "../content/CardStepper";
-import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
 
 import { RewardsApiInterface } from "utils/serverless-api/types";
 import CommunityRewardCard from "../cards/CommunityRewardCard";
-import { getAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
 import LiquidityProviderCard from "../cards/LiquidityProviderCard";
 import BridgeUserCard from "../cards/BridgeUserCard";
 import { FlowSelector } from "views/PreLaunchAirdrop/hooks/usePreLaunchAirdrop";
+import BridgeTravelerCard from "../cards/BridgeTravelerCard";
 
 type SplashFlowParams = {
   airdropDetailsLinkHandler: () => void;
@@ -58,47 +53,11 @@ const SplashFlow = ({
     />
     <CardTableWrapper>
       <CardWrapper>
-        <AirdropCard
-          title="Bridge Traveler Program"
-          description="Have you bridged before but have yet to use Across? Connect your wallet to check if you’re eligible for an airdrop through the Bridge Traveler Program."
-          Icon={TravellerIcon}
-          check={
-            rewardsData?.welcomeTravellerRewards?.walletEligible
-              ? "eligible"
-              : "ineligible"
-          }
-          children={
-            <CardStepper
-              steps={[
-                {
-                  buttonContent: <>Learn about Across</>,
-                  buttonHandler: () => {
-                    // Check if user has seen traveller flow before
-                    // TODO: Connect to data flow in different PR.
-                    if (
-                      account &&
-                      !getAccountSeenWelcomeTravellerFlow(account)
-                    ) {
-                      setActivePageFlow("traveller");
-                    }
-                  },
-                  // TODO: This flow needs to be composed to walk through these states.
-                  stepProgress: "completed",
-                  stepTitle: "Connect Discord",
-                  stepIcon: <WalletIcon />,
-                  completedText: "Eligible wallet",
-                },
-                {
-                  buttonContent: <>Go to Bridge</>,
-                  buttonHandler: () => {},
-                  // TODO: This flow needs to be composed to walk through these states.
-                  stepProgress: "completed",
-                  stepTitle: "Bridge on Across",
-                  completedText: "Completed",
-                },
-              ]}
-            />
-          }
+        <BridgeTravelerCard
+          rewardsData={rewardsData}
+          isConnected={isConnected}
+          account={account}
+          setActivePageFlow={setActivePageFlow}
         />
         <BridgeUserCard account={account} rewardsData={rewardsData} />
       </CardWrapper>
