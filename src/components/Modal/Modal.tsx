@@ -46,8 +46,6 @@ const Modal: React.FC<ModalProps> = ({
     ...verticalLocation,
   };
 
-  console.log(direction);
-
   const modalContentRef = useRef<HTMLDivElement>(null);
   const exitAnimationTimeoutId = useRef<NodeJS.Timeout>();
   const [forwardAnimation, setForwardAnimation] = useState<boolean>(true);

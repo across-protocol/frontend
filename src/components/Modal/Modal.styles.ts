@@ -22,10 +22,6 @@ export const Wrapper = styled.div<WrapperType>`
 
   display: flex;
   justify-content: center;
-  align-items: center;
-
-  padding-bottom: 16px;
-  padding-top: calc(72px + 16px);
 
   width: 100vw;
   height: 100vh;
