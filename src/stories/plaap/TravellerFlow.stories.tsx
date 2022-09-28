@@ -20,7 +20,7 @@ export default {
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof TravellerFlow> = (args) => {
   const account = "0x1234567890123456789012345678901234567890";
-  return <TravellerFlow account={account} />;
+  return <TravellerFlow switchToSplash={() => {}} account={account} />;
 };
 
 export const Primary = Template.bind({});
