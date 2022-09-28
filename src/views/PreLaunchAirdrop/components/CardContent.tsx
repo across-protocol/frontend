@@ -67,8 +67,8 @@ export default CardContent;
 const Wrapper = styled.div`
   display: flex;
   align-items: flex-start;
+  flex-direction: row;
   justify-content: space-between;
-  flex-direction: column;
   gap: 24px;
 
   background: transparent;
@@ -77,6 +77,9 @@ const Wrapper = styled.div`
 
   & * {
     z-index: 1;
+  }
+  @media screen and (max-width: 624px) {
+    flex-direction: column;
   }
 `;
 
