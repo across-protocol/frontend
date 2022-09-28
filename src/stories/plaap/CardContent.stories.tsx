@@ -64,8 +64,8 @@ WithButtonGroup.args = {
   externalLink: undefined,
   contentStackChildren: (
     <AirdropButtonGroup
-      left={{ link: "/", text: "Learn about Across" }}
-      right={{ link: "/", text: "Disconnect wallet" }}
+      left={{ handler: () => {}, text: "Learn about Across" }}
+      right={{ handler: () => {}, text: "Disconnect wallet" }}
     />
   ),
 };
@@ -80,7 +80,9 @@ WithSingleButtonGroup.args = {
   title: "Bridge Traveler Program",
   externalLink: undefined,
   contentStackChildren: (
-    <AirdropButtonGroup left={{ link: "/", text: "Learn about Across" }} />
+    <AirdropButtonGroup
+      left={{ handler: () => {}, text: "Learn about Across" }}
+    />
   ),
 };
 

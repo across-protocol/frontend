@@ -1,11 +1,10 @@
 import styled from "@emotion/styled";
 import { ButtonV2 } from "components";
 import React from "react";
-import { useHistory } from "react-router-dom";
 
 type ButtonProps = {
   text: string;
-  link: string | (() => void);
+  handler: () => void;
 };
 type AirdropButtonGroupProps = {
   left: ButtonProps;
@@ -16,21 +15,13 @@ const AirdropButtonGroup: React.FC<AirdropButtonGroupProps> = ({
   left,
   right,
 }) => {
-  const history = useHistory();
-  const onClick = (val: string | (() => void)) => {
-    if (typeof val === "string") {
-      history.push(val);
-    } else {
-      val();
-    }
-  };
   return (
     <Wrapper>
-      <StyledLink size="lg" onClick={() => onClick(left.link)}>
+      <StyledLink size="lg" onClick={() => left.handler()}>
         {left.text}
       </StyledLink>
       {right && (
-        <StyledLinkAlt size="lg" onClick={() => onClick(left.link)}>
+        <StyledLinkAlt size="lg" onClick={() => right.handler()}>
           {right.text}
         </StyledLinkAlt>
       )}

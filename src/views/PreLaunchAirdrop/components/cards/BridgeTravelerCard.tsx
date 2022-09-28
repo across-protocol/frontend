@@ -107,7 +107,7 @@ const BridgeTravelerCard: React.FC<Props> = ({
           <AirdropButtonGroup
             left={{
               text: "Learn about Across",
-              link: () => setActivePageFlow("traveller"),
+              handler: () => setActivePageFlow("traveller"),
             }}
           />
         ) : undefined
