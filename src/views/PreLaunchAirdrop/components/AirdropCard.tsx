@@ -15,6 +15,8 @@ type AirdropCardContentProps = {
   contentStackChildren?: React.ReactElement;
   hideBoxShadow?: boolean;
   rewardAmount?: string;
+  // Internal React-router link, eg: /pools
+  buttonLink?: string;
 };
 
 const AirdropCard: React.FC<AirdropCardContentProps> = ({
@@ -28,6 +30,7 @@ const AirdropCard: React.FC<AirdropCardContentProps> = ({
   contentStackChildren,
   hideBoxShadow,
   rewardAmount,
+  buttonLink,
 }) => (
   <Wrapper eligible={check ?? "undetermined"} hideBoxShadow={hideBoxShadow}>
     <WrapperBackground />
@@ -39,6 +42,7 @@ const AirdropCard: React.FC<AirdropCardContentProps> = ({
       acxTokenAmount={acxTokenAmount}
       externalLink={externalLink}
       rewardAmount={rewardAmount}
+      buttonLink={buttonLink}
     >
       {contentStackChildren}
     </CardContent>

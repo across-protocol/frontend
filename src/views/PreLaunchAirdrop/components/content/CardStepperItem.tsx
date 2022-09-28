@@ -98,6 +98,10 @@ const StepItemWrapper = styled.div`
 
 const IconWrapper = styled.div`
   position: relative;
+  // Need to discuss with Tim about precise breakpoints
+  @media screen and (max-width: 624px) {
+    display: none;
+  }
 `;
 
 const StepIconTextWrapper = styled.div`
