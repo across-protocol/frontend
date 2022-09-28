@@ -9,17 +9,27 @@ import { CheckIconState } from "../CardIcon";
 interface Props {
   rewardsData: RewardsApiInterface;
   account?: string;
+  isConnected: boolean;
 }
 
-function useBridgeUserCard(rewardsData: RewardsApiInterface) {
-  const check: CheckIconState = rewardsData?.earlyUserRewards?.eligible
+function useBridgeUserCard(
+  rewardsData: RewardsApiInterface,
+  isConnected: boolean
+) {
+  const check: CheckIconState = !isConnected
+    ? "undetermined"
+    : isConnected && rewardsData?.liquidityProviderRewards?.eligible
     ? "eligible"
     : "ineligible";
   return { check };
 }
 
-const BridgeUserCard: React.FC<Props> = ({ rewardsData, account }) => {
-  const { check } = useBridgeUserCard(rewardsData);
+const BridgeUserCard: React.FC<Props> = ({
+  rewardsData,
+  account,
+  isConnected,
+}) => {
+  const { check } = useBridgeUserCard(rewardsData, isConnected);
   return (
     <AirdropCard
       title="Early Bridge User"
