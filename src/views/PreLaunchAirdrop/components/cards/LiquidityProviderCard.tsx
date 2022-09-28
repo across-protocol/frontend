@@ -27,6 +27,7 @@ const LiquidityProviderCard: React.FC<Props> = ({ account, rewardsData }) => {
       Icon={MoneyIcon}
       check={check}
       rewardAmount={rewardsData?.liquidityProviderRewards?.payout}
+      buttonLink="/pools"
       children={
         check === "eligible" && (
           <RewardsCard
