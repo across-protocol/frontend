@@ -59,7 +59,11 @@ const SplashFlow = ({
           account={account}
           setActivePageFlow={setActivePageFlow}
         />
-        <BridgeUserCard account={account} rewardsData={rewardsData} />
+        <BridgeUserCard
+          account={account}
+          rewardsData={rewardsData}
+          isConnected={isConnected}
+        />
       </CardWrapper>
       <CardWrapper>
         <CommunityRewardCard
@@ -77,7 +81,11 @@ const SplashFlow = ({
           linkedWallet={linkedWallet}
           discordDetailsError={discordDetailsError}
         />
-        <LiquidityProviderCard account={account} rewardsData={rewardsData} />
+        <LiquidityProviderCard
+          account={account}
+          rewardsData={rewardsData}
+          isConnected={isConnected}
+        />
       </CardWrapper>
     </CardTableWrapper>
   </>
