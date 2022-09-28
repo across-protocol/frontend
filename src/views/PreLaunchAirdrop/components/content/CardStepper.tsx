@@ -82,6 +82,6 @@ const StepperWrapper = styled.div`
   }
   // Need to discuss with Tim about precise breakpoints
   @media screen and (max-width: 624px) {
-    display: none;
+    padding-left: 0;
   }
 `;
