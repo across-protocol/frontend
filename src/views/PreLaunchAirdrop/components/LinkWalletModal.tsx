@@ -85,6 +85,10 @@ const LinkWalletModal = ({
       height={450}
       exitOnOutsideClick
       disableExitOverride={isLoading}
+      verticalLocation={{
+        tablet: "bottom",
+        mobile: "bottom",
+      }}
     >
       <Alert status="warn">
         The linked wallet can be changed up until the official token launch on

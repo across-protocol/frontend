@@ -8,6 +8,13 @@ import {
   Wrapper,
 } from "./Modal.styles";
 
+type ModalDirectionOrientation = "middle" | "top" | "bottom";
+export type ModalDirection = {
+  desktop?: ModalDirectionOrientation;
+  tablet?: ModalDirectionOrientation;
+  mobile?: ModalDirectionOrientation;
+};
+
 type ModalProps = {
   title?: string;
 
@@ -18,6 +25,8 @@ type ModalProps = {
   exitModalHandler: () => void;
 
   disableExitOverride?: boolean;
+
+  verticalLocation?: ModalDirection;
 };
 
 const Modal: React.FC<ModalProps> = ({
@@ -28,7 +37,17 @@ const Modal: React.FC<ModalProps> = ({
   exitModalHandler: externalModalExitHandler,
   disableExitOverride,
   children,
+  verticalLocation,
 }) => {
+  const direction: ModalDirection = {
+    mobile: "middle",
+    desktop: "middle",
+    tablet: "middle",
+    ...verticalLocation,
+  };
+
+  console.log(direction);
+
   const modalContentRef = useRef<HTMLDivElement>(null);
   const exitAnimationTimeoutId = useRef<NodeJS.Timeout>();
   const [forwardAnimation, setForwardAnimation] = useState<boolean>(true);
@@ -70,6 +89,7 @@ const Modal: React.FC<ModalProps> = ({
 
   return (
     <Wrapper
+      direction={direction}
       onClick={offModalClickHandler}
       reverseAnimation={!forwardAnimation}
     >
