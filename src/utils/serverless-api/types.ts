@@ -22,7 +22,7 @@ export type RewardsApiFunction =
   | (() => null);
 
 export interface RewardInterface {
-  walletEligible: boolean;
+  eligible: boolean;
   completed: boolean;
   payout: string;
 }
