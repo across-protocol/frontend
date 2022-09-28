@@ -49,7 +49,7 @@ const CommunityRewardCard = ({
       ? account.toLowerCase() === linkedWallet.toLowerCase()
       : false;
 
-  const rewards = rewardsData?.communityRewards;
+  const rewards = isConnected ? rewardsData?.communityRewards : undefined;
   const walletIsLinked = linkedWallet !== undefined;
   const isEligible = rewards?.eligible ?? true;
   const payout = rewards?.completed ? rewards?.payout : undefined;
@@ -58,26 +58,29 @@ const CommunityRewardCard = ({
     <CardStepper
       steps={[
         {
-          buttonContent: discordDetailsError
-            ? "Reconnect"
-            : isDiscordAuthenticated || !isEligible
-            ? "Disconnect"
+          buttonContent: isDiscordAuthenticated
+            ? discordDetailsError
+              ? "Reconnect"
+              : "Disconnect"
             : "Connect Discord",
-          buttonHandler: discordDetailsError
-            ? discordLoginHandler
-            : isDiscordAuthenticated
-            ? discordLogoutHandler
-            : discordLoginHandler,
+          buttonHandler:
+            !isDiscordAuthenticated || discordDetailsError
+              ? discordLoginHandler
+              : discordLogoutHandler,
           stepProgress:
-            discordDetailsError || !isEligible
-              ? "failed"
-              : isConnected && isDiscordAuthenticated
-              ? "completed"
+            isConnected && isDiscordAuthenticated
+              ? discordDetailsError
+                ? "failed"
+                : isEligible || !rewards
+                ? "completed"
+                : "failed"
               : "awaiting",
-          stepTitle: discordDetailsError
-            ? "Retry connection..."
-            : isDiscordAuthenticated && discordName
-            ? discordName
+          stepTitle: isDiscordAuthenticated
+            ? discordDetailsError
+              ? "Retry connection..."
+              : isDiscordAuthenticated && discordName
+              ? discordName
+              : "Connecting..."
             : "Connect Discord",
           stepIcon: isDiscordAuthenticated ? (
             discordAvatar ? (
@@ -86,10 +89,10 @@ const CommunityRewardCard = ({
               <DefaultUserIcon />
             )
           ) : undefined,
-          completedText: discordDetailsError
-            ? "Failure to load details"
-            : isDiscordAuthenticated
-            ? isEligible
+          completedText: isDiscordAuthenticated
+            ? discordDetailsError
+              ? "Failure to load details"
+              : isEligible
               ? "Eligible account"
               : "Ineligible account"
             : undefined,
@@ -144,12 +147,10 @@ const CommunityRewardCard = ({
         description={cardDescription}
         Icon={DiscordIcon}
         check={
-          discordDetailsError
-            ? "undetermined"
-            : isConnected && rewards
-            ? isEligible
-              ? "eligible"
-              : "ineligible"
+          isConnected && isDiscordAuthenticated
+            ? discordDetailsError || (rewards && !isEligible)
+              ? "ineligible"
+              : "eligible"
             : "undetermined"
         }
         rewardAmount={payout}
