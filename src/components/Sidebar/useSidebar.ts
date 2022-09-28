@@ -45,6 +45,10 @@ export default function useSidebar(openSidebar: boolean) {
       title: "Rewards",
     },
     {
+      pathName: "/airdrop",
+      title: "Airdrop",
+    },
+    {
       pathName: "/about",
       title: "About",
     },
