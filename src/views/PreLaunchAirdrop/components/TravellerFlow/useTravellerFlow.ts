@@ -24,7 +24,7 @@ const TRAVELLER_FLOW_DATA = [
     title: "Go Forth And Bridge",
     Icon: Heart,
     description:
-      "This portal (button) will bring you to the bridge. You must complete a transfer to receive your gift. Ready?",
+      "This portal (button) will bring you to the bridge. You must complete a 0.1 ETH or 150 USDC transfer to receive your gift. Ready?",
   },
 ];
 export default function useTravellerFlow() {
