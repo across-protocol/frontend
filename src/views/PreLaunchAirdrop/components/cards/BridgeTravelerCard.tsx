@@ -97,7 +97,7 @@ const BridgeTravelerCard: React.FC<Props> = ({
                   {
                     buttonContent: "Go to Bridge",
                     buttonHandler: () => navigateToLink("/"),
-                    stepTitle: "Bridge on Across",
+                    stepTitle: "Bridge 0.1 ETH or 150 USDC",
                     stepProgress: isCompleted ? "completed" : "awaiting",
                   },
                 ]}
