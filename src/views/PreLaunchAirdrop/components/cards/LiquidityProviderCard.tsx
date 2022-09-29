@@ -5,6 +5,7 @@ import { RewardsApiInterface } from "utils/serverless-api/types";
 import { ReactComponent as LPArrow } from "assets/icons/plaap/lp-arrow.svg";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
 import { CheckIconState } from "../CardIcon";
+import { formatEther } from "utils";
 
 interface Props {
   rewardsData: RewardsApiInterface;
@@ -25,13 +26,18 @@ function useLiquidityProviderCard(
     ? "eligible"
     : "ineligible";
 
+  const payout =
+    isEligible && rewardsData?.liquidityProviderRewards?.amount
+      ? formatEther(rewardsData?.liquidityProviderRewards?.amount)
+      : undefined;
+
   const cardDescription = isConnected
     ? isEligible
       ? "Congratulations! You are now eligible for the Across Liquidity Provider airdrop."
       : "This wallet hasn’t pooled ETH, USDC, WBTC, or DAI into Across protocol."
     : "Liquidity providers who pool ETH, USDC, WBTC, and DAI into Across protocol before the token launch may be eligible for the $ACX airdrop.";
 
-  return { check, cardDescription };
+  return { check, payout, cardDescription };
 }
 
 const LiquidityProviderCard: React.FC<Props> = ({
@@ -39,7 +45,7 @@ const LiquidityProviderCard: React.FC<Props> = ({
   rewardsData,
   isConnected,
 }) => {
-  const { check, cardDescription } = useLiquidityProviderCard(
+  const { check, payout, cardDescription } = useLiquidityProviderCard(
     rewardsData,
     isConnected
   );
@@ -49,7 +55,7 @@ const LiquidityProviderCard: React.FC<Props> = ({
       description={cardDescription}
       Icon={LPArrow}
       check={check}
-      rewardAmount={rewardsData?.liquidityProviderRewards?.payout}
+      rewardAmount={payout}
       buttonLink="/pools"
       children={
         check === "eligible" && (

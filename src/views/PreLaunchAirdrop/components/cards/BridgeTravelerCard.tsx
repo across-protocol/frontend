@@ -7,7 +7,7 @@ import { CheckIconState } from "../CardIcon";
 import AirdropButtonGroup from "../content/AirdropButtonGroup";
 import { FlowSelector } from "views/PreLaunchAirdrop/hooks/usePreLaunchAirdrop";
 import CardStepper from "../content/CardStepper";
-import { shortenAddress } from "utils";
+import { formatEther, shortenAddress } from "utils";
 import { useHistory } from "react-router-dom";
 
 function useBridgeTravelerCard(
@@ -28,6 +28,10 @@ function useBridgeTravelerCard(
       : isWalletEligible
       ? "eligible"
       : "ineligible";
+
+  const payout = rewardsData?.welcomeTravellerRewards?.amount
+    ? formatEther(rewardsData?.welcomeTravellerRewards?.amount)
+    : undefined;
 
   let cardDescription =
     "Have you bridged before but have yet to use Across? Connect your wallet to check if you’re eligible for an airdrop through the Bridge Traveler Program.";
@@ -50,6 +54,7 @@ function useBridgeTravelerCard(
     check,
     isWalletEligible,
     isCompleted,
+    payout,
     navigateToLink: (link: string) => history.push(link),
   };
 }
@@ -67,7 +72,7 @@ const BridgeTravelerCard: React.FC<Props> = ({
   rewardsData,
   setActivePageFlow,
 }) => {
-  const { cardDescription, check, isCompleted, navigateToLink } =
+  const { cardDescription, check, isCompleted, navigateToLink, payout } =
     useBridgeTravelerCard(isConnected, rewardsData);
   return (
     <AirdropCard
@@ -75,9 +80,7 @@ const BridgeTravelerCard: React.FC<Props> = ({
       description={cardDescription}
       Icon={TravelerIcon}
       check={check}
-      rewardAmount={
-        isCompleted ? rewardsData?.liquidityProviderRewards?.payout : undefined
-      }
+      rewardAmount={isCompleted ? payout : undefined}
       children={
         isConnected
           ? check === "eligible" && (

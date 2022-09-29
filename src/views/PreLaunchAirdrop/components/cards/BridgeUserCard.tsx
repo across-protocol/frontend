@@ -5,6 +5,7 @@ import { RewardsApiInterface } from "utils/serverless-api/types";
 import { ReactComponent as BridgeIcon } from "assets/icons/plaap/bridge.svg";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-icon.svg";
 import { CheckIconState } from "../CardIcon";
+import { formatEther } from "utils";
 
 interface Props {
   rewardsData: RewardsApiInterface;
@@ -25,13 +26,18 @@ function useBridgeUserCard(
     ? "eligible"
     : "ineligible";
 
+  const payout =
+    isEligible && rewardsData?.earlyUserRewards?.amount
+      ? formatEther(rewardsData?.earlyUserRewards?.amount)
+      : undefined;
+
   const cardDescription = isConnected
     ? isEligible
       ? "Congratulations! You are now eligible for the Across Early Bridge User airdrop."
       : "This wallet didn’t bridge on Across before the Across Referral Program launch (July 18th, 2022)."
     : "Users who bridge assets on Across before the Across Referral Program launch (July 18th, 2022) may be eligible for the $ACX airdrop.";
 
-  return { check, cardDescription };
+  return { check, payout, cardDescription };
 }
 
 const BridgeUserCard: React.FC<Props> = ({
@@ -39,7 +45,7 @@ const BridgeUserCard: React.FC<Props> = ({
   account,
   isConnected,
 }) => {
-  const { check, cardDescription } = useBridgeUserCard(
+  const { check, cardDescription, payout } = useBridgeUserCard(
     rewardsData,
     isConnected
   );
@@ -49,7 +55,7 @@ const BridgeUserCard: React.FC<Props> = ({
       description={cardDescription}
       Icon={BridgeIcon}
       check={check}
-      rewardAmount={rewardsData?.earlyUserRewards?.payout}
+      rewardAmount={payout}
       children={
         check === "eligible" && (
           <RewardsCard
