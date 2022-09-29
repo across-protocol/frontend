@@ -15,22 +15,22 @@ export default async function getPrelaunchRewards(
           welcomeTravellerRewards: {
             eligible: true,
             completed: false,
-            payout: "1",
+            amount: "1",
           },
           earlyUserRewards: {
             eligible: true,
             completed: false,
-            payout: "2",
+            amount: "2",
           },
           liquidityProviderRewards: {
             eligible: true,
             completed: false,
-            payout: "5.123412341242314",
+            amount: "5.123412341242314",
           },
           communityRewards: {
             eligible: true,
             completed: false,
-            payout: "10",
+            amount: "10",
           },
         }
       : undefined
