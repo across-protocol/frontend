@@ -54,7 +54,7 @@ const CommunityRewardCard = ({
   const walletIsLinked = linkedWallet !== undefined;
   const isEligible = rewards?.eligible ?? true;
   const payout =
-    walletIsLinked && rewards?.amount
+    isEligible && walletIsLinked && rewards?.amount
       ? formatEther(rewards?.amount)
       : undefined;
 
