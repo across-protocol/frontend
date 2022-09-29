@@ -37,12 +37,12 @@ export default function useSidebar(openSidebar: boolean) {
       title: "Pool",
     },
     {
-      pathName: "/transactions",
-      title: "Transactions",
-    },
-    {
       pathName: "/rewards",
       title: "Rewards",
+    },
+    {
+      pathName: "/transactions",
+      title: "Transactions",
     },
     {
       pathName: "/airdrop",
