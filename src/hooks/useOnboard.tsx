@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import { useState, createContext } from "react";
 import {
   trackEvent,
@@ -122,9 +122,19 @@ export function useOnboardManager() {
     }
   }, [onboard]);
 
-  return {
-    onboard,
-    connect: (options?: ConnectOptions | undefined) => {
+  const customOnboardDisconnect = useCallback(
+    (wallet: DisconnectOptions) => {
+      // User requested to be disconnected, let's clear out the wallet type
+      // for the event that they're trying to connect using a different wallet
+      window.localStorage.removeItem(CACHED_WALLET_KEY);
+      trackEvent({ category: "wallet", action: "disconnect", name: "null" });
+      return disconnect(wallet);
+    },
+    [disconnect]
+  );
+
+  const customOnboardConnect = useCallback(
+    (options?: ConnectOptions | undefined) => {
       trackEvent({ category: "wallet", action: "connect", name: "null" });
       // Resolve the last wallet type if this user has connected before
       const previousConnnection =
@@ -144,13 +154,21 @@ export function useOnboardManager() {
       }
       return connect(options);
     },
-    disconnect: (wallet: DisconnectOptions) => {
-      // User requested to be disconnected, let's clear out the wallet type
-      // for the event that they're trying to connect using a different wallet
-      window.localStorage.removeItem(CACHED_WALLET_KEY);
-      trackEvent({ category: "wallet", action: "disconnect", name: "null" });
-      return disconnect(wallet);
-    },
+    [connect]
+  );
+
+  useEffect(() => {
+    // Check if a key exists from the previous wallet
+    const previousConnnection = window.localStorage.getItem(CACHED_WALLET_KEY);
+    if (!wallet && previousConnnection) {
+      customOnboardConnect();
+    }
+  }, [customOnboardConnect, wallet]);
+
+  return {
+    onboard,
+    connect: customOnboardConnect,
+    disconnect: customOnboardDisconnect,
     chains,
     connectedChain,
     settingChain,
