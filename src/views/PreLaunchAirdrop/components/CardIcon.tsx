@@ -67,6 +67,11 @@ const IconWrapper = styled.div<IconWrapperType>`
 
   height: ${({ addPadding }) => (addPadding ? "calc(100% - 2px)" : "100%")};
   width: ${({ addPadding }) => (addPadding ? "calc(100% - 2px)" : "100%")};
+
+  svg {
+    height: 56px;
+    width: 56px;
+  }
 `;
 
 const UndeterminedStyledCheckMark = styled(CheckMark)`
