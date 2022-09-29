@@ -1,7 +1,6 @@
 import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
 import { ReactComponent as PlusIcon } from "assets/icons/plus-icon-16.svg";
 import CardStepper from "../content/CardStepper";
-import { ReactComponent as DefaultUserIcon } from "assets/icons/plaap/default-user-icon.svg";
 import AirdropCard from "../AirdropCard";
 import { RewardsApiInterface } from "utils/serverless-api/types";
 import LinkWalletModal from "../LinkWalletModal";
@@ -63,7 +62,7 @@ const CommunityRewardCard = ({
     stepIcon = discordAvatar ? (
       <CustomAvatar src={discordAvatar} />
     ) : (
-      <DefaultUserIcon />
+      <DiscordIcon />
     );
   }
 
