@@ -16,12 +16,22 @@ function useLiquidityProviderCard(
   rewardsData: RewardsApiInterface,
   isConnected: boolean
 ) {
+  const isEligible =
+    isConnected && rewardsData?.liquidityProviderRewards?.eligible;
+
   const check: CheckIconState = !isConnected
     ? "undetermined"
-    : isConnected && rewardsData?.liquidityProviderRewards?.eligible
+    : isEligible
     ? "eligible"
     : "ineligible";
-  return { check };
+
+  const cardDescription = isConnected
+    ? isEligible
+      ? "Congratulations! You are now eligible for the Across Early Bridge User airdrop."
+      : "This wallet hasn’t pooled ETH, USDC, WBTC, or DAI into Across protocol."
+    : "Liquidity providers who pool ETH, USDC, WBTC, and DAI into Across protocol before the token launch may be eligible for the $ACX airdrop.";
+
+  return { check, cardDescription };
 }
 
 const LiquidityProviderCard: React.FC<Props> = ({
@@ -29,11 +39,14 @@ const LiquidityProviderCard: React.FC<Props> = ({
   rewardsData,
   isConnected,
 }) => {
-  const { check } = useLiquidityProviderCard(rewardsData, isConnected);
+  const { check, cardDescription } = useLiquidityProviderCard(
+    rewardsData,
+    isConnected
+  );
   return (
     <AirdropCard
       title="Liquidity Provider"
-      description="Liquidity providers who pool ETH, USDC, WBTC, and DAI into Across protocol before the token launch may be eligible for the $ACX airdrop."
+      description={cardDescription}
       Icon={LPArrow}
       check={check}
       rewardAmount={rewardsData?.liquidityProviderRewards?.payout}
