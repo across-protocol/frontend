@@ -41,7 +41,7 @@ export function MoreInfoFlow({ onClickBack }: Props) {
             <CardTextDescription>
               Significant contributor to the project which may include Discord
               members with Co-founder, Early Recruit, DAO Contributor or Senior
-              DAO Contributor status..
+              DAO Contributor status.
             </CardTextDescription>
           </AirdropCard>,
           <AirdropCard
