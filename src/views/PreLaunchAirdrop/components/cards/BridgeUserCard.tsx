@@ -32,7 +32,7 @@ function useBridgeUserCard(
 
   const cardDescription = isConnected
     ? isEligible
-      ? "Congratulations! You are now eligible for the Across Early Bridge User airdrop."
+      ? "Congratulations! You are eligible for the Across Early Bridge User airdrop."
       : "This wallet didn’t bridge on Across before the Across Referral Program launch (July 18th, 2022)."
     : "Users who bridge assets on Across before the Across Referral Program launch (July 18th, 2022) may be eligible for the $ACX airdrop.";
 
