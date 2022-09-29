@@ -1,6 +1,8 @@
 import { ButtonV2 } from "components";
 import axios from "axios";
 import { rewardsApiUrl } from "utils";
+
+// This resets the dev wallet to ineligible state.
 const TempTestingButton = () => {
   return (
     <ButtonV2
