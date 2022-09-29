@@ -10,7 +10,7 @@ import usePreLaunchAirdrop from "./hooks/usePreLaunchAirdrop";
 import TravellerFlow from "./components/TravellerFlow";
 import { SplashFlow } from "./components/SplashFlow";
 import { MoreInfoFlow } from "./components/MoreInfoFlow";
-
+import TempTestingButton from "./TempTestingButton";
 const PreLaunchAirdrop = () => {
   const {
     activePageFlow,
@@ -75,6 +75,8 @@ const PreLaunchAirdrop = () => {
           <source src={VideoBackground} type="video/mp4" />
         </BackgroundLayer>
         <OpacityLayer />
+
+        <TempTestingButton />
         <ContentWrapper>{activePageComponent}</ContentWrapper>
         <Footer />
       </Wrapper>
