@@ -698,15 +698,20 @@ export const mockServerlessAPI =
 
 export const discordClientId = process.env.REACT_APP_DISCORD_CLIENT_ID ?? "";
 
-// Configures the V2 endpoints
+// Configures the V2 breakpoints
+export const BREAKPOINTS_V2 = {
+  xs: 400,
+  sm: 576,
+  tb: 1024,
+};
 const breakpoint = (width: number) => ({
   andDown: `(max-width: ${width}px)`,
   andUp: `(min-width: ${width}px)`,
 });
 export const QUERIESV2 = {
-  xs: breakpoint(400),
-  sm: breakpoint(576),
-  tb: breakpoint(1024),
+  xs: breakpoint(BREAKPOINTS_V2.xs),
+  sm: breakpoint(BREAKPOINTS_V2.sm),
+  tb: breakpoint(BREAKPOINTS_V2.tb),
 };
 
 export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);
