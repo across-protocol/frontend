@@ -17,8 +17,7 @@ function useBridgeUserCard(
   rewardsData: RewardsApiInterface,
   isConnected: boolean
 ) {
-  const isEligible =
-    isConnected && rewardsData?.liquidityProviderRewards?.eligible;
+  const isEligible = isConnected && rewardsData?.earlyUserRewards?.eligible;
 
   const check: CheckIconState = !isConnected
     ? "undetermined"
