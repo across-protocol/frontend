@@ -7,7 +7,7 @@ import { RewardsApiInterface } from "utils/serverless-api/types";
 import LinkWalletModal from "../LinkWalletModal";
 import { useState } from "react";
 import styled from "@emotion/styled";
-import { shortenAddress } from "utils";
+import { formatEther, shortenAddress } from "utils";
 
 type CommunityRewardCardProps = {
   account: string | undefined;
@@ -39,10 +39,11 @@ const CommunityRewardCard = ({
   account,
   discordAvatar,
   discordName,
-  linkedWallet,
+  linkedWallet: baseLinkedWallet,
   discordDetailsError,
 }: CommunityRewardCardProps) => {
   const [displayModal, setDisplayModal] = useState(false);
+  const linkedWallet = isDiscordAuthenticated ? baseLinkedWallet : undefined;
 
   const isWalletTheSame =
     account && linkedWallet
@@ -52,7 +53,10 @@ const CommunityRewardCard = ({
   const rewards = isConnected ? rewardsData?.communityRewards : undefined;
   const walletIsLinked = linkedWallet !== undefined;
   const isEligible = rewards?.eligible ?? true;
-  const payout = rewards?.completed ? rewards?.payout : undefined;
+  const payout =
+    isEligible && walletIsLinked && rewards?.amount
+      ? formatEther(rewards?.amount)
+      : undefined;
 
   const children = isConnected ? (
     <CardStepper

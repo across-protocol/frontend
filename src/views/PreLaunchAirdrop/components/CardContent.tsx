@@ -4,9 +4,9 @@ import { CardIcon, EligibilityPill } from ".";
 import { CheckIconState } from "./CardIcon";
 import { ReactComponent as AcrossLogo } from "assets/across.svg";
 import { QUERIESV2 } from "utils";
-import { formatNumberMaxFracDigits } from "utils";
 import { SecondaryButtonV2 as UnstyledPoolButton } from "components/Buttons/ButtonV2";
 import { Link } from "react-router-dom";
+
 type CardContentProps = {
   check?: CheckIconState;
   Icon: React.FunctionComponent;
@@ -47,9 +47,7 @@ const CardContent: React.FC<CardContentProps> = ({
       </TextStack>
       {rewardAmount && (
         <RewardAmountWrapper>
-          <RewardAmount>
-            {formatNumberMaxFracDigits(Number(rewardAmount))} $ACX
-          </RewardAmount>
+          <RewardAmount>{rewardAmount} $ACX</RewardAmount>
           <AcrossLogo />
         </RewardAmountWrapper>
       )}

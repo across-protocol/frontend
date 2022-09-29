@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import getApiEndpoint from "utils/serverless-api";
 
 export function useDiscordDetails() {
-  const { discordJWT } = useDiscord();
+  const { discordJWT, isAuthenticated } = useDiscord();
   const { signer } = useOnboard();
 
   const [id, setId] = useState<string | undefined>(undefined);
@@ -19,7 +19,7 @@ export function useDiscordDetails() {
   useEffect(() => {
     setDiscordDetailsLoading(true);
     setDiscordDetailsError(false);
-    if (discordJWT) {
+    if (isAuthenticated && discordJWT) {
       getApiEndpoint()
         .prelaunch.discordUserDetails(discordJWT)
         .then((data) => {
@@ -34,8 +34,13 @@ export function useDiscordDetails() {
         .finally(() => {
           setDiscordDetailsLoading(false);
         });
+    } else {
+      setId(undefined);
+      setName(undefined);
+      setAvatar(undefined);
+      setWalletLinked(undefined);
     }
-  }, [discordJWT]);
+  }, [discordJWT, isAuthenticated]);
 
   const linkWallet = useCallback(async () => {
     let successfullyLinked = true;

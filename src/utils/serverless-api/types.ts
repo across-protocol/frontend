@@ -24,7 +24,7 @@ export type RewardsApiFunction =
 export interface RewardInterface {
   eligible: boolean;
   completed: boolean;
-  payout: string;
+  amount: string;
 }
 
 export interface RewardsApiInterface {
