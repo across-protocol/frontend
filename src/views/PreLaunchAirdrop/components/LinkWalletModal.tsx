@@ -61,7 +61,7 @@ const LinkWalletModal = ({
           });
       },
       infoText:
-        "By linking this wallet you approve it to be the recipient of the Bridge Traveler Program airdrop.",
+        "By linking this wallet you approve it to be the recipient of the Across Community member airdrop.",
       address,
       displaySuccess: false,
     },
