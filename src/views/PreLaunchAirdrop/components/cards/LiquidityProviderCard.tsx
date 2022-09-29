@@ -27,7 +27,7 @@ function useLiquidityProviderCard(
 
   const cardDescription = isConnected
     ? isEligible
-      ? "Congratulations! You are now eligible for the Across Early Bridge User airdrop."
+      ? "Congratulations! You are now eligible for the Across Liquidity Provider airdrop."
       : "This wallet hasn’t pooled ETH, USDC, WBTC, or DAI into Across protocol."
     : "Liquidity providers who pool ETH, USDC, WBTC, and DAI into Across protocol before the token launch may be eligible for the $ACX airdrop.";
 
