@@ -1,33 +1,31 @@
 import { ButtonV2 } from "components";
 import axios from "axios";
 import { rewardsApiUrl } from "utils";
-import { useState } from "react";
-
+import { useConnection } from "hooks";
 // This resets the dev wallet to ineligible state.
 const TempTestingButton = () => {
-  const [value, setValue] = useState("");
+  const { account } = useConnection();
   return (
     <div style={{ width: "200px", margin: "0 auto" }}>
-      <label>Address</label>
-      <input value={value} onChange={(e) => setValue(e.target.value)} />
+      <label>Reset Connected Address</label>
       <ButtonV2
         style={{ width: "200px", margin: "0 auto" }}
         size="md"
         onClick={() => {
           axios
             .patch(`${rewardsApiUrl}/airdrop/rewards/wallet-rewards`, {
-              walletAddress: value,
+              walletAddress: account,
               earlyUserRewards: "0",
               liquidityProviderRewards: "0",
               welcomeTravellerRewards: "0",
             })
             .then((res) => {
               console.log("success?", res);
-              setValue("");
-            });
+            })
+            .catch((err) => console.log("err in call", err));
         }}
       >
-        Reset Dev Wallet (testing)
+        Reset
       </ButtonV2>
     </div>
   );
