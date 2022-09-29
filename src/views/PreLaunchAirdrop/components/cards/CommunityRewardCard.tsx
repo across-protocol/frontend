@@ -39,10 +39,11 @@ const CommunityRewardCard = ({
   account,
   discordAvatar,
   discordName,
-  linkedWallet,
+  linkedWallet: baseLinkedWallet,
   discordDetailsError,
 }: CommunityRewardCardProps) => {
   const [displayModal, setDisplayModal] = useState(false);
+  const linkedWallet = isDiscordAuthenticated ? baseLinkedWallet : undefined;
 
   const isWalletTheSame =
     account && linkedWallet
@@ -52,7 +53,7 @@ const CommunityRewardCard = ({
   const rewards = isConnected ? rewardsData?.communityRewards : undefined;
   const walletIsLinked = linkedWallet !== undefined;
   const isEligible = rewards?.eligible ?? true;
-  const payout = rewards?.completed ? rewards?.payout : undefined;
+  const payout = walletIsLinked ? rewards?.amount : undefined;
 
   const children = isConnected ? (
     <CardStepper
