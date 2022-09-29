@@ -17,7 +17,9 @@ function useBridgeUserCard(
   rewardsData: RewardsApiInterface,
   isConnected: boolean
 ) {
-  const isEligible = rewardsData?.earlyUserRewards?.eligible;
+  const isEligible =
+    isConnected && rewardsData?.liquidityProviderRewards?.eligible;
+
   const check: CheckIconState = !isConnected
     ? "undetermined"
     : isEligible
@@ -29,7 +31,13 @@ function useBridgeUserCard(
       ? formatEther(rewardsData?.earlyUserRewards?.amount)
       : undefined;
 
-  return { check, payout };
+  const cardDescription = isConnected
+    ? isEligible
+      ? "Congratulations! You are now eligible for the Across Early Bridge User airdrop."
+      : "This wallet didn’t bridge on Across before the Across Referral Program launch (July 18th, 2022)."
+    : "Users who bridge assets on Across before the Across Referral Program launch (July 18th, 2022) may be eligible for the $ACX airdrop.";
+
+  return { check, payout, cardDescription };
 }
 
 const BridgeUserCard: React.FC<Props> = ({
@@ -37,11 +45,14 @@ const BridgeUserCard: React.FC<Props> = ({
   account,
   isConnected,
 }) => {
-  const { check, payout } = useBridgeUserCard(rewardsData, isConnected);
+  const { check, cardDescription, payout } = useBridgeUserCard(
+    rewardsData,
+    isConnected
+  );
   return (
     <AirdropCard
       title="Early Bridge User"
-      description="Users who bridge assets on Across before the Across Referral Program launch (July 18th, 2022) may be eligible for the $ACX airdrop."
+      description={cardDescription}
       Icon={BridgeIcon}
       check={check}
       rewardAmount={payout}
