@@ -118,8 +118,8 @@ const CommunityRewardCard = ({
           buttonHandler: () => setDisplayModal(true),
           stepProgress: walletIsLinked ? "completed" : "awaiting",
           stepTitle:
-            walletIsLinked && account
-              ? shortenAddress(account, "...", 4)
+            walletIsLinked && linkedWallet
+              ? shortenAddress(linkedWallet, "...", 4)
               : "Link to Ethereum wallet",
           completedText: walletIsLinked
             ? isWalletTheSame
