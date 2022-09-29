@@ -58,6 +58,15 @@ const CommunityRewardCard = ({
       ? formatEther(rewards?.amount)
       : undefined;
 
+  let stepIcon = undefined;
+  if (isDiscordAuthenticated) {
+    stepIcon = discordAvatar ? (
+      <CustomAvatar src={discordAvatar} />
+    ) : (
+      <DefaultUserIcon />
+    );
+  }
+
   const children = isConnected ? (
     <CardStepper
       steps={[
@@ -86,13 +95,7 @@ const CommunityRewardCard = ({
               ? discordName
               : "Connecting..."
             : "Connect Discord",
-          stepIcon: isDiscordAuthenticated ? (
-            discordAvatar ? (
-              <CustomAvatar src={discordAvatar} />
-            ) : (
-              <DefaultUserIcon />
-            )
-          ) : undefined,
+          stepIcon,
           completedText: isDiscordAuthenticated
             ? discordDetailsError
               ? "Failure to load details"
