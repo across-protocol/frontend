@@ -1,4 +1,7 @@
 import styled from "@emotion/styled";
+import { QUERIESV2, BREAKPOINTS_V2 } from "utils/constants";
+import { shortenAddress } from "utils";
+import useWindowSize from "hooks/useWindowsSize";
 
 interface Props {
   Icon?: React.ReactElement;
@@ -7,6 +10,9 @@ interface Props {
   bottomText: string;
 }
 const RewardsCard: React.FC<Props> = ({ Icon, label, address, bottomText }) => {
+  const { width = 0 } = useWindowSize();
+  const isMobile = width < BREAKPOINTS_V2.sm;
+
   return (
     <Wrapper>
       <TopRow>
@@ -15,7 +21,11 @@ const RewardsCard: React.FC<Props> = ({ Icon, label, address, bottomText }) => {
             <IconContainer>{Icon}</IconContainer>
             <TextWrapper>
               <Label>{label}</Label>
-              <Address>{address || "Wallet Address"}</Address>
+              <Address>
+                {isMobile
+                  ? shortenAddress(address, "...", 4)
+                  : address || "Wallet Address"}
+              </Address>
             </TextWrapper>
           </EligibleWallet>
         </EligibleWalletWrapper>
@@ -47,6 +57,10 @@ const Wrapper = styled.div`
     z-index: -1;
     top: 0;
   }
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding-left: 0;
+  }
 `;
 
 const EligibleWalletWrapper = styled.div`
@@ -64,6 +78,10 @@ const EligibleWallet = styled.div`
 
   justify-content: center;
   align-items: flex-start;
+
+  @media ${QUERIESV2.xs.andDown} {
+    flex-direction: column;
+  }
 `;
 
 const IconContainer = styled.div`
