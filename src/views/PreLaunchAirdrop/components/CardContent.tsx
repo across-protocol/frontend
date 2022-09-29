@@ -81,6 +81,10 @@ const Wrapper = styled.div`
   @media screen and (max-width: 624px) {
     flex-direction: column;
   }
+
+  a {
+    text-decoration: none;
+  }
 `;
 
 const TextStack = styled.div`
