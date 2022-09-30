@@ -2,6 +2,7 @@ import { useDiscord } from "hooks/useDiscord";
 import { useOnboard } from "hooks/useOnboard";
 import { useCallback, useEffect, useState } from "react";
 import getApiEndpoint from "utils/serverless-api";
+import { useDiscordQuery } from "./useDiscordQuery";
 
 export function useDiscordDetails() {
   const { discordJWT, isAuthenticated } = useDiscord();
@@ -16,31 +17,30 @@ export function useDiscordDetails() {
   const [discordDetailsLoading, setDiscordDetailsLoading] = useState(false);
   const [discordDetailsError, setDiscordDetailsError] = useState(false);
 
+  const { userDiscordDetails, isLoading, isError } =
+    useDiscordQuery(discordJWT);
+
   useEffect(() => {
-    setDiscordDetailsLoading(true);
-    setDiscordDetailsError(false);
-    if (isAuthenticated && discordJWT) {
-      getApiEndpoint()
-        .prelaunch.discordUserDetails(discordJWT)
-        .then((data) => {
-          setId(data.discordId);
-          setName(data.discordName);
-          setAvatar(data.discordAvatar);
-          setWalletLinked(data.walletLinked);
-        })
-        .catch(() => {
-          setDiscordDetailsError(true);
-        })
-        .finally(() => {
-          setDiscordDetailsLoading(false);
-        });
+    if (userDiscordDetails && isAuthenticated) {
+      setId(userDiscordDetails.discordId);
+      setName(userDiscordDetails.discordName);
+      setAvatar(userDiscordDetails.discordAvatar);
+      setWalletLinked(userDiscordDetails.walletLinked);
     } else {
       setId(undefined);
       setName(undefined);
       setAvatar(undefined);
       setWalletLinked(undefined);
     }
-  }, [discordJWT, isAuthenticated]);
+  }, [userDiscordDetails, isAuthenticated]);
+
+  useEffect(() => {
+    setDiscordDetailsError((e) => e || isError);
+  }, [isError]);
+
+  useEffect(() => {
+    setDiscordDetailsLoading((l) => l || isLoading);
+  }, [isLoading]);
 
   const linkWallet = useCallback(async () => {
     let successfullyLinked = true;
