@@ -134,7 +134,7 @@ const CommunityRewardCard = ({
     if (isEligible) {
       if (walletIsLinked) {
         cardDescription =
-          "Congratulations! You are now eligible for the Across Community Member airdrop.";
+          "Congratulations! You are eligible for the Across Community Member airdrop.";
       }
     } else {
       cardDescription =

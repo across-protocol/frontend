@@ -39,7 +39,7 @@ function useBridgeTravelerCard(
     if (isWalletEligible !== false) {
       if (isCompleted) {
         cardDescription =
-          "Congratulations, traveler! You are now eligible for the Bridge Traveler Program airdrop.";
+          "Congratulations, traveler! You are eligible for the Bridge Traveler Program airdrop.";
       } else {
         cardDescription =
           "Finish the steps to become eligible for an airdrop through the Bridge Traveler Program.";

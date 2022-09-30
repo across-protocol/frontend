@@ -33,8 +33,8 @@ function useLiquidityProviderCard(
 
   const cardDescription = isConnected
     ? isEligible
-      ? "Congratulations! You are now eligible for the Across Liquidity Provider airdrop."
-      : "This wallet hasn’t pooled ETH, USDC, WBTC, or DAI into Across protocol."
+      ? "Congratulations! You are eligible for the Across Liquidity Provider airdrop."
+      : "This wallet is not eligible for the Liquidity Provider airdrop.  You can still earn ACX from now till token launch if you provide liquidity on Across."
     : "Liquidity providers who pool ETH, USDC, WBTC, and DAI into Across protocol before the token launch may be eligible for the $ACX airdrop.";
 
   return { check, payout, cardDescription };
