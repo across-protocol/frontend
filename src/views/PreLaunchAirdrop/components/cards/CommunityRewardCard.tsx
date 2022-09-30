@@ -129,7 +129,7 @@ const CommunityRewardCard = ({
   ) : null;
 
   let cardDescription =
-    "Community members who have meaningfully contributed to Across prior to the community snapshot (September 1, 2022). This includes a discord role-based allocation as well as a bonus allocation for many community members who went above and beyond.";
+    "Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet.";
   if (isDiscordAuthenticated && rewards) {
     if (isEligible) {
       if (walletIsLinked) {

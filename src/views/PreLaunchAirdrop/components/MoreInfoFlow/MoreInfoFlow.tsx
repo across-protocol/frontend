@@ -39,9 +39,10 @@ export function MoreInfoFlow({ onClickBack }: Props) {
             hideBoxShadow
           >
             <CardTextDescription>
-              Significant contributor to the project which may include Discord
-              members with Co-founder, Early Recruit, DAO Contributor or Senior
-              DAO Contributor status.
+              Community members who have meaningfully contributed to Across
+              prior to the community snapshot (September 1, 2022). This includes
+              a discord role-based allocation as well as a bonus allocation for
+              many community members who went above and beyond.
             </CardTextDescription>
           </AirdropCard>,
           <AirdropCard
@@ -77,10 +78,10 @@ export function MoreInfoFlow({ onClickBack }: Props) {
             hideBoxShadow
           >
             <CardTextDescription>
-              Liquidity providers who pool ETH, USDC, WBTC, and DAI into the
+              Liquidity providers who pool ETH, USDC, WBTC or DAI into the
               Across protocol before the token launch. The amount of rewards to
               LPs are pro-rated by size and a fixed amount of tokens will be
-              emitted at each block since the inception of the protocol.
+              emitted at each block since the inception of the protocol."
             </CardTextDescription>
           </AirdropCard>,
         ]}
