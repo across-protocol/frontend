@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ReactComponent as CheckmarkIcon } from "assets/icons/rounded-checkmark-16.svg";
 import { QUERIESV2, shortenAddress } from "utils";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
-
+import { getCode, noContractCode } from "utils";
 type LinkWalletModalType = {
   displayModal: boolean;
   exitModalHandler: () => void;
@@ -28,7 +28,7 @@ const LinkWalletModal = ({
   const [isConfirmed, setIsConfirmed] = useState<
     "success" | "failure" | undefined
   >(undefined);
-
+  const [isContractAddress, setIsContractAddress] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { isMobile } = useCurrentBreakpoint();
@@ -38,6 +38,17 @@ const LinkWalletModal = ({
       setIsConfirmed(undefined);
     }
   }, [displayModal]);
+
+  useEffect(() => {
+    if (address) {
+      setIsContractAddress(false);
+      getCode(address, 1).then((addr) => {
+        if (addr !== noContractCode) {
+          setIsContractAddress(true);
+        }
+      });
+    }
+  }, [address]);
 
   const walletFlow = {
     disconnected: {
@@ -110,7 +121,9 @@ const LinkWalletModal = ({
                 : shortenAddress(currentFlow.address, "...", 10)}
             </UserAddressInput>
           )}
-          {currentFlow.displaySuccess ? (
+          {isContractAddress ? (
+            "Wallet is a contract address and Discord connection is not currently supported."
+          ) : currentFlow.displaySuccess ? (
             <ConfirmationTextWrapper success={isConfirmed === "success"}>
               {isConfirmed === "success" ? (
                 <>
