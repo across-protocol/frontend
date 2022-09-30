@@ -129,7 +129,7 @@ const CommunityRewardCard = ({
   ) : null;
 
   let cardDescription =
-    "Community members can check eligibility for the ACX airdrop by connecting their Discord account to an Ethereum wallet.";
+    "Community members who have meaningfully contributed to Across prior to the community snapshot (September 1, 2022). This includes a discord role-based allocation as well as a bonus allocation for many community members who went above and beyond.";
   if (isDiscordAuthenticated && rewards) {
     if (isEligible) {
       if (walletIsLinked) {
@@ -138,7 +138,7 @@ const CommunityRewardCard = ({
       }
     } else {
       cardDescription =
-        "This Discord account isn’t eligible for the airdrop. If you have multiple accounts you could try connecting to a different one.";
+        "This Discord account isn't eligible for the Community Member airdrop. If you have multiple accounts you could try connecting to a different one.";
     }
   }
 
