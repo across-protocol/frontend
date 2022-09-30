@@ -4,23 +4,14 @@ import getApiEndpoint from "utils/serverless-api";
 
 export function useDiscordQuery(jwt?: string) {
   const queryKey = jwt
-    ? prelaunchUserDetailsQueryKey()
+    ? prelaunchUserDetailsQueryKey(jwt)
     : "DISABLED_DISCORD_DETAILS_KEY";
 
-  const { data, ...other } = useQuery(
-    queryKey,
-    async () => {
-      if (jwt) {
-        return getApiEndpoint().prelaunch.discordUserDetails(jwt);
-      }
-    },
-    {
-      // refetch based on the chain polling interval
-      // disable this temporary
-      // refetchInterval: 60000,
-      enabled: !!jwt,
+  const { data, ...other } = useQuery(queryKey, async () => {
+    if (jwt) {
+      return getApiEndpoint().prelaunch.discordUserDetails(jwt);
     }
-  );
+  });
 
   return {
     userDiscordDetails: data,

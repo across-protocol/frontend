@@ -115,6 +115,6 @@ export function prelaunchDataQueryKey(address: string) {
   return ["prelaunch-data", address];
 }
 
-export function prelaunchUserDetailsQueryKey() {
-  return ["prelaunch-data-discord-details"];
+export function prelaunchUserDetailsQueryKey(jwt: string) {
+  return ["prelaunch-data-discord-details", jwt];
 }
