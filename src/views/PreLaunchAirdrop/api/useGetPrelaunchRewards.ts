@@ -5,7 +5,7 @@ import getPrelaunchRewards from "./getPrelaunchRewards";
 
 export function useGetPrelaunchRewards(address?: string, jwt?: string) {
   const queryKey = !!address
-    ? prelaunchDataQueryKey(address)
+    ? prelaunchDataQueryKey(address, jwt)
     : "DISABLED_ADDRESS_SUMMARY_KEY";
 
   const { data, ...other } = useQuery(
@@ -14,9 +14,6 @@ export function useGetPrelaunchRewards(address?: string, jwt?: string) {
       return getPrelaunchRewards(address!, jwt);
     },
     {
-      // refetch based on the chain polling interval
-      // disable this temporary
-      // refetchInterval: 60000,
       enabled: !!address,
     }
   );
