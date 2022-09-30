@@ -1,0 +1,24 @@
+name: Find Linear Issue in Pull Request
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  create-linear-issue-on-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find the Linear Issue
+        id: findIssue
+        uses: ctriolo/action-find-linear-issue@v1
+        with:
+          linear-api-key: ${{secrets.LINEAR_API_KEY}}
+
+      - name: Create comment in PR with Linear Issue link
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            [${{ steps.findIssue.outputs.linear-issue-identifier }}: ${{ steps.findIssue.outputs.linear-issue-title }}](${{ steps.findIssue.outputs.linear-issue-url }})
