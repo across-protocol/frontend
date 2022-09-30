@@ -42,11 +42,7 @@ const LinkWalletModal = ({
   useEffect(() => {
     if (address) {
       getCode(address, 1).then((addr) => {
-        if (addr !== noContractCode) {
-          setIsContractAddress(true);
-        } else {
-          setIsContractAddress(false);
-        }
+        setIsContractAddress(addr !== noContractCode);
       });
     }
   }, [address]);
