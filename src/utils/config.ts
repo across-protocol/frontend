@@ -139,6 +139,21 @@ export class ConfigClient {
       constants.isSupportedChainId(chainId) && this.spokeChains.has(chainId)
     );
   };
+  getSupportedCanonicalNameAsChainId = (canonicalName: string) => {
+    // Transform the canonical name to match ChainId key
+    const modifiedCanonicalName = canonicalName.toLowerCase();
+    // Attempt to resolve the chainId and return
+    const resolvedChain = constants.CanonicalChainName[modifiedCanonicalName];
+    return resolvedChain && this.isSupportedChainId(resolvedChain)
+      ? resolvedChain
+      : undefined;
+  };
+  resolveChainIdFromNumericOrCanonical = (chainIdOrCanonical?: string) => {
+    return chainIdOrCanonical
+      ? this.getSupportedCanonicalNameAsChainId(chainIdOrCanonical) ??
+          Number(chainIdOrCanonical)
+      : Number(chainIdOrCanonical);
+  };
   // returns token list in order specified by constants, but adds in token address for the chain specified
   getTokenList(chainId?: number): TokenList {
     const routeTable = Object.fromEntries(
