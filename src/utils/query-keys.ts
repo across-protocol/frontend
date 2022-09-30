@@ -114,3 +114,7 @@ export function depositsQueryKey(
 export function prelaunchDataQueryKey(address: string) {
   return ["prelaunch-data", address];
 }
+
+export function prelaunchUserDetailsQueryKey(jwt: string) {
+  return ["prelaunch-data-discord-details", jwt];
+}
