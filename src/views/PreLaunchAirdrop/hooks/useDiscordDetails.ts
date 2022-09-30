@@ -72,7 +72,7 @@ export function useDiscordDetails() {
     discordAvatar: avatar,
     linkWalletHandler: linkWallet,
     linkedWallet: walletLinked,
-    discordDetailsLoading: discordDetailsLoading || isLoading,
+    discordDetailsLoading: discordDetailsLoading,
     discordDetailsError,
   };
 }
