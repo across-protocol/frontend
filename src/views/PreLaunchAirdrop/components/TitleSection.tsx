@@ -21,9 +21,10 @@ const TitleSection = ({
       <TextStack>
         <PageHeader>ACX is about to launch.</PageHeader>
         <PageSubHeader>
-          The token launch is almost here and as a community member you will
-          have the opportunity to make your claim for a piece of the official
-          airdrop.
+          The Across token is almost here and contributors to the protocol can
+          now check their airdrop eligibility and prepare for the launch. Active
+          bridge users who have not used Across may also have an opportunity to
+          be included in this airdrop through the Bridge Traveler Program.
         </PageSubHeader>
       </TextStack>
       <ButtonStack>
