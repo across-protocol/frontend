@@ -2,6 +2,7 @@ import { ButtonV2 } from "components";
 import axios from "axios";
 import { rewardsApiUrl } from "utils";
 import { useConnection } from "hooks";
+import { parseEther } from "utils";
 // This resets the dev wallet to ineligible state.
 const TempTestingButton = () => {
   const { account } = useConnection();
@@ -37,9 +38,9 @@ const TempTestingButton = () => {
           axios
             .patch(`${rewardsApiUrl}/airdrop/rewards/wallet-rewards`, {
               walletAddress: account,
-              earlyUserRewards: "500000000000000000000",
-              liquidityProviderRewards: "1000000000000000000000",
-              welcomeTravellerRewards: "2000000000000000000000",
+              earlyUserRewards: parseEther("500").toString(),
+              liquidityProviderRewards: parseEther("1000").toString(),
+              welcomeTravellerRewards: parseEther("15000").toString(),
             })
             .then((res) => {
               console.log("success?", res);
