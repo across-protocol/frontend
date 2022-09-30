@@ -7,9 +7,11 @@ const TempTestingButton = () => {
   const { account } = useConnection();
   return (
     <div style={{ width: "200px", margin: "0 auto" }}>
-      <label>Reset Connected Address</label>
+      <label style={{ margin: "1rem auto" }}>
+        Reset Connected to Zero Rewards
+      </label>
       <ButtonV2
-        style={{ width: "200px", margin: "0 auto" }}
+        style={{ width: "200px", margin: "0 auto 1rem" }}
         size="md"
         onClick={() => {
           axios
@@ -25,7 +27,27 @@ const TempTestingButton = () => {
             .catch((err) => console.log("err in call", err));
         }}
       >
-        Reset
+        Reset to Zero
+      </ButtonV2>
+      <label style={{ margin: "1rem auto" }}>Reset Connected Address</label>
+      <ButtonV2
+        style={{ width: "200px", margin: "0 auto 1rem" }}
+        size="md"
+        onClick={() => {
+          axios
+            .patch(`${rewardsApiUrl}/airdrop/rewards/wallet-rewards`, {
+              walletAddress: account,
+              earlyUserRewards: "500000000000000000000",
+              liquidityProviderRewards: "1000000000000000000000",
+              welcomeTravellerRewards: "2000000000000000000000",
+            })
+            .then((res) => {
+              console.log("success?", res);
+            })
+            .catch((err) => console.log("err in call", err));
+        }}
+      >
+        Reset to Some Rewards
       </ButtonV2>
     </div>
   );
