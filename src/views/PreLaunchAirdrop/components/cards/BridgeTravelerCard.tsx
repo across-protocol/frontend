@@ -72,7 +72,7 @@ const BridgeTravelerCard: React.FC<Props> = ({
   rewardsData,
   setActivePageFlow,
 }) => {
-  const { cardDescription, check, isCompleted, navigateToLink, payout } =
+  const { cardDescription, check, isCompleted, navigateToLink } =
     useBridgeTravelerCard(isConnected, rewardsData);
   return (
     <AirdropCard
@@ -80,7 +80,6 @@ const BridgeTravelerCard: React.FC<Props> = ({
       description={cardDescription}
       Icon={TravelerIcon}
       check={check}
-      rewardAmount={isCompleted ? payout : undefined}
       children={
         isConnected
           ? check === "eligible" && (
