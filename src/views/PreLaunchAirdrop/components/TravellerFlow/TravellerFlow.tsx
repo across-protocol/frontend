@@ -6,12 +6,9 @@ import {
   Description,
   DotStepWrapper,
   ButtonWrapper,
+  SecondaryButton,
 } from "./TravellerFlow.styles";
-import {
-  SecondaryButtonV2,
-  TertiaryButton,
-  ButtonV2,
-} from "components/Buttons/ButtonV2";
+import { TertiaryButton, ButtonV2 } from "components/Buttons/ButtonV2";
 import useTravellerFlow from "./useTravellerFlow";
 import { setAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
 interface Props {
@@ -45,14 +42,14 @@ const TravellerFlow: React.FC<Props> = ({ account, switchToSplash }) => {
           {step === 1 ? "Back to Home" : "Back"}
         </TertiaryButton>
         {step < numDots ? (
-          <SecondaryButtonV2
+          <SecondaryButton
             onClick={() => {
               setStep((pv) => Math.min(pv + 1, numDots));
             }}
             size="md"
           >
             Next
-          </SecondaryButtonV2>
+          </SecondaryButton>
         ) : (
           <ButtonV2
             size="md"

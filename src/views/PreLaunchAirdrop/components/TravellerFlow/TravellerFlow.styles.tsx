@@ -5,6 +5,7 @@ import { ReactComponent as UnstyledRotate } from "assets/prelaunch/rotate-3d.svg
 import { ReactComponent as UnstyledBolt } from "assets/prelaunch/bolt.svg";
 import { ReactComponent as UnstyledPresent } from "assets/prelaunch/present.svg";
 import { ReactComponent as UnstyledHeart } from "assets/prelaunch/heart.svg";
+import { SecondaryButtonV2 } from "components";
 
 export const Wrapper = styled.div`
   min-height: calc(100% - 72px);
@@ -70,4 +71,8 @@ export const ButtonWrapper = styled.div`
   > button {
     margin: 0 4px;
   }
+`;
+
+export const SecondaryButton = styled(SecondaryButtonV2)`
+  background-color: transparent;
 `;
