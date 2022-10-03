@@ -139,7 +139,9 @@ export class ConfigClient {
       constants.isSupportedChainId(chainId) && this.spokeChains.has(chainId)
     );
   };
-  getSupportedCanonicalNameAsChainId = (canonicalName: string) => {
+  getSupportedCanonicalNameAsChainId = (canonicalName?: string) => {
+    // Returns undefined if the canonicalName is not defined
+    if (!canonicalName) return;
     // Transform the canonical name to match ChainId key
     const modifiedCanonicalName = canonicalName.toLowerCase();
     // Attempt to resolve the chainId and return
@@ -149,10 +151,10 @@ export class ConfigClient {
       : undefined;
   };
   resolveChainIdFromNumericOrCanonical = (chainIdOrCanonical?: string) => {
-    return chainIdOrCanonical
-      ? this.getSupportedCanonicalNameAsChainId(chainIdOrCanonical) ??
-          Number(chainIdOrCanonical)
-      : Number(chainIdOrCanonical);
+    return (
+      this.getSupportedCanonicalNameAsChainId(chainIdOrCanonical) ??
+      Number(chainIdOrCanonical)
+    );
   };
   // returns token list in order specified by constants, but adds in token address for the chain specified
   getTokenList(chainId?: number): TokenList {
