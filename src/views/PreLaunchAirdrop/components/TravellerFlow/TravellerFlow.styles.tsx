@@ -9,6 +9,10 @@ import { SecondaryButtonV2, TertiaryButton } from "components";
 
 export const Wrapper = styled.div`
   min-height: calc(100% - 72px);
+  max-width: calc(500px + 32px);
+  width: calc(100% - 32px);
+  margin: auto;
+  padding: 0 16px;
 `;
 
 export const HeroBlock = styled.div`
