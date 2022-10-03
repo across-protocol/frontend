@@ -38,7 +38,7 @@ export const CanonicalChainName = Object.fromEntries(
   Object.entries(ChainId)
     .filter((v) => Number.isNaN(Number(v[0])))
     .map((v) => [v[0].toLowerCase(), Number(v[1])])
-) as Record<string, number>;
+);
 
 /* Colors and Media Queries section */
 export const BREAKPOINTS = {
