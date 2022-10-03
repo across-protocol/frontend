@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { QUERIESV2 } from "utils";
 import CardStepperItem from "./CardStepperItem";
 
 export type Progress = "completed" | "awaiting" | "failed";
@@ -65,8 +66,12 @@ const StepperWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-left: 18px;
+  padding-left: 16px;
   padding-top: 32px;
+
+  @media ${QUERIESV2.tb.andDown} {
+    padding-left: 12px;
+  }
 
   background-color: #34353b;
 
