@@ -3,6 +3,7 @@ import {
   shortenAddress,
   shortenString,
   shortenTransactionHash,
+  smallNumberFormatter,
 } from "../format";
 const VALID_ADDRESS = "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828";
 const TX_HASH =
@@ -39,5 +40,9 @@ describe("#format functions", () => {
 
   it("shortenTransactionHash should shorten to first 5 chars + ...", () => {
     expect(shortenTransactionHash(TX_HASH)).toEqual("0xe5a...");
+  });
+
+  it("smallNumberFormatter should show at least 1 digit for numbers < 1 and round up to 3 sig digs", () => {
+    expect(smallNumberFormatter(0.01235)).toEqual("0.0124");
   });
 });

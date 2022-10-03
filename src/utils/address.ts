@@ -5,7 +5,6 @@ export function isValidAddress(address: string) {
 }
 
 export function getAddress(address: string) {
-  console.log("ethers", ethers);
   return ethers.utils.getAddress(address);
 }
 
