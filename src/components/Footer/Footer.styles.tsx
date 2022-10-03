@@ -50,7 +50,7 @@ export const AccentLink = styled(Link)`
 
   :hover {
     svg path {
-      fill: var(--color-uma-red);
+      fill: white;
     }
   }
 `;
