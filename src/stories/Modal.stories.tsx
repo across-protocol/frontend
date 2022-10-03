@@ -6,7 +6,17 @@ export default {
   title: "Modal",
   component: Modal,
   // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
-  argTypes: {},
+  argTypes: {
+    width: {
+      options: [200, 500, undefined],
+      control: { type: "radio" },
+    },
+    height: {
+      control: {
+        type: null,
+      },
+    },
+  },
 } as ComponentMeta<typeof Modal>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
@@ -33,15 +43,16 @@ Width.args = {
   children: <div>Bigger Width</div>,
 };
 
-export const Height = Template.bind({
-  title: "Height Demo",
-  height: 500,
-  children: <div>Bigger Height</div>,
-});
-
 export const TopVerticalLocation = Template.bind({});
 TopVerticalLocation.args = {
-  title: "Height Demo",
+  title: "Vertical Demo",
   verticalLocation: { desktop: "top", tablet: "top", mobile: "top" },
-  children: <div>Move to Top</div>,
+  children: <div>On Top</div>,
+};
+
+export const BottomVerticalLocation = Template.bind({});
+BottomVerticalLocation.args = {
+  title: "Vertical Demo",
+  verticalLocation: { desktop: "bottom", tablet: "bottom", mobile: "bottom" },
+  children: <div>On Bottom</div>,
 };
