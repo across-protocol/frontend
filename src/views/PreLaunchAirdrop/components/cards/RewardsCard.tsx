@@ -23,7 +23,7 @@ const RewardsCard: React.FC<Props> = ({ Icon, label, address, bottomText }) => {
               <Label>{label}</Label>
               <Address>
                 {isMobile
-                  ? shortenAddress(address, "...", 4)
+                  ? shortenAddress(address, "...", 15)
                   : address || "Wallet Address"}
               </Address>
             </TextWrapper>
@@ -42,10 +42,9 @@ export default RewardsCard;
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-left: 18px;
-  padding-top: 32px;
+  gap: 32px;
   background-color: #34353b;
+  padding-top: 32px;
 
   &:before {
     content: "";
@@ -60,6 +59,8 @@ const Wrapper = styled.div`
 
   @media ${QUERIESV2.sm.andDown} {
     padding-left: 0;
+    padding-top: 24px;
+    gap: 24px;
   }
 `;
 
@@ -117,7 +118,7 @@ const Label = styled.p`
   font-size: 14px;
   line-height: 18px;
 
-  color: #9daab2;
+  color: #6cf9d8;
 `;
 
 const Address = styled.p`
@@ -133,7 +134,6 @@ const TopRow = styled.div`
 `;
 
 const BottomRow = styled.div`
-  margin-top: 32px;
   display: flex;
   justify-content: center;
 `;
