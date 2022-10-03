@@ -58,6 +58,7 @@ const LiquidityProviderCard: React.FC<Props> = ({
     useLiquidityProviderCard(rewardsData, isConnected);
   return (
     <AirdropCard
+      boxShadowOnHover
       title="Liquidity Provider"
       description={cardDescription}
       Icon={LPArrow}

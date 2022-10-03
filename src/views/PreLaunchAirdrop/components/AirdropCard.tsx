@@ -14,6 +14,7 @@ type AirdropCardContentProps = {
   externalLink?: string;
   contentStackChildren?: React.ReactElement;
   hideBoxShadow?: boolean;
+  boxShadowOnHover?: boolean;
   rewardAmount?: string;
   // Internal React-router link, eg: /pools
   buttonLink?: string;
@@ -31,8 +32,13 @@ const AirdropCard: React.FC<AirdropCardContentProps> = ({
   hideBoxShadow,
   rewardAmount,
   buttonLink,
+  boxShadowOnHover,
 }) => (
-  <Wrapper eligible={check ?? "undetermined"} hideBoxShadow={hideBoxShadow}>
+  <Wrapper
+    eligible={check ?? "undetermined"}
+    boxShadowOnHover={boxShadowOnHover}
+    hideBoxShadow={hideBoxShadow}
+  >
     <WrapperBackground />
     <CardContent
       Icon={Icon}
@@ -55,15 +61,14 @@ export default AirdropCard;
 type WrapperType = {
   eligible: CheckIconState;
   hideBoxShadow?: boolean;
+  boxShadowOnHover?: boolean;
 };
 const Wrapper = styled.div<WrapperType>`
   width: 100%;
   position: relative;
 
   border: 1px solid ${({ eligible }) => CheckIconMapping[eligible].color};
-  box-shadow: 0px 24px 160px
-    ${({ hideBoxShadow }) =>
-      hideBoxShadow ? "transparent" : "rgba(0, 0, 0, 0.45)"};
+
   border-radius: 16px;
 
   display: flex;
@@ -80,6 +85,21 @@ const Wrapper = styled.div<WrapperType>`
     padding: 24px;
 
     max-width: calc(808px + 32px);
+  }
+
+  transition: ${({ boxShadowOnHover }) =>
+    boxShadowOnHover ? "box-shadow 250ms" : "none"};
+
+  box-shadow: ${({ hideBoxShadow, boxShadowOnHover }) =>
+    hideBoxShadow || boxShadowOnHover
+      ? "0px 16px 32px rgba(0, 0, 0, 0.2) "
+      : "0px 24px 160px rgba(0, 0, 0, 0.45) "};
+
+  &:hover {
+    box-shadow: ${({ hideBoxShadow, boxShadowOnHover }) =>
+      hideBoxShadow || boxShadowOnHover
+        ? "0px 40px 96px rgba(0, 0, 0, 0.45)"
+        : "0px 24px 160px rgba(0, 0, 0, 0.45)"};
   }
 `;
 
