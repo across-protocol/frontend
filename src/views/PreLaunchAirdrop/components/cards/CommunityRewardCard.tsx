@@ -178,6 +178,4 @@ const CustomAvatar = styled.img`
   width: 40px;
 
   padding: 1px;
-
-  border: 1px solid black;
 `;
