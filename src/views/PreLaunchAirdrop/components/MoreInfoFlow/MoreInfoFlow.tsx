@@ -81,7 +81,7 @@ export function MoreInfoFlow({ onClickBack }: Props) {
               Liquidity providers who pool ETH, USDC, WBTC or DAI into the
               Across protocol before the token launch. The amount of rewards to
               LPs are pro-rated by size and a fixed amount of tokens will be
-              emitted at each block since the inception of the protocol."
+              emitted at each block since the inception of the protocol.
             </CardTextDescription>
           </AirdropCard>,
         ]}
