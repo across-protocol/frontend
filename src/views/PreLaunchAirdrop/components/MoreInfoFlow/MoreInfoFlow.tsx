@@ -55,7 +55,11 @@ export function MoreInfoFlow({ onClickBack }: Props) {
               Active bridge users who have not used Across prior to the Across
               Referral Program (July 18, 2022) identified by the Bridge Traveler
               program. These users need to have completed a bridge transfer
-              ahead of the ACX token launch to become eligible.
+              ahead of the ACX token launch to become eligible. The amount of
+              ACX committed to this program will increase linearly from 10MM to
+              20MM tokens as the participation rate increases. Users who
+              complete a bridge transfer will share these tokens with some
+              allocation variability depending on past bridge activity.
             </CardTextDescription>
           </AirdropCard>,
           <AirdropCard
@@ -81,7 +85,7 @@ export function MoreInfoFlow({ onClickBack }: Props) {
               Liquidity providers who pool ETH, USDC, WBTC or DAI into the
               Across protocol before the token launch. The amount of rewards to
               LPs are pro-rated by size and a fixed amount of tokens will be
-              emitted at each block since the inception of the protocol."
+              emitted at each block since the inception of the protocol.
             </CardTextDescription>
           </AirdropCard>,
         ]}
