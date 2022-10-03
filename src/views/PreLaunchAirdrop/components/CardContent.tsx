@@ -4,8 +4,6 @@ import { CardIcon, EligibilityPill } from ".";
 import { CheckIconState } from "./CardIcon";
 import { ReactComponent as AcrossLogo } from "assets/across.svg";
 import { QUERIESV2 } from "utils";
-import { SecondaryButtonV2 as UnstyledPoolButton } from "components/Buttons/ButtonV2";
-import { Link } from "react-router-dom";
 
 type CardContentProps = {
   check?: CheckIconState;
@@ -27,7 +25,6 @@ const CardContent: React.FC<CardContentProps> = ({
   acxTokenAmount,
   rewardAmount,
   children,
-  buttonLink,
 }) => {
   const isPillDisplayed = check && check !== "undetermined";
 
@@ -50,11 +47,6 @@ const CardContent: React.FC<CardContentProps> = ({
           <RewardAmount>{rewardAmount} $ACX</RewardAmount>
           <AcrossLogo />
         </RewardAmountWrapper>
-      )}
-      {buttonLink && (
-        <Link to={buttonLink}>
-          <PoolLinkButton size="md">Go to Pools</PoolLinkButton>
-        </Link>
       )}
     </Wrapper>
   );
@@ -166,11 +158,4 @@ const TokenAmountWrapper = styled.div`
 const StyledAcrossLogo = styled(AcrossLogo)`
   height: 16px;
   width: 16px;
-`;
-
-const PoolLinkButton = styled(UnstyledPoolButton)`
-  display: none;
-  @media ${QUERIESV2.tb.andDown} {
-    display: block;
-  }
 `;

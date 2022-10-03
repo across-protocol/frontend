@@ -39,7 +39,8 @@ const StyledLink = styled(ButtonV2)`
   padding: 0px;
   gap: 6px;
 
-  width: 176px;
+  min-width: 176px;
+  width: fit-content;
   height: 40px;
 
   background: #2d2e33;
