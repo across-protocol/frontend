@@ -107,6 +107,10 @@ const CardTableWrapper = styled.div`
   @media ${QUERIESV2.sm.andUp} {
     margin-top: 84px;
   }
+
+  @media ${QUERIESV2.sm.andDown} {
+    gap: 16px;
+  }
 `;
 
 const CardWrapper = styled.div`
@@ -124,5 +128,9 @@ const CardWrapper = styled.div`
   @media ${QUERIESV2.tb.andDown} {
     padding-left: 16px;
     padding-right: 16px;
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    gap: 16px;
   }
 `;
