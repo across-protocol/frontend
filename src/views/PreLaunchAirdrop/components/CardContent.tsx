@@ -101,6 +101,7 @@ const Description = styled.p`
   font-weight: 400;
   font-size: 16px;
   line-height: 20px;
+  color: #c5d5e0;
 
   @media ${QUERIESV2.tb.andDown} {
     font-size: 14px;
