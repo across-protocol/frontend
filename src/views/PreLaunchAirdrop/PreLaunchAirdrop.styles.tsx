@@ -11,7 +11,7 @@ export const BackgroundLayer = styled.video`
   background: linear-gradient(72.13deg, #34353b 0%, rgba(52, 53, 59, 0.75) 100%),
     linear-gradient(0deg, #34353b, #34353b);
   transform: matrix(-1, 0, 0, 1, 0, 0);
-  mix-blend-mode: luminosity;
+  mix-blend-mode: luminosity !important;
   object-fit: cover;
 `;
 
