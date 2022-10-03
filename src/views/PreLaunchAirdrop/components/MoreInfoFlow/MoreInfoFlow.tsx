@@ -54,12 +54,13 @@ export function MoreInfoFlow({ onClickBack }: Props) {
             <CardTextDescription>
               Active bridge users who have not used Across prior to the Across
               Referral Program (July 18, 2022) identified by the Bridge Traveler
-              program. These users need to have completed a bridge transfer
+              program. These users need to complete a bridge transfer on Across
               ahead of the ACX token launch to become eligible. The amount of
-              ACX committed to this program will increase linearly from 10MM to
-              20MM tokens as the participation rate increases. Users who
-              complete a bridge transfer will share these tokens with some
-              allocation variability depending on past bridge activity.
+              ACX initially committed to this program is 10MM, but this amount
+              will double to 20MM if a participation rate of 30% or more is
+              achieved. Users who complete a bridge transfer will share these
+              tokens with some allocation variability depending on past bridge
+              activity.
             </CardTextDescription>
           </AirdropCard>,
           <AirdropCard
