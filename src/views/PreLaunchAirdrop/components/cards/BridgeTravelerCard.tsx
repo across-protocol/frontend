@@ -77,6 +77,7 @@ const BridgeTravelerCard: React.FC<Props> = ({
   return (
     <AirdropCard
       boxShadowOnHover
+      data-cy="bridge-traveler-card"
       title="Bridge Traveler Program"
       description={cardDescription}
       Icon={TravelerIcon}

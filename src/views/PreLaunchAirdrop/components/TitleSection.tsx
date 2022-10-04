@@ -28,11 +28,18 @@ const TitleSection = ({
       </TextStack>
       <ButtonStack>
         {!isConnected && (
-          <StyledButton onClick={walletConnectionHandler} size="lg">
+          <StyledButton
+            data-cy="connect-wallet"
+            onClick={walletConnectionHandler}
+            size="lg"
+          >
             Connect to check eligibility
           </StyledButton>
         )}
-        <EligibilityLink onClick={airdropDetailsLinkHandler}>
+        <EligibilityLink
+          data-cy="airdrop-details-button"
+          onClick={airdropDetailsLinkHandler}
+        >
           <InnerLinkText>Airdrop details</InnerLinkText>
           <StyledArrowIcon />
         </EligibilityLink>
