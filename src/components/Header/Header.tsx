@@ -49,6 +49,7 @@ const Header: React.FC<Props> = ({
     <Wrapper
       transparentHeader={transparentHeader}
       scrollPosition={scrollPosition}
+      data-cy="primary-header"
     >
       <UnstyledLink
         to={{ pathname: "/", search: location.search }}

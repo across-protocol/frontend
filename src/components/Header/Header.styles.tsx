@@ -16,7 +16,9 @@ export const Wrapper = styled.header<IWrapper>`
   */
   background-color: ${({ transparentHeader, scrollPosition }) =>
     transparentHeader
-      ? `#2d2e33${Math.min(240, Math.floor(2.5 * scrollPosition)).toString(16)}`
+      ? `#2d2e33${Math.min(240, Math.floor(2.5 * scrollPosition))
+          .toString(16)
+          .padStart(2, "0")}`
       : "#2d2e33"};
 
   height: 72px;
