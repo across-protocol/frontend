@@ -107,6 +107,16 @@ const ChildrenWrapper = styled.div`
   z-index: 1;
   isolation: isolate;
   position: relative;
+
+  &:before {
+    content: "";
+    border-top: 1px solid #3e4047;
+    position: absolute;
+    width: 200%;
+    height: 1px;
+    top: 0;
+    left: -50%;
+  }
 `;
 
 const WrapperBackground = styled(BackgroundVector)`
