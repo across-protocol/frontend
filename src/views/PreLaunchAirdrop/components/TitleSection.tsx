@@ -162,13 +162,8 @@ const StyledButton = styled(ButtonV2)`
 `;
 
 const StyledAcrossLogo = styled(AcrossRingLogo)`
-  filter: drop-shadow(0px 3.63936px 94.6234px #6dfad9);
-
-  height: 186px;
-  width: 280px;
-
   @media ${QUERIESV2.sm.andDown} {
-    width: 168px;
-    height: 112px;
+    width: 315px;
+    height: 240px;
   }
 `;
