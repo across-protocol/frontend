@@ -7,7 +7,7 @@ interface Props {
   Icon?: React.ReactElement;
   label: string;
   address: string;
-  bottomText: string;
+  bottomText?: string;
 }
 const RewardsCard: React.FC<Props> = ({ Icon, label, address, bottomText }) => {
   const { width = 0 } = useWindowSize();
@@ -30,9 +30,11 @@ const RewardsCard: React.FC<Props> = ({ Icon, label, address, bottomText }) => {
           </EligibleWallet>
         </EligibleWalletWrapper>
       </TopRow>
-      <BottomRow>
-        <BottomRowText>{bottomText}</BottomRowText>
-      </BottomRow>
+      {bottomText && (
+        <BottomRow>
+          <BottomRowText>{bottomText}</BottomRowText>
+        </BottomRow>
+      )}
     </Wrapper>
   );
 };
