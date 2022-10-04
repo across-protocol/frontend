@@ -82,7 +82,7 @@ const LiquidityProviderCard: React.FC<Props> = ({
             }
             address={account ?? ""}
             Icon={<WalletIcon />}
-            bottomText="Rewards are estimated as of September 1, 2022 and are subject to change.  Liquidity providers continue to earn ACX up to token launch."
+            bottomText="Rewards are estimated as of October 1, 2022 and are subject to change. Liquidity providers continue to earn ACX up to token launch."
           />
         )
       }

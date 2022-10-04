@@ -103,8 +103,7 @@ const LinkWalletModal = ({
       }}
     >
       <Alert status="warn">
-        The linked wallet can be changed up until the official token launch on
-        the 12th of October.
+        The linked wallet can be changed up until 25th of October.
       </Alert>
       <ButtonTextStack>
         <InfoText>{currentFlow.infoText}</InfoText>

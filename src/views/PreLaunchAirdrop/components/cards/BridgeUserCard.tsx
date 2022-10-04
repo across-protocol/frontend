@@ -62,8 +62,6 @@ const BridgeUserCard: React.FC<Props> = ({
             label="Eligible wallet"
             address={account ?? ""}
             Icon={<WalletIcon />}
-            bottomText="Rewards are estimated as of September 1, 2022 and are subject to
-    change."
           />
         )
       }
