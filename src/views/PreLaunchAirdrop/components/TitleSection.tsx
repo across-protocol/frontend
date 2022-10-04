@@ -21,10 +21,8 @@ const TitleSection = ({
       <TextStack>
         <PageHeader>ACX is about to launch.</PageHeader>
         <PageSubHeader>
-          The Across token is almost here and contributors to the protocol can
-          now check their airdrop eligibility and prepare for the launch. Active
-          bridge users who have not used Across may also have an opportunity to
-          be included in this airdrop through the Bridge Traveler Program.
+          As a community member you will have the opportunity to make your claim
+          for a piece of the official ACX airdrop.
         </PageSubHeader>
       </TextStack>
       <ButtonStack>
@@ -164,13 +162,8 @@ const StyledButton = styled(ButtonV2)`
 `;
 
 const StyledAcrossLogo = styled(AcrossRingLogo)`
-  filter: drop-shadow(0px 3.63936px 94.6234px #6dfad9);
-
-  height: 186px;
-  width: 280px;
-
   @media ${QUERIESV2.sm.andDown} {
-    width: 168px;
-    height: 112px;
+    width: 315px;
+    height: 240px;
   }
 `;
