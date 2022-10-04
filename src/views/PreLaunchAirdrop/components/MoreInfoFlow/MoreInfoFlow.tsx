@@ -155,6 +155,10 @@ const BackButton = styled.div`
 
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 8px;
   margin-bottom: 48px;
+
+  @media ${QUERIESV2.tb.andDown} {
+    margin-bottom: 24px;
+  }
 `;

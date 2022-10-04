@@ -3,7 +3,7 @@ import { Rotate, Bolt, Heart, Present } from "./TravellerFlow.styles";
 import { useHistory } from "react-router-dom";
 const TRAVELLER_FLOW_DATA = [
   {
-    title: "Welcome, Bridge Traveller.",
+    title: "Welcome, Bridge Traveler.",
     Icon: Rotate,
     description:
       "Hello. We detect that you’ve traveled far from home. Welcome to Across.",

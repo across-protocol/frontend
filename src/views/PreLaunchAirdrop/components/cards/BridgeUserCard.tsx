@@ -50,6 +50,7 @@ const BridgeUserCard: React.FC<Props> = ({
   );
   return (
     <AirdropCard
+      boxShadowOnHover
       title="Early Bridge User"
       description={cardDescription}
       Icon={BridgeIcon}

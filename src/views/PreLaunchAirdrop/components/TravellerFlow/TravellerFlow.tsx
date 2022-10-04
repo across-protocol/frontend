@@ -6,12 +6,10 @@ import {
   Description,
   DotStepWrapper,
   ButtonWrapper,
+  SecondaryButton,
+  StyledTertiaryButton,
 } from "./TravellerFlow.styles";
-import {
-  SecondaryButtonV2,
-  TertiaryButton,
-  ButtonV2,
-} from "components/Buttons/ButtonV2";
+import { ButtonV2 } from "components/Buttons/ButtonV2";
 import useTravellerFlow from "./useTravellerFlow";
 import { setAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
 interface Props {
@@ -30,7 +28,7 @@ const TravellerFlow: React.FC<Props> = ({ account, switchToSplash }) => {
       <Title>{view.title}</Title>
       <Description>{view.description}</Description>
       <ButtonWrapper>
-        <TertiaryButton
+        <StyledTertiaryButton
           onClick={() => {
             // Return back to view, not sure where yet.
             // Change when integrating this into regular view.
@@ -43,16 +41,16 @@ const TravellerFlow: React.FC<Props> = ({ account, switchToSplash }) => {
           size="md"
         >
           {step === 1 ? "Back to Home" : "Back"}
-        </TertiaryButton>
+        </StyledTertiaryButton>
         {step < numDots ? (
-          <SecondaryButtonV2
+          <SecondaryButton
             onClick={() => {
               setStep((pv) => Math.min(pv + 1, numDots));
             }}
             size="md"
           >
             Next
-          </SecondaryButtonV2>
+          </SecondaryButton>
         ) : (
           <ButtonV2
             size="md"

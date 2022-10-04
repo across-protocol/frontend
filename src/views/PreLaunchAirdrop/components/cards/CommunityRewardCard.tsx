@@ -145,6 +145,7 @@ const CommunityRewardCard = ({
   return (
     <>
       <AirdropCard
+        boxShadowOnHover
         title="Community Member"
         description={cardDescription}
         Icon={DiscordIcon}
@@ -178,6 +179,4 @@ const CustomAvatar = styled.img`
   width: 40px;
 
   padding: 1px;
-
-  border: 1px solid black;
 `;

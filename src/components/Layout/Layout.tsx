@@ -110,7 +110,7 @@ const Link = styled.a`
 
 const AccentLink = styled(Link)`
   &:hover {
-    color: var(--color-uma-red);
+    color: white;
   }
 `;
 

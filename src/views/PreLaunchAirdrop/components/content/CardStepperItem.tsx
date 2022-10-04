@@ -4,6 +4,7 @@ import { ReactComponent as CheckMark } from "assets/icons/filled-checkmark-16.sv
 import { ReactComponent as InvalidMark } from "assets/icons/solid-times-16.svg";
 import styled from "@emotion/styled";
 import { ButtonV2 } from "components";
+import { QUERIESV2 } from "utils";
 
 type ProgressWithAfterState = Progress | "not_reached";
 
@@ -151,9 +152,13 @@ const IconLinkConnection = styled.div<ProgressStyleAndPrevParam>`
 const ProgressIconTextWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 42px;
+  gap: 46px;
   justify-content: center;
   align-items: center;
+
+  @media ${QUERIESV2.tb.andDown} {
+    gap: 36px;
+  }
 `;
 
 const TextWrapper = styled.div`
