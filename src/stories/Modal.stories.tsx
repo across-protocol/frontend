@@ -1,11 +1,9 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import Modal from "components/Modal";
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
   title: "Modal",
   component: Modal,
-  // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
   argTypes: {
     width: {
       options: [200, 500, undefined],
@@ -19,7 +17,6 @@ export default {
   },
 } as ComponentMeta<typeof Modal>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof Modal> = (args) => {
   return (
     <Modal
@@ -33,7 +30,6 @@ const Template: ComponentStory<typeof Modal> = (args) => {
 };
 
 export const Default = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
 Default.args = {};
 
 export const Width = Template.bind({});

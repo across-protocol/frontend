@@ -7,7 +7,6 @@ import { ButtonV2 } from "components";
 export default {
   title: "DotStepper",
   component: DotStepper,
-  // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
   argTypes: {
     type: {
       values: ["default", "big"],
@@ -18,7 +17,6 @@ export default {
   },
 } as ComponentMeta<typeof DotStepper>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof DotStepper> = (args) => {
   const [step, setStep] = useState(args.step);
   const styles = {
@@ -54,7 +52,6 @@ const Template: ComponentStory<typeof DotStepper> = (args) => {
 };
 
 export const Default = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
 Default.args = {
   numDots: 4,
   step: 1,

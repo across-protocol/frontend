@@ -1,11 +1,9 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
   title: "BouncingDotsLoader",
   component: BouncingDotsLoader,
-  // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
   argTypes: {
     type: {
       values: ["default", "big"],
@@ -16,7 +14,6 @@ export default {
   },
 } as ComponentMeta<typeof BouncingDotsLoader>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof BouncingDotsLoader> = (args) => {
   const styles = {
     display: "flex",
@@ -34,7 +31,6 @@ const Template: ComponentStory<typeof BouncingDotsLoader> = (args) => {
 };
 
 export const Default = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
 Default.args = {};
 
 export const WhiteIcons = Template.bind({});
