@@ -25,7 +25,7 @@ export function MoreInfoFlow({ onClickBack }: Props) {
         <h3>Airdrop details</h3>
         <p>
           A total of 1,000,000,000 $ACX will be minted at inception and
-          120,000,000 $ACX will be distributed through an airdrop to users who
+          125,000,000 $ACX will be distributed through an airdrop to users who
           have contributed to Across.
         </p>
       </TitleContainer>
@@ -34,7 +34,7 @@ export function MoreInfoFlow({ onClickBack }: Props) {
         cards={[
           <AirdropCard
             Icon={DiscordIcon}
-            acxTokenAmount="25,000,000"
+            acxTokenAmount="20,000,000"
             title="Community Member"
             hideBoxShadow
           >
