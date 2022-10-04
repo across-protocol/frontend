@@ -34,7 +34,7 @@ export function MoreInfoFlow({ onClickBack }: Props) {
         cards={[
           <AirdropCard
             Icon={DiscordIcon}
-            acxTokenAmount="25,000,000"
+            acxTokenAmount="20,000,000"
             title="Community Member"
             hideBoxShadow
           >
