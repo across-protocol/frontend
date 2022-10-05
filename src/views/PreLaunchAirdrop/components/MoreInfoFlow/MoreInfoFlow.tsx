@@ -17,9 +17,9 @@ type Props = {
 
 export function MoreInfoFlow({ onClickBack }: Props) {
   return (
-    <Container>
+    <Container data-cy="airdrop-details">
       <TitleContainer>
-        <BackButton onClick={onClickBack}>
+        <BackButton data-cy="back-button" onClick={onClickBack}>
           <ChevronLeft size={24} strokeWidth={1} /> Back
         </BackButton>
         <h3>Airdrop details</h3>

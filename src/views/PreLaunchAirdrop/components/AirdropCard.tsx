@@ -18,6 +18,7 @@ type AirdropCardContentProps = {
   rewardAmount?: string;
   // Internal React-router link, eg: /pools
   buttonLink?: string;
+  "data-cy"?: string;
 };
 
 const AirdropCard: React.FC<AirdropCardContentProps> = ({
@@ -33,11 +34,13 @@ const AirdropCard: React.FC<AirdropCardContentProps> = ({
   rewardAmount,
   buttonLink,
   boxShadowOnHover,
+  ...restProps
 }) => (
   <Wrapper
     eligible={check ?? "undetermined"}
     boxShadowOnHover={boxShadowOnHover}
     hideBoxShadow={hideBoxShadow}
+    data-cy={restProps["data-cy"]}
   >
     <WrapperBackground />
     <CardContent
