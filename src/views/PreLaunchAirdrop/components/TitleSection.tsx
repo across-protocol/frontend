@@ -170,13 +170,6 @@ const StyledButton = styled(ButtonV2)`
   }
 `;
 
-// const StyledAcrossLogo = styled(AcrossRingLogo)`
-//   @media ${QUERIESV2.sm.andDown} {
-//     width: 315px;
-//     height: 240px;
-//   }
-// `;
-
 const StyledLottiePlayer = styled(LottiePlayer)`
   margin-bottom: -88px;
 `;
