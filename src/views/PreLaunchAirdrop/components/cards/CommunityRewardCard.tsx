@@ -146,6 +146,7 @@ const CommunityRewardCard = ({
     <>
       <AirdropCard
         boxShadowOnHover
+        data-cy="community-rewards-card"
         title="Community Member"
         description={cardDescription}
         Icon={DiscordIcon}

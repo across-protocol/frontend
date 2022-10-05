@@ -51,6 +51,7 @@ const BridgeUserCard: React.FC<Props> = ({
   return (
     <AirdropCard
       boxShadowOnHover
+      data-cy="bridge-user-card"
       title="Early Bridge User"
       description={cardDescription}
       Icon={BridgeIcon}
