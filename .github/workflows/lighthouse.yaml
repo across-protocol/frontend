@@ -1,11 +1,13 @@
 name: Lighthouse CI
 on:
-  deployment_status:
+  # pull_request:
+  issue_comment:
+    types: [edited]
 jobs:
   lighthouseci:
-    if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && !contains(github.event.deployment_status.target_url, 'goerli')
-    runs-on: ubuntu-latest
-    steps:
+    # if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && !contains(github.event.deployment_status.target_url, 'goerli')
+    # runs-on: ubuntu-latest
+    # steps:
     # - uses: actions/checkout@v2
     # - name: Lighthouse
     #   uses: foo-software/lighthouse-check-action@master
@@ -15,6 +17,13 @@ jobs:
     #     gitHubAccessToken: ${{secrets.GITHUB_TOKEN}}
     #     prCommentEnabled: true
     #     wait: true
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aaimio/vercel-preview-url-action@v1
+        id: vercel_preview_url
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
@@ -31,4 +40,4 @@ jobs:
         continue-on-error: true
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUBLIC_URL: ${{ github.event.deployment_status.target_url }}
+          PUBLIC_URL: ${{ steps.vercel_preview_url.outputs.vercel_preview_url }}
