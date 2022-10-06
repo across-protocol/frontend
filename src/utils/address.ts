@@ -1,5 +1,7 @@
 import { utils } from "ethers";
-import { ChainId, getProvider } from "utils";
+// import { ChainId, getProvider } from "utils";
+import { ChainId } from "./utils.d";
+import { getProvider } from "./providers";
 
 export function isValidAddress(address: string) {
   return utils.isAddress(address);
