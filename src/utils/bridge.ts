@@ -24,9 +24,9 @@ import {
   wbtcLpCushion,
   daiLpCushion,
 } from "./constants";
-
+import { getProvider } from "./providers";
 import { parseEther, tagAddress } from "./format";
-import { getConfig, getProvider } from "utils";
+import { getConfig } from "utils";
 import getApiEndpoint from "./serverless-api";
 
 export type Fee = {
