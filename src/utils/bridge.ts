@@ -14,7 +14,6 @@ import {
   ChainId,
   hubPoolChainId,
   hubPoolAddress,
-  getProvider,
   getConfigStoreAddress,
   queriesTable,
   FLAT_RELAY_CAPITAL_FEE,
@@ -27,7 +26,7 @@ import {
 } from "./constants";
 
 import { parseEther, tagAddress } from "./format";
-import { getConfig } from "utils";
+import { getConfig, getProvider } from "utils";
 import getApiEndpoint from "./serverless-api";
 
 export type Fee = {
