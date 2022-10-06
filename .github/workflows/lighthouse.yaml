@@ -1,8 +1,6 @@
 name: Lighthouse CI
 on:
-  # pull_request:
-  issue_comment:
-    types: [edited]
+  deployment_status:
 jobs:
   lighthouseci:
     if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && !contains(github.event.deployment_status.target_url, 'goerli')
