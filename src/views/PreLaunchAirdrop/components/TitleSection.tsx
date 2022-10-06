@@ -3,7 +3,8 @@ import styled from "@emotion/styled";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-right-16.svg";
 import { ButtonV2 } from "components";
 import { QUERIESV2 } from "utils";
-import { ReactComponent as AcrossRingLogo } from "assets/across-logo-with-rings.svg";
+import AcrossLogoAnimation from "assets/animations/lottie/across-plaap-splash-logo.json";
+import LottiePlayer from "components/LottiePlayer";
 
 type TitleSectionParams = {
   airdropDetailsLinkHandler: () => void;
@@ -17,7 +18,7 @@ const TitleSection = ({
 }: TitleSectionParams) => {
   return (
     <Wrapper>
-      <StyledAcrossLogo />
+      <StyledLottiePlayer animationData={AcrossLogoAnimation} autoplay />
       <TextStack>
         <PageHeader>ACX is about to launch.</PageHeader>
         <PageSubHeader>
@@ -169,9 +170,6 @@ const StyledButton = styled(ButtonV2)`
   }
 `;
 
-const StyledAcrossLogo = styled(AcrossRingLogo)`
-  @media ${QUERIESV2.sm.andDown} {
-    width: 315px;
-    height: 240px;
-  }
+const StyledLottiePlayer = styled(LottiePlayer)`
+  margin-bottom: -88px;
 `;
