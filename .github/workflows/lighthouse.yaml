@@ -6,30 +6,29 @@ jobs:
     if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && !contains(github.event.deployment_status.target_url, 'goerli')
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Lighthouse
-      uses: foo-software/lighthouse-check-action@master
-      with:
-        urls: '${{github.event.deployment_status.target_url}}/,${{github.event.deployment_status.target_url}}/airdrop,${{github.event.deployment_status.target_url}}/rewards'
-        device: all
-        gitHubAccessToken: ${{secrets.GITHUB_TOKEN}}
-        prCommentEnabled: true
-        wait: true
-
-      # - uses: actions/checkout@v2
-      # - uses: actions/setup-node@v1
-      #   with:
-      #     node-version: 14
-      # - uses: ./.github/actions/setup
-      # - uses: actions/cache@v3
-      #   id: lighthouse-cache
-      #   with:
-      #     path: /home/runner/.cache/Lighthouse
-      #     key: ${{ runner.os }}-lighthouse-${{ hashFiles('node_modules/@lhci') }}
-      # - if: steps.lighthouse-cache.outputs.cache-hit != 'true'
-      #   run: yarn add @lhci/cli@0.9.0
-      # - run: yarn lhci autorun --config ./lighthouserc.js
-      #   continue-on-error: true
-      #   env:
-      #     LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     PUBLIC_URL: ${{ github.event.deployment_status.target_url }}
+    # - uses: actions/checkout@v2
+    # - name: Lighthouse
+    #   uses: foo-software/lighthouse-check-action@master
+    #   with:
+    #     urls: '${{github.event.deployment_status.target_url}}/,${{github.event.deployment_status.target_url}}/airdrop,${{github.event.deployment_status.target_url}}/rewards'
+    #     device: all
+    #     gitHubAccessToken: ${{secrets.GITHUB_TOKEN}}
+    #     prCommentEnabled: true
+    #     wait: true
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - uses: ./.github/actions/setup
+      - uses: actions/cache@v3
+        id: lighthouse-cache
+        with:
+          path: /home/runner/.cache/Lighthouse
+          key: ${{ runner.os }}-lighthouse-${{ hashFiles('node_modules/@lhci') }}
+      - if: steps.lighthouse-cache.outputs.cache-hit != 'true'
+        run: yarn add @lhci/cli@0.9.0
+      - run: yarn lhci autorun --config ./lighthouserc.js
+        continue-on-error: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLIC_URL: ${{ github.event.deployment_status.target_url }}
