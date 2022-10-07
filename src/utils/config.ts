@@ -151,10 +151,11 @@ export class ConfigClient {
       : undefined;
   };
   resolveChainIdFromNumericOrCanonical = (chainIdOrCanonical?: string) => {
-    return (
-      this.getSupportedCanonicalNameAsChainId(chainIdOrCanonical) ??
-      Number(chainIdOrCanonical)
-    );
+    const asNumeric = Number(chainIdOrCanonical);
+    return Number.isNaN(asNumeric)
+      ? this.getSupportedCanonicalNameAsChainId(chainIdOrCanonical) ??
+          Number(chainIdOrCanonical)
+      : asNumeric;
   };
   // returns token list in order specified by constants, but adds in token address for the chain specified
   getTokenList(chainId?: number): TokenList {
