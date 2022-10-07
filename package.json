@@ -116,6 +116,7 @@
     "cypress": "^10.4.0",
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.0",
+    "jest-environment-hardhat": "^1.1.8",
     "lint-staged": "^12.4.1",
     "prettier": "^2.4.1",
     "serve": "^14.0.1",

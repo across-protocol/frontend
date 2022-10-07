@@ -14,7 +14,6 @@ import {
   ChainId,
   hubPoolChainId,
   hubPoolAddress,
-  getProvider,
   getConfigStoreAddress,
   queriesTable,
   FLAT_RELAY_CAPITAL_FEE,
@@ -25,7 +24,7 @@ import {
   wbtcLpCushion,
   daiLpCushion,
 } from "./constants";
-
+import { getProvider } from "./providers";
 import { parseEther, tagAddress } from "./format";
 import { getConfig } from "utils";
 import getApiEndpoint from "./serverless-api";

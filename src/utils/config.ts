@@ -1,6 +1,7 @@
 import assert from "assert";
 import { Signer } from "./ethers";
 import * as constants from "./constants";
+import * as providerUtils from "./providers";
 import {
   HubPool,
   HubPool__factory,
@@ -73,7 +74,7 @@ export class ConfigClient {
   }
   getSpokePool(chainId: constants.ChainId, signer?: Signer): SpokePool {
     const address = this.getSpokePoolAddress(chainId);
-    const provider = signer ?? constants.getProvider(chainId);
+    const provider = signer ?? providerUtils.getProvider(chainId);
     return SpokePool__factory.connect(address, provider);
   }
   getHubPoolChainId(): constants.ChainId {
@@ -90,7 +91,8 @@ export class ConfigClient {
   }
   getHubPool(signer?: Signer): HubPool {
     const address = this.getHubPoolAddress();
-    const provider = signer ?? constants.getProvider(this.getHubPoolChainId());
+    const provider =
+      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
     return HubPool__factory.connect(address, provider);
   }
   filterRoutes(query: Partial<constants.Route>): constants.Routes {

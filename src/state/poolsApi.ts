@@ -2,7 +2,6 @@ import * as acrossSdk from "@across-protocol/sdk-v2";
 import { update } from "./pools";
 import { store } from "../state";
 import {
-  getProvider,
   getConfigStoreAddress,
   ChainId,
   hubPoolAddress,
@@ -10,6 +9,7 @@ import {
   getConfig,
 } from "utils";
 import { ethers } from "ethers";
+import { getProvider } from "utils/providers";
 
 const provider = getProvider();
 

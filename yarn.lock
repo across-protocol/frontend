@@ -19659,6 +19659,13 @@ jest-each@^26.6.0, jest-each@^26.6.2:
     jest-util "^26.6.2"
     pretty-format "^26.6.2"
 
+jest-environment-hardhat@^1.1.8:
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/jest-environment-hardhat/-/jest-environment-hardhat-1.1.8.tgz#36e08cb087a8f0ca7e64cf60c221f898fac4d79f"
+  integrity sha512-1D5dix/cKR3IgS4MMImMbvvWXClUeFRvAo+E17JY6UBhmP29Kc8yrUCMG7r3g1JSvdBYBe64Nl7cqpydJmZMog==
+  dependencies:
+    setimmediate "^1.0.5"
+
 jest-environment-jsdom@^26.6.2:
   version "26.6.2"
   resolved "https://registry.yarnpkg.com/jest-environment-jsdom/-/jest-environment-jsdom-26.6.2.tgz#78d09fe9cf019a357009b9b7e1f101d23bd1da3e"
