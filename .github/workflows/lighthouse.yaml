@@ -3,11 +3,11 @@ on:
   pull_request:
 jobs:
   lighthouseci:
-    runs-on: ubuntu-latest
-    env:
-      DEPLOYMENT_URL: "https://frontend-v2-git-$(echo ${{ github.event.pull_request.head.ref }} | sed 's/\//-/g')-uma.vercel.app"
+    runs-on: ubuntu-latest      
     steps:
+      - run DEPLOYMENT_URL="https://frontend-v2-git-$(echo ${{ github.event.pull_request.head.ref }} | sed 's/\//-/g')-uma.vercel.app"
       - run: echo $DEPLOYMENT_URL
+      - run: echo ${{ env.DEPLOYMENT_URL }}
       - uses: UnlyEd/github-action-await-vercel@v1.2.14
         id: await-vercel
         env:
