@@ -10,3 +10,13 @@ test("should have a default scroll position", () => {
   });
   expect(result.current).toEqual(100);
 });
+
+test("scrollPosition updates on change", () => {
+  const { result } = renderHook(() => useScrollPosition());
+
+  act(() => {
+    global.pageYOffset = 100;
+    global.dispatchEvent(new Event("scroll"));
+  });
+  expect(result.current).toEqual(100);
+});
