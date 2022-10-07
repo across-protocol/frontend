@@ -10,7 +10,7 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         with:
-          deployment-url: 'https://frontend-v2-git-${{GITHUB_REF_NAME}}-uma.vercel.app'
+          deployment-url: 'https://frontend-v2-git-${{ env.GITHUB_REF_NAME }}-uma.vercel.app'
           timeout: 3600
       - uses: actions/setup-node@v1
         with:
