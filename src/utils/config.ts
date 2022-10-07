@@ -10,8 +10,9 @@ import {
 } from "@across-protocol/contracts-v2";
 import filter from "lodash/filter";
 import sortBy from "lodash/sortBy";
-
-export type Token = constants.TokenInfo & {
+import { TokenInfo } from "./utils";
+import { tokenList, getToken } from "./token";
+export type Token = TokenInfo & {
   l1TokenAddress: string;
   address: string;
   isNative: boolean;
@@ -40,7 +41,7 @@ export class ConfigClient {
     });
     // this lets us sort arbitrary array of tokens
     this.tokenOrder = Object.fromEntries(
-      Object.entries(constants.tokenList).map(([index, token]) => [
+      Object.entries(tokenList).map(([index, token]) => [
         token.symbol,
         Number(index),
       ])
@@ -148,9 +149,9 @@ export class ConfigClient {
         return [route.fromTokenSymbol, route];
       })
     );
-    return constants.tokenList
-      .filter((token: constants.TokenInfo) => routeTable[token.symbol])
-      .map((token: constants.TokenInfo) => {
+    return tokenList
+      .filter((token: TokenInfo) => routeTable[token.symbol])
+      .map((token: TokenInfo) => {
         const { fromTokenAddress, isNative, l1TokenAddress } =
           routeTable[token.symbol];
         return {
@@ -175,7 +176,7 @@ export class ConfigClient {
     const tokens = this.getTokenList(chainId);
     const token = tokens.find((token) => token.symbol === symbol);
     assert(token, `Token not found on chain ${chainId} and symbol ${symbol}`);
-    const tokenInfo = constants.getToken(symbol);
+    const tokenInfo = getToken(symbol);
     return {
       ...tokenInfo,
       address: token.address,
@@ -183,9 +184,9 @@ export class ConfigClient {
       l1TokenAddress: token.l1TokenAddress,
     };
   }
-  getNativeTokenInfo(chainId: number): constants.TokenInfo {
+  getNativeTokenInfo(chainId: number): TokenInfo {
     const chainInfo = constants.getChainInfo(chainId);
-    return constants.getToken(chainInfo.nativeCurrencySymbol);
+    return getToken(chainInfo.nativeCurrencySymbol);
   }
   canBridge(fromChain: number, toChain: number): boolean {
     const routes = this.filterRoutes({ fromChain, toChain });

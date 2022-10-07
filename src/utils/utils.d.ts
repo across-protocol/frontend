@@ -14,3 +14,14 @@ export enum ChainId {
   // Polygon testnet
   MUMBAI = 80001,
 }
+
+export type TokenInfo = {
+  name: string;
+  symbol: string;
+  decimals: number;
+  logoURI: string;
+  // tokens require a mainnet address to do price lookups on coingecko, not used for anything else.
+  mainnetAddress?: string;
+};
+// enforce weth to be first so we can use it as a guarantee in other parts of the app
+export type TokenInfoList = TokenInfo[];

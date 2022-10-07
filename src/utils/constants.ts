@@ -2,7 +2,6 @@ import assert from "assert";
 import { ethers } from "ethers";
 import ethereumLogo from "assets/ethereum-logo.svg";
 import optimismLogo from "assets/optimism-alt-logo.svg";
-import wethLogo from "assets/weth-logo.svg";
 import arbitrumLogo from "assets/arbitrum-logo.svg";
 import bobaLogo from "assets/boba-logo.svg";
 import polygonLogo from "assets/polygon-logo.svg";
@@ -274,132 +273,6 @@ export const chainInfoTable: ChainInfoTable = Object.fromEntries(
   }, [])
 );
 
-export type TokenInfo = {
-  name: string;
-  symbol: string;
-  decimals: number;
-  logoURI: string;
-  // tokens require a mainnet address to do price lookups on coingecko, not used for anything else.
-  mainnetAddress?: string;
-};
-// enforce weth to be first so we can use it as a guarantee in other parts of the app
-export type TokenInfoList = TokenInfo[];
-
-export const tokenList: TokenInfoList = [
-  {
-    name: "Ether",
-    symbol: "ETH",
-    decimals: 18,
-    logoURI: ethereumLogo,
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "OETH",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "AETH",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Matic",
-    symbol: "WMATIC",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"),
-  },
-  {
-    name: "Kovan Ethereum",
-    symbol: "KOV",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "KOR",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "ARETH",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Wrapped Ether",
-    symbol: "WETH",
-    decimals: 18,
-    logoURI: wethLogo,
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "USD Coin",
-    symbol: "USDC",
-    decimals: 6,
-    logoURI: "/logos/usdc-logo.png",
-    mainnetAddress: getAddress("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
-  },
-  {
-    name: "Dai Stablecoin",
-    symbol: "DAI",
-    decimals: 18,
-    logoURI: "/logos/dai-logo.png",
-    mainnetAddress: getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F"),
-  },
-  {
-    name: "Wrapped Bitcoin",
-    symbol: "WBTC",
-    decimals: 8,
-    logoURI: "/logos/wbtc-logo.svg",
-    mainnetAddress: getAddress("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"),
-  },
-  {
-    name: "Boba",
-    symbol: "BOBA",
-    decimals: 18,
-    logoURI: "/logos/boba-logo.svg",
-    mainnetAddress: getAddress("0x42bbfa2e77757c645eeaad1655e0911a7553efbc"),
-  },
-  {
-    name: "UMA",
-    symbol: "UMA",
-    decimals: 18,
-    logoURI: "/logos/uma-logo.svg",
-    mainnetAddress: getAddress("0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828"),
-  },
-  {
-    name: "Matic",
-    symbol: "MATIC",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"),
-  },
-  {
-    name: "Balancer",
-    symbol: "BAL",
-    decimals: 18,
-    logoURI: "/logos/bal.svg",
-    mainnetAddress: getAddress("0xba100000625a3754423978a60c9317c58a424e3D"),
-  },
-  {
-    name: "USDT",
-    symbol: "USDT",
-    decimals: 6,
-    logoURI: "/logos/usdt-logo.svg",
-    mainnetAddress: getAddress("0xdAC17F958D2ee523a2206206994597C13D831ec7"),
-  },
-];
-
 assert(
   process.env.REACT_APP_PUBLIC_INFURA_ID,
   "Missing process.env.REACT_APP_PUBLIC_INFURA_ID"
@@ -481,18 +354,6 @@ export function getChainInfo(chainId: number): ChainInfo {
   assert(isSupportedChainId(chainId), "Unsupported chain id " + chainId);
   return chainInfoTable[chainId];
 }
-
-export const tokenTable = Object.fromEntries(
-  tokenList.map((token) => {
-    return [token.symbol, token];
-  })
-);
-
-export const getToken = (symbol: string): TokenInfo => {
-  const token = tokenTable[symbol];
-  assert(token, "No token found for symbol: " + symbol);
-  return token;
-};
 
 const RouteSS = superstruct.object({
   fromChain: superstruct.number(),
