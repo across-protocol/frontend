@@ -150,6 +150,11 @@ export class ConfigClient {
       ? resolvedChain
       : undefined;
   };
+  /**
+   * This function converts either a chainId or canonical name into a corresponding chainId.
+   * @param chainIdOrCanonical Either a numeric string, an enumerated canonical name, undefined, or an invalid value.
+   * @returns The chain ID in the valid case. NaN in the invalid case.
+   */
   resolveChainIdFromNumericOrCanonical = (chainIdOrCanonical?: string) => {
     const asNumeric = Number(chainIdOrCanonical);
     return Number.isNaN(asNumeric)
