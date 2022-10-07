@@ -1,6 +1,6 @@
 name: Lighthouse CI
 on:
-  deployment_status:
+  pull_request:
 jobs:
   lighthouseci:
     runs-on: ubuntu-latest
