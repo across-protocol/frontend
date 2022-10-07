@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { Fee } from "utils/bridge";
-import { ChainId } from "utils/constants";
+import { ChainId } from "utils";
 
 export type ServerlessAPIEndpoints = {
   suggestedFees: SuggestedApiFeeType;

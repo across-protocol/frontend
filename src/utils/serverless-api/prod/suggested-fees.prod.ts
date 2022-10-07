@@ -1,7 +1,7 @@
 import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { Fee } from "utils/bridge";
-import { ChainId } from "utils/constants";
+import { ChainId } from "utils";
 
 /**
  * Creates an HTTP call to the `suggested-fees` API endpoint

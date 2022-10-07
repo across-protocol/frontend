@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { ChainId } from "./constants";
+import { ChainId } from "./utils.d";
 
 /**
  * Generates query keys for react-query `useQuery` hook, used in the `useLatestBlock` hook.

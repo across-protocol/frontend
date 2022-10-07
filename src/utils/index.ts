@@ -15,3 +15,4 @@ export * from "./ethers";
 export * from "./config";
 export * from "./matomo";
 export * from "./providers";
+export * from "./utils.d";

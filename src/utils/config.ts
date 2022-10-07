@@ -10,8 +10,10 @@ import {
 } from "@across-protocol/contracts-v2";
 import filter from "lodash/filter";
 import sortBy from "lodash/sortBy";
-import { TokenInfo } from "./utils";
+import { TokenInfo, ChainInfoList, ChainId } from "./utils";
 import { tokenList, getToken } from "./token";
+import { chainInfoList, getChainInfo } from "./chains";
+
 export type Token = TokenInfo & {
   l1TokenAddress: string;
   address: string;
@@ -47,7 +49,7 @@ export class ConfigClient {
       ])
     );
     // this lets us sort arbitrary list of chains
-    constants.chainInfoList.forEach((chain, index) => {
+    chainInfoList.forEach((chain, index) => {
       const { chainId } = chain;
       assert(
         constants.isSupportedChainId(chainId),
@@ -68,17 +70,17 @@ export class ConfigClient {
   getRoutes(): constants.Routes {
     return this.routes;
   }
-  getSpokePoolAddress(chainId: constants.ChainId): string {
+  getSpokePoolAddress(chainId: ChainId): string {
     const address = this.spokeAddresses[chainId];
     assert(address, "Spoke pool not supported on chain: " + chainId);
     return address;
   }
-  getSpokePool(chainId: constants.ChainId, signer?: Signer): SpokePool {
+  getSpokePool(chainId: ChainId, signer?: Signer): SpokePool {
     const address = this.getSpokePoolAddress(chainId);
     const provider = signer ?? providerUtils.getProvider(chainId);
     return SpokePool__factory.connect(address, provider);
   }
-  getHubPoolChainId(): constants.ChainId {
+  getHubPoolChainId(): ChainId {
     return this.config.hubPoolChain;
   }
   getHubPoolAddress(): string {
@@ -104,18 +106,18 @@ export class ConfigClient {
     );
     return filter(this.getRoutes(), cleanQuery);
   }
-  listToChains(): constants.ChainInfoList {
-    const result: constants.ChainInfoList = [];
-    constants.chainInfoList.forEach((chain) => {
+  listToChains(): ChainInfoList {
+    const result: ChainInfoList = [];
+    chainInfoList.forEach((chain) => {
       if (this.toChains.has(chain.chainId)) {
         result.push(chain);
       }
     });
     return result;
   }
-  listFromChains(): constants.ChainInfoList {
-    const result: constants.ChainInfoList = [];
-    constants.chainInfoList.forEach((chain) => {
+  listFromChains(): ChainInfoList {
+    const result: ChainInfoList = [];
+    chainInfoList.forEach((chain) => {
       if (this.fromChains.has(chain.chainId)) {
         result.push(chain);
       }
@@ -123,16 +125,16 @@ export class ConfigClient {
     return result;
   }
   // this maintains order specified in the constants file in the chainInfoList
-  getSpokeChains(): constants.ChainInfoList {
-    const result: constants.ChainInfoList = [];
-    constants.chainInfoList.forEach((chain) => {
+  getSpokeChains(): ChainInfoList {
+    const result: ChainInfoList = [];
+    chainInfoList.forEach((chain) => {
       if (this.spokeChains.has(chain.chainId)) {
         result.push(chain);
       }
     });
     return result;
   }
-  getSpokeChainIds(): constants.ChainId[] {
+  getSpokeChainIds(): ChainId[] {
     return this.getSpokeChains()
       .map((chain) => chain.chainId)
       .filter(constants.isSupportedChainId);
@@ -185,7 +187,7 @@ export class ConfigClient {
     };
   }
   getNativeTokenInfo(chainId: number): TokenInfo {
-    const chainInfo = constants.getChainInfo(chainId);
+    const chainInfo = getChainInfo(chainId);
     return getToken(chainInfo.nativeCurrencySymbol);
   }
   canBridge(fromChain: number, toChain: number): boolean {

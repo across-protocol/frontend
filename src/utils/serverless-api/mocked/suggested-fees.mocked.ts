@@ -1,6 +1,6 @@
 import { BigNumber, ethers } from "ethers";
 import { Fee } from "utils/bridge";
-import { ChainId } from "utils/constants";
+import { ChainId } from "utils";
 
 /**
  * Creates a mocked variant of the suggestedAPI Call

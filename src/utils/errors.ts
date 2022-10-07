@@ -1,4 +1,4 @@
-import { ChainId } from "./constants";
+import { ChainId } from "./utils.d";
 
 export class UnsupportedChainIdError extends Error {
   public constructor(unsupportedChainId: number) {

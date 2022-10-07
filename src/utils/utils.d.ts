@@ -25,3 +25,19 @@ export type TokenInfo = {
 };
 // enforce weth to be first so we can use it as a guarantee in other parts of the app
 export type TokenInfoList = TokenInfo[];
+
+export type ChainInfo = {
+  name: string;
+  fullName?: string;
+  chainId: ChainId;
+  logoURI: string;
+  rpcUrl?: string;
+  explorerUrl: string;
+  constructExplorerLink: (txHash: string) => string;
+  pollingInterval: number;
+  nativeCurrencySymbol: string;
+  earliestBlock: number;
+};
+
+export type ChainInfoList = ChainInfo[];
+export type ChainInfoTable = Record<number, ChainInfo>;

@@ -11,7 +11,6 @@ import { BridgeLimits } from "hooks";
 
 import {
   MAX_RELAY_FEE_PERCENT,
-  ChainId,
   hubPoolChainId,
   hubPoolAddress,
   getConfigStoreAddress,
@@ -26,7 +25,7 @@ import {
 } from "./constants";
 import { getProvider } from "./providers";
 import { parseEther, tagAddress } from "./format";
-import { getConfig } from "utils";
+import { getConfig, ChainId } from "utils";
 import getApiEndpoint from "./serverless-api";
 
 export type Fee = {
