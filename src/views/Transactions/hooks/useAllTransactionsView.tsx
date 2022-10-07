@@ -1,4 +1,4 @@
-import useWindowSize from "hooks/useWindowsSize";
+import useWindowSize from "hooks/useWindowSize";
 import { DepositStatus, useDeposits } from "hooks/useDeposits";
 import { BREAKPOINTS } from "utils";
 import { paginate } from "components/Pagination";
