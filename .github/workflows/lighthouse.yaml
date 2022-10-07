@@ -5,28 +5,32 @@ jobs:
   lighthouseci:
     runs-on: ubuntu-latest      
     steps:
-      - run: echo "DEPLOYMENT_URL=https://frontend-v2-git-$(echo ${{ github.event.pull_request.head.ref }} | sed 's/\//-/g')-uma.vercel.app" >> $GITHUB_ENV
-      - run: echo $DEPLOYMENT_URL
-      - run: echo ${{ env.DEPLOYMENT_URL }}
-      - uses: UnlyEd/github-action-await-vercel@v1.2.14
+      - name: Set DEPLOYMENT_URL variable
+        run: echo "DEPLOYMENT_URL=https://frontend-v2-git-$(echo ${{ github.event.pull_request.head.ref }} | sed 's/\//-/g')-uma.vercel.app" >> $GITHUB_ENV}
+      - name: Wait for Vercel to deploy on mainnet
+        uses: UnlyEd/github-action-await-vercel@v1.2.14
         id: await-vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         with:
-          deployment-url: 'https://frontend-v2-git-${{ github.event.pull_request.head.ref }}-uma.vercel.app'
+          deployment-url: ${{ env.DEPLOYMENT_URL }}
           timeout: 3600
-      - uses: actions/setup-node@v1
+      - name: Set up a Cache
+        uses: actions/setup-node@v1
         with:
           node-version: 14
       - uses: ./.github/actions/setup
-      - uses: actions/cache@v3
+      - name: Setup Cache for Lighthouse
+        uses: actions/cache@v3
         id: lighthouse-cache
         with:
           path: /home/runner/.cache/Lighthouse
           key: ${{ runner.os }}-lighthouse-${{ hashFiles('node_modules/@lhci') }}
-      - if: steps.lighthouse-cache.outputs.cache-hit != 'true'
+      - name: Install Lighthouse
+        if: steps.lighthouse-cache.outputs.cache-hit != 'true'
         run: yarn add @lhci/cli@0.9.0
-      - run: yarn lhci autorun --config ./lighthouserc.js
+      - name: Run Lighthouse's CLI utility
+        run: yarn lhci autorun --config ./lighthouserc.js
         continue-on-error: true
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
