@@ -1,5 +1,5 @@
 import { useConnection } from "hooks";
-import useWindowSize from "hooks/useWindowsSize";
+import useWindowSize from "hooks/useWindowSize";
 import { BREAKPOINTS } from "utils";
 
 import { useTxClient } from "./useTxClient";
