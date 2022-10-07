@@ -4,13 +4,16 @@ on:
 jobs:
   lighthouseci:
     runs-on: ubuntu-latest
+    env:
+      DEPLOYMENT_URL: "https://frontend-v2-git-${{ github.ref_name }}-uma.vercel.app"
     steps:
+      - run: echo https://frontend-v2-git-${{ github.ref_name }}-uma.vercel.app
       - uses: UnlyEd/github-action-await-vercel@v1.2.14
         id: await-vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         with:
-          deployment-url: 'https://frontend-v2-git-${{ env.GITHUB_REF_NAME }}-uma.vercel.app'
+          deployment-url: 'https://frontend-v2-git-${{ github.ref_name }}-uma.vercel.app'
           timeout: 3600
       - uses: actions/setup-node@v1
         with:
