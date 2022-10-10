@@ -1,7 +1,11 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Rotate, Bolt, Heart, Present } from "./TravellerFlow.styles";
 import { useHistory } from "react-router-dom";
-const TRAVELLER_FLOW_DATA = [
+const TRAVELLER_FLOW_DATA: {
+  title: string;
+  Icon: React.FC;
+  description: string | (string | { val: string; href?: string })[];
+}[] = [
   {
     title: "Welcome, Bridge Traveler.",
     Icon: Rotate,
@@ -11,8 +15,16 @@ const TRAVELLER_FLOW_DATA = [
   {
     title: "Our Offerings",
     Icon: Bolt,
-    description:
-      "Our realm offers lightning-fast transfers, astonishingly low fees and protection by the almighty OO.",
+    description: [
+      "Our realm offers lighting-fast transfers, astonishingly low fees and protection by ",
+      {
+        val: "UMA's Optimistic Oracle",
+        href: "https://umaproject.org/products/optimistic-oracle",
+      },
+      ". Learn more about Across ",
+      { val: "here", href: "/about" },
+      ".",
+    ],
   },
   {
     title: "Reserve Your Gift",

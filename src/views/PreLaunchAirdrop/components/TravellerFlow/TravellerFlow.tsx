@@ -26,7 +26,17 @@ const TravellerFlow: React.FC<Props> = ({ account, switchToSplash }) => {
         <Icon />
       </HeroBlock>
       <Title>{view.title}</Title>
-      <Description>{view.description}</Description>
+      <Description>
+        {typeof view.description === "string"
+          ? view.description
+          : view.description.map((e) => {
+              if (typeof e === "string") {
+                return <span>{e}</span>;
+              } else {
+                return <a href={e.href}>{e.val}</a>;
+              }
+            })}
+      </Description>
       <ButtonWrapper>
         <StyledTertiaryButton
           onClick={() => {
