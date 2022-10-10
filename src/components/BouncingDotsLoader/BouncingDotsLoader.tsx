@@ -6,19 +6,24 @@ export type BounceType = "default" | "big";
 interface Props {
   type?: BounceType;
   dataCy?: string;
+  whiteIcons?: boolean;
 }
 
-const BouncingDotsLoader: FC<Props> = ({ type = "default", dataCy }) => {
+const BouncingDotsLoader: FC<Props> = ({
+  type = "default",
+  dataCy,
+  whiteIcons,
+}) => {
   if (type === "big")
     return (
-      <BigBouncingWrapper data-cy={dataCy}>
+      <BigBouncingWrapper whiteIcons={whiteIcons} data-cy={dataCy}>
         <div />
         <div />
         <div />
       </BigBouncingWrapper>
     );
   return (
-    <BouncingWrapper data-cy={dataCy}>
+    <BouncingWrapper whiteIcons={whiteIcons} data-cy={dataCy}>
       <div />
       <div />
       <div />
@@ -26,7 +31,7 @@ const BouncingDotsLoader: FC<Props> = ({ type = "default", dataCy }) => {
   );
 };
 
-const BouncingWrapper = styled.div`
+const BouncingWrapper = styled.div<{ whiteIcons?: boolean }>`
   display: inline-flex;
   margin-left: 4px;
 
@@ -35,7 +40,8 @@ const BouncingWrapper = styled.div`
     height: 6px;
     margin: 2px 4px;
     border-radius: 50%;
-    background-color: var(--color-gray);
+    background-color: ${({ whiteIcons }) =>
+      whiteIcons ? "#fff" : "var(--color-gray)"};
     opacity: 1;
     animation: bouncing-loader 0.6s infinite alternate;
   }

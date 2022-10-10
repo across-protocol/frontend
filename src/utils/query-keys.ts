@@ -110,3 +110,11 @@ export function depositsQueryKey(
 ) {
   return ["deposits", status, limit, offset];
 }
+
+export function prelaunchDataQueryKey(address?: string, jwt?: string) {
+  return ["prelaunch-data", address, jwt];
+}
+
+export function prelaunchUserDetailsQueryKey(jwt: string) {
+  return ["prelaunch-data-discord-details", jwt];
+}

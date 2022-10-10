@@ -695,3 +695,23 @@ export const supportedNotifyChainIds = [1, 3, 4, 5, 42, 56, 100, 137, 250];
 
 export const mockServerlessAPI =
   process.env.REACT_APP_MOCK_SERVERLESS === "true";
+
+export const discordClientId = process.env.REACT_APP_DISCORD_CLIENT_ID ?? "";
+
+// Configures the V2 breakpoints
+export const BREAKPOINTS_V2 = {
+  xs: 400,
+  sm: 576,
+  tb: 1024,
+};
+const breakpoint = (width: number) => ({
+  andDown: `(max-width: ${width}px)`,
+  andUp: `(min-width: ${width}px)`,
+});
+export const QUERIESV2 = {
+  xs: breakpoint(BREAKPOINTS_V2.xs),
+  sm: breakpoint(BREAKPOINTS_V2.sm),
+  tb: breakpoint(BREAKPOINTS_V2.tb),
+};
+
+export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);

@@ -62,7 +62,7 @@ export const BalanceButton = styled.button`
   font-weight: 500;
   border: 1px solid #4d4f56;
   border-radius: 32px;
-  background-color: #2d2e33;
+  background-color: transparent;
   outline: none;
   cursor: pointer;
 
