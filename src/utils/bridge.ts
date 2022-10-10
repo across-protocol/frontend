@@ -17,7 +17,6 @@ import {
   getConfigStoreAddress,
   queriesTable,
   FLAT_RELAY_CAPITAL_FEE,
-  relayerFeeCapitalCostConfig,
   referrerDelimiterHex,
   usdcLpCushion,
   wethLpCushion,
@@ -379,7 +378,6 @@ export function relayFeeCalculatorConfig(
     nativeTokenDecimals: token.decimals,
     feeLimitPercent: MAX_RELAY_FEE_PERCENT,
     capitalCostsPercent: FLAT_RELAY_CAPITAL_FEE,
-    capitalCostsConfig: relayerFeeCapitalCostConfig,
     queries,
   };
 }
