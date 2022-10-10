@@ -576,14 +576,14 @@ export const relayerFeeCapitalCostConfig: {
   [token: string]: relayFeeCalculator.CapitalCostConfig;
 } = {
   ETH: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.0006").toString(),
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("750").toString(),
     decimals: 18,
   },
   WETH: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.0006").toString(),
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("750").toString(),
     decimals: 18,
   },
@@ -594,14 +594,14 @@ export const relayerFeeCapitalCostConfig: {
     decimals: 8,
   },
   DAI: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.002").toString(),
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("250000").toString(),
     decimals: 18,
   },
   USDC: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.00075").toString(),
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("1500000").toString(),
     decimals: 6,
   },
