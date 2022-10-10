@@ -32,6 +32,15 @@ export enum ChainId {
   // Polygon testnet
   MUMBAI = 80001,
 }
+
+// Maps `ChainId` to an object and inverts the Key/Value
+// pair. Ex) { "mainnet": 1 }
+export const CanonicalChainName = Object.fromEntries(
+  Object.entries(ChainId)
+    .filter((v) => Number.isNaN(Number(v[0])))
+    .map((v) => [v[0].toLowerCase(), Number(v[1])])
+);
+
 /* Colors and Media Queries section */
 export const BREAKPOINTS = {
   tabletMin: 550,
@@ -471,46 +480,6 @@ assert(
 export function isSupportedChainId(chainId: number): chainId is ChainId {
   return chainId in ChainId;
 }
-export const providerUrls: [ChainId, string][] = [
-  [ChainId.MAINNET, `https://mainnet.infura.io/v3/${infuraId}`],
-  [ChainId.ARBITRUM, ArbitrumProviderUrl],
-  [ChainId.POLYGON, PolygonProviderUrl],
-  [ChainId.OPTIMISM, `https://optimism-mainnet.infura.io/v3/${infuraId}`],
-  [ChainId.BOBA, `https://mainnet.boba.network`],
-  [ChainId.RINKEBY, `https://rinkeby.infura.io/v3/${infuraId}`],
-  [ChainId.KOVAN, `https://kovan.infura.io/v3/${infuraId}`],
-  [ChainId.KOVAN_OPTIMISM, `https://optimism-kovan.infura.io/v3/${infuraId}`],
-  [
-    ChainId.ARBITRUM_RINKEBY,
-    `https://arbitrum-rinkeby.infura.io/v3/${infuraId}`,
-  ],
-  [ChainId.GOERLI, `https://goerli.infura.io/v3/${infuraId}`],
-  [ChainId.MUMBAI, `https://polygon-mumbai.infura.io/v3/${infuraId}`],
-];
-export const providerUrlsTable: Record<number, string> =
-  Object.fromEntries(providerUrls);
-
-export const providers: [number, ethers.providers.StaticJsonRpcProvider][] =
-  providerUrls.map(([chainId, url]) => {
-    return [chainId, new ethers.providers.StaticJsonRpcProvider(url)];
-  });
-export const providersTable: Record<
-  number,
-  ethers.providers.StaticJsonRpcProvider
-> = Object.fromEntries(providers);
-
-export function getProvider(
-  chainId: ChainId = hubPoolChainId
-): ethers.providers.StaticJsonRpcProvider {
-  // Requires for Cypress testing. Only use the injected test provider if isCypress flag has been added to the window object..
-  if ((window as any).isCypress) {
-    const provider: ethers.providers.JsonRpcProvider = (window as any).ethereum
-      .provider;
-
-    return provider;
-  }
-  return providersTable[chainId];
-}
 
 export function getConfigStoreAddress(
   chainId: ChainId = hubPoolChainId
@@ -582,6 +551,8 @@ export const migrationPoolV2Warning =
 export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
 export const generalMaintenanceMessage =
   process.env.REACT_APP_GENERAL_MAINTENANCE_MESSAGE;
+
+export const bridgeDisabled = process.env.REACT_APP_BRIDGE_DISABLED === "true";
 
 // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
 // gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
@@ -728,3 +699,11 @@ export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
 export function stringValueInArray(value: string, arr: string[]) {
   return arr.indexOf(value) !== -1;
 }
+
+export const maxRelayFee = 0.25; // 25%
+export const minRelayFee = 0.0003; // 0.03%
+// Chains where Blocknative Notify can be used. See https://docs.blocknative.com/notify#initialization
+export const supportedNotifyChainIds = [1, 3, 4, 5, 42, 56, 100, 137, 250];
+
+export const mockServerlessAPI =
+  process.env.REACT_APP_MOCK_SERVERLESS === "true";

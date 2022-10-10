@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { transfersHistory } from "@across-protocol/sdk-v2";
 
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import getTxClient from "state/transferHistory";
 import { getSupportedTxTuples } from "../utils";
 
@@ -101,6 +101,14 @@ function getUpdatedTransferTuples(
   const nextTransferTuples = getSupportedTxTuples(nextTransfers);
 
   if (prevTransferTuples.length !== nextTransferTuples.length) {
+    return nextTransferTuples;
+  }
+
+  const didSpeedUpsChange = prevTransferTuples.some(
+    ([, prevTransfer], i) =>
+      prevTransfer.speedUps.length !== nextTransferTuples[i][1].speedUps.length
+  );
+  if (didSpeedUpsChange) {
     return nextTransferTuples;
   }
 

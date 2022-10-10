@@ -14,7 +14,6 @@ import {
   ChainId,
   hubPoolChainId,
   hubPoolAddress,
-  getProvider,
   getConfigStoreAddress,
   queriesTable,
   FLAT_RELAY_CAPITAL_FEE,
@@ -27,7 +26,9 @@ import {
 } from "./constants";
 
 import { parseEtherLike, tagAddress } from "./format";
+import { getProvider } from "./providers";
 import { getConfig } from "utils";
+import getApiEndpoint from "./serverless-api";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -45,6 +46,7 @@ export type BridgeFees = {
 export async function getRelayerFee(
   tokenSymbol: string,
   amount: ethers.BigNumber,
+  fromChainId: ChainId,
   toChainId: ChainId
 ): Promise<{
   relayerFee: Fee;
@@ -52,28 +54,12 @@ export async function getRelayerFee(
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
 }> {
-  const config = relayFeeCalculatorConfig(toChainId);
+  const address = getConfig().getTokenInfoBySymbol(
+    fromChainId,
+    tokenSymbol
+  ).address;
 
-  // Construction of a new RelayFeeCalculator will throw if any props in the config are incorrectly set. For example,
-  // if the capital cost config is incorrectly set for a token, construction will throw.
-  const calculator = new relayFeeCalculator.RelayFeeCalculator(config);
-  const result = await calculator.relayerFeeDetails(amount, tokenSymbol);
-
-  return {
-    relayerFee: {
-      pct: ethers.BigNumber.from(result.relayFeePercent),
-      total: ethers.BigNumber.from(result.relayFeeTotal),
-    },
-    relayerGasFee: {
-      pct: ethers.BigNumber.from(result.gasFeePercent),
-      total: ethers.BigNumber.from(result.gasFeeTotal),
-    },
-    relayerCapitalFee: {
-      pct: ethers.BigNumber.from(result.capitalFeePercent),
-      total: ethers.BigNumber.from(result.capitalFeeTotal),
-    },
-    isAmountTooLow: result.isAmountTooLow,
-  };
+  return getApiEndpoint().suggestedFees(amount, address, toChainId);
 }
 
 export async function getLpFee(
@@ -113,6 +99,7 @@ type GetBridgeFeesArgs = {
   amount: ethers.BigNumber;
   tokenSymbol: string;
   blockTimestamp: number;
+  fromChainId: ChainId;
   toChainId: ChainId;
 };
 
@@ -126,18 +113,21 @@ type GetBridgeFeesResult = BridgeFees & {
  * @param amount - amount to bridge
  * @param tokenSymbol - symbol of the token to bridge
  * @param blockTimestamp - timestamp of the block to use for calculating fees on
+ * @param fromChain The origin chain of this bridge action
+ * @param toChain The destination chain of this bridge action
  * @returns Returns the `relayerFee` and `lpFee` fees for bridging the given amount of tokens, along with an `isAmountTooLow` flag indicating whether the amount is too low to bridge and an `isLiquidityInsufficient` flag indicating whether the liquidity is insufficient.
  */
 export async function getBridgeFees({
   amount,
   tokenSymbol,
   blockTimestamp,
+  fromChainId,
   toChainId,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const config = getConfig();
   const l1TokenAddress = config.getL1TokenAddressBySymbol(tokenSymbol);
   const { relayerFee, relayerGasFee, relayerCapitalFee, isAmountTooLow } =
-    await getRelayerFee(tokenSymbol, amount, toChainId);
+    await getRelayerFee(tokenSymbol, amount, fromChainId, toChainId);
 
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
     l1TokenAddress,
@@ -161,24 +151,35 @@ export async function getBridgeFees({
 export const getConfirmationDepositTime = (
   amount: BigNumber,
   limits: BridgeLimits,
-  toChain: ChainId
+  toChain: ChainId,
+  fromChain: ChainId
 ) => {
+  const config = getConfig();
+  const depositDelay = config.depositDelays()[fromChain] || 0;
+  const getTimeEstimateString = (
+    lowEstimate: number,
+    highEstimate: number
+  ): string => {
+    return `~${lowEstimate + depositDelay}-${
+      highEstimate + depositDelay
+    } minutes`;
+  };
+
   if (amount.lte(limits.maxDepositInstant)) {
-    // 1 bot run, assuming it runs every 2 minutes.
-    return "~1-4 minutes";
+    return getTimeEstimateString(1, 4);
   } else if (amount.lte(limits.maxDepositShortDelay)) {
     // This is just a rough estimate of how long 2 bot runs (1-4 minutes allocated for each) + an arbitrum transfer of 3-10 minutes would take.
-    if (toChain === ChainId.ARBITRUM) return "~5-15 minutes";
+    if (toChain === ChainId.ARBITRUM) return getTimeEstimateString(5, 15);
 
     // Optimism transfers take about 10-20 minutes anecdotally. Boba is presumed to be similar.
     if (toChain === ChainId.OPTIMISM || toChain === ChainId.BOBA)
-      return "~12-25 minutes";
+      return getTimeEstimateString(12, 25);
 
     // Polygon transfers take 20-30 minutes anecdotally.
-    if (toChain === ChainId.POLYGON) return "~20-35 minutes";
+    if (toChain === ChainId.POLYGON) return getTimeEstimateString(20, 35);
 
     // Typical numbers for an arbitrary L2.
-    return "~10-30 minutes";
+    return getTimeEstimateString(10, 30);
   }
 
   // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.

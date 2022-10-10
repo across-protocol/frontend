@@ -1,6 +1,8 @@
 import React from "react";
+import { Zap } from "react-feather";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import styled from "@emotion/styled";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history";
 
 import {
@@ -26,9 +28,16 @@ import {
 type Props = {
   transfer: Transfer;
   token: Token;
+  enableSpeedUp?: boolean;
+  onClickSpeedUp?: (tuple: [token: Token, transfer: Transfer]) => void;
 };
 
-export function MobileDataRow({ transfer, token }: Props) {
+export function MobileDataRow({
+  transfer,
+  token,
+  enableSpeedUp,
+  onClickSpeedUp,
+}: Props) {
   const [isAccordionOpen, setIsAccordionOpen] = React.useState(false);
 
   const toggleAccordion = React.useCallback(() => {
@@ -85,6 +94,18 @@ export function MobileDataRow({ transfer, token }: Props) {
               destinationChainId={transfer.destinationChainId}
             />
           </AccordionRow>
+          {enableSpeedUp && (
+            <AccordionRow>
+              <div>Speed up</div>
+              <MobileSpeedUpCell
+                onClick={() =>
+                  onClickSpeedUp && onClickSpeedUp([token, transfer])
+                }
+              >
+                <Zap />
+              </MobileSpeedUpCell>
+            </AccordionRow>
+          )}
         </AccordionWrapper>
       )}
     </>
@@ -129,3 +150,9 @@ function ToggleAccordionCell(props: { isOpen: boolean }) {
     </MobileCell>
   );
 }
+
+const MobileSpeedUpCell = styled(MobileCell)`
+  svg {
+    padding-left: 8px;
+  }
+`;

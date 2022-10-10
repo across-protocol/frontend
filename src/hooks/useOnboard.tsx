@@ -20,7 +20,7 @@ import { Account } from "@web3-onboard/core/dist/types";
 import { useConnectWallet, useSetChain } from "@web3-onboard/react";
 import { Chain } from "@web3-onboard/common";
 import { ethers } from "ethers";
-import Notify, { API as NotifyAPI } from "bnc-notify";
+import Notify, { API as NotifyAPI, ConfigOptions } from "bnc-notify";
 
 export type SetChainOptions = {
   chainId: string;
@@ -40,18 +40,19 @@ type OnboardContextValue = {
   signer: ethers.providers.JsonRpcSigner | undefined;
   provider: ethers.providers.Web3Provider | null;
   notify: NotifyAPI;
+  setNotifyConfig: (opts: ConfigOptions) => void;
   account: Account | null;
   chainId: ChainId;
   error?: Error;
 };
 
 const notify = Notify({
-  dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY, // [String] The API key created by step one above
+  dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
   networkId: 1,
   desktopPosition: "topRight",
 });
 
-function useOnboardManager() {
+export function useOnboardManager() {
   const [onboard, setOnboard] = useState<OnboardAPI | null>(null);
   const [provider, setProvider] =
     useState<ethers.providers.Web3Provider | null>(null);
@@ -113,13 +114,14 @@ function useOnboardManager() {
     signer,
     provider,
     notify,
+    setNotifyConfig: (config: ConfigOptions) => notify.config(config),
     account,
     chainId: (Number(wallet?.chains[0].id) as ChainId) || 0,
     error,
   };
 }
 
-const OnboardContext = createContext<OnboardContextValue | undefined>(
+export const OnboardContext = createContext<OnboardContextValue | undefined>(
   undefined
 );
 OnboardContext.displayName = "OnboardContext";
@@ -129,6 +131,8 @@ export const OnboardProvider: React.FC = ({ children }) => {
     <OnboardContext.Provider value={value}>{children}</OnboardContext.Provider>
   );
 };
+
+OnboardProvider.displayName = "OnboardProvider";
 
 export function useOnboard() {
   const context = useContext(OnboardContext);

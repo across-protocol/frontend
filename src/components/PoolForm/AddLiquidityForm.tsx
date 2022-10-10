@@ -1,5 +1,5 @@
 import { FC, useState, useCallback, useEffect } from "react";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import {
   RoundBox,
   MaxButton,
