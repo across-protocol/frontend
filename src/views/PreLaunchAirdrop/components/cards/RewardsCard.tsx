@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { QUERIESV2, BREAKPOINTS_V2 } from "utils/constants";
 import { shortenAddress } from "utils";
-import useWindowSize from "hooks/useWindowsSize";
+import useWindowSize from "hooks/useWindowSize";
 
 interface Props {
   Icon?: React.ReactElement;
