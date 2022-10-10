@@ -8,17 +8,62 @@ import {
   ButtonWrapper,
   SecondaryButton,
   StyledTertiaryButton,
+  Rotate,
+  Bolt,
+  Heart,
+  Present,
 } from "./TravellerFlow.styles";
 import { ButtonV2 } from "components/Buttons/ButtonV2";
 import useTravellerFlow from "./useTravellerFlow";
 import { setAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
+import { Link } from "react-router-dom";
 interface Props {
   account: string;
   switchToSplash: () => void;
 }
 const numDots = 4;
 const TravellerFlow: React.FC<Props> = ({ account, switchToSplash }) => {
-  const { step, setStep, view, history } = useTravellerFlow();
+  const TRAVELLER_FLOW_DATA = [
+    {
+      title: "Welcome, Bridge Traveler.",
+      Icon: Rotate,
+      description:
+        "Hello. We detect that you’ve traveled far from home. Welcome to Across.",
+    },
+    {
+      title: "Our Offerings",
+      Icon: Bolt,
+      description: (
+        <>
+          Our realm offers lighting-fast transfers, astonishingly low fees and
+          protection by{" "}
+          <a
+            href="https://umaproject.org/products/optimistic-oracle"
+            target="_blank"
+            rel="noreferrer"
+          >
+            UMA's Optimistic Oracle
+          </a>
+          . Learn more about Across <Link to="/about">here</Link>.
+        </>
+      ),
+    },
+    {
+      title: "Reserve Your Gift",
+      Icon: Present,
+      description:
+        "We’ve prepared a welcome gift for you! It awaits your arrival. Let us show you the way.",
+    },
+    {
+      title: "Go Forth And Bridge",
+      Icon: Heart,
+      description:
+        "This portal (button) will bring you to the bridge. You must complete a 0.1 ETH or 150 USDC transfer to receive your gift. Ready?",
+    },
+  ];
+
+  const { step, setStep, history } = useTravellerFlow();
+  const view = TRAVELLER_FLOW_DATA[step - 1];
   const Icon = view.Icon;
   return (
     <Wrapper>
@@ -26,17 +71,7 @@ const TravellerFlow: React.FC<Props> = ({ account, switchToSplash }) => {
         <Icon />
       </HeroBlock>
       <Title>{view.title}</Title>
-      <Description>
-        {typeof view.description === "string"
-          ? view.description
-          : view.description.map((e) => {
-              if (typeof e === "string") {
-                return <span>{e}</span>;
-              } else {
-                return <a href={e.href}>{e.val}</a>;
-              }
-            })}
-      </Description>
+      <Description>{view.description}</Description>
       <ButtonWrapper>
         <StyledTertiaryButton
           onClick={() => {
