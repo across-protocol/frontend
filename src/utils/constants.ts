@@ -572,59 +572,6 @@ const getRoute = (
   return route;
 };
 
-export const relayerFeeCapitalCostConfig: {
-  [token: string]: relayFeeCalculator.CapitalCostConfig;
-} = {
-  ETH: {
-    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0001").toString(),
-    cutoff: ethers.utils.parseUnits("750").toString(),
-    decimals: 18,
-  },
-  WETH: {
-    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0001").toString(),
-    cutoff: ethers.utils.parseUnits("750").toString(),
-    decimals: 18,
-  },
-  WBTC: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.0025").toString(),
-    cutoff: ethers.utils.parseUnits("10").toString(),
-    decimals: 8,
-  },
-  DAI: {
-    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0001").toString(),
-    cutoff: ethers.utils.parseUnits("250000").toString(),
-    decimals: 18,
-  },
-  USDC: {
-    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0001").toString(),
-    cutoff: ethers.utils.parseUnits("1500000").toString(),
-    decimals: 6,
-  },
-  UMA: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.00075").toString(),
-    cutoff: ethers.utils.parseUnits("5000").toString(),
-    decimals: 18,
-  },
-  BADGER: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.001").toString(),
-    cutoff: ethers.utils.parseUnits("5000").toString(),
-    decimals: 18,
-  },
-  BOBA: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.001").toString(),
-    cutoff: ethers.utils.parseUnits("100000").toString(),
-    decimals: 18,
-  },
-};
-
 const getQueriesTable = () => {
   const optimismUsdcRoute = getRoute(ChainId.MAINNET, ChainId.OPTIMISM, "USDC");
   const arbitrumUsdcRoute = getRoute(ChainId.MAINNET, ChainId.ARBITRUM, "USDC");
@@ -695,3 +642,23 @@ export const supportedNotifyChainIds = [1, 3, 4, 5, 42, 56, 100, 137, 250];
 
 export const mockServerlessAPI =
   process.env.REACT_APP_MOCK_SERVERLESS === "true";
+
+export const discordClientId = process.env.REACT_APP_DISCORD_CLIENT_ID ?? "";
+
+// Configures the V2 breakpoints
+export const BREAKPOINTS_V2 = {
+  xs: 400,
+  sm: 576,
+  tb: 1024,
+};
+const breakpoint = (width: number) => ({
+  andDown: `(max-width: ${width}px)`,
+  andUp: `(min-width: ${width}px)`,
+});
+export const QUERIESV2 = {
+  xs: breakpoint(BREAKPOINTS_V2.xs),
+  sm: breakpoint(BREAKPOINTS_V2.sm),
+  tb: breakpoint(BREAKPOINTS_V2.tb),
+};
+
+export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);

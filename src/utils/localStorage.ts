@@ -9,3 +9,13 @@ export function getTxHistoryPageSize(): number | undefined {
     ? Number(localStorage.getItem(TX_HISTORY_PAGE_SIZE_KEY))
     : undefined;
 }
+
+export function setAccountSeenWelcomeTravellerFlow(account: string) {
+  localStorage.setItem(`accountSeenWelcomeTravellerFlow-${account}`, account);
+}
+
+export function getAccountSeenWelcomeTravellerFlow(
+  account: string
+): string | null {
+  return localStorage.getItem(`accountSeenWelcomeTravellerFlow-${account}`);
+}

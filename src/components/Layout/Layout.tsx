@@ -110,7 +110,7 @@ const Link = styled.a`
 
 const AccentLink = styled(Link)`
   &:hover {
-    color: var(--color-uma-red);
+    color: white;
   }
 `;
 
@@ -127,8 +127,7 @@ const Wrapper = styled.div`
   display: grid;
   padding: 0 10px;
   grid-template-columns: 1fr min(var(--central-content), 100%) 1fr;
-  min-height: 100%;
-  height: fit-content;
+  min-height: 100vh;
   @media ${QUERIES.tabletAndUp} {
     padding: 0 30px;
   }
