@@ -47,7 +47,7 @@ export const Title = styled.h2`
   text-align: center;
 `;
 
-export const Description = styled.h3`
+export const Description = styled.div`
   font-family: "Barlow";
   font-style: normal;
   font-weight: 400;
@@ -57,6 +57,12 @@ export const Description = styled.h3`
   color: #c5d5e0;
   max-width: 500px;
   margin: 16px auto 0;
+
+  & a {
+    color: inherit;
+    text-decoration-color: #9daab2;
+    font-weight: 500;
+  }
 `;
 
 export const DotStepWrapper = styled.div`
