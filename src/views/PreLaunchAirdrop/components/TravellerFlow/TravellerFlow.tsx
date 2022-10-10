@@ -16,7 +16,6 @@ import {
 import { ButtonV2 } from "components/Buttons/ButtonV2";
 import useTravellerFlow from "./useTravellerFlow";
 import { setAccountSeenWelcomeTravellerFlow } from "utils/localStorage";
-import { Link } from "react-router-dom";
 
 const TRAVELLER_FLOW_DATA = [
   {
