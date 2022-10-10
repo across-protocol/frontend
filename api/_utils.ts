@@ -185,6 +185,21 @@ export const bobaProvider = (): providers.StaticJsonRpcProvider =>
   new ethers.providers.StaticJsonRpcProvider("https://mainnet.boba.network");
 
 /**
+ * Resolves a fixed Static RPC provider if an override url has been specified.
+ * @returns A provider or undefined if an override was not specified.
+ */
+export const overrideProvider = (
+  chainId: string
+): providers.StaticJsonRpcProvider | undefined => {
+  const url = process.env[`OVERRIDE_PROVIDER_${chainId}`];
+  if (url) {
+    return new ethers.providers.StaticJsonRpcProvider(url);
+  } else {
+    return undefined;
+  }
+};
+
+/**
  * Generates a fixed HubPoolClientConfig object
  * @returns A fixed constant
  */
@@ -370,24 +385,29 @@ export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 export const getProvider = (_chainId: number): providers.Provider => {
   const chainId = _chainId.toString();
   if (!providerCache[chainId]) {
-    switch (chainId.toString()) {
-      case "1":
-        providerCache[chainId] = infuraProvider("mainnet");
-        break;
-      case "10":
-        providerCache[chainId] = infuraProvider("optimism-mainnet");
-        break;
-      case "137":
-        providerCache[chainId] = infuraProvider("polygon-mainnet");
-        break;
-      case "288":
-        providerCache[chainId] = bobaProvider();
-        break;
-      case "42161":
-        providerCache[chainId] = infuraProvider("arbitrum-mainnet");
-        break;
-      default:
-        throw new Error(`Invalid chainId provided: ${chainId}`);
+    const override = overrideProvider(chainId);
+    if (override) {
+      providerCache[chainId] = override;
+    } else {
+      switch (chainId.toString()) {
+        case "1":
+          providerCache[chainId] = infuraProvider("mainnet");
+          break;
+        case "10":
+          providerCache[chainId] = infuraProvider("optimism-mainnet");
+          break;
+        case "137":
+          providerCache[chainId] = infuraProvider("polygon-mainnet");
+          break;
+        case "288":
+          providerCache[chainId] = bobaProvider();
+          break;
+        case "42161":
+          providerCache[chainId] = infuraProvider("arbitrum-mainnet");
+          break;
+        default:
+          throw new Error(`Invalid chainId provided: ${chainId}`);
+      }
     }
   }
   return providerCache[chainId];
