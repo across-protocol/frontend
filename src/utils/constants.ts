@@ -31,6 +31,15 @@ export enum ChainId {
   // Polygon testnet
   MUMBAI = 80001,
 }
+
+// Maps `ChainId` to an object and inverts the Key/Value
+// pair. Ex) { "mainnet": 1 }
+export const CanonicalChainName = Object.fromEntries(
+  Object.entries(ChainId)
+    .filter((v) => Number.isNaN(Number(v[0])))
+    .map((v) => [v[0].toLowerCase(), Number(v[1])])
+);
+
 /* Colors and Media Queries section */
 export const BREAKPOINTS = {
   tabletMin: 550,

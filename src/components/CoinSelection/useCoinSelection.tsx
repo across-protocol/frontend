@@ -80,7 +80,7 @@ export default function useCoinSelection() {
       try {
         // Check if Token exists and amount is convertable to Wei
         config.getTokenInfoBySymbol(
-          Number(params.from),
+          config.resolveChainIdFromNumericOrCanonical(params.from),
           params.asset.toUpperCase()
         );
         toWeiSafe(params.amount);
