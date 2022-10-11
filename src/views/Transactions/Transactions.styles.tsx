@@ -14,7 +14,6 @@ export const TitleContainer = styled.div`
   max-width: 1425px;
   @media ${QUERIES.tabletAndDown} {
     flex-direction: column;
-    /* align-items: flex-start; */
   }
 `;
 

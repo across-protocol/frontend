@@ -1,4 +1,3 @@
-import { useConnection } from "state/hooks";
 import { useEffect, useState } from "react";
 import {
   addEtherscan,
@@ -18,6 +17,7 @@ import { BigNumber, BigNumberish, providers, Signer } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 import { API } from "bnc-notify";
 import axios from "axios";
+import { useConnection } from "hooks";
 
 export type StakingActionFunctionType = (
   amount: BigNumber,

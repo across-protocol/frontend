@@ -1,14 +1,6 @@
-import {
-  TableLink,
-  TableRow,
-  TableCell,
-  StyledPlus,
-} from "../TransactionsTable.styles";
-import { Token } from "utils/config";
-import { shortenTransactionHash } from "utils/format";
-import { getChainInfo } from "utils/constants";
+import { Zap } from "react-feather";
 import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
-import { ChainId } from "utils";
+import { ChainId, Token, shortenTransactionHash, getChainInfo } from "utils";
 
 import {
   ChainCell,
@@ -18,18 +10,29 @@ import {
   SymbolCell,
   AmountCell,
 } from "../cells";
+import {
+  TableLink,
+  TableRow,
+  TableCell,
+  StyledPlus,
+  SpeedUpCell,
+} from "../TransactionsTable.styles";
 import { TxLink } from "../../../types";
 
 type Props = {
   transfer: Transfer;
   token: Token;
   onClickFillTxsCellExpandButton: (fillTxLinks: TxLink[]) => void;
+  enableSpeedUp?: boolean;
+  onClickSpeedUp?: (tuple: [token: Token, transfer: Transfer]) => void;
 };
 
 export function DataRow({
   transfer,
   onClickFillTxsCellExpandButton,
   token,
+  enableSpeedUp,
+  onClickSpeedUp,
 }: Props) {
   return (
     <TableRow>
@@ -56,6 +59,14 @@ export function DataRow({
         destinationChainId={transfer.destinationChainId}
         onClickExpandButton={onClickFillTxsCellExpandButton}
       />
+      {enableSpeedUp && (
+        <SpeedUpCell
+          id="speed-up-cell"
+          onClick={() => onClickSpeedUp && onClickSpeedUp([token, transfer])}
+        >
+          <Zap />
+        </SpeedUpCell>
+      )}
     </TableRow>
   );
 }

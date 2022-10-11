@@ -23,6 +23,7 @@ const {
   REACT_APP_GOOGLE_SERVICE_ACCOUNT,
   VERCEL_ENV,
   GAS_MARKUP,
+  DISABLE_DEBUG_LOGS,
 } = process.env;
 
 const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
@@ -44,6 +45,10 @@ export const log = (
   severity: "DEBUG" | "INFO" | "WARN" | "ERROR",
   data: LogType
 ) => {
+  if (DISABLE_DEBUG_LOGS === "true" && severity === "DEBUG") {
+    console.log(data);
+    return;
+  }
   let message = JSON.stringify(data, null, 4);
   // Fire and forget. we don't wait for this to finish.
   gcpLogger
@@ -127,13 +132,6 @@ export const getTokenDetails = async (
     "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
     provider
   );
-  getLogger().debug({
-    at: "getTokenDetails",
-    message: "Fetching token details",
-    l1Token,
-    l2Token,
-    chainId,
-  });
 
   // 2 queries: treating the token as the l1Token or treating the token as the L2 token.
   const l2TokenFilter = hubPool.filters.SetPoolRebalanceRoute(
@@ -158,11 +156,6 @@ export const getTokenDetails = async (
   });
 
   const event = events[0];
-  getLogger().debug({
-    at: "getTokenDetails",
-    message: "Fetched pool rebalance route event",
-    event,
-  });
 
   return {
     hubPool,
@@ -181,11 +174,6 @@ export class InputError extends Error {}
  */
 export const infuraProvider = (name: string) => {
   const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
-  getLogger().info({
-    at: "infuraProvider",
-    message: "Using an Infura provider",
-    url,
-  });
   return new ethers.providers.StaticJsonRpcProvider(url);
 };
 
@@ -195,6 +183,21 @@ export const infuraProvider = (name: string) => {
  */
 export const bobaProvider = (): providers.StaticJsonRpcProvider =>
   new ethers.providers.StaticJsonRpcProvider("https://mainnet.boba.network");
+
+/**
+ * Resolves a fixed Static RPC provider if an override url has been specified.
+ * @returns A provider or undefined if an override was not specified.
+ */
+export const overrideProvider = (
+  chainId: string
+): providers.StaticJsonRpcProvider | undefined => {
+  const url = process.env[`OVERRIDE_PROVIDER_${chainId}`];
+  if (url) {
+    return new ethers.providers.StaticJsonRpcProvider(url);
+  } else {
+    return undefined;
+  }
+};
 
 /**
  * Generates a fixed HubPoolClientConfig object
@@ -313,11 +316,6 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
     queries: queryFn(),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
-  getLogger().info({
-    at: "getRelayerFeeDetails",
-    message: "Relayer fee calculator config",
-    relayerFeeCalculatorConfig,
-  });
   return new sdk.relayFeeCalculator.RelayFeeCalculator(
     relayerFeeCalculatorConfig,
     logger
@@ -364,15 +362,14 @@ export const getRelayerFeeDetails = (
  * @param l1Token The ERC20 token address of the coin to find the cached price of
  * @returns The price of the `l1Token` token.
  */
-export const getCachedTokenPrice = async (l1Token: string): Promise<number> => {
-  getLogger().debug({
-    at: "getCachedTokenPrice",
-    message: `Resolving price from ${resolveVercelEndpoint()}/api/coingecko`,
-  });
+export const getCachedTokenPrice = async (
+  l1Token: string,
+  baseCurrency: string = "eth"
+): Promise<number> => {
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
-        params: { l1Token },
+        params: { l1Token, baseCurrency },
       })
     ).data.price
   );
@@ -388,24 +385,29 @@ export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 export const getProvider = (_chainId: number): providers.Provider => {
   const chainId = _chainId.toString();
   if (!providerCache[chainId]) {
-    switch (chainId.toString()) {
-      case "1":
-        providerCache[chainId] = infuraProvider("mainnet");
-        break;
-      case "10":
-        providerCache[chainId] = infuraProvider("optimism-mainnet");
-        break;
-      case "137":
-        providerCache[chainId] = infuraProvider("polygon-mainnet");
-        break;
-      case "288":
-        providerCache[chainId] = bobaProvider();
-        break;
-      case "42161":
-        providerCache[chainId] = infuraProvider("arbitrum-mainnet");
-        break;
-      default:
-        throw new Error(`Invalid chainId provided: ${chainId}`);
+    const override = overrideProvider(chainId);
+    if (override) {
+      providerCache[chainId] = override;
+    } else {
+      switch (chainId.toString()) {
+        case "1":
+          providerCache[chainId] = infuraProvider("mainnet");
+          break;
+        case "10":
+          providerCache[chainId] = infuraProvider("optimism-mainnet");
+          break;
+        case "137":
+          providerCache[chainId] = infuraProvider("polygon-mainnet");
+          break;
+        case "288":
+          providerCache[chainId] = bobaProvider();
+          break;
+        case "42161":
+          providerCache[chainId] = infuraProvider("arbitrum-mainnet");
+          break;
+        default:
+          throw new Error(`Invalid chainId provided: ${chainId}`);
+      }
     }
   }
   return providerCache[chainId];
