@@ -70,8 +70,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
     timeEstimate = getConfirmationDepositTime(
       deposit.amount,
       limits,
-      deposit.toChain,
-      deposit.fromChain
+      deposit.toChain
     );
     fundsArrivalText = `Your funds will arrive in ${timeEstimate}`;
   } else if (isError) {

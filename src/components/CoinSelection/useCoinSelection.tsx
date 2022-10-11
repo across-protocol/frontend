@@ -1,8 +1,8 @@
-import React, { useEffect, useCallback } from "react";
 import { useSelect } from "downshift";
 import { ethers, BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
-import { useConnection } from "hooks";
+import React, { useEffect, useCallback } from "react";
+import { useConnection } from "state/hooks";
 import { useBalancesBySymbols, useBridgeFees, useSendForm } from "hooks";
 import {
   ParsingError,
@@ -12,7 +12,6 @@ import {
   FEE_ESTIMATION,
   toWeiSafe,
   getConfig,
-  bridgeDisabled,
 } from "utils";
 
 import { useQueryParams } from "hooks";
@@ -58,12 +57,7 @@ export default function useCoinSelection() {
     (token) => token.symbol === selectedItem?.symbol
   );
   const balance = balances[selectedIndex];
-  const { fees } = useBridgeFees(
-    amount,
-    fromChain,
-    toChain,
-    selectedItem?.symbol
-  );
+  const { fees } = useBridgeFees(amount, toChain, selectedItem?.symbol);
 
   const [inputAmount, setInputAmount] = React.useState<string>(
     selectedItem && amount.gt("0")
@@ -80,7 +74,7 @@ export default function useCoinSelection() {
       try {
         // Check if Token exists and amount is convertable to Wei
         config.getTokenInfoBySymbol(
-          config.resolveChainIdFromNumericOrCanonical(params.from),
+          Number(params.from),
           params.asset.toUpperCase()
         );
         toWeiSafe(params.amount);
@@ -144,9 +138,7 @@ export default function useCoinSelection() {
   ) {
     error = new InsufficientBalanceError();
   }
-  const errorMsg = bridgeDisabled
-    ? "Bridge currently disabled"
-    : error
+  const errorMsg = error
     ? error.message
     : fees?.isAmountTooLow
     ? "Bridge fee is high for this amount. Send a larger amount."
@@ -155,7 +147,6 @@ export default function useCoinSelection() {
     : undefined;
 
   const showError =
-    bridgeDisabled ||
     error ||
     (fees?.isAmountTooLow && amount.gt(0)) ||
     (fees?.isLiquidityInsufficient && amount.gt(0));

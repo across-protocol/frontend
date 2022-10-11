@@ -1,7 +1,7 @@
 import { FC } from "react";
 import styled from "@emotion/styled";
 
-export type BounceType = "default" | "big";
+export type BounceType = "default | big";
 
 interface Props {
   type?: BounceType;

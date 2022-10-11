@@ -1,7 +1,19 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
+
+import {
+  Send,
+  Pool,
+  About,
+  MyTransactions,
+  AllTransactions,
+  Rewards,
+  Staking,
+  Claim,
+  NotFound,
+} from "views";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
-import { useConnection } from "hooks";
+import { useConnection } from "state/hooks";
 import { useError } from "hooks";
 import styled from "@emotion/styled";
 import {
@@ -15,35 +27,6 @@ import {
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
-import BouncingDotsLoader from "components/BouncingDotsLoader";
-import NotFound from "./views/NotFound";
-
-const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
-const Rewards = lazy(
-  () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
-);
-const Send = lazy(() => import(/* webpackChunkName: "Send" */ "./views/Send"));
-const About = lazy(
-  () => import(/* webpackChunkName: "About" */ "./views/About")
-);
-const Claim = lazy(
-  () => import(/* webpackChunkName: "Claim" */ "./views/Claim")
-);
-const Staking = lazy(
-  () => import(/* webpackChunkName: "Staking" */ "./views/Staking")
-);
-const MyTransactions = lazy(
-  () =>
-    import(
-      /* webpackChunkName: "MyTransactions" */ "./views/Transactions/myTransactions"
-    )
-);
-const AllTransactions = lazy(
-  () =>
-    import(
-      /* webpackChunkName: "AllTransactions" */ "./views/Transactions/allTransactions"
-    )
-);
 
 const warningMessage = `
   We noticed that you have connected from a contract address.
@@ -117,35 +100,36 @@ const Routes: React.FC = () => {
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
+
+      <SuperHeader darkMode>
+        <i>USDT currently disabled for Across contract upgrade.</i>
+      </SuperHeader>
       <Header openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
-        <Suspense fallback={<BouncingDotsLoader />}>
-          <Route exact path="/transactions" component={MyTransactions} />
-          <Route exact path="/transactions/all" component={AllTransactions} />
-          <Route exact path="/pool" component={Pool} />
-          <Route exact path="/about" component={About} />
-          <Route exact path="/rewards" component={Rewards} />
-          <Route exact path="/airdrop" component={Claim} />
-          <Route
-            exact
-            path="/rewards/staking/:poolId"
-            render={({ match }) => {
-              const poolIdFound = stringValueInArray(
-                match.params.poolId.toLowerCase(),
-                config.getPoolSymbols()
-              );
+        <Route exact path="/transactions" component={MyTransactions} />
+        <Route exact path="/transactions/all" component={AllTransactions} />
+        <Route exact path="/pool" component={Pool} />
+        <Route exact path="/about" component={About} />
+        <Route exact path="/rewards" component={Rewards} />
+        <Route exact path="/airdrop" component={Claim} />
+        <Route
+          exact
+          path="/rewards/staking/:poolId"
+          render={({ match }) => {
+            const poolIdFound = stringValueInArray(
+              match.params.poolId.toLowerCase(),
+              config.getPoolSymbols()
+            );
 
-              if (poolIdFound) {
-                return <Staking />;
-              } else {
-                return <NotFound custom404Message="Pool not found." />;
-              }
-            }}
-          />
-          <Route exact path="/" component={Send} />
-        </Suspense>
-
+            if (poolIdFound) {
+              return <Staking />;
+            } else {
+              return <NotFound custom404Message="Pool not found." />;
+            }
+          }}
+        />
+        <Route exact path="/" component={Send} />
         <Route path="*" component={NotFound} />
       </Switch>
       <Toast position="top-right" />

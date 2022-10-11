@@ -1,14 +1,11 @@
-import { utils } from "ethers";
-// import { ChainId, getProvider } from "utils";
-import { ChainId } from "./utils.d";
-import { getProvider } from "./providers";
-
+import { ChainId, getProvider } from "utils";
+import { ethers } from "ethers";
 export function isValidAddress(address: string) {
-  return utils.isAddress(address);
+  return ethers.utils.isAddress(address);
 }
 
 export function getAddress(address: string) {
-  return utils.getAddress(address);
+  return ethers.utils.getAddress(address);
 }
 
 export const noContractCode = "0x";

@@ -1,6 +1,7 @@
+import { useConnection } from "state/hooks";
+
 import { useMerkleDistributor } from "./useMerkleDistributor";
 import { useAirdropRecipient } from "./useAirdropRecipient";
-import { useConnection } from "hooks";
 
 export function useClaimView() {
   const { isConnected, provider, connect } = useConnection();

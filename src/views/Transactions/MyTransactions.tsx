@@ -3,14 +3,14 @@ import { shortenAddress } from "utils";
 import {
   TransactionsTable,
   TransactionsTableWithPagination,
-} from "../components/TransactionsTable";
+} from "./components/TransactionsTable";
 
-import { useMyTransactionsView } from "../hooks/useMyTransactionsView";
+import { useMyTransactionsView } from "./hooks/useMyTransactionsView";
 
-import { ConnectButton, Account, ButtonWrapper } from "../Transactions.styles";
-import { TransactionsLayout } from "../components/TransactionsLayout";
+import { ConnectButton, Account, ButtonWrapper } from "./Transactions.styles";
+import { TransactionsLayout } from "./components/TransactionsLayout";
 
-const MyTransactions = () => {
+export function MyTransactions() {
   const {
     connectWallet,
     account,
@@ -75,7 +75,6 @@ const MyTransactions = () => {
           transferTuples={pendingTransferTuples}
           enablePartialFillInfoIcon
           isMobile={isMobile}
-          enableSpeedUps
         />
       }
       FilledTransactionsTable={
@@ -95,6 +94,4 @@ const MyTransactions = () => {
       }
     />
   );
-};
-
-export default MyTransactions;
+}

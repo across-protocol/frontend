@@ -29,7 +29,7 @@ import { ReferralsSummary } from "hooks/useReferralSummary";
 import { PopperTooltip } from "components/Tooltip";
 import { ExternalLink } from "components/ExternalLink";
 import StepperWithTooltips from "../StepperWithTooltips";
-import { useConnection } from "hooks";
+import { useConnection } from "state/hooks";
 
 interface Props {
   isConnected: boolean;

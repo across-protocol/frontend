@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { useConnection } from "hooks";
+import { useConnection } from "state/hooks";
 import { allowanceQueryKey, getAllowance, ChainId } from "utils";
 import { useBlock } from "./useBlock";
 import { BigNumber } from "ethers";

@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 
 import { IconPair } from "components/IconPair";
 import { PopperTooltip } from "components/Tooltip";
-import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
+import { ReactComponent as InfoIcon } from "assets/info.svg";
 import { QUERIESV2 } from "utils/constants";
 
 import { LightCard } from "./Card";

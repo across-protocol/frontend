@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 // import { Contract, providers } from "ethers";
 
-import { useConnection } from "hooks";
+import { useConnection } from "state/hooks";
 
 type ClaimState =
   | {
