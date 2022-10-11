@@ -1,4 +1,4 @@
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 
 import { useMerkleDistributor } from "./useMerkleDistributor";
 import { useAirdropRecipient } from "./useAirdropRecipient";
