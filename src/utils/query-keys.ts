@@ -30,16 +30,26 @@ export function balanceQueryKey(
 /**
  * @param tokenSymbol  The token symbol to check bridge fees for.
  * @param amount  The amount to check bridge fees for.
+ * @param fromChainId The origin chain of this bridge action
+ * @param toChainId The destination chain of this bridge action
  * @param blockNumber  The block number to execute the query on.
  * @returns An array of query keys for react-query `useQuery` hook.
  */
 export function bridgeFeesQueryKey(
   tokenSymbol: string,
   amount: ethers.BigNumber,
-  chainId: ChainId,
+  fromChainId: ChainId,
+  toChainId: ChainId,
   blockNumber: number
 ) {
-  return ["bridgeFees", tokenSymbol, amount, chainId, blockNumber];
+  return [
+    "bridgeFees",
+    tokenSymbol,
+    amount,
+    fromChainId,
+    toChainId,
+    blockNumber,
+  ];
 }
 
 export function bridgeLimitsQueryKey(
@@ -99,4 +109,12 @@ export function depositsQueryKey(
   offset: number
 ) {
   return ["deposits", status, limit, offset];
+}
+
+export function prelaunchDataQueryKey(address?: string, jwt?: string) {
+  return ["prelaunch-data", address, jwt];
+}
+
+export function prelaunchUserDetailsQueryKey(jwt: string) {
+  return ["prelaunch-data-discord-details", jwt];
 }

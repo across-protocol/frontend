@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 
 import { IconPair } from "components/IconPair";
 import { PopperTooltip } from "components/Tooltip";
-import { ReactComponent as InfoIcon } from "assets/info.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 import { QUERIESV2 } from "utils/constants";
 
 import { LightCard } from "./Card";
@@ -46,7 +46,7 @@ const Container = styled(LightCard)`
   flex-direction: column;
   gap: 32px;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     gap: 24px;
   }
 `;

@@ -39,9 +39,14 @@ const LINKS = !enableMigration
 interface Props {
   openSidebar: boolean;
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  transparentHeader?: boolean;
 }
 
-const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
+const Header: React.FC<Props> = ({
+  openSidebar,
+  setOpenSidebar,
+  transparentHeader,
+}) => {
   const location = useLocation();
   const scrollPosition = useScrollPosition();
 
@@ -50,7 +55,11 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
   };
 
   return (
-    <Wrapper scrollPosition={scrollPosition}>
+    <Wrapper
+      transparentHeader={transparentHeader}
+      scrollPosition={scrollPosition}
+      data-cy="primary-header"
+    >
       <UnstyledLink
         to={{ pathname: "/", search: location.search }}
         style={{ display: "flex" }}
