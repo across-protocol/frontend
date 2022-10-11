@@ -21,7 +21,8 @@ import {
   isSupportedChainId,
 } from "utils";
 
-import { usePrevious, useConnection } from "hooks";
+import { usePrevious } from "hooks";
+import { useConnection } from "state/hooks";
 import { useQueryParams } from "./useQueryParams";
 import { useHistory } from "react-router-dom";
 export enum FormStatus {
@@ -374,9 +375,8 @@ function useSendFormManager(): SendFormManagerContext {
     Because we need the asset's decimal value, you need to define **both** asset and amount for the optional params.
    */
   useEffect(() => {
-    const [fromChain, toChain] = [params.from, params.to].map(
-      config.resolveChainIdFromNumericOrCanonical
-    );
+    const fromChain = Number(params.from);
+    const toChain = Number(params.to);
     const areSupportedChains = [fromChain, toChain].every(
       config.isSupportedChainId
     );

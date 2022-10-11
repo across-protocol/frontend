@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useSendForm, useBridgeFees, useBridge, useBridgeLimits } from "hooks";
-import { confirmations, bridgeDisabled } from "utils";
+import { confirmations } from "utils";
 import { Deposit } from "views/Confirmation";
-import { useConnection } from "hooks";
+import { useConnection } from "state/hooks";
 
 export default function useSendAction(
   onDepositConfirmed: (deposit: Deposit) => void
@@ -12,7 +12,7 @@ export default function useSendAction(
   const toggleInfoModal = () => setOpenInfoModal((oldOpen) => !oldOpen);
   const { fromChain, toChain, amount, tokenSymbol, toAddress, selectedRoute } =
     useSendForm();
-  const { fees } = useBridgeFees(amount, fromChain, toChain, tokenSymbol);
+  const { fees } = useBridgeFees(amount, toChain, tokenSymbol);
   const { limits, isError } = useBridgeLimits(
     selectedRoute?.fromTokenAddress,
     fromChain,
@@ -23,7 +23,7 @@ export default function useSendAction(
   const [txHash, setTxHash] = useState("");
 
   const handleActionClick = async () => {
-    if (status !== "ready" || !selectedRoute || bridgeDisabled) {
+    if (status !== "ready" || !selectedRoute) {
       return;
     }
     try {
@@ -76,8 +76,7 @@ export default function useSendAction(
     }
   };
 
-  const buttonDisabled =
-    status !== "ready" || txPending || !selectedRoute || bridgeDisabled;
+  const buttonDisabled = status !== "ready" || txPending || !selectedRoute;
 
   let buttonMsg: string = "Send";
   if (txPending) {

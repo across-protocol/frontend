@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { useConnection } from "hooks";
+import { useConnection } from "state/hooks";
 
 import {
   ConnectButton,

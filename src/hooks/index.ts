@@ -8,7 +8,5 @@ export * from "./useSendForm";
 export * from "./useBridge";
 export * from "./useQueryParams";
 export * from "./useError";
-export * from "./useWindowSize";
+export * from "./useWindowsSize";
 export * from "./useScrollPosition";
-export * from "./useNotify";
-export * from "./useConnection";

@@ -2,8 +2,7 @@ import { FC, Dispatch, SetStateAction } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useSelect } from "downshift";
 
-import { useBalances } from "state/hooks";
-import { useConnection } from "hooks";
+import { useBalances, useConnection } from "state/hooks";
 import { formatUnits, TokenList, ChainId, Token } from "utils";
 import { SectionTitle } from "../Section";
 

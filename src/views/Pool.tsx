@@ -15,8 +15,7 @@ import {
   AddressZero,
   getConfig,
 } from "utils";
-import { useAppSelector, useBalance } from "state/hooks";
-import { useConnection } from "hooks";
+import { useAppSelector, useConnection, useBalance } from "state/hooks";
 import get from "lodash/get";
 import { getPoolClient } from "state/poolsApi";
 import styled from "@emotion/styled";

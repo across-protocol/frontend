@@ -1,6 +1,6 @@
 import { FC, Dispatch, SetStateAction, useState, useEffect } from "react";
 import PoolFormSlider from "./PoolFormSlider";
-import { useConnection } from "hooks";
+import { useConnection } from "state/hooks";
 import {
   RemoveAmount,
   RemovePercentButtonsWrapper,
@@ -162,10 +162,7 @@ const RemoveLiqudityForm: FC<Props> = ({
           feesEarned: max(feesEarned, 0),
           positionValue: totalPosition,
         },
-        // the sdk type specifies this needs to be a number but actually can take bignumberish.
-        // without setting tofixed is possible to crash the bignumber calculation with decimals
-        // longer than 18 digits by inputting very small amounts to withdraw.
-        (removeAmountSlider / 100).toFixed(18) as unknown as number
+        removeAmountSlider / 100
       )
     : null;
 

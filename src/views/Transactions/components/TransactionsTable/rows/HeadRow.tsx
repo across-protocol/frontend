@@ -2,17 +2,12 @@ import styled from "@emotion/styled";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 
-import {
-  TableHeadRow,
-  HeadCell,
-  SpeedUpHeadCell,
-} from "../TransactionsTable.styles";
+import { TableHeadRow, HeadCell } from "../TransactionsTable.styles";
 
 type Props = {
   isMobile?: boolean;
   showPartialFillInfoIcon?: boolean;
   onClickPartialFillInfoIcon: () => void;
-  enableSpeedUp?: boolean;
 };
 
 const InfoIcon = styled(FontAwesomeIcon)`
@@ -45,7 +40,6 @@ export function HeadRow(props: Props) {
           <HeadCell>Amount</HeadCell>
           <HeadCell>Deposit tx</HeadCell>
           <HeadCell>Fill tx(s)</HeadCell>
-          {props.enableSpeedUp && <SpeedUpHeadCell> </SpeedUpHeadCell>}
         </>
       )}
     </TableHeadRow>

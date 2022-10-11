@@ -11,8 +11,7 @@ describe("bridge", () => {
   });
 
   it("render fees box on input", () => {
-    cy.dataCy("select-from-chain").click();
-    cy.dataCy("from-chain-1").click();
+    cy.wait(7000);
     cy.dataCy("bridge-amount-input").click().type("1");
 
     cy.dataCy("send").should("be.disabled");

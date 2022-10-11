@@ -1,4 +1,4 @@
-import { useConnection } from "hooks";
+import { useConnection } from "state/hooks";
 import { useStakingActionsResolver } from "./useStakingActionsResolver";
 import { useStakingPoolResolver } from "./useStakingPoolResolver";
 

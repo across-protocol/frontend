@@ -51,13 +51,8 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
   const tokenInfo = tokenSymbol ? getToken(tokenSymbol) : undefined;
   const isWETH = tokenInfo?.symbol === "WETH";
   let timeToRelay = "loading";
-  if (limits && toChain && fromChain) {
-    timeToRelay = getConfirmationDepositTime(
-      amount,
-      limits,
-      toChain,
-      fromChain
-    );
+  if (limits && toChain) {
+    timeToRelay = getConfirmationDepositTime(amount, limits, toChain);
   } else if (limitsError) {
     timeToRelay = "estimation failed";
   }

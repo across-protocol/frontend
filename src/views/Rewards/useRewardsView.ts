@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 
-import { useConnection } from "hooks";
+import { useConnection } from "state/hooks";
 import { useReferrals } from "hooks/useReferrals";
 import { useReferralSummary } from "hooks/useReferralSummary";
 

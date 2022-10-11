@@ -1,7 +1,6 @@
 import assert from "assert";
 import { Signer } from "./ethers";
 import * as constants from "./constants";
-import * as providerUtils from "./providers";
 import {
   HubPool,
   HubPool__factory,
@@ -21,10 +20,6 @@ export type Token = constants.TokenInfo & {
   isNative: boolean;
 };
 export type TokenList = Token[];
-
-export interface DepositDelays {
-  [chainId: string]: number;
-}
 
 export class ConfigClient {
   public readonly spokeAddresses: Record<number, string> = {};
@@ -78,7 +73,7 @@ export class ConfigClient {
   }
   getSpokePool(chainId: constants.ChainId, signer?: Signer): SpokePool {
     const address = this.getSpokePoolAddress(chainId);
-    const provider = signer ?? providerUtils.getProvider(chainId);
+    const provider = signer ?? constants.getProvider(chainId);
     return SpokePool__factory.connect(address, provider);
   }
   getHubPoolChainId(): constants.ChainId {
@@ -98,14 +93,12 @@ export class ConfigClient {
   }
   getHubPool(signer?: Signer): HubPool {
     const address = this.getHubPoolAddress();
-    const provider =
-      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
+    const provider = signer ?? constants.getProvider(this.getHubPoolChainId());
     return HubPool__factory.connect(address, provider);
   }
   getAcceleratingDistributor(signer?: Signer): AcceleratingDistributor {
     const address = this.getAcceleratingDistributorAddress();
-    const provider =
-      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
+    const provider = signer ?? constants.getProvider(this.getHubPoolChainId());
     return AcceleratingDistributor__factory.connect(address, provider);
   }
   filterRoutes(query: Partial<constants.Route>): constants.Routes {
@@ -153,29 +146,6 @@ export class ConfigClient {
     return (
       constants.isSupportedChainId(chainId) && this.spokeChains.has(chainId)
     );
-  };
-  getSupportedCanonicalNameAsChainId = (canonicalName?: string) => {
-    // Returns undefined if the canonicalName is not defined
-    if (!canonicalName) return;
-    // Transform the canonical name to match ChainId key
-    const modifiedCanonicalName = canonicalName.toLowerCase();
-    // Attempt to resolve the chainId and return
-    const resolvedChain = constants.CanonicalChainName[modifiedCanonicalName];
-    return resolvedChain && this.isSupportedChainId(resolvedChain)
-      ? resolvedChain
-      : undefined;
-  };
-  /**
-   * This function converts either a chainId or canonical name into a corresponding chainId.
-   * @param chainIdOrCanonical Either a numeric string, an enumerated canonical name, undefined, or an invalid value.
-   * @returns The chain ID in the valid case. NaN in the invalid case.
-   */
-  resolveChainIdFromNumericOrCanonical = (chainIdOrCanonical?: string) => {
-    const asNumeric = Number(chainIdOrCanonical);
-    return Number.isNaN(asNumeric)
-      ? this.getSupportedCanonicalNameAsChainId(chainIdOrCanonical) ??
-          Number(chainIdOrCanonical)
-      : asNumeric;
   };
   // returns token list in order specified by constants, but adds in token address for the chain specified
   getTokenList(chainId?: number): TokenList {
@@ -239,19 +209,6 @@ export class ConfigClient {
     const tokenList = this.getTokenList(1);
     const poolSymbols = tokenList.map((token) => token.symbol.toLowerCase());
     return poolSymbols;
-  }
-  depositDelays() {
-    try {
-      const dd = process.env.REACT_APP_DEPOSIT_DELAY;
-      if (dd) {
-        return JSON.parse(dd) as DepositDelays;
-      } else {
-        return {};
-      }
-    } catch (err) {
-      console.error(err);
-      return {};
-    }
   }
 }
 

@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
 import { QUERIES } from "utils";
 import {
@@ -27,17 +26,7 @@ export const TableBody = BaseTableBody;
 
 export const TableHeadRow = BaseTableHeadRow;
 
-export const TableRow = styled(BaseTableRow)`
-  :hover {
-    #speed-up-cell {
-      svg {
-        opacity: 1;
-        transition: opacity 0.3s ease-in-out;
-        stroke: #44d2ff;
-      }
-    }
-  }
-`;
+export const TableRow = BaseTableRow;
 
 export const EmptyRow = BaseEmptyRow;
 
@@ -126,7 +115,7 @@ export const AccordionRow = styled.div`
     border-bottom: 1px solid #2c2f33;
     text-indent: 12px;
   }
-  &:nth-of-type(7) > div {
+  &:nth-of-type(6) > div {
     border-bottom: none;
   }
 `;
@@ -150,19 +139,4 @@ export const StyledPlus = styled(AcrossPlusIcon)`
   margin-top: 8px;
   margin-right: 4px;
   margin-left: 8px;
-`;
-
-export const SpeedUpHeadCell = styled(HeadCell)`
-  flex: 0.3;
-`;
-
-export const SpeedUpCell = styled(TableCell)`
-  cursor: pointer;
-  flex: 0.3;
-
-  svg {
-    opacity: 0;
-    height: 16px;
-    width: 16px;
-  }
 `;

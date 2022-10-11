@@ -4,7 +4,7 @@ import { FormStatus, useSendForm } from "./useSendForm";
 import { useBalanceBySymbol } from "./useBalance";
 import { useBridgeFees } from "./useBridgeFees";
 import { useAllowance } from "./useAllowance";
-import { useConnection } from "hooks";
+import { useConnection } from "state/hooks";
 import { useBlock } from "./useBlock";
 import {
   FEE_ESTIMATION,
@@ -78,7 +78,7 @@ export function useBridge() {
     fromChain && tokenSymbol
       ? config.getTokenInfoBySymbol(fromChain, tokenSymbol)
       : undefined;
-  const { fees } = useBridgeFees(amount, fromChain, toChain, tokenSymbol);
+  const { fees } = useBridgeFees(amount, toChain, tokenSymbol);
   const hasToSwitchChain = Boolean(
     fromChain && chainId && chainId !== fromChain
   );
