@@ -14,7 +14,7 @@ export const Wrapper = styled(Link)`
 
   text-decoration: none;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     padding: 0px 12px;
   }
 `;
@@ -28,7 +28,7 @@ export const Logo = styled.img`
   height: 32px;
   width: 32px;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     height: 24px;
     width: 24px;
   }
@@ -39,7 +39,7 @@ export const Text = styled.span`
   line-height: 26px;
 
   font-size: 22px;
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     font-size: 18px;
   }
 `;
@@ -50,7 +50,7 @@ export const TitleLogo = styled.div`
   align-items: center;
   gap: 12px;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     gap: 8px;
   }
 `;

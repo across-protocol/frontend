@@ -87,7 +87,7 @@ export const StakeInfoItem = styled.div`
     justify-content: flex-end;
   }
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     &:nth-of-type(2n) {
       justify-content: start;
     }
@@ -102,7 +102,7 @@ export const StakeInfoRow = styled.div`
   justify-content: space-between;
   flex-shrink: 0;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     flex-direction: column;
     gap: 6px;
   }
@@ -110,7 +110,7 @@ export const StakeInfoRow = styled.div`
 
 export const StakeAPYInfoRow = styled(StakeInfoRow)`
   cursor: pointer;
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     flex-direction: row;
     width: fit-content;
     gap: 12px;
@@ -128,7 +128,7 @@ export const LightGrayItemText = styled.span<{ margin?: number }>`
 export const StakeInfoItemSmall = styled(StakeInfoItem)`
   font-size: ${14 / 16}rem;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     font-size: ${12 / 16}rem;
   }
 `;
@@ -152,14 +152,14 @@ export const MutliplierValue = styled.div`
   color: #e0f3ff;
   display: inline-flex;
   justify-content: flex-end;
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     justify-content: flex-start;
   }
 `;
 
 export const APYInfo = styled(StakeInfo)`
   padding-bottom: 24px;
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     flex-direction: row;
     justify-content: flex-start;
   }

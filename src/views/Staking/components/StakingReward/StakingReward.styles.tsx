@@ -24,7 +24,7 @@ export const Wrapper = styled.div`
 
   padding: 24px;
   gap: 24px;
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     padding: 12px 16px;
     gap: 16px;
   }
@@ -48,7 +48,7 @@ export const Title = styled.p`
   color: #c5d5e0;
 
   font-size: 18px;
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     font-size: 16px;
   }
 `;
@@ -107,7 +107,7 @@ export const StakingClaimAmountText = styled.div`
 
   color: #e0f3ff;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     font-size: 14px;
     line-height: 18px;
   }

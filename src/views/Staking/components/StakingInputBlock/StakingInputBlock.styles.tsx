@@ -20,7 +20,7 @@ export const InputRow = styled.div`
     flex-shrink: 0;
   }
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     flex-direction: column;
     gap: 12px;
   }
@@ -43,7 +43,7 @@ export const InputWrapper = styled.div<IStakeInput>`
   border: 1px solid ${({ valid }) => (valid ? "#4c4e57" : "#f96c6c")};
   color: ${({ valid }) => (valid ? "#e0f3ff" : "#f96c6c")};
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     padding: 0px 12px;
     height: 48px;
   }
@@ -63,7 +63,7 @@ export const Input = styled.input`
   &:focus {
     outline: 0;
   }
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     font-size: 16px;
   }
 `;
@@ -87,7 +87,7 @@ export const MaxButton = styled(UnstyledButton)`
   }
 
   padding: 8px 16px;
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     height: 24px;
     padding: 0px 10px;
   }
@@ -95,7 +95,7 @@ export const MaxButton = styled(UnstyledButton)`
 
 export const ButtonWrapper = styled.div`
   flex-grow: 1;
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     width: 100%;
   }
 `;
@@ -112,7 +112,7 @@ export const StakeButton = styled(UnstyledButton)<IStakeButton>`
   height: 64px;
   color: #2d2e33;
   opacity: ${({ valid }) => (valid ? 1 : 0.25)};
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     text-align: center;
     width: 100%;
     height: 40px;

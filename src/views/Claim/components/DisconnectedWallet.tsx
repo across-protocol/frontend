@@ -41,7 +41,7 @@ const ContainerCard = styled(Card)`
   flex-direction: column;
   justify-content: flex-end;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     height: 280px;
   }
 `;
