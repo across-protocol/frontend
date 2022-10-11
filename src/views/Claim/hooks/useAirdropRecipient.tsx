@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useQuery } from "react-query";
 
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 
 type RecipientsWithProof = {
   [address: string]: {
