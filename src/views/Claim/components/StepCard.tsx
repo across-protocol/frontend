@@ -78,7 +78,7 @@ const TopRow = styled.div`
     margin-bottom: 4px;
   }
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     h6 {
       margin-bottom: 0;
     }
@@ -94,7 +94,7 @@ const CheckIconContainer = styled.div`
   height: 48px;
   width: 48px;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     height: 40px;
     width: 40px;
   }
@@ -112,7 +112,7 @@ const BodyContainer = styled.div`
   border-top: 1px solid #3e4047;
   margin-top: 24px;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     margin-top: 16px;
   }
 `;

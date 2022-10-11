@@ -14,7 +14,7 @@ export const Card = styled.div`
   border: 1px solid #3e4047;
   border-radius: 10px;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     padding: 16px;
   }
 `;

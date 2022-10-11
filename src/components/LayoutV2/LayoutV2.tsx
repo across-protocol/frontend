@@ -18,7 +18,7 @@ const Wrapper = styled.div`
 
   /* Subtract to account for header */
   min-height: calc(100vh - 72px);
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     /* Subtract to account for header */
     min-height: calc(100vh - 64px);
   } ;
@@ -37,7 +37,7 @@ const InnerWrapper = styled.div`
   flex-direction: column;
   gap: 16px;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     margin: 16px auto;
   }
 `;

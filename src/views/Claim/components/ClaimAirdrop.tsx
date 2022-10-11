@@ -105,7 +105,7 @@ const Container = styled.div`
   align-items: center;
   gap: 48px;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     gap: 32px;
   }
 `;
@@ -130,7 +130,7 @@ const BreakdownCardContainer = styled(LightCard)`
   flex-direction: column;
   padding: 0;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     padding: 0;
   }
 `;
@@ -139,7 +139,7 @@ const BreakdownTitle = styled.h6`
   align-self: stretch;
   padding: 16px 24px;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     padding: 12px;
   }
 `;
@@ -152,7 +152,7 @@ const BreakdownStats = styled.div`
   padding: 16px 24px;
   border-top: 1px solid #4c4e57;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     padding: 12px;
   }
 `;
@@ -183,7 +183,7 @@ const AddTokenToWalletContainer = styled.div`
     width: 48px;
   }
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     flex-direction: column;
     text-align: center;
   }

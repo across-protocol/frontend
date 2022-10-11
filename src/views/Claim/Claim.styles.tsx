@@ -26,7 +26,7 @@ export const BodyContainer = styled.div`
     padding-right: 16px;
   }
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     margin: 48px auto;
   }
 
@@ -45,7 +45,7 @@ export const BodyContainer = styled.div`
     font-size: ${26 / 16}rem;
     line-height: ${31 / 16}rem;
 
-    @media ${QUERIESV2.sm} {
+    @media ${QUERIESV2.sm.andDown} {
       font-size: ${22 / 16}rem;
       line-height: ${26 / 16}rem;
     }
@@ -55,7 +55,7 @@ export const BodyContainer = styled.div`
     font-size: ${22 / 16}rem;
     line-height: ${26 / 16}rem;
 
-    @media ${QUERIESV2.sm} {
+    @media ${QUERIESV2.sm.andDown} {
       font-size: ${18 / 16}rem;
       line-height: ${26 / 16}rem;
     }
@@ -65,14 +65,14 @@ export const BodyContainer = styled.div`
     font-size: ${18 / 16}rem;
     line-height: ${26 / 16}rem;
 
-    @media ${QUERIESV2.sm} {
+    @media ${QUERIESV2.sm.andDown} {
       font-size: ${16 / 16}rem;
       line-height: ${20 / 16}rem;
     }
   }
 
   p {
-    @media ${QUERIESV2.sm} {
+    @media ${QUERIESV2.sm.andDown} {
       font-size: ${14 / 16}rem;
       line-height: ${18 / 16}rem;
     }
@@ -93,13 +93,13 @@ export const Title = styled.h2`
   padding-left: 16px;
   padding-bottom: 24px;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     padding-bottom: 12px;
   }
 `;
 
 export const Button = styled(ButtonV2)`
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     font-size: ${16 / 16}rem;
     line-height: ${20 / 16}rem;
     padding: 10px 20px;

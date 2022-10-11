@@ -12,7 +12,7 @@ export const Wrapper = styled.div`
   flex-direction: column;
   gap: 16px;
 
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     margin: 16px auto;
   }
 `;
@@ -32,7 +32,7 @@ export const Card = styled.div`
 
   padding: 24px;
   gap: 24px;
-  @media ${QUERIESV2.sm} {
+  @media ${QUERIESV2.sm.andDown} {
     padding: 12px 16px;
     gap: 16px;
   }
