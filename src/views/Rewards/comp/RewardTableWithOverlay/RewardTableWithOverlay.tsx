@@ -1,4 +1,4 @@
-import { RewardTable, ConnectTableOverlay } from "../";
+import { RewardTable, ConnectTableOverlay } from "..";
 import createMyReferralsTableJSX, {
   headers,
 } from "../RewardTable/createMyReferralsTableJSX";
