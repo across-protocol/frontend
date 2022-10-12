@@ -32,7 +32,7 @@ export const providerUrlsTable: Record<number, string> =
 
 export const providers: [number, ethers.providers.StaticJsonRpcProvider][] =
   providerUrls.map(([chainId, url]) => {
-    return [chainId, new ethers.providers.StaticJsonRpcProvider(url)];
+    return [chainId, new ethers.providers.StaticJsonRpcProvider(url, chainId)];
   });
 export const providersTable: Record<
   number,
