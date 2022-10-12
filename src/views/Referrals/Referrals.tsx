@@ -1,11 +1,11 @@
-import { Content, Wrapper } from "./Rewards.styles";
+import { Content, Wrapper } from "./Referrals.styles";
 import {
   RewardReferral,
   RewardTableWithOverlay,
   RewardMediumBlock,
 } from "./comp";
 import Footer from "components/Footer";
-import { useRewardsView } from "./useRewardsView";
+import { useRewardsView } from "./useReferralsView";
 import { mediumUrl } from "utils";
 const Rewards = () => {
   const {
