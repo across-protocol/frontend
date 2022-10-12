@@ -35,7 +35,7 @@ function useBridgeTravelerCard(
 
   let cardDescription =
     "Have you bridged before but have yet to use Across? Connect your wallet to check if you're eligible for an airdrop through the Bridge Traveler Program.";
-  if (isConnected) {
+  if (isConnected && isWalletEligible !== undefined) {
     if (isWalletEligible !== false) {
       if (isCompleted) {
         cardDescription =
