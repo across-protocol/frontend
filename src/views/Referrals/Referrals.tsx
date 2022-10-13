@@ -7,7 +7,7 @@ import {
 import Footer from "components/Footer";
 import { useReferralsView } from "./useReferralsView";
 import { mediumUrl } from "utils";
-const Rewards = () => {
+const Referrals = () => {
   const {
     account,
     isConnected,
