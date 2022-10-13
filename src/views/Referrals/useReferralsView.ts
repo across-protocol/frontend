@@ -6,7 +6,7 @@ import { useReferralSummary } from "hooks/useReferralSummary";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-export const useRewardsView = () => {
+export const useReferralsView = () => {
   const { isConnected, account } = useConnection();
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSizeState] = useState(DEFAULT_PAGE_SIZE);

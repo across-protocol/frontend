@@ -5,7 +5,7 @@ import {
   RewardMediumBlock,
 } from "./comp";
 import Footer from "components/Footer";
-import { useRewardsView } from "./useReferralsView";
+import { useReferralsView } from "./useReferralsView";
 import { mediumUrl } from "utils";
 const Rewards = () => {
   const {
@@ -20,7 +20,7 @@ const Rewards = () => {
     setPageSize,
     pageSizes,
     totalReferralCount,
-  } = useRewardsView();
+  } = useReferralsView();
 
   return (
     <Wrapper>
