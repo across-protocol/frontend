@@ -9,3 +9,13 @@ export const Wrapper = styled.div`
   margin: 0 auto;
   padding: 32px 0;
 `;
+
+export const InnerSectionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 64px;
+
+  width: 100%;
+`;

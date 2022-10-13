@@ -7,5 +7,8 @@ export function useRewards() {
     isConnected,
     address: account,
     connectHandler: () => connect(),
+    totalRewards: "726.45 ACX",
+    stakedTokens: "$942,021.23",
+    referralTier: 1,
   };
 }
