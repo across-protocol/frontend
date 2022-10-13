@@ -1,50 +1,25 @@
-import { Content, Wrapper } from "./Rewards.styles";
-import {
-  RewardReferral,
-  RewardTableWithOverlay,
-  RewardMediumBlock,
-} from "./comp";
-import Footer from "components/Footer";
-import { useRewardsView } from "./useRewardsView";
-import { mediumUrl } from "utils";
-const Rewards = () => {
-  const {
-    account,
-    isConnected,
-    isReferalSummaryLoading,
-    referralsSummary,
-    referrals,
-    currentPage,
-    setCurrentPage,
-    pageSize,
-    setPageSize,
-    pageSizes,
-    totalReferralCount,
-  } = useRewardsView();
+import BreadcrumbV2 from "components/BreadcrumbV2";
+import ConnectedReferralBox from "./components/ConnectedReferralBox";
+import DisconnectedReferralBox from "./components/DisconnectedReferralBox";
+import SectionWrapper from "./components/SectionWrapper";
+import { useRewards } from "./hooks/useRewards";
+import { Wrapper } from "./Rewards.style";
 
+const Rewards = () => {
+  const { isConnected, connectHandler, address } = useRewards();
   return (
     <Wrapper>
-      <Content>
-        <RewardReferral
-          loading={isReferalSummaryLoading}
-          referrer={account}
-          referralsSummary={referralsSummary}
-          isConnected={isConnected}
-        />
-        {mediumUrl && <RewardMediumBlock />}
-        <RewardTableWithOverlay
-          isConnected={isConnected}
-          referrals={referrals}
-          account={account || ""}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          pageSize={pageSize}
-          setPageSize={setPageSize}
-          pageSizes={pageSizes}
-          totalReferralCount={totalReferralCount}
-        />
-      </Content>
-      <Footer />
+      <BreadcrumbV2 />
+      <SectionWrapper
+        title="Referrals"
+        link={{ name: "View all data", href: "/rewards/referrals" }}
+      >
+        {isConnected && address ? (
+          <ConnectedReferralBox address={address} />
+        ) : (
+          <DisconnectedReferralBox connectHandler={connectHandler} />
+        )}
+      </SectionWrapper>
     </Wrapper>
   );
 };

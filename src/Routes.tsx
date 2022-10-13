@@ -19,6 +19,9 @@ import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
 
 const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
+const Referrals = lazy(
+  () => import(/* webpackChunkName: "Referrals" */ "./views/Referrals")
+);
 const Rewards = lazy(
   () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
 );
@@ -138,8 +141,9 @@ const Routes: React.FC = () => {
           <Route exact path="/transactions/all" component={AllTransactions} />
           <Route exact path="/pool" component={Pool} />
           <Route exact path="/about" component={About} />
-          <Route exact path="/rewards" component={Rewards} />
+          <Route exact path="/rewards/referrals" component={Referrals} />
           <Route exact path="/rewards/claim" component={Claim} />
+          <Route exact path="/rewards" component={Rewards} />
           <Route exact path="/airdrop" component={Claim} />
           <Route
             exact
