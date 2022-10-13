@@ -49,4 +49,4 @@ const Rewards = () => {
   );
 };
 
-export default Rewards;
+export default Referrals;
