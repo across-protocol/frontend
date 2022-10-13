@@ -13,9 +13,10 @@ const CopyReferralLink = ({ condensed }: CopyReferralLinkType) => {
     useReferralLink();
   const text = condensed ? condensedReferralLink : referralLink;
 
-  const [completed, setCompleted] = useState(false);
+  const [completed, setCompleted] = useState<boolean>(false);
 
   useEffect(() => {
+    console.log(completed);
     if (completed) {
       navigator.clipboard.writeText(referralLinkWithProtocol ?? "");
       const timeoutId = setTimeout(() => {
@@ -28,9 +29,14 @@ const CopyReferralLink = ({ condensed }: CopyReferralLinkType) => {
   return (
     <Wrapper>
       <LinkText>{text}</LinkText>
-      <CopyReferralButton size="lg" onClick={() => setCompleted(true)}>
+      <CopyReferralButton
+        size="lg"
+        onClick={() => {
+          setCompleted(true);
+        }}
+      >
         {!condensed && "Copy referral link"}
-        <StyledCopyIcon completed={completed} />
+        <StyledCopyIcon completed={completed.toString()} />
       </CopyReferralButton>
     </Wrapper>
   );
@@ -85,15 +91,19 @@ const CopyReferralButton = styled(ButtonV2)`
   }
 `;
 
+// Note:  React was having an error hear related
+//        to the string being a boolean The way I
+//        removed this error was by dealing with this
+//        was by treating completed as a string
 type StyledCopyIconType = {
-  completed?: boolean;
+  completed: string;
 };
 const StyledCopyIcon = styled(UnstyledCopyIcon)<StyledCopyIconType>`
   height: 24px;
   width: 24px;
   & path {
-    stroke: ${({ completed }) => (completed ? "#6cf9d8" : "#e0f3ff")};
-
-    transition: stroke 0.5s;
+    stroke: ${({ completed }) =>
+      completed === "true" ? "#6cf9d8" : "#e0f3ff"};
+    transition: stroke 0.25s;
   }
 `;
