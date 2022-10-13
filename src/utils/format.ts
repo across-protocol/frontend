@@ -47,6 +47,35 @@ export function shortenString(
   )}`;
 }
 
+/**
+ * Shortens an arbitrary string to a fixed number of characters, mindful of the character length of the delimiter
+ * @param str The string to be potentially shortened
+ * @param delimiter The delimiter
+ * @param maxChars The number of characters to constrain this string
+ * @returns `str` if string is less than maxChars. The first `maxChars` chars if the delimiter is too large. A collapsed version with the delimiter in the middle.
+ */
+export function shortenStringToLength(
+  str: string,
+  delimiter: string,
+  maxChars: number
+) {
+  if (str.length <= maxChars) {
+    return str;
+  } else {
+    const charsNeeded = maxChars - delimiter.length;
+    // Delimiter is out of bounds
+    if (charsNeeded <= 0) {
+      return str.slice(0, maxChars);
+    } else {
+      const charDivision = charsNeeded / 2;
+      const left = str.slice(0, Math.ceil(charDivision));
+      const right =
+        charDivision < 1 ? "" : str.slice(-Math.floor(charDivision));
+      return `${left}${delimiter}${right}`;
+    }
+  }
+}
+
 export function shortenTransactionHash(hash: string): string {
   return `${hash.substring(0, 5)}...`;
 }
