@@ -12,7 +12,7 @@ export function useBreadcrumb() {
   if (routes.length === 0) {
     routes.push({ path: "/", name: "Home" });
   }
-  const ancestorRoutes = routes.length > 0 ? routes.slice(0, -1) : [];
+  const ancestorRoutes = routes.slice(0, -1);
   const currentRoute = routes[routes.length - 1];
 
   return {
