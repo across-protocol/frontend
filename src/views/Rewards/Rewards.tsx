@@ -13,7 +13,15 @@ const Rewards = () => {
     address,
     totalRewards,
     stakedTokens,
+
     referralTier,
+    referralRate,
+    referralRewards,
+    referralTransfers,
+    referralVolume,
+    referralWallets,
+
+    formatterFn,
   } = useRewards();
   return (
     <Wrapper>
@@ -31,7 +39,14 @@ const Rewards = () => {
           link={{ name: "View all data", href: "/rewards/referrals" }}
         >
           {isConnected && address ? (
-            <ConnectedReferralBox address={address} />
+            <ConnectedReferralBox
+              walletCount={referralWallets}
+              transferCount={referralTransfers}
+              volume={referralVolume}
+              formatter={formatterFn}
+              referralRate={referralRate}
+              rewards={referralRewards}
+            />
           ) : (
             <DisconnectedReferralBox connectHandler={connectHandler} />
           )}
