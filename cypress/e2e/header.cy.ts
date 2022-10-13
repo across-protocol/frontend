@@ -15,13 +15,4 @@ describe("headers", () => {
       );
     }
   });
-  it("should be transparent on /airdrop", () => {
-    cy.visit("/airdrop");
-    cy.dataCy("primary-header").should(
-      "have.css",
-      "background-color",
-      // #2d2e3300 in RGB is rgba(45, 46, 51, 0)
-      "rgba(45, 46, 51, 0)"
-    );
-  });
 });
