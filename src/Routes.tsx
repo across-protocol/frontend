@@ -20,7 +20,10 @@ import NotFound from "./views/NotFound";
 
 const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
 const Referrals = lazy(
-  () => import(/* webpackChunkName: "Rewards" */ "./views/Referrals")
+  () => import(/* webpackChunkName: "Referrals" */ "./views/Referrals")
+);
+const Rewards = lazy(
+  () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
 );
 const Send = lazy(() => import(/* webpackChunkName: "Send" */ "./views/Send"));
 const About = lazy(
@@ -140,6 +143,7 @@ const Routes: React.FC = () => {
           <Route exact path="/about" component={About} />
           <Route exact path="/rewards/referrals" component={Referrals} />
           <Route exact path="/rewards/claim" component={Claim} />
+          <Route exact path="/rewards" component={Rewards} />
           <Route exact path="/airdrop" component={Claim} />
           <Route
             exact
