@@ -1,6 +1,6 @@
-describe("rewards", () => {
+describe("referrals", () => {
   beforeEach(() => {
-    cy.visit("/rewards");
+    cy.visit("/rewards/referrals");
   });
 
   it("render in initial state", () => {
