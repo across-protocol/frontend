@@ -94,7 +94,7 @@ const CardWrapper = styled.div`
   overflow: clip;
 `;
 
-const CardText = styled.p`
+const CardText = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;

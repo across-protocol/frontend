@@ -6,37 +6,55 @@ import { ReactComponent as GraphIcon } from "assets/icons/graph-24.svg";
 import { ReactComponent as IncreaseIcon } from "assets/icons/increase-24.svg";
 import { ReactComponent as TrophyIcon } from "assets/icons/trophy-24.svg";
 import React from "react";
+import { formatNumberMaxFracDigits } from "utils";
+import { BigNumberish } from "ethers";
 
 type ConnectedReferralBoxType = {
-  address: string;
+  walletCount?: number;
+  transferCount?: number;
+  volume?: number;
+  referralRate?: number;
+  rewards?: string;
+  formatter: (wei: BigNumberish) => string;
 };
 
-const ConnectedReferralBox = ({ address }: ConnectedReferralBoxType) => {
+const ConnectedReferralBox = ({
+  walletCount,
+  transferCount,
+  volume,
+  referralRate,
+  rewards,
+  formatter,
+}: ConnectedReferralBoxType) => {
   const referralElements = [
     {
       Icon: WalletIcon,
       title: "Wallets",
-      value: <>2</>,
+      value: walletCount,
     },
     {
       Icon: TransferIcon,
       title: "Transfers",
-      value: <>2</>,
+      value: transferCount,
     },
     {
       Icon: GraphIcon,
       title: "Volume",
-      value: <>2</>,
+      value: volume ? `$${formatNumberMaxFracDigits(volume)}` : undefined,
     },
     {
       Icon: IncreaseIcon,
       title: "Rate",
-      value: <>2</>,
+      value: referralRate ? (
+        <>
+          {referralRate * 100}% <ReferreeText>10% for referee</ReferreeText>{" "}
+        </>
+      ) : undefined,
     },
     {
       Icon: TrophyIcon,
       title: "Rewards",
-      value: <>2</>,
+      value: rewards ? `${formatter(rewards)} ACX` : undefined,
     },
   ];
 
@@ -52,7 +70,7 @@ const ConnectedReferralBox = ({ address }: ConnectedReferralBoxType) => {
                   {val.title}
                 </ReferralInfoCardTitleWrapper>
                 <ReferralInfoCardDataWrapper>
-                  {val.value}
+                  {val.value ?? "-"}
                 </ReferralInfoCardDataWrapper>
               </ReferralInfoCardInnerWrapper>
             </ReferralInfoCard>
@@ -144,4 +162,8 @@ const DividerWrapper = styled.div`
   background: #34353b;
 
   padding: 24px 0;
+`;
+
+const ReferreeText = styled.span`
+  color: #9daab2;
 `;
