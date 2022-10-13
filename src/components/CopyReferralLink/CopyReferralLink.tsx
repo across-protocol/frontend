@@ -16,7 +16,6 @@ const CopyReferralLink = ({ condensed }: CopyReferralLinkType) => {
   const [completed, setCompleted] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log(completed);
     if (completed) {
       navigator.clipboard.writeText(referralLinkWithProtocol ?? "");
       const timeoutId = setTimeout(() => {
