@@ -1,31 +1,24 @@
-import {
-  Wrapper,
-  Text,
-  Logo,
-  ExitIcon,
-  TitleLogo,
-} from "./StakingExitAction.styles";
+import BreadcrumbV2 from "components/BreadcrumbV2";
+import { Text, Logo, TitleLogo } from "./StakingExitAction.styles";
 
 type StakingExitActionAttributes = {
   poolName: string;
-  exitLinkURI: string;
   poolLogoURI: string;
 };
 
 export const StakingExitAction = ({
   poolName,
-  exitLinkURI,
   poolLogoURI,
-}: StakingExitActionAttributes) => {
-  return (
-    <Wrapper to={exitLinkURI}>
-      <ExitIcon />
+}: StakingExitActionAttributes) => (
+  <BreadcrumbV2
+    onlyRootAncestor
+    customCurrentRoute={
       <TitleLogo>
         <Logo src={poolLogoURI} />
-        <Text>{poolName} Pool</Text>
+        <Text>Pool ({poolName})</Text>
       </TitleLogo>
-    </Wrapper>
-  );
-};
+    }
+  />
+);
 
 export default StakingExitAction;
