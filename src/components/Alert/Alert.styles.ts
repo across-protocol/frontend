@@ -12,6 +12,11 @@ const AlertColors: Record<
     fontColor: "#f9d26c",
     borderColor: "rgba(249, 210, 108, 0.1)",
   },
+  danger: {
+    bgColor: "rgba(249, 108, 108, 0.05)",
+    fontColor: "#f96c6c",
+    borderColor: "rgba(249, 108, 108, 0.1)",
+  },
 };
 
 type IncludeStatusType = {

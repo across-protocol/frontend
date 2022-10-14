@@ -96,6 +96,9 @@ const Staking = () => {
           maximumClaimableAmount={numericTernary(
             stakingData?.outstandingRewards
           )}
+          usersMultiplierPercentage={numberTernary(
+            stakingData?.usersMultiplierPercentage
+          )}
           isConnected={isConnected}
           walletConnectionHandler={connectWalletHandler}
         />

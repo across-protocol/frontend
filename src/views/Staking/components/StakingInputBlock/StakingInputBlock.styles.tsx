@@ -111,6 +111,7 @@ export const StakeButton = styled(UnstyledButton)<IStakeButton>`
   padding: 0px 40px;
   height: 64px;
   color: #2d2e33;
+  font-weight: 500;
   opacity: ${({ valid }) => (valid ? 1 : 0.25)};
   @media ${QUERIESV2.sm.andDown} {
     text-align: center;
