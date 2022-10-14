@@ -3,18 +3,38 @@ import { useBreadcrumb } from "./useBreadcrumb";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
 import { Link } from "react-router-dom";
 
-const BreadcrumbV2 = () => {
+type BreadcrumbV2Type = {
+  onlyRootAncestor?: boolean;
+  customCurrentRoute?: string | React.ReactElement;
+};
+
+const BreadcrumbV2 = ({
+  onlyRootAncestor,
+  customCurrentRoute,
+}: BreadcrumbV2Type) => {
   const { ancestorRoutes, currentRoute } = useBreadcrumb();
+
+  const definedAncestors =
+    onlyRootAncestor && ancestorRoutes.length > 0
+      ? [ancestorRoutes[0]]
+      : ancestorRoutes;
+
+  const updatedRoute = customCurrentRoute ? (
+    customCurrentRoute
+  ) : (
+    <InactiveLink>{currentRoute.name}</InactiveLink>
+  );
+
   return (
     <Wrapper>
       <BreadcrumbWrapper>
-        {ancestorRoutes.map((route) => (
+        {definedAncestors.map((route) => (
           <>
             <ActiveLink to={route.path}>{route.name}</ActiveLink>
-            <ArrowIcon />
+            <StyledArrowLink />
           </>
         ))}
-        <InactiveLink>{currentRoute.name}</InactiveLink>
+        {updatedRoute}
       </BreadcrumbWrapper>
       <Divider />
     </Wrapper>
@@ -64,4 +84,8 @@ const InactiveLink = styled.span`
   color: #e0f3ff;
 
   text-transform: capitalize;
+`;
+
+const StyledArrowLink = styled(ArrowIcon)`
+  rotate: -90deg;
 `;
