@@ -10,9 +10,9 @@ import {
   StakeButtonContentWrapper,
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
-import { AlertInfo } from "../StakingReward/AlertInfo";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { StylizedSVG } from "utils/types";
+import { Alert } from "components";
 
 interface Props {
   value: string;
@@ -78,7 +78,7 @@ const StakingInputBlock: React.FC<Props> = ({
       </ButtonWrapper>
     </InputRow>
     {!!value && !valid && !!errorMessage && (
-      <AlertInfo danger>{errorMessage}</AlertInfo>
+      <Alert status="danger">{errorMessage}</Alert>
     )}
   </Wrapper>
 );
