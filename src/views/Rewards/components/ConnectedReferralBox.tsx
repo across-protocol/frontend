@@ -6,7 +6,7 @@ import { ReactComponent as GraphIcon } from "assets/icons/graph-24.svg";
 import { ReactComponent as IncreaseIcon } from "assets/icons/increase-24.svg";
 import { ReactComponent as TrophyIcon } from "assets/icons/trophy-24.svg";
 import React from "react";
-import { formatNumberMaxFracDigits } from "utils";
+import { formatNumberMaxFracDigits, QUERIESV2 } from "utils";
 import { BigNumberish } from "ethers";
 
 type ConnectedReferralBoxType = {
@@ -110,6 +110,10 @@ const CardWrapper = styled.div`
   gap: 0;
 
   background: #34353b;
+
+  @media ${QUERIESV2.tb.andDown} {
+    flex-direction: column;
+  }
 `;
 
 const ReferralInfoCard = styled.div`
@@ -127,6 +131,12 @@ const ReferralInfoCardInnerWrapper = styled.div`
   align-items: flex-start;
   padding: 0px;
   gap: 8px;
+
+  @media ${QUERIESV2.tb.andDown} {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
 `;
 
 const ReferralInfoCardTitleWrapper = styled.div`
@@ -140,18 +150,35 @@ const ReferralInfoCardTitleWrapper = styled.div`
   font-size: 16px;
   line-height: 20px;
   color: #9daab2;
+
+  @media ${QUERIESV2.sm.andDown} {
+    font-size: 14px;
+    & svg {
+      height: 16px;
+      width: 16px;
+    }
+  }
 `;
 
 const ReferralInfoCardDataWrapper = styled.div`
   font-size: 18px;
   line-height: 26px;
   color: #e0f3ff;
+
+  @media ${QUERIESV2.sm.andDown} {
+    font-size: 14px;
+  }
 `;
 
 const Divider = styled.div`
   width: 1px;
   height: 56px;
   background: #3e4047;
+
+  @media ${QUERIESV2.tb.andDown} {
+    width: 100%;
+    height: 1px;
+  }
 `;
 
 const DividerWrapper = styled.div`
@@ -162,6 +189,11 @@ const DividerWrapper = styled.div`
   background: #34353b;
 
   padding: 24px 0;
+
+  @media ${QUERIESV2.tb.andDown} {
+    padding: 0 24px;
+    width: 100%;
+  }
 `;
 
 const ReferreeText = styled.span`

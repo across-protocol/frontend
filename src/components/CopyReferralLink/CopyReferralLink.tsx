@@ -3,14 +3,18 @@ import { ButtonV2 } from "components/Buttons";
 import { useReferralLink } from "hooks/useReferralLink";
 import { ReactComponent as UnstyledCopyIcon } from "assets/icons/copy-16.svg";
 import { useEffect, useState } from "react";
+import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
+import { QUERIESV2 } from "utils";
 
 type CopyReferralLinkType = {
   condensed?: boolean;
 };
 
-const CopyReferralLink = ({ condensed }: CopyReferralLinkType) => {
+const CopyReferralLink = ({ condensed: _condensed }: CopyReferralLinkType) => {
+  const { isMobile } = useCurrentBreakpoint();
   const { referralLink, condensedReferralLink, referralLinkWithProtocol } =
     useReferralLink();
+  const condensed = _condensed || isMobile;
   const text = condensed ? condensedReferralLink : referralLink;
 
   const [completed, setCompleted] = useState<boolean>(false);
@@ -50,7 +54,6 @@ const Wrapper = styled.div`
   align-items: center;
   gap: 16px;
   padding: 20px 24px;
-  gap: 255px;
 
   width: 100%;
 
@@ -68,6 +71,11 @@ const LinkText = styled.span`
   color: #9daab2;
 
   width: fit-content;
+
+  @media ${QUERIESV2.sm.andDown} {
+    font-size: 16px;
+    line-height: 20px;
+  }
 `;
 
 const CopyReferralButton = styled(ButtonV2)`
@@ -104,5 +112,10 @@ const StyledCopyIcon = styled(UnstyledCopyIcon)<StyledCopyIconType>`
     stroke: ${({ completed }) =>
       completed === "true" ? "#6cf9d8" : "#e0f3ff"};
     transition: stroke 0.25s;
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    height: 16px;
+    width: 16px;
   }
 `;
