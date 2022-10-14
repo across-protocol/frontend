@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { useBreadcrumb } from "./useBreadcrumb";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
 import { Link } from "react-router-dom";
+import { QUERIESV2 } from "utils";
 
 type BreadcrumbV2Type = {
   onlyRootAncestor?: boolean;
@@ -74,6 +75,10 @@ const ActiveLink = styled(Link)`
 
   text-transform: capitalize;
   text-decoration: none;
+
+  @media ${QUERIESV2.sm.andDown} {
+    font-size: 16px;
+  }
 `;
 
 const InactiveLink = styled.span`
@@ -84,6 +89,10 @@ const InactiveLink = styled.span`
   color: #e0f3ff;
 
   text-transform: capitalize;
+
+  @media ${QUERIESV2.sm.andDown} {
+    font-size: 16px;
+  }
 `;
 
 const StyledArrowLink = styled(ArrowIcon)`
