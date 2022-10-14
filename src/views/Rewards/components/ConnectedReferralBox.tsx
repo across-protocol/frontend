@@ -123,6 +123,10 @@ const ReferralInfoCard = styled.div`
   padding: 24px;
   gap: 12px;
   width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 16px;
+  }
 `;
 
 const ReferralInfoCardInnerWrapper = styled.div`
@@ -193,6 +197,10 @@ const DividerWrapper = styled.div`
   @media ${QUERIESV2.tb.andDown} {
     padding: 0 24px;
     width: 100%;
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 0 16px;
   }
 `;
 

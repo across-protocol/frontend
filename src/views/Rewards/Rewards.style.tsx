@@ -15,6 +15,7 @@ export const Wrapper = styled.div`
   @media ${QUERIESV2.sm.andDown} {
     max-width: calc(1140px + 24px);
     width: calc(100% - 24px);
+    gap: 16px;
   }
 `;
 
@@ -26,4 +27,8 @@ export const InnerSectionWrapper = styled.div`
   gap: 64px;
 
   width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    gap: 24px;
+  }
 `;
