@@ -29,7 +29,7 @@ export const StakingReward = ({
 
   return (
     <SectionTitleWrapperV2 title="Rewards">
-      <Card>
+      <StakingRewardCard>
         <Alert status="warn">
           <AlertText>
             Claiming tokens will reset your multiplier and decrease your ACX APY
@@ -37,7 +37,7 @@ export const StakingReward = ({
           </AlertText>
         </Alert>
         {isConnected ? (
-          <>
+          <ClaimRewardInputGroup>
             <RewardClaimWrapper>
               <RewardClaimWrapperTitle>
                 Claimable Rewards
@@ -54,7 +54,7 @@ export const StakingReward = ({
             >
               Claim Rewards
             </ClaimRewardButton>
-          </>
+          </ClaimRewardInputGroup>
         ) : (
           <ButtonGroupWrapper>
             <StakingInputBlock
@@ -70,7 +70,7 @@ export const StakingReward = ({
             />
           </ButtonGroupWrapper>
         )}
-      </Card>
+      </StakingRewardCard>
     </SectionTitleWrapperV2>
   );
 };
@@ -139,3 +139,16 @@ const AlertText = styled.p`
 `;
 
 const StyledAcrossLogo = styled(AcrossLogo)``;
+
+const StakingRewardCard = styled(Card)`
+  gap: 16px;
+`;
+
+const ClaimRewardInputGroup = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 12px;
+`;
