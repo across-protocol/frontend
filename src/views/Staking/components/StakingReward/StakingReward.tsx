@@ -9,7 +9,6 @@ import { StakingRewardPropType } from "../../types";
 import StakingInputBlock from "../StakingInputBlock";
 import { ReactComponent as AcrossLogo } from "assets/Across-logo-bullet.svg";
 import { Card } from "views/Staking/Staking.styles";
-import { useNotify } from "hooks";
 
 export const StakingReward = ({
   maximumClaimableAmount,
@@ -18,9 +17,6 @@ export const StakingReward = ({
 }: StakingRewardPropType) => {
   const [amountToClaim, setAmountToClaim] = useState("");
   const [isTransitioning] = useState(false);
-  const { txStatus } = useNotify();
-
-  console.log(txStatus);
 
   const valueOrEmpty = repeatableTernaryBuilder(
     isConnected && BigNumber.from(maximumClaimableAmount).gt(0),
