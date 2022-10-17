@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ethers } from "ethers";
+import CopyReferralLink from "components/CopyReferralLink";
 import {
   Wrapper,
   Header,
   SubHeader,
   ReferralLinkButtonsRow,
-  ReferralUrl,
   StyledReferralLogo,
   ReferralLinkBlock,
   ReferralTierBlock,
@@ -16,15 +16,15 @@ import {
   LightGrayItemText,
   WarningInfoItem,
   ConnectButton,
-  CopyIconDesktop,
-  CopyIconMobile,
   InfoIcon,
-  CopyCheckmark,
   ArrowSeparator,
   RewardsInfo,
+  ReferralLinkBlockBannerWrapper,
+  InnerReferralLinkBlock,
+  StyledReferralCopyLink,
 } from "./RewardReferral.styles";
 
-import { shortenAddress } from "utils";
+import { ReactComponent as PurpleBanner } from "assets/bg-banners/purple-card-banner.svg";
 import { ReferralsSummary } from "hooks/useReferralSummary";
 import { PopperTooltip } from "components/Tooltip";
 import { ExternalLink } from "components/ExternalLink";
@@ -69,65 +69,42 @@ const RewardReferral: React.FC<Props> = ({
 const ReferralLinkComponent: React.FC<{
   isConnected: boolean;
   referrer: string | undefined;
-}> = ({ isConnected, referrer }) => {
+}> = ({ isConnected }) => {
   const { connect } = useConnection();
-  const [showCheck, setShowCheck] = useState(false);
-  const referralUrl = useMemo(() => {
-    if (referrer) {
-      return `https://across.to/?ref=${referrer}`;
-    }
-    return "";
-  }, [referrer]);
-  const displayedReferralUrl = useMemo(() => {
-    if (referrer) {
-      return `across.to?ref=${shortenAddress(referrer, "..", 3)}`;
-    }
-    return "";
-  }, [referrer]);
 
   return (
     <ReferralLinkBlock>
-      <StyledReferralLogo />
-      <Header>{isConnected ? "My referral link" : "Refer and earn"}</Header>
-      <SubHeader>
-        {isConnected
-          ? "Share your unique referral link and collect ACX rewards for every transfer made from your referral."
-          : "Join the referral program and earn a portion of fees in ACX for transfers made from your unique referral link."}
-      </SubHeader>
-      {isConnected ? (
-        <ReferralLinkButtonsRow data-cy="referral-links">
-          <ReferralUrl
-            onClick={() => {
-              navigator.clipboard.writeText(referralUrl);
-              setShowCheck(true);
-              setTimeout(() => setShowCheck(false), 1500);
-            }}
-          >
-            <span>{displayedReferralUrl}</span>
-            {!showCheck ? (
-              <>
-                <CopyIconDesktop />
-                <CopyIconMobile />
-              </>
-            ) : (
-              <CopyCheckmark />
-            )}
-          </ReferralUrl>
-        </ReferralLinkButtonsRow>
-      ) : (
-        <ReferralLinkButtonsRow>
-          <ConnectButton
-            size="md"
-            onClick={() => connect()}
-            data-cy="connect-wallet"
-          >
-            Connect to get started
-          </ConnectButton>
-          <ExternalLink
-            href="https://docs.across.to/v2/how-to-use-across/referral-program"
-            text="Learn more"
-          />
-        </ReferralLinkButtonsRow>
+      <ReferralLinkBlockBannerWrapper>
+        <PurpleBanner />
+      </ReferralLinkBlockBannerWrapper>
+      <InnerReferralLinkBlock>
+        <StyledReferralLogo />
+        <Header>{isConnected ? "My referral link" : "Refer and earn"}</Header>
+        <SubHeader>
+          {isConnected
+            ? "Share your unique referral link and collect ACX rewards for every transfer made from your referral."
+            : "Join the referral program and earn a portion of fees in ACX for transfers made from your unique referral link."}
+        </SubHeader>
+        {!isConnected && (
+          <ReferralLinkButtonsRow>
+            <ConnectButton
+              size="md"
+              onClick={() => connect()}
+              data-cy="connect-wallet"
+            >
+              Connect to get started
+            </ConnectButton>
+            <ExternalLink
+              href="https://docs.across.to/v2/how-to-use-across/referral-program"
+              text="Learn more"
+            />
+          </ReferralLinkButtonsRow>
+        )}
+      </InnerReferralLinkBlock>
+      {isConnected && (
+        <StyledReferralCopyLink>
+          <CopyReferralLink condensed />
+        </StyledReferralCopyLink>
       )}
     </ReferralLinkBlock>
   );

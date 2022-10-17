@@ -1,11 +1,12 @@
 import styled from "@emotion/styled";
 import { ButtonV2 } from "components/Buttons";
-import { ReactComponent as ReferralSVG } from "assets/across-referrals.svg";
+import { ReactComponent as ReferralSVG } from "assets/icons/rewards/referral-within-star.svg";
 import { ReactComponent as CopyIcon16 } from "assets/icons/copy-16.svg";
 import { ReactComponent as CopyIcon24 } from "assets/icons/copy-24.svg";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import { QUERIESV2 } from "utils";
 
 export const Wrapper = styled.div`
   display: flex;
@@ -20,26 +21,65 @@ const ReferralRowBlock = styled.div`
   background-color: #34353b;
   border: 1px solid #3e4047;
   border-radius: 10px;
+
+  position: relative;
 `;
 
 export const ReferralLinkBlock = styled(ReferralRowBlock)`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  overflow: clip;
+  flex: 0 0 340px;
+
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  @media ${QUERIESV2.tb.andDown} {
+    flex: 0;
+    flex-grow: 0;
+  }
+`;
+
+export const InnerReferralLinkBlock = styled.div`
   flex: 0 0 340px;
   padding: 32px 24px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  z-index: 1;
 
   @media screen and (max-width: 1024px) {
-    flex: none;
     width: 100%;
-    padding: 0 24px 24px;
+    padding: 48px 24px 24px;
     border: none;
     background-color: transparent;
   }
 
   @media screen and (max-width: 428px) {
-    padding: 0 0 16px;
+    padding: 0 16px;
   }
+`;
+
+export const ReferralLinkBlockBannerWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  border: 0;
+`;
+
+export const StyledReferralCopyLink = styled.div`
+  z-index: 2;
+  width: 100%;
+  padding: 0;
 `;
 
 export const ReferralTierBlock = styled(ReferralRowBlock)`
