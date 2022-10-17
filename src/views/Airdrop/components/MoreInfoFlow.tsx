@@ -3,7 +3,7 @@ import { ChevronLeft } from "react-feather";
 
 import AirdropCard from "views/Airdrop/components/AirdropCard";
 import CardTextDescription from "views/Airdrop/components/CardTextDescription";
-import { VerticalCardsList } from "../VerticalCardsList";
+import { VerticalCardsList } from "./VerticalCardsList";
 import { QUERIESV2 } from "utils/constants";
 
 import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";

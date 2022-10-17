@@ -1,12 +1,12 @@
 import styled from "@emotion/styled";
 import { QUERIESV2 } from "utils";
-import TitleSection from "../TitleSection";
+import TitleSection from "./TitleSection";
 
 import { RewardsApiInterface } from "utils/serverless-api/types";
 import CommunityRewardCard from "../cards/CommunityRewardCard";
 import LiquidityProviderCard from "../cards/LiquidityProviderCard";
 import BridgeUserCard from "../cards/BridgeUserCard";
-import { FlowSelector } from "views/Airdrop/hooks/usePreLaunchAirdrop";
+import { FlowSelector } from "views/Airdrop/hooks/useAirdrop";
 import BridgeTravelerCard from "../cards/BridgeTravelerCard";
 
 type SplashFlowParams = {
