@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import React from "react";
 import { CheckIconMapping, CheckIconState } from "./CardIcon";
 import { ReactComponent as BackgroundVector } from "assets/prelaunch-card-background-vector.svg";
-import { CardContent } from ".";
+import { CardContent } from "../../PreLaunchAirdrop/components";
 import { QUERIES } from "utils";
 
 type AirdropCardContentProps = {

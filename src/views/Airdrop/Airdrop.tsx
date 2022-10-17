@@ -4,7 +4,7 @@ import {
   ContentWrapper,
   OpacityLayer,
   Wrapper,
-} from "./PreLaunchAirdrop.styles";
+} from "./Airdrop.styles";
 import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
 import usePreLaunchAirdrop from "./hooks/usePreLaunchAirdrop";
 import TravellerFlow from "./components/TravellerFlow";

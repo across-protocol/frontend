@@ -1,7 +1,7 @@
 import { useDiscord } from "hooks/useDiscord";
 import { useState, useEffect } from "react";
 import { useConnection } from "hooks";
-import { useGetPrelaunchRewards } from "../api/useGetPrelaunchRewards";
+import { useGetPrelaunchRewards } from "../../PreLaunchAirdrop/api/useGetPrelaunchRewards";
 import { useDiscordDetails } from "./useDiscordDetails";
 
 export type FlowSelector = "splash" | "traveller" | "info";

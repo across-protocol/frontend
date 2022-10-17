@@ -4,8 +4,8 @@ import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { SplashFlow } from "views/PreLaunchAirdrop/components/SplashFlow";
 import getPrelaunchRewards from "views/PreLaunchAirdrop/api/getPrelaunchRewards";
 import { RewardsApiInterface } from "utils/serverless-api/types";
-import { Wrapper } from "views/PreLaunchAirdrop/PreLaunchAirdrop.styles";
-import { FlowSelector } from "views/PreLaunchAirdrop/hooks/usePreLaunchAirdrop";
+import { Wrapper } from "views/Airdrop/Airdrop.styles";
+import { FlowSelector } from "views/Airdrop/hooks/usePreLaunchAirdrop";
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {

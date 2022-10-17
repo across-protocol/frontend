@@ -1,8 +1,8 @@
 import styled from "@emotion/styled";
 import { ChevronLeft } from "react-feather";
 
-import AirdropCard from "views/PreLaunchAirdrop/components/AirdropCard";
-import CardTextDescription from "views/PreLaunchAirdrop/components/content/CardTextDescription";
+import AirdropCard from "views/Airdrop/components/AirdropCard";
+import CardTextDescription from "views/Airdrop/components/CardTextDescription";
 import { VerticalCardsList } from "../VerticalCardsList";
 import { QUERIESV2 } from "utils/constants";
 
