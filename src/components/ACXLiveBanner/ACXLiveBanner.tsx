@@ -95,6 +95,8 @@ const Wrapper = styled.div`
 
   background: #202024;
   border-bottom: 1px solid #3e4047;
+
+  overflow: clip;
 `;
 
 const BackgroundLayer = styled.video`
@@ -102,7 +104,7 @@ const BackgroundLayer = styled.video`
   right: 0;
   top: 0;
   width: 100%;
-  height: 100%;
+  height: 200%;
   z-index: 0 !important;
   background: linear-gradient(72.13deg, #34353b 0%, rgba(52, 53, 59, 0.75) 100%),
     linear-gradient(0deg, #34353b, #34353b);
