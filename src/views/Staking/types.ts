@@ -12,6 +12,7 @@ type GenericStakingComponentProps = {
 
 export type StakingRewardPropType = GenericStakingComponentProps & {
   maximumClaimableAmount: BigNumberish;
+  usersMultiplierPercentage: number;
 };
 
 export type StakingFormPropType = GenericStakingComponentProps & {

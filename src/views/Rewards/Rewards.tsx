@@ -2,7 +2,7 @@ import BreadcrumbV2 from "components/BreadcrumbV2";
 import ConnectedReferralBox from "./components/ConnectedReferralBox";
 import DisconnectedReferralBox from "./components/DisconnectedReferralBox";
 import OverviewRewardSection from "./components/OverviewRewardSection";
-import SectionWrapper from "./components/SectionWrapper";
+import SectionWrapper from "../../components/SectionTitleWrapperV2/SectionWrapperV2";
 import { useRewards } from "./hooks/useRewards";
 import { InnerSectionWrapper, Wrapper } from "./Rewards.style";
 

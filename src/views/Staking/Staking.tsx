@@ -14,7 +14,6 @@ import { getChainInfo, hubPoolChainId } from "utils";
 const Staking = () => {
   const {
     poolName,
-    exitLinkURI,
     poolLogoURI,
     isConnected,
     connectWalletHandler,
@@ -55,11 +54,7 @@ const Staking = () => {
         </SuperHeader>
       )}
       <Wrapper>
-        <StakingExitAction
-          poolName={poolName}
-          exitLinkURI={exitLinkURI}
-          poolLogoURI={poolLogoURI}
-        />
+        <StakingExitAction poolName={poolName} poolLogoURI={poolLogoURI} />
         <StakingForm
           isDataLoading={isStakingDataLoading}
           isWrongNetwork={isWrongNetwork}
@@ -95,6 +90,9 @@ const Staking = () => {
         <StakingReward
           maximumClaimableAmount={numericTernary(
             stakingData?.outstandingRewards
+          )}
+          usersMultiplierPercentage={numberTernary(
+            stakingData?.usersMultiplierPercentage
           )}
           isConnected={isConnected}
           walletConnectionHandler={connectWalletHandler}

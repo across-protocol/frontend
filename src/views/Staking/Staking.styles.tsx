@@ -10,7 +10,7 @@ export const Wrapper = styled.div`
   margin: 64px auto 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 32px;
 
   @media ${QUERIESV2.sm.andDown} {
     margin: 16px auto;
@@ -18,6 +18,8 @@ export const Wrapper = styled.div`
 `;
 
 export const Card = styled.div`
+  width: 100%;
+
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
