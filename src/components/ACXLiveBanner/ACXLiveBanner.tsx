@@ -74,6 +74,11 @@ const ContentWrapper = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: center;
+
+  @media ${QUERIESV2.sm.andDown} {
+    gap: 12px;
+    padding: 0;
+  }
 `;
 
 const Wrapper = styled.div`
