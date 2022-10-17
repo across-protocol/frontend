@@ -1,54 +1,34 @@
 import Footer from "components/Footer";
+import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
+
+import { SplashFlow } from "./components/SplashFlow";
+import { MoreInfoFlow } from "./components/MoreInfoFlow";
+
+import useAirdrop from "./hooks/useAirdrop";
+
 import {
   BackgroundLayer,
   ContentWrapper,
   OpacityLayer,
   Wrapper,
 } from "./Airdrop.styles";
-import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
-import usePreLaunchAirdrop from "./hooks/useAirdrop";
-import { SplashFlow } from "./components/SplashFlow";
-import { MoreInfoFlow } from "./components/MoreInfoFlow";
-const PreLaunchAirdrop = () => {
+
+const Airdrop = () => {
   const {
     activePageFlow,
-    setActivePageFlow,
-    switchToSplash,
     switchToInfo,
-    isConnected,
-    connectWalletHandler,
-    account,
-    linkWalletHandler,
-    discordLoginHandler,
-    discordLogoutHandler,
-    isDiscordAuthenticated,
-    rewardsData,
-    discordAvatar,
-    discordId,
-    discordName,
-    linkedWallet,
-    discordDetailsError,
-  } = usePreLaunchAirdrop();
+    switchToSplash,
+    connectWallet,
+    airdropRecipientQuery,
+  } = useAirdrop();
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
     case "splash":
       activePageComponent = (
         <SplashFlow
-          discordDetailsError={discordDetailsError}
-          isDiscordAuthenticated={isDiscordAuthenticated}
-          discordLoginHandler={discordLoginHandler}
-          discordLogoutHandler={discordLogoutHandler}
-          connectWalletHandler={connectWalletHandler}
-          linkWalletHandler={linkWalletHandler}
-          isConnected={isConnected}
+          connectWalletHandler={connectWallet}
+          isConnecting={airdropRecipientQuery.isLoading}
           airdropDetailsLinkHandler={switchToInfo}
-          account={account}
-          rewardsData={rewardsData}
-          discordAvatar={discordAvatar}
-          discordId={discordId}
-          discordName={discordName}
-          linkedWallet={linkedWallet}
-          setActivePageFlow={setActivePageFlow}
         />
       );
       break;
@@ -58,6 +38,7 @@ const PreLaunchAirdrop = () => {
     default:
       activePageComponent = <></>;
   }
+
   return (
     <>
       <Wrapper>
@@ -73,4 +54,4 @@ const PreLaunchAirdrop = () => {
   );
 };
 
-export default PreLaunchAirdrop;
+export default Airdrop;

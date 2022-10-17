@@ -1,60 +1,40 @@
-import { useDiscord } from "hooks/useDiscord";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useConnection } from "hooks";
-import { useGetPrelaunchRewards } from "../../PreLaunchAirdrop/api/useGetPrelaunchRewards";
-import { useDiscordDetails } from "./useDiscordDetails";
 
-export type FlowSelector = "splash" | "traveller" | "info";
+import { useAirdropRecipient } from "./useAirdropRecipient";
 
-export default function usePreLaunchAirdrop() {
+export type FlowSelector = "splash" | "info" | "eligible" | "ineligible";
+
+export default function useAirdrop() {
   const [activePageFlow, setActivePageFlow] = useState<FlowSelector>("splash");
-  const { redirectToAuth, unauthenticate, isAuthenticated, discordJWT } =
-    useDiscord();
   const { isConnected, account, connect } = useConnection();
 
-  const { rewardsData } = useGetPrelaunchRewards(account, discordJWT);
-  const {
-    discordAvatar,
-    discordId,
-    discordName,
-    linkWalletHandler,
-    linkedWallet,
-    discordDetailsError,
-  } = useDiscordDetails();
+  const airdropRecipientQuery = useAirdropRecipient();
 
   useEffect(() => {
-    if (Object.keys(rewardsData).length && account && isConnected) {
+    if (isConnected && account && !airdropRecipientQuery.isLoading) {
+      setActivePageFlow(airdropRecipientQuery.data ? "eligible" : "ineligible");
+    } else {
       setActivePageFlow("splash");
     }
-  }, [rewardsData, account, isConnected]);
+  }, [
+    airdropRecipientQuery.data,
+    airdropRecipientQuery.isLoading,
+    isConnected,
+    account,
+  ]);
 
   return {
     activePageFlow,
-    setActivePageFlow,
-
-    discordLoginHandler: redirectToAuth,
-    discordLogoutHandler: unauthenticate,
-    isDiscordAuthenticated: isAuthenticated,
-
-    // Fns related to setting page flow
-    switchToSplash: () => setActivePageFlow("splash"),
-    switchToTraveller: () => setActivePageFlow("traveller"),
     switchToInfo: () => setActivePageFlow("info"),
+    switchToSplash: () => setActivePageFlow("splash"),
+    switchToEligible: () => setActivePageFlow("eligible"),
+    switchToIneligible: () => setActivePageFlow("ineligible"),
 
-    // Vars related to Onboard connection
+    airdropRecipientQuery,
+
     isConnected,
     account,
-    connectWalletHandler: () => connect(),
-
-    // Vars related to state management & modification
-    linkWalletHandler,
-    rewardsData,
-
-    discordAvatar,
-    discordId,
-    discordName,
-    linkedWallet,
-    discordDetailsError,
-    discordJWT,
+    connectWallet: () => connect(),
   };
 }
