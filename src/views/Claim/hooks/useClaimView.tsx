@@ -1,12 +1,10 @@
 import { useConnection } from "hooks";
 
 import { useMerkleDistributor } from "./useMerkleDistributor";
-import { useAirdropRecipient } from "./useAirdropRecipient";
 
 export function useClaimView() {
   const { isConnected, provider, connect } = useConnection();
 
-  const airdropRecipientQuery = useAirdropRecipient();
   const { handleClaim, claimState, hasClaimedState } = useMerkleDistributor();
 
   const handleAddTokenToWallet = async () => {
@@ -27,7 +25,6 @@ export function useClaimView() {
     handleConnectWallet: () => connect(),
     handleAddTokenToWallet,
     isConnected,
-    airdropRecipientQuery,
     handleClaim,
     claimState,
     hasClaimedState,

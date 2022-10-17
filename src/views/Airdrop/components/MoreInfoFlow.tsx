@@ -1,10 +1,11 @@
 import styled from "@emotion/styled";
 import { ChevronLeft } from "react-feather";
 
-import AirdropCard from "views/Airdrop/components/AirdropCard";
-import CardTextDescription from "views/Airdrop/components/CardTextDescription";
-import { VerticalCardsList } from "./VerticalCardsList";
 import { QUERIESV2 } from "utils/constants";
+import { Text } from "components/Text";
+
+import InfoCard from "./InfoCard";
+import { VerticalCardsList } from "./VerticalCardsList";
 
 import { ReactComponent as DiscordIcon } from "assets/icons/plaap/discord.svg";
 import { ReactComponent as EarlyBridgeIcon } from "assets/icons/plaap/bridge.svg";
@@ -20,74 +21,64 @@ export function MoreInfoFlow({ onClickBack }: Props) {
     <Container data-cy="airdrop-details">
       <TitleContainer>
         <BackButton data-cy="back-button" onClick={onClickBack}>
-          <ChevronLeft size={24} strokeWidth={1} /> Back
+          <ChevronLeft size={24} strokeWidth={1} />{" "}
+          <Text size="xl" color="#E0F3FF">
+            Back
+          </Text>
         </BackButton>
-        <h3>Airdrop details</h3>
-        <p>
+        <TitleText size="3xl" color="#E0F3FF">
+          Airdrop details
+        </TitleText>
+        <TitleDescriptionText>
           A total of 1,000,000,000 $ACX will be minted at inception and
           125,000,000 $ACX will be distributed through an airdrop to users who
           have contributed to Across.
-        </p>
+        </TitleDescriptionText>
       </TitleContainer>
 
       <VerticalCardsList
         cards={[
-          <AirdropCard
+          <InfoCard
             Icon={DiscordIcon}
             acxTokenAmount="20,000,000"
             title="Community Member"
-            hideBoxShadow
-          >
-            <CardTextDescription>
-              Community members who have meaningfully contributed to Across
-              prior to the community snapshot (September 1, 2022). This includes
-              a discord role-based allocation as well as a bonus allocation for
-              many community members who went above and beyond.
-            </CardTextDescription>
-          </AirdropCard>,
-          <AirdropCard
+            description="Community members who have meaningfully contributed to Across
+            prior to the community snapshot (September 1, 2022). This
+            includes a discord role-based allocation as well as a bonus
+            allocation for many community members who went above and beyond."
+          />,
+          <InfoCard
             Icon={BridgeTravelerIcon}
             acxTokenAmount="10,000,000 - 20,000,000"
             title="Bridge Traveler Program"
-            hideBoxShadow
-          >
-            <CardTextDescription>
-              Active bridge users identified by the Bridge Traveler program who
-              have not used Across prior to September 1, 2022. These users need
-              to complete a bridge transfer on Across ahead of the ACX token
-              launch to become eligible. The amount of ACX initially committed
-              to this program is 10MM, but this amount will double to 20MM if a
-              participation rate of 30% or more is achieved. Users who complete
-              a bridge transfer will share these tokens with some allocation
-              variability depending on past bridge activity.
-            </CardTextDescription>
-          </AirdropCard>,
-          <AirdropCard
+            description="Active bridge users identified by the Bridge Traveler program
+            who have not used Across prior to September 1, 2022. These users
+            need to complete a bridge transfer on Across ahead of the ACX
+            token launch to become eligible. The amount of ACX initially
+            committed to this program is 10MM, but this amount will double
+            to 20MM if a participation rate of 30% or more is achieved.
+            Users who complete a bridge transfer will share these tokens
+            with some allocation variability depending on past bridge
+            activity."
+          />,
+          <InfoCard
             Icon={EarlyBridgeIcon}
             acxTokenAmount="15,000,000"
             title="Early Bridge User"
-            hideBoxShadow
-          >
-            <CardTextDescription>
-              Users who bridged assets before the Across Referral Program (July
-              18th, 2022). These tokens will be allocated to wallets pro-rata by
-              the volume of transfer completed. A minimum transfer amount is
-              required and a maximum airdrop size will be applied.
-            </CardTextDescription>
-          </AirdropCard>,
-          <AirdropCard
+            description="Users who bridged assets before the Across Referral Program
+            (July 18th, 2022). These tokens will be allocated to wallets
+            pro-rata by the volume of transfer completed. A minimum transfer
+            amount is required and a maximum airdrop size will be applied."
+          />,
+          <InfoCard
             Icon={LPIcon}
             acxTokenAmount="70,000,000"
             title="Liquidity Provider"
-            hideBoxShadow
-          >
-            <CardTextDescription>
-              Liquidity providers who pool ETH, USDC, WBTC or DAI into the
-              Across protocol before the token launch. The amount of rewards to
-              LPs are pro-rated by size and a fixed amount of tokens will be
-              emitted at each block since the inception of the protocol.
-            </CardTextDescription>
-          </AirdropCard>,
+            description="Liquidity providers who pool ETH, USDC, WBTC or DAI into the
+            Across protocol before the token launch. The amount of rewards
+            to LPs are pro-rated by size and a fixed amount of tokens will
+            be emitted at each block since the inception of the protocol."
+          />,
         ]}
       />
     </Container>
@@ -119,18 +110,6 @@ const TitleContainer = styled.div`
   display: flex;
   flex-direction: column;
 
-  h3 {
-    font-size: ${32 / 16}rem;
-    line-height: ${38 / 16}rem;
-    font-weight: 400;
-    margin-bottom: 16px;
-    color: #e0f3ff;
-  }
-
-  p {
-    color: #c5d5e0;
-  }
-
   @media ${QUERIESV2.tb.andDown} {
     align-self: flex-start;
     margin-left: 100px;
@@ -145,10 +124,15 @@ const TitleContainer = styled.div`
   }
 `;
 
-const BackButton = styled.div`
-  font-size: ${22 / 16}rem;
+const TitleText = styled(Text)`
+  margin-bottom: 16px;
+`;
+
+const TitleDescriptionText = styled(Text)`
   line-height: ${26 / 16}rem;
-  font-weight: 400;
+`;
+
+const BackButton = styled.div`
   color: #e0f3ff;
   cursor: pointer;
 

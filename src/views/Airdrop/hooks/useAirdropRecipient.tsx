@@ -1,21 +1,29 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { useConnection } from "hooks";
 
-type RecipientsWithProof = {
-  [address: string]: {
-    accountIndex: number;
-    amount: string;
-    proof: string[];
-    metadata: {
-      amountBreakdown: {
-        liquidity: string;
-        bridging: string;
-        community: string;
-      };
+type ClaimWithProof = {
+  windowIndex: number;
+  accountIndex: number;
+  amount: string;
+  proof: string[];
+  metadata: {
+    amountBreakdown: {
+      communityRewards: string;
+      liquidityProviderRewards: string;
+      earlyUserRewards: string;
+      welcomeTravelerRewards: string;
     };
   };
+};
+
+type AirdropRecipient = {
+  user: {
+    discordName: string;
+    discordAvatar: string;
+  };
+  claims: ClaimWithProof[];
 };
 
 export function useAirdropRecipient() {
@@ -31,10 +39,19 @@ async function getAirdropRecipient(account?: string) {
     return undefined;
   }
 
-  const { data } = await axios.get<RecipientsWithProof>(
-    // TODO: replace with IPFS gateway url
-    "https://gist.githubusercontent.com/dohaki/53b241c26793260b6423fa1706e4cb96/raw/75bf9bb6e5adae3b059630de1b08b5db6d003959/recipients.json"
-  );
+  try {
+    const { data } = await axios.get<AirdropRecipient>(
+      // TODO: replace with Scraper API
+      "https://gist.githubusercontent.com/dohaki/53b241c26793260b6423fa1706e4cb96/raw/fea03c3ceac49bfb8fa952d19a3342a94665df06/recipients.json"
+    );
 
-  return data[account];
+    return data;
+  } catch (error: unknown) {
+    // if scraper api returns 404 then account not eligible
+    if (error instanceof AxiosError && error.response?.status === 404) {
+      return undefined;
+    }
+
+    throw error;
+  }
 }
