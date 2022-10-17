@@ -17,6 +17,7 @@ import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
+import ACXLiveBanner from "components/ACXLiveBanner/ACXLiveBanner";
 
 const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
 const Referrals = lazy(
@@ -53,7 +54,6 @@ const warningMessage = `
 `;
 
 function useRoutes() {
-  const [transparentHeader] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider, isContractAddress } = useConnection();
   const location = useLocation();
@@ -69,7 +69,6 @@ function useRoutes() {
     if (enableMigration && location.pathname !== "/pool") {
       history.push("/pool");
     }
-    // setTransparentHeader(location.pathname === "/airdrop");
   }, [location.pathname, history]);
 
   return {
@@ -79,7 +78,7 @@ function useRoutes() {
     error,
     removeError,
     location,
-    transparentHeader,
+    isAirdrop: location.pathname === "/airdrop",
     isContractAddress,
     config,
   };
@@ -94,7 +93,7 @@ const Routes: React.FC = () => {
     location,
     config,
     isContractAddress,
-    transparentHeader,
+    isAirdrop,
   } = useRoutes();
 
   return (
@@ -126,10 +125,11 @@ const Routes: React.FC = () => {
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
+      {!isAirdrop && <ACXLiveBanner />}
       <Header
         openSidebar={openSidebar}
         setOpenSidebar={setOpenSidebar}
-        transparentHeader={transparentHeader}
+        transparentHeader={isAirdrop}
       />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
