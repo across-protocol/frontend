@@ -1,6 +1,8 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-right-16.svg";
+import { QUERIESV2 } from "utils";
+import { Text } from "components/Text";
 
 type SectionWrapperType = {
   title: string;
@@ -20,7 +22,8 @@ const SectionWrapper: React.FC<SectionWrapperType> = ({
       <Title>{title}</Title>
       {link && (
         <LinkWrapper to={link.href}>
-          {link.name} <ArrowIcon />
+          <StyledText>{link.name}</StyledText>
+          <ArrowIcon />
         </LinkWrapper>
       )}
     </TopWrapper>
@@ -48,13 +51,13 @@ const TopWrapper = styled.div`
   padding: 0px 16px;
 
   width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 0px 12px;
+  }
 `;
 
-const Title = styled.p`
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 20px;
+const Title = styled(Text)`
   color: #9daab2;
 `;
 
@@ -66,12 +69,20 @@ const LinkWrapper = styled(Link)`
   gap: 4px;
 
   width: fit-content;
+  text-decoration: none;
 
+  @media ${QUERIESV2.sm.andDown} {
+    & svg {
+      height: 16px;
+      width: 16px;
+    }
+  }
+`;
+
+const StyledText = styled(Text)`
   color: #9daab2;
   font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 20px;
 
   text-decoration: none;
+  text-transform: capitalize;
 `;

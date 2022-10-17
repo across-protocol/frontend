@@ -5,6 +5,7 @@ import { ReactComponent as BlueBanner } from "assets/bg-banners/blue-card-banner
 import { ReactComponent as GreenBanner } from "assets/bg-banners/green-card-banner.svg";
 import { ReactComponent as PurpleBanner } from "assets/bg-banners/purple-card-banner.svg";
 import styled from "@emotion/styled";
+import { QUERIESV2 } from "utils";
 
 type OverviewRewardSectionType = {
   totalRewards?: string | React.FC;
@@ -52,9 +53,13 @@ const OverviewRewardSection = ({
           <BannerWrapper>
             <card.Banner />
           </BannerWrapper>
-          <card.Icon />
-          <CardText>{card.value ?? "-"}</CardText>
-          <CardTitle>{card.title}</CardTitle>
+          <IconWrapper>
+            <card.Icon />
+          </IconWrapper>
+          <CardTextWrapper>
+            <CardText>{card.value ?? "-"}</CardText>
+            <CardTitle>{card.title}</CardTitle>
+          </CardTextWrapper>
         </CardWrapper>
       ))}
     </Wrapper>
@@ -72,6 +77,11 @@ const Wrapper = styled.div`
   gap: 24px;
 
   width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: column;
+    gap: 16px;
+  }
 `;
 
 const CardWrapper = styled.div`
@@ -92,6 +102,26 @@ const CardWrapper = styled.div`
   position: relative;
 
   overflow: clip;
+
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 24px 16px;
+    gap: 16px;
+  }
+`;
+
+const CardTextWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    align-items: flex-start;
+  }
 `;
 
 const CardText = styled.div`
@@ -114,6 +144,10 @@ const CardTitle = styled.h3`
   font-size: 16px;
   line-height: 20px;
   color: #9daab2;
+
+  @media ${QUERIESV2.sm.andDown} {
+    font-size: 14px;
+  }
 `;
 
 const BannerWrapper = styled.div`
@@ -148,4 +182,11 @@ const StepIcon = styled.div`
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #2d2e33;
+`;
+
+const IconWrapper = styled.div`
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  flex-shrink: 0;
 `;

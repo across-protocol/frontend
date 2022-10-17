@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { useBreadcrumb } from "./useBreadcrumb";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
 import { Link } from "react-router-dom";
+import { Text } from "components/Text";
 
 type BreadcrumbV2Type = {
   onlyRootAncestor?: boolean;
@@ -22,7 +23,7 @@ const BreadcrumbV2 = ({
   const updatedRoute = customCurrentRoute ? (
     customCurrentRoute
   ) : (
-    <InactiveLink>{currentRoute.name}</InactiveLink>
+    <InactiveLink size="lg">{currentRoute.name}</InactiveLink>
   );
 
   return (
@@ -30,7 +31,9 @@ const BreadcrumbV2 = ({
       <BreadcrumbWrapper>
         {definedAncestors.map((route) => (
           <>
-            <ActiveLink to={route.path}>{route.name}</ActiveLink>
+            <ActiveLink to={route.path}>
+              <ActiveLinkText size="lg">{route.name}</ActiveLinkText>
+            </ActiveLink>
             <StyledArrowLink />
           </>
         ))}
@@ -66,23 +69,16 @@ const BreadcrumbWrapper = styled.div`
 `;
 
 const ActiveLink = styled(Link)`
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 26px;
-
   color: #9daab2;
 
   text-transform: capitalize;
   text-decoration: none;
 `;
 
-const InactiveLink = styled.span`
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 26px;
+const ActiveLinkText = styled(Text)``;
 
+const InactiveLink = styled(Text)`
   color: #e0f3ff;
-
   text-transform: capitalize;
 `;
 
