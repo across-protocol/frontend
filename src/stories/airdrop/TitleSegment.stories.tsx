@@ -1,11 +1,9 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { TitleSection } from "views/PreLaunchAirdrop/components";
+import TitleSection from "views/Airdrop/components/TitleSection";
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-  title: "PLAAP/TitleSegment",
+  title: "airdrop/TitleSegment",
   component: TitleSection,
-  // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
   argTypes: {},
   parameters: {
     backgrounds: {
@@ -15,19 +13,16 @@ export default {
   },
 } as ComponentMeta<typeof TitleSection>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof TitleSection> = (args) => (
   <TitleSection {...args} />
 );
 
 export const NotConnnected = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
 NotConnnected.args = {
   isConnected: false,
 };
 
 export const Connnected = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
 NotConnnected.args = {
   isConnected: true,
 };

@@ -6,8 +6,7 @@ import {
   Wrapper,
 } from "./Airdrop.styles";
 import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
-import usePreLaunchAirdrop from "./hooks/usePreLaunchAirdrop";
-import TravellerFlow from "./components/TravellerFlow";
+import usePreLaunchAirdrop from "./hooks/useAirdrop";
 import { SplashFlow } from "./components/SplashFlow";
 import { MoreInfoFlow } from "./components/MoreInfoFlow";
 const PreLaunchAirdrop = () => {
@@ -32,14 +31,6 @@ const PreLaunchAirdrop = () => {
   } = usePreLaunchAirdrop();
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
-    case "traveller":
-      activePageComponent = (
-        <TravellerFlow
-          account={account || ""}
-          switchToSplash={switchToSplash}
-        />
-      );
-      break;
     case "splash":
       activePageComponent = (
         <SplashFlow
