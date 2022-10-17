@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
 import { ReactComponent as Megaphone } from "assets/icons/megaphone-24.svg";
 import { ReactComponent as ChevronRight } from "assets/icons/arrow-right-16.svg";
-import { QUERIES, QUERIESV2 } from "utils";
+import { QUERIESV2 } from "utils";
 import { Link } from "react-router-dom";
 
 const ACXLiveBanner = () => (
