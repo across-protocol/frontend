@@ -29,9 +29,7 @@ const Send = lazy(() => import(/* webpackChunkName: "Send" */ "./views/Send"));
 const About = lazy(
   () => import(/* webpackChunkName: "About" */ "./views/About")
 );
-const Claim = lazy(
-  () => import(/* webpackChunkName: "Claim" */ "./views/Claim")
-);
+const Airdrop = lazy(() => import("./views/Airdrop"));
 const MyTransactions = lazy(
   () =>
     import(
@@ -44,7 +42,6 @@ const AllTransactions = lazy(
       /* webpackChunkName: "AllTransactions" */ "./views/Transactions/allTransactions"
     )
 );
-
 const Staking = lazy(
   () => import(/* webpackChunkName: "RewardStaking" */ "./views/Staking")
 );
@@ -142,9 +139,8 @@ const Routes: React.FC = () => {
           <Route exact path="/pool" component={Pool} />
           <Route exact path="/about" component={About} />
           <Route exact path="/rewards/referrals" component={Referrals} />
-          <Route exact path="/rewards/claim" component={Claim} />
           <Route exact path="/rewards" component={Rewards} />
-          <Route exact path="/airdrop" component={Claim} />
+          <Route exact path="/airdrop" component={Airdrop} />
           <Route
             exact
             path="/rewards/staking/:poolId"

@@ -1,6 +1,5 @@
 import { useLocation } from "react-router";
 import { Link as UnstyledLink } from "react-router-dom";
-import { Gift } from "react-feather";
 import Wallet from "../Wallet";
 import {
   Wrapper,
@@ -11,7 +10,6 @@ import {
   Item,
   WalletWrapper,
   Spacing,
-  TextWithIcon,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
 import { enableMigration } from "utils";
@@ -27,11 +25,7 @@ const LINKS = !enableMigration
       { href: "/transactions", name: "Transactions" },
       {
         href: "/airdrop",
-        name: (
-          <TextWithIcon>
-            Airdrop <Gift size={16} strokeWidth="1" />
-          </TextWithIcon>
-        ),
+        name: "Airdrop",
       },
     ]
   : [];
