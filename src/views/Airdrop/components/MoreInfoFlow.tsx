@@ -104,7 +104,6 @@ const Container = styled.div`
 const TitleContainer = styled.div`
   align-self: center;
   max-width: 466px;
-  margin-top: -48px;
   margin-left: 88px;
 
   display: flex;
@@ -114,7 +113,6 @@ const TitleContainer = styled.div`
     align-self: flex-start;
     margin-left: 100px;
     margin-right: 100px;
-    max-width: 800px;
   }
 
   @media ${QUERIESV2.sm.andDown} {
