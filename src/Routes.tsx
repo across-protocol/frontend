@@ -57,7 +57,6 @@ const warningMessage = `
 `;
 
 function useRoutes() {
-  const [isAirdrop, setIsAirdrop] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider, isContractAddress } = useConnection();
   const location = useLocation();
@@ -73,7 +72,6 @@ function useRoutes() {
     if (enableMigration && location.pathname !== "/pool") {
       history.push("/pool");
     }
-    setIsAirdrop(location.pathname === "/airdrop");
   }, [location.pathname, history]);
 
   return {
@@ -83,7 +81,7 @@ function useRoutes() {
     error,
     removeError,
     location,
-    isAirdrop,
+    isAirdrop: location.pathname === "/airdrop",
     isContractAddress,
     config,
   };
