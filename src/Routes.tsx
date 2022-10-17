@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import { Switch, Route, useLocation, useHistory, Link } from "react-router-dom";
+import { Switch, Route, useLocation, useHistory } from "react-router-dom";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
 import { useConnection } from "hooks";
 import { useError } from "hooks";
@@ -17,7 +17,7 @@ import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
-import { ReactComponent as UnstyledCloseIcon } from "assets/across-close-button.svg";
+import ACXLiveBanner from "components/ACXLiveBanner/ACXLiveBanner";
 
 const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
 const Referrals = lazy(
@@ -57,14 +57,13 @@ const warningMessage = `
 `;
 
 function useRoutes() {
-  const [transparentHeader] = useState(false);
+  const [isAirdrop, setIsAirdrop] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
   const { provider, isContractAddress } = useConnection();
   const location = useLocation();
   const history = useHistory();
   const { error, removeError } = useError();
   const config = getConfig();
-  const [showAirdropBanner, setShowAirdropBanner] = useState(true);
   // force the user on /pool page if showMigrationPage is active.
 
   // This UseEffect performs the following operations:
@@ -74,7 +73,7 @@ function useRoutes() {
     if (enableMigration && location.pathname !== "/pool") {
       history.push("/pool");
     }
-    // setTransparentHeader(location.pathname === "/airdrop");
+    setIsAirdrop(location.pathname === "/airdrop");
   }, [location.pathname, history]);
 
   return {
@@ -84,11 +83,9 @@ function useRoutes() {
     error,
     removeError,
     location,
-    transparentHeader,
+    isAirdrop,
     isContractAddress,
     config,
-    showAirdropBanner,
-    setShowAirdropBanner,
   };
 }
 // Need this component for useLocation hook
@@ -101,9 +98,7 @@ const Routes: React.FC = () => {
     location,
     config,
     isContractAddress,
-    transparentHeader,
-    showAirdropBanner,
-    setShowAirdropBanner,
+    isAirdrop,
   } = useRoutes();
 
   return (
@@ -135,20 +130,11 @@ const Routes: React.FC = () => {
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
-
-      {showAirdropBanner && (
-        <SuperHeader size="lg" darkMode>
-          <AirdropWrapper>
-            The ACX airdrop is here. Visit the{" "}
-            <Link to="/airdrop">Airdrop page</Link> to check your eligibility!{" "}
-            <CloseButton onClick={() => setShowAirdropBanner(false)} />
-          </AirdropWrapper>
-        </SuperHeader>
-      )}
+      {!isAirdrop && <ACXLiveBanner />}
       <Header
         openSidebar={openSidebar}
         setOpenSidebar={setOpenSidebar}
-        transparentHeader={transparentHeader}
+        transparentHeader={isAirdrop}
       />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <Switch>
@@ -192,28 +178,4 @@ const RemoveErrorSpan = styled.span`
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
-`;
-
-const CloseButton = styled(UnstyledCloseIcon)`
-  text-align: right;
-  font-size: ${20 / 16}rem;
-  font-weight: 700;
-  cursor: pointer;
-  margin-left: 16px;
-  path {
-    fill: #9daab2;
-  }
-  height: 16px;
-  &:hover {
-    path {
-      fill: #fff;
-    }
-  }
-`;
-
-const AirdropWrapper = styled.div`
-  color: #9daab2;
-  a {
-    color: var(--color-primary);
-  }
 `;
