@@ -668,3 +668,31 @@ export const QUERIESV2 = {
 };
 
 export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);
+
+export const rewardTiers = [
+  {
+    title: "Copper tier",
+    titleSecondary: "40% referral rate",
+    body: "Starting tier with no requirements to join.",
+  },
+  {
+    title: "Bronzer tier",
+    titleSecondary: "50% referral rate",
+    body: "Requires over $50,000 of bridge volume or 3 unique referral transfers.",
+  },
+  {
+    title: "Silver tier",
+    titleSecondary: "60% referral rate",
+    body: "Requires over $100,000 of bridge volume or 5 unique referral transfers.",
+  },
+  {
+    title: "Gold tier",
+    titleSecondary: "70% referral rate",
+    body: "Requires over $250,000 of bridge volume or 10 unique referral transfers.",
+  },
+  {
+    title: "Platinum tier",
+    titleSecondary: "80% referral rate",
+    body: "Requires over $500,000 of bridge volume or 20 unique referral transfers.",
+  },
+];
