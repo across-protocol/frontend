@@ -47,7 +47,8 @@ const ConnectedReferralBox = ({
       title: "Rate",
       value: referralRate ? (
         <>
-          {referralRate * 100}% <ReferreeText>10% for referee</ReferreeText>{" "}
+          {referralRate * 100 * 0.75}%{" "}
+          <ReferreeText>{referralRate * 100 * 0.25}% for referee</ReferreeText>
         </>
       ) : undefined,
     },
