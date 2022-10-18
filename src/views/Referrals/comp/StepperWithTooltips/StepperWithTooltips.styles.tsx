@@ -3,11 +3,6 @@ import styled from "@emotion/styled";
 export const Wrapper = styled.div`
   display: flex;
   align-items: center;
-  margin: ${24 / 16}rem 0;
-
-  @media screen and (max-width: 428px) {
-    margin: ${20 / 16}rem 0;
-  }
 `;
 
 export const StepItem = styled.div`
