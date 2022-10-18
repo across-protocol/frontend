@@ -2,15 +2,6 @@ import styled from "@emotion/styled";
 
 export const BaseWrapper = styled.div`
   margin: auto;
-  padding: ${64 / 16}rem 0 0;
-
-  @media (max-width: 1024px) {
-    padding: ${48 / 16}rem 0 0;
-  }
-
-  @media (max-width: 428px) {
-    padding: ${32 / 16}rem 0 0;
-  }
 `;
 
 export const BaseTitle = styled.h2`

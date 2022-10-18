@@ -9,6 +9,8 @@ export const Wrapper = styled.div`
   display: flex;
   gap: 24px 24px;
 
+  width: 100%;
+
   @media ${QUERIESV2.tb.andDown} {
     flex-direction: column;
   }
@@ -54,7 +56,7 @@ export const InnerReferralLinkBlock = styled.div`
   }
 
   @media ${QUERIESV2.sm.andDown} {
-    padding: 0 16px;
+    padding: 32px 16px;
   }
 `;
 
