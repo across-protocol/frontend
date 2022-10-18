@@ -31,7 +31,9 @@ export const Wrapper = BaseWrapper;
 
 export const Title = BaseTitle;
 
-export const TableWrapper = BaseTableWrapper;
+export const TableWrapper = styled(BaseTableWrapper)`
+  width: 100%;
+`;
 
 export const TableBody = BaseTableBody;
 
