@@ -6,8 +6,7 @@ import { PopperTooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 import { QUERIESV2 } from "utils/constants";
 
-import { LightCard } from "../../Claim/components/Card";
-import { Button } from "../../Claim/Claim.styles";
+import { Button } from "../Airdrop.styles";
 
 export function EarnOptionCard(props: {
   title: string;
@@ -41,11 +40,19 @@ export function EarnOptionCard(props: {
   );
 }
 
-const Container = styled(LightCard)`
+const Container = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 32px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+
+  background-color: #3e4047;
+
+  border: 1px solid #4c4e57;
+  border-radius: 10px;
 
   @media ${QUERIESV2.sm.andDown} {
     gap: 24px;

@@ -42,7 +42,10 @@ export function StepCard(props: Props) {
           </Text>
         </TopRowTextContainer>
         {props.showPill && (
-          <Pill color="#9DAAB2" backgroundColor="#3E4047">
+          <Pill
+            color={isStepCompleted ? "#6CF9D8" : "#9DAAB2"}
+            backgroundColor={isStepCompleted ? "#364C4C" : "#3E4047"}
+          >
             <Text size="xs">{isStepCompleted ? "claimed" : "unclaimed"}</Text>
           </Pill>
         )}
@@ -71,7 +74,7 @@ export function StepCard(props: Props) {
   );
 }
 
-const Container = styled.div`
+const Container = styled.div<{ isCompleted?: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -80,7 +83,8 @@ const Container = styled.div`
 
   background: #34353b;
 
-  border: 1px solid #3e4047;
+  border: 1px solid
+    ${({ isCompleted }) => (isCompleted ? "#6CF9D8" : "#3e4047")};
   border-radius: 10px;
 
   background-image: url(${bgImage});

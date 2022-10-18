@@ -1,7 +1,5 @@
 import styled from "@emotion/styled";
 
-import { ReactComponent as AcrossIcon } from "assets/acx.svg";
-import { Loader } from "components/Loader";
 import { Text } from "components/Text";
 import { QUERIESV2 } from "utils";
 
@@ -44,30 +42,17 @@ export function ClaimAirdrop({
           amountBreakdown={amountBreakdown}
         />
       </BreakdownCardContainer>
-      {isLoading ? (
-        <CenteredLoaderContainer>
-          <Loader />
-        </CenteredLoaderContainer>
-      ) : hasClaimed ? (
-        <AddTokenToWalletContainer>
-          <AcrossIcon />
-          <ClaimedTokensContainer>
-            <h6>Claimed tokens</h6>
-            {/* <h2>{formatUnits(amount || 0, DECIMALS)} ACX</h2> */}
-          </ClaimedTokensContainer>
-          <InverseButton size="lg" onClick={onClickAddToken}>
-            Add token to wallet
-          </InverseButton>
-        </AddTokenToWalletContainer>
+      {hasClaimed ? (
+        <InverseButton size="lg" onClick={onClickAddToken}>
+          Add token contract to wallet
+        </InverseButton>
       ) : (
-        <FullWidthButton size="lg" disabled={isClaiming} onClick={onClickClaim}>
-          {isClaiming ? (
-            <>
-              Claiming airdrop... <Loader />
-            </>
-          ) : (
-            "Claim airdrop"
-          )}
+        <FullWidthButton
+          size="lg"
+          disabled={isClaiming || isLoading}
+          onClick={onClickClaim}
+        >
+          {isClaiming ? "Claiming airdrop..." : "Claim airdrop"}
         </FullWidthButton>
       )}
     </Container>
@@ -108,40 +93,4 @@ const BreakdownTitle = styled(Text)`
   @media ${QUERIESV2.sm.andDown} {
     padding: 12px;
   }
-`;
-
-const AddTokenToWalletContainer = styled.div`
-  display: flex;
-  align-self: stretch;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  svg {
-    height: 48px;
-    width: 48px;
-  }
-
-  @media ${QUERIESV2.sm.andDown} {
-    flex-direction: column;
-    text-align: center;
-  }
-`;
-
-const ClaimedTokensContainer = styled.div`
-  flex: 1;
-  h6 {
-    color: #9daab2;
-  }
-  h2 {
-    color: inherit;
-  }
-`;
-
-const CenteredLoaderContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  height: 66px;
 `;

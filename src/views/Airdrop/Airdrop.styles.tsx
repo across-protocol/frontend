@@ -81,7 +81,7 @@ export const FullWidthButton = styled(Button)`
   width: 100%;
 `;
 
-export const InverseButton = styled(Button)`
+export const InverseButton = styled(FullWidthButton)`
   border: 1px solid #6cf9d8;
   color: #6cf9d8;
   background: transparent;
