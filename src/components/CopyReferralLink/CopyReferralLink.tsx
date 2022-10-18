@@ -31,7 +31,7 @@ const CopyReferralLink = ({ condensed: _condensed }: CopyReferralLinkType) => {
   }, [completed, referralLinkWithProtocol]);
 
   return (
-    <Wrapper>
+    <Wrapper data-cy="referral-links">
       <LinkText size="lg">{text}</LinkText>
       <CopyReferralButton
         size="lg"
