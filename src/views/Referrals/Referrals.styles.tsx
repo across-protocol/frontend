@@ -40,4 +40,8 @@ export const InnerContent = styled.div`
   padding: 0px;
   gap: 64px;
   width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    gap: 24px;
+  }
 `;
