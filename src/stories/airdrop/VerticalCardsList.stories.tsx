@@ -24,7 +24,7 @@ export const Primary = Template.bind({});
 Primary.args = {
   cards: [
     <InfoCard
-      Icon={DiscordIcon}
+      Icon={<DiscordIcon />}
       acxTokenAmount="20,000,000"
       title="Community Member"
       description="Community members who have meaningfully contributed to Across
@@ -33,7 +33,7 @@ Primary.args = {
     allocation for many community members who went above and beyond."
     />,
     <InfoCard
-      Icon={BridgeTravelerIcon}
+      Icon={<BridgeTravelerIcon />}
       acxTokenAmount="10,000,000 - 20,000,000"
       title="Bridge Traveler Program"
       description="Active bridge users identified by the Bridge Traveler program
@@ -47,7 +47,7 @@ Primary.args = {
     activity."
     />,
     <InfoCard
-      Icon={EarlyBridgeIcon}
+      Icon={<EarlyBridgeIcon />}
       acxTokenAmount="15,000,000"
       title="Early Bridge User"
       description="Users who bridged assets before the Across Referral Program
@@ -56,7 +56,7 @@ Primary.args = {
     amount is required and a maximum airdrop size will be applied."
     />,
     <InfoCard
-      Icon={LPIcon}
+      Icon={<LPIcon />}
       acxTokenAmount="70,000,000"
       title="Liquidity Provider"
       description="Liquidity providers who pool ETH, USDC, WBTC or DAI into the

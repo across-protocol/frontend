@@ -4,7 +4,7 @@ import { ReactComponent as AirdropXIcon } from "assets/airdrop-x.svg";
 import AirdropWavesBackground from "assets/airdrop-waves-bg.svg";
 
 import { Card } from "./Card";
-import { WaysToEarn } from "./WaysToEarn";
+import { WaysToEarn } from "../../Airdrop/components/WaysToEarn";
 
 export function NotEligibleWallet() {
   return (

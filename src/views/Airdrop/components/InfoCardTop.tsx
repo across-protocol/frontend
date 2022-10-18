@@ -5,10 +5,8 @@ import { ReactComponent as AcrossLogo } from "assets/across.svg";
 import { QUERIESV2 } from "utils";
 import { Text } from "components/Text";
 
-import CardIcon from "./CardIcon";
-
 type Props = {
-  Icon: React.FunctionComponent;
+  Icon: React.ReactElement;
   title: string;
   acxTokenAmount: string;
 };
@@ -16,7 +14,7 @@ type Props = {
 const InfoCardTop = ({ Icon, title, acxTokenAmount }: Props) => {
   return (
     <Wrapper>
-      <CardIcon Icon={Icon} />
+      {Icon}
       <TextStack>
         <Text size="xl" color="#E0F3FF">
           {title}
@@ -52,6 +50,11 @@ const Wrapper = styled.div`
 
   a {
     text-decoration: none;
+  }
+
+  > svg:first-child {
+    height: 56px;
+    width: 56px;
   }
 `;
 

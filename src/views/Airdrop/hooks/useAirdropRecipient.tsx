@@ -3,18 +3,20 @@ import { useQuery } from "react-query";
 
 import { useConnection } from "hooks";
 
-type ClaimWithProof = {
+export type AmountBreakdown = {
+  communityRewards: string;
+  liquidityProviderRewards: string;
+  earlyUserRewards: string;
+  welcomeTravelerRewards: string;
+};
+
+export type ClaimWithProof = {
   windowIndex: number;
   accountIndex: number;
   amount: string;
   proof: string[];
   metadata: {
-    amountBreakdown: {
-      communityRewards: string;
-      liquidityProviderRewards: string;
-      earlyUserRewards: string;
-      welcomeTravelerRewards: string;
-    };
+    amountBreakdown: AmountBreakdown;
   };
 };
 
@@ -42,7 +44,7 @@ async function getAirdropRecipient(account?: string) {
   try {
     const { data } = await axios.get<AirdropRecipient>(
       // TODO: replace with Scraper API
-      "https://gist.githubusercontent.com/dohaki/53b241c26793260b6423fa1706e4cb96/raw/fea03c3ceac49bfb8fa952d19a3342a94665df06/recipients.json"
+      "https://gist.githubusercontent.com/dohaki/53b241c26793260b6423fa1706e4cb96/raw/238982c067e36c68f854f6887cb0fa433fbbb406/recipients.json"
     );
 
     return data;

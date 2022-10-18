@@ -54,11 +54,12 @@ const sizeMap: Record<
   },
 };
 
-type TextColor = "white-100" | "white-88";
+type TextColor = "white-100" | "white-88" | "white-70";
 
 const colorMap: Record<TextColor, string> = {
   "white-100": "#E0F3FF",
   "white-88": "#C5D5E0",
+  "white-70": "#9DAAB2",
 };
 
 type TextProps = {
@@ -67,7 +68,7 @@ type TextProps = {
   color?: string;
 };
 
-export const Text = styled.p<TextProps>`
+export const Text = styled.div<TextProps>`
   font-style: normal;
   font-weight: ${({ weight = 400 }) => weight};
   color: ${({ color = "white-88" }) => colorMap[color as TextColor] || color};

@@ -8,7 +8,7 @@ import { Text } from "components/Text";
 import InfoCardTop from "./InfoCardTop";
 
 type Props = {
-  Icon: React.FunctionComponent;
+  Icon: React.ReactElement;
   title: string;
   description: string;
   acxTokenAmount: string;

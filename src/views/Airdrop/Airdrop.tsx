@@ -3,6 +3,7 @@ import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
 
 import { SplashFlow } from "./components/SplashFlow";
 import { MoreInfoFlow } from "./components/MoreInfoFlow";
+import { EligibleWalletFlow } from "./components/EligibleWalletFlow";
 
 import useAirdrop from "./hooks/useAirdrop";
 
@@ -34,6 +35,20 @@ const Airdrop = () => {
       break;
     case "info":
       activePageComponent = <MoreInfoFlow onClickBack={switchToSplash} />;
+      break;
+    case "eligible":
+      activePageComponent = (
+        <EligibleWalletFlow
+          isLoading={airdropRecipientQuery.isLoading}
+          discord={airdropRecipientQuery.data?.user}
+          amount={airdropRecipientQuery.data?.claims[0].amount}
+          amountBreakdown={
+            airdropRecipientQuery.data?.claims[0].metadata.amountBreakdown
+          }
+          onClickAddToken={() => console.log("add")}
+          onClickClaim={() => console.log("claim")}
+        />
+      );
       break;
     default:
       activePageComponent = <></>;
