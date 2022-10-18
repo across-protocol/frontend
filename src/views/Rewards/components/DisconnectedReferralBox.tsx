@@ -3,6 +3,7 @@ import { ReactComponent as ReferralIcon } from "assets/icons/rewards/referral-wi
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/external-link-12.svg";
 import { ButtonV2 } from "components";
 import { Link } from "react-router-dom";
+import { QUERIESV2 } from "utils";
 
 type DisconnectedReferralBoxType = {
   connectHandler: () => void;
@@ -57,6 +58,11 @@ const InnerWrapper = styled.div`
   gap: 48px;
 
   width: 100%;
+
+  @media ${QUERIESV2.tb.andDown} {
+    flex-direction: column;
+    gap: 24px;
+  }
 `;
 
 const IconTextWrapper = styled.div`
@@ -65,10 +71,17 @@ const IconTextWrapper = styled.div`
   align-items: center;
   padding: 0px;
   gap: 24px;
+
+  @media ${QUERIESV2.tb.andDown} {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
 `;
 
 const CTAText = styled.p`
-  width: 414px;
+  max-width: 414px;
+  width: 100%;
 
   font-style: normal;
   font-weight: 400;
@@ -85,6 +98,10 @@ const ButtonWrapper = styled.div`
   align-items: center;
   padding: 0px;
   gap: 24px;
+
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: column-reverse;
+  }
 `;
 
 const ConnectButton = styled(ButtonV2)`
