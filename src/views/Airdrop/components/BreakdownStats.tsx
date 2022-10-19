@@ -42,7 +42,7 @@ export function BreakdownStats({
             </Text>
             <DiscordName
               size="lg"
-              color={isEligible.communityRewards ? "#6CF9D8" : "#F96C6C"}
+              color={isEligible.communityRewards ? "aqua" : "error"}
             >
               {discord?.discordName}
             </DiscordName>
@@ -143,7 +143,7 @@ export function BreakdownStats({
         <Text size="lg" color="white-70">
           Total reward
         </Text>
-        <Text size="lg" color={amount ? "#6CF9D8" : ""}>
+        <Text size="lg" color={amount ? "aqua" : ""}>
           {amount ? `${formatUnits(amount, 18)} ACX` : "-"}
         </Text>
       </BreakdownTotalContainer>

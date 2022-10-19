@@ -54,12 +54,14 @@ const sizeMap: Record<
   },
 };
 
-type TextColor = "white-100" | "white-88" | "white-70";
+type TextColor = "white-100" | "white-88" | "white-70" | "aqua" | "error";
 
 const colorMap: Record<TextColor, string> = {
-  "white-100": "#E0F3FF",
-  "white-88": "#C5D5E0",
-  "white-70": "#9DAAB2",
+  "white-100": "hsla(203, 100%, 94%)", // #E0F3FF
+  "white-88": "hsla(204, 30%, 83%)", // #C5D5E0
+  "white-70": "hsla(203, 12%, 66%)", // "#9DAAB2"
+  aqua: "hsla(166, 92%, 70%)", // "#6CF9D8"
+  error: "hsla(0, 92%, 70%)", // "#f96c6c"
 };
 
 type TextProps = {
