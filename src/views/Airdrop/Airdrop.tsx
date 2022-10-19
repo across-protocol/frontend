@@ -4,6 +4,7 @@ import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
 import { SplashFlow } from "./components/SplashFlow";
 import { MoreInfoFlow } from "./components/MoreInfoFlow";
 import { EligibleWalletFlow } from "./components/EligibleWalletFlow";
+import { NotEligibleWalletFlow } from "./components/NotEligibleWalletFlow";
 
 import useAirdrop from "./hooks/useAirdrop";
 
@@ -57,6 +58,9 @@ const Airdrop = () => {
           onClickClaim={merkleDistributor.handleClaim}
         />
       );
+      break;
+    case "ineligible":
+      activePageComponent = <NotEligibleWalletFlow />;
       break;
     default:
       activePageComponent = <></>;

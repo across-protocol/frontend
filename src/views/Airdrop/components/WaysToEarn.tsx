@@ -7,22 +7,34 @@ import { EarnOptionCard } from "./EarnOptionCard";
 
 const OPTIONS = [
   {
-    MainIcon: <ReferralIcon />,
+    Icon: <ReferralIcon />,
     title: "Across Referral Program",
     subTitle:
       "Join the referral program and earn a portion of fees in ACX for transfers made from your unique referral link.",
     buttonLabel: "Refer to Earn ACX",
     href: "/",
-    apyRange: [5, 6],
+    pctRange: [40, 80],
+    pctLabel: "Referral rate",
+    pctTooltip: {
+      // TODO: use proper text
+      title: "Referral rate",
+      body: "Referral rate description",
+    },
   },
   {
-    MainIcon: <PoolStarRingIcon />,
+    Icon: <PoolStarRingIcon />,
     title: "Pool and Stake LP Tokens",
     subTitle:
       "Provide liquidity on Across and stake your LP tokens to earn ACX tokens in proportion to your staking.",
     buttonLabel: "Pool and Stake to Earn ACX",
     href: "/rewards/staking",
-    apyRange: [5, 6],
+    pctRange: [5, 6], // TODO: retrieve dynamically
+    pctLabel: "APY",
+    pctTooltip: {
+      // TODO: use proper text
+      title: "APY range",
+      body: "APY range description",
+    },
   },
 ];
 

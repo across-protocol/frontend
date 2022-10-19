@@ -13,13 +13,18 @@ export function EarnOptionCard(props: {
   subTitle: string;
   buttonLabel: string;
   href: string;
-  apyRange: number[];
-  MainIcon: React.ReactElement;
+  pctRange: number[];
+  pctLabel: string;
+  pctTooltip: {
+    title: string;
+    body: string;
+  };
+  Icon: React.ReactElement;
 }) {
   return (
     <Container>
       <EarnOptionTopContainer>
-        <IconContainer>{props.MainIcon}</IconContainer>
+        <IconContainer>{props.Icon}</IconContainer>
         <TextContainer>
           <Text size="lg" color="white-100">
             {props.title}
@@ -31,8 +36,15 @@ export function EarnOptionCard(props: {
       </EarnOptionTopContainer>
       <FullWidthButton size="lg">{props.buttonLabel}</FullWidthButton>
       <ApyContainer>
-        APY: {props.apyRange[0]} — {props.apyRange[1]}%{" "}
-        <PopperTooltip title="APY" body="APY info text" placement="top">
+        <Text>{props.pctLabel}:</Text>{" "}
+        <Text color="white-100">
+          {props.pctRange[0]} - {props.pctRange[1]}%
+        </Text>{" "}
+        <PopperTooltip
+          title={props.pctTooltip.title}
+          body={props.pctTooltip.body}
+          placement="top"
+        >
           <InfoIcon />
         </PopperTooltip>
       </ApyContainer>
