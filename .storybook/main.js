@@ -1,3 +1,5 @@
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
+
 module.exports = {
   stories: ["../src/**/*.stories.mdx", "../src/**/*.stories.@(js|jsx|ts|tsx)"],
   addons: [
@@ -5,7 +7,6 @@ module.exports = {
     "@storybook/addon-essentials",
     "@storybook/addon-interactions",
     "@storybook/preset-create-react-app",
-    "storybook-addon-react-router-v6",
   ],
   framework: "@storybook/react",
   core: {
@@ -26,4 +27,13 @@ module.exports = {
       return accumulator;
     }, {}),
   }),
+  webpackFinal: async (config) => {
+    config.resolve.plugins = [
+      ...(config.resolve.plugins || []),
+      new TsconfigPathsPlugin({
+        extensions: config.resolve.extensions,
+      }),
+    ];
+    return config;
+  },
 };

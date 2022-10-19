@@ -9,7 +9,7 @@ import { ReactComponent as LPIcon } from "assets/icons/plaap/money.svg";
 import { VerticalCardsList } from "views/Airdrop/components/VerticalCardsList";
 
 export default {
-  title: "PLAAP/VerticalCardsList",
+  title: "airdrop/VerticalCardsList",
   component: VerticalCardsList,
   argTypes: {},
 } as ComponentMeta<typeof VerticalCardsList>;
