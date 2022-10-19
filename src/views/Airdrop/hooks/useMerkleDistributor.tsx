@@ -112,7 +112,7 @@ async function mockedClaim() {
   return {
     hash: "0xTX_HASH",
     wait: async () => {
-      await new Promise((resolve) => setTimeout(() => resolve(true), 15_000));
+      await new Promise((resolve) => setTimeout(() => resolve(true), 5_000));
       return {
         transactionHash: "0xTX_HASH",
       };

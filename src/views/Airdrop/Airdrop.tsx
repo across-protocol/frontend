@@ -3,6 +3,7 @@ import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
 
 import { SplashFlow } from "./components/SplashFlow";
 import { MoreInfoFlow } from "./components/MoreInfoFlow";
+import { EligibleWalletFlow } from "./components/EligibleWalletFlow";
 
 import useAirdrop from "./hooks/useAirdrop";
 
@@ -20,6 +21,7 @@ const Airdrop = () => {
     switchToSplash,
     connectWallet,
     airdropRecipientQuery,
+    merkleDistributor,
   } = useAirdrop();
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
@@ -34,6 +36,27 @@ const Airdrop = () => {
       break;
     case "info":
       activePageComponent = <MoreInfoFlow onClickBack={switchToSplash} />;
+      break;
+    case "eligible":
+      activePageComponent = (
+        <EligibleWalletFlow
+          isLoading={airdropRecipientQuery.isLoading}
+          isClaiming={["pending", "pendingTx"].includes(
+            merkleDistributor.claimState.status
+          )}
+          hasClaimed={
+            merkleDistributor.hasClaimedState.status === "success" &&
+            merkleDistributor.hasClaimedState.hasClaimed
+          }
+          discord={airdropRecipientQuery.data?.user}
+          amount={airdropRecipientQuery.data?.claims[0].amount}
+          amountBreakdown={
+            airdropRecipientQuery.data?.claims[0].metadata.amountBreakdown
+          }
+          onClickAddToken={() => console.log("add")}
+          onClickClaim={merkleDistributor.handleClaim}
+        />
+      );
       break;
     default:
       activePageComponent = <></>;

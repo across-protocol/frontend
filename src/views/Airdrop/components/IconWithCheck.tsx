@@ -6,48 +6,37 @@ import { QUERIESV2 } from "utils";
 
 export type CheckIconState = "eligible" | "ineligible" | "undetermined";
 
-type CardIconProps = {
-  Icon: React.FunctionComponent;
+type Props = {
+  Icon: React.ReactElement;
   checkIconState?: CheckIconState;
 };
 
-const CardIcon = ({ Icon, checkIconState }: CardIconProps) => {
+const IconWithCheck = ({ Icon, checkIconState }: Props) => {
   const resolvedIconState = checkIconState ?? "undetermined";
   const CheckIcon = CheckIconMapping[resolvedIconState].CheckIcon;
   const isCheckIconPresent = Boolean(checkIconState);
-  return isCheckIconPresent ? (
+  return (
     <Wrapper>
       <IconWrapper addPadding={isCheckIconPresent} state={resolvedIconState}>
-        <Icon />
+        {Icon}
       </IconWrapper>
       {isCheckIconPresent && <CheckIcon />}
     </Wrapper>
-  ) : (
-    <BaseWrapper>
-      <Icon />
-    </BaseWrapper>
   );
 };
 
-export default CardIcon;
-
-const BaseWrapper = styled.div`
-  & svg {
-    height: 56px;
-    width: 56px;
-  }
-`;
+export default IconWithCheck;
 
 const Wrapper = styled.div`
   position: relative;
   isolation: isolate;
 
-  height: 64px;
-  width: 64px;
+  height: 38px;
+  width: 38px;
 
   @media ${QUERIESV2.tb.andDown} {
-    height: 54px;
-    width: 54px;
+    height: 30px;
+    width: 30px;
   }
 `;
 
@@ -65,12 +54,12 @@ const IconWrapper = styled.div<IconWrapperType>`
 
   overflow: clip;
 
-  height: ${({ addPadding }) => (addPadding ? "calc(100% - 2px)" : "100%")};
-  width: ${({ addPadding }) => (addPadding ? "calc(100% - 2px)" : "100%")};
+  height: ${({ addPadding }) => (addPadding ? "calc(100% - 1px)" : "100%")};
+  width: ${({ addPadding }) => (addPadding ? "calc(100% - 1px)" : "100%")};
 
   svg {
-    height: 56px;
-    width: 56px;
+    height: 32px;
+    width: 32px;
   }
 `;
 
@@ -79,8 +68,8 @@ const UndeterminedStyledCheckMark = styled(CheckMark)`
   bottom: -1px;
   right: -1px;
 
-  height: 25px;
-  width: 25px;
+  height: 18px;
+  width: 18px;
 
   background-color: #2d2e33;
   border: 1px solid #2d2e33;
@@ -98,8 +87,8 @@ const IneligibleStyledCheckMark = styled(InvalidMark)`
   bottom: -1px;
   right: -1px;
 
-  height: 25px;
-  width: 25px;
+  height: 18px;
+  width: 18px;
 
   background-color: #2d2e33;
   border: 1px solid #2d2e33;

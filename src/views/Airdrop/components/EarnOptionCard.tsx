@@ -1,13 +1,12 @@
 import React from "react";
 import styled from "@emotion/styled";
 
-import { IconPair } from "components/IconPair";
+import { Text } from "components/Text";
 import { PopperTooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 import { QUERIESV2 } from "utils/constants";
 
-import { LightCard } from "./Card";
-import { Button } from "../Claim.styles";
+import { Button } from "../Airdrop.styles";
 
 export function EarnOptionCard(props: {
   title: string;
@@ -16,18 +15,19 @@ export function EarnOptionCard(props: {
   href: string;
   apyRange: number[];
   MainIcon: React.ReactElement;
-  SmallIcon?: React.ReactElement;
 }) {
   return (
     <Container>
       <EarnOptionTopContainer>
-        <IconPairContainer>
-          <IconPair MainIcon={props.MainIcon} SmallIcon={props.SmallIcon} />
-        </IconPairContainer>
-        <div>
-          <h6>{props.title}</h6>
-          <p>{props.subTitle}</p>
-        </div>
+        <IconContainer>{props.MainIcon}</IconContainer>
+        <TextContainer>
+          <Text size="lg" color="white-100">
+            {props.title}
+          </Text>
+          <Text size="lg" color="white-88">
+            {props.subTitle}
+          </Text>
+        </TextContainer>
       </EarnOptionTopContainer>
       <FullWidthButton size="lg">{props.buttonLabel}</FullWidthButton>
       <ApyContainer>
@@ -40,15 +40,29 @@ export function EarnOptionCard(props: {
   );
 }
 
-const Container = styled(LightCard)`
+const Container = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 32px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+
+  background-color: #3e4047;
+
+  border: 1px solid #4c4e57;
+  border-radius: 10px;
 
   @media ${QUERIESV2.sm.andDown} {
     gap: 24px;
   }
+`;
+
+const TextContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 `;
 
 const EarnOptionTopContainer = styled.div`
@@ -59,7 +73,7 @@ const EarnOptionTopContainer = styled.div`
   justify-content: flex-start;
 `;
 
-const IconPairContainer = styled.div`
+const IconContainer = styled.div`
   margin-right: 18px;
 `;
 

@@ -1,9 +1,9 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import CardIcon from "views/Airdrop/components/CardIcon";
+import CardIcon from "views/Airdrop/components/IconWithCheck";
 import { ReactComponent as IIcon } from "assets/sample-airdrop-icon.svg";
 
 export default {
-  title: "airdrop/CardIcon",
+  title: "airdrop/IconWithCheck",
   component: CardIcon,
   argTypes: {},
   parameters: {
@@ -21,23 +21,23 @@ const Template: ComponentStory<typeof CardIcon> = (args) => (
 export const NoCheckMark = Template.bind({});
 NoCheckMark.args = {
   checkIconState: undefined,
-  Icon: IIcon,
+  Icon: <IIcon />,
 };
 
 export const Ineligible = Template.bind({});
 Ineligible.args = {
   checkIconState: "ineligible",
-  Icon: IIcon,
+  Icon: <IIcon />,
 };
 
 export const Eligible = Template.bind({});
 Eligible.args = {
   checkIconState: "eligible",
-  Icon: IIcon,
+  Icon: <IIcon />,
 };
 
 export const Undetermined = Template.bind({});
 Undetermined.args = {
   checkIconState: "undetermined",
-  Icon: IIcon,
+  Icon: <IIcon />,
 };
