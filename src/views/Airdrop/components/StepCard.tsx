@@ -31,7 +31,7 @@ export function StepCard(props: Props) {
   };
 
   return (
-    <Container>
+    <Container isCompleted={isStepCompleted}>
       <TopRow onClick={handleClickTopRow}>
         <CheckIconContainer isStepCompleted={isStepCompleted}>
           {props.Icon}
@@ -42,11 +42,10 @@ export function StepCard(props: Props) {
           </Text>
         </TopRowTextContainer>
         {props.showPill && (
-          <Pill
-            color={isStepCompleted ? "#6CF9D8" : "#9DAAB2"}
-            backgroundColor={isStepCompleted ? "#364C4C" : "#3E4047"}
-          >
-            <Text size="xs">{isStepCompleted ? "claimed" : "unclaimed"}</Text>
+          <Pill backgroundColor={isStepCompleted ? "#364C4C" : "#3E4047"}>
+            <Text size="xs" color={isStepCompleted ? "aqua" : "white-80"}>
+              {isStepCompleted ? "claimed" : "unclaimed"}
+            </Text>
           </Pill>
         )}
         <Chevron stroke="#9daab2" strokeWidth="1" />

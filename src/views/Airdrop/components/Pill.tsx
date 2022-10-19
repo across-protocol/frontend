@@ -1,7 +1,6 @@
 import styled from "@emotion/styled";
 
 type Props = {
-  color: string;
   backgroundColor: string;
 };
 
@@ -16,7 +15,6 @@ export const Pill = styled.div<Props>`
   padding: 0px 10px 2px;
   border-radius: 24px;
 
-  color: ${({ color }) => color};
   background-color: ${({ backgroundColor }) => backgroundColor};
   text-transform: uppercase;
   letter-spacing: 0.04em;
