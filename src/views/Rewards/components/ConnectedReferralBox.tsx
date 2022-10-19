@@ -100,6 +100,8 @@ const Wrapper = styled.div`
 
   border: 1px solid #3e4047;
   border-radius: 10px;
+
+  overflow: clip;
 `;
 
 const CardWrapper = styled.div`
