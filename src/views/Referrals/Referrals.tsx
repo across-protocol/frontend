@@ -1,4 +1,4 @@
-import { Content, Wrapper } from "./Referrals.styles";
+import { Content, InnerContent, Wrapper } from "./Referrals.styles";
 import {
   RewardReferral,
   RewardTableWithOverlay,
@@ -7,6 +7,7 @@ import {
 import Footer from "components/Footer";
 import { useReferralsView } from "./useReferralsView";
 import { mediumUrl } from "utils";
+import BreadcrumbV2 from "components/BreadcrumbV2";
 const Referrals = () => {
   const {
     account,
@@ -25,24 +26,27 @@ const Referrals = () => {
   return (
     <Wrapper>
       <Content>
-        <RewardReferral
-          loading={isReferalSummaryLoading}
-          referrer={account}
-          referralsSummary={referralsSummary}
-          isConnected={isConnected}
-        />
-        {mediumUrl && <RewardMediumBlock />}
-        <RewardTableWithOverlay
-          isConnected={isConnected}
-          referrals={referrals}
-          account={account || ""}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          pageSize={pageSize}
-          setPageSize={setPageSize}
-          pageSizes={pageSizes}
-          totalReferralCount={totalReferralCount}
-        />
+        <BreadcrumbV2 />
+        <InnerContent>
+          <RewardReferral
+            loading={isReferalSummaryLoading}
+            referrer={account}
+            referralsSummary={referralsSummary}
+            isConnected={isConnected}
+          />
+          {mediumUrl && <RewardMediumBlock />}
+          <RewardTableWithOverlay
+            isConnected={isConnected}
+            referrals={referrals}
+            account={account || ""}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            pageSizes={pageSizes}
+            totalReferralCount={totalReferralCount}
+          />
+        </InnerContent>
       </Content>
       <Footer />
     </Wrapper>

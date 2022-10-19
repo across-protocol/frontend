@@ -52,6 +52,8 @@ const Wrapper = styled.div`
   align-items: flex-start;
   padding: 0px;
   gap: 12px;
+
+  width: 100%;
 `;
 
 const Divider = styled.div`
@@ -75,7 +77,9 @@ const ActiveLink = styled(Link)`
   text-decoration: none;
 `;
 
-const ActiveLinkText = styled(Text)``;
+const ActiveLinkText = styled(Text)`
+  color: #9daab2;
+`;
 
 const InactiveLink = styled(Text)`
   color: #e0f3ff;
