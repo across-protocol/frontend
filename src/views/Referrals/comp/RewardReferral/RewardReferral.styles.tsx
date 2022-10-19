@@ -136,7 +136,7 @@ export const ClaimButton = styled(SecondaryButtonV2)`
   justify-content: center;
   align-items: center;
   padding: 10px 20px;
-  & p {
+  & * {
     font-weight: 500;
     color: #f9d26c;
   }
