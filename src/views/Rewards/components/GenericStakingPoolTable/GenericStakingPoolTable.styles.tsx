@@ -23,6 +23,7 @@ export const HeaderCell = styled(Cell)`
 export const RowCell = styled(Cell)`
   padding: 20px 16px;
   background: transparent;
+  border-top: 1px solid #3e4047;
 `;
 
 export const PoolCell = styled.div`
@@ -69,6 +70,7 @@ export const ButtonCell = styled.div`
   padding: 20px 16px;
 
   background: #2d2e33;
+  border-top: 1px solid #3e4047;
 `;
 
 export const StakeButton = styled(Link)`

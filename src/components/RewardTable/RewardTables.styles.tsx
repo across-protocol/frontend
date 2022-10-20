@@ -41,13 +41,13 @@ export const TableHeadRow = styled(BaseTableHeadRow)`
   background-color: #34353b;
 `;
 
-export const TableRow = styled(BaseTableRow)`
-  border-top: 1px solid #3e4047;
-`;
+export const TableRow = BaseTableRow;
 
 export const EmptyRow = BaseEmptyRow;
 
-export const TableCell = BaseTableCell;
+export const TableCell = styled(BaseTableCell)`
+  border-top: 1px solid #3e4047;
+`;
 
 export const HeadCell = BaseHeadCell;
 
@@ -236,6 +236,8 @@ export const GrayText = styled.div`
 `;
 
 export const ExplorerLinkContainer = styled.div<{ disabled?: boolean }>`
+  border-top: 1px solid #3e4047;
+
   position: sticky;
   right: 0;
   flex: 0 0 82px;
