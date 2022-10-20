@@ -1,8 +1,6 @@
 import styled, { StyledComponent } from "@emotion/styled";
 import RewardTable from "components/RewardTable";
-import { StyledETHIcon } from "components/RewardTable/RewardTables.styles";
 import { BigNumberish } from "ethers";
-import { formatUnitsFnBuilder, parseUnits } from "utils";
 import { formatRow, headers } from "./GenericStakingPoolFormatter";
 
 export type GenericStakingPoolRowData = {

@@ -232,7 +232,7 @@ const ReferralTierComponent: React.FC<{
       <MobileDivider />
       <StatsInfoSegment>
         {datum.map((stat, ind) => (
-          <>
+          <React.Fragment key={ind}>
             {ind !== 0 && <MobileDivider />}
             <StatsInfoRow key={stat.title.desktop}>
               <StatsTitleIconTooltipWrapper>
@@ -271,7 +271,7 @@ const ReferralTierComponent: React.FC<{
                 <StatsWhiteText size="lg">{stat.primaryText}</StatsWhiteText>
               </StatsValueWrapper>
             </StatsInfoRow>
-          </>
+          </React.Fragment>
         ))}
       </StatsInfoSegment>
     </ReferralTierBlock>
