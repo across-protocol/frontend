@@ -101,7 +101,7 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
   }
 `;
 
-export const ExternalLinkWrapper = styled(Link)`
+export const ExternalLinkButton = styled(Link)`
   border: 1px solid #4c4e57;
   border-radius: 32px;
   height: ${40 / 16}rem;

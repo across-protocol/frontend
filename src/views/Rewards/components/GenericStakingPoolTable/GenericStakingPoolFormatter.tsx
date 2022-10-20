@@ -4,10 +4,10 @@ import { GenericStakingPoolRowData } from "./GenericStakingPoolTable";
 import { IRow } from "components/Table/Table";
 import { BigNumber } from "ethers";
 import { formatEther } from "utils";
-import { ReactComponent as ExternalLink16 } from "assets/icons/external-link-16.svg";
+import { ReactComponent as ExternalLink16 } from "assets/icons/arrow-right-16.svg";
 import {
   ButtonCell,
-  ExternalLinkWrapper,
+  ExternalLinkButton,
   HeaderCell,
   InfoIcon,
   LogoWrapper,
@@ -33,7 +33,7 @@ const flexBasisLengths = [
   152, // Reward APY
   168, // Age of Capital
   112, // Rewards
-  236, // Button
+  108, // Button
 ];
 
 const rawHeader = [
@@ -61,6 +61,7 @@ const rawHeader = [
     },
   },
   "Rewards",
+  "",
 ];
 
 export const headers = rawHeader.map((header, idx) => {
@@ -169,9 +170,9 @@ function formatButtonCell(data: RowData, meta: MetaData) {
   const specificPoolLink = `/rewards/staking/${data.poolName}`;
   if (meta.hasLPStake) {
     button = (
-      <ExternalLinkWrapper to={specificPoolLink}>
+      <ExternalLinkButton to={specificPoolLink}>
         <ExternalLink16 />
-      </ExternalLinkWrapper>
+      </ExternalLinkButton>
     );
   } else if (meta.hasLPTokens) {
     button = <StakeButton to={specificPoolLink}>Stake</StakeButton>;
