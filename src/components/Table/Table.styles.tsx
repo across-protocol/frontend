@@ -60,7 +60,6 @@ export const BaseTableCell = styled.div`
   color: #e0f3ff;
   white-space: nowrap;
   background-color: #2d2e33;
-  border-top: 1px solid #3e4047;
 
   @media (max-width: 428px) {
     padding: ${13 / 16}rem 0 ${13 / 16}rem ${12 / 16}rem;
