@@ -37,9 +37,13 @@ export const TableWrapper = styled(BaseTableWrapper)`
 
 export const TableBody = BaseTableBody;
 
-export const TableHeadRow = BaseTableHeadRow;
+export const TableHeadRow = styled(BaseTableHeadRow)`
+  background-color: #34353b;
+`;
 
-export const TableRow = BaseTableRow;
+export const TableRow = styled(BaseTableRow)`
+  border-top: 1px solid #3e4047;
+`;
 
 export const EmptyRow = BaseEmptyRow;
 
@@ -244,8 +248,6 @@ export const ExplorerLinkContainer = styled.div<{ disabled?: boolean }>`
     rgba(45, 46, 51, 0) 0%,
     rgba(45, 46, 51, 1) 30%
   );
-  border-top: 1px solid #3e4047;
-
   a {
     height: 40px;
     width: 40px;
