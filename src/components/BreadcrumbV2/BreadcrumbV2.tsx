@@ -3,6 +3,7 @@ import { useBreadcrumb } from "./useBreadcrumb";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
 import { Link } from "react-router-dom";
 import { Text } from "components/Text";
+import React from "react";
 
 type BreadcrumbV2Type = {
   onlyRootAncestor?: boolean;
@@ -30,12 +31,12 @@ const BreadcrumbV2 = ({
     <Wrapper>
       <BreadcrumbWrapper>
         {definedAncestors.map((route) => (
-          <>
+          <React.Fragment key={route.path}>
             <ActiveLink to={route.path}>
               <ActiveLinkText size="lg">{route.name}</ActiveLinkText>
             </ActiveLink>
             <StyledArrowLink />
-          </>
+          </React.Fragment>
         ))}
         {updatedRoute}
       </BreadcrumbWrapper>
