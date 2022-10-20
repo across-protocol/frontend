@@ -1,19 +1,37 @@
-import styled from "@emotion/styled";
-import { BaseHeadCell } from "components/Table";
 import { Text } from "components/Text";
 import { PopperTooltip } from "components/Tooltip";
-import { ReactComponent as II } from "assets/icons/info-16.svg";
 import { GenericStakingPoolRowData } from "./GenericStakingPoolTable";
 import { IRow } from "components/Table/Table";
+import { BigNumber } from "ethers";
+import { formatEther } from "utils";
+import { ReactComponent as ExternalLink16 } from "assets/icons/external-link-16.svg";
+import {
+  ButtonCell,
+  ExternalLinkWrapper,
+  HeaderCell,
+  InfoIcon,
+  LogoWrapper,
+  MultiplierCell,
+  PoolCell,
+  RowCell,
+  StackedCell,
+  StakeButton,
+  StakedTokenCellInner,
+  StyledProgressBar,
+} from "./GenericStakingPoolTable.styles";
 
 type RowData = GenericStakingPoolRowData;
+type MetaData = {
+  hasLPTokens: boolean;
+  hasLPStake: boolean;
+};
 
 const flexBasisLengths = [
   172, // Pool
   232, // Staked LP Token
-  168, // Multiplier
-  144, // Reward APY
-  152, // Age of Capital
+  172, // Multiplier
+  152, // Reward APY
+  168, // Age of Capital
   112, // Rewards
   236, // Button
 ];
@@ -43,39 +61,7 @@ const rawHeader = [
     },
   },
   "Rewards",
-  "",
 ];
-
-const Cell = styled(BaseHeadCell)<{ length: number }>`
-  flex: 0 0 ${({ length }) => length}px;
-`;
-
-const InfoIcon = styled(II)`
-  cursor: pointer;
-`;
-
-const HeaderCell = styled(Cell)`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 6px;
-`;
-
-const RowCell = styled(Cell)`
-  padding: 20px 16px;
-  background: transparent;
-
-  border-top: 1px solid #3e4047;
-`;
-
-const PoolCell = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 0px;
-  gap: 24px;
-`;
 
 export const headers = rawHeader.map((header, idx) => {
   const text = typeof header === "string" ? header : header.header;
@@ -93,7 +79,7 @@ export const headers = rawHeader.map((header, idx) => {
   return {
     value: (
       <HeaderCell length={flexBasisLengths[idx]}>
-        <Text color="white-70" size="lg">
+        <Text color="white-70" size="md">
           {text}
         </Text>
         {toolTip}
@@ -102,23 +88,116 @@ export const headers = rawHeader.map((header, idx) => {
   };
 });
 
-function formatPoolCell(data: RowData) {
+function formatPoolCell(data: RowData, _meta: MetaData) {
   return (
     <PoolCell>
-      <data.logo />
-      <Text size="lg" color="white-100">
+      <LogoWrapper>
+        <data.logo />
+      </LogoWrapper>
+      <Text size="md" color="white-100">
         {data.poolName.toUpperCase()}
       </Text>
     </PoolCell>
   );
 }
 
-export function formatRow(data: RowData): IRow {
-  const formatterFns = [formatPoolCell];
+function formatMultiplierCell(data: RowData, meta: MetaData) {
+  return (
+    <MultiplierCell>
+      <StyledProgressBar
+        className="pool-progress-bar"
+        active={meta.hasLPStake}
+        percent={(data.multiplier / 3) * 100}
+      />
+      <Text size="md" color={`white-${meta.hasLPStake ? "100" : "70"}`}>
+        {data.multiplier.toFixed(2)}x
+      </Text>
+    </MultiplierCell>
+  );
+}
 
+function formatStakedLPCell(data: RowData, meta: MetaData) {
+  const fmtFn = data.lpTokenFormatter;
+  return (
+    <StackedCell>
+      <StakedTokenCellInner>
+        <Text size="md" color={`white-${meta.hasLPStake ? 100 : 70}`}>
+          {fmtFn(data.usersStakedLP)}
+        </Text>
+        <Text size="md" color="white-70">
+          &nbsp; / {fmtFn(data.usersTotalLP)}
+        </Text>
+      </StakedTokenCellInner>
+      <Text size="sm" color="white-70">
+        {data.poolName.toUpperCase()}-LP
+      </Text>
+    </StackedCell>
+  );
+}
+
+function formatRewardAPYCell(data: RowData, meta: MetaData) {
+  return (
+    <StackedCell>
+      <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
+        {formatEther(BigNumber.from(100).mul(data.rewardAPY))}%
+      </Text>
+      <Text color="white-70" size="sm">
+        Base: {formatEther(BigNumber.from(100).mul(data.baseAPY))}%
+      </Text>
+    </StackedCell>
+  );
+}
+
+function formatAgeofCapitalCell(data: RowData, meta: MetaData) {
+  return (
+    <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
+      {data.ageOfCapital} Day{data.ageOfCapital !== 1 && "s"}
+    </Text>
+  );
+}
+
+function formatRewardCell(data: RowData, meta: MetaData) {
+  return (
+    <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
+      {data.rewardFormatter(data.rewards)} ACX
+    </Text>
+  );
+}
+
+function formatButtonCell(data: RowData, meta: MetaData) {
+  let button: JSX.Element | undefined = undefined;
+  const specificPoolLink = `/rewards/staking/${data.poolName}`;
+  if (meta.hasLPStake) {
+    button = (
+      <ExternalLinkWrapper to={specificPoolLink}>
+        <ExternalLink16 />
+      </ExternalLinkWrapper>
+    );
+  } else if (meta.hasLPTokens) {
+    button = <StakeButton to={specificPoolLink}>Stake</StakeButton>;
+  } else {
+    button = <StakeButton to={"/pool"}>Add</StakeButton>;
+  }
+  return <ButtonCell>{button}</ButtonCell>;
+}
+
+export function formatRow(data: RowData): IRow {
+  const formatterFns = [
+    formatPoolCell,
+    formatStakedLPCell,
+    formatMultiplierCell,
+    formatRewardAPYCell,
+    formatAgeofCapitalCell,
+    formatRewardCell,
+  ];
+  const meta = {
+    hasLPStake: BigNumber.from(data.usersStakedLP).gt(0),
+    hasLPTokens: BigNumber.from(data.usersTotalLP).gt(0),
+  };
   return {
     cells: formatterFns.map((fn, idx) => ({
-      value: <RowCell length={flexBasisLengths[idx]}>{fn(data)}</RowCell>,
+      value: <RowCell length={flexBasisLengths[idx]}>{fn(data, meta)}</RowCell>,
     })),
+    explorerLink: formatButtonCell(data, meta),
   };
 }
