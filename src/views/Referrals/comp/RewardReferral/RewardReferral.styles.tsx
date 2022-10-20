@@ -137,8 +137,8 @@ export const ClaimButton = styled(SecondaryButtonV2)`
   align-items: center;
   padding: 10px 20px;
   & * {
-    font-weight: 500;
-    color: #f9d26c;
+    font-weight: 500 !important;
+    color: #f9d26c !important;
   }
   border-color: #f9d26c;
 
