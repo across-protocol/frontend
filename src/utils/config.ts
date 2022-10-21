@@ -7,6 +7,9 @@ import {
   HubPool__factory,
   SpokePool,
   SpokePool__factory,
+  getDeployedAddress,
+  MerkleDistributor,
+  MerkleDistributor__factory,
 } from "@across-protocol/contracts-v2";
 import filter from "lodash/filter";
 import sortBy from "lodash/sortBy";
@@ -88,7 +91,12 @@ export class ConfigClient {
     return this.config.hubPoolAddress;
   }
   getAcceleratingDistributorAddress(): string {
+    // TODO: replace hardcoded goerli address with official address from package
     return "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4";
+  }
+  getAcrossTokenAddress(): string {
+    // TODO: replace hardcoded goerli address with official address from package
+    return "0x40153DdFAd90C49dbE3F5c9F96f2a5B25ec67461";
   }
   getL1TokenAddressBySymbol(symbol: string) {
     // all routes have an l1Token address, so just find the first symbol that matches
@@ -107,6 +115,14 @@ export class ConfigClient {
     const provider =
       signer ?? providerUtils.getProvider(this.getHubPoolChainId());
     return AcceleratingDistributor__factory.connect(address, provider);
+  }
+  getMerkleDistributor(signer?: Signer): MerkleDistributor {
+    const address =
+      process.env.REACT_APP_MERKLE_DISTRIBUTOR_ADDRESS ||
+      getDeployedAddress("MerkleDistributor", this.getHubPoolChainId());
+    const provider =
+      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
+    return MerkleDistributor__factory.connect(address, provider);
   }
   filterRoutes(query: Partial<constants.Route>): constants.Routes {
     const cleanQuery: Partial<constants.Route> = Object.fromEntries(

@@ -14,10 +14,10 @@ import { AmountBreakdown } from "../hooks/useAirdropRecipient";
 
 export type Props = {
   isLoading?: boolean;
-  discord?: {
+  discord?: Partial<{
     discordName: string;
     discordAvatar?: string;
-  };
+  }> | null;
   amount?: string;
   amountBreakdown?: AmountBreakdown;
 };

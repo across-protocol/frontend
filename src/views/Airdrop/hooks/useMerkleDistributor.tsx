@@ -1,126 +1,91 @@
 import { useState, useEffect } from "react";
-// import { Contract, providers } from "ethers";
 
+import { getConfig } from "utils/config";
+import { notificationEmitter } from "utils/notify";
+import { airdropWindowIndex, hubPoolChainId } from "utils/constants";
 import { useConnection } from "hooks";
 
-type ClaimState =
-  | {
-      status: "idle";
-    }
-  | {
-      status: "pending";
-    }
-  | {
-      status: "pendingTx";
-      txHash: string;
-    }
-  | {
-      status: "success";
-      txHash: string;
-    }
-  | {
-      status: "error";
-      error: Error;
-    };
+import { useAirdropRecipient } from "./useAirdropRecipient";
 
-type HasClaimedState =
-  | {
-      status: "idle";
-    }
-  | {
-      status: "pending";
-    }
-  | {
-      status: "success";
-      hasClaimed: boolean;
-    }
-  | {
-      status: "error";
-      error: Error;
-    };
-
-// const merkleDistributorContract = new Contract(
-//   process.env.MERKLE_DISTRIBUTOR_ADDRESS || "",
-//   [
-//     "function hasClaimed(address) public view returns (bool)",
-//     "function claim(address to, uint256 amount, bytes32[] calldata proof) external",
-//   ]
-// );
+const config = getConfig();
 
 export function useMerkleDistributor() {
-  const { provider, account } = useConnection();
+  const { account, signer, notify, chainId } = useConnection();
+  const airdropRecipientQuery = useAirdropRecipient();
 
-  const [claimState, setClaimState] = useState<ClaimState>({
-    status: "idle",
-  });
-  const [hasClaimedState, setHasClaimedState] = useState<HasClaimedState>({
-    status: "idle",
-  });
+  const [isLoadingClaimed, setIsLoadingClaimed] = useState(false);
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [isClaimed, setIsClaimed] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string>();
 
   useEffect(() => {
-    if (account && provider) {
-      setHasClaimedState({ status: "pending" });
-      // merkleDistributorContract
-      //   .connect(provider)
-      //   .hasClaimed(account)
-      //   .then((hasClaimed) =>
-      //     setHasClaimedState({ status: "success", hasClaimed })
-      //   )
-      //   .catch((error) => setHasClaimedState({ status: "error", error }));
-      mockedHasClaimed()
-        .then((hasClaimed) =>
-          setHasClaimedState({ status: "success", hasClaimed })
-        )
-        .catch((error) => setHasClaimedState({ status: "error", error }));
+    setErrorMsg(
+      Number(chainId) !== hubPoolChainId
+        ? `Wrong network. Please switch to network with id: ${hubPoolChainId}`
+        : undefined
+    );
+  }, [chainId]);
+
+  useEffect(() => {
+    if (airdropRecipientQuery.data) {
+      setIsLoadingClaimed(true);
+
+      const merkleDistributor = config.getMerkleDistributor();
+      merkleDistributor
+        .isClaimed(airdropWindowIndex, airdropRecipientQuery.data.accountIndex)
+        .then(setIsClaimed)
+        .catch(console.error)
+        .finally(() => setIsLoadingClaimed(false));
     }
-  }, [provider, account]);
+  }, [airdropRecipientQuery.data, signer]);
 
   const handleClaim = async () => {
     try {
-      if (!provider || !account) {
-        throw new Error("No wallet connected");
+      if (!signer || !account) {
+        setErrorMsg("No wallet connected");
+        return;
       }
 
-      setClaimState({ status: "pending" });
-      // const [amount, proof] = getClaimAmountAndProof(account);
-      // const txResponse: providers.TransactionResponse =
-      //   await merkleDistributorContract
-      //     .connect(provider)
-      //     .claim(account, amount, proof);
-      const txResponse = await mockedClaim();
+      if (!airdropRecipientQuery.data) {
+        setErrorMsg("Ineligible for airdrop");
+        return;
+      }
 
-      setClaimState({ status: "pendingTx", txHash: txResponse.hash });
-      const txReceipt = await txResponse.wait();
+      setIsClaiming(true);
 
-      setClaimState({ status: "success", txHash: txReceipt.transactionHash });
-      setHasClaimedState({ status: "success", hasClaimed: true });
+      const merkleDistributor = config.getMerkleDistributor(signer);
+
+      const claimArgs = {
+        windowIndex: airdropWindowIndex,
+        account,
+        accountIndex: airdropRecipientQuery.data.accountIndex,
+        amount: airdropRecipientQuery.data.amount,
+        merkleProof: airdropRecipientQuery.data.proof,
+      };
+
+      const isValidClaim = await merkleDistributor.verifyClaim(claimArgs);
+
+      if (!isValidClaim) {
+        setErrorMsg("Invalid claim");
+        return;
+      }
+
+      const tx = await merkleDistributor.claim(claimArgs);
+      await notificationEmitter(tx.hash, notify);
+      setIsClaimed(true);
     } catch (error) {
-      setClaimState({ status: "error", error: error as Error });
+      console.error(error);
+      setErrorMsg("Something went wrong. Please try again");
+    } finally {
+      setIsClaiming(false);
     }
   };
 
-  return { handleClaim, claimState, hasClaimedState };
-}
-
-// TODO: implement
-// function getClaimAmountAndProof(account: string) {
-//   return ["1", "0x"];
-// }
-
-async function mockedClaim() {
-  await new Promise((resolve) => setTimeout(() => resolve(true), 5_000));
   return {
-    hash: "0xTX_HASH",
-    wait: async () => {
-      await new Promise((resolve) => setTimeout(() => resolve(true), 5_000));
-      return {
-        transactionHash: "0xTX_HASH",
-      };
-    },
+    handleClaim,
+    isClaimed,
+    isClaiming,
+    isLoadingClaimed,
+    errorMsg,
   };
-}
-
-async function mockedHasClaimed() {
-  await new Promise((resolve) => setTimeout(() => resolve(true), 5_000));
-  return false;
 }

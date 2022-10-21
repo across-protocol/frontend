@@ -21,6 +21,7 @@ const Airdrop = () => {
     switchToInfo,
     switchToSplash,
     connectWallet,
+    handleAddTokenToWallet,
     airdropRecipientQuery,
     merkleDistributor,
   } = useAirdrop();
@@ -41,21 +42,16 @@ const Airdrop = () => {
     case "eligible":
       activePageComponent = (
         <EligibleWalletFlow
-          isLoading={airdropRecipientQuery.isLoading}
-          isClaiming={["pending", "pendingTx"].includes(
-            merkleDistributor.claimState.status
-          )}
-          hasClaimed={
-            merkleDistributor.hasClaimedState.status === "success" &&
-            merkleDistributor.hasClaimedState.hasClaimed
-          }
-          discord={airdropRecipientQuery.data?.user}
-          amount={airdropRecipientQuery.data?.claims[0].amount}
-          amountBreakdown={
-            airdropRecipientQuery.data?.claims[0].metadata.amountBreakdown
-          }
-          onClickAddToken={() => console.log("add")}
+          isLoadingClaimed={merkleDistributor.isLoadingClaimed}
+          isLoadingAirdrop={airdropRecipientQuery.isLoading}
+          isClaiming={merkleDistributor.isClaiming}
+          hasClaimed={merkleDistributor.isClaimed}
+          discord={airdropRecipientQuery.data?.discord}
+          amount={airdropRecipientQuery.data?.amount}
+          amountBreakdown={airdropRecipientQuery.data?.payload?.amountBreakdown}
+          onClickAddToken={handleAddTokenToWallet}
           onClickClaim={merkleDistributor.handleClaim}
+          errorMsg={merkleDistributor.errorMsg}
         />
       );
       break;

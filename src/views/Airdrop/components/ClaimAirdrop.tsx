@@ -9,34 +9,38 @@ import { AmountBreakdown } from "../hooks/useAirdropRecipient";
 
 export type Props = {
   isClaiming?: boolean;
-  isLoading?: boolean;
+  isLoadingAirdrop?: boolean;
+  isLoadingClaimed?: boolean;
   hasClaimed?: boolean;
-  discord?: {
+  discord?: Partial<{
     discordName: string;
-    discordAvatar?: string;
-  };
+    discordAvatar: string;
+  }> | null;
   amount?: string;
   amountBreakdown?: AmountBreakdown;
   onClickClaim: () => void;
   onClickAddToken: () => void;
+  errorMsg?: string;
 };
 
 export function ClaimAirdrop({
   isClaiming,
-  isLoading,
+  isLoadingAirdrop,
+  isLoadingClaimed,
   hasClaimed,
   discord,
   amount,
   amountBreakdown,
   onClickAddToken,
   onClickClaim,
+  errorMsg,
 }: Props) {
   return (
     <Container>
       <BreakdownCardContainer>
         <BreakdownTitle size="lg">Airdrop breakdown</BreakdownTitle>
         <BreakdownStats
-          isLoading={isLoading}
+          isLoading={isLoadingAirdrop || isLoadingClaimed}
           discord={discord}
           amount={amount}
           amountBreakdown={amountBreakdown}
@@ -47,13 +51,18 @@ export function ClaimAirdrop({
           Add token contract to wallet
         </InverseButton>
       ) : (
-        <FullWidthButton
-          size="lg"
-          disabled={isClaiming || isLoading}
-          onClick={onClickClaim}
-        >
-          {isClaiming ? "Claiming airdrop..." : "Claim airdrop"}
-        </FullWidthButton>
+        <>
+          {errorMsg && <Text color="error">{errorMsg}</Text>}
+          <FullWidthButton
+            size="lg"
+            disabled={
+              isClaiming || isLoadingAirdrop || isLoadingClaimed || !!errorMsg
+            }
+            onClick={onClickClaim}
+          >
+            {isClaiming ? "Claiming airdrop..." : "Claim airdrop"}
+          </FullWidthButton>
+        </>
       )}
     </Container>
   );

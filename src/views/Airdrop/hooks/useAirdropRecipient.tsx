@@ -1,7 +1,8 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useQuery } from "react-query";
 
 import { useConnection } from "hooks";
+import { airdropWindowIndex, rewardsApiUrl } from "utils/constants";
 
 export type AmountBreakdown = {
   communityRewards: string;
@@ -10,50 +11,42 @@ export type AmountBreakdown = {
   welcomeTravelerRewards: string;
 };
 
-export type ClaimWithProof = {
-  windowIndex: number;
+type AirdropRecipient = {
   accountIndex: number;
   amount: string;
-  proof: string[];
-  metadata: {
+  payload: {
     amountBreakdown: AmountBreakdown;
   };
-};
-
-type AirdropRecipient = {
-  user: {
+  proof: string[];
+  merkleRoot: string;
+  windowIndex: number;
+  ipfsHash: string;
+  discord: null | Partial<{
+    discordId: string;
     discordName: string;
     discordAvatar: string;
-  };
-  claims: ClaimWithProof[];
+  }>;
 };
 
 export function useAirdropRecipient() {
   const { isConnected, account } = useConnection();
 
-  return useQuery(["airdrop", account], () => getAirdropRecipient(account), {
-    enabled: isConnected && !!account,
-  });
+  return useQuery(
+    ["airdrop", account],
+    () => getAirdropRecipient(airdropWindowIndex, account),
+    {
+      enabled: isConnected && !!account,
+    }
+  );
 }
 
-async function getAirdropRecipient(account?: string) {
+async function getAirdropRecipient(windowIndex: number, account?: string) {
   if (!account) {
     return undefined;
   }
 
-  try {
-    const { data } = await axios.get<AirdropRecipient>(
-      // TODO: replace with Scraper API
-      "https://gist.githubusercontent.com/dohaki/53b241c26793260b6423fa1706e4cb96/raw/238982c067e36c68f854f6887cb0fa433fbbb406/recipients.json"
-    );
-
-    return data;
-  } catch (error: unknown) {
-    // if scraper api returns 404 then account not eligible
-    if (error instanceof AxiosError && error.response?.status === 404) {
-      return undefined;
-    }
-
-    throw error;
-  }
+  const { data } = await axios.get<AirdropRecipient | {}>(
+    `${rewardsApiUrl}/airdrop/merkle-distributor-proof?address=${account}&windowIndex=${windowIndex}&includeDiscord=true`
+  );
+  return Object.keys(data).length ? (data as AirdropRecipient) : undefined;
 }
