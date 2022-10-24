@@ -18,6 +18,7 @@ export async function suggestedFeesMockedApiCall(
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
+  quoteTimestamp: BigNumber;
 }> {
   return {
     relayerFee: {
@@ -33,5 +34,6 @@ export async function suggestedFeesMockedApiCall(
       total: BigNumber.from("1"),
     },
     isAmountTooLow: false,
+    quoteTimestamp: BigNumber.from("1"),
   };
 }
