@@ -23,7 +23,6 @@ import {
 } from "utils";
 import useReferrer from "./useReferrer";
 import { useToast } from "components/Toast/useToast";
-import getApiEndpoint from "utils/serverless-api";
 
 enum SendStatus {
   IDLE = "idle",
