@@ -5,11 +5,7 @@ import * as sdk from "@across-protocol/sdk-v2";
 import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import {
-  BLOCK_TAG_LAG,
-  disabledL1Tokens,
-  DEFAULT_QUOTE_TIMESTAMP_BUFFER,
-} from "./_constants";
+import { disabledL1Tokens, DEFAULT_QUOTE_TIMESTAMP_BUFFER } from "./_constants";
 import { isString } from "./_typeguards";
 import { SuggestedFeesInputRequest } from "./_types";
 import {
@@ -86,23 +82,10 @@ const handler = async (
     );
 
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
-    const [{ number: latestBlock }, routeEnabled] = await Promise.all([
+    const [{ number: blockTag }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
       isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
     ]);
-
-    // If the query was supplied a timestamp, lets use the most
-    // recent block before the timestamp. If the timestamp is
-    // not specified, we can use the default variant of blockTag
-    // to be "latest". If we're not using the block associated with the `timestamp` passed as a
-    // request param, then we should set the lag approx. equal to the # of blocks that the
-    // quote time buffer lags HEAD.
-    // Note: Its ok if the BLOCK_TAG_LAG doesn't exactly correspond to the parsedTimestamp, since we are returning
-    // an indicative fee, not one passed to a smart contract function. The relayer will compute the actual fee for the
-    // quote time.
-    const blockTag = isString(timestamp)
-      ? latestBlock
-      : (-1 * quoteTimeBuffer) / 60 / 12;
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
       throw new InputError(
