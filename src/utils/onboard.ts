@@ -25,6 +25,12 @@ export function onboardInit() {
         rpcUrl: providerUrlsTable[ChainId.MAINNET],
       },
       {
+        id: 5,
+        token: "ETH",
+        label: "Goerli Testnet",
+        rpcUrl: providerUrlsTable[ChainId.GOERLI],
+      },
+      {
         id: 10,
         token: "OP",
         label: "Optimism Mainnet",

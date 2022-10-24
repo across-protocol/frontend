@@ -55,9 +55,7 @@ export function ClaimAirdrop({
           {errorMsg && <Text color="error">{errorMsg}</Text>}
           <FullWidthButton
             size="lg"
-            disabled={
-              isClaiming || isLoadingAirdrop || isLoadingClaimed || !!errorMsg
-            }
+            disabled={isClaiming || isLoadingAirdrop || isLoadingClaimed}
             onClick={onClickClaim}
           >
             {isClaiming ? "Claiming airdrop..." : "Claim airdrop"}

@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useConnection } from "hooks";
 
 import { useAirdropRecipient } from "./useAirdropRecipient";
-import { useMerkleDistributor } from "./useMerkleDistributor";
+import { useIsClaimed } from "./useIsClaimed";
+import { useClaim } from "./useClaim";
 
 import { getConfig } from "utils/config";
 import ACXImageSrc from "assets/acx.svg";
@@ -15,7 +16,8 @@ export default function useAirdrop() {
   const { isConnected, account, connect, provider } = useConnection();
 
   const airdropRecipientQuery = useAirdropRecipient();
-  const merkleDistributor = useMerkleDistributor();
+  const isClaimedQuery = useIsClaimed();
+  const claimMutation = useClaim();
 
   const handleAddTokenToWallet = async () => {
     if (provider) {
@@ -52,7 +54,8 @@ export default function useAirdrop() {
     switchToIneligible: () => setActivePageFlow("ineligible"),
 
     airdropRecipientQuery,
-    merkleDistributor,
+    isClaimedQuery,
+    claimMutation,
 
     isConnected,
     account,
