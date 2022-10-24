@@ -20,6 +20,7 @@ import {
   parseUnits,
   trackEvent,
   formatUnits,
+  QUOTE_TIMESTAMP_BUFFER,
 } from "utils";
 import useReferrer from "./useReferrer";
 import { useToast } from "components/Toast/useToast";
@@ -119,7 +120,7 @@ export function useBridge() {
         toChain: selectedRoute.toChain,
         isNative: selectedRoute.isNative,
         relayerFeePct: fees.relayerFee.pct,
-        timestamp: await hubPool.getCurrentTime(),
+        timestamp: (await hubPool.getCurrentTime()).sub(QUOTE_TIMESTAMP_BUFFER),
         referrer,
       });
       // matomo track bridge
