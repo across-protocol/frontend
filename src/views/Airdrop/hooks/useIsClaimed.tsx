@@ -12,14 +12,12 @@ export function useIsClaimed() {
   const { account } = useConnection();
   const airdropRecipientQuery = useAirdropRecipient();
 
-  const isQueryEnabled = Boolean(
-    airdropRecipientQuery.data?.accountIndex && account
-  );
+  const isQueryEnabled = Boolean(airdropRecipientQuery.data && account);
 
   return useQuery(
     ["airdrop", "is-claimed", account, airdropWindowIndex],
     () => {
-      if (airdropRecipientQuery.data?.accountIndex) {
+      if (airdropRecipientQuery.data) {
         return fetchIsClaimed(
           airdropWindowIndex,
           airdropRecipientQuery.data.accountIndex
