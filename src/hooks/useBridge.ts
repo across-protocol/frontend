@@ -23,7 +23,6 @@ import {
 } from "utils";
 import useReferrer from "./useReferrer";
 import { useToast } from "components/Toast/useToast";
-import { hubPool } from "@across-protocol/sdk-v2/dist/contracts";
 
 enum SendStatus {
   IDLE = "idle",
