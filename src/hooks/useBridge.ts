@@ -23,6 +23,7 @@ import {
 } from "utils";
 import useReferrer from "./useReferrer";
 import { useToast } from "components/Toast/useToast";
+import { hubPool } from "@across-protocol/sdk-v2/dist/contracts";
 
 enum SendStatus {
   IDLE = "idle",
@@ -93,6 +94,7 @@ export function useBridge() {
   });
 
   const hasToApprove = !!allowance && amount.gt(allowance);
+  const hubPool = config.getHubPool();
 
   const send = async () => {
     // NOTE: the `toAddress` check is redundant, as status won't be "ready" if `toAddress` is not set, but it's here to make TS happy. The same applies for `block` and `fees`.
@@ -119,7 +121,7 @@ export function useBridge() {
         isNative: selectedRoute.isNative,
         relayerFeePct: fees.relayerFee.pct,
         referrer,
-        timestamp: fees.quoteTimestamp,
+        timestamp: fees.quoteTimestamp ?? (await hubPool.getCurrentTime()),
       });
       // matomo track bridge
       trackEvent({

@@ -42,7 +42,7 @@ export type SuggestedApiFeeType = (
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
-  quoteTimestamp: ethers.BigNumber;
+  quoteTimestamp?: ethers.BigNumber;
 }>;
 
 export type RetrieveLinkedWalletType = (
