@@ -89,7 +89,12 @@ export const headers = rawHeader.map((header, idx) => {
   };
 });
 
-function formatPoolCell(data: RowData, _meta: MetaData) {
+type PoolRowCellType = {
+  data: RowData;
+  meta: MetaData;
+};
+
+function RowPoolCell({ data }: PoolRowCellType) {
   return (
     <PoolCell>
       <LogoWrapper>
@@ -102,7 +107,7 @@ function formatPoolCell(data: RowData, _meta: MetaData) {
   );
 }
 
-function formatMultiplierCell(data: RowData, meta: MetaData) {
+function RowMultiplierCell({ data, meta }: PoolRowCellType) {
   return (
     <MultiplierCell>
       <StyledProgressBar
@@ -117,7 +122,7 @@ function formatMultiplierCell(data: RowData, meta: MetaData) {
   );
 }
 
-function formatStakedLPCell(data: RowData, meta: MetaData) {
+function RowStakedLPCell({ data, meta }: PoolRowCellType) {
   const fmtFn = data.lpTokenFormatter;
   return (
     <StackedCell>
@@ -136,7 +141,7 @@ function formatStakedLPCell(data: RowData, meta: MetaData) {
   );
 }
 
-function formatRewardAPYCell(data: RowData, meta: MetaData) {
+function RowRewardAPYCell({ data, meta }: PoolRowCellType) {
   return (
     <StackedCell>
       <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
@@ -149,7 +154,7 @@ function formatRewardAPYCell(data: RowData, meta: MetaData) {
   );
 }
 
-function formatAgeofCapitalCell(data: RowData, meta: MetaData) {
+function RowAgeofCapitalCell({ data, meta }: PoolRowCellType) {
   return (
     <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
       {data.ageOfCapital} Day{data.ageOfCapital !== 1 && "s"}
@@ -157,7 +162,7 @@ function formatAgeofCapitalCell(data: RowData, meta: MetaData) {
   );
 }
 
-function formatRewardCell(data: RowData, meta: MetaData) {
+function RowRewardCell({ data, meta }: PoolRowCellType) {
   return (
     <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
       {data.rewardFormatter(data.rewards)} ACX
@@ -165,7 +170,7 @@ function formatRewardCell(data: RowData, meta: MetaData) {
   );
 }
 
-function formatButtonCell(data: RowData, meta: MetaData) {
+function RowButtonCell({ data, meta }: PoolRowCellType) {
   let button: JSX.Element | undefined = undefined;
   const specificPoolLink = `/rewards/staking/${data.poolName}`;
   if (meta.hasLPStake) {
@@ -183,22 +188,26 @@ function formatButtonCell(data: RowData, meta: MetaData) {
 }
 
 export function formatRow(data: RowData): IRow {
-  const formatterFns = [
-    formatPoolCell,
-    formatStakedLPCell,
-    formatMultiplierCell,
-    formatRewardAPYCell,
-    formatAgeofCapitalCell,
-    formatRewardCell,
+  const rowComponents = [
+    RowPoolCell,
+    RowStakedLPCell,
+    RowMultiplierCell,
+    RowRewardAPYCell,
+    RowAgeofCapitalCell,
+    RowRewardCell,
   ];
   const meta = {
     hasLPStake: BigNumber.from(data.usersStakedLP).gt(0),
     hasLPTokens: BigNumber.from(data.usersTotalLP).gt(0),
   };
   return {
-    cells: formatterFns.map((fn, idx) => ({
-      value: <RowCell length={flexBasisLengths[idx]}>{fn(data, meta)}</RowCell>,
+    cells: rowComponents.map((Cell, idx) => ({
+      value: (
+        <RowCell length={flexBasisLengths[idx]}>
+          {<Cell data={data} meta={meta} />}
+        </RowCell>
+      ),
     })),
-    explorerLink: formatButtonCell(data, meta),
+    explorerLink: <RowButtonCell data={data} meta={meta} />,
   };
 }
