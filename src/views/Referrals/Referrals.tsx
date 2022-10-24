@@ -8,6 +8,7 @@ import Footer from "components/Footer";
 import { useReferralsView } from "./useReferralsView";
 import { mediumUrl } from "utils";
 import BreadcrumbV2 from "components/BreadcrumbV2";
+import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 const Referrals = () => {
   const {
     account,
@@ -35,17 +36,19 @@ const Referrals = () => {
             isConnected={isConnected}
           />
           {mediumUrl && <RewardMediumBlock />}
-          <RewardTableWithOverlay
-            isConnected={isConnected}
-            referrals={referrals}
-            account={account || ""}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-            pageSizes={pageSizes}
-            totalReferralCount={totalReferralCount}
-          />
+          <SectionTitleWrapperV2 title="My transfers">
+            <RewardTableWithOverlay
+              isConnected={isConnected}
+              referrals={referrals}
+              account={account || ""}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              pageSize={pageSize}
+              setPageSize={setPageSize}
+              pageSizes={pageSizes}
+              totalReferralCount={totalReferralCount}
+            />
+          </SectionTitleWrapperV2>
         </InnerContent>
       </Content>
       <Footer />
