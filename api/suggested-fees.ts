@@ -5,7 +5,11 @@ import * as sdk from "@across-protocol/sdk-v2";
 import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
+import {
+  BLOCK_TAG_LAG,
+  disabledL1Tokens,
+  QUOTE_TIMESTAMP_BUFFER,
+} from "./_constants";
 import { isString } from "./_typeguards";
 import { SuggestedFeesInputRequest } from "./_types";
 import {
@@ -55,9 +59,13 @@ const handler = async (
 
     token = ethers.utils.getAddress(token);
 
+    // Note: Add a buffer to "latest" timestamp so that it corresponds to a block
+    // older than HEAD. This is to improve relayer UX who have heightened risk of sending inadvertent invalid
+    // fills for quote times right at HEAD (or worst, in the future of HEAD). If timestamp is supplied as a query param,
+    // then no need to apply buffer.
     const parsedTimestamp = isString(timestamp)
       ? Number(timestamp)
-      : (await provider.getBlock("latest")).timestamp;
+      : (await provider.getBlock("latest")).timestamp - QUOTE_TIMESTAMP_BUFFER;
 
     const amount = ethers.BigNumber.from(amountInput);
 
@@ -81,7 +89,10 @@ const handler = async (
     // If the query was supplied a timestamp, lets use the most
     // recent block before the timestamp. If the timestamp is
     // not specified, we can use the default variant of blockTag
-    // to be "latest"
+    // to be "latest".
+    // Note: Its ok if the BLOCK_TAG_LAG doesn't exactly correspond to the parsedTimestamp, since we are returning
+    // an indicative fee, not one passed to a smart contract function. The relayer will compute the actual fee for the
+    // quote time.
     const blockTag = isString(timestamp) ? latestBlock : BLOCK_TAG_LAG;
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))

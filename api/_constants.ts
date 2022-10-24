@@ -57,7 +57,10 @@ export const relayerFeeCapitalCostConfig = {
   },
 };
 
-export const BLOCK_TAG_LAG = -1;
+// If `timestamp` is not passed into a suggested-fees query, then return the latest mainnet timestamp minus this buffer.
+export const QUOTE_TIMESTAMP_BUFFER = 12 * 60 * 4; // ~4 blocks on mainnet (12s/block)
+export const BLOCK_TAG_LAG = (-1 * QUOTE_TIMESTAMP_BUFFER) / 12 / 60; // Number of blocks behind HEAD to query the
+// HubPool utilization.
 
 // Note: this is a small subset of all the supported base currencies, but since we don't expect to use the others,
 // we've decided to keep this list small for now.
