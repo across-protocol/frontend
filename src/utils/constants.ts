@@ -662,7 +662,3 @@ export const QUERIESV2 = {
 };
 
 export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);
-
-export const QUOTE_TIMESTAMP_BUFFER = process.env.QUOTE_TIMESTAMP_BUFFER
-  ? Number(process.env.QUOTE_TIMESTAMP_BUFFER)
-  : 12 * 25; // ~25 blocks on mainnet (12s/block), ~= 5 minutes.
