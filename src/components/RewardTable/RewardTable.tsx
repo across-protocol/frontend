@@ -18,7 +18,7 @@ interface Props {
   headers: ICell[];
   title?: string;
   scrollable: boolean;
-  emptyMessage?: string;
+  emptyMessage: string;
 }
 
 const RewardMyPoolsTable: FC<Props> = ({
@@ -54,11 +54,7 @@ const RewardMyPoolsTable: FC<Props> = ({
               );
             })
           ) : (
-            <EmptyRow>
-              {emptyMessage
-                ? emptyMessage
-                : "You have no referral transfers yet"}
-            </EmptyRow>
+            <EmptyRow>{emptyMessage}</EmptyRow>
           )}
         </TableBody>
       </TableWrapper>

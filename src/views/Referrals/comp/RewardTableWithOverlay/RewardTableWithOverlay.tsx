@@ -47,6 +47,7 @@ const RewardTableWithOverlay: React.FC<{
         title="My transfers"
         rows={paginatedRows}
         headers={headers}
+        emptyMessage="You have no referral transfers yet"
       />
       {isConnected && (
         <div>
