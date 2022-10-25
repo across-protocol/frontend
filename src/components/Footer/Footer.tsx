@@ -18,7 +18,7 @@ const NAV_LINKS = [
   {
     key: "docs",
     name: "Docs",
-    url: "https://docs.across.to/bridge/",
+    url: "https://docs.across.to/v2/",
     icon: "",
   },
   {
