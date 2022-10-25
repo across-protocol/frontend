@@ -13,3 +13,4 @@ export * from "./useScrollPosition";
 export * from "./useNotify";
 export * from "./useCenteredInViewport";
 export * from "./useConnection";
+export * from "./useIsWrongNetwork";

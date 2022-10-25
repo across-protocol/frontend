@@ -1,9 +1,6 @@
 import { BigNumberish } from "ethers";
-import {
-  FormatterFnType,
-  ParserFnType,
-  StakingActionFunctionType,
-} from "./hooks/useStakingActionsResolver";
+import { FormatterFnType, ParserFnType } from "./hooks/useStakingPool";
+import { StakingActionFunctionType } from "./hooks/useStakingAction";
 
 type GenericStakingComponentProps = {
   isConnected: boolean;
@@ -32,4 +29,5 @@ export type StakingFormPropType = GenericStakingComponentProps & {
   stakeActionFn: StakingActionFunctionType;
   unstakeActionFn: StakingActionFunctionType;
   isDataLoading: boolean;
+  isMutating: boolean;
 };
