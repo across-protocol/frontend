@@ -32,7 +32,7 @@ const InnerWrapper = styled.div<{ maxWidth: number }>`
   background-color: transparent;
 
   max-width: ${({ maxWidth }) => maxWidth}px;
-  width: calc(100% - 24px);
+  width: calc(100% - 32px);
 
   min-height: fit-content;
 
