@@ -37,6 +37,7 @@ type ResolvedDataType =
       shareOfPool: BigNumberish;
       estimatedApy: BigNumberish;
       requiresApproval: boolean;
+      isStakingPoolOfUser: boolean;
       lpTokenFormatter: FormatterFnType;
       lpTokenParser: ParserFnType;
     }
@@ -61,10 +62,7 @@ export function useAllStakingPools() {
 
   return useQueries(
     tokenList.map((token) => ({
-      queryKey: getStakingPoolQueryKey(
-        token.isNative ? config.getWethAddress() : token.address,
-        account
-      ),
+      queryKey: getStakingPoolQueryKey(token.address, account),
       queryFn: ({
         queryKey,
       }: QueryFunctionContext<[string, string?, string?]>) =>
@@ -148,7 +146,7 @@ const fetchStakingPool = async (
       : BigNumber.from(0),
     Promise.resolve((await lpTokenERC20.symbol()).slice(4)),
     axios.get(`/api/pools`, {
-      params: { token: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" },
+      params: { token: tokenAddress },
     }),
   ]);
 
@@ -167,12 +165,14 @@ const fetchStakingPool = async (
   );
 
   // Resolve the users reward multiplier as a percentage.
-  const usersMultiplierPercentage = formattedBigNumberToNumber(
-    currentUserRewardMultiplier
-      .mul(fixedPointAdjustment)
-      .div(maxMultiplier)
-      .mul(100)
-  );
+  const usersMultiplierPercentage = maxMultiplier.eq(0)
+    ? 0
+    : formattedBigNumberToNumber(
+        currentUserRewardMultiplier
+          .mul(fixedPointAdjustment)
+          .div(maxMultiplier)
+          .mul(100)
+      );
 
   // We need the amount of tokens that the user has in both their balance
   // and in the staked contract. We can add the staked + balance to get this
@@ -198,6 +198,10 @@ const fetchStakingPool = async (
   // user's entire balance.
   const requiresApproval = lpTokenAllowance.lte(availableLPTokenBalance);
 
+  const isStakingPoolOfUser =
+    BigNumber.from(userAmountOfLPStaked).gt(0) ||
+    BigNumber.from(outstandingRewards).gt(0);
+
   return {
     lpTokenAddress,
     acrossTokenAddress,
@@ -215,6 +219,7 @@ const fetchStakingPool = async (
     shareOfPool,
     estimatedApy,
     requiresApproval,
+    isStakingPoolOfUser,
     lpTokenFormatter,
     lpTokenParser,
   };
