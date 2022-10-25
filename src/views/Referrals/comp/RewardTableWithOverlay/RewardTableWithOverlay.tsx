@@ -44,9 +44,9 @@ const RewardTableWithOverlay: React.FC<{
       {!isConnected ? <ConnectTableOverlay /> : null}
       <RewardTable
         scrollable={rows.length > 0 && isConnected}
-        title="My transfers"
         rows={paginatedRows}
         headers={headers}
+        emptyMessage="You have no referral transfers yet"
       />
       {isConnected && (
         <div>

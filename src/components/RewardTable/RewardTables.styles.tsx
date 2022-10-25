@@ -37,13 +37,17 @@ export const TableWrapper = styled(BaseTableWrapper)`
 
 export const TableBody = BaseTableBody;
 
-export const TableHeadRow = BaseTableHeadRow;
+export const TableHeadRow = styled(BaseTableHeadRow)`
+  background-color: #34353b;
+`;
 
 export const TableRow = BaseTableRow;
 
 export const EmptyRow = BaseEmptyRow;
 
-export const TableCell = BaseTableCell;
+export const TableCell = styled(BaseTableCell)`
+  border-top: 1px solid #3e4047;
+`;
 
 export const HeadCell = BaseHeadCell;
 
@@ -232,6 +236,8 @@ export const GrayText = styled.div`
 `;
 
 export const ExplorerLinkContainer = styled.div<{ disabled?: boolean }>`
+  border-top: 1px solid #3e4047;
+
   position: sticky;
   right: 0;
   flex: 0 0 82px;
@@ -244,8 +250,6 @@ export const ExplorerLinkContainer = styled.div<{ disabled?: boolean }>`
     rgba(45, 46, 51, 0) 0%,
     rgba(45, 46, 51, 1) 30%
   );
-  border-top: 1px solid #3e4047;
-
   a {
     height: 40px;
     width: 40px;

@@ -5,6 +5,7 @@ import OverviewRewardSection from "./components/OverviewRewardSection";
 import SectionWrapper from "../../components/SectionTitleWrapperV2/SectionWrapperV2";
 import { useRewards } from "./hooks/useRewards";
 import { InnerSectionWrapper, Wrapper } from "./Rewards.style";
+import GenericStakingPoolTable from "./components/GenericStakingPoolTable/GenericStakingPoolTable";
 
 const Rewards = () => {
   const {
@@ -20,6 +21,8 @@ const Rewards = () => {
     referralTransfers,
     referralVolume,
     referralWallets,
+
+    poolData,
 
     formatterFn,
   } = useRewards();
@@ -50,6 +53,12 @@ const Rewards = () => {
           ) : (
             <DisconnectedReferralBox connectHandler={connectHandler} />
           )}
+        </SectionWrapper>
+        <SectionWrapper title="My pools">
+          <GenericStakingPoolTable poolData={poolData} />
+        </SectionWrapper>
+        <SectionWrapper title="All pools">
+          <GenericStakingPoolTable poolData={poolData} />
         </SectionWrapper>
       </InnerSectionWrapper>
     </Wrapper>

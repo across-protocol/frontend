@@ -29,7 +29,7 @@ import {
   RewardsCell,
   RewardsHeadCell,
   ExplorerLinkContainer,
-} from "./RewardTables.styles";
+} from "components/RewardTable/RewardTables.styles";
 import { ReactComponent as ExternalLink16 } from "assets/icons/external-link-16.svg";
 import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
 import { ReactComponent as ReferrerIcon } from "assets/icons/referrer.svg";
