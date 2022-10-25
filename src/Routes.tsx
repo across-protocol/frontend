@@ -27,6 +27,9 @@ const Rewards = lazy(
   () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
 );
 const Send = lazy(() => import(/* webpackChunkName: "Send" */ "./views/Send"));
+const Splash = lazy(
+  () => import(/* webpackChunkName: "Splash" */ "./views/Splash")
+);
 const About = lazy(
   () => import(/* webpackChunkName: "About" */ "./views/About")
 );
@@ -157,7 +160,8 @@ const Routes: React.FC = () => {
               }
             }}
           />
-          <Route exact path="/" component={Send} />
+          <Route exact path="/bridge" component={Send} />
+          <Route exact path="/" component={Splash} />
         </Suspense>
         <Route path="*" component={NotFound} />
       </Switch>
