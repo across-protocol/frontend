@@ -21,8 +21,10 @@ const Airdrop = () => {
     switchToInfo,
     switchToSplash,
     connectWallet,
+    handleAddTokenToWallet,
     airdropRecipientQuery,
-    merkleDistributor,
+    claimMutation,
+    isClaimedQuery,
   } = useAirdrop();
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
@@ -41,21 +43,18 @@ const Airdrop = () => {
     case "eligible":
       activePageComponent = (
         <EligibleWalletFlow
-          isLoading={airdropRecipientQuery.isLoading}
-          isClaiming={["pending", "pendingTx"].includes(
-            merkleDistributor.claimState.status
-          )}
-          hasClaimed={
-            merkleDistributor.hasClaimedState.status === "success" &&
-            merkleDistributor.hasClaimedState.hasClaimed
+          isLoadingClaimed={isClaimedQuery.isLoading}
+          isLoadingAirdrop={airdropRecipientQuery.isLoading}
+          isClaiming={claimMutation.isLoading}
+          hasClaimed={isClaimedQuery.data}
+          discord={airdropRecipientQuery.data?.discord}
+          amount={airdropRecipientQuery.data?.amount}
+          amountBreakdown={airdropRecipientQuery.data?.payload?.amountBreakdown}
+          onClickAddToken={handleAddTokenToWallet}
+          onClickClaim={claimMutation.mutate}
+          errorMsg={
+            claimMutation.error ? (claimMutation.error as Error).message : ""
           }
-          discord={airdropRecipientQuery.data?.user}
-          amount={airdropRecipientQuery.data?.claims[0].amount}
-          amountBreakdown={
-            airdropRecipientQuery.data?.claims[0].metadata.amountBreakdown
-          }
-          onClickAddToken={() => console.log("add")}
-          onClickClaim={merkleDistributor.handleClaim}
         />
       );
       break;

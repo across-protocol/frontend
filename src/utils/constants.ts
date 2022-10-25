@@ -433,6 +433,9 @@ assert(
 
 // PROCESS.ENV variables
 export const rewardsApiUrl = process.env.REACT_APP_REWARDS_API_URL;
+export const airdropWindowIndex = Number(
+  process.env.REACT_APP_AIRDROP_WINDOW_INDEX || 0
+);
 export const mediumUrl = process.env.REACT_APP_MEDIUM_URL;
 export const hubPoolChainId = Number(
   process.env.REACT_APP_HUBPOOL_CHAINID || 1
@@ -519,6 +522,7 @@ const RouteConfigSS = superstruct.type({
   hubPoolWethAddress: superstruct.string(),
   hubPoolChain: superstruct.number(),
   hubPoolAddress: superstruct.string(),
+  merkleDistributorAddress: superstruct.optional(superstruct.string()),
 });
 export type RouteConfig = superstruct.Infer<typeof RouteConfigSS>;
 export type Route = superstruct.Infer<typeof RouteSS>;

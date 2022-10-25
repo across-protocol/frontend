@@ -80,7 +80,9 @@ export function useOnboardManager() {
 
     if (wallet?.provider) {
       setProvider(new ethers.providers.Web3Provider(wallet.provider, "any"));
-      setSigner(new ethers.providers.Web3Provider(wallet.provider).getSigner());
+      setSigner(
+        new ethers.providers.Web3Provider(wallet.provider, "any").getSigner()
+      );
     } else {
       setProvider(null);
       setSigner(undefined);
