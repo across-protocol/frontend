@@ -16,7 +16,7 @@ const NAV_LINKS = [
   },
   {
     name: "Deep dive into our docs site",
-    url: "https://docs.across.to/bridge/",
+    url: "https://docs.across.to/v2",
   },
 ];
 
