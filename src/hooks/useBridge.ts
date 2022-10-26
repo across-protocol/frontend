@@ -119,8 +119,8 @@ export function useBridge() {
         toChain: selectedRoute.toChain,
         isNative: selectedRoute.isNative,
         relayerFeePct: fees.relayerFee.pct,
-        timestamp: await hubPool.getCurrentTime(),
         referrer,
+        timestamp: fees.quoteTimestamp ?? (await hubPool.getCurrentTime()),
       });
       // matomo track bridge
       trackEvent({

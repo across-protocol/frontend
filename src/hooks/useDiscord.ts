@@ -1,3 +1,4 @@
+import { decodeJwt } from "jose";
 import { useCallback, useEffect, useState } from "react";
 import { discordClientId } from "utils";
 import { useQueryParams } from "./useQueryParams";
@@ -41,7 +42,20 @@ export function useDiscord() {
   }, [unauthenticate]);
 
   useEffect(() => {
-    const storedJWT = window.localStorage.getItem(STORAGE_KEY);
+    let storedJWT = window.localStorage.getItem(STORAGE_KEY);
+    if (storedJWT) {
+      try {
+        const jwt = decodeJwt(storedJWT);
+        const exp = jwt.exp;
+        const currentSecondsSinceEpoch = Date.now() / 1000;
+        if (exp && currentSecondsSinceEpoch > exp) {
+          throw new Error("Expired.");
+        }
+      } catch (e) {
+        storedJWT = null;
+        window.localStorage.removeItem(STORAGE_KEY);
+      }
+    }
     setIsAuthenticated(Boolean(storedJWT));
     setDiscordJWT((jwt) => (jwt ? jwt : storedJWT) ?? undefined);
     setDiscordOAuthToken(params["code"] || undefined);

@@ -5,7 +5,7 @@ import * as sdk from "@across-protocol/sdk-v2";
 import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
+import { disabledL1Tokens, DEFAULT_QUOTE_TIMESTAMP_BUFFER } from "./_constants";
 import { isString } from "./_typeguards";
 import { SuggestedFeesInputRequest } from "./_types";
 import {
@@ -34,6 +34,11 @@ const handler = async (
 ) => {
   const logger = getLogger();
   try {
+    const { QUOTE_TIMESTAMP_BUFFER } = process.env;
+    const quoteTimeBuffer = QUOTE_TIMESTAMP_BUFFER
+      ? Number(QUOTE_TIMESTAMP_BUFFER)
+      : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
+
     const provider = infuraProvider("mainnet");
 
     if (
@@ -55,9 +60,13 @@ const handler = async (
 
     token = ethers.utils.getAddress(token);
 
+    // Note: Add a buffer to "latest" timestamp so that it corresponds to a block
+    // older than HEAD. This is to improve relayer UX who have heightened risk of sending inadvertent invalid
+    // fills for quote times right at HEAD (or worst, in the future of HEAD). If timestamp is supplied as a query param,
+    // then no need to apply buffer.
     const parsedTimestamp = isString(timestamp)
       ? Number(timestamp)
-      : (await provider.getBlock("latest")).timestamp;
+      : (await provider.getBlock("latest")).timestamp - quoteTimeBuffer;
 
     const amount = ethers.BigNumber.from(amountInput);
 
@@ -73,16 +82,10 @@ const handler = async (
     );
 
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
-    const [{ number: latestBlock }, routeEnabled] = await Promise.all([
+    const [{ number: blockTag }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
       isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
     ]);
-
-    // If the query was supplied a timestamp, lets use the most
-    // recent block before the timestamp. If the timestamp is
-    // not specified, we can use the default variant of blockTag
-    // to be "latest"
-    const blockTag = isString(timestamp) ? latestBlock : BLOCK_TAG_LAG;
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
       throw new InputError(
