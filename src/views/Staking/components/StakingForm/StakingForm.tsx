@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   Tabs,
@@ -53,22 +53,19 @@ export const StakingForm = ({
   isWrongNetwork,
   estimatedPoolApy,
   isDataLoading,
+  isMutating,
 }: StakingFormPropType) => {
   const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
   const [stakeAmount, setStakeAmount] = useState("");
-  const [isTransitioning, setTransitioning] = useState(false);
-  const isRendered = useRef(false);
 
   const buttonHandler = isWrongNetwork
     ? () => {}
     : isConnected
     ? () => {
-        (activeTab === "stake" ? stakeActionFn : unstakeActionFn)(
-          parseLPToken(stakeAmount),
-          setTransitioning,
-          isRendered
-        );
+        (activeTab === "stake" ? stakeActionFn : unstakeActionFn)({
+          amount: parseLPToken(stakeAmount),
+        });
       }
     : walletConnectionHandler;
 
@@ -88,21 +85,14 @@ export const StakingForm = ({
   );
 
   useEffect(() => {
-    if (!isTransitioning) {
+    if (!isMutating) {
       setStakeAmount("");
     }
-  }, [activeTab, isTransitioning]);
+  }, [activeTab, isMutating]);
 
   useEffect(() => {
     setIsPoolInfoVisible(false);
   }, [isConnected]);
-
-  useEffect(() => {
-    isRendered.current = true;
-    return () => {
-      isRendered.current = false;
-    };
-  }, []);
 
   return (
     <SectionTitleWrapperV2 title="Staking">
@@ -131,7 +121,7 @@ export const StakingForm = ({
             maxValue={buttonMaxValueText}
             omitInput={!isConnected}
             onClickHandler={buttonHandler}
-            displayLoader={isTransitioning}
+            displayLoader={isMutating}
           />
         </InputBlockWrapper>
         <Divider />

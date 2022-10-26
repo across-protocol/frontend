@@ -252,7 +252,7 @@ export class ConfigClient {
     return sortBy(reachableTokens, (token) => this.tokenOrder[token.symbol]);
   }
   getPoolSymbols(): string[] {
-    const tokenList = this.getTokenList(1);
+    const tokenList = this.getTokenList(constants.hubPoolChainId);
     const poolSymbols = tokenList.map((token) => token.symbol.toLowerCase());
     return poolSymbols;
   }
