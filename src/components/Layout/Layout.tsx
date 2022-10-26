@@ -9,7 +9,7 @@ import { ReactComponent as DocsLogo } from "assets/docs-logo.svg";
 const NAV_LINKS = [
   {
     name: "Docs",
-    url: "https://docs.across.to/bridge/",
+    url: "https://docs.across.to/v2",
     icon: DocsLogo,
   },
   {

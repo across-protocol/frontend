@@ -1,6 +1,6 @@
 describe("bridge", () => {
   it("render in initial state", () => {
-    cy.visit("/");
+    cy.visit("/bridge");
     cy.dataCy("connect-wallet").should("be.visible");
     cy.dataCy("send").should("be.disabled");
   });

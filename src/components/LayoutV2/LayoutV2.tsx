@@ -2,10 +2,14 @@ import styled from "@emotion/styled";
 import Footer from "components/Footer";
 import { QUERIESV2 } from "utils";
 
-const LayoutV2: React.FC = ({ children }) => {
+type LayoutProp = {
+  maxWidth?: number;
+};
+
+const LayoutV2: React.FC<LayoutProp> = ({ maxWidth, children }) => {
   return (
     <Wrapper>
-      <InnerWrapper>{children}</InnerWrapper>
+      <InnerWrapper maxWidth={maxWidth ?? 600}>{children}</InnerWrapper>
       <Footer />
     </Wrapper>
   );
@@ -24,11 +28,11 @@ const Wrapper = styled.div`
   } ;
 `;
 
-const InnerWrapper = styled.div`
+const InnerWrapper = styled.div<{ maxWidth: number }>`
   background-color: transparent;
 
-  max-width: 600px;
-  width: calc(100% - 24px);
+  max-width: ${({ maxWidth }) => maxWidth}px;
+  width: calc(100% - 32px);
 
   min-height: fit-content;
 

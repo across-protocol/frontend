@@ -32,7 +32,7 @@ export const useStakingView = () => {
     poolId,
     exitLinkURI: "/rewards",
     poolLogoURI: logoURI,
-    poolName: stakingPoolQuery.data?.lpTokenSymbolName || "-",
+    poolName: stakingPoolQuery.data?.lpTokenSymbolName ?? "-",
     mainnetAddress: l1TokenAddress,
     isWrongNetwork,
     isWrongNetworkHandler,
