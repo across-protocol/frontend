@@ -1,28 +1,39 @@
-import { useConnection, useIsWrongNetwork } from "hooks";
+import { useParams } from "react-router-dom";
 
-import { useStakingPoolResolver } from "./useStakingPoolResolver";
-import { useStakingPool } from "./useStakingPool";
+import { useConnection, useIsWrongNetwork, useStakingPool } from "hooks";
+import { getConfig, hubPoolChainId } from "utils";
+
 import { useStakeAction, useUnstakeAction } from "./useStakingAction";
 
+type StakingPathParams = {
+  poolId: string;
+};
+
+const config = getConfig();
+
 export const useStakingView = () => {
+  const { poolId } = useParams<StakingPathParams>();
   const { isConnected, provider, connect } = useConnection();
   const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork();
 
-  const { poolId, exitLinkURI, poolLogoURI, poolName, mainnetAddress } =
-    useStakingPoolResolver();
-  const stakingPoolQuery = useStakingPool(mainnetAddress);
-  const stakeActionMutation = useStakeAction(mainnetAddress);
-  const unstakeActionMutation = useUnstakeAction(mainnetAddress);
+  const { l1TokenAddress, logoURI } = config.getTokenInfoBySymbol(
+    hubPoolChainId,
+    poolId.toUpperCase()
+  );
+
+  const stakingPoolQuery = useStakingPool(l1TokenAddress);
+  const stakeActionMutation = useStakeAction(l1TokenAddress);
+  const unstakeActionMutation = useUnstakeAction(l1TokenAddress);
 
   return {
     stakingPoolQuery,
     stakeActionMutation,
     unstakeActionMutation,
     poolId,
-    exitLinkURI,
-    poolLogoURI,
-    poolName,
-    mainnetAddress,
+    exitLinkURI: "/rewards",
+    poolLogoURI: logoURI,
+    poolName: stakingPoolQuery.data?.lpTokenSymbolName ?? "-",
+    mainnetAddress: l1TokenAddress,
     isWrongNetwork,
     isWrongNetworkHandler,
     isConnected,

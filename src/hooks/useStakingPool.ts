@@ -9,8 +9,9 @@ import {
   parseEtherLike,
   safeDivide,
   toWeiSafe,
+  providersTable,
 } from "utils";
-import { BigNumber, BigNumberish, providers } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 import axios from "axios";
 
@@ -19,55 +20,56 @@ const config = getConfig();
 export type FormatterFnType = (wei: BigNumberish) => string;
 export type ParserFnType = (wei: string) => BigNumber;
 
-type ResolvedDataType =
-  | {
-      lpTokenAddress: string;
-      lpTokenSymbolName: string;
-      acrossTokenAddress: string;
-      poolEnabled: boolean;
-      globalAmountOfLPStaked: BigNumberish;
-      userAmountOfLPStaked: BigNumberish;
-      maxMultiplier: BigNumberish;
-      outstandingRewards: BigNumberish;
-      currentUserRewardMultiplier: BigNumberish;
-      availableLPTokenBalance: BigNumberish;
-      elapsedTimeSinceAvgDeposit: number;
-      usersMultiplierPercentage: number;
-      usersTotalLPTokens: BigNumberish;
-      shareOfPool: BigNumberish;
-      estimatedApy: BigNumberish;
-      requiresApproval: boolean;
-      isStakingPoolOfUser: boolean;
-      lpTokenFormatter: FormatterFnType;
-      lpTokenParser: ParserFnType;
-    }
-  | undefined;
+export type StakingPool = {
+  tokenLogoURI: string;
+  tokenSymbol: string;
+  lpTokenAddress: string;
+  lpTokenSymbolName: string;
+  acrossTokenAddress: string;
+  poolEnabled: boolean;
+  globalAmountOfLPStaked: BigNumber;
+  userAmountOfLPStaked: BigNumber;
+  maxMultiplier: BigNumber;
+  outstandingRewards: BigNumber;
+  currentUserRewardMultiplier: BigNumber;
+  availableLPTokenBalance: BigNumber;
+  elapsedTimeSinceAvgDeposit: number;
+  usersMultiplierPercentage: number;
+  usersTotalLPTokens: BigNumber;
+  shareOfPool: BigNumber;
+  estimatedApy: BigNumber;
+  requiresApproval: boolean;
+  isStakingPoolOfUser: boolean;
+  lpTokenFormatter: FormatterFnType;
+  lpTokenParser: ParserFnType;
+};
 
 export function useStakingPool(tokenAddress?: string) {
-  const { account, provider } = useConnection();
+  const { account } = useConnection();
 
   return useQuery(
     getStakingPoolQueryKey(tokenAddress, account),
-    () => fetchStakingPool(tokenAddress, provider, account),
+    () => fetchStakingPool(tokenAddress, account),
     {
-      enabled: Boolean(provider && tokenAddress),
+      refetchInterval: 15_000,
+      enabled: Boolean(tokenAddress),
     }
   );
 }
 
 export function useAllStakingPools() {
-  const { account, provider } = useConnection();
+  const { account } = useConnection();
 
   const tokenList = config.getTokenList(hubPoolChainId);
 
   return useQueries(
     tokenList.map((token) => ({
+      refetchInterval: 15_000,
       queryKey: getStakingPoolQueryKey(token.address, account),
       queryFn: ({
         queryKey,
       }: QueryFunctionContext<[string, string?, string?]>) =>
-        fetchStakingPool(queryKey[1], provider, queryKey[2]),
-      enabled: Boolean(provider),
+        fetchStakingPool(queryKey[1], queryKey[2]),
     }))
   );
 }
@@ -86,9 +88,10 @@ function getStakingPoolQueryKey(
  */
 const fetchStakingPool = async (
   tokenAddress?: string,
-  provider?: providers.Provider | null,
   account?: string
-): Promise<ResolvedDataType> => {
+): Promise<StakingPool | undefined> => {
+  const provider = providersTable[hubPoolChainId];
+
   if (!tokenAddress || !provider) {
     return;
   }
@@ -96,6 +99,10 @@ const fetchStakingPool = async (
   const hubPool = config.getHubPool();
   const acceleratingDistributor = config.getAcceleratingDistributor();
   const acceleratingDistributorAddress = acceleratingDistributor.address;
+  const { logoURI, symbol } = config.getTokenInfoByAddress(
+    hubPoolChainId,
+    tokenAddress
+  );
 
   // Get the corresponding LP token from the hub pool directly
   // Resolve the ACX reward token address from the AcceleratingDistributor
@@ -115,20 +122,15 @@ const fetchStakingPool = async (
     {
       rewardsOutstanding: outstandingRewards,
       cumulativeBalance: userAmountOfLPStaked,
-      averageDepositTime,
     },
+    averageDepositTime,
     availableLPTokenBalance,
     lpTokenDecimalCount,
     lpTokenAllowance,
     lpTokenSymbolName,
     poolQuery,
   ] = await Promise.all([
-    acceleratingDistributor.stakingTokens(lpTokenAddress) as Promise<{
-      enabled: boolean;
-      baseEmissionRate: BigNumber;
-      maxMultiplier: BigNumber;
-      cumulativeStaked: BigNumber;
-    }>,
+    acceleratingDistributor.stakingTokens(lpTokenAddress),
     account
       ? acceleratingDistributor.getUserRewardMultiplier(lpTokenAddress, account)
       : Promise.resolve(BigNumber.from(0)),
@@ -137,32 +139,34 @@ const fetchStakingPool = async (
       : Promise.resolve({
           rewardsOutstanding: BigNumber.from(0),
           cumulativeBalance: BigNumber.from(0),
-          averageDepositTime: BigNumber.from(0),
         }),
+    account
+      ? acceleratingDistributor.getTimeSinceAverageDeposit(
+          lpTokenAddress,
+          account
+        )
+      : BigNumber.from(0),
     account ? lpTokenERC20.balanceOf(account) : BigNumber.from(0),
     lpTokenERC20.decimals(),
     account
       ? lpTokenERC20.allowance(account, acceleratingDistributorAddress)
       : BigNumber.from(0),
     Promise.resolve((await lpTokenERC20.symbol()).slice(4)),
-    axios.get(`/api/pools`, {
+    axios.get<{
+      estimatedApy: string;
+      totalPoolSize: BigNumberish;
+    }>(`/api/pools`, {
       params: { token: tokenAddress },
     }),
   ]);
 
   // Resolve the data retrieved from the serverless /pools API call
-  const { estimatedApy: estimatedApyFromQuery, totalPoolSize } =
-    poolQuery.data as {
-      estimatedApy: string;
-      totalPoolSize: BigNumberish;
-    };
+  const { estimatedApy: estimatedApyFromQuery, totalPoolSize } = poolQuery.data;
 
   // The Average Deposit Time retrieves the # seconds since the last
   // deposit, weighted by all the deposits in a user's account. To calculate the
   // days elapsed, we can divide by 1 day in seconds (86,400 seconds)
-  const daysElapsed = formattedBigNumberToNumber(
-    averageDepositTime.mul(fixedPointAdjustment).div(86400)
-  );
+  const daysElapsed = averageDepositTime.div(86400).toNumber();
 
   // Resolve the users reward multiplier as a percentage.
   const usersMultiplierPercentage = maxMultiplier.eq(0)
@@ -203,10 +207,12 @@ const fetchStakingPool = async (
     BigNumber.from(outstandingRewards).gt(0);
 
   return {
+    tokenLogoURI: logoURI,
+    tokenSymbol: symbol,
     lpTokenAddress,
     acrossTokenAddress,
     poolEnabled,
-    globalAmountOfLPStaked: totalPoolSize,
+    globalAmountOfLPStaked: BigNumber.from(totalPoolSize),
     userAmountOfLPStaked,
     maxMultiplier,
     outstandingRewards,

@@ -3,10 +3,8 @@ import { BigNumber, Signer } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 import { API } from "bnc-notify";
 
-import { useConnection } from "hooks";
+import { useConnection, useStakingPool } from "hooks";
 import { getConfig, MAX_APPROVAL_AMOUNT, notificationEmitter } from "utils";
-
-import { useStakingPool } from "./useStakingPool";
 
 export type StakingActionFunctionArgs = { amount: BigNumber };
 export type StakingActionFunctionType = (

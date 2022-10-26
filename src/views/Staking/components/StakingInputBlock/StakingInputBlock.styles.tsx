@@ -132,3 +132,8 @@ export const StakeButtonContentWrapper = styled.div`
 export const LoaderWrapper = styled.div`
   height: fit-content;
 `;
+
+export const TokenIcon = styled.img`
+  height: 24px;
+  width: 24px;
+`;

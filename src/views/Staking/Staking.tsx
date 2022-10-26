@@ -48,6 +48,7 @@ const Staking = () => {
       <Wrapper>
         <StakingExitAction poolName={poolName} poolLogoURI={poolLogoURI} />
         <StakingForm
+          logoURI={stakingPoolQuery.data?.tokenLogoURI || ""}
           isDataLoading={stakingPoolQuery.isLoading}
           isMutating={
             stakeActionMutation.isLoading || unstakeActionMutation.isLoading

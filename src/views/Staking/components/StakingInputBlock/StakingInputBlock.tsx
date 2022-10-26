@@ -8,10 +8,10 @@ import {
   Wrapper,
   LoaderWrapper,
   StakeButtonContentWrapper,
+  TokenIcon,
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
-import { StylizedSVG } from "utils/types";
 import { Alert } from "components";
 
 interface Props {
@@ -19,7 +19,7 @@ interface Props {
   setValue: React.Dispatch<React.SetStateAction<string>>;
   valid: boolean;
   buttonText: string;
-  Logo: StylizedSVG;
+  logoURI: string;
   maxValue: string;
   omitInput?: boolean;
   onClickHandler: () => void | Promise<void>;
@@ -32,7 +32,7 @@ const StakingInputBlock: React.FC<Props> = ({
   setValue,
   valid,
   buttonText,
-  Logo,
+  logoURI,
   maxValue,
   displayLoader,
   omitInput,
@@ -43,7 +43,7 @@ const StakingInputBlock: React.FC<Props> = ({
     <InputRow>
       {!omitInput && (
         <InputWrapper valid={!value || valid}>
-          <Logo />
+          <TokenIcon src={logoURI} />
           <Input
             placeholder="Enter amount"
             value={value}

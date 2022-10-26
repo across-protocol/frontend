@@ -10,7 +10,6 @@ import {
   MutliplierValue,
   StyledProgressBar,
   APYInfoItem,
-  UsdcLogo,
   InfoIcon,
   Divider,
   InputBlockWrapper,
@@ -52,6 +51,7 @@ export const StakingForm = ({
   unstakeActionFn,
   isWrongNetwork,
   estimatedPoolApy,
+  logoURI,
   isDataLoading,
   isMutating,
 }: StakingFormPropType) => {
@@ -59,13 +59,13 @@ export const StakingForm = ({
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
   const [stakeAmount, setStakeAmount] = useState("");
 
-  const buttonHandler = isWrongNetwork
-    ? () => {}
-    : isConnected
+  const buttonHandler = isConnected
     ? () => {
-        (activeTab === "stake" ? stakeActionFn : unstakeActionFn)({
-          amount: parseLPToken(stakeAmount),
-        });
+        if (!isWrongNetwork) {
+          (activeTab === "stake" ? stakeActionFn : unstakeActionFn)({
+            amount: parseLPToken(stakeAmount),
+          });
+        }
       }
     : walletConnectionHandler;
 
@@ -117,7 +117,7 @@ export const StakingForm = ({
             setValue={setStakeAmount}
             valid={!isConnected || validateStakeAmount(stakeAmount)}
             buttonText={`${buttonTextPrefix} ${activeTab}`}
-            Logo={UsdcLogo}
+            logoURI={logoURI}
             maxValue={buttonMaxValueText}
             omitInput={!isConnected}
             onClickHandler={buttonHandler}

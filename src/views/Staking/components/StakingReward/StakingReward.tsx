@@ -7,7 +7,7 @@ import { formatEther } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { StakingRewardPropType } from "../../types";
 import StakingInputBlock from "../StakingInputBlock";
-import { ReactComponent as AcrossLogo } from "assets/Across-logo-bullet.svg";
+import AcrossLogo from "assets/Across-logo-bullet.svg";
 import { Card } from "views/Staking/Staking.styles";
 
 export const StakingReward = ({
@@ -58,7 +58,7 @@ export const StakingReward = ({
               setValue={setAmountToClaim}
               maxValue=""
               valid
-              Logo={StyledAcrossLogo}
+              logoURI={AcrossLogo}
               buttonText="Connect wallet to claim"
               onClickHandler={walletConnectionHandler}
               displayLoader={isTransitioning}
@@ -133,8 +133,6 @@ const AlertText = styled.p`
   line-height: 20px;
   color: #f9d26c;
 `;
-
-const StyledAcrossLogo = styled(AcrossLogo)``;
 
 const StakingRewardCard = styled(Card)`
   gap: 16px;
