@@ -40,24 +40,27 @@ const rawHeader = [
   "Pool",
   "Staked LP Tokens",
   {
-    header: "Multiplier",
+    header: "APY",
     tooltip: {
-      title: "Multiplier",
-      description: "Lorem Ipsum",
+      title: "APY",
+      description:
+        "Your total APY for the pool, including the pool APY plus rewards APY times your multiplier. Max APY is the maximum APY after you have staked your LP tokens for 100 days.",
     },
   },
   {
-    header: "Reward APY",
+    header: "Multiplier",
     tooltip: {
       title: "Multiplier",
-      description: "Lorem Ipsum",
+      description:
+        "Your multiple applied to the pool’s base reward APY, based on your age of capital.",
     },
   },
   {
     header: "Age of Capital",
     tooltip: {
       title: "Age of Capital",
-      description: "Lorem Ipsum",
+      description:
+        "Number of days you’ve staked LP tokens without claiming rewards. Weighted by size if multiple positions have been staked.",
     },
   },
   "Rewards",
@@ -191,8 +194,8 @@ export function formatRow(data: RowData): IRow {
   const rowComponents = [
     RowPoolCell,
     RowStakedLPCell,
-    RowMultiplierCell,
     RowRewardAPYCell,
+    RowMultiplierCell,
     RowAgeofCapitalCell,
     RowRewardCell,
   ];
