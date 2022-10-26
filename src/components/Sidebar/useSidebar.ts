@@ -29,7 +29,7 @@ export default function useSidebar(openSidebar: boolean) {
 
   const sidebarNavigationLinks = [
     {
-      pathName: "/",
+      pathName: "/bridge",
       title: "Bridge",
     },
     {

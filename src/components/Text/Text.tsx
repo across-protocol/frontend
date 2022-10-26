@@ -2,7 +2,16 @@ import styled from "@emotion/styled";
 
 import { QUERIESV2 } from "utils";
 
-type TextSize = "4xl" | "3xl" | "2xl" | "xl" | "lg" | "md" | "sm" | "xs";
+type TextSize =
+  | "4xl"
+  | "3.5xl"
+  | "3xl"
+  | "2xl"
+  | "xl"
+  | "lg"
+  | "md"
+  | "sm"
+  | "xs";
 
 const sizeMap: Record<
   TextSize,
@@ -15,6 +24,11 @@ const sizeMap: Record<
   "4xl": {
     fontSize: 48,
     lineHeight: 58,
+    mobileSize: "3xl",
+  },
+  "3.5xl": {
+    fontSize: 40,
+    lineHeight: 48,
     mobileSize: "3xl",
   },
   "3xl": {
