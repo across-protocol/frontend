@@ -278,6 +278,10 @@ export const ReferralIconContainer = styled.div`
 `;
 
 export const StyledETHIcon = styled(ETHLogo)``;
+export const StyledPoolIcon = styled.img`
+  width: 32px;
+  height: 32px;
+`;
 
 export const StyledUNILogo = styled(UNILogo)``;
 export const StyledUSDCLogo = styled(USDCLogo)``;

@@ -1,13 +1,19 @@
-import { StyledETHIcon } from "components/RewardTable/RewardTables.styles";
-import { useConnection } from "hooks";
+import { StakingPool, useConnection } from "hooks";
 import { ReferralsSummary, useReferralSummary } from "hooks/useReferralSummary";
-import { formatUnitsFnBuilder, parseUnits } from "utils";
+import { formatUnitsFnBuilder } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { GenericStakingPoolRowData } from "../components/GenericStakingPoolTable/GenericStakingPoolTable";
+import { useStakingPools } from "./useStakingPools";
 
 export function useRewards() {
   const { isConnected, connect, account } = useConnection();
   const { summary, isLoading } = useReferralSummary(account);
+
+  const {
+    myPools,
+    allPools,
+    isLoading: areStakingPoolsLoading,
+  } = useStakingPools();
 
   return {
     isConnected,
@@ -16,7 +22,9 @@ export function useRewards() {
     totalRewards: "726.45 ACX",
     stakedTokens: "$942,021.23",
     ...formatReferralSummary(summary, !isLoading && isConnected),
-    poolData: formatPoolData(),
+    areStakingPoolsLoading,
+    myPoolData: formatPoolData(myPools),
+    allPoolData: formatPoolData(allPools),
   };
 }
 
@@ -41,33 +49,24 @@ function formatReferralSummary(summary: ReferralsSummary, isValid: boolean) {
   };
 }
 
-function formatPoolData(): GenericStakingPoolRowData[] {
-  return [
-    {
-      poolName: "ETH",
-      logo: StyledETHIcon,
-      multiplier: 2,
-      rewardAPY: parseUnits(".0278", 18),
-      baseAPY: parseUnits(".0139", 18),
-      rewardFormatter: formatUnitsFnBuilder(18),
-      lpTokenFormatter: formatUnitsFnBuilder(6),
-      rewards: parseUnits("1", 18),
-      ageOfCapital: 3,
-      usersStakedLP: parseUnits("942021.23", 6),
-      usersTotalLP: parseUnits("1242021.23", 6),
-    },
-    {
-      poolName: "ETH",
-      logo: StyledETHIcon,
-      multiplier: 2,
-      rewardAPY: parseUnits(".0278", 18),
-      baseAPY: parseUnits(".0139", 18),
-      rewardFormatter: formatUnitsFnBuilder(18),
-      lpTokenFormatter: formatUnitsFnBuilder(6),
-      rewards: parseUnits("1", 18),
-      ageOfCapital: 3,
-      usersStakedLP: parseUnits("0", 6),
-      usersTotalLP: parseUnits("1242021.23", 6),
-    },
-  ];
+function formatPoolData(pools: StakingPool[]): GenericStakingPoolRowData[] {
+  return pools.map(formatPool);
+}
+
+function formatPool(pool: StakingPool): GenericStakingPoolRowData {
+  return {
+    poolName: pool.lpTokenSymbolName,
+    tokenLogoURI: pool.tokenLogoURI,
+    tokenSymbol: pool.tokenSymbol,
+    multiplier: pool.currentUserRewardMultiplier,
+    usersMultiplierPercentage: pool.usersMultiplierPercentage,
+    rewardAPY: pool.estimatedApy, // TODO: use correct pool value
+    baseAPY: pool.estimatedApy, // TODO: use correct pool value
+    rewardFormatter: formatUnitsFnBuilder(18),
+    lpTokenFormatter: pool.lpTokenFormatter,
+    rewards: pool.outstandingRewards,
+    ageOfCapital: pool.elapsedTimeSinceAvgDeposit,
+    usersStakedLP: pool.userAmountOfLPStaked,
+    usersTotalLP: pool.usersTotalLPTokens,
+  };
 }

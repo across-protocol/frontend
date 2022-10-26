@@ -19,6 +19,7 @@ import {
   StakedTokenCellInner,
   StyledProgressBar,
 } from "./GenericStakingPoolTable.styles";
+import { StyledPoolIcon } from "components/RewardTable/RewardTables.styles";
 
 type RowData = GenericStakingPoolRowData;
 type MetaData = {
@@ -98,7 +99,7 @@ function RowPoolCell({ data }: PoolRowCellType) {
   return (
     <PoolCell>
       <LogoWrapper>
-        <data.logo />
+        <StyledPoolIcon src={data.tokenLogoURI} />
       </LogoWrapper>
       <Text size="md" color="white-100">
         {data.poolName.toUpperCase()}
@@ -113,10 +114,10 @@ function RowMultiplierCell({ data, meta }: PoolRowCellType) {
       <StyledProgressBar
         className="pool-progress-bar"
         active={meta.hasLPStake}
-        percent={(data.multiplier / 3) * 100}
+        percent={data.usersMultiplierPercentage}
       />
       <Text size="md" color={`white-${meta.hasLPStake ? "100" : "70"}`}>
-        {data.multiplier.toFixed(2)}x
+        {Number(formatEther(data.multiplier)).toFixed(2)}x
       </Text>
     </MultiplierCell>
   );
@@ -135,7 +136,7 @@ function RowStakedLPCell({ data, meta }: PoolRowCellType) {
         </Text>
       </StakedTokenCellInner>
       <Text size="sm" color="white-70">
-        {data.poolName.toUpperCase()}-LP
+        {data.poolName.toUpperCase()}
       </Text>
     </StackedCell>
   );
@@ -172,7 +173,7 @@ function RowRewardCell({ data, meta }: PoolRowCellType) {
 
 function RowButtonCell({ data, meta }: PoolRowCellType) {
   let button: JSX.Element | undefined = undefined;
-  const specificPoolLink = `/rewards/staking/${data.poolName}`;
+  const specificPoolLink = `/rewards/staking/${data.tokenSymbol}`;
   if (meta.hasLPStake) {
     button = (
       <ExternalLinkButton to={specificPoolLink}>

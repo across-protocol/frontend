@@ -19,6 +19,7 @@ interface Props {
   title?: string;
   scrollable: boolean;
   emptyMessage: string;
+  isLoading?: boolean;
 }
 
 const RewardMyPoolsTable: FC<Props> = ({
@@ -26,6 +27,7 @@ const RewardMyPoolsTable: FC<Props> = ({
   headers,
   title,
   scrollable = true,
+  isLoading,
   emptyMessage,
 }) => {
   return (
@@ -54,7 +56,7 @@ const RewardMyPoolsTable: FC<Props> = ({
               );
             })
           ) : (
-            <EmptyRow>{emptyMessage}</EmptyRow>
+            <EmptyRow>{isLoading ? "Loading..." : emptyMessage}</EmptyRow>
           )}
         </TableBody>
       </TableWrapper>

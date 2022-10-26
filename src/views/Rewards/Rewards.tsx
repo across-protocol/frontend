@@ -22,7 +22,9 @@ const Rewards = () => {
     referralVolume,
     referralWallets,
 
-    poolData,
+    areStakingPoolsLoading,
+    myPoolData,
+    allPoolData,
 
     formatterFn,
   } = useRewards();
@@ -54,11 +56,18 @@ const Rewards = () => {
             <DisconnectedReferralBox connectHandler={connectHandler} />
           )}
         </SectionWrapper>
+
         <SectionWrapper title="My pools">
-          <GenericStakingPoolTable poolData={poolData} />
+          <GenericStakingPoolTable
+            poolData={myPoolData}
+            isLoading={areStakingPoolsLoading}
+          />
         </SectionWrapper>
         <SectionWrapper title="All pools">
-          <GenericStakingPoolTable poolData={poolData} />
+          <GenericStakingPoolTable
+            poolData={allPoolData}
+            isLoading={areStakingPoolsLoading}
+          />
         </SectionWrapper>
       </InnerSectionWrapper>
     </Wrapper>
