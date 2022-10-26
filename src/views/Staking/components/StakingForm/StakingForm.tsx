@@ -59,13 +59,13 @@ export const StakingForm = ({
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
   const [stakeAmount, setStakeAmount] = useState("");
 
-  const buttonHandler = isWrongNetwork
-    ? () => {}
-    : isConnected
+  const buttonHandler = isConnected
     ? () => {
-        (activeTab === "stake" ? stakeActionFn : unstakeActionFn)({
-          amount: parseLPToken(stakeAmount),
-        });
+        if (!isWrongNetwork) {
+          (activeTab === "stake" ? stakeActionFn : unstakeActionFn)({
+            amount: parseLPToken(stakeAmount),
+          });
+        }
       }
     : walletConnectionHandler;
 
