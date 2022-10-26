@@ -40,6 +40,7 @@ import { formatEther, formatNumberMaxFracDigits, rewardTiers } from "utils";
 
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-24.svg";
 import { ReactComponent as TransferIcon } from "assets/icons/transfer-24.svg";
+import { ReactComponent as TransferUniqueIcon } from "assets/icons/transfer-1-24.svg";
 import { ReactComponent as GraphIcon } from "assets/icons/graph-24.svg";
 import { ReactComponent as IncreaseIcon } from "assets/icons/increase-24.svg";
 import { ReactComponent as TrophyIcon } from "assets/icons/trophy-24.svg";
@@ -148,7 +149,29 @@ const ReferralTierComponent: React.FC<{
       primaryText: String(referralsSummary.referreeWallets),
       tooltip: {
         title: "Referee wallets",
-        description: "Lorem ipsum",
+        description:
+          "Number of unique wallets actively linked to your referral link.",
+      },
+    },
+    {
+      Icon: TransferUniqueIcon,
+      title: {
+        desktop: "Unique referral transfers",
+        mobile: "Unique transfers",
+      },
+      primaryText: `${referralsSummary.transfers} transfer${
+        referralsSummary.transfers !== 1 ? "s" : ""
+      }`,
+      secondaryText: nextTierTernary({
+        arrow: true,
+        value: `${
+          nextTier.referrals - referralsSummary.referreeWallets
+        } to next tier`,
+      }),
+      tooltip: {
+        title: "Unique referral transfers",
+        description:
+          "Total number of unique wallets that used your referral link.",
       },
     },
     {
@@ -163,10 +186,6 @@ const ReferralTierComponent: React.FC<{
           nextTier.referrals - referralsSummary.referreeWallets
         } to next tier`,
       }),
-      tooltip: {
-        title: "Transfers",
-        description: "Lorem ipsum",
-      },
     },
     {
       Icon: GraphIcon,
@@ -178,10 +197,6 @@ const ReferralTierComponent: React.FC<{
           nextTier.volume - referralsSummary.volume
         )} to next tier`,
       }),
-      tooltip: {
-        title: "Volume from Transfers",
-        description: "Lorem ipsum",
-      },
     },
     {
       Icon: IncreaseIcon,
@@ -195,19 +210,11 @@ const ReferralTierComponent: React.FC<{
           referralsSummary.referralRate * 0.25 * 100
         )}% for referee`,
       }),
-      tooltip: {
-        title: "Referral Rate",
-        description: "Lorem ipsum",
-      },
     },
     {
       Icon: TrophyIcon,
       title: { desktop: "Total Rewards", mobile: "Rewards" },
       primaryText: `${rewardsAmount} ACX`,
-      tooltip: {
-        title: "Total Rewards",
-        description: "Lorem ipsum",
-      },
     },
   ];
 
