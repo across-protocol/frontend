@@ -8,7 +8,8 @@ import axios from "axios";
 import * as sdk from "@across-protocol/sdk-v2";
 import { BigNumber, ethers, providers } from "ethers";
 import { Log, Logging } from "@google-cloud/logging";
-import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
+import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
+import enabledGoerliRoutesAsJson from "../src/data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
 
 import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
@@ -18,6 +19,7 @@ import { VercelResponse } from "@vercel/node";
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
 const {
+  REACT_APP_HUBPOOL_CHAINID,
   REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
   REACT_APP_GOOGLE_SERVICE_ACCOUNT,
@@ -33,6 +35,13 @@ const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
 export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 // Default to no markup.
 export const DEFAULT_GAS_MARKUP = 0;
+
+export const HUP_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
+
+export const ENABLED_ROUTES =
+  HUP_POOL_CHAIN_ID === 1
+    ? enabledMainnetRoutesAsJson
+    : enabledGoerliRoutesAsJson;
 
 /**
  * Writes a log using the google cloud logging utility
@@ -129,7 +138,7 @@ export const getTokenDetails = async (
   chainId?: string
 ) => {
   const hubPool = HubPool__factory.connect(
-    "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
+    ENABLED_ROUTES.hubPoolAddress,
     provider
   );
 
@@ -169,11 +178,14 @@ export class InputError extends Error {}
 
 /**
  * Resolves an Infura provider given the name of the ETH network
- * @param name The name of an ethereum network
+ * @param nameOrChainId The name of an ethereum network
  * @returns A valid Ethers RPC provider
  */
-export const infuraProvider = (name: string) => {
-  const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
+export const infuraProvider = (nameOrChainId: providers.Networkish) => {
+  const url = new ethers.providers.InfuraProvider(
+    nameOrChainId,
+    REACT_APP_PUBLIC_INFURA_ID
+  ).connection.url;
   return new ethers.providers.StaticJsonRpcProvider(url);
 };
 
@@ -203,12 +215,25 @@ export const overrideProvider = (
  * Generates a fixed HubPoolClientConfig object
  * @returns A fixed constant
  */
-export const makeHubPoolClientConfig = () => {
+export const makeHubPoolClientConfig = (chainId = 1) => {
   return {
-    chainId: 1,
-    hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
-    wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
+    1: {
+      chainId: 1,
+      hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
+      wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
+    },
+    5: {
+      chainId: 5,
+      hubPoolAddress: "0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d",
+      wethAddress: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+      configStoreAddress: "0x3215e3C91f87081757d0c41EF0CB77738123Be83",
+    },
+  }[chainId] as {
+    chainId: number;
+    hubPoolAddress: string;
+    wethAddress: string;
+    configStoreAddress: string;
   };
 };
 
@@ -217,11 +242,11 @@ export const makeHubPoolClientConfig = () => {
  * @returns A HubPool client that can query the blockchain
  */
 export const getHubPoolClient = () => {
-  const hubPoolConfig = makeHubPoolClientConfig();
+  const hubPoolConfig = makeHubPoolClientConfig(HUP_POOL_CHAIN_ID);
   return new sdk.pool.Client(
     hubPoolConfig,
     {
-      provider: infuraProvider("mainnet"),
+      provider: infuraProvider(HUP_POOL_CHAIN_ID),
     },
     (_, __) => {} // Dummy function that does nothing and is needed to construct this client.
   );
@@ -244,7 +269,7 @@ export const getGasMarkup = (chainId: string | number) => {
 export const queries: Record<number, () => QueryBase> = {
   1: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      infuraProvider("mainnet"),
+      infuraProvider(1),
       undefined,
       undefined,
       undefined,
@@ -255,7 +280,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   10: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
-      infuraProvider("optimism-mainnet"),
+      infuraProvider(10),
       undefined,
       undefined,
       undefined,
@@ -266,7 +291,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   137: () =>
     new sdk.relayFeeCalculator.PolygonQueries(
-      infuraProvider("polygon-mainnet"),
+      infuraProvider(137),
       undefined,
       undefined,
       undefined,
@@ -288,7 +313,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   42161: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
-      infuraProvider("arbitrum-mainnet"),
+      infuraProvider(42161),
       undefined,
       undefined,
       undefined,
@@ -389,25 +414,7 @@ export const getProvider = (_chainId: number): providers.Provider => {
     if (override) {
       providerCache[chainId] = override;
     } else {
-      switch (chainId.toString()) {
-        case "1":
-          providerCache[chainId] = infuraProvider("mainnet");
-          break;
-        case "10":
-          providerCache[chainId] = infuraProvider("optimism-mainnet");
-          break;
-        case "137":
-          providerCache[chainId] = infuraProvider("polygon-mainnet");
-          break;
-        case "288":
-          providerCache[chainId] = bobaProvider();
-          break;
-        case "42161":
-          providerCache[chainId] = infuraProvider("arbitrum-mainnet");
-          break;
-        default:
-          throw new Error(`Invalid chainId provided: ${chainId}`);
-      }
+      providerCache[chainId] = infuraProvider(_chainId);
     }
   }
   return providerCache[chainId];
@@ -464,7 +471,7 @@ export const isRouteEnabled = (
   toChainId: number,
   fromToken: string
 ): boolean => {
-  const enabled = enabledRoutesAsJson.routes.some(
+  const enabled = ENABLED_ROUTES.routes.some(
     ({ fromTokenAddress, fromChain, toChain }) =>
       fromChainId === fromChain &&
       toChainId === toChain &&
