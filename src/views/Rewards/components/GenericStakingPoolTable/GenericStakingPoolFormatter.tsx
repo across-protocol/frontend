@@ -151,7 +151,7 @@ function RowRewardAPYCell({ data, meta }: PoolRowCellType) {
         {formatEther(BigNumber.from(100).mul(data.rewardAPY))}%
       </Text>
       <Text color="white-70" size="sm">
-        Base: {formatEther(BigNumber.from(100).mul(data.baseAPY))}%
+        Max: {formatEther(BigNumber.from(100).mul(data.maxAPY))}%
       </Text>
     </StackedCell>
   );

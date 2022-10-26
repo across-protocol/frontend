@@ -11,6 +11,7 @@ export type GenericStakingPoolRowData = {
   rewardAPY: BigNumberish;
   baseAPY: BigNumberish;
   rewards: BigNumberish;
+  maxAPY: BigNumberish;
 
   usersStakedLP: BigNumberish;
   usersTotalLP: BigNumberish;
