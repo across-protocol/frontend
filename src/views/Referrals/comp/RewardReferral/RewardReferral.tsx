@@ -157,7 +157,7 @@ const ReferralTierComponent: React.FC<{
       Icon: TransferUniqueIcon,
       title: {
         desktop: "Unique referral transfers",
-        mobile: "Unique transfers",
+        mobile: "Unique referral transfers",
       },
       primaryText: `${referralsSummary.referreeWallets} transfer${
         referralsSummary.referreeWallets !== 1 ? "s" : ""
@@ -239,10 +239,10 @@ const ReferralTierComponent: React.FC<{
               <StatsTitleIconTooltipWrapper>
                 <StatsTitleIconWrapper>
                   <stat.Icon />
-                  <StatsGrayTextDesktop size="lg">
+                  <StatsGrayTextDesktop size="md">
                     {stat.title.desktop}
                   </StatsGrayTextDesktop>
-                  <StatsGrayTextMobile size="lg">
+                  <StatsGrayTextMobile size="md">
                     {stat.title.mobile}
                   </StatsGrayTextMobile>
                 </StatsTitleIconWrapper>
@@ -259,17 +259,17 @@ const ReferralTierComponent: React.FC<{
               <StatsValueWrapper>
                 {stat.secondaryText && (
                   <>
-                    <StatsGrayTextDesktop size="lg">
+                    <StatsGrayTextDesktop size="md">
                       {stat.secondaryText.value}
                     </StatsGrayTextDesktop>
                     {stat.secondaryText.arrow && (
                       <ArrowSeparator>
-                        <StatsGrayTextDesktop size="lg">←</StatsGrayTextDesktop>
+                        <StatsGrayTextDesktop size="md">←</StatsGrayTextDesktop>
                       </ArrowSeparator>
                     )}
                   </>
                 )}
-                <StatsWhiteText size="lg">{stat.primaryText}</StatsWhiteText>
+                <StatsWhiteText size="md">{stat.primaryText}</StatsWhiteText>
               </StatsValueWrapper>
             </StatsInfoRow>
           </React.Fragment>
