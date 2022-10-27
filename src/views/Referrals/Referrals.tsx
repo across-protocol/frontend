@@ -1,4 +1,9 @@
-import { Content, InnerContent, Wrapper } from "./Referrals.styles";
+import {
+  Content,
+  InnerContent,
+  ReferralMediumWrapper,
+  Wrapper,
+} from "./Referrals.styles";
 import {
   RewardReferral,
   RewardTableWithOverlay,
@@ -29,13 +34,15 @@ const Referrals = () => {
       <Content>
         <BreadcrumbV2 />
         <InnerContent>
-          <RewardReferral
-            loading={isReferalSummaryLoading}
-            referrer={account}
-            referralsSummary={referralsSummary}
-            isConnected={isConnected}
-          />
-          {mediumUrl && <RewardMediumBlock />}
+          <ReferralMediumWrapper>
+            <RewardReferral
+              loading={isReferalSummaryLoading}
+              referrer={account}
+              referralsSummary={referralsSummary}
+              isConnected={isConnected}
+            />
+            {(true || mediumUrl) && <RewardMediumBlock />}
+          </ReferralMediumWrapper>
           <SectionTitleWrapperV2 title="My transfers">
             <RewardTableWithOverlay
               isConnected={isConnected}

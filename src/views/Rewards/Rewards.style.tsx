@@ -1,13 +1,26 @@
 import styled from "@emotion/styled";
 import { QUERIESV2 } from "utils";
 
+export const OuterWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  /* Subtract to account for header */
+  min-height: calc(100vh - 72px);
+  @media ${QUERIESV2.sm.andDown} {
+    /* Subtract to account for header */
+    min-height: calc(100vh - 64px);
+  } ;
+`;
+
 export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
 
-  max-width: calc(1140px + 48px);
-  width: calc(100% - 48px);
+  max-width: calc(1140px);
+  width: calc(100%);
 
   margin: 0 auto;
   padding: 32px 0;
