@@ -1,6 +1,5 @@
 import { Text } from "components/Text";
 import { PopperTooltip } from "components/Tooltip";
-import { GenericStakingPoolRowData } from "./GenericStakingPoolTable";
 import { IRow } from "components/Table/Table";
 import { BigNumber } from "ethers";
 import { formatEther } from "utils";
@@ -20,8 +19,9 @@ import {
   StyledProgressBar,
 } from "./GenericStakingPoolTable.styles";
 import { StyledPoolIcon } from "components/RewardTable/RewardTables.styles";
+import { StakingPool } from "hooks";
 
-type RowData = GenericStakingPoolRowData;
+type RowData = StakingPool;
 type MetaData = {
   hasLPTokens: boolean;
   hasLPStake: boolean;
@@ -105,7 +105,7 @@ function RowPoolCell({ data }: PoolRowCellType) {
         <StyledPoolIcon src={data.tokenLogoURI} />
       </LogoWrapper>
       <Text size="md" color="white-100">
-        {data.poolName.toUpperCase()}
+        {data.tokenSymbol.toUpperCase()}
       </Text>
     </PoolCell>
   );
@@ -120,7 +120,7 @@ function RowMultiplierCell({ data, meta }: PoolRowCellType) {
         percent={data.usersMultiplierPercentage}
       />
       <Text size="md" color={`white-${meta.hasLPStake ? "100" : "70"}`}>
-        {Number(formatEther(data.multiplier)).toFixed(2)}x
+        {Number(formatEther(data.currentUserRewardMultiplier)).toFixed(2)}x
       </Text>
     </MultiplierCell>
   );
@@ -132,14 +132,14 @@ function RowStakedLPCell({ data, meta }: PoolRowCellType) {
     <StackedCell>
       <StakedTokenCellInner>
         <Text size="md" color={`white-${meta.hasLPStake ? 100 : 70}`}>
-          {fmtFn(data.usersStakedLP)}
+          {fmtFn(data.userAmountOfLPStaked)}
         </Text>
         <Text size="md" color="white-70">
-          &nbsp; / {fmtFn(data.usersTotalLP)}
+          &nbsp; / {fmtFn(data.usersTotalLPTokens)}
         </Text>
       </StakedTokenCellInner>
       <Text size="sm" color="white-70">
-        {data.poolName.toUpperCase()}
+        {data.lpTokenSymbolName.toUpperCase()}
       </Text>
     </StackedCell>
   );
@@ -149,10 +149,10 @@ function RowRewardAPYCell({ data, meta }: PoolRowCellType) {
   return (
     <StackedCell>
       <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-        {formatEther(BigNumber.from(100).mul(data.rewardAPY))}%
+        {formatEther(BigNumber.from(100).mul(data.estimatedApy))}%
       </Text>
       <Text color="white-70" size="sm">
-        Max: {formatEther(BigNumber.from(100).mul(data.maxAPY))}%
+        Max: {formatEther(BigNumber.from(100).mul(data.estimatedApy))}%
       </Text>
     </StackedCell>
   );
@@ -161,7 +161,8 @@ function RowRewardAPYCell({ data, meta }: PoolRowCellType) {
 function RowAgeofCapitalCell({ data, meta }: PoolRowCellType) {
   return (
     <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-      {data.ageOfCapital} Day{data.ageOfCapital !== 1 && "s"}
+      {data.elapsedTimeSinceAvgDeposit} Day
+      {data.elapsedTimeSinceAvgDeposit !== 1 && "s"}
     </Text>
   );
 }
@@ -169,7 +170,7 @@ function RowAgeofCapitalCell({ data, meta }: PoolRowCellType) {
 function RowRewardCell({ data, meta }: PoolRowCellType) {
   return (
     <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-      {data.rewardFormatter(data.rewards)} ACX
+      {formatEther(data.outstandingRewards)} ACX
     </Text>
   );
 }
@@ -201,8 +202,8 @@ export function formatRow(data: RowData): IRow {
     RowRewardCell,
   ];
   const meta = {
-    hasLPStake: BigNumber.from(data.usersStakedLP).gt(0),
-    hasLPTokens: BigNumber.from(data.usersTotalLP).gt(0),
+    hasLPStake: BigNumber.from(data.userAmountOfLPStaked).gt(0),
+    hasLPTokens: BigNumber.from(data.usersTotalLPTokens).gt(0),
   };
   return {
     cells: rowComponents.map((Cell, idx) => ({

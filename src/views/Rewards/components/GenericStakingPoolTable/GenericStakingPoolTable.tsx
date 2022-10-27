@@ -1,31 +1,10 @@
 import styled from "@emotion/styled";
 import RewardTable from "components/RewardTable";
-import { BigNumberish, BigNumber } from "ethers";
+import { StakingPool } from "hooks";
 import { formatRow, headers } from "./GenericStakingPoolFormatter";
 
-export type GenericStakingPoolRowData = {
-  tokenSymbol: string;
-  tokenLogoURI: string;
-  poolName: string;
-  multiplier: BigNumber;
-  usersMultiplierPercentage: number;
-
-  rewardAPY: BigNumber;
-  baseAPY: BigNumber;
-  rewards: BigNumber;
-  maxAPY: BigNumber;
-
-  usersStakedLP: BigNumber;
-  usersTotalLP: BigNumber;
-
-  ageOfCapital: number;
-
-  rewardFormatter: (wei: BigNumberish) => string;
-  lpTokenFormatter: (wei: BigNumberish) => string;
-};
-
 type GenericStakingPoolTableType = {
-  poolData?: GenericStakingPoolRowData[];
+  poolData?: StakingPool[];
   isLoading?: boolean;
 };
 

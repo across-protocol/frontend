@@ -1,8 +1,7 @@
-import { StakingPool, useConnection } from "hooks";
+import { useConnection } from "hooks";
 import { ReferralsSummary, useReferralSummary } from "hooks/useReferralSummary";
 import { formatUnitsFnBuilder } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import { GenericStakingPoolRowData } from "../components/GenericStakingPoolTable/GenericStakingPoolTable";
 import { useStakingPools } from "./useStakingPools";
 
 export function useRewards() {
@@ -23,8 +22,8 @@ export function useRewards() {
     stakedTokens: "$942,021.23",
     ...formatReferralSummary(summary, !isLoading && isConnected),
     areStakingPoolsLoading,
-    myPoolData: formatPoolData(myPools),
-    allPoolData: formatPoolData(allPools),
+    myPoolData: myPools,
+    allPoolData: allPools,
   };
 }
 
@@ -46,28 +45,5 @@ function formatReferralSummary(summary: ReferralsSummary, isValid: boolean) {
     referralTier: numericTernary(summary.tier),
     referralRate: numericTernary(summary.referralRate),
     formatterFn: formatUnitsFnBuilder(18),
-  };
-}
-
-function formatPoolData(pools: StakingPool[]): GenericStakingPoolRowData[] {
-  return pools.map(formatPool);
-}
-
-function formatPool(pool: StakingPool): GenericStakingPoolRowData {
-  return {
-    poolName: pool.lpTokenSymbolName,
-    tokenLogoURI: pool.tokenLogoURI,
-    tokenSymbol: pool.tokenSymbol,
-    multiplier: pool.currentUserRewardMultiplier,
-    usersMultiplierPercentage: pool.usersMultiplierPercentage,
-    rewardAPY: pool.estimatedApy, // TODO: use correct pool value
-    baseAPY: pool.estimatedApy, // TODO: use correct pool value
-    maxAPY: pool.estimatedApy,
-    rewardFormatter: formatUnitsFnBuilder(18),
-    lpTokenFormatter: pool.lpTokenFormatter,
-    rewards: pool.outstandingRewards,
-    ageOfCapital: pool.elapsedTimeSinceAvgDeposit,
-    usersStakedLP: pool.userAmountOfLPStaked,
-    usersTotalLP: pool.usersTotalLPTokens,
   };
 }
