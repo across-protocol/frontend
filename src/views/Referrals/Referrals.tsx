@@ -2,18 +2,17 @@ import {
   Content,
   InnerContent,
   ReferralMediumWrapper,
-  Wrapper,
 } from "./Referrals.styles";
 import {
   RewardReferral,
   RewardTableWithOverlay,
   RewardMediumBlock,
 } from "./comp";
-import Footer from "components/Footer";
 import { useReferralsView } from "./useReferralsView";
 import { mediumUrl } from "utils";
 import BreadcrumbV2 from "components/BreadcrumbV2";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
+import { LayoutV2 } from "components";
 const Referrals = () => {
   const {
     account,
@@ -30,7 +29,7 @@ const Referrals = () => {
   } = useReferralsView();
 
   return (
-    <Wrapper>
+    <LayoutV2 maxWidth={1140}>
       <Content>
         <BreadcrumbV2 />
         <InnerContent>
@@ -58,8 +57,7 @@ const Referrals = () => {
           </SectionTitleWrapperV2>
         </InnerContent>
       </Content>
-      <Footer />
-    </Wrapper>
+    </LayoutV2>
   );
 };
 

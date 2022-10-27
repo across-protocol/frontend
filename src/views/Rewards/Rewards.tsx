@@ -4,9 +4,9 @@ import DisconnectedReferralBox from "./components/DisconnectedReferralBox";
 import OverviewRewardSection from "./components/OverviewRewardSection";
 import SectionWrapper from "../../components/SectionTitleWrapperV2/SectionWrapperV2";
 import { useRewards } from "./hooks/useRewards";
-import { InnerSectionWrapper, OuterWrapper, Wrapper } from "./Rewards.style";
+import { InnerSectionWrapper, Wrapper } from "./Rewards.style";
 import GenericStakingPoolTable from "./components/GenericStakingPoolTable/GenericStakingPoolTable";
-import Footer from "components/Footer";
+import { LayoutV2 } from "components";
 
 const Rewards = () => {
   const {
@@ -30,7 +30,7 @@ const Rewards = () => {
     formatterFn,
   } = useRewards();
   return (
-    <OuterWrapper>
+    <LayoutV2 maxWidth={1140}>
       <Wrapper>
         <BreadcrumbV2 />
         <InnerSectionWrapper>
@@ -72,8 +72,7 @@ const Rewards = () => {
           </SectionWrapper>
         </InnerSectionWrapper>
       </Wrapper>
-      <Footer />
-    </OuterWrapper>
+    </LayoutV2>
   );
 };
 

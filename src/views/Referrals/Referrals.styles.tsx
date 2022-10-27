@@ -16,7 +16,7 @@ export const Wrapper = styled.div`
 export const Content = styled.div`
   width: 100%;
   max-width: calc(1140px + 80px);
-  padding: ${32 / 16}rem ${40 / 16}rem;
+  padding: ${32 / 16}rem 0;
   margin: 0 auto;
 
   display: flex;
@@ -25,11 +25,11 @@ export const Content = styled.div`
   gap: 24px;
 
   @media ${QUERIESV2.tb.andDown} {
-    padding: ${44 / 16}rem ${24 / 16}rem ${48 / 16}rem;
+    padding: ${16 / 16}rem 0rem ${48 / 16}rem;
   }
 
   @media ${QUERIESV2.sm.andDown} {
-    padding: ${36 / 16}rem ${12 / 16}rem ${48 / 16}rem;
+    padding: ${16 / 16}rem 0rem ${48 / 16}rem;
   }
 `;
 
