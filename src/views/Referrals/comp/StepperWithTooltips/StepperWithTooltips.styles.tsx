@@ -18,7 +18,7 @@ export const StepItem = styled.div`
   color: #2d2e33;
   border: 1px solid #e0f3ff;
   border-radius: 10px;
-  cursor: pointer;
+  cursor: default;
   z-index: 5;
 
   @media screen and (max-width: 428px) {
