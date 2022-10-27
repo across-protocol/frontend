@@ -197,7 +197,9 @@ const fetchStakingPool = async (
 
   // Resolve APY Information
   const poolApy = parseEtherLike(estimatedApyFromQuery);
-  const maxApy = poolApy.add(baseRewardsApy.mul(3));
+  const maxApy = poolApy.add(
+    baseRewardsApy.mul(maxMultiplier).div(fixedPointAdjustment)
+  );
   const totalApy = poolApy.add(
     baseRewardsApy.mul(
       userAmountOfLPStaked.gt(0) ? usersMultiplierPercentage / 100 : 1
