@@ -54,9 +54,9 @@ export function ClaimAirdrop({
       <InfoTextContainer>
         <Text size="lg">
           Claimed ACX tokens will be automatically staked in the{" "}
-          <HighlightedLink>Rewards Locking Program</HighlightedLink> to support
-          bridging ACX cross-chain, and earning up to {maxApyPct || "-"}% APY.
-          Read more <LinkWithUnderline>here</LinkWithUnderline>.
+          <HighlightedLink to="/">Rewards Locking Program</HighlightedLink> to
+          support bridging ACX cross-chain, and earning up to {maxApyPct || "-"}
+          % APY. Read more <LinkWithUnderline to="/">here</LinkWithUnderline>.
         </Text>
       </InfoTextContainer>
       {!hasClaimed ? (

@@ -56,7 +56,7 @@ export function EligibleWalletFlow(props: Props) {
             Claim your airdrop and find more ways to earn ACX below.
             <br />
             Learn more about the airdrop details{" "}
-            <LinkWithUnderline>here</LinkWithUnderline>.
+            <LinkWithUnderline to="">here</LinkWithUnderline>.
           </>
         }
         eligible
@@ -97,9 +97,10 @@ export function EligibleWalletFlow(props: Props) {
               <HelpIcon />
               <TextContainer>
                 <Text color="white-100">
-                  Visit <HighlightedLink>Rewards</HighlightedLink> to find your
-                  claimed tokens and track all rewards generated from activities
-                  on Across.
+                  Visit{" "}
+                  <HighlightedLink to={"/rewards"}>Rewards</HighlightedLink> to
+                  find your claimed tokens and track all rewards generated from
+                  activities on Across.
                 </Text>
               </TextContainer>
               <IconButton>

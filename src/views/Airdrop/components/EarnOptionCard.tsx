@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
+import { useHistory } from "react-router-dom";
 
 import { Text } from "components/Text";
 import { PopperTooltip } from "components/Tooltip";
@@ -20,6 +21,8 @@ export function EarnOptionCard(props: {
   bottomText: string;
   Icon: React.ReactElement;
 }) {
+  const history = useHistory();
+
   return (
     <Container>
       <EarnOptionTopContainer>
@@ -33,7 +36,11 @@ export function EarnOptionCard(props: {
           </Text>
         </TextContainer>
       </EarnOptionTopContainer>
-      <FullWidthButton size="lg">{props.buttonLabel}</FullWidthButton>
+      <FullWidthButton size="lg" onClick={() => history.push(props.href)}>
+        <Text size="lg" color="dark-grey" weight={500}>
+          {props.buttonLabel}
+        </Text>
+      </FullWidthButton>
       <ApyContainer>
         <Text color="white-100">{props.bottomText}</Text>{" "}
         <PopperTooltip

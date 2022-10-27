@@ -35,7 +35,7 @@ export function WaysToEarn({
           "Join the referral program and earn a portion of fees in ACX for transfers made from your unique referral link."
         }
         buttonLabel={"Refer to Earn ACX"}
-        href={"/rewards"}
+        href={"/rewards/referrals"}
         pctTooltip={{
           title: "Referral rate",
           body: "Referral rate description",
