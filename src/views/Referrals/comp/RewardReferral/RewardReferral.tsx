@@ -40,6 +40,7 @@ import { formatEther, formatNumberMaxFracDigits, rewardTiers } from "utils";
 
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-24.svg";
 import { ReactComponent as TransferIcon } from "assets/icons/transfer-24.svg";
+import { ReactComponent as TransferUniqueIcon } from "assets/icons/transfer-1-24.svg";
 import { ReactComponent as GraphIcon } from "assets/icons/graph-24.svg";
 import { ReactComponent as IncreaseIcon } from "assets/icons/increase-24.svg";
 import { ReactComponent as TrophyIcon } from "assets/icons/trophy-24.svg";
@@ -145,17 +146,21 @@ const ReferralTierComponent: React.FC<{
     {
       Icon: WalletIcon,
       title: { desktop: "Referee Wallets", mobile: "Wallets" },
-      primaryText: String(referralsSummary.referreeWallets),
+      primaryText: String(referralsSummary.activeRefereesCount),
       tooltip: {
         title: "Referee wallets",
-        description: "Lorem ipsum",
+        description:
+          "Number of unique wallets actively linked to your referral link.",
       },
     },
     {
-      Icon: TransferIcon,
-      title: { desktop: "Transfers", mobile: "Transfers" },
-      primaryText: `${referralsSummary.transfers} transfer${
-        referralsSummary.transfers !== 1 ? "s" : ""
+      Icon: TransferUniqueIcon,
+      title: {
+        desktop: "Unique referral transfers",
+        mobile: "Unique referral transfers",
+      },
+      primaryText: `${referralsSummary.referreeWallets} transfer${
+        referralsSummary.referreeWallets !== 1 ? "s" : ""
       }`,
       secondaryText: nextTierTernary({
         arrow: true,
@@ -164,9 +169,17 @@ const ReferralTierComponent: React.FC<{
         } to next tier`,
       }),
       tooltip: {
-        title: "Transfers",
-        description: "Lorem ipsum",
+        title: "Unique referral transfers",
+        description:
+          "Total number of unique wallets that used your referral link.",
       },
+    },
+    {
+      Icon: TransferIcon,
+      title: { desktop: "Transfers", mobile: "Transfers" },
+      primaryText: `${referralsSummary.transfers} transfer${
+        referralsSummary.transfers !== 1 ? "s" : ""
+      }`,
     },
     {
       Icon: GraphIcon,
@@ -178,10 +191,6 @@ const ReferralTierComponent: React.FC<{
           nextTier.volume - referralsSummary.volume
         )} to next tier`,
       }),
-      tooltip: {
-        title: "Volume from Transfers",
-        description: "Lorem ipsum",
-      },
     },
     {
       Icon: IncreaseIcon,
@@ -195,19 +204,11 @@ const ReferralTierComponent: React.FC<{
           referralsSummary.referralRate * 0.25 * 100
         )}% for referee`,
       }),
-      tooltip: {
-        title: "Referral Rate",
-        description: "Lorem ipsum",
-      },
     },
     {
       Icon: TrophyIcon,
       title: { desktop: "Total Rewards", mobile: "Rewards" },
       primaryText: `${rewardsAmount} ACX`,
-      tooltip: {
-        title: "Total Rewards",
-        description: "Lorem ipsum",
-      },
     },
   ];
 
@@ -238,10 +239,10 @@ const ReferralTierComponent: React.FC<{
               <StatsTitleIconTooltipWrapper>
                 <StatsTitleIconWrapper>
                   <stat.Icon />
-                  <StatsGrayTextDesktop size="lg">
+                  <StatsGrayTextDesktop size="md">
                     {stat.title.desktop}
                   </StatsGrayTextDesktop>
-                  <StatsGrayTextMobile size="lg">
+                  <StatsGrayTextMobile size="md">
                     {stat.title.mobile}
                   </StatsGrayTextMobile>
                 </StatsTitleIconWrapper>
@@ -258,17 +259,17 @@ const ReferralTierComponent: React.FC<{
               <StatsValueWrapper>
                 {stat.secondaryText && (
                   <>
-                    <StatsGrayTextDesktop size="lg">
+                    <StatsGrayTextDesktop size="md">
                       {stat.secondaryText.value}
                     </StatsGrayTextDesktop>
                     {stat.secondaryText.arrow && (
                       <ArrowSeparator>
-                        <StatsGrayTextDesktop size="lg">←</StatsGrayTextDesktop>
+                        <StatsGrayTextDesktop size="md">←</StatsGrayTextDesktop>
                       </ArrowSeparator>
                     )}
                   </>
                 )}
-                <StatsWhiteText size="lg">{stat.primaryText}</StatsWhiteText>
+                <StatsWhiteText size="md">{stat.primaryText}</StatsWhiteText>
               </StatsValueWrapper>
             </StatsInfoRow>
           </React.Fragment>
