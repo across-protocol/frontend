@@ -41,7 +41,7 @@ const Referrals = () => {
               referralsSummary={referralsSummary}
               isConnected={isConnected}
             />
-            {(true || mediumUrl) && <RewardMediumBlock />}
+            {mediumUrl && <RewardMediumBlock />}
           </ReferralMediumWrapper>
           <SectionTitleWrapperV2 title="My transfers">
             <RewardTableWithOverlay
