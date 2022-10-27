@@ -86,3 +86,12 @@ export const InverseButton = styled(FullWidthButton)`
   color: #6cf9d8;
   background: transparent;
 `;
+
+export const LinkWithUnderline = styled.a`
+  text-decoration: underline;
+  color: #e0f3ff;
+`;
+
+export const HighlightedLink = styled.a`
+  color: #6cf9d8;
+`;

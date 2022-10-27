@@ -3,7 +3,11 @@ import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { QUERIESV2 } from "utils";
 
-import { FullWidthButton, InverseButton } from "../Airdrop.styles";
+import {
+  FullWidthButton,
+  LinkWithUnderline,
+  HighlightedLink,
+} from "../Airdrop.styles";
 import { BreakdownStats } from "./BreakdownStats";
 import { AmountBreakdown } from "../hooks/useAirdropRecipient";
 
@@ -21,6 +25,7 @@ export type Props = {
   onClickClaim: () => void;
   onClickAddToken: () => void;
   errorMsg?: string;
+  maxApyPct?: number;
 };
 
 export function ClaimAirdrop({
@@ -31,9 +36,9 @@ export function ClaimAirdrop({
   discord,
   amount,
   amountBreakdown,
-  onClickAddToken,
   onClickClaim,
   errorMsg,
+  maxApyPct,
 }: Props) {
   return (
     <Container>
@@ -46,11 +51,15 @@ export function ClaimAirdrop({
           amountBreakdown={amountBreakdown}
         />
       </BreakdownCardContainer>
-      {hasClaimed ? (
-        <InverseButton size="lg" onClick={onClickAddToken}>
-          Add token contract to wallet
-        </InverseButton>
-      ) : (
+      <InfoTextContainer>
+        <Text size="lg">
+          Claimed ACX tokens will be automatically staked in the{" "}
+          <HighlightedLink>Rewards Locking Program</HighlightedLink> to support
+          bridging ACX cross-chain, and earning up to {maxApyPct || "-"}% APY.
+          Read more <LinkWithUnderline>here</LinkWithUnderline>.
+        </Text>
+      </InfoTextContainer>
+      {!hasClaimed ? (
         <>
           {errorMsg && <Text color="error">{errorMsg}</Text>}
           <FullWidthButton
@@ -61,7 +70,7 @@ export function ClaimAirdrop({
             {isClaiming ? "Claiming airdrop..." : "Claim airdrop"}
           </FullWidthButton>
         </>
-      )}
+      ) : null}
     </Container>
   );
 }
@@ -100,4 +109,8 @@ const BreakdownTitle = styled(Text)`
   @media ${QUERIESV2.sm.andDown} {
     padding: 12px;
   }
+`;
+
+const InfoTextContainer = styled.div`
+  text-align: center;
 `;

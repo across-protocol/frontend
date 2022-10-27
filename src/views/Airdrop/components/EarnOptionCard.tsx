@@ -13,12 +13,11 @@ export function EarnOptionCard(props: {
   subTitle: string;
   buttonLabel: string;
   href: string;
-  pctRange: number[];
-  pctLabel: string;
   pctTooltip: {
     title: string;
     body: string;
   };
+  bottomText: string;
   Icon: React.ReactElement;
 }) {
   return (
@@ -36,10 +35,7 @@ export function EarnOptionCard(props: {
       </EarnOptionTopContainer>
       <FullWidthButton size="lg">{props.buttonLabel}</FullWidthButton>
       <ApyContainer>
-        <Text>{props.pctLabel}:</Text>{" "}
-        <Text color="white-100">
-          {props.pctRange[0]} - {props.pctRange[1]}%
-        </Text>{" "}
+        <Text color="white-100">{props.bottomText}</Text>{" "}
         <PopperTooltip
           title={props.pctTooltip.title}
           body={props.pctTooltip.body}
@@ -83,10 +79,21 @@ const EarnOptionTopContainer = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+
+  @media ${QUERIESV2.sm.andDown} {
+    align-items: flex-start;
+  }
 `;
 
 const IconContainer = styled.div`
   margin-right: 18px;
+
+  @media ${QUERIESV2.sm.andDown} {
+    > svg {
+      height: 48px;
+      width: 48px;
+    }
+  }
 `;
 
 const FullWidthButton = styled(Button)`

@@ -16,8 +16,11 @@ type Props = {
   activeStepIndex: number;
   expandedStepIndex: number;
   title: string;
+  SubTitle?: React.ReactElement | null;
   Icon: React.ReactElement;
   showPill?: boolean;
+  isClaiming?: boolean;
+  TopRowAddon?: React.ReactElement | null;
 };
 
 export function StepCard(props: Props) {
@@ -40,11 +43,16 @@ export function StepCard(props: Props) {
           <Text size="xl" color="white-100">
             {props.title}
           </Text>
+          {props.SubTitle}
         </TopRowTextContainer>
         {props.showPill && (
           <Pill backgroundColor={isStepCompleted ? "#364C4C" : "#3E4047"}>
             <Text size="xs" color={isStepCompleted ? "aqua" : "white-80"}>
-              {isStepCompleted ? "claimed" : "unclaimed"}
+              {isStepCompleted
+                ? "claimed"
+                : props.isClaiming
+                ? "claiming..."
+                : "unclaimed"}
             </Text>
           </Pill>
         )}
@@ -69,6 +77,7 @@ export function StepCard(props: Props) {
           )}
         </AnimatePresence>
       </AnimationContainer>
+      {props.TopRowAddon}
     </Container>
   );
 }
@@ -82,8 +91,7 @@ const Container = styled.div<{ isCompleted?: boolean }>`
 
   background: #34353b;
 
-  border: 1px solid
-    ${({ isCompleted }) => (isCompleted ? "#6CF9D8" : "#3e4047")};
+  border: 1px solid #3e4047;
   border-radius: 10px;
 
   background-image: url(${bgImage});
@@ -122,6 +130,10 @@ const CheckIconContainer = styled.div<{ isStepCompleted?: boolean }>`
   @media ${QUERIESV2.sm.andDown} {
     height: 40px;
     width: 40px;
+    > svg {
+      height: 40px;
+      width: 40px;
+    }
   }
 `;
 

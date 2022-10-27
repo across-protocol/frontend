@@ -5,45 +5,45 @@ import { ReactComponent as ReferralIcon } from "assets/referral-star-ring.svg";
 
 import { EarnOptionCard } from "./EarnOptionCard";
 
-const OPTIONS = [
-  {
-    Icon: <ReferralIcon />,
-    title: "Across Referral Program",
-    subTitle:
-      "Join the referral program and earn a portion of fees in ACX for transfers made from your unique referral link.",
-    buttonLabel: "Refer to Earn ACX",
-    href: "/",
-    pctRange: [40, 80],
-    pctLabel: "Referral rate",
-    pctTooltip: {
-      // TODO: use proper text
-      title: "Referral rate",
-      body: "Referral rate description",
-    },
-  },
-  {
-    Icon: <PoolStarRingIcon />,
-    title: "Pool and Stake LP Tokens",
-    subTitle:
-      "Provide liquidity on Across and stake your LP tokens to earn ACX tokens in proportion to your staking.",
-    buttonLabel: "Pool and Stake to Earn ACX",
-    href: "/rewards/staking",
-    pctRange: [5, 6], // TODO: retrieve dynamically
-    pctLabel: "APY",
-    pctTooltip: {
-      // TODO: use proper text
-      title: "APY range",
-      body: "APY range description",
-    },
-  },
-];
-
-export function WaysToEarn() {
+export function WaysToEarn({
+  maxPoolApyPct,
+  maxReferralRatePct,
+}: {
+  maxPoolApyPct?: number;
+  maxReferralRatePct?: number;
+}) {
   return (
     <OptionsContainer>
-      {OPTIONS.map((option) => (
-        <EarnOptionCard key={option.title} {...option} />
-      ))}
+      <EarnOptionCard
+        Icon={<PoolStarRingIcon />}
+        title={"Pool and Stake LP Tokens"}
+        subTitle={
+          "Provide liquidity on Across and stake your LP tokens to earn ACX tokens in proportion to your staking."
+        }
+        buttonLabel={"Pool and Stake to Earn ACX"}
+        href={"/rewards"}
+        pctTooltip={{
+          title: "APY range",
+          body: "APY range description",
+        }}
+        bottomText={`Earn up to ${maxPoolApyPct || "-"}% APY.`}
+      />
+      <EarnOptionCard
+        Icon={<ReferralIcon />}
+        title={"Across Referral Program"}
+        subTitle={
+          "Join the referral program and earn a portion of fees in ACX for transfers made from your unique referral link."
+        }
+        buttonLabel={"Refer to Earn ACX"}
+        href={"/rewards"}
+        pctTooltip={{
+          title: "Referral rate",
+          body: "Referral rate description",
+        }}
+        bottomText={`Earn up to ${
+          maxReferralRatePct || "-"
+        }% of fees back in ACX.`}
+      />
     </OptionsContainer>
   );
 }
