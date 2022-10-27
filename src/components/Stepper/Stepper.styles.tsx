@@ -21,7 +21,7 @@ export const StepItem = styled.div`
   margin-bottom: 6px;
   font-size: ${14 / 16}rem;
   border: 1px solid #e0f3ff;
-  cursor: pointer;
+  cursor: default;
 `;
 
 export const Seperator = styled.div`

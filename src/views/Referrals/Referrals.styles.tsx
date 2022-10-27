@@ -45,3 +45,5 @@ export const InnerContent = styled.div`
     gap: 24px;
   }
 `;
+
+export const ReferralMediumWrapper = styled.div``;

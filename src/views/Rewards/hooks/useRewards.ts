@@ -62,6 +62,7 @@ function formatPool(pool: StakingPool): GenericStakingPoolRowData {
     usersMultiplierPercentage: pool.usersMultiplierPercentage,
     rewardAPY: pool.estimatedApy, // TODO: use correct pool value
     baseAPY: pool.estimatedApy, // TODO: use correct pool value
+    maxAPY: pool.estimatedApy,
     rewardFormatter: formatUnitsFnBuilder(18),
     lpTokenFormatter: pool.lpTokenFormatter,
     rewards: pool.outstandingRewards,

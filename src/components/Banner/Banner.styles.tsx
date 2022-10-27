@@ -12,7 +12,6 @@ export const Wrapper = styled.div`
   font-size: ${16 / 16}rem;
   position: unset;
   width: 100%;
-  margin-bottom: 2rem;
   top: 0;
   left: 0;
   z-index: 1100;
