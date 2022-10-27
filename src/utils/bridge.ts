@@ -172,7 +172,7 @@ export const getConfirmationDepositTime = (
   };
 
   if (amount.lte(limits.maxDepositInstant)) {
-    return getTimeEstimateString(1, 4);
+    return getTimeEstimateString(1, 5);
   } else if (amount.lte(limits.maxDepositShortDelay)) {
     // This is just a rough estimate of how long 2 bot runs (1-4 minutes allocated for each) + an arbitrum transfer of 3-10 minutes would take.
     if (toChain === ChainId.ARBITRUM) return getTimeEstimateString(5, 15);
