@@ -11,21 +11,7 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/contracts-v2@^0.0.50":
-  version "0.0.50"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-0.0.50.tgz#0f2509291fc3b4158c60212f560ef2d0094afde7"
-  integrity sha512-CScmgv0c9ZgG2p4Id9b0FhhR9PKsge2xvc7oSgHGIRjMRF5Xofr18MdjbfVnO06hS99g7D1ngDZNgaAdJKbrXg==
-  dependencies:
-    "@defi-wonderland/smock" "^2.0.7"
-    "@eth-optimism/contracts" "^0.5.11"
-    "@openzeppelin/contracts" "^4.4.2"
-    "@uma/common" "^2.17.0"
-    "@uma/contracts-node" "^0.2.0"
-    "@uma/core" "^2.24.0"
-    arb-bridge-eth "^0.7.4"
-    arb-bridge-peripherals "^1.0.5"
-
-"@across-protocol/contracts-v2@^1.0.4":
+"@across-protocol/contracts-v2@^1.0.3", "@across-protocol/contracts-v2@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-1.0.4.tgz#a39d95d643d154ff48417b960f740ee04ef17b17"
   integrity sha512-v0MDHp2kO3Yf1r5YTwUf5FQvhMD5JXZoYDWifYvHmyf7zI68NgzDL9Yvo9hFzAjYAFlrVSxhTU4pBijx+hcKLw==
@@ -49,14 +35,14 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.1.26":
-  version "0.1.26"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.1.26.tgz#b73744a8d61e87cacd73245d467516f9c6503d00"
-  integrity sha512-VjtS2P+nE8JpH3tUJZJQ0XPDUKJF6sdLCQ0kpjhaC1x3Qq4r66Uuzm5CVaxltxQf9rZ5gvKhigKLHBy7UB0/fw==
+"@across-protocol/sdk-v2@^0.1.30":
+  version "0.1.30"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.1.30.tgz#dcfb92b8db2cdbc3d1815b6d6cdd4d49814ecec7"
+  integrity sha512-8723IU9H08IuEbG3LccOqVln8vdOoR9VyIR6m7KwAR6rAXoZjjJf0zhgPvkkef7W3DC9AULQJlmKELd4qtNhVg==
   dependencies:
-    "@across-protocol/contracts-v2" "^0.0.50"
+    "@across-protocol/contracts-v2" "^1.0.3"
     "@eth-optimism/sdk" "^1.1.4"
-    "@uma/sdk" "^0.23.4"
+    "@uma/sdk" "^0.29.3"
     axios "^0.27.2"
     decimal.js "^10.3.1"
     ethers "^5.6.1"
@@ -4848,6 +4834,20 @@
     split-array-stream "^2.0.0"
     stream-events "^1.0.5"
 
+"@google-cloud/datastore@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-7.0.0.tgz#e026db7d12c773230abf9e6b391a6196ef3fb81b"
+  integrity sha512-CbvqzqWFtwHqH3EWMWHqKzKiM9dV+/Ga0e1oSr7rO2KA6QBHGvUEBbLxRWirHnt6Xz2drjzIVjVE1tuOENHPlQ==
+  dependencies:
+    "@google-cloud/promisify" "^2.0.0"
+    arrify "^2.0.1"
+    concat-stream "^2.0.0"
+    extend "^3.0.2"
+    google-gax "^3.0.1"
+    is "^3.3.0"
+    split-array-stream "^2.0.0"
+    stream-events "^1.0.5"
+
 "@google-cloud/kms@^2.3.1":
   version "2.11.0"
   resolved "https://registry.yarnpkg.com/@google-cloud/kms/-/kms-2.11.0.tgz#f0b039482b83e0647fb0d81cd3a243d8290b300e"
@@ -4948,9 +4948,9 @@
     xdg-basedir "^4.0.0"
 
 "@google-cloud/storage@^6.4.2":
-  version "6.5.4"
-  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.5.4.tgz#c43742ac12787df39c07725f131f199bb80e0b58"
-  integrity sha512-7ntxYkceJo0FzKvHZU988Vy+PFRErSiqEIgcErJ+Hg8vU+nCw0dhg2K0uJJSnUJoEPJLz4DFAMqYCme0WhD2uA==
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.6.0.tgz#01f64bf706acc98dc2787e490afe878ad9f64250"
+  integrity sha512-z1rj7ft15TZd7hzPVsqTZPduLPR+ZMOnwUME9d1yynJvHm5bWkyV3d3eigZ+v2Zirl7rjk8UZTdzRSYr1MvgRQ==
   dependencies:
     "@google-cloud/paginator" "^3.0.7"
     "@google-cloud/projectify" "^3.0.0"
@@ -6050,7 +6050,7 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
-"@openzeppelin/contracts-0.8@npm:@openzeppelin/contracts@^4.3.2", "@openzeppelin/contracts@^4.4.2":
+"@openzeppelin/contracts-0.8@npm:@openzeppelin/contracts@^4.3.2":
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.5.0.tgz#3fd75d57de172b3743cdfc1206883f56430409cc"
   integrity sha512-fdkzKPYMjrRiPK6K4y64e6GzULR7R7RwxSigHS8DDp7aWDeoReqsQI+cxHV1UuhAqX69L1lAaWDxenfP+xiqzA==
@@ -8807,44 +8807,7 @@
     "@typescript-eslint/types" "4.33.0"
     eslint-visitor-keys "^2.0.0"
 
-"@uma/common@^2.17.0", "@uma/common@^2.19.0":
-  version "2.19.0"
-  resolved "https://registry.yarnpkg.com/@uma/common/-/common-2.19.0.tgz#4ecca9fccbcbead55dbdfdae180b694af62a5f49"
-  integrity sha512-b9NiUSyVFXOXH3B2g6ZcwCv7bP2oX7c2EVskERhsbELNUi2SkmbKF7ivBQhRwbFRZGClply8e89z14E6Zi73Pw==
-  dependencies:
-    "@across-protocol/contracts" "^0.1.4"
-    "@eth-optimism/hardhat-ovm" "^0.2.2"
-    "@ethersproject/bignumber" "^5.0.5"
-    "@google-cloud/kms" "^2.3.1"
-    "@google-cloud/storage" "^5.8.5"
-    "@nomiclabs/hardhat-ethers" "^2.0.2"
-    "@nomiclabs/hardhat-etherscan" "^3.0.0"
-    "@nomiclabs/hardhat-truffle5" "^2.0.0"
-    "@nomiclabs/hardhat-web3" "^2.0.0"
-    "@truffle/contract" "^4.3.38"
-    "@truffle/hdwallet-provider" eip1559-beta
-    "@umaprotocol/truffle-ledger-provider" "^1.0.5"
-    "@uniswap/v3-core" "^1.0.0-rc.2"
-    abi-decoder "github:UMAprotocol/abi-decoder"
-    bignumber.js "^8.0.1"
-    chalk-pipe "^3.0.0"
-    decimal.js "^10.2.1"
-    dotenv "^9.0.0"
-    eth-crypto "^1.7.0"
-    hardhat "^2.5.0"
-    hardhat-deploy "0.9.1"
-    hardhat-gas-reporter "^1.0.4"
-    hardhat-typechain "^0.3.5"
-    lodash.uniqby "^4.7.0"
-    minimist "^1.2.0"
-    moment "^2.24.0"
-    node-metamask "github:UMAprotocol/node-metamask"
-    require-context "^1.1.0"
-    solidity-coverage "^0.7.13"
-    truffle-deploy-registry "^0.5.1"
-    web3 "^1.6.0"
-
-"@uma/common@^2.28.0":
+"@uma/common@^2.17.0", "@uma/common@^2.28.0":
   version "2.28.0"
   resolved "https://registry.yarnpkg.com/@uma/common/-/common-2.28.0.tgz#7123caf705a7bad3f16a9c211759913d9226929b"
   integrity sha512-a6znfnN8Te5imvIzEkcrwg87vkd6//Oa+H74uBtx1z4ZTU0+FcByUnfSbPMlwQxrvkF2GUF9+7mmnD81Dz8ZVg==
@@ -8881,30 +8844,62 @@
     web3 "^1.6.0"
     winston "^3.2.1"
 
+"@uma/common@^2.19.0":
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/@uma/common/-/common-2.19.0.tgz#4ecca9fccbcbead55dbdfdae180b694af62a5f49"
+  integrity sha512-b9NiUSyVFXOXH3B2g6ZcwCv7bP2oX7c2EVskERhsbELNUi2SkmbKF7ivBQhRwbFRZGClply8e89z14E6Zi73Pw==
+  dependencies:
+    "@across-protocol/contracts" "^0.1.4"
+    "@eth-optimism/hardhat-ovm" "^0.2.2"
+    "@ethersproject/bignumber" "^5.0.5"
+    "@google-cloud/kms" "^2.3.1"
+    "@google-cloud/storage" "^5.8.5"
+    "@nomiclabs/hardhat-ethers" "^2.0.2"
+    "@nomiclabs/hardhat-etherscan" "^3.0.0"
+    "@nomiclabs/hardhat-truffle5" "^2.0.0"
+    "@nomiclabs/hardhat-web3" "^2.0.0"
+    "@truffle/contract" "^4.3.38"
+    "@truffle/hdwallet-provider" eip1559-beta
+    "@umaprotocol/truffle-ledger-provider" "^1.0.5"
+    "@uniswap/v3-core" "^1.0.0-rc.2"
+    abi-decoder "github:UMAprotocol/abi-decoder"
+    bignumber.js "^8.0.1"
+    chalk-pipe "^3.0.0"
+    decimal.js "^10.2.1"
+    dotenv "^9.0.0"
+    eth-crypto "^1.7.0"
+    hardhat "^2.5.0"
+    hardhat-deploy "0.9.1"
+    hardhat-gas-reporter "^1.0.4"
+    hardhat-typechain "^0.3.5"
+    lodash.uniqby "^4.7.0"
+    minimist "^1.2.0"
+    moment "^2.24.0"
+    node-metamask "github:UMAprotocol/node-metamask"
+    require-context "^1.1.0"
+    solidity-coverage "^0.7.13"
+    truffle-deploy-registry "^0.5.1"
+    web3 "^1.6.0"
+
 "@uma/contracts-frontend@^0.1.17":
   version "0.1.17"
   resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.1.17.tgz#141760bf6d783ddfbe94ce5cfeff410d2e73311a"
   integrity sha512-sRWCFEC56DyBd+QcCPGoJghG9lAE8VQvcYpW9CSvyOLmSz+eugy1pxbOBg6v6qkGqexO1vCp608TkG71vaQqUg==
+
+"@uma/contracts-frontend@^0.3.18":
+  version "0.3.18"
+  resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.3.18.tgz#dc6afcfa401c07d8d08be53eff4a97ca8eb06c79"
+  integrity sha512-eneJdzpxe+UFAmZufL7MAnQ/gX1c9reU12iUpfcBcNscNDoQcHw82P4KTmzIQ2zqHvvnMmvE/uLOsZ5OXGGJBw==
 
 "@uma/contracts-frontend@^0.3.2":
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.3.2.tgz#97b187d017f8c2dc6f66924ad31cdea5a3dc5aa0"
   integrity sha512-WwTrmF+11EKT6Um+JfrqZOajeGNExdiOXZO4iIolUpTG4xBYI0D1KAGzUc2BNvkWAxD6ZdNuRqnQIvCX7+ySvQ==
 
-"@uma/contracts-frontend@^0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@uma/contracts-frontend/-/contracts-frontend-0.3.7.tgz#a959490bcf5e6b0cd1d941a60be86f8ff659dd54"
-  integrity sha512-we/ZSf91HQPtYSbGyPAnZmHJCU+hREXWJW4Ee2Ics+/dytTx5M4ecqlwgOq9bXJNHpUMMeq4WdwuxLYJjrW19A==
-
 "@uma/contracts-node@^0.1.17":
   version "0.1.17"
   resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.1.17.tgz#c69af7bc849efed1750476c74282c06366635ebe"
   integrity sha512-tUuprOrDDm/j60RQOf7dm+AxLO+tl6dmd904uWJVwCCZkOTILlr9Ava663VaMIGPn/dki5fE/UPJ5tdCENOANQ==
-
-"@uma/contracts-node@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.2.0.tgz#81c76c9100a2a1d94eea59b04e091eecb0fb29cb"
-  integrity sha512-Z8x3UcpPbjplFlWNMV+qKzcxvbnQD6PTWIW5l05J9YwbN7lbxjt3fK+ns6RTHkfKJwHifQeSbJ8nzqV4zo/b1Q==
 
 "@uma/contracts-node@^0.3.18":
   version "0.3.18"
@@ -8916,12 +8911,7 @@
   resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.3.2.tgz#884b00b2c6bf983c9f136d5f8a0749c5ff4e08cd"
   integrity sha512-Ncl7Kv2nxuY/wV5oczH2Nf6XCS7dJLad9DlzMI3jwPMPU98YT8ChHydcDe6ZiL0SAVTg7FgpIyh7lX0B7nV9Aw==
 
-"@uma/contracts-node@^0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@uma/contracts-node/-/contracts-node-0.3.7.tgz#d2a1afefc021c70b6565558b24cf5fd082b493fd"
-  integrity sha512-mzI7sv+W91Cm7TBjkMioKg0pvHEOgT8QMlCNPmuQtkxUNqMnNJCj6MLzzotF4c6i3YzHsmA+PbiSsh2jVbhftw==
-
-"@uma/core@^2.18.0", "@uma/core@^2.24.0":
+"@uma/core@^2.18.0":
   version "2.25.1"
   resolved "https://registry.yarnpkg.com/@uma/core/-/core-2.25.1.tgz#ca527d628e0a712374cc8bd0ae009ba585dd343c"
   integrity sha512-H7gSHEkN7ywvbOxeC1B5k402hyKS7wt44nqpxdWkl0Phco1GjIy7gdMhehlfYNMW8s/QZHoZ5jJnApK/z8MW5Q==
@@ -8980,15 +8970,15 @@
     immer "^9.0.7"
     lodash-es "^4.17.21"
 
-"@uma/sdk@^0.23.4":
-  version "0.23.4"
-  resolved "https://registry.yarnpkg.com/@uma/sdk/-/sdk-0.23.4.tgz#d27d9d24a45387f983e6a5edb0251925f40db62a"
-  integrity sha512-Sl5droihArcEspdHPz4sbJvcjymUMBGYZOLy87JAgXkC52mn6JHuGzI+7ljTjAAOT2vPhsfxNFEFcVIZHPEg+g==
+"@uma/sdk@^0.29.3":
+  version "0.29.3"
+  resolved "https://registry.yarnpkg.com/@uma/sdk/-/sdk-0.29.3.tgz#5ce510b80285df42db8cea671c44c68f1b7cab7a"
+  integrity sha512-BhCehfenH+wTVn4kIcXjPdhyNhbHSFypr5m3n2Kwovfjg/w0CN559+kzvC7mA+X67CsI0hmB+lBFgsmG+kbS+w==
   dependencies:
-    "@google-cloud/datastore" "^6.6.0"
+    "@google-cloud/datastore" "^7.0.0"
     "@types/lodash-es" "^4.17.5"
-    "@uma/contracts-frontend" "^0.3.7"
-    "@uma/contracts-node" "^0.3.7"
+    "@uma/contracts-frontend" "^0.3.18"
+    "@uma/contracts-node" "^0.3.18"
     axios "^0.24.0"
     bn.js "^4.11.9"
     decimal.js "^10.3.1"
