@@ -146,7 +146,7 @@ const ReferralTierComponent: React.FC<{
     {
       Icon: WalletIcon,
       title: { desktop: "Referee Wallets", mobile: "Wallets" },
-      primaryText: String(referralsSummary.referreeWallets),
+      primaryText: String(referralsSummary.activeRefereesCount),
       tooltip: {
         title: "Referee wallets",
         description:
@@ -159,8 +159,8 @@ const ReferralTierComponent: React.FC<{
         desktop: "Unique referral transfers",
         mobile: "Unique transfers",
       },
-      primaryText: `${referralsSummary.transfers} transfer${
-        referralsSummary.transfers !== 1 ? "s" : ""
+      primaryText: `${referralsSummary.referreeWallets} transfer${
+        referralsSummary.referreeWallets !== 1 ? "s" : ""
       }`,
       secondaryText: nextTierTernary({
         arrow: true,
@@ -180,12 +180,6 @@ const ReferralTierComponent: React.FC<{
       primaryText: `${referralsSummary.transfers} transfer${
         referralsSummary.transfers !== 1 ? "s" : ""
       }`,
-      secondaryText: nextTierTernary({
-        arrow: true,
-        value: `${
-          nextTier.referrals - referralsSummary.referreeWallets
-        } to next tier`,
-      }),
     },
     {
       Icon: GraphIcon,
