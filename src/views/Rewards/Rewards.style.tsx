@@ -26,8 +26,7 @@ export const Wrapper = styled.div`
   padding: 32px 0;
 
   @media ${QUERIESV2.sm.andDown} {
-    max-width: calc(1140px + 24px);
-    width: calc(100% - 24px);
+    padding: 16px 0;
     gap: 16px;
   }
 `;

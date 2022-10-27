@@ -30,19 +30,19 @@ const Wrapper = styled.div`
 
 const InnerWrapper = styled.div<{ maxWidth: number }>`
   background-color: transparent;
-
-  max-width: ${({ maxWidth }) => maxWidth}px;
-  width: calc(100% - 32px);
-
+  width: 100%;
   min-height: fit-content;
-
-  margin: 64px auto 32px;
+  margin: 0px auto 32px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 
+  padding: 0px 24px;
+  max-width: ${({ maxWidth }) => maxWidth + 48}px;
   @media ${QUERIESV2.sm.andDown} {
-    margin: 16px auto;
+    margin: 0px auto;
+    padding: 0px 12px;
+    max-width: ${({ maxWidth }) => maxWidth + 24}px;
   }
 `;
 

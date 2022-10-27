@@ -37,7 +37,12 @@ export type StakingPool = {
   usersMultiplierPercentage: number;
   usersTotalLPTokens: BigNumber;
   shareOfPool: BigNumber;
-  estimatedApy: BigNumber;
+  apyData: {
+    poolApy: BigNumber;
+    baseRewardsApy: BigNumber;
+    maxApy: BigNumber;
+    totalApy: BigNumber;
+  };
   requiresApproval: boolean;
   isStakingPoolOfUser: boolean;
   lpTokenFormatter: FormatterFnType;
@@ -117,7 +122,7 @@ const fetchStakingPool = async (
   // Resolve the provided account's outstanding rewards (if an account is connected) as well
   // as the global pool information
   const [
-    { enabled: poolEnabled, maxMultiplier },
+    { enabled: poolEnabled, maxMultiplier, baseEmissionRate: baseRewardsApy },
     currentUserRewardMultiplier,
     {
       rewardsOutstanding: outstandingRewards,
@@ -190,7 +195,16 @@ const fetchStakingPool = async (
     BigNumber.from(totalPoolSize)
   ).mul(100);
 
-  const estimatedApy = parseEtherLike(estimatedApyFromQuery).mul(100);
+  // Resolve APY Information
+  const poolApy = parseEtherLike(estimatedApyFromQuery);
+  const maxApy = poolApy.add(
+    baseRewardsApy.mul(maxMultiplier).div(fixedPointAdjustment)
+  );
+  const totalApy = poolApy.add(
+    baseRewardsApy.mul(
+      userAmountOfLPStaked.gt(0) ? usersMultiplierPercentage / 100 : 1
+    )
+  );
 
   // We can resolve custom formatter & parsers for the current LP
   // token that we are working with.
@@ -223,7 +237,12 @@ const fetchStakingPool = async (
     usersMultiplierPercentage,
     usersTotalLPTokens,
     shareOfPool,
-    estimatedApy,
+    apyData: {
+      poolApy,
+      maxApy,
+      totalApy,
+      baseRewardsApy,
+    },
     requiresApproval,
     isStakingPoolOfUser,
     lpTokenFormatter,

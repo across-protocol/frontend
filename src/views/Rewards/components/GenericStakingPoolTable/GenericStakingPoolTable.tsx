@@ -1,39 +1,23 @@
-import styled, { StyledComponent } from "@emotion/styled";
+import styled from "@emotion/styled";
 import RewardTable from "components/RewardTable";
-import { BigNumberish } from "ethers";
+import { StakingPool } from "hooks";
 import { formatRow, headers } from "./GenericStakingPoolFormatter";
 
-export type GenericStakingPoolRowData = {
-  logo: StyledComponent<any>;
-  poolName: string;
-  multiplier: number;
-
-  rewardAPY: BigNumberish;
-  baseAPY: BigNumberish;
-  rewards: BigNumberish;
-  maxAPY: BigNumberish;
-
-  usersStakedLP: BigNumberish;
-  usersTotalLP: BigNumberish;
-
-  ageOfCapital: number;
-
-  rewardFormatter: (wei: BigNumberish) => string;
-  lpTokenFormatter: (wei: BigNumberish) => string;
-};
-
 type GenericStakingPoolTableType = {
-  poolData?: GenericStakingPoolRowData[];
+  poolData?: StakingPool[];
+  isLoading?: boolean;
 };
 
 const GenericStakingPoolTable = ({
   poolData = [],
+  isLoading,
 }: GenericStakingPoolTableType) => {
   const rows = poolData.map((datum) => formatRow(datum));
   return (
     <Wrapper>
       <RewardTable
-        emptyMessage="Loading..."
+        emptyMessage="No pools"
+        isLoading={isLoading}
         scrollable={true}
         rows={rows}
         headers={headers}
