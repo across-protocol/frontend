@@ -462,6 +462,8 @@ export const FLAT_RELAY_CAPITAL_FEE = process.env
   .REACT_APP_FLAT_RELAY_CAPITAL_FEE
   ? Number(process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE)
   : 0;
+export const SHOW_ACX_NAV_TOKEN =
+  process.env.REACT_APP_SHOW_ACX_NAV_TOKEN === "true";
 export const AddressZero = ethers.constants.AddressZero;
 export const ArbitrumProviderUrl =
   process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
