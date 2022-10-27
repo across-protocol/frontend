@@ -149,10 +149,10 @@ function RowRewardAPYCell({ data, meta }: PoolRowCellType) {
   return (
     <StackedCell>
       <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-        {formatEther(BigNumber.from(100).mul(data.estimatedApy))}%
+        {formatEther(BigNumber.from(100).mul(data.apyData.totalApy))}%
       </Text>
       <Text color="white-70" size="sm">
-        Max: {formatEther(BigNumber.from(100).mul(data.estimatedApy))}%
+        Max: {formatEther(BigNumber.from(100).mul(data.apyData.maxApy))}%
       </Text>
     </StackedCell>
   );
