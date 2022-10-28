@@ -29,27 +29,27 @@ export function useSplash() {
   const cardBenefits = [
     {
       icon: ShieldIcon,
-      title: "Top security",
+      title: "Safe",
       description:
-        "Posuere aliquet faucibus sodales tristique egestas. Egestas quis nibh maecenas mi convallis aliquet. At egestas lectus at vel viverra ipsum convallis mattis eros. Scelerisque interdum elementum proin nibh velit libero lacus in enim.",
+        "The optimistic design means that no matter how many people are participating in the bridge, it only takes one single honest actor to dispute a false claim.",
     },
     {
       icon: ZapIcon,
-      title: "Blazing speed",
+      title: "Fast",
       description:
-        "Posuere aliquet faucibus sodales tristique egestas. Egestas quis nibh maecenas mi convallis aliquet. At egestas lectus at vel viverra ipsum convallis mattis eros. Scelerisque interdum elementum proin nibh velit libero lacus in enim.",
+        "Across is able to offer extremely fast bridging. Today, that means bridging under 3 minutes. In the future, next-block bridging will be possible.",
     },
     {
       icon: PiggyBankIcon,
-      title: "The affordable option",
+      title: "Growing",
       description:
-        "Posuere aliquet faucibus sodales tristique egestas. Egestas quis nibh maecenas mi convallis aliquet. At egestas lectus at vel viverra ipsum convallis mattis eros. Scelerisque interdum elementum proin nibh velit libero lacus in enim.",
+        "There are many ways to become a part of this mission, earn ACX rewards, and help guide the direction of the Across DAO. The best way is to start in the community.",
     },
     {
       icon: GemIcon,
-      title: "Capital efficiency",
+      title: "Elegant",
       description:
-        "Posuere aliquet faucibus sodales tristique egestas. Egestas quis nibh maecenas mi convallis aliquet. At egestas lectus at vel viverra ipsum convallis mattis eros. Scelerisque interdum elementum proin nibh velit libero lacus in enim.",
+        "Across is the result of approaching bridging not only as a technical concern but also as a financial engineering one. Across champions capital efficiency in every design choice.",
     },
   ];
 
