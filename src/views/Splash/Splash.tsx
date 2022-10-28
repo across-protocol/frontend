@@ -16,7 +16,7 @@ import {
   ExternalWrapper,
   CardBenefitWrapper,
 } from "./Splash.styles";
-import { useSplash } from "./useSplash";
+import { useSplash } from "./hooks/useSplash";
 import NumericBenefit from "./components/NumericBenefit";
 import CardBenefit from "./components/CardBenefit";
 

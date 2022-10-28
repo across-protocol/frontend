@@ -2,13 +2,28 @@ import { ReactComponent as GemIcon } from "assets/gem.svg";
 import { ReactComponent as PiggyBankIcon } from "assets/piggy-bank.svg";
 import { ReactComponent as ZapIcon } from "assets/zap.svg";
 import { ReactComponent as ShieldIcon } from "assets/shield-check.svg";
+import { useSplashDynamicData } from "./useSplashDynamicData";
+import { repeatableTernaryBuilder } from "utils/ternary";
+import { humanReadableNumber } from "utils";
 
 export function useSplash() {
+  const data = useSplashDynamicData();
+  const ternary = repeatableTernaryBuilder(Boolean(data), "-");
+
   const numericBenefits = [
-    { title: "Total Volume", value: "$1.2T" },
-    { title: "Total Transactions", value: "115M+" },
-    { title: "Average Fill Time", value: "12 min" },
-    { title: "User Funds Lost", value: "$0" },
+    {
+      title: "Total Volume",
+      value: ternary(`$${humanReadableNumber(data?.totalVolumeUsd ?? 0)}`),
+    },
+    {
+      title: "Total Transactions",
+      value: humanReadableNumber(data?.totalDeposits ?? 0),
+    },
+    {
+      title: "Average Fill Time",
+      value: ternary(`${Math.floor(data?.avgFillTimeInMinutes ?? 0)} min`),
+    },
+    { title: "User Funds Lost", value: ternary("$0") },
   ];
 
   const cardBenefits = [
