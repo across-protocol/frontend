@@ -59,7 +59,7 @@ export function ClaimAirdrop({
           % APY. Read more <LinkWithUnderline to="/">here</LinkWithUnderline>.
         </Text>
       </InfoTextContainer>
-      {!hasClaimed ? (
+      {!hasClaimed && (
         <>
           {errorMsg && <Text color="error">{errorMsg}</Text>}
           <FullWidthButton
@@ -70,7 +70,7 @@ export function ClaimAirdrop({
             {isClaiming ? "Claiming airdrop..." : "Claim airdrop"}
           </FullWidthButton>
         </>
-      ) : null}
+      )}
     </Container>
   );
 }

@@ -105,5 +105,5 @@ export const LinkWithUnderline = styled(Link)`
 
 export const HighlightedLink = styled(Link)`
   text-decoration: none;
-  color: #6cf9d8;
+  color: #6cf9d8 !important;
 `;

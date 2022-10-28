@@ -42,7 +42,7 @@ export function EarnOptionCard(props: {
         </Text>
       </FullWidthButton>
       <ApyContainer>
-        <Text color="white-100">{props.bottomText}</Text>{" "}
+        <Text color="white-100">{props.bottomText}</Text>
         <PopperTooltip
           title={props.pctTooltip.title}
           body={props.pctTooltip.body}

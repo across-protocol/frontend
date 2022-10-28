@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { useState, useEffect } from "react";
 import { ChevronRight } from "react-feather";
+import { Link } from "react-router-dom";
 
 import { ReactComponent as XStarRing } from "assets/x-star-ring.svg";
 import { ReactComponent as PlusStarRing } from "assets/plus-star-ring.svg";
@@ -75,11 +76,12 @@ export function EligibleWalletFlow(props: Props) {
               </Text>
               <EarningsContainer>
                 <Text size="lg" color="white-70">
-                  {" "}
-                  · Earning:
+                  ·
+                </Text>
+                <Text size="lg" color="white-70">
+                  Earning:
                 </Text>
                 <Text size="lg" color="white-100">
-                  {" "}
                   {props.currentApyPct || "-"}% APY
                 </Text>
               </EarningsContainer>
@@ -103,9 +105,9 @@ export function EligibleWalletFlow(props: Props) {
                   activities on Across.
                 </Text>
               </TextContainer>
-              <IconButton>
+              <IconButtonLink to="/rewards">
                 <ChevronRight stroke="#6CF9D8" strokeWidth="1.5" size={20} />
-              </IconButton>
+              </IconButtonLink>
             </TopRowAddonContainer>
           ) : null
         }
@@ -166,7 +168,7 @@ const TextContainer = styled.div`
   flex: 1;
 `;
 
-const IconButton = styled.a`
+const IconButtonLink = styled(Link)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -184,6 +186,11 @@ const SubTitleContainer = styled.div`
 `;
 
 const EarningsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  padding-left: 4px;
+
   @media ${QUERIESV2.sm.andDown} {
     display: none;
   }
