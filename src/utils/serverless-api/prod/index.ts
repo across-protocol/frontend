@@ -4,6 +4,7 @@ import { retrieveDiscordUserDetails } from "./retrieve-discord-user-details.prod
 import { retrieveLinkedWallet } from "./retrieve-linked-wallet.prod";
 import { suggestedFeesApiCall } from "./suggested-fees.prod";
 import rewardsApiCall from "./rewards";
+import { getDepositStats } from "./get-deposit-stats.prod";
 
 export const prodEndpoints: ServerlessAPIEndpoints = {
   suggestedFees: suggestedFeesApiCall,
@@ -12,5 +13,8 @@ export const prodEndpoints: ServerlessAPIEndpoints = {
     linkedWallet: retrieveLinkedWallet,
     connectWallet: connectLinkedWallet,
     discordUserDetails: retrieveDiscordUserDetails,
+  },
+  splash: {
+    getStats: getDepositStats,
   },
 };

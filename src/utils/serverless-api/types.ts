@@ -10,6 +10,9 @@ export type ServerlessAPIEndpoints = {
     connectWallet: ConnectLinkedWalletType;
     discordUserDetails: RetrieveDiscordUserDetailsType;
   };
+  splash: {
+    getStats: GetDepositStatsType;
+  };
 };
 
 export type RewardsApiFunction =
@@ -61,3 +64,11 @@ export type RetrieveDiscordUserDetailsType = (backendJWT: string) => Promise<{
   discordAvatar: string;
   walletLinked?: string;
 }>;
+
+export interface GetDepositStatsInterface {
+  totalDeposits: number;
+  avgFillTime: number;
+  totalVolumeUsd: number;
+}
+
+export type GetDepositStatsType = () => Promise<GetDepositStatsInterface>;
