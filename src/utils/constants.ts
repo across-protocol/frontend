@@ -410,10 +410,6 @@ export const tokenList: TokenInfoList = [
 ];
 
 assert(
-  process.env.REACT_APP_PUBLIC_INFURA_ID,
-  "Missing process.env.REACT_APP_PUBLIC_INFURA_ID"
-);
-assert(
   process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
   "Missing process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY"
 );
@@ -439,7 +435,8 @@ export const hubPoolChainId = Number(
 export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;
 export const enableReactQueryDevTools =
   process.env.REACT_APP_ENABLE_REACT_QUERY_DEV_TOOLS;
-export const infuraId = process.env.REACT_APP_PUBLIC_INFURA_ID;
+export const infuraId =
+  process.env.REACT_APP_PUBLIC_INFURA_ID || "e34138b2db5b496ab5cc52319d2f0299"; // Include this constant for testing
 export const confirmations =
   Number(process.env.REACT_APP_PUBLIC_CONFIRMATIONS) || 1;
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
