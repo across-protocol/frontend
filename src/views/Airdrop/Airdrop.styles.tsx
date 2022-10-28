@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { Link } from "react-router-dom";
 import { ButtonV2 } from "components";
 import { QUERIESV2 } from "utils";
 
@@ -85,4 +86,24 @@ export const InverseButton = styled(FullWidthButton)`
   border: 1px solid #6cf9d8;
   color: #6cf9d8;
   background: transparent;
+`;
+
+export const ExternalLinkWithUnderline = styled.a`
+  text-decoration: underline;
+  color: #e0f3ff;
+`;
+
+export const ExternalHighlightedLink = styled.a`
+  text-decoration: none;
+  color: #6cf9d8;
+`;
+
+export const LinkWithUnderline = styled(Link)`
+  text-decoration: underline;
+  color: #e0f3ff;
+`;
+
+export const HighlightedLink = styled(Link)`
+  text-decoration: none;
+  color: #6cf9d8 !important;
 `;

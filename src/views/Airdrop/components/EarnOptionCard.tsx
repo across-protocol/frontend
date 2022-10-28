@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
+import { useHistory } from "react-router-dom";
 
 import { Text } from "components/Text";
 import { PopperTooltip } from "components/Tooltip";
@@ -13,14 +14,15 @@ export function EarnOptionCard(props: {
   subTitle: string;
   buttonLabel: string;
   href: string;
-  pctRange: number[];
-  pctLabel: string;
   pctTooltip: {
     title: string;
     body: string;
   };
+  bottomText: string;
   Icon: React.ReactElement;
 }) {
+  const history = useHistory();
+
   return (
     <Container>
       <EarnOptionTopContainer>
@@ -34,12 +36,13 @@ export function EarnOptionCard(props: {
           </Text>
         </TextContainer>
       </EarnOptionTopContainer>
-      <FullWidthButton size="lg">{props.buttonLabel}</FullWidthButton>
+      <FullWidthButton size="lg" onClick={() => history.push(props.href)}>
+        <Text size="lg" color="dark-grey" weight={500}>
+          {props.buttonLabel}
+        </Text>
+      </FullWidthButton>
       <ApyContainer>
-        <Text>{props.pctLabel}:</Text>{" "}
-        <Text color="white-100">
-          {props.pctRange[0]} - {props.pctRange[1]}%
-        </Text>{" "}
+        <Text color="white-100">{props.bottomText}</Text>
         <PopperTooltip
           title={props.pctTooltip.title}
           body={props.pctTooltip.body}
@@ -83,10 +86,21 @@ const EarnOptionTopContainer = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+
+  @media ${QUERIESV2.sm.andDown} {
+    align-items: flex-start;
+  }
 `;
 
 const IconContainer = styled.div`
   margin-right: 18px;
+
+  @media ${QUERIESV2.sm.andDown} {
+    > svg {
+      height: 48px;
+      width: 48px;
+    }
+  }
 `;
 
 const FullWidthButton = styled(Button)`
