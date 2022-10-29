@@ -28,8 +28,8 @@ export const StakingReward = ({
       <StakingRewardCard>
         <Alert status="warn">
           <AlertText>
-            Claiming tokens will reset your multiplier and decrease your ACX APY
-            from X% to Y%
+            Claiming tokens will reset your multiplier and decrease your APY
+            from pool + base_rewards * multiplier% to pool + base_rewards * 1%.
           </AlertText>
         </Alert>
         {isConnected ? (
