@@ -3,12 +3,13 @@ import { Alert, ButtonV2 } from "components";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { BigNumber } from "ethers";
 import { useState } from "react";
-import { formatEther } from "utils";
+import { formatEther, QUERIESV2 } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { StakingRewardPropType } from "../../types";
 import StakingInputBlock from "../StakingInputBlock";
 import AcrossLogo from "assets/Across-logo-bullet.svg";
 import { Card } from "views/Staking/Staking.styles";
+import { Text } from "components/Text";
 
 export const StakingReward = ({
   maximumClaimableAmount,
@@ -17,6 +18,8 @@ export const StakingReward = ({
 }: StakingRewardPropType) => {
   const [amountToClaim, setAmountToClaim] = useState("");
   const [isTransitioning] = useState(false);
+
+  const activeColor = "white-" + (maximumClaimableAmount.gt(0) ? 100 : 70);
 
   const valueOrEmpty = repeatableTernaryBuilder(
     isConnected && BigNumber.from(maximumClaimableAmount).gt(0),
@@ -27,28 +30,28 @@ export const StakingReward = ({
     <SectionTitleWrapperV2 title="Rewards">
       <StakingRewardCard>
         <Alert status="warn">
-          <AlertText>
+          <Text weight={400} color="warning">
             Claiming tokens will reset your multiplier and decrease your APY
             from pool + base_rewards * multiplier% to pool + base_rewards * 1%.
-          </AlertText>
+          </Text>
         </Alert>
         {isConnected ? (
           <ClaimRewardInputGroup>
             <RewardClaimWrapper>
-              <RewardClaimWrapperTitle>
-                Claimable Rewards
-              </RewardClaimWrapperTitle>
+              <Text color="white-70">Claimable rewards</Text>
               {valueOrEmpty(
-                <RewardClaimWrapperReward>
+                <Text color={activeColor}>
                   {formatEther(maximumClaimableAmount)} ACX
-                </RewardClaimWrapperReward>
+                </Text>
               )}
             </RewardClaimWrapper>
             <ClaimRewardButton
               size="lg"
               disabled={BigNumber.from(maximumClaimableAmount).lte(0)}
             >
-              Claim Rewards
+              <Text color="warning" weight={500}>
+                Claim Rewards
+              </Text>
             </ClaimRewardButton>
           </ClaimRewardInputGroup>
         ) : (
@@ -85,19 +88,11 @@ const RewardClaimWrapper = styled.div`
 
   border: 1px solid #3e4047;
   border-radius: 12px;
-`;
 
-const RewardClaimWrapperTitle = styled.span`
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 26px;
-  color: #9daab2;
-`;
-const RewardClaimWrapperReward = styled.span`
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 26px;
-  color: #e0f3ff;
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 0 16px;
+    height: 48px;
+  }
 `;
 
 const ClaimRewardButton = styled(ButtonV2)`
@@ -114,28 +109,24 @@ const ClaimRewardButton = styled(ButtonV2)`
   border: 1px solid #f9d26c;
   border-radius: 32px;
 
-  font-weight: 500;
-  font-size: 18px;
-  line-height: 26px;
-  color: #f9d26c;
   text-transform: capitalize;
 
   background: transparent;
+
+  @media ${QUERIESV2.sm.andDown} {
+    height: 40px;
+  }
 `;
 
 const ButtonGroupWrapper = styled.div`
   width: 100%;
 `;
 
-const AlertText = styled.p`
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 20px;
-  color: #f9d26c;
-`;
-
 const StakingRewardCard = styled(Card)`
   gap: 16px;
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 16px;
+  }
 `;
 
 const ClaimRewardInputGroup = styled.div`

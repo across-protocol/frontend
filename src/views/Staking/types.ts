@@ -1,4 +1,4 @@
-import { BigNumberish } from "ethers";
+import { BigNumber } from "ethers";
 import { StakingPool } from "hooks/useStakingPool";
 import { StakingActionFunctionType } from "./hooks/useStakingAction";
 
@@ -8,7 +8,7 @@ type GenericStakingComponentProps = {
 };
 
 export type StakingRewardPropType = GenericStakingComponentProps & {
-  maximumClaimableAmount: BigNumberish;
+  maximumClaimableAmount: BigNumber;
   usersMultiplierPercentage: number;
 };
 
