@@ -40,6 +40,7 @@ export type StakingPool = {
   apyData: {
     poolApy: BigNumber;
     baseRewardsApy: BigNumber;
+    rewardsApy: BigNumber;
     maxApy: BigNumber;
     totalApy: BigNumber;
   };
@@ -200,11 +201,10 @@ const fetchStakingPool = async (
   const maxApy = poolApy.add(
     baseRewardsApy.mul(maxMultiplier).div(fixedPointAdjustment)
   );
-  const totalApy = poolApy.add(
-    baseRewardsApy.mul(
-      userAmountOfLPStaked.gt(0) ? usersMultiplierPercentage / 100 : 1
-    )
+  const rewardsApy = baseRewardsApy.mul(
+    userAmountOfLPStaked.gt(0) ? usersMultiplierPercentage / 100 : 1
   );
+  const totalApy = poolApy.add(rewardsApy);
 
   // We can resolve custom formatter & parsers for the current LP
   // token that we are working with.
@@ -242,10 +242,41 @@ const fetchStakingPool = async (
       maxApy,
       totalApy,
       baseRewardsApy,
+      rewardsApy,
     },
     requiresApproval,
     isStakingPoolOfUser,
     lpTokenFormatter,
     lpTokenParser,
   };
+};
+
+export const DEFAULT_STAKING_POOL_DATA: StakingPool = {
+  tokenLogoURI: "",
+  tokenSymbol: "",
+  lpTokenAddress: "",
+  lpTokenFormatter: () => "",
+  lpTokenParser: () => BigNumber.from(0),
+  lpTokenSymbolName: "",
+  acrossTokenAddress: "",
+  availableLPTokenBalance: BigNumber.from(0),
+  elapsedTimeSinceAvgDeposit: 0,
+  poolEnabled: true,
+  requiresApproval: false,
+  userAmountOfLPStaked: BigNumber.from(0),
+  usersMultiplierPercentage: 0,
+  usersTotalLPTokens: BigNumber.from(0),
+  currentUserRewardMultiplier: BigNumber.from(0),
+  isStakingPoolOfUser: false,
+  maxMultiplier: BigNumber.from(3),
+  globalAmountOfLPStaked: BigNumber.from(0),
+  outstandingRewards: BigNumber.from(0),
+  shareOfPool: BigNumber.from(0),
+  apyData: {
+    maxApy: BigNumber.from(0),
+    poolApy: BigNumber.from(0),
+    totalApy: BigNumber.from(0),
+    baseRewardsApy: BigNumber.from(0),
+    rewardsApy: BigNumber.from(0),
+  },
 };

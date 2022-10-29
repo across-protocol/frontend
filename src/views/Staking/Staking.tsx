@@ -3,7 +3,7 @@ import { StakingReward, StakingForm, StakingExitAction } from "./components";
 import { useStakingView } from "./hooks/useStakingView";
 import Footer from "components/Footer";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumberish } from "ethers";
 import { SuperHeader } from "components";
 import { getChainInfo, hubPoolChainId } from "utils";
 
@@ -18,6 +18,7 @@ const Staking = () => {
     unstakeActionMutation,
     isWrongNetwork,
     isWrongNetworkHandler,
+    poolData,
   } = useStakingView();
 
   const numericTernary = repeatableTernaryBuilder<BigNumberish>(
@@ -27,10 +28,6 @@ const Staking = () => {
   const numberTernary = repeatableTernaryBuilder<number>(
     !stakingPoolQuery.isLoading,
     0
-  );
-  const stringTernary = repeatableTernaryBuilder<string>(
-    !stakingPoolQuery.isLoading,
-    ""
   );
 
   return (
@@ -48,7 +45,7 @@ const Staking = () => {
       <Wrapper>
         <StakingExitAction poolName={poolName} poolLogoURI={poolLogoURI} />
         <StakingForm
-          logoURI={stakingPoolQuery.data?.tokenLogoURI || ""}
+          logoURI={poolLogoURI}
           isDataLoading={stakingPoolQuery.isLoading}
           isMutating={
             stakeActionMutation.isLoading || unstakeActionMutation.isLoading
@@ -56,40 +53,9 @@ const Staking = () => {
           isWrongNetwork={isWrongNetwork}
           isConnected={isConnected}
           walletConnectionHandler={connectWalletHandler}
-          lpTokenFormatter={
-            stakingPoolQuery.data?.lpTokenFormatter ?? (() => "0")
-          }
-          lpTokenParser={
-            stakingPoolQuery.data?.lpTokenParser ?? (() => BigNumber.from("0"))
-          }
-          estimatedPoolApy={numericTernary(
-            stakingPoolQuery.data?.apyData.poolApy
-          )}
-          lpTokenName={stringTernary(stakingPoolQuery.data?.lpTokenSymbolName)}
           stakeActionFn={stakeActionMutation.mutateAsync}
           unstakeActionFn={unstakeActionMutation.mutateAsync}
-          usersTotalLPTokens={numericTernary(
-            stakingPoolQuery.data?.usersTotalLPTokens
-          )}
-          userCumulativeStake={numericTernary(
-            stakingPoolQuery.data?.userAmountOfLPStaked
-          )}
-          currentMultiplier={numericTernary(
-            stakingPoolQuery.data?.currentUserRewardMultiplier
-          )}
-          usersMultiplierPercentage={numberTernary(
-            stakingPoolQuery.data?.usersMultiplierPercentage
-          )}
-          globalCumulativeStake={numericTernary(
-            stakingPoolQuery.data?.globalAmountOfLPStaked
-          )}
-          ageOfCapital={numberTernary(
-            stakingPoolQuery.data?.elapsedTimeSinceAvgDeposit
-          )}
-          availableLPTokenBalance={numericTernary(
-            stakingPoolQuery.data?.availableLPTokenBalance
-          )}
-          shareOfPool={numericTernary(stakingPoolQuery.data?.shareOfPool)}
+          poolData={poolData}
         />
         <StakingReward
           maximumClaimableAmount={numericTernary(

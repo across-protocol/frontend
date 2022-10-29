@@ -177,7 +177,7 @@ function RowRewardCell({ data, meta }: PoolRowCellType) {
 
 function RowButtonCell({ data, meta }: PoolRowCellType) {
   let button: JSX.Element | undefined = undefined;
-  const specificPoolLink = `/rewards/staking/${data.tokenSymbol}`;
+  const specificPoolLink = `/rewards/staking/${data.tokenSymbol.toLowerCase()}`;
   if (meta.hasLPStake) {
     button = (
       <ExternalLinkButton to={specificPoolLink}>

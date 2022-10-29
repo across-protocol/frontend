@@ -1,6 +1,11 @@
 import { useParams } from "react-router-dom";
 
-import { useConnection, useIsWrongNetwork, useStakingPool } from "hooks";
+import {
+  DEFAULT_STAKING_POOL_DATA,
+  useConnection,
+  useIsWrongNetwork,
+  useStakingPool,
+} from "hooks";
 import { getConfig, hubPoolChainId } from "utils";
 
 import { useStakeAction, useUnstakeAction } from "./useStakingAction";
@@ -27,6 +32,7 @@ export const useStakingView = () => {
 
   return {
     stakingPoolQuery,
+    poolData: stakingPoolQuery.data ?? DEFAULT_STAKING_POOL_DATA,
     stakeActionMutation,
     unstakeActionMutation,
     poolId,
