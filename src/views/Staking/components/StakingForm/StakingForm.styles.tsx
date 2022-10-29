@@ -38,12 +38,6 @@ interface ITab {
 }
 export const Tab = styled.div<ITab>`
   flex-grow: 1;
-  font-family: "Barlow";
-  font-style: normal;
-  font-weight: 500;
-  font-size: ${16 / 16}rem;
-  line-height: ${20 / 16}rem;
-  color: ${({ active }) => (active ? "#e0f3ff" : "#9DAAB2")};
   text-align: center;
   padding: 0 0 20px;
   border-bottom: ${(props) =>
@@ -105,7 +99,6 @@ export const StakeInfoRow = styled.div`
   flex-shrink: 0;
 
   @media ${QUERIESV2.sm.andDown} {
-    flex-direction: column;
     gap: 6px;
   }
 `;
@@ -114,7 +107,7 @@ export const StakeAPYInfoRow = styled(StakeInfoRow)`
   cursor: pointer;
   @media ${QUERIESV2.sm.andDown} {
     flex-direction: row;
-    width: fit-content;
+    width: 100%;
     gap: 12px;
     & > {
       width: fit-content;

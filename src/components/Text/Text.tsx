@@ -85,6 +85,7 @@ const colorMap: Record<TextColor, string> = {
   error: "hsla(0, 92%, 70%)", // "#f96c6c"
   warning: "#F9D26C",
   "dark-grey": "#2D2E33",
+  warning: "#f9d26c",
 };
 
 type TextProps = {
