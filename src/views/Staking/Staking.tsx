@@ -3,7 +3,6 @@ import { StakingReward, StakingForm, StakingExitAction } from "./components";
 import { useStakingView } from "./hooks/useStakingView";
 import Footer from "components/Footer";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import { BigNumberish } from "ethers";
 import { SuperHeader } from "components";
 import { getChainInfo, hubPoolChainId } from "utils";
 
@@ -21,10 +20,6 @@ const Staking = () => {
     poolData,
   } = useStakingView();
 
-  const numericTernary = repeatableTernaryBuilder<BigNumberish>(
-    !stakingPoolQuery.isLoading,
-    "0"
-  );
   const numberTernary = repeatableTernaryBuilder<number>(
     !stakingPoolQuery.isLoading,
     0
@@ -58,9 +53,7 @@ const Staking = () => {
           poolData={poolData}
         />
         <StakingReward
-          maximumClaimableAmount={numericTernary(
-            stakingPoolQuery.data?.outstandingRewards
-          )}
+          maximumClaimableAmount={poolData.outstandingRewards}
           usersMultiplierPercentage={numberTernary(
             stakingPoolQuery.data?.usersMultiplierPercentage
           )}
