@@ -103,13 +103,23 @@ export const StakingForm = ({
             onClick={() => setActiveTab("stake")}
             active={activeTab === "stake"}
           >
-            Stake
+            <Text
+              weight={500}
+              color={"white-" + (activeTab === "stake" ? "100" : "70")}
+            >
+              Stake
+            </Text>
           </Tab>
           <Tab
             onClick={() => setActiveTab("unstake")}
             active={activeTab === "unstake"}
           >
-            Unstake
+            <Text
+              weight={500}
+              color={"white-" + (activeTab === "unstake" ? "100" : "70")}
+            >
+              Unstake
+            </Text>
           </Tab>
         </Tabs>
         <InputBlockWrapper>

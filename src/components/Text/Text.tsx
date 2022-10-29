@@ -74,7 +74,8 @@ type TextColor =
   | "white-70"
   | "aqua"
   | "error"
-  | "dark-grey";
+  | "dark-grey"
+  | "warning";
 
 const colorMap: Record<TextColor, string> = {
   "white-100": "hsla(203, 100%, 94%)", // #E0F3FF
@@ -83,6 +84,7 @@ const colorMap: Record<TextColor, string> = {
   aqua: "hsla(166, 92%, 70%)", // "#6CF9D8"
   error: "hsla(0, 92%, 70%)", // "#f96c6c"
   "dark-grey": "#2D2E33",
+  warning: "#f9d26c",
 };
 
 type TextProps = {

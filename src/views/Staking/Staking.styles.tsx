@@ -14,6 +14,7 @@ export const Wrapper = styled.div`
 
   @media ${QUERIESV2.sm.andDown} {
     margin: 16px auto;
+    gap: 16px;
   }
 `;
 
