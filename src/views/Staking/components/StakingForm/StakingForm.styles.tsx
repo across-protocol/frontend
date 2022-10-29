@@ -79,6 +79,8 @@ export const StakeInfoItem = styled.div`
   line-height: ${20 / 16}rem;
   font-weight: 400;
 
+  gap: 4px;
+
   width: 100%;
   color: #9daab2;
 
@@ -120,50 +122,17 @@ export const StakeAPYInfoRow = styled(StakeInfoRow)`
   }
 `;
 
-export const LightGrayItemText = styled.span<{ margin?: number }>`
-  color: #e0f3ff;
-  margin-right: ${({ margin }) => (margin ? `${margin}px` : 0)};
-`;
-
-export const StakeInfoItemSmall = styled(StakeInfoItem)`
-  font-size: ${14 / 16}rem;
-
-  @media ${QUERIESV2.sm.andDown} {
-    font-size: ${12 / 16}rem;
-  }
-`;
-
 interface IStyledProgressBar {
   className?: string;
 }
 export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
   width: 80px;
   height: 14px;
-  margin-top: 5px;
   padding-right: 4px;
+  margin-right: 8px;
   > div {
     height: 8px;
   }
-`;
-
-export const MutliplierValue = styled.div`
-  font-weight: 400;
-  gap: 12px;
-  color: #e0f3ff;
-  display: inline-flex;
-  justify-content: flex-end;
-  @media ${QUERIESV2.sm.andDown} {
-    justify-content: flex-start;
-  }
-`;
-
-export const APYInfo = styled(StakeInfo)`
-  padding-bottom: 24px;
-  @media ${QUERIESV2.sm.andDown} {
-    flex-direction: row;
-    justify-content: flex-start;
-  }
-  margin-bottom: 24px;
 `;
 
 export const APYInfoItem = styled(StakeInfoItem)`

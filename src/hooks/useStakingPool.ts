@@ -43,6 +43,7 @@ export type StakingPool = {
   apyData: {
     poolApy: BigNumber;
     baseRewardsApy: BigNumber;
+    rewardsApy: BigNumber;
     maxApy: BigNumber;
     totalApy: BigNumber;
   };
@@ -222,11 +223,10 @@ const fetchStakingPool = async (
   const maxApy = poolApy.add(
     baseRewardsApy.mul(maxMultiplier).div(fixedPointAdjustment)
   );
-  const totalApy = poolApy.add(
-    baseRewardsApy.mul(
-      userAmountOfLPStaked.gt(0) ? usersMultiplierPercentage / 100 : 1
-    )
+  const rewardsApy = baseRewardsApy.mul(
+    userAmountOfLPStaked.gt(0) ? usersMultiplierPercentage / 100 : 1
   );
+  const totalApy = poolApy.add(rewardsApy);
 
   // We can resolve custom formatter & parsers for the current LP
   // token that we are working with.
@@ -269,6 +269,7 @@ const fetchStakingPool = async (
       maxApy,
       totalApy,
       baseRewardsApy,
+      rewardsApy,
     },
     requiresApproval,
     isStakingPoolOfUser,
@@ -304,5 +305,6 @@ export const DEFAULT_STAKING_POOL_DATA: StakingPool = {
     poolApy: BigNumber.from(0),
     totalApy: BigNumber.from(0),
     baseRewardsApy: BigNumber.from(0),
+    rewardsApy: BigNumber.from(0),
   },
 };
