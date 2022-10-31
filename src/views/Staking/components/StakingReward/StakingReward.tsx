@@ -12,17 +12,17 @@ import { Card } from "views/Staking/Staking.styles";
 import { Text } from "components/Text";
 
 export const StakingReward = ({
-  maximumClaimableAmount,
+  poolData: { outstandingRewards },
   isConnected,
   walletConnectionHandler,
 }: StakingRewardPropType) => {
   const [amountToClaim, setAmountToClaim] = useState("");
   const [isTransitioning] = useState(false);
 
-  const activeColor = "white-" + (maximumClaimableAmount.gt(0) ? 100 : 70);
+  const activeColor = "white-" + (outstandingRewards.gt(0) ? 100 : 70);
 
   const valueOrEmpty = repeatableTernaryBuilder(
-    isConnected && BigNumber.from(maximumClaimableAmount).gt(0),
+    isConnected && BigNumber.from(outstandingRewards).gt(0),
     <>-</>
   );
 
@@ -41,13 +41,13 @@ export const StakingReward = ({
               <Text color="white-70">Claimable rewards</Text>
               {valueOrEmpty(
                 <Text color={activeColor}>
-                  {formatEther(maximumClaimableAmount)} ACX
+                  {formatEther(outstandingRewards)} ACX
                 </Text>
               )}
             </RewardClaimWrapper>
             <ClaimRewardButton
               size="lg"
-              disabled={BigNumber.from(maximumClaimableAmount).lte(0)}
+              disabled={BigNumber.from(outstandingRewards).lte(0)}
             >
               <Text color="warning" weight={500}>
                 Claim Rewards

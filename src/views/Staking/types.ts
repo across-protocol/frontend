@@ -5,12 +5,10 @@ import { StakingActionFunctionType } from "./hooks/useStakingAction";
 type GenericStakingComponentProps = {
   isConnected: boolean;
   walletConnectionHandler: () => void;
+  poolData: StakingPool;
 };
 
-export type StakingRewardPropType = GenericStakingComponentProps & {
-  maximumClaimableAmount: BigNumber;
-  usersMultiplierPercentage: number;
-};
+export type StakingRewardPropType = GenericStakingComponentProps & {};
 
 export type StakingFormPropType = GenericStakingComponentProps & {
   logoURI: string;
@@ -19,5 +17,4 @@ export type StakingFormPropType = GenericStakingComponentProps & {
   isDataLoading: boolean;
   isMutating: boolean;
   isWrongNetwork: boolean;
-  poolData: StakingPool;
 };

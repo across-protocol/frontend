@@ -2,7 +2,6 @@ import { Wrapper } from "./Staking.styles";
 import { StakingReward, StakingForm, StakingExitAction } from "./components";
 import { useStakingView } from "./hooks/useStakingView";
 import Footer from "components/Footer";
-import { repeatableTernaryBuilder } from "utils/ternary";
 import { SuperHeader } from "components";
 import { getChainInfo, hubPoolChainId } from "utils";
 
@@ -19,11 +18,6 @@ const Staking = () => {
     isWrongNetworkHandler,
     poolData,
   } = useStakingView();
-
-  const numberTernary = repeatableTernaryBuilder<number>(
-    !stakingPoolQuery.isLoading,
-    0
-  );
 
   return (
     <>
@@ -53,10 +47,7 @@ const Staking = () => {
           poolData={poolData}
         />
         <StakingReward
-          maximumClaimableAmount={poolData.outstandingRewards}
-          usersMultiplierPercentage={numberTernary(
-            stakingPoolQuery.data?.usersMultiplierPercentage
-          )}
+          poolData={poolData}
           isConnected={isConnected}
           walletConnectionHandler={connectWalletHandler}
         />
