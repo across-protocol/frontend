@@ -48,13 +48,15 @@ export default function useAirdrop() {
     account,
   ]);
 
-  const maxApyPct = acrossStakingPoolQuery.data
-    ? formatWeiPct(acrossStakingPoolQuery.data.apyData.maxApy, 2)
-    : undefined;
+  const maxApyPct = formatWeiPct(
+    acrossStakingPoolQuery.data?.apyData.maxApy,
+    2
+  );
 
-  const currentApyPct = acrossStakingPoolQuery.data
-    ? formatWeiPct(acrossStakingPoolQuery.data.apyData.totalApy, 2)
-    : undefined;
+  const currentApyPct = formatWeiPct(
+    acrossStakingPoolQuery.data?.apyData.totalApy,
+    2
+  );
 
   return {
     activePageFlow,

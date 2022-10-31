@@ -56,7 +56,7 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
     if (suggestedRelayerFeePct && !didSetInitialFee) {
       setDidSetInitialFee(true);
       setRelayFeeInput(
-        appendPercentageSign(formatWeiPct(suggestedRelayerFeePct))
+        appendPercentageSign(formatWeiPct(suggestedRelayerFeePct) || "0")
       );
     }
   }, [suggestedRelayerFeePct, didSetInitialFee]);
