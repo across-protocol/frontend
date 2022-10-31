@@ -14,6 +14,7 @@ import {
 import { BigNumber, BigNumberish } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 import axios from "axios";
+import { ConvertDecimals } from "utils/convertdecimals";
 
 const config = getConfig();
 
@@ -29,6 +30,7 @@ export type StakingPool = {
   poolEnabled: boolean;
   globalAmountOfLPStaked: BigNumber;
   userAmountOfLPStaked: BigNumber;
+  userAmountOfLPStakedInUSD: BigNumber;
   maxMultiplier: BigNumber;
   outstandingRewards: BigNumber;
   currentUserRewardMultiplier: BigNumber;
@@ -160,13 +162,18 @@ const fetchStakingPool = async (
     axios.get<{
       estimatedApy: string;
       totalPoolSize: BigNumberish;
+      exchangeRateCurrent: string;
     }>(`/api/pools`, {
       params: { token: tokenAddress },
     }),
   ]);
 
   // Resolve the data retrieved from the serverless /pools API call
-  const { estimatedApy: estimatedApyFromQuery, totalPoolSize } = poolQuery.data;
+  const {
+    estimatedApy: estimatedApyFromQuery,
+    totalPoolSize,
+    exchangeRateCurrent: lpExchangeRateToUSD,
+  } = poolQuery.data;
 
   // The Average Deposit Time retrieves the # seconds since the last
   // deposit, weighted by all the deposits in a user's account. To calculate the
@@ -220,6 +227,10 @@ const fetchStakingPool = async (
     BigNumber.from(userAmountOfLPStaked).gt(0) ||
     BigNumber.from(outstandingRewards).gt(0);
 
+  const usdStakedValue = BigNumber.from(lpExchangeRateToUSD)
+    .mul(ConvertDecimals(lpTokenDecimalCount, 18)(userAmountOfLPStaked))
+    .div(fixedPointAdjustment);
+
   return {
     tokenLogoURI: logoURI,
     tokenSymbol: symbol,
@@ -228,6 +239,7 @@ const fetchStakingPool = async (
     poolEnabled,
     globalAmountOfLPStaked: BigNumber.from(totalPoolSize),
     userAmountOfLPStaked,
+    userAmountOfLPStakedInUSD: usdStakedValue,
     maxMultiplier,
     outstandingRewards,
     currentUserRewardMultiplier,
@@ -248,4 +260,34 @@ const fetchStakingPool = async (
     lpTokenFormatter,
     lpTokenParser,
   };
+};
+
+export const DEFAULT_STAKING_POOL_DATA: StakingPool = {
+  tokenLogoURI: "",
+  tokenSymbol: "",
+  lpTokenAddress: "",
+  lpTokenFormatter: () => "",
+  lpTokenParser: () => BigNumber.from(0),
+  lpTokenSymbolName: "",
+  acrossTokenAddress: "",
+  availableLPTokenBalance: BigNumber.from(0),
+  elapsedTimeSinceAvgDeposit: 0,
+  poolEnabled: true,
+  requiresApproval: false,
+  userAmountOfLPStaked: BigNumber.from(0),
+  userAmountOfLPStakedInUSD: BigNumber.from(0),
+  usersMultiplierPercentage: 0,
+  usersTotalLPTokens: BigNumber.from(0),
+  currentUserRewardMultiplier: BigNumber.from(0),
+  isStakingPoolOfUser: false,
+  maxMultiplier: BigNumber.from(3),
+  globalAmountOfLPStaked: BigNumber.from(0),
+  outstandingRewards: BigNumber.from(0),
+  shareOfPool: BigNumber.from(0),
+  apyData: {
+    maxApy: BigNumber.from(0),
+    poolApy: BigNumber.from(0),
+    totalApy: BigNumber.from(0),
+    baseRewardsApy: BigNumber.from(0),
+  },
 };

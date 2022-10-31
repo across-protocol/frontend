@@ -10,7 +10,7 @@ import { BigNumber } from "ethers";
 
 type OverviewRewardSectionType = {
   totalRewards?: BigNumber;
-  stakedTokens?: string | React.FC;
+  stakedTokens?: BigNumber;
   referralTier?: number;
 };
 
@@ -34,7 +34,10 @@ const OverviewRewardSection = ({
     },
     {
       title: "In Staked LP Tokens",
-      value: stakedTokens,
+      value:
+        stakedTokens && stakedTokens.gt(0)
+          ? `$${formatEther(stakedTokens)}`
+          : undefined,
       Icon: GraphWithStar,
       Banner: BlueBanner,
     },

@@ -26,12 +26,19 @@ export function useRewards() {
     return poolRewards.add(referralRewards);
   }, [summary, enabledPools]);
 
+  const usersLPStakedInUSD = useMemo(() => {
+    return enabledPools.reduce(
+      (prev, curr) => prev.add(curr.userAmountOfLPStakedInUSD),
+      BigNumber.from(0)
+    );
+  }, [enabledPools]);
+
   return {
     isConnected,
     address: account,
     connectHandler: () => connect(),
     totalRewards: totalRewards,
-    stakedTokens: "$942,021.23",
+    stakedTokens: usersLPStakedInUSD,
     ...formatReferralSummary(summary, !isLoading && isConnected),
     areStakingPoolsLoading,
     myPoolData: myPools,
