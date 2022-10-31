@@ -1,5 +1,7 @@
+import { BigNumber } from "ethers";
 import { useConnection } from "hooks";
 import { ReferralsSummary, useReferralSummary } from "hooks/useReferralSummary";
+import { useMemo } from "react";
 import { formatUnitsFnBuilder } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { useStakingPools } from "./useStakingPools";
@@ -11,15 +13,32 @@ export function useRewards() {
   const {
     myPools,
     allPools,
+    enabledPools,
     isLoading: areStakingPoolsLoading,
   } = useStakingPools();
+
+  const totalRewards = useMemo(() => {
+    const poolRewards = enabledPools.reduce(
+      (prev, curr) => prev.add(curr.outstandingRewards),
+      BigNumber.from(0)
+    );
+    const referralRewards = BigNumber.from(summary.rewardsAmount);
+    return poolRewards.add(referralRewards);
+  }, [summary, enabledPools]);
+
+  const usersLPStakedInUSD = useMemo(() => {
+    return enabledPools.reduce(
+      (prev, curr) => prev.add(curr.userAmountOfLPStakedInUSD),
+      BigNumber.from(0)
+    );
+  }, [enabledPools]);
 
   return {
     isConnected,
     address: account,
     connectHandler: () => connect(),
-    totalRewards: "726.45 ACX",
-    stakedTokens: "$942,021.23",
+    totalRewards: totalRewards,
+    stakedTokens: usersLPStakedInUSD,
     ...formatReferralSummary(summary, !isLoading && isConnected),
     areStakingPoolsLoading,
     myPoolData: myPools,

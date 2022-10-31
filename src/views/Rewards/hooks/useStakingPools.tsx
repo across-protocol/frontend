@@ -6,16 +6,14 @@ export const useStakingPools = () => {
   const stakingPools = allStakingPoolsQueries.flatMap(
     (query) => query.data || []
   );
-  const myPools = stakingPools.filter(
-    (pool) => pool.poolEnabled && pool.isStakingPoolOfUser
-  );
-  const allPools = stakingPools.filter(
-    (pool) => pool.poolEnabled && !pool.isStakingPoolOfUser
-  );
+  const enabledPools = stakingPools.filter((pool) => pool.poolEnabled);
+  const myPools = enabledPools.filter((pool) => pool.isStakingPoolOfUser);
+  const allPools = enabledPools.filter((pool) => !pool.isStakingPoolOfUser);
 
   return {
     myPools,
     allPools,
+    enabledPools,
     isLoading,
   };
 };
