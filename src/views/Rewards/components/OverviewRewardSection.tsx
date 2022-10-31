@@ -25,7 +25,10 @@ const OverviewRewardSection = ({
   const cardInformation = [
     {
       title: "Total Rewards",
-      value: totalRewards ? `${formatEther(totalRewards)} ACX` : undefined,
+      value:
+        totalRewards && totalRewards.gt(0)
+          ? `${formatEther(totalRewards)} ACX`
+          : undefined,
       Icon: AcrossWithStar,
       Banner: GreenBanner,
     },
