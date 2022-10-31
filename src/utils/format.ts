@@ -1,5 +1,6 @@
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import assert from "assert";
+import numeral from "numeral";
 
 export function isValidString(s: string | null | undefined | ""): s is string {
   if (s != null && typeof s === "string" && s !== "") {
@@ -226,6 +227,13 @@ export const formatNumberMaxFracDigits = threeMaxFracFormatter.format.bind(
   threeMaxFracFormatter
 );
 
+const twoMaxFracFormatter = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 2,
+});
+
+export const formatNumberTwoFracDigits =
+  twoMaxFracFormatter.format.bind(twoMaxFracFormatter);
+
 export function formatPoolAPY(
   wei: ethers.BigNumberish,
   decimals: number
@@ -239,4 +247,15 @@ export function formatWeiPct(wei: ethers.BigNumberish, precision: number = 3) {
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: precision,
   }).format(Number(ethers.utils.formatEther(wei)) * 100);
+}
+
+/**
+ * Formats a number into a human readable format
+ * @param num The number to format
+ * @returns A human readable format. I.e. 1000 -> 1K, 1001 -> 1K+
+ */
+export function humanReadableNumber(num: number): string {
+  num = Math.round(num);
+  if (num <= 0) return "0";
+  return numeral(num).format("0a").toUpperCase() + "+";
 }
