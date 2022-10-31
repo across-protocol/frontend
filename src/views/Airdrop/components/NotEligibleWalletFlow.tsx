@@ -4,10 +4,10 @@ import { QUERIESV2 } from "utils/constants";
 import bgImage from "assets/airdrop-waves-bg.svg";
 import { Text } from "components/Text";
 
-import { WaysToEarn } from "./WaysToEarn";
+import { WaysToEarn, Props } from "./WaysToEarn";
 import { WalletHero } from "./WalletHero";
 
-export function NotEligibleWalletFlow() {
+export function NotEligibleWalletFlow({ maxApyPct }: Props) {
   return (
     <Container>
       <WalletHero
@@ -27,7 +27,7 @@ export function NotEligibleWalletFlow() {
         <Title size="2xl" color="white-100">
           More ways to earn ACX
         </Title>
-        <WaysToEarn />
+        <WaysToEarn maxApyPct={maxApyPct} />
       </CardContainer>
     </Container>
   );

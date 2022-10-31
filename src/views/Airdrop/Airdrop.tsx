@@ -5,9 +5,7 @@ import { SplashFlow } from "./components/SplashFlow";
 import { MoreInfoFlow } from "./components/MoreInfoFlow";
 import { EligibleWalletFlow } from "./components/EligibleWalletFlow";
 import { NotEligibleWalletFlow } from "./components/NotEligibleWalletFlow";
-
 import useAirdrop from "./hooks/useAirdrop";
-
 import {
   BackgroundLayer,
   ContentWrapper,
@@ -23,9 +21,12 @@ const Airdrop = () => {
     connectWallet,
     handleAddTokenToWallet,
     airdropRecipientQuery,
+    maxApyPct,
+    currentApyPct,
     claimMutation,
     isClaimedQuery,
   } = useAirdrop();
+
   let activePageComponent: JSX.Element;
   switch (activePageFlow) {
     case "splash":
@@ -55,11 +56,13 @@ const Airdrop = () => {
           errorMsg={
             claimMutation.error ? (claimMutation.error as Error).message : ""
           }
+          maxApyPct={maxApyPct}
+          currentApyPct={currentApyPct}
         />
       );
       break;
     case "ineligible":
-      activePageComponent = <NotEligibleWalletFlow />;
+      activePageComponent = <NotEligibleWalletFlow maxApyPct={maxApyPct} />;
       break;
     default:
       activePageComponent = <></>;

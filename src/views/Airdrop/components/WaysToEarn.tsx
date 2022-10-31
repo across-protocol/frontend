@@ -3,15 +3,14 @@ import styled from "@emotion/styled";
 import { ReactComponent as PoolStarRingIcon } from "assets/pool-star-ring.svg";
 import { ReactComponent as ReferralIcon } from "assets/referral-star-ring.svg";
 
+import { tiers } from "../../Referrals/comp/RewardReferral/RewardReferral";
 import { EarnOptionCard } from "./EarnOptionCard";
 
-export function WaysToEarn({
-  maxPoolApyPct,
-  maxReferralRatePct,
-}: {
-  maxPoolApyPct?: number;
-  maxReferralRatePct?: number;
-}) {
+export type Props = {
+  maxApyPct?: string;
+};
+
+export function WaysToEarn({ maxApyPct }: Props) {
   return (
     <OptionsContainer>
       <EarnOptionCard
@@ -24,7 +23,7 @@ export function WaysToEarn({
           title: "APY range",
           body: "APY range description",
         }}
-        bottomText={`Earn up to ${maxPoolApyPct || "-"}% APY.`}
+        bottomText={`Earn up to ${maxApyPct ?? "-"}% APY.`}
       />
       <EarnOptionCard
         Icon={<ReferralIcon />}
@@ -37,7 +36,7 @@ export function WaysToEarn({
           body: "Referral rate description",
         }}
         bottomText={`Earn up to ${
-          maxReferralRatePct || "-"
+          tiers["5"].referralRate * 100
         }% of fees back in ACX.`}
       />
     </OptionsContainer>

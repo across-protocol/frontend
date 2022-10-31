@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useConnection } from "hooks";
+import { useConnection, useAcrossStakingPool } from "hooks";
 
 import { useAirdropRecipient } from "./useAirdropRecipient";
 import { useIsClaimed } from "./useIsClaimed";
@@ -7,6 +7,7 @@ import { useClaim } from "./useClaim";
 
 import { getConfig } from "utils/config";
 import ACXImageSrc from "assets/acx.svg";
+import { formatWeiPct } from "utils";
 
 export type FlowSelector = "splash" | "info" | "eligible" | "ineligible";
 
@@ -18,6 +19,7 @@ export default function useAirdrop() {
   const airdropRecipientQuery = useAirdropRecipient();
   const isClaimedQuery = useIsClaimed();
   const claimMutation = useClaim();
+  const acrossStakingPoolQuery = useAcrossStakingPool();
 
   const handleAddTokenToWallet = async () => {
     if (provider) {
@@ -46,6 +48,14 @@ export default function useAirdrop() {
     account,
   ]);
 
+  const maxApyPct = acrossStakingPoolQuery.data
+    ? formatWeiPct(acrossStakingPoolQuery.data.apyData.maxApy, 2)
+    : undefined;
+
+  const currentApyPct = acrossStakingPoolQuery.data
+    ? formatWeiPct(acrossStakingPoolQuery.data.apyData.totalApy, 2)
+    : undefined;
+
   return {
     activePageFlow,
     switchToInfo: () => setActivePageFlow("info"),
@@ -53,6 +63,9 @@ export default function useAirdrop() {
     switchToEligible: () => setActivePageFlow("eligible"),
     switchToIneligible: () => setActivePageFlow("ineligible"),
 
+    maxApyPct,
+    currentApyPct,
+    acrossStakingPoolQuery,
     airdropRecipientQuery,
     isClaimedQuery,
     claimMutation,
