@@ -40,13 +40,13 @@
       "l1TokenAddress": "0xd35CCeEAD182dcee0F148EbaC9447DA2c4D449c4"
     },
     {
-      "fromChain": 80001,
-      "toChain": 5,
-      "fromTokenAddress": "0xe6b8a5CF854791412c1f6EFC7CAf629f5Df1c747",
-      "fromSpokeAddress": "0x45fF03629D024b7763275e732a2d80202c18b31C",
-      "fromTokenSymbol": "USDC",
+      "fromChain": 5,
+      "toChain": 80001,
+      "fromTokenAddress": "0x40153DdFAd90C49dbE3F5c9F96f2a5B25ec67461",
+      "fromSpokeAddress": "0xEc88d3C08E2939562Ff8188B4e30A52236C3FF09",
+      "fromTokenSymbol": "ACX",
       "isNative": false,
-      "l1TokenAddress": "0xd35CCeEAD182dcee0F148EbaC9447DA2c4D449c4"
+      "l1TokenAddress": "0x40153DdFAd90C49dbE3F5c9F96f2a5B25ec67461"
     },
     {
       "fromChain": 5,
