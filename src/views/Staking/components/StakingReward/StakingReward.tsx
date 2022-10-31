@@ -3,7 +3,7 @@ import { Alert, ButtonV2 } from "components";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { BigNumber } from "ethers";
 import { useState } from "react";
-import { formatEther, QUERIESV2 } from "utils";
+import { formatEther, formatWeiPct, QUERIESV2 } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { StakingRewardPropType } from "../../types";
 import StakingInputBlock from "../StakingInputBlock";
@@ -12,7 +12,10 @@ import { Card } from "views/Staking/Staking.styles";
 import { Text } from "components/Text";
 
 export const StakingReward = ({
-  poolData: { outstandingRewards },
+  poolData: {
+    outstandingRewards,
+    apyData: { totalApy, minApy },
+  },
   isConnected,
   walletConnectionHandler,
 }: StakingRewardPropType) => {
@@ -29,12 +32,14 @@ export const StakingReward = ({
   return (
     <SectionTitleWrapperV2 title="Rewards">
       <StakingRewardCard>
-        <Alert status="warn">
-          <Text weight={400} color="warning">
-            Claiming tokens will reset your multiplier and decrease your APY
-            from pool + base_rewards * multiplier% to pool + base_rewards * 1%.
-          </Text>
-        </Alert>
+        {!totalApy.eq(minApy) && (
+          <Alert status="warn">
+            <Text weight={400} color="warning">
+              Claiming tokens will reset your multiplier and decrease your APY
+              from {formatWeiPct(totalApy, 0)}% to {formatWeiPct(minApy, 0)}%.
+            </Text>
+          </Alert>
+        )}
         {isConnected ? (
           <ClaimRewardInputGroup>
             <RewardClaimWrapper>

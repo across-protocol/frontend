@@ -2,7 +2,7 @@ import { Text } from "components/Text";
 import { PopperTooltip } from "components/Tooltip";
 import { IRow } from "components/Table/Table";
 import { BigNumber } from "ethers";
-import { formatEther } from "utils";
+import { formatEther, formatWeiPct } from "utils";
 import { ReactComponent as ExternalLink16 } from "assets/icons/arrow-right-16.svg";
 import {
   ButtonCell,
@@ -149,10 +149,10 @@ function RowRewardAPYCell({ data, meta }: PoolRowCellType) {
   return (
     <StackedCell>
       <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-        {formatEther(BigNumber.from(100).mul(data.apyData.totalApy))}%
+        {formatWeiPct(data.apyData.totalApy, 0)}%
       </Text>
       <Text color="white-70" size="sm">
-        Max: {formatEther(BigNumber.from(100).mul(data.apyData.maxApy))}%
+        Max: {formatWeiPct(data.apyData.maxApy, 0)}%
       </Text>
     </StackedCell>
   );

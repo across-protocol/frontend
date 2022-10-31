@@ -23,6 +23,7 @@ import { StakingFormPropType } from "../../types";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import {
   formatEther,
+  formatWeiPct,
   formatNumberMaxFracDigits,
   isNumericWithinRange,
 } from "utils";
@@ -229,7 +230,7 @@ export const StakingForm = ({
             <StakeInfoItem>
               {valueOrEmpty(
                 <Text color={activeColor}>
-                  {formatEther(poolData.apyData.totalApy)}%
+                  {formatWeiPct(poolData.apyData.totalApy)}%
                 </Text>
               )}
             </StakeInfoItem>
@@ -251,11 +252,11 @@ export const StakingForm = ({
                 {valueOrEmpty(
                   <>
                     <Text color={"white-70"}>
-                      Base {formatEther(poolData.apyData.baseRewardsApy)}%
+                      Base {formatWeiPct(poolData.apyData.baseRewardsApy)}%
                     </Text>
                     &nbsp;{" "}
                     <Text color={activeColor}>
-                      {formatEther(poolData.apyData.rewardsApy)}%
+                      {formatWeiPct(poolData.apyData.rewardsApy)}%
                     </Text>
                   </>
                 )}
@@ -266,7 +267,7 @@ export const StakingForm = ({
               <StakeInfoItem>
                 {valueOrEmpty(
                   <Text color={activeColor}>
-                    {formatEther(poolData.apyData.poolApy)}%
+                    {formatWeiPct(poolData.apyData.poolApy)}%
                   </Text>
                 )}
               </StakeInfoItem>

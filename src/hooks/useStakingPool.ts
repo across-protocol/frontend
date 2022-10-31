@@ -45,6 +45,7 @@ export type StakingPool = {
     baseRewardsApy: BigNumber;
     rewardsApy: BigNumber;
     maxApy: BigNumber;
+    minApy: BigNumber;
     totalApy: BigNumber;
   };
   requiresApproval: boolean;
@@ -223,6 +224,7 @@ const fetchStakingPool = async (
   const maxApy = poolApy.add(
     baseRewardsApy.mul(maxMultiplier).div(fixedPointAdjustment)
   );
+  const minApy = poolApy.add(baseRewardsApy);
   const rewardsApy = baseRewardsApy.mul(
     userAmountOfLPStaked.gt(0) ? usersMultiplierPercentage / 100 : 1
   );
@@ -267,6 +269,7 @@ const fetchStakingPool = async (
     apyData: {
       poolApy,
       maxApy,
+      minApy,
       totalApy,
       baseRewardsApy,
       rewardsApy,
@@ -306,5 +309,6 @@ export const DEFAULT_STAKING_POOL_DATA: StakingPool = {
     totalApy: BigNumber.from(0),
     baseRewardsApy: BigNumber.from(0),
     rewardsApy: BigNumber.from(0),
+    minApy: BigNumber.from(0),
   },
 };
