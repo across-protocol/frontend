@@ -5,10 +5,11 @@ import { ReactComponent as BlueBanner } from "assets/bg-banners/blue-card-banner
 import { ReactComponent as GreenBanner } from "assets/bg-banners/green-card-banner.svg";
 import { ReactComponent as PurpleBanner } from "assets/bg-banners/purple-card-banner.svg";
 import styled from "@emotion/styled";
-import { QUERIESV2 } from "utils";
+import { formatEther, QUERIESV2 } from "utils";
+import { BigNumber } from "ethers";
 
 type OverviewRewardSectionType = {
-  totalRewards?: string | React.FC;
+  totalRewards?: BigNumber;
   stakedTokens?: string | React.FC;
   referralTier?: number;
 };
@@ -24,7 +25,7 @@ const OverviewRewardSection = ({
   const cardInformation = [
     {
       title: "Total Rewards",
-      value: totalRewards,
+      value: totalRewards ? `${formatEther(totalRewards)} ACX` : undefined,
       Icon: AcrossWithStar,
       Banner: GreenBanner,
     },
