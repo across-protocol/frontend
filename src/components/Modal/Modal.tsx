@@ -1,5 +1,6 @@
 import usePageScrollLock from "hooks/usePageScrollLock";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   ModalContentWrapper,
   StyledExitIcon,
@@ -16,6 +17,7 @@ export type ModalDirection = {
 };
 
 type ModalProps = {
+  isOpen?: boolean;
   title?: string;
 
   height?: number;
@@ -30,6 +32,7 @@ type ModalProps = {
 };
 
 const Modal: React.FC<ModalProps> = ({
+  isOpen,
   title,
   height,
   width,
@@ -46,20 +49,11 @@ const Modal: React.FC<ModalProps> = ({
     ...verticalLocation,
   };
 
+  const container = useRef(document.getElementById("modal"));
   const modalContentRef = useRef<HTMLDivElement>(null);
   const exitAnimationTimeoutId = useRef<NodeJS.Timeout>();
   const [forwardAnimation, setForwardAnimation] = useState<boolean>(true);
   const { lockScroll, unlockScroll } = usePageScrollLock();
-
-  const exitHandler = () => {
-    if (!disableExitOverride) {
-      setForwardAnimation(false);
-      const id = setTimeout(() => {
-        externalModalExitHandler();
-      }, 500);
-      exitAnimationTimeoutId.current = id;
-    }
-  };
 
   const offModalClickHandler = (event: React.MouseEvent<HTMLElement>) => {
     if (
@@ -67,7 +61,7 @@ const Modal: React.FC<ModalProps> = ({
       exitOnOutsideClick &&
       !modalContentRef.current.contains(event.target as Node)
     ) {
-      exitHandler();
+      externalModalExitHandler();
     }
   };
 
@@ -85,7 +79,33 @@ const Modal: React.FC<ModalProps> = ({
     };
   }, []);
 
-  return (
+  useEffect(() => {
+    if (!isOpen && disableExitOverride) {
+      setForwardAnimation(false);
+      const id = setTimeout(() => {
+        externalModalExitHandler();
+      }, 500);
+      exitAnimationTimeoutId.current = id;
+    }
+  }, [isOpen, externalModalExitHandler]);
+
+  // We create the "modal" element and insert it into the DOM, if it does not exist already
+  useLayoutEffect(() => {
+    if (!container.current) {
+      // we know this to always be defined.
+      const root = document.getElementById("root") as HTMLDivElement;
+      const div = document.createElement("div");
+      div.id = "modal";
+      root.insertBefore(div, root.firstChild);
+      container.current = div;
+    }
+  }, []);
+
+  if (!container.current || !isOpen) {
+    return null;
+  }
+
+  return createPortal(
     <Wrapper
       direction={direction}
       onClick={offModalClickHandler}
@@ -94,11 +114,12 @@ const Modal: React.FC<ModalProps> = ({
       <ModalContentWrapper ref={modalContentRef} height={height} width={width}>
         <TitleAndExitWrapper>
           <Title>{title}</Title>
-          <StyledExitIcon onClick={() => exitHandler()} />
+          <StyledExitIcon onClick={() => externalModalExitHandler()} />
         </TitleAndExitWrapper>
         {children}
       </ModalContentWrapper>
-    </Wrapper>
+    </Wrapper>,
+    container.current
   );
 };
 
