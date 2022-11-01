@@ -3,7 +3,7 @@
 */
 import { Wallet } from "@ethersproject/wallet";
 import { Eip1193Bridge } from "@ethersproject/experimental";
-import { ethers } from "@ethersproject/experimental/node_modules/ethers";
+import { ethers } from "ethers";
 
 const PRIVATE_KEY_TEST_NEVER_USE =
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
@@ -15,7 +15,7 @@ export const TEST_ADDRESS_NEVER_USE = new Wallet(PRIVATE_KEY_TEST_NEVER_USE)
 export const TEST_ADDRESS_NEVER_USE_SHORTENED = `${TEST_ADDRESS_NEVER_USE.substr(
   0,
   6
-)}...${TEST_ADDRESS_NEVER_USE.substr(-4, 4)}`;
+)}...${TEST_ADDRESS_NEVER_USE.substring(-4, 4)}`;
 
 class CustomizedBridge extends Eip1193Bridge {
   async sendAsync(...args) {
