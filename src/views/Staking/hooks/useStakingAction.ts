@@ -20,7 +20,7 @@ export function useStakeAction(tokenAddress?: string) {
   ) => {
     if (stakingPoolQuery.data && signer && tokenAddress) {
       const { lpTokenAddress, requiresApproval } = stakingPoolQuery.data;
-      performStakingActionBuilderFn(
+      await performStakingActionBuilderFn(
         lpTokenAddress,
         signer,
         "stake",
@@ -43,7 +43,7 @@ export function useUnstakeAction(tokenAddress?: string) {
   ) => {
     if (stakingPoolQuery.data && signer && tokenAddress) {
       const { lpTokenAddress, requiresApproval } = stakingPoolQuery.data;
-      performStakingActionBuilderFn(
+      await performStakingActionBuilderFn(
         lpTokenAddress,
         signer,
         "unstake",
@@ -110,7 +110,7 @@ const performStakingActionBuilderFn = (
     // Call the generate the transaction to stake/unstake and
     // wait until the tx has been resolved
     const result = await callingFn(lpTokenAddress, amountAsBigNumber);
-    await notificationEmitter(result.hash, notify);
+    await notificationEmitter(result.hash, notify, 0);
   };
   return closure;
 };
