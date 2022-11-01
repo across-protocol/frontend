@@ -2,14 +2,12 @@ import styled from "@emotion/styled";
 import { Alert, ButtonV2 } from "components";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { BigNumber } from "ethers";
-import { useState } from "react";
 import { formatEther, formatWeiPct, QUERIESV2 } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { StakingRewardPropType } from "../../types";
-import StakingInputBlock from "../StakingInputBlock";
-import AcrossLogo from "assets/Across-logo-bullet.svg";
 import { Card } from "views/Staking/Staking.styles";
 import { Text } from "components/Text";
+import ConnectWalletButton from "../ConnectWalletButton";
 
 export const StakingReward = ({
   poolData: {
@@ -19,9 +17,6 @@ export const StakingReward = ({
   isConnected,
   walletConnectionHandler,
 }: StakingRewardPropType) => {
-  const [amountToClaim, setAmountToClaim] = useState("");
-  const [isTransitioning] = useState(false);
-
   const activeColor = "white-" + (outstandingRewards.gt(0) ? 100 : 70);
 
   const valueOrEmpty = repeatableTernaryBuilder(
@@ -60,19 +55,7 @@ export const StakingReward = ({
             </ClaimRewardButton>
           </ClaimRewardInputGroup>
         ) : (
-          <ButtonGroupWrapper>
-            <StakingInputBlock
-              value={amountToClaim}
-              setValue={setAmountToClaim}
-              maxValue=""
-              valid
-              logoURI={AcrossLogo}
-              buttonText="Connect wallet to claim"
-              onClickHandler={walletConnectionHandler}
-              displayLoader={isTransitioning}
-              omitInput
-            />
-          </ButtonGroupWrapper>
+          <ConnectWalletButton reasonToConnect="claim rewards" />
         )}
       </StakingRewardCard>
     </SectionTitleWrapperV2>
@@ -121,10 +104,6 @@ const ClaimRewardButton = styled(ButtonV2)`
   @media ${QUERIESV2.sm.andDown} {
     height: 40px;
   }
-`;
-
-const ButtonGroupWrapper = styled.div`
-  width: 100%;
 `;
 
 const StakingRewardCard = styled(Card)`

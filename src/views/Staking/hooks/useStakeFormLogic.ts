@@ -31,7 +31,6 @@ export function useStakeFormLogic(
               : poolData.userAmountOfLPStaked;
             setValidAmount(asNumeric.lte(maximum));
           } else {
-            setAmount(undefined);
             setValidAmount(true);
           }
         } else {
@@ -42,7 +41,7 @@ export function useStakeFormLogic(
   }, [amount, poolData, poolDataLoading, stakingAction]);
 
   const modifiedPoolData =
-    !poolDataLoading && amount && validAmount
+    !poolDataLoading && amount && validAmount && isNumberEthersParseable(amount)
       ? deriveNewStakingValues(
           poolData,
           poolData.lpTokenParser(amount),

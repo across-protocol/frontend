@@ -17,19 +17,13 @@ export function getBaseRewardsApr(
     totalStaked = BigNumber.from(1);
   }
 
-  const baseRewardsApr = safeDivide(
-    rewardsPerYear.mul(fixedPointAdjustment),
-    totalStaked
-  );
+  const baseRewardsApr = safeDivide(rewardsPerYear, totalStaked);
 
   if (!userStaked || userStaked.isZero()) {
     return baseRewardsApr;
   }
 
-  return safeDivide(
-    rewardsPerYear.mul(userStaked).mul(fixedPointAdjustment),
-    totalStaked.pow(2)
-  );
+  return safeDivide(rewardsPerYear.mul(userStaked), totalStaked.pow(2));
 }
 
 export function deriveNewStakingValues(

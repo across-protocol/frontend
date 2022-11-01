@@ -116,15 +116,19 @@ export const StakeAPYInfoRow = styled(StakeInfoRow)`
 `;
 
 interface IStyledProgressBar {
-  className?: string;
+  active: boolean;
 }
 export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
   width: 80px;
   height: 14px;
   padding-right: 4px;
   margin-right: 8px;
-  > div {
+  border-color: ${({ active }) => (active ? "#e0f3ff" : "#9daab2")};
+
+  & > div {
     height: 8px;
+
+    background-color: ${({ active }) => (active ? "#e0f3ff" : "#9daab2")};
   }
 `;
 

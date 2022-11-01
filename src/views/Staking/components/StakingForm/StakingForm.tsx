@@ -34,7 +34,7 @@ export const StakingForm = ({
   isWrongNetwork,
   isDataLoading,
   isMutating,
-  poolData,
+  poolData: originPoolData,
   logoURI,
 }: StakingFormPropType) => {
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
@@ -46,13 +46,14 @@ export const StakingForm = ({
     isAmountValid,
     stakingAction,
     maximumValue,
-  } = useStakeFormLogic(poolData, isDataLoading);
+    updatedPoolData: poolData,
+  } = useStakeFormLogic(originPoolData, isDataLoading);
 
   const buttonHandler = isConnected
     ? () => {
-        if (!isWrongNetwork) {
+        if (!isWrongNetwork && isAmountValid && amount) {
           (stakingAction === "stake" ? stakeActionFn : unstakeActionFn)({
-            amount: poolData.lpTokenParser(stakingAction),
+            amount: poolData.lpTokenParser(amount),
           });
         }
       }
@@ -81,7 +82,7 @@ export const StakingForm = ({
     setIsPoolInfoVisible(false);
   }, [isConnected]);
 
-  const activeColor = "white-" + (isAmountValid ? 100 : 70);
+  const activeColor = "white-" + (amount && isAmountValid ? 100 : 70);
   const lpFmt = poolData.lpTokenFormatter;
 
   return (
@@ -181,8 +182,9 @@ export const StakingForm = ({
               {valueOrEmpty(
                 <>
                   <StyledProgressBar
+                    active={Boolean(amount) && isAmountValid}
                     percent={poolData.usersMultiplierPercentage}
-                  />{" "}
+                  />
                   <Text color={activeColor}>
                     {formatEther(poolData.currentUserRewardMultiplier)} x
                   </Text>

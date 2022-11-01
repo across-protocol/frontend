@@ -193,7 +193,9 @@ const fetchStakingPool = async (
   // The Average Deposit Time retrieves the # seconds since the last
   // deposit, weighted by all the deposits in a user's account. To calculate the
   // days elapsed, we can divide by 1 day in seconds (86,400 seconds)
-  const daysElapsed = averageDepositTime.div(86400).toNumber();
+  const daysElapsed = userAmountOfLPStaked.eq(0)
+    ? 0
+    : averageDepositTime.div(86400).toNumber();
 
   // Resolve the users reward multiplier as a percentage.
   const usersMultiplierPercentage = maxMultiplier.eq(0)
