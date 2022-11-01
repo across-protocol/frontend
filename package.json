@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@across-protocol/contracts-v2": "^1.0.4",
-    "@across-protocol/sdk-v2": "^0.1.30",
+    "@across-protocol/sdk-v2": "0.1.31",
     "@datapunt/matomo-tracker-js": "^0.5.1",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
