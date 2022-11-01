@@ -16,7 +16,7 @@ import { Alert } from "components";
 
 interface Props {
   value: string;
-  setValue: React.Dispatch<React.SetStateAction<string>>;
+  setValue: React.Dispatch<React.SetStateAction<string | undefined>>;
   valid: boolean;
   buttonText: string;
   logoURI: string;

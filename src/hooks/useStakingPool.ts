@@ -40,6 +40,8 @@ export type StakingPool = {
   usersMultiplierPercentage: number;
   usersTotalLPTokens: BigNumber;
   shareOfPool: BigNumber;
+  secondsToMaxMultiplier: BigNumber;
+  lpTokenDecimalCount: number;
   apyData: {
     poolApy: BigNumber;
     baseRewardsApy: BigNumber;
@@ -132,7 +134,12 @@ const fetchStakingPool = async (
   // Resolve the provided account's outstanding rewards (if an account is connected) as well
   // as the global pool information
   const [
-    { enabled: poolEnabled, maxMultiplier, baseEmissionRate },
+    {
+      enabled: poolEnabled,
+      maxMultiplier,
+      secondsToMaxMultiplier,
+      baseEmissionRate,
+    },
     currentUserRewardMultiplier,
     {
       rewardsOutstanding: outstandingRewards,
@@ -225,9 +232,13 @@ const fetchStakingPool = async (
     baseRewardsApy.mul(maxMultiplier).div(fixedPointAdjustment)
   );
   const minApy = poolApy.add(baseRewardsApy);
-  const rewardsApy = baseRewardsApy.mul(
-    userAmountOfLPStaked.gt(0) ? usersMultiplierPercentage / 100 : 1
-  );
+  const rewardsApy = baseRewardsApy
+    .mul(
+      userAmountOfLPStaked.gt(0)
+        ? currentUserRewardMultiplier
+        : parseEtherLike("1")
+    )
+    .div(fixedPointAdjustment);
   const totalApy = poolApy.add(rewardsApy);
 
   // We can resolve custom formatter & parsers for the current LP
@@ -266,6 +277,7 @@ const fetchStakingPool = async (
     usersMultiplierPercentage,
     usersTotalLPTokens,
     shareOfPool,
+    lpTokenDecimalCount: lpTokenDecimalCount,
     apyData: {
       poolApy,
       maxApy,
@@ -276,6 +288,7 @@ const fetchStakingPool = async (
     },
     requiresApproval,
     isStakingPoolOfUser,
+    secondsToMaxMultiplier,
     lpTokenFormatter,
     lpTokenParser,
   };
@@ -303,6 +316,8 @@ export const DEFAULT_STAKING_POOL_DATA: StakingPool = {
   globalAmountOfLPStaked: BigNumber.from(0),
   outstandingRewards: BigNumber.from(0),
   shareOfPool: BigNumber.from(0),
+  secondsToMaxMultiplier: BigNumber.from(0),
+  lpTokenDecimalCount: 18,
   apyData: {
     maxApy: BigNumber.from(0),
     poolApy: BigNumber.from(0),

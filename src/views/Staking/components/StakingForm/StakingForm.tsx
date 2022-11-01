@@ -21,16 +21,10 @@ import { PopperTooltip } from "components/Tooltip";
 import StakingInputBlock from "../StakingInputBlock";
 import { StakingFormPropType } from "../../types";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import {
-  formatEther,
-  formatWeiPct,
-  formatNumberMaxFracDigits,
-  isNumericWithinRange,
-} from "utils";
+import { formatEther, formatWeiPct, formatNumberMaxFracDigits } from "utils";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { Text } from "components/Text";
-
-type StakeTab = "stake" | "unstake";
+import { useStakeFormLogic } from "views/Staking/hooks/useStakeFormLogic";
 
 export const StakingForm = ({
   isConnected,
@@ -43,39 +37,34 @@ export const StakingForm = ({
   poolData,
   logoURI,
 }: StakingFormPropType) => {
-  const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
-  const [stakeAmount, setStakeAmount] = useState("");
+
+  const {
+    setAmount,
+    setStakingAction,
+    amount,
+    isAmountValid,
+    stakingAction,
+    maximumValue,
+  } = useStakeFormLogic(poolData, isDataLoading);
 
   const buttonHandler = isConnected
     ? () => {
         if (!isWrongNetwork) {
-          (activeTab === "stake" ? stakeActionFn : unstakeActionFn)({
-            amount: poolData.lpTokenParser(stakeAmount),
+          (stakingAction === "stake" ? stakeActionFn : unstakeActionFn)({
+            amount: poolData.lpTokenParser(stakingAction),
           });
         }
       }
     : walletConnectionHandler;
 
   const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
-  const buttonMaxValue =
-    activeTab === "stake"
-      ? poolData.availableLPTokenBalance
-      : poolData.userAmountOfLPStaked;
+  const buttonMaxValue = maximumValue;
   const buttonMaxValueText = poolData
     .lpTokenFormatter(buttonMaxValue)
     .replaceAll(",", "");
 
   const ArrowIcon = isPoolInfoVisible ? ArrowIconUp : ArrowIconDown;
-
-  const validateStakeAmount = (amount: string) =>
-    isNumericWithinRange(
-      amount,
-      true,
-      "0",
-      buttonMaxValue,
-      poolData.lpTokenParser
-    );
 
   const valueOrEmpty = repeatableTernaryBuilder(
     isConnected && !isWrongNetwork && !isDataLoading,
@@ -84,16 +73,15 @@ export const StakingForm = ({
 
   useEffect(() => {
     if (!isMutating) {
-      setStakeAmount("");
+      setAmount(undefined);
     }
-  }, [activeTab, isMutating]);
+  }, [stakingAction, isMutating, setAmount]);
 
   useEffect(() => {
     setIsPoolInfoVisible(false);
   }, [isConnected]);
 
-  const activeColor =
-    "white-" + (poolData.userAmountOfLPStaked.gt(0) ? 100 : 70);
+  const activeColor = "white-" + (isAmountValid ? 100 : 70);
   const lpFmt = poolData.lpTokenFormatter;
 
   return (
@@ -101,23 +89,23 @@ export const StakingForm = ({
       <Card>
         <Tabs>
           <Tab
-            onClick={() => setActiveTab("stake")}
-            active={activeTab === "stake"}
+            onClick={() => setStakingAction("stake")}
+            active={stakingAction === "stake"}
           >
             <Text
               weight={500}
-              color={"white-" + (activeTab === "stake" ? "100" : "70")}
+              color={"white-" + (stakingAction === "stake" ? "100" : "70")}
             >
               Stake
             </Text>
           </Tab>
           <Tab
-            onClick={() => setActiveTab("unstake")}
-            active={activeTab === "unstake"}
+            onClick={() => setStakingAction("unstake")}
+            active={stakingAction === "unstake"}
           >
             <Text
               weight={500}
-              color={"white-" + (activeTab === "unstake" ? "100" : "70")}
+              color={"white-" + (stakingAction === "unstake" ? "100" : "70")}
             >
               Unstake
             </Text>
@@ -125,10 +113,10 @@ export const StakingForm = ({
         </Tabs>
         <InputBlockWrapper>
           <StakingInputBlock
-            value={stakeAmount}
-            setValue={setStakeAmount}
-            valid={!isConnected || validateStakeAmount(stakeAmount)}
-            buttonText={`${buttonTextPrefix} ${activeTab}`}
+            value={amount ?? ""}
+            setValue={setAmount}
+            valid={!isConnected || isAmountValid}
+            buttonText={`${buttonTextPrefix} ${stakingAction}`}
             logoURI={logoURI}
             maxValue={buttonMaxValueText}
             omitInput={!isConnected}
@@ -169,11 +157,10 @@ export const StakingForm = ({
               {valueOrEmpty(
                 <>
                   <Text color={activeColor}>
-                    {poolData.elapsedTimeSinceAvgDeposit <= 0
-                      ? "-"
-                      : `${formatNumberMaxFracDigits(
-                          poolData.elapsedTimeSinceAvgDeposit
-                        )} Days`}{" "}
+                    {formatNumberMaxFracDigits(
+                      poolData.elapsedTimeSinceAvgDeposit
+                    )}{" "}
+                    Days
                   </Text>
                 </>
               )}
