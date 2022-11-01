@@ -81,9 +81,9 @@ export function deriveNewStakingValues(
           .mul(100)
       );
 
-  const updatedRewardsApy = origin.apyData.baseRewardsApy.mul(
-    currentlyStaked.gt(0) ? updatedMultiplier : parseEtherLike("1")
-  );
+  const updatedRewardsApy = origin.apyData.baseRewardsApy
+    .mul(currentlyStaked.gt(0) ? updatedMultiplier : parseEtherLike("1"))
+    .div(fixedPointAdjustment);
 
   const updatedTotalApy = origin.apyData.poolApy.add(updatedRewardsApy);
 
