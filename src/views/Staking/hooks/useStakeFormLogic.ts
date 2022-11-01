@@ -10,38 +10,45 @@ export function useStakeFormLogic(
     "stake"
   );
   const [amount, setAmount] = useState<string | undefined>(undefined);
-  const [validAmount, setValidAmount] = useState(true);
+  const [isAmountValid, setIsAmountValid] = useState(false);
+  const [isAmountInvalid, setIsAmountInvalid] = useState(false);
 
   useEffect(() => {
     setAmount(undefined);
-    setValidAmount(true);
+    setIsAmountValid(false);
+    setIsAmountInvalid(false);
   }, [stakingAction]);
 
   useEffect(() => {
     const isStaked = stakingAction === "stake";
     if (!poolDataLoading) {
-      if (amount) {
+      setIsAmountValid(false);
+      setIsAmountInvalid(false);
+      if (amount && amount !== ".") {
         if (isNumberEthersParseable(amount)) {
           const asNumeric = poolData.lpTokenParser(amount);
+          console.log(asNumeric.toString());
           if (asNumeric.lt(0)) {
-            setValidAmount(false);
+            setIsAmountInvalid(true);
           } else if (asNumeric.gt(0)) {
             const maximum = isStaked
               ? poolData.availableLPTokenBalance
               : poolData.userAmountOfLPStaked;
-            setValidAmount(asNumeric.lte(maximum));
-          } else {
-            setValidAmount(true);
+            setIsAmountValid(asNumeric.lte(maximum));
+            setIsAmountInvalid(asNumeric.gt(maximum));
           }
         } else {
-          setValidAmount(false);
+          setIsAmountInvalid(true);
         }
       }
     }
   }, [amount, poolData, poolDataLoading, stakingAction]);
 
   const modifiedPoolData =
-    !poolDataLoading && amount && validAmount && isNumberEthersParseable(amount)
+    !poolDataLoading &&
+    amount &&
+    isAmountValid &&
+    isNumberEthersParseable(amount)
       ? deriveNewStakingValues(
           poolData,
           poolData.lpTokenParser(amount),
@@ -59,7 +66,8 @@ export function useStakeFormLogic(
     setStakingAction,
     amount,
     setAmount,
-    isAmountValid: validAmount,
+    isAmountValid,
+    isAmountInvalid,
     originPoolData: poolData,
     updatedPoolData: modifiedPoolData,
     maximumValue,

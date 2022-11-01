@@ -25,7 +25,10 @@ export const InputRow = styled.div`
     gap: 12px;
   }
 `;
-
+interface IStakeInput {
+  valid: boolean;
+  invalid: boolean;
+}
 export const InputWrapper = styled.div<IStakeInput>`
   display: flex;
   gap: 12px;
@@ -40,21 +43,19 @@ export const InputWrapper = styled.div<IStakeInput>`
 
   padding: 0px 24px;
 
-  border: 1px solid ${({ valid }) => (valid ? "#4c4e57" : "#f96c6c")};
-  color: ${({ valid }) => (valid ? "#e0f3ff" : "#f96c6c")};
-
+  border: 1px solid
+    ${({ valid, invalid }) =>
+      !valid && !invalid ? "#4c4e57" : invalid ? "#f96c6c" : "#e0f3ff"};
   @media ${QUERIESV2.sm.andDown} {
     padding: 0px 12px;
     height: 48px;
   }
 `;
 
-interface IStakeInput {
-  valid: boolean;
-}
-export const Input = styled.input`
+export const Input = styled.input<IStakeInput>`
   background: transparent;
-  color: #9daab2;
+  color: ${({ valid, invalid }) =>
+    !invalid && !valid ? "#9daab2" : invalid ? "#f96c6c" : "#e0f3ff"};
   font-size: 16px;
   border: none;
   width: 100%;
@@ -103,11 +104,13 @@ export const ButtonWrapper = styled.div`
 interface IStakeButton {
   valid: boolean;
   fullWidth?: boolean;
+  warningButtonColor?: boolean;
 }
 export const StakeButton = styled(UnstyledButton)<IStakeButton>`
   width: ${({ fullWidth }) => (fullWidth ? "100%" : "inherit")};
   text-transform: capitalize;
-  background: #6cf9d8;
+  background: ${({ warningButtonColor }) =>
+    warningButtonColor ? "#f9d26c" : "#6cf9d8;"};
   padding: 0px 40px;
   height: 64px;
   color: #2d2e33;

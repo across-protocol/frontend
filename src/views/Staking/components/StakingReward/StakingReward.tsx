@@ -15,7 +15,6 @@ export const StakingReward = ({
     apyData: { totalApy, minApy },
   },
   isConnected,
-  walletConnectionHandler,
 }: StakingRewardPropType) => {
   const activeColor = "white-" + (outstandingRewards.gt(0) ? 100 : 70);
 
@@ -27,7 +26,7 @@ export const StakingReward = ({
   return (
     <SectionTitleWrapperV2 title="Rewards">
       <StakingRewardCard>
-        {!totalApy.eq(minApy) && (
+        {outstandingRewards.gt(0) && (
           <Alert status="warn">
             <Text weight={400} color="warning">
               Claiming tokens will reset your multiplier and decrease your APY

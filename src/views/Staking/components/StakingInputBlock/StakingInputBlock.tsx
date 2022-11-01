@@ -12,59 +12,59 @@ import {
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
-import { Alert } from "components";
 
 interface Props {
   value: string;
   setValue: React.Dispatch<React.SetStateAction<string | undefined>>;
   valid: boolean;
+  invalid: boolean;
   buttonText: string;
   logoURI: string;
   maxValue: string;
-  omitInput?: boolean;
   onClickHandler: () => void | Promise<void>;
   displayLoader?: boolean;
-  errorMessage?: string;
+  warningButtonColor?: boolean;
 }
 
 const StakingInputBlock: React.FC<Props> = ({
   value,
   setValue,
   valid,
+  invalid,
   buttonText,
   logoURI,
   maxValue,
   displayLoader,
-  omitInput,
   onClickHandler,
-  errorMessage,
+  warningButtonColor,
 }) => (
   <Wrapper>
     <InputRow>
-      {!omitInput && (
-        <InputWrapper valid={!value || valid}>
-          <TokenIcon src={logoURI} />
-          <Input
-            placeholder="Enter amount"
-            value={value}
-            type="text"
-            onChange={(e) => setValue(e.target.value)}
-            disabled={displayLoader}
-          />
-          <MaxButton
-            disabled={displayLoader || !maxValue}
-            onClick={() => setValue(maxValue ?? "")}
-          >
-            Max
-          </MaxButton>
-        </InputWrapper>
-      )}
+      <InputWrapper valid={valid} invalid={invalid}>
+        <TokenIcon src={logoURI} />
+        <Input
+          valid={valid}
+          invalid={invalid}
+          placeholder="Enter amount"
+          value={value}
+          type="text"
+          onChange={(e) => setValue(e.target.value)}
+          disabled={displayLoader}
+        />
+        <MaxButton
+          disabled={displayLoader || !maxValue}
+          onClick={() => setValue(maxValue ?? "")}
+        >
+          Max
+        </MaxButton>
+      </InputWrapper>
+
       <ButtonWrapper>
         <StakeButton
           valid={valid}
-          fullWidth={omitInput}
           onClick={onClickHandler}
-          disabled={!valid || displayLoader || value === "0"}
+          disabled={!valid || invalid}
+          warningButtonColor={warningButtonColor}
         >
           <StakeButtonContentWrapper>
             <span>{capitalizeFirstLetter(buttonText)}</span>
@@ -77,9 +77,6 @@ const StakingInputBlock: React.FC<Props> = ({
         </StakeButton>
       </ButtonWrapper>
     </InputRow>
-    {!!value && !valid && !!errorMessage && (
-      <Alert status="danger">{errorMessage}</Alert>
-    )}
   </Wrapper>
 );
 

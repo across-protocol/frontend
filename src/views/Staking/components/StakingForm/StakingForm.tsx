@@ -44,6 +44,7 @@ export const StakingForm = ({
     setStakingAction,
     amount,
     isAmountValid,
+    isAmountInvalid,
     stakingAction,
     maximumValue,
     updatedPoolData: poolData,
@@ -115,18 +116,20 @@ export const StakingForm = ({
               value={amount ?? ""}
               setValue={setAmount}
               valid={isAmountValid}
+              invalid={isAmountInvalid}
               buttonText={stakingAction}
               logoURI={logoURI}
               maxValue={buttonMaxValueText}
               onClickHandler={buttonHandler}
               displayLoader={isMutating}
+              warningButtonColor={stakingAction === "unstake"}
             />
           ) : (
             <ConnectWalletButton reasonToConnect={stakingAction} />
           )}
           {isConnected && maximumValue.eq(0) && stakingAction === "unstake" && (
             <Text color="warning" size="sm">
-              You don’t have any tokens to unstake.
+              You don't have any tokens to unstake.
             </Text>
           )}
         </InputBlockWrapper>
@@ -139,7 +142,7 @@ export const StakingForm = ({
                 <>
                   <Text color={activeColor}>
                     {lpFmt(poolData.userAmountOfLPStaked)}
-                  </Text>{" "}
+                  </Text>
                   <Text color="white-70">
                     / {lpFmt(poolData.usersTotalLPTokens)}{" "}
                     {poolData.lpTokenSymbolName}

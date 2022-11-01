@@ -133,7 +133,7 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
 `;
 
 export const APYInfoItem = styled(StakeInfoItem)`
-  color: #c5d5e0;
+  gap: 0px;
 `;
 
 export const ArrowIconDown = styled(UnstyledArrowIcon)`
