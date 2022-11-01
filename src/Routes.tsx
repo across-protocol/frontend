@@ -147,6 +147,7 @@ const Routes: React.FC = () => {
           <Route exact path="/airdrop" component={PreLaunchAirdrop} />
           <Route exact path="/auth/discord" component={DiscordAuth} />
           <Route exact path="/" component={Send} />
+          <Route path="*" component={NotFound} />
         </Suspense>
         <Route path="*" component={NotFound} />
       </Switch>
