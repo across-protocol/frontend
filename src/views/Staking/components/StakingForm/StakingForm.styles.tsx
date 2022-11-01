@@ -156,4 +156,16 @@ export const InfoIcon = styled(II)`
 export const InputBlockWrapper = styled.div`
   width: 100%;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+  gap: 12px;
+  width: 100%;
+  text-align: center;
+
+  > div {
+    width: 100%;
+  }
 `;

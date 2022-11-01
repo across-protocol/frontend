@@ -25,10 +25,10 @@ import { formatEther, formatWeiPct, formatNumberMaxFracDigits } from "utils";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { Text } from "components/Text";
 import { useStakeFormLogic } from "views/Staking/hooks/useStakeFormLogic";
+import ConnectWalletButton from "../ConnectWalletButton";
 
 export const StakingForm = ({
   isConnected,
-  walletConnectionHandler,
   stakeActionFn,
   unstakeActionFn,
   isWrongNetwork,
@@ -49,17 +49,14 @@ export const StakingForm = ({
     updatedPoolData: poolData,
   } = useStakeFormLogic(originPoolData, isDataLoading);
 
-  const buttonHandler = isConnected
-    ? () => {
-        if (!isWrongNetwork && isAmountValid && amount) {
-          (stakingAction === "stake" ? stakeActionFn : unstakeActionFn)({
-            amount: poolData.lpTokenParser(amount),
-          });
-        }
-      }
-    : walletConnectionHandler;
+  const buttonHandler = () => {
+    if (!isWrongNetwork && isAmountValid && amount) {
+      (stakingAction === "stake" ? stakeActionFn : unstakeActionFn)({
+        amount: poolData.lpTokenParser(amount),
+      });
+    }
+  };
 
-  const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
   const buttonMaxValue = maximumValue;
   const buttonMaxValueText = poolData
     .lpTokenFormatter(buttonMaxValue)
@@ -90,7 +87,7 @@ export const StakingForm = ({
       <Card>
         <Tabs>
           <Tab
-            onClick={() => setStakingAction("stake")}
+            onClick={() => !isMutating && setStakingAction("stake")}
             active={stakingAction === "stake"}
           >
             <Text
@@ -101,7 +98,7 @@ export const StakingForm = ({
             </Text>
           </Tab>
           <Tab
-            onClick={() => setStakingAction("unstake")}
+            onClick={() => !isMutating && setStakingAction("unstake")}
             active={stakingAction === "unstake"}
           >
             <Text
@@ -113,17 +110,25 @@ export const StakingForm = ({
           </Tab>
         </Tabs>
         <InputBlockWrapper>
-          <StakingInputBlock
-            value={amount ?? ""}
-            setValue={setAmount}
-            valid={!isConnected || isAmountValid}
-            buttonText={`${buttonTextPrefix} ${stakingAction}`}
-            logoURI={logoURI}
-            maxValue={buttonMaxValueText}
-            omitInput={!isConnected}
-            onClickHandler={buttonHandler}
-            displayLoader={isMutating}
-          />
+          {isConnected ? (
+            <StakingInputBlock
+              value={amount ?? ""}
+              setValue={setAmount}
+              valid={isAmountValid}
+              buttonText={stakingAction}
+              logoURI={logoURI}
+              maxValue={buttonMaxValueText}
+              onClickHandler={buttonHandler}
+              displayLoader={isMutating}
+            />
+          ) : (
+            <ConnectWalletButton reasonToConnect={stakingAction} />
+          )}
+          {isConnected && maximumValue.eq(0) && stakingAction === "unstake" && (
+            <Text color="warning" size="sm">
+              You don’t have any tokens to unstake.
+            </Text>
+          )}
         </InputBlockWrapper>
         <Divider />
         <StakeInfo>

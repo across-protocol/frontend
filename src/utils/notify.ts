@@ -11,11 +11,13 @@ export function addEtherscan(transaction: any) {
  * Calls and waits on the Notify API to resolve the status of a TX
  * @param txHash The transaction hash to wait for
  * @param notify The BNC Notify API that is used to handle the UI visualization
+ * @param timingBuffer An optional waiting time in milliseconds to wait to resolve this promise on a successful tx confirmation. (Default: 5000ms)
  * @returns Nothing.
  */
 export const notificationEmitter = async (
   txHash: string,
-  notify: API
+  notify: API,
+  timingBuffer?: number
 ): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     const { emitter } = notify.hash(txHash);
@@ -24,7 +26,7 @@ export const notificationEmitter = async (
       notify.unsubscribe(txHash);
       setTimeout(() => {
         resolve();
-      }, 5000);
+      }, timingBuffer ?? 5000);
     });
     emitter.on("txFailed", () => {
       notify.unsubscribe(txHash);
