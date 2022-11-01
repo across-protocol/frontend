@@ -6,6 +6,7 @@ import { Text } from "components/Text";
 import { formatEther } from "utils";
 
 import { useClaimModal } from "../hooks/useClaimModal";
+import { tiers } from "../comp/RewardReferral/RewardReferral";
 
 type Props = {
   isOpen: boolean;
@@ -38,7 +39,7 @@ export function ClaimRewardsModal({ isOpen, onExit }: Props) {
     >
       <Alert status="warn">
         Claiming your ACX will reset your tier to Copper and referral rate to
-        40%.
+        {tiers[1].referralRate * 100}%.
       </Alert>
       <ClaimableBox>
         <Text size="lg" color="white-70">
