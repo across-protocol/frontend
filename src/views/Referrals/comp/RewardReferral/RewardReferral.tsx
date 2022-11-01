@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import CopyReferralLink from "components/CopyReferralLink";
 import {
   Wrapper,
@@ -46,6 +46,8 @@ import { ReactComponent as IncreaseIcon } from "assets/icons/increase-24.svg";
 import { ReactComponent as TrophyIcon } from "assets/icons/trophy-24.svg";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { Text } from "components/Text";
+import { ClaimRewardsModal } from "../ClaimRewardsModal";
+
 interface Props {
   isConnected: boolean;
   referrer: string | undefined;
@@ -129,6 +131,8 @@ const ReferralTierComponent: React.FC<{
   referralsSummary: ReferralsSummary;
   isConnected: boolean;
 }> = ({ referralsSummary, isConnected }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const rewardsAmount = useMemo(() => {
     if (referralsSummary.rewardsAmount) {
       return formatEther(referralsSummary.rewardsAmount);
@@ -214,13 +218,17 @@ const ReferralTierComponent: React.FC<{
 
   return (
     <ReferralTierBlock>
+      <ClaimRewardsModal
+        isOpen={isModalOpen}
+        onExit={() => setIsModalOpen(false)}
+      />
       <TierButtonWrapper>
         <TierWrapper>
           <TierHeader>{tiers[referralsSummary.tier].name}</TierHeader>
           <TierSmHeader>Current referral tier</TierSmHeader>
         </TierWrapper>
         {isConnected && (
-          <ClaimButton size="lg">
+          <ClaimButton size="lg" onClick={() => setIsModalOpen(true)}>
             <Text>Claim rewards</Text>
           </ClaimButton>
         )}
