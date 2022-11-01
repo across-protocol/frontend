@@ -25,7 +25,7 @@ export type Props = {
   onClickClaim: () => void;
   onClickAddToken: () => void;
   errorMsg?: string;
-  maxApyPct?: number;
+  maxApyPct?: string;
 };
 
 export function ClaimAirdrop({
@@ -55,7 +55,7 @@ export function ClaimAirdrop({
         <Text size="lg">
           Claimed ACX tokens will be automatically staked in the{" "}
           <HighlightedLink to="/">Rewards Locking Program</HighlightedLink> to
-          support bridging ACX cross-chain, and earning up to {maxApyPct || "-"}
+          support bridging ACX cross-chain, and earning up to {maxApyPct ?? "-"}
           % APY. Read more <LinkWithUnderline to="/">here</LinkWithUnderline>.
         </Text>
       </InfoTextContainer>

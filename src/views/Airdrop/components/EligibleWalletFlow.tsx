@@ -18,7 +18,7 @@ import { formatUnits } from "utils";
 import { LinkWithUnderline, HighlightedLink } from "../Airdrop.styles";
 
 type Props = ClaimAirdropProps & {
-  currentApyPct?: number;
+  currentApyPct?: number | string;
 };
 
 const StepIndex = {
@@ -82,7 +82,7 @@ export function EligibleWalletFlow(props: Props) {
                   Earning:
                 </Text>
                 <Text size="lg" color="white-100">
-                  {props.currentApyPct || "-"}% APY
+                  {props.currentApyPct ?? "-"}% APY
                 </Text>
               </EarningsContainer>
             </SubTitleContainer>

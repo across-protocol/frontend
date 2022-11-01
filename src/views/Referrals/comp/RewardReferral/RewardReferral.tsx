@@ -53,7 +53,7 @@ interface Props {
   referralsSummary: ReferralsSummary;
 }
 
-const tiers: Record<
+export const tiers: Record<
   number,
   { name: string; referralRate: number; referrals: number; volume: number }
 > = {

@@ -9,6 +9,7 @@ import polygonLogo from "assets/polygon-logo.svg";
 import { getAddress } from "./address";
 import * as superstruct from "superstruct";
 import { relayFeeCalculator } from "@across-protocol/sdk-v2";
+import { across } from "@uma/sdk";
 
 // all routes should be pre imported to be able to switch based on chain id
 import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
@@ -408,6 +409,13 @@ export const tokenList: TokenInfoList = [
     logoURI: "/logos/usdt-logo.svg",
     mainnetAddress: getAddress("0xdAC17F958D2ee523a2206206994597C13D831ec7"),
   },
+  {
+    name: "ACX",
+    symbol: "ACX",
+    decimals: 6,
+    logoURI: "/logos/acx-logo.svg",
+    mainnetAddress: getAddress("0x40153DdFAd90C49dbE3F5c9F96f2a5B25ec67461"), // TODO: replace with mainnet address
+  },
 ];
 
 assert(
@@ -702,3 +710,5 @@ export const rewardTiers = [
     body: "Requires over $500,000 of bridge volume or 20 unique referral transfers.",
   },
 ];
+
+export const secondsPerYear = across.constants.SECONDS_PER_YEAR;

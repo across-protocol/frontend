@@ -1,5 +1,5 @@
 import { useQuery, useQueries, QueryFunctionContext } from "react-query";
-import { useConnection } from "hooks";
+import { useConnection } from "hooks/useConnection";
 import {
   fixedPointAdjustment,
   formattedBigNumberToNumber,
@@ -10,6 +10,7 @@ import {
   safeDivide,
   toWeiSafe,
   providersTable,
+  getBaseRewardsApr,
 } from "utils";
 import { BigNumber, BigNumberish } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
@@ -81,6 +82,11 @@ export function useAllStakingPools() {
   );
 }
 
+export function useAcrossStakingPool() {
+  const acrossTokenAddress = config.getAcrossTokenAddress();
+  return useStakingPool(acrossTokenAddress);
+}
+
 function getStakingPoolQueryKey(
   tokenAddress?: string,
   account?: string
@@ -124,7 +130,7 @@ const fetchStakingPool = async (
   // Resolve the provided account's outstanding rewards (if an account is connected) as well
   // as the global pool information
   const [
-    { enabled: poolEnabled, maxMultiplier, baseEmissionRate: baseRewardsApy },
+    { enabled: poolEnabled, maxMultiplier, baseEmissionRate },
     currentUserRewardMultiplier,
     {
       rewardsOutstanding: outstandingRewards,
@@ -190,6 +196,13 @@ const fetchStakingPool = async (
           .mul(100)
       );
 
+  // Estimated base rewards APR
+  const baseRewardsApy = getBaseRewardsApr(
+    baseEmissionRate,
+    BigNumber.from(totalPoolSize),
+    userAmountOfLPStaked
+  );
+
   // We need the amount of tokens that the user has in both their balance
   // and in the staked contract. We can add the staked + balance to get this
   // figure.
@@ -197,10 +210,12 @@ const fetchStakingPool = async (
 
   // We can divide the amount of LP staked in the contract with the total pool
   // size.
-  const shareOfPool = safeDivide(
-    userAmountOfLPStaked.mul(fixedPointAdjustment),
-    BigNumber.from(totalPoolSize)
-  ).mul(100);
+  const shareOfPool = BigNumber.from(totalPoolSize).isZero()
+    ? BigNumber.from(0)
+    : safeDivide(
+        userAmountOfLPStaked.mul(fixedPointAdjustment),
+        BigNumber.from(totalPoolSize)
+      ).mul(100);
 
   // Resolve APY Information
   const poolApy = parseEtherLike(estimatedApyFromQuery);
