@@ -5,13 +5,15 @@ import { useConnection } from "hooks";
 import { hubPoolChainId } from "utils";
 
 export function useIsWrongNetwork() {
-  const { chainId, setChain } = useConnection();
+  const { chainId, isConnected, setChain } = useConnection();
 
   const [isWrongNetwork, setIsWrongNetwork] = useState(false);
 
   useEffect(() => {
-    setIsWrongNetwork(String(chainId) !== String(hubPoolChainId));
-  }, [chainId]);
+    setIsWrongNetwork(
+      isConnected && String(chainId) !== String(hubPoolChainId)
+    );
+  }, [isConnected, chainId]);
 
   const isWrongNetworkHandler = async () => {
     const didSetChain = await setChain({

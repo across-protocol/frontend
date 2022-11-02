@@ -5,9 +5,6 @@ import {
   Tab,
   StakeInfo,
   StakeInfoItem,
-  StakeInfoItemSmall,
-  LightGrayItemText,
-  MutliplierValue,
   StyledProgressBar,
   APYInfoItem,
   InfoIcon,
@@ -24,60 +21,49 @@ import { PopperTooltip } from "components/Tooltip";
 import StakingInputBlock from "../StakingInputBlock";
 import { StakingFormPropType } from "../../types";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import {
-  formatEther,
-  formatNumberMaxFracDigits,
-  isNumericWithinRange,
-} from "utils";
+import { formatEther, formatWeiPct, formatNumberMaxFracDigits } from "utils";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
-
-type StakeTab = "stake" | "unstake";
+import { Text } from "components/Text";
+import { useStakeFormLogic } from "views/Staking/hooks/useStakeFormLogic";
+import ConnectWalletButton from "../ConnectWalletButton";
 
 export const StakingForm = ({
   isConnected,
-  walletConnectionHandler,
-  userCumulativeStake,
-  lpTokenName,
-  currentMultiplier,
-  usersMultiplierPercentage,
-  usersTotalLPTokens,
-  ageOfCapital,
-  availableLPTokenBalance,
-  globalCumulativeStake,
-  shareOfPool,
-  lpTokenFormatter: formatLPToken,
-  lpTokenParser: parseLPToken,
   stakeActionFn,
   unstakeActionFn,
   isWrongNetwork,
-  estimatedPoolApy,
-  logoURI,
   isDataLoading,
   isMutating,
+  poolData: originPoolData,
+  logoURI,
 }: StakingFormPropType) => {
-  const [activeTab, setActiveTab] = useState<StakeTab>("stake");
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
-  const [stakeAmount, setStakeAmount] = useState("");
 
-  const buttonHandler = isConnected
-    ? () => {
-        if (!isWrongNetwork) {
-          (activeTab === "stake" ? stakeActionFn : unstakeActionFn)({
-            amount: parseLPToken(stakeAmount),
-          });
-        }
-      }
-    : walletConnectionHandler;
+  const {
+    setAmount,
+    setStakingAction,
+    amount,
+    isAmountValid,
+    isAmountInvalid,
+    stakingAction,
+    maximumValue,
+    updatedPoolData: poolData,
+  } = useStakeFormLogic(originPoolData, isDataLoading);
 
-  const buttonTextPrefix = isConnected ? "" : "Connect wallet to ";
-  const buttonMaxValue =
-    activeTab === "stake" ? availableLPTokenBalance : userCumulativeStake;
-  const buttonMaxValueText = formatLPToken(buttonMaxValue).replaceAll(",", "");
+  const buttonHandler = () => {
+    if (!isWrongNetwork && isAmountValid && amount) {
+      (stakingAction === "stake" ? stakeActionFn : unstakeActionFn)({
+        amount: poolData.lpTokenParser(amount),
+      });
+    }
+  };
+
+  const buttonMaxValue = maximumValue;
+  const buttonMaxValueText = poolData
+    .lpTokenFormatter(buttonMaxValue)
+    .replaceAll(",", "");
 
   const ArrowIcon = isPoolInfoVisible ? ArrowIconUp : ArrowIconDown;
-
-  const validateStakeAmount = (amount: string) =>
-    isNumericWithinRange(amount, true, "0", buttonMaxValue, parseLPToken);
 
   const valueOrEmpty = repeatableTernaryBuilder(
     isConnected && !isWrongNetwork && !isDataLoading,
@@ -86,43 +72,66 @@ export const StakingForm = ({
 
   useEffect(() => {
     if (!isMutating) {
-      setStakeAmount("");
+      setAmount(undefined);
     }
-  }, [activeTab, isMutating]);
+  }, [stakingAction, isMutating, setAmount]);
 
   useEffect(() => {
     setIsPoolInfoVisible(false);
   }, [isConnected]);
+
+  const activeColor = "white-" + (amount && isAmountValid ? 100 : 70);
+  const lpFmt = poolData.lpTokenFormatter;
 
   return (
     <SectionTitleWrapperV2 title="Staking">
       <Card>
         <Tabs>
           <Tab
-            onClick={() => setActiveTab("stake")}
-            active={activeTab === "stake"}
+            onClick={() => !isMutating && setStakingAction("stake")}
+            active={stakingAction === "stake"}
           >
-            Stake
+            <Text
+              weight={500}
+              color={"white-" + (stakingAction === "stake" ? "100" : "70")}
+            >
+              Stake
+            </Text>
           </Tab>
           <Tab
-            onClick={() => setActiveTab("unstake")}
-            active={activeTab === "unstake"}
+            onClick={() => !isMutating && setStakingAction("unstake")}
+            active={stakingAction === "unstake"}
           >
-            Unstake
+            <Text
+              weight={500}
+              color={"white-" + (stakingAction === "unstake" ? "100" : "70")}
+            >
+              Unstake
+            </Text>
           </Tab>
         </Tabs>
         <InputBlockWrapper>
-          <StakingInputBlock
-            value={stakeAmount}
-            setValue={setStakeAmount}
-            valid={!isConnected || validateStakeAmount(stakeAmount)}
-            buttonText={`${buttonTextPrefix} ${activeTab}`}
-            logoURI={logoURI}
-            maxValue={buttonMaxValueText}
-            omitInput={!isConnected}
-            onClickHandler={buttonHandler}
-            displayLoader={isMutating}
-          />
+          {isConnected ? (
+            <StakingInputBlock
+              value={amount ?? ""}
+              setValue={setAmount}
+              valid={isAmountValid}
+              invalid={isAmountInvalid}
+              buttonText={stakingAction}
+              logoURI={logoURI}
+              maxValue={buttonMaxValueText}
+              onClickHandler={buttonHandler}
+              displayLoader={isMutating}
+              warningButtonColor={stakingAction === "unstake"}
+            />
+          ) : (
+            <ConnectWalletButton reasonToConnect={stakingAction} />
+          )}
+          {isConnected && maximumValue.eq(0) && stakingAction === "unstake" && (
+            <Text color="warning" size="sm">
+              You don't have any tokens to unstake.
+            </Text>
+          )}
         </InputBlockWrapper>
         <Divider />
         <StakeInfo>
@@ -130,12 +139,15 @@ export const StakingForm = ({
             <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
             <StakeInfoItem>
               {valueOrEmpty(
-                <div>
-                  <LightGrayItemText margin={4}>
-                    {formatLPToken(userCumulativeStake)} /
-                  </LightGrayItemText>
-                  {formatLPToken(usersTotalLPTokens)} {lpTokenName}
-                </div>
+                <>
+                  <Text color={activeColor}>
+                    {lpFmt(poolData.userAmountOfLPStaked)}
+                  </Text>
+                  <Text color="white-70">
+                    / {lpFmt(poolData.usersTotalLPTokens)}{" "}
+                    {poolData.lpTokenSymbolName}
+                  </Text>
+                </>
               )}
             </StakeInfoItem>
           </StakeInfoRow>
@@ -143,8 +155,8 @@ export const StakingForm = ({
             <StakeInfoItem>
               Age of capital
               <PopperTooltip
-                title="Age of capital"
-                body="The age of capital is the time since the last time you staked LP tokens."
+                title="Age of Capital"
+                body="Number of days you've staked LP tokens without claiming rewards. Weighted by size if multiple positions have been staked."
                 placement="bottom-start"
               >
                 <InfoIcon />
@@ -153,9 +165,12 @@ export const StakingForm = ({
             <StakeInfoItem>
               {valueOrEmpty(
                 <>
-                  {ageOfCapital <= 0
-                    ? "-"
-                    : `${formatNumberMaxFracDigits(ageOfCapital)} Days`}
+                  <Text color={activeColor}>
+                    {formatNumberMaxFracDigits(
+                      poolData.elapsedTimeSinceAvgDeposit
+                    )}{" "}
+                    Days
+                  </Text>
                 </>
               )}
             </StakeInfoItem>
@@ -173,17 +188,22 @@ export const StakingForm = ({
             </StakeInfoItem>
             <StakeInfoItem>
               {valueOrEmpty(
-                <MutliplierValue>
-                  <StyledProgressBar percent={usersMultiplierPercentage} />
-                  {formatEther(currentMultiplier)} x
-                </MutliplierValue>
+                <>
+                  <StyledProgressBar
+                    active={Boolean(amount) && isAmountValid}
+                    percent={poolData.usersMultiplierPercentage}
+                  />
+                  <Text color={activeColor}>
+                    {formatEther(poolData.currentUserRewardMultiplier)} x
+                  </Text>
+                </>
               )}
             </StakeInfoItem>
           </StakeInfoRow>
           <StakeInfoRow>
-            <StakeInfoItemSmall>
+            <Text color="white-70" size="sm">
               Note: Multipliers of previously staked tokens are not impacted
-            </StakeInfoItemSmall>
+            </Text>
           </StakeInfoRow>
           <Divider />
           <StakeAPYInfoRow
@@ -194,35 +214,48 @@ export const StakingForm = ({
             <StakeInfoItem>
               <APYInfoItem>
                 <ArrowIcon />
-                Your total APY
+                APY
+                <PopperTooltip
+                  title="APY"
+                  body="Your total APY for the pool, including the pool APY plus rewards APY times your multiplier. Max APY is the maximum APY after you have staked your LP tokens for 100 days."
+                  placement="bottom-start"
+                >
+                  <InfoIcon />
+                </PopperTooltip>
               </APYInfoItem>
             </StakeInfoItem>
             <StakeInfoItem>
-              {valueOrEmpty(<LightGrayItemText>2.81%</LightGrayItemText>)}
+              {valueOrEmpty(
+                <Text color={activeColor}>
+                  {formatWeiPct(poolData.apyData.totalApy)}%
+                </Text>
+              )}
             </StakeInfoItem>
           </StakeAPYInfoRow>
           <InnerPoolStakeInfo visible={isPoolInfoVisible}>
             <Divider />
             <StakeInfoRow>
-              <StakeInfoItem>Your Rewards APY</StakeInfoItem>
               <StakeInfoItem>
-                {valueOrEmpty(
-                  <div>
-                    <LightGrayItemText margin={4}>2.43%</LightGrayItemText>
-                    Base 2.11%
-                  </div>
-                )}
+                Rewards APY{" "}
+                <PopperTooltip
+                  title="Rewards APY"
+                  body="The base reward APY times your multiplier."
+                  placement="bottom-start"
+                >
+                  <InfoIcon />
+                </PopperTooltip>
               </StakeInfoItem>
-            </StakeInfoRow>
-            <StakeInfoRow>
-              <StakeInfoItem>Pool liquidity</StakeInfoItem>
               <StakeInfoItem>
                 {valueOrEmpty(
-                  <div>
-                    <LightGrayItemText margin={4}>
-                      ${formatLPToken(globalCumulativeStake)}
-                    </LightGrayItemText>
-                  </div>
+                  <>
+                    <Text color={"white-70"}>
+                      Base {formatWeiPct(poolData.apyData.baseRewardsApy)}%
+                    </Text>
+                    &nbsp;{" "}
+                    <Text color={activeColor}>
+                      {formatWeiPct(poolData.apyData.rewardsApy)}%
+                    </Text>
+                  </>
                 )}
               </StakeInfoItem>
             </StakeInfoRow>
@@ -230,19 +263,9 @@ export const StakingForm = ({
               <StakeInfoItem>Pool APY</StakeInfoItem>
               <StakeInfoItem>
                 {valueOrEmpty(
-                  <LightGrayItemText margin={4}>
-                    {formatEther(estimatedPoolApy)}%
-                  </LightGrayItemText>
-                )}
-              </StakeInfoItem>
-            </StakeInfoRow>
-            <StakeInfoRow>
-              <StakeInfoItem>Share of pool</StakeInfoItem>
-              <StakeInfoItem>
-                {valueOrEmpty(
-                  <LightGrayItemText margin={4}>
-                    {formatEther(shareOfPool)}%
-                  </LightGrayItemText>
+                  <Text color={activeColor}>
+                    {formatWeiPct(poolData.apyData.poolApy)}%
+                  </Text>
                 )}
               </StakeInfoItem>
             </StakeInfoRow>

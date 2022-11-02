@@ -46,6 +46,11 @@ export const Wrapper = styled.div<IncludeStatusType>`
     font-size: 14px;
     line-height: 18px;
   }
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 12px;
+    gap: 12px;
+  }
 `;
 
 export const ChildrenWrapper = styled.div``;
@@ -62,5 +67,9 @@ export const StyledInfoIcon = styled(InfoIcon)<IncludeStatusType>`
   @media ${QUERIESV2.tb.andDown} {
     height: 20px;
     width: 20px;
+  }
+  @media ${QUERIESV2.sm.andDown} {
+    height: 16px;
+    width: 16px;
   }
 `;

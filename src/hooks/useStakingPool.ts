@@ -11,6 +11,7 @@ import {
   toWeiSafe,
   providersTable,
   getBaseRewardsApr,
+  secondsPerDay,
 } from "utils";
 import { BigNumber, BigNumberish } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
@@ -40,10 +41,14 @@ export type StakingPool = {
   usersMultiplierPercentage: number;
   usersTotalLPTokens: BigNumber;
   shareOfPool: BigNumber;
+  secondsToMaxMultiplier: BigNumber;
+  lpTokenDecimalCount: number;
   apyData: {
     poolApy: BigNumber;
     baseRewardsApy: BigNumber;
+    rewardsApy: BigNumber;
     maxApy: BigNumber;
+    minApy: BigNumber;
     totalApy: BigNumber;
   };
   requiresApproval: boolean;
@@ -130,7 +135,12 @@ const fetchStakingPool = async (
   // Resolve the provided account's outstanding rewards (if an account is connected) as well
   // as the global pool information
   const [
-    { enabled: poolEnabled, maxMultiplier, baseEmissionRate },
+    {
+      enabled: poolEnabled,
+      maxMultiplier,
+      secondsToMaxMultiplier,
+      baseEmissionRate,
+    },
     currentUserRewardMultiplier,
     {
       rewardsOutstanding: outstandingRewards,
@@ -184,7 +194,9 @@ const fetchStakingPool = async (
   // The Average Deposit Time retrieves the # seconds since the last
   // deposit, weighted by all the deposits in a user's account. To calculate the
   // days elapsed, we can divide by 1 day in seconds (86,400 seconds)
-  const daysElapsed = averageDepositTime.div(86400).toNumber();
+  const daysElapsed = userAmountOfLPStaked.eq(0)
+    ? 0
+    : averageDepositTime.div(secondsPerDay).toNumber();
 
   // Resolve the users reward multiplier as a percentage.
   const usersMultiplierPercentage = maxMultiplier.eq(0)
@@ -222,11 +234,15 @@ const fetchStakingPool = async (
   const maxApy = poolApy.add(
     baseRewardsApy.mul(maxMultiplier).div(fixedPointAdjustment)
   );
-  const totalApy = poolApy.add(
-    baseRewardsApy.mul(
-      userAmountOfLPStaked.gt(0) ? usersMultiplierPercentage / 100 : 1
+  const minApy = poolApy.add(baseRewardsApy);
+  const rewardsApy = baseRewardsApy
+    .mul(
+      userAmountOfLPStaked.gt(0)
+        ? currentUserRewardMultiplier
+        : parseEtherLike("1")
     )
-  );
+    .div(fixedPointAdjustment);
+  const totalApy = poolApy.add(rewardsApy);
 
   // We can resolve custom formatter & parsers for the current LP
   // token that we are working with.
@@ -264,14 +280,18 @@ const fetchStakingPool = async (
     usersMultiplierPercentage,
     usersTotalLPTokens,
     shareOfPool,
+    lpTokenDecimalCount: lpTokenDecimalCount,
     apyData: {
       poolApy,
       maxApy,
+      minApy,
       totalApy,
       baseRewardsApy,
+      rewardsApy,
     },
     requiresApproval,
     isStakingPoolOfUser,
+    secondsToMaxMultiplier,
     lpTokenFormatter,
     lpTokenParser,
   };
@@ -299,10 +319,14 @@ export const DEFAULT_STAKING_POOL_DATA: StakingPool = {
   globalAmountOfLPStaked: BigNumber.from(0),
   outstandingRewards: BigNumber.from(0),
   shareOfPool: BigNumber.from(0),
+  secondsToMaxMultiplier: BigNumber.from(0),
+  lpTokenDecimalCount: 18,
   apyData: {
     maxApy: BigNumber.from(0),
     poolApy: BigNumber.from(0),
     totalApy: BigNumber.from(0),
     baseRewardsApy: BigNumber.from(0),
+    rewardsApy: BigNumber.from(0),
+    minApy: BigNumber.from(0),
   },
 };

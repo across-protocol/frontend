@@ -5,7 +5,7 @@ import { secondsPerYear } from "utils/constants";
 import { getBaseRewardsApr } from "../rewards";
 
 describe("#getBaseRewardsApr", () => {
-  const baseEmissionRate = BigNumber.from(1);
+  const baseEmissionRate = parseEtherLike("1");
   const totalBaseRewardsPerYear = BigNumber.from(secondsPerYear);
 
   test("return base rewards APR of 100%", () => {

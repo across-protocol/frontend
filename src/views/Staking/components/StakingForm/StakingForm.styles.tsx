@@ -38,12 +38,6 @@ interface ITab {
 }
 export const Tab = styled.div<ITab>`
   flex-grow: 1;
-  font-family: "Barlow";
-  font-style: normal;
-  font-weight: 500;
-  font-size: ${16 / 16}rem;
-  line-height: ${20 / 16}rem;
-  color: ${({ active }) => (active ? "#e0f3ff" : "#9DAAB2")};
   text-align: center;
   padding: 0 0 20px;
   border-bottom: ${(props) =>
@@ -79,6 +73,8 @@ export const StakeInfoItem = styled.div`
   line-height: ${20 / 16}rem;
   font-weight: 400;
 
+  gap: 4px;
+
   width: 100%;
   color: #9daab2;
 
@@ -103,7 +99,6 @@ export const StakeInfoRow = styled.div`
   flex-shrink: 0;
 
   @media ${QUERIESV2.sm.andDown} {
-    flex-direction: column;
     gap: 6px;
   }
 `;
@@ -112,7 +107,7 @@ export const StakeAPYInfoRow = styled(StakeInfoRow)`
   cursor: pointer;
   @media ${QUERIESV2.sm.andDown} {
     flex-direction: row;
-    width: fit-content;
+    width: 100%;
     gap: 12px;
     & > {
       width: fit-content;
@@ -120,54 +115,25 @@ export const StakeAPYInfoRow = styled(StakeInfoRow)`
   }
 `;
 
-export const LightGrayItemText = styled.span<{ margin?: number }>`
-  color: #e0f3ff;
-  margin-right: ${({ margin }) => (margin ? `${margin}px` : 0)};
-`;
-
-export const StakeInfoItemSmall = styled(StakeInfoItem)`
-  font-size: ${14 / 16}rem;
-
-  @media ${QUERIESV2.sm.andDown} {
-    font-size: ${12 / 16}rem;
-  }
-`;
-
 interface IStyledProgressBar {
-  className?: string;
+  active: boolean;
 }
 export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
   width: 80px;
   height: 14px;
-  margin-top: 5px;
   padding-right: 4px;
-  > div {
+  margin-right: 8px;
+  border-color: ${({ active }) => (active ? "#e0f3ff" : "#9daab2")};
+
+  & > div {
     height: 8px;
-  }
-`;
 
-export const MutliplierValue = styled.div`
-  font-weight: 400;
-  gap: 12px;
-  color: #e0f3ff;
-  display: inline-flex;
-  justify-content: flex-end;
-  @media ${QUERIESV2.sm.andDown} {
-    justify-content: flex-start;
+    background-color: ${({ active }) => (active ? "#e0f3ff" : "#9daab2")};
   }
-`;
-
-export const APYInfo = styled(StakeInfo)`
-  padding-bottom: 24px;
-  @media ${QUERIESV2.sm.andDown} {
-    flex-direction: row;
-    justify-content: flex-start;
-  }
-  margin-bottom: 24px;
 `;
 
 export const APYInfoItem = styled(StakeInfoItem)`
-  color: #c5d5e0;
+  gap: 0px;
 `;
 
 export const ArrowIconDown = styled(UnstyledArrowIcon)`
@@ -190,4 +156,16 @@ export const InfoIcon = styled(II)`
 export const InputBlockWrapper = styled.div`
   width: 100%;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+  gap: 12px;
+  width: 100%;
+  text-align: center;
+
+  > div {
+    width: 100%;
+  }
 `;
