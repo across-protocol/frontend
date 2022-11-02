@@ -42,43 +42,41 @@ const handler = async (
       !isNaN(fixedTokenPrices[l1Token][baseCurrency])
     ) {
       price = fixedTokenPrices[l1Token][baseCurrency];
+    } else if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
+      // This base matches a supported base currency for CG.
+      [, price] = await coingeckoClient.getCurrentPriceByContract(
+        l1Token,
+        baseCurrency
+      );
     } else {
-      if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
-        // This base matches a supported base currency for CG.
-        [, price] = await coingeckoClient.getCurrentPriceByContract(
-          l1Token,
-          baseCurrency
+      // No match, so we try to look up the base currency directly.
+      const baseCurrencyToken = SymbolMapping[baseCurrency.toUpperCase()];
+
+      if (!baseCurrencyToken)
+        throw new InputError(`Base currency ${baseCurrency} not supported`);
+
+      // Special case: token and base are the same. Coingecko class returns a single result in this case, so it must
+      // be handled separately.
+      if (l1Token.toLowerCase() === baseCurrencyToken.address.toLowerCase())
+        price = 1;
+      else {
+        // Always use usd as the base currency for the purpose of conversion.
+        const [price1, price2] = await coingeckoClient.getContractPrices(
+          [l1Token, baseCurrencyToken.address],
+          "usd"
         );
-      } else {
-        // No match, so we try to look up the base currency directly.
-        const baseCurrencyToken = SymbolMapping[baseCurrency.toUpperCase()];
 
-        if (!baseCurrencyToken)
-          throw new InputError(`Base currency ${baseCurrency} not supported`);
+        // The ordering of the returned values are not guaranteed, so determine the ordering of the two values by
+        // comparing to the l1Token value.
+        const [tokenPriceUsd, basePriceUsd] =
+          price1.address.toLowerCase() === l1Token.toLowerCase()
+            ? [price1.price, price2.price]
+            : [price2.price, price1.price];
 
-        // Special case: token and base are the same. Coingecko class returns a single result in this case, so it must
-        // be handled separately.
-        if (l1Token.toLowerCase() === baseCurrencyToken.address.toLowerCase())
-          price = 1;
-        else {
-          // Always use usd as the base currency for the purpose of conversion.
-          const [price1, price2] = await coingeckoClient.getContractPrices(
-            [l1Token, baseCurrencyToken.address],
-            "usd"
-          );
-
-          // The ordering of the returned values are not guaranteed, so determine the ordering of the two values by
-          // comparing to the l1Token value.
-          const [tokenPriceUsd, basePriceUsd] =
-            price1.address.toLowerCase() === l1Token.toLowerCase()
-              ? [price1.price, price2.price]
-              : [price2.price, price1.price];
-
-          // Drop any decimals beyond the number of decimals for this token.
-          price = Number(
-            (tokenPriceUsd / basePriceUsd).toFixed(baseCurrencyToken.decimals)
-          );
-        }
+        // Drop any decimals beyond the number of decimals for this token.
+        price = Number(
+          (tokenPriceUsd / basePriceUsd).toFixed(baseCurrencyToken.decimals)
+        );
       }
     }
 
