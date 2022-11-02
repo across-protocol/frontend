@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers";
 import { StakingPool } from "hooks/useStakingPool";
 import { StakingActionFunctionType } from "./hooks/useStakingAction";
 
