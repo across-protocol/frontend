@@ -123,7 +123,7 @@ const CheckIconContainer = styled.div<{ isStepCompleted?: boolean }>`
     stroke: ${({ isStepCompleted }) => (isStepCompleted ? "#6cf9d8" : "")};
   }
 
-  path:nth-child(2) {
+  path:nth-of-type(2) {
     fill: ${({ isStepCompleted }) => (isStepCompleted ? "#6cf9d8" : "")};
   }
 

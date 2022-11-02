@@ -52,11 +52,11 @@ const BouncingWrapper = styled.div<{ whiteIcons?: boolean }>`
     }
   }
 
-  > div:nth-child(2) {
+  > div:nth-of-type(2) {
     animation-delay: 0.2s;
   }
 
-  > div:nth-child(3) {
+  > div:nth-of-type(3) {
     animation-delay: 0.4s;
   }
 `;
