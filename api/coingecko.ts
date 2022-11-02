@@ -33,11 +33,15 @@ const handler = async (
       REACT_APP_COINGECKO_PRO_API_KEY
     );
 
-    const fixedTokenPrices: { [token: string]: number } =
-      FIXED_TOKEN_PRICES !== undefined ? JSON.parse(FIXED_TOKEN_PRICES) : {};
+    const fixedTokenPrices: {
+      [token: string]: { [baseCurrency: string]: number };
+    } = FIXED_TOKEN_PRICES !== undefined ? JSON.parse(FIXED_TOKEN_PRICES) : {};
     let price: number;
-    if (!isNaN(fixedTokenPrices[l1Token])) {
-      price = fixedTokenPrices[l1Token];
+    if (
+      fixedTokenPrices[l1Token] !== undefined &&
+      !isNaN(fixedTokenPrices[l1Token][baseCurrency])
+    ) {
+      price = fixedTokenPrices[l1Token][baseCurrency];
     } else {
       if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
         // This base matches a supported base currency for CG.
