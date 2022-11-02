@@ -83,8 +83,7 @@ const colorMap: Record<TextColor, string> = {
   "white-70": "hsla(203, 12%, 66%)", // "#9DAAB2"
   aqua: "hsla(166, 92%, 70%)", // "#6CF9D8"
   error: "hsla(0, 92%, 70%)", // "#f96c6c"
-  warning: "#F9D26C",
-  "dark-grey": "#2D2E33",
+  "dark-grey": "#2d2e33",
   warning: "#f9d26c",
 };
 
