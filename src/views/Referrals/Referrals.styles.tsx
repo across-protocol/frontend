@@ -46,4 +46,6 @@ export const InnerContent = styled.div`
   }
 `;
 
-export const ReferralMediumWrapper = styled.div``;
+export const ReferralMediumWrapper = styled.div`
+  width: 100%; ;
+`;
