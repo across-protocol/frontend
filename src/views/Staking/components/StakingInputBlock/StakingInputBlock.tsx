@@ -24,6 +24,7 @@ interface Props {
   onClickHandler: () => void | Promise<void>;
   displayLoader?: boolean;
   warningButtonColor?: boolean;
+  disableInput?: boolean;
 }
 
 const StakingInputBlock: React.FC<Props> = ({
@@ -37,6 +38,7 @@ const StakingInputBlock: React.FC<Props> = ({
   displayLoader,
   onClickHandler,
   warningButtonColor,
+  disableInput,
 }) => (
   <Wrapper>
     <InputRow>
@@ -49,10 +51,10 @@ const StakingInputBlock: React.FC<Props> = ({
           value={value}
           type="text"
           onChange={(e) => setValue(e.target.value)}
-          disabled={displayLoader}
+          disabled={displayLoader || disableInput}
         />
         <MaxButton
-          disabled={displayLoader || !maxValue}
+          disabled={displayLoader || disableInput || !maxValue}
           onClick={() => setValue(maxValue ?? "")}
         >
           Max
