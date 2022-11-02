@@ -35,7 +35,19 @@ const handler = async (
 
     let price: number;
 
-    if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
+    if (
+      l1Token.toLowerCase() === "0x44108f0223a3c3028f5fe7aec7f9bb2e66bef82f"
+    ) {
+      if (!["eth", "usd"].includes(baseCurrency))
+        throw new InputError(`Base currency ${baseCurrency} not supported`);
+
+      let envVar =
+        baseCurrency === "eth"
+          ? process.env.REACT_APP_ACX_ETH_PRICE
+          : process.env.REACT_APP_ACX_USD_PRICE;
+
+      price = Number(envVar);
+    } else if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
       // This base matches a supported base currency for CG.
       [, price] = await coingeckoClient.getCurrentPriceByContract(
         l1Token,
