@@ -715,3 +715,4 @@ export const rewardTiers = [
 ];
 
 export const secondsPerYear = across.constants.SECONDS_PER_YEAR;
+export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day

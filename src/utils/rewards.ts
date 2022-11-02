@@ -1,4 +1,8 @@
-import { fixedPointAdjustment, secondsPerYear } from "utils/constants";
+import {
+  fixedPointAdjustment,
+  secondsPerDay,
+  secondsPerYear,
+} from "utils/constants";
 import { safeDivide } from "utils/math";
 import { BigNumber } from "ethers";
 import { parseEther } from "@ethersproject/units";
@@ -51,10 +55,10 @@ export function deriveNewStakingValues(
         .div(currentlyStaked)
         .mul(origin.elapsedTimeSinceAvgDeposit)
         .div(fixedPointAdjustment)
-    : BigNumber.from(origin.elapsedTimeSinceAvgDeposit).mul(86400);
+    : BigNumber.from(origin.elapsedTimeSinceAvgDeposit).mul(secondsPerDay); // The user wishes to unstake - the elapsed time does not change
 
   const updatedTimeEstimate = updatedTimeEstimateInSeconds
-    .div(86400)
+    .div(secondsPerDay)
     .toNumber();
 
   let fractionOfMaxMultiplier = updatedTimeEstimateInSeconds

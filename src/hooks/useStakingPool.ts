@@ -11,6 +11,7 @@ import {
   toWeiSafe,
   providersTable,
   getBaseRewardsApr,
+  secondsPerDay,
 } from "utils";
 import { BigNumber, BigNumberish } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
@@ -195,7 +196,7 @@ const fetchStakingPool = async (
   // days elapsed, we can divide by 1 day in seconds (86,400 seconds)
   const daysElapsed = userAmountOfLPStaked.eq(0)
     ? 0
-    : averageDepositTime.div(86400).toNumber();
+    : averageDepositTime.div(secondsPerDay).toNumber();
 
   // Resolve the users reward multiplier as a percentage.
   const usersMultiplierPercentage = maxMultiplier.eq(0)
