@@ -8,7 +8,7 @@ import { BigNumber } from "ethers";
 import { parseEther } from "@ethersproject/units";
 import { StakingPool } from "hooks";
 import { formattedBigNumberToNumber, parseEtherLike } from "./format";
-import _ from "lodash";
+import { cloneDeep } from "lodash";
 
 export function getBaseRewardsApr(
   baseEmissionRatePerSecond: BigNumber,
@@ -112,7 +112,7 @@ export function deriveNewStakingValues(
 
   // Clone all aspects of the origin so that there's no chance we can
   // modify the initial input.
-  const clonedOrigin = _.cloneDeep(origin);
+  const clonedOrigin = cloneDeep(origin);
   // Return the new configuration values with the origin values padded
   // to fill the rest of the data
   return {
