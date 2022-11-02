@@ -135,9 +135,9 @@ const Routes: React.FC = () => {
         setOpenSidebar={setOpenSidebar}
         transparentHeader={transparentHeader}
       />
-      <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
-      <Switch>
-        <Suspense fallback={<BouncingDotsLoader />}>
+      <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />{" "}
+      <Suspense fallback={<BouncingDotsLoader />}>
+        <Switch>
           <Route exact path="/transactions" component={MyTransactions} />
           <Route exact path="/transactions/all" component={AllTransactions} />
           <Route exact path="/pool" component={Pool} />
@@ -147,9 +147,9 @@ const Routes: React.FC = () => {
           <Route exact path="/airdrop" component={PreLaunchAirdrop} />
           <Route exact path="/auth/discord" component={DiscordAuth} />
           <Route exact path="/" component={Send} />
-        </Suspense>
-        <Route path="*" component={NotFound} />
-      </Switch>
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
       <Toast position="top-right" />
     </>
   );
