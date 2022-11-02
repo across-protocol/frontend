@@ -5,7 +5,7 @@ import { useConnection } from "hooks";
 import { hubPoolChainId } from "utils";
 
 export function useIsWrongNetwork() {
-  const { provider, chainId, isConnected } = useConnection();
+  const { chainId, isConnected, setChain } = useConnection();
 
   const [isWrongNetwork, setIsWrongNetwork] = useState(false);
 
