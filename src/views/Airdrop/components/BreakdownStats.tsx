@@ -7,10 +7,10 @@ import { ReactComponent as TravellerIcon } from "assets/icons/plaap/traveller.sv
 import { ReactComponent as LiquidityIcon } from "assets/icons/plaap/lp-arrow.svg";
 import { Text } from "components/Text";
 import { formatUnits, QUERIESV2 } from "utils";
+import { AmountBreakdown } from "utils/merkle-distributor";
 
 import CardIcon from "./IconWithCheck";
 import { BreakdownRow } from "./BreakdownRow";
-import { AmountBreakdown } from "../hooks/useAirdropRecipient";
 
 export type Props = {
   isLoading?: boolean;
@@ -164,6 +164,7 @@ function getIsEligible(
     liquidityProviderRewards: "0",
     earlyUserRewards: "0",
     welcomeTravelerRewards: "0",
+    referralRewards: "0",
   }
 ): EligibilityMap {
   return Object.entries(amountBreakdown).reduce<EligibilityMap>(

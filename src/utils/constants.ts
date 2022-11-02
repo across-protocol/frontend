@@ -444,6 +444,9 @@ export const rewardsApiUrl = process.env.REACT_APP_REWARDS_API_URL;
 export const airdropWindowIndex = Number(
   process.env.REACT_APP_AIRDROP_WINDOW_INDEX || 0
 );
+export const referralsStartWindowIndex = Number(
+  process.env.REACT_APP_REFERRALS_START_WINDOW_INDEX || airdropWindowIndex + 1
+);
 export const mediumUrl = process.env.REACT_APP_MEDIUM_URL;
 export const hubPoolChainId = Number(
   process.env.REACT_APP_HUBPOOL_CHAINID || 1

@@ -1,9 +1,9 @@
 import { API } from "bnc-notify";
-import { hubPoolChainId } from "utils";
+import { hubPoolChainId, getChainInfo } from "utils";
 
 export function addEtherscan(transaction: any) {
   return {
-    link: `https://etherscan.io/tx/${transaction.hash}`,
+    link: getChainInfo(hubPoolChainId).constructExplorerLink(transaction.hash),
   };
 }
 
@@ -18,7 +18,7 @@ export const notificationEmitter = async (
   notify: API
 ): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
-    const { emitter } = notify.hash(txHash, String(hubPoolChainId));
+    const { emitter } = notify.hash(txHash);
     emitter.on("all", addEtherscan);
     emitter.on("txConfirmed", () => {
       notify.unsubscribe(txHash);

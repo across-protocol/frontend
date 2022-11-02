@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 
 import { Text } from "components/Text";
 import { QUERIESV2 } from "utils";
+import { AmountBreakdown } from "utils/merkle-distributor";
 
 import {
   FullWidthButton,
@@ -9,7 +10,6 @@ import {
   HighlightedLink,
 } from "../Airdrop.styles";
 import { BreakdownStats } from "./BreakdownStats";
-import { AmountBreakdown } from "../hooks/useAirdropRecipient";
 
 export type Props = {
   isClaiming?: boolean;

@@ -6,6 +6,7 @@ import {
   UnsupportedChainIdError,
   isSupportedChainId,
   insideStorybookRuntime,
+  hubPoolChainId,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
@@ -51,7 +52,7 @@ type OnboardContextValue = {
 
 const notify = Notify({
   dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
-  networkId: 1,
+  networkId: hubPoolChainId,
   desktopPosition: "topRight",
 });
 
