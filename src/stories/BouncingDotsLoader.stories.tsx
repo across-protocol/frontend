@@ -35,5 +35,5 @@ Default.args = {};
 
 export const WhiteIcons = Template.bind({});
 WhiteIcons.args = {
-  whiteIcons: true,
+  dotColor: "white",
 };

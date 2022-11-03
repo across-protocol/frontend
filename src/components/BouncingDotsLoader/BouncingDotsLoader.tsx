@@ -3,27 +3,34 @@ import styled from "@emotion/styled";
 
 export type BounceType = "default" | "big";
 
+type LoaderColor = "white" | "dark-grey" | "warning";
+const LoaderColorMapping: Record<LoaderColor, string> = {
+  white: "#fff",
+  "dark-grey": "hsl(230deg 6% 19%);",
+  warning: "#fff",
+};
+
 interface Props {
   type?: BounceType;
   dataCy?: string;
-  whiteIcons?: boolean;
+  dotColor?: LoaderColor;
 }
 
 const BouncingDotsLoader: FC<Props> = ({
   type = "default",
   dataCy,
-  whiteIcons,
+  dotColor,
 }) => {
   if (type === "big")
     return (
-      <BigBouncingWrapper whiteIcons={whiteIcons} data-cy={dataCy}>
+      <BigBouncingWrapper dotColor={dotColor ?? "dark-grey"} data-cy={dataCy}>
         <div />
         <div />
         <div />
       </BigBouncingWrapper>
     );
   return (
-    <BouncingWrapper whiteIcons={whiteIcons} data-cy={dataCy}>
+    <BouncingWrapper dotColor={dotColor ?? "dark-grey"} data-cy={dataCy}>
       <div />
       <div />
       <div />
@@ -31,7 +38,7 @@ const BouncingDotsLoader: FC<Props> = ({
   );
 };
 
-const BouncingWrapper = styled.div<{ whiteIcons?: boolean }>`
+const BouncingWrapper = styled.div<{ dotColor: LoaderColor }>`
   display: inline-flex;
   margin-left: 4px;
 
@@ -40,8 +47,7 @@ const BouncingWrapper = styled.div<{ whiteIcons?: boolean }>`
     height: 6px;
     margin: 2px 4px;
     border-radius: 50%;
-    background-color: ${({ whiteIcons }) =>
-      whiteIcons ? "#fff" : "var(--color-gray)"};
+    background-color: ${({ dotColor }) => LoaderColorMapping[dotColor]};
     opacity: 1;
     animation: bouncing-loader 0.6s infinite alternate;
   }
