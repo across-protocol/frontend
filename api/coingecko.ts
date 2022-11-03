@@ -48,11 +48,14 @@ const handler = async (
       if (l1Token.toLowerCase() === baseCurrencyToken.address.toLowerCase())
         price = 1;
       else {
+        // USD price of token is hardcoded.
         const tokenPriceUsd = fixedTokenPrices[l1Token];
+        // Load USD price of base currency.
         const [basePriceUsd] = await coingeckoClient.getContractPrices(
           [baseCurrencyToken.address],
           "usd"
         );
+        // Return price of token in base as: token USD / base USD
         // Drop any decimals beyond the number of decimals for this token.
         price = Number(
           (tokenPriceUsd / basePriceUsd.price).toFixed(
