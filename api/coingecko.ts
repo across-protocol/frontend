@@ -34,15 +34,35 @@ const handler = async (
     );
 
     const fixedTokenPrices: {
-      [token: string]: { [baseCurrency: string]: number };
+      [token: string]: number;
     } = FIXED_TOKEN_PRICES !== undefined ? JSON.parse(FIXED_TOKEN_PRICES) : {};
     let price: number;
+
+    // Caller wants to override price for token, possibly because the token is not supported yet on the Coingecko API,
+    // so assume the caller set the USD price of the token. We now need to dynamically load the base currency.
     if (
       fixedTokenPrices[l1Token] !== undefined &&
-      !isNaN(fixedTokenPrices[l1Token][baseCurrency])
+      !isNaN(fixedTokenPrices[l1Token])
     ) {
-      price = fixedTokenPrices[l1Token][baseCurrency];
-    } else if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
+      const baseCurrencyToken = SymbolMapping[baseCurrency.toUpperCase()];
+      if (l1Token.toLowerCase() === baseCurrencyToken.address.toLowerCase())
+        price = 1;
+      else {
+        const tokenPriceUsd = fixedTokenPrices[l1Token];
+        const [basePriceUsd] = await coingeckoClient.getContractPrices(
+          [baseCurrencyToken.address],
+          "usd"
+        );
+        // Drop any decimals beyond the number of decimals for this token.
+        price = Number(
+          (tokenPriceUsd / basePriceUsd.price).toFixed(
+            baseCurrencyToken.decimals
+          )
+        );
+      }
+    }
+    // Fetch price dynamically from Coingecko API
+    else if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
       // This base matches a supported base currency for CG.
       [, price] = await coingeckoClient.getCurrentPriceByContract(
         l1Token,
