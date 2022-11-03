@@ -66,9 +66,11 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   useEffect(() => {
-    lockScroll();
+    if (isOpen) {
+      lockScroll();
+    }
     return () => unlockScroll();
-  }, [lockScroll, unlockScroll]);
+  }, [isOpen, lockScroll, unlockScroll]);
 
   useEffect(() => {
     return () => {
