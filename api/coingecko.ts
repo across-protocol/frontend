@@ -11,6 +11,61 @@ const { Coingecko } = coingecko;
 const { SymbolMapping } = relayFeeCalculator;
 const { REACT_APP_COINGECKO_PRO_API_KEY, FIXED_TOKEN_PRICES } = process.env;
 
+// Helper function to fetch prices from coingecko. Can fetch either or both token and base currency.
+// Set hardcodedTokenPriceUsd to 0 to load the token price from coingecko, otherwise load only the base
+// currency.
+const getCoingeckoPrices = async (
+  coingeckoClient: coingecko.Coingecko,
+  tokenAddress: string,
+  baseCurrency: string,
+  hardcodedTokenPriceUsd: number = 0
+): Promise<number> => {
+  const baseCurrencyToken = SymbolMapping[baseCurrency.toUpperCase()];
+
+  if (!baseCurrencyToken)
+    throw new InputError(`Base currency ${baseCurrency} not supported`);
+
+  // Special case: token and base are the same. Coingecko class returns a single result in this case, so it must
+  // be handled separately.
+  if (tokenAddress.toLowerCase() === baseCurrencyToken.address.toLowerCase())
+    return 1;
+
+  // Always use usd as the base currency for the purpose of conversion.
+  let tokenAddressesToFetchPricesFor =
+    hardcodedTokenPriceUsd !== 0
+      ? [baseCurrencyToken.address]
+      : [tokenAddress, baseCurrencyToken.address];
+  const prices = await coingeckoClient.getContractPrices(
+    tokenAddressesToFetchPricesFor,
+    "usd"
+  );
+
+  if (prices.length === 0 || prices.length > 2)
+    throw new Error("unexpected prices list returned by coingeckoClient");
+
+  console.log(prices, baseCurrency, tokenAddress);
+
+  // The ordering of the returned values are not guaranteed, so determine the ordering of the two values by
+  // comparing to the l1Token value.
+  let tokenPriceUsd: number, basePriceUsd: number;
+  if (prices.length === 2)
+    [tokenPriceUsd, basePriceUsd] =
+      prices[0].address.toLowerCase() === tokenAddress.toLowerCase()
+        ? [prices[0].price, prices[1].price]
+        : [prices[1].price, prices[0].price];
+  else {
+    tokenPriceUsd = hardcodedTokenPriceUsd;
+    basePriceUsd = prices[0].price;
+  }
+
+  console.log(tokenPriceUsd, basePriceUsd);
+
+  // Drop any decimals beyond the number of decimals for this token.
+  return Number(
+    (tokenPriceUsd / basePriceUsd).toFixed(baseCurrencyToken.decimals)
+  );
+};
+
 const handler = async (
   { query: { l1Token, baseCurrency } }: CoinGeckoInputRequest,
   response: VercelResponse
@@ -33,58 +88,6 @@ const handler = async (
       REACT_APP_COINGECKO_PRO_API_KEY
     );
 
-    // Helper function to fetch prices from coingecko. Can fetch either or both token and base currency.
-    // Set hardcodedTokenPriceUsd to 0 to load the token price from coingecko, otherwise load only the base
-    // currency.
-    const getCoingeckoPrices = async (
-      tokenAddress: string,
-      baseCurrency: string,
-      hardcodedTokenPriceUsd: number = 0
-    ): Promise<number> => {
-      const baseCurrencyToken = SymbolMapping[baseCurrency.toUpperCase()];
-
-      if (!baseCurrencyToken)
-        throw new InputError(`Base currency ${baseCurrency} not supported`);
-
-      // Special case: token and base are the same. Coingecko class returns a single result in this case, so it must
-      // be handled separately.
-      if (
-        tokenAddress.toLowerCase() === baseCurrencyToken.address.toLowerCase()
-      )
-        return 1;
-
-      // Always use usd as the base currency for the purpose of conversion.
-      let tokenAddressesToFetchPricesFor =
-        hardcodedTokenPriceUsd !== 0
-          ? [baseCurrencyToken.address]
-          : [tokenAddress, baseCurrencyToken.address];
-      const prices = await coingeckoClient.getContractPrices(
-        tokenAddressesToFetchPricesFor,
-        "usd"
-      );
-
-      if (prices.length === 0 || prices.length > 2)
-        throw new Error("unexpected prices list returned by coingeckoClient");
-
-      // The ordering of the returned values are not guaranteed, so determine the ordering of the two values by
-      // comparing to the l1Token value.
-      let tokenPriceUsd: number, basePriceUsd: number;
-      if (prices.length === 2)
-        [tokenPriceUsd, basePriceUsd] =
-          prices[0].address.toLowerCase() === tokenAddress.toLowerCase()
-            ? [prices[0].price, prices[1].price]
-            : [prices[1].price, prices[0].price];
-      else {
-        tokenPriceUsd = hardcodedTokenPriceUsd;
-        basePriceUsd = prices[0].price;
-      }
-
-      // Drop any decimals beyond the number of decimals for this token.
-      return Number(
-        (tokenPriceUsd / basePriceUsd).toFixed(baseCurrencyToken.decimals)
-      );
-    };
-
     const fixedTokenPrices: {
       [token: string]: number;
     } = FIXED_TOKEN_PRICES !== undefined ? JSON.parse(FIXED_TOKEN_PRICES) : {};
@@ -102,7 +105,12 @@ const handler = async (
       // If base is USD, return hardcoded token price in USD.
       if (baseCurrency === "usd") price = tokenPriceUsd;
       else {
-        price = await getCoingeckoPrices(l1Token, baseCurrency, tokenPriceUsd);
+        price = await getCoingeckoPrices(
+          coingeckoClient,
+          l1Token,
+          baseCurrency,
+          tokenPriceUsd
+        );
       }
     }
     // Fetch price dynamically from Coingecko API
@@ -113,7 +121,7 @@ const handler = async (
         baseCurrency
       );
     } else {
-      price = await getCoingeckoPrices(l1Token, baseCurrency);
+      price = await getCoingeckoPrices(coingeckoClient, l1Token, baseCurrency);
     }
 
     // Two different explanations for how `stale-while-revalidate` works:
