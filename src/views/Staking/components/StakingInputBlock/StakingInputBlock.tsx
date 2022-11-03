@@ -52,6 +52,7 @@ const StakingInputBlock: React.FC<Props> = ({
           type="text"
           onChange={(e) => setValue(e.target.value)}
           disabled={displayLoader || disableInput}
+          onKeyDown={(e) => e.key === "Enter" && valid && onClickHandler()}
         />
         <MaxButton
           disabled={displayLoader || disableInput || !maxValue}
