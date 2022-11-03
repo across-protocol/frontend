@@ -28,6 +28,8 @@ import {
   MobileDivider,
   TierButtonWrapper,
   ClaimButton,
+  RewardSecondaryTextWrapper,
+  StyledClockIcon,
 } from "./RewardReferral.styles";
 
 import { ReactComponent as PurpleBanner } from "assets/bg-banners/purple-card-banner.svg";
@@ -47,12 +49,14 @@ import { ReactComponent as TrophyIcon } from "assets/icons/trophy-24.svg";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { Text } from "components/Text";
 import { ClaimRewardsModal } from "../ClaimRewardsModal";
+import { BigNumber } from "ethers";
 
 interface Props {
   isConnected: boolean;
-  referrer: string | undefined;
+  referrer?: string;
   loading: boolean;
   referralsSummary: ReferralsSummary;
+  unclaimedReferralRewardAmount?: BigNumber;
 }
 
 export const tiers: Record<
@@ -68,9 +72,10 @@ export const tiers: Record<
 
 const RewardReferral: React.FC<Props> = ({
   isConnected,
-  loading,
   referrer,
   referralsSummary,
+  loading,
+  unclaimedReferralRewardAmount,
 }) => {
   return (
     <Wrapper>
@@ -78,6 +83,8 @@ const RewardReferral: React.FC<Props> = ({
       <ReferralTierComponent
         isConnected={isConnected}
         referralsSummary={referralsSummary}
+        unclaimedReferralRewardAmount={unclaimedReferralRewardAmount}
+        loading={loading}
       />
     </Wrapper>
   );
@@ -130,7 +137,14 @@ const ReferralLinkComponent: React.FC<{
 const ReferralTierComponent: React.FC<{
   referralsSummary: ReferralsSummary;
   isConnected: boolean;
-}> = ({ referralsSummary, isConnected }) => {
+  loading: boolean;
+  unclaimedReferralRewardAmount?: BigNumber;
+}> = ({
+  loading,
+  referralsSummary,
+  isConnected,
+  unclaimedReferralRewardAmount,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const rewardsAmount = useMemo(() => {
@@ -142,8 +156,13 @@ const ReferralTierComponent: React.FC<{
 
   const nextTier = tiers[referralsSummary.tier + 1];
 
+  const displayValuesTernary = repeatableTernaryBuilder(
+    !loading && isConnected,
+    <Text color="white-70">-</Text>
+  );
+
   const nextTierTernary = repeatableTernaryBuilder<
-    { arrow: boolean; value: string | React.ReactHTMLElement<any> } | undefined
+    { arrow: boolean; Value: JSX.Element } | undefined
   >(!!nextTier, undefined);
 
   const datum = [
@@ -168,9 +187,11 @@ const ReferralTierComponent: React.FC<{
       }`,
       secondaryText: nextTierTernary({
         arrow: true,
-        value: `${
-          nextTier.referrals - referralsSummary.referreeWallets
-        } to next tier`,
+        Value: (
+          <StatsGrayTextDesktop size="md">
+            {nextTier.referrals - referralsSummary.referreeWallets} to next tier
+          </StatsGrayTextDesktop>
+        ),
       }),
       tooltip: {
         title: "Unique referral transfers",
@@ -191,9 +212,15 @@ const ReferralTierComponent: React.FC<{
       primaryText: `$${formatNumberMaxFracDigits(referralsSummary.volume)}`,
       secondaryText: nextTierTernary({
         arrow: true,
-        value: `$${formatNumberMaxFracDigits(
-          nextTier.volume - referralsSummary.volume
-        )} to next tier`,
+        Value: (
+          <StatsGrayTextDesktop size="md">
+            $
+            {formatNumberMaxFracDigits(
+              nextTier.volume - referralsSummary.volume
+            )}{" "}
+            to next tier
+          </StatsGrayTextDesktop>
+        ),
       }),
     },
     {
@@ -204,14 +231,38 @@ const ReferralTierComponent: React.FC<{
       )}% referral rate`,
       secondaryText: nextTierTernary({
         arrow: false,
-        value: `${Math.floor(
-          referralsSummary.referralRate * 0.25 * 100
-        )}% for referee`,
+        Value: (
+          <StatsGrayTextDesktop size="md">
+            {Math.floor(referralsSummary.referralRate * 0.25 * 100)}% for
+            referee
+          </StatsGrayTextDesktop>
+        ),
       }),
     },
     {
       Icon: TrophyIcon,
       title: { desktop: "Total Rewards", mobile: "Rewards" },
+      secondaryText: unclaimedReferralRewardAmount
+        ? {
+            arrow: false,
+            Value: (
+              <RewardSecondaryTextWrapper>
+                <PopperTooltip
+                  title="Referral reward unlocking"
+                  body="New referral rewards are unlocked for claiming the first day of every month."
+                  placement="bottom-start"
+                  icon="clock"
+                >
+                  <StyledClockIcon />
+                </PopperTooltip>
+                <Text color="white-70">
+                  {formatEther(unclaimedReferralRewardAmount)} ACX
+                </Text>
+                <StatsGrayTextDesktop size="md">claimable</StatsGrayTextDesktop>
+              </RewardSecondaryTextWrapper>
+            ),
+          }
+        : undefined,
       primaryText: `${rewardsAmount} ACX`,
     },
   ];
@@ -264,21 +315,23 @@ const ReferralTierComponent: React.FC<{
                   </PopperTooltip>
                 )}
               </StatsTitleIconTooltipWrapper>
-              <StatsValueWrapper>
-                {stat.secondaryText && (
-                  <>
-                    <StatsGrayTextDesktop size="md">
-                      {stat.secondaryText.value}
-                    </StatsGrayTextDesktop>
-                    {stat.secondaryText.arrow && (
-                      <ArrowSeparator>
-                        <StatsGrayTextDesktop size="md">←</StatsGrayTextDesktop>
-                      </ArrowSeparator>
-                    )}
-                  </>
-                )}
-                <StatsWhiteText size="md">{stat.primaryText}</StatsWhiteText>
-              </StatsValueWrapper>
+              {displayValuesTernary(
+                <StatsValueWrapper>
+                  {stat.secondaryText && (
+                    <>
+                      {stat.secondaryText.Value}
+                      {stat.secondaryText.arrow && (
+                        <ArrowSeparator>
+                          <StatsGrayTextDesktop size="md">
+                            ←
+                          </StatsGrayTextDesktop>
+                        </ArrowSeparator>
+                      )}
+                    </>
+                  )}
+                  <StatsWhiteText size="md">{stat.primaryText}</StatsWhiteText>
+                </StatsValueWrapper>
+              )}
             </StatsInfoRow>
           </React.Fragment>
         ))}

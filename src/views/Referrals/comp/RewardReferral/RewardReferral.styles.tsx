@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { ButtonV2, SecondaryButtonV2 } from "components/Buttons";
 import { ReactComponent as ReferralSVG } from "assets/icons/rewards/referral-within-star.svg";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
+import { ReactComponent as ClockIcon } from "assets/icons/clock.svg";
 import { QUERIESV2 } from "utils";
 import { Text } from "components/Text";
 
@@ -81,6 +82,8 @@ export const StyledReferralCopyLink = styled.div`
 export const ReferralTierBlock = styled(ReferralRowBlock)`
   padding: ${24 / 16}rem;
   flex-grow: 2;
+
+  width: 100%;
 
   overflow: clip;
 
@@ -313,3 +316,14 @@ export const MobileDivider = styled.div`
     display: block;
   }
 `;
+
+export const RewardSecondaryTextWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0px;
+  gap: 4px;
+`;
+
+export const StyledClockIcon = styled(ClockIcon)``;
