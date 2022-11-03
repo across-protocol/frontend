@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import { useConnection } from "hooks";
 import { useReferrals } from "hooks/useReferrals";
 import { useReferralSummary } from "hooks/useReferralSummary";
+import { useUnclaimedReferralProofs } from "./hooks/useUnclaimedReferralProofs";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -26,9 +27,11 @@ export const useReferralsView = () => {
   );
   const { summary, isLoading: isReferalSummaryLoading } =
     useReferralSummary(account);
+  const { data: unclaimedReferralData } = useUnclaimedReferralProofs();
 
   return {
     referralsSummary: summary,
+    claimableReferralRewardAmount: unclaimedReferralData?.claimableAmount,
     isReferalSummaryLoading,
     isConnected,
     account,

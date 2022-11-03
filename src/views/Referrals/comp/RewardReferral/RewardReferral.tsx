@@ -49,12 +49,14 @@ import { ReactComponent as TrophyIcon } from "assets/icons/trophy-24.svg";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { Text } from "components/Text";
 import { ClaimRewardsModal } from "../ClaimRewardsModal";
+import { BigNumber } from "ethers";
 
 interface Props {
   isConnected: boolean;
-  referrer: string | undefined;
+  referrer?: string;
   loading: boolean;
   referralsSummary: ReferralsSummary;
+  claimableReferralRewardAmount?: BigNumber;
 }
 
 export const tiers: Record<
@@ -73,6 +75,7 @@ const RewardReferral: React.FC<Props> = ({
   referrer,
   referralsSummary,
   loading,
+  claimableReferralRewardAmount,
 }) => {
   return (
     <Wrapper>
@@ -80,6 +83,7 @@ const RewardReferral: React.FC<Props> = ({
       <ReferralTierComponent
         isConnected={isConnected}
         referralsSummary={referralsSummary}
+        claimableReferralRewardAmount={claimableReferralRewardAmount}
         loading={loading}
       />
     </Wrapper>
@@ -134,7 +138,13 @@ const ReferralTierComponent: React.FC<{
   referralsSummary: ReferralsSummary;
   isConnected: boolean;
   loading: boolean;
-}> = ({ loading, referralsSummary, isConnected }) => {
+  claimableReferralRewardAmount?: BigNumber;
+}> = ({
+  loading,
+  referralsSummary,
+  isConnected,
+  claimableReferralRewardAmount,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const rewardsAmount = useMemo(() => {
@@ -232,23 +242,27 @@ const ReferralTierComponent: React.FC<{
     {
       Icon: TrophyIcon,
       title: { desktop: "Total Rewards", mobile: "Rewards" },
-      secondaryText: {
-        arrow: false,
-        Value: (
-          <RewardSecondaryTextWrapper>
-            <PopperTooltip
-              title="Referral reward unlocking"
-              body="New referral rewards are unlocked for claiming the first day of every month."
-              placement="bottom-start"
-              icon="clock"
-            >
-              <StyledClockIcon />
-            </PopperTooltip>
-            <Text color="white-70">{142.21} ACX</Text>
-            <StatsGrayTextDesktop size="md">claimable</StatsGrayTextDesktop>
-          </RewardSecondaryTextWrapper>
-        ),
-      },
+      secondaryText: claimableReferralRewardAmount
+        ? {
+            arrow: false,
+            Value: (
+              <RewardSecondaryTextWrapper>
+                <PopperTooltip
+                  title="Referral reward unlocking"
+                  body="New referral rewards are unlocked for claiming the first day of every month."
+                  placement="bottom-start"
+                  icon="clock"
+                >
+                  <StyledClockIcon />
+                </PopperTooltip>
+                <Text color="white-70">
+                  {formatEther(claimableReferralRewardAmount)} ACX
+                </Text>
+                <StatsGrayTextDesktop size="md">claimable</StatsGrayTextDesktop>
+              </RewardSecondaryTextWrapper>
+            ),
+          }
+        : undefined,
       primaryText: `${rewardsAmount} ACX`,
     },
   ];
