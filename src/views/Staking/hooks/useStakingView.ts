@@ -9,6 +9,7 @@ import {
 import { getConfig, hubPoolChainId } from "utils";
 
 import { useStakeAction, useUnstakeAction } from "./useStakingAction";
+import { useClaimStakeRewardAction } from "./useClaimStakeRewardAction";
 
 type StakingPathParams = {
   poolId: string;
@@ -28,12 +29,14 @@ export const useStakingView = () => {
   const stakingPoolQuery = useStakingPool(l1TokenAddress);
   const stakeActionMutation = useStakeAction(l1TokenAddress);
   const unstakeActionMutation = useUnstakeAction(l1TokenAddress);
+  const claimActionMutation = useClaimStakeRewardAction(l1TokenAddress);
 
   return {
     stakingPoolQuery,
     poolData: stakingPoolQuery.data ?? DEFAULT_STAKING_POOL_DATA,
     stakeActionMutation,
     unstakeActionMutation,
+    claimActionMutation,
     poolId,
     exitLinkURI: "/rewards",
     poolLogoURI: logoURI,

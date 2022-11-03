@@ -8,6 +8,7 @@ import { StakingRewardPropType } from "../../types";
 import { Card } from "views/Staking/Staking.styles";
 import { Text } from "components/Text";
 import ConnectWalletButton from "../ConnectWalletButton";
+import BouncingDotsLoader from "components/BouncingDotsLoader";
 
 export const StakingReward = ({
   poolData: {
@@ -15,6 +16,8 @@ export const StakingReward = ({
     apyData: { totalApy, minApy },
   },
   isConnected,
+  claimActionHandler,
+  isMutating,
 }: StakingRewardPropType) => {
   const activeColor = "white-" + (outstandingRewards.gt(0) ? 100 : 70);
 
@@ -47,10 +50,12 @@ export const StakingReward = ({
             <ClaimRewardButton
               size="lg"
               disabled={BigNumber.from(outstandingRewards).lte(0)}
+              onClick={() => claimActionHandler()}
             >
               <Text color="warning" weight={500}>
                 Claim Rewards
               </Text>
+              {isMutating && <BouncingDotsLoader dotColor="warning" />}
             </ClaimRewardButton>
           </ClaimRewardInputGroup>
         ) : (
@@ -102,6 +107,10 @@ const ClaimRewardButton = styled(ButtonV2)`
 
   @media ${QUERIESV2.sm.andDown} {
     height: 40px;
+  }
+
+  &:active:after {
+    border: none;
   }
 `;
 
