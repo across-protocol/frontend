@@ -7,7 +7,7 @@ type LoaderColor = "white" | "dark-grey" | "warning";
 const LoaderColorMapping: Record<LoaderColor, string> = {
   white: "#fff",
   "dark-grey": "hsl(230deg 6% 19%);",
-  warning: "#fff",
+  warning: "#f9d26c",
 };
 
 interface Props {
