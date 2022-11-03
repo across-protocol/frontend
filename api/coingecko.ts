@@ -32,12 +32,9 @@ const getCoingeckoPrices = async (
   if (tokenAddress.toLowerCase() === baseCurrencyToken.address.toLowerCase())
     return 1;
 
-  let basePriceUsd, tokenPriceUsd;
   // If either token or base currency is in hardcoded list then use hardcoded USD price.
-  if (hardcodedTokenPrices[baseCurrencyToken.address] !== undefined)
-    basePriceUsd = hardcodedTokenPrices[baseCurrencyToken.address];
-  if (hardcodedTokenPrices[tokenAddress] !== undefined)
-    tokenPriceUsd = hardcodedTokenPrices[tokenAddress];
+  let basePriceUsd = hardcodedTokenPrices[baseCurrencyToken.address];
+  let tokenPriceUsd = hardcodedTokenPrices[tokenAddress];
 
   // Fetch undefined base and token USD prices from coingecko client.
   // Always use usd as the base currency for the purpose of conversion.
@@ -45,7 +42,7 @@ const getCoingeckoPrices = async (
   if (basePriceUsd === undefined)
     tokenAddressesToFetchPricesFor.push(baseCurrencyToken.address);
   if (tokenPriceUsd === undefined)
-    tokenAddressesToFetchPricesFor.push(baseCurrencyToken.address);
+    tokenAddressesToFetchPricesFor.push(tokenAddress);
 
   // Fetch prices and sanitize returned value
   const prices = await coingeckoClient.getContractPrices(
@@ -70,7 +67,7 @@ const getCoingeckoPrices = async (
 
   // Drop any decimals beyond the number of decimals for this token.
   return Number(
-    (Number(tokenPriceUsd) / basePriceUsd).toFixed(baseCurrencyToken.decimals)
+    (tokenPriceUsd / basePriceUsd).toFixed(baseCurrencyToken.decimals)
   );
 };
 
