@@ -27,7 +27,6 @@ export function useStakeFormLogic(
       if (amount && amount !== ".") {
         if (isNumberEthersParseable(amount)) {
           const asNumeric = poolData.lpTokenParser(amount);
-          console.log(asNumeric.toString());
           if (asNumeric.lt(0)) {
             setIsAmountInvalid(true);
           } else if (asNumeric.gt(0)) {
