@@ -411,7 +411,7 @@ export const tokenList: TokenInfoList = [
     name: "Across Protocol Token",
     symbol: "ACX",
     decimals: 18,
-    logoURI: "/logos/acx-logo.svg",
+    logoURI: "/logos/acx-logo.png",
     mainnetAddress: getAddress("0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F"),
   },
 ];
