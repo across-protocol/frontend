@@ -17,7 +17,7 @@ export function useSplash() {
     },
     {
       title: "Total Transactions",
-      value: humanReadableNumber(data?.totalDeposits ?? 0),
+      value: ternary(humanReadableNumber(data?.totalDeposits ?? 0)),
     },
     {
       title: "Average Fill Time",

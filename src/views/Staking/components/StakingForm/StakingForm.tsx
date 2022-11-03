@@ -123,6 +123,7 @@ export const StakingForm = ({
               onClickHandler={buttonHandler}
               displayLoader={isMutating}
               warningButtonColor={stakingAction === "unstake"}
+              disableInput={isDataLoading || isMutating}
             />
           ) : (
             <ConnectWalletButton reasonToConnect={stakingAction} />
