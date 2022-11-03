@@ -56,7 +56,7 @@ interface Props {
   referrer?: string;
   loading: boolean;
   referralsSummary: ReferralsSummary;
-  claimableReferralRewardAmount?: BigNumber;
+  unclaimedReferralRewardAmount?: BigNumber;
 }
 
 export const tiers: Record<
@@ -75,7 +75,7 @@ const RewardReferral: React.FC<Props> = ({
   referrer,
   referralsSummary,
   loading,
-  claimableReferralRewardAmount,
+  unclaimedReferralRewardAmount,
 }) => {
   return (
     <Wrapper>
@@ -83,7 +83,7 @@ const RewardReferral: React.FC<Props> = ({
       <ReferralTierComponent
         isConnected={isConnected}
         referralsSummary={referralsSummary}
-        claimableReferralRewardAmount={claimableReferralRewardAmount}
+        unclaimedReferralRewardAmount={unclaimedReferralRewardAmount}
         loading={loading}
       />
     </Wrapper>
@@ -138,12 +138,12 @@ const ReferralTierComponent: React.FC<{
   referralsSummary: ReferralsSummary;
   isConnected: boolean;
   loading: boolean;
-  claimableReferralRewardAmount?: BigNumber;
+  unclaimedReferralRewardAmount?: BigNumber;
 }> = ({
   loading,
   referralsSummary,
   isConnected,
-  claimableReferralRewardAmount,
+  unclaimedReferralRewardAmount,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -242,7 +242,7 @@ const ReferralTierComponent: React.FC<{
     {
       Icon: TrophyIcon,
       title: { desktop: "Total Rewards", mobile: "Rewards" },
-      secondaryText: claimableReferralRewardAmount
+      secondaryText: unclaimedReferralRewardAmount
         ? {
             arrow: false,
             Value: (
@@ -256,7 +256,7 @@ const ReferralTierComponent: React.FC<{
                   <StyledClockIcon />
                 </PopperTooltip>
                 <Text color="white-70">
-                  {formatEther(claimableReferralRewardAmount)} ACX
+                  {formatEther(unclaimedReferralRewardAmount)} ACX
                 </Text>
                 <StatsGrayTextDesktop size="md">claimable</StatsGrayTextDesktop>
               </RewardSecondaryTextWrapper>

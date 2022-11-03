@@ -26,7 +26,7 @@ const Referrals = () => {
     setPageSize,
     pageSizes,
     totalReferralCount,
-    claimableReferralRewardAmount,
+    unclaimedReferralRewardAmount,
   } = useReferralsView();
 
   return (
@@ -39,7 +39,7 @@ const Referrals = () => {
               loading={isReferalSummaryLoading}
               referrer={account}
               referralsSummary={referralsSummary}
-              claimableReferralRewardAmount={claimableReferralRewardAmount}
+              unclaimedReferralRewardAmount={unclaimedReferralRewardAmount}
               isConnected={isConnected}
             />
             {mediumUrl && <RewardMediumBlock />}

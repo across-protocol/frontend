@@ -31,7 +31,7 @@ export const useReferralsView = () => {
 
   return {
     referralsSummary: summary,
-    claimableReferralRewardAmount: unclaimedReferralData?.claimableAmount,
+    unclaimedReferralRewardAmount: unclaimedReferralData?.claimableAmount,
     isReferalSummaryLoading,
     isConnected,
     account,
