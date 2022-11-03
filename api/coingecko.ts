@@ -99,15 +99,17 @@ const handler = async (
     // We want to compute price and return to caller.
     let price: number;
 
-    const fixedTokenPrices: {
+    const _fixedTokenPrices: {
       [token: string]: number;
     } = FIXED_TOKEN_PRICES !== undefined ? JSON.parse(FIXED_TOKEN_PRICES) : {};
 
     // Make sure all keys in `fixedTokenPrices` are in checksum format.
-    Object.keys(fixedTokenPrices).forEach((tokenAddress) => {
-      if (ethers.utils.getAddress(tokenAddress) !== tokenAddress)
-        throw new Error("Must set keys in fixedTokenPrices in checksum format");
-    });
+    const fixedTokenPrices = Object.fromEntries(
+      Object.entries(_fixedTokenPrices).map(([token, price]) => [
+        ethers.utils.getAddress(token),
+        price,
+      ])
+    );
 
     // Caller wants to override price for token, possibly because the token is not supported yet on the Coingecko API,
     // so assume the caller set the USD price of the token. We now need to dynamically load the base currency.
