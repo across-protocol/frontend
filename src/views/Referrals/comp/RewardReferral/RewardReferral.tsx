@@ -189,7 +189,8 @@ const ReferralTierComponent: React.FC<{
         arrow: true,
         Value: (
           <StatsGrayTextDesktop size="md">
-            {nextTier.referrals - referralsSummary.referreeWallets} to next tier
+            {nextTier?.referrals - referralsSummary.referreeWallets} to next
+            tier
           </StatsGrayTextDesktop>
         ),
       }),
@@ -216,7 +217,7 @@ const ReferralTierComponent: React.FC<{
           <StatsGrayTextDesktop size="md">
             $
             {formatNumberMaxFracDigits(
-              nextTier.volume - referralsSummary.volume
+              nextTier?.volume - referralsSummary.volume
             )}{" "}
             to next tier
           </StatsGrayTextDesktop>
