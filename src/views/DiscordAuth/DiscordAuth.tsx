@@ -14,7 +14,7 @@ const DiscordAuth = () => {
         ) : (
           <Body>
             Finalizing connection
-            <BouncingDotsLoader whiteIcons />
+            <BouncingDotsLoader dotColor="white" />
           </Body>
         )}
       </Content>

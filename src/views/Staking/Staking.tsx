@@ -13,6 +13,7 @@ const Staking = () => {
     connectWalletHandler,
     stakingPoolQuery,
     stakeActionMutation,
+    claimActionMutation,
     unstakeActionMutation,
     isWrongNetwork,
     isWrongNetworkHandler,
@@ -50,6 +51,8 @@ const Staking = () => {
           poolData={poolData}
           isConnected={isConnected}
           walletConnectionHandler={connectWalletHandler}
+          claimActionHandler={claimActionMutation.mutateAsync}
+          isMutating={claimActionMutation.isLoading}
         />
       </Wrapper>
       <Footer />

@@ -7,7 +7,10 @@ type GenericStakingComponentProps = {
   poolData: StakingPool;
 };
 
-export type StakingRewardPropType = GenericStakingComponentProps & {};
+export type StakingRewardPropType = GenericStakingComponentProps & {
+  claimActionHandler: () => Promise<void>;
+  isMutating: boolean;
+};
 
 export type StakingFormPropType = GenericStakingComponentProps & {
   logoURI: string;
