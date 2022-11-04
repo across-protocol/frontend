@@ -2,12 +2,12 @@
 # yarn lockfile v1
 
 
-"@across-protocol/across-token@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@across-protocol/across-token/-/across-token-0.0.1.tgz#9fe58cd603759584bd5f340899e208303df998ac"
-  integrity sha512-J6PQvMSYkVC34GzYpK9KmTAGFnocmcm7ZRnK51TtSSE/cMJERXMJi9eLL1R7O9/meizHtrZxCi71gbqDq9PVlg==
+"@across-protocol/across-token@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@across-protocol/across-token/-/across-token-0.0.2.tgz#7affbbde89fbec8ea5b014b58aa1827e2723500d"
+  integrity sha512-sBcfvCEv1aoz63Zn/806kXn/XH/xxaoThFapp1lejn7svQeYThl9y9+ixDSY4uE2tX0S2pRNZ1mhg7Xd3tpmUw==
   dependencies:
-    "@openzeppelin/contracts" "^4.5.0"
+    "@openzeppelin/contracts" "^4.7.3"
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
@@ -6100,7 +6100,7 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.4.2.tgz#4e889c9c66e736f7de189a53f8ba5b8d789425c2"
   integrity sha512-NyJV7sJgoGYqbtNUWgzzOGW4T6rR19FmX1IJgXGdapGPWsuMelGJn9h03nos0iqfforCbCB0iYIR0MtIuIFLLw==
 
-"@openzeppelin/contracts@^4.2.0", "@openzeppelin/contracts@^4.3.2", "@openzeppelin/contracts@^4.5.0", "@openzeppelin/contracts@^4.7.3":
+"@openzeppelin/contracts@^4.2.0", "@openzeppelin/contracts@^4.3.2", "@openzeppelin/contracts@^4.7.3":
   version "4.7.3"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.7.3.tgz#939534757a81f8d69cc854c7692805684ff3111e"
   integrity sha512-dGRS0agJzu8ybo44pCIf3xBaPQN/65AIXNgK8+4gzKd5kbvlqyxryUYVLJv7fK98Seyd2hDZzVEHSWAh0Bt1Yw==

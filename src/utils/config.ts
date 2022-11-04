@@ -1,5 +1,4 @@
 import assert from "assert";
-import { Contract } from "ethers";
 import { Signer } from "./ethers";
 import * as constants from "./constants";
 import * as providerUtils from "./providers";
@@ -16,6 +15,8 @@ import sortBy from "lodash/sortBy";
 import {
   AcceleratingDistributor,
   AcceleratingDistributor__factory,
+  ClaimAndStake,
+  ClaimAndStake__factory,
 } from "@across-protocol/across-token";
 
 export type Token = constants.TokenInfo & {
@@ -146,15 +147,11 @@ export class ConfigClient {
       signer ?? providerUtils.getProvider(this.getHubPoolChainId());
     return AcrossMerkleDistributor__factory.connect(address, provider);
   }
-  getClaimAndStake(signer?: Signer): Contract {
+  getClaimAndStake(signer?: Signer): ClaimAndStake {
     const address = this.getClaimAndStakeAddress();
     const provider =
       signer ?? providerUtils.getProvider(this.getHubPoolChainId());
-    // TODO: replace with auto-generated Typechain bindings if available
-    const abi = [
-      "function claimAndStake(tuple(uint256 windowIndex, uint256 amount, uint256 accountIndex, address account, bytes32[] merkleProof) _claim)",
-    ];
-    return new Contract(address, abi, provider);
+    return ClaimAndStake__factory.connect(address, provider);
   }
   filterRoutes(query: Partial<constants.Route>): constants.Routes {
     const cleanQuery: Partial<constants.Route> = Object.fromEntries(
