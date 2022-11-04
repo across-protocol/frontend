@@ -1,8 +1,7 @@
 import { Wrapper } from "./Staking.styles";
 import { StakingReward, StakingForm, StakingExitAction } from "./components";
 import { useStakingView } from "./hooks/useStakingView";
-import Footer from "components/Footer";
-import { SuperHeader } from "components";
+import { LayoutV2, SuperHeader } from "components";
 import { getChainInfo, hubPoolChainId } from "utils";
 
 const Staking = () => {
@@ -32,30 +31,31 @@ const Staking = () => {
           </div>
         </SuperHeader>
       )}
-      <Wrapper>
-        <StakingExitAction poolName={poolName} poolLogoURI={poolLogoURI} />
-        <StakingForm
-          logoURI={poolLogoURI}
-          isDataLoading={stakingPoolQuery.isLoading}
-          isMutating={
-            stakeActionMutation.isLoading || unstakeActionMutation.isLoading
-          }
-          isWrongNetwork={isWrongNetwork}
-          isConnected={isConnected}
-          walletConnectionHandler={connectWalletHandler}
-          stakeActionFn={stakeActionMutation.mutateAsync}
-          unstakeActionFn={unstakeActionMutation.mutateAsync}
-          poolData={poolData}
-        />
-        <StakingReward
-          poolData={poolData}
-          isConnected={isConnected}
-          walletConnectionHandler={connectWalletHandler}
-          claimActionHandler={claimActionMutation.mutateAsync}
-          isMutating={claimActionMutation.isLoading}
-        />
-      </Wrapper>
-      <Footer />
+      <LayoutV2 maxWidth={600}>
+        <Wrapper>
+          <StakingExitAction poolName={poolName} poolLogoURI={poolLogoURI} />
+          <StakingForm
+            logoURI={poolLogoURI}
+            isDataLoading={stakingPoolQuery.isLoading}
+            isMutating={
+              stakeActionMutation.isLoading || unstakeActionMutation.isLoading
+            }
+            isWrongNetwork={isWrongNetwork}
+            isConnected={isConnected}
+            walletConnectionHandler={connectWalletHandler}
+            stakeActionFn={stakeActionMutation.mutateAsync}
+            unstakeActionFn={unstakeActionMutation.mutateAsync}
+            poolData={poolData}
+          />
+          <StakingReward
+            poolData={poolData}
+            isConnected={isConnected}
+            walletConnectionHandler={connectWalletHandler}
+            claimActionHandler={claimActionMutation.mutateAsync}
+            isMutating={claimActionMutation.isLoading}
+          />
+        </Wrapper>
+      </LayoutV2>
     </>
   );
 };
