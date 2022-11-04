@@ -23,7 +23,6 @@ export type Props = {
   amount?: string;
   amountBreakdown?: AmountBreakdown;
   onClickClaim: () => void;
-  onClickAddToken: () => void;
   errorMsg?: string;
   maxApyPct?: string;
 };

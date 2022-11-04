@@ -2,6 +2,10 @@
   "hubPoolChain": 5,
   "hubPoolAddress": "0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d",
   "hubPoolWethAddress": "0x60D4dB9b534EF9260a88b0BED6c486fe13E604Fc",
+  "acrossTokenAddress": "0x40153DdFAd90C49dbE3F5c9F96f2a5B25ec67461",
+  "acceleratingDistributorAddress": "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC",
+  "merkleDistributorAddress": "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
+  "claimAndStakeAddress": "0xF45D31fc33ea7d047172cd60ECc46d1a69696932",
   "routes": [
     {
       "fromChain": 80001,

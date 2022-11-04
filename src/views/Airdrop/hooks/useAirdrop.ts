@@ -2,38 +2,21 @@ import { useEffect, useState } from "react";
 import { useConnection, useAcrossStakingPool } from "hooks";
 
 import { useAirdropRecipient } from "./useAirdropRecipient";
-import { useIsClaimed } from "./useIsClaimed";
-import { useClaim } from "./useClaim";
+import { useIsAirdropClaimed } from "./useIsAirdropClaimed";
+import { useClaimAndStake } from "./useClaimAndStake";
 
-import { getConfig } from "utils/config";
-import ACXImageSrc from "assets/acx.svg";
 import { formatWeiPct } from "utils";
 
 export type FlowSelector = "splash" | "info" | "eligible" | "ineligible";
 
 export default function useAirdrop() {
-  const config = getConfig();
   const [activePageFlow, setActivePageFlow] = useState<FlowSelector>("splash");
-  const { isConnected, account, connect, provider } = useConnection();
+  const { isConnected, account, connect } = useConnection();
 
   const airdropRecipientQuery = useAirdropRecipient();
-  const isClaimedQuery = useIsClaimed();
-  const claimMutation = useClaim();
+  const isAirdropClaimedQuery = useIsAirdropClaimed();
+  const claimAndStakeMutation = useClaimAndStake();
   const acrossStakingPoolQuery = useAcrossStakingPool();
-
-  const handleAddTokenToWallet = async () => {
-    if (provider) {
-      await (provider as any).send("wallet_watchAsset", {
-        type: "ERC20",
-        options: {
-          address: config.getAcrossTokenAddress(),
-          symbol: "ACX",
-          decimals: 18,
-          image: ACXImageSrc, // TODO
-        },
-      });
-    }
-  };
 
   useEffect(() => {
     if (isConnected && account && !airdropRecipientQuery.isLoading) {
@@ -69,12 +52,11 @@ export default function useAirdrop() {
     currentApyPct,
     acrossStakingPoolQuery,
     airdropRecipientQuery,
-    isClaimedQuery,
-    claimMutation,
+    isAirdropClaimedQuery,
+    claimAndStakeMutation,
 
     isConnected,
     account,
     connectWallet: () => connect(),
-    handleAddTokenToWallet,
   };
 }
