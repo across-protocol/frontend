@@ -122,3 +122,10 @@ export function prelaunchUserDetailsQueryKey(jwt: string) {
 export function splashGetDepositStatsQueryKey() {
   return ["splash-screen-deposit-stats"];
 }
+
+export function isAirdropClaimedQueryKey(
+  account?: string,
+  airdropWindowIndex?: number
+) {
+  return ["is-airdrop-claimed", account, airdropWindowIndex];
+}

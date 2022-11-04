@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 
+import { isAirdropClaimedQueryKey } from "utils";
 import { airdropWindowIndex } from "utils/constants";
 import { fetchIsClaimed } from "utils/merkle-distributor";
 import { useConnection } from "hooks";
@@ -13,7 +14,7 @@ export function useIsAirdropClaimed() {
   const isQueryEnabled = Boolean(airdropRecipientQuery.data && account);
 
   return useQuery(
-    ["is-airdrop-claimed", account, airdropWindowIndex],
+    isAirdropClaimedQueryKey(account, airdropWindowIndex),
     () => {
       if (airdropRecipientQuery.data) {
         return fetchIsClaimed(
