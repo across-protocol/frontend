@@ -1,4 +1,5 @@
 import assert from "assert";
+import { Contract } from "ethers";
 import { Signer } from "./ethers";
 import * as constants from "./constants";
 import * as providerUtils from "./providers";
@@ -7,9 +8,8 @@ import {
   HubPool__factory,
   SpokePool,
   SpokePool__factory,
-  getDeployedAddress,
-  MerkleDistributor,
-  MerkleDistributor__factory,
+  AcrossMerkleDistributor,
+  AcrossMerkleDistributor__factory,
 } from "@across-protocol/contracts-v2";
 import filter from "lodash/filter";
 import sortBy from "lodash/sortBy";
@@ -91,12 +91,36 @@ export class ConfigClient {
     return this.config.hubPoolAddress;
   }
   getAcceleratingDistributorAddress(): string {
-    // TODO: replace hardcoded goerli address with official address from package
-    return "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4";
+    return (
+      process.env.REACT_APP_ACCELERATING_DISTRIBUTOR_ADDRESS ||
+      this.config.acceleratingDistributorAddress ||
+      // TODO: replace hardcoded goerli address with official address from package
+      "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC"
+    );
   }
   getAcrossTokenAddress(): string {
-    // TODO: replace hardcoded goerli address with official address from package
-    return "0x40153DdFAd90C49dbE3F5c9F96f2a5B25ec67461";
+    return (
+      process.env.REACT_APP_ACROSS_TOKEN_ADDRESS ||
+      this.config.acrossTokenAddress ||
+      // TODO: replace hardcoded goerli address with official address from package
+      "0x40153DdFAd90C49dbE3F5c9F96f2a5B25ec67461"
+    );
+  }
+  getMerkleDistributorAddress(): string {
+    return (
+      process.env.REACT_APP_MERKLE_DISTRIBUTOR_ADDRESS ||
+      this.config.merkleDistributorAddress ||
+      // TODO: replace hardcoded goerli address with official address from package
+      "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D"
+    );
+  }
+  getClaimAndStakeAddress(): string {
+    return (
+      process.env.REACT_APP_CLAIM_AND_STAKE_ADDRESS ||
+      this.config.claimAndStakeAddress ||
+      // TODO: replace hardcoded goerli address with official address from package
+      "0xF45D31fc33ea7d047172cd60ECc46d1a69696932"
+    );
   }
   getL1TokenAddressBySymbol(symbol: string) {
     // all routes have an l1Token address, so just find the first symbol that matches
@@ -116,13 +140,21 @@ export class ConfigClient {
       signer ?? providerUtils.getProvider(this.getHubPoolChainId());
     return AcceleratingDistributor__factory.connect(address, provider);
   }
-  getMerkleDistributor(signer?: Signer): MerkleDistributor {
-    const address =
-      process.env.REACT_APP_MERKLE_DISTRIBUTOR_ADDRESS ||
-      getDeployedAddress("MerkleDistributor", this.getHubPoolChainId());
+  getMerkleDistributor(signer?: Signer): AcrossMerkleDistributor {
+    const address = this.getMerkleDistributorAddress();
     const provider =
       signer ?? providerUtils.getProvider(this.getHubPoolChainId());
-    return MerkleDistributor__factory.connect(address, provider);
+    return AcrossMerkleDistributor__factory.connect(address, provider);
+  }
+  getClaimAndStake(signer?: Signer): Contract {
+    const address = this.getClaimAndStakeAddress();
+    const provider =
+      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
+    // TODO: replace with auto-generated Typechain bindings if available
+    const abi = [
+      "function claimAndStake(tuple(uint256 windowIndex, uint256 amount, uint256 accountIndex, address account, bytes32[] merkleProof) _claim)",
+    ];
+    return new Contract(address, abi, provider);
   }
   filterRoutes(query: Partial<constants.Route>): constants.Routes {
     const cleanQuery: Partial<constants.Route> = Object.fromEntries(

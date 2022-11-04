@@ -26,7 +26,7 @@ export const notificationEmitter = async (
       notify.unsubscribe(txHash);
       setTimeout(() => {
         resolve();
-      }, timingBuffer ?? 5000);
+      }, timingBuffer ?? 0);
     });
     emitter.on("txFailed", () => {
       notify.unsubscribe(txHash);

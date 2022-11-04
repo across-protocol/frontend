@@ -6,14 +6,14 @@ import { useConnection } from "hooks";
 
 import { useAirdropRecipient } from "./useAirdropRecipient";
 
-export function useIsClaimed() {
+export function useIsAirdropClaimed() {
   const { account } = useConnection();
   const airdropRecipientQuery = useAirdropRecipient();
 
   const isQueryEnabled = Boolean(airdropRecipientQuery.data && account);
 
   return useQuery(
-    ["airdrop", "is-claimed", account, airdropWindowIndex],
+    ["is-airdrop-claimed", account, airdropWindowIndex],
     () => {
       if (airdropRecipientQuery.data) {
         return fetchIsClaimed(

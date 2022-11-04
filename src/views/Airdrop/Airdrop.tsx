@@ -19,12 +19,12 @@ const Airdrop = () => {
     switchToInfo,
     switchToSplash,
     connectWallet,
-    handleAddTokenToWallet,
+
     airdropRecipientQuery,
     maxApyPct,
     currentApyPct,
-    claimMutation,
-    isClaimedQuery,
+    claimAndStakeMutation,
+    isAirdropClaimedQuery,
   } = useAirdrop();
 
   let activePageComponent: JSX.Element;
@@ -44,17 +44,18 @@ const Airdrop = () => {
     case "eligible":
       activePageComponent = (
         <EligibleWalletFlow
-          isLoadingClaimed={isClaimedQuery.isLoading}
+          isLoadingClaimed={isAirdropClaimedQuery.isLoading}
           isLoadingAirdrop={airdropRecipientQuery.isLoading}
-          isClaiming={claimMutation.isLoading}
-          hasClaimed={isClaimedQuery.data}
+          isClaiming={claimAndStakeMutation.isLoading}
+          hasClaimed={isAirdropClaimedQuery.data}
           discord={airdropRecipientQuery.data?.discord}
           amount={airdropRecipientQuery.data?.amount}
           amountBreakdown={airdropRecipientQuery.data?.payload?.amountBreakdown}
-          onClickAddToken={handleAddTokenToWallet}
-          onClickClaim={claimMutation.mutate}
+          onClickClaim={claimAndStakeMutation.mutate}
           errorMsg={
-            claimMutation.error ? (claimMutation.error as Error).message : ""
+            claimAndStakeMutation.error
+              ? (claimAndStakeMutation.error as Error).message
+              : ""
           }
           maxApyPct={maxApyPct}
           currentApyPct={currentApyPct}
