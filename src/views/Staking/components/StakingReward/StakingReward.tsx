@@ -29,14 +29,15 @@ export const StakingReward = ({
   return (
     <SectionTitleWrapperV2 title="Rewards">
       <StakingRewardCard>
-        {outstandingRewards.gt(0) && (
-          <Alert status="warn">
-            <Text weight={400} color="warning">
-              Claiming tokens will reset your multiplier and decrease your APY
-              from {formatWeiPct(totalApy, 0)}% to {formatWeiPct(minApy, 0)}%.
-            </Text>
-          </Alert>
-        )}
+        <Alert status="warn">
+          <Text weight={400} color="warning">
+            Claiming tokens will reset your multiplier and decrease your APY
+            {outstandingRewards.gt(0) && (
+              <>from {formatWeiPct(totalApy, 0)}% </>
+            )}{" "}
+            to {formatWeiPct(minApy, 0)}%.
+          </Text>
+        </Alert>
         {isConnected ? (
           <ClaimRewardInputGroup>
             <RewardClaimWrapper>
