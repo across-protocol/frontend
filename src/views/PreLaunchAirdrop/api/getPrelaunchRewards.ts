@@ -9,30 +9,6 @@ export default async function getPrelaunchRewards(
 ) {
   return getApiEndpoint().prelaunch.rewards(
     address,
-    mockServerlessAPI ? TEST_JWT : jwt,
-    mockServerlessAPI
-      ? {
-          welcomeTravellerRewards: {
-            eligible: true,
-            completed: false,
-            amount: "1",
-          },
-          earlyUserRewards: {
-            eligible: true,
-            completed: false,
-            amount: "2",
-          },
-          liquidityProviderRewards: {
-            eligible: true,
-            completed: false,
-            amount: "5.123412341242314",
-          },
-          communityRewards: {
-            eligible: true,
-            completed: false,
-            amount: "10",
-          },
-        }
-      : undefined
+    mockServerlessAPI ? TEST_JWT : jwt
   );
 }
