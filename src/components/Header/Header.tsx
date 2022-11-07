@@ -27,7 +27,7 @@ const LINKS = !enableMigration
       {
         href: "/airdrop",
         name: (
-          <Text color="aqua" size="lg">
+          <Text color="aqua" size="md">
             Airdrop
           </Text>
         ),
