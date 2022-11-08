@@ -76,14 +76,16 @@ export function useAllStakingPools() {
   const tokenList = config.getTokenList(hubPoolChainId);
 
   return useQueries(
-    tokenList.map((token) => ({
-      refetchInterval: 15_000,
-      queryKey: getStakingPoolQueryKey(token.address, account),
-      queryFn: ({
-        queryKey,
-      }: QueryFunctionContext<[string, string?, string?]>) =>
-        fetchStakingPool(queryKey[1], queryKey[2]),
-    }))
+    tokenList
+      .filter((token) => !token.isNative)
+      .map((token) => ({
+        refetchInterval: 15_000,
+        queryKey: getStakingPoolQueryKey(token.address, account),
+        queryFn: ({
+          queryKey,
+        }: QueryFunctionContext<[string, string?, string?]>) =>
+          fetchStakingPool(queryKey[1], queryKey[2]),
+      }))
   );
 }
 
@@ -207,6 +209,8 @@ const fetchStakingPool = async (
           .div(maxMultiplier)
           .mul(100)
       );
+
+  console.log(baseEmissionRate.toString());
 
   // Estimated base rewards APR
   const baseRewardsApy = getBaseRewardsApr(
