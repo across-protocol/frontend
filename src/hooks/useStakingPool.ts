@@ -142,6 +142,7 @@ const fetchStakingPool = async (
       maxMultiplier,
       secondsToMaxMultiplier,
       baseEmissionRate,
+      cumulativeStaked,
     },
     currentUserRewardMultiplier,
     {
@@ -210,12 +211,10 @@ const fetchStakingPool = async (
           .mul(100)
       );
 
-  console.log(baseEmissionRate.toString());
-
   // Estimated base rewards APR
   const baseRewardsApy = getBaseRewardsApr(
     baseEmissionRate,
-    BigNumber.from(totalPoolSize),
+    cumulativeStaked,
     userAmountOfLPStaked
   );
 
