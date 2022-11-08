@@ -69,6 +69,15 @@
       "fromTokenSymbol": "WETH",
       "isNative": false,
       "l1TokenAddress": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"
+    },
+    {
+      "fromChain": 5,
+      "toChain": 80001,
+      "fromTokenAddress": "0x5C221E77624690fff6dd741493D735a17716c26B",
+      "fromSpokeAddress": "0xEc88d3C08E2939562Ff8188B4e30A52236C3FF09",
+      "fromTokenSymbol": "DAI",
+      "isNative": false,
+      "l1TokenAddress": "0x5C221E77624690fff6dd741493D735a17716c26B"
     }
   ]
 }
