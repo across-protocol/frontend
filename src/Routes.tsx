@@ -18,6 +18,7 @@ import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
 import ACXLiveBanner from "components/ACXLiveBanner/ACXLiveBanner";
+import ScrollToTop from "components/ScrollToTop";
 
 const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
 const Referrals = lazy(
@@ -134,7 +135,8 @@ const Routes: React.FC = () => {
         setOpenSidebar={setOpenSidebar}
         transparentHeader={isAirdrop}
       />
-      <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />{" "}
+      <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
+      <ScrollToTop />
       <Suspense fallback={<BouncingDotsLoader />}>
         <Switch>
           <Route exact path="/transactions" component={MyTransactions} />
