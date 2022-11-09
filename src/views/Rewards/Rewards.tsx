@@ -58,12 +58,15 @@ const Rewards = () => {
               <DisconnectedReferralBox connectHandler={connectHandler} />
             )}
           </SectionWrapper>
-          <SectionWrapper title="My pools">
-            <GenericStakingPoolTable
-              poolData={myPoolData}
-              isLoading={areStakingPoolsLoading}
-            />
-          </SectionWrapper>
+          {isConnected && (
+            <SectionWrapper title="My pools">
+              <GenericStakingPoolTable
+                poolData={myPoolData}
+                isLoading={areStakingPoolsLoading}
+              />
+            </SectionWrapper>
+          )}
+
           <SectionWrapper title="All pools">
             <GenericStakingPoolTable
               poolData={allPoolData}
