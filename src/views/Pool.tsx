@@ -16,7 +16,7 @@ import {
   getConfig,
 } from "utils";
 import { useAppSelector, useBalance } from "state/hooks";
-import { useConnection } from "hooks";
+import { useConnection, useQueryParams } from "hooks";
 import get from "lodash/get";
 import { getPoolClient } from "state/poolsApi";
 import styled from "@emotion/styled";
@@ -43,6 +43,20 @@ const Pool: FC = () => {
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);
   const [defaultTab, setDefaultTab] = useState("Add");
+
+  // Enable deep linking on the pool to access a specific pool symbol
+  const { symbol: queryPoolSymbol } = useQueryParams();
+  useEffect(() => {
+    const resolvedToken = tokenList.find(
+      (token) =>
+        queryPoolSymbol &&
+        token.symbol.toLowerCase() === queryPoolSymbol.toLowerCase()
+    );
+    if (resolvedToken && token.symbol !== resolvedToken.symbol) {
+      setToken(resolvedToken);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
     isConnected,
