@@ -106,7 +106,9 @@ const handler = async (
       hubPool.interface.encodeFunctionData("pooledTokens", [l1Token]),
     ];
 
-    let tokenPrice = await getCachedTokenPrice(l1Token);
+    // @todo: Generalise the resolution of chainId => gasToken.
+    const baseCurrency = destinationChainId === "137" ? "matic" : "eth";
+    const tokenPrice = await getCachedTokenPrice(l1Token, baseCurrency);
 
     const [
       relayerFeeDetails,
