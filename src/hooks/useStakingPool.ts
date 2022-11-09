@@ -40,6 +40,7 @@ export type StakingPool = {
   elapsedTimeSinceAvgDeposit: number;
   usersMultiplierPercentage: number;
   usersTotalLPTokens: BigNumber;
+  baseEmissionRate: BigNumber;
   shareOfPool: BigNumber;
   secondsToMaxMultiplier: BigNumber;
   lpTokenDecimalCount: number;
@@ -271,7 +272,8 @@ const fetchStakingPool = async (
     lpTokenAddress,
     acrossTokenAddress,
     poolEnabled,
-    globalAmountOfLPStaked: BigNumber.from(totalPoolSize),
+    baseEmissionRate,
+    globalAmountOfLPStaked: cumulativeStaked,
     userAmountOfLPStaked,
     userAmountOfLPStakedInUSD: usdStakedValue,
     maxMultiplier,
@@ -306,6 +308,7 @@ export const DEFAULT_STAKING_POOL_DATA: StakingPool = {
   lpTokenAddress: "",
   lpTokenFormatter: () => "",
   lpTokenParser: () => BigNumber.from(0),
+  baseEmissionRate: BigNumber.from(0),
   lpTokenSymbolName: "",
   acrossTokenAddress: "",
   availableLPTokenBalance: BigNumber.from(0),

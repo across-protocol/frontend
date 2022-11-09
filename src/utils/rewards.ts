@@ -102,8 +102,26 @@ export function deriveNewStakingValues(
           .mul(100)
       );
 
+  // Generate the new cumulative total of all the staked pool
+  const updatedGlobalTotalLPStaked = origin.globalAmountOfLPStaked.add(
+    lpModification.mul(isStake ? 1 : -1)
+  );
+
+  // Regenerate the rewards base APY
+  const updatedBaseRewardsApy = getBaseRewardsApr(
+    origin.baseEmissionRate,
+    updatedGlobalTotalLPStaked,
+    currentlyStaked
+  );
+
+  // Regenerate the max and min APY values
+  const updatedMaxApy = origin.apyData.poolApy.add(
+    updatedBaseRewardsApy.mul(origin.maxMultiplier).div(fixedPointAdjustment)
+  );
+  const updatedMinApy = origin.apyData.poolApy.add(updatedBaseRewardsApy);
+
   // Resolve the new Rewards APY (base stakingAPY * multiplier)
-  const updatedRewardsApy = origin.apyData.baseRewardsApy
+  const updatedRewardsApy = updatedBaseRewardsApy
     .mul(currentlyStaked.gt(0) ? updatedMultiplier : parseEtherLike("1"))
     .div(fixedPointAdjustment);
 
@@ -122,9 +140,12 @@ export function deriveNewStakingValues(
     currentUserRewardMultiplier: updatedMultiplier,
     usersMultiplierPercentage: updatedMultiplierPercentage,
     apyData: {
-      ...clonedOrigin.apyData,
+      poolApy: origin.apyData.poolApy,
       rewardsApy: updatedRewardsApy,
       totalApy: updatedTotalApy,
+      maxApy: updatedMaxApy,
+      minApy: updatedMinApy,
+      baseRewardsApy: updatedBaseRewardsApy,
     },
   };
 }
