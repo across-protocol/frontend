@@ -14,30 +14,30 @@ export default async function prelaunchRewardsMockedCall(
 ): Promise<RewardsApiInterface> {
   const rv = {
     welcomeTravellerRewards: {
-      walletEligible: false,
+      eligible: true,
       completed: false,
-      payout: ethers.BigNumber.from("1").toString(),
+      amount: ethers.BigNumber.from("1").toString(),
     },
     earlyUserRewards: {
-      walletEligible: false,
+      eligible: false,
       completed: false,
-      payout: ethers.BigNumber.from("2").toString(),
+      amount: ethers.BigNumber.from("2").toString(),
     },
     liquidityProviderRewards: {
-      walletEligible: false,
+      eligible: false,
       completed: false,
-      payout: ethers.BigNumber.from("5").toString(),
+      amount: ethers.BigNumber.from("5").toString(),
     },
     communityRewards: _jwt
       ? {
-          walletEligible: false,
+          eligible: false,
           completed: false,
-          payout: ethers.BigNumber.from("10").toString(),
+          amount: ethers.BigNumber.from("10").toString(),
         }
       : {
-          walletEligible: false,
+          eligible: false,
           completed: false,
-          payout: ethers.BigNumber.from("0").toString(),
+          amount: ethers.BigNumber.from("0").toString(),
         },
     ..._returnValue,
   };
