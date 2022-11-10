@@ -15,16 +15,16 @@ export function getBaseRewardsApr(
   totalStaked: BigNumber,
   userStaked?: BigNumber
 ) {
-  const rewardsPerYear = baseEmissionRatePerSecond.mul(secondsPerYear);
+  const rewardsPerYear = baseEmissionRatePerSecond
+    .mul(secondsPerYear)
+    .mul(fixedPointAdjustment);
 
   if (totalStaked.isZero()) {
     totalStaked = BigNumber.from(1);
   }
 
-  const baseRewardsApr = safeDivide(rewardsPerYear, totalStaked);
-
   if (!userStaked || userStaked.isZero()) {
-    return baseRewardsApr;
+    return safeDivide(rewardsPerYear, totalStaked);
   }
 
   return safeDivide(rewardsPerYear.mul(userStaked), totalStaked.pow(2));

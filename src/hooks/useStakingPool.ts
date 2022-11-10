@@ -235,9 +235,7 @@ const fetchStakingPool = async (
 
   // Resolve APY Information
   const poolApy = parseEtherLike(estimatedApyFromQuery);
-  const maxApy = poolApy.add(
-    baseRewardsApy.mul(maxMultiplier).div(fixedPointAdjustment)
-  );
+  const maxApy = poolApy.add(baseRewardsApy.mul(maxMultiplier));
   const minApy = poolApy.add(baseRewardsApy);
   const rewardsApy = baseRewardsApy
     .mul(
