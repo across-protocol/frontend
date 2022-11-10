@@ -1,5 +1,5 @@
+import { ReactComponent as UsersIcon } from "assets/multi-users.svg";
 import { ReactComponent as GemIcon } from "assets/gem.svg";
-import { ReactComponent as PiggyBankIcon } from "assets/piggy-bank.svg";
 import { ReactComponent as ZapIcon } from "assets/zap.svg";
 import { ReactComponent as ShieldIcon } from "assets/shield-check.svg";
 import { useSplashDynamicData } from "./useSplashDynamicData";
@@ -40,16 +40,16 @@ export function useSplash() {
         "Across is able to offer extremely fast bridging. Today, that means bridging under 3 minutes. In the future, next-block bridging will be possible.",
     },
     {
-      icon: PiggyBankIcon,
+      icon: UsersIcon,
       title: "Growing",
       description:
-        "There are many ways to become a part of this mission, earn ACX rewards, and help guide the direction of the Across DAO. The best way is to start in the community.",
+        "There are many ways to become a part of this mission, earn ACX rewards, and help guide the direction of the Across DAO. The place to start is in the community.",
     },
     {
       icon: GemIcon,
-      title: "Elegant",
+      title: "Capital Efficient",
       description:
-        "Across is the result of approaching bridging not only as a technical concern but also as a financial engineering one. Across champions capital efficiency in every design choice.",
+        "Higher capital efficiency means lower costs and fewer funds at risk. Across was built with the thesis that capital efficiency is the single most important measure of a cross-chain bridge.",
     },
   ];
 
