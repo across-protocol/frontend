@@ -31,11 +31,8 @@ export const StakingReward = ({
       <StakingRewardCard>
         <Alert status="warn">
           <Text weight={400} color="warning">
-            Claiming tokens will reset your multiplier and decrease your APY
-            {outstandingRewards.gt(0) && (
-              <> from {formatWeiPct(totalApy, 0)}% </>
-            )}{" "}
-            to {valueOrEmpty(<>{formatWeiPct(minApy, 0)}%.</>)}
+            Claiming tokens will reset your multiplier and decrease your APY to{" "}
+            {formatWeiPct(minApy, 0)}%.
           </Text>
         </Alert>
         {isConnected ? (
