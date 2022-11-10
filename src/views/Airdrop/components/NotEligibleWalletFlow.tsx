@@ -6,7 +6,7 @@ import { Text } from "components/Text";
 
 import { WaysToEarn, Props as WaysToEarnProps } from "./WaysToEarn";
 import { WalletHero } from "./WalletHero";
-import { LinkSpanWithUnderline, HighlightedLink } from "../Airdrop.styles";
+import { LinkSpanWithUnderline } from "../Airdrop.styles";
 
 type Props = WaysToEarnProps & {
   onClickInfoLink: () => void;
@@ -73,8 +73,4 @@ const CardContainer = styled.div`
 
 const Title = styled(Text)`
   text-align: center;
-`;
-
-const Link = styled.a`
-  text-decoration: underline;
 `;
