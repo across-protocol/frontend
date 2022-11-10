@@ -35,7 +35,7 @@ export const StakingReward = ({
             {outstandingRewards.gt(0) && (
               <> from {formatWeiPct(totalApy, 0)}% </>
             )}{" "}
-            to {valueOrEmpty(<>{formatWeiPct(minApy, 0)}%.</>)}
+            to {formatWeiPct(minApy, 0)}%.
           </Text>
         </Alert>
         {isConnected ? (
