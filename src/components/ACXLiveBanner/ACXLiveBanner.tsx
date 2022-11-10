@@ -5,7 +5,11 @@ import { ReactComponent as ChevronRight } from "assets/icons/arrow-right-16.svg"
 import { QUERIESV2 } from "utils";
 import { Link } from "react-router-dom";
 
-const ACXLiveBanner = () => (
+const ACXLiveBanner = ({
+  enableHandler,
+}: {
+  enableHandler: React.Dispatch<React.SetStateAction<boolean>>;
+}) => (
   <Wrapper>
     <BackgroundLayer autoPlay loop muted>
       <source src={VideoBackground} type="video/mp4" />
@@ -24,7 +28,7 @@ const ACXLiveBanner = () => (
       </AnnouncementWrapper>
       <ButtonWrapper>
         Check eligibility{" "}
-        <StyledButton to="/airdrop">
+        <StyledButton to="/airdrop" onClick={() => enableHandler(false)}>
           <ChevronRight />
         </StyledButton>
       </ButtonWrapper>
