@@ -16,8 +16,8 @@ import {
 const Airdrop = () => {
   const {
     activePageFlow,
+    refreshPage,
     switchToInfo,
-    switchToSplash,
     connectWallet,
 
     airdropRecipientQuery,
@@ -39,7 +39,7 @@ const Airdrop = () => {
       );
       break;
     case "info":
-      activePageComponent = <MoreInfoFlow onClickBack={switchToSplash} />;
+      activePageComponent = <MoreInfoFlow onClickBack={refreshPage} />;
       break;
     case "eligible":
       activePageComponent = (
@@ -54,11 +54,17 @@ const Airdrop = () => {
           onClickClaim={claimAndStakeMutation.mutate}
           maxApyPct={maxApyPct}
           currentApyPct={currentApyPct}
+          onClickInfoLink={switchToInfo}
         />
       );
       break;
     case "ineligible":
-      activePageComponent = <NotEligibleWalletFlow maxApyPct={maxApyPct} />;
+      activePageComponent = (
+        <NotEligibleWalletFlow
+          maxApyPct={maxApyPct}
+          onClickInfoLink={switchToInfo}
+        />
+      );
       break;
     default:
       activePageComponent = <></>;

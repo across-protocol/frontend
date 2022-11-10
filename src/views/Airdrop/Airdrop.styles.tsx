@@ -103,6 +103,12 @@ export const LinkWithUnderline = styled(Link)`
   color: #e0f3ff;
 `;
 
+export const LinkSpanWithUnderline = styled.span`
+  text-decoration: underline;
+  color: #e0f3ff;
+  cursor: pointer;
+`;
+
 export const HighlightedLink = styled(Link)`
   text-decoration: none;
   color: #6cf9d8 !important;

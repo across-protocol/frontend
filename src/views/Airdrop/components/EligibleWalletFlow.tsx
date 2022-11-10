@@ -15,7 +15,7 @@ import { ClaimAirdrop, Props as ClaimAirdropProps } from "./ClaimAirdrop";
 import { WaysToEarn } from "./WaysToEarn";
 import { WalletHero } from "./WalletHero";
 import { formatUnits } from "utils";
-import { LinkWithUnderline, HighlightedLink } from "../Airdrop.styles";
+import { LinkSpanWithUnderline, HighlightedLink } from "../Airdrop.styles";
 
 type Props = ClaimAirdropProps & {
   currentApyPct?: number | string;
@@ -57,7 +57,10 @@ export function EligibleWalletFlow(props: Props) {
             Claim your airdrop and find more ways to earn ACX below.
             <br />
             Learn more about the airdrop details{" "}
-            <LinkWithUnderline to="">here</LinkWithUnderline>.
+            <LinkSpanWithUnderline onClick={props.onClickInfoLink}>
+              here
+            </LinkSpanWithUnderline>
+            .
           </>
         }
         eligible

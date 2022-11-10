@@ -4,10 +4,15 @@ import { QUERIESV2 } from "utils/constants";
 import bgImage from "assets/airdrop-waves-bg.svg";
 import { Text } from "components/Text";
 
-import { WaysToEarn, Props } from "./WaysToEarn";
+import { WaysToEarn, Props as WaysToEarnProps } from "./WaysToEarn";
 import { WalletHero } from "./WalletHero";
+import { LinkSpanWithUnderline, HighlightedLink } from "../Airdrop.styles";
 
-export function NotEligibleWalletFlow({ maxApyPct }: Props) {
+type Props = WaysToEarnProps & {
+  onClickInfoLink: () => void;
+};
+
+export function NotEligibleWalletFlow({ maxApyPct, onClickInfoLink }: Props) {
   return (
     <Container>
       <WalletHero
@@ -16,9 +21,9 @@ export function NotEligibleWalletFlow({ maxApyPct }: Props) {
           <>
             This wallet hasn't executed any of the required actions to earn an
             airdrop. Learn more about the airdrop distribution{" "}
-            <Link href="" target="_blank" rel="noreferrer">
+            <LinkSpanWithUnderline onClick={onClickInfoLink}>
               here
-            </Link>
+            </LinkSpanWithUnderline>
             .
           </>
         }
