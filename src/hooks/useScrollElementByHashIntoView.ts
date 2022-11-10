@@ -6,7 +6,7 @@ export function useScrollElementByHashIntoView() {
 
   useEffect(() => {
     if (hash) {
-      const element = document.getElementById(hash.replace("#", ""));
+      const element = document.getElementById(hash.replaceAll("#", ""));
       if (element) {
         element.scrollIntoView({
           behavior: "smooth",
