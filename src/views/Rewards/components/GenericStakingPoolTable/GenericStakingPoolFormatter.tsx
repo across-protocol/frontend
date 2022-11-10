@@ -187,7 +187,11 @@ function RowButtonCell({ data, meta }: PoolRowCellType) {
   } else if (meta.hasLPTokens) {
     button = <StakeButton to={specificPoolLink}>Stake</StakeButton>;
   } else {
-    button = <StakeButton to={"/pool"}>Add</StakeButton>;
+    button = (
+      <StakeButton to={`/pool?symbol=${data.tokenSymbol.toLowerCase()}`}>
+        Add
+      </StakeButton>
+    );
   }
   return <ButtonCell>{button}</ButtonCell>;
 }
