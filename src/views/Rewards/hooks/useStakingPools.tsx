@@ -7,7 +7,11 @@ export const useStakingPools = () => {
     (query) => query.data || []
   );
   const enabledPools = stakingPools.filter((pool) => pool.poolEnabled);
-  const myPools = enabledPools.filter((pool) => pool.isStakingPoolOfUser);
+  const poolsWithLP = enabledPools.filter((pool) => pool.isStakingPoolOfUser);
+  const myPools = [
+    ...poolsWithLP.filter((pool) => pool.userAmountOfLPStaked.gt(0)),
+    ...poolsWithLP.filter((pool) => pool.userAmountOfLPStaked.eq(0)),
+  ];
   const allPools = enabledPools.filter((pool) => !pool.isStakingPoolOfUser);
 
   return {

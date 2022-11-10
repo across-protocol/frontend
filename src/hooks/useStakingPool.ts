@@ -300,7 +300,7 @@ const fetchStakingPool = async (
   const requiresApproval = lpTokenAllowance.lte(availableLPTokenBalance);
 
   const isStakingPoolOfUser =
-    BigNumber.from(userAmountOfLPStaked).gt(0) ||
+    BigNumber.from(usersTotalLPTokens).gt(0) ||
     BigNumber.from(outstandingRewards).gt(0);
 
   return {
