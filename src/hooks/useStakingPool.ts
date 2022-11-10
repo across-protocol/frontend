@@ -12,6 +12,7 @@ import {
   providersTable,
   getBaseRewardsApr,
   secondsPerDay,
+  secondsPerYear,
 } from "utils";
 import { BigNumber, BigNumberish } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
@@ -56,6 +57,12 @@ export type StakingPool = {
   isStakingPoolOfUser: boolean;
   lpTokenFormatter: FormatterFnType;
   lpTokenParser: ParserFnType;
+};
+
+type PoolQueryData = {
+  estimatedApy: string;
+  totalPoolSize: BigNumberish;
+  exchangeRateCurrent: string;
 };
 
 export function useStakingPool(tokenAddress?: string) {
@@ -156,6 +163,7 @@ const fetchStakingPool = async (
     lpTokenAllowance,
     lpTokenSymbolName,
     poolQuery,
+    priceACXInUSD,
   ] = await Promise.all([
     acceleratingDistributor.stakingTokens(lpTokenAddress),
     account
@@ -179,13 +187,10 @@ const fetchStakingPool = async (
       ? lpTokenERC20.allowance(account, acceleratingDistributorAddress)
       : BigNumber.from(0),
     Promise.resolve((await lpTokenERC20.symbol()).slice(4)),
-    axios.get<{
-      estimatedApy: string;
-      totalPoolSize: BigNumberish;
-      exchangeRateCurrent: string;
-    }>(`/api/pools`, {
+    axios.get<PoolQueryData>(`/api/pools`, {
       params: { token: tokenAddress },
     }),
+    Promise.resolve(parseEtherLike("0.1")), // TODO: replace with coingecko
   ]);
 
   // Resolve the data retrieved from the serverless /pools API call
@@ -212,11 +217,21 @@ const fetchStakingPool = async (
           .mul(100)
       );
 
+  const usdCumulativeStakedValue = BigNumber.from(lpExchangeRateToUSD)
+    .mul(ConvertDecimals(lpTokenDecimalCount, 18)(cumulativeStaked))
+    .div(fixedPointAdjustment);
+  const usdStakedValue = BigNumber.from(lpExchangeRateToUSD)
+    .mul(ConvertDecimals(lpTokenDecimalCount, 18)(userAmountOfLPStaked))
+    .div(fixedPointAdjustment);
+
   // Estimated base rewards APR
   const baseRewardsApy = getBaseRewardsApr(
-    baseEmissionRate,
-    cumulativeStaked,
-    userAmountOfLPStaked
+    baseEmissionRate
+      .mul(secondsPerYear)
+      .mul(priceACXInUSD)
+      .div(fixedPointAdjustment),
+    usdCumulativeStakedValue,
+    usdStakedValue
   );
 
   // We need the amount of tokens that the user has in both their balance
@@ -235,7 +250,9 @@ const fetchStakingPool = async (
 
   // Resolve APY Information
   const poolApy = parseEtherLike(estimatedApyFromQuery);
-  const maxApy = poolApy.add(baseRewardsApy.mul(maxMultiplier));
+  const maxApy = poolApy.add(
+    baseRewardsApy.mul(maxMultiplier).div(fixedPointAdjustment)
+  );
   const minApy = poolApy.add(baseRewardsApy);
   const rewardsApy = baseRewardsApy
     .mul(
@@ -259,10 +276,6 @@ const fetchStakingPool = async (
   const isStakingPoolOfUser =
     BigNumber.from(userAmountOfLPStaked).gt(0) ||
     BigNumber.from(outstandingRewards).gt(0);
-
-  const usdStakedValue = BigNumber.from(lpExchangeRateToUSD)
-    .mul(ConvertDecimals(lpTokenDecimalCount, 18)(userAmountOfLPStaked))
-    .div(fixedPointAdjustment);
 
   return {
     tokenLogoURI: logoURI,
