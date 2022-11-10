@@ -11,6 +11,7 @@ export type FlowSelector = "splash" | "info" | "eligible" | "ineligible";
 
 export default function useAirdrop() {
   const [activePageFlow, setActivePageFlow] = useState<FlowSelector>("splash");
+  const [refreshPage, setRefreshPage] = useState(0);
   const { isConnected, account, connect } = useConnection();
 
   const airdropRecipientQuery = useAirdropRecipient();
@@ -29,6 +30,7 @@ export default function useAirdrop() {
     airdropRecipientQuery.isLoading,
     isConnected,
     account,
+    refreshPage,
   ]);
 
   const maxApyPct = formatWeiPct(
@@ -47,6 +49,7 @@ export default function useAirdrop() {
     switchToSplash: () => setActivePageFlow("splash"),
     switchToEligible: () => setActivePageFlow("eligible"),
     switchToIneligible: () => setActivePageFlow("ineligible"),
+    refreshPage: () => setRefreshPage((prev) => prev + 1),
 
     maxApyPct,
     currentApyPct,

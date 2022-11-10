@@ -7,6 +7,7 @@ import { useRewards } from "./hooks/useRewards";
 import { InnerSectionWrapper, Wrapper } from "./Rewards.style";
 import GenericStakingPoolTable from "./components/GenericStakingPoolTable/GenericStakingPoolTable";
 import { LayoutV2 } from "components";
+import useScrollElementByHashIntoView from "hooks/useScrollElementByHashIntoView";
 
 const Rewards = () => {
   const {
@@ -29,6 +30,9 @@ const Rewards = () => {
 
     formatterFn,
   } = useRewards();
+
+  useScrollElementByHashIntoView();
+
   return (
     <LayoutV2 maxWidth={1140}>
       <Wrapper>
@@ -59,7 +63,7 @@ const Rewards = () => {
             )}
           </SectionWrapper>
           {isConnected && (
-            <SectionWrapper title="My pools">
+            <SectionWrapper title="My pools" id="my-pools">
               <GenericStakingPoolTable
                 poolData={myPoolData}
                 isLoading={areStakingPoolsLoading}

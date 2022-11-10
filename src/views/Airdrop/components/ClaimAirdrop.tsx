@@ -6,7 +6,7 @@ import { AmountBreakdown } from "utils/merkle-distributor";
 
 import {
   FullWidthButton,
-  LinkWithUnderline,
+  LinkSpanWithUnderline,
   HighlightedLink,
 } from "../Airdrop.styles";
 import { BreakdownStats } from "./BreakdownStats";
@@ -25,6 +25,7 @@ export type Props = {
   onClickClaim: () => void;
   errorMsg?: string;
   maxApyPct?: string;
+  onClickInfoLink: () => void;
 };
 
 export function ClaimAirdrop({
@@ -38,6 +39,7 @@ export function ClaimAirdrop({
   onClickClaim,
   errorMsg,
   maxApyPct,
+  onClickInfoLink,
 }: Props) {
   return (
     <Container>
@@ -55,7 +57,11 @@ export function ClaimAirdrop({
           Claimed ACX tokens will be automatically staked in the{" "}
           <HighlightedLink to="/">Rewards Locking Program</HighlightedLink> to
           support bridging ACX cross-chain, and earning up to {maxApyPct ?? "-"}
-          % APY. Read more <LinkWithUnderline to="/">here</LinkWithUnderline>.
+          % APY. Read more{" "}
+          <LinkSpanWithUnderline onClick={onClickInfoLink}>
+            here
+          </LinkSpanWithUnderline>
+          .
         </Text>
       </InfoTextContainer>
       {!hasClaimed && (

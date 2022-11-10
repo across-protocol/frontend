@@ -12,7 +12,7 @@ export default {
 const Template: ComponentStory<typeof NotEligibleWalletFlow> = (args) => {
   return (
     <Wrapper>
-      <NotEligibleWalletFlow />
+      <NotEligibleWalletFlow onClickInfoLink={() => {}} />
     </Wrapper>
   );
 };
