@@ -3,8 +3,6 @@ import styled from "@emotion/styled";
 import { useHistory } from "react-router-dom";
 
 import { Text } from "components/Text";
-import { PopperTooltip } from "components/Tooltip";
-import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 import { QUERIESV2 } from "utils/constants";
 
 import { Button } from "../Airdrop.styles";
@@ -14,10 +12,6 @@ export function EarnOptionCard(props: {
   subTitle: string;
   buttonLabel: string;
   href: string;
-  pctTooltip: {
-    title: string;
-    body: string;
-  };
   bottomText: string;
   Icon: React.ReactElement;
 }) {
@@ -43,13 +37,6 @@ export function EarnOptionCard(props: {
       </FullWidthButton>
       <ApyContainer>
         <Text color="white-100">{props.bottomText}</Text>
-        <PopperTooltip
-          title={props.pctTooltip.title}
-          body={props.pctTooltip.body}
-          placement="top"
-        >
-          <InfoIcon />
-        </PopperTooltip>
       </ApyContainer>
     </Container>
   );

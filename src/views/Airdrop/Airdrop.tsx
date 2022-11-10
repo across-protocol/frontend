@@ -52,11 +52,6 @@ const Airdrop = () => {
           amount={airdropRecipientQuery.data?.amount}
           amountBreakdown={airdropRecipientQuery.data?.payload?.amountBreakdown}
           onClickClaim={claimAndStakeMutation.mutate}
-          errorMsg={
-            claimAndStakeMutation.error
-              ? (claimAndStakeMutation.error as Error).message
-              : ""
-          }
           maxApyPct={maxApyPct}
           currentApyPct={currentApyPct}
         />

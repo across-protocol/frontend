@@ -18,11 +18,7 @@ export function WaysToEarn({ maxApyPct }: Props) {
         title="Pool and Stake LP Tokens"
         subTitle="Provide liquidity on Across and stake your LP tokens to earn ACX tokens in proportion to your staking."
         buttonLabel="Pool and Stake to Earn ACX"
-        href="/rewards"
-        pctTooltip={{
-          title: "APY range",
-          body: "APY range description",
-        }}
+        href="/rewards#my-pools"
         bottomText={`Earn up to ${maxApyPct ?? "-"}% APY.`}
       />
       <EarnOptionCard
@@ -31,10 +27,6 @@ export function WaysToEarn({ maxApyPct }: Props) {
         subTitle="Join the referral program and earn a portion of fees in ACX for transfers made from your unique referral link."
         buttonLabel="Refer to Earn ACX"
         href="/rewards/referrals"
-        pctTooltip={{
-          title: "Referral rate",
-          body: "Referral rate description",
-        }}
         bottomText={`Earn up to ${
           tiers["5"].referralRate * 100
         }% of fees back in ACX.`}

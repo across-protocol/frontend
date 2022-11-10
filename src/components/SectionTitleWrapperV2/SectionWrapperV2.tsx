@@ -10,14 +10,16 @@ type SectionWrapperType = {
     href: string;
     name: string;
   };
+  id?: string;
 };
 
 const SectionWrapper: React.FC<SectionWrapperType> = ({
   children,
   title,
   link,
+  id,
 }) => (
-  <Wrapper>
+  <Wrapper id={id}>
     <TopWrapper>
       <Title>{title}</Title>
       {link && (

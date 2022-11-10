@@ -122,7 +122,7 @@ export function EligibleWalletFlow(props: Props) {
         expandedStepIndex={expandedStepIndex}
         Icon={<PlusStarRing />}
       >
-        <WaysToEarn />
+        <WaysToEarn maxApyPct={props.maxApyPct} />
       </StepCard>
     </Container>
   );
