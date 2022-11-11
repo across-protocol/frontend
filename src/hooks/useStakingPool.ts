@@ -73,13 +73,14 @@ export function useStakingPool(tokenAddress?: string) {
     config.getAcrossTokenAddress(),
     "usd"
   );
+  const acxPrice = acxPriceQuery.data?.price;
 
   return useQuery(
     getStakingPoolQueryKey(tokenAddress, account),
-    () => fetchStakingPool(tokenAddress, account, acxPriceQuery.data?.price),
+    () => fetchStakingPool(tokenAddress, account, acxPrice),
     {
       refetchInterval: 15_000,
-      enabled: Boolean(tokenAddress) && Boolean(acxPriceQuery.data?.price),
+      enabled: Boolean(tokenAddress) && Boolean(acxPrice),
     }
   );
 }
@@ -93,18 +94,19 @@ export function useAllStakingPools() {
     config.getAcrossTokenAddress(),
     "usd"
   );
+  const acxPrice = acxPriceQuery.data?.price;
 
   return useQueries(
     tokenList
       .filter((token) => !token.isNative)
       .map((token) => ({
-        enabled: Boolean(acxPriceQuery.data?.price),
+        enabled: Boolean(acxPrice),
         refetchInterval: 15_000,
         queryKey: getStakingPoolQueryKey(token.address, account),
         queryFn: ({
           queryKey,
         }: QueryFunctionContext<[string, string?, string?]>) =>
-          fetchStakingPool(queryKey[1], queryKey[2], acxPriceQuery.data?.price),
+          fetchStakingPool(queryKey[1], queryKey[2], acxPrice),
       }))
   );
 }
