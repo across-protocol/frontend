@@ -31,9 +31,6 @@ const Send = lazy(() => import(/* webpackChunkName: "Send" */ "./views/Send"));
 const Splash = lazy(
   () => import(/* webpackChunkName: "Splash" */ "./views/Splash")
 );
-const About = lazy(
-  () => import(/* webpackChunkName: "About" */ "./views/About")
-);
 const Airdrop = lazy(() => import("./views/Airdrop"));
 const MyTransactions = lazy(
   () =>
@@ -142,7 +139,6 @@ const Routes: React.FC = () => {
           <Route exact path="/transactions" component={MyTransactions} />
           <Route exact path="/transactions/all" component={AllTransactions} />
           <Route exact path="/pool" component={Pool} />
-          <Route exact path="/about" component={About} />
           <Route exact path="/rewards/referrals" component={Referrals} />
           <Route exact path="/rewards" component={Rewards} />
           <Route exact path="/airdrop" component={Airdrop} />
