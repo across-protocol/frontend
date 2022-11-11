@@ -1,8 +1,4 @@
-import {
-  fixedPointAdjustment,
-  secondsPerDay,
-  secondsPerYear,
-} from "utils/constants";
+import { fixedPointAdjustment, secondsPerDay } from "utils/constants";
 import { safeDivide } from "utils/math";
 import { BigNumber } from "ethers";
 import { parseEther } from "@ethersproject/units";
@@ -11,23 +7,25 @@ import { formattedBigNumberToNumber, parseEtherLike } from "./format";
 import { cloneDeep } from "lodash";
 
 export function getBaseRewardsApr(
-  baseEmissionRatePerSecond: BigNumber,
-  totalStaked: BigNumber,
-  userStaked?: BigNumber
+  rewardsPerYearInUSD: BigNumber,
+  totalStakedInUSD: BigNumber,
+  userStakedInUSD?: BigNumber
 ) {
-  const rewardsPerYear = baseEmissionRatePerSecond.mul(secondsPerYear);
-
-  if (totalStaked.isZero()) {
-    totalStaked = BigNumber.from(1);
+  if (totalStakedInUSD.isZero()) {
+    totalStakedInUSD = BigNumber.from(1);
   }
 
-  const baseRewardsApr = safeDivide(rewardsPerYear, totalStaked);
-
-  if (!userStaked || userStaked.isZero()) {
-    return baseRewardsApr;
+  if (!userStakedInUSD || userStakedInUSD.isZero()) {
+    return safeDivide(
+      rewardsPerYearInUSD.mul(fixedPointAdjustment),
+      totalStakedInUSD
+    );
   }
 
-  return safeDivide(rewardsPerYear.mul(userStaked), totalStaked.pow(2));
+  return safeDivide(
+    rewardsPerYearInUSD.mul(userStakedInUSD).mul(fixedPointAdjustment),
+    totalStakedInUSD.pow(2)
+  );
 }
 
 /**

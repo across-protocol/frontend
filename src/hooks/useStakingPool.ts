@@ -12,11 +12,13 @@ import {
   providersTable,
   getBaseRewardsApr,
   secondsPerDay,
+  secondsPerYear,
 } from "utils";
 import { BigNumber, BigNumberish } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 import axios from "axios";
 import { ConvertDecimals } from "utils/convertdecimals";
+import { useCoingeckoPrice } from "./useCoingeckoPrice";
 
 const config = getConfig();
 
@@ -58,15 +60,27 @@ export type StakingPool = {
   lpTokenParser: ParserFnType;
 };
 
+type PoolQueryData = {
+  estimatedApy: string;
+  totalPoolSize: BigNumberish;
+  exchangeRateCurrent: string;
+};
+
 export function useStakingPool(tokenAddress?: string) {
   const { account } = useConnection();
 
+  const acxPriceQuery = useCoingeckoPrice(
+    config.getAcrossTokenAddress(),
+    "usd"
+  );
+  const acxPrice = acxPriceQuery.data?.price;
+
   return useQuery(
     getStakingPoolQueryKey(tokenAddress, account),
-    () => fetchStakingPool(tokenAddress, account),
+    () => fetchStakingPool(tokenAddress, account, acxPrice),
     {
       refetchInterval: 15_000,
-      enabled: Boolean(tokenAddress),
+      enabled: Boolean(tokenAddress) && Boolean(acxPrice),
     }
   );
 }
@@ -76,16 +90,23 @@ export function useAllStakingPools() {
 
   const tokenList = config.getTokenList(hubPoolChainId);
 
+  const acxPriceQuery = useCoingeckoPrice(
+    config.getAcrossTokenAddress(),
+    "usd"
+  );
+  const acxPrice = acxPriceQuery.data?.price;
+
   return useQueries(
     tokenList
       .filter((token) => !token.isNative)
       .map((token) => ({
+        enabled: Boolean(acxPrice),
         refetchInterval: 15_000,
         queryKey: getStakingPoolQueryKey(token.address, account),
         queryFn: ({
           queryKey,
         }: QueryFunctionContext<[string, string?, string?]>) =>
-          fetchStakingPool(queryKey[1], queryKey[2]),
+          fetchStakingPool(queryKey[1], queryKey[2], acxPrice),
       }))
   );
 }
@@ -109,7 +130,8 @@ function getStakingPoolQueryKey(
  */
 const fetchStakingPool = async (
   tokenAddress?: string,
-  account?: string
+  account?: string,
+  acxPriceInUSD?: BigNumber
 ): Promise<StakingPool | undefined> => {
   const provider = providersTable[hubPoolChainId];
 
@@ -179,11 +201,7 @@ const fetchStakingPool = async (
       ? lpTokenERC20.allowance(account, acceleratingDistributorAddress)
       : BigNumber.from(0),
     Promise.resolve((await lpTokenERC20.symbol()).slice(4)),
-    axios.get<{
-      estimatedApy: string;
-      totalPoolSize: BigNumberish;
-      exchangeRateCurrent: string;
-    }>(`/api/pools`, {
+    axios.get<PoolQueryData>(`/api/pools`, {
       params: { token: tokenAddress },
     }),
   ]);
@@ -212,11 +230,21 @@ const fetchStakingPool = async (
           .mul(100)
       );
 
+  const usdCumulativeStakedValue = BigNumber.from(lpExchangeRateToUSD)
+    .mul(ConvertDecimals(lpTokenDecimalCount, 18)(cumulativeStaked))
+    .div(fixedPointAdjustment);
+  const usdStakedValue = BigNumber.from(lpExchangeRateToUSD)
+    .mul(ConvertDecimals(lpTokenDecimalCount, 18)(userAmountOfLPStaked))
+    .div(fixedPointAdjustment);
+
   // Estimated base rewards APR
   const baseRewardsApy = getBaseRewardsApr(
-    baseEmissionRate,
-    cumulativeStaked,
-    userAmountOfLPStaked
+    baseEmissionRate
+      .mul(secondsPerYear)
+      .mul(acxPriceInUSD || BigNumber.from(0))
+      .div(fixedPointAdjustment),
+    usdCumulativeStakedValue,
+    usdStakedValue
   );
 
   // We need the amount of tokens that the user has in both their balance
@@ -261,10 +289,6 @@ const fetchStakingPool = async (
   const isStakingPoolOfUser =
     BigNumber.from(userAmountOfLPStaked).gt(0) ||
     BigNumber.from(outstandingRewards).gt(0);
-
-  const usdStakedValue = BigNumber.from(lpExchangeRateToUSD)
-    .mul(ConvertDecimals(lpTokenDecimalCount, 18)(userAmountOfLPStaked))
-    .div(fixedPointAdjustment);
 
   return {
     tokenLogoURI: logoURI,
