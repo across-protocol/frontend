@@ -5,8 +5,10 @@ import { retrieveLinkedWallet } from "./retrieve-linked-wallet.prod";
 import { suggestedFeesApiCall } from "./suggested-fees.prod";
 import rewardsApiCall from "./rewards";
 import { getDepositStats } from "./get-deposit-stats.prod";
+import { coingeckoApiCall } from "./coingecko";
 
 export const prodEndpoints: ServerlessAPIEndpoints = {
+  coingecko: coingeckoApiCall,
   suggestedFees: suggestedFeesApiCall,
   prelaunch: {
     rewards: rewardsApiCall,

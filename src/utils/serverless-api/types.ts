@@ -1,8 +1,10 @@
 import { ethers, providers } from "ethers";
 import { Fee } from "utils/bridge";
 import { ChainId } from "utils/constants";
+import { CoingeckoApiCall } from "./prod/coingecko";
 
 export type ServerlessAPIEndpoints = {
+  coingecko: CoingeckoApiCall;
   suggestedFees: SuggestedApiFeeType;
   prelaunch: {
     rewards: RewardsApiFunction;

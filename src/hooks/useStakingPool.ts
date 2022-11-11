@@ -18,6 +18,7 @@ import { BigNumber, BigNumberish } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 import axios from "axios";
 import { ConvertDecimals } from "utils/convertdecimals";
+import { useCoingeckoPrice } from "./useCoingeckoPrice";
 
 const config = getConfig();
 
@@ -68,12 +69,17 @@ type PoolQueryData = {
 export function useStakingPool(tokenAddress?: string) {
   const { account } = useConnection();
 
+  const acxPriceQuery = useCoingeckoPrice(
+    config.getAcrossTokenAddress(),
+    "usd"
+  );
+
   return useQuery(
     getStakingPoolQueryKey(tokenAddress, account),
-    () => fetchStakingPool(tokenAddress, account),
+    () => fetchStakingPool(tokenAddress, account, acxPriceQuery.data?.price),
     {
       refetchInterval: 15_000,
-      enabled: Boolean(tokenAddress),
+      enabled: Boolean(tokenAddress) && Boolean(acxPriceQuery.data?.price),
     }
   );
 }
@@ -83,16 +89,22 @@ export function useAllStakingPools() {
 
   const tokenList = config.getTokenList(hubPoolChainId);
 
+  const acxPriceQuery = useCoingeckoPrice(
+    config.getAcrossTokenAddress(),
+    "usd"
+  );
+
   return useQueries(
     tokenList
       .filter((token) => !token.isNative)
       .map((token) => ({
+        enabled: Boolean(acxPriceQuery.data?.price),
         refetchInterval: 15_000,
         queryKey: getStakingPoolQueryKey(token.address, account),
         queryFn: ({
           queryKey,
         }: QueryFunctionContext<[string, string?, string?]>) =>
-          fetchStakingPool(queryKey[1], queryKey[2]),
+          fetchStakingPool(queryKey[1], queryKey[2], acxPriceQuery.data?.price),
       }))
   );
 }
@@ -116,7 +128,8 @@ function getStakingPoolQueryKey(
  */
 const fetchStakingPool = async (
   tokenAddress?: string,
-  account?: string
+  account?: string,
+  acxPriceInUSD?: BigNumber
 ): Promise<StakingPool | undefined> => {
   const provider = providersTable[hubPoolChainId];
 
@@ -163,7 +176,6 @@ const fetchStakingPool = async (
     lpTokenAllowance,
     lpTokenSymbolName,
     poolQuery,
-    priceACXInUSD,
   ] = await Promise.all([
     acceleratingDistributor.stakingTokens(lpTokenAddress),
     account
@@ -190,7 +202,6 @@ const fetchStakingPool = async (
     axios.get<PoolQueryData>(`/api/pools`, {
       params: { token: tokenAddress },
     }),
-    Promise.resolve(parseEtherLike("0.1")), // TODO: replace with coingecko
   ]);
 
   // Resolve the data retrieved from the serverless /pools API call
@@ -228,7 +239,7 @@ const fetchStakingPool = async (
   const baseRewardsApy = getBaseRewardsApr(
     baseEmissionRate
       .mul(secondsPerYear)
-      .mul(priceACXInUSD)
+      .mul(acxPriceInUSD || BigNumber.from(0))
       .div(fixedPointAdjustment),
     usdCumulativeStakedValue,
     usdStakedValue
