@@ -4,11 +4,7 @@ import { Text } from "components/Text";
 import { QUERIESV2 } from "utils";
 import { AmountBreakdown } from "utils/merkle-distributor";
 
-import {
-  FullWidthButton,
-  LinkSpanWithUnderline,
-  HighlightedLink,
-} from "../Airdrop.styles";
+import { FullWidthButton, ExternalLinkWithUnderline } from "../Airdrop.styles";
 import { BreakdownStats } from "./BreakdownStats";
 
 export type Props = {
@@ -55,12 +51,18 @@ export function ClaimAirdrop({
       <InfoTextContainer>
         <Text size="lg">
           Claimed ACX tokens will be automatically staked in the{" "}
-          <HighlightedLink to="/">Rewards Locking Program</HighlightedLink> to
-          support bridging ACX cross-chain, and earning up to {maxApyPct ?? "-"}
-          % APY. Read more{" "}
-          <LinkSpanWithUnderline onClick={onClickInfoLink}>
+          <Text color="aqua" as="span" size="lg">
+            Rewards Locking Program
+          </Text>{" "}
+          to support bridging ACX cross-chain, and earning up to{" "}
+          {maxApyPct ?? "-"}% APY. Read more{" "}
+          <ExternalLinkWithUnderline
+            href="https://docs.across.to/v2"
+            target="_blank"
+            rel="noreferrer"
+          >
             here
-          </LinkSpanWithUnderline>
+          </ExternalLinkWithUnderline>
           .
         </Text>
       </InfoTextContainer>
