@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { Link } from "react-router-dom";
+import { ChevronDown, ChevronUp } from "react-feather";
 import {
   StyledSidebar,
   StyledHeader,
@@ -12,6 +13,7 @@ import {
   StyledMenuItem,
   ConnectText,
   TopHeaderRow,
+  AccordionContainer,
 } from "./Sidebar.styles";
 import { getChainInfo, isSupportedChainId } from "utils";
 import useSidebar from "./useSidebar";
@@ -26,22 +28,28 @@ interface Props {
 const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
   const {
     sidebarNavigationLinks,
+    sidebarAboutLinks,
     account,
     ensName,
     isConnected,
     chainId,
     location,
     className,
+    toggleAboutAccordion,
+    setIsAboutAccordionOpen,
+    isAboutAccordionOpen,
   } = useSidebar(openSidebar);
   const { connect, disconnect, wallet } = useConnection();
   const addrOrEns = ensName ?? account;
 
   const onClickLink = () => {
     setOpenSidebar(false);
+    setIsAboutAccordionOpen(false);
   };
 
   const onClickOverlay = () => {
     setOpenSidebar(false);
+    setIsAboutAccordionOpen(false);
   };
 
   return (
@@ -82,25 +90,32 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               selected={location.pathname === item.pathName}
               key={idx}
             >
-              {item.isExternalLink ? (
-                <a
-                  href={item.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => onClickLink()}
-                >
-                  {item.title}
-                </a>
-              ) : (
-                <Link
-                  onClick={() => onClickLink()}
-                  to={{ pathname: item.pathName, search: location.search }}
-                >
-                  {item.title}
-                </Link>
-              )}
+              <Link
+                onClick={() => onClickLink()}
+                to={{ pathname: item.pathName, search: location.search }}
+              >
+                {item.title}
+              </Link>
             </StyledMenuItem>
           ))}
+          <AccordionContainer isOpen>
+            <StyledMenuItem onClick={toggleAboutAccordion}>
+              About{" "}
+              {isAboutAccordionOpen ? (
+                <ChevronUp stroke="#9daab2" strokeWidth="1" />
+              ) : (
+                <ChevronDown stroke="#9daab2" strokeWidth="1" />
+              )}
+            </StyledMenuItem>
+            {isAboutAccordionOpen &&
+              sidebarAboutLinks.map((item) => (
+                <StyledMenuItem key={item.link}>
+                  <a href={item.link} target="_blank" rel="noreferrer">
+                    {item.title}
+                  </a>
+                </StyledMenuItem>
+              ))}
+          </AccordionContainer>
         </StyledMenu>
       </StyledSidebar>
     </>

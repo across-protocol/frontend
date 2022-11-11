@@ -99,6 +99,15 @@ interface IStyledMenuItem {
   selected?: boolean;
 }
 export const StyledMenuItem = styled(MenuItem)<IStyledMenuItem>`
+  > div {
+    width: 100%;
+    > span {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+
   color: var(--color-white);
   font-weight: ${({ selected }) => (selected ? "600" : "400")};
   padding-left: 0;
@@ -126,3 +135,5 @@ export const ConnectText = styled.div`
 export const TopHeaderRow = styled.div`
   display: flex;
 `;
+
+export const AccordionContainer = styled.div<{ isOpen: boolean }>``;
