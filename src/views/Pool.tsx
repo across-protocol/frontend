@@ -43,6 +43,7 @@ const Pool: FC = () => {
   const [depositUrl, setDepositUrl] = useState("");
   const [loadingPoolState, setLoadingPoolState] = useState(false);
   const [defaultTab, setDefaultTab] = useState("Add");
+  const [refetchPool, setRefetchPool] = useState(0);
 
   // Enable deep linking on the pool to access a specific pool symbol
   const { symbol: queryPoolSymbol } = useQueryParams();
@@ -112,7 +113,7 @@ const Pool: FC = () => {
         setLoadingPoolState(false);
         refetchBalance();
       });
-  }, [token, setLoadingPoolState, poolClient, refetchBalance]);
+  }, [token, setLoadingPoolState, poolClient, refetchBalance, refetchPool]);
 
   useEffect(() => {
     if (isConnected && account && token.address) {
@@ -124,7 +125,7 @@ const Pool: FC = () => {
         .updateUser(account, address)
         .catch((err) => console.error("error loading user", err));
     }
-  }, [isConnected, account, token.address, poolClient]);
+  }, [isConnected, account, token.address, poolClient, refetchPool]);
 
   useEffect(() => {
     // Recheck for balances. note: Onboard provider is faster than ours.
@@ -231,6 +232,7 @@ const Pool: FC = () => {
               setDepositUrl={setDepositUrl}
               balance={balance.toString()}
               refetchBalance={refetchBalance}
+              refetchPool={() => setRefetchPool((prev) => prev + 1)}
               defaultTab={defaultTab}
               setDefaultTab={setDefaultTab}
               utilization={

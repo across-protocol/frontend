@@ -60,6 +60,7 @@ interface Props {
   error: string;
   setError: React.Dispatch<React.SetStateAction<string>>;
   onMaxClick: () => void;
+  refetchPool: () => void;
 }
 const RemoveLiqudityForm: FC<Props> = ({
   removeAmount,
@@ -80,6 +81,7 @@ const RemoveLiqudityForm: FC<Props> = ({
   error,
   setError,
   onMaxClick,
+  refetchPool,
 }) => {
   const poolClient = getPoolClient();
   const { isConnected, provider, signer, notify, account, connect } =
@@ -136,6 +138,7 @@ const RemoveLiqudityForm: FC<Props> = ({
             setShowSuccess("withdraw");
             setDepositUrl(url);
             setTxSubmitted(false);
+            refetchPool();
             if (account)
               setTimeout(
                 () => updateEthBalance({ chainId: 1, account }),

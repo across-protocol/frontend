@@ -55,6 +55,7 @@ interface Props {
   utilization: string;
   projectedApr: string;
   chainId: ChainId;
+  refetchPool: () => void;
 }
 
 const PoolForm: FC<Props> = ({
@@ -79,6 +80,7 @@ const PoolForm: FC<Props> = ({
   utilization,
   projectedApr,
   chainId,
+  refetchPool,
 }) => {
   const poolClient = getPoolClient();
   const [inputAmount, setInputAmount] = useState("");
@@ -229,6 +231,7 @@ const PoolForm: FC<Props> = ({
               )
             }
             chainId={chainId}
+            refetchPool={refetchPool}
           />
         </TabContentWrapper>
         <TabContentWrapper data-label="Remove" data-cy="remove-liquidity-form">
@@ -260,6 +263,7 @@ const PoolForm: FC<Props> = ({
                 setRemoveAmount
               )
             }
+            refetchPool={refetchPool}
           />
         </TabContentWrapper>
       </Tabs>
