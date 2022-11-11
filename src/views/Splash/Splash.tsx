@@ -29,14 +29,14 @@ const Splash = () => {
           <TitleSegment>
             <TitleDescriptionWrapper>
               <TitleText>
-                Bridge Across.
+                Across.
                 <GradientTitleSegment>
-                  Fast. Cheap. Secure.
+                  The Bridge Ethereum Deserves
                 </GradientTitleSegment>
               </TitleText>
               <DescriptionText size="lg" color="white-88">
-                Across offers the fastest, cheapest and most secure bridging
-                experience on the Ethereum blockchain today.
+                Across is a capital efficient and optimistic bridge that
+                connects the EVM ecosystem .
               </DescriptionText>
             </TitleDescriptionWrapper>
             <ButtonWrapper>
