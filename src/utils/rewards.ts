@@ -12,7 +12,7 @@ export function getBaseRewardsApr(
   userStakedInUSD?: BigNumber
 ) {
   if (totalStakedInUSD.isZero()) {
-    totalStakedInUSD = BigNumber.from(1);
+    totalStakedInUSD = parseEther("1");
   }
 
   if (!userStakedInUSD || userStakedInUSD.isZero()) {
