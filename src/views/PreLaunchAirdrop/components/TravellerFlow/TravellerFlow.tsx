@@ -39,7 +39,7 @@ const TRAVELLER_FLOW_DATA = [
           UMA's Optimistic Oracle
         </a>
         . Learn more about Across{" "}
-        <a href="/about" target="_blank" rel="noreferrer">
+        <a href="/" target="_blank" rel="noreferrer">
           here
         </a>
         .
