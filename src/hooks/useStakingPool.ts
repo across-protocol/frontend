@@ -218,7 +218,9 @@ const fetchStakingPool = async (
   // days elapsed, we can divide by 1 day in seconds (86,400 seconds)
   const daysElapsed = userAmountOfLPStaked.eq(0)
     ? 0
-    : averageDepositTime.div(secondsPerDay).toNumber();
+    : new Intl.NumberFormat("en-US", {
+        maximumFractionDigits: 2,
+      }).format(Number(averageDepositTime) / secondsPerDay);
 
   // Resolve the users reward multiplier as a percentage.
   const usersMultiplierPercentage = maxMultiplier.eq(0)
@@ -304,7 +306,7 @@ const fetchStakingPool = async (
     outstandingRewards,
     currentUserRewardMultiplier,
     availableLPTokenBalance,
-    elapsedTimeSinceAvgDeposit: daysElapsed,
+    elapsedTimeSinceAvgDeposit: Number(daysElapsed),
     lpTokenSymbolName,
     usersMultiplierPercentage,
     usersTotalLPTokens,
