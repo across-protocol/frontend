@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { useConnection, useAcrossStakingPool } from "hooks";
+import {
+  useConnection,
+  useAcrossStakingPool,
+  useMaxApyOfAllStakingPools,
+} from "hooks";
 
 import { useAirdropRecipient } from "./useAirdropRecipient";
 import { useIsAirdropClaimed } from "./useIsAirdropClaimed";
@@ -18,6 +22,7 @@ export default function useAirdrop() {
   const isAirdropClaimedQuery = useIsAirdropClaimed();
   const claimAndStakeMutation = useClaimAndStake();
   const acrossStakingPoolQuery = useAcrossStakingPool();
+  const { maxApyOfAllStakingPools } = useMaxApyOfAllStakingPools();
 
   useEffect(() => {
     if (isConnected && account && !airdropRecipientQuery.isLoading) {
@@ -33,14 +38,11 @@ export default function useAirdrop() {
     refreshPage,
   ]);
 
-  const maxApyPct = formatWeiPct(
-    acrossStakingPoolQuery.data?.apyData.maxApy,
-    2
-  );
+  const maxApyPct = formatWeiPct(maxApyOfAllStakingPools, 0);
 
   const currentApyPct = formatWeiPct(
     acrossStakingPoolQuery.data?.apyData.totalApy,
-    2
+    0
   );
 
   return {

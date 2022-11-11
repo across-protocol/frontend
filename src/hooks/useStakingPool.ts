@@ -111,6 +111,17 @@ export function useAllStakingPools() {
   );
 }
 
+export function useMaxApyOfAllStakingPools() {
+  const allStakingPoolQueries = useAllStakingPools();
+
+  const isLoading = allStakingPoolQueries.some((query) => query.isLoading);
+  const allMaxApys = allStakingPoolQueries
+    .map((query) => query.data?.apyData.maxApy || BigNumber.from(0))
+    .sort((a, b) => (a.lt(b) ? -1 : a.gt(b) ? 1 : 0));
+  const [maxApyOfAllStakingPools] = allMaxApys.slice(-1);
+  return { isLoading, maxApyOfAllStakingPools, allMaxApys };
+}
+
 export function useAcrossStakingPool() {
   const acrossTokenAddress = config.getAcrossTokenAddress();
   return useStakingPool(acrossTokenAddress);
