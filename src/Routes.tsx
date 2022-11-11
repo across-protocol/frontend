@@ -59,6 +59,7 @@ const warningMessage = `
 
 function useRoutes() {
   const [openSidebar, setOpenSidebar] = useState(false);
+  const [enableACXBanner, setEnableACXBanner] = useState(true);
   const { provider, isContractAddress } = useConnection();
   const location = useLocation();
   const history = useHistory();
@@ -85,6 +86,8 @@ function useRoutes() {
     isAirdrop: location.pathname === "/airdrop",
     isContractAddress,
     config,
+    enableACXBanner,
+    setEnableACXBanner,
   };
 }
 // Need this component for useLocation hook
@@ -98,6 +101,8 @@ const Routes: React.FC = () => {
     config,
     isContractAddress,
     isAirdrop,
+    enableACXBanner,
+    setEnableACXBanner,
   } = useRoutes();
 
   return (
@@ -129,7 +134,9 @@ const Routes: React.FC = () => {
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
-      {!isAirdrop && <ACXLiveBanner />}
+      {!isAirdrop && enableACXBanner && (
+        <ACXLiveBanner enableHandler={setEnableACXBanner} />
+      )}
       <Header
         openSidebar={openSidebar}
         setOpenSidebar={setOpenSidebar}

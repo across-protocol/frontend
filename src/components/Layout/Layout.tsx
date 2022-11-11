@@ -11,7 +11,7 @@ const Layout: React.FC = ({ children }) => (
     <LinkFooter>
       {NAV_LINKS.map((link) => (
         <Link
-          key={link.name}
+          key={link.key}
           href={link.url}
           target="_blank"
           rel="noopener noreferrer"
