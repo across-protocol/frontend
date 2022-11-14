@@ -53,7 +53,7 @@ const sidebarAboutLinks = [
     isExternalLink: true,
   },
   {
-    title: "Discourse",
+    title: "Forum",
     link: "https://forum.across.to/",
     isExternalLink: true,
   },
