@@ -8,12 +8,14 @@ import { ChainId } from "utils/constants";
  * @param amount The amount of fees to calculate
  * @param originToken The ERC20 token address from the origin chain
  * @param toChainid The destination chain number. The chain `amount` of `originToken` will be bridged to
+ * @param fromChainid The origin chain number. The chain `amount` of `originToken` will be bridged from
  * @returns The result of the HTTP call to `api/suggested-fees`
  */
 export async function suggestedFeesApiCall(
   amount: ethers.BigNumber,
   originToken: string,
-  toChainid: ChainId
+  toChainid: ChainId,
+  fromChainid: ChainId
 ): Promise<{
   relayerFee: Fee;
   relayerGasFee: Fee;
@@ -25,6 +27,7 @@ export async function suggestedFeesApiCall(
     params: {
       token: originToken,
       destinationChainId: toChainid,
+      originChainId: fromChainid,
       amount: amount.toString(),
       skipAmountLimit: true,
     },

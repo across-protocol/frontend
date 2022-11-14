@@ -36,7 +36,8 @@ export interface RewardsApiInterface {
 export type SuggestedApiFeeType = (
   amount: ethers.BigNumber,
   originToken: string,
-  toChainid: ChainId
+  toChainid: ChainId,
+  fromChainid: ChainId
 ) => Promise<{
   relayerFee: Fee;
   relayerGasFee: Fee;
