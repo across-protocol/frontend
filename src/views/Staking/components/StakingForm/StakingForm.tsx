@@ -66,7 +66,7 @@ export const StakingForm = ({
   const ArrowIcon = isPoolInfoVisible ? ArrowIconUp : ArrowIconDown;
 
   const valueOrEmpty = repeatableTernaryBuilder(
-    isConnected && !isWrongNetwork && !isDataLoading,
+    isConnected && !isWrongNetwork && !isDataLoading && !isMutating,
     <>-</>
   );
 
