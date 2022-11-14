@@ -94,7 +94,7 @@ export function useAllStakingPools() {
     config.getAcrossTokenAddress(),
     "usd"
   );
-  const acxPrice = acxPriceQuery.data?.price;
+  const acxPrice = acxPriceQuery.data?.price ?? parseEtherLike("1.0"); // FIXME: Remove this for launch
 
   return useQueries(
     tokenList
