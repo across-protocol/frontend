@@ -37,6 +37,8 @@ const Wrapper = styled.div`
   border: 1px solid #3e4047;
   background: #2d2e33;
 
+  overflow: clip;
+
   z-index: 1;
 
   filter: drop-shadow(0px 40px 96px rgba(0, 0, 0, 0.2));
@@ -73,5 +75,5 @@ const WrapperBackground = styled(BackgroundVector)`
   bottom: 0;
   width: 100% !important;
   height: 100% !important;
-  z-index: 0;
+  z-index: -1;
 `;
