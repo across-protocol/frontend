@@ -59,7 +59,12 @@ export async function getRelayerFee(
     tokenSymbol
   ).address;
 
-  return getApiEndpoint().suggestedFees(amount, address, toChainId);
+  return getApiEndpoint().suggestedFees(
+    amount,
+    address,
+    toChainId,
+    fromChainId
+  );
 }
 
 export async function getLpFee(
