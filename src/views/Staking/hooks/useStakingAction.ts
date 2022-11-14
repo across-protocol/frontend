@@ -100,8 +100,13 @@ const performStakingActionBuilderFn = (
         acceleratingDistributor.address,
         MAX_APPROVAL_AMOUNT
       );
-      // Wait for the transaction to return successful
-      await notificationEmitter(approvalResult.hash, notify);
+      try {
+        // Wait for the transaction to return successful
+        await notificationEmitter(approvalResult.hash, notify);
+      } catch (_e) {
+        // If this function fails to resolve (or the user rejects), we don't proceed.
+        return;
+      }
       innerApprovalRequired = false;
     }
     const callingFn = acceleratingDistributor[action];
@@ -109,8 +114,12 @@ const performStakingActionBuilderFn = (
 
     // Call the generate the transaction to stake/unstake and
     // wait until the tx has been resolved
-    const result = await callingFn(lpTokenAddress, amountAsBigNumber);
-    await notificationEmitter(result.hash, notify, 0);
+    try {
+      const result = await callingFn(lpTokenAddress, amountAsBigNumber);
+      await notificationEmitter(result.hash, notify, 0, true);
+    } catch (_e) {
+      // We currently don't handle the error case other than to exit gracefully.
+    }
   };
   return closure;
 };

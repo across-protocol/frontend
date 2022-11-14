@@ -34,10 +34,14 @@ const performClaimingAction = async (
   // Instantiate a contract instance of the AcceleratingDistributor with the user's signer
   const acceleratingDistributor =
     getConfig().getAcceleratingDistributor(signer);
-  // Attempt to request a reward withdrawl via the AcceleratingDistributor contract
-  const resultingTx = await acceleratingDistributor.withdrawReward(
-    lpTokenAddress
-  );
-  // Send this to onboard's notify API to track the TX
-  await notificationEmitter(resultingTx.hash, notify, 0);
+  try {
+    // Attempt to request a reward withdrawl via the AcceleratingDistributor contract
+    const resultingTx = await acceleratingDistributor.withdrawReward(
+      lpTokenAddress
+    );
+    // Send this to onboard's notify API to track the TX
+    await notificationEmitter(resultingTx.hash, notify, 0, true);
+  } catch (_e) {
+    // We currently don't handle the error case other than to exit gracefully.
+  }
 };
