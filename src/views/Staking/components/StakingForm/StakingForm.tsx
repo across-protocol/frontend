@@ -181,7 +181,7 @@ export const StakingForm = ({
               Multiplier
               <PopperTooltip
                 title="Multiplier"
-                body="The multiplier is the amount of LP tokens you get for staking."
+                body="Your multiple applied to the pool's base reward APY, determined by your age of capital."
                 placement="bottom-start"
               >
                 <InfoIcon />
