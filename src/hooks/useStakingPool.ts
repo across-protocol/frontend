@@ -73,9 +73,9 @@ export function useStakingPool(tokenAddress?: string) {
     config.getAcrossTokenAddress(),
     "usd"
   );
-  const acxPrice = acxPriceQuery.data?.price ?? parseEtherLike("1.0"); // FIXME: Remove this for launch
+  const acxPrice = acxPriceQuery.data?.price;
 
-  return useQuery(
+  const stakingPoolQuery = useQuery(
     getStakingPoolQueryKey(tokenAddress, account),
     () => fetchStakingPool(tokenAddress, account, acxPrice),
     {
@@ -83,6 +83,11 @@ export function useStakingPool(tokenAddress?: string) {
       enabled: Boolean(tokenAddress) && Boolean(acxPrice),
     }
   );
+
+  return {
+    ...stakingPoolQuery,
+    isLoading: stakingPoolQuery.isLoading || acxPriceQuery.isLoading,
+  };
 }
 
 export function useAllStakingPools() {
@@ -96,7 +101,7 @@ export function useAllStakingPools() {
   );
   const acxPrice = acxPriceQuery.data?.price;
 
-  return useQueries(
+  const batchedPoolQueries = useQueries(
     tokenList
       .filter((token) => !token.isNative)
       .map((token) => ({
@@ -109,6 +114,11 @@ export function useAllStakingPools() {
           fetchStakingPool(queryKey[1], queryKey[2], acxPrice),
       }))
   );
+
+  return batchedPoolQueries.map((query) => ({
+    ...query,
+    isLoading: query.isLoading || acxPriceQuery.isLoading,
+  }));
 }
 
 export function useMaxApyOfAllStakingPools() {
