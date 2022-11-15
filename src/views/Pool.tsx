@@ -14,6 +14,7 @@ import {
   getChainInfo,
   AddressZero,
   getConfig,
+  mockServerlessAPI,
 } from "utils";
 import { useAppSelector, useBalance } from "state/hooks";
 import { useConnection, useQueryParams, useStakingPool } from "hooks";
@@ -177,7 +178,7 @@ const Pool: FC = () => {
             setToken={setToken}
             chainId={chainId}
           />
-          {!loadingPoolState && !isStakingDataLoading ? (
+          {!loadingPoolState && (mockServerlessAPI || !isStakingDataLoading) ? (
             <PoolForm
               chainId={chainId}
               wrongNetwork={wrongNetwork}
