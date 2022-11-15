@@ -73,7 +73,7 @@ export function useStakingPool(tokenAddress?: string) {
     config.getAcrossTokenAddress(),
     "usd"
   );
-  const acxPrice = acxPriceQuery.data?.price ?? parseEtherLike("1.0"); // FIXME: Remove this for launch
+  const acxPrice = acxPriceQuery.data?.price;
 
   return useQuery(
     getStakingPoolQueryKey(tokenAddress, account),
@@ -94,7 +94,7 @@ export function useAllStakingPools() {
     config.getAcrossTokenAddress(),
     "usd"
   );
-  const acxPrice = acxPriceQuery.data?.price ?? parseEtherLike("1.0"); // FIXME: Remove this for launch
+  const acxPrice = acxPriceQuery.data?.price;
 
   return useQueries(
     tokenList
