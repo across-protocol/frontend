@@ -51,7 +51,6 @@ const PoolSelection: FC<Props> = ({ token, setToken, tokenList, chainId }) => {
         setToken(selectedItem as any);
       }
     },
-    selectedItem: token,
   });
 
   return (

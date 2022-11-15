@@ -44,20 +44,19 @@ const Pool: FC = () => {
   const [loadingPoolState, setLoadingPoolState] = useState(false);
   const [defaultTab, setDefaultTab] = useState("Add");
   const [refetchPool, setRefetchPool] = useState(0);
+  const [loaded, setLoaded] = useState(false);
 
   // Enable deep linking on the pool to access a specific pool symbol
   const { symbol: queryPoolSymbol } = useQueryParams();
-  useEffect(() => {
-    const resolvedToken = tokenList.find(
-      (token) =>
-        queryPoolSymbol &&
-        token.symbol.toLowerCase() === queryPoolSymbol.toLowerCase()
-    );
-    if (resolvedToken && token.symbol !== resolvedToken.symbol) {
-      setToken(resolvedToken);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const resolvedToken = tokenList.find(
+    (token) =>
+      queryPoolSymbol &&
+      token.symbol.toLowerCase() === queryPoolSymbol.toLowerCase()
+  );
+  if (!loaded && resolvedToken && token.symbol !== resolvedToken.symbol) {
+    setToken(resolvedToken);
+    setLoaded(true);
+  }
 
   const {
     isConnected,
