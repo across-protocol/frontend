@@ -15,6 +15,9 @@ export const Wrapper = styled.div`
   align-items: center;
   position: relative;
   gap: 64px;
+
+  padding: 96px 0;
+
   @media ${QUERIESV2.sm.andDown} {
     padding: 36px 0;
   }

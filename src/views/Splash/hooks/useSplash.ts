@@ -36,8 +36,9 @@ export function useSplash() {
     {
       icon: ZapIcon,
       title: "Fast",
-      description:
-        "Across is able to offer extremely fast bridging. Today, that means bridging under 3 minutes. In the future, next-block bridging will be possible.",
+      description: `Across is able to offer extremely fast bridging. Today, that means bridging under ${Math.floor(
+        data?.avgFillTimeInMinutes ?? 0
+      )} minutes, on average. In the future, next-block bridging will be possible.`,
     },
     {
       icon: UsersIcon,
