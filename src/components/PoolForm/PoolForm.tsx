@@ -38,6 +38,7 @@ interface Props {
   totalPoolSize: ethers.BigNumber;
   totalPosition: ethers.BigNumber;
   position: ethers.BigNumber;
+  stakedPosition: ethers.BigNumber;
   feesEarned: ethers.BigNumber;
   hubPoolAddress: string;
   lpTokens: ethers.BigNumber;
@@ -64,6 +65,7 @@ const PoolForm: FC<Props> = ({
   decimals,
   totalPoolSize,
   totalPosition,
+  stakedPosition,
   apy,
   position,
   feesEarned,
@@ -161,7 +163,11 @@ const PoolForm: FC<Props> = ({
         <PositionItem>
           <div>Position Size</div>
           <div data-cy="pool-position">
-            {formatUnits(totalPosition, decimals).replace("-", "")} {symbol}
+            {formatUnits(totalPosition.add(stakedPosition), decimals).replace(
+              "-",
+              ""
+            )}{" "}
+            {symbol}
           </div>
         </PositionItem>
         <PositionItem>
