@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { Alert, ButtonV2 } from "components";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { BigNumber } from "ethers";
-import { formatEther, formatWeiPct, QUERIESV2 } from "utils";
+import { formatEther, QUERIESV2 } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { StakingRewardPropType } from "../../types";
 import { Card } from "views/Staking/Staking.styles";
