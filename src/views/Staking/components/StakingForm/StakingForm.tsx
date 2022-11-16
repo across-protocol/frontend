@@ -197,7 +197,7 @@ export const StakingForm = ({
                   <Text color={activeColor}>
                     {Number(
                       formatEther(poolData.currentUserRewardMultiplier)
-                    ).toFixed(2)}{" "}
+                    ).toFixed(2)}
                     x
                   </Text>
                 </>
