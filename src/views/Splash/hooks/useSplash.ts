@@ -23,7 +23,7 @@ export function useSplash() {
       title: "Average Fill Time",
       value: ternary(`${Math.floor(data?.avgFillTimeInMinutes ?? 0)} min`),
     },
-    { title: "User Funds Lost", value: ternary("$0") },
+    { title: "To Bridge 1 ETH", value: ternary("< $1") },
   ];
 
   const cardBenefits = [
@@ -38,7 +38,7 @@ export function useSplash() {
       title: "Fast",
       description: `Across is able to offer extremely fast bridging. Today, that means bridging under ${Math.floor(
         data?.avgFillTimeInMinutes ?? 0
-      )} minutes, on average. In the future, next-block bridging will be possible.`,
+      )} minutes on average. In the future, next-block bridging will be possible.`,
     },
     {
       icon: UsersIcon,
