@@ -461,9 +461,9 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 
 /**
  * Determines if a given route is enabled to support an AcrossV2 bridge
- * @param _fromChainId The chain id of the origin bridge action
- * @param _toChainId The chain id of the destination bridge action.
- * @param _fromToken The originating token address. Note: is a valid ERC-20 address
+ * @param fromChainId The chain id of the origin bridge action
+ * @param toChainId The chain id of the destination bridge action.
+ * @param fromToken The originating token address. Note: is a valid ERC-20 address
  * @returns A boolean representing if a route with these parameters is available
  */
 export const isRouteEnabled = (

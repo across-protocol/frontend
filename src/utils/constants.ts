@@ -559,7 +559,7 @@ export function getRoutes(chainId: ChainId): RouteConfig {
 export const routeConfig = getRoutes(hubPoolChainId);
 export const hubPoolAddress = routeConfig.hubPoolAddress;
 export const migrationPoolV2Warning =
-  process.env.REACT_APP_MIGRATION_POOL_V2_WARNING;
+  process.env.REACT_APP_MIGRATION_POOL_V2_WARNING === "true";
 export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
 export const generalMaintenanceMessage =
   process.env.REACT_APP_GENERAL_MAINTENANCE_MESSAGE;
