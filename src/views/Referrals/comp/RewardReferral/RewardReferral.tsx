@@ -280,7 +280,14 @@ const ReferralTierComponent: React.FC<{
           <TierSmHeader>Current referral tier</TierSmHeader>
         </TierWrapper>
         {isConnected && (
-          <ClaimButton size="lg" onClick={() => setIsModalOpen(true)}>
+          <ClaimButton
+            size="lg"
+            onClick={() => setIsModalOpen(true)}
+            disabled={
+              !unclaimedReferralRewardAmount ||
+              unclaimedReferralRewardAmount.eq(0)
+            }
+          >
             <Text>Claim rewards</Text>
           </ClaimButton>
         )}
