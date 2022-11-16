@@ -9,7 +9,11 @@ import { coingecko, relayFeeCalculator } from "@across-protocol/sdk-v2";
 
 const { Coingecko } = coingecko;
 const { SymbolMapping } = relayFeeCalculator;
-const { REACT_APP_COINGECKO_PRO_API_KEY, FIXED_TOKEN_PRICES } = process.env;
+const {
+  REACT_APP_COINGECKO_PRO_API_KEY,
+  FIXED_TOKEN_PRICES,
+  REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES,
+} = process.env;
 
 // Helper function to fetch prices from coingecko. Can fetch either or both token and base currency.
 // Set hardcodedTokenPriceUsd to 0 to load the token price from coingecko, otherwise load only the base
@@ -87,6 +91,19 @@ const handler = async (
     else baseCurrency = baseCurrency.toLowerCase();
 
     l1Token = ethers.utils.getAddress(l1Token);
+
+    // Resolve the optional address lookup that maps one token's
+    // contract address to another.
+    const redirectLookupAddresses: Record<string, string> =
+      REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES !== undefined
+        ? JSON.parse(REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES)
+        : {};
+
+    // Perform a 1-deep lookup to see if the provided l1Token is
+    // to be "redirected" to another provided token contract address
+    if (redirectLookupAddresses[l1Token]) {
+      l1Token = redirectLookupAddresses[l1Token];
+    }
 
     const coingeckoClient = Coingecko.get(
       logger,

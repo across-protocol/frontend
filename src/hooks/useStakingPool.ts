@@ -19,6 +19,7 @@ import { ERC20__factory } from "@across-protocol/contracts-v2";
 import axios from "axios";
 import { ConvertDecimals } from "utils/convertdecimals";
 import { useCoingeckoPrice } from "./useCoingeckoPrice";
+import getApiEndpoint from "utils/serverless-api";
 
 const config = getConfig();
 
@@ -75,7 +76,7 @@ export function useStakingPool(tokenAddress?: string) {
   );
   const acxPrice = acxPriceQuery.data?.price;
 
-  return useQuery(
+  const stakingPoolQuery = useQuery(
     getStakingPoolQueryKey(tokenAddress, account),
     () => fetchStakingPool(tokenAddress, account, acxPrice),
     {
@@ -83,6 +84,11 @@ export function useStakingPool(tokenAddress?: string) {
       enabled: Boolean(tokenAddress) && Boolean(acxPrice),
     }
   );
+
+  return {
+    ...stakingPoolQuery,
+    isLoading: stakingPoolQuery.isLoading || acxPriceQuery.isLoading,
+  };
 }
 
 export function useAllStakingPools() {
@@ -96,7 +102,7 @@ export function useAllStakingPools() {
   );
   const acxPrice = acxPriceQuery.data?.price;
 
-  return useQueries(
+  const batchedPoolQueries = useQueries(
     tokenList
       .filter((token) => !token.isNative)
       .map((token) => ({
@@ -109,6 +115,11 @@ export function useAllStakingPools() {
           fetchStakingPool(queryKey[1], queryKey[2], acxPrice),
       }))
   );
+
+  return batchedPoolQueries.map((query) => ({
+    ...query,
+    isLoading: query.isLoading || acxPriceQuery.isLoading,
+  }));
 }
 
 export function useMaxApyOfAllStakingPools() {
@@ -160,9 +171,14 @@ const fetchStakingPool = async (
 
   // Get the corresponding LP token from the hub pool directly
   // Resolve the ACX reward token address from the AcceleratingDistributor
-  const [{ lpToken: lpTokenAddress }, acrossTokenAddress] = await Promise.all([
+  const [
+    { lpToken: lpTokenAddress },
+    acrossTokenAddress,
+    { price: tokenUSDExchangeRate },
+  ] = await Promise.all([
     hubPool.pooledTokens(tokenAddress),
     acceleratingDistributor.rewardToken(),
+    getApiEndpoint().coingecko(tokenAddress, "usd"),
   ]);
 
   const lpTokenERC20 = ERC20__factory.connect(lpTokenAddress, provider);
@@ -221,8 +237,12 @@ const fetchStakingPool = async (
   const {
     estimatedApy: estimatedApyFromQuery,
     totalPoolSize,
-    exchangeRateCurrent: lpExchangeRateToUSD,
+    exchangeRateCurrent: lpExchangeRateToToken,
   } = poolQuery.data;
+
+  const lpExchangeRateToUSD = tokenUSDExchangeRate
+    .mul(lpExchangeRateToToken)
+    .div(fixedPointAdjustment);
 
   // The Average Deposit Time retrieves the # seconds since the last
   // deposit, weighted by all the deposits in a user's account. To calculate the

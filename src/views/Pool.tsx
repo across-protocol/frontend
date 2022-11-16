@@ -14,9 +14,10 @@ import {
   getChainInfo,
   AddressZero,
   getConfig,
+  mockServerlessAPI,
 } from "utils";
 import { useAppSelector, useBalance } from "state/hooks";
-import { useConnection, useQueryParams } from "hooks";
+import { useConnection, useQueryParams, useStakingPool } from "hooks";
 import get from "lodash/get";
 import { getPoolClient } from "state/poolsApi";
 import styled from "@emotion/styled";
@@ -136,6 +137,10 @@ const Pool: FC = () => {
     }
   }, [depositUrl, refetchBalance]);
 
+  const { isLoading: isStakingDataLoading, data: stakeData } = useStakingPool(
+    token.l1TokenAddress
+  );
+
   return (
     <Layout>
       {wrongNetwork && (
@@ -173,7 +178,7 @@ const Pool: FC = () => {
             setToken={setToken}
             chainId={chainId}
           />
-          {!loadingPoolState ? (
+          {!loadingPoolState && (mockServerlessAPI || !isStakingDataLoading) ? (
             <PoolForm
               chainId={chainId}
               wrongNetwork={wrongNetwork}
@@ -200,6 +205,11 @@ const Pool: FC = () => {
                 userPosition
                   ? ethers.BigNumber.from(userPosition.positionValue)
                   : ethers.BigNumber.from("0")
+              }
+              stakedPosition={
+                stakeData && stakeData.poolEnabled
+                  ? stakeData.userAmountOfLPStaked
+                  : ethers.BigNumber.from(0)
               }
               feesEarned={
                 userPosition

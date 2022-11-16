@@ -195,7 +195,10 @@ export const StakingForm = ({
                     percent={poolData.usersMultiplierPercentage}
                   />
                   <Text color={activeColor}>
-                    {formatEther(poolData.currentUserRewardMultiplier)} x
+                    {Number(
+                      formatEther(poolData.currentUserRewardMultiplier)
+                    ).toFixed(2)}
+                    x
                   </Text>
                 </>
               )}

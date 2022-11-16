@@ -18,7 +18,7 @@ export async function coingeckoApiCall(
   const result = response.data;
   const price =
     baseCurrency === "usd"
-      ? ethers.utils.parseEther(result.price)
+      ? ethers.utils.parseEther(String(result.price))
       : ethers.BigNumber.from(result.price);
   return {
     price,
