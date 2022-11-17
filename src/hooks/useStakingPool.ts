@@ -78,7 +78,7 @@ export function useStakingPool(tokenAddress?: string) {
 
   const stakingPoolQuery = useQuery(
     getStakingPoolQueryKey(tokenAddress, account),
-    () => fetchStakingPool(tokenAddress, account, acxPrice),
+    ({ queryKey: keys }) => fetchStakingPool(keys[1], keys[2], acxPrice),
     {
       refetchInterval: 15_000,
       enabled: Boolean(tokenAddress) && Boolean(acxPrice),
@@ -195,10 +195,8 @@ const fetchStakingPool = async (
       cumulativeStaked,
     },
     currentUserRewardMultiplier,
-    {
-      rewardsOutstanding: outstandingRewards,
-      cumulativeBalance: userAmountOfLPStaked,
-    },
+    { cumulativeBalance: userAmountOfLPStaked },
+    outstandingRewards,
     averageDepositTime,
     availableLPTokenBalance,
     lpTokenDecimalCount,
@@ -217,16 +215,19 @@ const fetchStakingPool = async (
           cumulativeBalance: BigNumber.from(0),
         }),
     account
+      ? acceleratingDistributor.getOutstandingRewards(lpTokenAddress, account)
+      : Promise.resolve(BigNumber.from(0)),
+    account
       ? acceleratingDistributor.getTimeSinceAverageDeposit(
           lpTokenAddress,
           account
         )
-      : BigNumber.from(0),
+      : Promise.resolve(BigNumber.from(0)),
     account ? lpTokenERC20.balanceOf(account) : BigNumber.from(0),
     lpTokenERC20.decimals(),
     account
       ? lpTokenERC20.allowance(account, acceleratingDistributorAddress)
-      : BigNumber.from(0),
+      : Promise.resolve(BigNumber.from(0)),
     Promise.resolve((await lpTokenERC20.symbol()).slice(4)),
     axios.get<PoolQueryData>(`/api/pools`, {
       params: { token: tokenAddress },
