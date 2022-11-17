@@ -25,6 +25,7 @@ type RowData = StakingPool;
 type MetaData = {
   hasLPTokens: boolean;
   hasLPStake: boolean;
+  hasRewards: boolean;
 };
 
 const flexBasisLengths = [
@@ -184,7 +185,7 @@ function RowButtonCell({ data, meta }: PoolRowCellType) {
         <ExternalLink16 />
       </ExternalLinkButton>
     );
-  } else if (meta.hasLPTokens) {
+  } else if (meta.hasLPTokens || meta.hasRewards) {
     button = <StakeButton to={specificPoolLink}>Stake</StakeButton>;
   } else {
     button = (
@@ -208,6 +209,7 @@ export function formatRow(data: RowData): IRow {
   const meta = {
     hasLPStake: BigNumber.from(data.userAmountOfLPStaked).gt(0),
     hasLPTokens: BigNumber.from(data.usersTotalLPTokens).gt(0),
+    hasRewards: BigNumber.from(data.outstandingRewards).gt(0),
   };
   return {
     cells: rowComponents.map((Cell, idx) => ({
