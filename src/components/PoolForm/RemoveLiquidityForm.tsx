@@ -99,7 +99,8 @@ const RemoveLiqudityForm: FC<Props> = ({
     validateForm(removeAmount, position.toString(), decimals, symbol, setError);
   }, [removeAmount, removeAmountSlider, position, decimals, symbol, setError]);
 
-  const buttonDisabled = !error && ethers.utils.parseEther(removeAmount || "0").eq(0);
+  const buttonDisabled =
+    !error && ethers.utils.parseEther(removeAmount || "0").eq(0);
 
   const handleButtonClick = async () => {
     if (!provider) {
