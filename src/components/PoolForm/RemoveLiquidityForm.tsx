@@ -35,7 +35,6 @@ import {
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import api from "state/chainApi";
 import { ShowSuccess } from "views/Pool";
-import { parseEther } from "ethers/lib/utils";
 
 const { previewRemoval } = umaSdk.across.clients.bridgePool;
 
@@ -100,7 +99,7 @@ const RemoveLiqudityForm: FC<Props> = ({
     validateForm(removeAmount, position.toString(), decimals, symbol, setError);
   }, [removeAmount, removeAmountSlider, position, decimals, symbol, setError]);
 
-  const buttonDisabled = !error && parseEther(removeAmount || "0").eq(0);
+  const buttonDisabled = !error && ethers.utils.parseEther(removeAmount || "0").eq(0);
 
   const handleButtonClick = async () => {
     if (!provider) {
