@@ -7,6 +7,14 @@ import BGMesh from "assets/splash-mesh-bg.svg";
 export const ExternalWrapper = styled.div`
   background: url(${BGMesh});
   background-size: cover;
+
+  margin-top: -72px;
+  padding-top: 72px;
+
+  @media ${QUERIESV2.sm.andDown} {
+    margin-top: -64px;
+    padding-top: 64px;
+  }
 `;
 
 export const Wrapper = styled.div`
