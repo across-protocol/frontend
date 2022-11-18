@@ -39,13 +39,16 @@ const Wrapper = styled.div`
 
   overflow: clip;
 
-  z-index: 1;
+  z-index: 2;
 
   filter: drop-shadow(0px 40px 96px rgba(0, 0, 0, 0.2));
   border-radius: 16px;
 
+  transition: filter 0.3s;
+
   &:hover {
     filter: drop-shadow(0px 40px 96px rgba(0, 0, 0, 0.45));
+    z-index: 1;
   }
 
   @media ${QUERIESV2.sm.andDown} {
