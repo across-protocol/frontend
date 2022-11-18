@@ -13,7 +13,10 @@ type Props = {
   onExit: () => void;
 };
 
-export function ClaimRewardsModal({ isOpen, onExit }: Props) {
+export function ClaimRewardsModal({
+  isOpen: externalOpenInput,
+  onExit,
+}: Props) {
   const { claimMutation, unclaimedReferralProofsQuery, importTokenHandler } =
     useClaimModal();
 
@@ -23,6 +26,14 @@ export function ClaimRewardsModal({ isOpen, onExit }: Props) {
     (
       unclaimedReferralProofsQuery.data?.claimableAmount || BigNumber.from(0)
     ).isZero();
+
+  const isOpen =
+    externalOpenInput &&
+    !unclaimedReferralProofsQuery.isLoading &&
+    !claimMutation.isLoading &&
+    (
+      unclaimedReferralProofsQuery.data?.claimableAmount || BigNumber.from(0)
+    ).gt(0);
 
   return (
     <Modal
