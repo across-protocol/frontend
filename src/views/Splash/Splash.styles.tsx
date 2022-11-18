@@ -70,7 +70,7 @@ export const TitleText = styled.div`
 `;
 
 export const DescriptionText = styled(Text)`
-  max-width: 560px;
+  max-width: 390px;
   width: 100%;
   text-align: center;
 `;
@@ -133,7 +133,7 @@ export const DocButton = styled.a`
 `;
 
 export const NumericBenefitWrapper = styled.div`
-  padding-top: 60px;
+  padding-top: 30px;
   display: flex;
   flex-direction: row;
   align-items: center;
