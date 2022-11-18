@@ -63,6 +63,11 @@ export const TitleText = styled.div`
 
   color: #ffffff;
 
+  @media ${QUERIESV2.tb.andDown} {
+    font-size: ${54 / 16}rem;
+    line-height: ${64 / 16}rem;
+  }
+
   @media ${QUERIESV2.sm.andDown} {
     font-size: ${40 / 16}rem;
     line-height: ${48 / 16}rem;
