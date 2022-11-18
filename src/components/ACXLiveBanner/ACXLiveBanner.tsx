@@ -1,6 +1,5 @@
 import styled from "@emotion/styled";
 import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
-import { ReactComponent as Megaphone } from "assets/icons/megaphone-24.svg";
 import { ReactComponent as ChevronRight } from "assets/icons/arrow-right-16.svg";
 import { QUERIESV2 } from "utils";
 import { Link } from "react-router-dom";
@@ -17,7 +16,6 @@ const ACXLiveBanner = ({
     <OpacityLayer />
     <ContentWrapper>
       <AnnouncementWrapper>
-        <StyledMegaphone />
         <DesktopAnnouncement>
           We're excited to announce that the{" "}
           <GradientText>ACX token is live.</GradientText>
@@ -27,7 +25,7 @@ const ACXLiveBanner = ({
         </MobileAnnouncement>
       </AnnouncementWrapper>
       <ButtonWrapper>
-        Check eligibility{" "}
+        <DesktopText>Check eligibility </DesktopText>
         <StyledButton to="/airdrop" onClick={() => enableHandler(false)}>
           <ChevronRight />
         </StyledButton>
@@ -39,14 +37,14 @@ const ACXLiveBanner = ({
 export default ACXLiveBanner;
 
 const DesktopAnnouncement = styled.div`
-  @media ${QUERIESV2.sm.andDown} {
+  @media ${QUERIESV2.tb.andDown} {
     display: none;
   }
 `;
 
 const MobileAnnouncement = styled.div`
   display: none;
-  @media ${QUERIESV2.sm.andDown} {
+  @media ${QUERIESV2.tb.andDown} {
     display: block;
   }
 `;
@@ -124,18 +122,16 @@ const OpacityLayer = styled.div`
   width: 100%;
   height: 200%;
   z-index: 1 !important;
-  background: linear-gradient(72.13deg, #34353b 0%, rgba(52, 53, 59, 0.75) 100%),
-    linear-gradient(0deg, #34353b, #34353b);
+  background: linear-gradient(
+      81deg,
+      #202024 11.29%,
+      rgba(32, 32, 36, 0.75) 97.62%
+    ),
+    url(ezgif-1-96424221d0.png), #34353b;
+  background-blend-mode: normal, luminosity, normal;
+  transform: matrix(-1, 0, 0, 1, 0, 0);
+
   opacity: 0.9;
-`;
-
-const StyledMegaphone = styled(Megaphone)`
-  height: ${24 / 16}rem;
-  width: ${24 / 16}rem;
-
-  @media ${QUERIESV2.tb.andDown} {
-    display: none;
-  }
 `;
 
 const GradientText = styled.span`
@@ -169,5 +165,16 @@ const StyledButton = styled(Link)`
     & svg path {
       stroke: #2d2e33;
     }
+  }
+
+  @media ${QUERIESV2.tb.andDown} {
+    height: 32px;
+    width: 32px;
+  }
+`;
+
+const DesktopText = styled.span`
+  @media ${QUERIESV2.tb.andDown} {
+    display: none;
   }
 `;
