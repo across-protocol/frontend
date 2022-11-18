@@ -156,7 +156,7 @@ export const NumericBenefitWrapper = styled.div`
 export const CardBenefitWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
   flex-wrap: wrap;
