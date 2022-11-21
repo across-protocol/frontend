@@ -1,13 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query/react";
-import connectionReducer from "./connection";
 import chainApi from "./chainApi";
 import transactionsReducer from "./transactions";
 import poolsReducer from "./pools";
 
 export const store = configureStore({
   reducer: {
-    connection: connectionReducer,
     transactions: transactionsReducer,
     pools: poolsReducer,
     [chainApi.reducerPath]: chainApi.reducer,
