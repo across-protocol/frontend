@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 
 export async function coingeckoMockedApiCall(
   l1Token: string,
@@ -7,6 +7,6 @@ export async function coingeckoMockedApiCall(
   price: ethers.BigNumber;
 }> {
   return {
-    price: BigNumber.from("0.1"),
+    price: ethers.utils.parseEther(String("0.1")),
   };
 }

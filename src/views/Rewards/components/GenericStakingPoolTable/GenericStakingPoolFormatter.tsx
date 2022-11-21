@@ -30,10 +30,10 @@ type MetaData = {
 
 const flexBasisLengths = [
   156, // Pool
-  216, // Staked LP Token
-  136, // Multiplier
+  176, // Staked LP Token
   152, // Reward APY
-  136, // Age of Capital
+  176, // Multiplier
+  152, // Age of Capital
   96, // Rewards
   108, // Button
 ];

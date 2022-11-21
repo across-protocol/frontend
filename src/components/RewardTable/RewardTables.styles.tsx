@@ -41,7 +41,7 @@ export const TableHeadRow = styled(BaseTableHeadRow)`
   background-color: #34353b;
 `;
 
-export const TableRow = BaseTableRow;
+export const TableRow = styled(BaseTableRow)``;
 
 export const EmptyRow = BaseEmptyRow;
 
