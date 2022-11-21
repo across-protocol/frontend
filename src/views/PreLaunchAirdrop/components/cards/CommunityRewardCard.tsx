@@ -122,7 +122,7 @@ const CommunityRewardCard = ({
               ? shortenAddress(linkedWallet, "...", 4)
               : "Link to Ethereum wallet",
           completedText: walletIsLinked ? "Linked" : undefined,
-          disableButton: walletIsLinked && isWalletTheSame,
+          disableButton: true,
         },
       ]}
     />
