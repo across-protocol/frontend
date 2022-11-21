@@ -12,10 +12,10 @@ type CopyReferralLinkType = {
 };
 
 const CopyReferralLink = ({ condensed: _condensed }: CopyReferralLinkType) => {
-  const { isMobile } = useCurrentBreakpoint();
+  const { helpers } = useCurrentBreakpoint();
   const { referralLink, condensedReferralLink, referralLinkWithProtocol } =
     useReferralLink();
-  const condensed = _condensed || isMobile;
+  const condensed = _condensed || helpers.tabletAndDown;
   const text = condensed ? condensedReferralLink : referralLink;
 
   const [completed, setCompleted] = useState<boolean>(false);
@@ -61,6 +61,10 @@ const Wrapper = styled.div`
   background: #2d2e33;
   border-top: 1px solid #3e4047;
   border-radius: 0px 0px 10px 10px;
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 16px;
+  }
 `;
 
 const LinkText = styled(Text)`
