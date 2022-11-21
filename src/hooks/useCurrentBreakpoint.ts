@@ -10,7 +10,7 @@ const useCurrentBreakpoint = () => {
     const updateWidthCore = () => {
       setWindowSize(window.innerWidth);
     };
-    const updateWidth = throttle(updateWidthCore, 1500);
+    const updateWidth = throttle(updateWidthCore, 500);
     window.addEventListener("resize", updateWidth);
     updateWidthCore();
     return () => window.removeEventListener("resize", updateWidth);
