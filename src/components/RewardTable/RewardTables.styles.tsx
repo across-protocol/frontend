@@ -33,6 +33,7 @@ export const Title = BaseTitle;
 
 export const TableWrapper = styled(BaseTableWrapper)`
   width: 100%;
+  border-radius: 12px;
 `;
 
 export const TableBody = BaseTableBody;
