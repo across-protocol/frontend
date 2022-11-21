@@ -8,6 +8,7 @@ import { InnerSectionWrapper, Wrapper } from "./Rewards.style";
 import GenericStakingPoolTable from "./components/GenericStakingPoolTable/GenericStakingPoolTable";
 import { LayoutV2 } from "components";
 import useScrollElementByHashIntoView from "hooks/useScrollElementByHashIntoView";
+import AdditionalQuestionCTA from "./components/AdditionalQuestionCTA";
 
 const Rewards = () => {
   const {
@@ -79,6 +80,8 @@ const Rewards = () => {
               />
             </SectionWrapper>
           )}
+
+          <AdditionalQuestionCTA />
         </InnerSectionWrapper>
       </Wrapper>
     </LayoutV2>
