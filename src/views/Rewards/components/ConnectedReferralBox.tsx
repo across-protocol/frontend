@@ -142,6 +142,7 @@ const ReferralInfoCardInnerWrapper = styled.div`
   @media ${QUERIESV2.tb.andDown} {
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     width: 100%;
   }
 `;
