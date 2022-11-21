@@ -89,7 +89,7 @@ const Wrapper = styled.div`
 
   width: 100%;
 
-  @media ${QUERIESV2.sm.andDown} {
+  @media ${QUERIESV2.tb.andDown} {
     flex-direction: column;
     gap: 16px;
   }

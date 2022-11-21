@@ -172,6 +172,10 @@ const ReferralInfoCardDataWrapper = styled.div`
   line-height: 26px;
   color: #e0f3ff;
 
+  @media ${QUERIESV2.tb.andDown} {
+    font-size: 16px;
+  }
+
   @media ${QUERIESV2.sm.andDown} {
     font-size: 14px;
   }

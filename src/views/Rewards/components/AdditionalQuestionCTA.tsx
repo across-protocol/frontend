@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { ReactComponent as ExternalLink16 } from "assets/icons/external-link-16.svg";
+import { QUERIESV2 } from "utils";
 
 const LinkButton = ({ text, link }: { text: string; link: string }) => (
   <ButtonWrapper href={link}>
@@ -14,16 +15,16 @@ const AdditionalQuestionCTA = () => (
     <Text color="white-88">
       Got any questions? Check out our FAQ and Discord.
     </Text>
-    <LinkButton text="FAQ" link="https://docs.across.to/miscellaneous/faq" />
-    <LinkButton text="Discord" link="https://discord.com/invite/across" />
+    <ExternalButtonWrapper>
+      <LinkButton text="FAQ" link="https://docs.across.to/miscellaneous/faq" />
+      <LinkButton text="Discord" link="https://discord.com/invite/across" />
+    </ExternalButtonWrapper>
   </Wrapper>
 );
 
 export default AdditionalQuestionCTA;
 
 const Wrapper = styled.div`
-  margin-top: -32px;
-
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -31,6 +32,23 @@ const Wrapper = styled.div`
 
   width: 100%;
 
+  padding: 0px;
+  gap: 24px;
+
+  @media ${QUERIESV2.tb.andUp} {
+    margin-top: -32px;
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: column;
+    text-align: center;
+  }
+`;
+
+const ExternalButtonWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
   padding: 0px;
   gap: 16px;
 `;
