@@ -64,7 +64,11 @@ const OverviewRewardSection = ({
             <card.Icon />
           </IconWrapper>
           <CardTextWrapper>
-            <CardText>{card.value ?? "-"}</CardText>
+            {card.value ? (
+              <CardText>{card.value}</CardText>
+            ) : (
+              <CardTextGray>-</CardTextGray>
+            )}
             <CardTitle>{card.title}</CardTitle>
           </CardTextWrapper>
         </CardWrapper>
@@ -143,6 +147,10 @@ const CardText = styled.div`
   font-size: 26px;
   line-height: 31px;
   color: #e0f3ff;
+`;
+
+const CardTextGray = styled(CardText)`
+  color: #9daab2;
 `;
 
 const CardTitle = styled.h3`
