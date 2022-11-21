@@ -95,10 +95,10 @@ interface IStyledProgressBar {
 export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
   &.pool-progress-bar {
     padding-right: 4px;
-    max-width: 64px;
-    border-color: ${({ active }) => (active ? "#e0f3ff" : "#9daab2")};
+    max-width: 80px;
+    border-color: ${({ active }) => (active ? "#e0f3ff" : "#4c4e57")};
     & > div {
-      background-color: ${({ active }) => (active ? "#e0f3ff" : "#9daab2")};
+      background-color: ${({ active }) => (active ? "#e0f3ff" : "#4c4e57")};
     }
   }
 `;

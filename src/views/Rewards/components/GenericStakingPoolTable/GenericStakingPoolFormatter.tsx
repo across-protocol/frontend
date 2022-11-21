@@ -29,12 +29,12 @@ type MetaData = {
 };
 
 const flexBasisLengths = [
-  172, // Pool
-  232, // Staked LP Token
-  172, // Multiplier
+  156, // Pool
+  216, // Staked LP Token
+  136, // Multiplier
   152, // Reward APY
-  168, // Age of Capital
-  112, // Rewards
+  136, // Age of Capital
+  96, // Rewards
   108, // Button
 ];
 
