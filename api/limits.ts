@@ -158,47 +158,34 @@ const handler = async (
       multicallOutput[1]
     );
 
-    switch (ethers.utils.getAddress(l1Token)) {
-      case ethers.utils.getAddress(
-        "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-      ):
-        // Add WETH cushion to LP liquidity.
-        liquidReserves = liquidReserves.sub(
-          ethers.utils.parseEther(REACT_APP_WETH_LP_CUSHION || "0")
-        );
-        break;
+    // Subtract by any env-defined cushion amount.
+    const lpCushions: { [address: string]: [string | undefined, number] } = {
+      "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2": [
+        REACT_APP_WETH_LP_CUSHION,
+        18,
+      ],
+      "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48": [
+        REACT_APP_USDC_LP_CUSHION,
+        6,
+      ],
+      "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599": [
+        REACT_APP_WBTC_LP_CUSHION,
+        8,
+      ],
+      "0x6B175474E89094C44Da98b954EedeAC495271d0F": [
+        REACT_APP_DAI_LP_CUSHION,
+        18,
+      ],
+    };
+    const [lpCushion, decimals] = lpCushions[
+      ethers.utils.getAddress(l1Token)
+    ] ?? [0, 18];
+    if (lpCushion && decimals)
+      liquidReserves = liquidReserves.sub(
+        ethers.utils.parseUnits(lpCushion, decimals)
+      );
 
-      case ethers.utils.getAddress(
-        "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
-      ):
-        // Add USDC cushion to LP liquidity.
-        liquidReserves = liquidReserves.sub(
-          ethers.utils.parseUnits(REACT_APP_USDC_LP_CUSHION || "0", 6)
-        );
-        break;
-
-      case ethers.utils.getAddress(
-        "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
-      ):
-        // Add WBTC cushion to LP liquidity.
-        liquidReserves = liquidReserves.sub(
-          ethers.utils.parseUnits(REACT_APP_WBTC_LP_CUSHION || "0", 8)
-        );
-        break;
-
-      case ethers.utils.getAddress(
-        "0x6B175474E89094C44Da98b954EedeAC495271d0F"
-      ):
-        // Add DAI cushion to LP liquidity.
-        liquidReserves = liquidReserves.sub(
-          ethers.utils.parseUnits(REACT_APP_DAI_LP_CUSHION || "0", 18)
-        );
-        break;
-
-      default:
-        liquidReserves = ethers.BigNumber.from(0);
-        break;
-    }
+    if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
 
     const maxGasFee = ethers.utils
       .parseEther(maxRelayFeePct.toString())
