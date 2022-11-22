@@ -33,6 +33,7 @@ export const Title = BaseTitle;
 
 export const TableWrapper = styled(BaseTableWrapper)`
   width: 100%;
+  border-radius: 12px;
 `;
 
 export const TableBody = BaseTableBody;
@@ -41,7 +42,7 @@ export const TableHeadRow = styled(BaseTableHeadRow)`
   background-color: #34353b;
 `;
 
-export const TableRow = BaseTableRow;
+export const TableRow = styled(BaseTableRow)``;
 
 export const EmptyRow = BaseEmptyRow;
 

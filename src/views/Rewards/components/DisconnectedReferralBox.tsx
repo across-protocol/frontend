@@ -23,7 +23,7 @@ const DisconnectedReferralBox = ({
       </IconTextWrapper>
       <ButtonWrapper>
         <MoreInfoLink to={"/"}>
-          Learn More <ExternalLinkIcon />
+          Learn more <ExternalLinkIcon />
         </MoreInfoLink>
         <ConnectButton size="lg" onClick={connectHandler}>
           Connect to get started

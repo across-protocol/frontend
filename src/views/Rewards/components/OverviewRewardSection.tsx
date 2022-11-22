@@ -64,7 +64,11 @@ const OverviewRewardSection = ({
             <card.Icon />
           </IconWrapper>
           <CardTextWrapper>
-            <CardText>{card.value ?? "-"}</CardText>
+            {card.value ? (
+              <CardText>{card.value}</CardText>
+            ) : (
+              <CardTextGray>-</CardTextGray>
+            )}
             <CardTitle>{card.title}</CardTitle>
           </CardTextWrapper>
         </CardWrapper>
@@ -85,7 +89,7 @@ const Wrapper = styled.div`
 
   width: 100%;
 
-  @media ${QUERIESV2.sm.andDown} {
+  @media ${QUERIESV2.tb.andDown} {
     flex-direction: column;
     gap: 16px;
   }
@@ -143,6 +147,10 @@ const CardText = styled.div`
   font-size: 26px;
   line-height: 31px;
   color: #e0f3ff;
+`;
+
+const CardTextGray = styled(CardText)`
+  color: #9daab2;
 `;
 
 const CardTitle = styled.h3`

@@ -11,7 +11,7 @@ export const OuterWrapper = styled.div`
   @media ${QUERIESV2.sm.andDown} {
     /* Subtract to account for header */
     min-height: calc(100vh - 64px);
-  } ;
+  }
 `;
 
 export const Wrapper = styled.div`

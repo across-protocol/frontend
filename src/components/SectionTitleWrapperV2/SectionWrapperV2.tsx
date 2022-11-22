@@ -86,5 +86,4 @@ const StyledText = styled(Text)`
   font-style: normal;
 
   text-decoration: none;
-  text-transform: capitalize;
 `;
