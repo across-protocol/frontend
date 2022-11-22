@@ -116,7 +116,7 @@ const performStakingActionBuilderFn = (
     // wait until the tx has been resolved
     try {
       const result = await callingFn(lpTokenAddress, amountAsBigNumber);
-      await notificationEmitter(result.hash, notify, 0, true);
+      await notificationEmitter(result.hash, notify, 5000, true);
     } catch (_e) {
       // We currently don't handle the error case other than to exit gracefully.
     }

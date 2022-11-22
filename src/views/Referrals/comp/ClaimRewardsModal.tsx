@@ -57,7 +57,9 @@ export function ClaimRewardsModal({ isOpen, onExit }: Props) {
         </ClaimableBox>
         <Button
           size="lg"
-          onClick={() => claimMutation.mutate()}
+          onClick={() =>
+            claimMutation.mutate(undefined, { onSuccess: () => onExit() })
+          }
           disabled={disableButton}
         >
           <Text color="warning" size="lg">
