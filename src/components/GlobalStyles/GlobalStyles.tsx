@@ -96,6 +96,10 @@ const globalStyles = css`
   body {
     background-color: var(--color-gray);
     color: var(--color-white);
+
+    -webkit-font-smoothing: antialiased;
+    -moz-font-smoothing: antialiased;
+    -o-font-smoothing: antialiased;
   }
   #root {
     min-height: 100vh;

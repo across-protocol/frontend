@@ -81,6 +81,7 @@ function useRoutes() {
     removeError,
     location,
     isAirdrop: location.pathname === "/airdrop",
+    isHomepage: location.pathname === "/",
     isContractAddress,
     config,
     enableACXBanner,
@@ -100,6 +101,7 @@ const Routes: React.FC = () => {
     isAirdrop,
     enableACXBanner,
     setEnableACXBanner,
+    isHomepage,
   } = useRoutes();
 
   return (
@@ -137,7 +139,7 @@ const Routes: React.FC = () => {
       <Header
         openSidebar={openSidebar}
         setOpenSidebar={setOpenSidebar}
-        transparentHeader={isAirdrop}
+        transparentHeader={isAirdrop || isHomepage}
       />
       <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
       <ScrollToTop />

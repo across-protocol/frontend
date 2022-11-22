@@ -4,7 +4,7 @@ describe("headers", () => {
     cy.dataCy("primary-header").should("be.visible");
   });
   it("should not be transparent on any route except airdrop", () => {
-    const routes = ["/", "/pool", "/rewards", "/transactions"];
+    const routes = ["/bridge", "/pool", "/rewards", "/transactions"];
     for (const route of routes) {
       cy.visit(route);
       cy.dataCy("primary-header").should(

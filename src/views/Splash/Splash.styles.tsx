@@ -7,6 +7,14 @@ import BGMesh from "assets/splash-mesh-bg.svg";
 export const ExternalWrapper = styled.div`
   background: url(${BGMesh});
   background-size: cover;
+
+  margin-top: -72px;
+  padding-top: 72px;
+
+  @media ${QUERIESV2.sm.andDown} {
+    margin-top: -64px;
+    padding-top: 64px;
+  }
 `;
 
 export const Wrapper = styled.div`
@@ -55,6 +63,11 @@ export const TitleText = styled.div`
 
   color: #ffffff;
 
+  @media ${QUERIESV2.tb.andDown} {
+    font-size: ${54 / 16}rem;
+    line-height: ${64 / 16}rem;
+  }
+
   @media ${QUERIESV2.sm.andDown} {
     font-size: ${40 / 16}rem;
     line-height: ${48 / 16}rem;
@@ -62,7 +75,7 @@ export const TitleText = styled.div`
 `;
 
 export const DescriptionText = styled(Text)`
-  max-width: 560px;
+  max-width: 390px;
   width: 100%;
   text-align: center;
 `;
@@ -125,7 +138,7 @@ export const DocButton = styled.a`
 `;
 
 export const NumericBenefitWrapper = styled.div`
-  padding-top: 60px;
+  padding-top: 30px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -148,7 +161,7 @@ export const NumericBenefitWrapper = styled.div`
 export const CardBenefitWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
   flex-wrap: wrap;
