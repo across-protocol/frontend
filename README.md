@@ -7,7 +7,7 @@
 Web UI for V2 of the Across Protocol.
 
 - App: https://across.to
-- Docs: https://docs.across.to/v2
+- Docs: https://docs.across.to
 - Medium: https://medium.com/across-protocol
 
 ## Development
