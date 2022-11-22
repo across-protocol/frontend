@@ -44,6 +44,10 @@ export function deriveNewStakingValues(
   if (!lpModification || lpModification.eq(0) || !modificationType) {
     return undefined;
   }
+  // Clone all aspects of the origin so that there's no chance we can
+  // modify the initial input.
+  const clonedOrigin = cloneDeep(origin);
+
   // Resolve a boolean for if the user is staking or not
   const isStake = modificationType === "stake";
   // Resolve the new staked amount based on the lpConfiguration/staking Action
@@ -52,6 +56,13 @@ export function deriveNewStakingValues(
   );
   // Resolve if the user has effectively unstaked under this new configuration
   const noStake = currentlyStaked.eq(0);
+
+  // If the non-maximum unstake action is requested, the return should mirror
+  // the origin
+  if (!noStake && !isStake) {
+    return clonedOrigin;
+  }
+
   // Update the total amount of time the user has staked weighted on this new
   // stake/unstake action
   const currentSecondsElapsedSinceAvgDeposit = BigNumber.from(
@@ -123,9 +134,6 @@ export function deriveNewStakingValues(
   // Resolve the new total APY (pool APY + rewards APY)
   const updatedTotalApy = origin.apyData.poolApy.add(updatedRewardsApy);
 
-  // Clone all aspects of the origin so that there's no chance we can
-  // modify the initial input.
-  const clonedOrigin = cloneDeep(origin);
   // Return the new configuration values with the origin values padded
   // to fill the rest of the data
   return {
