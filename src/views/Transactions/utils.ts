@@ -51,11 +51,18 @@ export function formatToTransfer(deposit: Deposit): Transfer {
 
 export function isUnprofitable(
   depositTime: number,
-  currentRelayerFeePct: BigNumber
+  currentRelayerFeePct: BigNumber,
+  thresholds: Partial<{
+    hours: number;
+    basisPoints: number;
+  }> = {}
 ): boolean {
-  const isPendingForMoreThanDay =
-    Math.abs(DateTime.fromSeconds(depositTime).diffNow().as("hours")) > 24;
-  const hasTooLowRelayerFee = currentRelayerFeePct.lt(parseEtherLike("0.0001"));
+  const { hours = 24, basisPoints = 1 } = thresholds;
+  const isPendingTooLong =
+    Math.abs(DateTime.fromSeconds(depositTime).diffNow().as("hours")) > hours;
+  const hasTooLowRelayerFee = currentRelayerFeePct.lt(
+    parseEtherLike(String(basisPoints * 0.0001))
+  );
 
-  return isPendingForMoreThanDay || hasTooLowRelayerFee;
+  return isPendingTooLong || hasTooLowRelayerFee;
 }
