@@ -48,7 +48,11 @@ export function MobileDataRow({
     <>
       <MobileTableRow onClick={toggleAccordion}>
         <TimestampCell timestamp={transfer.depositTime} />
-        <StatusCell status={transfer.status} />
+        <StatusCell
+          status={transfer.status}
+          depositTime={transfer.depositTime}
+          currentRelayerFeePct={transfer.currentRelayerFeePct}
+        />
         <FilledPercentageCell
           filled={transfer.filled}
           amount={transfer.amount}
