@@ -66,6 +66,7 @@ export function useOnboardManager() {
   const [account, setAccount] = useState<Account | null>(null);
   const [error, setError] = useState<Error | undefined>(undefined);
 
+  /** Immediately resolve the onboard when it becomes available */
   if (!onboard) setOnboard(onboardInit());
 
   const [{ wallet }, connect, disconnect] = useConnectWallet();
