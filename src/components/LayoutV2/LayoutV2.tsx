@@ -4,23 +4,29 @@ import { QUERIESV2 } from "utils";
 
 type LayoutProp = {
   maxWidth?: number;
+  transparentBackground?: boolean;
 };
 
-const LayoutV2: React.FC<LayoutProp> = ({ maxWidth, children }) => {
+const LayoutV2: React.FC<LayoutProp> = ({
+  maxWidth,
+  children,
+  transparentBackground,
+}) => {
   return (
-    <Wrapper>
+    <Wrapper transparentBackground={transparentBackground}>
       <InnerWrapper maxWidth={maxWidth ?? 600}>{children}</InnerWrapper>
       <Footer />
     </Wrapper>
   );
 };
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ transparentBackground?: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 
-  background-color: #2d2e33;
+  background-color: ${({ transparentBackground }) =>
+    transparentBackground ? "transparent" : "#2d2e33"};
 
   /* Subtract to account for header */
   min-height: calc(100vh - 72px);

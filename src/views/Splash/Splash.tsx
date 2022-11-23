@@ -24,7 +24,7 @@ const Splash = () => {
   const { numericBenefits, cardBenefits } = useSplash();
   return (
     <ExternalWrapper>
-      <LayoutV2 maxWidth={1140}>
+      <LayoutV2 transparentBackground maxWidth={1140}>
         <Wrapper>
           <TitleSegment>
             <TitleDescriptionWrapper>
