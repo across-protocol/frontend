@@ -21,6 +21,20 @@ import {
   handleErrorCondition,
 } from "./_utils";
 
+const l1Tokens: { [symbol: string]: { address: string; decimals: number } } = {
+  BAL: { address: "0xba100000625a3754423978a60c9317c58a424e3D", decimals: 18 },
+  DAI: { address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals: 18 },
+  UMA: { address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828", decimals: 18 },
+  MATIC: {
+    address: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
+    decimals: 18,
+  },
+  BOBA: { address: "0x42bBFa2e77757C645eeaAd1655E0911a7553Efbc", decimals: 18 },
+  USDC: { address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", decimals: 6 },
+  WBTC: { address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", decimals: 8 },
+  WETH: { address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", decimals: 18 },
+};
+
 const handler = async (
   { query: { token, destinationChainId, originChainId } }: LimitsInputRequest,
   response: VercelResponse
@@ -161,37 +175,26 @@ const handler = async (
       multicallOutput[1]
     );
 
-    // Subtract by any env-defined cushion amount.
-    const lpCushions: { [address: string]: [string | undefined, number] } = {
-      "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2": [
-        REACT_APP_WETH_LP_CUSHION,
-        18,
-      ],
-      "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48": [
-        REACT_APP_USDC_LP_CUSHION,
-        6,
-      ],
-      "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599": [
-        REACT_APP_WBTC_LP_CUSHION,
-        8,
-      ],
-      "0x6B175474E89094C44Da98b954EedeAC495271d0F": [
-        REACT_APP_DAI_LP_CUSHION,
-        18,
-      ],
-      "0xba100000625a3754423978a60c9317c58a424e3D": [
-        REACT_APP_BAL_LP_CUSHION,
-        18,
-      ],
-      "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828": [
-        REACT_APP_UMA_LP_CUSHION,
-        18,
-      ],
-      "0x42bBFa2e77757C645eeaAd1655E0911a7553Efbc": [
-        REACT_APP_BOBA_LP_CUSHION,
-        18,
-      ],
+    // @todo: Change env var format to a single object with symbol-based lookup.
+    const _lpCushions: { [symbol: string]: string | undefined } = {
+      BAL: REACT_APP_BAL_LP_CUSHION,
+      DAI: REACT_APP_DAI_LP_CUSHION,
+      UMA: REACT_APP_UMA_LP_CUSHION,
+      BOBA: REACT_APP_BOBA_LP_CUSHION,
+      USDC: REACT_APP_USDC_LP_CUSHION,
+      WBTC: REACT_APP_WBTC_LP_CUSHION,
+      WETH: REACT_APP_WETH_LP_CUSHION,
     };
+
+    // Subtract any env-defined cushion amount.
+    const lpCushions: { [address: string]: [string | undefined, number] } =
+      Object.fromEntries(
+        Object.entries(_lpCushions).map(([symbol, lpCushion]) => {
+          const { address, decimals } = l1Tokens[symbol];
+          return [address, [lpCushion, decimals]];
+        })
+      );
+
     const [lpCushion, decimals] = lpCushions[
       ethers.utils.getAddress(l1Token)
     ] ?? [0, 18];
