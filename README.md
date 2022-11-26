@@ -91,5 +91,5 @@ In order to run Cypress e2e tests locally, you must do the following:
 2. Run the following:
 
 ```bash
-docker compose -f hardhat-node.yml up
+docker-compose -f hardhat-node.yml up
 ```
