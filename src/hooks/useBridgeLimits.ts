@@ -1,14 +1,6 @@
 import { useQuery } from "react-query";
 import { bridgeLimitsQueryKey, ChainId } from "utils";
-import axios from "axios";
-import { BigNumber } from "ethers";
-
-export interface BridgeLimits {
-  minDeposit: BigNumber;
-  maxDeposit: BigNumber;
-  maxDepositInstant: BigNumber;
-  maxDepositShortDelay: BigNumber;
-}
+import getApiEndpoint from "utils/serverless-api";
 
 /**
  * This hook calculates the limit .
@@ -29,19 +21,7 @@ export function useBridgeLimits(
     : "DISABLED_BRIDGE_LIMITS_QUERY";
   const { data: limits, ...delegated } = useQuery(
     queryKey,
-    async (): Promise<BridgeLimits> => {
-      const response = (
-        await axios.get(
-          `/api/limits?token=${token}&originChainId=${fromChainId}&destinationChainId=${toChainId}`
-        )
-      ).data;
-      return {
-        minDeposit: BigNumber.from(response.minDeposit),
-        maxDeposit: BigNumber.from(response.maxDeposit),
-        maxDepositInstant: BigNumber.from(response.maxDepositInstant),
-        maxDepositShortDelay: BigNumber.from(response.maxDepositShortDelay),
-      };
-    },
+    async () => getApiEndpoint().limits(token!, fromChainId!, toChainId!),
     {
       enabled: enabledQuery,
       // 5 mins.

@@ -6,10 +6,12 @@ import { suggestedFeesApiCall } from "./suggested-fees.prod";
 import rewardsApiCall from "./rewards";
 import { getDepositStats } from "./get-deposit-stats.prod";
 import { coingeckoApiCall } from "./coingecko";
+import { retrieveLimits } from "./bridge-limits.prod";
 
 export const prodEndpoints: ServerlessAPIEndpoints = {
   coingecko: coingeckoApiCall,
   suggestedFees: suggestedFeesApiCall,
+  limits: retrieveLimits,
   prelaunch: {
     rewards: rewardsApiCall,
     linkedWallet: retrieveLinkedWallet,
