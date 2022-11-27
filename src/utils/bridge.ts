@@ -22,6 +22,9 @@ import {
   wethLpCushion,
   wbtcLpCushion,
   daiLpCushion,
+  balLpCushion,
+  umaLpCushion,
+  bobaLpCushion,
 } from "./constants";
 import { getProvider } from "./providers";
 import { parseEther, tagAddress } from "./format";
@@ -336,6 +339,30 @@ export default class LpFeeCalculator {
       // Add DAI cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
         ethers.utils.parseUnits(daiLpCushion || "0", 18)
+      );
+    } else if (
+      ethers.utils.getAddress(tokenAddress) ===
+      ethers.utils.getAddress("0xba100000625a3754423978a60c9317c58a424e3D")
+    ) {
+      // Add BAL cushion to LP liquidity.
+      liquidReserves = pooledTokens.liquidReserves.sub(
+        ethers.utils.parseUnits(balLpCushion || "0", 18)
+      );
+    } else if (
+      ethers.utils.getAddress(tokenAddress) ===
+      ethers.utils.getAddress("0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828")
+    ) {
+      // Add UMA cushion to LP liquidity.
+      liquidReserves = pooledTokens.liquidReserves.sub(
+        ethers.utils.parseUnits(umaLpCushion || "0", 18)
+      );
+    } else if (
+      ethers.utils.getAddress(tokenAddress) ===
+      ethers.utils.getAddress("0x42bBFa2e77757C645eeaAd1655E0911a7553Efbc")
+    ) {
+      // Add BOBA cushion to LP liquidity.
+      liquidReserves = pooledTokens.liquidReserves.sub(
+        ethers.utils.parseUnits(bobaLpCushion || "0", 18)
       );
     }
 

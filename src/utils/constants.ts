@@ -631,6 +631,9 @@ export const usdcLpCushion = process.env.REACT_APP_USDC_LP_CUSHION || "0";
 export const wethLpCushion = process.env.REACT_APP_WETH_LP_CUSHION || "0";
 export const wbtcLpCushion = process.env.REACT_APP_WBTC_LP_CUSHION || "0";
 export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
+export const balLpCushion = process.env.REACT_APP_BAL_LP_CUSHION || "0";
+export const umaLpCushion = process.env.REACT_APP_UMA_LP_CUSHION || "0";
+export const bobaLpCushion = process.env.REACT_APP_BOBA_LP_CUSHION || "0";
 
 export const maxRelayFee = 0.25; // 25%
 export const minRelayFee = 0.0001; // 0.01%
