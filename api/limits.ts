@@ -35,6 +35,9 @@ const handler = async (
       REACT_APP_WETH_LP_CUSHION,
       REACT_APP_DAI_LP_CUSHION,
       REACT_APP_WBTC_LP_CUSHION,
+      REACT_APP_BAL_LP_CUSHION,
+      REACT_APP_UMA_LP_CUSHION,
+      REACT_APP_BOBA_LP_CUSHION,
     } = process.env;
     const providerUrl = `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
     const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl);
@@ -174,6 +177,18 @@ const handler = async (
       ],
       "0x6B175474E89094C44Da98b954EedeAC495271d0F": [
         REACT_APP_DAI_LP_CUSHION,
+        18,
+      ],
+      "0xba100000625a3754423978a60c9317c58a424e3D": [
+        REACT_APP_BAL_LP_CUSHION,
+        18,
+      ],
+      "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828": [
+        REACT_APP_UMA_LP_CUSHION,
+        18,
+      ],
+      "0x42bBFa2e77757C645eeaAd1655E0911a7553Efbc": [
+        REACT_APP_BOBA_LP_CUSHION,
         18,
       ],
     };
