@@ -6,6 +6,8 @@ import { useConnection, useIsWrongNetwork } from "hooks";
 
 import { useAirdropRecipient } from "./useAirdropRecipient";
 import { useIsAirdropClaimed } from "./useIsAirdropClaimed";
+import { parseEther } from "@ethersproject/units";
+import { fixedPointAdjustment } from "utils";
 
 const config = getConfig();
 
@@ -29,14 +31,24 @@ export function useClaimAndStake() {
     }
 
     const claimAndStakeContract = config.getClaimAndStake(signer);
-
-    const claimAndStakeTx = await claimAndStakeContract.claimAndStake({
+    const parameters = {
       windowIndex: airdropRecipientQuery.data.windowIndex,
       amount: airdropRecipientQuery.data.amount,
       accountIndex: airdropRecipientQuery.data.accountIndex,
       merkleProof: airdropRecipientQuery.data.proof,
       account,
-    });
+    };
+
+    const gasEstimate = await claimAndStakeContract.estimateGas.claimAndStake(
+      parameters
+    );
+
+    const claimAndStakeTx = await claimAndStakeContract.claimAndStake(
+      parameters,
+      {
+        gasLimit: gasEstimate.mul(parseEther("1.5")).div(fixedPointAdjustment),
+      }
+    );
     await notificationEmitter(claimAndStakeTx.hash, notify, 0);
   };
 
