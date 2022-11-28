@@ -277,8 +277,7 @@ const fetchStakingPool = async (
       .mul(secondsPerYear)
       .mul(acxPriceInUSD || BigNumber.from(0))
       .div(fixedPointAdjustment),
-    usdCumulativeStakedValue,
-    usdStakedValue
+    usdCumulativeStakedValue
   );
 
   // We need the amount of tokens that the user has in both their balance
