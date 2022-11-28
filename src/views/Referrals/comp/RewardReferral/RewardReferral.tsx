@@ -119,7 +119,7 @@ const ReferralLinkComponent: React.FC<{
               Connect to get started
             </ConnectButton>
             <ExternalLink
-              href="https://docs.across.to/v2/how-to-use-across/referral-program"
+              href="https://docs.across.to/how-to-use-across/rewards/referral-rewards#how-to-earn-referral-rewards"
               text="Learn more"
             />
           </ReferralLinkButtonsRow>

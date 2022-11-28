@@ -41,7 +41,7 @@ const Splash = () => {
               <BridgeButton to="/bridge">
                 <ButtonText size="lg">Go to Bridge</ButtonText>
               </BridgeButton>
-              <DocButton href="https://docs.across.to/v2/">
+              <DocButton href="https://docs.across.to/">
                 <Text color="white-100" size="lg">
                   Read docs
                 </Text>
