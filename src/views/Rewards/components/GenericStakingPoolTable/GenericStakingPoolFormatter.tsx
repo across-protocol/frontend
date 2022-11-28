@@ -150,10 +150,10 @@ function RowRewardAPYCell({ data, meta }: PoolRowCellType) {
   return (
     <StackedCell>
       <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-        {formatWeiPct(data.apyData.totalApy, 0)}%
+        {formatWeiPct(data.apyData.totalApy, 2)}%
       </Text>
       <Text color="white-70" size="sm">
-        Max: {formatWeiPct(data.apyData.maxApy, 0)}%
+        Max: {formatWeiPct(data.apyData.maxApy, 2)}%
       </Text>
     </StackedCell>
   );
