@@ -46,7 +46,7 @@ export function useClaimAndStake() {
     const claimAndStakeTx = await claimAndStakeContract.claimAndStake(
       parameters,
       {
-        gasLimit: gasEstimate.mul(parseEther("1.5")).div(fixedPointAdjustment),
+        gasLimit: gasEstimate.mul(parseEther("2.0")).div(fixedPointAdjustment),
       }
     );
     await notificationEmitter(claimAndStakeTx.hash, notify, 0);
