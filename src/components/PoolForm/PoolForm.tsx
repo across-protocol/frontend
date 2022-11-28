@@ -1,5 +1,5 @@
 import { FC, useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import Tabs from "../Tabs";
 import AddLiquidityForm from "./AddLiquidityForm";
 import RemoveLiquidityForm from "./RemoveLiquidityForm";
@@ -26,7 +26,7 @@ import {
   formatNumberMaxFracDigits,
   toWeiSafe,
 } from "utils";
-import { useConnection } from "hooks";
+import { ConverterFnType, useConnection } from "hooks";
 import type { ShowSuccess } from "views/Pool";
 import useSetLiquidityFormErrors from "./useSetLiquidityFormErrors";
 import maxClickHandler from "./maxClickHandler";
@@ -57,6 +57,8 @@ interface Props {
   projectedApr: string;
   chainId: ChainId;
   refetchPool: () => void;
+  convertFromUSD?: ConverterFnType;
+  convertToUSD?: ConverterFnType;
 }
 
 const PoolForm: FC<Props> = ({
@@ -83,6 +85,8 @@ const PoolForm: FC<Props> = ({
   projectedApr,
   chainId,
   refetchPool,
+  convertFromUSD: inputConvertFromUSD,
+  convertToUSD: inputConvertToUSD,
 }) => {
   const poolClient = getPoolClient();
   const [inputAmount, setInputAmount] = useState("");
@@ -95,6 +99,9 @@ const PoolForm: FC<Props> = ({
     DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE
   );
   const { isConnected, signer } = useConnection();
+
+  const convertFromUSD = inputConvertFromUSD ?? ((v: BigNumber) => v);
+  const convertToUSD = inputConvertToUSD ?? ((v: BigNumber) => v);
 
   // update our add-liquidity to contract call gas usage on an interval for eth only
   useEffect(() => {

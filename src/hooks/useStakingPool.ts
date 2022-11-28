@@ -25,6 +25,7 @@ const config = getConfig();
 
 export type FormatterFnType = (wei: BigNumberish) => string;
 export type ParserFnType = (wei: string) => BigNumber;
+export type ConverterFnType = (wei: BigNumber) => BigNumber;
 
 export type StakingPool = {
   tokenLogoURI: string;
@@ -59,9 +60,11 @@ export type StakingPool = {
   isStakingPoolOfUser: boolean;
   lpTokenFormatter: FormatterFnType;
   lpTokenParser: ParserFnType;
+  convertUsdToLPValue: ConverterFnType;
+  convertLPValueToUsd: ConverterFnType;
 };
 
-type PoolQueryData = {
+export type PoolQueryData = {
   estimatedApy: string;
   totalPoolSize: BigNumberish;
   exchangeRateCurrent: string;
@@ -264,12 +267,21 @@ const fetchStakingPool = async (
           .mul(100)
       );
 
-  const usdCumulativeStakedValue = BigNumber.from(lpExchangeRateToUSD)
-    .mul(ConvertDecimals(lpTokenDecimalCount, 18)(cumulativeStaked))
-    .div(fixedPointAdjustment);
-  const usdStakedValue = BigNumber.from(lpExchangeRateToUSD)
-    .mul(ConvertDecimals(lpTokenDecimalCount, 18)(userAmountOfLPStaked))
-    .div(fixedPointAdjustment);
+  const convertLPValueToUsd = (lpAmount: BigNumber) =>
+    BigNumber.from(lpExchangeRateToUSD)
+      .mul(ConvertDecimals(lpTokenDecimalCount, 18)(lpAmount))
+      .div(fixedPointAdjustment);
+
+  const convertUsdToLPValue = (usdAmount: BigNumber) =>
+    BigNumber.from(
+      ConvertDecimals(
+        18,
+        lpTokenDecimalCount
+      )(usdAmount.mul(fixedPointAdjustment).div(lpExchangeRateToUSD))
+    );
+
+  const usdCumulativeStakedValue = convertLPValueToUsd(cumulativeStaked);
+  const usdStakedValue = convertLPValueToUsd(userAmountOfLPStaked);
 
   // Estimated base rewards APR
   const baseRewardsApy = getBaseRewardsApr(
@@ -356,6 +368,8 @@ const fetchStakingPool = async (
     secondsToMaxMultiplier,
     lpTokenFormatter,
     lpTokenParser,
+    convertUsdToLPValue,
+    convertLPValueToUsd,
   };
 };
 
@@ -392,4 +406,6 @@ export const DEFAULT_STAKING_POOL_DATA: StakingPool = {
     rewardsApy: BigNumber.from(0),
     minApy: BigNumber.from(0),
   },
+  convertUsdToLPValue: () => BigNumber.from(0),
+  convertLPValueToUsd: () => BigNumber.from(0),
 };
