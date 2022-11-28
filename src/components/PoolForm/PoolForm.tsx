@@ -17,7 +17,6 @@ import {
   ROIItem,
 } from "./PoolForm.styles";
 import {
-  formatUnits,
   estimateGasForAddEthLiquidity,
   DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE,
   UPDATE_GAS_INTERVAL_MS,
@@ -25,6 +24,7 @@ import {
   formatPoolAPY,
   formatNumberMaxFracDigits,
   toWeiSafe,
+  formatEther,
 } from "utils";
 import { ConverterFnType, useConnection } from "hooks";
 import type { ShowSuccess } from "views/Pool";
@@ -170,17 +170,16 @@ const PoolForm: FC<Props> = ({
         <PositionItem>
           <div>Position Size</div>
           <div data-cy="pool-position">
-            {formatUnits(totalPosition.add(stakedPosition), decimals).replace(
-              "-",
-              ""
-            )}{" "}
+            {formatEther(
+              convertToUSD(totalPosition.add(stakedPosition))
+            ).replace("-", "")}{" "}
             {symbol}
           </div>
         </PositionItem>
         <PositionItem>
           <div>Total fees earned</div>
           <div>
-            {formatUnits(feesEarned, decimals)} {symbol}
+            {formatEther(convertToUSD(feesEarned))} {symbol}
           </div>
         </PositionItem>
       </Position>
@@ -188,7 +187,7 @@ const PoolForm: FC<Props> = ({
         <ROIItem>
           <div>Total pool size:</div>
           <div>
-            {formatPoolAPY(totalPoolSize, decimals)} {symbol}
+            {formatEther(convertToUSD(totalPoolSize))} {symbol}
           </div>
         </ROIItem>
         <ROIItem>
@@ -252,16 +251,16 @@ const PoolForm: FC<Props> = ({
             wrongNetwork={wrongNetwork}
             removeAmountSlider={removeAmountSlider}
             setRemoveAmountSlider={setRemoveAmountSlider}
-            lpTokens={lpTokens}
+            lpTokens={convertFromUSD(lpTokens)}
             decimals={decimals}
             symbol={symbol}
             tokenAddress={tokenAddress}
             setShowSuccess={setShowSuccess}
             setDepositUrl={setDepositUrl}
             balance={balance}
-            position={position}
-            feesEarned={feesEarned}
-            totalPosition={totalPosition}
+            position={convertToUSD(position)}
+            feesEarned={convertToUSD(feesEarned)}
+            totalPosition={convertToUSD(totalPosition)}
             refetchBalance={refetchBalance}
             chainId={chainId}
             error={removeFormError}
