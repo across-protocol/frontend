@@ -414,7 +414,7 @@ export const tokenList: TokenInfoList = [
     symbol: "ACX",
     decimals: 18,
     logoURI: "/logos/acx-logo.svg",
-    mainnetAddress: getAddress("0x40153DdFAd90C49dbE3F5c9F96f2a5B25ec67461"), // TODO: replace with mainnet address
+    mainnetAddress: getAddress("0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F"),
   },
 ];
 
