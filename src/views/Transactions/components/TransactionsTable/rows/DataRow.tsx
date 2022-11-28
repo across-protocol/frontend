@@ -37,7 +37,11 @@ export function DataRow({
   return (
     <TableRow>
       <TimestampCell timestamp={transfer.depositTime} />
-      <StatusCell status={transfer.status} />
+      <StatusCell
+        status={transfer.status}
+        depositTime={transfer.depositTime}
+        currentRelayerFeePct={transfer.currentRelayerFeePct}
+      />
       <FilledPercentageCell filled={transfer.filled} amount={transfer.amount} />
       <ChainCell chainId={transfer.sourceChainId as ChainId} />
       <ChainCell chainId={transfer.destinationChainId as ChainId} />

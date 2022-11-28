@@ -10,23 +10,28 @@ import {
   WrongNetworkError,
   rewardsBannerWarning,
   generalMaintenanceMessage,
+  stringValueInArray,
+  getConfig,
 } from "utils";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
+import ACXLiveBanner from "components/ACXLiveBanner/ACXLiveBanner";
+import ScrollToTop from "components/ScrollToTop";
 
 const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
+const Referrals = lazy(
+  () => import(/* webpackChunkName: "Referrals" */ "./views/Referrals")
+);
 const Rewards = lazy(
   () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
 );
 const Send = lazy(() => import(/* webpackChunkName: "Send" */ "./views/Send"));
-const About = lazy(
-  () => import(/* webpackChunkName: "About" */ "./views/About")
+const Splash = lazy(
+  () => import(/* webpackChunkName: "Splash" */ "./views/Splash")
 );
-const Claim = lazy(
-  () => import(/* webpackChunkName: "Claim" */ "./views/Claim")
-);
+const Airdrop = lazy(() => import("./views/Airdrop"));
 const MyTransactions = lazy(
   () =>
     import(
@@ -39,19 +44,8 @@ const AllTransactions = lazy(
       /* webpackChunkName: "AllTransactions" */ "./views/Transactions/allTransactions"
     )
 );
-
-const PreLaunchAirdrop = lazy(
-  () =>
-    import(
-      /* webpackChunkName: "PreLaunchAirdrop" */ "./views/PreLaunchAirdrop/PreLaunchAirdrop"
-    )
-);
-
-const DiscordAuth = lazy(
-  () =>
-    import(
-      /* webpackChunkName: "DiscordAuth" */ "./views/DiscordAuth/DiscordAuth"
-    )
+const Staking = lazy(
+  () => import(/* webpackChunkName: "RewardStaking" */ "./views/Staking")
 );
 
 const warningMessage = `
@@ -61,12 +55,14 @@ const warningMessage = `
 `;
 
 function useRoutes() {
-  const [transparentHeader, setTransparentHeader] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
+  const [enableACXBanner, setEnableACXBanner] = useState(true);
   const { provider, isContractAddress } = useConnection();
   const location = useLocation();
   const history = useHistory();
   const { error, removeError } = useError();
+  const config = getConfig();
+  // force the user on /pool page if showMigrationPage is active.
 
   // This UseEffect performs the following operations:
   //    1. Force the user to /pool if showMigrationPage is active
@@ -75,7 +71,6 @@ function useRoutes() {
     if (enableMigration && location.pathname !== "/pool") {
       history.push("/pool");
     }
-    setTransparentHeader(location.pathname === "/airdrop");
   }, [location.pathname, history]);
 
   return {
@@ -85,8 +80,12 @@ function useRoutes() {
     error,
     removeError,
     location,
-    transparentHeader,
+    isAirdrop: location.pathname === "/airdrop",
+    isHomepage: location.pathname === "/",
     isContractAddress,
+    config,
+    enableACXBanner,
+    setEnableACXBanner,
   };
 }
 // Need this component for useLocation hook
@@ -97,8 +96,12 @@ const Routes: React.FC = () => {
     error,
     removeError,
     location,
+    config,
     isContractAddress,
-    transparentHeader,
+    isAirdrop,
+    enableACXBanner,
+    setEnableACXBanner,
+    isHomepage,
   } = useRoutes();
 
   return (
@@ -130,24 +133,42 @@ const Routes: React.FC = () => {
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
+      {!isAirdrop && enableACXBanner && (
+        <ACXLiveBanner enableHandler={setEnableACXBanner} />
+      )}
       <Header
         openSidebar={openSidebar}
         setOpenSidebar={setOpenSidebar}
-        transparentHeader={transparentHeader}
+        transparentHeader={isAirdrop || isHomepage}
       />
-      <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />{" "}
+      <Sidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
+      <ScrollToTop />
       <Suspense fallback={<BouncingDotsLoader />}>
         <Switch>
           <Route exact path="/transactions" component={MyTransactions} />
           <Route exact path="/transactions/all" component={AllTransactions} />
           <Route exact path="/pool" component={Pool} />
-          <Route exact path="/about" component={About} />
+          <Route exact path="/rewards/referrals" component={Referrals} />
           <Route exact path="/rewards" component={Rewards} />
-          <Route exact path="/rewards/claim" component={Claim} />
-          <Route exact path="/airdrop" component={PreLaunchAirdrop} />
-          <Route exact path="/auth/discord" component={DiscordAuth} />
-          <Route exact path="/" component={Send} />
-          <Route component={NotFound} />
+          <Route exact path="/airdrop" component={Airdrop} />
+          <Route
+            exact
+            path="/rewards/staking/:poolId"
+            render={({ match }) => {
+              const poolIdFound = stringValueInArray(
+                match.params.poolId.toLowerCase(),
+                config.getPoolSymbols()
+              );
+
+              if (poolIdFound) {
+                return <Staking />;
+              } else {
+                return <NotFound custom404Message="Pool not found." />;
+              }
+            }}
+          />
+          <Route exact path="/bridge" component={Send} />
+          <Route exact path="/" component={Splash} />
         </Switch>
       </Suspense>
       <Toast position="top-right" />

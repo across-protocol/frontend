@@ -1,6 +1,6 @@
 import { ChildrenWrapper, StyledInfoIcon, Wrapper } from "./Alert.styles";
 
-export type AlertStatusType = "warn";
+export type AlertStatusType = "warn" | "danger";
 
 type AlertProps = {
   status: AlertStatusType;

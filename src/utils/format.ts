@@ -1,5 +1,6 @@
-import { ethers } from "ethers";
+import { BigNumber, BigNumberish, ethers } from "ethers";
 import assert from "assert";
+import numeral from "numeral";
 
 export function isValidString(s: string | null | undefined | ""): s is string {
   if (s != null && typeof s === "string" && s !== "") {
@@ -47,6 +48,35 @@ export function shortenString(
   )}`;
 }
 
+/**
+ * Shortens an arbitrary string to a fixed number of characters, mindful of the character length of the delimiter
+ * @param str The string to be potentially shortened
+ * @param delimiter The delimiter
+ * @param maxChars The number of characters to constrain this string
+ * @returns `str` if string is less than maxChars. The first `maxChars` chars if the delimiter is too large. A collapsed version with the delimiter in the middle.
+ */
+export function shortenStringToLength(
+  str: string,
+  delimiter: string,
+  maxChars: number
+) {
+  if (str.length <= maxChars) {
+    return str;
+  } else {
+    const charsNeeded = maxChars - delimiter.length;
+    // Delimiter is out of bounds
+    if (charsNeeded <= 0) {
+      return str.slice(0, maxChars);
+    } else {
+      const charDivision = charsNeeded / 2;
+      const left = str.slice(0, Math.ceil(charDivision));
+      const right =
+        charDivision < 1 ? "" : str.slice(-Math.floor(charDivision));
+      return `${left}${delimiter}${right}`;
+    }
+  }
+}
+
 export function shortenTransactionHash(hash: string): string {
   return `${hash.substring(0, 5)}...`;
 }
@@ -84,6 +114,13 @@ export function formatUnits(
   return smallNumberFormatter(value);
 }
 
+export function formatUnitsFnBuilder(decimals: number) {
+  function closure(wei: ethers.BigNumberish) {
+    return formatUnits(wei, decimals);
+  }
+  return closure;
+}
+
 export function makeFormatUnits(decimals: number) {
   return (wei: ethers.BigNumberish) => formatUnits(wei, decimals);
 }
@@ -100,8 +137,46 @@ export function parseUnits(value: string, decimals: number): ethers.BigNumber {
   return ethers.utils.parseUnits(value, decimals);
 }
 
-export function parseEther(value: string): ethers.BigNumber {
+export function parseUnitsFnBuilder(decimals: number) {
+  function closure(value: string) {
+    return parseUnits(value, decimals);
+  }
+  return closure;
+}
+
+export function parseEtherLike(value: string): ethers.BigNumber {
   return parseUnits(value, 18);
+}
+
+/**
+ * Checks if a given input is parseable
+ * @param amount A bignumberish value that will be attempted to be parsed
+ * @returns A boolean if this value can be parsed
+ */
+export function isNumberEthersParseable(amount: BigNumberish): boolean {
+  try {
+    parseEtherLike(amount.toString());
+    return true;
+  } catch (_e) {
+    return false;
+  }
+}
+
+/**
+ * Returns the formatted number version of a BigNumber value
+ * @param value A bignumber to be converted via `formatEther` and returned
+ * @param decimals The number of units to format `value` with. Default: 18
+ * @returns `formatEther(value)` as a Number, or NaN if impossible
+ */
+export function formattedBigNumberToNumber(
+  value: BigNumber,
+  decimals: number = 18
+): number {
+  try {
+    return Number(formatUnits(value, decimals));
+  } catch (_e) {
+    return Number.NaN;
+  }
 }
 
 export function stringToHex(value: string) {
@@ -152,6 +227,13 @@ export const formatNumberMaxFracDigits = threeMaxFracFormatter.format.bind(
   threeMaxFracFormatter
 );
 
+const twoMaxFracFormatter = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 2,
+});
+
+export const formatNumberTwoFracDigits =
+  twoMaxFracFormatter.format.bind(twoMaxFracFormatter);
+
 export function formatPoolAPY(
   wei: ethers.BigNumberish,
   decimals: number
@@ -161,8 +243,23 @@ export function formatPoolAPY(
   );
 }
 
-export function formatWeiPct(wei: ethers.BigNumberish, precision: number = 3) {
+export function formatWeiPct(wei?: ethers.BigNumberish, precision: number = 3) {
+  if (wei === undefined) {
+    return undefined;
+  }
+
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: precision,
   }).format(Number(ethers.utils.formatEther(wei)) * 100);
+}
+
+/**
+ * Formats a number into a human readable format
+ * @param num The number to format
+ * @returns A human readable format. I.e. 1000 -> 1K, 1001 -> 1K+
+ */
+export function humanReadableNumber(num: number): string {
+  num = Math.round(num);
+  if (num <= 0) return "0";
+  return numeral(num).format("0a").toUpperCase() + "+";
 }

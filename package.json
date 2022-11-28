@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@across-protocol/contracts-v2": "^1.0.4",
+    "@across-protocol/across-token": "^0.0.2",
+    "@across-protocol/contracts-v2": "^1.0.7",
     "@across-protocol/sdk-v2": "0.1.33",
     "@datapunt/matomo-tracker-js": "^0.5.1",
     "@emotion/react": "^11.4.1",
@@ -43,6 +44,7 @@
     "jose": "^4.9.3",
     "lodash-es": "^4.17.21",
     "luxon": "^2.3.1",
+    "numeral": "^2.0.6",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-feather": "^2.0.9",
@@ -66,8 +68,8 @@
     "serve": "serve -s build",
     "test-api": "jest test/api",
     "eject": "react-scripts eject",
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
+    "lint": "eslint src api cypress test",
+    "lint:fix": "eslint --fix src api cypress test",
     "predeploy": "yarn sitemap",
     "sitemap": "babel-node src/sitemap-generator.js",
     "prepare": "husky install",
@@ -107,6 +109,7 @@
     "@storybook/testing-library": "^0.0.13",
     "@testing-library/react-hooks": "^8.0.1",
     "@types/luxon": "^2.3.0",
+    "@types/numeral": "^2.0.2",
     "@types/react-lottie": "^1.2.6",
     "@types/react-slider": "^1.3.1",
     "@vercel/node": "^2.5.13",
@@ -125,7 +128,8 @@
     "prettier": "^2.4.1",
     "serve": "^14.0.1",
     "ts-jest": "^26.5.6",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "tsconfig-paths-webpack-plugin": "^4.0.0"
   },
   "babel": {
     "env": {

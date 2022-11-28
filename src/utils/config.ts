@@ -7,9 +7,17 @@ import {
   HubPool__factory,
   SpokePool,
   SpokePool__factory,
+  AcrossMerkleDistributor,
+  AcrossMerkleDistributor__factory,
 } from "@across-protocol/contracts-v2";
 import filter from "lodash/filter";
 import sortBy from "lodash/sortBy";
+import {
+  AcceleratingDistributor,
+  AcceleratingDistributor__factory,
+  ClaimAndStake,
+  ClaimAndStake__factory,
+} from "@across-protocol/across-token";
 
 export type Token = constants.TokenInfo & {
   l1TokenAddress: string;
@@ -83,6 +91,34 @@ export class ConfigClient {
   getHubPoolAddress(): string {
     return this.config.hubPoolAddress;
   }
+  getAcceleratingDistributorAddress(): string {
+    return (
+      process.env.REACT_APP_ACCELERATING_DISTRIBUTOR_ADDRESS ||
+      this.config.acceleratingDistributorAddress ||
+      "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48"
+    );
+  }
+  getAcrossTokenAddress(): string {
+    return (
+      process.env.REACT_APP_ACROSS_TOKEN_ADDRESS ||
+      this.config.acrossTokenAddress ||
+      "0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F"
+    );
+  }
+  getMerkleDistributorAddress(): string {
+    return (
+      process.env.REACT_APP_MERKLE_DISTRIBUTOR_ADDRESS ||
+      this.config.merkleDistributorAddress ||
+      "0xE50b2cEAC4f60E840Ae513924033E753e2366487"
+    );
+  }
+  getClaimAndStakeAddress(): string {
+    return (
+      process.env.REACT_APP_CLAIM_AND_STAKE_ADDRESS ||
+      this.config.claimAndStakeAddress ||
+      "0x985e8A89Dd6Af8896Ef075c8dd93512433dc5829"
+    );
+  }
   getL1TokenAddressBySymbol(symbol: string) {
     // all routes have an l1Token address, so just find the first symbol that matches
     const route = this.getRoutes().find((x) => x.fromTokenSymbol === symbol);
@@ -94,6 +130,24 @@ export class ConfigClient {
     const provider =
       signer ?? providerUtils.getProvider(this.getHubPoolChainId());
     return HubPool__factory.connect(address, provider);
+  }
+  getAcceleratingDistributor(signer?: Signer): AcceleratingDistributor {
+    const address = this.getAcceleratingDistributorAddress();
+    const provider =
+      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
+    return AcceleratingDistributor__factory.connect(address, provider);
+  }
+  getMerkleDistributor(signer?: Signer): AcrossMerkleDistributor {
+    const address = this.getMerkleDistributorAddress();
+    const provider =
+      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
+    return AcrossMerkleDistributor__factory.connect(address, provider);
+  }
+  getClaimAndStake(signer?: Signer): ClaimAndStake {
+    const address = this.getClaimAndStakeAddress();
+    const provider =
+      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
+    return ClaimAndStake__factory.connect(address, provider);
   }
   filterRoutes(query: Partial<constants.Route>): constants.Routes {
     const cleanQuery: Partial<constants.Route> = Object.fromEntries(
@@ -221,6 +275,11 @@ export class ConfigClient {
     );
     // use token sorting when returning reachable tokens
     return sortBy(reachableTokens, (token) => this.tokenOrder[token.symbol]);
+  }
+  getPoolSymbols(): string[] {
+    const tokenList = this.getTokenList(constants.hubPoolChainId);
+    const poolSymbols = tokenList.map((token) => token.symbol.toLowerCase());
+    return poolSymbols;
   }
   depositDelays() {
     try {

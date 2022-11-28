@@ -4,4 +4,5 @@ export interface ICell {
 
 export interface IRow {
   cells: ICell[];
+  explorerLink?: JSX.Element;
 }

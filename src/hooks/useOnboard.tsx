@@ -6,6 +6,7 @@ import {
   UnsupportedChainIdError,
   isSupportedChainId,
   insideStorybookRuntime,
+  hubPoolChainId,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
@@ -51,7 +52,7 @@ type OnboardContextValue = {
 
 const notify = Notify({
   dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
-  networkId: 1,
+  networkId: hubPoolChainId,
   desktopPosition: "topRight",
 });
 
@@ -80,7 +81,9 @@ export function useOnboardManager() {
 
     if (wallet?.provider) {
       setProvider(new ethers.providers.Web3Provider(wallet.provider, "any"));
-      setSigner(new ethers.providers.Web3Provider(wallet.provider).getSigner());
+      setSigner(
+        new ethers.providers.Web3Provider(wallet.provider, "any").getSigner()
+      );
     } else {
       setProvider(null);
       setSigner(undefined);

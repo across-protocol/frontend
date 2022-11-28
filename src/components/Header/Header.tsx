@@ -16,14 +16,22 @@ import { enableMigration } from "utils";
 import { ReactComponent as Logo } from "assets/across-mobile-logo.svg";
 import useScrollPosition from "hooks/useScrollPosition";
 import { isChildPath } from "./utils";
+import { Text } from "components/Text";
 
 const LINKS = !enableMigration
   ? [
-      { href: "/", name: "Bridge" },
+      { href: "/bridge", name: "Bridge" },
       { href: "/pool", name: "Pool" },
       { href: "/rewards", name: "Rewards" },
       { href: "/transactions", name: "Transactions" },
-      { href: "/airdrop", name: "Airdrop" },
+      {
+        href: "/airdrop",
+        name: (
+          <Text color="aqua" size="md">
+            Airdrop
+          </Text>
+        ),
+      },
     ]
   : [];
 

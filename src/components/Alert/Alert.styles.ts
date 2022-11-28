@@ -12,6 +12,11 @@ const AlertColors: Record<
     fontColor: "#f9d26c",
     borderColor: "rgba(249, 210, 108, 0.1)",
   },
+  danger: {
+    bgColor: "rgba(249, 108, 108, 0.05)",
+    fontColor: "#f96c6c",
+    borderColor: "rgba(249, 108, 108, 0.1)",
+  },
 };
 
 type IncludeStatusType = {
@@ -41,6 +46,11 @@ export const Wrapper = styled.div<IncludeStatusType>`
     font-size: 14px;
     line-height: 18px;
   }
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 12px;
+    gap: 12px;
+  }
 `;
 
 export const ChildrenWrapper = styled.div``;
@@ -57,5 +67,9 @@ export const StyledInfoIcon = styled(InfoIcon)<IncludeStatusType>`
   @media ${QUERIESV2.tb.andDown} {
     height: 20px;
     width: 20px;
+  }
+  @media ${QUERIESV2.sm.andDown} {
+    height: 16px;
+    width: 16px;
   }
 `;

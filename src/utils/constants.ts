@@ -9,11 +9,13 @@ import polygonLogo from "assets/polygon-logo.svg";
 import { getAddress } from "./address";
 import * as superstruct from "superstruct";
 import { relayFeeCalculator } from "@across-protocol/sdk-v2";
+import { across } from "@uma/sdk";
 
 // all routes should be pre imported to be able to switch based on chain id
 import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import GoerliRoutes from "data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
+import { parseEtherLike } from "./format";
 
 /* Chains and Tokens section */
 export enum ChainId {
@@ -408,7 +410,7 @@ export const tokenList: TokenInfoList = [
     mainnetAddress: getAddress("0xdAC17F958D2ee523a2206206994597C13D831ec7"),
   },
   {
-    name: "Across Protocol Token",
+    name: "ACX",
     symbol: "ACX",
     decimals: 18,
     logoURI: "/logos/acx-logo.svg",
@@ -435,6 +437,12 @@ assert(
 
 // PROCESS.ENV variables
 export const rewardsApiUrl = process.env.REACT_APP_REWARDS_API_URL;
+export const airdropWindowIndex = Number(
+  process.env.REACT_APP_AIRDROP_WINDOW_INDEX || 0
+);
+export const referralsStartWindowIndex = Number(
+  process.env.REACT_APP_REFERRALS_START_WINDOW_INDEX || airdropWindowIndex + 1
+);
 export const mediumUrl = process.env.REACT_APP_MEDIUM_URL;
 export const hubPoolChainId = Number(
   process.env.REACT_APP_HUBPOOL_CHAINID || 1
@@ -462,6 +470,8 @@ export const FLAT_RELAY_CAPITAL_FEE = process.env
   .REACT_APP_FLAT_RELAY_CAPITAL_FEE
   ? Number(process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE)
   : 0;
+export const SHOW_ACX_NAV_TOKEN =
+  process.env.REACT_APP_SHOW_ACX_NAV_TOKEN === "true";
 export const AddressZero = ethers.constants.AddressZero;
 export const ArbitrumProviderUrl =
   process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
@@ -522,6 +532,10 @@ const RouteConfigSS = superstruct.type({
   hubPoolWethAddress: superstruct.string(),
   hubPoolChain: superstruct.number(),
   hubPoolAddress: superstruct.string(),
+  acrossTokenAddress: superstruct.optional(superstruct.string()),
+  acceleratingDistributorAddress: superstruct.optional(superstruct.string()),
+  merkleDistributorAddress: superstruct.optional(superstruct.string()),
+  claimAndStakeAddress: superstruct.optional(superstruct.string()),
 });
 export type RouteConfig = superstruct.Infer<typeof RouteConfigSS>;
 export type Route = superstruct.Infer<typeof RouteSS>;
@@ -630,6 +644,8 @@ const getQueriesTable = () => {
   };
 };
 
+export const fixedPointAdjustment = parseEtherLike("1.0");
+
 export const queriesTable = getQueriesTable();
 
 export const referrerDelimiterHex = "0xd00dfeeddeadbeef";
@@ -642,6 +658,9 @@ export const balLpCushion = process.env.REACT_APP_BAL_LP_CUSHION || "0";
 export const umaLpCushion = process.env.REACT_APP_UMA_LP_CUSHION || "0";
 export const bobaLpCushion = process.env.REACT_APP_BOBA_LP_CUSHION || "0";
 
+export function stringValueInArray(value: string, arr: string[]) {
+  return arr.indexOf(value) !== -1;
+}
 export const maxRelayFee = 0.25; // 25%
 export const minRelayFee = 0.0001; // 0.01%
 // Chains where Blocknative Notify can be used. See https://docs.blocknative.com/notify#initialization
@@ -669,3 +688,34 @@ export const QUERIESV2 = {
 };
 
 export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);
+
+export const rewardTiers = [
+  {
+    title: "Copper tier",
+    titleSecondary: "40% referral rate",
+    body: "Starting tier with no requirements to join.",
+  },
+  {
+    title: "Bronzer tier",
+    titleSecondary: "50% referral rate",
+    body: "Requires over $50,000 of bridge volume or 3 unique referral transfers.",
+  },
+  {
+    title: "Silver tier",
+    titleSecondary: "60% referral rate",
+    body: "Requires over $100,000 of bridge volume or 5 unique referral transfers.",
+  },
+  {
+    title: "Gold tier",
+    titleSecondary: "70% referral rate",
+    body: "Requires over $250,000 of bridge volume or 10 unique referral transfers.",
+  },
+  {
+    title: "Platinum tier",
+    titleSecondary: "80% referral rate",
+    body: "Requires over $500,000 of bridge volume or 20 unique referral transfers.",
+  },
+];
+
+export const secondsPerYear = across.constants.SECONDS_PER_YEAR;
+export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day

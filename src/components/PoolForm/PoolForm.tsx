@@ -38,6 +38,7 @@ interface Props {
   totalPoolSize: ethers.BigNumber;
   totalPosition: ethers.BigNumber;
   position: ethers.BigNumber;
+  stakedPosition: ethers.BigNumber;
   feesEarned: ethers.BigNumber;
   hubPoolAddress: string;
   lpTokens: ethers.BigNumber;
@@ -55,6 +56,7 @@ interface Props {
   utilization: string;
   projectedApr: string;
   chainId: ChainId;
+  refetchPool: () => void;
 }
 
 const PoolForm: FC<Props> = ({
@@ -63,6 +65,7 @@ const PoolForm: FC<Props> = ({
   decimals,
   totalPoolSize,
   totalPosition,
+  stakedPosition,
   apy,
   position,
   feesEarned,
@@ -79,6 +82,7 @@ const PoolForm: FC<Props> = ({
   utilization,
   projectedApr,
   chainId,
+  refetchPool,
 }) => {
   const poolClient = getPoolClient();
   const [inputAmount, setInputAmount] = useState("");
@@ -159,7 +163,11 @@ const PoolForm: FC<Props> = ({
         <PositionItem>
           <div>Position Size</div>
           <div data-cy="pool-position">
-            {formatUnits(totalPosition, decimals).replace("-", "")} {symbol}
+            {formatUnits(totalPosition.add(stakedPosition), decimals).replace(
+              "-",
+              ""
+            )}{" "}
+            {symbol}
           </div>
         </PositionItem>
         <PositionItem>
@@ -229,6 +237,7 @@ const PoolForm: FC<Props> = ({
               )
             }
             chainId={chainId}
+            refetchPool={refetchPool}
           />
         </TabContentWrapper>
         <TabContentWrapper data-label="Remove" data-cy="remove-liquidity-form">
@@ -260,6 +269,7 @@ const PoolForm: FC<Props> = ({
                 setRemoveAmount
               )
             }
+            refetchPool={refetchPool}
           />
         </TabContentWrapper>
       </Tabs>

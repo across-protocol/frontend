@@ -26,8 +26,9 @@ import {
   umaLpCushion,
   bobaLpCushion,
 } from "./constants";
+
+import { parseEtherLike, tagAddress } from "./format";
 import { getProvider } from "./providers";
-import { parseEther, tagAddress } from "./format";
 import { getConfig } from "utils";
 import getApiEndpoint from "./serverless-api";
 
@@ -99,7 +100,7 @@ export async function getLpFee(
   );
   result.isLiquidityInsufficient =
     await lpFeeCalculator.isLiquidityInsufficient(l1TokenAddress, amount);
-  result.total = amount.mul(result.pct).div(parseEther("1"));
+  result.total = amount.mul(result.pct).div(parseEtherLike("1"));
   return result;
 }
 

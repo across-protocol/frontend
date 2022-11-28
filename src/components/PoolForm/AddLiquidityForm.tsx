@@ -43,6 +43,7 @@ interface Props {
   refetchBalance: () => void;
   onMaxClick: () => void;
   chainId: ChainId;
+  refetchPool: () => void;
 }
 
 const AddLiquidityForm: FC<Props> = ({
@@ -60,6 +61,8 @@ const AddLiquidityForm: FC<Props> = ({
   formError,
   onMaxClick,
   chainId,
+  refetchBalance,
+  refetchPool,
 }) => {
   const poolClient = getPoolClient();
   const { addError } = useError();
@@ -178,6 +181,7 @@ const AddLiquidityForm: FC<Props> = ({
             setTxSubmitted(false);
             const url = `https://etherscan.io/tx/${transaction.hash}`;
             setDepositUrl(url);
+            refetchPool();
             if (account)
               setTimeout(
                 () => updateEthBalance({ chainId: 1, account }),

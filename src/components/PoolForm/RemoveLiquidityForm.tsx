@@ -60,6 +60,7 @@ interface Props {
   error: string;
   setError: React.Dispatch<React.SetStateAction<string>>;
   onMaxClick: () => void;
+  refetchPool: () => void;
 }
 const RemoveLiqudityForm: FC<Props> = ({
   removeAmount,
@@ -80,6 +81,7 @@ const RemoveLiqudityForm: FC<Props> = ({
   error,
   setError,
   onMaxClick,
+  refetchPool,
 }) => {
   const poolClient = getPoolClient();
   const { isConnected, provider, signer, notify, account, connect } =
@@ -96,6 +98,9 @@ const RemoveLiqudityForm: FC<Props> = ({
   useEffect(() => {
     validateForm(removeAmount, position.toString(), decimals, symbol, setError);
   }, [removeAmount, removeAmountSlider, position, decimals, symbol, setError]);
+
+  const buttonDisabled =
+    !error && ethers.utils.parseEther(removeAmount || "0").eq(0);
 
   const handleButtonClick = async () => {
     if (!provider) {
@@ -136,6 +141,7 @@ const RemoveLiqudityForm: FC<Props> = ({
             setShowSuccess("withdraw");
             setDepositUrl(url);
             setTxSubmitted(false);
+            refetchPool();
             if (account)
               setTimeout(
                 () => updateEthBalance({ chainId: 1, account }),
@@ -318,7 +324,7 @@ const RemoveLiqudityForm: FC<Props> = ({
           <RemoveFormButton
             data-cy="remove-liquidity-button"
             onClick={handleButtonClick}
-            disabled={(wrongNetwork && !provider) || !!error}
+            disabled={(wrongNetwork && !provider) || !!error || buttonDisabled}
           >
             {buttonMessage()}
             {txSubmitted ? (
