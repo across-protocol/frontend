@@ -57,7 +57,7 @@ export function ClaimAirdrop({
           to support bridging ACX cross-chain, and earning up to{" "}
           {maxApyPct ?? "-"}% APY. Read more{" "}
           <ExternalLinkWithUnderline
-            href="https://docs.across.to/v2"
+            href="https://docs.across.to/how-to-use-across/rewards/reward-locking"
             target="_blank"
             rel="noreferrer"
           >
