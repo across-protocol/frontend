@@ -266,10 +266,19 @@ export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
+export const providerForChain: {
+  [chainId: number]: ethers.providers.StaticJsonRpcProvider;
+} = {
+  1: infuraProvider(1),
+  10: infuraProvider(10),
+  137: infuraProvider(137),
+  288: bobaProvider(),
+  42161: infuraProvider(42161),
+};
 export const queries: Record<number, () => QueryBase> = {
   1: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      infuraProvider(1),
+      providerForChain[1],
       undefined,
       undefined,
       undefined,
@@ -280,7 +289,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   10: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
-      infuraProvider(10),
+      providerForChain[10],
       undefined,
       undefined,
       undefined,
@@ -291,7 +300,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   137: () =>
     new sdk.relayFeeCalculator.PolygonQueries(
-      infuraProvider(137),
+      providerForChain[137],
       undefined,
       undefined,
       undefined,
@@ -302,7 +311,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   288: () =>
     new sdk.relayFeeCalculator.BobaQueries(
-      bobaProvider(),
+      providerForChain[288],
       undefined,
       undefined,
       undefined,
@@ -313,7 +322,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   42161: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
-      infuraProvider(42161),
+      providerForChain[42161],
       undefined,
       undefined,
       undefined,
@@ -414,7 +423,7 @@ export const getProvider = (_chainId: number): providers.Provider => {
     if (override) {
       providerCache[chainId] = override;
     } else {
-      providerCache[chainId] = infuraProvider(_chainId);
+      providerCache[chainId] = providerForChain[_chainId];
     }
   }
   return providerCache[chainId];
