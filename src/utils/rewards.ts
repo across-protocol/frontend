@@ -8,23 +8,15 @@ import { cloneDeep } from "lodash";
 
 export function getBaseRewardsApr(
   rewardsPerYearInUSD: BigNumber,
-  totalStakedInUSD: BigNumber,
-  userStakedInUSD?: BigNumber
+  totalStakedInUSD: BigNumber
 ) {
   if (totalStakedInUSD.isZero()) {
     totalStakedInUSD = parseEther("1");
   }
 
-  if (!userStakedInUSD || userStakedInUSD.isZero()) {
-    return safeDivide(
-      rewardsPerYearInUSD.mul(fixedPointAdjustment),
-      totalStakedInUSD
-    );
-  }
-
   return safeDivide(
-    rewardsPerYearInUSD.mul(userStakedInUSD).mul(fixedPointAdjustment),
-    totalStakedInUSD.pow(2)
+    rewardsPerYearInUSD.mul(fixedPointAdjustment),
+    totalStakedInUSD
   );
 }
 
