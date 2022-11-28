@@ -35,6 +35,9 @@ const handler = async (
       REACT_APP_WETH_LP_CUSHION,
       REACT_APP_DAI_LP_CUSHION,
       REACT_APP_WBTC_LP_CUSHION,
+      REACT_APP_BAL_LP_CUSHION,
+      REACT_APP_UMA_LP_CUSHION,
+      REACT_APP_BOBA_LP_CUSHION,
     } = process.env;
     const providerUrl = `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
     const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl);
@@ -106,7 +109,9 @@ const handler = async (
       hubPool.interface.encodeFunctionData("pooledTokens", [l1Token]),
     ];
 
-    let tokenPrice = await getCachedTokenPrice(l1Token);
+    // @todo: Generalise the resolution of chainId => gasToken.
+    const baseCurrency = destinationChainId === "137" ? "matic" : "eth";
+    const tokenPrice = await getCachedTokenPrice(l1Token, baseCurrency);
 
     const [
       relayerFeeDetails,
@@ -156,39 +161,44 @@ const handler = async (
       multicallOutput[1]
     );
 
-    if (
-      ethers.utils.getAddress(l1Token) ===
-      ethers.utils.getAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
-    ) {
-      // Add WETH cushion to LP liquidity.
+    // Subtract by any env-defined cushion amount.
+    const lpCushions: { [address: string]: [string | undefined, number] } = {
+      "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2": [
+        REACT_APP_WETH_LP_CUSHION,
+        18,
+      ],
+      "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48": [
+        REACT_APP_USDC_LP_CUSHION,
+        6,
+      ],
+      "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599": [
+        REACT_APP_WBTC_LP_CUSHION,
+        8,
+      ],
+      "0x6B175474E89094C44Da98b954EedeAC495271d0F": [
+        REACT_APP_DAI_LP_CUSHION,
+        18,
+      ],
+      "0xba100000625a3754423978a60c9317c58a424e3D": [
+        REACT_APP_BAL_LP_CUSHION,
+        18,
+      ],
+      "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828": [
+        REACT_APP_UMA_LP_CUSHION,
+        18,
+      ],
+      "0x42bBFa2e77757C645eeaAd1655E0911a7553Efbc": [
+        REACT_APP_BOBA_LP_CUSHION,
+        18,
+      ],
+    };
+    const [lpCushion, decimals] = lpCushions[
+      ethers.utils.getAddress(l1Token)
+    ] ?? [0, 18];
+    if (lpCushion && decimals)
       liquidReserves = liquidReserves.sub(
-        ethers.utils.parseEther(REACT_APP_WETH_LP_CUSHION || "0")
+        ethers.utils.parseUnits(lpCushion, decimals)
       );
-    } else if (
-      ethers.utils.getAddress(l1Token) ===
-      ethers.utils.getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
-    ) {
-      // Add USDC cushion to LP liquidity.
-      liquidReserves = liquidReserves.sub(
-        ethers.utils.parseUnits(REACT_APP_USDC_LP_CUSHION || "0", 6)
-      );
-    } else if (
-      ethers.utils.getAddress(l1Token) ===
-      ethers.utils.getAddress("0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599")
-    ) {
-      // Add WBTC cushion to LP liquidity.
-      liquidReserves = liquidReserves.sub(
-        ethers.utils.parseUnits(REACT_APP_WBTC_LP_CUSHION || "0", 8)
-      );
-    } else if (
-      ethers.utils.getAddress(l1Token) ===
-      ethers.utils.getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F")
-    ) {
-      // Add DAI cushion to LP liquidity.
-      liquidReserves = liquidReserves.sub(
-        ethers.utils.parseUnits(REACT_APP_DAI_LP_CUSHION || "0", 18)
-      );
-    }
 
     if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
 

@@ -25,7 +25,7 @@ function useBridgeTravelerCard(
   const check: CheckIconState =
     !isConnected || isWalletEligible === undefined
       ? "undetermined"
-      : isWalletEligible
+      : isCompleted
       ? "eligible"
       : "ineligible";
 
@@ -36,14 +36,9 @@ function useBridgeTravelerCard(
   let cardDescription =
     "Have you bridged before but have yet to use Across? Connect your wallet to check if you're eligible for an airdrop through the Bridge Traveler Program.";
   if (isConnected && isWalletEligible !== undefined) {
-    if (isWalletEligible) {
-      if (isCompleted) {
-        cardDescription =
-          "Congratulations, traveler! You are eligible for the Bridge Traveler Program airdrop.";
-      } else {
-        cardDescription =
-          "Finish the steps to become eligible for an airdrop through the Bridge Traveler Program.";
-      }
+    if (isCompleted) {
+      cardDescription =
+        "Congratulations, traveler! You are eligible for the Bridge Traveler Program airdrop.";
     } else {
       cardDescription =
         "This wallet isn't eligible for the Bridge Traveler Program airdrop. If you have multiple wallets you could try connecting to a different one.";

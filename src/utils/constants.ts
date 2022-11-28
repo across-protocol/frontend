@@ -545,7 +545,7 @@ export function getRoutes(chainId: ChainId): RouteConfig {
 export const routeConfig = getRoutes(hubPoolChainId);
 export const hubPoolAddress = routeConfig.hubPoolAddress;
 export const migrationPoolV2Warning =
-  process.env.REACT_APP_MIGRATION_POOL_V2_WARNING;
+  process.env.REACT_APP_MIGRATION_POOL_V2_WARNING === "true";
 export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
 export const generalMaintenanceMessage =
   process.env.REACT_APP_GENERAL_MAINTENANCE_MESSAGE;
@@ -638,6 +638,9 @@ export const usdcLpCushion = process.env.REACT_APP_USDC_LP_CUSHION || "0";
 export const wethLpCushion = process.env.REACT_APP_WETH_LP_CUSHION || "0";
 export const wbtcLpCushion = process.env.REACT_APP_WBTC_LP_CUSHION || "0";
 export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
+export const balLpCushion = process.env.REACT_APP_BAL_LP_CUSHION || "0";
+export const umaLpCushion = process.env.REACT_APP_UMA_LP_CUSHION || "0";
+export const bobaLpCushion = process.env.REACT_APP_BOBA_LP_CUSHION || "0";
 
 export const maxRelayFee = 0.25; // 25%
 export const minRelayFee = 0.0001; // 0.01%

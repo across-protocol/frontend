@@ -54,7 +54,7 @@ export default function useSidebar(openSidebar: boolean) {
     },
     {
       title: "Docs",
-      link: "https://docs.across.to/v2/",
+      link: "https://docs.across.to/",
       isExternalLink: true,
     },
     {
