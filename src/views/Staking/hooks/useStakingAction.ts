@@ -1,10 +1,16 @@
 import { useMutation } from "react-query";
-import { BigNumber, Signer } from "ethers";
+import { BigNumber, Signer, utils } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 import { API } from "bnc-notify";
 
 import { useConnection, useStakingPool } from "hooks";
-import { getConfig, MAX_APPROVAL_AMOUNT, notificationEmitter } from "utils";
+import {
+  fixedPointAdjustment,
+  getConfig,
+  MAX_APPROVAL_AMOUNT,
+  notificationEmitter,
+  gasEstimationMultiplier,
+} from "utils";
 
 export type StakingActionFunctionArgs = { amount: BigNumber };
 export type StakingActionFunctionType = (
@@ -115,7 +121,15 @@ const performStakingActionBuilderFn = (
     // Call the generate the transaction to stake/unstake and
     // wait until the tx has been resolved
     try {
-      const result = await callingFn(lpTokenAddress, amountAsBigNumber);
+      const gasEstimate = await acceleratingDistributor.estimateGas[action](
+        lpTokenAddress,
+        amountAsBigNumber
+      );
+      const result = await callingFn(lpTokenAddress, amountAsBigNumber, {
+        gasLimit: gasEstimate
+          .mul(utils.parseEther(String(gasEstimationMultiplier)))
+          .div(fixedPointAdjustment),
+      });
       await notificationEmitter(result.hash, notify, 5000, true);
     } catch (_e) {
       // We currently don't handle the error case other than to exit gracefully.
