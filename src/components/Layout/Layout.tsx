@@ -23,7 +23,6 @@ const FooterWrapper = styled.div`
 `;
 
 const Wrapper = styled.div`
-  position: relative;
   display: grid;
   padding: 0 10px;
   grid-template-columns: 1fr min(var(--central-content), 100%) 1fr;
