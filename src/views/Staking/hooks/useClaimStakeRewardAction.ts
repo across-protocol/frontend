@@ -3,6 +3,7 @@ import { Signer } from "ethers";
 import { useConnection, useStakingPool } from "hooks";
 import { useMutation } from "react-query";
 import { getConfig, notificationEmitter } from "utils";
+import { sendWithPaddedGas } from "utils/transactions";
 
 export function useClaimStakeRewardAction(tokenAddress?: string) {
   const { signer, notify } = useConnection();
@@ -36,9 +37,10 @@ const performClaimingAction = async (
     getConfig().getAcceleratingDistributor(signer);
   try {
     // Attempt to request a reward withdrawl via the AcceleratingDistributor contract
-    const resultingTx = await acceleratingDistributor.withdrawReward(
-      lpTokenAddress
-    );
+    const resultingTx = await sendWithPaddedGas(
+      acceleratingDistributor,
+      "withdrawReward"
+    )(lpTokenAddress);
     // Send this to onboard's notify API to track the TX
     await notificationEmitter(resultingTx.hash, notify, 0, true);
   } catch (_e) {
