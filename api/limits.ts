@@ -21,18 +21,19 @@ import {
   handleErrorCondition,
 } from "./_utils";
 
+// Note: Addresses must be checksummed.
 const l1Tokens: { [symbol: string]: { address: string; decimals: number } } = {
   BAL: { address: "0xba100000625a3754423978a60c9317c58a424e3D", decimals: 18 },
   DAI: { address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals: 18 },
   UMA: { address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828", decimals: 18 },
   MATIC: {
-    address: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
+    address: "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
     decimals: 18,
   },
   BOBA: { address: "0x42bBFa2e77757C645eeaAd1655E0911a7553Efbc", decimals: 18 },
   USDC: { address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", decimals: 6 },
   WBTC: { address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", decimals: 8 },
-  WETH: { address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", decimals: 18 },
+  WETH: { address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", decimals: 18 },
 };
 
 const handler = async (
