@@ -15,6 +15,7 @@ export type Deposit = {
   amount: string;
   depositTxHash: string;
   fillTxs: string[];
+  depositRelayerFeePct?: string;
 };
 
 type Pagination = {
