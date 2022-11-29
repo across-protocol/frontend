@@ -7,7 +7,7 @@ import { useConnection, useIsWrongNetwork } from "hooks";
 import { useAirdropRecipient } from "./useAirdropRecipient";
 import { useIsAirdropClaimed } from "./useIsAirdropClaimed";
 import { parseEther } from "@ethersproject/units";
-import { fixedPointAdjustment } from "utils";
+import { fixedPointAdjustment, gasEstimationMultiplier } from "utils";
 
 const config = getConfig();
 
@@ -46,7 +46,9 @@ export function useClaimAndStake() {
     const claimAndStakeTx = await claimAndStakeContract.claimAndStake(
       parameters,
       {
-        gasLimit: gasEstimate.mul(parseEther("2.0")).div(fixedPointAdjustment),
+        gasLimit: gasEstimate
+          .mul(parseEther(String(gasEstimationMultiplier)))
+          .div(fixedPointAdjustment),
       }
     );
     await notificationEmitter(claimAndStakeTx.hash, notify, 0);
