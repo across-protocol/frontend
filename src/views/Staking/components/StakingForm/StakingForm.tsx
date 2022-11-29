@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { utils } from "ethers";
 import {
   Card,
   Tabs,
@@ -59,9 +60,10 @@ export const StakingForm = ({
   };
 
   const buttonMaxValue = maximumValue;
-  const buttonMaxValueText = poolData
-    .lpTokenFormatter(buttonMaxValue)
-    .replaceAll(",", "");
+  const buttonMaxValueText = utils.formatUnits(
+    buttonMaxValue,
+    poolData.lpTokenDecimalCount
+  );
 
   const ArrowIcon = isPoolInfoVisible ? ArrowIconUp : ArrowIconDown;
 
