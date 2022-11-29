@@ -436,6 +436,9 @@ assert(
 );
 
 // PROCESS.ENV variables
+export const gasEstimationMultiplier = Number(
+  process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER || 2
+);
 export const rewardsApiUrl = process.env.REACT_APP_REWARDS_API_URL;
 export const airdropWindowIndex = Number(
   process.env.REACT_APP_AIRDROP_WINDOW_INDEX || 0
