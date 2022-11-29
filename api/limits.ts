@@ -23,6 +23,7 @@ import {
 
 // Note: Addresses must be checksummed.
 const l1Tokens: { [symbol: string]: { address: string; decimals: number } } = {
+  ACX: { address: "0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F", decimals: 18 },
   BAL: { address: "0xba100000625a3754423978a60c9317c58a424e3D", decimals: 18 },
   DAI: { address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals: 18 },
   UMA: { address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828", decimals: 18 },
