@@ -62,6 +62,8 @@ export type StakingPool = {
   lpTokenParser: ParserFnType;
   convertUsdToLPValue: ConverterFnType;
   convertLPValueToUsd: ConverterFnType;
+  convertLPToUnderlying: ConverterFnType;
+  convertUnderlyingToLP: ConverterFnType;
 };
 
 export type PoolQueryData = {
@@ -280,6 +282,11 @@ const fetchStakingPool = async (
       )(usdAmount.mul(fixedPointAdjustment).div(lpExchangeRateToUSD))
     );
 
+  const convertLPToUnderlying = (lp: BigNumber) =>
+    lp.mul(lpExchangeRateToToken).div(fixedPointAdjustment);
+  const convertUnderlyingToLP = (underlying: BigNumber) =>
+    underlying.mul(fixedPointAdjustment).div(lpExchangeRateToToken);
+
   const usdCumulativeStakedValue = convertLPValueToUsd(cumulativeStaked);
   const usdStakedValue = convertLPValueToUsd(userAmountOfLPStaked);
 
@@ -370,6 +377,8 @@ const fetchStakingPool = async (
     lpTokenParser,
     convertUsdToLPValue,
     convertLPValueToUsd,
+    convertLPToUnderlying,
+    convertUnderlyingToLP,
   };
 };
 
@@ -408,4 +417,6 @@ export const DEFAULT_STAKING_POOL_DATA: StakingPool = {
   },
   convertUsdToLPValue: () => BigNumber.from(0),
   convertLPValueToUsd: () => BigNumber.from(0),
+  convertLPToUnderlying: () => BigNumber.from(0),
+  convertUnderlyingToLP: () => BigNumber.from(0),
 };

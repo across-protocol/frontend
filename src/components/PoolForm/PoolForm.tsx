@@ -57,8 +57,8 @@ interface Props {
   projectedApr: string;
   chainId: ChainId;
   refetchPool: () => void;
-  convertFromUSD?: ConverterFnType;
-  convertToUSD?: ConverterFnType;
+  convertFromLP?: ConverterFnType;
+  convertToLP?: ConverterFnType;
 }
 
 const PoolForm: FC<Props> = ({
@@ -85,8 +85,8 @@ const PoolForm: FC<Props> = ({
   projectedApr,
   chainId,
   refetchPool,
-  convertFromUSD: inputConvertFromUSD,
-  convertToUSD: inputConvertToUSD,
+  convertFromLP: inputConvertFromLP,
+  convertToLP: inputConvertToLP,
 }) => {
   const poolClient = getPoolClient();
   const [inputAmount, setInputAmount] = useState("");
@@ -100,8 +100,8 @@ const PoolForm: FC<Props> = ({
   );
   const { isConnected, signer } = useConnection();
 
-  const convertFromUSD = inputConvertFromUSD ?? ((v: BigNumber) => v);
-  const convertToUSD = inputConvertToUSD ?? ((v: BigNumber) => v);
+  const convertFromLP = inputConvertFromLP ?? ((v: BigNumber) => v);
+  const convertToLP = inputConvertToLP ?? ((v: BigNumber) => v);
 
   // update our add-liquidity to contract call gas usage on an interval for eth only
   useEffect(() => {
@@ -171,23 +171,21 @@ const PoolForm: FC<Props> = ({
           <div>Position Size</div>
           <div data-cy="pool-position">
             {formatEther(
-              convertToUSD(totalPosition.add(stakedPosition))
+              convertToLP(totalPosition.add(stakedPosition))
             ).replace("-", "")}{" "}
             {symbol}
           </div>
         </PositionItem>
         <PositionItem>
           <div>Total fees earned</div>
-          <div>
-            {formatEther(convertToUSD(feesEarned))} {symbol}
-          </div>
+          <div>{/* {formatEther(convertToLP(feesEarned))} {symbol} */}-</div>
         </PositionItem>
       </Position>
       <ROI data-cy="pool-info-box">
         <ROIItem>
           <div>Total pool size:</div>
           <div>
-            {formatEther(convertToUSD(totalPoolSize))} {symbol}
+            {formatEther(convertToLP(totalPoolSize))} {symbol}
           </div>
         </ROIItem>
         <ROIItem>
