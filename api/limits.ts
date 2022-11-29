@@ -45,13 +45,6 @@ const handler = async (
       REACT_APP_PUBLIC_INFURA_ID,
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
-      REACT_APP_USDC_LP_CUSHION,
-      REACT_APP_WETH_LP_CUSHION,
-      REACT_APP_DAI_LP_CUSHION,
-      REACT_APP_WBTC_LP_CUSHION,
-      REACT_APP_BAL_LP_CUSHION,
-      REACT_APP_UMA_LP_CUSHION,
-      REACT_APP_BOBA_LP_CUSHION,
     } = process.env;
     const providerUrl = `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
     const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl);
@@ -86,6 +79,12 @@ const handler = async (
       token,
       originChainId
     );
+
+    const symbol = Object.keys(l1Tokens).find(
+      (symbol) => l1Tokens[symbol].address === l1Token
+    );
+    if (symbol === undefined)
+      throw new InputError(`Unsupported token address: ${token}`);
 
     const [tokenDetailsResult, routeEnabledResult] = await Promise.allSettled([
       getTokenDetails(provider, l1Token, undefined, destinationChainId),
@@ -175,34 +174,11 @@ const handler = async (
       multicallOutput[1]
     );
 
-    // @todo: Change env var format to a single object with symbol-based lookup.
-    const _lpCushions: { [symbol: string]: string | undefined } = {
-      BAL: REACT_APP_BAL_LP_CUSHION,
-      DAI: REACT_APP_DAI_LP_CUSHION,
-      UMA: REACT_APP_UMA_LP_CUSHION,
-      BOBA: REACT_APP_BOBA_LP_CUSHION,
-      USDC: REACT_APP_USDC_LP_CUSHION,
-      WBTC: REACT_APP_WBTC_LP_CUSHION,
-      WETH: REACT_APP_WETH_LP_CUSHION,
-    };
-
-    // Subtract any env-defined cushion amount.
-    const lpCushions: { [address: string]: [string | undefined, number] } =
-      Object.fromEntries(
-        Object.entries(_lpCushions).map(([symbol, lpCushion]) => {
-          const { address, decimals } = l1Tokens[symbol];
-          return [address, [lpCushion, decimals]];
-        })
-      );
-
-    const [lpCushion, decimals] = lpCushions[
-      ethers.utils.getAddress(l1Token)
-    ] ?? [0, 18];
-    if (lpCushion && decimals)
-      liquidReserves = liquidReserves.sub(
-        ethers.utils.parseUnits(lpCushion, decimals)
-      );
-
+    const lpCushion = ethers.utils.parseUnits(
+      process.env[`REACT_APP_${symbol}_LP_CUSHION`] ?? "0",
+      l1Tokens[symbol].decimals
+    );
+    liquidReserves = liquidReserves.sub(lpCushion);
     if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
 
     const maxGasFee = ethers.utils
