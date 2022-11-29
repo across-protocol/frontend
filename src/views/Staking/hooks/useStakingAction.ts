@@ -97,18 +97,19 @@ const performStakingActionBuilderFn = (
     // with the provided LP Token
     if (innerApprovalRequired) {
       const lpER20 = ERC20__factory.connect(lpTokenAddress, signer);
-      const approvalResult = await lpER20.approve(
-        acceleratingDistributor.address,
-        MAX_APPROVAL_AMOUNT
-      );
+
       try {
+        const approvalResult = await lpER20.approve(
+          acceleratingDistributor.address,
+          MAX_APPROVAL_AMOUNT
+        );
         // Wait for the transaction to return successful
         await notificationEmitter(approvalResult.hash, notify);
+        innerApprovalRequired = false;
       } catch (_e) {
         // If this function fails to resolve (or the user rejects), we don't proceed.
         return;
       }
-      innerApprovalRequired = false;
     }
     const callingFn = sendWithPaddedGas(acceleratingDistributor, action);
     const amountAsBigNumber = BigNumber.from(amount);
