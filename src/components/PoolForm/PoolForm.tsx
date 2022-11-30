@@ -85,7 +85,6 @@ const PoolForm: FC<Props> = ({
   projectedApr,
   chainId,
   refetchPool,
-  convertFromLP: inputConvertFromLP,
   convertToLP: inputConvertToLP,
 }) => {
   const poolClient = getPoolClient();
@@ -100,7 +99,6 @@ const PoolForm: FC<Props> = ({
   );
   const { isConnected, signer } = useConnection();
 
-  const convertFromLP = inputConvertFromLP ?? ((v: BigNumber) => v);
   const convertToLP = inputConvertToLP ?? ((v: BigNumber) => v);
 
   // update our add-liquidity to contract call gas usage on an interval for eth only
@@ -185,7 +183,7 @@ const PoolForm: FC<Props> = ({
         <ROIItem>
           <div>Total pool size:</div>
           <div>
-            {formatEther(convertToLP(totalPoolSize))} {symbol}
+            {formatPoolAPY(totalPoolSize, decimals)} {symbol}
           </div>
         </ROIItem>
         <ROIItem>
@@ -249,16 +247,16 @@ const PoolForm: FC<Props> = ({
             wrongNetwork={wrongNetwork}
             removeAmountSlider={removeAmountSlider}
             setRemoveAmountSlider={setRemoveAmountSlider}
-            lpTokens={convertFromUSD(lpTokens)}
+            lpTokens={lpTokens}
             decimals={decimals}
             symbol={symbol}
             tokenAddress={tokenAddress}
             setShowSuccess={setShowSuccess}
             setDepositUrl={setDepositUrl}
             balance={balance}
-            position={convertToUSD(position)}
-            feesEarned={convertToUSD(feesEarned)}
-            totalPosition={convertToUSD(totalPosition)}
+            position={position}
+            feesEarned={feesEarned}
+            totalPosition={totalPosition}
             refetchBalance={refetchBalance}
             chainId={chainId}
             error={removeFormError}
