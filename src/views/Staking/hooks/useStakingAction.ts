@@ -1,16 +1,11 @@
 import { useMutation } from "react-query";
-import { BigNumber, Signer, utils } from "ethers";
+import { BigNumber, Signer } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 import { API } from "bnc-notify";
 
 import { useConnection, useStakingPool } from "hooks";
-import {
-  fixedPointAdjustment,
-  getConfig,
-  MAX_APPROVAL_AMOUNT,
-  notificationEmitter,
-  gasEstimationMultiplier,
-} from "utils";
+import { getConfig, MAX_APPROVAL_AMOUNT, notificationEmitter } from "utils";
+import { sendWithPaddedGas } from "utils/transactions";
 
 export type StakingActionFunctionArgs = { amount: BigNumber };
 export type StakingActionFunctionType = (
@@ -102,34 +97,27 @@ const performStakingActionBuilderFn = (
     // with the provided LP Token
     if (innerApprovalRequired) {
       const lpER20 = ERC20__factory.connect(lpTokenAddress, signer);
-      const approvalResult = await lpER20.approve(
-        acceleratingDistributor.address,
-        MAX_APPROVAL_AMOUNT
-      );
+
       try {
+        const approvalResult = await lpER20.approve(
+          acceleratingDistributor.address,
+          MAX_APPROVAL_AMOUNT
+        );
         // Wait for the transaction to return successful
         await notificationEmitter(approvalResult.hash, notify);
+        innerApprovalRequired = false;
       } catch (_e) {
         // If this function fails to resolve (or the user rejects), we don't proceed.
         return;
       }
-      innerApprovalRequired = false;
     }
-    const callingFn = acceleratingDistributor[action];
+    const callingFn = sendWithPaddedGas(acceleratingDistributor, action);
     const amountAsBigNumber = BigNumber.from(amount);
 
     // Call the generate the transaction to stake/unstake and
     // wait until the tx has been resolved
     try {
-      const gasEstimate = await acceleratingDistributor.estimateGas[action](
-        lpTokenAddress,
-        amountAsBigNumber
-      );
-      const result = await callingFn(lpTokenAddress, amountAsBigNumber, {
-        gasLimit: gasEstimate
-          .mul(utils.parseEther(String(gasEstimationMultiplier)))
-          .div(fixedPointAdjustment),
-      });
+      const result = await callingFn(lpTokenAddress, amountAsBigNumber);
       await notificationEmitter(result.hash, notify, 5000, true);
     } catch (_e) {
       // We currently don't handle the error case other than to exit gracefully.

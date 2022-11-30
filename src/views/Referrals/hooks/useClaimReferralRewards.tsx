@@ -4,6 +4,7 @@ import { getConfig } from "utils/config";
 import { notificationEmitter } from "utils/notify";
 import { useConnection, useIsWrongNetwork } from "hooks";
 import { useUnclaimedReferralProofs } from "./useUnclaimedReferralProofs";
+import { sendWithPaddedGas } from "utils/transactions";
 
 const config = getConfig();
 
@@ -27,7 +28,8 @@ export function useClaimReferralRewards() {
 
     const merkleDistributor = config.getMerkleDistributor(signer);
 
-    const claimMultiTx = await merkleDistributor.claimMulti(
+    const senderFn = sendWithPaddedGas(merkleDistributor, "claimMulti");
+    const claimMultiTx = await senderFn(
       unclaimedReferralProofsQuery.data.unclaimed.map((claim) => ({
         ...claim,
         merkleProof: claim.proof,
