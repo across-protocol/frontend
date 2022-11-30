@@ -209,7 +209,7 @@ const handler = async (
       : ethers.utils
           .parseUnits(
             (minDeposits[destinationChainId] ?? 0).toString(),
-            decimals
+            l1Tokens[symbol].decimals
           )
           .mul(ethers.utils.parseUnits("1"))
           .div(tokenPriceUsd);
