@@ -47,10 +47,15 @@ const handler = async (
       REACT_APP_PUBLIC_INFURA_ID,
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
+      REACT_APP_MIN_DEPOSIT_USD,
     } = process.env;
     const providerUrl = `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
     const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl);
     logger.debug({ at: "limits", message: `Using provider at ${providerUrl}` });
+
+    const minDeposits = REACT_APP_MIN_DEPOSIT_USD
+      ? JSON.parse(REACT_APP_MIN_DEPOSIT_USD)
+      : {};
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
       ? []
@@ -125,8 +130,14 @@ const handler = async (
     ];
 
     // @todo: Generalise the resolution of chainId => gasToken.
-    const baseCurrency = destinationChainId === "137" ? "matic" : "eth";
-    const tokenPrice = await getCachedTokenPrice(l1Token, baseCurrency);
+    const [tokenPriceNative, _tokenPriceUsd] = await Promise.all([
+      getCachedTokenPrice(
+        l1Token,
+        destinationChainId === "137" ? "matic" : "eth"
+      ),
+      getCachedTokenPrice(l1Token, "usd"),
+    ]);
+    const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
     const [
       relayerFeeDetails,
@@ -139,7 +150,7 @@ const handler = async (
         l1Token,
         ethers.BigNumber.from("10").pow(18),
         Number(destinationChainId),
-        tokenPrice
+        tokenPriceNative
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
@@ -187,15 +198,29 @@ const handler = async (
       .parseEther(maxRelayFeePct.toString())
       .sub(relayerFeeDetails.capitalFeePercent);
 
+    // Ensure a maximum ratio of gas fee / deposit amount, then apply a floor afterwards.
+    const minDeposit = ethers.BigNumber.from(relayerFeeDetails.gasFeeTotal)
+      .mul(ethers.utils.parseEther("1"))
+      .div(maxGasFee);
+
+    // Normalise the environment-set USD minimum to units of the token being bridged.
+    const minDepositFloor = tokenPriceUsd.lte(0)
+      ? ethers.BigNumber.from(0)
+      : ethers.utils
+          .parseUnits(
+            (minDeposits[destinationChainId] ?? 0).toString(),
+            l1Tokens[symbol].decimals
+          )
+          .mul(ethers.utils.parseUnits("1"))
+          .div(tokenPriceUsd);
+
     const transferBalances = fullRelayerBalances.map((balance, i) =>
       balance.add(fullRelayerMainnetBalances[i])
     );
 
     const responseJson = {
-      minDeposit: ethers.BigNumber.from(relayerFeeDetails.gasFeeTotal)
-        .mul(ethers.utils.parseEther("1"))
-        .div(maxGasFee)
-        .toString(),
+      // Absolute minimum may be overridden by the environment.
+      minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
       maxDeposit: liquidReserves.toString(),
       // Note: max is used here rather than sum because relayers currently do not partial fill.
       maxDepositInstant: minBN(
