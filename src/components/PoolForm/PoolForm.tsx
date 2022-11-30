@@ -168,9 +168,10 @@ const PoolForm: FC<Props> = ({
         <PositionItem>
           <div>Position Size</div>
           <div data-cy="pool-position">
-            {formatEther(
-              convertToLP(totalPosition.add(stakedPosition))
-            ).replace("-", "")}{" "}
+            {formatUnits(totalPosition.add(convertFromLP(stakedPosition)), decimals).replace(
+              "-",
+              ""
+            )}{" "}
             {symbol}
           </div>
         </PositionItem>
