@@ -211,6 +211,8 @@ const Pool: FC = () => {
                   ? stakeData.userAmountOfLPStaked
                   : ethers.BigNumber.from(0)
               }
+              convertFromLP={stakeData && stakeData.convertLPToUnderlying}
+              convertToLP={stakeData && stakeData.convertUnderlyingToLP}
               feesEarned={
                 userPosition
                   ? max(ethers.BigNumber.from(userPosition.feesEarned), 0)

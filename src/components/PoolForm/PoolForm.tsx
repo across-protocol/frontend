@@ -1,5 +1,5 @@
 import { FC, useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import Tabs from "../Tabs";
 import AddLiquidityForm from "./AddLiquidityForm";
 import RemoveLiquidityForm from "./RemoveLiquidityForm";
@@ -17,7 +17,6 @@ import {
   ROIItem,
 } from "./PoolForm.styles";
 import {
-  formatUnits,
   estimateGasForAddEthLiquidity,
   DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE,
   UPDATE_GAS_INTERVAL_MS,
@@ -25,8 +24,9 @@ import {
   formatPoolAPY,
   formatNumberMaxFracDigits,
   toWeiSafe,
+  formatUnits,
 } from "utils";
-import { useConnection } from "hooks";
+import { ConverterFnType, useConnection } from "hooks";
 import type { ShowSuccess } from "views/Pool";
 import useSetLiquidityFormErrors from "./useSetLiquidityFormErrors";
 import maxClickHandler from "./maxClickHandler";
@@ -57,6 +57,8 @@ interface Props {
   projectedApr: string;
   chainId: ChainId;
   refetchPool: () => void;
+  convertFromLP?: ConverterFnType;
+  convertToLP?: ConverterFnType;
 }
 
 const PoolForm: FC<Props> = ({
@@ -83,6 +85,7 @@ const PoolForm: FC<Props> = ({
   projectedApr,
   chainId,
   refetchPool,
+  convertFromLP: inputConvertFromLP,
 }) => {
   const poolClient = getPoolClient();
   const [inputAmount, setInputAmount] = useState("");
@@ -95,6 +98,8 @@ const PoolForm: FC<Props> = ({
     DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE
   );
   const { isConnected, signer } = useConnection();
+
+  const convertFromLP = inputConvertFromLP ?? ((v: BigNumber) => v);
 
   // update our add-liquidity to contract call gas usage on an interval for eth only
   useEffect(() => {
@@ -163,18 +168,16 @@ const PoolForm: FC<Props> = ({
         <PositionItem>
           <div>Position Size</div>
           <div data-cy="pool-position">
-            {formatUnits(totalPosition.add(stakedPosition), decimals).replace(
-              "-",
-              ""
-            )}{" "}
+            {formatUnits(
+              totalPosition.add(convertFromLP(stakedPosition)),
+              decimals
+            ).replace("-", "")}{" "}
             {symbol}
           </div>
         </PositionItem>
         <PositionItem>
           <div>Total fees earned</div>
-          <div>
-            {formatUnits(feesEarned, decimals)} {symbol}
-          </div>
+          <div>{/* {formatEther(convertToLP(feesEarned))} {symbol} */}-</div>
         </PositionItem>
       </Position>
       <ROI data-cy="pool-info-box">
