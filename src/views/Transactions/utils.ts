@@ -38,13 +38,16 @@ export function doPartialFillsExist(pendingTransferTuples: SupportedTxTuple[]) {
  * and `speedUps` instead of placeholders.
  */
 export function formatToTransfer(deposit: Deposit): Transfer {
+  const initialRelayerFeePct = BigNumber.from(
+    deposit.depositRelayerFeePct || parseEtherLike("0.001")
+  );
   return {
     ...deposit,
     filled: BigNumber.from(deposit.filled),
     amount: BigNumber.from(deposit.amount),
     // replace with proper values if scraper-api supports relayer fee
-    initialRelayerFeePct: BigNumber.from(0),
-    currentRelayerFeePct: BigNumber.from(0),
+    initialRelayerFeePct: initialRelayerFeePct,
+    currentRelayerFeePct: initialRelayerFeePct,
     speedUps: [],
   };
 }

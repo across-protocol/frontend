@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { QUERIESV2 } from "utils";
 import { Text } from "components/Text";
+import copy from "copy-to-clipboard";
 
 type CopyReferralLinkType = {
   condensed?: boolean;
@@ -21,8 +22,8 @@ const CopyReferralLink = ({ condensed: _condensed }: CopyReferralLinkType) => {
   const [completed, setCompleted] = useState<boolean>(false);
 
   useEffect(() => {
-    if (completed) {
-      navigator.clipboard.writeText(referralLinkWithProtocol ?? "");
+    if (completed && referralLinkWithProtocol) {
+      copy(referralLinkWithProtocol);
       const timeoutId = setTimeout(() => {
         setCompleted(false);
       }, 3000);
