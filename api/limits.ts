@@ -205,7 +205,7 @@ const handler = async (
 
     // Normalise the environment-set USD minimum to units of the token being bridged.
     const minDepositFloor = tokenPriceUsd.lte(0)
-      ? tokenPriceUsd
+      ? ethers.BigNumber.from(0)
       : ethers.utils
           .parseUnits(
             (minDeposits[destinationChainId] ?? 0).toString(),
