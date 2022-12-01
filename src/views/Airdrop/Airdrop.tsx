@@ -1,5 +1,6 @@
 import Footer from "components/Footer";
 import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
+import VideoBackgroundPoster from "assets/prelaunch/acx-bg-video-poster.jpg";
 
 import { SplashFlow } from "./components/SplashFlow";
 import { MoreInfoFlow } from "./components/MoreInfoFlow";
@@ -73,7 +74,13 @@ const Airdrop = () => {
   return (
     <>
       <Wrapper>
-        <BackgroundLayer autoPlay loop muted>
+        <BackgroundLayer
+          autoPlay
+          loop
+          muted
+          poster={VideoBackgroundPoster}
+          playsInline
+        >
           <source src={VideoBackground} type="video/mp4" />
         </BackgroundLayer>
         <OpacityLayer />
