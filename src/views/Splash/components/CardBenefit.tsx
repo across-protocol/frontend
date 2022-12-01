@@ -27,6 +27,8 @@ const CardBenefit = ({ title, icon: Icon, description }: CardBenefitProp) => (
 export default CardBenefit;
 
 const Wrapper = styled.div`
+  position: relative;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -39,7 +41,7 @@ const Wrapper = styled.div`
 
   overflow: clip;
 
-  z-index: 2;
+  z-index: 1;
 
   filter: drop-shadow(0px 40px 96px rgba(0, 0, 0, 0.2));
   border-radius: 16px;
@@ -48,7 +50,6 @@ const Wrapper = styled.div`
 
   &:hover {
     filter: drop-shadow(0px 40px 96px rgba(0, 0, 0, 0.45));
-    z-index: 1;
   }
 
   @media ${QUERIESV2.sm.andDown} {
