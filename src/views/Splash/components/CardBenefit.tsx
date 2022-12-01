@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { QUERIESV2 } from "utils";
 import { ReactComponent as BackgroundVector } from "assets/prelaunch-card-background-vector.svg";
+import { isSafari } from "react-device-detect";
 
 type CardBenefitProp = {
   title: string;
@@ -41,13 +42,13 @@ const Wrapper = styled.div`
 
   overflow: clip;
 
-  z-index: 1;
-
-  filter: drop-shadow(0px 40px 96px rgba(0, 0, 0, 0.2));
   border-radius: 16px;
 
   transition: filter 0.3s;
 
+  filter: ${isSafari
+    ? "none"
+    : "drop-shadow(0px 40px 96px rgba(0, 0, 0, 0.2))"};
   &:hover {
     filter: drop-shadow(0px 40px 96px rgba(0, 0, 0, 0.45));
   }
