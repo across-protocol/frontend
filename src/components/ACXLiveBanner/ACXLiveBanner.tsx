@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import VideoBackground from "assets/prelaunch/acx-bg-video-comp.mp4";
+import VideoBackgroundPoster from "assets/prelaunch/acx-bg-video-poster.jpg";
 import { ReactComponent as ChevronRight } from "assets/icons/arrow-right-16.svg";
 import { QUERIESV2 } from "utils";
 import { Link } from "react-router-dom";
@@ -10,7 +11,13 @@ const ACXLiveBanner = ({
   enableHandler: React.Dispatch<React.SetStateAction<boolean>>;
 }) => (
   <Wrapper>
-    <BackgroundLayer autoPlay loop muted>
+    <BackgroundLayer
+      autoPlay
+      loop
+      muted
+      poster={VideoBackgroundPoster}
+      playsInline
+    >
       <source src={VideoBackground} type="video/mp4" />
     </BackgroundLayer>
     <OpacityLayer />
