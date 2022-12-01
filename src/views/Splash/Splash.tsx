@@ -21,7 +21,7 @@ import NumericBenefit from "./components/NumericBenefit";
 import CardBenefit from "./components/CardBenefit";
 
 const Splash = () => {
-  const { numericBenefits, cardBenefits } = useSplash();
+  const { numericBenefits, cardBenefits, location } = useSplash();
   return (
     <ExternalWrapper>
       <LayoutV2 transparentBackground maxWidth={1140}>
@@ -38,7 +38,9 @@ const Splash = () => {
               </DescriptionText>
             </TitleDescriptionWrapper>
             <ButtonWrapper>
-              <BridgeButton to="/bridge">
+              <BridgeButton
+                to={{ pathname: "/bridge", search: location.search }}
+              >
                 <ButtonText size="lg">Go to Bridge</ButtonText>
               </BridgeButton>
               <DocButton href="https://docs.across.to/">

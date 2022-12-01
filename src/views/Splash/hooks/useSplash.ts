@@ -5,10 +5,12 @@ import { ReactComponent as ShieldIcon } from "assets/shield-check.svg";
 import { useSplashDynamicData } from "./useSplashDynamicData";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { humanReadableNumber } from "utils";
+import { useLocation } from "react-router-dom";
 
 export function useSplash() {
   const data = useSplashDynamicData();
   const ternary = repeatableTernaryBuilder(Boolean(data), "-");
+  const location = useLocation();
 
   const numericBenefits = [
     {
@@ -57,5 +59,6 @@ export function useSplash() {
   return {
     numericBenefits,
     cardBenefits,
+    location,
   };
 }
