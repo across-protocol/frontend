@@ -1,5 +1,6 @@
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
+import { DateTime, Duration } from "luxon";
 import { isString } from "./_typeguards";
 import { CoinGeckoInputRequest } from "./_types";
 import { getLogger, InputError, handleErrorCondition } from "./_utils";
@@ -75,12 +76,66 @@ const getCoingeckoPrices = async (
   );
 };
 
+const getHistoricPrice = async (
+  coingeckoClient: coingecko.Coingecko,
+  tokenAddress: string,
+  baseCurrency: string,
+  timestamp: string
+) => {
+  const timestampDateTime = DateTime.fromSeconds(parseInt(timestamp));
+  const diffToNow = timestampDateTime.diffNow();
+
+  if (diffToNow.as("seconds") > 0 || !diffToNow.isValid) {
+    throw new InputError("Timestamp must be in the past and valid");
+  }
+
+  // We need to add some range offset to the `from` and `to` query params,
+  // due to the automatic data granularity of the historical market data from Coingecko:
+  // - 1 day from current time = 5 minute interval data
+  // - 1 - 90 days from current time = hourly data
+  // - above 90 days from current time = daily data (00:00 UTC)
+  const diffToNowInDays = Math.abs(diffToNow.as("days"));
+  const rangeOffset =
+    diffToNowInDays <= 1
+      ? Duration.fromDurationLike({ minutes: 5 })
+      : diffToNowInDays <= 90
+      ? Duration.fromDurationLike({ hours: 1 })
+      : Duration.fromDurationLike({ days: 1 });
+  const from = timestampDateTime.minus(rangeOffset).toMillis();
+  const to = timestampDateTime.plus(rangeOffset).toMillis();
+
+  const priceTuples: [timestamp: number, price: number][] =
+    await coingeckoClient.getHistoricContractPrices(
+      tokenAddress,
+      from,
+      to,
+      baseCurrency
+    );
+  if (!priceTuples.length) {
+    throw new Error("no historic prices returned by coingeckoClient");
+  }
+
+  // Because Coingecko can not return the historic price for an exact timestamp,
+  // we return the closest price at the closest timestamp.
+  const timestampDeltas = priceTuples.map(([timestamp]) =>
+    Math.abs(timestampDateTime.toMillis() - timestamp)
+  );
+  const minDelta = Math.min(...timestampDeltas);
+  const minIndex = timestampDeltas.findIndex((delta) => delta === minDelta);
+  const closestTuple = priceTuples[minIndex];
+  return closestTuple[1];
+};
+
 const handler = async (
-  { query: { l1Token, baseCurrency } }: CoinGeckoInputRequest,
+  { query: { l1Token, baseCurrency, timestamp } }: CoinGeckoInputRequest,
   response: VercelResponse
 ) => {
   const logger = getLogger();
   try {
+    if (isString(timestamp) && isNaN(parseInt(timestamp))) {
+      throw new InputError("Invalid timestamp");
+    }
+
     if (!isString(l1Token))
       throw new InputError("Must provide l1Token as query param");
 
@@ -145,10 +200,20 @@ const handler = async (
     // Fetch price dynamically from Coingecko API
     else if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
       // This base matches a supported base currency for CG.
-      [, price] = await coingeckoClient.getCurrentPriceByContract(
-        l1Token,
-        baseCurrency
-      );
+
+      if (!timestamp) {
+        [, price] = await coingeckoClient.getCurrentPriceByContract(
+          l1Token,
+          baseCurrency
+        );
+      } else {
+        price = await getHistoricPrice(
+          coingeckoClient,
+          l1Token,
+          baseCurrency,
+          timestamp
+        );
+      }
     } else {
       price = await getCoingeckoPrices(
         coingeckoClient,
