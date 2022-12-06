@@ -90,7 +90,7 @@ export function referralsQueryKey(
   account: string,
   limit: number,
   offset: number
-) {
+): [string, string, number, number] {
   return ["referrals", account, limit, offset];
 }
 

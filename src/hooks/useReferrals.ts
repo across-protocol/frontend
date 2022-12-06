@@ -45,14 +45,17 @@ export function useReferrals(
 
   const { data: referrals, ...other } = useQuery(
     queryKey,
-    async () => {
-      return getReferrals(account!, limit!, offset!);
+    async ({ queryKey: key }) => {
+      if (key[0] === "DISABLED_REFERRALS_KEY") return;
+      const query = key as [string, string, number, number];
+      return getReferrals(query[1], query[2], query[3]);
     },
     {
       // refetch based on the chain polling interval
       // disable this temporary
       // refetchInterval: 60000,
       enabled: enabledQuery,
+      staleTime: 10000, // only eligible to refetch after 10 seconds
     }
   );
 
