@@ -2,6 +2,7 @@
   "name": "across",
   "version": "0.1.0",
   "private": true,
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "@across-protocol/across-token": "^0.0.2",
     "@across-protocol/contracts-v2": "^1.0.7",
