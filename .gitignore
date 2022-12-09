@@ -23,6 +23,7 @@
 # IDE
 .idea
 .vscode
+*.code-workspace
 
 npm-debug.log*
 yarn-debug.log*

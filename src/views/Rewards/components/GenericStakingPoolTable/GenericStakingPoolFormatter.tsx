@@ -38,9 +38,25 @@ const flexBasisLengths = [
   108, // Button
 ];
 
-const rawHeader = [
+const rawHeader: (
+  | string
+  | {
+      header: string;
+      tooltip: {
+        title: string;
+        description: string;
+      };
+    }
+)[] = [
   "Pool",
-  "Staked LP Tokens",
+  {
+    header: "Staked LP Tokens",
+    tooltip: {
+      title: "Staked LP Tokens",
+      description:
+        "This displays your staked LP token amount. The amount in underlying can be seen in the Pool tab.",
+    },
+  },
   {
     header: "APY",
     tooltip: {
@@ -54,7 +70,7 @@ const rawHeader = [
     tooltip: {
       title: "Multiplier",
       description:
-        "Your multiple applied to the pool’s base reward APY, based on your age of capital.",
+        "Your multiple applied to the pool's base reward APY, based on your age of capital.",
     },
   },
   {

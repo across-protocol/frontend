@@ -139,7 +139,16 @@ export const StakingForm = ({
         <Divider />
         <StakeInfo>
           <StakeInfoRow>
-            <StakeInfoItem>Staked LP Tokens</StakeInfoItem>
+            <StakeInfoItem>
+              Staked LP Tokens
+              <PopperTooltip
+                title="Staked LP Tokens"
+                body="This displays your staked LP token amount. The amount in underlying can be seen in the Pool tab."
+                placement="bottom-start"
+              >
+                <InfoIcon />
+              </PopperTooltip>
+            </StakeInfoItem>
             <StakeInfoItem>
               {valueOrEmpty(
                 <>
