@@ -23,6 +23,7 @@ const {
   REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
   REACT_APP_GOOGLE_SERVICE_ACCOUNT,
+  REACT_APP_FLAT_RELAY_CAPITAL_FEE,
   VERCEL_ENV,
   GAS_MARKUP,
   DISABLE_DEBUG_LOGS,
@@ -37,6 +38,10 @@ export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 export const DEFAULT_GAS_MARKUP = 0;
 
 export const HUP_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
+
+export const FLAT_RELAY_CAPITAL_FEE = REACT_APP_FLAT_RELAY_CAPITAL_FEE
+  ? Number(process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE)
+  : 0;
 
 export const ENABLED_ROUTES =
   HUP_POOL_CHAIN_ID === 1
@@ -346,7 +351,7 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
 
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
-    capitalCostsPercent: 0.04,
+    capitalCostsPercent: FLAT_RELAY_CAPITAL_FEE, // This is set same way in ./src/utils/bridge.ts
     queries: queryFn(),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
@@ -372,6 +377,21 @@ export const getTokenSymbol = (tokenAddress: string): string => {
   return symbol;
 };
 
+export interface RelayerFeeDetails {
+  amountToRelay: string;
+  tokenSymbol: string;
+  gasFeePercent: string;
+  gasFeeTotal: string;
+  gasDiscountPercent: number;
+  capitalFeePercent: string;
+  capitalFeeTotal: string;
+  capitalDiscountPercent: number;
+  relayFeePercent: string;
+  relayFeeTotal: string;
+  feeLimitPercent: number;
+  isAmountTooLow: boolean;
+}
+
 /**
  * Retrieves the results of the `relayFeeCalculator` SDK function: `relayerFeeDetails`
  * @param l1Token A valid L1 ERC-20 token address
@@ -385,10 +405,26 @@ export const getRelayerFeeDetails = (
   amount: sdk.utils.BigNumberish,
   destinationChainId: number,
   tokenPrice?: number
-) => {
+): Promise<RelayerFeeDetails> => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
+};
+
+export const getMinAmountFromRelayerFeeDetails = (
+  relayerFeeDetails: RelayerFeeDetails
+): BigNumber => {
+  const maxGasFeePercent = ethers.utils
+    .parseEther((relayerFeeDetails.feeLimitPercent / 100).toString())
+    .sub(relayerFeeDetails.capitalFeePercent);
+
+  // Ensure a minimum gas fee to min deposit ratio:
+  // gasFeeTotal / minDeposit = maxGasFeePercent
+  const minDeposit = ethers.BigNumber.from(relayerFeeDetails.gasFeeTotal)
+    .mul(ethers.utils.parseEther("1"))
+    .div(maxGasFeePercent);
+
+  return minDeposit;
 };
 
 /**

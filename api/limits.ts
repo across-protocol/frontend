@@ -4,7 +4,7 @@
 import { HubPool__factory } from "@across-protocol/contracts-v2";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { BLOCK_TAG_LAG, disabledL1Tokens, maxRelayFeePct } from "./_constants";
+import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
 import { isPromiseRejectedResult, isString } from "./_typeguards";
 import { LimitsInputRequest } from "./_types";
 
@@ -19,6 +19,7 @@ import {
   minBN,
   isRouteEnabled,
   handleErrorCondition,
+  getMinAmountFromRelayerFeeDetails,
 } from "./_utils";
 
 // Note: Addresses must be checksummed.
@@ -194,14 +195,8 @@ const handler = async (
     liquidReserves = liquidReserves.sub(lpCushion);
     if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
 
-    const maxGasFee = ethers.utils
-      .parseEther(maxRelayFeePct.toString())
-      .sub(relayerFeeDetails.capitalFeePercent);
-
     // Ensure a maximum ratio of gas fee / deposit amount, then apply a floor afterwards.
-    const minDeposit = ethers.BigNumber.from(relayerFeeDetails.gasFeeTotal)
-      .mul(ethers.utils.parseEther("1"))
-      .div(maxGasFee);
+    const minDeposit = getMinAmountFromRelayerFeeDetails(relayerFeeDetails);
 
     // Normalise the environment-set USD minimum to units of the token being bridged.
     const minDepositFloor = tokenPriceUsd.lte(0)
