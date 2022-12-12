@@ -26,6 +26,7 @@ export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
     wethAddress: config.getWethAddress(),
     configStoreAddress,
     acceleratingDistributorAddress: config.getAcceleratingDistributorAddress(),
+    merkleDistributorAddress: config.getMerkleDistributorAddress(),
   };
 }
 

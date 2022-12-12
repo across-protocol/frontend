@@ -224,6 +224,7 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
       configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
       acceleratingDistributorAddress:
         "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
+      merkleDistributorAddress: "0xE50b2cEAC4f60E840Ae513924033E753e2366487",
     },
     5: {
       chainId: 5,
@@ -232,6 +233,7 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
       configStoreAddress: "0x3215e3C91f87081757d0c41EF0CB77738123Be83",
       acceleratingDistributorAddress:
         "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC",
+      merkleDistributorAddress: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
     },
   }[chainId] as {
     chainId: number;
@@ -239,6 +241,7 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
     wethAddress: string;
     configStoreAddress: string;
     acceleratingDistributorAddress: string;
+    merkleDistributorAddress: string;
   };
 };
 

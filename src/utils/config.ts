@@ -98,18 +98,18 @@ export class ConfigClient {
       "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48"
     );
   }
-  getAcrossTokenAddress(): string {
-    return (
-      process.env.REACT_APP_ACROSS_TOKEN_ADDRESS ||
-      this.config.acrossTokenAddress ||
-      "0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F"
-    );
-  }
   getMerkleDistributorAddress(): string {
     return (
       process.env.REACT_APP_MERKLE_DISTRIBUTOR_ADDRESS ||
       this.config.merkleDistributorAddress ||
       "0xE50b2cEAC4f60E840Ae513924033E753e2366487"
+    );
+  }
+  getAcrossTokenAddress(): string {
+    return (
+      process.env.REACT_APP_ACROSS_TOKEN_ADDRESS ||
+      this.config.acrossTokenAddress ||
+      "0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F"
     );
   }
   getClaimAndStakeAddress(): string {
