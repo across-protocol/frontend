@@ -726,3 +726,7 @@ export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day
 export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
   ? Number(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER)
   : undefined;
+
+export const amplitudeAPIKey = process.env.REACT_APP_AMPLITUDE_KEY
+  ? process.env.REACT_APP_AMPLITUDE_KEY
+  : undefined;
