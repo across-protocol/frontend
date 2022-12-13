@@ -739,3 +739,7 @@ export const suggestedFeesDeviationBufferMultiplier = !Number.isNaN(
 export const defaultRefetchInterval = 15_000;
 
 export const fallbackSuggestedRelayerFeePct = ethers.utils.parseEther("0.0001");
+
+export const amplitudeAPIKey = process.env.REACT_APP_AMPLITUDE_KEY
+  ? process.env.REACT_APP_AMPLITUDE_KEY
+  : undefined;
