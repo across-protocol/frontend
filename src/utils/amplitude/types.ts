@@ -22,6 +22,7 @@ export enum AmplitudeEvent {
 }
 interface ApplicationLoadedRecordInterface {
   event: AmplitudeEvent.ApplicationLoaded;
+  payload: {};
 }
 interface WebVitalsRecordInterface {
   event: AmplitudeEvent.WebVitals;
