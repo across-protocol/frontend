@@ -68,7 +68,6 @@ const PoolForm: FC<Props> = ({
   decimals,
   totalPoolSize,
   totalPosition,
-  stakedPosition,
   apy,
   position,
   feesEarned,
@@ -86,7 +85,6 @@ const PoolForm: FC<Props> = ({
   projectedApr,
   chainId,
   refetchPool,
-  convertFromLP: inputConvertFromLP,
   convertToLP: inputConvertToLP,
 }) => {
   const poolClient = getPoolClient();
@@ -101,7 +99,6 @@ const PoolForm: FC<Props> = ({
   );
   const { isConnected, signer } = useConnection();
 
-  const convertFromLP = inputConvertFromLP ?? ((v: BigNumber) => v);
   const convertToLP = inputConvertToLP ?? ((v: BigNumber) => v);
 
   // update our add-liquidity to contract call gas usage on an interval for eth only
@@ -171,11 +168,7 @@ const PoolForm: FC<Props> = ({
         <PositionItem>
           <div>Position Size</div>
           <div data-cy="pool-position">
-            {formatUnits(
-              totalPosition.add(convertFromLP(stakedPosition)),
-              decimals
-            ).replace("-", "")}{" "}
-            {symbol}
+            {formatUnits(totalPosition, decimals).replace("-", "")} {symbol}
           </div>
         </PositionItem>
         <PositionItem>
