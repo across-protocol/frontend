@@ -6,7 +6,23 @@ import { AmplitudeEventLogRecord } from "./types";
  * A common abstraction to logging via Amplitude
  */
 export class AmplitudeEventLogger {
-  constructor() {
+  /**
+   * A singleton instance of the AmplitudeEventLogger
+   */
+  private static sharedLogger: AmplitudeEventLogger | undefined = undefined;
+
+  /**
+   * Resolves a singleton instance of the AmplitudeEventLogger
+   * @returns A singleton instance of the AmplitudeEventLogger
+   */
+  public static shared(): AmplitudeEventLogger {
+    if (!AmplitudeEventLogger.sharedLogger) {
+      AmplitudeEventLogger.sharedLogger = new AmplitudeEventLogger();
+    }
+    return AmplitudeEventLogger.sharedLogger;
+  }
+
+  private constructor() {
     this.initAmplitude();
   }
   /**
