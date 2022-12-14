@@ -50,8 +50,13 @@ export function MobileDataRow({
         <TimestampCell timestamp={transfer.depositTime} />
         <StatusCell
           status={transfer.status}
+          amount={transfer.amount}
+          fromChainId={transfer.sourceChainId}
+          toChainId={transfer.destinationChainId}
+          tokenSymbol={token.symbol}
           depositTime={transfer.depositTime}
           currentRelayerFeePct={transfer.currentRelayerFeePct}
+          enableSpeedUp={enableSpeedUp}
         />
         <FilledPercentageCell
           filled={transfer.filled}

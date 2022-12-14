@@ -5,7 +5,6 @@ import { getConfig, parseEtherLike } from "utils";
 
 import { SupportedTxTuple } from "./types";
 import { BigNumber } from "ethers";
-import { DateTime } from "luxon";
 
 export function getSupportedTxTuples(
   transactions: Transfer[]
@@ -50,22 +49,4 @@ export function formatToTransfer(deposit: Deposit): Transfer {
     currentRelayerFeePct: initialRelayerFeePct,
     speedUps: [],
   };
-}
-
-export function isUnprofitable(
-  depositTime: number,
-  currentRelayerFeePct: BigNumber,
-  thresholds: Partial<{
-    hours: number;
-    basisPoints: number;
-  }> = {}
-): boolean {
-  const { hours = 24, basisPoints = 1 } = thresholds;
-  const isPendingTooLong =
-    Math.abs(DateTime.fromSeconds(depositTime).diffNow().as("hours")) > hours;
-  const hasTooLowRelayerFee = currentRelayerFeePct.lt(
-    parseEtherLike(String(basisPoints * 0.0001))
-  );
-
-  return isPendingTooLong || hasTooLowRelayerFee;
 }
