@@ -1,13 +1,16 @@
+import { ampli } from "./ampli";
 import { BrowserRouter as Router } from "react-router-dom";
-import { AmplitudeEventLogger } from "utils/amplitude";
-import { AmplitudeEvent } from "utils/amplitude/types";
 import Routes from "./Routes";
+import { amplitudeAPIKey } from "utils";
 
 // Record an event when the application is loaded
-AmplitudeEventLogger.shared().recordEvent({
-  event: AmplitudeEvent.ApplicationLoaded,
-  payload: {},
+ampli.load({
+  environment: "development",
+  client: {
+    apiKey: amplitudeAPIKey || "",
+  },
 });
+ampli.applicationLoaded();
 
 function App() {
   return (
