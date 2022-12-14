@@ -25,6 +25,7 @@ import {
   formatNumberMaxFracDigits,
   toWeiSafe,
   formatUnits,
+  formatEther,
 } from "utils";
 import { ConverterFnType, useConnection } from "hooks";
 import type { ShowSuccess } from "views/Pool";
@@ -86,6 +87,7 @@ const PoolForm: FC<Props> = ({
   chainId,
   refetchPool,
   convertFromLP: inputConvertFromLP,
+  convertToLP: inputConvertToLP,
 }) => {
   const poolClient = getPoolClient();
   const [inputAmount, setInputAmount] = useState("");
@@ -100,6 +102,7 @@ const PoolForm: FC<Props> = ({
   const { isConnected, signer } = useConnection();
 
   const convertFromLP = inputConvertFromLP ?? ((v: BigNumber) => v);
+  const convertToLP = inputConvertToLP ?? ((v: BigNumber) => v);
 
   // update our add-liquidity to contract call gas usage on an interval for eth only
   useEffect(() => {
@@ -177,7 +180,9 @@ const PoolForm: FC<Props> = ({
         </PositionItem>
         <PositionItem>
           <div>Total fees earned</div>
-          <div>{/* {formatEther(convertToLP(feesEarned))} {symbol} */}-</div>
+          <div>
+            {formatEther(convertToLP(feesEarned))} {symbol}
+          </div>
         </PositionItem>
       </Position>
       <ROI data-cy="pool-info-box">
