@@ -25,7 +25,6 @@ import {
   formatNumberMaxFracDigits,
   toWeiSafe,
   formatUnits,
-  formatEther,
 } from "utils";
 import { ConverterFnType, useConnection } from "hooks";
 import type { ShowSuccess } from "views/Pool";
@@ -174,7 +173,7 @@ const PoolForm: FC<Props> = ({
         <PositionItem>
           <div>Total fees earned</div>
           <div>
-            {formatEther(convertToLP(feesEarned))} {symbol}
+            {formatUnits(convertToLP(feesEarned), decimals)} {symbol}
           </div>
         </PositionItem>
       </Position>
