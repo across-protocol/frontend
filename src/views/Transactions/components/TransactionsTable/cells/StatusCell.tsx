@@ -10,7 +10,7 @@ import { TableCell } from "../TransactionsTable.styles";
 type Props = {
   status: TransferStatus;
   currentRelayerFeePct: BigNumberish;
-  suggestedRelayerFeePct: BigNumberish;
+  suggestedRelayerFeePct?: BigNumberish;
   enableSpeedUp?: boolean;
 };
 
@@ -23,7 +23,9 @@ export function StatusCell(props: Props) {
 }
 
 function PendingStatusCell(props: Props) {
-  const isProfitable = BigNumber.from(props.suggestedRelayerFeePct).lte(
+  const isProfitable = BigNumber.from(
+    props.suggestedRelayerFeePct || utils.parseEther("0.0001")
+  ).lte(
     BigNumber.from(props.currentRelayerFeePct)
       .mul(utils.parseEther(String(suggestedFeesDeviationBufferMultiplier)))
       .div(fixedPointAdjustment)

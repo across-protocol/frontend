@@ -28,8 +28,8 @@ export type Deposit = {
   fillTxs: string[];
   speedUps: SpeedUpDepositTx[];
   depositRelayerFeePct: string;
-  initialRelayerFeePct: string;
-  suggestedRelayerFeePct: string;
+  initialRelayerFeePct?: string;
+  suggestedRelayerFeePct?: string;
 };
 
 export type Pagination = {
