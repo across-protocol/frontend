@@ -84,7 +84,7 @@ export function useUserDeposits(
         (deposit) => deposit.depositorAddr === userAddress
       );
       const { deposits, pagination } = await getDeposits({
-        userAddress,
+        address: userAddress,
         status,
         limit,
         offset,
@@ -130,7 +130,7 @@ export function useUserDeposits(
 
 async function getDeposits(
   params: Partial<{
-    userAddress: string;
+    address: string;
     status: DepositStatus;
     limit: number;
     offset: number;
