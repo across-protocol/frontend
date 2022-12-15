@@ -1,12 +1,14 @@
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { formatNumberTwoSigDigits } from "utils";
 import { TableCell } from "../TransactionsTable.styles";
 
 export function FilledPercentageCell(props: {
-  filled: BigNumber;
-  amount: BigNumber;
+  filled: BigNumberish;
+  amount: BigNumberish;
 }) {
-  const filledPercentage = props.filled.mul(100).div(props.amount);
+  const filledPercentage = BigNumber.from(props.filled)
+    .mul(100)
+    .div(props.amount);
 
   return (
     <TableCell>

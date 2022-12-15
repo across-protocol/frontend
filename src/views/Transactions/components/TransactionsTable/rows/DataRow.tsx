@@ -1,6 +1,6 @@
 import { Zap } from "react-feather";
-import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
 import { ChainId, Token, shortenTransactionHash, getChainInfo } from "utils";
+import { Deposit } from "hooks/useDeposits";
 
 import {
   ChainCell,
@@ -17,14 +17,14 @@ import {
   StyledPlus,
   SpeedUpCell,
 } from "../TransactionsTable.styles";
-import { TxLink } from "../../../types";
+import { SupportedTxTuple, TxLink } from "../../../types";
 
 type Props = {
-  transfer: Transfer;
+  transfer: Deposit;
   token: Token;
   onClickFillTxsCellExpandButton: (fillTxLinks: TxLink[]) => void;
   enableSpeedUp?: boolean;
-  onClickSpeedUp?: (tuple: [token: Token, transfer: Transfer]) => void;
+  onClickSpeedUp?: (tuple: SupportedTxTuple) => void;
 };
 
 export function DataRow({
@@ -39,12 +39,8 @@ export function DataRow({
       <TimestampCell timestamp={transfer.depositTime} />
       <StatusCell
         status={transfer.status}
-        amount={transfer.amount}
-        fromChainId={transfer.sourceChainId}
-        toChainId={transfer.destinationChainId}
-        tokenSymbol={token.symbol}
-        depositTime={transfer.depositTime}
-        currentRelayerFeePct={transfer.currentRelayerFeePct}
+        currentRelayerFeePct={transfer.depositRelayerFeePct}
+        suggestedRelayerFeePct={transfer.suggestedRelayerFeePct}
         enableSpeedUp={enableSpeedUp}
       />
       <FilledPercentageCell filled={transfer.filled} amount={transfer.amount} />

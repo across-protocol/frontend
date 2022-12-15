@@ -4,6 +4,13 @@ import { rewardsApiUrl, depositsQueryKey } from "utils";
 
 export type DepositStatus = "pending" | "filled";
 
+export type SpeedUpDepositTx = {
+  hash: string;
+  blockNumber: number;
+  newRelayerFeePct: string;
+  depositSourceChainId: number;
+};
+
 export type Deposit = {
   depositId: number;
   depositTime: number;
@@ -12,19 +19,23 @@ export type Deposit = {
   sourceChainId: number;
   destinationChainId: number;
   assetAddr: string;
+  depositorAddr: string;
   amount: string;
   depositTxHash: string;
   fillTxs: string[];
-  depositRelayerFeePct?: string;
+  speedUps: SpeedUpDepositTx[];
+  depositRelayerFeePct: string;
+  initialRelayerFeePct: string;
+  suggestedRelayerFeePct: string;
 };
 
-type Pagination = {
+export type Pagination = {
   total: number;
   limit: number;
   offset: number;
 };
 
-type GetDepositsResponse = {
+export type GetDepositsResponse = {
   pagination: Pagination;
   deposits: Deposit[];
 };
@@ -34,21 +45,11 @@ export function useDeposits(
   limit: number,
   offset: number = 0
 ) {
-  const queryKey = depositsQueryKey(status, limit, offset);
-
-  const { data, ...other } = useQuery(
-    queryKey,
-    async () => {
-      return getDeposits(status, limit, offset);
-    },
+  return useQuery(
+    depositsQueryKey(status, limit, offset),
+    () => getDeposits(status, limit, offset),
     { keepPreviousData: true, refetchInterval: 15_000 }
   );
-
-  return {
-    deposits: data ? data.data.deposits : [],
-    pagination: data?.data.pagination,
-    ...other,
-  };
 }
 
 /**
@@ -60,7 +61,8 @@ async function getDeposits(
   limit: number,
   offset: number
 ) {
-  return axios.get<GetDepositsResponse>(
+  const { data } = await axios.get<GetDepositsResponse>(
     `${rewardsApiUrl}/deposits?status=${status}&limit=${limit}&offset=${offset}`
   );
+  return data;
 }

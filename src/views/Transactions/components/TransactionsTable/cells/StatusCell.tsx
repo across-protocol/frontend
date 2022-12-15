@@ -1,19 +1,16 @@
 import { TransferStatus } from "@across-protocol/sdk-v2/dist/transfers-history";
-import { BigNumber, utils } from "ethers";
-import { capitalizeFirstLetter, ChainId, fixedPointAdjustment } from "utils";
+import { BigNumber, BigNumberish, utils } from "ethers";
+import {
+  capitalizeFirstLetter,
+  fixedPointAdjustment,
+  suggestedFeesDeviationBufferMultiplier,
+} from "utils";
 import { TableCell } from "../TransactionsTable.styles";
-import { useSuggestedRelayerFeePct } from "hooks/useSuggestedRelayerFeePct";
-
-const SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER = "1.1";
 
 type Props = {
   status: TransferStatus;
-  amount: BigNumber;
-  fromChainId: ChainId;
-  toChainId: ChainId;
-  tokenSymbol: string;
-  depositTime: number;
-  currentRelayerFeePct: BigNumber;
+  currentRelayerFeePct: BigNumberish;
+  suggestedRelayerFeePct: BigNumberish;
   enableSpeedUp?: boolean;
 };
 
@@ -26,21 +23,11 @@ export function StatusCell(props: Props) {
 }
 
 function PendingStatusCell(props: Props) {
-  const { data: suggestedRelayerFeePct } = useSuggestedRelayerFeePct(
-    props.amount,
-    props.fromChainId,
-    props.toChainId,
-    props.tokenSymbol,
-    props.depositTime
+  const isProfitable = BigNumber.from(props.suggestedRelayerFeePct).lte(
+    BigNumber.from(props.currentRelayerFeePct)
+      .mul(utils.parseEther(String(suggestedFeesDeviationBufferMultiplier)))
+      .div(fixedPointAdjustment)
   );
 
-  const isUnprofitable =
-    suggestedRelayerFeePct &&
-    suggestedRelayerFeePct.gt(
-      props.currentRelayerFeePct
-        .mul(utils.parseEther(SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER))
-        .div(fixedPointAdjustment)
-    );
-
-  return <TableCell>{isUnprofitable ? "Unprofitable" : "Pending"}</TableCell>;
+  return <TableCell>{isProfitable ? "Pending" : "Unprofitable"}</TableCell>;
 }

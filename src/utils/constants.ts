@@ -726,3 +726,8 @@ export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day
 export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
   ? Number(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER)
   : undefined;
+
+export const suggestedFeesDeviationBufferMultiplier = process.env
+  .REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER
+  ? Number(process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER)
+  : 1.25;

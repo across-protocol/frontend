@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { BigNumber, utils } from "ethers";
-import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history";
 import { JsonRpcSigner } from "@uma/sdk/dist/types/oracle/types/ethers";
 
 import { useConnection } from "hooks";
 import { getConfig, getChainInfo, Token } from "utils";
 import { useBridgeFees, useNotify } from "hooks";
+import { Deposit } from "hooks/useDeposits";
 
 type SpeedUpStatus = "idle" | "pending" | "success" | "error";
 
-export function useSpeedUp(transfer: Transfer, token: Token) {
+export function useSpeedUp(transfer: Deposit, token: Token) {
   const config = getConfig();
   const { chainId, signer, setChain } = useConnection();
   const { fees, isLoading } = useBridgeFees(
-    transfer.amount,
+    BigNumber.from(transfer.amount),
     transfer.sourceChainId,
     transfer.destinationChainId,
     token.symbol
