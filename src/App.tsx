@@ -1,13 +1,17 @@
 import { ampli } from "./ampli";
 import { BrowserRouter as Router } from "react-router-dom";
 import Routes from "./Routes";
-import { amplitudeAPIKey, amplitudeEnvironment } from "utils";
+
+console.log(window.location.origin);
 
 // Record an event when the application is loaded
 ampli.load({
   environment: amplitudeEnvironment,
   client: {
-    apiKey: amplitudeAPIKey || "",
+    apiKey: "ACX_PLACEHOLDER_API_KEY",
+    configuration: {
+      serverUrl: `${window.location.origin}/api/instrumentation`,
+    },
   },
 });
 ampli.applicationLoaded();
