@@ -1,11 +1,11 @@
 import { ampli } from "./ampli";
 import { BrowserRouter as Router } from "react-router-dom";
 import Routes from "./Routes";
-import { amplitudeAPIKey } from "utils";
+import { amplitudeAPIKey, amplitudeEnvironment } from "utils";
 
 // Record an event when the application is loaded
 ampli.load({
-  environment: "development",
+  environment: amplitudeEnvironment,
   client: {
     apiKey: amplitudeAPIKey || "",
   },
