@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 8
+ * Tracking Plan Version: 13
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -30,10 +30,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: '8',
+    version: '13',
     branch: 'main',
     source: 'web',
-    versionId: '23d7486f-84c4-4ce2-b5d3-6ba193d65979'
+    versionId: 'a79129ac-e106-4dd4-b5cc-6837f3755c23'
   },
   ...{
     ingestionMetadata: {
@@ -89,9 +89,18 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
    */
-  page: "splashPage" | "bridgePage" | "poolPage" | "rewardsPage" | "transactionsPage" | "stakingPage";
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
   /**
    * | Rule | Value |
    * |---|---|
@@ -116,7 +125,21 @@ export interface DisconnectWalletButtonClickedProperties {
    */
   action: string;
   element: string;
-  page: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
   section: string;
 }
 
@@ -149,9 +172,23 @@ export interface PageViewedProperties {
   /**
    * Boolean if this is first time identifed user has visited page. Should be Null for anonymous users.
    */
-  isInitialPageView: string;
+  isInitialPageView: boolean;
   origin: string;
-  page: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
   path: string;
   /**
    * Referring url
