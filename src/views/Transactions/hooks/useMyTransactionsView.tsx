@@ -1,7 +1,6 @@
 import { useConnection } from "hooks";
 import useWindowSize from "hooks/useWindowSize";
-import { DepositStatus } from "hooks/useDeposits";
-import { useUserDeposits } from "hooks/useUserDeposits";
+import { DepositStatus, useUserDeposits } from "hooks/useDeposits";
 import { BREAKPOINTS } from "utils";
 import { paginate } from "components/Pagination";
 
