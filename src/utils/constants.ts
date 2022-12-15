@@ -735,3 +735,5 @@ export const amplitudeEnvironment =
   process.env.REACT_APP_AMPLITUDE_ENVIRONMENT === "production"
     ? "production"
     : "development";
+
+export const currentGitCommitHash = process.env.REACT_APP_GIT_COMMIT_HASH ?? "";
