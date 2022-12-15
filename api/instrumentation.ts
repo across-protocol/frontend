@@ -1,6 +1,6 @@
 import { VercelResponse } from "@vercel/node";
 import { ampli } from "../src/ampli";
-import { AMPLITUDE_KEY } from "./_constants";
+import { AMPLITUDE_ENV, AMPLITUDE_KEY } from "./_constants";
 import { InstrumentInputRequest } from "./_types";
 
 const handler = async (
@@ -13,7 +13,7 @@ const handler = async (
     return response.status(500).send("Amplitude is not enabled");
   }
   ampli.load({
-    environment: "development",
+    environment: AMPLITUDE_ENV,
     client: {
       apiKey: AMPLITUDE_KEY,
     },

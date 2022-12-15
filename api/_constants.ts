@@ -67,3 +67,8 @@ export const BLOCK_TAG_LAG = -1;
 export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
 
 export const AMPLITUDE_KEY = process.env.AMPLITUDE_KEY;
+
+export const AMPLITUDE_ENV =
+  process.env.AMPLITUDE_ENVIRONMENT === "production"
+    ? "production"
+    : "development";
