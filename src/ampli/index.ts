@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 6
+ * Tracking Plan Version: 8
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -16,13 +16,13 @@
  * [Full Setup Instructions](https://data.amplitude.com/risklabs/Risk%20Labs/implementation/web)
  */
 
-import * as amplitude from "@amplitude/analytics-browser";
+import * as amplitude from '@amplitude/analytics-browser';
 
-export type Environment = "production" | "development";
+export type Environment = 'production' | 'development';
 
 export const ApiKey: Record<Environment, string> = {
-  production: "",
-  development: "",
+  production: '0e684c66717732a1957eb6550723e4f0',
+  development: ''
 };
 
 /**
@@ -30,38 +30,26 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "6",
-    branch: "main",
-    source: "web",
-    versionId: "d91c6144-17e1-4f5e-8bb5-4ca896651fc9",
+    version: '8',
+    branch: 'main',
+    source: 'web',
+    versionId: '23d7486f-84c4-4ce2-b5d3-6ba193d65979'
   },
   ...{
     ingestionMetadata: {
-      sourceName: "browser-typescript-ampli",
-      sourceVersion: "2.0.0",
-    },
-  },
+      sourceName: 'browser-typescript-ampli',
+      sourceVersion: '2.0.0'
+    }
+  }
 };
 
-export interface LoadOptionsBase {
-  disabled?: boolean;
-}
+export interface LoadOptionsBase { disabled?: boolean }
 
-export type LoadOptionsWithEnvironment = LoadOptionsBase & {
-  environment: Environment;
-  client?: { configuration?: BrowserOptions };
-};
-export type LoadOptionsWithApiKey = LoadOptionsBase & {
-  client: { apiKey: string; configuration?: BrowserOptions };
-};
-export type LoadOptionsWithClientInstance = LoadOptionsBase & {
-  client: { instance: BrowserClient };
-};
+export type LoadOptionsWithEnvironment = LoadOptionsBase & { environment: Environment; client?: { configuration?: BrowserOptions; }; };
+export type LoadOptionsWithApiKey = LoadOptionsBase & { client: { apiKey: string; configuration?: BrowserOptions; } };
+export type LoadOptionsWithClientInstance = LoadOptionsBase & { client: { instance: BrowserClient; } };
 
-export type LoadOptions =
-  | LoadOptionsWithEnvironment
-  | LoadOptionsWithApiKey
-  | LoadOptionsWithClientInstance;
+export type LoadOptions = LoadOptionsWithEnvironment | LoadOptionsWithApiKey | LoadOptionsWithClientInstance;
 
 export interface IdentifyProperties {
   initial_dclid?: any;
@@ -101,14 +89,9 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage |
    */
-  page:
-    | "splashPage"
-    | "bridgePage"
-    | "poolPage"
-    | "rewardsPage"
-    | "transactionsPage";
+  page: "splashPage" | "bridgePage" | "poolPage" | "rewardsPage" | "transactionsPage" | "stakingPage";
   /**
    * | Rule | Value |
    * |---|---|
@@ -815,141 +798,169 @@ export interface WebVitalsProperties {
 }
 
 export class Identify implements BaseEvent {
-  event_type = "Identify";
+  event_type = 'Identify';
 
-  constructor(public event_properties?: IdentifyProperties) {
+  constructor(
+    public event_properties?: IdentifyProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class ApplicationLoaded implements BaseEvent {
-  event_type = "ApplicationLoaded";
+  event_type = 'ApplicationLoaded';
 }
 
 export class ConnectWalletButtonClicked implements BaseEvent {
-  event_type = "ConnectWalletButtonClicked";
+  event_type = 'ConnectWalletButtonClicked';
 
-  constructor(public event_properties: ConnectWalletButtonClickedProperties) {
+  constructor(
+    public event_properties: ConnectWalletButtonClickedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class DisconnectWalletButtonClicked implements BaseEvent {
-  event_type = "DisconnectWalletButtonClicked";
+  event_type = 'DisconnectWalletButtonClicked';
 
   constructor(
-    public event_properties: DisconnectWalletButtonClickedProperties
+    public event_properties: DisconnectWalletButtonClickedProperties,
   ) {
     this.event_properties = event_properties;
   }
 }
 
 export class FeesInfoExpanded implements BaseEvent {
-  event_type = "FeesInfoExpanded";
+  event_type = 'FeesInfoExpanded';
 }
 
 export class FromChainSelected implements BaseEvent {
-  event_type = "FromChainSelected";
+  event_type = 'FromChainSelected';
 
-  constructor(public event_properties: FromChainSelectedProperties) {
+  constructor(
+    public event_properties: FromChainSelectedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class MaxTokenAmountClicked implements BaseEvent {
-  event_type = "MaxTokenAmountClicked";
+  event_type = 'MaxTokenAmountClicked';
 
-  constructor(public event_properties: MaxTokenAmountClickedProperties) {
+  constructor(
+    public event_properties: MaxTokenAmountClickedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class PageViewed implements BaseEvent {
-  event_type = "PageViewed";
+  event_type = 'PageViewed';
 
-  constructor(public event_properties: PageViewedProperties) {
+  constructor(
+    public event_properties: PageViewedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class ToAccountChanged implements BaseEvent {
-  event_type = "ToAccountChanged";
+  event_type = 'ToAccountChanged';
 
-  constructor(public event_properties: ToAccountChangedProperties) {
+  constructor(
+    public event_properties: ToAccountChangedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class ToChainSelected implements BaseEvent {
-  event_type = "ToChainSelected";
+  event_type = 'ToChainSelected';
 
-  constructor(public event_properties: ToChainSelectedProperties) {
+  constructor(
+    public event_properties: ToChainSelectedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class TokenSelected implements BaseEvent {
-  event_type = "TokenSelected";
+  event_type = 'TokenSelected';
 
-  constructor(public event_properties: TokenSelectedProperties) {
+  constructor(
+    public event_properties: TokenSelectedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class TransferQuoteRecieved implements BaseEvent {
-  event_type = "TransferQuoteRecieved";
+  event_type = 'TransferQuoteRecieved';
 
-  constructor(public event_properties: TransferQuoteRecievedProperties) {
+  constructor(
+    public event_properties: TransferQuoteRecievedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class TransferSigned implements BaseEvent {
-  event_type = "TransferSigned";
+  event_type = 'TransferSigned';
 
-  constructor(public event_properties: TransferSignedProperties) {
+  constructor(
+    public event_properties: TransferSignedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class TransferSubmitted implements BaseEvent {
-  event_type = "TransferSubmitted";
+  event_type = 'TransferSubmitted';
 
-  constructor(public event_properties: TransferSubmittedProperties) {
+  constructor(
+    public event_properties: TransferSubmittedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class TransferTransactionCompleted implements BaseEvent {
-  event_type = "TransferTransactionCompleted";
+  event_type = 'TransferTransactionCompleted';
 
-  constructor(public event_properties: TransferTransactionCompletedProperties) {
+  constructor(
+    public event_properties: TransferTransactionCompletedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class WalletConnectTransactionCompleted implements BaseEvent {
-  event_type = "WalletConnectTransactionCompleted";
+  event_type = 'WalletConnectTransactionCompleted';
 
   constructor(
-    public event_properties: WalletConnectTransactionCompletedProperties
+    public event_properties: WalletConnectTransactionCompletedProperties,
   ) {
     this.event_properties = event_properties;
   }
 }
 
 export class WalletSelected implements BaseEvent {
-  event_type = "WalletSelected";
+  event_type = 'WalletSelected';
 
-  constructor(public event_properties: WalletSelectedProperties) {
+  constructor(
+    public event_properties: WalletSelectedProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
 
 export class WebVitals implements BaseEvent {
-  event_type = "WebVitals";
+  event_type = 'WebVitals';
 
-  constructor(public event_properties: WebVitalsProperties) {
+  constructor(
+    public event_properties: WebVitalsProperties,
+  ) {
     this.event_properties = event_properties;
   }
 }
