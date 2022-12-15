@@ -93,3 +93,11 @@ In order to run Cypress e2e tests locally, you must do the following:
 ```bash
 docker compose -f hardhat-node.yml up
 ```
+
+## Pull Data from Amplitude
+
+The `src/ampli` directory can be refreshed with new tracking data by running the following steps:
+
+1. Run `yarn ampli login` to log in to Amplitude
+2. Run `yarn ampli pull web` 
+    1. If Amplitude requests to create a new project, let it generate a `ampli.json` file.
