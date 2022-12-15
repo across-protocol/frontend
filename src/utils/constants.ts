@@ -730,3 +730,8 @@ export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
 export const amplitudeAPIKey = process.env.REACT_APP_AMPLITUDE_KEY
   ? process.env.REACT_APP_AMPLITUDE_KEY
   : undefined;
+
+export const amplitudeEnvironment =
+  process.env.REACT_APP_AMPLITUDE_ENVIRONMENT === "production"
+    ? "production"
+    : "development";
