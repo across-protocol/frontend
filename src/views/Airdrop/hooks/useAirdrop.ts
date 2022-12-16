@@ -9,7 +9,8 @@ import { useAirdropRecipient } from "./useAirdropRecipient";
 import { useIsAirdropClaimed } from "./useIsAirdropClaimed";
 import { useClaimAndStake } from "./useClaimAndStake";
 
-import { formatWeiPct } from "utils";
+import { formatWeiPct, getPageValue } from "utils";
+import { ampli } from "ampli";
 
 export type FlowSelector = "splash" | "info" | "eligible" | "ineligible";
 
@@ -62,6 +63,14 @@ export default function useAirdrop() {
 
     isConnected,
     account,
-    connectWallet: () => connect(),
+    connectWallet: () => {
+      connect();
+      ampli.connectWalletButtonClicked({
+        action: "onClick",
+        element: "connectWalletButton",
+        page: getPageValue(),
+        section: "airdropSplashFlow",
+      });
+    },
   };
 }

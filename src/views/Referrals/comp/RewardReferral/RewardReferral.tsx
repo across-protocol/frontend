@@ -38,7 +38,12 @@ import { PopperTooltip } from "components/Tooltip";
 import { ExternalLink } from "components/ExternalLink";
 import StepperWithTooltips from "../StepperWithTooltips";
 import { useConnection } from "hooks";
-import { formatEther, formatNumberMaxFracDigits, rewardTiers } from "utils";
+import {
+  formatEther,
+  formatNumberMaxFracDigits,
+  getPageValue,
+  rewardTiers,
+} from "utils";
 
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-24.svg";
 import { ReactComponent as TransferIcon } from "assets/icons/transfer-24.svg";
@@ -50,6 +55,7 @@ import { repeatableTernaryBuilder } from "utils/ternary";
 import { Text } from "components/Text";
 import { ClaimRewardsModal } from "../ClaimRewardsModal";
 import { BigNumber } from "ethers";
+import { ampli } from "ampli";
 
 interface Props {
   isConnected: boolean;
@@ -113,7 +119,15 @@ const ReferralLinkComponent: React.FC<{
           <ReferralLinkButtonsRow>
             <ConnectButton
               size="md"
-              onClick={() => connect()}
+              onClick={() => {
+                connect();
+                ampli.connectWalletButtonClicked({
+                  action: "onClick",
+                  element: "connectWalletButton",
+                  page: getPageValue(),
+                  section: "referralTable",
+                });
+              }}
               data-cy="connect-wallet"
             >
               Connect to get started

@@ -33,7 +33,7 @@ export function useRouteTrace() {
   }, [path]);
 }
 
-const pageLookup: Record<
+export const pageLookup: Record<
   string,
   | "404Page"
   | "splashPage"

@@ -1,18 +1,35 @@
 import styled from "@emotion/styled";
+import { ampli } from "ampli";
 import { ButtonV2 } from "components";
 import { Text } from "components/Text";
 import { useConnection } from "hooks";
-import { QUERIESV2 } from "utils";
+import { getPageValue, QUERIESV2 } from "utils";
 
 type ConnectWalletButtonParam = {
-  reasonToConnect: string;
+  reasonToConnect: "stake" | "unstake" | "claim rewards";
 };
 
 const ConnectWalletButton = ({ reasonToConnect }: ConnectWalletButtonParam) => {
   const { connect } = useConnection();
 
   return (
-    <Button size="lg" onClick={() => connect()}>
+    <Button
+      size="lg"
+      onClick={() => {
+        connect();
+        ampli.connectWalletButtonClicked({
+          action: "onClick",
+          element: "connectWalletButton",
+          page: getPageValue(),
+          section:
+            reasonToConnect === "stake"
+              ? "stakeFrom"
+              : reasonToConnect === "unstake"
+              ? "unstakeForm"
+              : "claimReferralRewardsForm",
+        });
+      }}
+    >
       <Text color="dark-grey" size="lg" weight={500}>
         Connect wallet to {reasonToConnect}
       </Text>

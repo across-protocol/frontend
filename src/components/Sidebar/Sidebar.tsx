@@ -15,10 +15,11 @@ import {
   TopHeaderRow,
   AccordionContainer,
 } from "./Sidebar.styles";
-import { getChainInfo, isSupportedChainId } from "utils";
+import { getChainInfo, getPageValue, isSupportedChainId } from "utils";
 import useSidebar from "./useSidebar";
 import closeIcon from "assets/across-close-button.svg";
 import { useConnection } from "hooks";
+import { ampli } from "ampli";
 
 interface Props {
   openSidebar: boolean;
@@ -59,7 +60,17 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
         <StyledHeader>
           <TopHeaderRow>
             {!isConnected && (
-              <ConnectButton onClick={() => connect()}>
+              <ConnectButton
+                onClick={() => {
+                  connect();
+                  ampli.connectWalletButtonClicked({
+                    action: "onClick",
+                    element: "connectWalletButton",
+                    page: getPageValue(),
+                    section: "mobileNavSidebar",
+                  });
+                }}
+              >
                 Connect Wallet
               </ConnectButton>
             )}

@@ -1,12 +1,13 @@
 import { useSelect } from "downshift";
-import { useConnection } from "hooks";
-import { useSendForm } from "hooks";
+import { useConnection, useSendForm } from "hooks";
 import {
   UnsupportedChainIdError,
   switchChain,
   getChainInfo,
   trackEvent,
+  getPageValue,
 } from "utils";
+import { ampli } from "ampli";
 
 export default function useChainSelection() {
   const { isConnected, provider, chainId, error, connect } = useConnection();
@@ -27,6 +28,12 @@ export default function useChainSelection() {
   const handleClick = () => {
     if (!provider) {
       connect();
+      ampli.connectWalletButtonClicked({
+        action: "onClick",
+        element: "connectWalletButton",
+        page: getPageValue(),
+        section: "bridgeForm",
+      });
     } else if (wrongNetworkSend) {
       switchChain(provider, fromChain);
     }

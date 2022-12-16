@@ -16,10 +16,17 @@ import { useERC20 } from "hooks";
 import { ethers } from "ethers";
 import { addEtherscan } from "utils/notify";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
-import { getChainInfo, switchChain, disableDeposits, ChainId } from "utils";
+import {
+  getChainInfo,
+  switchChain,
+  disableDeposits,
+  ChainId,
+  getPageValue,
+} from "utils";
 import api from "state/chainApi";
 import type { ShowSuccess } from "views/Pool";
 import { useError } from "hooks";
+import { ampli } from "ampli";
 
 // max uint value is 2^256 - 1
 const MAX_UINT_VAL = ethers.constants.MaxUint256;
@@ -149,7 +156,13 @@ const AddLiquidityForm: FC<Props> = ({
 
   const approveOrPoolTransactionHandler = async () => {
     if (!provider) {
-      return connect();
+      connect();
+      ampli.connectWalletButtonClicked({
+        action: "onClick",
+        element: "connectWalletButton",
+        page: getPageValue(),
+        section: "addLiquidityForm",
+      });
     }
     if (disableDeposits) return false;
     if (isConnected && userNeedsToApprove) return handleApprove();

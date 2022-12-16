@@ -1,6 +1,7 @@
 import { useConnection } from "hooks";
 import useWindowSize from "hooks/useWindowSize";
-import { BREAKPOINTS } from "utils";
+import { BREAKPOINTS, getPageValue } from "utils";
+import { ampli } from "ampli";
 
 import { useTxClient } from "./useTxClient";
 import { usePagination } from "./usePagination";
@@ -16,7 +17,15 @@ export function useMyTransactionsView() {
   const filledTransfersPagination = usePagination(filledTransferTuples.length);
 
   return {
-    connectWallet: connect,
+    connectWallet: () => {
+      connect();
+      ampli.connectWalletButtonClicked({
+        action: "onClick",
+        element: "connectWalletButton",
+        page: getPageValue(),
+        section: "myTransactionsTable",
+      });
+    },
     account,
     initialLoading,
     pendingTransferTuples,

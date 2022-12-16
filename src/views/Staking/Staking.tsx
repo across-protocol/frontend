@@ -9,7 +9,6 @@ const Staking = () => {
     poolName,
     poolLogoURI,
     isConnected,
-    connectWalletHandler,
     stakingPoolQuery,
     stakeActionMutation,
     claimActionMutation,
@@ -42,7 +41,6 @@ const Staking = () => {
             }
             isWrongNetwork={isWrongNetwork}
             isConnected={isConnected}
-            walletConnectionHandler={connectWalletHandler}
             stakeActionFn={stakeActionMutation.mutateAsync}
             unstakeActionFn={unstakeActionMutation.mutateAsync}
             poolData={poolData}
@@ -50,7 +48,6 @@ const Staking = () => {
           <StakingReward
             poolData={poolData}
             isConnected={isConnected}
-            walletConnectionHandler={connectWalletHandler}
             claimActionHandler={claimActionMutation.mutateAsync}
             isMutating={claimActionMutation.isLoading}
           />

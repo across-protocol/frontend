@@ -3,7 +3,6 @@ import { StakingActionFunctionType } from "./hooks/useStakingAction";
 
 type GenericStakingComponentProps = {
   isConnected: boolean;
-  walletConnectionHandler: () => void;
   poolData: StakingPool;
 };
 

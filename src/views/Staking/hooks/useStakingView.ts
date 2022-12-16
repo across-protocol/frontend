@@ -19,7 +19,7 @@ const config = getConfig();
 
 export const useStakingView = () => {
   const { poolId } = useParams<StakingPathParams>();
-  const { isConnected, provider, connect } = useConnection();
+  const { isConnected, provider } = useConnection();
   const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork();
   const { l1TokenAddress, logoURI } = config.getTokenInfoBySymbol(
     hubPoolChainId,
@@ -46,6 +46,5 @@ export const useStakingView = () => {
     isWrongNetworkHandler,
     isConnected,
     provider,
-    connectWalletHandler: () => connect(),
   };
 };

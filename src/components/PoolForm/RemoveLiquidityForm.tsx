@@ -31,10 +31,12 @@ import {
   switchChain,
   ChainId,
   calculateRemoveAmount,
+  getPageValue,
 } from "utils";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import api from "state/chainApi";
 import { ShowSuccess } from "views/Pool";
+import { ampli } from "ampli";
 
 const { previewRemoval } = umaSdk.across.clients.bridgePool;
 
@@ -105,6 +107,12 @@ const RemoveLiqudityForm: FC<Props> = ({
   const handleButtonClick = async () => {
     if (!provider) {
       connect();
+      ampli.connectWalletButtonClicked({
+        action: "onClick",
+        element: "connectWalletButton",
+        page: getPageValue(),
+        section: "removeLiquidityForm",
+      });
     }
     if (isConnected && removeAmountSlider > 0 && signer) {
       const scaler = ethers.BigNumber.from("10").pow(decimals);
