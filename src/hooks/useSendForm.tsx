@@ -4,7 +4,9 @@ import {
   useCallback,
   useContext,
   createContext,
+  useState,
 } from "react";
+import { ampli } from "../ampli";
 import { ethers } from "ethers";
 import {
   ChainId,
@@ -19,6 +21,7 @@ import {
   ChainInfo,
   ChainInfoList,
   isSupportedChainId,
+  getChainInfo,
 } from "utils";
 
 import { usePrevious, useConnection } from "hooks";
@@ -477,6 +480,51 @@ function useSendFormManager(): SendFormManagerContext {
       payload: error,
     });
   }, []);
+
+  const [previousFromChain, setPreviousFromChain] = useState<
+    ChainId | undefined
+  >(undefined);
+  useEffect(() => {
+    const fromChain = state.fromChain;
+    if (fromChain && fromChain !== previousFromChain) {
+      const chainInfo = getChainInfo(fromChain);
+      ampli.fromChainSelected({
+        fromChainId: chainInfo.chainId.toString(),
+        chainName: chainInfo.name,
+      });
+      setPreviousFromChain(fromChain);
+    }
+  }, [state.fromChain, previousFromChain]);
+
+  const [previousToChain, setPreviousToChain] = useState<ChainId | undefined>(
+    undefined
+  );
+  useEffect(() => {
+    const toChain = state.toChain;
+    if (toChain && toChain !== previousToChain) {
+      const chainInfo = getChainInfo(toChain);
+      ampli.toChainSelected({
+        toChainId: chainInfo.chainId.toString(),
+        chainName: chainInfo.name,
+      });
+      setPreviousToChain(toChain);
+    }
+  }, [state.toChain, previousToChain]);
+
+  const [previousToAccount, setPreviousToAccount] = useState<
+    string | undefined
+  >(undefined);
+  useEffect(() => {
+    const address = state.toAddress;
+    if (
+      address &&
+      address !== previousToAccount &&
+      address !== connectedAccount
+    ) {
+      ampli.toAccountChanged({ toWalletAddress: address });
+      setPreviousToAccount(address);
+    }
+  }, [state.toAddress, previousToAccount, connectedAccount]);
 
   return {
     ...state,
