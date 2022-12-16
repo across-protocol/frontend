@@ -1,7 +1,6 @@
 import { useCallback, useContext, useEffect } from "react";
 import { useState, createContext } from "react";
 import {
-  trackEvent,
   ChainId,
   UnsupportedChainIdError,
   isSupportedChainId,
@@ -10,13 +9,14 @@ import {
   trackIfWalletSelected,
   trackWalletConnectTransactionCompleted,
   trackConnectWalletButtonClicked,
+  trackDisconnectWalletButtonClicked,
+  identifyUserWallets,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
   OnboardAPI,
   ConnectOptions,
   WalletState,
-  DisconnectOptions,
   ConnectedChain,
 } from "@web3-onboard/core";
 
@@ -26,7 +26,10 @@ import { useConnectWallet, useSetChain } from "@web3-onboard/react";
 import { Chain } from "@web3-onboard/common";
 import { ethers } from "ethers";
 import Notify, { API as NotifyAPI, ConfigOptions } from "bnc-notify";
-import { ConnectWalletButtonClickedProperties } from "ampli";
+import {
+  ConnectWalletButtonClickedProperties,
+  DisconnectWalletButtonClickedProperties,
+} from "ampli";
 
 export type SetChainOptions = {
   chainId: string;
@@ -39,12 +42,18 @@ type TrackOnConnectOptions = {
   trackSection?: ConnectWalletButtonClickedProperties["section"];
 };
 
+type TrackOnDisconnectOptions = {
+  trackSection?: DisconnectWalletButtonClickedProperties["section"];
+};
+
 type OnboardContextValue = {
   onboard: OnboardAPI | null;
   connect: (
     options?: ConnectOptions & TrackOnConnectOptions
   ) => Promise<WalletState[]>;
-  disconnect: (wallet: DisconnectOptions) => Promise<WalletState[]>;
+  disconnect: (
+    wallet: WalletState & TrackOnDisconnectOptions
+  ) => Promise<WalletState[]>;
   chains: Chain[];
   connectedChain: ConnectedChain | null;
   settingChain: boolean;
@@ -136,11 +145,13 @@ export function useOnboardManager() {
   }, [onboard]);
 
   const customOnboardDisconnect = useCallback(
-    (wallet: DisconnectOptions) => {
+    (wallet: WalletState, options?: TrackOnDisconnectOptions) => {
+      if (options?.trackSection) {
+        trackDisconnectWalletButtonClicked(options.trackSection);
+      }
       // User requested to be disconnected, let's clear out the wallet type
       // for the event that they're trying to connect using a different wallet
       window.localStorage.removeItem(CACHED_WALLET_KEY);
-      trackEvent({ category: "wallet", action: "disconnect", name: "null" });
       return disconnect(wallet);
     },
     [disconnect]
@@ -172,6 +183,7 @@ export function useOnboardManager() {
       }
       trackIfWalletSelected(walletStates, previousConnection);
       trackWalletConnectTransactionCompleted(walletStates, previousConnection);
+      identifyUserWallets(walletStates);
 
       return walletStates;
     },

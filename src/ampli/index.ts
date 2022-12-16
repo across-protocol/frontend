@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 17
+ * Tracking Plan Version: 18
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -22,7 +22,7 @@ export type Environment = "production" | "development";
 
 export const ApiKey: Record<Environment, string> = {
   production: "0e684c66717732a1957eb6550723e4f0",
-  development: "",
+  development: "32c056c19a0937e1ebeae4bf9ad1910c",
 };
 
 /**
@@ -30,10 +30,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "17",
+    version: "18",
     branch: "main",
     source: "web",
-    versionId: "7354ccea-4728-43df-a9cb-5746fcbccfa6",
+    versionId: "284c0da5-b98e-485b-ba38-09ebb05de5f5",
   },
   ...{
     ingestionMetadata: {
@@ -64,6 +64,24 @@ export type LoadOptions =
   | LoadOptionsWithClientInstance;
 
 export interface IdentifyProperties {
+  /**
+   * List of wallet addresses connected during Wallet Connect Transaction Completed event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Unique Items | true |
+   * | Item Type | string |
+   */
+  allWalletAddressesConnected?: string[];
+  /**
+   * Chain ids of wallet addresses connected
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Unique Items | true |
+   * | Item Type | string |
+   */
+  allWalletChainIds?: string[];
   initial_dclid?: any;
   initial_fbclid?: any;
   initial_gbraid?: any;
@@ -81,6 +99,18 @@ export interface IdentifyProperties {
   initial_utm_source?: any;
   initial_utm_term?: any;
   initial_wbraid?: any;
+  /**
+   * Total volume of bridge transfers (since event tracking was implemented). Updated on each new transfer the user completes.
+   */
+  totalVolumeUsd?: string;
+  /**
+   * Currently connected wallet address
+   */
+  walletAddress?: string;
+  /**
+   * Type of wallet connected
+   */
+  walletType?: string;
 }
 
 export interface ConnectWalletButtonClickedProperties {
