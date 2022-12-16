@@ -24,6 +24,7 @@ import useSendAction from "./useSendAction";
 import type { Deposit } from "views/Confirmation";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { ReactComponent as ConfettiIcon } from "assets/confetti.svg";
+import { ampli } from "../../ampli";
 type Props = {
   onDeposit: (deposit: Deposit) => void;
 };
@@ -72,7 +73,14 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
                 <ConfettiIcon />
                 All transfers are slippage free!
               </SlippageDisclaimer>
-              <FeesButton onClick={toggleInfoModal}>Fees info</FeesButton>
+              <FeesButton
+                onClick={() => {
+                  ampli.feesInfoExpanded();
+                  toggleInfoModal();
+                }}
+              >
+                Fees info
+              </FeesButton>
             </InfoHeadlineContainer>
             <InfoContainer>
               <Info>
