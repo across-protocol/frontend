@@ -5,14 +5,26 @@ import { useConnection } from "hooks";
 import { QUERIESV2 } from "utils";
 
 type ConnectWalletButtonParam = {
-  reasonToConnect: string;
+  reasonToConnect: "stake" | "unstake" | "claim rewards";
 };
 
 const ConnectWalletButton = ({ reasonToConnect }: ConnectWalletButtonParam) => {
   const { connect } = useConnection();
 
   return (
-    <Button size="lg" onClick={() => connect()}>
+    <Button
+      size="lg"
+      onClick={() => {
+        connect({
+          trackSection:
+            reasonToConnect === "stake"
+              ? "stakeFrom"
+              : reasonToConnect === "unstake"
+              ? "unstakeForm"
+              : "claimReferralRewardsForm",
+        });
+      }}
+    >
       <Text color="dark-grey" size="lg" weight={500}>
         Connect wallet to {reasonToConnect}
       </Text>

@@ -16,7 +16,9 @@ export function useMyTransactionsView() {
   const filledTransfersPagination = usePagination(filledTransferTuples.length);
 
   return {
-    connectWallet: connect,
+    connectWallet: () => {
+      connect({ trackSection: "myTransactionsTable" });
+    },
     account,
     initialLoading,
     pendingTransferTuples,

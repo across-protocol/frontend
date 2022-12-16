@@ -104,7 +104,7 @@ const RemoveLiqudityForm: FC<Props> = ({
 
   const handleButtonClick = async () => {
     if (!provider) {
-      connect();
+      connect({ trackSection: "removeLiquidityForm" });
     }
     if (isConnected && removeAmountSlider > 0 && signer) {
       const scaler = ethers.BigNumber.from("10").pow(decimals);

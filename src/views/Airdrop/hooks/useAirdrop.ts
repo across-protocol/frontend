@@ -62,6 +62,8 @@ export default function useAirdrop() {
 
     isConnected,
     account,
-    connectWallet: () => connect(),
+    connectWallet: () => {
+      connect({ trackSection: "airdropSplashFlow" });
+    },
   };
 }
