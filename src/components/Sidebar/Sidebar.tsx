@@ -59,7 +59,11 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
         <StyledHeader>
           <TopHeaderRow>
             {!isConnected && (
-              <ConnectButton onClick={() => connect()}>
+              <ConnectButton
+                onClick={() => {
+                  connect({ trackSection: "mobileNavSidebar" });
+                }}
+              >
                 Connect Wallet
               </ConnectButton>
             )}
