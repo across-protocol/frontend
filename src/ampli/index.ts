@@ -21,8 +21,8 @@ import * as amplitude from "@amplitude/analytics-browser";
 export type Environment = "production" | "development";
 
 export const ApiKey: Record<Environment, string> = {
-  production: "0e684c66717732a1957eb6550723e4f0",
-  development: "32c056c19a0937e1ebeae4bf9ad1910c",
+  production: "",
+  development: "",
 };
 
 /**
