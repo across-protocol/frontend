@@ -12,6 +12,7 @@ import {
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
+import { trackMaxButtonClicked } from "utils";
 
 interface Props {
   value: string;
@@ -25,6 +26,7 @@ interface Props {
   displayLoader?: boolean;
   warningButtonColor?: boolean;
   disableInput?: boolean;
+  stakingAction: "stake" | "unstake";
 }
 
 const StakingInputBlock: React.FC<Props> = ({
@@ -39,6 +41,7 @@ const StakingInputBlock: React.FC<Props> = ({
   onClickHandler,
   warningButtonColor,
   disableInput,
+  stakingAction,
 }) => (
   <Wrapper>
     <InputRow>
@@ -56,7 +59,12 @@ const StakingInputBlock: React.FC<Props> = ({
         />
         <MaxButton
           disabled={displayLoader || disableInput || !maxValue}
-          onClick={() => setValue(maxValue ?? "")}
+          onClick={() => {
+            setValue(maxValue ?? "");
+            trackMaxButtonClicked(
+              stakingAction === "stake" ? "stakeForm" : "unstakeForm"
+            );
+          }}
         >
           Max
         </MaxButton>

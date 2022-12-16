@@ -5,7 +5,7 @@ import { Identify } from "@amplitude/analytics-browser";
 import {
   ampli,
   ConnectWalletButtonClickedProperties,
-  DisconnectWalletButtonClickedProperties,
+  MaxTokenAmountClickedProperties,
 } from "ampli";
 import { pageLookup } from "components/RouteTrace/useRouteTrace";
 
@@ -87,4 +87,15 @@ export function identifyUserWallets(walletStates: WalletState[]) {
   identifyObj.set("walletAddress", connectedWalletAddress);
   identifyObj.set("walletType", connectedWallet.label);
   return ampli.client?.identify(identifyObj);
+}
+
+export function trackMaxButtonClicked(
+  section: MaxTokenAmountClickedProperties["section"]
+) {
+  return ampli.maxTokenAmountClicked({
+    action: "onClick",
+    element: "maxButton",
+    page: getPageValue(),
+    section,
+  });
 }
