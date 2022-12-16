@@ -163,7 +163,9 @@ export function useOnboardManager() {
           },
         };
       }
-      const walletStates = await connect(options);
+      const walletStates = await connect(
+        options?.autoSelect ? options : undefined
+      );
 
       if (options?.trackSection) {
         trackConnectWalletButtonClicked(options.trackSection);
