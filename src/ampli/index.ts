@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 6
+ * Tracking Plan Version: 17
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -21,7 +21,7 @@ import * as amplitude from "@amplitude/analytics-browser";
 export type Environment = "production" | "development";
 
 export const ApiKey: Record<Environment, string> = {
-  production: "",
+  production: "0e684c66717732a1957eb6550723e4f0",
   development: "",
 };
 
@@ -30,10 +30,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "6",
+    version: "17",
     branch: "main",
     source: "web",
-    versionId: "d91c6144-17e1-4f5e-8bb5-4ca896651fc9",
+    versionId: "7354ccea-4728-43df-a9cb-5746fcbccfa6",
   },
   ...{
     ingestionMetadata: {
@@ -95,24 +95,28 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal |
    */
-  element: "connectWalletButton";
+  element: "connectWalletButton" | "web3OnboardModal";
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage |
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
    */
   page:
     | "splashPage"
     | "bridgePage"
     | "poolPage"
     | "rewardsPage"
-    | "transactionsPage";
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, stakeFrom, unstakeForm, myTransactionsTable |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, stakeFrom, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm |
    */
   section:
     | "navbar"
@@ -124,7 +128,9 @@ export interface ConnectWalletButtonClickedProperties {
     | "rewardsTable"
     | "stakeFrom"
     | "unstakeForm"
-    | "myTransactionsTable";
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm";
 }
 
 export interface DisconnectWalletButtonClickedProperties {
@@ -133,7 +139,21 @@ export interface DisconnectWalletButtonClickedProperties {
    */
   action: string;
   element: string;
-  page: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
   section: string;
 }
 
@@ -166,9 +186,23 @@ export interface PageViewedProperties {
   /**
    * Boolean if this is first time identifed user has visited page. Should be Null for anonymous users.
    */
-  isInitialPageView: string;
+  isInitialPageView: boolean;
   origin: string;
-  page: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
   path: string;
   /**
    * Referring url
@@ -779,19 +813,19 @@ export interface WalletConnectTransactionCompletedProperties {
   /**
    * Boolean if wallet connection was a reconnection.
    */
-  isReconnect: string;
+  isReconnect?: boolean;
   /**
    * Result of user signing or rejecting wallet connection
    */
-  succeeded: string;
+  succeeded: boolean;
   /**
    * Users' wallet address
    */
-  walletAddress: string;
+  walletAddress?: string;
   /**
    * Type of wallet attempted to connect
    */
-  walletType: string;
+  walletType?: string;
 }
 
 export interface WalletSelectedProperties {
@@ -804,7 +838,7 @@ export interface WalletSelectedProperties {
   /**
    * Type of wallet attempted to connect
    */
-  walletType: string;
+  walletType?: string;
 }
 
 export interface WebVitalsProperties {
