@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 18
+ * Tracking Plan Version: 21
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -30,10 +30,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "18",
+    version: "21",
     branch: "main",
     source: "web",
-    versionId: "284c0da5-b98e-485b-ba38-09ebb05de5f5",
+    versionId: "676d56e1-901b-4cd6-88da-5dba8aa2d384",
   },
   ...{
     ingestionMetadata: {
@@ -125,9 +125,9 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton |
    */
-  element: "connectWalletButton" | "web3OnboardModal";
+  element: "connectWalletButton" | "web3OnboardModal" | "maxButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -146,7 +146,7 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, stakeFrom, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm |
    */
   section:
     | "navbar"
@@ -156,11 +156,11 @@ export interface ConnectWalletButtonClickedProperties {
     | "airdropSplashFlow"
     | "referralTable"
     | "rewardsTable"
-    | "stakeFrom"
     | "unstakeForm"
     | "myTransactionsTable"
     | "bridgeForm"
-    | "claimReferralRewardsForm";
+    | "claimReferralRewardsForm"
+    | "stakeForm";
 }
 
 export interface DisconnectWalletButtonClickedProperties {
@@ -201,11 +201,37 @@ export interface FromChainSelectedProperties {
 export interface MaxTokenAmountClickedProperties {
   /**
    * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
    */
-  action: string;
-  element: string;
+  action: "onClick" | "onKeyPress";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton |
+   */
+  element: "connectWalletButton" | "web3OnboardModal" | "maxButton";
   page: string;
-  section: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm";
 }
 
 export interface PageViewedProperties {
