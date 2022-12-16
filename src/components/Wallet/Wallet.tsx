@@ -1,12 +1,7 @@
 import { FC } from "react";
 
 import { useConnection } from "hooks";
-import {
-  shortenAddress,
-  isSupportedChainId,
-  SHOW_ACX_NAV_TOKEN,
-  trackConnectWalletButtonClicked,
-} from "utils";
+import { shortenAddress, isSupportedChainId, SHOW_ACX_NAV_TOKEN } from "utils";
 
 import {
   ConnectButton,
@@ -38,8 +33,7 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
       <ConnectButton
         data-cy="wallet-connect-button"
         onClick={() => {
-          connect();
-          trackConnectWalletButtonClicked("navbar");
+          connect({ trackSection: "navbar" });
         }}
       >
         Connect

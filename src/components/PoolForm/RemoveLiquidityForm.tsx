@@ -31,7 +31,6 @@ import {
   switchChain,
   ChainId,
   calculateRemoveAmount,
-  trackConnectWalletButtonClicked,
 } from "utils";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import api from "state/chainApi";
@@ -105,8 +104,7 @@ const RemoveLiqudityForm: FC<Props> = ({
 
   const handleButtonClick = async () => {
     if (!provider) {
-      connect();
-      trackConnectWalletButtonClicked("removeLiquidityForm");
+      connect({ trackSection: "removeLiquidityForm" });
     }
     if (isConnected && removeAmountSlider > 0 && signer) {
       const scaler = ethers.BigNumber.from("10").pow(decimals);

@@ -15,11 +15,7 @@ import {
   TopHeaderRow,
   AccordionContainer,
 } from "./Sidebar.styles";
-import {
-  getChainInfo,
-  isSupportedChainId,
-  trackConnectWalletButtonClicked,
-} from "utils";
+import { getChainInfo, isSupportedChainId } from "utils";
 import useSidebar from "./useSidebar";
 import closeIcon from "assets/across-close-button.svg";
 import { useConnection } from "hooks";
@@ -65,8 +61,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
             {!isConnected && (
               <ConnectButton
                 onClick={() => {
-                  connect();
-                  trackConnectWalletButtonClicked("mobileNavSidebar");
+                  connect({ trackSection: "mobileNavSidebar" });
                 }}
               >
                 Connect Wallet

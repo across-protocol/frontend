@@ -1,6 +1,5 @@
 import { Overlay, ConnectButton } from "./ConnectTableOverlay.styles";
 import { useConnection } from "hooks";
-import { trackConnectWalletButtonClicked } from "utils";
 
 const ConnectTableOverlay = () => {
   const { connect } = useConnection();
@@ -9,8 +8,7 @@ const ConnectTableOverlay = () => {
       <ConnectButton
         size="md"
         onClick={() => {
-          connect();
-          trackConnectWalletButtonClicked("referralTable");
+          connect({ trackSection: "referralTable" });
         }}
       >
         Connect to track referral transfers

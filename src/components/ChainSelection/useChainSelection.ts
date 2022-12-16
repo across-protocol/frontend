@@ -5,7 +5,6 @@ import {
   switchChain,
   getChainInfo,
   trackEvent,
-  trackConnectWalletButtonClicked,
 } from "utils";
 
 export default function useChainSelection() {
@@ -26,8 +25,7 @@ export default function useChainSelection() {
 
   const handleClick = () => {
     if (!provider) {
-      connect();
-      trackConnectWalletButtonClicked("bridgeForm");
+      connect({ trackSection: "bridgeForm" });
     } else if (wrongNetworkSend) {
       switchChain(provider, fromChain);
     }

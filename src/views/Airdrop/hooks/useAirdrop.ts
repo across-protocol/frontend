@@ -9,7 +9,7 @@ import { useAirdropRecipient } from "./useAirdropRecipient";
 import { useIsAirdropClaimed } from "./useIsAirdropClaimed";
 import { useClaimAndStake } from "./useClaimAndStake";
 
-import { formatWeiPct, trackConnectWalletButtonClicked } from "utils";
+import { formatWeiPct } from "utils";
 
 export type FlowSelector = "splash" | "info" | "eligible" | "ineligible";
 
@@ -63,8 +63,7 @@ export default function useAirdrop() {
     isConnected,
     account,
     connectWallet: () => {
-      connect();
-      trackConnectWalletButtonClicked("airdropSplashFlow");
+      connect({ trackSection: "airdropSplashFlow" });
     },
   };
 }

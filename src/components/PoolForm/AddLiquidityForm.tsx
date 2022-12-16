@@ -16,13 +16,7 @@ import { useERC20 } from "hooks";
 import { ethers } from "ethers";
 import { addEtherscan } from "utils/notify";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
-import {
-  getChainInfo,
-  switchChain,
-  disableDeposits,
-  ChainId,
-  trackConnectWalletButtonClicked,
-} from "utils";
+import { getChainInfo, switchChain, disableDeposits, ChainId } from "utils";
 import api from "state/chainApi";
 import type { ShowSuccess } from "views/Pool";
 import { useError } from "hooks";
@@ -155,8 +149,7 @@ const AddLiquidityForm: FC<Props> = ({
 
   const approveOrPoolTransactionHandler = async () => {
     if (!provider) {
-      connect();
-      trackConnectWalletButtonClicked("addLiquidityForm");
+      connect({ trackSection: "addLiquidityForm" });
     }
     if (disableDeposits) return false;
     if (isConnected && userNeedsToApprove) return handleApprove();

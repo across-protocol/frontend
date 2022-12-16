@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { ButtonV2 } from "components";
 import { Text } from "components/Text";
 import { useConnection } from "hooks";
-import { QUERIESV2, trackConnectWalletButtonClicked } from "utils";
+import { QUERIESV2 } from "utils";
 
 type ConnectWalletButtonParam = {
   reasonToConnect: "stake" | "unstake" | "claim rewards";
@@ -15,14 +15,14 @@ const ConnectWalletButton = ({ reasonToConnect }: ConnectWalletButtonParam) => {
     <Button
       size="lg"
       onClick={() => {
-        connect();
-        trackConnectWalletButtonClicked(
-          reasonToConnect === "stake"
-            ? "stakeFrom"
-            : reasonToConnect === "unstake"
-            ? "unstakeForm"
-            : "claimReferralRewardsForm"
-        );
+        connect({
+          trackSection:
+            reasonToConnect === "stake"
+              ? "stakeFrom"
+              : reasonToConnect === "unstake"
+              ? "unstakeForm"
+              : "claimReferralRewardsForm",
+        });
       }}
     >
       <Text color="dark-grey" size="lg" weight={500}>

@@ -38,12 +38,7 @@ import { PopperTooltip } from "components/Tooltip";
 import { ExternalLink } from "components/ExternalLink";
 import StepperWithTooltips from "../StepperWithTooltips";
 import { useConnection } from "hooks";
-import {
-  formatEther,
-  formatNumberMaxFracDigits,
-  rewardTiers,
-  trackConnectWalletButtonClicked,
-} from "utils";
+import { formatEther, formatNumberMaxFracDigits, rewardTiers } from "utils";
 
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-24.svg";
 import { ReactComponent as TransferIcon } from "assets/icons/transfer-24.svg";
@@ -119,8 +114,7 @@ const ReferralLinkComponent: React.FC<{
             <ConnectButton
               size="md"
               onClick={() => {
-                connect();
-                trackConnectWalletButtonClicked("referralTable");
+                connect({ trackSection: "referralTable" });
               }}
               data-cy="connect-wallet"
             >

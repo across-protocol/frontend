@@ -137,8 +137,7 @@ export function useOnboardManager() {
   );
 
   const customOnboardConnect = useCallback(
-    (options?: ConnectOptions | undefined) => {
-      trackEvent({ category: "wallet", action: "connect", name: "null" });
+    async (options?: ConnectOptions & TrackOnConnectOptions) => {
       // Resolve the last wallet type if this user has connected before
       const previousConnnection =
         window.localStorage.getItem(CACHED_WALLET_KEY);
@@ -155,7 +154,9 @@ export function useOnboardManager() {
           },
         };
       }
-      return connect(options);
+      if (options?.trackSection) {
+        trackConnectWalletButtonClicked(options.trackSection);
+      }
     },
     [connect]
   );

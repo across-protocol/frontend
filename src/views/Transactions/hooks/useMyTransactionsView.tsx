@@ -1,6 +1,6 @@
 import { useConnection } from "hooks";
 import useWindowSize from "hooks/useWindowSize";
-import { BREAKPOINTS, trackConnectWalletButtonClicked } from "utils";
+import { BREAKPOINTS } from "utils";
 
 import { useTxClient } from "./useTxClient";
 import { usePagination } from "./usePagination";
@@ -17,8 +17,7 @@ export function useMyTransactionsView() {
 
   return {
     connectWallet: () => {
-      connect();
-      trackConnectWalletButtonClicked("myTransactionsTable");
+      connect({ trackSection: "myTransactionsTable" });
     },
     account,
     initialLoading,

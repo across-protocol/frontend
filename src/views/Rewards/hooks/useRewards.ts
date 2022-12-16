@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { useConnection } from "hooks";
 import { ReferralsSummary, useReferralSummary } from "hooks/useReferralSummary";
 import { useMemo } from "react";
-import { formatUnitsFnBuilder, trackConnectWalletButtonClicked } from "utils";
+import { formatUnitsFnBuilder } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { useStakingPools } from "./useStakingPools";
 
@@ -37,8 +37,7 @@ export function useRewards() {
     isConnected,
     address: account,
     connectHandler: () => {
-      connect();
-      trackConnectWalletButtonClicked("rewardsTable");
+      connect({ trackSection: "rewardsTable" });
     },
     totalRewards: totalRewards,
     stakedTokens: usersLPStakedInUSD,
