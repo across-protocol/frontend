@@ -41,8 +41,8 @@ import { useConnection } from "hooks";
 import {
   formatEther,
   formatNumberMaxFracDigits,
-  getPageValue,
   rewardTiers,
+  trackConnectWalletButtonClicked,
 } from "utils";
 
 import { ReactComponent as WalletIcon } from "assets/icons/wallet-24.svg";
@@ -55,7 +55,6 @@ import { repeatableTernaryBuilder } from "utils/ternary";
 import { Text } from "components/Text";
 import { ClaimRewardsModal } from "../ClaimRewardsModal";
 import { BigNumber } from "ethers";
-import { ampli } from "ampli";
 
 interface Props {
   isConnected: boolean;
@@ -121,12 +120,7 @@ const ReferralLinkComponent: React.FC<{
               size="md"
               onClick={() => {
                 connect();
-                ampli.connectWalletButtonClicked({
-                  action: "onClick",
-                  element: "connectWalletButton",
-                  page: getPageValue(),
-                  section: "referralTable",
-                });
+                trackConnectWalletButtonClicked("referralTable");
               }}
               data-cy="connect-wallet"
             >

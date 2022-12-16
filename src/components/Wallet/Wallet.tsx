@@ -5,9 +5,8 @@ import {
   shortenAddress,
   isSupportedChainId,
   SHOW_ACX_NAV_TOKEN,
-  getPageValue,
+  trackConnectWalletButtonClicked,
 } from "utils";
-import { ampli } from "ampli";
 
 import {
   ConnectButton,
@@ -40,12 +39,7 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
         data-cy="wallet-connect-button"
         onClick={() => {
           connect();
-          ampli.connectWalletButtonClicked({
-            action: "onClick",
-            element: "connectWalletButton",
-            page: getPageValue(),
-            section: "navbar",
-          });
+          trackConnectWalletButtonClicked("navbar");
         }}
       >
         Connect

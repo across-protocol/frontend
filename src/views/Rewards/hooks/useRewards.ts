@@ -1,9 +1,8 @@
-import { ampli } from "ampli";
 import { BigNumber } from "ethers";
 import { useConnection } from "hooks";
 import { ReferralsSummary, useReferralSummary } from "hooks/useReferralSummary";
 import { useMemo } from "react";
-import { formatUnitsFnBuilder, getPageValue } from "utils";
+import { formatUnitsFnBuilder, trackConnectWalletButtonClicked } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { useStakingPools } from "./useStakingPools";
 
@@ -39,12 +38,7 @@ export function useRewards() {
     address: account,
     connectHandler: () => {
       connect();
-      ampli.connectWalletButtonClicked({
-        action: "onClick",
-        element: "connectWalletButton",
-        page: getPageValue(),
-        section: "rewardsTable",
-      });
+      trackConnectWalletButtonClicked("rewardsTable");
     },
     totalRewards: totalRewards,
     stakedTokens: usersLPStakedInUSD,

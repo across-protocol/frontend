@@ -15,11 +15,14 @@ import {
   TopHeaderRow,
   AccordionContainer,
 } from "./Sidebar.styles";
-import { getChainInfo, getPageValue, isSupportedChainId } from "utils";
+import {
+  getChainInfo,
+  isSupportedChainId,
+  trackConnectWalletButtonClicked,
+} from "utils";
 import useSidebar from "./useSidebar";
 import closeIcon from "assets/across-close-button.svg";
 import { useConnection } from "hooks";
-import { ampli } from "ampli";
 
 interface Props {
   openSidebar: boolean;
@@ -63,12 +66,7 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
               <ConnectButton
                 onClick={() => {
                   connect();
-                  ampli.connectWalletButtonClicked({
-                    action: "onClick",
-                    element: "connectWalletButton",
-                    page: getPageValue(),
-                    section: "mobileNavSidebar",
-                  });
+                  trackConnectWalletButtonClicked("mobileNavSidebar");
                 }}
               >
                 Connect Wallet

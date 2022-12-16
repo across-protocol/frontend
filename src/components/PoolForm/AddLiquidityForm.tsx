@@ -21,12 +21,11 @@ import {
   switchChain,
   disableDeposits,
   ChainId,
-  getPageValue,
+  trackConnectWalletButtonClicked,
 } from "utils";
 import api from "state/chainApi";
 import type { ShowSuccess } from "views/Pool";
 import { useError } from "hooks";
-import { ampli } from "ampli";
 
 // max uint value is 2^256 - 1
 const MAX_UINT_VAL = ethers.constants.MaxUint256;
@@ -157,12 +156,7 @@ const AddLiquidityForm: FC<Props> = ({
   const approveOrPoolTransactionHandler = async () => {
     if (!provider) {
       connect();
-      ampli.connectWalletButtonClicked({
-        action: "onClick",
-        element: "connectWalletButton",
-        page: getPageValue(),
-        section: "addLiquidityForm",
-      });
+      trackConnectWalletButtonClicked("addLiquidityForm");
     }
     if (disableDeposits) return false;
     if (isConnected && userNeedsToApprove) return handleApprove();

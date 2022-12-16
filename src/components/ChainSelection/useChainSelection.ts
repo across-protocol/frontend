@@ -5,9 +5,8 @@ import {
   switchChain,
   getChainInfo,
   trackEvent,
-  getPageValue,
+  trackConnectWalletButtonClicked,
 } from "utils";
-import { ampli } from "ampli";
 
 export default function useChainSelection() {
   const { isConnected, provider, chainId, error, connect } = useConnection();
@@ -28,12 +27,7 @@ export default function useChainSelection() {
   const handleClick = () => {
     if (!provider) {
       connect();
-      ampli.connectWalletButtonClicked({
-        action: "onClick",
-        element: "connectWalletButton",
-        page: getPageValue(),
-        section: "bridgeForm",
-      });
+      trackConnectWalletButtonClicked("bridgeForm");
     } else if (wrongNetworkSend) {
       switchChain(provider, fromChain);
     }

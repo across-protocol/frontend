@@ -1,7 +1,6 @@
 import { useConnection } from "hooks";
 import useWindowSize from "hooks/useWindowSize";
-import { BREAKPOINTS, getPageValue } from "utils";
-import { ampli } from "ampli";
+import { BREAKPOINTS, trackConnectWalletButtonClicked } from "utils";
 
 import { useTxClient } from "./useTxClient";
 import { usePagination } from "./usePagination";
@@ -19,12 +18,7 @@ export function useMyTransactionsView() {
   return {
     connectWallet: () => {
       connect();
-      ampli.connectWalletButtonClicked({
-        action: "onClick",
-        element: "connectWalletButton",
-        page: getPageValue(),
-        section: "myTransactionsTable",
-      });
+      trackConnectWalletButtonClicked("myTransactionsTable");
     },
     account,
     initialLoading,
