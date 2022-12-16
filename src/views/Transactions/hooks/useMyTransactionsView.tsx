@@ -28,7 +28,9 @@ export function useMyTransactionsView() {
   );
 
   return {
-    connectWallet: connect,
+    connectWallet: () => {
+      connect({ trackSection: "myTransactionsTable" });
+    },
     account,
     paginatedFillUserDeposits,
     paginatedPendingUserDeposits,

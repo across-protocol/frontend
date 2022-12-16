@@ -149,7 +149,7 @@ const AddLiquidityForm: FC<Props> = ({
 
   const approveOrPoolTransactionHandler = async () => {
     if (!provider) {
-      return connect();
+      connect({ trackSection: "addLiquidityForm" });
     }
     if (disableDeposits) return false;
     if (isConnected && userNeedsToApprove) return handleApprove();

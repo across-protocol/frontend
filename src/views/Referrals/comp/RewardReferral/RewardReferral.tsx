@@ -113,7 +113,9 @@ const ReferralLinkComponent: React.FC<{
           <ReferralLinkButtonsRow>
             <ConnectButton
               size="md"
-              onClick={() => connect()}
+              onClick={() => {
+                connect({ trackSection: "referralTable" });
+              }}
               data-cy="connect-wallet"
             >
               Connect to get started
