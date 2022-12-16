@@ -481,6 +481,7 @@ function useSendFormManager(): SendFormManagerContext {
     });
   }, []);
 
+  // Amplitude tracking for the fromChain id and name
   const [previousFromChain, setPreviousFromChain] = useState<
     ChainId | undefined
   >(undefined);
@@ -496,6 +497,7 @@ function useSendFormManager(): SendFormManagerContext {
     }
   }, [state.fromChain, previousFromChain]);
 
+  // Amplitude tracking for the toChain id and name
   const [previousToChain, setPreviousToChain] = useState<ChainId | undefined>(
     undefined
   );
@@ -511,6 +513,7 @@ function useSendFormManager(): SendFormManagerContext {
     }
   }, [state.toChain, previousToChain]);
 
+  // Amplitude tracking for the toAccount address
   const [previousToAccount, setPreviousToAccount] = useState<
     string | undefined
   >(undefined);
@@ -525,6 +528,26 @@ function useSendFormManager(): SendFormManagerContext {
       setPreviousToAccount(address);
     }
   }, [state.toAddress, previousToAccount, connectedAccount]);
+
+  // Amplitude tracking for the token symbol
+  const [previousTokenSymbol, setPreviousTokenSymbol] = useState<
+    string | undefined
+  >(undefined);
+  useEffect(() => {
+    const tokenSymbol = state.tokenSymbol;
+    if (tokenSymbol && tokenSymbol !== previousTokenSymbol) {
+      const numberOfTokens = state.availableTokens.length;
+      const indexOfToken = state.availableTokens.findIndex(
+        (token) => token.symbol.toLowerCase() === tokenSymbol.toLowerCase()
+      );
+      ampli.tokenSelected({
+        tokenSymbol: tokenSymbol,
+        tokenListIndex: indexOfToken.toString(),
+        tokenListLength: numberOfTokens.toString(),
+      });
+      setPreviousTokenSymbol(tokenSymbol);
+    }
+  }, [state.tokenSymbol, state.availableTokens, previousTokenSymbol]);
 
   return {
     ...state,
