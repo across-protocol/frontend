@@ -1,7 +1,12 @@
 import { WalletState } from "@web3-onboard/core";
 import { utils } from "ethers";
+import { Identify } from "@amplitude/analytics-browser";
 
-import { ampli, ConnectWalletButtonClickedProperties } from "ampli";
+import {
+  ampli,
+  ConnectWalletButtonClickedProperties,
+  DisconnectWalletButtonClickedProperties,
+} from "ampli";
 import { pageLookup } from "components/RouteTrace/useRouteTrace";
 
 export function getPageValue() {
@@ -53,4 +58,33 @@ export function trackWalletConnectTransactionCompleted(
     walletAddress: utils.getAddress(walletStates[0].accounts[0].address),
     walletType: walletStates[0].label,
   });
+}
+
+export function trackDisconnectWalletButtonClicked(
+  section: DisconnectWalletButtonClickedProperties["section"]
+) {
+  return ampli.disconnectWalletButtonClicked({
+    action: "onClick",
+    element: "disconnectWalletButton",
+    page: getPageValue(),
+    section,
+  });
+}
+
+export function identifyUserWallets(walletStates: WalletState[]) {
+  if (walletStates.length === 0) {
+    return;
+  }
+
+  const [connectedWallet] = walletStates;
+  const connectedWalletAddress = utils.getAddress(
+    connectedWallet.accounts[0].address
+  );
+
+  const identifyObj = new Identify();
+  identifyObj.postInsert("allWalletAddressesConnected", connectedWalletAddress);
+  identifyObj.postInsert("allWalletChainIds", connectedWallet.chains[0].id);
+  identifyObj.set("walletAddress", connectedWalletAddress);
+  identifyObj.set("walletType", connectedWallet.label);
+  return ampli.client?.identify(identifyObj);
 }
