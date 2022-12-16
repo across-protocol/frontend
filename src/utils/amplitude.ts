@@ -5,6 +5,7 @@ import { Identify } from "@amplitude/analytics-browser";
 import {
   ampli,
   ConnectWalletButtonClickedProperties,
+  DisconnectWalletButtonClickedProperties,
   MaxTokenAmountClickedProperties,
 } from "ampli";
 import { pageLookup } from "components/RouteTrace/useRouteTrace";
