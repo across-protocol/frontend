@@ -8,6 +8,9 @@ ampli.load({
   environment: amplitudeEnvironment,
   client: {
     apiKey: amplitudeAPIKey || "",
+    configuration: {
+      disableCookies: true,
+    },
   },
 });
 ampli.applicationLoaded();
