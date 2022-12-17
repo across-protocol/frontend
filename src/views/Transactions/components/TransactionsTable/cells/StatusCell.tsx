@@ -2,6 +2,7 @@ import { TransferStatus } from "@across-protocol/sdk-v2/dist/transfers-history";
 import { BigNumber, BigNumberish, utils } from "ethers";
 import {
   capitalizeFirstLetter,
+  fallbackSuggestedRelayerFeePct,
   fixedPointAdjustment,
   suggestedFeesDeviationBufferMultiplier,
 } from "utils";
@@ -24,7 +25,7 @@ export function StatusCell(props: Props) {
 
 function PendingStatusCell(props: Props) {
   const isProfitable = BigNumber.from(
-    props.suggestedRelayerFeePct || utils.parseEther("0.0001")
+    props.suggestedRelayerFeePct || fallbackSuggestedRelayerFeePct
   ).lte(
     BigNumber.from(props.currentRelayerFeePct)
       .mul(utils.parseEther(String(suggestedFeesDeviationBufferMultiplier)))

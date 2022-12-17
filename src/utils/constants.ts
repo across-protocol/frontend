@@ -737,3 +737,5 @@ export const suggestedFeesDeviationBufferMultiplier = !Number.isNaN(
   : 1.25;
 
 export const defaultRefetchInterval = 15_000;
+
+export const fallbackSuggestedRelayerFeePct = ethers.utils.parseEther("0.0001");
