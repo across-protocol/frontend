@@ -1,15 +1,23 @@
-import { ampli } from "./ampli";
 import { BrowserRouter as Router } from "react-router-dom";
+import { Types } from "@amplitude/analytics-browser";
+import { ampli } from "./ampli";
 import Routes from "./Routes";
-import { amplitudeAPIKey, amplitudeEnvironment } from "utils";
+import { amplitudeEnvironment, isProductionBuild } from "utils";
 
 // Record an event when the application is loaded
 ampli.load({
   environment: amplitudeEnvironment,
   client: {
-    apiKey: amplitudeAPIKey || "",
     configuration: {
       disableCookies: true,
+      logLevel: isProductionBuild ? Types.LogLevel.Error : Types.LogLevel.Debug,
+      trackingOptions: {
+        ipAddress: false,
+        carrier: false,
+        city: false,
+        region: false,
+        dma: false, // designated market area
+      },
     },
   },
 });
