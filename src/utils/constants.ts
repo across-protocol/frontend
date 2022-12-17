@@ -727,8 +727,12 @@ export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
   ? Number(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER)
   : undefined;
 
-export const suggestedFeesDeviationBufferMultiplier = process.env
-  .REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER
+export const suggestedFeesDeviationBufferMultiplier = !Number.isNaN(
+  Number(
+    process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER ||
+      undefined
+  )
+)
   ? Number(process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER)
   : 1.25;
 
