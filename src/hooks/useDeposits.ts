@@ -1,7 +1,12 @@
 import axios from "axios";
 import { useQuery } from "react-query";
 
-import { rewardsApiUrl, depositsQueryKey, userDepositsQueryKey } from "utils";
+import {
+  rewardsApiUrl,
+  depositsQueryKey,
+  userDepositsQueryKey,
+  defaultRefetchInterval,
+} from "utils";
 
 import { useLocalPendingDeposits } from "./useLocalPendingDeposits";
 
@@ -51,7 +56,7 @@ export function useDeposits(
   return useQuery(
     depositsQueryKey(status, limit, offset),
     () => getDeposits({ status, limit, offset }),
-    { keepPreviousData: true, refetchInterval: 15_000 }
+    { keepPreviousData: true, refetchInterval: defaultRefetchInterval }
   );
 }
 
@@ -122,7 +127,7 @@ export function useUserDeposits(
     },
     {
       keepPreviousData: true,
-      refetchInterval: 15_000,
+      refetchInterval: defaultRefetchInterval,
       enabled: Boolean(userAddress),
     }
   );

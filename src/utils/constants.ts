@@ -731,3 +731,5 @@ export const suggestedFeesDeviationBufferMultiplier = process.env
   .REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER
   ? Number(process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER)
   : 1.25;
+
+export const defaultRefetchInterval = 15_000;
