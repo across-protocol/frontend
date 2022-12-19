@@ -15,6 +15,8 @@ import {
   PositionItem,
   ROI,
   ROIItem,
+  InfoIcon,
+  TooltipROIItem,
 } from "./PoolForm.styles";
 import {
   estimateGasForAddEthLiquidity,
@@ -30,6 +32,7 @@ import { ConverterFnType, useConnection } from "hooks";
 import type { ShowSuccess } from "views/Pool";
 import useSetLiquidityFormErrors from "./useSetLiquidityFormErrors";
 import maxClickHandler from "./maxClickHandler";
+import { PopperTooltip } from "components/Tooltip";
 interface Props {
   symbol: string;
   icon: string;
@@ -188,7 +191,16 @@ const PoolForm: FC<Props> = ({
           <div>{formatPoolAPY(utilization, 16)}%</div>
         </ROIItem>
         <ROIItem>
-          <div>Current APY:</div>
+          <TooltipROIItem>
+            APY:
+            <PopperTooltip
+              title={"APY"}
+              body={"Annualized LP bridge fees paid over the last 10 blocks."}
+              placement="bottom-start"
+            >
+              <InfoIcon />
+            </PopperTooltip>
+          </TooltipROIItem>
           <div>
             {formatNumberMaxFracDigits(Number(apy)).replaceAll(",", "")}%
           </div>
