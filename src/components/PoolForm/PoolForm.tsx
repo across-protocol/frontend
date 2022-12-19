@@ -81,7 +81,6 @@ const PoolForm: FC<Props> = ({
   defaultTab,
   setDefaultTab,
   utilization,
-  projectedApr,
   chainId,
   refetchPool,
   convertToLP: inputConvertToLP,
@@ -192,16 +191,6 @@ const PoolForm: FC<Props> = ({
           <div>Current APY:</div>
           <div>
             {formatNumberMaxFracDigits(Number(apy)).replaceAll(",", "")}%
-          </div>
-        </ROIItem>
-        <ROIItem>
-          <div>Projected APY:</div>
-          <div>
-            {formatNumberMaxFracDigits(Number(projectedApr)).replaceAll(
-              ",",
-              ""
-            )}
-            %
           </div>
         </ROIItem>
       </ROI>
