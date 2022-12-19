@@ -50,9 +50,10 @@ export function deriveNewStakingValues(
   const noStake = currentlyStaked.eq(0);
 
   // If the non-maximum unstake action is requested, the return should mirror
-  // the origin
+  // the origin except for the current staked amount which will decrease by the
+  // unstake amount.
   if (!noStake && !isStake) {
-    return clonedOrigin;
+    return { ...clonedOrigin, userAmountOfLPStaked: currentlyStaked };
   }
 
   // Update the total amount of time the user has staked weighted on this new
