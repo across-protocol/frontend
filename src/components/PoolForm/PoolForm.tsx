@@ -15,6 +15,8 @@ import {
   PositionItem,
   ROI,
   ROIItem,
+  InfoIcon,
+  TooltipROIItem,
 } from "./PoolForm.styles";
 import {
   estimateGasForAddEthLiquidity,
@@ -25,11 +27,13 @@ import {
   formatNumberMaxFracDigits,
   toWeiSafe,
   formatUnits,
+  max,
 } from "utils";
 import { ConverterFnType, useConnection } from "hooks";
 import type { ShowSuccess } from "views/Pool";
 import useSetLiquidityFormErrors from "./useSetLiquidityFormErrors";
 import maxClickHandler from "./maxClickHandler";
+import { PopperTooltip } from "components/Tooltip";
 interface Props {
   symbol: string;
   icon: string;
@@ -81,10 +85,11 @@ const PoolForm: FC<Props> = ({
   defaultTab,
   setDefaultTab,
   utilization,
-  projectedApr,
   chainId,
   refetchPool,
   convertToLP: inputConvertToLP,
+  convertFromLP: inputConvertFromLP,
+  stakedPosition,
 }) => {
   const poolClient = getPoolClient();
   const [inputAmount, setInputAmount] = useState("");
@@ -99,6 +104,7 @@ const PoolForm: FC<Props> = ({
   const { isConnected, signer } = useConnection();
 
   const convertToLP = inputConvertToLP ?? ((v: BigNumber) => v);
+  const convertFromLP = inputConvertFromLP ?? ((v: BigNumber) => v);
 
   // update our add-liquidity to contract call gas usage on an interval for eth only
   useEffect(() => {
@@ -133,6 +139,16 @@ const PoolForm: FC<Props> = ({
     addLiquidityGas
   );
 
+  // Set variables for remove liquidity form
+  const poolAvailableLiquidityToRemove = max(
+    BigNumber.from(position).sub(convertFromLP(stakedPosition)),
+    "0"
+  );
+  const poolAvailableLiquidityTotalPosition = max(
+    BigNumber.from(totalPosition).sub(convertFromLP(stakedPosition)),
+    "0"
+  );
+
   // if pool changes, set input value to "".
   useEffect(() => {
     setInputAmount("");
@@ -145,7 +161,12 @@ const PoolForm: FC<Props> = ({
   useEffect(() => {
     if (position.toString() && Number(removeAmount)) {
       const wei = Number(toWeiSafe(removeAmount, decimals).toString());
-      const pos = Number(position.toString());
+      const pos = Number(
+        (defaultTab === "Remove"
+          ? poolAvailableLiquidityToRemove
+          : position
+        ).toString()
+      );
       const percent = (wei / pos) * 100;
       if (percent >= 100) {
         setRemoveAmountSlider(100);
@@ -156,7 +177,8 @@ const PoolForm: FC<Props> = ({
         setRemoveAmountSlider(percent);
       }
     }
-  }, [removeAmount, isConnected]); // eslint-disable-line
+  }, [removeAmount, isConnected, poolAvailableLiquidityToRemove, defaultTab]); // eslint-disable-line
+
   return (
     <Wrapper>
       <Info>
@@ -189,19 +211,18 @@ const PoolForm: FC<Props> = ({
           <div>{formatPoolAPY(utilization, 16)}%</div>
         </ROIItem>
         <ROIItem>
-          <div>Current APY:</div>
+          <TooltipROIItem>
+            APY:
+            <PopperTooltip
+              title={"APY"}
+              body={"Annualized LP bridge fees paid over the last 10 blocks."}
+              placement="bottom-start"
+            >
+              <InfoIcon />
+            </PopperTooltip>
+          </TooltipROIItem>
           <div>
             {formatNumberMaxFracDigits(Number(apy)).replaceAll(",", "")}%
-          </div>
-        </ROIItem>
-        <ROIItem>
-          <div>Projected APY:</div>
-          <div>
-            {formatNumberMaxFracDigits(Number(projectedApr)).replaceAll(
-              ",",
-              ""
-            )}
-            %
           </div>
         </ROIItem>
       </ROI>
@@ -252,9 +273,9 @@ const PoolForm: FC<Props> = ({
             setShowSuccess={setShowSuccess}
             setDepositUrl={setDepositUrl}
             balance={balance}
-            position={position}
+            position={poolAvailableLiquidityToRemove}
             feesEarned={feesEarned}
-            totalPosition={totalPosition}
+            totalPosition={poolAvailableLiquidityTotalPosition}
             refetchBalance={refetchBalance}
             chainId={chainId}
             error={removeFormError}
@@ -263,7 +284,7 @@ const PoolForm: FC<Props> = ({
             setError={setRemoveFormError}
             onMaxClick={() =>
               maxClickHandler(
-                position.toString(),
+                poolAvailableLiquidityToRemove.toString(),
                 symbol,
                 decimals,
                 setRemoveAmount
