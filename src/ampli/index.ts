@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 21
+ * Tracking Plan Version: 23
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -30,10 +30,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "21",
+    version: "23",
     branch: "main",
     source: "web",
-    versionId: "676d56e1-901b-4cd6-88da-5dba8aa2d384",
+    versionId: "51ac33b5-7102-4df9-86f0-a2a7c22a3579",
   },
   ...{
     ingestionMetadata: {
@@ -332,11 +332,11 @@ export interface TransferQuoteRecievedProperties {
    * From chain name
    */
   fromChainName: string;
-  isAmountTooLow: string;
+  isAmountTooLow: boolean;
   /**
    * Boolean if sender and recipient address are equal.
    */
-  isSenderEqRecipient: string;
+  isSenderEqRecipient: boolean;
   /**
    * Lp fee percent, in decimals
    */
@@ -741,7 +741,7 @@ export interface TransferTransactionCompletedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  isAmountTooLow: string;
+  isAmountTooLow: boolean;
   /**
    * Lp fee percent, in decimals
    */
