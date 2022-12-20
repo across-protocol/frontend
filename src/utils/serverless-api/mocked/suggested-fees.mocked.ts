@@ -20,6 +20,8 @@ export async function suggestedFeesMockedApiCall(
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
+  quoteBlock: ethers.BigNumber;
+  quoteTimestamp: ethers.BigNumber;
 }> {
   return {
     relayerFee: {
@@ -35,5 +37,7 @@ export async function suggestedFeesMockedApiCall(
       total: BigNumber.from("1"),
     },
     isAmountTooLow: false,
+    quoteBlock: BigNumber.from("1"),
+    quoteTimestamp: BigNumber.from("1"),
   };
 }
