@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 23
+ * Tracking Plan Version: 24
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -30,10 +30,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "23",
+    version: "24",
     branch: "main",
     source: "web",
-    versionId: "51ac33b5-7102-4df9-86f0-a2a7c22a3579",
+    versionId: "873ed919-d77b-49a8-961e-e435bf1f0982",
   },
   ...{
     ingestionMetadata: {
@@ -708,7 +708,7 @@ export interface TransferSubmittedProperties {
   transferTimestamp: string;
 }
 
-export interface TransferTransactionCompletedProperties {
+export interface TransferTransactionConfirmedProperties {
   /**
    * Capital fee percent, in decimals
    */
@@ -1010,10 +1010,10 @@ export class TransferSubmitted implements BaseEvent {
   }
 }
 
-export class TransferTransactionCompleted implements BaseEvent {
-  event_type = "TransferTransactionCompleted";
+export class TransferTransactionConfirmed implements BaseEvent {
+  event_type = "TransferTransactionConfirmed";
 
-  constructor(public event_properties: TransferTransactionCompletedProperties) {
+  constructor(public event_properties: TransferTransactionConfirmedProperties) {
     this.event_properties = event_properties;
   }
 }
@@ -1393,9 +1393,9 @@ export class Ampli {
   }
 
   /**
-   * TransferTransactionCompleted
+   * TransferTransactionConfirmed
    *
-   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferTransactionCompleted)
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferTransactionConfirmed)
    *
    * On-chain transfer completed
    *
@@ -1404,11 +1404,11 @@ export class Ampli {
    * @param properties The event's properties (e.g. capitalFeePct)
    * @param options Amplitude event options.
    */
-  transferTransactionCompleted(
-    properties: TransferTransactionCompletedProperties,
+  transferTransactionConfirmed(
+    properties: TransferTransactionConfirmedProperties,
     options?: EventOptions,
   ) {
-    return this.track(new TransferTransactionCompleted(properties), options);
+    return this.track(new TransferTransactionConfirmed(properties), options);
   }
 
   /**

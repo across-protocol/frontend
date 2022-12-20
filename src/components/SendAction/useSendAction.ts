@@ -14,7 +14,7 @@ import {
 } from "utils";
 import { Deposit } from "views/Confirmation";
 import { useConnection } from "hooks";
-import { ampli } from "ampli";
+import { ampli, TransferQuoteRecievedProperties } from "ampli";
 import { useCoingeckoPrice } from "hooks/useCoingeckoPrice";
 import { BigNumber } from "ethers";
 import { ConvertDecimals } from "utils/convertdecimals";
@@ -75,6 +75,11 @@ export default function useSendAction(
   const { account, connect } = useConnection();
   const [txHash, setTxHash] = useState("");
 
+  const [quote, setQuote] = useState<
+    TransferQuoteRecievedProperties | undefined
+  >(undefined);
+  const [freezeQuote, setFreezeQuote] = useState(false);
+
   // This use effect instruments amplitude when a new quote is received
   useEffect(() => {
     // Ensure that we have a quote and fees before instrumenting.
@@ -85,9 +90,10 @@ export default function useSendAction(
       fromChainInfo &&
       toChainInfo &&
       toAddress &&
-      account
+      account &&
+      !freezeQuote
     ) {
-      ampli.transferQuoteRecieved({
+      const quote: TransferQuoteRecievedProperties = {
         capitalFeePct: formatWeiEtherPct(fees.relayerCapitalFee.pct),
         capitalFeeTotal: formatTokens(fees.relayerCapitalFee.total),
         capitalFeeTotalUsd: usdEquivalentString(fees.relayerCapitalFee.total),
@@ -139,13 +145,16 @@ export default function useSendAction(
             .add(fees.relayerGasFee.pct)
         ),
         transferQuoteBlockNumber: fees.quoteBlock.toString(),
-      });
+      };
+      ampli.transferQuoteRecieved(quote);
+      setQuote(quote);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fees, selectedRoute, tokenInfo]);
+  }, [fees, selectedRoute, tokenInfo, freezeQuote]);
 
   const handleActionClick = async () => {
-    if (status !== "ready" || !selectedRoute || bridgeDisabled) {
+    setFreezeQuote(true);
+    if (status !== "ready" || !selectedRoute || bridgeDisabled || !quote) {
       return;
     }
     try {
@@ -159,6 +168,7 @@ export default function useSendAction(
             .finally(() => {
               setTxPending(false);
               setTxHash("");
+              setFreezeQuote(false);
             });
         }
         return tx;
@@ -190,7 +200,7 @@ export default function useSendAction(
             .catch(console.error)
             .finally(() => {
               // Instrument amplitude after the transaction is confirmed for the submit button.
-
+              setFreezeQuote(false);
               setTxPending(false);
               setTxHash("");
             });
