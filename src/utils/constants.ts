@@ -460,6 +460,7 @@ export const confirmations =
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
 export const matomoUrl = process.env.REACT_APP_MATOMO_URL;
 export const debug = Boolean(process.env.REACT_APP_DEBUG);
+export const isProductionBuild = process.env.NODE_ENV === "production";
 
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
