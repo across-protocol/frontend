@@ -114,7 +114,7 @@ type GetBridgeFeesArgs = {
   toChainId: ChainId;
 };
 
-type GetBridgeFeesResult = BridgeFees & {
+export type GetBridgeFeesResult = BridgeFees & {
   isAmountTooLow: boolean;
   isLiquidityInsufficient: boolean;
 };

@@ -4,20 +4,16 @@ import {
   confirmations,
   bridgeDisabled,
   getToken,
-  formatUnits,
-  fixedPointAdjustment,
-  formatEther,
   getChainInfo,
   getConfirmationDepositTime,
   receiveAmount,
-  formatWeiPct,
+  generateTransferQuote,
 } from "utils";
+import { cloneDeep } from "lodash";
 import { Deposit } from "views/Confirmation";
 import { useConnection } from "hooks";
 import { ampli, TransferQuoteRecievedProperties } from "ampli";
 import { useCoingeckoPrice } from "hooks/useCoingeckoPrice";
-import { BigNumber } from "ethers";
-import { ConvertDecimals } from "utils/convertdecimals";
 
 export default function useSendAction(
   onDepositConfirmed: (deposit: Deposit) => void
@@ -56,21 +52,6 @@ export default function useSendAction(
     "usd",
     selectedRoute !== undefined
   );
-  // Create a function that converts a wei amount into a formatted token amount
-  const formatTokens = (wei: BigNumber) =>
-    formatUnits(wei, tokenInfo?.decimals ?? 18);
-  // Create a function that converts a wei amount to a USD equivalent
-  const usdEquivalent = (wei: BigNumber) =>
-    (tokenPrice.data?.price ?? fixedPointAdjustment)
-      .mul(
-        ConvertDecimals(tokenInfo?.decimals ?? 18, 18)(wei ?? BigNumber.from(0))
-      )
-      .div(fixedPointAdjustment);
-  // Create a function that converts a wei amount to a USD equivalent string
-  const usdEquivalentString = (wei: BigNumber) =>
-    formatEther(usdEquivalent(wei));
-  const formatWeiEtherPct = (wei: BigNumber) => formatWeiPct(wei)!.toString();
-
   const { status, hasToApprove, send, approve } = useBridge();
   const { account, connect } = useConnection();
   const [txHash, setTxHash] = useState("");
@@ -78,10 +59,10 @@ export default function useSendAction(
   const [quote, setQuote] = useState<
     TransferQuoteRecievedProperties | undefined
   >(undefined);
-  const [freezeQuote, setFreezeQuote] = useState(false);
 
   // This use effect instruments amplitude when a new quote is received
   useEffect(() => {
+    const tokenPriceInUSD = tokenPrice?.data?.price;
     // Ensure that we have a quote and fees before instrumenting.
     if (
       fees &&
@@ -91,70 +72,34 @@ export default function useSendAction(
       toChainInfo &&
       toAddress &&
       account &&
-      !freezeQuote
+      tokenPriceInUSD
     ) {
-      const quote: TransferQuoteRecievedProperties = {
-        capitalFeePct: formatWeiEtherPct(fees.relayerCapitalFee.pct),
-        capitalFeeTotal: formatTokens(fees.relayerCapitalFee.total),
-        capitalFeeTotalUsd: usdEquivalentString(fees.relayerCapitalFee.total),
-        expectedFillTimeInMinutes: timeToRelay,
-        fromAmount: formatTokens(amount),
-        fromAmountUsd: usdEquivalentString(amount),
-        fromChainId: selectedRoute.fromChain.toString(),
-        fromChainName: fromChainInfo.name,
-        isAmountTooLow: fees.isAmountTooLow,
-        isSenderEqRecipient: toAddress === account,
-        lpFeePct: formatWeiEtherPct(fees.lpFee.pct),
-        lpFeeTotal: formatTokens(fees.lpFee.total),
-        lpFeeTotalUsd: usdEquivalentString(fees.lpFee.total),
-        quoteLatencyMilliseconds: (
-          Date.now() - Number(fees.quoteTimestamp?.toString() ?? Date.now())
-        ).toString(),
-        quoteTimestamp: String(fees.quoteTimestamp ?? Date.now()),
-        recipient: toAddress,
-        relayFeePct: formatWeiEtherPct(fees.relayerFee.pct),
-        relayFeeTotal: formatTokens(fees.relayerFee.total),
-        relayFeeTotalUsd: usdEquivalentString(fees.relayerFee.total),
-        relayGasFeePct: formatWeiEtherPct(fees.relayerGasFee.pct),
-        relayGasFeeTotal: formatTokens(fees.relayerGasFee.total),
-        relayGasFeeTotalUsd: usdEquivalentString(fees.relayerGasFee.total),
-        sender: account,
-        routeChainIdFromTo: toChainInfo.chainId.toString(),
-        routeChainNameFromTo: toChainInfo.name,
-        toAmount: formatTokens(amount),
-        toAmountUsd: usdEquivalentString(amount),
-        toChainId: selectedRoute.toChain.toString(),
-        toChainName: toChainInfo.name,
-        tokenSymbol: tokenInfo.symbol,
-        totalBridgeFee: formatTokens(
-          fees.relayerCapitalFee.total
-            .add(fees.lpFee.total)
-            .add(fees.relayerFee.total)
-            .add(fees.relayerGasFee.total)
-        ),
-        totalBridgeFeeUsd: usdEquivalentString(
-          fees.relayerCapitalFee.total
-            .add(fees.lpFee.total)
-            .add(fees.relayerFee.total)
-            .add(fees.relayerGasFee.total)
-        ),
-        totalBridgeFeePct: formatWeiEtherPct(
-          fees.relayerCapitalFee.pct
-            .add(fees.lpFee.pct)
-            .add(fees.relayerFee.pct)
-            .add(fees.relayerGasFee.pct)
-        ),
-        transferQuoteBlockNumber: fees.quoteBlock.toString(),
-      };
+      const quote: TransferQuoteRecievedProperties = generateTransferQuote(
+        fees,
+        selectedRoute,
+        tokenInfo,
+        fromChainInfo,
+        toChainInfo,
+        toAddress,
+        account,
+        tokenPriceInUSD,
+        timeToRelay,
+        amount
+      );
       ampli.transferQuoteRecieved(quote);
       setQuote(quote);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fees, selectedRoute, tokenInfo, freezeQuote]);
+  }, [fees, selectedRoute, tokenInfo]);
 
   const handleActionClick = async () => {
-    setFreezeQuote(true);
-    if (status !== "ready" || !selectedRoute || bridgeDisabled || !quote) {
+    const frozenQuote = cloneDeep(quote);
+    if (
+      status !== "ready" ||
+      !selectedRoute ||
+      bridgeDisabled ||
+      !frozenQuote
+    ) {
       return;
     }
     try {
@@ -168,18 +113,19 @@ export default function useSendAction(
             .finally(() => {
               setTxPending(false);
               setTxHash("");
-              setFreezeQuote(false);
             });
         }
         return tx;
       } else {
         // Instrument amplitude before sending the transaction for the submit button.
+        // ampli.transferSubmitted({});
 
         // We save the fees here, in case they change between here and when we save the deposit.
         const feesUsed = fees;
         const tx = await send();
 
         // Instrument amplitude after signing the transaction for the submit button.
+        // ampli.transferSigned({});
 
         // NOTE: This check is redundant, as if `status` is `ready`, all of those are defined.
         if (tx && toAddress && account && feesUsed) {
@@ -200,7 +146,7 @@ export default function useSendAction(
             .catch(console.error)
             .finally(() => {
               // Instrument amplitude after the transaction is confirmed for the submit button.
-              setFreezeQuote(false);
+              // ampli.transferTransactionConfirmed({});
               setTxPending(false);
               setTxHash("");
             });
