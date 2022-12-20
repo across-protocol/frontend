@@ -3,7 +3,7 @@ import { Zap } from "react-feather";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import styled from "@emotion/styled";
-import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history";
+import { Deposit } from "hooks/useDeposits";
 
 import {
   FilledPercentageCell,
@@ -24,12 +24,13 @@ import {
   AccordionRow,
   TableLink,
 } from "../TransactionsTable.styles";
+import { SupportedTxTuple } from "../../../types";
 
 type Props = {
-  transfer: Transfer;
+  transfer: Deposit;
   token: Token;
   enableSpeedUp?: boolean;
-  onClickSpeedUp?: (tuple: [token: Token, transfer: Transfer]) => void;
+  onClickSpeedUp?: (tuple: SupportedTxTuple) => void;
 };
 
 export function MobileDataRow({
@@ -50,8 +51,9 @@ export function MobileDataRow({
         <TimestampCell timestamp={transfer.depositTime} />
         <StatusCell
           status={transfer.status}
-          depositTime={transfer.depositTime}
-          currentRelayerFeePct={transfer.currentRelayerFeePct}
+          currentRelayerFeePct={transfer.depositRelayerFeePct}
+          suggestedRelayerFeePct={transfer.suggestedRelayerFeePct}
+          enableSpeedUp={enableSpeedUp}
         />
         <FilledPercentageCell
           filled={transfer.filled}

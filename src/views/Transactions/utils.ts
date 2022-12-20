@@ -1,14 +1,11 @@
-import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history";
-
 import { Deposit } from "hooks/useDeposits";
-import { getConfig, parseEtherLike } from "utils";
+import { getConfig } from "utils";
 
 import { SupportedTxTuple } from "./types";
 import { BigNumber } from "ethers";
-import { DateTime } from "luxon";
 
 export function getSupportedTxTuples(
-  transactions: Transfer[]
+  transactions: Deposit[]
 ): SupportedTxTuple[] {
   const config = getConfig();
   return transactions.reduce((supported, tx) => {
@@ -29,43 +26,9 @@ export function getSupportedTxTuples(
 export function doPartialFillsExist(pendingTransferTuples: SupportedTxTuple[]) {
   return pendingTransferTuples.some(([, transfer]) => {
     const filledAmount = transfer.filled;
-    return filledAmount.gt(0) && filledAmount.lte(100);
+    return (
+      BigNumber.from(filledAmount).gt(0) &&
+      BigNumber.from(filledAmount).lte(100)
+    );
   });
-}
-
-/**
- * @todo Use proper values for `initialRelayerFeePct`, `currentRelayerFeePct`
- * and `speedUps` instead of placeholders.
- */
-export function formatToTransfer(deposit: Deposit): Transfer {
-  const initialRelayerFeePct = BigNumber.from(
-    deposit.depositRelayerFeePct || parseEtherLike("0.001")
-  );
-  return {
-    ...deposit,
-    filled: BigNumber.from(deposit.filled),
-    amount: BigNumber.from(deposit.amount),
-    // replace with proper values if scraper-api supports relayer fee
-    initialRelayerFeePct: initialRelayerFeePct,
-    currentRelayerFeePct: initialRelayerFeePct,
-    speedUps: [],
-  };
-}
-
-export function isUnprofitable(
-  depositTime: number,
-  currentRelayerFeePct: BigNumber,
-  thresholds: Partial<{
-    hours: number;
-    basisPoints: number;
-  }> = {}
-): boolean {
-  const { hours = 24, basisPoints = 1 } = thresholds;
-  const isPendingTooLong =
-    Math.abs(DateTime.fromSeconds(depositTime).diffNow().as("hours")) > hours;
-  const hasTooLowRelayerFee = currentRelayerFeePct.lt(
-    parseEtherLike(String(basisPoints * 0.0001))
-  );
-
-  return isPendingTooLong || hasTooLowRelayerFee;
 }

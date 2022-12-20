@@ -111,6 +111,15 @@ export function depositsQueryKey(
   return ["deposits", status, limit, offset];
 }
 
+export function userDepositsQueryKey(
+  userAddress: string,
+  status: "filled" | "pending",
+  limit: number,
+  offset: number
+) {
+  return ["user-deposits", userAddress, status, limit, offset];
+}
+
 export function prelaunchDataQueryKey(address?: string, jwt?: string) {
   return ["prelaunch-data", address, jwt];
 }

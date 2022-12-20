@@ -1,49 +1,45 @@
 import { shortenAddress } from "utils";
 
-import {
-  TransactionsTable,
-  TransactionsTableWithPagination,
-} from "../components/TransactionsTable";
+import { TransactionsTableWithPagination } from "../components/TransactionsTable";
 
 import { useMyTransactionsView } from "../hooks/useMyTransactionsView";
 
 import { ConnectButton, Account, ButtonWrapper } from "../Transactions.styles";
 import { TransactionsLayout } from "../components/TransactionsLayout";
+import { getSupportedTxTuples } from "../utils";
 
 const MyTransactions = () => {
   const {
     connectWallet,
     account,
     isConnected,
-    pendingTransferTuples,
+    paginatedFillUserDeposits,
+    paginatedPendingUserDeposits,
     isMobile,
-    initialLoading,
-    filledTransferTuples,
-    filledTransfersPagination,
+    pageSize,
+    handlePageSizeChange,
   } = useMyTransactionsView();
 
-  const showNoTransactionsFound =
-    !filledTransferTuples.length &&
-    !pendingTransferTuples.length &&
-    !initialLoading;
+  const isLoading =
+    paginatedFillUserDeposits.depositsQuery.isLoading ||
+    paginatedPendingUserDeposits.depositsQuery.isLoading;
 
   const showPendingTransactions =
-    isConnected && pendingTransferTuples.length > 0;
+    !isLoading &&
+    (paginatedPendingUserDeposits.depositsQuery.data?.deposits?.length || 0) >
+      0;
 
-  const {
-    paginateValues,
-    handlePageChange,
-    handlePageSizeChange,
-    currentPage,
-    pageSize,
-  } = filledTransfersPagination;
+  const showNoTransactionsFound =
+    !paginatedFillUserDeposits.depositsQuery.data?.deposits?.length &&
+    !paginatedPendingUserDeposits.depositsQuery.data?.deposits.length &&
+    !isLoading;
 
   return (
     <TransactionsLayout
       showNoTransactionsFound={showNoTransactionsFound}
       showPendingTransactions={showPendingTransactions}
       showFilledTransactions={isConnected}
-      showLoading={initialLoading}
+      showLoading={isLoading}
       ethNoteWrapperText={
         "Note - ETH transfers will appear as WETH but you will receive ETH"
       }
@@ -70,9 +66,16 @@ const MyTransactions = () => {
         </>
       }
       PendingTransactionsTable={
-        <TransactionsTable
+        <TransactionsTableWithPagination
           title="Ongoing"
-          transferTuples={pendingTransferTuples}
+          transferTuples={getSupportedTxTuples(
+            paginatedPendingUserDeposits.transfers
+          )}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
+          onPageChange={paginatedPendingUserDeposits.handlePageChange}
+          paginateValues={paginatedPendingUserDeposits.depositsPaginateValues}
+          currentPage={paginatedPendingUserDeposits.currentPage}
           enablePartialFillInfoIcon
           isMobile={isMobile}
           enableSpeedUps
@@ -82,15 +85,14 @@ const MyTransactions = () => {
         <TransactionsTableWithPagination
           isMobile={isMobile}
           title="History"
-          transferTuples={filledTransferTuples.slice(
-            paginateValues.startIndex,
-            paginateValues.endIndex
+          transferTuples={getSupportedTxTuples(
+            paginatedFillUserDeposits.transfers
           )}
           pageSize={pageSize}
           onPageSizeChange={handlePageSizeChange}
-          onPageChange={handlePageChange}
-          paginateValues={paginateValues}
-          currentPage={currentPage}
+          onPageChange={paginatedFillUserDeposits.handlePageChange}
+          paginateValues={paginatedFillUserDeposits.depositsPaginateValues}
+          currentPage={paginatedFillUserDeposits.currentPage}
         />
       }
     />

@@ -726,3 +726,16 @@ export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day
 export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
   ? Number(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER)
   : undefined;
+
+export const suggestedFeesDeviationBufferMultiplier = !Number.isNaN(
+  Number(
+    process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER ||
+      undefined
+  )
+)
+  ? Number(process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER)
+  : 1.25;
+
+export const defaultRefetchInterval = 15_000;
+
+export const fallbackSuggestedRelayerFeePct = ethers.utils.parseEther("0.0001");

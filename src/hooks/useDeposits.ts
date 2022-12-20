@@ -1,8 +1,23 @@
 import axios from "axios";
 import { useQuery } from "react-query";
-import { rewardsApiUrl, depositsQueryKey } from "utils";
+
+import {
+  rewardsApiUrl,
+  depositsQueryKey,
+  userDepositsQueryKey,
+  defaultRefetchInterval,
+} from "utils";
+
+import { useLocalPendingDeposits } from "./useLocalPendingDeposits";
 
 export type DepositStatus = "pending" | "filled";
+
+export type SpeedUpDepositTx = {
+  hash: string;
+  blockNumber: number;
+  newRelayerFeePct: string;
+  depositSourceChainId: number;
+};
 
 export type Deposit = {
   depositId: number;
@@ -12,19 +27,23 @@ export type Deposit = {
   sourceChainId: number;
   destinationChainId: number;
   assetAddr: string;
+  depositorAddr: string;
   amount: string;
   depositTxHash: string;
   fillTxs: string[];
-  depositRelayerFeePct?: string;
+  speedUps: SpeedUpDepositTx[];
+  depositRelayerFeePct: string;
+  initialRelayerFeePct?: string;
+  suggestedRelayerFeePct?: string;
 };
 
-type Pagination = {
+export type Pagination = {
   total: number;
   limit: number;
   offset: number;
 };
 
-type GetDepositsResponse = {
+export type GetDepositsResponse = {
   pagination: Pagination;
   deposits: Deposit[];
 };
@@ -34,33 +53,97 @@ export function useDeposits(
   limit: number,
   offset: number = 0
 ) {
-  const queryKey = depositsQueryKey(status, limit, offset);
-
-  const { data, ...other } = useQuery(
-    queryKey,
-    async () => {
-      return getDeposits(status, limit, offset);
-    },
-    { keepPreviousData: true, refetchInterval: 15_000 }
+  return useQuery(
+    depositsQueryKey(status, limit, offset),
+    () => getDeposits({ status, limit, offset }),
+    { keepPreviousData: true, refetchInterval: defaultRefetchInterval }
   );
-
-  return {
-    deposits: data ? data.data.deposits : [],
-    pagination: data?.data.pagination,
-    ...other,
-  };
 }
 
-/**
- * @param status Deposit status to query, one of 'filled', 'pending'.
- * @returns A promise resolving to the deposits data in the scraper database.
- */
-async function getDeposits(
+export function useUserDeposits(
   status: DepositStatus,
   limit: number,
-  offset: number
+  offset: number = 0,
+  userAddress?: string
 ) {
-  return axios.get<GetDepositsResponse>(
-    `${rewardsApiUrl}/deposits?status=${status}&limit=${limit}&offset=${offset}`
+  const { getLocalPendingDeposits, removeLocalPendingDeposits } =
+    useLocalPendingDeposits();
+
+  return useQuery(
+    userDepositsQueryKey(userAddress!, status, limit, offset),
+    async () => {
+      if (!userAddress) {
+        return {
+          deposits: [],
+          pagination: {
+            total: 0,
+            limit: 0,
+            offset: 0,
+          },
+        };
+      }
+
+      // To provide a better UX, we take optimistically updated local pending deposits
+      // into account to show on the "My Transactions" page.
+      const localPendingUserDeposits = getLocalPendingDeposits().filter(
+        (deposit) => deposit.depositorAddr === userAddress
+      );
+      const { deposits, pagination } = await getDeposits({
+        address: userAddress,
+        status,
+        limit,
+        offset,
+      });
+      const indexedDepositTxHashes = new Set(
+        deposits.map((d) => d.depositTxHash)
+      );
+
+      // If the Scraper API indexed the optimistically added pending deposit,
+      // then we need to remove it from local storage.
+      const indexedLocalPendingDeposits = localPendingUserDeposits.filter(
+        (localPendingDeposit) =>
+          indexedDepositTxHashes.has(localPendingDeposit.depositTxHash)
+      );
+      removeLocalPendingDeposits(
+        indexedLocalPendingDeposits.map((deposit) => deposit.depositTxHash)
+      );
+
+      // If the Scraper API is still a few blocks behind and didn't index
+      // the optimistically added deposits, then we merge them to provide instant
+      // visibility of a deposit after a user performed a transaction.
+      const notIndexedLocalPendingDeposits = localPendingUserDeposits.filter(
+        (localPendingDeposit) =>
+          !indexedDepositTxHashes.has(localPendingDeposit.depositTxHash)
+      );
+      const mergedDeposits =
+        status === "pending"
+          ? [...notIndexedLocalPendingDeposits, ...deposits]
+          : deposits;
+
+      return {
+        deposits: mergedDeposits,
+        pagination,
+      };
+    },
+    {
+      keepPreviousData: true,
+      refetchInterval: defaultRefetchInterval,
+      enabled: Boolean(userAddress),
+    }
   );
+}
+
+async function getDeposits(
+  params: Partial<{
+    address: string;
+    status: DepositStatus;
+    limit: number;
+    offset: number;
+  }>
+) {
+  const { data } = await axios.get<GetDepositsResponse>(
+    `${rewardsApiUrl}/deposits`,
+    { params }
+  );
+  return data;
 }
