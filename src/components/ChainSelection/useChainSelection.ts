@@ -1,6 +1,5 @@
 import { useSelect } from "downshift";
-import { useConnection } from "hooks";
-import { useSendForm } from "hooks";
+import { useConnection, useSendForm } from "hooks";
 import {
   UnsupportedChainIdError,
   switchChain,
