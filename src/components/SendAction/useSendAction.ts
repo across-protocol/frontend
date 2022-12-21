@@ -1,8 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSendForm, useBridgeFees, useBridge, useBridgeLimits } from "hooks";
-import { confirmations, bridgeDisabled } from "utils";
+import {
+  confirmations,
+  bridgeDisabled,
+  getToken,
+  getChainInfo,
+  getConfirmationDepositTime,
+  receiveAmount,
+  generateTransferQuote,
+  generateTransferSubmitted,
+  generateTransferSigned,
+  generateTransferConfirmed,
+} from "utils";
+import { cloneDeep } from "lodash";
 import { Deposit } from "views/Confirmation";
 import { useConnection } from "hooks";
+import { ampli, TransferQuoteRecievedProperties } from "ampli";
+import { useCoingeckoPrice } from "hooks/useCoingeckoPrice";
+import useReferrer from "hooks/useReferrer";
 
 export default function useSendAction(
   onDepositConfirmed: (deposit: Deposit) => void
@@ -18,12 +33,83 @@ export default function useSendAction(
     fromChain,
     toChain
   );
+
+  const showFees = amount.gt(0) && !!fees;
+  const amountMinusFees = showFees ? receiveAmount(amount, fees) : undefined;
+  const toChainInfo = toChain ? getChainInfo(toChain) : undefined;
+  const fromChainInfo = fromChain ? getChainInfo(fromChain) : undefined;
+  const tokenInfo = tokenSymbol ? getToken(tokenSymbol) : undefined;
+  let timeToRelay = "loading";
+  if (limits && toChain && fromChain) {
+    timeToRelay = getConfirmationDepositTime(
+      amount,
+      limits,
+      toChain,
+      fromChain
+    );
+  } else if (isError) {
+    timeToRelay = "estimation failed";
+  }
+
+  const tokenPrice = useCoingeckoPrice(
+    selectedRoute?.l1TokenAddress!,
+    "usd",
+    selectedRoute !== undefined
+  );
   const { status, hasToApprove, send, approve } = useBridge();
   const { account, connect } = useConnection();
   const [txHash, setTxHash] = useState("");
+  const { referrer } = useReferrer();
+
+  const [quote, setQuote] = useState<
+    TransferQuoteRecievedProperties | undefined
+  >(undefined);
+  const [initialQuoteTime, setInitialQuoteTime] = useState<number | undefined>(
+    undefined
+  );
+
+  // This use effect instruments amplitude when a new quote is received
+  useEffect(() => {
+    const tokenPriceInUSD = tokenPrice?.data?.price;
+    // Ensure that we have a quote and fees before instrumenting.
+    if (
+      fees &&
+      selectedRoute &&
+      tokenInfo &&
+      fromChainInfo &&
+      toChainInfo &&
+      toAddress &&
+      account &&
+      tokenPriceInUSD
+    ) {
+      const quote: TransferQuoteRecievedProperties = generateTransferQuote(
+        fees,
+        selectedRoute,
+        tokenInfo,
+        fromChainInfo,
+        toChainInfo,
+        toAddress,
+        account,
+        tokenPriceInUSD,
+        timeToRelay,
+        amount
+      );
+      ampli.transferQuoteRecieved(quote);
+      setQuote(quote);
+      setInitialQuoteTime((s) => s ?? Number(quote.quoteTimestamp));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fees, selectedRoute, tokenInfo]);
 
   const handleActionClick = async () => {
-    if (status !== "ready" || !selectedRoute || bridgeDisabled) {
+    const frozenQuote = cloneDeep(quote);
+    if (
+      status !== "ready" ||
+      !selectedRoute ||
+      bridgeDisabled ||
+      !frozenQuote ||
+      !initialQuoteTime
+    ) {
       return;
     }
     try {
@@ -41,14 +127,36 @@ export default function useSendAction(
         }
         return tx;
       } else {
+        // Instrument amplitude before sending the transaction for the submit button.
+        ampli.transferSubmitted(
+          generateTransferSubmitted(frozenQuote, referrer, initialQuoteTime)
+        );
+
+        const timeSubmitted = Date.now();
+
         // We save the fees here, in case they change between here and when we save the deposit.
         const feesUsed = fees;
         const tx = await send();
+
         // NOTE: This check is redundant, as if `status` is `ready`, all of those are defined.
         if (tx && toAddress && account && feesUsed) {
+          const timeSigned = tx.timestamp!;
+
+          // Instrument amplitude after signing the transaction for the submit button.
+          ampli.transferSigned(
+            generateTransferSigned(
+              frozenQuote,
+              referrer,
+              timeSubmitted,
+              tx.hash
+            )
+          );
           setTxHash(tx.hash);
+
+          let success = false;
           tx.wait(confirmations)
             .then((tx) => {
+              success = true;
               onDepositConfirmed({
                 txHash: tx.transactionHash,
                 amount,
@@ -62,6 +170,17 @@ export default function useSendAction(
             })
             .catch(console.error)
             .finally(() => {
+              // Instrument amplitude after the transaction is confirmed for the submit button.
+              ampli.transferTransactionConfirmed(
+                generateTransferConfirmed(
+                  frozenQuote,
+                  referrer,
+                  timeSigned,
+                  tx.hash,
+                  success,
+                  tx.timestamp!
+                )
+              );
               setTxPending(false);
               setTxHash("");
             });
@@ -109,5 +228,11 @@ export default function useSendAction(
     txHash,
     limits,
     limitsError: isError,
+    showFees,
+    amountMinusFees,
+    toChainInfo,
+    fromChainInfo,
+    tokenInfo,
+    timeToRelay,
   };
 }
