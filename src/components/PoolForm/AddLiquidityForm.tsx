@@ -16,7 +16,13 @@ import { useERC20 } from "hooks";
 import { ethers } from "ethers";
 import { addEtherscan } from "utils/notify";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
-import { getChainInfo, switchChain, disableDeposits, ChainId } from "utils";
+import {
+  getChainInfo,
+  switchChain,
+  disableDeposits,
+  ChainId,
+  trackMaxButtonClicked,
+} from "utils";
 import api from "state/chainApi";
 import type { ShowSuccess } from "views/Pool";
 import { useError } from "hooks";
@@ -227,7 +233,13 @@ const AddLiquidityForm: FC<Props> = ({
               : "var(--color-primary)",
           }}
         >
-          <MaxButton onClick={onMaxClick} disabled={!isConnected}>
+          <MaxButton
+            onClick={() => {
+              onMaxClick();
+              trackMaxButtonClicked("addLiquidityForm");
+            }}
+            disabled={!isConnected}
+          >
             max
           </MaxButton>
           <Input

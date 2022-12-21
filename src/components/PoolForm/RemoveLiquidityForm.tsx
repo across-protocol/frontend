@@ -31,6 +31,7 @@ import {
   switchChain,
   ChainId,
   calculateRemoveAmount,
+  trackMaxButtonClicked,
 } from "utils";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import api from "state/chainApi";
@@ -192,7 +193,13 @@ const RemoveLiqudityForm: FC<Props> = ({
               : "var(--color-primary)",
           }}
         >
-          <MaxButton onClick={onMaxClick} disabled={!isConnected}>
+          <MaxButton
+            onClick={() => {
+              onMaxClick();
+              trackMaxButtonClicked("removeLiquidityForm");
+            }}
+            disabled={!isConnected}
+          >
             max
           </MaxButton>
           <Input

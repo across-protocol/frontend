@@ -1,13 +1,23 @@
 import { WalletState } from "@web3-onboard/core";
-import { utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { Identify } from "@amplitude/analytics-browser";
 
 import {
   ampli,
   ConnectWalletButtonClickedProperties,
   DisconnectWalletButtonClickedProperties,
+  MaxTokenAmountClickedProperties,
+  TransferQuoteRecievedProperties,
+  TransferSignedProperties,
+  TransferSubmittedProperties,
+  TransferTransactionConfirmedProperties,
 } from "ampli";
 import { pageLookup } from "components/RouteTrace/useRouteTrace";
+import { TokenInfo, ChainInfo, fixedPointAdjustment } from "./constants";
+import { GetBridgeFeesResult } from "./bridge";
+import { ConvertDecimals } from "./convertdecimals";
+import { formatUnits, formatEther, formatWeiPct } from "./format";
+import { getConfig } from "./config";
 
 export function getPageValue() {
   const path = window.location.pathname;
@@ -87,4 +97,201 @@ export function identifyUserWallets(walletStates: WalletState[]) {
   identifyObj.set("walletAddress", connectedWalletAddress);
   identifyObj.set("walletType", connectedWallet.label);
   return ampli.client?.identify(identifyObj);
+}
+
+export function trackMaxButtonClicked(
+  section: MaxTokenAmountClickedProperties["section"]
+) {
+  return ampli.maxTokenAmountClicked({
+    action: "onClick",
+    element: "maxButton",
+    page: getPageValue(),
+    section,
+  });
+}
+
+export function generateTransferQuote(
+  fees: GetBridgeFeesResult,
+  selectedRoute: {
+    fromChain: number;
+    toChain: number;
+    fromTokenAddress: string;
+    fromSpokeAddress: string;
+    fromTokenSymbol: string;
+    isNative: boolean;
+    l1TokenAddress: string;
+  },
+  tokenInfo: TokenInfo,
+  fromChainInfo: ChainInfo,
+  toChainInfo: ChainInfo,
+  toAddress: string,
+  account: string,
+  tokenPrice: BigNumber,
+  timeToRelay: string,
+  amount: BigNumber
+): TransferQuoteRecievedProperties {
+  // Create a function that converts a wei amount into a formatted token amount
+  const formatTokens = (wei: BigNumber) =>
+    formatUnits(wei, tokenInfo?.decimals ?? 18);
+  // Create a function that converts a wei amount to a USD equivalent
+  const usdEquivalent = (wei: BigNumber) =>
+    tokenPrice
+      .mul(
+        ConvertDecimals(tokenInfo?.decimals ?? 18, 18)(wei ?? BigNumber.from(0))
+      )
+      .div(fixedPointAdjustment);
+  // Create a function that converts a wei amount to a USD equivalent string
+  const usdEquivalentString = (wei: BigNumber) =>
+    formatEther(usdEquivalent(wei));
+  const formatWeiEtherPct = (wei: BigNumber) => formatWeiPct(wei)!.toString();
+
+  return {
+    capitalFeePct: formatWeiEtherPct(fees.relayerCapitalFee.pct),
+    capitalFeeTotal: formatTokens(fees.relayerCapitalFee.total),
+    capitalFeeTotalUsd: usdEquivalentString(fees.relayerCapitalFee.total),
+    expectedFillTimeInMinutes: timeToRelay,
+    fromAmount: formatTokens(amount),
+    fromAmountUsd: usdEquivalentString(amount),
+    fromChainId: selectedRoute.fromChain.toString(),
+    fromChainName: fromChainInfo.name,
+    isAmountTooLow: fees.isAmountTooLow,
+    isSenderEqRecipient: toAddress === account,
+    lpFeePct: formatWeiEtherPct(fees.lpFee.pct),
+    lpFeeTotal: formatTokens(fees.lpFee.total),
+    lpFeeTotalUsd: usdEquivalentString(fees.lpFee.total),
+    quoteLatencyMilliseconds: (
+      Date.now() - Number(fees.quoteTimestamp?.toString() ?? Date.now())
+    ).toString(),
+    quoteTimestamp: String(fees.quoteTimestamp ?? Date.now()),
+    recipient: toAddress,
+    relayFeePct: formatWeiEtherPct(fees.relayerFee.pct),
+    relayFeeTotal: formatTokens(fees.relayerFee.total),
+    relayFeeTotalUsd: usdEquivalentString(fees.relayerFee.total),
+    relayGasFeePct: formatWeiEtherPct(fees.relayerGasFee.pct),
+    relayGasFeeTotal: formatTokens(fees.relayerGasFee.total),
+    relayGasFeeTotalUsd: usdEquivalentString(fees.relayerGasFee.total),
+    sender: account,
+    routeChainIdFromTo: toChainInfo.chainId.toString(),
+    routeChainNameFromTo: toChainInfo.name,
+    toAmount: formatTokens(amount),
+    toAmountUsd: usdEquivalentString(amount),
+    toChainId: selectedRoute.toChain.toString(),
+    toChainName: toChainInfo.name,
+    tokenSymbol: tokenInfo.symbol,
+    totalBridgeFee: formatTokens(
+      fees.relayerCapitalFee.total
+        .add(fees.lpFee.total)
+        .add(fees.relayerFee.total)
+        .add(fees.relayerGasFee.total)
+    ),
+    totalBridgeFeeUsd: usdEquivalentString(
+      fees.relayerCapitalFee.total
+        .add(fees.lpFee.total)
+        .add(fees.relayerFee.total)
+        .add(fees.relayerGasFee.total)
+    ),
+    totalBridgeFeePct: formatWeiEtherPct(
+      fees.relayerCapitalFee.pct
+        .add(fees.lpFee.pct)
+        .add(fees.relayerFee.pct)
+        .add(fees.relayerGasFee.pct)
+    ),
+    transferQuoteBlockNumber: fees.quoteBlock.toString(),
+  };
+}
+
+// generate transfer submitted quote
+export function generateTransferSubmitted(
+  quote: TransferQuoteRecievedProperties,
+  referralProgramAddress: string,
+  initialQuoteTime: number
+): TransferSubmittedProperties {
+  // Retrieves the from symbol by address from the config
+  const fromAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.fromChainId),
+    quote.tokenSymbol
+  ).address;
+  // Retrieves the to symbol by address from the config
+  const toAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.toChainId),
+    quote.tokenSymbol
+  ).address;
+
+  return {
+    ...quote,
+    fromTokenAddress: fromAddress,
+    referralProgramAddress: referralProgramAddress,
+    timeFromFirstQuoteToTransferSubmittedInMilliseconds: String(
+      Date.now() - initialQuoteTime
+    ),
+    transferTimestamp: String(Date.now()),
+    toTokenAddress: toAddress,
+  };
+}
+
+// generate transfer signed quote
+export function generateTransferSigned(
+  quote: TransferQuoteRecievedProperties,
+  referralProgramAddress: string,
+  initialSubmissionTime: number,
+  txHash: string
+): TransferSignedProperties {
+  // Retrieves the from symbol by address from the config
+  const fromAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.fromChainId),
+    quote.tokenSymbol
+  ).address;
+  // Retrieves the to symbol by address from the config
+  const toAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.toChainId),
+    quote.tokenSymbol
+  ).address;
+
+  return {
+    ...quote,
+    fromTokenAddress: fromAddress,
+    referralProgramAddress: referralProgramAddress,
+    timeFromTransferSubmittedToTransferSignedInMilliseconds: String(
+      Date.now() - initialSubmissionTime
+    ),
+    toTokenAddress: toAddress,
+    transactionHash: txHash,
+  };
+}
+
+// generate transfer confirmed quote
+export function generateTransferConfirmed(
+  quote: TransferQuoteRecievedProperties,
+  referralProgramAddress: string,
+  initialSignTime: number,
+  txHash: string,
+  success: boolean,
+  txCompletedTimestamp: number
+): TransferTransactionConfirmedProperties {
+  // Retrieves the from symbol by address from the config
+  const fromAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.fromChainId),
+    quote.tokenSymbol
+  ).address;
+  // Retrieves the to symbol by address from the config
+  const toAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.toChainId),
+    quote.tokenSymbol
+  ).address;
+
+  return {
+    ...quote,
+    fromTokenAddress: fromAddress,
+    referralProgramAddress: referralProgramAddress,
+    toTokenAddress: toAddress,
+    transactionHash: txHash,
+    succeeded: success,
+    timeFromTransferSignedToTransferCompleteInMilliseconds: String(
+      Date.now() - initialSignTime
+    ),
+    transferCompleteTimestamp: String(txCompletedTimestamp),
+    NetworkFeeNative: quote.relayGasFeeTotal,
+    NetworkFeeUsd: quote.relayGasFeeTotalUsd.toString(),
+    NetworkFeeNativeToken: quote.tokenSymbol,
+  };
 }
