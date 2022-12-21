@@ -8,12 +8,16 @@ import {
   DisconnectWalletButtonClickedProperties,
   MaxTokenAmountClickedProperties,
   TransferQuoteRecievedProperties,
+  TransferSignedProperties,
+  TransferSubmittedProperties,
+  TransferTransactionConfirmedProperties,
 } from "ampli";
 import { pageLookup } from "components/RouteTrace/useRouteTrace";
 import { TokenInfo, ChainInfo, fixedPointAdjustment } from "./constants";
 import { GetBridgeFeesResult } from "./bridge";
 import { ConvertDecimals } from "./convertdecimals";
 import { formatUnits, formatEther, formatWeiPct } from "./format";
+import { getConfig } from "./config";
 
 export function getPageValue() {
   const path = window.location.pathname;
@@ -193,5 +197,101 @@ export function generateTransferQuote(
         .add(fees.relayerGasFee.pct)
     ),
     transferQuoteBlockNumber: fees.quoteBlock.toString(),
+  };
+}
+
+// generate transfer submitted quote
+export function generateTransferSubmitted(
+  quote: TransferQuoteRecievedProperties,
+  referralProgramAddress: string,
+  initialQuoteTime: number
+): TransferSubmittedProperties {
+  // Retrieves the from symbol by address from the config
+  const fromAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.fromChainId),
+    quote.tokenSymbol
+  ).address;
+  // Retrieves the to symbol by address from the config
+  const toAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.toChainId),
+    quote.tokenSymbol
+  ).address;
+
+  return {
+    ...quote,
+    fromTokenAddress: fromAddress,
+    referralProgramAddress: referralProgramAddress,
+    timeFromFirstQuoteToTransferSubmittedInMilliseconds: String(
+      Date.now() - initialQuoteTime
+    ),
+    transferTimestamp: String(Date.now()),
+    toTokenAddress: toAddress,
+  };
+}
+
+// generate transfer signed quote
+export function generateTransferSigned(
+  quote: TransferQuoteRecievedProperties,
+  referralProgramAddress: string,
+  initialSubmissionTime: number,
+  txHash: string
+): TransferSignedProperties {
+  // Retrieves the from symbol by address from the config
+  const fromAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.fromChainId),
+    quote.tokenSymbol
+  ).address;
+  // Retrieves the to symbol by address from the config
+  const toAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.toChainId),
+    quote.tokenSymbol
+  ).address;
+
+  return {
+    ...quote,
+    fromTokenAddress: fromAddress,
+    referralProgramAddress: referralProgramAddress,
+    timeFromTransferSubmittedToTransferSignedInMilliseconds: String(
+      Date.now() - initialSubmissionTime
+    ),
+    toTokenAddress: toAddress,
+    transactionHash: txHash,
+  };
+}
+
+// generate transfer confirmed quote
+export function generateTransferConfirmed(
+  quote: TransferQuoteRecievedProperties,
+  referralProgramAddress: string,
+  initialSignTime: number,
+  txHash: string,
+  success: boolean,
+  txCompletedTimestamp: number
+): TransferTransactionConfirmedProperties {
+  // Retrieves the from symbol by address from the config
+  const fromAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.fromChainId),
+    quote.tokenSymbol
+  ).address;
+  // Retrieves the to symbol by address from the config
+  const toAddress = getConfig().getTokenInfoBySymbol(
+    Number(quote.toChainId),
+    quote.tokenSymbol
+  ).address;
+
+  return {
+    ...quote,
+    fromTokenAddress: fromAddress,
+    referralProgramAddress: referralProgramAddress,
+    toTokenAddress: toAddress,
+    transactionHash: txHash,
+    succeeded: success,
+    timeFromTransferSignedToTransferCompleteInMilliseconds: String(
+      Date.now() - initialSignTime
+    ),
+    transferCompleteTimestamp: String(txCompletedTimestamp),
+    NetworkFeeNative: quote.relayGasFeeTotal,
+    NetworkFeeUsd: quote.relayGasFeeTotalUsd.toString(),
+    NetworkFeeNativeToken: quote.tokenSymbol,
   };
 }

@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 24
+ * Tracking Plan Version: 26
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -30,10 +30,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "24",
+    version: "26",
     branch: "main",
     source: "web",
-    versionId: "873ed919-d77b-49a8-961e-e435bf1f0982",
+    versionId: "e753861f-4cfc-42ee-b64e-c27855c63602",
   },
   ...{
     ingestionMetadata: {
@@ -465,7 +465,7 @@ export interface TransferSignedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  isAmountTooLow: string;
+  isAmountTooLow: boolean;
   /**
    * Lp fee percent, in decimals
    */
@@ -601,10 +601,7 @@ export interface TransferSubmittedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  /**
-   * Fee is too large to do the transfer, e.g. if the gas fees on the destination are $1, but you're trying to send $0.10, the amount is too low for the relayer's gas cost.
-   */
-  isAmountTooLow: string;
+  isAmountTooLow: boolean;
   /**
    * Lp fee percent, in decimals
    */
@@ -811,9 +808,9 @@ export interface TransferTransactionConfirmedProperties {
    */
   sender: string;
   /**
-   * Result of chain transaction
+   * Result of user signing or rejecting wallet connection
    */
-  succeeded: string;
+  succeeded: boolean;
   /**
    * Duration in milliseconds between TransferSigned event to the TransferTransactionCompleted event
    */
