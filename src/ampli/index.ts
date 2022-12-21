@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 18
+ * Tracking Plan Version: 26
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -21,8 +21,8 @@ import * as amplitude from "@amplitude/analytics-browser";
 export type Environment = "production" | "development";
 
 export const ApiKey: Record<Environment, string> = {
-  production: "0e684c66717732a1957eb6550723e4f0",
-  development: "32c056c19a0937e1ebeae4bf9ad1910c",
+  production: "",
+  development: "",
 };
 
 /**
@@ -30,10 +30,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "18",
+    version: "26",
     branch: "main",
     source: "web",
-    versionId: "284c0da5-b98e-485b-ba38-09ebb05de5f5",
+    versionId: "e753861f-4cfc-42ee-b64e-c27855c63602",
   },
   ...{
     ingestionMetadata: {
@@ -125,9 +125,9 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton |
    */
-  element: "connectWalletButton" | "web3OnboardModal";
+  element: "connectWalletButton" | "web3OnboardModal" | "maxButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -146,7 +146,7 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, stakeFrom, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm |
    */
   section:
     | "navbar"
@@ -156,11 +156,11 @@ export interface ConnectWalletButtonClickedProperties {
     | "airdropSplashFlow"
     | "referralTable"
     | "rewardsTable"
-    | "stakeFrom"
     | "unstakeForm"
     | "myTransactionsTable"
     | "bridgeForm"
-    | "claimReferralRewardsForm";
+    | "claimReferralRewardsForm"
+    | "stakeForm";
 }
 
 export interface DisconnectWalletButtonClickedProperties {
@@ -201,11 +201,37 @@ export interface FromChainSelectedProperties {
 export interface MaxTokenAmountClickedProperties {
   /**
    * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
    */
-  action: string;
-  element: string;
+  action: "onClick" | "onKeyPress";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton |
+   */
+  element: "connectWalletButton" | "web3OnboardModal" | "maxButton";
   page: string;
-  section: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm";
 }
 
 export interface PageViewedProperties {
@@ -306,11 +332,11 @@ export interface TransferQuoteRecievedProperties {
    * From chain name
    */
   fromChainName: string;
-  isAmountTooLow: string;
+  isAmountTooLow: boolean;
   /**
    * Boolean if sender and recipient address are equal.
    */
-  isSenderEqRecipient: string;
+  isSenderEqRecipient: boolean;
   /**
    * Lp fee percent, in decimals
    */
@@ -439,7 +465,7 @@ export interface TransferSignedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  isAmountTooLow: string;
+  isAmountTooLow: boolean;
   /**
    * Lp fee percent, in decimals
    */
@@ -575,10 +601,7 @@ export interface TransferSubmittedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  /**
-   * Fee is too large to do the transfer, e.g. if the gas fees on the destination are $1, but you're trying to send $0.10, the amount is too low for the relayer's gas cost.
-   */
-  isAmountTooLow: string;
+  isAmountTooLow: boolean;
   /**
    * Lp fee percent, in decimals
    */
@@ -682,7 +705,7 @@ export interface TransferSubmittedProperties {
   transferTimestamp: string;
 }
 
-export interface TransferTransactionCompletedProperties {
+export interface TransferTransactionConfirmedProperties {
   /**
    * Capital fee percent, in decimals
    */
@@ -715,7 +738,7 @@ export interface TransferTransactionCompletedProperties {
    * Token address of bridge token on from chain
    */
   fromTokenAddress: string;
-  isAmountTooLow: string;
+  isAmountTooLow: boolean;
   /**
    * Lp fee percent, in decimals
    */
@@ -785,9 +808,9 @@ export interface TransferTransactionCompletedProperties {
    */
   sender: string;
   /**
-   * Result of chain transaction
+   * Result of user signing or rejecting wallet connection
    */
-  succeeded: string;
+  succeeded: boolean;
   /**
    * Duration in milliseconds between TransferSigned event to the TransferTransactionCompleted event
    */
@@ -984,10 +1007,10 @@ export class TransferSubmitted implements BaseEvent {
   }
 }
 
-export class TransferTransactionCompleted implements BaseEvent {
-  event_type = "TransferTransactionCompleted";
+export class TransferTransactionConfirmed implements BaseEvent {
+  event_type = "TransferTransactionConfirmed";
 
-  constructor(public event_properties: TransferTransactionCompletedProperties) {
+  constructor(public event_properties: TransferTransactionConfirmedProperties) {
     this.event_properties = event_properties;
   }
 }
@@ -1367,9 +1390,9 @@ export class Ampli {
   }
 
   /**
-   * TransferTransactionCompleted
+   * TransferTransactionConfirmed
    *
-   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferTransactionCompleted)
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferTransactionConfirmed)
    *
    * On-chain transfer completed
    *
@@ -1378,11 +1401,11 @@ export class Ampli {
    * @param properties The event's properties (e.g. capitalFeePct)
    * @param options Amplitude event options.
    */
-  transferTransactionCompleted(
-    properties: TransferTransactionCompletedProperties,
+  transferTransactionConfirmed(
+    properties: TransferTransactionConfirmedProperties,
     options?: EventOptions,
   ) {
-    return this.track(new TransferTransactionCompleted(properties), options);
+    return this.track(new TransferTransactionConfirmed(properties), options);
   }
 
   /**

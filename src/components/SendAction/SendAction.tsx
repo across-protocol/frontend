@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  formatUnits,
-  receiveAmount,
-  getChainInfo,
-  getToken,
-  getConfirmationDepositTime,
-} from "utils";
+import { formatUnits, getChainInfo } from "utils";
 import { PrimaryButton } from "../Buttons";
 import {
   Wrapper,
@@ -24,6 +18,7 @@ import useSendAction from "./useSendAction";
 import type { Deposit } from "views/Confirmation";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { ReactComponent as ConfettiIcon } from "assets/confetti.svg";
+import { ampli } from "../../ampli";
 type Props = {
   onDeposit: (deposit: Deposit) => void;
 };
@@ -31,8 +26,6 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
   const {
     amount,
     fees,
-    tokenSymbol,
-    toChain,
     handleActionClick,
     buttonDisabled,
     isInfoModalOpen,
@@ -41,26 +34,14 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
     txPending,
     fromChain,
     txHash,
-    limits,
-    limitsError,
+    showFees,
+    toChainInfo,
+    fromChainInfo,
+    tokenInfo,
+    timeToRelay,
+    amountMinusFees,
+    isWETH,
   } = useSendAction(onDeposit);
-  const showFees = amount.gt(0) && !!fees;
-  const amountMinusFees = showFees ? receiveAmount(amount, fees) : undefined;
-  const toChainInfo = toChain ? getChainInfo(toChain) : undefined;
-  const fromChainInfo = fromChain ? getChainInfo(fromChain) : undefined;
-  const tokenInfo = tokenSymbol ? getToken(tokenSymbol) : undefined;
-  const isWETH = tokenInfo?.symbol === "WETH";
-  let timeToRelay = "loading";
-  if (limits && toChain && fromChain) {
-    timeToRelay = getConfirmationDepositTime(
-      amount,
-      limits,
-      toChain,
-      fromChain
-    );
-  } else if (limitsError) {
-    timeToRelay = "estimation failed";
-  }
 
   return (
     <AccentSection>
@@ -72,7 +53,14 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
                 <ConfettiIcon />
                 All transfers are slippage free!
               </SlippageDisclaimer>
-              <FeesButton onClick={toggleInfoModal}>Fees info</FeesButton>
+              <FeesButton
+                onClick={() => {
+                  ampli.feesInfoExpanded();
+                  toggleInfoModal();
+                }}
+              >
+                Fees info
+              </FeesButton>
             </InfoHeadlineContainer>
             <InfoContainer>
               <Info>
@@ -82,7 +70,7 @@ const SendAction: React.FC<Props> = ({ onDeposit }) => {
               <Info>
                 <div>Destination Gas Fee</div>
                 <div>
-                  {showFees
+                  {showFees && fees
                     ? `${formatUnits(
                         fees.relayerGasFee.total,
                         tokenInfo.decimals

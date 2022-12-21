@@ -43,7 +43,8 @@ export type BridgeFees = {
   // Note: relayerGasFee and relayerCapitalFee are components of relayerFee.
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
-  quoteTimestamp?: ethers.BigNumber;
+  quoteTimestamp: ethers.BigNumber;
+  quoteBlock: ethers.BigNumber;
 };
 
 export async function getRelayerFee(
@@ -56,7 +57,8 @@ export async function getRelayerFee(
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
-  quoteTimestamp?: ethers.BigNumber;
+  quoteTimestamp: ethers.BigNumber;
+  quoteBlock: ethers.BigNumber;
 }> {
   const address = getConfig().getTokenInfoBySymbol(
     fromChainId,
@@ -112,7 +114,7 @@ type GetBridgeFeesArgs = {
   toChainId: ChainId;
 };
 
-type GetBridgeFeesResult = BridgeFees & {
+export type GetBridgeFeesResult = BridgeFees & {
   isAmountTooLow: boolean;
   isLiquidityInsufficient: boolean;
 };
@@ -141,6 +143,7 @@ export async function getBridgeFees({
     relayerCapitalFee,
     isAmountTooLow,
     quoteTimestamp,
+    quoteBlock,
   } = await getRelayerFee(tokenSymbol, amount, fromChainId, toChainId);
 
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
@@ -160,6 +163,7 @@ export async function getBridgeFees({
     isAmountTooLow,
     isLiquidityInsufficient,
     quoteTimestamp,
+    quoteBlock,
   };
 }
 

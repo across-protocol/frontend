@@ -13,6 +13,7 @@ import {
   toWeiSafe,
   getConfig,
   bridgeDisabled,
+  trackMaxButtonClicked,
 } from "utils";
 
 import { useQueryParams } from "hooks";
@@ -129,6 +130,7 @@ export default function useCoinSelection() {
         0
       );
     }
+    trackMaxButtonClicked("bridgeForm");
     setInputAmount(formatUnits(adjustedBalance, selectedItem.decimals));
   }, [balance, selectedItem]);
   // checks for insufficient balance errors
