@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 26
+ * Tracking Plan Version: 27
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -30,10 +30,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "26",
+    version: "27",
     branch: "main",
     source: "web",
-    versionId: "e753861f-4cfc-42ee-b64e-c27855c63602",
+    versionId: "825bde2a-9ff1-43bd-a52c-4f7609cb070e",
   },
   ...{
     ingestionMetadata: {
@@ -102,7 +102,7 @@ export interface IdentifyProperties {
   /**
    * Total volume of bridge transfers (since event tracking was implemented). Updated on each new transfer the user completes.
    */
-  totalVolumeUsd?: string;
+  totalVolumeUsd: string;
   /**
    * Currently connected wallet address
    */
@@ -904,7 +904,7 @@ export interface WebVitalsProperties {
 export class Identify implements BaseEvent {
   event_type = "Identify";
 
-  constructor(public event_properties?: IdentifyProperties) {
+  constructor(public event_properties: IdentifyProperties) {
     this.event_properties = event_properties;
   }
 }
@@ -1108,7 +1108,7 @@ export class Ampli {
    */
   identify(
     userId: string | undefined,
-    properties?: IdentifyProperties,
+    properties: IdentifyProperties,
     options?: EventOptions,
   ): PromiseResult<Result> {
     if (!this.isInitializedAndEnabled()) {
