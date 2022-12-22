@@ -16,7 +16,12 @@ import { pageLookup } from "components/RouteTrace/useRouteTrace";
 import { TokenInfo, ChainInfo, fixedPointAdjustment } from "./constants";
 import { GetBridgeFeesResult } from "./bridge";
 import { ConvertDecimals } from "./convertdecimals";
-import { formatUnits, formatEther, formatWeiPct } from "./format";
+import {
+  formatUnits,
+  formatEther,
+  formatWeiPct,
+  capitalizeFirstLetter,
+} from "./format";
 import { getConfig } from "./config";
 import { getIsFirstTimeUser, setIsFirstTimeUser } from "./localStorage";
 
@@ -135,7 +140,7 @@ export function generateTransferQuote(
 ): TransferQuoteRecievedProperties {
   // Create a function that converts a wei amount into a formatted token amount
   const formatTokens = (wei: BigNumber) =>
-    formatUnits(wei, tokenInfo?.decimals ?? 18);
+    formatUnits(wei, tokenInfo?.decimals ?? 18).replaceAll(",", "");
   // Create a function that converts a wei amount to a USD equivalent
   const usdEquivalent = (wei: BigNumber) =>
     tokenPrice
@@ -145,7 +150,7 @@ export function generateTransferQuote(
       .div(fixedPointAdjustment);
   // Create a function that converts a wei amount to a USD equivalent string
   const usdEquivalentString = (wei: BigNumber) =>
-    formatEther(usdEquivalent(wei));
+    formatEther(usdEquivalent(wei)).replaceAll(",", "");
   const formatWeiEtherPct = (wei: BigNumber) => formatWeiPct(wei)!.toString();
 
   return {
@@ -297,4 +302,71 @@ export function generateTransferConfirmed(
     NetworkFeeUsd: quote.relayGasFeeTotalUsd.toString(),
     NetworkFeeNativeToken: quote.tokenSymbol,
   };
+}
+
+export function recordTransferUserProperties(
+  amount: BigNumber,
+  tokenPrice: BigNumber,
+  decimals: number,
+  assetName: string,
+  fromChainId: number,
+  toChainId: number,
+  networkName: string
+) {
+  // Convert assetName to capital case
+  const assetNameCapitalCase = capitalizeFirstLetter(assetName);
+  // Convert networkName to capital case
+  const networkNameCapitalCase = capitalizeFirstLetter(networkName);
+
+  const tokenPriceInUSD = tokenPrice
+    .mul(ConvertDecimals(decimals, 18)(amount))
+    .div(fixedPointAdjustment);
+  // Generate a human readable (non gwei format) version of the token price in USD
+  // Ensure that the human readable version does not contain commas
+  const tokenPriceInUSDHumanReadable = formatEther(tokenPriceInUSD).replaceAll(
+    ",",
+    ""
+  );
+  // Convert the human readable string into a number for Amplitude
+  const tokenPriceInUSDNumber = Number(tokenPriceInUSDHumanReadable);
+
+  // Generate a human readable (non gwei format) version of the token amount
+  // Ensure that the human readable version does not contain commas
+  const tokenAmountHumanReadable = formatUnits(amount, decimals).replaceAll(
+    ",",
+    ""
+  );
+  // Convert the human readable string into a number for Amplitude
+  const tokenAmountNumber = Number(tokenAmountHumanReadable);
+
+  // Determine which is the from and to chain is an L1 or L2 chain
+  const isL1L2 = fromChainId === 1 && toChainId !== 1;
+  const isL2L1 = fromChainId !== 1 && toChainId === 1;
+  const isL2L2 = fromChainId !== 1 && toChainId !== 1;
+
+  const identifyObj = new Identify();
+
+  // Add 1 to the L1L2 transfers if the transfer is from L1 to L2
+  if (isL1L2) identifyObj.add("L1L2Transfers", 1);
+  // Add 1 to the L2L1 transfers if the transfer is from L2 to L1
+  if (isL2L1) identifyObj.add("L2L1Transfers", 1);
+  // Add 1 to the L2L2 transfers if the transfer is from L2 to L2
+  if (isL2L2) identifyObj.add("L2L2Transfers", 1);
+  // Add 1 to the total transfers
+  identifyObj.add("TotalTransfers", 1);
+
+  // Add the usd amount of the transfer to the total usd transferred
+  identifyObj.add("TotalVolumeUsd", tokenPriceInUSDNumber);
+
+  // Add the native amount to the total transfered in the native token
+  identifyObj.add(`${assetNameCapitalCase}VolumeNative`, tokenAmountNumber);
+  // Add the usd amount of the transfer to the total usd transferred
+  identifyObj.add(`${assetNameCapitalCase}VolumeUsd`, tokenPriceInUSDNumber);
+  // Set the current balance of the native token
+  identifyObj.add(
+    `${networkNameCapitalCase}${assetNameCapitalCase}WalletCurrentBalance`,
+    -tokenAmountNumber
+  );
+
+  return ampli.client?.identify(identifyObj);
 }
