@@ -11,6 +11,7 @@ import {
   generateTransferSubmitted,
   generateTransferSigned,
   generateTransferConfirmed,
+  recordTransferUserProperties,
 } from "utils";
 import { cloneDeep } from "lodash";
 import { Deposit } from "views/Confirmation";
@@ -33,6 +34,8 @@ export default function useSendAction(
     fromChain,
     toChain
   );
+  const { chainId: networkChainId } = useConnection();
+  const networkChainName = getChainInfo(networkChainId)?.name!;
 
   const showFees = amount.gt(0) && !!fees;
   const amountMinusFees = showFees ? receiveAmount(amount, fees) : undefined;
@@ -103,12 +106,15 @@ export default function useSendAction(
 
   const handleActionClick = async () => {
     const frozenQuote = cloneDeep(quote);
+    const price = tokenPrice?.data?.price;
     if (
       status !== "ready" ||
       !selectedRoute ||
       bridgeDisabled ||
       !frozenQuote ||
-      !initialQuoteTime
+      !initialQuoteTime ||
+      !price ||
+      !tokenInfo
     ) {
       return;
     }
@@ -184,6 +190,16 @@ export default function useSendAction(
               setTxPending(false);
               setTxHash("");
             });
+          // Call recordTransferUserProperties to update the user's properties in Amplitude.
+          recordTransferUserProperties(
+            amount,
+            price,
+            tokenInfo.decimals,
+            frozenQuote.tokenSymbol.toLowerCase(),
+            Number(frozenQuote.fromChainId),
+            Number(frozenQuote.toChainId),
+            networkChainName
+          );
           // TODO: we should invalidate and refetch any queries of the transaction tab, so when a user switches to it, they see the new transaction immediately.
         }
         return tx;
