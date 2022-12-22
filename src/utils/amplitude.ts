@@ -16,7 +16,12 @@ import { pageLookup } from "components/RouteTrace/useRouteTrace";
 import { TokenInfo, ChainInfo, fixedPointAdjustment } from "./constants";
 import { GetBridgeFeesResult } from "./bridge";
 import { ConvertDecimals } from "./convertdecimals";
-import { formatUnits, formatEther, formatWeiPct } from "./format";
+import {
+  formatUnits,
+  formatEther,
+  formatWeiPct,
+  capitalizeFirstLetter,
+} from "./format";
 import { getConfig } from "./config";
 import { getIsFirstTimeUser, setIsFirstTimeUser } from "./localStorage";
 
@@ -308,11 +313,6 @@ export function recordTransferUserProperties(
   toChainId: number,
   networkName: string
 ) {
-  // Create inline function to capitalize the first letter of a string
-  const capitalizeFirstLetter = (string: string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  };
-
   // Convert assetName to capital case
   const assetNameCapitalCase = capitalizeFirstLetter(assetName);
   // Convert networkName to capital case
