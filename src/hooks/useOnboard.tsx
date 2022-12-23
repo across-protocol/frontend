@@ -27,6 +27,7 @@ import { Chain } from "@web3-onboard/common";
 import { ethers } from "ethers";
 import Notify, { API as NotifyAPI, ConfigOptions } from "bnc-notify";
 import {
+  ampli,
   ConnectWalletButtonClickedProperties,
   DisconnectWalletButtonClickedProperties,
 } from "ampli";
@@ -149,6 +150,7 @@ export function useOnboardManager() {
       if (options?.trackSection) {
         trackDisconnectWalletButtonClicked(options.trackSection);
       }
+      ampli.client?.setUserId(undefined);
       // User requested to be disconnected, let's clear out the wallet type
       // for the event that they're trying to connect using a different wallet
       window.localStorage.removeItem(CACHED_WALLET_KEY);
@@ -178,12 +180,12 @@ export function useOnboardManager() {
         options?.autoSelect ? options : undefined
       );
 
+      identifyUserWallets(walletStates);
       if (options?.trackSection) {
         trackConnectWalletButtonClicked(options.trackSection);
       }
       trackIfWalletSelected(walletStates, previousConnection);
       trackWalletConnectTransactionCompleted(walletStates, previousConnection);
-      identifyUserWallets(walletStates);
 
       return walletStates;
     },
