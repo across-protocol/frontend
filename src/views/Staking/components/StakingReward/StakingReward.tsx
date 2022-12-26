@@ -5,16 +5,13 @@ import { BigNumber } from "ethers";
 import { formatEther, QUERIESV2 } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { StakingRewardPropType } from "../../types";
-import { Card } from "views/Staking/Staking.styles";
 import { Text } from "components/Text";
 import ConnectWalletButton from "../ConnectWalletButton";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
+import CardWrapper from "components/CardWrapper";
 
 export const StakingReward = ({
-  poolData: {
-    outstandingRewards,
-    apyData: { totalApy, minApy },
-  },
+  poolData: { outstandingRewards },
   isConnected,
   claimActionHandler,
   isMutating,
@@ -112,7 +109,7 @@ const ClaimRewardButton = styled(ButtonV2)`
   }
 `;
 
-const StakingRewardCard = styled(Card)`
+const StakingRewardCard = styled(CardWrapper)`
   gap: 16px;
   @media ${QUERIESV2.sm.andDown} {
     padding: 16px;
