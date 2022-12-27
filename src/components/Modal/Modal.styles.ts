@@ -84,6 +84,8 @@ export const Wrapper = styled.div<WrapperType>`
 type ModalWrapperType = {
   height?: number;
   width?: number;
+  yOffset?: number;
+  padding: "normal" | "thin";
 };
 export const ModalContentWrapper = styled.div<ModalWrapperType>`
   max-height: ${({ height }) => height ?? 400}px;
@@ -95,15 +97,18 @@ export const ModalContentWrapper = styled.div<ModalWrapperType>`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 24px;
+  gap: ${({ padding }) => (padding === "normal" ? "24px" : "16px")};
 
   margin: 0 auto;
-  padding: 24px;
+  padding: ${({ padding }) => (padding === "normal" ? "24px" : "16px")};
 
+  margin-top: ${({ yOffset }) => yOffset ?? 0}px;
   background: #202024;
   border: 1px solid #34353b;
   box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.32);
   border-radius: 16px;
+
+  position: relative;
 `;
 
 export const TitleAndExitWrapper = styled.div`
