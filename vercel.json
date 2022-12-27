@@ -25,7 +25,7 @@
           },
           {
             "key" : "Content-Security-Policy-Report-Only",
-            "value" : "default-src 'self'; font-src 'self' data:; img-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; report-uri https://umaproject.uriports.com/reports/report; report-to default"
+            "value" : "default-src 'self' across.to assets.vercel.com vercel.live api.across.to platform.twitter.com api.blocknative.com; font-src 'self' data:; img-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; report-uri https://umaproject.uriports.com/reports/report; report-to default"
           }
         ]
       }
