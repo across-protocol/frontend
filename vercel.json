@@ -25,7 +25,7 @@
           },
           {
             "key" : "Content-Security-Policy-Report-Only",
-            "value" : "default-src 'self'; font-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'self'; report-uri https://umaproject.uriports.com/reports/report; report-to default"
+            "value" : "default-src 'self'; font-src 'self'; img-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; report-uri https://umaproject.uriports.com/reports/report; report-to default"
           }
         ]
       }
