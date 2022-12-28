@@ -21,11 +21,19 @@
           },
           {
             "key" : "Permissions-Policy",
-            "value" : "geolocation=(self), microphone=()"
+            "value" : "geolocation=(self), microphone=(), camera=()"
           },
           {
             "key" : "Content-Security-Policy-Report-Only",
-            "value" : "default-src 'self'  api.across.to across.to wss://api.blocknative.com; font-src 'self' fonts.gstatic.com assets.vercel.com data:; img-src 'self' assets.vercel.com registry.walletconnect.org data:; connect-src wss://api.blocknative.com *.walletconnect.org mainnet.infura.io api.across.to across.to across.matomo.cloud *.alchemy.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' platform.twitter.com vercel.live across.matomo.cloud; style-src 'self' 'unsafe-inline'; frame-src 'self' vercel.live platform.twitter.com; frame-ancestors 'self'; report-uri https://umaproject.uriports.com/reports/report; report-to default"
+            "value" : "default-src 'self' api.across.to across.to wss://api.blocknative.com; font-src 'self' fonts.gstatic.com assets.vercel.com data:; img-src 'self' assets.vercel.com data:; connect-src wss://api.blocknative.com mainnet.infura.io api.across.to  across.to across.matomo.cloud; script-src 'self' 'unsafe-inline' 'unsafe-eval' platform.twitter.com vercel.live across.matomo.cloud; style-src 'self' 'unsafe-inline'; frame-src 'self' vercel.live platform.twitter.com; frame-ancestors 'self'; report-uri https://umaproject.uriports.com/reports/report; report-to default"
+          },
+          {
+            "key" : "Report-To",
+            "value" : "{\\\"group\\\":\\\"default\\\",\\\"max_age\\\":10886400,\\\"endpoints\\\":[{\\\"url\\\":\\\"https://umaproject.uriports.com/reports\\\"}],\\\"include_subdomains\\\":true}"
+          },
+          {
+            "key" : "NEL",
+            "value" : "{\\\"report_to\\\":\\\"default\\\",\\\"max_age\\\":2592000,\\\"include_subdomains\\\":true,\\\"failure_fraction\\\":0.5}"
           }
         ]
       }
