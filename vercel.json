@@ -29,11 +29,11 @@
           },
           {
             "key" : "Report-To",
-            "value" : "{\\\"group\\\":\\\"default\\\",\\\"max_age\\\":10886400,\\\"endpoints\\\":[{\\\"url\\\":\\\"https://umaproject.uriports.com/reports\\\"}],\\\"include_subdomains\\\":true}"
+            "value" : "{\"group\":\"default\",\"max_age\":10886400,\"endpoints\":[{\"url\":\"https://umaproject.uriports.com/reports\"}],\"include_subdomains\":true}"
           },
           {
             "key" : "NEL",
-            "value" : "{\\\"report_to\\\":\\\"default\\\",\\\"max_age\\\":2592000,\\\"include_subdomains\\\":true,\\\"failure_fraction\\\":0.5}"
+            "value" : "{\"report_to\":\"default\",\"max_age\":2592000,\"include_subdomains\":true,\"failure_fraction\":0.5}"
           }
         ]
       }
