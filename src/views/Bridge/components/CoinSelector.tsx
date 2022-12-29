@@ -3,7 +3,12 @@ import { Selector } from "components";
 import { Text } from "components/Text";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 import { BigNumber, utils } from "ethers";
-import { isNumberEthersParseable, parseUnitsFnBuilder, TokenInfo } from "utils";
+import {
+  isNumberEthersParseable,
+  parseUnitsFnBuilder,
+  QUERIESV2,
+  TokenInfo,
+} from "utils";
 import { useEffect, useState } from "react";
 import { Theme } from "@emotion/react";
 import { SelectorPropType } from "components/Selector/Selector";
@@ -179,10 +184,15 @@ const AmountWrapper = styled.div<IValidInput>`
   border: 1px solid ${({ valid }) => (!valid ? "#f96c6c" : "#4c4e57")};
   border-radius: 32px;
 
-  width: 70%;
+  width: calc(70% - 6px);
   height: 64px;
 
   flex-shrink: 0;
+
+  @media ${QUERIESV2.sm.andDown} {
+    height: 48px;
+    padding: 6px 12px 6px 24px;
+  }
 `;
 
 const AmountInnerWrapper = styled.div`
@@ -196,7 +206,9 @@ const AmountInnerWrapper = styled.div`
   width: 100%;
 `;
 
-const TokenSelection = styled(Selector)`` as StyledComponent<
+const TokenSelection = styled(Selector)`
+  width: calc(30% - 6px);
+` as StyledComponent<
   SelectorPropType<string> & {
     theme?: Theme | undefined;
   },
@@ -258,6 +270,13 @@ const AmountInnerInput = styled.input<IValidInput>`
   &:focus {
     outline: 0;
     font-size: 18px;
+  }
+
+  overflow-x: hidden;
+
+  @media ${QUERIESV2.sm.andDown} {
+    font-size: 16px;
+    line-height: 20px;
   }
 `;
 
