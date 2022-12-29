@@ -94,7 +94,6 @@ const CoinSelector = ({
   fromChain,
   toChain,
 }: CoinSelectorPropType) => {
-  console.log(tokenChoices);
   const {
     token,
     tokenFormatterFn,

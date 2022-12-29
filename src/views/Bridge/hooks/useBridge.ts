@@ -132,8 +132,6 @@ export function useBridge() {
   const usersBalance = useBalanceBySymbol(currentToken, currentFromRoute);
   const currentBalance = usersBalance.balance;
 
-  console.log(currentBalance, currentToken, currentFromRoute);
-
   return {
     availableTokens,
     currentToken,
