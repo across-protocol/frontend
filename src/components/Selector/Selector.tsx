@@ -23,10 +23,8 @@ const Selector = <ElementValue,>({
   setSelectedValue,
   title,
 }: SelectorPropType<ElementValue>) => {
-  const { displayModal, setDisplayModal, selectedIndex } = useSelector(
-    elements,
-    selectedValue
-  );
+  const { displayModal, setDisplayModal, selectedIndex, isMobile } =
+    useSelector(elements, selectedValue);
   return (
     <>
       <Wrapper onClick={() => setDisplayModal(true)}>
@@ -43,8 +41,12 @@ const Selector = <ElementValue,>({
         }}
         isOpen={displayModal}
         width={400}
-        verticalLocation="top"
-        topYOffset={112}
+        verticalLocation={{
+          tablet: "top",
+          desktop: "top",
+          mobile: "bottom",
+        }}
+        topYOffset={isMobile ? 16 : 112}
         exitOnOutsideClick
         title={
           <Text size="md" color="grey-400">

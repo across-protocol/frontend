@@ -1,3 +1,4 @@
+import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { useState } from "react";
 import { SelectorElementType } from "./Selector";
 
@@ -9,10 +10,12 @@ export function useSelector<ValueType>(
   const selectedIndex = elements.findIndex(
     (element) => element.value === selectedValue
   );
+  const { isMobile } = useCurrentBreakpoint();
 
   return {
     displayModal,
     setDisplayModal,
     selectedIndex: selectedIndex < 0 ? 0 : selectedIndex,
+    isMobile,
   };
 }
