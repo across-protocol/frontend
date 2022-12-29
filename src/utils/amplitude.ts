@@ -155,6 +155,9 @@ export function generateTransferQuote(
     formatEther(usdEquivalent(wei)).replaceAll(",", "");
   const formatWeiEtherPct = (wei: BigNumber) => formatWeiPct(wei)!.toString();
 
+  const totalBridgeFee = fees.relayerFee.total.add(fees.lpFee.total);
+  const totalBridgeFeePct = fees.relayerFee.pct.add(fees.lpFee.pct);
+
   return {
     capitalFeePct: formatWeiEtherPct(fees.relayerCapitalFee.pct),
     capitalFeeTotal: formatTokens(fees.relayerCapitalFee.total),
@@ -183,29 +186,14 @@ export function generateTransferQuote(
     sender: account,
     routeChainIdFromTo: toChainInfo.chainId.toString(),
     routeChainNameFromTo: toChainInfo.name,
-    toAmount: formatTokens(amount),
-    toAmountUsd: usdEquivalentString(amount),
+    toAmount: formatTokens(amount.sub(totalBridgeFee)),
+    toAmountUsd: usdEquivalentString(amount.sub(totalBridgeFee)),
     toChainId: selectedRoute.toChain.toString(),
     toChainName: toChainInfo.name,
     tokenSymbol: tokenInfo.symbol,
-    totalBridgeFee: formatTokens(
-      fees.relayerCapitalFee.total
-        .add(fees.lpFee.total)
-        .add(fees.relayerFee.total)
-        .add(fees.relayerGasFee.total)
-    ),
-    totalBridgeFeeUsd: usdEquivalentString(
-      fees.relayerCapitalFee.total
-        .add(fees.lpFee.total)
-        .add(fees.relayerFee.total)
-        .add(fees.relayerGasFee.total)
-    ),
-    totalBridgeFeePct: formatWeiEtherPct(
-      fees.relayerCapitalFee.pct
-        .add(fees.lpFee.pct)
-        .add(fees.relayerFee.pct)
-        .add(fees.relayerGasFee.pct)
-    ),
+    totalBridgeFee: formatTokens(totalBridgeFee),
+    totalBridgeFeeUsd: usdEquivalentString(totalBridgeFee),
+    totalBridgeFeePct: formatWeiEtherPct(totalBridgeFeePct),
     transferQuoteBlockNumber: fees.quoteBlock.toString(),
   };
 }
