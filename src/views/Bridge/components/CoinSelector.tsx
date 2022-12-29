@@ -76,9 +76,9 @@ function useCoinSelector(
 
 type CoinSelectorPropType = {
   currentSelectedBalance?: BigNumber;
-  setAmountToBridge: (v: BigNumber | undefined) => void;
+  onAmountToBridgeChanged: (v: BigNumber | undefined) => void;
   tokenChoices: TokenInfo[];
-  setTokenSelected: (s: string) => void;
+  onTokenSelected: (s: string) => void;
 
   tokenSelected: string;
   toChain: number;
@@ -87,9 +87,9 @@ type CoinSelectorPropType = {
 
 const CoinSelector = ({
   currentSelectedBalance,
-  setAmountToBridge,
+  onAmountToBridgeChanged,
   tokenSelected,
-  setTokenSelected,
+  onTokenSelected,
   tokenChoices,
   fromChain,
   toChain,
@@ -106,7 +106,7 @@ const CoinSelector = ({
     tokenSelected,
     fromChain,
     toChain,
-    setAmountToBridge,
+    onAmountToBridgeChanged,
     currentSelectedBalance
   );
   return (
@@ -149,7 +149,7 @@ const CoinSelector = ({
         }))}
         selectedValue={tokenSelected}
         title="Coins"
-        setSelectedValue={(v) => setTokenSelected(v)}
+        setSelectedValue={(v) => onTokenSelected(v)}
       />
     </Wrapper>
   );

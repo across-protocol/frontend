@@ -42,8 +42,8 @@ const Bridge = () => {
               toChain={currentToRoute ?? 1}
               tokenChoices={availableTokens}
               tokenSelected={currentToken}
-              setTokenSelected={setCurrentToken}
-              setAmountToBridge={setAmountToBridge}
+              onTokenSelected={setCurrentToken}
+              onAmountToBridgeChanged={setAmountToBridge}
               currentSelectedBalance={currentBalance}
             />
           </RowWrapper>
