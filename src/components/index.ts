@@ -14,6 +14,7 @@ export { default as LayoutV2 } from "./LayoutV2";
 export { default as DotStepper } from "./DotStepper";
 export { default as Modal } from "./Modal";
 export { default as Alert } from "./Alert";
+export { default as Selector } from "./Selector";
 
 export * from "./Box";
 export * from "./Buttons";
