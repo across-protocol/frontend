@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { ReactComponent as Arrow } from "assets/icons/arrow-16.svg";
 import Modal from "components/Modal";
 import { Text } from "components/Text";
+import { QUERIESV2 } from "utils";
 import { useSelector } from "./useSelector";
 
 export type SelectorElementType<Value> = {
@@ -97,6 +98,11 @@ const Wrapper = styled.div`
   border-radius: 32px;
 
   cursor: pointer;
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 12px;
+    height: 48px;
+  }
 `;
 
 const InternalWrapper = styled.div`
