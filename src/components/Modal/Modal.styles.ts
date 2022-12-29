@@ -66,15 +66,15 @@ export const Wrapper = styled.div<WrapperType>`
 
   @media ${QUERIESV2.sm.andDown} {
     align-items: ${({ direction }) =>
-      direction.tablet === "middle"
+      direction.mobile === "middle"
         ? "center"
-        : direction.tablet === "bottom"
+        : direction.mobile === "bottom"
         ? "flex-end"
         : "flex-start"};
     padding: ${({ direction }) =>
-        direction.tablet === "middle"
+        direction.mobile === "middle"
           ? "0px"
-          : direction.tablet === "bottom"
+          : direction.mobile === "bottom"
           ? "16px"
           : "calc(72px+16px)"}
       0px;
