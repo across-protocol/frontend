@@ -18,17 +18,19 @@ export type ModalDirection = {
 
 type ModalProps = {
   isOpen?: boolean;
-  title?: string;
+  title?: string | JSX.Element;
 
   height?: number;
   width?: number;
+  padding?: "normal" | "thin";
 
   exitOnOutsideClick?: boolean;
   exitModalHandler: () => void;
 
   disableExitOverride?: boolean;
 
-  verticalLocation?: ModalDirection;
+  verticalLocation?: ModalDirectionOrientation | ModalDirection;
+  topYOffset?: number;
 };
 
 const Modal: React.FC<ModalProps> = ({
@@ -40,8 +42,19 @@ const Modal: React.FC<ModalProps> = ({
   exitModalHandler: externalModalExitHandler,
   disableExitOverride,
   children,
-  verticalLocation,
+  verticalLocation: _verticalLocation,
+  topYOffset,
+  padding,
 }) => {
+  const verticalLocation: ModalDirection | undefined =
+    typeof _verticalLocation === "string"
+      ? {
+          desktop: _verticalLocation,
+          tablet: _verticalLocation,
+          mobile: _verticalLocation,
+        }
+      : _verticalLocation;
+
   const direction: ModalDirection = {
     mobile: "middle",
     desktop: "middle",
@@ -113,9 +126,20 @@ const Modal: React.FC<ModalProps> = ({
       onClick={offModalClickHandler}
       reverseAnimation={!forwardAnimation}
     >
-      <ModalContentWrapper ref={modalContentRef} height={height} width={width}>
+      <ModalContentWrapper
+        ref={modalContentRef}
+        height={height}
+        width={width}
+        yOffset={topYOffset}
+        padding={padding ?? "normal"}
+      >
         <TitleAndExitWrapper>
-          <Title>{title}</Title>
+          {typeof title === "string" ? (
+            <Title>{title}</Title>
+          ) : (
+            <div>{title}</div>
+          )}
+
           <StyledExitIcon onClick={() => externalModalExitHandler()} />
         </TitleAndExitWrapper>
         {children}
