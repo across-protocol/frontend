@@ -4,25 +4,28 @@ import Modal from "components/Modal";
 import { Text } from "components/Text";
 import { useSelector } from "./useSelector";
 
-type SelectorElementType = {
-  value: string;
+export type SelectorElementType<Value> = {
+  value: Value;
   element: JSX.Element;
 };
 
-type SelectorPropType = {
+export type SelectorPropType<Value> = {
   title: string;
-  elements: SelectorElementType[];
-  selectedIndex: number;
-  setSelectedIndex: (ind: number) => void;
+  elements: SelectorElementType<Value>[];
+  selectedValue: Value;
+  setSelectedValue: (ind: Value) => void;
 };
 
-const Selector = ({
+const Selector = <ElementValue,>({
   elements,
-  selectedIndex,
-  setSelectedIndex,
+  selectedValue,
+  setSelectedValue,
   title,
-}: SelectorPropType) => {
-  const { displayModal, setDisplayModal } = useSelector();
+}: SelectorPropType<ElementValue>) => {
+  const { displayModal, setDisplayModal, selectedIndex } = useSelector(
+    elements,
+    selectedValue
+  );
   return (
     <>
       <Wrapper onClick={() => setDisplayModal(true)}>
@@ -49,17 +52,18 @@ const Selector = ({
         }
         padding="thin"
       >
-        <ElementRowWrapper>
+        <ElementRowWrapper enableScroll={elements.length > 7}>
           <ElementRowDivider />
           {elements.map((element, idx) => (
             <ElementRow
+              key={idx}
               onClick={() => {
-                setSelectedIndex(idx);
+                setSelectedValue(element.value);
                 setDisplayModal(false);
               }}
               active={selectedIndex === idx}
             >
-              <ElementSection> {idx}</ElementSection>
+              <ElementSection> {element.element}</ElementSection>
               <ElementSection>
                 {idx === selectedIndex ? (
                   <ActiveIcon>
@@ -109,7 +113,7 @@ const ActiveElementWrapper = styled.div``;
 
 const StyledArrowIcon = styled(Arrow)``;
 
-const ElementRowWrapper = styled.div`
+const ElementRowWrapper = styled.div<{ enableScroll?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -117,7 +121,14 @@ const ElementRowWrapper = styled.div`
   margin: 0px -16px;
 
   width: calc(100% + 32px);
-  overflow-y: scroll;
+  overflow-y: ${({ enableScroll }) => (enableScroll ? "scroll" : "none")};
+
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
 `;
 
 const ElementRowDivider = styled.div`
