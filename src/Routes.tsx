@@ -28,7 +28,9 @@ const Referrals = lazy(
 const Rewards = lazy(
   () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
 );
-const Send = lazy(() => import(/* webpackChunkName: "Send" */ "./views/Send"));
+const Send = lazy(
+  () => import(/* webpackChunkName: "Send" */ "./views/Bridge")
+);
 const Splash = lazy(
   () => import(/* webpackChunkName: "Splash" */ "./views/Splash")
 );
