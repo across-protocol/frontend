@@ -6,11 +6,13 @@ import {
   CardWrapper,
   ChainIcon,
   ChainIconTextWrapper,
+  QuickSwapWrapper,
   RowWrapper,
   Wrapper,
 } from "./Bridge.styles";
 import Breadcrumb from "./components/Breadcrumb";
 import CoinSelector from "./components/CoinSelector";
+import QuickSwap from "./components/QuickSwap";
 import SlippageAlert from "./components/SlippageAlert";
 import { useBridge } from "./hooks/useBridge";
 
@@ -27,6 +29,7 @@ const Bridge = () => {
     availableToRoutes,
     currentToRoute,
     setCurrentToRoute,
+    handleQuickSwap,
   } = useBridge();
   return (
     <LayoutV2 maxWidth={600}>
@@ -72,6 +75,9 @@ const Bridge = () => {
             <Text size="md" color="grey-400">
               To
             </Text>
+            <QuickSwapWrapper>
+              <QuickSwap onQuickSwap={handleQuickSwap} />
+            </QuickSwapWrapper>
             <Selector<number>
               elements={availableToRoutes.map((r) => ({
                 value: r.chainId,

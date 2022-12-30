@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import { useBalanceBySymbol } from "hooks";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getChainInfo, getConfig, getToken } from "utils";
 
 const enabledRoutes = getConfig().getRoutes();
@@ -129,6 +129,20 @@ export function useBridge() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availableRoutes, currentToRoute]);
 
+  // Create a function called handleQuickSwap which swaps the from chain and to chain
+  // Use useCallback to avoid creating a new function every time the component re-renders
+  const handleQuickSwap = useCallback(() => {
+    if (currentFromRoute && currentToRoute) {
+      // Resolve the from and to route as temporary variables
+      const currentFromRouteTemp = currentFromRoute;
+      const currentToRouteTemp = currentToRoute;
+      // Set the current from route to the current to route
+      setCurrentFromRoute(currentToRouteTemp);
+      // Set the current to route to the current from route
+      setCurrentToRoute(currentFromRouteTemp);
+    }
+  }, [currentFromRoute, currentToRoute]);
+
   const usersBalance = useBalanceBySymbol(currentToken, currentFromRoute);
   const currentBalance = usersBalance.balance;
 
@@ -144,5 +158,6 @@ export function useBridge() {
     currentBalance,
     availableFromRoutes,
     availableToRoutes,
+    handleQuickSwap,
   };
 }
