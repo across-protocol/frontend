@@ -169,6 +169,12 @@ const Wrapper = styled.div`
   padding: 0px;
   gap: 12px;
   width: 100%;
+
+  @media ${QUERIESV2.xs.andDown} {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
 `;
 
 interface IValidInput {
@@ -193,6 +199,10 @@ const AmountWrapper = styled.div<IValidInput>`
     height: 48px;
     padding: 6px 12px 6px 24px;
   }
+
+  @media ${QUERIESV2.xs.andDown} {
+    width: 100%;
+  }
 `;
 
 const AmountInnerWrapper = styled.div`
@@ -208,6 +218,10 @@ const AmountInnerWrapper = styled.div`
 
 const TokenSelection = styled(Selector)`
   width: calc(30% - 6px);
+
+  @media ${QUERIESV2.xs.andDown} {
+    width: 100%;
+  }
 ` as StyledComponent<
   SelectorPropType<string> & {
     theme?: Theme | undefined;
