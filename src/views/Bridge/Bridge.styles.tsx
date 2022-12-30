@@ -30,6 +30,8 @@ export const RowWrapper = styled.div`
   gap: 12px;
 
   width: 100%;
+
+  position: relative;
 `;
 
 export const ChainIconTextWrapper = styled.div`
@@ -44,4 +46,12 @@ export const ChainIconTextWrapper = styled.div`
 export const ChainIcon = styled.img`
   width: 24px;
   height: 24px;
+`;
+
+export const QuickSwapWrapper = styled.div`
+  height: fit-content;
+  width: fit-content;
+  position: absolute;
+  left: calc(50% - 20px);
+  top: -25px;
 `;
