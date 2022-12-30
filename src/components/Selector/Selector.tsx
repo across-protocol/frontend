@@ -31,7 +31,7 @@ const Selector = <ElementValue,>({
       <Wrapper onClick={() => setDisplayModal(true)}>
         <InternalWrapper>
           <ActiveElementWrapper>
-            {elements[selectedIndex].element}
+            {elements[selectedIndex]?.element}
           </ActiveElementWrapper>
           <StyledArrowIcon />
         </InternalWrapper>
