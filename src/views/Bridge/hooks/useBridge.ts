@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { useBalanceBySymbol, useConnection } from "hooks";
+import { useBalanceBySymbol, useConnection, useIsWrongNetwork } from "hooks";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getChainInfo, getConfig, getToken } from "utils";
 
@@ -146,34 +146,17 @@ export function useBridge() {
   const usersBalance = useBalanceBySymbol(currentToken, currentFromRoute);
   const currentBalance = usersBalance.balance;
 
+  const { isWrongNetwork, isWrongNetworkHandler, checkWrongNetworkHandler } =
+    useIsWrongNetwork(currentFromRoute);
+
   // Resolve the user's current chain id
-  const {
-    isConnected,
-    chainId: walletChainId,
-    setChain: setWalletChainId,
-  } = useConnection();
-  // Store whether the user is on an unsupported chain
-  const [isWrongChain, setIsWrongChain] = useState(false);
+  const { isConnected, chainId: walletChainId } = useConnection();
 
   // When a user changes the from route, ensure that they are on the same chain id
   // otherwise the user will be prompted to switch chains. Only do this for connected wallets
   useEffect(() => {
-    setIsWrongChain(false);
-    if (currentFromRoute && isConnected && walletChainId) {
-      const fromChainInfo = getChainInfo(currentFromRoute);
-      if (fromChainInfo.chainId !== walletChainId) {
-        setIsWrongChain(true);
-        // setWalletChainId({ chainId: fromChainInfo.chainId.toString() });
-      }
-    }
-  }, [currentFromRoute, isConnected, setWalletChainId, walletChainId]);
-  // Create a funtion that switches the user to the correct chain id
-  const handleChainSwitch = useCallback(() => {
-    if (currentFromRoute)
-      setWalletChainId({
-        chainId: getChainInfo(currentFromRoute).chainId.toString(),
-      });
-  }, [currentFromRoute, setWalletChainId]);
+    checkWrongNetworkHandler();
+  }, [currentFromRoute, isConnected, checkWrongNetworkHandler]);
 
   return {
     availableTokens,
@@ -188,8 +171,8 @@ export function useBridge() {
     availableFromRoutes,
     availableToRoutes,
     handleQuickSwap,
-    isWrongChain,
-    handleChainSwitch,
+    isWrongChain: isWrongNetwork,
+    handleChainSwitch: isWrongNetworkHandler,
     walletChainId,
   };
 }
