@@ -1,17 +1,20 @@
 import { LayoutV2, SuperHeader } from "components";
 import Selector from "components/Selector/Selector";
 import { Text } from "components/Text";
-import { capitalizeFirstLetter, getChainInfo } from "utils";
+import { capitalizeFirstLetter, getChainInfo, getToken } from "utils";
 import {
+  Button,
   CardWrapper,
   ChainIcon,
   ChainIconTextWrapper,
+  Divider,
   QuickSwapWrapper,
   RowWrapper,
   Wrapper,
 } from "./Bridge.styles";
 import Breadcrumb from "./components/Breadcrumb";
 import CoinSelector from "./components/CoinSelector";
+import EstimatedTable from "./components/EstimatedTable";
 import QuickSwap from "./components/QuickSwap";
 import SlippageAlert from "./components/SlippageAlert";
 import { useBridge } from "./hooks/useBridge";
@@ -32,6 +35,10 @@ const Bridge = () => {
     isWrongChain,
     handleChainSwitch,
     handleQuickSwap,
+    isConnected,
+    buttonActionHandler,
+    buttonLabel,
+    isBridgeDisabled,
   } = useBridge();
   return (
     <>
@@ -112,6 +119,20 @@ const Bridge = () => {
           </CardWrapper>
           <CardWrapper>
             <SlippageAlert />
+            {currentToRoute && (
+              <EstimatedTable
+                chainId={currentToRoute}
+                estimatedTime=""
+                token={getToken(currentToken)}
+                dataLoaded={isConnected}
+              />
+            )}
+            <Divider />
+            <Button disabled={isBridgeDisabled} onClick={buttonActionHandler}>
+              <Text color="dark-grey" weight={500}>
+                {buttonLabel}
+              </Text>
+            </Button>
           </CardWrapper>
         </Wrapper>
       </LayoutV2>

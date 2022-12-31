@@ -2,6 +2,7 @@ import { BigNumber } from "ethers";
 import { useBalanceBySymbol, useConnection, useIsWrongNetwork } from "hooks";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getChainInfo, getConfig, getToken } from "utils";
+import { useBridgeAction } from "./useBridgeAction";
 
 const enabledRoutes = getConfig().getRoutes();
 
@@ -19,7 +20,9 @@ export function useBridge() {
   }, []);
 
   const [currentToken, setCurrentToken] = useState(availableTokens[0].symbol);
-  const [, setAmountToBridge] = useState<BigNumber | undefined>(undefined);
+  const [amountToBridge, setAmountToBridge] = useState<BigNumber | undefined>(
+    undefined
+  );
 
   // Filter routes to only show routes that are available for the current token when the user changes the token
   // Use useMemo to avoid recalculating this every time the component re-renders
@@ -158,7 +161,13 @@ export function useBridge() {
     checkWrongNetworkHandler();
   }, [currentFromRoute, isConnected, checkWrongNetworkHandler]);
 
+  const bridgeAction = useBridgeAction();
+
+  const isBridgeDisabled =
+    isConnected && (!amountToBridge || amountToBridge.eq(0));
+
   return {
+    ...bridgeAction,
     availableTokens,
     currentToken,
     setCurrentToken,
@@ -174,5 +183,7 @@ export function useBridge() {
     isWrongChain: isWrongNetwork,
     handleChainSwitch: isWrongNetworkHandler,
     walletChainId,
+    isConnected,
+    isBridgeDisabled,
   };
 }
