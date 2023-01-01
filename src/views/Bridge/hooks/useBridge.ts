@@ -1,7 +1,18 @@
 import { BigNumber } from "ethers";
-import { useBalanceBySymbol, useConnection, useIsWrongNetwork } from "hooks";
+import {
+  useBalanceBySymbol,
+  useBridgeFees,
+  useBridgeLimits,
+  useConnection,
+  useIsWrongNetwork,
+} from "hooks";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getChainInfo, getConfig, getToken } from "utils";
+import {
+  getChainInfo,
+  getConfig,
+  getConfirmationDepositTime,
+  getToken,
+} from "utils";
 import { useBridgeAction } from "./useBridgeAction";
 
 const enabledRoutes = getConfig().getRoutes();
@@ -166,8 +177,42 @@ export function useBridge() {
   const isBridgeDisabled =
     isConnected && (!amountToBridge || amountToBridge.eq(0));
 
+  // Resolve the fees by using the useBridgeFees hook
+  const { fees } = useBridgeFees(
+    amountToBridge ?? BigNumber.from(0),
+    currentFromRoute,
+    currentToRoute,
+    currentToken
+  );
+
+  // Resolve the limits by using the useBridgeLimits hook
+  const { limits } = useBridgeLimits(
+    getToken(currentToken).mainnetAddress,
+    currentFromRoute,
+    currentToRoute
+  );
+
+  // Resolve the amount of time it takes to bridge
+  const estimatedTime = useMemo(() => {
+    return amountToBridge &&
+      amountToBridge.gt(0) &&
+      currentFromRoute &&
+      currentToRoute
+      ? limits
+        ? getConfirmationDepositTime(
+            amountToBridge,
+            limits,
+            currentToRoute,
+            currentFromRoute
+          )
+        : "loading..."
+      : undefined;
+  }, [amountToBridge, currentFromRoute, currentToRoute, limits]);
+
   return {
     ...bridgeAction,
+    fees,
+    limits,
     availableTokens,
     currentToken,
     setCurrentToken,
@@ -185,5 +230,7 @@ export function useBridge() {
     walletChainId,
     isConnected,
     isBridgeDisabled,
+    amountToBridge,
+    estimatedTime,
   };
 }

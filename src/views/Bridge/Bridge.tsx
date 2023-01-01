@@ -1,7 +1,12 @@
 import { LayoutV2, SuperHeader } from "components";
 import Selector from "components/Selector/Selector";
 import { Text } from "components/Text";
-import { capitalizeFirstLetter, getChainInfo, getToken } from "utils";
+import {
+  capitalizeFirstLetter,
+  getChainInfo,
+  getToken,
+  receiveAmount,
+} from "utils";
 import {
   Button,
   CardWrapper,
@@ -39,6 +44,9 @@ const Bridge = () => {
     buttonActionHandler,
     buttonLabel,
     isBridgeDisabled,
+    fees,
+    amountToBridge,
+    estimatedTime,
   } = useBridge();
   return (
     <>
@@ -122,7 +130,14 @@ const Bridge = () => {
             {currentToRoute && (
               <EstimatedTable
                 chainId={currentToRoute}
-                estimatedTime=""
+                estimatedTime={estimatedTime}
+                gasFee={fees?.relayerGasFee.total}
+                bridgeFee={fees?.relayerCapitalFee.total}
+                totalReceived={
+                  fees && amountToBridge && amountToBridge.gt(0)
+                    ? receiveAmount(amountToBridge, fees)
+                    : undefined
+                }
                 token={getToken(currentToken)}
                 dataLoaded={isConnected}
               />

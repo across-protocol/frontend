@@ -2,7 +2,6 @@ import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { BigNumber } from "ethers";
 import { capitalizeFirstLetter, getChainInfo, TokenInfo } from "utils";
-import { repeatableTernaryBuilder } from "utils/ternary";
 import TokenFee from "./TokenFee";
 
 type EstimatedTableProps = {
@@ -10,19 +9,18 @@ type EstimatedTableProps = {
   estimatedTime?: string;
   gasFee?: BigNumber;
   bridgeFee?: BigNumber;
-  totalFee?: BigNumber;
+  totalReceived?: BigNumber;
   token: TokenInfo;
   dataLoaded: boolean;
 };
 
 const EstimatedTable = ({
-  dataLoaded,
   chainId,
   estimatedTime,
   gasFee,
   bridgeFee,
   token,
-  totalFee,
+  totalReceived,
 }: EstimatedTableProps) => (
   <Wrapper>
     <Row>
@@ -57,7 +55,11 @@ const EstimatedTable = ({
         You will receive
       </Text>
       <Text size="md" color="grey-400">
-        {totalFee ? <TokenFee amount={totalFee} token={token} /> : "-"}
+        {totalReceived ? (
+          <TokenFee amount={totalReceived} token={token} />
+        ) : (
+          "-"
+        )}
       </Text>
     </Row>
   </Wrapper>

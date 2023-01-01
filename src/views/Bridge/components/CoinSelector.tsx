@@ -61,6 +61,7 @@ function useCoinSelector(
   // If the user input is invalid, set the amount to bridge to undefined
   // If the user input is empty, set the amount to bridge to undefined
   useEffect(() => {
+    console.log("OOF");
     validateAndSetUserInput();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userAmountInput, validateAndSetUserInput]);
