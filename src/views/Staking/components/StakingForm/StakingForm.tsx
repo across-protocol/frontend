@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { utils } from "ethers";
 import {
-  Tabs,
-  Tab,
   StakeInfo,
   StakeInfoItem,
   StyledProgressBar,
@@ -18,6 +16,7 @@ import {
 } from "./StakingForm.styles";
 
 import { PopperTooltip } from "components/Tooltip";
+import { Tab, Tabs } from "components/TabsV2";
 import StakingInputBlock from "../StakingInputBlock";
 import { StakingFormPropType } from "../../types";
 import { repeatableTernaryBuilder } from "utils/ternary";

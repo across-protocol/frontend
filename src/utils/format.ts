@@ -82,36 +82,41 @@ export function shortenTransactionHash(hash: string): string {
 }
 
 // for number less than 1, this will ensure at least 1 digit is shown ( not rounded to 0)
-export const smallNumberFormatter = (num: number) =>
+export const smallNumberFormatter = (num: number, precision?: number) =>
   new Intl.NumberFormat("en-US", {
     minimumSignificantDigits: 1,
-    maximumSignificantDigits: 3,
+    maximumSignificantDigits: precision || 3,
   }).format(num);
 
 // for numbers 1 or greater, this will ensure we never round down and lose values > 1, while minimizing decimals to max of 3
-export const largeNumberFormatter = (num: number) =>
+export const largeNumberFormatter = (num: number, precision?: number) =>
   new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 3,
+    maximumFractionDigits: precision || 3,
   }).format(num);
 
 // for numbers 1000 or greater, this will remove any fractional component to make it a bit cleaner
-export const veryLargeNumberFormatter = (num: number) =>
+export const veryLargeNumberFormatter = (num: number, precision?: number) =>
   new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 0,
+    maximumFractionDigits: precision || 0,
   }).format(num);
 
 export function formatUnits(
   wei: ethers.BigNumberish,
-  decimals: number
+  decimals: number,
+  maxFractions?: Partial<{
+    xl: number;
+    l: number;
+    s: number;
+  }>
 ): string {
   const value = Number(ethers.utils.formatUnits(wei, decimals));
   if (value >= 1000) {
-    return veryLargeNumberFormatter(value);
+    return veryLargeNumberFormatter(value, maxFractions?.xl);
   }
   if (value >= 1) {
-    return largeNumberFormatter(value);
+    return largeNumberFormatter(value, maxFractions?.l);
   }
-  return smallNumberFormatter(value);
+  return smallNumberFormatter(value, maxFractions?.s);
 }
 
 export function formatUnitsFnBuilder(decimals: number) {
