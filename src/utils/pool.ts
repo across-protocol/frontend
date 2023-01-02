@@ -1,6 +1,15 @@
 import { ethers, Signer, BigNumberish, BigNumber } from "ethers";
-import { toWeiSafe } from "./weiMath";
-import { getPoolClient } from "state/poolsApi";
+import * as acrossSdk from "@across-protocol/sdk-v2";
+
+import {
+  getConfigStoreAddress,
+  ChainId,
+  hubPoolAddress,
+  hubPoolChainId,
+  getConfig,
+  toWeiSafe,
+  getProvider,
+} from "utils";
 
 export const DEFAULT_GAS_PRICE = toWeiSafe(
   process.env.REACT_APP_DEFAULT_GAS_PRICE || "400",
@@ -64,4 +73,34 @@ export async function estimateGasForAddEthLiquidity(
   const gasPrice = await getGasPrice(provider);
   const gas = await gasForAddEthLiquidity(signer, tokenAddress, balance);
   return estimateGas(gas, gasPrice, GAS_PRICE_BUFFER);
+}
+
+export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
+  const config = getConfig();
+  const configStoreAddress = ethers.utils.getAddress(
+    getConfigStoreAddress(chainId)
+  );
+  return {
+    chainId,
+    hubPoolAddress,
+    wethAddress: config.getWethAddress(),
+    configStoreAddress,
+    acceleratingDistributorAddress: config.getAcceleratingDistributorAddress(),
+    merkleDistributorAddress: config.getMerkleDistributorAddress(),
+  };
+}
+
+export let poolClient: undefined | acrossSdk.pool.Client;
+
+export function getPoolClient(): acrossSdk.pool.Client {
+  if (poolClient) return poolClient;
+  const hubPoolConfig = makePoolClientConfig(hubPoolChainId);
+  poolClient = new acrossSdk.pool.Client(
+    hubPoolConfig,
+    {
+      provider: getProvider(hubPoolChainId),
+    },
+    () => {}
+  );
+  return poolClient;
 }
