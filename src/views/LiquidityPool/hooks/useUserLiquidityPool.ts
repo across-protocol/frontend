@@ -1,7 +1,7 @@
 import { useConnection } from "hooks";
 import { useQuery } from "react-query";
 
-import { defaultRefetchInterval, getConfig, getPoolClient } from "utils";
+import { getConfig, getPoolClient } from "utils";
 
 const config = getConfig();
 const poolClient = getPoolClient();
@@ -14,7 +14,7 @@ export function useUserLiquidityPool(tokenSymbol?: string) {
     () => fetchUserLiquidityPool(account!, tokenSymbol!),
     {
       enabled: Boolean(account && tokenSymbol),
-      refetchInterval: defaultRefetchInterval,
+      staleTime: 300_000,
     }
   );
 }
