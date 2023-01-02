@@ -18,31 +18,7 @@ export const Wrapper = styled.div`
   box-sizing: border-box;
 `;
 
-export const Tabs = styled.div`
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin: 0 auto 0px;
-  justify-items: center;
-`;
-
 export const Divider = ExternalDivider;
-
-interface ITab {
-  active: boolean;
-}
-export const Tab = styled.div<ITab>`
-  flex-grow: 1;
-  text-align: center;
-  padding: 0 0 20px;
-  border-bottom: ${(props) =>
-    props.active ? "2px solid #e0f3ff" : "1px solid #3E4047"};
-  cursor: pointer;
-
-  @media ${QUERIESV2.sm.andDown} {
-    padding: 0 0 12px;
-  }
-`;
 
 export const UsdcLogo = styled(UnstyedUsdcLogo)``;
 
