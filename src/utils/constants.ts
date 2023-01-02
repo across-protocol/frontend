@@ -596,7 +596,7 @@ export const discordClientId = process.env.REACT_APP_DISCORD_CLIENT_ID ?? "";
 
 // Configures the V2 breakpoints
 export const BREAKPOINTS_V2 = {
-  xs: 400,
+  xs: 421,
   sm: 576,
   tb: 1024,
 };
