@@ -23,7 +23,9 @@ import RouteTrace from "components/RouteTrace/RouteTrace";
 import WalletTrace from "components/WalletTrace";
 import WalletBalanceTrace from "components/WalletBalanceTrace/WalletBalanceTrace";
 
-const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
+const Pool = lazy(
+  () => import(/* webpackChunkName: "Pool" */ "./views/LiquidityPool")
+);
 const Referrals = lazy(
   () => import(/* webpackChunkName: "Referrals" */ "./views/Referrals")
 );
