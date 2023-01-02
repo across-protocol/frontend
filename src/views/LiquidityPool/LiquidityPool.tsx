@@ -5,22 +5,28 @@ import { LayoutV2 } from "components";
 import CardWrapper from "components/CardWrapper";
 import { Tabs, Tab } from "components/TabsV2";
 import { formatNumberMaxFracDigits, formatUnits, formatWeiPct } from "utils";
+import { repeatableTernaryBuilder } from "utils/ternary";
+import { useConnection } from "hooks";
 
 import Breadcrumb from "./components/Breadcrumb";
 import PoolSelector from "./components/PoolSelector";
 import StatBox from "./components/StatBox";
 import UserStatRow from "./components/UserStatRow";
+import EarnByStakingInfoBox from "./components/EarnByStakingInfoBox";
+import { ActionInputBlock } from "./components/ActionInputBlock";
 
 import { useAllLiquidityPools } from "./hooks/useAllLiquidityPools";
 import { useUserLiquidityPool } from "./hooks/useUserLiquidityPool";
 
-import { Container, StatsRow } from "./LiquidityPool.styles";
+import { Container, StatsRow, Divider, Button } from "./LiquidityPool.styles";
 
 type PoolAction = "add" | "remove";
 
 export default function LiquidityPool() {
   const [action, setAction] = useState<PoolAction>("add");
   const [selectedPoolSymbol, setSelectedPoolSymbol] = useState("ETH");
+
+  const { isConnected, connect } = useConnection();
 
   const allLiquidityPoolQueries = useAllLiquidityPools();
   const arePoolsLoading = allLiquidityPoolQueries.some(
@@ -43,6 +49,8 @@ export default function LiquidityPool() {
       selectedLiquidityPool.symbol
     }`;
   };
+
+  const showValueOrDash = repeatableTernaryBuilder(!arePoolsLoading, "-");
 
   return (
     <LayoutV2 maxWidth={600}>
@@ -72,35 +80,54 @@ export default function LiquidityPool() {
           <StatsRow>
             <StatBox
               label="Pool size"
-              value={formatTokenAmount(selectedLiquidityPool?.totalPoolSize)}
+              value={showValueOrDash(
+                formatTokenAmount(selectedLiquidityPool?.totalPoolSize)
+              )}
             />
             <StatBox
               label="Pool utilization"
-              value={
+              value={showValueOrDash(
                 `${formatWeiPct(
                   selectedLiquidityPool?.liquidityUtilizationCurrent
-                )}%` || "-"
-              }
+                )}%`
+              )}
             />
             <StatBox
               label="Pool APY"
-              value={`${formatNumberMaxFracDigits(
-                Number(selectedLiquidityPool?.estimatedApy) * 100
-              )}%`}
+              value={showValueOrDash(
+                `${formatNumberMaxFracDigits(
+                  Number(selectedLiquidityPool?.estimatedApy) * 100
+                )}%`
+              )}
             />
           </StatsRow>
           <UserStatRow
             label="Position size"
-            value={formatTokenAmount(
-              userLiquidityPoolQuery.data?.positionValue
+            value={showValueOrDash(
+              formatTokenAmount(userLiquidityPoolQuery.data?.positionValue)
             )}
             tokenLogoURI={selectedLiquidityPool?.logoURI}
           />
           <UserStatRow
             label="Fees earned"
-            value={formatTokenAmount(userLiquidityPoolQuery.data?.feesEarned)}
+            value={showValueOrDash(
+              formatTokenAmount(userLiquidityPoolQuery.data?.feesEarned)
+            )}
             tokenLogoURI={selectedLiquidityPool?.logoURI}
           />
+          <Divider />
+          <EarnByStakingInfoBox
+            selectedTokenAddress={selectedLiquidityPool?.l1Token}
+            selectedPoolAction={action}
+          />
+          <Divider />
+          {!isConnected ? (
+            <Button size="lg" onClick={() => connect()}>
+              Connect Wallet
+            </Button>
+          ) : (
+            <ActionInputBlock action={action} />
+          )}
         </CardWrapper>
       </Container>
     </LayoutV2>
