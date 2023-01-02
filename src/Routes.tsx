@@ -21,7 +21,9 @@ import ACXLiveBanner from "components/ACXLiveBanner/ACXLiveBanner";
 import ScrollToTop from "components/ScrollToTop";
 import RouteTrace from "components/RouteTrace/RouteTrace";
 
-const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
+const Pool = lazy(
+  () => import(/* webpackChunkName: "Pool" */ "./views/LiquidityPool")
+);
 const Referrals = lazy(
   () => import(/* webpackChunkName: "Referrals" */ "./views/Referrals")
 );
