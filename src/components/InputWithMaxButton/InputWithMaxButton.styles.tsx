@@ -2,11 +2,11 @@ import styled from "@emotion/styled";
 import { QUERIESV2 } from "utils";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 
-interface Input {
+interface IInput {
   valid: boolean;
   invalid: boolean;
 }
-export const InputWrapper = styled.div<Input>`
+export const InputWrapper = styled.div<IInput>`
   display: flex;
   gap: 12px;
   justify-content: space-between;
@@ -29,7 +29,7 @@ export const InputWrapper = styled.div<Input>`
   }
 `;
 
-export const Input = styled.input<Input>`
+export const Input = styled.input<IInput>`
   background: transparent;
   color: ${({ valid, invalid }) =>
     !invalid && !valid ? "#9daab2" : invalid ? "#f96c6c" : "#e0f3ff"};
