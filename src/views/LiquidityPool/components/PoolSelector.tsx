@@ -1,9 +1,13 @@
+import { useEffect } from "react";
 import styled, { StyledComponent } from "@emotion/styled";
-import { Selector } from "components";
-import { Text } from "components/Text";
 import { BigNumber } from "ethers";
 import { Theme } from "@emotion/react";
+
+import { Selector, Text } from "components";
 import { SelectorPropType } from "components/Selector/Selector";
+
+import { useLiquidityPool } from "../hooks/useLiquidityPool";
+import { useUserLiquidityPool } from "../hooks/useUserLiquidityPool";
 
 type PoolInfo = {
   tokenSymbol: string;
@@ -12,16 +16,27 @@ type PoolInfo = {
 };
 
 type Props = {
-  selectedPoolSymbol: string;
+  selectedL1TokenSymbol: string;
+  selectedL1TokenAddress?: string;
   pools: PoolInfo[];
   onPoolSelected: (pool: string) => void;
 };
 
 export function PoolSelector({
-  selectedPoolSymbol,
+  selectedL1TokenSymbol,
+  selectedL1TokenAddress,
   pools,
   onPoolSelected,
 }: Props) {
+  const liquidityPoolQuery = useLiquidityPool(selectedL1TokenAddress);
+  const userLiquidityPoolQuery = useUserLiquidityPool(selectedL1TokenSymbol);
+
+  useEffect(() => {
+    liquidityPoolQuery.refetch();
+    userLiquidityPoolQuery.refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedL1TokenAddress]);
+
   return (
     <Wrapper>
       <TokenSelection
@@ -36,7 +51,7 @@ export function PoolSelector({
             </PoolIconTextWrapper>
           ),
         }))}
-        selectedValue={selectedPoolSymbol}
+        selectedValue={selectedL1TokenSymbol}
         title="Pools"
         setSelectedValue={(v) => onPoolSelected(v)}
       />
