@@ -15,6 +15,8 @@ export { default as DotStepper } from "./DotStepper";
 export { default as Modal } from "./Modal";
 export { default as Alert } from "./Alert";
 export { default as Selector } from "./Selector";
+export { default as InputWithMaxButton } from "./InputWithMaxButton";
+export { Text } from "./Text";
 
 export * from "./Box";
 export * from "./Buttons";
