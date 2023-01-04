@@ -1,53 +1,54 @@
-import { BigNumber } from "ethers";
 import { useConnection, useERC20 } from "hooks";
 import { useAllowance } from "hooks/useAllowance";
 import { useMutation } from "react-query";
-import { getConfig, MAX_APPROVAL_AMOUNT } from "utils";
+import {
+  AcrossDepositArgs,
+  getConfig,
+  MAX_APPROVAL_AMOUNT,
+  notificationEmitter,
+  sendAcrossDeposit,
+} from "utils";
 
 export function useBridgeAction(
   dataLoading: boolean,
-  amountToBridge?: BigNumber,
-  token?: string,
-  fromRoute?: number,
-  toRoute?: number
+  payload?: AcrossDepositArgs,
+  tokenSymbol?: string
 ) {
-  const { isConnected, connect, account, chainId, signer } = useConnection();
-  const { approve } = useERC20(token ?? "");
+  const { isConnected, connect, account, chainId, signer, notify } =
+    useConnection();
+  const { approve } = useERC20(tokenSymbol ?? "");
   const { allowance } = useAllowance(
-    token,
-    fromRoute,
+    tokenSymbol,
+    payload?.fromChain,
     account,
-    fromRoute ? getConfig().getSpokePoolAddress(fromRoute) : undefined
+    payload ? getConfig().getSpokePoolAddress(payload.fromChain) : undefined
   );
   const buttonActionHandler = useMutation(async () => {
     // Connect wallet if not connected
     if (!isConnected) {
       connect();
     } else {
-      // Check if allowance is defined, if the user amount to bridge, and if the token, fromRoute and toRoute are defined
-      if (
-        allowance !== undefined &&
-        amountToBridge !== undefined &&
-        token &&
-        fromRoute &&
-        toRoute
-      ) {
+      // Check if allowance is defined, payload is defined and signer is defined
+      if (allowance !== undefined && payload && signer) {
         // Get the spoke pool address and chain id
-        const spokePool = getConfig().getSpokePool(fromRoute, signer);
+        const spokePool = getConfig().getSpokePool(payload.fromChain, signer);
         // Ensure that the chain id is the same as the current chain id
-        if (chainId === fromRoute) {
+        if (chainId === payload.fromChain) {
           // Check if allowance is insufficient
-          if (allowance.lt(amountToBridge)) {
+          if (allowance.lt(payload.amount)) {
             // If not, call the approve function
-            await approve({
+            const tx = await approve({
               spender: spokePool.address,
               amount: MAX_APPROVAL_AMOUNT,
               signer,
             });
-          }
-          // else If not, call the approve function only if the token, fromRoute and toRoute are defined
-          else {
-            // await
+            if (tx) {
+              await notificationEmitter(tx.hash, notify);
+            }
+          } else {
+            // If so, call the sendAcrossDeposit function
+            const tx = await sendAcrossDeposit(signer, payload);
+            await notificationEmitter(tx.hash, notify);
           }
         }
       }
@@ -57,22 +58,32 @@ export function useBridgeAction(
   let buttonLabel = "";
   if (!isConnected) {
     buttonLabel = "Connect wallet";
-  } else if (amountToBridge) {
+  } else if (payload) {
     if (dataLoading || !allowance) {
       buttonLabel = "Loading...";
-    } else if (allowance.lt(amountToBridge)) {
-      buttonLabel = "Approve";
+    } else if (allowance.lt(payload.amount)) {
+      if (buttonActionHandler.isLoading) {
+        buttonLabel = "Approving...";
+      } else {
+        buttonLabel = "Approve";
+      }
     } else {
-      buttonLabel = "Confirm transaction";
+      if (buttonActionHandler.isLoading) {
+        buttonLabel = "Confirming...";
+      } else {
+        buttonLabel = "Confirm transaction";
+      }
     }
   } else {
     buttonLabel = "Confirm transaction";
   }
-  const buttonDisabled = !amountToBridge || (isConnected && dataLoading);
+  const buttonDisabled =
+    !payload || (isConnected && dataLoading) || buttonActionHandler.isLoading;
 
   return {
     isConnected,
-    buttonActionHandler,
+    buttonActionHandler: buttonActionHandler.mutateAsync,
+    isButtonActionLoading: buttonActionHandler.isLoading,
     buttonLabel,
     buttonDisabled,
   };

@@ -6,8 +6,10 @@ import {
   useConnection,
   useIsWrongNetwork,
 } from "hooks";
+import useReferrer from "hooks/useReferrer";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  AcrossDepositArgs,
   getChainInfo,
   getConfig,
   getConfirmationDepositTime,
@@ -50,6 +52,17 @@ export function useBridge() {
   );
   const [currentFromRoute, setCurrentFromRoute] = useState<number | undefined>(
     undefined
+  );
+
+  const currentRoute = useMemo(
+    () =>
+      availableRoutes.find(
+        (route) =>
+          route.fromChain === currentFromRoute &&
+          route.toChain === currentToRoute &&
+          route.fromTokenSymbol.toLowerCase() === currentToken.toLowerCase()
+      ),
+    [availableRoutes, currentFromRoute, currentToRoute, currentToken]
   );
 
   // Use useMemo to create an object of available from and to routes for the current token
@@ -171,7 +184,7 @@ export function useBridge() {
     useIsWrongNetwork(currentFromRoute);
 
   // Resolve the user's current chain id
-  const { isConnected, chainId: walletChainId } = useConnection();
+  const { isConnected, chainId: walletChainId, account } = useConnection();
 
   // When a user changes the from route, ensure that they are on the same chain id
   // otherwise the user will be prompted to switch chains. Only do this for connected wallets
@@ -214,11 +227,27 @@ export function useBridge() {
       : undefined;
   }, [amountToBridge, currentFromRoute, currentToRoute, limits]);
 
+  const { referrer } = useReferrer();
+
+  const bridgePayload: AcrossDepositArgs | undefined =
+    amountToBridge && currentRoute && fees && account
+      ? {
+          amount: amountToBridge,
+          fromChain: currentRoute.fromChain,
+          toChain: currentRoute.toChain,
+          timestamp: fees.quoteTimestamp!,
+          referrer,
+          relayerFeePct: fees.relayerFee.pct,
+          tokenAddress: currentRoute.fromTokenAddress,
+          isNative: currentRoute.isNative,
+          toAddress: account,
+        }
+      : undefined;
+
   const bridgeAction = useBridgeAction(
     limits === undefined || fees === undefined,
-    amountToBridge,
-    currentToken,
-    currentFromRoute
+    bridgePayload,
+    currentToken
   );
 
   return {

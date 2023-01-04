@@ -201,7 +201,7 @@ export const getConfirmationDepositTime = (
   return "~3-7 hours";
 };
 
-type AcrossDepositArgs = {
+export type AcrossDepositArgs = {
   fromChain: ChainId;
   toChain: ChainId;
   toAddress: string;
