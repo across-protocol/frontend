@@ -12,12 +12,15 @@ import {
   CardWrapper,
   ChainIcon,
   ChainIconTextWrapper,
+  ChangeAddressLink,
   Divider,
+  FromSelectionStack,
   QuickSwapWrapper,
   RowWrapper,
   Wrapper,
 } from "./Bridge.styles";
 import Breadcrumb from "./components/Breadcrumb";
+import ChangeAccountModal from "./components/ChangeAccountModal";
 import CoinSelector from "./components/CoinSelector";
 import EstimatedTable from "./components/EstimatedTable";
 import QuickSwap from "./components/QuickSwap";
@@ -47,6 +50,10 @@ const Bridge = () => {
     fees,
     amountToBridge,
     estimatedTime,
+    displayChangeAccount,
+    setDisplayChangeAccount,
+    toAccount,
+    setToAccount,
   } = useBridge();
   return (
     <>
@@ -60,6 +67,14 @@ const Bridge = () => {
             .
           </div>
         </SuperHeader>
+      )}
+      {toAccount && (
+        <ChangeAccountModal
+          displayModal={displayChangeAccount}
+          displayModalCloseHandler={() => setDisplayChangeAccount(false)}
+          currentAccount={toAccount}
+          changeAccountHandler={setToAccount}
+        />
       )}
       <LayoutV2 maxWidth={600}>
         <Wrapper>
@@ -107,22 +122,33 @@ const Bridge = () => {
               <QuickSwapWrapper>
                 <QuickSwap onQuickSwap={handleQuickSwap} />
               </QuickSwapWrapper>
-              <Selector<number>
-                elements={availableToRoutes.map((r) => ({
-                  value: r.chainId,
-                  element: (
-                    <ChainIconTextWrapper>
-                      <ChainIcon src={r.logoURI} />
-                      <Text size="md" color="white-100">
-                        {capitalizeFirstLetter(r.fullName ?? r.name)}
-                      </Text>
-                    </ChainIconTextWrapper>
-                  ),
-                }))}
-                selectedValue={currentToRoute ?? 1}
-                setSelectedValue={(v) => setCurrentToRoute(v)}
-                title="Chain"
-              />
+              <FromSelectionStack>
+                <Selector<number>
+                  elements={availableToRoutes.map((r) => ({
+                    value: r.chainId,
+                    element: (
+                      <ChainIconTextWrapper>
+                        <ChainIcon src={r.logoURI} />
+                        <Text size="md" color="white-100">
+                          {capitalizeFirstLetter(r.fullName ?? r.name)}
+                        </Text>
+                      </ChainIconTextWrapper>
+                    ),
+                  }))}
+                  selectedValue={currentToRoute ?? 1}
+                  setSelectedValue={(v) => setCurrentToRoute(v)}
+                  title="Chain"
+                />
+                <ChangeAddressLink
+                  size="sm"
+                  color="grey-400"
+                  onClick={() => {
+                    if (toAccount) setDisplayChangeAccount(true);
+                  }}
+                >
+                  Change account
+                </ChangeAddressLink>
+              </FromSelectionStack>
             </RowWrapper>
           </CardWrapper>
           <CardWrapper>

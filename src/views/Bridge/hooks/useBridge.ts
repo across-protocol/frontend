@@ -229,8 +229,17 @@ export function useBridge() {
 
   const { referrer } = useReferrer();
 
+  const [displayChangeAccount, setDisplayChangeAccount] = useState(false);
+  const [toAccount, setToAccount] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (isConnected && toAccount === undefined) {
+      setToAccount(account);
+    }
+  }, [isConnected, account, toAccount]);
+
   const bridgePayload: AcrossDepositArgs | undefined =
-    amountToBridge && currentRoute && fees && account
+    amountToBridge && currentRoute && fees
       ? {
           amount: amountToBridge,
           fromChain: currentRoute.fromChain,
@@ -240,7 +249,7 @@ export function useBridge() {
           relayerFeePct: fees.relayerFee.pct,
           tokenAddress: currentRoute.fromTokenAddress,
           isNative: currentRoute.isNative,
-          toAddress: account,
+          toAddress: toAccount ?? "",
         }
       : undefined;
 
@@ -252,6 +261,10 @@ export function useBridge() {
 
   return {
     ...bridgeAction,
+    displayChangeAccount,
+    setDisplayChangeAccount,
+    setToAccount,
+    toAccount,
     fees,
     limits,
     availableTokens,

@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { QUERIESV2 } from "utils";
 import ExternalCardWrapper from "components/CardWrapper";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
+import { Text } from "components";
 
 export const Wrapper = styled.div`
   background-color: transparent;
@@ -55,6 +56,19 @@ export const QuickSwapWrapper = styled.div`
   position: absolute;
   left: calc(50% - 20px);
   top: -25px;
+`;
+
+export const FromSelectionStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 4px;
+  width: 100%;
+`;
+
+export const ChangeAddressLink = styled(Text)`
+  cursor: pointer;
 `;
 
 export const Divider = styled.div`
