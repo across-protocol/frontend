@@ -1,14 +1,10 @@
 import {
   InputRow,
-  InputWrapper,
-  Input,
   ButtonWrapper,
   StakeButton,
-  MaxButton,
   Wrapper,
   LoaderWrapper,
   StakeButtonContentWrapper,
-  TokenIcon,
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
