@@ -1,12 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BigNumber, BigNumberish } from "ethers";
 
 import { LayoutV2 } from "components";
 import CardWrapper from "components/CardWrapper";
 import { Tabs, Tab } from "components/TabsV2";
-import { formatNumberMaxFracDigits, formatUnits, formatWeiPct } from "utils";
+import {
+  formatNumberMaxFracDigits,
+  formatUnits,
+  formatWeiPct,
+  getConfig,
+} from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import { useConnection } from "hooks";
+import { useConnection, useQueryParams } from "hooks";
 
 import Breadcrumb from "./components/Breadcrumb";
 import PoolSelector from "./components/PoolSelector";
@@ -27,6 +32,22 @@ export default function LiquidityPool() {
   const [selectedPoolSymbol, setSelectedPoolSymbol] = useState("ETH");
 
   const { isConnected, connect } = useConnection();
+
+  // Enable deep linking on the pool to access a specific pool symbol
+  const { symbol: queryPoolSymbol } = useQueryParams();
+  useEffect(() => {
+    const resolvedToken = getConfig()
+      .getTokenList()
+      .find(
+        (token) =>
+          queryPoolSymbol &&
+          token.symbol.toLowerCase() === queryPoolSymbol.toLowerCase()
+      );
+    if (resolvedToken && selectedPoolSymbol !== resolvedToken.symbol) {
+      setSelectedPoolSymbol(resolvedToken.symbol);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const allLiquidityPoolQueries = useAllLiquidityPools();
   const arePoolsLoading = allLiquidityPoolQueries.some(
