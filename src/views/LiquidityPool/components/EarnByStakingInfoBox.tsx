@@ -153,7 +153,10 @@ const TextContainer = styled.div`
   flex: 1;
 `;
 
-const IconButtonLink = styled(Link)<StyledProps>`
+const IconButtonLink = styled(Link, {
+  // Required to remove the console error: `Warning: React does not recognize the `selectedPoolAction` prop on a DOM element.`
+  shouldForwardProp: (prop) => prop !== "selectedPoolAction",
+})<StyledProps>`
   display: flex;
   align-items: center;
   justify-content: center;
