@@ -179,8 +179,6 @@ export function useBridge() {
     checkWrongNetworkHandler();
   }, [currentFromRoute, isConnected, checkWrongNetworkHandler]);
 
-  const bridgeAction = useBridgeAction();
-
   const isBridgeDisabled =
     isConnected && (!amountToBridge || amountToBridge.eq(0));
 
@@ -216,6 +214,13 @@ export function useBridge() {
       : undefined;
   }, [amountToBridge, currentFromRoute, currentToRoute, limits]);
 
+  const bridgeAction = useBridgeAction(
+    limits === undefined || fees === undefined,
+    amountToBridge,
+    currentToken,
+    currentFromRoute
+  );
+
   return {
     ...bridgeAction,
     fees,
@@ -236,7 +241,7 @@ export function useBridge() {
     handleChainSwitch: isWrongNetworkHandler,
     walletChainId,
     isConnected,
-    isBridgeDisabled,
+    isBridgeDisabled: isBridgeDisabled || bridgeAction.buttonDisabled,
     amountToBridge,
     estimatedTime,
   };
