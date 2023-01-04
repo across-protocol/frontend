@@ -36,19 +36,29 @@ export function useBridgeAction(
         if (chainId === payload.fromChain) {
           // Check if allowance is insufficient
           if (allowance.lt(payload.amount)) {
-            // If not, call the approve function
-            const tx = await approve({
-              spender: spokePool.address,
-              amount: MAX_APPROVAL_AMOUNT,
-              signer,
-            });
-            if (tx) {
-              await notificationEmitter(tx.hash, notify);
+            try {
+              // If not, call the approve function
+              const tx = await approve({
+                spender: spokePool.address,
+                amount: MAX_APPROVAL_AMOUNT,
+                signer,
+              });
+              if (tx) {
+                await notificationEmitter(tx.hash, notify);
+              }
+            } catch (e) {
+              console.error(e);
+              return;
             }
           } else {
-            // If so, call the sendAcrossDeposit function
-            const tx = await sendAcrossDeposit(signer, payload);
-            await notificationEmitter(tx.hash, notify);
+            try {
+              // If so, call the sendAcrossDeposit function
+              const tx = await sendAcrossDeposit(signer, payload);
+              await notificationEmitter(tx.hash, notify);
+            } catch (e) {
+              console.error(e);
+              return;
+            }
           }
         }
       }

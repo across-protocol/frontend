@@ -143,7 +143,12 @@ const Bridge = () => {
               />
             )}
             <Divider />
-            <Button disabled={isBridgeDisabled} onClick={buttonActionHandler}>
+            <Button
+              disabled={isBridgeDisabled}
+              onClick={() => {
+                buttonActionHandler();
+              }}
+            >
               <Text color="dark-grey" weight={500}>
                 {buttonLabel}
               </Text>

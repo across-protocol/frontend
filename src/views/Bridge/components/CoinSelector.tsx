@@ -3,7 +3,12 @@ import { Selector } from "components";
 import { Text } from "components/Text";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 import { BigNumber, utils } from "ethers";
-import { isNumberEthersParseable, parseUnitsFnBuilder, TokenInfo } from "utils";
+import {
+  isNumberEthersParseable,
+  parseUnitsFnBuilder,
+  QUERIESV2,
+  TokenInfo,
+} from "utils";
 import { useCallback, useEffect, useState } from "react";
 import { Theme } from "@emotion/react";
 import { SelectorPropType } from "components/Selector/Selector";
