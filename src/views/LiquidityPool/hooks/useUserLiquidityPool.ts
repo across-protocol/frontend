@@ -17,7 +17,7 @@ export function useUserLiquidityPool(tokenSymbol?: string) {
 
   return useQuery(
     getUserLiquidityPoolQueryKey(tokenSymbol, account),
-    () => fetchUserLiquidityPool(account!, tokenSymbol!),
+    () => fetchUserLiquidityPool(account, tokenSymbol),
     {
       enabled: Boolean(account && tokenSymbol),
       staleTime: 300_000,
@@ -33,9 +33,13 @@ export function getUserLiquidityPoolQueryKey(
 }
 
 async function fetchUserLiquidityPool(
-  userAddress: string,
-  tokenSymbol: string
+  userAddress?: string,
+  tokenSymbol?: string
 ) {
+  if (!userAddress || !tokenSymbol) {
+    return;
+  }
+
   const { logoURI, symbol, l1TokenAddress, decimals } =
     config.getTokenInfoBySymbol(config.getHubPoolChainId(), tokenSymbol);
 
