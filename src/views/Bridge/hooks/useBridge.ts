@@ -12,6 +12,7 @@ import {
   getConfig,
   getConfirmationDepositTime,
   getToken,
+  hubPoolChainId,
 } from "utils";
 import { useBridgeAction } from "./useBridgeAction";
 
@@ -76,6 +77,10 @@ export function useBridge() {
   // If the user changes the token and the current route is still available, keep the current route.
   useEffect(() => {
     if (availableRoutes.length > 0) {
+      const availableRoutesThatStartAtCurrentChain = availableRoutes.filter(
+        (route) => route.fromChain === (hubPoolChainId ?? 1)
+      );
+
       if (currentToRoute) {
         const toRouteStillAvailable = availableRoutes.some(
           (route) => route.toChain === currentToRoute
@@ -84,7 +89,7 @@ export function useBridge() {
           setCurrentToRoute(availableRoutes[0].toChain);
         }
       } else {
-        setCurrentToRoute(availableRoutes[0].toChain);
+        setCurrentToRoute(availableRoutesThatStartAtCurrentChain[0].toChain);
       }
       if (currentFromRoute) {
         const fromRouteStillAvailable = availableRoutes.some(
@@ -94,7 +99,9 @@ export function useBridge() {
           setCurrentFromRoute(availableRoutes[0].fromChain);
         }
       } else {
-        setCurrentFromRoute(availableRoutes[0].fromChain);
+        setCurrentFromRoute(
+          availableRoutesThatStartAtCurrentChain[0].fromChain
+        );
       }
     }
   }, [availableRoutes, currentToRoute, currentFromRoute]);
