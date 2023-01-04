@@ -1,17 +1,14 @@
 import {
   InputRow,
-  InputWrapper,
-  Input,
   ButtonWrapper,
   StakeButton,
-  MaxButton,
   Wrapper,
   LoaderWrapper,
   StakeButtonContentWrapper,
-  TokenIcon,
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
+import InputWithMaxButton from "components/InputWithMaxButton";
 
 interface Props {
   value: string;
@@ -42,25 +39,17 @@ const StakingInputBlock: React.FC<Props> = ({
 }) => (
   <Wrapper>
     <InputRow>
-      <InputWrapper valid={valid} invalid={invalid}>
-        <TokenIcon src={logoURI} />
-        <Input
-          valid={valid}
-          invalid={invalid}
-          placeholder="Enter amount"
-          value={value}
-          type="text"
-          onChange={(e) => setValue(e.target.value)}
-          disabled={displayLoader || disableInput}
-          onKeyDown={(e) => e.key === "Enter" && valid && onClickHandler()}
-        />
-        <MaxButton
-          disabled={displayLoader || disableInput || !maxValue}
-          onClick={() => setValue(maxValue ?? "")}
-        >
-          Max
-        </MaxButton>
-      </InputWrapper>
+      <InputWithMaxButton
+        valid={valid}
+        invalid={invalid}
+        value={value}
+        onChangeValue={(e) => setValue(e.target.value)}
+        disableInput={displayLoader || disableInput}
+        onEnterKeyDown={onClickHandler}
+        onClickMaxButton={() => setValue(maxValue ?? "")}
+        maxValue={maxValue}
+        logoURI={logoURI}
+      />
 
       <ButtonWrapper>
         <StakeButton

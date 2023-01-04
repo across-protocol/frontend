@@ -12,7 +12,7 @@ export function useAllLiquidityPools() {
     tokenList
       .filter((token) => !token.isNative)
       .map((token) => ({
-        refetchInterval: 60_000,
+        staleTime: 60_000,
         queryKey: ["liquidity-pool", token.address] as [string, string],
         queryFn: ({ queryKey }: QueryFunctionContext<[string, string]>) =>
           fetchPool(queryKey[1]),
