@@ -1,4 +1,4 @@
-import { ethers, providers } from "ethers";
+import { BigNumber, ethers, providers } from "ethers";
 import { Fee } from "utils/bridge";
 import { ChainId } from "utils/constants";
 import { CoingeckoApiCall } from "./prod/coingecko";
@@ -6,6 +6,7 @@ import { CoingeckoApiCall } from "./prod/coingecko";
 export type ServerlessAPIEndpoints = {
   coingecko: CoingeckoApiCall;
   suggestedFees: SuggestedApiFeeType;
+  limits: BridgeLimitFunction;
   prelaunch: {
     rewards: RewardsApiFunction;
     linkedWallet: RetrieveLinkedWalletType;
@@ -76,3 +77,16 @@ export interface GetDepositStatsInterface {
 }
 
 export type GetDepositStatsType = () => Promise<GetDepositStatsInterface>;
+
+export interface BridgeLimitInterface {
+  minDeposit: BigNumber;
+  maxDeposit: BigNumber;
+  maxDepositInstant: BigNumber;
+  maxDepositShortDelay: BigNumber;
+}
+
+export type BridgeLimitFunction = (
+  token: string,
+  fromChainId: string | ChainId,
+  toChainId: string | ChainId
+) => Promise<BridgeLimitInterface>;
