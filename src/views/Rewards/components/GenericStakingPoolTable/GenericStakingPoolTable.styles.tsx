@@ -34,6 +34,14 @@ export const PoolCell = styled.div`
   gap: 24px;
 `;
 
+export const PoolTextStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 2px;
+`;
+
 export const StackedCell = styled.div`
   display: flex;
   flex-direction: column;
@@ -117,6 +125,9 @@ export const ExternalLinkButton = styled(Link)`
 `;
 
 export const LogoWrapper = styled.div`
+  height: fit-content;
+  width: ${32 / 16}rem;
+  height: ${32 / 16}rem;
   & svg {
     width: ${32 / 16}rem;
     height: ${32 / 16}rem;

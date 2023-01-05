@@ -12,6 +12,7 @@ import {
   LogoWrapper,
   MultiplierCell,
   PoolCell,
+  PoolTextStack,
   RowCell,
   StackedCell,
   StakeButton,
@@ -29,7 +30,7 @@ type MetaData = {
 };
 
 const flexBasisLengths = [
-  156, // Pool
+  250, // Pool
   176, // Staked LP Token
   152, // Reward APY
   176, // Multiplier
@@ -121,9 +122,17 @@ function RowPoolCell({ data }: PoolRowCellType) {
       <LogoWrapper>
         <StyledPoolIcon src={data.tokenLogoURI} />
       </LogoWrapper>
-      <Text size="md" color="white-100">
-        {data.tokenSymbol.toUpperCase()}
-      </Text>
+      <PoolTextStack>
+        <Text size="md" color="white-100">
+          {data.tokenSymbol.toUpperCase()}
+        </Text>
+        <Text size="sm" color="grey-400">
+          Position size:{" "}
+          {data.lpTokenFormatter(
+            data.convertLPToUnderlying(data.usersTotalLPTokens)
+          )}
+        </Text>
+      </PoolTextStack>
     </PoolCell>
   );
 }
