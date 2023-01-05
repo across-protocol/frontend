@@ -7,7 +7,6 @@ export async function retrieveLimits(
   fromChainId: string | ChainId,
   toChainId: string | ChainId
 ): Promise<BridgeLimitInterface> {
-  // Call to scraper API and resolve the JWT
   const { data } = await axios.get<BridgeLimitInterface>(
     `/api/limits?token=${token}&originChainId=${fromChainId}&destinationChainId=${toChainId}`
   );

@@ -7,7 +7,6 @@ export async function retrieveLimitsMocked(
   _fromChainId: string | ChainId,
   _toChainId: string | ChainId
 ): Promise<BridgeLimitInterface> {
-  // Call to scraper API and resolve the JWT
   return {
     minDeposit: BigNumber.from("317845960607070"),
     maxDeposit: BigNumber.from("1625976243310274613043"),
