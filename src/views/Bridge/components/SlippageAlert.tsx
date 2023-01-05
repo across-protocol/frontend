@@ -1,19 +1,30 @@
 import styled from "@emotion/styled";
 import { Alert } from "components";
 import { Text } from "components/Text";
+import { useState } from "react";
+import FeeInformationModal from "./FeeInformationModal";
 
-const SlippageAlert = () => (
-  <Alert iconType="question" status="info">
-    <Wrapper>
-      <Text color="white-100" size="md">
-        All transfers are slippage free.
-      </Text>
-      <Link color="teal" size="md">
-        Learn more
-      </Link>
-    </Wrapper>
-  </Alert>
-);
+const SlippageAlert = () => {
+  const [displayModal, setDisplayModal] = useState(false);
+  return (
+    <>
+      <Alert iconType="question" status="info">
+        <Wrapper>
+          <Text color="white-100" size="md">
+            All transfers are slippage free.
+          </Text>
+          <Link color="teal" size="md" onClick={() => setDisplayModal(true)}>
+            Learn more
+          </Link>
+        </Wrapper>
+      </Alert>
+      <FeeInformationModal
+        displayModal={displayModal}
+        displayModalCloseHandler={() => setDisplayModal(false)}
+      />
+    </>
+  );
+};
 
 export default SlippageAlert;
 
