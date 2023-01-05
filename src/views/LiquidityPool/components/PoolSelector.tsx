@@ -16,26 +16,24 @@ type PoolInfo = {
 };
 
 type Props = {
-  selectedL1TokenSymbol: string;
-  selectedL1TokenAddress?: string;
+  selectedTokenSymbol: string;
   pools: PoolInfo[];
-  onPoolSelected: (pool: string) => void;
+  onPoolSelected: (tokenSymbol: string) => void;
 };
 
 export function PoolSelector({
-  selectedL1TokenSymbol,
-  selectedL1TokenAddress,
+  selectedTokenSymbol,
   pools,
   onPoolSelected,
 }: Props) {
-  const liquidityPoolQuery = useLiquidityPool(selectedL1TokenAddress);
-  const userLiquidityPoolQuery = useUserLiquidityPool(selectedL1TokenSymbol);
+  const liquidityPoolQuery = useLiquidityPool(selectedTokenSymbol);
+  const userLiquidityPoolQuery = useUserLiquidityPool(selectedTokenSymbol);
 
   useEffect(() => {
     liquidityPoolQuery.refetch();
     userLiquidityPoolQuery.refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedL1TokenAddress]);
+  }, [selectedTokenSymbol]);
 
   return (
     <Wrapper>
@@ -51,7 +49,7 @@ export function PoolSelector({
             </PoolIconTextWrapper>
           ),
         }))}
-        selectedValue={selectedL1TokenSymbol}
+        selectedValue={selectedTokenSymbol}
         title="Pools"
         setSelectedValue={(v) => onPoolSelected(v)}
       />

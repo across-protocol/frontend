@@ -16,36 +16,33 @@ import { useValidAmount } from "../hooks/useValidAmount";
 import { Button } from "../LiquidityPool.styles";
 
 type Props = {
-  selectedL1TokenAddress?: string;
-  selectedL1TokenDecimals?: number;
-  selectedL1TokenSymbol?: string;
+  selectedToken: {
+    l1TokenAddress: string;
+    symbol: string;
+    decimals: number;
+  };
   action: "add" | "remove";
 };
 
-export function ActionInputBlock({
-  action,
-  selectedL1TokenAddress,
-  selectedL1TokenDecimals,
-  selectedL1TokenSymbol,
-}: Props) {
+export function ActionInputBlock({ action, selectedToken }: Props) {
   const [amount, setAmount] = useState("");
 
-  const stakingPoolQuery = useStakingPool(selectedL1TokenAddress);
-  const maxAmountsQuery = useMaxAmounts(selectedL1TokenAddress);
+  const stakingPoolQuery = useStakingPool(selectedToken.l1TokenAddress);
+  const maxAmountsQuery = useMaxAmounts(selectedToken.l1TokenAddress);
 
   const addLiquidityMutation = useAddLiquidity(
-    selectedL1TokenSymbol,
-    selectedL1TokenAddress
+    selectedToken.symbol,
+    selectedToken.l1TokenAddress
   );
   const removeLiquidityMutation = useRemoveLiquidity(
-    selectedL1TokenSymbol,
-    selectedL1TokenAddress
+    selectedToken.symbol,
+    selectedToken.l1TokenAddress
   );
 
   const { amountValidationError } = useValidAmount(
     action,
     amount,
-    selectedL1TokenDecimals,
+    selectedToken.decimals,
     maxAmountsQuery.data
   );
 
@@ -55,7 +52,7 @@ export function ActionInputBlock({
     removeLiquidityMutation.reset();
     setAmount("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [action, selectedL1TokenSymbol]);
+  }, [action, selectedToken.symbol]);
 
   const handleAction = async () => {
     if (!maxAmountsQuery.data) {
@@ -93,12 +90,12 @@ export function ActionInputBlock({
     removeLiquidityMutation.isLoading;
 
   const maxAmount =
-    selectedL1TokenDecimals && maxAmountsQuery.data
+    selectedToken.decimals && maxAmountsQuery.data
       ? utils.formatUnits(
           action === "add"
             ? maxAmountsQuery.data.maxAddableAmount
             : maxAmountsQuery.data.maxRemovableAmount,
-          selectedL1TokenDecimals
+          selectedToken.decimals
         )
       : "0";
 
@@ -145,14 +142,14 @@ export function ActionInputBlock({
   );
 }
 
-export const Wrapper = styled.div`
+const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
 `;
 
-export const InputRow = styled.div`
+const InputRow = styled.div`
   display: flex;
   gap: 16px;
   flex-direction: row;
@@ -164,7 +161,7 @@ export const InputRow = styled.div`
   }
 `;
 
-export const ButtonWrapper = styled.div`
+const ButtonWrapper = styled.div`
   flex-shrink: 0;
   @media ${QUERIESV2.sm.andDown} {
     width: 100%;

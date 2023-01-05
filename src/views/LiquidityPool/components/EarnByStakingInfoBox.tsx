@@ -10,15 +10,19 @@ import { repeatableTernaryBuilder } from "utils/ternary";
 import { formatWeiPct } from "utils";
 
 type Props = {
-  selectedTokenAddress?: string;
+  selectedToken: {
+    l1TokenAddress: string;
+    symbol: string;
+    logoURI: string;
+  };
   selectedPoolAction: "add" | "remove";
 };
 
 export function EarnByStakingInfoBox({
-  selectedTokenAddress,
+  selectedToken,
   selectedPoolAction,
 }: Props) {
-  const { data, isLoading } = useStakingPool(selectedTokenAddress);
+  const { data, isLoading } = useStakingPool(selectedToken.l1TokenAddress);
   const { isConnected } = useConnection();
 
   const showValueOrDash = repeatableTernaryBuilder(
@@ -50,7 +54,7 @@ export function EarnByStakingInfoBox({
             {hasStaked ? " on staked " : " by staking "}
             {showValueOrDash(
               <Text color={textColor} as="span">
-                {data?.tokenSymbol.toUpperCase()}-LP
+                {selectedToken.symbol}-LP
               </Text>
             )}
           </Text>
@@ -67,7 +71,7 @@ export function EarnByStakingInfoBox({
             {showValueOrDash(
               <Text color={hasStaked ? "white-100" : "grey-400"} as="span">
                 {data?.lpTokenFormatter(data?.userAmountOfLPStaked || 0)} /{" "}
-                {data?.lpTokenFormatter(data?.availableLPTokenBalance || 0)}{" "}
+                {data?.lpTokenFormatter(data?.usersTotalLPTokens || 0)}{" "}
                 {data?.tokenSymbol.toUpperCase()}-LP
               </Text>
             )}

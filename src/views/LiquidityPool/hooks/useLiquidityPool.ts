@@ -9,24 +9,22 @@ export function useAllLiquidityPools() {
   const tokenList = config.getTokenList(hubPoolChainId);
 
   return useQueries(
-    tokenList
-      .filter((token) => !token.isNative)
-      .map((token) => ({
-        staleTime: 60_000,
-        queryKey: getLiquidityPoolQueryKey(token.l1TokenAddress),
-        queryFn: ({ queryKey }: QueryFunctionContext<[string, string?]>) =>
-          fetchPool(queryKey[1]),
-      }))
+    tokenList.map((token) => ({
+      staleTime: 60_000,
+      queryKey: getLiquidityPoolQueryKey(token.symbol),
+      queryFn: ({ queryKey }: QueryFunctionContext<[string, string?]>) =>
+        fetchPool(queryKey[1]),
+    }))
   );
 }
 
-export function useLiquidityPool(l1TokenAddress?: string) {
+export function useLiquidityPool(tokenSymbol?: string) {
   return useQuery(
-    getLiquidityPoolQueryKey(l1TokenAddress),
-    () => fetchPool(l1TokenAddress),
+    getLiquidityPoolQueryKey(tokenSymbol),
+    () => fetchPool(tokenSymbol),
     {
       staleTime: 60_000,
-      enabled: Boolean(l1TokenAddress),
+      enabled: Boolean(tokenSymbol),
     }
   );
 }
@@ -37,15 +35,15 @@ export function getLiquidityPoolQueryKey(
   return ["liquidity-pool", l1TokenAddress];
 }
 
-async function fetchPool(tokenAddress?: string) {
-  if (!tokenAddress) {
+async function fetchPool(tokenSymbol?: string) {
+  if (!tokenSymbol) {
     return;
   }
   const { logoURI, symbol, decimals, l1TokenAddress } =
-    config.getTokenInfoByAddress(config.getHubPoolChainId(), tokenAddress);
-  await poolClient.updatePool(tokenAddress);
+    config.getTokenInfoBySymbol(config.getHubPoolChainId(), tokenSymbol);
+  await poolClient.updatePool(l1TokenAddress);
   return {
-    ...poolClient.getPoolState(tokenAddress),
+    ...poolClient.getPoolState(l1TokenAddress),
     l1TokenLogoURI: logoURI,
     l1TokenSymbol: symbol,
     l1TokenDecimals: decimals,

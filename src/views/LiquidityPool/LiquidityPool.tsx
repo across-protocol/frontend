@@ -9,9 +9,10 @@ import {
   formatUnits,
   formatWeiPct,
   getConfig,
+  max,
 } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import { useConnection, useQueryParams } from "hooks";
+import { useConnection, useQueryParams, useStakingPool } from "hooks";
 
 import Breadcrumb from "./components/Breadcrumb";
 import PoolSelector from "./components/PoolSelector";
@@ -27,11 +28,16 @@ import { Container, StatsRow, Divider, Button } from "./LiquidityPool.styles";
 
 type PoolAction = "add" | "remove";
 
+const tokenList = getConfig().getTokenList();
+
 export default function LiquidityPool() {
   const [action, setAction] = useState<PoolAction>("add");
-  const [selectedPoolSymbol, setSelectedPoolSymbol] = useState("ETH");
+  const [selectedToken, setSelectedToken] = useState(tokenList[0]);
 
   const { isConnected, connect } = useConnection();
+
+  const userLiquidityPoolQuery = useUserLiquidityPool(selectedToken.symbol);
+  const allLiquidityPoolQueries = useAllLiquidityPools();
 
   // Enable deep linking on the pool to access a specific pool symbol
   const { symbol: queryPoolSymbol } = useQueryParams();
@@ -43,13 +49,12 @@ export default function LiquidityPool() {
           queryPoolSymbol &&
           token.symbol.toLowerCase() === queryPoolSymbol.toLowerCase()
       );
-    if (resolvedToken && selectedPoolSymbol !== resolvedToken.symbol) {
-      setSelectedPoolSymbol(resolvedToken.symbol);
+    if (resolvedToken && selectedToken.symbol !== resolvedToken.symbol) {
+      setSelectedToken(resolvedToken);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const allLiquidityPoolQueries = useAllLiquidityPools();
   const arePoolsLoading = allLiquidityPoolQueries.some(
     (query) => query.isLoading
   );
@@ -57,10 +62,8 @@ export default function LiquidityPool() {
     (query) => query.data || []
   );
 
-  const userLiquidityPoolQuery = useUserLiquidityPool(selectedPoolSymbol);
-
   const selectedLiquidityPool = liquidityPools.find(
-    (pool) => pool.l1TokenSymbol === selectedPoolSymbol
+    (pool) => pool.l1TokenSymbol === selectedToken.symbol
   );
   const formatTokenAmount = (amount?: BigNumberish) => {
     if (!selectedLiquidityPool || !amount) {
@@ -72,6 +75,10 @@ export default function LiquidityPool() {
   };
 
   const showValueOrDash = repeatableTernaryBuilder(!arePoolsLoading, "-");
+
+  const stakingPoolQuery = useStakingPool(
+    selectedLiquidityPool?.l1TokenAddress
+  );
 
   return (
     <LayoutV2 maxWidth={600}>
@@ -90,9 +97,13 @@ export default function LiquidityPool() {
             </Tab>
           </Tabs>
           <PoolSelector
-            selectedL1TokenSymbol={selectedPoolSymbol}
-            selectedL1TokenAddress={selectedLiquidityPool?.l1TokenAddress}
-            onPoolSelected={setSelectedPoolSymbol}
+            selectedTokenSymbol={selectedToken.symbol}
+            onPoolSelected={(tokenSymbol) => {
+              const token = tokenList.find(
+                (token) => token.symbol === tokenSymbol
+              );
+              setSelectedToken(token || tokenList[0]);
+            }}
             pools={liquidityPools.map((pool) => ({
               tokenSymbol: pool.l1TokenSymbol,
               tokenLogoURI: pool.l1TokenLogoURI,
@@ -133,13 +144,23 @@ export default function LiquidityPool() {
           <UserStatRow
             label="Fees earned"
             value={showValueOrDash(
-              formatTokenAmount(userLiquidityPoolQuery.data?.feesEarned)
+              formatTokenAmount(
+                stakingPoolQuery.data?.convertUnderlyingToLP &&
+                  userLiquidityPoolQuery.data?.feesEarned
+                  ? max(
+                      stakingPoolQuery.data.convertUnderlyingToLP(
+                        BigNumber.from(userLiquidityPoolQuery.data.feesEarned)
+                      ),
+                      0
+                    )
+                  : undefined
+              )
             )}
-            tokenLogoURI={selectedLiquidityPool?.l1TokenLogoURI}
+            tokenLogoURI={selectedToken.logoURI}
           />
           <Divider />
           <EarnByStakingInfoBox
-            selectedTokenAddress={selectedLiquidityPool?.l1Token}
+            selectedToken={selectedToken}
             selectedPoolAction={action}
           />
           <Divider />
@@ -148,12 +169,7 @@ export default function LiquidityPool() {
               Connect Wallet
             </Button>
           ) : (
-            <ActionInputBlock
-              action={action}
-              selectedL1TokenAddress={selectedLiquidityPool?.l1Token}
-              selectedL1TokenDecimals={selectedLiquidityPool?.l1TokenDecimals}
-              selectedL1TokenSymbol={selectedLiquidityPool?.l1TokenSymbol}
-            />
+            <ActionInputBlock action={action} selectedToken={selectedToken} />
           )}
         </CardWrapper>
       </Container>

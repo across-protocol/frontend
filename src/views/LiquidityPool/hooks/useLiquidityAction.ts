@@ -22,7 +22,7 @@ export function useAddLiquidity(tokenSymbol?: string, l1TokenAddress?: string) {
 
   const userLiquidityPoolQuery = useUserLiquidityPool(tokenSymbol);
   const stakingPoolQuery = useStakingPool(l1TokenAddress);
-  const liquidityPoolQuery = useLiquidityPool(l1TokenAddress);
+  const liquidityPoolQuery = useLiquidityPool(tokenSymbol);
 
   const { mutateAsync: approve } = useApprove();
 
@@ -87,7 +87,7 @@ export function useRemoveLiquidity(
 
   const userLiquidityPoolQuery = useUserLiquidityPool(tokenSymbol);
   const stakingPoolQuery = useStakingPool(tokenAddress);
-  const liquidityPoolQuery = useLiquidityPool(tokenAddress);
+  const liquidityPoolQuery = useLiquidityPool(tokenSymbol);
 
   const handleRemoveLiquidity = async (args: {
     amountInput: string;
