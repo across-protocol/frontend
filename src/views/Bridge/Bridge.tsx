@@ -1,17 +1,28 @@
-import { LayoutV2 } from "components";
+import { LayoutV2, SuperHeader } from "components";
 import Selector from "components/Selector/Selector";
 import { Text } from "components/Text";
-import { capitalizeFirstLetter } from "utils";
 import {
+  capitalizeFirstLetter,
+  getChainInfo,
+  getToken,
+  receiveAmount,
+} from "utils";
+import {
+  Button,
   CardWrapper,
   ChainIcon,
   ChainIconTextWrapper,
+  ChangeAddressLink,
+  Divider,
+  FromSelectionStack,
   QuickSwapWrapper,
   RowWrapper,
   Wrapper,
 } from "./Bridge.styles";
 import Breadcrumb from "./components/Breadcrumb";
+import ChangeAccountModal from "./components/ChangeAccountModal";
 import CoinSelector from "./components/CoinSelector";
+import EstimatedTable from "./components/EstimatedTable";
 import QuickSwap from "./components/QuickSwap";
 import SlippageAlert from "./components/SlippageAlert";
 import { useBridge } from "./hooks/useBridge";
@@ -29,78 +40,149 @@ const Bridge = () => {
     availableToRoutes,
     currentToRoute,
     setCurrentToRoute,
+    isWrongChain,
+    handleChainSwitch,
     handleQuickSwap,
+    isConnected,
+    buttonActionHandler,
+    buttonLabel,
+    isBridgeDisabled,
+    fees,
+    amountToBridge,
+    estimatedTime,
+    displayChangeAccount,
+    setDisplayChangeAccount,
+    toAccount,
+    setToAccount,
   } = useBridge();
   return (
-    <LayoutV2 maxWidth={600}>
-      <Wrapper>
-        <Breadcrumb />
-        <CardWrapper>
-          <RowWrapper>
-            <Text size="md" color="grey-400">
-              Send
-            </Text>
-            <CoinSelector
-              fromChain={currentFromRoute ?? 1}
-              toChain={currentToRoute ?? 1}
-              tokenChoices={availableTokens}
-              tokenSelected={currentToken}
-              onTokenSelected={setCurrentToken}
-              onAmountToBridgeChanged={setAmountToBridge}
-              currentSelectedBalance={currentBalance}
-            />
-          </RowWrapper>
-          <RowWrapper>
-            <Text size="md" color="grey-400">
-              From
-            </Text>
-            <Selector<number>
-              elements={availableFromRoutes.map((r) => ({
-                value: r.chainId,
-                element: (
-                  <ChainIconTextWrapper>
-                    <ChainIcon src={r.logoURI} />
-                    <Text size="md" color="white-100">
-                      {capitalizeFirstLetter(r.fullName ?? r.name)}
-                    </Text>
-                  </ChainIconTextWrapper>
-                ),
-              }))}
-              selectedValue={currentFromRoute ?? 1}
-              setSelectedValue={(v) => setCurrentFromRoute(v)}
-              title="Chain"
-            />
-          </RowWrapper>
-          <RowWrapper>
-            <Text size="md" color="grey-400">
-              To
-            </Text>
-            <QuickSwapWrapper>
-              <QuickSwap onQuickSwap={handleQuickSwap} />
-            </QuickSwapWrapper>
-            <Selector<number>
-              elements={availableToRoutes.map((r) => ({
-                value: r.chainId,
-                element: (
-                  <ChainIconTextWrapper>
-                    <ChainIcon src={r.logoURI} />
-                    <Text size="md" color="white-100">
-                      {capitalizeFirstLetter(r.fullName ?? r.name)}
-                    </Text>
-                  </ChainIconTextWrapper>
-                ),
-              }))}
-              selectedValue={currentToRoute ?? 1}
-              setSelectedValue={(v) => setCurrentToRoute(v)}
-              title="Chain"
-            />
-          </RowWrapper>
-        </CardWrapper>
-        <CardWrapper>
-          <SlippageAlert />
-        </CardWrapper>
-      </Wrapper>
-    </LayoutV2>
+    <>
+      {isWrongChain && currentFromRoute && (
+        <SuperHeader>
+          <div>
+            You are on an incorrect network. Please{" "}
+            <button onClick={handleChainSwitch}>
+              switch to {getChainInfo(currentFromRoute).name}
+            </button>
+            .
+          </div>
+        </SuperHeader>
+      )}
+      {toAccount && (
+        <ChangeAccountModal
+          displayModal={displayChangeAccount}
+          displayModalCloseHandler={() => setDisplayChangeAccount(false)}
+          currentAccount={toAccount}
+          changeAccountHandler={setToAccount}
+        />
+      )}
+      <LayoutV2 maxWidth={600}>
+        <Wrapper>
+          <Breadcrumb />
+          <CardWrapper>
+            <RowWrapper>
+              <Text size="md" color="grey-400">
+                Send
+              </Text>
+              <CoinSelector
+                fromChain={currentFromRoute ?? 1}
+                toChain={currentToRoute ?? 1}
+                tokenChoices={availableTokens}
+                tokenSelected={currentToken}
+                onTokenSelected={setCurrentToken}
+                onAmountToBridgeChanged={setAmountToBridge}
+                currentSelectedBalance={currentBalance}
+              />
+            </RowWrapper>
+            <RowWrapper>
+              <Text size="md" color="grey-400">
+                From
+              </Text>
+              <Selector<number>
+                elements={availableFromRoutes.map((r) => ({
+                  value: r.chainId,
+                  element: (
+                    <ChainIconTextWrapper>
+                      <ChainIcon src={r.logoURI} />
+                      <Text size="md" color="white-100">
+                        {capitalizeFirstLetter(r.fullName ?? r.name)}
+                      </Text>
+                    </ChainIconTextWrapper>
+                  ),
+                }))}
+                selectedValue={currentFromRoute ?? 1}
+                setSelectedValue={(v) => setCurrentFromRoute(v)}
+                title="Chain"
+              />
+            </RowWrapper>
+            <RowWrapper>
+              <Text size="md" color="grey-400">
+                To
+              </Text>
+              <QuickSwapWrapper>
+                <QuickSwap onQuickSwap={handleQuickSwap} />
+              </QuickSwapWrapper>
+              <FromSelectionStack>
+                <Selector<number>
+                  elements={availableToRoutes.map((r) => ({
+                    value: r.chainId,
+                    element: (
+                      <ChainIconTextWrapper>
+                        <ChainIcon src={r.logoURI} />
+                        <Text size="md" color="white-100">
+                          {capitalizeFirstLetter(r.fullName ?? r.name)}
+                        </Text>
+                      </ChainIconTextWrapper>
+                    ),
+                  }))}
+                  selectedValue={currentToRoute ?? 1}
+                  setSelectedValue={(v) => setCurrentToRoute(v)}
+                  title="Chain"
+                />
+                <ChangeAddressLink
+                  size="sm"
+                  color="grey-400"
+                  onClick={() => {
+                    if (toAccount) setDisplayChangeAccount(true);
+                  }}
+                >
+                  Change account
+                </ChangeAddressLink>
+              </FromSelectionStack>
+            </RowWrapper>
+          </CardWrapper>
+          <CardWrapper>
+            <SlippageAlert />
+            {currentToRoute && (
+              <EstimatedTable
+                chainId={currentToRoute}
+                estimatedTime={estimatedTime}
+                gasFee={fees?.relayerGasFee.total}
+                bridgeFee={fees?.relayerCapitalFee.total}
+                totalReceived={
+                  fees && amountToBridge && amountToBridge.gt(0)
+                    ? receiveAmount(amountToBridge, fees)
+                    : undefined
+                }
+                token={getToken(currentToken)}
+                dataLoaded={isConnected}
+              />
+            )}
+            <Divider />
+            <Button
+              disabled={isBridgeDisabled}
+              onClick={() => {
+                buttonActionHandler();
+              }}
+            >
+              <Text color="dark-grey" weight={500}>
+                {buttonLabel}
+              </Text>
+            </Button>
+          </CardWrapper>
+        </Wrapper>
+      </LayoutV2>
+    </>
   );
 };
 
