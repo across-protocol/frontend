@@ -23,6 +23,10 @@ export const StatsRow = styled.div`
   flex-direction: row;
   width: 100%;
   gap: 24px;
+
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: column;
+  }
 `;
 
 export const Divider = styled.div`
@@ -34,4 +38,10 @@ export const Divider = styled.div`
 export const Button = styled(ButtonV2)<{ isRemove?: boolean }>`
   width: 100%;
   background-color: ${({ isRemove }) => (isRemove ? `#f9d26c` : `#6cf9d8`)};
+
+  @media ${QUERIESV2.sm.andDown} {
+    height: 40px;
+    padding: 0px 20px;
+    border-radius: 20px;
+  }
 `;
