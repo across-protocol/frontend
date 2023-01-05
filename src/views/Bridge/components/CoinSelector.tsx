@@ -70,7 +70,6 @@ function useCoinSelector(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userAmountInput]);
 
-  // Create useEffect to set amount to bridge to undefined if the user disconnects their wallet
   useEffect(() => {
     if (isConnected) {
       validateAndSetUserInput();
@@ -78,7 +77,6 @@ function useCoinSelector(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected]);
 
-  // Set the user input to empty string when the token changes
   useEffect(() => {
     setUserAmountInput("");
     // eslint-disable-next-line react-hooks/exhaustive-deps

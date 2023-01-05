@@ -183,11 +183,8 @@ export function useBridge() {
   const { isWrongNetwork, isWrongNetworkHandler, checkWrongNetworkHandler } =
     useIsWrongNetwork(currentFromRoute);
 
-  // Resolve the user's current chain id
   const { isConnected, chainId: walletChainId, account } = useConnection();
 
-  // When a user changes the from route, ensure that they are on the same chain id
-  // otherwise the user will be prompted to switch chains.
   useEffect(() => {
     checkWrongNetworkHandler();
   }, [currentFromRoute, isConnected, checkWrongNetworkHandler]);
@@ -195,7 +192,6 @@ export function useBridge() {
   const isBridgeDisabled =
     isConnected && (!amountToBridge || amountToBridge.eq(0));
 
-  // Resolve the fees by using the useBridgeFees hook
   const { fees } = useBridgeFees(
     amountToBridge ?? BigNumber.from(0),
     currentFromRoute,
@@ -203,14 +199,12 @@ export function useBridge() {
     currentToken
   );
 
-  // Resolve the limits by using the useBridgeLimits hook
   const { limits } = useBridgeLimits(
     getToken(currentToken).mainnetAddress,
     currentFromRoute,
     currentToRoute
   );
 
-  // Resolve the amount of time it takes to bridge
   const estimatedTime = useMemo(() => {
     return amountToBridge &&
       amountToBridge.gt(0) &&
