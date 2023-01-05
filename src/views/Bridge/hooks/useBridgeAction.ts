@@ -23,42 +23,45 @@ export function useBridgeAction(
     account,
     payload ? getConfig().getSpokePoolAddress(payload.fromChain) : undefined
   );
+
+  const approvalHandler = async () => {
+    if (allowance !== undefined && payload && signer) {
+      const spokePool = getConfig().getSpokePool(payload.fromChain, signer);
+      if (chainId === payload.fromChain) {
+        if (allowance.lt(payload.amount)) {
+          try {
+            const tx = await approve({
+              spender: spokePool.address,
+              amount: MAX_APPROVAL_AMOUNT,
+              signer,
+            });
+            if (tx) {
+              await notificationEmitter(tx.hash, notify);
+            }
+          } catch (e) {
+            console.error(e);
+            return;
+          }
+        }
+      }
+    }
+  };
+
   const buttonActionHandler = useMutation(async () => {
-    // Connect wallet if not connected
     if (!isConnected) {
       connect();
     } else {
-      // Check if allowance is defined, payload is defined and signer is defined
       if (allowance !== undefined && payload && signer) {
-        // Get the spoke pool address and chain id
-        const spokePool = getConfig().getSpokePool(payload.fromChain, signer);
-        // Ensure that the chain id is the same as the current chain id
         if (chainId === payload.fromChain) {
-          // Check if allowance is insufficient
           if (allowance.lt(payload.amount)) {
-            try {
-              // If not, call the approve function
-              const tx = await approve({
-                spender: spokePool.address,
-                amount: MAX_APPROVAL_AMOUNT,
-                signer,
-              });
-              if (tx) {
-                await notificationEmitter(tx.hash, notify);
-              }
-            } catch (e) {
-              console.error(e);
-              return;
-            }
-          } else {
-            try {
-              // If so, call the sendAcrossDeposit function
-              const tx = await sendAcrossDeposit(signer, payload);
-              await notificationEmitter(tx.hash, notify);
-            } catch (e) {
-              console.error(e);
-              return;
-            }
+            await approvalHandler();
+          }
+          try {
+            const tx = await sendAcrossDeposit(signer, payload);
+            await notificationEmitter(tx.hash, notify);
+          } catch (e) {
+            console.error(e);
+            return;
           }
         }
       }
@@ -71,12 +74,6 @@ export function useBridgeAction(
   } else if (payload) {
     if (dataLoading || !allowance) {
       buttonLabel = "Loading...";
-    } else if (allowance.lt(payload.amount)) {
-      if (buttonActionHandler.isLoading) {
-        buttonLabel = "Approving...";
-      } else {
-        buttonLabel = "Approve";
-      }
     } else {
       if (buttonActionHandler.isLoading) {
         buttonLabel = "Confirming...";
