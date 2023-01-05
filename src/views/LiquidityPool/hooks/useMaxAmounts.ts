@@ -6,7 +6,10 @@ import { estimateGasForAddEthLiquidity, max } from "utils";
 
 import { useUserLiquidityPool } from "./useUserLiquidityPool";
 
-export function useMaxAmounts(selectedTokenAddress?: string) {
+export function useMaxAmounts(
+  selectedTokenAddress?: string,
+  selectedTokenSymbol?: string
+) {
   const { signer } = useConnection();
   const stakingPoolQuery = useStakingPool(selectedTokenAddress);
   const userLiquidityPoolQuery = useUserLiquidityPool(
@@ -16,8 +19,9 @@ export function useMaxAmounts(selectedTokenAddress?: string) {
   return useQuery(
     [
       "max-lp-amounts",
-      selectedTokenAddress,
+      selectedTokenSymbol,
       userLiquidityPoolQuery.data?.l1Balance.toString(),
+      userLiquidityPoolQuery.data?.positionValue.toString(),
     ],
     async () => {
       let maxAddableAmount: BigNumber;
@@ -65,7 +69,8 @@ export function useMaxAmounts(selectedTokenAddress?: string) {
     },
     {
       enabled: Boolean(
-        selectedTokenAddress &&
+        selectedTokenSymbol &&
+          selectedTokenAddress &&
           stakingPoolQuery.data &&
           userLiquidityPoolQuery.data &&
           signer

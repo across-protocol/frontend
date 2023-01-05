@@ -28,7 +28,10 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
   const [amount, setAmount] = useState("");
 
   const stakingPoolQuery = useStakingPool(selectedToken.l1TokenAddress);
-  const maxAmountsQuery = useMaxAmounts(selectedToken.l1TokenAddress);
+  const maxAmountsQuery = useMaxAmounts(
+    selectedToken.l1TokenAddress,
+    selectedToken.symbol
+  );
 
   const addLiquidityMutation = useAddLiquidity(
     selectedToken.symbol,
@@ -68,7 +71,10 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           maxAddableAmount,
         },
         {
-          onSuccess: () => setAmount(""),
+          onSuccess: () => {
+            setAmount("");
+            maxAmountsQuery.refetch();
+          },
         }
       );
     } else {
@@ -78,7 +84,10 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           maxRemovableAmount,
         },
         {
-          onSuccess: () => setAmount(""),
+          onSuccess: () => {
+            setAmount("");
+            maxAmountsQuery.refetch();
+          },
         }
       );
     }
