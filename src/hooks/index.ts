@@ -15,3 +15,4 @@ export * from "./useCenteredInViewport";
 export * from "./useConnection";
 export * from "./useIsWrongNetwork";
 export * from "./useStakingPool";
+export * from "./useApprove";

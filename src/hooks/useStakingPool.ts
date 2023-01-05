@@ -144,7 +144,7 @@ export function useAcrossStakingPool() {
   return useStakingPool(acrossTokenAddress);
 }
 
-function getStakingPoolQueryKey(
+export function getStakingPoolQueryKey(
   tokenAddress?: string,
   account?: string
 ): [string, string?, string?] {
