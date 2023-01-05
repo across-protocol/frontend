@@ -10,15 +10,19 @@ import { repeatableTernaryBuilder } from "utils/ternary";
 import { formatWeiPct } from "utils";
 
 type Props = {
-  selectedTokenAddress?: string;
+  selectedToken: {
+    l1TokenAddress: string;
+    symbol: string;
+    logoURI: string;
+  };
   selectedPoolAction: "add" | "remove";
 };
 
 export function EarnByStakingInfoBox({
-  selectedTokenAddress,
+  selectedToken,
   selectedPoolAction,
 }: Props) {
-  const { data, isLoading } = useStakingPool(selectedTokenAddress);
+  const { data, isLoading } = useStakingPool(selectedToken.l1TokenAddress);
   const { isConnected } = useConnection();
 
   const showValueOrDash = repeatableTernaryBuilder(
@@ -40,22 +44,27 @@ export function EarnByStakingInfoBox({
           <XStarRing width={40} height={40} />
         </LeftIconContainer>
         <TextContainer>
-          <Text color="white-100">
-            {hasStaked ? "Earning " : "Earn "}
-            {showValueOrDash(
-              <Text color={textColor} as="span">
-                +{formatWeiPct(apyToShow)}%
-              </Text>
-            )}
-            {hasStaked ? " on staked " : " by staking "}
-            {showValueOrDash(
-              <Text color={textColor} as="span">
-                {data?.tokenSymbol.toUpperCase()}-LP
-              </Text>
-            )}
-          </Text>
+          {showValueOrDash(
+            <Text color="white-100">
+              {hasStaked ? "Earning " : "Earn "}
+              {showValueOrDash(
+                <Text color={textColor} as="span">
+                  +{formatWeiPct(apyToShow)}%
+                </Text>
+              )}
+              {hasStaked ? " on staked " : " by staking "}
+              {showValueOrDash(
+                <Text color={textColor} as="span">
+                  {selectedToken.symbol}-LP
+                </Text>
+              )}
+            </Text>
+          )}
         </TextContainer>
-        <IconButtonLink to="/rewards" selectedPoolAction={selectedPoolAction}>
+        <IconButtonLink
+          to={`/rewards/staking/${selectedToken.symbol.toLowerCase()}`}
+          selectedPoolAction={selectedPoolAction}
+        >
           <ChevronRight strokeWidth="1.5" size={20} />
         </IconButtonLink>
       </UpperRowContainer>
@@ -67,18 +76,18 @@ export function EarnByStakingInfoBox({
             {showValueOrDash(
               <Text color={hasStaked ? "white-100" : "grey-400"} as="span">
                 {data?.lpTokenFormatter(data?.userAmountOfLPStaked || 0)} /{" "}
-                {data?.lpTokenFormatter(data?.availableLPTokenBalance || 0)}{" "}
-                {data?.tokenSymbol.toUpperCase()}-LP
+                {data?.lpTokenFormatter(data?.usersTotalLPTokens || 0)}{" "}
               </Text>
             )}
-            {data && (
-              <img
-                src={data?.tokenLogoURI}
-                alt={data?.tokenSymbol}
-                width={16}
-                height={16}
-              />
-            )}
+            <Text color={hasStaked ? "white-100" : "grey-400"} as="span">
+              {selectedToken.symbol}-LP
+            </Text>
+            <img
+              src={selectedToken.logoURI}
+              alt={selectedToken.symbol}
+              width={16}
+              height={16}
+            />
           </LowerRowContainer>
         </>
       )}
@@ -153,7 +162,10 @@ const TextContainer = styled.div`
   flex: 1;
 `;
 
-const IconButtonLink = styled(Link)<StyledProps>`
+const IconButtonLink = styled(Link, {
+  // Required to remove the console error: `Warning: React does not recognize the `selectedPoolAction` prop on a DOM element.`
+  shouldForwardProp: (prop) => prop !== "selectedPoolAction",
+})<StyledProps>`
   display: flex;
   align-items: center;
   justify-content: center;
