@@ -69,16 +69,14 @@ export default function LiquidityPool() {
     if (!selectedLiquidityPool || !amount) {
       return "-";
     }
-    return `${formatUnits(amount, selectedLiquidityPool.l1TokenDecimals, {
+    return `${formatUnits(amount, selectedToken.decimals, {
       xl: 3,
-    })} ${selectedLiquidityPool.l1TokenSymbol}`;
+    })} ${selectedToken.symbol}`;
   };
 
   const showValueOrDash = repeatableTernaryBuilder(!arePoolsLoading, "-");
 
-  const stakingPoolQuery = useStakingPool(
-    selectedLiquidityPool?.l1TokenAddress
-  );
+  const stakingPoolQuery = useStakingPool(selectedToken.l1TokenAddress);
 
   return (
     <LayoutV2 maxWidth={600}>
@@ -139,7 +137,7 @@ export default function LiquidityPool() {
             value={showValueOrDash(
               formatTokenAmount(userLiquidityPoolQuery.data?.positionValue)
             )}
-            tokenLogoURI={selectedLiquidityPool?.l1TokenLogoURI}
+            tokenLogoURI={selectedToken.logoURI}
           />
           <UserStatRow
             label="Fees earned"

@@ -123,13 +123,15 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
             isRemove={action === "remove"}
             disabled={Boolean(disableInputs || amountValidationError)}
           >
-            {action === "add"
-              ? addLiquidityMutation.isLoading
-                ? "Adding liquidity..."
-                : "Add liquidity"
-              : removeLiquidityMutation.isLoading
-              ? "Removing liquidity..."
-              : "Remove liquidity"}
+            <Text color="dark-grey" weight={500}>
+              {action === "add"
+                ? addLiquidityMutation.isLoading
+                  ? "Adding liquidity..."
+                  : "Add liquidity"
+                : removeLiquidityMutation.isLoading
+                ? "Removing liquidity..."
+                : "Remove liquidity"}
+            </Text>
           </Button>
         </ButtonWrapper>
       </InputRow>

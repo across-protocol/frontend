@@ -44,22 +44,27 @@ export function EarnByStakingInfoBox({
           <XStarRing width={40} height={40} />
         </LeftIconContainer>
         <TextContainer>
-          <Text color="white-100">
-            {hasStaked ? "Earning " : "Earn "}
-            {showValueOrDash(
-              <Text color={textColor} as="span">
-                +{formatWeiPct(apyToShow)}%
-              </Text>
-            )}
-            {hasStaked ? " on staked " : " by staking "}
-            {showValueOrDash(
-              <Text color={textColor} as="span">
-                {selectedToken.symbol}-LP
-              </Text>
-            )}
-          </Text>
+          {showValueOrDash(
+            <Text color="white-100">
+              {hasStaked ? "Earning " : "Earn "}
+              {showValueOrDash(
+                <Text color={textColor} as="span">
+                  +{formatWeiPct(apyToShow)}%
+                </Text>
+              )}
+              {hasStaked ? " on staked " : " by staking "}
+              {showValueOrDash(
+                <Text color={textColor} as="span">
+                  {selectedToken.symbol}-LP
+                </Text>
+              )}
+            </Text>
+          )}
         </TextContainer>
-        <IconButtonLink to="/rewards" selectedPoolAction={selectedPoolAction}>
+        <IconButtonLink
+          to={`/rewards/staking/${selectedToken.symbol.toLowerCase()}`}
+          selectedPoolAction={selectedPoolAction}
+        >
           <ChevronRight strokeWidth="1.5" size={20} />
         </IconButtonLink>
       </UpperRowContainer>
@@ -72,17 +77,17 @@ export function EarnByStakingInfoBox({
               <Text color={hasStaked ? "white-100" : "grey-400"} as="span">
                 {data?.lpTokenFormatter(data?.userAmountOfLPStaked || 0)} /{" "}
                 {data?.lpTokenFormatter(data?.usersTotalLPTokens || 0)}{" "}
-                {data?.tokenSymbol.toUpperCase()}-LP
               </Text>
             )}
-            {data && (
-              <img
-                src={data?.tokenLogoURI}
-                alt={data?.tokenSymbol}
-                width={16}
-                height={16}
-              />
-            )}
+            <Text color={hasStaked ? "white-100" : "grey-400"} as="span">
+              {selectedToken.symbol}-LP
+            </Text>
+            <img
+              src={selectedToken.logoURI}
+              alt={selectedToken.symbol}
+              width={16}
+              height={16}
+            />
           </LowerRowContainer>
         </>
       )}

@@ -22,7 +22,7 @@ export function parseAndValidateAmountInput(
     throw new Error("Input amount exceeds max amount");
   }
 
-  if (amountBN.lt(0)) {
+  if (amountBN.lte(0)) {
     throw new Error("Input amount must be greater than 0");
   }
 
