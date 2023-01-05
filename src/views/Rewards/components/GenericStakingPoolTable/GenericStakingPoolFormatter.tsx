@@ -8,15 +8,19 @@ import {
   ButtonCell,
   ExternalLinkButton,
   HeaderCell,
+  HorizontalStackedCell,
   InfoIcon,
   LogoWrapper,
   MultiplierCell,
   PoolCell,
   PoolTextStack,
+  RewardCell,
+  RewardConnectorTextWrapper,
   RowCell,
   StackedCell,
   StakeButton,
   StakedTokenCellInner,
+  StyledConnectorVector,
   StyledProgressBar,
 } from "./GenericStakingPoolTable.styles";
 import { StyledPoolIcon } from "components/RewardTable/RewardTables.styles";
@@ -32,7 +36,7 @@ type MetaData = {
 const flexBasisLengths = [
   250, // Pool
   176, // Staked LP Token
-  152, // Reward APY
+  200, // Reward APY
   176, // Multiplier
   152, // Age of Capital
   96, // Rewards
@@ -173,14 +177,27 @@ function RowStakedLPCell({ data, meta }: PoolRowCellType) {
 
 function RowRewardAPYCell({ data, meta }: PoolRowCellType) {
   return (
-    <StackedCell>
-      <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-        {formatWeiPct(data.apyData.totalApy, 2)}%
-      </Text>
-      <Text color="white-70" size="sm">
-        Max: {formatWeiPct(data.apyData.maxApy, 2)}%
-      </Text>
-    </StackedCell>
+    <RewardCell>
+      <HorizontalStackedCell>
+        <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
+          {formatWeiPct(data.apyData.totalApy, 2)}% &nbsp;
+        </Text>
+        <Text color="white-70" size="md">
+          / Max {formatWeiPct(data.apyData.maxApy, 2)}%
+        </Text>
+      </HorizontalStackedCell>
+      <RewardConnectorTextWrapper>
+        <StyledConnectorVector />
+        <StackedCell>
+          <Text color="grey-400" size="sm">
+            Pool: {formatWeiPct(data.apyData.poolApy, 2)}%
+          </Text>
+          <Text color="grey-400" size="sm">
+            Rewards: {formatWeiPct(data.apyData.rewardsApy, 2)}%
+          </Text>
+        </StackedCell>
+      </RewardConnectorTextWrapper>
+    </RewardCell>
   );
 }
 

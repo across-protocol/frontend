@@ -3,6 +3,7 @@ import ProgressBar from "components/ProgressBar";
 import { BaseHeadCell } from "components/Table";
 import { Link } from "react-router-dom";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
+import { ReactComponent as ConnectorVector } from "assets/connectors.svg";
 
 const Cell = styled(BaseHeadCell)<{ length: number }>`
   flex: 0 0 ${({ length }) => length}px;
@@ -20,8 +21,10 @@ export const HeaderCell = styled(Cell)`
   gap: 6px;
 `;
 
+export const StyledConnectorVector = styled(ConnectorVector)``;
+
 export const RowCell = styled(Cell)`
-  padding: 20px 16px;
+  padding: 24px;
   background: transparent;
   border-top: 1px solid #3e4047;
 `;
@@ -48,6 +51,30 @@ export const StackedCell = styled.div`
   align-items: flex-start;
   padding: 0px;
   gap: 2px;
+`;
+
+export const HorizontalStackedCell = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 0px;
+`;
+
+export const RewardCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 6px;
+`;
+
+export const RewardConnectorTextWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 4px;
 `;
 
 export const StakedTokenCellInner = styled.div`
