@@ -14,13 +14,18 @@ export function useApprove() {
     erc20Address: string;
     approvalAmount: BigNumberish;
     allowedContractAddress: string;
+    enforceCorrectNetwork?: boolean;
   }) => {
     if (!signer || !account) {
       return;
     }
 
     if (isWrongNetwork) {
-      await isWrongNetworkHandler();
+      if (args.enforceCorrectNetwork) {
+        await isWrongNetworkHandler();
+      } else {
+        return;
+      }
     }
 
     const erc20 = ERC20__factory.connect(args.erc20Address, signer);
