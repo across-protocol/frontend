@@ -36,7 +36,6 @@ const ChangeAccountModal = ({
 
   const onSaveHandler = () => {
     if (validInput) {
-      console.log("HI");
       changeAccountHandler(userInput);
       displayModalCloseHandler();
     }
