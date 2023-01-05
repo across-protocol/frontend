@@ -14,7 +14,7 @@ import enabledGoerliRoutesAsJson from "../src/data/routes_5_0xA44A832B994f796452
 import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
-import { VercelResponse } from "@vercel/node";
+import { NetlifyResponse } from "./coingecko";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -595,12 +595,14 @@ export function applyMapFilter<InputType, MapType>(
  */
 export function handleErrorCondition(
   endpoint: string,
-  response: VercelResponse,
   logger: LoggingUtility,
   error: unknown
-): VercelResponse {
+): NetlifyResponse {
   if (!(error instanceof Error)) {
-    return response.status(500).send("Error could not be defined.");
+    return {
+      statusCode: 500,
+      body: "Error could not be defined.",
+    };
   }
   let status: number;
   if (error instanceof InputError) {
@@ -610,5 +612,8 @@ export function handleErrorCondition(
     logger.error({ at: endpoint, message: "500 server error", error });
     status = 500;
   }
-  return response.status(status).send(error.message);
+  return {
+    statusCode: status,
+    body: error.message,
+  };
 }

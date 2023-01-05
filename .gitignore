@@ -38,3 +38,6 @@ yarn-error.log*
 
 # storybook
 build-storybook.log
+
+# Local Netlify folder
+.netlify

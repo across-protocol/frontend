@@ -1,9 +1,8 @@
-import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { isString } from "./_typeguards";
-import { CoinGeckoInputRequest } from "./_types";
 import { getLogger, InputError, handleErrorCondition } from "./_utils";
 import { SUPPORTED_CG_BASE_CURRENCIES } from "./_constants";
+import { HandlerEvent } from "@netlify/functions";
 
 import { coingecko, relayFeeCalculator } from "@across-protocol/sdk-v2";
 
@@ -42,7 +41,7 @@ const getCoingeckoPrices = async (
 
   // Fetch undefined base and token USD prices from coingecko client.
   // Always use usd as the base currency for the purpose of conversion.
-  const tokenAddressesToFetchPricesFor = [];
+  const tokenAddressesToFetchPricesFor: string[] = [];
   if (basePriceUsd === undefined)
     tokenAddressesToFetchPricesFor.push(baseCurrencyToken.address);
   if (tokenPriceUsd === undefined)
@@ -75,11 +74,30 @@ const getCoingeckoPrices = async (
   );
 };
 
+type NetlifyBaseRequest<T> = HandlerEvent & {
+  queryStringParameters: T | null;
+};
+
+type CoinGeckoRequest = NetlifyBaseRequest<{
+  l1Token: string;
+  baseCurrency: string;
+}>;
+
+export type NetlifyResponse = {
+  statusCode: number;
+  body: string;
+  headers?: { [key: string]: string };
+};
+
 const handler = async (
-  { query: { l1Token, baseCurrency } }: CoinGeckoInputRequest,
-  response: VercelResponse
-) => {
+  // { query: { l1Token, baseCurrency } }: CoinGeckoInputRequest,
+  // response: VercelResponse
+  event: CoinGeckoRequest
+): Promise<NetlifyResponse> => {
   const logger = getLogger();
+
+  let { l1Token, baseCurrency } = event.queryStringParameters || {};
+
   try {
     if (!isString(l1Token))
       throw new InputError("Must provide l1Token as query param");
@@ -173,13 +191,15 @@ const handler = async (
     // Revalidation will make the cache be fresh again, so it appears to clients that it was always fresh during
     // that period — effectively hiding the latency penalty of revalidation from them.
     // If no request happened during that period, the cache became stale and the next request will revalidate normally.
-    response.setHeader(
-      "Cache-Control",
-      "s-maxage=150, stale-while-revalidate=150"
-    );
-    response.status(200).json({ price });
+    return {
+      statusCode: 200,
+      headers: {
+        "Cache-Control": "s-maxage=150, stale-while-revalidate=150",
+      },
+      body: JSON.stringify({ price }),
+    };
   } catch (error: unknown) {
-    return handleErrorCondition("coingecko", response, logger, error);
+    return handleErrorCondition("coingecko", logger, error);
   }
 };
 
