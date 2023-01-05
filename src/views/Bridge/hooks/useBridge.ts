@@ -187,7 +187,7 @@ export function useBridge() {
   const { isConnected, chainId: walletChainId, account } = useConnection();
 
   // When a user changes the from route, ensure that they are on the same chain id
-  // otherwise the user will be prompted to switch chains. Only do this for connected wallets
+  // otherwise the user will be prompted to switch chains.
   useEffect(() => {
     checkWrongNetworkHandler();
   }, [currentFromRoute, isConnected, checkWrongNetworkHandler]);
