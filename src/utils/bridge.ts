@@ -7,7 +7,6 @@ import {
 } from "@across-protocol/sdk-v2";
 import { Provider, Block } from "@ethersproject/providers";
 import { ethers, BigNumber } from "ethers";
-import { BridgeLimits } from "hooks";
 
 import {
   MAX_RELAY_FEE_PERCENT,
@@ -31,6 +30,7 @@ import { parseEtherLike, tagAddress } from "./format";
 import { getProvider } from "./providers";
 import { getConfig } from "utils";
 import getApiEndpoint from "./serverless-api";
+import { BridgeLimitInterface } from "./serverless-api/types";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -165,7 +165,7 @@ export async function getBridgeFees({
 
 export const getConfirmationDepositTime = (
   amount: BigNumber,
-  limits: BridgeLimits,
+  limits: BridgeLimitInterface,
   toChain: ChainId,
   fromChain: ChainId
 ) => {
@@ -201,7 +201,7 @@ export const getConfirmationDepositTime = (
   return "~3-7 hours";
 };
 
-type AcrossDepositArgs = {
+export type AcrossDepositArgs = {
   fromChain: ChainId;
   toChain: ChainId;
   toAddress: string;

@@ -1,7 +1,22 @@
 import { BigNumber } from "ethers";
-import { useBalanceBySymbol } from "hooks";
+import {
+  useBalanceBySymbol,
+  useBridgeFees,
+  useBridgeLimits,
+  useConnection,
+  useIsWrongNetwork,
+} from "hooks";
+import useReferrer from "hooks/useReferrer";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getChainInfo, getConfig, getToken } from "utils";
+import {
+  AcrossDepositArgs,
+  getChainInfo,
+  getConfig,
+  getConfirmationDepositTime,
+  getToken,
+  hubPoolChainId,
+} from "utils";
+import { useBridgeAction } from "./useBridgeAction";
 
 const enabledRoutes = getConfig().getRoutes();
 
@@ -19,7 +34,9 @@ export function useBridge() {
   }, []);
 
   const [currentToken, setCurrentToken] = useState(availableTokens[0].symbol);
-  const [, setAmountToBridge] = useState<BigNumber | undefined>(undefined);
+  const [amountToBridge, setAmountToBridge] = useState<BigNumber | undefined>(
+    undefined
+  );
 
   // Filter routes to only show routes that are available for the current token when the user changes the token
   // Use useMemo to avoid recalculating this every time the component re-renders
@@ -35,6 +52,17 @@ export function useBridge() {
   );
   const [currentFromRoute, setCurrentFromRoute] = useState<number | undefined>(
     undefined
+  );
+
+  const currentRoute = useMemo(
+    () =>
+      availableRoutes.find(
+        (route) =>
+          route.fromChain === currentFromRoute &&
+          route.toChain === currentToRoute &&
+          route.fromTokenSymbol.toLowerCase() === currentToken.toLowerCase()
+      ),
+    [availableRoutes, currentFromRoute, currentToRoute, currentToken]
   );
 
   // Use useMemo to create an object of available from and to routes for the current token
@@ -62,6 +90,10 @@ export function useBridge() {
   // If the user changes the token and the current route is still available, keep the current route.
   useEffect(() => {
     if (availableRoutes.length > 0) {
+      const availableRoutesThatStartAtCurrentChain = availableRoutes.filter(
+        (route) => route.fromChain === (hubPoolChainId ?? 1)
+      );
+
       if (currentToRoute) {
         const toRouteStillAvailable = availableRoutes.some(
           (route) => route.toChain === currentToRoute
@@ -70,7 +102,7 @@ export function useBridge() {
           setCurrentToRoute(availableRoutes[0].toChain);
         }
       } else {
-        setCurrentToRoute(availableRoutes[0].toChain);
+        setCurrentToRoute(availableRoutesThatStartAtCurrentChain[0].toChain);
       }
       if (currentFromRoute) {
         const fromRouteStillAvailable = availableRoutes.some(
@@ -80,7 +112,9 @@ export function useBridge() {
           setCurrentFromRoute(availableRoutes[0].fromChain);
         }
       } else {
-        setCurrentFromRoute(availableRoutes[0].fromChain);
+        setCurrentFromRoute(
+          availableRoutesThatStartAtCurrentChain[0].fromChain
+        );
       }
     }
   }, [availableRoutes, currentToRoute, currentFromRoute]);
@@ -146,7 +180,87 @@ export function useBridge() {
   const usersBalance = useBalanceBySymbol(currentToken, currentFromRoute);
   const currentBalance = usersBalance.balance;
 
+  const { isWrongNetwork, isWrongNetworkHandler, checkWrongNetworkHandler } =
+    useIsWrongNetwork(currentFromRoute);
+
+  const { isConnected, chainId: walletChainId, account } = useConnection();
+
+  useEffect(() => {
+    checkWrongNetworkHandler();
+  }, [currentFromRoute, isConnected, checkWrongNetworkHandler]);
+
+  const isBridgeDisabled =
+    isConnected && (!amountToBridge || amountToBridge.eq(0));
+
+  const { fees } = useBridgeFees(
+    amountToBridge ?? BigNumber.from(0),
+    currentFromRoute,
+    currentToRoute,
+    currentToken
+  );
+
+  const { limits } = useBridgeLimits(
+    getToken(currentToken).mainnetAddress,
+    currentFromRoute,
+    currentToRoute
+  );
+
+  const estimatedTime = useMemo(() => {
+    return amountToBridge &&
+      amountToBridge.gt(0) &&
+      currentFromRoute &&
+      currentToRoute
+      ? limits
+        ? getConfirmationDepositTime(
+            amountToBridge,
+            limits,
+            currentToRoute,
+            currentFromRoute
+          )
+        : "loading..."
+      : undefined;
+  }, [amountToBridge, currentFromRoute, currentToRoute, limits]);
+
+  const { referrer } = useReferrer();
+
+  const [displayChangeAccount, setDisplayChangeAccount] = useState(false);
+  const [toAccount, setToAccount] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (isConnected && toAccount === undefined) {
+      setToAccount(account);
+    }
+  }, [isConnected, account, toAccount]);
+
+  const bridgePayload: AcrossDepositArgs | undefined =
+    amountToBridge && currentRoute && fees
+      ? {
+          amount: amountToBridge,
+          fromChain: currentRoute.fromChain,
+          toChain: currentRoute.toChain,
+          timestamp: fees.quoteTimestamp!,
+          referrer,
+          relayerFeePct: fees.relayerFee.pct,
+          tokenAddress: currentRoute.fromTokenAddress,
+          isNative: currentRoute.isNative,
+          toAddress: toAccount ?? "",
+        }
+      : undefined;
+
+  const bridgeAction = useBridgeAction(
+    limits === undefined || fees === undefined,
+    bridgePayload,
+    currentToken
+  );
+
   return {
+    ...bridgeAction,
+    displayChangeAccount,
+    setDisplayChangeAccount,
+    setToAccount,
+    toAccount,
+    fees,
+    limits,
     availableTokens,
     currentToken,
     setCurrentToken,
@@ -159,5 +273,13 @@ export function useBridge() {
     availableFromRoutes,
     availableToRoutes,
     handleQuickSwap,
+    isWrongChain: isWrongNetwork,
+    handleChainSwitch: isWrongNetworkHandler,
+    walletChainId,
+    isConnected,
+    isBridgeDisabled:
+      isConnected && (isBridgeDisabled || bridgeAction.buttonDisabled),
+    amountToBridge,
+    estimatedTime,
   };
 }
