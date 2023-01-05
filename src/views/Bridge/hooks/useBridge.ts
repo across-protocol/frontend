@@ -277,7 +277,8 @@ export function useBridge() {
     handleChainSwitch: isWrongNetworkHandler,
     walletChainId,
     isConnected,
-    isBridgeDisabled: isBridgeDisabled || bridgeAction.buttonDisabled,
+    isBridgeDisabled:
+      isConnected && (isBridgeDisabled || bridgeAction.buttonDisabled),
     amountToBridge,
     estimatedTime,
   };
