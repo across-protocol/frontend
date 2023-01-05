@@ -6,10 +6,12 @@ import { connectLinkedWalletMockedCall } from "./connect-linked-wallet.mocked";
 import { retrieveDiscordUserDetailsMockedCall } from "./retrieve-user-details.mocked";
 import { getDepositStatsMocked } from "./get-deposit-stats.mocked";
 import { coingeckoMockedApiCall } from "./coingecko.mocked";
+import { retrieveLimitsMocked } from "./bridge-limits.mocked";
 
 export const mockedEndpoints: ServerlessAPIEndpoints = {
   coingecko: coingeckoMockedApiCall,
   suggestedFees: suggestedFeesMockedApiCall,
+  limits: retrieveLimitsMocked,
   prelaunch: {
     rewards: prelaunchRewardsMockedCall,
     linkedWallet: retrieveLinkedWalletMockedCall,

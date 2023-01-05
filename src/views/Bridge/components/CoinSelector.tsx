@@ -9,9 +9,10 @@ import {
   QUERIESV2,
   TokenInfo,
 } from "utils";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Theme } from "@emotion/react";
 import { SelectorPropType } from "components/Selector/Selector";
+import { useConnection } from "hooks";
 
 function useCoinSelector(
   tokens: TokenInfo[],
@@ -23,6 +24,7 @@ function useCoinSelector(
 ) {
   const [userAmountInput, setUserAmountInput] = useState("");
   const [validInput, setValidInput] = useState(true);
+  const { isConnected } = useConnection();
   const token =
     tokens.find((t) => t.symbol.toLowerCase() === currentToken.toLowerCase()) ??
     tokens[0];
@@ -35,35 +37,46 @@ function useCoinSelector(
     }
   };
 
+  const validateAndSetUserInput = useCallback(() => {
+    setValidInput(true);
+    if (currentBalance) {
+      if (
+        userAmountInput === "" ||
+        userAmountInput === "." ||
+        userAmountInput === "0." ||
+        userAmountInput === "0"
+      ) {
+        setAmountToBridge(undefined);
+      } else {
+        const parsed = tokenParserFn(
+          isNumberEthersParseable(userAmountInput) ? userAmountInput : "-1"
+        );
+        if (parsed.gt(0) && parsed.lte(currentBalance)) {
+          setAmountToBridge(parsed);
+        } else {
+          setAmountToBridge(undefined);
+          setValidInput(false);
+        }
+      }
+    }
+  }, [currentBalance, setAmountToBridge, tokenParserFn, userAmountInput]);
+
   // Create a useEffect to validate the user input to be a valid big number greater than 0 and less than the current balance
   // If the user input is valid, set the amount to bridge to the user input value converted to a BigNumber with the tokenParserFn
   // If the user input is invalid, set the amount to bridge to undefined
   // If the user input is empty, set the amount to bridge to undefined
   useEffect(() => {
-    setValidInput(true);
-    if (!currentBalance) return;
-    if (
-      userAmountInput === "" ||
-      userAmountInput === "." ||
-      userAmountInput === "0." ||
-      userAmountInput === "0"
-    ) {
-      setAmountToBridge(undefined);
-    } else {
-      const parsed = tokenParserFn(
-        isNumberEthersParseable(userAmountInput) ? userAmountInput : "-1"
-      );
-      if (parsed.gt(0) && parsed.lte(currentBalance)) {
-        setAmountToBridge(parsed);
-      } else {
-        setAmountToBridge(undefined);
-        setValidInput(false);
-      }
-    }
+    validateAndSetUserInput();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userAmountInput]);
 
-  // Set the user input to empty string when the token changes
+  useEffect(() => {
+    if (isConnected) {
+      validateAndSetUserInput();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected]);
+
   useEffect(() => {
     setUserAmountInput("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
