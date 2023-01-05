@@ -103,7 +103,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
     <Wrapper>
       <InputRow>
         <InputWithMaxButton
-          valid={!amountValidationError}
+          valid={false}
           invalid={Boolean(amountValidationError)}
           value={amount}
           onChangeValue={(e) => setAmount(e.target.value)}
