@@ -15,6 +15,7 @@ export type SelectorPropType<Value> = {
   elements: SelectorElementType<Value>[];
   selectedValue: Value;
   setSelectedValue: (ind: Value) => void;
+  displayElement?: JSX.Element;
 };
 
 const Selector = <ElementValue,>({
@@ -22,6 +23,7 @@ const Selector = <ElementValue,>({
   selectedValue,
   setSelectedValue,
   title,
+  displayElement,
 }: SelectorPropType<ElementValue>) => {
   const { displayModal, setDisplayModal, selectedIndex, isMobile } =
     useSelector(elements, selectedValue);
@@ -30,7 +32,7 @@ const Selector = <ElementValue,>({
       <Wrapper onClick={() => setDisplayModal(true)}>
         <InternalWrapper>
           <ActiveElementWrapper>
-            {elements[selectedIndex]?.element}
+            {displayElement ? displayElement : elements[selectedIndex]?.element}
           </ActiveElementWrapper>
           <StyledArrowIcon />
         </InternalWrapper>
