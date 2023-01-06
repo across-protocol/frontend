@@ -23,6 +23,8 @@ type DepositConfirmationProps = {
   estimatedTime: string | undefined;
 
   isConnected: boolean;
+  transactionCompleted: boolean;
+  onTxHashChange: (txHash?: string) => void;
 };
 
 const DepositConfirmation = ({
@@ -33,6 +35,8 @@ const DepositConfirmation = ({
   amountToBridge,
   estimatedTime,
   isConnected,
+  transactionCompleted,
+  onTxHashChange,
 }: DepositConfirmationProps) => {
   return (
     <Wrapper>
@@ -95,7 +99,12 @@ const DepositConfirmation = ({
         dataLoaded={isConnected}
       />
       <Divider />
-      <Button>
+      <Button
+        disabled={!transactionCompleted}
+        onClick={() => {
+          onTxHashChange(undefined);
+        }}
+      >
         <Text size="lg" color="white" weight={500}>
           Initiate new transaction
         </Text>

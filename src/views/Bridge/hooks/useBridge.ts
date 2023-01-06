@@ -251,7 +251,8 @@ export function useBridge() {
         }
       : undefined;
 
-  const { onTxHashChange, trackingTxHash } = useBridgeDepositTracking();
+  const { onTxHashChange, trackingTxHash, transactionCompleted } =
+    useBridgeDepositTracking();
 
   const bridgeAction = useBridgeAction(
     limits === undefined || fees === undefined,
@@ -289,5 +290,7 @@ export function useBridge() {
     amountToBridge,
     estimatedTime,
     trackingTxHash,
+    transactionCompleted,
+    onTxHashChange,
   };
 }

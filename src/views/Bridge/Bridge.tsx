@@ -35,6 +35,8 @@ const Bridge = () => {
     toAccount,
     setToAccount,
     trackingTxHash,
+    transactionCompleted,
+    onTxHashChange,
   } = useBridge();
   return (
     <>
@@ -69,6 +71,8 @@ const Bridge = () => {
               currentToken={currentToken}
               estimatedTime={estimatedTime}
               isConnected={isConnected}
+              transactionCompleted={transactionCompleted}
+              onTxHashChange={onTxHashChange}
             />
           ) : (
             <BridgeForm

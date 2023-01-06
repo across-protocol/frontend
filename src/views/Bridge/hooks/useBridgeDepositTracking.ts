@@ -33,7 +33,7 @@ export function useBridgeDepositTracking() {
     : undefined;
   const depositFinished = !!depositFinishedDate;
 
-  const onTxHashChange = (txHash: string) => {
+  const onTxHashChange = (txHash?: string) => {
     setTxHash(txHash);
   };
 
