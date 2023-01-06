@@ -11,6 +11,8 @@ import {
   trackConnectWalletButtonClicked,
   trackDisconnectWalletButtonClicked,
   identifyUserWallets,
+  trackWalletChainId,
+  trackIsFirstTimeUser,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
@@ -131,6 +133,12 @@ export function useOnboardManager() {
       setError(undefined);
     }
   }, [wallet]);
+
+  useEffect(() => {
+    if (connectedChain) {
+      trackWalletChainId(connectedChain.id);
+    }
+  }, [connectedChain]);
 
   useEffect(() => {
     // Only acknowledge the state where onboard is defined
