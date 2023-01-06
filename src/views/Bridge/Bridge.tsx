@@ -61,7 +61,15 @@ const Bridge = () => {
         <Wrapper>
           <Breadcrumb />
           {trackingTxHash ? (
-            <DepositConfirmation />
+            <DepositConfirmation
+              currentFromRoute={currentFromRoute}
+              currentToRoute={currentToRoute}
+              fees={fees}
+              amountToBridge={amountToBridge}
+              currentToken={currentToken}
+              estimatedTime={estimatedTime}
+              isConnected={isConnected}
+            />
           ) : (
             <BridgeForm
               availableTokens={availableTokens}
