@@ -3,14 +3,17 @@ import Selector from "components/Selector/Selector";
 import { Text } from "components/Text";
 import {
   capitalizeFirstLetter,
+  ChainInfo,
   getChainInfo,
   getToken,
   receiveAmount,
+  shortenAddress,
 } from "utils";
 import {
   Button,
   CardWrapper,
   ChainIcon,
+  ChainIconSuperTextWrapper,
   ChainIconTextWrapper,
   ChangeAddressLink,
   Divider,
@@ -55,6 +58,27 @@ const Bridge = () => {
     toAccount,
     setToAccount,
   } = useBridge();
+
+  const mapChainInfoToRoute = (
+    c?: ChainInfo,
+    superText?: string
+  ): JSX.Element | undefined =>
+    c ? (
+      <ChainIconTextWrapper>
+        <ChainIcon src={c.logoURI} />
+        <ChainIconSuperTextWrapper>
+          {superText && (
+            <Text size="sm" color="grey-400">
+              {superText}
+            </Text>
+          )}
+          <Text size="md" color="white-100">
+            {capitalizeFirstLetter(c.fullName ?? c.name)}
+          </Text>
+        </ChainIconSuperTextWrapper>
+      </ChainIconTextWrapper>
+    ) : undefined;
+
   return (
     <>
       {isWrongChain && currentFromRoute && (
@@ -101,14 +125,7 @@ const Bridge = () => {
               <Selector<number>
                 elements={availableFromRoutes.map((r) => ({
                   value: r.chainId,
-                  element: (
-                    <ChainIconTextWrapper>
-                      <ChainIcon src={r.logoURI} />
-                      <Text size="md" color="white-100">
-                        {capitalizeFirstLetter(r.fullName ?? r.name)}
-                      </Text>
-                    </ChainIconTextWrapper>
-                  ),
+                  element: mapChainInfoToRoute(r)!,
                 }))}
                 selectedValue={currentFromRoute ?? 1}
                 setSelectedValue={(v) => setCurrentFromRoute(v)}
@@ -126,15 +143,16 @@ const Bridge = () => {
                 <Selector<number>
                   elements={availableToRoutes.map((r) => ({
                     value: r.chainId,
-                    element: (
-                      <ChainIconTextWrapper>
-                        <ChainIcon src={r.logoURI} />
-                        <Text size="md" color="white-100">
-                          {capitalizeFirstLetter(r.fullName ?? r.name)}
-                        </Text>
-                      </ChainIconTextWrapper>
-                    ),
+                    element: mapChainInfoToRoute(r)!,
                   }))}
+                  displayElement={mapChainInfoToRoute(
+                    availableToRoutes.filter(
+                      (r) => r.chainId === currentToRoute
+                    )[0],
+                    toAccount
+                      ? `Address: ${shortenAddress(toAccount, "...", 4)}`
+                      : undefined
+                  )}
                   selectedValue={currentToRoute ?? 1}
                   setSelectedValue={(v) => setCurrentToRoute(v)}
                   title="Chain"
