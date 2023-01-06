@@ -88,3 +88,11 @@ export const Button = styled(UnstyledButton)`
   height: 64px;
   width: 100%;
 `;
+
+export const ChainIconSuperTextWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0px;
+`;
