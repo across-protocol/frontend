@@ -4,6 +4,7 @@ import { Wrapper } from "./Bridge.styles";
 import Breadcrumb from "./components/Breadcrumb";
 import BridgeForm from "./components/BridgeForm";
 import ChangeAccountModal from "./components/ChangeAccountModal";
+import DepositConfirmation from "./components/DepositConfirmation";
 import { useBridge } from "./hooks/useBridge";
 
 const Bridge = () => {
@@ -33,6 +34,7 @@ const Bridge = () => {
     setDisplayChangeAccount,
     toAccount,
     setToAccount,
+    trackingTxHash,
   } = useBridge();
   return (
     <>
@@ -58,30 +60,34 @@ const Bridge = () => {
       <LayoutV2 maxWidth={600}>
         <Wrapper>
           <Breadcrumb />
-          <BridgeForm
-            availableTokens={availableTokens}
-            currentToken={currentToken}
-            setCurrentToken={setCurrentToken}
-            setAmountToBridge={setAmountToBridge}
-            currentBalance={currentBalance}
-            currentFromRoute={currentFromRoute}
-            setCurrentFromRoute={setCurrentFromRoute}
-            availableFromRoutes={availableFromRoutes}
-            availableToRoutes={availableToRoutes}
-            currentToRoute={currentToRoute}
-            setCurrentToRoute={setCurrentToRoute}
-            handleQuickSwap={handleQuickSwap}
-            isConnected={isConnected}
-            buttonActionHandler={buttonActionHandler}
-            buttonLabel={buttonLabel}
-            isBridgeDisabled={isBridgeDisabled}
-            fees={fees}
-            amountToBridge={amountToBridge}
-            estimatedTime={estimatedTime}
-            displayChangeAccount={displayChangeAccount}
-            setDisplayChangeAccount={setDisplayChangeAccount}
-            toAccount={toAccount}
-          />
+          {trackingTxHash ? (
+            <DepositConfirmation />
+          ) : (
+            <BridgeForm
+              availableTokens={availableTokens}
+              currentToken={currentToken}
+              setCurrentToken={setCurrentToken}
+              setAmountToBridge={setAmountToBridge}
+              currentBalance={currentBalance}
+              currentFromRoute={currentFromRoute}
+              setCurrentFromRoute={setCurrentFromRoute}
+              availableFromRoutes={availableFromRoutes}
+              availableToRoutes={availableToRoutes}
+              currentToRoute={currentToRoute}
+              setCurrentToRoute={setCurrentToRoute}
+              handleQuickSwap={handleQuickSwap}
+              isConnected={isConnected}
+              buttonActionHandler={buttonActionHandler}
+              buttonLabel={buttonLabel}
+              isBridgeDisabled={isBridgeDisabled}
+              fees={fees}
+              amountToBridge={amountToBridge}
+              estimatedTime={estimatedTime}
+              displayChangeAccount={displayChangeAccount}
+              setDisplayChangeAccount={setDisplayChangeAccount}
+              toAccount={toAccount}
+            />
+          )}
         </Wrapper>
       </LayoutV2>
     </>

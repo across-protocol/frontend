@@ -17,6 +17,7 @@ import {
   hubPoolChainId,
 } from "utils";
 import { useBridgeAction } from "./useBridgeAction";
+import { useBridgeDepositTracking } from "./useBridgeDepositTracking";
 
 const enabledRoutes = getConfig().getRoutes();
 
@@ -250,10 +251,13 @@ export function useBridge() {
         }
       : undefined;
 
+  const { onTxHashChange, trackingTxHash } = useBridgeDepositTracking();
+
   const bridgeAction = useBridgeAction(
     limits === undefined || fees === undefined,
     bridgePayload,
-    currentToken
+    currentToken,
+    onTxHashChange
   );
 
   return {
@@ -284,5 +288,6 @@ export function useBridge() {
       isConnected && (isBridgeDisabled || bridgeAction.buttonDisabled),
     amountToBridge,
     estimatedTime,
+    trackingTxHash,
   };
 }
