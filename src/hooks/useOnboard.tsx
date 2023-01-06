@@ -31,6 +31,7 @@ import {
   ConnectWalletButtonClickedProperties,
   DisconnectWalletButtonClickedProperties,
 } from "ampli";
+import { useUserDeposits } from "hooks/useDeposits";
 
 export type SetChainOptions = {
   chainId: string;
@@ -53,7 +54,8 @@ type OnboardContextValue = {
     options?: ConnectOptions & TrackOnConnectOptions
   ) => Promise<WalletState[]>;
   disconnect: (
-    wallet: WalletState & TrackOnDisconnectOptions
+    wallet: WalletState,
+    options?: TrackOnDisconnectOptions
   ) => Promise<WalletState[]>;
   chains: Chain[];
   connectedChain: ConnectedChain | null;
