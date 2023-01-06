@@ -92,6 +92,15 @@ export function useOnboardManager() {
   const [{ wallet }, connect, disconnect] = useConnectWallet();
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
 
+  // We use this query to check whether the user has any deposits
+  const userDepositsQuery = useUserDeposits("filled", 1, 0, account?.address);
+
+  useEffect(() => {
+    if (userDepositsQuery.data && account) {
+      trackIsFirstTimeUser(userDepositsQuery.data.deposits.length === 0);
+    }
+  }, [userDepositsQuery.data, account]);
+
   useEffect(() => {
     if (wallet?.accounts) {
       setAccount(wallet.accounts[0]);

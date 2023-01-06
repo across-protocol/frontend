@@ -19,17 +19,3 @@ export function getAccountSeenWelcomeTravellerFlow(
 ): string | null {
   return localStorage.getItem(`accountSeenWelcomeTravellerFlow-${account}`);
 }
-
-export function setIsFirstTimeUser(value: boolean) {
-  return localStorage.setItem("isFirstTimeUser", String(value));
-}
-
-export function getIsFirstTimeUser() {
-  const value = localStorage.getItem("isFirstTimeUser");
-
-  if (value === null) {
-    return true;
-  }
-
-  return Boolean(value === "true");
-}

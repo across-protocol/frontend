@@ -19,16 +19,16 @@ ReactDOM.render(
   <React.StrictMode>
     <GlobalStyles />
     <Provider store={store}>
-      <OnboardProvider>
-        <QueryClientProvider client={client}>
+      <QueryClientProvider client={client}>
+        <OnboardProvider>
           <ErrorProvider>
             <ToastProvider>
               <App />
             </ToastProvider>
           </ErrorProvider>
           {enableReactQueryDevTools && <ReactQueryDevtools />}
-        </QueryClientProvider>
-      </OnboardProvider>
+        </OnboardProvider>
+      </QueryClientProvider>
     </Provider>
   </React.StrictMode>,
   document.getElementById("root")
