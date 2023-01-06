@@ -230,6 +230,9 @@ export function useBridge() {
     if (isConnected && toAccount === undefined) {
       setToAccount(account);
     }
+    if (!isConnected) {
+      setToAccount(undefined);
+    }
   }, [isConnected, account, toAccount]);
 
   const bridgePayload: AcrossDepositArgs | undefined =
