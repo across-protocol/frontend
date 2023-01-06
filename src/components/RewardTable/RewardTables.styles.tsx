@@ -50,7 +50,7 @@ export const TableCell = styled(BaseTableCell)`
   border-top: 1px solid #3e4047;
 `;
 
-export const HeadCell = BaseHeadCell;
+export const HeadCell = styled(BaseHeadCell)``;
 
 export const AssetCell = styled(TableCell)`
   flex: 0 0 172px;
