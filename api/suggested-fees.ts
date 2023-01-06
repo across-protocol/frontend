@@ -112,7 +112,7 @@ const handler = async (
           blockTag,
         },
         computedOriginChainId,
-        destinationChainId
+        Number(destinationChainId)
       ),
       getCachedTokenPrice(l1Token, baseCurrency),
     ]);
