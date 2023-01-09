@@ -12,6 +12,7 @@ import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-external-
 import EstimatedTable from "./EstimatedTable";
 import { BigNumber } from "ethers";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
+import { Link } from "react-router-dom";
 
 type DepositConfirmationProps = {
   currentFromRoute: number | undefined;
@@ -25,6 +26,8 @@ type DepositConfirmationProps = {
   isConnected: boolean;
   transactionCompleted: boolean;
   onTxHashChange: (txHash?: string) => void;
+
+  explorerLink?: string;
 };
 
 const DepositConfirmation = ({
@@ -37,6 +40,7 @@ const DepositConfirmation = ({
   isConnected,
   transactionCompleted,
   onTxHashChange,
+  explorerLink,
 }: DepositConfirmationProps) => {
   return (
     <Wrapper>
@@ -71,7 +75,9 @@ const DepositConfirmation = ({
               Transactions page
             </Text>
           </ActionCardTitleWrapper>
-          <StyledExternalLinkIcon />
+          <ExternalContainerIconLink to="/transactions">
+            <StyledExternalLinkIcon />
+          </ExternalContainerIconLink>
         </ActionCard>
         <ActionCard>
           <ActionCardTitleWrapper>
@@ -82,7 +88,12 @@ const DepositConfirmation = ({
               Etherscan.io
             </Text>
           </ActionCardTitleWrapper>
-          <StyledExternalLinkIcon />
+          <ExternalContainerIconAnchor
+            href={explorerLink ?? "https://etherscan.io"}
+            target="_blank"
+          >
+            <StyledExternalLinkIcon />
+          </ExternalContainerIconAnchor>
         </ActionCard>
       </ActionCardContainer>
       <EstimatedTable
@@ -240,6 +251,16 @@ const StyledExternalLinkIcon = styled(ExternalLinkIcon)`
   & * {
     stroke: #9daab3;
   }
+`;
+
+const ExternalContainerIconAnchor = styled.a`
+  height: 32px;
+  width: 32px;
+`;
+
+const ExternalContainerIconLink = styled(Link)`
+  height: 32px;
+  width: 32px;
 `;
 
 const Divider = styled.div`

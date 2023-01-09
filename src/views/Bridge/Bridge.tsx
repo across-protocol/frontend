@@ -37,6 +37,7 @@ const Bridge = () => {
     trackingTxHash,
     transactionCompleted,
     onTxHashChange,
+    explorerUrl,
   } = useBridge();
   return (
     <>
@@ -73,6 +74,7 @@ const Bridge = () => {
               isConnected={isConnected}
               transactionCompleted={transactionCompleted}
               onTxHashChange={onTxHashChange}
+              explorerLink={explorerUrl}
             />
           ) : (
             <BridgeForm
