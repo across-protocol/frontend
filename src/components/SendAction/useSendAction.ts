@@ -35,7 +35,7 @@ export default function useSendAction(
     toChain
   );
   const { chainId: networkChainId } = useConnection();
-  const networkChainName = getChainInfo(networkChainId)?.name!;
+  const networkChainName = getChainInfo(networkChainId || 1)?.name!;
 
   const showFees = amount.gt(0) && !!fees;
   const amountMinusFees = showFees ? receiveAmount(amount, fees) : undefined;
