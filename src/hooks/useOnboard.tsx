@@ -96,7 +96,7 @@ export function useOnboardManager() {
   const [{ wallet }, connect, disconnect] = useConnectWallet();
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
 
-  // We use this query to check whether the user has any deposits
+  // We use this query to check whether the user has any deposits, i.e. is a first time user
   const userDepositsQuery = useUserDeposits("filled", 1, 0, account?.address);
 
   useEffect(() => {
@@ -135,10 +135,15 @@ export function useOnboardManager() {
   }, [wallet]);
 
   useEffect(() => {
-    if (connectedChain) {
-      trackWalletChainId(connectedChain.id);
+    if (connectedChain && wallet) {
+      const chainId = String(parseInt(connectedChain.id, 16));
+      trackWalletChainId(chainId);
+      ampli.walletNetworkSelected({
+        chainId,
+        chainName: connectedChain?.namespace || "unknown",
+      });
     }
-  }, [connectedChain]);
+  }, [connectedChain, wallet]);
 
   useEffect(() => {
     // Only acknowledge the state where onboard is defined

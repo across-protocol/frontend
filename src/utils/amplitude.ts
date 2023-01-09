@@ -300,6 +300,12 @@ export function generateTransferConfirmed(
     NetworkFeeNative: quote.relayGasFeeTotal,
     NetworkFeeUsd: quote.relayGasFeeTotalUsd.toString(),
     NetworkFeeNativeToken: quote.tokenSymbol,
+    // The following properties are only used to make Typescript happy and will be removed
+    // when changing this event to `DepositTransactionConfirmed`
+    fillAmount: "",
+    fillAmountUsd: "",
+    totalFilledAmount: "",
+    totalFilledAmountUsd: "",
   };
 }
 

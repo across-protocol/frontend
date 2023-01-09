@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 27
+ * Tracking Plan Version: 33
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -30,10 +30,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "27",
+    version: "33",
     branch: "main",
     source: "web",
-    versionId: "825bde2a-9ff1-43bd-a52c-4f7609cb070e",
+    versionId: "7e89748d-3557-4f00-be70-4e32bcca81d7",
   },
   ...{
     ingestionMetadata: {
@@ -101,8 +101,12 @@ export interface IdentifyProperties {
   initial_wbraid?: any;
   /**
    * Total volume of bridge transfers (since event tracking was implemented). Updated on each new transfer the user completes.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Type | integer |
    */
-  totalVolumeUsd: string;
+  totalVolumeUsd: number;
   /**
    * Currently connected wallet address
    */
@@ -718,6 +722,8 @@ export interface TransferTransactionConfirmedProperties {
    * Capital fee in USD
    */
   capitalFeeTotalUsd: string;
+  fillAmount: string;
+  fillAmountUsd: string;
   /**
    * From amount in the bridge token, in decimals
    */
@@ -847,6 +853,8 @@ export interface TransferTransactionConfirmedProperties {
    * Total bridge fee in USD
    */
   totalBridgeFeeUsd: string;
+  totalFilledAmount: string;
+  totalFilledAmountUsd: string;
   /**
    * Token address of bridge token on to chain
    */
@@ -879,6 +887,14 @@ export interface WalletConnectTransactionCompletedProperties {
    * Type of wallet attempted to connect
    */
   walletType?: string;
+}
+
+export interface WalletNetworkSelectedProperties {
+  chainId: string;
+  /**
+   * Name of the fromChain
+   */
+  chainName: string;
 }
 
 export interface WalletSelectedProperties {
@@ -1021,6 +1037,14 @@ export class WalletConnectTransactionCompleted implements BaseEvent {
   constructor(
     public event_properties: WalletConnectTransactionCompletedProperties
   ) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class WalletNetworkSelected implements BaseEvent {
+  event_type = "WalletNetworkSelected";
+
+  constructor(public event_properties: WalletNetworkSelectedProperties) {
     this.event_properties = event_properties;
   }
 }
@@ -1425,6 +1449,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new WalletConnectTransactionCompleted(properties), options);
+  }
+
+  /**
+   * WalletNetworkSelected
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/WalletNetworkSelected)
+   *
+   * Owner: Dong-Ha Kim
+   *
+   * @param properties The event's properties (e.g. chainId)
+   * @param options Amplitude event options.
+   */
+  walletNetworkSelected(
+    properties: WalletNetworkSelectedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new WalletNetworkSelected(properties), options);
   }
 
   /**
