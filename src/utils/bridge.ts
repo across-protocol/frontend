@@ -76,7 +76,9 @@ export async function getRelayerFee(
 export async function getLpFee(
   l1TokenAddress: string,
   amount: ethers.BigNumber,
-  blockTime?: number
+  blockTime?: number,
+  originChainId?: number,
+  destinationChainId?: number
 ): Promise<Fee & { isLiquidityInsufficient: boolean }> {
   if (amount.lte(0)) {
     throw new Error(`Amount must be greater than 0.`);
@@ -98,7 +100,9 @@ export async function getLpFee(
   result.pct = await lpFeeCalculator.getLpFeePct(
     l1TokenAddress,
     amount,
-    blockTime
+    blockTime,
+    originChainId,
+    destinationChainId
   );
   result.isLiquidityInsufficient =
     await lpFeeCalculator.isLiquidityInsufficient(l1TokenAddress, amount);
@@ -149,7 +153,9 @@ export async function getBridgeFees({
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
     l1TokenAddress,
     amount,
-    blockTimestamp
+    blockTimestamp,
+    fromChainId,
+    toChainId
   ).catch((err) => {
     console.error("Error getting lp fee", err);
     throw err;
@@ -376,7 +382,9 @@ export default class LpFeeCalculator {
   async getLpFeePct(
     tokenAddress: string,
     amount: utils.BigNumberish,
-    timestamp?: number
+    timestamp?: number,
+    originChainId?: number,
+    destinationChainId?: number
   ) {
     amount = BigNumber.from(amount);
     assert(amount.gt(0), "Amount must be greater than 0");
@@ -400,9 +408,14 @@ export default class LpFeeCalculator {
         amount,
         { blockTag }
       ),
-      configStoreClient.getRateModel(tokenAddress, {
-        blockTag,
-      }),
+      configStoreClient.getRateModel(
+        tokenAddress,
+        {
+          blockTag,
+        },
+        originChainId,
+        destinationChainId
+      ),
     ]);
     return calculateRealizedLpFeePct(rateModel, currentUt, nextUt);
   }
