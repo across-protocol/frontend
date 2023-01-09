@@ -11,6 +11,8 @@ import {
   trackConnectWalletButtonClicked,
   trackDisconnectWalletButtonClicked,
   identifyUserWallets,
+  trackWalletChainId,
+  trackIsFirstTimeUser,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
@@ -31,6 +33,7 @@ import {
   ConnectWalletButtonClickedProperties,
   DisconnectWalletButtonClickedProperties,
 } from "ampli";
+import { useUserDeposits } from "hooks/useDeposits";
 
 export type SetChainOptions = {
   chainId: string;
@@ -53,7 +56,8 @@ type OnboardContextValue = {
     options?: ConnectOptions & TrackOnConnectOptions
   ) => Promise<WalletState[]>;
   disconnect: (
-    wallet: WalletState & TrackOnDisconnectOptions
+    wallet: WalletState,
+    options?: TrackOnDisconnectOptions
   ) => Promise<WalletState[]>;
   chains: Chain[];
   connectedChain: ConnectedChain | null;
@@ -92,6 +96,15 @@ export function useOnboardManager() {
   const [{ wallet }, connect, disconnect] = useConnectWallet();
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
 
+  // We use this query to check whether the user has any deposits, i.e. is a first time user
+  const userDepositsQuery = useUserDeposits("filled", 1, 0, account?.address);
+
+  useEffect(() => {
+    if (userDepositsQuery.data && account) {
+      trackIsFirstTimeUser(userDepositsQuery.data.deposits.length === 0);
+    }
+  }, [userDepositsQuery.data, account]);
+
   useEffect(() => {
     if (wallet?.accounts) {
       setAccount(wallet.accounts[0]);
@@ -120,6 +133,17 @@ export function useOnboardManager() {
       setError(undefined);
     }
   }, [wallet]);
+
+  useEffect(() => {
+    if (connectedChain && wallet) {
+      const chainId = String(parseInt(connectedChain.id, 16));
+      trackWalletChainId(chainId);
+      ampli.walletNetworkSelected({
+        chainId,
+        chainName: connectedChain?.namespace || "unknown",
+      });
+    }
+  }, [connectedChain, wallet]);
 
   useEffect(() => {
     // Only acknowledge the state where onboard is defined

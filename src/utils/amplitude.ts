@@ -23,7 +23,6 @@ import {
   capitalizeFirstLetter,
 } from "./format";
 import { getConfig } from "./config";
-import { getIsFirstTimeUser, setIsFirstTimeUser } from "./localStorage";
 
 export function getPageValue() {
   const path = window.location.pathname;
@@ -104,8 +103,18 @@ export function identifyUserWallets(walletStates: WalletState[]) {
   identifyObj.postInsert("allWalletChainIds", connectedWallet.chains[0].id);
   identifyObj.set("walletAddress", connectedWalletAddress);
   identifyObj.set("walletType", connectedWallet.label);
-  identifyObj.set("isFirstTimeUser", getIsFirstTimeUser());
-  setIsFirstTimeUser(false);
+  return ampli.client?.identify(identifyObj);
+}
+
+export function trackWalletChainId(chainId: string) {
+  const identifyObj = new Identify();
+  identifyObj.postInsert("allWalletChainIds", chainId);
+  return ampli.client?.identify(identifyObj);
+}
+
+export function trackIsFirstTimeUser(isFirstTimeUser: boolean) {
+  const identifyObj = new Identify();
+  identifyObj.set("isFirstTimeUser", isFirstTimeUser);
   return ampli.client?.identify(identifyObj);
 }
 
@@ -291,6 +300,12 @@ export function generateTransferConfirmed(
     NetworkFeeNative: quote.relayGasFeeTotal,
     NetworkFeeUsd: quote.relayGasFeeTotalUsd.toString(),
     NetworkFeeNativeToken: quote.tokenSymbol,
+    // The following properties are only used to make Typescript happy and will be removed
+    // when changing this event to `DepositTransactionConfirmed`
+    fillAmount: "",
+    fillAmountUsd: "",
+    totalFilledAmount: "",
+    totalFilledAmountUsd: "",
   };
 }
 
