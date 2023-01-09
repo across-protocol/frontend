@@ -106,9 +106,14 @@ const handler = async (
       hubPool.callStatic.liquidityUtilizationPostRelay(l1Token, amount, {
         blockTag,
       }),
-      configStoreClient.getRateModel(l1Token, {
-        blockTag,
-      }),
+      configStoreClient.getRateModel(
+        l1Token,
+        {
+          blockTag,
+        },
+        computedOriginChainId,
+        Number(destinationChainId)
+      ),
       getCachedTokenPrice(l1Token, baseCurrency),
     ]);
     const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
