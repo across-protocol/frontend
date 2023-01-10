@@ -5,6 +5,10 @@ import {
   Wrapper,
   LoaderWrapper,
   StakeButtonContentWrapper,
+  Input,
+  InputWrapper,
+  MaxButton,
+  TokenIcon,
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
