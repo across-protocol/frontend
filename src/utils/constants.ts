@@ -460,6 +460,7 @@ export const confirmations =
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
 export const matomoUrl = process.env.REACT_APP_MATOMO_URL;
 export const debug = Boolean(process.env.REACT_APP_DEBUG);
+export const isProductionBuild = process.env.NODE_ENV === "production";
 
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
@@ -739,3 +740,14 @@ export const suggestedFeesDeviationBufferMultiplier = !Number.isNaN(
 export const defaultRefetchInterval = 15_000;
 
 export const fallbackSuggestedRelayerFeePct = ethers.utils.parseEther("0.0001");
+
+export const amplitudeAPIKey = process.env.REACT_APP_AMPLITUDE_KEY
+  ? process.env.REACT_APP_AMPLITUDE_KEY
+  : undefined;
+
+export const amplitudeEnvironment =
+  process.env.REACT_APP_AMPLITUDE_ENVIRONMENT === "production"
+    ? "production"
+    : "development";
+
+export const currentGitCommitHash = process.env.REACT_APP_GIT_COMMIT_HASH ?? "";

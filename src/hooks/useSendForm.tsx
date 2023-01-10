@@ -4,7 +4,9 @@ import {
   useCallback,
   useContext,
   createContext,
+  useState,
 } from "react";
+import { ampli } from "../ampli";
 import { ethers } from "ethers";
 import {
   ChainId,
@@ -19,6 +21,7 @@ import {
   ChainInfo,
   ChainInfoList,
   isSupportedChainId,
+  getChainInfo,
 } from "utils";
 
 import { usePrevious, useConnection } from "hooks";
@@ -477,6 +480,74 @@ function useSendFormManager(): SendFormManagerContext {
       payload: error,
     });
   }, []);
+
+  // Amplitude tracking for the fromChain id and name
+  const [previousFromChain, setPreviousFromChain] = useState<
+    ChainId | undefined
+  >(undefined);
+  useEffect(() => {
+    const fromChain = state.fromChain;
+    if (fromChain && fromChain !== previousFromChain) {
+      const chainInfo = getChainInfo(fromChain);
+      ampli.fromChainSelected({
+        fromChainId: chainInfo.chainId.toString(),
+        chainName: chainInfo.name,
+      });
+      setPreviousFromChain(fromChain);
+    }
+  }, [state.fromChain, previousFromChain]);
+
+  // Amplitude tracking for the toChain id and name
+  const [previousToChain, setPreviousToChain] = useState<ChainId | undefined>(
+    undefined
+  );
+  useEffect(() => {
+    const toChain = state.toChain;
+    if (toChain && toChain !== previousToChain) {
+      const chainInfo = getChainInfo(toChain);
+      ampli.toChainSelected({
+        toChainId: chainInfo.chainId.toString(),
+        chainName: chainInfo.name,
+      });
+      setPreviousToChain(toChain);
+    }
+  }, [state.toChain, previousToChain]);
+
+  // Amplitude tracking for the toAccount address
+  const [previousToAccount, setPreviousToAccount] = useState<
+    string | undefined
+  >(undefined);
+  useEffect(() => {
+    const address = state.toAddress;
+    if (
+      address &&
+      address !== previousToAccount &&
+      address !== connectedAccount
+    ) {
+      ampli.toAccountChanged({ toWalletAddress: address });
+      setPreviousToAccount(address);
+    }
+  }, [state.toAddress, previousToAccount, connectedAccount]);
+
+  // Amplitude tracking for the token symbol
+  const [previousTokenSymbol, setPreviousTokenSymbol] = useState<
+    string | undefined
+  >(undefined);
+  useEffect(() => {
+    const tokenSymbol = state.tokenSymbol;
+    if (tokenSymbol && tokenSymbol !== previousTokenSymbol) {
+      const numberOfTokens = state.availableTokens.length;
+      const indexOfToken = state.availableTokens.findIndex(
+        (token) => token.symbol.toLowerCase() === tokenSymbol.toLowerCase()
+      );
+      ampli.tokenSelected({
+        tokenSymbol: tokenSymbol,
+        tokenListIndex: indexOfToken.toString(),
+        tokenListLength: numberOfTokens.toString(),
+      });
+      setPreviousTokenSymbol(tokenSymbol);
+    }
+  }, [state.tokenSymbol, state.availableTokens, previousTokenSymbol]);
 
   return {
     ...state,

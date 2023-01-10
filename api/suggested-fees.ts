@@ -143,6 +143,7 @@ const handler = async (
       lpFeePct: realizedLPFeePct.toString(),
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
+      quoteBlock: blockTag.toString(),
     };
 
     response.status(200).json(responseJson);
