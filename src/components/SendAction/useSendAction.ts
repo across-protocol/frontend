@@ -10,13 +10,13 @@ import {
   generateTransferQuote,
   generateTransferSubmitted,
   generateTransferSigned,
-  generateTransferConfirmed,
+  generateDepositConfirmed,
   recordTransferUserProperties,
 } from "utils";
 import { cloneDeep } from "lodash";
 import { Deposit } from "views/Confirmation";
 import { useConnection } from "hooks";
-import { ampli, TransferQuoteRecievedProperties } from "ampli";
+import { ampli, TransferQuoteReceivedProperties } from "ampli";
 import { useCoingeckoPrice } from "hooks/useCoingeckoPrice";
 import useReferrer from "hooks/useReferrer";
 
@@ -65,7 +65,7 @@ export default function useSendAction(
   const { referrer } = useReferrer();
 
   const [quote, setQuote] = useState<
-    TransferQuoteRecievedProperties | undefined
+    TransferQuoteReceivedProperties | undefined
   >(undefined);
   const [initialQuoteTime, setInitialQuoteTime] = useState<number | undefined>(
     undefined
@@ -85,7 +85,7 @@ export default function useSendAction(
       account &&
       tokenPriceInUSD
     ) {
-      const quote: TransferQuoteRecievedProperties = generateTransferQuote(
+      const quote: TransferQuoteReceivedProperties = generateTransferQuote(
         fees,
         selectedRoute,
         tokenInfo,
@@ -97,7 +97,7 @@ export default function useSendAction(
         timeToRelay,
         amount
       );
-      ampli.transferQuoteRecieved(quote);
+      ampli.transferQuoteReceived(quote);
       setQuote(quote);
       setInitialQuoteTime((s) => s ?? Number(quote.quoteTimestamp));
     }
@@ -146,7 +146,7 @@ export default function useSendAction(
 
         // NOTE: This check is redundant, as if `status` is `ready`, all of those are defined.
         if (tx && toAddress && account && feesUsed) {
-          const timeSigned = tx.timestamp!;
+          const timeSigned = tx.timestamp || timeSubmitted;
 
           // Instrument amplitude after signing the transaction for the submit button.
           ampli.transferSigned(
@@ -162,7 +162,7 @@ export default function useSendAction(
           let success = false;
           tx.wait(confirmations)
             .then((tx) => {
-              success = true;
+              success = tx.status === 1;
               onDepositConfirmed({
                 txHash: tx.transactionHash,
                 amount,
@@ -177,8 +177,8 @@ export default function useSendAction(
             .catch(console.error)
             .finally(() => {
               // Instrument amplitude after the transaction is confirmed for the submit button.
-              ampli.transferTransactionConfirmed(
-                generateTransferConfirmed(
+              ampli.depositTransactionConfirmed(
+                generateDepositConfirmed(
                   frozenQuote,
                   referrer,
                   timeSigned,

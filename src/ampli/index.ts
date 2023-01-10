@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 33
+ * Tracking Plan Version: 36
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -30,10 +30,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "33",
+    version: "36",
     branch: "main",
     source: "web",
-    versionId: "7e89748d-3557-4f00-be70-4e32bcca81d7",
+    versionId: "e2b5c3ce-a3cf-4596-824c-430a57136f4f",
   },
   ...{
     ingestionMetadata: {
@@ -167,6 +167,176 @@ export interface ConnectWalletButtonClickedProperties {
     | "stakeForm";
 }
 
+export interface DepositTransactionConfirmedProperties {
+  /**
+   * Capital fee percent, in decimals
+   */
+  capitalFeePct: string;
+  /**
+   * Capital fee in the bridge token, in decimals
+   */
+  capitalFeeTotal: string;
+  /**
+   * Capital fee in USD
+   */
+  capitalFeeTotalUsd: string;
+  depositCompleteTimestamp: string;
+  /**
+   * Expected fill time in minutes, as displayed in the UI for the asset and route selected
+   */
+  expectedFillTimeInMinutes: string;
+  /**
+   * From amount in the bridge token, in decimals
+   */
+  fromAmount: string;
+  /**
+   * From amount in USD
+   */
+  fromAmountUsd: string;
+  /**
+   * Id of the fromChain
+   */
+  fromChainId: string;
+  /**
+   * From chain name
+   */
+  fromChainName: string;
+  /**
+   * Token address of bridge token on from chain
+   */
+  fromTokenAddress: string;
+  isAmountTooLow: boolean;
+  /**
+   * Boolean if sender and recipient address are equal.
+   */
+  isSenderEqRecipient: boolean;
+  /**
+   * Lp fee percent, in decimals
+   */
+  lpFeePct: string;
+  /**
+   * Lp fee in the bridge token, in decimals
+   */
+  lpFeeTotal: string;
+  /**
+   * Lp fee in USD
+   */
+  lpFeeTotalUsd: string;
+  /**
+   * Gas fee in network token
+   */
+  NetworkFeeNative: string;
+  /**
+   * Network native token
+   */
+  NetworkFeeNativeToken: string;
+  /**
+   * Gas fee in USD
+   */
+  NetworkFeeUsd: string;
+  /**
+   * Latency for FE to recieve quote in millisec
+   */
+  quoteLatencyMilliseconds: string;
+  /**
+   * Timestamp the FE recieves quote (may be different from the event timestamp)
+   */
+  quoteTimestamp: string;
+  /**
+   * Recipient wallet address
+   */
+  recipient: string;
+  /**
+   * Address of referee, null if no referral used
+   */
+  referralProgramAddress?: string;
+  /**
+   * Relay fee percent, in decimals
+   */
+  relayFeePct: string;
+  /**
+   * Relay fee in the gas token, in decimals
+   */
+  relayFeeTotal: string;
+  /**
+   * Relay fee in USD
+   */
+  relayFeeTotalUsd: string;
+  /**
+   * Relayer gas fee percent, in decimals
+   */
+  relayGasFeePct: string;
+  /**
+   * Relayer gas fee in the gas token, in decimals
+   */
+  relayGasFeeTotal: string;
+  /**
+   * Relayer fee in USD
+   */
+  relayGasFeeTotalUsd: string;
+  /**
+   * Route "{fromChainId}-{toChainId}"
+   */
+  routeChainIdFromTo: string;
+  /**
+   * Route "{fromChainName}-{toChainName}"
+   */
+  routeChainNameFromTo: string;
+  /**
+   * Sender wallet address
+   */
+  sender: string;
+  /**
+   * Result of user signing or rejecting wallet connection
+   */
+  succeeded: boolean;
+  /**
+   * Duration in milliseconds between TransferSigned event to the TransferTransactionCompleted event
+   */
+  timeFromTransferSignedToTransferCompleteInMilliseconds: string;
+  /**
+   * To amount of bridge token, in decimals
+   */
+  toAmount: string;
+  /**
+   * To amount in USD
+   */
+  toAmountUsd: string;
+  /**
+   * Id of the toChain
+   */
+  toChainId: string;
+  /**
+   * Name of the toChain
+   */
+  toChainName: string;
+  /**
+   * Symbol of bridge token
+   */
+  tokenSymbol: string;
+  /**
+   * Total bridge fee in the bridge token, in decimals
+   */
+  totalBridgeFee: string;
+  /**
+   * Total bridge fee percent, in decimals
+   */
+  totalBridgeFeePct: string;
+  /**
+   * Total bridge fee in USD
+   */
+  totalBridgeFeeUsd: string;
+  /**
+   * Token address of bridge token on to chain
+   */
+  toTokenAddress: string;
+  /**
+   * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
+   */
+  transactionHash: string;
+  transferQuoteBlockNumber: string;
+}
+
 export interface DisconnectWalletButtonClickedProperties {
   /**
    * Action user did to trigger the event.
@@ -267,7 +437,7 @@ export interface PageViewedProperties {
   /**
    * Referring url
    */
-  referrer: string;
+  referrer?: string;
 }
 
 export interface ToAccountChangedProperties {
@@ -303,7 +473,7 @@ export interface TokenSelectedProperties {
   tokenSymbol: string;
 }
 
-export interface TransferQuoteRecievedProperties {
+export interface TransferQuoteReceivedProperties {
   /**
    * Capital fee percent, in decimals
    */
@@ -450,6 +620,12 @@ export interface TransferSignedProperties {
    */
   capitalFeeTotalUsd: string;
   /**
+   * | Rule | Value |
+   * |---|---|
+   * | Regex |  |
+   */
+  expectedFillTimeInMinutes: string;
+  /**
    * From amount in the bridge token, in decimals
    */
   fromAmount: string;
@@ -470,6 +646,7 @@ export interface TransferSignedProperties {
    */
   fromTokenAddress: string;
   isAmountTooLow: boolean;
+  isSenderEqRecipient: boolean;
   /**
    * Lp fee percent, in decimals
    */
@@ -483,13 +660,25 @@ export interface TransferSignedProperties {
    */
   lpFeeTotalUsd: string;
   /**
+   * | Rule | Value |
+   * |---|---|
+   * | Regex |  |
+   */
+  quoteLatencyMilliseconds: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Regex |  |
+   */
+  quoteTimestamp: string;
+  /**
    * Recipient wallet address
    */
   recipient: string;
   /**
    * Address of referee, null if no referral used
    */
-  referralProgramAddress: string;
+  referralProgramAddress?: string;
   /**
    * Relay fee percent, in decimals
    */
@@ -570,6 +759,12 @@ export interface TransferSignedProperties {
    * Resulting transaction hash of transaction, null if "result" if SwapSigned event = failed
    */
   transactionHash: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Regex |  |
+   */
+  transferQuoteBlockNumber: string;
 }
 
 export interface TransferSubmittedProperties {
@@ -585,6 +780,12 @@ export interface TransferSubmittedProperties {
    * Capital fee in USD
    */
   capitalFeeTotalUsd: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Regex |  |
+   */
+  expectedFillTimeInMinutes: string;
   /**
    * From amount in the bridge token, in decimals
    */
@@ -606,6 +807,7 @@ export interface TransferSubmittedProperties {
    */
   fromTokenAddress: string;
   isAmountTooLow: boolean;
+  isSenderEqRecipient: boolean;
   /**
    * Lp fee percent, in decimals
    */
@@ -619,13 +821,25 @@ export interface TransferSubmittedProperties {
    */
   lpFeeTotalUsd: string;
   /**
+   * | Rule | Value |
+   * |---|---|
+   * | Regex |  |
+   */
+  quoteLatencyMilliseconds: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Regex |  |
+   */
+  quoteTimestamp: string;
+  /**
    * Recipient wallet address
    */
   recipient: string;
   /**
    * Address of referee, null if no referral used
    */
-  referralProgramAddress: string;
+  referralProgramAddress?: string;
   /**
    * Relay fee percent, in decimals
    */
@@ -709,167 +923,6 @@ export interface TransferSubmittedProperties {
   transferTimestamp: string;
 }
 
-export interface TransferTransactionConfirmedProperties {
-  /**
-   * Capital fee percent, in decimals
-   */
-  capitalFeePct: string;
-  /**
-   * Capital fee in the bridge token, in decimals
-   */
-  capitalFeeTotal: string;
-  /**
-   * Capital fee in USD
-   */
-  capitalFeeTotalUsd: string;
-  fillAmount: string;
-  fillAmountUsd: string;
-  /**
-   * From amount in the bridge token, in decimals
-   */
-  fromAmount: string;
-  /**
-   * From amount in USD
-   */
-  fromAmountUsd: string;
-  /**
-   * From chain id
-   */
-  fromChainId: string;
-  /**
-   * From chain name
-   */
-  fromChainName: string;
-  /**
-   * Token address of bridge token on from chain
-   */
-  fromTokenAddress: string;
-  isAmountTooLow: boolean;
-  /**
-   * Lp fee percent, in decimals
-   */
-  lpFeePct: string;
-  /**
-   * Lp fee in the bridge token, in decimals
-   */
-  lpFeeTotal: string;
-  /**
-   * Lp fee in USD
-   */
-  lpFeeTotalUsd: string;
-  /**
-   * Gas fee in network token
-   */
-  NetworkFeeNative: string;
-  /**
-   * Network native token
-   */
-  NetworkFeeNativeToken: string;
-  /**
-   * Gas fee in USD
-   */
-  NetworkFeeUsd: string;
-  /**
-   * Recipient wallet address
-   */
-  recipient: string;
-  /**
-   * Address of referee, null if no referral used
-   */
-  referralProgramAddress: string;
-  /**
-   * Relay fee percent, in decimals
-   */
-  relayFeePct: string;
-  /**
-   * Relay fee in the gas token, in decimals
-   */
-  relayFeeTotal: string;
-  /**
-   * Relay fee in USD
-   */
-  relayFeeTotalUsd: string;
-  /**
-   * Relayer gas fee percent, in decimals
-   */
-  relayGasFeePct: string;
-  /**
-   * Relayer gas fee in the gas token, in decimals
-   */
-  relayGasFeeTotal: string;
-  /**
-   * Relayer fee in USD
-   */
-  relayGasFeeTotalUsd: string;
-  /**
-   * Route "{fromChainId}-{toChainId}"
-   */
-  routeChainIdFromTo: string;
-  /**
-   * Route "{fromChainName}-{toChainName}"
-   */
-  routeChainNameFromTo: string;
-  /**
-   * Sender wallet address
-   */
-  sender: string;
-  /**
-   * Result of user signing or rejecting wallet connection
-   */
-  succeeded: boolean;
-  /**
-   * Duration in milliseconds between TransferSigned event to the TransferTransactionCompleted event
-   */
-  timeFromTransferSignedToTransferCompleteInMilliseconds: string;
-  /**
-   * To amount of bridge token, in decimals
-   */
-  toAmount: string;
-  /**
-   * To amount in USD
-   */
-  toAmountUsd: string;
-  /**
-   * Id of the toChain
-   */
-  toChainId: string;
-  /**
-   * Name of the toChain
-   */
-  toChainName: string;
-  /**
-   * Symbol of bridge token
-   */
-  tokenSymbol: string;
-  /**
-   * Total bridge fee in the bridge token, in decimals
-   */
-  totalBridgeFee: string;
-  /**
-   * Total bridge fee percent, in decimals
-   */
-  totalBridgeFeePct: string;
-  /**
-   * Total bridge fee in USD
-   */
-  totalBridgeFeeUsd: string;
-  totalFilledAmount: string;
-  totalFilledAmountUsd: string;
-  /**
-   * Token address of bridge token on to chain
-   */
-  toTokenAddress: string;
-  /**
-   * Resulting transaction hash of transaction, null if "result" if TransferTransactionCompleted = failed
-   */
-  transactionHash: string;
-  /**
-   * Timestamp transfer completed
-   */
-  transferCompleteTimestamp: string;
-  transferQuoteBlockNumber: string;
-}
-
 export interface WalletConnectTransactionCompletedProperties {
   /**
    * Boolean if wallet connection was a reconnection.
@@ -937,6 +990,14 @@ export class ConnectWalletButtonClicked implements BaseEvent {
   }
 }
 
+export class DepositTransactionConfirmed implements BaseEvent {
+  event_type = "DepositTransactionConfirmed";
+
+  constructor(public event_properties: DepositTransactionConfirmedProperties) {
+    this.event_properties = event_properties;
+  }
+}
+
 export class DisconnectWalletButtonClicked implements BaseEvent {
   event_type = "DisconnectWalletButtonClicked";
 
@@ -999,10 +1060,10 @@ export class TokenSelected implements BaseEvent {
   }
 }
 
-export class TransferQuoteRecieved implements BaseEvent {
-  event_type = "TransferQuoteRecieved";
+export class TransferQuoteReceived implements BaseEvent {
+  event_type = "TransferQuoteReceived";
 
-  constructor(public event_properties: TransferQuoteRecievedProperties) {
+  constructor(public event_properties: TransferQuoteReceivedProperties) {
     this.event_properties = event_properties;
   }
 }
@@ -1019,14 +1080,6 @@ export class TransferSubmitted implements BaseEvent {
   event_type = "TransferSubmitted";
 
   constructor(public event_properties: TransferSubmittedProperties) {
-    this.event_properties = event_properties;
-  }
-}
-
-export class TransferTransactionConfirmed implements BaseEvent {
-  event_type = "TransferTransactionConfirmed";
-
-  constructor(public event_properties: TransferTransactionConfirmedProperties) {
     this.event_properties = event_properties;
   }
 }
@@ -1207,6 +1260,25 @@ export class Ampli {
   }
 
   /**
+   * DepositTransactionConfirmed
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/DepositTransactionConfirmed)
+   *
+   * On-chain transfer completed
+   *
+   * Owner: Dong-Ha Kim
+   *
+   * @param properties The event's properties (e.g. capitalFeePct)
+   * @param options Amplitude event options.
+   */
+  depositTransactionConfirmed(
+    properties: DepositTransactionConfirmedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new DepositTransactionConfirmed(properties), options);
+  }
+
+  /**
    * DisconnectWalletButtonClicked
    *
    * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/DisconnectWalletButtonClicked)
@@ -1357,22 +1429,22 @@ export class Ampli {
   }
 
   /**
-   * TransferQuoteRecieved
+   * TransferQuoteReceived
    *
-   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferQuoteRecieved)
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferQuoteReceived)
    *
    * User recieves a quote for bridge transaction
    *
-   * Owner: James Morris
+   * Owner: Dong-Ha Kim
    *
    * @param properties The event's properties (e.g. capitalFeePct)
    * @param options Amplitude event options.
    */
-  transferQuoteRecieved(
-    properties: TransferQuoteRecievedProperties,
+  transferQuoteReceived(
+    properties: TransferQuoteReceivedProperties,
     options?: EventOptions,
   ) {
-    return this.track(new TransferQuoteRecieved(properties), options);
+    return this.track(new TransferQuoteReceived(properties), options);
   }
 
   /**
@@ -1411,25 +1483,6 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new TransferSubmitted(properties), options);
-  }
-
-  /**
-   * TransferTransactionConfirmed
-   *
-   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferTransactionConfirmed)
-   *
-   * On-chain transfer completed
-   *
-   * Owner: James Morris
-   *
-   * @param properties The event's properties (e.g. capitalFeePct)
-   * @param options Amplitude event options.
-   */
-  transferTransactionConfirmed(
-    properties: TransferTransactionConfirmedProperties,
-    options?: EventOptions,
-  ) {
-    return this.track(new TransferTransactionConfirmed(properties), options);
   }
 
   /**
