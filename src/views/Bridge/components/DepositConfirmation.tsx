@@ -13,6 +13,7 @@ import EstimatedTable from "./EstimatedTable";
 import { BigNumber } from "ethers";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 type DepositConfirmationProps = {
   currentFromRoute: number | undefined;
@@ -28,6 +29,7 @@ type DepositConfirmationProps = {
   onTxHashChange: (txHash?: string) => void;
 
   explorerLink?: string;
+  elapsedTimeFromDeposit?: string;
 };
 
 const DepositConfirmation = ({
@@ -41,24 +43,33 @@ const DepositConfirmation = ({
   transactionCompleted,
   onTxHashChange,
   explorerLink,
+  elapsedTimeFromDeposit,
 }: DepositConfirmationProps) => {
+  const [isAnimating, setIsAnimating] = useState(false);
+  useEffect(() => {
+    const v = setTimeout(() => {
+      setIsAnimating(true);
+    }, 1000);
+    return () => clearTimeout(v);
+  }, []);
+  transactionCompleted = transactionCompleted && isAnimating;
   return (
     <Wrapper>
       <TopWrapper>
         <TopWrapperAnimationWrapper>
-          <AnimatedLogoWrapper>
+          <AnimatedLogoWrapper completed={transactionCompleted}>
             <AnimatedLogo src={getChainInfo(currentFromRoute ?? 1).logoURI} />
           </AnimatedLogoWrapper>
-          <AnimatedDivider />
-          <StyledCheckStarIcon />
-          <AnimatedDivider />
-          <AnimatedLogoWrapper>
+          <AnimatedDivider completed={transactionCompleted} />
+          <StyledCheckStarIcon completed={transactionCompleted} />
+          <AnimatedDivider completed={transactionCompleted} />
+          <AnimatedLogoWrapper completed={transactionCompleted}>
             <AnimatedLogo src={getChainInfo(currentToRoute ?? 1).logoURI} />
           </AnimatedLogoWrapper>
         </TopWrapperAnimationWrapper>
         <TopWrapperTitleWrapper>
           <Text size="3xl" color="white">
-            00h 00m 01s
+            {elapsedTimeFromDeposit ?? "00h 00m 00s"}
           </Text>
           <Text size="lg" color="grey-400">
             Deposit in progress
@@ -177,18 +188,21 @@ const TopWrapperAnimationWrapper = styled.div`
 const StyledCheckStarIcon = styled(CheckStarIcon)<{ completed?: boolean }>`
   & * {
     stroke: ${({ completed }) => (completed ? "#6cf9d8" : "#9daab3")};
+    transition: stroke 0.5s ease-in-out;
   }
   flex-shrink: 0;
 `;
 
 const AnimatedDivider = styled.div<{ completed?: boolean }>`
-  width: 50px;
+  width: ${({ completed }) => (completed ? "22px" : "50px")};
   height: 1px;
   background: ${({ completed }) => (completed ? "#6cf9d8" : "#9daab3")};
   flex-shrink: 0;
+
+  transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
 `;
 
-const AnimatedLogoWrapper = styled.div`
+const AnimatedLogoWrapper = styled.div<{ completed?: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -200,7 +214,10 @@ const AnimatedLogoWrapper = styled.div`
 
   background: #2d2e33;
 
-  border: 1px solid #9daab3;
+  border: 1px solid;
+  border-color: ${({ completed }) => (completed ? "#6cf9d8" : "#9daab3")};
+  transition: border-color 0.5s ease-in-out;
+
   border-radius: 100px;
 
   flex-shrink: 0;

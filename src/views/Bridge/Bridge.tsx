@@ -38,6 +38,7 @@ const Bridge = () => {
     transactionCompleted,
     onTxHashChange,
     explorerUrl,
+    transactionElapsedTimeAsFormattedString,
   } = useBridge();
   return (
     <>
@@ -75,6 +76,7 @@ const Bridge = () => {
               transactionCompleted={transactionCompleted}
               onTxHashChange={onTxHashChange}
               explorerLink={explorerUrl}
+              elapsedTimeFromDeposit={transactionElapsedTimeAsFormattedString}
             />
           ) : (
             <BridgeForm

@@ -1,6 +1,7 @@
 import { useConnection } from "hooks";
 import { useTransaction } from "hooks/useTransaction";
 import { useEffect, useState } from "react";
+import { formatSeconds } from "utils";
 
 export function useBridgeDepositTracking() {
   const [txHash, setTxHash] = useState<string | undefined>(
@@ -18,19 +19,22 @@ export function useBridgeDepositTracking() {
   }, [txHash]);
 
   useEffect(() => {
-    setDepositFinishedDate(
-      receipt && receipt.status === 1 ? new Date() : undefined
-    );
+    if (!depositFinishedDate) {
+      setDepositFinishedDate(
+        receipt && receipt.status === 1 ? new Date() : undefined
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [receipt]);
 
   const trackingTxHash = !!txHash;
   const elapsedSeconds = startDate
     ? Math.floor(
-        ((depositFinishedDate?.getTime() ?? new Date().getTime()) -
-          startDate.getTime()) /
+        ((depositFinishedDate ?? new Date()).getTime() - startDate.getTime()) /
           1000
       )
     : undefined;
+  const elapsedTimeAsFormattedString = formatSeconds(elapsedSeconds);
   const depositFinished = !!depositFinishedDate;
 
   const onTxHashChange = (txHash?: string) => {
@@ -45,5 +49,6 @@ export function useBridgeDepositTracking() {
     trackingTxHash,
     transactionCompleted: depositFinished,
     transactionElapsedSeconds: elapsedSeconds,
+    transactionElapsedTimeAsFormattedString: elapsedTimeAsFormattedString,
   };
 }
