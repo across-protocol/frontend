@@ -444,12 +444,25 @@ function useSendFormManager(): SendFormManagerContext {
     }
   }, [chainId, previousChainId, config]);
 
-  const setTokenSymbol = useCallback((tokenSymbol: string) => {
-    dispatch({
-      type: ActionType.SET_TOKEN,
-      payload: tokenSymbol,
-    });
-  }, []);
+  const setTokenSymbol = useCallback(
+    (tokenSymbol: string) => {
+      dispatch({
+        type: ActionType.SET_TOKEN,
+        payload: tokenSymbol,
+      });
+      const numberOfTokens = state.availableTokens.length;
+      const indexOfToken = state.availableTokens.findIndex(
+        (token) => token.symbol.toLowerCase() === tokenSymbol.toLowerCase()
+      );
+      ampli.tokenSelected({
+        tokenSymbol: tokenSymbol,
+        tokenListIndex: indexOfToken.toString(),
+        tokenListLength: numberOfTokens.toString(),
+        default: false,
+      });
+    },
+    [state.availableTokens]
+  );
   const setAmount = useCallback((amount: ethers.BigNumber) => {
     dispatch({
       type: ActionType.SET_AMOUNT,
@@ -461,11 +474,23 @@ function useSendFormManager(): SendFormManagerContext {
       type: ActionType.SET_TO_CHAIN,
       payload: toChain,
     });
+    const chainInfo = getChainInfo(toChain);
+    ampli.toChainSelected({
+      toChainId: chainInfo.chainId.toString(),
+      chainName: chainInfo.name,
+      default: false,
+    });
   }, []);
   const setFromChain = useCallback((fromChain: ChainId) => {
     dispatch({
       type: ActionType.SET_FROM_CHAIN,
       payload: fromChain,
+    });
+    const chainInfo = getChainInfo(fromChain);
+    ampli.fromChainSelected({
+      fromChainId: chainInfo.chainId.toString(),
+      chainName: chainInfo.name,
+      default: false,
     });
   }, []);
   const setToAddress = useCallback((toAddress: string) => {
@@ -487,7 +512,7 @@ function useSendFormManager(): SendFormManagerContext {
   >(undefined);
   useEffect(() => {
     const fromChain = state.fromChain;
-    if (fromChain && fromChain !== previousFromChain) {
+    if (fromChain && previousFromChain === undefined) {
       const chainInfo = getChainInfo(fromChain);
       ampli.fromChainSelected({
         fromChainId: chainInfo.chainId.toString(),
@@ -504,7 +529,7 @@ function useSendFormManager(): SendFormManagerContext {
   );
   useEffect(() => {
     const toChain = state.toChain;
-    if (toChain && toChain !== previousToChain) {
+    if (toChain && toChain === undefined) {
       const chainInfo = getChainInfo(toChain);
       ampli.toChainSelected({
         toChainId: chainInfo.chainId.toString(),
@@ -537,7 +562,7 @@ function useSendFormManager(): SendFormManagerContext {
   >(undefined);
   useEffect(() => {
     const tokenSymbol = state.tokenSymbol;
-    if (tokenSymbol && tokenSymbol !== previousTokenSymbol) {
+    if (tokenSymbol && previousTokenSymbol === undefined) {
       const numberOfTokens = state.availableTokens.length;
       const indexOfToken = state.availableTokens.findIndex(
         (token) => token.symbol.toLowerCase() === tokenSymbol.toLowerCase()
