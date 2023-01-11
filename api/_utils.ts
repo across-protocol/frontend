@@ -355,6 +355,10 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
     queries: queryFn(),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
+  if (relayerFeeCalculatorConfig.feeLimitPercent < 1)
+    throw new Error(
+      "Setting fee limit % too low will produce nonsensical relay fee details"
+    );
   return new sdk.relayFeeCalculator.RelayFeeCalculator(
     relayerFeeCalculatorConfig,
     logger
