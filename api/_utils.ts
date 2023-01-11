@@ -376,9 +376,10 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
  * @returns A corresponding symbol to the given `tokenAddress`
  */
 export const getTokenSymbol = (tokenAddress: string): string => {
-  const symbol = Object.entries(sdk.relayFeeCalculator.SymbolMapping)?.find(
-    ([_symbol, { address }]) =>
-      address.toLowerCase() === tokenAddress.toLowerCase()
+  const symbol = Object.entries(sdk.constants.TOKEN_SYMBOLS_MAP)?.find(
+    ([_symbol, { addresses }]) =>
+      addresses[sdk.constants.CHAIN_IDs.MAINNET].toLowerCase() ===
+      tokenAddress.toLowerCase()
   )?.[0];
   if (!symbol) {
     throw new InputError("Token address provided was not whitelisted.");
