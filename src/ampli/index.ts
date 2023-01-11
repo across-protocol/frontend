@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 36
+ * Tracking Plan Version: 37
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -18,11 +18,12 @@
 
 import * as amplitude from "@amplitude/analytics-browser";
 
-export type Environment = "production" | "development";
+export type Environment = "production" | "development" | "testing";
 
 export const ApiKey: Record<Environment, string> = {
   production: "",
   development: "",
+  testing: "",
 };
 
 /**
@@ -30,10 +31,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "36",
+    version: "37",
     branch: "main",
     source: "web",
-    versionId: "e2b5c3ce-a3cf-4596-824c-430a57136f4f",
+    versionId: "d75968c3-62e4-47e9-be3c-3ae9a87811f6",
   },
   ...{
     ingestionMetadata: {
@@ -367,6 +368,10 @@ export interface FromChainSelectedProperties {
    */
   chainName: string;
   /**
+   * Whether or not this event is the default value loaded when an event is rendered.
+   */
+  default?: boolean;
+  /**
    * Id of the fromChain
    */
   fromChainId: string;
@@ -453,12 +458,20 @@ export interface ToChainSelectedProperties {
    */
   chainName: string;
   /**
+   * Whether or not this event is the default value loaded when an event is rendered.
+   */
+  default?: boolean;
+  /**
    * Id of the toChain
    */
   toChainId: string;
 }
 
 export interface TokenSelectedProperties {
+  /**
+   * Whether or not this event is the default value loaded when an event is rendered.
+   */
+  default?: boolean;
   /**
    * Position of the asset in the list
    */
@@ -1418,7 +1431,7 @@ export class Ampli {
    *
    * Owner: James Morris
    *
-   * @param properties The event's properties (e.g. tokenListIndex)
+   * @param properties The event's properties (e.g. default)
    * @param options Amplitude event options.
    */
   tokenSelected(

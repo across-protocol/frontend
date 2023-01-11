@@ -492,6 +492,7 @@ function useSendFormManager(): SendFormManagerContext {
       ampli.fromChainSelected({
         fromChainId: chainInfo.chainId.toString(),
         chainName: chainInfo.name,
+        default: previousFromChain === undefined,
       });
       setPreviousFromChain(fromChain);
     }
@@ -508,6 +509,7 @@ function useSendFormManager(): SendFormManagerContext {
       ampli.toChainSelected({
         toChainId: chainInfo.chainId.toString(),
         chainName: chainInfo.name,
+        default: previousToChain === undefined,
       });
       setPreviousToChain(toChain);
     }
@@ -544,6 +546,7 @@ function useSendFormManager(): SendFormManagerContext {
         tokenSymbol: tokenSymbol,
         tokenListIndex: indexOfToken.toString(),
         tokenListLength: numberOfTokens.toString(),
+        default: previousTokenSymbol === undefined,
       });
       setPreviousTokenSymbol(tokenSymbol);
     }
