@@ -1,4 +1,3 @@
-export { default as Send } from "./Send";
 export { default as Pool } from "./Pool";
 export { default as Confirmation } from "./Confirmation";
 export { default as AllTransactions } from "./Transactions/allTransactions";
