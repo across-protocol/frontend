@@ -36,7 +36,7 @@ export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 // Default to no markup.
 export const DEFAULT_GAS_MARKUP = 0;
 
-// Don't permit REACT_APP_FLAT_RELAY_CAPITAL_FEE=0
+// Don't permit HUP_POOL_CHAIN_ID=0
 export const HUP_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
 
 // Permit REACT_APP_FLAT_RELAY_CAPITAL_FEE=0
