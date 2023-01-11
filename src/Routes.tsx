@@ -23,8 +23,8 @@ import RouteTrace from "components/RouteTrace/RouteTrace";
 import WalletTrace from "components/WalletTrace";
 import WalletBalanceTrace from "components/WalletBalanceTrace/WalletBalanceTrace";
 
-const Pool = lazy(
-  () => import(/* webpackChunkName: "Pool" */ "./views/LiquidityPool")
+const LiquidityPool = lazy(
+  () => import(/* webpackChunkName: "LiquidityPool" */ "./views/LiquidityPool")
 );
 const Referrals = lazy(
   () => import(/* webpackChunkName: "Referrals" */ "./views/Referrals")
@@ -157,7 +157,7 @@ const Routes: React.FC = () => {
         <Switch>
           <Route exact path="/transactions" component={MyTransactions} />
           <Route exact path="/transactions/all" component={AllTransactions} />
-          <Route exact path="/pool" component={Pool} />
+          <Route exact path="/pool" component={LiquidityPool} />
           <Route exact path="/rewards/referrals" component={Referrals} />
           <Route exact path="/rewards" component={Rewards} />
           <Route exact path="/airdrop" component={Airdrop} />

@@ -163,7 +163,17 @@ export default function LiquidityPool() {
           />
           <Divider />
           {!isConnected ? (
-            <Button size="lg" onClick={() => connect()}>
+            <Button
+              size="lg"
+              onClick={() =>
+                connect({
+                  trackSection:
+                    action === "add"
+                      ? "addLiquidityForm"
+                      : "removeLiquidityForm",
+                })
+              }
+            >
               Connect Wallet
             </Button>
           ) : (
