@@ -22,73 +22,6 @@ import {
   handleErrorCondition,
 } from "./_utils";
 
-// Note: Addresses must be checksummed.
-const l1Tokens: { [symbol: string]: { address: string; decimals: number } } = {
-  ACX: {
-    address:
-      sdk.constants.TOKEN_SYMBOLS_MAP.ACX.addresses[
-        sdk.constants.CHAIN_IDs.MAINNET
-      ],
-    decimals: sdk.constants.TOKEN_SYMBOLS_MAP.ACX.decimals,
-  },
-  BAL: {
-    address:
-      sdk.constants.TOKEN_SYMBOLS_MAP.BAL.addresses[
-        sdk.constants.CHAIN_IDs.MAINNET
-      ],
-    decimals: sdk.constants.TOKEN_SYMBOLS_MAP.BAL.decimals,
-  },
-  DAI: {
-    address:
-      sdk.constants.TOKEN_SYMBOLS_MAP.DAI.addresses[
-        sdk.constants.CHAIN_IDs.MAINNET
-      ],
-    decimals: sdk.constants.TOKEN_SYMBOLS_MAP.DAI.decimals,
-  },
-  UMA: {
-    address:
-      sdk.constants.TOKEN_SYMBOLS_MAP.UMA.addresses[
-        sdk.constants.CHAIN_IDs.MAINNET
-      ],
-    decimals: sdk.constants.TOKEN_SYMBOLS_MAP.UMA.decimals,
-  },
-  MATIC: {
-    address:
-      sdk.constants.TOKEN_SYMBOLS_MAP.MATIC.addresses[
-        sdk.constants.CHAIN_IDs.MAINNET
-      ],
-    decimals: sdk.constants.TOKEN_SYMBOLS_MAP.MATIC.decimals,
-  },
-  BOBA: {
-    address:
-      sdk.constants.TOKEN_SYMBOLS_MAP.BOBA.addresses[
-        sdk.constants.CHAIN_IDs.MAINNET
-      ],
-    decimals: sdk.constants.TOKEN_SYMBOLS_MAP.BOBA.decimals,
-  },
-  USDC: {
-    address:
-      sdk.constants.TOKEN_SYMBOLS_MAP.USDC.addresses[
-        sdk.constants.CHAIN_IDs.MAINNET
-      ],
-    decimals: sdk.constants.TOKEN_SYMBOLS_MAP.USDC.decimals,
-  },
-  WBTC: {
-    address:
-      sdk.constants.TOKEN_SYMBOLS_MAP.WBTC.addresses[
-        sdk.constants.CHAIN_IDs.MAINNET
-      ],
-    decimals: sdk.constants.TOKEN_SYMBOLS_MAP.WBTC.decimals,
-  },
-  WETH: {
-    address:
-      sdk.constants.TOKEN_SYMBOLS_MAP.WETH.addresses[
-        sdk.constants.CHAIN_IDs.MAINNET
-      ],
-    decimals: sdk.constants.TOKEN_SYMBOLS_MAP.WETH.decimals,
-  },
-};
-
 const handler = async (
   { query: { token, destinationChainId, originChainId } }: LimitsInputRequest,
   response: VercelResponse
@@ -139,11 +72,13 @@ const handler = async (
       originChainId
     );
 
-    const symbol = Object.keys(l1Tokens).find(
-      (symbol) => l1Tokens[symbol].address === l1Token
+    const tokenDetails = Object.values(sdk.constants.TOKEN_SYMBOLS_MAP).find(
+      (details) =>
+        details.addresses[sdk.constants.CHAIN_IDs.MAINNET] === l1Token
     );
-    if (symbol === undefined)
+    if (tokenDetails === undefined)
       throw new InputError(`Unsupported token address: ${token}`);
+    const symbol = tokenDetails.symbol;
 
     const [tokenDetailsResult, routeEnabledResult] = await Promise.allSettled([
       getTokenDetails(provider, l1Token, undefined, destinationChainId),
@@ -241,7 +176,7 @@ const handler = async (
 
     const lpCushion = ethers.utils.parseUnits(
       process.env[`REACT_APP_${symbol}_LP_CUSHION`] ?? "0",
-      l1Tokens[symbol].decimals
+      tokenDetails.decimals
     );
     liquidReserves = liquidReserves.sub(lpCushion);
     if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
@@ -261,7 +196,7 @@ const handler = async (
       : ethers.utils
           .parseUnits(
             (minDeposits[destinationChainId] ?? 0).toString(),
-            l1Tokens[symbol].decimals
+            tokenDetails.decimals
           )
           .mul(ethers.utils.parseUnits("1"))
           .div(tokenPriceUsd);
