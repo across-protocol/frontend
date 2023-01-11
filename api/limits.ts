@@ -7,6 +7,7 @@ import { ethers } from "ethers";
 import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
 import { isPromiseRejectedResult, isString } from "./_typeguards";
 import { LimitsInputRequest } from "./_types";
+import * as sdk from "@across-protocol/sdk-v2";
 
 import {
   getLogger,
@@ -20,22 +21,6 @@ import {
   isRouteEnabled,
   handleErrorCondition,
 } from "./_utils";
-
-// Note: Addresses must be checksummed.
-const l1Tokens: { [symbol: string]: { address: string; decimals: number } } = {
-  ACX: { address: "0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F", decimals: 18 },
-  BAL: { address: "0xba100000625a3754423978a60c9317c58a424e3D", decimals: 18 },
-  DAI: { address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals: 18 },
-  UMA: { address: "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828", decimals: 18 },
-  MATIC: {
-    address: "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
-    decimals: 18,
-  },
-  BOBA: { address: "0x42bBFa2e77757C645eeaAd1655E0911a7553Efbc", decimals: 18 },
-  USDC: { address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", decimals: 6 },
-  WBTC: { address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", decimals: 8 },
-  WETH: { address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", decimals: 18 },
-};
 
 const handler = async (
   { query: { token, destinationChainId, originChainId } }: LimitsInputRequest,
@@ -87,11 +72,13 @@ const handler = async (
       originChainId
     );
 
-    const symbol = Object.keys(l1Tokens).find(
-      (symbol) => l1Tokens[symbol].address === l1Token
+    const tokenDetails = Object.values(sdk.constants.TOKEN_SYMBOLS_MAP).find(
+      (details) =>
+        details.addresses[sdk.constants.CHAIN_IDs.MAINNET] === l1Token
     );
-    if (symbol === undefined)
+    if (tokenDetails === undefined)
       throw new InputError(`Unsupported token address: ${token}`);
+    const symbol = tokenDetails.symbol;
 
     const [tokenDetailsResult, routeEnabledResult] = await Promise.allSettled([
       getTokenDetails(provider, l1Token, undefined, destinationChainId),
@@ -189,7 +176,7 @@ const handler = async (
 
     const lpCushion = ethers.utils.parseUnits(
       process.env[`REACT_APP_${symbol}_LP_CUSHION`] ?? "0",
-      l1Tokens[symbol].decimals
+      tokenDetails.decimals
     );
     liquidReserves = liquidReserves.sub(lpCushion);
     if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
@@ -202,7 +189,7 @@ const handler = async (
       : ethers.utils
           .parseUnits(
             (minDeposits[destinationChainId] ?? 0).toString(),
-            l1Tokens[symbol].decimals
+            tokenDetails.decimals
           )
           .mul(ethers.utils.parseUnits("1"))
           .div(tokenPriceUsd);

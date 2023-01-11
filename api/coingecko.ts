@@ -5,10 +5,9 @@ import { CoinGeckoInputRequest } from "./_types";
 import { getLogger, InputError, handleErrorCondition } from "./_utils";
 import { SUPPORTED_CG_BASE_CURRENCIES } from "./_constants";
 
-import { coingecko, relayFeeCalculator } from "@across-protocol/sdk-v2";
+import { coingecko, constants as sdkConstants } from "@across-protocol/sdk-v2";
 
 const { Coingecko } = coingecko;
-const { SymbolMapping } = relayFeeCalculator;
 const {
   REACT_APP_COINGECKO_PRO_API_KEY,
   FIXED_TOKEN_PRICES,
@@ -26,25 +25,29 @@ const getCoingeckoPrices = async (
     [token: string]: number;
   } = {}
 ): Promise<number> => {
-  const baseCurrencyToken = SymbolMapping[baseCurrency.toUpperCase()];
+  const baseCurrencyToken = Object.values(sdkConstants.TOKEN_SYMBOLS_MAP).find(
+    ({ symbol }) => symbol === baseCurrency.toUpperCase()
+  );
 
   if (!baseCurrencyToken)
     throw new InputError(`Base currency ${baseCurrency} not supported`);
 
   // Special case: token and base are the same. Coingecko class returns a single result in this case, so it must
   // be handled separately.
-  if (tokenAddress.toLowerCase() === baseCurrencyToken.address.toLowerCase())
+  const baseCurrentTokenAddress =
+    baseCurrencyToken.addresses[sdkConstants.CHAIN_IDs.MAINNET];
+  if (tokenAddress.toLowerCase() === baseCurrentTokenAddress.toLowerCase())
     return 1;
 
   // If either token or base currency is in hardcoded list then use hardcoded USD price.
-  let basePriceUsd = hardcodedTokenPrices[baseCurrencyToken.address];
+  let basePriceUsd = hardcodedTokenPrices[baseCurrentTokenAddress];
   let tokenPriceUsd = hardcodedTokenPrices[tokenAddress];
 
   // Fetch undefined base and token USD prices from coingecko client.
   // Always use usd as the base currency for the purpose of conversion.
   const tokenAddressesToFetchPricesFor = [];
   if (basePriceUsd === undefined)
-    tokenAddressesToFetchPricesFor.push(baseCurrencyToken.address);
+    tokenAddressesToFetchPricesFor.push(baseCurrentTokenAddress);
   if (tokenPriceUsd === undefined)
     tokenAddressesToFetchPricesFor.push(tokenAddress);
 

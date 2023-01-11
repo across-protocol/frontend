@@ -4,6 +4,7 @@ import {
   relayFeeCalculator,
   lpFeeCalculator,
   contracts,
+  constants,
 } from "@across-protocol/sdk-v2";
 import { Provider, Block } from "@ethersproject/providers";
 import { ethers, BigNumber } from "ethers";
@@ -321,7 +322,9 @@ export default class LpFeeCalculator {
 
     if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.WETH.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add WETH cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -329,7 +332,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add USDC cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -337,7 +342,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.WBTC.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add WBTC cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -345,7 +352,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.DAI.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add DAI cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -353,7 +362,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0xba100000625a3754423978a60c9317c58a424e3D")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.BAL.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add BAL cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -361,7 +372,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.UMA.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add UMA cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -369,7 +382,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0x42bBFa2e77757C645eeaAd1655E0911a7553Efbc")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.BOBA.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add BOBA cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
