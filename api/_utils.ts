@@ -389,24 +389,6 @@ export const getTokenSymbol = (tokenAddress: string): string => {
   return symbol;
 };
 
-// TODO: Move this interface to sdk-v2
-export interface RelayerFeeDetails {
-  amountToRelay: string;
-  tokenSymbol: string;
-  gasFeePercent: string;
-  gasFeeTotal: string;
-  gasDiscountPercent: number;
-  capitalFeePercent: string;
-  capitalFeeTotal: string;
-  capitalDiscountPercent: number;
-  relayFeePercent: string;
-  relayFeeTotal: string;
-  feeLimitPercent: number;
-  isAmountTooLow: boolean;
-  maxGasFeePercent: string;
-  minDeposit: string;
-}
-
 /**
  * Retrieves the results of the `relayFeeCalculator` SDK function: `relayerFeeDetails`
  * @param l1Token A valid L1 ERC-20 token address
@@ -420,7 +402,7 @@ export const getRelayerFeeDetails = (
   amount: sdk.utils.BigNumberish,
   destinationChainId: number,
   tokenPrice?: number
-): Promise<RelayerFeeDetails> => {
+): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
