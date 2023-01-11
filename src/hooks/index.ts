@@ -4,8 +4,6 @@ export * from "./useBlock";
 export * from "./useBridgeFees";
 export * from "./useBridgeLimits";
 export * from "./usePrevious";
-export * from "./useSendForm";
-export * from "./useBridge";
 export * from "./useQueryParams";
 export * from "./useError";
 export * from "./useWindowSize";
