@@ -220,7 +220,10 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
     1: {
       chainId: 1,
       hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
-      wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      wethAddress:
+        sdk.constants.TOKEN_SYMBOLS_MAP.WETH.addresses[
+          sdk.constants.CHAIN_IDs.MAINNET
+        ],
       configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
       acceleratingDistributorAddress:
         "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
@@ -229,7 +232,10 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
     5: {
       chainId: 5,
       hubPoolAddress: "0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d",
-      wethAddress: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+      wethAddress:
+        sdk.constants.TOKEN_SYMBOLS_MAP.WETH.addresses[
+          sdk.constants.CHAIN_IDs.GOERLI
+        ],
       configStoreAddress: "0x3215e3C91f87081757d0c41EF0CB77738123Be83",
       acceleratingDistributorAddress:
         "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC",
@@ -370,9 +376,10 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
  * @returns A corresponding symbol to the given `tokenAddress`
  */
 export const getTokenSymbol = (tokenAddress: string): string => {
-  const symbol = Object.entries(sdk.relayFeeCalculator.SymbolMapping)?.find(
-    ([_symbol, { address }]) =>
-      address.toLowerCase() === tokenAddress.toLowerCase()
+  const symbol = Object.entries(sdk.constants.TOKEN_SYMBOLS_MAP)?.find(
+    ([_symbol, { addresses }]) =>
+      addresses[sdk.constants.CHAIN_IDs.MAINNET].toLowerCase() ===
+      tokenAddress.toLowerCase()
   )?.[0];
   if (!symbol) {
     throw new InputError("Token address provided was not whitelisted.");
