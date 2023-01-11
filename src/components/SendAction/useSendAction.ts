@@ -12,6 +12,7 @@ import {
   generateTransferSigned,
   generateDepositConfirmed,
   recordTransferUserProperties,
+  ConfirmationDepositTimeType,
 } from "utils";
 import { cloneDeep } from "lodash";
 import { Deposit } from "views/Confirmation";
@@ -43,13 +44,16 @@ export default function useSendAction(
   const fromChainInfo = fromChain ? getChainInfo(fromChain) : undefined;
   const tokenInfo = tokenSymbol ? getToken(tokenSymbol) : undefined;
   let timeToRelay = "loading";
+  let estimatedTimeToRelayObject: ConfirmationDepositTimeType | undefined =
+    undefined;
   if (limits && toChain && fromChain) {
-    timeToRelay = getConfirmationDepositTime(
+    estimatedTimeToRelayObject = getConfirmationDepositTime(
       amount,
       limits,
       toChain,
       fromChain
     );
+    timeToRelay = estimatedTimeToRelayObject.formattedString;
   } else if (isError) {
     timeToRelay = "estimation failed";
   }
@@ -83,7 +87,8 @@ export default function useSendAction(
       toChainInfo &&
       toAddress &&
       account &&
-      tokenPriceInUSD
+      tokenPriceInUSD &&
+      estimatedTimeToRelayObject
     ) {
       const quote: TransferQuoteReceivedProperties = generateTransferQuote(
         fees,
@@ -94,7 +99,7 @@ export default function useSendAction(
         toAddress,
         account,
         tokenPriceInUSD,
-        timeToRelay,
+        estimatedTimeToRelayObject,
         amount
       );
       ampli.transferQuoteReceived(quote);
