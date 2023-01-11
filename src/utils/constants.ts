@@ -460,6 +460,7 @@ export const confirmations =
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
 export const matomoUrl = process.env.REACT_APP_MATOMO_URL;
 export const debug = Boolean(process.env.REACT_APP_DEBUG);
+export const isProductionBuild = process.env.NODE_ENV === "production";
 
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
@@ -726,3 +727,27 @@ export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day
 export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
   ? Number(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER)
   : undefined;
+
+export const suggestedFeesDeviationBufferMultiplier = !Number.isNaN(
+  Number(
+    process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER ||
+      undefined
+  )
+)
+  ? Number(process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER)
+  : 1.25;
+
+export const defaultRefetchInterval = 15_000;
+
+export const fallbackSuggestedRelayerFeePct = ethers.utils.parseEther("0.0001");
+
+export const amplitudeAPIKey = process.env.REACT_APP_AMPLITUDE_KEY
+  ? process.env.REACT_APP_AMPLITUDE_KEY
+  : undefined;
+
+export const amplitudeEnvironment =
+  process.env.REACT_APP_AMPLITUDE_ENVIRONMENT === "production"
+    ? "production"
+    : "development";
+
+export const currentGitCommitHash = process.env.REACT_APP_GIT_COMMIT_HASH ?? "";

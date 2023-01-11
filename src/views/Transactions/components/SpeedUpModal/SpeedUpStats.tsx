@@ -51,13 +51,13 @@ export function SpeedUpStats({
       </StatRow>
       <StatRow>
         <div>Current fee %</div>
-        <div>{formatWeiPct(transfer.currentRelayerFeePct)}%</div>
+        <div>{formatWeiPct(transfer.depositRelayerFeePct)}%</div>
       </StatRow>
       <StatRow>
         <div>Current fee in {token.symbol}</div>
         <div>
           {formatTokenUnits(
-            calcPctOfTokenAmount(transfer.currentRelayerFeePct, transfer.amount)
+            calcPctOfTokenAmount(transfer.depositRelayerFeePct, transfer.amount)
           )}
         </div>
       </StatRow>

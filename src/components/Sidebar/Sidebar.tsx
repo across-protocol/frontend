@@ -59,7 +59,11 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
         <StyledHeader>
           <TopHeaderRow>
             {!isConnected && (
-              <ConnectButton onClick={() => connect()}>
+              <ConnectButton
+                onClick={() => {
+                  connect({ trackSection: "mobileNavSidebar" });
+                }}
+              >
                 Connect Wallet
               </ConnectButton>
             )}
@@ -79,7 +83,11 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
             <HeaderText>Unsupported Network</HeaderText>
           ) : null}
           {isConnected && wallet ? (
-            <DisconnectButton onClick={() => disconnect(wallet)}>
+            <DisconnectButton
+              onClick={() =>
+                disconnect(wallet, { trackSection: "mobileNavSidebar" })
+              }
+            >
               Disconnect
             </DisconnectButton>
           ) : null}

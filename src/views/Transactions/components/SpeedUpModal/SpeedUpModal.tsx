@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Info, Zap } from "react-feather";
+import { BigNumber } from "ethers";
 
 import { formatWeiPct, getChainInfo } from "utils";
 import { maxRelayFee, minRelayFee } from "utils/constants";
@@ -65,7 +66,7 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
     try {
       if (relayFeeInput) {
         const currentFeePct =
-          Number(formatWeiPct(transfer.currentRelayerFeePct, 3)) / 100;
+          Number(formatWeiPct(transfer.depositRelayerFeePct, 3)) / 100;
         validateFeeInput(relayFeeInput, {
           maxFeePct: maxRelayFee,
           minFeePct: Math.max(minRelayFee, currentFeePct),
@@ -76,7 +77,7 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
     } catch (error) {
       setInputError((error as Error).message);
     }
-  }, [relayFeeInput, transfer.currentRelayerFeePct]);
+  }, [relayFeeInput, transfer.depositRelayerFeePct]);
 
   const handleInputChange = (e: React.FormEvent<HTMLInputElement>) => {
     const input = e.currentTarget.value;
@@ -84,7 +85,7 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
   };
 
   const isRelayerFeeFairlyPriced = suggestedRelayerFeePct
-    ? transfer.currentRelayerFeePct.gte(suggestedRelayerFeePct)
+    ? BigNumber.from(transfer.depositRelayerFeePct).gte(suggestedRelayerFeePct)
     : false;
   const isSpeedUpPending = speedUpStatus === "pending";
   const isConfirmDisabled =

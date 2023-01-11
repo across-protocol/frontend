@@ -227,18 +227,26 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
       hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
       wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
+      acceleratingDistributorAddress:
+        "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
+      merkleDistributorAddress: "0xE50b2cEAC4f60E840Ae513924033E753e2366487",
     },
     5: {
       chainId: 5,
       hubPoolAddress: "0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d",
       wethAddress: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
       configStoreAddress: "0x3215e3C91f87081757d0c41EF0CB77738123Be83",
+      acceleratingDistributorAddress:
+        "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC",
+      merkleDistributorAddress: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
     },
   }[chainId] as {
     chainId: number;
     hubPoolAddress: string;
     wethAddress: string;
     configStoreAddress: string;
+    acceleratingDistributorAddress: string;
+    merkleDistributorAddress: string;
   };
 };
 

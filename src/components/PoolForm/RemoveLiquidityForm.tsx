@@ -31,6 +31,7 @@ import {
   switchChain,
   ChainId,
   calculateRemoveAmount,
+  trackMaxButtonClicked,
 } from "utils";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import api from "state/chainApi";
@@ -100,11 +101,12 @@ const RemoveLiqudityForm: FC<Props> = ({
   }, [removeAmount, removeAmountSlider, position, decimals, symbol, setError]);
 
   const buttonDisabled =
-    !error && ethers.utils.parseEther(removeAmount || "0").eq(0);
+    !error &&
+    ethers.utils.parseEther(removeAmount.replaceAll(",", "") || "0").eq(0);
 
   const handleButtonClick = async () => {
     if (!provider) {
-      connect();
+      connect({ trackSection: "removeLiquidityForm" });
     }
     if (isConnected && removeAmountSlider > 0 && signer) {
       const scaler = ethers.BigNumber.from("10").pow(decimals);
@@ -191,7 +193,13 @@ const RemoveLiqudityForm: FC<Props> = ({
               : "var(--color-primary)",
           }}
         >
-          <MaxButton onClick={onMaxClick} disabled={!isConnected}>
+          <MaxButton
+            onClick={() => {
+              onMaxClick();
+              trackMaxButtonClicked("removeLiquidityForm");
+            }}
+            disabled={!isConnected}
+          >
             max
           </MaxButton>
           <Input

@@ -1,6 +1,5 @@
 import { useSelect } from "downshift";
-import { useConnection } from "hooks";
-import { useSendForm } from "hooks";
+import { useConnection, useSendForm } from "hooks";
 import {
   UnsupportedChainIdError,
   switchChain,
@@ -26,7 +25,7 @@ export default function useChainSelection() {
 
   const handleClick = () => {
     if (!provider) {
-      connect();
+      connect({ trackSection: "bridgeForm" });
     } else if (wrongNetworkSend) {
       switchChain(provider, fromChain);
     }

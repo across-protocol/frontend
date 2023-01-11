@@ -19,11 +19,12 @@ const AllTransactions = () => {
     paginatedPendingDeposits.depositsQuery.isLoading;
 
   const showPendingTransactions =
-    !isLoading && paginatedPendingDeposits.depositsQuery.deposits.length > 0;
+    !isLoading &&
+    (paginatedPendingDeposits.depositsQuery.data?.deposits?.length || 0) > 0;
 
   const showNoTransactionsFound =
-    !paginatedFillDeposits.depositsQuery.deposits.length &&
-    !paginatedPendingDeposits.depositsQuery.deposits.length &&
+    !paginatedFillDeposits.depositsQuery.data?.deposits?.length &&
+    !paginatedPendingDeposits.depositsQuery.data?.deposits.length &&
     !isLoading;
 
   return (

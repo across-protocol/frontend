@@ -43,7 +43,8 @@ export type BridgeFees = {
   // Note: relayerGasFee and relayerCapitalFee are components of relayerFee.
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
-  quoteTimestamp?: ethers.BigNumber;
+  quoteTimestamp: ethers.BigNumber;
+  quoteBlock: ethers.BigNumber;
 };
 
 export async function getRelayerFee(
@@ -56,7 +57,8 @@ export async function getRelayerFee(
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
-  quoteTimestamp?: ethers.BigNumber;
+  quoteTimestamp: ethers.BigNumber;
+  quoteBlock: ethers.BigNumber;
 }> {
   const address = getConfig().getTokenInfoBySymbol(
     fromChainId,
@@ -74,7 +76,9 @@ export async function getRelayerFee(
 export async function getLpFee(
   l1TokenAddress: string,
   amount: ethers.BigNumber,
-  blockTime?: number
+  blockTime?: number,
+  originChainId?: number,
+  destinationChainId?: number
 ): Promise<Fee & { isLiquidityInsufficient: boolean }> {
   if (amount.lte(0)) {
     throw new Error(`Amount must be greater than 0.`);
@@ -96,7 +100,9 @@ export async function getLpFee(
   result.pct = await lpFeeCalculator.getLpFeePct(
     l1TokenAddress,
     amount,
-    blockTime
+    blockTime,
+    originChainId,
+    destinationChainId
   );
   result.isLiquidityInsufficient =
     await lpFeeCalculator.isLiquidityInsufficient(l1TokenAddress, amount);
@@ -112,7 +118,7 @@ type GetBridgeFeesArgs = {
   toChainId: ChainId;
 };
 
-type GetBridgeFeesResult = BridgeFees & {
+export type GetBridgeFeesResult = BridgeFees & {
   isAmountTooLow: boolean;
   isLiquidityInsufficient: boolean;
 };
@@ -141,12 +147,15 @@ export async function getBridgeFees({
     relayerCapitalFee,
     isAmountTooLow,
     quoteTimestamp,
+    quoteBlock,
   } = await getRelayerFee(tokenSymbol, amount, fromChainId, toChainId);
 
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
     l1TokenAddress,
     amount,
-    blockTimestamp
+    blockTimestamp,
+    fromChainId,
+    toChainId
   ).catch((err) => {
     console.error("Error getting lp fee", err);
     throw err;
@@ -160,6 +169,7 @@ export async function getBridgeFees({
     isAmountTooLow,
     isLiquidityInsufficient,
     quoteTimestamp,
+    quoteBlock,
   };
 }
 
@@ -372,7 +382,9 @@ export default class LpFeeCalculator {
   async getLpFeePct(
     tokenAddress: string,
     amount: utils.BigNumberish,
-    timestamp?: number
+    timestamp?: number,
+    originChainId?: number,
+    destinationChainId?: number
   ) {
     amount = BigNumber.from(amount);
     assert(amount.gt(0), "Amount must be greater than 0");
@@ -396,9 +408,14 @@ export default class LpFeeCalculator {
         amount,
         { blockTag }
       ),
-      configStoreClient.getRateModel(tokenAddress, {
-        blockTag,
-      }),
+      configStoreClient.getRateModel(
+        tokenAddress,
+        {
+          blockTag,
+        },
+        originChainId,
+        destinationChainId
+      ),
     ]);
     return calculateRealizedLpFeePct(rateModel, currentUt, nextUt);
   }

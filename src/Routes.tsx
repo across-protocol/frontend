@@ -19,6 +19,7 @@ import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
 import ACXLiveBanner from "components/ACXLiveBanner/ACXLiveBanner";
 import ScrollToTop from "components/ScrollToTop";
+import RouteTrace from "components/RouteTrace/RouteTrace";
 
 const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
 const Referrals = lazy(
@@ -106,6 +107,7 @@ const Routes: React.FC = () => {
 
   return (
     <>
+      <RouteTrace />
       {generalMaintenanceMessage && (
         <SuperHeader size="lg">{generalMaintenanceMessage}</SuperHeader>
       )}

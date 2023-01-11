@@ -13,6 +13,7 @@ import {
   getBaseRewardsApr,
   secondsPerDay,
   secondsPerYear,
+  defaultRefetchInterval,
 } from "utils";
 import { BigNumber, BigNumberish } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
@@ -85,7 +86,7 @@ export function useStakingPool(tokenAddress?: string) {
     getStakingPoolQueryKey(tokenAddress, account),
     ({ queryKey: keys }) => fetchStakingPool(keys[1], keys[2], acxPrice),
     {
-      refetchInterval: 15_000,
+      refetchInterval: defaultRefetchInterval,
       enabled: Boolean(tokenAddress) && Boolean(acxPrice),
     }
   );
@@ -112,7 +113,7 @@ export function useAllStakingPools() {
       .filter((token) => !token.isNative)
       .map((token) => ({
         enabled: Boolean(acxPrice),
-        refetchInterval: 15_000,
+        refetchInterval: defaultRefetchInterval,
         queryKey: getStakingPoolQueryKey(token.address, account),
         queryFn: ({
           queryKey,

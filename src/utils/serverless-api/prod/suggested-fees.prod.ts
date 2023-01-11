@@ -22,6 +22,7 @@ export async function suggestedFeesApiCall(
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
   quoteTimestamp: ethers.BigNumber;
+  quoteBlock: ethers.BigNumber;
 }> {
   const response = await axios.get(`/api/suggested-fees`, {
     params: {
@@ -45,6 +46,7 @@ export async function suggestedFeesApiCall(
   const isAmountTooLow = result["isAmountTooLow"];
 
   const quoteTimestamp = BigNumber.from(result["timestamp"]);
+  const quoteBlock = BigNumber.from(result["quoteBlock"]);
 
   return {
     relayerFee: {
@@ -61,5 +63,6 @@ export async function suggestedFeesApiCall(
     },
     isAmountTooLow,
     quoteTimestamp,
+    quoteBlock,
   };
 }

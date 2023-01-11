@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { QUERIES } from "utils";
+import { ReactComponent as II } from "assets/icons/info-16.svg";
 
 export const Wrapper = styled.div`
   min-height: 80%;
@@ -76,4 +77,19 @@ export const ROIItem = styled.div`
   &:not(:last-of-type) {
     margin-bottom: 15px;
   }
+`;
+
+export const InfoIcon = styled(II)`
+  cursor: pointer;
+  & path {
+    stroke: var(--color-gray);
+  }
+`;
+
+// Create a component called TooltipROIItem that renders a <div> which is a flex box and the content is centered in the div
+export const TooltipROIItem = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 `;

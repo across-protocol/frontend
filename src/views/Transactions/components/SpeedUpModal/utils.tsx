@@ -1,4 +1,4 @@
-import { BigNumber, utils } from "ethers";
+import { BigNumber, utils, BigNumberish } from "ethers";
 import { toWeiSafe } from "utils";
 
 export function appendPercentageSign(feeInput: string) {
@@ -16,10 +16,12 @@ export function feeInputToBigNumberPct(feeInput: string) {
 }
 
 export function calcPctOfTokenAmount(
-  pctBigNumber: BigNumber,
-  tokenAmount: BigNumber
+  pctBigNumber: BigNumberish,
+  tokenAmount: BigNumberish
 ) {
-  return pctBigNumber.mul(tokenAmount).div(utils.parseEther("1"));
+  return BigNumber.from(pctBigNumber)
+    .mul(tokenAmount)
+    .div(utils.parseEther("1"));
 }
 
 export function validateFeeInput(

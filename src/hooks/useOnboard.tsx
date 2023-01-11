@@ -1,19 +1,24 @@
 import { useCallback, useContext, useEffect } from "react";
 import { useState, createContext } from "react";
 import {
-  trackEvent,
   ChainId,
   UnsupportedChainIdError,
   isSupportedChainId,
   insideStorybookRuntime,
   hubPoolChainId,
+  trackIfWalletSelected,
+  trackWalletConnectTransactionCompleted,
+  trackConnectWalletButtonClicked,
+  trackDisconnectWalletButtonClicked,
+  identifyUserWallets,
+  trackWalletChainId,
+  trackIsFirstTimeUser,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
   OnboardAPI,
   ConnectOptions,
   WalletState,
-  DisconnectOptions,
   ConnectedChain,
 } from "@web3-onboard/core";
 
@@ -23,6 +28,12 @@ import { useConnectWallet, useSetChain } from "@web3-onboard/react";
 import { Chain } from "@web3-onboard/common";
 import { ethers } from "ethers";
 import Notify, { API as NotifyAPI, ConfigOptions } from "bnc-notify";
+import {
+  ampli,
+  ConnectWalletButtonClickedProperties,
+  DisconnectWalletButtonClickedProperties,
+} from "ampli";
+import { useUserDeposits } from "hooks/useDeposits";
 
 export type SetChainOptions = {
   chainId: string;
@@ -31,10 +42,23 @@ export type SetChainOptions = {
 
 const CACHED_WALLET_KEY = "previous-wallet-service";
 
+type TrackOnConnectOptions = {
+  trackSection?: ConnectWalletButtonClickedProperties["section"];
+};
+
+type TrackOnDisconnectOptions = {
+  trackSection?: DisconnectWalletButtonClickedProperties["section"];
+};
+
 type OnboardContextValue = {
   onboard: OnboardAPI | null;
-  connect: (options?: ConnectOptions | undefined) => Promise<WalletState[]>;
-  disconnect: (wallet: DisconnectOptions) => Promise<WalletState[]>;
+  connect: (
+    options?: ConnectOptions & TrackOnConnectOptions
+  ) => Promise<WalletState[]>;
+  disconnect: (
+    wallet: WalletState,
+    options?: TrackOnDisconnectOptions
+  ) => Promise<WalletState[]>;
   chains: Chain[];
   connectedChain: ConnectedChain | null;
   settingChain: boolean;
@@ -72,6 +96,15 @@ export function useOnboardManager() {
   const [{ wallet }, connect, disconnect] = useConnectWallet();
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
 
+  // We use this query to check whether the user has any deposits, i.e. is a first time user
+  const userDepositsQuery = useUserDeposits("filled", 1, 0, account?.address);
+
+  useEffect(() => {
+    if (userDepositsQuery.data && account) {
+      trackIsFirstTimeUser(userDepositsQuery.data.deposits.length === 0);
+    }
+  }, [userDepositsQuery.data, account]);
+
   useEffect(() => {
     if (wallet?.accounts) {
       setAccount(wallet.accounts[0]);
@@ -102,6 +135,17 @@ export function useOnboardManager() {
   }, [wallet]);
 
   useEffect(() => {
+    if (connectedChain && wallet) {
+      const chainId = String(parseInt(connectedChain.id, 16));
+      trackWalletChainId(chainId);
+      ampli.walletNetworkSelected({
+        chainId,
+        chainName: connectedChain?.namespace || "unknown",
+      });
+    }
+  }, [connectedChain, wallet]);
+
+  useEffect(() => {
     // Only acknowledge the state where onboard is defined
     // Also disable for when running inside of storybook
     if (onboard && !insideStorybookRuntime) {
@@ -126,44 +170,56 @@ export function useOnboardManager() {
   }, [onboard]);
 
   const customOnboardDisconnect = useCallback(
-    (wallet: DisconnectOptions) => {
+    (wallet: WalletState, options?: TrackOnDisconnectOptions) => {
+      if (options?.trackSection) {
+        trackDisconnectWalletButtonClicked(options.trackSection);
+      }
+      ampli.client?.setUserId(undefined);
       // User requested to be disconnected, let's clear out the wallet type
       // for the event that they're trying to connect using a different wallet
       window.localStorage.removeItem(CACHED_WALLET_KEY);
-      trackEvent({ category: "wallet", action: "disconnect", name: "null" });
       return disconnect(wallet);
     },
     [disconnect]
   );
 
   const customOnboardConnect = useCallback(
-    (options?: ConnectOptions | undefined) => {
-      trackEvent({ category: "wallet", action: "connect", name: "null" });
+    async (options?: ConnectOptions & TrackOnConnectOptions) => {
       // Resolve the last wallet type if this user has connected before
-      const previousConnnection =
-        window.localStorage.getItem(CACHED_WALLET_KEY);
+      const previousConnection = window.localStorage.getItem(CACHED_WALLET_KEY);
       // Test the user was connected before a browser refresh and that
       // the calling code did not specify an autoSelect parameter
-      if (previousConnnection && !options?.autoSelect) {
+      if (previousConnection && !options?.autoSelect) {
         // Append the autoSelect option to include the previous connection
         // type
         options = {
           ...options,
           autoSelect: {
-            label: previousConnnection,
+            label: previousConnection,
             disableModals: true,
           },
         };
       }
-      return connect(options);
+      const walletStates = await connect(
+        options?.autoSelect ? options : undefined
+      );
+
+      identifyUserWallets(walletStates);
+      if (options?.trackSection) {
+        trackConnectWalletButtonClicked(options.trackSection);
+      }
+      trackIfWalletSelected(walletStates, previousConnection);
+      trackWalletConnectTransactionCompleted(walletStates, previousConnection);
+
+      return walletStates;
     },
     [connect]
   );
 
   useEffect(() => {
     // Check if a key exists from the previous wallet
-    const previousConnnection = window.localStorage.getItem(CACHED_WALLET_KEY);
-    if (!wallet && previousConnnection) {
+    const previousConnection = window.localStorage.getItem(CACHED_WALLET_KEY);
+    if (!wallet && previousConnection) {
       customOnboardConnect();
     }
   }, [customOnboardConnect, wallet]);

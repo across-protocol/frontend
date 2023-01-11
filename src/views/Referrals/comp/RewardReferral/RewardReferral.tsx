@@ -113,7 +113,9 @@ const ReferralLinkComponent: React.FC<{
           <ReferralLinkButtonsRow>
             <ConnectButton
               size="md"
-              onClick={() => connect()}
+              onClick={() => {
+                connect({ trackSection: "referralTable" });
+              }}
               data-cy="connect-wallet"
             >
               Connect to get started
@@ -249,8 +251,8 @@ const ReferralTierComponent: React.FC<{
             Value: (
               <RewardSecondaryTextWrapper>
                 <PopperTooltip
-                  title="Referral reward unlocking"
-                  body="New referral rewards are unlocked for claiming the first day of every month."
+                  title="Referral reward claiming"
+                  body="New referral rewards are claimable 2 weeks after the first day of every month."
                   placement="bottom-start"
                   icon="clock"
                 >
