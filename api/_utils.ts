@@ -41,7 +41,7 @@ export const HUP_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
 
 export const FLAT_RELAY_CAPITAL_FEE = REACT_APP_FLAT_RELAY_CAPITAL_FEE
   ? Number(process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE)
-  : 0;
+  : 0.03; // 0.03%
 
 export const ENABLED_ROUTES =
   HUP_POOL_CHAIN_ID === 1
