@@ -6,7 +6,7 @@
   "dependencies": {
     "@across-protocol/across-token": "^0.0.2",
     "@across-protocol/contracts-v2": "^1.0.7",
-    "@across-protocol/sdk-v2": "0.1.34",
+    "@across-protocol/sdk-v2": "0.3.6",
     "@datapunt/matomo-tracker-js": "^0.5.1",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",

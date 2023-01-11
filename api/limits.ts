@@ -19,7 +19,6 @@ import {
   minBN,
   isRouteEnabled,
   handleErrorCondition,
-  getMinAmountFromRelayerFeeDetails,
 } from "./_utils";
 
 // Note: Addresses must be checksummed.
@@ -195,8 +194,7 @@ const handler = async (
     liquidReserves = liquidReserves.sub(lpCushion);
     if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
 
-    // Ensure a maximum ratio of gas fee / deposit amount, then apply a floor afterwards.
-    const minDeposit = getMinAmountFromRelayerFeeDetails(relayerFeeDetails);
+    const minDeposit = ethers.BigNumber.from(relayerFeeDetails.minDeposit);
 
     // Normalise the environment-set USD minimum to units of the token being bridged.
     const minDepositFloor = tokenPriceUsd.lte(0)

@@ -381,6 +381,7 @@ export const getTokenSymbol = (tokenAddress: string): string => {
   return symbol;
 };
 
+// TODO: Move this interface to sdk-v2
 export interface RelayerFeeDetails {
   amountToRelay: string;
   tokenSymbol: string;
@@ -394,6 +395,8 @@ export interface RelayerFeeDetails {
   relayFeeTotal: string;
   feeLimitPercent: number;
   isAmountTooLow: boolean;
+  maxGasFeePercent: string;
+  minDeposit: string;
 }
 
 /**
@@ -413,22 +416,6 @@ export const getRelayerFeeDetails = (
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
-};
-
-export const getMinAmountFromRelayerFeeDetails = (
-  relayerFeeDetails: RelayerFeeDetails
-): BigNumber => {
-  const maxGasFeePercent = ethers.utils
-    .parseEther((relayerFeeDetails.feeLimitPercent / 100).toString())
-    .sub(relayerFeeDetails.capitalFeePercent);
-
-  // Ensure a minimum gas fee to min deposit ratio:
-  // gasFeeTotal / minDeposit = maxGasFeePercent
-  const minDeposit = ethers.BigNumber.from(relayerFeeDetails.gasFeeTotal)
-    .mul(ethers.utils.parseEther("1"))
-    .div(maxGasFeePercent);
-
-  return minDeposit;
 };
 
 /**
