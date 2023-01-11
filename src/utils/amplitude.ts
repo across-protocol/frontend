@@ -7,10 +7,10 @@ import {
   ConnectWalletButtonClickedProperties,
   DisconnectWalletButtonClickedProperties,
   MaxTokenAmountClickedProperties,
-  TransferQuoteRecievedProperties,
+  TransferQuoteReceivedProperties,
   TransferSignedProperties,
   TransferSubmittedProperties,
-  TransferTransactionConfirmedProperties,
+  DepositTransactionConfirmedProperties,
 } from "ampli";
 import { pageLookup } from "components/RouteTrace/useRouteTrace";
 import { TokenInfo, ChainInfo, fixedPointAdjustment } from "./constants";
@@ -148,7 +148,7 @@ export function generateTransferQuote(
   tokenPrice: BigNumber,
   timeToRelay: string,
   amount: BigNumber
-): TransferQuoteRecievedProperties {
+): TransferQuoteReceivedProperties {
   // Create a function that converts a wei amount into a formatted token amount
   const formatTokens = (wei: BigNumber) =>
     formatUnits(wei, tokenInfo?.decimals ?? 18).replaceAll(",", "");
@@ -209,7 +209,7 @@ export function generateTransferQuote(
 
 // generate transfer submitted quote
 export function generateTransferSubmitted(
-  quote: TransferQuoteRecievedProperties,
+  quote: TransferQuoteReceivedProperties,
   referralProgramAddress: string,
   initialQuoteTime: number
 ): TransferSubmittedProperties {
@@ -238,7 +238,7 @@ export function generateTransferSubmitted(
 
 // generate transfer signed quote
 export function generateTransferSigned(
-  quote: TransferQuoteRecievedProperties,
+  quote: TransferQuoteReceivedProperties,
   referralProgramAddress: string,
   initialSubmissionTime: number,
   txHash: string
@@ -267,14 +267,14 @@ export function generateTransferSigned(
 }
 
 // generate transfer confirmed quote
-export function generateTransferConfirmed(
-  quote: TransferQuoteRecievedProperties,
+export function generateDepositConfirmed(
+  quote: TransferQuoteReceivedProperties,
   referralProgramAddress: string,
   initialSignTime: number,
   txHash: string,
   success: boolean,
   txCompletedTimestamp: number
-): TransferTransactionConfirmedProperties {
+): DepositTransactionConfirmedProperties {
   // Retrieves the from symbol by address from the config
   const fromAddress = getConfig().getTokenInfoBySymbol(
     Number(quote.fromChainId),
@@ -296,16 +296,10 @@ export function generateTransferConfirmed(
     timeFromTransferSignedToTransferCompleteInMilliseconds: String(
       Date.now() - initialSignTime
     ),
-    transferCompleteTimestamp: String(txCompletedTimestamp),
+    depositCompleteTimestamp: String(txCompletedTimestamp),
     NetworkFeeNative: quote.relayGasFeeTotal,
     NetworkFeeUsd: quote.relayGasFeeTotalUsd.toString(),
     NetworkFeeNativeToken: quote.tokenSymbol,
-    // The following properties are only used to make Typescript happy and will be removed
-    // when changing this event to `DepositTransactionConfirmed`
-    fillAmount: "",
-    fillAmountUsd: "",
-    totalFilledAmount: "",
-    totalFilledAmountUsd: "",
   };
 }
 
