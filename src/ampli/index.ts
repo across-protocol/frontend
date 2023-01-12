@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 38
+ * Tracking Plan Version: 40
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -31,10 +31,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "38",
+    version: "40",
     branch: "main",
     source: "web",
-    versionId: "e406449c-98ad-4949-a59e-0f92b6e02ffd",
+    versionId: "cbc4a092-7d03-473a-bbba-f4fc79ef25b2",
   },
   ...{
     ingestionMetadata: {
@@ -168,7 +168,155 @@ export interface ConnectWalletButtonClickedProperties {
     | "stakeForm";
 }
 
-export interface DepositTransactionConfirmedProperties {
+export interface DisconnectWalletButtonClickedProperties {
+  /**
+   * Action user did to trigger the event.
+   */
+  action: string;
+  element: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
+  section: string;
+}
+
+export interface FromChainSelectedProperties {
+  /**
+   * Name of the fromChain
+   */
+  chainName: string;
+  /**
+   * Whether or not this event is the default value loaded when an event is rendered.
+   */
+  default?: boolean;
+  /**
+   * Id of the fromChain
+   */
+  fromChainId: string;
+}
+
+export interface MaxTokenAmountClickedProperties {
+  /**
+   * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
+   */
+  action: "onClick" | "onKeyPress";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton |
+   */
+  element: "connectWalletButton" | "web3OnboardModal" | "maxButton";
+  page: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm";
+}
+
+export interface PageViewedProperties {
+  /**
+   * Hash to identify the UI version when event was triggered
+   */
+  gitCommitHash: string;
+  /**
+   * Boolean if this is first time identifed user has visited page. Should be Null for anonymous users.
+   */
+  isInitialPageView: boolean;
+  origin: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
+  path: string;
+  /**
+   * Referring url
+   */
+  referrer?: string;
+}
+
+export interface ToAccountChangedProperties {
+  /**
+   * Recipient wallet address
+   */
+  toWalletAddress: string;
+}
+
+export interface ToChainSelectedProperties {
+  /**
+   * Name of the toChain
+   */
+  chainName: string;
+  /**
+   * Whether or not this event is the default value loaded when an event is rendered.
+   */
+  default?: boolean;
+  /**
+   * Id of the toChain
+   */
+  toChainId: string;
+}
+
+export interface TokenSelectedProperties {
+  /**
+   * Whether or not this event is the default value loaded when an event is rendered.
+   */
+  default?: boolean;
+  /**
+   * Position of the asset in the list
+   */
+  tokenListIndex: string;
+  /**
+   * Length of the asset list
+   */
+  tokenListLength: string;
+  /**
+   * Symbol of bridge token
+   */
+  tokenSymbol: string;
+}
+
+export interface TransferDepositConfirmedProperties {
   /**
    * Capital fee percent, in decimals
    */
@@ -352,154 +500,6 @@ export interface DepositTransactionConfirmedProperties {
    */
   transactionHash: string;
   transferQuoteBlockNumber: string;
-}
-
-export interface DisconnectWalletButtonClickedProperties {
-  /**
-   * Action user did to trigger the event.
-   */
-  action: string;
-  element: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
-   */
-  page:
-    | "splashPage"
-    | "bridgePage"
-    | "poolPage"
-    | "rewardsPage"
-    | "transactionsPage"
-    | "stakingPage"
-    | "referralPage"
-    | "airdropPage"
-    | "404Page";
-  section: string;
-}
-
-export interface FromChainSelectedProperties {
-  /**
-   * Name of the fromChain
-   */
-  chainName: string;
-  /**
-   * Whether or not this event is the default value loaded when an event is rendered.
-   */
-  default?: boolean;
-  /**
-   * Id of the fromChain
-   */
-  fromChainId: string;
-}
-
-export interface MaxTokenAmountClickedProperties {
-  /**
-   * Action user did to trigger the event.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Enum Values | onClick, onKeyPress |
-   */
-  action: "onClick" | "onKeyPress";
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton |
-   */
-  element: "connectWalletButton" | "web3OnboardModal" | "maxButton";
-  page: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm |
-   */
-  section:
-    | "navbar"
-    | "mobileNavSidebar"
-    | "addLiquidityForm"
-    | "removeLiquidityForm"
-    | "airdropSplashFlow"
-    | "referralTable"
-    | "rewardsTable"
-    | "unstakeForm"
-    | "myTransactionsTable"
-    | "bridgeForm"
-    | "claimReferralRewardsForm"
-    | "stakeForm";
-}
-
-export interface PageViewedProperties {
-  /**
-   * Hash to identify the UI version when event was triggered
-   */
-  gitCommitHash: string;
-  /**
-   * Boolean if this is first time identifed user has visited page. Should be Null for anonymous users.
-   */
-  isInitialPageView: boolean;
-  origin: string;
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
-   */
-  page:
-    | "splashPage"
-    | "bridgePage"
-    | "poolPage"
-    | "rewardsPage"
-    | "transactionsPage"
-    | "stakingPage"
-    | "referralPage"
-    | "airdropPage"
-    | "404Page";
-  path: string;
-  /**
-   * Referring url
-   */
-  referrer?: string;
-}
-
-export interface ToAccountChangedProperties {
-  /**
-   * Recipient wallet address
-   */
-  toWalletAddress: string;
-}
-
-export interface ToChainSelectedProperties {
-  /**
-   * Name of the toChain
-   */
-  chainName: string;
-  /**
-   * Whether or not this event is the default value loaded when an event is rendered.
-   */
-  default?: boolean;
-  /**
-   * Id of the toChain
-   */
-  toChainId: string;
-}
-
-export interface TokenSelectedProperties {
-  /**
-   * Whether or not this event is the default value loaded when an event is rendered.
-   */
-  default?: boolean;
-  /**
-   * Position of the asset in the list
-   */
-  tokenListIndex: string;
-  /**
-   * Length of the asset list
-   */
-  tokenListLength: string;
-  /**
-   * Symbol of bridge token
-   */
-  tokenSymbol: string;
 }
 
 export interface TransferQuoteReceivedProperties {
@@ -1067,14 +1067,6 @@ export class ConnectWalletButtonClicked implements BaseEvent {
   }
 }
 
-export class DepositTransactionConfirmed implements BaseEvent {
-  event_type = "DepositTransactionConfirmed";
-
-  constructor(public event_properties: DepositTransactionConfirmedProperties) {
-    this.event_properties = event_properties;
-  }
-}
-
 export class DisconnectWalletButtonClicked implements BaseEvent {
   event_type = "DisconnectWalletButtonClicked";
 
@@ -1133,6 +1125,14 @@ export class TokenSelected implements BaseEvent {
   event_type = "TokenSelected";
 
   constructor(public event_properties: TokenSelectedProperties) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class TransferDepositConfirmed implements BaseEvent {
+  event_type = "TransferDepositConfirmed";
+
+  constructor(public event_properties: TransferDepositConfirmedProperties) {
     this.event_properties = event_properties;
   }
 }
@@ -1337,25 +1337,6 @@ export class Ampli {
   }
 
   /**
-   * DepositTransactionConfirmed
-   *
-   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/DepositTransactionConfirmed)
-   *
-   * On-chain transfer completed
-   *
-   * Owner: Dong-Ha Kim
-   *
-   * @param properties The event's properties (e.g. capitalFeePct)
-   * @param options Amplitude event options.
-   */
-  depositTransactionConfirmed(
-    properties: DepositTransactionConfirmedProperties,
-    options?: EventOptions,
-  ) {
-    return this.track(new DepositTransactionConfirmed(properties), options);
-  }
-
-  /**
    * DisconnectWalletButtonClicked
    *
    * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/DisconnectWalletButtonClicked)
@@ -1503,6 +1484,25 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new TokenSelected(properties), options);
+  }
+
+  /**
+   * TransferDepositConfirmed
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferDepositConfirmed)
+   *
+   * On-chain transfer completed
+   *
+   * Owner: Dong-Ha Kim
+   *
+   * @param properties The event's properties (e.g. capitalFeePct)
+   * @param options Amplitude event options.
+   */
+  transferDepositConfirmed(
+    properties: TransferDepositConfirmedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new TransferDepositConfirmed(properties), options);
   }
 
   /**
