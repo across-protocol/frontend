@@ -16,6 +16,7 @@ import EstimatedTable from "./EstimatedTable";
 import QuickSwap from "./QuickSwap";
 import SlippageAlert from "./SlippageAlert";
 import { BigNumber } from "ethers";
+import AmountTooLowAlert from "./AmountTooLowAlert";
 
 type BridgeFormProps = {
   availableTokens: TokenInfo[];
@@ -40,6 +41,7 @@ type BridgeFormProps = {
   displayChangeAccount: boolean;
   setDisplayChangeAccount: (display: boolean) => void;
   toAccount: string | undefined;
+  amountTooLow: boolean;
 };
 
 const BridgeForm = ({
@@ -64,6 +66,7 @@ const BridgeForm = ({
   estimatedTime,
   setDisplayChangeAccount,
   toAccount,
+  amountTooLow,
 }: BridgeFormProps) => {
   const mapChainInfoToRoute = (
     c?: ChainInfo,
@@ -101,6 +104,7 @@ const BridgeForm = ({
             onAmountToBridgeChanged={setAmountToBridge}
             currentSelectedBalance={currentBalance}
           />
+          {amountTooLow && <AmountTooLowAlert />}
         </RowWrapper>
         <RowWrapper>
           <Text size="md" color="grey-400">

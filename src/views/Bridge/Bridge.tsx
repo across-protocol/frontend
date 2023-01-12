@@ -39,6 +39,7 @@ const Bridge = () => {
     onTxHashChange,
     explorerUrl,
     transactionElapsedTimeAsFormattedString,
+    amountTooLow,
   } = useBridge();
   return (
     <>
@@ -102,6 +103,7 @@ const Bridge = () => {
               displayChangeAccount={displayChangeAccount}
               setDisplayChangeAccount={setDisplayChangeAccount}
               toAccount={toAccount}
+              amountTooLow={amountTooLow}
             />
           )}
         </Wrapper>

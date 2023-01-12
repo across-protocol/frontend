@@ -291,7 +291,12 @@ export function useBridge() {
     walletChainId,
     isConnected,
     isBridgeDisabled:
-      isConnected && (isBridgeDisabled || bridgeAction.buttonDisabled),
+      isConnected &&
+      (isWrongNetwork ||
+        isBridgeDisabled ||
+        bridgeAction.buttonDisabled ||
+        (!!fees && fees.isAmountTooLow)),
+    amountTooLow: isConnected && (fees?.isAmountTooLow ?? false),
     amountToBridge,
     estimatedTime,
     trackingTxHash,

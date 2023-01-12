@@ -59,10 +59,10 @@ export function useBridgeAction(
           }
           try {
             const tx = await sendAcrossDeposit(signer, payload);
-            await notificationEmitter(tx.hash, notify);
             if (onTransactionComplete) {
               onTransactionComplete(tx.hash);
             }
+            await notificationEmitter(tx.hash, notify);
           } catch (e) {
             console.error(e);
             return;

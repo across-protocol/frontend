@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import { formatSeconds } from "utils";
 
 export function useBridgeDepositTracking() {
-  const [txHash, setTxHash] = useState<string | undefined>(
-    "0x3a63779018d070a7e9c8777c87a3e76b51df485458dab4440e3679e596c2633d"
-  );
+  const [txHash, setTxHash] = useState<string | undefined>(undefined);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [depositFinishedDate, setDepositFinishedDate] = useState<
     Date | undefined
