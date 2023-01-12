@@ -232,7 +232,7 @@ export function generateTransferSubmitted(
     fromTokenAddress: fromAddress,
     referralProgramAddress: referralProgramAddress,
     timeFromFirstQuoteToTransferSubmittedInMilliseconds: String(
-      Date.now() - initialQuoteTime
+      Date.now() - initialQuoteTime * 1000
     ),
     transferTimestamp: String(Date.now()),
     toTokenAddress: toAddress,
