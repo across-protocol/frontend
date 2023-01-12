@@ -155,6 +155,8 @@ export const LogoWrapper = styled.div`
   height: fit-content;
   width: ${32 / 16}rem;
   height: ${32 / 16}rem;
+  display: flex;
+  justify-content: center;
   & svg {
     width: ${32 / 16}rem;
     height: ${32 / 16}rem;

@@ -121,6 +121,7 @@ export const StakingForm = ({
               buttonText={stakingAction}
               logoURI={logoURI}
               maxValue={buttonMaxValueText}
+              stakingAction={stakingAction}
               onClickHandler={buttonHandler}
               displayLoader={isMutating}
               warningButtonColor={stakingAction === "unstake"}

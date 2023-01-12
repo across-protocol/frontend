@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { utils } from "ethers";
 
-import { QUERIESV2 } from "utils";
+import { QUERIESV2, trackMaxButtonClicked } from "utils";
 import { useStakingPool } from "hooks";
 import { InputWithMaxButton, Text } from "components";
 
@@ -120,6 +120,9 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           onEnterKeyDown={handleAction}
           onClickMaxButton={() => {
             setAmount(maxAmount);
+            trackMaxButtonClicked(
+              action === "add" ? "addLiquidityForm" : "removeLiquidityForm"
+            );
           }}
           maxValue={maxAmountsQuery.isLoading ? "" : maxAmount}
           disableTokenIcon

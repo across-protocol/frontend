@@ -1,9 +1,10 @@
 import { ethers } from "ethers";
+import { constants } from "@across-protocol/sdk-v2";
 
 export const maxRelayFeePct = 0.25;
 
 export const disabledL1Tokens = [
-  "0x3472A5A71965499acd81997a54BBA8D852C6E53d",
+  constants.TOKEN_SYMBOLS_MAP.BADGER.addresses[constants.CHAIN_IDs.MAINNET],
 ].map((x) => x.toLowerCase());
 
 export const relayerFeeCapitalCostConfig = {

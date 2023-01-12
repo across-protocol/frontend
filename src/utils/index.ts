@@ -17,3 +17,4 @@ export * from "./matomo";
 export * from "./providers";
 export * from "./rewards";
 export * from "./time";
+export * from "./amplitude";

@@ -36,7 +36,9 @@ export function useRewards() {
   return {
     isConnected,
     address: account,
-    connectHandler: () => connect(),
+    connectHandler: () => {
+      connect({ trackSection: "rewardsTable" });
+    },
     totalRewards: totalRewards,
     stakedTokens: usersLPStakedInUSD,
     ...formatReferralSummary(summary, !isLoading && isConnected),

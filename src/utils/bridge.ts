@@ -4,6 +4,7 @@ import {
   relayFeeCalculator,
   lpFeeCalculator,
   contracts,
+  constants,
 } from "@across-protocol/sdk-v2";
 import { Provider, Block } from "@ethersproject/providers";
 import { ethers, BigNumber } from "ethers";
@@ -43,7 +44,8 @@ export type BridgeFees = {
   // Note: relayerGasFee and relayerCapitalFee are components of relayerFee.
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
-  quoteTimestamp?: ethers.BigNumber;
+  quoteTimestamp: ethers.BigNumber;
+  quoteBlock: ethers.BigNumber;
 };
 
 export async function getRelayerFee(
@@ -56,7 +58,8 @@ export async function getRelayerFee(
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
-  quoteTimestamp?: ethers.BigNumber;
+  quoteTimestamp: ethers.BigNumber;
+  quoteBlock: ethers.BigNumber;
 }> {
   const address = getConfig().getTokenInfoBySymbol(
     fromChainId,
@@ -74,7 +77,9 @@ export async function getRelayerFee(
 export async function getLpFee(
   l1TokenAddress: string,
   amount: ethers.BigNumber,
-  blockTime?: number
+  blockTime?: number,
+  originChainId?: number,
+  destinationChainId?: number
 ): Promise<Fee & { isLiquidityInsufficient: boolean }> {
   if (amount.lte(0)) {
     throw new Error(`Amount must be greater than 0.`);
@@ -96,7 +101,9 @@ export async function getLpFee(
   result.pct = await lpFeeCalculator.getLpFeePct(
     l1TokenAddress,
     amount,
-    blockTime
+    blockTime,
+    originChainId,
+    destinationChainId
   );
   result.isLiquidityInsufficient =
     await lpFeeCalculator.isLiquidityInsufficient(l1TokenAddress, amount);
@@ -141,12 +148,15 @@ export async function getBridgeFees({
     relayerCapitalFee,
     isAmountTooLow,
     quoteTimestamp,
+    quoteBlock,
   } = await getRelayerFee(tokenSymbol, amount, fromChainId, toChainId);
 
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
     l1TokenAddress,
     amount,
-    blockTimestamp
+    blockTimestamp,
+    fromChainId,
+    toChainId
   ).catch((err) => {
     console.error("Error getting lp fee", err);
     throw err;
@@ -160,24 +170,39 @@ export async function getBridgeFees({
     isAmountTooLow,
     isLiquidityInsufficient,
     quoteTimestamp,
+    quoteBlock,
   };
 }
+
+export type ConfirmationDepositTimeType = {
+  formattedString: string;
+  lowEstimate: number;
+  highEstimate: number;
+};
 
 export const getConfirmationDepositTime = (
   amount: BigNumber,
   limits: BridgeLimitInterface,
   toChain: ChainId,
   fromChain: ChainId
-) => {
+): ConfirmationDepositTimeType => {
   const config = getConfig();
   const depositDelay = config.depositDelays()[fromChain] || 0;
   const getTimeEstimateString = (
     lowEstimate: number,
     highEstimate: number
-  ): string => {
-    return `~${lowEstimate + depositDelay}-${
-      highEstimate + depositDelay
-    } minutes`;
+  ): {
+    formattedString: string;
+    lowEstimate: number;
+    highEstimate: number;
+  } => {
+    return {
+      formattedString: `~${lowEstimate + depositDelay}-${
+        highEstimate + depositDelay
+      } minutes`,
+      lowEstimate: lowEstimate + depositDelay,
+      highEstimate: highEstimate + depositDelay,
+    };
   };
 
   if (amount.lte(limits.maxDepositInstant)) {
@@ -198,7 +223,7 @@ export const getConfirmationDepositTime = (
   }
 
   // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.
-  return "~3-7 hours";
+  return { formattedString: "~3-7 hours", lowEstimate: 180, highEstimate: 420 };
 };
 
 export type AcrossDepositArgs = {
@@ -311,7 +336,9 @@ export default class LpFeeCalculator {
 
     if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.WETH.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add WETH cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -319,7 +346,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add USDC cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -327,7 +356,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.WBTC.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add WBTC cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -335,7 +366,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.DAI.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add DAI cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -343,7 +376,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0xba100000625a3754423978a60c9317c58a424e3D")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.BAL.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add BAL cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -351,7 +386,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.UMA.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add UMA cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -359,7 +396,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0x42bBFa2e77757C645eeaAd1655E0911a7553Efbc")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.BOBA.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add BOBA cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -372,7 +411,9 @@ export default class LpFeeCalculator {
   async getLpFeePct(
     tokenAddress: string,
     amount: utils.BigNumberish,
-    timestamp?: number
+    timestamp?: number,
+    originChainId?: number,
+    destinationChainId?: number
   ) {
     amount = BigNumber.from(amount);
     assert(amount.gt(0), "Amount must be greater than 0");
@@ -396,9 +437,14 @@ export default class LpFeeCalculator {
         amount,
         { blockTag }
       ),
-      configStoreClient.getRateModel(tokenAddress, {
-        blockTag,
-      }),
+      configStoreClient.getRateModel(
+        tokenAddress,
+        {
+          blockTag,
+        },
+        originChainId,
+        destinationChainId
+      ),
     ]);
     return calculateRealizedLpFeePct(rateModel, currentUt, nextUt);
   }

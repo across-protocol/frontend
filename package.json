@@ -6,7 +6,8 @@
   "dependencies": {
     "@across-protocol/across-token": "^0.0.2",
     "@across-protocol/contracts-v2": "^1.0.7",
-    "@across-protocol/sdk-v2": "^0.2.2",
+    "@across-protocol/sdk-v2": "^0.3.7",
+    "@amplitude/analytics-browser": "^1.6.6",
     "@datapunt/matomo-tracker-js": "^0.5.1",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
@@ -16,7 +17,6 @@
     "@google-cloud/logging": "^10.1.1",
     "@popperjs/core": "^2.11.6",
     "@reach/dialog": "^0.16.2",
-    "@reduxjs/toolkit": "^1.6.2",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "12.1.5",
     "@testing-library/user-event": "^12.1.10",
@@ -55,19 +55,17 @@
     "react-popper": "^2.3.0",
     "react-pro-sidebar": "^0.7.1",
     "react-query": "^3.34.16",
-    "react-redux": "^7.2.5",
     "react-router-dom": "^5.3.0",
     "react-router-sitemap": "^1.2.0",
     "react-scripts": "4.0.3",
     "react-slider": "^2.0.4",
-    "redux": "^4.1.1",
     "superstruct": "^0.15.4",
     "typescript": "^4.1.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && react-scripts start",
+    "build": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && react-scripts build",
+    "test": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && react-scripts test",
     "serve": "serve -s build",
     "test-api": "jest test/api",
     "eject": "react-scripts eject",
@@ -80,7 +78,8 @@
     "cypress:run": "cypress run --e2e",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
-    "chromatic": "chromatic --exit-zero-on-changes"
+    "chromatic": "chromatic --exit-zero-on-changes",
+    "ampli:pull": "ampli pull --path=./src/ampli --omit-api-keys web && prettier -w ./src/ampli/*.ts"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": "yarn lint:fix"
@@ -98,6 +97,7 @@
     ]
   },
   "devDependencies": {
+    "@amplitude/ampli": "^1.27.1",
     "@babel/plugin-transform-modules-commonjs": "^7.18.6",
     "@ethersproject/experimental": "^5.6.3",
     "@storybook/addon-actions": "^6.5.12",
