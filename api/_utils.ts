@@ -36,7 +36,13 @@ export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 // Default to no markup.
 export const DEFAULT_GAS_MARKUP = 0;
 
+// Don't permit HUP_POOL_CHAIN_ID=0
 export const HUP_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
+
+// Permit REACT_APP_FLAT_RELAY_CAPITAL_FEE=0
+export const FLAT_RELAY_CAPITAL_FEE = Number(
+  process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE ?? 0.03
+); // 0.03%
 
 export const ENABLED_ROUTES =
   HUP_POOL_CHAIN_ID === 1
@@ -360,10 +366,14 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
 
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
-    capitalCostsPercent: 0.04,
+    capitalCostsPercent: FLAT_RELAY_CAPITAL_FEE, // This is set same way in ./src/utils/bridge.ts
     queries: queryFn(),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
+  if (relayerFeeCalculatorConfig.feeLimitPercent < 1)
+    throw new Error(
+      "Setting fee limit % < 1% will produce nonsensical relay fee details"
+    );
   return new sdk.relayFeeCalculator.RelayFeeCalculator(
     relayerFeeCalculatorConfig,
     logger
@@ -400,7 +410,7 @@ export const getRelayerFeeDetails = (
   amount: sdk.utils.BigNumberish,
   destinationChainId: number,
   tokenPrice?: number
-) => {
+): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
