@@ -12,7 +12,6 @@ import {
   trackDisconnectWalletButtonClicked,
   identifyUserWallets,
   trackWalletChainId,
-  trackIsFirstTimeUser,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
@@ -95,15 +94,6 @@ export function useOnboardManager() {
 
   const [{ wallet }, connect, disconnect] = useConnectWallet();
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
-
-  // We use this query to check whether the user has any deposits, i.e. is a first time user
-  const userDepositsQuery = useUserDeposits("filled", 1, 0, account?.address);
-
-  useEffect(() => {
-    if (userDepositsQuery.data && account) {
-      trackIsFirstTimeUser(userDepositsQuery.data.deposits.length === 0);
-    }
-  }, [userDepositsQuery.data, account]);
 
   useEffect(() => {
     if (wallet?.accounts) {

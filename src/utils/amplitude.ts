@@ -112,12 +112,6 @@ export function trackWalletChainId(chainId: string) {
   return ampli.client?.identify(identifyObj);
 }
 
-export function trackIsFirstTimeUser(isFirstTimeUser: boolean) {
-  const identifyObj = new Identify();
-  identifyObj.set("isFirstTimeUser", isFirstTimeUser);
-  return ampli.client?.identify(identifyObj);
-}
-
 export function trackMaxButtonClicked(
   section: MaxTokenAmountClickedProperties["section"]
 ) {
