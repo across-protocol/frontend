@@ -216,7 +216,7 @@ export function useBridge() {
             limits,
             currentToRoute,
             currentFromRoute
-          )
+          ).formattedString
         : "loading..."
       : undefined;
   }, [amountToBridge, currentFromRoute, currentToRoute, limits]);
