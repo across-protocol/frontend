@@ -10,7 +10,7 @@ import {
   TransferQuoteReceivedProperties,
   TransferSignedProperties,
   TransferSubmittedProperties,
-  DepositTransactionConfirmedProperties,
+  TransferDepositConfirmedProperties,
 } from "ampli";
 import { pageLookup } from "components/RouteTrace/useRouteTrace";
 import { TokenInfo, ChainInfo, fixedPointAdjustment } from "./constants";
@@ -277,7 +277,7 @@ export function generateDepositConfirmed(
   txHash: string,
   success: boolean,
   txCompletedTimestamp: number
-): DepositTransactionConfirmedProperties {
+): TransferDepositConfirmedProperties {
   // Retrieves the from symbol by address from the config
   const fromAddress = getConfig().getTokenInfoBySymbol(
     Number(quote.fromChainId),
