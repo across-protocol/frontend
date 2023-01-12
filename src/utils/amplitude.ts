@@ -14,7 +14,7 @@ import {
 } from "ampli";
 import { pageLookup } from "components/RouteTrace/useRouteTrace";
 import { TokenInfo, ChainInfo, fixedPointAdjustment } from "./constants";
-import { GetBridgeFeesResult } from "./bridge";
+import { ConfirmationDepositTimeType, GetBridgeFeesResult } from "./bridge";
 import { ConvertDecimals } from "./convertdecimals";
 import {
   formatUnits,
@@ -146,7 +146,7 @@ export function generateTransferQuote(
   toAddress: string,
   account: string,
   tokenPrice: BigNumber,
-  timeToRelay: string,
+  estimatedTimeToRelayObject: ConfirmationDepositTimeType,
   amount: BigNumber
 ): TransferQuoteReceivedProperties {
   // Create a function that converts a wei amount into a formatted token amount
@@ -171,7 +171,10 @@ export function generateTransferQuote(
     capitalFeePct: formatWeiEtherPct(fees.relayerCapitalFee.pct),
     capitalFeeTotal: formatTokens(fees.relayerCapitalFee.total),
     capitalFeeTotalUsd: usdEquivalentString(fees.relayerCapitalFee.total),
-    expectedFillTimeInMinutes: timeToRelay,
+    expectedFillTimeInMinutes: estimatedTimeToRelayObject.formattedString,
+    expectedFillTimeInMinutesLowerBound: estimatedTimeToRelayObject.lowEstimate,
+    expectedFillTimeInMinutesUpperBound:
+      estimatedTimeToRelayObject.highEstimate,
     fromAmount: formatTokens(amount),
     fromAmountUsd: usdEquivalentString(amount),
     fromChainId: selectedRoute.fromChain.toString(),

@@ -174,21 +174,35 @@ export async function getBridgeFees({
   };
 }
 
+export type ConfirmationDepositTimeType = {
+  formattedString: string;
+  lowEstimate: number;
+  highEstimate: number;
+};
+
 export const getConfirmationDepositTime = (
   amount: BigNumber,
   limits: BridgeLimits,
   toChain: ChainId,
   fromChain: ChainId
-) => {
+): ConfirmationDepositTimeType => {
   const config = getConfig();
   const depositDelay = config.depositDelays()[fromChain] || 0;
   const getTimeEstimateString = (
     lowEstimate: number,
     highEstimate: number
-  ): string => {
-    return `~${lowEstimate + depositDelay}-${
-      highEstimate + depositDelay
-    } minutes`;
+  ): {
+    formattedString: string;
+    lowEstimate: number;
+    highEstimate: number;
+  } => {
+    return {
+      formattedString: `~${lowEstimate + depositDelay}-${
+        highEstimate + depositDelay
+      } minutes`,
+      lowEstimate: lowEstimate + depositDelay,
+      highEstimate: highEstimate + depositDelay,
+    };
   };
 
   if (amount.lte(limits.maxDepositInstant)) {
@@ -209,7 +223,7 @@ export const getConfirmationDepositTime = (
   }
 
   // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.
-  return "~3-7 hours";
+  return { formattedString: "~3-7 hours", lowEstimate: 180, highEstimate: 420 };
 };
 
 type AcrossDepositArgs = {

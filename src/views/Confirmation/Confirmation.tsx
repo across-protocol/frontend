@@ -72,7 +72,7 @@ const Confirmation: React.FC<Props> = ({ deposit, onClose }) => {
       limits,
       deposit.toChain,
       deposit.fromChain
-    );
+    ).formattedString;
     fundsArrivalText = `Your funds will arrive in ${timeEstimate}`;
   } else if (isError) {
     fundsArrivalText = "Time estimation failed";

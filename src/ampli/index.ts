@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 37
+ * Tracking Plan Version: 38
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -31,10 +31,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "37",
+    version: "38",
     branch: "main",
     source: "web",
-    versionId: "d75968c3-62e4-47e9-be3c-3ae9a87811f6",
+    versionId: "e406449c-98ad-4949-a59e-0f92b6e02ffd",
   },
   ...{
     ingestionMetadata: {
@@ -186,6 +186,22 @@ export interface DepositTransactionConfirmedProperties {
    * Expected fill time in minutes, as displayed in the UI for the asset and route selected
    */
   expectedFillTimeInMinutes: string;
+  /**
+   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Type | number |
+   */
+  expectedFillTimeInMinutesLowerBound?: number;
+  /**
+   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Type | number |
+   */
+  expectedFillTimeInMinutesUpperBound?: number;
   /**
    * From amount in the bridge token, in decimals
    */
@@ -504,6 +520,22 @@ export interface TransferQuoteReceivedProperties {
    */
   expectedFillTimeInMinutes: string;
   /**
+   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Type | number |
+   */
+  expectedFillTimeInMinutesLowerBound?: number;
+  /**
+   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Type | number |
+   */
+  expectedFillTimeInMinutesUpperBound?: number;
+  /**
    * From amount in the bridge token, in decimals
    */
   fromAmount: string;
@@ -638,6 +670,22 @@ export interface TransferSignedProperties {
    * | Regex |  |
    */
   expectedFillTimeInMinutes: string;
+  /**
+   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Type | number |
+   */
+  expectedFillTimeInMinutesLowerBound?: number;
+  /**
+   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Type | number |
+   */
+  expectedFillTimeInMinutesUpperBound?: number;
   /**
    * From amount in the bridge token, in decimals
    */
@@ -799,6 +847,22 @@ export interface TransferSubmittedProperties {
    * | Regex |  |
    */
   expectedFillTimeInMinutes: string;
+  /**
+   * The lower bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Type | number |
+   */
+  expectedFillTimeInMinutesLowerBound?: number;
+  /**
+   * The upper bound of the expected fill time in minutes, as displayed in the UI for the asset and route selected.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Type | number |
+   */
+  expectedFillTimeInMinutesUpperBound?: number;
   /**
    * From amount in the bridge token, in decimals
    */
