@@ -1,21 +1,30 @@
 import assert from "assert";
 import { ethers } from "ethers";
+import { relayFeeCalculator, constants } from "@across-protocol/sdk-v2";
+import { across } from "@uma/sdk";
+import * as superstruct from "superstruct";
+
+import { getAddress } from "./address";
+import { parseEtherLike } from "./format";
+
 import ethereumLogo from "assets/ethereum-logo.svg";
 import optimismLogo from "assets/optimism-alt-logo.svg";
 import wethLogo from "assets/weth-logo.svg";
 import arbitrumLogo from "assets/arbitrum-logo.svg";
 import bobaLogo from "assets/boba-logo.svg";
 import polygonLogo from "assets/polygon-logo.svg";
-import { getAddress } from "./address";
-import * as superstruct from "superstruct";
-import { relayFeeCalculator } from "@across-protocol/sdk-v2";
-import { across } from "@uma/sdk";
+import usdcLogo from "assets/usdc-logo.png";
+import daiLogo from "assets/dai.svg";
+import wbtcLogo from "assets/wbtc.svg";
+import umaLogo from "assets/uma.svg";
+import acxLogo from "assets/across.svg";
+import balLogo from "assets/bal.svg";
+import usdtLogo from "assets/usdt-logo.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
 import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import GoerliRoutes from "data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
-import { parseEtherLike } from "./format";
 
 /* Chains and Tokens section */
 export enum ChainId {
@@ -296,127 +305,37 @@ export type TokenInfo = {
 // enforce weth to be first so we can use it as a guarantee in other parts of the app
 export type TokenInfoList = TokenInfo[];
 
-export const tokenList: TokenInfoList = [
-  {
-    name: "Ether",
-    symbol: "ETH",
-    decimals: 18,
-    logoURI: ethereumLogo,
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "OETH",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "AETH",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Matic",
-    symbol: "WMATIC",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"),
-  },
-  {
-    name: "Kovan Ethereum",
-    symbol: "KOV",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "KOR",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "ARETH",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Wrapped Ether",
-    symbol: "WETH",
-    decimals: 18,
-    logoURI: wethLogo,
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "USD Coin",
-    symbol: "USDC",
-    decimals: 6,
-    logoURI: "/logos/usdc-logo.png",
-    mainnetAddress: getAddress("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
-  },
-  {
-    name: "Dai Stablecoin",
-    symbol: "DAI",
-    decimals: 18,
-    logoURI: "/logos/dai-logo.png",
-    mainnetAddress: getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F"),
-  },
-  {
-    name: "Wrapped Bitcoin",
-    symbol: "WBTC",
-    decimals: 8,
-    logoURI: "/logos/wbtc-logo.svg",
-    mainnetAddress: getAddress("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"),
-  },
-  {
-    name: "Boba",
-    symbol: "BOBA",
-    decimals: 18,
-    logoURI: "/logos/boba-logo.svg",
-    mainnetAddress: getAddress("0x42bbfa2e77757c645eeaad1655e0911a7553efbc"),
-  },
-  {
-    name: "UMA",
-    symbol: "UMA",
-    decimals: 18,
-    logoURI: "/logos/uma-logo.svg",
-    mainnetAddress: getAddress("0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828"),
-  },
-  {
-    name: "Matic",
-    symbol: "MATIC",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"),
-  },
-  {
-    name: "Balancer",
-    symbol: "BAL",
-    decimals: 18,
-    logoURI: "/logos/bal.svg",
-    mainnetAddress: getAddress("0xba100000625a3754423978a60c9317c58a424e3D"),
-  },
-  {
-    name: "USDT",
-    symbol: "USDT",
-    decimals: 6,
-    logoURI: "/logos/usdt-logo.svg",
-    mainnetAddress: getAddress("0xdAC17F958D2ee523a2206206994597C13D831ec7"),
-  },
-  {
-    name: "ACX",
-    symbol: "ACX",
-    decimals: 18,
-    logoURI: "/logos/acx-logo.svg",
-    mainnetAddress: getAddress("0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F"),
-  },
-];
+export const tokenSymbolLogoMap = {
+  ETH: ethereumLogo,
+  WETH: wethLogo,
+  MATIC: polygonLogo,
+  WMATIC: polygonLogo,
+  USDC: usdcLogo,
+  DAI: daiLogo,
+  WBTC: wbtcLogo,
+  BOBA: bobaLogo,
+  UMA: umaLogo,
+  ACX: acxLogo,
+  USDT: usdtLogo,
+  BAL: balLogo,
+};
+
+export const tokenList: TokenInfoList = Object.entries(
+  tokenSymbolLogoMap
+).flatMap(([symbol, logoURI]) => {
+  const tokenInfo =
+    constants.TOKEN_SYMBOLS_MAP[symbol as keyof typeof tokenSymbolLogoMap];
+
+  if (!tokenInfo) {
+    return [];
+  }
+
+  return {
+    ...tokenInfo,
+    logoURI,
+    mainnetAddress: tokenInfo.addresses[constants.CHAIN_IDs.MAINNET],
+  };
+});
 
 assert(
   process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,

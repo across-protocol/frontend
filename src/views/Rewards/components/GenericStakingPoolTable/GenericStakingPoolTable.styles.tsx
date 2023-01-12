@@ -117,6 +117,8 @@ export const ExternalLinkButton = styled(Link)`
 `;
 
 export const LogoWrapper = styled.div`
+  display: flex;
+  justify-content: center;
   & svg {
     width: ${32 / 16}rem;
     height: ${32 / 16}rem;
