@@ -32,7 +32,6 @@ import {
   ConnectWalletButtonClickedProperties,
   DisconnectWalletButtonClickedProperties,
 } from "ampli";
-import { useUserDeposits } from "hooks/useDeposits";
 
 export type SetChainOptions = {
   chainId: string;

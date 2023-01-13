@@ -13,7 +13,13 @@ import {
   TransferDepositConfirmedProperties,
 } from "ampli";
 import { pageLookup } from "components/RouteTrace/useRouteTrace";
-import { TokenInfo, ChainInfo, fixedPointAdjustment } from "./constants";
+import {
+  TokenInfo,
+  ChainInfo,
+  fixedPointAdjustment,
+  getToken,
+  getChainInfo,
+} from "./constants";
 import { ConfirmationDepositTimeType, GetBridgeFeesResult } from "./bridge";
 import { ConvertDecimals } from "./convertdecimals";
 import {
@@ -23,6 +29,7 @@ import {
   capitalizeFirstLetter,
 } from "./format";
 import { getConfig } from "./config";
+import { ChainId } from "./utils";
 
 export function getPageValue() {
   const path = window.location.pathname;
@@ -98,9 +105,14 @@ export function identifyUserWallets(walletStates: WalletState[]) {
 
   ampli.client?.setUserId(connectedWalletAddress);
 
+  let chainId = connectedWallet.chains[0].id;
+  if (chainId.startsWith("0x")) {
+    chainId = parseInt(chainId, 16).toString();
+  }
+
   const identifyObj = new Identify();
   identifyObj.postInsert("allWalletAddressesConnected", connectedWalletAddress);
-  identifyObj.postInsert("allWalletChainIds", connectedWallet.chains[0].id);
+  identifyObj.postInsert("allWalletChainIds", chainId);
   identifyObj.set("walletAddress", connectedWalletAddress);
   identifyObj.set("walletType", connectedWallet.label);
   return ampli.client?.identify(identifyObj);
@@ -365,4 +377,23 @@ export function recordTransferUserProperties(
   );
 
   return ampli.client?.identify(identifyObj);
+}
+
+export function reportTokenBalance(
+  chainId: ChainId,
+  balance: BigNumber,
+  symbol: string
+) {
+  const token = getToken(symbol);
+  const chain = getChainInfo(chainId);
+
+  const chainName = capitalizeFirstLetter(chain.name);
+  const tokenName = capitalizeFirstLetter(token.symbol);
+  const tokenBalance = Number(
+    formatUnits(balance, token.decimals).replaceAll(",", "")
+  );
+
+  const identifyObj = new Identify();
+  identifyObj.set(`${chainName}${tokenName}WalletCurrentBalance`, tokenBalance);
+  ampli.client?.identify(identifyObj);
 }
