@@ -384,11 +384,11 @@ export function reportTokenBalance(
 
   const chainName = capitalizeFirstLetter(chain.name);
   const tokenName = capitalizeFirstLetter(token.symbol);
+  const tokenBalance = Number(
+    formatUnits(balance, token.decimals).replaceAll(",", "")
+  );
 
   const identifyObj = new Identify();
-  identifyObj.set(
-    `${chainName}${tokenName}WalletCurrentBalance`,
-    formatUnits(balance, token.decimals)
-  );
+  identifyObj.set(`${chainName}${tokenName}WalletCurrentBalance`, tokenBalance);
   ampli.client?.identify(identifyObj);
 }
