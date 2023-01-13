@@ -18,6 +18,7 @@ export function useTransaction(chainId: ChainId, txHash?: string) {
     {
       enabled: !!txHash && !!provider,
       refetchInterval: 1000,
+      staleTime: Infinity,
     }
   );
 
