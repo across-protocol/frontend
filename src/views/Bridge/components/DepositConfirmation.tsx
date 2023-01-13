@@ -25,7 +25,7 @@ type DepositConfirmationProps = {
   estimatedTime: string | undefined;
 
   isConnected: boolean;
-  transactionCompleted: boolean;
+  transactionPending: boolean;
   onTxHashChange: (txHash?: string) => void;
 
   explorerLink?: string;
@@ -40,7 +40,7 @@ const DepositConfirmation = ({
   amountToBridge,
   estimatedTime,
   isConnected,
-  transactionCompleted,
+  transactionPending,
   onTxHashChange,
   explorerLink,
   elapsedTimeFromDeposit,
@@ -48,17 +48,17 @@ const DepositConfirmation = ({
   <Wrapper>
     <TopWrapper>
       <TopWrapperAnimationWrapper>
-        <AnimatedLogoWrapper completed={transactionCompleted}>
+        <AnimatedLogoWrapper completed={!transactionPending}>
           <AnimatedLogo src={getChainInfo(currentFromRoute ?? 1).logoURI} />
         </AnimatedLogoWrapper>
-        <AnimatedDivider completed={transactionCompleted} />
-        <StyledCheckStarIcon completed={transactionCompleted} />
-        <AnimatedDivider completed={transactionCompleted} />
-        <AnimatedLogoWrapper completed={transactionCompleted}>
+        <AnimatedDivider completed={!transactionPending} />
+        <StyledCheckStarIcon completed={!transactionPending} />
+        <AnimatedDivider completed={!transactionPending} />
+        <AnimatedLogoWrapper completed={!transactionPending}>
           <AnimatedLogo src={getChainInfo(currentToRoute ?? 1).logoURI} />
         </AnimatedLogoWrapper>
       </TopWrapperAnimationWrapper>
-      {!transactionCompleted ? (
+      {transactionPending ? (
         <TopWrapperTitleWrapper>
           <Text size="3xl" color="white">
             {elapsedTimeFromDeposit ?? "00h 00m 00s"}
@@ -127,14 +127,14 @@ const DepositConfirmation = ({
     />
     <Divider />
     <Button
-      disabled={!transactionCompleted}
+      disabled={transactionPending}
       onClick={() => {
         onTxHashChange(undefined);
       }}
     >
       <Text
         size="lg"
-        color={transactionCompleted ? "aqua" : "white"}
+        color={!transactionPending ? "aqua" : "white"}
         weight={500}
       >
         Initiate new transaction

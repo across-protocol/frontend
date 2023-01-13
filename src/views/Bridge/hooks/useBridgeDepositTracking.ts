@@ -45,7 +45,7 @@ export function useBridgeDepositTracking() {
     receipt,
     explorerUrl,
     trackingTxHash,
-    transactionCompleted: depositFinished,
+    transactionPending: !depositFinished,
     transactionElapsedSeconds: elapsedSeconds,
     transactionElapsedTimeAsFormattedString: elapsedTimeAsFormattedString,
   };

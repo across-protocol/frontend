@@ -35,7 +35,7 @@ const Bridge = () => {
     toAccount,
     setToAccount,
     trackingTxHash,
-    transactionCompleted,
+    transactionPending,
     onTxHashChange,
     explorerUrl,
     transactionElapsedTimeAsFormattedString,
@@ -74,7 +74,7 @@ const Bridge = () => {
               currentToken={currentToken}
               estimatedTime={estimatedTime}
               isConnected={isConnected}
-              transactionCompleted={transactionCompleted}
+              transactionPending={transactionPending}
               onTxHashChange={onTxHashChange}
               explorerLink={explorerUrl}
               elapsedTimeFromDeposit={transactionElapsedTimeAsFormattedString}

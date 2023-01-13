@@ -254,7 +254,7 @@ export function useBridge() {
   const {
     onTxHashChange,
     trackingTxHash,
-    transactionCompleted,
+    transactionPending,
     explorerUrl,
     transactionElapsedTimeAsFormattedString,
   } = useBridgeDepositTracking();
@@ -300,7 +300,7 @@ export function useBridge() {
     amountToBridge,
     estimatedTime,
     trackingTxHash,
-    transactionCompleted,
+    transactionPending,
     explorerUrl,
     onTxHashChange,
     transactionElapsedTimeAsFormattedString,
