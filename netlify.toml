@@ -8,3 +8,11 @@
     Permissions-Policy = '''
     geolocation=(self), 
     microphone=()'''
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@across-protocol/sdk-v2", "@google-cloud/logging"]
+  included_files = ["src/data/*.json"]
