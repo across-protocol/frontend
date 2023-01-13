@@ -98,9 +98,14 @@ export function identifyUserWallets(walletStates: WalletState[]) {
 
   ampli.client?.setUserId(connectedWalletAddress);
 
+  let chainId = connectedWallet.chains[0].id;
+  if (chainId.startsWith("0x")) {
+    chainId = parseInt(chainId, 16).toString();
+  }
+
   const identifyObj = new Identify();
   identifyObj.postInsert("allWalletAddressesConnected", connectedWalletAddress);
-  identifyObj.postInsert("allWalletChainIds", connectedWallet.chains[0].id);
+  identifyObj.postInsert("allWalletChainIds", chainId);
   identifyObj.set("walletAddress", connectedWalletAddress);
   identifyObj.set("walletType", connectedWallet.label);
   return ampli.client?.identify(identifyObj);
