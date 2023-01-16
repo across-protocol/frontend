@@ -20,6 +20,7 @@ import NotFound from "./views/NotFound";
 import ACXLiveBanner from "components/ACXLiveBanner/ACXLiveBanner";
 import ScrollToTop from "components/ScrollToTop";
 import RouteTrace from "components/RouteTrace/RouteTrace";
+import WalletBalanceTrace from "components/WalletBalanceTrace/WalletBalanceTrace";
 
 const Pool = lazy(() => import(/* webpackChunkName: "Pool" */ "./views/Pool"));
 const Referrals = lazy(
@@ -108,6 +109,7 @@ const Routes: React.FC = () => {
   return (
     <>
       <RouteTrace />
+      <WalletBalanceTrace />
       {generalMaintenanceMessage && (
         <SuperHeader size="lg">{generalMaintenanceMessage}</SuperHeader>
       )}
