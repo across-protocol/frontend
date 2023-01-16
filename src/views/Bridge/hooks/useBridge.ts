@@ -95,6 +95,10 @@ export function useBridge() {
         (route) => route.fromChain === (hubPoolChainId ?? 1)
       );
 
+      if (availableRoutesThatStartAtCurrentChain.length === 0) {
+        return;
+      }
+
       if (currentToRoute) {
         const toRouteStillAvailable = availableRoutes.some(
           (route) => route.toChain === currentToRoute
@@ -201,7 +205,7 @@ export function useBridge() {
   );
 
   const { limits } = useBridgeLimits(
-    getToken(currentToken).mainnetAddress,
+    currentRoute?.fromTokenAddress,
     currentFromRoute,
     currentToRoute
   );
