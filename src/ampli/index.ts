@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 40
+ * Tracking Plan Version: 42
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -31,10 +31,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "40",
+    version: "42",
     branch: "main",
     source: "web",
-    versionId: "cbc4a092-7d03-473a-bbba-f4fc79ef25b2",
+    versionId: "7a7b1343-bd50-4f0e-87cf-51349aa22120",
   },
   ...{
     ingestionMetadata: {
@@ -270,6 +270,10 @@ export interface PageViewedProperties {
     | "404Page";
   path: string;
   /**
+   * Address of referee, null if no referral used
+   */
+  referralProgramAddress?: string;
+  /**
    * Referring url
    */
   referrer?: string;
@@ -316,7 +320,7 @@ export interface TokenSelectedProperties {
   tokenSymbol: string;
 }
 
-export interface TransferDepositConfirmedProperties {
+export interface TransferDepositCompletedProperties {
   /**
    * Capital fee percent, in decimals
    */
@@ -387,18 +391,9 @@ export interface TransferDepositConfirmedProperties {
    * Lp fee in USD
    */
   lpFeeTotalUsd: string;
-  /**
-   * Gas fee in network token
-   */
-  NetworkFeeNative: string;
-  /**
-   * Network native token
-   */
-  NetworkFeeNativeToken: string;
-  /**
-   * Gas fee in USD
-   */
-  NetworkFeeUsd: string;
+  networkFeeNative: string;
+  networkFeeNativeToken: string;
+  networkFeeUsd: string;
   /**
    * Latency for FE to recieve quote in millisec
    */
@@ -1129,10 +1124,10 @@ export class TokenSelected implements BaseEvent {
   }
 }
 
-export class TransferDepositConfirmed implements BaseEvent {
-  event_type = "TransferDepositConfirmed";
+export class TransferDepositCompleted implements BaseEvent {
+  event_type = "TransferDepositCompleted";
 
-  constructor(public event_properties: TransferDepositConfirmedProperties) {
+  constructor(public event_properties: TransferDepositCompletedProperties) {
     this.event_properties = event_properties;
   }
 }
@@ -1487,9 +1482,9 @@ export class Ampli {
   }
 
   /**
-   * TransferDepositConfirmed
+   * TransferDepositCompleted
    *
-   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferDepositConfirmed)
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TransferDepositCompleted)
    *
    * On-chain transfer completed
    *
@@ -1498,11 +1493,11 @@ export class Ampli {
    * @param properties The event's properties (e.g. capitalFeePct)
    * @param options Amplitude event options.
    */
-  transferDepositConfirmed(
-    properties: TransferDepositConfirmedProperties,
+  transferDepositCompleted(
+    properties: TransferDepositCompletedProperties,
     options?: EventOptions,
   ) {
-    return this.track(new TransferDepositConfirmed(properties), options);
+    return this.track(new TransferDepositCompleted(properties), options);
   }
 
   /**

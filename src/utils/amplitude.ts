@@ -10,7 +10,7 @@ import {
   TransferQuoteReceivedProperties,
   TransferSignedProperties,
   TransferSubmittedProperties,
-  TransferDepositConfirmedProperties,
+  TransferDepositCompletedProperties,
 } from "ampli";
 import { pageLookup } from "components/RouteTrace/useRouteTrace";
 import {
@@ -283,7 +283,7 @@ export function generateDepositConfirmed(
   txHash: string,
   success: boolean,
   txCompletedTimestamp: number
-): TransferDepositConfirmedProperties {
+): TransferDepositCompletedProperties {
   // Retrieves the from symbol by address from the config
   const fromAddress = getConfig().getTokenInfoBySymbol(
     Number(quote.fromChainId),
@@ -306,9 +306,9 @@ export function generateDepositConfirmed(
       Date.now() - initialSignTime
     ),
     depositCompleteTimestamp: String(txCompletedTimestamp),
-    NetworkFeeNative: quote.relayGasFeeTotal,
-    NetworkFeeUsd: quote.relayGasFeeTotalUsd.toString(),
-    NetworkFeeNativeToken: quote.tokenSymbol,
+    networkFeeNative: quote.relayGasFeeTotal,
+    networkFeeUsd: quote.relayGasFeeTotalUsd.toString(),
+    networkFeeNativeToken: quote.tokenSymbol,
   };
 }
 
