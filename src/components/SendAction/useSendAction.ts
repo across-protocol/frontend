@@ -182,7 +182,7 @@ export default function useSendAction(
             .catch(console.error)
             .finally(() => {
               // Instrument amplitude after the transaction is confirmed for the submit button.
-              ampli.transferDepositConfirmed(
+              ampli.transferDepositCompleted(
                 generateDepositConfirmed(
                   frozenQuote,
                   referrer,
