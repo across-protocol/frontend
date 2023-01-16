@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 40
+ * Tracking Plan Version: 41
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -31,10 +31,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "40",
+    version: "41",
     branch: "main",
     source: "web",
-    versionId: "cbc4a092-7d03-473a-bbba-f4fc79ef25b2",
+    versionId: "62571c6d-a8a6-489c-9839-c5291ec9e839",
   },
   ...{
     ingestionMetadata: {
@@ -269,6 +269,10 @@ export interface PageViewedProperties {
     | "airdropPage"
     | "404Page";
   path: string;
+  /**
+   * Address of referee, null if no referral used
+   */
+  referralProgramAddress?: string;
   /**
    * Referring url
    */

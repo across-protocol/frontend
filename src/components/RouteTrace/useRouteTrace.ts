@@ -1,3 +1,4 @@
+import useReferrer from "hooks/useReferrer";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { currentGitCommitHash, getConfig } from "utils";
@@ -5,6 +6,7 @@ import { ampli } from "../../ampli";
 
 export function useRouteTrace() {
   const location = useLocation();
+  const { referrer: referralAddress } = useReferrer();
   const [initialPage, setInitialPage] = useState(true);
   const [path, setPath] = useState("");
 
@@ -26,6 +28,7 @@ export function useRouteTrace() {
         isInitialPageView: initialPage,
         page,
         gitCommitHash: currentGitCommitHash,
+        referralProgramAddress: referralAddress,
       });
       setInitialPage(false);
     }
