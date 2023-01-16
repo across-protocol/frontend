@@ -13,7 +13,8 @@ export function useBridgeAction(
   dataLoading: boolean,
   payload?: AcrossDepositArgs,
   tokenSymbol?: string,
-  onTransactionComplete?: (hash: string) => void
+  onTransactionComplete?: (hash: string) => void,
+  onDepositResolved?: (success: boolean) => void
 ) {
   const { isConnected, connect, account, chainId, signer, notify } =
     useConnection();
@@ -63,8 +64,14 @@ export function useBridgeAction(
               onTransactionComplete(tx.hash);
             }
             await notificationEmitter(tx.hash, notify);
+            if (onDepositResolved) {
+              onDepositResolved(true);
+            }
           } catch (e) {
             console.error(e);
+            if (onDepositResolved) {
+              onDepositResolved(false);
+            }
             return;
           }
         }

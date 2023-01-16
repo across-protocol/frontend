@@ -17,7 +17,6 @@ export function useTransaction(chainId: ChainId, txHash?: string) {
     () => getTransactionReceipt(txHash!, provider!),
     {
       enabled: !!txHash && !!provider,
-      refetchInterval: 1000,
       staleTime: Infinity,
     }
   );

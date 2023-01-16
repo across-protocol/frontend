@@ -10,20 +10,12 @@ export function useBridgeDepositTracking() {
     Date | undefined
   >(undefined);
   const { chainId } = useConnection();
-  const { receipt, explorerUrl } = useTransaction(chainId || 1, txHash);
+  const { explorerUrl } = useTransaction(chainId || 1, txHash);
 
   useEffect(() => {
     setStartDate(txHash ? new Date() : undefined);
+    setDepositFinishedDate(undefined);
   }, [txHash]);
-
-  useEffect(() => {
-    if (!depositFinishedDate) {
-      setDepositFinishedDate(
-        receipt && receipt.status === 1 ? new Date() : undefined
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [receipt]);
 
   const trackingTxHash = !!txHash;
   const elapsedSeconds = startDate
@@ -39,14 +31,18 @@ export function useBridgeDepositTracking() {
     setTxHash(txHash);
   };
 
+  const onDepositResolved = (success: boolean) => {
+    setDepositFinishedDate(success ? new Date() : undefined);
+  };
+
   return {
     txHash,
     onTxHashChange,
-    receipt,
     explorerUrl,
     trackingTxHash,
     transactionPending: !depositFinished,
     transactionElapsedSeconds: elapsedSeconds,
     transactionElapsedTimeAsFormattedString: elapsedTimeAsFormattedString,
+    onDepositResolved,
   };
 }
