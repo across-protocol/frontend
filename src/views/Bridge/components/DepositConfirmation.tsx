@@ -12,7 +12,6 @@ import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-external-
 import EstimatedTable from "./EstimatedTable";
 import { BigNumber } from "ethers";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
-import { Link } from "react-router-dom";
 import { keyframes } from "@emotion/react";
 
 type DepositConfirmationProps = {
@@ -91,9 +90,9 @@ const DepositConfirmation = ({
             Transactions page
           </Text>
         </ActionCardTitleWrapper>
-        <ExternalContainerIconLink to="/transactions">
+        <ExternalContainerIconAnchor href="/transactions">
           <StyledExternalLinkIcon />
-        </ExternalContainerIconLink>
+        </ExternalContainerIconAnchor>
       </ActionCard>
       <ActionCard>
         <ActionCardTitleWrapper>
@@ -295,11 +294,6 @@ const StyledExternalLinkIcon = styled(ExternalLinkIcon)`
 `;
 
 const ExternalContainerIconAnchor = styled.a`
-  height: 32px;
-  width: 32px;
-`;
-
-const ExternalContainerIconLink = styled(Link)`
   height: 32px;
   width: 32px;
 `;
