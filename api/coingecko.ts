@@ -1,8 +1,13 @@
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { isString } from "./_typeguards";
-import { CoinGeckoInputRequest } from "./_types";
-import { getLogger, InputError, handleErrorCondition } from "./_utils";
+import { object, assert, Infer, optional, string } from "superstruct";
+import { TypedVercelRequest } from "./_types";
+import {
+  getLogger,
+  InputError,
+  handleErrorCondition,
+  validAddress,
+} from "./_utils";
 import { SUPPORTED_CG_BASE_CURRENCIES } from "./_constants";
 
 import { coingecko, constants as sdkConstants } from "@across-protocol/sdk-v2";
@@ -78,19 +83,26 @@ const getCoingeckoPrices = async (
   );
 };
 
+const CoingeckoQueryParamsSchema = object({
+  l1Token: validAddress(),
+  baseCurrency: optional(string()),
+});
+
+type CoingeckoQueryParams = Infer<typeof CoingeckoQueryParamsSchema>;
+
 const handler = async (
-  { query: { l1Token, baseCurrency } }: CoinGeckoInputRequest,
+  { query }: TypedVercelRequest<CoingeckoQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
   try {
-    if (!isString(l1Token))
-      throw new InputError("Must provide l1Token as query param");
+    assert(query, CoingeckoQueryParamsSchema);
+    let { l1Token, baseCurrency } = query;
 
     // Start the symbol as lower case for CG.
     // This isn't explicitly required, but there's nothing in their docs that guarantee that upper-case symbols will
     // work.
-    if (!isString(baseCurrency)) baseCurrency = "eth";
+    if (!baseCurrency) baseCurrency = "eth";
     else baseCurrency = baseCurrency.toLowerCase();
 
     l1Token = ethers.utils.getAddress(l1Token);

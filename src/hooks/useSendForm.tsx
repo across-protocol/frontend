@@ -498,6 +498,7 @@ function useSendFormManager(): SendFormManagerContext {
       type: ActionType.SET_TO_ADDRESS,
       payload: toAddress,
     });
+    ampli.toAccountChanged({ toWalletAddress: toAddress });
   }, []);
   const setError = useCallback((error: ParsingError | undefined) => {
     dispatch({
@@ -529,7 +530,7 @@ function useSendFormManager(): SendFormManagerContext {
   );
   useEffect(() => {
     const toChain = state.toChain;
-    if (toChain && toChain === undefined) {
+    if (toChain && previousToChain === undefined) {
       const chainInfo = getChainInfo(toChain);
       ampli.toChainSelected({
         toChainId: chainInfo.chainId.toString(),
@@ -539,22 +540,6 @@ function useSendFormManager(): SendFormManagerContext {
       setPreviousToChain(toChain);
     }
   }, [state.toChain, previousToChain]);
-
-  // Amplitude tracking for the toAccount address
-  const [previousToAccount, setPreviousToAccount] = useState<
-    string | undefined
-  >(undefined);
-  useEffect(() => {
-    const address = state.toAddress;
-    if (
-      address &&
-      address !== previousToAccount &&
-      address !== connectedAccount
-    ) {
-      ampli.toAccountChanged({ toWalletAddress: address });
-      setPreviousToAccount(address);
-    }
-  }, [state.toAddress, previousToAccount, connectedAccount]);
 
   // Amplitude tracking for the token symbol
   const [previousTokenSymbol, setPreviousTokenSymbol] = useState<

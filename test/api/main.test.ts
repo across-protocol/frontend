@@ -35,7 +35,7 @@ describe("API Test", () => {
     await limitsHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
-      "Must provide token and destinationChainId as query params"
+      expect.stringMatching(/At path: token/)
     );
   });
 
@@ -43,7 +43,7 @@ describe("API Test", () => {
     await feesHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
-      "Must provide amount, token, and destinationChainId as query params"
+      expect.stringMatching(/At path: amount/)
     );
   });
 
@@ -51,7 +51,7 @@ describe("API Test", () => {
     await poolsHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
-      "Must provide token as query param"
+      expect.stringMatching(/At path: token/)
     );
   });
 
@@ -59,7 +59,7 @@ describe("API Test", () => {
     await coingeckoHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
-      "Must provide l1Token as query param"
+      expect.stringMatching(/At path: l1Token/)
     );
   });
 

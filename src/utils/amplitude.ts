@@ -399,3 +399,9 @@ export function reportTokenBalance(
   identifyObj.set(`${chainName}${tokenName}WalletCurrentBalance`, tokenBalance);
   ampli.client?.identify(identifyObj);
 }
+
+export function reportTotalWalletUsdBalance(totalBalance: number) {
+  const identifyObj = new Identify();
+  identifyObj.set("usdWalletCurrentBalance", totalBalance);
+  ampli.client?.identify(identifyObj);
+}
