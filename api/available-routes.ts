@@ -1,16 +1,38 @@
 import { VercelResponse } from "@vercel/node";
-import { getLogger, handleErrorCondition, applyMapFilter } from "./_utils";
+import { object, assert, Infer, optional } from "superstruct";
+import {
+  getLogger,
+  handleErrorCondition,
+  applyMapFilter,
+  validAddress,
+  positiveIntStr,
+} from "./_utils";
 import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
-import { AvailableRoutesInputRequest, L1TokenMapRouting } from "./_types";
+import { TypedVercelRequest } from "./_types";
+
+const AvailableRoutesQueryParamsSchema = object({
+  originToken: optional(validAddress()),
+  destinationToken: optional(validAddress()),
+  destinationChainId: optional(positiveIntStr()),
+  originChainId: optional(positiveIntStr()),
+});
+
+type AvailableRoutesQueryParams = Infer<
+  typeof AvailableRoutesQueryParamsSchema
+>;
+
+type L1TokenMapRouting = Record<string, Record<string, string>>;
 
 const handler = async (
-  {
-    query: { originChainId, destinationChainId, originToken, destinationToken },
-  }: AvailableRoutesInputRequest,
+  { query }: TypedVercelRequest<AvailableRoutesQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
   try {
+    assert(query, AvailableRoutesQueryParamsSchema);
+    const { originToken, destinationToken, originChainId, destinationChainId } =
+      query;
+
     // Generate a mapping that contains similar tokens on each chain
     // Note:  The key in this dictionary represents an l1Token address, and
     //        the corresponding value is a nested hashmap containing a key

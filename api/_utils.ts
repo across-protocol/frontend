@@ -6,8 +6,9 @@ import {
 } from "@across-protocol/contracts-v2";
 import axios from "axios";
 import * as sdk from "@across-protocol/sdk-v2";
-import { BigNumber, ethers, providers } from "ethers";
+import { BigNumber, ethers, providers, utils } from "ethers";
 import { Log, Logging } from "@google-cloud/logging";
+import { define, StructError } from "superstruct";
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
 
@@ -620,7 +621,7 @@ export function handleErrorCondition(
     return response.status(500).send("Error could not be defined.");
   }
   let status: number;
-  if (error instanceof InputError) {
+  if (error instanceof InputError || error instanceof StructError) {
     logger.warn({ at: endpoint, message: "400 input error", error });
     status = 400;
   } else {
@@ -628,4 +629,35 @@ export function handleErrorCondition(
     status = 500;
   }
   return response.status(status).send(error.message);
+}
+
+/* ------------------------- superstruct validators ------------------------- */
+
+export function parsableBigNumberString() {
+  return define<string>("parsableBigNumberString", (value) => {
+    try {
+      BigNumber.from(value);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  });
+}
+
+export function validAddress() {
+  return define<string>("validAddress", (value) =>
+    utils.isAddress(value as string)
+  );
+}
+
+export function positiveIntStr() {
+  return define<string>("positiveIntStr", (value) => {
+    return Number.isInteger(Number(value)) && Number(value) > 0;
+  });
+}
+
+export function boolStr() {
+  return define<string>("boolStr", (value) => {
+    return value === "true" || value === "false";
+  });
 }

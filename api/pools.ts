@@ -1,27 +1,32 @@
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { isString } from "./_typeguards";
-import { PoolInputRequest } from "./_types";
+import { object, assert, Infer } from "superstruct";
+import { TypedVercelRequest } from "./_types";
 
 import {
   getLogger,
-  InputError,
   getHubPoolClient,
   handleErrorCondition,
+  validAddress,
 } from "./_utils";
 
+const PoolsQueryParamsSchema = object({
+  token: validAddress(),
+});
+
+type PoolsQueryParams = Infer<typeof PoolsQueryParamsSchema>;
+
 const handler = async (
-  { query: { token } }: PoolInputRequest,
+  { query }: TypedVercelRequest<PoolsQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
   try {
-    const hubPoolClient = await getHubPoolClient();
+    const hubPoolClient = getHubPoolClient();
 
-    if (!isString(token))
-      throw new InputError("Must provide token as query param");
+    assert(query, PoolsQueryParamsSchema);
 
-    token = ethers.utils.getAddress(token);
+    const token = ethers.utils.getAddress(query.token);
 
     await hubPoolClient.updatePool(token);
 

@@ -5,9 +5,10 @@ import { HubPool__factory } from "@across-protocol/contracts-v2";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
-import { isPromiseRejectedResult, isString } from "./_typeguards";
-import { LimitsInputRequest } from "./_types";
+import { isPromiseRejectedResult } from "./_typeguards";
+import { TypedVercelRequest } from "./_types";
 import * as sdk from "@across-protocol/sdk-v2";
+import { object, assert, Infer, optional } from "superstruct";
 
 import {
   getLogger,
@@ -20,10 +21,20 @@ import {
   minBN,
   isRouteEnabled,
   handleErrorCondition,
+  validAddress,
+  positiveIntStr,
 } from "./_utils";
 
+const LimitsQueryParamsSchema = object({
+  token: validAddress(),
+  destinationChainId: positiveIntStr(),
+  originChainId: optional(positiveIntStr()),
+});
+
+type LimitsQueryParams = Infer<typeof LimitsQueryParamsSchema>;
+
 const handler = async (
-  { query: { token, destinationChainId, originChainId } }: LimitsInputRequest,
+  { query }: TypedVercelRequest<LimitsQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -54,10 +65,9 @@ const handler = async (
             return ethers.utils.getAddress(relayer);
           }
         );
-    if (!isString(token) || !isString(destinationChainId))
-      throw new InputError(
-        "Must provide token and destinationChainId as query params"
-      );
+
+    assert(query, LimitsQueryParamsSchema);
+    let { token, destinationChainId, originChainId } = query;
 
     if (originChainId === destinationChainId) {
       throw new InputError("Origin and destination chains cannot be the same");

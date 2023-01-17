@@ -5,9 +5,9 @@ import * as sdk from "@across-protocol/sdk-v2";
 import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
+import { type, assert, Infer, optional } from "superstruct";
 import { disabledL1Tokens, DEFAULT_QUOTE_TIMESTAMP_BUFFER } from "./_constants";
-import { isString } from "./_typeguards";
-import { SuggestedFeesInputRequest } from "./_types";
+import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
   getTokenDetails,
@@ -17,19 +17,25 @@ import {
   isRouteEnabled,
   getCachedTokenPrice,
   handleErrorCondition,
+  parsableBigNumberString,
+  validAddress,
+  positiveIntStr,
+  boolStr,
 } from "./_utils";
 
+const SuggestedFeesQueryParamsSchema = type({
+  amount: parsableBigNumberString(),
+  token: validAddress(),
+  destinationChainId: positiveIntStr(),
+  originChainId: optional(positiveIntStr()),
+  timestamp: optional(positiveIntStr()),
+  skipAmountLimit: optional(boolStr()),
+});
+
+type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
+
 const handler = async (
-  {
-    query: {
-      amount: amountInput,
-      token,
-      timestamp,
-      destinationChainId,
-      originChainId,
-      skipAmountLimit,
-    },
-  }: SuggestedFeesInputRequest,
+  { query }: TypedVercelRequest<SuggestedFeesQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -41,21 +47,19 @@ const handler = async (
 
     const provider = infuraProvider("mainnet");
 
-    if (
-      !isString(amountInput) ||
-      !isString(token) ||
-      !isString(destinationChainId)
-    )
-      throw new InputError(
-        "Must provide amount, token, and destinationChainId as query params"
-      );
+    assert(query, SuggestedFeesQueryParamsSchema);
+
+    let {
+      amount: amountInput,
+      token,
+      destinationChainId,
+      originChainId,
+      timestamp,
+      skipAmountLimit,
+    } = query;
+
     if (originChainId === destinationChainId) {
       throw new InputError("Origin and destination chains cannot be the same");
-    }
-
-    const amountAsValue = Number(amountInput);
-    if (Number.isNaN(amountAsValue) || amountAsValue <= 0) {
-      throw new InputError("Value provided in amount parameter is not valid.");
     }
 
     token = ethers.utils.getAddress(token);
@@ -64,7 +68,7 @@ const handler = async (
     // older than HEAD. This is to improve relayer UX who have heightened risk of sending inadvertent invalid
     // fills for quote times right at HEAD (or worst, in the future of HEAD). If timestamp is supplied as a query param,
     // then no need to apply buffer.
-    const parsedTimestamp = isString(timestamp)
+    const parsedTimestamp = timestamp
       ? Number(timestamp)
       : (await provider.getBlock("latest")).timestamp - quoteTimeBuffer;
 
