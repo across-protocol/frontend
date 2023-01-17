@@ -1,5 +1,10 @@
-import { useCallback, useContext, useEffect } from "react";
-import { useState, createContext } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  createContext,
+} from "react";
 import {
   ChainId,
   UnsupportedChainIdError,
@@ -7,11 +12,10 @@ import {
   insideStorybookRuntime,
   hubPoolChainId,
   trackIfWalletSelected,
-  trackWalletConnectTransactionCompleted,
   trackConnectWalletButtonClicked,
   trackDisconnectWalletButtonClicked,
-  identifyUserWallets,
-  trackWalletChainId,
+  CACHED_WALLET_KEY,
+  setUserId,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
@@ -37,8 +41,6 @@ export type SetChainOptions = {
   chainId: string;
   chainNamespace?: string;
 };
-
-const CACHED_WALLET_KEY = "previous-wallet-service";
 
 type TrackOnConnectOptions = {
   trackSection?: ConnectWalletButtonClickedProperties["section"];
@@ -124,17 +126,6 @@ export function useOnboardManager() {
   }, [wallet]);
 
   useEffect(() => {
-    if (connectedChain && wallet) {
-      const chainId = String(parseInt(connectedChain.id, 16));
-      trackWalletChainId(chainId);
-      ampli.walletNetworkSelected({
-        chainId,
-        chainName: connectedChain?.namespace || "unknown",
-      });
-    }
-  }, [connectedChain, wallet]);
-
-  useEffect(() => {
     // Only acknowledge the state where onboard is defined
     // Also disable for when running inside of storybook
     if (onboard && !insideStorybookRuntime) {
@@ -193,12 +184,11 @@ export function useOnboardManager() {
         options?.autoSelect ? options : undefined
       );
 
-      identifyUserWallets(walletStates);
+      setUserId(walletStates[0]?.accounts[0]?.address);
       if (options?.trackSection) {
         trackConnectWalletButtonClicked(options.trackSection);
       }
       trackIfWalletSelected(walletStates, previousConnection);
-      trackWalletConnectTransactionCompleted(walletStates, previousConnection);
 
       return walletStates;
     },

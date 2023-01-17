@@ -670,3 +670,5 @@ export const amplitudeEnvironment =
     : "development";
 
 export const currentGitCommitHash = process.env.REACT_APP_GIT_COMMIT_HASH ?? "";
+
+export const CACHED_WALLET_KEY = "previous-wallet-service";
