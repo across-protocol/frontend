@@ -529,7 +529,7 @@ function useSendFormManager(): SendFormManagerContext {
   );
   useEffect(() => {
     const toChain = state.toChain;
-    if (toChain && toChain === undefined) {
+    if (toChain && previousToChain === undefined) {
       const chainInfo = getChainInfo(toChain);
       ampli.toChainSelected({
         toChainId: chainInfo.chainId.toString(),
