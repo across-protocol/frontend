@@ -5,6 +5,7 @@ import {
   ChainId,
   fixedPointAdjustment,
   getBalance,
+  getConfig,
   getRoutes,
   getToken,
   reportTotalWalletUsdBalance,
@@ -29,7 +30,7 @@ type TokenSymbolAddressType = {
   fromTokenAddress: string;
 };
 const availableTokens: Record<number, TokenSymbolAddressType[]> = getRoutes(
-  ChainId.MAINNET
+  getConfig().getHubPoolChainId()
 ).routes.reduce((acc, route) => {
   const { fromChain, fromTokenSymbol, fromTokenAddress } = route;
   const payload = { fromTokenSymbol, fromTokenAddress };
