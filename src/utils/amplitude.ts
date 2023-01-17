@@ -93,6 +93,14 @@ export function trackDisconnectWalletButtonClicked(
   });
 }
 
+export function setUserId(walletAddress?: string) {
+  if (!walletAddress) {
+    return;
+  }
+
+  ampli.client?.setUserId(walletAddress);
+}
+
 export function identifyUserWallets(walletStates: WalletState[]) {
   if (walletStates.length === 0) {
     return;
@@ -105,20 +113,14 @@ export function identifyUserWallets(walletStates: WalletState[]) {
 
   ampli.client?.setUserId(connectedWalletAddress);
 
-  let chainId = connectedWallet.chains[0].id;
-  if (chainId.startsWith("0x")) {
-    chainId = parseInt(chainId, 16).toString();
-  }
-
   const identifyObj = new Identify();
   identifyObj.postInsert("allWalletAddressesConnected", connectedWalletAddress);
-  identifyObj.postInsert("allWalletChainIds", chainId);
   identifyObj.set("walletAddress", connectedWalletAddress);
   identifyObj.set("walletType", connectedWallet.label);
   return ampli.client?.identify(identifyObj);
 }
 
-export function trackWalletChainId(chainId: string) {
+export function trackWalletChainId(chainId: string | number) {
   const identifyObj = new Identify();
   identifyObj.postInsert("allWalletChainIds", chainId);
   return ampli.client?.identify(identifyObj);
