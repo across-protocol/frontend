@@ -104,7 +104,7 @@ export default function useSendAction(
       );
       ampli.transferQuoteReceived(quote);
       setQuote(quote);
-      setInitialQuoteTime((s) => s ?? Number(quote.quoteTimestamp));
+      setInitialQuoteTime((s) => s ?? Date.now());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fees, selectedRoute, tokenInfo]);
