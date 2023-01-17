@@ -224,17 +224,11 @@ export function generateTransferSubmitted(
   referralProgramAddress: string,
   initialQuoteTime: number
 ): TransferSubmittedProperties {
-  // Retrieves the from symbol by address from the config
-  const fromAddress = getConfig().getTokenInfoBySymbol(
+  const { fromAddress, toAddress } = getConfig().getFromToAddressesBySymbol(
+    quote.tokenSymbol,
     Number(quote.fromChainId),
-    quote.tokenSymbol
-  ).address;
-  // Retrieves the to symbol by address from the config
-  const toAddress = getConfig().getTokenInfoBySymbol(
-    Number(quote.toChainId),
-    quote.tokenSymbol
-  ).address;
-
+    Number(quote.toChainId)
+  );
   return {
     ...quote,
     fromTokenAddress: fromAddress,
@@ -254,17 +248,11 @@ export function generateTransferSigned(
   initialSubmissionTime: number,
   txHash: string
 ): TransferSignedProperties {
-  // Retrieves the from symbol by address from the config
-  const fromAddress = getConfig().getTokenInfoBySymbol(
+  const { fromAddress, toAddress } = getConfig().getFromToAddressesBySymbol(
+    quote.tokenSymbol,
     Number(quote.fromChainId),
-    quote.tokenSymbol
-  ).address;
-  // Retrieves the to symbol by address from the config
-  const toAddress = getConfig().getTokenInfoBySymbol(
-    Number(quote.toChainId),
-    quote.tokenSymbol
-  ).address;
-
+    Number(quote.toChainId)
+  );
   return {
     ...quote,
     fromTokenAddress: fromAddress,
@@ -286,17 +274,11 @@ export function generateDepositConfirmed(
   success: boolean,
   txCompletedTimestamp: number
 ): TransferDepositCompletedProperties {
-  // Retrieves the from symbol by address from the config
-  const fromAddress = getConfig().getTokenInfoBySymbol(
+  const { fromAddress, toAddress } = getConfig().getFromToAddressesBySymbol(
+    quote.tokenSymbol,
     Number(quote.fromChainId),
-    quote.tokenSymbol
-  ).address;
-  // Retrieves the to symbol by address from the config
-  const toAddress = getConfig().getTokenInfoBySymbol(
-    Number(quote.toChainId),
-    quote.tokenSymbol
-  ).address;
-
+    Number(quote.toChainId)
+  );
   return {
     ...quote,
     fromTokenAddress: fromAddress,

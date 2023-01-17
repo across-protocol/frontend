@@ -260,6 +260,33 @@ export class ConfigClient {
       l1TokenAddress: token.l1TokenAddress,
     };
   }
+  getTokenInfoByL1TokenAddress(chainId: number, l1TokenAddress: string): Token {
+    const tokens = this.getTokenList(chainId);
+    const token = tokens.find(
+      (token) => token.l1TokenAddress === l1TokenAddress
+    );
+    assert(
+      token,
+      `Token not found on chain ${chainId} and l1TokenAddress ${l1TokenAddress}`
+    );
+    return token;
+  }
+  getFromToAddressesBySymbol(
+    symbol: string,
+    fromChainId: number,
+    toChainId: number
+  ) {
+    const { l1TokenAddress } = this.getTokenInfoBySymbol(fromChainId, symbol);
+    const fromAddress = this.getTokenInfoByL1TokenAddress(
+      fromChainId,
+      l1TokenAddress
+    ).address;
+    const toAddress = this.getTokenInfoByL1TokenAddress(
+      toChainId,
+      l1TokenAddress
+    ).address;
+    return { fromAddress, toAddress };
+  }
   getNativeTokenInfo(chainId: number): constants.TokenInfo {
     const chainInfo = constants.getChainInfo(chainId);
     return constants.getToken(chainInfo.nativeCurrencySymbol);
