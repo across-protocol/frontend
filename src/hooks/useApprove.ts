@@ -3,7 +3,7 @@ import { useMutation } from "react-query";
 import { BigNumberish } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 
-import { MAX_APPROVAL_AMOUNT, notificationEmitter } from "utils";
+import { MAX_APPROVAL_AMOUNT, waitOnTransaction } from "utils";
 import { useIsWrongNetwork } from "hooks";
 
 export function useApprove() {
@@ -39,7 +39,7 @@ export function useApprove() {
         args.allowedContractAddress,
         MAX_APPROVAL_AMOUNT
       );
-      await notificationEmitter(txResponse.hash, notify);
+      await waitOnTransaction(txResponse, notify);
     }
   };
 

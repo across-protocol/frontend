@@ -5,14 +5,16 @@ import {
   AcrossDepositArgs,
   getConfig,
   MAX_APPROVAL_AMOUNT,
-  notificationEmitter,
   sendAcrossDeposit,
+  waitOnTransaction,
 } from "utils";
 
 export function useBridgeAction(
   dataLoading: boolean,
   payload?: AcrossDepositArgs,
-  tokenSymbol?: string
+  tokenSymbol?: string,
+  onTransactionComplete?: (hash: string) => void,
+  onDepositResolved?: (success: boolean) => void
 ) {
   const { isConnected, connect, account, chainId, signer, notify } =
     useConnection();
@@ -36,7 +38,7 @@ export function useBridgeAction(
               signer,
             });
             if (tx) {
-              await notificationEmitter(tx.hash, notify);
+              await waitOnTransaction(tx, notify);
             }
           } catch (e) {
             console.error(e);
@@ -58,9 +60,18 @@ export function useBridgeAction(
           }
           try {
             const tx = await sendAcrossDeposit(signer, payload);
-            await notificationEmitter(tx.hash, notify);
+            if (onTransactionComplete) {
+              onTransactionComplete(tx.hash);
+            }
+            await waitOnTransaction(tx, notify);
+            if (onDepositResolved) {
+              onDepositResolved(true);
+            }
           } catch (e) {
             console.error(e);
+            if (onDepositResolved) {
+              onDepositResolved(false);
+            }
             return;
           }
         }

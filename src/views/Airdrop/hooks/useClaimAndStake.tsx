@@ -1,7 +1,7 @@
 import { useMutation } from "react-query";
 
 import { getConfig } from "utils/config";
-import { notificationEmitter } from "utils/notify";
+import { waitOnTransaction } from "utils/notify";
 import { useConnection, useIsWrongNetwork } from "hooks";
 
 import { useAirdropRecipient } from "./useAirdropRecipient";
@@ -43,7 +43,7 @@ export function useClaimAndStake() {
       "claimAndStake"
     )(parameters);
 
-    await notificationEmitter(claimAndStakeTx.hash, notify, 0);
+    await waitOnTransaction(claimAndStakeTx, notify, 0);
   };
 
   return useMutation(handleClaimAndStake, {
