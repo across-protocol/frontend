@@ -22,7 +22,7 @@ const SendForm: React.FC<Props> = ({ onDepositConfirmed }) => {
       {wrongNetwork && provider && fromChain && (
         <SuperHeader>
           <div>
-            You are on an incorrect network. Please{" "}
+            You are on the incorrect network. Please{" "}
             <button onClick={() => switchChain(provider, fromChain)}>
               switch to {getChainInfo(fromChain).name}
             </button>

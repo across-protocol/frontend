@@ -23,7 +23,7 @@ const Staking = () => {
       {isWrongNetwork && (
         <SuperHeader>
           <div>
-            You are on an incorrect network. Please{" "}
+            You are on the incorrect network. Please{" "}
             <button onClick={isWrongNetworkHandler}>
               switch to {getChainInfo(hubPoolChainId).name}
             </button>

@@ -146,7 +146,7 @@ const Pool: FC = () => {
       {wrongNetwork && (
         <SuperHeader>
           <div>
-            You are on an incorrect network. Please{" "}
+            You are on the incorrect network. Please{" "}
             <button onClick={() => switchChain(provider, chainId)}>
               switch to {chainInfo.name}
             </button>

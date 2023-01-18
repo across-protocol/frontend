@@ -176,7 +176,7 @@ function AlertBox({
           <Info />
         </div>
         <p>
-          You are on an incorrect network. Please{" "}
+          You are on the incorrect network. Please{" "}
           <button onClick={onClickSwitch}>
             switch to {getChainInfo(sourceChainId).name}
           </button>
