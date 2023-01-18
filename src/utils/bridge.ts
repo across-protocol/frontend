@@ -45,6 +45,8 @@ export type BridgeFees = {
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
   quoteTimestamp: ethers.BigNumber;
+  quoteTimestampInMs: ethers.BigNumber;
+  quoteLatency: ethers.BigNumber;
   quoteBlock: ethers.BigNumber;
 };
 
@@ -141,6 +143,7 @@ export async function getBridgeFees({
   toChainId,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const config = getConfig();
+  const timeBeforeRequests = Date.now();
   const l1TokenAddress = config.getL1TokenAddressBySymbol(tokenSymbol);
   const {
     relayerFee,
@@ -161,6 +164,9 @@ export async function getBridgeFees({
     console.error("Error getting lp fee", err);
     throw err;
   });
+  const timeAfterRequests = Date.now();
+
+  const quoteLatency = BigNumber.from(timeAfterRequests - timeBeforeRequests);
 
   return {
     relayerFee,
@@ -170,7 +176,9 @@ export async function getBridgeFees({
     isAmountTooLow,
     isLiquidityInsufficient,
     quoteTimestamp,
+    quoteTimestampInMs: quoteTimestamp.mul(1000),
     quoteBlock,
+    quoteLatency,
   };
 }
 

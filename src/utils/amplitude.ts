@@ -192,10 +192,8 @@ export function generateTransferQuote(
     lpFeePct: formatWeiEtherPct(fees.lpFee.pct),
     lpFeeTotal: formatTokens(fees.lpFee.total),
     lpFeeTotalUsd: usdEquivalentString(fees.lpFee.total),
-    quoteLatencyMilliseconds: (
-      Date.now() - Number(fees.quoteTimestamp?.toString() ?? Date.now())
-    ).toString(),
-    quoteTimestamp: String(fees.quoteTimestamp ?? Date.now()),
+    quoteLatencyMilliseconds: fees.quoteLatency.toString(),
+    quoteTimestamp: String(fees.quoteTimestampInMs ?? Date.now()),
     recipient: toAddress,
     relayFeePct: formatWeiEtherPct(fees.relayerFee.pct),
     relayFeeTotal: formatTokens(fees.relayerFee.total),
@@ -234,7 +232,7 @@ export function generateTransferSubmitted(
     fromTokenAddress: fromAddress,
     referralProgramAddress: referralProgramAddress,
     timeFromFirstQuoteToTransferSubmittedInMilliseconds: String(
-      Date.now() - initialQuoteTime * 1000
+      Date.now() - initialQuoteTime
     ),
     transferTimestamp: String(Date.now()),
     toTokenAddress: toAddress,
