@@ -5,8 +5,8 @@ import {
   AcrossDepositArgs,
   getConfig,
   MAX_APPROVAL_AMOUNT,
-  notificationEmitter,
   sendAcrossDeposit,
+  waitOnTransaction,
 } from "utils";
 
 export function useBridgeAction(
@@ -38,7 +38,7 @@ export function useBridgeAction(
               signer,
             });
             if (tx) {
-              await notificationEmitter(tx.hash, notify);
+              await waitOnTransaction(tx, notify);
             }
           } catch (e) {
             console.error(e);
@@ -63,7 +63,7 @@ export function useBridgeAction(
             if (onTransactionComplete) {
               onTransactionComplete(tx.hash);
             }
-            await notificationEmitter(tx.hash, notify);
+            await waitOnTransaction(tx, notify);
             if (onDepositResolved) {
               onDepositResolved(true);
             }

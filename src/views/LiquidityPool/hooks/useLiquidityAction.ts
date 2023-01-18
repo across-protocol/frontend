@@ -6,7 +6,7 @@ import {
   getConfig,
   hubPoolChainId,
   hubPoolAddress,
-  notificationEmitter,
+  waitOnTransaction,
 } from "utils";
 import { useIsWrongNetwork, useApprove, useStakingPool } from "hooks";
 
@@ -66,7 +66,7 @@ export function useAddLiquidity(tokenSymbol?: string, l1TokenAddress?: string) {
         value: isEth ? parsedAndValidAmount : undefined,
       }
     );
-    await notificationEmitter(txResponse.hash, notify);
+    await waitOnTransaction(txResponse, notify);
   };
 
   return useMutation(handleAddLiquidity, {
@@ -115,7 +115,7 @@ export function useRemoveLiquidity(
       parsedAndValidAmount,
       isEth
     );
-    await notificationEmitter(txResponse.hash, notify);
+    await waitOnTransaction(txResponse, notify);
   };
 
   return useMutation(handleRemoveLiquidity, {
