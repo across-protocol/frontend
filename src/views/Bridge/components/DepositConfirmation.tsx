@@ -2,17 +2,17 @@ import styled from "@emotion/styled";
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
 import { Text } from "components";
 import { ReactComponent as CheckStarIcon } from "assets/check-star-ring-opaque-filled.svg";
-import {
-  GetBridgeFeesResult,
-  getChainInfo,
-  getToken,
-  receiveAmount,
-} from "utils";
+import { ChainId, GetBridgeFeesResult, getToken, receiveAmount } from "utils";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-external-link-16.svg";
 import EstimatedTable from "./EstimatedTable";
 import { BigNumber } from "ethers";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 import { keyframes } from "@emotion/react";
+import { ReactComponent as EthereumGrayscaleLogo } from "assets/grayscale-logos/eth.svg";
+import { ReactComponent as PolygonGrayscaleLogo } from "assets/grayscale-logos/polygon.svg";
+import { ReactComponent as BobaGrayscaleLogo } from "assets/grayscale-logos/boba.svg";
+import { ReactComponent as ArbitrumGrayscaleLogo } from "assets/grayscale-logos/arbitrum.svg";
+import { ReactComponent as OptimismGrayscaleLogo } from "assets/grayscale-logos/optimism.svg";
 
 type DepositConfirmationProps = {
   currentFromRoute: number | undefined;
@@ -43,104 +43,125 @@ const DepositConfirmation = ({
   onTxHashChange,
   explorerLink,
   elapsedTimeFromDeposit,
-}: DepositConfirmationProps) => (
-  <Wrapper>
-    <TopWrapper>
-      <TopWrapperAnimationWrapper>
-        <AnimatedLogoWrapper completed={!transactionPending}>
-          <AnimatedLogo src={getChainInfo(currentFromRoute ?? 1).logoURI} />
-        </AnimatedLogoWrapper>
-        <AnimatedDivider completed={!transactionPending} />
-        <StyledCheckStarIcon completed={!transactionPending} />
-        <AnimatedDivider completed={!transactionPending} />
-        <AnimatedLogoWrapper completed={!transactionPending}>
-          <AnimatedLogo src={getChainInfo(currentToRoute ?? 1).logoURI} />
-        </AnimatedLogoWrapper>
-      </TopWrapperAnimationWrapper>
-      {transactionPending ? (
-        <TopWrapperTitleWrapper>
-          <Text size="3xl" color="white">
-            {elapsedTimeFromDeposit ?? "00h 00m 00s"}
-          </Text>
-          <Text size="lg" color="grey-400">
-            Deposit in progress
-          </Text>
-        </TopWrapperTitleWrapper>
-      ) : (
-        <AnimatedTopWrapperTitleWrapper>
-          <Text size="3xl" color="aqua">
-            Deposit successful!
-          </Text>
-          <Text size="lg" color="grey-400">
-            Finished in{" "}
-            <WhiteSpanText>
+}: DepositConfirmationProps) => {
+  const LogoMapping: {
+    [key: number]: JSX.Element;
+  } = {
+    [ChainId.ARBITRUM]: <ArbitrumGrayscaleLogo />,
+    [ChainId.POLYGON]: <PolygonGrayscaleLogo />,
+    [ChainId.BOBA]: <BobaGrayscaleLogo />,
+    [ChainId.OPTIMISM]: <OptimismGrayscaleLogo />,
+    [ChainId.MAINNET]: <EthereumGrayscaleLogo />,
+    [ChainId.ARBITRUM_RINKEBY]: <EthereumGrayscaleLogo />,
+    [ChainId.MUMBAI]: <EthereumGrayscaleLogo />,
+    [ChainId.KOVAN_OPTIMISM]: <EthereumGrayscaleLogo />,
+    [ChainId.KOVAN]: <EthereumGrayscaleLogo />,
+    [ChainId.RINKEBY]: <EthereumGrayscaleLogo />,
+  };
+
+  return (
+    <Wrapper>
+      <TopWrapper>
+        <TopWrapperAnimationWrapper>
+          <AnimatedLogoWrapper completed={!transactionPending}>
+            <AnimatedLogo completed={!transactionPending}>
+              {LogoMapping[currentFromRoute ?? 1]}
+            </AnimatedLogo>
+          </AnimatedLogoWrapper>
+          <AnimatedDivider completed={!transactionPending} />
+          <StyledCheckStarIcon completed={!transactionPending} />
+          <AnimatedDivider completed={!transactionPending} />
+          <AnimatedLogoWrapper completed={!transactionPending}>
+            <AnimatedLogo completed={!transactionPending}>
+              {LogoMapping[currentToRoute ?? 1]}
+            </AnimatedLogo>
+          </AnimatedLogoWrapper>
+        </TopWrapperAnimationWrapper>
+        {transactionPending ? (
+          <TopWrapperTitleWrapper>
+            <Text size="3xl" color="white">
               {elapsedTimeFromDeposit ?? "00h 00m 00s"}
-            </WhiteSpanText>
-          </Text>
-        </AnimatedTopWrapperTitleWrapper>
-      )}
-    </TopWrapper>
-    <ActionCardContainer>
-      <ActionCard>
-        <ActionCardTitleWrapper>
-          <Text size="md" color="white">
-            Monitor progress
-          </Text>
-          <Text size="sm" color="grey-400">
-            Transactions page
-          </Text>
-        </ActionCardTitleWrapper>
-        <ExternalContainerIconAnchor target="_blank" href="/transactions">
-          <StyledExternalLinkIcon />
-        </ExternalContainerIconAnchor>
-      </ActionCard>
-      <ActionCard>
-        <ActionCardTitleWrapper>
-          <Text size="md" color="white">
-            Track in Explorer
-          </Text>
-          <Text size="sm" color="grey-400">
-            Etherscan.io
-          </Text>
-        </ActionCardTitleWrapper>
-        <ExternalContainerIconAnchor
-          href={explorerLink ?? "https://etherscan.io"}
-          target="_blank"
-        >
-          <StyledExternalLinkIcon />
-        </ExternalContainerIconAnchor>
-      </ActionCard>
-    </ActionCardContainer>
-    <EstimatedTable
-      chainId={currentToRoute ?? 1}
-      estimatedTime={estimatedTime}
-      gasFee={fees?.relayerGasFee.total}
-      bridgeFee={fees?.relayerCapitalFee.total}
-      totalReceived={
-        fees && amountToBridge && amountToBridge.gt(0)
-          ? receiveAmount(amountToBridge, fees)
-          : undefined
-      }
-      token={getToken(currentToken)}
-      dataLoaded={isConnected}
-    />
-    <Divider />
-    <Button
-      disabled={transactionPending}
-      onClick={() => {
-        onTxHashChange(undefined);
-      }}
-    >
-      <Text
-        size="lg"
-        color={!transactionPending ? "aqua" : "white"}
-        weight={500}
+            </Text>
+            <Text size="lg" color="grey-400">
+              Deposit in progress
+            </Text>
+          </TopWrapperTitleWrapper>
+        ) : (
+          <AnimatedTopWrapperTitleWrapper>
+            <Text size="3xl" color="aqua">
+              Deposit successful!
+            </Text>
+            <Text size="lg" color="grey-400">
+              Finished in{" "}
+              <WhiteSpanText>
+                {elapsedTimeFromDeposit ?? "00h 00m 00s"}
+              </WhiteSpanText>
+            </Text>
+          </AnimatedTopWrapperTitleWrapper>
+        )}
+      </TopWrapper>
+      <ActionCardContainer>
+        <ActionCard>
+          <ActionCardTitleWrapper>
+            <Text size="md" color="white">
+              Monitor progress
+            </Text>
+            <Text size="sm" color="grey-400">
+              Transactions page
+            </Text>
+          </ActionCardTitleWrapper>
+          <ExternalContainerIconAnchor target="_blank" href="/transactions">
+            <StyledExternalLinkIcon />
+          </ExternalContainerIconAnchor>
+        </ActionCard>
+        <ActionCard>
+          <ActionCardTitleWrapper>
+            <Text size="md" color="white">
+              Track in Explorer
+            </Text>
+            <Text size="sm" color="grey-400">
+              Etherscan.io
+            </Text>
+          </ActionCardTitleWrapper>
+          <ExternalContainerIconAnchor
+            href={explorerLink ?? "https://etherscan.io"}
+            target="_blank"
+          >
+            <StyledExternalLinkIcon />
+          </ExternalContainerIconAnchor>
+        </ActionCard>
+      </ActionCardContainer>
+      <EstimatedTable
+        chainId={currentToRoute ?? 1}
+        estimatedTime={estimatedTime}
+        gasFee={fees?.relayerGasFee.total}
+        bridgeFee={fees?.relayerCapitalFee.total}
+        totalReceived={
+          fees && amountToBridge && amountToBridge.gt(0)
+            ? receiveAmount(amountToBridge, fees)
+            : undefined
+        }
+        token={getToken(currentToken)}
+        dataLoaded={isConnected}
+      />
+      <Divider />
+      <Button
+        disabled={transactionPending}
+        onClick={() => {
+          onTxHashChange(undefined);
+        }}
       >
-        Initiate new transaction
-      </Text>
-    </Button>
-  </Wrapper>
-);
+        <Text
+          size="lg"
+          color={!transactionPending ? "aqua" : "white"}
+          weight={500}
+        >
+          Initiate new transaction
+        </Text>
+      </Button>
+    </Wrapper>
+  );
+};
 
 export default DepositConfirmation;
 
@@ -246,11 +267,6 @@ const AnimatedLogoWrapper = styled.div<{ completed?: boolean }>`
   flex-shrink: 0;
 `;
 
-const AnimatedLogo = styled.img`
-  width: 48px;
-  height: 48px;
-`;
-
 const ActionCardContainer = styled.div`
   display: flex;
   flex-direction: row;
@@ -325,4 +341,20 @@ const Button = styled(UnstyledButton)<{ disabled?: boolean }>`
 
 const WhiteSpanText = styled.span`
   color: #ffffff;
+`;
+
+const AnimatedLogo = styled.div<{
+  completed?: boolean;
+}>`
+  width: 48px;
+  height: 48px;
+  & svg {
+    width: 48px;
+    height: 48px;
+    border-radius: 100%;
+    & rect {
+      transition: fill 1s ease-in-out;
+      fill: ${({ completed }) => (completed ? "#6cf9d8" : "#9daab3")};
+    }
+  }
 `;
