@@ -29,7 +29,7 @@ import { Account } from "@web3-onboard/core/dist/types";
 
 import { useConnectWallet, useSetChain } from "@web3-onboard/react";
 import { Chain } from "@web3-onboard/common";
-import { ethers } from "ethers";
+import { ethers, utils } from "ethers";
 import Notify, { API as NotifyAPI, ConfigOptions } from "bnc-notify";
 import {
   ampli,
@@ -184,7 +184,9 @@ export function useOnboardManager() {
         options?.autoSelect ? options : undefined
       );
 
-      setUserId(walletStates[0]?.accounts[0]?.address);
+      if (walletStates[0]?.accounts[0]?.address) {
+        setUserId(utils.getAddress(walletStates[0]?.accounts[0]?.address));
+      }
       if (options?.trackSection) {
         trackConnectWalletButtonClicked(options.trackSection);
       }
