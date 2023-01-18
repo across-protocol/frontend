@@ -2,7 +2,7 @@ import { API } from "bnc-notify";
 import { Signer } from "ethers";
 import { useConnection, useStakingPool } from "hooks";
 import { useMutation } from "react-query";
-import { getConfig, notificationEmitter } from "utils";
+import { getConfig, waitOnTransaction } from "utils";
 import { sendWithPaddedGas } from "utils/transactions";
 
 export function useClaimStakeRewardAction(tokenAddress?: string) {
@@ -42,7 +42,7 @@ const performClaimingAction = async (
       "withdrawReward"
     )(lpTokenAddress);
     // Send this to onboard's notify API to track the TX
-    await notificationEmitter(resultingTx.hash, notify, 0, true);
+    await waitOnTransaction(resultingTx, notify, 0, true);
   } catch (_e) {
     // We currently don't handle the error case other than to exit gracefully.
   }

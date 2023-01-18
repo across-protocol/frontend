@@ -32,8 +32,9 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   padding: 0px;
+  padding-top: 1px;
   gap: 12px;
 
   width: 100%;
