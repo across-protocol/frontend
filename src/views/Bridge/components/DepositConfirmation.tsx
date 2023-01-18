@@ -90,7 +90,7 @@ const DepositConfirmation = ({
             Transactions page
           </Text>
         </ActionCardTitleWrapper>
-        <ExternalContainerIconAnchor href="/transactions">
+        <ExternalContainerIconAnchor target="_blank" href="/transactions">
           <StyledExternalLinkIcon />
         </ExternalContainerIconAnchor>
       </ActionCard>
