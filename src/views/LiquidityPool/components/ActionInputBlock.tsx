@@ -58,7 +58,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
   }, [action, selectedToken.symbol]);
 
   const handleAction = async () => {
-    if (!maxAmountsQuery.data) {
+    if (!maxAmountsQuery.data || !stakingPoolQuery.data) {
       return;
     }
 
@@ -82,6 +82,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
         {
           amountInput: amount,
           maxRemovableAmount,
+          convertUnderlyingToLP: stakingPoolQuery.data.convertUnderlyingToLP,
         },
         {
           onSuccess: () => {
