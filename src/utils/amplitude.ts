@@ -27,6 +27,7 @@ import {
   formatEther,
   formatWeiPct,
   capitalizeFirstLetter,
+  convertToCapitalCase,
 } from "./format";
 import { getConfig } from "./config";
 import { ChainId } from "./utils";
@@ -369,8 +370,8 @@ export function reportTokenBalance(
   const token = getToken(symbol);
   const chain = getChainInfo(chainId);
 
-  const chainName = capitalizeFirstLetter(chain.name);
-  const tokenName = capitalizeFirstLetter(token.symbol);
+  const chainName = convertToCapitalCase(chain.name);
+  const tokenName = convertToCapitalCase(token.symbol);
   const tokenBalance = Number(
     formatUnits(balance, token.decimals).replaceAll(",", "")
   );

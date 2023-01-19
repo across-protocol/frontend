@@ -212,6 +212,18 @@ export function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+/**
+ * Converts a string to sentence case delineated by spaces
+ * @param str The string to convert
+ * @returns The string in sentence case
+ */
+export function convertToCapitalCase(str: string) {
+  return str
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toUpperCase())
+    .join(" ");
+}
+
 const twoSigFormatter = new Intl.NumberFormat("en-US", {
   maximumSignificantDigits: 2,
 });
