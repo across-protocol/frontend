@@ -261,13 +261,15 @@ export function useBridge() {
     transactionPending,
     explorerUrl,
     transactionElapsedTimeAsFormattedString,
+    txCompletedHandler,
   } = useBridgeDepositTracking();
 
   const bridgeAction = useBridgeAction(
     limits === undefined || fees === undefined,
     bridgePayload,
     currentToken,
-    onTxHashChange
+    onTxHashChange,
+    txCompletedHandler
   );
 
   return {

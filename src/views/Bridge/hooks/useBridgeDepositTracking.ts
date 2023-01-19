@@ -1,7 +1,7 @@
 import { useConnection } from "hooks";
 import { useTransaction } from "hooks/useTransaction";
 import { useEffect, useState } from "react";
-import { formatSeconds } from "utils";
+import { formatMilliseconds } from "utils";
 
 export function useBridgeDepositTracking() {
   const [txHash, setTxHash] = useState<string | undefined>(undefined);
@@ -16,14 +16,9 @@ export function useBridgeDepositTracking() {
     setStartDate(txHash ? new Date() : undefined);
   }, [txHash]);
 
-  useEffect(() => {
-    if (!depositFinishedDate) {
-      setDepositFinishedDate(
-        receipt && receipt.status === 1 ? new Date() : undefined
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [receipt]);
+  const onTransactionCompleted = (success: boolean) => {
+    setDepositFinishedDate(success ? new Date() : undefined);
+  };
 
   const [elapsedSeconds, setElapsedSeconds] = useState<number | undefined>();
 
@@ -31,13 +26,11 @@ export function useBridgeDepositTracking() {
     if (startDate) {
       const interval = setInterval(() => {
         setElapsedSeconds(
-          Math.floor(
-            ((depositFinishedDate ?? new Date()).getTime() -
-              startDate.getTime()) /
-              1000
-          )
+          ((depositFinishedDate ?? new Date()).getTime() -
+            startDate.getTime()) /
+            1000
         );
-      }, 1000);
+      }, 100);
       return () => clearInterval(interval);
     } else {
       setElapsedSeconds(undefined);
@@ -45,7 +38,9 @@ export function useBridgeDepositTracking() {
   }, [startDate, depositFinishedDate]);
 
   const trackingTxHash = !!txHash;
-  const elapsedTimeAsFormattedString = formatSeconds(elapsedSeconds);
+  const elapsedTimeAsFormattedString = formatMilliseconds(
+    Math.floor((elapsedSeconds ?? 0) * 1000)
+  );
   const depositFinished = !!depositFinishedDate;
 
   const onTxHashChange = (txHash?: string) => {
@@ -61,5 +56,6 @@ export function useBridgeDepositTracking() {
     transactionPending: !depositFinished,
     transactionElapsedSeconds: elapsedSeconds,
     transactionElapsedTimeAsFormattedString: elapsedTimeAsFormattedString,
+    txCompletedHandler: onTransactionCompleted,
   };
 }
