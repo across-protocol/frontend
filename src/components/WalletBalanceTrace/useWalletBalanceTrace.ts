@@ -6,6 +6,7 @@ import {
   fixedPointAdjustment,
   getBalance,
   getConfig,
+  getNativeBalance,
   getRoutes,
   getToken,
   reportTotalWalletUsdBalance,
@@ -40,6 +41,7 @@ const availableTokens: Record<number, TokenSymbolAddressType[]> = getRoutes(
   }
   return acc;
 }, {} as Record<number, TokenSymbolAddressType[]>);
+
 const availableSymbols = [
   ...new Set(getRoutes(ChainId.MAINNET).routes.map((r) => r.fromTokenSymbol)),
 ];
@@ -58,20 +60,30 @@ const calculateUsdBalances = async (account: string) => {
 
   const balances = (
     await Promise.all(
-      Object.entries(availableTokens).flatMap(
-        async ([chainId, tokens]) =>
-          await Promise.all(
-            tokens.map(async ({ fromTokenSymbol, fromTokenAddress }) => ({
-              fromTokenSymbol,
-              fromTokenAddress,
-              balance: await getBalance(
-                Number(chainId),
-                account,
-                fromTokenAddress
-              ),
-            }))
-          )
-      )
+      Object.entries(availableTokens).flatMap(async ([chainId, tokens]) => {
+        const promises = tokens.map(
+          async ({ fromTokenSymbol, fromTokenAddress }) => ({
+            fromTokenSymbol,
+            fromTokenAddress,
+            balance: await getBalance(
+              Number(chainId),
+              account,
+              fromTokenAddress
+            ),
+          })
+        );
+        if (chainId !== "137") {
+          const fn = async () => {
+            return {
+              fromTokenSymbol: "WETH",
+              fromTokenAddress: "0000000000000000000000000000000000000000",
+              balance: await getNativeBalance(Number(chainId), account),
+            };
+          };
+          promises.push(fn());
+        }
+        return await Promise.all(promises);
+      })
     )
   ).flat(2);
 
