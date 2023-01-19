@@ -4,7 +4,7 @@ import { getConfig } from "utils/config";
 import { useConnection, useIsWrongNetwork } from "hooks";
 import { useUnclaimedReferralProofs } from "./useUnclaimedReferralProofs";
 import { sendWithPaddedGas } from "utils/transactions";
-import { waitOnTransaction } from "utils";
+import { hubPoolChainId, waitOnTransaction } from "utils";
 
 const config = getConfig();
 
@@ -36,7 +36,7 @@ export function useClaimReferralRewards() {
         account,
       }))
     );
-    await waitOnTransaction(claimMultiTx, notify);
+    await waitOnTransaction(hubPoolChainId, claimMultiTx, notify);
   };
 
   return useMutation(handleClaim, {

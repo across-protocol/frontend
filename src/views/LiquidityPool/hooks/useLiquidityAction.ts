@@ -66,7 +66,7 @@ export function useAddLiquidity(tokenSymbol?: string, l1TokenAddress?: string) {
         value: isEth ? parsedAndValidAmount : undefined,
       }
     );
-    await waitOnTransaction(txResponse, notify);
+    await waitOnTransaction(hubPoolChainId, txResponse, notify);
   };
 
   return useMutation(handleAddLiquidity, {
@@ -115,7 +115,7 @@ export function useRemoveLiquidity(
       parsedAndValidAmount,
       isEth
     );
-    await waitOnTransaction(txResponse, notify);
+    await waitOnTransaction(hubPoolChainId, txResponse, notify);
   };
 
   return useMutation(handleRemoveLiquidity, {
