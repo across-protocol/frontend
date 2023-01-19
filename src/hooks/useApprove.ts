@@ -3,12 +3,13 @@ import { useMutation } from "react-query";
 import { BigNumberish } from "ethers";
 import { ERC20__factory } from "@across-protocol/contracts-v2";
 
-import { MAX_APPROVAL_AMOUNT, waitOnTransaction } from "utils";
+import { hubPoolChainId, MAX_APPROVAL_AMOUNT, waitOnTransaction } from "utils";
 import { useIsWrongNetwork } from "hooks";
 
-export function useApprove() {
+export function useApprove(requiredChainId = hubPoolChainId) {
   const { account, signer, notify } = useConnection();
-  const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork();
+  const { isWrongNetwork, isWrongNetworkHandler } =
+    useIsWrongNetwork(requiredChainId);
 
   const handleApprove = async (args: {
     erc20Address: string;
@@ -39,7 +40,7 @@ export function useApprove() {
         args.allowedContractAddress,
         MAX_APPROVAL_AMOUNT
       );
-      await waitOnTransaction(txResponse, notify);
+      await waitOnTransaction(requiredChainId, txResponse, notify);
     }
   };
 

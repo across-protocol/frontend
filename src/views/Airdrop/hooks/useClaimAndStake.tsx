@@ -3,10 +3,11 @@ import { useMutation } from "react-query";
 import { getConfig } from "utils/config";
 import { waitOnTransaction } from "utils/notify";
 import { useConnection, useIsWrongNetwork } from "hooks";
+import { sendWithPaddedGas } from "utils/transactions";
+import { hubPoolChainId } from "utils";
 
 import { useAirdropRecipient } from "./useAirdropRecipient";
 import { useIsAirdropClaimed } from "./useIsAirdropClaimed";
-import { sendWithPaddedGas } from "utils/transactions";
 
 const config = getConfig();
 
@@ -43,7 +44,7 @@ export function useClaimAndStake() {
       "claimAndStake"
     )(parameters);
 
-    await waitOnTransaction(claimAndStakeTx, notify, 0);
+    await waitOnTransaction(hubPoolChainId, claimAndStakeTx, notify, 0);
   };
 
   return useMutation(handleClaimAndStake, {
