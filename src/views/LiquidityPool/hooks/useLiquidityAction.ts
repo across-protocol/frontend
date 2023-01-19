@@ -1,4 +1,4 @@
-import { useConnection } from "hooks";
+import { ConverterFnType, useConnection } from "hooks";
 import { useMutation } from "react-query";
 import { BigNumber } from "ethers";
 
@@ -92,6 +92,7 @@ export function useRemoveLiquidity(
   const handleRemoveLiquidity = async (args: {
     amountInput: string;
     maxRemovableAmount: BigNumber;
+    convertUnderlyingToLP: ConverterFnType;
   }) => {
     if (!tokenSymbol || !signer || !account) {
       return;
@@ -112,7 +113,7 @@ export function useRemoveLiquidity(
     const hubPoolContract = config.getHubPool(signer);
     const txResponse = await hubPoolContract.removeLiquidity(
       tokenInfo.l1TokenAddress,
-      parsedAndValidAmount,
+      args.convertUnderlyingToLP(parsedAndValidAmount),
       isEth
     );
     await waitOnTransaction(txResponse, notify);
