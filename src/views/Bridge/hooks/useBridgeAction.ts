@@ -38,7 +38,7 @@ export function useBridgeAction(
               signer,
             });
             if (tx) {
-              await waitOnTransaction(tx, notify);
+              await waitOnTransaction(payload.fromChain, tx, notify);
             }
           } catch (e) {
             console.error(e);
@@ -63,7 +63,7 @@ export function useBridgeAction(
             if (onTransactionComplete) {
               onTransactionComplete(tx.hash);
             }
-            await waitOnTransaction(tx, notify);
+            await waitOnTransaction(payload.fromChain, tx, notify);
             if (onDepositResolved) {
               onDepositResolved(true);
             }

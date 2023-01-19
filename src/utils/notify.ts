@@ -50,12 +50,13 @@ export const notificationEmitter = async (
  * @param ignoreErrors An optional parameter to ignore tx failure and return successful
  **/
 export const waitOnTransaction = async (
+  requiredChainId: number,
   tx: ContractTransaction,
   notify: NotifyAPI,
   timingBuffer?: number,
   ignoreErrors?: boolean
 ): Promise<void> => {
-  if (supportedNotifyChainIds.includes(tx.chainId)) {
+  if (supportedNotifyChainIds.includes(requiredChainId)) {
     await notificationEmitter(tx.hash, notify, timingBuffer, ignoreErrors);
   } else {
     try {
