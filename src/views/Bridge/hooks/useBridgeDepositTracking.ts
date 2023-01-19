@@ -1,7 +1,6 @@
 import { useConnection } from "hooks";
-import { useTransaction } from "hooks/useTransaction";
 import { useEffect, useState } from "react";
-import { formatMilliseconds } from "utils";
+import { formatMilliseconds, getChainInfo } from "utils";
 
 export function useBridgeDepositTracking() {
   const [txHash, setTxHash] = useState<string | undefined>(undefined);
@@ -10,7 +9,10 @@ export function useBridgeDepositTracking() {
     Date | undefined
   >(undefined);
   const { chainId } = useConnection();
-  const { receipt, explorerUrl } = useTransaction(chainId || 1, txHash);
+  const explorerUrl =
+    txHash && chainId
+      ? getChainInfo(chainId).constructExplorerLink(txHash)
+      : undefined;
 
   useEffect(() => {
     setStartDate(txHash ? new Date() : undefined);
@@ -50,7 +52,6 @@ export function useBridgeDepositTracking() {
   return {
     txHash,
     onTxHashChange,
-    receipt,
     explorerUrl,
     trackingTxHash,
     transactionPending: !depositFinished,
