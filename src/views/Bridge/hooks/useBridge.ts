@@ -10,12 +10,14 @@ import useReferrer from "hooks/useReferrer";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AcrossDepositArgs,
+  GetBridgeFeesResult,
   getChainInfo,
   getConfig,
   getConfirmationDepositTime,
   getToken,
   hubPoolChainId,
 } from "utils";
+import { BridgeLimitInterface } from "utils/serverless-api/types";
 import { useBridgeAction } from "./useBridgeAction";
 import { useBridgeDepositTracking } from "./useBridgeDepositTracking";
 
@@ -197,18 +199,39 @@ export function useBridge() {
   const isBridgeDisabled =
     isConnected && (!amountToBridge || amountToBridge.eq(0));
 
-  const { fees } = useBridgeFees(
+  const { fees: rawFees } = useBridgeFees(
     amountToBridge ?? BigNumber.from(0),
     currentFromRoute,
     currentToRoute,
     currentToken
   );
 
-  const { limits } = useBridgeLimits(
+  const { limits: rawLimits } = useBridgeLimits(
     currentRoute?.fromTokenAddress,
     currentFromRoute,
     currentToRoute
   );
+
+  const [fees, setFees] = useState<GetBridgeFeesResult | undefined>();
+  const [limits, setLimits] = useState<BridgeLimitInterface | undefined>();
+
+  const {
+    onTxHashChange,
+    trackingTxHash,
+    transactionPending,
+    explorerUrl,
+    transactionElapsedTimeAsFormattedString,
+    txCompletedHandler,
+  } = useBridgeDepositTracking();
+
+  useEffect(() => {
+    if (!trackingTxHash || !rawFees) {
+      setFees(rawFees);
+    }
+    if (!trackingTxHash || !rawLimits) {
+      setLimits(rawLimits);
+    }
+  }, [rawFees, rawLimits, trackingTxHash]);
 
   const estimatedTime = useMemo(() => {
     return amountToBridge &&
@@ -254,15 +277,6 @@ export function useBridge() {
           toAddress: toAccount ?? "",
         }
       : undefined;
-
-  const {
-    onTxHashChange,
-    trackingTxHash,
-    transactionPending,
-    explorerUrl,
-    transactionElapsedTimeAsFormattedString,
-    txCompletedHandler,
-  } = useBridgeDepositTracking();
 
   const bridgeAction = useBridgeAction(
     limits === undefined || fees === undefined,
