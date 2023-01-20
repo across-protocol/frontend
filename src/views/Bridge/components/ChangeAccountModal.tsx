@@ -83,7 +83,7 @@ const ChangeAccountModal = ({
           </ButtonWrapper>
         </InnerWrapper>
         <Text size="md" color="grey-400">
-          Note that only <UnderlinedText>ERC-20</UnderlinedText> addresses are
+          Note that only <UnderlinedText>Ethereum</UnderlinedText> addresses are
           valid.
         </Text>
       </Wrapper>
