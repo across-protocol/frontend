@@ -187,8 +187,11 @@ export function useBridge() {
   const usersBalance = useBalanceBySymbol(currentToken, currentFromRoute);
   const currentBalance = usersBalance.balance;
 
-  const { isWrongNetwork, isWrongNetworkHandler, checkWrongNetworkHandler } =
-    useIsWrongNetwork(currentFromRoute);
+  const {
+    isWrongNetwork,
+    isWrongNetworkHandlerWithoutError: isWrongNetworkHandler,
+    checkWrongNetworkHandler,
+  } = useIsWrongNetwork(currentFromRoute);
 
   const { isConnected, chainId: walletChainId, account } = useConnection();
 
