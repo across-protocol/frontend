@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 45
+ * Tracking Plan Version: 48
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -31,10 +31,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "45",
+    version: "48",
     branch: "main",
     source: "web",
-    versionId: "78eb81d9-5899-45ad-ba09-3a36e661dd58",
+    versionId: "b6ae0501-d357-497d-9c93-27640ad3cd9f",
   },
   ...{
     ingestionMetadata: {
@@ -123,9 +123,13 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton |
    */
-  element: "connectWalletButton" | "web3OnboardModal" | "maxButton";
+  element:
+    | "connectWalletButton"
+    | "web3OnboardModal"
+    | "maxButton"
+    | "quickSwapButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -212,9 +216,13 @@ export interface MaxTokenAmountClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton |
    */
-  element: "connectWalletButton" | "web3OnboardModal" | "maxButton";
+  element:
+    | "connectWalletButton"
+    | "web3OnboardModal"
+    | "maxButton"
+    | "quickSwapButton";
   page: string;
   /**
    * | Rule | Value |
@@ -270,6 +278,60 @@ export interface PageViewedProperties {
    * Referring url
    */
   referrer?: string;
+}
+
+export interface QuickSwapButtonClickedProperties {
+  /**
+   * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
+   */
+  action: "onClick" | "onKeyPress";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton |
+   */
+  element:
+    | "connectWalletButton"
+    | "web3OnboardModal"
+    | "maxButton"
+    | "quickSwapButton";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm";
 }
 
 export interface ToAccountChangedProperties {
@@ -1093,6 +1155,14 @@ export class PageViewed implements BaseEvent {
   }
 }
 
+export class QuickSwapButtonClicked implements BaseEvent {
+  event_type = "QuickSwapButtonClicked";
+
+  constructor(public event_properties: QuickSwapButtonClickedProperties) {
+    this.event_properties = event_properties;
+  }
+}
+
 export class ToAccountChanged implements BaseEvent {
   event_type = "ToAccountChanged";
 
@@ -1415,6 +1485,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new PageViewed(properties), options);
+  }
+
+  /**
+   * QuickSwapButtonClicked
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/QuickSwapButtonClicked)
+   *
+   * Owner: James Morris
+   *
+   * @param properties The event's properties (e.g. action)
+   * @param options Amplitude event options.
+   */
+  quickSwapButtonClicked(
+    properties: QuickSwapButtonClickedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new QuickSwapButtonClicked(properties), options);
   }
 
   /**

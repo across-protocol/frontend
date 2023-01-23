@@ -1,3 +1,4 @@
+import { TransferQuoteReceivedProperties, ampli } from "ampli";
 import { BigNumber } from "ethers";
 import {
   useBalanceBySymbol,
@@ -6,10 +7,12 @@ import {
   useConnection,
   useIsWrongNetwork,
 } from "hooks";
+import { useCoingeckoPrice } from "hooks/useCoingeckoPrice";
 import useReferrer from "hooks/useReferrer";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AcrossDepositArgs,
+  generateTransferQuote,
   GetBridgeFeesResult,
   getChainInfo,
   getConfig,
@@ -101,6 +104,12 @@ export function useBridge() {
           route.fromTokenSymbol.toLowerCase() === currentToken.toLowerCase()
       ),
     [availableRoutes, currentFromRoute, currentToRoute, currentToken]
+  );
+
+  const currentSelectedTokenPrice = useCoingeckoPrice(
+    currentRoute?.l1TokenAddress!,
+    "usd",
+    currentRoute !== undefined
   );
 
   // Use useMemo to create an object of available from and to routes for the current token
@@ -270,7 +279,7 @@ export function useBridge() {
     txCompletedHandler,
   } = useBridgeDepositTracking();
 
-  const estimatedTime = useMemo(() => {
+  const estimatedTimeToRelayObject = useMemo(() => {
     return amountToBridge &&
       amountToBridge.gt(0) &&
       currentFromRoute &&
@@ -281,10 +290,13 @@ export function useBridge() {
             limits,
             currentToRoute,
             currentFromRoute
-          ).formattedString
-        : "loading..."
+          )
+        : undefined
       : undefined;
   }, [amountToBridge, currentFromRoute, currentToRoute, limits]);
+  const estimatedTime = limits
+    ? estimatedTimeToRelayObject?.formattedString ?? "loading..."
+    : undefined;
 
   const { referrer } = useReferrer();
 
@@ -315,12 +327,57 @@ export function useBridge() {
         }
       : undefined;
 
+  const [quote, setQuote] = useState<
+    TransferQuoteReceivedProperties | undefined
+  >(undefined);
+  const [initialQuoteTime, setInitialQuoteTime] = useState<number | undefined>(
+    undefined
+  );
+
+  // This use effect instruments amplitude when a new quote is received
+  useEffect(() => {
+    const tokenPriceInUSD = currentSelectedTokenPrice?.data?.price;
+    // Ensure that we have a quote and fees before instrumenting.
+    if (
+      fees &&
+      currentRoute &&
+      toAccount &&
+      account &&
+      tokenPriceInUSD &&
+      estimatedTimeToRelayObject &&
+      amountToBridge
+    ) {
+      const tokenInfo = getToken(currentRoute.fromTokenSymbol);
+      const fromChainInfo = getChainInfo(currentRoute.fromChain);
+      const toChainInfo = getChainInfo(currentRoute.toChain);
+      const quote: TransferQuoteReceivedProperties = generateTransferQuote(
+        fees,
+        currentRoute,
+        tokenInfo,
+        fromChainInfo,
+        toChainInfo,
+        toAccount,
+        account,
+        tokenPriceInUSD,
+        estimatedTimeToRelayObject,
+        amountToBridge
+      );
+      ampli.transferQuoteReceived(quote);
+      setQuote(quote);
+      setInitialQuoteTime((s) => s ?? Date.now());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fees, currentRoute]);
+
   const bridgeAction = useBridgeAction(
     limits === undefined || fees === undefined,
     bridgePayload,
     currentToken,
     onTxHashChange,
-    txCompletedHandler
+    txCompletedHandler,
+    quote,
+    initialQuoteTime,
+    currentSelectedTokenPrice?.data?.price
   );
 
   const isBridgeButtonLoading = bridgeAction.isButtonActionLoading;
