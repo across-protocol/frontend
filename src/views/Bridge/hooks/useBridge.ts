@@ -10,12 +10,14 @@ import useReferrer from "hooks/useReferrer";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AcrossDepositArgs,
+  GetBridgeFeesResult,
   getChainInfo,
   getConfig,
   getConfirmationDepositTime,
   getToken,
   hubPoolChainId,
 } from "utils";
+import { BridgeLimitInterface } from "utils/serverless-api/types";
 import { useBridgeAction } from "./useBridgeAction";
 import { useBridgeDepositTracking } from "./useBridgeDepositTracking";
 
@@ -197,18 +199,30 @@ export function useBridge() {
   const isBridgeDisabled =
     isConnected && (!amountToBridge || amountToBridge.eq(0));
 
-  const { fees } = useBridgeFees(
+  const { fees: rawFees } = useBridgeFees(
     amountToBridge ?? BigNumber.from(0),
     currentFromRoute,
     currentToRoute,
     currentToken
   );
 
-  const { limits } = useBridgeLimits(
+  const { limits: rawLimits } = useBridgeLimits(
     currentRoute?.fromTokenAddress,
     currentFromRoute,
     currentToRoute
   );
+
+  const [fees, setFees] = useState<GetBridgeFeesResult | undefined>();
+  const [limits, setLimits] = useState<BridgeLimitInterface | undefined>();
+
+  const {
+    onTxHashChange,
+    trackingTxHash,
+    transactionPending,
+    explorerUrl,
+    transactionElapsedTimeAsFormattedString,
+    txCompletedHandler,
+  } = useBridgeDepositTracking();
 
   const estimatedTime = useMemo(() => {
     return amountToBridge &&
@@ -255,20 +269,25 @@ export function useBridge() {
         }
       : undefined;
 
-  const {
-    onTxHashChange,
-    trackingTxHash,
-    transactionPending,
-    explorerUrl,
-    transactionElapsedTimeAsFormattedString,
-  } = useBridgeDepositTracking();
-
   const bridgeAction = useBridgeAction(
     limits === undefined || fees === undefined,
     bridgePayload,
     currentToken,
-    onTxHashChange
+    onTxHashChange,
+    txCompletedHandler
   );
+
+  const isBridgeButtonLoading = bridgeAction.isButtonActionLoading;
+
+  useEffect(() => {
+    if ((!isBridgeButtonLoading && !trackingTxHash) || !fees) {
+      setFees(rawFees);
+    }
+    if ((!isBridgeButtonLoading && !trackingTxHash) || !limits) {
+      setLimits(rawLimits);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawFees, rawLimits, trackingTxHash, isBridgeButtonLoading]);
 
   return {
     ...bridgeAction,
