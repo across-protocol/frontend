@@ -224,15 +224,6 @@ export function useBridge() {
     txCompletedHandler,
   } = useBridgeDepositTracking();
 
-  useEffect(() => {
-    if (!trackingTxHash || !rawFees) {
-      setFees(rawFees);
-    }
-    if (!trackingTxHash || !rawLimits) {
-      setLimits(rawLimits);
-    }
-  }, [rawFees, rawLimits, trackingTxHash]);
-
   const estimatedTime = useMemo(() => {
     return amountToBridge &&
       amountToBridge.gt(0) &&
@@ -285,6 +276,18 @@ export function useBridge() {
     onTxHashChange,
     txCompletedHandler
   );
+
+  const isBridgeButtonLoading = bridgeAction.isButtonActionLoading;
+
+  useEffect(() => {
+    if ((!isBridgeButtonLoading && !trackingTxHash) || !fees) {
+      setFees(rawFees);
+    }
+    if ((!isBridgeButtonLoading && !trackingTxHash) || !limits) {
+      setLimits(rawLimits);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawFees, rawLimits, trackingTxHash, isBridgeButtonLoading]);
 
   return {
     ...bridgeAction,
