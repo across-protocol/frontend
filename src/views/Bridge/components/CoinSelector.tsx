@@ -8,6 +8,7 @@ import {
   parseUnitsFnBuilder,
   QUERIESV2,
   TokenInfo,
+  trackMaxButtonClicked,
 } from "utils";
 import { useCallback, useEffect, useState } from "react";
 import { Theme } from "@emotion/react";
@@ -34,6 +35,7 @@ function useCoinSelector(
   const maxBalanceOnClick = () => {
     if (currentBalance) {
       setUserAmountInput(tokenFormatterFn(currentBalance));
+      trackMaxButtonClicked("bridgeForm");
     }
   };
 
