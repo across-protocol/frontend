@@ -11,6 +11,7 @@ import {
   TransferSignedProperties,
   TransferSubmittedProperties,
   TransferDepositCompletedProperties,
+  QuickSwapButtonClickedProperties,
 } from "ampli";
 import { pageLookup } from "components/RouteTrace/useRouteTrace";
 import {
@@ -19,6 +20,7 @@ import {
   fixedPointAdjustment,
   getToken,
   getChainInfo,
+  tokenList,
 } from "./constants";
 import { ConfirmationDepositTimeType, GetBridgeFeesResult } from "./bridge";
 import { ConvertDecimals } from "./convertdecimals";
@@ -80,6 +82,50 @@ export function trackWalletConnectTransactionCompleted(
     succeeded: true,
     walletAddress: utils.getAddress(walletStates[0].accounts[0].address),
     walletType: walletStates[0].label,
+  });
+}
+
+export function trackFromChainChanged(chainId: ChainId, isDefault?: boolean) {
+  if (Number.isNaN(chainId)) return Promise.resolve();
+  const chain = getChainInfo(chainId);
+  return ampli.fromChainSelected({
+    fromChainId: chain.chainId.toString(),
+    chainName: chain.name,
+    default: isDefault,
+  });
+}
+
+export function trackToChainChanged(chainId: ChainId, isDefault?: boolean) {
+  if (Number.isNaN(chainId)) return Promise.resolve();
+  const chain = getChainInfo(chainId);
+  return ampli.toChainSelected({
+    toChainId: chain.chainId.toString(),
+    chainName: chain.name,
+    default: isDefault,
+  });
+}
+
+export function trackQuickSwap(
+  section: QuickSwapButtonClickedProperties["section"]
+) {
+  return ampli.quickSwapButtonClicked({
+    element: "quickSwapButton",
+    page: getPageValue(),
+    section,
+    action: "onClick",
+  });
+}
+
+export function trackTokenChanged(tokenSymbol: string, isDefault?: boolean) {
+  if (!tokenSymbol) return Promise.resolve();
+  const token = getToken(tokenSymbol);
+  return ampli.tokenSelected({
+    tokenSymbol: token.symbol,
+    default: isDefault,
+    tokenListIndex: tokenList
+      .findIndex((t) => t.symbol === token.symbol)
+      .toString(),
+    tokenListLength: tokenList.length.toString(),
   });
 }
 

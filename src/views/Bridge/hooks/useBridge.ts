@@ -1,3 +1,4 @@
+import { TransferQuoteReceivedProperties, ampli } from "ampli";
 import { BigNumber } from "ethers";
 import {
   useBalanceBySymbol,
@@ -6,16 +7,22 @@ import {
   useConnection,
   useIsWrongNetwork,
 } from "hooks";
+import { useCoingeckoPrice } from "hooks/useCoingeckoPrice";
 import useReferrer from "hooks/useReferrer";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AcrossDepositArgs,
+  generateTransferQuote,
   GetBridgeFeesResult,
   getChainInfo,
   getConfig,
   getConfirmationDepositTime,
   getToken,
   hubPoolChainId,
+  trackFromChainChanged,
+  trackQuickSwap,
+  trackToChainChanged,
+  trackTokenChanged,
 } from "utils";
 import { BridgeLimitInterface } from "utils/serverless-api/types";
 import { useBridgeAction } from "./useBridgeAction";
@@ -37,9 +44,18 @@ export function useBridge() {
   }, []);
 
   const [currentToken, setCurrentToken] = useState(availableTokens[0].symbol);
+  const [isDefaultToken, setIsDefaultToken] = useState(true);
   const [amountToBridge, setAmountToBridge] = useState<BigNumber | undefined>(
     undefined
   );
+
+  useEffect(() => {
+    if (isDefaultToken) {
+      trackTokenChanged(currentToken, true);
+    }
+    setIsDefaultToken(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentToken]);
 
   // Filter routes to only show routes that are available for the current token when the user changes the token
   // Use useMemo to avoid recalculating this every time the component re-renders
@@ -53,9 +69,31 @@ export function useBridge() {
   const [currentToRoute, setCurrentToRoute] = useState<number | undefined>(
     undefined
   );
+  const [isDefaultToRoute, setIsDefaultToRoute] = useState(true);
   const [currentFromRoute, setCurrentFromRoute] = useState<number | undefined>(
     undefined
   );
+  const [isDefaultFromRoute, setIsDefaultFromRoute] = useState(true);
+
+  useEffect(() => {
+    if (currentToRoute) {
+      if (isDefaultToRoute) {
+        trackToChainChanged(currentToRoute, true);
+      }
+      setIsDefaultToRoute(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentToRoute]);
+
+  useEffect(() => {
+    if (currentFromRoute) {
+      if (isDefaultFromRoute) {
+        trackFromChainChanged(currentFromRoute, true);
+      }
+      setIsDefaultFromRoute(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentFromRoute]);
 
   const currentRoute = useMemo(
     () =>
@@ -66,6 +104,12 @@ export function useBridge() {
           route.fromTokenSymbol.toLowerCase() === currentToken.toLowerCase()
       ),
     [availableRoutes, currentFromRoute, currentToRoute, currentToken]
+  );
+
+  const currentSelectedTokenPrice = useCoingeckoPrice(
+    currentRoute?.l1TokenAddress!,
+    "usd",
+    currentRoute !== undefined
   );
 
   // Use useMemo to create an object of available from and to routes for the current token
@@ -141,6 +185,7 @@ export function useBridge() {
             );
           if (!toRouteStillAvailable) {
             setCurrentToRoute(availableToRoutesForCurrentFromRoute[0]);
+            trackToChainChanged(availableToRoutesForCurrentFromRoute[0], true);
           }
         }
       }
@@ -163,6 +208,10 @@ export function useBridge() {
             );
           if (!fromRouteStillAvailable) {
             setCurrentFromRoute(availableFromRoutesForCurrentToRoute[0]);
+            trackFromChainChanged(
+              availableFromRoutesForCurrentToRoute[0],
+              true
+            );
           }
         }
       }
@@ -179,16 +228,22 @@ export function useBridge() {
       const currentToRouteTemp = currentToRoute;
       // Set the current from route to the current to route
       setCurrentFromRoute(currentToRouteTemp);
+      trackFromChainChanged(currentToRouteTemp, false);
       // Set the current to route to the current from route
       setCurrentToRoute(currentFromRouteTemp);
+      trackToChainChanged(currentFromRouteTemp, false);
+      trackQuickSwap("bridgeForm");
     }
   }, [currentFromRoute, currentToRoute]);
 
   const usersBalance = useBalanceBySymbol(currentToken, currentFromRoute);
   const currentBalance = usersBalance.balance;
 
-  const { isWrongNetwork, isWrongNetworkHandler, checkWrongNetworkHandler } =
-    useIsWrongNetwork(currentFromRoute);
+  const {
+    isWrongNetwork,
+    isWrongNetworkHandlerWithoutError: isWrongNetworkHandler,
+    checkWrongNetworkHandler,
+  } = useIsWrongNetwork(currentFromRoute);
 
   const { isConnected, chainId: walletChainId, account } = useConnection();
 
@@ -224,7 +279,7 @@ export function useBridge() {
     txCompletedHandler,
   } = useBridgeDepositTracking();
 
-  const estimatedTime = useMemo(() => {
+  const estimatedTimeToRelayObject = useMemo(() => {
     return amountToBridge &&
       amountToBridge.gt(0) &&
       currentFromRoute &&
@@ -235,10 +290,13 @@ export function useBridge() {
             limits,
             currentToRoute,
             currentFromRoute
-          ).formattedString
-        : "loading..."
+          )
+        : undefined
       : undefined;
   }, [amountToBridge, currentFromRoute, currentToRoute, limits]);
+  const estimatedTime = limits
+    ? estimatedTimeToRelayObject?.formattedString ?? "loading..."
+    : undefined;
 
   const { referrer } = useReferrer();
 
@@ -269,12 +327,57 @@ export function useBridge() {
         }
       : undefined;
 
+  const [quote, setQuote] = useState<
+    TransferQuoteReceivedProperties | undefined
+  >(undefined);
+  const [initialQuoteTime, setInitialQuoteTime] = useState<number | undefined>(
+    undefined
+  );
+
+  // This use effect instruments amplitude when a new quote is received
+  useEffect(() => {
+    const tokenPriceInUSD = currentSelectedTokenPrice?.data?.price;
+    // Ensure that we have a quote and fees before instrumenting.
+    if (
+      fees &&
+      currentRoute &&
+      toAccount &&
+      account &&
+      tokenPriceInUSD &&
+      estimatedTimeToRelayObject &&
+      amountToBridge
+    ) {
+      const tokenInfo = getToken(currentRoute.fromTokenSymbol);
+      const fromChainInfo = getChainInfo(currentRoute.fromChain);
+      const toChainInfo = getChainInfo(currentRoute.toChain);
+      const quote: TransferQuoteReceivedProperties = generateTransferQuote(
+        fees,
+        currentRoute,
+        tokenInfo,
+        fromChainInfo,
+        toChainInfo,
+        toAccount,
+        account,
+        tokenPriceInUSD,
+        estimatedTimeToRelayObject,
+        amountToBridge
+      );
+      ampli.transferQuoteReceived(quote);
+      setQuote(quote);
+      setInitialQuoteTime((s) => s ?? Date.now());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fees, currentRoute]);
+
   const bridgeAction = useBridgeAction(
     limits === undefined || fees === undefined,
     bridgePayload,
     currentToken,
     onTxHashChange,
-    txCompletedHandler
+    txCompletedHandler,
+    quote,
+    initialQuoteTime,
+    currentSelectedTokenPrice?.data?.price
   );
 
   const isBridgeButtonLoading = bridgeAction.isButtonActionLoading;
@@ -289,6 +392,25 @@ export function useBridge() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rawFees, rawLimits, trackingTxHash, isBridgeButtonLoading]);
 
+  const setCurrentTokenExternal = (token: string) => {
+    setCurrentToken(token);
+    trackTokenChanged(token);
+  };
+
+  const setCurrentFromRouteExternal = (chainId?: number) => {
+    setCurrentFromRoute(chainId);
+    if (chainId) {
+      trackFromChainChanged(chainId, false);
+    }
+  };
+
+  const setCurrentToRouteExternal = (chainId?: number) => {
+    setCurrentToRoute(chainId);
+    if (chainId) {
+      trackToChainChanged(chainId, false);
+    }
+  };
+
   return {
     ...bridgeAction,
     displayChangeAccount,
@@ -299,12 +421,12 @@ export function useBridge() {
     limits,
     availableTokens,
     currentToken,
-    setCurrentToken,
+    setCurrentToken: setCurrentTokenExternal,
     setAmountToBridge,
     currentFromRoute,
     currentToRoute,
-    setCurrentFromRoute,
-    setCurrentToRoute,
+    setCurrentFromRoute: setCurrentFromRouteExternal,
+    setCurrentToRoute: setCurrentToRouteExternal,
     currentBalance,
     availableFromRoutes,
     availableToRoutes,

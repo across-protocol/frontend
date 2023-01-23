@@ -36,9 +36,22 @@ export function useIsWrongNetwork(baseChain?: number) {
     }
   };
 
+  const isWrongNetworkHandlerWithoutError = async () => {
+    try {
+      await isWrongNetworkHandler();
+    } catch (_e) {
+      console.error(
+        `Wrong network. Please switch to network ${
+          providers.getNetwork(correctChainId).name
+        }`
+      );
+    }
+  };
+
   return {
     isWrongNetwork,
     isWrongNetworkHandler,
     checkWrongNetworkHandler,
+    isWrongNetworkHandlerWithoutError,
   };
 }
