@@ -6,7 +6,8 @@ import { ampli } from "../../ampli";
 
 export function useRouteTrace() {
   const location = useLocation();
-  const { referrer: referralAddress } = useReferrer();
+  const { referrer: referralAddress, isResolved: isReferralAddressResolved } =
+    useReferrer();
   const [initialPage, setInitialPage] = useState(true);
   const [path, setPath] = useState("");
 
@@ -17,7 +18,7 @@ export function useRouteTrace() {
   }, [location, path]);
 
   useEffect(() => {
-    if (path) {
+    if (path && isReferralAddressResolved) {
       const referrer = document.referrer;
       const origin = window.location.origin;
       const page = pageLookup[path] ?? "404Page";
@@ -30,10 +31,13 @@ export function useRouteTrace() {
         gitCommitHash: currentGitCommitHash,
         referralProgramAddress: referralAddress,
       });
-      setInitialPage(false);
+
+      if (initialPage) {
+        setInitialPage(false);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path]);
+  }, [path, isReferralAddressResolved]);
 }
 
 export const pageLookup: Record<
