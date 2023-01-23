@@ -16,6 +16,10 @@ import {
   getConfirmationDepositTime,
   getToken,
   hubPoolChainId,
+  trackFromChainChanged,
+  trackQuickSwap,
+  trackToChainChanged,
+  trackTokenChanged,
 } from "utils";
 import { BridgeLimitInterface } from "utils/serverless-api/types";
 import { useBridgeAction } from "./useBridgeAction";
@@ -37,9 +41,18 @@ export function useBridge() {
   }, []);
 
   const [currentToken, setCurrentToken] = useState(availableTokens[0].symbol);
+  const [isDefaultToken, setIsDefaultToken] = useState(true);
   const [amountToBridge, setAmountToBridge] = useState<BigNumber | undefined>(
     undefined
   );
+
+  useEffect(() => {
+    if (isDefaultToken) {
+      trackTokenChanged(currentToken, true);
+    }
+    setIsDefaultToken(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentToken]);
 
   // Filter routes to only show routes that are available for the current token when the user changes the token
   // Use useMemo to avoid recalculating this every time the component re-renders
@@ -53,9 +66,31 @@ export function useBridge() {
   const [currentToRoute, setCurrentToRoute] = useState<number | undefined>(
     undefined
   );
+  const [isDefaultToRoute, setIsDefaultToRoute] = useState(true);
   const [currentFromRoute, setCurrentFromRoute] = useState<number | undefined>(
     undefined
   );
+  const [isDefaultFromRoute, setIsDefaultFromRoute] = useState(true);
+
+  useEffect(() => {
+    if (currentToRoute) {
+      if (isDefaultToRoute) {
+        trackToChainChanged(currentToRoute, true);
+      }
+      setIsDefaultToRoute(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentToRoute]);
+
+  useEffect(() => {
+    if (currentFromRoute) {
+      if (isDefaultFromRoute) {
+        trackFromChainChanged(currentFromRoute, true);
+      }
+      setIsDefaultFromRoute(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentFromRoute]);
 
   const currentRoute = useMemo(
     () =>
@@ -141,6 +176,7 @@ export function useBridge() {
             );
           if (!toRouteStillAvailable) {
             setCurrentToRoute(availableToRoutesForCurrentFromRoute[0]);
+            trackToChainChanged(availableToRoutesForCurrentFromRoute[0], true);
           }
         }
       }
@@ -163,6 +199,10 @@ export function useBridge() {
             );
           if (!fromRouteStillAvailable) {
             setCurrentFromRoute(availableFromRoutesForCurrentToRoute[0]);
+            trackFromChainChanged(
+              availableFromRoutesForCurrentToRoute[0],
+              true
+            );
           }
         }
       }
@@ -179,8 +219,11 @@ export function useBridge() {
       const currentToRouteTemp = currentToRoute;
       // Set the current from route to the current to route
       setCurrentFromRoute(currentToRouteTemp);
+      trackFromChainChanged(currentToRouteTemp, false);
       // Set the current to route to the current from route
       setCurrentToRoute(currentFromRouteTemp);
+      trackToChainChanged(currentFromRouteTemp, false);
+      trackQuickSwap("bridgeForm");
     }
   }, [currentFromRoute, currentToRoute]);
 
@@ -292,6 +335,25 @@ export function useBridge() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rawFees, rawLimits, trackingTxHash, isBridgeButtonLoading]);
 
+  const setCurrentTokenExternal = (token: string) => {
+    setCurrentToken(token);
+    trackTokenChanged(token);
+  };
+
+  const setCurrentFromRouteExternal = (chainId?: number) => {
+    setCurrentFromRoute(chainId);
+    if (chainId) {
+      trackFromChainChanged(chainId, false);
+    }
+  };
+
+  const setCurrentToRouteExternal = (chainId?: number) => {
+    setCurrentToRoute(chainId);
+    if (chainId) {
+      trackToChainChanged(chainId, false);
+    }
+  };
+
   return {
     ...bridgeAction,
     displayChangeAccount,
@@ -302,12 +364,12 @@ export function useBridge() {
     limits,
     availableTokens,
     currentToken,
-    setCurrentToken,
+    setCurrentToken: setCurrentTokenExternal,
     setAmountToBridge,
     currentFromRoute,
     currentToRoute,
-    setCurrentFromRoute,
-    setCurrentToRoute,
+    setCurrentFromRoute: setCurrentFromRouteExternal,
+    setCurrentToRoute: setCurrentToRouteExternal,
     currentBalance,
     availableFromRoutes,
     availableToRoutes,
