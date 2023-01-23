@@ -7,7 +7,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 42
+ * Tracking Plan Version: 45
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -31,10 +31,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "42",
+    version: "45",
     branch: "main",
     source: "web",
-    versionId: "7a7b1343-bd50-4f0e-87cf-51349aa22120",
+    versionId: "78eb81d9-5899-45ad-ba09-3a36e661dd58",
   },
   ...{
     ingestionMetadata: {
@@ -65,6 +65,7 @@ export type LoadOptions =
   | LoadOptionsWithClientInstance;
 
 export interface IdentifyProperties {
+  AllAssetsAllNetworksWalletCurrentBalanceUsd?: string;
   /**
    * List of wallet addresses connected during Wallet Connect Transaction Completed event.
    *
@@ -73,7 +74,7 @@ export interface IdentifyProperties {
    * | Unique Items | true |
    * | Item Type | string |
    */
-  allWalletAddressesConnected?: string[];
+  AllWalletAddressesConnected?: string[];
   /**
    * Chain ids of wallet addresses connected
    *
@@ -82,7 +83,7 @@ export interface IdentifyProperties {
    * | Unique Items | true |
    * | Item Type | string |
    */
-  allWalletChainIds?: string[];
+  AllWalletChainIds?: string[];
   initial_dclid?: any;
   initial_fbclid?: any;
   initial_gbraid?: any;
@@ -101,21 +102,13 @@ export interface IdentifyProperties {
   initial_utm_term?: any;
   initial_wbraid?: any;
   /**
-   * Total volume of bridge transfers (since event tracking was implemented). Updated on each new transfer the user completes.
-   *
-   * | Rule | Value |
-   * |---|---|
-   * | Type | integer |
-   */
-  totalVolumeUsd: number;
-  /**
    * Currently connected wallet address
    */
-  walletAddress?: string;
+  WalletAddress?: string;
   /**
    * Type of wallet connected
    */
-  walletType?: string;
+  WalletType?: string;
 }
 
 export interface ConnectWalletButtonClickedProperties {
@@ -1045,7 +1038,7 @@ export interface WebVitalsProperties {
 export class Identify implements BaseEvent {
   event_type = "Identify";
 
-  constructor(public event_properties: IdentifyProperties) {
+  constructor(public event_properties?: IdentifyProperties) {
     this.event_properties = event_properties;
   }
 }
@@ -1257,7 +1250,7 @@ export class Ampli {
    */
   identify(
     userId: string | undefined,
-    properties: IdentifyProperties,
+    properties?: IdentifyProperties,
     options?: EventOptions,
   ): PromiseResult<Result> {
     if (!this.isInitializedAndEnabled()) {
