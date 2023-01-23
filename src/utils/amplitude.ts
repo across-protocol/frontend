@@ -114,15 +114,15 @@ export function identifyUserWallets(walletStates: WalletState[]) {
   ampli.client?.setUserId(connectedWalletAddress);
 
   const identifyObj = new Identify();
-  identifyObj.postInsert("allWalletAddressesConnected", connectedWalletAddress);
-  identifyObj.set("walletAddress", connectedWalletAddress);
-  identifyObj.set("walletType", connectedWallet.label);
+  identifyObj.postInsert("AllWalletAddressesConnected", connectedWalletAddress);
+  identifyObj.set("WalletAddress", connectedWalletAddress);
+  identifyObj.set("WalletType", connectedWallet.label);
   return ampli.client?.identify(identifyObj);
 }
 
 export function trackWalletChainId(chainId: string | number) {
   const identifyObj = new Identify();
-  identifyObj.postInsert("allWalletChainIds", chainId);
+  identifyObj.postInsert("AllWalletChainIds", chainId);
   return ampli.client?.identify(identifyObj);
 }
 
@@ -382,6 +382,6 @@ export function reportTokenBalance(
 
 export function reportTotalWalletUsdBalance(totalBalance: number) {
   const identifyObj = new Identify();
-  identifyObj.set("usdWalletCurrentBalance", totalBalance);
+  identifyObj.set("AllAssetsAllNetworksWalletCurrentBalanceUsd", totalBalance);
   ampli.client?.identify(identifyObj);
 }
