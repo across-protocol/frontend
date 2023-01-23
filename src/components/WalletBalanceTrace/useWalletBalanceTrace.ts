@@ -76,7 +76,7 @@ const calculateUsdBalances = async (account: string) => {
           const fn = async () => {
             return {
               fromTokenSymbol: "WETH",
-              fromTokenAddress: "0000000000000000000000000000000000000000",
+              fromTokenAddress: "0x0000000000000000000000000000000000000000",
               balance: await getNativeBalance(Number(chainId), account),
             };
           };
