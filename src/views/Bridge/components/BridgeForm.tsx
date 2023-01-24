@@ -10,6 +10,7 @@ import {
   getToken,
   TokenInfo,
   GetBridgeFeesResult,
+  QUERIESV2,
 } from "utils";
 import CoinSelector from "./CoinSelector";
 import EstimatedTable from "./EstimatedTable";
@@ -271,6 +272,10 @@ const Button = styled(UnstyledButton)`
   border-radius: 32px;
   height: 64px;
   width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    height: 40px;
+  }
 `;
 
 const ChainIconSuperTextWrapper = styled.div`
