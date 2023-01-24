@@ -12,9 +12,7 @@ export function useMaxAmounts(
 ) {
   const { signer } = useConnection();
   const stakingPoolQuery = useStakingPool(selectedTokenAddress);
-  const userLiquidityPoolQuery = useUserLiquidityPool(
-    stakingPoolQuery.data?.tokenSymbol
-  );
+  const userLiquidityPoolQuery = useUserLiquidityPool(selectedTokenSymbol);
 
   return useQuery(
     [
@@ -29,25 +27,23 @@ export function useMaxAmounts(
 
       if (
         selectedTokenAddress &&
+        selectedTokenSymbol &&
         stakingPoolQuery.data &&
         userLiquidityPoolQuery.data &&
         signer
       ) {
         const { l1Balance } = userLiquidityPoolQuery.data;
-        maxAddableAmount = !["WETH", "ETH"].includes(
-          stakingPoolQuery.data.tokenSymbol
-        )
-          ? l1Balance
-          : // For ETH, we need to take the gas costs into account before setting the max. addable amount
-            await estimateGasForAddEthLiquidity(
-              signer,
-              selectedTokenAddress,
-              l1Balance
-            )
-              .then((estimatedGasCosts) =>
-                max(l1Balance.sub(estimatedGasCosts), 0)
-              )
-              .catch((err) => max(l1Balance.sub(utils.parseEther("0.01")), 0));
+        maxAddableAmount =
+          "ETH" !== selectedTokenSymbol
+            ? l1Balance
+            : // For ETH, we need to take the gas costs into account before setting the max. addable amount
+              await estimateGasForAddEthLiquidity(signer, selectedTokenAddress)
+                .then((estimatedGasCosts) =>
+                  max(l1Balance.sub(estimatedGasCosts), 0)
+                )
+                .catch((err) =>
+                  max(l1Balance.sub(utils.parseEther("0.01")), 0)
+                );
         maxRemovableAmount = max(
           BigNumber.from(userLiquidityPoolQuery.data.positionValue).sub(
             stakingPoolQuery.data.convertLPToUnderlying(
