@@ -231,6 +231,7 @@ export function useBridge() {
       trackFromChainChanged(currentToRouteTemp, false);
       // Set the current to route to the current from route
       setCurrentToRoute(currentFromRouteTemp);
+      setAmountToBridge(undefined);
       trackToChainChanged(currentFromRouteTemp, false);
       trackQuickSwap("bridgeForm");
     }
@@ -254,14 +255,14 @@ export function useBridge() {
   const isBridgeDisabled =
     isConnected && (!amountToBridge || amountToBridge.eq(0));
 
-  const { fees: rawFees } = useBridgeFees(
+  const { fees: rawFees, isLoading: areRawFeesLoading } = useBridgeFees(
     amountToBridge ?? BigNumber.from(0),
     currentFromRoute,
     currentToRoute,
     currentToken
   );
 
-  const { limits: rawLimits } = useBridgeLimits(
+  const { limits: rawLimits, isLoading: areRawLimitsLoading } = useBridgeLimits(
     currentRoute?.fromTokenAddress,
     currentFromRoute,
     currentToRoute
@@ -294,8 +295,10 @@ export function useBridge() {
         : undefined
       : undefined;
   }, [amountToBridge, currentFromRoute, currentToRoute, limits]);
-  const estimatedTime = limits
-    ? estimatedTimeToRelayObject?.formattedString ?? "loading..."
+  const estimatedTime = areRawLimitsLoading
+    ? "loading..."
+    : limits
+    ? estimatedTimeToRelayObject?.formattedString
     : undefined;
 
   const { referrer } = useReferrer();
@@ -365,7 +368,7 @@ export function useBridge() {
   }, [fees, currentRoute]);
 
   const bridgeAction = useBridgeAction(
-    limits === undefined || fees === undefined,
+    areRawFeesLoading || areRawLimitsLoading,
     bridgePayload,
     currentToken,
     onTxHashChange,
@@ -432,8 +435,7 @@ export function useBridge() {
     isConnected,
     isBridgeDisabled:
       isConnected &&
-      (isWrongNetwork ||
-        isBridgeDisabled ||
+      (isBridgeDisabled ||
         bridgeAction.buttonDisabled ||
         (!!fees && fees.isAmountTooLow)),
     amountTooLow: isConnected && (fees?.isAmountTooLow ?? false),

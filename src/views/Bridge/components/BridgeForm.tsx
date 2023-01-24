@@ -32,7 +32,9 @@ type BridgeFormProps = {
   setCurrentToRoute: (chainId: number) => void;
   handleQuickSwap: () => void;
   isConnected: boolean;
-  buttonActionHandler: () => Promise<void>;
+  isWrongChain: boolean;
+  handleChainSwitch: () => void;
+  buttonActionHandler: () => void;
   buttonLabel: string;
   isBridgeDisabled: boolean;
   fees: GetBridgeFeesResult | undefined;
@@ -57,6 +59,8 @@ const BridgeForm = ({
   currentToRoute,
   setCurrentToRoute,
   handleQuickSwap,
+  isWrongChain,
+  handleChainSwitch,
   isConnected,
   buttonActionHandler,
   buttonLabel,
@@ -175,16 +179,24 @@ const BridgeForm = ({
           />
         )}
         <Divider />
-        <Button
-          disabled={isBridgeDisabled}
-          onClick={() => {
-            buttonActionHandler();
-          }}
-        >
-          <Text color="dark-grey" weight={500}>
-            {buttonLabel}
-          </Text>
-        </Button>
+        {isWrongChain ? (
+          <Button onClick={() => handleChainSwitch()}>
+            <Text color="dark-grey" weight={500}>
+              Switch Network
+            </Text>
+          </Button>
+        ) : (
+          <Button
+            disabled={isBridgeDisabled}
+            onClick={() => {
+              buttonActionHandler();
+            }}
+          >
+            <Text color="dark-grey" weight={500}>
+              {buttonLabel}
+            </Text>
+          </Button>
+        )}
       </CardWrapper>{" "}
     </>
   );

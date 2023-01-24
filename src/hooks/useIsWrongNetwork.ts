@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { providers } from "ethers";
 
 import { useConnection } from "hooks";
-import { hubPoolChainId } from "utils";
+import { hubPoolChainId, chainInfoTable } from "utils";
 
 export function useIsWrongNetwork(baseChain?: number) {
   const correctChainId = baseChain ?? hubPoolChainId;
@@ -29,9 +28,7 @@ export function useIsWrongNetwork(baseChain?: number) {
 
     if (!didSetChain) {
       throw new Error(
-        `Wrong network. Please switch to network ${
-          providers.getNetwork(correctChainId).name
-        }`
+        `Wrong network. Please switch to network ${chainInfoTable[correctChainId]?.name}`
       );
     }
   };
@@ -41,9 +38,7 @@ export function useIsWrongNetwork(baseChain?: number) {
       await isWrongNetworkHandler();
     } catch (_e) {
       console.error(
-        `Wrong network. Please switch to network ${
-          providers.getNetwork(correctChainId).name
-        }`
+        `Wrong network. Please switch to network ${chainInfoTable[correctChainId]?.name}`
       );
     }
   };

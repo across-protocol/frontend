@@ -1,7 +1,8 @@
 import { ampli, TransferQuoteReceivedProperties } from "ampli";
-import { BigNumber, ContractTransaction } from "ethers";
-import { useConnection, useERC20 } from "hooks";
-import { useAllowance } from "hooks/useAllowance";
+import { BigNumber, ContractTransaction, utils } from "ethers";
+import { DateTime } from "luxon";
+import { useConnection, useApprove, useIsWrongNetwork } from "hooks";
+import { useLocalPendingDeposits } from "hooks/useLocalPendingDeposits";
 import { cloneDeep } from "lodash";
 import { useMutation } from "react-query";
 import {
@@ -11,11 +12,12 @@ import {
   generateTransferSubmitted,
   getConfig,
   getToken,
-  MAX_APPROVAL_AMOUNT,
   recordTransferUserProperties,
   sendAcrossDeposit,
   waitOnTransaction,
 } from "utils";
+
+const config = getConfig();
 
 export function useBridgeAction(
   dataLoading: boolean,
@@ -27,38 +29,14 @@ export function useBridgeAction(
   recentInitialQuoteTime?: number,
   tokenPrice?: BigNumber
 ) {
-  const { isConnected, connect, account, chainId, signer, notify } =
-    useConnection();
-  const { approve } = useERC20(tokenSymbol ?? "");
-  const { allowance } = useAllowance(
-    tokenSymbol,
-    payload?.fromChain,
-    account,
-    payload ? getConfig().getSpokePoolAddress(payload.fromChain) : undefined
+  const { isConnected, connect, signer, notify, account } = useConnection();
+
+  const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork(
+    payload?.fromChain
   );
 
-  const approvalHandler = async () => {
-    if (allowance !== undefined && payload && signer) {
-      const spokePool = getConfig().getSpokePool(payload.fromChain, signer);
-      if (chainId === payload.fromChain) {
-        if (allowance.lt(payload.amount)) {
-          try {
-            const tx = await approve({
-              spender: spokePool.address,
-              amount: MAX_APPROVAL_AMOUNT,
-              signer,
-            });
-            if (tx) {
-              await waitOnTransaction(payload.fromChain, tx, notify);
-            }
-          } catch (e) {
-            console.error(e);
-            return;
-          }
-        }
-      }
-    }
-  };
+  const { addLocalPendingDeposit } = useLocalPendingDeposits();
+  const approveHandler = useApprove(payload?.fromChain);
 
   const buttonActionHandler = useMutation(async () => {
     const frozenQuote = cloneDeep(recentQuote);
@@ -69,110 +47,144 @@ export function useBridgeAction(
 
     if (!isConnected) {
       connect();
-    } else {
-      if (
-        allowance !== undefined &&
-        frozenPayload &&
-        signer &&
-        chainId === frozenPayload.fromChain &&
-        frozenQuote &&
-        frozenInitialQuoteTime &&
-        frozenTokenPrice
-      ) {
-        if (allowance.lt(frozenPayload.amount)) {
-          await approvalHandler();
-        }
-        let succeeded = false;
-        let timeSigned: number | undefined = undefined;
-        let tx: ContractTransaction | undefined = undefined;
-        try {
-          // Instrument amplitude before sending the transaction for the submit button.
-          ampli.transferSubmitted(
-            generateTransferSubmitted(
-              frozenQuote,
-              referrer,
-              frozenInitialQuoteTime
-            )
-          );
-          const timeSubmitted = Date.now();
+      return;
+    }
 
-          tx = await sendAcrossDeposit(signer, frozenPayload);
+    if (
+      !frozenPayload ||
+      !signer ||
+      !account ||
+      !frozenQuote ||
+      !frozenInitialQuoteTime ||
+      !frozenTokenPrice ||
+      !tokenSymbol
+    ) {
+      return;
+    }
 
-          // Instrument amplitude after signing the transaction for the submit button.
-          timeSigned = Date.now();
-          ampli.transferSigned(
-            generateTransferSigned(
-              frozenQuote,
-              referrer,
-              timeSubmitted,
-              tx.hash
-            )
-          );
+    if (isWrongNetwork) {
+      await isWrongNetworkHandler();
+    }
 
-          if (onTransactionComplete) {
-            onTransactionComplete(tx.hash);
-          }
-          await waitOnTransaction(frozenPayload.fromChain, tx, notify);
-          if (onDepositResolved) {
-            onDepositResolved(true);
-          }
-          succeeded = true;
-        } catch (e) {
-          console.error(e);
-          if (onDepositResolved) {
-            onDepositResolved(false);
-          }
-        }
-        if (timeSigned && tx) {
-          ampli.transferDepositCompleted(
-            generateDepositConfirmed(
-              frozenQuote,
-              referrer,
-              timeSigned,
-              tx.hash,
-              succeeded,
-              tx.timestamp!
-            )
-          );
-        }
-        // Call recordTransferUserProperties to update the user's properties in Amplitude.
-        recordTransferUserProperties(
-          frozenPayload.amount,
-          frozenTokenPrice,
-          getToken(frozenQuote.tokenSymbol).decimals,
-          frozenQuote.tokenSymbol.toLowerCase(),
-          Number(frozenQuote.fromChainId),
-          Number(frozenQuote.toChainId),
-          frozenQuote.fromChainName
-        );
+    if (tokenSymbol !== "ETH") {
+      await approveHandler.mutateAsync({
+        erc20Address: config.getTokenInfoBySymbol(
+          frozenPayload.fromChain,
+          tokenSymbol
+        ).address,
+        approvalAmount: frozenPayload.amount,
+        allowedContractAddress: config.getSpokePoolAddress(
+          frozenPayload.fromChain
+        ),
+      });
+    }
+
+    let succeeded = false;
+    let timeSigned: number | undefined = undefined;
+    let tx: ContractTransaction | undefined = undefined;
+    try {
+      // Instrument amplitude before sending the transaction for the submit button.
+      ampli.transferSubmitted(
+        generateTransferSubmitted(frozenQuote, referrer, frozenInitialQuoteTime)
+      );
+      const timeSubmitted = Date.now();
+
+      tx = await sendAcrossDeposit(signer, frozenPayload);
+
+      // Instrument amplitude after signing the transaction for the submit button.
+      timeSigned = Date.now();
+      ampli.transferSigned(
+        generateTransferSigned(frozenQuote, referrer, timeSubmitted, tx.hash)
+      );
+
+      if (onTransactionComplete) {
+        onTransactionComplete(tx.hash);
+      }
+      await waitOnTransaction(frozenPayload.fromChain, tx, notify);
+
+      // Optimistically add deposit to local storage for instant visibility on the
+      // "My Transactions" page. See `src/hooks/useUserDeposits.ts` for details.
+      addLocalPendingDeposit({
+        depositId: 0,
+        depositTime: DateTime.now().toSeconds(),
+        status: "pending",
+        filled: "0",
+        sourceChainId: frozenPayload.fromChain,
+        destinationChainId: frozenPayload.toChain,
+        assetAddr: frozenPayload.tokenAddress,
+        depositorAddr: utils.getAddress(account),
+        amount: frozenPayload.amount.toString(),
+        depositTxHash: tx.hash,
+        fillTxs: [],
+        speedUps: [],
+        depositRelayerFeePct: frozenPayload.relayerFeePct.toString(),
+        initialRelayerFeePct: frozenPayload.relayerFeePct.toString(),
+        suggestedRelayerFeePct: frozenPayload.relayerFeePct.toString(),
+      });
+
+      if (onDepositResolved) {
+        onDepositResolved(true);
+      }
+      succeeded = true;
+    } catch (e) {
+      console.error(e);
+      if (onDepositResolved) {
+        onDepositResolved(false);
       }
     }
+    if (timeSigned && tx) {
+      ampli.transferDepositCompleted(
+        generateDepositConfirmed(
+          frozenQuote,
+          referrer,
+          timeSigned,
+          tx.hash,
+          succeeded,
+          tx.timestamp!
+        )
+      );
+    }
+    // Call recordTransferUserProperties to update the user's properties in Amplitude.
+    recordTransferUserProperties(
+      frozenPayload.amount,
+      frozenTokenPrice,
+      getToken(frozenQuote.tokenSymbol).decimals,
+      frozenQuote.tokenSymbol.toLowerCase(),
+      Number(frozenQuote.fromChainId),
+      Number(frozenQuote.toChainId),
+      frozenQuote.fromChainName
+    );
   });
 
-  let buttonLabel = "";
-  if (!isConnected) {
-    buttonLabel = "Connect wallet";
-  } else if (payload) {
-    if (dataLoading || !allowance) {
-      buttonLabel = "Loading...";
-    } else {
-      if (buttonActionHandler.isLoading) {
-        buttonLabel = "Confirming...";
-      } else {
-        buttonLabel = "Confirm transaction";
-      }
-    }
-  } else {
-    buttonLabel = "Confirm transaction";
-  }
   const buttonDisabled =
     !payload || (isConnected && dataLoading) || buttonActionHandler.isLoading;
 
   return {
     isConnected,
-    buttonActionHandler: buttonActionHandler.mutateAsync,
+    buttonActionHandler: buttonActionHandler.mutate,
     isButtonActionLoading: buttonActionHandler.isLoading,
-    buttonLabel,
+    buttonLabel: getButtonLabel({
+      isConnected,
+      isDataLoading: dataLoading,
+      isMutating: buttonActionHandler.isLoading,
+    }),
     buttonDisabled,
   };
+}
+
+function getButtonLabel(args: {
+  isConnected: boolean;
+  isDataLoading: boolean;
+  isMutating: boolean;
+}) {
+  if (!args.isConnected) {
+    return "Connect wallet";
+  }
+  if (args.isMutating) {
+    return "Confirming...";
+  }
+  if (args.isDataLoading) {
+    return "Loading...";
+  }
+  return "Confirm transaction";
 }
