@@ -304,13 +304,8 @@ export function useBridge() {
   const [toAccount, setToAccount] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (isConnected && toAccount === undefined) {
-      setToAccount(account);
-    }
-    if (!isConnected) {
-      setToAccount(undefined);
-    }
-  }, [isConnected, account, toAccount]);
+    setToAccount(account);
+  }, [account]);
 
   const bridgePayload: AcrossDepositArgs | undefined =
     amountToBridge && currentRoute && fees
