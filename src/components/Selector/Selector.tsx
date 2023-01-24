@@ -128,7 +128,7 @@ const ElementRowWrapper = styled.div<{ enableScroll?: boolean }>`
   flex-direction: column;
   align-items: flex-start;
   padding: 0px;
-  margin: 0px -16px;
+  margin: 0px -16px -16px;
 
   width: calc(100% + 32px);
   overflow-y: ${({ enableScroll }) => (enableScroll ? "scroll" : "none")};
