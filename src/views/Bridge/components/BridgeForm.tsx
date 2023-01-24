@@ -32,7 +32,7 @@ type BridgeFormProps = {
   setCurrentToRoute: (chainId: number) => void;
   handleQuickSwap: () => void;
   isConnected: boolean;
-  buttonActionHandler: () => Promise<void>;
+  buttonActionHandler: () => void;
   buttonLabel: string;
   isBridgeDisabled: boolean;
   fees: GetBridgeFeesResult | undefined;

@@ -437,8 +437,7 @@ export function useBridge() {
     isConnected,
     isBridgeDisabled:
       isConnected &&
-      (isWrongNetwork ||
-        isBridgeDisabled ||
+      (isBridgeDisabled ||
         bridgeAction.buttonDisabled ||
         (!!fees && fees.isAmountTooLow)),
     amountTooLow: isConnected && (fees?.isAmountTooLow ?? false),
