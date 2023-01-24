@@ -301,6 +301,10 @@ const AmountInnerInput = styled.input<IValidInput>`
     font-size: 18px;
   }
 
+  &::placeholder {
+    color: #9daab3;
+  }
+
   overflow-x: hidden;
 
   @media ${QUERIESV2.sm.andDown} {

@@ -64,6 +64,11 @@ export const Input = styled.input<IStakeInput>`
   &:focus {
     outline: 0;
   }
+
+  &::placeholder {
+    color: #9daab3;
+  }
+
   @media ${QUERIESV2.sm.andDown} {
     font-size: 16px;
   }
