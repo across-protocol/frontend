@@ -81,6 +81,7 @@ function useCoinSelector(
 
   useEffect(() => {
     setUserAmountInput("");
+    setAmountToBridge(undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentToken, toChain, fromChain]);
 
