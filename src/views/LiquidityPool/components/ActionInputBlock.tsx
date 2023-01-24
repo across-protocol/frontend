@@ -2,8 +2,8 @@ import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { utils } from "ethers";
 
-import { QUERIESV2, trackMaxButtonClicked } from "utils";
-import { useStakingPool } from "hooks";
+import { hubPoolChainId, QUERIESV2, trackMaxButtonClicked } from "utils";
+import { useIsWrongNetwork, useStakingPool } from "hooks";
 import { InputWithMaxButton, Text } from "components";
 
 import {

@@ -21,6 +21,8 @@ const Bridge = () => {
     setCurrentToRoute,
     handleQuickSwap,
     isConnected,
+    isWrongChain,
+    handleChainSwitch,
     buttonActionHandler,
     buttonLabel,
     isBridgeDisabled,
@@ -82,6 +84,8 @@ const Bridge = () => {
               currentToRoute={currentToRoute}
               setCurrentToRoute={setCurrentToRoute}
               handleQuickSwap={handleQuickSwap}
+              isWrongChain={isWrongChain}
+              handleChainSwitch={handleChainSwitch}
               isConnected={isConnected}
               buttonActionHandler={buttonActionHandler}
               buttonLabel={buttonLabel}

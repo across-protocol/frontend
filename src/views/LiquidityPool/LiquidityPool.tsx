@@ -13,7 +13,12 @@ import {
   hubPoolChainId,
 } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import { useConnection, useQueryParams, useStakingPool } from "hooks";
+import {
+  useConnection,
+  useIsWrongNetwork,
+  useQueryParams,
+  useStakingPool,
+} from "hooks";
 
 import Breadcrumb from "./components/Breadcrumb";
 import PoolSelector from "./components/PoolSelector";
@@ -36,6 +41,8 @@ export default function LiquidityPool() {
   const [selectedToken, setSelectedToken] = useState(tokenList[0]);
 
   const { isConnected, connect } = useConnection();
+  const { isWrongNetwork, isWrongNetworkHandlerWithoutError } =
+    useIsWrongNetwork();
 
   const userLiquidityPoolQuery = useUserLiquidityPool(selectedToken.symbol);
   const allLiquidityPoolQueries = useAllLiquidityPools();
@@ -178,6 +185,13 @@ export default function LiquidityPool() {
                 }
               >
                 Connect Wallet
+              </Button>
+            ) : isWrongNetwork ? (
+              <Button
+                size="lg"
+                onClick={() => isWrongNetworkHandlerWithoutError()}
+              >
+                Switch Network
               </Button>
             ) : (
               <ActionInputBlock action={action} selectedToken={selectedToken} />
