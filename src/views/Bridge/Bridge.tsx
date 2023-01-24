@@ -19,8 +19,6 @@ const Bridge = () => {
     availableToRoutes,
     currentToRoute,
     setCurrentToRoute,
-    isWrongChain,
-    handleChainSwitch,
     handleQuickSwap,
     isConnected,
     buttonActionHandler,
