@@ -1,5 +1,6 @@
-import { API } from "bnc-notify";
-import { hubPoolChainId, getChainInfo } from "utils";
+import { API as NotifyAPI } from "bnc-notify";
+import { ContractTransaction } from "ethers";
+import { hubPoolChainId, getChainInfo, supportedNotifyChainIds } from "utils";
 
 export function addEtherscan(transaction: any) {
   return {
@@ -17,7 +18,7 @@ export function addEtherscan(transaction: any) {
  */
 export const notificationEmitter = async (
   txHash: string,
-  notify: API,
+  notify: NotifyAPI,
   timingBuffer?: number,
   ignoreErrors?: boolean
 ): Promise<void> => {
@@ -39,4 +40,31 @@ export const notificationEmitter = async (
       }
     });
   });
+};
+
+/**
+ * Calls and waits on the Notify API to resolve the status of a TX if the chain is supported by Onboard
+ * @param tx The transaction to wait for
+ * @param notify The BNC Notify API that is used to handle the UI visualization
+ * @param timingBuffer An optional waiting time in milliseconds to wait to resolve this promise on a successful tx confirmation in Notify (Default: 5000ms)
+ * @param ignoreErrors An optional parameter to ignore tx failure and return successful
+ **/
+export const waitOnTransaction = async (
+  requiredChainId: number,
+  tx: ContractTransaction,
+  notify: NotifyAPI,
+  timingBuffer?: number,
+  ignoreErrors?: boolean
+): Promise<void> => {
+  if (supportedNotifyChainIds.includes(requiredChainId)) {
+    await notificationEmitter(tx.hash, notify, timingBuffer, ignoreErrors);
+  } else {
+    try {
+      await tx.wait();
+    } catch (e) {
+      if (!ignoreErrors) {
+        throw e;
+      }
+    }
+  }
 };

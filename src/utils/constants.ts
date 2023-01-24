@@ -21,6 +21,12 @@ import acxLogo from "assets/across.svg";
 import balLogo from "assets/bal.svg";
 import usdtLogo from "assets/usdt-logo.svg";
 
+import ethereumLogoGrayscale from "assets/grayscale-logos/eth.svg";
+import optimismLogoGrayscale from "assets/grayscale-logos/optimism.svg";
+import arbitrumLogoGrayscale from "assets/grayscale-logos/arbitrum.svg";
+import polygonLogoGrayscale from "assets/grayscale-logos/polygon.svg";
+import bobaLogoGrayscale from "assets/grayscale-logos/boba.svg";
+
 // all routes should be pre imported to be able to switch based on chain id
 import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -128,6 +134,7 @@ export type ChainInfo = {
   fullName?: string;
   chainId: ChainId;
   logoURI: string;
+  grayscaleLogoURI: string;
   rpcUrl?: string;
   explorerUrl: string;
   constructExplorerLink: (txHash: string) => string;
@@ -151,6 +158,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Ethereum Mainnet",
     chainId: ChainId.MAINNET,
     logoURI: ethereumLogo,
+    grayscaleLogoURI: ethereumLogoGrayscale,
     explorerUrl: "https://etherscan.io",
     constructExplorerLink: defaultConstructExplorerLink("https://etherscan.io"),
     nativeCurrencySymbol: "ETH",
@@ -162,6 +170,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Arbitrum One",
     chainId: ChainId.ARBITRUM,
     logoURI: arbitrumLogo,
+    grayscaleLogoURI: arbitrumLogoGrayscale,
     rpcUrl: "https://arb1.arbitrum.io/rpc",
     explorerUrl: "https://arbiscan.io",
     constructExplorerLink: (txHash: string) =>
@@ -176,6 +185,7 @@ export const chainInfoList: ChainInfoList = [
     logoURI: bobaLogo,
     rpcUrl: "https://mainnet.boba.network",
     explorerUrl: "https://blockexplorer.boba.network",
+    grayscaleLogoURI: bobaLogoGrayscale,
     constructExplorerLink: (txHash: string) =>
       `https://blockexplorer.boba.network/tx/${txHash}`,
     nativeCurrencySymbol: "ETH",
@@ -186,6 +196,7 @@ export const chainInfoList: ChainInfoList = [
     name: "Optimism",
     chainId: ChainId.OPTIMISM,
     logoURI: optimismLogo,
+    grayscaleLogoURI: optimismLogoGrayscale,
     rpcUrl: "https://mainnet.optimism.io",
     explorerUrl: "https://optimistic.etherscan.io",
     constructExplorerLink: (txHash: string) =>
@@ -199,6 +210,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Polygon Network",
     chainId: ChainId.POLYGON,
     logoURI: polygonLogo,
+    grayscaleLogoURI: polygonLogoGrayscale,
     rpcUrl: "https://rpc.ankr.com/polygon",
     explorerUrl: "https://polygonscan.com",
     constructExplorerLink: defaultConstructExplorerLink(
@@ -213,6 +225,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Goerli Testnet",
     chainId: ChainId.GOERLI,
     logoURI: ethereumLogo,
+    grayscaleLogoURI: ethereumLogoGrayscale,
     explorerUrl: "https://goerli.etherscan.io/",
     constructExplorerLink: defaultConstructExplorerLink(
       "https://goerli.etherscan.io/"
@@ -226,6 +239,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Ethereum Testnet Kovan",
     chainId: ChainId.KOVAN,
     logoURI: ethereumLogo,
+    grayscaleLogoURI: ethereumLogoGrayscale,
     explorerUrl: "https://kovan.etherscan.io",
     constructExplorerLink: defaultConstructExplorerLink(
       "https://kovan.etherscan.io"
@@ -239,6 +253,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Optimism Testnet Kovan",
     chainId: ChainId.KOVAN_OPTIMISM,
     logoURI: optimismLogo,
+    grayscaleLogoURI: optimismLogoGrayscale,
     rpcUrl: "https://kovan.optimism.io",
     explorerUrl: "https://kovan-optimistic.etherscan.io",
     constructExplorerLink: (txHash: string) =>
@@ -251,6 +266,7 @@ export const chainInfoList: ChainInfoList = [
     name: "Mumbai",
     chainId: ChainId.MUMBAI,
     logoURI: polygonLogo,
+    grayscaleLogoURI: polygonLogoGrayscale,
     rpcUrl: "https://matic-mumbai.chainstacklabs.com",
     explorerUrl: "https://mumbai.polygonscan.com",
     constructExplorerLink: defaultConstructExplorerLink(
@@ -265,6 +281,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Arbitrum Testnet Rinkeby",
     chainId: ChainId.ARBITRUM_RINKEBY,
     logoURI: arbitrumLogo,
+    grayscaleLogoURI: arbitrumLogoGrayscale,
     explorerUrl: "https://rinkeby-explorer.arbitrum.io",
     constructExplorerLink: (txHash: string) =>
       `https://rinkeby-explorer.arbitrum.io/tx/${txHash}`,
@@ -278,6 +295,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Rinkeby Testnet",
     chainId: ChainId.RINKEBY,
     logoURI: ethereumLogo,
+    grayscaleLogoURI: ethereumLogoGrayscale,
     explorerUrl: "https://rinkeby.etherscan.io",
     constructExplorerLink: defaultConstructExplorerLink(
       "https://rinkeby.etherscan.io"
@@ -596,7 +614,7 @@ export const discordClientId = process.env.REACT_APP_DISCORD_CLIENT_ID ?? "";
 
 // Configures the V2 breakpoints
 export const BREAKPOINTS_V2 = {
-  xs: 400,
+  xs: 421,
   sm: 576,
   tb: 1024,
 };

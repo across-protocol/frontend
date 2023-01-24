@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { utils } from "ethers";
 import {
-  Card,
-  Tabs,
-  Tab,
   StakeInfo,
   StakeInfoItem,
   StyledProgressBar,
@@ -19,6 +16,7 @@ import {
 } from "./StakingForm.styles";
 
 import { PopperTooltip } from "components/Tooltip";
+import { Tab, Tabs } from "components/TabsV2";
 import StakingInputBlock from "../StakingInputBlock";
 import { StakingFormPropType } from "../../types";
 import { repeatableTernaryBuilder } from "utils/ternary";
@@ -27,6 +25,7 @@ import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { Text } from "components/Text";
 import { useStakeFormLogic } from "views/Staking/hooks/useStakeFormLogic";
 import ConnectWalletButton from "../ConnectWalletButton";
+import CardWrapper from "components/CardWrapper";
 
 export const StakingForm = ({
   isConnected,
@@ -87,7 +86,7 @@ export const StakingForm = ({
 
   return (
     <SectionTitleWrapperV2 title="Staking">
-      <Card>
+      <CardWrapper>
         <Tabs>
           <Tab
             onClick={() => !isMutating && setStakingAction("stake")}
@@ -287,7 +286,7 @@ export const StakingForm = ({
             </StakeInfoRow>
           </InnerPoolStakeInfo>
         </StakeInfo>
-      </Card>
+      </CardWrapper>
     </SectionTitleWrapperV2>
   );
 };

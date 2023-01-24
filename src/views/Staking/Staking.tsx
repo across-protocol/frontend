@@ -1,8 +1,8 @@
 import { Wrapper } from "./Staking.styles";
 import { StakingReward, StakingForm, StakingExitAction } from "./components";
 import { useStakingView } from "./hooks/useStakingView";
-import { LayoutV2, SuperHeader } from "components";
-import { getChainInfo, hubPoolChainId } from "utils";
+import { LayoutV2, WrongNetworkHeader } from "components";
+import { hubPoolChainId } from "utils";
 
 const Staking = () => {
   const {
@@ -14,22 +14,12 @@ const Staking = () => {
     claimActionMutation,
     unstakeActionMutation,
     isWrongNetwork,
-    isWrongNetworkHandler,
     poolData,
   } = useStakingView();
 
   return (
     <>
-      {isWrongNetwork && (
-        <SuperHeader>
-          <div>
-            You are on the incorrect network. Please{" "}
-            <button onClick={isWrongNetworkHandler}>
-              switch to {getChainInfo(hubPoolChainId).name}
-            </button>
-          </div>
-        </SuperHeader>
-      )}
+      <WrongNetworkHeader requiredChainId={hubPoolChainId} />
       <LayoutV2 maxWidth={600}>
         <Wrapper>
           <StakingExitAction poolName={poolName} poolLogoURI={poolLogoURI} />

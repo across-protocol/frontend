@@ -4,7 +4,12 @@ import { ERC20__factory } from "@across-protocol/contracts-v2";
 import { API } from "bnc-notify";
 
 import { useConnection, useStakingPool } from "hooks";
-import { getConfig, MAX_APPROVAL_AMOUNT, notificationEmitter } from "utils";
+import {
+  getConfig,
+  hubPoolChainId,
+  MAX_APPROVAL_AMOUNT,
+  waitOnTransaction,
+} from "utils";
 import { sendWithPaddedGas } from "utils/transactions";
 
 export type StakingActionFunctionArgs = { amount: BigNumber };
@@ -104,7 +109,7 @@ const performStakingActionBuilderFn = (
           MAX_APPROVAL_AMOUNT
         );
         // Wait for the transaction to return successful
-        await notificationEmitter(approvalResult.hash, notify);
+        await waitOnTransaction(hubPoolChainId, approvalResult, notify);
         innerApprovalRequired = false;
       } catch (_e) {
         // If this function fails to resolve (or the user rejects), we don't proceed.
@@ -118,7 +123,7 @@ const performStakingActionBuilderFn = (
     // wait until the tx has been resolved
     try {
       const result = await callingFn(lpTokenAddress, amountAsBigNumber);
-      await notificationEmitter(result.hash, notify, 5000, true);
+      await waitOnTransaction(hubPoolChainId, result, notify, 5000, true);
     } catch (_e) {
       // We currently don't handle the error case other than to exit gracefully.
     }

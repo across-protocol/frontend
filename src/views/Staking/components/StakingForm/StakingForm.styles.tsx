@@ -3,14 +3,9 @@ import ProgressBar from "components/ProgressBar";
 import { ReactComponent as UnstyedUsdcLogo } from "assets/icons/usdc-24.svg";
 import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
-import {
-  Card as ExternalCard,
-  Divider as ExternalDivider,
-} from "../../Staking.styles";
+import { Divider as ExternalDivider } from "../../Staking.styles";
 
 import { QUERIESV2 } from "utils";
-
-export const Card = styled(ExternalCard)``;
 
 export const Wrapper = styled.div`
   display: flex;
@@ -23,31 +18,7 @@ export const Wrapper = styled.div`
   box-sizing: border-box;
 `;
 
-export const Tabs = styled.div`
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin: 0 auto 0px;
-  justify-items: center;
-`;
-
 export const Divider = ExternalDivider;
-
-interface ITab {
-  active: boolean;
-}
-export const Tab = styled.div<ITab>`
-  flex-grow: 1;
-  text-align: center;
-  padding: 0 0 20px;
-  border-bottom: ${(props) =>
-    props.active ? "2px solid #e0f3ff" : "1px solid #3E4047"};
-  cursor: pointer;
-
-  @media ${QUERIESV2.sm.andDown} {
-    padding: 0 0 12px;
-  }
-`;
 
 export const UsdcLogo = styled(UnstyedUsdcLogo)``;
 

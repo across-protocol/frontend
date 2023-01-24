@@ -1,10 +1,10 @@
 import { useMutation } from "react-query";
 
 import { getConfig } from "utils/config";
-import { notificationEmitter } from "utils/notify";
 import { useConnection, useIsWrongNetwork } from "hooks";
 import { useUnclaimedReferralProofs } from "./useUnclaimedReferralProofs";
 import { sendWithPaddedGas } from "utils/transactions";
+import { hubPoolChainId, waitOnTransaction } from "utils";
 
 const config = getConfig();
 
@@ -36,7 +36,7 @@ export function useClaimReferralRewards() {
         account,
       }))
     );
-    await notificationEmitter(claimMultiTx.hash, notify);
+    await waitOnTransaction(hubPoolChainId, claimMultiTx, notify);
   };
 
   return useMutation(handleClaim, {

@@ -1,13 +1,13 @@
 import {
   InputRow,
-  InputWrapper,
-  Input,
   ButtonWrapper,
   StakeButton,
-  MaxButton,
   Wrapper,
   LoaderWrapper,
   StakeButtonContentWrapper,
+  Input,
+  InputWrapper,
+  MaxButton,
   TokenIcon,
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
