@@ -38,6 +38,7 @@ function useCoinSelector(
       trackMaxButtonClicked("bridgeForm");
     }
   };
+  const [displayBalance, setDisplayBalance] = useState(false);
 
   const validateAndSetUserInput = useCallback(() => {
     setValidInput(true);
@@ -91,6 +92,8 @@ function useCoinSelector(
     setUserAmountInput,
     maxBalanceOnClick,
     validInput,
+    displayBalance,
+    setDisplayBalance,
   };
 }
 
@@ -121,6 +124,8 @@ const CoinSelector = ({
     setUserAmountInput,
     maxBalanceOnClick,
     validInput,
+    displayBalance,
+    setDisplayBalance,
   } = useCoinSelector(
     tokenChoices,
     tokenSelected,
@@ -134,7 +139,7 @@ const CoinSelector = ({
       <AmountWrapper valid={validInput}>
         <AmountInnerWrapper>
           <AmountInnerWrapperTextStack>
-            {currentSelectedBalance && (
+            {currentSelectedBalance && (displayBalance || userAmountInput) && (
               <Text size="sm" color="grey-400">
                 Balance: {tokenFormatterFn(currentSelectedBalance)}{" "}
                 {token.symbol.toUpperCase()}
@@ -145,6 +150,8 @@ const CoinSelector = ({
               placeholder="Enter amount"
               value={userAmountInput}
               onChange={(e) => setUserAmountInput(e.target.value)}
+              onFocus={() => setDisplayBalance(true)}
+              onBlur={() => setDisplayBalance(false)}
             />
           </AmountInnerWrapperTextStack>
           <MaxButtonWrapper
