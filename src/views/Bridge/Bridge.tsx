@@ -1,5 +1,4 @@
-import { LayoutV2, SuperHeader } from "components";
-import { getChainInfo } from "utils";
+import { LayoutV2, WrongNetworkHeader } from "components";
 import { Wrapper } from "./Bridge.styles";
 import Breadcrumb from "./components/Breadcrumb";
 import BridgeForm from "./components/BridgeForm";
@@ -43,16 +42,8 @@ const Bridge = () => {
   } = useBridge();
   return (
     <>
-      {isWrongChain && currentFromRoute && (
-        <SuperHeader>
-          <div>
-            You are on an incorrect network. Please{" "}
-            <button onClick={handleChainSwitch}>
-              switch to {getChainInfo(currentFromRoute).name}
-            </button>
-            .
-          </div>
-        </SuperHeader>
+      {currentFromRoute && (
+        <WrongNetworkHeader requiredChainId={currentFromRoute} />
       )}
       {toAccount && (
         <ChangeAccountModal

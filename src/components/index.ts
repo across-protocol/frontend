@@ -13,6 +13,7 @@ export { default as Alert } from "./Alert";
 export { default as Selector } from "./Selector";
 export { default as InputWithMaxButton } from "./InputWithMaxButton";
 export { Text } from "./Text";
+export { WrongNetworkHeader } from "./WrongNetworkHeader";
 
 export * from "./Box";
 export * from "./Buttons";

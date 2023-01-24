@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { BigNumber, BigNumberish } from "ethers";
 
-import { LayoutV2 } from "components";
+import { LayoutV2, WrongNetworkHeader } from "components";
 import CardWrapper from "components/CardWrapper";
 import { Tabs, Tab } from "components/TabsV2";
 import {
@@ -10,6 +10,7 @@ import {
   formatWeiPct,
   getConfig,
   max,
+  hubPoolChainId,
 } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { useConnection, useQueryParams, useStakingPool } from "hooks";
@@ -79,108 +80,111 @@ export default function LiquidityPool() {
   const stakingPoolQuery = useStakingPool(selectedToken.l1TokenAddress);
 
   return (
-    <LayoutV2 maxWidth={600}>
-      <Container>
-        <Breadcrumb />
-        <CardWrapper>
-          <Tabs>
-            <Tab active={action === "add"} onClick={() => setAction("add")}>
-              Add
-            </Tab>
-            <Tab
-              active={action === "remove"}
-              onClick={() => setAction("remove")}
-            >
-              Remove
-            </Tab>
-          </Tabs>
-          <PoolSelector
-            selectedTokenSymbol={selectedToken.symbol}
-            onPoolSelected={(tokenSymbol) => {
-              const token = tokenList.find(
-                (token) => token.symbol === tokenSymbol
-              );
-              setSelectedToken(token || tokenList[0]);
-            }}
-            pools={liquidityPools.map((pool) => ({
-              tokenSymbol: pool.l1TokenSymbol,
-              tokenLogoURI: pool.l1TokenLogoURI,
-              poolSize: BigNumber.from(pool.totalPoolSize),
-            }))}
-          />
-          <StatsRow>
-            <StatBox
-              label="Pool size"
-              value={showValueOrDash(
-                formatTokenAmount(selectedLiquidityPool?.totalPoolSize)
-              )}
+    <>
+      <WrongNetworkHeader requiredChainId={hubPoolChainId} />
+      <LayoutV2 maxWidth={600}>
+        <Container>
+          <Breadcrumb />
+          <CardWrapper>
+            <Tabs>
+              <Tab active={action === "add"} onClick={() => setAction("add")}>
+                Add
+              </Tab>
+              <Tab
+                active={action === "remove"}
+                onClick={() => setAction("remove")}
+              >
+                Remove
+              </Tab>
+            </Tabs>
+            <PoolSelector
+              selectedTokenSymbol={selectedToken.symbol}
+              onPoolSelected={(tokenSymbol) => {
+                const token = tokenList.find(
+                  (token) => token.symbol === tokenSymbol
+                );
+                setSelectedToken(token || tokenList[0]);
+              }}
+              pools={liquidityPools.map((pool) => ({
+                tokenSymbol: pool.l1TokenSymbol,
+                tokenLogoURI: pool.l1TokenLogoURI,
+                poolSize: BigNumber.from(pool.totalPoolSize),
+              }))}
             />
-            <StatBox
-              label="Pool utilization"
+            <StatsRow>
+              <StatBox
+                label="Pool size"
+                value={showValueOrDash(
+                  formatTokenAmount(selectedLiquidityPool?.totalPoolSize)
+                )}
+              />
+              <StatBox
+                label="Pool utilization"
+                value={showValueOrDash(
+                  `${formatWeiPct(
+                    selectedLiquidityPool?.liquidityUtilizationCurrent
+                  )}%`
+                )}
+              />
+              <StatBox
+                label="Pool APY"
+                value={showValueOrDash(
+                  `${formatNumberMaxFracDigits(
+                    Number(selectedLiquidityPool?.estimatedApy) * 100
+                  )}%`
+                )}
+              />
+            </StatsRow>
+            <UserStatRow
+              label="Position size"
               value={showValueOrDash(
-                `${formatWeiPct(
-                  selectedLiquidityPool?.liquidityUtilizationCurrent
-                )}%`
+                formatTokenAmount(userLiquidityPoolQuery.data?.positionValue)
               )}
+              tokenLogoURI={selectedToken.logoURI}
             />
-            <StatBox
-              label="Pool APY"
+            <UserStatRow
+              label="Fees earned"
               value={showValueOrDash(
-                `${formatNumberMaxFracDigits(
-                  Number(selectedLiquidityPool?.estimatedApy) * 100
-                )}%`
+                formatTokenAmount(
+                  stakingPoolQuery.data?.convertUnderlyingToLP &&
+                    userLiquidityPoolQuery.data?.feesEarned
+                    ? max(
+                        stakingPoolQuery.data.convertUnderlyingToLP(
+                          BigNumber.from(userLiquidityPoolQuery.data.feesEarned)
+                        ),
+                        0
+                      )
+                    : undefined
+                )
               )}
+              tokenLogoURI={selectedToken.logoURI}
             />
-          </StatsRow>
-          <UserStatRow
-            label="Position size"
-            value={showValueOrDash(
-              formatTokenAmount(userLiquidityPoolQuery.data?.positionValue)
+            <Divider />
+            <EarnByStakingInfoBox
+              selectedToken={selectedToken}
+              selectedPoolAction={action}
+            />
+            <Divider />
+            {!isConnected ? (
+              <Button
+                size="lg"
+                onClick={() =>
+                  connect({
+                    trackSection:
+                      action === "add"
+                        ? "addLiquidityForm"
+                        : "removeLiquidityForm",
+                  })
+                }
+              >
+                Connect Wallet
+              </Button>
+            ) : (
+              <ActionInputBlock action={action} selectedToken={selectedToken} />
             )}
-            tokenLogoURI={selectedToken.logoURI}
-          />
-          <UserStatRow
-            label="Fees earned"
-            value={showValueOrDash(
-              formatTokenAmount(
-                stakingPoolQuery.data?.convertUnderlyingToLP &&
-                  userLiquidityPoolQuery.data?.feesEarned
-                  ? max(
-                      stakingPoolQuery.data.convertUnderlyingToLP(
-                        BigNumber.from(userLiquidityPoolQuery.data.feesEarned)
-                      ),
-                      0
-                    )
-                  : undefined
-              )
-            )}
-            tokenLogoURI={selectedToken.logoURI}
-          />
-          <Divider />
-          <EarnByStakingInfoBox
-            selectedToken={selectedToken}
-            selectedPoolAction={action}
-          />
-          <Divider />
-          {!isConnected ? (
-            <Button
-              size="lg"
-              onClick={() =>
-                connect({
-                  trackSection:
-                    action === "add"
-                      ? "addLiquidityForm"
-                      : "removeLiquidityForm",
-                })
-              }
-            >
-              Connect Wallet
-            </Button>
-          ) : (
-            <ActionInputBlock action={action} selectedToken={selectedToken} />
-          )}
-        </CardWrapper>
-      </Container>
-    </LayoutV2>
+          </CardWrapper>
+        </Container>
+      </LayoutV2>
+    </>
   );
 }
