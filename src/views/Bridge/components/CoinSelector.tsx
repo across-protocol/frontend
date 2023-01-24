@@ -41,24 +41,25 @@ function useCoinSelector(
 
   const validateAndSetUserInput = useCallback(() => {
     setValidInput(true);
-    if (currentBalance) {
+    if (
+      userAmountInput === "" ||
+      userAmountInput === "." ||
+      userAmountInput === "0." ||
+      userAmountInput === "0"
+    ) {
+      setAmountToBridge(undefined);
+    } else {
+      const parsedUserInput = tokenParserFn(
+        isNumberEthersParseable(userAmountInput) ? userAmountInput : "-1"
+      );
       if (
-        userAmountInput === "" ||
-        userAmountInput === "." ||
-        userAmountInput === "0." ||
-        userAmountInput === "0"
+        parsedUserInput.gt(0) &&
+        (!currentBalance || parsedUserInput.lte(currentBalance))
       ) {
-        setAmountToBridge(undefined);
+        setAmountToBridge(parsedUserInput);
       } else {
-        const parsed = tokenParserFn(
-          isNumberEthersParseable(userAmountInput) ? userAmountInput : "-1"
-        );
-        if (parsed.gt(0) && parsed.lte(currentBalance)) {
-          setAmountToBridge(parsed);
-        } else {
-          setAmountToBridge(undefined);
-          setValidInput(false);
-        }
+        setAmountToBridge(undefined);
+        setValidInput(false);
       }
     }
   }, [currentBalance, setAmountToBridge, tokenParserFn, userAmountInput]);
