@@ -1,6 +1,8 @@
 import { ampli, TransferQuoteReceivedProperties } from "ampli";
-import { BigNumber, ContractTransaction } from "ethers";
+import { BigNumber, ContractTransaction, utils } from "ethers";
+import { DateTime } from "luxon";
 import { useConnection, useApprove, useIsWrongNetwork } from "hooks";
+import { useLocalPendingDeposits } from "hooks/useLocalPendingDeposits";
 import { cloneDeep } from "lodash";
 import { useMutation } from "react-query";
 import {
@@ -27,12 +29,13 @@ export function useBridgeAction(
   recentInitialQuoteTime?: number,
   tokenPrice?: BigNumber
 ) {
-  const { isConnected, connect, signer, notify } = useConnection();
+  const { isConnected, connect, signer, notify, account } = useConnection();
 
   const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork(
     payload?.fromChain
   );
 
+  const { addLocalPendingDeposit } = useLocalPendingDeposits();
   const approveHandler = useApprove(payload?.fromChain);
 
   const buttonActionHandler = useMutation(async () => {
@@ -50,6 +53,7 @@ export function useBridgeAction(
     if (
       !frozenPayload ||
       !signer ||
+      !account ||
       !frozenQuote ||
       !frozenInitialQuoteTime ||
       !frozenTokenPrice ||
@@ -97,6 +101,27 @@ export function useBridgeAction(
         onTransactionComplete(tx.hash);
       }
       await waitOnTransaction(frozenPayload.fromChain, tx, notify);
+
+      // Optimistically add deposit to local storage for instant visibility on the
+      // "My Transactions" page. See `src/hooks/useUserDeposits.ts` for details.
+      addLocalPendingDeposit({
+        depositId: 0,
+        depositTime: DateTime.now().toSeconds(),
+        status: "pending",
+        filled: "0",
+        sourceChainId: frozenPayload.fromChain,
+        destinationChainId: frozenPayload.toChain,
+        assetAddr: frozenPayload.tokenAddress,
+        depositorAddr: utils.getAddress(account),
+        amount: frozenPayload.amount.toString(),
+        depositTxHash: tx.hash,
+        fillTxs: [],
+        speedUps: [],
+        depositRelayerFeePct: frozenPayload.relayerFeePct.toString(),
+        initialRelayerFeePct: frozenPayload.relayerFeePct.toString(),
+        suggestedRelayerFeePct: frozenPayload.relayerFeePct.toString(),
+      });
+
       if (onDepositResolved) {
         onDepositResolved(true);
       }
