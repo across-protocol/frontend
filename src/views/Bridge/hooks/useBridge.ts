@@ -415,6 +415,7 @@ export function useBridge() {
     setDisplayChangeAccount,
     setToAccount,
     toAccount,
+    walletAccount: account,
     fees,
     limits,
     availableTokens,

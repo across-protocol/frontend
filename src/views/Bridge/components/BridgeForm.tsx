@@ -43,8 +43,9 @@ type BridgeFormProps = {
   estimatedTime: string | undefined;
   displayChangeAccount: boolean;
   setDisplayChangeAccount: (display: boolean) => void;
-  toAccount: string | undefined;
+  toAccount?: string;
   amountTooLow: boolean;
+  walletAccount?: string;
 };
 
 const BridgeForm = ({
@@ -72,6 +73,7 @@ const BridgeForm = ({
   setDisplayChangeAccount,
   toAccount,
   amountTooLow,
+  walletAccount,
 }: BridgeFormProps) => {
   const mapChainInfoToRoute = (
     c?: ChainInfo,
@@ -108,6 +110,7 @@ const BridgeForm = ({
             onTokenSelected={setCurrentToken}
             onAmountToBridgeChanged={setAmountToBridge}
             currentSelectedBalance={currentBalance}
+            walletAccount={walletAccount}
           />
           {amountTooLow && <AmountTooLowAlert />}
         </RowWrapper>

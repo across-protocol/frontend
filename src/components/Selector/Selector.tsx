@@ -8,6 +8,7 @@ import { useSelector } from "./useSelector";
 export type SelectorElementType<Value> = {
   value: Value;
   element: JSX.Element;
+  suffix?: JSX.Element;
 };
 
 export type SelectorPropType<Value> = {
@@ -16,6 +17,7 @@ export type SelectorPropType<Value> = {
   selectedValue: Value;
   setSelectedValue: (ind: Value) => void;
   displayElement?: JSX.Element;
+  disabled?: boolean;
 };
 
 const Selector = <ElementValue,>({
@@ -24,12 +26,16 @@ const Selector = <ElementValue,>({
   setSelectedValue,
   title,
   displayElement,
+  disabled,
 }: SelectorPropType<ElementValue>) => {
   const { displayModal, setDisplayModal, selectedIndex, isMobile } =
     useSelector(elements, selectedValue);
   return (
     <>
-      <Wrapper onClick={() => setDisplayModal(true)}>
+      <Wrapper
+        disabled={disabled}
+        onClick={() => !disabled && setDisplayModal(true)}
+      >
         <InternalWrapper>
           <ActiveElementWrapper>
             {displayElement ? displayElement : elements[selectedIndex]?.element}
@@ -70,13 +76,16 @@ const Selector = <ElementValue,>({
             >
               <ElementSection> {element.element}</ElementSection>
               <ElementSection>
-                {idx === selectedIndex ? (
-                  <ActiveIcon>
-                    <ActiveSelectedIcon />
-                  </ActiveIcon>
-                ) : (
-                  <InactiveIcon />
-                )}
+                <ElementSuffixWrapper>
+                  {element.suffix}
+                  {idx === selectedIndex ? (
+                    <ActiveIcon>
+                      <ActiveSelectedIcon />
+                    </ActiveIcon>
+                  ) : (
+                    <InactiveIcon />
+                  )}
+                </ElementSuffixWrapper>
               </ElementSection>
             </ElementRow>
           ))}
@@ -88,7 +97,7 @@ const Selector = <ElementValue,>({
 
 export default Selector;
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ disabled?: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -101,7 +110,7 @@ const Wrapper = styled.div`
   border: 1px solid #4c4e57;
   border-radius: 32px;
 
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 
   @media ${QUERIESV2.sm.andDown} {
     padding: 12px;
@@ -208,4 +217,13 @@ const ActiveSelectedIcon = styled.div`
   flex-shrink: 0;
 
   background: #44d2ff;
+`;
+
+const ElementSuffixWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0px;
+  gap: 4px;
 `;

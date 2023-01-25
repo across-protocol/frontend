@@ -4,6 +4,7 @@ import { Text } from "components/Text";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 import { BigNumber, utils } from "ethers";
 import {
+  formatUnits,
   isNumberEthersParseable,
   parseUnitsFnBuilder,
   QUERIESV2,
@@ -13,7 +14,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { Theme } from "@emotion/react";
 import { SelectorPropType } from "components/Selector/Selector";
-import { useConnection } from "hooks";
+import { useBalancesBySymbols, useConnection } from "hooks";
 
 function useCoinSelector(
   tokens: TokenInfo[],
@@ -21,7 +22,8 @@ function useCoinSelector(
   fromChain: number,
   toChain: number,
   setAmountToBridge: (v: BigNumber | undefined) => void,
-  currentBalance?: BigNumber
+  currentBalance?: BigNumber,
+  account?: string
 ) {
   const [userAmountInput, setUserAmountInput] = useState("");
   const [validInput, setValidInput] = useState(true);
@@ -38,6 +40,13 @@ function useCoinSelector(
       trackMaxButtonClicked("bridgeForm");
     }
   };
+  const tokenBalances = useBalancesBySymbols({
+    tokenSymbols: tokens.map((t) => t.symbol),
+    chainId: fromChain,
+    account,
+  });
+  const disabledSelector = !!account && tokenBalances.balances.some((b) => !b);
+
   const [displayBalance, setDisplayBalance] = useState(false);
 
   const validateAndSetUserInput = useCallback(() => {
@@ -96,6 +105,8 @@ function useCoinSelector(
     validInput,
     displayBalance,
     setDisplayBalance,
+    disabledSelector,
+    balances: tokenBalances?.balances,
   };
 }
 
@@ -108,6 +119,8 @@ type CoinSelectorPropType = {
   tokenSelected: string;
   toChain: number;
   fromChain: number;
+
+  walletAccount?: string;
 };
 
 const CoinSelector = ({
@@ -118,6 +131,7 @@ const CoinSelector = ({
   tokenChoices,
   fromChain,
   toChain,
+  walletAccount,
 }: CoinSelectorPropType) => {
   const {
     token,
@@ -128,14 +142,18 @@ const CoinSelector = ({
     validInput,
     displayBalance,
     setDisplayBalance,
+    disabledSelector,
+    balances,
   } = useCoinSelector(
     tokenChoices,
     tokenSelected,
     fromChain,
     toChain,
     onAmountToBridgeChanged,
-    currentSelectedBalance
+    currentSelectedBalance,
+    walletAccount
   );
+
   return (
     <Wrapper>
       <AmountWrapper valid={validInput}>
@@ -165,7 +183,7 @@ const CoinSelector = ({
         </AmountInnerWrapper>
       </AmountWrapper>
       <TokenSelection
-        elements={tokenChoices.map((t) => ({
+        elements={tokenChoices.map((t, idx) => ({
           value: t.symbol,
           element: (
             <CoinIconTextWrapper>
@@ -175,10 +193,26 @@ const CoinSelector = ({
               </Text>
             </CoinIconTextWrapper>
           ),
+          suffix: (
+            <Text size="md" color="grey-400">
+              {balances &&
+                balances[idx] &&
+                formatUnits(balances[idx]!, t.decimals)}
+            </Text>
+          ),
         }))}
+        displayElement={
+          <CoinIconTextWrapper>
+            <CoinIcon src={token.logoURI} />
+            <Text size="md" color="white-100">
+              {token.symbol.toUpperCase()}
+            </Text>
+          </CoinIconTextWrapper>
+        }
         selectedValue={tokenSelected}
         title="Coins"
         setSelectedValue={(v) => onTokenSelected(v)}
+        disabled={disabledSelector}
       />
     </Wrapper>
   );
