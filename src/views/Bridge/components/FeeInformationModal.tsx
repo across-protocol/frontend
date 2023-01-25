@@ -92,7 +92,7 @@ const FeeInformationModal = ({
                 {text}
               </Text>
             </ExternalLinkIconTextContainer>
-            <ExternalContainerIconLink href={link}>
+            <ExternalContainerIconLink href={link} target="_blank">
               <StyledExternalLinkIcon />
             </ExternalContainerIconLink>
           </ExternalLinkWrapper>
