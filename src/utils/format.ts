@@ -280,3 +280,39 @@ export function humanReadableNumber(num: number): string {
   if (num <= 0) return "0";
   return numeral(num).format("0a").toUpperCase() + "+";
 }
+
+/**
+ * Truncates decimals to a given number of decimals
+ * @param decimals The number of decimals that the value has in a fixed point format (i.e. 18)
+ * @param maxDecimals The maximum number of decimals to show
+ * @returns A function that takes a value and truncates it to the given number of decimals
+ */
+export function truncateDecimals(
+  decimals: number,
+  maxDecimals: number
+): (value: ethers.BigNumberish) => string {
+  return (value: ethers.BigNumberish) => {
+    const valueBN = ethers.BigNumber.from(value);
+    const valueStr = ethers.utils.formatUnits(valueBN, decimals);
+    if (valueStr.includes(".")) {
+      const [whole, decimal] = valueStr.split(".");
+      if (decimal.length > maxDecimals) {
+        if (
+          Number(whole) === 0 &&
+          Number(decimal) < 10 ** (decimals - maxDecimals)
+        ) {
+          return "~0";
+        }
+        if (maxDecimals === 0 || decimal === "" || Number(decimal) === 0) {
+          return whole;
+        } else {
+          return `${whole}.${decimal.slice(0, maxDecimals)}`;
+        }
+      } else {
+        return valueStr.padEnd(maxDecimals, "0");
+      }
+    } else {
+      return valueStr;
+    }
+  };
+}
