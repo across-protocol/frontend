@@ -10,6 +10,7 @@ import {
   getToken,
   TokenInfo,
   GetBridgeFeesResult,
+  QUERIESV2,
 } from "utils";
 import CoinSelector from "./CoinSelector";
 import EstimatedTable from "./EstimatedTable";
@@ -125,9 +126,9 @@ const BridgeForm = ({
           />
         </RowWrapper>
         <RowWrapper>
-          <Text size="md" color="grey-400">
+          <PaddedText size="md" color="grey-400">
             To
-          </Text>
+          </PaddedText>
           <QuickSwapWrapper>
             <QuickSwap onQuickSwap={handleQuickSwap} />
           </QuickSwapWrapper>
@@ -240,6 +241,15 @@ const QuickSwapWrapper = styled.div`
   position: absolute;
   left: calc(50% - 20px);
   top: -25px;
+  @media ${QUERIESV2.sm.andDown} {
+    top: -16px;
+  }
+`;
+
+const PaddedText = styled(Text)`
+  @media ${QUERIESV2.sm.andDown} {
+    padding-top: 12px;
+  }
 `;
 
 const FromSelectionStack = styled.div`
