@@ -108,6 +108,8 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
+
+  width: 100%;
 `;
 
 const InnerWrapperStack = styled.div`
@@ -144,7 +146,12 @@ const ExternalLinkContainer = styled.div`
   padding: 0px;
   gap: 12px;
 
-  max-width: 500px;
+  max-width: 524px;
+
+  width: calc(100% + 24px);
+  margin-right: -24px;
+  padding-right: 24px;
+
   overflow-x: scroll;
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
