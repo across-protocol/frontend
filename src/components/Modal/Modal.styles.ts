@@ -109,6 +109,8 @@ export const ModalContentWrapper = styled.div<ModalWrapperType>`
   border-radius: 16px;
 
   position: relative;
+
+  overflow: hidden;
 `;
 
 export const TitleAndExitWrapper = styled.div`
