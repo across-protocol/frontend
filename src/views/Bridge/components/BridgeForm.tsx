@@ -281,6 +281,10 @@ const Button = styled(UnstyledButton)`
   border-radius: 32px;
   height: 64px;
   width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    height: 40px;
+  }
 `;
 
 const ChainIconSuperTextWrapper = styled.div`
