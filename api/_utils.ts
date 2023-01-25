@@ -65,7 +65,18 @@ export const log = (
     console.log(data);
     return;
   }
-  let message = JSON.stringify(data, null, 4);
+  // JSON.stringify(error) returns "{}", to mitigate we replace the error with
+  // a custom object that contains the error message and stack.
+  const dataWithReplacedError = data.error
+    ? {
+        ...data,
+        error: {
+          message: data.error?.message,
+          stack: data.error?.stack,
+        },
+      }
+    : data;
+  let message = JSON.stringify(dataWithReplacedError, null, 4);
   // Fire and forget. we don't wait for this to finish.
   gcpLogger
     .write(
