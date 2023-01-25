@@ -5,6 +5,7 @@ import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Butto
 import { BigNumber, utils } from "ethers";
 import {
   formatUnits,
+  getConfig,
   isNumberEthersParseable,
   parseUnitsFnBuilder,
   QUERIESV2,
@@ -40,12 +41,29 @@ function useCoinSelector(
       trackMaxButtonClicked("bridgeForm");
     }
   };
+
+  const queryableTokens = tokens.filter((t) => {
+    try {
+      const config = getConfig();
+      config.getTokenInfoBySymbol(fromChain, t.symbol);
+      return true;
+    } catch (_e: unknown) {
+      return false;
+    }
+  });
+
   const tokenBalances = useBalancesBySymbols({
-    tokenSymbols: tokens.map((t) => t.symbol),
+    tokenSymbols: queryableTokens.map((t) => t.symbol),
     chainId: fromChain,
     account,
   });
-  const disabledSelector = !!account && tokenBalances.balances.some((b) => !b);
+  const disabledSelector = !!account && tokenBalances.isLoading;
+  const balances: Record<string, BigNumber> = Object.fromEntries(
+    tokenBalances.balances.map((b, idx) => [
+      queryableTokens[idx].symbol,
+      b ?? BigNumber.from(0),
+    ])
+  );
 
   const [displayBalance, setDisplayBalance] = useState(false);
 
@@ -106,7 +124,7 @@ function useCoinSelector(
     displayBalance,
     setDisplayBalance,
     disabledSelector,
-    balances: tokenBalances?.balances,
+    balances,
   };
 }
 
@@ -196,8 +214,10 @@ const CoinSelector = ({
           suffix: (
             <Text size="md" color="grey-400">
               {balances &&
-                balances[idx] &&
-                formatUnits(balances[idx]!, t.decimals)}
+                formatUnits(
+                  balances[t.symbol] ?? BigNumber.from(0),
+                  t.decimals
+                )}
             </Text>
           ),
         }))}
