@@ -13,7 +13,7 @@ const SlippageAlert = () => {
   };
   return (
     <>
-      <Alert iconType="question" status="info">
+      <Alert iconType="question" status="info" alignIcon="center">
         <Wrapper>
           <Text color="white-100" size="md">
             All transfers are slippage free.
