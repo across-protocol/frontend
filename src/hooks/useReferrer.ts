@@ -37,7 +37,12 @@ export default function useReferrer() {
           if (!ethers.utils.isAddress(r)) {
             setError("Invalid referral address");
           }
+        })
+        .finally(() => {
+          setIsResolved(true);
         });
+    } else {
+      setIsResolved(true);
     }
     // eslint-disable-next-line
   }, [provider, r]);
