@@ -1,6 +1,6 @@
 import { useIsWrongNetwork } from "hooks";
 import { SuperHeader } from "components";
-import { chainInfoTable, hubPoolChainId } from "utils";
+import { getChainInfo } from "utils";
 
 export function WrongNetworkHeader({
   requiredChainId,
@@ -10,7 +10,7 @@ export function WrongNetworkHeader({
   const { isWrongNetwork, isWrongNetworkHandlerWithoutError } =
     useIsWrongNetwork(requiredChainId);
 
-  if (!isWrongNetwork) {
+  if (!isWrongNetwork && requiredChainId) {
     return null;
   }
 
@@ -19,7 +19,7 @@ export function WrongNetworkHeader({
       <div>
         You are on the incorrect network. Please{" "}
         <button onClick={isWrongNetworkHandlerWithoutError}>
-          switch to {chainInfoTable[hubPoolChainId]?.name || hubPoolChainId}
+          switch to {getChainInfo(requiredChainId!)?.name}
         </button>
       </div>
     </SuperHeader>
