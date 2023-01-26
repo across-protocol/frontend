@@ -3,6 +3,7 @@ import { Modal } from "components";
 import { Text } from "components/Text";
 import { ReactComponent as QuestionMarkIcon } from "assets/icons/question-24.svg";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-external-link-16.svg";
+import { isMobile } from "react-device-detect";
 
 type FeeInformationModalProps = {
   displayModal: boolean;
@@ -35,6 +36,12 @@ const FeeInformationModal = ({
     width={550}
     height={900}
     exitOnOutsideClick
+    verticalLocation={{
+      desktop: "middle",
+      mobile: "bottom",
+      tablet: "bottom",
+    }}
+    padding={isMobile ? "thin" : "normal"}
   >
     <Wrapper>
       <InnerWrapperStack>
