@@ -10,9 +10,9 @@ import {
   HeaderCell,
   HorizontalStackedCell,
   InfoIcon,
+  PoolCell,
   LogoWrapper,
   MultiplierCell,
-  PoolCell,
   PoolTextStack,
   RewardCell,
   RewardConnectorTextWrapper,
@@ -22,6 +22,8 @@ import {
   StakedTokenCellInner,
   StyledConnectorVector,
   StyledProgressBar,
+  ExternalStackedCell,
+  ExternalTextCell,
 } from "./GenericStakingPoolTable.styles";
 import { StyledPoolIcon } from "components/RewardTable/RewardTables.styles";
 import { StakingPool } from "hooks";
@@ -159,7 +161,7 @@ function RowMultiplierCell({ data, meta }: PoolRowCellType) {
 function RowStakedLPCell({ data, meta }: PoolRowCellType) {
   const fmtFn = data.lpTokenFormatter;
   return (
-    <StackedCell>
+    <ExternalStackedCell>
       <StakedTokenCellInner>
         <Text size="md" color={`white-${meta.hasLPStake ? 100 : 70}`}>
           {fmtFn(data.userAmountOfLPStaked)}
@@ -171,7 +173,7 @@ function RowStakedLPCell({ data, meta }: PoolRowCellType) {
       <Text size="sm" color="white-70">
         {data.lpTokenSymbolName.toUpperCase()}
       </Text>
-    </StackedCell>
+    </ExternalStackedCell>
   );
 }
 
@@ -203,18 +205,22 @@ function RowRewardAPYCell({ data, meta }: PoolRowCellType) {
 
 function RowAgeofCapitalCell({ data, meta }: PoolRowCellType) {
   return (
-    <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-      {data.elapsedTimeSinceAvgDeposit} Day
-      {data.elapsedTimeSinceAvgDeposit !== 1 && "s"}
-    </Text>
+    <ExternalTextCell>
+      <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
+        {data.elapsedTimeSinceAvgDeposit} Day
+        {data.elapsedTimeSinceAvgDeposit !== 1 && "s"}
+      </Text>
+    </ExternalTextCell>
   );
 }
 
 function RowRewardCell({ data, meta }: PoolRowCellType) {
   return (
-    <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-      {formatEther(data.outstandingRewards)} ACX
-    </Text>
+    <ExternalTextCell>
+      <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
+        {formatEther(data.outstandingRewards)} ACX
+      </Text>
+    </ExternalTextCell>
   );
 }
 

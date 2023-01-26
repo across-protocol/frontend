@@ -4,6 +4,7 @@ import { BaseHeadCell } from "components/Table";
 import { Link } from "react-router-dom";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
 import { ReactComponent as ConnectorVector } from "assets/connectors.svg";
+import { QUERIESV2 } from "utils";
 
 const Cell = styled(BaseHeadCell)<{ length: number }>`
   flex: 0 0 ${({ length }) => length}px;
@@ -29,7 +30,16 @@ export const RowCell = styled(Cell)`
   border-top: 1px solid #3e4047;
 `;
 
-export const PoolCell = styled.div`
+const BaseCell = styled.div`
+  margin-left: -8px;
+  width: calc(100%);
+
+  @media ${QUERIESV2.sm.andDown} {
+    margin-left: -8px;
+  }
+`;
+
+export const PoolCell = styled(BaseCell)`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -38,6 +48,14 @@ export const PoolCell = styled.div`
 `;
 
 export const PoolTextStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 2px;
+`;
+
+export const ExternalStackedCell = styled(BaseCell)`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -61,7 +79,7 @@ export const HorizontalStackedCell = styled.div`
   gap: 0px;
 `;
 
-export const RewardCell = styled.div`
+export const RewardCell = styled(BaseCell)`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -85,13 +103,14 @@ export const StakedTokenCellInner = styled.div`
   gap: 0;
 `;
 
-export const MultiplierCell = styled.div`
+export const MultiplierCell = styled(BaseCell)`
   display: flex;
   flex-direction: row;
   align-items: center;
   padding: 0px;
   gap: 12px;
   width: 100%;
+  margin-left: -6px;
 `;
 
 export const ButtonCell = styled.div`
@@ -161,4 +180,8 @@ export const LogoWrapper = styled.div`
     width: ${32 / 16}rem;
     height: ${32 / 16}rem;
   }
+`;
+
+export const ExternalTextCell = styled(BaseCell)`
+  margin-left: -6px;
 `;
