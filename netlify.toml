@@ -14,9 +14,9 @@
   status = 200
 [[redirects]]
   from = "/.functions/*"
-  to = "/api/:splat"
+  to = "/api-migration/:splat"
   status = 200
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["@across-protocol/sdk-v2"," @uma/contracts-node","@google-cloud/logging"]
+  #external_node_modules = ["@across-protocol/sdk-v2"," @uma/contracts-node","@google-cloud/logging"]
   included_files = ["src/data/*.json"]
