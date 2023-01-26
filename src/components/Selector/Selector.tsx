@@ -57,8 +57,8 @@ const Selector = <ElementValue,>({
         }
         padding="thin"
       >
+        <ElementRowDivider />
         <ElementRowWrapper enableScroll={elements.length > 7}>
-          <ElementRowDivider />
           {elements.map((element, idx) => (
             <ElementRow
               key={idx}
@@ -143,8 +143,11 @@ const ElementRowWrapper = styled.div<{ enableScroll?: boolean }>`
 
 const ElementRowDivider = styled.div`
   height: 1px;
-  width: 100%;
+  min-height: 1px;
   background: #34353b;
+
+  margin: 0px -16px -16px;
+  width: calc(100% + 32px);
 `;
 
 const ElementRow = styled.div<{ active: boolean }>`
