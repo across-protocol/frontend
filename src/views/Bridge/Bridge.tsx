@@ -39,6 +39,7 @@ const Bridge = () => {
     explorerUrl,
     transactionElapsedTimeAsFormattedString,
     amountTooLow,
+    walletAccount,
   } = useBridge();
   return (
     <>
@@ -97,6 +98,7 @@ const Bridge = () => {
               setDisplayChangeAccount={setDisplayChangeAccount}
               toAccount={toAccount}
               amountTooLow={amountTooLow}
+              walletAccount={walletAccount}
             />
           )}
         </Wrapper>
