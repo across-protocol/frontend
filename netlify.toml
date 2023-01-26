@@ -12,6 +12,10 @@
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+[[redirects]]
+  from = "/.functions/*"
+  to = "/api/:splat"
+  status = 200
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@across-protocol/sdk-v2", "@google-cloud/logging"]
