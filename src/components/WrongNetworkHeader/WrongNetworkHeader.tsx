@@ -10,7 +10,7 @@ export function WrongNetworkHeader({
   const { isWrongNetwork, isWrongNetworkHandlerWithoutError } =
     useIsWrongNetwork(requiredChainId);
 
-  if (!isWrongNetwork && requiredChainId) {
+  if (!isWrongNetwork || !requiredChainId) {
     return null;
   }
 
@@ -19,7 +19,7 @@ export function WrongNetworkHeader({
       <div>
         You are on the incorrect network. Please{" "}
         <button onClick={isWrongNetworkHandlerWithoutError}>
-          switch to {getChainInfo(requiredChainId!)?.name}
+          switch to {getChainInfo(requiredChainId)?.name}
         </button>
       </div>
     </SuperHeader>
