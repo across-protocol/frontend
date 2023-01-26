@@ -11,16 +11,18 @@ export type AlertIconType = "info" | "question";
 type AlertProps = {
   status: AlertStatusType;
   iconType?: AlertIconType;
+  alignIcon?: "top" | "center";
 };
 
 const Alert: React.FC<AlertProps> = ({
   status,
   iconType: _iconType,
+  alignIcon = "top",
   children,
 }) => {
   const iconType: AlertIconType = _iconType ?? "info";
   return (
-    <Wrapper status={status}>
+    <Wrapper status={status} align={alignIcon}>
       {iconType === "info" ? (
         <StyledInfoIcon status={status} />
       ) : (

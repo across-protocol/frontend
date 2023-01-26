@@ -27,13 +27,14 @@ const AlertColors: Record<
 
 type IncludeStatusType = {
   status: AlertStatusType;
+  align?: "top" | "center";
 };
 export const Wrapper = styled.div<IncludeStatusType>`
   width: 100%;
 
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: ${({ align }) => (align === "top" ? "flex-start" : "center")};
   justify-content: flex-start;
 
   gap: 14px;
