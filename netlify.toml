@@ -18,5 +18,5 @@
   status = 200
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["across-protocol/sdk-v2","uma/core","google-cloud/logging"]
+  external_node_modules = ["@across-protocol/sdk-v2"," @uma/contracts-node","@google-cloud/logging"]
   included_files = ["src/data/*.json"]
