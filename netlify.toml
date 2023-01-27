@@ -19,4 +19,4 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["ethers","axios","@across-protocol/sdk-v2","@across-protocol/contracts-v2","@ethersproject/providers","@uma/contracts-node","@google-cloud/logging"]
-  included_files = ["src/data/*.json"]
+  included_files = ["src/data/*.json","package.json","node_modules/**"]
