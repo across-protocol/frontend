@@ -19,4 +19,4 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["ethers","@uma/contracts-node","@google-cloud/logging"]
-  included_files = ["src/data/*.json","node_modules/"]
+  included_files = ["src/data/*.json"]
