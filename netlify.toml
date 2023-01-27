@@ -8,7 +8,11 @@
     Permissions-Policy = '''
     geolocation=(self), 
     microphone=()'''
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["ethers","axios","@across-protocol/sdk-v2","@across-protocol/contracts-v2","@ethersproject/providers","@uma/contracts-node","@google-cloud/logging"]
+  external_node_modules = ["@across-protocol/sdk-v2", "@google-cloud/logging"]
   included_files = ["src/data/*.json"]
