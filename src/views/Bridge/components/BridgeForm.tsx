@@ -46,6 +46,7 @@ type BridgeFormProps = {
   toAccount?: string;
   amountTooLow: boolean;
   walletAccount?: string;
+  disableQuickSwap?: boolean;
 };
 
 const BridgeForm = ({
@@ -74,6 +75,7 @@ const BridgeForm = ({
   toAccount,
   amountTooLow,
   walletAccount,
+  disableQuickSwap,
 }: BridgeFormProps) => {
   const mapChainInfoToRoute = (
     c?: ChainInfo,
@@ -133,7 +135,10 @@ const BridgeForm = ({
             To
           </PaddedText>
           <QuickSwapWrapper>
-            <QuickSwap onQuickSwap={handleQuickSwap} />
+            <QuickSwap
+              disabled={disableQuickSwap}
+              onQuickSwap={handleQuickSwap}
+            />
           </QuickSwapWrapper>
           <FromSelectionStack>
             <Selector<number>

@@ -3,12 +3,13 @@ import { ReactComponent as ArrowUpDown } from "assets/icons/arrow-up-down-16.svg
 
 type QuickSwapPropTypes = {
   onQuickSwap: () => void;
+  disabled?: boolean;
 };
 
-const QuickSwap = ({ onQuickSwap }: QuickSwapPropTypes) => (
-  <Wrapper>
+const QuickSwap = ({ onQuickSwap, disabled }: QuickSwapPropTypes) => (
+  <Wrapper disabled={disabled}>
     <Divider />
-    <IconWrapper onClick={() => onQuickSwap()}>
+    <IconWrapper disabled={disabled} onClick={() => !disabled && onQuickSwap()}>
       <ArrowUpDown />
     </IconWrapper>
     <Divider />
@@ -17,7 +18,7 @@ const QuickSwap = ({ onQuickSwap }: QuickSwapPropTypes) => (
 
 export default QuickSwap;
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ disabled?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -25,9 +26,11 @@ const Wrapper = styled.div`
   gap: 0px;
 
   height: 58px;
+
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
 
-const IconWrapper = styled.div`
+const IconWrapper = styled.div<{ disabled?: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -41,7 +44,7 @@ const IconWrapper = styled.div`
   border: 1px solid #4c4e57;
   border-radius: 32px;
 
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 
   &:hover {
     color: #e0f3ff;

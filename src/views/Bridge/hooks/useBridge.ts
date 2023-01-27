@@ -219,6 +219,8 @@ export function useBridge() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availableRoutes, currentToRoute]);
 
+  const [disableQuickSwap, setDisableQuickSwap] = useState(false);
+
   // Create a function called handleQuickSwap which swaps the from chain and to chain
   // Use useCallback to avoid creating a new function every time the component re-renders
   const handleQuickSwap = useCallback(() => {
@@ -226,6 +228,11 @@ export function useBridge() {
       // Resolve the from and to route as temporary variables
       const currentFromRouteTemp = currentFromRoute;
       const currentToRouteTemp = currentToRoute;
+
+      if (disableQuickSwap) {
+        return;
+      }
+
       // Set the current from route to the current to route
       setCurrentFromRoute(currentToRouteTemp);
       trackFromChainChanged(currentToRouteTemp, false);
@@ -235,7 +242,22 @@ export function useBridge() {
       trackToChainChanged(currentFromRouteTemp, false);
       trackQuickSwap("bridgeForm");
     }
-  }, [currentFromRoute, currentToRoute]);
+  }, [currentFromRoute, currentToRoute, disableQuickSwap]);
+
+  useEffect(() => {
+    // Resolve the from and to route as temporary variables
+    const currentFromRouteTemp = currentFromRoute;
+    const currentToRouteTemp = currentToRoute;
+    // Verify that there's an avaialble route where the from and to
+    // chains are inverted and a token is available
+    const availableRoute = availableRoutes.some(
+      (route) =>
+        route.fromChain === currentToRouteTemp &&
+        route.toChain === currentFromRouteTemp &&
+        route.fromTokenSymbol === currentToken
+    );
+    setDisableQuickSwap(!availableRoute);
+  }, [availableRoutes, currentFromRoute, currentToRoute, currentToken]);
 
   const usersBalance = useBalanceBySymbol(currentToken, currentFromRoute);
   const currentBalance = usersBalance.balance;
@@ -447,5 +469,6 @@ export function useBridge() {
     explorerUrl,
     onTxHashChange,
     transactionElapsedTimeAsFormattedString,
+    disableQuickSwap,
   };
 }
