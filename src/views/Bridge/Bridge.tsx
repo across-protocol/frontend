@@ -40,6 +40,7 @@ const Bridge = () => {
     transactionElapsedTimeAsFormattedString,
     amountTooLow,
     walletAccount,
+    disableQuickSwap,
   } = useBridge();
   return (
     <>
@@ -99,6 +100,7 @@ const Bridge = () => {
               toAccount={toAccount}
               amountTooLow={amountTooLow}
               walletAccount={walletAccount}
+              disableQuickSwap={disableQuickSwap}
             />
           )}
         </Wrapper>
