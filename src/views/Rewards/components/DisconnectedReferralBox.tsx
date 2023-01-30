@@ -2,7 +2,6 @@ import styled from "@emotion/styled";
 import { ReactComponent as ReferralIcon } from "assets/icons/rewards/referral-within-star.svg";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/external-link-12.svg";
 import { ButtonV2 } from "components";
-import { Link } from "react-router-dom";
 import { QUERIESV2 } from "utils";
 
 type DisconnectedReferralBoxType = {
@@ -22,7 +21,10 @@ const DisconnectedReferralBox = ({
         </CTAText>
       </IconTextWrapper>
       <ButtonWrapper>
-        <MoreInfoLink to={"/"}>
+        <MoreInfoLink
+          href="https://docs.across.to/how-to-use-across/rewards/referral-rewards#how-to-earn-referral-rewards"
+          target="_blank"
+        >
           Learn more <ExternalLinkIcon />
         </MoreInfoLink>
         <ConnectButton size="lg" onClick={connectHandler}>
@@ -126,7 +128,7 @@ const ConnectButton = styled(ButtonV2)`
   color: #6cf9d8;
 `;
 
-const MoreInfoLink = styled(Link)`
+const MoreInfoLink = styled.a`
   display: flex;
   flex-direction: row;
   align-items: center;
