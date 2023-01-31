@@ -62,7 +62,8 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
       return;
     }
 
-    const { maxAddableAmount, maxRemovableAmount } = maxAmountsQuery.data;
+    const { maxAddableAmount, maxRemovableAmount, maxRemovableAmountInLP } =
+      maxAmountsQuery.data;
 
     if (action === "add") {
       addLiquidityMutation.mutate(
@@ -82,7 +83,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
         {
           amountInput: amount,
           maxRemovableAmount,
-          convertUnderlyingToLP: stakingPoolQuery.data.convertUnderlyingToLP,
+          maxRemovableAmountInLP,
         },
         {
           onSuccess: () => {

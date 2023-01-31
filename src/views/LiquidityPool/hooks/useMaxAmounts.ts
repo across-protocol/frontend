@@ -24,6 +24,7 @@ export function useMaxAmounts(
     async () => {
       let maxAddableAmount: BigNumber;
       let maxRemovableAmount: BigNumber;
+      let maxRemovableAmountInLP: BigNumber;
 
       if (
         selectedTokenAddress &&
@@ -52,14 +53,22 @@ export function useMaxAmounts(
           ),
           0
         );
+        maxRemovableAmountInLP = max(
+          BigNumber.from(userLiquidityPoolQuery.data.lpTokens).sub(
+            stakingPoolQuery.data.userAmountOfLPStaked
+          ),
+          0
+        );
       } else {
         maxAddableAmount = BigNumber.from(0);
         maxRemovableAmount = BigNumber.from(0);
+        maxRemovableAmountInLP = BigNumber.from(0);
       }
 
       return {
         maxAddableAmount,
         maxRemovableAmount,
+        maxRemovableAmountInLP,
       };
     },
     {
