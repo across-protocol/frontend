@@ -4,6 +4,7 @@ import {
   shortenString,
   shortenTransactionHash,
   smallNumberFormatter,
+  truncateDecimals,
 } from "../format";
 const VALID_ADDRESS = "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828";
 const TX_HASH =
@@ -53,5 +54,23 @@ describe("#shortenTransactionHash", () => {
 describe("#smallNumberFormatter", () => {
   it("smallNumberFormatter should show at least 1 digit for numbers < 1 and round up to 3 sig digs", () => {
     expect(smallNumberFormatter(0.01235)).toEqual("0.0124");
+  });
+});
+
+describe("#truncateDecimals", () => {
+  it("truncateDecimals should truncate decimals to 2 places", () => {
+    expect(truncateDecimals(6, 2)(12345)).toEqual("~0.01");
+  });
+  it("truncateDecimals should truncate decimals to 3 places", () => {
+    expect(truncateDecimals(6, 3)(12345)).toEqual("~0.012");
+  });
+  it("truncateDecimals should leave a whole number alone", () => {
+    expect(truncateDecimals(0, 3)(123456)).toEqual("123456");
+  });
+  it("truncateDecimals should properly handle 0", () => {
+    expect(truncateDecimals(18, 3)(0)).toEqual("0.000");
+  });
+  it("truncateDecimals should properly handle 0.0000001", () => {
+    expect(truncateDecimals(18, 1)(1)).toEqual("~0.0");
   });
 });
