@@ -294,25 +294,16 @@ export function truncateDecimals(
   return (value: ethers.BigNumberish) => {
     const valueBN = ethers.BigNumber.from(value);
     const valueStr = ethers.utils.formatUnits(valueBN, decimals);
-    if (valueStr.includes(".")) {
-      const [whole, decimal] = valueStr.split(".");
-      if (decimal.length > maxDecimals) {
-        if (
-          Number(whole) === 0 &&
-          Number(decimal) < 10 ** (decimals - maxDecimals)
-        ) {
-          return "~0";
-        }
-        if (maxDecimals === 0 || decimal === "" || Number(decimal) === 0) {
-          return whole;
-        } else {
-          return `${whole}.${decimal.slice(0, maxDecimals)}`;
-        }
-      } else {
-        return valueStr.padEnd(maxDecimals, "0");
-      }
-    } else {
+    const [int, decimal] = valueStr.split(".");
+
+    if (!decimal) {
       return valueStr;
     }
+
+    if (decimal.length > maxDecimals) {
+      return `~${int}.${decimal.slice(0, maxDecimals)}`;
+    }
+
+    return `${int}.${decimal.padEnd(maxDecimals, "0")}`;
   };
 }
