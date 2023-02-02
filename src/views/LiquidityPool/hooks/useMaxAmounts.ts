@@ -53,11 +53,8 @@ export function useMaxAmounts(
           ),
           0
         );
-        maxRemovableAmountInLP = max(
-          BigNumber.from(userLiquidityPoolQuery.data.lpTokens).sub(
-            stakingPoolQuery.data.userAmountOfLPStaked
-          ),
-          0
+        maxRemovableAmountInLP = BigNumber.from(
+          userLiquidityPoolQuery.data.lpTokens
         );
       } else {
         maxAddableAmount = BigNumber.from(0);
