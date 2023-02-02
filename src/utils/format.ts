@@ -297,13 +297,13 @@ export function truncateDecimals(
     const [int, decimal] = valueStr.split(".");
 
     if (!decimal) {
-      return valueStr;
+      return formatUnits(valueStr, 0);
     }
 
     if (decimal.length > maxDecimals) {
-      return `~${int}.${decimal.slice(0, maxDecimals)}`;
+      return `~${formatUnits(int, 0)}.${decimal.slice(0, maxDecimals)}`;
     }
 
-    return `${int}.${decimal.padEnd(maxDecimals, "0")}`;
+    return `${formatUnits(int, 0)}.${decimal.padEnd(maxDecimals, "0")}`;
   };
 }
