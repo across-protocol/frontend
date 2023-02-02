@@ -45,19 +45,11 @@ export function useMaxAmounts(
                 .catch((err) =>
                   max(l1Balance.sub(utils.parseEther("0.01")), 0)
                 );
-        maxRemovableAmount = max(
-          BigNumber.from(userLiquidityPoolQuery.data.positionValue).sub(
-            stakingPoolQuery.data.convertLPToUnderlying(
-              stakingPoolQuery.data.userAmountOfLPStaked
-            )
-          ),
-          0
+        maxRemovableAmountInLP = BigNumber.from(
+          userLiquidityPoolQuery.data.lpTokens
         );
-        maxRemovableAmountInLP = max(
-          BigNumber.from(userLiquidityPoolQuery.data.lpTokens).sub(
-            stakingPoolQuery.data.userAmountOfLPStaked
-          ),
-          0
+        maxRemovableAmount = stakingPoolQuery.data.convertLPToUnderlying(
+          maxRemovableAmountInLP
         );
       } else {
         maxAddableAmount = BigNumber.from(0);
