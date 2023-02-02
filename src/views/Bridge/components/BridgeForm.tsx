@@ -6,11 +6,11 @@ import {
   ChainInfo,
   capitalizeFirstLetter,
   shortenAddress,
-  receiveAmount,
   getToken,
   TokenInfo,
   GetBridgeFeesResult,
   QUERIESV2,
+  receiveAmount,
 } from "utils";
 import CoinSelector from "./CoinSelector";
 import EstimatedTable from "./EstimatedTable";
@@ -177,10 +177,14 @@ const BridgeForm = ({
             chainId={currentToRoute}
             estimatedTime={estimatedTime}
             gasFee={fees?.relayerGasFee.total}
-            bridgeFee={fees?.relayerCapitalFee.total}
+            bridgeFee={
+              fees && amountToBridge && amountToBridge.gt(0)
+                ? receiveAmount(amountToBridge, fees).deductionsSansRelayerGas
+                : undefined
+            }
             totalReceived={
               fees && amountToBridge && amountToBridge.gt(0)
-                ? receiveAmount(amountToBridge, fees)
+                ? receiveAmount(amountToBridge, fees).receivable
                 : undefined
             }
             token={getToken(currentToken)}
