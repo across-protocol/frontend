@@ -135,10 +135,14 @@ const DepositConfirmation = ({
         chainId={currentToRoute ?? 1}
         estimatedTime={estimatedTime}
         gasFee={fees?.relayerGasFee.total}
-        bridgeFee={fees?.relayerCapitalFee.total}
+        bridgeFee={
+          fees && amountToBridge && amountToBridge.gt(0)
+            ? receiveAmount(amountToBridge, fees).deductionsSansRelayerGas
+            : undefined
+        }
         totalReceived={
           fees && amountToBridge && amountToBridge.gt(0)
-            ? receiveAmount(amountToBridge, fees)
+            ? receiveAmount(amountToBridge, fees).receivable
             : undefined
         }
         token={getToken(currentToken)}

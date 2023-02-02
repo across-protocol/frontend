@@ -7,8 +7,29 @@ export function max(a: BigNumberish, b: BigNumberish) {
   return BigNumber.from(b);
 }
 
-export function receiveAmount(amount: BigNumber, fees: BridgeFees) {
-  return max(amount.sub(fees.relayerFee.total).sub(fees.lpFee.total), 0);
+/**
+ * Finds the amount of tokens that will be received after fees are deducted
+ * @param amount Amount of tokens to be received (gross amount before fees)
+ * @param fees Amount of fees to be deducted from the amount
+ * @returns The amount of tokens that will be received after fees are deducted
+ */
+export function receiveAmount(
+  amount: BigNumber,
+  fees: BridgeFees
+): {
+  deductions: BigNumber;
+  deductionsSansRelayerGas: BigNumber;
+  receivable: BigNumber;
+} {
+  const deductions = fees.relayerFee.total
+    .add(fees.lpFee.total)
+    .add(fees.relayerGasFee.total);
+
+  return {
+    receivable: max(amount.sub(deductions), 0),
+    deductions,
+    deductionsSansRelayerGas: deductions.sub(fees.relayerGasFee.total),
+  };
 }
 
 export function safeDivide(numerator: BigNumber, divisor: BigNumber) {
