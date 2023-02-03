@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { BigNumber } from "ethers";
-import { TokenInfo, truncateDecimals } from "utils";
+import { formatUnits, TokenInfo } from "utils";
 
 type TokenFeeProps = {
   token: TokenInfo;
@@ -11,7 +11,7 @@ type TokenFeeProps = {
 const TokenFee = ({ token, amount }: TokenFeeProps) => (
   <Wrapper>
     <NumericText size="md" color="grey-400">
-      {truncateDecimals(token.decimals, 6)(amount)} {token.symbol.toUpperCase()}{" "}
+      {formatUnits(amount, token.decimals)} {token.symbol.toUpperCase()}{" "}
     </NumericText>
     <TokenSymbol src={token.logoURI} />
   </Wrapper>

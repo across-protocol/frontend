@@ -16,6 +16,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Theme } from "@emotion/react";
 import { SelectorPropType } from "components/Selector/Selector";
 import { useBalancesBySymbols, useConnection } from "hooks";
+import { useLiquidityPool } from "views/LiquidityPool/hooks/useLiquidityPool";
 
 function useCoinSelector(
   tokens: TokenInfo[],
@@ -52,6 +53,8 @@ function useCoinSelector(
     }
   });
 
+  const { data: poolData } = useLiquidityPool(currentToken);
+
   const tokenBalances = useBalancesBySymbols({
     tokenSymbols: queryableTokens.map((t) => t.symbol),
     chainId: fromChain,
@@ -82,7 +85,8 @@ function useCoinSelector(
       );
       if (
         parsedUserInput.gt(0) &&
-        (!currentBalance || parsedUserInput.lte(currentBalance))
+        (!currentBalance || parsedUserInput.lte(currentBalance)) &&
+        (!poolData || parsedUserInput.lte(poolData.liquidReserves))
       ) {
         setAmountToBridge(parsedUserInput);
       } else {
@@ -90,7 +94,13 @@ function useCoinSelector(
         setValidInput(false);
       }
     }
-  }, [currentBalance, setAmountToBridge, tokenParserFn, userAmountInput]);
+  }, [
+    currentBalance,
+    poolData,
+    setAmountToBridge,
+    tokenParserFn,
+    userAmountInput,
+  ]);
 
   // Create a useEffect to validate the user input to be a valid big number greater than 0 and less than the current balance
   // If the user input is valid, set the amount to bridge to the user input value converted to a BigNumber with the tokenParserFn
@@ -211,15 +221,15 @@ const CoinSelector = ({
               </Text>
             </CoinIconTextWrapper>
           ),
-          suffix: (
-            <Text size="md" color="grey-400">
-              {balances &&
-                formatUnits(
+          suffix:
+            balances && balances[t.symbol]?.gt(0) ? (
+              <Text size="md" color="grey-400">
+                {formatUnits(
                   balances[t.symbol] ?? BigNumber.from(0),
                   t.decimals
                 )}
-            </Text>
-          ),
+              </Text>
+            ) : undefined,
         }))}
         displayElement={
           <CoinIconTextWrapper>
