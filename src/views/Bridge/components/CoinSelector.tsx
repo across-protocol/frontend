@@ -221,16 +221,15 @@ const CoinSelector = ({
               </Text>
             </CoinIconTextWrapper>
           ),
-          suffix: (
-            <Text size="md" color="grey-400">
-              {balances &&
-                balances[t.symbol]?.gt(0) &&
-                formatUnits(
+          suffix:
+            balances && balances[t.symbol]?.gt(0) ? (
+              <Text size="md" color="grey-400">
+                {formatUnits(
                   balances[t.symbol] ?? BigNumber.from(0),
                   t.decimals
                 )}
-            </Text>
-          ),
+              </Text>
+            ) : undefined,
         }))}
         displayElement={
           <CoinIconTextWrapper>
