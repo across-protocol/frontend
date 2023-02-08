@@ -24,6 +24,7 @@ function useCoinSelector(
   fromChain: number,
   toChain: number,
   setAmountToBridge: (v: BigNumber | undefined) => void,
+  setIsBridgeAmountValid: (v: boolean) => void,
   currentBalance?: BigNumber,
   account?: string
 ) {
@@ -85,10 +86,10 @@ function useCoinSelector(
       );
       if (
         parsedUserInput.gt(0) &&
-        (!currentBalance || parsedUserInput.lte(currentBalance)) &&
         (!poolData || parsedUserInput.lte(poolData.liquidReserves))
       ) {
         setAmountToBridge(parsedUserInput);
+        setValidInput(!currentBalance || parsedUserInput.lte(currentBalance));
       } else {
         setAmountToBridge(undefined);
         setValidInput(false);
@@ -101,6 +102,10 @@ function useCoinSelector(
     tokenParserFn,
     userAmountInput,
   ]);
+
+  useEffect(() => {
+    setIsBridgeAmountValid(validInput);
+  }, [validInput, setIsBridgeAmountValid]);
 
   // Create a useEffect to validate the user input to be a valid big number greater than 0 and less than the current balance
   // If the user input is valid, set the amount to bridge to the user input value converted to a BigNumber with the tokenParserFn
@@ -149,6 +154,8 @@ type CoinSelectorPropType = {
   fromChain: number;
 
   walletAccount?: string;
+
+  setIsBridgeAmountValid: (v: boolean) => void;
 };
 
 const CoinSelector = ({
@@ -160,6 +167,7 @@ const CoinSelector = ({
   fromChain,
   toChain,
   walletAccount,
+  setIsBridgeAmountValid,
 }: CoinSelectorPropType) => {
   const {
     token,
@@ -178,6 +186,7 @@ const CoinSelector = ({
     fromChain,
     toChain,
     onAmountToBridgeChanged,
+    setIsBridgeAmountValid,
     currentSelectedBalance,
     walletAccount
   );

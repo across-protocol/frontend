@@ -47,6 +47,7 @@ type BridgeFormProps = {
   amountTooLow: boolean;
   walletAccount?: string;
   disableQuickSwap?: boolean;
+  setIsBridgeAmountValid: (isValid: boolean) => void;
 };
 
 const BridgeForm = ({
@@ -76,6 +77,7 @@ const BridgeForm = ({
   amountTooLow,
   walletAccount,
   disableQuickSwap,
+  setIsBridgeAmountValid,
 }: BridgeFormProps) => {
   const mapChainInfoToRoute = (
     c?: ChainInfo,
@@ -113,6 +115,7 @@ const BridgeForm = ({
             onAmountToBridgeChanged={setAmountToBridge}
             currentSelectedBalance={currentBalance}
             walletAccount={walletAccount}
+            setIsBridgeAmountValid={setIsBridgeAmountValid}
           />
           {amountTooLow && <AmountTooLowAlert />}
         </RowWrapper>
