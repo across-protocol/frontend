@@ -48,6 +48,7 @@ export function useBridge() {
   const [amountToBridge, setAmountToBridge] = useState<BigNumber | undefined>(
     undefined
   );
+  const [isBridgeAmountValid, setIsBridgeAmountValid] = useState(false);
 
   useEffect(() => {
     if (isDefaultToken) {
@@ -458,7 +459,8 @@ export function useBridge() {
     isConnected,
     isBridgeDisabled:
       isConnected &&
-      (isBridgeDisabled ||
+      (!isBridgeAmountValid ||
+        isBridgeDisabled ||
         bridgeAction.buttonDisabled ||
         (!!fees && fees.isAmountTooLow)),
     amountTooLow: isConnected && (fees?.isAmountTooLow ?? false),
@@ -470,5 +472,6 @@ export function useBridge() {
     onTxHashChange,
     transactionElapsedTimeAsFormattedString,
     disableQuickSwap,
+    setIsBridgeAmountValid,
   };
 }

@@ -41,6 +41,7 @@ const Bridge = () => {
     amountTooLow,
     walletAccount,
     disableQuickSwap,
+    setIsBridgeAmountValid,
   } = useBridge();
   return (
     <>
@@ -101,6 +102,7 @@ const Bridge = () => {
               amountTooLow={amountTooLow}
               walletAccount={walletAccount}
               disableQuickSwap={disableQuickSwap}
+              setIsBridgeAmountValid={setIsBridgeAmountValid}
             />
           )}
         </Wrapper>
