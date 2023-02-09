@@ -34,7 +34,7 @@ const sidebarAboutLinks = [
   },
   {
     title: "Support (Discord)",
-    link: "https://discord.com/invite/across/",
+    link: "https://discord.across.to",
     isExternalLink: true,
   },
   {

@@ -18,7 +18,7 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
           not receive your funds within the estimated amount of time, please
           visit the ‘across-support’ channel within the{" "}
           <Link
-            href="https://discord.gg/across"
+            href="https://discord.across.to"
             target="_blank"
             rel="noopener noreferrer"
           >
