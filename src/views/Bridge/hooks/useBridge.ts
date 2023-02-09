@@ -432,8 +432,6 @@ export function useBridge() {
     }
   };
 
-  console.log("isBridgeAmountValid", isBridgeAmountValid);
-
   return {
     ...bridgeAction,
     displayChangeAccount,
