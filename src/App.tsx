@@ -3,13 +3,20 @@ import { Types } from "@amplitude/analytics-browser";
 import { createInstance } from "@amplitude/marketing-analytics-browser";
 import { ampli } from "./ampli";
 import Routes from "./Routes";
-import { amplitudeAPIKey, isProductionBuild } from "utils";
+import {
+  amplitudeAPIKey,
+  isAmplitudeLoggingEnabled,
+  isProductionBuild,
+} from "utils";
 
 if (amplitudeAPIKey) {
   const instance = createInstance();
   instance.init(amplitudeAPIKey, undefined, {
     disableCookies: true,
-    logLevel: isProductionBuild ? Types.LogLevel.Error : Types.LogLevel.Debug,
+    logLevel:
+      isProductionBuild || !isAmplitudeLoggingEnabled
+        ? Types.LogLevel.Error
+        : Types.LogLevel.Debug,
     trackingOptions: {
       ipAddress: false,
       carrier: false,
