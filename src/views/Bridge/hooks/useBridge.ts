@@ -413,14 +413,14 @@ export function useBridge() {
   }, [rawFees, rawLimits, trackingTxHash, isBridgeButtonLoading]);
 
   const setCurrentTokenExternal = (token: string) => {
-    const routeAvailable = availableRoutes.some(
+    const routeAvailable = enabledRoutes.some(
       (route) =>
         (!currentFromRoute || route.fromChain === currentFromRoute) &&
         (!currentToRoute || route.toChain === currentToRoute) &&
         route.fromTokenSymbol === token
     );
     if (!routeAvailable) {
-      const firstAvailableRoute = availableRoutes.find(
+      const firstAvailableRoute = enabledRoutes.find(
         (route) => route.fromTokenSymbol === token
       );
       setCurrentFromRoute(firstAvailableRoute?.fromChain);
