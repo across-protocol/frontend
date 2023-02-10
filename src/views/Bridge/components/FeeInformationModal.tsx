@@ -53,7 +53,7 @@ const FeeInformationModal = ({
             The estimated amount of time expected to receive your funds. If you
             do not receive your funds within the estimated amount of time,
             please visit the `across-support channel` within the{" "}
-            <ExternalLink href="https://discord.gg/across">
+            <ExternalLink href="https://discord.across.to">
               Across Discord
             </ExternalLink>
             .

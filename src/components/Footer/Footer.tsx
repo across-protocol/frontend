@@ -24,7 +24,7 @@ export const NAV_LINKS = [
   {
     key: "discord",
     name: "",
-    url: "https://discord.gg/across",
+    url: "https://discord.across.to",
     icon: DiscordLogo,
   },
   {
