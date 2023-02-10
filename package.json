@@ -66,6 +66,7 @@
   "scripts": {
     "start": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && react-scripts start",
     "build": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && react-scripts build",
+    "analyze": "yarn build --stats && webpack-bundle-analyzer build/bundle-stats.json -m server -r build/bundle-stats.html",
     "test": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && react-scripts test",
     "serve": "serve -s build",
     "test-api": "jest test/api",
@@ -133,7 +134,8 @@
     "serve": "^14.0.1",
     "ts-jest": "^26.5.6",
     "ts-node": "^10.9.1",
-    "tsconfig-paths-webpack-plugin": "^4.0.0"
+    "tsconfig-paths-webpack-plugin": "^4.0.0",
+    "webpack-bundle-analyzer": "^4.7.0"
   },
   "babel": {
     "env": {
