@@ -337,7 +337,7 @@ const fetchStakingPool = async (
 
   // Determine if the contract has an allowance of at least the current
   // user's entire balance.
-  const requiresApproval = lpTokenAllowance.lte(availableLPTokenBalance);
+  const requiresApproval = lpTokenAllowance.lt(availableLPTokenBalance);
 
   const isStakingPoolOfUser =
     BigNumber.from(usersTotalLPTokens).gt(0) ||
