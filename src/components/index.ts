@@ -19,3 +19,4 @@ export * from "./Box";
 export * from "./Buttons";
 export * from "./Section";
 export * from "./ExternalLink";
+export * from "./ErrorBoundary";

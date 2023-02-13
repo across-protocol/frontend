@@ -692,3 +692,9 @@ export const amplitudeEnvironment =
 export const currentGitCommitHash = process.env.REACT_APP_GIT_COMMIT_HASH ?? "";
 
 export const CACHED_WALLET_KEY = "previous-wallet-service";
+
+export const sentryEnv = process.env.REACT_APP_SENTRY_ENV;
+export const sentryDsn = process.env.REACT_APP_SENTRY_DSN;
+export const isSentryEnabled = Boolean(
+  process.env.REACT_APP_ENABLE_SENTRY === "true"
+);
