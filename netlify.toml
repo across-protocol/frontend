@@ -13,6 +13,7 @@
   to = "/.netlify/functions/:splat"
   status = 200
 [functions]
+  directory = "api-migration"
   node_bundler = "esbuild"
-  external_node_modules = ["@across-protocol/sdk-v2"]
-  included_files = ["src/data/*.json"]
+  external_node_modules = ["@google-cloud/logging", "@uma/contracts-node"]
+  included_files = ["src/data/*.json", "node_modules/ethers/**", "node_modules/@ethersproject/**", "node_modules/js-sha3/**", "node_modules/aes-js/**", "node_modules/scrypt-js/**", "node_modules/bech32/**"]
