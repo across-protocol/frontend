@@ -25,7 +25,7 @@
           },
           {
             "key" : "Content-Security-Policy-Report-Only",
-            "value" : "default-src 'self' api.across.to across.to wss://api.blocknative.com; font-src 'self' fonts.gstatic.com assets.vercel.com data:; img-src 'self' registry.walletconnect.org assets.vercel.com data:; connect-src wss://*.bridge.walletconnect.org wss://api.blocknative.com mainnet.infura.io dev.api.across.to api.across.to across.to across.matomo.cloud mainnet.boba.network *.wallet.coinbase.com *.alchemy.com *.infura.io api2.amplitude.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' platform.twitter.com vercel.live across.matomo.cloud; style-src 'self' 'unsafe-inline'; frame-src 'self' vercel.live platform.twitter.com; frame-ancestors 'self'; report-uri https://umaproject.uriports.com/reports/report; report-to default"
+            "value" : "default-src 'self' api.across.to across.to wss://api.blocknative.com; font-src 'self' fonts.gstatic.com assets.vercel.com data:; img-src 'self' registry.walletconnect.org assets.vercel.com data:; connect-src wss://*.bridge.walletconnect.org wss://api.blocknative.com mainnet.infura.io dev.api.across.to api.across.to across.to across.matomo.cloud mainnet.boba.network *.wallet.coinbase.com *.alchemy.com *.infura.io api2.amplitude.com *.sentry.io; script-src 'self' 'unsafe-inline' 'unsafe-eval' platform.twitter.com vercel.live across.matomo.cloud; style-src 'self' 'unsafe-inline'; frame-src 'self' vercel.live platform.twitter.com; frame-ancestors 'self'; report-uri https://umaproject.uriports.com/reports/report; report-to default"
           },
           {
             "key" : "Report-To",
