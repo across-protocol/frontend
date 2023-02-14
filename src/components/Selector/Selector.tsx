@@ -2,13 +2,20 @@ import styled from "@emotion/styled";
 import { ReactComponent as Arrow } from "assets/icons/arrow-16.svg";
 import Modal from "components/Modal";
 import { Text } from "components/Text";
+import { PopperTooltip } from "components/Tooltip";
 import { QUERIESV2 } from "utils";
+import { ReactComponent as II } from "assets/icons/info-16.svg";
 import { useSelector } from "./useSelector";
 
 export type SelectorElementType<Value> = {
   value: Value;
   element: JSX.Element;
   suffix?: JSX.Element;
+  disabled?: boolean;
+  disabledTooltip?: {
+    title: string;
+    description: string;
+  };
 };
 
 export type SelectorPropType<Value> = {
@@ -69,16 +76,37 @@ const Selector = <ElementValue,>({
             <ElementRow
               key={idx}
               onClick={() => {
+                if (element.disabled) return;
                 setSelectedValue(element.value);
                 setDisplayModal(false);
               }}
-              active={selectedIndex === idx}
+              active={!element.disabled && selectedIndex === idx}
+              disabled={element.disabled}
             >
-              <ElementSection> {element.element}</ElementSection>
+              <ElementSection disabled={element.disabled}>
+                {element.element}
+              </ElementSection>
               <ElementSection>
-                <ElementSuffixWrapper>
-                  {element.suffix}
-                  {idx === selectedIndex ? (
+                <ElementSuffixWrapper largeGap={element.disabled}>
+                  {element.disabled ? (
+                    <Text size="sm" color="grey-400">
+                      Not supported
+                    </Text>
+                  ) : (
+                    element.suffix
+                  )}
+                  {element.disabled ? (
+                    <PopperTooltip
+                      title={element.disabledTooltip?.title ?? "Not supported."}
+                      body={
+                        element.disabledTooltip?.description ??
+                        "This asset is not supported within this context."
+                      }
+                      placement="bottom-start"
+                    >
+                      <InfoIcon />
+                    </PopperTooltip>
+                  ) : idx === selectedIndex ? (
                     <ActiveIcon>
                       <ActiveSelectedIcon />
                     </ActiveIcon>
@@ -159,23 +187,26 @@ const ElementRowDivider = styled.div`
   width: calc(100% + 32px);
 `;
 
-const ElementRow = styled.div<{ active: boolean }>`
+const ElementRow = styled.div<{ active: boolean; disabled?: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding: 14px 12px 14px 16px;
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
   width: 100%;
 
-  background: ${({ active }) => (active ? "#2d2e33" : "transparent")};
+  background: ${({ active, disabled }) =>
+    active && !disabled ? "#2d2e33" : "transparent"};
 
   &:hover {
-    background: #2d2e33;
+    background: ${({ disabled }) => (!disabled ? "#2d2e33" : "transparent")};
   }
 `;
 
-const ElementSection = styled.div``;
+const ElementSection = styled.div<{ disabled?: boolean }>`
+  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
+`;
 
 const InactiveIcon = styled.div`
   display: flex;
@@ -222,11 +253,13 @@ const ActiveSelectedIcon = styled.div`
   background: #44d2ff;
 `;
 
-const ElementSuffixWrapper = styled.div`
+const ElementSuffixWrapper = styled.div<{ largeGap?: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
   padding: 0px;
-  gap: 4px;
+  gap: ${({ largeGap }) => (largeGap ? "16px" : "4px")};
 `;
+
+const InfoIcon = styled(II)``;
