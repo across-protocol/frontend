@@ -93,7 +93,7 @@ const globalStyles = css`
   body {
     min-height: 100vh;
     @media ${QUERIESV2.tb.andDown} {
-      min-height: -webkit-fill-available;
+      min-height: 100dvh;
     }
   }
   body {
