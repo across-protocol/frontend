@@ -104,7 +104,9 @@ const Selector = <ElementValue,>({
                       }
                       placement="bottom-start"
                     >
-                      <InfoIcon />
+                      <InfoIconWrapper>
+                        <InfoIcon />
+                      </InfoIconWrapper>
                     </PopperTooltip>
                   ) : idx === selectedIndex ? (
                     <ActiveIcon>
@@ -262,4 +264,16 @@ const ElementSuffixWrapper = styled.div<{ largeGap?: boolean }>`
   gap: ${({ largeGap }) => (largeGap ? "16px" : "4px")};
 `;
 
-const InfoIcon = styled(II)``;
+const InfoIcon = styled(II)`
+  height: 16px;
+  width: 16px;
+`;
+
+const InfoIconWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 24px;
+  width: 24px;
+`;
