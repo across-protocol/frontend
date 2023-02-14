@@ -5,6 +5,7 @@ import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Butto
 import { BigNumber, utils } from "ethers";
 import {
   formatUnits,
+  getChainInfo,
   getConfig,
   isNumberEthersParseable,
   parseUnitsFnBuilder,
@@ -220,8 +221,20 @@ const CoinSelector = ({
         </AmountInnerWrapper>
       </AmountWrapper>
       <TokenSelection
-        elements={tokenChoices.map((t, idx) => ({
+        elements={tokenChoices.map((t) => ({
           value: t.symbol,
+          disabled: !getConfig().routes.some(
+            (r) =>
+              toChain === r.toChain &&
+              fromChain === r.fromChain &&
+              r.fromTokenSymbol === t.symbol
+          ),
+          disabledTooltip: {
+            title: "Asset not supported.",
+            description: `${t.symbol.toUpperCase()} is not supported on ${
+              getChainInfo(fromChain).name
+            }. Pick a different asset or change the destination chain.`,
+          },
           element: (
             <CoinIconTextWrapper>
               <CoinIcon src={t.logoURI} />

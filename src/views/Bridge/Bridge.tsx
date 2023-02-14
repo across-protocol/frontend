@@ -42,6 +42,8 @@ const Bridge = () => {
     walletAccount,
     disableQuickSwap,
     setIsBridgeAmountValid,
+    allFromRoutes,
+    allToRoutes,
   } = useBridge();
   return (
     <>
@@ -83,7 +85,9 @@ const Bridge = () => {
               currentFromRoute={currentFromRoute}
               setCurrentFromRoute={setCurrentFromRoute}
               availableFromRoutes={availableFromRoutes}
+              allFromRoutes={allFromRoutes}
               availableToRoutes={availableToRoutes}
+              allToRoutes={allToRoutes}
               currentToRoute={currentToRoute}
               setCurrentToRoute={setCurrentToRoute}
               handleQuickSwap={handleQuickSwap}
