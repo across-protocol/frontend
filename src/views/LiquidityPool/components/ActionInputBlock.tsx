@@ -100,6 +100,14 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
     addLiquidityMutation.isLoading ||
     removeLiquidityMutation.isLoading;
 
+  const disableAction = Boolean(
+    disableInputs ||
+      amountValidationError ||
+      !amount ||
+      !maxAmountsQuery.data ||
+      !stakingPoolQuery.data
+  );
+
   const maxAmount =
     selectedToken.decimals && maxAmountsQuery.data
       ? utils.formatUnits(
@@ -135,7 +143,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
             size="lg"
             onClick={handleAction}
             isRemove={action === "remove"}
-            disabled={Boolean(disableInputs || amountValidationError)}
+            disabled={disableAction}
           >
             <Text color="dark-grey" weight={500}>
               {action === "add"
