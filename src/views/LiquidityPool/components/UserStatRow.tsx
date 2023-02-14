@@ -10,7 +10,7 @@ type Props = {
 
 export default function UserStatBox({ label, value, tokenLogoURI }: Props) {
   return (
-    <Container>
+    <Container data-cy="pool-info-box">
       <Text color="grey-400">{label}</Text>
       <ValueContainer>
         <Text color="grey-400">{value} </Text>

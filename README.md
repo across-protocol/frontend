@@ -43,9 +43,16 @@ yarn build
 yarn test
 ```
 
-### Run integration tests
+### Run e2e tests
 
-We use [cypress](https://docs.cypress.io/guides/overview/why-cypress) for handling integration tests.
+Our e2e tests rely on a local hardhat node that forks mainnet.
+First, set the env var `HARDHAT_INFURA_ID` in your `.env` file and make sure to run such a node before starting the tests:
+
+```bash
+yarn hardhat:node
+```
+
+We use [cypress](https://docs.cypress.io/guides/overview/why-cypress) for handling e2e tests.
 To run the tests locally, first make sure to have a local dev sever running:
 
 ```bash
@@ -83,21 +90,10 @@ Modal - 99998
 
 Have a look at [CONTRIBUTING](./CONTRIBUTING.md) to get more information on contributions and best practices.
 
-## E2E Testing with Cypress + Hardhat
-
-In order to run Cypress e2e tests locally, you must do the following:
-
-1. Define HARDHAT_INFURA_ID to your desired infura project ID in .env.
-2. Run the following:
-
-```bash
-docker compose -f hardhat-node.yml up
-```
-
 ## Pull Data from Amplitude
 
 The `src/ampli` directory can be refreshed with new tracking data by running the following steps:
 
 1. Run `yarn ampli login` to log in to Amplitude
-2. Run `yarn ampli pull web` 
-    1. If Amplitude requests to create a new project, let it generate a `ampli.json` file.
+2. Run `yarn ampli pull web`
+   1. If Amplitude requests to create a new project, let it generate a `ampli.json` file.

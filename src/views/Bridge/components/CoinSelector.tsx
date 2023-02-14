@@ -210,6 +210,7 @@ const CoinSelector = ({
               onChange={(e) => setUserAmountInput(e.target.value)}
               onFocus={() => setDisplayBalance(true)}
               onBlur={() => setDisplayBalance(false)}
+              data-cy="bridge-amount-input"
             />
           </AmountInnerWrapperTextStack>
           <MaxButtonWrapper

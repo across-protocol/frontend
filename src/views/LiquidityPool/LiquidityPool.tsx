@@ -118,7 +118,7 @@ export default function LiquidityPool() {
                 poolSize: BigNumber.from(pool.totalPoolSize),
               }))}
             />
-            <StatsRow>
+            <StatsRow data-cy="pool-info-box">
               <StatBox
                 label="Pool size"
                 value={showValueOrDash(
@@ -175,6 +175,7 @@ export default function LiquidityPool() {
             {!isConnected ? (
               <Button
                 size="lg"
+                data-cy-="connect-wallet"
                 onClick={() =>
                   connect({
                     trackSection:

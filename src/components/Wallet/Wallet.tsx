@@ -52,7 +52,9 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
       {account && (
         <>
           {SHOW_ACX_NAV_TOKEN && <Separator />}
-          <Account>{ensName ?? shortenAddress(account, "..", 4)}</Account>
+          <Account data-cy="wallet-address">
+            {ensName ?? shortenAddress(account, "..", 4)}
+          </Account>
         </>
       )}
     </BalanceButton>
