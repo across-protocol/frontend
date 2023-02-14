@@ -33,14 +33,28 @@ const enabledRoutes = getConfig().getRoutes();
 export function useBridge() {
   // Get all available tokens from the enabled routes and use useMemo to avoid
   // recalculating this every time the component re-renders
-  const availableTokens = useMemo(() => {
+  const { availableTokens, allFromRoutes, allToRoutes } = useMemo(() => {
     // Map the enabled routes to an array of token symbols and filter for duplicates
-    return enabledRoutes
-      .map((route) => getToken(route.fromTokenSymbol))
-      .filter(
-        (token, index, self) =>
-          index === self.findIndex((t) => t.symbol === token.symbol)
-      );
+    return {
+      availableTokens: enabledRoutes
+        .map((route) => getToken(route.fromTokenSymbol))
+        .filter(
+          (token, index, self) =>
+            index === self.findIndex((t) => t.symbol === token.symbol)
+        ),
+      allFromRoutes: enabledRoutes
+        .map((route) => getChainInfo(route.fromChain))
+        .filter(
+          (chain, index, self) =>
+            index === self.findIndex((t) => t.chainId === chain.chainId)
+        ),
+      allToRoutes: enabledRoutes
+        .map((route) => getChainInfo(route.toChain))
+        .filter(
+          (chain, index, self) =>
+            index === self.findIndex((t) => t.chainId === chain.chainId)
+        ),
+    };
   }, []);
 
   const [currentToken, setCurrentToken] = useState(availableTokens[0].symbol);
@@ -486,5 +500,7 @@ export function useBridge() {
     transactionElapsedTimeAsFormattedString,
     disableQuickSwap,
     setIsBridgeAmountValid,
+    allFromRoutes,
+    allToRoutes,
   };
 }

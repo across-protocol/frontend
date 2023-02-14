@@ -28,7 +28,9 @@ type BridgeFormProps = {
   currentFromRoute: number | undefined;
   setCurrentFromRoute: (chainId: number) => void;
   availableFromRoutes: ChainInfo[];
+  allFromRoutes: ChainInfo[];
   availableToRoutes: ChainInfo[];
+  allToRoutes: ChainInfo[];
   currentToRoute: number | undefined;
   setCurrentToRoute: (chainId: number) => void;
   handleQuickSwap: () => void;
@@ -78,6 +80,8 @@ const BridgeForm = ({
   walletAccount,
   disableQuickSwap,
   setIsBridgeAmountValid,
+  allToRoutes,
+  allFromRoutes,
 }: BridgeFormProps) => {
   const mapChainInfoToRoute = (
     c?: ChainInfo,
@@ -124,9 +128,16 @@ const BridgeForm = ({
             From
           </Text>
           <Selector<number>
-            elements={availableFromRoutes.map((r) => ({
+            elements={allFromRoutes.map((r) => ({
               value: r.chainId,
               element: mapChainInfoToRoute(r)!,
+              disabled: availableFromRoutes.every(
+                (c) => c.chainId !== r.chainId
+              ),
+              disabledTooltip: {
+                title: `Asset not supported on ${r.name}.`,
+                description: `${currentToken} is not supported on ${r.name}. Please select another asset or change this chain.`,
+              },
             }))}
             selectedValue={currentFromRoute ?? 1}
             setSelectedValue={(v) => setCurrentFromRoute(v)}
@@ -145,9 +156,16 @@ const BridgeForm = ({
           </QuickSwapWrapper>
           <FromSelectionStack>
             <Selector<number>
-              elements={availableToRoutes.map((r) => ({
+              elements={allToRoutes.map((r) => ({
                 value: r.chainId,
                 element: mapChainInfoToRoute(r)!,
+                disabled: availableToRoutes.every(
+                  (c) => c.chainId !== r.chainId
+                ),
+                disabledTooltip: {
+                  title: `Asset not supported on ${r.name}.`,
+                  description: `${currentToken} is not supported on ${r.name}. Please select another asset or change this chain.`,
+                },
               }))}
               displayElement={mapChainInfoToRoute(
                 availableToRoutes.filter(
