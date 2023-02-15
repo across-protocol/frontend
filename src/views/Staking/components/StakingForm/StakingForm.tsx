@@ -251,10 +251,10 @@ export const StakingForm = ({
             <Divider />
             <StakeInfoRow>
               <StakeInfoItem>
-                Rewards APY{" "}
+                Rewards APY
                 <PopperTooltip
                   title="Rewards APY"
-                  body="The base reward APY times your multiplier."
+                  body="The base reward APR times your multiplier."
                   placement="bottom-start"
                 >
                   <InfoIcon />
