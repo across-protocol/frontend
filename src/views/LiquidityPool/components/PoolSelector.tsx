@@ -38,6 +38,7 @@ export function PoolSelector({
   return (
     <Wrapper>
       <TokenSelection
+        data-cy="select-pool"
         elements={pools.map((p) => ({
           value: p.tokenSymbol,
           element: (

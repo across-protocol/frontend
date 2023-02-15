@@ -225,6 +225,7 @@ const BridgeForm = ({
             onClick={() => {
               buttonActionHandler();
             }}
+            data-cy={!isConnected ? "connect-wallet" : "bridge-button"}
           >
             <Text color="dark-grey" weight={500}>
               {buttonLabel}

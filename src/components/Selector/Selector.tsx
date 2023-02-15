@@ -25,6 +25,7 @@ export type SelectorPropType<Value> = {
   setSelectedValue: (ind: Value) => void;
   displayElement?: JSX.Element;
   disabled?: boolean;
+  "data-cy"?: string;
 };
 
 const Selector = <ElementValue,>({
@@ -34,6 +35,7 @@ const Selector = <ElementValue,>({
   title,
   displayElement,
   disabled,
+  "data-cy": dataCy,
 }: SelectorPropType<ElementValue>) => {
   const { displayModal, setDisplayModal, selectedIndex, isMobile } =
     useSelector(elements, selectedValue);
@@ -42,6 +44,7 @@ const Selector = <ElementValue,>({
       <Wrapper
         disabled={disabled}
         onClick={() => !disabled && setDisplayModal(true)}
+        data-cy={dataCy}
       >
         <InternalWrapper>
           <ActiveElementWrapper>
@@ -69,6 +72,7 @@ const Selector = <ElementValue,>({
           </Text>
         }
         padding="thin"
+        data-cy={`${dataCy}-modal`}
       >
         <ElementRowDivider />
         <ElementRowWrapper enableScroll={elements.length > 7}>

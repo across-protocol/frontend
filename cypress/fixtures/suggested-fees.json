@@ -1,0 +1,12 @@
+{
+  "capitalFeePct": "100000000000000",
+  "capitalFeeTotal": "100000000000000",
+  "relayGasFeePct": "260576379222652",
+  "relayGasFeeTotal": "260576379222652",
+  "relayFeePct": "360576379222652",
+  "relayFeeTotal": "360576379222652",
+  "lpFeePct": "0",
+  "timestamp": "1676385959",
+  "isAmountTooLow": false,
+  "quoteBlock": "16627672"
+}

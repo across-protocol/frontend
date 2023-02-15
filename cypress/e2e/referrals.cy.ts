@@ -1,5 +1,13 @@
 describe("referrals", () => {
   beforeEach(() => {
+    cy.intercept("/api/suggested-fees?*", { fixture: "suggested-fees" }).as(
+      "getSuggestedFees"
+    );
+    cy.intercept("/api/coingecko?*", { fixture: "price" }).as(
+      "getCoingeckoPrice"
+    );
+    cy.intercept("/api/limits?*", { fixture: "limits" }).as("getLimits");
+
     cy.visit("/rewards/referrals");
   });
 

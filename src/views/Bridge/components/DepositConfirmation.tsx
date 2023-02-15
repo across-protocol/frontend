@@ -60,7 +60,7 @@ const DepositConfirmation = ({
   };
 
   return (
-    <Wrapper>
+    <Wrapper data-cy="transaction-submitted">
       <TopWrapper>
         <TopWrapperAnimationWrapper>
           <AnimatedLogoWrapper completed={!transactionPending}>

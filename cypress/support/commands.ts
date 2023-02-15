@@ -27,10 +27,8 @@ Cypress.Commands.overwrite(
       onBeforeLoad(win: any) {
         options && options.onBeforeLoad && options.onBeforeLoad(win);
         win.localStorage.clear();
-        win.localStorage.setItem("cypress-testing", "true");
 
         win.ethereum = createCustomizedBridge();
-        win.isCypress = true;
       },
     });
   }
@@ -76,6 +74,7 @@ Cypress.Commands.add(
  */
 Cypress.Commands.add("connectInjectedWallet", (connectWalletElementDataId) => {
   cy.dataCy(connectWalletElementDataId).click();
+  cy.wait(1000);
   cy.get("onboard-v2")
     .shadow()
     .find(".wallets-container")
