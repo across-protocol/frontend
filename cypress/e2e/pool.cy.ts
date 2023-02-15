@@ -7,23 +7,26 @@ describe("pool", () => {
       "getCoingeckoPrice"
     );
     cy.intercept("/api/limits?*", { fixture: "limits" }).as("getLimits");
+    cy.intercept("/api/pools?*", { fixture: "pools" }).as("getPools");
+
+    cy.visit("/pool");
   });
 
   it("render in initial state", () => {
-    cy.visit("/pool");
-    cy.dataCy("position-info-box").should("be.visible");
+    cy.dataCy("user-pool-info-box").should("be.visible");
     cy.dataCy("pool-info-box").should("be.visible");
   });
 
-  it("update info boxes on pool change", () => {
+  it("select pool", () => {
+    cy.wait("@getPools");
     cy.dataCy("select-pool").click();
-    cy.dataCy("pool-weth").click();
+    cy.dataCy("select-pool-modal").contains("WETH Pool").click();
 
-    cy.dataCy("position-info-box").should("be.visible");
-    cy.dataCy("pool-info-box").should("be.visible");
+    cy.dataCy("select-pool").should("contain.text", "WETH Pool");
   });
 
   it("show action button on connected wallet", () => {
+    cy.scrollTo("bottom");
     cy.connectInjectedWallet("connect-wallet");
     cy.dataCy("add-button").should("be.visible");
   });

@@ -31,6 +31,8 @@ type ModalProps = {
 
   verticalLocation?: ModalDirectionOrientation | ModalDirection;
   topYOffset?: number;
+
+  "data-cy"?: string;
 };
 
 const Modal: React.FC<ModalProps> = ({
@@ -45,6 +47,7 @@ const Modal: React.FC<ModalProps> = ({
   verticalLocation: _verticalLocation,
   topYOffset,
   padding,
+  "data-cy": dataCy,
 }) => {
   const verticalLocation: ModalDirection | undefined =
     typeof _verticalLocation === "string"
@@ -125,6 +128,7 @@ const Modal: React.FC<ModalProps> = ({
       direction={direction}
       onClick={offModalClickHandler}
       reverseAnimation={!forwardAnimation}
+      data-cy={dataCy}
     >
       <ModalContentWrapper
         ref={modalContentRef}

@@ -42,9 +42,7 @@ export function PoolSelector({
         elements={pools.map((p) => ({
           value: p.tokenSymbol,
           element: (
-            <PoolIconTextWrapper
-              data-cy={`pool-${p.tokenSymbol.toLowerCase()}`}
-            >
+            <PoolIconTextWrapper>
               <PoolIcon src={p.tokenLogoURI} />
               <Text size="md" color="white-100">
                 {p.tokenSymbol.toUpperCase()} Pool

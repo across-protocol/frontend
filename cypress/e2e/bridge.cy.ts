@@ -7,14 +7,11 @@ describe("bridge", () => {
       "getCoingeckoPrice"
     );
     cy.intercept("/api/limits?*", { fixture: "limits" }).as("getLimits");
-  });
 
-  afterEach(() => {
-    cy.scrollTo("top");
+    cy.visit("/bridge");
   });
 
   it("render in initial state", () => {
-    cy.visit("/bridge");
     cy.scrollTo("bottom");
     cy.dataCy("connect-wallet").should("be.visible");
   });

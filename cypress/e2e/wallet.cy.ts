@@ -9,7 +9,7 @@ describe("wallet", () => {
     cy.intercept("/api/limits?*", { fixture: "limits" }).as("getLimits");
   });
 
-  it("display ACX balance for connected wallet", () => {
+  it("display address for connected wallet", () => {
     cy.visit("/bridge");
     cy.connectInjectedWallet("connect-wallet");
 

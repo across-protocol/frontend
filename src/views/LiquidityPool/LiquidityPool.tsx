@@ -175,7 +175,7 @@ export default function LiquidityPool() {
             {!isConnected ? (
               <Button
                 size="lg"
-                data-cy-="connect-wallet"
+                data-cy="connect-wallet"
                 onClick={() =>
                   connect({
                     trackSection:
