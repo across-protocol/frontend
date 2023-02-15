@@ -147,6 +147,7 @@ const handler = async (
         l1Token,
         ethers.BigNumber.from("10").pow(18),
         Number(destinationChainId),
+        computedOriginChainId,
         tokenPriceNative
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
