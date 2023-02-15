@@ -164,16 +164,17 @@ export function useOnboardManager() {
   );
 
   const customOnboardConnect = useCallback(
-    async (options?: ConnectOptions & TrackOnConnectOptions) => {
+    async (options: ConnectOptions & TrackOnConnectOptions = {}) => {
+      let { trackSection, ...connectOptions } = options;
       // Resolve the last wallet type if this user has connected before
       const previousConnection = window.localStorage.getItem(CACHED_WALLET_KEY);
       // Test the user was connected before a browser refresh and that
       // the calling code did not specify an autoSelect parameter
-      if (previousConnection && !options?.autoSelect) {
+      if (previousConnection && !connectOptions?.autoSelect) {
         // Append the autoSelect option to include the previous connection
         // type
-        options = {
-          ...options,
+        connectOptions = {
+          ...connectOptions,
           autoSelect: {
             label: previousConnection,
             disableModals: true,
@@ -181,14 +182,14 @@ export function useOnboardManager() {
         };
       }
       const walletStates = await connect(
-        options?.autoSelect ? options : undefined
+        connectOptions?.autoSelect ? connectOptions : undefined
       );
 
       if (walletStates[0]?.accounts[0]?.address) {
         setUserId(utils.getAddress(walletStates[0]?.accounts[0]?.address));
       }
-      if (options?.trackSection) {
-        trackConnectWalletButtonClicked(options.trackSection);
+      if (trackSection) {
+        trackConnectWalletButtonClicked(trackSection);
       }
       trackIfWalletSelected(walletStates, previousConnection);
 
