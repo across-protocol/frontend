@@ -65,6 +65,7 @@ const Selector = <ElementValue,>({
           mobile: "bottom",
         }}
         topYOffset={isMobile ? 16 : 112}
+        bottomYOffset={isMobile ? 112 : undefined}
         exitOnOutsideClick
         title={
           <Text size="md" color="grey-400">

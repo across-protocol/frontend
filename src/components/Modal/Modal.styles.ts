@@ -84,7 +84,8 @@ export const Wrapper = styled.div<WrapperType>`
 type ModalWrapperType = {
   height?: number;
   width?: number;
-  yOffset?: number;
+  topYOffset?: number;
+  bottomYOffset?: number;
   padding: "normal" | "thin";
 };
 export const ModalContentWrapper = styled.div<ModalWrapperType>`
@@ -102,7 +103,8 @@ export const ModalContentWrapper = styled.div<ModalWrapperType>`
   margin: 0 auto;
   padding: ${({ padding }) => (padding === "normal" ? "24px" : "16px")};
 
-  margin-top: ${({ yOffset }) => yOffset ?? 0}px;
+  margin-top: ${({ topYOffset }) => topYOffset ?? 0}px;
+  margin-bottom: ${({ bottomYOffset }) => bottomYOffset ?? 0}px;
   background: #202024;
   border: 1px solid #34353b;
   box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.32);

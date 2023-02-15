@@ -1,6 +1,6 @@
 import { Global, css } from "@emotion/react";
 import { reset } from "./reset";
-import { COLORS, QUERIESV2 } from "utils";
+import { COLORS } from "utils";
 
 export const typography = css`
   /* only take latin chars to reduce bundle size */
@@ -92,9 +92,6 @@ const globalStyles = css`
   html,
   body {
     min-height: 100vh;
-    @media ${QUERIESV2.tb.andDown} {
-      min-height: 100dvh;
-    }
   }
   body {
     background-color: var(--color-gray);

@@ -31,8 +31,8 @@ type ModalProps = {
 
   verticalLocation?: ModalDirectionOrientation | ModalDirection;
   topYOffset?: number;
-
   "data-cy"?: string;
+  bottomYOffset?: number;
 };
 
 const Modal: React.FC<ModalProps> = ({
@@ -46,6 +46,7 @@ const Modal: React.FC<ModalProps> = ({
   children,
   verticalLocation: _verticalLocation,
   topYOffset,
+  bottomYOffset,
   padding,
   "data-cy": dataCy,
 }) => {
@@ -134,7 +135,8 @@ const Modal: React.FC<ModalProps> = ({
         ref={modalContentRef}
         height={height}
         width={width}
-        yOffset={topYOffset}
+        topYOffset={topYOffset}
+        bottomYOffset={bottomYOffset}
         padding={padding ?? "normal"}
       >
         <TitleAndExitWrapper>
