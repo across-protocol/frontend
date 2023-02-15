@@ -69,7 +69,7 @@ const rawHeader: (
     tooltip: {
       title: "APY",
       description:
-        "Your total APY for the pool, including the pool APY plus rewards APY times your multiplier. Max APY is the maximum APY after you have staked your LP tokens for 100 days.",
+        "Your total APY for the pool, including the pool APY plus rewards APR times your multiplier. Max APY is the maximum APY after you have staked your LP tokens for 100 days.",
     },
   },
   {

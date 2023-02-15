@@ -231,8 +231,8 @@ export const StakingForm = ({
                 <ArrowIcon />
                 APY
                 <PopperTooltip
-                  title="APY"
-                  body="Your total APY for the pool, including the pool APY plus rewards APY times your multiplier. Max APY is the maximum APY after you have staked your LP tokens for 100 days."
+                  title="Rewards APR"
+                  body="Your total APY for the pool, including the pool APY plus rewards APR times your multiplier. Max APY is the maximum APY after you have staked your LP tokens for 100 days."
                   placement="bottom-start"
                 >
                   <InfoIcon />
@@ -251,10 +251,10 @@ export const StakingForm = ({
             <Divider />
             <StakeInfoRow>
               <StakeInfoItem>
-                Rewards APY{" "}
+                Rewards APY
                 <PopperTooltip
                   title="Rewards APY"
-                  body="The base reward APY times your multiplier."
+                  body="The base reward APR times your multiplier."
                   placement="bottom-start"
                 >
                   <InfoIcon />
