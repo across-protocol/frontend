@@ -16,4 +16,4 @@
   directory = "api-migration"
   node_bundler = "esbuild"
   external_node_modules = ["@google-cloud/logging", "@uma/contracts-node", "@across-protocol/sdk-v2"]
-  included_files = ["src/data/*.json", "node_modules/@across-protocol/sdk-v2/**", "node_modules/ethers/**", "node_modules/@ethersproject/**", "node_modules/js-sha3/**", "node_modules/aes-js/**", "node_modules/scrypt-js/**", "node_modules/bech32/**"]
+  included_files = ["src/data/*.json", "node_modules/**"]
