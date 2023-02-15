@@ -36,7 +36,7 @@ export function useConnection() {
 
   return {
     account: account ? ethers.utils.getAddress(account.address) : undefined,
-    ensName: account?.ens,
+    ensName: account?.ens?.name,
     chainId,
     provider,
     signer,
