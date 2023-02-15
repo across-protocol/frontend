@@ -1,22 +1,14 @@
 import assert from "assert";
 import { clients, utils, BlockFinder } from "@uma/sdk";
-import {
-  relayFeeCalculator,
-  lpFeeCalculator,
-  contracts,
-  constants,
-} from "@across-protocol/sdk-v2";
+import { lpFeeCalculator, contracts, constants } from "@across-protocol/sdk-v2";
 import { Provider, Block } from "@ethersproject/providers";
 import { ethers, BigNumber } from "ethers";
 
 import {
-  MAX_RELAY_FEE_PERCENT,
   ChainId,
   hubPoolChainId,
   hubPoolAddress,
   getConfigStoreAddress,
-  queriesTable,
-  FLAT_RELAY_CAPITAL_FEE,
   referrerDelimiterHex,
   usdcLpCushion,
   wethLpCushion,
@@ -456,23 +448,4 @@ export default class LpFeeCalculator {
     ]);
     return calculateRealizedLpFeePct(rateModel, currentUt, nextUt);
   }
-}
-
-export function relayFeeCalculatorConfig(
-  chainId: ChainId
-): relayFeeCalculator.RelayFeeCalculatorConfig {
-  const config = getConfig();
-  const provider = getProvider(chainId);
-  const token = config.getNativeTokenInfo(chainId);
-
-  if (!queriesTable[chainId])
-    throw new Error(`No queries in queriesTable for chainId ${chainId}!`);
-
-  const queries = queriesTable[chainId](provider);
-  return {
-    nativeTokenDecimals: token.decimals,
-    feeLimitPercent: MAX_RELAY_FEE_PERCENT,
-    capitalCostsPercent: FLAT_RELAY_CAPITAL_FEE,
-    queries,
-  };
 }
