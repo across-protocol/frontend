@@ -17,5 +17,11 @@
     "jsx": "react-jsx",
     "baseUrl": "src",
   },
-  "include": ["src", "test", "api", "api-migration"]
+  "include": ["src", "test", "api", "api-migration"],
+  "exclude": [
+    "node_modules",
+    "./node_modules",
+    "./node_modules/*",
+    "./node_modules/**/*",
+  ]
 }
