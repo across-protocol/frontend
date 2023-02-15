@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { constants } from "@across-protocol/sdk-v2";
+import { constants, relayFeeCalculator } from "@across-protocol/sdk-v2";
 
 export const maxRelayFeePct = 0.25;
 
@@ -7,7 +7,9 @@ export const disabledL1Tokens = [
   constants.TOKEN_SYMBOLS_MAP.BADGER.addresses[constants.CHAIN_IDs.MAINNET],
 ].map((x) => x.toLowerCase());
 
-export const relayerFeeCapitalCostConfig = {
+export const relayerFeeCapitalCostConfig: {
+  [token: string]: relayFeeCalculator.RelayCapitalCostConfig;
+} = {
   ETH: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
     upperBound: ethers.utils.parseUnits("0.0001").toString(),
@@ -33,10 +35,30 @@ export const relayerFeeCapitalCostConfig = {
     decimals: 18,
   },
   USDC: {
-    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0001").toString(),
-    cutoff: ethers.utils.parseUnits("1500000").toString(),
-    decimals: 6,
+    default: {
+      lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+      upperBound: ethers.utils.parseUnits("0.0001").toString(),
+      cutoff: ethers.utils.parseUnits("1500000").toString(),
+      decimals: 6,
+    },
+    routeOverrides: {
+      "10": {
+        "42161": {
+          lowerBound: ethers.utils.parseUnits("0").toString(),
+          upperBound: ethers.utils.parseUnits("0").toString(),
+          cutoff: ethers.utils.parseUnits("0").toString(),
+          decimals: 6,
+        },
+      },
+      "42161": {
+        "10": {
+          lowerBound: ethers.utils.parseUnits("0").toString(),
+          upperBound: ethers.utils.parseUnits("0").toString(),
+          cutoff: ethers.utils.parseUnits("0").toString(),
+          decimals: 6,
+        },
+      },
+    },
   },
   UMA: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
