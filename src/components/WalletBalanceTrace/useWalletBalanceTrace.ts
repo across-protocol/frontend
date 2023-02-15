@@ -18,9 +18,11 @@ export function useWalletBalanceTrace() {
   const { account, isConnected } = useConnection();
   useEffect(() => {
     if (account && isConnected) {
-      calculateUsdBalances(account).then((balance) => {
-        reportTotalWalletUsdBalance(balance);
-      });
+      calculateUsdBalances(account)
+        .then((balance) => {
+          reportTotalWalletUsdBalance(balance);
+        })
+        .catch((e) => console.error("Failed to fetch balances:", e));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account]);
@@ -49,11 +51,15 @@ const availableSymbols = [
 const calculateUsdBalances = async (account: string) => {
   const usdPrices: Record<string, BigNumber> = await availableSymbols.reduce(
     async (acc, symbol) => {
-      const { price } = await getApiEndpoint().coingecko(
-        getToken(symbol).mainnetAddress!,
-        "usd"
-      );
-      return Promise.resolve({ ...(await acc), [symbol]: price });
+      try {
+        const { price } = await getApiEndpoint().coingecko(
+          getToken(symbol).mainnetAddress!,
+          "usd"
+        );
+        return Promise.resolve({ ...(await acc), [symbol]: price });
+      } catch (e) {
+        return Promise.resolve(await acc);
+      }
     },
     Promise.resolve({})
   );
