@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
 import { useConnection } from "hooks";
