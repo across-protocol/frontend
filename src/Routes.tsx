@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
 import { useConnection } from "hooks";
@@ -13,6 +13,7 @@ import {
   stringValueInArray,
   getConfig,
 } from "utils";
+import lazyWithRetry from "utils/lazy-with-retry";
 import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
@@ -23,35 +24,35 @@ import RouteTrace from "components/RouteTrace/RouteTrace";
 import WalletTrace from "components/WalletTrace";
 import WalletBalanceTrace from "components/WalletBalanceTrace/WalletBalanceTrace";
 
-const LiquidityPool = lazy(
-  () => import(/* webpackChunkName: "LiquidityPool" */ "./views/LiquidityPool")
+const LiquidityPool = lazyWithRetry(
+  () => import(/* webpackChunkName: "LiquidityPools" */ "./views/LiquidityPool")
 );
-const Referrals = lazy(
+const Referrals = lazyWithRetry(
   () => import(/* webpackChunkName: "Referrals" */ "./views/Referrals")
 );
-const Rewards = lazy(
+const Rewards = lazyWithRetry(
   () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
 );
-const Send = lazy(
+const Send = lazyWithRetry(
   () => import(/* webpackChunkName: "Send" */ "./views/Bridge")
 );
-const Splash = lazy(
+const Splash = lazyWithRetry(
   () => import(/* webpackChunkName: "Splash" */ "./views/Splash")
 );
-const Airdrop = lazy(() => import("./views/Airdrop"));
-const MyTransactions = lazy(
+const Airdrop = lazyWithRetry(() => import("./views/Airdrop"));
+const MyTransactions = lazyWithRetry(
   () =>
     import(
       /* webpackChunkName: "MyTransactions" */ "./views/Transactions/myTransactions"
     )
 );
-const AllTransactions = lazy(
+const AllTransactions = lazyWithRetry(
   () =>
     import(
       /* webpackChunkName: "AllTransactions" */ "./views/Transactions/allTransactions"
     )
 );
-const Staking = lazy(
+const Staking = lazyWithRetry(
   () => import(/* webpackChunkName: "RewardStaking" */ "./views/Staking")
 );
 
