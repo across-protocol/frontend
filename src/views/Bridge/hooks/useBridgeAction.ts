@@ -44,6 +44,7 @@ export function useBridgeAction(
     const frozenPayload = cloneDeep(payload);
     const referrer = frozenPayload?.referrer ?? "";
     const frozenTokenPrice = cloneDeep(tokenPrice);
+    const frozenAccount = cloneDeep(account);
 
     if (!isConnected) {
       connect();
@@ -53,7 +54,7 @@ export function useBridgeAction(
     if (
       !frozenPayload ||
       !signer ||
-      !account ||
+      !frozenAccount ||
       !frozenQuote ||
       !frozenInitialQuoteTime ||
       !frozenTokenPrice ||
@@ -112,7 +113,7 @@ export function useBridgeAction(
         sourceChainId: frozenPayload.fromChain,
         destinationChainId: frozenPayload.toChain,
         assetAddr: frozenPayload.tokenAddress,
-        depositorAddr: utils.getAddress(account),
+        depositorAddr: utils.getAddress(frozenAccount),
         amount: frozenPayload.amount.toString(),
         depositTxHash: tx.hash,
         fillTxs: [],
