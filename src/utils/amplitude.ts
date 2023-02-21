@@ -33,6 +33,8 @@ import {
 } from "./format";
 import { getConfig } from "./config";
 import { ChainId } from "./utils";
+import { categorizeNumberInRange } from "./math";
+import { range } from "lodash";
 
 export function getPageValue() {
   const path = window.location.pathname;
@@ -428,7 +430,22 @@ export function reportTokenBalance(
 }
 
 export function reportTotalWalletUsdBalance(totalBalance: number) {
+  // Categorize the total balance into a range. The range will be from 0 to 1000,
+  // from 10000 to 100000 in increments of 10000, from 100000 to 250000, and from 250000 to 1000000
+  const totalBalanceStringRange = categorizeNumberInRange(totalBalance, [
+    0,
+    1_000,
+    ...range(10_000, 100_000, 10_000),
+    100_000,
+    250_000,
+    1_000_000,
+  ]);
+
   const identifyObj = new Identify();
   identifyObj.set("AllAssetsAllNetworksWalletCurrentBalanceUsd", totalBalance);
+  identifyObj.set(
+    "AllAssetsAllNetworksWalletCurrentBalanceUsdRange",
+    totalBalanceStringRange
+  );
   ampli.client?.identify(identifyObj);
 }

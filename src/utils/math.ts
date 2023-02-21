@@ -76,3 +76,25 @@ export function isNumericWithinRange(
     return true;
   }
 }
+
+/**
+ * Create a function that converts a number into a range.
+ * The input number is compared against the input range of increasing boundry numbers. It is assumed that each increasing number is inclusive of the left and exclusive of the right.
+ * @param value The value to categorize in the range
+ * @param boundry The boundry numbers to categorize the value in the range. These values must be in increasing order and must not contain duplicates.
+ * @returns A string representation of the range that the value falls in. If the value is less than the first boundry, it is in the range of `< boundry[0]`. If the value is greater than the last boundry, it is in the range of `> boundry[-1]`. If the value is between two boundries, it is in the range of `[boundry[i] - boundry[i+1])`.
+ */
+export function categorizeNumberInRange(
+  value: number,
+  boundry: number[]
+): string {
+  if (value < boundry[0]) {
+    return `<${boundry[0]}`;
+  }
+  for (let i = 0; i < boundry.length - 1; i++) {
+    if (value >= boundry[i] && value < boundry[i + 1]) {
+      return `[${boundry[i]}-${boundry[i + 1]}]`;
+    }
+  }
+  return `>${boundry[boundry.length - 1]}`;
+}
