@@ -128,6 +128,7 @@ const handler = async (
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
+      computedOriginChainId,
       Number(destinationChainId),
       tokenPrice
     );

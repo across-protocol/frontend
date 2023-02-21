@@ -420,12 +420,19 @@ export const getTokenSymbol = (tokenAddress: string): string => {
 export const getRelayerFeeDetails = (
   l1Token: string,
   amount: sdk.utils.BigNumberish,
+  originChainId: number,
   destinationChainId: number,
   tokenPrice?: number
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
-  return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
+  return relayFeeCalculator.relayerFeeDetails(
+    amount,
+    tokenSymbol,
+    tokenPrice,
+    originChainId?.toString(),
+    destinationChainId.toString()
+  );
 };
 
 /**
