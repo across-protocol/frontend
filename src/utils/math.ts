@@ -21,10 +21,7 @@ export function receiveAmount(
   deductionsSansRelayerGas: BigNumber;
   receivable: BigNumber;
 } {
-  const deductions = fees.relayerFee.total
-    .add(fees.lpFee.total)
-    .add(fees.relayerGasFee.total);
-
+  const deductions = fees.relayerFee.total.add(fees.lpFee.total);
   return {
     receivable: max(amount.sub(deductions), 0),
     deductions,
