@@ -30,6 +30,7 @@ if (amplitudeAPIKey) {
   });
   ampli.load({
     client: { instance },
+    environment: isProductionBuild ? "production" : "development",
   });
 }
 // Record an event when the application is loaded
