@@ -28,7 +28,7 @@ export function receiveAmount(
   return {
     receivable: max(amount.sub(deductions), 0),
     deductions,
-    deductionsSansRelayerGas: deductions.sub(fees.relayerGasFee.total),
+    deductionsSansRelayerGas: deductions.sub(fees.relayerGasFee.total.mul(2)),
   };
 }
 
