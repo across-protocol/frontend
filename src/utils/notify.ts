@@ -1,6 +1,11 @@
 import { API as NotifyAPI } from "bnc-notify";
 import { ContractTransaction } from "ethers";
-import { hubPoolChainId, getChainInfo, supportedNotifyChainIds } from "utils";
+import {
+  hubPoolChainId,
+  getChainInfo,
+  supportedNotifyChainIds,
+  getProvider,
+} from "utils";
 
 export function addEtherscan(transaction: any) {
   return {
@@ -60,7 +65,8 @@ export const waitOnTransaction = async (
     await notificationEmitter(tx.hash, notify, timingBuffer, ignoreErrors);
   } else {
     try {
-      await tx.wait();
+      const provider = getProvider(requiredChainId);
+      await provider.waitForTransaction(tx.hash);
     } catch (e) {
       if (!ignoreErrors) {
         throw e;
