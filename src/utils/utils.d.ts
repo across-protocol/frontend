@@ -3,7 +3,6 @@ export enum ChainId {
   MAINNET = 1,
   OPTIMISM = 10,
   ARBITRUM = 42161,
-  BOBA = 288,
   POLYGON = 137,
   // testnets
   RINKEBY = 4,

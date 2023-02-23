@@ -10,7 +10,6 @@ import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Butto
 import { keyframes } from "@emotion/react";
 import { ReactComponent as EthereumGrayscaleLogo } from "assets/grayscale-logos/eth.svg";
 import { ReactComponent as PolygonGrayscaleLogo } from "assets/grayscale-logos/polygon.svg";
-import { ReactComponent as BobaGrayscaleLogo } from "assets/grayscale-logos/boba.svg";
 import { ReactComponent as ArbitrumGrayscaleLogo } from "assets/grayscale-logos/arbitrum.svg";
 import { ReactComponent as OptimismGrayscaleLogo } from "assets/grayscale-logos/optimism.svg";
 
@@ -49,7 +48,6 @@ const DepositConfirmation = ({
   } = {
     [ChainId.ARBITRUM]: <ArbitrumGrayscaleLogo />,
     [ChainId.POLYGON]: <PolygonGrayscaleLogo />,
-    [ChainId.BOBA]: <BobaGrayscaleLogo />,
     [ChainId.OPTIMISM]: <OptimismGrayscaleLogo />,
     [ChainId.MAINNET]: <EthereumGrayscaleLogo />,
     [ChainId.ARBITRUM_RINKEBY]: <EthereumGrayscaleLogo />,

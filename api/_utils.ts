@@ -208,13 +208,6 @@ export const infuraProvider = (nameOrChainId: providers.Networkish) => {
 };
 
 /**
- * Resolves a fixed Static RPC provider
- * @returns A valid Boba Provider that can be used to query the Boba blockchain
- */
-export const bobaProvider = (): providers.StaticJsonRpcProvider =>
-  new ethers.providers.StaticJsonRpcProvider("https://mainnet.boba.network");
-
-/**
  * Resolves a fixed Static RPC provider if an override url has been specified.
  * @returns A provider or undefined if an override was not specified.
  */
@@ -304,7 +297,6 @@ export const providerForChain: {
   1: infuraProvider(1),
   10: infuraProvider(10),
   137: infuraProvider(137),
-  288: bobaProvider(),
   42161: infuraProvider(42161),
 };
 export const queries: Record<number, () => QueryBase> = {
@@ -340,17 +332,6 @@ export const queries: Record<number, () => QueryBase> = {
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(137)
-    ),
-  288: () =>
-    new sdk.relayFeeCalculator.BobaQueries(
-      providerForChain[288],
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(288)
     ),
   42161: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
