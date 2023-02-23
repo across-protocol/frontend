@@ -13,6 +13,7 @@ import {
 } from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
 import getApiEndpoint from "utils/serverless-api";
+import Sentry from "utils/sentry";
 
 export function useWalletBalanceTrace() {
   const { account, isConnected } = useConnection();
@@ -22,7 +23,10 @@ export function useWalletBalanceTrace() {
         .then((balance) => {
           reportTotalWalletUsdBalance(balance);
         })
-        .catch((e) => console.error("Failed to fetch balances:", e));
+        .catch((e) => {
+          console.error("Failed to fetch balances:", e);
+          Sentry.captureException(e);
+        });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account]);
@@ -49,19 +53,16 @@ const availableSymbols = [
 ];
 
 const calculateUsdBalances = async (account: string) => {
-  const usdPrices: Record<string, BigNumber> = await availableSymbols.reduce(
-    async (acc, symbol) => {
-      try {
-        const { price } = await getApiEndpoint().coingecko(
-          getToken(symbol).mainnetAddress!,
-          "usd"
-        );
-        return Promise.resolve({ ...(await acc), [symbol]: price });
-      } catch (e) {
-        return Promise.resolve(await acc);
-      }
+  const coingeckoPrices = await Promise.all(
+    availableSymbols.map((symbol) =>
+      getApiEndpoint().coingecko(getToken(symbol).mainnetAddress!, "usd")
+    )
+  );
+  const usdPrices: Record<string, BigNumber> = coingeckoPrices.reduce(
+    (acc, { price }, i) => {
+      return { ...acc, [availableSymbols[i]]: price };
     },
-    Promise.resolve({})
+    {}
   );
 
   const balances = (
