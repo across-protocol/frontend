@@ -12,7 +12,6 @@ import {
 } from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
 import getApiEndpoint from "utils/serverless-api";
-import Sentry from "utils/sentry";
 import { useQuery } from "react-query";
 
 export function useWalletBalanceTrace() {
@@ -22,15 +21,9 @@ export function useWalletBalanceTrace() {
     ["wallet-balance", account ?? "loading"],
     async () => {
       if (!account) return;
-      try {
-        const balance = await calculateUsdBalances(account);
-        reportTotalWalletUsdBalance(balance);
-        return balance;
-      } catch (e) {
-        console.error("Failed to fetch balances:", e);
-        Sentry.captureException(e);
-        throw e; // Throw the error so that react-query can retry
-      }
+      const balance = await calculateUsdBalances(account);
+      reportTotalWalletUsdBalance(balance);
+      return balance;
     },
     {
       refetchOnWindowFocus: false,
