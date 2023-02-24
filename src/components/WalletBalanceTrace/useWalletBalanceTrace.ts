@@ -1,6 +1,5 @@
 import { BigNumber, utils } from "ethers";
 import { useConnection } from "hooks";
-import { useEffect, useState } from "react";
 import {
   ChainId,
   fixedPointAdjustment,
@@ -14,35 +13,33 @@ import {
 import { ConvertDecimals } from "utils/convertdecimals";
 import getApiEndpoint from "utils/serverless-api";
 import Sentry from "utils/sentry";
+import { useQuery } from "react-query";
 
 export function useWalletBalanceTrace() {
-  const { account, isConnected } = useConnection();
-  const [recordingSuccessful, setRecordingSuccessful] = useState(false);
+  const { account } = useConnection();
 
-  // While setRecordingSuccessful is false, attempt to record the wallet balance every 30 seconds
-  useEffect(() => {
-    const interval =
-      account && isConnected && !recordingSuccessful
-        ? setInterval(() => {
-            calculateUsdBalances(account)
-              .then((balance) => {
-                reportTotalWalletUsdBalance(balance);
-                setRecordingSuccessful(true);
-              })
-              .catch((e) => {
-                console.error("Failed to fetch balances:", e);
-                Sentry.captureException(e);
-              });
-          }, 30000)
-        : undefined;
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, recordingSuccessful]);
-
-  // Reset the recordingSuccessful state whenever the account changes
-  useEffect(() => {
-    setRecordingSuccessful(false);
-  }, [account]);
+  useQuery(
+    ["wallet-balance", account ?? "loading"],
+    async () => {
+      if (!account) return;
+      try {
+        const balance = await calculateUsdBalances(account);
+        reportTotalWalletUsdBalance(balance);
+        return balance;
+      } catch (e) {
+        console.error("Failed to fetch balances:", e);
+        Sentry.captureException(e);
+        throw e; // Throw the error so that react-query can retry
+      }
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      refetchInterval: false,
+      retry: 5,
+      retryDelay: 3000,
+    }
+  );
 
   type TokenSymbolAddressType = {
     fromTokenSymbol: string;
