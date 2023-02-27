@@ -679,3 +679,24 @@ export function boolStr() {
     return value === "true" || value === "false";
   });
 }
+
+export function convertDecimalToNumericString(
+  value: string | number,
+  decimals: number
+): BigNumber {
+  // Convert the value to a string.
+  const stringValue = value.toString();
+  // Truncate the value to the number of decimals without converting to a number.
+  // Value does not necessarily have to be contain a decimal and can appear in
+  // any location in the string.
+  const truncatedValue = stringValue.split(".")[0];
+  // Convert the value to a big number.
+  const asBigNumber = BigNumber.from(truncatedValue);
+  // If the value is greater than 0, then we can just return it.
+  if (asBigNumber.gt(0)) {
+    return ethers.BigNumber.from(stringValue);
+  } else {
+    // Otherwise, value is a decimal and we need to convert it to a numeric string.
+    return ethers.utils.parseUnits(stringValue, decimals);
+  }
+}

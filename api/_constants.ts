@@ -1,3 +1,4 @@
+import { convertDecimalToNumericString } from "./_utils";
 import { ethers } from "ethers";
 import { constants, relayFeeCalculator } from "@across-protocol/sdk-v2";
 
@@ -64,8 +65,14 @@ const relayerFeeCapitalCostOverrides: Record<
   string,
   Record<string, Record<string, relayFeeCalculator.CapitalCostConfig>>
 > = process.env.RELAYER_FEE_CAPITAL_COST_OVERRIDES
-  ? JSON.parse(process.env.RELAYER_FEE_CAPITAL_COST_OVERRIDES)
+  ? JSON.parse(process.env.RELAYER_FEE_CAPITAL_COST_OVERRIDES, (_, value) =>
+      typeof value === "number"
+        ? convertDecimalToNumericString(value, 18)
+        : value
+    )
   : {};
+
+console.log(relayerFeeCapitalCostOverrides);
 
 export const relayerFeeCapitalCostConfig: {
   [token: string]: relayFeeCalculator.RelayCapitalCostConfig;
