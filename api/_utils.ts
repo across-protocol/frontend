@@ -636,14 +636,23 @@ export function handleErrorCondition(
   error: unknown
 ): VercelResponse {
   if (!(error instanceof Error)) {
+    console.error("Error could not be defined.", error);
     return response.status(500).send("Error could not be defined.");
   }
   let status: number;
   if (error instanceof InputError || error instanceof StructError) {
-    logger.warn({ at: endpoint, message: "400 input error", error });
+    logger.warn({
+      at: endpoint,
+      message: "400 input error",
+      error: error.message,
+    });
     status = 400;
   } else {
-    logger.error({ at: endpoint, message: "500 server error", error });
+    logger.error({
+      at: endpoint,
+      message: "500 server error",
+      error: error.message,
+    });
     status = 500;
   }
   return response.status(status).send(error.message);
