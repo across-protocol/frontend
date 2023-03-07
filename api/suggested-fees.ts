@@ -33,6 +33,11 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  logger.debug({
+    at: "SuggestedFees",
+    message: "Query data",
+    query,
+  });
   try {
     const provider = infuraProvider("mainnet");
 
@@ -131,6 +136,12 @@ const handler = async (
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
     };
+
+    logger.debug({
+      at: "SuggestedFees",
+      message: "Response data",
+      responseJson,
+    });
 
     response.status(200).json(responseJson);
   } catch (error) {
