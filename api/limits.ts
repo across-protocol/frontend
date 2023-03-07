@@ -70,10 +70,8 @@ const handler = async (
             return ethers.utils.getAddress(relayer);
           }
         );
-    if (!isString(token) || !isString(destinationChainId))
-      throw new InputError(
-        "Must provide token and destinationChainId as query params"
-      );
+    assert(query, LimitsQueryParamsSchema);
+    let { token, destinationChainId, originChainId } = query;
 
     if (originChainId === destinationChainId) {
       throw new InputError("Origin and destination chains cannot be the same");
@@ -132,7 +130,15 @@ const handler = async (
       hubPool.interface.encodeFunctionData("pooledTokens", [l1Token]),
     ];
 
-    let tokenPrice = await getCachedTokenPrice(l1Token);
+    // @todo: Generalise the resolution of chainId => gasToken.
+    const [tokenPriceNative, _tokenPriceUsd] = await Promise.all([
+      getCachedTokenPrice(
+        l1Token,
+        destinationChainId === "137" ? "matic" : "eth"
+      ),
+      getCachedTokenPrice(l1Token, "usd"),
+    ]);
+    const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
     const [
       relayerFeeDetails,
@@ -183,45 +189,25 @@ const handler = async (
       multicallOutput[1]
     );
 
-    if (
-      ethers.utils.getAddress(l1Token) ===
-      ethers.utils.getAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
-    ) {
-      // Add WETH cushion to LP liquidity.
-      liquidReserves = liquidReserves.sub(
-        ethers.utils.parseEther(REACT_APP_WETH_LP_CUSHION || "0")
-      );
-    } else if (
-      ethers.utils.getAddress(l1Token) ===
-      ethers.utils.getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
-    ) {
-      // Add USDC cushion to LP liquidity.
-      liquidReserves = liquidReserves.sub(
-        ethers.utils.parseUnits(REACT_APP_USDC_LP_CUSHION || "0", 6)
-      );
-    } else if (
-      ethers.utils.getAddress(l1Token) ===
-      ethers.utils.getAddress("0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599")
-    ) {
-      // Add WBTC cushion to LP liquidity.
-      liquidReserves = liquidReserves.sub(
-        ethers.utils.parseUnits(REACT_APP_WBTC_LP_CUSHION || "0", 8)
-      );
-    } else if (
-      ethers.utils.getAddress(l1Token) ===
-      ethers.utils.getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F")
-    ) {
-      // Add DAI cushion to LP liquidity.
-      liquidReserves = liquidReserves.sub(
-        ethers.utils.parseUnits(REACT_APP_DAI_LP_CUSHION || "0", 18)
-      );
-    }
-
+    const lpCushion = ethers.utils.parseUnits(
+      process.env[`REACT_APP_${symbol}_LP_CUSHION`] ?? "0",
+      tokenDetails.decimals
+    );
+    liquidReserves = liquidReserves.sub(lpCushion);
     if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
 
-    const maxGasFee = ethers.utils
-      .parseEther(maxRelayFeePct.toString())
-      .sub(relayerFeeDetails.capitalFeePercent);
+    const minDeposit = ethers.BigNumber.from(relayerFeeDetails.minDeposit);
+
+    // Normalise the environment-set USD minimum to units of the token being bridged.
+    const minDepositFloor = tokenPriceUsd.lte(0)
+      ? ethers.BigNumber.from(0)
+      : ethers.utils
+          .parseUnits(
+            (minDeposits[destinationChainId] ?? 0).toString(),
+            tokenDetails.decimals
+          )
+          .mul(ethers.utils.parseUnits("1"))
+          .div(tokenPriceUsd);
 
     const transferBalances = fullRelayerBalances.map((balance, i) =>
       balance.add(fullRelayerMainnetBalances[i])

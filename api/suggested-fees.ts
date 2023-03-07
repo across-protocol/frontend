@@ -96,12 +96,6 @@ const handler = async (
       isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
     ]);
 
-    // If the query was supplied a timestamp, lets use the most
-    // recent block before the timestamp. If the timestamp is
-    // not specified, we can use the default variant of blockTag
-    // to be "latest"
-    const blockTag = isString(timestamp) ? latestBlock : BLOCK_TAG_LAG;
-
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
       throw new InputError(
         `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled.`
