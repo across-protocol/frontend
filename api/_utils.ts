@@ -645,14 +645,14 @@ export function handleErrorCondition(
     logger.warn({
       at: endpoint,
       message: "400 input error",
-      error: error.message,
+      reason: error.message || error.stack || error.toString(),
     });
     status = 400;
   } else {
     logger.error({
       at: endpoint,
       message: "500 server error",
-      error: error.message,
+      reason: error.message || error.stack || error.toString(),
     });
     status = 500;
   }
