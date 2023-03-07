@@ -635,7 +635,6 @@ export function handleErrorCondition(
   logger: LoggingUtility,
   error: unknown
 ): VercelResponse {
-  console.log(error);
   if (!(error instanceof Error)) {
     console.error("Error could not be defined.", error);
     return response.status(500).send("Error could not be defined.");
@@ -645,17 +644,16 @@ export function handleErrorCondition(
     logger.warn({
       at: endpoint,
       message: "400 input error",
-      reason: error.message || error.stack || error.toString(),
     });
     status = 400;
   } else {
     logger.error({
       at: endpoint,
       message: "500 server error",
-      reason: error.message || error.stack || error.toString(),
     });
     status = 500;
   }
+  console.error(error);
   return response.status(status).send(error.message);
 }
 
