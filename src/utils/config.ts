@@ -1,14 +1,23 @@
 import assert from "assert";
 import { Signer } from "./ethers";
 import * as constants from "./constants";
+import * as providerUtils from "./providers";
 import {
   HubPool,
   HubPool__factory,
   SpokePool,
   SpokePool__factory,
+  AcrossMerkleDistributor,
+  AcrossMerkleDistributor__factory,
 } from "@across-protocol/contracts-v2";
 import filter from "lodash/filter";
 import sortBy from "lodash/sortBy";
+import {
+  AcceleratingDistributor,
+  AcceleratingDistributor__factory,
+  ClaimAndStake,
+  ClaimAndStake__factory,
+} from "@across-protocol/across-token";
 
 export type Token = constants.TokenInfo & {
   l1TokenAddress: string;
@@ -16,6 +25,10 @@ export type Token = constants.TokenInfo & {
   isNative: boolean;
 };
 export type TokenList = Token[];
+
+export interface DepositDelays {
+  [chainId: string]: number;
+}
 
 export class ConfigClient {
   public readonly spokeAddresses: Record<number, string> = {};
@@ -69,7 +82,7 @@ export class ConfigClient {
   }
   getSpokePool(chainId: constants.ChainId, signer?: Signer): SpokePool {
     const address = this.getSpokePoolAddress(chainId);
-    const provider = signer ?? constants.getProvider(chainId);
+    const provider = signer ?? providerUtils.getProvider(chainId);
     return SpokePool__factory.connect(address, provider);
   }
   getHubPoolChainId(): constants.ChainId {
@@ -77,6 +90,34 @@ export class ConfigClient {
   }
   getHubPoolAddress(): string {
     return this.config.hubPoolAddress;
+  }
+  getAcceleratingDistributorAddress(): string {
+    return (
+      process.env.REACT_APP_ACCELERATING_DISTRIBUTOR_ADDRESS ||
+      this.config.acceleratingDistributorAddress ||
+      "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48"
+    );
+  }
+  getMerkleDistributorAddress(): string {
+    return (
+      process.env.REACT_APP_MERKLE_DISTRIBUTOR_ADDRESS ||
+      this.config.merkleDistributorAddress ||
+      "0xE50b2cEAC4f60E840Ae513924033E753e2366487"
+    );
+  }
+  getAcrossTokenAddress(): string {
+    return (
+      process.env.REACT_APP_ACROSS_TOKEN_ADDRESS ||
+      this.config.acrossTokenAddress ||
+      "0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F"
+    );
+  }
+  getClaimAndStakeAddress(): string {
+    return (
+      process.env.REACT_APP_CLAIM_AND_STAKE_ADDRESS ||
+      this.config.claimAndStakeAddress ||
+      "0x985e8A89Dd6Af8896Ef075c8dd93512433dc5829"
+    );
   }
   getL1TokenAddressBySymbol(symbol: string) {
     // all routes have an l1Token address, so just find the first symbol that matches
@@ -86,8 +127,27 @@ export class ConfigClient {
   }
   getHubPool(signer?: Signer): HubPool {
     const address = this.getHubPoolAddress();
-    const provider = signer ?? constants.getProvider(this.getHubPoolChainId());
+    const provider =
+      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
     return HubPool__factory.connect(address, provider);
+  }
+  getAcceleratingDistributor(signer?: Signer): AcceleratingDistributor {
+    const address = this.getAcceleratingDistributorAddress();
+    const provider =
+      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
+    return AcceleratingDistributor__factory.connect(address, provider);
+  }
+  getMerkleDistributor(signer?: Signer): AcrossMerkleDistributor {
+    const address = this.getMerkleDistributorAddress();
+    const provider =
+      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
+    return AcrossMerkleDistributor__factory.connect(address, provider);
+  }
+  getClaimAndStake(signer?: Signer): ClaimAndStake {
+    const address = this.getClaimAndStakeAddress();
+    const provider =
+      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
+    return ClaimAndStake__factory.connect(address, provider);
   }
   filterRoutes(query: Partial<constants.Route>): constants.Routes {
     const cleanQuery: Partial<constants.Route> = Object.fromEntries(
@@ -135,6 +195,29 @@ export class ConfigClient {
       constants.isSupportedChainId(chainId) && this.spokeChains.has(chainId)
     );
   };
+  getSupportedCanonicalNameAsChainId = (canonicalName?: string) => {
+    // Returns undefined if the canonicalName is not defined
+    if (!canonicalName) return;
+    // Transform the canonical name to match ChainId key
+    const modifiedCanonicalName = canonicalName.toLowerCase();
+    // Attempt to resolve the chainId and return
+    const resolvedChain = constants.CanonicalChainName[modifiedCanonicalName];
+    return resolvedChain && this.isSupportedChainId(resolvedChain)
+      ? resolvedChain
+      : undefined;
+  };
+  /**
+   * This function converts either a chainId or canonical name into a corresponding chainId.
+   * @param chainIdOrCanonical Either a numeric string, an enumerated canonical name, undefined, or an invalid value.
+   * @returns The chain ID in the valid case. NaN in the invalid case.
+   */
+  resolveChainIdFromNumericOrCanonical = (chainIdOrCanonical?: string) => {
+    const asNumeric = Number(chainIdOrCanonical);
+    return Number.isNaN(asNumeric)
+      ? this.getSupportedCanonicalNameAsChainId(chainIdOrCanonical) ??
+          Number(chainIdOrCanonical)
+      : asNumeric;
+  };
   // returns token list in order specified by constants, but adds in token address for the chain specified
   getTokenList(chainId?: number): TokenList {
     const routeTable = Object.fromEntries(
@@ -177,6 +260,33 @@ export class ConfigClient {
       l1TokenAddress: token.l1TokenAddress,
     };
   }
+  getTokenInfoByL1TokenAddress(chainId: number, l1TokenAddress: string): Token {
+    const tokens = this.getTokenList(chainId);
+    const token = tokens.find(
+      (token) => token.l1TokenAddress === l1TokenAddress
+    );
+    assert(
+      token,
+      `Token not found on chain ${chainId} and l1TokenAddress ${l1TokenAddress}`
+    );
+    return token;
+  }
+  getFromToAddressesBySymbol(
+    symbol: string,
+    fromChainId: number,
+    toChainId: number
+  ) {
+    const { l1TokenAddress } = this.getTokenInfoBySymbol(fromChainId, symbol);
+    const fromAddress = this.getTokenInfoByL1TokenAddress(
+      fromChainId,
+      l1TokenAddress
+    ).address;
+    const toAddress = this.getTokenInfoByL1TokenAddress(
+      toChainId,
+      l1TokenAddress
+    ).address;
+    return { fromAddress, toAddress };
+  }
   getNativeTokenInfo(chainId: number): constants.TokenInfo {
     const chainInfo = constants.getChainInfo(chainId);
     return constants.getToken(chainInfo.nativeCurrencySymbol);
@@ -192,6 +302,24 @@ export class ConfigClient {
     );
     // use token sorting when returning reachable tokens
     return sortBy(reachableTokens, (token) => this.tokenOrder[token.symbol]);
+  }
+  getPoolSymbols(): string[] {
+    const tokenList = this.getTokenList(constants.hubPoolChainId);
+    const poolSymbols = tokenList.map((token) => token.symbol.toLowerCase());
+    return poolSymbols;
+  }
+  depositDelays() {
+    try {
+      const dd = process.env.REACT_APP_DEPOSIT_DELAY;
+      if (dd) {
+        return JSON.parse(dd) as DepositDelays;
+      } else {
+        return {};
+      }
+    } catch (err) {
+      console.error(err);
+      return {};
+    }
   }
 }
 

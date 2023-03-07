@@ -26,7 +26,7 @@ export const FillTxInfoModal: React.FC<Props> = ({ isOpen, onClose }) => {
           <Info>
             If you have any concerns, feel free to submit a ticket on{" "}
             <Link
-              href="https://discord.gg/across"
+              href="https://discord.across.to"
               target="_blank"
               rel="noreferrer"
             >

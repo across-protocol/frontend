@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useQueryParams } from "./useQueryParams";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 
 export default function useReferrer() {
   const { provider } = useConnection();
@@ -11,11 +11,13 @@ export default function useReferrer() {
   const r = refParam || referrer;
 
   const [address, setAddress] = useState<string>("");
+  const [isResolved, setIsResolved] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   useEffect(() => {
     setError("");
     if (provider && r) {
       if (ethers.utils.isAddress(r)) {
+        setIsResolved(true);
         return setAddress(r);
       }
 
@@ -23,6 +25,7 @@ export default function useReferrer() {
         .resolveName(r)
         .then((ra) => {
           setAddress(ra || "");
+          setIsResolved(true);
           if (!ra) {
             setError("Invalid referral ENS name");
           }
@@ -34,12 +37,17 @@ export default function useReferrer() {
           if (!ethers.utils.isAddress(r)) {
             setError("Invalid referral address");
           }
+        })
+        .finally(() => {
+          setIsResolved(true);
         });
+    } else {
+      setIsResolved(true);
     }
     // eslint-disable-next-line
   }, [provider, r]);
   // If ref and referrer params exist, prefer referrer param.
   // Not likely to happen but should have a catch if we get a bad link.
   // TODO? Test which of these is a good value?
-  return { referrer: address, error };
+  return { referrer: address, error, isResolved };
 }

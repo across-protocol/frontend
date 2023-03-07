@@ -1,5 +1,6 @@
-import { ethers } from "ethers";
+import { BigNumber, BigNumberish, ethers } from "ethers";
 import assert from "assert";
+import numeral from "numeral";
 
 export function isValidString(s: string | null | undefined | ""): s is string {
   if (s != null && typeof s === "string" && s !== "") {
@@ -47,41 +48,86 @@ export function shortenString(
   )}`;
 }
 
+/**
+ * Shortens an arbitrary string to a fixed number of characters, mindful of the character length of the delimiter
+ * @param str The string to be potentially shortened
+ * @param delimiter The delimiter
+ * @param maxChars The number of characters to constrain this string
+ * @returns `str` if string is less than maxChars. The first `maxChars` chars if the delimiter is too large. A collapsed version with the delimiter in the middle.
+ */
+export function shortenStringToLength(
+  str: string,
+  delimiter: string,
+  maxChars: number
+) {
+  if (str.length <= maxChars) {
+    return str;
+  } else {
+    const charsNeeded = maxChars - delimiter.length;
+    // Delimiter is out of bounds
+    if (charsNeeded <= 0) {
+      return str.slice(0, maxChars);
+    } else {
+      const charDivision = charsNeeded / 2;
+      const left = str.slice(0, Math.ceil(charDivision));
+      const right =
+        charDivision < 1 ? "" : str.slice(-Math.floor(charDivision));
+      return `${left}${delimiter}${right}`;
+    }
+  }
+}
+
 export function shortenTransactionHash(hash: string): string {
   return `${hash.substring(0, 5)}...`;
 }
 
 // for number less than 1, this will ensure at least 1 digit is shown ( not rounded to 0)
-export const smallNumberFormatter = (num: number) =>
+export const smallNumberFormatter = (num: number, precision?: number) =>
   new Intl.NumberFormat("en-US", {
     minimumSignificantDigits: 1,
-    maximumSignificantDigits: 3,
+    maximumSignificantDigits: precision || 3,
   }).format(num);
 
 // for numbers 1 or greater, this will ensure we never round down and lose values > 1, while minimizing decimals to max of 3
-export const largeNumberFormatter = (num: number) =>
+export const largeNumberFormatter = (num: number, precision?: number) =>
   new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 3,
+    maximumFractionDigits: precision || 3,
   }).format(num);
 
 // for numbers 1000 or greater, this will remove any fractional component to make it a bit cleaner
-export const veryLargeNumberFormatter = (num: number) =>
+export const veryLargeNumberFormatter = (num: number, precision?: number) =>
   new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 0,
+    maximumFractionDigits: precision || 0,
   }).format(num);
 
 export function formatUnits(
   wei: ethers.BigNumberish,
-  decimals: number
+  decimals: number,
+  maxFractions?: Partial<{
+    xl: number;
+    l: number;
+    s: number;
+  }>
 ): string {
   const value = Number(ethers.utils.formatUnits(wei, decimals));
   if (value >= 1000) {
-    return veryLargeNumberFormatter(value);
+    return veryLargeNumberFormatter(value, maxFractions?.xl);
   }
   if (value >= 1) {
-    return largeNumberFormatter(value);
+    return largeNumberFormatter(value, maxFractions?.l);
   }
-  return smallNumberFormatter(value);
+  return smallNumberFormatter(value, maxFractions?.s);
+}
+
+export function formatUnitsFnBuilder(decimals: number) {
+  function closure(wei: ethers.BigNumberish) {
+    return formatUnits(wei, decimals);
+  }
+  return closure;
+}
+
+export function makeFormatUnits(decimals: number) {
+  return (wei: ethers.BigNumberish) => formatUnits(wei, decimals);
 }
 
 export function formatEther(wei: ethers.BigNumberish): string {
@@ -96,8 +142,46 @@ export function parseUnits(value: string, decimals: number): ethers.BigNumber {
   return ethers.utils.parseUnits(value, decimals);
 }
 
-export function parseEther(value: string): ethers.BigNumber {
+export function parseUnitsFnBuilder(decimals: number) {
+  function closure(value: string) {
+    return parseUnits(value, decimals);
+  }
+  return closure;
+}
+
+export function parseEtherLike(value: string): ethers.BigNumber {
   return parseUnits(value, 18);
+}
+
+/**
+ * Checks if a given input is parseable
+ * @param amount A bignumberish value that will be attempted to be parsed
+ * @returns A boolean if this value can be parsed
+ */
+export function isNumberEthersParseable(amount: BigNumberish): boolean {
+  try {
+    parseEtherLike(amount.toString());
+    return true;
+  } catch (_e) {
+    return false;
+  }
+}
+
+/**
+ * Returns the formatted number version of a BigNumber value
+ * @param value A bignumber to be converted via `formatEther` and returned
+ * @param decimals The number of units to format `value` with. Default: 18
+ * @returns `formatEther(value)` as a Number, or NaN if impossible
+ */
+export function formattedBigNumberToNumber(
+  value: BigNumber,
+  decimals: number = 18
+): number {
+  try {
+    return Number(formatUnits(value, decimals));
+  } catch (_e) {
+    return Number.NaN;
+  }
 }
 
 export function stringToHex(value: string) {
@@ -133,6 +217,18 @@ export function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+/**
+ * Converts a string to sentence case delineated by spaces
+ * @param str The string to convert
+ * @returns The string in sentence case
+ */
+export function convertToCapitalCase(str: string) {
+  return str
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
 const twoSigFormatter = new Intl.NumberFormat("en-US", {
   maximumSignificantDigits: 2,
 });
@@ -148,6 +244,13 @@ export const formatNumberMaxFracDigits = threeMaxFracFormatter.format.bind(
   threeMaxFracFormatter
 );
 
+const twoMaxFracFormatter = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 2,
+});
+
+export const formatNumberTwoFracDigits =
+  twoMaxFracFormatter.format.bind(twoMaxFracFormatter);
+
 export function formatPoolAPY(
   wei: ethers.BigNumberish,
   decimals: number
@@ -155,4 +258,25 @@ export function formatPoolAPY(
   return formatNumberMaxFracDigits(
     Number(ethers.utils.formatUnits(wei, decimals))
   );
+}
+
+export function formatWeiPct(wei?: ethers.BigNumberish, precision: number = 3) {
+  if (wei === undefined) {
+    return undefined;
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: precision,
+  }).format(Number(ethers.utils.formatEther(wei)) * 100);
+}
+
+/**
+ * Formats a number into a human readable format
+ * @param num The number to format
+ * @returns A human readable format. I.e. 1000 -> 1K, 1001 -> 1K+
+ */
+export function humanReadableNumber(num: number): string {
+  num = Math.round(num);
+  if (num <= 0) return "0";
+  return numeral(num).format("0a").toUpperCase() + "+";
 }

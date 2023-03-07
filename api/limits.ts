@@ -4,9 +4,11 @@
 import { HubPool__factory } from "@across-protocol/contracts-v2";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { BLOCK_TAG_LAG, disabledL1Tokens, maxRelayFeePct } from "./_constants";
-import { isPromiseRejectedResult, isString } from "./_typeguards";
-import { LimitsInputRequest } from "./_types";
+import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
+import { isPromiseRejectedResult } from "./_typeguards";
+import { TypedVercelRequest } from "./_types";
+import * as sdk from "@across-protocol/sdk-v2";
+import { object, assert, Infer, optional } from "superstruct";
 
 import {
   getLogger,
@@ -19,10 +21,20 @@ import {
   minBN,
   isRouteEnabled,
   handleErrorCondition,
+  validAddress,
+  positiveIntStr,
 } from "./_utils";
 
+const LimitsQueryParamsSchema = object({
+  token: validAddress(),
+  destinationChainId: positiveIntStr(),
+  originChainId: optional(positiveIntStr()),
+});
+
+type LimitsQueryParams = Infer<typeof LimitsQueryParamsSchema>;
+
 const handler = async (
-  { query: { token, destinationChainId, originChainId } }: LimitsInputRequest,
+  { query }: TypedVercelRequest<LimitsQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -36,14 +48,15 @@ const handler = async (
       REACT_APP_PUBLIC_INFURA_ID,
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
-      REACT_APP_USDC_LP_CUSHION,
-      REACT_APP_WETH_LP_CUSHION,
-      REACT_APP_DAI_LP_CUSHION,
-      REACT_APP_WBTC_LP_CUSHION,
+      REACT_APP_MIN_DEPOSIT_USD,
     } = process.env;
     const providerUrl = `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
     const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl);
     logger.debug({ at: "limits", message: `Using provider at ${providerUrl}` });
+
+    const minDeposits = REACT_APP_MIN_DEPOSIT_USD
+      ? JSON.parse(REACT_APP_MIN_DEPOSIT_USD)
+      : {};
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
       ? []
@@ -74,6 +87,14 @@ const handler = async (
       token,
       originChainId
     );
+
+    const tokenDetails = Object.values(sdk.constants.TOKEN_SYMBOLS_MAP).find(
+      (details) =>
+        details.addresses[sdk.constants.CHAIN_IDs.MAINNET] === l1Token
+    );
+    if (tokenDetails === undefined)
+      throw new InputError(`Unsupported token address: ${token}`);
+    const symbol = tokenDetails.symbol;
 
     const [tokenDetailsResult, routeEnabledResult] = await Promise.allSettled([
       getTokenDetails(provider, l1Token, undefined, destinationChainId),
@@ -124,7 +145,8 @@ const handler = async (
         l1Token,
         ethers.BigNumber.from("10").pow(18),
         Number(destinationChainId),
-        tokenPrice
+        computedOriginChainId,
+        tokenPriceNative
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
@@ -206,10 +228,8 @@ const handler = async (
     );
 
     const responseJson = {
-      minDeposit: ethers.BigNumber.from(relayerFeeDetails.gasFeeTotal)
-        .mul(ethers.utils.parseEther("1"))
-        .div(maxGasFee)
-        .toString(),
+      // Absolute minimum may be overridden by the environment.
+      minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
       maxDeposit: liquidReserves.toString(),
       // Note: max is used here rather than sum because relayers currently do not partial fill.
       maxDepositInstant: minBN(

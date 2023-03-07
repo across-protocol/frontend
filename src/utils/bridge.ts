@@ -1,33 +1,29 @@
 import assert from "assert";
 import { clients, utils, BlockFinder } from "@uma/sdk";
-import {
-  relayFeeCalculator,
-  lpFeeCalculator,
-  contracts,
-} from "@across-protocol/sdk-v2";
+import { lpFeeCalculator, contracts, constants } from "@across-protocol/sdk-v2";
 import { Provider, Block } from "@ethersproject/providers";
 import { ethers, BigNumber } from "ethers";
-import { BridgeLimits } from "hooks";
 
 import {
-  MAX_RELAY_FEE_PERCENT,
   ChainId,
   hubPoolChainId,
   hubPoolAddress,
-  getProvider,
   getConfigStoreAddress,
-  queriesTable,
-  FLAT_RELAY_CAPITAL_FEE,
-  relayerFeeCapitalCostConfig,
   referrerDelimiterHex,
   usdcLpCushion,
   wethLpCushion,
   wbtcLpCushion,
   daiLpCushion,
+  balLpCushion,
+  umaLpCushion,
+  bobaLpCushion,
 } from "./constants";
 
-import { parseEther, tagAddress } from "./format";
+import { parseEtherLike, tagAddress } from "./format";
+import { getProvider } from "./providers";
 import { getConfig } from "utils";
+import getApiEndpoint from "./serverless-api";
+import { BridgeLimitInterface } from "./serverless-api/types";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -40,46 +36,44 @@ export type BridgeFees = {
   // Note: relayerGasFee and relayerCapitalFee are components of relayerFee.
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
+  quoteTimestamp: ethers.BigNumber;
+  quoteTimestampInMs: ethers.BigNumber;
+  quoteLatency: ethers.BigNumber;
+  quoteBlock: ethers.BigNumber;
 };
 
 export async function getRelayerFee(
   tokenSymbol: string,
   amount: ethers.BigNumber,
+  fromChainId: ChainId,
   toChainId: ChainId
 ): Promise<{
   relayerFee: Fee;
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
   isAmountTooLow: boolean;
+  quoteTimestamp: ethers.BigNumber;
+  quoteBlock: ethers.BigNumber;
 }> {
-  const config = relayFeeCalculatorConfig(toChainId);
+  const address = getConfig().getTokenInfoBySymbol(
+    fromChainId,
+    tokenSymbol
+  ).address;
 
-  // Construction of a new RelayFeeCalculator will throw if any props in the config are incorrectly set. For example,
-  // if the capital cost config is incorrectly set for a token, construction will throw.
-  const calculator = new relayFeeCalculator.RelayFeeCalculator(config);
-  const result = await calculator.relayerFeeDetails(amount, tokenSymbol);
-
-  return {
-    relayerFee: {
-      pct: ethers.BigNumber.from(result.relayFeePercent),
-      total: ethers.BigNumber.from(result.relayFeeTotal),
-    },
-    relayerGasFee: {
-      pct: ethers.BigNumber.from(result.gasFeePercent),
-      total: ethers.BigNumber.from(result.gasFeeTotal),
-    },
-    relayerCapitalFee: {
-      pct: ethers.BigNumber.from(result.capitalFeePercent),
-      total: ethers.BigNumber.from(result.capitalFeeTotal),
-    },
-    isAmountTooLow: result.isAmountTooLow,
-  };
+  return getApiEndpoint().suggestedFees(
+    amount,
+    address,
+    toChainId,
+    fromChainId
+  );
 }
 
 export async function getLpFee(
   l1TokenAddress: string,
   amount: ethers.BigNumber,
-  blockTime?: number
+  blockTime?: number,
+  originChainId?: number,
+  destinationChainId?: number
 ): Promise<Fee & { isLiquidityInsufficient: boolean }> {
   if (amount.lte(0)) {
     throw new Error(`Amount must be greater than 0.`);
@@ -101,11 +95,13 @@ export async function getLpFee(
   result.pct = await lpFeeCalculator.getLpFeePct(
     l1TokenAddress,
     amount,
-    blockTime
+    blockTime,
+    originChainId,
+    destinationChainId
   );
   result.isLiquidityInsufficient =
     await lpFeeCalculator.isLiquidityInsufficient(l1TokenAddress, amount);
-  result.total = amount.mul(result.pct).div(parseEther("1"));
+  result.total = amount.mul(result.pct).div(parseEtherLike("1"));
   return result;
 }
 
@@ -113,10 +109,11 @@ type GetBridgeFeesArgs = {
   amount: ethers.BigNumber;
   tokenSymbol: string;
   blockTimestamp: number;
+  fromChainId: ChainId;
   toChainId: ChainId;
 };
 
-type GetBridgeFeesResult = BridgeFees & {
+export type GetBridgeFeesResult = BridgeFees & {
   isAmountTooLow: boolean;
   isLiquidityInsufficient: boolean;
 };
@@ -126,27 +123,42 @@ type GetBridgeFeesResult = BridgeFees & {
  * @param amount - amount to bridge
  * @param tokenSymbol - symbol of the token to bridge
  * @param blockTimestamp - timestamp of the block to use for calculating fees on
+ * @param fromChain The origin chain of this bridge action
+ * @param toChain The destination chain of this bridge action
  * @returns Returns the `relayerFee` and `lpFee` fees for bridging the given amount of tokens, along with an `isAmountTooLow` flag indicating whether the amount is too low to bridge and an `isLiquidityInsufficient` flag indicating whether the liquidity is insufficient.
  */
 export async function getBridgeFees({
   amount,
   tokenSymbol,
   blockTimestamp,
+  fromChainId,
   toChainId,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const config = getConfig();
+  const timeBeforeRequests = Date.now();
   const l1TokenAddress = config.getL1TokenAddressBySymbol(tokenSymbol);
-  const { relayerFee, relayerGasFee, relayerCapitalFee, isAmountTooLow } =
-    await getRelayerFee(tokenSymbol, amount, toChainId);
+  const {
+    relayerFee,
+    relayerGasFee,
+    relayerCapitalFee,
+    isAmountTooLow,
+    quoteTimestamp,
+    quoteBlock,
+  } = await getRelayerFee(tokenSymbol, amount, fromChainId, toChainId);
 
   const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
     l1TokenAddress,
     amount,
-    blockTimestamp
+    blockTimestamp,
+    fromChainId,
+    toChainId
   ).catch((err) => {
     console.error("Error getting lp fee", err);
     throw err;
   });
+  const timeAfterRequests = Date.now();
+
+  const quoteLatency = BigNumber.from(timeAfterRequests - timeBeforeRequests);
 
   return {
     relayerFee,
@@ -155,37 +167,66 @@ export async function getBridgeFees({
     lpFee,
     isAmountTooLow,
     isLiquidityInsufficient,
+    quoteTimestamp,
+    quoteTimestampInMs: quoteTimestamp.mul(1000),
+    quoteBlock,
+    quoteLatency,
   };
 }
 
+export type ConfirmationDepositTimeType = {
+  formattedString: string;
+  lowEstimate: number;
+  highEstimate: number;
+};
+
 export const getConfirmationDepositTime = (
   amount: BigNumber,
-  limits: BridgeLimits,
-  toChain: ChainId
-) => {
+  limits: BridgeLimitInterface,
+  toChain: ChainId,
+  fromChain: ChainId
+): ConfirmationDepositTimeType => {
+  const config = getConfig();
+  const depositDelay = config.depositDelays()[fromChain] || 0;
+  const getTimeEstimateString = (
+    lowEstimate: number,
+    highEstimate: number
+  ): {
+    formattedString: string;
+    lowEstimate: number;
+    highEstimate: number;
+  } => {
+    return {
+      formattedString: `~${lowEstimate + depositDelay}-${
+        highEstimate + depositDelay
+      } minutes`,
+      lowEstimate: lowEstimate + depositDelay,
+      highEstimate: highEstimate + depositDelay,
+    };
+  };
+
   if (amount.lte(limits.maxDepositInstant)) {
-    // 1 bot run, assuming it runs every 2 minutes.
-    return "~1-4 minutes";
+    return getTimeEstimateString(1, 5);
   } else if (amount.lte(limits.maxDepositShortDelay)) {
     // This is just a rough estimate of how long 2 bot runs (1-4 minutes allocated for each) + an arbitrum transfer of 3-10 minutes would take.
-    if (toChain === ChainId.ARBITRUM) return "~5-15 minutes";
+    if (toChain === ChainId.ARBITRUM) return getTimeEstimateString(5, 15);
 
     // Optimism transfers take about 10-20 minutes anecdotally. Boba is presumed to be similar.
     if (toChain === ChainId.OPTIMISM || toChain === ChainId.BOBA)
-      return "~12-25 minutes";
+      return getTimeEstimateString(12, 25);
 
     // Polygon transfers take 20-30 minutes anecdotally.
-    if (toChain === ChainId.POLYGON) return "~20-35 minutes";
+    if (toChain === ChainId.POLYGON) return getTimeEstimateString(20, 35);
 
     // Typical numbers for an arbitrary L2.
-    return "~10-30 minutes";
+    return getTimeEstimateString(10, 30);
   }
 
   // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.
-  return "~3-7 hours";
+  return { formattedString: "~3-7 hours", lowEstimate: 180, highEstimate: 420 };
 };
 
-type AcrossDepositArgs = {
+export type AcrossDepositArgs = {
   fromChain: ChainId;
   toChain: ChainId;
   toAddress: string;
@@ -295,7 +336,9 @@ export default class LpFeeCalculator {
 
     if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.WETH.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add WETH cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -303,7 +346,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add USDC cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -311,7 +356,9 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.WBTC.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add WBTC cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
@@ -319,11 +366,43 @@ export default class LpFeeCalculator {
       );
     } else if (
       ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F")
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.DAI.addresses[constants.CHAIN_IDs.MAINNET]
+      )
     ) {
       // Add DAI cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
         ethers.utils.parseUnits(daiLpCushion || "0", 18)
+      );
+    } else if (
+      ethers.utils.getAddress(tokenAddress) ===
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.BAL.addresses[constants.CHAIN_IDs.MAINNET]
+      )
+    ) {
+      // Add BAL cushion to LP liquidity.
+      liquidReserves = pooledTokens.liquidReserves.sub(
+        ethers.utils.parseUnits(balLpCushion || "0", 18)
+      );
+    } else if (
+      ethers.utils.getAddress(tokenAddress) ===
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.UMA.addresses[constants.CHAIN_IDs.MAINNET]
+      )
+    ) {
+      // Add UMA cushion to LP liquidity.
+      liquidReserves = pooledTokens.liquidReserves.sub(
+        ethers.utils.parseUnits(umaLpCushion || "0", 18)
+      );
+    } else if (
+      ethers.utils.getAddress(tokenAddress) ===
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.BOBA.addresses[constants.CHAIN_IDs.MAINNET]
+      )
+    ) {
+      // Add BOBA cushion to LP liquidity.
+      liquidReserves = pooledTokens.liquidReserves.sub(
+        ethers.utils.parseUnits(bobaLpCushion || "0", 18)
       );
     }
 
@@ -332,7 +411,9 @@ export default class LpFeeCalculator {
   async getLpFeePct(
     tokenAddress: string,
     amount: utils.BigNumberish,
-    timestamp?: number
+    timestamp?: number,
+    originChainId?: number,
+    destinationChainId?: number
   ) {
     amount = BigNumber.from(amount);
     assert(amount.gt(0), "Amount must be greater than 0");
@@ -356,30 +437,15 @@ export default class LpFeeCalculator {
         amount,
         { blockTag }
       ),
-      configStoreClient.getRateModel(tokenAddress, {
-        blockTag,
-      }),
+      configStoreClient.getRateModel(
+        tokenAddress,
+        {
+          blockTag,
+        },
+        originChainId,
+        destinationChainId
+      ),
     ]);
     return calculateRealizedLpFeePct(rateModel, currentUt, nextUt);
   }
-}
-
-export function relayFeeCalculatorConfig(
-  chainId: ChainId
-): relayFeeCalculator.RelayFeeCalculatorConfig {
-  const config = getConfig();
-  const provider = getProvider(chainId);
-  const token = config.getNativeTokenInfo(chainId);
-
-  if (!queriesTable[chainId])
-    throw new Error(`No queries in queriesTable for chainId ${chainId}!`);
-
-  const queries = queriesTable[chainId](provider);
-  return {
-    nativeTokenDecimals: token.decimals,
-    feeLimitPercent: MAX_RELAY_FEE_PERCENT,
-    capitalCostsPercent: FLAT_RELAY_CAPITAL_FEE,
-    capitalCostsConfig: relayerFeeCapitalCostConfig,
-    queries,
-  };
 }

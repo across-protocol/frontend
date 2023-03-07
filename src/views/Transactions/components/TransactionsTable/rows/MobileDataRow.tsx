@@ -1,7 +1,9 @@
 import React from "react";
+import { Zap } from "react-feather";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
-import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history";
+import styled from "@emotion/styled";
+import { Deposit } from "hooks/useDeposits";
 
 import {
   FilledPercentageCell,
@@ -22,13 +24,21 @@ import {
   AccordionRow,
   TableLink,
 } from "../TransactionsTable.styles";
+import { SupportedTxTuple } from "../../../types";
 
 type Props = {
-  transfer: Transfer;
+  transfer: Deposit;
   token: Token;
+  enableSpeedUp?: boolean;
+  onClickSpeedUp?: (tuple: SupportedTxTuple) => void;
 };
 
-export function MobileDataRow({ transfer, token }: Props) {
+export function MobileDataRow({
+  transfer,
+  token,
+  enableSpeedUp,
+  onClickSpeedUp,
+}: Props) {
   const [isAccordionOpen, setIsAccordionOpen] = React.useState(false);
 
   const toggleAccordion = React.useCallback(() => {
@@ -39,7 +49,12 @@ export function MobileDataRow({ transfer, token }: Props) {
     <>
       <MobileTableRow onClick={toggleAccordion}>
         <TimestampCell timestamp={transfer.depositTime} />
-        <StatusCell status={transfer.status} />
+        <StatusCell
+          status={transfer.status}
+          currentRelayerFeePct={transfer.depositRelayerFeePct}
+          suggestedRelayerFeePct={transfer.suggestedRelayerFeePct}
+          enableSpeedUp={enableSpeedUp}
+        />
         <FilledPercentageCell
           filled={transfer.filled}
           amount={transfer.amount}
@@ -85,6 +100,18 @@ export function MobileDataRow({ transfer, token }: Props) {
               destinationChainId={transfer.destinationChainId}
             />
           </AccordionRow>
+          {enableSpeedUp && (
+            <AccordionRow>
+              <div>Speed up</div>
+              <MobileSpeedUpCell
+                onClick={() =>
+                  onClickSpeedUp && onClickSpeedUp([token, transfer])
+                }
+              >
+                <Zap />
+              </MobileSpeedUpCell>
+            </AccordionRow>
+          )}
         </AccordionWrapper>
       )}
     </>
@@ -129,3 +156,9 @@ function ToggleAccordionCell(props: { isOpen: boolean }) {
     </MobileCell>
   );
 }
+
+const MobileSpeedUpCell = styled(MobileCell)`
+  svg {
+    padding-left: 8px;
+  }
+`;

@@ -7,7 +7,7 @@
 Web UI for V2 of the Across Protocol.
 
 - App: https://across.to
-- Docs: https://docs.across.to/v2
+- Docs: https://docs.across.to
 - Medium: https://medium.com/across-protocol
 
 ## Development
@@ -43,9 +43,16 @@ yarn build
 yarn test
 ```
 
-### Run integration tests
+### Run e2e tests
 
-We use [cypress](https://docs.cypress.io/guides/overview/why-cypress) for handling integration tests.
+Our e2e tests rely on a local hardhat node that forks mainnet.
+First, set the env var `HARDHAT_INFURA_ID` in your `.env` file and make sure to run such a node before starting the tests:
+
+```bash
+yarn hardhat:node
+```
+
+We use [cypress](https://docs.cypress.io/guides/overview/why-cypress) for handling e2e tests.
 To run the tests locally, first make sure to have a local dev sever running:
 
 ```bash
@@ -77,18 +84,16 @@ CYPRESS_BASE_URL=http://localhost:3333 yarn cypress:run
 
 Navbar - 1000
 Toast - 99999
+Modal - 99998
 
 ## Contributing
 
 Have a look at [CONTRIBUTING](./CONTRIBUTING.md) to get more information on contributions and best practices.
 
-## E2E Testing with Cypress + Hardhat
+## Pull Data from Amplitude
 
-In order to run Cypress e2e tests locally, you must do the following:
+The `src/ampli` directory can be refreshed with new tracking data by running the following steps:
 
-1. Define HARDHAT_INFURA_ID to your desired infura project ID in .env.
-2. Run the following:
-
-```bash
-docker compose -f hardhat-node.yml up
-```
+1. Run `yarn ampli login` to log in to Amplitude
+2. Run `yarn ampli pull web`
+   1. If Amplitude requests to create a new project, let it generate a `ampli.json` file.

@@ -3,7 +3,8 @@ import injectedModule from "@web3-onboard/injected-wallets";
 import walletConnectModule from "@web3-onboard/walletconnect";
 import gnosisModule from "@web3-onboard/gnosis";
 import coinbaseModule from "@web3-onboard/coinbase";
-import { onboardApiKey, ChainId, providerUrlsTable } from "utils";
+import { onboardApiKey, ChainId } from "utils";
+import { providerUrlsTable } from "utils/providers";
 import logo from "assets/across-logo-v2.svg";
 
 const injected = injectedModule();
@@ -22,6 +23,12 @@ export function onboardInit() {
         token: "ETH",
         label: "Ethereum Mainnet",
         rpcUrl: providerUrlsTable[ChainId.MAINNET],
+      },
+      {
+        id: 5,
+        token: "ETH",
+        label: "Goerli Testnet",
+        rpcUrl: providerUrlsTable[ChainId.GOERLI],
       },
       {
         id: 10,
@@ -67,6 +74,9 @@ export function onboardInit() {
       mobile: {
         enabled: false,
       },
+    },
+    notify: {
+      enabled: false,
     },
   });
 }

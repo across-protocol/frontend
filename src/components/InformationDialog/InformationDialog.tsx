@@ -18,7 +18,7 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
           not receive your funds within the estimated amount of time, please
           visit the ‘across-support’ channel within the{" "}
           <Link
-            href="https://discord.gg/across"
+            href="https://discord.across.to"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -51,7 +51,7 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
         <li>
           Click{" "}
           <Link
-            href="https://docs.across.to/v2/how-does-across-work/overview/overview-more-details"
+            href="https://docs.across.to/how-across-works/overview"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -62,7 +62,7 @@ const InformationDialog: React.FC<Props> = ({ isOpen, onClose }) => {
         <li>
           Click{" "}
           <Link
-            href="https://docs.across.to/v2/how-does-across-work/fees"
+            href="https://docs.across.to/how-across-works/fees"
             target="_blank"
             rel="noopener noreferrer"
           >

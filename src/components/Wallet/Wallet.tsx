@@ -1,5 +1,7 @@
 import { FC } from "react";
-import { useConnection } from "state/hooks";
+
+import { useConnection } from "hooks";
+import { shortenAddress, isSupportedChainId, SHOW_ACX_NAV_TOKEN } from "utils";
 
 import {
   ConnectButton,
@@ -10,7 +12,6 @@ import {
   Account,
   Separator,
 } from "./Wallet.styles";
-import { shortenAddress, isSupportedChainId } from "utils";
 
 interface Props {
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -29,7 +30,12 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
 
   if (!isConnected) {
     return (
-      <ConnectButton data-cy="wallet-connect-button" onClick={() => connect()}>
+      <ConnectButton
+        data-cy="wallet-connect-button"
+        onClick={() => {
+          connect({ trackSection: "navbar" });
+        }}
+      >
         Connect
       </ConnectButton>
     );
@@ -37,12 +43,18 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
 
   return (
     <BalanceButton onClick={() => setOpenSidebar(true)} data-cy="acx-balance">
-      <Logo />
-      <BalanceWallet>0 ACX</BalanceWallet>
+      {SHOW_ACX_NAV_TOKEN && (
+        <>
+          <Logo />
+          <BalanceWallet>0 ACX</BalanceWallet>
+        </>
+      )}
       {account && (
         <>
-          <Separator />
-          <Account>{ensName ?? shortenAddress(account, "..", 4)}</Account>
+          {SHOW_ACX_NAV_TOKEN && <Separator />}
+          <Account data-cy="wallet-address">
+            {ensName ?? shortenAddress(account, "..", 4)}
+          </Account>
         </>
       )}
     </BalanceButton>

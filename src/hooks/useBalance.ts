@@ -1,5 +1,5 @@
 import { useQuery, useQueries } from "react-query";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 import { useBlock } from "./useBlock";
 import { usePrevious } from "hooks";
 import {
@@ -227,5 +227,6 @@ export function useBalancesBySymbols({
   const result = useQueries(queries);
   return {
     balances: result.map((result) => result.data),
+    isLoading: result.some((s) => s.isLoading),
   };
 }

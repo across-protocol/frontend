@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { Link } from "react-router-dom";
+import { ChevronDown, ChevronUp } from "react-feather";
 import {
   StyledSidebar,
   StyledHeader,
@@ -12,11 +13,12 @@ import {
   StyledMenuItem,
   ConnectText,
   TopHeaderRow,
+  AccordionContainer,
 } from "./Sidebar.styles";
 import { getChainInfo, isSupportedChainId } from "utils";
 import useSidebar from "./useSidebar";
 import closeIcon from "assets/across-close-button.svg";
-import { useConnection } from "state/hooks";
+import { useConnection } from "hooks";
 
 interface Props {
   openSidebar: boolean;
@@ -24,23 +26,44 @@ interface Props {
 }
 
 const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
-  const { account, ensName, isConnected, chainId, location, className } =
-    useSidebar(openSidebar);
+  const {
+    sidebarNavigationLinks,
+    sidebarAboutLinks,
+    account,
+    ensName,
+    isConnected,
+    chainId,
+    location,
+    className,
+    toggleAboutAccordion,
+    setIsAboutAccordionOpen,
+    isAboutAccordionOpen,
+  } = useSidebar(openSidebar);
   const { connect, disconnect, wallet } = useConnection();
   const addrOrEns = ensName ?? account;
 
   const onClickLink = () => {
     setOpenSidebar(false);
+    setIsAboutAccordionOpen(false);
+  };
+
+  const onClickOverlay = () => {
+    setOpenSidebar(false);
+    setIsAboutAccordionOpen(false);
   };
 
   return (
     <>
-      {openSidebar && <Overlay />}
+      {openSidebar && <Overlay onClick={() => onClickOverlay()} />}
       <StyledSidebar className={className}>
         <StyledHeader>
           <TopHeaderRow>
             {!isConnected && (
-              <ConnectButton onClick={() => connect()}>
+              <ConnectButton
+                onClick={() => {
+                  connect({ trackSection: "mobileNavSidebar" });
+                }}
+              >
                 Connect Wallet
               </ConnectButton>
             )}
@@ -60,112 +83,47 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
             <HeaderText>Unsupported Network</HeaderText>
           ) : null}
           {isConnected && wallet ? (
-            <DisconnectButton onClick={() => disconnect(wallet)}>
+            <DisconnectButton
+              onClick={() =>
+                disconnect(wallet, { trackSection: "mobileNavSidebar" })
+              }
+            >
               Disconnect
             </DisconnectButton>
           ) : null}
         </StyledHeader>
         <StyledMenu>
-          <StyledMenuItem selected={location.pathname === "/"}>
-            <Link
-              onClick={() => onClickLink()}
-              to={{ pathname: "/", search: location.search }}
+          {sidebarNavigationLinks.map((item, idx) => (
+            <StyledMenuItem
+              selected={location.pathname === item.pathName}
+              key={idx}
             >
-              Bridge
-            </Link>
-          </StyledMenuItem>
-          <StyledMenuItem selected={location.pathname === "/pool"}>
-            <Link
-              onClick={() => onClickLink()}
-              to={{ pathname: "/pool", search: location.search }}
-            >
-              Pool
-            </Link>
-          </StyledMenuItem>
-          <StyledMenuItem selected={location.pathname === "/transactions"}>
-            <Link
-              onClick={() => onClickLink()}
-              to={{ pathname: "/transactions", search: location.search }}
-            >
-              Transactions
-            </Link>
-          </StyledMenuItem>
-          <StyledMenuItem selected={location.pathname === "/rewards"}>
-            <Link
-              onClick={() => onClickLink()}
-              to={{ pathname: "/rewards", search: location.search }}
-            >
-              Rewards
-            </Link>
-          </StyledMenuItem>
-          <StyledMenuItem selected={location.pathname === "/about"}>
-            <Link
-              onClick={() => onClickLink()}
-              to={{ pathname: "/about", search: location.search }}
-            >
-              About
-            </Link>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://docs.across.to/bridge/"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Docs
-            </a>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://discord.com/invite/across"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Support (Discord)
-            </a>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://github.com/across-protocol"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Github
-            </a>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://twitter.com/AcrossProtocol/"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Twitter
-            </a>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://medium.com/across-protocol"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Medium
-            </a>
-          </StyledMenuItem>
-          <StyledMenuItem>
-            <a
-              href="https://forum.across.to/"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => onClickLink()}
-            >
-              Discourse
-            </a>
-          </StyledMenuItem>
+              <Link
+                onClick={() => onClickLink()}
+                to={{ pathname: item.pathName, search: location.search }}
+              >
+                {item.title}
+              </Link>
+            </StyledMenuItem>
+          ))}
+          <AccordionContainer isOpen>
+            <StyledMenuItem onClick={toggleAboutAccordion}>
+              About{" "}
+              {isAboutAccordionOpen ? (
+                <ChevronUp stroke="#9daab2" strokeWidth="1" />
+              ) : (
+                <ChevronDown stroke="#9daab2" strokeWidth="1" />
+              )}
+            </StyledMenuItem>
+            {isAboutAccordionOpen &&
+              sidebarAboutLinks.map((item) => (
+                <StyledMenuItem key={item.link}>
+                  <a href={item.link} target="_blank" rel="noreferrer">
+                    {item.title}
+                  </a>
+                </StyledMenuItem>
+              ))}
+          </AccordionContainer>
         </StyledMenu>
       </StyledSidebar>
     </>

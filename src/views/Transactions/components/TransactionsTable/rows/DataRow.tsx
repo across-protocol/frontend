@@ -1,14 +1,6 @@
-import {
-  TableLink,
-  TableRow,
-  TableCell,
-  StyledPlus,
-} from "../TransactionsTable.styles";
-import { Token } from "utils/config";
-import { shortenTransactionHash } from "utils/format";
-import { getChainInfo } from "utils/constants";
-import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history/model";
-import { ChainId } from "utils";
+import { Zap } from "react-feather";
+import { ChainId, Token, shortenTransactionHash, getChainInfo } from "utils";
+import { Deposit } from "hooks/useDeposits";
 
 import {
   ChainCell,
@@ -18,23 +10,39 @@ import {
   SymbolCell,
   AmountCell,
 } from "../cells";
-import { TxLink } from "../../../types";
+import {
+  TableLink,
+  TableRow,
+  TableCell,
+  StyledPlus,
+  SpeedUpCell,
+} from "../TransactionsTable.styles";
+import { SupportedTxTuple, TxLink } from "../../../types";
 
 type Props = {
-  transfer: Transfer;
+  transfer: Deposit;
   token: Token;
   onClickFillTxsCellExpandButton: (fillTxLinks: TxLink[]) => void;
+  enableSpeedUp?: boolean;
+  onClickSpeedUp?: (tuple: SupportedTxTuple) => void;
 };
 
 export function DataRow({
   transfer,
   onClickFillTxsCellExpandButton,
   token,
+  enableSpeedUp,
+  onClickSpeedUp,
 }: Props) {
   return (
     <TableRow>
       <TimestampCell timestamp={transfer.depositTime} />
-      <StatusCell status={transfer.status} />
+      <StatusCell
+        status={transfer.status}
+        currentRelayerFeePct={transfer.depositRelayerFeePct}
+        suggestedRelayerFeePct={transfer.suggestedRelayerFeePct}
+        enableSpeedUp={enableSpeedUp}
+      />
       <FilledPercentageCell filled={transfer.filled} amount={transfer.amount} />
       <ChainCell chainId={transfer.sourceChainId as ChainId} />
       <ChainCell chainId={transfer.destinationChainId as ChainId} />
@@ -56,6 +64,14 @@ export function DataRow({
         destinationChainId={transfer.destinationChainId}
         onClickExpandButton={onClickFillTxsCellExpandButton}
       />
+      {enableSpeedUp && (
+        <SpeedUpCell
+          id="speed-up-cell"
+          onClick={() => onClickSpeedUp && onClickSpeedUp([token, transfer])}
+        >
+          <Zap />
+        </SpeedUpCell>
+      )}
     </TableRow>
   );
 }

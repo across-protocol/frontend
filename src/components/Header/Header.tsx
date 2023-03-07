@@ -16,22 +16,36 @@ import { enableMigration } from "utils";
 import { ReactComponent as Logo } from "assets/across-mobile-logo.svg";
 import useScrollPosition from "hooks/useScrollPosition";
 import { isChildPath } from "./utils";
+import { Text } from "components/Text";
 
 const LINKS = !enableMigration
   ? [
-      { href: "/", name: "Bridge" },
+      { href: "/bridge", name: "Bridge" },
       { href: "/pool", name: "Pool" },
       { href: "/rewards", name: "Rewards" },
       { href: "/transactions", name: "Transactions" },
+      {
+        href: "/airdrop",
+        name: (
+          <Text color="aqua" size="md">
+            Airdrop
+          </Text>
+        ),
+      },
     ]
   : [];
 
 interface Props {
   openSidebar: boolean;
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  transparentHeader?: boolean;
 }
 
-const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
+const Header: React.FC<Props> = ({
+  openSidebar,
+  setOpenSidebar,
+  transparentHeader,
+}) => {
   const location = useLocation();
   const scrollPosition = useScrollPosition();
 
@@ -40,7 +54,11 @@ const Header: React.FC<Props> = ({ openSidebar, setOpenSidebar }) => {
   };
 
   return (
-    <Wrapper scrollPosition={scrollPosition}>
+    <Wrapper
+      transparentHeader={transparentHeader}
+      scrollPosition={scrollPosition}
+      data-cy="primary-header"
+    >
       <UnstyledLink
         to={{ pathname: "/", search: location.search }}
         style={{ display: "flex" }}

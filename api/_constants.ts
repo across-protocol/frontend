@@ -1,21 +1,24 @@
 import { ethers } from "ethers";
+import { constants, relayFeeCalculator } from "@across-protocol/sdk-v2";
 
 export const maxRelayFeePct = 0.25;
 
 export const disabledL1Tokens = [
-  "0x3472A5A71965499acd81997a54BBA8D852C6E53d",
+  constants.TOKEN_SYMBOLS_MAP.BADGER.addresses[constants.CHAIN_IDs.MAINNET],
 ].map((x) => x.toLowerCase());
 
-export const relayerFeeCapitalCostConfig = {
+const defaultRelayerFeeCapitalCostConfig: {
+  [token: string]: relayFeeCalculator.CapitalCostConfig;
+} = {
   ETH: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.0006").toString(),
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("750").toString(),
     decimals: 18,
   },
   WETH: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.0006").toString(),
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("750").toString(),
     decimals: 18,
   },
@@ -26,14 +29,14 @@ export const relayerFeeCapitalCostConfig = {
     decimals: 8,
   },
   DAI: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.002").toString(),
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("250000").toString(),
     decimals: 18,
   },
   USDC: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.00075").toString(),
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("1500000").toString(),
     decimals: 6,
   },
@@ -56,6 +59,32 @@ export const relayerFeeCapitalCostConfig = {
     decimals: 18,
   },
 };
+
+const relayerFeeCapitalCostOverrides: Record<
+  string,
+  Record<string, Record<string, relayFeeCalculator.CapitalCostConfig>>
+> = process.env.RELAYER_FEE_CAPITAL_COST_OVERRIDES
+  ? JSON.parse(process.env.RELAYER_FEE_CAPITAL_COST_OVERRIDES)
+  : {};
+
+export const relayerFeeCapitalCostConfig: {
+  [token: string]: relayFeeCalculator.RelayCapitalCostConfig;
+} = Object.fromEntries(
+  Object.keys(defaultRelayerFeeCapitalCostConfig).map(
+    (token): [string, relayFeeCalculator.CapitalCostConfigOverride] => {
+      return [
+        token,
+        {
+          default: defaultRelayerFeeCapitalCostConfig[token],
+          routeOverrides: relayerFeeCapitalCostOverrides[token] || {},
+        },
+      ];
+    }
+  )
+);
+
+// If `timestamp` is not passed into a suggested-fees query, then return the latest mainnet timestamp minus this buffer.
+export const DEFAULT_QUOTE_TIMESTAMP_BUFFER = 12 * 25; // ~25 blocks on mainnet (12s/block), ~= 5 minutes.
 
 export const BLOCK_TAG_LAG = -1;
 

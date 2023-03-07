@@ -6,9 +6,11 @@ import {
 } from "@across-protocol/contracts-v2";
 import axios from "axios";
 import * as sdk from "@across-protocol/sdk-v2";
-import { BigNumber, ethers, providers } from "ethers";
+import { BigNumber, ethers, providers, utils } from "ethers";
 import { Log, Logging } from "@google-cloud/logging";
-import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
+import { define, StructError } from "superstruct";
+import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
+import enabledGoerliRoutesAsJson from "../src/data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
 
 import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
@@ -18,11 +20,13 @@ import { VercelResponse } from "@vercel/node";
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
 const {
+  REACT_APP_HUBPOOL_CHAINID,
   REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
   REACT_APP_GOOGLE_SERVICE_ACCOUNT,
   VERCEL_ENV,
   GAS_MARKUP,
+  DISABLE_DEBUG_LOGS,
 } = process.env;
 
 const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
@@ -32,6 +36,19 @@ const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
 export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 // Default to no markup.
 export const DEFAULT_GAS_MARKUP = 0;
+
+// Don't permit HUP_POOL_CHAIN_ID=0
+export const HUP_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
+
+// Permit REACT_APP_FLAT_RELAY_CAPITAL_FEE=0
+export const FLAT_RELAY_CAPITAL_FEE = Number(
+  process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE ?? 0.03
+); // 0.03%
+
+export const ENABLED_ROUTES =
+  HUP_POOL_CHAIN_ID === 1
+    ? enabledMainnetRoutesAsJson
+    : enabledGoerliRoutesAsJson;
 
 /**
  * Writes a log using the google cloud logging utility
@@ -44,7 +61,22 @@ export const log = (
   severity: "DEBUG" | "INFO" | "WARN" | "ERROR",
   data: LogType
 ) => {
-  let message = JSON.stringify(data, null, 4);
+  if (DISABLE_DEBUG_LOGS === "true" && severity === "DEBUG") {
+    console.log(data);
+    return;
+  }
+  // JSON.stringify(error) returns "{}", to mitigate we replace the error with
+  // a custom object that contains the error message and stack.
+  const dataWithReplacedError = data.error
+    ? {
+        ...data,
+        error: {
+          message: data.error?.message,
+          stack: data.error?.stack,
+        },
+      }
+    : data;
+  let message = JSON.stringify(dataWithReplacedError, null, 4);
   // Fire and forget. we don't wait for this to finish.
   gcpLogger
     .write(
@@ -124,7 +156,7 @@ export const getTokenDetails = async (
   chainId?: string
 ) => {
   const hubPool = HubPool__factory.connect(
-    "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
+    ENABLED_ROUTES.hubPoolAddress,
     provider
   );
 
@@ -164,7 +196,7 @@ export class InputError extends Error {}
 
 /**
  * Resolves an Infura provider given the name of the ETH network
- * @param name The name of an ethereum network
+ * @param nameOrChainId The name of an ethereum network
  * @returns A valid Ethers RPC provider
  */
 export const infuraProvider = (name: string) => {
@@ -180,15 +212,57 @@ export const bobaProvider = (): providers.StaticJsonRpcProvider =>
   new ethers.providers.StaticJsonRpcProvider("https://mainnet.boba.network");
 
 /**
+ * Resolves a fixed Static RPC provider if an override url has been specified.
+ * @returns A provider or undefined if an override was not specified.
+ */
+export const overrideProvider = (
+  chainId: string
+): providers.StaticJsonRpcProvider | undefined => {
+  const url = process.env[`OVERRIDE_PROVIDER_${chainId}`];
+  if (url) {
+    return new ethers.providers.StaticJsonRpcProvider(url);
+  } else {
+    return undefined;
+  }
+};
+
+/**
  * Generates a fixed HubPoolClientConfig object
  * @returns A fixed constant
  */
-export const makeHubPoolClientConfig = () => {
+export const makeHubPoolClientConfig = (chainId = 1) => {
   return {
-    chainId: 1,
-    hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
-    wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
+    1: {
+      chainId: 1,
+      hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
+      wethAddress:
+        sdk.constants.TOKEN_SYMBOLS_MAP.WETH.addresses[
+          sdk.constants.CHAIN_IDs.MAINNET
+        ],
+      configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
+      acceleratingDistributorAddress:
+        "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
+      merkleDistributorAddress: "0xE50b2cEAC4f60E840Ae513924033E753e2366487",
+    },
+    5: {
+      chainId: 5,
+      hubPoolAddress: "0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d",
+      wethAddress:
+        sdk.constants.TOKEN_SYMBOLS_MAP.WETH.addresses[
+          sdk.constants.CHAIN_IDs.GOERLI
+        ],
+      configStoreAddress: "0x3215e3C91f87081757d0c41EF0CB77738123Be83",
+      acceleratingDistributorAddress:
+        "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC",
+      merkleDistributorAddress: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
+    },
+  }[chainId] as {
+    chainId: number;
+    hubPoolAddress: string;
+    wethAddress: string;
+    configStoreAddress: string;
+    acceleratingDistributorAddress: string;
+    merkleDistributorAddress: string;
   };
 };
 
@@ -197,11 +271,11 @@ export const makeHubPoolClientConfig = () => {
  * @returns A HubPool client that can query the blockchain
  */
 export const getHubPoolClient = () => {
-  const hubPoolConfig = makeHubPoolClientConfig();
+  const hubPoolConfig = makeHubPoolClientConfig(HUP_POOL_CHAIN_ID);
   return new sdk.pool.Client(
     hubPoolConfig,
     {
-      provider: infuraProvider("mainnet"),
+      provider: infuraProvider(HUP_POOL_CHAIN_ID),
     },
     (_, __) => {} // Dummy function that does nothing and is needed to construct this client.
   );
@@ -221,10 +295,19 @@ export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
+export const providerForChain: {
+  [chainId: number]: ethers.providers.StaticJsonRpcProvider;
+} = {
+  1: infuraProvider(1),
+  10: infuraProvider(10),
+  137: infuraProvider(137),
+  288: bobaProvider(),
+  42161: infuraProvider(42161),
+};
 export const queries: Record<number, () => QueryBase> = {
   1: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      infuraProvider("mainnet"),
+      providerForChain[1],
       undefined,
       undefined,
       undefined,
@@ -235,7 +318,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   10: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
-      infuraProvider("optimism-mainnet"),
+      providerForChain[10],
       undefined,
       undefined,
       undefined,
@@ -246,7 +329,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   137: () =>
     new sdk.relayFeeCalculator.PolygonQueries(
-      infuraProvider("polygon-mainnet"),
+      providerForChain[137],
       undefined,
       undefined,
       undefined,
@@ -257,7 +340,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   288: () =>
     new sdk.relayFeeCalculator.BobaQueries(
-      bobaProvider(),
+      providerForChain[288],
       undefined,
       undefined,
       undefined,
@@ -268,7 +351,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   42161: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
-      infuraProvider("arbitrum-mainnet"),
+      providerForChain[42161],
       undefined,
       undefined,
       undefined,
@@ -292,7 +375,7 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
 
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
-    capitalCostsPercent: 0.04,
+    capitalCostsPercent: FLAT_RELAY_CAPITAL_FEE, // This is set same way in ./src/utils/bridge.ts
     queries: queryFn(),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
@@ -308,9 +391,10 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
  * @returns A corresponding symbol to the given `tokenAddress`
  */
 export const getTokenSymbol = (tokenAddress: string): string => {
-  const symbol = Object.entries(sdk.relayFeeCalculator.SymbolMapping)?.find(
-    ([_symbol, { address }]) =>
-      address.toLowerCase() === tokenAddress.toLowerCase()
+  const symbol = Object.entries(sdk.constants.TOKEN_SYMBOLS_MAP)?.find(
+    ([_symbol, { addresses }]) =>
+      addresses[sdk.constants.CHAIN_IDs.MAINNET].toLowerCase() ===
+      tokenAddress.toLowerCase()
   )?.[0];
   if (!symbol) {
     throw new InputError("Token address provided was not whitelisted.");
@@ -329,12 +413,19 @@ export const getTokenSymbol = (tokenAddress: string): string => {
 export const getRelayerFeeDetails = (
   l1Token: string,
   amount: sdk.utils.BigNumberish,
+  originChainId: number,
   destinationChainId: number,
   tokenPrice?: number
-) => {
+): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
-  return relayFeeCalculator.relayerFeeDetails(amount, tokenSymbol, tokenPrice);
+  return relayFeeCalculator.relayerFeeDetails(
+    amount,
+    tokenSymbol,
+    tokenPrice,
+    originChainId?.toString(),
+    destinationChainId.toString()
+  );
 };
 
 /**
@@ -346,7 +437,7 @@ export const getCachedTokenPrice = async (l1Token: string): Promise<number> => {
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
-        params: { l1Token },
+        params: { l1Token, baseCurrency },
       })
     ).data.price
   );
@@ -362,24 +453,11 @@ export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 export const getProvider = (_chainId: number): providers.Provider => {
   const chainId = _chainId.toString();
   if (!providerCache[chainId]) {
-    switch (chainId.toString()) {
-      case "1":
-        providerCache[chainId] = infuraProvider("mainnet");
-        break;
-      case "10":
-        providerCache[chainId] = infuraProvider("optimism-mainnet");
-        break;
-      case "137":
-        providerCache[chainId] = infuraProvider("polygon-mainnet");
-        break;
-      case "288":
-        providerCache[chainId] = bobaProvider();
-        break;
-      case "42161":
-        providerCache[chainId] = infuraProvider("arbitrum-mainnet");
-        break;
-      default:
-        throw new Error(`Invalid chainId provided: ${chainId}`);
+    const override = overrideProvider(chainId);
+    if (override) {
+      providerCache[chainId] = override;
+    } else {
+      providerCache[chainId] = providerForChain[_chainId];
     }
   }
   return providerCache[chainId];
@@ -426,9 +504,9 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 
 /**
  * Determines if a given route is enabled to support an AcrossV2 bridge
- * @param _fromChainId The chain id of the origin bridge action
- * @param _toChainId The chain id of the destination bridge action.
- * @param _fromToken The originating token address. Note: is a valid ERC-20 address
+ * @param fromChainId The chain id of the origin bridge action
+ * @param toChainId The chain id of the destination bridge action.
+ * @param fromToken The originating token address. Note: is a valid ERC-20 address
  * @returns A boolean representing if a route with these parameters is available
  */
 export const isRouteEnabled = (
@@ -436,7 +514,7 @@ export const isRouteEnabled = (
   toChainId: number,
   fromToken: string
 ): boolean => {
-  const enabled = enabledRoutesAsJson.routes.some(
+  const enabled = ENABLED_ROUTES.routes.some(
     ({ fromTokenAddress, fromChain, toChain }) =>
       fromChainId === fromChain &&
       toChainId === toChain &&
@@ -551,7 +629,7 @@ export function handleErrorCondition(
     return response.status(500).send("Error could not be defined.");
   }
   let status: number;
-  if (error instanceof InputError) {
+  if (error instanceof InputError || error instanceof StructError) {
     logger.warn({ at: endpoint, message: "400 input error", error });
     status = 400;
   } else {
@@ -559,4 +637,35 @@ export function handleErrorCondition(
     status = 500;
   }
   return response.status(status).send(error.message);
+}
+
+/* ------------------------- superstruct validators ------------------------- */
+
+export function parsableBigNumberString() {
+  return define<string>("parsableBigNumberString", (value) => {
+    try {
+      BigNumber.from(value);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  });
+}
+
+export function validAddress() {
+  return define<string>("validAddress", (value) =>
+    utils.isAddress(value as string)
+  );
+}
+
+export function positiveIntStr() {
+  return define<string>("positiveIntStr", (value) => {
+    return Number.isInteger(Number(value)) && Number(value) > 0;
+  });
+}
+
+export function boolStr() {
+  return define<string>("boolStr", (value) => {
+    return value === "true" || value === "false";
+  });
 }

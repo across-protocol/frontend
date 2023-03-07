@@ -12,13 +12,15 @@ import { ReactComponent as RoundedCheckmark16 } from "assets/icons/rounded-check
 import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
 import { ReactComponent as ReferrerIcon } from "assets/icons/referrer.svg";
 import { ReactComponent as SelfReferralIcon } from "assets/icons/self-referral.svg";
+import { ReactComponent as ClockIcon } from "assets/icons/clock.svg";
 
 export type TooltipIcon =
   | "green-checkmark"
   | "grey-checkmark"
   | "referee"
   | "referral"
-  | "self-referral";
+  | "self-referral"
+  | "clock";
 export interface TooltipProps {
   icon?: TooltipIcon;
   title: string;
@@ -103,6 +105,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         {icon === "self-referral" && <SelfReferralIcon />}
         {icon === "referral" && <ReferrerIcon />}
         {icon === "referee" && <RefereeIcon />}
+        {icon === "clock" && <ClockIcon />}
         {title}
         {titleSecondary && <TitleSecondary>{titleSecondary}</TitleSecondary>}
       </TitleRow>

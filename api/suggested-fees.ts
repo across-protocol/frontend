@@ -5,9 +5,9 @@ import * as sdk from "@across-protocol/sdk-v2";
 import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
-import { isString } from "./_typeguards";
-import { SuggestedFeesInputRequest } from "./_types";
+import { type, assert, Infer, optional } from "superstruct";
+import { disabledL1Tokens, DEFAULT_QUOTE_TIMESTAMP_BUFFER } from "./_constants";
+import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
   getTokenDetails,
@@ -17,19 +17,25 @@ import {
   isRouteEnabled,
   getCachedTokenPrice,
   handleErrorCondition,
+  parsableBigNumberString,
+  validAddress,
+  positiveIntStr,
+  boolStr,
 } from "./_utils";
 
+const SuggestedFeesQueryParamsSchema = type({
+  amount: parsableBigNumberString(),
+  token: validAddress(),
+  destinationChainId: positiveIntStr(),
+  originChainId: optional(positiveIntStr()),
+  timestamp: optional(positiveIntStr()),
+  skipAmountLimit: optional(boolStr()),
+});
+
+type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
+
 const handler = async (
-  {
-    query: {
-      amount: amountInput,
-      token,
-      timestamp,
-      destinationChainId,
-      originChainId,
-      skipAmountLimit,
-    },
-  }: SuggestedFeesInputRequest,
+  { query }: TypedVercelRequest<SuggestedFeesQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -39,30 +45,37 @@ const handler = async (
     query,
   });
   try {
+    const { QUOTE_TIMESTAMP_BUFFER } = process.env;
+    const quoteTimeBuffer = QUOTE_TIMESTAMP_BUFFER
+      ? Number(QUOTE_TIMESTAMP_BUFFER)
+      : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
+
     const provider = infuraProvider("mainnet");
 
-    if (
-      !isString(amountInput) ||
-      !isString(token) ||
-      !isString(destinationChainId)
-    )
-      throw new InputError(
-        "Must provide amount, token, and destinationChainId as query params"
-      );
+    assert(query, SuggestedFeesQueryParamsSchema);
+
+    let {
+      amount: amountInput,
+      token,
+      destinationChainId,
+      originChainId,
+      timestamp,
+      skipAmountLimit,
+    } = query;
+
     if (originChainId === destinationChainId) {
       throw new InputError("Origin and destination chains cannot be the same");
     }
 
-    const amountAsValue = Number(amountInput);
-    if (Number.isNaN(amountAsValue) || amountAsValue <= 0) {
-      throw new InputError("Value provided in amount parameter is not valid.");
-    }
-
     token = ethers.utils.getAddress(token);
 
-    const parsedTimestamp = isString(timestamp)
+    // Note: Add a buffer to "latest" timestamp so that it corresponds to a block
+    // older than HEAD. This is to improve relayer UX who have heightened risk of sending inadvertent invalid
+    // fills for quote times right at HEAD (or worst, in the future of HEAD). If timestamp is supplied as a query param,
+    // then no need to apply buffer.
+    const parsedTimestamp = timestamp
       ? Number(timestamp)
-      : (await provider.getBlock("latest")).timestamp;
+      : (await provider.getBlock("latest")).timestamp - quoteTimeBuffer;
 
     const amount = ethers.BigNumber.from(amountInput);
 
@@ -78,7 +91,7 @@ const handler = async (
     );
 
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
-    const [{ number: latestBlock }, routeEnabled] = await Promise.all([
+    const [{ number: blockTag }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
       isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
     ]);
@@ -99,6 +112,8 @@ const handler = async (
       provider
     );
 
+    const baseCurrency = destinationChainId === "137" ? "matic" : "eth";
+
     const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
       hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
         blockTag,
@@ -106,10 +121,15 @@ const handler = async (
       hubPool.callStatic.liquidityUtilizationPostRelay(l1Token, amount, {
         blockTag,
       }),
-      configStoreClient.getRateModel(l1Token, {
-        blockTag,
-      }),
-      getCachedTokenPrice(l1Token),
+      configStoreClient.getRateModel(
+        l1Token,
+        {
+          blockTag,
+        },
+        computedOriginChainId,
+        Number(destinationChainId)
+      ),
+      getCachedTokenPrice(l1Token, baseCurrency),
     ]);
     const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
@@ -119,6 +139,7 @@ const handler = async (
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
+      computedOriginChainId,
       Number(destinationChainId),
       tokenPrice
     );
@@ -130,11 +151,15 @@ const handler = async (
 
     const responseJson = {
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
+      capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
+      relayGasFeeTotal: relayerFeeDetails.gasFeeTotal,
       relayFeePct: relayerFeeDetails.relayFeePercent,
+      relayFeeTotal: relayerFeeDetails.relayFeeTotal,
       lpFeePct: realizedLPFeePct.toString(),
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
+      quoteBlock: blockTag.toString(),
     };
 
     logger.debug({

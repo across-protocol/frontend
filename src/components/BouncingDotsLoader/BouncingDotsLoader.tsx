@@ -1,24 +1,36 @@
 import { FC } from "react";
 import styled from "@emotion/styled";
 
-export type BounceType = "default | big";
+export type BounceType = "default" | "big";
+
+type LoaderColor = "white" | "dark-grey" | "warning";
+const LoaderColorMapping: Record<LoaderColor, string> = {
+  white: "#fff",
+  "dark-grey": "hsl(230deg 6% 19%);",
+  warning: "#f9d26c",
+};
 
 interface Props {
   type?: BounceType;
   dataCy?: string;
+  dotColor?: LoaderColor;
 }
 
-const BouncingDotsLoader: FC<Props> = ({ type = "default", dataCy }) => {
+const BouncingDotsLoader: FC<Props> = ({
+  type = "default",
+  dataCy,
+  dotColor,
+}) => {
   if (type === "big")
     return (
-      <BigBouncingWrapper data-cy={dataCy}>
+      <BigBouncingWrapper dotColor={dotColor ?? "dark-grey"} data-cy={dataCy}>
         <div />
         <div />
         <div />
       </BigBouncingWrapper>
     );
   return (
-    <BouncingWrapper data-cy={dataCy}>
+    <BouncingWrapper dotColor={dotColor ?? "dark-grey"} data-cy={dataCy}>
       <div />
       <div />
       <div />
@@ -26,7 +38,7 @@ const BouncingDotsLoader: FC<Props> = ({ type = "default", dataCy }) => {
   );
 };
 
-const BouncingWrapper = styled.div`
+const BouncingWrapper = styled.div<{ dotColor: LoaderColor }>`
   display: inline-flex;
   margin-left: 4px;
 
@@ -35,7 +47,7 @@ const BouncingWrapper = styled.div`
     height: 6px;
     margin: 2px 4px;
     border-radius: 50%;
-    background-color: var(--color-gray);
+    background-color: ${({ dotColor }) => LoaderColorMapping[dotColor]};
     opacity: 1;
     animation: bouncing-loader 0.6s infinite alternate;
   }
@@ -46,11 +58,11 @@ const BouncingWrapper = styled.div`
     }
   }
 
-  > div:nth-child(2) {
+  > div:nth-of-type(2) {
     animation-delay: 0.2s;
   }
 
-  > div:nth-child(3) {
+  > div:nth-of-type(3) {
     animation-delay: 0.4s;
   }
 `;

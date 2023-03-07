@@ -6,9 +6,8 @@ on:
   push:
     branches:
       - master
+      - epic/**
   pull_request:
-    branches:
-      - master
 
 jobs:
   lint:
@@ -23,22 +22,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
-      - run: yarn test
+      - name: Unit tests
+        env:
+          REACT_APP_PUBLIC_INFURA_ID: ${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
+          REACT_APP_PUBLIC_ONBOARD_API_KEY: ${{ secrets.CYPRESS_PUBLIC_ONBOARD_API_KEY }}
+          REACT_APP_REWARDS_API_URL: ${{ secrets.CYPRESS_REWARDS_API_URL }}
+          REACT_APP_CHAIN_137_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_137_PROVIDER_URL }}
+          REACT_APP_CHAIN_42161_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_42161_PROVIDER_URL }}
+          REACT_APP_MOCK_SERVERLESS: true
+        run: yarn test
 
   cypress-tests:
     runs-on: ubuntu-latest
-
-    services:
-      hardhat:
-        image: umaprotocol/protocol
-        env:
-          NODE_OPTIONS: "--max-old-space-size=4096"
-          HARDHAT_CHAIN_ID: "1"
-          WORKDIR: "/protocol"
-          COMMAND: "yarn hardhat node --fork https://mainnet.infura.io/v3/${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}"
-        ports:
-          - 8545:8545
-
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup
@@ -56,7 +51,12 @@ jobs:
           REACT_APP_REWARDS_API_URL: ${{ secrets.CYPRESS_REWARDS_API_URL }}
           REACT_APP_CHAIN_137_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_137_PROVIDER_URL }}
           REACT_APP_CHAIN_42161_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_42161_PROVIDER_URL }}
+          REACT_APP_MOCK_SERVERLESS: true
         run: yarn build
+      - name: Run hardhat mainnet fork
+        env:
+          HARDHAT_INFURA_ID: ${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
+        run: yarn hardhat:node &
       - name: Cypress run Chrome
         uses: cypress-io/github-action@v4
         with:
@@ -66,13 +66,13 @@ jobs:
           wait-on: "http://localhost:3000"
           wait-on-timeout: 300
       - name: Upload screenshots
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure() # only upload screenshots if tests fail
         with:
           name: cypress-screenshots
           path: cypress/screenshots
       - name: Upload videos
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: cypress-videos

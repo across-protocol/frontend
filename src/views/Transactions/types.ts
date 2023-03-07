@@ -1,4 +1,4 @@
-import { Transfer } from "@across-protocol/sdk-v2/dist/transfers-history";
+import { Deposit } from "hooks/useDeposits";
 import { Token } from "utils";
 
 export interface TxLink {
@@ -6,4 +6,4 @@ export interface TxLink {
   url: string;
 }
 
-export type SupportedTxTuple = [token: Token, tx: Transfer];
+export type SupportedTxTuple = [token: Token, tx: Deposit];

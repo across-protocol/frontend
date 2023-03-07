@@ -8,23 +8,23 @@ import {
 import { ReactComponent as DiscordLogo } from "assets/icons/discord-24.svg";
 import { ReactComponent as TwitterLogo } from "assets/icons/twitter-24.svg";
 
-const NAV_LINKS = [
+export const NAV_LINKS = [
   {
     key: "faq",
     name: "FAQ",
-    url: "",
+    url: "https://docs.across.to/additional-info/faq",
     icon: "",
   },
   {
     key: "docs",
     name: "Docs",
-    url: "https://docs.across.to/bridge/",
+    url: "https://docs.across.to/",
     icon: "",
   },
   {
     key: "discord",
     name: "",
-    url: "https://discord.gg/across",
+    url: "https://discord.across.to",
     icon: DiscordLogo,
   },
   {

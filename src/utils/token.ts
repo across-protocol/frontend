@@ -1,15 +1,25 @@
-import { getProvider, ChainId, getConfig, toWeiSafe, formatUnits } from "utils";
+import {
+  getProvider,
+  ChainId,
+  getConfig,
+  toWeiSafe,
+  formatUnits,
+  reportTokenBalance,
+} from "utils";
 import { clients } from "@uma/sdk";
 import { ethers } from "ethers";
 
-export function getNativeBalance(
+export async function getNativeBalance(
   chainId: ChainId,
   account: string,
   blockNumber: number | "latest" = "latest"
 ) {
   const provider = getProvider(chainId);
+  const balance = await provider.getBalance(account, blockNumber);
 
-  return provider.getBalance(account, blockNumber);
+  reportTokenBalance(chainId, balance, chainId === 137 ? "MATIC" : "ETH");
+
+  return balance;
 }
 /**
  *
@@ -19,7 +29,7 @@ export function getNativeBalance(
  * @param blockNumber The block number to execute the query.
  * @returns a Promise that resolves to the balance of the account
  */
-export function getBalance(
+export async function getBalance(
   chainId: ChainId,
   account: string,
   tokenAddress: string,
@@ -27,7 +37,10 @@ export function getBalance(
 ): Promise<ethers.BigNumber> {
   const provider = getProvider(chainId);
   const contract = clients.erc20.connect(tokenAddress, provider);
-  return contract.balanceOf(account, { blockTag: blockNumber });
+  const symbol = await contract.symbol({ blockTag: blockNumber });
+  const balance = await contract.balanceOf(account, { blockTag: blockNumber });
+  reportTokenBalance(chainId, balance, symbol);
+  return balance;
 }
 
 /**

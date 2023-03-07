@@ -1,4 +1,4 @@
-import useWindowSize from "hooks/useWindowsSize";
+import useWindowSize from "hooks/useWindowSize";
 import { DepositStatus, useDeposits } from "hooks/useDeposits";
 import { BREAKPOINTS } from "utils";
 import { paginate } from "components/Pagination";
@@ -8,7 +8,6 @@ import {
   useCurrentPage,
   DEFAULT_MAX_NAVIGATION_COUNT,
 } from "./usePagination";
-import { formatToTransfer } from "../utils";
 
 export function useAllTransactionsView() {
   const { width = 0 } = useWindowSize();
@@ -36,19 +35,17 @@ function usePaginatedDeposits(depositStatus: DepositStatus, pageSize: number) {
     currentPage * pageSize
   );
   const depositsPaginateValues = paginate({
-    elementCount: depositsQuery.pagination?.total || 0,
+    elementCount: depositsQuery.data?.pagination?.total || 0,
     currentPage,
     maxNavigationCount: DEFAULT_MAX_NAVIGATION_COUNT,
     elementsPerPage: pageSize,
   });
 
-  const transfers = depositsQuery.deposits.map(formatToTransfer);
-
   return {
     currentPage,
     handlePageChange,
     depositsQuery,
-    transfers,
+    transfers: depositsQuery.data?.deposits || [],
     depositsPaginateValues,
   };
 }

@@ -1,14 +1,31 @@
 import assert from "assert";
 import { ethers } from "ethers";
+import { relayFeeCalculator, constants } from "@across-protocol/sdk-v2";
+import { across } from "@uma/sdk";
+import * as superstruct from "superstruct";
+
+import { getAddress } from "./address";
+import { parseEtherLike } from "./format";
+
 import ethereumLogo from "assets/ethereum-logo.svg";
 import optimismLogo from "assets/optimism-alt-logo.svg";
 import wethLogo from "assets/weth-logo.svg";
 import arbitrumLogo from "assets/arbitrum-logo.svg";
 import bobaLogo from "assets/boba-logo.svg";
 import polygonLogo from "assets/polygon-logo.svg";
-import { getAddress } from "./address";
-import * as superstruct from "superstruct";
-import { relayFeeCalculator } from "@across-protocol/sdk-v2";
+import usdcLogo from "assets/usdc-logo.png";
+import daiLogo from "assets/dai.svg";
+import wbtcLogo from "assets/wbtc.svg";
+import umaLogo from "assets/uma.svg";
+import acxLogo from "assets/across.svg";
+import balLogo from "assets/bal.svg";
+import usdtLogo from "assets/usdt-logo.svg";
+
+import ethereumLogoGrayscale from "assets/grayscale-logos/eth.svg";
+import optimismLogoGrayscale from "assets/grayscale-logos/optimism.svg";
+import arbitrumLogoGrayscale from "assets/grayscale-logos/arbitrum.svg";
+import polygonLogoGrayscale from "assets/grayscale-logos/polygon.svg";
+import bobaLogoGrayscale from "assets/grayscale-logos/boba.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
 import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
@@ -31,6 +48,15 @@ export enum ChainId {
   // Polygon testnet
   MUMBAI = 80001,
 }
+
+// Maps `ChainId` to an object and inverts the Key/Value
+// pair. Ex) { "mainnet": 1 }
+export const CanonicalChainName = Object.fromEntries(
+  Object.entries(ChainId)
+    .filter((v) => Number.isNaN(Number(v[0])))
+    .map((v) => [v[0].toLowerCase(), Number(v[1])])
+);
+
 /* Colors and Media Queries section */
 export const BREAKPOINTS = {
   tabletMin: 550,
@@ -108,6 +134,7 @@ export type ChainInfo = {
   fullName?: string;
   chainId: ChainId;
   logoURI: string;
+  grayscaleLogoURI: string;
   rpcUrl?: string;
   explorerUrl: string;
   constructExplorerLink: (txHash: string) => string;
@@ -131,6 +158,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Ethereum Mainnet",
     chainId: ChainId.MAINNET,
     logoURI: ethereumLogo,
+    grayscaleLogoURI: ethereumLogoGrayscale,
     explorerUrl: "https://etherscan.io",
     constructExplorerLink: defaultConstructExplorerLink("https://etherscan.io"),
     nativeCurrencySymbol: "ETH",
@@ -142,6 +170,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Arbitrum One",
     chainId: ChainId.ARBITRUM,
     logoURI: arbitrumLogo,
+    grayscaleLogoURI: arbitrumLogoGrayscale,
     rpcUrl: "https://arb1.arbitrum.io/rpc",
     explorerUrl: "https://arbiscan.io",
     constructExplorerLink: (txHash: string) =>
@@ -156,6 +185,7 @@ export const chainInfoList: ChainInfoList = [
     logoURI: bobaLogo,
     rpcUrl: "https://mainnet.boba.network",
     explorerUrl: "https://blockexplorer.boba.network",
+    grayscaleLogoURI: bobaLogoGrayscale,
     constructExplorerLink: (txHash: string) =>
       `https://blockexplorer.boba.network/tx/${txHash}`,
     nativeCurrencySymbol: "ETH",
@@ -166,6 +196,7 @@ export const chainInfoList: ChainInfoList = [
     name: "Optimism",
     chainId: ChainId.OPTIMISM,
     logoURI: optimismLogo,
+    grayscaleLogoURI: optimismLogoGrayscale,
     rpcUrl: "https://mainnet.optimism.io",
     explorerUrl: "https://optimistic.etherscan.io",
     constructExplorerLink: (txHash: string) =>
@@ -179,6 +210,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Polygon Network",
     chainId: ChainId.POLYGON,
     logoURI: polygonLogo,
+    grayscaleLogoURI: polygonLogoGrayscale,
     rpcUrl: "https://rpc.ankr.com/polygon",
     explorerUrl: "https://polygonscan.com",
     constructExplorerLink: defaultConstructExplorerLink(
@@ -193,6 +225,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Goerli Testnet",
     chainId: ChainId.GOERLI,
     logoURI: ethereumLogo,
+    grayscaleLogoURI: ethereumLogoGrayscale,
     explorerUrl: "https://goerli.etherscan.io/",
     constructExplorerLink: defaultConstructExplorerLink(
       "https://goerli.etherscan.io/"
@@ -206,6 +239,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Ethereum Testnet Kovan",
     chainId: ChainId.KOVAN,
     logoURI: ethereumLogo,
+    grayscaleLogoURI: ethereumLogoGrayscale,
     explorerUrl: "https://kovan.etherscan.io",
     constructExplorerLink: defaultConstructExplorerLink(
       "https://kovan.etherscan.io"
@@ -219,6 +253,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Optimism Testnet Kovan",
     chainId: ChainId.KOVAN_OPTIMISM,
     logoURI: optimismLogo,
+    grayscaleLogoURI: optimismLogoGrayscale,
     rpcUrl: "https://kovan.optimism.io",
     explorerUrl: "https://kovan-optimistic.etherscan.io",
     constructExplorerLink: (txHash: string) =>
@@ -231,6 +266,7 @@ export const chainInfoList: ChainInfoList = [
     name: "Mumbai",
     chainId: ChainId.MUMBAI,
     logoURI: polygonLogo,
+    grayscaleLogoURI: polygonLogoGrayscale,
     rpcUrl: "https://matic-mumbai.chainstacklabs.com",
     explorerUrl: "https://mumbai.polygonscan.com",
     constructExplorerLink: defaultConstructExplorerLink(
@@ -245,6 +281,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Arbitrum Testnet Rinkeby",
     chainId: ChainId.ARBITRUM_RINKEBY,
     logoURI: arbitrumLogo,
+    grayscaleLogoURI: arbitrumLogoGrayscale,
     explorerUrl: "https://rinkeby-explorer.arbitrum.io",
     constructExplorerLink: (txHash: string) =>
       `https://rinkeby-explorer.arbitrum.io/tx/${txHash}`,
@@ -258,6 +295,7 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Rinkeby Testnet",
     chainId: ChainId.RINKEBY,
     logoURI: ethereumLogo,
+    grayscaleLogoURI: ethereumLogoGrayscale,
     explorerUrl: "https://rinkeby.etherscan.io",
     constructExplorerLink: defaultConstructExplorerLink(
       "https://rinkeby.etherscan.io"
@@ -285,125 +323,38 @@ export type TokenInfo = {
 // enforce weth to be first so we can use it as a guarantee in other parts of the app
 export type TokenInfoList = TokenInfo[];
 
-export const tokenList: TokenInfoList = [
-  {
-    name: "Ether",
-    symbol: "ETH",
-    decimals: 18,
-    logoURI: ethereumLogo,
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "OETH",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "AETH",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Matic",
-    symbol: "WMATIC",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"),
-  },
-  {
-    name: "Kovan Ethereum",
-    symbol: "KOV",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "KOR",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Ether",
-    symbol: "ARETH",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "Wrapped Ether",
-    symbol: "WETH",
-    decimals: 18,
-    logoURI: wethLogo,
-    mainnetAddress: getAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  {
-    name: "USD Coin",
-    symbol: "USDC",
-    decimals: 6,
-    logoURI: "/logos/usdc-logo.png",
-    mainnetAddress: getAddress("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
-  },
-  {
-    name: "Dai Stablecoin",
-    symbol: "DAI",
-    decimals: 18,
-    logoURI: "/logos/dai-logo.png",
-    mainnetAddress: getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F"),
-  },
-  {
-    name: "Wrapped Bitcoin",
-    symbol: "WBTC",
-    decimals: 8,
-    logoURI: "/logos/wbtc-logo.svg",
-    mainnetAddress: getAddress("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"),
-  },
-  {
-    name: "Boba",
-    symbol: "BOBA",
-    decimals: 18,
-    logoURI: "/logos/boba-logo.svg",
-    mainnetAddress: getAddress("0x42bbfa2e77757c645eeaad1655e0911a7553efbc"),
-  },
-  {
-    name: "UMA",
-    symbol: "UMA",
-    decimals: 18,
-    logoURI: "/logos/uma-logo.svg",
-    mainnetAddress: getAddress("0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828"),
-  },
-  {
-    name: "Matic",
-    symbol: "MATIC",
-    decimals: 18,
-    logoURI: "/logos/ethereum-logo.svg",
-    mainnetAddress: getAddress("0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"),
-  },
-  {
-    name: "Balancer",
-    symbol: "BAL",
-    decimals: 18,
-    logoURI: "/logos/bal.svg",
-    mainnetAddress: getAddress("0xba100000625a3754423978a60c9317c58a424e3D"),
-  },
-  {
-    name: "USDT",
-    symbol: "USDT",
-    decimals: 6,
-    logoURI: "/logos/usdt-logo.svg",
-    mainnetAddress: getAddress("0xdAC17F958D2ee523a2206206994597C13D831ec7"),
-  },
-];
+export const tokenSymbolLogoMap = {
+  ETH: ethereumLogo,
+  WETH: wethLogo,
+  MATIC: polygonLogo,
+  WMATIC: polygonLogo,
+  USDC: usdcLogo,
+  DAI: daiLogo,
+  WBTC: wbtcLogo,
+  BOBA: bobaLogo,
+  UMA: umaLogo,
+  ACX: acxLogo,
+  USDT: usdtLogo,
+  BAL: balLogo,
+};
 
-assert(
-  process.env.REACT_APP_PUBLIC_INFURA_ID,
-  "Missing process.env.REACT_APP_PUBLIC_INFURA_ID"
-);
+export const tokenList: TokenInfoList = Object.entries(
+  tokenSymbolLogoMap
+).flatMap(([symbol, logoURI]) => {
+  const tokenInfo =
+    constants.TOKEN_SYMBOLS_MAP[symbol as keyof typeof tokenSymbolLogoMap];
+
+  if (!tokenInfo) {
+    return [];
+  }
+
+  return {
+    ...tokenInfo,
+    logoURI,
+    mainnetAddress: tokenInfo.addresses[constants.CHAIN_IDs.MAINNET],
+  };
+});
+
 assert(
   process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
   "Missing process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY"
@@ -422,7 +373,16 @@ assert(
 );
 
 // PROCESS.ENV variables
+export const gasEstimationMultiplier = Number(
+  process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER || 2
+);
 export const rewardsApiUrl = process.env.REACT_APP_REWARDS_API_URL;
+export const airdropWindowIndex = Number(
+  process.env.REACT_APP_AIRDROP_WINDOW_INDEX || 0
+);
+export const referralsStartWindowIndex = Number(
+  process.env.REACT_APP_REFERRALS_START_WINDOW_INDEX || airdropWindowIndex + 1
+);
 export const mediumUrl = process.env.REACT_APP_MEDIUM_URL;
 export const hubPoolChainId = Number(
   process.env.REACT_APP_HUBPOOL_CHAINID || 1
@@ -430,12 +390,16 @@ export const hubPoolChainId = Number(
 export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;
 export const enableReactQueryDevTools =
   process.env.REACT_APP_ENABLE_REACT_QUERY_DEV_TOOLS;
-export const infuraId = process.env.REACT_APP_PUBLIC_INFURA_ID;
+export const infuraId =
+  process.env.REACT_APP_PUBLIC_INFURA_ID || "e34138b2db5b496ab5cc52319d2f0299"; // Include this constant for testing
 export const confirmations =
   Number(process.env.REACT_APP_PUBLIC_CONFIRMATIONS) || 1;
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
 export const matomoUrl = process.env.REACT_APP_MATOMO_URL;
 export const debug = Boolean(process.env.REACT_APP_DEBUG);
+export const isProductionBuild = process.env.NODE_ENV === "production";
+export const isAmplitudeLoggingEnabled =
+  process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
 
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
@@ -449,6 +413,8 @@ export const FLAT_RELAY_CAPITAL_FEE = process.env
   .REACT_APP_FLAT_RELAY_CAPITAL_FEE
   ? Number(process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE)
   : 0;
+export const SHOW_ACX_NAV_TOKEN =
+  process.env.REACT_APP_SHOW_ACX_NAV_TOKEN === "true";
 export const AddressZero = ethers.constants.AddressZero;
 export const ArbitrumProviderUrl =
   process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
@@ -464,46 +430,6 @@ assert(
 );
 export function isSupportedChainId(chainId: number): chainId is ChainId {
   return chainId in ChainId;
-}
-export const providerUrls: [ChainId, string][] = [
-  [ChainId.MAINNET, `https://mainnet.infura.io/v3/${infuraId}`],
-  [ChainId.ARBITRUM, ArbitrumProviderUrl],
-  [ChainId.POLYGON, PolygonProviderUrl],
-  [ChainId.OPTIMISM, `https://optimism-mainnet.infura.io/v3/${infuraId}`],
-  [ChainId.BOBA, `https://mainnet.boba.network`],
-  [ChainId.RINKEBY, `https://rinkeby.infura.io/v3/${infuraId}`],
-  [ChainId.KOVAN, `https://kovan.infura.io/v3/${infuraId}`],
-  [ChainId.KOVAN_OPTIMISM, `https://optimism-kovan.infura.io/v3/${infuraId}`],
-  [
-    ChainId.ARBITRUM_RINKEBY,
-    `https://arbitrum-rinkeby.infura.io/v3/${infuraId}`,
-  ],
-  [ChainId.GOERLI, `https://goerli.infura.io/v3/${infuraId}`],
-  [ChainId.MUMBAI, `https://polygon-mumbai.infura.io/v3/${infuraId}`],
-];
-export const providerUrlsTable: Record<number, string> =
-  Object.fromEntries(providerUrls);
-
-export const providers: [number, ethers.providers.StaticJsonRpcProvider][] =
-  providerUrls.map(([chainId, url]) => {
-    return [chainId, new ethers.providers.StaticJsonRpcProvider(url)];
-  });
-export const providersTable: Record<
-  number,
-  ethers.providers.StaticJsonRpcProvider
-> = Object.fromEntries(providers);
-
-export function getProvider(
-  chainId: ChainId = hubPoolChainId
-): ethers.providers.StaticJsonRpcProvider {
-  // Requires for Cypress testing. Only use the injected test provider if isCypress flag has been added to the window object..
-  if ((window as any).isCypress) {
-    const provider: ethers.providers.JsonRpcProvider = (window as any).ethereum
-      .provider;
-
-    return provider;
-  }
-  return providersTable[chainId];
 }
 
 export function getConfigStoreAddress(
@@ -549,6 +475,10 @@ const RouteConfigSS = superstruct.type({
   hubPoolWethAddress: superstruct.string(),
   hubPoolChain: superstruct.number(),
   hubPoolAddress: superstruct.string(),
+  acrossTokenAddress: superstruct.optional(superstruct.string()),
+  acceleratingDistributorAddress: superstruct.optional(superstruct.string()),
+  merkleDistributorAddress: superstruct.optional(superstruct.string()),
+  claimAndStakeAddress: superstruct.optional(superstruct.string()),
 });
 export type RouteConfig = superstruct.Infer<typeof RouteConfigSS>;
 export type Route = superstruct.Infer<typeof RouteSS>;
@@ -572,10 +502,12 @@ export function getRoutes(chainId: ChainId): RouteConfig {
 export const routeConfig = getRoutes(hubPoolChainId);
 export const hubPoolAddress = routeConfig.hubPoolAddress;
 export const migrationPoolV2Warning =
-  process.env.REACT_APP_MIGRATION_POOL_V2_WARNING;
+  process.env.REACT_APP_MIGRATION_POOL_V2_WARNING === "true";
 export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
 export const generalMaintenanceMessage =
   process.env.REACT_APP_GENERAL_MAINTENANCE_MESSAGE;
+
+export const bridgeDisabled = process.env.REACT_APP_BRIDGE_DISABLED === "true";
 
 // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
 // gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
@@ -599,59 +531,6 @@ const getRoute = (
       `Couldn't find route for mainnet chain ${mainnetChainId}, fromChain: ${fromChainId}, and symbol ${symbol}`
     );
   return route;
-};
-
-export const relayerFeeCapitalCostConfig: {
-  [token: string]: relayFeeCalculator.CapitalCostConfig;
-} = {
-  ETH: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.0006").toString(),
-    cutoff: ethers.utils.parseUnits("750").toString(),
-    decimals: 18,
-  },
-  WETH: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.0006").toString(),
-    cutoff: ethers.utils.parseUnits("750").toString(),
-    decimals: 18,
-  },
-  WBTC: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.0025").toString(),
-    cutoff: ethers.utils.parseUnits("10").toString(),
-    decimals: 8,
-  },
-  DAI: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.002").toString(),
-    cutoff: ethers.utils.parseUnits("250000").toString(),
-    decimals: 18,
-  },
-  USDC: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.00075").toString(),
-    cutoff: ethers.utils.parseUnits("1500000").toString(),
-    decimals: 6,
-  },
-  UMA: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.00075").toString(),
-    cutoff: ethers.utils.parseUnits("5000").toString(),
-    decimals: 18,
-  },
-  BADGER: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.001").toString(),
-    cutoff: ethers.utils.parseUnits("5000").toString(),
-    decimals: 18,
-  },
-  BOBA: {
-    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
-    upperBound: ethers.utils.parseUnits("0.001").toString(),
-    cutoff: ethers.utils.parseUnits("100000").toString(),
-    decimals: 18,
-  },
 };
 
 const getQueriesTable = () => {
@@ -708,6 +587,8 @@ const getQueriesTable = () => {
   };
 };
 
+export const fixedPointAdjustment = parseEtherLike("1.0");
+
 export const queriesTable = getQueriesTable();
 
 export const referrerDelimiterHex = "0xd00dfeeddeadbeef";
@@ -716,3 +597,104 @@ export const usdcLpCushion = process.env.REACT_APP_USDC_LP_CUSHION || "0";
 export const wethLpCushion = process.env.REACT_APP_WETH_LP_CUSHION || "0";
 export const wbtcLpCushion = process.env.REACT_APP_WBTC_LP_CUSHION || "0";
 export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
+export const balLpCushion = process.env.REACT_APP_BAL_LP_CUSHION || "0";
+export const umaLpCushion = process.env.REACT_APP_UMA_LP_CUSHION || "0";
+export const bobaLpCushion = process.env.REACT_APP_BOBA_LP_CUSHION || "0";
+
+export function stringValueInArray(value: string, arr: string[]) {
+  return arr.indexOf(value) !== -1;
+}
+export const maxRelayFee = 0.25; // 25%
+export const minRelayFee = 0.0001; // 0.01%
+// Chains where Blocknative Notify can be used. See https://docs.blocknative.com/notify#initialization
+export const supportedNotifyChainIds = [1, 3, 4, 5, 42, 56, 100, 137, 250];
+
+export const mockServerlessAPI =
+  process.env.REACT_APP_MOCK_SERVERLESS === "true";
+
+export const discordClientId = process.env.REACT_APP_DISCORD_CLIENT_ID ?? "";
+
+// Configures the V2 breakpoints
+export const BREAKPOINTS_V2 = {
+  xs: 421,
+  sm: 576,
+  tb: 1024,
+};
+const breakpoint = (width: number) => ({
+  andDown: `(max-width: ${width}px)`,
+  andUp: `(min-width: ${width}px)`,
+});
+export const QUERIESV2 = {
+  xs: breakpoint(BREAKPOINTS_V2.xs),
+  sm: breakpoint(BREAKPOINTS_V2.sm),
+  tb: breakpoint(BREAKPOINTS_V2.tb),
+};
+
+export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);
+
+export const rewardTiers = [
+  {
+    title: "Copper tier",
+    titleSecondary: "40% referral rate",
+    body: "Starting tier with no requirements to join.",
+  },
+  {
+    title: "Bronzer tier",
+    titleSecondary: "50% referral rate",
+    body: "Requires over $50,000 of bridge volume or 3 unique referral transfers.",
+  },
+  {
+    title: "Silver tier",
+    titleSecondary: "60% referral rate",
+    body: "Requires over $100,000 of bridge volume or 5 unique referral transfers.",
+  },
+  {
+    title: "Gold tier",
+    titleSecondary: "70% referral rate",
+    body: "Requires over $250,000 of bridge volume or 10 unique referral transfers.",
+  },
+  {
+    title: "Platinum tier",
+    titleSecondary: "80% referral rate",
+    body: "Requires over $500,000 of bridge volume or 20 unique referral transfers.",
+  },
+];
+
+export const secondsPerYear = across.constants.SECONDS_PER_YEAR;
+export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day
+
+export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
+  ? Number(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER)
+  : undefined;
+
+export const suggestedFeesDeviationBufferMultiplier = !Number.isNaN(
+  Number(
+    process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER ||
+      undefined
+  )
+)
+  ? Number(process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER)
+  : 1.25;
+
+export const defaultRefetchInterval = 15_000;
+
+export const fallbackSuggestedRelayerFeePct = ethers.utils.parseEther("0.0001");
+
+export const amplitudeAPIKey = process.env.REACT_APP_AMPLITUDE_KEY
+  ? process.env.REACT_APP_AMPLITUDE_KEY
+  : undefined;
+
+export const amplitudeEnvironment =
+  process.env.REACT_APP_AMPLITUDE_ENVIRONMENT === "production"
+    ? "production"
+    : "development";
+
+export const currentGitCommitHash = process.env.REACT_APP_GIT_COMMIT_HASH ?? "";
+
+export const CACHED_WALLET_KEY = "previous-wallet-service";
+
+export const sentryEnv = process.env.REACT_APP_SENTRY_ENV;
+export const sentryDsn = process.env.REACT_APP_SENTRY_DSN;
+export const isSentryEnabled = Boolean(
+  process.env.REACT_APP_ENABLE_SENTRY === "true"
+);
