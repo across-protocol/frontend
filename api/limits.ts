@@ -70,6 +70,7 @@ const handler = async (
             return ethers.utils.getAddress(relayer);
           }
         );
+
     assert(query, LimitsQueryParamsSchema);
     let { token, destinationChainId, originChainId } = query;
 
