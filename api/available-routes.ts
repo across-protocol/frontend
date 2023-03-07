@@ -28,6 +28,11 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  logger.debug({
+    at: "Routes",
+    message: "Query data",
+    query,
+  });
   try {
     assert(query, AvailableRoutesQueryParamsSchema);
     const { originToken, destinationToken, originChainId, destinationChainId } =
@@ -93,6 +98,11 @@ const handler = async (
     // Revalidation will make the cache be fresh again, so it appears to clients that it was always fresh during
     // that period — effectively hiding the latency penalty of revalidation from them.
     // If no request happened during that period, the cache became stale and the next request will revalidate normally.
+    logger.debug({
+      at: "Routes",
+      message: "Response data",
+      responseJson: enabledRoutes,
+    });
     response.setHeader(
       "Cache-Control",
       "s-maxage=21600, stale-while-revalidate=21600"

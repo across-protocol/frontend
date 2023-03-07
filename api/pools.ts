@@ -21,6 +21,11 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  logger.debug({
+    at: "Pools",
+    message: "Query data",
+    query,
+  });
   try {
     const hubPoolClient = getHubPoolClient();
 
@@ -34,6 +39,11 @@ const handler = async (
     // Vercel invocations and run time for this serverless function and trades off potential inaccuracy in times of
     // high volume. "max-age=0" instructs browsers not to cache, while s-maxage instructs Vercel edge caching
     // to cache the responses and invalidate when deployments update.
+    logger.debug({
+      at: "Pools",
+      message: "Response data",
+      responseJson: hubPoolClient.getPoolState(token),
+    });
     response.setHeader("Cache-Control", "s-maxage=300");
     response.status(200).json(hubPoolClient.getPoolState(token));
   } catch (error: unknown) {

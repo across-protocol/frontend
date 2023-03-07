@@ -39,6 +39,11 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  logger.debug({
+    at: "SuggestedFees",
+    message: "Query data",
+    query,
+  });
   try {
     const { QUOTE_TIMESTAMP_BUFFER } = process.env;
     const quoteTimeBuffer = QUOTE_TIMESTAMP_BUFFER
@@ -150,6 +155,12 @@ const handler = async (
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: blockTag.toString(),
     };
+
+    logger.debug({
+      at: "SuggestedFees",
+      message: "Response data",
+      responseJson,
+    });
 
     response.status(200).json(responseJson);
   } catch (error) {

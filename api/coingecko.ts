@@ -95,6 +95,11 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  logger.debug({
+    at: "Coingecko",
+    message: "Query data",
+    query,
+  });
   try {
     assert(query, CoingeckoQueryParamsSchema);
     let { l1Token, baseCurrency } = query;
@@ -188,6 +193,11 @@ const handler = async (
     // Revalidation will make the cache be fresh again, so it appears to clients that it was always fresh during
     // that period — effectively hiding the latency penalty of revalidation from them.
     // If no request happened during that period, the cache became stale and the next request will revalidate normally.
+    logger.debug({
+      at: "Coingecko",
+      message: "Response data",
+      responseJson: { price },
+    });
     response.setHeader(
       "Cache-Control",
       "s-maxage=150, stale-while-revalidate=150"
