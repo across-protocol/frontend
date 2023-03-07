@@ -635,6 +635,7 @@ export function handleErrorCondition(
   logger: LoggingUtility,
   error: unknown
 ): VercelResponse {
+  console.log(error);
   if (!(error instanceof Error)) {
     console.error("Error could not be defined.", error);
     return response.status(500).send("Error could not be defined.");
