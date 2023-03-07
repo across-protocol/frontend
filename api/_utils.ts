@@ -199,8 +199,11 @@ export class InputError extends Error {}
  * @param nameOrChainId The name of an ethereum network
  * @returns A valid Ethers RPC provider
  */
-export const infuraProvider = (name: string) => {
-  const url = `https://${name}.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
+export const infuraProvider = (nameOrChainId: providers.Networkish) => {
+  const url = new ethers.providers.InfuraProvider(
+    nameOrChainId,
+    REACT_APP_PUBLIC_INFURA_ID
+  ).connection.url;
   return new ethers.providers.StaticJsonRpcProvider(url);
 };
 
@@ -379,6 +382,10 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
     queries: queryFn(),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
+  if (relayerFeeCalculatorConfig.feeLimitPercent < 1)
+    throw new Error(
+      "Setting fee limit % < 1% will produce nonsensical relay fee details"
+    );
   return new sdk.relayFeeCalculator.RelayFeeCalculator(
     relayerFeeCalculatorConfig,
     logger
@@ -433,7 +440,10 @@ export const getRelayerFeeDetails = (
  * @param l1Token The ERC20 token address of the coin to find the cached price of
  * @returns The price of the `l1Token` token.
  */
-export const getCachedTokenPrice = async (l1Token: string): Promise<number> => {
+export const getCachedTokenPrice = async (
+  l1Token: string,
+  baseCurrency: string = "eth"
+): Promise<number> => {
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
