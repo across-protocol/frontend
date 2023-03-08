@@ -7,7 +7,6 @@ const poolClient = getPoolClient();
 
 export function useAllLiquidityPools() {
   const tokenList = config.getTokenPoolList(hubPoolChainId);
-  console.log(tokenList);
 
   return useQueries(
     tokenList.map((token) => ({
