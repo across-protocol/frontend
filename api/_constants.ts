@@ -52,6 +52,12 @@ const defaultRelayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("5000").toString(),
     decimals: 18,
   },
+  BOBA: {
+    lowerBound: ethers.utils.parseUnits("0.0003").toString(),
+    upperBound: ethers.utils.parseUnits("0.001").toString(),
+    cutoff: ethers.utils.parseUnits("100000").toString(),
+    decimals: 18,
+  },
 };
 
 const relayerFeeCapitalCostOverrides: Record<

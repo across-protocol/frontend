@@ -11,6 +11,7 @@ import ethereumLogo from "assets/ethereum-logo.svg";
 import optimismLogo from "assets/optimism-alt-logo.svg";
 import wethLogo from "assets/weth-logo.svg";
 import arbitrumLogo from "assets/arbitrum-logo.svg";
+import bobaLogo from "assets/boba-logo.svg";
 import polygonLogo from "assets/polygon-logo.svg";
 import usdcLogo from "assets/usdc-logo.png";
 import daiLogo from "assets/dai.svg";
@@ -19,7 +20,6 @@ import umaLogo from "assets/uma.svg";
 import acxLogo from "assets/across.svg";
 import balLogo from "assets/bal.svg";
 import usdtLogo from "assets/usdt-logo.svg";
-import bobaLogo from "assets/boba-logo.svg";
 
 import ethereumLogoGrayscale from "assets/grayscale-logos/eth.svg";
 import optimismLogoGrayscale from "assets/grayscale-logos/optimism.svg";
@@ -315,11 +315,11 @@ export const tokenSymbolLogoMap = {
   USDC: usdcLogo,
   DAI: daiLogo,
   WBTC: wbtcLogo,
+  BOBA: bobaLogo,
   UMA: umaLogo,
   ACX: acxLogo,
   USDT: usdtLogo,
   BAL: balLogo,
-  BOBA: bobaLogo,
 };
 
 export const tokenList: TokenInfoList = Object.entries(
