@@ -16,6 +16,7 @@ import {
   daiLpCushion,
   balLpCushion,
   umaLpCushion,
+  bobaLpCushion,
 } from "./constants";
 
 import { parseEtherLike, tagAddress } from "./format";
@@ -393,6 +394,16 @@ export default class LpFeeCalculator {
       // Add UMA cushion to LP liquidity.
       liquidReserves = pooledTokens.liquidReserves.sub(
         ethers.utils.parseUnits(umaLpCushion || "0", 18)
+      );
+    } else if (
+      ethers.utils.getAddress(tokenAddress) ===
+      ethers.utils.getAddress(
+        constants.TOKEN_SYMBOLS_MAP.BOBA.addresses[constants.CHAIN_IDs.MAINNET]
+      )
+    ) {
+      // Add BOBA cushion to LP liquidity.
+      liquidReserves = pooledTokens.liquidReserves.sub(
+        ethers.utils.parseUnits(bobaLpCushion || "0", 18)
       );
     }
 

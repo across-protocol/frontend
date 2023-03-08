@@ -589,6 +589,7 @@ export const wbtcLpCushion = process.env.REACT_APP_WBTC_LP_CUSHION || "0";
 export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
 export const balLpCushion = process.env.REACT_APP_BAL_LP_CUSHION || "0";
 export const umaLpCushion = process.env.REACT_APP_UMA_LP_CUSHION || "0";
+export const bobaLpCushion = process.env.REACT_APP_BOBA_LP_CUSHION || "0";
 
 export function stringValueInArray(value: string, arr: string[]) {
   return arr.indexOf(value) !== -1;
