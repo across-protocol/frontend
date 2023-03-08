@@ -19,6 +19,7 @@ import umaLogo from "assets/uma.svg";
 import acxLogo from "assets/across.svg";
 import balLogo from "assets/bal.svg";
 import usdtLogo from "assets/usdt-logo.svg";
+import bobaLogo from "assets/boba-logo.svg";
 
 import ethereumLogoGrayscale from "assets/grayscale-logos/eth.svg";
 import optimismLogoGrayscale from "assets/grayscale-logos/optimism.svg";
@@ -318,6 +319,7 @@ export const tokenSymbolLogoMap = {
   ACX: acxLogo,
   USDT: usdtLogo,
   BAL: balLogo,
+  BOBA: bobaLogo,
 };
 
 export const tokenList: TokenInfoList = Object.entries(
@@ -452,8 +454,14 @@ const RouteSS = superstruct.object({
   l1TokenAddress: superstruct.string(),
 });
 const RoutesSS = superstruct.array(RouteSS);
+const PoolSS = superstruct.object({
+  tokenSymbol: superstruct.string(),
+  isNative: superstruct.boolean(),
+});
+const PoolsSS = superstruct.array(PoolSS);
 const RouteConfigSS = superstruct.type({
   routes: RoutesSS,
+  pools: PoolsSS,
   hubPoolWethAddress: superstruct.string(),
   hubPoolChain: superstruct.number(),
   hubPoolAddress: superstruct.string(),
@@ -465,6 +473,8 @@ const RouteConfigSS = superstruct.type({
 export type RouteConfig = superstruct.Infer<typeof RouteConfigSS>;
 export type Route = superstruct.Infer<typeof RouteSS>;
 export type Routes = superstruct.Infer<typeof RoutesSS>;
+export type Pool = superstruct.Infer<typeof PoolSS>;
+export type Pools = superstruct.Infer<typeof PoolsSS>;
 export function getRoutes(chainId: ChainId): RouteConfig {
   if (chainId === ChainId.KOVAN) {
     superstruct.assert(KovanRoutes, RouteConfigSS);

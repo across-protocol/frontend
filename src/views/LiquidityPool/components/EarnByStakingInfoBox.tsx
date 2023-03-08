@@ -22,7 +22,9 @@ export function EarnByStakingInfoBox({
   selectedToken,
   selectedPoolAction,
 }: Props) {
-  const { data, isLoading } = useStakingPool(selectedToken.l1TokenAddress);
+  const { data, isLoading, isError } = useStakingPool(
+    selectedToken.l1TokenAddress
+  );
   const { isConnected } = useConnection();
 
   const showValueOrDash = repeatableTernaryBuilder(
@@ -37,7 +39,9 @@ export function EarnByStakingInfoBox({
 
   const textColor = selectedPoolAction === "add" ? "aqua" : "warning";
 
-  return (
+  return isError ? (
+    <></>
+  ) : (
     <Container selectedPoolAction={selectedPoolAction}>
       <UpperRowContainer>
         <LeftIconContainer selectedPoolAction={selectedPoolAction}>

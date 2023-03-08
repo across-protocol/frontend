@@ -844,5 +844,11 @@
       "isNative": false,
       "l1TokenAddress": "0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F"
     }
+  ],
+  "pools": [
+    {
+      "tokenSymbol": "BOBA",
+      "isNative": false
+    }
   ]
 }

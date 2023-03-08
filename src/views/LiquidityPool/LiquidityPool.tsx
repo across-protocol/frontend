@@ -34,7 +34,7 @@ import { Container, StatsRow, Divider, Button } from "./LiquidityPool.styles";
 
 type PoolAction = "add" | "remove";
 
-const tokenList = getConfig().getTokenList();
+const tokenList = getConfig().getTokenPoolList();
 
 export default function LiquidityPool() {
   const [action, setAction] = useState<PoolAction>("add");
@@ -51,7 +51,7 @@ export default function LiquidityPool() {
   const { symbol: queryPoolSymbol } = useQueryParams();
   useEffect(() => {
     const resolvedToken = getConfig()
-      .getTokenList()
+      .getTokenPoolList()
       .find(
         (token) =>
           queryPoolSymbol &&

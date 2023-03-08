@@ -6,7 +6,8 @@ const config = getConfig();
 const poolClient = getPoolClient();
 
 export function useAllLiquidityPools() {
-  const tokenList = config.getTokenList(hubPoolChainId);
+  const tokenList = config.getTokenPoolList(hubPoolChainId);
+  console.log(tokenList);
 
   return useQueries(
     tokenList.map((token) => ({
@@ -40,7 +41,7 @@ async function fetchPool(tokenSymbol?: string) {
     return;
   }
   const { logoURI, symbol, decimals, l1TokenAddress } =
-    config.getTokenInfoBySymbol(config.getHubPoolChainId(), tokenSymbol);
+    config.getPoolTokenInfoBySymbol(config.getHubPoolChainId(), tokenSymbol);
   await poolClient.updatePool(l1TokenAddress);
   return {
     ...poolClient.getPoolState(l1TokenAddress),
