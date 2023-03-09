@@ -79,5 +79,6 @@
       "isNative": false,
       "l1TokenAddress": "0x5C221E77624690fff6dd741493D735a17716c26B"
     }
-  ]
+  ],
+  "pools": []
 }

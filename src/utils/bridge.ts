@@ -211,9 +211,10 @@ export const getConfirmationDepositTime = (
     // This is just a rough estimate of how long 2 bot runs (1-4 minutes allocated for each) + an arbitrum transfer of 3-10 minutes would take.
     if (toChain === ChainId.ARBITRUM) return getTimeEstimateString(5, 15);
 
-    // Optimism transfers take about 10-20 minutes anecdotally. Boba is presumed to be similar.
-    if (toChain === ChainId.OPTIMISM || toChain === ChainId.BOBA)
+    // Optimism transfers take about 10-20 minutes anecdotally.
+    if (toChain === ChainId.OPTIMISM) {
       return getTimeEstimateString(12, 25);
+    }
 
     // Polygon transfers take 20-30 minutes anecdotally.
     if (toChain === ChainId.POLYGON) return getTimeEstimateString(20, 35);

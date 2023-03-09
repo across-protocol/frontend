@@ -25,7 +25,6 @@ import ethereumLogoGrayscale from "assets/grayscale-logos/eth.svg";
 import optimismLogoGrayscale from "assets/grayscale-logos/optimism.svg";
 import arbitrumLogoGrayscale from "assets/grayscale-logos/arbitrum.svg";
 import polygonLogoGrayscale from "assets/grayscale-logos/polygon.svg";
-import bobaLogoGrayscale from "assets/grayscale-logos/boba.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
 import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
@@ -37,7 +36,6 @@ export enum ChainId {
   MAINNET = 1,
   OPTIMISM = 10,
   ARBITRUM = 42161,
-  BOBA = 288,
   POLYGON = 137,
   // testnets
   RINKEBY = 4,
@@ -119,7 +117,6 @@ export const configStoreAddresses: Record<ChainId, string> = {
   [ChainId.MAINNET]: getAddress("0x3B03509645713718B78951126E0A6de6f10043f5"),
   [ChainId.ARBITRUM]: ethers.constants.AddressZero,
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
-  [ChainId.BOBA]: ethers.constants.AddressZero,
   [ChainId.POLYGON]: ethers.constants.AddressZero,
   [ChainId.RINKEBY]: ethers.constants.AddressZero,
   [ChainId.KOVAN]: getAddress("0xDd74f7603e3fDA6435aEc91F8960a6b8b40415f3"),
@@ -178,19 +175,6 @@ export const chainInfoList: ChainInfoList = [
     nativeCurrencySymbol: "AETH",
     pollingInterval: defaultBlockPollingInterval,
     earliestBlock: 11102271,
-  },
-  {
-    name: "Boba",
-    chainId: ChainId.BOBA,
-    logoURI: bobaLogo,
-    rpcUrl: "https://mainnet.boba.network",
-    explorerUrl: "https://blockexplorer.boba.network",
-    grayscaleLogoURI: bobaLogoGrayscale,
-    constructExplorerLink: (txHash: string) =>
-      `https://blockexplorer.boba.network/tx/${txHash}`,
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 551955,
   },
   {
     name: "Optimism",
@@ -470,8 +454,14 @@ const RouteSS = superstruct.object({
   l1TokenAddress: superstruct.string(),
 });
 const RoutesSS = superstruct.array(RouteSS);
+const PoolSS = superstruct.object({
+  tokenSymbol: superstruct.string(),
+  isNative: superstruct.boolean(),
+});
+const PoolsSS = superstruct.array(PoolSS);
 const RouteConfigSS = superstruct.type({
   routes: RoutesSS,
+  pools: PoolsSS,
   hubPoolWethAddress: superstruct.string(),
   hubPoolChain: superstruct.number(),
   hubPoolAddress: superstruct.string(),
@@ -483,6 +473,8 @@ const RouteConfigSS = superstruct.type({
 export type RouteConfig = superstruct.Infer<typeof RouteConfigSS>;
 export type Route = superstruct.Infer<typeof RouteSS>;
 export type Routes = superstruct.Infer<typeof RoutesSS>;
+export type Pool = superstruct.Infer<typeof PoolSS>;
+export type Pools = superstruct.Infer<typeof PoolsSS>;
 export function getRoutes(chainId: ChainId): RouteConfig {
   if (chainId === ChainId.KOVAN) {
     superstruct.assert(KovanRoutes, RouteConfigSS);
@@ -556,8 +548,6 @@ const getQueriesTable = () => {
         optimismUsdcRoute.fromTokenAddress,
         dummyFromAddress
       ),
-    [ChainId.BOBA]: (provider: ethers.providers.Provider) =>
-      new relayFeeCalculator.BobaQueries(provider),
     [ChainId.POLYGON]: (provider: ethers.providers.Provider) =>
       new relayFeeCalculator.PolygonQueries(provider),
     [ChainId.KOVAN]: (provider: ethers.providers.Provider) =>

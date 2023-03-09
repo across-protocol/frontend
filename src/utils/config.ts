@@ -38,6 +38,7 @@ export class ConfigClient {
   public tokenOrder: Record<string, number> = {};
   public chainOrder: Record<string, number> = {};
   public routes: constants.Routes = [];
+  public pools: constants.Pools = [];
   constructor(private config: constants.RouteConfig) {
     this.config.routes.forEach((route) => {
       this.spokeAddresses[route.fromChain] = route.fromSpokeAddress;
@@ -68,12 +69,17 @@ export class ConfigClient {
         this.tokenOrder[route.fromTokenSymbol] + this.chainOrder[route.toChain]
       );
     });
+    // prioritize routes based on token symbol and tochain. This just gives us better route prioritization when filtering a fromChain
+    this.pools = this.config.pools;
   }
   getWethAddress(): string {
     return this.config.hubPoolWethAddress;
   }
   getRoutes(): constants.Routes {
     return this.routes;
+  }
+  getPools(): constants.Pools {
+    return this.pools;
   }
   getSpokePoolAddress(chainId: constants.ChainId): string {
     const address = this.spokeAddresses[chainId];
@@ -157,6 +163,14 @@ export class ConfigClient {
     );
     return filter(this.getRoutes(), cleanQuery);
   }
+  filterPools(query: Partial<constants.Pool>): constants.Pools {
+    const cleanQuery: Partial<constants.Pool> = Object.fromEntries(
+      Object.entries(query).filter((entry) => {
+        return entry[1] !== undefined;
+      })
+    );
+    return filter(this.getPools(), cleanQuery);
+  }
   listToChains(): constants.ChainInfoList {
     const result: constants.ChainInfoList = [];
     constants.chainInfoList.forEach((chain) => {
@@ -238,6 +252,29 @@ export class ConfigClient {
         };
       });
   }
+  getTokenPoolList(chainId?: number): TokenList {
+    const exclusivePools = this.filterPools({}).flatMap(
+      (pool): (Token & { addresses: Record<string, string> })[] => {
+        const token = constants.tokenList.find(
+          (t) => t.symbol === pool.tokenSymbol
+        );
+        if (!token) return [];
+        return [
+          {
+            isNative: pool.isNative,
+            l1TokenAddress: token.mainnetAddress!,
+            address: token.mainnetAddress!,
+            ...token,
+            addresses: {
+              [constants.ChainId.MAINNET]: token.mainnetAddress!,
+            },
+          },
+        ];
+      }
+    );
+    console.log(exclusivePools);
+    return [...this.getTokenList(chainId), ...exclusivePools];
+  }
   // this has a chance to mix up eth/weth which can be a problem. prefer token by symbol.
   getTokenInfoByAddress(chainId: number, address: string): Token {
     const tokens = this.getTokenList(chainId);
@@ -250,6 +287,18 @@ export class ConfigClient {
   }
   getTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getTokenList(chainId);
+    const token = tokens.find((token) => token.symbol === symbol);
+    assert(token, `Token not found on chain ${chainId} and symbol ${symbol}`);
+    const tokenInfo = constants.getToken(symbol);
+    return {
+      ...tokenInfo,
+      address: token.address,
+      isNative: token.isNative,
+      l1TokenAddress: token.l1TokenAddress,
+    };
+  }
+  getPoolTokenInfoBySymbol(chainId: number, symbol: string): Token {
+    const tokens = this.getTokenPoolList(chainId);
     const token = tokens.find((token) => token.symbol === symbol);
     assert(token, `Token not found on chain ${chainId} and symbol ${symbol}`);
     const tokenInfo = constants.getToken(symbol);

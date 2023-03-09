@@ -43,12 +43,6 @@ export function onboardInit() {
         rpcUrl: providerUrlsTable[ChainId.POLYGON],
       },
       {
-        id: 288,
-        token: "BOBA",
-        label: "BOBA Mainnet",
-        rpcUrl: providerUrlsTable[ChainId.BOBA],
-      },
-      {
         id: 42161,
         token: "ETH",
         label: "Arbitrum Mainnet",
@@ -59,7 +53,7 @@ export function onboardInit() {
       name: "Across Bridge",
       icon: logo,
       description:
-        "Across is the fastest, cheapest and most secure cross-chain bridge for Ethereum, Arbitrum, Optimism, Polygon, Boba and other Layer 1 and Layer 2 networks. Transfer tokens with Across.",
+        "Across is the fastest, cheapest and most secure cross-chain bridge for Ethereum, Arbitrum, Optimism, Polygon and other Layer 1 and Layer 2 networks. Transfer tokens with Across.",
       recommendedInjectedWallets: [
         { name: "Metamask", url: "https://metamask.io" },
         { name: "Coinbase", url: "https://wallet.coinbase.com/" },
