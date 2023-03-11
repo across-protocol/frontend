@@ -506,5 +506,6 @@ export function useBridge() {
     setIsBridgeAmountValid,
     allFromRoutes,
     allToRoutes,
+    isAmountGtMaxDeposit,
   };
 }

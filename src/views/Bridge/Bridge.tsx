@@ -44,6 +44,7 @@ const Bridge = () => {
     setIsBridgeAmountValid,
     allFromRoutes,
     allToRoutes,
+    isAmountGtMaxDeposit,
   } = useBridge();
   return (
     <>
@@ -107,6 +108,7 @@ const Bridge = () => {
               walletAccount={walletAccount}
               disableQuickSwap={disableQuickSwap}
               setIsBridgeAmountValid={setIsBridgeAmountValid}
+              isAmountGtMaxDeposit={isAmountGtMaxDeposit}
             />
           )}
         </Wrapper>
