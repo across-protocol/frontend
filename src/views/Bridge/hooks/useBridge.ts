@@ -459,6 +459,9 @@ export function useBridge() {
     }
   };
 
+  const isAmountGtMaxDeposit =
+    !!limits && !!amountToBridge && amountToBridge.gte(limits.maxDeposit);
+
   return {
     ...bridgeAction,
     displayChangeAccount,
@@ -489,7 +492,8 @@ export function useBridge() {
       (!isBridgeAmountValid ||
         isBridgeDisabled ||
         bridgeAction.buttonDisabled ||
-        (!!fees && fees.isAmountTooLow)),
+        (!!fees && fees.isAmountTooLow) ||
+        isAmountGtMaxDeposit),
     amountTooLow: isConnected && (fees?.isAmountTooLow ?? false),
     amountToBridge,
     estimatedTime,
