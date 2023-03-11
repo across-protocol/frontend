@@ -6,7 +6,7 @@ const AmountTooLowAlert = () => (
   <Alert iconType="info" status="warn">
     <Wrapper>
       <Text color="white-100" size="md">
-        Bridge fee is high for this amount. Send a larger amount.
+        Cannot process a transfer of this size at this time.
       </Text>
     </Wrapper>
   </Alert>

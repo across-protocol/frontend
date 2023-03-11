@@ -460,7 +460,7 @@ export function useBridge() {
   };
 
   const isAmountGtMaxDeposit =
-    !!limits && !!amountToBridge && amountToBridge.gte(limits.maxDeposit);
+    !!limits && !!amountToBridge && amountToBridge.gt(limits.maxDeposit);
 
   return {
     ...bridgeAction,
