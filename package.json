@@ -44,7 +44,7 @@
     "copy-to-clipboard": "^3.3.3",
     "downshift": "^6.1.7",
     "ethers": "5.7.2",
-    "framer-motion": "4.1.17",
+    "framer-motion": "10.2.4",
     "jose": "^4.9.3",
     "lodash-es": "^4.17.21",
     "luxon": "^2.3.1",
