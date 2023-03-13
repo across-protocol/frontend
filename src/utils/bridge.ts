@@ -1,6 +1,6 @@
 import assert from "assert";
 import { clients, utils, BlockFinder } from "@uma/sdk";
-import { lpFeeCalculator, contracts, constants } from "@across-protocol/sdk-v2";
+import { lpFeeCalculator, contracts } from "@across-protocol/sdk-v2";
 import { Provider, Block } from "@ethersproject/providers";
 import { ethers, BigNumber } from "ethers";
 
@@ -10,18 +10,12 @@ import {
   hubPoolAddress,
   getConfigStoreAddress,
   referrerDelimiterHex,
-  usdcLpCushion,
-  wethLpCushion,
-  wbtcLpCushion,
-  daiLpCushion,
-  balLpCushion,
-  umaLpCushion,
-  bobaLpCushion,
+  getTokenByAddress,
 } from "./constants";
 
 import { parseEtherLike, tagAddress } from "./format";
 import { getProvider } from "./providers";
-import { getConfig } from "utils";
+import { getConfig, getLpCushion } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 
@@ -100,7 +94,12 @@ export async function getLpFee(
     destinationChainId
   );
   result.isLiquidityInsufficient =
-    await lpFeeCalculator.isLiquidityInsufficient(l1TokenAddress, amount);
+    await lpFeeCalculator.isLiquidityInsufficient(
+      l1TokenAddress,
+      amount,
+      originChainId,
+      destinationChainId
+    );
   result.total = amount.mul(result.pct).div(parseEtherLike("1"));
   return result;
 }
@@ -326,7 +325,9 @@ export default class LpFeeCalculator {
   }
   async isLiquidityInsufficient(
     tokenAddress: string,
-    amount: utils.BigNumberish
+    amount: utils.BigNumberish,
+    originChainId?: number,
+    destinationChainId?: number
   ): Promise<boolean> {
     const [, pooledTokens] = await Promise.all([
       this.hubPoolInstance.callStatic.sync(tokenAddress),
@@ -335,77 +336,19 @@ export default class LpFeeCalculator {
 
     let liquidReserves = pooledTokens.liquidReserves;
 
-    if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.WETH.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add WETH cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseEther(wethLpCushion)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add USDC cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(usdcLpCushion, 6)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.WBTC.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add WBTC cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(wbtcLpCushion || "0", 8)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.DAI.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add DAI cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(daiLpCushion || "0", 18)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.BAL.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add BAL cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(balLpCushion || "0", 18)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.UMA.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add UMA cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(umaLpCushion || "0", 18)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.BOBA.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add BOBA cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(bobaLpCushion || "0", 18)
-      );
-    }
+    // Attempt to resolve the token from the token address.
+    const token = getTokenByAddress(tokenAddress);
+    // Resolve the LP cushion for the token. Determine if the token is a bridged token.
+    const lpCushion = getLpCushion(
+      token.symbol,
+      originChainId,
+      destinationChainId
+    );
+    console.log(lpCushion);
+    // Subtract the LP cushion from the liquid reserves.
+    liquidReserves = liquidReserves.sub(
+      ethers.utils.parseUnits(lpCushion, token.decimals)
+    );
 
     return liquidReserves.lt(amount);
   }

@@ -83,6 +83,25 @@ export const relayerFeeCapitalCostConfig: {
   )
 );
 
+/**
+ * The cushion applied to the total available liquidity when calculating the max amount of a token to relay.
+ * This is to account for slippage and other factors that may cause the relay to fail.
+ * This map takes the following format:
+ * {
+ *    "DAI": "100000",
+ *    "DAI:1:10": "100001",
+ * }
+ * The key is the token symbol, and the value is the cushion in wei. If the key is a token symbol followed by a colon,
+ * followed by an origin chain ID, followed by a colon, followed by a destination chain ID, then the cushion will only
+ * apply to that specific route. For example, the key "DAI:1:10" will only apply to the DAI route from mainnet to
+ * optimism.
+ */
+export const lpCushionMap: {
+  [symbol: string]: string;
+} = process.env.REACT_APP_LP_CUSHION_MAP
+  ? JSON.parse(process.env.REACT_APP_LP_CUSHION_MAP)
+  : {};
+
 // If `timestamp` is not passed into a suggested-fees query, then return the latest mainnet timestamp minus this buffer.
 export const DEFAULT_QUOTE_TIMESTAMP_BUFFER = 12 * 25; // ~25 blocks on mainnet (12s/block), ~= 5 minutes.
 

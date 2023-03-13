@@ -12,7 +12,11 @@ import { define, StructError } from "superstruct";
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
 
-import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
+import {
+  lpCushionMap,
+  maxRelayFeePct,
+  relayerFeeCapitalCostConfig,
+} from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
 import { VercelResponse } from "@vercel/node";
@@ -667,4 +671,21 @@ export function boolStr() {
   return define<string>("boolStr", (value) => {
     return value === "true" || value === "false";
   });
+}
+
+/**
+ * Returns the cushion for a given token symbol and route. If no route is specified, the cushion for the token symbol
+ * @param symbol The token symbol
+ * @param fromChainId The origin chain ID
+ * @param toChainId The destination chain ID
+ * @returns The cushion in wei
+ */
+export function getLpCushion(
+  symbol: string,
+  fromChainId?: number,
+  toChainId?: number
+) {
+  const key = `${symbol}:${fromChainId}:${toChainId}`;
+  if (lpCushionMap[key]) return lpCushionMap[key];
+  return lpCushionMap[symbol] ?? "0";
 }
