@@ -344,7 +344,6 @@ export default class LpFeeCalculator {
       originChainId,
       destinationChainId
     );
-    console.log(lpCushion);
     // Subtract the LP cushion from the liquid reserves.
     liquidReserves = liquidReserves.sub(
       ethers.utils.parseUnits(lpCushion, token.decimals)
