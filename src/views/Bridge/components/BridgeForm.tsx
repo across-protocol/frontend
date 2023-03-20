@@ -18,7 +18,6 @@ import QuickSwap from "./QuickSwap";
 import SlippageAlert from "./SlippageAlert";
 import { BigNumber } from "ethers";
 import AmountTooLowAlert from "./AmountTooLowAlert";
-import InsufficientLiquidityAlert from "./InsufficientLiquidityAlert";
 
 type BridgeFormProps = {
   availableTokens: TokenInfo[];
@@ -51,7 +50,6 @@ type BridgeFormProps = {
   walletAccount?: string;
   disableQuickSwap?: boolean;
   setIsBridgeAmountValid: (isValid: boolean) => void;
-  isAmountGtMaxDeposit: boolean;
 };
 
 const BridgeForm = ({
@@ -84,7 +82,6 @@ const BridgeForm = ({
   setIsBridgeAmountValid,
   allToRoutes,
   allFromRoutes,
-  isAmountGtMaxDeposit,
 }: BridgeFormProps) => {
   const mapChainInfoToRoute = (
     c?: ChainInfo,
@@ -124,8 +121,7 @@ const BridgeForm = ({
             walletAccount={walletAccount}
             setIsBridgeAmountValid={setIsBridgeAmountValid}
           />
-          {isAmountGtMaxDeposit && <InsufficientLiquidityAlert />}
-          {!isAmountGtMaxDeposit && amountTooLow && <AmountTooLowAlert />}
+          {amountTooLow && <AmountTooLowAlert />}
         </RowWrapper>
         <RowWrapper>
           <Text size="md" color="grey-400">

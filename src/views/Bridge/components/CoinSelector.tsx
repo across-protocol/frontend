@@ -16,8 +16,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { Theme } from "@emotion/react";
 import { SelectorPropType } from "components/Selector/Selector";
-import { useBalancesBySymbols, useConnection } from "hooks";
-import { useLiquidityPool } from "views/LiquidityPool/hooks/useLiquidityPool";
+import { useBalancesBySymbols, useBridgeLimits, useConnection } from "hooks";
 
 function useCoinSelector(
   tokens: TokenInfo[],
@@ -55,7 +54,7 @@ function useCoinSelector(
     }
   });
 
-  const { data: poolData } = useLiquidityPool(currentToken);
+  const { limits } = useBridgeLimits(currentToken, fromChain, toChain);
 
   const tokenBalances = useBalancesBySymbols({
     tokenSymbols: queryableTokens.map((t) => t.symbol),
@@ -87,7 +86,7 @@ function useCoinSelector(
       );
       if (
         parsedUserInput.gt(0) &&
-        (!poolData || parsedUserInput.lte(poolData.liquidReserves))
+        (!limits || parsedUserInput.lte(limits.maxDeposit))
       ) {
         setAmountToBridge(parsedUserInput);
         setValidInput(!currentBalance || parsedUserInput.lte(currentBalance));
@@ -98,7 +97,7 @@ function useCoinSelector(
     }
   }, [
     currentBalance,
-    poolData,
+    limits,
     setAmountToBridge,
     tokenParserFn,
     userAmountInput,
