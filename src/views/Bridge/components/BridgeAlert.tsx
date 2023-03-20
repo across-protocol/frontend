@@ -2,17 +2,17 @@ import styled from "@emotion/styled";
 import { Alert } from "components";
 import { Text } from "components/Text";
 
-const AmountTooLowAlert = () => (
+const BridgeAlert: React.FC = ({ children }) => (
   <Alert iconType="info" status="warn">
     <Wrapper>
       <Text color="white-100" size="md">
-        Bridge fee is high for this amount. Send a larger amount.
+        {children}
       </Text>
     </Wrapper>
   </Alert>
 );
 
-export default AmountTooLowAlert;
+export default BridgeAlert;
 
 const Wrapper = styled.div`
   display: flex;

@@ -63,6 +63,8 @@ export function useBridge() {
     undefined
   );
   const [isBridgeAmountValid, setIsBridgeAmountValid] = useState(false);
+  const [isLiquidityFromAountExceeded, setIsLiquidityFromAountExceeded] =
+    useState(false);
 
   useEffect(() => {
     if (isDefaultToken) {
@@ -502,5 +504,7 @@ export function useBridge() {
     setIsBridgeAmountValid,
     allFromRoutes,
     allToRoutes,
+    isLiquidityFromAountExceeded,
+    setIsLiquidityFromAountExceeded,
   };
 }

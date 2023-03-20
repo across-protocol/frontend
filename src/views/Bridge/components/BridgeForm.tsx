@@ -17,7 +17,7 @@ import EstimatedTable from "./EstimatedTable";
 import QuickSwap from "./QuickSwap";
 import SlippageAlert from "./SlippageAlert";
 import { BigNumber } from "ethers";
-import AmountTooLowAlert from "./AmountTooLowAlert";
+import BridgeAlert from "./BridgeAlert";
 
 type BridgeFormProps = {
   availableTokens: TokenInfo[];
@@ -50,6 +50,8 @@ type BridgeFormProps = {
   walletAccount?: string;
   disableQuickSwap?: boolean;
   setIsBridgeAmountValid: (isValid: boolean) => void;
+  setIsLiquidityFromAountExceeded: (isExceeded: boolean) => void;
+  isLiquidityFromAountExceeded: boolean;
 };
 
 const BridgeForm = ({
@@ -82,6 +84,8 @@ const BridgeForm = ({
   setIsBridgeAmountValid,
   allToRoutes,
   allFromRoutes,
+  isLiquidityFromAountExceeded,
+  setIsLiquidityFromAountExceeded,
 }: BridgeFormProps) => {
   const mapChainInfoToRoute = (
     c?: ChainInfo,
@@ -120,8 +124,18 @@ const BridgeForm = ({
             currentSelectedBalance={currentBalance}
             walletAccount={walletAccount}
             setIsBridgeAmountValid={setIsBridgeAmountValid}
+            setIsLiquidityFromAountExceeded={setIsLiquidityFromAountExceeded}
           />
-          {amountTooLow && <AmountTooLowAlert />}
+          {amountTooLow && (
+            <BridgeAlert>
+              Bridge fee is high for this amount. Send a larger amount.
+            </BridgeAlert>
+          )}
+          {isLiquidityFromAountExceeded && (
+            <BridgeAlert>
+              Insufficient bridge liquidity to process this transfer.
+            </BridgeAlert>
+          )}
         </RowWrapper>
         <RowWrapper>
           <Text size="md" color="grey-400">

@@ -25,6 +25,7 @@ function useCoinSelector(
   toChain: number,
   setAmountToBridge: (v: BigNumber | undefined) => void,
   setIsBridgeAmountValid: (v: boolean) => void,
+  setIsLiquidityFromAountExceeded: (v: boolean) => void,
   currentBalance?: BigNumber,
   account?: string
 ) {
@@ -73,6 +74,7 @@ function useCoinSelector(
 
   const validateAndSetUserInput = useCallback(() => {
     setValidInput(true);
+    setIsLiquidityFromAountExceeded(false);
     if (
       userAmountInput === "" ||
       userAmountInput === "." ||
@@ -93,6 +95,7 @@ function useCoinSelector(
       } else {
         setAmountToBridge(undefined);
         setValidInput(false);
+        setIsLiquidityFromAountExceeded(true);
       }
     }
   }, [
@@ -101,6 +104,7 @@ function useCoinSelector(
     setAmountToBridge,
     tokenParserFn,
     userAmountInput,
+    setIsLiquidityFromAountExceeded,
   ]);
 
   useEffect(() => {
@@ -156,6 +160,7 @@ type CoinSelectorPropType = {
   walletAccount?: string;
 
   setIsBridgeAmountValid: (v: boolean) => void;
+  setIsLiquidityFromAountExceeded: (v: boolean) => void;
 };
 
 const CoinSelector = ({
@@ -168,6 +173,7 @@ const CoinSelector = ({
   toChain,
   walletAccount,
   setIsBridgeAmountValid,
+  setIsLiquidityFromAountExceeded,
 }: CoinSelectorPropType) => {
   const {
     token,
@@ -187,6 +193,7 @@ const CoinSelector = ({
     toChain,
     onAmountToBridgeChanged,
     setIsBridgeAmountValid,
+    setIsLiquidityFromAountExceeded,
     currentSelectedBalance,
     walletAccount
   );
