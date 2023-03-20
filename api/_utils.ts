@@ -12,11 +12,7 @@ import { define, StructError } from "superstruct";
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
 
-import {
-  lpCushionMap,
-  maxRelayFeePct,
-  relayerFeeCapitalCostConfig,
-} from "./_constants";
+import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
 import { VercelResponse } from "@vercel/node";
@@ -685,7 +681,13 @@ export function getLpCushion(
   fromChainId?: number,
   toChainId?: number
 ) {
-  const key = `${symbol}:${fromChainId}:${toChainId}`;
-  if (lpCushionMap[key]) return lpCushionMap[key];
-  return lpCushionMap[symbol] ?? "0";
+  return (
+    [
+      `REACT_APP_LP_CUSHION_${symbol}_${fromChainId}_${toChainId}`,
+      `REACT_APP_LP_CUSHION_${symbol}_${fromChainId}`,
+      `REACT_APP_LP_CUSHION_${symbol}`,
+    ]
+      .map((key) => process.env[key])
+      .find((value) => value !== undefined) ?? "0"
+  );
 }
