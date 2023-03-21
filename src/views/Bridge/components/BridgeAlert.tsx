@@ -1,27 +1,34 @@
 import styled from "@emotion/styled";
-import { Alert } from "components";
-import { Text } from "components/Text";
+import { ReactComponent as II } from "assets/icons/info-16.svg";
+import { Text } from "components";
 
-const BridgeAlert: React.FC = ({ children }) => (
-  <Alert iconType="info" status="warn">
-    <Wrapper>
-      <Text color="white-100" size="md">
-        {children}
-      </Text>
-    </Wrapper>
-  </Alert>
+const BridgeInputErrorAlert: React.FC = ({ children }) => (
+  <ErrorWrapper>
+    <ErrorIcon />
+    <Text size="sm" color="error">
+      {children}
+    </Text>
+  </ErrorWrapper>
 );
 
-export default BridgeAlert;
+export default BridgeInputErrorAlert;
 
-const Wrapper = styled.div`
+const ErrorWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: center;
+  align-items: flex-end;
   padding: 0px;
-  padding-top: 1px;
-  gap: 12px;
+  gap: 8px;
 
   width: 100%;
+`;
+
+const ErrorIcon = styled(II)`
+  height: 16px;
+  width: 16px;
+
+  & path {
+    stroke: #f96c6c !important;
+  }
 `;

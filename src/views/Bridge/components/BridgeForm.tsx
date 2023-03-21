@@ -17,7 +17,6 @@ import EstimatedTable from "./EstimatedTable";
 import QuickSwap from "./QuickSwap";
 import SlippageAlert from "./SlippageAlert";
 import { BigNumber } from "ethers";
-import BridgeAlert from "./BridgeAlert";
 
 type BridgeFormProps = {
   availableTokens: TokenInfo[];
@@ -124,18 +123,10 @@ const BridgeForm = ({
             currentSelectedBalance={currentBalance}
             walletAccount={walletAccount}
             setIsBridgeAmountValid={setIsBridgeAmountValid}
-            setIsLiquidityFromAountExceeded={setIsLiquidityFromAountExceeded}
+            setIsLiquidityFromAmountExceeded={setIsLiquidityFromAountExceeded}
+            isAmountTooLow={amountTooLow}
+            isInsufficientLiquidityExceeded={isLiquidityFromAountExceeded}
           />
-          {amountTooLow && (
-            <BridgeAlert>
-              Bridge fee is high for this amount. Send a larger amount.
-            </BridgeAlert>
-          )}
-          {isLiquidityFromAountExceeded && (
-            <BridgeAlert>
-              Insufficient bridge liquidity to process this transfer.
-            </BridgeAlert>
-          )}
         </RowWrapper>
         <RowWrapper>
           <Text size="md" color="grey-400">
