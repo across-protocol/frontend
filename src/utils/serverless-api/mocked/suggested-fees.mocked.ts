@@ -1,6 +1,7 @@
 import { BigNumber, ethers } from "ethers";
 import { Fee } from "utils/bridge";
 import { ChainId } from "utils/constants";
+import { SuggestedApiFeeReturnType } from "../types";
 
 /**
  * Creates a mocked variant of the suggestedAPI Call
@@ -15,14 +16,7 @@ export async function suggestedFeesMockedApiCall(
   _originToken: string,
   _toChainid: ChainId,
   _fromChainid: ChainId
-): Promise<{
-  relayerFee: Fee;
-  relayerGasFee: Fee;
-  relayerCapitalFee: Fee;
-  isAmountTooLow: boolean;
-  quoteBlock: ethers.BigNumber;
-  quoteTimestamp: ethers.BigNumber;
-}> {
+): Promise<SuggestedApiFeeReturnType> {
   return {
     relayerFee: {
       pct: BigNumber.from("1"),
@@ -33,6 +27,10 @@ export async function suggestedFeesMockedApiCall(
       total: BigNumber.from("1"),
     },
     relayerGasFee: {
+      pct: BigNumber.from("1"),
+      total: BigNumber.from("1"),
+    },
+    lpFee: {
       pct: BigNumber.from("1"),
       total: BigNumber.from("1"),
     },
