@@ -1,5 +1,4 @@
 import { BigNumber, ethers } from "ethers";
-import { Fee } from "utils/bridge";
 import { ChainId } from "utils/constants";
 import { SuggestedApiFeeReturnType } from "../types";
 

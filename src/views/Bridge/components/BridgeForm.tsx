@@ -115,7 +115,7 @@ const BridgeForm = ({
           </Text>
           <CoinSelector
             fromChain={currentFromRoute ?? 1}
-            toChain={currentToRoute ?? 1}
+            toChain={currentToRoute ?? 10}
             tokenChoices={availableTokens}
             tokenSelected={currentToken}
             onTokenSelected={setCurrentToken}

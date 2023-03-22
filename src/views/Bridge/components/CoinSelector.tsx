@@ -56,7 +56,11 @@ function useCoinSelector(
     }
   });
 
-  const { limits } = useBridgeLimits(currentToken, fromChain, toChain);
+  const { limits } = useBridgeLimits(
+    getConfig().getTokenInfoBySymbol(fromChain, currentToken).address,
+    fromChain,
+    toChain
+  );
 
   const tokenBalances = useBalancesBySymbols({
     tokenSymbols: queryableTokens.map((t) => t.symbol),
