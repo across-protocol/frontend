@@ -39,19 +39,23 @@ export interface RewardsApiInterface {
   liquidityProviderRewards: RewardInterface;
   communityRewards?: RewardInterface;
 }
+
+export type SuggestedApiFeeReturnType = {
+  relayerFee: Fee;
+  relayerGasFee: Fee;
+  relayerCapitalFee: Fee;
+  lpFee: Fee;
+  isAmountTooLow: boolean;
+  quoteTimestamp: ethers.BigNumber;
+  quoteBlock: ethers.BigNumber;
+};
+
 export type SuggestedApiFeeType = (
   amount: ethers.BigNumber,
   originToken: string,
   toChainid: ChainId,
   fromChainid: ChainId
-) => Promise<{
-  relayerFee: Fee;
-  relayerGasFee: Fee;
-  relayerCapitalFee: Fee;
-  isAmountTooLow: boolean;
-  quoteTimestamp: ethers.BigNumber;
-  quoteBlock: ethers.BigNumber;
-}>;
+) => Promise<SuggestedApiFeeReturnType>;
 
 export type RetrieveLinkedWalletType = (
   backendJWT: string

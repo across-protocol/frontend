@@ -1,25 +1,9 @@
-import assert from "assert";
-import { clients, utils, BlockFinder } from "@uma/sdk";
-import { lpFeeCalculator, contracts, constants } from "@across-protocol/sdk-v2";
-import { Provider, Block } from "@ethersproject/providers";
+import { clients } from "@uma/sdk";
 import { ethers, BigNumber } from "ethers";
 
-import {
-  ChainId,
-  hubPoolChainId,
-  hubPoolAddress,
-  getConfigStoreAddress,
-  referrerDelimiterHex,
-  usdcLpCushion,
-  wethLpCushion,
-  wbtcLpCushion,
-  daiLpCushion,
-  balLpCushion,
-  umaLpCushion,
-  bobaLpCushion,
-} from "./constants";
+import { ChainId, referrerDelimiterHex } from "./constants";
 
-import { parseEtherLike, tagAddress } from "./format";
+import { tagAddress } from "./format";
 import { getProvider } from "./providers";
 import { getConfig } from "utils";
 import getApiEndpoint from "./serverless-api";
@@ -42,69 +26,6 @@ export type BridgeFees = {
   quoteBlock: ethers.BigNumber;
 };
 
-export async function getRelayerFee(
-  tokenSymbol: string,
-  amount: ethers.BigNumber,
-  fromChainId: ChainId,
-  toChainId: ChainId
-): Promise<{
-  relayerFee: Fee;
-  relayerGasFee: Fee;
-  relayerCapitalFee: Fee;
-  isAmountTooLow: boolean;
-  quoteTimestamp: ethers.BigNumber;
-  quoteBlock: ethers.BigNumber;
-}> {
-  const address = getConfig().getTokenInfoBySymbol(
-    fromChainId,
-    tokenSymbol
-  ).address;
-
-  return getApiEndpoint().suggestedFees(
-    amount,
-    address,
-    toChainId,
-    fromChainId
-  );
-}
-
-export async function getLpFee(
-  l1TokenAddress: string,
-  amount: ethers.BigNumber,
-  blockTime?: number,
-  originChainId?: number,
-  destinationChainId?: number
-): Promise<Fee & { isLiquidityInsufficient: boolean }> {
-  if (amount.lte(0)) {
-    throw new Error(`Amount must be greater than 0.`);
-  }
-  const provider = getProvider(hubPoolChainId);
-  const configStoreAddress = getConfigStoreAddress(hubPoolChainId);
-
-  const result = {
-    pct: BigNumber.from(0),
-    total: BigNumber.from(0),
-    isLiquidityInsufficient: false,
-  };
-
-  const lpFeeCalculator = new LpFeeCalculator(
-    provider,
-    hubPoolAddress,
-    configStoreAddress
-  );
-  result.pct = await lpFeeCalculator.getLpFeePct(
-    l1TokenAddress,
-    amount,
-    blockTime,
-    originChainId,
-    destinationChainId
-  );
-  result.isLiquidityInsufficient =
-    await lpFeeCalculator.isLiquidityInsufficient(l1TokenAddress, amount);
-  result.total = amount.mul(result.pct).div(parseEtherLike("1"));
-  return result;
-}
-
 type GetBridgeFeesArgs = {
   amount: ethers.BigNumber;
   tokenSymbol: string;
@@ -115,7 +36,6 @@ type GetBridgeFeesArgs = {
 
 export type GetBridgeFeesResult = BridgeFees & {
   isAmountTooLow: boolean;
-  isLiquidityInsufficient: boolean;
 };
 
 /**
@@ -130,13 +50,10 @@ export type GetBridgeFeesResult = BridgeFees & {
 export async function getBridgeFees({
   amount,
   tokenSymbol,
-  blockTimestamp,
   fromChainId,
   toChainId,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
-  const config = getConfig();
   const timeBeforeRequests = Date.now();
-  const l1TokenAddress = config.getL1TokenAddressBySymbol(tokenSymbol);
   const {
     relayerFee,
     relayerGasFee,
@@ -144,18 +61,13 @@ export async function getBridgeFees({
     isAmountTooLow,
     quoteTimestamp,
     quoteBlock,
-  } = await getRelayerFee(tokenSymbol, amount, fromChainId, toChainId);
-
-  const { isLiquidityInsufficient, ...lpFee } = await getLpFee(
-    l1TokenAddress,
+    lpFee,
+  } = await getApiEndpoint().suggestedFees(
     amount,
-    blockTimestamp,
-    fromChainId,
-    toChainId
-  ).catch((err) => {
-    console.error("Error getting lp fee", err);
-    throw err;
-  });
+    getConfig().getTokenInfoBySymbol(fromChainId, tokenSymbol).address,
+    toChainId,
+    fromChainId
+  );
   const timeAfterRequests = Date.now();
 
   const quoteLatency = BigNumber.from(timeAfterRequests - timeBeforeRequests);
@@ -166,7 +78,6 @@ export async function getBridgeFees({
     relayerCapitalFee,
     lpFee,
     isAmountTooLow,
-    isLiquidityInsufficient,
     quoteTimestamp,
     quoteTimestampInMs: quoteTimestamp.mul(1000),
     quoteBlock,
@@ -303,150 +214,4 @@ export async function sendAcrossApproval(
   }
   const tokenContract = clients.erc20.connect(tokenAddress, signer);
   return tokenContract.approve(spokePool.address, amount);
-}
-
-const { exists } = utils;
-const { calculateRealizedLpFeePct } = lpFeeCalculator;
-
-export default class LpFeeCalculator {
-  private blockFinder: BlockFinder<Block>;
-  private hubPoolInstance: contracts.hubPool.Instance;
-  private configStoreClient: contracts.acrossConfigStore.Client;
-  constructor(
-    private provider: Provider,
-    hubPoolAddress: string,
-    configStoreAddress: string
-  ) {
-    this.blockFinder = new BlockFinder<Block>(provider.getBlock.bind(provider));
-    this.hubPoolInstance = contracts.hubPool.connect(hubPoolAddress, provider);
-    this.configStoreClient = new contracts.acrossConfigStore.Client(
-      configStoreAddress,
-      provider
-    );
-  }
-  async isLiquidityInsufficient(
-    tokenAddress: string,
-    amount: utils.BigNumberish
-  ): Promise<boolean> {
-    const [, pooledTokens] = await Promise.all([
-      this.hubPoolInstance.callStatic.sync(tokenAddress),
-      this.hubPoolInstance.callStatic.pooledTokens(tokenAddress),
-    ]);
-
-    let liquidReserves = pooledTokens.liquidReserves;
-
-    if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.WETH.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add WETH cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseEther(wethLpCushion)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.USDC.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add USDC cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(usdcLpCushion, 6)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.WBTC.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add WBTC cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(wbtcLpCushion || "0", 8)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.DAI.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add DAI cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(daiLpCushion || "0", 18)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.BAL.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add BAL cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(balLpCushion || "0", 18)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.UMA.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add UMA cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(umaLpCushion || "0", 18)
-      );
-    } else if (
-      ethers.utils.getAddress(tokenAddress) ===
-      ethers.utils.getAddress(
-        constants.TOKEN_SYMBOLS_MAP.BOBA.addresses[constants.CHAIN_IDs.MAINNET]
-      )
-    ) {
-      // Add BOBA cushion to LP liquidity.
-      liquidReserves = pooledTokens.liquidReserves.sub(
-        ethers.utils.parseUnits(bobaLpCushion || "0", 18)
-      );
-    }
-
-    return liquidReserves.lt(amount);
-  }
-  async getLpFeePct(
-    tokenAddress: string,
-    amount: utils.BigNumberish,
-    timestamp?: number,
-    originChainId?: number,
-    destinationChainId?: number
-  ) {
-    amount = BigNumber.from(amount);
-    assert(amount.gt(0), "Amount must be greater than 0");
-    const { blockFinder, hubPoolInstance, configStoreClient, provider } = this;
-
-    const targetBlock = exists(timestamp)
-      ? await blockFinder.getBlockForTimestamp(timestamp)
-      : await provider.getBlock("latest");
-    assert(
-      exists(targetBlock),
-      "Unable to find target block for timestamp: " + timestamp || "latest"
-    );
-    const blockTag = targetBlock.number;
-
-    const [currentUt, nextUt, rateModel] = await Promise.all([
-      hubPoolInstance.callStatic.liquidityUtilizationCurrent(tokenAddress, {
-        blockTag,
-      }),
-      hubPoolInstance.callStatic.liquidityUtilizationPostRelay(
-        tokenAddress,
-        amount,
-        { blockTag }
-      ),
-      configStoreClient.getRateModel(
-        tokenAddress,
-        {
-          blockTag,
-        },
-        originChainId,
-        destinationChainId
-      ),
-    ]);
-    return calculateRealizedLpFeePct(rateModel, currentUt, nextUt);
-  }
 }

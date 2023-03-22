@@ -1,6 +1,7 @@
 import type { BridgeFees } from "./bridge";
 import { BigNumber, BigNumberish } from "ethers";
 import { isNumberEthersParseable } from "./format";
+import { lpCushionMap } from "./constants";
 
 export function max(a: BigNumberish, b: BigNumberish) {
   if (BigNumber.from(a).gte(b)) return BigNumber.from(a);
@@ -94,4 +95,21 @@ export function categorizeNumberInRange(
     }
   }
   return `>${boundry[boundry.length - 1]}`;
+}
+
+/**
+ * Returns the cushion for a given token symbol and route. If no route is specified, the cushion for the token symbol
+ * @param symbol The token symbol
+ * @param fromChainId The origin chain ID
+ * @param toChainId The destination chain ID
+ * @returns The cushion in wei
+ */
+export function getLpCushion(
+  symbol: string,
+  fromChainId?: number,
+  toChainId?: number
+) {
+  const key = `${symbol}:${fromChainId}:${toChainId}`;
+  if (lpCushionMap[key]) return lpCushionMap[key];
+  return lpCushionMap[symbol] ?? "0";
 }

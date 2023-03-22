@@ -668,3 +668,26 @@ export function boolStr() {
     return value === "true" || value === "false";
   });
 }
+
+/**
+ * Returns the cushion for a given token symbol and route. If no route is specified, the cushion for the token symbol
+ * @param symbol The token symbol
+ * @param fromChainId The origin chain ID
+ * @param toChainId The destination chain ID
+ * @returns The cushion in wei
+ */
+export function getLpCushion(
+  symbol: string,
+  fromChainId?: number,
+  toChainId?: number
+) {
+  return (
+    [
+      `REACT_APP_LP_CUSHION_${symbol}_${fromChainId}_${toChainId}`,
+      `REACT_APP_LP_CUSHION_${symbol}_${fromChainId}`,
+      `REACT_APP_LP_CUSHION_${symbol}`,
+    ]
+      .map((key) => process.env[key])
+      .find((value) => value !== undefined) ?? "0"
+  );
+}

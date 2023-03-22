@@ -1,7 +1,7 @@
 import axios from "axios";
 import { BigNumber, ethers } from "ethers";
-import { Fee } from "utils/bridge";
 import { ChainId } from "utils/constants";
+import { SuggestedApiFeeReturnType } from "../types";
 
 /**
  * Creates an HTTP call to the `suggested-fees` API endpoint
@@ -16,14 +16,7 @@ export async function suggestedFeesApiCall(
   originToken: string,
   toChainid: ChainId,
   fromChainid: ChainId
-): Promise<{
-  relayerFee: Fee;
-  relayerGasFee: Fee;
-  relayerCapitalFee: Fee;
-  isAmountTooLow: boolean;
-  quoteTimestamp: ethers.BigNumber;
-  quoteBlock: ethers.BigNumber;
-}> {
+): Promise<SuggestedApiFeeReturnType> {
   const response = await axios.get(`/api/suggested-fees`, {
     params: {
       token: originToken,
@@ -43,6 +36,9 @@ export async function suggestedFeesApiCall(
   const relayGasFeePct = BigNumber.from(result["relayGasFeePct"]);
   const relayGasFeeTotal = BigNumber.from(result["relayGasFeeTotal"]);
 
+  const lpFeePct = BigNumber.from(result["lpFeePct"]);
+  const lpFeeTotal = amount.mul(lpFeePct).div(ethers.utils.parseEther("1"));
+
   const isAmountTooLow = result["isAmountTooLow"];
 
   const quoteTimestamp = BigNumber.from(result["timestamp"]);
@@ -60,6 +56,10 @@ export async function suggestedFeesApiCall(
     relayerGasFee: {
       pct: relayGasFeePct,
       total: relayGasFeeTotal,
+    },
+    lpFee: {
+      pct: lpFeePct,
+      total: lpFeeTotal,
     },
     isAmountTooLow,
     quoteTimestamp,

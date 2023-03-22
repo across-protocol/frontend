@@ -23,6 +23,7 @@ import {
   handleErrorCondition,
   validAddress,
   positiveIntStr,
+  getLpCushion,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -191,7 +192,7 @@ const handler = async (
     );
 
     const lpCushion = ethers.utils.parseUnits(
-      process.env[`REACT_APP_${symbol}_LP_CUSHION`] ?? "0",
+      getLpCushion(symbol, computedOriginChainId, Number(destinationChainId)),
       tokenDetails.decimals
     );
     liquidReserves = liquidReserves.sub(lpCushion);

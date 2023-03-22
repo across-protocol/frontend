@@ -272,7 +272,6 @@ export class ConfigClient {
         ];
       }
     );
-    console.log(exclusivePools);
     return [...this.getTokenList(chainId), ...exclusivePools];
   }
   // this has a chance to mix up eth/weth which can be a problem. prefer token by symbol.

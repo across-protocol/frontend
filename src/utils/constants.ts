@@ -444,6 +444,19 @@ export const getToken = (symbol: string): TokenInfo => {
   return token;
 };
 
+/**
+ * Resolves a token by address. This is useful for tokens that have multiple addresses on different chains.
+ * @param address An address of a token
+ * @returns The token info for the token with the given address
+ */
+export const getTokenByAddress = (address: string): TokenInfo => {
+  const token = Object.values(constants.TOKEN_SYMBOLS_MAP).find((token) =>
+    Object.values(token.addresses).includes(address)
+  );
+  assert(token, "No token found for address: " + address);
+  return getToken(token.symbol);
+};
+
 const RouteSS = superstruct.object({
   fromChain: superstruct.number(),
   toChain: superstruct.number(),
@@ -583,13 +596,24 @@ export const queriesTable = getQueriesTable();
 
 export const referrerDelimiterHex = "0xd00dfeeddeadbeef";
 
-export const usdcLpCushion = process.env.REACT_APP_USDC_LP_CUSHION || "0";
-export const wethLpCushion = process.env.REACT_APP_WETH_LP_CUSHION || "0";
-export const wbtcLpCushion = process.env.REACT_APP_WBTC_LP_CUSHION || "0";
-export const daiLpCushion = process.env.REACT_APP_DAI_LP_CUSHION || "0";
-export const balLpCushion = process.env.REACT_APP_BAL_LP_CUSHION || "0";
-export const umaLpCushion = process.env.REACT_APP_UMA_LP_CUSHION || "0";
-export const bobaLpCushion = process.env.REACT_APP_BOBA_LP_CUSHION || "0";
+/**
+ * The cushion applied to the total available liquidity when calculating the max amount of a token to relay.
+ * This is to account for slippage and other factors that may cause the relay to fail.
+ * This map takes the following format:
+ * {
+ *    "DAI": "100000",
+ *    "DAI:1:10": "100001",
+ * }
+ * The key is the token symbol, and the value is the cushion in wei. If the key is a token symbol followed by a colon,
+ * followed by an origin chain ID, followed by a colon, followed by a destination chain ID, then the cushion will only
+ * apply to that specific route. For example, the key "DAI:1:10" will only apply to the DAI route from mainnet to
+ * optimism.
+ */
+export const lpCushionMap: {
+  [symbol: string]: string;
+} = process.env.REACT_APP_LP_CUSHION_MAP
+  ? JSON.parse(process.env.REACT_APP_LP_CUSHION_MAP)
+  : {};
 
 export function stringValueInArray(value: string, arr: string[]) {
   return arr.indexOf(value) !== -1;

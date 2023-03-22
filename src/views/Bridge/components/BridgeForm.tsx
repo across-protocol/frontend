@@ -17,8 +17,6 @@ import EstimatedTable from "./EstimatedTable";
 import QuickSwap from "./QuickSwap";
 import SlippageAlert from "./SlippageAlert";
 import { BigNumber } from "ethers";
-import AmountTooLowAlert from "./AmountTooLowAlert";
-import InsufficientLiquidityAlert from "./InsufficientLiquidityAlert";
 
 type BridgeFormProps = {
   availableTokens: TokenInfo[];
@@ -51,7 +49,8 @@ type BridgeFormProps = {
   walletAccount?: string;
   disableQuickSwap?: boolean;
   setIsBridgeAmountValid: (isValid: boolean) => void;
-  isAmountGtMaxDeposit: boolean;
+  setIsLiquidityFromAountExceeded: (isExceeded: boolean) => void;
+  isLiquidityFromAountExceeded: boolean;
 };
 
 const BridgeForm = ({
@@ -84,7 +83,8 @@ const BridgeForm = ({
   setIsBridgeAmountValid,
   allToRoutes,
   allFromRoutes,
-  isAmountGtMaxDeposit,
+  isLiquidityFromAountExceeded,
+  setIsLiquidityFromAountExceeded,
 }: BridgeFormProps) => {
   const mapChainInfoToRoute = (
     c?: ChainInfo,
@@ -115,7 +115,7 @@ const BridgeForm = ({
           </Text>
           <CoinSelector
             fromChain={currentFromRoute ?? 1}
-            toChain={currentToRoute ?? 1}
+            toChain={currentToRoute ?? 10}
             tokenChoices={availableTokens}
             tokenSelected={currentToken}
             onTokenSelected={setCurrentToken}
@@ -123,9 +123,10 @@ const BridgeForm = ({
             currentSelectedBalance={currentBalance}
             walletAccount={walletAccount}
             setIsBridgeAmountValid={setIsBridgeAmountValid}
+            setIsLiquidityFromAmountExceeded={setIsLiquidityFromAountExceeded}
+            isAmountTooLow={amountTooLow}
+            isInsufficientLiquidityExceeded={isLiquidityFromAountExceeded}
           />
-          {isAmountGtMaxDeposit && <InsufficientLiquidityAlert />}
-          {!isAmountGtMaxDeposit && amountTooLow && <AmountTooLowAlert />}
         </RowWrapper>
         <RowWrapper>
           <Text size="md" color="grey-400">

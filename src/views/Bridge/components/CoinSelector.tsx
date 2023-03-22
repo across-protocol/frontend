@@ -16,8 +16,8 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { Theme } from "@emotion/react";
 import { SelectorPropType } from "components/Selector/Selector";
-import { useBalancesBySymbols, useConnection } from "hooks";
-import { useLiquidityPool } from "views/LiquidityPool/hooks/useLiquidityPool";
+import { useBalancesBySymbols, useBridgeLimits, useConnection } from "hooks";
+import BridgeInputErrorAlert from "./BridgeAlert";
 
 function useCoinSelector(
   tokens: TokenInfo[],
@@ -26,6 +26,7 @@ function useCoinSelector(
   toChain: number,
   setAmountToBridge: (v: BigNumber | undefined) => void,
   setIsBridgeAmountValid: (v: boolean) => void,
+  setIsLiquidityFromAmountExceeded: (v: boolean) => void,
   currentBalance?: BigNumber,
   account?: string
 ) {
@@ -55,7 +56,11 @@ function useCoinSelector(
     }
   });
 
-  const { data: poolData } = useLiquidityPool(currentToken);
+  const { limits } = useBridgeLimits(
+    getConfig().getTokenInfoBySymbol(fromChain, currentToken).address,
+    fromChain,
+    toChain
+  );
 
   const tokenBalances = useBalancesBySymbols({
     tokenSymbols: queryableTokens.map((t) => t.symbol),
@@ -72,25 +77,27 @@ function useCoinSelector(
 
   const [displayBalance, setDisplayBalance] = useState(false);
 
+  const isValueAmbiguous = /^[0]*[.]?[0]*$/.test(userAmountInput);
+
   const validateAndSetUserInput = useCallback(() => {
     setValidInput(true);
-    if (
-      userAmountInput === "" ||
-      userAmountInput === "." ||
-      userAmountInput === "0." ||
-      userAmountInput === "0"
-    ) {
+    setIsLiquidityFromAmountExceeded(false);
+    if (isValueAmbiguous) {
       setAmountToBridge(undefined);
     } else {
       const parsedUserInput = tokenParserFn(
         isNumberEthersParseable(userAmountInput) ? userAmountInput : "-1"
       );
-      if (
-        parsedUserInput.gt(0) &&
-        (!poolData || parsedUserInput.lte(poolData.liquidReserves))
-      ) {
+      if (parsedUserInput.gt(0)) {
+        if (!!limits && parsedUserInput.gt(limits.maxDeposit)) {
+          setValidInput(false);
+          setIsLiquidityFromAmountExceeded(true);
+        }
+        setValidInput(
+          (validity) =>
+            validity && (!currentBalance || parsedUserInput.lte(currentBalance))
+        );
         setAmountToBridge(parsedUserInput);
-        setValidInput(!currentBalance || parsedUserInput.lte(currentBalance));
       } else {
         setAmountToBridge(undefined);
         setValidInput(false);
@@ -98,10 +105,12 @@ function useCoinSelector(
     }
   }, [
     currentBalance,
-    poolData,
+    limits,
     setAmountToBridge,
     tokenParserFn,
     userAmountInput,
+    setIsLiquidityFromAmountExceeded,
+    isValueAmbiguous,
   ]);
 
   useEffect(() => {
@@ -141,6 +150,7 @@ function useCoinSelector(
     setDisplayBalance,
     disabledSelector,
     balances,
+    isValueAmbiguous,
   };
 }
 
@@ -157,6 +167,10 @@ type CoinSelectorPropType = {
   walletAccount?: string;
 
   setIsBridgeAmountValid: (v: boolean) => void;
+  setIsLiquidityFromAmountExceeded: (v: boolean) => void;
+  isInsufficientLiquidityExceeded: boolean;
+
+  isAmountTooLow: boolean;
 };
 
 const CoinSelector = ({
@@ -169,6 +183,9 @@ const CoinSelector = ({
   toChain,
   walletAccount,
   setIsBridgeAmountValid,
+  setIsLiquidityFromAmountExceeded,
+  isInsufficientLiquidityExceeded,
+  isAmountTooLow,
 }: CoinSelectorPropType) => {
   const {
     token,
@@ -181,6 +198,7 @@ const CoinSelector = ({
     setDisplayBalance,
     disabledSelector,
     balances,
+    isValueAmbiguous,
   } = useCoinSelector(
     tokenChoices,
     tokenSelected,
@@ -188,39 +206,57 @@ const CoinSelector = ({
     toChain,
     onAmountToBridgeChanged,
     setIsBridgeAmountValid,
+    setIsLiquidityFromAmountExceeded,
     currentSelectedBalance,
     walletAccount
   );
 
   return (
     <Wrapper>
-      <AmountWrapper valid={validInput}>
-        <AmountInnerWrapper>
-          <AmountInnerWrapperTextStack>
-            {currentSelectedBalance && (displayBalance || userAmountInput) && (
-              <Text size="sm" color="grey-400">
-                Balance: {tokenFormatterFn(currentSelectedBalance)}{" "}
-                {token.symbol.toUpperCase()}
-              </Text>
-            )}
-            <AmountInnerInput
-              valid={validInput}
-              placeholder="Enter amount"
-              value={userAmountInput}
-              onChange={(e) => setUserAmountInput(e.target.value)}
-              onFocus={() => setDisplayBalance(true)}
-              onBlur={() => setDisplayBalance(false)}
-              data-cy="bridge-amount-input"
-            />
-          </AmountInnerWrapperTextStack>
-          <MaxButtonWrapper
-            onClick={() => maxBalanceOnClick()}
-            disabled={!currentSelectedBalance}
-          >
-            MAX
-          </MaxButtonWrapper>
-        </AmountInnerWrapper>
-      </AmountWrapper>
+      <AmountExternalWrapper>
+        <AmountWrapper valid={validInput}>
+          <AmountInnerWrapper>
+            <AmountInnerWrapperTextStack>
+              {currentSelectedBalance && (displayBalance || userAmountInput) && (
+                <Text size="sm" color="grey-400">
+                  Balance: {tokenFormatterFn(currentSelectedBalance)}{" "}
+                  {token.symbol.toUpperCase()}
+                </Text>
+              )}
+              <AmountInnerInput
+                valid={validInput}
+                placeholder="Enter amount"
+                value={userAmountInput}
+                onChange={(e) => setUserAmountInput(e.target.value)}
+                onFocus={() => setDisplayBalance(true)}
+                onBlur={() => setDisplayBalance(false)}
+                data-cy="bridge-amount-input"
+              />
+            </AmountInnerWrapperTextStack>
+            <MaxButtonWrapper
+              onClick={() => maxBalanceOnClick()}
+              disabled={!currentSelectedBalance}
+            >
+              MAX
+            </MaxButtonWrapper>
+          </AmountInnerWrapper>
+        </AmountWrapper>
+        {!isValueAmbiguous && userAmountInput && !validInput && (
+          <BridgeInputErrorAlert>
+            Only positive numbers are allowed as an input.
+          </BridgeInputErrorAlert>
+        )}
+        {isInsufficientLiquidityExceeded && (
+          <BridgeInputErrorAlert>
+            Insufficient bridge liquidity to process this transfer.
+          </BridgeInputErrorAlert>
+        )}
+        {isAmountTooLow && (
+          <BridgeInputErrorAlert>
+            Bridge fee is high for this amount.
+          </BridgeInputErrorAlert>
+        )}
+      </AmountExternalWrapper>
       <TokenSelection
         elements={tokenChoices.map((t) => ({
           value: t.symbol,
@@ -301,7 +337,7 @@ const AmountWrapper = styled.div<IValidInput>`
   border: 1px solid ${({ valid }) => (!valid ? "#f96c6c" : "#4c4e57")};
   border-radius: 32px;
 
-  width: calc(70% - 6px);
+  width: 100%;
   height: 64px;
 
   flex-shrink: 0;
@@ -310,7 +346,16 @@ const AmountWrapper = styled.div<IValidInput>`
     height: 48px;
     padding: 6px 12px 6px 24px;
   }
+`;
 
+const AmountExternalWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+
+  width: calc(70% - 6px);
+  flex-shrink: 0;
   @media ${QUERIESV2.xs.andDown} {
     width: 100%;
   }
