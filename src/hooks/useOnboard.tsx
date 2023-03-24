@@ -46,6 +46,10 @@ type TrackOnConnectOptions = {
   trackSection?: ConnectWalletButtonClickedProperties["section"];
 };
 
+type AttemptAutoSelectOptions = {
+  enableAutoSelect?: boolean;
+};
+
 type TrackOnDisconnectOptions = {
   trackSection?: DisconnectWalletButtonClickedProperties["section"];
 };
@@ -162,15 +166,22 @@ export function useOnboardManager() {
     },
     [disconnect]
   );
-
   const customOnboardConnect = useCallback(
-    async (options: ConnectOptions & TrackOnConnectOptions = {}) => {
-      let { trackSection, ...connectOptions } = options;
+    async (
+      options: ConnectOptions &
+        TrackOnConnectOptions &
+        AttemptAutoSelectOptions = {}
+    ) => {
+      let { trackSection, enableAutoSelect, ...connectOptions } = options;
       // Resolve the last wallet type if this user has connected before
       const previousConnection = window.localStorage.getItem(CACHED_WALLET_KEY);
       // Test the user was connected before a browser refresh and that
       // the calling code did not specify an autoSelect parameter
-      if (previousConnection && !connectOptions?.autoSelect) {
+      if (
+        previousConnection &&
+        !connectOptions?.autoSelect &&
+        !!enableAutoSelect
+      ) {
         // Append the autoSelect option to include the previous connection
         // type
         connectOptions = {
@@ -184,7 +195,6 @@ export function useOnboardManager() {
       const walletStates = await connect(
         connectOptions?.autoSelect ? connectOptions : undefined
       );
-
       if (walletStates[0]?.accounts[0]?.address) {
         setUserId(utils.getAddress(walletStates[0]?.accounts[0]?.address));
       }
@@ -202,7 +212,9 @@ export function useOnboardManager() {
     // Check if a key exists from the previous wallet
     const previousConnection = window.localStorage.getItem(CACHED_WALLET_KEY);
     if (!wallet && previousConnection) {
-      customOnboardConnect();
+      customOnboardConnect({
+        enableAutoSelect: true,
+      });
     }
   }, [customOnboardConnect, wallet]);
 
