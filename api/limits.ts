@@ -152,8 +152,8 @@ const handler = async (
       getRelayerFeeDetails(
         l1Token,
         ethers.BigNumber.from("10").pow(18),
-        Number(destinationChainId),
         computedOriginChainId,
+        Number(destinationChainId),
         tokenPriceNative
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
