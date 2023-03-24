@@ -394,6 +394,7 @@ export const getTokenSymbol = (tokenAddress: string): string => {
  * Retrieves the results of the `relayFeeCalculator` SDK function: `relayerFeeDetails`
  * @param l1Token A valid L1 ERC-20 token address
  * @param amount  The amount of funds that are requesting to be transferred
+ * @param originChainId The origin chain that this token will be transferred from
  * @param destinationChainId The destination chain that this token will be transferred to
  * @param tokenPrice An optional overred price to prevent the SDK from creating its own call
  * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
@@ -411,7 +412,7 @@ export const getRelayerFeeDetails = (
     amount,
     tokenSymbol,
     tokenPrice,
-    originChainId?.toString(),
+    originChainId.toString(),
     destinationChainId.toString()
   );
 };
