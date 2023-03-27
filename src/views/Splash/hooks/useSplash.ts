@@ -15,7 +15,7 @@ export function useSplash() {
   const numericBenefits = [
     {
       title: "Total Volume",
-      value: ternary(`$${humanReadableNumber(data?.totalVolumeUsd ?? 0)}`),
+      value: ternary(`$${humanReadableNumber(data?.totalVolumeUsd ?? 0, 1)}`),
     },
     {
       title: "Total Transactions",

@@ -275,8 +275,11 @@ export function formatWeiPct(wei?: ethers.BigNumberish, precision: number = 3) {
  * @param num The number to format
  * @returns A human readable format. I.e. 1000 -> 1K, 1001 -> 1K+
  */
-export function humanReadableNumber(num: number): string {
-  num = Math.round(num);
+export function humanReadableNumber(num: number, decimals = 0): string {
   if (num <= 0) return "0";
-  return numeral(num).format("0a").toUpperCase() + "+";
+  return (
+    numeral(num)
+      .format(decimals <= 0 ? "0a" : `0.${"0".repeat(decimals)}a`)
+      .toUpperCase() + "+"
+  );
 }
