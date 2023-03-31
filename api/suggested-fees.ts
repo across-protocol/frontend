@@ -84,8 +84,7 @@ const handler = async (
     // We can use rounding here to increase the chance that a deposit's quote timestamp is re-used, thereby
     // allowing relayers hit the cache more often when fetching a block for a timestamp.
     // Divide by 60 seconds, round down to nearest integer, multiply by 60 seconds.
-    const parsedTimestamp =
-      Math.floor(_parsedTimestamp / (60 * 1000)) * 60 * 1000;
+    const parsedTimestamp = Math.floor(_parsedTimestamp / 60) * 60;
 
     const amount = ethers.BigNumber.from(amountInput);
 
