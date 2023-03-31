@@ -45,7 +45,7 @@ const handler = async (
     query,
   });
   try {
-    const { QUOTE_TIMESTAMP_BUFFER } = process.env;
+    const { QUOTE_TIMESTAMP_BUFFER, QUOTE_TIMESTAMP_PRECISION } = process.env;
     const quoteTimeBuffer = QUOTE_TIMESTAMP_BUFFER
       ? Number(QUOTE_TIMESTAMP_BUFFER)
       : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
@@ -84,7 +84,11 @@ const handler = async (
     // We can use rounding here to increase the chance that a deposit's quote timestamp is re-used, thereby
     // allowing relayers hit the cache more often when fetching a block for a timestamp.
     // Divide by intended precision in seconds, round down to nearest integer, multiply by precision in seconds.
-    const parsedTimestamp = Math.floor(_parsedTimestamp / 300) * 300;
+    const precision = QUOTE_TIMESTAMP_PRECISION
+      ? Number(QUOTE_TIMESTAMP_PRECISION)
+      : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
+    const parsedTimestamp =
+      Math.floor(_parsedTimestamp / precision) * precision;
 
     const amount = ethers.BigNumber.from(amountInput);
 
