@@ -76,7 +76,7 @@ const handler = async (
     const _parsedTimestamp = timestamp
       ? Number(timestamp)
       : (await provider.getBlock("latest")).timestamp - quoteTimeBuffer;
-    
+
     // Round timestamp to nearest minute. Assuming that depositors use this timestamp as the `quoteTimestamp` will allow relayers
     // to take advantage of cached block-for-timestamp values when computing LP fee %'s. Currently the relayer is assumed
     // to first find the block for deposit's `quoteTimestamp` and then call `HubPool#liquidityUtilization` at that block
@@ -84,7 +84,8 @@ const handler = async (
     // We can use rounding here to increase the chance that a deposit's quote timestamp is re-used, thereby
     // allowing relayers hit the cache more often when fetching a block for a timestamp.
     // Divide by 60 seconds, round down to nearest integer, multiply by 60 seconds.
-    const parsedTimestamp = Math.floor(_parsedTimestamp / (60 * 1000)) * 60 * 1000;
+    const parsedTimestamp =
+      Math.floor(_parsedTimestamp / (60 * 1000)) * 60 * 1000;
 
     const amount = ethers.BigNumber.from(amountInput);
 
