@@ -18,6 +18,7 @@ export function useConnection() {
     error,
     setChain,
     setNotifyConfig,
+    didAttemptAutoSelect,
   } = useOnboard();
 
   useEffect(() => {
@@ -49,5 +50,6 @@ export function useConnection() {
     wallet,
     setChain,
     isContractAddress,
+    didAttemptAutoSelect,
   };
 }

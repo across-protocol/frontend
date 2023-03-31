@@ -1,10 +1,10 @@
 import useReferrer from "hooks/useReferrer";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { currentGitCommitHash, getConfig } from "utils";
-import { ampli } from "../../ampli";
+import { currentGitCommitHash, getPageValue } from "utils";
+import { ampli } from "ampli";
 
-export function useRouteTrace() {
+export function useRouteTrace(areInitialUserPropsSet: boolean) {
   const location = useLocation();
   const { referrer: referralAddress, isResolved: isReferralAddressResolved } =
     useReferrer();
@@ -18,10 +18,10 @@ export function useRouteTrace() {
   }, [location, path]);
 
   useEffect(() => {
-    if (path && isReferralAddressResolved) {
+    if (path && isReferralAddressResolved && areInitialUserPropsSet) {
       const referrer = document.referrer;
       const origin = window.location.origin;
-      const page = pageLookup[path] ?? "404Page";
+      const page = getPageValue();
       ampli.pageViewed({
         path,
         referrer,
@@ -37,35 +37,5 @@ export function useRouteTrace() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, isReferralAddressResolved]);
+  }, [path, isReferralAddressResolved, areInitialUserPropsSet]);
 }
-
-export const pageLookup: Record<
-  string,
-  | "404Page"
-  | "splashPage"
-  | "bridgePage"
-  | "poolPage"
-  | "rewardsPage"
-  | "transactionsPage"
-  | "stakingPage"
-  | "referralPage"
-  | "airdropPage"
-> = {
-  "/": "splashPage",
-  "/bridge": "bridgePage",
-  "/pool": "poolPage",
-  "/rewards": "rewardsPage",
-  "/rewards/referrals": "referralPage",
-  "/airdrop": "airdropPage",
-  "/transactions": "transactionsPage",
-  ...getConfig()
-    .getPoolSymbols()
-    .reduce(
-      (acc, sym) => ({
-        ...acc,
-        [`/rewards/staking/${sym.toLowerCase()}`]: "stakingPage",
-      }),
-      {}
-    ),
-};

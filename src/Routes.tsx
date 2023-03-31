@@ -20,9 +20,7 @@ import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
 import ACXLiveBanner from "components/ACXLiveBanner/ACXLiveBanner";
 import ScrollToTop from "components/ScrollToTop";
-import RouteTrace from "components/RouteTrace/RouteTrace";
-import WalletTrace from "components/WalletTrace";
-import WalletBalanceTrace from "components/WalletBalanceTrace/WalletBalanceTrace";
+import { AmpliTrace } from "components/AmpliTrace";
 
 const LiquidityPool = lazyWithRetry(
   () => import(/* webpackChunkName: "LiquidityPools" */ "./views/LiquidityPool")
@@ -114,9 +112,7 @@ const Routes: React.FC = () => {
 
   return (
     <>
-      <RouteTrace />
-      <WalletTrace />
-      <WalletBalanceTrace />
+      <AmpliTrace />
       {generalMaintenanceMessage && (
         <SuperHeader size="lg">{generalMaintenanceMessage}</SuperHeader>
       )}
