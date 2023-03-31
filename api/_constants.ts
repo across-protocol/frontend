@@ -86,6 +86,10 @@ export const relayerFeeCapitalCostConfig: {
 // If `timestamp` is not passed into a suggested-fees query, then return the latest mainnet timestamp minus this buffer.
 export const DEFAULT_QUOTE_TIMESTAMP_BUFFER = 12 * 25; // ~25 blocks on mainnet (12s/block), ~= 5 minutes.
 
+// If `timestamp` is not passed into a suggested-fees query, then return the latest price rounded to
+// the nearest multiple of this value.
+export const DEFAULT_QUOTE_TIMESTAMP_PRECISION = 5 * 60; // 5 minutes
+
 export const BLOCK_TAG_LAG = -1;
 
 // Note: this is a small subset of all the supported base currencies, but since we don't expect to use the others,

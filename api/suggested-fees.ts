@@ -45,7 +45,7 @@ const handler = async (
     query,
   });
   try {
-    const { QUOTE_TIMESTAMP_BUFFER } = process.env;
+    const { QUOTE_TIMESTAMP_BUFFER, QUOTE_TIMESTAMP_PRECISION } = process.env;
     const quoteTimeBuffer = QUOTE_TIMESTAMP_BUFFER
       ? Number(QUOTE_TIMESTAMP_BUFFER)
       : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
@@ -73,9 +73,22 @@ const handler = async (
     // older than HEAD. This is to improve relayer UX who have heightened risk of sending inadvertent invalid
     // fills for quote times right at HEAD (or worst, in the future of HEAD). If timestamp is supplied as a query param,
     // then no need to apply buffer.
-    const parsedTimestamp = timestamp
+    const _parsedTimestamp = timestamp
       ? Number(timestamp)
       : (await provider.getBlock("latest")).timestamp - quoteTimeBuffer;
+
+    // Round timestamp. Assuming that depositors use this timestamp as the `quoteTimestamp` will allow relayers
+    // to take advantage of cached block-for-timestamp values when computing LP fee %'s. Currently the relayer is assumed
+    // to first find the block for deposit's `quoteTimestamp` and then call `HubPool#liquidityUtilization` at that block
+    // height to derive the LP fee. The expensive operation is finding a block for a timestamp and involves a binary search.
+    // We can use rounding here to increase the chance that a deposit's quote timestamp is re-used, thereby
+    // allowing relayers hit the cache more often when fetching a block for a timestamp.
+    // Divide by intended precision in seconds, round down to nearest integer, multiply by precision in seconds.
+    const precision = QUOTE_TIMESTAMP_PRECISION
+      ? Number(QUOTE_TIMESTAMP_PRECISION)
+      : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
+    const parsedTimestamp =
+      Math.floor(_parsedTimestamp / precision) * precision;
 
     const amount = ethers.BigNumber.from(amountInput);
 
