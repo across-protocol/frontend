@@ -203,6 +203,26 @@ export function identifyWalletChainId(chainId: string | number) {
   return ampli.client?.identify(identifyObj);
 }
 
+export function identifyReferrer() {
+  let referrer, referring_domain;
+
+  try {
+    referrer = document.referrer || undefined;
+    referring_domain = referrer?.split("/")[2] ?? undefined;
+  } catch (error) {
+    return;
+  }
+
+  if (!referrer || !referring_domain) {
+    return;
+  }
+
+  const identifyObj = new Identify();
+  identifyObj.set("referrer", referrer);
+  identifyObj.set("referring_domain", referring_domain);
+  return ampli.client?.identify(identifyObj);
+}
+
 export function trackMaxButtonClicked(
   section: MaxTokenAmountClickedProperties["section"]
 ) {

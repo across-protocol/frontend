@@ -5,6 +5,7 @@ import {
   identifyUserWallet,
   setUserId,
   identifyWalletChainId,
+  identifyReferrer,
 } from "utils/amplitude";
 import { ampli } from "ampli";
 
@@ -34,6 +35,9 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
           identifyWalletChainId(chainId).promise,
         ]);
       }
+
+      // Always enforce referring_domain
+      await identifyReferrer()?.promise;
 
       ampli.applicationLoaded();
 
