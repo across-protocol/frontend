@@ -8,22 +8,23 @@ import {
   CACHED_WALLET_KEY,
 } from "utils";
 import { ampli } from "ampli";
-import { useConnection } from "hooks";
+import { useConnection, useAmplitude } from "hooks";
 
-export function useWalletTrace(areInitialUserPropsSet: boolean) {
-  useWalletNetworkTrace(areInitialUserPropsSet);
-  useWalletChangeTrace(areInitialUserPropsSet);
+export function useWalletTrace() {
+  useWalletNetworkTrace();
+  useWalletChangeTrace();
 }
 
-export function useWalletNetworkTrace(areInitialUserPropsSet: boolean) {
+export function useWalletNetworkTrace() {
   const [prevTracked, setPrevTracked] = useState<
     { account: string; chainId: number } | undefined
   >();
+  const { addToAmpliQueue } = useAmplitude();
 
   const { account, chainId } = useConnection();
 
   useEffect(() => {
-    if (!chainId || !account || !areInitialUserPropsSet) {
+    if (!chainId || !account) {
       return;
     }
 
@@ -32,23 +33,26 @@ export function useWalletNetworkTrace(areInitialUserPropsSet: boolean) {
     }
 
     const chainInfo = chainInfoTable[Number(chainId)];
-    ampli.walletNetworkSelected({
-      chainId: String(chainId),
-      chainName: chainInfo?.name || "unknown",
+    addToAmpliQueue(async () => {
+      await ampli.walletNetworkSelected({
+        chainId: String(chainId),
+        chainName: chainInfo?.name || "unknown",
+      }).promise;
     });
     setPrevTracked({ account, chainId });
-  }, [chainId, account, areInitialUserPropsSet]);
+  }, [chainId, account]);
 }
 
-export function useWalletChangeTrace(areInitialUserPropsSet: boolean) {
+export function useWalletChangeTrace() {
   const [prevTrackedWallet, setPrevTrackedWallet] = useState<
     string | undefined
   >();
+  const { addToAmpliQueue } = useAmplitude();
 
   const { wallet } = useConnection();
 
   useEffect(() => {
-    if (!wallet || !areInitialUserPropsSet) {
+    if (!wallet) {
       return;
     }
 
@@ -59,8 +63,11 @@ export function useWalletChangeTrace(areInitialUserPropsSet: boolean) {
     }
 
     const previousConnection = window.localStorage.getItem(CACHED_WALLET_KEY);
-    trackWalletConnectTransactionCompleted(wallet, previousConnection);
+    addToAmpliQueue(async () => {
+      await trackWalletConnectTransactionCompleted(wallet, previousConnection)
+        .promise;
+    });
 
     setPrevTrackedWallet(connectedWalletAddress);
-  }, [wallet, areInitialUserPropsSet]);
+  }, [wallet]);
 }

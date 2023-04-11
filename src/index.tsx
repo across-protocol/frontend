@@ -14,6 +14,7 @@ import "./onboard-override.css";
 import { ErrorProvider } from "hooks";
 import { ToastProvider } from "components/Toast/useToast";
 import { OnboardProvider } from "hooks/useOnboard";
+import { AmpliProvider } from "hooks/useAmplitude";
 import { enableReactQueryDevTools } from "utils";
 import Sentry from "utils/sentry";
 
@@ -47,12 +48,14 @@ ReactDOM.render(
     <ErrorBoundary>
       <QueryClientProvider client={client}>
         <OnboardProvider>
-          <ErrorProvider>
-            <ToastProvider>
-              <App />
-            </ToastProvider>
-          </ErrorProvider>
-          {enableReactQueryDevTools && <ReactQueryDevtools />}
+          <AmpliProvider>
+            <ErrorProvider>
+              <ToastProvider>
+                <App />
+              </ToastProvider>
+            </ErrorProvider>
+            {enableReactQueryDevTools && <ReactQueryDevtools />}
+          </AmpliProvider>
         </OnboardProvider>
       </QueryClientProvider>
     </ErrorBoundary>

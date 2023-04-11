@@ -1,8 +1,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
-import { useConnection } from "hooks";
-import { useError } from "hooks";
+import { useConnection, useError } from "hooks";
 import styled from "@emotion/styled";
 import {
   disableDeposits,
