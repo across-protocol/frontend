@@ -14,3 +14,8 @@ export * from "./useConnection";
 export * from "./useIsWrongNetwork";
 export * from "./useStakingPool";
 export * from "./useApprove";
+export * from "./useWalletBalanceTrace";
+export * from "./useRouteTrace";
+export * from "./useWalletTrace";
+export * from "./useQueue";
+export * from "./useAmplitude";

@@ -13,7 +13,6 @@ import {
   TransferDepositCompletedProperties,
   QuickSwapButtonClickedProperties,
 } from "ampli";
-import { pageLookup } from "components/RouteTrace/useRouteTrace";
 import {
   TokenInfo,
   ChainInfo,
@@ -35,6 +34,36 @@ import { getConfig } from "./config";
 import { ChainId } from "./utils";
 import { categorizeNumberInRange } from "./math";
 import { range } from "lodash";
+
+export const pageLookup: Record<
+  string,
+  | "404Page"
+  | "splashPage"
+  | "bridgePage"
+  | "poolPage"
+  | "rewardsPage"
+  | "transactionsPage"
+  | "stakingPage"
+  | "referralPage"
+  | "airdropPage"
+> = {
+  "/": "splashPage",
+  "/bridge": "bridgePage",
+  "/pool": "poolPage",
+  "/rewards": "rewardsPage",
+  "/rewards/referrals": "referralPage",
+  "/airdrop": "airdropPage",
+  "/transactions": "transactionsPage",
+  ...getConfig()
+    .getPoolSymbols()
+    .reduce(
+      (acc, sym) => ({
+        ...acc,
+        [`/rewards/staking/${sym.toLowerCase()}`]: "stakingPage",
+      }),
+      {}
+    ),
+};
 
 export function getPageValue() {
   const path = window.location.pathname;
@@ -69,10 +98,10 @@ export function trackIfWalletSelected(
 }
 
 export function trackWalletConnectTransactionCompleted(
-  walletStates: WalletState[],
+  connectedWallet: WalletState | null,
   previousConnection?: string | null
 ) {
-  if (walletStates.length === 0) {
+  if (!connectedWallet) {
     return ampli.walletConnectTransactionCompleted({
       isReconnect: false,
       succeeded: false,
@@ -82,8 +111,8 @@ export function trackWalletConnectTransactionCompleted(
   return ampli.walletConnectTransactionCompleted({
     isReconnect: Boolean(previousConnection),
     succeeded: true,
-    walletAddress: utils.getAddress(walletStates[0].accounts[0].address),
-    walletType: walletStates[0].label,
+    walletAddress: utils.getAddress(connectedWallet.accounts[0].address),
+    walletType: connectedWallet.label,
   });
 }
 
@@ -150,12 +179,11 @@ export function setUserId(walletAddress?: string) {
   ampli.client?.setUserId(walletAddress);
 }
 
-export function identifyUserWallets(walletStates: WalletState[]) {
-  if (walletStates.length === 0) {
+export function identifyUserWallet(connectedWallet: WalletState | null) {
+  if (!connectedWallet) {
     return;
   }
 
-  const [connectedWallet] = walletStates;
   const connectedWalletAddress = utils.getAddress(
     connectedWallet.accounts[0].address
   );
@@ -169,9 +197,29 @@ export function identifyUserWallets(walletStates: WalletState[]) {
   return ampli.client?.identify(identifyObj);
 }
 
-export function trackWalletChainId(chainId: string | number) {
+export function identifyWalletChainId(chainId: string | number) {
   const identifyObj = new Identify();
   identifyObj.postInsert("AllWalletChainIds", chainId);
+  return ampli.client?.identify(identifyObj);
+}
+
+export function identifyReferrer() {
+  let referrer, referring_domain;
+
+  try {
+    referrer = document.referrer || undefined;
+    referring_domain = referrer?.split("/")[2] ?? undefined;
+  } catch (error) {
+    return;
+  }
+
+  if (!referrer || !referring_domain) {
+    return;
+  }
+
+  const identifyObj = new Identify();
+  identifyObj.set("referrer", referrer);
+  identifyObj.set("referring_domain", referring_domain);
   return ampli.client?.identify(identifyObj);
 }
 

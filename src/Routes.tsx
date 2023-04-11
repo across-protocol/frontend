@@ -1,8 +1,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
-import { useConnection } from "hooks";
-import { useError } from "hooks";
+import { useConnection, useError } from "hooks";
 import styled from "@emotion/styled";
 import {
   disableDeposits,
@@ -20,9 +19,7 @@ import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
 import ACXLiveBanner from "components/ACXLiveBanner/ACXLiveBanner";
 import ScrollToTop from "components/ScrollToTop";
-import RouteTrace from "components/RouteTrace/RouteTrace";
-import WalletTrace from "components/WalletTrace";
-import WalletBalanceTrace from "components/WalletBalanceTrace/WalletBalanceTrace";
+import { AmpliTrace } from "components/AmpliTrace";
 
 const LiquidityPool = lazyWithRetry(
   () => import(/* webpackChunkName: "LiquidityPools" */ "./views/LiquidityPool")
@@ -114,9 +111,7 @@ const Routes: React.FC = () => {
 
   return (
     <>
-      <RouteTrace />
-      <WalletTrace />
-      <WalletBalanceTrace />
+      <AmpliTrace />
       {generalMaintenanceMessage && (
         <SuperHeader size="lg">{generalMaintenanceMessage}</SuperHeader>
       )}

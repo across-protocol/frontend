@@ -1,18 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import { useWallets } from "@web3-onboard/react";
 import { utils } from "ethers";
 
 import {
-  trackWalletChainId,
   trackWalletConnectTransactionCompleted,
   chainInfoTable,
   CACHED_WALLET_KEY,
-  identifyUserWallets,
-  setUserId,
 } from "utils";
 import { ampli } from "ampli";
-import { useConnection } from "hooks";
+import { useConnection, useAmplitude } from "hooks";
 
 export function useWalletTrace() {
   useWalletNetworkTrace();
@@ -23,6 +19,7 @@ export function useWalletNetworkTrace() {
   const [prevTracked, setPrevTracked] = useState<
     { account: string; chainId: number } | undefined
   >();
+  const { addToAmpliQueue } = useAmplitude();
 
   const { account, chainId } = useConnection();
 
@@ -36,11 +33,11 @@ export function useWalletNetworkTrace() {
     }
 
     const chainInfo = chainInfoTable[Number(chainId)];
-    setUserId(account);
-    trackWalletChainId(chainId);
-    ampli.walletNetworkSelected({
-      chainId: String(chainId),
-      chainName: chainInfo?.name || "unknown",
+    addToAmpliQueue(async () => {
+      await ampli.walletNetworkSelected({
+        chainId: String(chainId),
+        chainName: chainInfo?.name || "unknown",
+      }).promise;
     });
     setPrevTracked({ account, chainId });
   }, [chainId, account]);
@@ -50,27 +47,27 @@ export function useWalletChangeTrace() {
   const [prevTrackedWallet, setPrevTrackedWallet] = useState<
     string | undefined
   >();
+  const { addToAmpliQueue } = useAmplitude();
 
-  const wallets = useWallets();
+  const { wallet } = useConnection();
 
   useEffect(() => {
-    if (wallets.length === 0) {
+    if (!wallet) {
       return;
     }
 
-    const [connectedWallet] = wallets;
-    const connectedWalletAddress = utils.getAddress(
-      connectedWallet.accounts[0].address
-    );
+    const connectedWalletAddress = utils.getAddress(wallet.accounts[0].address);
 
     if (prevTrackedWallet === connectedWalletAddress) {
       return;
     }
 
-    identifyUserWallets(wallets);
     const previousConnection = window.localStorage.getItem(CACHED_WALLET_KEY);
-    trackWalletConnectTransactionCompleted(wallets, previousConnection);
+    addToAmpliQueue(async () => {
+      await trackWalletConnectTransactionCompleted(wallet, previousConnection)
+        .promise;
+    });
 
     setPrevTrackedWallet(connectedWalletAddress);
-  }, [wallets]);
+  }, [wallet]);
 }

@@ -76,6 +76,7 @@ type OnboardContextValue = {
   account: Account | null;
   chainId: ChainId;
   error?: Error;
+  didAttemptAutoSelect: boolean;
 };
 
 const notify = Notify({
@@ -93,6 +94,7 @@ export function useOnboardManager() {
   >(undefined);
   const [account, setAccount] = useState<Account | null>(null);
   const [error, setError] = useState<Error | undefined>(undefined);
+  const [didAttemptAutoSelect, setDidAttemptAutoSelect] = useState(false);
 
   /** Immediately resolve the onboard when it becomes available */
   if (!onboard) setOnboard(onboardInit());
@@ -214,7 +216,11 @@ export function useOnboardManager() {
     if (!wallet && previousConnection) {
       customOnboardConnect({
         enableAutoSelect: true,
+      }).then(() => {
+        setDidAttemptAutoSelect(true);
       });
+    } else {
+      setDidAttemptAutoSelect(true);
     }
   }, [customOnboardConnect, wallet]);
 
@@ -235,6 +241,7 @@ export function useOnboardManager() {
     account,
     chainId: (Number(wallet?.chains[0].id) as ChainId) || 0,
     error,
+    didAttemptAutoSelect,
   };
 }
 
