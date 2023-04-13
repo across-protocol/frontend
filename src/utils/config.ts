@@ -2,6 +2,9 @@ import assert from "assert";
 import { Signer } from "./ethers";
 import * as constants from "./constants";
 import * as providerUtils from "./providers";
+import filter from "lodash/filter";
+import sortBy from "lodash/sortBy";
+
 import {
   HubPool,
   HubPool__factory,
@@ -9,15 +12,11 @@ import {
   SpokePool__factory,
   AcrossMerkleDistributor,
   AcrossMerkleDistributor__factory,
-} from "@across-protocol/contracts-v2";
-import filter from "lodash/filter";
-import sortBy from "lodash/sortBy";
-import {
   AcceleratingDistributor,
   AcceleratingDistributor__factory,
   ClaimAndStake,
   ClaimAndStake__factory,
-} from "@across-protocol/across-token";
+} from "utils/typechain";
 
 export type Token = constants.TokenInfo & {
   l1TokenAddress: string;

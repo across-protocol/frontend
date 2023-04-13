@@ -1,6 +1,8 @@
-import { ERC20__factory } from "@across-protocol/contracts-v2";
 import { providers } from "ethers";
 import { useCallback } from "react";
+
+import { ERC20__factory } from "utils/typechain";
+
 import { useConnection } from "./useConnection";
 
 export function useWalletTokenImport() {

@@ -1,6 +1,5 @@
 import { useMutation } from "react-query";
 import { BigNumber, Signer } from "ethers";
-import { ERC20__factory } from "@across-protocol/contracts-v2";
 import { API } from "bnc-notify";
 
 import { useConnection, useStakingPool } from "hooks";
@@ -11,6 +10,7 @@ import {
   waitOnTransaction,
 } from "utils";
 import { sendWithPaddedGas } from "utils/transactions";
+import { ERC20__factory } from "utils/typechain";
 
 export type StakingActionFunctionArgs = { amount: BigNumber };
 export type StakingActionFunctionType = (
