@@ -16,11 +16,11 @@ import {
   defaultRefetchInterval,
 } from "utils";
 import { BigNumber, BigNumberish } from "ethers";
-import { ERC20__factory } from "@across-protocol/contracts-v2";
 import axios from "axios";
 import { ConvertDecimals } from "utils/convertdecimals";
 import { useCoingeckoPrice } from "./useCoingeckoPrice";
 import getApiEndpoint from "utils/serverless-api";
+import { ERC20__factory } from "utils/typechain";
 
 const config = getConfig();
 

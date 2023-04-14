@@ -13,7 +13,7 @@ import {
   HubPool__factory,
   SpokePool,
   SpokePool__factory,
-} from "@across-protocol/contracts-v2";
+} from "utils/typechain";
 
 // event types
 type L1TokenEnabledForLiquidityProvision = GetEventType<

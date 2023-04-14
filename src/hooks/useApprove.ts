@@ -1,9 +1,9 @@
 import { useConnection } from "hooks";
 import { useMutation } from "react-query";
 import { BigNumberish } from "ethers";
-import { ERC20__factory } from "@across-protocol/contracts-v2";
 
 import { hubPoolChainId, MAX_APPROVAL_AMOUNT, waitOnTransaction } from "utils";
+import { ERC20__factory } from "utils/typechain";
 import { useIsWrongNetwork } from "hooks";
 
 export function useApprove(requiredChainId = hubPoolChainId) {
