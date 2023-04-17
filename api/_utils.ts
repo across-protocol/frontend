@@ -10,7 +10,7 @@ import { BigNumber, ethers, providers, utils } from "ethers";
 import { Log, Logging } from "@google-cloud/logging";
 import { define, StructError } from "superstruct";
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
-import enabledGoerliRoutesAsJson from "../src/data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
+import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
 
 import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
@@ -298,6 +298,9 @@ export const providerForChain: {
   10: infuraProvider(10),
   137: infuraProvider(137),
   42161: infuraProvider(42161),
+  // testnets
+  5: infuraProvider(5),
+  421613: infuraProvider(421613),
 };
 export const queries: Record<number, () => QueryBase> = {
   1: () =>
@@ -344,6 +347,29 @@ export const queries: Record<number, () => QueryBase> = {
       getLogger(),
       getGasMarkup(42161)
     ),
+  // testnets
+  5: () =>
+    new sdk.relayFeeCalculator.EthereumQueries(
+      providerForChain[5],
+      undefined,
+      "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(5)
+    ),
+  421613: () =>
+    new sdk.relayFeeCalculator.EthereumQueries(
+      providerForChain[421613],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(421613)
+    ),
 };
 
 /**
@@ -381,8 +407,7 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
 export const getTokenSymbol = (tokenAddress: string): string => {
   const symbol = Object.entries(sdk.constants.TOKEN_SYMBOLS_MAP)?.find(
     ([_symbol, { addresses }]) =>
-      addresses[sdk.constants.CHAIN_IDs.MAINNET].toLowerCase() ===
-      tokenAddress.toLowerCase()
+      addresses[HUP_POOL_CHAIN_ID]?.toLowerCase() === tokenAddress.toLowerCase()
   )?.[0];
   if (!symbol) {
     throw new InputError("Token address provided was not whitelisted.");
