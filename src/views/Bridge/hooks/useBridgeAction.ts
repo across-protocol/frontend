@@ -114,6 +114,8 @@ export function useBridgeAction(
         destinationChainId: frozenPayload.toChain,
         assetAddr: frozenPayload.tokenAddress,
         depositorAddr: utils.getAddress(frozenAccount),
+        recipientAddr: frozenPayload.toAddress,
+        message: frozenPayload.message || "0x",
         amount: frozenPayload.amount.toString(),
         depositTxHash: tx.hash,
         fillTxs: [],

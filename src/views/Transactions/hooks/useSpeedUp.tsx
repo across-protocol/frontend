@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { BigNumber, utils } from "ethers";
-import { JsonRpcSigner } from "@uma/sdk/dist/types/oracle/types/ethers";
+import { BigNumber } from "ethers";
+import { utils as sdkUtils } from "@across-protocol/sdk-v2";
 
 import { useConnection } from "hooks";
 import { getConfig, getChainInfo, Token } from "utils";
@@ -46,7 +46,13 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
     }
   }, [txStatus, txErrorMsg]);
 
-  const speedUp = async (newRelayerFeePct: BigNumber) => {
+  const speedUp = async (
+    newRelayerFeePct: BigNumber,
+    optionalUpdates: Partial<{
+      newMessage?: string;
+      newRecipient?: string;
+    }> = {}
+  ) => {
     try {
       setSpeedUpStatus("pending");
       setSpeedUpErrorMsg("");
@@ -55,17 +61,30 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
         throw new Error(`Wallet is not connected`);
       }
 
-      const depositorSignature = await getDepositorSignature(signer, {
-        originChainId: transfer.sourceChainId,
+      const newRecipient =
+        optionalUpdates.newRecipient || transfer.recipientAddr;
+      const newMessage = optionalUpdates.newMessage || transfer.message;
+
+      const typedData = sdkUtils.getUpdateDepositTypedData(
+        transfer.depositId,
+        transfer.sourceChainId,
         newRelayerFeePct,
-        depositId: transfer.depositId,
-      });
+        newRecipient,
+        newMessage
+      );
+      const depositorSignature = await signer._signTypedData(
+        typedData.domain as Omit<typeof typedData.domain, "salt">,
+        typedData.types,
+        typedData.message
+      );
 
       const spokePool = config.getSpokePool(transfer.sourceChainId, signer);
       const txResponse = await spokePool.speedUpDeposit(
         await signer.getAddress(),
         newRelayerFeePct,
         transfer.depositId,
+        newRecipient,
+        newMessage,
         depositorSignature
       );
       setChainId(transfer.sourceChainId);
@@ -92,27 +111,4 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
     suggestedRelayerFeePct,
     speedUpTxLink,
   };
-}
-
-async function getDepositorSignature(
-  signer: JsonRpcSigner,
-  relayerFeeMessage: {
-    originChainId: number;
-    newRelayerFeePct: BigNumber;
-    depositId: number;
-  }
-) {
-  const depositorMessageHash = utils.keccak256(
-    utils.defaultAbiCoder.encode(
-      ["string", "uint64", "uint32", "uint32"],
-      [
-        "ACROSS-V2-FEE-1.0",
-        relayerFeeMessage.newRelayerFeePct,
-        relayerFeeMessage.depositId,
-        relayerFeeMessage.originChainId,
-      ]
-    )
-  );
-
-  return signer.signMessage(utils.arrayify(depositorMessageHash));
 }

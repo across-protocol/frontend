@@ -28,6 +28,8 @@ export type Deposit = {
   destinationChainId: number;
   assetAddr: string;
   depositorAddr: string;
+  recipientAddr: string;
+  message: string;
   amount: string;
   depositTxHash: string;
   fillTxs: string[];

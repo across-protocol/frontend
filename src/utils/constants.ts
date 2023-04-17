@@ -27,9 +27,8 @@ import arbitrumLogoGrayscale from "assets/grayscale-logos/arbitrum.svg";
 import polygonLogoGrayscale from "assets/grayscale-logos/polygon.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
-import KovanRoutes from "data/routes_42_0x8d84F51710dfa9D409027B167371bBd79e0539e5.json";
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
-import GoerliRoutes from "data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
+import GoerliRoutes from "data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
 
 /* Chains and Tokens section */
 export enum ChainId {
@@ -38,10 +37,7 @@ export enum ChainId {
   ARBITRUM = 42161,
   POLYGON = 137,
   // testnets
-  RINKEBY = 4,
-  KOVAN = 42,
-  KOVAN_OPTIMISM = 69,
-  ARBITRUM_RINKEBY = 421611,
+  ARBITRUM_GOERLI = 421613,
   GOERLI = 5,
   // Polygon testnet
   MUMBAI = 80001,
@@ -118,10 +114,7 @@ export const configStoreAddresses: Record<ChainId, string> = {
   [ChainId.ARBITRUM]: ethers.constants.AddressZero,
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.POLYGON]: ethers.constants.AddressZero,
-  [ChainId.RINKEBY]: ethers.constants.AddressZero,
-  [ChainId.KOVAN]: getAddress("0xDd74f7603e3fDA6435aEc91F8960a6b8b40415f3"),
-  [ChainId.KOVAN_OPTIMISM]: ethers.constants.AddressZero,
-  [ChainId.ARBITRUM_RINKEBY]: ethers.constants.AddressZero,
+  [ChainId.ARBITRUM_GOERLI]: ethers.constants.AddressZero,
   [ChainId.GOERLI]: getAddress("0x3215e3C91f87081757d0c41EF0CB77738123Be83"),
   [ChainId.MUMBAI]: ethers.constants.AddressZero,
 };
@@ -219,34 +212,6 @@ export const chainInfoList: ChainInfoList = [
     earliestBlock: 6586188,
   },
   {
-    name: "Kovan",
-    fullName: "Ethereum Testnet Kovan",
-    chainId: ChainId.KOVAN,
-    logoURI: ethereumLogo,
-    grayscaleLogoURI: ethereumLogoGrayscale,
-    explorerUrl: "https://kovan.etherscan.io",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://kovan.etherscan.io"
-    ),
-    nativeCurrencySymbol: "KOV",
-    pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 31457386,
-  },
-  {
-    name: "Optimism Kovan",
-    fullName: "Optimism Testnet Kovan",
-    chainId: ChainId.KOVAN_OPTIMISM,
-    logoURI: optimismLogo,
-    grayscaleLogoURI: optimismLogoGrayscale,
-    rpcUrl: "https://kovan.optimism.io",
-    explorerUrl: "https://kovan-optimistic.etherscan.io",
-    constructExplorerLink: (txHash: string) =>
-      `https://kovan-optimistic.etherscan.io/tx/${txHash}`,
-    nativeCurrencySymbol: "KOR",
-    pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 2537971,
-  },
-  {
     name: "Mumbai",
     chainId: ChainId.MUMBAI,
     logoURI: polygonLogo,
@@ -261,32 +226,17 @@ export const chainInfoList: ChainInfoList = [
     earliestBlock: 25751326,
   },
   {
-    name: "Arbitrum Rinkeby",
-    fullName: "Arbitrum Testnet Rinkeby",
-    chainId: ChainId.ARBITRUM_RINKEBY,
+    name: "Arbitrum Goerli",
+    fullName: "Arbitrum Testnet Goerli",
+    chainId: ChainId.ARBITRUM_GOERLI,
     logoURI: arbitrumLogo,
     grayscaleLogoURI: arbitrumLogoGrayscale,
-    explorerUrl: "https://rinkeby-explorer.arbitrum.io",
+    explorerUrl: "https://testnet.arbiscan.io",
     constructExplorerLink: (txHash: string) =>
-      `https://rinkeby-explorer.arbitrum.io/tx/${txHash}`,
-    rpcUrl: "https://rinkeby.arbitrum.io/rpc",
-    nativeCurrencySymbol: "ARETH",
-    pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 10523275,
-  },
-  {
-    name: "Rinkeby",
-    fullName: "Rinkeby Testnet",
-    chainId: ChainId.RINKEBY,
-    logoURI: ethereumLogo,
-    grayscaleLogoURI: ethereumLogoGrayscale,
-    explorerUrl: "https://rinkeby.etherscan.io",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://rinkeby.etherscan.io"
-    ),
+      `https://testnet.arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 10485193,
+    earliestBlock: 10523275,
   },
 ];
 
@@ -489,10 +439,6 @@ export type Routes = superstruct.Infer<typeof RoutesSS>;
 export type Pool = superstruct.Infer<typeof PoolSS>;
 export type Pools = superstruct.Infer<typeof PoolsSS>;
 export function getRoutes(chainId: ChainId): RouteConfig {
-  if (chainId === ChainId.KOVAN) {
-    superstruct.assert(KovanRoutes, RouteConfigSS);
-    return KovanRoutes;
-  }
   if (chainId === ChainId.MAINNET) {
     superstruct.assert(MainnetRoutes, RouteConfigSS);
     return MainnetRoutes;
@@ -563,29 +509,17 @@ const getQueriesTable = () => {
       ),
     [ChainId.POLYGON]: (provider: ethers.providers.Provider) =>
       new relayFeeCalculator.PolygonQueries(provider),
-    [ChainId.KOVAN]: (provider: ethers.providers.Provider) =>
-      new relayFeeCalculator.EthereumQueries(provider),
-    [ChainId.RINKEBY]: (provider: ethers.providers.Provider) =>
-      new relayFeeCalculator.EthereumQueries(provider),
     [ChainId.GOERLI]: (provider: ethers.providers.Provider) =>
       new relayFeeCalculator.EthereumQueries(provider),
     [ChainId.MUMBAI]: (provider: ethers.providers.Provider) =>
       new relayFeeCalculator.PolygonQueries(provider),
-    // Use hardcoded DAI address instead of USDC because DAI is enabled here.
-    [ChainId.KOVAN_OPTIMISM]: (provider: ethers.providers.Provider) =>
-      new relayFeeCalculator.OptimismQueries(
-        provider,
-        undefined,
-        "0x1954D4A36ac4fD8BEde42E59368565A92290E705",
-        "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"
-      ),
     // Use hardcoded WETH address instead of USDC because WETH is enabled here.
-    [ChainId.ARBITRUM_RINKEBY]: (provider: ethers.providers.Provider) =>
+    [ChainId.ARBITRUM_GOERLI]: (provider: ethers.providers.Provider) =>
       new relayFeeCalculator.ArbitrumQueries(
         provider,
         undefined,
-        "0x3BED21dAe767e4Df894B31b14aD32369cE4bad8b",
-        "0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681"
+        "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7", // v2.5 SpokePool
+        "0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681" // WETH
       ),
   };
 };
@@ -712,3 +646,6 @@ export const sentryDsn = process.env.REACT_APP_SENTRY_DSN;
 export const isSentryEnabled = Boolean(
   process.env.REACT_APP_ENABLE_SENTRY === "true"
 );
+
+export const defaultBridgeFromChainId = hubPoolChainId;
+export const defaultBridgeToChainId = hubPoolChainId === 1 ? 10 : 5;
