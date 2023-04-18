@@ -6,8 +6,8 @@ import {
   applyMapFilter,
   validAddress,
   positiveIntStr,
+  ENABLED_ROUTES,
 } from "./_utils";
-import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import { TypedVercelRequest } from "./_types";
 
 const AvailableRoutesQueryParamsSchema = object({
@@ -47,7 +47,7 @@ const handler = async (
       l1TokenAddress,
       fromChain,
       fromTokenAddress,
-    } of enabledRoutesAsJson.routes) {
+    } of ENABLED_ROUTES.routes) {
       l1TokensToDestinationTokens[l1TokenAddress] = {
         ...l1TokensToDestinationTokens[l1TokenAddress],
         [fromChain]: fromTokenAddress,
@@ -55,7 +55,7 @@ const handler = async (
     }
 
     const enabledRoutes = applyMapFilter(
-      enabledRoutesAsJson.routes,
+      ENABLED_ROUTES.routes,
       // Filter out elements from the request query parameters
       (route: {
         originToken: string;
