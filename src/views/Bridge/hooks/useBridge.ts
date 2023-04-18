@@ -303,8 +303,8 @@ export function useBridge() {
 
   const { limits: rawLimits, isLoading: areRawLimitsLoading } = useBridgeLimits(
     currentRoute?.fromTokenAddress,
-    currentFromRoute,
-    currentToRoute
+    currentRoute?.fromChain,
+    currentRoute?.toChain
   );
 
   const [fees, setFees] = useState<GetBridgeFeesResult | undefined>();
@@ -474,8 +474,8 @@ export function useBridge() {
     currentToken,
     setCurrentToken: setCurrentTokenExternal,
     setAmountToBridge,
-    currentFromRoute,
-    currentToRoute,
+    currentFromRoute: currentRoute?.fromChain,
+    currentToRoute: currentRoute?.toChain,
     setCurrentFromRoute: setCurrentFromRouteExternal,
     setCurrentToRoute: setCurrentToRouteExternal,
     currentBalance,
