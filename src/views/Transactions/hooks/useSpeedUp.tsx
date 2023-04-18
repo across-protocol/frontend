@@ -1,36 +1,31 @@
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import { utils as sdkUtils } from "@across-protocol/sdk-v2";
+import { useMutation } from "react-query";
 
-import { useConnection } from "hooks";
-import { getConfig, getChainInfo, Token } from "utils";
-import { useBridgeFees, useNotify } from "hooks";
-import { Deposit } from "hooks/useDeposits";
+import { useConnection, useBridgeFees, useIsWrongNetwork } from "hooks";
+import { getConfig, getChainInfo, Token, waitOnTransaction } from "utils";
 
-type SpeedUpStatus = "idle" | "pending" | "success" | "error";
+import type { Deposit } from "hooks/useDeposits";
+
+const config = getConfig();
 
 export function useSpeedUp(transfer: Deposit, token: Token) {
-  const config = getConfig();
-  const { chainId, signer, setChain } = useConnection();
+  const { signer, notify } = useConnection();
+  const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork(
+    transfer.sourceChainId
+  );
   const { fees, isLoading } = useBridgeFees(
     BigNumber.from(transfer.amount),
     transfer.sourceChainId,
     transfer.destinationChainId,
     token.symbol
   );
-  const { setChainId, setTxResponse, txStatus, txErrorMsg } = useNotify();
 
-  const [isCorrectChain, setIsCorrectChain] = useState(false);
-  const [speedUpStatus, setSpeedUpStatus] = useState<SpeedUpStatus>("idle");
-  const [speedUpErrorMsg, setSpeedUpErrorMsg] = useState<string>("");
   const [speedUpTxLink, setSpeedUpTxLink] = useState<string>("");
   const [suggestedRelayerFeePct, setSuggestedRelayerFeePct] = useState<
     BigNumber | undefined
   >();
-
-  useEffect(() => {
-    setIsCorrectChain(chainId === transfer.sourceChainId);
-  }, [chainId, transfer.sourceChainId]);
 
   useEffect(() => {
     if (fees) {
@@ -38,37 +33,30 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
     }
   }, [fees]);
 
-  useEffect(() => {
-    setSpeedUpStatus(txStatus);
-
-    if (txErrorMsg) {
-      setSpeedUpErrorMsg(txErrorMsg);
-    }
-  }, [txStatus, txErrorMsg]);
-
-  const speedUp = async (
-    newRelayerFeePct: BigNumber,
-    optionalUpdates: Partial<{
-      newMessage?: string;
-      newRecipient?: string;
-    }> = {}
-  ) => {
-    try {
-      setSpeedUpStatus("pending");
-      setSpeedUpErrorMsg("");
-
+  const speedUp = useMutation(
+    async (args: {
+      newRelayerFeePct: BigNumber;
+      optionalUpdates?: Partial<{
+        newMessage: string;
+        newRecipient: string;
+      }>;
+    }) => {
       if (!signer) {
-        throw new Error(`Wallet is not connected`);
+        return;
+      }
+
+      if (isWrongNetwork) {
+        await isWrongNetworkHandler();
       }
 
       const newRecipient =
-        optionalUpdates.newRecipient || transfer.recipientAddr;
-      const newMessage = optionalUpdates.newMessage || transfer.message;
+        args.optionalUpdates?.newRecipient || transfer.recipientAddr;
+      const newMessage = args.optionalUpdates?.newMessage || transfer.message;
 
       const typedData = sdkUtils.getUpdateDepositTypedData(
         transfer.depositId,
         transfer.sourceChainId,
-        newRelayerFeePct,
+        args.newRelayerFeePct,
         newRecipient,
         newMessage
       );
@@ -81,32 +69,25 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
       const spokePool = config.getSpokePool(transfer.sourceChainId, signer);
       const txResponse = await spokePool.speedUpDeposit(
         await signer.getAddress(),
-        newRelayerFeePct,
+        args.newRelayerFeePct,
         transfer.depositId,
         newRecipient,
         newMessage,
         depositorSignature
       );
-      setChainId(transfer.sourceChainId);
-      setTxResponse(txResponse);
       setSpeedUpTxLink(
         getChainInfo(transfer.sourceChainId).constructExplorerLink(
           txResponse.hash
         )
       );
-    } catch (error) {
-      setSpeedUpStatus("error");
-      setSpeedUpErrorMsg((error as Error).message);
-      console.error(error);
+      await waitOnTransaction(transfer.sourceChainId, txResponse, notify);
     }
-  };
+  );
 
   return {
     speedUp,
-    speedUpStatus,
-    speedUpErrorMsg,
-    isCorrectChain,
-    setChain,
+    isWrongNetwork,
+    isWrongNetworkHandler,
     isFetchingFees: isLoading,
     suggestedRelayerFeePct,
     speedUpTxLink,
