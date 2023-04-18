@@ -29,7 +29,6 @@
     "@types/react-dom": "^17.0.0",
     "@types/react-router-dom": "^5.3.1",
     "@uma/contracts-frontend": "^0.1.17",
-    "@uma/contracts-node": "^0.1.17",
     "@uma/sdk": "^0.22.2",
     "@web3-onboard/coinbase": "^2.1.0",
     "@web3-onboard/core": "^2.8.0",
