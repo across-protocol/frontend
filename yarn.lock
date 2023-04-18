@@ -11,15 +11,15 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/contracts-v2@^2.1.0-beta.6":
-  version "2.1.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.1.0-beta.6.tgz#911885a908cd16443ef946fa58684ed492f4dde7"
-  integrity sha512-b+s82oiE2TuRT9Tz2I9jD5V0kRMt5fC60fQmt+N1wAUYNrtYUG/eUWiO/dxLE65hNCkniEOcABlOwBHJOzkqEg==
+"@across-protocol/contracts-v2@^2.1.0-beta.10":
+  version "2.1.0-beta.10"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.1.0-beta.10.tgz#3a869a6fcdc459b74d0b2760904854bcbbf48a59"
+  integrity sha512-To1bN8Td0sFLw/wpNb36UKRbV1g6Fd4ZdLp91pfvOxjqHTDoPeuZtKFrIfI4C5NkqkKht1KNWCmeE4s6f7pwTA==
   dependencies:
     "@defi-wonderland/smock" "^2.3.4"
     "@eth-optimism/contracts" "^0.5.11"
-    "@openzeppelin/contracts" "^4.7.3"
-    "@openzeppelin/contracts-upgradeable" "^4.8.2"
+    "@openzeppelin/contracts" "^4.8.3"
+    "@openzeppelin/contracts-upgradeable" "^4.8.3"
     "@uma/common" "^2.29.0"
     "@uma/contracts-node" "^0.3.18"
     "@uma/core" "^2.41.0"
@@ -35,13 +35,13 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.5.0-beta.12":
-  version "0.5.0-beta.12"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.5.0-beta.12.tgz#12ebd43e7770f698e91637443dcff7579f74f772"
-  integrity sha512-R95ltP/pQawzPOISG/urZl2EevyrpPKUzI8O5HWQBJLonrZyzOwjIlyYG9V0J+w0Iz6dt7/cxvmBZYKnioTVUg==
+"@across-protocol/sdk-v2@^0.5.0-beta.14":
+  version "0.5.0-beta.14"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.5.0-beta.14.tgz#dceeaec7b1f5c75b7ac7036a3de7308f9a45b0a0"
+  integrity sha512-P9tDc0kcmL1ltuAGEPObRkipl9pW0yC9aB6FBmezc3L9sbh3CmbBcw7gkFcPsJd7GEuxLfekdL6rOfyFc7Oqlw==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
-    "@across-protocol/contracts-v2" "^2.1.0-beta.6"
+    "@across-protocol/contracts-v2" "^2.1.0-beta.10"
     "@eth-optimism/sdk" "^1.6.0"
     "@uma/sdk" "^0.29.3"
     axios "^0.27.2"
@@ -4752,6 +4752,11 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.8.2.tgz#edef522bdbc46d478481391553bababdd2199e27"
   integrity sha512-zIggnBwemUmmt9IS73qxi+tumALxCY4QEs3zLCII78k0Gfse2hAOdAkuAeLUzvWUpneMUfFE5sGHzEUSTvn4Ag==
 
+"@openzeppelin/contracts-upgradeable@^4.8.3":
+  version "4.8.3"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.8.3.tgz#6b076a7b751811b90fe3a172a7faeaa603e13a3f"
+  integrity sha512-SXDRl7HKpl2WDoJpn7CK/M9U4Z8gNXDHHChAKh0Iz+Wew3wu6CmFYBeie3je8V0GSXZAIYYwUktSrnW/kwVPtg==
+
 "@openzeppelin/contracts@3.4.2":
   version "3.4.2"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-3.4.2.tgz#d81f786fda2871d1eb8a8c5a73e455753ba53527"
@@ -4776,6 +4781,11 @@
   version "4.8.2"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.8.2.tgz#d815ade0027b50beb9bcca67143c6bcc3e3923d6"
   integrity sha512-kEUOgPQszC0fSYWpbh2kT94ltOJwj1qfT2DWo+zVttmGmf97JZ99LspePNaeeaLhCImaHVeBbjaQFZQn7+Zc5g==
+
+"@openzeppelin/contracts@^4.8.3":
+  version "4.8.3"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.8.3.tgz#cbef3146bfc570849405f59cba18235da95a252a"
+  integrity sha512-bQHV8R9Me8IaJoJ2vPG4rXcL7seB7YVuskr4f+f5RyOStSZetwzkWtoqDMl5erkBJy0lDRUnIR2WIkPiC0GJlg==
 
 "@openzeppelin/upgrades-core@^1.7.6":
   version "1.20.5"
