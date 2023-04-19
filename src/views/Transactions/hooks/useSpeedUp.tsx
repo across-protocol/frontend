@@ -1,36 +1,31 @@
 import { useState, useEffect } from "react";
-import { BigNumber, utils } from "ethers";
-import { JsonRpcSigner } from "@uma/sdk/dist/types/oracle/types/ethers";
+import { BigNumber } from "ethers";
+import { utils as sdkUtils } from "@across-protocol/sdk-v2";
+import { useMutation } from "react-query";
 
-import { useConnection } from "hooks";
-import { getConfig, getChainInfo, Token } from "utils";
-import { useBridgeFees, useNotify } from "hooks";
-import { Deposit } from "hooks/useDeposits";
+import { useConnection, useBridgeFees, useIsWrongNetwork } from "hooks";
+import { getConfig, getChainInfo, Token, waitOnTransaction } from "utils";
 
-type SpeedUpStatus = "idle" | "pending" | "success" | "error";
+import type { Deposit } from "hooks/useDeposits";
+
+const config = getConfig();
 
 export function useSpeedUp(transfer: Deposit, token: Token) {
-  const config = getConfig();
-  const { chainId, signer, setChain } = useConnection();
+  const { signer, notify } = useConnection();
+  const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork(
+    transfer.sourceChainId
+  );
   const { fees, isLoading } = useBridgeFees(
     BigNumber.from(transfer.amount),
     transfer.sourceChainId,
     transfer.destinationChainId,
     token.symbol
   );
-  const { setChainId, setTxResponse, txStatus, txErrorMsg } = useNotify();
 
-  const [isCorrectChain, setIsCorrectChain] = useState(false);
-  const [speedUpStatus, setSpeedUpStatus] = useState<SpeedUpStatus>("idle");
-  const [speedUpErrorMsg, setSpeedUpErrorMsg] = useState<string>("");
   const [speedUpTxLink, setSpeedUpTxLink] = useState<string>("");
   const [suggestedRelayerFeePct, setSuggestedRelayerFeePct] = useState<
     BigNumber | undefined
   >();
-
-  useEffect(() => {
-    setIsCorrectChain(chainId === transfer.sourceChainId);
-  }, [chainId, transfer.sourceChainId]);
 
   useEffect(() => {
     if (fees) {
@@ -38,81 +33,63 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
     }
   }, [fees]);
 
-  useEffect(() => {
-    setSpeedUpStatus(txStatus);
-
-    if (txErrorMsg) {
-      setSpeedUpErrorMsg(txErrorMsg);
-    }
-  }, [txStatus, txErrorMsg]);
-
-  const speedUp = async (newRelayerFeePct: BigNumber) => {
-    try {
-      setSpeedUpStatus("pending");
-      setSpeedUpErrorMsg("");
-
+  const speedUp = useMutation(
+    async (args: {
+      newRelayerFeePct: BigNumber;
+      optionalUpdates?: Partial<{
+        newMessage: string;
+        newRecipient: string;
+      }>;
+    }) => {
       if (!signer) {
-        throw new Error(`Wallet is not connected`);
+        return;
       }
 
-      const depositorSignature = await getDepositorSignature(signer, {
-        originChainId: transfer.sourceChainId,
-        newRelayerFeePct,
-        depositId: transfer.depositId,
-      });
+      if (isWrongNetwork) {
+        await isWrongNetworkHandler();
+      }
+
+      const newRecipient =
+        args.optionalUpdates?.newRecipient || transfer.recipientAddr;
+      const newMessage = args.optionalUpdates?.newMessage || transfer.message;
+
+      const typedData = sdkUtils.getUpdateDepositTypedData(
+        transfer.depositId,
+        transfer.sourceChainId,
+        args.newRelayerFeePct,
+        newRecipient,
+        newMessage
+      );
+      const depositorSignature = await signer._signTypedData(
+        typedData.domain as Omit<typeof typedData.domain, "salt">,
+        typedData.types,
+        typedData.message
+      );
 
       const spokePool = config.getSpokePool(transfer.sourceChainId, signer);
       const txResponse = await spokePool.speedUpDeposit(
         await signer.getAddress(),
-        newRelayerFeePct,
+        args.newRelayerFeePct,
         transfer.depositId,
+        newRecipient,
+        newMessage,
         depositorSignature
       );
-      setChainId(transfer.sourceChainId);
-      setTxResponse(txResponse);
       setSpeedUpTxLink(
         getChainInfo(transfer.sourceChainId).constructExplorerLink(
           txResponse.hash
         )
       );
-    } catch (error) {
-      setSpeedUpStatus("error");
-      setSpeedUpErrorMsg((error as Error).message);
-      console.error(error);
+      await waitOnTransaction(transfer.sourceChainId, txResponse, notify);
     }
-  };
+  );
 
   return {
     speedUp,
-    speedUpStatus,
-    speedUpErrorMsg,
-    isCorrectChain,
-    setChain,
+    isWrongNetwork,
+    isWrongNetworkHandler,
     isFetchingFees: isLoading,
     suggestedRelayerFeePct,
     speedUpTxLink,
   };
-}
-
-async function getDepositorSignature(
-  signer: JsonRpcSigner,
-  relayerFeeMessage: {
-    originChainId: number;
-    newRelayerFeePct: BigNumber;
-    depositId: number;
-  }
-) {
-  const depositorMessageHash = utils.keccak256(
-    utils.defaultAbiCoder.encode(
-      ["string", "uint64", "uint32", "uint32"],
-      [
-        "ACROSS-V2-FEE-1.0",
-        relayerFeeMessage.newRelayerFeePct,
-        relayerFeeMessage.depositId,
-        relayerFeeMessage.originChainId,
-      ]
-    )
-  );
-
-  return signer.signMessage(utils.arrayify(depositorMessageHash));
 }

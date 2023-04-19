@@ -44,10 +44,8 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
 
   const {
     speedUp,
-    speedUpStatus,
-    speedUpErrorMsg,
-    isCorrectChain,
-    setChain,
+    isWrongNetwork,
+    isWrongNetworkHandler,
     suggestedRelayerFeePct,
     isFetchingFees,
     speedUpTxLink,
@@ -87,28 +85,23 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
   const isRelayerFeeFairlyPriced = suggestedRelayerFeePct
     ? BigNumber.from(transfer.depositRelayerFeePct).gte(suggestedRelayerFeePct)
     : false;
-  const isSpeedUpPending = speedUpStatus === "pending";
   const isConfirmDisabled =
-    !relayFeeInput || !!inputError || isSpeedUpPending || !isCorrectChain;
+    !relayFeeInput || !!inputError || speedUp.isLoading || isWrongNetwork;
 
   return (
     <Overlay isOpen={isOpen} onDismiss={onClose}>
       <Content aria-label="speed-up-modal">
-        {speedUpStatus === "success" ? (
+        {speedUp.isSuccess ? (
           <SuccessContent onClose={onClose} />
         ) : (
           <>
             <Title>Speed up transaction</Title>
             <AlertBox
-              isCorrectChain={isCorrectChain}
-              speedUpError={speedUpErrorMsg}
+              isCorrectChain={!isWrongNetwork}
+              speedUpError={speedUp.isError ? "Speed up failed" : undefined}
               isRelayerFeeFairlyPriced={isRelayerFeeFairlyPriced}
               sourceChainId={transfer.sourceChainId}
-              onClickSwitch={() =>
-                setChain({
-                  chainId: `0x${transfer.sourceChainId.toString(16)}`,
-                })
-              }
+              onClickSwitch={isWrongNetworkHandler}
             />
             <InputWithButton
               label="Relay fee"
@@ -137,9 +130,13 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
                 size="md"
                 disabled={isConfirmDisabled}
                 warning={isRelayerFeeFairlyPriced}
-                onClick={() => speedUp(feeInputToBigNumberPct(relayFeeInput))}
+                onClick={() =>
+                  speedUp.mutate({
+                    newRelayerFeePct: feeInputToBigNumberPct(relayFeeInput),
+                  })
+                }
               >
-                {isSpeedUpPending ? "Confirming..." : "Confirm"}
+                {speedUp.isLoading ? "Confirming..." : "Confirm"}
               </ConfirmButton>
             </ButtonsRow>
           </>
