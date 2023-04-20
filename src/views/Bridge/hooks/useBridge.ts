@@ -296,8 +296,8 @@ export function useBridge() {
 
   const { fees: rawFees, isLoading: areRawFeesLoading } = useBridgeFees(
     amountToBridge ?? BigNumber.from(0),
-    currentFromRoute,
-    currentToRoute,
+    currentRoute?.fromChain,
+    currentRoute?.toChain,
     currentToken
   );
 
