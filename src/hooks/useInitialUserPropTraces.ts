@@ -14,13 +14,14 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
   const [prevTrackedAccount, setPrevTrackedAccount] = useState<
     string | undefined
   >();
+  const [didApplicationLoad, setDidApplicationLoad] = useState(false);
 
   const { didAttemptAutoSelect, wallet, account, chainId } = useConnection();
   const walletBalanceTraceQuery = useWalletBalanceTrace();
 
   // Re-triggers the initial user props when the account changes
   useEffect(() => {
-    if (!prevTrackedAccount || prevTrackedAccount === account) {
+    if (prevTrackedAccount === account) {
       return;
     }
 
@@ -51,11 +52,6 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
       // Always enforce referring_domain
       await identifyReferrer()?.promise;
 
-      // Ensures that this event is triggered once per session
-      if (!prevTrackedAccount) {
-        await ampli.applicationLoaded().promise;
-      }
-
       setAreInitialUserPropsSet(true);
       setPrevTrackedAccount(account);
     })();
@@ -70,6 +66,14 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
     walletBalanceTraceQuery.status,
     walletBalanceTraceQuery.failureCount,
   ]);
+
+  useEffect(() => {
+    // Ensures that this event is triggered once per session
+    if (!didApplicationLoad && areInitialUserPropsSet) {
+      ampli.applicationLoaded();
+      setDidApplicationLoad(true);
+    }
+  }, [didApplicationLoad, areInitialUserPropsSet]);
 
   return { areInitialUserPropsSet };
 }

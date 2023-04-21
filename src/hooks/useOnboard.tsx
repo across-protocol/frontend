@@ -15,7 +15,7 @@ import {
   trackConnectWalletButtonClicked,
   trackDisconnectWalletButtonClicked,
   CACHED_WALLET_KEY,
-  setUserId,
+  identifyUserWallet,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
@@ -197,8 +197,8 @@ export function useOnboardManager() {
       const walletStates = await connect(
         connectOptions?.autoSelect ? connectOptions : undefined
       );
-      if (walletStates[0]?.accounts[0]?.address) {
-        setUserId(utils.getAddress(walletStates[0]?.accounts[0]?.address));
+      if (walletStates[0]) {
+        identifyUserWallet(walletStates[0]);
       }
       if (trackSection) {
         trackConnectWalletButtonClicked(trackSection);
