@@ -16,7 +16,12 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { Theme } from "@emotion/react";
 import { SelectorPropType } from "components/Selector/Selector";
-import { useBalancesBySymbols, useBridgeLimits, useConnection } from "hooks";
+import {
+  useBalancesBySymbols,
+  useBridgeLimits,
+  useConnection,
+  useAmplitude,
+} from "hooks";
 import BridgeInputErrorAlert from "./BridgeAlert";
 
 function useCoinSelector(
@@ -33,6 +38,8 @@ function useCoinSelector(
   const [userAmountInput, setUserAmountInput] = useState("");
   const [validInput, setValidInput] = useState(true);
   const { isConnected } = useConnection();
+  const { addToAmpliQueue } = useAmplitude();
+
   const token =
     tokens.find((t) => t.symbol.toLowerCase() === currentToken.toLowerCase()) ??
     tokens[0];
@@ -42,7 +49,9 @@ function useCoinSelector(
   const maxBalanceOnClick = () => {
     if (currentBalance) {
       setUserAmountInput(tokenFormatterFn(currentBalance));
-      trackMaxButtonClicked("bridgeForm");
+      addToAmpliQueue(async () => {
+        trackMaxButtonClicked("bridgeForm");
+      });
     }
   };
 

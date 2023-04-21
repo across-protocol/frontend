@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { utils } from "ethers";
 
 import { QUERIESV2, trackMaxButtonClicked } from "utils";
-import { useStakingPool } from "hooks";
+import { useStakingPool, useAmplitude } from "hooks";
 import { InputWithMaxButton, Text } from "components";
 
 import {
@@ -48,6 +48,8 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
     selectedToken.decimals,
     maxAmountsQuery.data
   );
+
+  const { addToAmpliQueue } = useAmplitude();
 
   // Reset amount input and mutation state when switching actions or tokens
   useEffect(() => {
@@ -130,9 +132,11 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           onEnterKeyDown={handleAction}
           onClickMaxButton={() => {
             setAmount(maxAmount);
-            trackMaxButtonClicked(
-              action === "add" ? "addLiquidityForm" : "removeLiquidityForm"
-            );
+            addToAmpliQueue(async () => {
+              trackMaxButtonClicked(
+                action === "add" ? "addLiquidityForm" : "removeLiquidityForm"
+              );
+            });
           }}
           maxValue={maxAmountsQuery.isLoading ? "" : maxAmount}
           disableTokenIcon
