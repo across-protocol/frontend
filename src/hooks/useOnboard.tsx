@@ -15,7 +15,7 @@ import {
   trackConnectWalletButtonClicked,
   trackDisconnectWalletButtonClicked,
   CACHED_WALLET_KEY,
-  setUserId,
+  identifyUserWallet,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
@@ -29,7 +29,7 @@ import { Account } from "@web3-onboard/core/dist/types";
 
 import { useConnectWallet, useSetChain } from "@web3-onboard/react";
 import { Chain } from "@web3-onboard/common";
-import { ethers, utils } from "ethers";
+import { ethers } from "ethers";
 import Notify, { API as NotifyAPI, ConfigOptions } from "bnc-notify";
 import {
   ampli,
@@ -197,8 +197,8 @@ export function useOnboardManager() {
       const walletStates = await connect(
         connectOptions?.autoSelect ? connectOptions : undefined
       );
-      if (walletStates[0]?.accounts[0]?.address) {
-        setUserId(utils.getAddress(walletStates[0]?.accounts[0]?.address));
+      if (walletStates[0]) {
+        identifyUserWallet(walletStates[0]);
       }
       if (trackSection) {
         trackConnectWalletButtonClicked(trackSection);

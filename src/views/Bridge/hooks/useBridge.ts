@@ -6,6 +6,7 @@ import {
   useBridgeLimits,
   useConnection,
   useIsWrongNetwork,
+  useAmplitude,
 } from "hooks";
 import { useCoingeckoPrice } from "hooks/useCoingeckoPrice";
 import useReferrer from "hooks/useReferrer";
@@ -66,9 +67,13 @@ export function useBridge() {
   const [isLiquidityFromAountExceeded, setIsLiquidityFromAountExceeded] =
     useState(false);
 
+  const { addToAmpliQueue } = useAmplitude();
+
   useEffect(() => {
     if (isDefaultToken) {
-      trackTokenChanged(currentToken, true);
+      addToAmpliQueue(() => {
+        trackTokenChanged(currentToken, true);
+      });
     }
     setIsDefaultToken(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,7 +100,9 @@ export function useBridge() {
   useEffect(() => {
     if (currentToRoute) {
       if (isDefaultToRoute) {
-        trackToChainChanged(currentToRoute, true);
+        addToAmpliQueue(() => {
+          trackToChainChanged(currentToRoute, true);
+        });
       }
       setIsDefaultToRoute(false);
     }
@@ -105,7 +112,9 @@ export function useBridge() {
   useEffect(() => {
     if (currentFromRoute) {
       if (isDefaultFromRoute) {
-        trackFromChainChanged(currentFromRoute, true);
+        addToAmpliQueue(() => {
+          trackFromChainChanged(currentFromRoute, true);
+        });
       }
       setIsDefaultFromRoute(false);
     }
@@ -202,7 +211,12 @@ export function useBridge() {
             );
           if (!toRouteStillAvailable) {
             setCurrentToRoute(availableToRoutesForCurrentFromRoute[0]);
-            trackToChainChanged(availableToRoutesForCurrentFromRoute[0], true);
+            addToAmpliQueue(() => {
+              trackToChainChanged(
+                availableToRoutesForCurrentFromRoute[0],
+                true
+              );
+            });
           }
         }
       }
@@ -225,10 +239,12 @@ export function useBridge() {
             );
           if (!fromRouteStillAvailable) {
             setCurrentFromRoute(availableFromRoutesForCurrentToRoute[0]);
-            trackFromChainChanged(
-              availableFromRoutesForCurrentToRoute[0],
-              true
-            );
+            addToAmpliQueue(() => {
+              trackFromChainChanged(
+                availableFromRoutesForCurrentToRoute[0],
+                true
+              );
+            });
           }
         }
       }
@@ -252,14 +268,16 @@ export function useBridge() {
 
       // Set the current from route to the current to route
       setCurrentFromRoute(currentToRouteTemp);
-      trackFromChainChanged(currentToRouteTemp, false);
       // Set the current to route to the current from route
       setCurrentToRoute(currentFromRouteTemp);
       setAmountToBridge(undefined);
-      trackToChainChanged(currentFromRouteTemp, false);
-      trackQuickSwap("bridgeForm");
+      addToAmpliQueue(() => {
+        trackFromChainChanged(currentToRouteTemp, false);
+        trackToChainChanged(currentFromRouteTemp, false);
+        trackQuickSwap("bridgeForm");
+      });
     }
-  }, [currentFromRoute, currentToRoute, disableQuickSwap]);
+  }, [currentFromRoute, currentToRoute, disableQuickSwap, addToAmpliQueue]);
 
   useEffect(() => {
     // Resolve the from and to route as temporary variables
@@ -399,7 +417,9 @@ export function useBridge() {
         estimatedTimeToRelayObject,
         amountToBridge
       );
-      ampli.transferQuoteReceived(quote);
+      addToAmpliQueue(() => {
+        ampli.transferQuoteReceived(quote);
+      });
       setQuote(quote);
       setInitialQuoteTime((s) => s ?? Date.now());
     }
@@ -444,20 +464,26 @@ export function useBridge() {
       setCurrentToRoute(firstAvailableRoute?.toChain);
     }
     setCurrentToken(token);
-    trackTokenChanged(token);
+    addToAmpliQueue(() => {
+      trackTokenChanged(token);
+    });
   };
 
   const setCurrentFromRouteExternal = (chainId?: number) => {
     setCurrentFromRoute(chainId);
     if (chainId) {
-      trackFromChainChanged(chainId, false);
+      addToAmpliQueue(() => {
+        trackFromChainChanged(chainId, false);
+      });
     }
   };
 
   const setCurrentToRouteExternal = (chainId?: number) => {
     setCurrentToRoute(chainId);
     if (chainId) {
-      trackToChainChanged(chainId, false);
+      addToAmpliQueue(() => {
+        trackToChainChanged(chainId, false);
+      });
     }
   };
 

@@ -1,7 +1,12 @@
 import { ampli, TransferQuoteReceivedProperties } from "ampli";
 import { BigNumber, ContractTransaction, utils } from "ethers";
 import { DateTime } from "luxon";
-import { useConnection, useApprove, useIsWrongNetwork } from "hooks";
+import {
+  useConnection,
+  useApprove,
+  useIsWrongNetwork,
+  useAmplitude,
+} from "hooks";
 import { useLocalPendingDeposits } from "hooks/useLocalPendingDeposits";
 import { cloneDeep } from "lodash";
 import { useMutation } from "react-query";
@@ -37,6 +42,7 @@ export function useBridgeAction(
 
   const { addLocalPendingDeposit } = useLocalPendingDeposits();
   const approveHandler = useApprove(payload?.fromChain);
+  const { addToAmpliQueue } = useAmplitude();
 
   const buttonActionHandler = useMutation(async () => {
     const frozenQuote = cloneDeep(recentQuote);
@@ -84,19 +90,27 @@ export function useBridgeAction(
     let timeSigned: number | undefined = undefined;
     let tx: ContractTransaction | undefined = undefined;
     try {
-      // Instrument amplitude before sending the transaction for the submit button.
-      ampli.transferSubmitted(
-        generateTransferSubmitted(frozenQuote, referrer, frozenInitialQuoteTime)
-      );
+      addToAmpliQueue(() => {
+        // Instrument amplitude before sending the transaction for the submit button.
+        ampli.transferSubmitted(
+          generateTransferSubmitted(
+            frozenQuote,
+            referrer,
+            frozenInitialQuoteTime
+          )
+        );
+      });
       const timeSubmitted = Date.now();
 
       tx = await sendAcrossDeposit(signer, frozenPayload);
 
       // Instrument amplitude after signing the transaction for the submit button.
       timeSigned = Date.now();
-      ampli.transferSigned(
-        generateTransferSigned(frozenQuote, referrer, timeSubmitted, tx.hash)
-      );
+      addToAmpliQueue(() => {
+        ampli.transferSigned(
+          generateTransferSigned(frozenQuote, referrer, timeSubmitted, tx!.hash)
+        );
+      });
 
       if (onTransactionComplete) {
         onTransactionComplete(tx.hash);
@@ -134,16 +148,18 @@ export function useBridgeAction(
       }
     }
     if (timeSigned && tx) {
-      ampli.transferDepositCompleted(
-        generateDepositConfirmed(
-          frozenQuote,
-          referrer,
-          timeSigned,
-          tx.hash,
-          succeeded,
-          tx.timestamp!
-        )
-      );
+      addToAmpliQueue(() => {
+        ampli.transferDepositCompleted(
+          generateDepositConfirmed(
+            frozenQuote,
+            referrer,
+            timeSigned!,
+            tx!.hash,
+            succeeded,
+            tx!.timestamp!
+          )
+        );
+      });
     }
     // Call recordTransferUserProperties to update the user's properties in Amplitude.
     recordTransferUserProperties(

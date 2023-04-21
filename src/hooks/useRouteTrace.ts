@@ -24,8 +24,8 @@ export function useRouteTrace() {
       const referrer = document.referrer;
       const origin = window.location.origin;
       const page = getPageValue();
-      addToAmpliQueue(async () => {
-        await ampli.pageViewed({
+      addToAmpliQueue(() => {
+        ampli.pageViewed({
           path,
           referrer,
           origin,
@@ -33,7 +33,7 @@ export function useRouteTrace() {
           page,
           gitCommitHash: currentGitCommitHash,
           referralProgramAddress: referralAddress,
-        }).promise;
+        });
       });
 
       if (initialPage) {

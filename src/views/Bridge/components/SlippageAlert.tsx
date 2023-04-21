@@ -4,12 +4,17 @@ import { Alert } from "components";
 import { Text } from "components/Text";
 import { useState } from "react";
 import FeeInformationModal from "./FeeInformationModal";
+import { useAmplitude } from "hooks";
 
 const SlippageAlert = () => {
   const [displayModal, setDisplayModal] = useState(false);
+  const { addToAmpliQueue } = useAmplitude();
+
   const displayModalHandler = () => {
     setDisplayModal(true);
-    ampli.feesInfoExpanded();
+    addToAmpliQueue(() => {
+      ampli.feesInfoExpanded();
+    });
   };
   return (
     <>

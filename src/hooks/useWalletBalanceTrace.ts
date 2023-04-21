@@ -9,6 +9,7 @@ import {
   getRoutes,
   getToken,
   reportTotalWalletUsdBalance,
+  setUserId,
 } from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
 import getApiEndpoint from "utils/serverless-api";
@@ -21,6 +22,7 @@ export function useWalletBalanceTrace() {
     ["wallet-balance", account ?? "loading"],
     async () => {
       if (!account) return;
+      setUserId(account);
       const balance = await calculateUsdBalances(account);
       reportTotalWalletUsdBalance(balance);
       return balance;
