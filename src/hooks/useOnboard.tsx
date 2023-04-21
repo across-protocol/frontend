@@ -29,7 +29,7 @@ import { Account } from "@web3-onboard/core/dist/types";
 
 import { useConnectWallet, useSetChain } from "@web3-onboard/react";
 import { Chain } from "@web3-onboard/common";
-import { ethers, utils } from "ethers";
+import { ethers } from "ethers";
 import Notify, { API as NotifyAPI, ConfigOptions } from "bnc-notify";
 import {
   ampli,
