@@ -90,7 +90,7 @@ export function useBridgeAction(
     let timeSigned: number | undefined = undefined;
     let tx: ContractTransaction | undefined = undefined;
     try {
-      addToAmpliQueue(async () => {
+      addToAmpliQueue(() => {
         // Instrument amplitude before sending the transaction for the submit button.
         ampli.transferSubmitted(
           generateTransferSubmitted(
@@ -106,7 +106,7 @@ export function useBridgeAction(
 
       // Instrument amplitude after signing the transaction for the submit button.
       timeSigned = Date.now();
-      addToAmpliQueue(async () => {
+      addToAmpliQueue(() => {
         ampli.transferSigned(
           generateTransferSigned(frozenQuote, referrer, timeSubmitted, tx!.hash)
         );
@@ -148,7 +148,7 @@ export function useBridgeAction(
       }
     }
     if (timeSigned && tx) {
-      addToAmpliQueue(async () => {
+      addToAmpliQueue(() => {
         ampli.transferDepositCompleted(
           generateDepositConfirmed(
             frozenQuote,

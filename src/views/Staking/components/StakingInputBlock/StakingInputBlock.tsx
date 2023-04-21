@@ -64,7 +64,7 @@ const StakingInputBlock: React.FC<Props> = ({
             disabled={displayLoader || disableInput || !maxValue}
             onClick={() => {
               setValue(maxValue ?? "");
-              addToAmpliQueue(async () => {
+              addToAmpliQueue(() => {
                 trackMaxButtonClicked(
                   stakingAction === "stake" ? "stakeForm" : "unstakeForm"
                 );

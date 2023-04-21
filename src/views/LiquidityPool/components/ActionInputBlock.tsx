@@ -132,7 +132,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           onEnterKeyDown={handleAction}
           onClickMaxButton={() => {
             setAmount(maxAmount);
-            addToAmpliQueue(async () => {
+            addToAmpliQueue(() => {
               trackMaxButtonClicked(
                 action === "add" ? "addLiquidityForm" : "removeLiquidityForm"
               );

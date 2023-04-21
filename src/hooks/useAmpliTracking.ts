@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import { useQueue } from "hooks/useQueue";
 
-type TrackingRequest = () => Promise<void>;
+export type TrackingRequest = () => Promise<void> | void;
 
 export function useAmpliTracking(areInitialPropsSet: boolean) {
   const { addToQueue, queue, processNext } = useQueue<TrackingRequest>();

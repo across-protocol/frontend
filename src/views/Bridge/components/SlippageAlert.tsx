@@ -12,7 +12,7 @@ const SlippageAlert = () => {
 
   const displayModalHandler = () => {
     setDisplayModal(true);
-    addToAmpliQueue(async () => {
+    addToAmpliQueue(() => {
       ampli.feesInfoExpanded();
     });
   };

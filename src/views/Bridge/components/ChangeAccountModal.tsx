@@ -41,7 +41,7 @@ const ChangeAccountModal = ({
   const onSaveHandler = () => {
     if (validInput) {
       changeAccountHandler(userInput);
-      addToAmpliQueue(async () => {
+      addToAmpliQueue(() => {
         ampli.toAccountChanged({
           toWalletAddress: userInput,
         });

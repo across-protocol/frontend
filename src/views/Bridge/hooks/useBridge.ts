@@ -71,7 +71,7 @@ export function useBridge() {
 
   useEffect(() => {
     if (isDefaultToken) {
-      addToAmpliQueue(async () => {
+      addToAmpliQueue(() => {
         trackTokenChanged(currentToken, true);
       });
     }
@@ -100,7 +100,7 @@ export function useBridge() {
   useEffect(() => {
     if (currentToRoute) {
       if (isDefaultToRoute) {
-        addToAmpliQueue(async () => {
+        addToAmpliQueue(() => {
           trackToChainChanged(currentToRoute, true);
         });
       }
@@ -112,7 +112,7 @@ export function useBridge() {
   useEffect(() => {
     if (currentFromRoute) {
       if (isDefaultFromRoute) {
-        addToAmpliQueue(async () => {
+        addToAmpliQueue(() => {
           trackFromChainChanged(currentFromRoute, true);
         });
       }
@@ -211,7 +211,7 @@ export function useBridge() {
             );
           if (!toRouteStillAvailable) {
             setCurrentToRoute(availableToRoutesForCurrentFromRoute[0]);
-            addToAmpliQueue(async () => {
+            addToAmpliQueue(() => {
               trackToChainChanged(
                 availableToRoutesForCurrentFromRoute[0],
                 true
@@ -239,7 +239,7 @@ export function useBridge() {
             );
           if (!fromRouteStillAvailable) {
             setCurrentFromRoute(availableFromRoutesForCurrentToRoute[0]);
-            addToAmpliQueue(async () => {
+            addToAmpliQueue(() => {
               trackFromChainChanged(
                 availableFromRoutesForCurrentToRoute[0],
                 true
@@ -271,7 +271,7 @@ export function useBridge() {
       // Set the current to route to the current from route
       setCurrentToRoute(currentFromRouteTemp);
       setAmountToBridge(undefined);
-      addToAmpliQueue(async () => {
+      addToAmpliQueue(() => {
         trackFromChainChanged(currentToRouteTemp, false);
         trackToChainChanged(currentFromRouteTemp, false);
         trackQuickSwap("bridgeForm");
@@ -417,7 +417,7 @@ export function useBridge() {
         estimatedTimeToRelayObject,
         amountToBridge
       );
-      addToAmpliQueue(async () => {
+      addToAmpliQueue(() => {
         ampli.transferQuoteReceived(quote);
       });
       setQuote(quote);
@@ -464,7 +464,7 @@ export function useBridge() {
       setCurrentToRoute(firstAvailableRoute?.toChain);
     }
     setCurrentToken(token);
-    addToAmpliQueue(async () => {
+    addToAmpliQueue(() => {
       trackTokenChanged(token);
     });
   };
@@ -472,7 +472,7 @@ export function useBridge() {
   const setCurrentFromRouteExternal = (chainId?: number) => {
     setCurrentFromRoute(chainId);
     if (chainId) {
-      addToAmpliQueue(async () => {
+      addToAmpliQueue(() => {
         trackFromChainChanged(chainId, false);
       });
     }
@@ -481,7 +481,7 @@ export function useBridge() {
   const setCurrentToRouteExternal = (chainId?: number) => {
     setCurrentToRoute(chainId);
     if (chainId) {
-      addToAmpliQueue(async () => {
+      addToAmpliQueue(() => {
         trackToChainChanged(chainId, false);
       });
     }

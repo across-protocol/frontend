@@ -49,7 +49,7 @@ function useCoinSelector(
   const maxBalanceOnClick = () => {
     if (currentBalance) {
       setUserAmountInput(tokenFormatterFn(currentBalance));
-      addToAmpliQueue(async () => {
+      addToAmpliQueue(() => {
         trackMaxButtonClicked("bridgeForm");
       });
     }
