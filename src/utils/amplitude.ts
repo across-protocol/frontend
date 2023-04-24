@@ -213,7 +213,7 @@ export function identifyReferrer() {
     return;
   }
 
-  if (!referrer || !referring_domain) {
+  if (!referrer || !referring_domain || referring_domain === "across.to") {
     return;
   }
 
