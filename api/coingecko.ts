@@ -34,8 +34,7 @@ const getCoingeckoPrices = async (
     ({ symbol }) => symbol === baseCurrency.toUpperCase()
   );
 
-  if (!baseCurrencyToken)
-    throw new InputError(`Base currency ${baseCurrency} not supported`);
+  if (!baseCurrencyToken) throw new InputError(`Base currency not supported`);
 
   // Special case: token and base are the same. Coingecko class returns a single result in this case, so it must
   // be handled separately.
@@ -101,7 +100,11 @@ const handler = async (
     query,
   });
   try {
-    assert(query, CoingeckoQueryParamsSchema);
+    try {
+      assert(query, CoingeckoQueryParamsSchema);
+    } catch (error) {
+      throw new Error("Invalid query parameters");
+    }
     let { l1Token, baseCurrency } = query;
 
     // Start the symbol as lower case for CG.

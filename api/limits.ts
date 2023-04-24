@@ -5,7 +5,6 @@ import { HubPool__factory } from "@across-protocol/contracts-v2";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
-import { isPromiseRejectedResult } from "./_typeguards";
 import { TypedVercelRequest } from "./_types";
 import * as sdk from "@across-protocol/sdk-v2";
 import { object, assert, Infer, optional } from "superstruct";
@@ -72,7 +71,11 @@ const handler = async (
           }
         );
 
-    assert(query, LimitsQueryParamsSchema);
+    try {
+      assert(query, LimitsQueryParamsSchema);
+    } catch (error) {
+      throw new Error("Invalid query parameters");
+    }
     let { token, destinationChainId, originChainId } = query;
 
     if (originChainId === destinationChainId) {
@@ -93,7 +96,7 @@ const handler = async (
         details.addresses[sdk.constants.CHAIN_IDs.MAINNET] === l1Token
     );
     if (tokenDetails === undefined)
-      throw new InputError(`Unsupported token address: ${token}`);
+      throw new InputError("Unsupported token address");
     const symbol = tokenDetails.symbol;
 
     const [tokenDetailsResult, routeEnabledResult] = await Promise.allSettled([
@@ -107,18 +110,7 @@ const handler = async (
       routeEnabledResult.status === "rejected" ||
       !routeEnabledResult.value
     ) {
-      // Add the raw error (if any) to ensure that the user sees the real error if it's something unexpected, like a provider issue.
-      const rawError =
-        (isPromiseRejectedResult(tokenDetailsResult) &&
-          tokenDetailsResult.reason) ||
-        (isPromiseRejectedResult(routeEnabledResult) && routeEnabledResult);
-
-      const errorString = rawError
-        ? `Raw Error: ${rawError.stack || rawError.toString()}`
-        : "";
-      throw new InputError(
-        `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled. ${errorString}`
-      );
+      throw new InputError(`Route is not enabled.`);
     }
 
     const { l2Token: destinationToken } = tokenDetailsResult.value;
