@@ -4,7 +4,7 @@ import { amplitudeAPIKey } from "utils";
 
 import { useLoadAmpli } from "./useLoadAmpli";
 import { useInitialUserPropTraces } from "./useInitialUserPropTraces";
-import { useAmpliTracking } from "./useAmpliTracking";
+import { useAmpliTracking, TrackingRequest } from "./useAmpliTracking";
 
 const isAmpliDisabled = Boolean(amplitudeAPIKey);
 
@@ -12,7 +12,7 @@ export const AmpliContext = createContext<{
   isAmpliLoaded: boolean;
   isAmpliDisabled: boolean;
   areInitialUserPropsSet: boolean;
-  addToAmpliQueue: (request: () => Promise<void>) => void;
+  addToAmpliQueue: (request: TrackingRequest) => void;
 }>({
   isAmpliLoaded: false,
   isAmpliDisabled,

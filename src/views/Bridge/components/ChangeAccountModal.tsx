@@ -6,6 +6,7 @@ import { ReactComponent as CrossIcon } from "assets/icons/cross-16.svg";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 import { ethers } from "ethers";
 import { ampli } from "ampli";
+import { useAmplitude } from "hooks";
 
 type ChangeAccountModalProps = {
   displayModal: boolean;
@@ -23,6 +24,8 @@ const ChangeAccountModal = ({
   const [userInput, setUserInput] = useState(currentAccount);
   const [validInput, setValidInput] = useState(false);
 
+  const { addToAmpliQueue } = useAmplitude();
+
   useEffect(() => {
     if (displayModal) {
       setUserInput(currentAccount);
@@ -38,8 +41,10 @@ const ChangeAccountModal = ({
   const onSaveHandler = () => {
     if (validInput) {
       changeAccountHandler(userInput);
-      ampli.toAccountChanged({
-        toWalletAddress: userInput,
+      addToAmpliQueue(() => {
+        ampli.toAccountChanged({
+          toWalletAddress: userInput,
+        });
       });
       displayModalCloseHandler();
     }

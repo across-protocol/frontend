@@ -14,7 +14,6 @@ export function useQueue<T>() {
       if (!next) {
         return;
       }
-      console.log("processNext", { next, rest });
 
       await processFn(next);
       setQueue(rest);

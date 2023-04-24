@@ -11,9 +11,22 @@ import { ampli } from "ampli";
 
 export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
   const [areInitialUserPropsSet, setAreInitialUserPropsSet] = useState(false);
+  const [prevTrackedAccount, setPrevTrackedAccount] = useState<
+    string | undefined
+  >();
+  const [didApplicationLoad, setDidApplicationLoad] = useState(false);
 
   const { didAttemptAutoSelect, wallet, account, chainId } = useConnection();
   const walletBalanceTraceQuery = useWalletBalanceTrace();
+
+  // Re-triggers the initial user props when the account changes
+  useEffect(() => {
+    if (prevTrackedAccount === account) {
+      return;
+    }
+
+    setAreInitialUserPropsSet(false);
+  }, [account, prevTrackedAccount]);
 
   useEffect(() => {
     (async () => {
@@ -39,20 +52,28 @@ export function useInitialUserPropTraces(isAmpliLoaded: boolean) {
       // Always enforce referring_domain
       await identifyReferrer()?.promise;
 
-      ampli.applicationLoaded();
-
       setAreInitialUserPropsSet(true);
+      setPrevTrackedAccount(account);
     })();
   }, [
     isAmpliLoaded,
     didAttemptAutoSelect,
     areInitialUserPropsSet,
     account,
+    prevTrackedAccount,
     chainId,
     wallet,
     walletBalanceTraceQuery.status,
     walletBalanceTraceQuery.failureCount,
   ]);
+
+  useEffect(() => {
+    // Ensures that this event is triggered once per session
+    if (!didApplicationLoad && areInitialUserPropsSet) {
+      ampli.applicationLoaded();
+      setDidApplicationLoad(true);
+    }
+  }, [didApplicationLoad, areInitialUserPropsSet]);
 
   return { areInitialUserPropsSet };
 }

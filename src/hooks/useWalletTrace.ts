@@ -33,11 +33,11 @@ export function useWalletNetworkTrace() {
     }
 
     const chainInfo = chainInfoTable[Number(chainId)];
-    addToAmpliQueue(async () => {
-      await ampli.walletNetworkSelected({
+    addToAmpliQueue(() => {
+      ampli.walletNetworkSelected({
         chainId: String(chainId),
         chainName: chainInfo?.name || "unknown",
-      }).promise;
+      });
     });
     setPrevTracked({ account, chainId });
   }, [chainId, account]);
@@ -63,9 +63,8 @@ export function useWalletChangeTrace() {
     }
 
     const previousConnection = window.localStorage.getItem(CACHED_WALLET_KEY);
-    addToAmpliQueue(async () => {
-      await trackWalletConnectTransactionCompleted(wallet, previousConnection)
-        .promise;
+    addToAmpliQueue(() => {
+      trackWalletConnectTransactionCompleted(wallet, previousConnection);
     });
 
     setPrevTrackedWallet(connectedWalletAddress);

@@ -378,7 +378,6 @@ export function getConfigStoreAddress(
 }
 
 export function getChainInfo(chainId: number): ChainInfo {
-  assert(isSupportedChainId(chainId), "Unsupported chain id " + chainId);
   return chainInfoTable[chainId];
 }
 
