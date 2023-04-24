@@ -29,7 +29,11 @@ const handler = async (
   try {
     const hubPoolClient = getHubPoolClient();
 
-    assert(query, PoolsQueryParamsSchema);
+    try {
+      assert(query, PoolsQueryParamsSchema);
+    } catch (error) {
+      throw new Error("Invalid query parameters");
+    }
 
     const token = ethers.utils.getAddress(query.token);
 

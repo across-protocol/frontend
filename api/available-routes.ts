@@ -34,7 +34,11 @@ const handler = async (
     query,
   });
   try {
-    assert(query, AvailableRoutesQueryParamsSchema);
+    try {
+      assert(query, AvailableRoutesQueryParamsSchema);
+    } catch (error) {
+      throw new Error("Invalid query parameters");
+    }
     const { originToken, destinationToken, originChainId, destinationChainId } =
       query;
 

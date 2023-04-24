@@ -52,7 +52,11 @@ const handler = async (
 
     const provider = infuraProvider("mainnet");
 
-    assert(query, SuggestedFeesQueryParamsSchema);
+    try {
+      assert(query, SuggestedFeesQueryParamsSchema);
+    } catch (error) {
+      throw new Error("Invalid query parameters");
+    }
 
     let {
       amount: amountInput,
@@ -110,9 +114,7 @@ const handler = async (
     ]);
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
-      throw new InputError(
-        `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled.`
-      );
+      throw new InputError(`Route is not enabled.`);
 
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       "0x3B03509645713718B78951126E0A6de6f10043f5",
