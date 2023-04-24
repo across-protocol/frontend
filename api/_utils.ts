@@ -537,7 +537,7 @@ export const isRouteEnabled = (
       toChainId === toChain &&
       fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
   );
-  return enabled;
+  return enabled && false; // TODO: This will disable all routes until we want to enable them
 };
 
 /**
