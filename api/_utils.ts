@@ -279,8 +279,8 @@ export const getHubPoolClient = () => {
 
 // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
 // gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
-// a USDC approval for the _current_ spoke pools on Optimism (0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9) and Arbitrum
-// (0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C). It also has a small amount of USDC ($0.10) used for estimations.
+// a USDC approval for the _current_ spoke pools on Optimism (0x6f26Bf09B1C792e3228e5467807a900A503c0281) and Arbitrum
+// (0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A). It also has a small amount of USDC ($0.10) used for estimations.
 // If this address lacks either of these, estimations will fail and relays to optimism and arbitrum will hang when
 // estimating gas. Defaults to 0x893d0d70ad97717052e3aa8903d9615804167759 so the app can technically run without this.
 export const dummyFromAddress =
@@ -491,17 +491,17 @@ export const getSpokePool = (_chainId: number): SpokePool => {
   switch (chainId.toString()) {
     case "1":
       return SpokePool__factory.connect(
-        "0x4D9079Bb4165aeb4084c526a32695dCfd2F77381",
+        "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
         provider
       );
     case "10":
       return SpokePool__factory.connect(
-        "0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9",
+        "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
         provider
       );
     case "137":
       return SpokePool__factory.connect(
-        "0x69B5c72837769eF1e7C164Abc6515DcFf217F920",
+        "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
         provider
       );
     case "288":
@@ -511,7 +511,7 @@ export const getSpokePool = (_chainId: number): SpokePool => {
       );
     case "42161":
       return SpokePool__factory.connect(
-        "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
+        "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
         provider
       );
     default:
