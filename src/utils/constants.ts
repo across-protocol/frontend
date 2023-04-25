@@ -1,5 +1,5 @@
 import assert from "assert";
-import { ethers } from "ethers";
+import { ethers, providers } from "ethers";
 import { relayFeeCalculator, constants } from "@across-protocol/sdk-v2";
 import { across } from "@uma/sdk";
 import * as superstruct from "superstruct";
@@ -378,7 +378,31 @@ export function getConfigStoreAddress(
 }
 
 export function getChainInfo(chainId: number): ChainInfo {
-  return chainInfoTable[chainId];
+  let chainInfo = chainInfoTable[chainId];
+
+  if (!chainInfo) {
+    let unknownNetworkName = `Unknown Network (${chainId})`;
+    try {
+      const { name } = providers.getNetwork(chainId);
+      unknownNetworkName = name;
+    } catch (error) {}
+
+    chainInfo = {
+      name: unknownNetworkName,
+      fullName: unknownNetworkName,
+      chainId,
+      logoURI: ethereumLogo,
+      grayscaleLogoURI: ethereumLogoGrayscale,
+      explorerUrl: "https://blockscan.com/",
+      constructExplorerLink: (txHash: string) =>
+        `https://blockscan.com/tx/${txHash}`,
+      nativeCurrencySymbol: "ETH",
+      pollingInterval: defaultBlockPollingInterval,
+      earliestBlock: 1,
+    };
+  }
+
+  return chainInfo;
 }
 
 export const tokenTable = Object.fromEntries(
