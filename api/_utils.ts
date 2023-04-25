@@ -15,7 +15,8 @@ import enabledGoerliRoutesAsJson from "../src/data/routes_5_0xA44A832B994f796452
 import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
-import { VercelResponse } from "@vercel/node";
+import { VercelResponse, VercelRequestQuery } from "@vercel/node";
+import { escape } from "lodash";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -691,4 +692,15 @@ export function getLpCushion(
       .map((key) => process.env[key])
       .find((value) => value !== undefined) ?? "0"
   );
+}
+
+export function sanitizeQuery(query: VercelRequestQuery) {
+  return Object.entries(query).reduce((accumulator, [key, value]) => {
+    if (value !== undefined) {
+      accumulator[key] = Array.isArray(value)
+        ? value.map(escape)
+        : escape(value);
+    }
+    return accumulator;
+  }, {} as VercelRequestQuery);
 }

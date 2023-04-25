@@ -23,6 +23,7 @@ import {
   validAddress,
   positiveIntStr,
   getLpCushion,
+  sanitizeQuery,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -71,11 +72,9 @@ const handler = async (
           }
         );
 
-    try {
-      assert(query, LimitsQueryParamsSchema);
-    } catch (error) {
-      throw new Error("Invalid query parameters");
-    }
+    query = sanitizeQuery(query);
+    assert(query, LimitsQueryParamsSchema);
+
     let { token, destinationChainId, originChainId } = query;
 
     if (originChainId === destinationChainId) {

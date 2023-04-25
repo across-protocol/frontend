@@ -7,6 +7,7 @@ import {
   InputError,
   handleErrorCondition,
   validAddress,
+  sanitizeQuery,
 } from "./_utils";
 import { SUPPORTED_CG_BASE_CURRENCIES } from "./_constants";
 
@@ -100,11 +101,9 @@ const handler = async (
     query,
   });
   try {
-    try {
-      assert(query, CoingeckoQueryParamsSchema);
-    } catch (error) {
-      throw new Error("Invalid query parameters");
-    }
+    query = sanitizeQuery(query);
+    assert(query, CoingeckoQueryParamsSchema);
+
     let { l1Token, baseCurrency } = query;
 
     // Start the symbol as lower case for CG.

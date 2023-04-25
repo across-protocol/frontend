@@ -33,22 +33,34 @@ describe("API Test", () => {
 
   test("limits has no load-time errors", async () => {
     await limitsHandler(request as TypedVercelRequest<any>, response);
-    expect(response.status).toHaveBeenCalledWith(500);
+    expect(response.status).toHaveBeenCalledWith(400);
+    expect(response.send).toHaveBeenCalledWith(
+      expect.stringMatching(/At path: token/)
+    );
   });
 
   test("suggested-fees has no load-time errors", async () => {
     await feesHandler(request as TypedVercelRequest<any>, response);
-    expect(response.status).toHaveBeenCalledWith(500);
+    expect(response.status).toHaveBeenCalledWith(400);
+    expect(response.send).toHaveBeenCalledWith(
+      expect.stringMatching(/At path: amount/)
+    );
   });
 
   test("pools has no load-time errors", async () => {
     await poolsHandler(request as TypedVercelRequest<any>, response);
-    expect(response.status).toHaveBeenCalledWith(500);
+    expect(response.status).toHaveBeenCalledWith(400);
+    expect(response.send).toHaveBeenCalledWith(
+      expect.stringMatching(/At path: token/)
+    );
   });
 
   test("coingecko has no load-time errors", async () => {
     await coingeckoHandler(request as TypedVercelRequest<any>, response);
-    expect(response.status).toHaveBeenCalledWith(500);
+    expect(response.status).toHaveBeenCalledWith(400);
+    expect(response.send).toHaveBeenCalledWith(
+      expect.stringMatching(/At path: l1Token/)
+    );
   });
 
   test("available-routes has no load-time errors", async () => {
