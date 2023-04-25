@@ -112,7 +112,7 @@ const handler = async (
     );
     response.status(200).json(enabledRoutes);
   } catch (error: unknown) {
-    return handleErrorCondition("coingecko", response, logger, error);
+    return handleErrorCondition("available-routes", response, logger, error);
   }
 };
 
