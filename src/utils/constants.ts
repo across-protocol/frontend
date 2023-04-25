@@ -20,6 +20,7 @@ import umaLogo from "assets/uma.svg";
 import acxLogo from "assets/across.svg";
 import balLogo from "assets/bal.svg";
 import usdtLogo from "assets/usdt-logo.svg";
+import unknownLogo from "assets/icons/question-24.svg";
 
 import ethereumLogoGrayscale from "assets/grayscale-logos/eth.svg";
 import optimismLogoGrayscale from "assets/grayscale-logos/optimism.svg";
@@ -381,18 +382,15 @@ export function getChainInfo(chainId: number): ChainInfo {
   let chainInfo = chainInfoTable[chainId];
 
   if (!chainInfo) {
-    let unknownNetworkName = `Unknown Network (${chainId})`;
-    try {
-      const { name } = providers.getNetwork(chainId);
-      unknownNetworkName = name;
-    } catch (error) {}
+    let { name } = providers.getNetwork(chainId);
+    name = name === "unknown" ? `Unknown (${chainId})` : name;
 
     chainInfo = {
-      name: unknownNetworkName,
-      fullName: unknownNetworkName,
+      name,
+      fullName: name,
       chainId,
-      logoURI: ethereumLogo,
-      grayscaleLogoURI: ethereumLogoGrayscale,
+      logoURI: unknownLogo,
+      grayscaleLogoURI: unknownLogo,
       explorerUrl: "https://blockscan.com/",
       constructExplorerLink: (txHash: string) =>
         `https://blockscan.com/tx/${txHash}`,
