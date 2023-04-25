@@ -136,8 +136,7 @@ const Routes: React.FC = () => {
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
-      <SuperHeader darkMode>
-        <InfoLogo />
+      <SuperHeader size="lg">
         <span>
           &nbsp; Starting at 10 AM ET on April 25th, Across bridging
           functionality will be paused for a minimum of 4 hours for a planned
