@@ -49,7 +49,7 @@ const handler = async (
     l1TokenAddress,
     fromChain,
     fromTokenAddress,
-  } of enabledRoutesAsJson.routes) {
+  } of ENABLED_ROUTES.routes) {
     l1TokensToDestinationTokens[l1TokenAddress] = {
       ...l1TokensToDestinationTokens[l1TokenAddress],
       [fromChain]: fromTokenAddress,
@@ -57,7 +57,7 @@ const handler = async (
   }
 
   const enabledRoutes = applyMapFilter(
-    enabledRoutesAsJson.routes,
+    ENABLED_ROUTES.routes,
     // Filter out elements from the request query parameters
     (route: {
       originToken: string;
