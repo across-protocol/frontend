@@ -1,5 +1,5 @@
 import { ethers, Signer, BigNumberish, BigNumber } from "ethers";
-import * as acrossSdk from "@across-protocol/sdk-v2";
+import { pool } from "@across-protocol/sdk-v2";
 
 import {
   getConfigStoreAddress,
@@ -75,7 +75,7 @@ export async function estimateGasForAddEthLiquidity(
   return estimateGas(gas, gasPrice, GAS_PRICE_BUFFER);
 }
 
-export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
+export function makePoolClientConfig(chainId: ChainId): pool.Config {
   const config = getConfig();
   const configStoreAddress = ethers.utils.getAddress(
     getConfigStoreAddress(chainId)
@@ -90,12 +90,12 @@ export function makePoolClientConfig(chainId: ChainId): acrossSdk.pool.Config {
   };
 }
 
-export let poolClient: undefined | acrossSdk.pool.Client;
+export let poolClient: undefined | pool.Client;
 
-export function getPoolClient(): acrossSdk.pool.Client {
+export function getPoolClient(): pool.Client {
   if (poolClient) return poolClient;
   const hubPoolConfig = makePoolClientConfig(hubPoolChainId);
-  poolClient = new acrossSdk.pool.Client(
+  poolClient = new pool.Client(
     hubPoolConfig,
     {
       provider: getProvider(hubPoolChainId),

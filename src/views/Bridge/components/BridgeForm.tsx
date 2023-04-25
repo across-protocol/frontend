@@ -11,6 +11,8 @@ import {
   GetBridgeFeesResult,
   QUERIESV2,
   receiveAmount,
+  defaultBridgeFromChainId,
+  defaultBridgeToChainId,
 } from "utils";
 import CoinSelector from "./CoinSelector";
 import EstimatedTable from "./EstimatedTable";
@@ -114,8 +116,8 @@ const BridgeForm = ({
             Send
           </Text>
           <CoinSelector
-            fromChain={currentFromRoute ?? 1}
-            toChain={currentToRoute ?? 10}
+            fromChain={currentFromRoute ?? defaultBridgeFromChainId}
+            toChain={currentToRoute ?? defaultBridgeToChainId}
             tokenChoices={availableTokens}
             tokenSelected={currentToken}
             onTokenSelected={setCurrentToken}

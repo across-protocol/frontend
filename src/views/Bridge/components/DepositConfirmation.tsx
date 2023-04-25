@@ -50,11 +50,9 @@ const DepositConfirmation = ({
     [ChainId.POLYGON]: <PolygonGrayscaleLogo />,
     [ChainId.OPTIMISM]: <OptimismGrayscaleLogo />,
     [ChainId.MAINNET]: <EthereumGrayscaleLogo />,
-    [ChainId.ARBITRUM_RINKEBY]: <EthereumGrayscaleLogo />,
+    [ChainId.GOERLI]: <EthereumGrayscaleLogo />,
+    [ChainId.ARBITRUM_GOERLI]: <EthereumGrayscaleLogo />,
     [ChainId.MUMBAI]: <EthereumGrayscaleLogo />,
-    [ChainId.KOVAN_OPTIMISM]: <EthereumGrayscaleLogo />,
-    [ChainId.KOVAN]: <EthereumGrayscaleLogo />,
-    [ChainId.RINKEBY]: <EthereumGrayscaleLogo />,
   };
 
   return (

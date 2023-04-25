@@ -146,6 +146,8 @@ export type AcrossDepositArgs = {
   tokenAddress: string;
   relayerFeePct: ethers.BigNumber;
   timestamp: ethers.BigNumber;
+  message?: string;
+  maxCount?: ethers.BigNumber;
   referrer?: string;
   isNative: boolean;
 };
@@ -170,6 +172,8 @@ export async function sendAcrossDeposit(
     toChain: destinationChainId,
     relayerFeePct,
     timestamp: quoteTimestamp,
+    message = "0x",
+    maxCount = ethers.constants.MaxUint256,
     isNative,
     referrer,
   }: AcrossDepositArgs
@@ -189,6 +193,8 @@ export async function sendAcrossDeposit(
     destinationChainId,
     relayerFeePct,
     quoteTimestamp,
+    message,
+    maxCount,
     { value }
   );
 
