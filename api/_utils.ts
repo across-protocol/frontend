@@ -380,7 +380,7 @@ export const queries: Record<number, () => QueryBase> = {
 export const getRelayerFeeCalculator = (destinationChainId: number) => {
   const queryFn = queries[destinationChainId];
   if (queryFn === undefined) {
-    throw new InputError(`Invalid destination chain Id: ${destinationChainId}`);
+    throw new InputError("Invalid destination chain Id");
   }
 
   const relayerFeeCalculatorConfig = {
@@ -515,7 +515,7 @@ export const getSpokePool = (_chainId: number): SpokePool => {
         provider
       );
     default:
-      throw new Error(`Invalid chainId provided: ${chainId}`);
+      throw new Error("Invalid chainId provided");
   }
 };
 

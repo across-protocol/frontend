@@ -54,7 +54,11 @@ const handler = async (
 
     const provider = infuraProvider(HUP_POOL_CHAIN_ID);
 
-    assert(query, SuggestedFeesQueryParamsSchema);
+    try {
+      assert(query, SuggestedFeesQueryParamsSchema);
+    } catch (error) {
+      throw new Error("Invalid query parameters");
+    }
 
     let {
       amount: amountInput,
@@ -112,9 +116,7 @@ const handler = async (
     ]);
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
-      throw new InputError(
-        `Route from chainId ${computedOriginChainId} to chainId ${destinationChainId} with origin token address ${token} is not enabled.`
-      );
+      throw new InputError(`Route is not enabled.`);
 
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       ENABLED_ROUTES.acrossConfigStoreAddress,
