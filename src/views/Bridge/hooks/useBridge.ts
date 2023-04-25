@@ -514,10 +514,11 @@ export function useBridge() {
     isConnected,
     isBridgeDisabled:
       isConnected &&
-      (!isBridgeAmountValid ||
+      (true || // TODO: Remove when we want to re-enable bridging.
+        !isBridgeAmountValid ||
         isBridgeDisabled ||
         bridgeAction.buttonDisabled ||
-        (!!fees && fees.isAmountTooLow)),
+        !!fees?.isAmountTooLow),
     amountTooLow: isConnected && (fees?.isAmountTooLow ?? false),
     amountToBridge,
     estimatedTime,
