@@ -1,5 +1,5 @@
 import assert from "assert";
-import { ethers } from "ethers";
+import { ethers, providers } from "ethers";
 import { relayFeeCalculator, constants } from "@across-protocol/sdk-v2";
 import { across } from "@uma/sdk";
 import * as superstruct from "superstruct";
@@ -20,6 +20,7 @@ import umaLogo from "assets/uma.svg";
 import acxLogo from "assets/across.svg";
 import balLogo from "assets/bal.svg";
 import usdtLogo from "assets/usdt-logo.svg";
+import unknownLogo from "assets/icons/question-24.svg";
 
 import ethereumLogoGrayscale from "assets/grayscale-logos/eth.svg";
 import optimismLogoGrayscale from "assets/grayscale-logos/optimism.svg";
@@ -378,7 +379,28 @@ export function getConfigStoreAddress(
 }
 
 export function getChainInfo(chainId: number): ChainInfo {
-  return chainInfoTable[chainId];
+  let chainInfo = chainInfoTable[chainId];
+
+  if (!chainInfo) {
+    let { name } = providers.getNetwork(chainId);
+    name = name === "unknown" ? `Unknown (${chainId})` : name;
+
+    chainInfo = {
+      name,
+      fullName: name,
+      chainId,
+      logoURI: unknownLogo,
+      grayscaleLogoURI: unknownLogo,
+      explorerUrl: "https://blockscan.com/",
+      constructExplorerLink: (txHash: string) =>
+        `https://blockscan.com/tx/${txHash}`,
+      nativeCurrencySymbol: "ETH",
+      pollingInterval: defaultBlockPollingInterval,
+      earliestBlock: 1,
+    };
+  }
+
+  return chainInfo;
 }
 
 export const tokenTable = Object.fromEntries(
