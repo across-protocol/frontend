@@ -487,19 +487,6 @@ export function useBridge() {
     }
   };
 
-  console.log("isConnected", isConnected);
-  console.log("isBridgeAmountValid", isBridgeAmountValid);
-  console.log("buttonDisabled", bridgeAction.buttonDisabled);
-  console.log("fees?.isAmountTooLow", !!fees?.isAmountTooLow);
-  console.log(
-    "button disabled",
-    isConnected &&
-      (!isBridgeAmountValid ||
-        isBridgeDisabled ||
-        bridgeAction.buttonDisabled ||
-        !!fees?.isAmountTooLow)
-  );
-
   return {
     ...bridgeAction,
     displayChangeAccount,
