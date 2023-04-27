@@ -21,7 +21,6 @@ import {
   validAddress,
   positiveIntStr,
   boolStr,
-  sanitizeQuery,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -53,7 +52,6 @@ const handler = async (
 
     const provider = infuraProvider("mainnet");
 
-    query = sanitizeQuery(query);
     assert(query, SuggestedFeesQueryParamsSchema);
 
     let {

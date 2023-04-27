@@ -8,7 +8,6 @@ import {
   getHubPoolClient,
   handleErrorCondition,
   validAddress,
-  sanitizeQuery,
 } from "./_utils";
 
 const PoolsQueryParamsSchema = object({
@@ -30,7 +29,6 @@ const handler = async (
   try {
     const hubPoolClient = getHubPoolClient();
 
-    query = sanitizeQuery(query);
     assert(query, PoolsQueryParamsSchema);
 
     const token = ethers.utils.getAddress(query.token);

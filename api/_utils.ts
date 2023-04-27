@@ -623,12 +623,21 @@ export function handleErrorCondition(
     return response.status(500).send("Error could not be defined.");
   }
   let status: number;
-  if (error instanceof InputError || error instanceof StructError) {
+  if (error instanceof InputError) {
     logger.warn({
       at: endpoint,
-      message: "400 input error",
+      message: `400 input error: ${error.message}`,
     });
     status = 400;
+  } else if (error instanceof StructError) {
+    logger.warn({
+      at: endpoint,
+      message: `400 validation error: ${error.message}`,
+    });
+    status = 400;
+    const { type, path } = error;
+    // Sanitize the error message that will be sent to client
+    error.message = `ValidationError - At path: ${path}. Expected type: ${type}`;
   } else {
     logger.error({
       at: endpoint,
@@ -692,15 +701,4 @@ export function getLpCushion(
       .map((key) => process.env[key])
       .find((value) => value !== undefined) ?? "0"
   );
-}
-
-export function sanitizeQuery(query: VercelRequestQuery) {
-  return Object.entries(query).reduce((accumulator, [key, value]) => {
-    if (value !== undefined) {
-      accumulator[key] = Array.isArray(value)
-        ? value.map(escape)
-        : escape(value);
-    }
-    return accumulator;
-  }, {} as VercelRequestQuery);
 }

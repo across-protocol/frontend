@@ -7,7 +7,6 @@ import {
   InputError,
   handleErrorCondition,
   validAddress,
-  sanitizeQuery,
 } from "./_utils";
 import { SUPPORTED_CG_BASE_CURRENCIES } from "./_constants";
 
@@ -101,7 +100,6 @@ const handler = async (
     query,
   });
   try {
-    query = sanitizeQuery(query);
     assert(query, CoingeckoQueryParamsSchema);
 
     let { l1Token, baseCurrency } = query;

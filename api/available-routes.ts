@@ -6,7 +6,6 @@ import {
   validAddress,
   positiveIntStr,
   handleErrorCondition,
-  sanitizeQuery,
 } from "./_utils";
 import enabledRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import { TypedVercelRequest } from "./_types";
@@ -35,7 +34,6 @@ const handler = async (
     query,
   });
   try {
-    query = sanitizeQuery(query);
     assert(query, AvailableRoutesQueryParamsSchema);
 
     const { originToken, destinationToken, originChainId, destinationChainId } =

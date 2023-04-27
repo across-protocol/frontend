@@ -23,7 +23,6 @@ import {
   validAddress,
   positiveIntStr,
   getLpCushion,
-  sanitizeQuery,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -72,7 +71,6 @@ const handler = async (
           }
         );
 
-    query = sanitizeQuery(query);
     assert(query, LimitsQueryParamsSchema);
 
     let { token, destinationChainId, originChainId } = query;
