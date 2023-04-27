@@ -15,8 +15,7 @@ import enabledGoerliRoutesAsJson from "../src/data/routes_5_0xA44A832B994f796452
 import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
-import { VercelResponse, VercelRequestQuery } from "@vercel/node";
-import { escape } from "lodash";
+import { VercelResponse } from "@vercel/node";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
