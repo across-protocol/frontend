@@ -10,7 +10,7 @@ import { BigNumber, ethers, providers, utils } from "ethers";
 import { Log, Logging } from "@google-cloud/logging";
 import { define, StructError } from "superstruct";
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
-import enabledGoerliRoutesAsJson from "../src/data/routes_5_0xA44A832B994f796452e4FaF191a041F791AD8A0A.json";
+import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
 
 import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
@@ -279,8 +279,8 @@ export const getHubPoolClient = () => {
 
 // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
 // gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
-// a USDC approval for the _current_ spoke pools on Optimism (0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9) and Arbitrum
-// (0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C). It also has a small amount of USDC ($0.10) used for estimations.
+// a USDC approval for the _current_ spoke pools on Optimism (0x6f26Bf09B1C792e3228e5467807a900A503c0281) and Arbitrum
+// (0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A). It also has a small amount of USDC ($0.10) used for estimations.
 // If this address lacks either of these, estimations will fail and relays to optimism and arbitrum will hang when
 // estimating gas. Defaults to 0x893d0d70ad97717052e3aa8903d9615804167759 so the app can technically run without this.
 export const dummyFromAddress =
@@ -298,6 +298,9 @@ export const providerForChain: {
   10: infuraProvider(10),
   137: infuraProvider(137),
   42161: infuraProvider(42161),
+  // testnets
+  5: infuraProvider(5),
+  421613: infuraProvider(421613),
 };
 export const queries: Record<number, () => QueryBase> = {
   1: () =>
@@ -344,6 +347,29 @@ export const queries: Record<number, () => QueryBase> = {
       getLogger(),
       getGasMarkup(42161)
     ),
+  // testnets
+  5: () =>
+    new sdk.relayFeeCalculator.EthereumQueries(
+      providerForChain[5],
+      undefined,
+      "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(5)
+    ),
+  421613: () =>
+    new sdk.relayFeeCalculator.EthereumQueries(
+      providerForChain[421613],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(421613)
+    ),
 };
 
 /**
@@ -381,8 +407,7 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
 export const getTokenSymbol = (tokenAddress: string): string => {
   const symbol = Object.entries(sdk.constants.TOKEN_SYMBOLS_MAP)?.find(
     ([_symbol, { addresses }]) =>
-      addresses[sdk.constants.CHAIN_IDs.MAINNET].toLowerCase() ===
-      tokenAddress.toLowerCase()
+      addresses[HUP_POOL_CHAIN_ID]?.toLowerCase() === tokenAddress.toLowerCase()
   )?.[0];
   if (!symbol) {
     throw new InputError("Token address provided was not whitelisted.");
@@ -466,17 +491,17 @@ export const getSpokePool = (_chainId: number): SpokePool => {
   switch (chainId.toString()) {
     case "1":
       return SpokePool__factory.connect(
-        "0x4D9079Bb4165aeb4084c526a32695dCfd2F77381",
+        "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
         provider
       );
     case "10":
       return SpokePool__factory.connect(
-        "0xa420b2d1c0841415A695b81E5B867BCD07Dff8C9",
+        "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
         provider
       );
     case "137":
       return SpokePool__factory.connect(
-        "0x69B5c72837769eF1e7C164Abc6515DcFf217F920",
+        "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
         provider
       );
     case "288":
@@ -486,7 +511,7 @@ export const getSpokePool = (_chainId: number): SpokePool => {
       );
     case "42161":
       return SpokePool__factory.connect(
-        "0xB88690461dDbaB6f04Dfad7df66B7725942FEb9C",
+        "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
         provider
       );
     default:

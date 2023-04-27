@@ -20,6 +20,7 @@ import {
   recordTransferUserProperties,
   sendAcrossDeposit,
   waitOnTransaction,
+  parseFundsDepositedLog,
 } from "utils";
 
 const config = getConfig();
@@ -116,11 +117,12 @@ export function useBridgeAction(
         onTransactionComplete(tx.hash);
       }
       await waitOnTransaction(frozenPayload.fromChain, tx, notify);
+      const receipt = await tx.wait(1);
 
       // Optimistically add deposit to local storage for instant visibility on the
-      // "My Transactions" page. See `src/hooks/useUserDeposits.ts` for details.
+      // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
       addLocalPendingDeposit({
-        depositId: 0,
+        depositId: parseFundsDepositedLog(receipt.logs)?.args["depositId"] || 0,
         depositTime: DateTime.now().toSeconds(),
         status: "pending",
         filled: "0",
@@ -128,6 +130,8 @@ export function useBridgeAction(
         destinationChainId: frozenPayload.toChain,
         assetAddr: frozenPayload.tokenAddress,
         depositorAddr: utils.getAddress(frozenAccount),
+        recipientAddr: frozenPayload.toAddress,
+        message: frozenPayload.message || "0x",
         amount: frozenPayload.amount.toString(),
         depositTxHash: tx.hash,
         fillTxs: [],

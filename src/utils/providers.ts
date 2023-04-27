@@ -15,13 +15,7 @@ export const providerUrls: [ChainId, string][] = [
   [ChainId.ARBITRUM, ArbitrumProviderUrl],
   [ChainId.POLYGON, PolygonProviderUrl],
   [ChainId.OPTIMISM, `https://optimism-mainnet.infura.io/v3/${infuraId}`],
-  [ChainId.RINKEBY, `https://rinkeby.infura.io/v3/${infuraId}`],
-  [ChainId.KOVAN, `https://kovan.infura.io/v3/${infuraId}`],
-  [ChainId.KOVAN_OPTIMISM, `https://optimism-kovan.infura.io/v3/${infuraId}`],
-  [
-    ChainId.ARBITRUM_RINKEBY,
-    `https://arbitrum-rinkeby.infura.io/v3/${infuraId}`,
-  ],
+  [ChainId.ARBITRUM_GOERLI, `https://arbitrum-goerli.infura.io/v3/${infuraId}`],
   [ChainId.GOERLI, `https://goerli.infura.io/v3/${infuraId}`],
   [ChainId.MUMBAI, `https://polygon-mumbai.infura.io/v3/${infuraId}`],
 ];

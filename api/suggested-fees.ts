@@ -21,6 +21,8 @@ import {
   validAddress,
   positiveIntStr,
   boolStr,
+  HUP_POOL_CHAIN_ID,
+  ENABLED_ROUTES,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -50,7 +52,7 @@ const handler = async (
       ? Number(QUOTE_TIMESTAMP_BUFFER)
       : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
 
-    const provider = infuraProvider("mainnet");
+    const provider = infuraProvider(HUP_POOL_CHAIN_ID);
 
     assert(query, SuggestedFeesQueryParamsSchema);
 
@@ -113,7 +115,7 @@ const handler = async (
       throw new InputError(`Route is not enabled.`);
 
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
-      "0x3B03509645713718B78951126E0A6de6f10043f5",
+      ENABLED_ROUTES.acrossConfigStoreAddress,
       provider
     );
 

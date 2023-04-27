@@ -23,6 +23,9 @@ import {
   validAddress,
   positiveIntStr,
   getLpCushion,
+  infuraProvider,
+  HUP_POOL_CHAIN_ID,
+  ENABLED_ROUTES,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -45,14 +48,15 @@ const handler = async (
   });
   try {
     const {
-      REACT_APP_PUBLIC_INFURA_ID,
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
       REACT_APP_MIN_DEPOSIT_USD,
     } = process.env;
-    const providerUrl = `https://mainnet.infura.io/v3/${REACT_APP_PUBLIC_INFURA_ID}`;
-    const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl);
-    logger.debug({ at: "limits", message: `Using provider at ${providerUrl}` });
+    const provider = infuraProvider(HUP_POOL_CHAIN_ID);
+    logger.debug({
+      at: "limits",
+      message: `Using INFURA provider for chain ${HUP_POOL_CHAIN_ID}`,
+    });
 
     const minDeposits = REACT_APP_MIN_DEPOSIT_USD
       ? JSON.parse(REACT_APP_MIN_DEPOSIT_USD)
@@ -89,8 +93,7 @@ const handler = async (
     );
 
     const tokenDetails = Object.values(sdk.constants.TOKEN_SYMBOLS_MAP).find(
-      (details) =>
-        details.addresses[sdk.constants.CHAIN_IDs.MAINNET] === l1Token
+      (details) => details.addresses[HUP_POOL_CHAIN_ID] === l1Token
     );
     if (tokenDetails === undefined)
       throw new InputError("Unsupported token address");
@@ -112,7 +115,7 @@ const handler = async (
 
     const { l2Token: destinationToken } = tokenDetailsResult.value;
     const hubPool = HubPool__factory.connect(
-      "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
+      ENABLED_ROUTES.hubPoolAddress,
       provider
     );
 

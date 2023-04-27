@@ -17,7 +17,6 @@ import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
-import ACXLiveBanner from "components/ACXLiveBanner/ACXLiveBanner";
 import ScrollToTop from "components/ScrollToTop";
 import { AmpliTrace } from "components/AmpliTrace";
 
@@ -104,8 +103,6 @@ const Routes: React.FC = () => {
     config,
     isContractAddress,
     isAirdrop,
-    enableACXBanner,
-    setEnableACXBanner,
     isHomepage,
   } = useRoutes();
 
@@ -138,9 +135,6 @@ const Routes: React.FC = () => {
       )}
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
-      )}
-      {!isAirdrop && enableACXBanner && (
-        <ACXLiveBanner enableHandler={setEnableACXBanner} />
       )}
       <Header
         openSidebar={openSidebar}
