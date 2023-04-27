@@ -54,11 +54,7 @@ const handler = async (
 
     const provider = infuraProvider(HUP_POOL_CHAIN_ID);
 
-    try {
-      assert(query, SuggestedFeesQueryParamsSchema);
-    } catch (error) {
-      throw new Error("Invalid query parameters");
-    }
+    assert(query, SuggestedFeesQueryParamsSchema);
 
     let {
       amount: amountInput,

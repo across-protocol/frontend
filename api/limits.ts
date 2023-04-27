@@ -75,11 +75,8 @@ const handler = async (
           }
         );
 
-    try {
-      assert(query, LimitsQueryParamsSchema);
-    } catch (error) {
-      throw new Error("Invalid query parameters");
-    }
+    assert(query, LimitsQueryParamsSchema);
+
     let { token, destinationChainId, originChainId } = query;
 
     if (originChainId === destinationChainId) {

@@ -100,11 +100,8 @@ const handler = async (
     query,
   });
   try {
-    try {
-      assert(query, CoingeckoQueryParamsSchema);
-    } catch (error) {
-      throw new Error("Invalid query parameters");
-    }
+    assert(query, CoingeckoQueryParamsSchema);
+
     let { l1Token, baseCurrency } = query;
 
     // Start the symbol as lower case for CG.
