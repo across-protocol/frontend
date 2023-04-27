@@ -38,7 +38,7 @@ export function EarnByStakingInfoBox({
     : data?.apyData.baseRewardsApy;
 
   const textColor = selectedPoolAction === "add" ? "aqua" : "warning";
-  const isStakingPoolEnabled = data?.poolEnabled;
+  const isStakingPoolEnabled = !!data?.poolEnabled;
 
   return isError ? (
     <></>
