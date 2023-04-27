@@ -27,7 +27,7 @@ export function EarnByStakingInfoBox({
   );
   const { isConnected } = useConnection();
 
-  const showValueOrDash = repeatableTernaryBuilder(
+  const showDashIfLoading = repeatableTernaryBuilder(
     !isLoading,
     <Text as="span">-</Text>
   );
@@ -38,6 +38,7 @@ export function EarnByStakingInfoBox({
     : data?.apyData.baseRewardsApy;
 
   const textColor = selectedPoolAction === "add" ? "aqua" : "warning";
+  const isStakingPoolEnabled = data?.poolEnabled;
 
   return isError ? (
     <></>
@@ -48,36 +49,42 @@ export function EarnByStakingInfoBox({
           <XStarRing width={40} height={40} />
         </LeftIconContainer>
         <TextContainer>
-          {showValueOrDash(
-            <Text color="white-100">
-              {hasStaked ? "Earning " : "Earn "}
-              {showValueOrDash(
-                <Text color={textColor} as="span">
-                  +{formatWeiPct(apyToShow)}%
-                </Text>
-              )}
-              {hasStaked ? " on staked " : " by staking "}
-              {showValueOrDash(
-                <Text color={textColor} as="span">
-                  {selectedToken.symbol}-LP
-                </Text>
-              )}
-            </Text>
+          {showDashIfLoading(
+            isStakingPoolEnabled ? (
+              <Text color="white-100">
+                {hasStaked ? "Earning " : "Earn "}
+                {showDashIfLoading(
+                  <Text color={textColor} as="span">
+                    +{formatWeiPct(apyToShow)}%
+                  </Text>
+                )}
+                {hasStaked ? " on staked " : " by staking "}
+                {showDashIfLoading(
+                  <Text color={textColor} as="span">
+                    {selectedToken.symbol}-LP
+                  </Text>
+                )}
+              </Text>
+            ) : (
+              <Text>Staking is not enabled for {selectedToken.symbol}-LP</Text>
+            )
           )}
         </TextContainer>
-        <IconButtonLink
-          to={`/rewards/staking/${selectedToken.symbol.toLowerCase()}`}
-          selectedPoolAction={selectedPoolAction}
-        >
-          <ChevronRight strokeWidth="1.5" size={20} />
-        </IconButtonLink>
+        {isStakingPoolEnabled && (
+          <IconButtonLink
+            to={`/rewards/staking/${selectedToken.symbol.toLowerCase()}`}
+            selectedPoolAction={selectedPoolAction}
+          >
+            <ChevronRight strokeWidth="1.5" size={20} />
+          </IconButtonLink>
+        )}
       </UpperRowContainer>
       {isConnected && (
         <>
           <Divider selectedPoolAction={selectedPoolAction} />
           <LowerRowContainer>
             <Text color="grey-400">Staked LP Tokens</Text>
-            {showValueOrDash(
+            {showDashIfLoading(
               <Text color={hasStaked ? "white-100" : "grey-400"} as="span">
                 {data?.lpTokenFormatter(data?.userAmountOfLPStaked || 0)} /{" "}
                 {data?.lpTokenFormatter(data?.usersTotalLPTokens || 0)}{" "}
