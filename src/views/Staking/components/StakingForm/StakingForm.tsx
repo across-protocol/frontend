@@ -83,6 +83,7 @@ export const StakingForm = ({
 
   const activeColor = "white-" + (amount && isAmountValid ? 100 : 70);
   const lpFmt = poolData.lpTokenFormatter;
+  const isStakingPoolEnabled = poolData.poolEnabled;
 
   return (
     <SectionTitleWrapperV2 title="Staking">
@@ -125,7 +126,9 @@ export const StakingForm = ({
               onClickHandler={buttonHandler}
               displayLoader={isMutating}
               warningButtonColor={stakingAction === "unstake"}
-              disableInput={isDataLoading || isMutating}
+              disableInput={
+                isDataLoading || isMutating || !poolData.poolEnabled
+              }
             />
           ) : (
             <ConnectWalletButton reasonToConnect={stakingAction} />
@@ -133,6 +136,11 @@ export const StakingForm = ({
           {isConnected && maximumValue.eq(0) && stakingAction === "unstake" && (
             <Text color="warning" size="sm">
               You don't have any tokens to unstake.
+            </Text>
+          )}
+          {!isDataLoading && !isStakingPoolEnabled && (
+            <Text color="warning" size="sm">
+              Staking is not enabled for {poolData.tokenSymbol}-LP
             </Text>
           )}
         </InputBlockWrapper>
