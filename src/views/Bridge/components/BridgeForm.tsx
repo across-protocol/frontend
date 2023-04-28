@@ -122,6 +122,7 @@ const BridgeForm = ({
             tokenSelected={currentToken}
             onTokenSelected={setCurrentToken}
             onAmountToBridgeChanged={setAmountToBridge}
+            amountToBridge={amountToBridge}
             currentSelectedBalance={currentBalance}
             walletAccount={walletAccount}
             setIsBridgeAmountValid={setIsBridgeAmountValid}
