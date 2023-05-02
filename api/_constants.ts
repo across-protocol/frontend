@@ -40,6 +40,12 @@ const defaultRelayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("1500000").toString(),
     decimals: 6,
   },
+  USDT: {
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
+    cutoff: ethers.utils.parseUnits("250000").toString(),
+    decimals: 6,
+  },
   UMA: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.00075").toString(),

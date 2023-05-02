@@ -14,6 +14,7 @@ import {
   StyledWBTCLogo,
   StyledUmaLogo,
   StyledBadgerLogo,
+  StyledUSDTLogo,
   AssetHeadCell,
   AssetCell,
   ChainsCell,
@@ -62,6 +63,8 @@ function determineIcon(symbol: string) {
       return <StyledUmaLogo />;
     case "BADGER":
       return <StyledBadgerLogo />;
+    case "USDT":
+      return <StyledUSDTLogo />;
     default:
       return <StyledETHIcon />;
   }
