@@ -38,7 +38,10 @@ export class ConfigClient {
   public chainOrder: Record<string, number> = {};
   public routes: constants.Routes = [];
   public pools: constants.Pools = [];
-  constructor(private config: constants.RouteConfig) {
+  constructor(
+    private config: constants.RouteConfig,
+    private disabledTokens: string[] = []
+  ) {
     this.config.routes.forEach((route) => {
       this.spokeAddresses[route.fromChain] = route.fromSpokeAddress;
       this.spokeChains.add(route.fromChain);
@@ -73,6 +76,11 @@ export class ConfigClient {
   }
   getWethAddress(): string {
     return this.config.hubPoolWethAddress;
+  }
+  getEnabledRoutes(): constants.Routes {
+    return this.routes.filter(
+      (route) => !this.disabledTokens.includes(route.fromTokenSymbol)
+    );
   }
   getRoutes(): constants.Routes {
     return this.routes;
@@ -374,6 +382,9 @@ export class ConfigClient {
 let config: ConfigClient | undefined;
 export function getConfig(): ConfigClient {
   if (config) return config;
-  config = new ConfigClient(constants.routeConfig);
+  config = new ConfigClient(
+    constants.routeConfig,
+    constants.disabledBridgeTokens
+  );
   return config;
 }

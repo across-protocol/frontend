@@ -29,7 +29,7 @@ import { BridgeLimitInterface } from "utils/serverless-api/types";
 import { useBridgeAction } from "./useBridgeAction";
 import { useBridgeDepositTracking } from "./useBridgeDepositTracking";
 
-const enabledRoutes = getConfig().getRoutes();
+const enabledRoutes = getConfig().getEnabledRoutes();
 
 export function useBridge() {
   // Get all available tokens from the enabled routes and use useMemo to avoid
