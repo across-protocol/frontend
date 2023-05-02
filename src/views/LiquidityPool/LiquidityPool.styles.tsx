@@ -44,4 +44,8 @@ export const Button = styled(ButtonV2)<{ isRemove?: boolean }>`
     padding: 0px 20px;
     border-radius: 20px;
   }
+
+  &:hover {
+    opacity: 1;
+  }
 `;
