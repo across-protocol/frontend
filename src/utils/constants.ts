@@ -670,3 +670,9 @@ export const isSentryEnabled = Boolean(
 
 export const defaultBridgeFromChainId = hubPoolChainId;
 export const defaultBridgeToChainId = hubPoolChainId === 1 ? 10 : 5;
+
+export const disabledBridgeTokens = String(
+  process.env.REACT_APP_DISABLED_BRIDGE_TOKENS || ""
+)
+  .split(",")
+  .map((symbol) => symbol.toUpperCase());
