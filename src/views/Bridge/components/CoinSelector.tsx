@@ -30,6 +30,7 @@ function useCoinSelector(
   fromChain: number,
   toChain: number,
   setAmountToBridge: (v: BigNumber | undefined) => void,
+  amountToBridge: BigNumber | undefined,
   setIsBridgeAmountValid: (v: boolean) => void,
   setIsLiquidityFromAmountExceeded: (v: boolean) => void,
   currentBalance?: BigNumber,
@@ -148,6 +149,20 @@ function useCoinSelector(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentToken, toChain, fromChain]);
 
+  const errorMessage:
+    | "insufficientBalance"
+    | "insufficientLiquidity"
+    | "invalid"
+    | undefined = isValueAmbiguous
+    ? undefined
+    : !!limits && amountToBridge && amountToBridge.gt(limits.maxDeposit)
+    ? "insufficientLiquidity"
+    : !!currentBalance && amountToBridge && amountToBridge.gt(currentBalance)
+    ? "insufficientBalance"
+    : !validInput
+    ? "invalid"
+    : undefined;
+
   return {
     token,
     tokenFormatterFn,
@@ -160,12 +175,14 @@ function useCoinSelector(
     disabledSelector,
     balances,
     isValueAmbiguous,
+    errorMessage,
   };
 }
 
 type CoinSelectorPropType = {
   currentSelectedBalance?: BigNumber;
   onAmountToBridgeChanged: (v: BigNumber | undefined) => void;
+  amountToBridge?: BigNumber;
   tokenChoices: TokenInfo[];
   onTokenSelected: (s: string) => void;
 
@@ -193,8 +210,7 @@ const CoinSelector = ({
   walletAccount,
   setIsBridgeAmountValid,
   setIsLiquidityFromAmountExceeded,
-  isInsufficientLiquidityExceeded,
-  isAmountTooLow,
+  amountToBridge,
 }: CoinSelectorPropType) => {
   const {
     token,
@@ -207,13 +223,14 @@ const CoinSelector = ({
     setDisplayBalance,
     disabledSelector,
     balances,
-    isValueAmbiguous,
+    errorMessage,
   } = useCoinSelector(
     tokenChoices,
     tokenSelected,
     fromChain,
     toChain,
     onAmountToBridgeChanged,
+    amountToBridge,
     setIsBridgeAmountValid,
     setIsLiquidityFromAmountExceeded,
     currentSelectedBalance,
@@ -250,19 +267,14 @@ const CoinSelector = ({
             </MaxButtonWrapper>
           </AmountInnerWrapper>
         </AmountWrapper>
-        {!isValueAmbiguous && userAmountInput && !validInput && (
+        {errorMessage !== undefined && (
           <BridgeInputErrorAlert>
-            Only positive numbers are allowed as an input.
-          </BridgeInputErrorAlert>
-        )}
-        {isInsufficientLiquidityExceeded && (
-          <BridgeInputErrorAlert>
-            Insufficient bridge liquidity to process this transfer.
-          </BridgeInputErrorAlert>
-        )}
-        {isAmountTooLow && (
-          <BridgeInputErrorAlert>
-            Bridge fee is high for this amount.
+            {errorMessage === "insufficientBalance" &&
+              "Insufficient balance to process this transfer."}
+            {errorMessage === "insufficientLiquidity" &&
+              "Insufficient bridge liquidity to process this transfer."}
+            {errorMessage === "invalid" &&
+              "Only positive numbers are allowed as an input."}
           </BridgeInputErrorAlert>
         )}
       </AmountExternalWrapper>
