@@ -946,7 +946,7 @@
     },
     {
       "fromChain": 42161,
-      "toChain": 1,
+      "toChain": 137,
       "fromTokenAddress": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
       "fromSpokeAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
       "fromTokenSymbol": "USDT",
