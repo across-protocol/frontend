@@ -20,11 +20,9 @@ export const notificationEmitter = async (
 ): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     const { emitter } = notify.hash(txHash);
-    emitter.on("all", (transaction) => {
+    emitter.on("all", () => {
       return {
-        link: getChainInfo(requiredChainId).constructExplorerLink(
-          transaction.hash!!
-        ),
+        link: getChainInfo(requiredChainId).constructExplorerLink(txHash),
       };
     });
     emitter.on("txConfirmed", () => {
