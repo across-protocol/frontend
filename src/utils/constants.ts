@@ -264,12 +264,12 @@ export const tokenSymbolLogoMap = {
   MATIC: polygonLogo,
   WMATIC: polygonLogo,
   USDC: usdcLogo,
+  USDT: usdtLogo,
   DAI: daiLogo,
   WBTC: wbtcLogo,
   BOBA: bobaLogo,
   UMA: umaLogo,
   ACX: acxLogo,
-  USDT: usdtLogo,
   BAL: balLogo,
 };
 
