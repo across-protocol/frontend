@@ -1,20 +1,10 @@
 import { API as NotifyAPI } from "bnc-notify";
 import { ContractTransaction } from "ethers";
-import {
-  hubPoolChainId,
-  getChainInfo,
-  supportedNotifyChainIds,
-  getProvider,
-} from "utils";
-
-export function addEtherscan(transaction: any) {
-  return {
-    link: getChainInfo(hubPoolChainId).constructExplorerLink(transaction.hash),
-  };
-}
+import { getChainInfo, supportedNotifyChainIds, getProvider } from "utils";
 
 /**
  * Calls and waits on the Notify API to resolve the status of a TX
+ * @param requiredChainId Notify supported chain id.
  * @param txHash The transaction hash to wait for
  * @param notify The BNC Notify API that is used to handle the UI visualization
  * @param timingBuffer An optional waiting time in milliseconds to wait to resolve this promise on a successful tx confirmation. (Default: 5000ms)
@@ -22,6 +12,7 @@ export function addEtherscan(transaction: any) {
  * @returns Nothing.
  */
 export const notificationEmitter = async (
+  requiredChainId: number,
   txHash: string,
   notify: NotifyAPI,
   timingBuffer?: number,
@@ -29,7 +20,13 @@ export const notificationEmitter = async (
 ): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     const { emitter } = notify.hash(txHash);
-    emitter.on("all", addEtherscan);
+    emitter.on("all", (transaction) => {
+      return {
+        link: getChainInfo(requiredChainId).constructExplorerLink(
+          transaction.hash!!
+        ),
+      };
+    });
     emitter.on("txConfirmed", () => {
       notify.unsubscribe(txHash);
       setTimeout(() => {
@@ -62,7 +59,13 @@ export const waitOnTransaction = async (
   ignoreErrors?: boolean
 ): Promise<void> => {
   if (supportedNotifyChainIds.includes(requiredChainId)) {
-    await notificationEmitter(tx.hash, notify, timingBuffer, ignoreErrors);
+    await notificationEmitter(
+      requiredChainId,
+      tx.hash,
+      notify,
+      timingBuffer,
+      ignoreErrors
+    );
   } else {
     try {
       const provider = getProvider(requiredChainId);
