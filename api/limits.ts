@@ -1,7 +1,7 @@
 // Note: ideally this would be written in ts as vercel claims they support it natively.
 // However, when written in ts, the imports seem to fail, so this is in js for now.
 
-import { HubPool__factory } from "@across-protocol/sdk-v2/dist/typechain";
+import { HubPool__factory } from "@across-protocol/contracts-v2/dist/typechain";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
