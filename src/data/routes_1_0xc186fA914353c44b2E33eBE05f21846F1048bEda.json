@@ -91,6 +91,15 @@
     },
     {
       "fromChain": 1,
+      "toChain": 10,
+      "fromTokenAddress": "0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F",
+      "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "fromTokenSymbol": "SNX",
+      "isNative": false,
+      "l1TokenAddress": "0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F"
+    },
+    {
+      "fromChain": 1,
       "toChain": 137,
       "fromTokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
@@ -331,6 +340,15 @@
       "fromTokenSymbol": "USDT",
       "isNative": false,
       "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
+      "fromChain": 10,
+      "toChain": 1,
+      "fromTokenAddress": "0x8700dAec35aF8Ff88c16BdF0418774CB3D7599B4",
+      "fromSpokeAddress": "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
+      "fromTokenSymbol": "SNX",
+      "isNative": false,
+      "l1TokenAddress": "0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F"
     },
     {
       "fromChain": 10,
