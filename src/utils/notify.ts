@@ -19,6 +19,10 @@ export const notificationEmitter = async (
   ignoreErrors?: boolean
 ): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
+    notify.config({
+      networkId: requiredChainId,
+    });
+
     const { emitter } = notify.hash(txHash);
     emitter.on("all", () => {
       return {
