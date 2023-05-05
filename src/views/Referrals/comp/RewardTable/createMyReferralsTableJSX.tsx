@@ -15,6 +15,7 @@ import {
   StyledUmaLogo,
   StyledBadgerLogo,
   StyledUSDTLogo,
+  StyledSNXLogo,
   AssetHeadCell,
   AssetCell,
   ChainsCell,
@@ -65,6 +66,8 @@ function determineIcon(symbol: string) {
       return <StyledBadgerLogo />;
     case "USDT":
       return <StyledUSDTLogo />;
+    case "SNX":
+      return <StyledSNXLogo />;
     default:
       return <StyledETHIcon />;
   }

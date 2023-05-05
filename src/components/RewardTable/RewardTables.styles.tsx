@@ -13,6 +13,7 @@ import { ReactComponent as DaiLogo } from "assets/dai.svg";
 import { ReactComponent as UmaLogo } from "assets/uma.svg";
 import { ReactComponent as WBTCLogo } from "assets/wbtc.svg";
 import { ReactComponent as USDTLogo } from "assets/usdt-logo.svg";
+import { ReactComponent as SNXLogo } from "assets/snx-logo.svg";
 import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
 
 import ProgressBar from "components/ProgressBar";
@@ -296,6 +297,10 @@ export const StyledWBTCLogo = styled(WBTCLogo)``;
 export const StyledUmaLogo = styled(UmaLogo)``;
 export const StyledBadgerLogo = styled(BadgerLogo)``;
 export const StyledUSDTLogo = styled(USDTLogo)`
+  width: 32px;
+  height: 32px;
+`;
+export const StyledSNXLogo = styled(SNXLogo)`
   width: 32px;
   height: 32px;
 `;
