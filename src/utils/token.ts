@@ -1,3 +1,5 @@
+import { ethers } from "ethers";
+
 import {
   getProvider,
   ChainId,
@@ -6,8 +8,7 @@ import {
   formatUnits,
   reportTokenBalance,
 } from "utils";
-import { clients } from "@uma/sdk";
-import { ethers } from "ethers";
+import { ERC20__factory } from "utils/typechain";
 
 export async function getNativeBalance(
   chainId: ChainId,
@@ -36,7 +37,7 @@ export async function getBalance(
   blockNumber: number | "latest" = "latest"
 ): Promise<ethers.BigNumber> {
   const provider = getProvider(chainId);
-  const contract = clients.erc20.connect(tokenAddress, provider);
+  const contract = ERC20__factory.connect(tokenAddress, provider);
   const symbol = await contract.symbol({ blockTag: blockNumber });
   const balance = await contract.balanceOf(account, { blockTag: blockNumber });
   reportTokenBalance(chainId, balance, symbol);
@@ -69,7 +70,7 @@ export async function getAllowance(
   if (isNative) {
     return ethers.constants.MaxUint256;
   }
-  const contract = clients.erc20.connect(address, provider);
+  const contract = ERC20__factory.connect(address, provider);
   return contract.allowance(owner, spender, { blockTag: blockNumber });
 }
 

@@ -1,8 +1,7 @@
-import { clients } from "@uma/sdk";
 import { ethers, BigNumber } from "ethers";
 
 import { ChainId, referrerDelimiterHex } from "./constants";
-
+import { ERC20__factory } from "./typechain";
 import { tagAddress } from "./format";
 import { getProvider } from "./providers";
 import { getConfig } from "utils";
@@ -218,6 +217,6 @@ export async function sendAcrossApproval(
   if (!code) {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
-  const tokenContract = clients.erc20.connect(tokenAddress, signer);
+  const tokenContract = ERC20__factory.connect(tokenAddress, signer);
   return tokenContract.approve(spokePool.address, amount);
 }

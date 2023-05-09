@@ -3,7 +3,7 @@ import {
   ERC20__factory,
   SpokePool__factory,
   SpokePool,
-} from "@across-protocol/contracts-v2";
+} from "@across-protocol/contracts-v2/dist/typechain";
 import axios from "axios";
 import * as sdk from "@across-protocol/sdk-v2";
 import { BigNumber, ethers, providers, utils } from "ethers";

@@ -1,4 +1,3 @@
-export * from "./useERC20";
 export * from "./useBalance";
 export * from "./useBlock";
 export * from "./useBridgeFees";

@@ -15,3 +15,7 @@ export type { HubPool } from "@across-protocol/contracts-v2/dist/typechain/HubPo
 export type { SpokePool } from "@across-protocol/contracts-v2/dist/typechain/SpokePool";
 export type { AcceleratingDistributor } from "@across-protocol/across-token/dist/typechain/AcceleratingDistributor";
 export type { ClaimAndStake } from "@across-protocol/across-token/dist/typechain/ClaimAndStake";
+export type {
+  TypedEvent,
+  TypedEventFilter,
+} from "@across-protocol/contracts-v2/dist/typechain/common";

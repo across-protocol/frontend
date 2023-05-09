@@ -1,7 +1,6 @@
 import assert from "assert";
 import { ethers, providers } from "ethers";
 import { relayFeeCalculator, constants } from "@across-protocol/sdk-v2";
-import { across } from "@uma/sdk";
 import * as superstruct from "superstruct";
 
 import { getAddress } from "./address";
@@ -330,7 +329,6 @@ export const infuraId =
 export const confirmations =
   Number(process.env.REACT_APP_PUBLIC_CONFIRMATIONS) || 1;
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
-export const matomoUrl = process.env.REACT_APP_MATOMO_URL;
 export const debug = Boolean(process.env.REACT_APP_DEBUG);
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
@@ -629,7 +627,7 @@ export const rewardTiers = [
   },
 ];
 
-export const secondsPerYear = across.constants.SECONDS_PER_YEAR;
+export const secondsPerYear = 31557600;
 export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day
 
 export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
