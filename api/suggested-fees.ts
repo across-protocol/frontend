@@ -168,7 +168,7 @@ const handler = async (
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: blockTag.toString(),
-      spokePoolAddress: getSpokePoolAddress(Number(originChainId)),
+      spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
     };
 
     logger.debug({
