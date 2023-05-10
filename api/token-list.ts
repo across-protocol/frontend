@@ -55,15 +55,15 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
     // Two different explanations for how `stale-while-revalidate` works:
 
     // https://vercel.com/docs/concepts/edge-network/caching#stale-while-revalidate
-    // This tells our CDN the value is fresh for 6 hours. If a request is repeated within the next 6 hours,
+    // This tells our CDN the value is fresh for 7 days. If a request is repeated within the next 7 days,
     // the previously cached value is still fresh. The header x-vercel-cache present in the response will show the
-    // value HIT. If the request is repeated up to 6 hours later, the cached value will be stale but
+    // value HIT. If the request is repeated up to 7 days later, the cached value will be stale but
     // still render. In the background, a revalidation request will be made to populate the cache with a fresh value.
     // x-vercel-cache will have the value STALE until the cache is refreshed.
 
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-    // The response is fresh for 6 hours. After 6 hours it becomes stale, but the cache is allowed to reuse it
-    // for any requests that are made in the following 6 hours, provided that they revalidate the response in the background.
+    // The response is fresh for 7 days. After 7 days it becomes stale, but the cache is allowed to reuse it
+    // for any requests that are made in the following 7 days, provided that they revalidate the response in the background.
     // Revalidation will make the cache be fresh again, so it appears to clients that it was always fresh during
     // that period — effectively hiding the latency penalty of revalidation from them.
     // If no request happened during that period, the cache became stale and the next request will revalidate normally.
@@ -74,7 +74,7 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
     });
     response.setHeader(
       "Cache-Control",
-      "s-maxage=21600, stale-while-revalidate=21600"
+      "s-maxage=604800, stale-while-revalidate=604800"
     );
     response.status(200).json(enrichedTokensPerChain);
   } catch (error: unknown) {
