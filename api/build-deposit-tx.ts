@@ -99,7 +99,7 @@ const handler = async (
       message: "Response data",
       responseJson,
     });
-
+    response.setHeader("Cache-Control", "s-maxage=300");
     response.status(200).json(responseJson);
   } catch (error) {
     return handleErrorCondition("build-deposit-tx", response, logger, error);
