@@ -52,30 +52,16 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
       }
     );
 
-    // Two different explanations for how `stale-while-revalidate` works:
-
-    // https://vercel.com/docs/concepts/edge-network/caching#stale-while-revalidate
-    // This tells our CDN the value is fresh for 7 days. If a request is repeated within the next 7 days,
-    // the previously cached value is still fresh. The header x-vercel-cache present in the response will show the
-    // value HIT. If the request is repeated up to 7 days later, the cached value will be stale but
-    // still render. In the background, a revalidation request will be made to populate the cache with a fresh value.
-    // x-vercel-cache will have the value STALE until the cache is refreshed.
-
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-    // The response is fresh for 7 days. After 7 days it becomes stale, but the cache is allowed to reuse it
-    // for any requests that are made in the following 7 days, provided that they revalidate the response in the background.
-    // Revalidation will make the cache be fresh again, so it appears to clients that it was always fresh during
-    // that period — effectively hiding the latency penalty of revalidation from them.
-    // If no request happened during that period, the cache became stale and the next request will revalidate normally.
+    // Instruct Vercel to cache limit data for this token for 6 hours. Caching can be used to limit number of
+    // Vercel invocations and run time for this serverless function and trades off potential inaccuracy in times of
+    // high volume. "max-age=0" instructs browsers not to cache, while s-maxage instructs Vercel edge caching
+    // to cache the responses and invalidate when deployments update.
     logger.debug({
       at: "TokenList",
       message: "Response data",
       responseJson: enrichedTokensPerChain,
     });
-    response.setHeader(
-      "Cache-Control",
-      "s-maxage=604800, stale-while-revalidate=604800"
-    );
+    response.setHeader("Cache-Control", "s-maxage=21600");
     response.status(200).json(enrichedTokensPerChain);
   } catch (error: unknown) {
     return handleErrorCondition("token-list", response, logger, error);
