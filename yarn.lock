@@ -11,10 +11,10 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/contracts-v2@2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.2.1.tgz#201cc2b5b5dd860ee148949645abad545603cf97"
-  integrity sha512-jNO6SHNlxkWDsE4n0UmZR4LGIlt7sg+WR0vntAq/bxbgxzinm+yFr2p5zaSQvEqGjgVcr39EELWZ+FPpdRduSw==
+"@across-protocol/contracts-v2@2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.2.2.tgz#ff7684317e93678c88f440eca9e7d398bfbd485a"
+  integrity sha512-y4ouHyRafRv/+L3CgvYE4V4CFWgK9Qm7cOSVusc+l1XTlgdRNgh0JIA41fXE6pG7eu+V6GmayMSUO9tAbH9QDA==
   dependencies:
     "@defi-wonderland/smock" "^2.3.4"
     "@eth-optimism/contracts" "^0.5.11"
@@ -33,13 +33,13 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.5.5":
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.5.5.tgz#e032cf652410cedc7843a5ab021133e1bc722b2d"
-  integrity sha512-kWC2QQeIdrYSLG1PUfN0+MG7XcxktL1aZIocaTXt0i/0nSJppyvPn5O/YL24rtcQ0bx3u/OLxKVBJ453bt0/nQ==
+"@across-protocol/sdk-v2@^0.5.6":
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.5.6.tgz#85e992ac6822dae5e09a0871ccf5ba57182db71d"
+  integrity sha512-cSFErbXN8E7N3HDJdbegeVf8/gWnA5VFqiVrpxY3l2FTHMOpvyMe+DPdqL3DP57ijLqbQd/3tag4DdHdoWFIpw==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
-    "@across-protocol/contracts-v2" "2.2.1"
+    "@across-protocol/contracts-v2" "2.2.2"
     "@eth-optimism/sdk" "^1.6.0"
     "@uma/sdk" "^0.29.3"
     axios "^0.27.2"

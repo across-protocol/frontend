@@ -19,6 +19,7 @@ import umaLogo from "assets/uma.svg";
 import acxLogo from "assets/across.svg";
 import balLogo from "assets/bal.svg";
 import usdtLogo from "assets/usdt-logo.svg";
+import snxLogo from "assets/snx-logo.svg";
 import unknownLogo from "assets/icons/question-24.svg";
 
 import ethereumLogoGrayscale from "assets/grayscale-logos/eth.svg";
@@ -270,6 +271,7 @@ export const tokenSymbolLogoMap = {
   UMA: umaLogo,
   ACX: acxLogo,
   BAL: balLogo,
+  SNX: snxLogo,
 };
 
 export const tokenList: TokenInfoList = Object.entries(
