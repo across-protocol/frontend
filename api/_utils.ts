@@ -681,6 +681,16 @@ export function validAddress() {
   );
 }
 
+export function validAddressOrENS() {
+  return define<string>("validAddressOrENS", (value) => {
+    const ensDomainRegex =
+      /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/;
+    return (
+      utils.isAddress(value as string) || ensDomainRegex.test(value as string)
+    );
+  });
+}
+
 export function positiveIntStr() {
   return define<string>("positiveIntStr", (value) => {
     return Number.isInteger(Number(value)) && Number(value) > 0;
@@ -716,9 +726,21 @@ export function getLpCushion(
   );
 }
 
-export function tagReferrer(dataHex: string, referrerAddress: string) {
-  if (!ethers.utils.isAddress(referrerAddress)) {
-    throw new Error("Data must be a valid address");
+export async function tagReferrer(
+  dataHex: string,
+  referrerAddressOrENS: string
+) {
+  let referrerAddress: string | null;
+
+  if (ethers.utils.isAddress(referrerAddressOrENS)) {
+    referrerAddress = referrerAddressOrENS;
+  } else {
+    const provider = infuraProvider(1);
+    referrerAddress = await provider.resolveName(referrerAddressOrENS);
+  }
+
+  if (!referrerAddress) {
+    throw new Error("Invalid referrer address or ENS name");
   }
 
   if (!ethers.utils.isHexString(dataHex)) {

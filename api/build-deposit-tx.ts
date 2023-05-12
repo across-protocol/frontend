@@ -12,12 +12,12 @@ import {
   boolStr,
   getSpokePool,
   tagReferrer,
+  validAddressOrENS,
 } from "./_utils";
 
 const BuildDepositTxQueryParamsSchema = type({
   amount: parsableBigNumberString(),
   token: validAddress(),
-  isNative: boolStr(),
   destinationChainId: positiveIntStr(),
   originChainId: positiveIntStr(),
   recipient: validAddress(),
@@ -25,7 +25,7 @@ const BuildDepositTxQueryParamsSchema = type({
   quoteTimestamp: positiveIntStr(),
   message: optional(string()),
   maxCount: optional(boolStr()),
-  referrer: optional(validAddress()),
+  referrer: optional(validAddressOrENS()),
 });
 
 type BuildDepositTxQueryParams = Infer<typeof BuildDepositTxQueryParamsSchema>;
@@ -86,10 +86,7 @@ const handler = async (
     );
 
     // do not tag a referrer if data is not provided as a hex string.
-    tx.data =
-      referrer && ethers.utils.isAddress(referrer)
-        ? tagReferrer(tx.data!, referrer)
-        : tx.data;
+    tx.data = referrer ? await tagReferrer(tx.data!, referrer) : tx.data;
 
     const responseJson = {
       data: tx.data,
