@@ -45,6 +45,11 @@ export const FLAT_RELAY_CAPITAL_FEE = Number(
   process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE ?? 0.03
 ); // 0.03%
 
+// Tokens that should be disabled in the routes
+export const DISABLED_ROUTE_TOKENS = (
+  process.env.DISABLED_ROUTE_TOKENS || ""
+).split(",");
+
 export const ENABLED_ROUTES =
   HUP_POOL_CHAIN_ID === 1
     ? enabledMainnetRoutesAsJson
@@ -532,7 +537,8 @@ export const isRouteEnabled = (
   fromToken: string
 ): boolean => {
   const enabled = ENABLED_ROUTES.routes.some(
-    ({ fromTokenAddress, fromChain, toChain }) =>
+    ({ fromTokenAddress, fromChain, toChain, fromTokenSymbol }) =>
+      !DISABLED_ROUTE_TOKENS.includes(fromTokenSymbol) &&
       fromChainId === fromChain &&
       toChainId === toChain &&
       fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
