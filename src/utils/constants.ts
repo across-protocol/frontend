@@ -608,7 +608,7 @@ export const rewardTiers = [
     body: "Starting tier with no requirements to join.",
   },
   {
-    title: "Bronzer tier",
+    title: "Bronze tier",
     titleSecondary: "50% referral rate",
     body: "Requires over $50,000 of bridge volume or 3 unique referral transfers.",
   },
