@@ -6,7 +6,6 @@ export function useIsContractAddress(address?: string, chainId = 1) {
   const [isContractAddress, setIsContractAddress] = useState(false);
 
   useEffect(() => {
-    setIsContractAddress(false);
     if (address && chainId) {
       getCode(address, chainId)
         .then((res) => {
