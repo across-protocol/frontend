@@ -39,7 +39,7 @@ const ChangeAccountModal = ({
   }, [currentAccount, userInput]);
 
   const onSaveHandler = () => {
-    if (validInput) {
+    if (validInput || userInput === "") {
       changeAccountHandler(userInput);
       addToAmpliQueue(() => {
         ampli.toAccountChanged({
@@ -84,7 +84,10 @@ const ChangeAccountModal = ({
                 Cancel
               </Text>
             </CancelButton>
-            <SaveButton disabled={!validInput} onClick={onSaveHandler}>
+            <SaveButton
+              disabled={!validInput && !!userInput}
+              onClick={onSaveHandler}
+            >
               <Text size="lg" weight={500} color="dark-grey">
                 Save
               </Text>
