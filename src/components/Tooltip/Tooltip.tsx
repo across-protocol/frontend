@@ -23,13 +23,13 @@ export type TooltipIcon =
   | "clock";
 export interface TooltipProps {
   icon?: TooltipIcon;
-  title: string;
+  title?: string;
   titleSecondary?: string;
   body: string;
 }
 
 export const PopperTooltip: React.FC<{
-  title: string;
+  title?: string;
   body: string;
   icon?: TooltipIcon;
   placement?: Placement;
@@ -99,16 +99,18 @@ export const Tooltip: React.FC<TooltipProps> = ({
 }) => {
   return (
     <Wrapper>
-      <TitleRow>
-        {icon === "green-checkmark" && <RoundedCheckmark16 />}
-        {icon === "grey-checkmark" && <GreyRoundedCheckmark16 />}
-        {icon === "self-referral" && <SelfReferralIcon />}
-        {icon === "referral" && <ReferrerIcon />}
-        {icon === "referee" && <RefereeIcon />}
-        {icon === "clock" && <ClockIcon />}
-        {title}
-        {titleSecondary && <TitleSecondary>{titleSecondary}</TitleSecondary>}
-      </TitleRow>
+      {title && (
+        <TitleRow>
+          {icon === "green-checkmark" && <RoundedCheckmark16 />}
+          {icon === "grey-checkmark" && <GreyRoundedCheckmark16 />}
+          {icon === "self-referral" && <SelfReferralIcon />}
+          {icon === "referral" && <ReferrerIcon />}
+          {icon === "referee" && <RefereeIcon />}
+          {icon === "clock" && <ClockIcon />}
+          {title}
+          {titleSecondary && <TitleSecondary>{titleSecondary}</TitleSecondary>}
+        </TitleRow>
+      )}
       <Body>{body}</Body>
     </Wrapper>
   );
