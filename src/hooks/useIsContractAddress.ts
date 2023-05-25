@@ -14,6 +14,8 @@ export function useIsContractAddress(address?: string, chainId = 1) {
         .catch((err) => {
           console.log("err in getCode call", err);
         });
+    } else {
+      setIsContractAddress(false);
     }
   }, [address, chainId]);
 
