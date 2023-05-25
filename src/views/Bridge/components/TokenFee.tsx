@@ -6,11 +6,12 @@ import { formatUnits, TokenInfo } from "utils";
 type TokenFeeProps = {
   token: TokenInfo;
   amount: BigNumber;
+  textColor?: string;
 };
 
-const TokenFee = ({ token, amount }: TokenFeeProps) => (
+const TokenFee = ({ token, amount, textColor = "grey-400" }: TokenFeeProps) => (
   <Wrapper>
-    <NumericText size="md" color="grey-400">
+    <NumericText size="md" color={textColor}>
       {formatUnits(amount, token.decimals)} {token.symbol.toUpperCase()}{" "}
     </NumericText>
     <TokenSymbol src={token.logoURI} />

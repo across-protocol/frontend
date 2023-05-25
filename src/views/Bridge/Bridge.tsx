@@ -32,7 +32,7 @@ const Bridge = () => {
     displayChangeAccount,
     setDisplayChangeAccount,
     toAccount,
-    setToAccount,
+    setCustomToAddress,
     trackingTxHash,
     transactionPending,
     onTxHashChange,
@@ -56,8 +56,8 @@ const Bridge = () => {
         <ChangeAccountModal
           displayModal={displayChangeAccount}
           displayModalCloseHandler={() => setDisplayChangeAccount(false)}
-          currentAccount={toAccount}
-          changeAccountHandler={setToAccount}
+          currentAccount={toAccount?.address}
+          changeAccountHandler={setCustomToAddress}
         />
       )}
       <LayoutV2 maxWidth={600}>
