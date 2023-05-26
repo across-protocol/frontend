@@ -69,7 +69,7 @@ export default function useStepperWithTooltips(
         items.push(
           <StepItemComponent
             key={i}
-            title={tooltips[i].title}
+            title={tooltips[i].title || ""}
             titleSecondary={tooltips[i].titleSecondary}
             body={tooltips[i].body}
             type="completed"
@@ -84,7 +84,7 @@ export default function useStepperWithTooltips(
         items.push(
           <StepItemComponent
             key={i}
-            title={tooltips[i].title}
+            title={tooltips[i].title || ""}
             titleSecondary={tooltips[i].titleSecondary}
             body={tooltips[i].body}
             type="current"
@@ -99,7 +99,7 @@ export default function useStepperWithTooltips(
         items.push(
           <StepItemComponent
             key={i}
-            title={tooltips[i].title}
+            title={tooltips[i].title || ""}
             titleSecondary={tooltips[i].titleSecondary}
             body={tooltips[i].body}
             type="next"

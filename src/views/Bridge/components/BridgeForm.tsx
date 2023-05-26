@@ -19,6 +19,7 @@ import EstimatedTable from "./EstimatedTable";
 import QuickSwap from "./QuickSwap";
 import SlippageAlert from "./SlippageAlert";
 import { BigNumber } from "ethers";
+import { ToAccount } from "../hooks/useToAccount";
 
 type BridgeFormProps = {
   availableTokens: TokenInfo[];
@@ -46,7 +47,7 @@ type BridgeFormProps = {
   estimatedTime: string | undefined;
   displayChangeAccount: boolean;
   setDisplayChangeAccount: (display: boolean) => void;
-  toAccount?: string;
+  toAccount?: ToAccount;
   amountTooLow: boolean;
   walletAccount?: string;
   disableQuickSwap?: boolean;
@@ -107,6 +108,9 @@ const BridgeForm = ({
         </ChainIconSuperTextWrapper>
       </ChainIconTextWrapper>
     ) : undefined;
+
+  const isRouteMainnetToPolygon =
+    currentFromRoute === 1 && currentToRoute === 137;
 
   return (
     <>
@@ -180,7 +184,7 @@ const BridgeForm = ({
                   (r) => r.chainId === currentToRoute
                 )[0],
                 toAccount
-                  ? `Address: ${shortenAddress(toAccount, "...", 4)}`
+                  ? `Address: ${shortenAddress(toAccount.address, "...", 4)}`
                   : undefined
               )}
               selectedValue={currentToRoute ?? 1}
@@ -218,6 +222,7 @@ const BridgeForm = ({
             }
             token={getToken(currentToken)}
             dataLoaded={isConnected}
+            willReceiveWETH={isRouteMainnetToPolygon || toAccount?.isContract}
           />
         )}
         <Divider />

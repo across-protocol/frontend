@@ -1,7 +1,17 @@
 import styled from "@emotion/styled";
-import { Text } from "components/Text";
 import { BigNumber } from "ethers";
-import { capitalizeFirstLetter, getChainInfo, TokenInfo } from "utils";
+
+import { Text } from "components/Text";
+import { PopperTooltip } from "components/Tooltip";
+import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
+
+import {
+  capitalizeFirstLetter,
+  getChainInfo,
+  TokenInfo,
+  getToken,
+} from "utils";
+
 import TokenFee from "./TokenFee";
 
 type EstimatedTableProps = {
@@ -12,6 +22,7 @@ type EstimatedTableProps = {
   totalReceived?: BigNumber;
   token: TokenInfo;
   dataLoaded: boolean;
+  willReceiveWETH?: boolean;
 };
 
 const EstimatedTable = ({
@@ -21,6 +32,7 @@ const EstimatedTable = ({
   bridgeFee,
   token,
   totalReceived,
+  willReceiveWETH,
 }: EstimatedTableProps) => (
   <Wrapper>
     <Row>
@@ -56,7 +68,11 @@ const EstimatedTable = ({
       </Text>
       <Text size="md" color="grey-400">
         {totalReceived ? (
-          <TokenFee amount={totalReceived} token={token} />
+          <TotalReceive
+            totalReceived={totalReceived}
+            token={token}
+            willReceiveWETH={willReceiveWETH}
+          />
         ) : (
           "-"
         )}
@@ -64,6 +80,35 @@ const EstimatedTable = ({
     </Row>
   </Wrapper>
 );
+
+function TotalReceive({
+  totalReceived,
+  token,
+  willReceiveWETH,
+}: {
+  totalReceived: BigNumber;
+  willReceiveWETH?: boolean;
+  token: TokenInfo;
+}) {
+  if (!willReceiveWETH) {
+    return <TokenFee amount={totalReceived} token={token} />;
+  }
+  return (
+    <TotalReceiveRow>
+      <PopperTooltip
+        body="When bridging ETH and recipient address is a smart contract, or destination is Polygon, you will receive WETH."
+        placement="bottom-start"
+      >
+        <WarningInfoIcon />
+      </PopperTooltip>
+      <TokenFee
+        amount={totalReceived}
+        token={getToken("WETH")}
+        textColor="warning"
+      />
+    </TotalReceiveRow>
+  );
+}
 
 export default EstimatedTable;
 
@@ -90,4 +135,17 @@ const Row = styled.div`
 
 const WhiteText = styled.span`
   color: #e0f3ff;
+`;
+
+const TotalReceiveRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+`;
+
+const WarningInfoIcon = styled(InfoIcon)`
+  path {
+    stroke: #f9d26c;
+  }
 `;

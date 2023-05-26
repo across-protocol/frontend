@@ -28,6 +28,7 @@ import {
 import { BridgeLimitInterface } from "utils/serverless-api/types";
 import { useBridgeAction } from "./useBridgeAction";
 import { useBridgeDepositTracking } from "./useBridgeDepositTracking";
+import { useToAccount } from "./useToAccount";
 
 const enabledRoutes = getConfig().getEnabledRoutes();
 
@@ -361,11 +362,7 @@ export function useBridge() {
   const { referrer } = useReferrer();
 
   const [displayChangeAccount, setDisplayChangeAccount] = useState(false);
-  const [toAccount, setToAccount] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    setToAccount(account);
-  }, [account]);
+  const { toAccount, setCustomToAddress } = useToAccount(currentToRoute);
 
   const bridgePayload: AcrossDepositArgs | undefined =
     amountToBridge && currentRoute && fees
@@ -378,7 +375,7 @@ export function useBridge() {
           relayerFeePct: fees.relayerFee.pct,
           tokenAddress: currentRoute.fromTokenAddress,
           isNative: currentRoute.isNative,
-          toAddress: toAccount ?? "",
+          toAddress: toAccount?.address ?? "",
         }
       : undefined;
 
@@ -411,7 +408,7 @@ export function useBridge() {
         tokenInfo,
         fromChainInfo,
         toChainInfo,
-        toAccount,
+        toAccount?.address,
         account,
         tokenPriceInUSD,
         estimatedTimeToRelayObject,
@@ -491,7 +488,7 @@ export function useBridge() {
     ...bridgeAction,
     displayChangeAccount,
     setDisplayChangeAccount,
-    setToAccount,
+    setCustomToAddress,
     toAccount,
     walletAccount: account,
     fees,
