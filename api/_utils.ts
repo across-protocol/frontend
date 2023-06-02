@@ -491,34 +491,23 @@ export const getProvider = (_chainId: number): providers.Provider => {
  * @returns The corresponding SpokePool for the given `_chainId`
  */
 export const getSpokePool = (_chainId: number): SpokePool => {
+  const spokePoolAddress = getSpokePoolAddress(_chainId);
+  return SpokePool__factory.connect(spokePoolAddress, getProvider(_chainId));
+};
+
+export const getSpokePoolAddress = (_chainId: number): string => {
   const chainId = _chainId.toString();
-  const provider = getProvider(_chainId);
   switch (chainId.toString()) {
     case "1":
-      return SpokePool__factory.connect(
-        "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
-        provider
-      );
+      return "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5";
     case "10":
-      return SpokePool__factory.connect(
-        "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
-        provider
-      );
+      return "0x6f26Bf09B1C792e3228e5467807a900A503c0281";
     case "137":
-      return SpokePool__factory.connect(
-        "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
-        provider
-      );
+      return "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096";
     case "288":
-      return SpokePool__factory.connect(
-        "0xBbc6009fEfFc27ce705322832Cb2068F8C1e0A58",
-        provider
-      );
+      return "0xBbc6009fEfFc27ce705322832Cb2068F8C1e0A58";
     case "42161":
-      return SpokePool__factory.connect(
-        "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
-        provider
-      );
+      return "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A";
     default:
       throw new Error("Invalid chainId provided");
   }
@@ -698,6 +687,16 @@ export function validAddress() {
   );
 }
 
+export function validAddressOrENS() {
+  return define<string>("validAddressOrENS", (value) => {
+    const ensDomainRegex =
+      /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/;
+    return (
+      utils.isAddress(value as string) || ensDomainRegex.test(value as string)
+    );
+  });
+}
+
 export function positiveIntStr() {
   return define<string>("positiveIntStr", (value) => {
     return Number.isInteger(Number(value)) && Number(value) > 0;
@@ -731,4 +730,43 @@ export function getLpCushion(
       .map((key) => process.env[key])
       .find((value) => value !== undefined) ?? "0"
   );
+}
+
+export async function tagReferrer(
+  dataHex: string,
+  referrerAddressOrENS: string
+) {
+  let referrerAddress: string | null;
+
+  if (ethers.utils.isAddress(referrerAddressOrENS)) {
+    referrerAddress = referrerAddressOrENS;
+  } else {
+    const provider = infuraProvider(1);
+    referrerAddress = await provider.resolveName(referrerAddressOrENS);
+  }
+
+  if (!referrerAddress) {
+    throw new Error("Invalid referrer address or ENS name");
+  }
+
+  if (!ethers.utils.isHexString(dataHex)) {
+    throw new Error("Data must be a valid hex string");
+  }
+
+  return ethers.utils.hexConcat([
+    dataHex,
+    "0xd00dfeeddeadbeef",
+    referrerAddress,
+  ]);
+}
+
+export function getFallbackTokenLogoURI(l1TokenAddress: string) {
+  const isACX =
+    sdk.constants.TOKEN_SYMBOLS_MAP.ACX.addresses[1] === l1TokenAddress;
+
+  if (isACX) {
+    return "https://across.to/logo-small.png";
+  }
+
+  return `https://github.com/trustwallet/assets/blob/master/blockchains/ethereum/assets/${l1TokenAddress}/logo.png?raw=true`;
 }

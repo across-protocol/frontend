@@ -23,6 +23,7 @@ import {
   boolStr,
   HUP_POOL_CHAIN_ID,
   ENABLED_ROUTES,
+  getSpokePoolAddress,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -167,6 +168,7 @@ const handler = async (
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: blockTag.toString(),
+      spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
     };
 
     logger.debug({
