@@ -26,6 +26,7 @@ const BuildDepositTxQueryParamsSchema = type({
   message: optional(string()),
   maxCount: optional(boolStr()),
   referrer: optional(validAddressOrENS()),
+  isNative: optional(boolStr()),
 });
 
 type BuildDepositTxQueryParams = Infer<typeof BuildDepositTxQueryParamsSchema>;
@@ -56,6 +57,7 @@ const handler = async (
       message = "0x",
       maxCount = ethers.constants.MaxUint256.toString(),
       referrer,
+      isNative: isNativeBoolStr,
     } = query;
 
     recipient = ethers.utils.getAddress(recipient);
@@ -64,6 +66,7 @@ const handler = async (
     const originChainId = parseInt(originChainIdInput);
     const amount = ethers.BigNumber.from(amountInput);
     const relayerFeePct = ethers.BigNumber.from(relayerFeePctInput);
+    const isNative = isNativeBoolStr === "true";
 
     if (originChainId === destinationChainId) {
       throw new InputError("Origin and destination chains cannot be the same");
@@ -71,8 +74,7 @@ const handler = async (
 
     const spokePool = getSpokePool(originChainId);
 
-    const value =
-      token === ethers.constants.AddressZero ? amount : ethers.constants.Zero;
+    const value = isNative ? amount : ethers.constants.Zero;
     const tx = await spokePool.populateTransaction.deposit(
       recipient,
       token,
