@@ -676,3 +676,7 @@ export const disabledBridgeTokens = String(
 )
   .split(",")
   .map((symbol) => symbol.toUpperCase());
+
+export const disabledChainIds = (
+  process.env.REACT_APP_DISABLED_CHAINS || ""
+).split(",");

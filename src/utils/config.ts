@@ -79,7 +79,11 @@ export class ConfigClient {
   }
   getEnabledRoutes(): constants.Routes {
     return this.routes.filter(
-      (route) => !this.disabledTokens.includes(route.fromTokenSymbol)
+      (route) =>
+        !this.disabledTokens.includes(route.fromTokenSymbol) &&
+        ![route.fromChain, route.toChain].some((chainId) =>
+          constants.disabledChainIds.includes(chainId.toString())
+        )
     );
   }
   getRoutes(): constants.Routes {

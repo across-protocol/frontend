@@ -65,8 +65,9 @@ const _ENABLED_ROUTES =
 
 _ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
   ({ fromChain, toChain }) =>
-    !DISABLED_CHAINS.includes(fromChain.toString()) &&
-    !DISABLED_CHAINS.includes(toChain.toString())
+    ![fromChain, toChain].some((chainId) =>
+      DISABLED_CHAINS.includes(chainId.toString())
+    )
 );
 
 export const ENABLED_ROUTES = _ENABLED_ROUTES;
