@@ -24,7 +24,7 @@ import {
   positiveIntStr,
   getLpCushion,
   infuraProvider,
-  HUP_POOL_CHAIN_ID,
+  HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
 } from "./_utils";
 
@@ -52,10 +52,10 @@ const handler = async (
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
       REACT_APP_MIN_DEPOSIT_USD,
     } = process.env;
-    const provider = infuraProvider(HUP_POOL_CHAIN_ID);
+    const provider = infuraProvider(HUB_POOL_CHAIN_ID);
     logger.debug({
       at: "limits",
-      message: `Using INFURA provider for chain ${HUP_POOL_CHAIN_ID}`,
+      message: `Using INFURA provider for chain ${HUB_POOL_CHAIN_ID}`,
     });
 
     const minDeposits = REACT_APP_MIN_DEPOSIT_USD
@@ -93,7 +93,7 @@ const handler = async (
     );
 
     const tokenDetails = Object.values(sdk.constants.TOKEN_SYMBOLS_MAP).find(
-      (details) => details.addresses[HUP_POOL_CHAIN_ID] === l1Token
+      (details) => details.addresses[HUB_POOL_CHAIN_ID] === l1Token
     );
     if (tokenDetails === undefined)
       throw new InputError("Unsupported token address");

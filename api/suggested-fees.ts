@@ -21,7 +21,7 @@ import {
   validAddress,
   positiveIntStr,
   boolStr,
-  HUP_POOL_CHAIN_ID,
+  HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
   getSpokePoolAddress,
 } from "./_utils";
@@ -53,7 +53,7 @@ const handler = async (
       ? Number(QUOTE_TIMESTAMP_BUFFER)
       : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
 
-    const provider = infuraProvider(HUP_POOL_CHAIN_ID);
+    const provider = infuraProvider(HUB_POOL_CHAIN_ID);
 
     assert(query, SuggestedFeesQueryParamsSchema);
 
