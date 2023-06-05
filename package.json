@@ -126,7 +126,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "hardhat": "^2.12.7",
     "husky": "^8.0.0",
-    "jest-environment-hardhat": "^1.1.8",
+    "jest-environment-hardhat": "^1.1.9",
     "lint-staged": "^13.0.3",
     "prettier": "^2.4.1",
     "serve": "^14.0.1",
