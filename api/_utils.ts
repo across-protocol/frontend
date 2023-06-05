@@ -37,8 +37,8 @@ export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 // Default to no markup.
 export const DEFAULT_GAS_MARKUP = 0;
 
-// Don't permit HUP_POOL_CHAIN_ID=0
-export const HUP_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
+// Don't permit HUB_POOL_CHAIN_ID=0
+export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
 
 // Permit REACT_APP_FLAT_RELAY_CAPITAL_FEE=0
 export const FLAT_RELAY_CAPITAL_FEE = Number(
@@ -50,10 +50,27 @@ export const DISABLED_ROUTE_TOKENS = (
   process.env.DISABLED_ROUTE_TOKENS || ""
 ).split(",");
 
-export const ENABLED_ROUTES =
-  HUP_POOL_CHAIN_ID === 1
+// This is an array of chainIds that should be disabled. This array overrides
+// the ENABLED_ROUTES object below. This is useful for disabling a chainId
+// temporarily without having to redeploy the app or change core config
+// data (e.g. the ENABLED_ROUTES object and the data/routes.json files).
+export const DISABLED_CHAINS = (
+  process.env.REACT_APP_DISABLED_CHAINS || ""
+).split(",");
+
+const _ENABLED_ROUTES =
+  HUB_POOL_CHAIN_ID === 1
     ? enabledMainnetRoutesAsJson
     : enabledGoerliRoutesAsJson;
+
+_ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
+  ({ fromChain, toChain }) =>
+    ![fromChain, toChain].some((chainId) =>
+      DISABLED_CHAINS.includes(chainId.toString())
+    )
+);
+
+export const ENABLED_ROUTES = _ENABLED_ROUTES;
 
 /**
  * Writes a log using the google cloud logging utility
@@ -272,11 +289,11 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
  * @returns A HubPool client that can query the blockchain
  */
 export const getHubPoolClient = () => {
-  const hubPoolConfig = makeHubPoolClientConfig(HUP_POOL_CHAIN_ID);
+  const hubPoolConfig = makeHubPoolClientConfig(HUB_POOL_CHAIN_ID);
   return new sdk.pool.Client(
     hubPoolConfig,
     {
-      provider: infuraProvider(HUP_POOL_CHAIN_ID),
+      provider: infuraProvider(HUB_POOL_CHAIN_ID),
     },
     (_, __) => {} // Dummy function that does nothing and is needed to construct this client.
   );
@@ -412,7 +429,7 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
 export const getTokenSymbol = (tokenAddress: string): string => {
   const symbol = Object.entries(sdk.constants.TOKEN_SYMBOLS_MAP)?.find(
     ([_symbol, { addresses }]) =>
-      addresses[HUP_POOL_CHAIN_ID]?.toLowerCase() === tokenAddress.toLowerCase()
+      addresses[HUB_POOL_CHAIN_ID]?.toLowerCase() === tokenAddress.toLowerCase()
   )?.[0];
   if (!symbol) {
     throw new InputError("Token address provided was not whitelisted.");
@@ -690,6 +707,7 @@ export function validAddress() {
 export function validAddressOrENS() {
   return define<string>("validAddressOrENS", (value) => {
     const ensDomainRegex =
+      // eslint-disable-next-line no-useless-escape
       /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/;
     return (
       utils.isAddress(value as string) || ensDomainRegex.test(value as string)
