@@ -267,11 +267,11 @@ export const tokenSymbolLogoMap = {
   USDT: usdtLogo,
   DAI: daiLogo,
   WBTC: wbtcLogo,
-  BOBA: bobaLogo,
+  BAL: balLogo,
   UMA: umaLogo,
   ACX: acxLogo,
-  BAL: balLogo,
   SNX: snxLogo,
+  BOBA: bobaLogo,
 };
 
 export const tokenList: TokenInfoList = Object.entries(
