@@ -50,10 +50,26 @@ export const DISABLED_ROUTE_TOKENS = (
   process.env.DISABLED_ROUTE_TOKENS || ""
 ).split(",");
 
-export const ENABLED_ROUTES =
+// This is an array of chainIds that should be disabled. This array overrides
+// the ENABLED_ROUTES object below. This is useful for disabling a chainId
+// temporarily without having to redeploy the app or change core config
+// data (e.g. the ENABLED_ROUTES object and the data/routes.json files).
+export const DISABLED_CHAINS = (
+  process.env.REACT_APP_DISABLED_CHAINS || ""
+).split(",");
+
+const _ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1
     ? enabledMainnetRoutesAsJson
     : enabledGoerliRoutesAsJson;
+
+_ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
+  ({ fromChain, toChain }) =>
+    !DISABLED_CHAINS.includes(fromChain.toString()) &&
+    !DISABLED_CHAINS.includes(toChain.toString())
+);
+
+export const ENABLED_ROUTES = _ENABLED_ROUTES;
 
 /**
  * Writes a log using the google cloud logging utility
