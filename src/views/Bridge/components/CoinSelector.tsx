@@ -34,7 +34,8 @@ function useCoinSelector(
   setIsBridgeAmountValid: (v: boolean) => void,
   setIsLiquidityFromAmountExceeded: (v: boolean) => void,
   currentBalance?: BigNumber,
-  account?: string
+  account?: string,
+  isAmountTooLow?: boolean
 ) {
   const [userAmountInput, setUserAmountInput] = useState("");
   const [validInput, setValidInput] = useState(true);
@@ -153,12 +154,15 @@ function useCoinSelector(
     | "insufficientBalance"
     | "insufficientLiquidity"
     | "invalid"
+    | "requestTooLow"
     | undefined = isValueAmbiguous
     ? undefined
     : !!limits && amountToBridge && amountToBridge.gt(limits.maxDeposit)
     ? "insufficientLiquidity"
     : !!currentBalance && amountToBridge && amountToBridge.gt(currentBalance)
     ? "insufficientBalance"
+    : isAmountTooLow
+    ? "requestTooLow"
     : !validInput
     ? "invalid"
     : undefined;
@@ -211,6 +215,7 @@ const CoinSelector = ({
   setIsBridgeAmountValid,
   setIsLiquidityFromAmountExceeded,
   amountToBridge,
+  isAmountTooLow,
 }: CoinSelectorPropType) => {
   const {
     token,
@@ -234,7 +239,8 @@ const CoinSelector = ({
     setIsBridgeAmountValid,
     setIsLiquidityFromAmountExceeded,
     currentSelectedBalance,
-    walletAccount
+    walletAccount,
+    isAmountTooLow
   );
 
   return (
@@ -275,6 +281,8 @@ const CoinSelector = ({
               "Insufficient bridge liquidity to process this transfer."}
             {errorMessage === "invalid" &&
               "Only positive numbers are allowed as an input."}
+            {errorMessage === "requestTooLow" &&
+              "The amount you are trying to bridge is too low."}
           </BridgeInputErrorAlert>
         )}
       </AmountExternalWrapper>
