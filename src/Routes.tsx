@@ -133,15 +133,6 @@ const Routes: React.FC = () => {
           </span>
         </Banner>
       )}
-      <SuperHeader>
-        <div>
-          Bridge transactions involving Optimism will be disabled during the{" "}
-          <a href="https://status.optimism.io/" style={{ color: "inherit" }}>
-            OP Bedrock Upgrade
-          </a>
-          .
-        </div>
-      </SuperHeader>
       {isContractAddress && (
         <SuperHeader size="lg">{warningMessage}</SuperHeader>
       )}
