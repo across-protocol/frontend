@@ -20,6 +20,7 @@ import QuickSwap from "./QuickSwap";
 import SlippageAlert from "./SlippageAlert";
 import { BigNumber } from "ethers";
 import { ToAccount } from "../hooks/useToAccount";
+import { getReceiveTokenSymbol } from "../utils";
 
 type BridgeFormProps = {
   availableTokens: TokenInfo[];
@@ -108,9 +109,6 @@ const BridgeForm = ({
         </ChainIconSuperTextWrapper>
       </ChainIconTextWrapper>
     ) : undefined;
-
-  const isRouteMainnetToPolygon =
-    currentFromRoute === 1 && currentToRoute === 137;
 
   return (
     <>
@@ -222,7 +220,13 @@ const BridgeForm = ({
             }
             token={getToken(currentToken)}
             dataLoaded={isConnected}
-            willReceiveWETH={isRouteMainnetToPolygon || toAccount?.isContract}
+            receiveToken={getToken(
+              getReceiveTokenSymbol(
+                currentToRoute,
+                currentToken,
+                Boolean(toAccount?.isContract)
+              )
+            )}
           />
         )}
         <Divider />

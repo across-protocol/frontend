@@ -22,7 +22,7 @@ type EstimatedTableProps = {
   totalReceived?: BigNumber;
   token: TokenInfo;
   dataLoaded: boolean;
-  willReceiveWETH?: boolean;
+  receiveToken: TokenInfo;
 };
 
 const EstimatedTable = ({
@@ -32,7 +32,7 @@ const EstimatedTable = ({
   bridgeFee,
   token,
   totalReceived,
-  willReceiveWETH,
+  receiveToken,
 }: EstimatedTableProps) => (
   <Wrapper>
     <Row>
@@ -71,7 +71,7 @@ const EstimatedTable = ({
           <TotalReceive
             totalReceived={totalReceived}
             token={token}
-            willReceiveWETH={willReceiveWETH}
+            receiveToken={receiveToken}
           />
         ) : (
           "-"
@@ -84,26 +84,31 @@ const EstimatedTable = ({
 function TotalReceive({
   totalReceived,
   token,
-  willReceiveWETH,
+  receiveToken,
 }: {
   totalReceived: BigNumber;
-  willReceiveWETH?: boolean;
+  receiveToken: TokenInfo;
   token: TokenInfo;
 }) {
-  if (!willReceiveWETH) {
+  const areTokensSame = token.symbol === receiveToken.symbol;
+
+  if (areTokensSame) {
     return <TokenFee amount={totalReceived} token={token} />;
   }
+
+  const isBridgeTokenETH = token.symbol === "ETH";
+  const tooltipText = isBridgeTokenETH
+    ? "When bridging ETH and recipient address is a smart contract, or destination is Polygon, you will receive WETH."
+    : "When bridging WETH and recipient address is an EOA, you will receive ETH.";
+
   return (
     <TotalReceiveRow>
-      <PopperTooltip
-        body="When bridging ETH and recipient address is a smart contract, or destination is Polygon, you will receive WETH."
-        placement="bottom-start"
-      >
+      <PopperTooltip body={tooltipText} placement="bottom-start">
         <WarningInfoIcon />
       </PopperTooltip>
       <TokenFee
         amount={totalReceived}
-        token={getToken("WETH")}
+        token={receiveToken}
         textColor="warning"
       />
     </TotalReceiveRow>
