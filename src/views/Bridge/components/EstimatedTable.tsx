@@ -5,12 +5,7 @@ import { Text } from "components/Text";
 import { PopperTooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 
-import {
-  capitalizeFirstLetter,
-  getChainInfo,
-  TokenInfo,
-  getToken,
-} from "utils";
+import { capitalizeFirstLetter, getChainInfo, TokenInfo } from "utils";
 
 import TokenFee from "./TokenFee";
 
