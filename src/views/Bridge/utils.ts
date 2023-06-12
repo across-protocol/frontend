@@ -1,3 +1,14 @@
+/**
+ * Returns the token symbol to be used for the receive token. The protocol bridges
+ * ETH/WETH depending on certain conditions:
+ * - If the user wants to bridge ETH and destination chain is Polygon, the bridge will send WETH
+ * - If the user wants to bridge ETH and the receiver is a contract, the bridge will send WETH
+ * - If the user wants to bridge WETH and the receiver is an EOA, the bridge will send ETH
+ * @param destinationChainId Destination chain id.
+ * @param bridgeTokenSymbol Token symbol to be bridged.
+ * @param isReceiverContract Whether the receiver is a contract or not.
+ * @returns The token symbol to be used for the receive token.
+ */
 export function getReceiveTokenSymbol(
   destinationChainId: number,
   bridgeTokenSymbol: string,

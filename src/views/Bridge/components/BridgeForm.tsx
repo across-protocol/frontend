@@ -19,8 +19,9 @@ import EstimatedTable from "./EstimatedTable";
 import QuickSwap from "./QuickSwap";
 import SlippageAlert from "./SlippageAlert";
 import { BigNumber } from "ethers";
-import { ToAccount } from "../hooks/useToAccount";
 import { getReceiveTokenSymbol } from "../utils";
+
+import type { ToAccount } from "../hooks/useToAccount";
 
 type BridgeFormProps = {
   availableTokens: TokenInfo[];
