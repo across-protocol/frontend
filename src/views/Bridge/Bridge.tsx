@@ -76,6 +76,7 @@ const Bridge = () => {
               onTxHashChange={onTxHashChange}
               explorerLink={explorerUrl}
               elapsedTimeFromDeposit={transactionElapsedTimeAsFormattedString}
+              toAccount={toAccount}
             />
           ) : (
             <BridgeForm

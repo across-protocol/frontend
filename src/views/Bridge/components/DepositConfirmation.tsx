@@ -12,11 +12,14 @@ import { ReactComponent as EthereumGrayscaleLogo } from "assets/grayscale-logos/
 import { ReactComponent as PolygonGrayscaleLogo } from "assets/grayscale-logos/polygon.svg";
 import { ReactComponent as ArbitrumGrayscaleLogo } from "assets/grayscale-logos/arbitrum.svg";
 import { ReactComponent as OptimismGrayscaleLogo } from "assets/grayscale-logos/optimism.svg";
+import { getReceiveTokenSymbol } from "../utils";
+import { ToAccount } from "../hooks/useToAccount";
 
 type DepositConfirmationProps = {
   currentFromRoute: number | undefined;
   currentToRoute: number | undefined;
   currentToken: string;
+  toAccount?: ToAccount;
 
   fees: GetBridgeFeesResult | undefined;
   amountToBridge: BigNumber | undefined;
@@ -34,6 +37,7 @@ const DepositConfirmation = ({
   currentFromRoute,
   currentToRoute,
   currentToken,
+  toAccount,
   fees,
   amountToBridge,
   estimatedTime,
@@ -143,6 +147,13 @@ const DepositConfirmation = ({
         }
         token={getToken(currentToken)}
         dataLoaded={isConnected}
+        receiveToken={getToken(
+          getReceiveTokenSymbol(
+            currentToRoute || 1,
+            currentToken,
+            Boolean(toAccount?.isContract)
+          )
+        )}
       />
       <Divider />
       <Button
