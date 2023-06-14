@@ -7,6 +7,7 @@ import {
   amplitudeAPIKey,
   isAmplitudeLoggingEnabled,
   isProductionBuild,
+  amplitudeServerUrl,
 } from "utils";
 
 export function useLoadAmpli() {
@@ -17,6 +18,7 @@ export function useLoadAmpli() {
       const instance = createInstance();
       instance
         .init(amplitudeAPIKey, undefined, {
+          serverUrl: amplitudeServerUrl,
           disableCookies: true,
           logLevel:
             isProductionBuild || !isAmplitudeLoggingEnabled

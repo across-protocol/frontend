@@ -653,10 +653,9 @@ export const amplitudeAPIKey = process.env.REACT_APP_AMPLITUDE_KEY
   ? process.env.REACT_APP_AMPLITUDE_KEY
   : undefined;
 
-export const amplitudeEnvironment =
-  process.env.REACT_APP_AMPLITUDE_ENVIRONMENT === "production"
-    ? "production"
-    : "development";
+export const amplitudeServerUrl = process.env.REACT_APP_AMPLITUDE_SERVER_URL
+  ? process.env.REACT_APP_AMPLITUDE_SERVER_URL
+  : undefined;
 
 export const currentGitCommitHash = process.env.REACT_APP_GIT_COMMIT_HASH ?? "";
 
