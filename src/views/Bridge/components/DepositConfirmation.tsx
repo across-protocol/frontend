@@ -44,9 +44,10 @@ const DepositConfirmation = ({
   isConnected,
   transactionPending,
   onTxHashChange,
-  explorerLink,
+  explorerLink: _explorerLink,
   elapsedTimeFromDeposit,
 }: DepositConfirmationProps) => {
+  const explorerLink = _explorerLink ?? "https://etherscan.io";
   const LogoMapping: {
     [key: number]: JSX.Element;
   } = {
@@ -120,7 +121,7 @@ const DepositConfirmation = ({
               Track in Explorer
             </Text>
             <Text size="sm" color="grey-400">
-              Etherscan.io
+              {new URL(explorerLink).hostname}
             </Text>
           </ActionCardTitleWrapper>
           <ExternalContainerIconAnchor
