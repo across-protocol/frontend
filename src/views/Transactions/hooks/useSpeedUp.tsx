@@ -51,7 +51,8 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
 
       const newRecipient =
         args.optionalUpdates?.newRecipient || transfer.recipientAddr;
-      const newMessage = args.optionalUpdates?.newMessage || transfer.message;
+      const newMessage =
+        args.optionalUpdates?.newMessage || transfer.message || "0x";
 
       const typedData = sdkUtils.getUpdateDepositTypedData(
         transfer.depositId,
