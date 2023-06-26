@@ -16,6 +16,7 @@ import {
   StyledBadgerLogo,
   StyledUSDTLogo,
   StyledSNXLogo,
+  StyledPoolTogetherLogo,
   AssetHeadCell,
   AssetCell,
   ChainsCell,
@@ -68,6 +69,8 @@ function determineIcon(symbol: string) {
       return <StyledUSDTLogo />;
     case "SNX":
       return <StyledSNXLogo />;
+    case "POOL":
+      return <StyledPoolTogetherLogo />;
     default:
       return <StyledETHIcon />;
   }

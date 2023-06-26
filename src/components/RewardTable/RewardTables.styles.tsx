@@ -14,6 +14,7 @@ import { ReactComponent as UmaLogo } from "assets/uma.svg";
 import { ReactComponent as WBTCLogo } from "assets/wbtc.svg";
 import { ReactComponent as USDTLogo } from "assets/usdt-logo.svg";
 import { ReactComponent as SNXLogo } from "assets/snx-logo.svg";
+import { ReactComponent as PoolTogetherLogo } from "assets/pooltogether-logo.svg";
 import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
 
 import ProgressBar from "components/ProgressBar";
@@ -301,6 +302,10 @@ export const StyledUSDTLogo = styled(USDTLogo)`
   height: 32px;
 `;
 export const StyledSNXLogo = styled(SNXLogo)`
+  width: 32px;
+  height: 32px;
+`;
+export const StyledPoolTogetherLogo = styled(PoolTogetherLogo)`
   width: 32px;
   height: 32px;
 `;
