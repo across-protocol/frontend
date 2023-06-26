@@ -64,10 +64,10 @@ const _ENABLED_ROUTES =
     : enabledGoerliRoutesAsJson;
 
 _ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
-  ({ fromChain, toChain }) =>
+  ({ fromChain, toChain, fromTokenSymbol }) =>
     ![fromChain, toChain].some((chainId) =>
       DISABLED_CHAINS.includes(chainId.toString())
-    )
+    ) && !DISABLED_ROUTE_TOKENS.includes(fromTokenSymbol)
 );
 
 export const ENABLED_ROUTES = _ENABLED_ROUTES;
@@ -544,7 +544,6 @@ export const isRouteEnabled = (
 ): boolean => {
   const enabled = ENABLED_ROUTES.routes.some(
     ({ fromTokenAddress, fromChain, toChain, fromTokenSymbol }) =>
-      !DISABLED_ROUTE_TOKENS.includes(fromTokenSymbol) &&
       fromChainId === fromChain &&
       toChainId === toChain &&
       fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
