@@ -7,7 +7,6 @@ import {
   positiveIntStr,
   ENABLED_ROUTES,
   handleErrorCondition,
-  DISABLED_ROUTE_TOKENS,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 
@@ -40,11 +39,6 @@ const handler = async (
     const { originToken, destinationToken, originChainId, destinationChainId } =
       query;
 
-    // Filter out disabled routes
-    const availableRoutes = ENABLED_ROUTES.routes.filter(
-      (route) => !DISABLED_ROUTE_TOKENS.includes(route.fromTokenSymbol)
-    );
-
     // Generate a mapping that contains similar tokens on each chain
     // Note:  The key in this dictionary represents an l1Token address, and
     //        the corresponding value is a nested hashmap containing a key
@@ -54,7 +48,7 @@ const handler = async (
       l1TokenAddress,
       fromChain,
       fromTokenAddress,
-    } of availableRoutes) {
+    } of ENABLED_ROUTES.routes) {
       l1TokensToDestinationTokens[l1TokenAddress] = {
         ...l1TokensToDestinationTokens[l1TokenAddress],
         [fromChain]: fromTokenAddress,
@@ -62,7 +56,7 @@ const handler = async (
     }
 
     const enabledRoutes = applyMapFilter(
-      availableRoutes,
+      ENABLED_ROUTES.routes,
       // Filter out elements from the request query parameters
       (route: {
         originToken: string;

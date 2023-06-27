@@ -1,6 +1,6 @@
 import assert from "assert";
 import { ethers, providers } from "ethers";
-import { relayFeeCalculator, constants } from "@across-protocol/sdk-v2";
+import { constants } from "@across-protocol/sdk-v2";
 import * as superstruct from "superstruct";
 
 import { getAddress } from "./address";
@@ -20,6 +20,7 @@ import acxLogo from "assets/across.svg";
 import balLogo from "assets/bal.svg";
 import usdtLogo from "assets/usdt-logo.svg";
 import snxLogo from "assets/snx-logo.svg";
+import pooltogetherLogo from "assets/pooltogether-logo.svg";
 import unknownLogo from "assets/icons/question-24.svg";
 
 import ethereumLogoGrayscale from "assets/grayscale-logos/eth.svg";
@@ -258,7 +259,8 @@ export type TokenInfo = {
 // enforce weth to be first so we can use it as a guarantee in other parts of the app
 export type TokenInfoList = TokenInfo[];
 
-export const tokenSymbolLogoMap = {
+// Order of this map determines the order of the tokens in the token selector
+export const orderedTokenSymbolLogoMap = {
   ETH: ethereumLogo,
   WETH: wethLogo,
   MATIC: polygonLogo,
@@ -271,14 +273,17 @@ export const tokenSymbolLogoMap = {
   UMA: umaLogo,
   ACX: acxLogo,
   SNX: snxLogo,
+  POOL: pooltogetherLogo,
   BOBA: bobaLogo,
 };
 
 export const tokenList: TokenInfoList = Object.entries(
-  tokenSymbolLogoMap
+  orderedTokenSymbolLogoMap
 ).flatMap(([symbol, logoURI]) => {
   const tokenInfo =
-    constants.TOKEN_SYMBOLS_MAP[symbol as keyof typeof tokenSymbolLogoMap];
+    constants.TOKEN_SYMBOLS_MAP[
+      symbol as keyof typeof orderedTokenSymbolLogoMap
+    ];
 
   if (!tokenInfo) {
     return [];
@@ -491,63 +496,7 @@ export const dummyFromAddress =
   process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
   "0x893d0d70ad97717052e3aa8903d9615804167759";
 
-const getRoute = (
-  mainnetChainId: ChainId,
-  fromChainId: number,
-  symbol: string
-) => {
-  const routes = getRoutes(mainnetChainId);
-  const route = routes.routes.find((route) => route.fromTokenSymbol === symbol);
-  if (!route)
-    throw new Error(
-      `Couldn't find route for mainnet chain ${mainnetChainId}, fromChain: ${fromChainId}, and symbol ${symbol}`
-    );
-  return route;
-};
-
-const getQueriesTable = () => {
-  const optimismUsdcRoute = getRoute(ChainId.MAINNET, ChainId.OPTIMISM, "USDC");
-  const arbitrumUsdcRoute = getRoute(ChainId.MAINNET, ChainId.ARBITRUM, "USDC");
-
-  return {
-    [ChainId.MAINNET]: (provider: ethers.providers.Provider) =>
-      new relayFeeCalculator.EthereumQueries(provider),
-    [ChainId.ARBITRUM]: (provider: ethers.providers.Provider) =>
-      new relayFeeCalculator.ArbitrumQueries(
-        provider,
-        undefined,
-        arbitrumUsdcRoute.fromSpokeAddress,
-        arbitrumUsdcRoute.fromTokenAddress,
-        dummyFromAddress
-      ),
-    [ChainId.OPTIMISM]: (provider: ethers.providers.Provider) =>
-      new relayFeeCalculator.OptimismQueries(
-        provider,
-        undefined,
-        optimismUsdcRoute.fromSpokeAddress,
-        optimismUsdcRoute.fromTokenAddress,
-        dummyFromAddress
-      ),
-    [ChainId.POLYGON]: (provider: ethers.providers.Provider) =>
-      new relayFeeCalculator.PolygonQueries(provider),
-    [ChainId.GOERLI]: (provider: ethers.providers.Provider) =>
-      new relayFeeCalculator.EthereumQueries(provider),
-    [ChainId.MUMBAI]: (provider: ethers.providers.Provider) =>
-      new relayFeeCalculator.PolygonQueries(provider),
-    // Use hardcoded WETH address instead of USDC because WETH is enabled here.
-    [ChainId.ARBITRUM_GOERLI]: (provider: ethers.providers.Provider) =>
-      new relayFeeCalculator.ArbitrumQueries(
-        provider,
-        undefined,
-        "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7", // v2.5 SpokePool
-        "0xB47e6A5f8b33b3F17603C83a0535A9dcD7E32681" // WETH
-      ),
-  };
-};
-
 export const fixedPointAdjustment = parseEtherLike("1.0");
-
-export const queriesTable = getQueriesTable();
 
 export const referrerDelimiterHex = "0xd00dfeeddeadbeef";
 
