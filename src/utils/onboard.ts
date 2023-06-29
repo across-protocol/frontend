@@ -11,7 +11,7 @@ const injected = injectedModule();
 const gnosis = gnosisModule();
 const walletConnect = walletConnectModule({
   version: 2,
-  projectId: walletConnectProjectId,
+  projectId: walletConnectProjectId!,
 });
 const coinbase = coinbaseModule();
 
