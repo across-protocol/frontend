@@ -148,7 +148,7 @@ function useCoinSelector(
     setUserAmountInput("");
     setAmountToBridge(undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentToken, toChain, fromChain]);
+  }, [currentToken]);
 
   const errorMessage:
     | "insufficientBalance"
