@@ -1,7 +1,7 @@
 import { getCode } from "../address";
 
-const V_ETH = process.env.REACT_APP_V_ETH || "";
-const UMA_ADDRESS = process.env.REACT_APP_UMA_ADDRESS || "";
+const V_ETH = import.meta.env.VITE_V_ETH || "";
+const UMA_ADDRESS = import.meta.env.VITE_UMA_ADDRESS || "";
 
 describe("#getCode", () => {
   it("return 0x when address is not a Contract", () => {

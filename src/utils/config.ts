@@ -110,28 +110,28 @@ export class ConfigClient {
   }
   getAcceleratingDistributorAddress(): string {
     return (
-      process.env.REACT_APP_ACCELERATING_DISTRIBUTOR_ADDRESS ||
+      import.meta.env.VITE_ACCELERATING_DISTRIBUTOR_ADDRESS ||
       this.config.acceleratingDistributorAddress ||
       "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48"
     );
   }
   getMerkleDistributorAddress(): string {
     return (
-      process.env.REACT_APP_MERKLE_DISTRIBUTOR_ADDRESS ||
+      import.meta.env.VITE_MERKLE_DISTRIBUTOR_ADDRESS ||
       this.config.merkleDistributorAddress ||
       "0xE50b2cEAC4f60E840Ae513924033E753e2366487"
     );
   }
   getAcrossTokenAddress(): string {
     return (
-      process.env.REACT_APP_ACROSS_TOKEN_ADDRESS ||
+      import.meta.env.VITE_ACROSS_TOKEN_ADDRESS ||
       this.config.acrossTokenAddress ||
       "0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F"
     );
   }
   getClaimAndStakeAddress(): string {
     return (
-      process.env.REACT_APP_CLAIM_AND_STAKE_ADDRESS ||
+      import.meta.env.VITE_CLAIM_AND_STAKE_ADDRESS ||
       this.config.claimAndStakeAddress ||
       "0x985e8A89Dd6Af8896Ef075c8dd93512433dc5829"
     );
@@ -369,7 +369,7 @@ export class ConfigClient {
   }
   depositDelays() {
     try {
-      const dd = process.env.REACT_APP_DEPOSIT_DELAY;
+      const dd = import.meta.env.VITE_DEPOSIT_DELAY;
       if (dd) {
         return JSON.parse(dd) as DepositDelays;
       } else {

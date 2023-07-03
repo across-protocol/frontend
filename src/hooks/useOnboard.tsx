@@ -80,7 +80,7 @@ type OnboardContextValue = {
 };
 
 const notify = Notify({
-  dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
+  dappId: import.meta.env.VITE_PUBLIC_ONBOARD_API_KEY,
   networkId: hubPoolChainId,
   desktopPosition: "topRight",
 });

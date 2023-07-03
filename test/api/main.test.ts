@@ -6,8 +6,8 @@ import coingeckoHandler from "../../api/coingecko";
 import availableRouteHandler from "../../api/available-routes";
 import { TypedVercelRequest } from "../../api/_types";
 
-process.env.REACT_APP_PUBLIC_INFURA_ID = "e34138b2db5b496ab5cc52319d2f0299";
-process.env.REACT_APP_GOOGLE_SERVICE_ACCOUNT = "{}";
+process.env.VITE_PUBLIC_INFURA_ID = "e34138b2db5b496ab5cc52319d2f0299";
+process.env.VITE_GOOGLE_SERVICE_ACCOUNT = "{}";
 
 const getMockedResponse = () => {
   const response: any = {};

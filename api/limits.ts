@@ -48,9 +48,9 @@ const handler = async (
   });
   try {
     const {
-      REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
-      REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
-      REACT_APP_MIN_DEPOSIT_USD,
+      VITE_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
+      VITE_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
+      VITE_MIN_DEPOSIT_USD,
     } = process.env;
     const provider = infuraProvider(HUB_POOL_CHAIN_ID);
     logger.debug({
@@ -58,18 +58,18 @@ const handler = async (
       message: `Using INFURA provider for chain ${HUB_POOL_CHAIN_ID}`,
     });
 
-    const minDeposits = REACT_APP_MIN_DEPOSIT_USD
-      ? JSON.parse(REACT_APP_MIN_DEPOSIT_USD)
+    const minDeposits = VITE_MIN_DEPOSIT_USD
+      ? JSON.parse(VITE_MIN_DEPOSIT_USD)
       : {};
 
-    const fullRelayers = !REACT_APP_FULL_RELAYERS
+    const fullRelayers = !VITE_FULL_RELAYERS
       ? []
-      : (JSON.parse(REACT_APP_FULL_RELAYERS) as string[]).map((relayer) => {
+      : (JSON.parse(VITE_FULL_RELAYERS) as string[]).map((relayer) => {
           return ethers.utils.getAddress(relayer);
         });
-    const transferRestrictedRelayers = !REACT_APP_TRANSFER_RESTRICTED_RELAYERS
+    const transferRestrictedRelayers = !VITE_TRANSFER_RESTRICTED_RELAYERS
       ? []
-      : (JSON.parse(REACT_APP_TRANSFER_RESTRICTED_RELAYERS) as string[]).map(
+      : (JSON.parse(VITE_TRANSFER_RESTRICTED_RELAYERS) as string[]).map(
           (relayer) => {
             return ethers.utils.getAddress(relayer);
           }

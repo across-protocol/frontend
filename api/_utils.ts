@@ -20,17 +20,17 @@ import { VercelResponse } from "@vercel/node";
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
 const {
-  REACT_APP_HUBPOOL_CHAINID,
-  REACT_APP_PUBLIC_INFURA_ID,
-  REACT_APP_COINGECKO_PRO_API_KEY,
-  REACT_APP_GOOGLE_SERVICE_ACCOUNT,
+  VITE_HUBPOOL_CHAINID,
+  VITE_PUBLIC_INFURA_ID,
+  VITE_COINGECKO_PRO_API_KEY,
+  VITE_GOOGLE_SERVICE_ACCOUNT,
   VERCEL_ENV,
   GAS_MARKUP,
   DISABLE_DEBUG_LOGS,
 } = process.env;
 
-const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
-  ? JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT)
+const GOOGLE_SERVICE_ACCOUNT = VITE_GOOGLE_SERVICE_ACCOUNT
+  ? JSON.parse(VITE_GOOGLE_SERVICE_ACCOUNT)
   : {};
 
 export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
@@ -38,11 +38,11 @@ export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 export const DEFAULT_GAS_MARKUP = 0;
 
 // Don't permit HUB_POOL_CHAIN_ID=0
-export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
+export const HUB_POOL_CHAIN_ID = Number(VITE_HUBPOOL_CHAINID || 1);
 
-// Permit REACT_APP_FLAT_RELAY_CAPITAL_FEE=0
+// Permit VITE_FLAT_RELAY_CAPITAL_FEE=0
 export const FLAT_RELAY_CAPITAL_FEE = Number(
-  process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE ?? 0.03
+  process.env.VITE_FLAT_RELAY_CAPITAL_FEE ?? 0.03
 ); // 0.03%
 
 // Tokens that should be disabled in the routes
@@ -54,9 +54,9 @@ export const DISABLED_ROUTE_TOKENS = (
 // the ENABLED_ROUTES object below. This is useful for disabling a chainId
 // temporarily without having to redeploy the app or change core config
 // data (e.g. the ENABLED_ROUTES object and the data/routes.json files).
-export const DISABLED_CHAINS = (
-  process.env.REACT_APP_DISABLED_CHAINS || ""
-).split(",");
+export const DISABLED_CHAINS = (process.env.VITE_DISABLED_CHAINS || "").split(
+  ","
+);
 
 const _ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1
@@ -224,7 +224,7 @@ export class InputError extends Error {}
 export const infuraProvider = (nameOrChainId: providers.Networkish) => {
   const url = new ethers.providers.InfuraProvider(
     nameOrChainId,
-    REACT_APP_PUBLIC_INFURA_ID
+    VITE_PUBLIC_INFURA_ID
   ).connection.url;
   return new ethers.providers.StaticJsonRpcProvider(url);
 };
@@ -306,7 +306,7 @@ export const getHubPoolClient = () => {
 // If this address lacks either of these, estimations will fail and relays to optimism and arbitrum will hang when
 // estimating gas. Defaults to 0x893d0d70ad97717052e3aa8903d9615804167759 so the app can technically run without this.
 export const dummyFromAddress =
-  process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
+  process.env.VITE_DUMMY_FROM_ADDRESS ||
   "0x893d0d70ad97717052e3aa8903d9615804167759";
 
 export const getGasMarkup = (chainId: string | number) => {
@@ -332,7 +332,7 @@ export const queries: Record<number, () => QueryBase> = {
       undefined,
       undefined,
       undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
+      VITE_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(1)
     ),
@@ -343,7 +343,7 @@ export const queries: Record<number, () => QueryBase> = {
       undefined,
       undefined,
       undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
+      VITE_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(10)
     ),
@@ -354,7 +354,7 @@ export const queries: Record<number, () => QueryBase> = {
       undefined,
       undefined,
       undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
+      VITE_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(137)
     ),
@@ -365,7 +365,7 @@ export const queries: Record<number, () => QueryBase> = {
       undefined,
       undefined,
       undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
+      VITE_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(42161)
     ),
@@ -377,7 +377,7 @@ export const queries: Record<number, () => QueryBase> = {
       "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
       undefined,
       undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
+      VITE_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(5)
     ),
@@ -388,7 +388,7 @@ export const queries: Record<number, () => QueryBase> = {
       undefined,
       undefined,
       undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
+      VITE_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(421613)
     ),
@@ -740,9 +740,9 @@ export function getLpCushion(
 ) {
   return (
     [
-      `REACT_APP_LP_CUSHION_${symbol}_${fromChainId}_${toChainId}`,
-      `REACT_APP_LP_CUSHION_${symbol}_${fromChainId}`,
-      `REACT_APP_LP_CUSHION_${symbol}`,
+      `VITE_LP_CUSHION_${symbol}_${fromChainId}_${toChainId}`,
+      `VITE_LP_CUSHION_${symbol}_${fromChainId}`,
+      `VITE_LP_CUSHION_${symbol}`,
     ]
       .map((key) => process.env[key])
       .find((value) => value !== undefined) ?? "0"

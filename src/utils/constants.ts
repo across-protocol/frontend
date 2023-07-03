@@ -138,7 +138,7 @@ export type ChainInfo = {
 export type ChainInfoList = ChainInfo[];
 export type ChainInfoTable = Record<number, ChainInfo>;
 export const defaultBlockPollingInterval =
-  Number(process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL_S || 30) * 1000;
+  Number(import.meta.env.VITE_DEFAULT_BLOCK_POLLING_INTERVAL_S || 30) * 1000;
 
 const defaultConstructExplorerLink =
   (explorerUrl: string) => (txHash: string) =>
@@ -296,72 +296,69 @@ export const tokenList: TokenInfoList = Object.entries(
   };
 });
 
-assert(
-  process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
-  "Missing process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY"
-);
-assert(
-  process.env.REACT_APP_REWARDS_API_URL,
-  "Missing process.env.REACT_APP_REWARDS_API_URL"
-);
-assert(
-  process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
-  "REACT_APP_CHAIN_137_PROVIDER_URL must be defined."
-);
-assert(
-  process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
-  "REACT_APP_CHAIN_42161_PROVIDER_URL must be defined."
-);
+// assert(
+//   import.meta.env.VITE_PUBLIC_ONBOARD_API_KEY,
+//   "Missing import.meta.env.VITE_PUBLIC_ONBOARD_API_KEY"
+// );
+// assert(
+//   import.meta.env.VITE_REWARDS_API_URL,
+//   "Missing import.meta.env.VITE_REWARDS_API_URL"
+// );
+// assert(
+//   import.meta.env.VITE_CHAIN_137_PROVIDER_URL,
+//   "VITE_CHAIN_137_PROVIDER_URL must be defined."
+// );
+// assert(
+//   import.meta.env.VITE_CHAIN_42161_PROVIDER_URL,
+//   "VITE_CHAIN_42161_PROVIDER_URL must be defined."
+// );
 
-// PROCESS.ENV variables
+// import.meta.env variables
 export const gasEstimationMultiplier = Number(
-  process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER || 2
+  import.meta.env.VITE_GAS_ESTIMATION_MULTIPLIER || 2
 );
-export const rewardsApiUrl = process.env.REACT_APP_REWARDS_API_URL;
+export const rewardsApiUrl = import.meta.env.VITE_REWARDS_API_URL;
 export const airdropWindowIndex = Number(
-  process.env.REACT_APP_AIRDROP_WINDOW_INDEX || 0
+  import.meta.env.VITE_AIRDROP_WINDOW_INDEX || 0
 );
 export const referralsStartWindowIndex = Number(
-  process.env.REACT_APP_REFERRALS_START_WINDOW_INDEX || airdropWindowIndex + 1
+  import.meta.env.VITE_REFERRALS_START_WINDOW_INDEX || airdropWindowIndex + 1
 );
-export const mediumUrl = process.env.REACT_APP_MEDIUM_URL;
-export const hubPoolChainId = Number(
-  process.env.REACT_APP_HUBPOOL_CHAINID || 1
-);
-export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;
-export const enableReactQueryDevTools =
-  process.env.REACT_APP_ENABLE_REACT_QUERY_DEV_TOOLS;
+export const mediumUrl = import.meta.env.VITE_MEDIUM_URL;
+export const hubPoolChainId = Number(import.meta.env.VITE_HUBPOOL_CHAINID || 1);
+export const disableDeposits = import.meta.env.VITE_DISABLE_DEPOSITS;
+export const enableReactQueryDevTools = import.meta.env
+  .VITE_ENABLE_REACT_QUERY_DEV_TOOLS;
 export const infuraId =
-  process.env.REACT_APP_PUBLIC_INFURA_ID || "e34138b2db5b496ab5cc52319d2f0299"; // Include this constant for testing
+  import.meta.env.VITE_PUBLIC_INFURA_ID || "e34138b2db5b496ab5cc52319d2f0299"; // Include this constant for testing
 export const confirmations =
-  Number(process.env.REACT_APP_PUBLIC_CONFIRMATIONS) || 1;
-export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
-export const debug = Boolean(process.env.REACT_APP_DEBUG);
-export const isProductionBuild = process.env.NODE_ENV === "production";
+  Number(import.meta.env.VITE_PUBLIC_CONFIRMATIONS) || 1;
+export const onboardApiKey = import.meta.env.VITE_PUBLIC_ONBOARD_API_KEY;
+export const debug = Boolean(import.meta.env.VITE_DEBUG);
+export const isProductionBuild = import.meta.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
-  process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
+  import.meta.env.VITE_AMPLITUDE_DEBUG_LOGGING === "true";
 
-export const rewardsBannerWarning =
-  process.env.REACT_APP_REWARDS_BANNER_WARNING;
+export const rewardsBannerWarning = import.meta.env.VITE_REWARDS_BANNER_WARNING;
 
 export const MAX_APPROVAL_AMOUNT = ethers.constants.MaxUint256;
 export const FEE_ESTIMATION = ".004";
 export const MAX_RELAY_FEE_PERCENT = Number(
-  process.env.REACT_APP_MAX_RELAY_FEE_PERCENT || 50
+  import.meta.env.VITE_MAX_RELAY_FEE_PERCENT || 50
 );
-export const FLAT_RELAY_CAPITAL_FEE = process.env
-  .REACT_APP_FLAT_RELAY_CAPITAL_FEE
-  ? Number(process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE)
+export const FLAT_RELAY_CAPITAL_FEE = import.meta.env
+  .VITE_FLAT_RELAY_CAPITAL_FEE
+  ? Number(import.meta.env.VITE_FLAT_RELAY_CAPITAL_FEE)
   : 0;
 export const SHOW_ACX_NAV_TOKEN =
-  process.env.REACT_APP_SHOW_ACX_NAV_TOKEN === "true";
+  import.meta.env.VITE_SHOW_ACX_NAV_TOKEN === "true";
 export const AddressZero = ethers.constants.AddressZero;
 export const ArbitrumProviderUrl =
-  process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
+  import.meta.env.VITE_CHAIN_42161_PROVIDER_URL ||
   `https://arbitrum-mainnet.infura.io/v3/${infuraId}`;
 
 export const PolygonProviderUrl =
-  process.env.REACT_APP_CHAIN_137_PROVIDER_URL ||
+  import.meta.env.VITE_CHAIN_137_PROVIDER_URL ||
   `https://polygon-mainnet.infura.io/v3/${infuraId}`;
 
 assert(
@@ -479,12 +476,12 @@ export function getRoutes(chainId: ChainId): RouteConfig {
 export const routeConfig = getRoutes(hubPoolChainId);
 export const hubPoolAddress = routeConfig.hubPoolAddress;
 export const migrationPoolV2Warning =
-  process.env.REACT_APP_MIGRATION_POOL_V2_WARNING === "true";
-export const enableMigration = process.env.REACT_APP_ENABLE_MIGRATION;
-export const generalMaintenanceMessage =
-  process.env.REACT_APP_GENERAL_MAINTENANCE_MESSAGE;
+  import.meta.env.VITE_MIGRATION_POOL_V2_WARNING === "true";
+export const enableMigration = import.meta.env.VITE_ENABLE_MIGRATION;
+export const generalMaintenanceMessage = import.meta.env
+  .VITE_GENERAL_MAINTENANCE_MESSAGE;
 
-export const bridgeDisabled = process.env.REACT_APP_BRIDGE_DISABLED === "true";
+export const bridgeDisabled = import.meta.env.VITE_BRIDGE_DISABLED === "true";
 
 // Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
 // gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
@@ -493,7 +490,7 @@ export const bridgeDisabled = process.env.REACT_APP_BRIDGE_DISABLED === "true";
 // If this address lacks either of these, estimations will fail and relays to optimism and arbitrum will hang when
 // estimating gas. Defaults to 0x893d0d70ad97717052e3aa8903d9615804167759 so the app can technically run without this.
 export const dummyFromAddress =
-  process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
+  import.meta.env.VITE_DUMMY_FROM_ADDRESS ||
   "0x893d0d70ad97717052e3aa8903d9615804167759";
 
 export const fixedPointAdjustment = parseEtherLike("1.0");
@@ -515,8 +512,8 @@ export const referrerDelimiterHex = "0xd00dfeeddeadbeef";
  */
 export const lpCushionMap: {
   [symbol: string]: string;
-} = process.env.REACT_APP_LP_CUSHION_MAP
-  ? JSON.parse(process.env.REACT_APP_LP_CUSHION_MAP)
+} = import.meta.env.VITE_LP_CUSHION_MAP
+  ? JSON.parse(import.meta.env.VITE_LP_CUSHION_MAP)
   : {};
 
 export function stringValueInArray(value: string, arr: string[]) {
@@ -528,9 +525,9 @@ export const minRelayFee = 0.0001; // 0.01%
 export const supportedNotifyChainIds = [1, 3, 4, 5, 42, 56, 100, 137, 250];
 
 export const mockServerlessAPI =
-  process.env.REACT_APP_MOCK_SERVERLESS === "true";
+  import.meta.env.VITE_MOCK_SERVERLESS === "true";
 
-export const discordClientId = process.env.REACT_APP_DISCORD_CLIENT_ID ?? "";
+export const discordClientId = import.meta.env.VITE_DISCORD_CLIENT_ID ?? "";
 
 // Configures the V2 breakpoints
 export const BREAKPOINTS_V2 = {
@@ -548,7 +545,7 @@ export const QUERIESV2 = {
   tb: breakpoint(BREAKPOINTS_V2.tb),
 };
 
-export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);
+export const insideStorybookRuntime = Boolean(import.meta.env.STORYBOOK);
 
 export const rewardTiers = [
   {
@@ -581,50 +578,49 @@ export const rewardTiers = [
 export const secondsPerYear = 31557600;
 export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day
 
-export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
-  ? Number(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER)
+export const gasMultiplier = import.meta.env.VITE_GAS_ESTIMATION_MULTIPLIER
+  ? Number(import.meta.env.VITE_GAS_ESTIMATION_MULTIPLIER)
   : undefined;
 
 export const suggestedFeesDeviationBufferMultiplier = !Number.isNaN(
   Number(
-    process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER ||
-      undefined
+    import.meta.env.VITE_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER || undefined
   )
 )
-  ? Number(process.env.REACT_APP_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER)
+  ? Number(import.meta.env.VITE_SUGGESTED_FEES_DEVIATION_BUFFER_MULTIPLIER)
   : 1.25;
 
 export const defaultRefetchInterval = 15_000;
 
 export const fallbackSuggestedRelayerFeePct = ethers.utils.parseEther("0.0001");
 
-export const amplitudeAPIKey = process.env.REACT_APP_AMPLITUDE_KEY
-  ? process.env.REACT_APP_AMPLITUDE_KEY
+export const amplitudeAPIKey = import.meta.env.VITE_AMPLITUDE_KEY
+  ? import.meta.env.VITE_AMPLITUDE_KEY
   : undefined;
 
-export const amplitudeServerUrl = process.env.REACT_APP_AMPLITUDE_SERVER_URL
-  ? process.env.REACT_APP_AMPLITUDE_SERVER_URL
+export const amplitudeServerUrl = import.meta.env.VITE_AMPLITUDE_SERVER_URL
+  ? import.meta.env.VITE_AMPLITUDE_SERVER_URL
   : undefined;
 
-export const currentGitCommitHash = process.env.REACT_APP_GIT_COMMIT_HASH ?? "";
+export const currentGitCommitHash = import.meta.env.VITE_GIT_COMMIT_HASH ?? "";
 
 export const CACHED_WALLET_KEY = "previous-wallet-service";
 
-export const sentryEnv = process.env.REACT_APP_SENTRY_ENV;
-export const sentryDsn = process.env.REACT_APP_SENTRY_DSN;
+export const sentryEnv = import.meta.env.VITE_SENTRY_ENV;
+export const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
 export const isSentryEnabled = Boolean(
-  process.env.REACT_APP_ENABLE_SENTRY === "true"
+  import.meta.env.VITE_ENABLE_SENTRY === "true"
 );
 
 export const defaultBridgeFromChainId = hubPoolChainId;
 export const defaultBridgeToChainId = hubPoolChainId === 1 ? 10 : 5;
 
 export const disabledBridgeTokens = String(
-  process.env.REACT_APP_DISABLED_BRIDGE_TOKENS || ""
+  import.meta.env.VITE_DISABLED_BRIDGE_TOKENS || ""
 )
   .split(",")
   .map((symbol) => symbol.toUpperCase());
 
 export const disabledChainIds = (
-  process.env.REACT_APP_DISABLED_CHAINS || ""
+  import.meta.env.VITE_DISABLED_CHAINS || ""
 ).split(",");

@@ -14,7 +14,7 @@ import { coingecko, constants as sdkConstants } from "@across-protocol/sdk-v2";
 
 const { Coingecko } = coingecko;
 const {
-  REACT_APP_COINGECKO_PRO_API_KEY,
+  VITE_COINGECKO_PRO_API_KEY,
   FIXED_TOKEN_PRICES,
   REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES,
 } = process.env;
@@ -125,10 +125,7 @@ const handler = async (
       l1Token = redirectLookupAddresses[l1Token];
     }
 
-    const coingeckoClient = Coingecko.get(
-      logger,
-      REACT_APP_COINGECKO_PRO_API_KEY
-    );
+    const coingeckoClient = Coingecko.get(logger, VITE_COINGECKO_PRO_API_KEY);
 
     // We want to compute price and return to caller.
     let price: number;
