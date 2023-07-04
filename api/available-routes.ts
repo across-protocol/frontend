@@ -1,6 +1,5 @@
 import { VercelResponse } from "@vercel/node";
 import { object, assert, Infer, optional } from "superstruct";
-
 import {
   getLogger,
   applyMapFilter,
