@@ -12,9 +12,7 @@ import { define, StructError } from "superstruct";
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
 
-// For ESM support import with .js
-// See https://www.typescriptlang.org/docs/handbook/esm-node.html
-import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants.js";
+import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
 import { VercelResponse } from "@vercel/node";

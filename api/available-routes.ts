@@ -1,7 +1,6 @@
 import { VercelResponse } from "@vercel/node";
 import { object, assert, Infer, optional } from "superstruct";
-// For ESM support import with .js
-// See https://www.typescriptlang.org/docs/handbook/esm-node.html
+
 import {
   getLogger,
   applyMapFilter,
@@ -9,7 +8,7 @@ import {
   positiveIntStr,
   ENABLED_ROUTES,
   handleErrorCondition,
-} from "./_utils.js";
+} from "./_utils";
 import { TypedVercelRequest } from "./_types";
 
 const AvailableRoutesQueryParamsSchema = object({

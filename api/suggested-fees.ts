@@ -6,12 +6,7 @@ import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { type, assert, Infer, optional } from "superstruct";
-// For ESM support import with .js
-// See https://www.typescriptlang.org/docs/handbook/esm-node.html
-import {
-  disabledL1Tokens,
-  DEFAULT_QUOTE_TIMESTAMP_BUFFER,
-} from "./_constants.js";
+import { disabledL1Tokens, DEFAULT_QUOTE_TIMESTAMP_BUFFER } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,

@@ -2,16 +2,13 @@ import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { object, assert, Infer, optional, string } from "superstruct";
 import { TypedVercelRequest } from "./_types";
-
-// For ESM support import with .js
-// See https://www.typescriptlang.org/docs/handbook/esm-node.html
 import {
   getLogger,
   InputError,
   handleErrorCondition,
   validAddress,
-} from "./_utils.js";
-import { SUPPORTED_CG_BASE_CURRENCIES } from "./_constants.js";
+} from "./_utils";
+import { SUPPORTED_CG_BASE_CURRENCIES } from "./_constants";
 
 import { coingecko, constants as sdkConstants } from "@across-protocol/sdk-v2";
 
