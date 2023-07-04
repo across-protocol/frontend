@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "license": "AGPL-3.0-only",
+  "type": "module",
   "dependencies": {
     "@across-protocol/sdk-v2": "^0.10.4",
     "@amplitude/analytics-browser": "^1.6.6",
