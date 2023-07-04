@@ -2,6 +2,8 @@ import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
 import { TypedVercelRequest } from "./_types";
+// For ESM support import with .js
+// See https://www.typescriptlang.org/docs/handbook/esm-node.html
 import {
   getLogger,
   InputError,
@@ -13,7 +15,7 @@ import {
   getSpokePool,
   tagReferrer,
   validAddressOrENS,
-} from "./_utils";
+} from "./_utils.js";
 
 const BuildDepositTxQueryParamsSchema = type({
   amount: parsableBigNumberString(),

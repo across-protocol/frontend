@@ -4,10 +4,12 @@
 import { HubPool__factory } from "@across-protocol/contracts-v2/dist/typechain/index.js";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import * as sdk from "@across-protocol/sdk-v2";
 import { object, assert, Infer, optional } from "superstruct";
+// For ESM support import with .js
+// See https://www.typescriptlang.org/docs/handbook/esm-node.html
+import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants.js";
 
 import {
   getLogger,

@@ -2,13 +2,14 @@ import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { object, assert, Infer } from "superstruct";
 import { TypedVercelRequest } from "./_types";
-
+// For ESM support import with .js
+// See https://www.typescriptlang.org/docs/handbook/esm-node.html
 import {
   getLogger,
   getHubPoolClient,
   handleErrorCondition,
   validAddress,
-} from "./_utils";
+} from "./_utils.js";
 
 const PoolsQueryParamsSchema = object({
   token: validAddress(),
