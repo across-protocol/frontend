@@ -10,10 +10,6 @@ import eslint from "vite-plugin-eslint";
 import EnvironmentPlugin from "vite-plugin-environment";
 
 export default defineConfig({
-  // https://github.com/vitejs/vite/issues/1973#issuecomment-787571499
-  define: {
-    "process.env": {},
-  },
   build: {
     outDir: "build",
     commonjsOptions: {
