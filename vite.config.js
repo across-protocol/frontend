@@ -7,45 +7,52 @@ import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfil
 import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
 import rollupNodePolyFill from "rollup-plugin-node-polyfills";
 import eslint from "vite-plugin-eslint";
+import EnvironmentPlugin from "vite-plugin-environment";
 
-export default defineConfig(() => {
-  return {
-    // https://github.com/vitejs/vite/issues/1973#issuecomment-787571499
-    define: {
-      "process.env": {},
+export default defineConfig({
+  // https://github.com/vitejs/vite/issues/1973#issuecomment-787571499
+  define: {
+    "process.env": {},
+  },
+  build: {
+    outDir: "build",
+    commonjsOptions: {
+      include: [],
     },
-    build: {
-      outDir: "build",
+    rollupOptions: {
+      maxParallelFileOps: 100,
+      plugins: [rollupNodePolyFill()],
       commonjsOptions: {
-        include: [],
-      },
-      rollupOptions: {
-        maxParallelFileOps: 50,
-        plugins: [
-          // Enable rollup polyfills plugin
-          // used during production bundling
-          rollupNodePolyFill(),
-        ],
+        transformMixedEsModules: true,
       },
     },
-    plugins: [
-      react(),
-      svgr({ svgrOptions: { icon: true } }),
-      tsconfigPaths(),
-      eslint(),
+  },
+  plugins: [
+    react(),
+    svgr({ svgrOptions: { icon: true } }),
+    tsconfigPaths(),
+    eslint(),
+    EnvironmentPlugin("all", { prefix: "REACT_APP_" }),
+  ],
+  optimizeDeps: {
+    disabled: false,
+    include: [
+      "@web3-onboard/common",
+      "@walletconnect/ethereum-provider",
+      "rxjs",
+      "rxjs/operators",
     ],
-    optimizeDeps: {
-      disabled: false,
-      esbuildOptions: {
-        // Enable esbuild polyfill plugins
-        plugins: [
-          NodeGlobalsPolyfillPlugin({
-            process: true,
-            buffer: true,
-          }),
-          NodeModulesPolyfillPlugin(),
-        ],
+    esbuildOptions: {
+      define: {
+        global: "globalThis",
       },
+      plugins: [
+        NodeGlobalsPolyfillPlugin({
+          process: true,
+          buffer: true,
+        }),
+        NodeModulesPolyfillPlugin(),
+      ],
     },
-  };
+  },
 });

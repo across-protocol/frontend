@@ -5,7 +5,7 @@ import { ServerlessAPIEndpoints } from "./types";
 
 /**
  * Returns a set of functions used to interface with Across' serverless API
- * @returns A set of mocked or production-ready functions depending on the `VITE_MOCK_SERVERLESS` env variable.
+ * @returns A set of mocked or production-ready functions depending on the `REACT_APP_MOCK_SERVERLESS` env variable.
  */
 export default function getApiEndpoint(): ServerlessAPIEndpoints {
   if (mockServerlessAPI) {

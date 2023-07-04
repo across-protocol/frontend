@@ -3,6 +3,14 @@ import { parseEtherLike } from "utils/format";
 
 import { getBaseRewardsApr } from "../rewards";
 
+// Enums break ts-jest
+// https://github.com/kulshekhar/ts-jest/issues/3397
+jest.mock("../providers.ts", () => ({
+  ChainId: {
+    MAINNET: 1,
+  },
+}));
+
 describe("#getBaseRewardsApr", () => {
   const totalBaseRewardsPerYear = BigNumber.from(1);
 

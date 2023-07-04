@@ -1,13 +1,12 @@
 import { ethers } from "ethers";
-import { ChainId } from "./utils.d";
-import { hubPoolChainId } from "./constants";
-const infuraId = import.meta.env.VITE_PUBLIC_INFURA_ID || "";
+import { hubPoolChainId, ChainId } from "./constants";
+const infuraId = process.env.REACT_APP_PUBLIC_INFURA_ID || "";
 const ArbitrumProviderUrl =
-  import.meta.env.VITE_CHAIN_42161_PROVIDER_URL ||
+  process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
   `https://arbitrum-mainnet.infura.io/v3/${infuraId}`;
 
 const PolygonProviderUrl =
-  import.meta.env.VITE_CHAIN_137_PROVIDER_URL ||
+  process.env.REACT_APP_CHAIN_137_PROVIDER_URL ||
   `https://polygon-mainnet.infura.io/v3/${infuraId}`;
 
 export const providerUrls: [ChainId, string][] = [

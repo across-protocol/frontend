@@ -12,11 +12,11 @@ import {
 } from "utils";
 
 export const DEFAULT_GAS_PRICE = toWeiSafe(
-  import.meta.env.VITE_DEFAULT_GAS_PRICE || "400",
+  process.env.REACT_APP_DEFAULT_GAS_PRICE || "400",
   9
 );
 export const GAS_PRICE_BUFFER = toWeiSafe(
-  import.meta.env.VITE_GAS_PRICE_BUFFER || "0",
+  process.env.REACT_APP_GAS_PRICE_BUFFER || "0",
   9
 );
 // Rounded up from a mainnet transaction sending eth gas limit
@@ -29,7 +29,7 @@ export const DEFAULT_ADD_LIQUIDITY_ETH_GAS_ESTIMATE = estimateGas(
 );
 
 export const UPDATE_GAS_INTERVAL_MS = parseInt(
-  import.meta.env.VITE_UPDATE_GAS_INTERVAL_MS || "30000"
+  process.env.REACT_APP_UPDATE_GAS_INTERVAL_MS || "30000"
 );
 
 // for a dynamic gas estimation
