@@ -1,5 +1,5 @@
 {
-  "devCommand": "yarn start",
+  "devCommand": "yarn dev",
   "headers": [
     {
       "source": "/(.*)",

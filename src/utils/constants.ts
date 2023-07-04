@@ -299,28 +299,12 @@ export const tokenList: TokenInfoList = Object.entries(
   };
 });
 
-// assert(
-//   process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
-//   "Missing process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY"
-// );
-// assert(
-//   process.env.REACT_APP_REWARDS_API_URL,
-//   "Missing process.env.REACT_APP_REWARDS_API_URL"
-// );
-// assert(
-//   process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
-//   "REACT_APP_CHAIN_137_PROVIDER_URL must be defined."
-// );
-// assert(
-//   process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
-//   "REACT_APP_CHAIN_42161_PROVIDER_URL must be defined."
-// );
-
 // process.env variables
 export const gasEstimationMultiplier = Number(
   process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER || 2
 );
-export const rewardsApiUrl = process.env.REACT_APP_REWARDS_API_URL;
+export const rewardsApiUrl =
+  process.env.REACT_APP_REWARDS_API_URL || "https://api.across.to";
 export const airdropWindowIndex = Number(
   process.env.REACT_APP_AIRDROP_WINDOW_INDEX || 0
 );
