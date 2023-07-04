@@ -10,7 +10,7 @@ import logo from "assets/across-logo-v2.svg";
 const injected = injectedModule();
 const gnosis = gnosisModule();
 const walletConnect = walletConnectModule({
-  projectId: walletConnectProjectId || "4ceff7ad8f4842fc983c7a18ecfe45e5",
+  projectId: walletConnectProjectId,
   version: 2,
 });
 const coinbase = coinbaseModule();
