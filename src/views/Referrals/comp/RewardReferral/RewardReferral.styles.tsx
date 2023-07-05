@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "@emotion/styled";
 import { ButtonV2, SecondaryButtonV2 } from "components/Buttons";
 import { ReactComponent as ReferralSVG } from "assets/icons/rewards/referral-within-star.svg";
