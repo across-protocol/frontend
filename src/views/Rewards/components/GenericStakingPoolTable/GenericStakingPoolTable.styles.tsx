@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "@emotion/styled";
 import ProgressBar from "components/ProgressBar";
 import { BaseHeadCell } from "components/Table";
@@ -11,15 +10,7 @@ const Cell = styled(BaseHeadCell)<{ length: number }>`
   flex: 0 0 ${({ length }) => length}px;
 `;
 
-const _II: any = React.forwardRef(
-  ({ ref, ...props }: { ref?: React.Ref<HTMLDivElement> }) => (
-    <div ref={ref} {...props}>
-      <II />
-    </div>
-  )
-);
-
-export const InfoIcon = styled(_II)`
+export const InfoIcon = styled(II)`
   cursor: pointer;
 `;
 
