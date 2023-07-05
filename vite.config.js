@@ -25,7 +25,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    svgr({ svgrOptions: { icon: true } }),
+    svgr(),
     tsconfigPaths(),
     eslint(),
     EnvironmentPlugin("all", { prefix: "REACT_APP_" }),
