@@ -34,7 +34,7 @@ import {
 
 import { ReactComponent as PurpleBanner } from "assets/bg-banners/purple-card-banner.svg";
 import { ReferralsSummary } from "hooks/useReferralSummary";
-import { PopperTooltip } from "components/Tooltip";
+import { Tooltip } from "components/Tooltip";
 import { ExternalLink } from "components/ExternalLink";
 import StepperWithTooltips from "../StepperWithTooltips";
 import { useConnection } from "hooks";
@@ -250,14 +250,14 @@ const ReferralTierComponent: React.FC<{
             arrow: false,
             Value: (
               <RewardSecondaryTextWrapper>
-                <PopperTooltip
+                <Tooltip
                   title="Referral reward claiming"
                   body="New referral rewards are claimable 2 weeks after the first day of every month."
                   placement="bottom-start"
                   icon="clock"
                 >
                   <StyledClockIcon />
-                </PopperTooltip>
+                </Tooltip>
                 <Text color="white-70">
                   {formatEther(unclaimedReferralRewardAmount)} ACX
                 </Text>
@@ -316,13 +316,13 @@ const ReferralTierComponent: React.FC<{
                   </StatsGrayTextMobile>
                 </StatsTitleIconWrapper>
                 {stat.tooltip && (
-                  <PopperTooltip
+                  <Tooltip
                     title={stat.tooltip.title}
                     body={stat.tooltip.description}
                     placement="bottom-start"
                   >
                     <InfoIcon />
-                  </PopperTooltip>
+                  </Tooltip>
                 )}
               </StatsTitleIconTooltipWrapper>
               {displayValuesTernary(

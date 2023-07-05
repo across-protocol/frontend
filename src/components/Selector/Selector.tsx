@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { ReactComponent as Arrow } from "assets/icons/arrow-16.svg";
 import Modal from "components/Modal";
 import { Text } from "components/Text";
-import { PopperTooltip } from "components/Tooltip";
+import { Tooltip } from "components/Tooltip";
 import { QUERIESV2 } from "utils";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
 import { useSelector } from "./useSelector";
@@ -101,7 +101,7 @@ const Selector = <ElementValue,>({
                     element.suffix
                   )}
                   {element.disabled ? (
-                    <PopperTooltip
+                    <Tooltip
                       title={element.disabledTooltip?.title ?? "Not supported."}
                       body={
                         element.disabledTooltip?.description ??
@@ -112,7 +112,7 @@ const Selector = <ElementValue,>({
                       <InfoIconWrapper>
                         <InfoIcon />
                       </InfoIconWrapper>
-                    </PopperTooltip>
+                    </Tooltip>
                   ) : idx === selectedIndex ? (
                     <ActiveIcon>
                       <ActiveSelectedIcon />

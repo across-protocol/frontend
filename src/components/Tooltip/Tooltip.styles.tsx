@@ -1,5 +1,14 @@
 import styled from "@emotion/styled";
+import { Tooltip } from "react-tooltip";
 import { ReactComponent as RoundedCheckmark16 } from "assets/icons/rounded-checkmark-16.svg";
+
+export const StyledTooltip = styled(Tooltip)`
+  z-index: 5;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0;
+  border-radius: 50%;
+`;
 
 export const Wrapper = styled.div`
   padding: 16px;
