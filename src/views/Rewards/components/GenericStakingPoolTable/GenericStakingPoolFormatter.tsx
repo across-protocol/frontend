@@ -1,5 +1,5 @@
 import { Text } from "components/Text";
-import { PopperTooltip } from "components/Tooltip";
+import { Tooltip } from "components/Tooltip";
 import { IRow } from "components/Table/Table";
 import { BigNumber } from "ethers";
 import { formatEther, formatWeiPct } from "utils";
@@ -96,13 +96,13 @@ export const headers = rawHeader.map((header, idx) => {
   const text = typeof header === "string" ? header : header.header;
   const toolTip =
     typeof header === "string" ? undefined : (
-      <PopperTooltip
+      <Tooltip
         title={header.tooltip.title}
         body={header.tooltip.description}
         placement="bottom-start"
       >
         <InfoIcon />
-      </PopperTooltip>
+      </Tooltip>
     );
 
   return {

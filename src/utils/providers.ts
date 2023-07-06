@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
-import { ChainId } from "./utils.d";
-import { hubPoolChainId } from "./constants";
+import { hubPoolChainId, ChainId } from "./constants";
 const infuraId = process.env.REACT_APP_PUBLIC_INFURA_ID || "";
 const ArbitrumProviderUrl =
   process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||

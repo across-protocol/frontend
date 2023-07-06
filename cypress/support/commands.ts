@@ -80,9 +80,4 @@ Cypress.Commands.add("connectInjectedWallet", (connectWalletElementDataId) => {
     .find(".wallets-container")
     .contains("Detected Wallet")
     .click();
-
-  cy.get("onboard-v2")
-    .shadow()
-    .find(".button-container.absolute.svelte-ro440k")
-    .click();
 });

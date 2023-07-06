@@ -37,7 +37,7 @@ import { ReactComponent as ExternalLink16 } from "assets/icons/external-link-16.
 import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
 import { ReactComponent as ReferrerIcon } from "assets/icons/referrer.svg";
 import { ReactComponent as SelfReferralIcon } from "assets/icons/self-referral.svg";
-import { PopperTooltip, TooltipIcon } from "components/Tooltip";
+import { Tooltip, TooltipIcon } from "components/Tooltip";
 
 export default function createMyReferralsTableJSX(
   referrals: Referral[],
@@ -102,12 +102,7 @@ function determineReferralIcon(
   }
 
   return (
-    <PopperTooltip
-      title={title}
-      body={body}
-      icon={icon}
-      placement="bottom-start"
-    >
+    <Tooltip title={title} body={body} icon={icon} placement="bottom-start">
       <ReferralIconContainer>
         {(() => {
           if (account === depositAddr && account === referralAddr) {
@@ -119,7 +114,7 @@ function determineReferralIcon(
           }
         })()}
       </ReferralIconContainer>
-    </PopperTooltip>
+    </Tooltip>
   );
 }
 

@@ -15,7 +15,7 @@ import {
   ArrowIconDown,
 } from "./StakingForm.styles";
 
-import { PopperTooltip } from "components/Tooltip";
+import { Tooltip } from "components/Tooltip";
 import { Tab, Tabs } from "components/TabsV2";
 import StakingInputBlock from "../StakingInputBlock";
 import { StakingFormPropType } from "../../types";
@@ -149,13 +149,13 @@ export const StakingForm = ({
           <StakeInfoRow>
             <StakeInfoItem>
               Staked LP Tokens
-              <PopperTooltip
+              <Tooltip
                 title="Staked LP Tokens"
                 body="This displays your staked LP token amount. The amount in underlying can be seen in the Pool tab."
                 placement="bottom-start"
               >
                 <InfoIcon />
-              </PopperTooltip>
+              </Tooltip>
             </StakeInfoItem>
             <StakeInfoItem>
               {valueOrEmpty(
@@ -174,13 +174,13 @@ export const StakingForm = ({
           <StakeInfoRow>
             <StakeInfoItem>
               Age of capital
-              <PopperTooltip
+              <Tooltip
                 title="Age of Capital"
                 body="Number of days you've staked LP tokens without claiming rewards. Weighted by size if multiple positions have been staked."
                 placement="bottom-start"
               >
                 <InfoIcon />
-              </PopperTooltip>
+              </Tooltip>
             </StakeInfoItem>
             <StakeInfoItem>
               {valueOrEmpty(
@@ -198,13 +198,13 @@ export const StakingForm = ({
           <StakeInfoRow>
             <StakeInfoItem>
               Multiplier
-              <PopperTooltip
+              <Tooltip
                 title="Multiplier"
                 body="Your multiple applied to the pool's base reward APY, determined by your age of capital."
                 placement="bottom-start"
               >
                 <InfoIcon />
-              </PopperTooltip>
+              </Tooltip>
             </StakeInfoItem>
             <StakeInfoItem>
               {valueOrEmpty(
@@ -238,13 +238,13 @@ export const StakingForm = ({
               <APYInfoItem>
                 <ArrowIcon />
                 APY
-                <PopperTooltip
+                <Tooltip
                   title="Rewards APR"
                   body="Your total APY for the pool, including the pool APY plus rewards APR times your multiplier. Max APY is the maximum APY after you have staked your LP tokens for 100 days."
                   placement="bottom-start"
                 >
                   <InfoIcon />
-                </PopperTooltip>
+                </Tooltip>
               </APYInfoItem>
             </StakeInfoItem>
             <StakeInfoItem>
@@ -260,13 +260,13 @@ export const StakingForm = ({
             <StakeInfoRow>
               <StakeInfoItem>
                 Rewards APY
-                <PopperTooltip
+                <Tooltip
                   title="Rewards APY"
                   body="The base reward APR times your multiplier."
                   placement="bottom-start"
                 >
                   <InfoIcon />
-                </PopperTooltip>
+                </Tooltip>
               </StakeInfoItem>
               <StakeInfoItem>
                 {valueOrEmpty(

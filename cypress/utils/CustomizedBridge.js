@@ -38,6 +38,8 @@ class CustomizedBridge extends Eip1193Bridge {
       method = args[0];
       params = args[1];
     }
+    console.log("method -------", method);
+    console.log("params -------", params);
 
     // Implemented by UMA
     if (method === "eth_call") {
@@ -83,6 +85,7 @@ class CustomizedBridge extends Eip1193Bridge {
         return result;
       }
     } catch (error) {
+      console.error("error received", method, params, error);
       if (isCallbackForm) {
         callback(error, null);
       } else {

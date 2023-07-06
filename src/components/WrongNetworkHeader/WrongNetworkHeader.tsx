@@ -1,5 +1,5 @@
 import { useIsWrongNetwork } from "hooks";
-import { SuperHeader } from "components";
+import SuperHeader from "components/SuperHeader/SuperHeader";
 import { chainInfoTable, hubPoolChainId } from "utils";
 
 export function WrongNetworkHeader({

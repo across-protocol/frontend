@@ -3,7 +3,6 @@ import { ethers, providers } from "ethers";
 import { constants } from "@across-protocol/sdk-v2";
 import * as superstruct from "superstruct";
 
-import { getAddress } from "./address";
 import { parseEtherLike } from "./format";
 
 import ethereumLogo from "assets/ethereum-logo.svg";
@@ -112,12 +111,16 @@ export const COLORS = {
 
 // Update once addresses are known
 export const configStoreAddresses: Record<ChainId, string> = {
-  [ChainId.MAINNET]: getAddress("0x3B03509645713718B78951126E0A6de6f10043f5"),
+  [ChainId.MAINNET]: ethers.utils.getAddress(
+    "0x3B03509645713718B78951126E0A6de6f10043f5"
+  ),
   [ChainId.ARBITRUM]: ethers.constants.AddressZero,
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.POLYGON]: ethers.constants.AddressZero,
   [ChainId.ARBITRUM_GOERLI]: ethers.constants.AddressZero,
-  [ChainId.GOERLI]: getAddress("0x3215e3C91f87081757d0c41EF0CB77738123Be83"),
+  [ChainId.GOERLI]: ethers.utils.getAddress(
+    "0x3215e3C91f87081757d0c41EF0CB77738123Be83"
+  ),
   [ChainId.MUMBAI]: ethers.constants.AddressZero,
 };
 
@@ -296,28 +299,12 @@ export const tokenList: TokenInfoList = Object.entries(
   };
 });
 
-assert(
-  process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
-  "Missing process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY"
-);
-assert(
-  process.env.REACT_APP_REWARDS_API_URL,
-  "Missing process.env.REACT_APP_REWARDS_API_URL"
-);
-assert(
-  process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
-  "REACT_APP_CHAIN_137_PROVIDER_URL must be defined."
-);
-assert(
-  process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
-  "REACT_APP_CHAIN_42161_PROVIDER_URL must be defined."
-);
-
-// PROCESS.ENV variables
+// process.env variables
 export const gasEstimationMultiplier = Number(
   process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER || 2
 );
-export const rewardsApiUrl = process.env.REACT_APP_REWARDS_API_URL;
+export const rewardsApiUrl =
+  process.env.REACT_APP_REWARDS_API_URL || "https://api.across.to";
 export const airdropWindowIndex = Number(
   process.env.REACT_APP_AIRDROP_WINDOW_INDEX || 0
 );
@@ -336,6 +323,8 @@ export const infuraId =
 export const confirmations =
   Number(process.env.REACT_APP_PUBLIC_CONFIRMATIONS) || 1;
 export const onboardApiKey = process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY;
+export const walletConnectProjectId =
+  process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID!;
 export const debug = Boolean(process.env.REACT_APP_DEBUG);
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =

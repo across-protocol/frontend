@@ -8,7 +8,7 @@ import {
 } from "./StepperWithTooltips.styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
-import { PopperTooltip, TooltipProps } from "components/Tooltip/Tooltip";
+import { Tooltip, TooltipProps } from "components/Tooltip/Tooltip";
 
 export const StepFactory = forwardRef<
   HTMLInputElement,
@@ -35,7 +35,7 @@ export const StepItemComponent: React.FC<{
   type: "completed" | "current" | "next";
 }> = ({ body, title, children, type, titleSecondary }) => {
   return (
-    <PopperTooltip
+    <Tooltip
       title={title}
       titleSecondary={titleSecondary}
       body={body}
@@ -46,7 +46,7 @@ export const StepItemComponent: React.FC<{
       }
     >
       <StepFactory type={type}>{children}</StepFactory>
-    </PopperTooltip>
+    </Tooltip>
   );
 };
 

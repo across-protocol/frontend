@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
 
 import { Text } from "components/Text";
-import { PopperTooltip } from "components/Tooltip";
+import { Tooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 
 import { capitalizeFirstLetter, getChainInfo, TokenInfo } from "utils";
@@ -98,9 +98,9 @@ function TotalReceive({
 
   return (
     <TotalReceiveRow>
-      <PopperTooltip body={tooltipText} placement="bottom-start">
+      <Tooltip body={tooltipText} placement="bottom-start">
         <WarningInfoIcon />
-      </PopperTooltip>
+      </Tooltip>
       <TokenFee
         amount={totalReceived}
         token={receiveToken}
