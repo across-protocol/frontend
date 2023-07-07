@@ -12,6 +12,7 @@ const gnosis = gnosisModule();
 const walletConnect = walletConnectModule({
   projectId: walletConnectProjectId,
   version: 2,
+  requiredChains: [1, 10, 137, 42161],
 });
 const coinbase = coinbaseModule();
 
