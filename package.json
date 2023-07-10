@@ -66,7 +66,8 @@
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
     "chromatic": "chromatic --exit-zero-on-changes",
-    "ampli:pull": "ampli pull --path=./src/ampli --omit-api-keys web && prettier -w ./src/ampli/*.ts"
+    "ampli:pull": "ampli pull --path=./src/ampli --omit-api-keys web && prettier -w ./src/ampli/*.ts",
+    "postinstall": "patch-package"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": "yarn lint:fix"
@@ -133,6 +134,8 @@
     "jest-environment-jsdom": "^29.5.0",
     "jest-transform-stub": "^2.0.0",
     "lint-staged": "^13.0.3",
+    "patch-package": "^7.0.0",
+    "postinstall-postinstall": "^2.1.0",
     "prettier": "^2.4.1",
     "serve": "^14.0.1",
     "ts-jest": "^29.1.1",
