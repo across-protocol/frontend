@@ -1,18 +1,29 @@
 import {
   HubPool__factory,
+  HubPool,
   ERC20__factory,
   SpokePool__factory,
   SpokePool,
+  AcrossConfigStore__factory,
+  AcrossConfigStore,
 } from "@across-protocol/contracts-v2/dist/typechain";
 import axios from "axios";
 import * as sdk from "@across-protocol/sdk-v2";
 import { BigNumber, ethers, providers, utils } from "ethers";
 import { Log, Logging } from "@google-cloud/logging";
+import winston from "winston";
+import { LoggingWinston } from "@google-cloud/logging-winston";
 import { define, StructError } from "superstruct";
+
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
 
-import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
+import {
+  maxRelayFeePct,
+  relayerFeeCapitalCostConfig,
+  SPOKE_POOLS,
+} from "./_constants";
+
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
 import { VercelResponse } from "@vercel/node";
@@ -71,6 +82,21 @@ _ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
 );
 
 export const ENABLED_ROUTES = _ENABLED_ROUTES;
+export const ENABLED_TOKEN_SYMBOLS = Array.from(
+  new Set(ENABLED_ROUTES.routes.map(({ fromTokenSymbol }) => fromTokenSymbol))
+);
+
+// Complete set of chain IDs ever supported by the HubPool
+export const SUPPORTED_CHAIN_IDS =
+  HUB_POOL_CHAIN_ID === 1
+    ? [
+        sdk.constants.CHAIN_IDs.MAINNET,
+        sdk.constants.CHAIN_IDs.ARBITRUM,
+        sdk.constants.CHAIN_IDs.BOBA,
+        sdk.constants.CHAIN_IDs.OPTIMISM,
+        sdk.constants.CHAIN_IDs.POLYGON,
+      ]
+    : [sdk.constants.CHAIN_IDs.GOERLI, sdk.constants.CHAIN_IDs.ARBITRUM_GOERLI];
 
 /**
  * Writes a log using the google cloud logging utility
@@ -152,6 +178,34 @@ export const getLogger = (): LoggingUtility => {
     };
   }
   return logger;
+};
+
+export const getWinstonLogger = () => {
+  const isGoogleServiceAccountSet =
+    Object.keys(GOOGLE_SERVICE_ACCOUNT).length !== 0;
+
+  const transports = [
+    new winston.transports.Console({
+      level: "info",
+    }),
+    isGoogleServiceAccountSet
+      ? new LoggingWinston({
+          projectId: GOOGLE_SERVICE_ACCOUNT.project_id,
+          credentials: {
+            client_email: GOOGLE_SERVICE_ACCOUNT.client_email,
+            private_key: GOOGLE_SERVICE_ACCOUNT.private_key,
+          },
+          resource: {
+            type: "global",
+          },
+        })
+      : [],
+  ].flat();
+
+  return winston.createLogger({
+    level: "debug",
+    transports,
+  });
 };
 
 /**
@@ -324,75 +378,77 @@ export const providerForChain: {
   5: infuraProvider(5),
   421613: infuraProvider(421613),
 };
-export const queries: Record<number, () => QueryBase> = {
-  1: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(
-      providerForChain[1],
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(1)
-    ),
-  10: () =>
-    new sdk.relayFeeCalculator.OptimismQueries(
-      providerForChain[10],
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(10)
-    ),
-  137: () =>
-    new sdk.relayFeeCalculator.PolygonQueries(
-      providerForChain[137],
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(137)
-    ),
-  42161: () =>
-    new sdk.relayFeeCalculator.ArbitrumQueries(
-      providerForChain[42161],
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(42161)
-    ),
+export const queriesMap: Record<number, QueryBase> = {
+  1: new sdk.relayFeeCalculator.EthereumQueries(
+    providerForChain[1],
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(1)
+  ),
+  10: new sdk.relayFeeCalculator.OptimismQueries(
+    providerForChain[10],
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(10)
+  ),
+  137: new sdk.relayFeeCalculator.PolygonQueries(
+    providerForChain[137],
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(137)
+  ),
+  42161: new sdk.relayFeeCalculator.ArbitrumQueries(
+    providerForChain[42161],
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(42161)
+  ),
   // testnets
-  5: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(
-      providerForChain[5],
-      undefined,
-      "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(5)
-    ),
-  421613: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(
-      providerForChain[421613],
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(421613)
-    ),
+  5: new sdk.relayFeeCalculator.EthereumQueries(
+    providerForChain[5],
+    undefined,
+    "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
+    undefined,
+    undefined,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(5)
+  ),
+  421613: new sdk.relayFeeCalculator.EthereumQueries(
+    providerForChain[421613],
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(421613)
+  ),
 };
+
+export const relayFeeCalculatorConfig: sdk.relayFeeCalculator.RelayFeeCalculatorConfigWithMap =
+  {
+    feeLimitPercent: maxRelayFeePct * 100,
+    capitalCostsPercent: FLAT_RELAY_CAPITAL_FEE, // This is set same way in ./src/utils/bridge.ts
+    queriesMap,
+    capitalCostsConfig: relayerFeeCapitalCostConfig,
+  };
 
 /**
  * Retrieves an isntance of the Across SDK RelayFeeCalculator
@@ -400,24 +456,19 @@ export const queries: Record<number, () => QueryBase> = {
  * @returns An instance of the `RelayFeeCalculator` for the specific chain specified by `destinationChainId`
  */
 export const getRelayerFeeCalculator = (destinationChainId: number) => {
-  const queryFn = queries[destinationChainId];
-  if (queryFn === undefined) {
-    throw new InputError("Invalid destination chain Id");
-  }
-
-  const relayerFeeCalculatorConfig = {
-    feeLimitPercent: maxRelayFeePct * 100,
-    capitalCostsPercent: FLAT_RELAY_CAPITAL_FEE, // This is set same way in ./src/utils/bridge.ts
-    queries: queryFn(),
-    capitalCostsConfig: relayerFeeCapitalCostConfig,
-  };
-  if (relayerFeeCalculatorConfig.feeLimitPercent < 1)
+  if (
+    relayFeeCalculatorConfig.feeLimitPercent &&
+    relayFeeCalculatorConfig.feeLimitPercent < 1
+  ) {
     throw new Error(
       "Setting fee limit % < 1% will produce nonsensical relay fee details"
     );
+  }
+
   return new sdk.relayFeeCalculator.RelayFeeCalculator(
-    relayerFeeCalculatorConfig,
-    logger
+    relayFeeCalculatorConfig,
+    logger,
+    destinationChainId
   );
 };
 
@@ -513,21 +564,27 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 };
 
 export const getSpokePoolAddress = (_chainId: number): string => {
-  const chainId = _chainId.toString();
-  switch (chainId.toString()) {
-    case "1":
-      return "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5";
-    case "10":
-      return "0x6f26Bf09B1C792e3228e5467807a900A503c0281";
-    case "137":
-      return "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096";
-    case "288":
-      return "0xBbc6009fEfFc27ce705322832Cb2068F8C1e0A58";
-    case "42161":
-      return "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A";
-    default:
-      throw new Error("Invalid chainId provided");
+  if (!SPOKE_POOLS[_chainId]) {
+    throw new Error("Invalid chainId provided");
   }
+
+  return SPOKE_POOLS[_chainId].address;
+};
+
+export const getAcrossConfigStore = (): AcrossConfigStore => {
+  const acrossConfigStoreAddress = ENABLED_ROUTES.acrossConfigStoreAddress;
+  return AcrossConfigStore__factory.connect(
+    acrossConfigStoreAddress,
+    getProvider(HUB_POOL_CHAIN_ID)
+  );
+};
+
+export const getHubPool = (): HubPool => {
+  const hubPoolAddress = ENABLED_ROUTES.hubPoolAddress;
+  return HubPool__factory.connect(
+    hubPoolAddress,
+    getProvider(HUB_POOL_CHAIN_ID)
+  );
 };
 
 /**
@@ -650,7 +707,7 @@ export function applyMapFilter<InputType, MapType>(
 export function handleErrorCondition(
   endpoint: string,
   response: VercelResponse,
-  logger: LoggingUtility,
+  logger: LoggingUtility | winston.Logger,
   error: unknown
 ): VercelResponse {
   if (!(error instanceof Error)) {

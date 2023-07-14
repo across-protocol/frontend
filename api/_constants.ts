@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { constants, relayFeeCalculator } from "@across-protocol/sdk-v2";
+import { constants, relayFeeCalculator, utils } from "@across-protocol/sdk-v2";
 
 export const maxRelayFeePct = 0.25;
 
@@ -101,3 +101,39 @@ export const BLOCK_TAG_LAG = -1;
 // Note: this is a small subset of all the supported base currencies, but since we don't expect to use the others,
 // we've decided to keep this list small for now.
 export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
+
+export const SPOKE_POOLS = {
+  [constants.CHAIN_IDs.MAINNET]: {
+    address: "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+    deploymentBlock: 17117454,
+  },
+  [constants.CHAIN_IDs.OPTIMISM]: {
+    address: "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
+    deploymentBlock: 93903076,
+  },
+  [constants.CHAIN_IDs.POLYGON]: {
+    address: "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
+    deploymentBlock: 41908657,
+  },
+  [constants.CHAIN_IDs.ARBITRUM]: {
+    address: "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+    deploymentBlock: 83868041,
+  },
+  [constants.CHAIN_IDs.BOBA]: {
+    address: "0xBbc6009fEfFc27ce705322832Cb2068F8C1e0A58",
+    deploymentBlock: 619993,
+  },
+  // testnets
+  [constants.CHAIN_IDs.GOERLI]: {
+    address: "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
+    deploymentBlock: 8824778,
+  },
+  [constants.CHAIN_IDs.ARBITRUM_GOERLI]: {
+    address: "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+    deploymentBlock: 16711734,
+  },
+};
+
+export const CONFIG_STORE_VERSION = Number(
+  process.env.CONFIG_STORE_VERSION || utils.UBA_MIN_CONFIG_STORE_VERSION
+);

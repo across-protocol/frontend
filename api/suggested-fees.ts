@@ -1,6 +1,3 @@
-// Note: ideally this would be written in ts as vercel claims they support it natively.
-// However, when written in ts, the imports seem to fail, so this is in js for now.
-
 import * as sdk from "@across-protocol/sdk-v2";
 import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
