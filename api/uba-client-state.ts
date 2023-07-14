@@ -28,7 +28,7 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
 
   try {
     const l1Provider = infuraProvider(HUB_POOL_CHAIN_ID);
-    const blockFinder = new BlockFinder(l1Provider.getBlock);
+    const blockFinder = new BlockFinder(l1Provider.getBlock.bind(l1Provider));
     const [l1EventSearchFromBlock, l1LatestBlock] = await Promise.all([
       blockFinder.getBlockForTimestamp(
         Date.now() - L1_EVENT_SEARCH_FROM_BLOCK_OFFSET
@@ -45,6 +45,7 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
       CONFIG_STORE_VERSION,
       SUPPORTED_CHAIN_IDS
     );
+    await configStoreClient.update();
 
     const hubPoolClient = new clients.HubPoolClient(
       logger,
