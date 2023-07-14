@@ -50,6 +50,8 @@ export const DEFAULT_GAS_MARKUP = 0;
 
 // Don't permit HUB_POOL_CHAIN_ID=0
 export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
+export const HUB_POOL_DEPLOYMENT_BLOCK =
+  HUB_POOL_CHAIN_ID === 1 ? 14819537 : 7370152;
 
 // Permit REACT_APP_FLAT_RELAY_CAPITAL_FEE=0
 export const FLAT_RELAY_CAPITAL_FEE = Number(
@@ -92,7 +94,6 @@ export const SUPPORTED_CHAIN_IDS =
     ? [
         sdk.constants.CHAIN_IDs.MAINNET,
         sdk.constants.CHAIN_IDs.ARBITRUM,
-        sdk.constants.CHAIN_IDs.BOBA,
         sdk.constants.CHAIN_IDs.OPTIMISM,
         sdk.constants.CHAIN_IDs.POLYGON,
       ]
@@ -186,7 +187,7 @@ export const getWinstonLogger = () => {
 
   const transports = [
     new winston.transports.Console({
-      level: "info",
+      level: "debug",
     }),
     isGoogleServiceAccountSet
       ? new LoggingWinston({

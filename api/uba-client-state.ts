@@ -6,18 +6,19 @@ import {
   handleErrorCondition,
   ENABLED_TOKEN_SYMBOLS,
   HUB_POOL_CHAIN_ID,
+  HUB_POOL_DEPLOYMENT_BLOCK,
   SUPPORTED_CHAIN_IDS,
   getWinstonLogger,
   getAcrossConfigStore,
   getHubPool,
   getSpokePool,
-  infuraProvider,
+  getProvider,
   relayFeeCalculatorConfig,
 } from "./_utils";
 import { SPOKE_POOLS, CONFIG_STORE_VERSION } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 
-const L1_EVENT_SEARCH_FROM_BLOCK_OFFSET = 24 * 60 * 60 * 1000; // 24 hours
+const L1_EVENT_SEARCH_FROM_BLOCK_MS_OFFSET = 24 * 60 * 60 * 1000; // 24 hours
 
 const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
   const logger = getWinstonLogger();
@@ -27,11 +28,11 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
   });
 
   try {
-    const l1Provider = infuraProvider(HUB_POOL_CHAIN_ID);
+    const l1Provider = getProvider(HUB_POOL_CHAIN_ID);
     const blockFinder = new BlockFinder(l1Provider.getBlock.bind(l1Provider));
     const [l1EventSearchFromBlock, l1LatestBlock] = await Promise.all([
       blockFinder.getBlockForTimestamp(
-        Date.now() - L1_EVENT_SEARCH_FROM_BLOCK_OFFSET
+        Math.round((Date.now() - L1_EVENT_SEARCH_FROM_BLOCK_MS_OFFSET) / 1000)
       ),
       l1Provider.getBlock("latest"),
     ]);
@@ -40,7 +41,7 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
       logger,
       getAcrossConfigStore(),
       {
-        fromBlock: l1EventSearchFromBlock.number,
+        fromBlock: 0,
       },
       CONFIG_STORE_VERSION,
       SUPPORTED_CHAIN_IDS
@@ -50,7 +51,12 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
     const hubPoolClient = new clients.HubPoolClient(
       logger,
       getHubPool(),
-      configStoreClient
+      configStoreClient,
+      HUB_POOL_DEPLOYMENT_BLOCK,
+      HUB_POOL_CHAIN_ID,
+      {
+        fromBlock: l1EventSearchFromBlock.number,
+      }
     );
 
     const spokePoolClientsMap = SUPPORTED_CHAIN_IDS.reduce((acc, chainId) => {
@@ -61,7 +67,10 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
           getSpokePool(chainId),
           hubPoolClient,
           chainId,
-          SPOKE_POOLS[chainId].deploymentBlock
+          SPOKE_POOLS[chainId].deploymentBlock,
+          {
+            fromBlock: l1EventSearchFromBlock.number,
+          }
         ),
       };
     }, {});
