@@ -18,7 +18,7 @@ import {
 import { SPOKE_POOLS, CONFIG_STORE_VERSION } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 
-const L1_EVENT_SEARCH_FROM_BLOCK_MS_OFFSET = 24 * 60 * 60 * 1000; // 24 hours
+const SPOKE_POOL_FROM_BLOCK_MS_OFFSET = 24 * 60 * 60 * 1000; // 24 hours
 
 const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
   const logger = getWinstonLogger();
@@ -29,19 +29,34 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
 
   try {
     const l1Provider = getProvider(HUB_POOL_CHAIN_ID);
-    const blockFinder = new BlockFinder(l1Provider.getBlock.bind(l1Provider));
-    const [l1EventSearchFromBlock, l1LatestBlock] = await Promise.all([
-      blockFinder.getBlockForTimestamp(
-        Math.round((Date.now() - L1_EVENT_SEARCH_FROM_BLOCK_MS_OFFSET) / 1000)
-      ),
-      l1Provider.getBlock("latest"),
-    ]);
+    const l1LatestBlock = await l1Provider.getBlock("latest");
+
+    const blockFinders: Record<
+      string,
+      BlockFinder<{ timestamp: number; number: number }>
+    > = SUPPORTED_CHAIN_IDS.reduce((acc, chainId) => {
+      const provider = getProvider(chainId);
+      return {
+        ...acc,
+        [chainId]: new BlockFinder(provider.getBlock.bind(provider)),
+      };
+    }, {});
+    const spokePoolFromBlocks = await Promise.all(
+      SUPPORTED_CHAIN_IDS.map(async (chainId) => {
+        const blockFinder = blockFinders[chainId];
+        const spokePoolDeploymentBlock = await blockFinder.getBlockForTimestamp(
+          Math.round((Date.now() - SPOKE_POOL_FROM_BLOCK_MS_OFFSET) / 1000)
+        );
+        return spokePoolDeploymentBlock.number;
+      })
+    );
 
     const configStoreClient = new clients.AcrossConfigStoreClient(
       logger,
       getAcrossConfigStore(),
       {
-        fromBlock: 0,
+        fromBlock: HUB_POOL_DEPLOYMENT_BLOCK,
+        maxBlockLookBack: 10_000,
       },
       CONFIG_STORE_VERSION,
       SUPPORTED_CHAIN_IDS
@@ -55,31 +70,36 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
       HUB_POOL_DEPLOYMENT_BLOCK,
       HUB_POOL_CHAIN_ID,
       {
-        fromBlock: l1EventSearchFromBlock.number,
+        fromBlock: HUB_POOL_DEPLOYMENT_BLOCK,
+        maxBlockLookBack: 10_000,
       }
     );
 
-    const spokePoolClientsMap = SUPPORTED_CHAIN_IDS.reduce((acc, chainId) => {
-      return {
-        ...acc,
-        [chainId]: new clients.SpokePoolClient(
-          logger,
-          getSpokePool(chainId),
-          hubPoolClient,
-          chainId,
-          SPOKE_POOLS[chainId].deploymentBlock,
-          {
-            fromBlock: l1EventSearchFromBlock.number,
-          }
-        ),
-      };
-    }, {});
+    const spokePoolClientsMap = SUPPORTED_CHAIN_IDS.reduce(
+      (acc, chainId, i) => {
+        return {
+          ...acc,
+          [chainId]: new clients.SpokePoolClient(
+            logger,
+            getSpokePool(chainId),
+            hubPoolClient,
+            chainId,
+            SPOKE_POOLS[chainId].deploymentBlock,
+            {
+              fromBlock: spokePoolFromBlocks[i],
+              maxBlockLookBack: 10_000,
+            }
+          ),
+        };
+      },
+      {}
+    );
 
     const ubaState = await clients.updateUBAClient(
       hubPoolClient,
       spokePoolClientsMap,
       SUPPORTED_CHAIN_IDS,
-      ENABLED_TOKEN_SYMBOLS,
+      ENABLED_TOKEN_SYMBOLS.filter((symbol) => symbol !== "ETH"),
       l1LatestBlock.number,
       true,
       relayFeeCalculatorConfig,
