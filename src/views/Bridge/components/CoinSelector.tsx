@@ -296,10 +296,12 @@ const CoinSelector = ({
               r.fromTokenSymbol === t.symbol
           ),
           disabledTooltip: {
-            title: "Asset not supported.",
-            description: `${t.symbol.toUpperCase()} is not supported on ${
+            title: "Asset not supported on route.",
+            description: `${t.symbol.toUpperCase()} is not supported on route ${
               getChainInfo(fromChain).name
-            }. Pick a different asset or change the destination chain.`,
+            } -> ${
+              getChainInfo(toChain).name
+            }. Pick a different asset or change the route.`,
           },
           element: (
             <CoinIconTextWrapper>
