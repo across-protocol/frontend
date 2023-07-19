@@ -137,3 +137,5 @@ export const SPOKE_POOLS = {
 export const CONFIG_STORE_VERSION = Number(
   process.env.CONFIG_STORE_VERSION || utils.UBA_MIN_CONFIG_STORE_VERSION
 );
+
+export const REDIS_LATEST_UBA_CLIENTS_STATE_KEY = "latestUBAClientState";

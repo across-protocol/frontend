@@ -15,6 +15,7 @@ import { Log, Logging } from "@google-cloud/logging";
 import winston from "winston";
 import { LoggingWinston } from "@google-cloud/logging-winston";
 import { define, StructError } from "superstruct";
+import { createClient } from "redis";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
@@ -45,6 +46,7 @@ const {
   VERCEL_ENV,
   GAS_MARKUP,
   DISABLE_DEBUG_LOGS,
+  REDIS_URL,
 } = process.env;
 
 const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
@@ -1019,4 +1021,13 @@ export function getFallbackTokenLogoURI(l1TokenAddress: string) {
   }
 
   return `https://github.com/trustwallet/assets/blob/master/blockchains/ethereum/assets/${l1TokenAddress}/logo.png?raw=true`;
+}
+
+export function getRedisClient() {
+  if (!REDIS_URL) {
+    throw new Error("REDIS_URL env var not set");
+  }
+  return createClient({
+    url: REDIS_URL,
+  });
 }

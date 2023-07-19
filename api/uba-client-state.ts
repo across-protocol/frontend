@@ -1,22 +1,15 @@
 import { VercelResponse } from "@vercel/node";
-import { clients } from "@across-protocol/sdk-v2";
-import { object, assert, Infer, optional } from "superstruct";
+import { object, Infer } from "superstruct";
 
 import {
   handleErrorCondition,
-  ENABLED_TOKEN_SYMBOLS,
-  SUPPORTED_CHAIN_IDS,
   getWinstonLogger,
-  validTokenSymbol,
-  getHubAndSpokeClients,
+  getRedisClient,
 } from "./_utils";
+import { REDIS_LATEST_UBA_CLIENTS_STATE_KEY } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 
-const SPOKE_POOL_FROM_BLOCK_MS_OFFSET = 24 * 60 * 60 * 1000; // 24 hours
-
-const UBAClientStateQueryParamsSchema = object({
-  tokenSymbol: optional(validTokenSymbol()),
-});
+const UBAClientStateQueryParamsSchema = object({});
 
 type AvailableRoutesQueryParams = Infer<typeof UBAClientStateQueryParamsSchema>;
 
@@ -32,39 +25,18 @@ const handler = async (
   });
 
   try {
-    assert(query, UBAClientStateQueryParamsSchema);
-    const { tokenSymbol } = query;
-    const tokenSymbolUpper = tokenSymbol?.toUpperCase();
-    const tokenSymbols = tokenSymbolUpper
-      ? [tokenSymbolUpper === "ETH" ? "WETH" : tokenSymbolUpper]
-      : ENABLED_TOKEN_SYMBOLS;
+    const redisClient = getRedisClient();
+    await redisClient.connect();
 
-    const { hubPoolClient, spokePoolClientsMap } = await getHubAndSpokeClients(
-      logger,
-      SPOKE_POOL_FROM_BLOCK_MS_OFFSET,
-      // These provider options are used to make many concurrent RPC requests to our provider
-      // more reliable. If we use, for example, a single cached provider instance of `StaticJsonRpcProvider`,
-      // we can run into issues where the RPC requests fail randomly for multiple concurrent requests and
-      // connections.
-      // Using multiple instances of `JsonRpcBatchProvider` instead makes the RPC requests more reliable.
-      {
-        useBatch: true,
-        useUncached: true,
-      }
+    const latestUBAClientState = await redisClient.get(
+      REDIS_LATEST_UBA_CLIENTS_STATE_KEY
     );
-    await hubPoolClient.configStoreClient.update();
 
-    const ubaClientState = await clients.updateUBAClient(
-      hubPoolClient,
-      spokePoolClientsMap,
-      SUPPORTED_CHAIN_IDS,
-      tokenSymbols.filter((symbol) => symbol !== "ETH"),
-      true,
-      1
-    );
-    const serializedUBAState = JSON.parse(
-      clients.serializeUBAClientState(ubaClientState)
-    );
+    if (!latestUBAClientState) {
+      throw new Error("No UBA client state found in Redis");
+    }
+
+    const serializedUBAState = JSON.parse(latestUBAClientState);
 
     // Explanation on how `s-maxage` and `stale-while-revalidate` work together:
     //
