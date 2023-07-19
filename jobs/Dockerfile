@@ -1,7 +1,7 @@
 FROM node:18
 WORKDIR /app
-COPY ../package.json .
-COPY ../yarn.lock .
+COPY /workspace/build/package.json .
+COPY /workspace/build/yarn.lock .
 RUN yarn install
 COPY ../ .
 RUN yarn build:jobs
