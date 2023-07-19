@@ -44,6 +44,7 @@
     "react-router-sitemap": "^1.2.0",
     "react-slider": "^2.0.4",
     "react-tooltip": "^5.18.0",
+    "redis": "^4.6.7",
     "superstruct": "^0.15.4",
     "typescript": "^4.1.2"
   },
@@ -68,7 +69,9 @@
     "build-storybook": "build-storybook -s public",
     "chromatic": "chromatic --exit-zero-on-changes",
     "ampli:pull": "ampli pull --path=./src/ampli --omit-api-keys web && prettier -w ./src/ampli/*.ts",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "build:jobs": "rm -rf jobs/dist && tsc -p jobs/tsconfig.json",
+    "start:jobs:uba-state": "node jobs/dist/jobs/store-uba-client-state.js"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": "yarn lint:fix"

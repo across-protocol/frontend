@@ -42,3 +42,5 @@ build-storybook.log
 
 # Amplitude
 ampli.json
+
+dist
