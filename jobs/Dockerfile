@@ -1,6 +1,6 @@
 FROM node:18
 WORKDIR /workspace
-COPY /workspace .
+COPY . /workspace
 
 RUN yarn install
 
