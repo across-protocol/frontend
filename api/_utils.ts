@@ -9,6 +9,7 @@ import {
 } from "@across-protocol/contracts-v2/dist/typechain";
 import axios from "axios";
 import * as sdk from "@across-protocol/sdk-v2";
+import { BlockFinder } from "@uma/sdk";
 import { BigNumber, ethers, providers, utils } from "ethers";
 import { Log, Logging } from "@google-cloud/logging";
 import winston from "winston";
@@ -19,16 +20,22 @@ import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
 
 import {
+  CONFIG_STORE_VERSION,
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
   SPOKE_POOLS,
 } from "./_constants";
 
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
+import {
+  StaticJsonRpcProvider,
+  JsonRpcBatchProvider,
+} from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
 import { VercelResponse } from "@vercel/node";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
+
+type GetProviderOpts = Partial<{ useBatch?: boolean; useUncached?: boolean }>;
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -52,6 +59,9 @@ export const DEFAULT_GAS_MARKUP = 0;
 export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
 export const HUB_POOL_DEPLOYMENT_BLOCK =
   HUB_POOL_CHAIN_ID === 1 ? 14819537 : 7370152;
+
+export const CONFIG_STORE_DEPLOYMENT_BLOCK =
+  HUB_POOL_CHAIN_ID === 1 ? 14717196 : 14717196;
 
 // Permit REACT_APP_FLAT_RELAY_CAPITAL_FEE=0
 export const FLAT_RELAY_CAPITAL_FEE = Number(
@@ -222,7 +232,7 @@ export const resolveVercelEndpoint = () => {
       return `https://${url}`;
     case "development":
     default:
-      return `http://localhost:3000`;
+      return `http://127.0.0.1:3000`;
   }
 };
 
@@ -261,11 +271,14 @@ export const getTokenDetails = async (
 
   const event = events[0];
 
+  const tokenSymbol = getTokenSymbol(event.args.l1Token);
+
   return {
     hubPool,
     chainId: event.args.destinationChainId.toNumber(),
     l1Token: event.args.l1Token,
     l2Token: event.args.destinationToken,
+    tokenSymbol: tokenSymbol === "ETH" ? "WETH" : tokenSymbol,
   };
 };
 
@@ -274,26 +287,34 @@ export class InputError extends Error {}
 /**
  * Resolves an Infura provider given the name of the ETH network
  * @param nameOrChainId The name of an ethereum network
+ * @param useBatch An optional boolean to use a `JsonRpcBatchProvider`.
  * @returns A valid Ethers RPC provider
  */
-export const infuraProvider = (nameOrChainId: providers.Networkish) => {
+export const infuraProvider = (
+  nameOrChainId: providers.Networkish,
+  useBatch?: boolean
+) => {
   const url = new ethers.providers.InfuraProvider(
     nameOrChainId,
     REACT_APP_PUBLIC_INFURA_ID
   ).connection.url;
-  return new ethers.providers.StaticJsonRpcProvider(url);
+  return useBatch
+    ? new ethers.providers.JsonRpcBatchProvider(url)
+    : new ethers.providers.StaticJsonRpcProvider(url);
 };
 
 /**
  * Resolves a fixed Static RPC provider if an override url has been specified.
+ * @param chainId The chain id to resolve a provider for.
+ * @param useBatch An optional boolean to use a `JsonRpcBatchProvider`.
  * @returns A provider or undefined if an override was not specified.
  */
-export const overrideProvider = (
-  chainId: string
-): providers.StaticJsonRpcProvider | undefined => {
+export const overrideProvider = (chainId: string, useBatch?: boolean) => {
   const url = process.env[`OVERRIDE_PROVIDER_${chainId}`];
   if (url) {
-    return new ethers.providers.StaticJsonRpcProvider(url);
+    return useBatch
+      ? new ethers.providers.JsonRpcBatchProvider(url)
+      : new ethers.providers.StaticJsonRpcProvider(url);
   } else {
     return undefined;
   }
@@ -473,6 +494,10 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
   );
 };
 
+export const getWeiPct = (numerator: BigNumber, denominator: BigNumber) => {
+  return numerator.mul(ethers.utils.parseEther("1")).div(denominator);
+};
+
 /**
  * Resolves a tokenAddress to a given textual symbol
  * @param tokenAddress The token address to convert into a symbol
@@ -534,34 +559,73 @@ export const getCachedTokenPrice = async (
   );
 };
 
+/**
+ * Creates an HTTP call to the `/api/uba-client-state` endpoint to resolve a cached
+ * UBA client state.
+ * @param tokenSymbol Optional token symbol to filter the cached state by.
+ * @returns The cached `UBAClientState`.
+ */
+export const getCachedUBAClientState = async (
+  tokenSymbol?: string
+): Promise<any> => {
+  return (
+    await axios(`${resolveVercelEndpoint()}/api/uba-client-state`, {
+      params: { tokenSymbol },
+    })
+  ).data;
+};
+
 export const providerCache: Record<string, StaticJsonRpcProvider> = {};
+export const batchProviderCache: Record<string, JsonRpcBatchProvider> = {};
 
 /**
  * Generates a relevant provider for the given input chainId
  * @param _chainId A valid chain identifier where an AcrossV2 contract is deployed
+ * @param opts.useBatch A boolean flag to determine if a `JsonRpcBatchProvider` should be used
+ * @param opts.useUncached A boolean flag to determine if a provider should be cached or not
  * @returns A provider object to query the requested blockchain
  */
-export const getProvider = (_chainId: number): providers.Provider => {
+export const getProvider = (
+  _chainId: number,
+  opts: GetProviderOpts = {}
+): providers.Provider => {
   const chainId = _chainId.toString();
-  if (!providerCache[chainId]) {
+
+  if (opts.useUncached) {
+    return (
+      overrideProvider(chainId, opts.useBatch) ||
+      infuraProvider(_chainId, opts.useBatch)
+    );
+  }
+
+  const cacheToUse = opts.useBatch ? batchProviderCache : providerCache;
+  if (!cacheToUse[chainId]) {
     const override = overrideProvider(chainId);
     if (override) {
-      providerCache[chainId] = override;
+      cacheToUse[chainId] = override;
     } else {
-      providerCache[chainId] = providerForChain[_chainId];
+      cacheToUse[chainId] = providerForChain[_chainId];
     }
   }
-  return providerCache[chainId];
+  return cacheToUse[chainId];
 };
 
 /**
  * Generates a relevant SpokePool given the input chain ID
  * @param _chainId A valid chain Id that corresponds to an available AcrossV2 Spoke Pool
+ * @param providerOpts.useUncached A boolean flag to determine if a provider should be cached or not
+ * @param providerOpts.useBatch A boolean flag to determine if a `JsonRpcBatchProvider` should be used
  * @returns The corresponding SpokePool for the given `_chainId`
  */
-export const getSpokePool = (_chainId: number): SpokePool => {
+export const getSpokePool = (
+  _chainId: number,
+  providerOpts?: GetProviderOpts
+): SpokePool => {
   const spokePoolAddress = getSpokePoolAddress(_chainId);
-  return SpokePool__factory.connect(spokePoolAddress, getProvider(_chainId));
+  return SpokePool__factory.connect(
+    spokePoolAddress,
+    getProvider(_chainId, providerOpts)
+  );
 };
 
 export const getSpokePoolAddress = (_chainId: number): string => {
@@ -572,20 +636,125 @@ export const getSpokePoolAddress = (_chainId: number): string => {
   return SPOKE_POOLS[_chainId].address;
 };
 
-export const getAcrossConfigStore = (): AcrossConfigStore => {
+export const getAcrossConfigStore = (
+  providerOpts?: GetProviderOpts
+): AcrossConfigStore => {
   const acrossConfigStoreAddress = ENABLED_ROUTES.acrossConfigStoreAddress;
   return AcrossConfigStore__factory.connect(
     acrossConfigStoreAddress,
-    getProvider(HUB_POOL_CHAIN_ID)
+    getProvider(HUB_POOL_CHAIN_ID, providerOpts)
   );
 };
 
-export const getHubPool = (): HubPool => {
+export const getHubPool = (providerOpts?: GetProviderOpts): HubPool => {
   const hubPoolAddress = ENABLED_ROUTES.hubPoolAddress;
   return HubPool__factory.connect(
     hubPoolAddress,
-    getProvider(HUB_POOL_CHAIN_ID)
+    getProvider(HUB_POOL_CHAIN_ID, providerOpts)
   );
+};
+
+export const getBlockFinders = (
+  chainIds: number[],
+  providerOpts?: GetProviderOpts
+) => {
+  const blockFinders: Record<
+    string,
+    BlockFinder<{ timestamp: number; number: number }>
+  > = chainIds.reduce((acc, chainId) => {
+    const provider = getProvider(chainId, providerOpts);
+    return {
+      ...acc,
+      [chainId]: new BlockFinder(provider.getBlock.bind(provider)),
+    };
+  }, {});
+  return blockFinders;
+};
+
+export const getFromBlocksWithOffset = async (
+  chainIds: number[],
+  fromBlockOffsetMS: number
+) => {
+  const blockFinders = getBlockFinders(chainIds);
+  const fromBlocks = await Promise.all(
+    chainIds.map(async (chainId) => {
+      const blockFinder = blockFinders[chainId];
+      const fromBlock = await blockFinder.getBlockForTimestamp(
+        Math.round((Date.now() - fromBlockOffsetMS) / 1000)
+      );
+      return fromBlock.number;
+    })
+  );
+  return fromBlocks.reduce((acc, fromBlock, i) => {
+    return {
+      ...acc,
+      [chainIds[i]]: {
+        fromBlock,
+        blockFinder: blockFinders[chainIds[i]],
+      },
+    };
+  }, {}) as Record<
+    string,
+    {
+      fromBlock: number;
+      blockFinder: BlockFinder<{ timestamp: number; number: number }>;
+    }
+  >;
+};
+
+export const getHubAndSpokeClients = async (
+  logger: winston.Logger,
+  spokePoolFromBlockOffsetMS: number,
+  providerOpts?: GetProviderOpts
+) => {
+  const configStoreClient = new sdk.clients.AcrossConfigStoreClient(
+    logger,
+    getAcrossConfigStore(providerOpts),
+    {
+      fromBlock: CONFIG_STORE_DEPLOYMENT_BLOCK,
+      maxBlockLookBack: 20_000,
+    },
+    CONFIG_STORE_VERSION,
+    SUPPORTED_CHAIN_IDS
+  );
+
+  const hubPoolClient = new sdk.clients.HubPoolClient(
+    logger,
+    getHubPool(providerOpts),
+    configStoreClient,
+    HUB_POOL_DEPLOYMENT_BLOCK,
+    HUB_POOL_CHAIN_ID,
+    {
+      fromBlock: HUB_POOL_DEPLOYMENT_BLOCK,
+      maxBlockLookBack: 20_000,
+    }
+  );
+
+  const spokePoolFromBlocks = await getFromBlocksWithOffset(
+    SUPPORTED_CHAIN_IDS,
+    spokePoolFromBlockOffsetMS
+  );
+  const spokePoolClientsMap = SUPPORTED_CHAIN_IDS.reduce((acc, chainId, i) => {
+    return {
+      ...acc,
+      [chainId]: new sdk.clients.SpokePoolClient(
+        logger,
+        getSpokePool(chainId, providerOpts),
+        hubPoolClient,
+        chainId,
+        SPOKE_POOLS[chainId].deploymentBlock,
+        {
+          fromBlock: spokePoolFromBlocks[chainId].fromBlock,
+          maxBlockLookBack: 10_000,
+        }
+      ),
+    };
+  }, {});
+
+  return {
+    hubPoolClient,
+    spokePoolClientsMap,
+  };
 };
 
 /**
@@ -758,6 +927,12 @@ export function parsableBigNumberString() {
 export function validAddress() {
   return define<string>("validAddress", (value) =>
     utils.isAddress(value as string)
+  );
+}
+
+export function validTokenSymbol() {
+  return define<string>("validTokenSymbol", (value) =>
+    ENABLED_TOKEN_SYMBOLS.includes((value as string).toUpperCase())
   );
 }
 
