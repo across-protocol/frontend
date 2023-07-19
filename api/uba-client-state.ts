@@ -81,7 +81,7 @@ const handler = async (
     });
     response.setHeader(
       "Cache-Control",
-      "s-maxage=180, stale-while-revalidate=120"
+      "s-maxage=120, stale-while-revalidate=180"
     );
     response.status(200).json(serializedUBAState);
   } catch (error: unknown) {
