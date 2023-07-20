@@ -2,7 +2,7 @@ FROM node:18-alpine as builder
 
 RUN apk add --no-cache git openssh python3 make g++
 
-WORKDIR /app
+WORKDIR /workspace
 
 COPY ../package.json .
 COPY ../yarn.lock .
@@ -26,12 +26,12 @@ FROM node:18-alpine as runner
 
 ENV NODE_ENV=production
 
-WORKDIR /app
+WORKDIR /workspace
 
 COPY ../package.json .
 
 # Copy already built app and deps
-COPY --from=builder /app/jobs /app/jobs
-COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /workspace/jobs /workspace/jobs
+COPY --from=builder /workspace/node_modules /workspace/node_modules
 
 CMD ["yarn", "start:jobs:uba-state"]
