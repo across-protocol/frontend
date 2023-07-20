@@ -1,13 +1,14 @@
 steps:
   - name: "gcr.io/cloud-builders/docker"
+    dir: "jobs"
     args:
       [
         "build",
         "-t",
         "gcr.io/images-across-6363/frontend-v2-jobs",
         "-f",
-        "./jobs/Dockerfile",
-        ".",
+        "./Dockerfile",
+        "..",
       ]
 options:
   machineType: "E2_HIGHCPU_32"
