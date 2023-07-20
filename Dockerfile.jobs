@@ -34,4 +34,4 @@ COPY ./package.json .
 COPY --from=builder /workspace/jobs /workspace/jobs
 COPY --from=builder /workspace/node_modules /workspace/node_modules
 
-CMD ["yarn", "start:jobs:uba-state"]
+# CMD ["yarn", "start:jobs:uba-state"]
