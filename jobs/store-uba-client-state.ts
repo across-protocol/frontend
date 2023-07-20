@@ -62,12 +62,11 @@ async function main() {
     );
     const serializedUBAState = clients.serializeUBAClientState(ubaClientState);
 
-    logger.info("Connecting to Redis...");
+    logger.info("Storing state on redis...");
     const redisClient = createClient({
       url: process.env.REDIS_URL,
     });
     await redisClient.connect();
-    logger.info("Storing state on redis...");
     await redisClient.set(
       REDIS_LATEST_UBA_CLIENTS_STATE_KEY,
       serializedUBAState

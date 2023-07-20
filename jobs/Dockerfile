@@ -1,8 +1,37 @@
-FROM node:18
-WORKDIR /workspace
-COPY . /workspace
+FROM node:18-alpine as builder
 
-RUN yarn install
+RUN apk add --no-cache git openssh python3 make g++
 
+WORKDIR /app
+
+COPY ../package.json .
+COPY ../yarn.lock .
+
+# Install all deps
+RUN yarn --frozen-lockfile
+
+COPY ../ .
+
+# Build app
 RUN yarn build:jobs
+
+# Remove node_modules
+RUN rm -rf node_modules
+
+# Install only production deps
+RUN yarn install --prod --frozen-lockfile --ignore-scripts
+
+
+FROM node:18-alpine as runner
+
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+COPY ../package.json .
+
+# Copy already built app and deps
+COPY --from=builder /app/jobs /app/jobs
+COPY --from=builder /app/node_modules /app/node_modules
+
 CMD ["yarn", "start:jobs:uba-state"]
