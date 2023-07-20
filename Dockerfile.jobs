@@ -4,13 +4,13 @@ RUN apk add --no-cache git openssh python3 make g++
 
 WORKDIR /workspace
 
-COPY ../package.json .
-COPY ../yarn.lock .
+COPY ./package.json .
+COPY ./yarn.lock .
 
 # Install all deps
 RUN yarn --frozen-lockfile
 
-COPY ../ .
+COPY . .
 
 # Build app
 RUN yarn build:jobs
@@ -28,7 +28,7 @@ ENV NODE_ENV=production
 
 WORKDIR /workspace
 
-COPY ../package.json .
+COPY ./package.json .
 
 # Copy already built app and deps
 COPY --from=builder /workspace/jobs /workspace/jobs
