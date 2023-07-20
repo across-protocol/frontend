@@ -6,7 +6,7 @@ steps:
         "-t",
         "gcr.io/images-across-6363/frontend-v2-jobs",
         "-f",
-        "jobs/Dockerfile",
+        "./jobs/Dockerfile",
         ".",
       ]
 options:
