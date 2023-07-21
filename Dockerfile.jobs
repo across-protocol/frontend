@@ -20,7 +20,7 @@ RUN yarn build:jobs
 RUN rm -rf node_modules
 
 # Install only production deps
-RUN yarn install --prod --frozen-lockfile --ignore-scripts
+RUN yarn install --prod --frozen-lockfile
 
 
 FROM node:18-alpine as runner
