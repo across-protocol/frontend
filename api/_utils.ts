@@ -15,7 +15,7 @@ import { Log, Logging } from "@google-cloud/logging";
 import winston from "winston";
 import { LoggingWinston } from "@google-cloud/logging-winston";
 import { define, StructError } from "superstruct";
-import { createClient } from "@vercel/kv";
+import { createClient } from "redis";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
@@ -53,9 +53,6 @@ const {
   VERCEL_ENV,
   GAS_MARKUP,
   DISABLE_DEBUG_LOGS,
-  KV_REST_API_URL,
-  KV_REST_API_TOKEN,
-  KV_REST_API_READ_ONLY_TOKEN,
 } = process.env;
 
 const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
@@ -588,20 +585,14 @@ export const getCachedUBAClientSubStates = async (
   tokenSymbol: string
 ) => {
   const client = createClient({
-    token: KV_REST_API_TOKEN!,
-    url: KV_REST_API_URL!,
+    url: process.env.REDIS_URL,
   });
-  console.log({
-    originChainId,
-    destinationChainId,
-    tokenSymbol,
-    KV_REST_API_TOKEN,
-    KV_REST_API_URL,
-  });
+  await client.connect();
   const subStates = await Promise.all([
     client.get(getUBAClientSubStateCacheKey(originChainId, tokenSymbol)),
     client.get(getUBAClientSubStateCacheKey(destinationChainId, tokenSymbol)),
   ]);
+  await client.disconnect();
   return subStates;
 };
 

@@ -1,7 +1,7 @@
 import { clients } from "@across-protocol/sdk-v2";
 import assert from "assert";
 import dotenv from "dotenv";
-import { createClient } from "@vercel/kv";
+import { createClient } from "redis";
 
 import {
   ENABLED_TOKEN_SYMBOLS,
@@ -26,16 +26,12 @@ async function main() {
 
   try {
     // Required user-defined env vars
-    const { REACT_APP_PUBLIC_INFURA_ID, KV_REST_API_TOKEN, KV_REST_API_URL } =
-      process.env;
+    const { REACT_APP_PUBLIC_INFURA_ID, REDIS_URL } = process.env;
     assert(
       Boolean(REACT_APP_PUBLIC_INFURA_ID),
       "Missing env var: REACT_APP_PUBLIC_INFURA_ID"
     );
-    assert(
-      Boolean(KV_REST_API_TOKEN) && Boolean(KV_REST_API_URL),
-      "Missing env vars: KV_REST_API_TOKEN and/or KV_REST_API_URL"
-    );
+    assert(Boolean(REDIS_URL), "Missing env var: REDIS_URL");
 
     // Optional user-defined env vars
     const SPOKE_POOL_FROM_BLOCK_MS_OFFSET = Number(
@@ -124,9 +120,9 @@ async function main() {
 
     logger.info("Storing sub states on redis...");
     const redisClient = createClient({
-      token: KV_REST_API_TOKEN!,
-      url: KV_REST_API_URL!,
+      url: REDIS_URL,
     });
+    await redisClient.connect();
     for (const chainTokenCombi in subStates) {
       const [chainId, tokenSymbol] = chainTokenCombi.split("-");
       await redisClient.set(
@@ -134,6 +130,7 @@ async function main() {
         subStates[chainTokenCombi]
       );
     }
+    await redisClient.disconnect();
     logger.info("Stored.");
 
     return;

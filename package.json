@@ -17,7 +17,6 @@
     "@reach/dialog": "^0.16.2",
     "@sentry/react": "^7.37.2",
     "@uma/sdk": "^0.22.2",
-    "@vercel/kv": "^0.2.2",
     "@web3-onboard/coinbase": "^2.2.4",
     "@web3-onboard/core": "^2.20.4",
     "@web3-onboard/gnosis": "^2.1.10",
@@ -47,6 +46,7 @@
     "react-router-sitemap": "^1.2.0",
     "react-slider": "^2.0.4",
     "react-tooltip": "^5.18.0",
+    "redis": "^4.6.7",
     "superstruct": "^0.15.4",
     "typescript": "^4.1.2"
   },
