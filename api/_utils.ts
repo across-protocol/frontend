@@ -15,7 +15,7 @@ import { Log, Logging } from "@google-cloud/logging";
 import winston from "winston";
 import { LoggingWinston } from "@google-cloud/logging-winston";
 import { define, StructError } from "superstruct";
-import { createClient } from "redis";
+import { createClient } from "@vercel/kv";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
@@ -26,6 +26,7 @@ import {
   relayerFeeCapitalCostConfig,
   SPOKE_POOLS,
 } from "./_constants";
+import { RateLimitedBatchProvider } from "./_provider-utils";
 
 import {
   StaticJsonRpcProvider,
@@ -33,10 +34,16 @@ import {
 } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
 import { VercelResponse } from "@vercel/node";
+import { SpokePoolClient } from "@across-protocol/sdk-v2/dist/clients";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
-type GetProviderOpts = Partial<{ useBatch?: boolean; useUncached?: boolean }>;
+type GetProviderOpts = Partial<{
+  useBatch?: boolean;
+  useUncached?: boolean;
+  connectionInfo?: Omit<ethers.utils.ConnectionInfo, "url">;
+  maxConcurrency?: number;
+}>;
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -46,7 +53,9 @@ const {
   VERCEL_ENV,
   GAS_MARKUP,
   DISABLE_DEBUG_LOGS,
-  REDIS_URL,
+  KV_REST_API_URL,
+  KV_REST_API_TOKEN,
+  KV_REST_API_READ_ONLY_TOKEN,
 } = process.env;
 
 const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
@@ -63,7 +72,7 @@ export const HUB_POOL_DEPLOYMENT_BLOCK =
   HUB_POOL_CHAIN_ID === 1 ? 14819537 : 7370152;
 
 export const CONFIG_STORE_DEPLOYMENT_BLOCK =
-  HUB_POOL_CHAIN_ID === 1 ? 14717196 : 14717196;
+  HUB_POOL_CHAIN_ID === 1 ? 14717196 : 8824980;
 
 // Permit REACT_APP_FLAT_RELAY_CAPITAL_FEE=0
 export const FLAT_RELAY_CAPITAL_FEE = Number(
@@ -103,12 +112,7 @@ export const ENABLED_TOKEN_SYMBOLS = Array.from(
 // Complete set of chain IDs ever supported by the HubPool
 export const SUPPORTED_CHAIN_IDS =
   HUB_POOL_CHAIN_ID === 1
-    ? [
-        sdk.constants.CHAIN_IDs.MAINNET,
-        sdk.constants.CHAIN_IDs.ARBITRUM,
-        sdk.constants.CHAIN_IDs.OPTIMISM,
-        sdk.constants.CHAIN_IDs.POLYGON,
-      ]
+    ? sdk.constants.CHAIN_ID_LIST_INDICES
     : [sdk.constants.CHAIN_IDs.GOERLI, sdk.constants.CHAIN_IDs.ARBITRUM_GOERLI];
 
 /**
@@ -294,15 +298,19 @@ export class InputError extends Error {}
  */
 export const infuraProvider = (
   nameOrChainId: providers.Networkish,
-  useBatch?: boolean
+  opts: GetProviderOpts = {}
 ) => {
   const url = new ethers.providers.InfuraProvider(
     nameOrChainId,
     REACT_APP_PUBLIC_INFURA_ID
   ).connection.url;
-  return useBatch
-    ? new ethers.providers.JsonRpcBatchProvider(url)
-    : new ethers.providers.StaticJsonRpcProvider(url);
+  const providerArgs = {
+    url,
+    ...opts.connectionInfo,
+  };
+  return opts.useBatch
+    ? new RateLimitedBatchProvider(opts.maxConcurrency || 200, providerArgs)
+    : new ethers.providers.StaticJsonRpcProvider(providerArgs);
 };
 
 /**
@@ -311,12 +319,19 @@ export const infuraProvider = (
  * @param useBatch An optional boolean to use a `JsonRpcBatchProvider`.
  * @returns A provider or undefined if an override was not specified.
  */
-export const overrideProvider = (chainId: string, useBatch?: boolean) => {
+export const overrideProvider = (
+  chainId: string,
+  opts: GetProviderOpts = {}
+) => {
   const url = process.env[`OVERRIDE_PROVIDER_${chainId}`];
   if (url) {
-    return useBatch
-      ? new ethers.providers.JsonRpcBatchProvider(url)
-      : new ethers.providers.StaticJsonRpcProvider(url);
+    const providerArgs = {
+      url,
+      ...opts.connectionInfo,
+    };
+    return opts.useBatch
+      ? new RateLimitedBatchProvider(opts.maxConcurrency || 200, providerArgs)
+      : new ethers.providers.StaticJsonRpcProvider(providerArgs);
   } else {
     return undefined;
   }
@@ -567,14 +582,27 @@ export const getCachedTokenPrice = async (
  * @param tokenSymbol Optional token symbol to filter the cached state by.
  * @returns The cached `UBAClientState`.
  */
-export const getCachedUBAClientState = async (
-  tokenSymbol?: string
-): Promise<any> => {
-  return (
-    await axios(`${resolveVercelEndpoint()}/api/uba-client-state`, {
-      params: { tokenSymbol },
-    })
-  ).data;
+export const getCachedUBAClientSubStates = async (
+  originChainId: number,
+  destinationChainId: number,
+  tokenSymbol: string
+) => {
+  const client = createClient({
+    token: KV_REST_API_TOKEN!,
+    url: KV_REST_API_URL!,
+  });
+  console.log({
+    originChainId,
+    destinationChainId,
+    tokenSymbol,
+    KV_REST_API_TOKEN,
+    KV_REST_API_URL,
+  });
+  const subStates = await Promise.all([
+    client.get(getUBAClientSubStateCacheKey(originChainId, tokenSymbol)),
+    client.get(getUBAClientSubStateCacheKey(destinationChainId, tokenSymbol)),
+  ]);
+  return subStates;
 };
 
 export const providerCache: Record<string, StaticJsonRpcProvider> = {};
@@ -593,16 +621,24 @@ export const getProvider = (
 ): providers.Provider => {
   const chainId = _chainId.toString();
 
+  const connectionInfo = {
+    // defaults
+    timeout: 240_000,
+    throttleLimit: 5,
+    retryLimit: 5,
+    allowGzip: true,
+    // optional overrides
+    ...opts.connectionInfo,
+  };
+  opts.connectionInfo = connectionInfo;
+
   if (opts.useUncached) {
-    return (
-      overrideProvider(chainId, opts.useBatch) ||
-      infuraProvider(_chainId, opts.useBatch)
-    );
+    return overrideProvider(chainId, opts) || infuraProvider(_chainId, opts);
   }
 
   const cacheToUse = opts.useBatch ? batchProviderCache : providerCache;
   if (!cacheToUse[chainId]) {
-    const override = overrideProvider(chainId);
+    const override = overrideProvider(chainId, opts);
     if (override) {
       cacheToUse[chainId] = override;
     } else {
@@ -707,6 +743,7 @@ export const getFromBlocksWithOffset = async (
 export const getHubAndSpokeClients = async (
   logger: winston.Logger,
   spokePoolFromBlockOffsetMS: number,
+  relevantSpokePoolChainIds: number[],
   providerOpts?: GetProviderOpts
 ) => {
   const configStoreClient = new sdk.clients.AcrossConfigStoreClient(
@@ -733,25 +770,26 @@ export const getHubAndSpokeClients = async (
   );
 
   const spokePoolFromBlocks = await getFromBlocksWithOffset(
-    SUPPORTED_CHAIN_IDS,
+    relevantSpokePoolChainIds,
     spokePoolFromBlockOffsetMS
   );
-  const spokePoolClientsMap = SUPPORTED_CHAIN_IDS.reduce((acc, chainId, i) => {
-    return {
-      ...acc,
-      [chainId]: new sdk.clients.SpokePoolClient(
-        logger,
-        getSpokePool(chainId, providerOpts),
-        hubPoolClient,
-        chainId,
-        SPOKE_POOLS[chainId].deploymentBlock,
-        {
-          fromBlock: spokePoolFromBlocks[chainId].fromBlock,
-          maxBlockLookBack: 10_000,
-        }
-      ),
-    };
-  }, {});
+  const spokePoolClientsMap: Record<string, SpokePoolClient> =
+    relevantSpokePoolChainIds.reduce((acc, chainId) => {
+      return {
+        ...acc,
+        [chainId]: new sdk.clients.SpokePoolClient(
+          logger,
+          getSpokePool(chainId, providerOpts),
+          hubPoolClient,
+          chainId,
+          SPOKE_POOLS[chainId].deploymentBlock,
+          {
+            fromBlock: spokePoolFromBlocks[chainId].fromBlock,
+            maxBlockLookBack: 10_000,
+          }
+        ),
+      };
+    }, {});
 
   return {
     hubPoolClient,
@@ -1023,11 +1061,25 @@ export function getFallbackTokenLogoURI(l1TokenAddress: string) {
   return `https://github.com/trustwallet/assets/blob/master/blockchains/ethereum/assets/${l1TokenAddress}/logo.png?raw=true`;
 }
 
-export function getRedisClient() {
-  if (!REDIS_URL) {
-    throw new Error("REDIS_URL env var not set");
-  }
-  return createClient({
-    url: REDIS_URL,
-  });
+export function delay(s: number): Promise<void> {
+  return new Promise<void>((resolve) =>
+    setTimeout(resolve, Math.round(s * 1000))
+  );
+}
+
+export async function logDuration(
+  task: () => Promise<void>,
+  logFn: (durationMS: number) => void
+) {
+  const start = Date.now();
+  await task();
+  const end = Date.now();
+  logFn(end - start);
+}
+
+export function getUBAClientSubStateCacheKey(
+  chainId: number,
+  tokenSymbol: string
+) {
+  return `uba-sub-state:${chainId}-${tokenSymbol.toLowerCase()}`;
 }

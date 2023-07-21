@@ -1,0 +1,15 @@
+diff --git a/node_modules/@across-protocol/sdk-v2/dist/sdk-v2.cjs.development.js b/node_modules/@across-protocol/sdk-v2/dist/sdk-v2.cjs.development.js
+index e8bb343..7f41a1b 100644
+--- a/node_modules/@across-protocol/sdk-v2/dist/sdk-v2.cjs.development.js
++++ b/node_modules/@across-protocol/sdk-v2/dist/sdk-v2.cjs.development.js
+@@ -2785,7 +2785,9 @@ function validateFillForDeposit(fill, deposit, fillFieldsToIgnore) {
+ // Lowest ConfigStore version where the UBA model is in effect.
+ var UBA_MIN_CONFIG_STORE_VERSION = 2;
+ function isUBA(version) {
+-  return version >= UBA_MIN_CONFIG_STORE_VERSION;
++  // NOTE: for testability return true
++  // return version >= UBA_MIN_CONFIG_STORE_VERSION;
++  return true
+ }
+ 
+ /**
