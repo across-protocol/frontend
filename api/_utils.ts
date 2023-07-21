@@ -53,9 +53,6 @@ const {
   VERCEL_ENV,
   GAS_MARKUP,
   DISABLE_DEBUG_LOGS,
-  KV_REST_API_URL,
-  KV_REST_API_TOKEN,
-  KV_REST_API_READ_ONLY_TOKEN,
 } = process.env;
 
 const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
@@ -587,16 +584,17 @@ export const getCachedUBAClientSubStates = async (
   destinationChainId: number,
   tokenSymbol: string
 ) => {
+  const { KV_REST_API_TOKEN, KV_REST_API_READ_ONLY_TOKEN, KV_REST_API_URL } =
+    process.env;
+  const token = KV_REST_API_READ_ONLY_TOKEN || KV_REST_API_TOKEN;
+
+  if (!token || !KV_REST_API_URL) {
+    throw new Error("Missing KV_REST_API_TOKEN or KV_REST_API_URL");
+  }
+
   const client = createClient({
-    token: KV_REST_API_TOKEN!,
-    url: KV_REST_API_URL!,
-  });
-  console.log({
-    originChainId,
-    destinationChainId,
-    tokenSymbol,
-    KV_REST_API_TOKEN,
-    KV_REST_API_URL,
+    token,
+    url: KV_REST_API_URL,
   });
   const subStates = await Promise.all([
     client.get(getUBAClientSubStateCacheKey(originChainId, tokenSymbol)),

@@ -50,7 +50,7 @@ async function main() {
       process.env.PROVIDER_REQUEST_TIMEOUT_MS || 60 * 1000 // default to 1 minute
     );
     const PROVIDER_REQUESTS_MAX_CONCURRENCY = Number(
-      process.env.PROVIDER_REQUESTS_MAX_CONCURRENCY || 100 // default to 200 concurrent requests
+      process.env.PROVIDER_REQUESTS_MAX_CONCURRENCY || 150 // default to 200 concurrent requests
     );
 
     const relevantSpokePoolChainIds = SUPPORTED_CHAIN_IDS.filter(
