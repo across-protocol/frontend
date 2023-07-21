@@ -122,10 +122,7 @@ async function main() {
       }
     }
 
-    logger.info("Storing sub states on redis...", {
-      KV_REST_API_TOKEN,
-      KV_REST_API_URL,
-    });
+    logger.info("Storing sub states on redis...");
     const redisClient = createClient({
       token: KV_REST_API_TOKEN!,
       url: KV_REST_API_URL!,
