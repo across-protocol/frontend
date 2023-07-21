@@ -6,6 +6,7 @@ WORKDIR /workspace
 
 COPY ./package.json .
 COPY ./yarn.lock .
+COPY ./patches .
 
 # Install all deps
 RUN yarn --frozen-lockfile
