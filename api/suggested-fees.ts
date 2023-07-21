@@ -1,15 +1,13 @@
 import * as sdk from "@across-protocol/sdk-v2";
 import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { type, assert, Infer, optional } from "superstruct";
 import { disabledL1Tokens, DEFAULT_QUOTE_TIMESTAMP_BUFFER } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
-  getLogger,
   getTokenDetails,
   InputError,
-  infuraProvider,
   getRelayerFeeDetails,
   isRouteEnabled,
   getCachedTokenPrice,
@@ -19,8 +17,13 @@ import {
   positiveIntStr,
   boolStr,
   HUB_POOL_CHAIN_ID,
-  ENABLED_ROUTES,
   getSpokePoolAddress,
+  getProvider,
+  getCachedUBAClientSubStates,
+  SUPPORTED_CHAIN_IDS,
+  getWinstonLogger,
+  getHubAndSpokeClients,
+  getWeiPct,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -38,7 +41,7 @@ const handler = async (
   { query }: TypedVercelRequest<SuggestedFeesQueryParams>,
   response: VercelResponse
 ) => {
-  const logger = getLogger();
+  const logger = getWinstonLogger();
   logger.debug({
     at: "SuggestedFees",
     message: "Query data",
@@ -50,7 +53,7 @@ const handler = async (
       ? Number(QUOTE_TIMESTAMP_BUFFER)
       : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
 
-    const provider = infuraProvider(HUB_POOL_CHAIN_ID);
+    const l1Provider = getProvider(HUB_POOL_CHAIN_ID);
 
     assert(query, SuggestedFeesQueryParamsSchema);
 
@@ -75,7 +78,7 @@ const handler = async (
     // then no need to apply buffer.
     const _parsedTimestamp = timestamp
       ? Number(timestamp)
-      : (await provider.getBlock("latest")).timestamp - quoteTimeBuffer;
+      : (await l1Provider.getBlock("latest")).timestamp - quoteTimeBuffer;
 
     // Round timestamp. Assuming that depositors use this timestamp as the `quoteTimestamp` will allow relayers
     // to take advantage of cached block-for-timestamp values when computing LP fee %'s. Currently the relayer is assumed
@@ -94,16 +97,16 @@ const handler = async (
 
     let {
       l1Token,
-      hubPool,
       chainId: computedOriginChainId,
+      tokenSymbol,
     } = await getTokenDetails(
-      provider,
+      l1Provider,
       undefined, // Search by l2Token only.
       token,
       originChainId
     );
 
-    const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
+    const blockFinder = new BlockFinder(l1Provider.getBlock.bind(l1Provider));
     const [{ number: blockTag }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
       isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
@@ -112,35 +115,8 @@ const handler = async (
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
       throw new InputError(`Route is not enabled.`);
 
-    const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
-      ENABLED_ROUTES.acrossConfigStoreAddress,
-      provider
-    );
-
     const baseCurrency = destinationChainId === "137" ? "matic" : "eth";
-
-    const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
-      hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
-        blockTag,
-      }),
-      hubPool.callStatic.liquidityUtilizationPostRelay(l1Token, amount, {
-        blockTag,
-      }),
-      configStoreClient.getRateModel(
-        l1Token,
-        {
-          blockTag,
-        },
-        computedOriginChainId,
-        Number(destinationChainId)
-      ),
-      getCachedTokenPrice(l1Token, baseCurrency),
-    ]);
-    const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
-      rateModel,
-      currentUt,
-      nextUt
-    );
+    const tokenPrice = await getCachedTokenPrice(l1Token, baseCurrency);
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
@@ -154,14 +130,72 @@ const handler = async (
     if (!skipAmountLimitEnabled && relayerFeeDetails.isAmountTooLow)
       throw new InputError("Sent amount is too low relative to fees");
 
+    const [cachedSubStateOrigin, cachedSubStateDestination] =
+      await getCachedUBAClientSubStates(
+        computedOriginChainId,
+        Number(destinationChainId),
+        tokenSymbol
+      );
+
+    if (!cachedSubStateOrigin || !cachedSubStateDestination) {
+      throw new Error("No cached UBA client state found");
+    }
+    if (
+      typeof cachedSubStateOrigin !== "object" ||
+      typeof cachedSubStateDestination !== "object"
+    ) {
+      throw new Error("Invalid cached UBA client state");
+    }
+
+    const { hubPoolClient, spokePoolClientsMap } = await getHubAndSpokeClients(
+      logger,
+      0,
+      [computedOriginChainId, Number(destinationChainId)]
+    );
+    const ubaClient = new sdk.clients.UBAClient(
+      SUPPORTED_CHAIN_IDS,
+      [tokenSymbol],
+      hubPoolClient,
+      spokePoolClientsMap,
+      1,
+      logger
+    );
+
+    await ubaClient.update(
+      sdk.clients.deserializeUBAClientState({
+        ...cachedSubStateDestination,
+        ...cachedSubStateOrigin,
+      })
+    );
+
+    const { depositBalancingFee, relayerBalancingFee, lpFee } =
+      ubaClient.getLatestFeesForDeposit(
+        amount,
+        blockTag,
+        token,
+        computedOriginChainId,
+        Number(destinationChainId)
+      );
+
+    // gas fee + capital costs + relayer balancing fee
+    const relayFeeTotal = BigNumber.from(relayerFeeDetails.gasFeeTotal)
+      .add(relayerFeeDetails.capitalFeeTotal)
+      .add(relayerBalancingFee);
+
     const responseJson = {
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
       relayGasFeeTotal: relayerFeeDetails.gasFeeTotal,
-      relayFeePct: relayerFeeDetails.relayFeePercent,
-      relayFeeTotal: relayerFeeDetails.relayFeeTotal,
-      lpFeePct: realizedLPFeePct.toString(),
+      depositBalancingFeePct: getWeiPct(depositBalancingFee, amount).toString(),
+      depositBalancingFee: depositBalancingFee.toString(),
+      relayerBalancingFee: relayerBalancingFee.toString(),
+      relayerBalancingFeePct: getWeiPct(relayerBalancingFee, amount).toString(),
+      relayFeePct: getWeiPct(relayFeeTotal, amount).toString(),
+      relayFeeTotal: relayFeeTotal.toString(),
+      lpFeePct: getWeiPct(lpFee, amount).toString(),
+      lpFee: lpFee.toString(),
+
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: blockTag.toString(),
