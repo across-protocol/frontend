@@ -85,7 +85,7 @@
     ]
   },
   "devDependencies": {
-    "@amplitude/ampli": "^1.27.1",
+    "@amplitude/ampli": "^1.32.0",
     "@babel/plugin-transform-modules-commonjs": "^7.18.6",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
