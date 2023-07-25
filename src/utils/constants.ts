@@ -271,6 +271,7 @@ export const orderedTokenSymbolLogoMap = {
   MATIC: polygonLogo,
   WMATIC: polygonLogo,
   USDC: usdcLogo,
+  "USDC.e": usdcLogo,
   USDT: usdtLogo,
   DAI: daiLogo,
   WBTC: wbtcLogo,
@@ -285,9 +286,23 @@ export const orderedTokenSymbolLogoMap = {
 export const tokenList: TokenInfoList = Object.entries(
   orderedTokenSymbolLogoMap
 ).flatMap(([symbol, logoURI]) => {
+  // NOTE: Handle edge case for Arbitrum and USDC combination.
+  // We currently do not support native USDC on Arbitrum, only the bridged USDC.e token.
+  // Until we do, we need to add a special case for USDC.e to the token list.
+  if (symbol === "USDC.e") {
+    const usdcTokenInfo = constants.TOKEN_SYMBOLS_MAP.USDC;
+    return {
+      ...usdcTokenInfo,
+      logoURI,
+      symbol: "USDC.e",
+      displaySymbol: "USDC.e",
+      mainnetAddress: usdcTokenInfo.addresses[constants.CHAIN_IDs.MAINNET],
+    };
+  }
+
   const tokenInfo =
     constants.TOKEN_SYMBOLS_MAP[
-      symbol as keyof typeof orderedTokenSymbolLogoMap
+      symbol as keyof Omit<typeof orderedTokenSymbolLogoMap, "USDC.e">
     ];
 
   if (!tokenInfo) {
