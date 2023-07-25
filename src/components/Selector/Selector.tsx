@@ -16,7 +16,6 @@ export type SelectorElementType<Value> = {
     title: string;
     description: string | JSX.Element;
   };
-  hidden?: boolean;
 };
 
 export type SelectorPropType<Value> = {
@@ -88,7 +87,6 @@ const Selector = <ElementValue,>({
               }}
               active={!element.disabled && selectedIndex === idx}
               disabled={element.disabled}
-              hidden={element.hidden}
             >
               <ElementSection disabled={element.disabled}>
                 {element.element}
@@ -200,9 +198,8 @@ const ElementRowDivider = styled.div`
 const ElementRow = styled.div<{
   active: boolean;
   disabled?: boolean;
-  hidden?: boolean;
 }>`
-  display: ${({ hidden }) => (hidden ? "none" : "flex")};
+  display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
