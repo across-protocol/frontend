@@ -147,7 +147,7 @@ const BridgeForm = ({
                 (c) => c.chainId !== r.chainId
               ),
               disabledTooltip: {
-                title: `Asset not supported on ${r.name}.`,
+                title: `Asset not supported on route.`,
                 description: (
                   <RouteNotSupportedTooltipText
                     symbol={currentToken}
