@@ -1,3 +1,5 @@
+import { constants } from "@across-protocol/sdk-v2";
+
 import { Text } from "components/Text";
 import { getChainInfo } from "utils";
 
@@ -13,7 +15,9 @@ export const RouteNotSupportedTooltipText = ({
   toChain,
 }: Props) => {
   const isArbitrumNativeUSDC =
-    (fromChain === 42161 || toChain === 42161) && symbol === "USDC";
+    (fromChain === constants.CHAIN_IDs.ARBITRUM ||
+      toChain === constants.CHAIN_IDs.ARBITRUM) &&
+    symbol === "USDC";
   return (
     <Text color="white-70" size="sm">
       {isArbitrumNativeUSDC ? (
