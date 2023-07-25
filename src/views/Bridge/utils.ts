@@ -29,18 +29,3 @@ export function getReceiveTokenSymbol(
 
   return bridgeTokenSymbol;
 }
-
-export function isFromArbitrumUSDC(tokenSymbol: string, fromChainId: number) {
-  return fromChainId === 42161 && tokenSymbol === "USDC";
-}
-
-export function isFromArbitrumNativeUSDC(
-  tokenSymbol: string,
-  fromChainId: number,
-  displayTokenSymbol?: string
-) {
-  return (
-    isFromArbitrumUSDC(tokenSymbol, fromChainId) &&
-    displayTokenSymbol !== "USDC.e"
-  );
-}

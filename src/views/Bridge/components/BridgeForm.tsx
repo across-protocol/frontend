@@ -18,6 +18,7 @@ import CoinSelector from "./CoinSelector";
 import EstimatedTable from "./EstimatedTable";
 import QuickSwap from "./QuickSwap";
 import SlippageAlert from "./SlippageAlert";
+import RouteNotSupportedTooltipText from "./RouteNotSupportedTooltipText";
 import { BigNumber } from "ethers";
 import { getReceiveTokenSymbol } from "../utils";
 
@@ -147,7 +148,13 @@ const BridgeForm = ({
               ),
               disabledTooltip: {
                 title: `Asset not supported on ${r.name}.`,
-                description: `${currentToken} is not supported on ${r.name}. Please select another asset or change this chain.`,
+                description: (
+                  <RouteNotSupportedTooltipText
+                    symbol={currentToken}
+                    fromChain={r.chainId!}
+                    toChain={currentToRoute!}
+                  />
+                ),
               },
             }))}
             selectedValue={currentFromRoute ?? 1}
@@ -174,8 +181,14 @@ const BridgeForm = ({
                   (c) => c.chainId !== r.chainId
                 ),
                 disabledTooltip: {
-                  title: `Asset not supported on ${r.name}.`,
-                  description: `${currentToken} is not supported on ${r.name}. Please select another asset or change this chain.`,
+                  title: `Asset not supported on route`,
+                  description: (
+                    <RouteNotSupportedTooltipText
+                      symbol={currentToken}
+                      fromChain={currentFromRoute!}
+                      toChain={r.chainId}
+                    />
+                  ),
                 },
               }))}
               displayElement={mapChainInfoToRoute(

@@ -5,7 +5,6 @@ import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Butto
 import { BigNumber, utils } from "ethers";
 import {
   formatUnits,
-  getChainInfo,
   getConfig,
   isNumberEthersParseable,
   parseUnitsFnBuilder,
@@ -23,7 +22,7 @@ import {
   useAmplitude,
 } from "hooks";
 import BridgeInputErrorAlert from "./BridgeAlert";
-import { isFromArbitrumUSDC, isFromArbitrumNativeUSDC } from "../utils";
+import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
 
 function useCoinSelector(
   tokens: TokenInfo[],
@@ -244,19 +243,6 @@ const CoinSelector = ({
     isAmountTooLow
   );
 
-  // NOTE: Handle edge case for Arbitrum and USDC combination.
-  // We currently do not support native USDC on Arbitrum, only the bridged USDC.e token.
-  // Until we, we need to inform the user.
-  const indexOfUSDC = tokenChoices.findIndex((t) => t.symbol === "USDC");
-  const tokens = isFromArbitrumUSDC(token.symbol, fromChain)
-    ? [
-        ...tokenChoices.splice(indexOfUSDC, 0, {
-          ...tokenChoices[indexOfUSDC],
-          displaySymbol: "USDC.e",
-        }),
-      ]
-    : tokenChoices;
-
   return (
     <Wrapper>
       <AmountExternalWrapper>
@@ -301,35 +287,29 @@ const CoinSelector = ({
         )}
       </AmountExternalWrapper>
       <TokenSelection
-        elements={tokens.map((t) => ({
+        elements={tokenChoices.map((t) => ({
           value: t.symbol,
-          disabled:
-            isFromArbitrumNativeUSDC(t.symbol, fromChain, t.displaySymbol) ||
-            !getConfig().routes.some(
-              (r) =>
-                toChain === r.toChain &&
-                fromChain === r.fromChain &&
-                r.fromTokenSymbol === t.symbol
-            ),
+          disabled: !getConfig().routes.some(
+            (r) =>
+              toChain === r.toChain &&
+              fromChain === r.fromChain &&
+              r.fromTokenSymbol === t.symbol
+          ),
           disabledTooltip: {
             title: "Asset not supported on route.",
-            description: isFromArbitrumNativeUSDC(
-              t.symbol,
-              fromChain,
-              t.displaySymbol
-            )
-              ? `Across currently only support USDC.e (bridged USDC) on Arbitrum.`
-              : `${t.symbol.toUpperCase()} is not supported on route ${
-                  getChainInfo(fromChain).name
-                } -> ${
-                  getChainInfo(toChain).name
-                }. Pick a different asset or change the route.`,
+            description: (
+              <RouteNotSupportedTooltipText
+                symbol={t.symbol}
+                fromChain={fromChain}
+                toChain={toChain}
+              />
+            ),
           },
           element: (
             <CoinIconTextWrapper>
               <CoinIcon src={t.logoURI} />
               <Text size="md" color="white-100">
-                {t.symbol.toUpperCase()}
+                {t.displaySymbol || t.symbol.toUpperCase()}
               </Text>
             </CoinIconTextWrapper>
           ),
@@ -347,7 +327,7 @@ const CoinSelector = ({
           <CoinIconTextWrapper>
             <CoinIcon src={token.logoURI} />
             <Text size="md" color="white-100">
-              {token.symbol.toUpperCase()}
+              {token.displaySymbol || token.symbol.toUpperCase()}
             </Text>
           </CoinIconTextWrapper>
         }
@@ -359,22 +339,6 @@ const CoinSelector = ({
     </Wrapper>
   );
 };
-
-function isTokenDisabled(token: TokenInfo, fromChain: number, toChain: number) {
-  const isArbitrumAndUSDC = fromChain === 42161 && token.symbol === "USDC";
-
-  return (
-    (isArbitrumAndUSDC &&
-      token.symbol === "USDC" &&
-      token.displaySymbol !== "USDC.e") ||
-    !getConfig().routes.some(
-      (r) =>
-        toChain === r.toChain &&
-        fromChain === r.fromChain &&
-        r.fromTokenSymbol === token.symbol
-    )
-  );
-}
 
 export default CoinSelector;
 
