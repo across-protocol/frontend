@@ -27,7 +27,7 @@ export interface TooltipProps {
   icon?: TooltipIcon;
   title?: string;
   titleSecondary?: string;
-  body: string;
+  body: string | JSX.Element;
   placement?: PlacesType;
 }
 
