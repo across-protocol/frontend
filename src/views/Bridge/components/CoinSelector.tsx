@@ -252,7 +252,7 @@ const CoinSelector = ({
               {currentSelectedBalance && (displayBalance || userAmountInput) && (
                 <Text size="sm" color="grey-400">
                   Balance: {tokenFormatterFn(currentSelectedBalance)}{" "}
-                  {token.symbol}
+                  {token.displaySymbol || token.symbol.toUpperCase()}
                 </Text>
               )}
               <AmountInnerInput
