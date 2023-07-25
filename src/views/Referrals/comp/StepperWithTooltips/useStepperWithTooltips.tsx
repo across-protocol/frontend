@@ -31,7 +31,7 @@ export const StepFactory = forwardRef<
 export const StepItemComponent: React.FC<{
   title: string;
   titleSecondary?: string;
-  body: string;
+  body: string | JSX.Element;
   type: "completed" | "current" | "next";
 }> = ({ body, title, children, type, titleSecondary }) => {
   return (
