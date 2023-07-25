@@ -258,6 +258,8 @@ export type TokenInfo = {
   logoURI: string;
   // tokens require a mainnet address to do price lookups on coingecko, not used for anything else.
   mainnetAddress?: string;
+  // optional display symbol for tokens that have a different symbol on the frontend
+  displaySymbol?: string;
 };
 // enforce weth to be first so we can use it as a guarantee in other parts of the app
 export type TokenInfoList = TokenInfo[];
