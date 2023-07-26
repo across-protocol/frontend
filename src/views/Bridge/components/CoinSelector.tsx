@@ -5,7 +5,6 @@ import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Butto
 import { BigNumber, utils } from "ethers";
 import {
   formatUnits,
-  getChainInfo,
   getConfig,
   isNumberEthersParseable,
   parseUnitsFnBuilder,
@@ -23,6 +22,7 @@ import {
   useAmplitude,
 } from "hooks";
 import BridgeInputErrorAlert from "./BridgeAlert";
+import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
 
 function useCoinSelector(
   tokens: TokenInfo[],
@@ -252,7 +252,7 @@ const CoinSelector = ({
               {currentSelectedBalance && (displayBalance || userAmountInput) && (
                 <Text size="sm" color="grey-400">
                   Balance: {tokenFormatterFn(currentSelectedBalance)}{" "}
-                  {token.symbol.toUpperCase()}
+                  {token.displaySymbol || token.symbol.toUpperCase()}
                 </Text>
               )}
               <AmountInnerInput
@@ -297,17 +297,19 @@ const CoinSelector = ({
           ),
           disabledTooltip: {
             title: "Asset not supported on route.",
-            description: `${t.symbol.toUpperCase()} is not supported on route ${
-              getChainInfo(fromChain).name
-            } -> ${
-              getChainInfo(toChain).name
-            }. Pick a different asset or change the route.`,
+            description: (
+              <RouteNotSupportedTooltipText
+                symbol={t.symbol}
+                fromChain={fromChain}
+                toChain={toChain}
+              />
+            ),
           },
           element: (
             <CoinIconTextWrapper>
               <CoinIcon src={t.logoURI} />
               <Text size="md" color="white-100">
-                {t.symbol.toUpperCase()}
+                {t.displaySymbol || t.symbol.toUpperCase()}
               </Text>
             </CoinIconTextWrapper>
           ),
@@ -325,7 +327,7 @@ const CoinSelector = ({
           <CoinIconTextWrapper>
             <CoinIcon src={token.logoURI} />
             <Text size="md" color="white-100">
-              {token.symbol.toUpperCase()}
+              {token.displaySymbol || token.symbol.toUpperCase()}
             </Text>
           </CoinIconTextWrapper>
         }

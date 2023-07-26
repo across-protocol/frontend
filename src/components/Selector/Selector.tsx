@@ -14,7 +14,7 @@ export type SelectorElementType<Value> = {
   disabled?: boolean;
   disabledTooltip?: {
     title: string;
-    description: string;
+    description: string | JSX.Element;
   };
 };
 
@@ -102,6 +102,7 @@ const Selector = <ElementValue,>({
                   )}
                   {element.disabled ? (
                     <Tooltip
+                      tooltipId={`selector-disabled-${idx}`}
                       title={element.disabledTooltip?.title ?? "Not supported."}
                       body={
                         element.disabledTooltip?.description ??
@@ -194,7 +195,10 @@ const ElementRowDivider = styled.div`
   width: calc(100% + 32px);
 `;
 
-const ElementRow = styled.div<{ active: boolean; disabled?: boolean }>`
+const ElementRow = styled.div<{
+  active: boolean;
+  disabled?: boolean;
+}>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
