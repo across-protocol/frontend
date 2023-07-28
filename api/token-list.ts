@@ -41,7 +41,9 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
       (token) => {
         const tokenInfo =
           constants.TOKEN_SYMBOLS_MAP[
-            token.symbol as keyof typeof constants.TOKEN_SYMBOLS_MAP
+            token.symbol === "USDC.e"
+              ? "USDC"
+              : (token.symbol as keyof typeof constants.TOKEN_SYMBOLS_MAP)
           ];
         return {
           ...token,
