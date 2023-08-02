@@ -1,25 +1,48 @@
 import { ethers, providers } from "ethers";
 import { hubPoolChainId, ChainId, infuraId } from "./constants";
 
-function getProviderUrl(chainId: number) {
-  const overrideUrl = process.env[`REACT_APP_CHAIN_${chainId}_PROVIDER_URL`];
-  if (overrideUrl) {
-    return overrideUrl;
-  }
-
+function getInfuraProviderUrl(chainId: number) {
   const infuraUrl = new providers.InfuraProvider(chainId, infuraId).connection
     .url;
   return infuraUrl;
 }
 
 export const providerUrls: [ChainId, string][] = [
-  [ChainId.MAINNET, getProviderUrl(ChainId.MAINNET)],
-  [ChainId.ARBITRUM, getProviderUrl(ChainId.ARBITRUM)],
-  [ChainId.POLYGON, getProviderUrl(ChainId.POLYGON)],
-  [ChainId.OPTIMISM, getProviderUrl(ChainId.OPTIMISM)],
-  [ChainId.ARBITRUM_GOERLI, getProviderUrl(ChainId.ARBITRUM_GOERLI)],
-  [ChainId.GOERLI, getProviderUrl(ChainId.GOERLI)],
-  [ChainId.MUMBAI, getProviderUrl(ChainId.MUMBAI)],
+  [
+    ChainId.MAINNET,
+    process.env.REACT_APP_CHAIN_1_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.MAINNET),
+  ],
+  [
+    ChainId.ARBITRUM,
+    process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.ARBITRUM),
+  ],
+  [
+    ChainId.POLYGON,
+    process.env.REACT_APP_CHAIN_137_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.POLYGON),
+  ],
+  [
+    ChainId.OPTIMISM,
+    process.env.REACT_APP_CHAIN_10_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.OPTIMISM),
+  ],
+  [
+    ChainId.ARBITRUM_GOERLI,
+    process.env.REACT_APP_CHAIN_421613_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.ARBITRUM_GOERLI),
+  ],
+  [
+    ChainId.GOERLI,
+    process.env.REACT_APP_CHAIN_5_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.GOERLI),
+  ],
+  [
+    ChainId.MUMBAI,
+    process.env.REACT_APP_CHAIN_80001_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.MUMBAI),
+  ],
 ];
 
 export const providerUrlsTable: Record<number, string> =
