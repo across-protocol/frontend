@@ -23,7 +23,7 @@ import {
   validAddress,
   positiveIntStr,
   getLpCushion,
-  infuraProvider,
+  getProvider,
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
 } from "./_utils";
@@ -52,7 +52,7 @@ const handler = async (
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
       REACT_APP_MIN_DEPOSIT_USD,
     } = process.env;
-    const provider = infuraProvider(HUB_POOL_CHAIN_ID);
+    const provider = getProvider(HUB_POOL_CHAIN_ID);
     logger.debug({
       at: "limits",
       message: `Using INFURA provider for chain ${HUB_POOL_CHAIN_ID}`,

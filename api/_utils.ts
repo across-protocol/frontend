@@ -313,21 +313,10 @@ export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
-export const providerForChain: {
-  [chainId: number]: ethers.providers.StaticJsonRpcProvider;
-} = {
-  1: infuraProvider(1),
-  10: infuraProvider(10),
-  137: infuraProvider(137),
-  42161: infuraProvider(42161),
-  // testnets
-  5: infuraProvider(5),
-  421613: infuraProvider(421613),
-};
 export const queries: Record<number, () => QueryBase> = {
   1: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      providerForChain[1],
+      getProvider(1),
       undefined,
       undefined,
       undefined,
@@ -338,7 +327,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   10: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
-      providerForChain[10],
+      getProvider(10),
       undefined,
       undefined,
       undefined,
@@ -349,7 +338,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   137: () =>
     new sdk.relayFeeCalculator.PolygonQueries(
-      providerForChain[137],
+      getProvider(137),
       undefined,
       undefined,
       undefined,
@@ -360,7 +349,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   42161: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
-      providerForChain[42161],
+      getProvider(42161),
       undefined,
       undefined,
       undefined,
@@ -372,7 +361,7 @@ export const queries: Record<number, () => QueryBase> = {
   // testnets
   5: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      providerForChain[5],
+      getProvider(5),
       undefined,
       "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
       undefined,
@@ -383,7 +372,7 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   421613: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      providerForChain[421613],
+      getProvider(421613),
       undefined,
       undefined,
       undefined,
@@ -489,14 +478,16 @@ export const providerCache: Record<string, StaticJsonRpcProvider> = {};
  * @param _chainId A valid chain identifier where an AcrossV2 contract is deployed
  * @returns A provider object to query the requested blockchain
  */
-export const getProvider = (_chainId: number): providers.Provider => {
+export const getProvider = (
+  _chainId: number
+): providers.StaticJsonRpcProvider => {
   const chainId = _chainId.toString();
   if (!providerCache[chainId]) {
     const override = overrideProvider(chainId);
     if (override) {
       providerCache[chainId] = override;
     } else {
-      providerCache[chainId] = providerForChain[_chainId];
+      providerCache[chainId] = infuraProvider(_chainId);
     }
   }
   return providerCache[chainId];

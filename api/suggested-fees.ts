@@ -12,7 +12,7 @@ import {
   getLogger,
   getTokenDetails,
   InputError,
-  infuraProvider,
+  getProvider,
   getRelayerFeeDetails,
   isRouteEnabled,
   getCachedTokenPrice,
@@ -53,7 +53,7 @@ const handler = async (
       ? Number(QUOTE_TIMESTAMP_BUFFER)
       : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
 
-    const provider = infuraProvider(HUB_POOL_CHAIN_ID);
+    const provider = getProvider(HUB_POOL_CHAIN_ID);
 
     assert(query, SuggestedFeesQueryParamsSchema);
 
