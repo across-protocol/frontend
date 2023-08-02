@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { constants, relayFeeCalculator } from "@across-protocol/sdk-v2";
+import { constants, relayFeeCalculator, utils } from "@across-protocol/sdk-v2";
 
 export const maxRelayFeePct = 0.25;
 
@@ -101,3 +101,6 @@ export const BLOCK_TAG_LAG = -1;
 // Note: this is a small subset of all the supported base currencies, but since we don't expect to use the others,
 // we've decided to keep this list small for now.
 export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
+
+// 1:1 because we don't need to handle underlying tokens on FE
+export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;
