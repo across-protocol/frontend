@@ -7,6 +7,7 @@ import { retrieveDiscordUserDetailsMockedCall } from "./retrieve-user-details.mo
 import { getDepositStatsMocked } from "./get-deposit-stats.mocked";
 import { coingeckoMockedApiCall } from "./coingecko.mocked";
 import { retrieveLimitsMocked } from "./bridge-limits.mocked";
+import { poolsApiCall } from "./pools.mocked";
 
 export const mockedEndpoints: ServerlessAPIEndpoints = {
   coingecko: coingeckoMockedApiCall,
@@ -21,4 +22,5 @@ export const mockedEndpoints: ServerlessAPIEndpoints = {
   splash: {
     getStats: getDepositStatsMocked,
   },
+  pools: poolsApiCall,
 };

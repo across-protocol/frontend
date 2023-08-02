@@ -2,6 +2,7 @@ import { BigNumber, ethers, providers } from "ethers";
 import { Fee } from "utils/bridge";
 import { ChainId } from "utils/constants";
 import { CoingeckoApiCall } from "./prod/coingecko";
+import { PoolsApiCall } from "./prod/pools";
 
 export type ServerlessAPIEndpoints = {
   coingecko: CoingeckoApiCall;
@@ -16,6 +17,7 @@ export type ServerlessAPIEndpoints = {
   splash: {
     getStats: GetDepositStatsType;
   };
+  pools: PoolsApiCall;
 };
 
 export type RewardsApiFunction =

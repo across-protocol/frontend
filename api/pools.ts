@@ -1,17 +1,18 @@
 import { VercelResponse } from "@vercel/node";
-import { ethers } from "ethers";
-import { object, assert, Infer } from "superstruct";
+import { object, assert, Infer, enums, optional } from "superstruct";
+
 import { TypedVercelRequest } from "./_types";
 
 import {
   getLogger,
-  getHubPoolClient,
   handleErrorCondition,
   validAddress,
+  getPoolState,
 } from "./_utils";
 
 const PoolsQueryParamsSchema = object({
   token: validAddress(),
+  externalPoolProvider: optional(enums(["balancer"])),
 });
 
 type PoolsQueryParams = Infer<typeof PoolsQueryParamsSchema>;
@@ -27,13 +28,16 @@ const handler = async (
     query,
   });
   try {
-    const hubPoolClient = getHubPoolClient();
-
     assert(query, PoolsQueryParamsSchema);
 
-    const token = ethers.utils.getAddress(query.token);
+    const { token, externalPoolProvider } = query;
 
-    await hubPoolClient.updatePool(token);
+    const poolState = await getPoolState(token, externalPoolProvider);
+
+    const responseData = {
+      estimatedApy: poolState.estimatedApy,
+      exchangeRateCurrent: poolState.exchangeRateCurrent,
+    };
 
     // Instruct Vercel to cache limit data for this token for 5 minutes. Caching can be used to limit number of
     // Vercel invocations and run time for this serverless function and trades off potential inaccuracy in times of
@@ -42,10 +46,10 @@ const handler = async (
     logger.debug({
       at: "Pools",
       message: "Response data",
-      responseJson: hubPoolClient.getPoolState(token),
+      responseJson: responseData,
     });
     response.setHeader("Cache-Control", "s-maxage=300");
-    response.status(200).json(hubPoolClient.getPoolState(token));
+    response.status(200).json(responseData);
   } catch (error: unknown) {
     return handleErrorCondition("pools", response, logger, error);
   }
