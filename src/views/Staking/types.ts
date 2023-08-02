@@ -1,4 +1,4 @@
-import { StakingPool } from "hooks/useStakingPool";
+import { StakingPool } from "utils/staking-pool";
 import { StakingActionFunctionType } from "./hooks/useStakingAction";
 
 type GenericStakingComponentProps = {
@@ -13,6 +13,7 @@ export type StakingRewardPropType = GenericStakingComponentProps & {
 
 export type StakingFormPropType = GenericStakingComponentProps & {
   logoURI: string;
+  logoURIs?: [string, string];
   stakeActionFn: StakingActionFunctionType;
   unstakeActionFn: StakingActionFunctionType;
   isDataLoading: boolean;

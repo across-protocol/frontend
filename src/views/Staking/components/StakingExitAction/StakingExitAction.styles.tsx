@@ -1,6 +1,10 @@
 import styled from "@emotion/styled";
 import { QUERIESV2 } from "utils";
 
+export const IconPairContainer = styled.div`
+  padding-top: 8px;
+`;
+
 export const Logo = styled.img`
   height: 24px;
   width: 24px;

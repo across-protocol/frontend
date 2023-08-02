@@ -1,12 +1,8 @@
 import { useParams } from "react-router-dom";
 
-import {
-  DEFAULT_STAKING_POOL_DATA,
-  useConnection,
-  useIsWrongNetwork,
-  useStakingPool,
-} from "hooks";
+import { useConnection, useIsWrongNetwork, useStakingPool } from "hooks";
 import { getConfig, hubPoolChainId } from "utils";
+import { DEFAULT_STAKING_POOL_DATA } from "utils/staking-pool";
 
 import { useStakeAction, useUnstakeAction } from "./useStakingAction";
 import { useClaimStakeRewardAction } from "./useClaimStakeRewardAction";
@@ -21,10 +17,8 @@ export const useStakingView = () => {
   const { poolId } = useParams<StakingPathParams>();
   const { isConnected, provider } = useConnection();
   const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork();
-  const { l1TokenAddress, logoURI } = config.getTokenInfoBySymbol(
-    hubPoolChainId,
-    poolId.toUpperCase()
-  );
+  const { l1TokenAddress, logoURI, logoURIs } =
+    config.getStakingPoolTokenInfoBySymbol(hubPoolChainId, poolId);
 
   const stakingPoolQuery = useStakingPool(l1TokenAddress);
   const stakeActionMutation = useStakeAction(l1TokenAddress);
@@ -40,6 +34,7 @@ export const useStakingView = () => {
     poolId,
     exitLinkURI: "/rewards",
     poolLogoURI: logoURI,
+    poolLogoURIs: logoURIs,
     poolName: stakingPoolQuery.data?.lpTokenSymbolName ?? "-",
     mainnetAddress: l1TokenAddress,
     isWrongNetwork,

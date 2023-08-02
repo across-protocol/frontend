@@ -26,7 +26,8 @@ import {
   ExternalTextCell,
 } from "./GenericStakingPoolTable.styles";
 import { StyledPoolIcon } from "components/RewardTable/RewardTables.styles";
-import { StakingPool } from "hooks";
+import { StakingPool } from "utils/staking-pool";
+import { IconPair } from "components/IconPair";
 
 type RowData = StakingPool;
 type MetaData = {
@@ -125,12 +126,19 @@ type PoolRowCellType = {
 function RowPoolCell({ data }: PoolRowCellType) {
   return (
     <PoolCell>
-      <LogoWrapper>
-        <StyledPoolIcon src={data.tokenLogoURI} />
-      </LogoWrapper>
+      {data.tokenLogsURIs ? (
+        <IconPair
+          LeftIcon={<StyledPoolIcon src={data.tokenLogsURIs[0]} />}
+          RightIcon={<StyledPoolIcon src={data.tokenLogsURIs[1]} />}
+        />
+      ) : (
+        <LogoWrapper>
+          <StyledPoolIcon src={data.tokenLogoURI} />
+        </LogoWrapper>
+      )}
       <PoolTextStack>
         <Text size="md" color="white-100">
-          {data.tokenSymbol.toUpperCase()}
+          {data.tokenDisplaySymbol || data.tokenSymbol.toUpperCase()}
         </Text>
         <Text size="sm" color="grey-400">
           Position size:{" "}
@@ -171,7 +179,9 @@ function RowStakedLPCell({ data, meta }: PoolRowCellType) {
         </Text>
       </StakedTokenCellInner>
       <Text size="sm" color="white-70">
-        {data.lpTokenSymbolName.toUpperCase()}
+        {data.isExternalLP
+          ? data.tokenDisplaySymbol
+          : data.lpTokenSymbolName.toUpperCase()}
       </Text>
     </ExternalStackedCell>
   );
@@ -233,7 +243,7 @@ function RowButtonCell({ data, meta }: PoolRowCellType) {
         <ExternalLink16 />
       </ExternalLinkButton>
     );
-  } else if (meta.hasLPTokens || meta.hasRewards) {
+  } else if (meta.hasLPTokens || meta.hasRewards || data.isExternalLP) {
     button = <StakeButton to={specificPoolLink}>Stake</StakeButton>;
   } else {
     button = (

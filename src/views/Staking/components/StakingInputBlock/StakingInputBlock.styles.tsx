@@ -145,3 +145,8 @@ export const TokenIcon = styled.img`
   height: 24px;
   width: 24px;
 `;
+
+export const IconPairContainer = styled.div`
+  padding-top: 8px;
+  margin-right: 8px;
+`;
