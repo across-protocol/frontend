@@ -236,7 +236,7 @@ export const infuraProvider = (nameOrChainId: providers.Networkish) => {
 export const overrideProvider = (
   chainId: string
 ): providers.StaticJsonRpcProvider | undefined => {
-  const url = process.env[`OVERRIDE_PROVIDER_${chainId}`];
+  const url = process.env[`REACT_APP_CHAIN_${chainId}_PROVIDER_URL`];
   if (url) {
     return new ethers.providers.StaticJsonRpcProvider(url);
   } else {
