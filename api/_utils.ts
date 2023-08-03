@@ -856,7 +856,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
   const apr = await balancer.pools.apr(pool);
 
   return {
-    estimatedApy: Number(apr.max / 1000).toFixed(2),
+    estimatedApy: Number(apr.max / 10000).toFixed(2),
     exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
   };
 }
