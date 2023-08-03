@@ -92,7 +92,7 @@ const StakingInputBlock: React.FC<Props> = ({
           <StakeButton
             valid={valid}
             onClick={onClickHandler}
-            disabled={!valid || invalid}
+            disabled={!valid || invalid || displayLoader}
             warningButtonColor={warningButtonColor}
           >
             <StakeButtonContentWrapper>
