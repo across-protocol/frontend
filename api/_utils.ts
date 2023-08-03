@@ -820,11 +820,14 @@ export async function getExternalPoolState(
 }
 
 async function getBalancerPoolState(poolTokenAddress: string) {
-  const supportedBalancerPools = {
-    ACXwstETH: {
-      id: "0x36be1e97ea98ab43b4debf92742517266f5731a3000200000000000000000466",
-      address: "0x32296969ef14eb0c6d29669c550d4a0449130230",
+  const supportedBalancerPoolsMap = {
+    1: {
+      "50wstETH-50ACX": {
+        id: "0x36be1e97ea98ab43b4debf92742517266f5731a3000200000000000000000466",
+        address: "0x36Be1E97eA98AB43b4dEBf92742517266F5731a3",
+      },
     },
+    5: {},
   };
 
   const config = {
@@ -832,14 +835,17 @@ async function getBalancerPoolState(poolTokenAddress: string) {
       ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID as 1 | 5],
       pools: {
         ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID as 1 | 5].pools,
-        ...supportedBalancerPools,
+        ...supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID as 1 | 5],
       },
     },
     rpcUrl: infuraProvider(HUB_POOL_CHAIN_ID).connection.url,
   };
   const balancer = new BalancerSDK(config);
 
-  const pool = await balancer.pools.findBy("address", poolTokenAddress);
+  const pool = await balancer.pools.findBy(
+    "address",
+    poolTokenAddress.toLowerCase()
+  );
 
   if (!pool) {
     throw new InputError(
