@@ -288,7 +288,9 @@ export class ConfigClient {
   getStakingPoolTokenList(chainId?: number): TokenList {
     return [
       ...this.getTokenList(chainId),
-      ...constants.externalLPsForStaking.map((token) => {
+      ...constants.externalLPsForStaking[
+        chainId || constants.hubPoolChainId
+      ].map((token) => {
         return {
           address: token.mainnetAddress!,
           isNative: false,

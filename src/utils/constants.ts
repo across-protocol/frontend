@@ -140,8 +140,12 @@ export type ChainInfo = {
 
 export type ChainInfoList = ChainInfo[];
 export type ChainInfoTable = Record<number, ChainInfo>;
+
 export const defaultBlockPollingInterval =
   Number(process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL_S || 30) * 1000;
+export const hubPoolChainId = Number(
+  process.env.REACT_APP_HUBPOOL_CHAINID || 1
+);
 
 const defaultConstructExplorerLink =
   (explorerUrl: string) => (txHash: string) =>
@@ -270,21 +274,23 @@ export type ExternalLPTokenList = Array<
   }
 >;
 
-export const externalLPsForStaking: ExternalLPTokenList = [
-  {
-    name: "Balancer 50wstETH-50ACX",
-    symbol: "ACXwstETH",
-    displaySymbol: "ACXwstETH",
-    decimals: 18,
-    mainnetAddress: "0x36Be1E97eA98AB43b4dEBf92742517266F5731a3",
-    logoURI: balLogo,
-    provider: "balancer",
-    logoURIs: [
-      acxLogo,
-      "https://assets.coingecko.com/coins/images/18834/small/wstETH.png?1633565443",
-    ],
-  },
-];
+export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
+  1: [
+    {
+      name: "Balancer 50wstETH-50ACX",
+      symbol: "50wstETH-50ACX",
+      displaySymbol: "50wstETH-50ACX",
+      decimals: 18,
+      mainnetAddress: "0x36Be1E97eA98AB43b4dEBf92742517266F5731a3",
+      logoURI: balLogo,
+      provider: "balancer",
+      logoURIs: [
+        acxLogo,
+        "https://assets.coingecko.com/coins/images/18834/small/wstETH.png?1633565443",
+      ],
+    },
+  ],
+};
 
 // Order of this map determines the order of the tokens in the token selector
 export const orderedTokenSymbolLogoMap = {
@@ -317,7 +323,7 @@ export const tokenList = [
         logoURI,
         symbol: "USDC.e",
         displaySymbol: "USDC.e",
-        mainnetAddress: usdcTokenInfo.addresses[constants.CHAIN_IDs.MAINNET],
+        mainnetAddress: usdcTokenInfo.addresses[hubPoolChainId],
       };
     }
 
@@ -333,10 +339,10 @@ export const tokenList = [
     return {
       ...tokenInfo,
       logoURI,
-      mainnetAddress: tokenInfo.addresses[constants.CHAIN_IDs.MAINNET],
+      mainnetAddress: tokenInfo.addresses[hubPoolChainId],
     };
   }),
-  ...externalLPsForStaking,
+  ...externalLPsForStaking[hubPoolChainId],
 ];
 
 // process.env variables
@@ -352,9 +358,6 @@ export const referralsStartWindowIndex = Number(
   process.env.REACT_APP_REFERRALS_START_WINDOW_INDEX || airdropWindowIndex + 1
 );
 export const mediumUrl = process.env.REACT_APP_MEDIUM_URL;
-export const hubPoolChainId = Number(
-  process.env.REACT_APP_HUBPOOL_CHAINID || 1
-);
 export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;
 export const enableReactQueryDevTools =
   process.env.REACT_APP_ENABLE_REACT_QUERY_DEV_TOOLS;

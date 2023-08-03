@@ -91,7 +91,7 @@ export async function fetchStakingPool(
   const acceleratingDistributorAddress = acceleratingDistributor.address;
 
   // Check if the token is an external LP token
-  const externalLP = externalLPsForStaking.find(
+  const externalLP = externalLPsForStaking[hubPoolChainId].find(
     (lp) => lp.mainnetAddress?.toLowerCase() === tokenAddress?.toLowerCase()
   );
   const isExternalLP = Boolean(externalLP);
