@@ -1,8 +1,8 @@
 import { useQuery, useQueries, QueryFunctionContext } from "react-query";
-import { useConnection } from "hooks/useConnection";
 import { BigNumber } from "ethers";
 
 import { getConfig, hubPoolChainId, defaultRefetchInterval } from "utils";
+import { useConnection } from "hooks/useConnection";
 import { fetchStakingPool } from "utils/staking-pool";
 
 import { useCoingeckoPrice } from "./useCoingeckoPrice";
