@@ -7,7 +7,6 @@ import {
   getConfig,
   hubPoolChainId,
   parseEtherLike,
-  safeDivide,
   toWeiSafe,
   providersTable,
   getBaseRewardsApr,
@@ -46,7 +45,6 @@ export type StakingPool = {
   usersMultiplierPercentage: number;
   usersTotalLPTokens: BigNumber;
   baseEmissionRate: BigNumber;
-  shareOfPool: BigNumber;
   secondsToMaxMultiplier: BigNumber;
   lpTokenDecimalCount: number;
   apyData: {
@@ -243,7 +241,6 @@ const fetchStakingPool = async (
   // Resolve the data retrieved from the serverless /pools API call
   const {
     estimatedApy: estimatedApyFromQuery,
-    totalPoolSize,
     exchangeRateCurrent: lpExchangeRateToToken,
   } = poolQuery.data;
 
@@ -305,15 +302,6 @@ const fetchStakingPool = async (
   // figure.
   const usersTotalLPTokens = availableLPTokenBalance.add(userAmountOfLPStaked);
 
-  // We can divide the amount of LP staked in the contract with the total pool
-  // size.
-  const shareOfPool = BigNumber.from(totalPoolSize).isZero()
-    ? BigNumber.from(0)
-    : safeDivide(
-        userAmountOfLPStaked.mul(fixedPointAdjustment),
-        BigNumber.from(totalPoolSize)
-      ).mul(100);
-
   // Resolve APY Information
   const poolApy = parseEtherLike(estimatedApyFromQuery);
   const maxApy = poolApy.add(
@@ -361,7 +349,6 @@ const fetchStakingPool = async (
     lpTokenSymbolName,
     usersMultiplierPercentage,
     usersTotalLPTokens,
-    shareOfPool,
     lpTokenDecimalCount: lpTokenDecimalCount,
     apyData: {
       poolApy,
@@ -405,7 +392,6 @@ export const DEFAULT_STAKING_POOL_DATA: StakingPool = {
   maxMultiplier: BigNumber.from(3),
   globalAmountOfLPStaked: BigNumber.from(0),
   outstandingRewards: BigNumber.from(0),
-  shareOfPool: BigNumber.from(0),
   secondsToMaxMultiplier: BigNumber.from(0),
   lpTokenDecimalCount: 18,
   apyData: {
