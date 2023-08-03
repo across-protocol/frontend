@@ -16,6 +16,7 @@ import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { trackMaxButtonClicked } from "utils";
 import { useAmplitude } from "hooks";
 import { IconPair } from "components/IconPair";
+import { StakingPoolTokenPairLogoURIs } from "../../types";
 
 interface Props {
   value: string;
@@ -24,7 +25,7 @@ interface Props {
   invalid: boolean;
   buttonText: string;
   logoURI: string;
-  logoURIs?: [string, string];
+  logoURIs?: StakingPoolTokenPairLogoURIs;
   maxValue: string;
   onClickHandler: () => void | Promise<void>;
   displayLoader?: boolean;

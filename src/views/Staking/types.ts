@@ -11,9 +11,11 @@ export type StakingRewardPropType = GenericStakingComponentProps & {
   isMutating: boolean;
 };
 
+export type StakingPoolTokenPairLogoURIs = [string, string];
+
 export type StakingFormPropType = GenericStakingComponentProps & {
   logoURI: string;
-  logoURIs?: [string, string];
+  logoURIs?: StakingPoolTokenPairLogoURIs;
   stakeActionFn: StakingActionFunctionType;
   unstakeActionFn: StakingActionFunctionType;
   isDataLoading: boolean;
