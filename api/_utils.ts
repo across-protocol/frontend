@@ -9,10 +9,16 @@ import * as sdk from "@across-protocol/sdk-v2";
 import { BigNumber, ethers, providers, utils } from "ethers";
 import { Log, Logging } from "@google-cloud/logging";
 import { define, StructError } from "superstruct";
+import { BalancerSDK, BALANCER_NETWORK_CONFIG } from "@balancer-labs/sdk";
+
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
 
-import { maxRelayFeePct, relayerFeeCapitalCostConfig } from "./_constants";
+import {
+  maxRelayFeePct,
+  relayerFeeCapitalCostConfig,
+  EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
+} from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
 import { VercelResponse } from "@vercel/node";
@@ -786,4 +792,71 @@ export function getFallbackTokenLogoURI(l1TokenAddress: string) {
   }
 
   return `https://github.com/trustwallet/assets/blob/master/blockchains/ethereum/assets/${l1TokenAddress}/logo.png?raw=true`;
+}
+
+export async function getPoolState(
+  tokenAddress: string,
+  externalPoolProvider?: string
+) {
+  if (!externalPoolProvider) {
+    const hubPoolClient = getHubPoolClient();
+    await hubPoolClient.updatePool(tokenAddress);
+    return hubPoolClient.getPoolState(tokenAddress);
+  }
+
+  return getExternalPoolState(tokenAddress, externalPoolProvider);
+}
+
+export async function getExternalPoolState(
+  tokenAddress: string,
+  externalPoolProvider: string
+) {
+  switch (externalPoolProvider) {
+    case "balancer":
+      return getBalancerPoolState(tokenAddress);
+    default:
+      throw new InputError("Invalid external pool provider");
+  }
+}
+
+async function getBalancerPoolState(poolTokenAddress: string) {
+  const supportedBalancerPoolsMap = {
+    1: {
+      "50wstETH-50ACX": {
+        id: "0x36be1e97ea98ab43b4debf92742517266f5731a3000200000000000000000466",
+        address: "0x36Be1E97eA98AB43b4dEBf92742517266F5731a3",
+      },
+    },
+    5: {},
+  };
+
+  const config = {
+    network: {
+      ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID as 1 | 5],
+      pools: {
+        ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID as 1 | 5].pools,
+        ...supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID as 1 | 5],
+      },
+    },
+    rpcUrl: infuraProvider(HUB_POOL_CHAIN_ID).connection.url,
+  };
+  const balancer = new BalancerSDK(config);
+
+  const pool = await balancer.pools.findBy(
+    "address",
+    poolTokenAddress.toLowerCase()
+  );
+
+  if (!pool) {
+    throw new InputError(
+      `Balancer pool with address ${poolTokenAddress} not found`
+    );
+  }
+
+  const apr = await balancer.pools.apr(pool);
+
+  return {
+    estimatedApy: Number(apr.max / 1000).toFixed(2),
+    exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
+  };
 }
