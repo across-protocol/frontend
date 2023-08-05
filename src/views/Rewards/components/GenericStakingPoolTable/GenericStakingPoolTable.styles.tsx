@@ -127,7 +127,7 @@ export const ButtonCell = styled.div`
   border-top: 1px solid #3e4047;
 `;
 
-export const StakeButton = styled(Link)`
+export const StakeButton = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;

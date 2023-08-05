@@ -25,6 +25,7 @@ export type ConverterFnType = (wei: BigNumber) => BigNumber;
 
 export type StakingPool = {
   isExternalLP?: boolean;
+  externalLinkToLP?: string;
   tokenLogoURI: string;
   tokenLogsURIs?: [string, string];
   tokenSymbol: string;
@@ -58,7 +59,6 @@ export type StakingPool = {
   isStakingPoolOfUser: boolean;
   lpTokenFormatter: FormatterFnType;
   lpTokenParser: ParserFnType;
-  convertUsdToLPValue: ConverterFnType;
   convertLPValueToUsd: ConverterFnType;
   convertLPToUnderlying: ConverterFnType;
   convertUnderlyingToLP: ConverterFnType;
@@ -198,14 +198,6 @@ export async function fetchStakingPool(
       .mul(ConvertDecimals(lpTokenDecimalCount, 18)(lpAmount))
       .div(fixedPointAdjustment);
 
-  const convertUsdToLPValue = (usdAmount: BigNumber) =>
-    BigNumber.from(
-      ConvertDecimals(
-        18,
-        lpTokenDecimalCount
-      )(usdAmount.mul(fixedPointAdjustment).div(lpExchangeRateToUSD))
-    );
-
   const convertLPToUnderlying = (lp: BigNumber) =>
     lp.mul(lpExchangeRateToToken).div(fixedPointAdjustment);
   const convertUnderlyingToLP = (underlying: BigNumber) =>
@@ -259,6 +251,7 @@ export async function fetchStakingPool(
 
   return {
     isExternalLP,
+    externalLinkToLP: externalLP?.linkToLP,
     tokenLogoURI: logoURI,
     tokenLogsURIs: externalLP?.logoURIs,
     tokenSymbol: symbol,
@@ -292,7 +285,6 @@ export async function fetchStakingPool(
     secondsToMaxMultiplier,
     lpTokenFormatter,
     lpTokenParser,
-    convertUsdToLPValue,
     convertLPValueToUsd,
     convertLPToUnderlying,
     convertUnderlyingToLP,
@@ -331,7 +323,6 @@ export const DEFAULT_STAKING_POOL_DATA: StakingPool = {
     rewardsApy: BigNumber.from(0),
     minApy: BigNumber.from(0),
   },
-  convertUsdToLPValue: () => BigNumber.from(0),
   convertLPValueToUsd: () => BigNumber.from(0),
   convertLPToUnderlying: () => BigNumber.from(0),
   convertUnderlyingToLP: () => BigNumber.from(0),

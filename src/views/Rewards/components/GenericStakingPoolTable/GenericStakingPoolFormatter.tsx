@@ -1,7 +1,9 @@
+import { Link } from "react-router-dom";
+import { BigNumber } from "ethers";
+
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { IRow } from "components/Table/Table";
-import { BigNumber } from "ethers";
 import { formatEther, formatWeiPct } from "utils";
 import { ReactComponent as ExternalLink16 } from "assets/icons/arrow-right-16.svg";
 import {
@@ -243,12 +245,22 @@ function RowButtonCell({ data, meta }: PoolRowCellType) {
         <ExternalLink16 />
       </ExternalLinkButton>
     );
-  } else if (meta.hasLPTokens || meta.hasRewards || data.isExternalLP) {
-    button = <StakeButton to={specificPoolLink}>Stake</StakeButton>;
+  } else if (meta.hasLPTokens || meta.hasRewards) {
+    button = (
+      <StakeButton>
+        <Link to={specificPoolLink}>Stake</Link>
+      </StakeButton>
+    );
   } else {
     button = (
-      <StakeButton to={`/pool?symbol=${data.tokenSymbol.toLowerCase()}`}>
-        Add
+      <StakeButton>
+        {data.externalLinkToLP ? (
+          <a href={data.externalLinkToLP} target="_blank" rel="noreferrer">
+            Add
+          </a>
+        ) : (
+          <Link to={`/pool?symbol=${data.tokenSymbol.toLowerCase()}`}>Add</Link>
+        )}
       </StakeButton>
     );
   }
