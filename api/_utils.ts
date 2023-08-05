@@ -364,6 +364,17 @@ export const queries: Record<number, () => QueryBase> = {
       getLogger(),
       getGasMarkup(42161)
     ),
+  324: () =>
+    new sdk.relayFeeCalculator.EthereumQueries(
+      getProvider(324),
+      undefined,
+      "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF",
+      "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(324)
+    ),
   // testnets
   5: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
@@ -386,6 +397,17 @@ export const queries: Record<number, () => QueryBase> = {
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(421613)
+    ),
+  288: () =>
+    new sdk.relayFeeCalculator.EthereumQueries(
+      getProvider(288),
+      undefined,
+      "0x863859ef502F0Ee9676626ED5B418037252eFeb2",
+      "0x0faF6df7054946141266420b43783387A78d82A9",
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(288)
     ),
 };
 
@@ -522,6 +544,10 @@ export const getSpokePoolAddress = (_chainId: number): string => {
       return "0xBbc6009fEfFc27ce705322832Cb2068F8C1e0A58";
     case "42161":
       return "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A";
+    case "324":
+      return "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF";
+    case "280":
+      return "0x863859ef502F0Ee9676626ED5B418037252eFeb2";
     default:
       throw new Error("Invalid chainId provided");
   }

@@ -25,6 +25,24 @@
       "fromTokenSymbol": "WETH",
       "isNative": false,
       "l1TokenAddress": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"
+    },
+    {
+      "fromChain": 5,
+      "toChain": 280,
+      "fromTokenAddress": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+      "fromSpokeAddress": "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
+      "fromTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"
+    },
+    {
+      "fromChain": 280,
+      "toChain": 5,
+      "fromTokenAddress": "0x20b28B1e4665FFf290650586ad76E977EAb90c5D",
+      "fromSpokeAddress": "0x863859ef502F0Ee9676626ED5B418037252eFeb2",
+      "fromTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"
     }
   ],
   "pools": []

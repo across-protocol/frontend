@@ -31,7 +31,7 @@ import {
   convertToCapitalCase,
 } from "./format";
 import { getConfig } from "./config";
-import { ChainId } from "./utils";
+import { ChainId } from "./constants";
 import { categorizeNumberInRange } from "./math";
 import { range } from "lodash";
 
