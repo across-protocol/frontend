@@ -1,35 +1,61 @@
-import { ethers } from "ethers";
-import { hubPoolChainId, ChainId } from "./constants";
-const infuraId = process.env.REACT_APP_PUBLIC_INFURA_ID || "";
-const ArbitrumProviderUrl =
-  process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
-  `https://arbitrum-mainnet.infura.io/v3/${infuraId}`;
+import { ethers, providers } from "ethers";
+import { hubPoolChainId, ChainId, infuraId } from "./constants";
 
-const PolygonProviderUrl =
-  process.env.REACT_APP_CHAIN_137_PROVIDER_URL ||
-  `https://polygon-mainnet.infura.io/v3/${infuraId}`;
+function getInfuraProviderUrl(chainId: number) {
+  const infuraUrl = new providers.InfuraProvider(chainId, infuraId).connection
+    .url;
+  return infuraUrl;
+}
 
 export const providerUrls: [ChainId, string][] = [
-  [ChainId.MAINNET, `https://mainnet.infura.io/v3/${infuraId}`],
-  [ChainId.ARBITRUM, ArbitrumProviderUrl],
-  [ChainId.POLYGON, PolygonProviderUrl],
-  [ChainId.OPTIMISM, `https://optimism-mainnet.infura.io/v3/${infuraId}`],
-  [ChainId.ARBITRUM_GOERLI, `https://arbitrum-goerli.infura.io/v3/${infuraId}`],
-  [ChainId.GOERLI, `https://goerli.infura.io/v3/${infuraId}`],
-  [ChainId.MUMBAI, `https://polygon-mumbai.infura.io/v3/${infuraId}`],
+  [
+    ChainId.MAINNET,
+    process.env.REACT_APP_CHAIN_1_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.MAINNET),
+  ],
+  [
+    ChainId.ARBITRUM,
+    process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.ARBITRUM),
+  ],
+  [
+    ChainId.POLYGON,
+    process.env.REACT_APP_CHAIN_137_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.POLYGON),
+  ],
+  [
+    ChainId.OPTIMISM,
+    process.env.REACT_APP_CHAIN_10_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.OPTIMISM),
+  ],
+  [
+    ChainId.ARBITRUM_GOERLI,
+    process.env.REACT_APP_CHAIN_421613_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.ARBITRUM_GOERLI),
+  ],
+  [
+    ChainId.GOERLI,
+    process.env.REACT_APP_CHAIN_5_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.GOERLI),
+  ],
+  [
+    ChainId.MUMBAI,
+    process.env.REACT_APP_CHAIN_80001_PROVIDER_URL ||
+      getInfuraProviderUrl(ChainId.MUMBAI),
+  ],
 ];
 
 export const providerUrlsTable: Record<number, string> =
   Object.fromEntries(providerUrls);
 
-export const providers: [number, ethers.providers.StaticJsonRpcProvider][] =
-  providerUrls.map(([chainId, url]) => {
-    return [chainId, new ethers.providers.StaticJsonRpcProvider(url, chainId)];
-  });
 export const providersTable: Record<
   number,
   ethers.providers.StaticJsonRpcProvider
-> = Object.fromEntries(providers);
+> = Object.fromEntries(
+  providerUrls.map(([chainId, url]) => {
+    return [chainId, new ethers.providers.StaticJsonRpcProvider(url, chainId)];
+  })
+);
 
 export function getProvider(
   chainId: ChainId = hubPoolChainId

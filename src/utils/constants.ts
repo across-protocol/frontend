@@ -362,13 +362,6 @@ export const FLAT_RELAY_CAPITAL_FEE = process.env
 export const SHOW_ACX_NAV_TOKEN =
   process.env.REACT_APP_SHOW_ACX_NAV_TOKEN === "true";
 export const AddressZero = ethers.constants.AddressZero;
-export const ArbitrumProviderUrl =
-  process.env.REACT_APP_CHAIN_42161_PROVIDER_URL ||
-  `https://arbitrum-mainnet.infura.io/v3/${infuraId}`;
-
-export const PolygonProviderUrl =
-  process.env.REACT_APP_CHAIN_137_PROVIDER_URL ||
-  `https://polygon-mainnet.infura.io/v3/${infuraId}`;
 
 assert(
   isSupportedChainId(hubPoolChainId),
