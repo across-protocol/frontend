@@ -138,9 +138,12 @@ export const StakeButton = styled.div`
 
   height: ${40 / 16}rem;
 
-  color: #6cf9d8;
-  font-weight: 500;
-  text-decoration: none;
+  a,
+  button {
+    color: #6cf9d8;
+    font-weight: 500;
+    text-decoration: none;
+  }
 `;
 
 interface IStyledProgressBar {
