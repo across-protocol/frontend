@@ -398,16 +398,16 @@ export const queries: Record<number, () => QueryBase> = {
       getLogger(),
       getGasMarkup(421613)
     ),
-  288: () =>
+  280: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      getProvider(288),
+      getProvider(280),
       undefined,
       "0x863859ef502F0Ee9676626ED5B418037252eFeb2",
       "0x0faF6df7054946141266420b43783387A78d82A9",
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(288)
+      getGasMarkup(280)
     ),
 };
 
@@ -855,7 +855,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
         ...supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID as 1 | 5],
       },
     },
-    rpcUrl: infuraProvider(HUB_POOL_CHAIN_ID).connection.url,
+    rpcUrl: getProvider(HUB_POOL_CHAIN_ID).connection.url,
   };
   const balancer = new BalancerSDK(config);
 
