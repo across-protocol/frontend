@@ -29,6 +29,11 @@ export const providerUrls: [ChainId, string][] = [
       getInfuraProviderUrl(ChainId.OPTIMISM),
   ],
   [
+    ChainId.ZK_SYNC,
+    process.env.REACT_APP_CHAIN_324_PROVIDER_URL ||
+      "https://mainnet.era.zksync.io",
+  ],
+  [
     ChainId.ARBITRUM_GOERLI,
     process.env.REACT_APP_CHAIN_421613_PROVIDER_URL ||
       getInfuraProviderUrl(ChainId.ARBITRUM_GOERLI),
@@ -42,6 +47,11 @@ export const providerUrls: [ChainId, string][] = [
     ChainId.MUMBAI,
     process.env.REACT_APP_CHAIN_80001_PROVIDER_URL ||
       getInfuraProviderUrl(ChainId.MUMBAI),
+  ],
+  [
+    ChainId.ZK_SYNC_GOERLI,
+    process.env.REACT_APP_CHAIN_280_PROVIDER_URL ||
+      "https://zksync2-testnet.zksync.dev/",
   ],
 ];
 
