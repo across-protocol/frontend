@@ -173,7 +173,7 @@ export const resolveVercelEndpoint = () => {
       return `https://${url}`;
     case "development":
     default:
-      return `http://localhost:3000`;
+      return `http://127.0.0.1:3000`;
   }
 };
 
@@ -365,12 +365,13 @@ export const queries: Record<number, () => QueryBase> = {
       getGasMarkup(42161)
     ),
   324: () =>
+    // @TODO: replace with exposed adapter from sdk
     new sdk.relayFeeCalculator.EthereumQueries(
       getProvider(324),
       undefined,
       "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF",
       "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
-      undefined,
+      "0x893d0d70ad97717052e3aa8903d9615804167759",
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(324)
@@ -382,7 +383,7 @@ export const queries: Record<number, () => QueryBase> = {
       undefined,
       "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
       undefined,
-      undefined,
+      "0x893d0d70ad97717052e3aa8903d9615804167759",
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(5)
@@ -391,9 +392,9 @@ export const queries: Record<number, () => QueryBase> = {
     new sdk.relayFeeCalculator.EthereumQueries(
       getProvider(421613),
       undefined,
+      "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
       undefined,
-      undefined,
-      undefined,
+      "0x893d0d70ad97717052e3aa8903d9615804167759",
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(421613)
@@ -404,7 +405,7 @@ export const queries: Record<number, () => QueryBase> = {
       undefined,
       "0x863859ef502F0Ee9676626ED5B418037252eFeb2",
       "0x0faF6df7054946141266420b43783387A78d82A9",
-      undefined,
+      "0x893d0d70ad97717052e3aa8903d9615804167759",
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(280)
