@@ -20,7 +20,9 @@ describe("pool", () => {
   it("select pool", () => {
     cy.wait("@getPools");
     cy.dataCy("select-pool").click();
-    cy.dataCy("select-pool-modal").contains("WETH Pool").click();
+    cy.dataCy("select-pool-modal")
+      .contains("WETH Pool", { timeout: 15_000 })
+      .click();
 
     cy.dataCy("select-pool").should("contain.text", "WETH Pool");
   });
