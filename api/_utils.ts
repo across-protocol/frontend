@@ -365,13 +365,12 @@ export const queries: Record<number, () => QueryBase> = {
       getGasMarkup(42161)
     ),
   324: () =>
-    // @TODO: replace with exposed adapter from sdk
-    new sdk.relayFeeCalculator.EthereumQueries(
+    new sdk.relayFeeCalculator.ZkSyncQueries(
       getProvider(324),
       undefined,
-      "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF",
-      "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
-      "0x893d0d70ad97717052e3aa8903d9615804167759",
+      undefined,
+      undefined,
+      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(324)
@@ -382,7 +381,7 @@ export const queries: Record<number, () => QueryBase> = {
       getProvider(5),
       undefined,
       "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
-      undefined,
+      "0xd35CCeEAD182dcee0F148EbaC9447DA2c4D449c4",
       "0x893d0d70ad97717052e3aa8903d9615804167759",
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
