@@ -375,7 +375,10 @@ export const queries: Record<number, () => QueryBase> = {
       getLogger(),
       getGasMarkup(324)
     ),
-  // testnets
+  /* --------------------------- Testnet queries --------------------------- */
+  // The `dummyFromAddress` thats used for gas estimation is not preloaded with USDC on testnets.
+  // Until we preload it, we'll the mainnet equivalents. This should be fine since we're only using
+  // these for gas estimation.
   5: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
       getProvider(1),
