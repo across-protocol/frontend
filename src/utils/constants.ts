@@ -141,7 +141,6 @@ export type ChainInfo = {
   constructExplorerLink: (txHash: string) => string;
   pollingInterval: number;
   nativeCurrencySymbol: string;
-  earliestBlock: number;
 };
 
 export type ChainInfoList = ChainInfo[];
@@ -164,7 +163,6 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: defaultConstructExplorerLink("https://etherscan.io"),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 14704425,
   },
   {
     name: "Arbitrum",
@@ -178,7 +176,6 @@ export const chainInfoList: ChainInfoList = [
       `https://arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "AETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 11102271,
   },
   {
     name: "Optimism",
@@ -191,7 +188,6 @@ export const chainInfoList: ChainInfoList = [
       `https://optimistic.etherscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "OETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 6979967,
   },
   {
     name: "Polygon",
@@ -206,7 +202,6 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "MATIC",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 27875891,
   },
   {
     name: "zkSync",
@@ -221,7 +216,6 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 10352565,
   },
   {
     name: "Goerli",
@@ -235,7 +229,6 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 6586188,
   },
   {
     name: "Mumbai",
@@ -249,7 +242,6 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "WMATIC",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 25751326,
   },
   {
     name: "Arbitrum Goerli",
@@ -262,7 +254,6 @@ export const chainInfoList: ChainInfoList = [
       `https://testnet.arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 10523275,
   },
   {
     name: "zkSync Goerli",
@@ -277,7 +268,6 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 10263886,
   },
 ];
 
@@ -436,7 +426,6 @@ export function getChainInfo(chainId: number): ChainInfo {
         `https://blockscan.com/tx/${txHash}`,
       nativeCurrencySymbol: "ETH",
       pollingInterval: defaultBlockPollingInterval,
-      earliestBlock: 1,
     };
   }
 
