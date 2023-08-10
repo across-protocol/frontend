@@ -4,9 +4,12 @@
 import { HubPool__factory } from "@across-protocol/contracts-v2/dist/typechain";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
+import {
+  BLOCK_TAG_LAG,
+  disabledL1Tokens,
+  TOKEN_SYMBOLS_MAP,
+} from "./_constants";
 import { TypedVercelRequest } from "./_types";
-import * as sdk from "@across-protocol/sdk-v2";
 import { object, assert, Infer, optional } from "superstruct";
 
 import {
@@ -92,17 +95,9 @@ const handler = async (
       originChainId
     );
 
-    const tokenDetails = Object.values({
-      ...sdk.constants.TOKEN_SYMBOLS_MAP,
-      USDC: {
-        ...sdk.constants.TOKEN_SYMBOLS_MAP.USDC,
-        addresses: {
-          ...sdk.constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
-          // TODO: remove when new sdk version is released
-          [5 as number]: "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
-        },
-      },
-    }).find((details) => details.addresses[HUB_POOL_CHAIN_ID] === l1Token);
+    const tokenDetails = Object.values(TOKEN_SYMBOLS_MAP).find(
+      (details) => details.addresses[HUB_POOL_CHAIN_ID] === l1Token
+    );
     if (tokenDetails === undefined)
       throw new InputError("Unsupported token address");
     const symbol = tokenDetails.symbol;
