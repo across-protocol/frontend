@@ -652,3 +652,7 @@ export const disabledBridgeTokens = String(
 export const disabledChainIds = (
   process.env.REACT_APP_DISABLED_CHAINS || ""
 ).split(",");
+
+export const disabledChainIdsForAvailableRoutes = (
+  process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
+).split(",");

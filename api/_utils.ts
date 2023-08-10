@@ -65,6 +65,14 @@ export const DISABLED_CHAINS = (
   process.env.REACT_APP_DISABLED_CHAINS || ""
 ).split(",");
 
+// This is an array of chainIds that should be disabled. In contrast to the
+// above constant `DISABLED_CHAINS`, this constant is used to disable chains
+// only for the `/available-routes` endpoint and DOES NOT affect the
+// `ENABLED_ROUTES` object.
+export const DISABLED_CHAINS_FOR_AVAILABLE_ROUTES = (
+  process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
+).split(",");
+
 const _ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1
     ? enabledMainnetRoutesAsJson
