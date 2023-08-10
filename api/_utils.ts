@@ -381,41 +381,38 @@ export const queries: Record<number, () => QueryBase> = {
       getGasMarkup(324)
     ),
   /* --------------------------- Testnet queries --------------------------- */
-  // The `dummyFromAddress` thats used for gas estimation is not preloaded with USDC on testnets.
-  // Until we preload it, we'll the mainnet equivalents. This should be fine since we're only using
-  // these for gas estimation.
   5: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      getProvider(1),
+      getProvider(5),
       undefined,
-      undefined,
-      undefined,
-      undefined,
+      "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
+      "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
+      "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(1)
+      getGasMarkup(5)
     ),
   421613: () =>
-    new sdk.relayFeeCalculator.ArbitrumQueries(
-      getProvider(42161),
+    new sdk.relayFeeCalculator.EthereumQueries(
+      getProvider(421613),
       undefined,
+      "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
       undefined,
-      undefined,
-      undefined,
+      "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(42161)
+      getGasMarkup(421613)
     ),
   280: () =>
-    new sdk.relayFeeCalculator.ZkSyncQueries(
-      getProvider(324),
+    new sdk.relayFeeCalculator.EthereumQueries(
+      getProvider(280),
       undefined,
-      undefined,
-      undefined,
-      undefined,
+      "0x863859ef502F0Ee9676626ED5B418037252eFeb2",
+      "0x0faF6df7054946141266420b43783387A78d82A9",
+      "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(324)
+      getGasMarkup(280)
     ),
 };
 
