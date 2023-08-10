@@ -397,7 +397,7 @@ export const queries: Record<number, () => QueryBase> = {
       getProvider(421613),
       undefined,
       "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
-      "0xfd064A18f3BF249cf1f87FC203E90D8f650f2d63",
+      "0x8FB1E3fC51F3b789dED7557E680551d93Ea9d892",
       "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
