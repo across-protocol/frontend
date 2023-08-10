@@ -38,11 +38,11 @@
     {
       "fromChain": 5,
       "toChain": 280,
-      "fromTokenAddress": "0xd35CCeEAD182dcee0F148EbaC9447DA2c4D449c4",
+      "fromTokenAddress": "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
       "fromSpokeAddress": "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
       "fromTokenSymbol": "USDC",
       "isNative": false,
-      "l1TokenAddress": "0xd35CCeEAD182dcee0F148EbaC9447DA2c4D449c4"
+      "l1TokenAddress": "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"
     },
     {
       "fromChain": 280,
@@ -60,7 +60,7 @@
       "fromSpokeAddress": "0x863859ef502F0Ee9676626ED5B418037252eFeb2",
       "fromTokenSymbol": "USDC",
       "isNative": false,
-      "l1TokenAddress": "0xd35CCeEAD182dcee0F148EbaC9447DA2c4D449c4"
+      "l1TokenAddress": "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"
     }
   ],
   "pools": []

@@ -92,9 +92,17 @@ const handler = async (
       originChainId
     );
 
-    const tokenDetails = Object.values(sdk.constants.TOKEN_SYMBOLS_MAP).find(
-      (details) => details.addresses[HUB_POOL_CHAIN_ID] === l1Token
-    );
+    const tokenDetails = Object.values({
+      ...sdk.constants.TOKEN_SYMBOLS_MAP,
+      USDC: {
+        ...sdk.constants.TOKEN_SYMBOLS_MAP.USDC,
+        addresses: {
+          ...sdk.constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
+          // TODO: remove when new sdk version is released
+          [5 as number]: "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
+        },
+      },
+    }).find((details) => details.addresses[HUB_POOL_CHAIN_ID] === l1Token);
     if (tokenDetails === undefined)
       throw new InputError("Unsupported token address");
     const symbol = tokenDetails.symbol;
