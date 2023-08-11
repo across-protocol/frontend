@@ -12,6 +12,7 @@ import { ReactComponent as EthereumGrayscaleLogo } from "assets/grayscale-logos/
 import { ReactComponent as PolygonGrayscaleLogo } from "assets/grayscale-logos/polygon.svg";
 import { ReactComponent as ArbitrumGrayscaleLogo } from "assets/grayscale-logos/arbitrum.svg";
 import { ReactComponent as OptimismGrayscaleLogo } from "assets/grayscale-logos/optimism.svg";
+import { ReactComponent as ZkSyncGrayscaleLogo } from "assets/grayscale-logos/zksync.svg";
 import { getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
 
@@ -55,9 +56,12 @@ const DepositConfirmation = ({
     [ChainId.POLYGON]: <PolygonGrayscaleLogo />,
     [ChainId.OPTIMISM]: <OptimismGrayscaleLogo />,
     [ChainId.MAINNET]: <EthereumGrayscaleLogo />,
+    [ChainId.ZK_SYNC]: <ZkSyncGrayscaleLogo />,
+    // testnets
     [ChainId.GOERLI]: <EthereumGrayscaleLogo />,
     [ChainId.ARBITRUM_GOERLI]: <EthereumGrayscaleLogo />,
     [ChainId.MUMBAI]: <EthereumGrayscaleLogo />,
+    [ChainId.ZK_SYNC_GOERLI]: <ZkSyncGrayscaleLogo />,
   };
 
   return (

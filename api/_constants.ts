@@ -104,3 +104,5 @@ export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
 export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;
+
+export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;

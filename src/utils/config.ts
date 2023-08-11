@@ -82,7 +82,10 @@ export class ConfigClient {
       (route) =>
         !this.disabledTokens.includes(route.fromTokenSymbol) &&
         ![route.fromChain, route.toChain].some((chainId) =>
-          constants.disabledChainIds.includes(chainId.toString())
+          [
+            ...constants.disabledChainIds,
+            ...constants.disabledChainIdsForAvailableRoutes,
+          ].includes(chainId.toString())
         )
     );
   }

@@ -3,8 +3,13 @@ import injectedModule from "@web3-onboard/injected-wallets";
 import walletConnectModule from "@web3-onboard/walletconnect";
 import gnosisModule from "@web3-onboard/gnosis";
 import coinbaseModule from "@web3-onboard/coinbase";
-import { onboardApiKey, ChainId, walletConnectProjectId } from "utils";
-import { providerUrlsTable } from "utils/providers";
+
+import {
+  onboardApiKey,
+  walletConnectProjectId,
+  chainInfoList,
+  providerUrlsTable,
+} from "utils";
 import logo from "assets/across-logo-v2.svg";
 
 const injected = injectedModule();
@@ -20,38 +25,13 @@ export function onboardInit() {
     apiKey: onboardApiKey,
     wallets: [injected, coinbase, walletConnect, gnosis],
 
-    chains: [
-      {
-        id: 1,
-        token: "ETH",
-        label: "Ethereum Mainnet",
-        rpcUrl: providerUrlsTable[ChainId.MAINNET],
-      },
-      {
-        id: 5,
-        token: "ETH",
-        label: "Goerli Testnet",
-        rpcUrl: providerUrlsTable[ChainId.GOERLI],
-      },
-      {
-        id: 10,
-        token: "OP",
-        label: "Optimism Mainnet",
-        rpcUrl: providerUrlsTable[ChainId.OPTIMISM],
-      },
-      {
-        id: 137,
-        token: "MATIC",
-        label: "Polygon Mainnet",
-        rpcUrl: providerUrlsTable[ChainId.POLYGON],
-      },
-      {
-        id: 42161,
-        token: "ETH",
-        label: "Arbitrum Mainnet",
-        rpcUrl: providerUrlsTable[ChainId.ARBITRUM],
-      },
-    ],
+    chains: chainInfoList.map((chainInfo) => ({
+      id: chainInfo.chainId,
+      label: chainInfo.fullName || chainInfo.name,
+      token: chainInfo.nativeCurrencySymbol,
+      rpcUrl: chainInfo.rpcUrl || providerUrlsTable[chainInfo.chainId],
+    })),
+
     appMetadata: {
       name: "Across Bridge",
       icon: logo,

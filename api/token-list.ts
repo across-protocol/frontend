@@ -5,6 +5,7 @@ import {
   handleErrorCondition,
   getFallbackTokenLogoURI,
   ENABLED_ROUTES,
+  DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 
@@ -12,30 +13,37 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
   const logger = getLogger();
 
   try {
-    const tokensPerChain = ENABLED_ROUTES.routes.reduce(
-      (acc, route) => {
-        return {
-          ...acc,
-          [`${route.fromTokenSymbol}-${route.fromChain}`]: {
-            symbol: route.fromTokenSymbol,
-            chainId: route.fromChain,
-            address: route.fromTokenAddress,
-            isNative: route.isNative,
-            l1TokenAddress: route.l1TokenAddress,
-          },
-        };
-      },
-      {} as Record<
-        string,
-        {
-          symbol: string;
-          chainId: number;
-          address: string;
-          isNative: boolean;
-          l1TokenAddress: string;
-        }
-      >
-    );
+    const tokensPerChain = ENABLED_ROUTES.routes
+      .filter(
+        (route) =>
+          ![route.fromChain, route.toChain].some((chainId) =>
+            DISABLED_CHAINS_FOR_AVAILABLE_ROUTES.includes(String(chainId))
+          )
+      )
+      .reduce(
+        (acc, route) => {
+          return {
+            ...acc,
+            [`${route.fromTokenSymbol}-${route.fromChain}`]: {
+              symbol: route.fromTokenSymbol,
+              chainId: route.fromChain,
+              address: route.fromTokenAddress,
+              isNative: route.isNative,
+              l1TokenAddress: route.l1TokenAddress,
+            },
+          };
+        },
+        {} as Record<
+          string,
+          {
+            symbol: string;
+            chainId: number;
+            address: string;
+            isNative: boolean;
+            l1TokenAddress: string;
+          }
+        >
+      );
 
     const enrichedTokensPerChain = Object.values(tokensPerChain).map(
       (token) => {

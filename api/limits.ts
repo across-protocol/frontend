@@ -4,9 +4,12 @@
 import { HubPool__factory } from "@across-protocol/contracts-v2/dist/typechain";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { BLOCK_TAG_LAG, disabledL1Tokens } from "./_constants";
+import {
+  BLOCK_TAG_LAG,
+  disabledL1Tokens,
+  TOKEN_SYMBOLS_MAP,
+} from "./_constants";
 import { TypedVercelRequest } from "./_types";
-import * as sdk from "@across-protocol/sdk-v2";
 import { object, assert, Infer, optional } from "superstruct";
 
 import {
@@ -92,7 +95,7 @@ const handler = async (
       originChainId
     );
 
-    const tokenDetails = Object.values(sdk.constants.TOKEN_SYMBOLS_MAP).find(
+    const tokenDetails = Object.values(TOKEN_SYMBOLS_MAP).find(
       (details) => details.addresses[HUB_POOL_CHAIN_ID] === l1Token
     );
     if (tokenDetails === undefined)

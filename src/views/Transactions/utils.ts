@@ -1,5 +1,9 @@
 import { Deposit } from "hooks/useDeposits";
-import { getConfig } from "utils";
+import {
+  getConfig,
+  disabledChainIds,
+  disabledChainIdsForAvailableRoutes,
+} from "utils";
 
 import { SupportedTxTuple } from "./types";
 import { BigNumber } from "ethers";
@@ -10,6 +14,16 @@ export function getSupportedTxTuples(
   const config = getConfig();
   return transactions.reduce((supported, tx) => {
     try {
+      // Do not show transactions for disabled chains
+      if (
+        [tx.sourceChainId, tx.destinationChainId].some((chainId) =>
+          [...disabledChainIds, ...disabledChainIdsForAvailableRoutes].includes(
+            String(chainId)
+          )
+        )
+      ) {
+        return supported;
+      }
       // this can error out if there are transactions with new tokens not added to routes, ie we cant lookup by address
       const token = config.getTokenInfoByAddress(
         tx.sourceChainId,

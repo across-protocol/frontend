@@ -36,10 +36,8 @@ export function useIsWrongNetwork(baseChain?: number) {
   const isWrongNetworkHandlerWithoutError = async () => {
     try {
       await isWrongNetworkHandler();
-    } catch (_e) {
-      console.error(
-        `Wrong network. Please switch to network ${chainInfoTable[correctChainId]?.name}`
-      );
+    } catch (error) {
+      console.error(error);
     }
   };
 

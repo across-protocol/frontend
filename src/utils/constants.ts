@@ -11,6 +11,7 @@ import wethLogo from "assets/weth-logo.svg";
 import arbitrumLogo from "assets/arbitrum-logo.svg";
 import bobaLogo from "assets/boba-logo.svg";
 import polygonLogo from "assets/polygon-logo.svg";
+import zkSyncLogo from "assets/zksync-logo.svg";
 import usdcLogo from "assets/usdc-logo.png";
 import daiLogo from "assets/dai.svg";
 import wbtcLogo from "assets/wbtc.svg";
@@ -26,6 +27,7 @@ import ethereumLogoGrayscale from "assets/grayscale-logos/eth.svg";
 import optimismLogoGrayscale from "assets/grayscale-logos/optimism.svg";
 import arbitrumLogoGrayscale from "assets/grayscale-logos/arbitrum.svg";
 import polygonLogoGrayscale from "assets/grayscale-logos/polygon.svg";
+import zkSyncLogoGrayscale from "assets/grayscale-logos/zksync.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -37,8 +39,10 @@ export enum ChainId {
   OPTIMISM = 10,
   ARBITRUM = 42161,
   POLYGON = 137,
+  ZK_SYNC = 324,
   // testnets
   ARBITRUM_GOERLI = 421613,
+  ZK_SYNC_GOERLI = 280,
   GOERLI = 5,
   // Polygon testnet
   MUMBAI = 80001,
@@ -117,11 +121,13 @@ export const configStoreAddresses: Record<ChainId, string> = {
   [ChainId.ARBITRUM]: ethers.constants.AddressZero,
   [ChainId.OPTIMISM]: ethers.constants.AddressZero,
   [ChainId.POLYGON]: ethers.constants.AddressZero,
+  [ChainId.ZK_SYNC]: ethers.constants.AddressZero,
   [ChainId.ARBITRUM_GOERLI]: ethers.constants.AddressZero,
   [ChainId.GOERLI]: ethers.utils.getAddress(
     "0x3215e3C91f87081757d0c41EF0CB77738123Be83"
   ),
   [ChainId.MUMBAI]: ethers.constants.AddressZero,
+  [ChainId.ZK_SYNC_GOERLI]: ethers.constants.AddressZero,
 };
 
 export type ChainInfo = {
@@ -135,7 +141,6 @@ export type ChainInfo = {
   constructExplorerLink: (txHash: string) => string;
   pollingInterval: number;
   nativeCurrencySymbol: string;
-  earliestBlock: number;
 };
 
 export type ChainInfoList = ChainInfo[];
@@ -158,7 +163,6 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: defaultConstructExplorerLink("https://etherscan.io"),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 14704425,
   },
   {
     name: "Arbitrum",
@@ -172,7 +176,6 @@ export const chainInfoList: ChainInfoList = [
       `https://arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "AETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 11102271,
   },
   {
     name: "Optimism",
@@ -185,7 +188,6 @@ export const chainInfoList: ChainInfoList = [
       `https://optimistic.etherscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "OETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 6979967,
   },
   {
     name: "Polygon",
@@ -200,7 +202,20 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "MATIC",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 27875891,
+  },
+  {
+    name: "zkSync",
+    fullName: "zkSync Era",
+    chainId: ChainId.ZK_SYNC,
+    logoURI: zkSyncLogo,
+    grayscaleLogoURI: zkSyncLogoGrayscale,
+    rpcUrl: "https://mainnet.era.zksync.io",
+    explorerUrl: "https://explorer.zksync.io",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://explorer.zksync.io"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
   },
   {
     name: "Goerli",
@@ -214,7 +229,6 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 6586188,
   },
   {
     name: "Mumbai",
@@ -228,7 +242,6 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "WMATIC",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 25751326,
   },
   {
     name: "Arbitrum Goerli",
@@ -241,7 +254,20 @@ export const chainInfoList: ChainInfoList = [
       `https://testnet.arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    earliestBlock: 10523275,
+  },
+  {
+    name: "zkSync Goerli",
+    fullName: "zkSync Testnet Goerli",
+    chainId: ChainId.ZK_SYNC_GOERLI,
+    logoURI: zkSyncLogo,
+    grayscaleLogoURI: zkSyncLogoGrayscale,
+    rpcUrl: "https://testnet.era.zksync.dev",
+    explorerUrl: "https://goerli.explorer.zksync.io",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://goerli.explorer.zksync.io"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
   },
 ];
 
@@ -400,7 +426,6 @@ export function getChainInfo(chainId: number): ChainInfo {
         `https://blockscan.com/tx/${txHash}`,
       nativeCurrencySymbol: "ETH",
       pollingInterval: defaultBlockPollingInterval,
-      earliestBlock: 1,
     };
   }
 
@@ -626,4 +651,8 @@ export const disabledBridgeTokens = String(
 
 export const disabledChainIds = (
   process.env.REACT_APP_DISABLED_CHAINS || ""
+).split(",");
+
+export const disabledChainIdsForAvailableRoutes = (
+  process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");

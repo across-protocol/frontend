@@ -18,6 +18,7 @@ import {
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
   EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
+  TOKEN_SYMBOLS_MAP,
 } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
@@ -62,6 +63,14 @@ export const DISABLED_ROUTE_TOKENS = (
 // data (e.g. the ENABLED_ROUTES object and the data/routes.json files).
 export const DISABLED_CHAINS = (
   process.env.REACT_APP_DISABLED_CHAINS || ""
+).split(",");
+
+// This is an array of chainIds that should be disabled. In contrast to the
+// above constant `DISABLED_CHAINS`, this constant is used to disable chains
+// only for the `/available-routes` endpoint and DOES NOT affect the
+// `ENABLED_ROUTES` object.
+export const DISABLED_CHAINS_FOR_AVAILABLE_ROUTES = (
+  process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
 const _ENABLED_ROUTES =
@@ -173,7 +182,7 @@ export const resolveVercelEndpoint = () => {
       return `https://${url}`;
     case "development":
     default:
-      return `http://localhost:3000`;
+      return `http://127.0.0.1:3000`;
   }
 };
 
@@ -260,9 +269,7 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
       chainId: 1,
       hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
       wethAddress:
-        sdk.constants.TOKEN_SYMBOLS_MAP.WETH.addresses[
-          sdk.constants.CHAIN_IDs.MAINNET
-        ],
+        TOKEN_SYMBOLS_MAP.WETH.addresses[sdk.constants.CHAIN_IDs.MAINNET],
       configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
       acceleratingDistributorAddress:
         "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
@@ -272,9 +279,7 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
       chainId: 5,
       hubPoolAddress: "0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d",
       wethAddress:
-        sdk.constants.TOKEN_SYMBOLS_MAP.WETH.addresses[
-          sdk.constants.CHAIN_IDs.GOERLI
-        ],
+        TOKEN_SYMBOLS_MAP.WETH.addresses[sdk.constants.CHAIN_IDs.GOERLI],
       configStoreAddress: "0x3215e3C91f87081757d0c41EF0CB77738123Be83",
       acceleratingDistributorAddress:
         "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC",
@@ -364,12 +369,23 @@ export const queries: Record<number, () => QueryBase> = {
       getLogger(),
       getGasMarkup(42161)
     ),
-  // testnets
+  324: () =>
+    new sdk.relayFeeCalculator.ZkSyncQueries(
+      getProvider(324),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(324)
+    ),
+  /* --------------------------- Testnet queries --------------------------- */
   5: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(
+    new sdk.relayFeeCalculator.EthereumGoerliQueries(
       getProvider(5),
       undefined,
-      "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
+      undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
@@ -377,7 +393,7 @@ export const queries: Record<number, () => QueryBase> = {
       getGasMarkup(5)
     ),
   421613: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(
+    new sdk.relayFeeCalculator.ArbitrumGoerliQueries(
       getProvider(421613),
       undefined,
       undefined,
@@ -386,6 +402,17 @@ export const queries: Record<number, () => QueryBase> = {
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(421613)
+    ),
+  280: () =>
+    new sdk.relayFeeCalculator.zkSyncGoerliQueries(
+      getProvider(280),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(280)
     ),
 };
 
@@ -422,7 +449,7 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
  * @returns A corresponding symbol to the given `tokenAddress`
  */
 export const getTokenSymbol = (tokenAddress: string): string => {
-  const symbol = Object.entries(sdk.constants.TOKEN_SYMBOLS_MAP)?.find(
+  const symbol = Object.entries(TOKEN_SYMBOLS_MAP).find(
     ([_symbol, { addresses }]) =>
       addresses[HUB_POOL_CHAIN_ID]?.toLowerCase() === tokenAddress.toLowerCase()
   )?.[0];
@@ -522,6 +549,15 @@ export const getSpokePoolAddress = (_chainId: number): string => {
       return "0xBbc6009fEfFc27ce705322832Cb2068F8C1e0A58";
     case "42161":
       return "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A";
+    case "324":
+      return "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF";
+    // testnets
+    case "5":
+      return "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7";
+    case "421613":
+      return "0xD29C85F15DF544bA632C9E25829fd29d767d7978";
+    case "280":
+      return "0x863859ef502F0Ee9676626ED5B418037252eFeb2";
     default:
       throw new Error("Invalid chainId provided");
   }
@@ -775,8 +811,7 @@ export async function tagReferrer(
 }
 
 export function getFallbackTokenLogoURI(l1TokenAddress: string) {
-  const isACX =
-    sdk.constants.TOKEN_SYMBOLS_MAP.ACX.addresses[1] === l1TokenAddress;
+  const isACX = TOKEN_SYMBOLS_MAP.ACX.addresses[1] === l1TokenAddress;
 
   if (isACX) {
     return "https://across.to/logo-small.png";
@@ -829,7 +864,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
         ...supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID as 1 | 5],
       },
     },
-    rpcUrl: infuraProvider(HUB_POOL_CHAIN_ID).connection.url,
+    rpcUrl: getProvider(HUB_POOL_CHAIN_ID).connection.url,
   };
   const balancer = new BalancerSDK(config);
 
