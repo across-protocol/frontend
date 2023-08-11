@@ -105,14 +105,4 @@ export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
 // 1:1 because we don't need to handle underlying tokens on FE
 export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;
 
-export const TOKEN_SYMBOLS_MAP = {
-  ...constants.TOKEN_SYMBOLS_MAP,
-  USDC: {
-    ...constants.TOKEN_SYMBOLS_MAP.USDC,
-    addresses: {
-      ...constants.TOKEN_SYMBOLS_MAP.USDC.addresses,
-      // TODO: remove when new sdk version is released
-      [5 as number]: "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
-    },
-  },
-};
+export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;

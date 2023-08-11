@@ -382,34 +382,34 @@ export const queries: Record<number, () => QueryBase> = {
     ),
   /* --------------------------- Testnet queries --------------------------- */
   5: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(
+    new sdk.relayFeeCalculator.EthereumGoerliQueries(
       getProvider(5),
       undefined,
-      "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7",
-      "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
-      "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
+      undefined,
+      undefined,
+      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(5)
     ),
   421613: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(
+    new sdk.relayFeeCalculator.ArbitrumGoerliQueries(
       getProvider(421613),
       undefined,
-      "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
-      "0x8FB1E3fC51F3b789dED7557E680551d93Ea9d892",
-      "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
+      undefined,
+      undefined,
+      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(421613)
     ),
   280: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(
+    new sdk.relayFeeCalculator.zkSyncGoerliQueries(
       getProvider(280),
       undefined,
-      "0x863859ef502F0Ee9676626ED5B418037252eFeb2",
-      "0x0faF6df7054946141266420b43783387A78d82A9",
-      "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
+      undefined,
+      undefined,
+      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(280)
