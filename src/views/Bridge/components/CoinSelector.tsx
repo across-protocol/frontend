@@ -135,7 +135,7 @@ function useCoinSelector(
   useEffect(() => {
     validateAndSetUserInput();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userAmountInput]);
+  }, [userAmountInput, toChain, fromChain]);
 
   useEffect(() => {
     if (isConnected) {
