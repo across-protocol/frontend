@@ -21,6 +21,7 @@ import {
   TOKEN_SYMBOLS_MAP,
 } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
+import { DEFAULT_SIMULATED_RELAYER_ADDRESS } from "@across-protocol/sdk-v2/dist/relayFeeCalculator";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
 import { VercelResponse } from "@vercel/node";
 
@@ -310,15 +311,12 @@ export const getHubPoolClient = () => {
   );
 };
 
-// Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
-// gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
-// a USDC approval for the _current_ spoke pools on Optimism (0x6f26Bf09B1C792e3228e5467807a900A503c0281) and Arbitrum
-// (0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A). It also has a small amount of USDC ($0.10) used for estimations.
-// If this address lacks either of these, estimations will fail and relays to optimism and arbitrum will hang when
-// estimating gas. Defaults to 0x893d0d70ad97717052e3aa8903d9615804167759 so the app can technically run without this.
+// Note: This address is used as the from address for simulated relay transactions to estimate gas consumtion.
+// This address should be pre-loaded with a USDC approval for the _current_ spoke pools. It also has a small
+// amount of USDC ($0.10) used for estimations. If this address lacks either of these, estimations will fail.
+// Defaults to an address that is not in active use, so the app can technically run without this.
 export const dummyFromAddress =
-  process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
-  "0x893d0d70ad97717052e3aa8903d9615804167759";
+  process.env.REACT_APP_DUMMY_FROM_ADDRESS || DEFAULT_SIMULATED_RELAYER_ADDRESS;
 
 export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
