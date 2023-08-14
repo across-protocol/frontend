@@ -719,8 +719,8 @@ export function handleErrorCondition(
 
 /* ------------------------- superstruct validators ------------------------- */
 
-export function parsableBigNumberString() {
-  return define<string>("parsableBigNumberString", (value) => {
+export function parseableBigNumberString() {
+  return define<string>("parseableBigNumberString", (value) => {
     try {
       BigNumber.from(value);
       return true;

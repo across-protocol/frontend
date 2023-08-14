@@ -6,7 +6,7 @@ import {
   getLogger,
   InputError,
   handleErrorCondition,
-  parsableBigNumberString,
+  parseableBigNumberString,
   validAddress,
   positiveIntStr,
   boolStr,
@@ -16,12 +16,12 @@ import {
 } from "./_utils";
 
 const BuildDepositTxQueryParamsSchema = type({
-  amount: parsableBigNumberString(),
+  amount: parseableBigNumberString(),
   token: validAddress(),
   destinationChainId: positiveIntStr(),
   originChainId: positiveIntStr(),
   recipient: validAddress(),
-  relayerFeePct: parsableBigNumberString(),
+  relayerFeePct: parseableBigNumberString(),
   quoteTimestamp: positiveIntStr(),
   message: optional(string()),
   maxCount: optional(boolStr()),

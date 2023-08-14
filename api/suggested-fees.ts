@@ -17,7 +17,7 @@ import {
   isRouteEnabled,
   getCachedTokenPrice,
   handleErrorCondition,
-  parsableBigNumberString,
+  parseableBigNumberString,
   validAddress,
   positiveIntStr,
   boolStr,
@@ -27,7 +27,7 @@ import {
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
-  amount: parsableBigNumberString(),
+  amount: parseableBigNumberString(),
   token: validAddress(),
   destinationChainId: positiveIntStr(),
   originChainId: optional(positiveIntStr()),
