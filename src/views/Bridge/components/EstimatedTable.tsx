@@ -98,7 +98,11 @@ function TotalReceive({
 
   return (
     <TotalReceiveRow>
-      <Tooltip body={tooltipText} placement="bottom-start">
+      <Tooltip
+        tooltipId="eth-weth-info"
+        body={tooltipText}
+        placement="bottom-start"
+      >
         <WarningInfoIcon />
       </Tooltip>
       <TokenFee
