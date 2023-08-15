@@ -23,7 +23,11 @@ export function getReceiveTokenSymbol(
     return "WETH";
   }
 
-  if (bridgeTokenSymbol === "WETH" && !isReceiverContract) {
+  if (
+    bridgeTokenSymbol === "WETH" &&
+    !isDestinationChainPolygon &&
+    !isReceiverContract
+  ) {
     return "ETH";
   }
 
