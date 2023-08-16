@@ -369,7 +369,8 @@ const AnimatedLogo = styled.div<{
     height: 48px;
     border-radius: 100%;
     & rect,
-    circle {
+    circle,
+    #path-to-animate {
       transition: fill 1s ease-in-out;
       fill: ${({ completed }) => (completed ? "#6cf9d8" : "#9daab3")};
     }
