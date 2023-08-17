@@ -34,6 +34,11 @@ export const providerUrls: [ChainId, string][] = [
       "https://mainnet.era.zksync.io",
   ],
   [
+    ChainId.BASE,
+    process.env.REACT_APP_CHAIN_8453_PROVIDER_URL || "https://mainnet.base.org",
+  ],
+  // testnets
+  [
     ChainId.ARBITRUM_GOERLI,
     process.env.REACT_APP_CHAIN_421613_PROVIDER_URL ||
       getInfuraProviderUrl(ChainId.ARBITRUM_GOERLI),
@@ -52,6 +57,10 @@ export const providerUrls: [ChainId, string][] = [
     ChainId.ZK_SYNC_GOERLI,
     process.env.REACT_APP_CHAIN_280_PROVIDER_URL ||
       "https://zksync2-testnet.zksync.dev/",
+  ],
+  [
+    ChainId.BASE_GOERLI,
+    process.env.REACT_APP_CHAIN_84531_PROVIDER_URL || "https://goerli.base.org",
   ],
 ];
 
