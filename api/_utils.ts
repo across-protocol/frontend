@@ -19,6 +19,7 @@ import {
   relayerFeeCapitalCostConfig,
   EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
   TOKEN_SYMBOLS_MAP,
+  CHAIN_IDS,
 } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
@@ -310,109 +311,121 @@ export const getHubPoolClient = () => {
   );
 };
 
-// Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
-// gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
-// a USDC approval for the _current_ spoke pools on Optimism (0x6f26Bf09B1C792e3228e5467807a900A503c0281) and Arbitrum
-// (0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A). It also has a small amount of USDC ($0.10) used for estimations.
-// If this address lacks either of these, estimations will fail and relays to optimism and arbitrum will hang when
-// estimating gas. Defaults to 0x893d0d70ad97717052e3aa8903d9615804167759 so the app can technically run without this.
-export const dummyFromAddress =
-  process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
-  "0x893d0d70ad97717052e3aa8903d9615804167759";
-
 export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
 export const queries: Record<number, () => QueryBase> = {
-  1: () =>
+  [CHAIN_IDS.MAINNET]: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      getProvider(1),
+      getProvider(CHAIN_IDS.MAINNET),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(1)
+      getGasMarkup(CHAIN_IDS.MAINNET)
     ),
-  10: () =>
+  [CHAIN_IDS.OPTIMISM]: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
-      getProvider(10),
+      getProvider(CHAIN_IDS.OPTIMISM),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(10)
+      getGasMarkup(CHAIN_IDS.OPTIMISM)
     ),
-  137: () =>
+  [CHAIN_IDS.POLYGON]: () =>
     new sdk.relayFeeCalculator.PolygonQueries(
-      getProvider(137),
+      getProvider(CHAIN_IDS.POLYGON),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(137)
+      getGasMarkup(CHAIN_IDS.POLYGON)
     ),
-  42161: () =>
+  [CHAIN_IDS.ARBITRUM]: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
-      getProvider(42161),
+      getProvider(CHAIN_IDS.ARBITRUM),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(42161)
+      getGasMarkup(CHAIN_IDS.ARBITRUM)
     ),
-  324: () =>
+  [CHAIN_IDS.ZK_SYNC]: () =>
     new sdk.relayFeeCalculator.ZkSyncQueries(
-      getProvider(324),
+      getProvider(CHAIN_IDS.ZK_SYNC),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(324)
+      getGasMarkup(CHAIN_IDS.ZK_SYNC)
+    ),
+  [CHAIN_IDS.BASE]: () =>
+    new sdk.relayFeeCalculator.BaseQueries(
+      getProvider(CHAIN_IDS.BASE),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDS.BASE)
     ),
   /* --------------------------- Testnet queries --------------------------- */
-  5: () =>
+  [CHAIN_IDS.GOERLI]: () =>
     new sdk.relayFeeCalculator.EthereumGoerliQueries(
-      getProvider(5),
+      getProvider(CHAIN_IDS.GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(5)
+      getGasMarkup(CHAIN_IDS.GOERLI)
     ),
-  421613: () =>
+  [CHAIN_IDS.ARBITRUM_GOERLI]: () =>
     new sdk.relayFeeCalculator.ArbitrumGoerliQueries(
-      getProvider(421613),
+      getProvider(CHAIN_IDS.ARBITRUM_GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(421613)
+      getGasMarkup(CHAIN_IDS.ARBITRUM_GOERLI)
     ),
-  280: () =>
+  [CHAIN_IDS.ZK_SYNC_GOERLI]: () =>
     new sdk.relayFeeCalculator.zkSyncGoerliQueries(
-      getProvider(280),
+      getProvider(CHAIN_IDS.ZK_SYNC_GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(280)
+      getGasMarkup(CHAIN_IDS.ZK_SYNC_GOERLI)
+    ),
+  [CHAIN_IDS.BASE_GOERLI]: () =>
+    new sdk.relayFeeCalculator.BaseGoerliQueries(
+      getProvider(CHAIN_IDS.BASE_GOERLI),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDS.BASE_GOERLI)
     ),
 };
 
@@ -536,30 +549,12 @@ export const getSpokePool = (_chainId: number): SpokePool => {
   return SpokePool__factory.connect(spokePoolAddress, getProvider(_chainId));
 };
 
-export const getSpokePoolAddress = (_chainId: number): string => {
-  const chainId = _chainId.toString();
-  switch (chainId.toString()) {
-    case "1":
-      return "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5";
-    case "10":
-      return "0x6f26Bf09B1C792e3228e5467807a900A503c0281";
-    case "137":
-      return "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096";
-    case "288":
-      return "0xBbc6009fEfFc27ce705322832Cb2068F8C1e0A58";
-    case "42161":
-      return "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A";
-    case "324":
-      return "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF";
-    // testnets
-    case "5":
-      return "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7";
-    case "421613":
+export const getSpokePoolAddress = (chainId: number): string => {
+  switch (chainId) {
+    case CHAIN_IDS.ARBITRUM_GOERLI:
       return "0xD29C85F15DF544bA632C9E25829fd29d767d7978";
-    case "280":
-      return "0x863859ef502F0Ee9676626ED5B418037252eFeb2";
     default:
-      throw new Error("Invalid chainId provided");
+      return sdk.utils.getDeployedAddress("SpokePool", chainId);
   }
 };
 
