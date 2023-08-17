@@ -991,7 +991,7 @@
     },
     {
       "fromChain": 137,
-      "toChain": 18453,
+      "toChain": 8453,
       "fromTokenAddress": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
       "fromSpokeAddress": "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
       "fromTokenSymbol": "WETH",
