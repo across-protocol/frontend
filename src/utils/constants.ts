@@ -656,3 +656,7 @@ export const disabledChainIds = (
 export const disabledChainIdsForAvailableRoutes = (
   process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
+
+export const walletBlacklist = (process.env.REACT_APP_WALLET_BLACKLIST || "")
+  .split(",")
+  .map((address) => address.toLowerCase());
