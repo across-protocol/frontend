@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { bridgeLimitsQueryKey, ChainId } from "utils";
+import { bridgeLimitsQueryKey, ChainId, getConfig } from "utils";
 import { BigNumber } from "ethers";
 import getApiEndpoint from "utils/serverless-api";
 
@@ -18,18 +18,26 @@ export interface BridgeLimits {
  * @returns The limits datastructure returned from the serverless api.
  */
 export function useBridgeLimits(
-  token?: string,
+  tokenSymbol?: string,
   fromChainId?: ChainId,
   toChainId?: ChainId
 ) {
   const enabledQuery =
-    token !== undefined && toChainId !== undefined && fromChainId !== undefined;
+    tokenSymbol !== undefined &&
+    toChainId !== undefined &&
+    fromChainId !== undefined;
   const queryKey = enabledQuery
-    ? bridgeLimitsQueryKey(token, fromChainId, toChainId)
+    ? bridgeLimitsQueryKey(tokenSymbol, fromChainId, toChainId)
     : "DISABLED_BRIDGE_LIMITS_QUERY";
   const { data: limits, ...delegated } = useQuery(
     queryKey,
-    async () => getApiEndpoint().limits(token!, fromChainId!, toChainId!),
+    () => {
+      if (!tokenSymbol || !fromChainId || !toChainId) {
+        return;
+      }
+      const token = getConfig().getTokenInfoBySymbol(fromChainId, tokenSymbol);
+      return getApiEndpoint().limits(token.address, fromChainId!, toChainId!);
+    },
     {
       enabled: enabledQuery,
       // 5 mins.
