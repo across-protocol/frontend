@@ -1,3 +1,16 @@
+import { BigNumber } from "ethers";
+
+import {
+  ChainId,
+  Route,
+  getChainInfo,
+  getConfig,
+  getToken,
+  hubPoolChainId,
+} from "utils";
+
+const enabledRoutes = getConfig().getEnabledRoutes();
+
 /**
  * Returns the token symbol to be used for the receive token. The protocol bridges
  * ETH/WETH depending on certain conditions:
@@ -14,7 +27,7 @@ export function getReceiveTokenSymbol(
   bridgeTokenSymbol: string,
   isReceiverContract: boolean
 ) {
-  const isDestinationChainPolygon = destinationChainId === 137;
+  const isDestinationChainPolygon = destinationChainId === ChainId.POLYGON;
 
   if (
     bridgeTokenSymbol === "ETH" &&
@@ -31,5 +44,204 @@ export function getReceiveTokenSymbol(
     return "ETH";
   }
 
+  if (bridgeTokenSymbol === "USDC" && destinationChainId === ChainId.ARBITRUM) {
+    return "USDC.e";
+  }
+
+  if (bridgeTokenSymbol === "USDC.e") {
+    return "USDC";
+  }
+
   return bridgeTokenSymbol;
+}
+
+export function validateBridgeAmount(
+  parsedAmountInput?: BigNumber,
+  isAmountTooLow?: boolean,
+  currentBalance?: BigNumber,
+  maxDeposit?: BigNumber
+): {
+  errorMessage?: string;
+  parsedUserInput?: BigNumber;
+} {
+  if (!parsedAmountInput) {
+    return {
+      errorMessage: "invalid",
+    };
+  }
+
+  if (maxDeposit && parsedAmountInput.gt(maxDeposit)) {
+    return {
+      errorMessage: "insufficientLiquidity",
+    };
+  }
+
+  if (currentBalance && parsedAmountInput.gt(currentBalance)) {
+    return {
+      errorMessage: "insufficientBalance",
+    };
+  }
+
+  if (isAmountTooLow) {
+    return {
+      errorMessage: "requestTooLow",
+    };
+  }
+
+  if (parsedAmountInput.lte(0)) {
+    return {
+      errorMessage: "invalid",
+    };
+  }
+
+  return {
+    errorMessage: undefined,
+  };
+}
+
+export function getInitialRoute(
+  defaults: Partial<{
+    symbol: string;
+    fromChain: number;
+    toChain: number;
+  }> = {}
+) {
+  return (
+    findEnabledRoute({
+      symbol: defaults.symbol || "ETH",
+      fromChain: defaults.fromChain || hubPoolChainId,
+      toChain: defaults.toChain,
+    }) || enabledRoutes[0]
+  );
+}
+
+export function findEnabledRoute(
+  filter: Partial<{
+    symbol: string;
+    fromChain: number;
+    toChain: number;
+  }> = {}
+) {
+  const { symbol, fromChain, toChain } = filter;
+
+  const route = enabledRoutes.find(
+    (route) =>
+      (symbol ? route.fromTokenSymbol === symbol : true) &&
+      (fromChain ? route.fromChain === fromChain : true) &&
+      (toChain ? route.toChain === toChain : true)
+  );
+  return route;
+}
+/**
+ * Returns the next best matching route based on the given priority keys and filter.
+ * @param priorityFilterKeys Set of filter keys to use if no route is found based on `filter`.
+ * @param filter Filter to apply for best matching route.
+ */
+export function findNextBestRoute(
+  priorityFilterKeys: ("symbol" | "fromChain" | "toChain")[],
+  filter: Partial<{
+    symbol: string;
+    fromChain: number;
+    toChain: number;
+  }> = {}
+) {
+  let route: Route | undefined;
+
+  const interchangeableTokenPairs: Record<string, string> = {
+    USDC: "USDC.e",
+    "USDC.e": "USDC",
+    ETH: "WETH",
+    WETH: "ETH",
+  };
+  const equivalentTokenSymbol = filter.symbol
+    ? interchangeableTokenPairs[filter.symbol]
+    : undefined;
+
+  route = findEnabledRoute(filter);
+
+  if (!route && equivalentTokenSymbol) {
+    route = findEnabledRoute({
+      ...filter,
+      symbol: equivalentTokenSymbol,
+    });
+  }
+
+  if (!route) {
+    const allFilterKeys = ["symbol", "fromChain", "toChain"] as const;
+    const nonPriorityFilterKeys = allFilterKeys.filter((key) =>
+      priorityFilterKeys.includes(key)
+    );
+
+    for (const nonPrioKey of nonPriorityFilterKeys) {
+      const priorityFilter = priorityFilterKeys.reduce(
+        (acc, priorityFilterKey) => ({
+          ...acc,
+          [priorityFilterKey]: filter[priorityFilterKey],
+        }),
+        {}
+      );
+      route = findEnabledRoute({
+        ...priorityFilter,
+        [nonPrioKey]: filter[nonPrioKey],
+      });
+
+      if (!route && nonPrioKey === "symbol" && equivalentTokenSymbol) {
+        route = findEnabledRoute({
+          ...priorityFilter,
+          symbol: equivalentTokenSymbol,
+        });
+      }
+
+      if (route) {
+        break;
+      }
+    }
+  }
+
+  return route;
+}
+
+export function getAllTokens() {
+  return enabledRoutes
+    .map((route) => getToken(route.fromTokenSymbol))
+    .filter(
+      (token, index, self) =>
+        index === self.findIndex((t) => t.symbol === token.symbol)
+    );
+}
+
+export function getAvailableTokens(
+  selectedFromChain: number,
+  selectedToChain: number
+) {
+  return enabledRoutes
+    .filter(
+      (route) =>
+        route.fromChain === selectedFromChain &&
+        route.toChain === selectedToChain
+    )
+    .map((route) => getToken(route.fromTokenSymbol))
+    .filter(
+      (token, index, self) =>
+        index === self.findIndex((t) => t.symbol === token.symbol)
+    );
+}
+
+export function getAllChains() {
+  return enabledRoutes
+    .map((route) => getChainInfo(route.fromChain))
+    .filter(
+      (chain, index, self) =>
+        index ===
+        self.findIndex((fromChain) => fromChain.chainId === chain.chainId)
+    )
+    .sort((a, b) => {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
+    });
 }
