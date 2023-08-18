@@ -46,7 +46,7 @@ export function TokenSelector({ selectedRoute, onSelectToken }: Props) {
   }, [fromChain, toChain]);
 
   const { balances } = useBalancesBySymbols({
-    tokenSymbols: orderedTokens.map((t) => t.symbol),
+    tokenSymbols: orderedTokens.filter((t) => !t.disabled).map((t) => t.symbol),
     chainId: fromChain,
     account,
   });

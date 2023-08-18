@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BigNumber, utils } from "ethers";
 
 import { Text } from "components/Text";
@@ -28,6 +28,10 @@ export function AmountInput({
 }: Props) {
   const [displayBalance, setDisplayBalance] = useState(false);
   const [didFocus, setDidFocus] = useState(false);
+
+  useEffect(() => {
+    setDidFocus(false);
+  }, [selectedRoute]);
 
   const token = getToken(selectedRoute.fromTokenSymbol);
 

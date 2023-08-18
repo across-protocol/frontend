@@ -2,12 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { BigNumber, utils } from "ethers";
 
 import { useAmplitude, useBalanceBySymbol } from "hooks";
-import {
-  getConfig,
-  Route,
-  trackMaxButtonClicked,
-  isNumberEthersParseable,
-} from "utils";
+import { getConfig, Route, trackMaxButtonClicked } from "utils";
 
 import { validateBridgeAmount } from "../utils";
 
@@ -48,11 +43,12 @@ export function useAmountInput(selectedRoute: Route) {
   }, [selectedRoute]);
 
   useEffect(() => {
-    setParsedAmount(
-      isNumberEthersParseable(userAmountInput)
-        ? utils.parseUnits(userAmountInput, token.decimals)
-        : undefined
-    );
+    try {
+      const parsed = utils.parseUnits(userAmountInput, token.decimals);
+      setParsedAmount(parsed);
+    } catch (error) {
+      setParsedAmount(undefined);
+    }
   }, [userAmountInput, token.decimals]);
 
   return {

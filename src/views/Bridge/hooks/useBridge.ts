@@ -104,7 +104,7 @@ export function useBridge() {
   useEffect(() => {
     if (bridgeAction.isButtonActionLoading || trackingTxHash) {
       setShouldUpdateQuote(false);
-    } else if (trackingTxHash) {
+    } else if (!trackingTxHash) {
       setShouldUpdateQuote(true);
     }
   }, [bridgeAction.isButtonActionLoading, trackingTxHash]);
