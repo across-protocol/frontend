@@ -22,7 +22,7 @@ export function useBridgeDepositTracking() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [txHash]);
 
-  const onTransactionCompleted = (success: boolean) => {
+  const handleTransactionCompleted = (success: boolean) => {
     setDepositFinishedDate(success ? new Date() : undefined);
   };
 
@@ -50,7 +50,7 @@ export function useBridgeDepositTracking() {
 
   const depositFinished = !!depositFinishedDate;
 
-  const onTxHashChange = useCallback(
+  const handleTxHashChange = useCallback(
     (txHash?: string) => {
       setTxHash(txHash);
       setDepositFinishedDate(undefined);
@@ -60,12 +60,12 @@ export function useBridgeDepositTracking() {
 
   return {
     txHash,
-    onTxHashChange,
+    handleTxHashChange,
     explorerUrl,
     trackingTxHash,
     transactionPending: !depositFinished,
     transactionElapsedSeconds: elapsedSeconds,
     transactionElapsedTimeAsFormattedString: elapsedTimeAsFormattedString,
-    txCompletedHandler: onTransactionCompleted,
+    handleTransactionCompleted,
   };
 }

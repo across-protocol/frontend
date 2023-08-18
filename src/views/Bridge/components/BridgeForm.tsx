@@ -1,117 +1,81 @@
+import { BigNumber } from "ethers";
 import styled from "@emotion/styled";
+
 import ExternalCardWrapper from "components/CardWrapper";
 import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
-import { Selector, Text } from "components";
-import {
-  ChainInfo,
-  capitalizeFirstLetter,
-  shortenAddress,
-  getToken,
-  TokenInfo,
-  GetBridgeFeesResult,
-  QUERIESV2,
-  receiveAmount,
-  defaultBridgeFromChainId,
-  defaultBridgeToChainId,
-} from "utils";
-import CoinSelector from "./CoinSelector";
+import { Text } from "components";
+
 import EstimatedTable from "./EstimatedTable";
 import QuickSwap from "./QuickSwap";
 import SlippageAlert from "./SlippageAlert";
-import RouteNotSupportedTooltipText from "./RouteNotSupportedTooltipText";
-import { BigNumber } from "ethers";
-import { getReceiveTokenSymbol } from "../utils";
+import { AmountInput } from "./AmountInput";
+import { TokenSelector } from "./TokenSelector";
+import { ChainSelector } from "./ChainSelector";
 
-import type { ToAccount } from "../hooks/useToAccount";
+import {
+  getToken,
+  GetBridgeFeesResult,
+  QUERIESV2,
+  receiveAmount,
+  Route,
+} from "utils";
+
+import { getReceiveTokenSymbol } from "../utils";
+import { ToAccount } from "../hooks/useToAccount";
 
 type BridgeFormProps = {
-  availableTokens: TokenInfo[];
-  currentToken: string;
-  setCurrentToken: (token: string) => void;
-  setAmountToBridge: (amount: BigNumber | undefined) => void;
-  currentBalance: BigNumber | undefined;
-  currentFromRoute: number | undefined;
-  setCurrentFromRoute: (chainId: number) => void;
-  availableFromRoutes: ChainInfo[];
-  allFromRoutes: ChainInfo[];
-  availableToRoutes: ChainInfo[];
-  allToRoutes: ChainInfo[];
-  currentToRoute: number | undefined;
-  setCurrentToRoute: (chainId: number) => void;
-  handleQuickSwap: () => void;
+  selectedRoute: Route;
+  amountInput: string;
+  amountToBridge?: BigNumber;
+  toAccount?: ToAccount;
+
+  onChangeAmountInput: (input: string) => void;
+  onClickMaxBalance: () => void;
+  onSelectToken: (token: string) => void;
+  onSelectFromChain: (chainId: number) => void;
+  onSelectToChain: (chainId: number) => void;
+  onClickQuickSwap: () => void;
+  onClickChainSwitch: () => void;
+  onClickActionButton: () => void;
+  onClickChangeToAddress: () => void;
+
+  fees?: GetBridgeFeesResult;
+  estimatedTimeString?: string;
+  balance?: BigNumber;
+
   isConnected: boolean;
   isWrongChain: boolean;
-  handleChainSwitch: () => void;
-  buttonActionHandler: () => void;
   buttonLabel: string;
   isBridgeDisabled: boolean;
-  fees: GetBridgeFeesResult | undefined;
-  amountToBridge: BigNumber | undefined;
-  estimatedTime: string | undefined;
-  displayChangeAccount: boolean;
-  setDisplayChangeAccount: (display: boolean) => void;
-  toAccount?: ToAccount;
-  amountTooLow: boolean;
-  walletAccount?: string;
-  disableQuickSwap?: boolean;
-  setIsBridgeAmountValid: (isValid: boolean) => void;
-  setIsLiquidityFromAountExceeded: (isExceeded: boolean) => void;
-  isLiquidityFromAountExceeded: boolean;
+  validationError?: string;
 };
 
 const BridgeForm = ({
-  availableTokens,
-  currentToken,
-  setCurrentToken,
-  setAmountToBridge,
-  currentBalance,
-  currentFromRoute,
-  setCurrentFromRoute,
-  availableFromRoutes,
-  availableToRoutes,
-  currentToRoute,
-  setCurrentToRoute,
-  handleQuickSwap,
-  isWrongChain,
-  handleChainSwitch,
+  selectedRoute,
+  amountToBridge,
+  amountInput,
+  toAccount,
+
+  onClickMaxBalance,
+  onChangeAmountInput,
+  onSelectToken,
+  onSelectFromChain,
+  onSelectToChain,
+  onClickQuickSwap,
+  onClickChainSwitch,
+  onClickActionButton,
+  onClickChangeToAddress,
+
+  fees,
+  estimatedTimeString,
+  balance,
+
   isConnected,
-  buttonActionHandler,
+  isWrongChain,
   buttonLabel,
   isBridgeDisabled,
-  fees,
-  amountToBridge,
-  estimatedTime,
-  setDisplayChangeAccount,
-  toAccount,
-  amountTooLow,
-  walletAccount,
-  disableQuickSwap,
-  setIsBridgeAmountValid,
-  allToRoutes,
-  allFromRoutes,
-  isLiquidityFromAountExceeded,
-  setIsLiquidityFromAountExceeded,
+  validationError,
 }: BridgeFormProps) => {
-  const mapChainInfoToRoute = (
-    c?: ChainInfo,
-    superText?: string
-  ): JSX.Element | undefined =>
-    c ? (
-      <ChainIconTextWrapper>
-        <ChainIcon src={c.logoURI} />
-        <ChainIconSuperTextWrapper>
-          {superText && (
-            <Text size="sm" color="grey-400">
-              {superText}
-            </Text>
-          )}
-          <Text size="md" color="white-100">
-            {capitalizeFirstLetter(c.fullName ?? c.name)}
-          </Text>
-        </ChainIconSuperTextWrapper>
-      </ChainIconTextWrapper>
-    ) : undefined;
-
   return (
     <>
       <CardWrapper>
@@ -119,47 +83,30 @@ const BridgeForm = ({
           <Text size="md" color="grey-400">
             Send
           </Text>
-          <CoinSelector
-            fromChain={currentFromRoute ?? defaultBridgeFromChainId}
-            toChain={currentToRoute ?? defaultBridgeToChainId}
-            tokenChoices={availableTokens}
-            tokenSelected={currentToken}
-            onTokenSelected={setCurrentToken}
-            onAmountToBridgeChanged={setAmountToBridge}
-            amountToBridge={amountToBridge}
-            currentSelectedBalance={currentBalance}
-            walletAccount={walletAccount}
-            setIsBridgeAmountValid={setIsBridgeAmountValid}
-            setIsLiquidityFromAmountExceeded={setIsLiquidityFromAountExceeded}
-            isAmountTooLow={amountTooLow}
-            isInsufficientLiquidityExceeded={isLiquidityFromAountExceeded}
-          />
+          <SendWrapper>
+            <AmountInput
+              amountInput={amountInput}
+              parsedAmountInput={amountToBridge}
+              selectedRoute={selectedRoute}
+              onChangeAmountInput={onChangeAmountInput}
+              onClickMaxBalance={onClickMaxBalance}
+              validationError={validationError}
+              balance={balance}
+            />
+            <TokenSelector
+              selectedRoute={selectedRoute}
+              onSelectToken={onSelectToken}
+            />
+          </SendWrapper>
         </RowWrapper>
         <RowWrapper>
           <Text size="md" color="grey-400">
             From
           </Text>
-          <Selector<number>
-            elements={allFromRoutes.map((r) => ({
-              value: r.chainId,
-              element: mapChainInfoToRoute(r)!,
-              disabled: availableFromRoutes.every(
-                (c) => c.chainId !== r.chainId
-              ),
-              disabledTooltip: {
-                title: `Asset not supported on route.`,
-                description: (
-                  <RouteNotSupportedTooltipText
-                    symbol={currentToken}
-                    fromChain={r.chainId!}
-                    toChain={currentToRoute!}
-                  />
-                ),
-              },
-            }))}
-            selectedValue={currentFromRoute ?? 1}
-            setSelectedValue={(v) => setCurrentFromRoute(v)}
-            title="Chain"
+          <ChainSelector
+            selectedRoute={selectedRoute}
+            fromOrTo="from"
+            onSelectChain={onSelectFromChain}
           />
         </RowWrapper>
         <RowWrapper>
@@ -167,48 +114,19 @@ const BridgeForm = ({
             To
           </PaddedText>
           <QuickSwapWrapper>
-            <QuickSwap
-              disabled={disableQuickSwap}
-              onQuickSwap={handleQuickSwap}
-            />
+            <QuickSwap onQuickSwap={onClickQuickSwap} />
           </QuickSwapWrapper>
           <FromSelectionStack>
-            <Selector<number>
-              elements={allToRoutes.map((r) => ({
-                value: r.chainId,
-                element: mapChainInfoToRoute(r)!,
-                disabled: availableToRoutes.every(
-                  (c) => c.chainId !== r.chainId
-                ),
-                disabledTooltip: {
-                  title: `Asset not supported on route`,
-                  description: (
-                    <RouteNotSupportedTooltipText
-                      symbol={currentToken}
-                      fromChain={currentFromRoute!}
-                      toChain={r.chainId}
-                    />
-                  ),
-                },
-              }))}
-              displayElement={mapChainInfoToRoute(
-                availableToRoutes.filter(
-                  (r) => r.chainId === currentToRoute
-                )[0],
-                toAccount
-                  ? `Address: ${shortenAddress(toAccount.address, "...", 4)}`
-                  : undefined
-              )}
-              selectedValue={currentToRoute ?? 1}
-              setSelectedValue={(v) => setCurrentToRoute(v)}
-              title="Chain"
+            <ChainSelector
+              selectedRoute={selectedRoute}
+              fromOrTo="to"
+              onSelectChain={onSelectToChain}
+              toAddress={toAccount?.address}
             />
             <ChangeAddressLink
               size="sm"
               color="grey-400"
-              onClick={() => {
-                if (toAccount) setDisplayChangeAccount(true);
-              }}
+              onClick={onClickChangeToAddress}
             >
               Change account
             </ChangeAddressLink>
@@ -217,35 +135,33 @@ const BridgeForm = ({
       </CardWrapper>
       <CardWrapper>
         <SlippageAlert />
-        {currentToRoute && (
-          <EstimatedTable
-            chainId={currentToRoute}
-            estimatedTime={estimatedTime}
-            gasFee={fees?.relayerGasFee.total}
-            bridgeFee={
-              fees && amountToBridge && amountToBridge.gt(0)
-                ? receiveAmount(amountToBridge, fees).deductionsSansRelayerGas
-                : undefined
-            }
-            totalReceived={
-              fees && amountToBridge && amountToBridge.gt(0)
-                ? receiveAmount(amountToBridge, fees).receivable
-                : undefined
-            }
-            token={getToken(currentToken)}
-            dataLoaded={isConnected}
-            receiveToken={getToken(
-              getReceiveTokenSymbol(
-                currentToRoute,
-                currentToken,
-                Boolean(toAccount?.isContract)
-              )
-            )}
-          />
-        )}
+        <EstimatedTable
+          chainId={selectedRoute.toChain}
+          estimatedTime={estimatedTimeString}
+          gasFee={fees?.relayerGasFee.total}
+          bridgeFee={
+            fees && amountToBridge && amountToBridge.gt(0)
+              ? receiveAmount(amountToBridge, fees).deductionsSansRelayerGas
+              : undefined
+          }
+          totalReceived={
+            fees && amountToBridge && amountToBridge.gt(0)
+              ? receiveAmount(amountToBridge, fees).receivable
+              : undefined
+          }
+          token={getToken(selectedRoute.fromTokenSymbol)}
+          dataLoaded={isConnected}
+          receiveToken={getToken(
+            getReceiveTokenSymbol(
+              selectedRoute.toChain,
+              selectedRoute.fromTokenSymbol,
+              Boolean(toAccount?.isContract)
+            )
+          )}
+        />
         <Divider />
         {isWrongChain ? (
-          <Button onClick={() => handleChainSwitch()}>
+          <Button onClick={onClickChainSwitch}>
             <Text color="dark-grey" weight={500}>
               Switch Network
             </Text>
@@ -253,9 +169,7 @@ const BridgeForm = ({
         ) : (
           <Button
             disabled={isBridgeDisabled}
-            onClick={() => {
-              buttonActionHandler();
-            }}
+            onClick={onClickActionButton}
             data-cy={!isConnected ? "connect-wallet" : "bridge-button"}
           >
             <Text color="dark-grey" weight={500}>
@@ -286,18 +200,19 @@ const RowWrapper = styled.div`
   position: relative;
 `;
 
-const ChainIconTextWrapper = styled.div`
+const SendWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
+  align-items: flex-start;
   padding: 0px;
   gap: 12px;
-`;
+  width: 100%;
 
-const ChainIcon = styled.img`
-  width: 24px;
-  height: 24px;
+  @media ${QUERIESV2.xs.andDown} {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
 `;
 
 const QuickSwapWrapper = styled.div`
@@ -350,12 +265,4 @@ const Button = styled(UnstyledButton)`
   @media ${QUERIESV2.sm.andDown} {
     height: 40px;
   }
-`;
-
-const ChainIconSuperTextWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 0px;
 `;
