@@ -91,10 +91,16 @@ function TotalReceive({
     return <TokenFee amount={totalReceived} token={token} />;
   }
 
-  const isBridgeTokenETH = token.symbol === "ETH";
-  const tooltipText = isBridgeTokenETH
-    ? "When bridging ETH and recipient address is a smart contract, or destination is Polygon, you will receive WETH."
-    : "When bridging WETH and recipient address is an EOA, you will receive ETH.";
+  const tooltipText =
+    token.symbol === "ETH"
+      ? "When bridging ETH and recipient address is a smart contract, or destination is Polygon, you will receive WETH."
+      : token.symbol === "WETH"
+      ? "When bridging WETH and recipient address is an EOA, you will receive ETH."
+      : token.symbol === "USDC"
+      ? "When bridging USDC to Arbitrum, you will receive USDC.e (bridged USDC)."
+      : token.symbol === "USDC.e"
+      ? "When bridging USDC.e from Arbitrum, you will receive USDC."
+      : "";
 
   return (
     <TotalReceiveRow>
@@ -149,6 +155,7 @@ const TotalReceiveRow = styled.div`
 `;
 
 const WarningInfoIcon = styled(InfoIcon)`
+  margin-top: 8px;
   path {
     stroke: #f9d26c;
   }
