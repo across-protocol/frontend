@@ -41,7 +41,7 @@ export function useBridge() {
     userAmountInput,
     parsedAmount,
     balance,
-  } = useAmountInput(selectedRoute);
+  } = useAmountInput(selectedRoute, trackingTxHash && !transactionPending);
 
   const { toAccount, setCustomToAddress } = useToAccount(selectedRoute.toChain);
 
@@ -109,9 +109,10 @@ export function useBridge() {
     }
   }, [bridgeAction.isButtonActionLoading, trackingTxHash]);
 
-  const estimatedTimeString = isQuoteLoading
-    ? "loading..."
-    : estimatedTime?.formattedString;
+  const estimatedTimeString =
+    isQuoteLoading && !trackingTxHash
+      ? "loading..."
+      : estimatedTime?.formattedString;
 
   return {
     ...bridgeAction,

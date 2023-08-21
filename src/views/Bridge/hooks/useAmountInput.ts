@@ -6,7 +6,7 @@ import { getConfig, Route, trackMaxButtonClicked } from "utils";
 
 import { validateBridgeAmount } from "../utils";
 
-export function useAmountInput(selectedRoute: Route) {
+export function useAmountInput(selectedRoute: Route, didTxSucceed?: boolean) {
   const [userAmountInput, setUserAmountInput] = useState("");
   const [parsedAmount, setParsedAmount] = useState<BigNumber | undefined>(
     undefined
@@ -41,6 +41,13 @@ export function useAmountInput(selectedRoute: Route) {
     setUserAmountInput("");
     setParsedAmount(undefined);
   }, [selectedRoute.fromTokenSymbol]);
+
+  useEffect(() => {
+    if (didTxSucceed) {
+      setUserAmountInput("");
+      setParsedAmount(undefined);
+    }
+  }, [didTxSucceed]);
 
   useEffect(() => {
     try {
