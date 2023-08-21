@@ -30,18 +30,18 @@ import GoerliRoutes from "data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD
 
 /* Chains and Tokens section */
 export enum ChainId {
-  MAINNET = 1,
-  OPTIMISM = 10,
-  ARBITRUM = 42161,
-  POLYGON = 137,
-  ZK_SYNC = 324,
-  BASE = 8453,
+  MAINNET = constants.CHAIN_IDs.MAINNET,
+  OPTIMISM = constants.CHAIN_IDs.OPTIMISM,
+  ARBITRUM = constants.CHAIN_IDs.ARBITRUM,
+  POLYGON = constants.CHAIN_IDs.POLYGON,
+  ZK_SYNC = constants.CHAIN_IDs.ZK_SYNC,
+  BASE = constants.CHAIN_IDs.BASE,
   // testnets
-  ARBITRUM_GOERLI = 421613,
-  ZK_SYNC_GOERLI = 280,
-  BASE_GOERLI = 84531,
-  GOERLI = 5,
-  MUMBAI = 80001,
+  ARBITRUM_GOERLI = constants.CHAIN_IDs.ARBITRUM_GOERLI,
+  ZK_SYNC_GOERLI = constants.CHAIN_IDs.ZK_SYNC_GOERLI,
+  BASE_GOERLI = constants.CHAIN_IDs.BASE_GOERLI,
+  GOERLI = constants.CHAIN_IDs.GOERLI,
+  MUMBAI = constants.CHAIN_IDs.MUMBAI,
 }
 
 // Maps `ChainId` to an object and inverts the Key/Value
