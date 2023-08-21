@@ -20,7 +20,7 @@ import {
   Route,
 } from "utils";
 
-import { getReceiveTokenSymbol } from "../utils";
+import { AmountInputError, getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
 
 type BridgeFormProps = {
@@ -47,7 +47,7 @@ type BridgeFormProps = {
   isWrongChain: boolean;
   buttonLabel: string;
   isBridgeDisabled: boolean;
-  validationError?: string;
+  validationError?: AmountInputError;
 };
 
 const BridgeForm = ({
