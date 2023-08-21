@@ -1,6 +1,6 @@
 import assert from "assert";
 import { ethers, providers } from "ethers";
-import { constants } from "@across-protocol/sdk-v2";
+import { constants, utils } from "@across-protocol/sdk-v2";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
@@ -107,25 +107,6 @@ export const COLORS = {
   black: "0deg 0% 0%",
   umaRed: "0deg 100% 65%",
   purple: "267deg 77% 62%",
-};
-
-// Update once addresses are known
-export const configStoreAddresses: Record<ChainId, string> = {
-  [ChainId.MAINNET]: ethers.utils.getAddress(
-    "0x3B03509645713718B78951126E0A6de6f10043f5"
-  ),
-  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
-  [ChainId.OPTIMISM]: ethers.constants.AddressZero,
-  [ChainId.POLYGON]: ethers.constants.AddressZero,
-  [ChainId.ZK_SYNC]: ethers.constants.AddressZero,
-  [ChainId.BASE]: ethers.constants.AddressZero,
-  [ChainId.ARBITRUM_GOERLI]: ethers.constants.AddressZero,
-  [ChainId.GOERLI]: ethers.utils.getAddress(
-    "0x3215e3C91f87081757d0c41EF0CB77738123Be83"
-  ),
-  [ChainId.MUMBAI]: ethers.constants.AddressZero,
-  [ChainId.ZK_SYNC_GOERLI]: ethers.constants.AddressZero,
-  [ChainId.BASE_GOERLI]: ethers.constants.AddressZero,
 };
 
 export type ChainInfo = {
@@ -413,9 +394,12 @@ export function isSupportedChainId(chainId: number): chainId is ChainId {
 export function getConfigStoreAddress(
   chainId: ChainId = hubPoolChainId
 ): string {
-  const configStoreAddress = configStoreAddresses[chainId];
+  const configStoreAddress = utils.getDeployedAddress(
+    "AcrossConfigStore",
+    chainId
+  );
   assert(
-    configStoreAddress !== AddressZero,
+    Boolean(configStoreAddress),
     "Config Store address not set for chain: " + chainId
   );
   return configStoreAddress;
