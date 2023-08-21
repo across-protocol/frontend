@@ -28,7 +28,7 @@ type DepositConfirmationProps = {
 
   isConnected: boolean;
   transactionPending: boolean;
-  onTxHashChange: (txHash?: string) => void;
+  onClickNewTx: () => void;
 
   explorerLink?: string;
   elapsedTimeFromDeposit?: string;
@@ -44,7 +44,7 @@ const DepositConfirmation = ({
   estimatedTime,
   isConnected,
   transactionPending,
-  onTxHashChange,
+  onClickNewTx,
   explorerLink: _explorerLink,
   elapsedTimeFromDeposit,
 }: DepositConfirmationProps) => {
@@ -161,12 +161,7 @@ const DepositConfirmation = ({
         )}
       />
       <Divider />
-      <Button
-        disabled={transactionPending}
-        onClick={() => {
-          onTxHashChange(undefined);
-        }}
-      >
+      <Button disabled={transactionPending} onClick={onClickNewTx}>
         <Text
           size="lg"
           color={!transactionPending ? "aqua" : "white"}

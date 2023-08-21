@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useConnection, useIsWrongNetwork } from "hooks";
 import useReferrer from "hooks/useReferrer";
@@ -38,10 +38,11 @@ export function useBridge() {
   const {
     handleChangeAmountInput,
     handleClickMaxBalance,
+    clearInput,
     userAmountInput,
     parsedAmount,
     balance,
-  } = useAmountInput(selectedRoute, trackingTxHash && !transactionPending);
+  } = useAmountInput(selectedRoute);
 
   const { toAccount, setCustomToAddress } = useToAccount(selectedRoute.toChain);
 
@@ -104,10 +105,14 @@ export function useBridge() {
   useEffect(() => {
     if (bridgeAction.isButtonActionLoading || trackingTxHash) {
       setShouldUpdateQuote(false);
-    } else if (!trackingTxHash) {
-      setShouldUpdateQuote(true);
     }
   }, [bridgeAction.isButtonActionLoading, trackingTxHash]);
+
+  const handleClickNewTx = useCallback(() => {
+    clearInput();
+    setShouldUpdateQuote(true);
+    handleTxHashChange(undefined);
+  }, [clearInput, handleTxHashChange]);
 
   const estimatedTimeString =
     isQuoteLoading && !trackingTxHash
@@ -133,7 +138,7 @@ export function useBridge() {
     trackingTxHash,
     transactionPending,
     explorerUrl,
-    handleTxHashChange,
+    handleClickNewTx,
     transactionElapsedTimeAsFormattedString,
     handleChangeAmountInput,
     handleClickMaxBalance,

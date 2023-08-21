@@ -30,7 +30,7 @@ const Bridge = () => {
     setCustomToAddress,
     trackingTxHash,
     transactionPending,
-    handleTxHashChange,
+    handleClickNewTx,
     explorerUrl,
     transactionElapsedTimeAsFormattedString,
     handleChangeAmountInput,
@@ -64,7 +64,7 @@ const Bridge = () => {
               estimatedTime={estimatedTimeString}
               isConnected={isConnected}
               transactionPending={transactionPending}
-              onTxHashChange={handleTxHashChange}
+              onClickNewTx={handleClickNewTx}
               explorerLink={explorerUrl}
               elapsedTimeFromDeposit={transactionElapsedTimeAsFormattedString}
               toAccount={toAccount}

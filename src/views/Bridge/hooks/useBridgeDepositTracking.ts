@@ -50,13 +50,10 @@ export function useBridgeDepositTracking() {
 
   const depositFinished = !!depositFinishedDate;
 
-  const handleTxHashChange = useCallback(
-    (txHash?: string) => {
-      setTxHash(txHash);
-      setDepositFinishedDate(undefined);
-    },
-    [setTxHash, setDepositFinishedDate]
-  );
+  const handleTxHashChange = useCallback((txHash?: string) => {
+    setTxHash(txHash);
+    setDepositFinishedDate(undefined);
+  }, []);
 
   return {
     txHash,

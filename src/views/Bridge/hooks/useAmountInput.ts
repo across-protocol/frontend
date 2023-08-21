@@ -37,17 +37,14 @@ export function useAmountInput(selectedRoute: Route, didTxSucceed?: boolean) {
     setUserAmountInput(changedInput);
   }, []);
 
-  useEffect(() => {
+  const clearInput = useCallback(() => {
     setUserAmountInput("");
     setParsedAmount(undefined);
-  }, [selectedRoute.fromTokenSymbol]);
+  }, []);
 
   useEffect(() => {
-    if (didTxSucceed) {
-      setUserAmountInput("");
-      setParsedAmount(undefined);
-    }
-  }, [didTxSucceed]);
+    clearInput();
+  }, [selectedRoute.fromTokenSymbol, clearInput]);
 
   useEffect(() => {
     try {
@@ -61,6 +58,7 @@ export function useAmountInput(selectedRoute: Route, didTxSucceed?: boolean) {
   return {
     handleChangeAmountInput,
     handleClickMaxBalance,
+    clearInput,
     userAmountInput,
     parsedAmount,
     balance,
