@@ -4,7 +4,7 @@ import { BigNumber, utils } from "ethers";
 import { useAmplitude, useBalanceBySymbol } from "hooks";
 import { getConfig, Route, trackMaxButtonClicked } from "utils";
 
-import { validateBridgeAmount } from "../utils";
+import { AmountInputError, validateBridgeAmount } from "../utils";
 
 export function useAmountInput(selectedRoute: Route, didTxSucceed?: boolean) {
   const [userAmountInput, setUserAmountInput] = useState("");
@@ -71,16 +71,18 @@ export function useValidAmount(
   currentBalance?: BigNumber,
   maxDeposit?: BigNumber
 ) {
-  const [validationError, setValidationError] = useState<string | undefined>();
+  const [validationError, setValidationError] = useState<
+    AmountInputError | undefined
+  >();
 
   useEffect(() => {
-    const { errorMessage } = validateBridgeAmount(
+    const { error } = validateBridgeAmount(
       parsedAmount,
       isAmountTooLow,
       currentBalance,
       maxDeposit
     );
-    setValidationError(errorMessage);
+    setValidationError(error);
   }, [parsedAmount, isAmountTooLow, currentBalance, maxDeposit]);
 
   return {

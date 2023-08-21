@@ -9,6 +9,14 @@ import {
   hubPoolChainId,
 } from "utils";
 
+export enum AmountInputError {
+  INVALID = "invalid",
+  NEGATIVE_AMOUNT = "negativeAmount",
+  INSUFFICIENT_LIQUIDITY = "insufficientLiquidity",
+  INSUFFICIENT_BALANCE = "insufficientBalance",
+  AMOUNT_TOO_LOW = "amountTooLow",
+}
+
 const enabledRoutes = getConfig().getEnabledRoutes();
 
 /**
@@ -60,42 +68,39 @@ export function validateBridgeAmount(
   isAmountTooLow?: boolean,
   currentBalance?: BigNumber,
   maxDeposit?: BigNumber
-): {
-  errorMessage?: string;
-  parsedUserInput?: BigNumber;
-} {
+) {
   if (!parsedAmountInput) {
     return {
-      errorMessage: "invalid",
+      error: AmountInputError.INVALID,
     };
   }
 
   if (maxDeposit && parsedAmountInput.gt(maxDeposit)) {
     return {
-      errorMessage: "insufficientLiquidity",
+      error: AmountInputError.INSUFFICIENT_LIQUIDITY,
     };
   }
 
   if (currentBalance && parsedAmountInput.gt(currentBalance)) {
     return {
-      errorMessage: "insufficientBalance",
+      error: AmountInputError.INSUFFICIENT_BALANCE,
     };
   }
 
   if (isAmountTooLow) {
     return {
-      errorMessage: "requestTooLow",
+      error: AmountInputError.AMOUNT_TOO_LOW,
     };
   }
 
   if (parsedAmountInput.lte(0)) {
     return {
-      errorMessage: "invalid",
+      error: AmountInputError.NEGATIVE_AMOUNT,
     };
   }
 
   return {
-    errorMessage: undefined,
+    error: undefined,
   };
 }
 

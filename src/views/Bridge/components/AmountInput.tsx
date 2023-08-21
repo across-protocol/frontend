@@ -7,6 +7,7 @@ import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Butto
 import { QUERIESV2, Route, getToken } from "utils";
 
 import BridgeInputErrorAlert from "./BridgeAlert";
+import { AmountInputError } from "../utils";
 
 type Props = {
   balance?: BigNumber;
@@ -15,7 +16,7 @@ type Props = {
   onChangeAmountInput: (input: string) => void;
   onClickMaxBalance: () => void;
   selectedRoute: Route;
-  validationError?: string;
+  validationError?: AmountInputError;
 };
 
 export function AmountInput({
@@ -76,14 +77,15 @@ export function AmountInput({
       </AmountWrapper>
       {didFocus && !isAmountValid && (
         <BridgeInputErrorAlert>
-          {validationError === "insufficientBalance" &&
+          {validationError === AmountInputError.INSUFFICIENT_BALANCE &&
             "Insufficient balance to process this transfer."}
-          {validationError === "insufficientLiquidity" &&
+          {validationError === AmountInputError.INSUFFICIENT_LIQUIDITY &&
             "Insufficient bridge liquidity to process this transfer."}
-          {validationError === "invalid" &&
+          {validationError === AmountInputError.NEGATIVE_AMOUNT &&
             "Only positive numbers are allowed as an input."}
-          {validationError === "requestTooLow" &&
+          {validationError === AmountInputError.AMOUNT_TOO_LOW &&
             "The amount you are trying to bridge is too low."}
+          {validationError === AmountInputError.INVALID && "Input is invalid."}
         </BridgeInputErrorAlert>
       )}
     </AmountExternalWrapper>
