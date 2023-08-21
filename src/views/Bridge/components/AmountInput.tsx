@@ -63,7 +63,13 @@ export function AmountInput({
               data-cy="bridge-amount-input"
             />
           </AmountInnerWrapperTextStack>
-          <MaxButtonWrapper onClick={onClickMaxBalance} disabled={!balance}>
+          <MaxButtonWrapper
+            onClick={() => {
+              setDidFocus(true);
+              onClickMaxBalance();
+            }}
+            disabled={!balance}
+          >
             MAX
           </MaxButtonWrapper>
         </AmountInnerWrapper>
