@@ -40,7 +40,7 @@ export function useAmountInput(selectedRoute: Route) {
   useEffect(() => {
     setUserAmountInput("");
     setParsedAmount(undefined);
-  }, [selectedRoute]);
+  }, [selectedRoute.fromTokenSymbol]);
 
   useEffect(() => {
     try {
