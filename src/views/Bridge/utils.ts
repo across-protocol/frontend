@@ -11,7 +11,6 @@ import {
 
 export enum AmountInputError {
   INVALID = "invalid",
-  NEGATIVE_AMOUNT = "negativeAmount",
   INSUFFICIENT_LIQUIDITY = "insufficientLiquidity",
   INSUFFICIENT_BALANCE = "insufficientBalance",
   AMOUNT_TOO_LOW = "amountTooLow",
@@ -95,7 +94,7 @@ export function validateBridgeAmount(
 
   if (parsedAmountInput.lte(0)) {
     return {
-      error: AmountInputError.NEGATIVE_AMOUNT,
+      error: AmountInputError.INVALID,
     };
   }
 

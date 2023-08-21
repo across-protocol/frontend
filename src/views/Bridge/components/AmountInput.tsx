@@ -81,11 +81,10 @@ export function AmountInput({
             "Insufficient balance to process this transfer."}
           {validationError === AmountInputError.INSUFFICIENT_LIQUIDITY &&
             "Insufficient bridge liquidity to process this transfer."}
-          {validationError === AmountInputError.NEGATIVE_AMOUNT &&
+          {validationError === AmountInputError.INVALID &&
             "Only positive numbers are allowed as an input."}
           {validationError === AmountInputError.AMOUNT_TOO_LOW &&
             "The amount you are trying to bridge is too low."}
-          {validationError === AmountInputError.INVALID && "Input is invalid."}
         </BridgeInputErrorAlert>
       )}
     </AmountExternalWrapper>
