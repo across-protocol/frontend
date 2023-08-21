@@ -31,7 +31,7 @@ export function AmountInput({
 
   useEffect(() => {
     setDidFocus(false);
-  }, [selectedRoute.fromTokenAddress]);
+  }, [selectedRoute.fromTokenSymbol]);
 
   const token = getToken(selectedRoute.fromTokenSymbol);
 
