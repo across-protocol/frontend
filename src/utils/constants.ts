@@ -399,7 +399,7 @@ export function getConfigStoreAddress(
     chainId
   );
   assert(
-    Boolean(configStoreAddress),
+    ethers.utils.isAddress(configStoreAddress),
     "Config Store address not set for chain: " + chainId
   );
   return configStoreAddress;
