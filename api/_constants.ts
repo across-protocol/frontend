@@ -106,3 +106,5 @@ export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
 export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;
 
 export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
+
+export const CHAIN_IDS = constants.CHAIN_IDs;
