@@ -104,7 +104,7 @@ const AmountWrapper = styled.div<IValidInput>`
   align-items: center;
   padding: 9px 20px 9px 32px;
   background: #2d2e33;
-  border: 1px solid ${({ valid }) => (!valid ? "#f96c6c" : "#4c4e57")};
+  border: 1px solid ${({ valid }) => (valid ? "#4c4e57" : "#f96c6c")};
   border-radius: 32px;
 
   width: 100%;
@@ -178,14 +178,12 @@ const AmountInnerWrapperTextStack = styled.div`
 `;
 
 const AmountInnerInput = styled.input<IValidInput>`
-  font-family: "Barlow";
-  font-style: normal;
   font-weight: 400;
   font-size: 18px;
   line-height: 26px;
   color: #e0f3ff;
 
-  color: ${({ valid }) => (!valid ? "#f96c6c" : "#e0f3ff")};
+  color: ${({ valid }) => (valid ? "#e0f3ff" : "#f96c6c")};
   background: none;
 
   width: 100%;
