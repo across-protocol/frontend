@@ -20,7 +20,7 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
   try {
     const enabledPoolsUnderlyingAddresses = ENABLED_POOLS_UNDERLYING_TOKENS.map(
       (token) => token.addresses[HUB_POOL_CHAIN_ID]
-    );
+    ).filter((address) => Boolean(address));
 
     const stakingPools = await Promise.all(
       enabledPoolsUnderlyingAddresses.map((tokenAddress) =>
@@ -28,8 +28,16 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
       )
     );
 
-    const formattedPools = stakingPools.map((pool, index) => {
-      const underlyingToken = ENABLED_POOLS_UNDERLYING_TOKENS[index];
+    const formattedPools = stakingPools.flatMap((pool) => {
+      const underlyingToken = ENABLED_POOLS_UNDERLYING_TOKENS.find(
+        (token) =>
+          token.addresses[HUB_POOL_CHAIN_ID] === pool.poolUnderlyingTokenAddress
+      );
+
+      if (!underlyingToken) {
+        return [];
+      }
+
       return {
         name: underlyingToken.symbol,
         chain: HUB_POOL_CHAIN_ID === 1 ? "Ethereum" : "Goerli",

@@ -970,6 +970,7 @@ export async function fetchStakingPool(
   return {
     hubPoolAddress: hubPool.address,
     acceleratingDistributorAddress: acceleratingDistributor.address,
+    poolUnderlyingTokenAddress,
     lpTokenAddress,
     poolEnabled,
     lpTokenSymbolName,
