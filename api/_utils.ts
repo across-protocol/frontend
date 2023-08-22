@@ -890,9 +890,14 @@ async function getBalancerPoolState(poolTokenAddress: string) {
 }
 
 export async function fetchStakingPool(
-  poolUnderlyingTokenAddress: string,
+  underlyingToken: {
+    address: string;
+    symbol: string;
+    decimals: number;
+  },
   externalPoolProvider?: string
 ) {
+  const poolUnderlyingTokenAddress = underlyingToken.address;
   const provider = getProvider(HUB_POOL_CHAIN_ID);
 
   const hubPool = HubPool__factory.connect(
@@ -969,7 +974,7 @@ export async function fetchStakingPool(
   return {
     hubPoolAddress: hubPool.address,
     acceleratingDistributorAddress: acceleratingDistributor.address,
-    poolUnderlyingTokenAddress,
+    underlyingToken,
     lpTokenAddress,
     poolEnabled,
     lpTokenSymbolName,
