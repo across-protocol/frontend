@@ -48,12 +48,15 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
           ACX: utils.formatEther(pool.apyData.rewardsApy),
         },
         apy: utils.formatEther(pool.apyData.totalApy),
-        tvl: pool.usdCumulativeStakedValue
-          .add(pool.usdTotalPoolSize)
-          .toString(),
+        tvl: utils.formatEther(pool.usdTotalPoolSize),
         link: "https://across.to/rewards",
         active: true,
-        composition: { [underlyingToken.symbol]: pool.totalPoolSize },
+        composition: {
+          [underlyingToken.symbol]: utils.formatUnits(
+            pool.totalPoolSize,
+            underlyingToken.decimals
+          ),
+        },
         contract_address: pool.acceleratingDistributorAddress,
         tokens: [underlyingToken.symbol],
         underlying_tokens: [underlyingToken.addresses[HUB_POOL_CHAIN_ID]],

@@ -934,7 +934,8 @@ export async function fetchStakingPool(
     totalPoolSize,
   } = liquidityPoolState;
 
-  const lpExchangeRateToUSD = BigNumber.from(tokenUSDExchangeRate)
+  const lpExchangeRateToUSD = utils
+    .parseUnits(tokenUSDExchangeRate.toString())
     .mul(lpExchangeRateToToken)
     .div(sdk.utils.fixedPointAdjustment);
 
@@ -942,18 +943,16 @@ export async function fetchStakingPool(
     BigNumber.from(lpExchangeRateToUSD)
       .mul(ConvertDecimals(lpTokenDecimalCount, 18)(lpAmount))
       .div(sdk.utils.fixedPointAdjustment);
-  const convertUnderlyingToLP = (underlying: BigNumber) =>
-    underlying.mul(sdk.utils.fixedPointAdjustment).div(lpExchangeRateToToken);
 
   const usdCumulativeStakedValue = convertLPValueToUsd(cumulativeStaked);
-  const usdTotalPoolSize = convertLPValueToUsd(
-    convertUnderlyingToLP(BigNumber.from(totalPoolSize))
-  );
+  const usdTotalPoolSize = BigNumber.from(totalPoolSize)
+    .mul(utils.parseUnits(tokenUSDExchangeRate.toString()))
+    .div(sdk.utils.fixedPointAdjustment);
 
   const baseRewardsApy = getBaseRewardsApr(
     baseEmissionRate
       .mul(SECONDS_PER_YEAR)
-      .mul(acxPriceInUSD)
+      .mul(utils.parseUnits(acxPriceInUSD.toString()))
       .div(sdk.utils.fixedPointAdjustment),
     usdCumulativeStakedValue
   );
@@ -984,7 +983,6 @@ export async function fetchStakingPool(
       rewardsApy,
     },
     usdTotalPoolSize,
-    usdCumulativeStakedValue,
     totalPoolSize,
   };
 }
