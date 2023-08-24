@@ -4,6 +4,7 @@ import {
   SpokePool__factory,
   SpokePool,
 } from "@across-protocol/contracts-v2/dist/typechain";
+import { AcceleratingDistributor__factory } from "@across-protocol/across-token/dist/typechain";
 import axios from "axios";
 import * as sdk from "@across-protocol/sdk-v2";
 import { BigNumber, ethers, providers, utils } from "ethers";
@@ -20,6 +21,7 @@ import {
   EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
   TOKEN_SYMBOLS_MAP,
   CHAIN_IDS,
+  SECONDS_PER_YEAR,
 } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
@@ -820,12 +822,16 @@ export async function getPoolState(
   externalPoolProvider?: string
 ) {
   if (!externalPoolProvider) {
-    const hubPoolClient = getHubPoolClient();
-    await hubPoolClient.updatePool(tokenAddress);
-    return hubPoolClient.getPoolState(tokenAddress);
+    return getAcrossPoolState(tokenAddress);
   }
 
   return getExternalPoolState(tokenAddress, externalPoolProvider);
+}
+
+export async function getAcrossPoolState(tokenAddress: string) {
+  const hubPoolClient = getHubPoolClient();
+  await hubPoolClient.updatePool(tokenAddress);
+  return hubPoolClient.getPoolState(tokenAddress);
 }
 
 export async function getExternalPoolState(
@@ -879,5 +885,136 @@ async function getBalancerPoolState(poolTokenAddress: string) {
   return {
     estimatedApy: Number(apr.max / 1000).toFixed(2),
     exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
+    totalPoolSize: pool.totalShares,
   };
+}
+
+export async function fetchStakingPool(
+  underlyingToken: {
+    address: string;
+    symbol: string;
+    decimals: number;
+  },
+  externalPoolProvider?: string
+) {
+  const poolUnderlyingTokenAddress = underlyingToken.address;
+  const provider = getProvider(HUB_POOL_CHAIN_ID);
+
+  const hubPool = HubPool__factory.connect(
+    ENABLED_ROUTES.hubPoolAddress,
+    provider
+  );
+  const acceleratingDistributor = AcceleratingDistributor__factory.connect(
+    ENABLED_ROUTES.acceleratingDistributorAddress,
+    provider
+  );
+
+  const lpTokenAddress = externalPoolProvider
+    ? poolUnderlyingTokenAddress
+    : (await hubPool.pooledTokens(poolUnderlyingTokenAddress)).lpToken;
+
+  const [acrossTokenAddress, tokenUSDExchangeRate] = await Promise.all([
+    acceleratingDistributor.rewardToken(),
+    getCachedTokenPrice(poolUnderlyingTokenAddress, "usd"),
+  ]);
+  const acxPriceInUSD = await getCachedTokenPrice(acrossTokenAddress, "usd");
+
+  const lpTokenERC20 = ERC20__factory.connect(lpTokenAddress, provider);
+
+  const [
+    { enabled: poolEnabled, maxMultiplier, baseEmissionRate, cumulativeStaked },
+    lpTokenDecimalCount,
+    lpTokenSymbolName,
+    liquidityPoolState,
+  ] = await Promise.all([
+    acceleratingDistributor.stakingTokens(lpTokenAddress),
+    lpTokenERC20.decimals(),
+    lpTokenERC20.symbol(),
+    getPoolState(poolUnderlyingTokenAddress, externalPoolProvider),
+  ]);
+
+  const {
+    estimatedApy: estimatedApyFromQuery,
+    exchangeRateCurrent: lpExchangeRateToToken,
+    totalPoolSize,
+  } = liquidityPoolState;
+
+  const lpExchangeRateToUSD = utils
+    .parseUnits(tokenUSDExchangeRate.toString())
+    .mul(lpExchangeRateToToken)
+    .div(sdk.utils.fixedPointAdjustment);
+
+  const convertLPValueToUsd = (lpAmount: BigNumber) =>
+    BigNumber.from(lpExchangeRateToUSD)
+      .mul(ConvertDecimals(lpTokenDecimalCount, 18)(lpAmount))
+      .div(sdk.utils.fixedPointAdjustment);
+
+  const usdCumulativeStakedValue = convertLPValueToUsd(cumulativeStaked);
+  const usdTotalPoolSize = BigNumber.from(totalPoolSize)
+    .mul(utils.parseUnits(tokenUSDExchangeRate.toString()))
+    .div(sdk.utils.fixedPointAdjustment);
+
+  const baseRewardsApy = getBaseRewardsApr(
+    baseEmissionRate
+      .mul(SECONDS_PER_YEAR)
+      .mul(utils.parseUnits(acxPriceInUSD.toString()))
+      .div(sdk.utils.fixedPointAdjustment),
+    usdCumulativeStakedValue
+  );
+  const poolApy = utils.parseEther(estimatedApyFromQuery);
+  const maxApy = poolApy.add(
+    baseRewardsApy.mul(maxMultiplier).div(sdk.utils.fixedPointAdjustment)
+  );
+  const minApy = poolApy.add(baseRewardsApy);
+  const rewardsApy = baseRewardsApy
+    .mul(utils.parseEther("1"))
+    .div(sdk.utils.fixedPointAdjustment);
+  const totalApy = poolApy.add(rewardsApy);
+
+  return {
+    hubPoolAddress: hubPool.address,
+    acceleratingDistributorAddress: acceleratingDistributor.address,
+    underlyingToken,
+    lpTokenAddress,
+    poolEnabled,
+    lpTokenSymbolName,
+    lpTokenDecimalCount: lpTokenDecimalCount,
+    apyData: {
+      poolApy,
+      maxApy,
+      minApy,
+      totalApy,
+      baseRewardsApy,
+      rewardsApy,
+    },
+    usdTotalPoolSize,
+    totalPoolSize,
+  };
+}
+
+// Copied from @uma/common
+export const ConvertDecimals = (fromDecimals: number, toDecimals: number) => {
+  // amount: string, BN, number - integer amount in fromDecimals smallest unit that want to convert toDecimals
+  // returns: string with toDecimals in smallest unit
+  return (amount: BigNumber): string => {
+    amount = BigNumber.from(amount);
+    if (amount.isZero()) return amount.toString();
+    const diff = fromDecimals - toDecimals;
+    if (diff === 0) return amount.toString();
+    if (diff > 0) return amount.div(BigNumber.from("10").pow(diff)).toString();
+    return amount.mul(BigNumber.from("10").pow(-1 * diff)).toString();
+  };
+};
+
+export function getBaseRewardsApr(
+  rewardsPerYearInUSD: BigNumber,
+  totalStakedInUSD: BigNumber
+) {
+  if (totalStakedInUSD.isZero()) {
+    totalStakedInUSD = utils.parseEther("1");
+  }
+
+  return rewardsPerYearInUSD
+    .mul(sdk.utils.fixedPointAdjustment)
+    .div(totalStakedInUSD);
 }
