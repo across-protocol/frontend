@@ -19,6 +19,7 @@ import {
   receiveAmount,
   Route,
 } from "utils";
+import { VoidHandler } from "utils/types";
 
 import { AmountInputError, getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
@@ -30,14 +31,14 @@ type BridgeFormProps = {
   toAccount?: ToAccount;
 
   onChangeAmountInput: (input: string) => void;
-  onClickMaxBalance: () => void;
+  onClickMaxBalance: VoidHandler;
   onSelectToken: (token: string) => void;
   onSelectFromChain: (chainId: number) => void;
   onSelectToChain: (chainId: number) => void;
-  onClickQuickSwap: () => void;
-  onClickChainSwitch: () => void;
-  onClickActionButton: () => void;
-  onClickChangeToAddress: () => void;
+  onClickQuickSwap: VoidHandler;
+  onClickChainSwitch: VoidHandler;
+  onClickActionButton: VoidHandler;
+  onClickChangeToAddress: VoidHandler;
 
   fees?: GetBridgeFeesResult;
   estimatedTimeString?: string;

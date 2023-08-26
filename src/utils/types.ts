@@ -12,3 +12,5 @@ export type StylizedSVG = StyledComponent<
   {},
   {}
 >;
+
+export type VoidHandler = () => void;
