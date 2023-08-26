@@ -1,13 +1,6 @@
 import { ethers } from "ethers";
 
-import {
-  getProvider,
-  ChainId,
-  getConfig,
-  toWeiSafe,
-  formatUnits,
-  reportTokenBalance,
-} from "utils";
+import { getProvider, ChainId, getConfig, toWeiSafe, formatUnits } from "utils";
 import { ERC20__factory } from "utils/typechain";
 
 export async function getNativeBalance(
@@ -17,9 +10,6 @@ export async function getNativeBalance(
 ) {
   const provider = getProvider(chainId);
   const balance = await provider.getBalance(account, blockNumber);
-
-  reportTokenBalance(chainId, balance, chainId === 137 ? "MATIC" : "ETH");
-
   return balance;
 }
 /**
@@ -38,9 +28,7 @@ export async function getBalance(
 ): Promise<ethers.BigNumber> {
   const provider = getProvider(chainId);
   const contract = ERC20__factory.connect(tokenAddress, provider);
-  const symbol = await contract.symbol({ blockTag: blockNumber });
   const balance = await contract.balanceOf(account, { blockTag: blockNumber });
-  reportTokenBalance(chainId, balance, symbol);
   return balance;
 }
 
