@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 import { bridgeLimitsQueryKey, ChainId, getConfig } from "utils";
 import { BigNumber } from "ethers";
 import getApiEndpoint from "utils/serverless-api";
+import { isDefined } from "utils/defined";
 
 export interface BridgeLimits {
   minDeposit: BigNumber;
@@ -23,9 +24,9 @@ export function useBridgeLimits(
   toChainId?: ChainId
 ) {
   const enabledQuery =
-    tokenSymbol !== undefined &&
-    toChainId !== undefined &&
-    fromChainId !== undefined;
+    isDefined<string>(tokenSymbol) &&
+    isDefined<ChainId>(fromChainId) &&
+    isDefined<ChainId>(toChainId);
   const queryKey = enabledQuery
     ? bridgeLimitsQueryKey(tokenSymbol, fromChainId, toChainId)
     : "DISABLED_BRIDGE_LIMITS_QUERY";
