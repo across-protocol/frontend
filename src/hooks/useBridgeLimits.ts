@@ -33,11 +33,17 @@ export function useBridgeLimits(
   const { data: limits, ...delegated } = useQuery(
     queryKey,
     () => {
-      if (!tokenSymbol || !fromChainId || !toChainId) {
+      if (
+        !(
+          isDefined<string>(tokenSymbol) &&
+          isDefined<ChainId>(fromChainId) &&
+          isDefined<ChainId>(toChainId)
+        )
+      ) {
         return;
       }
       const token = getConfig().getTokenInfoBySymbol(fromChainId, tokenSymbol);
-      return getApiEndpoint().limits(token.address, fromChainId!, toChainId!);
+      return getApiEndpoint().limits(token.address, fromChainId, toChainId);
     },
     {
       enabled: enabledQuery,
