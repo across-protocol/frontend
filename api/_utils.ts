@@ -892,7 +892,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
     // 2.3% (0.023) as 230
     // etc. So we divide by 10_000 to get the actual percentage.
     estimatedApy: Number(apr.swapFees / 10_000).toFixed(2),
-    exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
+    exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE.toString(),
     totalPoolSize: pool.totalShares,
   };
 }
