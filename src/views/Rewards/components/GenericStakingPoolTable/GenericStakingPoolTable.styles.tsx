@@ -127,7 +127,7 @@ export const ButtonCell = styled.div`
   border-top: 1px solid #3e4047;
 `;
 
-export const StakeButton = styled(Link)`
+export const StakeButton = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -138,9 +138,12 @@ export const StakeButton = styled(Link)`
 
   height: ${40 / 16}rem;
 
-  color: #6cf9d8;
-  font-weight: 500;
-  text-decoration: none;
+  a,
+  button {
+    color: #6cf9d8;
+    font-weight: 500;
+    text-decoration: none;
+  }
 `;
 
 interface IStyledProgressBar {

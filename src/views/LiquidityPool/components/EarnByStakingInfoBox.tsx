@@ -32,7 +32,7 @@ export function EarnByStakingInfoBox({
     <Text as="span">-</Text>
   );
 
-  const hasStaked = !data?.userAmountOfLPStaked.isZero();
+  const hasStaked = !data?.userAmountOfLPStaked?.isZero();
   const apyToShow = hasStaked
     ? data?.apyData.rewardsApy
     : data?.apyData.baseRewardsApy;

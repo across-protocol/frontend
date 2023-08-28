@@ -8,6 +8,7 @@ const Staking = () => {
   const {
     poolName,
     poolLogoURI,
+    poolLogoURIs,
     isConnected,
     stakingPoolQuery,
     stakeActionMutation,
@@ -22,9 +23,14 @@ const Staking = () => {
       <WrongNetworkHeader requiredChainId={hubPoolChainId} />
       <LayoutV2 maxWidth={600}>
         <Wrapper>
-          <StakingExitAction poolName={poolName} poolLogoURI={poolLogoURI} />
+          <StakingExitAction
+            poolName={poolName}
+            poolLogoURI={poolLogoURI}
+            poolLogoURIs={poolLogoURIs}
+          />
           <StakingForm
             logoURI={poolLogoURI}
+            logoURIs={poolLogoURIs}
             isDataLoading={stakingPoolQuery.isLoading}
             isMutating={
               stakeActionMutation.isLoading || unstakeActionMutation.isLoading

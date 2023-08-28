@@ -2,7 +2,7 @@ import { fixedPointAdjustment, secondsPerDay } from "utils/constants";
 import { safeDivide } from "utils/math";
 import { BigNumber } from "ethers";
 import { parseEther } from "@ethersproject/units";
-import { StakingPool } from "hooks";
+import { StakingPool } from "utils/staking-pool";
 import { formattedBigNumberToNumber, parseEtherLike } from "./format";
 import { cloneDeep } from "lodash";
 

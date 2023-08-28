@@ -18,11 +18,10 @@ describe("pool", () => {
   });
 
   it("select pool", () => {
-    cy.wait("@getPools");
     cy.dataCy("select-pool").click();
-    cy.dataCy("select-pool-modal").contains("WETH Pool").click();
+    cy.dataCy("select-pool-modal").contains("ETH Pool").click();
 
-    cy.dataCy("select-pool").should("contain.text", "WETH Pool");
+    cy.dataCy("select-pool").should("contain.text", "ETH Pool");
   });
 
   it("show action button on connected wallet", () => {
