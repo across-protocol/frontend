@@ -8,6 +8,7 @@ import {
   getNativeBalance,
   getRoutes,
   getToken,
+  reportTokenBalance,
   reportTotalWalletUsdBalance,
   setUserId,
 } from "utils";
@@ -75,6 +76,7 @@ const calculateUsdBalances = async (account: string) => {
       Object.entries(availableTokens).flatMap(async ([chainId, tokens]) => {
         const promises = tokens.map(
           async ({ fromTokenSymbol, fromTokenAddress }) => ({
+            fromChainId: Number(chainId),
             fromTokenSymbol,
             fromTokenAddress,
             balance: await getBalance(
@@ -87,6 +89,7 @@ const calculateUsdBalances = async (account: string) => {
         if (chainId !== "137") {
           const fn = async () => {
             return {
+              fromChainId: Number(chainId),
               fromTokenSymbol: "ETH",
               fromTokenAddress: "0x0000000000000000000000000000000000000000",
               balance: await getNativeBalance(Number(chainId), account),
@@ -98,6 +101,17 @@ const calculateUsdBalances = async (account: string) => {
       })
     )
   ).flat(2);
+
+  try {
+    await Promise.all(
+      balances.map(async ({ fromChainId, fromTokenSymbol, balance }) => {
+        const token = getToken(fromTokenSymbol);
+        return reportTokenBalance(fromChainId, balance, token.symbol);
+      })
+    );
+  } catch (error) {
+    console.error("Failed to track balances", error);
+  }
 
   const totalBalance = balances.reduce((acc, { fromTokenSymbol, balance }) => {
     const token = getToken(fromTokenSymbol);
