@@ -22,6 +22,10 @@ import {
   TOKEN_SYMBOLS_MAP,
   CHAIN_IDS,
   SECONDS_PER_YEAR,
+  MINIMAL_BALANCER_V2_POOL_ABI,
+  MINIMAL_BALANCER_V2_VAULT_ABI,
+  MINIMAL_MULTICALL3_ABI,
+  MULTICALL3_ADDRESS,
 } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
@@ -1021,4 +1025,108 @@ export function getBaseRewardsApr(
   return rewardsPerYearInUSD
     .mul(sdk.utils.fixedPointAdjustment)
     .div(totalStakedInUSD);
+}
+
+/**
+ * Makes a series of read calls via multicall3 (so they only hit the provider once).
+ * @param provider Provider to use for the calls.
+ * @param calls the calls to make via multicall3. Each call includes a contract, function name, and args, so that
+ * this function can encode them correctly.
+ * @returns An array of the decoded results in the same order that they were passed in.
+ */
+export async function callViaMulticall3(
+  provider: ethers.providers.JsonRpcProvider,
+  calls: {
+    contract: ethers.Contract;
+    functionName: string;
+    args?: any[];
+  }[]
+): Promise<any[]> {
+  const multicall3 = new ethers.Contract(
+    MULTICALL3_ADDRESS,
+    MINIMAL_MULTICALL3_ABI,
+    provider
+  );
+  const inputs = calls.map(({ contract, functionName, args }) => ({
+    target: contract.address,
+    callData: contract.interface.encodeFunctionData(functionName, args),
+  }));
+
+  const [_, results] = await multicall3.callStatic.aggregate(inputs);
+  return results.map((result, i) =>
+    calls[i].contract.interface.decodeFunctionResult(
+      calls[i].functionName,
+      result
+    )
+  );
+}
+
+/**
+ * This gets a balancer v2 token price by querying the vault contract for the tokens and balances, and then
+ * querying coingecko for the prices of those tokens.
+ * @param tokenAddress The address of the balancer v2 token.
+ * @param chainId The chain id where the token exists.
+ */
+export async function getBalancerV2TokenPrice(
+  tokenAddress: string,
+  chainId = 1
+) {
+  const provider = getProvider(chainId);
+  const pool = new ethers.Contract(
+    tokenAddress,
+    MINIMAL_BALANCER_V2_POOL_ABI,
+    provider
+  );
+
+  const [vaultAddress, poolId, totalSupply] = await callViaMulticall3(
+    provider,
+    [
+      {
+        contract: pool,
+        functionName: "getVault",
+      },
+      {
+        contract: pool,
+        functionName: "getPoolId",
+      },
+      {
+        contract: pool,
+        functionName: "totalSupply",
+      },
+    ]
+  );
+
+  const vault = new ethers.Contract(
+    vaultAddress,
+    MINIMAL_BALANCER_V2_VAULT_ABI,
+    provider
+  );
+
+  const { tokens, balances } = (await vault.getPoolTokens(poolId)) as {
+    tokens: string[];
+    balances: BigNumber[];
+  };
+
+  const tokenValues = await Promise.all(
+    tokens.map(async (token: string, i: number): Promise<number> => {
+      const tokenContract = ERC20__factory.connect(token, provider);
+      const [price, decimals] = await Promise.all([
+        getCachedTokenPrice(token, "usd"),
+        tokenContract.decimals(),
+      ]);
+      const balance = parseFloat(
+        ethers.utils.formatUnits(balances[i], decimals)
+      );
+      return balance * price;
+    })
+  );
+
+  const totalValue = tokenValues.reduce((a, b) => a + b, 0);
+
+  // Balancer v2 tokens have 18 decimals.
+  const floatTotalSupply = parseFloat(
+    ethers.utils.formatUnits(totalSupply, 18)
+  );
+
+  return totalValue / floatTotalSupply;
 }
