@@ -838,7 +838,7 @@ export async function getDefiLlamaPoolState(
   const url = `https://yields.llama.fi/chart/${UUID}`;
   const response = await axios.get<{
     status: string;
-    data: { timestamp: string; apy: string; tvlUsd: string }[];
+    data: { timestamp: string; apy: number; tvlUsd: number }[];
   }>(url);
   if (response.data.status !== "success") {
     throw new Error("Failed to fetch pool state");
@@ -846,9 +846,9 @@ export async function getDefiLlamaPoolState(
   const data = response.data.data;
   const lastElement = data[data.length - 1];
   return {
-    estimatedApy: lastElement.apy,
+    estimatedApy: lastElement.apy.toFixed(2),
     exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE.toString(),
-    totalPoolSize: lastElement.tvlUsd,
+    totalPoolSize: lastElement.tvlUsd.toFixed(2),
   };
 }
 
