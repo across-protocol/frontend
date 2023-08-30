@@ -846,7 +846,7 @@ export async function getDefiLlamaPoolState(
   const data = response.data.data;
   const lastElement = data[data.length - 1];
   return {
-    estimatedApy: lastElement.apy.toFixed(2),
+    estimatedApy: (lastElement.apy / 100).toFixed(4),
     exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE.toString(),
     totalPoolSize: lastElement.tvlUsd.toFixed(2),
   };
