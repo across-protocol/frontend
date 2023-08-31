@@ -26,10 +26,12 @@ import {
   MINIMAL_BALANCER_V2_VAULT_ABI,
   MINIMAL_MULTICALL3_ABI,
   MULTICALL3_ADDRESS,
+  DEFI_LLAMA_POOL_LOOKUP,
 } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
 import { VercelResponse } from "@vercel/node";
+import { PoolStateResult } from "./_types";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -824,12 +826,34 @@ export function getFallbackTokenLogoURI(l1TokenAddress: string) {
 export async function getPoolState(
   tokenAddress: string,
   externalPoolProvider?: string
-) {
-  if (!externalPoolProvider) {
+): Promise<PoolStateResult> {
+  const resolvedAddress = ethers.utils.getAddress(tokenAddress);
+  if (DEFI_LLAMA_POOL_LOOKUP[resolvedAddress] !== undefined) {
+    return getDefiLlamaPoolState(tokenAddress);
+  } else {
     return getAcrossPoolState(tokenAddress);
   }
+}
 
-  return getExternalPoolState(tokenAddress, externalPoolProvider);
+export async function getDefiLlamaPoolState(
+  tokenAddress: string
+): Promise<PoolStateResult> {
+  const UUID = DEFI_LLAMA_POOL_LOOKUP[ethers.utils.getAddress(tokenAddress)];
+  const url = `https://yields.llama.fi/chart/${UUID}`;
+  const response = await axios.get<{
+    status: string;
+    data: { timestamp: string; apy: number; tvlUsd: number }[];
+  }>(url);
+  if (response.data.status !== "success") {
+    throw new Error("Failed to fetch pool state");
+  }
+  const data = response.data.data;
+  const lastElement = data[data.length - 1];
+  return {
+    estimatedApy: (lastElement.apy / 100).toFixed(4),
+    exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE.toString(),
+    totalPoolSize: lastElement.tvlUsd.toFixed(2),
+  };
 }
 
 export async function getAcrossPoolState(tokenAddress: string) {
