@@ -1,9 +1,5 @@
 import { Deposit } from "hooks/useDeposits";
-import {
-  getConfig,
-  disabledChainIds,
-  disabledChainIdsForAvailableRoutes,
-} from "utils";
+import { getConfig, disabledChainIds } from "utils";
 
 import { SupportedTxTuple } from "./types";
 import { BigNumber } from "ethers";
@@ -17,9 +13,7 @@ export function getSupportedTxTuples(
       // Do not show transactions for disabled chains
       if (
         [tx.sourceChainId, tx.destinationChainId].some((chainId) =>
-          [...disabledChainIds, ...disabledChainIdsForAvailableRoutes].includes(
-            String(chainId)
-          )
+          disabledChainIds.includes(String(chainId))
         )
       ) {
         return supported;
