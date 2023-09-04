@@ -70,19 +70,45 @@ export const DISABLED_CHAINS = (
   process.env.REACT_APP_DISABLED_CHAINS || ""
 ).split(",");
 
-const _ENABLED_ROUTES =
+const RAW_ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1
     ? enabledMainnetRoutesAsJson
     : enabledGoerliRoutesAsJson;
 
-_ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
+// This array represents the array of chains that are available for the
+// frontend to display in the /available-routes and /token-list API endpoints.
+// This list is whitelisted in that certain aggregators use this list to
+// which routes are available to serve bridge transactions by across. To ensure
+// that the available routes are explicitely defined, we use an opt-in approach
+// to adding chains to this list. If a chain is not in this list, it will not
+// be presented in the /available-routes and /token-list endpoints.
+//
+// If no chains are specified, then we default to the chains that are
+// specified in the routes.json file.
+//
+// To ensure continuity, we also filter out any chains that are in the
+// disabled chains array.
+export const WHITELISTED_AVAILABLE_CHAINS = (
+  process.env.REACT_APP_WHITELISTED_AVAILABLE_CHAINS
+    ? process.env.REACT_APP_WHITELISTED_AVAILABLE_CHAINS.split(",")
+    : Array.from(
+        new Set(
+          RAW_ENABLED_ROUTES.routes.flatMap(({ fromChain, toChain }) => [
+            String(fromChain),
+            String(toChain),
+          ])
+        )
+      )
+).filter((chainId) => !DISABLED_CHAINS.includes(chainId));
+
+RAW_ENABLED_ROUTES.routes = RAW_ENABLED_ROUTES.routes.filter(
   ({ fromChain, toChain, fromTokenSymbol }) =>
     ![fromChain, toChain].some((chainId) =>
       DISABLED_CHAINS.includes(chainId.toString())
     ) && !DISABLED_ROUTE_TOKENS.includes(fromTokenSymbol)
 );
 
-export const ENABLED_ROUTES = _ENABLED_ROUTES;
+export const ENABLED_ROUTES = RAW_ENABLED_ROUTES;
 
 /**
  * Writes a log using the google cloud logging utility

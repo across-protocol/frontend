@@ -7,7 +7,7 @@ import {
   positiveIntStr,
   ENABLED_ROUTES,
   handleErrorCondition,
-  areChainsEnabled,
+  WHITELISTED_AVAILABLE_CHAINS,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 
@@ -65,7 +65,9 @@ const handler = async (
         destinationChainId: number;
         destinationToken: string;
       }) =>
-        areChainsEnabled(route.originChainId, route.destinationChainId) &&
+        [route.originChainId, route.destinationChainId].every((chain) =>
+          WHITELISTED_AVAILABLE_CHAINS.includes(String(chain))
+        ) &&
         (!originToken ||
           originToken.toLowerCase() === route.originToken.toLowerCase()) &&
         (!originChainId || originChainId === String(route.originChainId)) &&

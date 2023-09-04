@@ -5,7 +5,7 @@ import {
   handleErrorCondition,
   getFallbackTokenLogoURI,
   ENABLED_ROUTES,
-  areChainsEnabled,
+  WHITELISTED_AVAILABLE_CHAINS,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 
@@ -14,7 +14,11 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
 
   try {
     const tokensPerChain = ENABLED_ROUTES.routes
-      .filter((route) => areChainsEnabled(route.fromChain, route.toChain))
+      .filter(({ fromChain, toChain }) =>
+        [fromChain, toChain].every((chain) =>
+          WHITELISTED_AVAILABLE_CHAINS.includes(String(chain))
+        )
+      )
       .reduce(
         (acc, route) => {
           return {
