@@ -70,14 +70,6 @@ export const DISABLED_CHAINS = (
   process.env.REACT_APP_DISABLED_CHAINS || ""
 ).split(",");
 
-// This is an array of chainIds that should be disabled. In contrast to the
-// above constant `DISABLED_CHAINS`, this constant is used to disable chains
-// only for the `/available-routes` endpoint and DOES NOT affect the
-// `ENABLED_ROUTES` object.
-export const DISABLED_CHAINS_FOR_AVAILABLE_ROUTES = (
-  process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
-).split(",");
-
 const _ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1
     ? enabledMainnetRoutesAsJson
@@ -1047,4 +1039,14 @@ export function getBaseRewardsApr(
   return rewardsPerYearInUSD
     .mul(sdk.utils.fixedPointAdjustment)
     .div(totalStakedInUSD);
+}
+
+/**
+ * Determines if a given set of chains are enabled for bridging.
+ * @param chains A list of chain IDs to check if they are enabled
+ * @returns A boolean representing if all chains are enabled
+ * @note This function uses the `DISABLED_CHAINS` environment variable to determine if a chain is disabled
+ */
+export function areChainsEnabled(...chains: string[] | number[]) {
+  return !chains.some((chain) => DISABLED_CHAINS.includes(String(chain)));
 }
