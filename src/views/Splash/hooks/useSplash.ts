@@ -28,6 +28,8 @@ export function useSplash() {
     { title: "To Bridge 1 ETH", value: ternary("< $1") },
   ];
 
+  const averageFillTimeInMinutes = Math.floor(data?.avgFillTimeInMinutes ?? 0);
+
   const cardBenefits = [
     {
       icon: ShieldIcon,
@@ -38,9 +40,9 @@ export function useSplash() {
     {
       icon: ZapIcon,
       title: "Fast",
-      description: `Across is able to offer extremely fast bridging. Today, that means bridging under ${Math.floor(
-        data?.avgFillTimeInMinutes ?? 0
-      )} minutes on average. In the future, next-block bridging will be possible.`,
+      description: `Across is able to offer extremely fast bridging. Today, that means bridging under ${averageFillTimeInMinutes} minute${
+        averageFillTimeInMinutes === 1 ? "" : "s"
+      } on average. In the future, next-block bridging will be possible.`,
     },
     {
       icon: UsersIcon,
