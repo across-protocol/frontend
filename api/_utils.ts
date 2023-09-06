@@ -1052,7 +1052,7 @@ export async function callViaMulticall3(
     callData: contract.interface.encodeFunctionData(functionName, args),
   }));
 
-  const [_, results] = await multicall3.callStatic.aggregate(inputs);
+  const [, results] = await multicall3.callStatic.aggregate(inputs);
   return results.map((result, i) =>
     calls[i].contract.interface.decodeFunctionResult(
       calls[i].functionName,
