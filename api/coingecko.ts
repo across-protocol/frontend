@@ -186,6 +186,24 @@ const handler = async (
           balancerV2PoolTokens
         );
       }
+    } else if (
+      balancerV2PoolTokens.includes(ethers.utils.getAddress(l1Token))
+    ) {
+      if (baseCurrency === "usd") {
+        price = await getBalancerV2TokenPrice(l1Token);
+      } else if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
+        throw new Error(
+          "Only CG base currency allowed for BalancerV2 tokens is usd"
+        );
+      } else {
+        price = await getCoingeckoPrices(
+          coingeckoClient,
+          l1Token,
+          baseCurrency,
+          fixedTokenPrices,
+          balancerV2PoolTokens
+        );
+      }
     }
     // Fetch price dynamically from Coingecko API
     else if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {

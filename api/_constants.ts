@@ -140,6 +140,13 @@ export const MINIMAL_BALANCER_V2_POOL_ABI = [
     stateMutability: "view",
     type: "function",
   },
+  {
+    inputs: [],
+    name: "totalSupply",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
 ];
 
 export const MINIMAL_BALANCER_V2_VAULT_ABI = [
