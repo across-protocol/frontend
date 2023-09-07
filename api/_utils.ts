@@ -912,6 +912,8 @@ async function getBalancerPoolState(poolTokenAddress: string) {
   // APRs in the APY calculation.
   const apyEstimated = (apr.swapFees + apr.tokenAprs.total) / 10_000;
 
+  console.log(apyEstimated);
+
   return {
     // The Balancer SDK returns percentages as follows:
     // 23% (0.23) as 2300
@@ -919,7 +921,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
     // etc. So we divide by 10_000 to get the actual percentage.
     //
     // Additionally, we receive a potential range of APRs, so we take the average.
-    estimatedApy: apyEstimated.toFixed(2),
+    estimatedApy: apyEstimated.toFixed(3),
     exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE.toString(),
     totalPoolSize: pool.totalShares,
   };
