@@ -1159,5 +1159,5 @@ export async function getBalancerV2TokenPrice(
     ethers.utils.formatUnits(totalSupply, 18)
   );
 
-  return totalValue / floatTotalSupply;
+  return Number((totalValue / floatTotalSupply).toFixed(18));
 }
