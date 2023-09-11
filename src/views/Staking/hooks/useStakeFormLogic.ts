@@ -1,6 +1,7 @@
-import { StakingPool } from "hooks";
 import { useEffect, useState } from "react";
+
 import { deriveNewStakingValues, isNumberEthersParseable } from "utils";
+import { StakingPool } from "utils/staking-pool";
 
 export function useStakeFormLogic(
   poolData: StakingPool,

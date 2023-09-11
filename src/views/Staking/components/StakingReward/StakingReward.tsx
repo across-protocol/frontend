@@ -44,7 +44,7 @@ export const StakingReward = ({
             </RewardClaimWrapper>
             <ClaimRewardButton
               size="lg"
-              disabled={BigNumber.from(outstandingRewards).lte(0)}
+              disabled={BigNumber.from(outstandingRewards).lte(0) || isMutating}
               onClick={() => claimActionHandler()}
             >
               <Text color="warning" weight={500}>

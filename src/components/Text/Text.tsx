@@ -13,6 +13,8 @@ type TextSize =
   | "sm"
   | "xs";
 
+type TextCasing = "uppercase" | "lowercase" | "capitalize" | "normal";
+
 const sizeMap: Record<
   TextSize,
   {
@@ -95,6 +97,7 @@ type TextProps = {
   size?: TextSize;
   weight?: number;
   color?: string;
+  casing?: TextCasing;
 };
 
 export const Text = styled.div<TextProps>`
@@ -105,6 +108,9 @@ export const Text = styled.div<TextProps>`
   font-size: ${({ size = "md" }) => `${sizeMap[size].fontSize / 16}rem`};
   line-height: ${({ size = "md" }) =>
     `${sizeMap[size || "md"].lineHeight / 16}rem`};
+
+  text-transform: ${({ casing = "normal" }) =>
+    casing === "normal" ? "none" : casing};
 
   @media ${QUERIESV2.sm.andDown} {
     font-size: ${({ size = "md" }) =>

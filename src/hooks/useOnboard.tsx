@@ -16,6 +16,7 @@ import {
   trackDisconnectWalletButtonClicked,
   CACHED_WALLET_KEY,
   identifyUserWallet,
+  walletBlacklist,
 } from "utils";
 import { onboardInit } from "utils/onboard";
 import {
@@ -103,6 +104,15 @@ export function useOnboardManager() {
   const [{ chains, connectedChain, settingChain }, setChain] = useSetChain();
 
   useEffect(() => {
+    if (
+      wallet?.accounts.some((account) =>
+        walletBlacklist.includes(account.address.toLowerCase())
+      )
+    ) {
+      disconnect(wallet);
+      return;
+    }
+
     if (wallet?.accounts) {
       setAccount(wallet.accounts[0]);
     } else {
@@ -129,7 +139,7 @@ export function useOnboardManager() {
     } else {
       setError(undefined);
     }
-  }, [wallet]);
+  }, [wallet, disconnect]);
 
   useEffect(() => {
     // Only acknowledge the state where onboard is defined

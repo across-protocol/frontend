@@ -36,6 +36,7 @@ export const StakingForm = ({
   isMutating,
   poolData: originPoolData,
   logoURI,
+  logoURIs,
 }: StakingFormPropType) => {
   const [isPoolInfoVisible, setIsPoolInfoVisible] = useState(false);
 
@@ -121,6 +122,7 @@ export const StakingForm = ({
               invalid={isAmountInvalid}
               buttonText={stakingAction}
               logoURI={logoURI}
+              logoURIs={logoURIs}
               maxValue={buttonMaxValueText}
               stakingAction={stakingAction}
               onClickHandler={buttonHandler}

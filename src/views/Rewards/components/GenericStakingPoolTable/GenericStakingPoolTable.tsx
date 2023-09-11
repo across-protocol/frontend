@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import RewardTable from "components/RewardTable";
-import { StakingPool } from "hooks";
+import { StakingPool } from "utils/staking-pool";
 import { formatRow, headers } from "./GenericStakingPoolFormatter";
 
 type GenericStakingPoolTableType = {

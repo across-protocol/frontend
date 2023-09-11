@@ -9,11 +9,14 @@ import {
   InputWrapper,
   MaxButton,
   TokenIcon,
+  IconPairContainer,
 } from "./StakingInputBlock.styles";
 import { capitalizeFirstLetter } from "utils/format";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { trackMaxButtonClicked } from "utils";
 import { useAmplitude } from "hooks";
+import { IconPair } from "components/IconPair";
+import { StakingPoolTokenPairLogoURIs } from "../../types";
 
 interface Props {
   value: string;
@@ -22,6 +25,7 @@ interface Props {
   invalid: boolean;
   buttonText: string;
   logoURI: string;
+  logoURIs?: StakingPoolTokenPairLogoURIs;
   maxValue: string;
   onClickHandler: () => void | Promise<void>;
   displayLoader?: boolean;
@@ -37,6 +41,7 @@ const StakingInputBlock: React.FC<Props> = ({
   invalid,
   buttonText,
   logoURI,
+  logoURIs,
   maxValue,
   displayLoader,
   onClickHandler,
@@ -49,7 +54,16 @@ const StakingInputBlock: React.FC<Props> = ({
     <Wrapper>
       <InputRow>
         <InputWrapper valid={valid} invalid={invalid}>
-          <TokenIcon src={logoURI} />
+          {logoURIs ? (
+            <IconPairContainer>
+              <IconPair
+                LeftIcon={<TokenIcon src={logoURIs[0]} />}
+                RightIcon={<TokenIcon src={logoURIs[1]} />}
+              />
+            </IconPairContainer>
+          ) : (
+            <TokenIcon src={logoURI} />
+          )}
           <Input
             valid={valid}
             invalid={invalid}
@@ -79,7 +93,7 @@ const StakingInputBlock: React.FC<Props> = ({
           <StakeButton
             valid={valid}
             onClick={onClickHandler}
-            disabled={!valid || invalid}
+            disabled={!valid || invalid || displayLoader}
             warningButtonColor={warningButtonColor}
           >
             <StakeButtonContentWrapper>

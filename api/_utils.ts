@@ -4,6 +4,7 @@ import {
   SpokePool__factory,
   SpokePool,
 } from "@across-protocol/contracts-v2/dist/typechain";
+import { AcceleratingDistributor__factory } from "@across-protocol/across-token/dist/typechain";
 import axios from "axios";
 import * as sdk from "@across-protocol/sdk-v2";
 import { BigNumber, ethers, providers, utils } from "ethers";
@@ -19,10 +20,14 @@ import {
   relayerFeeCapitalCostConfig,
   EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
   TOKEN_SYMBOLS_MAP,
+  CHAIN_IDS,
+  SECONDS_PER_YEAR,
+  DEFI_LLAMA_POOL_LOOKUP,
 } from "./_constants";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
 import { VercelResponse } from "@vercel/node";
+import { PoolStateResult } from "./_types";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -310,109 +315,121 @@ export const getHubPoolClient = () => {
   );
 };
 
-// Note: this address is used as the from address for simulated relay transactions on Optimism and Arbitrum since
-// gas estimates require a live estimate and not a pre-configured gas amount. This address should be pre-loaded with
-// a USDC approval for the _current_ spoke pools on Optimism (0x6f26Bf09B1C792e3228e5467807a900A503c0281) and Arbitrum
-// (0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A). It also has a small amount of USDC ($0.10) used for estimations.
-// If this address lacks either of these, estimations will fail and relays to optimism and arbitrum will hang when
-// estimating gas. Defaults to 0x893d0d70ad97717052e3aa8903d9615804167759 so the app can technically run without this.
-export const dummyFromAddress =
-  process.env.REACT_APP_DUMMY_FROM_ADDRESS ||
-  "0x893d0d70ad97717052e3aa8903d9615804167759";
-
 export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
 export const queries: Record<number, () => QueryBase> = {
-  1: () =>
+  [CHAIN_IDS.MAINNET]: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      getProvider(1),
+      getProvider(CHAIN_IDS.MAINNET),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(1)
+      getGasMarkup(CHAIN_IDS.MAINNET)
     ),
-  10: () =>
+  [CHAIN_IDS.OPTIMISM]: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
-      getProvider(10),
+      getProvider(CHAIN_IDS.OPTIMISM),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(10)
+      getGasMarkup(CHAIN_IDS.OPTIMISM)
     ),
-  137: () =>
+  [CHAIN_IDS.POLYGON]: () =>
     new sdk.relayFeeCalculator.PolygonQueries(
-      getProvider(137),
+      getProvider(CHAIN_IDS.POLYGON),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(137)
+      getGasMarkup(CHAIN_IDS.POLYGON)
     ),
-  42161: () =>
+  [CHAIN_IDS.ARBITRUM]: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
-      getProvider(42161),
+      getProvider(CHAIN_IDS.ARBITRUM),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(42161)
+      getGasMarkup(CHAIN_IDS.ARBITRUM)
     ),
-  324: () =>
+  [CHAIN_IDS.ZK_SYNC]: () =>
     new sdk.relayFeeCalculator.ZkSyncQueries(
-      getProvider(324),
+      getProvider(CHAIN_IDS.ZK_SYNC),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(324)
+      getGasMarkup(CHAIN_IDS.ZK_SYNC)
+    ),
+  [CHAIN_IDS.BASE]: () =>
+    new sdk.relayFeeCalculator.BaseQueries(
+      getProvider(CHAIN_IDS.BASE),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDS.BASE)
     ),
   /* --------------------------- Testnet queries --------------------------- */
-  5: () =>
+  [CHAIN_IDS.GOERLI]: () =>
     new sdk.relayFeeCalculator.EthereumGoerliQueries(
-      getProvider(5),
+      getProvider(CHAIN_IDS.GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(5)
+      getGasMarkup(CHAIN_IDS.GOERLI)
     ),
-  421613: () =>
+  [CHAIN_IDS.ARBITRUM_GOERLI]: () =>
     new sdk.relayFeeCalculator.ArbitrumGoerliQueries(
-      getProvider(421613),
+      getProvider(CHAIN_IDS.ARBITRUM_GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(421613)
+      getGasMarkup(CHAIN_IDS.ARBITRUM_GOERLI)
     ),
-  280: () =>
+  [CHAIN_IDS.ZK_SYNC_GOERLI]: () =>
     new sdk.relayFeeCalculator.zkSyncGoerliQueries(
-      getProvider(280),
+      getProvider(CHAIN_IDS.ZK_SYNC_GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(280)
+      getGasMarkup(CHAIN_IDS.ZK_SYNC_GOERLI)
+    ),
+  [CHAIN_IDS.BASE_GOERLI]: () =>
+    new sdk.relayFeeCalculator.BaseGoerliQueries(
+      getProvider(CHAIN_IDS.BASE_GOERLI),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDS.BASE_GOERLI)
     ),
 };
 
@@ -536,30 +553,12 @@ export const getSpokePool = (_chainId: number): SpokePool => {
   return SpokePool__factory.connect(spokePoolAddress, getProvider(_chainId));
 };
 
-export const getSpokePoolAddress = (_chainId: number): string => {
-  const chainId = _chainId.toString();
-  switch (chainId.toString()) {
-    case "1":
-      return "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5";
-    case "10":
-      return "0x6f26Bf09B1C792e3228e5467807a900A503c0281";
-    case "137":
-      return "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096";
-    case "288":
-      return "0xBbc6009fEfFc27ce705322832Cb2068F8C1e0A58";
-    case "42161":
-      return "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A";
-    case "324":
-      return "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF";
-    // testnets
-    case "5":
-      return "0x063fFa6C9748e3f0b9bA8ee3bbbCEe98d92651f7";
-    case "421613":
+export const getSpokePoolAddress = (chainId: number): string => {
+  switch (chainId) {
+    case CHAIN_IDS.ARBITRUM_GOERLI:
       return "0xD29C85F15DF544bA632C9E25829fd29d767d7978";
-    case "280":
-      return "0x863859ef502F0Ee9676626ED5B418037252eFeb2";
     default:
-      throw new Error("Invalid chainId provided");
+      return sdk.utils.getDeployedAddress("SpokePool", chainId);
   }
 };
 
@@ -823,14 +822,42 @@ export function getFallbackTokenLogoURI(l1TokenAddress: string) {
 export async function getPoolState(
   tokenAddress: string,
   externalPoolProvider?: string
-) {
-  if (!externalPoolProvider) {
-    const hubPoolClient = getHubPoolClient();
-    await hubPoolClient.updatePool(tokenAddress);
-    return hubPoolClient.getPoolState(tokenAddress);
+): Promise<PoolStateResult> {
+  const resolvedAddress = ethers.utils.getAddress(tokenAddress);
+  if (externalPoolProvider === "balancer") {
+    return getExternalPoolState(tokenAddress, externalPoolProvider);
+  } else if (DEFI_LLAMA_POOL_LOOKUP[resolvedAddress] !== undefined) {
+    return getDefiLlamaPoolState(tokenAddress);
+  } else {
+    return getAcrossPoolState(tokenAddress);
   }
+}
 
-  return getExternalPoolState(tokenAddress, externalPoolProvider);
+export async function getDefiLlamaPoolState(
+  tokenAddress: string
+): Promise<PoolStateResult> {
+  const UUID = DEFI_LLAMA_POOL_LOOKUP[ethers.utils.getAddress(tokenAddress)];
+  const url = `https://yields.llama.fi/chart/${UUID}`;
+  const response = await axios.get<{
+    status: string;
+    data: { timestamp: string; apy: number; tvlUsd: number }[];
+  }>(url);
+  if (response.data.status !== "success") {
+    throw new Error("Failed to fetch pool state");
+  }
+  const data = response.data.data;
+  const lastElement = data[data.length - 1];
+  return {
+    estimatedApy: (lastElement.apy / 100).toFixed(4),
+    exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE.toString(),
+    totalPoolSize: lastElement.tvlUsd.toFixed(2),
+  };
+}
+
+export async function getAcrossPoolState(tokenAddress: string) {
+  const hubPoolClient = getHubPoolClient();
+  await hubPoolClient.updatePool(tokenAddress);
+  return hubPoolClient.getPoolState(tokenAddress);
 }
 
 export async function getExternalPoolState(
@@ -881,8 +908,149 @@ async function getBalancerPoolState(poolTokenAddress: string) {
 
   const apr = await balancer.pools.apr(pool);
 
+  // We want to include the swap fees & the underlying token
+  // APRs in the APY calculation.
+  const apyEstimated = (apr.swapFees + apr.tokenAprs.total) / 10_000;
+
   return {
-    estimatedApy: Number(apr.max / 1000).toFixed(2),
-    exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
+    // The Balancer SDK returns percentages as follows:
+    // 23% (0.23) as 2300
+    // 2.3% (0.023) as 230
+    // etc. So we divide by 10_000 to get the actual percentage.
+    //
+    // Additionally, we receive a potential range of APRs, so we take the average.
+    estimatedApy: apyEstimated.toFixed(3),
+    exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE.toString(),
+    totalPoolSize: pool.totalShares,
   };
+}
+
+export async function fetchStakingPool(
+  underlyingToken: {
+    address: string;
+    symbol: string;
+    decimals: number;
+  },
+  externalPoolProvider?: string
+) {
+  const poolUnderlyingTokenAddress = underlyingToken.address;
+  const provider = getProvider(HUB_POOL_CHAIN_ID);
+
+  const hubPool = HubPool__factory.connect(
+    ENABLED_ROUTES.hubPoolAddress,
+    provider
+  );
+  const acceleratingDistributor = AcceleratingDistributor__factory.connect(
+    ENABLED_ROUTES.acceleratingDistributorAddress,
+    provider
+  );
+
+  const lpTokenAddress = externalPoolProvider
+    ? poolUnderlyingTokenAddress
+    : (await hubPool.pooledTokens(poolUnderlyingTokenAddress)).lpToken;
+
+  const [acrossTokenAddress, tokenUSDExchangeRate] = await Promise.all([
+    acceleratingDistributor.rewardToken(),
+    getCachedTokenPrice(poolUnderlyingTokenAddress, "usd"),
+  ]);
+  const acxPriceInUSD = await getCachedTokenPrice(acrossTokenAddress, "usd");
+
+  const lpTokenERC20 = ERC20__factory.connect(lpTokenAddress, provider);
+
+  const [
+    { enabled: poolEnabled, maxMultiplier, baseEmissionRate, cumulativeStaked },
+    lpTokenDecimalCount,
+    lpTokenSymbolName,
+    liquidityPoolState,
+  ] = await Promise.all([
+    acceleratingDistributor.stakingTokens(lpTokenAddress),
+    lpTokenERC20.decimals(),
+    lpTokenERC20.symbol(),
+    getPoolState(poolUnderlyingTokenAddress, externalPoolProvider),
+  ]);
+
+  const {
+    estimatedApy: estimatedApyFromQuery,
+    exchangeRateCurrent: lpExchangeRateToToken,
+    totalPoolSize,
+  } = liquidityPoolState;
+
+  const lpExchangeRateToUSD = utils
+    .parseUnits(tokenUSDExchangeRate.toString())
+    .mul(lpExchangeRateToToken)
+    .div(sdk.utils.fixedPointAdjustment);
+
+  const convertLPValueToUsd = (lpAmount: BigNumber) =>
+    BigNumber.from(lpExchangeRateToUSD)
+      .mul(ConvertDecimals(lpTokenDecimalCount, 18)(lpAmount))
+      .div(sdk.utils.fixedPointAdjustment);
+
+  const usdCumulativeStakedValue = convertLPValueToUsd(cumulativeStaked);
+  const usdTotalPoolSize = BigNumber.from(totalPoolSize)
+    .mul(utils.parseUnits(tokenUSDExchangeRate.toString()))
+    .div(sdk.utils.fixedPointAdjustment);
+
+  const baseRewardsApy = getBaseRewardsApr(
+    baseEmissionRate
+      .mul(SECONDS_PER_YEAR)
+      .mul(utils.parseUnits(acxPriceInUSD.toString()))
+      .div(sdk.utils.fixedPointAdjustment),
+    usdCumulativeStakedValue
+  );
+  const poolApy = utils.parseEther(estimatedApyFromQuery);
+  const maxApy = poolApy.add(
+    baseRewardsApy.mul(maxMultiplier).div(sdk.utils.fixedPointAdjustment)
+  );
+  const minApy = poolApy.add(baseRewardsApy);
+  const rewardsApy = baseRewardsApy
+    .mul(utils.parseEther("1"))
+    .div(sdk.utils.fixedPointAdjustment);
+  const totalApy = poolApy.add(rewardsApy);
+
+  return {
+    hubPoolAddress: hubPool.address,
+    acceleratingDistributorAddress: acceleratingDistributor.address,
+    underlyingToken,
+    lpTokenAddress,
+    poolEnabled,
+    lpTokenSymbolName,
+    lpTokenDecimalCount: lpTokenDecimalCount,
+    apyData: {
+      poolApy,
+      maxApy,
+      minApy,
+      totalApy,
+      baseRewardsApy,
+      rewardsApy,
+    },
+    usdTotalPoolSize,
+    totalPoolSize,
+  };
+}
+
+// Copied from @uma/common
+export const ConvertDecimals = (fromDecimals: number, toDecimals: number) => {
+  // amount: string, BN, number - integer amount in fromDecimals smallest unit that want to convert toDecimals
+  // returns: string with toDecimals in smallest unit
+  return (amount: BigNumber): string => {
+    amount = BigNumber.from(amount);
+    if (amount.isZero()) return amount.toString();
+    const diff = fromDecimals - toDecimals;
+    if (diff === 0) return amount.toString();
+    if (diff > 0) return amount.div(BigNumber.from("10").pow(diff)).toString();
+    return amount.mul(BigNumber.from("10").pow(-1 * diff)).toString();
+  };
+};
+
+export function getBaseRewardsApr(
+  rewardsPerYearInUSD: BigNumber,
+  totalStakedInUSD: BigNumber
+) {
+  if (totalStakedInUSD.isZero()) {
+    totalStakedInUSD = utils.parseEther("1");
+  }
+
+  return rewardsPerYearInUSD
+    .mul(sdk.utils.fixedPointAdjustment)
+    .div(totalStakedInUSD);
 }

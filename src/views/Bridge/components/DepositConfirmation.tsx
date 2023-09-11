@@ -13,6 +13,7 @@ import { ReactComponent as PolygonGrayscaleLogo } from "assets/grayscale-logos/p
 import { ReactComponent as ArbitrumGrayscaleLogo } from "assets/grayscale-logos/arbitrum.svg";
 import { ReactComponent as OptimismGrayscaleLogo } from "assets/grayscale-logos/optimism.svg";
 import { ReactComponent as ZkSyncGrayscaleLogo } from "assets/grayscale-logos/zksync.svg";
+import { ReactComponent as BaseGrayscaleLogo } from "assets/grayscale-logos/base.svg";
 import { getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
 
@@ -34,6 +35,23 @@ type DepositConfirmationProps = {
   elapsedTimeFromDeposit?: string;
 };
 
+const logoMapping: {
+  [key: number]: JSX.Element;
+} = {
+  [ChainId.ARBITRUM]: <ArbitrumGrayscaleLogo />,
+  [ChainId.POLYGON]: <PolygonGrayscaleLogo />,
+  [ChainId.OPTIMISM]: <OptimismGrayscaleLogo />,
+  [ChainId.MAINNET]: <EthereumGrayscaleLogo />,
+  [ChainId.ZK_SYNC]: <ZkSyncGrayscaleLogo />,
+  [ChainId.BASE]: <BaseGrayscaleLogo />,
+  // testnets
+  [ChainId.GOERLI]: <EthereumGrayscaleLogo />,
+  [ChainId.ARBITRUM_GOERLI]: <EthereumGrayscaleLogo />,
+  [ChainId.MUMBAI]: <EthereumGrayscaleLogo />,
+  [ChainId.ZK_SYNC_GOERLI]: <ZkSyncGrayscaleLogo />,
+  [ChainId.BASE_GOERLI]: <BaseGrayscaleLogo />,
+};
+
 const DepositConfirmation = ({
   currentFromRoute,
   currentToRoute,
@@ -49,20 +67,6 @@ const DepositConfirmation = ({
   elapsedTimeFromDeposit,
 }: DepositConfirmationProps) => {
   const explorerLink = _explorerLink ?? "https://etherscan.io";
-  const LogoMapping: {
-    [key: number]: JSX.Element;
-  } = {
-    [ChainId.ARBITRUM]: <ArbitrumGrayscaleLogo />,
-    [ChainId.POLYGON]: <PolygonGrayscaleLogo />,
-    [ChainId.OPTIMISM]: <OptimismGrayscaleLogo />,
-    [ChainId.MAINNET]: <EthereumGrayscaleLogo />,
-    [ChainId.ZK_SYNC]: <ZkSyncGrayscaleLogo />,
-    // testnets
-    [ChainId.GOERLI]: <EthereumGrayscaleLogo />,
-    [ChainId.ARBITRUM_GOERLI]: <EthereumGrayscaleLogo />,
-    [ChainId.MUMBAI]: <EthereumGrayscaleLogo />,
-    [ChainId.ZK_SYNC_GOERLI]: <ZkSyncGrayscaleLogo />,
-  };
 
   return (
     <Wrapper data-cy="transaction-submitted">
@@ -70,7 +74,7 @@ const DepositConfirmation = ({
         <TopWrapperAnimationWrapper>
           <AnimatedLogoWrapper completed={!transactionPending}>
             <AnimatedLogo completed={!transactionPending}>
-              {LogoMapping[currentFromRoute ?? 1]}
+              {logoMapping[currentFromRoute ?? 1]}
             </AnimatedLogo>
           </AnimatedLogoWrapper>
           <AnimatedDivider completed={!transactionPending} />
@@ -78,7 +82,7 @@ const DepositConfirmation = ({
           <AnimatedDivider completed={!transactionPending} />
           <AnimatedLogoWrapper completed={!transactionPending}>
             <AnimatedLogo completed={!transactionPending}>
-              {LogoMapping[currentToRoute ?? 1]}
+              {logoMapping[currentToRoute ?? 1]}
             </AnimatedLogo>
           </AnimatedLogoWrapper>
         </TopWrapperAnimationWrapper>

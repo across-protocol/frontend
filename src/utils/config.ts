@@ -288,6 +288,24 @@ export class ConfigClient {
     );
     return [...this.getTokenList(chainId), ...exclusivePools];
   }
+  getStakingPoolTokenList(chainId?: number): TokenList {
+    return [
+      ...this.getTokenList(chainId),
+      ...constants.externalLPsForStaking[
+        chainId || constants.hubPoolChainId
+      ].map((token) => {
+        return {
+          address: token.mainnetAddress!,
+          isNative: false,
+          l1TokenAddress: token.mainnetAddress!,
+          ...token,
+          addresses: {
+            [constants.ChainId.MAINNET]: token.mainnetAddress!,
+          },
+        };
+      }),
+    ];
+  }
   // this has a chance to mix up eth/weth which can be a problem. prefer token by symbol.
   getTokenInfoByAddress(chainId: number, address: string): Token {
     const tokens = this.getTokenList(chainId);
@@ -300,19 +318,24 @@ export class ConfigClient {
   }
   getTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getTokenList(chainId);
-    const token = tokens.find((token) => token.symbol === symbol);
-    assert(token, `Token not found on chain ${chainId} and symbol ${symbol}`);
-    const tokenInfo = constants.getToken(symbol);
-    return {
-      ...tokenInfo,
-      address: token.address,
-      isNative: token.isNative,
-      l1TokenAddress: token.l1TokenAddress,
-    };
+    return this._getTokenInfoBySymbol(chainId, symbol, tokens);
+  }
+  getStakingPoolTokenInfoBySymbol(chainId: number, symbol: string): Token {
+    const tokens = this.getStakingPoolTokenList(chainId);
+    return this._getTokenInfoBySymbol(chainId, symbol, tokens);
   }
   getPoolTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getTokenPoolList(chainId);
-    const token = tokens.find((token) => token.symbol === symbol);
+    return this._getTokenInfoBySymbol(chainId, symbol, tokens);
+  }
+  _getTokenInfoBySymbol(
+    chainId: number,
+    symbol: string,
+    srcTokenList: TokenList
+  ): Token {
+    const token = srcTokenList.find(
+      (token) => token.symbol.toUpperCase() === symbol.toUpperCase()
+    );
     assert(token, `Token not found on chain ${chainId} and symbol ${symbol}`);
     const tokenInfo = constants.getToken(symbol);
     return {
@@ -366,7 +389,7 @@ export class ConfigClient {
     return sortBy(reachableTokens, (token) => this.tokenOrder[token.symbol]);
   }
   getPoolSymbols(): string[] {
-    const tokenList = this.getTokenList(constants.hubPoolChainId);
+    const tokenList = this.getStakingPoolTokenList(constants.hubPoolChainId);
     const poolSymbols = tokenList.map((token) => token.symbol.toLowerCase());
     return poolSymbols;
   }

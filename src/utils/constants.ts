@@ -1,6 +1,6 @@
 import assert from "assert";
 import { ethers, providers } from "ethers";
-import { constants } from "@across-protocol/sdk-v2";
+import { constants, utils } from "@across-protocol/sdk-v2";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
@@ -12,6 +12,7 @@ import arbitrumLogo from "assets/arbitrum-logo.svg";
 import bobaLogo from "assets/boba-logo.svg";
 import polygonLogo from "assets/polygon-logo.svg";
 import zkSyncLogo from "assets/zksync-logo.svg";
+import baseLogo from "assets/base-logo.svg";
 import usdcLogo from "assets/usdc-logo.png";
 import daiLogo from "assets/dai.svg";
 import wbtcLogo from "assets/wbtc.svg";
@@ -23,29 +24,24 @@ import snxLogo from "assets/snx-logo.svg";
 import pooltogetherLogo from "assets/pooltogether-logo.svg";
 import unknownLogo from "assets/icons/question-24.svg";
 
-import ethereumLogoGrayscale from "assets/grayscale-logos/eth.svg";
-import optimismLogoGrayscale from "assets/grayscale-logos/optimism.svg";
-import arbitrumLogoGrayscale from "assets/grayscale-logos/arbitrum.svg";
-import polygonLogoGrayscale from "assets/grayscale-logos/polygon.svg";
-import zkSyncLogoGrayscale from "assets/grayscale-logos/zksync.svg";
-
 // all routes should be pre imported to be able to switch based on chain id
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import GoerliRoutes from "data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
 
 /* Chains and Tokens section */
 export enum ChainId {
-  MAINNET = 1,
-  OPTIMISM = 10,
-  ARBITRUM = 42161,
-  POLYGON = 137,
-  ZK_SYNC = 324,
+  MAINNET = constants.CHAIN_IDs.MAINNET,
+  OPTIMISM = constants.CHAIN_IDs.OPTIMISM,
+  ARBITRUM = constants.CHAIN_IDs.ARBITRUM,
+  POLYGON = constants.CHAIN_IDs.POLYGON,
+  ZK_SYNC = constants.CHAIN_IDs.ZK_SYNC,
+  BASE = constants.CHAIN_IDs.BASE,
   // testnets
-  ARBITRUM_GOERLI = 421613,
-  ZK_SYNC_GOERLI = 280,
-  GOERLI = 5,
-  // Polygon testnet
-  MUMBAI = 80001,
+  ARBITRUM_GOERLI = constants.CHAIN_IDs.ARBITRUM_GOERLI,
+  ZK_SYNC_GOERLI = constants.CHAIN_IDs.ZK_SYNC_GOERLI,
+  BASE_GOERLI = constants.CHAIN_IDs.BASE_GOERLI,
+  GOERLI = constants.CHAIN_IDs.GOERLI,
+  MUMBAI = constants.CHAIN_IDs.MUMBAI,
 }
 
 // Maps `ChainId` to an object and inverts the Key/Value
@@ -113,29 +109,11 @@ export const COLORS = {
   purple: "267deg 77% 62%",
 };
 
-// Update once addresses are known
-export const configStoreAddresses: Record<ChainId, string> = {
-  [ChainId.MAINNET]: ethers.utils.getAddress(
-    "0x3B03509645713718B78951126E0A6de6f10043f5"
-  ),
-  [ChainId.ARBITRUM]: ethers.constants.AddressZero,
-  [ChainId.OPTIMISM]: ethers.constants.AddressZero,
-  [ChainId.POLYGON]: ethers.constants.AddressZero,
-  [ChainId.ZK_SYNC]: ethers.constants.AddressZero,
-  [ChainId.ARBITRUM_GOERLI]: ethers.constants.AddressZero,
-  [ChainId.GOERLI]: ethers.utils.getAddress(
-    "0x3215e3C91f87081757d0c41EF0CB77738123Be83"
-  ),
-  [ChainId.MUMBAI]: ethers.constants.AddressZero,
-  [ChainId.ZK_SYNC_GOERLI]: ethers.constants.AddressZero,
-};
-
 export type ChainInfo = {
   name: string;
   fullName?: string;
   chainId: ChainId;
   logoURI: string;
-  grayscaleLogoURI: string;
   rpcUrl?: string;
   explorerUrl: string;
   constructExplorerLink: (txHash: string) => string;
@@ -145,8 +123,12 @@ export type ChainInfo = {
 
 export type ChainInfoList = ChainInfo[];
 export type ChainInfoTable = Record<number, ChainInfo>;
+
 export const defaultBlockPollingInterval =
   Number(process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL_S || 30) * 1000;
+export const hubPoolChainId = Number(
+  process.env.REACT_APP_HUBPOOL_CHAINID || 1
+);
 
 const defaultConstructExplorerLink =
   (explorerUrl: string) => (txHash: string) =>
@@ -158,7 +140,6 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Ethereum Mainnet",
     chainId: ChainId.MAINNET,
     logoURI: ethereumLogo,
-    grayscaleLogoURI: ethereumLogoGrayscale,
     explorerUrl: "https://etherscan.io",
     constructExplorerLink: defaultConstructExplorerLink("https://etherscan.io"),
     nativeCurrencySymbol: "ETH",
@@ -169,7 +150,6 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Arbitrum One",
     chainId: ChainId.ARBITRUM,
     logoURI: arbitrumLogo,
-    grayscaleLogoURI: arbitrumLogoGrayscale,
     rpcUrl: "https://arb1.arbitrum.io/rpc",
     explorerUrl: "https://arbiscan.io",
     constructExplorerLink: (txHash: string) =>
@@ -181,7 +161,6 @@ export const chainInfoList: ChainInfoList = [
     name: "Optimism",
     chainId: ChainId.OPTIMISM,
     logoURI: optimismLogo,
-    grayscaleLogoURI: optimismLogoGrayscale,
     rpcUrl: "https://mainnet.optimism.io",
     explorerUrl: "https://optimistic.etherscan.io",
     constructExplorerLink: (txHash: string) =>
@@ -194,7 +173,6 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Polygon Network",
     chainId: ChainId.POLYGON,
     logoURI: polygonLogo,
-    grayscaleLogoURI: polygonLogoGrayscale,
     rpcUrl: "https://rpc.ankr.com/polygon",
     explorerUrl: "https://polygonscan.com",
     constructExplorerLink: defaultConstructExplorerLink(
@@ -208,7 +186,6 @@ export const chainInfoList: ChainInfoList = [
     fullName: "zkSync Era",
     chainId: ChainId.ZK_SYNC,
     logoURI: zkSyncLogo,
-    grayscaleLogoURI: zkSyncLogoGrayscale,
     rpcUrl: "https://mainnet.era.zksync.io",
     explorerUrl: "https://explorer.zksync.io",
     constructExplorerLink: defaultConstructExplorerLink(
@@ -218,11 +195,22 @@ export const chainInfoList: ChainInfoList = [
     pollingInterval: defaultBlockPollingInterval,
   },
   {
+    name: "Base",
+    fullName: "Base",
+    chainId: ChainId.BASE,
+    logoURI: baseLogo,
+    rpcUrl: "https://mainnet.base.org",
+    explorerUrl: "https://basescan.org",
+    constructExplorerLink: defaultConstructExplorerLink("https://basescan.org"),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
+  },
+  // testnets
+  {
     name: "Goerli",
     fullName: "Goerli Testnet",
     chainId: ChainId.GOERLI,
     logoURI: ethereumLogo,
-    grayscaleLogoURI: ethereumLogoGrayscale,
     explorerUrl: "https://goerli.etherscan.io/",
     constructExplorerLink: defaultConstructExplorerLink(
       "https://goerli.etherscan.io/"
@@ -234,7 +222,6 @@ export const chainInfoList: ChainInfoList = [
     name: "Mumbai",
     chainId: ChainId.MUMBAI,
     logoURI: polygonLogo,
-    grayscaleLogoURI: polygonLogoGrayscale,
     rpcUrl: "https://matic-mumbai.chainstacklabs.com",
     explorerUrl: "https://mumbai.polygonscan.com",
     constructExplorerLink: defaultConstructExplorerLink(
@@ -248,7 +235,6 @@ export const chainInfoList: ChainInfoList = [
     fullName: "Arbitrum Testnet Goerli",
     chainId: ChainId.ARBITRUM_GOERLI,
     logoURI: arbitrumLogo,
-    grayscaleLogoURI: arbitrumLogoGrayscale,
     explorerUrl: "https://testnet.arbiscan.io",
     constructExplorerLink: (txHash: string) =>
       `https://testnet.arbiscan.io/tx/${txHash}`,
@@ -260,11 +246,23 @@ export const chainInfoList: ChainInfoList = [
     fullName: "zkSync Testnet Goerli",
     chainId: ChainId.ZK_SYNC_GOERLI,
     logoURI: zkSyncLogo,
-    grayscaleLogoURI: zkSyncLogoGrayscale,
     rpcUrl: "https://testnet.era.zksync.dev",
     explorerUrl: "https://goerli.explorer.zksync.io",
     constructExplorerLink: defaultConstructExplorerLink(
       "https://goerli.explorer.zksync.io"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
+  },
+  {
+    name: "Base Goerli",
+    fullName: "Base Testnet Goerli",
+    chainId: ChainId.BASE_GOERLI,
+    logoURI: baseLogo,
+    rpcUrl: "https://goerli.base.org",
+    explorerUrl: "https://goerli.basescan.org",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://goerli.basescan.org"
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
@@ -282,13 +280,40 @@ export type TokenInfo = {
   symbol: string;
   decimals: number;
   logoURI: string;
+  logoURIs?: [string, string];
   // tokens require a mainnet address to do price lookups on coingecko, not used for anything else.
   mainnetAddress?: string;
   // optional display symbol for tokens that have a different symbol on the frontend
   displaySymbol?: string;
 };
-// enforce weth to be first so we can use it as a guarantee in other parts of the app
 export type TokenInfoList = TokenInfo[];
+
+export type ExternalLPTokenList = Array<
+  TokenInfo & {
+    provider: string;
+    linkToLP: string;
+  }
+>;
+
+export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
+  1: [
+    {
+      name: "Balancer 50wstETH-50ACX",
+      symbol: "50wstETH-50ACX",
+      displaySymbol: "50wstETH-50ACX",
+      decimals: 18,
+      mainnetAddress: "0x36Be1E97eA98AB43b4dEBf92742517266F5731a3",
+      logoURI: balLogo,
+      provider: "balancer",
+      linkToLP:
+        "https://app.balancer.fi/#/ethereum/pool/0x36be1e97ea98ab43b4debf92742517266f5731a3000200000000000000000466",
+      logoURIs: [
+        acxLogo,
+        "https://assets.coingecko.com/coins/images/18834/small/wstETH.png?1633565443",
+      ],
+    },
+  ],
+};
 
 // Order of this map determines the order of the tokens in the token selector
 export const orderedTokenSymbolLogoMap = {
@@ -309,38 +334,39 @@ export const orderedTokenSymbolLogoMap = {
   BOBA: bobaLogo,
 };
 
-export const tokenList: TokenInfoList = Object.entries(
-  orderedTokenSymbolLogoMap
-).flatMap(([symbol, logoURI]) => {
-  // NOTE: Handle edge case for Arbitrum and USDC combination.
-  // We currently do not support native USDC on Arbitrum, only the bridged USDC.e token.
-  // Until we do, we need to add a special case for USDC.e to the token list.
-  if (symbol === "USDC.e") {
-    const usdcTokenInfo = constants.TOKEN_SYMBOLS_MAP.USDC;
+export const tokenList = [
+  ...Object.entries(orderedTokenSymbolLogoMap).flatMap(([symbol, logoURI]) => {
+    // NOTE: Handle edge case for Arbitrum and USDC combination.
+    // We currently do not support native USDC on Arbitrum, only the bridged USDC.e token.
+    // Until we do, we need to add a special case for USDC.e to the token list.
+    if (symbol === "USDC.e") {
+      const usdcTokenInfo = constants.TOKEN_SYMBOLS_MAP.USDC;
+      return {
+        ...usdcTokenInfo,
+        logoURI,
+        symbol: "USDC.e",
+        displaySymbol: "USDC.e",
+        mainnetAddress: usdcTokenInfo.addresses[hubPoolChainId],
+      };
+    }
+
+    const tokenInfo =
+      constants.TOKEN_SYMBOLS_MAP[
+        symbol as keyof typeof constants.TOKEN_SYMBOLS_MAP
+      ];
+
+    if (!tokenInfo) {
+      return [];
+    }
+
     return {
-      ...usdcTokenInfo,
+      ...tokenInfo,
       logoURI,
-      symbol: "USDC.e",
-      displaySymbol: "USDC.e",
-      mainnetAddress: usdcTokenInfo.addresses[constants.CHAIN_IDs.MAINNET],
+      mainnetAddress: tokenInfo.addresses[hubPoolChainId],
     };
-  }
-
-  const tokenInfo =
-    constants.TOKEN_SYMBOLS_MAP[
-      symbol as keyof Omit<typeof orderedTokenSymbolLogoMap, "USDC.e">
-    ];
-
-  if (!tokenInfo) {
-    return [];
-  }
-
-  return {
-    ...tokenInfo,
-    logoURI,
-    mainnetAddress: tokenInfo.addresses[constants.CHAIN_IDs.MAINNET],
-  };
-});
+  }),
+  ...externalLPsForStaking[hubPoolChainId],
+];
 
 // process.env variables
 export const gasEstimationMultiplier = Number(
@@ -355,9 +381,6 @@ export const referralsStartWindowIndex = Number(
   process.env.REACT_APP_REFERRALS_START_WINDOW_INDEX || airdropWindowIndex + 1
 );
 export const mediumUrl = process.env.REACT_APP_MEDIUM_URL;
-export const hubPoolChainId = Number(
-  process.env.REACT_APP_HUBPOOL_CHAINID || 1
-);
 export const disableDeposits = process.env.REACT_APP_DISABLE_DEPOSITS;
 export const enableReactQueryDevTools =
   process.env.REACT_APP_ENABLE_REACT_QUERY_DEV_TOOLS;
@@ -400,9 +423,12 @@ export function isSupportedChainId(chainId: number): chainId is ChainId {
 export function getConfigStoreAddress(
   chainId: ChainId = hubPoolChainId
 ): string {
-  const configStoreAddress = configStoreAddresses[chainId];
+  const configStoreAddress = utils.getDeployedAddress(
+    "AcrossConfigStore",
+    chainId
+  );
   assert(
-    configStoreAddress !== AddressZero,
+    ethers.utils.isAddress(configStoreAddress),
     "Config Store address not set for chain: " + chainId
   );
   return configStoreAddress;
@@ -420,7 +446,6 @@ export function getChainInfo(chainId: number): ChainInfo {
       fullName: name,
       chainId,
       logoURI: unknownLogo,
-      grayscaleLogoURI: unknownLogo,
       explorerUrl: "https://blockscan.com/",
       constructExplorerLink: (txHash: string) =>
         `https://blockscan.com/tx/${txHash}`,
@@ -434,12 +459,12 @@ export function getChainInfo(chainId: number): ChainInfo {
 
 export const tokenTable = Object.fromEntries(
   tokenList.map((token) => {
-    return [token.symbol, token];
+    return [token.symbol.toUpperCase(), token];
   })
 );
 
 export const getToken = (symbol: string): TokenInfo => {
-  const token = tokenTable[symbol];
+  const token = tokenTable[symbol.toUpperCase()];
   assert(token, "No token found for symbol: " + symbol);
   return token;
 };
@@ -656,3 +681,7 @@ export const disabledChainIds = (
 export const disabledChainIdsForAvailableRoutes = (
   process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
+
+export const walletBlacklist = (process.env.REACT_APP_WALLET_BLACKLIST || "")
+  .split(",")
+  .map((address) => address.toLowerCase());

@@ -106,3 +106,26 @@ export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
 export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;
 
 export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
+
+export const CHAIN_IDS = constants.CHAIN_IDs;
+
+export const ENABLED_POOLS_UNDERLYING_TOKENS = [
+  constants.TOKEN_SYMBOLS_MAP.ETH,
+  constants.TOKEN_SYMBOLS_MAP.WETH,
+  constants.TOKEN_SYMBOLS_MAP.USDC,
+  constants.TOKEN_SYMBOLS_MAP.USDT,
+  constants.TOKEN_SYMBOLS_MAP.DAI,
+  constants.TOKEN_SYMBOLS_MAP.WBTC,
+  constants.TOKEN_SYMBOLS_MAP.BAL,
+  constants.TOKEN_SYMBOLS_MAP.UMA,
+  constants.TOKEN_SYMBOLS_MAP.ACX,
+  constants.TOKEN_SYMBOLS_MAP.SNX,
+  constants.TOKEN_SYMBOLS_MAP.POOL,
+];
+
+export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
+
+export const DEFI_LLAMA_POOL_LOOKUP: Record<string, string> = {
+  "0x36Be1E97eA98AB43b4dEBf92742517266F5731a3":
+    "8f7b5b8c-09db-45e3-8938-f30115d34672",
+};
