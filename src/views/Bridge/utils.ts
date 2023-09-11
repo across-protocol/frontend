@@ -162,23 +162,30 @@ export function findNextBestRoute(
 ) {
   let route: Route | undefined;
 
-  const interchangeableTokenPairs: Record<string, string> = {
-    USDC: "USDC.e",
-    "USDC.e": "USDC",
-    ETH: "WETH",
-    WETH: "ETH",
+  const interchangeableTokenPairs: Record<string, string[]> = {
+    USDC: ["USDbC", "USDC.e"],
+    "USDC.e": ["USDC", "USDbC"],
+    USDbC: ["USDC", "USDC.e"],
+    ETH: ["WETH"],
+    WETH: ["ETH"],
   };
-  const equivalentTokenSymbol = filter.symbol
+  const equivalentTokenSymbols = filter.symbol
     ? interchangeableTokenPairs[filter.symbol]
     : undefined;
 
   route = findEnabledRoute(filter);
 
-  if (!route && equivalentTokenSymbol) {
-    route = findEnabledRoute({
-      ...filter,
-      symbol: equivalentTokenSymbol,
-    });
+  if (!route && equivalentTokenSymbols) {
+    for (const equivalentTokenSymbol of equivalentTokenSymbols) {
+      route = findEnabledRoute({
+        ...filter,
+        symbol: equivalentTokenSymbol,
+      });
+
+      if (route) {
+        break;
+      }
+    }
   }
 
   if (!route) {
@@ -200,11 +207,17 @@ export function findNextBestRoute(
         [nonPrioKey]: filter[nonPrioKey],
       });
 
-      if (!route && nonPrioKey === "symbol" && equivalentTokenSymbol) {
-        route = findEnabledRoute({
-          ...priorityFilter,
-          symbol: equivalentTokenSymbol,
-        });
+      if (!route && nonPrioKey === "symbol" && equivalentTokenSymbols) {
+        for (const equivalentTokenSymbol of equivalentTokenSymbols) {
+          route = findEnabledRoute({
+            ...priorityFilter,
+            symbol: equivalentTokenSymbol,
+          });
+
+          if (route) {
+            break;
+          }
+        }
       }
 
       if (route) {
