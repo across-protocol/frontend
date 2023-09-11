@@ -3,6 +3,7 @@ import { BigNumber } from "ethers";
 import {
   ChainId,
   Route,
+  bridgedUSDCSymbols,
   getChainInfo,
   getConfig,
   getToken,
@@ -51,11 +52,21 @@ export function getReceiveTokenSymbol(
     return "ETH";
   }
 
-  if (bridgeTokenSymbol === "USDC" && destinationChainId === ChainId.ARBITRUM) {
+  if (
+    ["USDC", "USDbC"].includes(bridgeTokenSymbol) &&
+    destinationChainId === ChainId.ARBITRUM
+  ) {
     return "USDC.e";
   }
 
-  if (bridgeTokenSymbol === "USDC.e") {
+  if (
+    ["USDC", "USDC.e"].includes(bridgeTokenSymbol) &&
+    destinationChainId === ChainId.BASE
+  ) {
+    return "USDbC";
+  }
+
+  if (bridgedUSDCSymbols.includes(bridgeTokenSymbol)) {
     return "USDC";
   }
 

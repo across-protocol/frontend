@@ -5,7 +5,13 @@ import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 
-import { capitalizeFirstLetter, getChainInfo, TokenInfo } from "utils";
+import {
+  bridgedUSDCSymbolsMap,
+  capitalizeFirstLetter,
+  ChainId,
+  getChainInfo,
+  TokenInfo,
+} from "utils";
 
 import TokenFee from "./TokenFee";
 
@@ -67,6 +73,7 @@ const EstimatedTable = ({
             totalReceived={totalReceived}
             token={token}
             receiveToken={receiveToken}
+            destinationChainId={chainId}
           />
         ) : (
           "-"
@@ -80,26 +87,36 @@ function TotalReceive({
   totalReceived,
   token,
   receiveToken,
+  destinationChainId,
 }: {
   totalReceived: BigNumber;
   receiveToken: TokenInfo;
   token: TokenInfo;
+  destinationChainId: number;
 }) {
   const areTokensSame = token.symbol === receiveToken.symbol;
 
   if (areTokensSame) {
     return <TokenFee amount={totalReceived} token={token} />;
   }
-
+  const destinationChainName = capitalizeFirstLetter(
+    getChainInfo(destinationChainId).name
+  );
   const tooltipText =
     token.symbol === "ETH"
       ? "When bridging ETH and recipient address is a smart contract, or destination is Polygon, you will receive WETH."
       : token.symbol === "WETH"
       ? "When bridging WETH and recipient address is an EOA, you will receive ETH."
       : token.symbol === "USDC"
-      ? "When bridging USDC to Arbitrum, you will receive USDC.e (bridged USDC)."
+      ? `When bridging USDC to ${destinationChainName}, you will receive ${bridgedUSDCSymbolsMap[destinationChainId]} (bridged USDC).`
       : token.symbol === "USDC.e"
-      ? "When bridging USDC.e from Arbitrum, you will receive USDC."
+      ? `When bridging USDC.e from Arbitrum, you will receive ${
+          destinationChainId === ChainId.BASE ? "USDbC" : "USDC"
+        }.`
+      : token.symbol === "USDbC"
+      ? `When bridging USDbC from Base, you will receive ${
+          destinationChainId === ChainId.ARBITRUM ? "USDC.e" : "USDC"
+        }.`
       : "";
 
   return (

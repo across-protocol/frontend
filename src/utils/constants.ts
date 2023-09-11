@@ -315,6 +315,12 @@ export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
   ],
 };
 
+export const bridgedUSDCSymbolsMap = {
+  [ChainId.ARBITRUM]: "USDC.e",
+  [ChainId.BASE]: "USDbC",
+};
+export const bridgedUSDCSymbols = Object.values(bridgedUSDCSymbolsMap);
+
 // Order of this map determines the order of the tokens in the token selector
 export const orderedTokenSymbolLogoMap = {
   ETH: ethereumLogo,
@@ -323,6 +329,7 @@ export const orderedTokenSymbolLogoMap = {
   WMATIC: polygonLogo,
   USDC: usdcLogo,
   "USDC.e": usdcLogo,
+  USDbC: usdcLogo,
   USDT: usdtLogo,
   DAI: daiLogo,
   WBTC: wbtcLogo,
@@ -336,16 +343,14 @@ export const orderedTokenSymbolLogoMap = {
 
 export const tokenList = [
   ...Object.entries(orderedTokenSymbolLogoMap).flatMap(([symbol, logoURI]) => {
-    // NOTE: Handle edge case for Arbitrum and USDC combination.
-    // We currently do not support native USDC on Arbitrum, only the bridged USDC.e token.
-    // Until we do, we need to add a special case for USDC.e to the token list.
-    if (symbol === "USDC.e") {
+    // NOTE: Handle cases for bridged USDC such as USDC.e or USDbC.
+    if (bridgedUSDCSymbols.includes(symbol)) {
       const usdcTokenInfo = constants.TOKEN_SYMBOLS_MAP.USDC;
       return {
         ...usdcTokenInfo,
         logoURI,
-        symbol: "USDC.e",
-        displaySymbol: "USDC.e",
+        symbol,
+        displaySymbol: symbol,
         mainnetAddress: usdcTokenInfo.addresses[hubPoolChainId],
       };
     }
