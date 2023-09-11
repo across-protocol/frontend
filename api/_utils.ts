@@ -824,7 +824,9 @@ export async function getPoolState(
   externalPoolProvider?: string
 ): Promise<PoolStateResult> {
   const resolvedAddress = ethers.utils.getAddress(tokenAddress);
-  if (DEFI_LLAMA_POOL_LOOKUP[resolvedAddress] !== undefined) {
+  if (externalPoolProvider === "balancer") {
+    return getExternalPoolState(tokenAddress, externalPoolProvider);
+  } else if (DEFI_LLAMA_POOL_LOOKUP[resolvedAddress] !== undefined) {
     return getDefiLlamaPoolState(tokenAddress);
   } else {
     return getAcrossPoolState(tokenAddress);
@@ -906,6 +908,10 @@ async function getBalancerPoolState(poolTokenAddress: string) {
 
   const apr = await balancer.pools.apr(pool);
 
+  // We want to include the swap fees & the underlying token
+  // APRs in the APY calculation.
+  const apyEstimated = (apr.swapFees + apr.tokenAprs.total) / 10_000;
+
   return {
     // The Balancer SDK returns percentages as follows:
     // 23% (0.23) as 2300
@@ -913,7 +919,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
     // etc. So we divide by 10_000 to get the actual percentage.
     //
     // Additionally, we receive a potential range of APRs, so we take the average.
-    estimatedApy: Number((apr.max + apr.min) / 2 / 10_000).toFixed(2),
+    estimatedApy: apyEstimated.toFixed(3),
     exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE.toString(),
     totalPoolSize: pool.totalShares,
   };
