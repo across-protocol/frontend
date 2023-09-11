@@ -158,7 +158,7 @@ let logger: LoggingUtility;
  * @returns A valid Logging utility that can be used throughout the runtime
  */
 export const getLogger = (): LoggingUtility => {
-  // // Use the default logger which logs to console if no GCP service account is configured.
+  // Use the default logger which logs to console if no GCP service account is configured.
   if (Object.keys(GOOGLE_SERVICE_ACCOUNT).length === 0) {
     logger = sdk.relayFeeCalculator.DEFAULT_LOGGER;
   }
