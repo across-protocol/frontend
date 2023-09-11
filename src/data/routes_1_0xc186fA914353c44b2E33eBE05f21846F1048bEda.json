@@ -1701,15 +1701,6 @@
       "fromTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-    },
-    {
-      "fromChain": 8453,
-      "toChain": 324,
-      "fromTokenAddress": "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
-      "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
-      "fromTokenSymbol": "DAI",
-      "isNative": false,
-      "l1TokenAddress": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
     }
   ],
   "pools": [
