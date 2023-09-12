@@ -141,7 +141,8 @@ const DepositConfirmation = ({
         </ActionCard>
       </ActionCardContainer>
       <EstimatedTable
-        chainId={currentToRoute ?? 1}
+        fromChainId={currentFromRoute ?? 1}
+        toChainId={currentToRoute ?? 1}
         estimatedTime={estimatedTime}
         gasFee={fees?.relayerGasFee.total}
         bridgeFee={

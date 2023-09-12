@@ -137,7 +137,8 @@ const BridgeForm = ({
       <CardWrapper>
         <SlippageAlert />
         <EstimatedTable
-          chainId={selectedRoute.toChain}
+          fromChainId={selectedRoute.fromChain}
+          toChainId={selectedRoute.toChain}
           estimatedTime={estimatedTimeString}
           gasFee={fees?.relayerGasFee.total}
           bridgeFee={
