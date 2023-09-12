@@ -7,6 +7,7 @@ import {
   InputError,
   handleErrorCondition,
   validAddress,
+  getBalancerV2TokenPrice,
 } from "./_utils";
 import { SUPPORTED_CG_BASE_CURRENCIES } from "./_constants";
 
@@ -17,6 +18,7 @@ const {
   REACT_APP_COINGECKO_PRO_API_KEY,
   FIXED_TOKEN_PRICES,
   REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES,
+  BALANCER_V2_TOKENS,
 } = process.env;
 
 // Helper function to fetch prices from coingecko. Can fetch either or both token and base currency.
@@ -28,7 +30,8 @@ const getCoingeckoPrices = async (
   baseCurrency: string,
   hardcodedTokenPrices: {
     [token: string]: number;
-  } = {}
+  } = {},
+  balancerV2PoolTokens: string[] = []
 ): Promise<number> => {
   const baseCurrencyToken = Object.values(sdkConstants.TOKEN_SYMBOLS_MAP).find(
     ({ symbol }) => symbol === baseCurrency.toUpperCase()
@@ -44,37 +47,53 @@ const getCoingeckoPrices = async (
     return 1;
 
   // If either token or base currency is in hardcoded list then use hardcoded USD price.
-  let basePriceUsd = hardcodedTokenPrices[baseCurrentTokenAddress];
-  let tokenPriceUsd = hardcodedTokenPrices[tokenAddress];
+  let basePriceUsdPromise: Promise<number> | number | undefined =
+    hardcodedTokenPrices[baseCurrentTokenAddress];
+  let tokenPriceUsdPromise: Promise<number> | number | undefined =
+    hardcodedTokenPrices[tokenAddress];
+
+  if (
+    basePriceUsdPromise === undefined &&
+    balancerV2PoolTokens.includes(
+      ethers.utils.getAddress(baseCurrentTokenAddress)
+    )
+  ) {
+    // Note this assumes mainnet token because all token addresses are assumed to be mainnet in this function.
+    basePriceUsdPromise = getBalancerV2TokenPrice(baseCurrentTokenAddress);
+  }
+
+  if (
+    tokenPriceUsdPromise === undefined &&
+    balancerV2PoolTokens.includes(ethers.utils.getAddress(tokenAddress))
+  ) {
+    // Note this assumes mainnet token because all token addresses are assumed to be mainnet in this function.
+    basePriceUsdPromise = getBalancerV2TokenPrice(tokenAddress);
+  }
 
   // Fetch undefined base and token USD prices from coingecko client.
   // Always use usd as the base currency for the purpose of conversion.
-  const tokenAddressesToFetchPricesFor = [];
-  if (basePriceUsd === undefined)
-    tokenAddressesToFetchPricesFor.push(baseCurrentTokenAddress);
-  if (tokenPriceUsd === undefined)
-    tokenAddressesToFetchPricesFor.push(tokenAddress);
-
-  // Fetch prices and sanitize returned value
-  const prices = await coingeckoClient.getContractPrices(
-    tokenAddressesToFetchPricesFor,
-    "usd"
-  );
-  if (prices.length === 0 || prices.length > 2)
-    throw new Error("unexpected prices list returned by coingeckoClient");
-
-  // The ordering of the returned values are not guaranteed, so determine the ordering of the two values by
-  // comparing to the l1Token value.
-  if (prices.length === 2)
-    [tokenPriceUsd, basePriceUsd] =
-      prices[0].address.toLowerCase() === tokenAddress.toLowerCase()
-        ? [prices[0].price, prices[1].price]
-        : [prices[1].price, prices[0].price];
-  else {
-    // Only one price was fetched, and it was the one (i.e. base or token) that wasn't hardcoded.
-    if (basePriceUsd === undefined) basePriceUsd = prices[0].price;
-    else tokenPriceUsd = prices[0].price;
+  if (basePriceUsdPromise === undefined && tokenPriceUsdPromise === undefined) {
+    const groupedPromise = coingeckoClient.getContractPrices(
+      [baseCurrentTokenAddress, tokenAddress],
+      "usd"
+    );
+    basePriceUsdPromise = groupedPromise.then((prices) => prices[0].price);
+    tokenPriceUsdPromise = groupedPromise.then((prices) => prices[1].price);
+  } else if (basePriceUsdPromise === undefined) {
+    basePriceUsdPromise = coingeckoClient
+      .getContractPrices([baseCurrentTokenAddress, tokenAddress], "usd")
+      .then((prices) => prices[0].price);
+  } else if (tokenPriceUsdPromise === undefined) {
+    basePriceUsdPromise = coingeckoClient
+      .getContractPrices([baseCurrentTokenAddress, tokenAddress], "usd")
+      .then((prices) => prices[0].price);
   }
+
+  // Extract from a promise.all.
+  const [basePriceUsd, tokenPriceUsd] = await Promise.all([
+    basePriceUsdPromise,
+    tokenPriceUsdPromise,
+  ]);
 
   // Drop any decimals beyond the number of decimals for this token.
   return Number(
@@ -145,6 +164,11 @@ const handler = async (
       ])
     );
 
+    const balancerV2PoolTokens =
+      BALANCER_V2_TOKENS !== undefined
+        ? JSON.parse(BALANCER_V2_TOKENS).map(ethers.utils.getAddress)
+        : [];
+
     // Caller wants to override price for token, possibly because the token is not supported yet on the Coingecko API,
     // so assume the caller set the USD price of the token. We now need to dynamically load the base currency.
     if (
@@ -158,7 +182,26 @@ const handler = async (
           coingeckoClient,
           l1Token,
           baseCurrency,
-          fixedTokenPrices
+          fixedTokenPrices,
+          balancerV2PoolTokens
+        );
+      }
+    } else if (
+      balancerV2PoolTokens.includes(ethers.utils.getAddress(l1Token))
+    ) {
+      if (baseCurrency === "usd") {
+        price = await getBalancerV2TokenPrice(l1Token);
+      } else if (SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
+        throw new Error(
+          "Only CG base currency allowed for BalancerV2 tokens is usd"
+        );
+      } else {
+        price = await getCoingeckoPrices(
+          coingeckoClient,
+          l1Token,
+          baseCurrency,
+          fixedTokenPrices,
+          balancerV2PoolTokens
         );
       }
     }
@@ -174,7 +217,8 @@ const handler = async (
         coingeckoClient,
         l1Token,
         baseCurrency,
-        fixedTokenPrices
+        fixedTokenPrices,
+        balancerV2PoolTokens
       );
     }
 
