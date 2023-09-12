@@ -317,9 +317,12 @@ export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
 
 export const bridgedUSDCSymbolsMap = {
   [ChainId.ARBITRUM]: "USDC.e",
+  [ChainId.OPTIMISM]: "USDC.e",
   [ChainId.BASE]: "USDbC",
 };
-export const bridgedUSDCSymbols = Object.values(bridgedUSDCSymbolsMap);
+export const bridgedUSDCSymbols = Array.from(
+  new Set(Object.values(bridgedUSDCSymbolsMap)).values()
+);
 
 // Order of this map determines the order of the tokens in the token selector
 export const orderedTokenSymbolLogoMap = {

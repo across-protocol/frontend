@@ -54,7 +54,7 @@ export function getReceiveTokenSymbol(
 
   if (
     ["USDC", "USDbC"].includes(bridgeTokenSymbol) &&
-    destinationChainId === ChainId.ARBITRUM
+    [ChainId.OPTIMISM, ChainId.ARBITRUM].includes(destinationChainId)
   ) {
     return "USDC.e";
   }

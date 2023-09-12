@@ -8,7 +8,6 @@ import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 import {
   bridgedUSDCSymbolsMap,
   capitalizeFirstLetter,
-  ChainId,
   getChainInfo,
   TokenInfo,
 } from "utils";
@@ -16,7 +15,8 @@ import {
 import TokenFee from "./TokenFee";
 
 type EstimatedTableProps = {
-  chainId: number;
+  fromChainId: number;
+  toChainId: number;
   estimatedTime?: string;
   gasFee?: BigNumber;
   bridgeFee?: BigNumber;
@@ -27,7 +27,8 @@ type EstimatedTableProps = {
 };
 
 const EstimatedTable = ({
-  chainId,
+  fromChainId,
+  toChainId,
   estimatedTime,
   gasFee,
   bridgeFee,
@@ -40,7 +41,7 @@ const EstimatedTable = ({
       <Text size="md" color="grey-400">
         Time to{" "}
         <WhiteText>
-          {capitalizeFirstLetter(getChainInfo(chainId).name)}
+          {capitalizeFirstLetter(getChainInfo(toChainId).name)}
         </WhiteText>
       </Text>
       <Text size="md" color="grey-400">
@@ -73,7 +74,8 @@ const EstimatedTable = ({
             totalReceived={totalReceived}
             token={token}
             receiveToken={receiveToken}
-            destinationChainId={chainId}
+            srcChainId={fromChainId}
+            destinationChainId={toChainId}
           />
         ) : (
           "-"
@@ -87,11 +89,13 @@ function TotalReceive({
   totalReceived,
   token,
   receiveToken,
+  srcChainId,
   destinationChainId,
 }: {
   totalReceived: BigNumber;
   receiveToken: TokenInfo;
   token: TokenInfo;
+  srcChainId: number;
   destinationChainId: number;
 }) {
   const areTokensSame = token.symbol === receiveToken.symbol;
@@ -99,6 +103,7 @@ function TotalReceive({
   if (areTokensSame) {
     return <TokenFee amount={totalReceived} token={token} />;
   }
+  const sourceChainName = capitalizeFirstLetter(getChainInfo(srcChainId).name);
   const destinationChainName = capitalizeFirstLetter(
     getChainInfo(destinationChainId).name
   );
@@ -107,17 +112,13 @@ function TotalReceive({
       ? "When bridging ETH and recipient address is a smart contract, or destination is Polygon, you will receive WETH."
       : token.symbol === "WETH"
       ? "When bridging WETH and recipient address is an EOA, you will receive ETH."
-      : token.symbol === "USDC"
-      ? `When bridging USDC to ${destinationChainName}, you will receive ${bridgedUSDCSymbolsMap[destinationChainId]} (bridged USDC).`
-      : token.symbol === "USDC.e"
-      ? `When bridging USDC.e from Arbitrum, you will receive ${
-          destinationChainId === ChainId.BASE ? "USDbC" : "USDC"
-        }.`
-      : token.symbol === "USDbC"
-      ? `When bridging USDbC from Base, you will receive ${
-          destinationChainId === ChainId.ARBITRUM ? "USDC.e" : "USDC"
-        }.`
-      : "";
+      : `When bridging ${
+          token.symbol
+        } from ${sourceChainName} to ${destinationChainName}, you will receive ${
+          bridgedUSDCSymbolsMap[destinationChainId] || "USDC"
+        }${
+          bridgedUSDCSymbolsMap[destinationChainId] ? " (bridged USDC)" : ""
+        }.`;
 
   return (
     <TotalReceiveRow>
