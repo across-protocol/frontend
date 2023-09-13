@@ -12,7 +12,8 @@ type TokenFeeProps = {
 const TokenFee = ({ token, amount, textColor = "grey-400" }: TokenFeeProps) => (
   <Wrapper>
     <NumericText size="md" color={textColor}>
-      {formatUnits(amount, token.decimals)} {token.symbol.toUpperCase()}{" "}
+      {formatUnits(amount, token.decimals)}{" "}
+      {token.displaySymbol || token.symbol.toUpperCase()}{" "}
     </NumericText>
     <TokenSymbol src={token.logoURI} />
   </Wrapper>

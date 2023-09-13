@@ -49,7 +49,7 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
       (token) => {
         const tokenInfo =
           constants.TOKEN_SYMBOLS_MAP[
-            token.symbol === "USDC.e"
+            ["USDC.e", "USDbC"].includes(token.symbol)
               ? "USDC"
               : (token.symbol as keyof typeof constants.TOKEN_SYMBOLS_MAP)
           ];
