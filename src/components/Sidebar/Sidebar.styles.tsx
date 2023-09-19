@@ -1,51 +1,8 @@
-import { ProSidebar, SidebarHeader, Menu, MenuItem } from "react-pro-sidebar";
-
 import styled from "@emotion/styled";
-import "react-pro-sidebar/dist/css/styles.css";
+
 import { SecondaryButton } from "../Buttons";
-import { QUERIES } from "utils";
 
-export const Overlay = styled.div`
-  z-index: 50;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--color-gray-transparent-lighter);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-`;
-
-export const StyledSidebar = styled(ProSidebar)`
-  position: fixed;
-  transition: all 0.25s ease-in-out;
-  top: 0;
-  width: 450px;
-  transform: translateX(100%);
-  right: 0;
-  display: block;
-  &.closed {
-    display: none;
-  }
-  @media ${QUERIES.tabletAndDown} {
-    width: 100%;
-    height: 100%;
-  }
-  &.open {
-    right: -450px;
-    transform: translateX(-100%);
-    @media ${QUERIES.tabletAndDown} {
-      right: -100%;
-    }
-  }
-  .pro-sidebar-inner > .pro-sidebar-layout {
-    background-color: var(--color-gray-600);
-  }
-`;
-
-export const StyledHeader = styled(SidebarHeader)`
+export const StyledHeader = styled.div`
   background-color: var(--color-primary);
   padding: 1.5rem;
 `;
@@ -85,39 +42,6 @@ export const ConnectButton = styled(SecondaryButton)`
 export const DisconnectButton = styled(ConnectButton)`
   margin-top: 1.25rem;
 `;
-export const StyledMenu = styled(Menu)`
-  &.pro-menu {
-    padding-top: 0;
-    padding-bottom: 0;
-    a {
-      color: var(--color-white);
-    }
-  }
-  background-color: var(--color-gray-550);
-`;
-interface IStyledMenuItem {
-  selected?: boolean;
-}
-export const StyledMenuItem = styled(MenuItem)<IStyledMenuItem>`
-  > div {
-    width: 100%;
-    > span {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-    }
-  }
-
-  color: var(--color-white);
-  font-weight: ${({ selected }) => (selected ? "600" : "400")};
-  padding-left: 0;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--color-gray-550);
-  background-color: ${({ selected }) => {
-    return selected ? "var(--color-gray-550)" : "var(--color-gray-600)";
-  }};
-`;
 
 export const ConnectText = styled.div`
   > div {
@@ -135,5 +59,3 @@ export const ConnectText = styled.div`
 export const TopHeaderRow = styled.div`
   display: flex;
 `;
-
-export const AccordionContainer = styled.div<{ isOpen: boolean }>``;

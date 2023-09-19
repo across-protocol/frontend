@@ -1,31 +1,37 @@
-import { FC } from "react";
+import { useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, ChevronUp } from "react-feather";
 import {
-  StyledSidebar,
+  Menu,
+  SubMenu,
+  MenuItem,
+  Sidebar as ReactProSidebar,
+  sidebarClasses,
+  menuClasses,
+} from "react-pro-sidebar";
+
+import {
   StyledHeader,
-  Overlay,
   CloseButton,
   HeaderText,
   ConnectButton,
   DisconnectButton,
-  StyledMenu,
-  StyledMenuItem,
   ConnectText,
   TopHeaderRow,
-  AccordionContainer,
 } from "./Sidebar.styles";
 import { getChainInfo, isSupportedChainId } from "utils";
 import useSidebar from "./useSidebar";
 import closeIcon from "assets/across-close-button.svg";
 import { useConnection } from "hooks";
+import { Text } from "components";
 
 interface Props {
   openSidebar: boolean;
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
+const sidebarWidth = "450px";
+
+const Sidebar = ({ openSidebar, setOpenSidebar }: Props) => {
   const {
     sidebarNavigationLinks,
     sidebarAboutLinks,
@@ -33,8 +39,6 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
     ensName,
     isConnected,
     chainId,
-    location,
-    className,
     toggleAboutAccordion,
     setIsAboutAccordionOpen,
     isAboutAccordionOpen,
@@ -42,91 +46,121 @@ const Sidebar: FC<Props> = ({ openSidebar, setOpenSidebar }) => {
   const { connect, disconnect, wallet } = useConnection();
   const addrOrEns = ensName ?? account;
 
-  const onClickLink = () => {
+  const onClickLink = useCallback(() => {
     setOpenSidebar(false);
     setIsAboutAccordionOpen(false);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const onClickOverlay = () => {
+  const onClickOverlay = useCallback(() => {
     setOpenSidebar(false);
     setIsAboutAccordionOpen(false);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <>
-      {openSidebar && <Overlay onClick={() => onClickOverlay()} />}
-      <StyledSidebar className={className}>
-        <StyledHeader>
-          <TopHeaderRow>
-            {!isConnected && (
-              <ConnectButton
-                onClick={() => {
-                  connect({ trackSection: "mobileNavSidebar" });
-                }}
-              >
-                Connect Wallet
-              </ConnectButton>
-            )}
-            {isConnected && (
-              <ConnectText>
-                <div /> Connected
-              </ConnectText>
-            )}
-            <CloseButton onClick={() => setOpenSidebar(false)}>
-              <img src={closeIcon} alt="close_button" />
-            </CloseButton>
-          </TopHeaderRow>
-          {addrOrEns && <HeaderText>{addrOrEns}</HeaderText>}
-          {isSupportedChainId(chainId) ? (
-            <HeaderText>{getChainInfo(chainId).name}</HeaderText>
-          ) : isConnected ? (
-            <HeaderText>Unsupported Network</HeaderText>
-          ) : null}
-          {isConnected && wallet ? (
-            <DisconnectButton
-              onClick={() =>
-                disconnect(wallet, { trackSection: "mobileNavSidebar" })
+    <ReactProSidebar
+      onBackdropClick={onClickOverlay}
+      toggled={openSidebar}
+      breakPoint="all"
+      width={sidebarWidth}
+      rootStyles={{
+        zIndex: "3000 !important",
+        // @ts-ignore
+        direction: "ltr !important", // hack to display on the right side
+        [`@media (max-width: ${sidebarWidth})`]: {
+          width: "100%",
+          minWidth: "100%",
+        },
+        borderLeftWidth: "0px !important",
+        [`.${sidebarClasses.container}`]: {
+          background: "#34353a",
+        },
+      }}
+      rtl // hack to display on the right side
+    >
+      <StyledHeader>
+        <TopHeaderRow>
+          {!isConnected && (
+            <ConnectButton
+              onClick={() => {
+                connect({ trackSection: "mobileNavSidebar" });
+              }}
+            >
+              Connect Wallet
+            </ConnectButton>
+          )}
+          {isConnected && (
+            <ConnectText>
+              <div /> Connected
+            </ConnectText>
+          )}
+          <CloseButton onClick={() => setOpenSidebar(false)}>
+            <img src={closeIcon} alt="close_button" />
+          </CloseButton>
+        </TopHeaderRow>
+        {addrOrEns && <HeaderText>{addrOrEns}</HeaderText>}
+        {isSupportedChainId(chainId) ? (
+          <HeaderText>{getChainInfo(chainId).name}</HeaderText>
+        ) : isConnected ? (
+          <HeaderText>Unsupported Network</HeaderText>
+        ) : null}
+        {isConnected && wallet ? (
+          <DisconnectButton
+            onClick={() =>
+              disconnect(wallet, { trackSection: "mobileNavSidebar" })
+            }
+          >
+            Disconnect
+          </DisconnectButton>
+        ) : null}
+      </StyledHeader>
+      <Menu
+        closeOnClick={true}
+        menuItemStyles={{
+          button: {
+            ":hover": {
+              backgroundColor: "#34353a",
+            },
+          },
+        }}
+      >
+        {sidebarNavigationLinks.map((item) => (
+          <MenuItem
+            key={item.title}
+            onClick={onClickLink}
+            component={<Link to={item.pathName} />}
+          >
+            <Text>{item.title}</Text>
+          </MenuItem>
+        ))}
+        <SubMenu
+          label="About"
+          open={isAboutAccordionOpen}
+          onOpenChange={toggleAboutAccordion}
+          rootStyles={{
+            backgroundColor: "#34353a",
+            color: "#b5c3ceff",
+            [`.${menuClasses.subMenuContent}`]: {
+              backgroundColor: "#34353a",
+            },
+          }}
+        >
+          {sidebarAboutLinks.map((item) => (
+            <MenuItem
+              key={item.title}
+              component={
+                <a href={item.link} target="_blank" rel="noreferrer">
+                  {item.title}
+                </a>
               }
             >
-              Disconnect
-            </DisconnectButton>
-          ) : null}
-        </StyledHeader>
-        <StyledMenu>
-          {sidebarNavigationLinks.map((item, idx) => (
-            <StyledMenuItem
-              selected={location.pathname === item.pathName}
-              key={idx}
-            >
-              <Link
-                onClick={() => onClickLink()}
-                to={{ pathname: item.pathName, search: location.search }}
-              >
-                {item.title}
-              </Link>
-            </StyledMenuItem>
+              <Text>{item.title}</Text>
+            </MenuItem>
           ))}
-          <AccordionContainer isOpen>
-            <StyledMenuItem onClick={toggleAboutAccordion}>
-              About{" "}
-              {isAboutAccordionOpen ? (
-                <ChevronUp stroke="#9daab2" strokeWidth="1" />
-              ) : (
-                <ChevronDown stroke="#9daab2" strokeWidth="1" />
-              )}
-            </StyledMenuItem>
-            {isAboutAccordionOpen &&
-              sidebarAboutLinks.map((item) => (
-                <StyledMenuItem key={item.link}>
-                  <a href={item.link} target="_blank" rel="noreferrer">
-                    {item.title}
-                  </a>
-                </StyledMenuItem>
-              ))}
-          </AccordionContainer>
-        </StyledMenu>
-      </StyledSidebar>
-    </>
+        </SubMenu>
+      </Menu>
+    </ReactProSidebar>
   );
 };
 
