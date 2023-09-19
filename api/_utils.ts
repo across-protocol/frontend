@@ -1,16 +1,16 @@
-import {
-  HubPool__factory,
-  ERC20__factory,
-  SpokePool__factory,
-  SpokePool,
-} from "@across-protocol/contracts-v2/dist/typechain";
 import { AcceleratingDistributor__factory } from "@across-protocol/across-token/dist/typechain";
-import axios from "axios";
+import {
+  ERC20__factory,
+  HubPool__factory,
+  SpokePool,
+  SpokePool__factory,
+} from "@across-protocol/contracts-v2/dist/typechain";
 import * as sdk from "@across-protocol/sdk-v2";
-import { BigNumber, ethers, providers, utils } from "ethers";
+import { BALANCER_NETWORK_CONFIG, BalancerSDK } from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
-import { define, StructError } from "superstruct";
-import { BalancerSDK, BALANCER_NETWORK_CONFIG } from "@balancer-labs/sdk";
+import axios from "axios";
+import { BigNumber, ethers, providers, utils } from "ethers";
+import { StructError, define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
@@ -21,19 +21,18 @@ import {
   MINIMAL_MULTICALL3_ABI,
 } from "./_abis";
 
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
+import { VercelResponse } from "@vercel/node";
 import {
-  maxRelayFeePct,
-  relayerFeeCapitalCostConfig,
-  EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
-  TOKEN_SYMBOLS_MAP,
   CHAIN_IDS,
-  SECONDS_PER_YEAR,
   MULTICALL3_ADDRESS,
   DEFI_LLAMA_POOL_LOOKUP,
+  EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
+  SECONDS_PER_YEAR,
+  TOKEN_SYMBOLS_MAP,
+  maxRelayFeePct,
+  relayerFeeCapitalCostConfig,
 } from "./_constants";
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
-import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
-import { VercelResponse } from "@vercel/node";
 import { PoolStateResult } from "./_types";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
@@ -326,7 +325,10 @@ export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
-export const queries: Record<number, () => QueryBase> = {
+export const queries: Record<
+  number,
+  () => sdk.relayFeeCalculator.QueryInterface
+> = {
   [CHAIN_IDS.MAINNET]: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
       getProvider(CHAIN_IDS.MAINNET),
