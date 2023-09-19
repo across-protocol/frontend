@@ -8,9 +8,9 @@ import {
 } from "utils";
 import { useAmplitude } from "hooks";
 
-import { getInitialRouteFromQueryParams, findNextBestRoute } from "../utils";
+import { getRouteFromQueryParams, findNextBestRoute } from "../utils";
 
-const initialRoute = getInitialRouteFromQueryParams();
+const initialRoute = getRouteFromQueryParams();
 
 export function useSelectRoute() {
   const [selectedRoute, setSelectedRoute] = useState(initialRoute);
@@ -38,7 +38,7 @@ export function useSelectRoute() {
           symbol: tokenSymbol,
           fromChain: selectedRoute.fromChain,
           toChain: selectedRoute.toChain,
-        }) || getInitialRouteFromQueryParams();
+        }) || initialRoute;
 
       setSelectedRoute(route);
 

@@ -276,7 +276,7 @@ export function getAllChains() {
     });
 }
 
-export function getInitialRouteFromQueryParams() {
+export function getRouteFromQueryParams() {
   const params = new URLSearchParams(window.location.search);
 
   const fromChain = Number(params.get("from"));
