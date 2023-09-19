@@ -1,7 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 
 import {
-  hubPoolChainId,
   trackFromChainChanged,
   trackToChainChanged,
   trackTokenChanged,
@@ -9,15 +8,12 @@ import {
 } from "utils";
 import { useAmplitude } from "hooks";
 
-import { getInitialRoute, findNextBestRoute } from "../utils";
-
-const initialRoute = getInitialRoute({
-  symbol: "ETH",
-  fromChain: hubPoolChainId,
-});
+import { getInitialRouteFromQueryParams, findNextBestRoute } from "../utils";
 
 export function useSelectRoute() {
-  const [selectedRoute, setSelectedRoute] = useState(initialRoute);
+  const [selectedRoute, setSelectedRoute] = useState(
+    getInitialRouteFromQueryParams()
+  );
   const [isDefaultRouteTracked, setIsDefaultRouteTracked] = useState(false);
 
   const { addToAmpliQueue } = useAmplitude();
@@ -42,7 +38,7 @@ export function useSelectRoute() {
           symbol: tokenSymbol,
           fromChain: selectedRoute.fromChain,
           toChain: selectedRoute.toChain,
-        }) || initialRoute;
+        }) || getInitialRouteFromQueryParams();
 
       setSelectedRoute(route);
 
@@ -63,7 +59,7 @@ export function useSelectRoute() {
       const route =
         findNextBestRoute(["fromChain", "toChain"], filterBy) ||
         findNextBestRoute(["fromChain", "symbol"], filterBy) ||
-        initialRoute;
+        getInitialRouteFromQueryParams();
 
       setSelectedRoute(route);
 
@@ -84,7 +80,7 @@ export function useSelectRoute() {
       const route =
         findNextBestRoute(["fromChain", "toChain"], filterBy) ||
         findNextBestRoute(["symbol", "toChain"], filterBy) ||
-        initialRoute;
+        getInitialRouteFromQueryParams();
 
       setSelectedRoute(route);
 
