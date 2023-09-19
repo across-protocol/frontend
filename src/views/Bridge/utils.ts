@@ -141,7 +141,9 @@ export function findEnabledRoute(
 
   const route = enabledRoutes.find(
     (route) =>
-      (symbol ? route.fromTokenSymbol === symbol : true) &&
+      (symbol
+        ? route.fromTokenSymbol.toUpperCase() === symbol.toUpperCase()
+        : true) &&
       (fromChain ? route.fromChain === fromChain : true) &&
       (toChain ? route.toChain === toChain : true)
   );
@@ -272,4 +274,26 @@ export function getAllChains() {
       }
       return 0;
     });
+}
+
+export function getRouteFromQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+
+  const fromChain = Number(params.get("from"));
+  const toChain = Number(params.get("to"));
+  const token = params.get("token");
+
+  const filter = {
+    fromChain: fromChain || hubPoolChainId,
+    toChain: toChain || undefined,
+    symbol: token ? token.toUpperCase() : "ETH",
+  };
+
+  let route = findNextBestRoute(["fromChain"], filter);
+
+  if (!route) {
+    route = getInitialRoute(filter);
+  }
+
+  return route;
 }

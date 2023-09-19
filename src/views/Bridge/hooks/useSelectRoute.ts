@@ -1,7 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 
 import {
-  hubPoolChainId,
   trackFromChainChanged,
   trackToChainChanged,
   trackTokenChanged,
@@ -9,12 +8,9 @@ import {
 } from "utils";
 import { useAmplitude } from "hooks";
 
-import { getInitialRoute, findNextBestRoute } from "../utils";
+import { getRouteFromQueryParams, findNextBestRoute } from "../utils";
 
-const initialRoute = getInitialRoute({
-  symbol: "ETH",
-  fromChain: hubPoolChainId,
-});
+const initialRoute = getRouteFromQueryParams();
 
 export function useSelectRoute() {
   const [selectedRoute, setSelectedRoute] = useState(initialRoute);
