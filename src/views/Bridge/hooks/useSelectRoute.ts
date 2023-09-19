@@ -10,10 +10,10 @@ import { useAmplitude } from "hooks";
 
 import { getInitialRouteFromQueryParams, findNextBestRoute } from "../utils";
 
+const initialRoute = getInitialRouteFromQueryParams();
+
 export function useSelectRoute() {
-  const [selectedRoute, setSelectedRoute] = useState(
-    getInitialRouteFromQueryParams()
-  );
+  const [selectedRoute, setSelectedRoute] = useState(initialRoute);
   const [isDefaultRouteTracked, setIsDefaultRouteTracked] = useState(false);
 
   const { addToAmpliQueue } = useAmplitude();
@@ -59,7 +59,7 @@ export function useSelectRoute() {
       const route =
         findNextBestRoute(["fromChain", "toChain"], filterBy) ||
         findNextBestRoute(["fromChain", "symbol"], filterBy) ||
-        getInitialRouteFromQueryParams();
+        initialRoute;
 
       setSelectedRoute(route);
 
@@ -80,7 +80,7 @@ export function useSelectRoute() {
       const route =
         findNextBestRoute(["fromChain", "toChain"], filterBy) ||
         findNextBestRoute(["symbol", "toChain"], filterBy) ||
-        getInitialRouteFromQueryParams();
+        initialRoute;
 
       setSelectedRoute(route);
 

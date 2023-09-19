@@ -283,11 +283,17 @@ export function getInitialRouteFromQueryParams() {
   const toChain = Number(params.get("to"));
   const token = params.get("token");
 
-  const route = getInitialRoute({
+  const filter = {
     fromChain: fromChain || hubPoolChainId,
     toChain: toChain || undefined,
     symbol: token ? token.toUpperCase() : "ETH",
-  });
+  };
+
+  let route = findNextBestRoute(["fromChain"], filter);
+
+  if (!route) {
+    route = getInitialRoute(filter);
+  }
 
   return route;
 }
