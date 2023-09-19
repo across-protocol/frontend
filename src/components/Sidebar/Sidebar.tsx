@@ -62,7 +62,7 @@ const Sidebar = ({ openSidebar, setOpenSidebar }: Props) => {
     <ReactProSidebar
       onBackdropClick={onClickOverlay}
       toggled={openSidebar}
-      breakPoint="all"
+      breakPoint="always"
       width={sidebarWidth}
       rootStyles={{
         zIndex: "3000 !important",
