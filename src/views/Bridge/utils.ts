@@ -19,6 +19,24 @@ export enum AmountInputError {
 
 const enabledRoutes = getConfig().getEnabledRoutes();
 
+const interchangeableTokenPairs: Record<string, string[]> = {
+  USDC: ["USDbC", "USDC.e"],
+  "USDC.e": ["USDC", "USDbC"],
+  USDbC: ["USDC", "USDC.e"],
+  ETH: ["WETH"],
+  WETH: ["ETH"],
+};
+
+export function areTokensInterchangeable(
+  tokenSymbol1: string,
+  tokenSymbol2: string
+) {
+  return (
+    Boolean(interchangeableTokenPairs[tokenSymbol1]) &&
+    interchangeableTokenPairs[tokenSymbol1].includes(tokenSymbol2)
+  );
+}
+
 /**
  * Returns the token symbol to be used for the receive token. The protocol bridges
  * ETH/WETH depending on certain conditions:
@@ -164,13 +182,6 @@ export function findNextBestRoute(
 ) {
   let route: Route | undefined;
 
-  const interchangeableTokenPairs: Record<string, string[]> = {
-    USDC: ["USDbC", "USDC.e"],
-    "USDC.e": ["USDC", "USDbC"],
-    USDbC: ["USDC", "USDC.e"],
-    ETH: ["WETH"],
-    WETH: ["ETH"],
-  };
   const equivalentTokenSymbols = filter.symbol
     ? interchangeableTokenPairs[filter.symbol]
     : undefined;

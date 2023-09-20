@@ -1,16 +1,22 @@
 import { useState, useEffect, useCallback } from "react";
 import { BigNumber, utils } from "ethers";
 
-import { useAmplitude, useBalanceBySymbol } from "hooks";
+import { useAmplitude, useBalanceBySymbol, usePrevious } from "hooks";
 import { getConfig, Route, trackMaxButtonClicked } from "utils";
 
-import { AmountInputError, validateBridgeAmount } from "../utils";
+import {
+  AmountInputError,
+  validateBridgeAmount,
+  areTokensInterchangeable,
+} from "../utils";
 
-export function useAmountInput(selectedRoute: Route, didTxSucceed?: boolean) {
+export function useAmountInput(selectedRoute: Route) {
   const [userAmountInput, setUserAmountInput] = useState("");
   const [parsedAmount, setParsedAmount] = useState<BigNumber | undefined>(
     undefined
   );
+
+  const prevFromTokenSymbol = usePrevious(selectedRoute.fromTokenSymbol);
 
   const { addToAmpliQueue } = useAmplitude();
 
@@ -43,8 +49,18 @@ export function useAmountInput(selectedRoute: Route, didTxSucceed?: boolean) {
   }, []);
 
   useEffect(() => {
+    if (
+      prevFromTokenSymbol === selectedRoute.fromTokenSymbol ||
+      areTokensInterchangeable(
+        prevFromTokenSymbol,
+        selectedRoute.fromTokenSymbol
+      )
+    ) {
+      return;
+    }
+
     clearInput();
-  }, [selectedRoute.fromTokenSymbol, clearInput]);
+  }, [prevFromTokenSymbol, selectedRoute.fromTokenSymbol, clearInput]);
 
   useEffect(() => {
     try {
