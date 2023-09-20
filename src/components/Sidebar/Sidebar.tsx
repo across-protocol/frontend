@@ -31,6 +31,27 @@ interface Props {
 
 const sidebarWidth = "450px";
 
+const sidebarRootStyles = {
+  zIndex: "3000 !important",
+  direction: "ltr !important", // hack to display on the right side
+  [`@media (max-width: ${sidebarWidth})`]: {
+    width: "100%",
+    minWidth: "100%",
+  },
+  borderLeftWidth: "0px !important",
+  [`.${sidebarClasses.container}`]: {
+    background: "#34353a",
+  },
+};
+
+const subMenuRootStyles = {
+  backgroundColor: "#34353a",
+  color: "#b5c3ceff",
+  [`.${menuClasses.subMenuContent}`]: {
+    backgroundColor: "#34353a",
+  },
+};
+
 const Sidebar = ({ openSidebar, setOpenSidebar }: Props) => {
   const {
     sidebarNavigationLinks,
@@ -64,19 +85,8 @@ const Sidebar = ({ openSidebar, setOpenSidebar }: Props) => {
       toggled={openSidebar}
       breakPoint="all"
       width={sidebarWidth}
-      rootStyles={{
-        zIndex: "3000 !important",
-        // @ts-ignore
-        direction: "ltr !important", // hack to display on the right side
-        [`@media (max-width: ${sidebarWidth})`]: {
-          width: "100%",
-          minWidth: "100%",
-        },
-        borderLeftWidth: "0px !important",
-        [`.${sidebarClasses.container}`]: {
-          background: "#34353a",
-        },
-      }}
+      // @ts-ignore
+      rootStyles={sidebarRootStyles}
       rtl // hack to display on the right side
     >
       <StyledHeader>
@@ -138,13 +148,7 @@ const Sidebar = ({ openSidebar, setOpenSidebar }: Props) => {
           label="About"
           open={isAboutAccordionOpen}
           onOpenChange={toggleAboutAccordion}
-          rootStyles={{
-            backgroundColor: "#34353a",
-            color: "#b5c3ceff",
-            [`.${menuClasses.subMenuContent}`]: {
-              backgroundColor: "#34353a",
-            },
-          }}
+          rootStyles={subMenuRootStyles}
         >
           {sidebarAboutLinks.map((item) => (
             <MenuItem
