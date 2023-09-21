@@ -42,10 +42,10 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.15.17":
-  version "0.15.17"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.15.17.tgz#707dbbbd56279ef3ab5d7ef7985b6d22906295d4"
-  integrity sha512-f4iOMQ8QPUtlpxhfyz3zkEiKP/3vEE/qyBBT48o9suZNyhq1RYoCxdcBLBDahcXzDZxUn0Jm0pT5wgU4hZz5Fg==
+"@across-protocol/sdk-v2@^0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.16.2.tgz#bb9e38e40e5fc55ae8b8aba1a52cd2f6a0aa2b33"
+  integrity sha512-k7sj7DqdWR8ucfWR2dMigKUc6kGYPi23nngNw9V4udYmJ4NUR977yDFzwKzi3W33dB1daAuvGWCaWEg/kL/eOw==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
     "@across-protocol/contracts-v2" "^2.4.3"
@@ -53,6 +53,7 @@
     "@pinata/sdk" "^2.1.0"
     "@uma/sdk" "^0.34.1"
     axios "^0.27.2"
+    big-number "^2.0.0"
     decimal.js "^10.3.1"
     ethers "^5.7.2"
     lodash.get "^4.4.2"
@@ -11793,6 +11794,11 @@ big-integer@^1.6.16, big-integer@^1.6.7:
   version "1.6.51"
   resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.51.tgz#0df92a5d9880560d3ff2d5fd20245c889d130686"
   integrity sha512-GPEid2Y9QU1Exl1rpO9B2IPJGHPSupF5GnVIP0blYvNOMer2bTvSWs1jGOUg04hTmu67nmLsQ9TBo1puaotBHg==
+
+big-number@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/big-number/-/big-number-2.0.0.tgz#98548eda9393b445791670a213aed6f6dcd66ee3"
+  integrity sha512-C67Su0g+XsmXADX/UM9L/+xSbqqwq0D/qGJs2ky6Noy2FDuCZnC38ZSXODiaBvqWma2VYRZEXgm4H74PS6tCDg==
 
 big.js@^5.2.2:
   version "5.2.2"
