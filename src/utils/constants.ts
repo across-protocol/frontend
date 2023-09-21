@@ -638,9 +638,10 @@ export const rewardTiers = [
 export const secondsPerYear = 31557600;
 export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day
 
-export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
-  ? Number(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER)
-  : undefined;
+export const gasMultiplierPerChain: Record<string, number> = process.env
+  .REACT_APP_GAS_ESTIMATION_MULTIPLIER_PER_CHAIN
+  ? JSON.parse(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER_PER_CHAIN)
+  : {};
 
 export const suggestedFeesDeviationBufferMultiplier = !Number.isNaN(
   Number(
