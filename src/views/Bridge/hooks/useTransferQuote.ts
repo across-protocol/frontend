@@ -61,7 +61,7 @@ export function useTransferQuote(
     if (shouldUpdateQuote || !quotedLimits) {
       setQuotedLimits(limitsQuery.limits);
     }
-    if (shouldUpdateQuote || !quotedLimits) {
+    if (shouldUpdateQuote || !quotePriceUSD) {
       setQuotedPriceUSD(usdPriceQuery.data?.price);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
