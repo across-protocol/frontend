@@ -28,10 +28,10 @@ export function AmountInput({
   validationError,
 }: Props) {
   const [displayBalance, setDisplayBalance] = useState(false);
-  const [didFocus, setDidFocus] = useState(false);
+  const [didEnter, setDidEnter] = useState(false);
 
   useEffect(() => {
-    setDidFocus(false);
+    setDidEnter(false);
   }, [selectedRoute.fromTokenSymbol]);
 
   const token = getToken(selectedRoute.fromTokenSymbol);
@@ -40,7 +40,7 @@ export function AmountInput({
 
   return (
     <AmountExternalWrapper>
-      <AmountWrapper valid={didFocus ? isAmountValid : true}>
+      <AmountWrapper valid={didEnter ? isAmountValid : true}>
         <AmountInnerWrapper>
           <AmountInnerWrapperTextStack>
             {balance && (displayBalance || amountInput) && (
@@ -50,15 +50,19 @@ export function AmountInput({
               </Text>
             )}
             <AmountInnerInput
-              valid={didFocus ? isAmountValid : true}
+              valid={didEnter ? isAmountValid : true}
               placeholder="Enter amount"
               value={amountInput}
-              onChange={(e) => onChangeAmountInput(e.target.value)}
+              onChange={(e) => {
+                if (!didEnter) {
+                  setDidEnter(true);
+                }
+                onChangeAmountInput(e.target.value);
+              }}
               onFocus={() => {
                 setDisplayBalance(true);
               }}
               onBlur={() => {
-                setDidFocus(true);
                 setDisplayBalance(false);
               }}
               data-cy="bridge-amount-input"
@@ -66,7 +70,6 @@ export function AmountInput({
           </AmountInnerWrapperTextStack>
           <MaxButtonWrapper
             onClick={() => {
-              setDidFocus(true);
               onClickMaxBalance();
             }}
             disabled={!balance}
@@ -75,7 +78,7 @@ export function AmountInput({
           </MaxButtonWrapper>
         </AmountInnerWrapper>
       </AmountWrapper>
-      {didFocus && !isAmountValid && (
+      {didEnter && !isAmountValid && (
         <BridgeInputErrorAlert>
           {validationError === AmountInputError.INSUFFICIENT_BALANCE &&
             "Insufficient balance to process this transfer."}
