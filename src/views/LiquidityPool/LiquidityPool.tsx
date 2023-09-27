@@ -31,6 +31,10 @@ import { useAllLiquidityPools } from "./hooks/useLiquidityPool";
 import { useUserLiquidityPool } from "./hooks/useUserLiquidityPool";
 
 import { Container, StatsRow, Divider, Button } from "./LiquidityPool.styles";
+import ChainSelector from "views/Bridge/components/ChainSelector";
+import { useSelectRoute } from "views/Bridge/hooks/useSelectRoute";
+import { getRouteFromQueryParams } from "views/Bridge/utils";
+import { useBridge } from "views/Bridge/hooks/useBridge";
 
 type PoolAction = "add" | "remove";
 
@@ -85,6 +89,8 @@ export default function LiquidityPool() {
   const showValueOrDash = repeatableTernaryBuilder(!arePoolsLoading, "-");
 
   const stakingPoolQuery = useStakingPool(selectedToken.l1TokenAddress);
+  const { selectedRoute, handleSelectFromChain, handleSelectToken } =
+    useSelectRoute(1);
 
   return (
     <>
@@ -111,6 +117,7 @@ export default function LiquidityPool() {
                   (token) => token.symbol === tokenSymbol
                 );
                 setSelectedToken(token || tokenList[0]);
+                handleSelectToken(token?.symbol || tokenList[0].symbol);
               }}
               pools={liquidityPools.map((pool) => ({
                 tokenSymbol: pool.l1TokenSymbol,
@@ -118,6 +125,13 @@ export default function LiquidityPool() {
                 poolSize: BigNumber.from(pool.totalPoolSize),
               }))}
             />
+            {action === "add" ? (
+              <ChainSelector
+                fromOrTo="from"
+                selectedRoute={selectedRoute}
+                onSelectChain={handleSelectFromChain}
+              />
+            ) : undefined}
             <StatsRow data-cy="pool-info-box">
               <StatBox
                 label="Pool size"
@@ -195,7 +209,11 @@ export default function LiquidityPool() {
                 Switch Network
               </Button>
             ) : (
-              <ActionInputBlock action={action} selectedToken={selectedToken} />
+              <ActionInputBlock
+                action={action}
+                selectedToken={selectedToken}
+                selectedRoute={selectedRoute}
+              />
             )}
           </CardWrapper>
         </Container>

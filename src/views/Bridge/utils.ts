@@ -287,7 +287,7 @@ export function getAllChains() {
     });
 }
 
-export function getRouteFromQueryParams() {
+export function getRouteFromQueryParams(fixedToChain?: number) {
   const params = new URLSearchParams(window.location.search);
 
   const fromChain = Number(params.get("from"));
@@ -295,8 +295,12 @@ export function getRouteFromQueryParams() {
   const token = params.get("token");
 
   const filter = {
-    fromChain: fromChain || hubPoolChainId,
-    toChain: toChain || undefined,
+    fromChain:
+      fixedToChain !== undefined &&
+      fixedToChain === (fromChain || hubPoolChainId)
+        ? undefined
+        : fromChain || hubPoolChainId,
+    toChain: fixedToChain || toChain || undefined,
     symbol: token ? token.toUpperCase() : "ETH",
   };
 

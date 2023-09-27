@@ -42,3 +42,4 @@ build-storybook.log
 
 # Amplitude
 ampli.json
+.env*.local

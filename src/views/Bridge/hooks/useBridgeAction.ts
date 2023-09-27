@@ -190,6 +190,7 @@ export function useBridgeAction(
       isMutating: buttonActionHandler.isLoading,
     }),
     buttonDisabled,
+    buttonActionMutationResult: buttonActionHandler,
   };
 }
 

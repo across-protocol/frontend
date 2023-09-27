@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
-import { utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 
 import { QUERIESV2, trackMaxButtonClicked } from "utils";
 import { useStakingPool, useAmplitude } from "hooks";
@@ -9,11 +9,15 @@ import { InputWithMaxButton, Text } from "components";
 import {
   useAddLiquidity,
   useRemoveLiquidity,
+  useAddAndBridge,
 } from "../hooks/useLiquidityAction";
 import { useMaxAmounts } from "../hooks/useMaxAmounts";
 import { useValidAmount } from "../hooks/useValidAmount";
 
 import { Button } from "../LiquidityPool.styles";
+import { useBridgeAction } from "views/Bridge/hooks/useBridgeAction";
+import { useTransferQuote } from "views/Bridge/hooks/useTransferQuote";
+import { parseAndValidateAmountInput } from "../utils";
 
 type Props = {
   selectedToken: {
@@ -22,9 +26,22 @@ type Props = {
     decimals: number;
   };
   action: "add" | "remove";
+  selectedRoute: {
+    l1TokenAddress: string;
+    fromChain: number;
+    toChain: number;
+    fromTokenAddress: string;
+    fromSpokeAddress: string;
+    fromTokenSymbol: string;
+    isNative: boolean;
+  };
 };
 
-export function ActionInputBlock({ action, selectedToken }: Props) {
+export function ActionInputBlock({
+  action,
+  selectedToken,
+  selectedRoute,
+}: Props) {
   const [amount, setAmount] = useState("");
 
   const stakingPoolQuery = useStakingPool(selectedToken.l1TokenAddress);
@@ -41,6 +58,15 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
     selectedToken.symbol,
     selectedToken.l1TokenAddress
   );
+  const addAndBridgeMutation = useAddAndBridge(
+    selectedRoute.fromChain,
+    selectedRoute,
+    amount,
+    selectedToken.decimals,
+    selectedToken.symbol,
+    selectedRoute.fromTokenAddress,
+    selectedToken.symbol === "ETH"
+  );
 
   const { amountValidationError } = useValidAmount(
     action,
@@ -55,6 +81,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
   useEffect(() => {
     addLiquidityMutation.reset();
     removeLiquidityMutation.reset();
+    addAndBridgeMutation.reset();
     setAmount("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [action, selectedToken.symbol]);
@@ -68,18 +95,22 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
       maxAmountsQuery.data;
 
     if (action === "add") {
-      addLiquidityMutation.mutate(
-        {
-          amountInput: amount,
-          maxAddableAmount,
-        },
-        {
-          onSuccess: () => {
-            setAmount("");
-            maxAmountsQuery.refetch();
+      if (selectedRoute.fromChain === 1) {
+        addLiquidityMutation.mutate(
+          {
+            amountInput: amount,
+            maxAddableAmount,
           },
-        }
-      );
+          {
+            onSuccess: () => {
+              setAmount("");
+              maxAmountsQuery.refetch();
+            },
+          }
+        );
+      } else {
+        addAndBridgeMutation.mutate();
+      }
     } else {
       removeLiquidityMutation.mutate(
         {

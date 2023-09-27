@@ -16,3 +16,7 @@ export async function getCode(address: string, chainId: ChainId) {
   const provider = getProvider(chainId);
   return await provider.getCode(address);
 }
+
+export function abiEncodeAddress(address: string) {
+  return utils.defaultAbiCoder.encode(["address"], [address]);
+}
