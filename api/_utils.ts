@@ -41,15 +41,12 @@ const {
   REACT_APP_HUBPOOL_CHAINID,
   REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
-  REACT_APP_GOOGLE_SERVICE_ACCOUNT,
   VERCEL_ENV,
   GAS_MARKUP,
   DISABLE_DEBUG_LOGS,
 } = process.env;
 
-const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
-  ? JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT)
-  : {};
+const GOOGLE_SERVICE_ACCOUNT = {};
 
 export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 // Default to no markup.
@@ -158,25 +155,7 @@ let logger: LoggingUtility;
  */
 export const getLogger = (): LoggingUtility => {
   // Use the default logger which logs to console if no GCP service account is configured.
-  if (Object.keys(GOOGLE_SERVICE_ACCOUNT).length === 0) {
-    logger = sdk.relayFeeCalculator.DEFAULT_LOGGER;
-  }
-
-  if (!logger) {
-    const gcpLogger = new Logging({
-      projectId: GOOGLE_SERVICE_ACCOUNT.project_id,
-      credentials: {
-        client_email: GOOGLE_SERVICE_ACCOUNT.client_email,
-        private_key: GOOGLE_SERVICE_ACCOUNT.private_key,
-      },
-    }).log(VERCEL_ENV ?? "", { removeCircular: true });
-    logger = {
-      debug: (data: LogType) => log(gcpLogger, "DEBUG", data),
-      info: (data: LogType) => log(gcpLogger, "INFO", data),
-      warn: (data: LogType) => log(gcpLogger, "WARN", data),
-      error: (data: LogType) => log(gcpLogger, "ERROR", data),
-    };
-  }
+  logger = sdk.relayFeeCalculator.DEFAULT_LOGGER;
   return logger;
 };
 

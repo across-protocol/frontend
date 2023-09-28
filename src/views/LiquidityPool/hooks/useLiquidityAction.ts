@@ -10,6 +10,7 @@ import {
   fixedPointAdjustment,
   AcrossDepositArgs,
   abiEncodeAddress,
+  sendAcrossDeposit,
 } from "utils";
 import { useIsWrongNetwork, useApprove, useStakingPool } from "hooks";
 
@@ -19,6 +20,7 @@ import { parseAndValidateAmountInput } from "../utils";
 import { useBridge } from "views/Bridge/hooks/useBridge";
 import { useTransferQuote } from "views/Bridge/hooks/useTransferQuote";
 import { useBridgeAction } from "views/Bridge/hooks/useBridgeAction";
+import { useMemo } from "react";
 
 const config = getConfig();
 
@@ -159,21 +161,24 @@ export function useAddAndBridge(
   tokenAddress: string,
   isNative: boolean
 ) {
-  const { account } = useConnection();
+  console.log("got here2");
+  const { account, signer } = useConnection();
 
-  let parsedAmount: BigNumber;
-  try {
-    parsedAmount = parseAndValidateAmountInput(
-      amount,
-      tokenDecimals,
-      BigNumber.from(10).pow(100)
-    );
-  } catch {
-    parsedAmount = BigNumber.from(0);
-  }
+  let parsedAmount: BigNumber = useMemo(() => {
+    try {
+      return parseAndValidateAmountInput(
+        amount,
+        tokenDecimals,
+        BigNumber.from(10).pow(100)
+      );
+    } catch {
+      return BigNumber.from(0);
+    }
+  }, [amount, tokenDecimals]);
 
-  // Replace with real address.
-  const toAddress = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
+  const toAddress = "0x6cAA3f63478ae7cB9D286b1a373EBB85928E49C7";
+
+  console.log("got here3");
 
   const {
     estimatedTime,
@@ -209,21 +214,29 @@ export function useAddAndBridge(
     timestamp:
       initialQuoteTime === undefined
         ? BigNumber.from(Math.round(Date.now() / 1000))
-        : BigNumber.from(initialQuoteTime),
+        : BigNumber.from(Math.round(initialQuoteTime / 1000)),
     message: account ? abiEncodeAddress(account) : "0x1234",
     isNative: isNative,
   };
 
-  const bridgeActionOutput = useBridgeAction(
-    isQuoteLoading,
-    depositArgs,
-    tokenSymbol,
-    () => {},
-    () => {},
-    quote,
-    initialQuoteTime,
-    quotePriceUSD
-  );
+  console.log("got here4");
+
+  return async () => {
+    console.log("got here1");
+    if (!signer) return;
+    await (await sendAcrossDeposit(signer!, depositArgs)).wait();
+  };
+
+  // const bridgeActionOutput = useBridgeAction(
+  //   isQuoteLoading,
+  //   depositArgs,
+  //   tokenSymbol,
+  //   () => {},
+  //   () => {},
+  //   quote,
+  //   initialQuoteTime,
+  //   quotePriceUSD
+  // );
 
   // const handleBridgeAndAddLiquidity = async (args: {
   //   amountInput: string;
@@ -263,7 +276,7 @@ export function useAddAndBridge(
   //   await waitOnTransaction(hubPoolChainId, txResponse, notify);
   // };
 
-  return bridgeActionOutput.buttonActionMutationResult;
+  // return bridgeActionOutput.buttonActionMutationResult;
 
   // return useMutation(, {
   //   onSuccess: () => {

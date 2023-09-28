@@ -44,9 +44,9 @@ export default function LiquidityPool() {
   const [action, setAction] = useState<PoolAction>("add");
   const [selectedToken, setSelectedToken] = useState(tokenList[0]);
 
-  const { isConnected, connect } = useConnection();
+  const { isConnected, connect, chainId } = useConnection();
   const { isWrongNetwork, isWrongNetworkHandlerWithoutError } =
-    useIsWrongNetwork();
+    useIsWrongNetwork(action === "remove" ? 1 : chainId);
 
   const userLiquidityPoolQuery = useUserLiquidityPool(selectedToken.symbol);
   const allLiquidityPoolQueries = useAllLiquidityPools();
@@ -90,11 +90,13 @@ export default function LiquidityPool() {
 
   const stakingPoolQuery = useStakingPool(selectedToken.l1TokenAddress);
   const { selectedRoute, handleSelectFromChain, handleSelectToken } =
-    useSelectRoute(1);
+    useSelectRoute(1, chainId);
 
   return (
     <>
-      <WrongNetworkHeader requiredChainId={hubPoolChainId} />
+      <WrongNetworkHeader
+        requiredChainId={action === "remove" ? 1 : selectedRoute.fromChain}
+      />
       <LayoutV2 maxWidth={600}>
         <Container>
           <Breadcrumb />

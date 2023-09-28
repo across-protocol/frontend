@@ -81,7 +81,6 @@ export function ActionInputBlock({
   useEffect(() => {
     addLiquidityMutation.reset();
     removeLiquidityMutation.reset();
-    addAndBridgeMutation.reset();
     setAmount("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [action, selectedToken.symbol]);
@@ -109,7 +108,7 @@ export function ActionInputBlock({
           }
         );
       } else {
-        addAndBridgeMutation.mutate();
+        addAndBridgeMutation().then(() => setAmount(""));
       }
     } else {
       removeLiquidityMutation.mutate(
@@ -185,7 +184,9 @@ export function ActionInputBlock({
               {action === "add"
                 ? addLiquidityMutation.isLoading
                   ? "Adding liquidity..."
-                  : "Add liquidity"
+                  : selectedRoute.fromChain === 1
+                  ? "Add liquidity"
+                  : "Add and Stake"
                 : removeLiquidityMutation.isLoading
                 ? "Removing liquidity..."
                 : "Remove liquidity"}
