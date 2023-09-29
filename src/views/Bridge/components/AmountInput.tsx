@@ -50,6 +50,7 @@ export function AmountInput({
               </Text>
             )}
             <AmountInnerInput
+              type="number"
               valid={didEnter ? isAmountValid : true}
               placeholder="Enter amount"
               value={amountInput}
