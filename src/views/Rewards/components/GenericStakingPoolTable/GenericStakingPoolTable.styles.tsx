@@ -25,17 +25,15 @@ export const HeaderCell = styled(Cell)`
 export const StyledConnectorVector = styled(ConnectorVector)``;
 
 export const RowCell = styled(Cell)`
-  padding: 24px;
+  padding: 24px 16px;
   background: transparent;
   border-top: 1px solid #3e4047;
 `;
 
 const BaseCell = styled.div`
-  margin-left: -8px;
   width: calc(100%);
 
   @media ${QUERIESV2.sm.andDown} {
-    margin-left: -8px;
   }
 `;
 
