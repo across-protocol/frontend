@@ -14,6 +14,7 @@ export const Overlay = styled(DialogOverlay)`
   justify-content: center;
   align-items: center;
   z-index: 100000;
+  overflow-y: scroll;
 `;
 
 export const Content = styled(DialogContent)`
@@ -32,6 +33,7 @@ export const SuccessContainer = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 24px;
+  padding-bottom: 24px;
 
   svg {
     stroke: #6cf9d8;
@@ -97,7 +99,12 @@ export const ButtonsRow = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  gap: 8px;
+`;
+
+export const CloseHeaderRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
 `;
 
 export const ConfirmButton = styled(ButtonV2)<{ warning?: boolean }>`
