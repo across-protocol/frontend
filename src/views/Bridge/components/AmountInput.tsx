@@ -209,4 +209,14 @@ const AmountInnerInput = styled.input<IValidInput>`
     font-size: 16px;
     line-height: 20px;
   }
+
+  // hide number input arrows
+  /* Chrome, Safari, Edge, Opera */
+  ::-webkit-outer-spin-button,
+  ::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  /* Firefox */
+  -moz-appearance: textfield;
 `;
