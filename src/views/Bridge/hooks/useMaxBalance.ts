@@ -1,8 +1,14 @@
 import { useQuery } from "react-query";
-import { BigNumber, providers, utils, constants } from "ethers";
+import { BigNumber, providers, constants } from "ethers";
 
 import { useBalanceBySymbol, useConnection } from "hooks";
-import { getConfig, Route, max, getProvider } from "utils";
+import {
+  getConfig,
+  Route,
+  max,
+  getProvider,
+  fallbackEstimatedGasCosts,
+} from "utils";
 import { getPaddedGasEstimation } from "utils/transactions";
 
 const config = getConfig();
@@ -35,10 +41,10 @@ export function useMaxBalance(selectedRoute: Route) {
                 )
                 .catch((err) => {
                   console.error(err);
-                  return max(balance.sub(utils.parseEther("0.01")), 0);
+                  return max(balance.sub(fallbackEstimatedGasCosts), 0);
                 });
       } else {
-        maxBridgeAmount = BigNumber.from(0);
+        maxBridgeAmount = constants.Zero;
       }
 
       return maxBridgeAmount;
@@ -55,7 +61,7 @@ async function estimateGasCostsForDeposit(
 ) {
   const provider = getProvider(selectedRoute.fromChain);
   const spokePool = config.getSpokePool(selectedRoute.fromChain);
-  const mockedArgs = {
+  const argsForEstimation = {
     recipient: await signer.getAddress(),
     originToken: config.getTokenInfoByAddress(
       selectedRoute.fromChain,
@@ -72,8 +78,8 @@ async function estimateGasCostsForDeposit(
     selectedRoute.fromChain,
     spokePool,
     "deposit",
-    ...Object.values(mockedArgs),
-    { value: selectedRoute.isNative ? mockedArgs.amount : 0 }
+    ...Object.values(argsForEstimation),
+    { value: selectedRoute.isNative ? argsForEstimation.amount : 0 }
   );
   const gasPrice = await provider.getGasPrice();
   return gasPrice.mul(paddedGasEstimation);

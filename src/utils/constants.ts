@@ -377,9 +377,6 @@ export const tokenList = [
 ];
 
 // process.env variables
-export const gasEstimationMultiplier = Number(
-  process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER || 2
-);
 export const rewardsApiUrl =
   process.env.REACT_APP_REWARDS_API_URL || "https://api.across.to";
 export const airdropWindowIndex = Number(
@@ -694,3 +691,6 @@ export const disabledChainIdsForAvailableRoutes = (
 export const walletBlacklist = (process.env.REACT_APP_WALLET_BLACKLIST || "")
   .split(",")
   .map((address) => address.toLowerCase());
+
+// Fallback gas costs for when the gas estimation fails
+export const fallbackEstimatedGasCosts = ethers.utils.parseEther("0.01");
