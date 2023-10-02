@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Info, Zap } from "react-feather";
+import { Info, Zap, X } from "react-feather";
 import { BigNumber } from "ethers";
 
 import { formatWeiPct, getChainInfo } from "utils";
 import { maxRelayFee, minRelayFee } from "utils/constants";
+import { Text } from "components/Text";
 
 import {
   Overlay,
   Content,
   SuccessContainer,
   SpeedUpTxLinkContainer,
-  Title,
   InfoBox,
   ErrorBox,
   ButtonsRow,
+  CloseHeaderRow,
   CancelButton,
   ConfirmButton,
 } from "./SpeedUpModal.styles";
@@ -95,7 +96,7 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
           <SuccessContent onClose={onClose} />
         ) : (
           <>
-            <Title>Speed up transaction</Title>
+            <Text size="xl">Speed up transaction</Text>
             <AlertBox
               isCorrectChain={!isWrongNetwork}
               speedUpError={speedUp.isError ? "Speed up failed" : undefined}
@@ -172,12 +173,12 @@ function AlertBox({
         <div>
           <Info />
         </div>
-        <p>
+        <Text color="error">
           You are on the incorrect network. Please{" "}
           <button onClick={onClickSwitch}>
             switch to {getChainInfo(sourceChainId).name}
           </button>
-        </p>
+        </Text>
       </ErrorBox>
     );
   } else if (speedUpError) {
@@ -186,7 +187,7 @@ function AlertBox({
         <div>
           <Info />
         </div>
-        <p>{speedUpError}</p>
+        <Text color="error">{speedUpError}</Text>
       </ErrorBox>
     );
   } else if (isRelayerFeeFairlyPriced) {
@@ -195,10 +196,10 @@ function AlertBox({
         <div>
           <Info />
         </div>
-        <p>
+        <Text color="warning">
           Note: The relay is already fairly priced compared to other
           transactions with similar characteristics.
-        </p>
+        </Text>
       </InfoBox>
     );
   }
@@ -209,16 +210,14 @@ function AlertBox({
 function SuccessContent({ onClose }: Pick<Props, "onClose">) {
   return (
     <>
+      <CloseHeaderRow>
+        <X size={16} onClick={onClose} />
+      </CloseHeaderRow>
       <SuccessContainer>
-        <Title>Success</Title>
+        <Text size="xl">Success</Text>
         <Zap size={64} />
-        <p>Transaction was sped up successfully.</p>
+        <Text>Transaction was sped up successfully.</Text>
       </SuccessContainer>
-      <ButtonsRow>
-        <CancelButton size="md" onClick={onClose}>
-          Close
-        </CancelButton>
-      </ButtonsRow>
     </>
   );
 }
