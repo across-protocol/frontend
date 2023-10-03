@@ -103,10 +103,20 @@ export function useBridge() {
   }, [selectedRoute.fromChain, isConnected, checkWrongNetworkHandler]);
 
   useEffect(() => {
-    if (bridgeAction.isButtonActionLoading || trackingTxHash) {
+    if (
+      shouldUpdateQuote &&
+      (bridgeAction.isButtonActionLoading || trackingTxHash)
+    ) {
       setShouldUpdateQuote(false);
+    } else if (bridgeAction.didActionError && !shouldUpdateQuote) {
+      setShouldUpdateQuote(true);
     }
-  }, [bridgeAction.isButtonActionLoading, trackingTxHash]);
+  }, [
+    shouldUpdateQuote,
+    bridgeAction.isButtonActionLoading,
+    trackingTxHash,
+    bridgeAction.didActionError,
+  ]);
 
   const handleClickNewTx = useCallback(() => {
     clearInput();

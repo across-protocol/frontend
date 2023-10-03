@@ -90,21 +90,17 @@ export function useBridgeAction(
     let succeeded = false;
     let timeSigned: number | undefined = undefined;
     let tx: ContractTransaction | undefined = undefined;
+    addToAmpliQueue(() => {
+      // Instrument amplitude before sending the transaction for the submit button.
+      ampli.transferSubmitted(
+        generateTransferSubmitted(frozenQuote, referrer, frozenInitialQuoteTime)
+      );
+    });
+    const timeSubmitted = Date.now();
+
+    tx = await sendAcrossDeposit(signer, frozenPayload);
+
     try {
-      addToAmpliQueue(() => {
-        // Instrument amplitude before sending the transaction for the submit button.
-        ampli.transferSubmitted(
-          generateTransferSubmitted(
-            frozenQuote,
-            referrer,
-            frozenInitialQuoteTime
-          )
-        );
-      });
-      const timeSubmitted = Date.now();
-
-      tx = await sendAcrossDeposit(signer, frozenPayload);
-
       // Instrument amplitude after signing the transaction for the submit button.
       timeSigned = Date.now();
       addToAmpliQueue(() => {
@@ -184,6 +180,7 @@ export function useBridgeAction(
     isConnected,
     buttonActionHandler: buttonActionHandler.mutate,
     isButtonActionLoading: buttonActionHandler.isLoading,
+    didActionError: buttonActionHandler.isError,
     buttonLabel: getButtonLabel({
       isConnected,
       isDataLoading: dataLoading,
