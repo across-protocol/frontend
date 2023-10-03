@@ -9,9 +9,13 @@ import {
   validAddress,
   getBalancerV2TokenPrice,
 } from "./_utils";
-import { SUPPORTED_CG_BASE_CURRENCIES } from "./_constants";
+import {
+  SUPPORTED_CG_BASE_CURRENCIES,
+  CHAIN_IDs,
+  TOKEN_SYMBOLS_MAP,
+} from "./_constants";
 
-import { coingecko, constants as sdkConstants } from "@across-protocol/sdk-v2";
+import { coingecko } from "@across-protocol/sdk-v2";
 
 const { Coingecko } = coingecko;
 const {
@@ -33,7 +37,7 @@ const getCoingeckoPrices = async (
   } = {},
   balancerV2PoolTokens: string[] = []
 ): Promise<number> => {
-  const baseCurrencyToken = Object.values(sdkConstants.TOKEN_SYMBOLS_MAP).find(
+  const baseCurrencyToken = Object.values(TOKEN_SYMBOLS_MAP).find(
     ({ symbol }) => symbol === baseCurrency.toUpperCase()
   );
 
@@ -42,7 +46,7 @@ const getCoingeckoPrices = async (
   // Special case: token and base are the same. Coingecko class returns a single result in this case, so it must
   // be handled separately.
   const baseCurrentTokenAddress =
-    baseCurrencyToken.addresses[sdkConstants.CHAIN_IDs.MAINNET];
+    baseCurrencyToken.addresses[CHAIN_IDs.MAINNET];
   if (tokenAddress.toLowerCase() === baseCurrentTokenAddress.toLowerCase())
     return 1;
 

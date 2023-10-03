@@ -1,5 +1,4 @@
 import { VercelResponse } from "@vercel/node";
-import { constants } from "@across-protocol/sdk-v2";
 import {
   getLogger,
   handleErrorCondition,
@@ -8,6 +7,7 @@ import {
   DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
+import { TOKEN_SYMBOLS_MAP } from "./_constants";
 
 const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
   const logger = getLogger();
@@ -48,10 +48,10 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
     const enrichedTokensPerChain = Object.values(tokensPerChain).map(
       (token) => {
         const tokenInfo =
-          constants.TOKEN_SYMBOLS_MAP[
+          TOKEN_SYMBOLS_MAP[
             ["USDC.e", "USDbC"].includes(token.symbol)
               ? "USDC"
-              : (token.symbol as keyof typeof constants.TOKEN_SYMBOLS_MAP)
+              : (token.symbol as keyof typeof TOKEN_SYMBOLS_MAP)
           ];
         return {
           ...token,
