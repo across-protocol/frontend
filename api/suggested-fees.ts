@@ -5,7 +5,7 @@ import * as sdk from "@across-protocol/sdk-v2";
 import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { type, assert, Infer, optional } from "superstruct";
+import { type, assert, Infer, optional, string } from "superstruct";
 import { disabledL1Tokens, DEFAULT_QUOTE_TIMESTAMP_BUFFER } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
@@ -33,6 +33,9 @@ const SuggestedFeesQueryParamsSchema = type({
   originChainId: optional(positiveIntStr()),
   timestamp: optional(positiveIntStr()),
   skipAmountLimit: optional(boolStr()),
+  message: optional(string()),
+  recipientAddress: optional(validAddress()),
+  relayerAddress: optional(validAddress()),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
@@ -64,6 +67,9 @@ const handler = async (
       originChainId,
       timestamp,
       skipAmountLimit,
+      recipientAddress,
+      relayerAddress,
+      message,
     } = query;
 
     if (originChainId === destinationChainId) {
@@ -77,6 +83,31 @@ const handler = async (
       getTokenDetails(provider, undefined, token, originChainId),
     ]);
     const { l1Token, hubPool, chainId: computedOriginChainId } = tokenDetails;
+
+    if (
+      sdk.utils.isDefined(message) &&
+      !sdk.utils.isDefined(recipientAddress)
+    ) {
+      throw new InputError(
+        "Recipient address is required when message is provided"
+      );
+    }
+    if (
+      sdk.utils.isDefined(message) &&
+      // Our message encoding is a hex string, so we need to check that the length is even.
+      message.length % 2 !== 0
+    ) {
+      throw new InputError("Message must be an even hex string");
+    }
+
+    const messagePayload =
+      sdk.utils.isDefined(message) && sdk.utils.isDefined(recipientAddress)
+        ? {
+            message,
+            recipientAddress,
+            relayerAddress,
+          }
+        : undefined;
 
     // Note: Add a buffer to "latest" timestamp so that it corresponds to a block older than HEAD.
     // This is to improve relayer UX who have heightened risk of sending inadvertent invalid fills
@@ -151,7 +182,8 @@ const handler = async (
       amount,
       computedOriginChainId,
       Number(destinationChainId),
-      tokenPrice
+      tokenPrice,
+      messagePayload
     );
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";

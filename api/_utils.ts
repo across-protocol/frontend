@@ -33,7 +33,7 @@ import {
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
 } from "./_constants";
-import { PoolStateResult } from "./_types";
+import { MessagePayload, PoolStateResult } from "./_types";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -333,7 +333,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.MAINNET)
@@ -341,7 +340,6 @@ export const queries: Record<
   [CHAIN_IDs.OPTIMISM]: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
       getProvider(CHAIN_IDs.OPTIMISM),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -355,7 +353,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.POLYGON)
@@ -363,7 +360,6 @@ export const queries: Record<
   [CHAIN_IDs.ARBITRUM]: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
       getProvider(CHAIN_IDs.ARBITRUM),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -377,7 +373,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.ZK_SYNC)
@@ -385,7 +380,6 @@ export const queries: Record<
   [CHAIN_IDs.BASE]: () =>
     new sdk.relayFeeCalculator.BaseQueries(
       getProvider(CHAIN_IDs.BASE),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -400,7 +394,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.GOERLI)
@@ -408,7 +401,6 @@ export const queries: Record<
   [CHAIN_IDs.ARBITRUM_GOERLI]: () =>
     new sdk.relayFeeCalculator.ArbitrumGoerliQueries(
       getProvider(CHAIN_IDs.ARBITRUM_GOERLI),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -422,7 +414,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.ZK_SYNC_GOERLI)
@@ -430,7 +421,6 @@ export const queries: Record<
   [CHAIN_IDs.BASE_GOERLI]: () =>
     new sdk.relayFeeCalculator.BaseGoerliQueries(
       getProvider(CHAIN_IDs.BASE_GOERLI),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -492,22 +482,43 @@ export const getTokenSymbol = (tokenAddress: string): string => {
  * @param tokenPrice An optional overred price to prevent the SDK from creating its own call
  * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
  */
-export const getRelayerFeeDetails = (
+export const getRelayerFeeDetails = async (
   l1Token: string,
   amount: sdk.utils.BigNumberish,
   originChainId: number,
   destinationChainId: number,
-  tokenPrice?: number
+  tokenPrice?: number,
+  messagePayload?: MessagePayload
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
-  return relayFeeCalculator.relayerFeeDetails(
-    amount,
-    tokenSymbol,
-    tokenPrice,
-    originChainId.toString(),
-    destinationChainId.toString()
-  );
+  try {
+    return await relayFeeCalculator.relayerFeeDetails(
+      amount,
+      tokenSymbol,
+      String(originChainId),
+      String(destinationChainId),
+      messagePayload,
+      tokenPrice
+    );
+  } catch (_e: unknown) {
+    const e = _e as Error;
+    // If the error is due to a specific number of erroneous inputs,
+    // we can propagate the error to the user as a 4xx.
+    if (e.message.includes("Could not simulate message fill.")) {
+      throw new InputError(e.message);
+    } else {
+      // Otherwise, we throw a 500.
+      throw new Error(
+        `Could not process relayer fee details.
+      ${
+        sdk.utils.isDefined(messagePayload)
+          ? " The likely cause is related to message payload."
+          : ""
+      }`
+      );
+    }
+  }
 };
 
 /**

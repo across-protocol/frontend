@@ -3,3 +3,9 @@ export type PoolStateResult = {
   exchangeRateCurrent: string;
   totalPoolSize: string;
 };
+
+export type MessagePayload = {
+  message: string;
+  recipientAddress: string;
+  relayerAddress?: string;
+};
