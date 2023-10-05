@@ -503,10 +503,18 @@ const PoolSS = superstruct.object({
   tokenSymbol: superstruct.string(),
   isNative: superstruct.boolean(),
 });
+const EnabledSpokePoolVerifierSS = superstruct.object({
+  chain: superstruct.number(),
+  address: superstruct.string(),
+});
+const EnabledSpokePoolVerifiersSS = superstruct.array(
+  EnabledSpokePoolVerifierSS
+);
 const PoolsSS = superstruct.array(PoolSS);
 const RouteConfigSS = superstruct.type({
   routes: RoutesSS,
   pools: PoolsSS,
+  enabledSpokePoolVerifiers: EnabledSpokePoolVerifiersSS,
   hubPoolWethAddress: superstruct.string(),
   hubPoolChain: superstruct.number(),
   hubPoolAddress: superstruct.string(),
@@ -520,6 +528,12 @@ export type Route = superstruct.Infer<typeof RouteSS>;
 export type Routes = superstruct.Infer<typeof RoutesSS>;
 export type Pool = superstruct.Infer<typeof PoolSS>;
 export type Pools = superstruct.Infer<typeof PoolsSS>;
+export type EnabledSpokePoolVerifier = superstruct.Infer<
+  typeof EnabledSpokePoolVerifierSS
+>;
+export type EnabledSpokePoolVerifiers = superstruct.Infer<
+  typeof EnabledSpokePoolVerifiersSS
+>;
 export function getRoutes(chainId: ChainId): RouteConfig {
   if (chainId === ChainId.MAINNET) {
     superstruct.assert(MainnetRoutes, RouteConfigSS);

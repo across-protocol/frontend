@@ -34,10 +34,12 @@ export class ConfigClient {
   public readonly spokeChains: Set<number> = new Set();
   public readonly fromChains: Set<number> = new Set();
   public readonly toChains: Set<number> = new Set();
+  public readonly enabledSpokePoolVerifierChains: Set<number> = new Set();
   public tokenOrder: Record<string, number> = {};
   public chainOrder: Record<string, number> = {};
   public routes: constants.Routes = [];
   public pools: constants.Pools = [];
+  public enabledSpokePoolVerifiers: constants.EnabledSpokePoolVerifiers = [];
   constructor(
     private config: constants.RouteConfig,
     private disabledTokens: string[] = []
@@ -71,8 +73,12 @@ export class ConfigClient {
         this.tokenOrder[route.fromTokenSymbol] + this.chainOrder[route.toChain]
       );
     });
-    // prioritize routes based on token symbol and tochain. This just gives us better route prioritization when filtering a fromChain
     this.pools = this.config.pools;
+    this.enabledSpokePoolVerifiers =
+      this.config.enabledSpokePoolVerifiers || [];
+    this.enabledSpokePoolVerifierChains = new Set(
+      this.enabledSpokePoolVerifiers.map(({ chain }) => chain)
+    );
   }
   getWethAddress(): string {
     return this.config.hubPoolWethAddress;
@@ -104,6 +110,21 @@ export class ConfigClient {
     const address = this.getSpokePoolAddress(chainId);
     const provider = signer ?? providerUtils.getProvider(chainId);
     return SpokePool__factory.connect(address, provider);
+  }
+  getSpokePoolVerifierAddress(chainId: constants.ChainId): string {
+    const enabledSpokePoolVerifier = this.enabledSpokePoolVerifiers.find(
+      ({ chain }) => chain === chainId
+    );
+    assert(
+      enabledSpokePoolVerifier,
+      "SpokePoolVerifier not supported on chain: " + chainId
+    );
+    return enabledSpokePoolVerifier.address;
+  }
+  getSpokePoolVerifier(chainId: constants.ChainId, signer?: Signer): SpokePool {
+    const address = this.getSpokePoolVerifierAddress(chainId);
+    const provider = signer ?? providerUtils.getProvider(chainId);
+    return SpokePool__factory.connect(address, provider); // TODO: Use SpokePoolVerifier when new contracts-v2 package is released
   }
   getHubPoolChainId(): constants.ChainId {
     return this.config.hubPoolChain;
