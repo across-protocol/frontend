@@ -1,4 +1,3 @@
-import { TransferStatus } from "@across-protocol/sdk-v2/dist/transfers-history";
 import { BigNumber, BigNumberish, utils } from "ethers";
 import {
   capitalizeFirstLetter,
@@ -7,9 +6,10 @@ import {
   suggestedFeesDeviationBufferMultiplier,
 } from "utils";
 import { TableCell } from "../TransactionsTable.styles";
+import { transfersHistory } from "@across-protocol/sdk-v2";
 
 type Props = {
-  status: TransferStatus;
+  status: transfersHistory.TransferStatus;
   currentRelayerFeePct: BigNumberish;
   suggestedRelayerFeePct?: BigNumberish;
   enableSpeedUp?: boolean;

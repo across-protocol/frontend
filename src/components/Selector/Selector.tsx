@@ -26,6 +26,7 @@ export type SelectorPropType<Value> = {
   displayElement?: JSX.Element;
   disabled?: boolean;
   "data-cy"?: string;
+  allowSelectDisabled?: boolean;
 };
 
 const Selector = <ElementValue,>({
@@ -36,6 +37,7 @@ const Selector = <ElementValue,>({
   displayElement,
   disabled,
   "data-cy": dataCy,
+  allowSelectDisabled,
 }: SelectorPropType<ElementValue>) => {
   const { displayModal, setDisplayModal, selectedIndex, isMobile } =
     useSelector(elements, selectedValue);
@@ -79,14 +81,16 @@ const Selector = <ElementValue,>({
         <ElementRowWrapper enableScroll={elements.length > 7}>
           {elements.map((element, idx) => (
             <ElementRow
-              key={idx}
+              key={String(element.value)}
               onClick={() => {
-                if (element.disabled) return;
+                if (element.disabled && !allowSelectDisabled) {
+                  return;
+                }
                 setSelectedValue(element.value);
                 setDisplayModal(false);
               }}
               active={!element.disabled && selectedIndex === idx}
-              disabled={element.disabled}
+              disabled={element.disabled && !allowSelectDisabled}
             >
               <ElementSection disabled={element.disabled}>
                 {element.element}

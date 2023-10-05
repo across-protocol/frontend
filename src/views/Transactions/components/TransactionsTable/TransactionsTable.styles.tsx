@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
-import { QUERIES } from "utils";
+import { QUERIESV2 } from "utils";
 import {
   BaseTableWrapper,
   BaseWrapper,
@@ -56,7 +56,7 @@ export const HeadCell = styled(BaseHeadCell)`
 export const TableLogo = styled.img`
   height: 15px;
   margin-right: 4px;
-  @media ${QUERIES.tabletAndDown} {
+  @media ${QUERIESV2.tb.andDown} {
     margin-left: 16px;
   }
 `;
@@ -139,7 +139,7 @@ export const PaginationWrapper = styled.div`
   max-width: 1425px;
   margin: auto;
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm.andDown} {
     padding: 0 ${20 / 16}rem;
   }
 `;

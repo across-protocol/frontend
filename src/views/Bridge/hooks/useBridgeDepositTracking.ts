@@ -1,6 +1,6 @@
 import { useConnection } from "hooks";
 import { useCallback, useEffect, useState } from "react";
-import { formatMilliseconds, getChainInfo } from "utils";
+import { formatSeconds, getChainInfo } from "utils";
 
 export function useBridgeDepositTracking() {
   const [txHash, setTxHash] = useState<string | undefined>(undefined);
@@ -22,7 +22,7 @@ export function useBridgeDepositTracking() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [txHash]);
 
-  const onTransactionCompleted = (success: boolean) => {
+  const handleTransactionCompleted = (success: boolean) => {
     setDepositFinishedDate(success ? new Date() : undefined);
   };
 
@@ -44,28 +44,25 @@ export function useBridgeDepositTracking() {
   }, [startDate, depositFinishedDate]);
 
   const trackingTxHash = !!txHash;
-  const elapsedTimeAsFormattedString = formatMilliseconds(
-    Math.floor((elapsedSeconds ?? 0) * 1000)
+  const elapsedTimeAsFormattedString = formatSeconds(
+    Math.floor(elapsedSeconds ?? 0)
   );
 
   const depositFinished = !!depositFinishedDate;
 
-  const onTxHashChange = useCallback(
-    (txHash?: string) => {
-      setTxHash(txHash);
-      setDepositFinishedDate(undefined);
-    },
-    [setTxHash, setDepositFinishedDate]
-  );
+  const handleTxHashChange = useCallback((txHash?: string) => {
+    setTxHash(txHash);
+    setDepositFinishedDate(undefined);
+  }, []);
 
   return {
     txHash,
-    onTxHashChange,
+    handleTxHashChange,
     explorerUrl,
     trackingTxHash,
     transactionPending: !depositFinished,
     transactionElapsedSeconds: elapsedSeconds,
     transactionElapsedTimeAsFormattedString: elapsedTimeAsFormattedString,
-    txCompletedHandler: onTransactionCompleted,
+    handleTransactionCompleted,
   };
 }

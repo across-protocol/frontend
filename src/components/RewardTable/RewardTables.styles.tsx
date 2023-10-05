@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { SecondaryButtonWithoutShadow } from "components/Buttons";
 import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
-import { QUERIES } from "utils";
+import { QUERIESV2 } from "utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { ReactComponent as ETHLogo } from "assets/eth.svg";
@@ -157,7 +157,7 @@ export const PaginationWrapper = styled.div`
   max-width: 1425px;
   margin: auto;
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.tb.andDown} {
     padding: 0 ${20 / 16}rem;
   }
 `;

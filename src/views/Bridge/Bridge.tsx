@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { LayoutV2, WrongNetworkHeader } from "components";
 import { Wrapper } from "./Bridge.styles";
 import Breadcrumb from "./components/Breadcrumb";
@@ -7,18 +9,10 @@ import DepositConfirmation from "./components/DepositConfirmation";
 import { useBridge } from "./hooks/useBridge";
 
 const Bridge = () => {
+  const [displayChangeAccount, setDisplayChangeAccount] = useState(false);
+
   const {
-    availableTokens,
-    currentToken,
-    setCurrentToken,
-    setAmountToBridge,
-    currentBalance,
-    currentFromRoute,
-    setCurrentFromRoute,
-    availableFromRoutes,
-    availableToRoutes,
-    currentToRoute,
-    setCurrentToRoute,
+    selectedRoute,
     handleQuickSwap,
     isConnected,
     isWrongChain,
@@ -27,31 +21,28 @@ const Bridge = () => {
     buttonLabel,
     isBridgeDisabled,
     fees,
+    balance,
+    amountValidationError,
+    userAmountInput,
     amountToBridge,
-    estimatedTime,
-    displayChangeAccount,
-    setDisplayChangeAccount,
+    estimatedTimeString,
     toAccount,
     setCustomToAddress,
     trackingTxHash,
     transactionPending,
-    onTxHashChange,
+    handleClickNewTx,
     explorerUrl,
     transactionElapsedTimeAsFormattedString,
-    amountTooLow,
-    walletAccount,
-    disableQuickSwap,
-    setIsBridgeAmountValid,
-    allFromRoutes,
-    allToRoutes,
-    isLiquidityFromAountExceeded,
-    setIsLiquidityFromAountExceeded,
+    handleChangeAmountInput,
+    handleClickMaxBalance,
+    handleSelectToken,
+    handleSelectFromChain,
+    handleSelectToChain,
   } = useBridge();
+
   return (
     <>
-      {currentFromRoute && (
-        <WrongNetworkHeader requiredChainId={currentFromRoute} />
-      )}
+      <WrongNetworkHeader requiredChainId={selectedRoute.fromChain} />
       {toAccount && (
         <ChangeAccountModal
           displayModal={displayChangeAccount}
@@ -65,53 +56,42 @@ const Bridge = () => {
           <Breadcrumb />
           {trackingTxHash ? (
             <DepositConfirmation
-              currentFromRoute={currentFromRoute}
-              currentToRoute={currentToRoute}
+              currentFromRoute={selectedRoute.fromChain}
+              currentToRoute={selectedRoute.toChain}
               fees={fees}
               amountToBridge={amountToBridge}
-              currentToken={currentToken}
-              estimatedTime={estimatedTime}
+              currentToken={selectedRoute.fromTokenSymbol}
+              estimatedTime={estimatedTimeString}
               isConnected={isConnected}
               transactionPending={transactionPending}
-              onTxHashChange={onTxHashChange}
+              onClickNewTx={handleClickNewTx}
               explorerLink={explorerUrl}
               elapsedTimeFromDeposit={transactionElapsedTimeAsFormattedString}
               toAccount={toAccount}
             />
           ) : (
             <BridgeForm
-              availableTokens={availableTokens}
-              currentToken={currentToken}
-              setCurrentToken={setCurrentToken}
-              setAmountToBridge={setAmountToBridge}
-              currentBalance={currentBalance}
-              currentFromRoute={currentFromRoute}
-              setCurrentFromRoute={setCurrentFromRoute}
-              availableFromRoutes={availableFromRoutes}
-              allFromRoutes={allFromRoutes}
-              availableToRoutes={availableToRoutes}
-              allToRoutes={allToRoutes}
-              currentToRoute={currentToRoute}
-              setCurrentToRoute={setCurrentToRoute}
-              handleQuickSwap={handleQuickSwap}
-              isWrongChain={isWrongChain}
-              handleChainSwitch={handleChainSwitch}
+              selectedRoute={selectedRoute}
+              amountToBridge={amountToBridge}
+              amountInput={userAmountInput}
+              toAccount={toAccount}
+              onChangeAmountInput={handleChangeAmountInput}
+              onClickMaxBalance={handleClickMaxBalance}
+              onSelectToken={handleSelectToken}
+              onSelectFromChain={handleSelectFromChain}
+              onSelectToChain={handleSelectToChain}
+              onClickQuickSwap={handleQuickSwap}
+              onClickChainSwitch={handleChainSwitch}
+              onClickActionButton={buttonActionHandler}
+              onClickChangeToAddress={() => setDisplayChangeAccount(true)}
+              fees={fees}
+              estimatedTimeString={estimatedTimeString}
               isConnected={isConnected}
-              buttonActionHandler={buttonActionHandler}
+              isWrongChain={isWrongChain}
               buttonLabel={buttonLabel}
               isBridgeDisabled={isBridgeDisabled}
-              fees={fees}
-              amountToBridge={amountToBridge}
-              estimatedTime={estimatedTime}
-              displayChangeAccount={displayChangeAccount}
-              setDisplayChangeAccount={setDisplayChangeAccount}
-              toAccount={toAccount}
-              amountTooLow={amountTooLow}
-              walletAccount={walletAccount}
-              disableQuickSwap={disableQuickSwap}
-              setIsBridgeAmountValid={setIsBridgeAmountValid}
-              setIsLiquidityFromAountExceeded={setIsLiquidityFromAountExceeded}
-              isLiquidityFromAountExceeded={isLiquidityFromAountExceeded}
+              validationError={amountValidationError}
+              balance={balance}
             />
           )}
         </Wrapper>

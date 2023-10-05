@@ -1,32 +1,38 @@
-import {
-  HubPool__factory,
-  ERC20__factory,
-  SpokePool__factory,
-  SpokePool,
-} from "@across-protocol/contracts-v2/dist/typechain";
 import { AcceleratingDistributor__factory } from "@across-protocol/across-token/dist/typechain";
-import axios from "axios";
+import {
+  ERC20__factory,
+  HubPool__factory,
+  SpokePool,
+  SpokePool__factory,
+} from "@across-protocol/contracts-v2/dist/typechain";
 import * as sdk from "@across-protocol/sdk-v2";
-import { BigNumber, ethers, providers, utils } from "ethers";
+import { BALANCER_NETWORK_CONFIG, BalancerSDK } from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
-import { define, StructError } from "superstruct";
-import { BalancerSDK, BALANCER_NETWORK_CONFIG } from "@balancer-labs/sdk";
+import axios from "axios";
+import { BigNumber, ethers, providers, utils } from "ethers";
+import { StructError, define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
 
 import {
+  MINIMAL_BALANCER_V2_POOL_ABI,
+  MINIMAL_BALANCER_V2_VAULT_ABI,
+  MINIMAL_MULTICALL3_ABI,
+} from "./_abis";
+
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
+import { VercelResponse } from "@vercel/node";
+import {
+  CHAIN_IDs,
+  MULTICALL3_ADDRESS,
+  DEFI_LLAMA_POOL_LOOKUP,
+  EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
+  SECONDS_PER_YEAR,
+  TOKEN_SYMBOLS_MAP,
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
-  EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
-  TOKEN_SYMBOLS_MAP,
-  CHAIN_IDS,
-  SECONDS_PER_YEAR,
-  DEFI_LLAMA_POOL_LOOKUP,
 } from "./_constants";
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
-import QueryBase from "@across-protocol/sdk-v2/dist/relayFeeCalculator/chain-queries/baseQuery";
-import { VercelResponse } from "@vercel/node";
 import { PoolStateResult } from "./_types";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
@@ -35,14 +41,14 @@ const {
   REACT_APP_HUBPOOL_CHAINID,
   REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
-  REACT_APP_GOOGLE_SERVICE_ACCOUNT,
+  GOOGLE_SERVICE_ACCOUNT: _GOOGLE_SERVICE_ACCOUNT,
   VERCEL_ENV,
   GAS_MARKUP,
   DISABLE_DEBUG_LOGS,
 } = process.env;
 
-const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
-  ? JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT)
+const GOOGLE_SERVICE_ACCOUNT = _GOOGLE_SERVICE_ACCOUNT
+  ? JSON.parse(_GOOGLE_SERVICE_ACCOUNT)
   : {};
 
 export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
@@ -273,8 +279,7 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
     1: {
       chainId: 1,
       hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
-      wethAddress:
-        TOKEN_SYMBOLS_MAP.WETH.addresses[sdk.constants.CHAIN_IDs.MAINNET],
+      wethAddress: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.MAINNET],
       configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
       acceleratingDistributorAddress:
         "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
@@ -283,8 +288,7 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
     5: {
       chainId: 5,
       hubPoolAddress: "0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d",
-      wethAddress:
-        TOKEN_SYMBOLS_MAP.WETH.addresses[sdk.constants.CHAIN_IDs.GOERLI],
+      wethAddress: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.GOERLI],
       configStoreAddress: "0x3215e3C91f87081757d0c41EF0CB77738123Be83",
       acceleratingDistributorAddress:
         "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC",
@@ -319,117 +323,120 @@ export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
-export const queries: Record<number, () => QueryBase> = {
-  [CHAIN_IDS.MAINNET]: () =>
+export const queries: Record<
+  number,
+  () => sdk.relayFeeCalculator.QueryInterface
+> = {
+  [CHAIN_IDs.MAINNET]: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      getProvider(CHAIN_IDS.MAINNET),
+      getProvider(CHAIN_IDs.MAINNET),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.MAINNET)
+      getGasMarkup(CHAIN_IDs.MAINNET)
     ),
-  [CHAIN_IDS.OPTIMISM]: () =>
+  [CHAIN_IDs.OPTIMISM]: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
-      getProvider(CHAIN_IDS.OPTIMISM),
+      getProvider(CHAIN_IDs.OPTIMISM),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.OPTIMISM)
+      getGasMarkup(CHAIN_IDs.OPTIMISM)
     ),
-  [CHAIN_IDS.POLYGON]: () =>
+  [CHAIN_IDs.POLYGON]: () =>
     new sdk.relayFeeCalculator.PolygonQueries(
-      getProvider(CHAIN_IDS.POLYGON),
+      getProvider(CHAIN_IDs.POLYGON),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.POLYGON)
+      getGasMarkup(CHAIN_IDs.POLYGON)
     ),
-  [CHAIN_IDS.ARBITRUM]: () =>
+  [CHAIN_IDs.ARBITRUM]: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
-      getProvider(CHAIN_IDS.ARBITRUM),
+      getProvider(CHAIN_IDs.ARBITRUM),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.ARBITRUM)
+      getGasMarkup(CHAIN_IDs.ARBITRUM)
     ),
-  [CHAIN_IDS.ZK_SYNC]: () =>
+  [CHAIN_IDs.ZK_SYNC]: () =>
     new sdk.relayFeeCalculator.ZkSyncQueries(
-      getProvider(CHAIN_IDS.ZK_SYNC),
+      getProvider(CHAIN_IDs.ZK_SYNC),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.ZK_SYNC)
+      getGasMarkup(CHAIN_IDs.ZK_SYNC)
     ),
-  [CHAIN_IDS.BASE]: () =>
+  [CHAIN_IDs.BASE]: () =>
     new sdk.relayFeeCalculator.BaseQueries(
-      getProvider(CHAIN_IDS.BASE),
+      getProvider(CHAIN_IDs.BASE),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.BASE)
+      getGasMarkup(CHAIN_IDs.BASE)
     ),
   /* --------------------------- Testnet queries --------------------------- */
-  [CHAIN_IDS.GOERLI]: () =>
+  [CHAIN_IDs.GOERLI]: () =>
     new sdk.relayFeeCalculator.EthereumGoerliQueries(
-      getProvider(CHAIN_IDS.GOERLI),
+      getProvider(CHAIN_IDs.GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.GOERLI)
+      getGasMarkup(CHAIN_IDs.GOERLI)
     ),
-  [CHAIN_IDS.ARBITRUM_GOERLI]: () =>
+  [CHAIN_IDs.ARBITRUM_GOERLI]: () =>
     new sdk.relayFeeCalculator.ArbitrumGoerliQueries(
-      getProvider(CHAIN_IDS.ARBITRUM_GOERLI),
+      getProvider(CHAIN_IDs.ARBITRUM_GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.ARBITRUM_GOERLI)
+      getGasMarkup(CHAIN_IDs.ARBITRUM_GOERLI)
     ),
-  [CHAIN_IDS.ZK_SYNC_GOERLI]: () =>
+  [CHAIN_IDs.ZK_SYNC_GOERLI]: () =>
     new sdk.relayFeeCalculator.zkSyncGoerliQueries(
-      getProvider(CHAIN_IDS.ZK_SYNC_GOERLI),
+      getProvider(CHAIN_IDs.ZK_SYNC_GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.ZK_SYNC_GOERLI)
+      getGasMarkup(CHAIN_IDs.ZK_SYNC_GOERLI)
     ),
-  [CHAIN_IDS.BASE_GOERLI]: () =>
+  [CHAIN_IDs.BASE_GOERLI]: () =>
     new sdk.relayFeeCalculator.BaseGoerliQueries(
-      getProvider(CHAIN_IDS.BASE_GOERLI),
+      getProvider(CHAIN_IDs.BASE_GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.BASE_GOERLI)
+      getGasMarkup(CHAIN_IDs.BASE_GOERLI)
     ),
 };
 
@@ -555,7 +562,7 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
-    case CHAIN_IDS.ARBITRUM_GOERLI:
+    case CHAIN_IDs.ARBITRUM_GOERLI:
       return "0xD29C85F15DF544bA632C9E25829fd29d767d7978";
     default:
       return sdk.utils.getDeployedAddress("SpokePool", chainId);
@@ -824,7 +831,9 @@ export async function getPoolState(
   externalPoolProvider?: string
 ): Promise<PoolStateResult> {
   const resolvedAddress = ethers.utils.getAddress(tokenAddress);
-  if (DEFI_LLAMA_POOL_LOOKUP[resolvedAddress] !== undefined) {
+  if (externalPoolProvider === "balancer") {
+    return getExternalPoolState(tokenAddress, externalPoolProvider);
+  } else if (DEFI_LLAMA_POOL_LOOKUP[resolvedAddress] !== undefined) {
     return getDefiLlamaPoolState(tokenAddress);
   } else {
     return getAcrossPoolState(tokenAddress);
@@ -906,6 +915,10 @@ async function getBalancerPoolState(poolTokenAddress: string) {
 
   const apr = await balancer.pools.apr(pool);
 
+  // We want to include the swap fees & the underlying token
+  // APRs in the APY calculation.
+  const apyEstimated = (apr.swapFees + apr.tokenAprs.total) / 10_000;
+
   return {
     // The Balancer SDK returns percentages as follows:
     // 23% (0.23) as 2300
@@ -913,7 +926,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
     // etc. So we divide by 10_000 to get the actual percentage.
     //
     // Additionally, we receive a potential range of APRs, so we take the average.
-    estimatedApy: Number((apr.max + apr.min) / 2 / 10_000).toFixed(2),
+    estimatedApy: apyEstimated.toFixed(3),
     exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE.toString(),
     totalPoolSize: pool.totalShares,
   };
@@ -1047,4 +1060,110 @@ export function getBaseRewardsApr(
   return rewardsPerYearInUSD
     .mul(sdk.utils.fixedPointAdjustment)
     .div(totalStakedInUSD);
+}
+
+/**
+ * Makes a series of read calls via multicall3 (so they only hit the provider once).
+ * @param provider Provider to use for the calls.
+ * @param calls the calls to make via multicall3. Each call includes a contract, function name, and args, so that
+ * this function can encode them correctly.
+ * @returns An array of the decoded results in the same order that they were passed in.
+ */
+export async function callViaMulticall3(
+  provider: ethers.providers.JsonRpcProvider,
+  calls: {
+    contract: ethers.Contract;
+    functionName: string;
+    args?: any[];
+  }[]
+): Promise<ethers.utils.Result[]> {
+  const multicall3 = new ethers.Contract(
+    MULTICALL3_ADDRESS,
+    MINIMAL_MULTICALL3_ABI,
+    provider
+  );
+  const inputs = calls.map(({ contract, functionName, args }) => ({
+    target: contract.address,
+    callData: contract.interface.encodeFunctionData(functionName, args),
+  }));
+
+  const [, results] = await (multicall3.callStatic.aggregate(inputs) as Promise<
+    [BigNumber, string[]]
+  >);
+  return results.map((result, i) =>
+    calls[i].contract.interface.decodeFunctionResult(
+      calls[i].functionName,
+      result
+    )
+  );
+}
+
+/**
+ * This gets a balancer v2 token price by querying the vault contract for the tokens and balances, and then
+ * querying coingecko for the prices of those tokens.
+ * @param tokenAddress The address of the balancer v2 token.
+ * @param chainId The chain id where the token exists.
+ */
+export async function getBalancerV2TokenPrice(
+  tokenAddress: string,
+  chainId = 1
+) {
+  const provider = getProvider(chainId);
+  const pool = new ethers.Contract(
+    tokenAddress,
+    MINIMAL_BALANCER_V2_POOL_ABI,
+    provider
+  );
+
+  const [[vaultAddress], [poolId], [totalSupply]] = await callViaMulticall3(
+    provider,
+    [
+      {
+        contract: pool,
+        functionName: "getVault",
+      },
+      {
+        contract: pool,
+        functionName: "getPoolId",
+      },
+      {
+        contract: pool,
+        functionName: "totalSupply",
+      },
+    ]
+  );
+
+  const vault = new ethers.Contract(
+    vaultAddress,
+    MINIMAL_BALANCER_V2_VAULT_ABI,
+    provider
+  );
+
+  const { tokens, balances } = (await vault.getPoolTokens(poolId)) as {
+    tokens: string[];
+    balances: BigNumber[];
+  };
+
+  const tokenValues = await Promise.all(
+    tokens.map(async (token: string, i: number): Promise<number> => {
+      const tokenContract = ERC20__factory.connect(token, provider);
+      const [price, decimals] = await Promise.all([
+        getCachedTokenPrice(token, "usd"),
+        tokenContract.decimals(),
+      ]);
+      const balance = parseFloat(
+        ethers.utils.formatUnits(balances[i], decimals)
+      );
+      return balance * price;
+    })
+  );
+
+  const totalValue = tokenValues.reduce((a, b) => a + b, 0);
+
+  // Balancer v2 tokens have 18 decimals.
+  const floatTotalSupply = parseFloat(
+    ethers.utils.formatUnits(totalSupply, 18)
+  );
+
+  return Number((totalValue / floatTotalSupply).toFixed(18));
 }

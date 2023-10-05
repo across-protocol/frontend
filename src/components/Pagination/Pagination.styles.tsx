@@ -1,7 +1,7 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { BaseButton } from "components/Buttons";
-import { QUERIES } from "utils";
+import { QUERIESV2 } from "utils";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
 
 export const Wrapper = styled.div`
@@ -10,16 +10,16 @@ export const Wrapper = styled.div`
   width: 100%;
   padding: ${16 / 16}rem ${16 / 16}rem 0;
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm.andDown} {
     flex-direction: column;
-    align-items: flex-end;
+    align-items: center;
   }
 `;
 
 export const PageSizeSelectWrapper = styled.div`
   position: relative;
 
-  @media ${QUERIES.mobileAndDown} {
+  @media ${QUERIESV2.sm.andDown} {
     margin-bottom: 1rem;
   }
 `;
@@ -90,7 +90,24 @@ export const PaginationElements = styled.div`
   align-items: center;
   justify-content: right;
   gap: 6px;
-  font-weight: 500;
+
+  @media ${QUERIESV2.sm.andDown} {
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+`;
+
+export const PageNumbersWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+`;
+
+export const PrevNextWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
 `;
 
 interface IElementWrapper {
@@ -98,12 +115,12 @@ interface IElementWrapper {
 }
 
 export const ElementWrapper = styled.div<IElementWrapper>`
-  min-width: 40px;
-  padding: 8px 14px;
-  font-size: ${16 / 16}rem;
-  line-height: ${20 / 16}rem;
-  font-weight: 500;
-  color: #e0f3ff;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   border: ${({ active }) =>
     active ? "1px solid #ffffff" : "1px solid var(--color-pagination)"};
@@ -113,6 +130,11 @@ export const ElementWrapper = styled.div<IElementWrapper>`
 
   :hover {
     opacity: 0.8;
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    min-width: 28px;
+    min-height: 28px;
   }
 `;
 

@@ -2,7 +2,13 @@ import styled from "@emotion/styled";
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
 import { Text } from "components";
 import { ReactComponent as CheckStarIcon } from "assets/check-star-ring-opaque-filled.svg";
-import { ChainId, GetBridgeFeesResult, getToken, receiveAmount } from "utils";
+import {
+  ChainId,
+  GetBridgeFeesResult,
+  QUERIESV2,
+  getToken,
+  receiveAmount,
+} from "utils";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-external-link-16.svg";
 import EstimatedTable from "./EstimatedTable";
 import { BigNumber } from "ethers";
@@ -29,7 +35,7 @@ type DepositConfirmationProps = {
 
   isConnected: boolean;
   transactionPending: boolean;
-  onTxHashChange: (txHash?: string) => void;
+  onClickNewTx: () => void;
 
   explorerLink?: string;
   elapsedTimeFromDeposit?: string;
@@ -62,7 +68,7 @@ const DepositConfirmation = ({
   estimatedTime,
   isConnected,
   transactionPending,
-  onTxHashChange,
+  onClickNewTx,
   explorerLink: _explorerLink,
   elapsedTimeFromDeposit,
 }: DepositConfirmationProps) => {
@@ -141,7 +147,8 @@ const DepositConfirmation = ({
         </ActionCard>
       </ActionCardContainer>
       <EstimatedTable
-        chainId={currentToRoute ?? 1}
+        fromChainId={currentFromRoute ?? 1}
+        toChainId={currentToRoute ?? 1}
         estimatedTime={estimatedTime}
         gasFee={fees?.relayerGasFee.total}
         bridgeFee={
@@ -165,12 +172,7 @@ const DepositConfirmation = ({
         )}
       />
       <Divider />
-      <Button
-        disabled={transactionPending}
-        onClick={() => {
-          onTxHashChange(undefined);
-        }}
-      >
+      <Button disabled={transactionPending} onClick={onClickNewTx}>
         <Text
           size="lg"
           color={!transactionPending ? "aqua" : "white"}
@@ -255,6 +257,11 @@ const StyledCheckStarIcon = styled(CheckStarIcon)<{ completed?: boolean }>`
     transition: stroke 0.5s ease-in-out;
   }
   flex-shrink: 0;
+
+  @media ${QUERIESV2.sm.andDown} {
+    width: 52px;
+    height: 52px;
+  }
 `;
 
 const AnimatedDivider = styled.div<{ completed?: boolean }>`
@@ -285,6 +292,11 @@ const AnimatedLogoWrapper = styled.div<{ completed?: boolean }>`
   border-radius: 100px;
 
   flex-shrink: 0;
+
+  @media ${QUERIESV2.sm.andDown} {
+    width: 40px;
+    height: 40px;
+  }
 `;
 
 const ActionCardContainer = styled.div`
@@ -294,6 +306,10 @@ const ActionCardContainer = styled.div`
   padding: 0px;
   gap: 16px;
   width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: column;
+  }
 `;
 
 const ActionCard = styled.div`
@@ -377,6 +393,16 @@ const AnimatedLogo = styled.div<{
     #path-to-animate {
       transition: fill 1s ease-in-out;
       fill: ${({ completed }) => (completed ? "#6cf9d8" : "#9daab3")};
+    }
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    width: 32px;
+    height: 32px;
+
+    & svg {
+      width: 32px;
+      height: 32px;
     }
   }
 `;

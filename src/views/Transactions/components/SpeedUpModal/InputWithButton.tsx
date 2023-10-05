@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import styled from "@emotion/styled";
 
+import { QUERIESV2 } from "utils";
+import { Text } from "components/Text";
+
 type Props = React.HTMLProps<HTMLInputElement> & {
   label?: string;
   error?: string;
@@ -20,7 +23,11 @@ export function InputWithButton({
   return (
     <Container>
       <InputContainer>
-        {label && <label>{label}</label>}
+        {label && (
+          <label>
+            <Text>{label}</Text>
+          </label>
+        )}
         <InputWithButtonContainer
           isInputFocused={isInputFocused}
           hasError={Boolean(error)}
@@ -39,7 +46,11 @@ export function InputWithButton({
           {Button && Button}
         </InputWithButtonContainer>
       </InputContainer>
-      {error && <ErrorContainer>{error}</ErrorContainer>}
+      {error && (
+        <ErrorContainer>
+          <Text color="error">{error}</Text>
+        </ErrorContainer>
+      )}
     </Container>
   );
 }
@@ -52,11 +63,10 @@ const InputContainer = styled.div`
   align-items: center;
   gap: 16px;
 
-  label {
-    font-weight: 400;
-    font-size: ${18 / 16}rem;
-    line-height: ${26 / 16}rem;
-    color: #9daab2;
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: column;
+    align-items: start;
+    gap: 8px;
   }
 `;
 
@@ -79,7 +89,11 @@ const InputWithButtonContainer = styled.div<{
   gap: 16px;
 
   color: #9daab2;
-  font-weight: 400;
+
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: column;
+    width: 100%;
+  }
 
   input {
     flex: 1;
@@ -91,6 +105,10 @@ const InputWithButtonContainer = styled.div<{
     border: none;
     outline: none;
     background: transparent;
+
+    @media ${QUERIESV2.sm.andDown} {
+      width: 100%;
+    }
   }
 
   button {
@@ -117,13 +135,15 @@ const InputWithButtonContainer = styled.div<{
 `;
 
 const ErrorContainer = styled.div`
-  color: #f96c6c;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 14px;
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
   padding: 8px 16px;
+
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: column;
+    align-items: end;
+    padding: 8px 0px;
+  }
 `;

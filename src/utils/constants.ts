@@ -1,6 +1,7 @@
 import assert from "assert";
 import { ethers, providers } from "ethers";
-import { constants, utils } from "@across-protocol/sdk-v2";
+import { utils } from "@across-protocol/sdk-v2";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants-v2";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
@@ -30,18 +31,18 @@ import GoerliRoutes from "data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD
 
 /* Chains and Tokens section */
 export enum ChainId {
-  MAINNET = constants.CHAIN_IDs.MAINNET,
-  OPTIMISM = constants.CHAIN_IDs.OPTIMISM,
-  ARBITRUM = constants.CHAIN_IDs.ARBITRUM,
-  POLYGON = constants.CHAIN_IDs.POLYGON,
-  ZK_SYNC = constants.CHAIN_IDs.ZK_SYNC,
-  BASE = constants.CHAIN_IDs.BASE,
+  MAINNET = CHAIN_IDs.MAINNET,
+  OPTIMISM = CHAIN_IDs.OPTIMISM,
+  ARBITRUM = CHAIN_IDs.ARBITRUM,
+  POLYGON = CHAIN_IDs.POLYGON,
+  ZK_SYNC = CHAIN_IDs.ZK_SYNC,
+  BASE = CHAIN_IDs.BASE,
   // testnets
-  ARBITRUM_GOERLI = constants.CHAIN_IDs.ARBITRUM_GOERLI,
-  ZK_SYNC_GOERLI = constants.CHAIN_IDs.ZK_SYNC_GOERLI,
-  BASE_GOERLI = constants.CHAIN_IDs.BASE_GOERLI,
-  GOERLI = constants.CHAIN_IDs.GOERLI,
-  MUMBAI = constants.CHAIN_IDs.MUMBAI,
+  ARBITRUM_GOERLI = CHAIN_IDs.ARBITRUM_GOERLI,
+  ZK_SYNC_GOERLI = CHAIN_IDs.ZK_SYNC_GOERLI,
+  BASE_GOERLI = CHAIN_IDs.BASE_GOERLI,
+  GOERLI = CHAIN_IDs.GOERLI,
+  MUMBAI = CHAIN_IDs.MUMBAI,
 }
 
 // Maps `ChainId` to an object and inverts the Key/Value
@@ -315,6 +316,15 @@ export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
   ],
 };
 
+export const bridgedUSDCSymbolsMap = {
+  [ChainId.ARBITRUM]: "USDC.e",
+  [ChainId.OPTIMISM]: "USDC.e",
+  [ChainId.BASE]: "USDbC",
+};
+export const bridgedUSDCSymbols = Array.from(
+  new Set(Object.values(bridgedUSDCSymbolsMap)).values()
+);
+
 // Order of this map determines the order of the tokens in the token selector
 export const orderedTokenSymbolLogoMap = {
   ETH: ethereumLogo,
@@ -323,6 +333,7 @@ export const orderedTokenSymbolLogoMap = {
   WMATIC: polygonLogo,
   USDC: usdcLogo,
   "USDC.e": usdcLogo,
+  USDbC: usdcLogo,
   USDT: usdtLogo,
   DAI: daiLogo,
   WBTC: wbtcLogo,
@@ -336,24 +347,20 @@ export const orderedTokenSymbolLogoMap = {
 
 export const tokenList = [
   ...Object.entries(orderedTokenSymbolLogoMap).flatMap(([symbol, logoURI]) => {
-    // NOTE: Handle edge case for Arbitrum and USDC combination.
-    // We currently do not support native USDC on Arbitrum, only the bridged USDC.e token.
-    // Until we do, we need to add a special case for USDC.e to the token list.
-    if (symbol === "USDC.e") {
-      const usdcTokenInfo = constants.TOKEN_SYMBOLS_MAP.USDC;
+    // NOTE: Handle cases for bridged USDC such as USDC.e or USDbC.
+    if (bridgedUSDCSymbols.includes(symbol)) {
+      const usdcTokenInfo = TOKEN_SYMBOLS_MAP.USDC;
       return {
         ...usdcTokenInfo,
         logoURI,
-        symbol: "USDC.e",
-        displaySymbol: "USDC.e",
+        symbol,
+        displaySymbol: symbol,
         mainnetAddress: usdcTokenInfo.addresses[hubPoolChainId],
       };
     }
 
     const tokenInfo =
-      constants.TOKEN_SYMBOLS_MAP[
-        symbol as keyof typeof constants.TOKEN_SYMBOLS_MAP
-      ];
+      TOKEN_SYMBOLS_MAP[symbol as keyof typeof TOKEN_SYMBOLS_MAP];
 
     if (!tokenInfo) {
       return [];
@@ -475,7 +482,7 @@ export const getToken = (symbol: string): TokenInfo => {
  * @returns The token info for the token with the given address
  */
 export const getTokenByAddress = (address: string): TokenInfo => {
-  const token = Object.values(constants.TOKEN_SYMBOLS_MAP).find((token) =>
+  const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
     Object.values(token.addresses).includes(address)
   );
   assert(token, "No token found for address: " + address);

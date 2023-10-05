@@ -1,5 +1,7 @@
 import styled from "@emotion/styled";
 
+import { QUERIESV2 } from "utils";
+
 export const BaseWrapper = styled.div`
   margin: auto;
 `;
@@ -11,7 +13,7 @@ export const BaseTitle = styled.h2`
   line-height: ${26 / 16}rem;
   font-weight: 400;
 
-  @media (max-width: 428px) {
+  @media ${QUERIESV2.tb.andDown} {
     font-size: ${16 / 16}rem;
     line-height: ${20 / 16}rem;
   }
@@ -21,6 +23,7 @@ export const BaseTableWrapper = styled.div<{ scrollable?: boolean }>`
   border: 1px solid #3e4047;
   border-radius: 8px;
   overflow-x: ${({ scrollable }) => (scrollable ? "auto" : "hidden")};
+  overscroll-behavior-x: none;
 
   ::-webkit-scrollbar {
     height: 0;
@@ -61,7 +64,7 @@ export const BaseTableCell = styled.div`
   white-space: nowrap;
   background-color: #2d2e33;
 
-  @media (max-width: 428px) {
+  @media ${QUERIESV2.tb.andDown} {
     padding: ${13 / 16}rem 0 ${13 / 16}rem ${12 / 16}rem;
     font-size: ${14 / 16}rem;
     line-height: ${18 / 16}rem;
@@ -74,7 +77,7 @@ export const BaseHeadCell = styled(BaseTableCell)`
   background-color: #34353b;
   border: none;
 
-  @media (max-width: 428px) {
+  @media ${QUERIESV2.tb.andDown} {
     padding: ${7 / 16}rem 0 ${7 / 16}rem ${12 / 16}rem;
   }
 `;
@@ -88,7 +91,7 @@ export const BaseEmptyRow = styled.div`
   line-height: ${20 / 16}rem;
   color: #c5d5e0;
 
-  @media (max-width: 428px) {
+  @media ${QUERIESV2.tb.andDown} {
     padding: ${22 / 16}rem ${16 / 16}rem;
     font-size: ${14 / 16}rem;
     line-height: ${18 / 16}rem;
