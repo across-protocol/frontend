@@ -9,12 +9,10 @@ import {
   getConfirmationDepositTime,
   Route,
 } from "utils";
-import { useAmplitude, useBridgeFees, useBridgeLimits } from "hooks";
+import { useBridgeFees, useBridgeLimits } from "hooks";
 import { useCoingeckoPrice } from "hooks/useCoingeckoPrice";
-import { ampli } from "ampli";
 
 export function useTransferQuote(
-  shouldUpdateQuote: boolean,
   selectedRoute: Route,
   amountToBridge: BigNumber,
   fromAddress?: string,
@@ -23,8 +21,6 @@ export function useTransferQuote(
   const [initialQuoteTime, setInitialQuoteTime] = useState<
     number | undefined
   >();
-
-  const { addToAmpliQueue } = useAmplitude();
 
   const feesQuery = useBridgeFees(
     amountToBridge,
@@ -49,10 +45,7 @@ export function useTransferQuote(
       amountToBridge.toString(),
     ],
     enabled: Boolean(
-      shouldUpdateQuote &&
-        feesQuery.fees &&
-        limitsQuery.limits &&
-        usdPriceQuery.data?.price
+      feesQuery.fees && limitsQuery.limits && usdPriceQuery.data?.price
     ),
     queryFn: async () => {
       if (
@@ -105,13 +98,6 @@ export function useTransferQuote(
         quotedLimits: limitsQuery.limits,
         quotePriceUSD: usdPriceQuery.data.price,
       };
-    },
-    onSuccess: (data) => {
-      if (data.quote) {
-        addToAmpliQueue(() => {
-          ampli.transferQuoteReceived(data.quote);
-        });
-      }
     },
   });
 }

@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 
-import { useConnection, useIsWrongNetwork } from "hooks";
+import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
 import useReferrer from "hooks/useReferrer";
 
 import { useBridgeAction } from "./useBridgeAction";
@@ -10,13 +10,18 @@ import { useToAccount } from "./useToAccount";
 import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote } from "./useTransferQuote";
 import { useAmountInput, useValidAmount } from "./useAmountInput";
+import { ampli } from "ampli";
 
 export function useBridge() {
   const [shouldUpdateQuote, setShouldUpdateQuote] = useState(true);
+  const [usedTransferQuote, setUsedTransferQuote] =
+    useState<ReturnType<typeof useTransferQuote>["data"]>();
 
   const { isConnected, chainId: walletChainId, account } = useConnection();
 
   const { referrer } = useReferrer();
+
+  const { addToAmpliQueue } = useAmplitude();
 
   const {
     selectedRoute,
@@ -47,12 +52,12 @@ export function useBridge() {
   const { toAccount, setCustomToAddress } = useToAccount(selectedRoute.toChain);
 
   const { data: transferQuote, isLoading: isQuoteLoading } = useTransferQuote(
-    shouldUpdateQuote,
     selectedRoute,
     parsedAmount?.gt(0) ? parsedAmount : BigNumber.from(0),
     account,
     toAccount?.address
   );
+
   const {
     quote,
     quotePriceUSD,
@@ -60,7 +65,7 @@ export function useBridge() {
     quotedLimits,
     initialQuoteTime,
     estimatedTime,
-  } = transferQuote || {};
+  } = usedTransferQuote || {};
 
   const { amountValidationError, isAmountValid } = useValidAmount(
     parsedAmount,
@@ -101,6 +106,18 @@ export function useBridge() {
   useEffect(() => {
     checkWrongNetworkHandler();
   }, [selectedRoute.fromChain, isConnected, checkWrongNetworkHandler]);
+
+  useEffect(() => {
+    if (shouldUpdateQuote && !isQuoteLoading) {
+      setUsedTransferQuote(transferQuote);
+
+      if (transferQuote?.quote) {
+        addToAmpliQueue(() => {
+          ampli.transferQuoteReceived(transferQuote?.quote);
+        });
+      }
+    }
+  }, [transferQuote, shouldUpdateQuote, isQuoteLoading, addToAmpliQueue]);
 
   useEffect(() => {
     if (
