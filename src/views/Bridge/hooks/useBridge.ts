@@ -46,21 +46,21 @@ export function useBridge() {
 
   const { toAccount, setCustomToAddress } = useToAccount(selectedRoute.toChain);
 
-  const {
-    estimatedTime,
-    quote,
-    initialQuoteTime,
-    quotedFees,
-    quotedLimits,
-    quotePriceUSD,
-    isQuoteLoading,
-  } = useTransferQuote(
+  const { data: transferQuote, isLoading: isQuoteLoading } = useTransferQuote(
+    shouldUpdateQuote,
     selectedRoute,
     parsedAmount?.gt(0) ? parsedAmount : BigNumber.from(0),
     account,
-    toAccount?.address,
-    shouldUpdateQuote
+    toAccount?.address
   );
+  const {
+    quote,
+    quotePriceUSD,
+    quotedFees,
+    quotedLimits,
+    initialQuoteTime,
+    estimatedTime,
+  } = transferQuote || {};
 
   const { amountValidationError, isAmountValid } = useValidAmount(
     parsedAmount,

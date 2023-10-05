@@ -126,7 +126,7 @@ export type ChainInfoList = ChainInfo[];
 export type ChainInfoTable = Record<number, ChainInfo>;
 
 export const defaultBlockPollingInterval =
-  Number(process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL_S || 30) * 1000;
+  Number(process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL_S || 15) * 1000;
 export const hubPoolChainId = Number(
   process.env.REACT_APP_HUBPOOL_CHAINID || 1
 );
@@ -193,7 +193,7 @@ export const chainInfoList: ChainInfoList = [
       "https://explorer.zksync.io"
     ),
     nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
+    pollingInterval: 5_000,
   },
   {
     name: "Base",
@@ -204,7 +204,7 @@ export const chainInfoList: ChainInfoList = [
     explorerUrl: "https://basescan.org",
     constructExplorerLink: defaultConstructExplorerLink("https://basescan.org"),
     nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
+    pollingInterval: 2_000,
   },
   // testnets
   {
