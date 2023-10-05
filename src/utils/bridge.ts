@@ -178,14 +178,34 @@ export async function sendAcrossDeposit(
   }: AcrossDepositArgs
 ): Promise<ethers.providers.TransactionResponse> {
   const config = getConfig();
-  const spokePool = config.getSpokePool(fromChain);
   const provider = getProvider(fromChain);
-  const code = await provider.getCode(spokePool.address);
-  if (!code) {
+
+  // We send native tokens to the SpokePoolVerifier contract if enabled for the chain.
+  const shouldUseSpokePoolVerifier =
+    config.enabledSpokePoolVerifierChains.has(fromChain) && isNative;
+
+  const spokePool = config.getSpokePool(fromChain);
+  const spokePoolVerifier = shouldUseSpokePoolVerifier
+    ? config.getSpokePoolVerifier(fromChain)
+    : undefined;
+
+  const [spokePoolCode, spokePoolVerifierCode] = await Promise.all([
+    provider.getCode(spokePool.address),
+    spokePoolVerifier
+      ? await provider.getCode(spokePoolVerifier.address)
+      : Promise.resolve(true),
+  ]);
+  if (!spokePoolCode) {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
+  if (!spokePoolVerifierCode) {
+    throw new Error(
+      `SpokePoolVerifier not deployed at ${spokePoolVerifier?.address}`
+    );
+  }
+
   const value = isNative ? amount : ethers.constants.Zero;
-  const tx = await spokePool.populateTransaction.deposit(
+  const commonArgs = [
     recipient,
     tokenAddress,
     amount,
@@ -194,8 +214,16 @@ export async function sendAcrossDeposit(
     quoteTimestamp,
     message,
     maxCount,
-    { value }
-  );
+    { value },
+  ] as const;
+
+  const tx = shouldUseSpokePoolVerifier
+    ? await config
+        .getSpokePoolVerifier(fromChain)
+        .populateTransaction.deposit(...commonArgs)
+    : await config
+        .getSpokePool(fromChain)
+        .populateTransaction.deposit(...commonArgs);
 
   // do not tag a referrer if data is not provided as a hex string.
   tx.data =
