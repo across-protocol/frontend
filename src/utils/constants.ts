@@ -193,7 +193,7 @@ export const chainInfoList: ChainInfoList = [
       "https://explorer.zksync.io"
     ),
     nativeCurrencySymbol: "ETH",
-    pollingInterval: 5_000,
+    pollingInterval: 10_000,
   },
   {
     name: "Base",
@@ -204,7 +204,7 @@ export const chainInfoList: ChainInfoList = [
     explorerUrl: "https://basescan.org",
     constructExplorerLink: defaultConstructExplorerLink("https://basescan.org"),
     nativeCurrencySymbol: "ETH",
-    pollingInterval: 2_000,
+    pollingInterval: 10_000,
   },
   // testnets
   {
