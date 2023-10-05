@@ -49,9 +49,11 @@ export function useTransferQuote(
       amountToBridge.toString(),
     ],
     enabled: Boolean(
-      feesQuery.fees && limitsQuery.limits && usdPriceQuery.data?.price
+      shouldUpdateQuote &&
+        feesQuery.fees &&
+        limitsQuery.limits &&
+        usdPriceQuery.data?.price
     ),
-    staleTime: shouldUpdateQuote ? undefined : Infinity,
     queryFn: async () => {
       if (
         !feesQuery.fees ||
