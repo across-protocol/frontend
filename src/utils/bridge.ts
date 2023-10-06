@@ -220,7 +220,7 @@ export async function sendAcrossDeposit(
   const tx = shouldUseSpokePoolVerifier
     ? await config
         .getSpokePoolVerifier(fromChain)
-        .populateTransaction.deposit(...commonArgs)
+        .populateTransaction.deposit(spokePool.address, ...commonArgs)
     : await config
         .getSpokePool(fromChain)
         .populateTransaction.deposit(...commonArgs);

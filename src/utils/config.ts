@@ -10,6 +10,8 @@ import {
   HubPool__factory,
   SpokePool,
   SpokePool__factory,
+  SpokePoolVerifier,
+  SpokePoolVerifier__factory,
   AcrossMerkleDistributor,
   AcrossMerkleDistributor__factory,
   AcceleratingDistributor,
@@ -121,10 +123,13 @@ export class ConfigClient {
     );
     return enabledSpokePoolVerifier.address;
   }
-  getSpokePoolVerifier(chainId: constants.ChainId, signer?: Signer): SpokePool {
+  getSpokePoolVerifier(
+    chainId: constants.ChainId,
+    signer?: Signer
+  ): SpokePoolVerifier {
     const address = this.getSpokePoolVerifierAddress(chainId);
     const provider = signer ?? providerUtils.getProvider(chainId);
-    return SpokePool__factory.connect(address, provider); // TODO: Use SpokePoolVerifier when new contracts-v2 package is released
+    return SpokePoolVerifier__factory.connect(address, provider);
   }
   getHubPoolChainId(): constants.ChainId {
     return this.config.hubPoolChain;
