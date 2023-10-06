@@ -109,7 +109,6 @@ export function useBridge() {
 
   useEffect(() => {
     if (shouldUpdateQuote && !isQuoteLoading) {
-      console.log("setUsedTransferQuote", transferQuote);
       setUsedTransferQuote(transferQuote);
 
       if (transferQuote?.quote) {

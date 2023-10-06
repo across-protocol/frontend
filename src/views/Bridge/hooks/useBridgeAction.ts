@@ -53,15 +53,6 @@ export function useBridgeAction(
     const frozenTokenPrice = cloneDeep(tokenPrice);
     const frozenAccount = cloneDeep(account);
 
-    console.log("click", {
-      frozenQuote,
-      frozenInitialQuoteTime,
-      frozenPayload,
-      referrer,
-      frozenTokenPrice,
-      frozenAccount,
-    });
-
     if (!isConnected) {
       connect();
       return;
