@@ -33,7 +33,7 @@ import {
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
 } from "./_constants";
-import { MessagePayload, PoolStateResult } from "./_types";
+import { PoolStateResult } from "./_types";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -487,8 +487,10 @@ export const getRelayerFeeDetails = async (
   amount: sdk.utils.BigNumberish,
   originChainId: number,
   destinationChainId: number,
+  recipientAddress: string,
   tokenPrice?: number,
-  messagePayload?: MessagePayload
+  message?: string,
+  relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const tokenSymbol = getTokenSymbol(l1Token);
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
@@ -498,8 +500,10 @@ export const getRelayerFeeDetails = async (
       tokenSymbol,
       String(originChainId),
       String(destinationChainId),
-      messagePayload,
-      tokenPrice
+      recipientAddress,
+      message,
+      tokenPrice,
+      relayerAddress
     );
   } catch (_e: unknown) {
     const e = _e as Error;
@@ -512,7 +516,7 @@ export const getRelayerFeeDetails = async (
       throw new Error(
         `Could not process relayer fee details.
       ${
-        sdk.utils.isDefined(messagePayload)
+        sdk.utils.isDefined(message)
           ? " The likely cause is related to message payload."
           : ""
       }`

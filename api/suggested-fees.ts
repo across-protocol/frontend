@@ -34,7 +34,7 @@ const SuggestedFeesQueryParamsSchema = type({
   timestamp: optional(positiveIntStr()),
   skipAmountLimit: optional(boolStr()),
   message: optional(string()),
-  recipientAddress: optional(validAddress()),
+  recipientAddress: validAddress(),
   relayerAddress: optional(validAddress()),
 });
 
@@ -78,18 +78,18 @@ const handler = async (
 
     token = ethers.utils.getAddress(token);
 
-    const [latestBlock, tokenDetails] = await Promise.all([
-      provider.getBlock("latest"),
-      getTokenDetails(provider, undefined, token, originChainId),
-    ]);
+    const [latestBlock, tokenDetails, isRecipientAContract] = await Promise.all(
+      [
+        provider.getBlock("latest"),
+        getTokenDetails(provider, undefined, token, originChainId),
+        sdk.utils.isContractDeployedToAddress(recipientAddress, provider),
+      ]
+    );
     const { l1Token, hubPool, chainId: computedOriginChainId } = tokenDetails;
 
-    if (
-      sdk.utils.isDefined(message) &&
-      !sdk.utils.isDefined(recipientAddress)
-    ) {
+    if (sdk.utils.isDefined(message) && !isRecipientAContract) {
       throw new InputError(
-        "Recipient address is required when message is provided"
+        "Recipient address with a contract deployed to it is required when a message is provided"
       );
     }
     if (
@@ -99,15 +99,6 @@ const handler = async (
     ) {
       throw new InputError("Message must be an even hex string");
     }
-
-    const messagePayload =
-      sdk.utils.isDefined(message) && sdk.utils.isDefined(recipientAddress)
-        ? {
-            message,
-            recipientAddress,
-            relayerAddress,
-          }
-        : undefined;
 
     // Note: Add a buffer to "latest" timestamp so that it corresponds to a block older than HEAD.
     // This is to improve relayer UX who have heightened risk of sending inadvertent invalid fills
@@ -182,8 +173,10 @@ const handler = async (
       amount,
       computedOriginChainId,
       Number(destinationChainId),
+      recipientAddress,
       tokenPrice,
-      messagePayload
+      message,
+      relayerAddress
     );
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";
