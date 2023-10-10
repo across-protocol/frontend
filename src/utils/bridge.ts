@@ -186,19 +186,20 @@ export async function sendAcrossDeposit(
   // If the spoke pool verifier is enabled, use it for native transfers.
   const shouldUseSpokePoolVerifier = Boolean(spokePoolVerifier) && isNative;
 
-  const [spokePoolCode, spokePoolVerifierCode] = await Promise.all([
-    provider.getCode(spokePool.address),
-    spokePoolVerifier
-      ? provider.getCode(spokePoolVerifier.address)
-      : Promise.resolve(true),
-  ]);
+  if (shouldUseSpokePoolVerifier) {
+    const spokePoolVerifierCode = await provider.getCode(
+      spokePoolVerifier!.address
+    );
+    if (!spokePoolVerifierCode || spokePoolVerifierCode === "0x") {
+      throw new Error(
+        `SpokePoolVerifier not deployed at ${spokePoolVerifier!.address}`
+      );
+    }
+  }
+
+  const spokePoolCode = await provider.getCode(spokePool.address);
   if (!spokePoolCode || spokePoolCode === "0x") {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
-  }
-  if (!spokePoolVerifierCode || spokePoolVerifierCode === "0x") {
-    throw new Error(
-      `SpokePoolVerifier not deployed at ${spokePoolVerifier?.address}`
-    );
   }
 
   const value = isNative ? amount : ethers.constants.Zero;
