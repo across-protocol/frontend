@@ -112,18 +112,22 @@ export class ConfigClient {
     const provider = signer ?? providerUtils.getProvider(chainId);
     return SpokePool__factory.connect(address, provider);
   }
-  getSpokePoolVerifierAddress(chainId: constants.ChainId): string {
-    assert(
-      this.enabledChainsSpokePoolVerifier.has(chainId),
-      "SpokePoolVerifier not enabled on chain: " + chainId
-    );
+  getSpokePoolVerifierAddress(chainId: constants.ChainId): string | undefined {
+    if (!this.enabledChainsSpokePoolVerifier.has(chainId)) {
+      return undefined;
+    }
     return this.spokePoolVerifierAddress;
   }
   getSpokePoolVerifier(
     chainId: constants.ChainId,
     signer?: Signer
-  ): SpokePoolVerifier {
+  ): SpokePoolVerifier | undefined {
     const address = this.getSpokePoolVerifierAddress(chainId);
+
+    if (!address) {
+      return undefined;
+    }
+
     const provider = signer ?? providerUtils.getProvider(chainId);
     return SpokePoolVerifier__factory.connect(address, provider);
   }

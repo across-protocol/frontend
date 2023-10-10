@@ -180,25 +180,22 @@ export async function sendAcrossDeposit(
   const config = getConfig();
   const provider = getProvider(fromChain);
 
-  // We send native tokens to the SpokePoolVerifier contract if enabled for the chain.
-  const shouldUseSpokePoolVerifier =
-    config.enabledSpokePoolVerifierChains.has(fromChain) && isNative;
-
   const spokePool = config.getSpokePool(fromChain);
-  const spokePoolVerifier = shouldUseSpokePoolVerifier
-    ? config.getSpokePoolVerifier(fromChain)
-    : undefined;
+  const spokePoolVerifier = config.getSpokePoolVerifier(fromChain);
+
+  // If the spoke pool verifier is enabled, use it for native transfers.
+  const shouldUseSpokePoolVerifier = Boolean(spokePoolVerifier) && isNative;
 
   const [spokePoolCode, spokePoolVerifierCode] = await Promise.all([
     provider.getCode(spokePool.address),
     spokePoolVerifier
-      ? await provider.getCode(spokePoolVerifier.address)
+      ? provider.getCode(spokePoolVerifier.address)
       : Promise.resolve(true),
   ]);
-  if (!spokePoolCode) {
+  if (!spokePoolCode || spokePoolCode === "0x") {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
-  if (!spokePoolVerifierCode) {
+  if (!spokePoolVerifierCode || spokePoolVerifierCode === "0x") {
     throw new Error(
       `SpokePoolVerifier not deployed at ${spokePoolVerifier?.address}`
     );
@@ -219,7 +216,7 @@ export async function sendAcrossDeposit(
 
   const tx = shouldUseSpokePoolVerifier
     ? await config
-        .getSpokePoolVerifier(fromChain)
+        .getSpokePoolVerifier(fromChain)!
         .populateTransaction.deposit(spokePool.address, ...commonArgs)
     : await config
         .getSpokePool(fromChain)
