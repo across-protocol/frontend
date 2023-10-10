@@ -1,8 +1,9 @@
-import { BigNumber } from "ethers";
 import { useCallback, useEffect, useState } from "react";
+import { utils } from "@across-protocol/sdk-v2";
 
 import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
 import useReferrer from "hooks/useReferrer";
+import { ampli } from "ampli";
 
 import { useBridgeAction } from "./useBridgeAction";
 import { useBridgeDepositTracking } from "./useBridgeDepositTracking";
@@ -10,7 +11,6 @@ import { useToAccount } from "./useToAccount";
 import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote } from "./useTransferQuote";
 import { useAmountInput, useValidAmount } from "./useAmountInput";
-import { ampli } from "ampli";
 
 export function useBridge() {
   const [shouldUpdateQuote, setShouldUpdateQuote] = useState(true);
@@ -53,7 +53,7 @@ export function useBridge() {
 
   const { data: transferQuote, isLoading: isQuoteLoading } = useTransferQuote(
     selectedRoute,
-    parsedAmount?.gt(0) ? parsedAmount : BigNumber.from(0),
+    parsedAmount?.gt(0) ? parsedAmount : utils.bnZero,
     account,
     toAccount?.address
   );
