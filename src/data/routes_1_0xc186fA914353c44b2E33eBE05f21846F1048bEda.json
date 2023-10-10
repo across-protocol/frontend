@@ -1709,26 +1709,8 @@
       "isNative": false
     }
   ],
-  "enabledSpokePoolVerifiers": [
-    {
-      "chain": 1,
-      "address": "0x269727F088F16E1Aea52Cf5a97B1CD41DAA3f02D"
-    },
-    {
-      "chain": 10,
-      "address": "0x269727F088F16E1Aea52Cf5a97B1CD41DAA3f02D"
-    },
-    {
-      "chain": 137,
-      "address": "0x269727F088F16E1Aea52Cf5a97B1CD41DAA3f02D"
-    },
-    {
-      "chain": 8453,
-      "address": "0x269727F088F16E1Aea52Cf5a97B1CD41DAA3f02D"
-    },
-    {
-      "chain": 42161,
-      "address": "0x269727F088F16E1Aea52Cf5a97B1CD41DAA3f02D"
-    }
-  ]
+  "spokePoolVerifier": {
+    "address": "0x269727F088F16E1Aea52Cf5a97B1CD41DAA3f02D",
+    "enabledChains": [1, 10, 137, 8453, 42161]
+  }
 }

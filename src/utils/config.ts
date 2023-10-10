@@ -36,12 +36,12 @@ export class ConfigClient {
   public readonly spokeChains: Set<number> = new Set();
   public readonly fromChains: Set<number> = new Set();
   public readonly toChains: Set<number> = new Set();
-  public readonly enabledSpokePoolVerifierChains: Set<number> = new Set();
+  public readonly enabledChainsSpokePoolVerifier: Set<number> = new Set();
+  public readonly spokePoolVerifierAddress: string = "";
   public tokenOrder: Record<string, number> = {};
   public chainOrder: Record<string, number> = {};
   public routes: constants.Routes = [];
   public pools: constants.Pools = [];
-  public enabledSpokePoolVerifiers: constants.EnabledSpokePoolVerifiers = [];
   constructor(
     private config: constants.RouteConfig,
     private disabledTokens: string[] = []
@@ -76,11 +76,10 @@ export class ConfigClient {
       );
     });
     this.pools = this.config.pools;
-    this.enabledSpokePoolVerifiers =
-      this.config.enabledSpokePoolVerifiers || [];
-    this.enabledSpokePoolVerifierChains = new Set(
-      this.enabledSpokePoolVerifiers.map(({ chain }) => chain)
+    this.enabledChainsSpokePoolVerifier = new Set(
+      this.config.spokePoolVerifier.enabledChains || []
     );
+    this.spokePoolVerifierAddress = this.config.spokePoolVerifier.address;
   }
   getWethAddress(): string {
     return this.config.hubPoolWethAddress;
@@ -114,14 +113,11 @@ export class ConfigClient {
     return SpokePool__factory.connect(address, provider);
   }
   getSpokePoolVerifierAddress(chainId: constants.ChainId): string {
-    const enabledSpokePoolVerifier = this.enabledSpokePoolVerifiers.find(
-      ({ chain }) => chain === chainId
-    );
     assert(
-      enabledSpokePoolVerifier,
-      "SpokePoolVerifier not supported on chain: " + chainId
+      this.enabledChainsSpokePoolVerifier.has(chainId),
+      "SpokePoolVerifier not enabled on chain: " + chainId
     );
-    return enabledSpokePoolVerifier.address;
+    return this.spokePoolVerifierAddress;
   }
   getSpokePoolVerifier(
     chainId: constants.ChainId,
