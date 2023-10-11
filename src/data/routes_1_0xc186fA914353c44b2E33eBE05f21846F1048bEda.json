@@ -1780,5 +1780,9 @@
       "tokenSymbol": "BOBA",
       "isNative": false
     }
-  ]
+  ],
+  "spokePoolVerifier": {
+    "address": "0x269727F088F16E1Aea52Cf5a97B1CD41DAA3f02D",
+    "enabledChains": [1, 10, 137, 8453, 42161]
+  }
 }

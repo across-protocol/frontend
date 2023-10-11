@@ -88,7 +88,9 @@ export function useUserDeposits(
       // To provide a better UX, we take optimistically updated local pending deposits
       // into account to show on the "My Transactions" page.
       const localPendingUserDeposits = getLocalPendingDeposits().filter(
-        (deposit) => deposit.depositorAddr === userAddress
+        (deposit) =>
+          deposit.depositorAddr === userAddress ||
+          deposit.recipientAddr === userAddress
       );
       const { deposits, pagination } = await getDeposits({
         address: userAddress,
