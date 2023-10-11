@@ -1,5 +1,4 @@
 export { default as GlobalStyles } from "./GlobalStyles";
-export { default as Layout } from "./Layout";
 export { default as Header } from "./Header";
 export { default as Dialog } from "./Dialog";
 export { default as SuperHeader } from "./SuperHeader";
