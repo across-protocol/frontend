@@ -67,7 +67,7 @@ async function estimateGasCostsForDeposit(
       selectedRoute.fromChain,
       selectedRoute.fromTokenAddress
     ).address,
-    amount: 1,
+    amount: selectedRoute.isNative ? 0 : 1,
     destinationChain: selectedRoute.toChain,
     relayerFeePct: 1,
     quoteTimestamp: BigNumber.from(Math.floor(Date.now() / 1000)),
