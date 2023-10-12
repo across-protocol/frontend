@@ -134,7 +134,7 @@ export const getConfirmationDepositTime = (
   }
 
   // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.
-  return { formattedString: "~3-6 hours", lowEstimate: 180, highEstimate: 360 };
+  return { formattedString: "~2-4 hours", lowEstimate: 180, highEstimate: 360 };
 };
 
 export type AcrossDepositArgs = {
@@ -178,14 +178,32 @@ export async function sendAcrossDeposit(
   }: AcrossDepositArgs
 ): Promise<ethers.providers.TransactionResponse> {
   const config = getConfig();
-  const spokePool = config.getSpokePool(fromChain);
   const provider = getProvider(fromChain);
-  const code = await provider.getCode(spokePool.address);
-  if (!code) {
+
+  const spokePool = config.getSpokePool(fromChain);
+  const spokePoolVerifier = config.getSpokePoolVerifier(fromChain);
+
+  // If the spoke pool verifier is enabled, use it for native transfers.
+  const shouldUseSpokePoolVerifier = Boolean(spokePoolVerifier) && isNative;
+
+  if (shouldUseSpokePoolVerifier) {
+    const spokePoolVerifierCode = await provider.getCode(
+      spokePoolVerifier!.address
+    );
+    if (!spokePoolVerifierCode || spokePoolVerifierCode === "0x") {
+      throw new Error(
+        `SpokePoolVerifier not deployed at ${spokePoolVerifier!.address}`
+      );
+    }
+  }
+
+  const spokePoolCode = await provider.getCode(spokePool.address);
+  if (!spokePoolCode || spokePoolCode === "0x") {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
+
   const value = isNative ? amount : ethers.constants.Zero;
-  const tx = await spokePool.populateTransaction.deposit(
+  const commonArgs = [
     recipient,
     tokenAddress,
     amount,
@@ -194,8 +212,16 @@ export async function sendAcrossDeposit(
     quoteTimestamp,
     message,
     maxCount,
-    { value }
-  );
+    { value },
+  ] as const;
+
+  const tx = shouldUseSpokePoolVerifier
+    ? await config
+        .getSpokePoolVerifier(fromChain)!
+        .populateTransaction.deposit(spokePool.address, ...commonArgs)
+    : await config
+        .getSpokePool(fromChain)
+        .populateTransaction.deposit(...commonArgs);
 
   // do not tag a referrer if data is not provided as a hex string.
   tx.data =

@@ -20,7 +20,7 @@ export const InputRow = styled.div`
     flex-shrink: 0;
   }
 
-  @media ${QUERIESV2.sm.andDown} {
+  @media ${QUERIESV2.xs.andDown} {
     flex-direction: column;
     gap: 12px;
   }
@@ -101,7 +101,7 @@ export const MaxButton = styled(UnstyledButton)`
 
 export const ButtonWrapper = styled.div`
   flex-grow: 1;
-  @media ${QUERIESV2.sm.andDown} {
+  @media ${QUERIESV2.xs.andDown} {
     width: 100%;
   }
 `;

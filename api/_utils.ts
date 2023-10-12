@@ -24,7 +24,7 @@ import {
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { VercelResponse } from "@vercel/node";
 import {
-  CHAIN_IDS,
+  CHAIN_IDs,
   MULTICALL3_ADDRESS,
   DEFI_LLAMA_POOL_LOOKUP,
   EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
@@ -41,14 +41,14 @@ const {
   REACT_APP_HUBPOOL_CHAINID,
   REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
-  REACT_APP_GOOGLE_SERVICE_ACCOUNT,
+  GOOGLE_SERVICE_ACCOUNT: _GOOGLE_SERVICE_ACCOUNT,
   VERCEL_ENV,
   GAS_MARKUP,
   DISABLE_DEBUG_LOGS,
 } = process.env;
 
-const GOOGLE_SERVICE_ACCOUNT = REACT_APP_GOOGLE_SERVICE_ACCOUNT
-  ? JSON.parse(REACT_APP_GOOGLE_SERVICE_ACCOUNT)
+const GOOGLE_SERVICE_ACCOUNT = _GOOGLE_SERVICE_ACCOUNT
+  ? JSON.parse(_GOOGLE_SERVICE_ACCOUNT)
   : {};
 
 export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
@@ -279,8 +279,7 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
     1: {
       chainId: 1,
       hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
-      wethAddress:
-        TOKEN_SYMBOLS_MAP.WETH.addresses[sdk.constants.CHAIN_IDs.MAINNET],
+      wethAddress: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.MAINNET],
       configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
       acceleratingDistributorAddress:
         "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
@@ -289,8 +288,7 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
     5: {
       chainId: 5,
       hubPoolAddress: "0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d",
-      wethAddress:
-        TOKEN_SYMBOLS_MAP.WETH.addresses[sdk.constants.CHAIN_IDs.GOERLI],
+      wethAddress: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.GOERLI],
       configStoreAddress: "0x3215e3C91f87081757d0c41EF0CB77738123Be83",
       acceleratingDistributorAddress:
         "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC",
@@ -329,116 +327,116 @@ export const queries: Record<
   number,
   () => sdk.relayFeeCalculator.QueryInterface
 > = {
-  [CHAIN_IDS.MAINNET]: () =>
+  [CHAIN_IDs.MAINNET]: () =>
     new sdk.relayFeeCalculator.EthereumQueries(
-      getProvider(CHAIN_IDS.MAINNET),
+      getProvider(CHAIN_IDs.MAINNET),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.MAINNET)
+      getGasMarkup(CHAIN_IDs.MAINNET)
     ),
-  [CHAIN_IDS.OPTIMISM]: () =>
+  [CHAIN_IDs.OPTIMISM]: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
-      getProvider(CHAIN_IDS.OPTIMISM),
+      getProvider(CHAIN_IDs.OPTIMISM),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.OPTIMISM)
+      getGasMarkup(CHAIN_IDs.OPTIMISM)
     ),
-  [CHAIN_IDS.POLYGON]: () =>
+  [CHAIN_IDs.POLYGON]: () =>
     new sdk.relayFeeCalculator.PolygonQueries(
-      getProvider(CHAIN_IDS.POLYGON),
+      getProvider(CHAIN_IDs.POLYGON),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.POLYGON)
+      getGasMarkup(CHAIN_IDs.POLYGON)
     ),
-  [CHAIN_IDS.ARBITRUM]: () =>
+  [CHAIN_IDs.ARBITRUM]: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
-      getProvider(CHAIN_IDS.ARBITRUM),
+      getProvider(CHAIN_IDs.ARBITRUM),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.ARBITRUM)
+      getGasMarkup(CHAIN_IDs.ARBITRUM)
     ),
-  [CHAIN_IDS.ZK_SYNC]: () =>
+  [CHAIN_IDs.ZK_SYNC]: () =>
     new sdk.relayFeeCalculator.ZkSyncQueries(
-      getProvider(CHAIN_IDS.ZK_SYNC),
+      getProvider(CHAIN_IDs.ZK_SYNC),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.ZK_SYNC)
+      getGasMarkup(CHAIN_IDs.ZK_SYNC)
     ),
-  [CHAIN_IDS.BASE]: () =>
+  [CHAIN_IDs.BASE]: () =>
     new sdk.relayFeeCalculator.BaseQueries(
-      getProvider(CHAIN_IDS.BASE),
+      getProvider(CHAIN_IDs.BASE),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.BASE)
+      getGasMarkup(CHAIN_IDs.BASE)
     ),
   /* --------------------------- Testnet queries --------------------------- */
-  [CHAIN_IDS.GOERLI]: () =>
+  [CHAIN_IDs.GOERLI]: () =>
     new sdk.relayFeeCalculator.EthereumGoerliQueries(
-      getProvider(CHAIN_IDS.GOERLI),
+      getProvider(CHAIN_IDs.GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.GOERLI)
+      getGasMarkup(CHAIN_IDs.GOERLI)
     ),
-  [CHAIN_IDS.ARBITRUM_GOERLI]: () =>
+  [CHAIN_IDs.ARBITRUM_GOERLI]: () =>
     new sdk.relayFeeCalculator.ArbitrumGoerliQueries(
-      getProvider(CHAIN_IDS.ARBITRUM_GOERLI),
+      getProvider(CHAIN_IDs.ARBITRUM_GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.ARBITRUM_GOERLI)
+      getGasMarkup(CHAIN_IDs.ARBITRUM_GOERLI)
     ),
-  [CHAIN_IDS.ZK_SYNC_GOERLI]: () =>
+  [CHAIN_IDs.ZK_SYNC_GOERLI]: () =>
     new sdk.relayFeeCalculator.zkSyncGoerliQueries(
-      getProvider(CHAIN_IDS.ZK_SYNC_GOERLI),
+      getProvider(CHAIN_IDs.ZK_SYNC_GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.ZK_SYNC_GOERLI)
+      getGasMarkup(CHAIN_IDs.ZK_SYNC_GOERLI)
     ),
-  [CHAIN_IDS.BASE_GOERLI]: () =>
+  [CHAIN_IDs.BASE_GOERLI]: () =>
     new sdk.relayFeeCalculator.BaseGoerliQueries(
-      getProvider(CHAIN_IDS.BASE_GOERLI),
+      getProvider(CHAIN_IDs.BASE_GOERLI),
       undefined,
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDS.BASE_GOERLI)
+      getGasMarkup(CHAIN_IDs.BASE_GOERLI)
     ),
 };
 
@@ -564,7 +562,7 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
-    case CHAIN_IDS.ARBITRUM_GOERLI:
+    case CHAIN_IDs.ARBITRUM_GOERLI:
       return "0xD29C85F15DF544bA632C9E25829fd29d767d7978";
     default:
       return sdk.utils.getDeployedAddress("SpokePool", chainId);

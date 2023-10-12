@@ -1,10 +1,15 @@
 import { ethers } from "ethers";
-import { constants, relayFeeCalculator, utils } from "@across-protocol/sdk-v2";
+import { relayFeeCalculator, utils } from "@across-protocol/sdk-v2";
+import * as constants from "@across-protocol/constants-v2";
+
+export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
+
+export const CHAIN_IDs = constants.CHAIN_IDs;
 
 export const maxRelayFeePct = 0.25;
 
 export const disabledL1Tokens = [
-  constants.TOKEN_SYMBOLS_MAP.BADGER.addresses[constants.CHAIN_IDs.MAINNET],
+  TOKEN_SYMBOLS_MAP.BADGER.addresses[CHAIN_IDs.MAINNET],
 ].map((x) => x.toLowerCase());
 
 const defaultRelayerFeeCapitalCostConfig: {
@@ -105,22 +110,18 @@ export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
 // 1:1 because we don't need to handle underlying tokens on FE
 export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;
 
-export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
-
-export const CHAIN_IDS = constants.CHAIN_IDs;
-
 export const ENABLED_POOLS_UNDERLYING_TOKENS = [
-  constants.TOKEN_SYMBOLS_MAP.ETH,
-  constants.TOKEN_SYMBOLS_MAP.WETH,
-  constants.TOKEN_SYMBOLS_MAP.USDC,
-  constants.TOKEN_SYMBOLS_MAP.USDT,
-  constants.TOKEN_SYMBOLS_MAP.DAI,
-  constants.TOKEN_SYMBOLS_MAP.WBTC,
-  constants.TOKEN_SYMBOLS_MAP.BAL,
-  constants.TOKEN_SYMBOLS_MAP.UMA,
-  constants.TOKEN_SYMBOLS_MAP.ACX,
-  constants.TOKEN_SYMBOLS_MAP.SNX,
-  constants.TOKEN_SYMBOLS_MAP.POOL,
+  TOKEN_SYMBOLS_MAP.ETH,
+  TOKEN_SYMBOLS_MAP.WETH,
+  TOKEN_SYMBOLS_MAP.USDC,
+  TOKEN_SYMBOLS_MAP.USDT,
+  TOKEN_SYMBOLS_MAP.DAI,
+  TOKEN_SYMBOLS_MAP.WBTC,
+  TOKEN_SYMBOLS_MAP.BAL,
+  TOKEN_SYMBOLS_MAP.UMA,
+  TOKEN_SYMBOLS_MAP.ACX,
+  TOKEN_SYMBOLS_MAP.SNX,
+  TOKEN_SYMBOLS_MAP.POOL,
 ];
 
 export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;

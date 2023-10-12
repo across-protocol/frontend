@@ -1,6 +1,6 @@
 import { useConnection } from "hooks";
 import { useCallback, useEffect, useState } from "react";
-import { formatMilliseconds, getChainInfo } from "utils";
+import { formatSeconds, getChainInfo } from "utils";
 
 export function useBridgeDepositTracking() {
   const [txHash, setTxHash] = useState<string | undefined>(undefined);
@@ -44,8 +44,8 @@ export function useBridgeDepositTracking() {
   }, [startDate, depositFinishedDate]);
 
   const trackingTxHash = !!txHash;
-  const elapsedTimeAsFormattedString = formatMilliseconds(
-    Math.floor((elapsedSeconds ?? 0) * 1000)
+  const elapsedTimeAsFormattedString = formatSeconds(
+    Math.floor(elapsedSeconds ?? 0)
   );
 
   const depositFinished = !!depositFinishedDate;

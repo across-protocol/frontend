@@ -63,5 +63,9 @@
       "l1TokenAddress": "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"
     }
   ],
-  "pools": []
+  "pools": [],
+  "spokePoolVerifier": {
+    "address": "0x269727F088F16E1Aea52Cf5a97B1CD41DAA3f02D",
+    "enabledChains": []
+  }
 }

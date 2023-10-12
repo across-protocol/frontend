@@ -1,4 +1,6 @@
 import styled from "@emotion/styled";
+
+import { Text } from "components/Text";
 import { formatWeiPct, getChainInfo, makeFormatUnits } from "utils";
 
 import {
@@ -32,43 +34,47 @@ export function SpeedUpStats({
   return (
     <StatsBox>
       <StatRow>
-        <div>Asset</div>
-        <div>
+        <Text color="white-70">Asset</Text>
+        <Text color="white-70">
           {token.symbol}{" "}
           <img src={token.logoURI} alt={`token_logo_${token.symbol}`} />
-        </div>
+        </Text>
       </StatRow>
       <StatRow>
-        <div>From → To</div>
-        <div>
+        <Text color="white-70">From → To</Text>
+        <Text color="white-70">
           {getChainInfo(transfer.sourceChainId).name} →{" "}
           {getChainInfo(transfer.destinationChainId).name}
-        </div>
+        </Text>
       </StatRow>
       <StatRow>
-        <div>Amount</div>
-        <div>{formatTokenUnits(transfer.amount)}</div>
+        <Text color="white-70">Amount</Text>
+        <Text color="white-70">{formatTokenUnits(transfer.amount)}</Text>
       </StatRow>
       <StatRow>
-        <div>Current fee %</div>
-        <div>{formatWeiPct(transfer.depositRelayerFeePct)}%</div>
+        <Text color="white-70">Current fee %</Text>
+        <Text color="white-70">
+          {formatWeiPct(transfer.depositRelayerFeePct)}%
+        </Text>
       </StatRow>
       <StatRow>
-        <div>Current fee in {token.symbol}</div>
-        <div>
+        <Text color="white-70">Current fee in {token.symbol}</Text>
+        <Text color="white-70">
           {formatTokenUnits(
             calcPctOfTokenAmount(transfer.depositRelayerFeePct, transfer.amount)
           )}
-        </div>
+        </Text>
       </StatRow>
       <Divider />
       <StatRow highlightValue>
-        <div>New fee %</div>
-        <div>{hideNewFee ? "-" : appendPercentageSign(feeInput)}</div>
+        <Text color="white-70">New fee %</Text>
+        <Text color="white-70">
+          {hideNewFee ? "-" : appendPercentageSign(feeInput)}
+        </Text>
       </StatRow>
       <StatRow highlightValue>
-        <div>New fee in {token.symbol}</div>
-        <div>
+        <Text color="white-70">New fee in {token.symbol}</Text>
+        <Text color="white-70">
           {hideNewFee
             ? "-"
             : formatTokenUnits(
@@ -77,7 +83,7 @@ export function SpeedUpStats({
                   transfer.amount
                 )
               )}
-        </div>
+        </Text>
       </StatRow>
     </StatsBox>
   );

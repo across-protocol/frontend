@@ -1,8 +1,9 @@
-import { BigNumber } from "ethers";
 import { useCallback, useEffect, useState } from "react";
+import { utils } from "@across-protocol/sdk-v2";
 
-import { useConnection, useIsWrongNetwork } from "hooks";
+import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
 import useReferrer from "hooks/useReferrer";
+import { ampli } from "ampli";
 
 import { useBridgeAction } from "./useBridgeAction";
 import { useBridgeDepositTracking } from "./useBridgeDepositTracking";
@@ -13,10 +14,14 @@ import { useAmountInput, useValidAmount } from "./useAmountInput";
 
 export function useBridge() {
   const [shouldUpdateQuote, setShouldUpdateQuote] = useState(true);
+  const [usedTransferQuote, setUsedTransferQuote] =
+    useState<ReturnType<typeof useTransferQuote>["data"]>();
 
   const { isConnected, chainId: walletChainId, account } = useConnection();
 
   const { referrer } = useReferrer();
+
+  const { addToAmpliQueue } = useAmplitude();
 
   const {
     selectedRoute,
@@ -47,21 +52,21 @@ export function useBridge() {
 
   const { toAccount, setCustomToAddress } = useToAccount(selectedRoute.toChain);
 
+  const { data: transferQuote, isLoading: isQuoteLoading } = useTransferQuote(
+    selectedRoute,
+    parsedAmount?.gt(0) ? parsedAmount : utils.bnZero,
+    account,
+    toAccount?.address
+  );
+
   const {
-    estimatedTime,
     quote,
-    initialQuoteTime,
+    quotePriceUSD,
     quotedFees,
     quotedLimits,
-    quotePriceUSD,
-    isQuoteLoading,
-  } = useTransferQuote(
-    selectedRoute,
-    parsedAmount?.gt(0) ? parsedAmount : BigNumber.from(0),
-    account,
-    toAccount?.address,
-    shouldUpdateQuote
-  );
+    initialQuoteTime,
+    estimatedTime,
+  } = usedTransferQuote || {};
 
   const { amountValidationError, isAmountValid } = useValidAmount(
     parsedAmount,
@@ -104,10 +109,32 @@ export function useBridge() {
   }, [selectedRoute.fromChain, isConnected, checkWrongNetworkHandler]);
 
   useEffect(() => {
-    if (bridgeAction.isButtonActionLoading || trackingTxHash) {
-      setShouldUpdateQuote(false);
+    if (shouldUpdateQuote && !isQuoteLoading) {
+      setUsedTransferQuote(transferQuote);
+
+      if (transferQuote?.quote) {
+        addToAmpliQueue(() => {
+          ampli.transferQuoteReceived(transferQuote?.quote);
+        });
+      }
     }
-  }, [bridgeAction.isButtonActionLoading, trackingTxHash]);
+  }, [transferQuote, shouldUpdateQuote, isQuoteLoading, addToAmpliQueue]);
+
+  useEffect(() => {
+    if (
+      shouldUpdateQuote &&
+      (bridgeAction.isButtonActionLoading || trackingTxHash)
+    ) {
+      setShouldUpdateQuote(false);
+    } else if (bridgeAction.didActionError && !shouldUpdateQuote) {
+      setShouldUpdateQuote(true);
+    }
+  }, [
+    shouldUpdateQuote,
+    bridgeAction.isButtonActionLoading,
+    trackingTxHash,
+    bridgeAction.didActionError,
+  ]);
 
   const handleClickNewTx = useCallback(() => {
     clearInput();
