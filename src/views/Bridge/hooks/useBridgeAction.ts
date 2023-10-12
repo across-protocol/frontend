@@ -67,7 +67,7 @@ export function useBridgeAction(
       !frozenTokenPrice ||
       !tokenSymbol
     ) {
-      return;
+      throw new Error("Missing required data for bridge action");
     }
 
     if (isWrongNetwork) {

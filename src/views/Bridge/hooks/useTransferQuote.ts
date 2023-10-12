@@ -86,14 +86,16 @@ export function useTransferQuote(
         toAddress
       );
 
+      let initialQuoteTimeToUse = initialQuoteTime || Date.now();
+
       if (!initialQuoteTime) {
-        setInitialQuoteTime((s) => s ?? Date.now());
+        setInitialQuoteTime((s) => s ?? initialQuoteTimeToUse);
       }
 
       return {
         estimatedTime,
         quote,
-        initialQuoteTime,
+        initialQuoteTime: initialQuoteTimeToUse,
         quotedFees: feesQuery.fees,
         quotedLimits: limitsQuery.limits,
         quotePriceUSD: usdPriceQuery.data.price,
