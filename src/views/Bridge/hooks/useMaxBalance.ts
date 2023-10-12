@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { BigNumber, providers, constants } from "ethers";
+import { BigNumber, providers, constants, utils } from "ethers";
 
 import { useBalanceBySymbol, useConnection } from "hooks";
 import {
@@ -60,17 +60,19 @@ async function estimateGasCostsForDeposit(
   signer: providers.JsonRpcSigner
 ) {
   const provider = getProvider(selectedRoute.fromChain);
-  const spokePool = config.getSpokePool(selectedRoute.fromChain);
+  const spokePool = config.getSpokePool(selectedRoute.fromChain, signer);
+  const tokenInfo = config.getTokenInfoByAddress(
+    selectedRoute.fromChain,
+    selectedRoute.fromTokenAddress
+  );
+  const amount = utils.parseUnits("0.000001", tokenInfo.decimals);
   const argsForEstimation = {
     recipient: await signer.getAddress(),
-    originToken: config.getTokenInfoByAddress(
-      selectedRoute.fromChain,
-      selectedRoute.fromTokenAddress
-    ).address,
-    amount: selectedRoute.isNative ? 0 : 1,
+    originToken: tokenInfo.address,
+    amount,
     destinationChain: selectedRoute.toChain,
-    relayerFeePct: 1,
-    quoteTimestamp: BigNumber.from(Math.floor(Date.now() / 1000)),
+    relayerFeePct: 0,
+    quoteTimestamp: BigNumber.from(Math.floor(Date.now() / 1000)).sub(60 * 60),
     message: "0x",
     maxCount: constants.MaxUint256,
   };
@@ -79,7 +81,7 @@ async function estimateGasCostsForDeposit(
     spokePool,
     "deposit",
     ...Object.values(argsForEstimation),
-    { value: selectedRoute.isNative ? argsForEstimation.amount : 0 }
+    { value: selectedRoute.isNative ? amount : 0 }
   );
   const gasPrice = await provider.getGasPrice();
   return gasPrice.mul(paddedGasEstimation);
