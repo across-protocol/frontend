@@ -17,13 +17,13 @@ const defaultRelayerFeeCapitalCostConfig: {
 } = {
   ETH: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0006").toString(),
+    upperBound: ethers.utils.parseUnits("0.0004").toString(),
     cutoff: ethers.utils.parseUnits("750").toString(),
     decimals: 18,
   },
   WETH: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0006").toString(),
+    upperBound: ethers.utils.parseUnits("0.0004").toString(),
     cutoff: ethers.utils.parseUnits("750").toString(),
     decimals: 18,
   },
