@@ -290,7 +290,7 @@ export function generateTransferQuote(
     lpFeeTotal: formatTokens(fees.lpFee.total),
     lpFeeTotalUsd: usdEquivalentString(fees.lpFee.total),
     quoteLatencyMilliseconds: fees.quoteLatency.toString(),
-    quoteTimestamp: String(fees.quoteTimestampInMs ?? Date.now()),
+    quoteTimestamp: String(fees.quoteTimestamp),
     recipient: toAddress || "not connected",
     relayFeePct: formatWeiEtherPct(fees.relayerFee.pct),
     relayFeeTotal: formatTokens(fees.relayerFee.total),
