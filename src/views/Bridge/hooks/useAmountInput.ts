@@ -9,6 +9,7 @@ import {
   validateBridgeAmount,
   areTokensInterchangeable,
 } from "../utils";
+import { useMaxBalance } from "./useMaxBalance";
 
 export function useAmountInput(selectedRoute: Route) {
   const [userAmountInput, setUserAmountInput] = useState("");
@@ -25,19 +26,21 @@ export function useAmountInput(selectedRoute: Route) {
     selectedRoute.fromChain
   );
 
+  const { data: maxBalance } = useMaxBalance(selectedRoute);
+
   const token = getConfig().getTokenInfoBySymbol(
     selectedRoute.fromChain,
     selectedRoute.fromTokenSymbol
   );
 
   const handleClickMaxBalance = useCallback(() => {
-    if (balance) {
-      setUserAmountInput(utils.formatUnits(balance, token.decimals));
+    if (maxBalance) {
+      setUserAmountInput(utils.formatUnits(maxBalance, token.decimals));
       addToAmpliQueue(() => {
         trackMaxButtonClicked("bridgeForm");
       });
     }
-  }, [balance, token.decimals, addToAmpliQueue]);
+  }, [maxBalance, token.decimals, addToAmpliQueue]);
 
   const handleChangeAmountInput = useCallback((changedInput: string) => {
     setUserAmountInput(changedInput);
@@ -78,13 +81,14 @@ export function useAmountInput(selectedRoute: Route) {
     userAmountInput,
     parsedAmount,
     balance,
+    maxBalance,
   };
 }
 
 export function useValidAmount(
   parsedAmount?: BigNumber,
   isAmountTooLow?: boolean,
-  currentBalance?: BigNumber,
+  maxBalance?: BigNumber,
   maxDeposit?: BigNumber
 ) {
   const [validationError, setValidationError] = useState<
@@ -95,11 +99,11 @@ export function useValidAmount(
     const { error } = validateBridgeAmount(
       parsedAmount,
       isAmountTooLow,
-      currentBalance,
+      maxBalance,
       maxDeposit
     );
     setValidationError(error);
-  }, [parsedAmount, isAmountTooLow, currentBalance, maxDeposit]);
+  }, [parsedAmount, isAmountTooLow, maxBalance, maxDeposit]);
 
   return {
     amountValidationError: validationError,

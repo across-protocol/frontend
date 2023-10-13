@@ -376,9 +376,6 @@ export const tokenList = [
 ];
 
 // process.env variables
-export const gasEstimationMultiplier = Number(
-  process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER || 2
-);
 export const rewardsApiUrl =
   process.env.REACT_APP_REWARDS_API_URL || "https://api.across.to";
 export const airdropWindowIndex = Number(
@@ -643,9 +640,10 @@ export const rewardTiers = [
 export const secondsPerYear = 31557600;
 export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day
 
-export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
-  ? Number(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER)
-  : undefined;
+export const gasMultiplierPerChain: Record<string, number> = process.env
+  .REACT_APP_GAS_ESTIMATION_MULTIPLIER_PER_CHAIN
+  ? JSON.parse(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER_PER_CHAIN)
+  : {};
 
 export const suggestedFeesDeviationBufferMultiplier = !Number.isNaN(
   Number(
@@ -698,3 +696,6 @@ export const disabledChainIdsForAvailableRoutes = (
 export const walletBlacklist = (process.env.REACT_APP_WALLET_BLACKLIST || "")
   .split(",")
   .map((address) => address.toLowerCase());
+
+// Fallback gas costs for when the gas estimation fails
+export const fallbackEstimatedGasCosts = ethers.utils.parseEther("0.01");

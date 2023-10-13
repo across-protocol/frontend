@@ -47,6 +47,7 @@ export function useBridge() {
     userAmountInput,
     parsedAmount,
     balance,
+    maxBalance,
   } = useAmountInput(selectedRoute);
 
   const { toAccount, setCustomToAddress } = useToAccount(selectedRoute.toChain);
@@ -70,7 +71,7 @@ export function useBridge() {
   const { amountValidationError, isAmountValid } = useValidAmount(
     parsedAmount,
     quotedFees?.isAmountTooLow,
-    balance,
+    maxBalance,
     quotedLimits?.maxDeposit
   );
 
