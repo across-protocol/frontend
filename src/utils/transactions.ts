@@ -72,7 +72,7 @@ export function sendWithPaddedGas(
       chainId,
       contract,
       method,
-      args
+      ...args
     );
     return contract[method](...args, {
       gasLimit: gasToRecommend,
