@@ -5,16 +5,20 @@ import Sentry from "utils/sentry";
 
 import { Wrapper, InnerWrapper, ButtonsWrapper } from "./ErrorBoundary.styles";
 
-export function FallbackComponent() {
+export function FallbackComponent(props: { error: Error }) {
   return (
     <Wrapper>
       <InnerWrapper>
         <Text size="3xl" color="white">
           Something went wrong
         </Text>
+        <Text>Sorry, an error occurred.</Text>
+        <code>
+          {props.error.name}: {props.error.message}
+        </code>
         <Text>
-          Sorry, an error occurred. We've been notified about this issue and
-          we'll take a look at it shortly.
+          We've been notified about this issue and we'll take a look at it
+          shortly.
         </Text>
         <Text>
           You can also try reloading the page, request support on Discord or
@@ -24,9 +28,12 @@ export function FallbackComponent() {
           <TertiaryButton size="sm" onClick={() => window.location.reload()}>
             Reload
           </TertiaryButton>
-          <a href="https://discord.across.to" target="_blank" rel="noreferrer">
-            <TertiaryButton size="sm">Discord</TertiaryButton>
-          </a>
+          <TertiaryButton
+            size="sm"
+            onClick={() => window.open("https://discord.across.to", "_blank")}
+          >
+            Discord
+          </TertiaryButton>
         </ButtonsWrapper>
       </InnerWrapper>
       <Footer />
@@ -37,7 +44,7 @@ export function FallbackComponent() {
 export function ErrorBoundary(props: { children: React.ReactNode }) {
   return (
     <Sentry.ErrorBoundary
-      fallback={FallbackComponent}
+      fallback={({ error }) => <FallbackComponent error={error} />}
       beforeCapture={(scope) => scope.setLevel("fatal")}
     >
       {props.children}

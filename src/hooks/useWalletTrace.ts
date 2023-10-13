@@ -52,7 +52,7 @@ export function useWalletChangeTrace() {
   const { wallet } = useConnection();
 
   useEffect(() => {
-    if (!wallet) {
+    if (!wallet || !wallet.accounts.length) {
       return;
     }
 
@@ -68,5 +68,5 @@ export function useWalletChangeTrace() {
     });
 
     setPrevTrackedWallet(connectedWalletAddress);
-  }, [wallet]);
+  }, [wallet, wallet?.accounts.length]);
 }
