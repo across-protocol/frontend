@@ -229,6 +229,14 @@ export async function sendAcrossDeposit(
       ? tagAddress(tx.data!, referrer, referrerDelimiterHex)
       : tx.data;
 
+  // Last test to ensure that the tx is valid and that the signer
+  // is connected to the correct chain.
+  if ((await signer.getChainId()) !== fromChain) {
+    throw new Error(
+      "Signer is not connected to the correct chain. This may have happened in the background"
+    );
+  }
+
   return signer.sendTransaction(tx);
 }
 
