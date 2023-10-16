@@ -215,13 +215,13 @@ export async function sendAcrossDeposit(
     { value },
   ] as const;
 
-  const tx = shouldUseSpokePoolVerifier
-    ? await config
-        .getSpokePoolVerifier(fromChain)!
-        .populateTransaction.deposit(spokePool.address, ...commonArgs)
-    : await config
-        .getSpokePool(fromChain)
-        .populateTransaction.deposit(...commonArgs);
+  const tx =
+    shouldUseSpokePoolVerifier && spokePoolVerifier
+      ? await spokePoolVerifier.populateTransaction.deposit(
+          spokePool.address,
+          ...commonArgs
+        )
+      : await spokePool.populateTransaction.deposit(...commonArgs);
 
   // do not tag a referrer if data is not provided as a hex string.
   tx.data =
