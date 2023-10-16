@@ -215,19 +215,29 @@ export async function sendAcrossDeposit(
     { value },
   ] as const;
 
-  const tx = shouldUseSpokePoolVerifier
-    ? await config
-        .getSpokePoolVerifier(fromChain)!
-        .populateTransaction.deposit(spokePool.address, ...commonArgs)
-    : await config
-        .getSpokePool(fromChain)
-        .populateTransaction.deposit(...commonArgs);
+  const tx =
+    shouldUseSpokePoolVerifier && spokePoolVerifier
+      ? await spokePoolVerifier.populateTransaction.deposit(
+          spokePool.address,
+          ...commonArgs
+        )
+      : await spokePool.populateTransaction.deposit(...commonArgs);
 
   // do not tag a referrer if data is not provided as a hex string.
   tx.data =
     referrer && ethers.utils.isAddress(referrer)
       ? tagAddress(tx.data!, referrer, referrerDelimiterHex)
       : tx.data;
+
+  // Last test to ensure that the tx is valid and that the signer
+  // is connected to the correct chain.
+  // NOTE: I think this is a good candiate for using an RPC call
+  //       to get the chainId of the signer.
+  if ((await signer.getChainId()) !== fromChain) {
+    throw new Error(
+      "Signer is not connected to the correct chain. This may have happened in the background"
+    );
+  }
 
   return signer.sendTransaction(tx);
 }
