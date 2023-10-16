@@ -2,7 +2,13 @@ import { useQuery } from "react-query";
 import { BigNumber, constants } from "ethers";
 
 import { useBalanceBySymbol, useConnection } from "hooks";
-import { Route, max, getProvider, gasExpenditureDeposit } from "utils";
+import {
+  Route,
+  max,
+  getProvider,
+  gasExpenditureDeposit,
+  gasMultiplierPerChain,
+} from "utils";
 
 export function useMaxBalance(selectedRoute: Route) {
   const { balance } = useBalanceBySymbol(
@@ -42,8 +48,13 @@ export function useMaxBalance(selectedRoute: Route) {
   );
 }
 
+/**
+ * Estimated gas costs for a deposit with an empty message.
+ * This is used to calculate the maximum amount of ETH that can be bridged.
+ */
 async function estimateGasCostsForDeposit(selectedRoute: Route) {
   const provider = getProvider(selectedRoute.fromChain);
   const gasPrice = await provider.getGasPrice();
-  return gasPrice.mul(gasExpenditureDeposit);
+  const gasMultiplier = gasMultiplierPerChain[selectedRoute.fromChain] || 3;
+  return gasPrice.mul(gasMultiplier).mul(gasExpenditureDeposit);
 }
