@@ -231,6 +231,8 @@ export async function sendAcrossDeposit(
 
   // Last test to ensure that the tx is valid and that the signer
   // is connected to the correct chain.
+  // NOTE: I think this is a good candiate for using an RPC call
+  //       to get the chainId of the signer.
   if ((await signer.getChainId()) !== fromChain) {
     throw new Error(
       "Signer is not connected to the correct chain. This may have happened in the background"
