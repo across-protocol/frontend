@@ -408,10 +408,6 @@ export const FEE_ESTIMATION = ".004";
 export const MAX_RELAY_FEE_PERCENT = Number(
   process.env.REACT_APP_MAX_RELAY_FEE_PERCENT || 50
 );
-export const FLAT_RELAY_CAPITAL_FEE = process.env
-  .REACT_APP_FLAT_RELAY_CAPITAL_FEE
-  ? Number(process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE)
-  : 0;
 export const SHOW_ACX_NAV_TOKEN =
   process.env.REACT_APP_SHOW_ACX_NAV_TOKEN === "true";
 export const AddressZero = ethers.constants.AddressZero;
