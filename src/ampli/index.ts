@@ -189,7 +189,7 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
    */
   element:
     | "connectWalletButton"
@@ -198,7 +198,8 @@ export interface ConnectWalletButtonClickedProperties {
     | "quickSwapButton"
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
-    | "earnByAddingLiquidityAndStakingLink";
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -217,7 +218,7 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
    */
   section:
     | "navbar"
@@ -232,8 +233,7 @@ export interface ConnectWalletButtonClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation"
-    | "disconnectWalletButton";
+    | "depositConfirmation";
 }
 
 export interface DisconnectWalletButtonClickedProperties {
@@ -244,7 +244,7 @@ export interface DisconnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
    */
   element:
     | "connectWalletButton"
@@ -253,7 +253,8 @@ export interface DisconnectWalletButtonClickedProperties {
     | "quickSwapButton"
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
-    | "earnByAddingLiquidityAndStakingLink";
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -272,7 +273,7 @@ export interface DisconnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
    */
   section:
     | "navbar"
@@ -287,8 +288,7 @@ export interface DisconnectWalletButtonClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation"
-    | "disconnectWalletButton";
+    | "depositConfirmation";
 }
 
 export interface EarnByAddingLiquidityClickedProperties {
@@ -303,7 +303,7 @@ export interface EarnByAddingLiquidityClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
    */
   element:
     | "connectWalletButton"
@@ -312,7 +312,8 @@ export interface EarnByAddingLiquidityClickedProperties {
     | "quickSwapButton"
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
-    | "earnByAddingLiquidityAndStakingLink";
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -331,7 +332,7 @@ export interface EarnByAddingLiquidityClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
    */
   section:
     | "navbar"
@@ -346,8 +347,7 @@ export interface EarnByAddingLiquidityClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation"
-    | "disconnectWalletButton";
+    | "depositConfirmation";
 }
 
 export interface FromChainSelectedProperties {
@@ -377,7 +377,7 @@ export interface MaxTokenAmountClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
    */
   element:
     | "connectWalletButton"
@@ -386,12 +386,13 @@ export interface MaxTokenAmountClickedProperties {
     | "quickSwapButton"
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
-    | "earnByAddingLiquidityAndStakingLink";
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   page: string;
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
    */
   section:
     | "navbar"
@@ -406,8 +407,7 @@ export interface MaxTokenAmountClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation"
-    | "disconnectWalletButton";
+    | "depositConfirmation";
 }
 
 export interface MonitorDepositProgressClickedProperties {
@@ -422,7 +422,7 @@ export interface MonitorDepositProgressClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
    */
   element:
     | "connectWalletButton"
@@ -431,7 +431,8 @@ export interface MonitorDepositProgressClickedProperties {
     | "quickSwapButton"
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
-    | "earnByAddingLiquidityAndStakingLink";
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -450,7 +451,7 @@ export interface MonitorDepositProgressClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
    */
   section:
     | "navbar"
@@ -465,8 +466,7 @@ export interface MonitorDepositProgressClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation"
-    | "disconnectWalletButton";
+    | "depositConfirmation";
 }
 
 export interface PageViewedProperties {
@@ -517,7 +517,7 @@ export interface QuickSwapButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
    */
   element:
     | "connectWalletButton"
@@ -526,7 +526,8 @@ export interface QuickSwapButtonClickedProperties {
     | "quickSwapButton"
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
-    | "earnByAddingLiquidityAndStakingLink";
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -545,7 +546,7 @@ export interface QuickSwapButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
    */
   section:
     | "navbar"
@@ -560,8 +561,7 @@ export interface QuickSwapButtonClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation"
-    | "disconnectWalletButton";
+    | "depositConfirmation";
 }
 
 export interface ToAccountChangedProperties {
@@ -617,7 +617,7 @@ export interface TrackInExplorerClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
    */
   element:
     | "connectWalletButton"
@@ -626,7 +626,8 @@ export interface TrackInExplorerClickedProperties {
     | "quickSwapButton"
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
-    | "earnByAddingLiquidityAndStakingLink";
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -645,7 +646,7 @@ export interface TrackInExplorerClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
    */
   section:
     | "navbar"
@@ -660,8 +661,7 @@ export interface TrackInExplorerClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation"
-    | "disconnectWalletButton";
+    | "depositConfirmation";
 }
 
 export interface TransferDepositCompletedProperties {
@@ -1374,7 +1374,7 @@ export interface WalletSelectedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
    */
   element:
     | "connectWalletButton"
@@ -1383,7 +1383,8 @@ export interface WalletSelectedProperties {
     | "quickSwapButton"
     | "trackInExplorerLink"
     | "monitorDepositProgressLink"
-    | "earnByAddingLiquidityAndStakingLink";
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   page: string;
   /**
    * Type of wallet attempted to connect
