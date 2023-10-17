@@ -26,6 +26,8 @@ import { ReactComponent as ArrowStarRingIcon } from "assets/arrow-star-ring.svg"
 import { ReactComponent as ArrowRightIcon } from "assets/icons/arrow-right-16.svg";
 import { getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
+import { useAmplitude } from "hooks/useAmplitude";
+import { ampli } from "ampli";
 
 type DepositConfirmationProps = {
   currentFromRoute: number | undefined;
@@ -83,6 +85,7 @@ const DepositConfirmation = ({
   const explorerLink = _explorerLink ?? "https://etherscan.io";
 
   const history = useHistory();
+  const { addToAmpliQueue } = useAmplitude();
 
   return (
     <Wrapper data-cy="transaction-submitted">
@@ -128,9 +131,17 @@ const DepositConfirmation = ({
       <ActionCardContainer>
         <ActionCard
           isClickable
-          onClick={() =>
-            history.push(`/pool?symbol=${currentToken.toLowerCase()}`)
-          }
+          onClick={() => {
+            history.push(`/pool?symbol=${currentToken.toLowerCase()}`);
+            addToAmpliQueue(() => {
+              ampli.earnByAddingLiquidityClicked({
+                action: "onClick",
+                element: "earnByAddingLiquidityAndStakingLink",
+                page: "bridgePage",
+                section: "depositConfirmation",
+              });
+            });
+          }}
         >
           <LPInfoIconAndTextWrapper>
             <LPInfoIconContainer>
@@ -159,7 +170,20 @@ const DepositConfirmation = ({
               Transactions page
             </Text>
           </ActionCardTitleWrapper>
-          <ExternalContainerIconAnchor target="_blank" href="/transactions">
+          <ExternalContainerIconAnchor
+            target="_blank"
+            href="/transactions"
+            onClick={() => {
+              addToAmpliQueue(() => {
+                ampli.monitorDepositProgressClicked({
+                  action: "onClick",
+                  element: "monitorDepositProgressLink",
+                  page: "bridgePage",
+                  section: "depositConfirmation",
+                });
+              });
+            }}
+          >
             <StyledExternalLinkIcon />
           </ExternalContainerIconAnchor>
         </ActionCard>
@@ -175,6 +199,16 @@ const DepositConfirmation = ({
           <ExternalContainerIconAnchor
             href={explorerLink ?? "https://etherscan.io"}
             target="_blank"
+            onClick={() => {
+              addToAmpliQueue(() => {
+                ampli.trackInExplorerClicked({
+                  action: "onClick",
+                  element: "trackInExplorerLink",
+                  page: "bridgePage",
+                  section: "depositConfirmation",
+                });
+              });
+            }}
           >
             <StyledExternalLinkIcon />
           </ExternalContainerIconAnchor>
