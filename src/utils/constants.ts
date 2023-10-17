@@ -1,5 +1,5 @@
 import assert from "assert";
-import { ethers, providers } from "ethers";
+import { BigNumber, ethers, providers } from "ethers";
 import { utils } from "@across-protocol/sdk-v2";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants-v2";
 import * as superstruct from "superstruct";
@@ -697,5 +697,5 @@ export const walletBlacklist = (process.env.REACT_APP_WALLET_BLACKLIST || "")
   .split(",")
   .map((address) => address.toLowerCase());
 
-// Fallback gas costs for when the gas estimation fails
-export const fallbackEstimatedGasCosts = ethers.utils.parseEther("0.01");
+// Pre-computed gas expenditure for deposits used for estimations
+export const gasExpenditureDeposit = BigNumber.from(90_000);
