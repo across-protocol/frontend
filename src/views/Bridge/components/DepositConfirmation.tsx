@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { useHistory } from "react-router-dom";
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
 import { Text } from "components";
 import { ReactComponent as CheckStarIcon } from "assets/check-star-ring-opaque-filled.svg";
@@ -6,6 +7,7 @@ import {
   ChainId,
   GetBridgeFeesResult,
   QUERIESV2,
+  formatWeiPct,
   getToken,
   receiveAmount,
 } from "utils";
@@ -20,6 +22,8 @@ import { ReactComponent as ArbitrumGrayscaleLogo } from "assets/grayscale-logos/
 import { ReactComponent as OptimismGrayscaleLogo } from "assets/grayscale-logos/optimism.svg";
 import { ReactComponent as ZkSyncGrayscaleLogo } from "assets/grayscale-logos/zksync.svg";
 import { ReactComponent as BaseGrayscaleLogo } from "assets/grayscale-logos/base.svg";
+import { ReactComponent as ArrowStarRingIcon } from "assets/arrow-star-ring.svg";
+import { ReactComponent as ArrowRightIcon } from "assets/icons/arrow-right-16.svg";
 import { getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
 
@@ -39,6 +43,9 @@ type DepositConfirmationProps = {
 
   explorerLink?: string;
   elapsedTimeFromDeposit?: string;
+
+  currentTokenMaxApy?: BigNumber;
+  isCurrentTokenMaxApyLoading?: boolean;
 };
 
 const logoMapping: {
@@ -71,8 +78,11 @@ const DepositConfirmation = ({
   onClickNewTx,
   explorerLink: _explorerLink,
   elapsedTimeFromDeposit,
+  currentTokenMaxApy,
 }: DepositConfirmationProps) => {
   const explorerLink = _explorerLink ?? "https://etherscan.io";
+
+  const history = useHistory();
 
   return (
     <Wrapper data-cy="transaction-submitted">
@@ -115,6 +125,30 @@ const DepositConfirmation = ({
           </AnimatedTopWrapperTitleWrapper>
         )}
       </TopWrapper>
+      <ActionCardContainer>
+        <ActionCard
+          isClickable
+          onClick={() =>
+            history.push(`/pool?symbol=${currentToken.toLowerCase()}`)
+          }
+        >
+          <LPInfoIconAndTextWrapper>
+            <LPInfoIconContainer>
+              <ArrowStarRingIcon />
+            </LPInfoIconContainer>
+            <Text size="md" color="white">
+              Earn{" "}
+              <Text as="span" color="teal">
+                {currentTokenMaxApy ? formatWeiPct(currentTokenMaxApy, 3) : "-"}
+                %
+              </Text>{" "}
+              by adding liquidity and staking
+            </Text>
+          </LPInfoIconAndTextWrapper>
+          <ArrowRightIcon />
+        </ActionCard>
+      </ActionCardContainer>
+      <Divider />
       <ActionCardContainer>
         <ActionCard>
           <ActionCardTitleWrapper>
@@ -312,7 +346,7 @@ const ActionCardContainer = styled.div`
   }
 `;
 
-const ActionCard = styled.div`
+const ActionCard = styled.div<{ isClickable?: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -326,6 +360,8 @@ const ActionCard = styled.div`
   background: #3e4047;
   border: 1px solid #4c4e57;
   border-radius: 8px;
+
+  cursor: ${({ isClickable }) => (isClickable ? "pointer" : "default")};
 `;
 
 const ActionCardTitleWrapper = styled.div`
@@ -405,4 +441,16 @@ const AnimatedLogo = styled.div<{
       height: 32px;
     }
   }
+`;
+
+const LPInfoIconContainer = styled.div`
+  margin-left: -16px;
+  margin-top: 16px;
+`;
+
+const LPInfoIconAndTextWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 `;

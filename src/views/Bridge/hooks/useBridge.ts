@@ -3,6 +3,7 @@ import { utils } from "@across-protocol/sdk-v2";
 
 import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
 import useReferrer from "hooks/useReferrer";
+import { useStakingPool } from "hooks/useStakingPool";
 import { ampli } from "ampli";
 
 import { useBridgeAction } from "./useBridgeAction";
@@ -39,6 +40,9 @@ export function useBridge() {
     transactionElapsedTimeAsFormattedString,
     handleTransactionCompleted,
   } = useBridgeDepositTracking();
+
+  const { data: selectedRoutePool, isLoading: isSelectedRoutePoolLoading } =
+    useStakingPool(selectedRoute.l1TokenAddress);
 
   const {
     handleChangeAmountInput,
@@ -175,5 +179,7 @@ export function useBridge() {
     handleSelectFromChain,
     handleSelectToChain,
     handleSelectToken,
+    isCurrentTokenMaxApyLoading: isSelectedRoutePoolLoading,
+    currentTokenMaxApy: selectedRoutePool?.apyData.maxApy,
   };
 }

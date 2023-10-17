@@ -33,6 +33,8 @@ const Bridge = () => {
     handleClickNewTx,
     explorerUrl,
     transactionElapsedTimeAsFormattedString,
+    isCurrentTokenMaxApyLoading,
+    currentTokenMaxApy,
     handleChangeAmountInput,
     handleClickMaxBalance,
     handleSelectToken,
@@ -68,6 +70,8 @@ const Bridge = () => {
               explorerLink={explorerUrl}
               elapsedTimeFromDeposit={transactionElapsedTimeAsFormattedString}
               toAccount={toAccount}
+              currentTokenMaxApy={currentTokenMaxApy}
+              isCurrentTokenMaxApyLoading={isCurrentTokenMaxApyLoading}
             />
           ) : (
             <BridgeForm
