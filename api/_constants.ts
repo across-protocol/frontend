@@ -63,6 +63,24 @@ const defaultRelayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("5000").toString(),
     decimals: 18,
   },
+  ACX: {
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.001").toString(),
+    cutoff: ethers.utils.parseUnits("1000000").toString(),
+    decimals: 18,
+  },
+  BAL: {
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.001").toString(),
+    cutoff: ethers.utils.parseUnits("10000").toString(),
+    decimals: 18,
+  },
+  POOL: {
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.001").toString(),
+    cutoff: ethers.utils.parseUnits("10000").toString(),
+    decimals: 18,
+  },
   BOBA: {
     lowerBound: ethers.utils.parseUnits("0.0003").toString(),
     upperBound: ethers.utils.parseUnits("0.001").toString(),
