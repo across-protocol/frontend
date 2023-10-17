@@ -132,7 +132,10 @@ const DepositConfirmation = ({
         <ActionCard
           isClickable
           onClick={() => {
-            history.push(`/pool?symbol=${currentToken.toLowerCase()}`);
+            const tokenSymbol = ["USDC.e", "USDbC"].includes(currentToken)
+              ? "USDC"
+              : currentToken;
+            history.push(`/pool?symbol=${tokenSymbol.toLowerCase()}`);
             addToAmpliQueue(() => {
               ampli.earnByAddingLiquidityClicked({
                 action: "onClick",
