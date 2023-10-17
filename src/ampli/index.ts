@@ -217,7 +217,7 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
    */
   section:
     | "navbar"
@@ -232,7 +232,8 @@ export interface ConnectWalletButtonClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation";
+    | "depositConfirmation"
+    | "disconnectWalletButton";
 }
 
 export interface DisconnectWalletButtonClickedProperties {
@@ -271,7 +272,7 @@ export interface DisconnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
    */
   section:
     | "navbar"
@@ -286,7 +287,8 @@ export interface DisconnectWalletButtonClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation";
+    | "depositConfirmation"
+    | "disconnectWalletButton";
 }
 
 export interface EarnByAddingLiquidityClickedProperties {
@@ -329,7 +331,7 @@ export interface EarnByAddingLiquidityClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
    */
   section:
     | "navbar"
@@ -344,7 +346,8 @@ export interface EarnByAddingLiquidityClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation";
+    | "depositConfirmation"
+    | "disconnectWalletButton";
 }
 
 export interface FromChainSelectedProperties {
@@ -388,7 +391,7 @@ export interface MaxTokenAmountClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
    */
   section:
     | "navbar"
@@ -403,7 +406,8 @@ export interface MaxTokenAmountClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation";
+    | "depositConfirmation"
+    | "disconnectWalletButton";
 }
 
 export interface MonitorDepositProgressClickedProperties {
@@ -446,7 +450,7 @@ export interface MonitorDepositProgressClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
    */
   section:
     | "navbar"
@@ -461,7 +465,8 @@ export interface MonitorDepositProgressClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation";
+    | "depositConfirmation"
+    | "disconnectWalletButton";
 }
 
 export interface PageViewedProperties {
@@ -540,7 +545,7 @@ export interface QuickSwapButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
    */
   section:
     | "navbar"
@@ -555,7 +560,8 @@ export interface QuickSwapButtonClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation";
+    | "depositConfirmation"
+    | "disconnectWalletButton";
 }
 
 export interface ToAccountChangedProperties {
@@ -639,7 +645,7 @@ export interface TrackInExplorerClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation, disconnectWalletButton |
    */
   section:
     | "navbar"
@@ -654,7 +660,8 @@ export interface TrackInExplorerClickedProperties {
     | "bridgeForm"
     | "claimReferralRewardsForm"
     | "stakeForm"
-    | "depositConfirmation";
+    | "depositConfirmation"
+    | "disconnectWalletButton";
 }
 
 export interface TransferDepositCompletedProperties {
