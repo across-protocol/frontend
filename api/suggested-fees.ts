@@ -179,7 +179,7 @@ const handler = async (
       responseJson,
     });
 
-    response.setHeader("Cache-Control", "s-maxage=300");
+    response.setHeader("Cache-Control", "s-maxage=10");
     response.status(200).json(responseJson);
   } catch (error) {
     return handleErrorCondition("suggested-fees", response, logger, error);
