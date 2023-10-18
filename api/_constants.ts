@@ -87,6 +87,12 @@ const defaultRelayerFeeCapitalCostConfig: {
     cutoff: ethers.utils.parseUnits("100000").toString(),
     decimals: 18,
   },
+  SNX: {
+    lowerBound: ethers.utils.parseUnits("0.0001").toString(),
+    upperBound: ethers.utils.parseUnits("0.001").toString(),
+    cutoff: ethers.utils.parseUnits("10000").toString(),
+    decimals: 18,
+  },
 };
 
 const relayerFeeCapitalCostOverrides: Record<
