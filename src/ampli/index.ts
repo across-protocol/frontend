@@ -1,5 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
+// @ts-nocheck
 /**
  * Ampli - A strong typed wrapper for your Analytics
  *
@@ -7,7 +8,7 @@
  * To update run 'ampli pull web'
  *
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
- * Tracking Plan Version: 48
+ * Tracking Plan Version: 50
  * Build: 1.0.0
  * Runtime: browser:typescript-ampli-v2
  *
@@ -31,10 +32,10 @@ export const ApiKey: Record<Environment, string> = {
  */
 export const DefaultConfiguration: BrowserOptions = {
   plan: {
-    version: "48",
+    version: "50",
     branch: "main",
     source: "web",
-    versionId: "b6ae0501-d357-497d-9c93-27640ad3cd9f",
+    versionId: "5b6bde07-5ed3-4021-967f-fdaec4b35a87",
   },
   ...{
     ingestionMetadata: {
@@ -65,6 +66,8 @@ export type LoadOptions =
   | LoadOptionsWithClientInstance;
 
 export interface IdentifyProperties {
+  AcxVolumeNative?: any;
+  AcxVolumeUsd?: any;
   AllAssetsAllNetworksWalletCurrentBalanceUsd?: string;
   /**
    * List of wallet addresses connected during Wallet Connect Transaction Completed event.
@@ -84,6 +87,39 @@ export interface IdentifyProperties {
    * | Item Type | string |
    */
   AllWalletChainIds?: string[];
+  ArbitrumAcxWalletCurrentBalance?: any;
+  ArbitrumBalWalletCurrentBalance?: any;
+  ArbitrumDaiWalletCurrentBalance?: any;
+  ArbitrumEthWalletCurrentBalance?: any;
+  ArbitrumUmaWalletCurrentBalance?: any;
+  ArbitrumUsdcWalletCurrentBalance?: any;
+  ArbitrumWbtcWalletCurrentBalance?: any;
+  ArbitrumWethWalletCurrentBalance?: any;
+  BalVolumeNative?: any;
+  BalVolumeUsd?: any;
+  BobaAcxWalletCurrentBalance?: any;
+  BobaBobaWalletCurrentBalance?: any;
+  BobaDaiWalletCurrentBalance?: any;
+  BobaEthWalletCurrentBalance?: any;
+  BobaUmaWalletCurrentBalance?: any;
+  BobaUsdcWalletCurrentBalance?: any;
+  BobaVolumeNative?: any;
+  BobaVolumeUsd?: any;
+  BobaWbtcWalletCurrentBalance?: any;
+  BobaWethWalletCurrentBalance?: any;
+  DaiVolumeNative?: any;
+  DaiVolumeUsd?: any;
+  EthereumAcxWalletCurrentBalance?: any;
+  EthereumBalWalletCurrentBalance?: any;
+  EthereumBobaWalletCurrentBalance?: any;
+  EthereumDaiWalletCurrentBalance?: any;
+  EthereumEthWalletCurrentBalance?: any;
+  EthereumUmaWalletCurrentBalance?: any;
+  EthereumUsdcWalletCurrentBalance?: any;
+  EthereumWbtcWalletCurrentBalance?: any;
+  EthereumWethWalletCurrentBalance?: any;
+  EthVolumeNative?: any;
+  EthVolumeUsd?: any;
   initial_dclid?: any;
   initial_fbclid?: any;
   initial_gbraid?: any;
@@ -101,6 +137,32 @@ export interface IdentifyProperties {
   initial_utm_source?: any;
   initial_utm_term?: any;
   initial_wbraid?: any;
+  L1L2Transfers?: any;
+  L2L1Transfers?: any;
+  L2L2Transfers?: any;
+  OptimismAcxWalletCurrentBalance?: any;
+  OptimismBalWalletCurrentBalance?: any;
+  OptimismDaiWalletCurrentBalance?: any;
+  OptimismEthWalletCurrentBalance?: any;
+  OptimismUmaWalletCurrentBalance?: any;
+  OptimismUsdcWalletCurrentBalance?: any;
+  OptimismWbtcWalletCurrentBalance?: any;
+  OptimismWethWalletCurrentBalance?: any;
+  PolygonAcxWalletCurrentBalance?: any;
+  PolygonBalWalletCurrentBalance?: any;
+  PolygonDaiWalletCurrentBalance?: any;
+  PolygonUmaWalletCurrentBalance?: any;
+  PolygonUsdcWalletCurrentBalance?: any;
+  PolygonWbtcWalletCurrentBalance?: any;
+  PolygonWethWalletCurrentBalance?: any;
+  referrer?: any;
+  referring_domain?: any;
+  TotalTransfers?: any;
+  TotalVolumeUsd?: any;
+  UmaVolumeNative?: any;
+  UmaVolumeUsd?: any;
+  UsdcVolumeNative?: any;
+  UsdcVolumeUsd?: any;
   /**
    * Currently connected wallet address
    */
@@ -109,6 +171,10 @@ export interface IdentifyProperties {
    * Type of wallet connected
    */
   WalletType?: string;
+  WbtcVolumeNative?: any;
+  WbtcVolumeUsd?: any;
+  WethVolumeNative?: any;
+  WethVolumeUsd?: any;
 }
 
 export interface ConnectWalletButtonClickedProperties {
@@ -123,13 +189,17 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
    */
   element:
     | "connectWalletButton"
     | "web3OnboardModal"
     | "maxButton"
-    | "quickSwapButton";
+    | "quickSwapButton"
+    | "trackInExplorerLink"
+    | "monitorDepositProgressLink"
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -148,7 +218,7 @@ export interface ConnectWalletButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
    */
   section:
     | "navbar"
@@ -162,7 +232,8 @@ export interface ConnectWalletButtonClickedProperties {
     | "myTransactionsTable"
     | "bridgeForm"
     | "claimReferralRewardsForm"
-    | "stakeForm";
+    | "stakeForm"
+    | "depositConfirmation";
 }
 
 export interface DisconnectWalletButtonClickedProperties {
@@ -170,7 +241,20 @@ export interface DisconnectWalletButtonClickedProperties {
    * Action user did to trigger the event.
    */
   action: string;
-  element: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   */
+  element:
+    | "connectWalletButton"
+    | "web3OnboardModal"
+    | "maxButton"
+    | "quickSwapButton"
+    | "trackInExplorerLink"
+    | "monitorDepositProgressLink"
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -186,7 +270,84 @@ export interface DisconnectWalletButtonClickedProperties {
     | "referralPage"
     | "airdropPage"
     | "404Page";
-  section: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm"
+    | "depositConfirmation";
+}
+
+export interface EarnByAddingLiquidityClickedProperties {
+  /**
+   * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
+   */
+  action: "onClick" | "onKeyPress";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   */
+  element:
+    | "connectWalletButton"
+    | "web3OnboardModal"
+    | "maxButton"
+    | "quickSwapButton"
+    | "trackInExplorerLink"
+    | "monitorDepositProgressLink"
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm"
+    | "depositConfirmation";
 }
 
 export interface FromChainSelectedProperties {
@@ -216,18 +377,22 @@ export interface MaxTokenAmountClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
    */
   element:
     | "connectWalletButton"
     | "web3OnboardModal"
     | "maxButton"
-    | "quickSwapButton";
+    | "quickSwapButton"
+    | "trackInExplorerLink"
+    | "monitorDepositProgressLink"
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   page: string;
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
    */
   section:
     | "navbar"
@@ -241,7 +406,67 @@ export interface MaxTokenAmountClickedProperties {
     | "myTransactionsTable"
     | "bridgeForm"
     | "claimReferralRewardsForm"
-    | "stakeForm";
+    | "stakeForm"
+    | "depositConfirmation";
+}
+
+export interface MonitorDepositProgressClickedProperties {
+  /**
+   * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
+   */
+  action: "onClick" | "onKeyPress";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   */
+  element:
+    | "connectWalletButton"
+    | "web3OnboardModal"
+    | "maxButton"
+    | "quickSwapButton"
+    | "trackInExplorerLink"
+    | "monitorDepositProgressLink"
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm"
+    | "depositConfirmation";
 }
 
 export interface PageViewedProperties {
@@ -292,13 +517,17 @@ export interface QuickSwapButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton |
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
    */
   element:
     | "connectWalletButton"
     | "web3OnboardModal"
     | "maxButton"
-    | "quickSwapButton";
+    | "quickSwapButton"
+    | "trackInExplorerLink"
+    | "monitorDepositProgressLink"
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   /**
    * | Rule | Value |
    * |---|---|
@@ -317,7 +546,7 @@ export interface QuickSwapButtonClickedProperties {
   /**
    * | Rule | Value |
    * |---|---|
-   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm |
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
    */
   section:
     | "navbar"
@@ -331,7 +560,8 @@ export interface QuickSwapButtonClickedProperties {
     | "myTransactionsTable"
     | "bridgeForm"
     | "claimReferralRewardsForm"
-    | "stakeForm";
+    | "stakeForm"
+    | "depositConfirmation";
 }
 
 export interface ToAccountChangedProperties {
@@ -373,6 +603,65 @@ export interface TokenSelectedProperties {
    * Symbol of bridge token
    */
   tokenSymbol: string;
+}
+
+export interface TrackInExplorerClickedProperties {
+  /**
+   * Action user did to trigger the event.
+   *
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | onClick, onKeyPress |
+   */
+  action: "onClick" | "onKeyPress";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   */
+  element:
+    | "connectWalletButton"
+    | "web3OnboardModal"
+    | "maxButton"
+    | "quickSwapButton"
+    | "trackInExplorerLink"
+    | "monitorDepositProgressLink"
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | splashPage, bridgePage, poolPage, rewardsPage, transactionsPage, stakingPage, referralPage, airdropPage, 404Page |
+   */
+  page:
+    | "splashPage"
+    | "bridgePage"
+    | "poolPage"
+    | "rewardsPage"
+    | "transactionsPage"
+    | "stakingPage"
+    | "referralPage"
+    | "airdropPage"
+    | "404Page";
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | navbar, mobileNavSidebar, addLiquidityForm, removeLiquidityForm, airdropSplashFlow, referralTable, rewardsTable, unstakeForm, myTransactionsTable, bridgeForm, claimReferralRewardsForm, stakeForm, depositConfirmation |
+   */
+  section:
+    | "navbar"
+    | "mobileNavSidebar"
+    | "addLiquidityForm"
+    | "removeLiquidityForm"
+    | "airdropSplashFlow"
+    | "referralTable"
+    | "rewardsTable"
+    | "unstakeForm"
+    | "myTransactionsTable"
+    | "bridgeForm"
+    | "claimReferralRewardsForm"
+    | "stakeForm"
+    | "depositConfirmation";
 }
 
 export interface TransferDepositCompletedProperties {
@@ -1082,7 +1371,20 @@ export interface WalletSelectedProperties {
    * Action user did to trigger the event.
    */
   action: string;
-  element: string;
+  /**
+   * | Rule | Value |
+   * |---|---|
+   * | Enum Values | connectWalletButton, web3OnboardModal, maxButton, quickSwapButton, trackInExplorerLink, monitorDepositProgressLink, earnByAddingLiquidityAndStakingLink, disconnectWalletButton |
+   */
+  element:
+    | "connectWalletButton"
+    | "web3OnboardModal"
+    | "maxButton"
+    | "quickSwapButton"
+    | "trackInExplorerLink"
+    | "monitorDepositProgressLink"
+    | "earnByAddingLiquidityAndStakingLink"
+    | "disconnectWalletButton";
   page: string;
   /**
    * Type of wallet attempted to connect
@@ -1098,7 +1400,7 @@ export interface WebVitalsProperties {
 }
 
 export class Identify implements BaseEvent {
-  event_type = "Identify";
+  event_type = amplitude.Types.SpecialEventType.IDENTIFY;
 
   constructor(public event_properties?: IdentifyProperties) {
     this.event_properties = event_properties;
@@ -1127,6 +1429,14 @@ export class DisconnectWalletButtonClicked implements BaseEvent {
   }
 }
 
+export class EarnByAddingLiquidityClicked implements BaseEvent {
+  event_type = "EarnByAddingLiquidityClicked";
+
+  constructor(public event_properties: EarnByAddingLiquidityClickedProperties) {
+    this.event_properties = event_properties;
+  }
+}
+
 export class FeesInfoExpanded implements BaseEvent {
   event_type = "FeesInfoExpanded";
 }
@@ -1143,6 +1453,16 @@ export class MaxTokenAmountClicked implements BaseEvent {
   event_type = "MaxTokenAmountClicked";
 
   constructor(public event_properties: MaxTokenAmountClickedProperties) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class MonitorDepositProgressClicked implements BaseEvent {
+  event_type = "MonitorDepositProgressClicked";
+
+  constructor(
+    public event_properties: MonitorDepositProgressClickedProperties
+  ) {
     this.event_properties = event_properties;
   }
 }
@@ -1183,6 +1503,14 @@ export class TokenSelected implements BaseEvent {
   event_type = "TokenSelected";
 
   constructor(public event_properties: TokenSelectedProperties) {
+    this.event_properties = event_properties;
+  }
+}
+
+export class TrackInExplorerClicked implements BaseEvent {
+  event_type = "TrackInExplorerClicked";
+
+  constructor(public event_properties: TrackInExplorerClickedProperties) {
     this.event_properties = event_properties;
   }
 }
@@ -1303,7 +1631,8 @@ export class Ampli {
       this.amplitude = options.client.instance;
     } else if (apiKey) {
       this.amplitude = amplitude.createInstance();
-      return this.amplitude.init(apiKey, undefined, { ...DefaultConfiguration, ...options.client?.configuration });
+      const configuration = (options.client && 'configuration' in options.client) ? options.client.configuration : {};
+      return this.amplitude.init(apiKey, undefined, { ...DefaultConfiguration, ...configuration });
     } else {
       console.error("ERROR: ampli.load() requires 'environment', 'client.apiKey', or 'client.instance'");
     }
@@ -1342,6 +1671,17 @@ export class Ampli {
       amplitudeIdentify,
       options,
     );
+  }
+
+ /**
+  * Flush the event.
+  */
+  flush() : PromiseResult<Result> {
+    if (!this.isInitializedAndEnabled()) {
+      return getVoidPromiseResult();
+    }
+
+    return this.amplitude!.flush();
   }
 
   /**
@@ -1414,6 +1754,23 @@ export class Ampli {
   }
 
   /**
+   * EarnByAddingLiquidityClicked
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/EarnByAddingLiquidityClicked)
+   *
+   * This event tracks when a user clicks on the "Earn by Adding Liquidity" CTA within the application
+   *
+   * @param properties The event's properties (e.g. action)
+   * @param options Amplitude event options.
+   */
+  earnByAddingLiquidityClicked(
+    properties: EarnByAddingLiquidityClickedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new EarnByAddingLiquidityClicked(properties), options);
+  }
+
+  /**
    * FeesInfoExpanded
    *
    * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/FeesInfoExpanded)
@@ -1466,6 +1823,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new MaxTokenAmountClicked(properties), options);
+  }
+
+  /**
+   * MonitorDepositProgressClicked
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/MonitorDepositProgressClicked)
+   *
+   * This event tracks when a user clicks on the "Monitor Progress" button within the application
+   *
+   * @param properties The event's properties (e.g. action)
+   * @param options Amplitude event options.
+   */
+  monitorDepositProgressClicked(
+    properties: MonitorDepositProgressClickedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new MonitorDepositProgressClicked(properties), options);
   }
 
   /**
@@ -1559,6 +1933,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new TokenSelected(properties), options);
+  }
+
+  /**
+   * TrackInExplorerClicked
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/TrackInExplorerClicked)
+   *
+   * This event tracks when a user clicks on the "Track in explorer" button within the application
+   *
+   * @param properties The event's properties (e.g. action)
+   * @param options Amplitude event options.
+   */
+  trackInExplorerClicked(
+    properties: TrackInExplorerClickedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new TrackInExplorerClicked(properties), options);
   }
 
   /**
