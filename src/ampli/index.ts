@@ -236,6 +236,19 @@ export interface ConnectWalletButtonClickedProperties {
     | "depositConfirmation";
 }
 
+export interface DepositNetworkMismatchProperties {
+  /**
+   * Id of the fromChain
+   */
+  fromChainId: string;
+  signerAddress: string;
+  signerChainId: string;
+  /**
+   * Id of the toChain
+   */
+  toChainId: string;
+}
+
 export interface DisconnectWalletButtonClickedProperties {
   /**
    * Action user did to trigger the event.
@@ -1419,6 +1432,14 @@ export class ConnectWalletButtonClicked implements BaseEvent {
   }
 }
 
+export class DepositNetworkMismatch implements BaseEvent {
+  event_type = "DepositNetworkMismatch";
+
+  constructor(public event_properties: DepositNetworkMismatchProperties) {
+    this.event_properties = event_properties;
+  }
+}
+
 export class DisconnectWalletButtonClicked implements BaseEvent {
   event_type = "DisconnectWalletButtonClicked";
 
@@ -1732,6 +1753,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new ConnectWalletButtonClicked(properties), options);
+  }
+
+  /**
+   * DepositNetworkMismatch
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest/DepositNetworkMismatch)
+   *
+   * This event tracks instances where a transfer deposit is attempted to a network that does not match the intended network
+   *
+   * @param properties The event's properties (e.g. fromChainId)
+   * @param options Amplitude event options.
+   */
+  depositNetworkMismatch(
+    properties: DepositNetworkMismatchProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new DepositNetworkMismatch(properties), options);
   }
 
   /**

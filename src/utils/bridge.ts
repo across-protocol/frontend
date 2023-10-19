@@ -7,6 +7,7 @@ import { getProvider } from "./providers";
 import { getConfig } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
+import { DepositNetworkMismatchProperties } from "ampli";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -175,7 +176,10 @@ export async function sendAcrossDeposit(
     maxCount = ethers.constants.MaxUint256,
     isNative,
     referrer,
-  }: AcrossDepositArgs
+  }: AcrossDepositArgs,
+  onNetworkMismatch?: (
+    mismatchProperties: DepositNetworkMismatchProperties
+  ) => void
 ): Promise<ethers.providers.TransactionResponse> {
   const config = getConfig();
   const provider = getProvider(fromChain);
@@ -233,7 +237,14 @@ export async function sendAcrossDeposit(
   // is connected to the correct chain.
   // NOTE: I think this is a good candiate for using an RPC call
   //       to get the chainId of the signer.
-  if ((await signer.getChainId()) !== fromChain) {
+  const signerChainId = await signer.getChainId();
+  if (signerChainId !== fromChain) {
+    onNetworkMismatch?.({
+      signerAddress: await signer.getAddress(),
+      fromChainId: String(fromChain),
+      toChainId: String(destinationChainId),
+      signerChainId: String(signerChainId),
+    });
     throw new Error(
       "Signer is not connected to the correct chain. This may have happened in the background"
     );
