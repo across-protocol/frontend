@@ -333,6 +333,7 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
+      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.MAINNET)
@@ -340,6 +341,7 @@ export const queries: Record<
   [CHAIN_IDs.OPTIMISM]: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
       getProvider(CHAIN_IDs.OPTIMISM),
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -353,6 +355,7 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
+      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.POLYGON)
@@ -360,6 +363,7 @@ export const queries: Record<
   [CHAIN_IDs.ARBITRUM]: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
       getProvider(CHAIN_IDs.ARBITRUM),
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -373,6 +377,7 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
+      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.ZK_SYNC)
@@ -380,6 +385,7 @@ export const queries: Record<
   [CHAIN_IDs.BASE]: () =>
     new sdk.relayFeeCalculator.BaseQueries(
       getProvider(CHAIN_IDs.BASE),
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -394,6 +400,7 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
+      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.GOERLI)
@@ -401,6 +408,7 @@ export const queries: Record<
   [CHAIN_IDs.ARBITRUM_GOERLI]: () =>
     new sdk.relayFeeCalculator.ArbitrumGoerliQueries(
       getProvider(CHAIN_IDs.ARBITRUM_GOERLI),
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -414,6 +422,7 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
+      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.ZK_SYNC_GOERLI)
@@ -421,6 +430,7 @@ export const queries: Record<
   [CHAIN_IDs.BASE_GOERLI]: () =>
     new sdk.relayFeeCalculator.BaseGoerliQueries(
       getProvider(CHAIN_IDs.BASE_GOERLI),
+      undefined,
       undefined,
       undefined,
       undefined,
