@@ -93,6 +93,9 @@ export class ConfigClient {
             ...constants.disabledChainIds,
             ...constants.disabledChainIdsForAvailableRoutes,
           ].includes(chainId.toString())
+        ) &&
+        !constants.disabledTokensForAvailableRoutes.some(
+          (s) => s.toUpperCase() === route.fromTokenSymbol.toUpperCase()
         )
     );
   }

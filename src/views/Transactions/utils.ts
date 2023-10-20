@@ -3,6 +3,7 @@ import {
   getConfig,
   disabledChainIds,
   disabledChainIdsForAvailableRoutes,
+  disabledTokensForAvailableRoutes,
 } from "utils";
 
 import { SupportedTxTuple } from "./types";
@@ -20,6 +21,10 @@ export function getSupportedTxTuples(
           [...disabledChainIds, ...disabledChainIdsForAvailableRoutes].includes(
             String(chainId)
           )
+        ) ||
+        // Do not show transactions for disabled tokens
+        disabledTokensForAvailableRoutes.includes(
+          config.getTokenInfoByAddress(tx.sourceChainId, tx.assetAddr).symbol
         )
       ) {
         return supported;

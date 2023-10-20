@@ -5,6 +5,7 @@ import {
   getFallbackTokenLogoURI,
   ENABLED_ROUTES,
   DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
+  DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 import { TOKEN_SYMBOLS_MAP } from "./_constants";
@@ -18,6 +19,9 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
         (route) =>
           ![route.fromChain, route.toChain].some((chainId) =>
             DISABLED_CHAINS_FOR_AVAILABLE_ROUTES.includes(String(chainId))
+          ) &&
+          !DISABLED_TOKENS_FOR_AVAILABLE_ROUTES.some(
+            (s) => s.toUpperCase() === route.fromTokenSymbol.toUpperCase()
           )
       )
       .reduce(
