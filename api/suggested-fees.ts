@@ -76,28 +76,53 @@ const handler = async (
       throw new InputError("Origin and destination chains cannot be the same");
     }
 
+    relayerAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
     token = ethers.utils.getAddress(token);
 
-    const [latestBlock, tokenDetails, isRecipientAContract] = await Promise.all(
-      [
-        provider.getBlock("latest"),
-        getTokenDetails(provider, undefined, token, originChainId),
-        sdk.utils.isContractDeployedToAddress(recipientAddress, provider),
-      ]
-    );
+    const [latestBlock, tokenDetails] = await Promise.all([
+      provider.getBlock("latest"),
+      getTokenDetails(provider, undefined, token, originChainId),
+    ]);
     const { l1Token, hubPool, chainId: computedOriginChainId } = tokenDetails;
 
-    if (sdk.utils.isDefined(message) && !isRecipientAContract) {
-      throw new InputError(
-        "Recipient address with a contract deployed to it is required when a message is provided"
+    if (sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message)) {
+      if (message.length % 2 !== 0) {
+        // Our message encoding is a hex string, so we need to check that the length is even.
+        throw new InputError("Message must be an even hex string");
+      }
+      const isRecipientAContract = await sdk.utils.isContractDeployedToAddress(
+        recipientAddress,
+        provider
       );
-    }
-    if (
-      sdk.utils.isDefined(message) &&
-      // Our message encoding is a hex string, so we need to check that the length is even.
-      message.length % 2 !== 0
-    ) {
-      throw new InputError("Message must be an even hex string");
+      if (!isRecipientAContract) {
+        throw new InputError(
+          "Recipient address with a contract deployed to it is required when a message is provided"
+        );
+      } else {
+        // If we're in this case, it's likely that we're going to have to simulate the execution of
+        // a complex message handling from the specified relayer to the specified recipient by calling
+        // the arbitrary function call `handleAcrossMessage` at the recipient. So that we can discern
+        // the difference between an OUT_OF_FUNDS error in either the transfer or through the execution
+        // of the `handleAcrossMessage` we will check that the balance of the relayer is sufficient to
+        // support this deposit.
+        const destinationToken =
+          sdk.utils.getL2TokenAddresses(l1Token)?.[Number(destinationChainId)];
+        if (!sdk.utils.isDefined(destinationToken)) {
+          throw new InputError(
+            `Could not resolve token address on ${destinationChainId} for ${l1Token}`
+          );
+        }
+        const balanceOfToken = await sdk.utils.getTokenBalance(
+          relayerAddress,
+          destinationToken,
+          provider
+        );
+        if (balanceOfToken.lt(amountInput)) {
+          throw new InputError(
+            `Quotes for partial filling when message is defined are unavailable.`
+          );
+        }
+      }
     }
 
     // Note: Add a buffer to "latest" timestamp so that it corresponds to a block older than HEAD.

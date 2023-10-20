@@ -333,7 +333,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.MAINNET)
@@ -341,7 +340,6 @@ export const queries: Record<
   [CHAIN_IDs.OPTIMISM]: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
       getProvider(CHAIN_IDs.OPTIMISM),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -355,7 +353,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.POLYGON)
@@ -363,7 +360,6 @@ export const queries: Record<
   [CHAIN_IDs.ARBITRUM]: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
       getProvider(CHAIN_IDs.ARBITRUM),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -377,7 +373,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.ZK_SYNC)
@@ -385,7 +380,6 @@ export const queries: Record<
   [CHAIN_IDs.BASE]: () =>
     new sdk.relayFeeCalculator.BaseQueries(
       getProvider(CHAIN_IDs.BASE),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -400,7 +394,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.GOERLI)
@@ -408,7 +401,6 @@ export const queries: Record<
   [CHAIN_IDs.ARBITRUM_GOERLI]: () =>
     new sdk.relayFeeCalculator.ArbitrumGoerliQueries(
       getProvider(CHAIN_IDs.ARBITRUM_GOERLI),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -422,7 +414,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.ZK_SYNC_GOERLI)
@@ -430,7 +421,6 @@ export const queries: Record<
   [CHAIN_IDs.BASE_GOERLI]: () =>
     new sdk.relayFeeCalculator.BaseGoerliQueries(
       getProvider(CHAIN_IDs.BASE_GOERLI),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -502,18 +492,35 @@ export const getRelayerFeeDetails = async (
   message?: string,
   relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const tokenSymbol = getTokenSymbol(l1Token);
+  const tokenAddresses = sdk.utils.getL2TokenAddresses(l1Token);
+  if (!tokenAddresses) {
+    throw new InputError(
+      `Could not resolve token address for token ${l1Token}`
+    );
+  }
+  const originToken = tokenAddresses[originChainId];
+  const destinationToken = tokenAddresses[destinationChainId];
+
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   try {
     return await relayFeeCalculator.relayerFeeDetails(
+      {
+        amount: sdk.utils.toBN(amount),
+        depositId: sdk.utils.bnUint32Max.toNumber(),
+        depositor: sdk.utils.randomAddress(), // Random depositor - shouldn't make too much of a difference.
+        destinationChainId,
+        originChainId,
+        relayerFeePct: sdk.utils.bnZero,
+        realizedLpFeePct: sdk.utils.bnZero,
+        recipient: recipientAddress,
+        message: message ?? sdk.constants.EMPTY_MESSAGE,
+        quoteTimestamp: sdk.utils.getCurrentTime(),
+        originToken,
+        destinationToken,
+      },
       amount,
-      tokenSymbol,
-      String(originChainId),
-      String(destinationChainId),
-      recipientAddress,
-      message,
-      tokenPrice,
-      relayerAddress
+      relayerAddress,
+      tokenPrice
     );
   } catch (_e: unknown) {
     const e = _e as Error;
