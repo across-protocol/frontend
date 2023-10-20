@@ -8,6 +8,7 @@ import {
   ENABLED_ROUTES,
   handleErrorCondition,
   DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
+  DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 
@@ -64,9 +65,13 @@ const handler = async (
         originChainId: number;
         destinationChainId: number;
         destinationToken: string;
+        fromTokenSymbol: string;
       }) =>
         ![route.originChainId, route.destinationChainId].some((chainId) =>
           DISABLED_CHAINS_FOR_AVAILABLE_ROUTES.includes(String(chainId))
+        ) &&
+        !DISABLED_TOKENS_FOR_AVAILABLE_ROUTES.some(
+          (s) => s.toUpperCase() === route.fromTokenSymbol.toUpperCase()
         ) &&
         (!originToken ||
           originToken.toLowerCase() === route.originToken.toLowerCase()) &&
@@ -81,6 +86,7 @@ const handler = async (
         originChainId: route.fromChain,
         originToken: route.fromTokenAddress,
         destinationChainId: route.toChain,
+        fromTokenSymbol: route.fromTokenSymbol,
         // Resolve destination chain directly from the
         // l1TokensToDestinationTokens map
         destinationToken:

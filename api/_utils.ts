@@ -79,6 +79,10 @@ export const DISABLED_CHAINS_FOR_AVAILABLE_ROUTES = (
   process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
+export const DISABLED_TOKENS_FOR_AVAILABLE_ROUTES = (
+  process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
+).split(",");
+
 const _ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1
     ? enabledMainnetRoutesAsJson
