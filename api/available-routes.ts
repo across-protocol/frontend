@@ -92,7 +92,12 @@ const handler = async (
         destinationToken:
           l1TokensToDestinationTokens[route.l1TokenAddress][route.toChain],
       })
-    );
+    ).map((route) => ({
+      originChainId: route.originChainId,
+      originToken: route.originToken,
+      destinationChainId: route.destinationChainId,
+      destinationToken: route.destinationToken,
+    }));
 
     // Two different explanations for how `stale-while-revalidate` works:
 
