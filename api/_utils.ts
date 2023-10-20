@@ -523,22 +523,10 @@ export const getRelayerFeeDetails = async (
       tokenPrice
     );
   } catch (_e: unknown) {
+    // Resolve and transform the error
     const e = _e as Error;
-    // If the error is due to a specific number of erroneous inputs,
-    // we can propagate the error to the user as a 4xx.
-    if (e.message.includes("Could not simulate message fill.")) {
-      throw new InputError(e.message);
-    } else {
-      // Otherwise, we throw a 500.
-      throw new Error(
-        `Could not process relayer fee details.
-      ${
-        sdk.utils.isDefined(message)
-          ? " The likely cause is related to message payload."
-          : ""
-      }`
-      );
-    }
+    // We want to mask this error as an Input error.
+    throw new InputError(e?.message);
   }
 };
 
