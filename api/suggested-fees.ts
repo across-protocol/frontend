@@ -99,7 +99,7 @@ const handler = async (
       );
       if (!isRecipientAContract) {
         throw new InputError(
-          "Recipient address with a contract deployed to it is required when a message is provided"
+          "Recipient must be a contract when a message is provided"
         );
       } else {
         // If we're in this case, it's likely that we're going to have to simulate the execution of
