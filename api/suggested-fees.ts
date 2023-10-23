@@ -122,7 +122,7 @@ const handler = async (
         );
         if (balanceOfToken.lt(amountInput)) {
           throw new InputError(
-            `Quotes for partial filling when message is defined are unavailable.`
+            `Relayer Address (${relayerAddress}) doesn't have enough funds to support this deposit. For help, please reach out to https://discord.across.to`
           );
         }
       }
