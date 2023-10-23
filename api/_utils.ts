@@ -611,23 +611,63 @@ export const isRouteEnabled = (
 };
 
 /**
- * Resolves the balance of a given ERC20 token at a provided address
+ * Resolves the balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
+ * native currency will be returned.
  * @param chainId The blockchain Id to query against
- * @param token The valid ERC20 token address on the given `chainId`
+ * @param token The valid ERC20 token address on the given `chainId`. If undefined, the native currency will be used
  * @param account A valid Web3 wallet address
- * @param blockTag A blockTag to specify a historical balance date
+ * @param blockTag A blockTag to specify a historical balance date or the latest balance
  * @returns A promise that resolves to the BigNumber of the balance
  */
 export const getBalance = (
   chainId: string | number,
-  token: string,
   account: string,
+  token?: string,
   blockTag: number | "latest" = "latest"
 ): Promise<BigNumber> => {
-  return ERC20__factory.connect(token, getProvider(Number(chainId))).balanceOf(
+  const provider = getProvider(Number(chainId));
+  if (sdk.utils.isDefined(token)) {
+    return sdk.utils.getTokenBalance(account, token, provider, blockTag);
+  } else {
+    return provider.getBalance(account, blockTag);
+  }
+};
+
+/**
+ * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
+ * native currency will be returned.
+ * @param chainId The blockchain Id to query against
+ * @param token The valid ERC20 token address on the given `chainId`. If undefined, the native currency will be used
+ * @param account A valid Web3 wallet address
+ * @param blockTag A blockTag to specify a historical balance date or the latest balance
+ * @returns A promise that resolves to the BigNumber of the balance
+ */
+export const getCachedTokenBalance = async (
+  chainId: string | number,
+  account: string,
+  token?: string,
+  blockTag: number | "latest" = "latest"
+): Promise<BigNumber> => {
+  // Define the initial params
+  const params: Record<string, unknown> = {
+    chainId,
     account,
-    { blockTag }
+  };
+  if (token) {
+    params["token"] = token;
+  }
+  if (blockTag !== "latest") {
+    params["blockTag"] = blockTag;
+  }
+  // Make the request
+  const response = await axios.get<{ balance: string }>(
+    `${resolveVercelEndpoint()}/api/account-balance`,
+    {
+      params,
+    }
   );
+  // Return the balance
+  return BigNumber.from(response.data.balance);
 };
 
 /**

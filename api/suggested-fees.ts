@@ -24,6 +24,7 @@ import {
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
   getSpokePoolAddress,
+  getCachedTokenBalance,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -115,10 +116,10 @@ const handler = async (
             `Could not resolve token address on ${destinationChainId} for ${l1Token}`
           );
         }
-        const balanceOfToken = await sdk.utils.getTokenBalance(
-          relayerAddress,
+        const balanceOfToken = await getCachedTokenBalance(
+          destinationChainId,
           destinationToken,
-          provider
+          relayerAddress
         );
         if (balanceOfToken.lt(amountInput)) {
           throw new InputError(
