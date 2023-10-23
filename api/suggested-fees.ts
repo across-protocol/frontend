@@ -86,6 +86,9 @@ const handler = async (
     const { l1Token, hubPool, chainId: computedOriginChainId } = tokenDetails;
 
     if (sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message)) {
+      if (!ethers.utils.isHexString(message)) {
+        throw new InputError("Message must be a hex string");
+      }
       if (message.length % 2 !== 0) {
         // Our message encoding is a hex string, so we need to check that the length is even.
         throw new InputError("Message must be an even hex string");
