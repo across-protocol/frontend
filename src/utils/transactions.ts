@@ -1,6 +1,10 @@
 import { Contract, ContractTransaction, ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
-import { fixedPointAdjustment, gasMultiplier } from "./constants";
+import {
+  fixedPointAdjustment,
+  gasMultiplierPerChain,
+  hubPoolChainId,
+} from "./constants";
 
 /**
  * This function takes a raw transaction and a signer and returns the result of signing the transaction.
@@ -26,34 +30,53 @@ export async function sendSignedTransaction(
 
 type Transaction = Promise<ContractTransaction>;
 
+export async function getPaddedGasEstimation(
+  chainId: number,
+  contract: Contract,
+  method: string,
+  ...args: any[]
+) {
+  const gasMultiplier = gasMultiplierPerChain[chainId];
+  /* If the gas multiplier hasn't been set, run this function as a normal tx */
+  if (!gasMultiplier) {
+    return contract.estimateGas[method](...args);
+  } else {
+    // Estimate the gas with the provided estimateGas logic
+    const gasEstimation = await contract.estimateGas[method](...args);
+    // Factor in the padding
+    const gasToRecommend = gasEstimation
+      .mul(parseEther(String(gasMultiplier)))
+      .div(fixedPointAdjustment);
+    return gasToRecommend;
+  }
+}
+
 /**
  * Pads the gas estimation by a fixed amount dictated in the `REACT_SEND_TXN_GAS_ESTIMATION_MULTIPLIER` env var
  * @param contract The contract that this transaction will originate from
  * @param method The specific call method
  * @returns A completed or failed transaction
  */
-export function sendWithPaddedGas(contract: Contract, method: string) {
+export function sendWithPaddedGas(
+  contract: Contract,
+  method: string,
+  chainId: number = hubPoolChainId
+) {
   /**
    * Executes a given smart contract method with padded gas.
    * @param args The arguments to supply this smart contract call
    * @returns A contract transaction result.
    */
   const fn = async (...args: any[]): Transaction => {
-    /* If the gas multiplier hasn't been set, run this function as a normal tx */
-    if (!gasMultiplier) {
-      return contract[method](...args) as Promise<ContractTransaction>;
-    } else {
-      // Estimate the gas with the provided estimateGas logic
-      const gasEstimation = await contract.estimateGas[method](...args);
-      // Factor in the padding
-      const gasToRecommend = gasEstimation
-        .mul(parseEther(String(gasMultiplier)))
-        .div(fixedPointAdjustment);
-      // Call the tx with the padded gas
-      return contract[method](...args, {
-        gasLimit: gasToRecommend,
-      });
-    }
+    const gasToRecommend = await getPaddedGasEstimation(
+      chainId,
+      contract,
+      method,
+      ...args
+    );
+    return contract[method](...args, {
+      gasLimit: gasToRecommend,
+    });
   };
   return fn;
 }

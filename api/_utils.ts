@@ -58,11 +58,6 @@ export const DEFAULT_GAS_MARKUP = 0;
 // Don't permit HUB_POOL_CHAIN_ID=0
 export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
 
-// Permit REACT_APP_FLAT_RELAY_CAPITAL_FEE=0
-export const FLAT_RELAY_CAPITAL_FEE = Number(
-  process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE ?? 0.03
-); // 0.03%
-
 // Tokens that should be disabled in the routes
 export const DISABLED_ROUTE_TOKENS = (
   process.env.DISABLED_ROUTE_TOKENS || ""
@@ -82,6 +77,10 @@ export const DISABLED_CHAINS = (
 // `ENABLED_ROUTES` object.
 export const DISABLED_CHAINS_FOR_AVAILABLE_ROUTES = (
   process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
+).split(",");
+
+export const DISABLED_TOKENS_FOR_AVAILABLE_ROUTES = (
+  process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
 const _ENABLED_ROUTES =
@@ -443,7 +442,6 @@ export const getRelayerFeeCalculator = (destinationChainId: number) => {
 
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
-    capitalCostsPercent: FLAT_RELAY_CAPITAL_FEE, // This is set same way in ./src/utils/bridge.ts
     queries: queryFn(),
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };

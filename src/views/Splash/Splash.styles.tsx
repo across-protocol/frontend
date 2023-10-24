@@ -3,6 +3,7 @@ import { Text } from "components/Text";
 import { Link } from "react-router-dom";
 import { QUERIESV2 } from "utils";
 import BGMesh from "assets/splash-mesh-bg.svg";
+import BGMeshMobile from "assets/splash-mesh-bg-mobile.png";
 
 export const ExternalWrapper = styled.div`
   background: url(${BGMesh});
@@ -12,6 +13,8 @@ export const ExternalWrapper = styled.div`
   padding-top: 72px;
 
   @media ${QUERIESV2.sm.andDown} {
+    background: url(${BGMeshMobile});
+
     margin-top: -64px;
     padding-top: 64px;
   }

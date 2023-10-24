@@ -10,7 +10,7 @@ import {
   chainInfoList,
   providerUrlsTable,
 } from "utils";
-import logo from "assets/across-logo-v2.svg";
+import logo from "assets/across.svg";
 
 const injected = injectedModule();
 const gnosis = gnosisModule();

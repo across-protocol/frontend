@@ -7,6 +7,7 @@ import { getProvider } from "./providers";
 import { getConfig } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
+import { DepositNetworkMismatchProperties } from "ampli";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -175,17 +176,38 @@ export async function sendAcrossDeposit(
     maxCount = ethers.constants.MaxUint256,
     isNative,
     referrer,
-  }: AcrossDepositArgs
+  }: AcrossDepositArgs,
+  onNetworkMismatch?: (
+    mismatchProperties: DepositNetworkMismatchProperties
+  ) => void
 ): Promise<ethers.providers.TransactionResponse> {
   const config = getConfig();
-  const spokePool = config.getSpokePool(fromChain);
   const provider = getProvider(fromChain);
-  const code = await provider.getCode(spokePool.address);
-  if (!code) {
+
+  const spokePool = config.getSpokePool(fromChain);
+  const spokePoolVerifier = config.getSpokePoolVerifier(fromChain);
+
+  // If the spoke pool verifier is enabled, use it for native transfers.
+  const shouldUseSpokePoolVerifier = Boolean(spokePoolVerifier) && isNative;
+
+  if (shouldUseSpokePoolVerifier) {
+    const spokePoolVerifierCode = await provider.getCode(
+      spokePoolVerifier!.address
+    );
+    if (!spokePoolVerifierCode || spokePoolVerifierCode === "0x") {
+      throw new Error(
+        `SpokePoolVerifier not deployed at ${spokePoolVerifier!.address}`
+      );
+    }
+  }
+
+  const spokePoolCode = await provider.getCode(spokePool.address);
+  if (!spokePoolCode || spokePoolCode === "0x") {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
+
   const value = isNative ? amount : ethers.constants.Zero;
-  const tx = await spokePool.populateTransaction.deposit(
+  const commonArgs = [
     recipient,
     tokenAddress,
     amount,
@@ -194,14 +216,39 @@ export async function sendAcrossDeposit(
     quoteTimestamp,
     message,
     maxCount,
-    { value }
-  );
+    { value },
+  ] as const;
+
+  const tx =
+    shouldUseSpokePoolVerifier && spokePoolVerifier
+      ? await spokePoolVerifier.populateTransaction.deposit(
+          spokePool.address,
+          ...commonArgs
+        )
+      : await spokePool.populateTransaction.deposit(...commonArgs);
 
   // do not tag a referrer if data is not provided as a hex string.
   tx.data =
     referrer && ethers.utils.isAddress(referrer)
       ? tagAddress(tx.data!, referrer, referrerDelimiterHex)
       : tx.data;
+
+  // Last test to ensure that the tx is valid and that the signer
+  // is connected to the correct chain.
+  // NOTE: I think this is a good candiate for using an RPC call
+  //       to get the chainId of the signer.
+  const signerChainId = await signer.getChainId();
+  if (signerChainId !== fromChain) {
+    onNetworkMismatch?.({
+      signerAddress: await signer.getAddress(),
+      fromChainId: String(fromChain),
+      toChainId: String(destinationChainId),
+      signerChainId: String(signerChainId),
+    });
+    throw new Error(
+      "Signer is not connected to the correct chain. This may have happened in the background"
+    );
+  }
 
   return signer.sendTransaction(tx);
 }

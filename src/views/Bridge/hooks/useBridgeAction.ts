@@ -67,7 +67,7 @@ export function useBridgeAction(
       !frozenTokenPrice ||
       !tokenSymbol
     ) {
-      return;
+      throw new Error("Missing required data for bridge action");
     }
 
     if (isWrongNetwork) {
@@ -98,7 +98,15 @@ export function useBridgeAction(
     });
     const timeSubmitted = Date.now();
 
-    tx = await sendAcrossDeposit(signer, frozenPayload);
+    tx = await sendAcrossDeposit(
+      signer,
+      frozenPayload,
+      (networkMismatchProperties) => {
+        addToAmpliQueue(() => {
+          ampli.depositNetworkMismatch(networkMismatchProperties);
+        });
+      }
+    );
 
     try {
       // Instrument amplitude after signing the transaction for the submit button.

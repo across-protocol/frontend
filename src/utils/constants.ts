@@ -1,5 +1,5 @@
 import assert from "assert";
-import { ethers, providers } from "ethers";
+import { BigNumber, ethers, providers } from "ethers";
 import { utils } from "@across-protocol/sdk-v2";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants-v2";
 import * as superstruct from "superstruct";
@@ -126,7 +126,7 @@ export type ChainInfoList = ChainInfo[];
 export type ChainInfoTable = Record<number, ChainInfo>;
 
 export const defaultBlockPollingInterval =
-  Number(process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL_S || 30) * 1000;
+  Number(process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL_S || 15) * 1000;
 export const hubPoolChainId = Number(
   process.env.REACT_APP_HUBPOOL_CHAINID || 1
 );
@@ -193,7 +193,7 @@ export const chainInfoList: ChainInfoList = [
       "https://explorer.zksync.io"
     ),
     nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
+    pollingInterval: 10_000,
   },
   {
     name: "Base",
@@ -204,7 +204,7 @@ export const chainInfoList: ChainInfoList = [
     explorerUrl: "https://basescan.org",
     constructExplorerLink: defaultConstructExplorerLink("https://basescan.org"),
     nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
+    pollingInterval: 10_000,
   },
   // testnets
   {
@@ -376,9 +376,6 @@ export const tokenList = [
 ];
 
 // process.env variables
-export const gasEstimationMultiplier = Number(
-  process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER || 2
-);
 export const rewardsApiUrl =
   process.env.REACT_APP_REWARDS_API_URL || "https://api.across.to";
 export const airdropWindowIndex = Number(
@@ -411,10 +408,6 @@ export const FEE_ESTIMATION = ".004";
 export const MAX_RELAY_FEE_PERCENT = Number(
   process.env.REACT_APP_MAX_RELAY_FEE_PERCENT || 50
 );
-export const FLAT_RELAY_CAPITAL_FEE = process.env
-  .REACT_APP_FLAT_RELAY_CAPITAL_FEE
-  ? Number(process.env.REACT_APP_FLAT_RELAY_CAPITAL_FEE)
-  : 0;
 export const SHOW_ACX_NAV_TOKEN =
   process.env.REACT_APP_SHOW_ACX_NAV_TOKEN === "true";
 export const AddressZero = ethers.constants.AddressZero;
@@ -503,10 +496,15 @@ const PoolSS = superstruct.object({
   tokenSymbol: superstruct.string(),
   isNative: superstruct.boolean(),
 });
+const SpokePoolVerifierSS = superstruct.object({
+  enabledChains: superstruct.array(superstruct.number()),
+  address: superstruct.string(),
+});
 const PoolsSS = superstruct.array(PoolSS);
 const RouteConfigSS = superstruct.type({
   routes: RoutesSS,
   pools: PoolsSS,
+  spokePoolVerifier: SpokePoolVerifierSS,
   hubPoolWethAddress: superstruct.string(),
   hubPoolChain: superstruct.number(),
   hubPoolAddress: superstruct.string(),
@@ -520,6 +518,7 @@ export type Route = superstruct.Infer<typeof RouteSS>;
 export type Routes = superstruct.Infer<typeof RoutesSS>;
 export type Pool = superstruct.Infer<typeof PoolSS>;
 export type Pools = superstruct.Infer<typeof PoolsSS>;
+export type SpokePoolVerifier = superstruct.Infer<typeof SpokePoolVerifierSS>;
 export function getRoutes(chainId: ChainId): RouteConfig {
   if (chainId === ChainId.MAINNET) {
     superstruct.assert(MainnetRoutes, RouteConfigSS);
@@ -637,9 +636,10 @@ export const rewardTiers = [
 export const secondsPerYear = 31557600;
 export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day
 
-export const gasMultiplier = process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER
-  ? Number(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER)
-  : undefined;
+export const gasMultiplierPerChain: Record<string, number> = process.env
+  .REACT_APP_GAS_ESTIMATION_MULTIPLIER_PER_CHAIN
+  ? JSON.parse(process.env.REACT_APP_GAS_ESTIMATION_MULTIPLIER_PER_CHAIN)
+  : {};
 
 export const suggestedFeesDeviationBufferMultiplier = !Number.isNaN(
   Number(
@@ -689,6 +689,13 @@ export const disabledChainIdsForAvailableRoutes = (
   process.env.REACT_APP_DISABLED_CHAINS_FOR_AVAILABLE_ROUTES || ""
 ).split(",");
 
+export const disabledTokensForAvailableRoutes = (
+  process.env.REACT_APP_DISABLED_TOKENS_FOR_AVAILABLE_ROUTES || ""
+).split(",");
+
 export const walletBlacklist = (process.env.REACT_APP_WALLET_BLACKLIST || "")
   .split(",")
   .map((address) => address.toLowerCase());
+
+// Pre-computed gas expenditure for deposits used for estimations
+export const gasExpenditureDeposit = BigNumber.from(90_000);

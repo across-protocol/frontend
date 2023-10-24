@@ -10,6 +10,8 @@ import {
   HubPool__factory,
   SpokePool,
   SpokePool__factory,
+  SpokePoolVerifier,
+  SpokePoolVerifier__factory,
   AcrossMerkleDistributor,
   AcrossMerkleDistributor__factory,
   AcceleratingDistributor,
@@ -34,6 +36,8 @@ export class ConfigClient {
   public readonly spokeChains: Set<number> = new Set();
   public readonly fromChains: Set<number> = new Set();
   public readonly toChains: Set<number> = new Set();
+  public readonly enabledChainsSpokePoolVerifier: Set<number> = new Set();
+  public readonly spokePoolVerifierAddress: string = "";
   public tokenOrder: Record<string, number> = {};
   public chainOrder: Record<string, number> = {};
   public routes: constants.Routes = [];
@@ -71,8 +75,11 @@ export class ConfigClient {
         this.tokenOrder[route.fromTokenSymbol] + this.chainOrder[route.toChain]
       );
     });
-    // prioritize routes based on token symbol and tochain. This just gives us better route prioritization when filtering a fromChain
     this.pools = this.config.pools;
+    this.enabledChainsSpokePoolVerifier = new Set(
+      this.config.spokePoolVerifier.enabledChains || []
+    );
+    this.spokePoolVerifierAddress = this.config.spokePoolVerifier.address;
   }
   getWethAddress(): string {
     return this.config.hubPoolWethAddress;
@@ -86,6 +93,9 @@ export class ConfigClient {
             ...constants.disabledChainIds,
             ...constants.disabledChainIdsForAvailableRoutes,
           ].includes(chainId.toString())
+        ) &&
+        !constants.disabledTokensForAvailableRoutes.some(
+          (s) => s.toUpperCase() === route.fromTokenSymbol.toUpperCase()
         )
     );
   }
@@ -104,6 +114,25 @@ export class ConfigClient {
     const address = this.getSpokePoolAddress(chainId);
     const provider = signer ?? providerUtils.getProvider(chainId);
     return SpokePool__factory.connect(address, provider);
+  }
+  getSpokePoolVerifierAddress(chainId: constants.ChainId): string | undefined {
+    if (!this.enabledChainsSpokePoolVerifier.has(chainId)) {
+      return undefined;
+    }
+    return this.spokePoolVerifierAddress;
+  }
+  getSpokePoolVerifier(
+    chainId: constants.ChainId,
+    signer?: Signer
+  ): SpokePoolVerifier | undefined {
+    const address = this.getSpokePoolVerifierAddress(chainId);
+
+    if (!address) {
+      return undefined;
+    }
+
+    const provider = signer ?? providerUtils.getProvider(chainId);
+    return SpokePoolVerifier__factory.connect(address, provider);
   }
   getHubPoolChainId(): constants.ChainId {
     return this.config.hubPoolChain;
