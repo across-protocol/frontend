@@ -477,7 +477,10 @@ export const getTokenSymbol = (tokenAddress: string): string => {
  * @param amount  The amount of funds that are requesting to be transferred
  * @param originChainId The origin chain that this token will be transferred from
  * @param destinationChainId The destination chain that this token will be transferred to
+ * @param recipientAddress The address that will receive the transferred funds
  * @param tokenPrice An optional overred price to prevent the SDK from creating its own call
+ * @param message An optional message to include in the transfer
+ * @param relayerAddress An optional relayer address to use for the transfer
  * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
  */
 export const getRelayerFeeDetails = async (
@@ -485,7 +488,7 @@ export const getRelayerFeeDetails = async (
   amount: sdk.utils.BigNumberish,
   originChainId: number,
   destinationChainId: number,
-  recipientAddress: string,
+  recipientAddress = "0x893d0d70ad97717052e3aa8903d9615804167759", // A known dummy address
   tokenPrice?: number,
   message?: string,
   relayerAddress?: string
@@ -505,7 +508,7 @@ export const getRelayerFeeDetails = async (
       {
         amount: sdk.utils.toBN(amount),
         depositId: sdk.utils.bnUint32Max.toNumber(),
-        depositor: sdk.utils.randomAddress(), // Random depositor - shouldn't make too much of a difference.
+        depositor: recipientAddress,
         destinationChainId,
         originChainId,
         relayerFeePct: sdk.utils.bnZero,
