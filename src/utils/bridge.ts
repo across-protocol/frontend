@@ -8,7 +8,6 @@ import { getConfig } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
-import { AddressZero } from "./constants";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -65,7 +64,6 @@ export async function getBridgeFees({
     lpFee,
   } = await getApiEndpoint().suggestedFees(
     amount,
-    AddressZero, // We don't need to know the recipient address for this call.
     getConfig().getTokenInfoBySymbol(fromChainId, tokenSymbol).address,
     toChainId,
     fromChainId

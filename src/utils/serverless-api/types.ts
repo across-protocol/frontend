@@ -54,7 +54,6 @@ export type SuggestedApiFeeReturnType = {
 
 export type SuggestedApiFeeType = (
   amount: ethers.BigNumber,
-  recipientAddress: string,
   originToken: string,
   toChainid: ChainId,
   fromChainid: ChainId

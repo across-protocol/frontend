@@ -6,7 +6,6 @@ import { SuggestedApiFeeReturnType } from "../types";
 /**
  * Creates an HTTP call to the `suggested-fees` API endpoint
  * @param amount The amount of fees to calculate
- * @param recipientAddress The address of the recipient
  * @param originToken The ERC20 token address from the origin chain
  * @param toChainid The destination chain number. The chain `amount` of `originToken` will be bridged to
  * @param fromChainid The origin chain number. The chain `amount` of `originToken` will be bridged from
@@ -14,7 +13,6 @@ import { SuggestedApiFeeReturnType } from "../types";
  */
 export async function suggestedFeesApiCall(
   amount: ethers.BigNumber,
-  recipientAddress: string,
   originToken: string,
   toChainid: ChainId,
   fromChainid: ChainId
@@ -26,7 +24,6 @@ export async function suggestedFeesApiCall(
       originChainId: fromChainid,
       amount: amount.toString(),
       skipAmountLimit: true,
-      recipientAddress,
     },
   });
   const result = response.data;

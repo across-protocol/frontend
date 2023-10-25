@@ -6,7 +6,6 @@ import { useBlock } from "./useBlock";
 /**
  * This hook calculates the bridge fees for a given token and amount.
  * @param amount - The amount to check bridge fees for.
- * @param recipient - The recipient of the bridge transfer.
  * @param fromChainId The chain Id of the origin chain
  * @param toChainId The chain Id of the receiving chain, its timestamp will be used to calculate the fees.
  * @param tokenSymbol - The token symbol to check bridge fees for.
