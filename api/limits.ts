@@ -155,29 +155,19 @@ const handler = async (
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
         fullRelayers.map((relayer) =>
-          getCachedTokenBalance(
-            destinationChainId!,
-            destinationToken,
-            relayer,
-            BLOCK_TAG_LAG
-          )
+          getCachedTokenBalance(destinationChainId!, destinationToken, relayer)
         )
       ),
       Promise.all(
         transferRestrictedRelayers.map((relayer) =>
-          getCachedTokenBalance(
-            destinationChainId!,
-            destinationToken,
-            relayer,
-            BLOCK_TAG_LAG
-          )
+          getCachedTokenBalance(destinationChainId!, destinationToken, relayer)
         )
       ),
       Promise.all(
         fullRelayers.map((relayer) =>
           destinationChainId === "1"
             ? ethers.BigNumber.from("0")
-            : getCachedTokenBalance("1", l1Token, relayer, BLOCK_TAG_LAG)
+            : getCachedTokenBalance("1", l1Token, relayer)
         )
       ),
     ]);
