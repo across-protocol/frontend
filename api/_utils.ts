@@ -488,7 +488,7 @@ export const getRelayerFeeDetails = async (
   amount: sdk.utils.BigNumberish,
   originChainId: number,
   destinationChainId: number,
-  recipientAddress = "0x893d0d70ad97717052e3aa8903d9615804167759", // A known dummy address
+  recipientAddress: string,
   tokenPrice?: number,
   message?: string,
   relayerAddress?: string

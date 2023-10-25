@@ -30,6 +30,7 @@ import {
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
 } from "./_utils";
+import { constants } from "@across-protocol/sdk-v2";
 
 const LimitsQueryParamsSchema = object({
   token: validAddress(),
@@ -149,7 +150,7 @@ const handler = async (
         ethers.BigNumber.from("10").pow(18),
         computedOriginChainId,
         Number(destinationChainId),
-        undefined,
+        constants.ZERO_ADDRESS,
         tokenPriceNative
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
