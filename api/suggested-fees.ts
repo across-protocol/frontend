@@ -35,7 +35,7 @@ const SuggestedFeesQueryParamsSchema = type({
   timestamp: optional(positiveIntStr()),
   skipAmountLimit: optional(boolStr()),
   message: optional(string()),
-  recipientAddress: validAddress(),
+  recipientAddress: optional(validAddress()),
   relayerAddress: optional(validAddress()),
 });
 
@@ -78,6 +78,7 @@ const handler = async (
     }
 
     relayerAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+    recipientAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
     token = ethers.utils.getAddress(token);
 
     const [latestBlock, tokenDetails] = await Promise.all([
