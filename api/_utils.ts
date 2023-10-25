@@ -1,3 +1,4 @@
+import "./_imports";
 import { AcceleratingDistributor__factory } from "@across-protocol/across-token/dist/typechain";
 import {
   ERC20__factory,
@@ -11,7 +12,6 @@ import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
 import { BigNumber, ethers, providers, utils } from "ethers";
 import { StructError, define } from "superstruct";
-
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
 
@@ -36,6 +36,7 @@ import {
   defaultRelayerAddressOverride,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
+import { kv } from "@vercel/kv";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -620,45 +621,31 @@ export const isRouteEnabled = (
  * @param token The valid ERC20 token address on the given `chainId`.
  * @returns A promise that resolves to the BigNumber of the balance
  */
-export const getBalance = (
+export const getBalance = async (
   chainId: string | number,
   account: string,
   token: string
 ): Promise<BigNumber> => {
-  return sdk.utils.getTokenBalance(
-    account,
-    token,
-    getProvider(Number(chainId)),
-    BLOCK_TAG_LAG
-  );
-};
-
-/**
- * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
- * native currency will be returned.
- * @param chainId The blockchain Id to query against
- * @param account A valid Web3 wallet address
- * @param token The valid ERC20 token address on the given `chainId`.
- * @returns A promise that resolves to the BigNumber of the balance
- */
-export const getCachedTokenBalance = async (
-  chainId: string | number,
-  account: string,
-  token: string
-): Promise<BigNumber> => {
-  // Make the request to the vercel API.
-  const response = await axios.get<{ balance: string }>(
-    `${resolveVercelEndpoint()}/api/account-balance`,
-    {
-      params: {
-        chainId,
-        account,
-        token,
-      },
-    }
-  );
-  // Return the balance
-  return BigNumber.from(response.data.balance);
+  const key = `balance_${chainId}-${account}-${token}`.toLowerCase();
+  const data = await kv.get<string>(key);
+  if (sdk.utils.isDefined(data)) {
+    return BigNumber.from(data);
+  } else {
+    const balance = await sdk.utils.getTokenBalance(
+      account,
+      token,
+      getProvider(Number(chainId)),
+      BLOCK_TAG_LAG // We should do this for consistency
+    );
+    await kv.set(key, balance.toString(), {
+      ex: 60 * 5, // 5 minutes
+    });
+    getLogger().debug({
+      at: "_utils#getBalance",
+      message: `Cached balance for ${key}: ${balance}`,
+    });
+    return balance;
+  }
 };
 
 /**
