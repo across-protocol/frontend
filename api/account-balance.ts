@@ -31,8 +31,7 @@ const handler = async (
     assert(query, AccountBalanceQueryParamsSchema);
     // Deconstruct the query parameters
     let { token, account, chainId } = query;
-    // Rely on the utils to query the balance of either the native
-    // token or an ERC20 token.
+    // Rely on the utils to query the balance of the account for the token
     const balance = await getBalance(chainId, account, token);
     // Package the response
     const result = {
