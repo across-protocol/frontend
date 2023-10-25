@@ -32,6 +32,7 @@ import {
   TOKEN_SYMBOLS_MAP,
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
+  BLOCK_TAG_LAG,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
 
@@ -627,7 +628,8 @@ export const getBalance = (
   return sdk.utils.getTokenBalance(
     account,
     token,
-    getProvider(Number(chainId))
+    getProvider(Number(chainId)),
+    BLOCK_TAG_LAG
   );
 };
 
