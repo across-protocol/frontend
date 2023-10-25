@@ -5,6 +5,7 @@ import { SuggestedApiFeeReturnType } from "../types";
 /**
  * Creates a mocked variant of the suggestedAPI Call
  * @param _amount The amount of fees to calculate
+ * @param _recipientAddress The address of the recipient
  * @param _originToken The ERC20 token address from the origin chain
  * @param _toChainid The destination chain number. The chain `amount` of `originToken` will be bridged to
  * @param _fromChainid The origin chain number. The chain `amount` of `originToken` will be bridged from
@@ -12,6 +13,7 @@ import { SuggestedApiFeeReturnType } from "../types";
  */
 export async function suggestedFeesMockedApiCall(
   _amount: ethers.BigNumber,
+  _recipientAddress: string,
   _originToken: string,
   _toChainid: ChainId,
   _fromChainid: ChainId
