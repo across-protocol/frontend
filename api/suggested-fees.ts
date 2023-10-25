@@ -118,8 +118,8 @@ const handler = async (
         }
         const balanceOfToken = await getCachedTokenBalance(
           destinationChainId,
-          destinationToken,
-          relayerAddress
+          relayerAddress,
+          destinationToken
         );
         if (balanceOfToken.lt(amountInput)) {
           throw new InputError(
