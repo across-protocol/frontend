@@ -617,20 +617,18 @@ export const isRouteEnabled = (
  * @param chainId The blockchain Id to query against
  * @param token The valid ERC20 token address on the given `chainId`. If undefined, the native currency will be used
  * @param account A valid Web3 wallet address
- * @param blockTag A blockTag to specify a historical balance date or the latest balance
  * @returns A promise that resolves to the BigNumber of the balance
  */
 export const getBalance = (
   chainId: string | number,
   account: string,
-  token?: string,
-  blockTag: number | "latest" = "latest"
+  token?: string
 ): Promise<BigNumber> => {
   const provider = getProvider(Number(chainId));
   if (sdk.utils.isDefined(token)) {
-    return sdk.utils.getTokenBalance(account, token, provider, blockTag);
+    return sdk.utils.getTokenBalance(account, token, provider);
   } else {
-    return provider.getBalance(account, blockTag);
+    return provider.getBalance(account);
   }
 };
 
@@ -640,14 +638,12 @@ export const getBalance = (
  * @param chainId The blockchain Id to query against
  * @param token The valid ERC20 token address on the given `chainId`. If undefined, the native currency will be used
  * @param account A valid Web3 wallet address
- * @param blockTag A blockTag to specify a historical balance date or the latest balance
  * @returns A promise that resolves to the BigNumber of the balance
  */
 export const getCachedTokenBalance = async (
   chainId: string | number,
   account: string,
-  token?: string,
-  blockTag: number | "latest" = "latest"
+  token?: string
 ): Promise<BigNumber> => {
   // Define the initial params
   const params: Record<string, unknown> = {
@@ -656,9 +652,6 @@ export const getCachedTokenBalance = async (
   };
   if (token) {
     params["token"] = token;
-  }
-  if (blockTag !== "latest") {
-    params["blockTag"] = blockTag;
   }
   // Make the request
   const response = await axios.get<{ balance: string }>(
