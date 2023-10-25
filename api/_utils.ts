@@ -615,49 +615,44 @@ export const isRouteEnabled = (
  * Resolves the balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
  * native currency will be returned.
  * @param chainId The blockchain Id to query against
- * @param token The valid ERC20 token address on the given `chainId`. If undefined, the native currency will be used
  * @param account A valid Web3 wallet address
+ * @param token The valid ERC20 token address on the given `chainId`.
  * @returns A promise that resolves to the BigNumber of the balance
  */
 export const getBalance = (
   chainId: string | number,
   account: string,
-  token?: string
+  token: string
 ): Promise<BigNumber> => {
-  const provider = getProvider(Number(chainId));
-  if (sdk.utils.isDefined(token)) {
-    return sdk.utils.getTokenBalance(account, token, provider);
-  } else {
-    return provider.getBalance(account);
-  }
+  return sdk.utils.getTokenBalance(
+    account,
+    token,
+    getProvider(Number(chainId))
+  );
 };
 
 /**
  * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
  * native currency will be returned.
  * @param chainId The blockchain Id to query against
- * @param token The valid ERC20 token address on the given `chainId`. If undefined, the native currency will be used
  * @param account A valid Web3 wallet address
+ * @param token The valid ERC20 token address on the given `chainId`.
  * @returns A promise that resolves to the BigNumber of the balance
  */
 export const getCachedTokenBalance = async (
   chainId: string | number,
   account: string,
-  token?: string
+  token: string
 ): Promise<BigNumber> => {
-  // Define the initial params
-  const params: Record<string, unknown> = {
-    chainId,
-    account,
-  };
-  if (token) {
-    params["token"] = token;
-  }
-  // Make the request
+  // Make the request to the vercel API.
   const response = await axios.get<{ balance: string }>(
     `${resolveVercelEndpoint()}/api/account-balance`,
     {
-      params,
+      params: {
+        chainId,
+        account,
+        token,
+      },
     }
   );
   // Return the balance

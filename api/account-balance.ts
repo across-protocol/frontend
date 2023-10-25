@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { assert, Infer, optional, type, min, integer } from "superstruct";
+import { assert, Infer, type, string } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import {
   getBalance,
@@ -9,9 +9,9 @@ import {
 } from "./_utils";
 
 const AccountBalanceQueryParamsSchema = type({
-  token: optional(validAddress()),
+  token: validAddress(),
   account: validAddress(),
-  chainId: min(integer(), 1),
+  chainId: string(),
 });
 
 type AccountBalanceQueryParams = Infer<typeof AccountBalanceQueryParamsSchema>;
@@ -39,8 +39,6 @@ const handler = async (
       balance: balance.toString(),
       account: account,
       token: token,
-      isNative: token === undefined,
-      tag: "latest",
     };
     // Log the response
     logger.debug({
