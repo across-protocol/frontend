@@ -3,7 +3,7 @@
 
 import { HubPool__factory } from "@across-protocol/contracts-v2/dist/typechain";
 import { VercelResponse } from "@vercel/node";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import {
   BLOCK_TAG_LAG,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
@@ -147,7 +147,7 @@ const handler = async (
     ] = await Promise.all([
       getRelayerFeeDetails(
         l1Token,
-        ethers.BigNumber.from("10").pow(18),
+        BigNumber.from("10").pow(tokenDetails.decimals),
         computedOriginChainId,
         Number(destinationChainId),
         DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
