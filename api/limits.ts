@@ -147,7 +147,7 @@ const handler = async (
     ] = await Promise.all([
       getRelayerFeeDetails(
         l1Token,
-        ethers.BigNumber.from("10").pow(18),
+        ethers.BigNumber.from("10").pow(tokenDetails.decimals),
         computedOriginChainId,
         Number(destinationChainId),
         DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
