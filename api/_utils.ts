@@ -524,11 +524,9 @@ export const getRelayerFeeDetails = async (
       relayerAddress,
       tokenPrice
     );
-  } catch (_e: unknown) {
-    // Resolve and transform the error
-    const e = _e as Error;
-    // We want to mask this error as an Input error.
-    throw new InputError(e?.message);
+  } catch (err: unknown) {
+    const reason = resolveEthersError(err);
+    throw new InputError(`Failed to estimate relayer fees (${reason})`);
   }
 };
 
@@ -727,6 +725,14 @@ export function applyMapFilter<InputType, MapType>(
     }
     return accumulator;
   }, []);
+}
+
+export function resolveEthersError(err: unknown): string {
+  return sdk.typeguards.isEthersError(err)
+    ? `${err.reason}: ${err.code}`
+    : sdk.typeguards.isError(err)
+    ? err.message
+    : "unknown error";
 }
 
 /**
