@@ -526,7 +526,7 @@ export const getRelayerFeeDetails = async (
     );
   } catch (err: unknown) {
     const reason = resolveEthersError(err);
-    throw new InputError(`Failed to estimate relayer fees (${reason})`);
+    throw new InputError(`Relayer fill simulation failed - ${reason}`);
   }
 };
 
