@@ -6,7 +6,11 @@ import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
-import { disabledL1Tokens, DEFAULT_QUOTE_TIMESTAMP_BUFFER } from "./_constants";
+import {
+  disabledL1Tokens,
+  DEFAULT_QUOTE_TIMESTAMP_BUFFER,
+  TOKEN_SYMBOLS_MAP,
+} from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
@@ -25,6 +29,7 @@ import {
   ENABLED_ROUTES,
   getSpokePoolAddress,
   getCachedTokenBalance,
+  getDefaultRelayerAddress,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -77,7 +82,6 @@ const handler = async (
       throw new InputError("Origin and destination chains cannot be the same");
     }
 
-    relayerAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
     recipientAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
     token = ethers.utils.getAddress(token);
 
@@ -86,6 +90,19 @@ const handler = async (
       getTokenDetails(provider, undefined, token, originChainId),
     ]);
     const { l1Token, hubPool, chainId: computedOriginChainId } = tokenDetails;
+
+    const tokenInformation = Object.values(TOKEN_SYMBOLS_MAP).find(
+      (details) => details.addresses[HUB_POOL_CHAIN_ID] === l1Token
+    );
+
+    if (!sdk.utils.isDefined(tokenInformation)) {
+      throw new InputError("Unsupported token address");
+    }
+
+    relayerAddress ??= getDefaultRelayerAddress(
+      tokenInformation.symbol,
+      Number(destinationChainId)
+    );
 
     if (sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message)) {
       if (!ethers.utils.isHexString(message)) {
