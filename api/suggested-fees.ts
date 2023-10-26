@@ -64,7 +64,7 @@ const handler = async (
     let {
       amount: amountInput,
       token,
-      destinationChainId,
+      destinationChainId: _destinationChainId,
       originChainId,
       timestamp,
       skipAmountLimit,
@@ -73,9 +73,10 @@ const handler = async (
       message,
     } = query;
 
-    if (originChainId === destinationChainId) {
+    if (originChainId === _destinationChainId) {
       throw new InputError("Origin and destination chains cannot be the same");
     }
+    const destinationChainId = Number(_destinationChainId);
 
     relayerAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
     recipientAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
@@ -97,7 +98,7 @@ const handler = async (
       }
       const isRecipientAContract = await sdk.utils.isContractDeployedToAddress(
         recipientAddress,
-        provider
+        getProvider(destinationChainId)
       );
       if (!isRecipientAContract) {
         throw new InputError(
@@ -111,7 +112,7 @@ const handler = async (
         // of the `handleAcrossMessage` we will check that the balance of the relayer is sufficient to
         // support this deposit.
         const destinationToken =
-          sdk.utils.getL2TokenAddresses(l1Token)?.[Number(destinationChainId)];
+          sdk.utils.getL2TokenAddresses(l1Token)?.[destinationChainId];
         if (!sdk.utils.isDefined(destinationToken)) {
           throw new InputError(
             `Could not resolve token address on ${destinationChainId} for ${l1Token}`
@@ -163,7 +164,7 @@ const handler = async (
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
     const [{ number: blockTag }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
-      isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
+      isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
@@ -174,7 +175,7 @@ const handler = async (
       provider
     );
 
-    const baseCurrency = destinationChainId === "137" ? "matic" : "eth";
+    const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
     const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
       hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
@@ -189,7 +190,7 @@ const handler = async (
           blockTag,
         },
         computedOriginChainId,
-        Number(destinationChainId)
+        destinationChainId
       ),
       getCachedTokenPrice(l1Token, baseCurrency),
     ]);
@@ -202,7 +203,7 @@ const handler = async (
       l1Token,
       amount,
       computedOriginChainId,
-      Number(destinationChainId),
+      destinationChainId,
       recipientAddress,
       tokenPrice,
       message,
