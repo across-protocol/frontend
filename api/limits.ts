@@ -6,6 +6,7 @@ import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import {
   BLOCK_TAG_LAG,
+  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   disabledL1Tokens,
   TOKEN_SYMBOLS_MAP,
 } from "./_constants";
@@ -30,7 +31,6 @@ import {
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
 } from "./_utils";
-import { constants } from "@across-protocol/sdk-v2";
 
 const LimitsQueryParamsSchema = object({
   token: validAddress(),
@@ -150,7 +150,7 @@ const handler = async (
         ethers.BigNumber.from("10").pow(18),
         computedOriginChainId,
         Number(destinationChainId),
-        constants.DEFAULT_SIMULATED_RELAYER_ADDRESS,
+        DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
         tokenPriceNative
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
