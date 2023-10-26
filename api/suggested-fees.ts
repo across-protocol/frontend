@@ -199,16 +199,22 @@ const handler = async (
       currentUt,
       nextUt
     );
-    const relayerFeeDetails = await getRelayerFeeDetails(
-      l1Token,
-      amount,
-      computedOriginChainId,
-      destinationChainId,
-      recipientAddress,
-      tokenPrice,
-      message,
-      relayerAddress
-    );
+
+    let relayerFeeDetails: sdk.relayFeeCalculator.RelayerFeeDetails;
+    try {
+      relayerFeeDetails = await getRelayerFeeDetails(
+        l1Token,
+        amount,
+        computedOriginChainId,
+        destinationChainId,
+        recipientAddress,
+        tokenPrice,
+        message,
+        relayerAddress
+      );
+    } catch {
+      throw new InputError(`Failed to estimate relayer fees`);
+    }
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";
 
