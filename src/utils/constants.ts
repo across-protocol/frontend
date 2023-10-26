@@ -588,7 +588,7 @@ export const COLORS = {
   brand: "var(--color-interface-aqua)",
   error: "var(--color-interface-red)",
   warning: "var(--color-interface-yellow)",
-  white: "var(--tints-shades-white-100)",
+  white: "var(--color-interface-white)",
   "dark-grey": "var(--color-neutrals-black-800)",
 };
 

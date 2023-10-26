@@ -7,8 +7,7 @@ import {
   userDepositsQueryKey,
   defaultRefetchInterval,
 } from "utils";
-
-import { useLocalPendingDeposits } from "./useLocalPendingDeposits";
+import { getLocalDeposits, removeLocalDeposits } from "../utils/local-deposits";
 
 export type DepositStatus = "pending" | "filled";
 
@@ -37,6 +36,16 @@ export type Deposit = {
   depositRelayerFeePct: string;
   initialRelayerFeePct?: string;
   suggestedRelayerFeePct?: string;
+  feeBreakdown?: {
+    bridgeFee: {
+      pct: string;
+      usd: string;
+    };
+    destinationGasFee: {
+      pct: string;
+      usd: string;
+    };
+  };
 };
 
 export type Pagination = {
@@ -68,9 +77,6 @@ export function useUserDeposits(
   offset: number = 0,
   userAddress?: string
 ) {
-  const { getLocalPendingDeposits, removeLocalPendingDeposits } =
-    useLocalPendingDeposits();
-
   return useQuery(
     userDepositsQueryKey(userAddress!, status, limit, offset),
     async () => {
@@ -85,12 +91,13 @@ export function useUserDeposits(
         };
       }
 
-      // To provide a better UX, we take optimistically updated local pending deposits
+      // To provide a better UX, we take optimistically updated local deposits
       // into account to show on the "My Transactions" page.
-      const localPendingUserDeposits = getLocalPendingDeposits().filter(
+      const localUserDeposits = getLocalDeposits().filter(
         (deposit) =>
-          deposit.depositorAddr === userAddress ||
-          deposit.recipientAddr === userAddress
+          deposit.status === status &&
+          (deposit.depositorAddr === userAddress ||
+            deposit.recipientAddr === userAddress)
       );
       const { deposits, pagination } = await getDeposits({
         address: userAddress,
@@ -102,27 +109,24 @@ export function useUserDeposits(
         deposits.map((d) => d.depositTxHash)
       );
 
-      // If the Scraper API indexed the optimistically added pending deposit,
+      // If the Scraper API indexed the optimistically added deposit,
       // then we need to remove it from local storage.
-      const indexedLocalPendingDeposits = localPendingUserDeposits.filter(
+      const indexedLocalDeposits = localUserDeposits.filter(
         (localPendingDeposit) =>
           indexedDepositTxHashes.has(localPendingDeposit.depositTxHash)
       );
-      removeLocalPendingDeposits(
-        indexedLocalPendingDeposits.map((deposit) => deposit.depositTxHash)
+      removeLocalDeposits(
+        indexedLocalDeposits.map((deposit) => deposit.depositTxHash)
       );
 
       // If the Scraper API is still a few blocks behind and didn't index
       // the optimistically added deposits, then we merge them to provide instant
       // visibility of a deposit after a user performed a transaction.
-      const notIndexedLocalPendingDeposits = localPendingUserDeposits.filter(
+      const notIndexedLocalDeposits = localUserDeposits.filter(
         (localPendingDeposit) =>
           !indexedDepositTxHashes.has(localPendingDeposit.depositTxHash)
       );
-      const mergedDeposits =
-        status === "pending"
-          ? [...notIndexedLocalPendingDeposits, ...deposits]
-          : deposits;
+      const mergedDeposits = [...notIndexedLocalDeposits, ...deposits];
 
       return {
         deposits: mergedDeposits,

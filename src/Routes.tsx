@@ -51,6 +51,7 @@ const AllTransactions = lazyWithRetry(
 const Staking = lazyWithRetry(
   () => import(/* webpackChunkName: "RewardStaking" */ "./views/Staking")
 );
+const DepositStatus = lazyWithRetry(() => import("./views/DepositStatus"));
 
 const warningMessage = `
   We noticed that you have connected from a contract address.
@@ -168,6 +169,7 @@ const Routes: React.FC = () => {
             }}
           />
           <Route exact path="/bridge" component={Send} />
+          <Route path="/bridge/:depositTxHash" component={DepositStatus} />
           <Route exact path="/" component={Splash} />
         </Switch>
       </Suspense>
