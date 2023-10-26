@@ -33,6 +33,7 @@ import {
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
   BLOCK_TAG_LAG,
+  defaultRelayerAddressOverride,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
 
@@ -1217,4 +1218,23 @@ export async function getBalancerV2TokenPrice(
   );
 
   return Number((totalValue / floatTotalSupply).toFixed(18));
+}
+
+/**
+ * Returns the EOA that will serve as the default relayer address
+ * @param symbol A valid token symbol
+ * @param destinationChainId The destination chain that a bridge operation will transfer to
+ * @returns A valid EOA address
+ */
+export function getDefaultRelayerAddress(
+  symbol: string,
+  destinationChainId: number
+) {
+  // All symbols are uppercase in this record.
+  const result = defaultRelayerAddressOverride[symbol.toUpperCase()];
+  if (result?.destinationChains.includes(destinationChainId)) {
+    return result.relayer;
+  } else {
+    return sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+  }
 }
