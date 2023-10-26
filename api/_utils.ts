@@ -32,6 +32,7 @@ import {
   TOKEN_SYMBOLS_MAP,
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
+  BLOCK_TAG_LAG,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
 
@@ -332,7 +333,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.MAINNET)
@@ -340,7 +340,6 @@ export const queries: Record<
   [CHAIN_IDs.OPTIMISM]: () =>
     new sdk.relayFeeCalculator.OptimismQueries(
       getProvider(CHAIN_IDs.OPTIMISM),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -354,7 +353,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.POLYGON)
@@ -362,7 +360,6 @@ export const queries: Record<
   [CHAIN_IDs.ARBITRUM]: () =>
     new sdk.relayFeeCalculator.ArbitrumQueries(
       getProvider(CHAIN_IDs.ARBITRUM),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -376,7 +373,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.ZK_SYNC)
@@ -384,7 +380,6 @@ export const queries: Record<
   [CHAIN_IDs.BASE]: () =>
     new sdk.relayFeeCalculator.BaseQueries(
       getProvider(CHAIN_IDs.BASE),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -399,7 +394,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.GOERLI)
@@ -407,7 +401,6 @@ export const queries: Record<
   [CHAIN_IDs.ARBITRUM_GOERLI]: () =>
     new sdk.relayFeeCalculator.ArbitrumGoerliQueries(
       getProvider(CHAIN_IDs.ARBITRUM_GOERLI),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -421,7 +414,6 @@ export const queries: Record<
       undefined,
       undefined,
       undefined,
-      undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.ZK_SYNC_GOERLI)
@@ -429,7 +421,6 @@ export const queries: Record<
   [CHAIN_IDs.BASE_GOERLI]: () =>
     new sdk.relayFeeCalculator.BaseGoerliQueries(
       getProvider(CHAIN_IDs.BASE_GOERLI),
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -487,25 +478,58 @@ export const getTokenSymbol = (tokenAddress: string): string => {
  * @param amount  The amount of funds that are requesting to be transferred
  * @param originChainId The origin chain that this token will be transferred from
  * @param destinationChainId The destination chain that this token will be transferred to
+ * @param recipientAddress The address that will receive the transferred funds
  * @param tokenPrice An optional overred price to prevent the SDK from creating its own call
+ * @param message An optional message to include in the transfer
+ * @param relayerAddress An optional relayer address to use for the transfer
  * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
  */
-export const getRelayerFeeDetails = (
+export const getRelayerFeeDetails = async (
   l1Token: string,
   amount: sdk.utils.BigNumberish,
   originChainId: number,
   destinationChainId: number,
-  tokenPrice?: number
+  recipientAddress: string,
+  tokenPrice?: number,
+  message?: string,
+  relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const tokenSymbol = getTokenSymbol(l1Token);
+  const tokenAddresses = sdk.utils.getL2TokenAddresses(l1Token);
+  if (!tokenAddresses) {
+    throw new InputError(
+      `Could not resolve token address for token ${l1Token}`
+    );
+  }
+  const originToken = tokenAddresses[originChainId];
+  const destinationToken = tokenAddresses[destinationChainId];
+
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
-  return relayFeeCalculator.relayerFeeDetails(
-    amount,
-    tokenSymbol,
-    tokenPrice,
-    originChainId.toString(),
-    destinationChainId.toString()
-  );
+  try {
+    return await relayFeeCalculator.relayerFeeDetails(
+      {
+        amount: sdk.utils.toBN(amount),
+        depositId: sdk.utils.bnUint32Max.toNumber(),
+        depositor: recipientAddress,
+        destinationChainId,
+        originChainId,
+        relayerFeePct: sdk.utils.bnZero,
+        realizedLpFeePct: sdk.utils.bnZero,
+        recipient: recipientAddress,
+        message: message ?? sdk.constants.EMPTY_MESSAGE,
+        quoteTimestamp: sdk.utils.getCurrentTime(),
+        originToken,
+        destinationToken,
+      },
+      amount,
+      relayerAddress,
+      tokenPrice
+    );
+  } catch (_e: unknown) {
+    // Resolve and transform the error
+    const e = _e as Error;
+    // We want to mask this error as an Input error.
+    throw new InputError(e?.message);
+  }
 };
 
 /**
@@ -589,23 +613,52 @@ export const isRouteEnabled = (
 };
 
 /**
- * Resolves the balance of a given ERC20 token at a provided address
+ * Resolves the balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
+ * native currency will be returned.
  * @param chainId The blockchain Id to query against
- * @param token The valid ERC20 token address on the given `chainId`
  * @param account A valid Web3 wallet address
- * @param blockTag A blockTag to specify a historical balance date
+ * @param token The valid ERC20 token address on the given `chainId`.
  * @returns A promise that resolves to the BigNumber of the balance
  */
 export const getBalance = (
   chainId: string | number,
-  token: string,
   account: string,
-  blockTag: number | "latest" = "latest"
+  token: string
 ): Promise<BigNumber> => {
-  return ERC20__factory.connect(token, getProvider(Number(chainId))).balanceOf(
+  return sdk.utils.getTokenBalance(
     account,
-    { blockTag }
+    token,
+    getProvider(Number(chainId)),
+    BLOCK_TAG_LAG
   );
+};
+
+/**
+ * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
+ * native currency will be returned.
+ * @param chainId The blockchain Id to query against
+ * @param account A valid Web3 wallet address
+ * @param token The valid ERC20 token address on the given `chainId`.
+ * @returns A promise that resolves to the BigNumber of the balance
+ */
+export const getCachedTokenBalance = async (
+  chainId: string | number,
+  account: string,
+  token: string
+): Promise<BigNumber> => {
+  // Make the request to the vercel API.
+  const response = await axios.get<{ balance: string }>(
+    `${resolveVercelEndpoint()}/api/account-balance`,
+    {
+      params: {
+        chainId,
+        account,
+        token,
+      },
+    }
+  );
+  // Return the balance
+  return BigNumber.from(response.data.balance);
 };
 
 /**

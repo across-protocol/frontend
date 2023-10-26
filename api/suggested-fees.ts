@@ -5,7 +5,7 @@ import * as sdk from "@across-protocol/sdk-v2";
 import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { type, assert, Infer, optional } from "superstruct";
+import { type, assert, Infer, optional, string } from "superstruct";
 import { disabledL1Tokens, DEFAULT_QUOTE_TIMESTAMP_BUFFER } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
@@ -24,6 +24,7 @@ import {
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
   getSpokePoolAddress,
+  getCachedTokenBalance,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -33,6 +34,9 @@ const SuggestedFeesQueryParamsSchema = type({
   originChainId: optional(positiveIntStr()),
   timestamp: optional(positiveIntStr()),
   skipAmountLimit: optional(boolStr()),
+  message: optional(string()),
+  recipientAddress: optional(validAddress()),
+  relayerAddress: optional(validAddress()),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
@@ -64,12 +68,17 @@ const handler = async (
       originChainId,
       timestamp,
       skipAmountLimit,
+      recipientAddress,
+      relayerAddress,
+      message,
     } = query;
 
     if (originChainId === destinationChainId) {
       throw new InputError("Origin and destination chains cannot be the same");
     }
 
+    relayerAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+    recipientAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
     token = ethers.utils.getAddress(token);
 
     const [latestBlock, tokenDetails] = await Promise.all([
@@ -77,6 +86,49 @@ const handler = async (
       getTokenDetails(provider, undefined, token, originChainId),
     ]);
     const { l1Token, hubPool, chainId: computedOriginChainId } = tokenDetails;
+
+    if (sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message)) {
+      if (!ethers.utils.isHexString(message)) {
+        throw new InputError("Message must be a hex string");
+      }
+      if (message.length % 2 !== 0) {
+        // Our message encoding is a hex string, so we need to check that the length is even.
+        throw new InputError("Message must be an even hex string");
+      }
+      const isRecipientAContract = await sdk.utils.isContractDeployedToAddress(
+        recipientAddress,
+        provider
+      );
+      if (!isRecipientAContract) {
+        throw new InputError(
+          "Recipient must be a contract when a message is provided"
+        );
+      } else {
+        // If we're in this case, it's likely that we're going to have to simulate the execution of
+        // a complex message handling from the specified relayer to the specified recipient by calling
+        // the arbitrary function call `handleAcrossMessage` at the recipient. So that we can discern
+        // the difference between an OUT_OF_FUNDS error in either the transfer or through the execution
+        // of the `handleAcrossMessage` we will check that the balance of the relayer is sufficient to
+        // support this deposit.
+        const destinationToken =
+          sdk.utils.getL2TokenAddresses(l1Token)?.[Number(destinationChainId)];
+        if (!sdk.utils.isDefined(destinationToken)) {
+          throw new InputError(
+            `Could not resolve token address on ${destinationChainId} for ${l1Token}`
+          );
+        }
+        const balanceOfToken = await getCachedTokenBalance(
+          destinationChainId,
+          relayerAddress,
+          destinationToken
+        );
+        if (balanceOfToken.lt(amountInput)) {
+          throw new InputError(
+            `Relayer Address (${relayerAddress}) doesn't have enough funds to support this deposit. For help, please reach out to https://discord.across.to`
+          );
+        }
+      }
+    }
 
     // Note: Add a buffer to "latest" timestamp so that it corresponds to a block older than HEAD.
     // This is to improve relayer UX who have heightened risk of sending inadvertent invalid fills
@@ -151,7 +203,10 @@ const handler = async (
       amount,
       computedOriginChainId,
       Number(destinationChainId),
-      tokenPrice
+      recipientAddress,
+      tokenPrice,
+      message,
+      relayerAddress
     );
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";

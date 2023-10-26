@@ -18,7 +18,7 @@ import {
   getRelayerFeeDetails,
   getCachedTokenPrice,
   getTokenDetails,
-  getBalance,
+  getCachedTokenBalance,
   maxBN,
   minBN,
   isRouteEnabled,
@@ -30,6 +30,7 @@ import {
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
 } from "./_utils";
+import { constants } from "@across-protocol/sdk-v2";
 
 const LimitsQueryParamsSchema = object({
   token: validAddress(),
@@ -149,34 +150,25 @@ const handler = async (
         ethers.BigNumber.from("10").pow(18),
         computedOriginChainId,
         Number(destinationChainId),
+        constants.ZERO_ADDRESS,
         tokenPriceNative
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
         fullRelayers.map((relayer) =>
-          getBalance(
-            destinationChainId!,
-            destinationToken,
-            relayer,
-            BLOCK_TAG_LAG
-          )
+          getCachedTokenBalance(destinationChainId!, relayer, destinationToken)
         )
       ),
       Promise.all(
         transferRestrictedRelayers.map((relayer) =>
-          getBalance(
-            destinationChainId!,
-            destinationToken,
-            relayer,
-            BLOCK_TAG_LAG
-          )
+          getCachedTokenBalance(destinationChainId!, relayer, destinationToken)
         )
       ),
       Promise.all(
         fullRelayers.map((relayer) =>
           destinationChainId === "1"
             ? ethers.BigNumber.from("0")
-            : getBalance("1", l1Token, relayer, BLOCK_TAG_LAG)
+            : getCachedTokenBalance("1", relayer, l1Token)
         )
       ),
     ]);
