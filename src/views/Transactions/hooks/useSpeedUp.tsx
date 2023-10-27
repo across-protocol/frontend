@@ -20,7 +20,7 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
     transfer.sourceChainId,
     transfer.destinationChainId,
     token.symbol,
-    transfer.depositorAddr
+    transfer.recipientAddr
   );
 
   const [speedUpTxLink, setSpeedUpTxLink] = useState<string>("");
