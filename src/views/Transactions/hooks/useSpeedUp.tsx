@@ -19,7 +19,8 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
     BigNumber.from(transfer.amount),
     transfer.sourceChainId,
     transfer.destinationChainId,
-    token.symbol
+    token.symbol,
+    transfer.recipientAddr
   );
 
   const [speedUpTxLink, setSpeedUpTxLink] = useState<string>("");

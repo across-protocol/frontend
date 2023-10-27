@@ -6,7 +6,11 @@ import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
-import { disabledL1Tokens, DEFAULT_QUOTE_TIMESTAMP_BUFFER } from "./_constants";
+import {
+  disabledL1Tokens,
+  DEFAULT_QUOTE_TIMESTAMP_BUFFER,
+  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+} from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
@@ -79,7 +83,7 @@ const handler = async (
     const destinationChainId = Number(_destinationChainId);
 
     relayerAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
-    recipientAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+    recipientAddress ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     token = ethers.utils.getAddress(token);
 
     const [latestBlock, tokenDetails] = await Promise.all([

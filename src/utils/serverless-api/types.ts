@@ -56,7 +56,8 @@ export type SuggestedApiFeeType = (
   amount: ethers.BigNumber,
   originToken: string,
   toChainid: ChainId,
-  fromChainid: ChainId
+  fromChainid: ChainId,
+  recipientAddress: string
 ) => Promise<SuggestedApiFeeReturnType>;
 
 export type RetrieveLinkedWalletType = (

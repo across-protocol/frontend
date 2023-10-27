@@ -15,13 +15,15 @@ export async function suggestedFeesApiCall(
   amount: ethers.BigNumber,
   originToken: string,
   toChainid: ChainId,
-  fromChainid: ChainId
+  fromChainid: ChainId,
+  recipientAddress: string
 ): Promise<SuggestedApiFeeReturnType> {
   const response = await axios.get(`/api/suggested-fees`, {
     params: {
       token: originToken,
       destinationChainId: toChainid,
       originChainId: fromChainid,
+      recipientAddress,
       amount: amount.toString(),
       skipAmountLimit: true,
     },
