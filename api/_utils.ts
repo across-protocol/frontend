@@ -505,6 +505,7 @@ export const getRelayerFeeDetails = async (
 
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   try {
+    const oneBp = ethers.utils.parseEther("0.0001");
     return await relayFeeCalculator.relayerFeeDetails(
       {
         amount: sdk.utils.toBN(amount),
@@ -512,8 +513,8 @@ export const getRelayerFeeDetails = async (
         depositor: recipientAddress,
         destinationChainId,
         originChainId,
-        relayerFeePct: sdk.utils.bnZero,
-        realizedLpFeePct: sdk.utils.bnZero,
+        relayerFeePct: oneBp,
+        realizedLpFeePct: oneBp,
         recipient: recipientAddress,
         message: message ?? sdk.constants.EMPTY_MESSAGE,
         quoteTimestamp: sdk.utils.getCurrentTime(),
