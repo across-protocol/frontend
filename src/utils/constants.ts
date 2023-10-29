@@ -67,49 +67,6 @@ export const QUERIES = {
   mobileAndDown: `(max-width: ${(BREAKPOINTS.tabletMin - 1) / 16}rem)`,
 };
 
-export const COLORS = {
-  gray: {
-    100: "0deg 0% 89%",
-    // Hex: #F5F5F5
-    150: "0deg 0% 96%",
-
-    // #2C2F33
-    160: "214.3deg 7.4% 18.6%",
-    // #27292c
-    175: "216deg 6% 16.3%",
-    // hsl(214.3,7.4%,18.6%)
-    200: "220deg 2% 72%",
-    // #2c2e32
-    250: "220deg 6.4% 18.4%",
-    300: "240deg 4% 27%",
-    // #2d2e33
-    500: "230deg 6% 19%",
-    // #68686c
-    550: "240deg 2% 42%",
-    // #4d4c53
-    600: "249deg 4% 31%",
-  },
-  primary: {
-    // #6df8d8
-    500: "166deg 92% 70%",
-    // #565757
-    600: "180deg 0.6% 33.9%",
-    700: "180deg 15% 25%",
-  },
-  secondary: {
-    500: "266deg 77% 62%",
-  },
-  error: {
-    500: "11deg 92% 70%",
-    300: "11deg 93% 94%",
-  },
-  // Hex: #ffffff
-  white: "0deg 100% 100%",
-  black: "0deg 0% 0%",
-  umaRed: "0deg 100% 65%",
-  purple: "267deg 77% 62%",
-};
-
 export type ChainInfo = {
   name: string;
   fullName?: string;

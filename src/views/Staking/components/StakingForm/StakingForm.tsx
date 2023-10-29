@@ -16,7 +16,7 @@ import {
 } from "./StakingForm.styles";
 
 import { Tooltip } from "components/Tooltip";
-import { Tab, Tabs } from "components/TabsV2";
+import { Tab, Tabs } from "components/Tabs";
 import StakingInputBlock from "../StakingInputBlock";
 import { StakingFormPropType } from "../../types";
 import { repeatableTernaryBuilder } from "utils/ternary";
