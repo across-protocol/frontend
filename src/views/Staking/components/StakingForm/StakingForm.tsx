@@ -82,7 +82,7 @@ export const StakingForm = ({
     setIsPoolInfoVisible(false);
   }, [isConnected]);
 
-  const activeColor = "white-" + (amount && isAmountValid ? 100 : 70);
+  const activeColor = amount && isAmountValid ? "white-100" : "white-70";
   const lpFmt = poolData.lpTokenFormatter;
   const isStakingPoolEnabled = poolData.poolEnabled;
 
@@ -96,7 +96,7 @@ export const StakingForm = ({
           >
             <Text
               weight={500}
-              color={"white-" + (stakingAction === "stake" ? "100" : "70")}
+              color={stakingAction === "stake" ? "white-100" : "white-70"}
             >
               Stake
             </Text>
@@ -107,7 +107,7 @@ export const StakingForm = ({
           >
             <Text
               weight={500}
-              color={"white-" + (stakingAction === "unstake" ? "100" : "70")}
+              color={stakingAction === "unstake" ? "white-100" : "white-70"}
             >
               Unstake
             </Text>
