@@ -108,9 +108,15 @@ const handler = async (
       isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
     ]);
     // If any of the above fails or the route is not enabled, we assume that the
-    if (tokenDetailsResult.status === "rejected" || routeEnabledResult.status === "rejected") {
+    if (
+      tokenDetailsResult.status === "rejected" ||
+      routeEnabledResult.status === "rejected"
+    ) {
       throw new InputError(`Unable to query route.`);
-    } else if (!routeEnabledResult.value || disabledL1Tokens.includes(l1Token.toLowerCase())) {
+    } else if (
+      !routeEnabledResult.value ||
+      disabledL1Tokens.includes(l1Token.toLowerCase())
+    ) {
       throw new InputError(`Route is not enabled.`);
     }
 
