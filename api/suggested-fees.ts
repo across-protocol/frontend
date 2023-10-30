@@ -130,7 +130,7 @@ const handler = async (
         if (balanceOfToken.lt(amountInput)) {
           throw new InputError(
             `Relayer Address (${relayer}) doesn't have enough funds to support this deposit;` +
-            ` for help, please reach out to https://discord.across.to`
+              ` for help, please reach out to https://discord.across.to`
           );
         }
       }
