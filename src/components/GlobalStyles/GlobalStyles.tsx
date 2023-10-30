@@ -62,6 +62,8 @@ const variables = css`
     --color-neutrals-light-200: #e0f3ff;
     --color-neutrals-light-300: #c5d5e0;
 
+    --tints-shades-white-70: #9daab2;
+    --tints-shades-white-88: #c5d5e0;
     --tints-shades-white-100: #e0f3ff;
     --tints-shades-white-200: #9daab2;
 

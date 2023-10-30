@@ -143,7 +143,7 @@ export function BreakdownStats({
         <Text size="lg" color="white-70">
           Total reward
         </Text>
-        <Text size="lg" color={amount ? "aqua" : ""}>
+        <Text size="lg" color={amount ? "aqua" : "white"}>
           {amount ? `${formatUnits(amount, 18)} ACX` : "-"}
         </Text>
       </BreakdownTotalContainer>
