@@ -560,6 +560,37 @@ export const QUERIESV2 = {
   tb: breakpoint(BREAKPOINTS_V2.tb),
 };
 
+// See src/components/GlobalStyles/GlobalStyles.tsx for the CSS variables
+export const COLORS = {
+  red: "var(--color-interface-red)",
+  yellow: "var(--color-interface-yellow)",
+  aqua: "var(--color-interface-aqua)",
+  "aqua-15": "var(--color-interface-aqua-15)",
+  teal: "var(--color-interface-teal)",
+  "teal-5": "var(--color-interface-teal-5)",
+  "teal-15": "var(--color-interface-teal-15)",
+  "black-700": "var(--color-neutrals-black-700)",
+  "black-800": "var(--color-neutrals-black-800)",
+  "black-900": "var(--color-neutrals-black-900)",
+  "grey-400": "var(--color-neutrals-grey-400)",
+  "grey-500": "var(--color-neutrals-grey-500)",
+  "grey-600": "var(--color-neutrals-grey-600)",
+  "light-100": "var(--color-neutrals-light-100)",
+  "light-200": "var(--color-neutrals-light-200)",
+  "light-300": "var(--color-neutrals-light-300)",
+  "white-70": "var(--tints-shades-white-70)",
+  "white-88": "var(--tints-shades-white-88)",
+  "white-100": "var(--tints-shades-white-100)",
+  "white-200": "var(--tints-shades-white-200)",
+
+  // Aliases
+  primary: "var(--color-interface-aqua)",
+  brand: "var(--color-interface-aqua)",
+  error: "var(--color-interface-red)",
+  warning: "var(--color-interface-yellow)",
+  "dark-grey": "var(--color-neutrals-black-800)",
+};
+
 export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);
 
 export const rewardTiers = [
