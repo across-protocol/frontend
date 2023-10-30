@@ -39,8 +39,8 @@ const SuggestedFeesQueryParamsSchema = type({
   timestamp: optional(positiveIntStr()),
   skipAmountLimit: optional(boolStr()),
   message: optional(string()),
-  recipientAddress: optional(validAddress()),
-  relayerAddress: optional(validAddress()),
+  recipient: optional(validAddress()),
+  relayer: optional(validAddress()),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
@@ -72,8 +72,8 @@ const handler = async (
       originChainId,
       timestamp,
       skipAmountLimit,
-      recipientAddress,
-      relayerAddress,
+      recipient,
+      relayer,
       message,
     } = query;
 
@@ -82,8 +82,8 @@ const handler = async (
     }
     const destinationChainId = Number(_destinationChainId);
 
-    relayerAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
-    recipientAddress ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+    relayer ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+    recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     token = ethers.utils.getAddress(token);
 
     const [latestBlock, tokenDetails] = await Promise.all([
@@ -101,7 +101,7 @@ const handler = async (
         throw new InputError("Message must be an even hex string");
       }
       const isRecipientAContract = await sdk.utils.isContractDeployedToAddress(
-        recipientAddress,
+        recipient,
         getProvider(destinationChainId)
       );
       if (!isRecipientAContract) {
@@ -124,12 +124,13 @@ const handler = async (
         }
         const balanceOfToken = await getCachedTokenBalance(
           destinationChainId,
-          relayerAddress,
+          relayer,
           destinationToken
         );
         if (balanceOfToken.lt(amountInput)) {
           throw new InputError(
-            `Relayer Address (${relayerAddress}) doesn't have enough funds to support this deposit. For help, please reach out to https://discord.across.to`
+            `Relayer Address (${relayer}) doesn't have enough funds to support this deposit;` +
+              ` for help, please reach out to https://discord.across.to`
           );
         }
       }
@@ -208,10 +209,10 @@ const handler = async (
       amount,
       computedOriginChainId,
       destinationChainId,
-      recipientAddress,
+      recipient,
       tokenPrice,
       message,
-      relayerAddress
+      relayer
     );
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";
