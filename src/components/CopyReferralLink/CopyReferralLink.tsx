@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ButtonV2 } from "components/Buttons";
+import { UnstyledButton } from "components/Button";
 import { useReferralLink } from "hooks/useReferralLink";
 import { ReactComponent as UnstyledCopyIcon } from "assets/icons/copy-16.svg";
 import { useEffect, useState } from "react";
@@ -76,7 +76,7 @@ const LinkText = styled(Text)`
   width: fit-content;
 `;
 
-const CopyReferralButton = styled(ButtonV2)`
+const CopyReferralButton = styled(UnstyledButton)`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -90,10 +90,6 @@ const CopyReferralButton = styled(ButtonV2)`
   color: #e0f3ff;
 
   background: transparent;
-
-  &:active::after {
-    border: none !important;
-  }
 `;
 
 // Note:  React was having an error hear related

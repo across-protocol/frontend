@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import styled from "@emotion/styled";
 
 import ExternalCardWrapper from "components/CardWrapper";
-import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
+import { PrimaryButton } from "components/Button";
 import { Text } from "components";
 
 import EstimatedTable from "./EstimatedTable";
@@ -163,20 +163,14 @@ const BridgeForm = ({
         />
         <Divider />
         {isWrongChain ? (
-          <Button onClick={onClickChainSwitch}>
-            <Text color="dark-grey" weight={500}>
-              Switch Network
-            </Text>
-          </Button>
+          <Button onClick={onClickChainSwitch}>Switch Network</Button>
         ) : (
           <Button
             disabled={isBridgeDisabled}
             onClick={onClickActionButton}
             data-cy={!isConnected ? "connect-wallet" : "bridge-button"}
           >
-            <Text color="dark-grey" weight={500}>
-              {buttonLabel}
-            </Text>
+            {buttonLabel}
           </Button>
         )}
       </CardWrapper>{" "}
@@ -253,18 +247,6 @@ const Divider = styled.div`
   background: #3e4047;
 `;
 
-const Button = styled(UnstyledButton)`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-
-  background: #6cf9d8;
-  border-radius: 32px;
-  height: 64px;
+const Button = styled(PrimaryButton)`
   width: 100%;
-
-  @media ${QUERIESV2.sm.andDown} {
-    height: 40px;
-  }
 `;

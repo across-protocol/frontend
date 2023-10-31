@@ -1,6 +1,6 @@
 import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
-import { BaseButton } from "components/Buttons";
+import { UnstyledButton } from "components/Button";
 import { QUERIESV2 } from "utils";
 import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
 
@@ -24,7 +24,7 @@ export const PageSizeSelectWrapper = styled.div`
   }
 `;
 
-export const PageSizeSelectButton = styled(BaseButton)`
+export const PageSizeSelectButton = styled(UnstyledButton)`
   padding: 10px 20px;
   display: flex;
   align-items: center;
@@ -67,7 +67,7 @@ export const PageSizeSelectDropdown = styled.div`
   background-color: var(--color-gray);
 `;
 
-export const PageSizeOptiontButton = styled(BaseButton)`
+export const PageSizeOptiontButton = styled(UnstyledButton)`
   padding: 6px 20px;
   display: flex;
   align-items: center;

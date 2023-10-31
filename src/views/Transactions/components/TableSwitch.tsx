@@ -2,7 +2,7 @@ import { useState } from "react";
 import styled from "@emotion/styled";
 import { useLocation, useHistory } from "react-router";
 
-import { BaseButton } from "components/Buttons";
+import { UnstyledButton } from "components/Button";
 import { QUERIES } from "utils";
 
 const SwitchContainer = styled.div`
@@ -16,7 +16,7 @@ const SwitchContainer = styled.div`
   }
 `;
 
-const SwitchButton = styled(BaseButton)`
+const SwitchButton = styled(UnstyledButton)`
   flex-basis: 50%;
   height: 40px;
   padding: 0 20px;

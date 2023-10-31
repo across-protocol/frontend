@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { PrimaryButton } from "components/Buttons";
+import { PrimaryButton } from "components/Button";
 import { QUERIES } from "utils";
 
 export const Wrapper = styled.div`

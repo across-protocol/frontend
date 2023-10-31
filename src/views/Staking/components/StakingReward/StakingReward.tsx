@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
-import { Alert, ButtonV2 } from "components";
+import { Alert } from "components";
+import { SecondaryButton } from "components/Button";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { BigNumber } from "ethers";
 import { formatEther, QUERIESV2 } from "utils";
@@ -46,10 +47,9 @@ export const StakingReward = ({
               size="lg"
               disabled={BigNumber.from(outstandingRewards).lte(0) || isMutating}
               onClick={() => claimActionHandler()}
+              borderColor="yellow"
             >
-              <Text color="warning" weight={500}>
-                Claim Rewards
-              </Text>
+              Claim Rewards
               {isMutating && <BouncingDotsLoader dotColor="warning" />}
             </ClaimRewardButton>
           </ClaimRewardInputGroup>
@@ -82,31 +82,10 @@ const RewardClaimWrapper = styled.div`
   }
 `;
 
-const ClaimRewardButton = styled(ButtonV2)`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 0px 40px;
-  gap: 4px;
-
-  height: 64px;
+const ClaimRewardButton = styled(SecondaryButton)`
   width: 100%;
 
-  border: 1px solid #f9d26c;
-  border-radius: 32px;
-
   text-transform: capitalize;
-
-  background: transparent;
-
-  @media ${QUERIESV2.sm.andDown} {
-    height: 40px;
-  }
-
-  &:active:after {
-    border: none;
-  }
 `;
 
 const StakingRewardCard = styled(CardWrapper)`

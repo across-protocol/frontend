@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { QUERIESV2 } from "utils";
-import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
+import { PrimaryButton, UnstyledButton } from "components/Button";
 
 export const Wrapper = styled.div`
   display: flex;
@@ -106,28 +106,8 @@ export const ButtonWrapper = styled.div`
   }
 `;
 
-interface IStakeButton {
-  valid: boolean;
-  fullWidth?: boolean;
-  warningButtonColor?: boolean;
-}
-export const StakeButton = styled(UnstyledButton)<IStakeButton>`
-  width: ${({ fullWidth }) => (fullWidth ? "100%" : "inherit")};
+export const StakeButton = styled(PrimaryButton)`
   text-transform: capitalize;
-  background: ${({ warningButtonColor }) =>
-    warningButtonColor ? "#f9d26c" : "#6cf9d8;"};
-  padding: 0px 40px;
-  height: 64px;
-  color: #2d2e33;
-  font-weight: 500;
-  opacity: ${({ valid }) => (valid ? 1 : 0.25)};
-  @media ${QUERIESV2.sm.andDown} {
-    text-align: center;
-    width: 100%;
-    height: 40px;
-    padding: 0px 20px;
-    border-radius: 20px;
-  }
 `;
 
 export const StakeButtonContentWrapper = styled.div`

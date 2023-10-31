@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { ButtonV2 } from "components";
+import { UnstyledButton } from "components/Button";
 import { Text } from "components/Text";
 import LottiePlayer from "components/LottiePlayer";
 import { QUERIESV2 } from "utils";
@@ -29,11 +29,9 @@ export const SplashFlow = ({
         size="lg"
         disabled={isConnecting}
       >
-        <Text size="lg" weight={500} color="dark-grey">
-          {isConnecting
-            ? "Checking eligibility..."
-            : "Connect to check eligibility"}
-        </Text>
+        {isConnecting
+          ? "Checking eligibility..."
+          : "Connect to check eligibility"}
       </StyledButton>
       <EligibilityLink
         data-cy="airdrop-details-button"
@@ -111,7 +109,7 @@ const StyledArrowIcon = styled(ArrowIcon)`
   }
 `;
 
-const StyledButton = styled(ButtonV2)`
+const StyledButton = styled(UnstyledButton)`
   width: 293px;
   height: 64px;
 

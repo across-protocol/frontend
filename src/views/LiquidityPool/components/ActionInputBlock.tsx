@@ -146,7 +146,7 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           <Button
             size="lg"
             onClick={handleAction}
-            isRemove={action === "remove"}
+            backgroundColor={action === "remove" ? "yellow" : "aqua"}
             disabled={disableAction}
             data-cy={action === "add" ? "add-button" : "remove-button"}
           >

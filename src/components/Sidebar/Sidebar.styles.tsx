@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { SecondaryButton } from "../Buttons";
+import { PrimaryButton } from "../Button";
 
 export const StyledHeader = styled.div`
   background-color: var(--color-primary);
@@ -25,21 +25,9 @@ export const HeaderText = styled.div`
   font-size: ${16 / 16}rem;
 `;
 
-export const ConnectButton = styled(SecondaryButton)`
-  border: none;
-  background-color: inherit;
-  cursor: pointer;
-  padding: 16px;
-  font-size: 1rem;
-  border-radius: var(--radius);
-  position: relative;
-  background-color: var(--color-gray);
-  color: var(--color-white);
-  padding: 12px 16px;
-  border: 1px solid transparent;
-`;
+export const ConnectButton = styled(PrimaryButton)``;
 
-export const DisconnectButton = styled(ConnectButton)`
+export const DisconnectButton = styled(PrimaryButton)`
   margin-top: 1.25rem;
 `;
 

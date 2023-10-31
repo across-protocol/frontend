@@ -1,6 +1,6 @@
 import Footer from "components/Footer";
 import { Text } from "components/Text";
-import { TertiaryButton } from "components/Buttons";
+import { SecondaryButton } from "components/Button";
 import Sentry from "utils/sentry";
 
 import { Wrapper, InnerWrapper, ButtonsWrapper } from "./ErrorBoundary.styles";
@@ -25,15 +25,15 @@ export function FallbackComponent(props: { error: Error }) {
           come back later.
         </Text>
         <ButtonsWrapper>
-          <TertiaryButton size="sm" onClick={() => window.location.reload()}>
+          <SecondaryButton size="sm" onClick={() => window.location.reload()}>
             Reload
-          </TertiaryButton>
-          <TertiaryButton
+          </SecondaryButton>
+          <SecondaryButton
             size="sm"
             onClick={() => window.open("https://discord.across.to", "_blank")}
           >
             Discord
-          </TertiaryButton>
+          </SecondaryButton>
         </ButtonsWrapper>
       </InnerWrapper>
       <Footer />
