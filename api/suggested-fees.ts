@@ -102,7 +102,7 @@ const handler = async (
       throw new InputError("Unsupported token address");
     }
 
-    relayerAddress ??= getDefaultRelayerAddress(
+    relayer ??= getDefaultRelayerAddress(
       tokenInformation.symbol,
       Number(destinationChainId)
     );
