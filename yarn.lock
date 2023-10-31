@@ -47,10 +47,10 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.17.5":
-  version "0.17.5"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.17.5.tgz#2163afb65092afa2f5d37eca511b1e4b89c0e2e6"
-  integrity sha512-C12ih8ZpX4Q+WLkPOCYqkR9K4GPEk9a8TGtPQdtdGszPS6/1t9mGGeU/dDJu52eMKRC8A7VmBNxwWndDcTdw/Q==
+"@across-protocol/sdk-v2@^0.17.10":
+  version "0.17.10"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.17.10.tgz#8043f3e220742b9079ac75187d7c6c18f4a68592"
+  integrity sha512-HWViQjHHlvN+lnbOtmH2ZgYhu4VcYhwr17tCFOBP3ECdLs4OwBtwSUDhWlc2KG99CgZHvU3eiXN2nvhqPYwZew==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
     "@across-protocol/constants-v2" "^1.0.4"
