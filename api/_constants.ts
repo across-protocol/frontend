@@ -100,7 +100,7 @@ export const defaultRelayerAddressOverride: Record<
   { relayer: string; destinationChains: number[] }
 > = {
   SNX: {
-    relayer: "0x19cdc2b23af0cc791ca64dda5bfc094cddda31cd",
+    relayer: "0x19cDc2b23AF0cC791ca64dda5BFc094Cddda31Cd",
     destinationChains: [1, 10],
   },
 };
