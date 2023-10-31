@@ -512,8 +512,8 @@ export const getRelayerFeeDetails = async (
         depositor: recipientAddress,
         destinationChainId,
         originChainId,
-        relayerFeePct: sdk.utils.bnZero,
-        realizedLpFeePct: sdk.utils.bnZero,
+        relayerFeePct: sdk.utils.bnOne,
+        realizedLpFeePct: sdk.utils.bnOne,
         recipient: recipientAddress,
         message: message ?? sdk.constants.EMPTY_MESSAGE,
         quoteTimestamp: sdk.utils.getCurrentTime(),
@@ -521,6 +521,7 @@ export const getRelayerFeeDetails = async (
         destinationToken,
       },
       amount,
+      sdk.utils.isMessageEmpty(message),
       relayerAddress,
       tokenPrice
     );
