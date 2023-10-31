@@ -16,12 +16,12 @@ const InfoCardTop = ({ Icon, title, acxTokenAmount }: Props) => {
     <Wrapper>
       {Icon}
       <TextStack>
-        <Text size="xl" color="#E0F3FF">
+        <Text size="xl" color="white-100">
           {title}
         </Text>
         <TokenAmountWrapper>
           <StyledAcrossLogo />
-          <Text color="#6cf9d8">{acxTokenAmount} $ACX</Text>
+          <Text color="aqua">{acxTokenAmount} $ACX</Text>
         </TokenAmountWrapper>
       </TextStack>
     </Wrapper>

@@ -1,6 +1,5 @@
 import { Global, css } from "@emotion/react";
 import { reset } from "./reset";
-import { COLORS } from "utils";
 
 export const typography = css`
   /* only take latin chars to reduce bundle size */
@@ -37,44 +36,44 @@ export const typography = css`
 `;
 const variables = css`
   :root {
-    /* COLORS */
+    --color-interface-red: #f96c6c;
 
-    --color-gray: hsl(${COLORS.gray[500]});
-    --color-gray-600: hsla(${COLORS.gray[600]});
-    --color-gray-550: hsla(${COLORS.gray[550]});
-    --color-gray-500: hsla(${COLORS.gray[500]});
-    --color-gray-300: hsla(${COLORS.gray[300]});
-    --color-gray-250: hsla(${COLORS.gray[250]});
-    --color-gray-200: hsla(${COLORS.gray[200]});
-    --color-gray-175: hsla(${COLORS.gray[175]});
-    --color-gray-160: hsla(${COLORS.gray[160]});
-    --color-gray-150: hsla(${COLORS.gray[150]});
-    --color-gray-100: hsla(${COLORS.gray[100]});
-    --color-white: hsl(${COLORS.white});
-    --color-black: hsl(${COLORS.black});
-    --color-primary: hsl(${COLORS.primary[500]});
-    --color-primary-dark: hsl(${COLORS.primary[700]});
-    --color-primary-hover: hsla(${COLORS.primary[500]} / 0.15);
-    --color-pagination: hsl(${COLORS.primary[600]});
-    --color-secondary: hsl(${COLORS.secondary[500]});
-    --color-error: hsl(${COLORS.error[500]});
-    --color-error-light: hsl(${COLORS.error[300]});
-    --color-uma-red: hsl(${COLORS.umaRed});
-    --color-purple: hsl(${COLORS.purple});
-    --color-primary-transparent: hsla(${COLORS.primary[500]} / 0.4);
-    --color-black-transparent: hsla(${COLORS.black} / 0.75);
-    --color-white-transparent: hsla(${COLORS.white} / 0.75);
-    --color-gray-transparent: rgba(45, 46, 51, 0.1);
-    --color-gray-transparent-lighter: rgba(45, 46, 51, 0.65);
-    /*
-    Silence the warning about missing Reach Dialog styles
-  */
-    --reach-dialog: 1;
+    --color-interface-yellow: #f9d26c;
 
-    /* 
-    Keep a consistent width between the middle section and the headers
-  */
-    --central-content: 500px;
+    --color-brand-aqua: #6cf9d8;
+    --color-interface-aqua: #6cf9d8;
+    --color-interface-aqua-15: #6cf9d826;
+
+    --color-interface-teal: #44d2ff;
+    --color-interface-teal-5: #44d2ff0d;
+    --color-interface-teal-15: #44d2ff26;
+
+    --color-interface-white: #ffffff;
+
+    --color-neutrals-black-700: #34353b;
+    --color-neutrals-black-800: #2d2e33;
+    --color-neutrals-black-900: #202024;
+
+    --color-neutrals-grey-400: #9daab3;
+    --color-neutrals-grey-500: #4c4e57;
+    --color-neutrals-grey-600: #3e4047;
+
+    --color-neutrals-light-100: #ffffff;
+    --color-neutrals-light-200: #e0f3ff;
+    --color-neutrals-light-300: #c5d5e0;
+
+    --tints-shades-white-70: #9daab2;
+    --tints-shades-white-88: #c5d5e0;
+    --tints-shades-white-100: #e0f3ff;
+    --tints-shades-white-200: #9daab2;
+
+    /* Old variables kept until refactored */
+    --color-primary: var(--color-interface-aqua);
+    --color-gray: var(--color-neutrals-black-800);
+    --color-black: var(--color-neutrals-black-900);
+    --color-pagination: var(--color-neutrals-grey-500);
+    --color-white: var(--color-interface-white);
+    --color-error: var(--color-interface-red);
   }
 `;
 

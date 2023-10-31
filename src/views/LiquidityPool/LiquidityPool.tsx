@@ -3,7 +3,7 @@ import { BigNumber, BigNumberish } from "ethers";
 
 import { LayoutV2, WrongNetworkHeader } from "components";
 import CardWrapper from "components/CardWrapper";
-import { Tabs, Tab } from "components/TabsV2";
+import { Tabs, Tab } from "components/Tabs";
 import {
   formatNumberMaxFracDigits,
   formatUnits,

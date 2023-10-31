@@ -29,7 +29,7 @@ export const SplashFlow = ({
         size="lg"
         disabled={isConnecting}
       >
-        <Text size="lg" weight={500} color="#2D2E33">
+        <Text size="lg" weight={500} color="dark-grey">
           {isConnecting
             ? "Checking eligibility..."
             : "Connect to check eligibility"}

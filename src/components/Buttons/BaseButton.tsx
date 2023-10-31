@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { COLORS } from "utils";
 
 export const BaseButton = styled.button`
   --radius: 30px;
@@ -28,7 +27,7 @@ export const PrimaryButton = styled(BaseButton)`
     bottom: 0;
     opacity: 0;
     border-radius: var(--radius);
-    box-shadow: 0 0 16px hsla(${COLORS.primary[500]} / 0.55);
+    box-shadow: 0 0 16px hsla(var(--color-gray) / 0.55);
     transition: opacity 0.2s;
   }
   &:hover:not(:disabled) {
@@ -50,7 +49,7 @@ export const SecondaryButton = styled(BaseButton)`
     bottom: 0;
     opacity: 0;
     border-radius: var(--radius);
-    box-shadow: 0 0 16px hsla(${COLORS.gray[500]} / 0.55);
+    box-shadow: 0 0 16px hsla(var(--color-gray) / 0.55);
     transition: opacity 0.2s;
   }
   &:hover:not(:disabled) {

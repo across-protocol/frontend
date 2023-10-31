@@ -22,11 +22,11 @@ export function MoreInfoFlow({ onClickBack }: Props) {
       <TitleContainer>
         <BackButton data-cy="back-button" onClick={onClickBack}>
           <ChevronLeft size={24} strokeWidth={1} />{" "}
-          <Text size="xl" color="#E0F3FF">
+          <Text size="xl" color="white">
             Back
           </Text>
         </BackButton>
-        <TitleText size="3xl" color="#E0F3FF">
+        <TitleText size="3xl" color="white">
           Airdrop details
         </TitleText>
         <TitleDescriptionText>

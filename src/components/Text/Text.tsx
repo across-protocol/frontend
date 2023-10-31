@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { QUERIESV2 } from "utils";
+import { QUERIESV2, COLORS } from "utils";
 
 type TextSize =
   | "4xl"
@@ -70,40 +70,19 @@ const sizeMap: Record<
   },
 };
 
-type TextColor =
-  | "white-100"
-  | "white-88"
-  | "white-70"
-  | "aqua"
-  | "error"
-  | "dark-grey"
-  | "warning"
-  | "grey-400"
-  | "teal";
-
-const colorMap: Record<TextColor, string> = {
-  "white-100": "hsla(203, 100%, 94%)", // #E0F3FF
-  "white-88": "hsla(204, 30%, 83%)", // #C5D5E0
-  "white-70": "hsla(203, 12%, 66%)", // "#9DAAB2"
-  "grey-400": "hsla(205, 13%, 66%, 1)", // "#9DAAB3"
-  aqua: "hsla(166, 92%, 70%)", // "#6CF9D8"
-  error: "hsla(0, 92%, 70%)", // "#f96c6c"
-  "dark-grey": "#2d2e33",
-  warning: "#f9d26c",
-  teal: "#44D2FF",
-};
+export type TextColor = keyof typeof COLORS;
 
 type TextProps = {
   size?: TextSize;
   weight?: number;
-  color?: string;
+  color?: TextColor;
   casing?: TextCasing;
 };
 
 export const Text = styled.div<TextProps>`
   font-style: normal;
   font-weight: ${({ weight = 400 }) => weight};
-  color: ${({ color = "white-88" }) => colorMap[color as TextColor] || color};
+  color: ${({ color = "white-88" }) => COLORS[color]};
 
   font-size: ${({ size = "md" }) => `${sizeMap[size].fontSize / 16}rem`};
   line-height: ${({ size = "md" }) =>
