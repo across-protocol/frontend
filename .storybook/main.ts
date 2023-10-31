@@ -1,16 +1,19 @@
-const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
+import type { StorybookConfig } from "@storybook/react-vite";
 
-module.exports = {
-  stories: ["../src/**/*.stories.mdx", "../src/**/*.stories.@(js|jsx|ts|tsx)"],
+const config: StorybookConfig = {
+  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: [
     "@storybook/addon-links",
     "@storybook/addon-essentials",
+    "@storybook/addon-onboarding",
     "@storybook/addon-interactions",
-    "@storybook/preset-create-react-app",
   ],
-  framework: "@storybook/react",
-  core: {
-    builder: "webpack4",
+  framework: {
+    name: "@storybook/react-vite",
+    options: {},
+  },
+  docs: {
+    autodocs: "tag",
   },
   // Note: by default, storybook only forwards environment variables that
   //       take the form /^STORYBOOK_/ . The code below creates a 1:1 mapping
@@ -27,13 +30,5 @@ module.exports = {
       return accumulator;
     }, {}),
   }),
-  webpackFinal: async (config) => {
-    config.resolve.plugins = [
-      ...(config.resolve.plugins || []),
-      new TsconfigPathsPlugin({
-        extensions: config.resolve.extensions,
-      }),
-    ];
-    return config;
-  },
 };
+export default config;
