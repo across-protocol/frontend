@@ -1,12 +1,12 @@
 import styled from "@emotion/styled";
-import { Text } from "components/Text";
+import { Text, TextColor } from "components/Text";
 import { BigNumber } from "ethers";
 import { formatUnits, TokenInfo } from "utils";
 
 type TokenFeeProps = {
   token: TokenInfo;
   amount: BigNumber;
-  textColor?: string;
+  textColor?: TextColor;
 };
 
 const TokenFee = ({ token, amount, textColor = "grey-400" }: TokenFeeProps) => (

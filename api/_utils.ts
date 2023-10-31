@@ -525,11 +525,9 @@ export const getRelayerFeeDetails = async (
       relayerAddress,
       tokenPrice
     );
-  } catch (_e: unknown) {
-    // Resolve and transform the error
-    const e = _e as Error;
-    // We want to mask this error as an Input error.
-    throw new InputError(e?.message);
+  } catch (err: unknown) {
+    const reason = resolveEthersError(err);
+    throw new InputError(`Relayer fill simulation failed - ${reason}`);
   }
 };
 
@@ -728,6 +726,15 @@ export function applyMapFilter<InputType, MapType>(
     }
     return accumulator;
   }, []);
+}
+
+export function resolveEthersError(err: unknown): string {
+  // prettier-ignore
+  return sdk.typeguards.isEthersError(err)
+    ? `${err.reason}: ${err.code}`
+    : sdk.typeguards.isError(err)
+      ? err.message
+      : "unknown error";
 }
 
 /**

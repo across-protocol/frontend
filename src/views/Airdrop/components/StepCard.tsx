@@ -47,7 +47,7 @@ export function StepCard(props: Props) {
         </TopRowTextContainer>
         {props.showPill && (
           <Pill backgroundColor={isStepCompleted ? "#364C4C" : "#3E4047"}>
-            <Text size="xs" color={isStepCompleted ? "aqua" : "white-80"}>
+            <Text size="xs" color={isStepCompleted ? "aqua" : "white"}>
               {isStepCompleted
                 ? "claimed"
                 : props.isClaiming

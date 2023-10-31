@@ -67,49 +67,6 @@ export const QUERIES = {
   mobileAndDown: `(max-width: ${(BREAKPOINTS.tabletMin - 1) / 16}rem)`,
 };
 
-export const COLORS = {
-  gray: {
-    100: "0deg 0% 89%",
-    // Hex: #F5F5F5
-    150: "0deg 0% 96%",
-
-    // #2C2F33
-    160: "214.3deg 7.4% 18.6%",
-    // #27292c
-    175: "216deg 6% 16.3%",
-    // hsl(214.3,7.4%,18.6%)
-    200: "220deg 2% 72%",
-    // #2c2e32
-    250: "220deg 6.4% 18.4%",
-    300: "240deg 4% 27%",
-    // #2d2e33
-    500: "230deg 6% 19%",
-    // #68686c
-    550: "240deg 2% 42%",
-    // #4d4c53
-    600: "249deg 4% 31%",
-  },
-  primary: {
-    // #6df8d8
-    500: "166deg 92% 70%",
-    // #565757
-    600: "180deg 0.6% 33.9%",
-    700: "180deg 15% 25%",
-  },
-  secondary: {
-    500: "266deg 77% 62%",
-  },
-  error: {
-    500: "11deg 92% 70%",
-    300: "11deg 93% 94%",
-  },
-  // Hex: #ffffff
-  white: "0deg 100% 100%",
-  black: "0deg 0% 0%",
-  umaRed: "0deg 100% 65%",
-  purple: "267deg 77% 62%",
-};
-
 export type ChainInfo = {
   name: string;
   fullName?: string;
@@ -601,6 +558,38 @@ export const QUERIESV2 = {
   xs: breakpoint(BREAKPOINTS_V2.xs),
   sm: breakpoint(BREAKPOINTS_V2.sm),
   tb: breakpoint(BREAKPOINTS_V2.tb),
+};
+
+// See src/components/GlobalStyles/GlobalStyles.tsx for the CSS variables
+export const COLORS = {
+  red: "var(--color-interface-red)",
+  yellow: "var(--color-interface-yellow)",
+  aqua: "var(--color-interface-aqua)",
+  "aqua-15": "var(--color-interface-aqua-15)",
+  teal: "var(--color-interface-teal)",
+  "teal-5": "var(--color-interface-teal-5)",
+  "teal-15": "var(--color-interface-teal-15)",
+  "black-700": "var(--color-neutrals-black-700)",
+  "black-800": "var(--color-neutrals-black-800)",
+  "black-900": "var(--color-neutrals-black-900)",
+  "grey-400": "var(--color-neutrals-grey-400)",
+  "grey-500": "var(--color-neutrals-grey-500)",
+  "grey-600": "var(--color-neutrals-grey-600)",
+  "light-100": "var(--color-neutrals-light-100)",
+  "light-200": "var(--color-neutrals-light-200)",
+  "light-300": "var(--color-neutrals-light-300)",
+  "white-70": "var(--tints-shades-white-70)",
+  "white-88": "var(--tints-shades-white-88)",
+  "white-100": "var(--tints-shades-white-100)",
+  "white-200": "var(--tints-shades-white-200)",
+
+  // Aliases
+  primary: "var(--color-interface-aqua)",
+  brand: "var(--color-interface-aqua)",
+  error: "var(--color-interface-red)",
+  warning: "var(--color-interface-yellow)",
+  white: "var(--tints-shades-white-100)",
+  "dark-grey": "var(--color-neutrals-black-800)",
 };
 
 export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);

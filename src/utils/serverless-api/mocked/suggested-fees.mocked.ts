@@ -14,7 +14,8 @@ export async function suggestedFeesMockedApiCall(
   _amount: ethers.BigNumber,
   _originToken: string,
   _toChainid: ChainId,
-  _fromChainid: ChainId
+  _fromChainid: ChainId,
+  _recipientAddress: string
 ): Promise<SuggestedApiFeeReturnType> {
   return {
     relayerFee: {

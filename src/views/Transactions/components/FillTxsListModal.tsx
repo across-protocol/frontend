@@ -2,7 +2,7 @@ import React from "react";
 import styled from "@emotion/styled";
 import { X } from "react-feather";
 import { DialogContent, DialogOverlay } from "@reach/dialog";
-import { COLORS, QUERIES } from "utils";
+import { QUERIES } from "utils";
 
 import { TxLink } from "../types";
 
@@ -104,7 +104,7 @@ const Overlay = styled(DialogOverlay)`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: hsla(${COLORS.gray[500]} / 0.9);
+  background-color: hsla(var(--color-gray) / 0.9);
   display: flex;
   justify-content: center;
   align-items: flex-start;

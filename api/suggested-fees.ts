@@ -10,6 +10,7 @@ import {
   disabledL1Tokens,
   DEFAULT_QUOTE_TIMESTAMP_BUFFER,
   TOKEN_SYMBOLS_MAP,
+  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
 } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
@@ -40,8 +41,8 @@ const SuggestedFeesQueryParamsSchema = type({
   timestamp: optional(positiveIntStr()),
   skipAmountLimit: optional(boolStr()),
   message: optional(string()),
-  recipientAddress: optional(validAddress()),
-  relayerAddress: optional(validAddress()),
+  recipient: optional(validAddress()),
+  relayer: optional(validAddress()),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
@@ -69,20 +70,22 @@ const handler = async (
     let {
       amount: amountInput,
       token,
-      destinationChainId,
+      destinationChainId: _destinationChainId,
       originChainId,
       timestamp,
       skipAmountLimit,
-      recipientAddress,
-      relayerAddress,
+      recipient,
+      relayer,
       message,
     } = query;
 
-    if (originChainId === destinationChainId) {
+    if (originChainId === _destinationChainId) {
       throw new InputError("Origin and destination chains cannot be the same");
     }
+    const destinationChainId = Number(_destinationChainId);
 
-    recipientAddress ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+    relayer ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+    recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     token = ethers.utils.getAddress(token);
 
     const [latestBlock, tokenDetails] = await Promise.all([
@@ -113,8 +116,8 @@ const handler = async (
         throw new InputError("Message must be an even hex string");
       }
       const isRecipientAContract = await sdk.utils.isContractDeployedToAddress(
-        recipientAddress,
-        provider
+        recipient,
+        getProvider(destinationChainId)
       );
       if (!isRecipientAContract) {
         throw new InputError(
@@ -128,7 +131,7 @@ const handler = async (
         // of the `handleAcrossMessage` we will check that the balance of the relayer is sufficient to
         // support this deposit.
         const destinationToken =
-          sdk.utils.getL2TokenAddresses(l1Token)?.[Number(destinationChainId)];
+          sdk.utils.getL2TokenAddresses(l1Token)?.[destinationChainId];
         if (!sdk.utils.isDefined(destinationToken)) {
           throw new InputError(
             `Could not resolve token address on ${destinationChainId} for ${l1Token}`
@@ -136,12 +139,13 @@ const handler = async (
         }
         const balanceOfToken = await getCachedTokenBalance(
           destinationChainId,
-          relayerAddress,
+          relayer,
           destinationToken
         );
         if (balanceOfToken.lt(amountInput)) {
           throw new InputError(
-            `Relayer Address (${relayerAddress}) doesn't have enough funds to support this deposit. For help, please reach out to https://discord.across.to`
+            `Relayer Address (${relayer}) doesn't have enough funds to support this deposit;` +
+              ` for help, please reach out to https://discord.across.to`
           );
         }
       }
@@ -180,7 +184,7 @@ const handler = async (
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
     const [{ number: blockTag }, routeEnabled] = await Promise.all([
       blockFinder.getBlockForTimestamp(parsedTimestamp),
-      isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
+      isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
 
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
@@ -191,7 +195,7 @@ const handler = async (
       provider
     );
 
-    const baseCurrency = destinationChainId === "137" ? "matic" : "eth";
+    const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
     const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
       hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
@@ -206,7 +210,7 @@ const handler = async (
           blockTag,
         },
         computedOriginChainId,
-        Number(destinationChainId)
+        destinationChainId
       ),
       getCachedTokenPrice(l1Token, baseCurrency),
     ]);
@@ -219,11 +223,11 @@ const handler = async (
       l1Token,
       amount,
       computedOriginChainId,
-      Number(destinationChainId),
-      recipientAddress,
+      destinationChainId,
+      recipient,
       tokenPrice,
       message,
-      relayerAddress
+      relayer
     );
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";

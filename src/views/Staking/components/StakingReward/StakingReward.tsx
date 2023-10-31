@@ -16,8 +16,6 @@ export const StakingReward = ({
   claimActionHandler,
   isMutating,
 }: StakingRewardPropType) => {
-  const activeColor = "white-" + (outstandingRewards.gt(0) ? 100 : 70);
-
   const valueOrEmpty = repeatableTernaryBuilder(
     isConnected && BigNumber.from(outstandingRewards).gt(0),
     <>-</>
@@ -37,7 +35,9 @@ export const StakingReward = ({
             <RewardClaimWrapper>
               <Text color="white-70">Claimable rewards</Text>
               {valueOrEmpty(
-                <Text color={activeColor}>
+                <Text
+                  color={outstandingRewards.gt(0) ? "white-100" : "white-70"}
+                >
                   {formatEther(outstandingRewards)} ACX
                 </Text>
               )}

@@ -112,10 +112,13 @@ const handler = async (
     ]);
     // If any of the above fails or the route is not enabled, we assume that the
     if (
-      disabledL1Tokens.includes(l1Token.toLowerCase()) ||
       tokenDetailsResult.status === "rejected" ||
-      routeEnabledResult.status === "rejected" ||
-      !routeEnabledResult.value
+      routeEnabledResult.status === "rejected"
+    ) {
+      throw new InputError(`Unable to query route.`);
+    } else if (
+      !routeEnabledResult.value ||
+      disabledL1Tokens.includes(l1Token.toLowerCase())
     ) {
       throw new InputError(`Route is not enabled.`);
     }

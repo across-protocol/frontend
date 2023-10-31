@@ -15,11 +15,17 @@ export function useBridgeFees(
   amount: ethers.BigNumber,
   fromChainId?: ChainId,
   toChainId?: ChainId,
-  tokenSymbol?: string
+  tokenSymbol?: string,
+  recipientAddress?: string
 ) {
   const { block } = useBlock(toChainId);
   const enabledQuery =
-    !!toChainId && !!fromChainId && !!block && !!tokenSymbol && amount.gt(0);
+    !!toChainId &&
+    !!fromChainId &&
+    !!block &&
+    !!tokenSymbol &&
+    amount.gt(0) &&
+    !!recipientAddress;
   const queryKey = enabledQuery
     ? bridgeFeesQueryKey(
         tokenSymbol,
@@ -38,6 +44,7 @@ export function useBridgeFees(
         blockTimestamp: block!.timestamp,
         toChainId: toChainId!,
         fromChainId: fromChainId!,
+        recipientAddress: recipientAddress!,
       });
     },
     {

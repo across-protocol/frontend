@@ -32,6 +32,7 @@ type GetBridgeFeesArgs = {
   blockTimestamp: number;
   fromChainId: ChainId;
   toChainId: ChainId;
+  recipientAddress: string;
 };
 
 export type GetBridgeFeesResult = BridgeFees & {
@@ -52,6 +53,7 @@ export async function getBridgeFees({
   tokenSymbol,
   fromChainId,
   toChainId,
+  recipientAddress,
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const timeBeforeRequests = Date.now();
   const {
@@ -66,7 +68,8 @@ export async function getBridgeFees({
     amount,
     getConfig().getTokenInfoBySymbol(fromChainId, tokenSymbol).address,
     toChainId,
-    fromChainId
+    fromChainId,
+    recipientAddress
   );
   const timeAfterRequests = Date.now();
 

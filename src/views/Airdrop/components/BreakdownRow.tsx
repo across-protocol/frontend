@@ -1,14 +1,14 @@
 import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
 
-import { Text } from "components/Text";
+import { Text, TextColor } from "components/Text";
 import { formatUnits } from "utils/format";
 
 type Props = {
   label: string | React.ReactElement;
   Icon?: React.ReactElement;
   amount?: string;
-  amountColor?: string;
+  amountColor?: TextColor;
 };
 
 export const BreakdownRow = ({
