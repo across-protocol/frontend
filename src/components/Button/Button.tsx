@@ -63,7 +63,6 @@ const sizeMap: Record<
 
 const BaseButton = styled.button<BaseButtonProps>`
   // Text styles
-  font-family: "Barlow";
   font-style: normal;
   font-weight: 500;
   font-size: ${({ size = "lg" }) => sizeMap[size].fontSize};
