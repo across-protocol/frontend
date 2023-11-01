@@ -7,6 +7,6 @@ export async function coingeckoMockedApiCall(
   price: ethers.BigNumber;
 }> {
   return {
-    price: ethers.utils.parseEther(String("0.1")),
+    price: ethers.utils.parseEther(String("0.17")),
   };
 }

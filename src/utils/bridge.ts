@@ -32,7 +32,7 @@ type GetBridgeFeesArgs = {
   blockTimestamp: number;
   fromChainId: ChainId;
   toChainId: ChainId;
-  recipientAddress: string;
+  recipientAddress?: string;
 };
 
 export type GetBridgeFeesResult = BridgeFees & {
