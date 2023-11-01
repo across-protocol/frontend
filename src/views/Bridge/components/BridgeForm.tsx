@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import styled from "@emotion/styled";
 
 import ExternalCardWrapper from "components/CardWrapper";
-import { PrimaryButton } from "components/Button";
+import { UnstyledButton } from "components/Button";
 import { Text } from "components";
 
 import EstimatedTable from "./EstimatedTable";
@@ -23,6 +23,7 @@ import { VoidHandler } from "utils/types";
 
 import { AmountInputError, getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
+import { ConvertTokensToBaseCurrencyType } from "../hooks/useBridge";
 
 type BridgeFormProps = {
   selectedRoute: Route;
@@ -49,6 +50,8 @@ type BridgeFormProps = {
   buttonLabel: string;
   isBridgeDisabled: boolean;
   validationError?: AmountInputError;
+  convertTokensToBaseCurrency: ConvertTokensToBaseCurrencyType;
+  depositReferralReward?: BigNumber;
 };
 
 const BridgeForm = ({
@@ -76,6 +79,8 @@ const BridgeForm = ({
   buttonLabel,
   isBridgeDisabled,
   validationError,
+  convertTokensToBaseCurrency,
+  depositReferralReward,
 }: BridgeFormProps) => {
   return (
     <>
@@ -160,8 +165,9 @@ const BridgeForm = ({
               Boolean(toAccount?.isContract)
             )
           )}
+          convertTokensToBaseCurrency={convertTokensToBaseCurrency}
+          depositReferralReward={depositReferralReward}
         />
-        <Divider />
         {isWrongChain ? (
           <Button onClick={onClickChainSwitch}>Switch Network</Button>
         ) : (
@@ -241,12 +247,14 @@ const ChangeAddressLink = styled(Text)`
   cursor: pointer;
 `;
 
-const Divider = styled.div`
-  width: 100%;
-  height: 1px;
-  background: #3e4047;
-`;
+const Button = styled(UnstyledButton)`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 
-const Button = styled(PrimaryButton)`
+  background: #6cf9d8;
+  border-radius: 32px;
+  height: 64px;
   width: 100%;
 `;

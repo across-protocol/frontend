@@ -13,6 +13,7 @@ import {
 } from "utils";
 
 import TokenFee from "./TokenFee";
+import { ConvertTokensToBaseCurrencyType } from "../hooks/useBridge";
 
 type EstimatedTableProps = {
   fromChainId: number;
@@ -24,6 +25,8 @@ type EstimatedTableProps = {
   token: TokenInfo;
   dataLoaded: boolean;
   receiveToken: TokenInfo;
+  convertTokensToBaseCurrency: ConvertTokensToBaseCurrencyType;
+  depositReferralReward?: BigNumber;
 };
 
 const EstimatedTable = ({

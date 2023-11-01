@@ -40,6 +40,8 @@ const Bridge = () => {
     handleSelectToken,
     handleSelectFromChain,
     handleSelectToChain,
+    depositReferralReward,
+    convertTokensToBaseCurrency,
   } = useBridge();
 
   return (
@@ -96,6 +98,8 @@ const Bridge = () => {
               isBridgeDisabled={isBridgeDisabled}
               validationError={amountValidationError}
               balance={balance}
+              convertTokensToBaseCurrency={convertTokensToBaseCurrency}
+              depositReferralReward={depositReferralReward}
             />
           )}
         </Wrapper>
