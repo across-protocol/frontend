@@ -103,12 +103,13 @@ export function useBridgeAction(
       );
     });
 
+    const statusPageSearchParams = new URLSearchParams({
+      originChainId: String(frozenPayload.fromChain),
+      destinationChainId: String(frozenPayload.toChain),
+      bridgeTokenSymbol: tokenSymbol,
+    }).toString();
     history.push(
-      `/bridge/${tx.hash}?${new URLSearchParams({
-        originChainId: String(frozenPayload.fromChain),
-        destinationChainId: String(frozenPayload.toChain),
-        bridgeTokenSymbol: tokenSymbol,
-      }).toString()}`,
+      `/bridge/${tx.hash}?${statusPageSearchParams}`,
       // This state is stored in session storage and therefore persist
       // after a refresh of the deposit status page.
       {
