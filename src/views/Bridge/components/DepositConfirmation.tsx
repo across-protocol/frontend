@@ -28,6 +28,7 @@ import { getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
 import { useAmplitude } from "hooks/useAmplitude";
 import { ampli } from "ampli";
+import { ConvertTokensToBaseCurrencyType } from "../hooks/useBridge";
 
 type DepositConfirmationProps = {
   currentFromRoute: number | undefined;
@@ -48,6 +49,8 @@ type DepositConfirmationProps = {
 
   currentTokenMaxApy?: BigNumber;
   isCurrentTokenMaxApyLoading?: boolean;
+  convertTokensToBaseCurrency: ConvertTokensToBaseCurrencyType;
+  depositReferralReward?: BigNumber;
 };
 
 const logoMapping: {
@@ -81,6 +84,8 @@ const DepositConfirmation = ({
   explorerLink: _explorerLink,
   elapsedTimeFromDeposit,
   currentTokenMaxApy,
+  convertTokensToBaseCurrency,
+  depositReferralReward,
 }: DepositConfirmationProps) => {
   const explorerLink = _explorerLink ?? "https://etherscan.io";
 
@@ -241,6 +246,8 @@ const DepositConfirmation = ({
             Boolean(toAccount?.isContract)
           )
         )}
+        convertTokensToBaseCurrency={convertTokensToBaseCurrency}
+        depositReferralReward={depositReferralReward}
       />
       <Divider />
       <Button disabled={transactionPending} onClick={onClickNewTx}>

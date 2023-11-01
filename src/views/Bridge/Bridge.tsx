@@ -74,6 +74,8 @@ const Bridge = () => {
               toAccount={toAccount}
               currentTokenMaxApy={currentTokenMaxApy}
               isCurrentTokenMaxApyLoading={isCurrentTokenMaxApyLoading}
+              convertTokensToBaseCurrency={convertTokensToBaseCurrency}
+              depositReferralReward={depositReferralReward}
             />
           ) : (
             <BridgeForm
