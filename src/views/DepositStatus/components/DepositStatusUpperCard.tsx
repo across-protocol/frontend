@@ -1,3 +1,4 @@
+import React from "react";
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
 
@@ -13,7 +14,7 @@ import { ReactComponent as ZkSyncGrayscaleLogo } from "assets/grayscale-logos/zk
 import { ReactComponent as BaseGrayscaleLogo } from "assets/grayscale-logos/base.svg";
 import { Text, Badge } from "components";
 
-import { ChainId, QUERIESV2 } from "utils";
+import { ChainId, QUERIESV2, COLORS } from "utils";
 
 import { useElapsedSeconds } from "../hooks/useElapsedSeconds";
 import { useDepositTracking } from "../hooks/useDepositTracking";
@@ -21,9 +22,7 @@ import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus, FromBridgePagePayload } from "../types";
 
-const grayscaleLogos: {
-  [key: number]: JSX.Element;
-} = {
+const grayscaleLogos: Record<number, React.ReactNode> = {
   [ChainId.ARBITRUM]: <ArbitrumGrayscaleLogo />,
   [ChainId.POLYGON]: <PolygonGrayscaleLogo />,
   [ChainId.OPTIMISM]: <OptimismGrayscaleLogo />,
@@ -155,8 +154,8 @@ const Wrapper = styled.div`
   gap: 30px;
 
   background-image: url(${BgBanner});
-  background-color: #2d2e33;
-  border-bottom: 1px solid #3e4047;
+  background-color: ${COLORS["black-800"]};
+  border-bottom: 1px solid ${COLORS["grey-600"]};
 
   width: calc(100% + 48px);
   margin: 0 -24px;
@@ -250,7 +249,7 @@ const AnimatedDividerFromChain = styled(AnimatedDivider)<{
   status: DepositStatus;
 }>`
   background: ${({ status }) =>
-    status === "depositing" ? "#FFFFFF" : "#6cf9d8"};
+    status === "depositing" ? COLORS.white : COLORS.aqua};
 `;
 
 const AnimatedDividerToChain = styled(AnimatedDivider)<{
@@ -258,10 +257,10 @@ const AnimatedDividerToChain = styled(AnimatedDivider)<{
 }>`
   background: ${({ status }) =>
     status === "depositing"
-      ? "#9daab3"
+      ? COLORS["grey-400"]
       : status === "filling"
-      ? "#FFFFFF"
-      : "#6cf9d8"};
+      ? COLORS.white
+      : COLORS.aqua};
 `;
 
 const AnimatedLogoWrapper = styled.div`
@@ -274,7 +273,7 @@ const AnimatedLogoWrapper = styled.div`
   width: 60px;
   height: 60px;
 
-  background: #2d2e33;
+  background: ${COLORS["black-800"]};
 
   border: 1px solid;
   transition: border-color 0.5s ease-in-out;
@@ -293,7 +292,7 @@ const AnimatedLogoWrapperFromChain = styled(AnimatedLogoWrapper)<{
   status: DepositStatus;
 }>`
   border-color: ${({ status }) =>
-    status === "depositing" ? "#FFFFFF" : "#6cf9d8"};
+    status === "depositing" ? COLORS.white : COLORS.aqua};
 `;
 
 const AnimatedLogoWrapperToChain = styled(AnimatedLogoWrapper)<{
@@ -301,10 +300,10 @@ const AnimatedLogoWrapperToChain = styled(AnimatedLogoWrapper)<{
 }>`
   border-color: ${({ status }) =>
     status === "depositing"
-      ? "#9daab3"
+      ? COLORS["grey-400"]
       : status === "filling"
-      ? "#FFFFFF"
-      : "#6cf9d8"};
+      ? COLORS.white
+      : COLORS.aqua};
 `;
 
 const AnimatedLogo = styled.div<{
@@ -340,7 +339,7 @@ const AnimatedLogoFromChain = styled(AnimatedLogo)<{ status: DepositStatus }>`
     circle,
     #path-to-animate {
       fill: ${({ status }) =>
-        status === "depositing" ? "#FFFFFF" : "#6cf9d8"};
+        status === "depositing" ? "COLORS.white" : COLORS.aqua};
     }
   }
 `;
@@ -352,10 +351,10 @@ const AnimatedLogoToChain = styled(AnimatedLogo)<{ status: DepositStatus }>`
     #path-to-animate {
       fill: ${({ status }) =>
         status === "depositing"
-          ? "#9daab3"
+          ? COLORS["grey-400"]
           : status === "filling"
-          ? "#FFFFFF"
-          : "#6cf9d8"};
+          ? COLORS.white
+          : COLORS.aqua};
     }
   }
 `;
