@@ -192,8 +192,8 @@ const TransactionsPageLinkWrapper = styled.a`
   align-items: center;
   justify-content: space-between;
   border: 1px solid ${COLORS["grey-500"]};
-  border-radius: 0.5rem;
-  padding: 1rem;
+  border-radius: 8px;
+  padding: 16px;
   text-decoration: none;
 `;
 
