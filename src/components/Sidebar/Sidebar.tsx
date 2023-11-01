@@ -93,6 +93,8 @@ const Sidebar = ({ openSidebar, setOpenSidebar }: Props) => {
         <TopHeaderRow>
           {!isConnected && (
             <ConnectButton
+              backgroundColor="dark-grey"
+              textColor="white"
               onClick={() => {
                 connect({ trackSection: "mobileNavSidebar" });
               }}
@@ -117,6 +119,9 @@ const Sidebar = ({ openSidebar, setOpenSidebar }: Props) => {
         ) : null}
         {isConnected && wallet ? (
           <DisconnectButton
+            backgroundColor="dark-grey"
+            textColor="white"
+            size="md"
             onClick={() =>
               disconnect(wallet, { trackSection: "mobileNavSidebar" })
             }

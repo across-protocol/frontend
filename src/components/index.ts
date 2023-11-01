@@ -11,6 +11,6 @@ export { default as InputWithMaxButton } from "./InputWithMaxButton";
 export { Text } from "./Text";
 export { WrongNetworkHeader } from "./WrongNetworkHeader";
 
-export * from "./Buttons";
+export * from "./Button";
 export * from "./ExternalLink";
 export * from "./ErrorBoundary";

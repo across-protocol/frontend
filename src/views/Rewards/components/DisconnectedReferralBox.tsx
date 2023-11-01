@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { ReactComponent as ReferralIcon } from "assets/icons/rewards/referral-within-star.svg";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/external-link-12.svg";
-import { ButtonV2 } from "components";
+import { SecondaryButton } from "components/Button";
 import { QUERIESV2 } from "utils";
 
 type DisconnectedReferralBoxType = {
@@ -27,7 +27,7 @@ const DisconnectedReferralBox = ({
         >
           Learn more <ExternalLinkIcon />
         </MoreInfoLink>
-        <ConnectButton size="lg" onClick={connectHandler}>
+        <ConnectButton size="md" onClick={connectHandler}>
           Connect to get started
         </ConnectButton>
       </ButtonWrapper>
@@ -106,27 +106,7 @@ const ButtonWrapper = styled.div`
   }
 `;
 
-const ConnectButton = styled(ButtonV2)`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid #6cf9d8;
-  border-radius: 20px;
-
-  padding: 0 20px;
-
-  background-color: transparent;
-
-  height: 40px;
-  width: fit-content;
-
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 20px;
-  color: #6cf9d8;
-`;
+const ConnectButton = styled(SecondaryButton)``;
 
 const MoreInfoLink = styled.a`
   display: flex;

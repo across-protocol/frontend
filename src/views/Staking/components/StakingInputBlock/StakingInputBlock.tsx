@@ -91,10 +91,9 @@ const StakingInputBlock: React.FC<Props> = ({
 
         <ButtonWrapper>
           <StakeButton
-            valid={valid}
             onClick={onClickHandler}
             disabled={!valid || invalid || displayLoader}
-            warningButtonColor={warningButtonColor}
+            backgroundColor={warningButtonColor ? "yellow" : "aqua"}
           >
             <StakeButtonContentWrapper>
               <span>{capitalizeFirstLetter(buttonText)}</span>

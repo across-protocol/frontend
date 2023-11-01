@@ -1,16 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { SecondaryButton } from "../../components/Button";
+import { PrimaryButton } from "../../components/Button";
 
-const meta: Meta<typeof SecondaryButton> = {
-  component: SecondaryButton,
+const meta: Meta<typeof PrimaryButton> = {
+  component: PrimaryButton,
   argTypes: {
-    borderColor: {
-      control: {
-        type: "select",
-      },
-    },
-    hoveredBorderColor: {
+    backgroundColor: {
       control: {
         type: "select",
       },
@@ -36,10 +31,8 @@ const meta: Meta<typeof SecondaryButton> = {
 
 export default meta;
 
-type Story = StoryObj<typeof SecondaryButton>;
+type Story = StoryObj<typeof PrimaryButton>;
 
-export const Secondary: Story = {
-  render: (args) => (
-    <SecondaryButton {...args}>Secondary Button</SecondaryButton>
-  ),
+export const Primary: Story = {
+  render: (args) => <PrimaryButton {...args}>Primary Button</PrimaryButton>,
 };

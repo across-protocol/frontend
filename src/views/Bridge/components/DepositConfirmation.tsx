@@ -14,7 +14,7 @@ import {
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-external-link-16.svg";
 import EstimatedTable from "./EstimatedTable";
 import { BigNumber } from "ethers";
-import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
+import { UnstyledButton } from "components/Button";
 import { keyframes } from "@emotion/react";
 import { ReactComponent as EthereumGrayscaleLogo } from "assets/grayscale-logos/eth.svg";
 import { ReactComponent as PolygonGrayscaleLogo } from "assets/grayscale-logos/polygon.svg";

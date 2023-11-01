@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
-import { ButtonV2 } from "components";
+import { PrimaryButton, SecondaryButton } from "components/Button";
 import { QUERIESV2 } from "utils";
 
 export const BackgroundLayer = styled.video`
@@ -69,23 +69,14 @@ export const ContentWrapper = styled.div`
   align-items: center;
 `;
 
-export const Button = styled(ButtonV2)`
-  @media ${QUERIESV2.sm.andDown} {
-    padding: 10px 20px;
-  }
-`;
+export const Button = styled(PrimaryButton)``;
 
-export const FullWidthButton = styled(Button)`
-  display: flex;
-  justify-content: center;
-  gap: 8px;
+export const FullWidthButton = styled(PrimaryButton)`
   width: 100%;
 `;
 
-export const InverseButton = styled(FullWidthButton)`
-  border: 1px solid #6cf9d8;
-  color: #6cf9d8;
-  background: transparent;
+export const InverseButton = styled(SecondaryButton)`
+  width: 100%;
 `;
 
 export const ExternalLinkWithUnderline = styled.a`

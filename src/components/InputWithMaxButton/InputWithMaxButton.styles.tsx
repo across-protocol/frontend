@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
+import { UnstyledButton } from "components/Button";
 import { QUERIESV2 } from "utils";
-import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
 
 interface IInput {
   valid: boolean;

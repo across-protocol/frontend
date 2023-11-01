@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
 
-import { Alert, ButtonV2, Modal } from "components";
+import { Alert, Modal } from "components";
+import { SecondaryButton } from "components/Button";
 import { Text } from "components/Text";
 import { formatEther, QUERIESV2 } from "utils";
 
@@ -57,14 +58,13 @@ export function ClaimRewardsModal({ isOpen, onExit }: Props) {
         </ClaimableBox>
         <Button
           size="lg"
+          borderColor="yellow"
           onClick={() =>
             claimMutation.mutate(undefined, { onSuccess: () => onExit() })
           }
           disabled={disableButton}
         >
-          <Text color="warning" size="lg">
-            {claimMutation.isLoading ? "Claiming..." : "Claim rewards"}
-          </Text>
+          {claimMutation.isLoading ? "Claiming..." : "Claim rewards"}
         </Button>
       </ClaimableBoxInnerWrapper>
       <AddToWalletWrapper>
@@ -99,10 +99,8 @@ const ClaimableBoxInnerWrapper = styled.div`
   gap: 12px;
 `;
 
-const Button = styled(ButtonV2)`
+const Button = styled(SecondaryButton)`
   width: 100%;
-  border: 1px solid #f9d26c;
-  background-color: transparent;
 `;
 
 const AddToWalletWrapper = styled.div`

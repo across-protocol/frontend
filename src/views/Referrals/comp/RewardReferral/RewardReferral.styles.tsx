@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ButtonV2, SecondaryButtonV2 } from "components/Buttons";
+import { SecondaryButton, PrimaryButton } from "components/Button";
 import { ReactComponent as ReferralSVG } from "assets/icons/rewards/referral-within-star.svg";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
 import { ReactComponent as ClockIcon } from "assets/icons/clock.svg";
@@ -133,22 +133,7 @@ export const TierButtonWrapper = styled.div`
   gap: 8px;
 `;
 
-export const ClaimButton = styled(SecondaryButtonV2)`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 20px;
-  & * {
-    font-weight: 500 !important;
-    color: #f9d26c !important;
-  }
-  border-color: #f9d26c;
-
-  @media ${QUERIESV2.sm.andDown} {
-    padding: 8px 16px;
-  }
-`;
+export const ClaimButton = styled(SecondaryButton)``;
 
 export const TierSmHeader = styled.h4`
   font-size: ${16 / 16}rem;
@@ -204,7 +189,7 @@ export const ReferralLinkButtonsRow = styled.div`
   }
 `;
 
-export const ConnectButton = styled(ButtonV2)`
+export const ConnectButton = styled(PrimaryButton)`
   @media ${QUERIESV2.sm.andDown} {
     font-size: 14px;
     line-height: 18px;

@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ButtonV2 } from "components/Buttons";
+import { SecondaryButton } from "components/Button";
 
 export const Overlay = styled.div`
   position: absolute;
@@ -24,18 +24,4 @@ export const Overlay = styled.div`
   }
 `;
 
-export const ConnectButton = styled(ButtonV2)`
-  border: 1px solid var(--color-primary);
-  color: var(--color-primary);
-  background-color: #2d2e33;
-
-  :hover {
-    opacity: 0.9;
-  }
-
-  :active {
-    ::after {
-      content: none;
-    }
-  }
-`;
+export const ConnectButton = styled(SecondaryButton)``;

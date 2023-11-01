@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { BigNumber, utils } from "ethers";
 
 import { Text } from "components/Text";
-import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
+import { UnstyledButton } from "components/Button";
 import { QUERIESV2, Route, getToken } from "utils";
 
 import BridgeInputErrorAlert from "./BridgeAlert";

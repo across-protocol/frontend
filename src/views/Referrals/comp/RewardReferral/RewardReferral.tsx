@@ -283,14 +283,15 @@ const ReferralTierComponent: React.FC<{
         </TierWrapper>
         {isConnected && (
           <ClaimButton
-            size="lg"
+            size="md"
+            borderColor="yellow"
             onClick={() => setIsModalOpen(true)}
             disabled={
               !unclaimedReferralRewardAmount ||
               unclaimedReferralRewardAmount.eq(0)
             }
           >
-            <Text>Claim rewards</Text>
+            Claim rewards
           </ClaimButton>
         )}
       </TierButtonWrapper>

@@ -3,7 +3,7 @@ import { Modal, Text } from "components";
 import { useEffect, useState } from "react";
 import { QUERIESV2 } from "utils";
 import { ReactComponent as CrossIcon } from "assets/icons/cross-16.svg";
-import { SecondaryButtonWithoutShadow as UnstyledButton } from "components/Buttons";
+import { UnstyledButton } from "components/Button";
 import { ethers } from "ethers";
 import { ampli } from "ampli";
 import { useAmplitude } from "hooks";

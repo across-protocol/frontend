@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ButtonV2 } from "components";
+import { PrimaryButton } from "components/Button";
 import { QUERIESV2 } from "utils";
 
 export const Container = styled.div`
@@ -35,17 +35,6 @@ export const Divider = styled.div`
   height: 1px;
 `;
 
-export const Button = styled(ButtonV2)<{ isRemove?: boolean }>`
+export const Button = styled(PrimaryButton)`
   width: 100%;
-  background-color: ${({ isRemove }) => (isRemove ? `#f9d26c` : `#6cf9d8`)};
-
-  @media ${QUERIESV2.sm.andDown} {
-    height: 40px;
-    padding: 0px 20px;
-    border-radius: 20px;
-  }
-
-  &:hover {
-    opacity: 1;
-  }
 `;
