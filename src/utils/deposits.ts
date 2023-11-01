@@ -4,6 +4,14 @@ import { SpokePool__factory } from "./typechain";
 
 const config = getConfig();
 
+export class NoFundsDepositedLogError extends Error {
+  constructor(depositTxHash: string, chainId: number) {
+    super(
+      `Could not parse log FundsDeposited in tx ${depositTxHash} on chain ${chainId}`
+    );
+  }
+}
+
 export function parseFundsDepositedLog(
   logs: Array<{
     topics: string[];
@@ -40,9 +48,7 @@ export async function getDepositByTxHash(
   const parsedDepositLog = parseFundsDepositedLog(depositTxReceipt.logs);
 
   if (!parsedDepositLog) {
-    throw new Error(
-      `Could not parse log FundsDeposited in tx ${depositTxHash} on chain ${fromChainId}`
-    );
+    throw new NoFundsDepositedLogError(depositTxHash, fromChainId);
   }
 
   const block = await fromProvider.getBlock(depositTxReceipt.blockNumber);

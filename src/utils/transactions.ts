@@ -80,3 +80,7 @@ export function sendWithPaddedGas(
   };
   return fn;
 }
+
+export function isValidTxHash(txHash: string) {
+  return new RegExp(/^0x([A-Fa-f0-9]{64})$/).test(txHash);
+}

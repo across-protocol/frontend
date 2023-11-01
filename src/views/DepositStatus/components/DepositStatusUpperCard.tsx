@@ -14,7 +14,7 @@ import { ReactComponent as ZkSyncGrayscaleLogo } from "assets/grayscale-logos/zk
 import { ReactComponent as BaseGrayscaleLogo } from "assets/grayscale-logos/base.svg";
 import { Text, Badge } from "components";
 
-import { ChainId, QUERIESV2, COLORS } from "utils";
+import { ChainId, QUERIESV2, COLORS, NoFundsDepositedLogError } from "utils";
 
 import { useElapsedSeconds } from "../hooks/useElapsedSeconds";
 import { useDepositTracking } from "../hooks/useDepositTracking";
@@ -75,6 +75,20 @@ export function DepositStatusUpperCard({
     : !fillTxCompletedTime
     ? "filling"
     : "filled";
+
+  // This error indicates that the used deposit tx hash does not originate from
+  // an Across SpokePool contract.
+  if (depositQuery.error instanceof NoFundsDepositedLogError) {
+    return (
+      <Wrapper>
+        <TopWrapperTitleWrapper>
+          <Text size="lg" color="error">
+            Invalid deposit tx hash
+          </Text>
+        </TopWrapperTitleWrapper>
+      </Wrapper>
+    );
+  }
 
   return (
     <Wrapper>

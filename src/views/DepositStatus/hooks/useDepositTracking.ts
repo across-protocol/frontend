@@ -1,4 +1,5 @@
 import { useQuery } from "react-query";
+import { useState } from "react";
 
 import { useAmplitude } from "hooks";
 import {
@@ -8,6 +9,7 @@ import {
   wait,
   getDepositByTxHash,
   getFillByDepositTxHash,
+  NoFundsDepositedLogError,
 } from "utils";
 import {
   getLocalDepositByTxHash,
@@ -25,6 +27,8 @@ export function useDepositTracking(
   toChainId: number,
   fromBridgePagePayload?: FromBridgePagePayload
 ) {
+  const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(false);
+
   const { addToAmpliQueue } = useAmplitude();
 
   const depositQuery = useQuery(
@@ -33,11 +37,22 @@ export function useDepositTracking(
       // On some L2s the tx is mined too fast for the animation to show, so we add a delay
       await wait(1_000);
 
-      return getDepositByTxHash(depositTxHash, fromChainId);
+      try {
+        const deposit = await getDepositByTxHash(depositTxHash, fromChainId);
+        return deposit;
+      } catch (e) {
+        // If the error NoFundsDepositedLogError is thrown, this implies that the used
+        // tx hash is valid and mined but the origin is not a SpokePool contract. So we
+        // should not retry the query and throw the error.
+        if (e instanceof NoFundsDepositedLogError) {
+          setShouldRetryDepositQuery(false);
+        }
+        throw e;
+      }
     },
     {
       staleTime: Infinity,
-      retry: true,
+      retry: shouldRetryDepositQuery,
       onSuccess: (data) => {
         if (!fromBridgePagePayload) {
           return;

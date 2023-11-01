@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
 
 import { QUERIESV2 } from "utils";
+import { isValidTxHash } from "utils/transactions";
 import { LayoutV2 } from "components";
 import NotFound from "views/NotFound";
 
@@ -34,6 +35,10 @@ export default function DepositStatus() {
     !bridgeTokenSymbol
   ) {
     return <NotFound />;
+  }
+
+  if (!isValidTxHash(depositTxHash)) {
+    return <NotFound custom404Message="Invalid transaction hash" />;
   }
 
   return (
