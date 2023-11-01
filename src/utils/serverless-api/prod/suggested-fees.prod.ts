@@ -23,7 +23,7 @@ export async function suggestedFeesApiCall(
       token: originToken,
       destinationChainId: toChainid,
       originChainId: fromChainid,
-      recipientAddress,
+      recipient: recipientAddress,
       amount: amount.toString(),
       skipAmountLimit: true,
     },
