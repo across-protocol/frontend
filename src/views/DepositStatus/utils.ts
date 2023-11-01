@@ -11,7 +11,7 @@ export function convertForDepositQuery(
   const { sendDepositArgs, quote } = fromBridgePagePayload;
 
   return {
-    depositId: Number(data.parsedDepositLog.args.depositId || 0),
+    depositId: Number(data.parsedDepositLog.args.depositId),
     depositTime: data.depositTimestamp || Math.floor(Date.now() / 1000),
     status: "pending" as const,
     filled: "0",
@@ -22,7 +22,7 @@ export function convertForDepositQuery(
     recipientAddr: sendDepositArgs.toAddress,
     message: sendDepositArgs.message || "0x",
     amount: BigNumber.from(sendDepositArgs.amount).toString(),
-    depositTxHash: data.depositTxReceipt.transactionHash || "0x",
+    depositTxHash: data.depositTxReceipt.transactionHash,
     fillTxs: [],
     speedUps: [],
     depositRelayerFeePct: BigNumber.from(
@@ -54,9 +54,7 @@ export function convertForFillQuery(
   const { sendDepositArgs, quote } = fromBridgePagePayload;
 
   return {
-    depositId: Number(
-      data.depositByTxHash.parsedDepositLog.args.depositId || 0
-    ),
+    depositId: Number(data.depositByTxHash.parsedDepositLog.args.depositId),
     depositTime:
       data.depositByTxHash.depositTimestamp || Math.floor(Date.now() / 1000),
     status: "filled" as const,
@@ -68,8 +66,7 @@ export function convertForFillQuery(
     recipientAddr: sendDepositArgs.toAddress,
     message: sendDepositArgs.message || "0x",
     amount: BigNumber.from(sendDepositArgs.amount).toString(),
-    depositTxHash:
-      data.depositByTxHash.depositTxReceipt.transactionHash || "0x",
+    depositTxHash: data.depositByTxHash.depositTxReceipt.transactionHash,
     fillTxs: data.fillTxHashes || [],
     speedUps: [],
     depositRelayerFeePct: BigNumber.from(
