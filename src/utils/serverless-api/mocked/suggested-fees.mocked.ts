@@ -1,6 +1,7 @@
 import { BigNumber, ethers } from "ethers";
-import { ChainId } from "utils/constants";
+import { ChainId, getTokenByAddress } from "utils/constants";
 import { SuggestedApiFeeReturnType } from "../types";
+import { parseUnits } from "utils/format";
 
 /**
  * Creates a mocked variant of the suggestedAPI Call
@@ -15,24 +16,27 @@ export async function suggestedFeesMockedApiCall(
   _originToken: string,
   _toChainid: ChainId,
   _fromChainid: ChainId,
-  _recipientAddress: string
+  _recipientAddress?: string
 ): Promise<SuggestedApiFeeReturnType> {
+  const token = getTokenByAddress(_originToken);
+  const decimals = token?.decimals ?? 18;
+
   return {
     relayerFee: {
       pct: BigNumber.from("1"),
-      total: BigNumber.from("1"),
+      total: parseUnits("0.5", decimals),
     },
     relayerCapitalFee: {
       pct: BigNumber.from("1"),
-      total: BigNumber.from("1"),
+      total: parseUnits("0.5", decimals),
     },
     relayerGasFee: {
       pct: BigNumber.from("1"),
-      total: BigNumber.from("1"),
+      total: parseUnits("0.5", decimals),
     },
     lpFee: {
       pct: BigNumber.from("1"),
-      total: BigNumber.from("1"),
+      total: parseUnits("0.5", decimals),
     },
     isAmountTooLow: false,
     quoteBlock: BigNumber.from("1"),

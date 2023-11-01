@@ -20,12 +20,7 @@ export function useBridgeFees(
 ) {
   const { block } = useBlock(toChainId);
   const enabledQuery =
-    !!toChainId &&
-    !!fromChainId &&
-    !!block &&
-    !!tokenSymbol &&
-    amount.gt(0) &&
-    !!recipientAddress;
+    !!toChainId && !!fromChainId && !!block && !!tokenSymbol && amount.gt(0);
   const queryKey = enabledQuery
     ? bridgeFeesQueryKey(
         tokenSymbol,
@@ -44,7 +39,7 @@ export function useBridgeFees(
         blockTimestamp: block!.timestamp,
         toChainId: toChainId!,
         fromChainId: fromChainId!,
-        recipientAddress: recipientAddress!,
+        recipientAddress,
       });
     },
     {
