@@ -95,6 +95,16 @@ const defaultRelayerFeeCapitalCostConfig: {
   },
 };
 
+export const defaultRelayerAddressOverride: Record<
+  string,
+  { relayer: string; destinationChains: number[] }
+> = {
+  SNX: {
+    relayer: "0x19cDc2b23AF0cC791ca64dda5BFc094Cddda31Cd",
+    destinationChains: [1, 10],
+  },
+};
+
 const relayerFeeCapitalCostOverrides: Record<
   string,
   Record<string, Record<string, relayFeeCalculator.CapitalCostConfig>>

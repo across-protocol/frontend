@@ -30,6 +30,7 @@ import {
   getProvider,
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
+  getDefaultRelayerAddress,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -99,8 +100,10 @@ const handler = async (
     const tokenDetails = Object.values(TOKEN_SYMBOLS_MAP).find(
       (details) => details.addresses[HUB_POOL_CHAIN_ID] === l1Token
     );
-    if (tokenDetails === undefined)
+
+    if (tokenDetails === undefined) {
       throw new InputError("Unsupported token address");
+    }
     const symbol = tokenDetails.symbol;
 
     const [tokenDetailsResult, routeEnabledResult] = await Promise.allSettled([
@@ -154,7 +157,9 @@ const handler = async (
         computedOriginChainId,
         Number(destinationChainId),
         DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-        tokenPriceNative
+        tokenPriceNative,
+        undefined,
+        getDefaultRelayerAddress(symbol, Number(destinationChainId))
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
