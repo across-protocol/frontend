@@ -120,7 +120,7 @@ const EstimatedTable = ({
             Net fee
           </Text>
           <Tooltip
-            body="Total fees less any rewards, in USD"
+            body="Total fees less any rewards, in USD."
             title="Net fee"
             placement="bottom-start"
           >
