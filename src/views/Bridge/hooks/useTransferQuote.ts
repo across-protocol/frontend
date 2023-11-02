@@ -39,6 +39,7 @@ export function useTransferQuote(
   return useQuery({
     queryKey: [
       "quote",
+      feesQuery.fees?.quoteBlock.toNumber(),
       selectedRoute.fromChain,
       selectedRoute.toChain,
       selectedRoute.fromTokenSymbol,
