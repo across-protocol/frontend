@@ -152,7 +152,6 @@ const BridgeForm = ({
               : undefined
           }
           token={getToken(selectedRoute.fromTokenSymbol)}
-          dataLoaded={isConnected}
           receiveToken={getToken(
             getReceiveTokenSymbol(
               selectedRoute.toChain,

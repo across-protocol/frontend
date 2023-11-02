@@ -80,6 +80,7 @@ const ActiveLink = styled(Link)`
 
 const ActiveLinkText = styled(Text)`
   color: #9daab2;
+  text-transform: capitalize;
 `;
 
 const InactiveLink = styled(Text)`

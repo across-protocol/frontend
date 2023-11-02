@@ -73,6 +73,7 @@ export const MaxButton = styled(UnstyledButton)`
   @media ${QUERIESV2.sm.andDown} {
     height: 24px;
     padding: 0px 10px;
+    font-size: 12px;
   }
 `;
 

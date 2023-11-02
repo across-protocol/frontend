@@ -27,7 +27,6 @@ type EstimatedTableProps = {
   bridgeFee?: BigNumber;
   totalReceived?: BigNumber;
   token: TokenInfo;
-  dataLoaded: boolean;
   receiveToken: TokenInfo;
 };
 

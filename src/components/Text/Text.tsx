@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 
 import { QUERIESV2, COLORS } from "utils";
 
-type TextSize =
+export type TextSize =
   | "4xl"
   | "3.5xl"
   | "3xl"

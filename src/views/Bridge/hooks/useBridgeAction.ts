@@ -1,26 +1,20 @@
 import { ampli, TransferQuoteReceivedProperties } from "ampli";
-import { BigNumber, ContractTransaction, utils } from "ethers";
-import { DateTime } from "luxon";
+import { BigNumber } from "ethers";
 import {
   useConnection,
   useApprove,
   useIsWrongNetwork,
   useAmplitude,
 } from "hooks";
-import { useLocalPendingDeposits } from "hooks/useLocalPendingDeposits";
 import { cloneDeep } from "lodash";
 import { useMutation } from "react-query";
+import { useHistory } from "react-router-dom";
 import {
   AcrossDepositArgs,
-  generateDepositConfirmed,
   generateTransferSigned,
   generateTransferSubmitted,
   getConfig,
-  getToken,
-  recordTransferUserProperties,
   sendAcrossDeposit,
-  waitOnTransaction,
-  parseFundsDepositedLog,
 } from "utils";
 
 const config = getConfig();
@@ -29,19 +23,17 @@ export function useBridgeAction(
   dataLoading: boolean,
   payload?: AcrossDepositArgs,
   tokenSymbol?: string,
-  onTransactionComplete?: (hash: string) => void,
-  onDepositResolved?: (success: boolean) => void,
   recentQuote?: TransferQuoteReceivedProperties,
   recentInitialQuoteTime?: number,
   tokenPrice?: BigNumber
 ) {
-  const { isConnected, connect, signer, notify, account } = useConnection();
+  const { isConnected, connect, signer, account } = useConnection();
+  const history = useHistory();
 
   const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork(
     payload?.fromChain
   );
 
-  const { addLocalPendingDeposit } = useLocalPendingDeposits();
   const approveHandler = useApprove(payload?.fromChain);
   const { addToAmpliQueue } = useAmplitude();
 
@@ -87,9 +79,6 @@ export function useBridgeAction(
       });
     }
 
-    let succeeded = false;
-    let timeSigned: number | undefined = undefined;
-    let tx: ContractTransaction | undefined = undefined;
     addToAmpliQueue(() => {
       // Instrument amplitude before sending the transaction for the submit button.
       ampli.transferSubmitted(
@@ -98,7 +87,7 @@ export function useBridgeAction(
     });
     const timeSubmitted = Date.now();
 
-    tx = await sendAcrossDeposit(
+    const tx = await sendAcrossDeposit(
       signer,
       frozenPayload,
       (networkMismatchProperties) => {
@@ -108,76 +97,31 @@ export function useBridgeAction(
       }
     );
 
-    try {
-      // Instrument amplitude after signing the transaction for the submit button.
-      timeSigned = Date.now();
-      addToAmpliQueue(() => {
-        ampli.transferSigned(
-          generateTransferSigned(frozenQuote, referrer, timeSubmitted, tx!.hash)
-        );
-      });
+    addToAmpliQueue(() => {
+      ampli.transferSigned(
+        generateTransferSigned(frozenQuote, referrer, timeSubmitted, tx.hash)
+      );
+    });
 
-      if (onTransactionComplete) {
-        onTransactionComplete(tx.hash);
+    const statusPageSearchParams = new URLSearchParams({
+      originChainId: String(frozenPayload.fromChain),
+      destinationChainId: String(frozenPayload.toChain),
+      bridgeTokenSymbol: tokenSymbol,
+    }).toString();
+    history.push(
+      `/bridge/${tx.hash}?${statusPageSearchParams}`,
+      // This state is stored in session storage and therefore persist
+      // after a refresh of the deposit status page.
+      {
+        fromBridgePagePayload: {
+          sendDepositArgs: frozenPayload,
+          quote: frozenQuote,
+          referrer,
+          account: frozenAccount,
+          timeSigned: Date.now(),
+          tokenPrice,
+        },
       }
-      await waitOnTransaction(frozenPayload.fromChain, tx, notify);
-      const receipt = await tx.wait(1);
-
-      // Optimistically add deposit to local storage for instant visibility on the
-      // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
-      addLocalPendingDeposit({
-        depositId: parseFundsDepositedLog(receipt.logs)?.args["depositId"] || 0,
-        depositTime: DateTime.now().toSeconds(),
-        status: "pending",
-        filled: "0",
-        sourceChainId: frozenPayload.fromChain,
-        destinationChainId: frozenPayload.toChain,
-        assetAddr: frozenPayload.tokenAddress,
-        depositorAddr: utils.getAddress(frozenAccount),
-        recipientAddr: frozenPayload.toAddress,
-        message: frozenPayload.message || "0x",
-        amount: frozenPayload.amount.toString(),
-        depositTxHash: tx.hash,
-        fillTxs: [],
-        speedUps: [],
-        depositRelayerFeePct: frozenPayload.relayerFeePct.toString(),
-        initialRelayerFeePct: frozenPayload.relayerFeePct.toString(),
-        suggestedRelayerFeePct: frozenPayload.relayerFeePct.toString(),
-      });
-
-      if (onDepositResolved) {
-        onDepositResolved(true);
-      }
-      succeeded = true;
-    } catch (e) {
-      console.error(e);
-      if (onDepositResolved) {
-        onDepositResolved(false);
-      }
-    }
-    if (timeSigned && tx) {
-      addToAmpliQueue(() => {
-        ampli.transferDepositCompleted(
-          generateDepositConfirmed(
-            frozenQuote,
-            referrer,
-            timeSigned!,
-            tx!.hash,
-            succeeded,
-            tx!.timestamp!
-          )
-        );
-      });
-    }
-    // Call recordTransferUserProperties to update the user's properties in Amplitude.
-    recordTransferUserProperties(
-      frozenPayload.amount,
-      frozenTokenPrice,
-      getToken(frozenQuote.tokenSymbol).decimals,
-      frozenQuote.tokenSymbol.toLowerCase(),
-      Number(frozenQuote.fromChainId),
-      Number(frozenQuote.toChainId),
-      frozenQuote.fromChainName
     );
   });
 

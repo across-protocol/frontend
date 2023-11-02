@@ -18,6 +18,7 @@ type SecondaryButtonProps = BaseButtonProps & {
   textColor?: ButtonColor;
   borderColor?: ButtonColor;
   hoveredBorderColor?: ButtonColor;
+  backgroundColor?: ButtonColor;
 };
 
 const sizeMap: Record<
@@ -131,6 +132,8 @@ export const SecondaryButton = styled(BaseButton)<SecondaryButtonProps>`
     COLORS[textColor || borderColor]};
   border: 1px solid;
   border-color: ${({ borderColor = "aqua" }) => COLORS[borderColor]};
+  background-color: ${({ backgroundColor }) =>
+    backgroundColor ? COLORS[backgroundColor] : "transparent"};
 
   &:hover:not(:disabled) {
     border-color: ${({ hoveredBorderColor, borderColor = "aqua" }) =>

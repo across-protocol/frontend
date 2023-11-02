@@ -1,2 +1,2 @@
 export { Text } from "./Text";
-export type { TextColor } from "./Text";
+export type { TextColor, TextSize } from "./Text";

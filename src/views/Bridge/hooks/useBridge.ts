@@ -1,13 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { utils } from "@across-protocol/sdk-v2";
 
 import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
 import useReferrer from "hooks/useReferrer";
-import { useStakingPool } from "hooks/useStakingPool";
 import { ampli } from "ampli";
 
 import { useBridgeAction } from "./useBridgeAction";
-import { useBridgeDepositTracking } from "./useBridgeDepositTracking";
 import { useToAccount } from "./useToAccount";
 import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote } from "./useTransferQuote";
@@ -33,21 +31,8 @@ export function useBridge() {
   } = useSelectRoute();
 
   const {
-    handleTxHashChange,
-    trackingTxHash,
-    transactionPending,
-    explorerUrl,
-    transactionElapsedTimeAsFormattedString,
-    handleTransactionCompleted,
-  } = useBridgeDepositTracking();
-
-  const { data: selectedRoutePool, isLoading: isSelectedRoutePoolLoading } =
-    useStakingPool(selectedRoute.l1TokenAddress);
-
-  const {
     handleChangeAmountInput,
     handleClickMaxBalance,
-    clearInput,
     userAmountInput,
     parsedAmount,
     balance,
@@ -56,7 +41,11 @@ export function useBridge() {
 
   const { toAccount, setCustomToAddress } = useToAccount(selectedRoute.toChain);
 
-  const { data: transferQuote, isLoading: isQuoteLoading } = useTransferQuote(
+  const {
+    data: transferQuote,
+    isLoading: isQuoteLoading,
+    isFetching: isQuoteFetching,
+  } = useTransferQuote(
     selectedRoute,
     parsedAmount?.gt(0) ? parsedAmount : utils.bnZero,
     account,
@@ -72,6 +61,9 @@ export function useBridge() {
     estimatedTime,
   } = usedTransferQuote || {};
 
+  const isQuoteUpdating =
+    shouldUpdateQuote && (isQuoteLoading || isQuoteFetching);
+
   const { amountValidationError, isAmountValid } = useValidAmount(
     parsedAmount,
     quotedFees?.isAmountTooLow,
@@ -86,7 +78,7 @@ export function useBridge() {
   } = useIsWrongNetwork(selectedRoute.fromChain);
 
   const bridgeAction = useBridgeAction(
-    isQuoteLoading,
+    isQuoteUpdating,
     isAmountValid && parsedAmount && quotedFees && quotedLimits
       ? {
           amount: parsedAmount,
@@ -101,8 +93,6 @@ export function useBridge() {
         }
       : undefined,
     selectedRoute.fromTokenSymbol,
-    handleTxHashChange,
-    handleTransactionCompleted,
     quote,
     initialQuoteTime,
     quotePriceUSD
@@ -113,7 +103,7 @@ export function useBridge() {
   }, [selectedRoute.fromChain, isConnected, checkWrongNetworkHandler]);
 
   useEffect(() => {
-    if (shouldUpdateQuote && !isQuoteLoading) {
+    if (!isQuoteUpdating && shouldUpdateQuote) {
       setUsedTransferQuote(transferQuote);
 
       if (transferQuote?.quote) {
@@ -122,34 +112,26 @@ export function useBridge() {
         });
       }
     }
-  }, [transferQuote, shouldUpdateQuote, isQuoteLoading, addToAmpliQueue]);
+  }, [transferQuote, shouldUpdateQuote, isQuoteUpdating, addToAmpliQueue]);
 
   useEffect(() => {
-    if (
-      shouldUpdateQuote &&
-      (bridgeAction.isButtonActionLoading || trackingTxHash)
-    ) {
+    if (shouldUpdateQuote && bridgeAction.isButtonActionLoading) {
       setShouldUpdateQuote(false);
-    } else if (bridgeAction.didActionError && !shouldUpdateQuote) {
+    } else if (
+      (bridgeAction.didActionError || !bridgeAction.isButtonActionLoading) &&
+      !shouldUpdateQuote
+    ) {
       setShouldUpdateQuote(true);
     }
   }, [
     shouldUpdateQuote,
     bridgeAction.isButtonActionLoading,
-    trackingTxHash,
     bridgeAction.didActionError,
   ]);
 
-  const handleClickNewTx = useCallback(() => {
-    clearInput();
-    setShouldUpdateQuote(true);
-    handleTxHashChange(undefined);
-  }, [clearInput, handleTxHashChange]);
-
-  const estimatedTimeString =
-    isQuoteLoading && !trackingTxHash
-      ? "loading..."
-      : estimatedTime?.formattedString;
+  const estimatedTimeString = isQuoteLoading
+    ? "loading..."
+    : estimatedTime?.formattedString;
 
   return {
     ...bridgeAction,
@@ -167,11 +149,6 @@ export function useBridge() {
     isBridgeDisabled: isConnected && bridgeAction.buttonDisabled,
     amountToBridge: parsedAmount,
     estimatedTimeString,
-    trackingTxHash,
-    transactionPending,
-    explorerUrl,
-    handleClickNewTx,
-    transactionElapsedTimeAsFormattedString,
     handleChangeAmountInput,
     handleClickMaxBalance,
     userAmountInput,
@@ -179,7 +156,5 @@ export function useBridge() {
     handleSelectFromChain,
     handleSelectToChain,
     handleSelectToken,
-    isCurrentTokenMaxApyLoading: isSelectedRoutePoolLoading,
-    currentTokenMaxApy: selectedRoutePool?.apyData.maxApy,
   };
 }
