@@ -10,7 +10,9 @@ export { default as Selector } from "./Selector";
 export { default as InputWithMaxButton } from "./InputWithMaxButton";
 export { Text } from "./Text";
 export { WrongNetworkHeader } from "./WrongNetworkHeader";
+export { default as CardWrapper } from "./CardWrapper";
 
 export * from "./Button";
+export * from "./Badge";
 export * from "./ExternalLink";
 export * from "./ErrorBoundary";

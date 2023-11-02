@@ -13,7 +13,10 @@ export { ClaimAndStake__factory } from "@across-protocol/across-token/dist/typec
 
 export type { AcrossMerkleDistributor } from "@across-protocol/contracts-v2/dist/typechain/contracts/merkle-distributor/AcrossMerkleDistributor";
 export type { HubPool } from "@across-protocol/contracts-v2/dist/typechain/contracts/HubPool";
-export type { SpokePool } from "@across-protocol/contracts-v2/dist/typechain/contracts/SpokePool.sol/SpokePool";
+export type {
+  SpokePool,
+  FundsDepositedEvent,
+} from "@across-protocol/contracts-v2/dist/typechain/contracts/SpokePool.sol/SpokePool";
 export type { SpokePoolVerifier } from "@across-protocol/contracts-v2/dist/typechain/contracts/SpokePoolVerifier";
 export type { AcceleratingDistributor } from "@across-protocol/across-token/dist/typechain/AcceleratingDistributor";
 export type { ClaimAndStake } from "@across-protocol/across-token/dist/typechain/ClaimAndStake";

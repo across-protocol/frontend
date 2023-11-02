@@ -17,3 +17,4 @@ export * from "./rewards";
 export * from "./time";
 export * from "./amplitude";
 export * from "./deposits";
+export * from "./wait";
