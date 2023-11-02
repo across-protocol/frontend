@@ -95,6 +95,10 @@ const defaultRelayerFeeCapitalCostConfig: {
   },
 };
 
+export const coinGeckoAssetPlatformLookup: Record<string, string> = {
+  "0x4200000000000000000000000000000000000042": "optimistic-ethereum",
+};
+
 export const defaultRelayerAddressOverride: Record<
   string,
   { relayer: string; destinationChains: number[] }
