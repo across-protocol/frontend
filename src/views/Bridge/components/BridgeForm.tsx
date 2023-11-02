@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import styled from "@emotion/styled";
 
 import ExternalCardWrapper from "components/CardWrapper";
-import { UnstyledButton } from "components/Button";
+import { PrimaryButton } from "components/Button";
 import { Text } from "components";
 
 import EstimatedTable from "./EstimatedTable";
@@ -247,7 +247,7 @@ const ChangeAddressLink = styled(Text)`
   cursor: pointer;
 `;
 
-const Button = styled(UnstyledButton)`
+const Button = styled(PrimaryButton)`
   display: flex;
   flex-direction: row;
   justify-content: center;
