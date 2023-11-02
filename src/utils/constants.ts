@@ -563,6 +563,9 @@ export const QUERIESV2 = {
 // See src/components/GlobalStyles/GlobalStyles.tsx for the CSS variables
 export const COLORS = {
   red: "var(--color-interface-red)",
+  "op-red": "var(--color-interface-op-red)",
+  "op-red-5": "var(--color-interface-op-red-5)",
+  "op-red-15": "var(--color-interface-op-red-15)",
   yellow: "var(--color-interface-yellow)",
   aqua: "var(--color-interface-aqua)",
   "aqua-5": "var(--color-interface-aqua-5)",
