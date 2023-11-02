@@ -248,13 +248,5 @@ const ChangeAddressLink = styled(Text)`
 `;
 
 const Button = styled(PrimaryButton)`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-
-  background: #6cf9d8;
-  border-radius: 32px;
-  height: 64px;
   width: 100%;
 `;
