@@ -300,6 +300,7 @@ export const orderedTokenSymbolLogoMap = {
   SNX: snxLogo,
   POOL: pooltogetherLogo,
   BOBA: bobaLogo,
+  OP: optimismLogo,
 };
 
 export const tokenList = [
