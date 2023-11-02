@@ -170,6 +170,13 @@ const MaxButtonWrapper = styled(UnstyledButton)`
     color: #e0f3ff;
     border-color: #e0f3ff;
   }
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 0 10px;
+    height: 24px;
+    font-size: 12px;
+    line-height: 14px;
+  }
 `;
 
 const AmountInnerWrapperTextStack = styled.div`
