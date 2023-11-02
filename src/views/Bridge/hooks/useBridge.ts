@@ -117,7 +117,10 @@ export function useBridge() {
   useEffect(() => {
     if (shouldUpdateQuote && bridgeAction.isButtonActionLoading) {
       setShouldUpdateQuote(false);
-    } else if (bridgeAction.didActionError && !shouldUpdateQuote) {
+    } else if (
+      (bridgeAction.didActionError || !bridgeAction.isButtonActionLoading) &&
+      !shouldUpdateQuote
+    ) {
       setShouldUpdateQuote(true);
     }
   }, [
