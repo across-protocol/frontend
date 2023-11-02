@@ -23,7 +23,6 @@ import { VoidHandler } from "utils/types";
 
 import { AmountInputError, getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
-import { ConvertTokensToBaseCurrencyType } from "../hooks/useBridge";
 
 type BridgeFormProps = {
   selectedRoute: Route;
