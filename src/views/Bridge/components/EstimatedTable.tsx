@@ -11,15 +11,13 @@ import {
   capitalizeFirstLetter,
   COLORS,
   formatUnits,
-  formatUnitsFnBuilder,
   getChainInfo,
   getToken,
   TokenInfo,
 } from "utils";
 
 import TokenFee from "./TokenFee";
-import { useState } from "react";
-import { ConvertTokensToBaseCurrencyType } from "../hooks/useBridge";
+import { useEstimatedTable } from "../hooks/useEstimatedTable";
 
 type EstimatedTableProps = {
   fromChainId: number;
@@ -31,8 +29,6 @@ type EstimatedTableProps = {
   token: TokenInfo;
   dataLoaded: boolean;
   receiveToken: TokenInfo;
-  convertTokensToBaseCurrency: ConvertTokensToBaseCurrencyType;
-  depositReferralReward?: BigNumber;
 };
 
 const PriceFee = ({
@@ -74,22 +70,20 @@ const EstimatedTable = ({
   token,
   totalReceived,
   receiveToken,
-  convertTokensToBaseCurrency: { l1: convertL1Token, acx: convertACXToken },
-  depositReferralReward,
 }: EstimatedTableProps) => {
-  const [isDetailedFeesAvailable, setIsDetailedFeesAvailable] = useState(false);
-  const ArrowIcon = isDetailedFeesAvailable ? ArrowIconUp : ArrowIconDown;
-  const hasDepositReferralReward =
-    depositReferralReward && depositReferralReward.gt(0);
+  const {
+    isDetailedFeesAvailable,
+    setIsDetailedFeesAvailable,
+    referralRewardAsBaseCurrency,
+    gasFeeAsBaseCurrency,
+    bridgeFeeAsBaseCurrency,
+    netFeeAsBaseCurrency,
+    formatUsd,
+    depositReferralReward,
+    hasDepositReferralReward,
+  } = useEstimatedTable(token, gasFee, bridgeFee);
 
-  const referralRewardAsBaseCurrency = convertACXToken(depositReferralReward);
-  const gasFeeAsBaseCurrency = convertL1Token(gasFee);
-  const bridgeFeeAsBaseCurrency = convertL1Token(bridgeFee);
-  const netFeeAsBaseCurrency =
-    gasFeeAsBaseCurrency && bridgeFeeAsBaseCurrency
-      ? gasFeeAsBaseCurrency.add(bridgeFeeAsBaseCurrency)
-      : undefined;
-  const formatUsd = formatUnitsFnBuilder(18);
+  const ArrowIcon = isDetailedFeesAvailable ? ArrowIconUp : ArrowIconDown;
 
   return (
     <Wrapper>

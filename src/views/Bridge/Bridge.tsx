@@ -40,8 +40,6 @@ const Bridge = () => {
     handleSelectToken,
     handleSelectFromChain,
     handleSelectToChain,
-    depositReferralReward,
-    convertTokensToBaseCurrency,
   } = useBridge();
 
   return (
@@ -74,8 +72,6 @@ const Bridge = () => {
               toAccount={toAccount}
               currentTokenMaxApy={currentTokenMaxApy}
               isCurrentTokenMaxApyLoading={isCurrentTokenMaxApyLoading}
-              convertTokensToBaseCurrency={convertTokensToBaseCurrency}
-              depositReferralReward={depositReferralReward}
             />
           ) : (
             <BridgeForm
@@ -100,8 +96,6 @@ const Bridge = () => {
               isBridgeDisabled={isBridgeDisabled}
               validationError={amountValidationError}
               balance={balance}
-              convertTokensToBaseCurrency={convertTokensToBaseCurrency}
-              depositReferralReward={depositReferralReward}
             />
           )}
         </Wrapper>

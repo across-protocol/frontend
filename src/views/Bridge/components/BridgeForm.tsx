@@ -50,8 +50,6 @@ type BridgeFormProps = {
   buttonLabel: string;
   isBridgeDisabled: boolean;
   validationError?: AmountInputError;
-  convertTokensToBaseCurrency: ConvertTokensToBaseCurrencyType;
-  depositReferralReward?: BigNumber;
 };
 
 const BridgeForm = ({
@@ -79,8 +77,6 @@ const BridgeForm = ({
   buttonLabel,
   isBridgeDisabled,
   validationError,
-  convertTokensToBaseCurrency,
-  depositReferralReward,
 }: BridgeFormProps) => {
   return (
     <>
@@ -165,8 +161,6 @@ const BridgeForm = ({
               Boolean(toAccount?.isContract)
             )
           )}
-          convertTokensToBaseCurrency={convertTokensToBaseCurrency}
-          depositReferralReward={depositReferralReward}
         />
         {isWrongChain ? (
           <Button onClick={onClickChainSwitch}>Switch Network</Button>
