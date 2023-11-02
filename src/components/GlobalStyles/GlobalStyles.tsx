@@ -42,6 +42,7 @@ const variables = css`
 
     --color-brand-aqua: #6cf9d8;
     --color-interface-aqua: #6cf9d8;
+    --color-interface-aqua-5: #6cf9d80d;
     --color-interface-aqua-15: #6cf9d826;
 
     --color-interface-teal: #44d2ff;

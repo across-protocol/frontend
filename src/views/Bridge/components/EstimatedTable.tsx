@@ -9,6 +9,7 @@ import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
 import {
   bridgedUSDCSymbolsMap,
   capitalizeFirstLetter,
+  COLORS,
   formatUnits,
   formatUnitsFnBuilder,
   getChainInfo,
@@ -319,7 +320,7 @@ const ShiftedRow = styled(Row)`
 `;
 
 const WhiteText = styled.span`
-  color: #e0f3ff;
+  color: ${COLORS.white};
 `;
 
 const TotalReceiveRow = styled.div`
@@ -332,7 +333,7 @@ const TotalReceiveRow = styled.div`
 const WarningInfoIcon = styled(InfoIcon)`
   margin-top: 8px;
   path {
-    stroke: #f9d26c;
+    stroke: ${COLORS.warning};
   }
 `;
 
@@ -362,8 +363,8 @@ const ReferralRewardWrapper = styled.div`
 
   // Style
   border-radius: 22px;
-  border: 1px solid var(--color-interface-aqua-15, rgba(108, 249, 216, 0.15));
-  background: var(--color-interface-aqua-5, rgba(108, 249, 216, 0.05));
+  border: 1px solid ${COLORS["aqua-15"]};
+  background: ${COLORS["aqua-5"]};
 `;
 
 const BaseCurrencyWrapper = styled.div`
@@ -380,13 +381,13 @@ const Divider = styled.div`
   align-items: center;
   gap: 10px;
   align-self: stretch;
-  background: var(--color-neutrals-grey-600, #3e4047);
+  background: ${COLORS["grey-600"]};
   width: 100%;
 `;
 
 const ArrowIconDown = styled(UnstyledArrowIcon)`
   path {
-    stroke: #9daab2;
+    stroke: ${COLORS["white-70"]};
   }
 `;
 
