@@ -12,7 +12,6 @@ import {
   COLORS,
   formatUnits,
   getChainInfo,
-  getToken,
   TokenInfo,
 } from "utils";
 
@@ -36,23 +35,33 @@ const PriceFee = ({
   token,
   highlightTokenFee = false,
   rewardPercentageOfFees,
+  isACX = true,
 }: {
   tokenFee?: BigNumber;
   baseCurrencyFee?: BigNumber;
   token: TokenInfo;
   highlightTokenFee?: boolean;
   rewardPercentageOfFees?: number;
+  isACX?: boolean;
 }) => (
   <BaseCurrencyWrapper>
     {baseCurrencyFee && tokenFee && (
-      <Text size="md" color="grey-400">
-        {rewardPercentageOfFees &&
-          `(${Math.floor(rewardPercentageOfFees * 100)}% of fees) `}
-        {`$${formatUnits(baseCurrencyFee, 18)}`}
-      </Text>
+      <>
+        {rewardPercentageOfFees && (
+          <Text size="md" color="grey-400">
+            ({Math.floor(rewardPercentageOfFees * 100)}% of fees)
+          </Text>
+        )}
+        <Text size="md" color="grey-400">
+          {`$${formatUnits(baseCurrencyFee, 18)}`}
+        </Text>
+      </>
     )}
     {tokenFee ? (
-      <Text size="md" color={highlightTokenFee ? "primary" : "white"}>
+      <Text
+        size="md"
+        color={highlightTokenFee ? (isACX ? "primary" : "op-red") : "white"}
+      >
         {`${formatUnits(tokenFee, token.decimals)} ${token.symbol}`}
       </Text>
     ) : (
@@ -85,9 +94,13 @@ const EstimatedTable = ({
     depositReferralReward,
     depositReferralPercentage,
     hasDepositReferralReward,
-  } = useEstimatedTable(token, gasFee, bridgeFee);
+    rewardToken,
+    isRewardAcx,
+  } = useEstimatedTable(token, toChainId, gasFee, bridgeFee);
 
   const ArrowIcon = isDetailedFeesAvailable ? ArrowIconUp : ArrowIconDown;
+  const rewardDisplaySymbol =
+    rewardToken.displaySymbol || rewardToken.symbol.toUpperCase();
 
   return (
     <Wrapper>
@@ -96,9 +109,9 @@ const EstimatedTable = ({
           <Text size="md" color="grey-400">
             Across Referral Rewards
           </Text>
-          <ReferralRewardWrapper>
+          <ReferralRewardWrapper isACX={isRewardAcx}>
             <PriceFee
-              token={getToken("ACX")}
+              token={rewardToken}
               tokenFee={depositReferralReward}
               baseCurrencyFee={referralRewardAsBaseCurrency}
             />
@@ -188,11 +201,11 @@ const EstimatedTable = ({
             <ShiftedRow>
               <ToolTipWrapper>
                 <Text size="md" color="grey-400">
-                  ACX Referral Reward
+                  {rewardDisplaySymbol} Referral Reward
                 </Text>
                 <Tooltip
-                  title="ACX Referral Reward"
-                  body="Estimate of ACX earned on this transfer from Referral Rewards program."
+                  title={`${rewardDisplaySymbol} Referral Reward`}
+                  body={`Estimate of ${rewardDisplaySymbol} earned on this transfer from Referral Rewards program.`}
                   placement="bottom-start"
                 >
                   <InfoIconWrapper>
@@ -201,11 +214,12 @@ const EstimatedTable = ({
                 </Tooltip>
               </ToolTipWrapper>
               <PriceFee
-                token={getToken("ACX")}
+                token={rewardToken}
                 tokenFee={depositReferralReward}
                 baseCurrencyFee={referralRewardAsBaseCurrency}
                 rewardPercentageOfFees={depositReferralPercentage}
                 highlightTokenFee
+                isACX={isRewardAcx}
               />
             </ShiftedRow>
           )}
@@ -353,7 +367,7 @@ const InfoIconWrapper = styled.div`
   width: 16px;
 `;
 
-const ReferralRewardWrapper = styled.div`
+const ReferralRewardWrapper = styled.div<{ isACX: boolean }>`
   //Layout
   display: flex;
   padding: 6px 12px;
@@ -362,8 +376,8 @@ const ReferralRewardWrapper = styled.div`
 
   // Style
   border-radius: 22px;
-  border: 1px solid ${COLORS["aqua-15"]};
-  background: ${COLORS["aqua-5"]};
+  border: 1px solid ${({ isACX }) => COLORS[isACX ? "aqua-15" : "op-red-15"]};
+  background: ${({ isACX }) => COLORS[isACX ? "aqua-5" : "op-red-5"]};
 `;
 
 const BaseCurrencyWrapper = styled.div`
