@@ -35,15 +35,19 @@ const PriceFee = ({
   baseCurrencyFee,
   token,
   highlightTokenFee = false,
+  rewardPercentageOfFees,
 }: {
   tokenFee?: BigNumber;
   baseCurrencyFee?: BigNumber;
   token: TokenInfo;
   highlightTokenFee?: boolean;
+  rewardPercentageOfFees?: number;
 }) => (
   <BaseCurrencyWrapper>
     {baseCurrencyFee && tokenFee && (
       <Text size="md" color="grey-400">
+        {rewardPercentageOfFees &&
+          `(${Math.floor(rewardPercentageOfFees * 100)}% of fees) `}
         {`$${formatUnits(baseCurrencyFee, 18)}`}
       </Text>
     )}
@@ -79,6 +83,7 @@ const EstimatedTable = ({
     netFeeAsBaseCurrency,
     formatUsd,
     depositReferralReward,
+    depositReferralPercentage,
     hasDepositReferralReward,
   } = useEstimatedTable(token, gasFee, bridgeFee);
 
@@ -199,6 +204,7 @@ const EstimatedTable = ({
                 token={getToken("ACX")}
                 tokenFee={depositReferralReward}
                 baseCurrencyFee={referralRewardAsBaseCurrency}
+                rewardPercentageOfFees={depositReferralPercentage}
                 highlightTokenFee
               />
             </ShiftedRow>

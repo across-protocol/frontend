@@ -42,10 +42,14 @@ export function useEstimatedTable(
     const totalFeesACX = totalFeesUSD
       .mul(fixedPointAdjustment)
       .div(acxExchangeRate);
-    const feePct = parseUnits(referralSummary.referralRate.toString(), 18);
-    const totalReward = totalFeesACX.mul(feePct).div(fixedPointAdjustment);
-    // 75% of the reward goes to the referree
-    return totalReward.mul(parseUnits("0.75", 18)).div(fixedPointAdjustment);
+    // 75% of the reward goes to the referree of the referral rate
+    const availableRewardPercentage = referralSummary.referralRate * 0.75;
+    return {
+      tokens: totalFeesACX
+        .mul(parseUnits(availableRewardPercentage.toString(), 18))
+        .div(fixedPointAdjustment),
+      percentage: availableRewardPercentage,
+    };
   }, [
     referralSummary,
     bridgeFee,
@@ -54,10 +58,8 @@ export function useEstimatedTable(
     referrer,
   ]);
 
-  console.log(referralSummary);
-
   const referralRewardAsBaseCurrency = convertRewardToBaseCurrency(
-    depositReferralReward
+    depositReferralReward?.tokens
   );
   const gasFeeAsBaseCurrency = convertL1ToBaseCurrency(gasFee);
   const bridgeFeeAsBaseCurrency = convertL1ToBaseCurrency(bridgeFee);
@@ -67,7 +69,7 @@ export function useEstimatedTable(
       : undefined;
   const formatUsd = formatUnitsFnBuilder(18);
   const hasDepositReferralReward =
-    depositReferralReward && depositReferralReward.gt(0);
+    depositReferralReward && depositReferralReward?.tokens.gt(0);
 
   return {
     isDetailedFeesAvailable,
@@ -77,7 +79,8 @@ export function useEstimatedTable(
     bridgeFeeAsBaseCurrency,
     netFeeAsBaseCurrency,
     formatUsd,
-    depositReferralReward,
+    depositReferralReward: depositReferralReward?.tokens,
+    depositReferralPercentage: depositReferralReward?.percentage,
     hasDepositReferralReward,
   };
 }
