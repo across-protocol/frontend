@@ -96,6 +96,7 @@ export const MaxButton = styled(UnstyledButton)`
   @media ${QUERIESV2.sm.andDown} {
     height: 24px;
     padding: 0px 10px;
+    font-size: 12px;
   }
 `;
 
@@ -108,6 +109,9 @@ export const ButtonWrapper = styled.div`
 
 export const StakeButton = styled(PrimaryButton)`
   text-transform: capitalize;
+  @media ${QUERIESV2.sm.andDown} {
+    width: 100%;
+  }
 `;
 
 export const StakeButtonContentWrapper = styled.div`
