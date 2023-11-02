@@ -1,7 +1,7 @@
 import { utils } from "@across-protocol/sdk-v2";
 import { BigNumber } from "ethers";
-import { useConnection } from "hooks";
 import { useReferralSummary } from "hooks/useReferralSummary";
+import useReferrer from "hooks/useReferrer";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { useMemo, useState } from "react";
 import {
@@ -18,8 +18,8 @@ export function useEstimatedTable(
 ) {
   const [isDetailedFeesAvailable, setIsDetailedFeesAvailable] = useState(false);
 
-  const { account } = useConnection();
-  const { summary: referralSummary } = useReferralSummary(account);
+  const { referrer } = useReferrer();
+  const { summary: referralSummary } = useReferralSummary(referrer);
 
   const { convertTokenToBaseCurrency: convertL1ToBaseCurrency } =
     useTokenConversion(token.symbol, "usd");
@@ -27,7 +27,11 @@ export function useEstimatedTable(
     useTokenConversion("ACX", "usd");
 
   const depositReferralReward = useMemo(() => {
-    if (!utils.isDefined(referralSummary) || !utils.isDefined(bridgeFee)) {
+    if (
+      !utils.isDefined(referralSummary) ||
+      !utils.isDefined(bridgeFee) ||
+      !referrer
+    ) {
       return undefined;
     }
     const totalFeesUSD = convertL1ToBaseCurrency(bridgeFee);
@@ -39,13 +43,18 @@ export function useEstimatedTable(
       .mul(fixedPointAdjustment)
       .div(acxExchangeRate);
     const feePct = parseUnits(referralSummary.referralRate.toString(), 18);
-    return totalFeesACX.mul(feePct).div(fixedPointAdjustment);
+    const totalReward = totalFeesACX.mul(feePct).div(fixedPointAdjustment);
+    // 75% of the reward goes to the referree
+    return totalReward.mul(parseUnits("0.75", 18)).div(fixedPointAdjustment);
   }, [
     referralSummary,
     bridgeFee,
     convertL1ToBaseCurrency,
     convertRewardToBaseCurrency,
+    referrer,
   ]);
+
+  console.log(referralSummary);
 
   const referralRewardAsBaseCurrency = convertRewardToBaseCurrency(
     depositReferralReward
