@@ -11,7 +11,7 @@ import type { Deposit } from "hooks/useDeposits";
 const config = getConfig();
 
 export function useSpeedUp(transfer: Deposit, token: Token) {
-  const { signer, notify } = useConnection();
+  const { signer, notify, account } = useConnection();
   const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork(
     transfer.sourceChainId
   );
@@ -42,8 +42,12 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
         newRecipient: string;
       }>;
     }) => {
-      if (!signer) {
-        return;
+      if (!signer || !account) {
+        throw new Error("No wallet connected");
+      }
+
+      if (transfer.depositorAddr.toLowerCase() !== account.toLowerCase()) {
+        throw new Error("Speed up not possible for this deposit");
       }
 
       if (isWrongNetwork) {
