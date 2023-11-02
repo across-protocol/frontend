@@ -12,12 +12,6 @@ import { useToAccount } from "./useToAccount";
 import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote } from "./useTransferQuote";
 import { useAmountInput, useValidAmount } from "./useAmountInput";
-import { BigNumber } from "ethers";
-
-export type ConvertTokensToBaseCurrencyType = {
-  l1: (amount?: BigNumber) => BigNumber | undefined;
-  acx: (amount?: BigNumber) => BigNumber | undefined;
-};
 
 export function useBridge() {
   const [shouldUpdateQuote, setShouldUpdateQuote] = useState(true);
