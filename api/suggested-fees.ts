@@ -101,7 +101,7 @@ const handler = async (
 
     relayer ??= getDefaultRelayerAddress(
       tokenInformation.symbol,
-      Number(destinationChainId)
+      destinationChainId
     );
     recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
 
