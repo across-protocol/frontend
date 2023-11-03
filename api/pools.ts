@@ -45,7 +45,7 @@ const handler = async (
     // to cache the responses and invalidate when deployments update.
     logger.debug({
       at: "Pools",
-      message: "Response data",
+      message: "Response data  ",
       responseJson: responseData,
     });
     response.setHeader("Cache-Control", "s-maxage=300");
