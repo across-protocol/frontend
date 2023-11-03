@@ -83,9 +83,6 @@ const handler = async (
       throw new InputError("Origin and destination chains cannot be the same");
     }
     const destinationChainId = Number(_destinationChainId);
-
-    relayer ??= sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
-    recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     token = ethers.utils.getAddress(token);
 
     const [latestBlock, tokenDetails] = await Promise.all([
@@ -104,8 +101,9 @@ const handler = async (
 
     relayer ??= getDefaultRelayerAddress(
       tokenInformation.symbol,
-      Number(destinationChainId)
+      destinationChainId
     );
+    recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
 
     if (sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message)) {
       if (!ethers.utils.isHexString(message)) {
