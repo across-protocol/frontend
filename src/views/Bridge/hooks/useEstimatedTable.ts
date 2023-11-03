@@ -1,5 +1,6 @@
 import { utils } from "@across-protocol/sdk-v2";
 import { BigNumber } from "ethers";
+import { useConnection } from "hooks";
 import { useReferralSummary } from "hooks/useReferralSummary";
 import useReferrer from "hooks/useReferrer";
 import { useTokenConversion } from "hooks/useTokenConversion";
@@ -18,6 +19,7 @@ export function useEstimatedTable(
 ) {
   const [isDetailedFeesAvailable, setIsDetailedFeesAvailable] = useState(false);
 
+  const { account } = useConnection();
   const { referrer } = useReferrer();
   const { summary: referralSummary } = useReferralSummary(referrer);
 
@@ -43,7 +45,8 @@ export function useEstimatedTable(
       .mul(fixedPointAdjustment)
       .div(acxExchangeRate);
     // 75% of the reward goes to the referree of the referral rate
-    const availableRewardPercentage = referralSummary.referralRate * 0.75;
+    const availableRewardPercentage =
+      referralSummary.referralRate * (referrer === account ? 1.0 : 0.75);
     return {
       tokens: totalFeesACX
         .mul(parseUnits(availableRewardPercentage.toString(), 18))
@@ -56,6 +59,7 @@ export function useEstimatedTable(
     convertL1ToBaseCurrency,
     convertRewardToBaseCurrency,
     referrer,
+    account,
   ]);
 
   const referralRewardAsBaseCurrency = convertRewardToBaseCurrency(
