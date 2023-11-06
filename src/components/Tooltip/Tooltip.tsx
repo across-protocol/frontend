@@ -8,6 +8,7 @@ import {
   GreyRoundedCheckmark16,
   TitleSecondary,
   StyledTooltip,
+  StyledAnchor,
 } from "./Tooltip.styles";
 import { ReactComponent as RoundedCheckmark16 } from "assets/icons/rounded-checkmark-16.svg";
 import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
@@ -46,10 +47,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   return (
     <>
-      <a data-tooltip-id={id} data-tooltip-place={placement}>
+      <StyledAnchor data-tooltip-id={id} data-tooltip-place={placement}>
         {children}
-      </a>
-      <StyledTooltip id={id} noArrow>
+      </StyledAnchor>
+      <StyledTooltip id={id} noArrow opacity={1}>
         <Wrapper>
           {title && (
             <TitleRow>
