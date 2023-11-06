@@ -1259,14 +1259,17 @@ export function sendResponse(
   response: VercelResponse,
   body: Record<string, unknown>,
   statusCode = 200,
-  cache?: number
+  cacheSeconds = 300,
+  staleWhileRevalidateSeconds?: number
 ) {
-  // We only want to cache if the status code is 200 and the
-  // caching time has been defined.
-  if (statusCode === 200 && sdk.utils.isDefined(cache)) {
+  if (cacheSeconds > 0) {
+    // Per Vercel's documentation, Vercel will only cache a response when
+    // the status code is 200. I.e. we can always set a cache policy
     response.setHeader(
       "Cache-Control",
-      `s-max-age=${cache}, stale-while-revalidate=${cache}`
+      (staleWhileRevalidateSeconds ?? 0) > 0
+        ? `s-maxage=${cacheSeconds}, stale-while-revalidate=${staleWhileRevalidateSeconds}`
+        : `s-maxage=${cacheSeconds}`
     );
   }
   return response.status(statusCode).json(body);
