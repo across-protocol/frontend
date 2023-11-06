@@ -31,6 +31,7 @@ import {
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
   getDefaultRelayerAddress,
+  sendResponse,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -235,8 +236,7 @@ const handler = async (
       message: "Response data",
       responseJson,
     });
-    response.setHeader("Cache-Control", "s-maxage=300");
-    response.status(200).json(responseJson);
+    sendResponse(response, responseJson, 200, 300);
   } catch (error: unknown) {
     return handleErrorCondition("limits", response, logger, error);
   }

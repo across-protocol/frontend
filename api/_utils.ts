@@ -1246,3 +1246,29 @@ export function getDefaultRelayerAddress(
     return sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
   }
 }
+
+/**
+ * Performs the needed function calls to return a Vercel Response
+ * @param response The response client provided by Vercel
+ * @param body A payload in JSON format to send to the client
+ * @param statusCode The status code - defaults to 200
+ * @param cache The cache time in seconds - defaults to 300
+ * @returns The response object
+ */
+export function sendResponse(
+  response: VercelResponse,
+  body: Record<string, unknown>,
+  statusCode = 200,
+  cache?: number
+) {
+  response.setHeader("Content-Type", "application/json");
+  // We only want to cache if the status code is 200 and the
+  // caching time has been defined.
+  if (statusCode === 200 && sdk.utils.isDefined(cache)) {
+    response.setHeader(
+      "Cache-Control",
+      `s-max-age=${cache}, stale-while-revalidate=${cache}`
+    );
+  }
+  return response.status(statusCode).send(body);
+}
