@@ -1260,16 +1260,16 @@ export function getDefaultRelayerAddress(
 export function sendResponse(
   response: VercelResponse,
   body: Record<string, unknown>,
-  statusCode = 200,
-  cacheSeconds = 300,
-  staleWhileRevalidateSeconds?: number
+  statusCode: number,
+  cacheSeconds: number,
+  staleWhileRevalidateSeconds: number
 ) {
   if (cacheSeconds > 0) {
     // Per Vercel's documentation, Vercel will only cache a response when
     // the status code is 200. I.e. we can always set a cache policy
     response.setHeader(
       "Cache-Control",
-      (staleWhileRevalidateSeconds ?? 0) > 0
+      staleWhileRevalidateSeconds > 0
         ? `s-maxage=${cacheSeconds}, stale-while-revalidate=${staleWhileRevalidateSeconds}`
         : `s-maxage=${cacheSeconds}`
     );
