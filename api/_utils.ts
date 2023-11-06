@@ -1252,8 +1252,10 @@ export function getDefaultRelayerAddress(
  * @param response The response client provided by Vercel
  * @param body A payload in JSON format to send to the client
  * @param statusCode The status code - defaults to 200
- * @param cache The cache time in seconds - defaults to 300
+ * @param cacheSeconds The cache time in seconds - defaults to 300
+ * @param staleWhileRevalidateSeconds The stale while revalidate time in seconds - defaults to 0
  * @returns The response object
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
  */
 export function sendResponse(
   response: VercelResponse,
