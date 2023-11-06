@@ -1261,7 +1261,6 @@ export function sendResponse(
   statusCode = 200,
   cache?: number
 ) {
-  response.setHeader("Content-Type", "application/json");
   // We only want to cache if the status code is 200 and the
   // caching time has been defined.
   if (statusCode === 200 && sdk.utils.isDefined(cache)) {
@@ -1270,5 +1269,5 @@ export function sendResponse(
       `s-max-age=${cache}, stale-while-revalidate=${cache}`
     );
   }
-  return response.status(statusCode).send(body);
+  return response.status(statusCode).json(body);
 }
