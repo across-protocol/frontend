@@ -30,9 +30,9 @@ export function useRewardToken(destinationChainId: number) {
       if (rewardToken.symbol === "OP") {
         return 0.95;
       } else {
-        // 100% reward if referrer is the account, 75% otherwise
+        // 100% of rate if referree is the user account, 25% otherwise
         return (
-          (referrer === account ? 1.0 : 0.75) * referralSummary.referralRate
+          (referrer === account ? 1.0 : 0.25) * referralSummary.referralRate
         );
       }
     },

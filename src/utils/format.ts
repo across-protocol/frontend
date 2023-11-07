@@ -291,5 +291,7 @@ export function humanReadableNumber(num: number, decimals = 0): string {
  * @note USD only has 2 decimal places of precision, so this will round up to the nearest cent.
  */
 export function formatUSD(value: BigNumberish): string {
-  return numeral(formatEther(value)).format("0,0.00").toUpperCase();
+  const formattedString = formatUnits(value, 18);
+  const [dollars, cents] = formattedString.split(".");
+  return `${dollars}.${cents.slice(0, 2).padEnd(2, "0")}`;
 }
