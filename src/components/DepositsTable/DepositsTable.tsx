@@ -4,7 +4,7 @@ import { HeadRow, headerCells, ColumnKey } from "./HeadRow";
 import { DataRow } from "./DataRow";
 import { Deposit } from "hooks/useDeposits";
 
-type Props = {
+export type Props = {
   disabledColumns?: ColumnKey[];
   onClickSpeedUp?: () => void;
   deposits: Deposit[];
