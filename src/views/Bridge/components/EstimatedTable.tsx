@@ -11,6 +11,7 @@ import {
   capitalizeFirstLetter,
   COLORS,
   formatUnits,
+  formatUSD,
   getChainInfo,
   TokenInfo,
 } from "utils";
@@ -53,7 +54,7 @@ const PriceFee = ({
           </Text>
         )}
         <Text size="md" color="grey-400">
-          {`$${formatUnits(baseCurrencyFee, 18)}`}
+          {`$${formatUSD(baseCurrencyFee)}`}
         </Text>
       </>
     )}
@@ -90,7 +91,6 @@ const EstimatedTable = ({
     gasFeeAsBaseCurrency,
     bridgeFeeAsBaseCurrency,
     netFeeAsBaseCurrency,
-    formatUsd,
     depositReferralReward,
     depositReferralPercentage,
     hasDepositReferralReward,
@@ -147,7 +147,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <Text size="md" color={netFeeAsBaseCurrency ? "white" : "grey-400"}>
-          {netFeeAsBaseCurrency ? `$ ${formatUsd(netFeeAsBaseCurrency)}` : "-"}
+          {netFeeAsBaseCurrency ? `$ ${formatUSD(netFeeAsBaseCurrency)}` : "-"}
         </Text>
       </ClickableRow>
       {isDetailedFeesAvailable && (

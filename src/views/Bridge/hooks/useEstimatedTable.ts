@@ -3,12 +3,7 @@ import { BigNumber } from "ethers";
 import { useRewardToken } from "hooks/useRewardToken";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { useMemo, useState } from "react";
-import {
-  TokenInfo,
-  fixedPointAdjustment,
-  formatUnitsFnBuilder,
-  parseUnits,
-} from "utils";
+import { TokenInfo, fixedPointAdjustment, parseUnits } from "utils";
 
 export function useEstimatedTable(
   token: TokenInfo,
@@ -64,7 +59,6 @@ export function useEstimatedTable(
     gasFeeAsBaseCurrency && bridgeFeeAsBaseCurrency
       ? gasFeeAsBaseCurrency.add(bridgeFeeAsBaseCurrency)
       : undefined;
-  const formatUsd = formatUnitsFnBuilder(18);
   const hasDepositReferralReward = depositReferralReward?.gt(0);
 
   return {
@@ -74,7 +68,6 @@ export function useEstimatedTable(
     gasFeeAsBaseCurrency,
     bridgeFeeAsBaseCurrency,
     netFeeAsBaseCurrency,
-    formatUsd,
     depositReferralReward: depositReferralReward,
     depositReferralPercentage: availableRewardPercentage,
     hasDepositReferralReward,
