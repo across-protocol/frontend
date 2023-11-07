@@ -357,6 +357,9 @@ export const debug = Boolean(process.env.REACT_APP_DEBUG);
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
+export const rebateTokensAvailable = String(
+  process.env.REACT_APP_EXTERNAL_REBATE_TOKENS_AVAILABLE || ""
+).split(",");
 
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
