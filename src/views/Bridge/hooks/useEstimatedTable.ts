@@ -49,7 +49,7 @@ export function useEstimatedTable(
     convertRewardToBaseCurrency,
     rewardToken.decimals,
   ]);
-  const hasDepositReferralReward = depositReferralReward?.gt(0);
+  const hasDepositReferralReward = depositReferralReward?.gt(0) ?? false;
   const referralRewardAsBaseCurrency = convertRewardToBaseCurrency(
     depositReferralReward
   );
@@ -73,7 +73,7 @@ export function useEstimatedTable(
     gasFeeAsBaseCurrency,
     bridgeFeeAsBaseCurrency,
     netFeeAsBaseCurrency,
-    depositReferralReward: depositReferralReward,
+    depositReferralReward,
     depositReferralPercentage: availableRewardPercentage,
     hasDepositReferralReward,
     rewardToken,

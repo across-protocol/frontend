@@ -13,6 +13,7 @@ import {
   formatUnits,
   formatUSD,
   getChainInfo,
+  isDefined,
   TokenInfo,
 } from "utils";
 
@@ -36,12 +37,14 @@ const PriceFee = ({
   token,
   highlightTokenFee = false,
   rewardPercentageOfFees,
+  hideSymbolOnEmpty = true,
 }: {
   tokenFee?: BigNumber;
   baseCurrencyFee?: BigNumber;
   token: TokenInfo;
   highlightTokenFee?: boolean;
   rewardPercentageOfFees?: number;
+  hideSymbolOnEmpty?: boolean;
 }) => (
   <BaseCurrencyWrapper>
     {baseCurrencyFee && tokenFee && (
@@ -65,7 +68,9 @@ const PriceFee = ({
         -
       </Text>
     )}
-    {tokenFee && <TokenSymbol src={token.logoURI} />}
+    {(isDefined(tokenFee) || !hideSymbolOnEmpty) && (
+      <TokenSymbol src={token.logoURI} />
+    )}
   </BaseCurrencyWrapper>
 );
 
@@ -99,20 +104,24 @@ const EstimatedTable = ({
 
   return (
     <Wrapper>
-      {hasDepositReferralReward && (
-        <Row>
-          <Text size="md" color="grey-400">
-            Across Referral Rewards
-          </Text>
-          <ReferralRewardWrapper isACX={isRewardAcx}>
-            <PriceFee
-              token={rewardToken}
-              tokenFee={depositReferralReward}
-              baseCurrencyFee={referralRewardAsBaseCurrency}
-            />
-          </ReferralRewardWrapper>
-        </Row>
-      )}
+      <Row>
+        <Text size="md" color="grey-400">
+          {isRewardAcx
+            ? "Across Referral Rewards"
+            : `${rewardDisplaySymbol} Rewards`}
+        </Text>
+        <ReferralRewardWrapper
+          isACX={isRewardAcx}
+          isTransparent={!hasDepositReferralReward}
+        >
+          <PriceFee
+            token={rewardToken}
+            tokenFee={depositReferralReward}
+            baseCurrencyFee={referralRewardAsBaseCurrency}
+            hideSymbolOnEmpty={false}
+          />
+        </ReferralRewardWrapper>
+      </Row>
       <Row>
         <Text size="md" color="grey-400">
           Time to{" "}
@@ -192,31 +201,32 @@ const EstimatedTable = ({
               baseCurrencyFee={gasFeeAsBaseCurrency}
             />
           </ShiftedRow>
-          {hasDepositReferralReward && (
-            <ShiftedRow>
-              <ToolTipWrapper>
-                <Text size="md" color="grey-400">
-                  {rewardDisplaySymbol} Referral Reward
-                </Text>
-                <Tooltip
-                  title={`${rewardDisplaySymbol} Referral Reward`}
-                  body={`Estimate of ${rewardDisplaySymbol} earned on this transfer from Referral Rewards program.`}
-                  placement="bottom-start"
-                >
-                  <InfoIconWrapper>
-                    <InfoIcon />
-                  </InfoIconWrapper>
-                </Tooltip>
-              </ToolTipWrapper>
+          <ShiftedRow>
+            <ToolTipWrapper>
+              <Text size="md" color="grey-400">
+                {rewardDisplaySymbol} Rebate
+              </Text>
+              <Tooltip
+                title={`${rewardDisplaySymbol} Referral Reward`}
+                body={`Estimate of ${rewardDisplaySymbol} earned on this transfer from Referral Rewards program.`}
+                placement="bottom-start"
+              >
+                <InfoIconWrapper>
+                  <InfoIcon />
+                </InfoIconWrapper>
+              </Tooltip>
+            </ToolTipWrapper>
+            <TransparentWrapper isTransparent={!hasDepositReferralReward}>
               <PriceFee
                 token={rewardToken}
                 tokenFee={depositReferralReward}
                 baseCurrencyFee={referralRewardAsBaseCurrency}
                 rewardPercentageOfFees={depositReferralPercentage}
                 highlightTokenFee={isRewardAcx}
+                hideSymbolOnEmpty={!isDefined(netFeeAsBaseCurrency)}
               />
-            </ShiftedRow>
-          )}
+            </TransparentWrapper>
+          </ShiftedRow>
         </>
       )}
       <Divider />
@@ -361,7 +371,10 @@ const InfoIconWrapper = styled.div`
   width: 16px;
 `;
 
-const ReferralRewardWrapper = styled.div<{ isACX: boolean }>`
+const ReferralRewardWrapper = styled.div<{
+  isACX: boolean;
+  isTransparent?: boolean;
+}>`
   //Layout
   display: flex;
   padding: 6px 12px;
@@ -372,6 +385,9 @@ const ReferralRewardWrapper = styled.div<{ isACX: boolean }>`
   border-radius: 22px;
   border: 1px solid ${({ isACX }) => COLORS[isACX ? "aqua-15" : "op-red-15"]};
   background: ${({ isACX }) => COLORS[isACX ? "aqua-5" : "op-red-5"]};
+
+  // Opacity
+  opacity: ${({ isTransparent = false }) => (isTransparent ? 0.5 : 1)};
 `;
 
 const BaseCurrencyWrapper = styled.div`
@@ -405,4 +421,18 @@ const ArrowIconUp = styled(ArrowIconDown)`
 const TokenSymbol = styled.img`
   width: 16px;
   height: 16px;
+`;
+
+const TransparentWrapper = styled.div<{ isTransparent: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  height: fit-content;
+  width: fit-content;
+
+  padding: 0;
+  margin: 0;
+
+  opacity: ${({ isTransparent }) => (isTransparent ? 0.5 : 1)};
 `;
