@@ -1,5 +1,6 @@
 import { utils } from "@across-protocol/sdk-v2";
 import { BigNumber } from "ethers";
+import { useConnection } from "hooks";
 import { useReferralSummary } from "hooks/useReferralSummary";
 import useReferrer from "hooks/useReferrer";
 import { useTokenConversion } from "hooks/useTokenConversion";
@@ -25,6 +26,7 @@ export function useEstimatedTable(
     [destinationChainId]
   );
 
+  const { account } = useConnection();
   const { referrer } = useReferrer();
   const { summary: referralSummary } = useReferralSummary(referrer);
 
@@ -75,6 +77,8 @@ export function useEstimatedTable(
     convertRewardToBaseCurrency,
     rewardToken,
     destinationChainId,
+    account,
+    referrer,
   ]);
 
   const referralRewardAsBaseCurrency = convertRewardToBaseCurrency(
