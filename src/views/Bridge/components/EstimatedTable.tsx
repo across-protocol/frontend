@@ -14,6 +14,7 @@ import {
   formatUSD,
   getChainInfo,
   isDefined,
+  QUERIESV2,
   TokenInfo,
 } from "utils";
 
@@ -38,6 +39,7 @@ const PriceFee = ({
   highlightTokenFee = false,
   rewardPercentageOfFees,
   hideSymbolOnEmpty = true,
+  tokenIconFirstOnMobile = false,
 }: {
   tokenFee?: BigNumber;
   baseCurrencyFee?: BigNumber;
@@ -45,34 +47,39 @@ const PriceFee = ({
   highlightTokenFee?: boolean;
   rewardPercentageOfFees?: number;
   hideSymbolOnEmpty?: boolean;
-}) => (
-  <BaseCurrencyWrapper>
-    {baseCurrencyFee && tokenFee && (
-      <>
-        {rewardPercentageOfFees && (
+  tokenIconFirstOnMobile?: boolean;
+}) => {
+  const Token = (isDefined(tokenFee) || !hideSymbolOnEmpty) && (
+    <TokenSymbol src={token.logoURI} />
+  );
+
+  return (
+    <BaseCurrencyWrapper invertOnMobile={tokenIconFirstOnMobile}>
+      {baseCurrencyFee && tokenFee && (
+        <>
+          {rewardPercentageOfFees && (
+            <PercentageText size="md" color="grey-400">
+              ({Math.floor(rewardPercentageOfFees * 100)}% of fees)
+            </PercentageText>
+          )}
           <Text size="md" color="grey-400">
-            ({Math.floor(rewardPercentageOfFees * 100)}% of fees)
+            {`$${formatUSD(baseCurrencyFee)}`}
           </Text>
-        )}
-        <Text size="md" color="grey-400">
-          {`$${formatUSD(baseCurrencyFee)}`}
+        </>
+      )}
+      {tokenFee ? (
+        <Text size="md" color={highlightTokenFee ? "primary" : "white"}>
+          {`${formatUnits(tokenFee, token.decimals)} ${token.symbol}`}
         </Text>
-      </>
-    )}
-    {tokenFee ? (
-      <Text size="md" color={highlightTokenFee ? "primary" : "white"}>
-        {`${formatUnits(tokenFee, token.decimals)} ${token.symbol}`}
-      </Text>
-    ) : (
-      <Text size="md" color="grey-400">
-        -
-      </Text>
-    )}
-    {(isDefined(tokenFee) || !hideSymbolOnEmpty) && (
-      <TokenSymbol src={token.logoURI} />
-    )}
-  </BaseCurrencyWrapper>
-);
+      ) : (
+        <Text size="md" color="grey-400">
+          -
+        </Text>
+      )}
+      {Token}
+    </BaseCurrencyWrapper>
+  );
+};
 
 const EstimatedTable = ({
   fromChainId,
@@ -104,7 +111,7 @@ const EstimatedTable = ({
 
   return (
     <Wrapper>
-      <Row>
+      <Row stackOnMobile>
         <Text size="md" color="grey-400">
           {isRewardAcx
             ? "Across Referral Rewards"
@@ -119,6 +126,7 @@ const EstimatedTable = ({
             tokenFee={depositReferralReward}
             baseCurrencyFee={referralRewardAsBaseCurrency}
             hideSymbolOnEmpty={false}
+            tokenIconFirstOnMobile
           />
         </ReferralRewardWrapper>
       </Row>
@@ -317,7 +325,7 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
-const Row = styled.div`
+const Row = styled.div<{ stackOnMobile?: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -326,6 +334,13 @@ const Row = styled.div`
   gap: 6px;
 
   width: 100%;
+
+  @media ${QUERIESV2.xs.andDown} {
+    flex-direction: ${({ stackOnMobile = false }) =>
+      stackOnMobile ? "column" : "row"};
+    align-items: flex-start;
+    gap: 8px;
+  }
 `;
 
 const ClickableRow = styled(Row)`
@@ -388,12 +403,19 @@ const ReferralRewardWrapper = styled.div<{
 
   // Opacity
   opacity: ${({ isTransparent = false }) => (isTransparent ? 0.5 : 1)};
+
+  // Mobile
+  @media ${QUERIESV2.xs.andDown} {
+    width: 100%;
+  }
 `;
 
-const BaseCurrencyWrapper = styled.div`
+const BaseCurrencyWrapper = styled.div<{ invertOnMobile: boolean }>`
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-direction: ${({ invertOnMobile }) =>
+    invertOnMobile ? "row-reverse" : "row"};
 `;
 
 const Divider = styled.div`
@@ -435,4 +457,10 @@ const TransparentWrapper = styled.div<{ isTransparent: boolean }>`
   margin: 0;
 
   opacity: ${({ isTransparent }) => (isTransparent ? 0.5 : 1)};
+`;
+
+const PercentageText = styled(Text)`
+  @media ${QUERIESV2.xs.andDown} {
+    display: none;
+  }
 `;
