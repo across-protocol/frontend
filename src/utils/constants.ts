@@ -583,6 +583,8 @@ export const COLORS = {
   "black-800": "var(--color-neutrals-black-800)",
   "black-900": "var(--color-neutrals-black-900)",
   "grey-400": "var(--color-neutrals-grey-400)",
+  "grey-400-15": "var(--color-neutrals-grey-400-15)",
+  "grey-400-5": "var(--color-neutrals-grey-400-5)",
   "grey-500": "var(--color-neutrals-grey-500)",
   "grey-600": "var(--color-neutrals-grey-600)",
   "light-100": "var(--color-neutrals-light-100)",

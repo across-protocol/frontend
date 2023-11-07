@@ -60,6 +60,9 @@ const variables = css`
     --color-neutrals-black-900: #202024;
 
     --color-neutrals-grey-400: #9daab3;
+    --color-neutrals-grey-400-15: #9daab326;
+    --color-neutrals-grey-400-5: #9daab30d;
+
     --color-neutrals-grey-500: #4c4e57;
     --color-neutrals-grey-600: #3e4047;
 
