@@ -359,7 +359,9 @@ export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
 export const rebateTokensAvailable = String(
   process.env.REACT_APP_EXTERNAL_REBATE_TOKENS_AVAILABLE || ""
-).split(",");
+)
+  .toUpperCase()
+  .split(",");
 
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
