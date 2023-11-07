@@ -27,7 +27,7 @@ export function useDepositTracking(
   toChainId: number,
   fromBridgePagePayload?: FromBridgePagePayload
 ) {
-  const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(false);
+  const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(true);
 
   const { addToAmpliQueue } = useAmplitude();
 

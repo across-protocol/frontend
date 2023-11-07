@@ -71,6 +71,9 @@ export function AmountInput({
           </AmountInnerWrapperTextStack>
           <MaxButtonWrapper
             onClick={() => {
+              if (!didEnter) {
+                setDidEnter(true);
+              }
               onClickMaxBalance();
             }}
             disabled={!balance}
