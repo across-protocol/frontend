@@ -213,7 +213,7 @@ const EstimatedTable = ({
                 tokenFee={depositReferralReward}
                 baseCurrencyFee={referralRewardAsBaseCurrency}
                 rewardPercentageOfFees={depositReferralPercentage}
-                highlightTokenFee
+                highlightTokenFee={isRewardAcx}
               />
             </ShiftedRow>
           )}
