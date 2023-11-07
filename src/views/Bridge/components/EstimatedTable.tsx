@@ -36,14 +36,12 @@ const PriceFee = ({
   token,
   highlightTokenFee = false,
   rewardPercentageOfFees,
-  isACX = true,
 }: {
   tokenFee?: BigNumber;
   baseCurrencyFee?: BigNumber;
   token: TokenInfo;
   highlightTokenFee?: boolean;
   rewardPercentageOfFees?: number;
-  isACX?: boolean;
 }) => (
   <BaseCurrencyWrapper>
     {baseCurrencyFee && tokenFee && (
@@ -59,10 +57,7 @@ const PriceFee = ({
       </>
     )}
     {tokenFee ? (
-      <Text
-        size="md"
-        color={highlightTokenFee ? (isACX ? "primary" : "op-red") : "white"}
-      >
+      <Text size="md" color={highlightTokenFee ? "primary" : "white"}>
         {`${formatUnits(tokenFee, token.decimals)} ${token.symbol}`}
       </Text>
     ) : (
@@ -219,7 +214,6 @@ const EstimatedTable = ({
                 baseCurrencyFee={referralRewardAsBaseCurrency}
                 rewardPercentageOfFees={depositReferralPercentage}
                 highlightTokenFee
-                isACX={isRewardAcx}
               />
             </ShiftedRow>
           )}
