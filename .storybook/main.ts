@@ -1,3 +1,4 @@
+import { mergeConfig } from "vite";
 import type { StorybookConfig } from "@storybook/react-vite";
 
 const config: StorybookConfig = {
@@ -30,5 +31,14 @@ const config: StorybookConfig = {
       return accumulator;
     }, {}),
   }),
+  viteFinal: async (config) => {
+    return mergeConfig(config, {
+      server: {
+        watch: {
+          ignored: ["**/.env.*", "**/coverage/**"],
+        },
+      },
+    });
+  },
 };
 export default config;
