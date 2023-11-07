@@ -2,6 +2,7 @@
 // However, when written in ts, the imports seem to fail, so this is in js for now.
 
 import { HubPool__factory } from "@across-protocol/contracts-v2/dist/typechain";
+import { utils as sdkUtils } from "@across-protocol/sdk-v2";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import {
@@ -135,11 +136,10 @@ const handler = async (
       hubPool.interface.encodeFunctionData("pooledTokens", [l1Token]),
     ];
 
-    // @todo: Generalise the resolution of chainId => gasToken.
     const [tokenPriceNative, _tokenPriceUsd] = await Promise.all([
       getCachedTokenPrice(
         l1Token,
-        destinationChainId === "137" ? "matic" : "eth"
+        sdkUtils.getNativeTokenSymbol(destinationChainId).toLowerCase()
       ),
       getCachedTokenPrice(l1Token, "usd"),
     ]);
