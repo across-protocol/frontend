@@ -16,7 +16,7 @@ import { Text, Badge } from "components";
 
 import { ChainId, QUERIESV2, COLORS, NoFundsDepositedLogError } from "utils";
 
-import { useElapsedSeconds } from "../hooks/useElapsedSeconds";
+import { useElapsedSeconds } from "../../../hooks/useElapsedSeconds";
 import { useDepositTracking } from "../hooks/useDepositTracking";
 import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";

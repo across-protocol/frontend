@@ -107,6 +107,7 @@ export function useBridgeAction(
       originChainId: String(frozenPayload.fromChain),
       destinationChainId: String(frozenPayload.toChain),
       bridgeTokenSymbol: tokenSymbol,
+      referrer,
     }).toString();
     history.push(
       `/bridge/${tx.hash}?${statusPageSearchParams}`,

@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React from "react";
+import React, { ReactNode } from "react";
 import { PlacesType } from "react-tooltip";
 import {
   Wrapper,
@@ -25,11 +25,13 @@ export type TooltipIcon =
   | "clock";
 export interface TooltipProps {
   tooltipId?: string;
-  icon?: TooltipIcon;
+  icon?: TooltipIcon | ReactNode;
   title?: string;
   titleSecondary?: string;
   body: string | JSX.Element;
   placement?: PlacesType;
+  maxWidth?: number;
+  offset?: number;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
@@ -40,6 +42,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
   icon,
   placement,
   titleSecondary,
+  maxWidth,
+  offset,
 }) => {
   const id = tooltipId || title;
 
@@ -50,10 +54,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
       <StyledAnchor data-tooltip-id={id} data-tooltip-place={placement}>
         {children}
       </StyledAnchor>
-      <StyledTooltip id={id} noArrow opacity={1}>
-        <Wrapper>
+      <StyledTooltip id={id} noArrow opacity={1} offset={offset}>
+        <Wrapper maxWidth={maxWidth}>
           {title && (
             <TitleRow>
+              {typeof icon === "object" && icon}
               {icon === "green-checkmark" && <RoundedCheckmark16 />}
               {icon === "grey-checkmark" && <GreyRoundedCheckmark16 />}
               {icon === "self-referral" && <SelfReferralIcon />}
