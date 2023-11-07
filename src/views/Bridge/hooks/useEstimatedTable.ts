@@ -49,17 +49,22 @@ export function useEstimatedTable(
     convertRewardToBaseCurrency,
     rewardToken.decimals,
   ]);
-
+  const hasDepositReferralReward = depositReferralReward?.gt(0);
   const referralRewardAsBaseCurrency = convertRewardToBaseCurrency(
     depositReferralReward
   );
   const gasFeeAsBaseCurrency = convertL1ToBaseCurrency(gasFee);
   const bridgeFeeAsBaseCurrency = convertL1ToBaseCurrency(bridgeFee);
-  const netFeeAsBaseCurrency =
+  let netFeeAsBaseCurrency =
     gasFeeAsBaseCurrency && bridgeFeeAsBaseCurrency
       ? gasFeeAsBaseCurrency.add(bridgeFeeAsBaseCurrency)
       : undefined;
-  const hasDepositReferralReward = depositReferralReward?.gt(0);
+  // If we have a referral reward, subtract the rebate from the net fee
+  if (netFeeAsBaseCurrency && referralRewardAsBaseCurrency) {
+    netFeeAsBaseCurrency = netFeeAsBaseCurrency.sub(
+      referralRewardAsBaseCurrency
+    );
+  }
 
   return {
     isDetailedFeesAvailable,
