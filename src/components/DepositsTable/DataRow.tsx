@@ -129,7 +129,7 @@ const StyledRow = styled.tr`
   align-items: center;
   gap: 16px;
   padding: 0px 24px;
-  border-width: 1px 1px 0px 1px;
+  border-width: 0px 1px 1px 1px;
   border-style: solid;
   border-color: ${COLORS["grey-600"]};
 

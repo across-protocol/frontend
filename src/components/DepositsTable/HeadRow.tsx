@@ -87,7 +87,6 @@ const StyledRow = styled.tr`
   background-color: ${COLORS["black-700"]};
   border-radius: 12px 12px 0px 0px;
   border: ${COLORS["grey-600"]} 1px solid;
-  border-bottom: 0px;
 `;
 
 const StyledCell = styled.th<{ width: number }>`
