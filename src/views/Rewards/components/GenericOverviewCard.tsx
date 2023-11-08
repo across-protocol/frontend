@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { COLORS } from "utils";
+import { COLORS, QUERIESV2 } from "utils";
 import { ReactComponent as Background } from "assets/bg-banners/overview-card-background.svg";
 import { Text } from "components";
 import { ReactElement } from "react";
@@ -110,6 +110,11 @@ const ContentWrapper = styled.div`
 
   height: 100%;
   width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 16px;
+    gap: 16px;
+  }
 `;
 
 const UpperIconTextStack = styled.div`

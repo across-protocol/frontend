@@ -1,27 +1,22 @@
 import styled from "@emotion/styled";
 import { COLORS, QUERIESV2, TokenInfo, formatUnits } from "utils";
-import CloudBackground from "assets/bg-banners/cloud-staking.svg";
-import { PrimaryButton, Text } from "components";
-import { useReferralSummary } from "hooks/useReferralSummary";
-import { useConnection } from "hooks";
+import { Text } from "components";
+import { ReactComponent as ChevronRight } from "assets/icons/arrow-right-16.svg";
+import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
+import { Link } from "react-router-dom";
 
 type RewardProgramCardProps = {
   token: TokenInfo;
 };
 
 const RewardProgramCard = ({ token }: RewardProgramCardProps) => {
-  const { account } = useConnection();
-  // For now, we can only assume that the token is ACX
-  const {
-    summary: { rewardsAmount },
-  } = useReferralSummary(account);
-  const programName =
-    token.symbol === "ACX" ? "Across Referral Program" : "OP Rewards Program";
+  const { programName, rewardsAmount, primaryColor, backgroundUrl, url } =
+    useRewardProgramCard(token);
 
   return (
-    <Wrapper>
-      <LogoContainer>
-        <img src={token.logoURI} alt={token.symbol} />
+    <Wrapper primaryColor={primaryColor} backgroundUrl={backgroundUrl}>
+      <LogoContainer primaryColor={primaryColor}>
+        <Logo src={token.logoURI} alt={token.symbol} />
       </LogoContainer>
       <TextStack>
         <Text color="white" size="lg">
@@ -31,20 +26,16 @@ const RewardProgramCard = ({ token }: RewardProgramCardProps) => {
           {formatUnits(rewardsAmount, token.decimals)} {token.symbol} earned
         </Text>
       </TextStack>
-      <StyledCopyButton
-        onClick={() => {}}
-        size="md"
-        backgroundColor="black-700"
-        textColor="aqua"
-      >
-        &gt;
+      <StyledCopyButton to={url} primaryColor={primaryColor}>
+        <ChevronRight />
       </StyledCopyButton>
     </Wrapper>
   );
 };
 
 export default RewardProgramCard;
-const Wrapper = styled.div`
+
+const Wrapper = styled.div<{ primaryColor: string; backgroundUrl: string }>`
   display: flex;
   align-items: center;
   gap: 12px;
@@ -52,27 +43,37 @@ const Wrapper = styled.div`
   align-self: stretch;
   padding: 24px 16px;
   border-radius: 8px;
-  border: 1px solid ${COLORS["aqua-15"]};
-  background: url(${CloudBackground}) no-repeat;
+  border: 1px solid
+    ${({ primaryColor }) => COLORS[`${primaryColor}-15` as keyof typeof COLORS]};
+  background: url(${({ backgroundUrl }) => backgroundUrl}) no-repeat;
+  background-position: top;
+  background-size: cover;
+
   @media ${QUERIESV2.sm.andDown} {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
     align-self: stretch;
-    padding: 16px;
+    padding: 24px;
   }
 `;
 
-const LogoContainer = styled.div`
+const Logo = styled.img`
+  height: 24px;
+  width: 24px;
+`;
+
+const LogoContainer = styled.div<{ primaryColor: string }>`
   // Layout
   display: flex;
   padding: 8px;
   align-items: flex-start;
   // Colors
   border-radius: 32px;
-  border: 1px solid ${COLORS["grey-400"]};
-  background: ${COLORS["grey-400"]};
+  border: 1px solid ${COLORS["grey-400-15"]};
+  background: ${({ primaryColor }) =>
+    COLORS[`${primaryColor}-5` as keyof typeof COLORS]};
   box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.08),
     0px 2px 6px 0px rgba(0, 0, 0, 0.08);
   @media ${QUERIESV2.sm.andDown} {
@@ -88,9 +89,22 @@ const TextStack = styled.div`
   flex: 1 0 0;
 `;
 
-const StyledCopyButton = styled(PrimaryButton)`
-  border: 1px solid ${COLORS["aqua-15"]};
-  @media ${QUERIESV2.sm.andDown} {
-    display: none;
+const StyledCopyButton = styled(Link)<{ primaryColor: string }>`
+  display: flex;
+  height: 40px;
+  width: 40px;
+  padding: 0px;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+
+  background-color: transparent;
+
+  border-radius: 32px;
+  border: 1px solid ${COLORS["grey-500"]};
+
+  cursor: pointer;
+  * {
+    cursor: pointer;
   }
 `;

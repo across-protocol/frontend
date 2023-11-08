@@ -2,22 +2,22 @@ import styled from "@emotion/styled";
 import SectionWrapper from "components/SectionTitleWrapperV2/SectionWrapperV2";
 
 import RewardProgramCard from "./RewardProgramCard";
-import { getToken } from "utils";
+import { getToken, rebateTokensAvailable } from "utils";
 
-const RewardProgramSection = () => {
-  const tokens = ["ACX", "OP"];
+const DesktopRewardProgramSection = () => {
+  const tokens = ["ACX", ...rebateTokensAvailable];
   return (
-    <SectionWrapper title="Reward programs">
+    <SectionWrapper title="Reward programs" hideOnMobile>
       <InnerWrapper>
         {tokens.map((token) => (
-          <RewardProgramCard token={getToken(token)} />
+          <RewardProgramCard token={getToken(token)} key={token} />
         ))}
       </InnerWrapper>
     </SectionWrapper>
   );
 };
 
-export default RewardProgramSection;
+export default DesktopRewardProgramSection;
 
 const InnerWrapper = styled.div`
   display: flex;
