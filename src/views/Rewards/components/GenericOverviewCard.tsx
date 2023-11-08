@@ -2,10 +2,11 @@ import styled from "@emotion/styled";
 import { COLORS } from "utils";
 import { ReactComponent as Background } from "assets/bg-banners/overview-card-background.svg";
 import { Text } from "components";
+import { ReactElement } from "react";
 
 type GenericOverviewCardTitleProps = {
   subTitle: string;
-  title: string;
+  title: string | ReactElement;
 };
 
 type GenericOverviewCardProps = {
