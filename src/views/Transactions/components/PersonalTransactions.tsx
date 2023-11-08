@@ -34,7 +34,11 @@ export function PersonalTransactions({ statusFilter }: Props) {
     return (
       <EmptyTable>
         <Text size="lg">Please connect your wallet to view transactions</Text>
-        <SecondaryButton size="md" onClick={() => connect()}>
+        <SecondaryButton
+          data-cy="connect-wallet"
+          size="md"
+          onClick={() => connect()}
+        >
           Connect Wallet
         </SecondaryButton>
       </EmptyTable>
