@@ -9,6 +9,7 @@ import {
   fallbackSuggestedRelayerFeePct,
   suggestedFeesDeviationBufferMultiplier,
   fixedPointAdjustment,
+  pendingStateTimeUntilSlow,
 } from "utils";
 
 import { HeaderCells, ColumnKey } from "./HeadRow";
@@ -32,8 +33,6 @@ type Props = {
 };
 
 const config = getConfig();
-
-const MAX_PENDING_STATE_TIME_UNTIL_SLOW = 30 * 60; // 30 mins
 
 function isColumnDisabled(disabledColumns: ColumnKey[], column: ColumnKey) {
   return disabledColumns.includes(column);
@@ -61,7 +60,7 @@ export function DataRow({
     deposit.status === "pending" &&
     Math.abs(
       DateTime.fromSeconds(deposit.depositTime).diffNow("seconds").as("seconds")
-    ) > MAX_PENDING_STATE_TIME_UNTIL_SLOW;
+    ) > pendingStateTimeUntilSlow;
 
   // Hide unsupported or unknown token deposits
   if (!token) {

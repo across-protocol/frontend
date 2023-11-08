@@ -4,7 +4,7 @@ import { HeadRow, headerCells, ColumnKey } from "./HeadRow";
 import { DataRow } from "./DataRow";
 import { Deposit } from "hooks/useDeposits";
 
-export type Props = {
+export type DepositsTableProps = {
   disabledColumns?: ColumnKey[];
   onClickSpeedUp?: (deposit: Deposit) => void;
   deposits: Deposit[];
@@ -14,7 +14,7 @@ export function DepositsTable({
   disabledColumns = [],
   deposits,
   onClickSpeedUp,
-}: Props) {
+}: DepositsTableProps) {
   return (
     <Wrapper>
       <StyledTable>

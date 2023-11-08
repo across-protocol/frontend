@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 
 import Pagination, { paginate } from "components/Pagination";
-import { DepositsTable, Props as DepositsTableProps } from "./DepositsTable";
+import { DepositsTable, DepositsTableProps } from "./DepositsTable";
 
 type Props = DepositsTableProps & {
   currentPage: number;

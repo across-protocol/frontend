@@ -688,3 +688,6 @@ export const walletBlacklist = (process.env.REACT_APP_WALLET_BLACKLIST || "")
 
 // Pre-computed gas expenditure for deposits used for estimations
 export const gasExpenditureDeposit = BigNumber.from(90_000);
+
+// Used to determine whether to show the "slow" warning in the deposits table
+export const pendingStateTimeUntilSlow = 30 * 60; // 30 mins

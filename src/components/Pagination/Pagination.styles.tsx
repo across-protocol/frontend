@@ -40,7 +40,6 @@ export const PageSizeSelectButton = styled(UnstyledButton)`
   }
 
   @media ${QUERIESV2.sm.andDown} {
-    margin-bottom: 1rem;
     padding: 10px 20px;
   }
 `;
