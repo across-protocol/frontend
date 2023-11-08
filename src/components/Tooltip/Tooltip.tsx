@@ -16,13 +16,17 @@ import { ReactComponent as ReferrerIcon } from "assets/icons/referrer.svg";
 import { ReactComponent as SelfReferralIcon } from "assets/icons/self-referral.svg";
 import { ReactComponent as ClockIcon } from "assets/icons/clock.svg";
 
-export type TooltipIcon =
-  | "green-checkmark"
-  | "grey-checkmark"
-  | "referee"
-  | "referral"
-  | "self-referral"
-  | "clock";
+const iconMap = {
+  "green-checkmark": <RoundedCheckmark16 />,
+  "grey-checkmark": <GreyRoundedCheckmark16 />,
+  "self-referral": <SelfReferralIcon />,
+  referral: <ReferrerIcon />,
+  referee: <RefereeIcon />,
+  clock: <ClockIcon />,
+};
+
+export type TooltipIcon = keyof typeof iconMap;
+
 export interface TooltipProps {
   tooltipId?: string;
   icon?: TooltipIcon | ReactNode;
@@ -49,6 +53,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   if (!children) return null;
 
+  const iconElement = iconMap[icon as TooltipIcon] || icon;
+
   return (
     <>
       <StyledAnchor data-tooltip-id={id} data-tooltip-place={placement}>
@@ -58,13 +64,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         <Wrapper maxWidth={maxWidth}>
           {title && (
             <TitleRow>
-              {typeof icon === "object" && icon}
-              {icon === "green-checkmark" && <RoundedCheckmark16 />}
-              {icon === "grey-checkmark" && <GreyRoundedCheckmark16 />}
-              {icon === "self-referral" && <SelfReferralIcon />}
-              {icon === "referral" && <ReferrerIcon />}
-              {icon === "referee" && <RefereeIcon />}
-              {icon === "clock" && <ClockIcon />}
+              {iconElement}
               {title}
               {titleSecondary && (
                 <TitleSecondary>{titleSecondary}</TitleSecondary>

@@ -1,11 +1,8 @@
 import styled from "@emotion/styled";
-
 import { Text } from "components/Text";
-
 import { COLORS } from "utils";
 
 export type HeaderCells = typeof headerCells;
-
 export type ColumnKey = keyof HeaderCells;
 
 export const headerCells = {
