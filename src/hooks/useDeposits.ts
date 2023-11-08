@@ -8,6 +8,7 @@ import {
   defaultRefetchInterval,
 } from "utils";
 import { getLocalDeposits, removeLocalDeposits } from "../utils/local-deposits";
+import { DepositStatusFilter } from "views/Transactions/types";
 
 export type DepositStatus = "pending" | "filled";
 
@@ -67,19 +68,25 @@ export type GetDepositsResponse = {
 };
 
 export function useDeposits(
-  status: DepositStatus,
+  status: DepositStatusFilter,
   limit: number,
   offset: number = 0
 ) {
   return useQuery(
     depositsQueryKey(status, limit, offset),
-    () => getDeposits({ status, limit, offset }),
+    () => {
+      return getDeposits({
+        status: status === "all" ? undefined : status,
+        limit,
+        offset,
+      });
+    },
     { keepPreviousData: true, refetchInterval: defaultRefetchInterval }
   );
 }
 
 export function useUserDeposits(
-  status: DepositStatus,
+  status: DepositStatusFilter,
   limit: number,
   offset: number = 0,
   userAddress?: string
@@ -98,17 +105,20 @@ export function useUserDeposits(
         };
       }
 
+      const omitStatusFilter = status === "all";
+
       // To provide a better UX, we take optimistically updated local deposits
       // into account to show on the "My Transactions" page.
-      const localUserDeposits = getLocalDeposits().filter(
-        (deposit) =>
-          deposit.status === status &&
-          (deposit.depositorAddr === userAddress ||
-            deposit.recipientAddr === userAddress)
+      const localUserDeposits = getLocalDeposits().filter((deposit) =>
+        omitStatusFilter
+          ? true
+          : deposit.status === status &&
+            (deposit.depositorAddr === userAddress ||
+              deposit.recipientAddr === userAddress)
       );
       const { deposits, pagination } = await getDeposits({
         address: userAddress,
-        status,
+        status: omitStatusFilter ? undefined : status,
         limit,
         offset,
       });

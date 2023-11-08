@@ -7,3 +7,5 @@ export interface TxLink {
 }
 
 export type SupportedTxTuple = [token: Token, tx: Deposit];
+
+export type DepositStatusFilter = "all" | "pending" | "filled";

@@ -124,13 +124,13 @@ export function SpeedUpModal({ isOpen, onClose, txTuple }: Props) {
               isInitiallyFetchingFees={isFetchingFees && !didSetInitialFee}
             />
             <ButtonsRow>
-              <CancelButton size="md" borderColor="white-100" onClick={onClose}>
-                Cancel
+              <CancelButton size="md" onClick={onClose}>
+                <Text color="grey-400">Cancel</Text>
               </CancelButton>
               <ConfirmButton
                 size="md"
                 disabled={isConfirmDisabled}
-                backgroundColor={isRelayerFeeFairlyPriced ? "yellow" : "aqua"}
+                borderColor={isRelayerFeeFairlyPriced ? "yellow" : "aqua"}
                 onClick={() =>
                   speedUp.mutate({
                     newRelayerFeePct: feeInputToBigNumberPct(relayFeeInput),

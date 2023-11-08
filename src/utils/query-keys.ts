@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import { ChainId } from "./constants";
+import { DepositStatusFilter } from "views/Transactions/types";
 
 /**
  * Generates query keys for react-query `useQuery` hook, used in the `useLatestBlock` hook.
@@ -104,7 +105,7 @@ export function referralSummaryQueryKey(account: string) {
 }
 
 export function depositsQueryKey(
-  status: "filled" | "pending",
+  status: DepositStatusFilter,
   limit: number,
   offset: number
 ) {
@@ -113,7 +114,7 @@ export function depositsQueryKey(
 
 export function userDepositsQueryKey(
   userAddress: string,
-  status: "filled" | "pending",
+  status: DepositStatusFilter,
   limit: number,
   offset: number
 ) {
