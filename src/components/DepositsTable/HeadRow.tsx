@@ -16,7 +16,7 @@ export const headerCells = {
   },
   route: {
     label: "Route",
-    width: 206,
+    width: 144,
   },
   address: {
     label: "Address",

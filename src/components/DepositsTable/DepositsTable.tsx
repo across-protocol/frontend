@@ -6,7 +6,7 @@ import { Deposit } from "hooks/useDeposits";
 
 export type Props = {
   disabledColumns?: ColumnKey[];
-  onClickSpeedUp?: () => void;
+  onClickSpeedUp?: (deposit: Deposit) => void;
   deposits: Deposit[];
 };
 
@@ -42,7 +42,6 @@ const Wrapper = styled.div`
 `;
 
 const StyledTable = styled.table`
-  width: 1666px;
   white-space: nowrap;
   table-layout: fixed;
 `;

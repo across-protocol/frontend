@@ -163,6 +163,7 @@ export default meta;
 type Story = StoryObj<typeof PaginatedDepositsTable>;
 
 const BasicPagination = () => {
+  const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(1);
   const [deposits, setDeposits] = useState<Deposit[]>(
     mockedDeposits.slice(0, 1)
@@ -171,9 +172,12 @@ const BasicPagination = () => {
   return (
     <PaginatedDepositsTable
       deposits={deposits}
+      currentPage={currentPage}
       onPageChange={(page) => {
+        setCurrentPage(page);
         setDeposits(mockedDeposits.slice(page, page + pageSize));
       }}
+      currentPageSize={pageSize}
       onPageSizeChange={(size) => {
         setPageSize(size);
         setDeposits(mockedDeposits.slice(0, size));

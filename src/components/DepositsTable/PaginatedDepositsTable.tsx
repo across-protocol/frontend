@@ -1,12 +1,13 @@
 import styled from "@emotion/styled";
 
-import Pagination from "components/Pagination";
-import { usePagination } from "hooks/usePagination";
+import Pagination, { paginate } from "components/Pagination";
 import { DepositsTable, Props as DepositsTableProps } from "./DepositsTable";
 
 type Props = DepositsTableProps & {
-  onPageChange: (currentPage: number) => void;
-  onPageSizeChange: (currentPageSize: number) => void;
+  currentPage: number;
+  onPageChange: (newPage: number) => void;
+  currentPageSize: number;
+  onPageSizeChange: (newPageSize: number) => void;
   totalCount: number;
   initialPageSize?: number;
   pageSizes?: number[];
@@ -15,29 +16,29 @@ type Props = DepositsTableProps & {
 const DEFAULT_PAGE_SIZES = [10, 25, 50];
 
 export function PaginatedDepositsTable({
+  currentPage,
   onPageChange,
+  currentPageSize,
   onPageSizeChange,
   totalCount,
   initialPageSize = DEFAULT_PAGE_SIZES[0],
   pageSizes = DEFAULT_PAGE_SIZES,
   ...depositsTableProps
 }: Props) {
-  const { pageSize, currentPage, setCurrentPage, setPageSize, paginateValues } =
-    usePagination(totalCount, { initialPageSize });
+  const paginateValues = paginate({
+    elementCount: totalCount,
+    currentPage,
+    maxNavigationCount: 5,
+    elementsPerPage: currentPageSize,
+  });
 
   return (
     <>
       <DepositsTable {...depositsTableProps} />
       <PaginationWrapper>
         <Pagination
-          onPageChange={(newPage) => {
-            setCurrentPage(newPage);
-            onPageChange(newPage);
-          }}
-          onPageSizeChange={(newPageSize) => {
-            setPageSize(newPageSize);
-            onPageSizeChange(newPageSize);
-          }}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
           pageList={paginateValues.pageList}
           activeIndex={paginateValues.activeIndex}
           disableBack={paginateValues.disableBack}
@@ -46,7 +47,7 @@ export function PaginatedDepositsTable({
           hideEnd={paginateValues.hideEnd}
           lastPage={paginateValues.lastPage}
           currentPage={currentPage}
-          pageSize={pageSize}
+          pageSize={currentPageSize}
           pageSizes={pageSizes}
         />
       </PaginationWrapper>

@@ -28,12 +28,12 @@ type Props = {
   deposit: Deposit;
   headerCells: HeaderCells;
   disabledColumns?: ColumnKey[];
-  onClickSpeedUp?: () => void;
+  onClickSpeedUp?: (deposit: Deposit) => void;
 };
 
 const config = getConfig();
 
-const MAX_PENDING_STATE_TIME_UNTIL_SLOW = 15 * 60; // 15 mins
+const MAX_PENDING_STATE_TIME_UNTIL_SLOW = 30 * 60; // 30 mins
 
 function isColumnDisabled(disabledColumns: ColumnKey[], column: ColumnKey) {
   return disabledColumns.includes(column);
@@ -59,8 +59,9 @@ export function DataRow({
   );
   const isSlowRelay =
     deposit.status === "pending" &&
-    DateTime.fromSeconds(deposit.depositTime).diffNow("seconds").as("seconds") <
-      MAX_PENDING_STATE_TIME_UNTIL_SLOW;
+    Math.abs(
+      DateTime.fromSeconds(deposit.depositTime).diffNow("seconds").as("seconds")
+    ) > MAX_PENDING_STATE_TIME_UNTIL_SLOW;
 
   // Hide unsupported or unknown token deposits
   if (!token) {
