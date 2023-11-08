@@ -9,6 +9,7 @@ import GenericStakingPoolTable from "./components/GenericStakingPoolTable/Generi
 import { LayoutV2 } from "components";
 import useScrollElementByHashIntoView from "hooks/useScrollElementByHashIntoView";
 import AdditionalQuestionCTA from "./components/AdditionalQuestionCTA";
+import OverviewSection from "./components/OverviewSection";
 
 const Rewards = () => {
   const {
@@ -39,13 +40,7 @@ const Rewards = () => {
       <Wrapper>
         <BreadcrumbV2 />
         <InnerSectionWrapper>
-          <SectionWrapper title="Overview">
-            <OverviewRewardSection
-              totalRewards={totalRewards}
-              stakedTokens={stakedTokens}
-              referralTier={referralTier}
-            />
-          </SectionWrapper>
+          <OverviewSection />
           <SectionWrapper
             title="Referrals"
             link={{ name: "View all data", href: "/rewards/referrals" }}
