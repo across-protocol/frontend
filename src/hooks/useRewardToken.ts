@@ -2,8 +2,8 @@ import { useConnection } from "hooks";
 import { useMemo } from "react";
 import { useQuery } from "react-query";
 import { getToken, rebateTokensAvailable } from "utils";
-import { useReferralSummary } from "./useReferralSummary";
 import useReferrer from "./useReferrer";
+import { useSimplifiedReferralSummary } from "./useSimplifiedReferralSummary";
 
 export function useRewardToken(destinationChainId: number) {
   const rewardToken = useMemo(() => {
@@ -16,8 +16,7 @@ export function useRewardToken(destinationChainId: number) {
   const { account } = useConnection();
   const { referrer } = useReferrer();
 
-  // TODO: Replace with real more efficient hook call
-  const { summary: referralSummary } = useReferralSummary(referrer);
+  const { summary: referralSummary } = useSimplifiedReferralSummary(referrer);
 
   // We don't want to worry about the referrer or account if we're
   // not using the ACX reward token
