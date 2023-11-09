@@ -32,6 +32,7 @@ const Rewards = () => {
           {(areStakingPoolsLoading || allPoolData.length > 0) && (
             <SectionWrapper title="All pools">
               <GenericStakingPoolTable
+                greyscaleTokenLogo={isConnected}
                 poolData={allPoolData}
                 isLoading={areStakingPoolsLoading}
               />

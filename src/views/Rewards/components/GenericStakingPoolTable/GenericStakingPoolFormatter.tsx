@@ -38,6 +38,7 @@ type MetaData = {
   hasLPTokens: boolean;
   hasLPStake: boolean;
   hasRewards: boolean;
+  greyscaleTokenLogo: boolean;
 };
 
 const flexBasisLengths = [
@@ -127,17 +128,30 @@ type PoolRowCellType = {
   meta: MetaData;
 };
 
-function RowPoolCell({ data }: PoolRowCellType) {
+function RowPoolCell({ data, meta }: PoolRowCellType) {
   return (
     <PoolCell>
       {data.tokenLogsURIs ? (
         <IconPair
-          LeftIcon={<StyledPoolIcon src={data.tokenLogsURIs[0]} />}
-          RightIcon={<StyledPoolIcon src={data.tokenLogsURIs[1]} />}
+          LeftIcon={
+            <StyledPoolIcon
+              greyscale={meta.greyscaleTokenLogo}
+              src={data.tokenLogsURIs[0]}
+            />
+          }
+          RightIcon={
+            <StyledPoolIcon
+              greyscale={meta.greyscaleTokenLogo}
+              src={data.tokenLogsURIs[1]}
+            />
+          }
         />
       ) : (
         <LogoWrapper>
-          <StyledPoolIcon src={data.tokenLogoURI} />
+          <StyledPoolIcon
+            greyscale={meta.greyscaleTokenLogo}
+            src={data.tokenLogoURI}
+          />
         </LogoWrapper>
       )}
       <PoolTextStack>
@@ -272,7 +286,7 @@ function RowButtonCell({ data, meta }: PoolRowCellType) {
   return <ButtonCell>{button}</ButtonCell>;
 }
 
-export function formatRow(data: RowData): IRow {
+export function formatRow(data: RowData, greyscaleTokenLogo: boolean): IRow {
   const rowComponents = [
     RowPoolCell,
     RowStakedLPCell,
@@ -285,6 +299,7 @@ export function formatRow(data: RowData): IRow {
     hasLPStake: BigNumber.from(data.userAmountOfLPStaked).gt(0),
     hasLPTokens: BigNumber.from(data.usersTotalLPTokens).gt(0),
     hasRewards: BigNumber.from(data.outstandingRewards).gt(0),
+    greyscaleTokenLogo,
   };
   return {
     cells: rowComponents.map((Cell, idx) => ({

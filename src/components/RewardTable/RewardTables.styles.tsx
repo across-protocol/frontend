@@ -276,9 +276,11 @@ export const ReferralIconContainer = styled.div`
 `;
 
 export const StyledETHIcon = styled(ETHLogo)``;
-export const StyledPoolIcon = styled.img`
+export const StyledPoolIcon = styled.img<{ greyscale?: boolean }>`
   width: 32px;
   height: 32px;
+
+  filter: ${({ greyscale }) => (greyscale ? "grayscale(100%)" : "none")};
 `;
 
 export const StyledUNILogo = styled(UNILogo)``;
