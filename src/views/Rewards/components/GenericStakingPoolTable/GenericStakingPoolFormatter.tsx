@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { IRow } from "components/Table/Table";
-import { formatEther, formatWeiPct } from "utils";
+import { formatEther, formatWeiPct, getToken } from "utils";
 import { ReactComponent as ExternalLink16 } from "assets/icons/arrow-right-16.svg";
 import {
   ButtonCell,
@@ -26,6 +26,8 @@ import {
   StyledProgressBar,
   ExternalStackedCell,
   ExternalTextCell,
+  RewardCellLogoTextWrapper,
+  RewardCellLogo,
 } from "./GenericStakingPoolTable.styles";
 import { StyledPoolIcon } from "components/RewardTable/RewardTables.styles";
 import { StakingPool } from "utils/staking-pool";
@@ -229,9 +231,12 @@ function RowAgeofCapitalCell({ data, meta }: PoolRowCellType) {
 function RowRewardCell({ data, meta }: PoolRowCellType) {
   return (
     <ExternalTextCell>
-      <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-        {formatEther(data.outstandingRewards)} ACX
-      </Text>
+      <RewardCellLogoTextWrapper>
+        <RewardCellLogo src={getToken("ACX").logoURI} />
+        <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
+          {formatEther(data.outstandingRewards)} ACX
+        </Text>
+      </RewardCellLogoTextWrapper>
     </ExternalTextCell>
   );
 }

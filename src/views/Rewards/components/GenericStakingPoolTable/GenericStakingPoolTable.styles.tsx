@@ -186,3 +186,14 @@ export const LogoWrapper = styled.div`
 export const ExternalTextCell = styled(BaseCell)`
   margin-left: -6px;
 `;
+
+export const RewardCellLogoTextWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const RewardCellLogo = styled.img`
+  height: 16px;
+  width: 16px;
+`;
