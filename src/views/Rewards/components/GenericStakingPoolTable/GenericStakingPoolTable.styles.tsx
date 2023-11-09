@@ -183,9 +183,7 @@ export const LogoWrapper = styled.div`
   }
 `;
 
-export const ExternalTextCell = styled(BaseCell)`
-  margin-left: -6px;
-`;
+export const ExternalTextCell = styled(BaseCell)``;
 
 export const RewardCellLogoTextWrapper = styled.div`
   display: flex;
