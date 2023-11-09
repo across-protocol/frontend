@@ -2,12 +2,12 @@ import styled from "@emotion/styled";
 import SectionWrapper from "components/SectionTitleWrapperV2/SectionWrapperV2";
 
 import RewardProgramCard from "./RewardProgramCard";
-import { getToken, rebateTokensAvailable } from "utils";
+import { QUERIESV2, getToken, rebateTokensAvailable } from "utils";
 
 const DesktopRewardProgramSection = () => {
   const tokens = ["ACX", ...rebateTokensAvailable];
   return (
-    <SectionWrapper title="Reward programs" hideOnMobile>
+    <SectionWrapper title="Reward programs">
       <InnerWrapper>
         {tokens.map((token) => (
           <RewardProgramCard token={getToken(token)} key={token} />
@@ -24,4 +24,8 @@ const InnerWrapper = styled.div`
   align-items: flex-start;
   gap: 16px;
   width: 100%;
+
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: column;
+  }
 `;

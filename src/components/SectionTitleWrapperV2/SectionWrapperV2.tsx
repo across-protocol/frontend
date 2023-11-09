@@ -11,7 +11,6 @@ type SectionWrapperType = {
     name: string;
   };
   id?: string;
-  hideOnMobile?: boolean;
 };
 
 const SectionWrapper: React.FC<SectionWrapperType> = ({
@@ -19,9 +18,8 @@ const SectionWrapper: React.FC<SectionWrapperType> = ({
   title,
   link,
   id,
-  hideOnMobile = false,
 }) => (
-  <Wrapper hideOnMobile={hideOnMobile} id={id}>
+  <Wrapper id={id}>
     <TopWrapper>
       <Title>{title}</Title>
       {link && (
@@ -37,7 +35,7 @@ const SectionWrapper: React.FC<SectionWrapperType> = ({
 
 export default SectionWrapper;
 
-const Wrapper = styled.div<{ hideOnMobile: boolean }>`
+const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -45,10 +43,6 @@ const Wrapper = styled.div<{ hideOnMobile: boolean }>`
   gap: 16px;
 
   width: 100%;
-
-  @media ${QUERIESV2.sm.andDown} {
-    display: ${({ hideOnMobile }) => (hideOnMobile ? "none" : "flex")};
-  }
 `;
 
 const TopWrapper = styled.div`

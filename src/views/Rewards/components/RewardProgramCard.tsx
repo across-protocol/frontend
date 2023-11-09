@@ -50,12 +50,9 @@ const Wrapper = styled.div<{ primaryColor: string; backgroundUrl: string }>`
   background-size: cover;
 
   @media ${QUERIESV2.sm.andDown} {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
     gap: 12px;
     align-self: stretch;
-    padding: 24px;
+    padding: 16px;
   }
 `;
 
@@ -76,9 +73,6 @@ const LogoContainer = styled.div<{ primaryColor: string }>`
     COLORS[`${primaryColor}-5` as keyof typeof COLORS]};
   box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.08),
     0px 2px 6px 0px rgba(0, 0, 0, 0.08);
-  @media ${QUERIESV2.sm.andDown} {
-    display: none;
-  }
 `;
 
 const TextStack = styled.div`
