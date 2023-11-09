@@ -2,6 +2,7 @@ import { useConnection, useReferralSummary } from "hooks";
 import { COLORS, TokenInfo } from "utils";
 import ACXCloudBackground from "assets/bg-banners/cloud-staking.svg";
 import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
+import { BigNumber } from "ethers";
 
 export function useRewardProgramCard(token: TokenInfo) {
   const { account } = useConnection();
@@ -35,6 +36,6 @@ export function useRewardProgramCard(token: TokenInfo) {
 
   return {
     ...details[token.symbol],
-    rewardsAmount: rewardsAmount,
+    rewardsAmount: BigNumber.from(rewardsAmount),
   };
 }
