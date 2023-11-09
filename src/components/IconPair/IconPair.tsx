@@ -1,39 +1,59 @@
 import styled from "@emotion/styled";
 import React from "react";
 
+import { COLORS } from "utils";
+
+type BorderColor = keyof typeof COLORS;
+
 type Props = {
   LeftIcon: React.ReactElement;
   RightIcon: React.ReactElement;
+  iconSize?: number;
+  borderColor?: BorderColor;
 };
 
 export function IconPair(props: Props) {
   return (
-    <Container>
-      <LeftIconContainer>{props.LeftIcon}</LeftIconContainer>
-      <RightIconContainer>{props.RightIcon}</RightIconContainer>
+    <Container borderColor={props.borderColor}>
+      <LeftIconContainer iconSize={props.iconSize}>
+        {props.LeftIcon}
+      </LeftIconContainer>
+      <RightIconContainer iconSize={props.iconSize}>
+        {props.RightIcon}
+      </RightIconContainer>
     </Container>
   );
 }
 
-const Container = styled.div`
+const Container = styled.div<{ borderColor?: BorderColor }>`
   position: relative;
 
   img,
   svg {
-    border: 2px solid #2d2e33ff;
+    border: 2px solid ${({ borderColor }) => COLORS[borderColor || "black-800"]};
     border-radius: 50%;
   }
 `;
 
-const LeftIconContainer = styled.div`
-  height: 32px;
-  width: 32px;
+const LeftIconContainer = styled.div<{ iconSize?: number }>`
+  height: ${({ iconSize = 32 }) => iconSize}px;
+  width: ${({ iconSize = 32 }) => iconSize}px;
+
+  img {
+    height: ${({ iconSize = 32 }) => iconSize}px;
+    width: ${({ iconSize = 32 }) => iconSize}px;
+  }
 `;
 
-const RightIconContainer = styled.div`
+const RightIconContainer = styled.div<{ iconSize?: number }>`
   position: absolute;
-  right: -18px;
+  right: -${({ iconSize = 32 }) => iconSize / 1.75}px;
   bottom: 0px;
-  height: 32px;
-  width: 32px;
+  height: ${({ iconSize = 32 }) => iconSize}px;
+  width: ${({ iconSize = 32 }) => iconSize}px;
+
+  img {
+    height: ${({ iconSize = 32 }) => iconSize}px;
+    width: ${({ iconSize = 32 }) => iconSize}px;
+  }
 `;

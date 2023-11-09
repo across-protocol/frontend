@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React from "react";
+import React, { ReactNode } from "react";
 import { PlacesType } from "react-tooltip";
 import {
   Wrapper,
@@ -16,20 +16,26 @@ import { ReactComponent as ReferrerIcon } from "assets/icons/referrer.svg";
 import { ReactComponent as SelfReferralIcon } from "assets/icons/self-referral.svg";
 import { ReactComponent as ClockIcon } from "assets/icons/clock.svg";
 
-export type TooltipIcon =
-  | "green-checkmark"
-  | "grey-checkmark"
-  | "referee"
-  | "referral"
-  | "self-referral"
-  | "clock";
+const iconMap = {
+  "green-checkmark": <RoundedCheckmark16 />,
+  "grey-checkmark": <GreyRoundedCheckmark16 />,
+  "self-referral": <SelfReferralIcon />,
+  referral: <ReferrerIcon />,
+  referee: <RefereeIcon />,
+  clock: <ClockIcon />,
+};
+
+export type TooltipIcon = keyof typeof iconMap;
+
 export interface TooltipProps {
   tooltipId?: string;
-  icon?: TooltipIcon;
+  icon?: TooltipIcon | ReactNode;
   title?: string;
   titleSecondary?: string;
   body: string | JSX.Element;
   placement?: PlacesType;
+  maxWidth?: number;
+  offset?: number;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
@@ -40,26 +46,25 @@ export const Tooltip: React.FC<TooltipProps> = ({
   icon,
   placement,
   titleSecondary,
+  maxWidth,
+  offset,
 }) => {
   const id = tooltipId || title;
 
   if (!children) return null;
+
+  const iconElement = iconMap[icon as TooltipIcon] || icon;
 
   return (
     <>
       <StyledAnchor data-tooltip-id={id} data-tooltip-place={placement}>
         {children}
       </StyledAnchor>
-      <StyledTooltip id={id} noArrow opacity={1}>
-        <Wrapper>
+      <StyledTooltip id={id} noArrow opacity={1} offset={offset}>
+        <Wrapper maxWidth={maxWidth}>
           {title && (
             <TitleRow>
-              {icon === "green-checkmark" && <RoundedCheckmark16 />}
-              {icon === "grey-checkmark" && <GreyRoundedCheckmark16 />}
-              {icon === "self-referral" && <SelfReferralIcon />}
-              {icon === "referral" && <ReferrerIcon />}
-              {icon === "referee" && <RefereeIcon />}
-              {icon === "clock" && <ClockIcon />}
+              {iconElement}
               {title}
               {titleSecondary && (
                 <TitleSecondary>{titleSecondary}</TitleSecondary>
