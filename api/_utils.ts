@@ -1246,3 +1246,31 @@ export function getDefaultRelayerAddress(
     return sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
   }
 }
+
+/**
+ * Performs the needed function calls to return a Vercel Response
+ * @param response The response client provided by Vercel
+ * @param body A payload in JSON format to send to the client
+ * @param statusCode The status code - defaults to 200
+ * @param cacheSeconds The cache time in non-negative whole seconds
+ * @param staleWhileRevalidateSeconds The stale while revalidate time in non-negative whole seconds
+ * @returns The response object
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+ * @see https://datatracker.ietf.org/doc/html/rfc7234
+ * @note Be careful to not set anything negative please. The comment in the fn explains why
+ */
+export function sendResponse(
+  response: VercelResponse,
+  body: Record<string, unknown>,
+  statusCode: number,
+  cacheSeconds: number,
+  staleWhileRevalidateSeconds: number
+) {
+  // Invalid (non-positive/non-integer) values will be considered undefined per RFC-7234.
+  // Most browsers will consider these invalid and will request fresh data.
+  response.setHeader(
+    "Cache-Control",
+    `s-maxage=${cacheSeconds}, stale-while-revalidate=${staleWhileRevalidateSeconds}`
+  );
+  return response.status(statusCode).json(body);
+}

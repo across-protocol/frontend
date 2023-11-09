@@ -36,6 +36,13 @@ export type Deposit = {
   depositRelayerFeePct: string;
   initialRelayerFeePct?: string;
   suggestedRelayerFeePct?: string;
+  fillTime?: number;
+  rewards?: {
+    type: "referrals" | "op-rebates";
+    rate: number;
+    amount: string;
+    usd: string;
+  };
   feeBreakdown?: {
     bridgeFee: {
       pct: string;

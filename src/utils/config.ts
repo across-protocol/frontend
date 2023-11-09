@@ -345,6 +345,16 @@ export class ConfigClient {
     );
     return token;
   }
+  getTokenInfoByAddressSafe(
+    chainId: number,
+    address: string
+  ): Token | undefined {
+    try {
+      return this.getTokenInfoByAddress(chainId, address);
+    } catch (error) {
+      return undefined;
+    }
+  }
   getTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getTokenList(chainId);
     return this._getTokenInfoBySymbol(chainId, symbol, tokens);

@@ -14,9 +14,9 @@ export const StyledTooltip = styled(Tooltip)`
   border-radius: 50%;
 `;
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ maxWidth?: number }>`
   padding: 16px;
-  max-width: 320px;
+  max-width: ${({ maxWidth = 320 }) => maxWidth}px;
   background: #202024;
   border: 1px solid #34353b;
   box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.32);
