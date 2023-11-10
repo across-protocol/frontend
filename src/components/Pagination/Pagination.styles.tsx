@@ -38,6 +38,10 @@ export const PageSizeSelectButton = styled(UnstyledButton)`
   svg {
     margin-left: 6px;
   }
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 10px 20px;
+  }
 `;
 
 const PageSelectDropdownRevealAnimation = keyframes`
@@ -82,6 +86,10 @@ export const PageSizeOptiontButton = styled(UnstyledButton)`
   :hover {
     background-color: var(--color-primary);
     color: var(--color-gray);
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 6px 20px;
   }
 `;
 

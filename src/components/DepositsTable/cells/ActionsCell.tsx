@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import styled from "@emotion/styled";
 
 import { ReactComponent as ZapIcon } from "assets/zap.svg";
@@ -11,7 +12,7 @@ type Props = {
   deposit: Deposit;
   isSlowRelay?: boolean;
   isProfitable?: boolean;
-  onClickSpeedUp?: () => void;
+  onClickSpeedUp?: (deposit: Deposit) => void;
 };
 
 export function ActionsCell({
@@ -41,12 +42,16 @@ export function ActionsCell({
       </Tooltip>
     ) : null;
 
+  const handleClickSpeedUp = useCallback(() => {
+    onClickSpeedUp?.(deposit);
+  }, [deposit, onClickSpeedUp]);
+
   const speedUp =
     deposit.status === "pending" ? (
       isProfitable ? (
-        <ZapIconOnHover id="speed-up-icon" onClick={onClickSpeedUp} />
+        <ZapIconOnHover id="speed-up-icon" onClick={handleClickSpeedUp} />
       ) : (
-        <ZapIconPersistent onClick={onClickSpeedUp} />
+        <ZapIconPersistent onClick={handleClickSpeedUp} />
       )
     ) : null;
 
