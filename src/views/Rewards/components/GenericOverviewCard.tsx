@@ -10,7 +10,7 @@ type GenericOverviewCardTitleProps = {
 };
 
 type GenericOverviewCardProps = {
-  Icon: React.FC;
+  Icon: ReactNode;
   upperCard: GenericOverviewCardTitleProps;
   lowerCard: {
     left: GenericOverviewCardTitleProps;
@@ -29,9 +29,7 @@ const GenericOverviewCard = ({
     </BackgroundWrapper>
     <ContentWrapper>
       <UpperIconTextStack>
-        <IconWrapper>
-          <Icon />
-        </IconWrapper>
+        <IconWrapper>{Icon}</IconWrapper>
         <UpperTextStack>
           <Text size="md" color="grey-400">
             {upperCard.subTitle}
