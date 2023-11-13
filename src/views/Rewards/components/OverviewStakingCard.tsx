@@ -4,6 +4,7 @@ import GenericOverviewCard from "./GenericOverviewCard";
 import { ReactComponent as Icon } from "assets/icons/rewards/graph-within-star.svg";
 import { formatUSD } from "utils";
 import styled from "@emotion/styled";
+import { utils } from "@across-protocol/sdk-v2";
 
 const OverviewStakingCard = () => {
   const { stakedTokens, largestStakedPool } = useRewards();
@@ -11,7 +12,7 @@ const OverviewStakingCard = () => {
   return (
     <GenericOverviewCard
       upperCard={{
-        title: formatUsd(stakedTokens ?? BigNumber.from(0)),
+        title: formatUsd(stakedTokens || utils.bnZero),
         subTitle: "$ in staked LP tokens",
       }}
       lowerCard={{
@@ -27,7 +28,7 @@ const OverviewStakingCard = () => {
           subTitle: "Top Pool",
         },
         right: {
-          title: formatUsd(largestStakedPool?.amount ?? BigNumber.from(0)),
+          title: formatUsd(largestStakedPool?.amount || utils.bnZero),
           subTitle: "Staked amount",
         },
       }}
