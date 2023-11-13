@@ -9,6 +9,7 @@ import {
   fallbackSuggestedRelayerFeePct,
   suggestedFeesDeviationBufferMultiplier,
   fixedPointAdjustment,
+  pendingStateTimeUntilSlow,
 } from "utils";
 
 import { HeaderCells, ColumnKey } from "./HeadRow";
@@ -28,12 +29,10 @@ type Props = {
   deposit: Deposit;
   headerCells: HeaderCells;
   disabledColumns?: ColumnKey[];
-  onClickSpeedUp?: () => void;
+  onClickSpeedUp?: (deposit: Deposit) => void;
 };
 
 const config = getConfig();
-
-const MAX_PENDING_STATE_TIME_UNTIL_SLOW = 15 * 60; // 15 mins
 
 function isColumnDisabled(disabledColumns: ColumnKey[], column: ColumnKey) {
   return disabledColumns.includes(column);
@@ -59,8 +58,9 @@ export function DataRow({
   );
   const isSlowRelay =
     deposit.status === "pending" &&
-    DateTime.fromSeconds(deposit.depositTime).diffNow("seconds").as("seconds") <
-      MAX_PENDING_STATE_TIME_UNTIL_SLOW;
+    Math.abs(
+      DateTime.fromSeconds(deposit.depositTime).diffNow("seconds").as("seconds")
+    ) > pendingStateTimeUntilSlow;
 
   // Hide unsupported or unknown token deposits
   if (!token) {
