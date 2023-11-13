@@ -13,6 +13,7 @@ import {
   SUPPORTED_CG_BASE_CURRENCIES,
   CHAIN_IDs,
   TOKEN_SYMBOLS_MAP,
+  coinGeckoAssetPlatformLookup,
 } from "./_constants";
 
 import { coingecko } from "@across-protocol/sdk-v2";
@@ -173,6 +174,8 @@ const handler = async (
         ? JSON.parse(BALANCER_V2_TOKENS).map(ethers.utils.getAddress)
         : [];
 
+    const platformId = coinGeckoAssetPlatformLookup[l1Token] ?? "ethereum";
+
     // Caller wants to override price for token, possibly because the token is not supported yet on the Coingecko API,
     // so assume the caller set the USD price of the token. We now need to dynamically load the base currency.
     if (
@@ -214,7 +217,8 @@ const handler = async (
       // This base matches a supported base currency for CG.
       [, price] = await coingeckoClient.getCurrentPriceByContract(
         l1Token,
-        baseCurrency
+        baseCurrency,
+        platformId
       );
     } else {
       price = await getCoingeckoPrices(

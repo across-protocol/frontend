@@ -7,7 +7,6 @@ import { Text } from "components";
 
 import EstimatedTable from "./EstimatedTable";
 import QuickSwap from "./QuickSwap";
-import SlippageAlert from "./SlippageAlert";
 import { AmountInput } from "./AmountInput";
 import { TokenSelector } from "./TokenSelector";
 import { ChainSelector } from "./ChainSelector";
@@ -23,6 +22,7 @@ import { VoidHandler } from "utils/types";
 
 import { AmountInputError, getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
+import StakingCTA from "./StakingCTA";
 
 type BridgeFormProps = {
   selectedRoute: Route;
@@ -135,7 +135,7 @@ const BridgeForm = ({
         </RowWrapper>
       </CardWrapper>
       <CardWrapper>
-        <SlippageAlert />
+        <StakingCTA />
         <EstimatedTable
           fromChainId={selectedRoute.fromChain}
           toChainId={selectedRoute.toChain}

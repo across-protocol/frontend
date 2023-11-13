@@ -11,8 +11,10 @@ import {
   capitalizeFirstLetter,
   COLORS,
   formatUnits,
+  formatUSD,
   getChainInfo,
-  getToken,
+  isDefined,
+  QUERIESV2,
   TokenInfo,
 } from "utils";
 
@@ -36,33 +38,48 @@ const PriceFee = ({
   token,
   highlightTokenFee = false,
   rewardPercentageOfFees,
+  hideSymbolOnEmpty = true,
+  tokenIconFirstOnMobile = false,
 }: {
   tokenFee?: BigNumber;
   baseCurrencyFee?: BigNumber;
   token: TokenInfo;
   highlightTokenFee?: boolean;
   rewardPercentageOfFees?: number;
-}) => (
-  <BaseCurrencyWrapper>
-    {baseCurrencyFee && tokenFee && (
-      <Text size="md" color="grey-400">
-        {rewardPercentageOfFees &&
-          `(${Math.floor(rewardPercentageOfFees * 100)}% of fees) `}
-        {`$${formatUnits(baseCurrencyFee, 18)}`}
-      </Text>
-    )}
-    {tokenFee ? (
-      <Text size="md" color={highlightTokenFee ? "primary" : "white"}>
-        {`${formatUnits(tokenFee, token.decimals)} ${token.symbol}`}
-      </Text>
-    ) : (
-      <Text size="md" color="grey-400">
-        -
-      </Text>
-    )}
-    {tokenFee && <TokenSymbol src={token.logoURI} />}
-  </BaseCurrencyWrapper>
-);
+  hideSymbolOnEmpty?: boolean;
+  tokenIconFirstOnMobile?: boolean;
+}) => {
+  const Token = (isDefined(tokenFee) || !hideSymbolOnEmpty) && (
+    <TokenSymbol src={token.logoURI} />
+  );
+
+  return (
+    <BaseCurrencyWrapper invertOnMobile={tokenIconFirstOnMobile}>
+      {baseCurrencyFee && tokenFee && (
+        <>
+          {rewardPercentageOfFees && (
+            <PercentageText size="md" color="grey-400">
+              ({Math.floor(rewardPercentageOfFees * 100)}% of fees)
+            </PercentageText>
+          )}
+          <Text size="md" color="grey-400">
+            {`$${formatUSD(baseCurrencyFee)}`}
+          </Text>
+        </>
+      )}
+      {tokenFee ? (
+        <Text size="md" color={highlightTokenFee ? "primary" : "white"}>
+          {`${formatUnits(tokenFee, token.decimals)} ${token.symbol}`}
+        </Text>
+      ) : (
+        <Text size="md" color="grey-400">
+          -
+        </Text>
+      )}
+      {Token}
+    </BaseCurrencyWrapper>
+  );
+};
 
 const EstimatedTable = ({
   fromChainId,
@@ -81,30 +98,38 @@ const EstimatedTable = ({
     gasFeeAsBaseCurrency,
     bridgeFeeAsBaseCurrency,
     netFeeAsBaseCurrency,
-    formatUsd,
     depositReferralReward,
     depositReferralPercentage,
     hasDepositReferralReward,
-  } = useEstimatedTable(token, gasFee, bridgeFee);
+    rewardToken,
+    isRewardAcx,
+  } = useEstimatedTable(token, toChainId, gasFee, bridgeFee);
 
   const ArrowIcon = isDetailedFeesAvailable ? ArrowIconUp : ArrowIconDown;
+  const rewardDisplaySymbol =
+    rewardToken.displaySymbol || rewardToken.symbol.toUpperCase();
 
   return (
     <Wrapper>
-      {hasDepositReferralReward && (
-        <Row>
-          <Text size="md" color="grey-400">
-            Across Referral Rewards
-          </Text>
-          <ReferralRewardWrapper>
-            <PriceFee
-              token={getToken("ACX")}
-              tokenFee={depositReferralReward}
-              baseCurrencyFee={referralRewardAsBaseCurrency}
-            />
-          </ReferralRewardWrapper>
-        </Row>
-      )}
+      <Row stackOnMobile>
+        <Text size="md" color="grey-400">
+          {isRewardAcx
+            ? "Across Referral Rewards"
+            : `${rewardDisplaySymbol} Rewards`}
+        </Text>
+        <ReferralRewardWrapper
+          isACX={isRewardAcx}
+          isTransparent={!hasDepositReferralReward}
+        >
+          <PriceFee
+            token={rewardToken}
+            tokenFee={depositReferralReward}
+            baseCurrencyFee={referralRewardAsBaseCurrency}
+            hideSymbolOnEmpty={false}
+            tokenIconFirstOnMobile
+          />
+        </ReferralRewardWrapper>
+      </Row>
       <Row>
         <Text size="md" color="grey-400">
           Time to{" "}
@@ -134,7 +159,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <Text size="md" color={netFeeAsBaseCurrency ? "white" : "grey-400"}>
-          {netFeeAsBaseCurrency ? `$ ${formatUsd(netFeeAsBaseCurrency)}` : "-"}
+          {netFeeAsBaseCurrency ? `$ ${formatUSD(netFeeAsBaseCurrency)}` : "-"}
         </Text>
       </ClickableRow>
       {isDetailedFeesAvailable && (
@@ -184,31 +209,32 @@ const EstimatedTable = ({
               baseCurrencyFee={gasFeeAsBaseCurrency}
             />
           </ShiftedRow>
-          {hasDepositReferralReward && (
-            <ShiftedRow>
-              <ToolTipWrapper>
-                <Text size="md" color="grey-400">
-                  ACX Referral Reward
-                </Text>
-                <Tooltip
-                  title="ACX Referral Reward"
-                  body="Estimate of ACX earned on this transfer from Referral Rewards program."
-                  placement="bottom-start"
-                >
-                  <InfoIconWrapper>
-                    <InfoIcon />
-                  </InfoIconWrapper>
-                </Tooltip>
-              </ToolTipWrapper>
+          <ShiftedRow>
+            <ToolTipWrapper>
+              <Text size="md" color="grey-400">
+                {rewardDisplaySymbol} Rebate
+              </Text>
+              <Tooltip
+                title={`${rewardDisplaySymbol} Referral Reward`}
+                body={`Estimate of ${rewardDisplaySymbol} earned on this transfer from the ${rewardDisplaySymbol} rebate program.`}
+                placement="bottom-start"
+              >
+                <InfoIconWrapper>
+                  <InfoIcon />
+                </InfoIconWrapper>
+              </Tooltip>
+            </ToolTipWrapper>
+            <TransparentWrapper isTransparent={!hasDepositReferralReward}>
               <PriceFee
-                token={getToken("ACX")}
+                token={rewardToken}
                 tokenFee={depositReferralReward}
                 baseCurrencyFee={referralRewardAsBaseCurrency}
                 rewardPercentageOfFees={depositReferralPercentage}
-                highlightTokenFee
+                highlightTokenFee={isRewardAcx}
+                hideSymbolOnEmpty={!isDefined(netFeeAsBaseCurrency)}
               />
-            </ShiftedRow>
-          )}
+            </TransparentWrapper>
+          </ShiftedRow>
         </>
       )}
       <Divider />
@@ -299,7 +325,7 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
-const Row = styled.div`
+const Row = styled.div<{ stackOnMobile?: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -308,6 +334,13 @@ const Row = styled.div`
   gap: 6px;
 
   width: 100%;
+
+  @media ${QUERIESV2.xs.andDown} {
+    flex-direction: ${({ stackOnMobile = false }) =>
+      stackOnMobile ? "column" : "row"};
+    align-items: flex-start;
+    gap: 8px;
+  }
 `;
 
 const ClickableRow = styled(Row)`
@@ -353,7 +386,10 @@ const InfoIconWrapper = styled.div`
   width: 16px;
 `;
 
-const ReferralRewardWrapper = styled.div`
+const ReferralRewardWrapper = styled.div<{
+  isACX: boolean;
+  isTransparent?: boolean;
+}>`
   //Layout
   display: flex;
   padding: 6px 12px;
@@ -362,14 +398,24 @@ const ReferralRewardWrapper = styled.div`
 
   // Style
   border-radius: 22px;
-  border: 1px solid ${COLORS["aqua-15"]};
-  background: ${COLORS["aqua-5"]};
+  border: 1px solid ${({ isACX }) => COLORS[isACX ? "aqua-15" : "op-red-15"]};
+  background: ${({ isACX }) => COLORS[isACX ? "aqua-5" : "op-red-5"]};
+
+  // Opacity
+  opacity: ${({ isTransparent = false }) => (isTransparent ? 0.5 : 1)};
+
+  // Mobile
+  @media ${QUERIESV2.xs.andDown} {
+    width: 100%;
+  }
 `;
 
-const BaseCurrencyWrapper = styled.div`
+const BaseCurrencyWrapper = styled.div<{ invertOnMobile: boolean }>`
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-direction: ${({ invertOnMobile }) =>
+    invertOnMobile ? "row-reverse" : "row"};
 `;
 
 const Divider = styled.div`
@@ -397,4 +443,24 @@ const ArrowIconUp = styled(ArrowIconDown)`
 const TokenSymbol = styled.img`
   width: 16px;
   height: 16px;
+`;
+
+const TransparentWrapper = styled.div<{ isTransparent: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  height: fit-content;
+  width: fit-content;
+
+  padding: 0;
+  margin: 0;
+
+  opacity: ${({ isTransparent }) => (isTransparent ? 0.5 : 1)};
+`;
+
+const PercentageText = styled(Text)`
+  @media ${QUERIESV2.xs.andDown} {
+    display: none;
+  }
 `;
