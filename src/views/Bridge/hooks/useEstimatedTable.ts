@@ -12,20 +12,22 @@ export function useEstimatedTable(
   bridgeFee?: BigNumber
 ) {
   const [isDetailedFeesAvailable, setIsDetailedFeesAvailable] = useState(false);
-
   const { rewardToken, availableRewardPercentage, isACXRewardToken } =
     useRewardToken(destinationChainId);
-
   const { convertTokenToBaseCurrency: convertL1ToBaseCurrency } =
     useTokenConversion(token.symbol, "usd");
   const { convertTokenToBaseCurrency: convertRewardToBaseCurrency } =
     useTokenConversion(rewardToken.symbol, "usd");
 
   const depositReferralReward: BigNumber | undefined = useMemo(() => {
-    if (availableRewardPercentage === undefined) {
+    if (
+      availableRewardPercentage === undefined ||
+      bridgeFee === undefined ||
+      gasFee === undefined
+    ) {
       return undefined;
     }
-    const totalFeesUSD = convertL1ToBaseCurrency(bridgeFee);
+    const totalFeesUSD = convertL1ToBaseCurrency(bridgeFee.add(gasFee));
     const rewardExchangeRate = convertRewardToBaseCurrency(
       parseUnits("1", rewardToken.decimals) // Convert 1 token to USD
     );
@@ -44,35 +46,46 @@ export function useEstimatedTable(
       .div(fixedPointAdjustment);
   }, [
     bridgeFee,
+    gasFee,
     availableRewardPercentage,
     convertL1ToBaseCurrency,
     convertRewardToBaseCurrency,
     rewardToken.decimals,
   ]);
   const hasDepositReferralReward = depositReferralReward?.gt(0) ?? false;
-  const referralRewardAsBaseCurrency = convertRewardToBaseCurrency(
-    depositReferralReward
-  );
-  const gasFeeAsBaseCurrency = convertL1ToBaseCurrency(gasFee);
-  const bridgeFeeAsBaseCurrency = convertL1ToBaseCurrency(bridgeFee);
-  let netFeeAsBaseCurrency =
-    gasFeeAsBaseCurrency && bridgeFeeAsBaseCurrency
-      ? gasFeeAsBaseCurrency.add(bridgeFeeAsBaseCurrency)
-      : undefined;
-  // If we have a referral reward, subtract the rebate from the net fee
-  if (netFeeAsBaseCurrency && referralRewardAsBaseCurrency) {
-    netFeeAsBaseCurrency = netFeeAsBaseCurrency.sub(
-      referralRewardAsBaseCurrency
+
+  const baseCurrencyConversions = useMemo(() => {
+    const gasFeeAsBaseCurrency = convertL1ToBaseCurrency(gasFee);
+    const bridgeFeeAsBaseCurrency = convertL1ToBaseCurrency(bridgeFee);
+    const referralRewardAsBaseCurrency = convertRewardToBaseCurrency(
+      depositReferralReward
     );
-  }
+
+    const netFeeAsBaseCurrency =
+      gasFeeAsBaseCurrency && bridgeFeeAsBaseCurrency
+        ? gasFeeAsBaseCurrency
+            .add(bridgeFeeAsBaseCurrency)
+            .sub(referralRewardAsBaseCurrency ?? 0)
+        : undefined;
+
+    return {
+      gasFeeAsBaseCurrency,
+      bridgeFeeAsBaseCurrency,
+      referralRewardAsBaseCurrency,
+      netFeeAsBaseCurrency,
+    };
+  }, [
+    bridgeFee,
+    convertL1ToBaseCurrency,
+    convertRewardToBaseCurrency,
+    depositReferralReward,
+    gasFee,
+  ]);
 
   return {
+    ...baseCurrencyConversions,
     isDetailedFeesAvailable,
     setIsDetailedFeesAvailable,
-    referralRewardAsBaseCurrency,
-    gasFeeAsBaseCurrency,
-    bridgeFeeAsBaseCurrency,
-    netFeeAsBaseCurrency,
     depositReferralReward,
     depositReferralPercentage: availableRewardPercentage,
     hasDepositReferralReward,
