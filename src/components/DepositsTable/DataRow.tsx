@@ -9,7 +9,7 @@ import {
   fallbackSuggestedRelayerFeePct,
   suggestedFeesDeviationBufferMultiplier,
   fixedPointAdjustment,
-  pendingStateTimeUntilSlow,
+  pendingStateTimeUntilDelayed,
 } from "utils";
 
 import { HeaderCells, ColumnKey } from "./HeadRow";
@@ -24,6 +24,7 @@ import { FeeCell } from "./cells/FeeCell";
 import { RateCell } from "./cells/RateCell";
 import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
+import { useBridgeLimits } from "hooks";
 
 type Props = {
   deposit: Deposit;
@@ -49,6 +50,13 @@ export function DataRow({
     deposit.assetAddr
   );
 
+  const { limits } = useBridgeLimits(
+    // disable query for filled deposits
+    deposit.status === "pending" ? token?.symbol : undefined,
+    deposit.sourceChainId,
+    deposit.destinationChainId
+  );
+
   const isProfitable = BigNumber.from(
     deposit.suggestedRelayerFeePct || fallbackSuggestedRelayerFeePct
   ).lte(
@@ -56,11 +64,14 @@ export function DataRow({
       .mul(utils.parseEther(String(suggestedFeesDeviationBufferMultiplier)))
       .div(fixedPointAdjustment)
   );
-  const isSlowRelay =
+  const isDelayed =
     deposit.status === "pending" &&
     Math.abs(
       DateTime.fromSeconds(deposit.depositTime).diffNow("seconds").as("seconds")
-    ) > pendingStateTimeUntilSlow;
+    ) > pendingStateTimeUntilDelayed &&
+    limits
+      ? BigNumber.from(deposit.amount).gt(limits?.maxDepositInstant)
+      : false;
 
   // Hide unsupported or unknown token deposits
   if (!token) {
@@ -115,7 +126,7 @@ export function DataRow({
         <ActionsCell
           deposit={deposit}
           isProfitable={isProfitable}
-          isSlowRelay={isSlowRelay}
+          isDelayed={isDelayed}
           onClickSpeedUp={onClickSpeedUp}
         />
       )}

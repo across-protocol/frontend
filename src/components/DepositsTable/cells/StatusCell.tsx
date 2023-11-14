@@ -16,6 +16,7 @@ type Props = {
   deposit: Deposit;
   width: number;
   isProfitable?: boolean;
+  isDelayed?: boolean;
 };
 
 export function StatusCell({ deposit, width, isProfitable }: Props) {
@@ -53,13 +54,28 @@ function FilledStatusCell({ deposit, width }: Props) {
   );
 }
 
-function PendingStatusCell({ deposit, width, isProfitable }: Props) {
+function PendingStatusCell({ isDelayed, width, isProfitable }: Props) {
   return (
     <StyledPendingStatusCell width={width}>
       <Text color={isProfitable ? "light-200" : "yellow"}>
-        {isProfitable ? "Processing..." : "Fee too low"}
+        {isDelayed ? "Delayed" : isProfitable ? "Processing..." : "Fee too low"}
       </Text>
-      {isProfitable ? (
+      {isDelayed ? (
+        <Tooltip
+          tooltipId="delayed-cell-info"
+          placement="bottom"
+          title="Relayer running out of funds"
+          body={
+            <Text size="sm" color="light-300">
+              Due to low relay funds this transaction may take up to 3 hours to
+              complete. Your full relayer fee will be refunded for the
+              inconvenience.
+            </Text>
+          }
+        >
+          <StyledInfoIcon />
+        </Tooltip>
+      ) : isProfitable ? (
         <StyledLoadingIcon />
       ) : (
         <Tooltip

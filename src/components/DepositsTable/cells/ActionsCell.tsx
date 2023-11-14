@@ -10,7 +10,7 @@ import { COLORS } from "utils";
 
 type Props = {
   deposit: Deposit;
-  isSlowRelay?: boolean;
+  isDelayed?: boolean;
   isProfitable?: boolean;
   onClickSpeedUp?: (deposit: Deposit) => void;
 };
@@ -18,13 +18,13 @@ type Props = {
 export function ActionsCell({
   deposit,
   isProfitable,
-  isSlowRelay,
+  isDelayed,
   onClickSpeedUp,
 }: Props) {
   const slowRelayInfo =
-    isSlowRelay && isProfitable ? (
+    isDelayed && isProfitable ? (
       <Tooltip
-        tooltipId="slow-relay-info"
+        tooltipId="delayed-info"
         title="Relayer running out of funds"
         maxWidth={320}
         placement="left"
