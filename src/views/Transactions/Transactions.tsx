@@ -58,13 +58,13 @@ export function Transactions() {
 }
 
 const Wrapper = styled.div`
-  max-width: 1142px;
+  max-width: 1280px;
   margin: 0 auto;
   margin-top: 32px;
   display: flex;
   flex-direction: column;
 
-  @media (max-width: 1142px) {
+  @media (max-width: 1280px) {
     padding: 0 16px;
   }
 `;
