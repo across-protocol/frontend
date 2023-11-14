@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import { useRewards } from "../hooks/useRewards";
 import GenericOverviewCard from "./GenericOverviewCard";
-import { ReactComponent as Icon } from "assets/icons/rewards/graph-within-star.svg";
+import { ReactComponent as Icon } from "assets/icons/reward-lg.svg";
 
 const OverviewRewardsCard = () => {
   const { totalRewards, referralACXRewards, stakingRewards, formatterFn } =
