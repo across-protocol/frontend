@@ -40,7 +40,7 @@ export function AllTransactions({ statusFilter }: Props) {
           size="md"
           onClick={() => {
             queryClient.cancelQueries({ queryKey: ["deposits"] });
-            depositsQuery.refetch();
+            queryClient.invalidateQueries({ queryKey: ["deposits"] });
           }}
         >
           Reload data
