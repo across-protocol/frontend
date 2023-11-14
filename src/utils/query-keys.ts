@@ -118,7 +118,7 @@ export function userDepositsQueryKey(
   limit: number,
   offset: number
 ) {
-  return ["user-deposits", userAddress, status, limit, offset];
+  return ["deposits", "user", userAddress, status, limit, offset];
 }
 
 export function prelaunchDataQueryKey(address?: string, jwt?: string) {

@@ -1,4 +1,5 @@
 import { useHistory } from "react-router-dom";
+import { useQueryClient } from "react-query";
 
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import { Text } from "components/Text";
@@ -29,6 +30,7 @@ export function PersonalTransactions({ statusFilter }: Props) {
   } = usePersonalTransactions(statusFilter);
   const { isConnected, connect } = useConnection();
   const history = useHistory();
+  const queryClient = useQueryClient();
 
   if (!isConnected) {
     return (
@@ -57,14 +59,20 @@ export function PersonalTransactions({ statusFilter }: Props) {
     return (
       <EmptyTable>
         <Text size="lg">Something went wrong... Please try again later</Text>
-        <SecondaryButton size="md" onClick={() => depositsQuery.refetch()}>
+        <SecondaryButton
+          size="md"
+          onClick={() => {
+            queryClient.cancelQueries({ queryKey: ["deposits"] });
+            depositsQuery.refetch();
+          }}
+        >
           Reload data
         </SecondaryButton>
       </EmptyTable>
     );
   }
 
-  if (deposits.length === 0) {
+  if (currentPage === 0 && deposits.length === 0) {
     return (
       <EmptyTable>
         <Text size="lg">You have no personal transactions yet</Text>

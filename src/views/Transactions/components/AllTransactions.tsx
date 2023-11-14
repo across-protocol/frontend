@@ -1,3 +1,5 @@
+import { useQueryClient } from "react-query";
+
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import { Text } from "components/Text";
 import { SecondaryButton } from "components";
@@ -20,6 +22,7 @@ export function AllTransactions({ statusFilter }: Props) {
     totalDeposits,
     depositsQuery,
   } = useAllTransactions(statusFilter);
+  const queryClient = useQueryClient();
 
   if (depositsQuery.isLoading) {
     return (
@@ -33,14 +36,20 @@ export function AllTransactions({ statusFilter }: Props) {
     return (
       <EmptyTable>
         <Text size="lg">Something went wrong... Please try again later.</Text>
-        <SecondaryButton size="md" onClick={() => depositsQuery.refetch()}>
+        <SecondaryButton
+          size="md"
+          onClick={() => {
+            queryClient.cancelQueries({ queryKey: ["deposits"] });
+            depositsQuery.refetch();
+          }}
+        >
           Reload data
         </SecondaryButton>
       </EmptyTable>
     );
   }
 
-  if (deposits.length === 0) {
+  if (currentPage === 0 && deposits.length === 0) {
     return (
       <EmptyTable>
         <Text size="lg">No indexed transactions found</Text>
