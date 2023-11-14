@@ -52,7 +52,7 @@ export function DataRow({
   const isProfitable = BigNumber.from(
     deposit.suggestedRelayerFeePct || fallbackSuggestedRelayerFeePct
   ).lte(
-    BigNumber.from(deposit.depositRelayerFeePct)
+    BigNumber.from(deposit.depositRelayerFeePct || 0)
       .mul(utils.parseEther(String(suggestedFeesDeviationBufferMultiplier)))
       .div(fixedPointAdjustment)
   );

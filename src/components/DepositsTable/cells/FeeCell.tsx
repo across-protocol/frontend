@@ -43,14 +43,14 @@ function FeeWithoutBreakdown({ deposit }: { deposit: Deposit }) {
       <Text color="light-200">
         {formatUnits(
           BigNumber.from(deposit.amount)
-            .mul(deposit.depositRelayerFeePct)
+            .mul(deposit.depositRelayerFeePct || 0)
             .div(fixedPointAdjustment),
           tokenInfo.decimals
         )}{" "}
         {tokenInfo.symbol}
       </Text>
       <Text size="sm" color="grey-400">
-        {formatWeiPct(deposit.depositRelayerFeePct, 3)}%
+        {formatWeiPct(deposit.depositRelayerFeePct || 0, 3)}%
       </Text>
     </>
   );
