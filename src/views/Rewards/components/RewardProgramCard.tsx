@@ -1,17 +1,23 @@
 import styled from "@emotion/styled";
-import { COLORS, QUERIESV2, TokenInfo, formatUnits } from "utils";
+import { COLORS, QUERIESV2, formatUnits, rewardProgramTypes } from "utils";
 import { Text } from "components";
 import { ReactComponent as ChevronRight } from "assets/icons/arrow-right-16.svg";
 import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
 import { Link } from "react-router-dom";
 
 type RewardProgramCardProps = {
-  token: TokenInfo;
+  program: rewardProgramTypes;
 };
 
-const RewardProgramCard = ({ token }: RewardProgramCardProps) => {
-  const { programName, rewardsAmount, primaryColor, backgroundUrl, url } =
-    useRewardProgramCard(token);
+const RewardProgramCard = ({ program }: RewardProgramCardProps) => {
+  const {
+    programName,
+    rewardsAmount,
+    primaryColor,
+    backgroundUrl,
+    url,
+    token,
+  } = useRewardProgramCard(program);
 
   return (
     <Wrapper primaryColor={primaryColor} backgroundUrl={backgroundUrl}>
