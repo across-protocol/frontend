@@ -4,26 +4,26 @@ import { BigNumber } from "ethers";
 import { Alert, Modal } from "components";
 import { SecondaryButton } from "components/Button";
 import { Text } from "components/Text";
-import { formatEther, QUERIESV2 } from "utils";
+import { formatEther, QUERIESV2, rewardProgramTypes, rewardTiers } from "utils";
 
-import { useClaimModal } from "../hooks/useClaimModal";
-import { tiers } from "../comp/RewardReferral/RewardReferral";
+import { useClaimModal } from "./hooks/useClaimModal";
 
 type Props = {
   isOpen: boolean;
   onExit: () => void;
+  program: rewardProgramTypes;
 };
 
-export function ClaimRewardsModal({ isOpen, onExit }: Props) {
-  const { claimMutation, unclaimedReferralProofsQuery, importTokenHandler } =
-    useClaimModal();
+export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
+  const { importTokenHandler, unclaimedReferralProofsQuery } =
+    useClaimModal(program);
 
   const disableButton =
     unclaimedReferralProofsQuery.isLoading ||
-    claimMutation.isLoading ||
-    (
-      unclaimedReferralProofsQuery.data?.claimableAmount || BigNumber.from(0)
+    BigNumber.from(
+      unclaimedReferralProofsQuery.data?.claimableAmount ?? 0
     ).isZero();
+  // claimMutation.isLoading ||
 
   return (
     <Modal
@@ -41,7 +41,7 @@ export function ClaimRewardsModal({ isOpen, onExit }: Props) {
     >
       <Alert status="warn">
         Claiming your ACX will reset your tier to Copper and referral rate to{" "}
-        {tiers[1].referralRate * 100}%.
+        {rewardTiers[1].referralRate * 100}%.
       </Alert>
       <ClaimableBoxInnerWrapper>
         <ClaimableBox>
@@ -59,12 +59,12 @@ export function ClaimRewardsModal({ isOpen, onExit }: Props) {
         <Button
           size="lg"
           borderColor="yellow"
-          onClick={() =>
-            claimMutation.mutate(undefined, { onSuccess: () => onExit() })
-          }
+          // onClick={() =>
+          //   claimMutation.mutate(undefined, { onSuccess: () => onExit() })
+          // }
           disabled={disableButton}
         >
-          {claimMutation.isLoading ? "Claiming..." : "Claim rewards"}
+          {/* {claimMutation.isLoading ? "Claiming..." : "Claim rewards"} */}
         </Button>
       </ClaimableBoxInnerWrapper>
       <AddToWalletWrapper>

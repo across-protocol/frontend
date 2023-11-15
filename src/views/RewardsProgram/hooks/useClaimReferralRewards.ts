@@ -2,9 +2,9 @@ import { useMutation } from "react-query";
 
 import { getConfig } from "utils/config";
 import { useConnection, useIsWrongNetwork } from "hooks";
-import { useUnclaimedReferralProofs } from "./useUnclaimedReferralProofs";
 import { sendWithPaddedGas } from "utils/transactions";
 import { hubPoolChainId, waitOnTransaction } from "utils";
+import { useUnclaimedReferralProofs } from "hooks/useUnclaimedReferralProofs";
 
 const config = getConfig();
 
