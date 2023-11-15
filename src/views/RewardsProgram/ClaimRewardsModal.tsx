@@ -15,15 +15,15 @@ type Props = {
 };
 
 export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
-  const { importTokenHandler, unclaimedReferralProofsQuery } =
+  const { importTokenHandler, unclaimedReferralProofsQuery, claimMutation } =
     useClaimModal(program);
 
   const disableButton =
     unclaimedReferralProofsQuery.isLoading ||
     BigNumber.from(
       unclaimedReferralProofsQuery.data?.claimableAmount ?? 0
-    ).isZero();
-  // claimMutation.isLoading ||
+    ).isZero() ||
+    claimMutation.isLoading;
 
   return (
     <Modal
@@ -41,7 +41,7 @@ export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
     >
       <Alert status="warn">
         Claiming your ACX will reset your tier to Copper and referral rate to{" "}
-        {rewardTiers[1].referralRate * 100}%.
+        {rewardTiers[0].referralRate * 100}%.
       </Alert>
       <ClaimableBoxInnerWrapper>
         <ClaimableBox>
@@ -59,12 +59,12 @@ export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
         <Button
           size="lg"
           borderColor="yellow"
-          // onClick={() =>
-          //   claimMutation.mutate(undefined, { onSuccess: () => onExit() })
-          // }
+          onClick={() =>
+            claimMutation.mutate(undefined, { onSuccess: () => onExit() })
+          }
           disabled={disableButton}
         >
-          {/* {claimMutation.isLoading ? "Claiming..." : "Claim rewards"} */}
+          {claimMutation.isLoading ? "Claiming..." : "Claim rewards"}
         </Button>
       </ClaimableBoxInnerWrapper>
       <AddToWalletWrapper>

@@ -42,18 +42,19 @@ const ACXReferralLinkCard = ({ condensed }: CopyReferralLinkType) => {
           {text}
         </Text>
       </ReferralLinkTextStack>
-      <StyledCopyIcon completed={completed} />
+      <StyledCopyIcon isCompleted={completed} />
     </ReferralLinkWrapper>
   );
 };
 
 export default ACXReferralLinkCard;
 
-const StyledCopyIcon = styled(UnstyledCopyIcon)<{ completed?: boolean }>`
+const StyledCopyIcon = styled(UnstyledCopyIcon)<{ isCompleted?: boolean }>`
   height: 16px;
   width: 16px;
   & path {
-    stroke: ${({ completed = false }) => (completed ? "#6cf9d8" : "#e0f3ff")};
+    stroke: ${({ isCompleted = false }) =>
+      isCompleted ? "#6cf9d8" : "#e0f3ff"};
     transition: stroke 0.15s;
   }
 
