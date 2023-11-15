@@ -1,6 +1,6 @@
 import { useConnection, useReferralSummary } from "hooks";
 import {
-  TokenInfo,
+  getToken,
   rewardProgramTypes,
   rewardPrograms,
   rewardProgramsAvailable,
@@ -9,7 +9,7 @@ import ACXCloudBackground from "assets/bg-banners/cloud-staking.svg";
 import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 import { BigNumber } from "ethers";
 
-export function useRewardProgramCard(token: TokenInfo) {
+export function useRewardProgramCard(programName: rewardProgramTypes) {
   const { account } = useConnection();
 
   // We shouldn't hoist this into our constants, but we can
@@ -29,13 +29,18 @@ export function useRewardProgramCard(token: TokenInfo) {
     ])
   );
 
+  const programDetail = details[programName];
+
   // TODO: Make this dynamic so that we can get other rebate tokens
   const {
     summary: { rewardsAmount },
   } = useReferralSummary(account);
 
+  const token = getToken(programDetail.rewardTokenSymbol);
+
   return {
-    ...details[token.symbol],
+    ...programDetail,
+    token,
     rewardsAmount: BigNumber.from(rewardsAmount),
   };
 }

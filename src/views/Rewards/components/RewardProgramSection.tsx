@@ -2,19 +2,14 @@ import styled from "@emotion/styled";
 import SectionWrapper from "components/SectionTitleWrapperV2/SectionWrapperV2";
 
 import RewardProgramCard from "./RewardProgramCard";
-import {
-  QUERIESV2,
-  getToken,
-  rewardProgramsAvailable,
-  rewardPrograms,
-} from "utils";
+import { QUERIESV2, rewardProgramsAvailable, rewardPrograms } from "utils";
 
 const DesktopRewardProgramSection = () => (
   <SectionWrapper title="Reward programs">
-    <InnerWrapper>
+    <InnerWrapper halfWidth={rewardProgramsAvailable.length === 1}>
       {rewardProgramsAvailable.map((program) => (
         <RewardProgramCard
-          token={getToken(rewardPrograms[program].rewardTokenSymbol)}
+          program={program}
           key={rewardPrograms[program].rewardTokenSymbol}
         />
       ))}
@@ -24,7 +19,7 @@ const DesktopRewardProgramSection = () => (
 
 export default DesktopRewardProgramSection;
 
-const InnerWrapper = styled.div`
+const InnerWrapper = styled.div<{ halfWidth: boolean }>`
   display: flex;
   align-items: flex-start;
   gap: 16px;
@@ -32,5 +27,9 @@ const InnerWrapper = styled.div`
 
   @media ${QUERIESV2.sm.andDown} {
     flex-direction: column;
+  }
+
+  @media ${QUERIESV2.tb.andUp} {
+    ${({ halfWidth }) => halfWidth && `width: 50%;`}
   }
 `;

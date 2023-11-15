@@ -54,7 +54,7 @@ jobs:
           REACT_APP_CHAIN_42161_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_42161_PROVIDER_URL }}
           REACT_APP_WALLET_CONNECT_PROJECT_ID: ${{ secrets.CYPRESS_WALLET_CONNECT_PROJECT_ID }}
           REACT_APP_MOCK_SERVERLESS: true
-          REACT_APP_EXTERNAL_REBATE_TOKENS_AVAILABLE: "OP"
+          REACT_APP_REBATE_PROGRAMS_AVAILABLE: "op-rebate"
         run: yarn build
       - name: Run hardhat mainnet fork
         env:

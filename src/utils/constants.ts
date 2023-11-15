@@ -383,11 +383,13 @@ export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
 export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = [
-  ...(String(process.env.REACT_APP_REBATE_PROGRAMS_AVAILABLE || "")
-    .toUpperCase()
-    .split(",") as (keyof typeof rewardPrograms)[]),
   // Our referrals program is always available
   "referrals",
+  ...(
+    String(process.env.REACT_APP_REBATE_PROGRAMS_AVAILABLE || "")
+      .toLowerCase()
+      .split(",") as (keyof typeof rewardPrograms)[]
+  ).filter((v) => v),
 ];
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
