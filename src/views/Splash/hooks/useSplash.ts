@@ -12,6 +12,8 @@ export function useSplash() {
   const ternary = repeatableTernaryBuilder(Boolean(data), "-");
   const location = useLocation();
 
+  const averageFillTimeInMinutes = Math.floor(data?.avgFillTimeInMinutes ?? 0);
+
   const numericBenefits = [
     {
       title: "Total Volume",
@@ -23,12 +25,15 @@ export function useSplash() {
     },
     {
       title: "Average Fill Time",
-      value: ternary(`${Math.floor(data?.avgFillTimeInMinutes ?? 0)} min`),
+      value: ternary(
+        `${averageFillTimeInMinutes < 1 ? "<" : ""} ${Math.max(
+          averageFillTimeInMinutes,
+          1
+        )} min`
+      ),
     },
     { title: "To Bridge 1 ETH", value: ternary("< $1") },
   ];
-
-  const averageFillTimeInMinutes = Math.floor(data?.avgFillTimeInMinutes ?? 0);
 
   const cardBenefits = [
     {
@@ -40,8 +45,11 @@ export function useSplash() {
     {
       icon: ZapIcon,
       title: "Fast",
-      description: `Across is able to offer extremely fast bridging. Today, that means bridging under ${averageFillTimeInMinutes} minute${
-        averageFillTimeInMinutes === 1 ? "" : "s"
+      description: `Across is able to offer extremely fast bridging. Today, that means bridging under ${Math.max(
+        averageFillTimeInMinutes,
+        1
+      )} minute${
+        averageFillTimeInMinutes <= 1 ? "" : "s"
       } on average. In the future, next-block bridging will be possible.`,
     },
     {
