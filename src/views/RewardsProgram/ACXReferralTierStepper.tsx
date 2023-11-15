@@ -8,8 +8,6 @@ const ACXReferralTierStepper = () => {
   const {
     summary: { tier },
   } = useSimplifiedReferralSummary();
-  console.log(rewardTiers);
-  console.log(tier);
   return (
     <Wrapper>
       {rewardTiers.map((_, index) => (
@@ -17,7 +15,11 @@ const ACXReferralTierStepper = () => {
           <NumberedStepItem>
             <CircleStep
               status={
-                index === tier - 1 ? "half" : index < tier ? "full" : "empty"
+                tier < 5 && index === tier - 1
+                  ? "half"
+                  : index < tier
+                  ? "full"
+                  : "empty"
               }
             />
             <Text size="lg" color={index < tier ? "white" : "grey-400"}>
