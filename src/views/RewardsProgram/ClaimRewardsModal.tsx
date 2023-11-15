@@ -15,8 +15,12 @@ type Props = {
 };
 
 export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
-  const { importTokenHandler, unclaimedReferralProofsQuery, claimMutation } =
-    useClaimModal(program);
+  const {
+    importTokenHandler,
+    unclaimedReferralProofsQuery,
+    claimMutation,
+    token,
+  } = useClaimModal(program);
 
   const disableButton =
     unclaimedReferralProofsQuery.isLoading ||
@@ -49,11 +53,16 @@ export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
             Claimable rewards
           </Text>
           <Text color="white-100">
-            {unclaimedReferralProofsQuery.isLoading
-              ? "Loading..."
-              : `${formatEther(
+            {unclaimedReferralProofsQuery.isLoading ? (
+              "Loading..."
+            ) : (
+              <IconText>
+                {formatEther(
                   unclaimedReferralProofsQuery.data?.claimableAmount || "0"
-                )} ACX`}
+                ) + " ACX"}
+                <Icon src={token.logoURI} />
+              </IconText>
+            )}
           </Text>
         </ClaimableBox>
         <Button
@@ -118,4 +127,15 @@ const AddToWalletWrapper = styled.div`
 
 const AddToWalletLink = styled(Text)`
   cursor: pointer;
+`;
+
+const Icon = styled.img`
+  height: 16px;
+  width: 16px;
+`;
+
+const IconText = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;

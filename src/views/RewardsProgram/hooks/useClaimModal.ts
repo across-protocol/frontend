@@ -1,11 +1,11 @@
 import { useUnclaimedReferralProofs } from "hooks/useUnclaimedReferralProofs";
 import { useWalletTokenImport } from "hooks/useWalletTokenImport";
-import { getConfig, rewardProgramTypes } from "utils";
+import { getConfig, getToken, rewardProgramTypes, rewardPrograms } from "utils";
 import { useCallback } from "react";
 import { useClaimReferralRewards } from "./useClaimReferralRewards";
 
-export function useClaimModal(_program: rewardProgramTypes) {
-  // TODO: use program to determine which query to use
+export function useClaimModal(program: rewardProgramTypes) {
+  const token = getToken(rewardPrograms[program].rewardTokenSymbol);
 
   const unclaimedReferralProofsQuery = useUnclaimedReferralProofs();
   const { importTokenIntoWalletFromLookup } = useWalletTokenImport();
@@ -20,5 +20,6 @@ export function useClaimModal(_program: rewardProgramTypes) {
     unclaimedReferralProofsQuery,
     claimMutation,
     importTokenHandler,
+    token,
   };
 }
