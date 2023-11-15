@@ -4,6 +4,9 @@ import BreadcrumbV2 from "components/BreadcrumbV2";
 import { BigNumber } from "ethers";
 import { QUERIESV2, rewardProgramTypes } from "utils";
 import GenericRewardClaimCard from "./GenericRewardClaimCard";
+import GenericInformationCard, {
+  GenericRewardInformationRowType,
+} from "./GenericInformationCard";
 
 type GenericRewardsProgramProps = {
   programName: string;
@@ -13,12 +16,7 @@ type GenericRewardsProgramProps = {
     availableRewards: BigNumber;
     children?: React.ReactNode;
   };
-  metaCard: {
-    title: string;
-    tooltip?: string;
-    value: string;
-    suffix?: React.ReactNode;
-  }[];
+  metaCard: GenericRewardInformationRowType[];
   transferFilter: () => boolean;
 };
 
@@ -37,10 +35,7 @@ const GenericRewardsProgram = ({
           program={program}
           children={claimCard.children}
         />
-        <GenericRewardClaimCard
-          program={program}
-          children={claimCard.children}
-        />
+        <GenericInformationCard rows={metaCard} />
       </CardStack>
     </Content>
   </LayoutV2>

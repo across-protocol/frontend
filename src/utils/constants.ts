@@ -607,6 +607,7 @@ export const COLORS = {
   "op-red-15": "var(--color-interface-op-red-15)",
   yellow: "var(--color-interface-yellow)",
   aqua: "var(--color-interface-aqua)",
+  "aqua-0": "var(--color-interface-aqua-0)",
   "aqua-5": "var(--color-interface-aqua-5)",
   "aqua-15": "var(--color-interface-aqua-15)",
   teal: "var(--color-interface-teal)",
