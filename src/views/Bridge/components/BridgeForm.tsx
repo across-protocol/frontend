@@ -22,7 +22,7 @@ import { VoidHandler } from "utils/types";
 
 import { AmountInputError, getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
-import StakingCTA from "./StakingCTA";
+import ReferralCTA from "./ReferralCTA";
 
 type BridgeFormProps = {
   selectedRoute: Route;
@@ -135,7 +135,7 @@ const BridgeForm = ({
         </RowWrapper>
       </CardWrapper>
       <CardWrapper>
-        {isConnected && <StakingCTA />}
+        {isConnected && <ReferralCTA />}
         <EstimatedTable
           fromChainId={selectedRoute.fromChain}
           toChainId={selectedRoute.toChain}

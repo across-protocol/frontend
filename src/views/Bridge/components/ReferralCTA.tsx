@@ -7,7 +7,7 @@ import copy from "copy-to-clipboard";
 import { useReferralLink } from "hooks/useReferralLink";
 import { useCallback } from "react";
 
-const StakingCTA = () => {
+const ReferralCTA = () => {
   const { referralLinkWithProtocol } = useReferralLink();
   const handleCopy = useCallback(() => {
     if (referralLinkWithProtocol) {
@@ -44,7 +44,7 @@ const StakingCTA = () => {
   );
 };
 
-export default StakingCTA;
+export default ReferralCTA;
 
 const Wrapper = styled.div`
   display: flex;
