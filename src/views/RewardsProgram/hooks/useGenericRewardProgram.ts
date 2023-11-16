@@ -1,25 +1,39 @@
 import { useConnection } from "hooks";
-import { Deposit, useUserDeposits } from "hooks/useDeposits";
+import { Referral, useReferrals } from "hooks/useReferrals";
 import { useMemo, useState } from "react";
 
 export function useGenericRewardProgram(
-  depositFilter: (deposit: Deposit) => boolean
+  referralFilter: (referral: Referral) => boolean
 ) {
   const { account } = useConnection();
-  const [offset, setOffset] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSizes = useMemo(() => [10, 25, 50], []);
+  const [currentPage, setCurrentPage] = useState(pageSizes[0]);
+  const [pageSize, setPageSizeState] = useState(10);
 
-  const { data } = useUserDeposits("filled", pageSize, offset, account);
-  const deposits = useMemo(
-    () => (data?.deposits ?? []).filter((d) => depositFilter(d) && !!d.rewards),
-    [data?.deposits, depositFilter]
+  // Note: we need to reset the page to 0 whenever we change the size to avoid going off the end.
+  const setPageSize = (newPageSize: number) => {
+    // Reset current page to 0 when resetting the page size.
+    setCurrentPage(0);
+    setPageSizeState(newPageSize);
+  };
+
+  const {
+    referrals: _referrals,
+    pagination: { total: totalReferrals },
+  } = useReferrals(account, pageSize, pageSize * currentPage);
+
+  const referrals = useMemo(
+    () => _referrals.filter(referralFilter),
+    [_referrals, referralFilter]
   );
 
   return {
-    deposits,
-    offset,
-    setOffset,
+    currentPage,
+    setCurrentPage,
     pageSize,
     setPageSize,
+    referrals,
+    pageSizes,
+    totalReferrals,
   };
 }

@@ -8,9 +8,9 @@ import GenericInformationCard, {
   GenericRewardInformationRowType,
 } from "./GenericInformationCard";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
-import { Deposit } from "hooks/useDeposits";
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import { useGenericRewardProgram } from "./hooks/useGenericRewardProgram";
+import { Referral } from "hooks/useReferrals";
 
 type GenericRewardsProgramProps = {
   programName: string;
@@ -21,7 +21,7 @@ type GenericRewardsProgramProps = {
     children?: React.ReactNode;
   };
   metaCard: GenericRewardInformationRowType[];
-  depositFilter: (deposit: Deposit) => boolean;
+  referralFilter: (referral: Referral) => boolean;
 };
 
 const GenericRewardsProgram = ({
@@ -29,10 +29,17 @@ const GenericRewardsProgram = ({
   program,
   claimCard,
   metaCard,
-  depositFilter,
+  referralFilter,
 }: GenericRewardsProgramProps) => {
-  const { deposits, offset, setOffset, pageSize, setPageSize } =
-    useGenericRewardProgram(depositFilter);
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    pageSizes,
+    referrals,
+    totalReferrals,
+  } = useGenericRewardProgram(referralFilter);
   return (
     <LayoutV2 maxWidth={1140}>
       <Content>
@@ -46,12 +53,13 @@ const GenericRewardsProgram = ({
         </CardStack>
         <SectionTitleWrapperV2 title="My transfers">
           <PaginatedDepositsTable
-            deposits={deposits}
-            currentPage={offset}
-            onPageChange={(p) => setOffset(p)}
+            deposits={referrals}
+            currentPage={currentPage}
+            onPageChange={(p) => setCurrentPage(p)}
             currentPageSize={pageSize}
-            totalCount={deposits.length}
+            totalCount={totalReferrals}
             onPageSizeChange={(s) => setPageSize(s)}
+            pageSizes={pageSizes}
           />
         </SectionTitleWrapperV2>
       </Content>
