@@ -8,6 +8,9 @@ import GenericInformationCard, {
   GenericRewardInformationRowType,
 } from "./GenericInformationCard";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
+import { Deposit } from "hooks/useDeposits";
+import { PaginatedDepositsTable } from "components/DepositsTable";
+import { useGenericRewardProgram } from "./hooks/useGenericRewardProgram";
 
 type GenericRewardsProgramProps = {
   programName: string;
@@ -18,7 +21,7 @@ type GenericRewardsProgramProps = {
     children?: React.ReactNode;
   };
   metaCard: GenericRewardInformationRowType[];
-  transferFilter: () => boolean;
+  depositFilter: (deposit: Deposit) => boolean;
 };
 
 const GenericRewardsProgram = ({
@@ -26,22 +29,35 @@ const GenericRewardsProgram = ({
   program,
   claimCard,
   metaCard,
-  transferFilter,
-}: GenericRewardsProgramProps) => (
-  <LayoutV2 maxWidth={1140}>
-    <Content>
-      <BreadcrumbV2 customCurrentRoute={programName} />
-      <CardStack>
-        <GenericRewardClaimCard
-          program={program}
-          children={claimCard.children}
-        />
-        <GenericInformationCard program={program} rows={metaCard} />
-      </CardStack>
-      <SectionTitleWrapperV2 title="My transfers"></SectionTitleWrapperV2>
-    </Content>
-  </LayoutV2>
-);
+  depositFilter,
+}: GenericRewardsProgramProps) => {
+  const { deposits, offset, setOffset, pageSize, setPageSize } =
+    useGenericRewardProgram(depositFilter);
+  return (
+    <LayoutV2 maxWidth={1140}>
+      <Content>
+        <BreadcrumbV2 customCurrentRoute={programName} />
+        <CardStack>
+          <GenericRewardClaimCard
+            program={program}
+            children={claimCard.children}
+          />
+          <GenericInformationCard program={program} rows={metaCard} />
+        </CardStack>
+        <SectionTitleWrapperV2 title="My transfers">
+          <PaginatedDepositsTable
+            deposits={deposits}
+            currentPage={offset}
+            onPageChange={(p) => setOffset(p)}
+            currentPageSize={pageSize}
+            totalCount={deposits.length}
+            onPageSizeChange={(s) => setPageSize(s)}
+          />
+        </SectionTitleWrapperV2>
+      </Content>
+    </LayoutV2>
+  );
+};
 
 export default GenericRewardsProgram;
 

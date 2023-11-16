@@ -23,7 +23,7 @@ const ACXReferralsProgram = () => {
         ),
       }}
       programName="ACX Referral Program"
-      transferFilter={() => true}
+      depositFilter={() => true}
     />
   );
 };
