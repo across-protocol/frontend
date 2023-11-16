@@ -7,6 +7,7 @@ import GenericRewardClaimCard from "./GenericRewardClaimCard";
 import GenericInformationCard, {
   GenericRewardInformationRowType,
 } from "./GenericInformationCard";
+import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 
 type GenericRewardsProgramProps = {
   programName: string;
@@ -37,6 +38,7 @@ const GenericRewardsProgram = ({
         />
         <GenericInformationCard program={program} rows={metaCard} />
       </CardStack>
+      <SectionTitleWrapperV2 title="My transfers"></SectionTitleWrapperV2>
     </Content>
   </LayoutV2>
 );

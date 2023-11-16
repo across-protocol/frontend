@@ -65,7 +65,7 @@ const NumberedStepItem = styled.div`
   height: 40px;
   flex-shrink: 0;
 
-  border: 2px solid ${COLORS["aqua-15"]};
+  border: 1px solid ${COLORS["aqua-15"]};
   border-radius: 50%;
 `;
 
@@ -74,9 +74,9 @@ const CircleStep = styled.div<{ status: "empty" | "half" | "full" }>`
 
   width: 40px;
   height: 40px;
-  top: -2px;
-  left: -2px;
-  border: 2px solid ${COLORS["white"]};
+  top: -1px;
+  left: -1px;
+  border: 1px solid ${COLORS["white"]};
   border-radius: 50%;
 
   /* 
