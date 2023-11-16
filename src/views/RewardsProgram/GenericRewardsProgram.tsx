@@ -35,7 +35,7 @@ const GenericRewardsProgram = ({
           program={program}
           children={claimCard.children}
         />
-        <GenericInformationCard rows={metaCard} />
+        <GenericInformationCard program={program} rows={metaCard} />
       </CardStack>
     </Content>
   </LayoutV2>
@@ -66,6 +66,7 @@ const Content = styled.div`
 const CardStack = styled.div`
   display: flex;
   width: 100%;
+  height: 288px;
   align-items: flex-start;
   gap: 16px;
 

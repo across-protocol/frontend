@@ -1,13 +1,14 @@
 import styled from "@emotion/styled";
 import { Text } from "components";
-import { useSimplifiedReferralSummary } from "hooks";
+import { useConnection, useSimplifiedReferralSummary } from "hooks";
 import React from "react";
 import { COLORS, rewardTiers } from "utils";
 
 const ACXReferralTierStepper = () => {
+  const { account } = useConnection();
   const {
     summary: { tier },
-  } = useSimplifiedReferralSummary();
+  } = useSimplifiedReferralSummary(account);
   return (
     <Wrapper>
       {rewardTiers.map((_, index) => (
@@ -64,7 +65,7 @@ const NumberedStepItem = styled.div`
   height: 40px;
   flex-shrink: 0;
 
-  border: 3px solid ${COLORS["aqua-15"]};
+  border: 2px solid ${COLORS["aqua-15"]};
   border-radius: 50%;
 `;
 
@@ -73,9 +74,9 @@ const CircleStep = styled.div<{ status: "empty" | "half" | "full" }>`
 
   width: 40px;
   height: 40px;
-  top: -3px;
-  left: -3px;
-  border: 3px solid ${COLORS["white"]};
+  top: -2px;
+  left: -2px;
+  border: 2px solid ${COLORS["white"]};
   border-radius: 50%;
 
   /* 

@@ -1,15 +1,22 @@
 import styled from "@emotion/styled";
 import { COLORS, QUERIESV2, rewardProgramTypes, rewardPrograms } from "utils";
+import DefaultBanner from "assets/bg-banners/default-banner.svg";
 
 type GenericCardProps = {
   program: rewardProgramTypes;
   children: React.ReactNode;
+  displayBranding?: boolean;
 };
 
-const GenericCard = ({ program, children }: GenericCardProps) => {
-  const { primaryColor, backgroundUrl } = rewardPrograms[program];
+const GenericCard = ({
+  program,
+  children,
+  displayBranding = false,
+}: GenericCardProps) => {
+  const { primaryColor, backgroundUrl: brandingUrl } = rewardPrograms[program];
+  const backgroundUrl = displayBranding ? brandingUrl : DefaultBanner;
   return (
-    <Wrapper primaryColor={primaryColor}>
+    <Wrapper primaryColor={primaryColor} displayBranding={displayBranding}>
       <BackgroundLayer>
         <BackgroundImage src={backgroundUrl} />
       </BackgroundLayer>
@@ -20,18 +27,34 @@ const GenericCard = ({ program, children }: GenericCardProps) => {
 
 export default GenericCard;
 
-const Wrapper = styled.div<{ primaryColor: string; transparentFade?: boolean }>`
+const Wrapper = styled.div<{ primaryColor: string; displayBranding: boolean }>`
   display: flex;
   width: 100%;
+  height: 100%;
   padding: 24px;
   border-radius: 8px;
   border: 1px solid
-    ${({ primaryColor }) => COLORS[`${primaryColor}-15` as keyof typeof COLORS]};
+    ${({ primaryColor, displayBranding }) =>
+      COLORS[
+        displayBranding
+          ? (`${primaryColor}-15` as keyof typeof COLORS)
+          : "grey-600"
+      ]};
   background: linear-gradient(
     90deg,
-    ${({ primaryColor }) => COLORS[`${primaryColor}-5` as keyof typeof COLORS]}
+    ${({ primaryColor, displayBranding }) =>
+        COLORS[
+          displayBranding
+            ? (`${primaryColor}-5` as keyof typeof COLORS)
+            : "black-700"
+        ]}
       0%,
-    ${({ primaryColor }) => COLORS[`${primaryColor}-0` as keyof typeof COLORS]}
+    ${({ primaryColor, displayBranding }) =>
+        COLORS[
+          displayBranding
+            ? (`${primaryColor}-0` as keyof typeof COLORS)
+            : "black-700"
+        ]}
       100%
   );
 

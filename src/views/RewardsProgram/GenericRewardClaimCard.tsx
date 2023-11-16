@@ -32,7 +32,7 @@ const GenericRewardClaimCard = ({
         isOpen={isModalOpen}
         onExit={() => setModalOpen(false)}
       />
-      <GenericCard program={program}>
+      <GenericCard program={program} displayBranding>
         <Header>
           <LogoContainer primaryColor={primaryColor}>
             <Logo src={token.logoURI} alt={token.symbol} />
