@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers";
 import GenericRewardsProgram from "./GenericRewardsProgram";
 import { useACXReferralsProgram } from "./hooks/useACXReferralsProgram";
 import ACXReferralLinkCard from "./ACXReferralLinkCard";
@@ -7,14 +6,14 @@ import styled from "@emotion/styled";
 import ACXReferralTierStepper from "./ACXReferralTierStepper";
 
 const ACXReferralsProgram = () => {
-  const { labels } = useACXReferralsProgram();
+  const { labels, rewardsAmount, claimableAmount } = useACXReferralsProgram();
   return (
     <GenericRewardsProgram
       program="referrals"
       metaCard={labels}
       claimCard={{
-        totalRewards: BigNumber.from(0),
-        availableRewards: BigNumber.from(0),
+        totalRewards: rewardsAmount,
+        availableRewards: claimableAmount,
         children: (
           <>
             <ACXReferralLinkCard condensed />
