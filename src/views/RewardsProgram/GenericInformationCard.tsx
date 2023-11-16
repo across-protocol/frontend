@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import GenericCard from "./GenericCard";
-import { rewardProgramTypes } from "utils";
+import { QUERIESV2, isDefined, rewardProgramTypes } from "utils";
 import { Text } from "components";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 import { Tooltip } from "components/Tooltip";
@@ -24,7 +24,7 @@ const GenericInformationCard = ({
   program: rewardProgramTypes;
 }) => (
   <GenericCard program={program}>
-    <RowContainer>
+    <RowContainer elements={rows.length}>
       {rows.map(
         ({
           title,
@@ -46,14 +46,17 @@ const GenericInformationCard = ({
                 </Tooltip>
               )}
             </TitleWithTooltipStack>
-            <ValueWithPrefixStack extendedPrefixSpacing={extendedPrefixSpacing}>
+            <ValueWithPrefixStack
+              extendedPrefixSpacing={extendedPrefixSpacing}
+              hasPrefix={isDefined(prefix)}
+            >
               {prefix && (
                 <>
                   <PrefixIconPrefixStack>
                     {prefixIcon === "clock" && <ClockIcon />}
                     <Text color="grey-400">{prefix}</Text>
                   </PrefixIconPrefixStack>
-                  {prefixArrow && <Text color="grey-400">←</Text>}
+                  {prefixArrow && <ArrowIcon color="grey-400">←</ArrowIcon>}
                 </>
               )}
               <Text color="white">{value}</Text>
@@ -67,12 +70,29 @@ const GenericInformationCard = ({
 
 export default GenericInformationCard;
 
-const RowContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+const RowContainer = styled.div<{ elements: number }>`
+  display: grid;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 16px;
-  align-self: stretch;
+  width: 100%;
+
+  @media ${QUERIESV2.tb.andDown} {
+    grid-template-columns: repeat(
+      ${({ elements }) => Math.min(elements, 4)},
+      1fr
+    );
+    row-gap: 24px;
+    grid-template-rows: repeat(
+      ${({ elements }) => Math.ceil(elements / 4)},
+      1fr
+    );
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
 `;
 
 const Row = styled.div`
@@ -80,6 +100,12 @@ const Row = styled.div`
   justify-content: space-between;
   align-items: center;
   align-self: stretch;
+  @media ${QUERIESV2.tb.andDown} {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 8px;
+  }
 `;
 
 const TitleWithTooltipStack = styled.div`
@@ -88,11 +114,28 @@ const TitleWithTooltipStack = styled.div`
   gap: 8px;
 `;
 
-const ValueWithPrefixStack = styled.div<{ extendedPrefixSpacing?: boolean }>`
+const ValueWithPrefixStack = styled.div<{
+  extendedPrefixSpacing?: boolean;
+  hasPrefix?: boolean;
+}>`
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: ${({ extendedPrefixSpacing }) => (extendedPrefixSpacing ? 12 : 8)}px;
+
+  @media ${QUERIESV2.tb.andDown} {
+    flex-direction: column-reverse;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    width: ${({ hasPrefix }) => (hasPrefix ? "100%" : "auto")};
+  }
 `;
 
 const InfoIconWrapper = styled.div`
@@ -108,4 +151,10 @@ const PrefixIconPrefixStack = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
+`;
+
+const ArrowIcon = styled(Text)`
+  @media ${QUERIESV2.tb.andDown} {
+    display: none;
+  }
 `;

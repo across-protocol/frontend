@@ -73,5 +73,6 @@ const CardStack = styled.div`
   @media ${QUERIESV2.tb.andDown} {
     flex-direction: column;
     align-items: flex-start;
+    height: fit-content;
   }
 `;
