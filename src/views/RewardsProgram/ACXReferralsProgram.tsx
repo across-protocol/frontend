@@ -36,7 +36,7 @@ const Divider = styled.div`
   margin-left: -100%;
   width: 300%;
   flex-shrink: 0;
-  background-color: ${COLORS["grey-400-15"]};
+  background-color: ${COLORS["aqua-5"]};
 `;
 
 export const StyledReferralLogo = styled(ReferralSVG)`

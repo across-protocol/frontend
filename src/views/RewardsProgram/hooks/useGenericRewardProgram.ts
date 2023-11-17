@@ -1,11 +1,11 @@
 import { useConnection } from "hooks";
 import { Referral, useReferrals } from "hooks/useReferrals";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export function useGenericRewardProgram(
   referralFilter: (referral: Referral) => boolean
 ) {
-  const { account } = useConnection();
+  const { account, isConnected } = useConnection();
   const pageSizes = useMemo(() => [10, 25, 50], []);
   const [currentPage, setCurrentPage] = useState(pageSizes[0]);
   const [pageSize, setPageSizeState] = useState(10);
@@ -27,6 +27,10 @@ export function useGenericRewardProgram(
     [_referrals, referralFilter]
   );
 
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [account]);
+
   return {
     currentPage,
     setCurrentPage,
@@ -36,5 +40,6 @@ export function useGenericRewardProgram(
     pageSizes,
     totalReferrals,
     account,
+    isConnected,
   };
 }

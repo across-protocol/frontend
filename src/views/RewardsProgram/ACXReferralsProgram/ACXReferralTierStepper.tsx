@@ -5,7 +5,7 @@ import React from "react";
 import { COLORS, rewardTiers } from "utils";
 
 const ACXReferralTierStepper = () => {
-  const { account } = useConnection();
+  const { account, isConnected } = useConnection();
   const {
     summary: { tier },
   } = useSimplifiedReferralSummary(account);
@@ -16,10 +16,12 @@ const ACXReferralTierStepper = () => {
           <NumberedStepItem>
             <CircleStep
               status={
-                tier < 5 && index === tier - 1
-                  ? "half"
-                  : index < tier
-                  ? "full"
+                isConnected
+                  ? tier < 5 && index === tier - 1
+                    ? "half"
+                    : index < tier
+                    ? "full"
+                    : "empty"
                   : "empty"
               }
             />

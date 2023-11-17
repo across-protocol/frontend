@@ -11,6 +11,7 @@ import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { useGenericRewardProgram } from "../hooks/useGenericRewardProgram";
 import { Referral } from "hooks/useReferrals";
 import RewardTableWithOverlay from "./RewardTableWithOverlay";
+import GenericConnectToWallet from "./GenericConnectToWallet";
 
 type GenericRewardsProgramProps = {
   programName: string;
@@ -40,6 +41,7 @@ const GenericRewardsProgram = ({
     totalReferrals,
     account,
     referrals,
+    isConnected,
   } = useGenericRewardProgram(referralFilter);
   return (
     <LayoutV2 maxWidth={1140}>
@@ -53,16 +55,20 @@ const GenericRewardsProgram = ({
           <GenericInformationCard program={program} rows={metaCard} />
         </CardStack>
         <SectionTitleWrapperV2 title="My transfers">
-          <RewardTableWithOverlay
-            referrals={referrals}
-            account={account || ""}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-            pageSizes={pageSizes}
-            totalReferralCount={totalReferrals}
-          />
+          {isConnected ? (
+            <RewardTableWithOverlay
+              referrals={referrals}
+              account={account || ""}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              pageSize={pageSize}
+              setPageSize={setPageSize}
+              pageSizes={pageSizes}
+              totalReferralCount={totalReferrals}
+            />
+          ) : (
+            <GenericConnectToWallet programName={programName} />
+          )}
         </SectionTitleWrapperV2>
       </Content>
     </LayoutV2>

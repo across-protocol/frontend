@@ -5,7 +5,6 @@ import { Wrapper } from "./RewardTableWithOverlay.styles";
 import { Referral } from "hooks/useReferrals";
 import Pagination from "components/Pagination";
 import paginate from "components/Pagination/paginate";
-import ConnectTableOverlay from "../ConnectTableOverlay";
 import RewardTable from "components/RewardTable";
 import { useConnection } from "hooks";
 
@@ -42,7 +41,6 @@ const RewardTableWithOverlay: React.FC<{
 
   return (
     <Wrapper>
-      {!isConnected ? <ConnectTableOverlay /> : null}
       <RewardTable
         scrollable={rows.length > 0 && isConnected}
         rows={paginatedRows}

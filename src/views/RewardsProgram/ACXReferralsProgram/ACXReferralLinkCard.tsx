@@ -1,19 +1,21 @@
 import styled from "@emotion/styled";
 import { useReferralLink } from "hooks/useReferralLink";
 import { ReactComponent as UnstyledCopyIcon } from "assets/icons/copy-16.svg";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { COLORS, QUERIESV2 } from "utils";
 import { Text } from "components/Text";
 import copy from "copy-to-clipboard";
+import { useConnection } from "hooks";
 
 type CopyReferralLinkType = {
   condensed?: boolean;
 };
 
 const ACXReferralLinkCard = ({ condensed }: CopyReferralLinkType) => {
+  const { isConnected } = useConnection();
   const { referralLink, condensedReferralLink, referralLinkWithProtocol } =
     useReferralLink();
-  const text = condensed ? condensedReferralLink : referralLink;
+  const displayedUrl = condensed ? condensedReferralLink : referralLink;
 
   const [completed, setCompleted] = useState<boolean>(false);
 
@@ -27,19 +29,24 @@ const ACXReferralLinkCard = ({ condensed }: CopyReferralLinkType) => {
     }
   }, [completed, referralLinkWithProtocol]);
 
+  const clickHandler = useCallback(() => {
+    if (isConnected) {
+      setCompleted(true);
+    }
+  }, [isConnected]);
+
   return (
     <ReferralLinkWrapper
       data-cy="referral-links"
-      onClick={() => {
-        setCompleted(true);
-      }}
+      onClick={clickHandler}
+      isConnected={isConnected}
     >
       <ReferralLinkTextStack>
         <Text size="sm" color="grey-400">
           My Referral link
         </Text>
         <Text color="white" size="lg">
-          {text}
+          {isConnected ? displayedUrl : "-"}
         </Text>
       </ReferralLinkTextStack>
       <StyledCopyIcon isCompleted={completed} />
@@ -64,7 +71,7 @@ const StyledCopyIcon = styled(UnstyledCopyIcon)<{ isCompleted?: boolean }>`
   }
 `;
 
-const ReferralLinkWrapper = styled.div`
+const ReferralLinkWrapper = styled.div<{ isConnected: boolean }>`
   display: flex;
   padding: 20px;
   align-self: stretch;
@@ -78,7 +85,7 @@ const ReferralLinkWrapper = styled.div`
 
   height: 72px;
 
-  cursor: pointer;
+  cursor: ${({ isConnected }) => (isConnected ? "pointer" : "not-allowed")};
 `;
 
 const ReferralLinkTextStack = styled.div`

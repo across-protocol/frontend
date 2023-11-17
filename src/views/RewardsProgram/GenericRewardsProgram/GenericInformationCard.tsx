@@ -5,7 +5,6 @@ import { Text } from "components";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 import { Tooltip } from "components/Tooltip";
 import { ReactComponent as ClockIcon } from "assets/icons/clock.svg";
-import { useConnection } from "hooks";
 
 export type GenericRewardInformationRowType = {
   title: string;
@@ -23,62 +22,53 @@ const GenericInformationCard = ({
 }: {
   rows: GenericRewardInformationRowType[];
   program: rewardProgramTypes;
-}) => {
-  const { isConnected } = useConnection();
-  return (
-    <GenericCard program={program}>
-      <RowContainer elements={rows.length}>
-        {rows.map(
-          ({
-            title,
-            tooltip,
-            value,
-            prefix,
-            extendedPrefixSpacing,
-            prefixArrow,
-            prefixIcon,
-          }) => (
-            <Row key={title}>
-              <TitleWithTooltipStack>
-                <Text color="grey-400">{title}</Text>
-                {tooltip && (
-                  <Tooltip
-                    body={tooltip}
-                    title={title}
-                    placement="bottom-start"
-                  >
-                    <InfoIconWrapper>
-                      <InfoIcon />
-                    </InfoIconWrapper>
-                  </Tooltip>
-                )}
-              </TitleWithTooltipStack>
-              {isConnected ? (
-                <ValueWithPrefixStack
-                  extendedPrefixSpacing={extendedPrefixSpacing}
-                  hasPrefix={isDefined(prefix)}
-                >
-                  {prefix && (
-                    <>
-                      <PrefixIconPrefixStack>
-                        {prefixIcon === "clock" && <ClockIcon />}
-                        <Text color="grey-400">{prefix}</Text>
-                      </PrefixIconPrefixStack>
-                      {prefixArrow && <ArrowIcon color="grey-400">←</ArrowIcon>}
-                    </>
-                  )}
-                  <Text color="white">{value}</Text>
-                </ValueWithPrefixStack>
-              ) : (
-                <Text color="grey-400">-</Text>
+}) => (
+  <GenericCard program={program}>
+    <RowContainer elements={rows.length}>
+      {rows.map(
+        ({
+          title,
+          tooltip,
+          value,
+          prefix,
+          extendedPrefixSpacing,
+          prefixArrow,
+          prefixIcon,
+        }) => (
+          <Row key={title}>
+            <TitleWithTooltipStack>
+              <Text color="grey-400">{title}</Text>
+              {tooltip && (
+                <Tooltip body={tooltip} title={title} placement="bottom-start">
+                  <InfoIconWrapper>
+                    <InfoIcon />
+                  </InfoIconWrapper>
+                </Tooltip>
               )}
-            </Row>
-          )
-        )}
-      </RowContainer>
-    </GenericCard>
-  );
-};
+            </TitleWithTooltipStack>
+            {
+              <ValueWithPrefixStack
+                extendedPrefixSpacing={extendedPrefixSpacing}
+                hasPrefix={isDefined(prefix)}
+              >
+                {prefix && (
+                  <>
+                    <PrefixIconPrefixStack>
+                      {prefixIcon === "clock" && <ClockIcon />}
+                      <Text color="grey-400">{prefix}</Text>
+                    </PrefixIconPrefixStack>
+                    {prefixArrow && <ArrowIcon color="grey-400">←</ArrowIcon>}
+                  </>
+                )}
+                <Text color="white">{value}</Text>
+              </ValueWithPrefixStack>
+            }
+          </Row>
+        )
+      )}
+    </RowContainer>
+  </GenericCard>
+);
 
 export default GenericInformationCard;
 
