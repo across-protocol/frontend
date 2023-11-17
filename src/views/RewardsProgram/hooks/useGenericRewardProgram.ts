@@ -35,5 +35,6 @@ export function useGenericRewardProgram(
     referrals,
     pageSizes,
     totalReferrals,
+    account,
   };
 }

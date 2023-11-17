@@ -8,9 +8,9 @@ import GenericInformationCard, {
   GenericRewardInformationRowType,
 } from "./GenericInformationCard";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
-import { PaginatedDepositsTable } from "components/DepositsTable";
 import { useGenericRewardProgram } from "../hooks/useGenericRewardProgram";
 import { Referral } from "hooks/useReferrals";
+import RewardTableWithOverlay from "./RewardTableWithOverlay";
 
 type GenericRewardsProgramProps = {
   programName: string;
@@ -38,6 +38,8 @@ const GenericRewardsProgram = ({
     setPageSize,
     pageSizes,
     totalReferrals,
+    account,
+    referrals,
   } = useGenericRewardProgram(referralFilter);
   return (
     <LayoutV2 maxWidth={1140}>
@@ -51,14 +53,15 @@ const GenericRewardsProgram = ({
           <GenericInformationCard program={program} rows={metaCard} />
         </CardStack>
         <SectionTitleWrapperV2 title="My transfers">
-          <PaginatedDepositsTable
-            deposits={[]}
+          <RewardTableWithOverlay
+            referrals={referrals}
+            account={account || ""}
             currentPage={currentPage}
-            onPageChange={(p) => setCurrentPage(p)}
-            currentPageSize={pageSize}
-            totalCount={totalReferrals}
-            onPageSizeChange={(s) => setPageSize(s)}
+            setCurrentPage={setCurrentPage}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
             pageSizes={pageSizes}
+            totalReferralCount={totalReferrals}
           />
         </SectionTitleWrapperV2>
       </Content>
