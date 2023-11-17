@@ -38,21 +38,36 @@ export type Deposit = {
   initialRelayerFeePct?: string;
   suggestedRelayerFeePct?: string;
   fillTime?: number;
-  rewards?: {
-    type: "referrals" | "op-rebates";
-    rate: number;
-    amount: string;
-    usd: string;
-  };
+  rewards?:
+    | {
+        type: "op-rebates";
+        rate: number;
+        amount: string;
+        usd: string;
+      }
+    | {
+        type: "referrals";
+        rate: number;
+        tier: number;
+        amount: string;
+        usd: string;
+      };
   feeBreakdown?: {
-    bridgeFee: {
-      pct: string;
-      usd: string;
-    };
-    destinationGasFee: {
-      pct: string;
-      usd: string;
-    };
+    // lp fee
+    lpFeeUsd: string;
+    lpFeePct: string; // wei pct
+    lpFeeAmount: string;
+    // relayer fee
+    relayCapitalFeeUsd: string;
+    relayCapitalFeePct: string; // wei pct
+    relayCapitalFeeAmount: string;
+    relayGasFeeUsd: string;
+    relayGasFeePct: string; // wei pct
+    relayGasFeeAmount: string;
+    // total = lp fee + relayer fee
+    totalBridgeFeeUsd: string;
+    totalBridgeFeePct: string; // wei pct
+    totalBridgeFeeAmount: string;
   };
 };
 
@@ -79,6 +94,7 @@ export function useDeposits(
         status: status === "all" ? undefined : status,
         limit,
         offset,
+        skipOldUnprofitable: true,
       });
     },
     { keepPreviousData: true, refetchInterval: defaultRefetchInterval }
@@ -160,6 +176,7 @@ export function useUserDeposits(
 
 async function getDeposits(
   params: Partial<{
+    skipOldUnprofitable: boolean;
     address: string;
     status: DepositStatus;
     limit: number;
@@ -167,7 +184,7 @@ async function getDeposits(
   }>
 ) {
   const { data } = await axios.get<GetDepositsResponse>(
-    `${rewardsApiUrl}/deposits`,
+    `${rewardsApiUrl}/deposits/tx-page`,
     { params }
   );
   return data;
