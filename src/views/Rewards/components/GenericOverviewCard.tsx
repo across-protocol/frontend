@@ -34,7 +34,10 @@ const GenericOverviewCard = ({
           <Text size="md" color="grey-400">
             {upperCard.subTitle}
           </Text>
-          <Text size="2xl" color="white">
+          <Text
+            size="2xl"
+            color={upperCard.title === "-" ? "grey-400" : "white"}
+          >
             {upperCard.title}
           </Text>
         </UpperTextStack>

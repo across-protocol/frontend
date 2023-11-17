@@ -2,15 +2,17 @@ import { BigNumber } from "ethers";
 import { useRewards } from "../hooks/useRewards";
 import GenericOverviewCard from "./GenericOverviewCard";
 import { ReactComponent as Icon } from "assets/icons/reward-lg.svg";
+import { useConnection } from "hooks";
 
 const OverviewRewardsCard = () => {
   const { totalRewards, referralACXRewards, stakingRewards, formatterFn } =
     useRewards();
+  const { isConnected } = useConnection();
   const formatACX = (value: BigNumber) => `${formatterFn(value)} ACX`;
   return (
     <GenericOverviewCard
       upperCard={{
-        title: totalRewards.gt(0) ? formatACX(totalRewards) : "-",
+        title: isConnected ? formatACX(totalRewards) : "-",
         subTitle: "ACX Rewards",
       }}
       lowerCard={{
