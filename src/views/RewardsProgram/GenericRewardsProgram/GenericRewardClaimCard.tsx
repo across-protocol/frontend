@@ -23,6 +23,7 @@ const GenericRewardClaimCard = ({
     unclaimedAmount,
     rewardTokenSymbol,
     formatUnits,
+    isConnected,
   } = useGenericRewardClaimCard(program);
   const [isModalOpen, setModalOpen] = useState(false);
   return (
@@ -51,15 +52,17 @@ const GenericRewardClaimCard = ({
             )}
           </TextStack>
 
-          <StyledHandlerButton
-            onClick={() => setModalOpen(true)}
-            primaryColor={primaryColor}
-            disabled={!unclaimedAmount || unclaimedAmount.lte(0)}
-          >
-            <Text color="white" size="md" weight={500}>
-              Claim
-            </Text>
-          </StyledHandlerButton>
+          {isConnected && (
+            <StyledHandlerButton
+              onClick={() => setModalOpen(true)}
+              primaryColor={primaryColor}
+              disabled={!unclaimedAmount || unclaimedAmount.lte(0)}
+            >
+              <Text color="white" size="md" weight={500}>
+                Claim
+              </Text>
+            </StyledHandlerButton>
+          )}
         </Header>
         {children}
       </GenericCard>
