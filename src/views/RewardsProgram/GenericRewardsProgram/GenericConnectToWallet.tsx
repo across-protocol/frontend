@@ -19,6 +19,7 @@ const GenericConnectToWallet = ({
       </Text>
       <SecondaryButton
         size="md"
+        data-cy="connect-wallet"
         onClick={() => {
           connect({ trackSection: "referralTable" });
         }}
