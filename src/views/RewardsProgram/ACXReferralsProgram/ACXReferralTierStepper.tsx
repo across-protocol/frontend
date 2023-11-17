@@ -25,7 +25,10 @@ const ACXReferralTierStepper = () => {
                   : "empty"
               }
             />
-            <Text size="lg" color={index < tier ? "white" : "grey-400"}>
+            <Text
+              size="lg"
+              color={isConnected && index < tier ? "white" : "grey-400"}
+            >
               {index + 1}
             </Text>
           </NumberedStepItem>
