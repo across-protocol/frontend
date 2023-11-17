@@ -1,13 +1,9 @@
 import styled from "@emotion/styled";
-import { ReactComponent as Icon } from "assets/icons/reward-lg.svg";
+import { ReactComponent as Icon } from "assets/icons/lp-lg.svg";
 import { BigNumber } from "ethers";
 import { formatUSD } from "utils";
 import { useRewards } from "../hooks/useRewards";
 import GenericOverviewCard from "./GenericOverviewCard";
-import { ReactComponent as Icon } from "assets/icons/lp-lg.svg";
-import { formatUSD } from "utils";
-import styled from "@emotion/styled";
-import { utils } from "@across-protocol/sdk-v2";
 
 const OverviewStakingCard = () => {
   const { stakedTokens, largestStakedPool } = useRewards();
