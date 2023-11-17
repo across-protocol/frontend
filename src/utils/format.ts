@@ -292,5 +292,5 @@ export function humanReadableNumber(num: number, decimals = 0): string {
  */
 export function formatUSD(value: BigNumberish): string {
   const formattedString = formatUnits(value, 18);
-  return numeral(formattedString).format("0.00");
+  return numeral(formattedString).format("0,0.00");
 }
