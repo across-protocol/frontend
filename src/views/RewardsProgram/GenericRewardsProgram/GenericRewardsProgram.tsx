@@ -9,7 +9,7 @@ import GenericInformationCard, {
 } from "./GenericInformationCard";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { PaginatedDepositsTable } from "components/DepositsTable";
-import { useGenericRewardProgram } from "./hooks/useGenericRewardProgram";
+import { useGenericRewardProgram } from "../hooks/useGenericRewardProgram";
 import { Referral } from "hooks/useReferrals";
 
 type GenericRewardsProgramProps = {

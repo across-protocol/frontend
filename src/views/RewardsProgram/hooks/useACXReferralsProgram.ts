@@ -1,5 +1,5 @@
 import { useConnection, useReferralSummary } from "hooks";
-import { GenericRewardInformationRowType } from "../GenericInformationCard";
+import { GenericRewardInformationRowType } from "../GenericRewardsProgram/GenericInformationCard";
 import {
   formatNumberTwoFracDigits,
   formatUnits,

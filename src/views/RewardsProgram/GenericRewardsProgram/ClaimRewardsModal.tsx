@@ -6,7 +6,7 @@ import { SecondaryButton } from "components/Button";
 import { Text } from "components/Text";
 import { formatEther, QUERIESV2, rewardProgramTypes, rewardTiers } from "utils";
 
-import { useClaimModal } from "./hooks/useClaimModal";
+import { useClaimModal } from "../hooks/useClaimModal";
 
 type Props = {
   isOpen: boolean;

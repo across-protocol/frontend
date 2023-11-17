@@ -1,9 +1,9 @@
 import styled from "@emotion/styled";
 import { ReactComponent as ReferralSVG } from "assets/icons/rewards/referral-within-star.svg";
 import { COLORS } from "utils";
-import ACXReferralLinkCard from "./ACXReferralLinkCard";
-import ACXReferralTierStepper from "./ACXReferralTierStepper";
-import GenericRewardsProgram from "./GenericRewardsProgram";
+import ACXReferralLinkCard from "./ACXReferralsProgram/ACXReferralLinkCard";
+import ACXReferralTierStepper from "./ACXReferralsProgram/ACXReferralTierStepper";
+import GenericRewardsProgram from "./GenericRewardsProgram/GenericRewardsProgram";
 import { useACXReferralsProgram } from "./hooks/useACXReferralsProgram";
 
 const ACXReferralsProgram = () => {

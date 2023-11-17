@@ -5,7 +5,7 @@ import styled from "@emotion/styled";
 import {
   GenericRewardClaimCardDisconnectedStateProps,
   useGenericRewardClaimCard,
-} from "./hooks/useGenericRewardClaimCard";
+} from "../hooks/useGenericRewardClaimCard";
 import { ReactComponent as ClockIcon } from "assets/icons/clock.svg";
 import { useState } from "react";
 import { ClaimRewardsModal } from "./ClaimRewardsModal";
