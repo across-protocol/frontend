@@ -144,8 +144,10 @@ const IconWrapper = styled.div`
 
   flex-shrink: 0;
 
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
+
+  margin: -12px;
 `;
 
 const Divider = styled.div`

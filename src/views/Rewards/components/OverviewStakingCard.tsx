@@ -1,10 +1,9 @@
+import styled from "@emotion/styled";
+import { ReactComponent as Icon } from "assets/icons/reward-lg.svg";
 import { BigNumber } from "ethers";
+import { formatUSD } from "utils";
 import { useRewards } from "../hooks/useRewards";
 import GenericOverviewCard from "./GenericOverviewCard";
-import { ReactComponent as Icon } from "assets/icons/rewards/graph-within-star.svg";
-import { formatUSD } from "utils";
-import styled from "@emotion/styled";
-import { utils } from "@across-protocol/sdk-v2";
 
 const OverviewStakingCard = () => {
   const { stakedTokens, largestStakedPool } = useRewards();
@@ -12,7 +11,7 @@ const OverviewStakingCard = () => {
   return (
     <GenericOverviewCard
       upperCard={{
-        title: formatUsd(stakedTokens || utils.bnZero),
+        title: stakedTokens?.gt(0) ? formatUsd(stakedTokens) : "-",
         subTitle: "$ in staked LP tokens",
       }}
       lowerCard={{
@@ -28,11 +27,11 @@ const OverviewStakingCard = () => {
           subTitle: "Top Pool",
         },
         right: {
-          title: formatUsd(largestStakedPool?.amount || utils.bnZero),
+          title: largestStakedPool ? formatUsd(largestStakedPool.amount) : "-",
           subTitle: "Staked amount",
         },
       }}
-      Icon={Icon}
+      Icon={<Icon />}
     />
   );
 };
