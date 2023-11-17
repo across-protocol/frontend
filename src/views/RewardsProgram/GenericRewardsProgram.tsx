@@ -37,7 +37,6 @@ const GenericRewardsProgram = ({
     pageSize,
     setPageSize,
     pageSizes,
-    referrals,
     totalReferrals,
   } = useGenericRewardProgram(referralFilter);
   return (
@@ -53,7 +52,7 @@ const GenericRewardsProgram = ({
         </CardStack>
         <SectionTitleWrapperV2 title="My transfers">
           <PaginatedDepositsTable
-            deposits={referrals}
+            deposits={[]}
             currentPage={currentPage}
             onPageChange={(p) => setCurrentPage(p)}
             currentPageSize={pageSize}
