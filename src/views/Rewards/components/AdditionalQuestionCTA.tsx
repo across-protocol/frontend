@@ -38,10 +38,6 @@ const Wrapper = styled.div`
   padding: 0px;
   gap: 24px;
 
-  @media ${QUERIESV2.tb.andUp} {
-    margin-top: -32px;
-  }
-
   @media ${QUERIESV2.sm.andDown} {
     flex-direction: column;
     text-align: center;
