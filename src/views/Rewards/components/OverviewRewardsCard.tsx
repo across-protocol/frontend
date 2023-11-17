@@ -10,20 +10,20 @@ const OverviewRewardsCard = () => {
   return (
     <GenericOverviewCard
       upperCard={{
-        title: formatACX(totalRewards),
+        title: totalRewards.gt(0) ? formatACX(totalRewards) : "-",
         subTitle: "ACX Rewards",
       }}
       lowerCard={{
         left: {
-          title: formatACX(referralACXRewards),
+          title: referralACXRewards.gt(0) ? formatACX(referralACXRewards) : "-",
           subTitle: "Referral rewards",
         },
         right: {
-          title: formatACX(stakingRewards),
+          title: stakingRewards.gt(0) ? formatACX(stakingRewards) : "-",
           subTitle: "Staking rewards",
         },
       }}
-      Icon={Icon}
+      Icon={<Icon />}
     />
   );
 };

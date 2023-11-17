@@ -4,6 +4,7 @@ import { Text } from "components";
 import { ReactComponent as ChevronRight } from "assets/icons/arrow-right-16.svg";
 import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
 import { Link } from "react-router-dom";
+import { useConnection } from "hooks";
 
 type RewardProgramCardProps = {
   program: rewardProgramTypes;
@@ -18,6 +19,7 @@ const RewardProgramCard = ({ program }: RewardProgramCardProps) => {
     url,
     token,
   } = useRewardProgramCard(program);
+  const { isConnected } = useConnection();
 
   return (
     <Wrapper primaryColor={primaryColor} backgroundUrl={backgroundUrl}>
@@ -28,9 +30,11 @@ const RewardProgramCard = ({ program }: RewardProgramCardProps) => {
         <Text color="white" size="lg">
           {programName}
         </Text>
-        <Text color="grey-400" size="md">
-          {formatUnits(rewardsAmount, token.decimals)} {token.symbol} earned
-        </Text>
+        {isConnected && (
+          <Text color="grey-400" size="md">
+            {formatUnits(rewardsAmount, token.decimals)} {token.symbol} earned
+          </Text>
+        )}
       </TextStack>
       <StyledCopyButton to={url} primaryColor={primaryColor}>
         <ChevronRight />
