@@ -25,7 +25,9 @@ export function RewardsCell({ deposit, width }: Props) {
             {formatUnits(deposit.rewards.amount, rewardToken.decimals)}{" "}
             {rewardToken.symbol}
           </Text>
-          <Text color="grey-400">${formatUnits(deposit.rewards.usd, 18)}</Text>
+          <Text color="grey-400">
+            ${Number(deposit.rewards.usd).toFixed(2)}
+          </Text>
         </>
       ) : (
         <Text>-</Text>
