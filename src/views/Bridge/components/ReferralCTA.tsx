@@ -5,21 +5,34 @@ import { ReactComponent as ACXLogo } from "assets/across.svg";
 import { PrimaryButton, Text } from "components";
 import copy from "copy-to-clipboard";
 import { useReferralLink } from "hooks/useReferralLink";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "hooks";
 
 const ReferralCTA = () => {
   const { referralLinkWithProtocol } = useReferralLink();
   const { isConnected, connect } = useConnection();
+  const [isCopied, setIsCopied] = useState(false);
   const handleCopy = useCallback(() => {
     if (!isConnected) {
       connect({
         trackSection: "bridgeForm",
       });
+      setIsCopied(false);
     } else if (referralLinkWithProtocol) {
       copy(referralLinkWithProtocol);
+      setIsCopied(true);
     }
   }, [connect, isConnected, referralLinkWithProtocol]);
+
+  useEffect(() => {
+    if (isCopied) {
+      const t = setTimeout(() => {
+        setIsCopied(false);
+      }, 1000);
+      return () => clearTimeout(t);
+    }
+  });
+
   return (
     <Wrapper>
       <LogoContainer>
@@ -40,6 +53,8 @@ const ReferralCTA = () => {
         size="md"
         backgroundColor="black-700"
         textColor="aqua"
+        isCopied={isCopied}
+        disabled={isCopied}
       >
         {isConnected ? "Copy link" : "Connect"}
       </StyledCopyButton>
@@ -108,12 +123,17 @@ const TextStack = styled.div`
   flex: 1 0 0;
 `;
 
-const StyledCopyButton = styled(PrimaryButton)`
+const StyledCopyButton = styled(PrimaryButton)<{ isCopied?: boolean }>`
   border: 1px solid ${COLORS["aqua-15"]};
 
   @media ${QUERIESV2.sm.andDown} {
     display: none;
   }
+  transition: all 0.2s ease-in-out;
+
+  background-color: ${({ isCopied }) =>
+    isCopied ? COLORS["aqua"] : COLORS["black-700"]};
+  color: ${({ isCopied }) => (isCopied ? COLORS["black-700"] : COLORS["aqua"])};
 `;
 
 const HighlightText = styled.span`
