@@ -8,6 +8,7 @@ import {
   fixedPointAdjustment,
   formatUSD,
   formatUnits,
+  isDefined,
   parseUnits,
 } from "utils";
 
@@ -69,24 +70,29 @@ export function useEstimatedTable(
 
   const baseCurrencyConversions = useMemo(() => {
     const parseUsd = (usd?: number) =>
-      usd ? parseUnits(String(usd), 18) : undefined;
-    const formatNumericUsd = (usd?: BigNumber) =>
-      usd ? Number(formatUSD(usd)) : undefined;
+      isDefined(usd) ? parseUnits(String(usd), 18) : undefined;
+    const formatNumericUsd = (usd: BigNumber) => Number(formatUSD(usd));
     const gasFeeInUSD = convertL1ToBaseCurrency(gasFee);
     const bridgeFeeInUSD = convertL1ToBaseCurrency(bridgeFee);
 
+    if (!isDefined(gasFeeInUSD) || !isDefined(bridgeFeeInUSD)) {
+      return {
+        gasFeeAsBaseCurrency: undefined,
+        bridgeFeeAsBaseCurrency: undefined,
+        referralRewardAsBaseCurrency: undefined,
+        netFeeAsBaseCurrency: undefined,
+      };
+    }
+
     const numericGasFee = formatNumericUsd(gasFeeInUSD);
     const numericBridgeFee = formatNumericUsd(bridgeFeeInUSD);
-    const numericReward =
-      numericBridgeFee && numericGasFee && availableRewardPercentage
-        ? (numericBridgeFee + numericGasFee) *
-          Number(formatUnits(availableRewardPercentage, 18))
-        : undefined;
+    const numericReward = availableRewardPercentage
+      ? (numericBridgeFee + numericGasFee) *
+        Number(formatUnits(availableRewardPercentage, 18))
+      : undefined;
 
     const netFeeAsBaseCurrency =
-      numericBridgeFee && numericGasFee
-        ? numericBridgeFee + numericGasFee - (numericReward ?? 0)
-        : undefined;
+      numericBridgeFee + numericGasFee - (numericReward ?? 0);
 
     return {
       gasFeeAsBaseCurrency: parseUsd(numericGasFee),
