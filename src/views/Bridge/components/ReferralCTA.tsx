@@ -6,14 +6,20 @@ import { PrimaryButton, Text } from "components";
 import copy from "copy-to-clipboard";
 import { useReferralLink } from "hooks/useReferralLink";
 import { useCallback } from "react";
+import { useConnection } from "hooks";
 
 const ReferralCTA = () => {
   const { referralLinkWithProtocol } = useReferralLink();
+  const { isConnected, connect } = useConnection();
   const handleCopy = useCallback(() => {
-    if (referralLinkWithProtocol) {
+    if (!isConnected) {
+      connect({
+        trackSection: "bridgeForm",
+      });
+    } else if (referralLinkWithProtocol) {
       copy(referralLinkWithProtocol);
     }
-  }, [referralLinkWithProtocol]);
+  }, [connect, isConnected, referralLinkWithProtocol]);
   return (
     <Wrapper>
       <LogoContainer>
@@ -35,10 +41,10 @@ const ReferralCTA = () => {
         backgroundColor="black-700"
         textColor="aqua"
       >
-        Copy link
+        {isConnected ? "Copy link" : "Connect"}
       </StyledCopyButton>
       <TextButton size="md" weight={500} onClick={handleCopy}>
-        Copy
+        {isConnected ? "copy" : "Connect"}
       </TextButton>
     </Wrapper>
   );

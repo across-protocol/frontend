@@ -135,7 +135,7 @@ const BridgeForm = ({
         </RowWrapper>
       </CardWrapper>
       <CardWrapper>
-        {isConnected && <ReferralCTA />}
+        <ReferralCTA />
         <EstimatedTable
           fromChainId={selectedRoute.fromChain}
           toChainId={selectedRoute.toChain}
