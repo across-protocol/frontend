@@ -333,6 +333,31 @@ export const tokenList = [
   ...externalLPsForStaking[hubPoolChainId],
 ];
 
+export type rewardProgramTypes = "referrals" | "op-rebate";
+
+export const rewardPrograms: Record<
+  rewardProgramTypes,
+  {
+    programName: string;
+    primaryColor: keyof typeof COLORS;
+    url: string;
+    rewardTokenSymbol: string;
+  }
+> = {
+  referrals: {
+    programName: "Across Referral Program",
+    primaryColor: "aqua",
+    url: "/rewards/referrals",
+    rewardTokenSymbol: "ACX",
+  },
+  "op-rebate": {
+    programName: "OP Rewards Program",
+    primaryColor: "op-red",
+    url: "/rewards/op-rewards",
+    rewardTokenSymbol: "OP",
+  },
+};
+
 // process.env variables
 export const rewardsApiUrl =
   process.env.REACT_APP_REWARDS_API_URL || "https://api.across.to";
@@ -357,12 +382,15 @@ export const debug = Boolean(process.env.REACT_APP_DEBUG);
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
-export const rebateTokensAvailable = String(
-  process.env.REACT_APP_EXTERNAL_REBATE_TOKENS_AVAILABLE || ""
-)
-  .toUpperCase()
-  .split(",");
-
+export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = [
+  // Our referrals program is always available
+  "referrals",
+  ...(
+    String(process.env.REACT_APP_REBATE_PROGRAMS_AVAILABLE || "")
+      .toLowerCase()
+      .split(",") as (keyof typeof rewardPrograms)[]
+  ).filter((v) => v),
+];
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
 

@@ -1,13 +1,13 @@
 import { useConnection } from "hooks";
 import { useMemo } from "react";
 import { useQuery } from "react-query";
-import { getToken, rebateTokensAvailable } from "utils";
+import { getToken, rewardProgramsAvailable } from "utils";
 import useReferrer from "./useReferrer";
 import { useSimplifiedReferralSummary } from "./useSimplifiedReferralSummary";
 
 export function useRewardToken(destinationChainId: number) {
   const rewardToken = useMemo(() => {
-    if (rebateTokensAvailable.includes("OP")) {
+    if (rewardProgramsAvailable.includes("op-rebate")) {
       return getToken(destinationChainId === 10 ? "OP" : "ACX");
     }
     return getToken("ACX");
