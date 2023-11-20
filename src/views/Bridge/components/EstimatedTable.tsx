@@ -12,6 +12,7 @@ import {
   COLORS,
   formatUnits,
   formatUSD,
+  formatWeiPct,
   getChainInfo,
   isDefined,
   QUERIESV2,
@@ -45,7 +46,7 @@ const PriceFee = ({
   baseCurrencyFee?: BigNumber;
   token: TokenInfo;
   highlightTokenFee?: boolean;
-  rewardPercentageOfFees?: number;
+  rewardPercentageOfFees?: BigNumber;
   hideSymbolOnEmpty?: boolean;
   tokenIconFirstOnMobile?: boolean;
 }) => {
@@ -59,7 +60,7 @@ const PriceFee = ({
         <>
           {rewardPercentageOfFees && (
             <PercentageText size="md" color="grey-400">
-              ({Math.floor(rewardPercentageOfFees * 100)}% of fees)
+              ({formatWeiPct(rewardPercentageOfFees)}% of fees)
             </PercentageText>
           )}
           <Text size="md" color="grey-400">

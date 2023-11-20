@@ -3,7 +3,13 @@ import { BigNumber } from "ethers";
 import { useRewardToken } from "hooks/useRewardToken";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { useMemo, useState } from "react";
-import { TokenInfo, fixedPointAdjustment, parseUnits } from "utils";
+import {
+  TokenInfo,
+  fixedPointAdjustment,
+  formatUSD,
+  formatUnits,
+  parseUnits,
+} from "utils";
 
 export function useEstimatedTable(
   token: TokenInfo,
@@ -12,14 +18,14 @@ export function useEstimatedTable(
   bridgeFee?: BigNumber
 ) {
   const [isDetailedFeesAvailable, setIsDetailedFeesAvailable] = useState(false);
-  const { rewardToken, availableRewardPercentage, isACXRewardToken } =
+  const { rewardToken, isACXRewardToken, availableRewardPercentage } =
     useRewardToken(destinationChainId);
   const { convertTokenToBaseCurrency: convertL1ToBaseCurrency } =
     useTokenConversion(token.symbol, "usd");
   const { convertTokenToBaseCurrency: convertRewardToBaseCurrency } =
     useTokenConversion(rewardToken.symbol, "usd");
 
-  const depositReferralReward: BigNumber | undefined = useMemo(() => {
+  const depositReward = useMemo(() => {
     if (
       availableRewardPercentage === undefined ||
       bridgeFee === undefined ||
@@ -27,7 +33,12 @@ export function useEstimatedTable(
     ) {
       return undefined;
     }
-    const totalFeesUSD = convertL1ToBaseCurrency(bridgeFee.add(gasFee));
+    const totalFeeInL1 = bridgeFee.add(gasFee);
+    const totalRewardInL1 = totalFeeInL1
+      .mul(availableRewardPercentage)
+      .div(fixedPointAdjustment);
+
+    const totalFeesUSD = convertL1ToBaseCurrency(totalRewardInL1);
     const rewardExchangeRate = convertRewardToBaseCurrency(
       parseUnits("1", rewardToken.decimals) // Convert 1 token to USD
     );
@@ -37,56 +48,59 @@ export function useEstimatedTable(
     ) {
       return undefined;
     }
-    const totalFeesInRewardCurrency = totalFeesUSD
+    const totalRewardInRewardToken = totalFeesUSD
       .mul(parseUnits("1.0", rewardToken.decimals)) // Account for the fixed point adjustment
       .div(rewardExchangeRate);
 
-    return totalFeesInRewardCurrency
-      .mul(parseUnits(availableRewardPercentage.toString(), 18))
-      .div(fixedPointAdjustment);
+    return {
+      rewardAsL1: totalRewardInL1,
+      rewardAsRewardToken: totalRewardInRewardToken,
+    };
   }, [
-    bridgeFee,
-    gasFee,
     availableRewardPercentage,
+    bridgeFee,
     convertL1ToBaseCurrency,
     convertRewardToBaseCurrency,
+    gasFee,
     rewardToken.decimals,
   ]);
-  const hasDepositReferralReward = depositReferralReward?.gt(0) ?? false;
+
+  const hasDepositReferralReward = depositReward?.rewardAsL1.gt(0) ?? false;
 
   const baseCurrencyConversions = useMemo(() => {
-    const gasFeeAsBaseCurrency = convertL1ToBaseCurrency(gasFee);
-    const bridgeFeeAsBaseCurrency = convertL1ToBaseCurrency(bridgeFee);
-    const referralRewardAsBaseCurrency = convertRewardToBaseCurrency(
-      depositReferralReward
-    );
+    const parseUsd = (usd?: number) =>
+      usd ? parseUnits(String(usd), 18) : undefined;
+    const formatNumericUsd = (usd?: BigNumber) =>
+      usd ? Number(formatUSD(usd)) : undefined;
+    const gasFeeInUSD = convertL1ToBaseCurrency(gasFee);
+    const bridgeFeeInUSD = convertL1ToBaseCurrency(bridgeFee);
+
+    const numericGasFee = formatNumericUsd(gasFeeInUSD);
+    const numericBridgeFee = formatNumericUsd(bridgeFeeInUSD);
+    const numericReward =
+      numericBridgeFee && numericGasFee && availableRewardPercentage
+        ? (numericBridgeFee + numericGasFee) *
+          Number(formatUnits(availableRewardPercentage, 18))
+        : undefined;
 
     const netFeeAsBaseCurrency =
-      gasFeeAsBaseCurrency && bridgeFeeAsBaseCurrency
-        ? gasFeeAsBaseCurrency
-            .add(bridgeFeeAsBaseCurrency)
-            .sub(referralRewardAsBaseCurrency ?? 0)
+      numericBridgeFee && numericGasFee
+        ? numericBridgeFee + numericGasFee - (numericReward ?? 0)
         : undefined;
 
     return {
-      gasFeeAsBaseCurrency,
-      bridgeFeeAsBaseCurrency,
-      referralRewardAsBaseCurrency,
-      netFeeAsBaseCurrency,
+      gasFeeAsBaseCurrency: parseUsd(numericGasFee),
+      bridgeFeeAsBaseCurrency: parseUsd(numericBridgeFee),
+      referralRewardAsBaseCurrency: parseUsd(numericReward),
+      netFeeAsBaseCurrency: parseUsd(netFeeAsBaseCurrency),
     };
-  }, [
-    bridgeFee,
-    convertL1ToBaseCurrency,
-    convertRewardToBaseCurrency,
-    depositReferralReward,
-    gasFee,
-  ]);
+  }, [availableRewardPercentage, bridgeFee, convertL1ToBaseCurrency, gasFee]);
 
   return {
     ...baseCurrencyConversions,
     isDetailedFeesAvailable,
     setIsDetailedFeesAvailable,
-    depositReferralReward,
+    depositReferralReward: depositReward?.rewardAsRewardToken,
     depositReferralPercentage: availableRewardPercentage,
     hasDepositReferralReward,
     rewardToken,
