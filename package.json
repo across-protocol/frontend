@@ -19,6 +19,7 @@
     "@safe-global/safe-apps-provider": "^0.18.0",
     "@safe-global/safe-apps-sdk": "^8.1.0",
     "@sentry/react": "^7.81.0",
+    "@sentry/vite-plugin": "^2.10.1",
     "@uma/sdk": "^0.22.2",
     "@web3-onboard/coinbase": "^2.2.5",
     "@web3-onboard/core": "^2.21.2",

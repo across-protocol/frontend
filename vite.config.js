@@ -1,3 +1,4 @@
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { defineConfig } from "vite";
 
 import react from "@vitejs/plugin-react";
@@ -30,6 +31,10 @@ export default defineConfig({
       exclude: ["**/node_modules/**", "**/sdk-v2/**"],
     }),
     EnvironmentPlugin("all", { prefix: "REACT_APP_" }),
+    sentryVitePlugin({
+      org: "risk-labs-m6",
+      project: "across-frontend",
+    }),
   ],
   optimizeDeps: {
     disabled: false,
