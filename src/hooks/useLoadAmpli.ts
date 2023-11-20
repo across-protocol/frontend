@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { Types } from "@amplitude/analytics-browser";
-import { createInstance } from "@amplitude/marketing-analytics-browser";
+import * as amplitude from "@amplitude/analytics-browser";
 
 import { ampli } from "ampli";
 import {
@@ -15,27 +14,26 @@ export function useLoadAmpli() {
 
   useEffect(() => {
     if (amplitudeAPIKey && !isAmpliLoaded) {
-      const instance = createInstance();
-      instance
+      amplitude
         .init(amplitudeAPIKey, undefined, {
           serverUrl: amplitudeServerUrl,
-          disableCookies: true,
+          identityStorage: "none",
           logLevel:
             isProductionBuild || !isAmplitudeLoggingEnabled
-              ? Types.LogLevel.Error
-              : Types.LogLevel.Debug,
-          trackingOptions: {
-            ipAddress: false,
-            carrier: false,
-            city: false,
-            region: false,
-            dma: false, // designated market area
+              ? amplitude.Types.LogLevel.Error
+              : amplitude.Types.LogLevel.Debug,
+          defaultTracking: {
+            attribution: true,
+            pageViews: false,
+            sessions: true,
+            fileDownloads: false,
+            formInteractions: false,
           },
         })
         .promise.then(
           () =>
             ampli.load({
-              client: { instance },
+              client: { instance: amplitude },
             }).promise
         )
         .then(() => {
