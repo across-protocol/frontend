@@ -5,7 +5,7 @@
  */
 export const resolveWebsiteUrl = () => {
   const url = process.env.REACT_APP_VERCEL_URL ?? "across.to";
-  const env = process.env.REACT_APP_VERCEL_ENV ?? "development";
+  const env = process.env.REACT_APP_VERCEL_ENV ?? "production";
   switch (env) {
     case "preview":
     case "production":
