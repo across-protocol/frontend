@@ -1,6 +1,8 @@
 import styled from "@emotion/styled";
 import { Text } from "components";
+import { Tooltip } from "components/Tooltip";
 import { useConnection, useSimplifiedReferralSummary } from "hooks";
+import numeral from "numeral";
 import React from "react";
 import { COLORS, rewardTiers } from "utils";
 
@@ -11,27 +13,43 @@ const ACXReferralTierStepper = () => {
   } = useSimplifiedReferralSummary(account);
   return (
     <Wrapper>
-      {rewardTiers.map((_, index) => (
+      {rewardTiers.map((reward, index) => (
         <React.Fragment key={`active-${index}}`}>
-          <NumberedStepItem>
-            <CircleStep
-              status={
-                isConnected
-                  ? tier < 5 && index === tier - 1
-                    ? "half"
-                    : index < tier
-                    ? "full"
+          <Tooltip
+            body={`Volumes ${
+              index === rewardTiers.length - 1
+                ? `over $${numeral(reward.volume).format("0,0.00")}`
+                : `of $${numeral(reward.volume).format("0,0.00")} - $${numeral(
+                    rewardTiers[index + 1].volume
+                  ).format("0,0.00")}`
+            }
+            yielding ${Math.floor(
+              reward.referralRate * 100
+            )}% in Referral rate.`}
+            title={reward.title}
+            placement="bottom-start"
+            tooltipId={`referral-tier-${index}`}
+          >
+            <NumberedStepItem>
+              <CircleStep
+                status={
+                  isConnected
+                    ? tier < 5 && index === tier - 1
+                      ? "half"
+                      : index < tier
+                      ? "full"
+                      : "empty"
                     : "empty"
-                  : "empty"
-              }
-            />
-            <Text
-              size="lg"
-              color={isConnected && index < tier ? "white" : "grey-400"}
-            >
-              {index + 1}
-            </Text>
-          </NumberedStepItem>
+                }
+              />
+              <Text
+                size="lg"
+                color={isConnected && index < tier ? "white" : "grey-400"}
+              >
+                {index + 1}
+              </Text>
+            </NumberedStepItem>
+          </Tooltip>
           {index < rewardTiers.length - 1 && <HorizontalLine />}
         </React.Fragment>
       ))}
