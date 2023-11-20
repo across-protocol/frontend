@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useQueryParams } from "./useQueryParams";
 import { useConnection } from "hooks";
+import { isDefined } from "utils";
 
 export default function useReferrer() {
   const { provider } = useConnection();
@@ -15,32 +16,32 @@ export default function useReferrer() {
   const [error, setError] = useState<string>("");
   useEffect(() => {
     setError("");
-    if (provider && r) {
+    if (isDefined(r)) {
       if (ethers.utils.isAddress(r)) {
         setIsResolved(true);
         return setAddress(r);
+      } else if (isDefined(provider)) {
+        provider
+          .resolveName(r)
+          .then((ra) => {
+            setAddress(ra || "");
+            setIsResolved(true);
+            if (!ra) {
+              setError("Invalid referral ENS name");
+            }
+          })
+          .catch((e) => {
+            // Error here would imply an issue with the provider call, not with the ENS name necessarily.
+            console.warn("error resolving name", e);
+            setAddress("");
+            if (!ethers.utils.isAddress(r)) {
+              setError("Invalid referral address");
+            }
+          })
+          .finally(() => {
+            setIsResolved(true);
+          });
       }
-
-      provider
-        .resolveName(r)
-        .then((ra) => {
-          setAddress(ra || "");
-          setIsResolved(true);
-          if (!ra) {
-            setError("Invalid referral ENS name");
-          }
-        })
-        .catch((e) => {
-          // Error here would imply an issue with the provider call, not with the ENS name necessarily.
-          console.warn("error resolving name", e);
-          setAddress("");
-          if (!ethers.utils.isAddress(r)) {
-            setError("Invalid referral address");
-          }
-        })
-        .finally(() => {
-          setIsResolved(true);
-        });
     } else {
       setIsResolved(true);
     }
