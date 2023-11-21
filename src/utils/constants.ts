@@ -335,7 +335,7 @@ export const tokenList = [
   ...externalLPsForStaking[hubPoolChainId],
 ];
 
-export type rewardProgramTypes = "referrals" | "op-rebate";
+export type rewardProgramTypes = "referrals" | "op-rebates";
 export const rewardPrograms: Record<
   rewardProgramTypes,
   {
