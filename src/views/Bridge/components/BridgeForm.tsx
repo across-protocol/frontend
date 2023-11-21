@@ -7,7 +7,6 @@ import { Text } from "components";
 
 import EstimatedTable from "./EstimatedTable";
 import QuickSwap from "./QuickSwap";
-import SlippageAlert from "./SlippageAlert";
 import { AmountInput } from "./AmountInput";
 import { TokenSelector } from "./TokenSelector";
 import { ChainSelector } from "./ChainSelector";
@@ -23,6 +22,7 @@ import { VoidHandler } from "utils/types";
 
 import { AmountInputError, getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
+import ReferralCTA from "./ReferralCTA";
 
 type BridgeFormProps = {
   selectedRoute: Route;
@@ -135,7 +135,7 @@ const BridgeForm = ({
         </RowWrapper>
       </CardWrapper>
       <CardWrapper>
-        <SlippageAlert />
+        <ReferralCTA />
         <EstimatedTable
           fromChainId={selectedRoute.fromChain}
           toChainId={selectedRoute.toChain}
@@ -160,7 +160,6 @@ const BridgeForm = ({
             )
           )}
         />
-        <Divider />
         {isWrongChain ? (
           <Button onClick={onClickChainSwitch}>Switch Network</Button>
         ) : (
@@ -238,12 +237,6 @@ const FromSelectionStack = styled.div`
 
 const ChangeAddressLink = styled(Text)`
   cursor: pointer;
-`;
-
-const Divider = styled.div`
-  width: 100%;
-  height: 1px;
-  background: #3e4047;
 `;
 
 const Button = styled(PrimaryButton)`

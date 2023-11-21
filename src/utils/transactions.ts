@@ -1,10 +1,10 @@
-import { Contract, ContractTransaction, ethers } from "ethers";
-import { parseEther } from "ethers/lib/utils";
 import {
   fixedPointAdjustment,
   gasMultiplierPerChain,
   hubPoolChainId,
 } from "./constants";
+import { Contract, ContractTransaction, Signer, providers } from "./ethers";
+import { parseUnits } from "./format";
 
 /**
  * This function takes a raw transaction and a signer and returns the result of signing the transaction.
@@ -13,8 +13,8 @@ import {
  * @returns The raw transaction signed by the given `signer`.
  */
 export function signTransaction(
-  rawTx: ethers.providers.TransactionRequest,
-  signer: ethers.Signer
+  rawTx: providers.TransactionRequest,
+  signer: Signer
 ): Promise<string> {
   //TODO: here is where we might do safety checks on the transaction
   return signer.signTransaction(rawTx);
@@ -22,8 +22,8 @@ export function signTransaction(
 
 export async function sendSignedTransaction(
   signedTx: string,
-  provider: ethers.providers.Provider
-): Promise<ethers.providers.TransactionResponse> {
+  provider: providers.Provider
+): Promise<providers.TransactionResponse> {
   const tx = await provider.sendTransaction(signedTx);
   return tx;
 }
@@ -45,7 +45,7 @@ export async function getPaddedGasEstimation(
     const gasEstimation = await contract.estimateGas[method](...args);
     // Factor in the padding
     const gasToRecommend = gasEstimation
-      .mul(parseEther(String(gasMultiplier)))
+      .mul(parseUnits(String(gasMultiplier), 18))
       .div(fixedPointAdjustment);
     return gasToRecommend;
   }

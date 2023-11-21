@@ -40,8 +40,13 @@ const variables = css`
 
     --color-interface-yellow: #f9d26c;
 
+    --color-interface-op-red: #f96c6c;
+    --color-interface-op-red-5: #f96c6c0d;
+    --color-interface-op-red-15: #f96c6c26;
+
     --color-brand-aqua: #6cf9d8;
     --color-interface-aqua: #6cf9d8;
+    --color-interface-aqua-5: #6cf9d80d;
     --color-interface-aqua-15: #6cf9d826;
 
     --color-interface-teal: #44d2ff;
@@ -55,6 +60,9 @@ const variables = css`
     --color-neutrals-black-900: #202024;
 
     --color-neutrals-grey-400: #9daab3;
+    --color-neutrals-grey-400-15: #9daab326;
+    --color-neutrals-grey-400-5: #9daab30d;
+
     --color-neutrals-grey-500: #4c4e57;
     --color-neutrals-grey-600: #3e4047;
 

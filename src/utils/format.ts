@@ -283,3 +283,14 @@ export function humanReadableNumber(num: number, decimals = 0): string {
       .toUpperCase() + "+"
   );
 }
+
+/**
+ * Formats an 18 decimal WEI representation of USD into standard USD format
+ * @param value A 18 decimal fixed-point integer representation of USD
+ * @returns A string formatted as USD. A number with 2 decimal places.
+ * @note USD only has 2 decimal places of precision, so this will round to the nearest cent.
+ */
+export function formatUSD(value: BigNumberish): string {
+  const formattedString = formatUnits(value, 18);
+  return numeral(formattedString).format("0,0.00");
+}

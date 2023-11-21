@@ -18,3 +18,5 @@ export * from "./time";
 export * from "./amplitude";
 export * from "./deposits";
 export * from "./wait";
+export * from "./defined";
+export * from "./network";

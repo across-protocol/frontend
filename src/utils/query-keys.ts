@@ -103,6 +103,15 @@ export function referralSummaryQueryKey(account: string) {
   return ["referralSummary", account];
 }
 
+/**
+ * Generates query keys for react-query `useQuery` hook, used in the `useSimplifiedReferralSummary` hook.
+ * @param account  The address that referral summary is being queried for.
+ * @returns An array of query keys for react-query `useQuery` hook.
+ */
+export function simplifiedReferralSummaryQueryKey(account: string) {
+  return ["referralSummary", "simplified", account];
+}
+
 export function depositsQueryKey(
   status: "filled" | "pending",
   limit: number,
