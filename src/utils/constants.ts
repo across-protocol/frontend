@@ -336,7 +336,6 @@ export const tokenList = [
 ];
 
 export type rewardProgramTypes = "referrals" | "op-rebate";
-
 export const rewardPrograms: Record<
   rewardProgramTypes,
   {
@@ -354,7 +353,7 @@ export const rewardPrograms: Record<
     rewardTokenSymbol: "ACX",
     backgroundUrl: ACXCloudBackground,
   },
-  "op-rebate": {
+  "op-rebates": {
     programName: "OP Rewards Program",
     primaryColor: "op-red",
     url: "/rewards/op-rewards",

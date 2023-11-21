@@ -19,7 +19,7 @@ export default function useReferrer() {
     if (isDefined(r)) {
       if (ethers.utils.isAddress(r)) {
         setIsResolved(true);
-        return setAddress(r);
+        setAddress(r);
       } else if (isDefined(provider)) {
         provider
           .resolveName(r)
