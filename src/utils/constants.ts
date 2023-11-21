@@ -333,7 +333,7 @@ export const tokenList = [
   ...externalLPsForStaking[hubPoolChainId],
 ];
 
-export type rewardProgramTypes = "referrals" | "op-rebate";
+export type rewardProgramTypes = "referrals" | "op-rebates";
 
 export const rewardPrograms: Record<
   rewardProgramTypes,
@@ -350,7 +350,7 @@ export const rewardPrograms: Record<
     url: "/rewards/referrals",
     rewardTokenSymbol: "ACX",
   },
-  "op-rebate": {
+  "op-rebates": {
     programName: "OP Rewards Program",
     primaryColor: "op-red",
     url: "/rewards/op-rewards",

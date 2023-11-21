@@ -7,7 +7,7 @@ import { useSimplifiedReferralSummary } from "./useSimplifiedReferralSummary";
 
 export function useRewardToken(destinationChainId: number) {
   const rewardToken = useMemo(() => {
-    if (rewardProgramsAvailable.includes("op-rebate")) {
+    if (rewardProgramsAvailable.includes("op-rebates")) {
       return getToken(destinationChainId === 10 ? "OP" : "ACX");
     }
     return getToken("ACX");
