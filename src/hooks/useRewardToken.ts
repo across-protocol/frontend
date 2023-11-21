@@ -6,12 +6,11 @@ import useReferrer from "./useReferrer";
 import { useSimplifiedReferralSummary } from "./useSimplifiedReferralSummary";
 
 export function useRewardToken(destinationChainId: number) {
-  const rewardToken = useMemo(() => {
-    if (rewardProgramsAvailable.includes("op-rebates")) {
-      return getToken(destinationChainId === 10 ? "OP" : "ACX");
-    }
-    return getToken("ACX");
-  }, [destinationChainId]);
+  const rewardToken = getToken(
+    rewardProgramsAvailable.includes("op-rebates") && destinationChainId === 10
+      ? "OP"
+      : "ACX"
+  );
 
   const { account } = useConnection();
   const { referrer } = useReferrer();
