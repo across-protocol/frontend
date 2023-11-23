@@ -248,7 +248,7 @@ export type TokenInfoList = TokenInfo[];
 
 export type ExternalLPTokenList = Array<
   TokenInfo & {
-    provider: string;
+    provider?: string;
     linkToLP: string;
   }
 >;
@@ -262,7 +262,7 @@ export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
       decimals: 18,
       mainnetAddress: "0x36Be1E97eA98AB43b4dEBf92742517266F5731a3",
       logoURI: balLogo,
-      provider: "balancer",
+      // provider: "balancer",
       linkToLP:
         "https://app.balancer.fi/#/ethereum/pool/0x36be1e97ea98ab43b4debf92742517266f5731a3000200000000000000000466",
       logoURIs: [
