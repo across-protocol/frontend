@@ -1,5 +1,4 @@
 import { useConnection } from "hooks";
-import { useMemo } from "react";
 import { useQuery } from "react-query";
 import { getToken, parseUnits, rewardProgramsAvailable } from "utils";
 import useReferrer from "./useReferrer";
