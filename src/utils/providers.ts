@@ -11,7 +11,7 @@ function getInfuraProviderUrl(chainId: number): string | undefined {
 
 function getProviderUrl(chainId: number): string {
   const resolvedRpcUrl =
-    process.env[`REACT_APP_CHAIN_${chainId}_PROVIDER_URL`] ||
+    chainInfoTable[chainId]?.customRpcUrl ||
     getInfuraProviderUrl(chainId) ||
     chainInfoTable[chainId]?.rpcUrl;
   if (resolvedRpcUrl) {

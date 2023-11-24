@@ -73,6 +73,7 @@ export type ChainInfo = {
   chainId: ChainId;
   logoURI: string;
   rpcUrl?: string;
+  customRpcUrl?: string;
   explorerUrl: string;
   constructExplorerLink: (txHash: string) => string;
   pollingInterval: number;
@@ -102,6 +103,7 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: defaultConstructExplorerLink("https://etherscan.io"),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_1_PROVIDER_URL,
   },
   {
     name: "Arbitrum",
@@ -114,6 +116,7 @@ export const chainInfoList: ChainInfoList = [
       `https://arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "AETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
   },
   {
     name: "Optimism",
@@ -125,6 +128,7 @@ export const chainInfoList: ChainInfoList = [
       `https://optimistic.etherscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "OETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_10_PROVIDER_URL,
   },
   {
     name: "Polygon",
@@ -138,6 +142,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "MATIC",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
   },
   {
     name: "zkSync",
@@ -151,6 +156,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: 10_000,
+    customRpcUrl: process.env.REACT_APP_CHAIN_324_PROVIDER_URL,
   },
   {
     name: "Base",
@@ -162,6 +168,7 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: defaultConstructExplorerLink("https://basescan.org"),
     nativeCurrencySymbol: "ETH",
     pollingInterval: 10_000,
+    customRpcUrl: process.env.REACT_APP_CHAIN_8453_PROVIDER_URL,
   },
   // testnets
   {
@@ -175,6 +182,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_5_PROVIDER_URL,
   },
   {
     name: "Mumbai",
@@ -187,6 +195,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "WMATIC",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_80001_PROVIDER_URL,
   },
   {
     name: "Arbitrum Goerli",
@@ -198,6 +207,7 @@ export const chainInfoList: ChainInfoList = [
       `https://testnet.arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_421613_PROVIDER_URL,
   },
   {
     name: "zkSync Goerli",
@@ -211,6 +221,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_280_PROVIDER_URL,
   },
   {
     name: "Base Goerli",
@@ -224,6 +235,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_84531_PROVIDER_URL,
   },
 ];
 
