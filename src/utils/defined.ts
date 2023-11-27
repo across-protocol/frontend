@@ -1,3 +1,3 @@
-export function isDefined<T>(value: unknown): value is T {
-  return value !== undefined && value !== null;
-}
+import { utils } from "@across-protocol/sdk-v2";
+
+export const isDefined = utils.isDefined;

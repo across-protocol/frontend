@@ -1,9 +1,12 @@
+import { utils } from "ethers";
+
 import {
   isValidString,
   shortenAddress,
   shortenString,
   shortenTransactionHash,
   smallNumberFormatter,
+  formatUSD,
 } from "../format";
 const VALID_ADDRESS = "0x04Fa0d235C4abf4BcF4787aF4CF447DE572eF828";
 const TX_HASH =
@@ -53,5 +56,19 @@ describe("#shortenTransactionHash", () => {
 describe("#smallNumberFormatter", () => {
   it("smallNumberFormatter should show at least 1 digit for numbers < 1 and round up to 3 sig digs", () => {
     expect(smallNumberFormatter(0.01235)).toEqual("0.0124");
+  });
+});
+
+describe("#formatUSD", () => {
+  it("should format a wei BigNumber to 2 decimal places", () => {
+    expect(formatUSD(utils.parseEther("1.1"))).toEqual("1.10");
+  });
+
+  it("should format a very small wei number to 2 decimal places", () => {
+    expect(formatUSD(1)).toEqual("0.00");
+  });
+
+  it("should format a large wei BigNumber to 2 decimal places", () => {
+    expect(formatUSD(utils.parseEther("100000.123456"))).toEqual("100,000.12");
   });
 });

@@ -300,6 +300,7 @@ export const orderedTokenSymbolLogoMap = {
   SNX: snxLogo,
   POOL: pooltogetherLogo,
   BOBA: bobaLogo,
+  OP: optimismLogo,
 };
 
 export const tokenList = [
@@ -332,6 +333,31 @@ export const tokenList = [
   ...externalLPsForStaking[hubPoolChainId],
 ];
 
+export type rewardProgramTypes = "referrals" | "op-rebates";
+
+export const rewardPrograms: Record<
+  rewardProgramTypes,
+  {
+    programName: string;
+    primaryColor: keyof typeof COLORS;
+    url: string;
+    rewardTokenSymbol: string;
+  }
+> = {
+  referrals: {
+    programName: "Across Referral Program",
+    primaryColor: "aqua",
+    url: "/rewards/referrals",
+    rewardTokenSymbol: "ACX",
+  },
+  "op-rebates": {
+    programName: "OP Rewards Program",
+    primaryColor: "op-red",
+    url: "/rewards/op-rewards",
+    rewardTokenSymbol: "OP",
+  },
+};
+
 // process.env variables
 export const rewardsApiUrl =
   process.env.REACT_APP_REWARDS_API_URL || "https://api.across.to";
@@ -356,7 +382,15 @@ export const debug = Boolean(process.env.REACT_APP_DEBUG);
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
-
+export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = [
+  // Our referrals program is always available
+  "referrals",
+  ...(
+    String(process.env.REACT_APP_REBATE_PROGRAMS_AVAILABLE || "")
+      .toLowerCase()
+      .split(",") as (keyof typeof rewardPrograms)[]
+  ).filter((v) => v),
+];
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
 
@@ -563,8 +597,12 @@ export const QUERIESV2 = {
 // See src/components/GlobalStyles/GlobalStyles.tsx for the CSS variables
 export const COLORS = {
   red: "var(--color-interface-red)",
+  "op-red": "var(--color-interface-op-red)",
+  "op-red-5": "var(--color-interface-op-red-5)",
+  "op-red-15": "var(--color-interface-op-red-15)",
   yellow: "var(--color-interface-yellow)",
   aqua: "var(--color-interface-aqua)",
+  "aqua-5": "var(--color-interface-aqua-5)",
   "aqua-15": "var(--color-interface-aqua-15)",
   teal: "var(--color-interface-teal)",
   "teal-5": "var(--color-interface-teal-5)",
@@ -573,6 +611,8 @@ export const COLORS = {
   "black-800": "var(--color-neutrals-black-800)",
   "black-900": "var(--color-neutrals-black-900)",
   "grey-400": "var(--color-neutrals-grey-400)",
+  "grey-400-15": "var(--color-neutrals-grey-400-15)",
+  "grey-400-5": "var(--color-neutrals-grey-400-5)",
   "grey-500": "var(--color-neutrals-grey-500)",
   "grey-600": "var(--color-neutrals-grey-600)",
   "light-100": "var(--color-neutrals-light-100)",
