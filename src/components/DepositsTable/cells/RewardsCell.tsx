@@ -20,13 +20,15 @@ export function RewardsCell({ deposit, width }: Props) {
     <StyledRewardsCell width={width}>
       {deposit.rewards && rewardToken ? (
         <>
-          <img src={rewardToken.logoURI} alt={rewardToken.symbol} />
-          <Text color="light-200">
-            {formatUnits(deposit.rewards.amount, rewardToken.decimals)}{" "}
-            {rewardToken.symbol}
-          </Text>
+          <TitleWrapper>
+            <img src={rewardToken.logoURI} alt={rewardToken.symbol} />
+            <Text color="light-200">
+              {formatUnits(deposit.rewards.amount, rewardToken.decimals)}{" "}
+              {rewardToken.symbol}
+            </Text>
+          </TitleWrapper>
           <Text color="grey-400">
-            ${Number(deposit.rewards.usd).toFixed(2)}
+            ${Number(deposit.rewards.usd).toFixed(4)}
           </Text>
         </>
       ) : (
@@ -38,9 +40,16 @@ export function RewardsCell({ deposit, width }: Props) {
 
 const StyledRewardsCell = styled(BaseCell)`
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const TitleWrapper = styled.div`
+  display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 8px;
 
   > img {
     width: 16px;

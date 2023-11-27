@@ -107,6 +107,7 @@ export function PersonalTransactions({ statusFilter }: Props) {
         onPageSizeChange={handlePageSizeChange}
         initialPageSize={pageSize}
         onClickSpeedUp={setDepositToSpeedUp}
+        filterKey={`personal-${statusFilter}`}
         disabledColumns={["bridgeFee"]}
       />
     </>
