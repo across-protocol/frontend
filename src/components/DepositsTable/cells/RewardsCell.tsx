@@ -4,7 +4,7 @@ import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
 
 import { BaseCell } from "./BaseCell";
-import { formatUnits, getToken } from "utils";
+import { formatUnits, getToken, formatMaxFracDigits } from "utils";
 
 type Props = {
   deposit: Deposit;
@@ -28,7 +28,7 @@ export function RewardsCell({ deposit, width }: Props) {
             </Text>
           </TitleWrapper>
           <Text color="grey-400">
-            ${Number(deposit.rewards.usd).toFixed(4)}
+            ${formatMaxFracDigits(Number(deposit.rewards.usd), 4)}
           </Text>
         </>
       ) : (
