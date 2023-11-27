@@ -52,15 +52,19 @@ const GenericRewardsProgram = ({
         </CardStack>
         <SectionTitleWrapperV2 title="My transfers">
           {isConnected ? (
-            <PaginatedDepositsTable
-              deposits={referrals}
-              onPageChange={setCurrentPage}
-              currentPage={currentPage}
-              pageSizes={pageSizes}
-              onPageSizeChange={setPageSize}
-              currentPageSize={pageSize}
-              totalCount={totalReferrals}
-            />
+            <TableWrapper>
+              <PaginatedDepositsTable
+                deposits={referrals}
+                onPageChange={setCurrentPage}
+                currentPage={currentPage}
+                pageSizes={pageSizes}
+                onPageSizeChange={setPageSize}
+                currentPageSize={pageSize}
+                totalCount={totalReferrals}
+                onClickSpeedUp={() => {}}
+                initialPageSize={pageSize}
+              />
+            </TableWrapper>
           ) : (
             <GenericConnectToWallet programName={programName} />
           )}
@@ -104,4 +108,9 @@ const CardStack = styled.div`
     align-items: flex-start;
     height: fit-content;
   }
+`;
+
+const TableWrapper = styled.div`
+  max-width: 100%;
+  overflow-x: scroll;
 `;

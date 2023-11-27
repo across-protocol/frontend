@@ -1,6 +1,11 @@
 import axios from "axios";
 import { useQuery } from "react-query";
-import { rewardsApiUrl, referralsQueryKey, rewardProgramTypes } from "utils";
+import {
+  rewardsApiUrl,
+  referralsQueryKey,
+  rewardProgramTypes,
+  parseUnitsWithExtendedDecimals,
+} from "utils";
 import { Deposit } from "./useDeposits";
 
 export interface Pagination {
@@ -44,10 +49,40 @@ export function useReferrals(
     }
   );
 
-  console.log(referrals?.data);
-
   return {
-    referrals: referrals?.data.deposits || [],
+    referrals:
+      referrals?.data.deposits.map((deposit) => ({
+        ...deposit,
+        depositRelayerFeePct: deposit.depositRelayerFeePct || "0",
+        rewards: deposit.rewards
+          ? {
+              ...deposit.rewards,
+              usd: parseUnitsWithExtendedDecimals(
+                deposit?.rewards?.usd ?? 0,
+                18
+              ).toString(),
+            }
+          : undefined,
+        feeBreakdown: deposit.feeBreakdown
+          ? {
+              ...deposit.feeBreakdown,
+              bridgeFee: {
+                ...deposit.feeBreakdown.bridgeFee,
+                usd: parseUnitsWithExtendedDecimals(
+                  deposit.feeBreakdown?.bridgeFee?.usd ?? 0,
+                  18
+                ).toString(),
+              },
+              destinationGasFee: {
+                ...deposit.feeBreakdown.destinationGasFee,
+                usd: parseUnitsWithExtendedDecimals(
+                  deposit.feeBreakdown?.destinationGasFee?.usd ?? 0,
+                  18
+                ).toString(),
+              },
+            }
+          : undefined,
+      })) || [],
     // Note: returning all 0s is a little hacky, but it means that the app won't let the user with the pages while
     // loading. There may be better ways to manage this, maybe with a loading indicator that disables all pagination.
     pagination: referrals?.data.pagination || defaultPagination,

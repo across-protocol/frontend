@@ -294,3 +294,15 @@ export function formatUSD(value: BigNumberish): string {
   const formattedString = ethers.utils.formatUnits(value, 18);
   return numeral(Number(formattedString).toFixed(2)).format("0,0.00");
 }
+
+export function parseUnitsWithExtendedDecimals(
+  value: string,
+  decimals: number
+): BigNumber {
+  let valueToParse = String(value);
+  if (valueToParse.includes(".")) {
+    const [whole, fraction] = value.split(".");
+    valueToParse = `${whole}.${(fraction ?? "").slice(0, decimals)}`;
+  }
+  return ethers.utils.parseUnits(valueToParse, decimals);
+}
