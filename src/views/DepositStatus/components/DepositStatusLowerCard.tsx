@@ -10,6 +10,7 @@ import { useIsContractAddress } from "hooks/useIsContractAddress";
 
 import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
 import { FromBridgePagePayload } from "../types";
+import ReferralCTA from "views/Bridge/components/ReferralCTA";
 
 type Props = {
   fromChainId: number;
@@ -54,6 +55,7 @@ export function DepositStatusLowerCard({
         l1TokenAddress={tokenInfo.mainnetAddress!}
         bridgeTokenSymbol={bridgeTokenSymbol}
       />
+      <ReferralCTA />
       {fromBridgePagePayload && (
         <>
           <Divider />
