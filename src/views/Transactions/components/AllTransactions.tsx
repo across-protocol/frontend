@@ -66,7 +66,7 @@ export function AllTransactions({ statusFilter }: Props) {
       onPageChange={setCurrentPage}
       onPageSizeChange={handlePageSizeChange}
       initialPageSize={pageSize}
-      disabledColumns={["loyaltyRate", "rewards", "actions"]}
+      disabledColumns={["netFee", "rewardsRate", "rewards", "actions"]}
     />
   );
 }

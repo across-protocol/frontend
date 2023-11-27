@@ -20,7 +20,8 @@ import { AddressCell } from "./cells/AddressCell";
 import { DateCell } from "./cells/DateCell";
 import { StatusCell } from "./cells/StatusCell";
 import { TxCell } from "./cells/TxCell";
-import { FeeCell } from "./cells/FeeCell";
+import { NetFeeCell } from "./cells/NetFeeCell";
+import { BridgeFeeCell } from "./cells/BridgeFeeCell";
 import { RateCell } from "./cells/RateCell";
 import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
@@ -113,11 +114,14 @@ export function DataRow({
       {isColumnDisabled(disabledColumns, "transactions") ? null : (
         <TxCell deposit={deposit} width={headerCells.transactions.width} />
       )}
-      {isColumnDisabled(disabledColumns, "netFee") ? null : (
-        <FeeCell deposit={deposit} width={headerCells.netFee.width} />
+      {isColumnDisabled(disabledColumns, "bridgeFee") ? null : (
+        <BridgeFeeCell deposit={deposit} width={headerCells.netFee.width} />
       )}
-      {isColumnDisabled(disabledColumns, "loyaltyRate") ? null : (
-        <RateCell deposit={deposit} width={headerCells.loyaltyRate.width} />
+      {isColumnDisabled(disabledColumns, "netFee") ? null : (
+        <NetFeeCell deposit={deposit} width={headerCells.netFee.width} />
+      )}
+      {isColumnDisabled(disabledColumns, "rewardsRate") ? null : (
+        <RateCell deposit={deposit} width={headerCells.rewardsRate.width} />
       )}
       {isColumnDisabled(disabledColumns, "rewards") ? null : (
         <RewardsCell deposit={deposit} width={headerCells.rewards.width} />

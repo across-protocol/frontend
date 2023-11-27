@@ -107,8 +107,7 @@ export function PersonalTransactions({ statusFilter }: Props) {
         onPageSizeChange={handlePageSizeChange}
         initialPageSize={pageSize}
         onClickSpeedUp={setDepositToSpeedUp}
-        // NOTE: Disabled until fully supported by scraper
-        disabledColumns={["loyaltyRate", "rewards"]}
+        disabledColumns={["bridgeFee"]}
       />
     </>
   );

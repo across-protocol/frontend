@@ -185,7 +185,13 @@ async function getDeposits(
 ) {
   const { data } = await axios.get<GetDepositsResponse>(
     `${rewardsApiUrl}/deposits/tx-page`,
-    { params }
+    {
+      params: {
+        ...params,
+        orderBy: "status",
+        depositorOrRecipientAddress: params.address,
+      },
+    }
   );
   return data;
 }

@@ -54,7 +54,7 @@ function FilledStatusCell({ deposit, width }: Props) {
   );
 }
 
-function PendingStatusCell({ isDelayed, width, isProfitable }: Props) {
+function PendingStatusCell({ isDelayed, width, isProfitable, deposit }: Props) {
   return (
     <StyledPendingStatusCell width={width}>
       <Text color={isProfitable ? "light-200" : "yellow"}>
@@ -62,7 +62,7 @@ function PendingStatusCell({ isDelayed, width, isProfitable }: Props) {
       </Text>
       {isDelayed ? (
         <Tooltip
-          tooltipId="delayed-cell-info"
+          tooltipId={`delayed-cell-info-${deposit.depositTxHash}`}
           placement="bottom"
           title="Relayer running out of funds"
           body={
@@ -79,7 +79,7 @@ function PendingStatusCell({ isDelayed, width, isProfitable }: Props) {
         <StyledLoadingIcon />
       ) : (
         <Tooltip
-          tooltipId="fee-too-low"
+          tooltipId={`fee-too-low-${deposit.depositTxHash}`}
           placement="bottom"
           title="Relayer fee is too low"
           body={

@@ -15,6 +15,7 @@ import {
   formatWeiPct,
   getConfig,
   getToken,
+  isBigNumberish,
 } from "utils";
 
 type Props = {
@@ -22,12 +23,13 @@ type Props = {
   width: number;
 };
 
-export function FeeCell({ deposit, width }: Props) {
-  const feeCellValue = !deposit.feeBreakdown ? (
-    <FeeWithoutBreakdown deposit={deposit} />
-  ) : (
-    <FeeWithBreakdown deposit={deposit} />
-  );
+export function NetFeeCell({ deposit, width }: Props) {
+  const feeCellValue =
+    !deposit.feeBreakdown || Object.keys(deposit.feeBreakdown).length === 0 ? (
+      <FeeWithoutBreakdown deposit={deposit} />
+    ) : (
+      <FeeWithBreakdown deposit={deposit} />
+    );
 
   return <StyledFeeCell width={width}>{feeCellValue}</StyledFeeCell>;
 }
@@ -69,6 +71,16 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
     ? getToken(deposit.rewards.type === "op-rebates" ? "OP" : "ACX")
     : undefined;
 
+  const relayCapitalFeeAmount = BigNumber.from(
+    isBigNumberish(deposit.feeBreakdown?.relayCapitalFeeAmount)
+      ? deposit.feeBreakdown?.relayCapitalFeeAmount || 0
+      : 0
+  );
+  const lpFeeAmount = BigNumber.from(
+    isBigNumberish(deposit.feeBreakdown?.lpFeeAmount)
+      ? deposit.feeBreakdown?.lpFeeAmount || 0
+      : 0
+  );
   return (
     <>
       <Text color="light-200">${netFee.toFixed(2)}</Text>
@@ -77,7 +89,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
           Fee breakdown
         </Text>
         <Tooltip
-          tooltipId="fee-breakdown"
+          tooltipId={`fee-breakdown-${deposit.depositTxHash}`}
           placement="bottom-start"
           title="Fee breakdown"
           maxWidth={400}
@@ -106,9 +118,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                   </Text>
                   <Text size="sm" color="light-200">
                     {formatUnits(
-                      BigNumber.from(
-                        deposit.feeBreakdown?.relayCapitalFeeAmount || 0
-                      ).mul(deposit.feeBreakdown?.lpFeeAmount || 0),
+                      relayCapitalFeeAmount.add(lpFeeAmount),
                       tokenInfo.decimals
                     )}{" "}
                     {tokenInfo.symbol}
@@ -130,7 +140,9 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                   <Text size="sm" color="light-200">
                     {formatUnits(
                       BigNumber.from(
-                        deposit.feeBreakdown?.relayGasFeeAmount || 0
+                        isBigNumberish(deposit.feeBreakdown?.relayGasFeeAmount)
+                          ? deposit.feeBreakdown?.relayGasFeeAmount || 0
+                          : 0
                       ),
                       tokenInfo.decimals
                     )}{" "}
