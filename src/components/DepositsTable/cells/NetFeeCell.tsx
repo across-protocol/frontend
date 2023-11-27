@@ -158,7 +158,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                   </Text>
                   <FeeValueWrapper>
                     <Text size="sm" color="aqua">
-                      ${Number(deposit.rewards.usd).toFixed(2)}
+                      ${Number(deposit.rewards.usd).toFixed(4)}
                     </Text>
                     <img src={rewardToken.logoURI} alt={rewardToken.symbol} />
                   </FeeValueWrapper>
