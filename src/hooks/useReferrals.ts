@@ -1,22 +1,7 @@
 import axios from "axios";
 import { useQuery } from "react-query";
-import { rewardsApiUrl, referralsQueryKey } from "utils";
-
-export interface Referral {
-  depositTxHash: string;
-  sourceChainId: number;
-  destinationChainId: number;
-  amount: string;
-  symbol: string;
-  decimals: number;
-  depositorAddr: string;
-  referralAddress: string;
-  depositDate: string;
-  realizedLpFeeUsd?: number;
-  bridgeFeeUsd?: number;
-  referralRate: number;
-  acxRewards: string;
-}
+import { rewardsApiUrl, referralsQueryKey, rewardProgramTypes } from "utils";
+import { Deposit } from "./useDeposits";
 
 export interface Pagination {
   total: number;
@@ -26,12 +11,13 @@ export interface Pagination {
 
 export interface GetReferralsResponse {
   pagination: Pagination;
-  referrals: Referral[];
+  deposits: Deposit[];
 }
 
 const defaultPagination: Pagination = { total: 0, limit: 0, offset: 0 };
 
 export function useReferrals(
+  program: rewardProgramTypes,
   account?: string,
   limit?: number,
   offset?: number
@@ -40,15 +26,14 @@ export function useReferrals(
     account !== undefined && limit !== undefined && offset !== undefined;
 
   const queryKey = enabledQuery
-    ? referralsQueryKey(account, limit, offset)
+    ? referralsQueryKey(program, account, limit, offset)
     : "DISABLED_REFERRALS_KEY";
 
   const { data: referrals, ...other } = useQuery(
     queryKey,
     async ({ queryKey: key }) => {
       if (key[0] === "DISABLED_REFERRALS_KEY") return;
-      const query = key as [string, string, number, number];
-      return getReferrals(query[1], query[2], query[3]);
+      return getReferrals(...key);
     },
     {
       // refetch based on the chain polling interval
@@ -59,8 +44,10 @@ export function useReferrals(
     }
   );
 
+  console.log(referrals?.data);
+
   return {
-    referrals: referrals?.data.referrals || [],
+    referrals: referrals?.data.deposits || [],
     // Note: returning all 0s is a little hacky, but it means that the app won't let the user with the pages while
     // loading. There may be better ways to manage this, maybe with a loading indicator that disables all pagination.
     pagination: referrals?.data.pagination || defaultPagination,
@@ -72,8 +59,13 @@ export function useReferrals(
  * @param account Address of logged in user.
  * @returns A promise resolving to the referral data of the user
  */
-async function getReferrals(account: string, limit: number, offset: number) {
+async function getReferrals(
+  program: rewardProgramTypes,
+  account: string,
+  limit: number,
+  offset: number
+) {
   return axios.get<GetReferralsResponse>(
-    `${rewardsApiUrl}/referrals/details?address=${account}&limit=${limit}&offset=${offset}`
+    `${rewardsApiUrl}/rewards/${program}?userAddress=${account}&limit=${limit}&offset=${offset}`
   );
 }

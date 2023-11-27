@@ -1,6 +1,10 @@
 import axios from "axios";
 import { useQuery } from "react-query";
-import { rewardsApiUrl, referralSummaryQueryKey } from "utils";
+import {
+  rewardsApiUrl,
+  referralSummaryQueryKey,
+  rewardProgramTypes,
+} from "utils";
 
 /**
  * Fetches the latest block from a given chain Id on an interval.
@@ -28,15 +32,18 @@ const defaultReferralsSummary: ReferralsSummary = {
   activeRefereesCount: 0,
 };
 
-export function useReferralSummary(account?: string) {
+export function useReferralSummary(
+  program: rewardProgramTypes,
+  account?: string
+) {
   const queryKey = !!account
-    ? referralSummaryQueryKey(account)
+    ? referralSummaryQueryKey(account, program)
     : "DISABLED_REFERRAL_SUMMARY_KEY";
 
   const { data: summary, ...other } = useQuery(
     queryKey,
     async () => {
-      return getReferralSummary(account!);
+      return getReferralSummary(program, account!);
     },
     {
       // refetch based on the chain polling interval
@@ -56,8 +63,11 @@ export function useReferralSummary(account?: string) {
  * @param account Address of logged in user.
  * @returns A promise resolving to the referral summary of the user
  */
-async function getReferralSummary(account: string) {
+async function getReferralSummary(
+  program: rewardProgramTypes,
+  account: string
+) {
   return axios.get<ReferralsSummary>(
-    `${rewardsApiUrl}/referrals/summary?address=${account}`
+    `${rewardsApiUrl}/${program}/summary?address=${account}`
   );
 }

@@ -24,7 +24,6 @@ const ACXReferralsProgram = () => {
         ),
       }}
       programName="ACX Referral Program"
-      referralFilter={() => true}
     />
   );
 };

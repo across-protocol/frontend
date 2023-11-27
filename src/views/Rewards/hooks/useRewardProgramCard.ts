@@ -9,7 +9,7 @@ export function useRewardProgramCard(programName: rewardProgramTypes) {
   // TODO: Make this dynamic so that we can get other rebate tokens
   const {
     summary: { rewardsAmount },
-  } = useReferralSummary(account);
+  } = useReferralSummary(programName, account);
   return {
     ...programDetail,
     token,

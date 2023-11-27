@@ -12,7 +12,7 @@ import { BigNumber } from "ethers";
 
 export function useACXReferralsProgram() {
   const { account } = useConnection();
-  const { summary } = useReferralSummary(account);
+  const { summary } = useReferralSummary("referrals", account);
   const token = useMemo(() => getToken("ACX"), []);
   const { data: unclaimedReferralData } = useUnclaimedReferralProofs();
 

@@ -9,9 +9,8 @@ import GenericInformationCard, {
 } from "./GenericInformationCard";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { useGenericRewardProgram } from "../hooks/useGenericRewardProgram";
-import { Referral } from "hooks/useReferrals";
-import RewardTableWithOverlay from "./RewardTableWithOverlay";
 import GenericConnectToWallet from "./GenericConnectToWallet";
+import { PaginatedDepositsTable } from "components/DepositsTable";
 
 type GenericRewardsProgramProps = {
   programName: string;
@@ -22,7 +21,6 @@ type GenericRewardsProgramProps = {
     children?: React.ReactNode;
   };
   metaCard: GenericRewardInformationRowType[];
-  referralFilter: (referral: Referral) => boolean;
 };
 
 const GenericRewardsProgram = ({
@@ -30,7 +28,6 @@ const GenericRewardsProgram = ({
   program,
   claimCard,
   metaCard,
-  referralFilter,
 }: GenericRewardsProgramProps) => {
   const {
     currentPage,
@@ -39,10 +36,9 @@ const GenericRewardsProgram = ({
     setPageSize,
     pageSizes,
     totalReferrals,
-    account,
     referrals,
     isConnected,
-  } = useGenericRewardProgram(referralFilter);
+  } = useGenericRewardProgram(program);
   return (
     <LayoutV2 maxWidth={1140}>
       <Content>
@@ -56,15 +52,14 @@ const GenericRewardsProgram = ({
         </CardStack>
         <SectionTitleWrapperV2 title="My transfers">
           {isConnected ? (
-            <RewardTableWithOverlay
-              referrals={referrals}
-              account={account || ""}
+            <PaginatedDepositsTable
+              deposits={referrals}
+              onPageChange={setCurrentPage}
               currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              pageSize={pageSize}
-              setPageSize={setPageSize}
               pageSizes={pageSizes}
-              totalReferralCount={totalReferrals}
+              onPageSizeChange={setPageSize}
+              currentPageSize={pageSize}
+              totalCount={totalReferrals}
             />
           ) : (
             <GenericConnectToWallet programName={programName} />

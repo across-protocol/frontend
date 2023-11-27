@@ -26,7 +26,7 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
   );
   const {
     summary: { rewardsAmount },
-  } = useReferralSummary(account);
+  } = useReferralSummary(program, account);
   const { data: unclaimedReferralData } = useUnclaimedReferralProofs();
   const formatUnits = formatUnitsFnBuilder(token.decimals);
 

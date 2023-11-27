@@ -8,7 +8,7 @@ import { useStakingPools } from "./useStakingPools";
 
 export function useRewards() {
   const { isConnected, connect, account } = useConnection();
-  const { summary, isLoading } = useReferralSummary(account);
+  const { summary, isLoading } = useReferralSummary("referrals", account);
 
   const {
     myPools,
