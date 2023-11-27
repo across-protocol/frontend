@@ -251,6 +251,13 @@ const twoMaxFracFormatter = new Intl.NumberFormat("en-US", {
 export const formatNumberTwoFracDigits =
   twoMaxFracFormatter.format.bind(twoMaxFracFormatter);
 
+export function formatMaxFracDigits(number: number, maxFracDigits: number) {
+  const formatter = new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: maxFracDigits,
+  });
+  return formatter.format(number);
+}
+
 export function formatPoolAPY(
   wei: ethers.BigNumberish,
   decimals: number

@@ -58,13 +58,13 @@ export function Transactions() {
 }
 
 const Wrapper = styled.div<{ activeTab?: "personal" | "all" }>`
-  max-width: ${({ activeTab }) => (activeTab === "personal" ? 1480 : 1280)}px;
+  max-width: ${({ activeTab }) => (activeTab === "personal" ? 1476 : 1132)}px;
   margin: 0 auto;
   margin-top: 32px;
   display: flex;
   flex-direction: column;
 
-  @media (max-width: 1480px) {
+  @media (max-width: 1476px) {
     padding: 0 16px;
   }
 `;

@@ -12,7 +12,7 @@ export const headerCells = {
   },
   amount: {
     label: "Amount",
-    width: 104,
+    width: 96,
   },
   route: {
     label: "Route",
@@ -20,11 +20,11 @@ export const headerCells = {
   },
   address: {
     label: "Address",
-    width: 112,
+    width: 108,
   },
   date: {
     label: "Date",
-    width: 104,
+    width: 94,
   },
   status: {
     label: "Status",
@@ -32,11 +32,11 @@ export const headerCells = {
   },
   transactions: {
     label: "Transactions",
-    width: 176,
+    width: 148,
   },
   netFee: {
     label: "Net fee",
-    width: 136,
+    width: 128,
   },
   bridgeFee: {
     label: "Bridge fee",
@@ -48,7 +48,7 @@ export const headerCells = {
   },
   rewards: {
     label: "Rewards",
-    width: 136,
+    width: 128,
   },
   actions: {
     label: "",

@@ -16,6 +16,7 @@ import {
   getConfig,
   getToken,
   isBigNumberish,
+  formatMaxFracDigits,
 } from "utils";
 
 type Props = {
@@ -100,7 +101,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                   Net fee
                 </Text>
                 <Text size="sm" color="light-100">
-                  ${netFee.toFixed(2)}
+                  ${formatMaxFracDigits(netFee, 2)}
                 </Text>
               </FeeBreakdownRow>
               <Divider />
@@ -111,10 +112,11 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                 <FeeValueWrapper>
                   <Text size="sm" color="grey-400">
                     $
-                    {(
+                    {formatMaxFracDigits(
                       Number(deposit.feeBreakdown?.relayCapitalFeeUsd || 0) +
-                      Number(deposit.feeBreakdown?.lpFeeUsd || 0)
-                    ).toFixed(2)}
+                        Number(deposit.feeBreakdown?.lpFeeUsd || 0),
+                      2
+                    )}
                   </Text>
                   <Text size="sm" color="light-200">
                     {formatUnits(
@@ -133,8 +135,9 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                 <FeeValueWrapper>
                   <Text size="sm" color="grey-400">
                     $
-                    {Number(deposit.feeBreakdown?.relayGasFeeUsd || 0).toFixed(
-                      2
+                    {formatMaxFracDigits(
+                      Number(deposit.feeBreakdown?.relayGasFeeUsd || 0),
+                      4
                     )}
                   </Text>
                   <Text size="sm" color="light-200">
@@ -158,7 +161,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                   </Text>
                   <FeeValueWrapper>
                     <Text size="sm" color="aqua">
-                      ${Number(deposit.rewards.usd).toFixed(4)}
+                      ${formatMaxFracDigits(Number(deposit.rewards.usd), 4)}
                     </Text>
                     <img src={rewardToken.logoURI} alt={rewardToken.symbol} />
                   </FeeValueWrapper>
