@@ -4,7 +4,7 @@ import { BigNumber, utils } from "ethers";
 
 import { Text } from "components/Text";
 import { UnstyledButton } from "components/Button";
-import { QUERIESV2, Route, getToken } from "utils";
+import { QUERIESV2, Route, getToken, isDefined } from "utils";
 
 import BridgeInputErrorAlert from "./BridgeAlert";
 import { AmountInputError } from "../utils";
@@ -36,7 +36,9 @@ export function AmountInput({
 
   const token = getToken(selectedRoute.fromTokenSymbol);
 
-  const isAmountValid = !Boolean(validationError);
+  // Valid if no input, otherwise check if there's not an error
+  const isAmountValid =
+    (amountInput ?? "") === "" || !isDefined(validationError);
 
   return (
     <AmountExternalWrapper>
@@ -229,4 +231,5 @@ const AmountInnerInput = styled.input<IValidInput>`
   }
   /* Firefox */
   -moz-appearance: textfield;
+  appearance: textfield;
 `;
