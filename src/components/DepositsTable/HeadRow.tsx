@@ -28,7 +28,7 @@ export const headerCells = {
   },
   status: {
     label: "Status",
-    width: 144,
+    width: 120,
   },
   transactions: {
     label: "Transactions",
