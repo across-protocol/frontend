@@ -52,7 +52,7 @@ const GenericRewardsProgram = ({
         </CardStack>
         <SectionTitleWrapperV2 title="My transfers">
           {isConnected ? (
-            <TableWrapper>
+            <TableWrapper data-cy="rewards-table">
               <PaginatedDepositsTable
                 deposits={referrals}
                 onPageChange={setCurrentPage}
