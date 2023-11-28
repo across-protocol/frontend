@@ -181,15 +181,17 @@ async function getDeposits(
     status: DepositStatus;
     limit: number;
     offset: number;
-  }>
+  }> = {}
 ) {
   const { data } = await axios.get<GetDepositsResponse>(
     `${rewardsApiUrl}/deposits/tx-page`,
     {
       params: {
-        ...params,
-        orderBy: "status",
+        skipOldUnprofitable: params.skipOldUnprofitable,
+        limit: params.limit,
+        offset: params.offset,
         depositorOrRecipientAddress: params.address,
+        orderBy: "status",
       },
     }
   );
