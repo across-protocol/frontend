@@ -52,7 +52,7 @@ function PendingStatusCell({ width, deposit }: Props) {
 
   return (
     <StyledPendingStatusCell width={width}>
-      <Text color={isProfitable ? "light-200" : "yellow"}>
+      <Text color={isProfitable && !isDelayed ? "light-200" : "yellow"}>
         {isDelayed ? "Delayed" : isProfitable ? "Processing..." : "Fee too low"}
       </Text>
       {isDelayed ? (
