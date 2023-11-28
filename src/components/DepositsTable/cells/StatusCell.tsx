@@ -40,7 +40,7 @@ function FilledStatusCell({ deposit, width }: Props) {
         <Text color="aqua">{formatSeconds(elapsedSeconds || 0)}</Text>
       ) : null}
       <FinalizedText color="aqua" size={doesFillTimeExist ? "sm" : "md"}>
-        Finalized
+        Filled
         <CheckIcon />
       </FinalizedText>
     </StyledFilledStatusCell>

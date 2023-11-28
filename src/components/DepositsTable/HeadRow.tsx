@@ -39,7 +39,7 @@ export const headerCells = {
     width: 128,
   },
   bridgeFee: {
-    label: "Bridge fee",
+    label: "Fees",
     width: 136,
   },
   rewardsRate: {
