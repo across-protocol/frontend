@@ -1,5 +1,5 @@
 import { useConnection } from "hooks";
-import { useReferrals } from "hooks/useReferrals";
+import { useRewards } from "hooks/useRewards";
 import { useEffect, useMemo, useState } from "react";
 import { rewardProgramTypes } from "utils";
 
@@ -19,7 +19,7 @@ export function useGenericRewardProgram(program: rewardProgramTypes) {
   const {
     referrals,
     pagination: { total: totalReferrals },
-  } = useReferrals(program, account, pageSize, pageSize * currentPage);
+  } = useRewards(program, account, pageSize, pageSize * currentPage);
 
   useEffect(() => {
     setCurrentPage(0);

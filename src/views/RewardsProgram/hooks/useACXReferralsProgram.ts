@@ -1,4 +1,4 @@
-import { useConnection, useReferralSummary } from "hooks";
+import { useConnection, useRewardSummary } from "hooks";
 import { GenericRewardInformationRowType } from "../GenericRewardsProgram/GenericInformationCard";
 import {
   formatNumberTwoFracDigits,
@@ -12,7 +12,7 @@ import { BigNumber } from "ethers";
 
 export function useACXReferralsProgram() {
   const { account } = useConnection();
-  const { summary } = useReferralSummary("referrals", account);
+  const { summary } = useRewardSummary("referrals", account);
   const token = useMemo(() => getToken("ACX"), []);
   const { data: unclaimedReferralData } = useUnclaimedReferralProofs();
 

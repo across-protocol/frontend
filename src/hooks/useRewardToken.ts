@@ -1,8 +1,7 @@
-import { useConnection } from "hooks";
+import { useConnection, useSimplifiedReferralSummary } from "hooks";
 import { useQuery } from "react-query";
 import { getToken, parseUnits, rewardProgramsAvailable } from "utils";
 import useReferrer from "./useReferrer";
-import { useSimplifiedReferralSummary } from "./useSimplifiedReferralSummary";
 
 export function useRewardToken(destinationChainId: number) {
   const rewardToken = getToken(

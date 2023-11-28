@@ -80,14 +80,14 @@ export function allowanceQueryKey(
 }
 
 /**
- * Generates query keys for react-query `useQuery` hook, used in the `useReferrals` hook.
- * @param program  The reward program that referrals are being queried for.
- * @param account  The address that referrals are being queried for.
+ * Generates query keys for react-query `useQuery` hook, used in the `useRewards` hook.
+ * @param program  The reward program that rewards are being queried for.
+ * @param account  The address that rewards are being queried for.
  * @param limit The limit on the number of results that are returned (page size).
  * @param offset The number of elements to omit before returning results.
  * @returns An array of query keys for react-query `useQuery` hook.
  */
-export function referralsQueryKey(
+export function rewardsQueryKey(
   program: rewardProgramTypes,
   account: string,
   limit: number,
@@ -97,16 +97,16 @@ export function referralsQueryKey(
 }
 
 /**
- * Generates query keys for react-query `useQuery` hook, used in the `useReferralSummary` hook.
- * @param account  The address that referral summary is being queried for.
- * @param program  The reward program that referral summary is being queried for.
+ * Generates query keys for react-query `useQuery` hook, used in the `useRewardSummary` hook.
+ * @param account  The address that reward summary is being queried for.
+ * @param program  The reward program that reward summary is being queried for.
  * @returns An array of query keys for react-query `useQuery` hook.
  */
-export function referralSummaryQueryKey(
+export function rewardSummaryQueryKey(
   account: string,
   program: rewardProgramTypes
 ) {
-  return ["referralSummary", program, account];
+  return ["rewardSummary", program, account];
 }
 
 /**

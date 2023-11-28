@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { useConnection, useReferralSummary } from "hooks";
+import { useConnection, useRewardSummary } from "hooks";
 import { useUnclaimedReferralProofs } from "hooks/useUnclaimedReferralProofs";
 import { useMemo } from "react";
 import {
@@ -26,7 +26,7 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
   );
   const {
     summary: { rewardsAmount },
-  } = useReferralSummary(program, account);
+  } = useRewardSummary(program, account);
   const { data: unclaimedReferralData } = useUnclaimedReferralProofs();
   const formatUnits = formatUnitsFnBuilder(token.decimals);
 

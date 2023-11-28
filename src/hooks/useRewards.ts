@@ -2,7 +2,7 @@ import axios from "axios";
 import { useQuery } from "react-query";
 import {
   rewardsApiUrl,
-  referralsQueryKey,
+  rewardsQueryKey,
   rewardProgramTypes,
   parseUnitsWithExtendedDecimals,
 } from "utils";
@@ -14,14 +14,14 @@ export interface Pagination {
   offset: number;
 }
 
-export interface GetReferralsResponse {
+export interface GetRewardsResponse {
   pagination: Pagination;
   deposits: Deposit[];
 }
 
 const defaultPagination: Pagination = { total: 0, limit: 0, offset: 0 };
 
-export function useReferrals(
+export function useRewards(
   program: rewardProgramTypes,
   account?: string,
   limit?: number,
@@ -31,7 +31,7 @@ export function useReferrals(
     account !== undefined && limit !== undefined && offset !== undefined;
 
   const queryKey = enabledQuery
-    ? referralsQueryKey(program, account, limit, offset)
+    ? rewardsQueryKey(program, account, limit, offset)
     : "DISABLED_REFERRALS_KEY";
 
   const { data: referrals, ...other } = useQuery(
@@ -100,7 +100,7 @@ async function getReferrals(
   limit: number,
   offset: number
 ) {
-  return axios.get<GetReferralsResponse>(
+  return axios.get<GetRewardsResponse>(
     `${rewardsApiUrl}/rewards/${program}?userAddress=${account}&limit=${limit}&offset=${offset}`
   );
 }
