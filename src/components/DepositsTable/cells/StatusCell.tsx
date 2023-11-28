@@ -11,23 +11,16 @@ import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 import { formatSeconds, COLORS } from "utils";
 
 import { BaseCell } from "./BaseCell";
+import { useIsProfitableAndDelayed } from "../hooks/useIsProfitableAndDelayed";
 
 type Props = {
   deposit: Deposit;
   width: number;
-  isProfitable?: boolean;
-  isDelayed?: boolean;
 };
 
-export function StatusCell({ deposit, width, isProfitable }: Props) {
+export function StatusCell({ deposit, width }: Props) {
   if (deposit.status === "pending") {
-    return (
-      <PendingStatusCell
-        deposit={deposit}
-        width={width}
-        isProfitable={isProfitable}
-      />
-    );
+    return <PendingStatusCell deposit={deposit} width={width} />;
   }
 
   return <FilledStatusCell deposit={deposit} width={width} />;
@@ -54,7 +47,9 @@ function FilledStatusCell({ deposit, width }: Props) {
   );
 }
 
-function PendingStatusCell({ isDelayed, width, isProfitable, deposit }: Props) {
+function PendingStatusCell({ width, deposit }: Props) {
+  const { isDelayed, isProfitable } = useIsProfitableAndDelayed(deposit);
+
   return (
     <StyledPendingStatusCell width={width}>
       <Text color={isProfitable ? "light-200" : "yellow"}>

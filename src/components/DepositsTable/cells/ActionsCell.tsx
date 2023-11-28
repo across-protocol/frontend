@@ -8,19 +8,16 @@ import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";
 import { COLORS } from "utils";
 
+import { useIsProfitableAndDelayed } from "../hooks/useIsProfitableAndDelayed";
+
 type Props = {
   deposit: Deposit;
-  isDelayed?: boolean;
-  isProfitable?: boolean;
   onClickSpeedUp?: (deposit: Deposit) => void;
 };
 
-export function ActionsCell({
-  deposit,
-  isProfitable,
-  isDelayed,
-  onClickSpeedUp,
-}: Props) {
+export function ActionsCell({ deposit, onClickSpeedUp }: Props) {
+  const { isDelayed, isProfitable } = useIsProfitableAndDelayed(deposit);
+
   const slowRelayInfo =
     isDelayed && isProfitable ? (
       <Tooltip

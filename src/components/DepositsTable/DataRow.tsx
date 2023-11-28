@@ -1,16 +1,7 @@
 import styled from "@emotion/styled";
-import { BigNumber, utils } from "ethers";
-import { DateTime } from "luxon";
 
 import { Deposit } from "hooks/useDeposits";
-import {
-  COLORS,
-  getConfig,
-  fallbackSuggestedRelayerFeePct,
-  suggestedFeesDeviationBufferMultiplier,
-  fixedPointAdjustment,
-  pendingStateTimeUntilDelayed,
-} from "utils";
+import { COLORS, getConfig } from "utils";
 
 import { HeaderCells, ColumnKey } from "./HeadRow";
 import { AssetCell } from "./cells/AssetCell";
@@ -25,7 +16,6 @@ import { BridgeFeeCell } from "./cells/BridgeFeeCell";
 import { RateCell } from "./cells/RateCell";
 import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
-import { useBridgeLimits } from "hooks";
 
 type Props = {
   deposit: Deposit;
@@ -50,29 +40,6 @@ export function DataRow({
     deposit.sourceChainId,
     deposit.assetAddr
   );
-
-  const { limits } = useBridgeLimits(
-    // disable query for filled deposits
-    deposit.status === "pending" ? token?.symbol : undefined,
-    deposit.sourceChainId,
-    deposit.destinationChainId
-  );
-
-  const isProfitable = BigNumber.from(
-    deposit.suggestedRelayerFeePct || fallbackSuggestedRelayerFeePct
-  ).lte(
-    BigNumber.from(deposit.depositRelayerFeePct || 0)
-      .mul(utils.parseEther(String(suggestedFeesDeviationBufferMultiplier)))
-      .div(fixedPointAdjustment)
-  );
-  const isDelayed =
-    deposit.status === "pending" &&
-    Math.abs(
-      DateTime.fromSeconds(deposit.depositTime).diffNow("seconds").as("seconds")
-    ) > pendingStateTimeUntilDelayed &&
-    limits
-      ? BigNumber.from(deposit.amount).gt(limits?.maxDepositInstant)
-      : false;
 
   // Hide unsupported or unknown token deposits
   if (!token) {
@@ -105,11 +72,7 @@ export function DataRow({
         <DateCell deposit={deposit} width={headerCells.date.width} />
       )}
       {isColumnDisabled(disabledColumns, "status") ? null : (
-        <StatusCell
-          deposit={deposit}
-          width={headerCells.status.width}
-          isProfitable={isProfitable}
-        />
+        <StatusCell deposit={deposit} width={headerCells.status.width} />
       )}
       {isColumnDisabled(disabledColumns, "transactions") ? null : (
         <TxCell deposit={deposit} width={headerCells.transactions.width} />
@@ -127,12 +90,7 @@ export function DataRow({
         <RewardsCell deposit={deposit} width={headerCells.rewards.width} />
       )}
       {isColumnDisabled(disabledColumns, "actions") ? null : (
-        <ActionsCell
-          deposit={deposit}
-          isProfitable={isProfitable}
-          isDelayed={isDelayed}
-          onClickSpeedUp={onClickSpeedUp}
-        />
+        <ActionsCell deposit={deposit} onClickSpeedUp={onClickSpeedUp} />
       )}
     </StyledRow>
   );
