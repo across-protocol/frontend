@@ -368,7 +368,7 @@ export const rewardPrograms: Record<
   "op-rebates": {
     programName: "OP Rewards Program",
     primaryColor: "op-red",
-    url: "/rewards/op-rewards",
+    url: "/rewards/optimism-grant-program",
     rewardTokenSymbol: "OP",
     backgroundUrl: OPCloudBackground,
   },
