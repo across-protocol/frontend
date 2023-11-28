@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { IRow } from "components/Table/Table";
-import { formatEther, formatWeiPct } from "utils";
+import { formatEther, formatWeiPct, getToken } from "utils";
 import { ReactComponent as ExternalLink16 } from "assets/icons/arrow-right-16.svg";
 import {
   ButtonCell,
@@ -26,6 +26,8 @@ import {
   StyledProgressBar,
   ExternalStackedCell,
   ExternalTextCell,
+  RewardCellLogoTextWrapper,
+  RewardCellLogo,
 } from "./GenericStakingPoolTable.styles";
 import { StyledPoolIcon } from "components/RewardTable/RewardTables.styles";
 import { StakingPool } from "utils/staking-pool";
@@ -36,6 +38,7 @@ type MetaData = {
   hasLPTokens: boolean;
   hasLPStake: boolean;
   hasRewards: boolean;
+  greyscaleTokenLogo: boolean;
 };
 
 const flexBasisLengths = [
@@ -125,17 +128,30 @@ type PoolRowCellType = {
   meta: MetaData;
 };
 
-function RowPoolCell({ data }: PoolRowCellType) {
+function RowPoolCell({ data, meta }: PoolRowCellType) {
   return (
     <PoolCell>
       {data.tokenLogsURIs ? (
         <IconPair
-          LeftIcon={<StyledPoolIcon src={data.tokenLogsURIs[0]} />}
-          RightIcon={<StyledPoolIcon src={data.tokenLogsURIs[1]} />}
+          LeftIcon={
+            <StyledPoolIcon
+              greyscale={meta.greyscaleTokenLogo}
+              src={data.tokenLogsURIs[0]}
+            />
+          }
+          RightIcon={
+            <StyledPoolIcon
+              greyscale={meta.greyscaleTokenLogo}
+              src={data.tokenLogsURIs[1]}
+            />
+          }
         />
       ) : (
         <LogoWrapper>
-          <StyledPoolIcon src={data.tokenLogoURI} />
+          <StyledPoolIcon
+            greyscale={meta.greyscaleTokenLogo}
+            src={data.tokenLogoURI}
+          />
         </LogoWrapper>
       )}
       <PoolTextStack>
@@ -229,9 +245,12 @@ function RowAgeofCapitalCell({ data, meta }: PoolRowCellType) {
 function RowRewardCell({ data, meta }: PoolRowCellType) {
   return (
     <ExternalTextCell>
-      <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-        {formatEther(data.outstandingRewards)} ACX
-      </Text>
+      <RewardCellLogoTextWrapper>
+        <RewardCellLogo src={getToken("ACX").logoURI} />
+        <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
+          {formatEther(data.outstandingRewards)} ACX
+        </Text>
+      </RewardCellLogoTextWrapper>
     </ExternalTextCell>
   );
 }
@@ -267,7 +286,7 @@ function RowButtonCell({ data, meta }: PoolRowCellType) {
   return <ButtonCell>{button}</ButtonCell>;
 }
 
-export function formatRow(data: RowData): IRow {
+export function formatRow(data: RowData, greyscaleTokenLogo: boolean): IRow {
   const rowComponents = [
     RowPoolCell,
     RowStakedLPCell,
@@ -280,6 +299,7 @@ export function formatRow(data: RowData): IRow {
     hasLPStake: BigNumber.from(data.userAmountOfLPStaked).gt(0),
     hasLPTokens: BigNumber.from(data.usersTotalLPTokens).gt(0),
     hasRewards: BigNumber.from(data.outstandingRewards).gt(0),
+    greyscaleTokenLogo,
   };
   return {
     cells: rowComponents.map((Cell, idx) => ({

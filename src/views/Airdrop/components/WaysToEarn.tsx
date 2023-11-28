@@ -3,8 +3,8 @@ import styled from "@emotion/styled";
 import { ReactComponent as PoolStarRingIcon } from "assets/pool-star-ring.svg";
 import { ReactComponent as ReferralIcon } from "assets/referral-star-ring.svg";
 
-import { tiers } from "../../Referrals/comp/RewardReferral/RewardReferral";
 import { EarnOptionCard } from "./EarnOptionCard";
+import { rewardTiers } from "utils";
 
 export type Props = {
   maxApyPct?: string;
@@ -28,7 +28,7 @@ export function WaysToEarn({ maxApyPct }: Props) {
         buttonLabel="Refer to Earn ACX"
         href="/rewards/referrals"
         bottomText={`Earn up to ${
-          tiers["5"].referralRate * 100
+          rewardTiers[rewardTiers.length - 1].referralRate * 100
         }% of fees back in ACX.`}
       />
     </OptionsContainer>

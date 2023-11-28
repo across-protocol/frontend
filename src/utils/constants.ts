@@ -24,6 +24,8 @@ import usdtLogo from "assets/usdt-logo.svg";
 import snxLogo from "assets/snx-logo.svg";
 import pooltogetherLogo from "assets/pooltogether-logo.svg";
 import unknownLogo from "assets/icons/question-24.svg";
+import ACXCloudBackground from "assets/bg-banners/cloud-staking.svg";
+import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -346,7 +348,6 @@ export const tokenList = [
 ];
 
 export type rewardProgramTypes = "referrals" | "op-rebates";
-
 export const rewardPrograms: Record<
   rewardProgramTypes,
   {
@@ -354,6 +355,7 @@ export const rewardPrograms: Record<
     primaryColor: keyof typeof COLORS;
     url: string;
     rewardTokenSymbol: string;
+    backgroundUrl: string;
   }
 > = {
   referrals: {
@@ -361,12 +363,14 @@ export const rewardPrograms: Record<
     primaryColor: "aqua",
     url: "/rewards/referrals",
     rewardTokenSymbol: "ACX",
+    backgroundUrl: ACXCloudBackground,
   },
   "op-rebates": {
     programName: "OP Rewards Program",
     primaryColor: "op-red",
     url: "/rewards/op-rewards",
     rewardTokenSymbol: "OP",
+    backgroundUrl: OPCloudBackground,
   },
 };
 
@@ -614,6 +618,7 @@ export const COLORS = {
   "op-red-15": "var(--color-interface-op-red-15)",
   yellow: "var(--color-interface-yellow)",
   aqua: "var(--color-interface-aqua)",
+  "aqua-0": "var(--color-interface-aqua-0)",
   "aqua-5": "var(--color-interface-aqua-5)",
   "aqua-15": "var(--color-interface-aqua-15)",
   teal: "var(--color-interface-teal)",
@@ -651,26 +656,46 @@ export const rewardTiers = [
     title: "Copper tier",
     titleSecondary: "40% referral rate",
     body: "Starting tier with no requirements to join.",
+    name: "Copper",
+    referralRate: 0.4,
+    referrals: 0,
+    volume: 0,
   },
   {
     title: "Bronze tier",
     titleSecondary: "50% referral rate",
     body: "Requires over $50,000 of bridge volume or 3 unique referral transfers.",
+    name: "Bronze",
+    referralRate: 0.5,
+    referrals: 3,
+    volume: 50000,
   },
   {
     title: "Silver tier",
     titleSecondary: "60% referral rate",
     body: "Requires over $100,000 of bridge volume or 5 unique referral transfers.",
+    name: "Silver",
+    referralRate: 0.6,
+    referrals: 5,
+    volume: 100000,
   },
   {
     title: "Gold tier",
     titleSecondary: "70% referral rate",
     body: "Requires over $250,000 of bridge volume or 10 unique referral transfers.",
+    name: "Gold",
+    referralRate: 0.7,
+    referrals: 10,
+    volume: 250000,
   },
   {
     title: "Platinum tier",
     titleSecondary: "80% referral rate",
     body: "Requires over $500,000 of bridge volume or 20 unique referral transfers.",
+    name: "Platinum",
+    referralRate: 0.8,
+    referrals: 20,
+    volume: 500000,
   },
 ];
 

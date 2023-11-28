@@ -6,13 +6,15 @@ import { formatRow, headers } from "./GenericStakingPoolFormatter";
 type GenericStakingPoolTableType = {
   poolData?: StakingPool[];
   isLoading?: boolean;
+  greyscaleTokenLogo?: boolean;
 };
 
 const GenericStakingPoolTable = ({
   poolData = [],
   isLoading,
+  greyscaleTokenLogo = false,
 }: GenericStakingPoolTableType) => {
-  const rows = poolData.map((datum) => formatRow(datum));
+  const rows = poolData.map((datum) => formatRow(datum, greyscaleTokenLogo));
   return (
     <Wrapper>
       <RewardTable
