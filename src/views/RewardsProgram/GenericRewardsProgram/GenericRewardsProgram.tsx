@@ -113,4 +113,8 @@ const CardStack = styled.div`
 const TableWrapper = styled.div`
   max-width: 100%;
   overflow-x: scroll;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
