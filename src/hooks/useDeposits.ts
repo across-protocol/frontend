@@ -187,6 +187,7 @@ async function getDeposits(
     `${rewardsApiUrl}/deposits/tx-page`,
     {
       params: {
+        status: params.status,
         skipOldUnprofitable: params.skipOldUnprofitable,
         limit: params.limit,
         offset: params.offset,
