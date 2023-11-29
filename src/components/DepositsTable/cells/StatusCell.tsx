@@ -11,22 +11,16 @@ import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 import { formatSeconds, COLORS } from "utils";
 
 import { BaseCell } from "./BaseCell";
+import { useIsProfitableAndDelayed } from "../hooks/useIsProfitableAndDelayed";
 
 type Props = {
   deposit: Deposit;
   width: number;
-  isProfitable?: boolean;
 };
 
-export function StatusCell({ deposit, width, isProfitable }: Props) {
+export function StatusCell({ deposit, width }: Props) {
   if (deposit.status === "pending") {
-    return (
-      <PendingStatusCell
-        deposit={deposit}
-        width={width}
-        isProfitable={isProfitable}
-      />
-    );
+    return <PendingStatusCell deposit={deposit} width={width} />;
   }
 
   return <FilledStatusCell deposit={deposit} width={width} />;
@@ -46,24 +40,41 @@ function FilledStatusCell({ deposit, width }: Props) {
         <Text color="aqua">{formatSeconds(elapsedSeconds || 0)}</Text>
       ) : null}
       <FinalizedText color="aqua" size={doesFillTimeExist ? "sm" : "md"}>
-        Finalized
+        Filled
         <CheckIcon />
       </FinalizedText>
     </StyledFilledStatusCell>
   );
 }
 
-function PendingStatusCell({ deposit, width, isProfitable }: Props) {
+function PendingStatusCell({ width, deposit }: Props) {
+  const { isDelayed, isProfitable } = useIsProfitableAndDelayed(deposit);
+
   return (
     <StyledPendingStatusCell width={width}>
-      <Text color={isProfitable ? "light-200" : "yellow"}>
-        {isProfitable ? "Processing..." : "Fee too low"}
+      <Text color={isProfitable && !isDelayed ? "light-200" : "yellow"}>
+        {isDelayed ? "Delayed" : isProfitable ? "Processing..." : "Fee too low"}
       </Text>
-      {isProfitable ? (
+      {isDelayed ? (
+        <Tooltip
+          tooltipId={`delayed-cell-info-${deposit.depositTxHash}`}
+          placement="bottom"
+          title="Relayer running out of funds"
+          body={
+            <Text size="sm" color="light-300">
+              Due to low relay funds this transaction may take up to 3 hours to
+              complete. Your full relayer fee will be refunded for the
+              inconvenience.
+            </Text>
+          }
+        >
+          <StyledInfoIcon />
+        </Tooltip>
+      ) : isProfitable ? (
         <StyledLoadingIcon />
       ) : (
         <Tooltip
-          tooltipId="fee-too-low"
+          tooltipId={`fee-too-low-${deposit.depositTxHash}`}
           placement="bottom"
           title="Relayer fee is too low"
           body={

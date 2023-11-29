@@ -1,16 +1,7 @@
 import styled from "@emotion/styled";
-import { BigNumber, utils } from "ethers";
-import { DateTime } from "luxon";
 
 import { Deposit } from "hooks/useDeposits";
-import {
-  COLORS,
-  getConfig,
-  fallbackSuggestedRelayerFeePct,
-  suggestedFeesDeviationBufferMultiplier,
-  fixedPointAdjustment,
-  pendingStateTimeUntilSlow,
-} from "utils";
+import { COLORS, getConfig } from "utils";
 
 import { HeaderCells, ColumnKey } from "./HeadRow";
 import { AssetCell } from "./cells/AssetCell";
@@ -20,7 +11,8 @@ import { AddressCell } from "./cells/AddressCell";
 import { DateCell } from "./cells/DateCell";
 import { StatusCell } from "./cells/StatusCell";
 import { TxCell } from "./cells/TxCell";
-import { FeeCell } from "./cells/FeeCell";
+import { NetFeeCell } from "./cells/NetFeeCell";
+import { BridgeFeeCell } from "./cells/BridgeFeeCell";
 import { RateCell } from "./cells/RateCell";
 import { RewardsCell } from "./cells/RewardsCell";
 import { ActionsCell } from "./cells/ActionsCell";
@@ -48,19 +40,6 @@ export function DataRow({
     deposit.sourceChainId,
     deposit.assetAddr
   );
-
-  const isProfitable = BigNumber.from(
-    deposit.suggestedRelayerFeePct || fallbackSuggestedRelayerFeePct
-  ).lte(
-    BigNumber.from(deposit.depositRelayerFeePct)
-      .mul(utils.parseEther(String(suggestedFeesDeviationBufferMultiplier)))
-      .div(fixedPointAdjustment)
-  );
-  const isSlowRelay =
-    deposit.status === "pending" &&
-    Math.abs(
-      DateTime.fromSeconds(deposit.depositTime).diffNow("seconds").as("seconds")
-    ) > pendingStateTimeUntilSlow;
 
   // Hide unsupported or unknown token deposits
   if (!token) {
@@ -93,31 +72,25 @@ export function DataRow({
         <DateCell deposit={deposit} width={headerCells.date.width} />
       )}
       {isColumnDisabled(disabledColumns, "status") ? null : (
-        <StatusCell
-          deposit={deposit}
-          width={headerCells.status.width}
-          isProfitable={isProfitable}
-        />
+        <StatusCell deposit={deposit} width={headerCells.status.width} />
       )}
       {isColumnDisabled(disabledColumns, "transactions") ? null : (
         <TxCell deposit={deposit} width={headerCells.transactions.width} />
       )}
-      {isColumnDisabled(disabledColumns, "netFee") ? null : (
-        <FeeCell deposit={deposit} width={headerCells.netFee.width} />
+      {isColumnDisabled(disabledColumns, "bridgeFee") ? null : (
+        <BridgeFeeCell deposit={deposit} width={headerCells.netFee.width} />
       )}
-      {isColumnDisabled(disabledColumns, "loyaltyRate") ? null : (
-        <RateCell deposit={deposit} width={headerCells.loyaltyRate.width} />
+      {isColumnDisabled(disabledColumns, "netFee") ? null : (
+        <NetFeeCell deposit={deposit} width={headerCells.netFee.width} />
+      )}
+      {isColumnDisabled(disabledColumns, "rewardsRate") ? null : (
+        <RateCell deposit={deposit} width={headerCells.rewardsRate.width} />
       )}
       {isColumnDisabled(disabledColumns, "rewards") ? null : (
         <RewardsCell deposit={deposit} width={headerCells.rewards.width} />
       )}
       {isColumnDisabled(disabledColumns, "actions") ? null : (
-        <ActionsCell
-          deposit={deposit}
-          isProfitable={isProfitable}
-          isSlowRelay={isSlowRelay}
-          onClickSpeedUp={onClickSpeedUp}
-        />
+        <ActionsCell deposit={deposit} onClickSpeedUp={onClickSpeedUp} />
       )}
     </StyledRow>
   );

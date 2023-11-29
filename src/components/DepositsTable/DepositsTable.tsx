@@ -8,12 +8,14 @@ export type DepositsTableProps = {
   disabledColumns?: ColumnKey[];
   onClickSpeedUp?: (deposit: Deposit) => void;
   deposits: Deposit[];
+  filterKey?: string;
 };
 
 export function DepositsTable({
   disabledColumns = [],
   deposits,
   onClickSpeedUp,
+  filterKey = "",
 }: DepositsTableProps) {
   return (
     <Wrapper>
@@ -24,7 +26,7 @@ export function DepositsTable({
             <DataRow
               disabledColumns={disabledColumns}
               headerCells={headerCells}
-              key={deposit.depositId}
+              key={`${filterKey}${deposit.sourceChainId}-${deposit.depositId}`}
               deposit={deposit}
               onClickSpeedUp={onClickSpeedUp}
             />
