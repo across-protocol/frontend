@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { LayoutV2 } from "components";
 import BreadcrumbV2 from "components/BreadcrumbV2";
 import { BigNumber } from "ethers";
+import { useQueryClient } from "react-query";
 import { QUERIESV2, rewardProgramTypes } from "utils";
 import GenericRewardClaimCard from "./GenericRewardClaimCard";
 import GenericInformationCard, {
@@ -9,8 +10,8 @@ import GenericInformationCard, {
 } from "./GenericInformationCard";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { useGenericRewardProgram } from "../hooks/useGenericRewardProgram";
-import GenericConnectToWallet from "./GenericConnectToWallet";
 import { PaginatedDepositsTable } from "components/DepositsTable";
+import GenericEmptyTable from "./GenericEmptyTable";
 
 type GenericRewardsProgramProps = {
   programName: string;
@@ -35,10 +36,21 @@ const GenericRewardsProgram = ({
     pageSize,
     setPageSize,
     pageSizes,
-    totalReferrals,
-    referrals,
+    rewardsQuery,
     isConnected,
+    connect,
   } = useGenericRewardProgram(program);
+  const queryClient = useQueryClient();
+
+  const deposits = rewardsQuery.data?.deposits || [];
+  const depositsCount = rewardsQuery.data?.pagination.total || 0;
+
+  const showEmptyTable =
+    !isConnected ||
+    rewardsQuery.isError ||
+    rewardsQuery.isLoading ||
+    deposits.length === 0;
+
   return (
     <LayoutV2 maxWidth={1140}>
       <Content>
@@ -51,22 +63,36 @@ const GenericRewardsProgram = ({
           <GenericInformationCard program={program} rows={metaCard} />
         </CardStack>
         <SectionTitleWrapperV2 title="My transfers">
-          {isConnected ? (
+          {showEmptyTable ? (
+            <GenericEmptyTable
+              programName={programName}
+              isConnected={isConnected}
+              isLoading={rewardsQuery.isLoading}
+              isError={rewardsQuery.isError}
+              isEmpty={deposits.length === 0}
+              onClickConnect={() => {
+                connect({ trackSection: "referralTable" });
+              }}
+              onClickReload={async () => {
+                await queryClient.cancelQueries({ queryKey: [programName] });
+                await queryClient.resetQueries({ queryKey: [programName] });
+                rewardsQuery.refetch();
+              }}
+            />
+          ) : (
             <TableWrapper data-cy="rewards-table">
               <PaginatedDepositsTable
-                deposits={referrals}
+                deposits={deposits}
                 onPageChange={setCurrentPage}
                 currentPage={currentPage}
                 pageSizes={pageSizes}
                 onPageSizeChange={setPageSize}
                 currentPageSize={pageSize}
-                totalCount={totalReferrals}
-                onClickSpeedUp={() => {}}
+                totalCount={depositsCount}
                 initialPageSize={pageSize}
+                disabledColumns={["actions", "bridgeFee"]}
               />
             </TableWrapper>
-          ) : (
-            <GenericConnectToWallet programName={programName} />
           )}
         </SectionTitleWrapperV2>
       </Content>

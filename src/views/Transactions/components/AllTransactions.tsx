@@ -38,9 +38,10 @@ export function AllTransactions({ statusFilter }: Props) {
         <Text size="lg">Something went wrong... Please try again later.</Text>
         <SecondaryButton
           size="md"
-          onClick={() => {
-            queryClient.cancelQueries({ queryKey: ["deposits"] });
-            queryClient.invalidateQueries({ queryKey: ["deposits"] });
+          onClick={async () => {
+            await queryClient.cancelQueries({ queryKey: ["deposits"] });
+            await queryClient.resetQueries({ queryKey: ["deposits"] });
+            depositsQuery.refetch();
           }}
         >
           Reload data
