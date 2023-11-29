@@ -77,7 +77,7 @@ function FillTxDropdownMenu({ deposit }: { deposit: Deposit }) {
               <DropdownMenuItemContentLeft>
                 <Text color="grey-400">Fill</Text>
                 <Text color="light-200">
-                  {shortenAddress(deposit.depositTxHash, ". .", 4)}
+                  {shortenAddress(txHash, ". .", 4)}
                 </Text>
               </DropdownMenuItemContentLeft>
               <ArrowExternalLink />

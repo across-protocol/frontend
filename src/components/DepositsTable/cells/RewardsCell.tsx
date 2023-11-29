@@ -4,7 +4,7 @@ import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
 
 import { BaseCell } from "./BaseCell";
-import { formatUnits, getToken } from "utils";
+import { formatUnits, getToken, formatMaxFracDigits } from "utils";
 
 type Props = {
   deposit: Deposit;
@@ -20,12 +20,16 @@ export function RewardsCell({ deposit, width }: Props) {
     <StyledRewardsCell width={width}>
       {deposit.rewards && rewardToken ? (
         <>
-          <img src={rewardToken.logoURI} alt={rewardToken.symbol} />
-          <Text color="light-200">
-            {formatUnits(deposit.rewards.amount, rewardToken.decimals)}{" "}
-            {rewardToken.symbol}
+          <TitleWrapper>
+            <img src={rewardToken.logoURI} alt={rewardToken.symbol} />
+            <Text color="light-200">
+              {formatUnits(deposit.rewards.amount, rewardToken.decimals)}{" "}
+              {rewardToken.symbol}
+            </Text>
+          </TitleWrapper>
+          <Text color="grey-400">
+            ${formatMaxFracDigits(Number(deposit.rewards.usd), 4)}
           </Text>
-          <Text color="grey-400">${formatUnits(deposit.rewards.usd, 18)}</Text>
         </>
       ) : (
         <Text>-</Text>
@@ -36,9 +40,16 @@ export function RewardsCell({ deposit, width }: Props) {
 
 const StyledRewardsCell = styled(BaseCell)`
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const TitleWrapper = styled.div`
+  display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 8px;
 
   > img {
     width: 16px;

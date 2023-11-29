@@ -39,17 +39,8 @@ const Splash = lazyWithRetry(
   () => import(/* webpackChunkName: "Splash" */ "./views/Splash")
 );
 const Airdrop = lazyWithRetry(() => import("./views/Airdrop"));
-const MyTransactions = lazyWithRetry(
-  () =>
-    import(
-      /* webpackChunkName: "MyTransactions" */ "./views/Transactions/myTransactions"
-    )
-);
-const AllTransactions = lazyWithRetry(
-  () =>
-    import(
-      /* webpackChunkName: "AllTransactions" */ "./views/Transactions/allTransactions"
-    )
+const Transactions = lazyWithRetry(
+  () => import(/* webpackChunkName: "Transactions" */ "./views/Transactions")
 );
 const Staking = lazyWithRetry(
   () => import(/* webpackChunkName: "RewardStaking" */ "./views/Staking")
@@ -149,8 +140,7 @@ const Routes: React.FC = () => {
       <ScrollToTop />
       <Suspense fallback={<BouncingDotsLoader />}>
         <Switch>
-          <Route exact path="/transactions" component={MyTransactions} />
-          <Route exact path="/transactions/all" component={AllTransactions} />
+          <Route exact path="/transactions" component={Transactions} />
           <Route exact path="/pool" component={LiquidityPool} />
           <Route exact path="/rewards/referrals" component={Referrals} />
           <Route exact path="/rewards" component={Rewards} />

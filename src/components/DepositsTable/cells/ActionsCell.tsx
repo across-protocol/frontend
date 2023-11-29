@@ -8,23 +8,20 @@ import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";
 import { COLORS } from "utils";
 
+import { useIsProfitableAndDelayed } from "../hooks/useIsProfitableAndDelayed";
+
 type Props = {
   deposit: Deposit;
-  isSlowRelay?: boolean;
-  isProfitable?: boolean;
   onClickSpeedUp?: (deposit: Deposit) => void;
 };
 
-export function ActionsCell({
-  deposit,
-  isProfitable,
-  isSlowRelay,
-  onClickSpeedUp,
-}: Props) {
+export function ActionsCell({ deposit, onClickSpeedUp }: Props) {
+  const { isDelayed, isProfitable } = useIsProfitableAndDelayed(deposit);
+
   const slowRelayInfo =
-    isSlowRelay && isProfitable ? (
+    isDelayed && isProfitable ? (
       <Tooltip
-        tooltipId="slow-relay-info"
+        tooltipId="delayed-info"
         title="Relayer running out of funds"
         maxWidth={320}
         placement="left"

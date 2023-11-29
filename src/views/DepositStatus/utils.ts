@@ -35,14 +35,18 @@ export function convertForDepositQuery(
       sendDepositArgs.relayerFeePct
     ).toString(),
     feeBreakdown: {
-      bridgeFee: {
-        pct: quote.totalBridgeFeePct,
-        usd: quote.totalBridgeFeeUsd,
-      },
-      destinationGasFee: {
-        pct: quote.relayGasFeePct,
-        usd: quote.relayGasFeeTotalUsd,
-      },
+      lpFeeUsd: quote.lpFeeTotalUsd,
+      lpFeePct: quote.lpFeePct,
+      lpFeeAmount: quote.lpFeeTotal,
+      relayCapitalFeeUsd: quote.capitalFeeTotalUsd,
+      relayCapitalFeePct: quote.capitalFeePct,
+      relayCapitalFeeAmount: quote.capitalFeeTotal,
+      relayGasFeeUsd: quote.relayGasFeeTotalUsd,
+      relayGasFeePct: quote.relayGasFeePct,
+      relayGasFeeAmount: quote.relayFeeTotal,
+      totalBridgeFeeUsd: quote.totalBridgeFeeUsd,
+      totalBridgeFeePct: quote.totalBridgeFeePct,
+      totalBridgeFeeAmount: quote.totalBridgeFee,
     },
   };
 }
@@ -79,14 +83,18 @@ export function convertForFillQuery(
       sendDepositArgs.relayerFeePct
     ).toString(),
     feeBreakdown: {
-      bridgeFee: {
-        pct: quote.totalBridgeFeePct,
-        usd: quote.totalBridgeFeeUsd,
-      },
-      destinationGasFee: {
-        pct: quote.relayGasFeePct,
-        usd: quote.relayGasFeeTotalUsd,
-      },
+      lpFeeUsd: quote.lpFeeTotalUsd,
+      lpFeePct: quote.lpFeePct,
+      lpFeeAmount: quote.lpFeeTotal,
+      relayCapitalFeeUsd: quote.capitalFeeTotalUsd,
+      relayCapitalFeePct: quote.capitalFeePct,
+      relayCapitalFeeAmount: quote.capitalFeeTotal,
+      relayGasFeeUsd: quote.relayGasFeeTotalUsd,
+      relayGasFeePct: quote.relayGasFeePct,
+      relayGasFeeAmount: quote.relayFeeTotal,
+      totalBridgeFeeUsd: quote.totalBridgeFeeUsd,
+      totalBridgeFeePct: quote.totalBridgeFeePct,
+      totalBridgeFeeAmount: quote.totalBridgeFee,
     },
   };
 }

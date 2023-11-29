@@ -15,6 +15,8 @@ import {
   formatWeiPct,
   getConfig,
   getToken,
+  isBigNumberish,
+  formatMaxFracDigits,
 } from "utils";
 
 type Props = {
@@ -22,12 +24,13 @@ type Props = {
   width: number;
 };
 
-export function FeeCell({ deposit, width }: Props) {
-  const feeCellValue = !deposit.feeBreakdown ? (
-    <FeeWithoutBreakdown deposit={deposit} />
-  ) : (
-    <FeeWithBreakdown deposit={deposit} />
-  );
+export function NetFeeCell({ deposit, width }: Props) {
+  const feeCellValue =
+    !deposit.feeBreakdown || Object.keys(deposit.feeBreakdown).length === 0 ? (
+      <FeeWithoutBreakdown deposit={deposit} />
+    ) : (
+      <FeeWithBreakdown deposit={deposit} />
+    );
 
   return <StyledFeeCell width={width}>{feeCellValue}</StyledFeeCell>;
 }
@@ -43,23 +46,23 @@ function FeeWithoutBreakdown({ deposit }: { deposit: Deposit }) {
       <Text color="light-200">
         {formatUnits(
           BigNumber.from(deposit.amount)
-            .mul(deposit.depositRelayerFeePct)
+            .mul(deposit.depositRelayerFeePct || 0)
             .div(fixedPointAdjustment),
           tokenInfo.decimals
         )}{" "}
         {tokenInfo.symbol}
       </Text>
       <Text size="sm" color="grey-400">
-        {formatWeiPct(deposit.depositRelayerFeePct, 3)}%
+        {formatWeiPct(deposit.depositRelayerFeePct || 0, 3)}%
       </Text>
     </>
   );
 }
 
 function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
-  const netFee = BigNumber.from(deposit.feeBreakdown?.bridgeFee.usd || 0)
-    .add(BigNumber.from(deposit.feeBreakdown?.destinationGasFee.usd || 0))
-    .sub(BigNumber.from(deposit.rewards?.usd || 0));
+  const netFee =
+    Number(deposit.feeBreakdown?.totalBridgeFeeUsd || 0) -
+    Number(deposit.rewards?.usd || 0);
 
   const tokenInfo = getConfig().getTokenInfoByAddress(
     deposit.sourceChainId,
@@ -69,15 +72,25 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
     ? getToken(deposit.rewards.type === "op-rebates" ? "OP" : "ACX")
     : undefined;
 
+  const relayCapitalFeeAmount = BigNumber.from(
+    isBigNumberish(deposit.feeBreakdown?.relayCapitalFeeAmount)
+      ? deposit.feeBreakdown?.relayCapitalFeeAmount || 0
+      : 0
+  );
+  const lpFeeAmount = BigNumber.from(
+    isBigNumberish(deposit.feeBreakdown?.lpFeeAmount)
+      ? deposit.feeBreakdown?.lpFeeAmount || 0
+      : 0
+  );
   return (
     <>
-      <Text color="light-200">${formatUnits(netFee, 18)}</Text>
+      <Text color="light-200">${netFee.toFixed(2)}</Text>
       <LowerRow>
         <Text size="sm" color="grey-400">
           Fee breakdown
         </Text>
         <Tooltip
-          tooltipId="fee-breakdown"
+          tooltipId={`fee-breakdown-${deposit.depositTxHash}`}
           placement="bottom-start"
           title="Fee breakdown"
           maxWidth={400}
@@ -88,7 +101,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                   Net fee
                 </Text>
                 <Text size="sm" color="light-100">
-                  ${formatUnits(netFee, 18)}
+                  ${formatMaxFracDigits(netFee, 2)}
                 </Text>
               </FeeBreakdownRow>
               <Divider />
@@ -98,13 +111,16 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                 </Text>
                 <FeeValueWrapper>
                   <Text size="sm" color="grey-400">
-                    ${formatUnits(deposit.feeBreakdown?.bridgeFee.usd || 0, 18)}
+                    $
+                    {formatMaxFracDigits(
+                      Number(deposit.feeBreakdown?.relayCapitalFeeUsd || 0) +
+                        Number(deposit.feeBreakdown?.lpFeeUsd || 0),
+                      2
+                    )}
                   </Text>
                   <Text size="sm" color="light-200">
                     {formatUnits(
-                      BigNumber.from(deposit.feeBreakdown?.bridgeFee.pct || 0)
-                        .mul(deposit.amount)
-                        .div(fixedPointAdjustment),
+                      relayCapitalFeeAmount.add(lpFeeAmount),
                       tokenInfo.decimals
                     )}{" "}
                     {tokenInfo.symbol}
@@ -119,18 +135,18 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                 <FeeValueWrapper>
                   <Text size="sm" color="grey-400">
                     $
-                    {formatUnits(
-                      deposit.feeBreakdown?.destinationGasFee.usd || 0,
-                      18
+                    {formatMaxFracDigits(
+                      Number(deposit.feeBreakdown?.relayGasFeeUsd || 0),
+                      4
                     )}
                   </Text>
                   <Text size="sm" color="light-200">
                     {formatUnits(
                       BigNumber.from(
-                        deposit.feeBreakdown?.destinationGasFee.pct || 0
-                      )
-                        .mul(deposit.amount)
-                        .div(fixedPointAdjustment),
+                        isBigNumberish(deposit.feeBreakdown?.relayGasFeeAmount)
+                          ? deposit.feeBreakdown?.relayGasFeeAmount || 0
+                          : 0
+                      ),
                       tokenInfo.decimals
                     )}{" "}
                     {tokenInfo.symbol}
@@ -145,7 +161,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                   </Text>
                   <FeeValueWrapper>
                     <Text size="sm" color="aqua">
-                      ${formatUnits(deposit.rewards.usd, rewardToken.decimals)}
+                      ${formatMaxFracDigits(Number(deposit.rewards.usd), 4)}
                     </Text>
                     <img src={rewardToken.logoURI} alt={rewardToken.symbol} />
                   </FeeValueWrapper>
