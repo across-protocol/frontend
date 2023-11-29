@@ -24,6 +24,8 @@ import usdtLogo from "assets/usdt-logo.svg";
 import snxLogo from "assets/snx-logo.svg";
 import pooltogetherLogo from "assets/pooltogether-logo.svg";
 import unknownLogo from "assets/icons/question-24.svg";
+import ACXCloudBackground from "assets/bg-banners/cloud-staking.svg";
+import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -73,6 +75,7 @@ export type ChainInfo = {
   chainId: ChainId;
   logoURI: string;
   rpcUrl?: string;
+  customRpcUrl?: string;
   explorerUrl: string;
   constructExplorerLink: (txHash: string) => string;
   pollingInterval: number;
@@ -102,6 +105,7 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: defaultConstructExplorerLink("https://etherscan.io"),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_1_PROVIDER_URL,
   },
   {
     name: "Arbitrum",
@@ -114,6 +118,7 @@ export const chainInfoList: ChainInfoList = [
       `https://arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "AETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
   },
   {
     name: "Optimism",
@@ -125,6 +130,7 @@ export const chainInfoList: ChainInfoList = [
       `https://optimistic.etherscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "OETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_10_PROVIDER_URL,
   },
   {
     name: "Polygon",
@@ -138,6 +144,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "MATIC",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
   },
   {
     name: "zkSync",
@@ -151,6 +158,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: 10_000,
+    customRpcUrl: process.env.REACT_APP_CHAIN_324_PROVIDER_URL,
   },
   {
     name: "Base",
@@ -162,6 +170,7 @@ export const chainInfoList: ChainInfoList = [
     constructExplorerLink: defaultConstructExplorerLink("https://basescan.org"),
     nativeCurrencySymbol: "ETH",
     pollingInterval: 10_000,
+    customRpcUrl: process.env.REACT_APP_CHAIN_8453_PROVIDER_URL,
   },
   // testnets
   {
@@ -175,6 +184,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_5_PROVIDER_URL,
   },
   {
     name: "Mumbai",
@@ -187,6 +197,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "WMATIC",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_80001_PROVIDER_URL,
   },
   {
     name: "Arbitrum Goerli",
@@ -198,6 +209,7 @@ export const chainInfoList: ChainInfoList = [
       `https://testnet.arbiscan.io/tx/${txHash}`,
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_421613_PROVIDER_URL,
   },
   {
     name: "zkSync Goerli",
@@ -211,6 +223,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_280_PROVIDER_URL,
   },
   {
     name: "Base Goerli",
@@ -224,6 +237,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_84531_PROVIDER_URL,
   },
 ];
 
@@ -300,6 +314,7 @@ export const orderedTokenSymbolLogoMap = {
   SNX: snxLogo,
   POOL: pooltogetherLogo,
   BOBA: bobaLogo,
+  OP: optimismLogo,
 };
 
 export const tokenList = [
@@ -332,6 +347,33 @@ export const tokenList = [
   ...externalLPsForStaking[hubPoolChainId],
 ];
 
+export type rewardProgramTypes = "referrals" | "op-rebates";
+export const rewardPrograms: Record<
+  rewardProgramTypes,
+  {
+    programName: string;
+    primaryColor: keyof typeof COLORS;
+    url: string;
+    rewardTokenSymbol: string;
+    backgroundUrl: string;
+  }
+> = {
+  referrals: {
+    programName: "Across Referral Program",
+    primaryColor: "aqua",
+    url: "/rewards/referrals",
+    rewardTokenSymbol: "ACX",
+    backgroundUrl: ACXCloudBackground,
+  },
+  "op-rebates": {
+    programName: "OP Rewards Program",
+    primaryColor: "op-red",
+    url: "/rewards/op-rewards",
+    rewardTokenSymbol: "OP",
+    backgroundUrl: OPCloudBackground,
+  },
+};
+
 // process.env variables
 export const rewardsApiUrl =
   process.env.REACT_APP_REWARDS_API_URL || "https://api.across.to";
@@ -356,7 +398,15 @@ export const debug = Boolean(process.env.REACT_APP_DEBUG);
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
-
+export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = [
+  // Our referrals program is always available
+  "referrals",
+  ...(
+    String(process.env.REACT_APP_REBATE_PROGRAMS_AVAILABLE || "")
+      .toLowerCase()
+      .split(",") as (keyof typeof rewardPrograms)[]
+  ).filter((v) => v),
+];
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
 
@@ -563,8 +613,13 @@ export const QUERIESV2 = {
 // See src/components/GlobalStyles/GlobalStyles.tsx for the CSS variables
 export const COLORS = {
   red: "var(--color-interface-red)",
+  "op-red": "var(--color-interface-op-red)",
+  "op-red-5": "var(--color-interface-op-red-5)",
+  "op-red-15": "var(--color-interface-op-red-15)",
   yellow: "var(--color-interface-yellow)",
   aqua: "var(--color-interface-aqua)",
+  "aqua-0": "var(--color-interface-aqua-0)",
+  "aqua-5": "var(--color-interface-aqua-5)",
   "aqua-15": "var(--color-interface-aqua-15)",
   teal: "var(--color-interface-teal)",
   "teal-5": "var(--color-interface-teal-5)",
@@ -573,6 +628,8 @@ export const COLORS = {
   "black-800": "var(--color-neutrals-black-800)",
   "black-900": "var(--color-neutrals-black-900)",
   "grey-400": "var(--color-neutrals-grey-400)",
+  "grey-400-15": "var(--color-neutrals-grey-400-15)",
+  "grey-400-5": "var(--color-neutrals-grey-400-5)",
   "grey-500": "var(--color-neutrals-grey-500)",
   "grey-600": "var(--color-neutrals-grey-600)",
   "light-100": "var(--color-neutrals-light-100)",
@@ -599,26 +656,46 @@ export const rewardTiers = [
     title: "Copper tier",
     titleSecondary: "40% referral rate",
     body: "Starting tier with no requirements to join.",
+    name: "Copper",
+    referralRate: 0.4,
+    referrals: 0,
+    volume: 0,
   },
   {
     title: "Bronze tier",
     titleSecondary: "50% referral rate",
     body: "Requires over $50,000 of bridge volume or 3 unique referral transfers.",
+    name: "Bronze",
+    referralRate: 0.5,
+    referrals: 3,
+    volume: 50000,
   },
   {
     title: "Silver tier",
     titleSecondary: "60% referral rate",
     body: "Requires over $100,000 of bridge volume or 5 unique referral transfers.",
+    name: "Silver",
+    referralRate: 0.6,
+    referrals: 5,
+    volume: 100000,
   },
   {
     title: "Gold tier",
     titleSecondary: "70% referral rate",
     body: "Requires over $250,000 of bridge volume or 10 unique referral transfers.",
+    name: "Gold",
+    referralRate: 0.7,
+    referrals: 10,
+    volume: 250000,
   },
   {
     title: "Platinum tier",
     titleSecondary: "80% referral rate",
     body: "Requires over $500,000 of bridge volume or 20 unique referral transfers.",
+    name: "Platinum",
+    referralRate: 0.8,
+    referrals: 20,
+    volume: 500000,
   },
 ];
 
@@ -689,5 +766,5 @@ export const walletBlacklist = (process.env.REACT_APP_WALLET_BLACKLIST || "")
 // Pre-computed gas expenditure for deposits used for estimations
 export const gasExpenditureDeposit = BigNumber.from(90_000);
 
-// Used to determine whether to show the "slow" warning in the deposits table
-export const pendingStateTimeUntilSlow = 30 * 60; // 30 mins
+// Used to determine whether to show the "delayed" warning in the deposits table
+export const pendingStateTimeUntilDelayed = 5 * 60; // 5 mins

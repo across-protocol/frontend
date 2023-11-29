@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { getChainInfo, shortenAddress } from "utils";
+import { getChainInfo, getToken, shortenAddress } from "utils";
 import { ethers } from "ethers";
 import { ICell, IRow } from "components/Table/Table.d";
 import { Referral } from "hooks/useReferrals";
@@ -32,6 +32,8 @@ import {
   RewardsCell,
   RewardsHeadCell,
   ExplorerLinkContainer,
+  RewardCellLogoTextWrapper,
+  RewardCellLogo,
 } from "components/RewardTable/RewardTables.styles";
 import { ReactComponent as ExternalLink16 } from "assets/icons/external-link-16.svg";
 import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
@@ -201,9 +203,12 @@ function formatMyReferralsRows(referrals: Referral[], account: string): IRow[] {
         {
           value: (
             <RewardsCell>
-              {`${Number(ethers.utils.formatUnits(r.acxRewards, 18)).toFixed(
-                4
-              )} ACX`}
+              <RewardCellLogoTextWrapper>
+                <RewardCellLogo src={getToken("ACX").logoURI} />
+                {`${Number(ethers.utils.formatUnits(r.acxRewards, 18)).toFixed(
+                  4
+                )} ACX`}
+              </RewardCellLogoTextWrapper>
             </RewardsCell>
           ),
         },

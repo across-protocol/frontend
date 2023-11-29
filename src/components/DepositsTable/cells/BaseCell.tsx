@@ -6,4 +6,6 @@ export const BaseCell = styled.td<{ width: number }>`
   flex-direction: row;
   align-items: center;
   width: ${({ width }) => width}px;
+
+  overflow-x: hidden;
 `;

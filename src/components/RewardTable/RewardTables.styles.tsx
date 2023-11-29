@@ -112,6 +112,17 @@ export const RewardsCell = styled(TableCell)`
   min-width: 120px;
 `;
 
+export const RewardCellLogoTextWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const RewardCellLogo = styled.img`
+  height: 16px;
+  width: 16px;
+`;
+
 export const RewardsHeadCell = styled(HeadCell)`
   min-width: 202px;
 `;
@@ -265,9 +276,11 @@ export const ReferralIconContainer = styled.div`
 `;
 
 export const StyledETHIcon = styled(ETHLogo)``;
-export const StyledPoolIcon = styled.img`
+export const StyledPoolIcon = styled.img<{ greyscale?: boolean }>`
   width: 32px;
   height: 32px;
+
+  filter: ${({ greyscale }) => (greyscale ? "grayscale(100%)" : "none")};
 `;
 
 export const StyledUNILogo = styled(UNILogo)``;

@@ -230,7 +230,7 @@ const ReferralTierComponent: React.FC<{
       Icon: IncreaseIcon,
       title: { desktop: "Referral Rate", mobile: "Rate" },
       primaryText: `${Math.floor(
-        referralsSummary.referralRate * 0.75 * 100
+        referralsSummary.referralRate * 100
       )}% referral rate`,
       secondaryText: nextTierTernary({
         arrow: false,

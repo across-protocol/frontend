@@ -8,6 +8,7 @@ import {
   defaultRefetchInterval,
 } from "utils";
 import { getLocalDeposits, removeLocalDeposits } from "../utils/local-deposits";
+import { DepositStatusFilter } from "views/Transactions/types";
 
 export type DepositStatus = "pending" | "filled";
 
@@ -37,21 +38,36 @@ export type Deposit = {
   initialRelayerFeePct?: string;
   suggestedRelayerFeePct?: string;
   fillTime?: number;
-  rewards?: {
-    type: "referrals" | "op-rebates";
-    rate: number;
-    amount: string;
-    usd: string;
-  };
+  rewards?:
+    | {
+        type: "op-rebates";
+        rate: number;
+        amount: string;
+        usd: string;
+      }
+    | {
+        type: "referrals";
+        rate: number;
+        tier: number;
+        amount: string;
+        usd: string;
+      };
   feeBreakdown?: {
-    bridgeFee: {
-      pct: string;
-      usd: string;
-    };
-    destinationGasFee: {
-      pct: string;
-      usd: string;
-    };
+    // lp fee
+    lpFeeUsd: string;
+    lpFeePct: string; // wei pct
+    lpFeeAmount: string;
+    // relayer fee
+    relayCapitalFeeUsd: string;
+    relayCapitalFeePct: string; // wei pct
+    relayCapitalFeeAmount: string;
+    relayGasFeeUsd: string;
+    relayGasFeePct: string; // wei pct
+    relayGasFeeAmount: string;
+    // total = lp fee + relayer fee
+    totalBridgeFeeUsd: string;
+    totalBridgeFeePct: string; // wei pct
+    totalBridgeFeeAmount: string;
   };
 };
 
@@ -67,19 +83,26 @@ export type GetDepositsResponse = {
 };
 
 export function useDeposits(
-  status: DepositStatus,
+  status: DepositStatusFilter,
   limit: number,
   offset: number = 0
 ) {
   return useQuery(
     depositsQueryKey(status, limit, offset),
-    () => getDeposits({ status, limit, offset }),
+    () => {
+      return getDeposits({
+        status: status === "all" ? undefined : status,
+        limit,
+        offset,
+        skipOldUnprofitable: true,
+      });
+    },
     { keepPreviousData: true, refetchInterval: defaultRefetchInterval }
   );
 }
 
 export function useUserDeposits(
-  status: DepositStatus,
+  status: DepositStatusFilter,
   limit: number,
   offset: number = 0,
   userAddress?: string
@@ -98,17 +121,20 @@ export function useUserDeposits(
         };
       }
 
+      const omitStatusFilter = status === "all";
+
       // To provide a better UX, we take optimistically updated local deposits
       // into account to show on the "My Transactions" page.
-      const localUserDeposits = getLocalDeposits().filter(
-        (deposit) =>
-          deposit.status === status &&
-          (deposit.depositorAddr === userAddress ||
-            deposit.recipientAddr === userAddress)
+      const localUserDeposits = getLocalDeposits().filter((deposit) =>
+        omitStatusFilter
+          ? true
+          : deposit.status === status &&
+            (deposit.depositorAddr === userAddress ||
+              deposit.recipientAddr === userAddress)
       );
       const { deposits, pagination } = await getDeposits({
         address: userAddress,
-        status,
+        status: omitStatusFilter ? undefined : status,
         limit,
         offset,
       });
@@ -150,15 +176,25 @@ export function useUserDeposits(
 
 async function getDeposits(
   params: Partial<{
+    skipOldUnprofitable: boolean;
     address: string;
     status: DepositStatus;
     limit: number;
     offset: number;
-  }>
+  }> = {}
 ) {
   const { data } = await axios.get<GetDepositsResponse>(
-    `${rewardsApiUrl}/deposits`,
-    { params }
+    `${rewardsApiUrl}/deposits/tx-page`,
+    {
+      params: {
+        status: params.status,
+        skipOldUnprofitable: params.skipOldUnprofitable,
+        limit: params.limit,
+        offset: params.offset,
+        depositorOrRecipientAddress: params.address,
+        orderBy: "status",
+      },
+    }
   );
   return data;
 }

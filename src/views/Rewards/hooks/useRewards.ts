@@ -17,13 +17,17 @@ export function useRewards() {
     isLoading: areStakingPoolsLoading,
   } = useStakingPools();
 
-  const totalRewards = useMemo(() => {
+  const { totalRewards, stakingRewards, referralRewards } = useMemo(() => {
     const poolRewards = enabledPools.reduce(
       (prev, curr) => prev.add(curr.outstandingRewards),
       BigNumber.from(0)
     );
     const referralRewards = BigNumber.from(summary.rewardsAmount);
-    return poolRewards.add(referralRewards);
+    return {
+      totalRewards: poolRewards.add(referralRewards),
+      referralRewards,
+      stakingRewards: poolRewards,
+    };
   }, [summary, enabledPools]);
 
   const usersLPStakedInUSD = useMemo(() => {
@@ -33,6 +37,23 @@ export function useRewards() {
     );
   }, [enabledPools]);
 
+  const largestStakedPool = useMemo(() => {
+    if (myPools.length === 0) return undefined;
+    let largestPool = myPools[0];
+    myPools.forEach((pool) => {
+      if (
+        pool.userAmountOfLPStakedInUSD.gt(largestPool.userAmountOfLPStakedInUSD)
+      ) {
+        largestPool = pool;
+      }
+    });
+    return {
+      name: largestPool.tokenDisplaySymbol ?? largestPool.tokenSymbol,
+      logo: largestPool.tokenLogoURI,
+      amount: largestPool.userAmountOfLPStakedInUSD,
+    };
+  }, [myPools]);
+
   return {
     isConnected,
     address: account,
@@ -40,11 +61,14 @@ export function useRewards() {
       connect({ trackSection: "rewardsTable" });
     },
     totalRewards: totalRewards,
+    stakingRewards,
+    referralACXRewards: referralRewards,
     stakedTokens: usersLPStakedInUSD,
     ...formatReferralSummary(summary, !isLoading && isConnected),
     areStakingPoolsLoading,
     myPoolData: myPools,
     allPoolData: allPools,
+    largestStakedPool,
   };
 }
 

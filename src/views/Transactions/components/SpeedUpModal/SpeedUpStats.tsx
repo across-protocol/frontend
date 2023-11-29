@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 
 import { Text } from "components/Text";
-import { formatWeiPct, getChainInfo, makeFormatUnits } from "utils";
+import { COLORS, formatWeiPct, getChainInfo, makeFormatUnits } from "utils";
 
 import {
   appendPercentageSign,
@@ -95,6 +95,7 @@ const StatsBox = styled.div`
   align-items: flex-start;
   padding: 16px;
   gap: 12px;
+  background-color: ${COLORS["black-800"]};
 
   border: 1px solid #34353b;
   border-radius: 12px;

@@ -8,10 +8,9 @@ export const useStakingPools = () => {
   );
   const enabledPools = stakingPools.filter((pool) => pool.poolEnabled);
   const poolsWithLP = enabledPools.filter((pool) => pool.isStakingPoolOfUser);
-  const myPools = [
-    ...poolsWithLP.filter((pool) => pool.userAmountOfLPStaked.gt(0)),
-    ...poolsWithLP.filter((pool) => pool.userAmountOfLPStaked.eq(0)),
-  ];
+  const myPools = poolsWithLP.filter((pool) =>
+    pool.userAmountOfLPStaked.gte(0)
+  );
   const allPools = enabledPools.filter((pool) => !pool.isStakingPoolOfUser);
 
   return {

@@ -1,6 +1,8 @@
 import { Deposit } from "hooks/useDeposits";
 import { Token } from "utils";
 
+export type { DepositStatusFilter } from "utils";
+
 export interface TxLink {
   text: string;
   url: string;

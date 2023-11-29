@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { DialogContent, DialogOverlay } from "@reach/dialog";
 
-import { PrimaryButton, SecondaryButton } from "components/Button";
+import { SecondaryButton, UnstyledButton } from "components/Button";
 
 export const Overlay = styled(DialogOverlay)`
   position: fixed;
@@ -99,7 +99,7 @@ export const ButtonsRow = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  gap: 16px;
+  gap: 24px;
 `;
 
 export const CloseHeaderRow = styled.div`
@@ -108,13 +108,9 @@ export const CloseHeaderRow = styled.div`
   justify-content: flex-end;
 `;
 
-export const ConfirmButton = styled(PrimaryButton)`
-  width: 100%;
-`;
+export const ConfirmButton = styled(SecondaryButton)``;
 
-export const CancelButton = styled(SecondaryButton)`
-  width: 100%;
-`;
+export const CancelButton = styled(UnstyledButton)``;
 
 export const SpeedUpTxLinkContainer = styled.div`
   display: flex;

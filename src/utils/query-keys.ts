@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import { ChainId } from "./constants";
+import { DepositStatusFilter } from "views/Transactions/types";
 
 /**
  * Generates query keys for react-query `useQuery` hook, used in the `useLatestBlock` hook.
@@ -103,8 +104,17 @@ export function referralSummaryQueryKey(account: string) {
   return ["referralSummary", account];
 }
 
+/**
+ * Generates query keys for react-query `useQuery` hook, used in the `useSimplifiedReferralSummary` hook.
+ * @param account  The address that referral summary is being queried for.
+ * @returns An array of query keys for react-query `useQuery` hook.
+ */
+export function simplifiedReferralSummaryQueryKey(account: string) {
+  return ["referralSummary", "simplified", account];
+}
+
 export function depositsQueryKey(
-  status: "filled" | "pending",
+  status: DepositStatusFilter,
   limit: number,
   offset: number
 ) {
@@ -113,11 +123,11 @@ export function depositsQueryKey(
 
 export function userDepositsQueryKey(
   userAddress: string,
-  status: "filled" | "pending",
+  status: DepositStatusFilter,
   limit: number,
   offset: number
 ) {
-  return ["user-deposits", userAddress, status, limit, offset];
+  return ["deposits", "user", userAddress, status, limit, offset];
 }
 
 export function prelaunchDataQueryKey(address?: string, jwt?: string) {
