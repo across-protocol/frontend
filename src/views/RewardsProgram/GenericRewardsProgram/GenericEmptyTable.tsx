@@ -65,7 +65,7 @@ const GenericEmptyTable = ({
 
   if (isEmpty) {
     return (
-      <Wrapper>
+      <Wrapper data-cy="empty-rewards-table">
         <Text size="lg" color="grey-400">
           No {programName} transfers yet
         </Text>
