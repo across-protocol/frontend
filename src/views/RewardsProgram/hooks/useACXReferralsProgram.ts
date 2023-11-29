@@ -1,9 +1,11 @@
 import { useConnection, useRewardSummary } from "hooks";
 import { GenericRewardInformationRowType } from "../GenericRewardsProgram/GenericInformationCard";
 import {
+  capitalizeFirstLetter,
   formatNumberTwoFracDigits,
   formatUnits,
   getToken,
+  rewardPrograms,
   rewardTiers,
 } from "utils";
 import { useMemo } from "react";
@@ -13,6 +15,7 @@ import { BigNumber } from "ethers";
 export function useACXReferralsProgram() {
   const { account } = useConnection();
   const { summary } = useRewardSummary("referrals", account);
+  const { programName } = rewardPrograms["referrals"];
   const token = useMemo(() => getToken("ACX"), []);
   const { data: unclaimedReferralData } = useUnclaimedReferralProofs();
 
@@ -73,26 +76,24 @@ export function useACXReferralsProgram() {
       {
         title: "Total Rewards",
         value: `${formatUnits(summary.rewardsAmount, token.decimals)} ACX`,
-        prefix: unclaimedReferralData?.claimableAmount.gt(0)
-          ? `${formatUnits(
-              unclaimedReferralData.claimableAmount,
-              token.decimals
-            )} ACX claimable`
-          : undefined,
+        prefix: `${formatUnits(
+          unclaimedReferralData?.claimableAmount ?? 0,
+          token.decimals
+        )} ACX claimable`,
         prefixIcon: "clock",
+        prefixIconTooltip: {
+          content: `New ${programName.toLowerCase()} rewards are claimable 2 weeks after the first day of every month`,
+          title: `${capitalizeFirstLetter(programName.toLowerCase())} claiming`,
+        },
       },
     ],
     [
       currentTier.title,
       nextTier,
-      summary.activeRefereesCount,
-      summary.referralRate,
-      summary.referreeWallets,
-      summary.rewardsAmount,
-      summary.transfers,
-      summary.volume,
+      summary,
       token.decimals,
       unclaimedReferralData?.claimableAmount,
+      programName,
     ]
   );
 
