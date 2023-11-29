@@ -14,6 +14,10 @@ export type GenericRewardInformationRowType = {
   extendedPrefixSpacing?: boolean;
   prefixArrow?: boolean;
   prefixIcon?: "clock";
+  prefixIconTooltip?: {
+    title: string;
+    content: string;
+  };
 };
 
 const GenericInformationCard = ({
@@ -26,15 +30,19 @@ const GenericInformationCard = ({
   <GenericCard program={program}>
     <RowContainer elements={rows.length}>
       {rows.map(
-        ({
-          title,
-          tooltip,
-          value,
-          prefix,
-          extendedPrefixSpacing,
-          prefixArrow,
-          prefixIcon,
-        }) => (
+        (
+          {
+            title,
+            tooltip,
+            value,
+            prefix,
+            extendedPrefixSpacing,
+            prefixArrow,
+            prefixIcon,
+            prefixIconTooltip,
+          },
+          idx
+        ) => (
           <Row key={title}>
             <TitleWithTooltipStack>
               <Text color="grey-400">{title}</Text>
@@ -54,7 +62,20 @@ const GenericInformationCard = ({
                 {prefix && (
                   <>
                     <PrefixIconPrefixStack>
-                      {prefixIcon === "clock" && <ClockIcon />}
+                      {prefixIcon === "clock" &&
+                        (prefixIconTooltip ? (
+                          <Tooltip
+                            tooltipId={`prefix-info-tooltip-${idx}-${program}`}
+                            body={prefixIconTooltip.content}
+                            title={prefixIconTooltip.title}
+                            icon={prefixIcon}
+                            placement="bottom-start"
+                          >
+                            <ClockIcon />
+                          </Tooltip>
+                        ) : (
+                          <ClockIcon />
+                        ))}
                       <Text color="grey-400">{prefix}</Text>
                     </PrefixIconPrefixStack>
                     {prefixArrow && <ArrowIcon color="grey-400">←</ArrowIcon>}
