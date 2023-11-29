@@ -151,7 +151,7 @@ const Routes: React.FC = () => {
           <Route exact path="/rewards/referrals" component={Referrals} />
           <Route
             exact
-            path="rewards/optimism-grant-program"
+            path="/rewards/optimism-grant-program"
             component={OPRebates}
           />
           <Route exact path="/rewards" component={Rewards} />

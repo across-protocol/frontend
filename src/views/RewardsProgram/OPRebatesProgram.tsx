@@ -1,14 +1,15 @@
 import GenericRewardsProgram from "./GenericRewardsProgram/GenericRewardsProgram";
-import { BigNumber } from "ethers";
+import { useOPRebatesProgram } from "./hooks/useOPRebatesProgram";
 
 const OPRebatesProgram = () => {
+  const { labels, rewardsAmount, claimableAmount } = useOPRebatesProgram();
   return (
     <GenericRewardsProgram
-      program="referrals"
-      metaCard={[]}
+      program="op-rebates"
+      metaCard={labels}
       claimCard={{
-        totalRewards: BigNumber.from(0),
-        availableRewards: BigNumber.from(0),
+        totalRewards: rewardsAmount,
+        availableRewards: claimableAmount,
       }}
       programName="OP Rewards Program"
     />
