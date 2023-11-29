@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { ChainId } from "./constants";
+import { ChainId, rewardProgramTypes } from "./constants";
 import { DepositStatusFilter } from "views/Transactions/types";
 
 /**
@@ -81,27 +81,33 @@ export function allowanceQueryKey(
 }
 
 /**
- * Generates query keys for react-query `useQuery` hook, used in the `useReferrals` hook.
- * @param account  The address that referrals are being queried for.
+ * Generates query keys for react-query `useQuery` hook, used in the `useRewards` hook.
+ * @param program  The reward program that rewards are being queried for.
+ * @param account  The address that rewards are being queried for.
  * @param limit The limit on the number of results that are returned (page size).
  * @param offset The number of elements to omit before returning results.
  * @returns An array of query keys for react-query `useQuery` hook.
  */
-export function referralsQueryKey(
+export function rewardsQueryKey(
+  program: rewardProgramTypes,
   account: string,
   limit: number,
   offset: number
-): [string, string, number, number] {
-  return ["referrals", account, limit, offset];
+): [rewardProgramTypes, string, number, number] {
+  return [program, account, limit, offset];
 }
 
 /**
- * Generates query keys for react-query `useQuery` hook, used in the `useReferralSummary` hook.
- * @param account  The address that referral summary is being queried for.
+ * Generates query keys for react-query `useQuery` hook, used in the `useRewardSummary` hook.
+ * @param account  The address that reward summary is being queried for.
+ * @param program  The reward program that reward summary is being queried for.
  * @returns An array of query keys for react-query `useQuery` hook.
  */
-export function referralSummaryQueryKey(account: string) {
-  return ["referralSummary", account];
+export function rewardSummaryQueryKey(
+  account: string,
+  program: rewardProgramTypes
+) {
+  return ["rewardSummary", program, account];
 }
 
 /**

@@ -1,14 +1,18 @@
 import axios from "axios";
 import { useQuery } from "react-query";
-import { rewardsApiUrl, referralSummaryQueryKey } from "utils";
+import {
+  rewardsApiUrl,
+  rewardSummaryQueryKey,
+  rewardProgramTypes,
+} from "utils";
 
 /**
  * Fetches the latest block from a given chain Id on an interval.
  * @param account Address of logged in user.
- * @returns Referral summary data and useQuery params.
+ * @returns Reward summary data and useQuery params.
  */
 
-export interface ReferralsSummary {
+export interface RewardsSummary {
   referreeWallets: number;
   transfers: number;
   volume: number;
@@ -18,7 +22,7 @@ export interface ReferralsSummary {
   activeRefereesCount: number;
 }
 
-const defaultReferralsSummary: ReferralsSummary = {
+const defaultRewardsSummary: RewardsSummary = {
   referralRate: 0.4,
   referreeWallets: 0,
   rewardsAmount: "0",
@@ -28,15 +32,18 @@ const defaultReferralsSummary: ReferralsSummary = {
   activeRefereesCount: 0,
 };
 
-export function useReferralSummary(account?: string) {
+export function useRewardSummary(
+  program: rewardProgramTypes,
+  account?: string
+) {
   const queryKey = !!account
-    ? referralSummaryQueryKey(account)
+    ? rewardSummaryQueryKey(account, program)
     : "DISABLED_REFERRAL_SUMMARY_KEY";
 
   const { data: summary, ...other } = useQuery(
     queryKey,
     async () => {
-      return getReferralSummary(account!);
+      return getRewardSummary(program, account!);
     },
     {
       // refetch based on the chain polling interval
@@ -47,7 +54,7 @@ export function useReferralSummary(account?: string) {
   );
 
   return {
-    summary: summary?.data || defaultReferralsSummary,
+    summary: summary?.data || defaultRewardsSummary,
     ...other,
   };
 }
@@ -56,8 +63,8 @@ export function useReferralSummary(account?: string) {
  * @param account Address of logged in user.
  * @returns A promise resolving to the referral summary of the user
  */
-async function getReferralSummary(account: string) {
-  return axios.get<ReferralsSummary>(
-    `${rewardsApiUrl}/referrals/summary?address=${account}`
+async function getRewardSummary(program: rewardProgramTypes, account: string) {
+  return axios.get<RewardsSummary>(
+    `${rewardsApiUrl}/${program}/summary?address=${account}`
   );
 }

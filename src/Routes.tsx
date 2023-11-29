@@ -24,7 +24,10 @@ const LiquidityPool = lazyWithRetry(
   () => import(/* webpackChunkName: "LiquidityPools" */ "./views/LiquidityPool")
 );
 const Referrals = lazyWithRetry(
-  () => import(/* webpackChunkName: "Referrals" */ "./views/Referrals")
+  () =>
+    import(
+      /* webpackChunkName: "Referrals" */ "./views/RewardsProgram/ACXReferralsProgram"
+    )
 );
 const Rewards = lazyWithRetry(
   () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")

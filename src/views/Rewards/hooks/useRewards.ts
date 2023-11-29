@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import { useConnection } from "hooks";
-import { ReferralsSummary, useReferralSummary } from "hooks/useReferralSummary";
+import { RewardsSummary, useRewardSummary } from "hooks/useRewardSummary";
 import { useMemo } from "react";
 import { formatUnitsFnBuilder } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
@@ -8,7 +8,7 @@ import { useStakingPools } from "./useStakingPools";
 
 export function useRewards() {
   const { isConnected, connect, account } = useConnection();
-  const { summary, isLoading } = useReferralSummary(account);
+  const { summary, isLoading } = useRewardSummary("referrals", account);
 
   const {
     myPools,
@@ -72,7 +72,7 @@ export function useRewards() {
   };
 }
 
-function formatReferralSummary(summary: ReferralsSummary, isValid: boolean) {
+function formatReferralSummary(summary: RewardsSummary, isValid: boolean) {
   const stringTernary = repeatableTernaryBuilder<string | undefined>(
     isValid,
     undefined

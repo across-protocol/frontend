@@ -1,10 +1,10 @@
 import axios from "axios";
 import { useQuery } from "react-query";
 import { rewardsApiUrl, simplifiedReferralSummaryQueryKey } from "utils";
-import { ReferralsSummary } from "./useReferralSummary";
+import { RewardsSummary } from "./useRewardSummary";
 
 export type SimplifiedReferralsSummary = Pick<
-  ReferralsSummary,
+  RewardsSummary,
   "tier" | "referralRate"
 >;
 
@@ -42,7 +42,7 @@ export function useSimplifiedReferralSummary(account?: string) {
  * @returns A promise resolving to the referral summary of the user
  */
 async function getReferralSummary(account: string) {
-  return axios.get<ReferralsSummary>(
+  return axios.get<RewardsSummary>(
     `${rewardsApiUrl}/referrals/summary?address=${account}&fields[]=referralRate&fields[]=tier`
   );
 }

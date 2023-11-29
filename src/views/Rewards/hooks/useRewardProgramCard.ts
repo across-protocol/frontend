@@ -1,4 +1,4 @@
-import { useConnection, useReferralSummary } from "hooks";
+import { useConnection, useRewardSummary } from "hooks";
 import { getToken, rewardProgramTypes, rewardPrograms } from "utils";
 import { BigNumber } from "ethers";
 
@@ -9,7 +9,7 @@ export function useRewardProgramCard(programName: rewardProgramTypes) {
   // TODO: Make this dynamic so that we can get other rebate tokens
   const {
     summary: { rewardsAmount },
-  } = useReferralSummary(account);
+  } = useRewardSummary(programName, account);
   return {
     ...programDetail,
     token,

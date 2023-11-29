@@ -21,11 +21,14 @@ const BreadcrumbV2 = ({
       ? [ancestorRoutes[0]]
       : ancestorRoutes;
 
-  const updatedRoute = customCurrentRoute ? (
-    customCurrentRoute
-  ) : (
-    <InactiveLink size="lg">{currentRoute.name}</InactiveLink>
-  );
+  const updatedRoute =
+    customCurrentRoute && typeof customCurrentRoute !== "string" ? (
+      customCurrentRoute
+    ) : (
+      <InactiveLink size="lg">
+        {customCurrentRoute ?? currentRoute.name}
+      </InactiveLink>
+    );
 
   return (
     <Wrapper>
