@@ -10,8 +10,6 @@ export function useRewards() {
   const { isConnected, connect, account } = useConnection();
   const { summary, isLoading } = useRewardSummary("referrals", account);
 
-  console.log(summary);
-
   if (summary.program !== "referrals") {
     throw new Error("Invalid program type");
   }
