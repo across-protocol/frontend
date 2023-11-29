@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { rewardProgramTypes } from "utils";
 
 export function useGenericRewardProgram(program: rewardProgramTypes) {
-  const { account, isConnected } = useConnection();
+  const { account, isConnected, connect } = useConnection();
   const pageSizes = useMemo(() => [10, 25, 50], []);
   const [currentPage, setCurrentPage] = useState(pageSizes[0]);
   const [pageSize, setPageSizeState] = useState(10);
@@ -16,10 +16,12 @@ export function useGenericRewardProgram(program: rewardProgramTypes) {
     setPageSizeState(newPageSize);
   };
 
-  const {
-    referrals,
-    pagination: { total: totalReferrals },
-  } = useRewards(program, account, pageSize, pageSize * currentPage);
+  const rewardsQuery = useRewards(
+    program,
+    account,
+    pageSize,
+    pageSize * currentPage
+  );
 
   useEffect(() => {
     setCurrentPage(0);
@@ -30,10 +32,10 @@ export function useGenericRewardProgram(program: rewardProgramTypes) {
     setCurrentPage,
     pageSize,
     setPageSize,
-    referrals,
     pageSizes,
-    totalReferrals,
     account,
     isConnected,
+    connect,
+    rewardsQuery,
   };
 }
