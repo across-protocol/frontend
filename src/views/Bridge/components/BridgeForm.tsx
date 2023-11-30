@@ -78,7 +78,7 @@ const BridgeForm = ({
   isBridgeDisabled,
   validationError,
 }: BridgeFormProps) => {
-  const { rewardToken } = useRewardToken(selectedRoute.toChain);
+  const { programName } = useRewardToken(selectedRoute.toChain);
   return (
     <>
       <CardWrapper>
@@ -137,7 +137,7 @@ const BridgeForm = ({
         </RowWrapper>
       </CardWrapper>
       <CardWrapper>
-        {rewardToken.symbol === "ACX" && <ReferralCTA />}
+        <ReferralCTA program={programName} />
         <EstimatedTable
           fromChainId={selectedRoute.fromChain}
           toChainId={selectedRoute.toChain}

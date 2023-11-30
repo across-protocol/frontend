@@ -356,6 +356,7 @@ export const rewardPrograms: Record<
     url: string;
     rewardTokenSymbol: string;
     backgroundUrl: string;
+    highestPct: number;
   }
 > = {
   referrals: {
@@ -364,6 +365,7 @@ export const rewardPrograms: Record<
     url: "/rewards/referrals",
     rewardTokenSymbol: "ACX",
     backgroundUrl: ACXCloudBackground,
+    highestPct: 0.8,
   },
   "op-rebates": {
     programName: "OP Rewards Program",
@@ -371,6 +373,7 @@ export const rewardPrograms: Record<
     url: "/rewards/optimism-grant-program",
     rewardTokenSymbol: "OP",
     backgroundUrl: OPCloudBackground,
+    highestPct: 0.95,
   },
 };
 
