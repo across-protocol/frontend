@@ -1,12 +1,18 @@
 import { useConnection, useRewardSummary } from "hooks";
 import { GenericRewardInformationRowType } from "../GenericRewardsProgram/GenericInformationCard";
-import { formatUnits, getToken } from "utils";
+import {
+  capitalizeFirstLetter,
+  formatUnits,
+  getToken,
+  rewardPrograms,
+} from "utils";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
 
 export function useOPRebatesProgram() {
   const { account } = useConnection();
   const { summary } = useRewardSummary("op-rebates", account);
+  const { programName } = rewardPrograms["op-rebates"];
   const token = useMemo(() => getToken("OP"), []);
 
   if (summary.program !== "op-rebates") {
@@ -34,9 +40,13 @@ export function useOPRebatesProgram() {
           token.decimals
         )} ${token.symbol} claimable`,
         prefixIcon: "clock",
+        prefixIconTooltip: {
+          content: `New ${programName.toLowerCase()} rewards are claimable 2 weeks after the first day of every month`,
+          title: `${capitalizeFirstLetter(programName.toLowerCase())} claiming`,
+        },
       },
     ],
-    [summary, token]
+    [programName, summary, token]
   );
 
   return {
