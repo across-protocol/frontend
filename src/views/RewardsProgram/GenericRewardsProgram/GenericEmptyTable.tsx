@@ -42,7 +42,7 @@ const GenericEmptyTable = ({
 
   if (isLoading) {
     return (
-      <Wrapper>
+      <Wrapper data-cy="empty-rewards-table">
         <Text size="lg" color="grey-400">
           Loading...
         </Text>

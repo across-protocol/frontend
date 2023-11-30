@@ -12,6 +12,7 @@ import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { useGenericRewardProgram } from "../hooks/useGenericRewardProgram";
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import GenericEmptyTable from "./GenericEmptyTable";
+import { useRef } from "react";
 
 type GenericRewardsProgramProps = {
   programName: string;
@@ -40,6 +41,7 @@ const GenericRewardsProgram = ({
     isConnected,
     connect,
   } = useGenericRewardProgram(program);
+  const metaRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
   const deposits = rewardsQuery.data?.deposits || [];
@@ -56,11 +58,15 @@ const GenericRewardsProgram = ({
       <Content>
         <BreadcrumbV2 customCurrentRoute={programName} />
         <CardStack>
-          <GenericRewardClaimCard
-            program={program}
-            children={claimCard.children}
-          />
-          <GenericInformationCard program={program} rows={metaCard} />
+          <CardWrapper height={metaRef?.current?.offsetHeight}>
+            <GenericRewardClaimCard
+              program={program}
+              children={claimCard.children}
+            />
+          </CardWrapper>
+          <CardWrapper ref={metaRef}>
+            <GenericInformationCard program={program} rows={metaCard} />
+          </CardWrapper>
         </CardStack>
         <SectionTitleWrapperV2 title="My transfers">
           {showEmptyTable ? (
@@ -125,7 +131,6 @@ const Content = styled.div`
 const CardStack = styled.div`
   display: flex;
   width: 100%;
-  height: 288px;
   align-items: flex-start;
   gap: 16px;
 
@@ -142,5 +147,13 @@ const TableWrapper = styled.div`
 
   &::-webkit-scrollbar {
     display: none;
+  }
+`;
+
+const CardWrapper = styled.div<{ height?: number }>`
+  height: fit-content;
+  width: 100%;
+  @media ${QUERIESV2.tb.andUp} {
+    height: ${({ height }) => (height ? `${height}px` : "fit-content")};
   }
 `;

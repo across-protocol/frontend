@@ -17,6 +17,7 @@ export type GenericRewardClaimCardDisconnectedStateProps = {
 
 export function useGenericRewardClaimCard(program: rewardProgramTypes) {
   const { account, isConnected } = useConnection();
+  const { data: unclaimedReferralData } = useUnclaimedReferralProofs();
   const { programDetails, token } = useMemo(
     () => ({
       programDetails: rewardPrograms[program],
@@ -24,10 +25,16 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
     }),
     [program]
   );
-  const {
-    summary: { rewardsAmount },
-  } = useRewardSummary(program, account);
-  const { data: unclaimedReferralData } = useUnclaimedReferralProofs();
+  const { summary } = useRewardSummary(program, account);
+  const rewardsAmount =
+    summary.program === "op-rebates"
+      ? summary.claimableRewards
+      : summary.rewardsAmount;
+  const unclaimedAmount =
+    summary.program === "referrals"
+      ? unclaimedReferralData?.claimableAmount
+      : summary.unclaimedRewards;
+
   const formatUnits = formatUnitsFnBuilder(token.decimals);
 
   // TODO: add a state for OP rewards and a state for referral rewards
@@ -43,8 +50,7 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
     ...programDetails,
     token,
     rewardsAmount: BigNumber.from(rewardsAmount),
-    unclaimedAmount:
-      unclaimedReferralData?.claimableAmount ?? BigNumber.from(0),
+    unclaimedAmount: BigNumber.from(unclaimedAmount ?? 0),
     formatUnits,
     disconnectedState,
     isConnected,

@@ -6,13 +6,14 @@ import {
   rewardProgramTypes,
 } from "utils";
 
-/**
- * Fetches the latest block from a given chain Id on an interval.
- * @param account Address of logged in user.
- * @returns Reward summary data and useQuery params.
- */
+export type OPRebateSummary = {
+  depositsCount: number;
+  unclaimedRewards?: string;
+  volumeUsd: number;
+  claimableRewards: string;
+};
 
-export interface RewardsSummary {
+export type ACXReferralSummary = {
   referreeWallets: number;
   transfers: number;
   volume: number;
@@ -20,9 +21,18 @@ export interface RewardsSummary {
   rewardsAmount: string;
   tier: number;
   activeRefereesCount: number;
-}
+};
 
-const defaultRewardsSummary: RewardsSummary = {
+export type RewardsSummary =
+  | ({
+      program: "referrals";
+    } & ACXReferralSummary)
+  | ({
+      program: "op-rebates";
+    } & OPRebateSummary);
+
+const defaultACXRewardsSummary: RewardsSummary = {
+  program: "referrals",
   referralRate: 0.4,
   referreeWallets: 0,
   rewardsAmount: "0",
@@ -32,18 +42,29 @@ const defaultRewardsSummary: RewardsSummary = {
   activeRefereesCount: 0,
 };
 
+const defaultOPRewardsSummary: RewardsSummary = {
+  program: "op-rebates",
+  claimableRewards: "0",
+  depositsCount: 0,
+  unclaimedRewards: "0",
+  volumeUsd: 0,
+};
+
 export function useRewardSummary(
   program: rewardProgramTypes,
   account?: string
 ) {
   const queryKey = !!account
     ? rewardSummaryQueryKey(account, program)
-    : "DISABLED_REFERRAL_SUMMARY_KEY";
+    : ["DISABLED_REFERRAL_SUMMARY_KEY", program];
 
-  const { data: summary, ...other } = useQuery(
+  const { data: _summary, ...other } = useQuery(
     queryKey,
-    async () => {
-      return getRewardSummary(program, account!);
+    async ({ queryKey }) => {
+      const rewardProgram = queryKey.includes("op-rebates")
+        ? "op-rebates"
+        : "referrals";
+      return getRewardSummary(rewardProgram, account!);
     },
     {
       // refetch based on the chain polling interval
@@ -52,9 +73,12 @@ export function useRewardSummary(
       enabled: !!account,
     }
   );
-
   return {
-    summary: summary?.data || defaultRewardsSummary,
+    summary:
+      _summary?.data ||
+      (program === "op-rebates"
+        ? defaultOPRewardsSummary
+        : defaultACXRewardsSummary),
     ...other,
   };
 }
@@ -64,7 +88,11 @@ export function useRewardSummary(
  * @returns A promise resolving to the referral summary of the user
  */
 async function getRewardSummary(program: rewardProgramTypes, account: string) {
-  return axios.get<RewardsSummary>(
-    `${rewardsApiUrl}/${program}/summary?address=${account}`
+  const result = await axios.get<RewardsSummary>(
+    `${rewardsApiUrl}/rewards/${program}/summary?userAddress=${account}`
   );
+  if (result.data) {
+    result.data.program = program;
+  }
+  return result;
 }

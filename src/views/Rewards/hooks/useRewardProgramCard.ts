@@ -6,10 +6,11 @@ export function useRewardProgramCard(programName: rewardProgramTypes) {
   const { account } = useConnection();
   const programDetail = rewardPrograms[programName];
   const token = getToken(programDetail.rewardTokenSymbol);
-  // TODO: Make this dynamic so that we can get other rebate tokens
-  const {
-    summary: { rewardsAmount },
-  } = useRewardSummary(programName, account);
+  const { summary } = useRewardSummary(programName, account);
+  const rewardsAmount =
+    summary.program === "op-rebates"
+      ? summary.claimableRewards
+      : summary.rewardsAmount;
   return {
     ...programDetail,
     token,

@@ -1,28 +1,27 @@
 import styled from "@emotion/styled";
-import { COLORS, QUERIESV2 } from "utils";
-import CloudBackground from "assets/bg-banners/cloud-staking.svg";
-import { ReactComponent as ACXLogo } from "assets/across.svg";
+import {
+  COLORS,
+  QUERIESV2,
+  getToken,
+  rewardProgramTypes,
+  rewardPrograms,
+} from "utils";
 import { PrimaryButton, Text } from "components";
 import copy from "copy-to-clipboard";
 import { useReferralLink } from "hooks/useReferralLink";
 import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "hooks";
+import { useHistory } from "react-router-dom";
 
-const ReferralCTA = () => {
+type ReferralCTAProps = {
+  program: rewardProgramTypes;
+};
+
+const ReferralCTA = ({ program }: ReferralCTAProps) => {
+  const { push: navigate } = useHistory();
   const { referralLinkWithProtocol } = useReferralLink();
   const { isConnected, connect } = useConnection();
   const [isCopied, setIsCopied] = useState(false);
-  const handleCopy = useCallback(() => {
-    if (!isConnected) {
-      connect({
-        trackSection: "bridgeForm",
-      });
-      setIsCopied(false);
-    } else if (referralLinkWithProtocol) {
-      copy(referralLinkWithProtocol);
-      setIsCopied(true);
-    }
-  }, [connect, isConnected, referralLinkWithProtocol]);
 
   useEffect(() => {
     if (isCopied) {
@@ -33,33 +32,75 @@ const ReferralCTA = () => {
     }
   });
 
+  const rewardProgram = rewardPrograms[program];
+  const rewardToken = getToken(rewardProgram.rewardTokenSymbol);
+
+  const handleClick = useCallback(() => {
+    if (rewardProgram.rewardTokenSymbol === "ACX") {
+      if (!isConnected) {
+        connect({
+          trackSection: "bridgeForm",
+        });
+        setIsCopied(false);
+      } else if (referralLinkWithProtocol) {
+        copy(referralLinkWithProtocol);
+        setIsCopied(true);
+      }
+    } else {
+      navigate(rewardProgram.url);
+    }
+  }, [connect, isConnected, navigate, referralLinkWithProtocol, rewardProgram]);
+
+  const bodyCopy =
+    rewardProgram.rewardTokenSymbol === "ACX"
+      ? "Share your unique referral link and earn on every transaction made with your link."
+      : "Bridge to Optimism and earn on every transaction.";
+
+  const buttonCopy =
+    rewardProgram.rewardTokenSymbol === "ACX"
+      ? isConnected
+        ? "Copy link"
+        : "Connect"
+      : "View Rewards";
+
   return (
-    <Wrapper>
-      <LogoContainer>
-        <StyledLogo />
+    <Wrapper
+      primaryColor={rewardProgram.primaryColor}
+      bgUrl={rewardProgram.backgroundUrl}
+    >
+      <LogoContainer primaryColor={rewardProgram.primaryColor}>
+        <StyledLogo src={rewardToken.logoURI} />
       </LogoContainer>
       <TextStack>
         <Text color="white" size="md">
-          Earn up to <HighlightText>80%</HighlightText> in ACX Rewards with
-          referrals
+          Earn up to{" "}
+          <HighlightText program={program}>
+            {rewardProgram.highestPct * 100}%
+          </HighlightText>{" "}
+          in {rewardProgram.rewardTokenSymbol} Rewards with referrals
         </Text>
         <Text color="grey-400" size="sm">
-          Share your unique referral link and earn on every transaction made
-          with your link.
+          {bodyCopy}
         </Text>
       </TextStack>
       <StyledCopyButton
-        onClick={handleCopy}
+        onClick={handleClick}
         size="md"
         backgroundColor="black-700"
-        textColor="aqua"
+        textColor={program === "referrals" ? "aqua" : "white"}
         isCopied={isCopied}
         disabled={isCopied}
+        primaryColor={rewardProgram.primaryColor}
       >
-        {isConnected ? "Copy link" : "Connect"}
+        {buttonCopy}
       </StyledCopyButton>
-      <TextButton size="md" weight={500} onClick={handleCopy}>
-        {isConnected ? "copy" : "Connect"}
+      <TextButton
+        size="md"
+        weight={500}
+        onClick={handleClick}
+        primaryColor={rewardProgram.primaryColor}
+      >
+        {buttonCopy}
       </TextButton>
     </Wrapper>
   );
@@ -67,7 +108,7 @@ const ReferralCTA = () => {
 
 export default ReferralCTA;
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ bgUrl: string; primaryColor: string }>`
   display: flex;
   align-items: center;
   gap: 12px;
@@ -77,8 +118,10 @@ const Wrapper = styled.div`
   padding: 24px 16px;
 
   border-radius: 8px;
-  border: 1px solid ${COLORS["aqua-15"]};
-  background: url(${CloudBackground}) no-repeat;
+  border: 1px solid
+    ${({ primaryColor }) => COLORS[`${primaryColor}-15` as keyof typeof COLORS]};
+  background: url(${({ bgUrl }) => bgUrl}) no-repeat;
+  background-size: cover;
 
   @media ${QUERIESV2.sm.andDown} {
     display: flex;
@@ -91,7 +134,7 @@ const Wrapper = styled.div`
   }
 `;
 
-const LogoContainer = styled.div`
+const LogoContainer = styled.div<{ primaryColor: string }>`
   // Layout
   display: flex;
   padding: 8px;
@@ -99,7 +142,8 @@ const LogoContainer = styled.div`
 
   // Colors
   border-radius: 32px;
-  border: 1px solid ${COLORS["grey-400-15"]};
+  border: 1px solid
+    ${({ primaryColor }) => COLORS[`${primaryColor}-15` as keyof typeof COLORS]};
   background: ${COLORS["grey-400-5"]};
 
   box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.08),
@@ -110,7 +154,7 @@ const LogoContainer = styled.div`
   }
 `;
 
-const StyledLogo = styled(ACXLogo)`
+const StyledLogo = styled.img`
   height: 24px;
   width: auto;
 `;
@@ -123,8 +167,13 @@ const TextStack = styled.div`
   flex: 1 0 0;
 `;
 
-const StyledCopyButton = styled(PrimaryButton)<{ isCopied?: boolean }>`
-  border: 1px solid ${COLORS["aqua-15"]};
+const StyledCopyButton = styled(PrimaryButton)<{
+  isCopied?: boolean;
+  primaryColor: string;
+  textColor: keyof typeof COLORS;
+}>`
+  border: 1px solid
+    ${({ primaryColor }) => COLORS[`${primaryColor}-15` as keyof typeof COLORS]};
 
   @media ${QUERIESV2.sm.andDown} {
     display: none;
@@ -133,16 +182,17 @@ const StyledCopyButton = styled(PrimaryButton)<{ isCopied?: boolean }>`
 
   background-color: ${({ isCopied }) =>
     isCopied ? COLORS["aqua"] : COLORS["black-700"]};
-  color: ${({ isCopied }) => (isCopied ? COLORS["black-700"] : COLORS["aqua"])};
+  color: ${({ isCopied, textColor }) =>
+    isCopied ? COLORS["black-700"] : COLORS[textColor]};
 `;
 
-const HighlightText = styled.span`
-  color: ${COLORS["aqua"]};
+const HighlightText = styled.span<{ program: rewardProgramTypes }>`
+  color: ${({ program }) => COLORS[rewardPrograms[program].primaryColor]};
 `;
 
-const TextButton = styled(Text)`
+const TextButton = styled(Text)<{ primaryColor: keyof typeof COLORS }>`
   cursor: pointer;
-  color: ${COLORS["aqua"]};
+  color: ${({ primaryColor }) => COLORS[primaryColor]};
   display: none;
   @media ${QUERIESV2.sm.andDown} {
     display: block;

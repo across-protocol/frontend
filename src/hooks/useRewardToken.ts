@@ -1,6 +1,11 @@
 import { useConnection, useSimplifiedReferralSummary } from "hooks";
 import { useQuery } from "react-query";
-import { getToken, parseUnits, rewardProgramsAvailable } from "utils";
+import {
+  getToken,
+  parseUnits,
+  rewardProgramTypes,
+  rewardProgramsAvailable,
+} from "utils";
 import useReferrer from "./useReferrer";
 
 export function useRewardToken(destinationChainId: number) {
@@ -44,5 +49,8 @@ export function useRewardToken(destinationChainId: number) {
     ...availableRewardPercentage,
     availableRewardPercentage: availableRewardPercentage.data || undefined,
     isACXRewardToken: rewardToken.symbol === "ACX",
+    programName: (rewardToken.symbol === "ACX"
+      ? "referrals"
+      : "op-rebates") as rewardProgramTypes,
   };
 }

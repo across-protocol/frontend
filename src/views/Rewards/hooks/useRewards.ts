@@ -10,6 +10,10 @@ export function useRewards() {
   const { isConnected, connect, account } = useConnection();
   const { summary, isLoading } = useRewardSummary("referrals", account);
 
+  if (summary.program !== "referrals") {
+    throw new Error("Invalid program type");
+  }
+
   const {
     myPools,
     allPools,
@@ -73,6 +77,10 @@ export function useRewards() {
 }
 
 function formatReferralSummary(summary: RewardsSummary, isValid: boolean) {
+  if (summary.program !== "referrals") {
+    throw new Error("Invalid program type");
+  }
+
   const stringTernary = repeatableTernaryBuilder<string | undefined>(
     isValid,
     undefined

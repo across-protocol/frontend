@@ -19,6 +19,10 @@ export function useACXReferralsProgram() {
   const token = useMemo(() => getToken("ACX"), []);
   const { data: unclaimedReferralData } = useUnclaimedReferralProofs();
 
+  if (summary.program !== "referrals") {
+    throw new Error("Invalid program type");
+  }
+
   const { currentTier, nextTier } = useMemo(
     () => ({
       currentTier: rewardTiers[summary.tier - 1],

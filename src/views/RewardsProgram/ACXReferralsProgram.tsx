@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { ReactComponent as ReferralSVG } from "assets/icons/rewards/referral-within-star.svg";
-import { COLORS } from "utils";
+import { COLORS, QUERIESV2 } from "utils";
 import ACXReferralLinkCard from "./ACXReferralsProgram/ACXReferralLinkCard";
 import ACXReferralTierStepper from "./ACXReferralsProgram/ACXReferralTierStepper";
 import GenericRewardsProgram from "./GenericRewardsProgram/GenericRewardsProgram";
@@ -32,10 +32,13 @@ export default ACXReferralsProgram;
 
 const Divider = styled.div`
   height: 1px;
-  margin-left: -100%;
-  width: 300%;
+  width: calc(100% + 48px);
   flex-shrink: 0;
   background-color: ${COLORS["aqua-5"]};
+
+  @media ${QUERIESV2.sm.andDown} {
+    width: calc(100% + 32px);
+  }
 `;
 
 export const StyledReferralLogo = styled(ReferralSVG)`

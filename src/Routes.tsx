@@ -29,6 +29,12 @@ const Referrals = lazyWithRetry(
       /* webpackChunkName: "Referrals" */ "./views/RewardsProgram/ACXReferralsProgram"
     )
 );
+const OPRebates = lazyWithRetry(
+  () =>
+    import(
+      /* webpackChunkName: "OPRebates" */ "./views/RewardsProgram/OPRebatesProgram"
+    )
+);
 const Rewards = lazyWithRetry(
   () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
 );
@@ -143,6 +149,11 @@ const Routes: React.FC = () => {
           <Route exact path="/transactions" component={Transactions} />
           <Route exact path="/pool" component={LiquidityPool} />
           <Route exact path="/rewards/referrals" component={Referrals} />
+          <Route
+            exact
+            path="/rewards/optimism-grant-program"
+            component={OPRebates}
+          />
           <Route exact path="/rewards" component={Rewards} />
           <Route exact path="/airdrop" component={Airdrop} />
           <Route

@@ -11,6 +11,7 @@ import { useIsContractAddress } from "hooks/useIsContractAddress";
 import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
 import { FromBridgePagePayload } from "../types";
 import ReferralCTA from "views/Bridge/components/ReferralCTA";
+import { useRewardToken } from "hooks/useRewardToken";
 
 type Props = {
   fromChainId: number;
@@ -31,6 +32,7 @@ export function DepositStatusLowerCard({
   const history = useHistory();
 
   const tokenInfo = getToken(bridgeTokenSymbol);
+  const { programName } = useRewardToken(toChainId);
 
   const FeesTable = quote ? (
     <EstimatedTable
@@ -55,7 +57,7 @@ export function DepositStatusLowerCard({
         l1TokenAddress={tokenInfo.mainnetAddress!}
         bridgeTokenSymbol={bridgeTokenSymbol}
       />
-      <ReferralCTA />
+      <ReferralCTA program={programName} />
       {fromBridgePagePayload && (
         <>
           <Divider />

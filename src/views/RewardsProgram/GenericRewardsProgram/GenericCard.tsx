@@ -58,7 +58,6 @@ const Wrapper = styled.div<{ primaryColor: string; displayBranding: boolean }>`
       100%
   );
 
-  overflow: clip;
   isolation: isolate;
   position: relative;
 
@@ -87,10 +86,13 @@ const BackgroundLayer = styled.div`
   position: absolute;
   top: 0;
   left: 0;
+  right: 0;
   z-index: 0;
+  overflow: clip;
+  height: 100%;
+  width: 100%;
 `;
 
 const BackgroundImage = styled.img`
-  width: calc(100% + 24px);
-  height: 100%;
+  width: 100%;
 `;
