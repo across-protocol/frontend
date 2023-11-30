@@ -22,16 +22,15 @@ export function ActionsCell({ deposit, onClickSpeedUp }: Props) {
     isDelayed && isProfitable ? (
       <Tooltip
         tooltipId="delayed-info"
-        title="Relayer running out of funds"
+        title="Insufficient relayer funds"
         maxWidth={320}
         placement="left"
         offset={60}
         icon={<SlowRelayInfoIconTooltip />}
         body={
           <Text size="sm" color="light-300">
-            Due to low relay funds this transaction may take up to 3 hours to
-            complete. Your full relayer fee will be refunded for the
-            inconvenience.
+            Due to insufficient relayer funds this transaction may take up to 3
+            hours to complete. No relayer fee will be charged on this transfer.
           </Text>
         }
       >
