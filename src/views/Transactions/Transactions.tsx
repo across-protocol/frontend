@@ -1,14 +1,14 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
 
-import { Text } from "components/Text";
-import Footer from "components/Footer";
-import { COLORS } from "utils";
+import { COLORS, QUERIESV2 } from "utils";
 
 import { FilterDropdown } from "./components/FilterDropdown";
 import { PersonalTransactions } from "./components/PersonalTransactions";
 import { AllTransactions } from "./components/AllTransactions";
 import { DepositStatusFilter } from "./types";
+import { LayoutV2 } from "components";
+import BreadcrumbV2 from "components/BreadcrumbV2";
 
 const statusFilterOptions: DepositStatusFilter[] = ["all", "pending", "filled"];
 
@@ -19,64 +19,61 @@ export function Transactions() {
   );
 
   return (
-    <Wrapper activeTab={activeTab}>
-      <Text size="lg" color="light-200">
-        Transactions
-      </Text>
-      <Divider />
-      <FilterWrapper>
-        <TabWrapper>
-          <Tab
-            onClick={() => setActiveTab("personal")}
-            active={activeTab === "personal"}
-          >
-            Personal
-          </Tab>
-          <Tab onClick={() => setActiveTab("all")} active={activeTab === "all"}>
-            All
-          </Tab>
-        </TabWrapper>
-        <FilterDropdown
-          filterLabel="Status"
-          filterOptions={statusFilterOptions}
-          selectedFilter={statusFilter}
-          onSelectFilter={(filter) =>
-            setStatusFilter(filter as DepositStatusFilter)
-          }
-        />
-      </FilterWrapper>
-      <BodyWrapper>
-        {activeTab === "personal" ? (
-          <PersonalTransactions statusFilter={statusFilter} />
-        ) : (
-          <AllTransactions statusFilter={statusFilter} />
-        )}
-      </BodyWrapper>
-      <Footer />
-    </Wrapper>
+    <LayoutV2 maxWidth={1140}>
+      <Wrapper>
+        <BreadcrumbV2 />
+        <FilterWrapper>
+          <TabWrapper>
+            <Tab
+              onClick={() => setActiveTab("personal")}
+              active={activeTab === "personal"}
+            >
+              Personal
+            </Tab>
+            <Tab
+              onClick={() => setActiveTab("all")}
+              active={activeTab === "all"}
+            >
+              All
+            </Tab>
+          </TabWrapper>
+          <FilterDropdown
+            filterLabel="Status"
+            filterOptions={statusFilterOptions}
+            selectedFilter={statusFilter}
+            onSelectFilter={(filter) =>
+              setStatusFilter(filter as DepositStatusFilter)
+            }
+          />
+        </FilterWrapper>
+        <BodyWrapper>
+          {activeTab === "personal" ? (
+            <PersonalTransactions statusFilter={statusFilter} />
+          ) : (
+            <AllTransactions statusFilter={statusFilter} />
+          )}
+        </BodyWrapper>
+      </Wrapper>
+    </LayoutV2>
   );
 }
 
-const Wrapper = styled.div<{ activeTab?: "personal" | "all" }>`
-  max-width: ${({ activeTab }) => (activeTab === "personal" ? 1476 : 1132)}px;
-  margin: 0 auto;
-  margin-top: 32px;
+const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
+  gap: 24px;
 
-  @media (max-width: 1476px) {
-    padding: 0 16px;
+  max-width: calc(1140px);
+  width: calc(100%);
+
+  margin: 0 auto;
+  padding: 32px 0;
+
+  @media ${QUERIESV2.sm.andDown} {
+    padding: 16px 0;
+    gap: 16px;
   }
 `;
-
-const Divider = styled.div`
-  height: 1px;
-  width: 100%;
-  background-color: ${COLORS["black-700"]};
-  margin-top: 12px;
-  margin-bottom: 24px;
-`;
-
 const Tab = styled.div<{ active?: boolean }>`
   display: flex;
   height: 48px;
