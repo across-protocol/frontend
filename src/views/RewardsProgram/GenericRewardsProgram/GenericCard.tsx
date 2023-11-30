@@ -89,9 +89,10 @@ const BackgroundLayer = styled.div`
   right: 0;
   z-index: 0;
   overflow: clip;
+  height: 100%;
+  width: 100%;
 `;
 
 const BackgroundImage = styled.img`
-  width: calc(100% + 24px);
-  height: 100%;
+  width: 100%;
 `;
