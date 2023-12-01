@@ -98,7 +98,7 @@ export async function fetchStakingPool(
 
   const { logoURI, symbol, displaySymbol } = isExternalLP
     ? externalLP!
-    : config.getTokenInfoByAddress(hubPoolChainId, tokenAddress);
+    : config.getPoolTokenInfoByAddress(hubPoolChainId, tokenAddress);
 
   const lpTokenAddress = isExternalLP
     ? tokenAddress

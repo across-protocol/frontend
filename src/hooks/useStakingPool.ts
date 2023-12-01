@@ -23,20 +23,12 @@ export function useStakingPool(tokenAddress?: string) {
   );
   const acxPrice = acxPriceQuery.data?.price;
 
-  const queryEnabled =
-    isDefined(tokenAddress) &&
-    config
-      .getStakingPoolTokenList()
-      .map((t) => t.mainnetAddress)
-      .includes(tokenAddress) &&
-    isDefined(acxPrice);
-
   const stakingPoolQuery = useQuery(
     getStakingPoolQueryKey(tokenAddress, account),
     ({ queryKey: keys }) => fetchStakingPool(keys[1], keys[2], acxPrice),
     {
       refetchInterval: defaultRefetchInterval,
-      enabled: queryEnabled,
+      enabled: isDefined(tokenAddress),
     }
   );
 
