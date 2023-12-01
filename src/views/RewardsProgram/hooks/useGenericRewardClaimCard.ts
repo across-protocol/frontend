@@ -28,12 +28,12 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
   const { summary } = useRewardSummary(program, account);
   const rewardsAmount =
     summary.program === "op-rebates"
-      ? summary.claimableRewards
+      ? summary.unclaimedRewards
       : summary.rewardsAmount;
   const unclaimedAmount =
     summary.program === "referrals"
       ? unclaimedReferralData?.claimableAmount
-      : summary.unclaimedRewards;
+      : summary.claimableRewards;
 
   const formatUnits = formatUnitsFnBuilder(token.decimals);
 
@@ -49,7 +49,7 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
   return {
     ...programDetails,
     token,
-    rewardsAmount: BigNumber.from(rewardsAmount),
+    rewardsAmount: BigNumber.from(rewardsAmount ?? 0),
     unclaimedAmount: BigNumber.from(unclaimedAmount ?? 0),
     formatUnits,
     disconnectedState,
