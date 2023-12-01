@@ -51,7 +51,7 @@ export function useOPRebatesProgram() {
 
   return {
     labels,
-    rewardsAmount: BigNumber.from(0),
-    claimableAmount: BigNumber.from(summary.unclaimedRewards || 0),
+    rewardsAmount: BigNumber.from(summary.unclaimedRewards || 0),
+    claimableAmount: BigNumber.from(summary.claimableRewards || 0),
   };
 }
