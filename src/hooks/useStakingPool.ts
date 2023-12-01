@@ -1,12 +1,7 @@
 import { useQuery, useQueries, QueryFunctionContext } from "react-query";
 import { BigNumber } from "ethers";
 
-import {
-  getConfig,
-  hubPoolChainId,
-  defaultRefetchInterval,
-  isDefined,
-} from "utils";
+import { getConfig, hubPoolChainId, defaultRefetchInterval } from "utils";
 import { useConnection } from "hooks/useConnection";
 import { fetchStakingPool } from "utils/staking-pool";
 
@@ -28,7 +23,7 @@ export function useStakingPool(tokenAddress?: string) {
     ({ queryKey: keys }) => fetchStakingPool(keys[1], keys[2], acxPrice),
     {
       refetchInterval: defaultRefetchInterval,
-      enabled: isDefined(tokenAddress),
+      enabled: Boolean(tokenAddress) && Boolean(acxPrice),
     }
   );
 
