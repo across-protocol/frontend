@@ -32,11 +32,11 @@ export function useOPRebatesProgram() {
       {
         title: "Rewards",
         tooltip: "Rewards earned from this Optimism program",
-        value: `${formatUnits(summary.claimableRewards, token.decimals)} ${
+        value: `${formatUnits(summary.unclaimedRewards || 0, token.decimals)} ${
           token.symbol
         }`,
         prefix: `${formatUnits(
-          summary.unclaimedRewards ?? "0",
+          summary.claimableRewards ?? "0",
           token.decimals
         )} ${token.symbol} claimable`,
         prefixIcon: "clock",
@@ -51,7 +51,7 @@ export function useOPRebatesProgram() {
 
   return {
     labels,
-    rewardsAmount: BigNumber.from(0),
-    claimableAmount: BigNumber.from(summary.unclaimedRewards || 0),
+    rewardsAmount: BigNumber.from(summary.unclaimedRewards || 0),
+    claimableAmount: BigNumber.from(summary.claimableRewards || 0),
   };
 }
