@@ -9,7 +9,7 @@ export function useRewardProgramCard(programName: rewardProgramTypes) {
   const { summary } = useRewardSummary(programName, account);
   const rewardsAmount =
     summary.program === "op-rebates"
-      ? summary.unclaimedRewards
+      ? summary.unclaimedRewards ?? 0
       : summary.rewardsAmount;
   return {
     ...programDetail,
