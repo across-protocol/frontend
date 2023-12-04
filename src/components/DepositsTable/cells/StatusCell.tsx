@@ -59,12 +59,13 @@ function PendingStatusCell({ width, deposit }: Props) {
         <Tooltip
           tooltipId={`delayed-cell-info-${deposit.depositTxHash}`}
           placement="bottom"
-          title="Relayer running out of funds"
+          title="Insufficient relayer funds"
           body={
             <Text size="sm" color="light-300">
-              Due to low relay funds this transaction may take up to 3 hours to
-              complete. Your full relayer fee will be refunded for the
-              inconvenience.
+              Relayer funds are insufficient to complete this trasfer
+              immediately. The transfer will be settled directly by Across and
+              may may take up to 3 hours. No relayer fee will be charged on this
+              transfer.
             </Text>
           }
         >
