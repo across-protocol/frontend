@@ -285,6 +285,7 @@ export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
       ],
     },
   ],
+  5: [],
 };
 
 export const bridgedUSDCSymbolsMap = {
