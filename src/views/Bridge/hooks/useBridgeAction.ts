@@ -68,10 +68,7 @@ export function useBridgeAction(
 
     if (tokenSymbol !== "ETH") {
       await approveHandler.mutateAsync({
-        erc20Address: config.getTokenInfoBySymbol(
-          frozenPayload.fromChain,
-          tokenSymbol
-        ).address,
+        erc20Symbol: tokenSymbol,
         approvalAmount: frozenPayload.amount,
         allowedContractAddress: config.getSpokePoolAddress(
           frozenPayload.fromChain
