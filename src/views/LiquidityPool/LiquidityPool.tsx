@@ -86,6 +86,11 @@ export default function LiquidityPool() {
 
   const stakingPoolQuery = useStakingPool(selectedToken.l1TokenAddress);
 
+  const showStakingCTA = getConfig()
+    .getStakingPoolTokenList()
+    .map((v) => v.l1TokenAddress)
+    .includes(selectedToken.l1TokenAddress);
+
   return (
     <>
       <WrongNetworkHeader requiredChainId={hubPoolChainId} />
@@ -166,11 +171,15 @@ export default function LiquidityPool() {
               )}
               tokenLogoURI={selectedToken.logoURI}
             />
-            <Divider />
-            <EarnByStakingInfoBox
-              selectedToken={selectedToken}
-              selectedPoolAction={action}
-            />
+            {showStakingCTA && (
+              <>
+                <Divider />
+                <EarnByStakingInfoBox
+                  selectedToken={selectedToken}
+                  selectedPoolAction={action}
+                />
+              </>
+            )}
             <Divider />
             {!isConnected ? (
               <Button

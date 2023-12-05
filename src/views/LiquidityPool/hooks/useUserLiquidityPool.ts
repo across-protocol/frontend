@@ -41,7 +41,7 @@ async function fetchUserLiquidityPool(
   }
 
   const { logoURI, symbol, l1TokenAddress, decimals } =
-    config.getTokenInfoBySymbol(config.getHubPoolChainId(), tokenSymbol);
+    config.getPoolTokenInfoBySymbol(config.getHubPoolChainId(), tokenSymbol);
 
   const [l1Balance] = await Promise.all([
     tokenSymbol === "ETH"
