@@ -36,7 +36,7 @@ export function useApprove(requiredChainId = hubPoolChainId) {
       }
     }
 
-    const tokenInfo = config.getTokenInfoBySymbol(
+    const tokenInfo = config.getPoolTokenInfoBySymbol(
       requiredChainId,
       args.erc20Symbol
     );
