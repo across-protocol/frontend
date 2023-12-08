@@ -3,14 +3,7 @@ import { BigNumber } from "ethers";
 import { useRewardToken } from "hooks/useRewardToken";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { useMemo, useState } from "react";
-import {
-  TokenInfo,
-  fixedPointAdjustment,
-  formatUSD,
-  formatUnits,
-  isDefined,
-  parseUnits,
-} from "utils";
+import { TokenInfo, fixedPointAdjustment, isDefined, parseUnits } from "utils";
 
 export function useEstimatedTable(
   token: TokenInfo,
@@ -69,9 +62,6 @@ export function useEstimatedTable(
   const hasDepositReferralReward = depositReward?.rewardAsL1.gt(0) ?? false;
 
   const baseCurrencyConversions = useMemo(() => {
-    const parseUsd = (usd?: number) =>
-      isDefined(usd) ? parseUnits(String(usd), 18) : undefined;
-    const formatNumericUsd = (usd: BigNumber) => Number(formatUSD(usd));
     const gasFeeInUSD = convertL1ToBaseCurrency(gasFee);
     const bridgeFeeInUSD = convertL1ToBaseCurrency(bridgeFee);
 
@@ -84,21 +74,22 @@ export function useEstimatedTable(
       };
     }
 
-    const numericGasFee = formatNumericUsd(gasFeeInUSD);
-    const numericBridgeFee = formatNumericUsd(bridgeFeeInUSD);
-    const numericReward = availableRewardPercentage
-      ? (numericBridgeFee + numericGasFee) *
-        Number(formatUnits(availableRewardPercentage, 18))
+    const rewardInUSD = availableRewardPercentage
+      ? gasFeeInUSD
+          .add(bridgeFeeInUSD)
+          .mul(availableRewardPercentage)
+          .div(fixedPointAdjustment)
       : undefined;
 
-    const netFeeAsBaseCurrency =
-      numericBridgeFee + numericGasFee - (numericReward ?? 0);
+    const netFeeAsBaseCurrency = gasFeeInUSD
+      .add(bridgeFeeInUSD)
+      .sub(rewardInUSD ?? 0);
 
     return {
-      gasFeeAsBaseCurrency: parseUsd(numericGasFee),
-      bridgeFeeAsBaseCurrency: parseUsd(numericBridgeFee),
-      referralRewardAsBaseCurrency: parseUsd(numericReward),
-      netFeeAsBaseCurrency: parseUsd(netFeeAsBaseCurrency),
+      gasFeeAsBaseCurrency: gasFeeInUSD,
+      bridgeFeeAsBaseCurrency: bridgeFeeInUSD,
+      referralRewardAsBaseCurrency: rewardInUSD,
+      netFeeAsBaseCurrency: netFeeAsBaseCurrency,
     };
   }, [availableRewardPercentage, bridgeFee, convertL1ToBaseCurrency, gasFee]);
 
