@@ -6,7 +6,6 @@ import { useMemo, useState } from "react";
 import {
   TokenInfo,
   fixedPointAdjustment,
-  formatUSD,
   formatUnits,
   isDefined,
   parseUnits,
@@ -71,7 +70,7 @@ export function useEstimatedTable(
   const baseCurrencyConversions = useMemo(() => {
     const parseUsd = (usd?: number) =>
       isDefined(usd) ? parseUnits(String(usd), 18) : undefined;
-    const formatNumericUsd = (usd: BigNumber) => Number(formatUSD(usd));
+    const formatNumericUsd = (usd: BigNumber) => Number(formatUnits(usd, 18));
     const gasFeeInUSD = convertL1ToBaseCurrency(gasFee);
     const bridgeFeeInUSD = convertL1ToBaseCurrency(bridgeFee);
 
