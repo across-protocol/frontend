@@ -50,12 +50,13 @@ export function useAddLiquidity(tokenSymbol?: string, l1TokenAddress?: string) {
     try {
       if (!isEth) {
         await approve({
-          erc20Address: tokenInfo.l1TokenAddress,
+          erc20Symbol: tokenSymbol,
           approvalAmount: parsedAndValidAmount,
           allowedContractAddress: hubPoolAddress,
         });
       }
     } catch (error) {
+      console.error(error);
       return;
     }
 
