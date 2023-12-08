@@ -69,7 +69,7 @@ export function useEstimatedTable(
 
   const baseCurrencyConversions = useMemo(() => {
     const parseUsd = (usd?: number) =>
-      isDefined(usd) ? parseUnits(String(usd), 18) : undefined;
+      isDefined(usd) ? parseUnits(String(usd.toFixed(2)), 18) : undefined;
     const formatNumericUsd = (usd: BigNumber) =>
       Number(ethersUtils.formatUnits(usd, 18));
     const gasFeeInUSD = convertL1ToBaseCurrency(gasFee);
