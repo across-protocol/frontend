@@ -1,12 +1,11 @@
 import { utils } from "@across-protocol/sdk-v2";
-import { BigNumber } from "ethers";
+import { BigNumber, utils as ethersUtils } from "ethers";
 import { useRewardToken } from "hooks/useRewardToken";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { useMemo, useState } from "react";
 import {
   TokenInfo,
   fixedPointAdjustment,
-  formatUSD,
   formatUnits,
   isDefined,
   parseUnits,
@@ -71,7 +70,8 @@ export function useEstimatedTable(
   const baseCurrencyConversions = useMemo(() => {
     const parseUsd = (usd?: number) =>
       isDefined(usd) ? parseUnits(String(usd), 18) : undefined;
-    const formatNumericUsd = (usd: BigNumber) => Number(formatUSD(usd));
+    const formatNumericUsd = (usd: BigNumber) =>
+      Number(Number(ethersUtils.formatUnits(usd, 18)).toFixed(2));
     const gasFeeInUSD = convertL1ToBaseCurrency(gasFee);
     const bridgeFeeInUSD = convertL1ToBaseCurrency(bridgeFee);
 
