@@ -1457,7 +1457,6 @@
       "isNative": false,
       "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
     },
-
     {
       "fromChain": 324,
       "toChain": 42161,
@@ -1566,7 +1565,6 @@
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
-
     {
       "fromChain": 8453,
       "toChain": 1,
@@ -1602,6 +1600,15 @@
       "fromTokenSymbol": "DAI",
       "isNative": false,
       "l1TokenAddress": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+    },
+    {
+      "fromChain": 8453,
+      "toChain": 1,
+      "fromTokenAddress": "0x4158734D47Fc9692176B5085E0F52ee0Da5d47F1",
+      "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "fromTokenSymbol": "BAL",
+      "isNative": false,
+      "l1TokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D"
     },
     {
       "fromChain": 8453,
@@ -1641,6 +1648,15 @@
     },
     {
       "fromChain": 8453,
+      "toChain": 10,
+      "fromTokenAddress": "0x4158734D47Fc9692176B5085E0F52ee0Da5d47F1",
+      "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "fromTokenSymbol": "BAL",
+      "isNative": false,
+      "l1TokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D"
+    },
+    {
+      "fromChain": 8453,
       "toChain": 137,
       "fromTokenAddress": "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
       "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
@@ -1677,6 +1693,15 @@
     },
     {
       "fromChain": 8453,
+      "toChain": 137,
+      "fromTokenAddress": "0x4158734D47Fc9692176B5085E0F52ee0Da5d47F1",
+      "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "fromTokenSymbol": "BAL",
+      "isNative": false,
+      "l1TokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D"
+    },
+    {
+      "fromChain": 8453,
       "toChain": 42161,
       "fromTokenAddress": "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
       "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
@@ -1710,6 +1735,15 @@
       "fromTokenSymbol": "DAI",
       "isNative": false,
       "l1TokenAddress": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+    },
+    {
+      "fromChain": 8453,
+      "toChain": 42161,
+      "fromTokenAddress": "0x4158734D47Fc9692176B5085E0F52ee0Da5d47F1",
+      "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "fromTokenSymbol": "BAL",
+      "isNative": false,
+      "l1TokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D"
     },
     {
       "fromChain": 8453,
@@ -1737,42 +1771,6 @@
       "fromTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-    },
-    {
-      "fromChain": 8453,
-      "toChain": 1,
-      "fromTokenAddress": "0x4158734D47Fc9692176B5085E0F52ee0Da5d47F1",
-      "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
-      "fromTokenSymbol": "BAL",
-      "isNative": false,
-      "l1TokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D"
-    },
-    {
-      "fromChain": 8453,
-      "toChain": 10,
-      "fromTokenAddress": "0x4158734D47Fc9692176B5085E0F52ee0Da5d47F1",
-      "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
-      "fromTokenSymbol": "BAL",
-      "isNative": false,
-      "l1TokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D"
-    },
-    {
-      "fromChain": 8453,
-      "toChain": 42161,
-      "fromTokenAddress": "0x4158734D47Fc9692176B5085E0F52ee0Da5d47F1",
-      "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
-      "fromTokenSymbol": "BAL",
-      "isNative": false,
-      "l1TokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D"
-    },
-    {
-      "fromChain": 8453,
-      "toChain": 137,
-      "fromTokenAddress": "0x4158734D47Fc9692176B5085E0F52ee0Da5d47F1",
-      "fromSpokeAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
-      "fromTokenSymbol": "BAL",
-      "isNative": false,
-      "l1TokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D"
     }
   ],
   "pools": [
