@@ -4,7 +4,7 @@
   "private": true,
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "@across-protocol/constants-v2": "^1.0.5",
+    "@across-protocol/constants-v2": "^1.0.8",
     "@across-protocol/sdk-v2": "^0.17.10",
     "@amplitude/analytics-browser": "^2.3.5",
     "@balancer-labs/sdk": "^1.1.5",
@@ -91,7 +91,7 @@
     ]
   },
   "devDependencies": {
-    "@amplitude/ampli": "^1.27.1",
+    "@amplitude/ampli": "^1.34.0",
     "@babel/plugin-transform-modules-commonjs": "^7.18.6",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
