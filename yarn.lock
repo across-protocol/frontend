@@ -26,11 +26,17 @@
   resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.5.tgz#461fa0fd907c4ed52cc5c16f5603b1a96b000e56"
   integrity sha512-PVXyarhxUxhEP8il47HPt0yR3SfnD7K4PfNQ31X4UMzvJ2ohgQoW3eWXUbEYNGeZUJsVos4GHAc3Hu1h2Jno5w==
 
-"@across-protocol/contracts-v2@^2.4.4":
-  version "2.4.4"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.4.4.tgz#face03ecb7c9f3c2e3171996eb4af432a718dcef"
-  integrity sha512-6HVAXhff9GhIny0XfXQYHbaply+sTG/hffaoN+/qygoX59wOduNdokjicV095tDOgVqoVEFpI8m3P/fMM08bcw==
+"@across-protocol/constants-v2@^1.0.7":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.8.tgz#0f4dc9fbcf7b99dd895a06bb6070b5d3c8e1188d"
+  integrity sha512-7rygtlYseWNI/5ocIT9SXYu6L86oQbKTtFNAOw5MqD53bbsREzRy5dU0wkUHJzvHiNIQ+iawKnzprqshHHeRKw==
+
+"@across-protocol/contracts-v2@^2.4.7":
+  version "2.4.7"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.4.7.tgz#1f3be7410cd77a11c17d6f86758ad3290d886740"
+  integrity sha512-Ao7B2Sp9MUCVB77bJLLemZThpHU+0/BLbQdI0/vn2AQWtwTQfFqlF3q+qfbEvFI4arNsivHcM5rsfwyWrz4onw==
   dependencies:
+    "@across-protocol/constants-v2" "^1.0.4"
     "@defi-wonderland/smock" "^2.3.4"
     "@eth-optimism/contracts" "^0.5.40"
     "@ethersproject/abstract-provider" "5.7.0"
@@ -52,14 +58,14 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.17.10":
-  version "0.17.10"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.17.10.tgz#8043f3e220742b9079ac75187d7c6c18f4a68592"
-  integrity sha512-HWViQjHHlvN+lnbOtmH2ZgYhu4VcYhwr17tCFOBP3ECdLs4OwBtwSUDhWlc2KG99CgZHvU3eiXN2nvhqPYwZew==
+"@across-protocol/sdk-v2@^0.17.17":
+  version "0.17.17"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.17.17.tgz#1cd191dd835b7546419d31b64c5195bb973639e4"
+  integrity sha512-N5EkPOJIOoUkO4/JNeRlQw7h9GRHrTQQ+ptua2cjF9i+cicukNLKrLPUTWrBXIgjsr5nXEAZl17KyeOqvXNafg==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
-    "@across-protocol/constants-v2" "^1.0.4"
-    "@across-protocol/contracts-v2" "^2.4.4"
+    "@across-protocol/constants-v2" "^1.0.7"
+    "@across-protocol/contracts-v2" "^2.4.7"
     "@eth-optimism/sdk" "^2.1.0"
     "@pinata/sdk" "^2.1.0"
     "@types/mocha" "^10.0.1"
