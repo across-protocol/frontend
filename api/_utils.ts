@@ -1,4 +1,4 @@
-import "./_imports";
+import "./_polyfills";
 import { AcceleratingDistributor__factory } from "@across-protocol/across-token/dist/typechain";
 import {
   ERC20__factory,
