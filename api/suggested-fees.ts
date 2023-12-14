@@ -30,7 +30,7 @@ import {
   ENABLED_ROUTES,
   getSpokePoolAddress,
   getDefaultRelayerAddress,
-  getBalance,
+  getCachedBalance,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -135,7 +135,7 @@ const handler = async (
             `Could not resolve token address on ${destinationChainId} for ${l1Token}`
           );
         }
-        const balanceOfToken = await getBalance(
+        const balanceOfToken = await getCachedBalance(
           destinationChainId,
           relayer,
           destinationToken

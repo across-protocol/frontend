@@ -621,7 +621,7 @@ export const isRouteEnabled = (
  * @param token The valid ERC20 token address on the given `chainId`.
  * @returns A promise that resolves to the BigNumber of the balance
  */
-export const getBalance = async (
+export const getCachedBalance = async (
   chainId: string | number,
   account: string,
   token: string

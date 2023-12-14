@@ -29,7 +29,7 @@ import {
   getProvider,
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
-  getBalance,
+  getCachedBalance,
   getDefaultRelayerAddress,
   sendResponse,
 } from "./_utils";
@@ -165,19 +165,19 @@ const handler = async (
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
         fullRelayers.map((relayer) =>
-          getBalance(destinationChainId!, destinationToken, relayer)
+          getCachedBalance(destinationChainId!, destinationToken, relayer)
         )
       ),
       Promise.all(
         transferRestrictedRelayers.map((relayer) =>
-          getBalance(destinationChainId!, destinationToken, relayer)
+          getCachedBalance(destinationChainId!, destinationToken, relayer)
         )
       ),
       Promise.all(
         fullRelayers.map((relayer) =>
           destinationChainId === "1"
             ? ethers.BigNumber.from("0")
-            : getBalance("1", l1Token, relayer)
+            : getCachedBalance("1", l1Token, relayer)
         )
       ),
     ]);
