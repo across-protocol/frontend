@@ -29,12 +29,8 @@ import {
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
   getSpokePoolAddress,
-<<<<<<< HEAD
-  getCachedTokenBalance,
   getDefaultRelayerAddress,
-=======
   getBalance,
->>>>>>> 5797e0a6 (feat: add redis caching support for getBalance)
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -117,18 +113,10 @@ const handler = async (
         // Our message encoding is a hex string, so we need to check that the length is even.
         throw new InputError("Message must be an even hex string");
       }
-<<<<<<< HEAD
       const isRecipientAContract = await sdk.utils.isContractDeployedToAddress(
         recipient,
         getProvider(destinationChainId)
       );
-=======
-      const isRecipientAContract =
-        (await sdk.utils.isContractDeployedToAddress(
-          recipientAddress,
-          provider
-        )) || true;
->>>>>>> 5797e0a6 (feat: add redis caching support for getBalance)
       if (!isRecipientAContract) {
         throw new InputError(
           "Recipient must be a contract when a message is provided"
@@ -149,11 +137,7 @@ const handler = async (
         }
         const balanceOfToken = await getBalance(
           destinationChainId,
-<<<<<<< HEAD
           relayer,
-=======
-          relayerAddress,
->>>>>>> 5797e0a6 (feat: add redis caching support for getBalance)
           destinationToken
         );
         if (balanceOfToken.lt(amountInput)) {

@@ -29,12 +29,9 @@ import {
   getProvider,
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
-<<<<<<< HEAD
+  getBalance,
   getDefaultRelayerAddress,
   sendResponse,
-=======
-  getBalance,
->>>>>>> 5797e0a6 (feat: add redis caching support for getBalance)
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -168,31 +165,19 @@ const handler = async (
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
         fullRelayers.map((relayer) =>
-<<<<<<< HEAD
-          getCachedTokenBalance(destinationChainId!, relayer, destinationToken)
-=======
           getBalance(destinationChainId!, destinationToken, relayer)
->>>>>>> 5797e0a6 (feat: add redis caching support for getBalance)
         )
       ),
       Promise.all(
         transferRestrictedRelayers.map((relayer) =>
-<<<<<<< HEAD
-          getCachedTokenBalance(destinationChainId!, relayer, destinationToken)
-=======
           getBalance(destinationChainId!, destinationToken, relayer)
->>>>>>> 5797e0a6 (feat: add redis caching support for getBalance)
         )
       ),
       Promise.all(
         fullRelayers.map((relayer) =>
           destinationChainId === "1"
             ? ethers.BigNumber.from("0")
-<<<<<<< HEAD
-            : getCachedTokenBalance("1", relayer, l1Token)
-=======
             : getBalance("1", l1Token, relayer)
->>>>>>> 5797e0a6 (feat: add redis caching support for getBalance)
         )
       ),
     ]);
