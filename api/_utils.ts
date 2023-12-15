@@ -1,4 +1,7 @@
-import "./_polyfills";
+// _POLYFILLS MUST BE IMPORTED FIRST
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as _pFill from "./_polyfills";
+
 import { AcceleratingDistributor__factory } from "@across-protocol/across-token/dist/typechain";
 import {
   ERC20__factory,
