@@ -7,6 +7,7 @@ import {
   TitleLogo,
   IconPairContainer,
 } from "./StakingExitAction.styles";
+import { isDefined } from "utils";
 
 type StakingExitActionAttributes = {
   poolName: string;
@@ -22,7 +23,7 @@ export const StakingExitAction = ({
   <BreadcrumbV2
     onlyRootAncestor
     customCurrentRoute={
-      <TitleLogo>
+      <TitleLogo extendWidth={isDefined(poolLogoURIs)}>
         {poolLogoURIs ? (
           <IconPairContainer>
             <IconPair

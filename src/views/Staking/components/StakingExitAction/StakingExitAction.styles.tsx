@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { QUERIESV2 } from "utils";
 
 export const IconPairContainer = styled.div`
-  padding-top: 8px;
+  padding-right: 4px;
 `;
 
 export const Logo = styled.img`
@@ -22,11 +22,11 @@ export const Text = styled.span`
   color: #e0f3ff;
 `;
 
-export const TitleLogo = styled.div`
+export const TitleLogo = styled.div<{ extendWidth: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
+  gap: ${({ extendWidth }) => (extendWidth ? 18 : 12)}px;
 
   @media ${QUERIESV2.sm.andDown} {
     gap: 8px;
