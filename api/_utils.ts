@@ -246,6 +246,7 @@ export const getTokenDetails = async (
 };
 
 export class InputError extends Error {}
+export class ServerError extends Error {}
 
 /**
  * Resolves an Infura provider given the name of the ETH network
@@ -640,13 +641,17 @@ export const getCachedBalance = async (
       getProvider(Number(chainId)),
       BLOCK_TAG_LAG // We should do this for consistency
     );
-    await kv.set(key, balance.toString(), {
-      ex: 60 * 5, // 5 minutes
-    });
-    getLogger().debug({
-      at: "_utils#getBalance",
-      message: `Cached balance for ${key}: ${balance}`,
-    });
+    try {
+      await kv.set(key, balance.toString(), {
+        ex: 60 * 5, // 5 minutes
+      });
+      getLogger().debug({
+        at: "_utils#getBalance",
+        message: `Cached balance for ${key}: ${balance}`,
+      });
+    } catch (_err) {
+      throw new ServerError();
+    }
     return balance;
   }
 };
