@@ -14,6 +14,7 @@ export const ExternalWrapper = styled.div`
 
   @media ${QUERIESV2.sm.andDown} {
     background: url(${BGMeshMobile});
+    background-size: cover;
 
     margin-top: -64px;
     padding-top: 64px;
