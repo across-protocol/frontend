@@ -94,13 +94,22 @@ export async function getFillByDepositTxHash(
     )
   );
 
-  if (!filledRelayEvents.length) {
+  if (filledRelayEvents.length === 0) {
     throw new Error(
       `Could not find FilledRelay events for depositId ${depositId} on chain ${toChainId}`
     );
   }
 
-  const filledRelayEvent = filledRelayEvents[0];
+  const filledRelayEvent = filledRelayEvents.find((event) =>
+    event.args.amount.eq(event.args.totalFilledAmount)
+  );
+
+  if (!filledRelayEvent) {
+    throw new Error(
+      `Could not find FilledRelay event that fully filed depositId ${depositId} on chain ${toChainId}`
+    );
+  }
+
   const fillTxBlock = await filledRelayEvent.getBlock();
 
   return {
