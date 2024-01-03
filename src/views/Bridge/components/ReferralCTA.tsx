@@ -77,7 +77,7 @@ const ReferralCTA = ({ program }: ReferralCTAProps) => {
           <HighlightText program={program}>
             {rewardProgram.highestPct * 100}%
           </HighlightText>{" "}
-          in {rewardProgram.rewardTokenSymbol} Rewards with referrals
+          in {rewardProgram.rewardTokenSymbol} Rewards
         </Text>
         <Text color="grey-400" size="sm">
           {bodyCopy}
