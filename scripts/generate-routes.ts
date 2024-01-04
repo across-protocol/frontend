@@ -431,7 +431,11 @@ function generateRoutes(hubPoolChainId = 1) {
 }
 
 function getUsdcSymbol(chainId: number) {
-  if ([CHAIN_IDs.ARBITRUM, CHAIN_IDs.OPTIMISM].includes(chainId)) {
+  if (
+    [CHAIN_IDs.ARBITRUM, CHAIN_IDs.OPTIMISM, CHAIN_IDs.POLYGON].includes(
+      chainId
+    )
+  ) {
     return "USDC.e";
   }
 

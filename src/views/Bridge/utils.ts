@@ -4,6 +4,7 @@ import {
   ChainId,
   Route,
   bridgedUSDCSymbols,
+  chainsWithNativeUSDC,
   getChainInfo,
   getConfig,
   getToken,
@@ -72,7 +73,9 @@ export function getReceiveTokenSymbol(
 
   if (
     ["USDC", "USDbC"].includes(bridgeTokenSymbol) &&
-    [ChainId.OPTIMISM, ChainId.ARBITRUM].includes(destinationChainId)
+    chainsWithNativeUSDC
+      .filter((chainId) => chainId !== ChainId.BASE)
+      .includes(destinationChainId)
   ) {
     return "USDC.e";
   }
