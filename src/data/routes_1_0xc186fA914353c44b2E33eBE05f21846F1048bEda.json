@@ -760,7 +760,7 @@
       "toChain": 1,
       "fromTokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
       "fromSpokeAddress": "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
-      "fromTokenSymbol": "USDC",
+      "fromTokenSymbol": "USDC.e",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
@@ -841,7 +841,7 @@
       "toChain": 10,
       "fromTokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
       "fromSpokeAddress": "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
-      "fromTokenSymbol": "USDC",
+      "fromTokenSymbol": "USDC.e",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
@@ -922,7 +922,7 @@
       "toChain": 42161,
       "fromTokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
       "fromSpokeAddress": "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
-      "fromTokenSymbol": "USDC",
+      "fromTokenSymbol": "USDC.e",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
@@ -976,7 +976,7 @@
       "toChain": 324,
       "fromTokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
       "fromSpokeAddress": "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
-      "fromTokenSymbol": "USDC",
+      "fromTokenSymbol": "USDC.e",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
@@ -1021,7 +1021,7 @@
       "toChain": 8453,
       "fromTokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
       "fromSpokeAddress": "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
-      "fromTokenSymbol": "USDC",
+      "fromTokenSymbol": "USDC.e",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },

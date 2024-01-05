@@ -1,7 +1,9 @@
-import { CHAIN_IDs } from "@across-protocol/constants-v2";
-
 import { Text } from "components/Text";
-import { getChainInfo } from "utils";
+import {
+  getChainInfo,
+  bridgedUSDCSymbolsMap,
+  chainsWithNativeUSDC,
+} from "utils";
 
 type Props = {
   symbol: string;
@@ -14,20 +16,30 @@ export const RouteNotSupportedTooltipText = ({
   fromChain,
   toChain,
 }: Props) => {
-  const isArbitrumNativeUSDC =
-    (fromChain === CHAIN_IDs.ARBITRUM || toChain === CHAIN_IDs.ARBITRUM) &&
+  const isOnlyBridgedUsdcSupported =
+    (chainsWithNativeUSDC.includes(fromChain) ||
+      chainsWithNativeUSDC.includes(toChain)) &&
     symbol === "USDC";
+
   return (
     <Text color="white-70" size="sm">
-      {isArbitrumNativeUSDC ? (
+      {isOnlyBridgedUsdcSupported ? (
         <>
           Across currently only supports{" "}
           <Text color="white-100" size="sm" as="a">
-            USDC.e
+            {
+              bridgedUSDCSymbolsMap[
+                chainsWithNativeUSDC.includes(fromChain) ? fromChain : toChain
+              ]
+            }
           </Text>{" "}
           (bridged USDC) on{" "}
           <Text color="white-100" size="sm" as="a">
-            Arbitrum
+            {
+              getChainInfo(
+                chainsWithNativeUSDC.includes(fromChain) ? fromChain : toChain
+              ).name
+            }
           </Text>
           .
         </>
