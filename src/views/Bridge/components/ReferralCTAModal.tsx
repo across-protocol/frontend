@@ -92,7 +92,7 @@ const ReferralCTAModal = ({
           </Text>
         </TwitterPreviewWrapper>
         <Button onClick={onClick}>
-          Connect to <XIconPrimary />
+          Share on <XIconPrimary />
         </Button>
       </Wrapper>
     </Modal>
