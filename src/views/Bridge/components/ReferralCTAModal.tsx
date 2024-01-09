@@ -3,8 +3,10 @@ import { ReactComponent as UserIcon } from "assets/icons/user-48.svg";
 import { ReactComponent as XBlueCheck } from "assets/icons/x-blue-check.svg";
 import { ReactComponent as XIconWhite } from "assets/icons/x-white.svg";
 import { Modal, PrimaryButton, Text } from "components";
+import { useConnection } from "hooks";
 import useCurrentBreakpoint from "hooks/useCurrentBreakpoint";
 import { useReferralLink } from "hooks/useReferralLink";
+import { useEffect } from "react";
 import { COLORS } from "utils";
 import ACXReferralLinkCard from "views/RewardsProgram/ACXReferralsProgram/ACXReferralLinkCard";
 
@@ -17,12 +19,22 @@ const ReferralCTAModal = ({
   isOpen,
   exitModalHandler,
 }: ReferralCTAModalProps) => {
+  const { isConnected } = useConnection();
   const { isMobile } = useCurrentBreakpoint();
   const { condensedReferralLink, referralLinkWithProtocol } = useReferralLink();
   const onClick = () => {
     const twitterShareLink = `https://twitter.com/intent/tweet?&url=${referralLinkWithProtocol}&text=If anyone is interested in fast and cheap bridging, below is my @acrossprotocol referral link:%0A%0A`;
     window.open(twitterShareLink, "_blank")?.focus();
   };
+
+  // We want to immediately close the modal if the user disconnects.
+  // Otherwise, the user will be able to see the modal, but won't have a referral link to share.
+  useEffect(() => {
+    if (!isConnected) {
+      exitModalHandler();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected]);
 
   return (
     <Modal
