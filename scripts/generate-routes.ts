@@ -88,7 +88,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC", "USDT", "WBTC", "DAI"],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -147,7 +147,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT"],
+            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -202,7 +202,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["WETH", "USDC", "WBTC", "USDT"],
+            tokens: ["WETH", "USDC", "WBTC", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -258,7 +258,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["WBTC", "USDC", "WETH", "ETH", "USDT"],
+            tokens: ["WBTC", "USDC", "WETH", "ETH", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -272,23 +272,23 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.MAINNET,
-            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT"],
+            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
-            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT"],
+            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
-            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT"],
+            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
-            tokens: ["WETH", "USDC", "WBTC", "USDT"],
+            tokens: ["WETH", "USDC", "WBTC", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.BASE,
-            tokens: ["WETH", "ETH", "USDC"],
+            tokens: ["WETH", "ETH", "USDC", "DAI"],
           },
         ],
       },
@@ -314,7 +314,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["USDC", "WETH", "ETH"],
+            tokens: ["USDC", "WETH", "ETH", "DAI"],
           },
         ],
       },
