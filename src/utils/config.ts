@@ -161,9 +161,8 @@ export class ConfigClient {
     );
   }
   getOpRewardsMerkleDistributorChainId(): number {
-    return (
-      parseInt(process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_CHAIN_ID) ||
-      10
+    return parseInt(
+      process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_CHAIN_ID || "10"
     );
   }
   getAcrossTokenAddress(): string {
