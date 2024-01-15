@@ -4,17 +4,25 @@ import { useCallback } from "react";
 import { ERC20__factory } from "utils/typechain";
 
 import { useConnection } from "./useConnection";
+import { useIsWrongNetwork } from "./useIsWrongNetwork";
+import { ChainId } from "utils";
 
-export function useWalletTokenImport() {
+export function useWalletTokenImport(chainId?: ChainId) {
   const { signer } = useConnection();
+  const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork(chainId);
   const importTokenIntoWallet = useCallback(
     (address: string, symbol: string, decimals: number) =>
       importTokenToWallet(signer)(address, symbol, decimals),
     [signer]
   );
   const importTokenIntoWalletFromLookup = useCallback(
-    (address: string) => importTokenToWalletFromLookup(signer)(address),
-    [signer]
+    async (address: string) => {
+      if (isWrongNetwork) {
+        await isWrongNetworkHandler();
+      }
+      await importTokenToWalletFromLookup(signer)(address);
+    },
+    [signer, isWrongNetwork, isWrongNetworkHandler]
   );
   return { importTokenIntoWallet, importTokenIntoWalletFromLookup };
 }
