@@ -19,7 +19,8 @@ export function useIsAirdropClaimed() {
       if (airdropRecipientQuery.data) {
         return fetchIsClaimed(
           airdropWindowIndex,
-          airdropRecipientQuery.data.accountIndex
+          airdropRecipientQuery.data.accountIndex,
+          "referrals"
         );
       }
     },

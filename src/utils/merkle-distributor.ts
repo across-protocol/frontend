@@ -5,6 +5,7 @@ import {
   airdropWindowIndex,
   rewardsApiUrl,
   referralsStartWindowIndex,
+  rewardProgramTypes,
 } from "utils/constants";
 
 export type AmountBreakdown = {
@@ -36,9 +37,10 @@ const config = getConfig();
 
 export async function fetchIsClaimed(
   windowIndex: number,
-  accountIndex: number
+  accountIndex: number,
+  rewardsType: rewardProgramTypes
 ) {
-  const merkleDistributor = config.getMerkleDistributor();
+  const merkleDistributor = config.getMerkleDistributor(rewardsType);
   return merkleDistributor.isClaimed(windowIndex, accountIndex);
 }
 
@@ -60,17 +62,30 @@ export async function fetchAirdropProof(account?: string) {
   return Object.keys(data).length ? (data as AirdropRecipient) : undefined;
 }
 
-export async function fetchReferralProofs(account?: string) {
+export async function fetchAirdropProofs(
+  rewardsType: rewardProgramTypes,
+  account?: string
+) {
   if (!account) {
     return [];
   }
 
+  const startWindowIndex =
+    rewardsType === "referrals" ? referralsStartWindowIndex : 0;
+  let rewardsTypeQuery = "";
+
+  if (rewardsType === "referrals") {
+    rewardsTypeQuery = "referral-rewards";
+  } else if (rewardsType === "op-rebates") {
+    rewardsTypeQuery = "op-rewards";
+  }
   const { data } = await axios.get<AirdropRecipient[]>(
     `${rewardsApiUrl}/airdrop/merkle-distributor-proofs`,
     {
       params: {
         address: account,
-        startWindowIndex: referralsStartWindowIndex,
+        startWindowIndex,
+        rewardsType: rewardsTypeQuery,
       },
     }
   );

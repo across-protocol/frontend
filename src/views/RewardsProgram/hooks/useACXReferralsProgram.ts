@@ -9,7 +9,7 @@ import {
   rewardTiers,
 } from "utils";
 import { useMemo } from "react";
-import { useUnclaimedReferralProofs } from "hooks/useUnclaimedReferralProofs";
+import { useUnclaimedReferralProofs } from "hooks/useUnclaimedProofs";
 import { BigNumber } from "ethers";
 
 export function useACXReferralsProgram() {

@@ -3,17 +3,25 @@ import { useMutation } from "react-query";
 import { getConfig } from "utils/config";
 import { useConnection, useIsWrongNetwork } from "hooks";
 import { sendWithPaddedGas } from "utils/transactions";
-import { hubPoolChainId, waitOnTransaction } from "utils";
-import { useUnclaimedReferralProofs } from "hooks/useUnclaimedReferralProofs";
+import {
+  ChainId,
+  hubPoolChainId,
+  rewardProgramTypes,
+  waitOnTransaction,
+} from "utils";
+import { useUnclaimedProofs } from "hooks/useUnclaimedProofs";
 
 const config = getConfig();
 
-export function useClaimReferralRewards() {
+export function useClaimRewards(program: rewardProgramTypes) {
   const { account, signer, notify } = useConnection();
-  const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork();
-  const unclaimedReferralProofsQuery = useUnclaimedReferralProofs();
+  const baseChainId =
+    program === "referrals" ? hubPoolChainId : ChainId.OPTIMISM;
+  const { isWrongNetwork, isWrongNetworkHandler } =
+    useIsWrongNetwork(baseChainId);
+  const unclaimedProofsQuery = useUnclaimedProofs(program);
   const handleClaim = async () => {
-    if (!unclaimedReferralProofsQuery?.data?.unclaimed.length) {
+    if (!unclaimedProofsQuery?.data?.unclaimed.length) {
       return;
     }
     if (!signer || !account) {
@@ -22,10 +30,10 @@ export function useClaimReferralRewards() {
     if (isWrongNetwork) {
       await isWrongNetworkHandler();
     }
-    const merkleDistributor = config.getMerkleDistributor(signer);
+    const merkleDistributor = config.getMerkleDistributor(program, signer);
     const senderFn = sendWithPaddedGas(merkleDistributor, "claimMulti");
     const claimMultiTx = await senderFn(
-      unclaimedReferralProofsQuery.data.unclaimed.map((claim) => ({
+      unclaimedProofsQuery.data.unclaimed.map((claim) => ({
         ...claim,
         merkleProof: claim.proof,
         account,
@@ -34,6 +42,6 @@ export function useClaimReferralRewards() {
     await waitOnTransaction(hubPoolChainId, claimMultiTx, notify);
   };
   return useMutation(handleClaim, {
-    onSuccess: () => unclaimedReferralProofsQuery.refetch(),
+    onSuccess: () => unclaimedProofsQuery.refetch(),
   });
 }

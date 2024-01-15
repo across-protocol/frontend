@@ -154,12 +154,27 @@ export class ConfigClient {
       "0xE50b2cEAC4f60E840Ae513924033E753e2366487"
     );
   }
+  getOpRewardsMerkleDistributorAddress(): string {
+    return (
+      process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_ADDRESS ||
+      "0xc8b31410340d57417bE62672f6B53dfB9de30aC2"
+    );
+  }
+  getOpRewardsMerkleDistributorChainId(): number {
+    return (
+      parseInt(process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_CHAIN_ID) ||
+      10
+    );
+  }
   getAcrossTokenAddress(): string {
     return (
       process.env.REACT_APP_ACROSS_TOKEN_ADDRESS ||
       this.config.acrossTokenAddress ||
       "0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F"
     );
+  }
+  getOpTokenAddress(): string {
+    return "0x4200000000000000000000000000000000000042";
   }
   getClaimAndStakeAddress(): string {
     return (
@@ -186,10 +201,30 @@ export class ConfigClient {
       signer ?? providerUtils.getProvider(this.getHubPoolChainId());
     return AcceleratingDistributor__factory.connect(address, provider);
   }
-  getMerkleDistributor(signer?: Signer): AcrossMerkleDistributor {
-    const address = this.getMerkleDistributorAddress();
-    const provider =
-      signer ?? providerUtils.getProvider(this.getHubPoolChainId());
+  getMerkleDistributor(
+    rewardsType: constants.rewardProgramTypes,
+    signer?: Signer
+  ): AcrossMerkleDistributor {
+    let address = "";
+
+    if (rewardsType === "referrals") {
+      address = this.getMerkleDistributorAddress();
+    } else if (rewardsType === "op-rebates") {
+      address = this.getOpRewardsMerkleDistributorAddress();
+    }
+
+    let provider = signer;
+
+    if (!provider) {
+      if (rewardsType === "referrals") {
+        provider = providerUtils.getProvider(this.getHubPoolChainId());
+      } else if (rewardsType === "op-rebates") {
+        provider = providerUtils.getProvider(
+          this.getOpRewardsMerkleDistributorChainId()
+        );
+      }
+    }
+
     return AcrossMerkleDistributor__factory.connect(address, provider);
   }
   getClaimAndStake(signer?: Signer): ClaimAndStake {
