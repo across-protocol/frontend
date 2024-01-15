@@ -212,17 +212,13 @@ export class ConfigClient {
       address = this.getOpRewardsMerkleDistributorAddress();
     }
 
-    let provider = signer;
-
-    if (!provider) {
-      if (rewardsType === "referrals") {
-        provider = providerUtils.getProvider(this.getHubPoolChainId());
-      } else {
-        provider = providerUtils.getProvider(
-          this.getOpRewardsMerkleDistributorChainId()
-        );
-      }
-    }
+    let provider =
+      signer ??
+      providerUtils.getProvider(
+        rewardsType === "referrals"
+          ? this.getHubPoolChainId()
+          : this.getOpRewardsMerkleDistributorChainId()
+      );
 
     return AcrossMerkleDistributor__factory.connect(address, provider);
   }
