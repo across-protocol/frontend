@@ -218,7 +218,7 @@ export class ConfigClient {
     if (!provider) {
       if (rewardsType === "referrals") {
         provider = providerUtils.getProvider(this.getHubPoolChainId());
-      } else if (rewardsType === "op-rebates") {
+      } else {
         provider = providerUtils.getProvider(
           this.getOpRewardsMerkleDistributorChainId()
         );
