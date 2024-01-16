@@ -17,6 +17,7 @@ export function useUnclaimedProofs(rewardsType: rewardProgramTypes) {
     }
   );
 }
+
 export function useUnclaimedReferralProofs() {
   const { isConnected, account } = useConnection();
 

@@ -1,12 +1,6 @@
 import { useUnclaimedProofs } from "hooks/useUnclaimedProofs";
 import { useWalletTokenImport } from "hooks/useWalletTokenImport";
-import {
-  ChainId,
-  getConfig,
-  getToken,
-  rewardProgramTypes,
-  rewardPrograms,
-} from "utils";
+import { getConfig, getToken, rewardProgramTypes, rewardPrograms } from "utils";
 import { useCallback } from "react";
 import { useClaimRewards } from "./useClaimReferralRewards";
 
