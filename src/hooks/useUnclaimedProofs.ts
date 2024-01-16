@@ -3,27 +3,20 @@ import { BigNumber } from "ethers";
 
 import { useConnection } from "hooks";
 import { fetchIsClaimed, fetchAirdropProofs } from "utils/merkle-distributor";
-import { useMemo } from "react";
-import { rewardProgramTypes } from "utils";
+import { getUnclaimedProofsQueryKey, rewardProgramTypes } from "utils";
 
 export function useUnclaimedProofs(rewardsType: rewardProgramTypes) {
   const { isConnected, account } = useConnection();
-  const queryIdentifier = useMemo(() => {
-    if (rewardsType === "referrals") {
-      return ["referral-rewards", "unclaimed"];
-    } else {
-      return ["op-rewards", "unclaimed"];
-    }
-  }, [rewardsType]);
 
   return useQuery(
-    [...queryIdentifier, account],
+    getUnclaimedProofsQueryKey(rewardsType, account),
     () => fetchUnclaimedProofs(rewardsType, account),
     {
       enabled: isConnected && !!account,
     }
   );
 }
+
 export function useUnclaimedReferralProofs() {
   const { isConnected, account } = useConnection();
 

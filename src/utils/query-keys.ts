@@ -154,3 +154,14 @@ export function isAirdropClaimedQueryKey(
 ) {
   return ["is-airdrop-claimed", account, airdropWindowIndex];
 }
+
+export function getUnclaimedProofsQueryKey(
+  rewardsType: rewardProgramTypes,
+  account?: string
+) {
+  if (rewardsType === "referrals") {
+    return ["referral-rewards", "unclaimed", account];
+  } else {
+    return ["op-rewards", "unclaimed", account];
+  }
+}
