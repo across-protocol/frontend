@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 import { BigNumber } from "ethers";
+import { mapAsync } from "@across-protocol/sdk-v2/dist/types/utils";
 
 import { useConnection } from "hooks";
 import { fetchIsClaimed, fetchAirdropProofs } from "utils/merkle-distributor";
@@ -74,8 +75,9 @@ async function fetchIsClaimedForIndices(
   indices: { accountIndex: number; windowIndex: number }[],
   rewardsType: rewardProgramTypes
 ) {
-  const isClaimedResults = await Promise.all(
-    indices.map(async ({ accountIndex, windowIndex }) => {
+  const isClaimedResults = await mapAsync(
+    indices,
+    async ({ accountIndex, windowIndex }) => {
       const isClaimed = await fetchIsClaimed(
         windowIndex,
         accountIndex,
@@ -86,7 +88,7 @@ async function fetchIsClaimedForIndices(
         windowIndex,
         accountIndex,
       };
-    })
+    }
   );
 
   return isClaimedResults;

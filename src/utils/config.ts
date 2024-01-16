@@ -204,16 +204,13 @@ export class ConfigClient {
     rewardsType: constants.rewardProgramTypes,
     signer?: Signer
   ): AcrossMerkleDistributor {
-    let address = "";
-
-    if (rewardsType === "referrals") {
-      address = this.getMerkleDistributorAddress();
-    } else if (rewardsType === "op-rebates") {
-      address = this.getOpRewardsMerkleDistributorAddress();
-    }
+    let address =
+      rewardsType === "referrals"
+        ? this.getMerkleDistributorAddress()
+        : this.getOpRewardsMerkleDistributorAddress();
 
     let provider =
-      signer ??
+      signer?.provider ??
       providerUtils.getProvider(
         rewardsType === "referrals"
           ? this.getHubPoolChainId()
