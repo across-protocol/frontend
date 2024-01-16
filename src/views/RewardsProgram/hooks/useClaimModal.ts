@@ -1,23 +1,30 @@
-import { useUnclaimedReferralProofs } from "hooks/useUnclaimedReferralProofs";
+import { useUnclaimedProofs } from "hooks/useUnclaimedProofs";
 import { useWalletTokenImport } from "hooks/useWalletTokenImport";
 import { getConfig, getToken, rewardProgramTypes, rewardPrograms } from "utils";
 import { useCallback } from "react";
-import { useClaimReferralRewards } from "./useClaimReferralRewards";
+import { useClaimRewards } from "./useClaimReferralRewards";
 
 export function useClaimModal(program: rewardProgramTypes) {
   const token = getToken(rewardPrograms[program].rewardTokenSymbol);
-
-  const unclaimedReferralProofsQuery = useUnclaimedReferralProofs();
-  const { importTokenIntoWalletFromLookup } = useWalletTokenImport();
-  const claimMutation = useClaimReferralRewards();
-
+  const unclaimedProofsQuery = useUnclaimedProofs(program);
+  const rewardsChainId =
+    program === "referrals"
+      ? getConfig().getHubPoolChainId()
+      : getConfig().getOpRewardsMerkleDistributorChainId();
+  const { importTokenIntoWalletFromLookup } =
+    useWalletTokenImport(rewardsChainId);
+  const claimMutation = useClaimRewards(program);
+  const tokenAddress =
+    program === "referrals"
+      ? getConfig().getAcrossTokenAddress()
+      : getConfig().getOpTokenAddress();
   const importTokenHandler = useCallback(
-    () => importTokenIntoWalletFromLookup(getConfig().getAcrossTokenAddress()),
-    [importTokenIntoWalletFromLookup]
+    () => importTokenIntoWalletFromLookup(tokenAddress),
+    [importTokenIntoWalletFromLookup, tokenAddress]
   );
 
   return {
-    unclaimedReferralProofsQuery,
+    unclaimedProofsQuery,
     claimMutation,
     importTokenHandler,
     token,

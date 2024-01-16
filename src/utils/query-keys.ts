@@ -154,3 +154,10 @@ export function isAirdropClaimedQueryKey(
 ) {
   return ["is-airdrop-claimed", account, airdropWindowIndex];
 }
+
+export function getUnclaimedProofsQueryKey(
+  rewardsType: rewardProgramTypes,
+  account?: string
+) {
+  return [rewardsType, "unclaimed", account];
+}

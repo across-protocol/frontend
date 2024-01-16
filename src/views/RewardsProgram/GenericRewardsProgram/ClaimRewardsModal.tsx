@@ -15,18 +15,12 @@ type Props = {
 };
 
 export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
-  const {
-    importTokenHandler,
-    unclaimedReferralProofsQuery,
-    claimMutation,
-    token,
-  } = useClaimModal(program);
+  const { importTokenHandler, unclaimedProofsQuery, claimMutation, token } =
+    useClaimModal(program);
 
   const disableButton =
-    unclaimedReferralProofsQuery.isLoading ||
-    BigNumber.from(
-      unclaimedReferralProofsQuery.data?.claimableAmount ?? 0
-    ).isZero() ||
+    unclaimedProofsQuery.isLoading ||
+    BigNumber.from(unclaimedProofsQuery.data?.claimableAmount ?? 0).isZero() ||
     claimMutation.isLoading;
 
   return (
@@ -43,23 +37,25 @@ export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
         mobile: "bottom",
       }}
     >
-      <Alert status="warn">
-        Claiming your ACX will reset your tier to Copper and referral rate to{" "}
-        {rewardTiers[0].referralRate * 100}%.
-      </Alert>
+      {program === "referrals" && (
+        <Alert status="warn">
+          Claiming your ACX will reset your tier to Copper and referral rate to{" "}
+          {rewardTiers[0].referralRate * 100}%.
+        </Alert>
+      )}
       <ClaimableBoxInnerWrapper>
         <ClaimableBox>
           <Text size="lg" color="white-70">
             Claimable rewards
           </Text>
           <Text color="white-100">
-            {unclaimedReferralProofsQuery.isLoading ? (
+            {unclaimedProofsQuery.isLoading ? (
               "Loading..."
             ) : (
               <IconText>
                 {formatEther(
-                  unclaimedReferralProofsQuery.data?.claimableAmount || "0"
-                ) + " ACX"}
+                  unclaimedProofsQuery.data?.claimableAmount || "0"
+                ) + ` ${token.symbol}`}
                 <Icon src={token.logoURI} />
               </IconText>
             )}
@@ -78,7 +74,7 @@ export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
       </ClaimableBoxInnerWrapper>
       <AddToWalletWrapper>
         <Text size="md" color="white-70">
-          Can't find the ACX token in your wallet? &nbsp;
+          Can't find the {token.symbol} token in your wallet? &nbsp;
         </Text>
         <AddToWalletLink onClick={importTokenHandler}>
           Click here to add it.

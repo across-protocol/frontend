@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import { useConnection, useRewardSummary } from "hooks";
-import { useUnclaimedReferralProofs } from "hooks/useUnclaimedReferralProofs";
+import { useUnclaimedProofs } from "hooks/useUnclaimedProofs";
 import { useMemo } from "react";
 import {
   formatUnitsFnBuilder,
@@ -17,7 +17,7 @@ export type GenericRewardClaimCardDisconnectedStateProps = {
 
 export function useGenericRewardClaimCard(program: rewardProgramTypes) {
   const { account, isConnected } = useConnection();
-  const { data: unclaimedReferralData } = useUnclaimedReferralProofs();
+  const { data: unclaimedReferralData } = useUnclaimedProofs(program);
   const { programDetails, token } = useMemo(
     () => ({
       programDetails: rewardPrograms[program],
@@ -30,10 +30,7 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
     summary.program === "op-rebates"
       ? summary.unclaimedRewards
       : summary.rewardsAmount;
-  const unclaimedAmount =
-    summary.program === "referrals"
-      ? unclaimedReferralData?.claimableAmount
-      : summary.claimableRewards;
+  const unclaimedAmount = unclaimedReferralData?.claimableAmount;
 
   const formatUnits = formatUnitsFnBuilder(token.decimals);
 

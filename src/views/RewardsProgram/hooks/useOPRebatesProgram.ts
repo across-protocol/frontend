@@ -8,12 +8,14 @@ import {
 } from "utils";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
+import { useUnclaimedOpRewardsProofs } from "hooks/useUnclaimedProofs";
 
 export function useOPRebatesProgram() {
   const { account } = useConnection();
   const { summary } = useRewardSummary("op-rebates", account);
   const { programName } = rewardPrograms["op-rebates"];
   const token = useMemo(() => getToken("OP"), []);
+  const { data: unclaimedOpRewardsData } = useUnclaimedOpRewardsProofs();
 
   if (summary.program !== "op-rebates") {
     throw new Error("Invalid program type");
@@ -36,7 +38,7 @@ export function useOPRebatesProgram() {
           token.symbol
         }`,
         prefix: `${formatUnits(
-          summary.claimableRewards ?? "0",
+          unclaimedOpRewardsData?.claimableAmount ?? 0,
           token.decimals
         )} ${token.symbol} claimable`,
         prefixIcon: "clock",
@@ -46,12 +48,14 @@ export function useOPRebatesProgram() {
         },
       },
     ],
-    [programName, summary, token]
+    [programName, summary, token, unclaimedOpRewardsData?.claimableAmount]
   );
 
   return {
     labels,
     rewardsAmount: BigNumber.from(summary.unclaimedRewards || 0),
-    claimableAmount: BigNumber.from(summary.claimableRewards || 0),
+    claimableAmount: BigNumber.from(
+      unclaimedOpRewardsData?.claimableAmount || 0
+    ),
   };
 }
