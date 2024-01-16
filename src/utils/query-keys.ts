@@ -159,9 +159,5 @@ export function getUnclaimedProofsQueryKey(
   rewardsType: rewardProgramTypes,
   account?: string
 ) {
-  if (rewardsType === "referrals") {
-    return ["referral-rewards", "unclaimed", account];
-  } else {
-    return ["op-rewards", "unclaimed", account];
-  }
+  return [rewardsType, "unclaimed", account];
 }
