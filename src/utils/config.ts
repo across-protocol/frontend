@@ -210,7 +210,7 @@ export class ConfigClient {
         : this.getOpRewardsMerkleDistributorAddress();
 
     let provider =
-      signer?.provider ??
+      signer ??
       providerUtils.getProvider(
         rewardsType === "referrals"
           ? this.getHubPoolChainId()
