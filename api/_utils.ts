@@ -198,7 +198,7 @@ export const resolveVercelEndpoint = () => {
   }
 };
 
-export const getTokenDetails = async (
+const _getTokenDetails = async (
   provider: providers.Provider,
   l1Token?: string,
   l2Token?: string,
@@ -231,15 +231,27 @@ export const getTokenDetails = async (
     return b.logIndex - a.logIndex;
   });
 
-  const event = events[0];
-
-  return {
+  return events.map((event) => ({
     hubPool,
     chainId: event.args.destinationChainId.toNumber(),
     l1Token: event.args.l1Token,
     l2Token: event.args.destinationToken,
-  };
+  }));
 };
+
+export const getTokenDetails = async (
+  provider: providers.Provider,
+  l1Token?: string,
+  l2Token?: string,
+  chainId?: string
+) => (await _getTokenDetails(provider, l1Token, l2Token, chainId))[0];
+
+export const hasPotentialRouteCollision = async (
+  provider: providers.Provider,
+  l1Token?: string,
+  l2Token?: string,
+  chainId?: string
+) => (await _getTokenDetails(provider, l1Token, l2Token, chainId)).length > 1;
 
 export class InputError extends Error {}
 
@@ -604,7 +616,7 @@ export const isRouteEnabled = (
   fromToken: string
 ): boolean => {
   const enabled = ENABLED_ROUTES.routes.some(
-    ({ fromTokenAddress, fromChain, toChain, fromTokenSymbol }) =>
+    ({ fromTokenAddress, fromChain, toChain }) =>
       fromChainId === fromChain &&
       toChainId === toChain &&
       fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
