@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ethers } from "ethers";
+import { vercelApiBaseUrl } from "utils";
 
 export type CoingeckoApiCall = typeof coingeckoApiCall;
 
@@ -9,7 +10,7 @@ export async function coingeckoApiCall(
 ): Promise<{
   price: ethers.BigNumber;
 }> {
-  const response = await axios.get(`/api/coingecko`, {
+  const response = await axios.get(`${vercelApiBaseUrl}/api/coingecko`, {
     params: {
       l1Token,
       baseCurrency,

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { vercelApiBaseUrl } from "utils";
 
 export type PoolsApiCall = typeof poolsApiCall;
 
@@ -11,7 +12,7 @@ export async function poolsApiCall(
   l1TokenOrExternalPoolToken: string,
   externalPoolProvider?: string
 ): Promise<PoolQueryData> {
-  const response = await axios.get(`/api/pools`, {
+  const response = await axios.get(`${vercelApiBaseUrl}/api/pools`, {
     params: {
       token: l1TokenOrExternalPoolToken,
       externalPoolProvider,
