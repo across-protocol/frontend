@@ -36,7 +36,7 @@
           "key": "NEL",
           "value": "{\"report_to\":\"default\",\"max_age\":2592000,\"include_subdomains\":true,\"failure_fraction\":0.5}"
         },
-        { "key": "Access-Control-Allow-Origin", "value": "http://localhost" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
         {
           "key": "Access-Control-Allow-Methods",
           "value": "GET,OPTIONS"
