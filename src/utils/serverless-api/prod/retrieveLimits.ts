@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ChainId } from "utils";
+import { ChainId, vercelApiBaseUrl } from "utils";
 import { BridgeLimitInterface } from "../types";
 
 export async function retrieveLimits(
@@ -8,7 +8,7 @@ export async function retrieveLimits(
   toChainId: string | ChainId
 ): Promise<BridgeLimitInterface> {
   const { data } = await axios.get<BridgeLimitInterface>(
-    `/api/limits?token=${token}&originChainId=${fromChainId}&destinationChainId=${toChainId}`
+    `${vercelApiBaseUrl}/api/limits?token=${token}&originChainId=${fromChainId}&destinationChainId=${toChainId}`
   );
   return data;
 }

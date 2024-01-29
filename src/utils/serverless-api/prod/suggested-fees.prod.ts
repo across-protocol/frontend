@@ -1,6 +1,6 @@
 import axios from "axios";
 import { BigNumber, ethers } from "ethers";
-import { ChainId } from "utils/constants";
+import { ChainId, vercelApiBaseUrl } from "utils/constants";
 import { SuggestedApiFeeReturnType } from "../types";
 
 /**
@@ -18,7 +18,7 @@ export async function suggestedFeesApiCall(
   fromChainid: ChainId,
   recipientAddress?: string
 ): Promise<SuggestedApiFeeReturnType> {
-  const response = await axios.get(`/api/suggested-fees`, {
+  const response = await axios.get(`${vercelApiBaseUrl}/api/suggested-fees`, {
     params: {
       token: originToken,
       destinationChainId: toChainid,
