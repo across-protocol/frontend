@@ -130,7 +130,7 @@ const handler = async (
       );
       throw new InputError(
         routeCollision
-          ? `Potential route collision. Please specify the originChainId.`
+          ? `More than one ACX route maps to the provided inputs causing ambiguity. Please specify the originChainId.`
           : `Route is not enabled.`
       );
     }
