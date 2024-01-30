@@ -27,7 +27,6 @@ import {
   positiveIntStr,
   boolStr,
   HUB_POOL_CHAIN_ID,
-  ENABLED_ROUTES,
   getSpokePoolAddress,
   getCachedTokenBalance,
   getDefaultRelayerAddress,
@@ -89,7 +88,7 @@ const handler = async (
       provider.getBlock("latest"),
       getTokenDetails(provider, undefined, token, originChainId),
     ]);
-    const { l1Token, hubPool, chainId: computedOriginChainId } = tokenDetails;
+    const { l1Token, chainId: computedOriginChainId } = tokenDetails;
 
     const tokenInformation = Object.values(TOKEN_SYMBOLS_MAP).find(
       (details) => details.addresses[HUB_POOL_CHAIN_ID] === l1Token
@@ -188,35 +187,9 @@ const handler = async (
     if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
       throw new InputError(`Route is not enabled.`);
 
-    const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
-      ENABLED_ROUTES.acrossConfigStoreAddress,
-      provider
-    );
-
     const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
-    const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
-      hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
-        blockTag,
-      }),
-      hubPool.callStatic.liquidityUtilizationPostRelay(l1Token, amount, {
-        blockTag,
-      }),
-      configStoreClient.getRateModel(
-        l1Token,
-        {
-          blockTag,
-        },
-        computedOriginChainId,
-        destinationChainId
-      ),
-      getCachedTokenPrice(l1Token, baseCurrency),
-    ]);
-    const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
-      rateModel,
-      currentUt,
-      nextUt
-    );
+    const tokenPrice = await getCachedTokenPrice(l1Token, baseCurrency);
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
@@ -238,9 +211,9 @@ const handler = async (
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
       relayGasFeeTotal: relayerFeeDetails.gasFeeTotal,
-      relayFeePct: relayerFeeDetails.relayFeePercent,
-      relayFeeTotal: relayerFeeDetails.relayFeeTotal,
-      lpFeePct: realizedLPFeePct.toString(),
+      relayFeePct: relayerFeeDetails.relayFeePercent, // gasFeePercent + capitalFeePercent
+      relayFeeTotal: relayerFeeDetails.relayFeeTotal, // gasFeeTotal + capitalFeeTotal
+      lpFeePct: "0",
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: blockTag.toString(),
