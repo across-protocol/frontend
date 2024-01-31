@@ -248,8 +248,7 @@ const handler = async (
       relayGasFeeTotal: relayerFeeDetails.gasFeeTotal,
       relayFeePct: totalRelayerFeePct.toString(), // capitalFeePct + gasFeePct + lpFeePct
       relayFeeTotal: totalRelayerFee.toString(), // capitalFeeTotal + gasFeeTotal + lpFeeTotal
-      // Note: lpFeePct is now included in relayFeePct. We set it to 0 here for backwards compatibility.
-      lpFeePct: "0",
+      lpFeePct: "0", // Note: lpFeePct is now included in relayFeePct. We set it to 0 here for backwards compatibility.
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: blockTag.toString(),
