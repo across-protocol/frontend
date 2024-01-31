@@ -256,8 +256,8 @@ const handler = async (
       // V3's new fee structure
       relayerFee: {
         // Note: this is the total fee, including the LP fee.
-        pct: totalRelayerFeePct,
-        total: totalRelayerFee,
+        pct: totalRelayerFeePct.toString(),
+        total: totalRelayerFee.toString(),
       },
       relayerCapitalFee: {
         pct: relayerFeeDetails.capitalFeePercent,
@@ -268,8 +268,11 @@ const handler = async (
         total: relayerFeeDetails.gasFeeTotal,
       },
       lpFee: {
-        pct: realizedLPFeePct,
-        total: amount.mul(realizedLPFeePct).div(ethers.constants.WeiPerEther),
+        pct: realizedLPFeePct.toString(),
+        total: amount
+          .mul(realizedLPFeePct)
+          .div(ethers.constants.WeiPerEther)
+          .toString(),
       },
     };
 
