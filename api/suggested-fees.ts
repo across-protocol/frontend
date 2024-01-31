@@ -212,11 +212,12 @@ const handler = async (
       ),
       getCachedTokenPrice(l1Token, baseCurrency),
     ]);
-    const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
+    const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
       nextUt
     );
+    const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
@@ -236,10 +237,8 @@ const handler = async (
     // Across V3's new `deposit` function requires now a total fee that includes the LP fee
     const totalRelayerFee = ethers.BigNumber.from(
       relayerFeeDetails.relayFeeTotal
-    ).add(realizedLPFeePct);
-    const totalRelayerFeePct = totalRelayerFee
-      .mul(ethers.constants.WeiPerEther)
-      .div(amount);
+    ).add(lpFeeTotal);
+    const totalRelayerFeePct = totalRelayerFee.add(lpFeePct);
 
     const responseJson = {
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
@@ -268,11 +267,8 @@ const handler = async (
         total: relayerFeeDetails.gasFeeTotal,
       },
       lpFee: {
-        pct: realizedLPFeePct.toString(),
-        total: amount
-          .mul(realizedLPFeePct)
-          .div(ethers.constants.WeiPerEther)
-          .toString(),
+        pct: lpFeePct.toString(),
+        total: lpFeeTotal.toString(),
       },
     };
 
