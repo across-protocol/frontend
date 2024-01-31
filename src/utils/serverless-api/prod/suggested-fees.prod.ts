@@ -29,7 +29,6 @@ export async function suggestedFeesApiCall(
     },
   });
   const result = response.data;
-  console.log(result);
   const relayFeePct = BigNumber.from(result.relayerFee.pct);
   const relayFeeTotal = BigNumber.from(result.relayerFee.total);
 
