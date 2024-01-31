@@ -23,7 +23,7 @@ const ReferralCTAModal = ({
   const { isMobile } = useCurrentBreakpoint();
   const { condensedReferralLink, referralLinkWithProtocol } = useReferralLink();
   const onClick = () => {
-    const twitterShareLink = `https://twitter.com/intent/tweet?&url=${referralLinkWithProtocol}&text=If anyone is interested in fast and cheap bridging, below is my @acrossprotocol referral link:%0A%0A`;
+    const twitterShareLink = `https://twitter.com/intent/tweet?text=I've just received $ACX token rewards for bridging with @AcrossProtocol.%0A%0AUse my referral link to earn $ACX each time you bridge:%0A%0A${referralLinkWithProtocol}`;
     window.open(twitterShareLink, "_blank")?.focus();
   };
 
@@ -79,11 +79,13 @@ const ReferralCTAModal = ({
             </TwitterPreviewTitleTextWrapper>
           </TwitterPreviewTitleRow>
           <Text size="md" color="white">
-            If anyone is interested in fast and cheap bridging, below is my{" "}
+            I've just received $ACX token rewards for bridging with{" "}
             <Link href="https://twitter.com/AcrossProtocol" target="_blank">
               @acrossprotocol
-            </Link>{" "}
-            referral link:
+            </Link>
+            .
+            <br /> <br />
+            Use my referral link to earn $ACX each time you bridge:
           </Text>
           <Text size="md" color="light-blue-200">
             <Link href={referralLinkWithProtocol} target="_blank">
