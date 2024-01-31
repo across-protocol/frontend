@@ -7,11 +7,11 @@ import {
   rewardPrograms,
 } from "utils";
 import { PrimaryButton, Text } from "components";
-import copy from "copy-to-clipboard";
 import { useReferralLink } from "hooks/useReferralLink";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useConnection } from "hooks";
 import { useHistory } from "react-router-dom";
+import ReferralCTAModal from "./ReferralCTAModal";
 
 type ReferralCTAProps = {
   program: rewardProgramTypes;
@@ -21,16 +21,7 @@ const ReferralCTA = ({ program }: ReferralCTAProps) => {
   const { push: navigate } = useHistory();
   const { referralLinkWithProtocol } = useReferralLink();
   const { isConnected, connect } = useConnection();
-  const [isCopied, setIsCopied] = useState(false);
-
-  useEffect(() => {
-    if (isCopied) {
-      const t = setTimeout(() => {
-        setIsCopied(false);
-      }, 1000);
-      return () => clearTimeout(t);
-    }
-  });
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const rewardProgram = rewardPrograms[program];
   const rewardToken = getToken(rewardProgram.rewardTokenSymbol);
@@ -41,10 +32,8 @@ const ReferralCTA = ({ program }: ReferralCTAProps) => {
         connect({
           trackSection: "bridgeForm",
         });
-        setIsCopied(false);
       } else if (referralLinkWithProtocol) {
-        copy(referralLinkWithProtocol);
-        setIsCopied(true);
+        setIsShareModalOpen(true);
       }
     } else {
       navigate(rewardProgram.url);
@@ -59,50 +48,54 @@ const ReferralCTA = ({ program }: ReferralCTAProps) => {
   const buttonCopy =
     rewardProgram.rewardTokenSymbol === "ACX"
       ? isConnected
-        ? "Copy link"
+        ? "Share"
         : "Connect"
       : "View Rewards";
 
   return (
-    <Wrapper
-      primaryColor={rewardProgram.primaryColor}
-      bgUrl={rewardProgram.backgroundUrl}
-    >
-      <LogoContainer primaryColor={rewardProgram.primaryColor}>
-        <StyledLogo src={rewardToken.logoURI} />
-      </LogoContainer>
-      <TextStack>
-        <Text color="white" size="md">
-          Earn up to{" "}
-          <HighlightText program={program}>
-            {rewardProgram.highestPct * 100}%
-          </HighlightText>{" "}
-          in {rewardProgram.rewardTokenSymbol} Rewards
-        </Text>
-        <Text color="grey-400" size="sm">
-          {bodyCopy}
-        </Text>
-      </TextStack>
-      <StyledCopyButton
-        onClick={handleClick}
-        size="md"
-        backgroundColor="black-700"
-        textColor={program === "referrals" ? "aqua" : "white"}
-        isCopied={isCopied}
-        disabled={isCopied}
+    <>
+      <Wrapper
         primaryColor={rewardProgram.primaryColor}
+        bgUrl={rewardProgram.backgroundUrl}
       >
-        {buttonCopy}
-      </StyledCopyButton>
-      <TextButton
-        size="md"
-        weight={500}
-        onClick={handleClick}
-        primaryColor={rewardProgram.primaryColor}
-      >
-        {buttonCopy}
-      </TextButton>
-    </Wrapper>
+        <LogoContainer primaryColor={rewardProgram.primaryColor}>
+          <StyledLogo src={rewardToken.logoURI} />
+        </LogoContainer>
+        <TextStack>
+          <Text color="white" size="md">
+            Earn up to{" "}
+            <HighlightText program={program}>
+              {rewardProgram.highestPct * 100}%
+            </HighlightText>{" "}
+            in {rewardProgram.rewardTokenSymbol} Rewards
+          </Text>
+          <Text color="grey-400" size="sm">
+            {bodyCopy}
+          </Text>
+        </TextStack>
+        <StyledCopyButton
+          onClick={handleClick}
+          size="md"
+          backgroundColor="black-700"
+          textColor={program === "referrals" ? "aqua" : "white"}
+          primaryColor={rewardProgram.primaryColor}
+        >
+          {buttonCopy}
+        </StyledCopyButton>
+        <TextButton
+          size="md"
+          weight={500}
+          onClick={handleClick}
+          primaryColor={rewardProgram.primaryColor}
+        >
+          {buttonCopy}
+        </TextButton>
+      </Wrapper>
+      <ReferralCTAModal
+        isOpen={isShareModalOpen}
+        exitModalHandler={() => setIsShareModalOpen(false)}
+      />
+    </>
   );
 };
 
@@ -168,7 +161,6 @@ const TextStack = styled.div`
 `;
 
 const StyledCopyButton = styled(PrimaryButton)<{
-  isCopied?: boolean;
   primaryColor: string;
   textColor: keyof typeof COLORS;
 }>`
@@ -180,10 +172,8 @@ const StyledCopyButton = styled(PrimaryButton)<{
   }
   transition: all 0.2s ease-in-out;
 
-  background-color: ${({ isCopied }) =>
-    isCopied ? COLORS["aqua"] : COLORS["black-700"]};
-  color: ${({ isCopied, textColor }) =>
-    isCopied ? COLORS["black-700"] : COLORS[textColor]};
+  background-color: ${COLORS["black-700"]};
+  color: ${({ textColor }) => COLORS[textColor]};
 `;
 
 const HighlightText = styled.span<{ program: rewardProgramTypes }>`
