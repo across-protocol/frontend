@@ -269,8 +269,8 @@ export function generateTransferQuote(
     formatEther(usdEquivalent(wei)).replaceAll(",", "");
   const formatWeiEtherPct = (wei: BigNumber) => formatWeiPct(wei)!.toString();
 
-  const totalBridgeFee = fees.relayerFee.total.add(fees.lpFee.total);
-  const totalBridgeFeePct = fees.relayerFee.pct.add(fees.lpFee.pct);
+  const totalBridgeFee = fees.relayerFee.total;
+  const totalBridgeFeePct = fees.relayerFee.pct;
 
   return {
     capitalFeePct: formatWeiEtherPct(fees.relayerCapitalFee.pct),

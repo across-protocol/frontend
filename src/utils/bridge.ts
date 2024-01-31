@@ -15,9 +15,8 @@ export type Fee = {
 };
 
 export type BridgeFees = {
-  relayerFee: Fee;
+  relayerFee: Fee; // relayerGasFee + relayerCapitalFee + lpFee.
   lpFee: Fee;
-  // Note: relayerGasFee and relayerCapitalFee are components of relayerFee.
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
   quoteTimestamp: ethers.BigNumber;

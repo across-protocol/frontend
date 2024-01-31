@@ -29,17 +29,17 @@ export async function suggestedFeesApiCall(
     },
   });
   const result = response.data;
-  const relayFeePct = BigNumber.from(result["relayFeePct"]);
-  const relayFeeTotal = BigNumber.from(result["relayFeeTotal"]);
+  const relayFeePct = BigNumber.from(result.relayerFee.pct);
+  const relayFeeTotal = BigNumber.from(result.relayerFee.total);
 
-  const capitalFeePct = BigNumber.from(result["capitalFeePct"]);
-  const capitalFeeTotal = BigNumber.from(result["capitalFeeTotal"]);
+  const capitalFeePct = BigNumber.from(result.capitalFee.pct);
+  const capitalFeeTotal = BigNumber.from(result.capitalFee.total);
 
-  const relayGasFeePct = BigNumber.from(result["relayGasFeePct"]);
-  const relayGasFeeTotal = BigNumber.from(result["relayGasFeeTotal"]);
+  const relayGasFeePct = BigNumber.from(result.relayerGasFee.pct);
+  const relayGasFeeTotal = BigNumber.from(result.relayerGasFee.total);
 
-  const lpFeePct = BigNumber.from(result["lpFeePct"]);
-  const lpFeeTotal = amount.mul(lpFeePct).div(ethers.utils.parseEther("1"));
+  const lpFeePct = BigNumber.from(result.lpFee.pct);
+  const lpFeeTotal = BigNumber.from(result.lpFee.total);
 
   const isAmountTooLow = result["isAmountTooLow"];
 
