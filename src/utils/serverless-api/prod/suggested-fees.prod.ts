@@ -29,11 +29,12 @@ export async function suggestedFeesApiCall(
     },
   });
   const result = response.data;
+  console.log(result);
   const relayFeePct = BigNumber.from(result.relayerFee.pct);
   const relayFeeTotal = BigNumber.from(result.relayerFee.total);
 
-  const capitalFeePct = BigNumber.from(result.capitalFee.pct);
-  const capitalFeeTotal = BigNumber.from(result.capitalFee.total);
+  const capitalFeePct = BigNumber.from(result.relayerCapitalFee.pct);
+  const capitalFeeTotal = BigNumber.from(result.relayerCapitalFee.total);
 
   const relayGasFeePct = BigNumber.from(result.relayerGasFee.pct);
   const relayGasFeeTotal = BigNumber.from(result.relayerGasFee.total);
