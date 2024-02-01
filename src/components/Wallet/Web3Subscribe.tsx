@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SubscribeButton } from "./Wallet.styles";
 import { useConnection } from "hooks";
 
@@ -7,11 +7,6 @@ const Web3Subscribe = () => {
   const [isCBWallet, setIsCBWallet] = useState(false);
   const [isSubscribed, setISubscribed] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const subscribeButtonText = useMemo(() => {
-    if (isLoading) return "Loading...";
-    return isSubscribed ? "Unsubscribe" : "Subscribe";
-  }, [isLoading, isSubscribed]);
 
   const handleSubscribe = useCallback(() => {
     if (isCBWallet) {
@@ -34,6 +29,12 @@ const Web3Subscribe = () => {
       onLoading: setIsLoading,
     });
   }, []);
+
+  const subscribeButtonText = isLoading
+    ? "Loading..."
+    : isSubscribed
+    ? "Unsubscribe"
+    : "Subscribe";
 
   return isCBWallet ? (
     <SubscribeButton onClick={handleSubscribe}>
