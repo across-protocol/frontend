@@ -11,7 +11,9 @@ import {
   BalanceWallet,
   Account,
   Separator,
+  WalletWrapper,
 } from "./Wallet.styles";
+import Web3Subscribe from "./Web3Subscribe";
 
 interface Props {
   setOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -42,22 +44,25 @@ const Wallet: FC<Props> = ({ setOpenSidebar }) => {
   }
 
   return (
-    <BalanceButton onClick={() => setOpenSidebar(true)} data-cy="acx-balance">
-      {SHOW_ACX_NAV_TOKEN && (
-        <>
-          <Logo />
-          <BalanceWallet>0 ACX</BalanceWallet>
-        </>
-      )}
-      {account && (
-        <>
-          {SHOW_ACX_NAV_TOKEN && <Separator />}
-          <Account data-cy="wallet-address">
-            {ensName ?? shortenAddress(account, "..", 4)}
-          </Account>
-        </>
-      )}
-    </BalanceButton>
+    <WalletWrapper>
+      <Web3Subscribe />
+      <BalanceButton onClick={() => setOpenSidebar(true)} data-cy="acx-balance">
+        {SHOW_ACX_NAV_TOKEN && (
+          <>
+            <Logo />
+            <BalanceWallet>0 ACX</BalanceWallet>
+          </>
+        )}
+        {account && (
+          <>
+            {SHOW_ACX_NAV_TOKEN && <Separator />}
+            <Account data-cy="wallet-address">
+              {ensName ?? shortenAddress(account, "..", 4)}
+            </Account>
+          </>
+        )}
+      </BalanceButton>
+    </WalletWrapper>
   );
 };
 export default Wallet;
