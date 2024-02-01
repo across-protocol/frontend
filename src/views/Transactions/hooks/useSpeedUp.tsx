@@ -30,7 +30,7 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
 
   useEffect(() => {
     if (fees) {
-      setSuggestedRelayerFeePct(fees.relayerFee.pct);
+      setSuggestedRelayerFeePct(fees.totalRelayFee.pct);
     }
   }, [fees]);
 

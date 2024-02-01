@@ -269,8 +269,8 @@ export function generateTransferQuote(
     formatEther(usdEquivalent(wei)).replaceAll(",", "");
   const formatWeiEtherPct = (wei: BigNumber) => formatWeiPct(wei)!.toString();
 
-  const totalBridgeFee = fees.relayerFee.total;
-  const totalBridgeFeePct = fees.relayerFee.pct;
+  const totalBridgeFee = fees.totalRelayFee.total;
+  const totalBridgeFeePct = fees.totalRelayFee.pct;
 
   return {
     capitalFeePct: formatWeiEtherPct(fees.relayerCapitalFee.pct),
@@ -292,9 +292,15 @@ export function generateTransferQuote(
     quoteLatencyMilliseconds: fees.quoteLatency.toString(),
     quoteTimestamp: String(fees.quoteTimestamp),
     recipient: toAddress || "not connected",
-    relayFeePct: formatWeiEtherPct(fees.relayerFee.pct),
-    relayFeeTotal: formatTokens(fees.relayerFee.total),
-    relayFeeTotalUsd: usdEquivalentString(fees.relayerFee.total),
+    relayFeePct: formatWeiEtherPct(
+      fees.relayerGasFee.pct.add(fees.relayerCapitalFee.pct)
+    ),
+    relayFeeTotal: formatTokens(
+      fees.relayerGasFee.total.add(fees.relayerCapitalFee.total)
+    ),
+    relayFeeTotalUsd: usdEquivalentString(
+      fees.relayerGasFee.total.add(fees.relayerCapitalFee.total)
+    ),
     relayGasFeePct: formatWeiEtherPct(fees.relayerGasFee.pct),
     relayGasFeeTotal: formatTokens(fees.relayerGasFee.total),
     relayGasFeeTotalUsd: usdEquivalentString(fees.relayerGasFee.total),

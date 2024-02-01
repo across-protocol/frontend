@@ -29,17 +29,17 @@ export async function suggestedFeesApiCall(
     },
   });
   const result = response.data;
-  const relayFeePct = BigNumber.from(result.relayerFee.pct);
-  const relayFeeTotal = BigNumber.from(result.relayerFee.total);
+  const totalRelayFeePct = BigNumber.from(result.v3.totalRelayFee.pct);
+  const totalRelayFeeTotal = BigNumber.from(result.v3.totalRelayFee.total);
 
-  const capitalFeePct = BigNumber.from(result.relayerCapitalFee.pct);
-  const capitalFeeTotal = BigNumber.from(result.relayerCapitalFee.total);
+  const capitalFeePct = BigNumber.from(result.v3.relayerCapitalFee.pct);
+  const capitalFeeTotal = BigNumber.from(result.v3.relayerCapitalFee.total);
 
-  const relayGasFeePct = BigNumber.from(result.relayerGasFee.pct);
-  const relayGasFeeTotal = BigNumber.from(result.relayerGasFee.total);
+  const relayGasFeePct = BigNumber.from(result.v3.relayerGasFee.pct);
+  const relayGasFeeTotal = BigNumber.from(result.v3.relayerGasFee.total);
 
-  const lpFeePct = BigNumber.from(result.lpFee.pct);
-  const lpFeeTotal = BigNumber.from(result.lpFee.total);
+  const lpFeePct = BigNumber.from(result.v3.lpFee.pct);
+  const lpFeeTotal = BigNumber.from(result.v3.lpFee.total);
 
   const isAmountTooLow = result["isAmountTooLow"];
 
@@ -47,9 +47,9 @@ export async function suggestedFeesApiCall(
   const quoteBlock = BigNumber.from(result["quoteBlock"]);
 
   return {
-    relayerFee: {
-      pct: relayFeePct,
-      total: relayFeeTotal,
+    totalRelayFee: {
+      pct: totalRelayFeePct,
+      total: totalRelayFeeTotal,
     },
     relayerCapitalFee: {
       pct: capitalFeePct,

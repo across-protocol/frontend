@@ -15,7 +15,7 @@ export type Fee = {
 };
 
 export type BridgeFees = {
-  relayerFee: Fee; // relayerGasFee + relayerCapitalFee + lpFee.
+  totalRelayFee: Fee; // relayerGasFee + relayerCapitalFee + lpFee.
   lpFee: Fee;
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
@@ -56,7 +56,7 @@ export async function getBridgeFees({
 }: GetBridgeFeesArgs): Promise<GetBridgeFeesResult> {
   const timeBeforeRequests = Date.now();
   const {
-    relayerFee,
+    totalRelayFee,
     relayerGasFee,
     relayerCapitalFee,
     isAmountTooLow,
@@ -75,7 +75,7 @@ export async function getBridgeFees({
   const quoteLatency = BigNumber.from(timeAfterRequests - timeBeforeRequests);
 
   return {
-    relayerFee,
+    totalRelayFee,
     relayerGasFee,
     relayerCapitalFee,
     lpFee,

@@ -43,7 +43,7 @@ export interface RewardsApiInterface {
 }
 
 export type SuggestedApiFeeReturnType = {
-  relayerFee: Fee;
+  totalRelayFee: Fee;
   relayerGasFee: Fee;
   relayerCapitalFee: Fee;
   lpFee: Fee;

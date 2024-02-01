@@ -235,40 +235,44 @@ const handler = async (
       throw new InputError("Sent amount is too low relative to fees");
 
     // Across V3's new `deposit` function requires now a total fee that includes the LP fee
-    const totalRelayerFee = ethers.BigNumber.from(
+    const totalRelayFee = ethers.BigNumber.from(
       relayerFeeDetails.relayFeeTotal
     ).add(lpFeeTotal);
-    const totalRelayerFeePct = totalRelayerFee.add(lpFeePct);
+    const totalRelayFeePct = ethers.BigNumber.from(
+      relayerFeeDetails.relayFeePercent
+    ).add(lpFeePct);
 
     const responseJson = {
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
       relayGasFeeTotal: relayerFeeDetails.gasFeeTotal,
-      relayFeePct: totalRelayerFeePct.toString(), // capitalFeePct + gasFeePct + lpFeePct
-      relayFeeTotal: totalRelayerFee.toString(), // capitalFeeTotal + gasFeeTotal + lpFeeTotal
+      relayFeePct: totalRelayFee.toString(), // capitalFeePct + gasFeePct + lpFeePct
+      relayFeeTotal: totalRelayFee.toString(), // capitalFeeTotal + gasFeeTotal + lpFeeTotal
       lpFeePct: "0", // Note: lpFeePct is now included in relayFeePct. We set it to 0 here for backwards compatibility.
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: blockTag.toString(),
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
-      // V3's new fee structure
-      relayerFee: {
-        // Note: this is the total fee, including the LP fee.
-        pct: totalRelayerFeePct.toString(),
-        total: totalRelayerFee.toString(),
-      },
-      relayerCapitalFee: {
-        pct: relayerFeeDetails.capitalFeePercent,
-        total: relayerFeeDetails.capitalFeeTotal,
-      },
-      relayerGasFee: {
-        pct: relayerFeeDetails.gasFeePercent,
-        total: relayerFeeDetails.gasFeeTotal,
-      },
-      lpFee: {
-        pct: lpFeePct.toString(),
-        total: lpFeeTotal.toString(),
+      // v3's new fee structure
+      v3: {
+        // capitalFee + gasFee + lpFee
+        totalRelayFee: {
+          pct: totalRelayFee.toString(),
+          total: totalRelayFeePct.toString(),
+        },
+        relayerCapitalFee: {
+          pct: relayerFeeDetails.capitalFeePercent,
+          total: relayerFeeDetails.capitalFeeTotal,
+        },
+        relayerGasFee: {
+          pct: relayerFeeDetails.gasFeePercent,
+          total: relayerFeeDetails.gasFeeTotal,
+        },
+        lpFee: {
+          pct: lpFeePct.toString(),
+          total: lpFeeTotal.toString(),
+        },
       },
     };
 
