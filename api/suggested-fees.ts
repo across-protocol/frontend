@@ -254,25 +254,24 @@ const handler = async (
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: blockTag.toString(),
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
-      // v3's new fee structure
-      v3: {
+      // Note: v3's new fee structure. Below are the correct values for the new fee structure. The above `*Pct` and `*Total`
+      // values are for backwards compatibility which will be removed in the future.
+      totalRelayFee: {
         // capitalFee + gasFee + lpFee
-        totalRelayFee: {
-          pct: totalRelayFee.toString(),
-          total: totalRelayFeePct.toString(),
-        },
-        relayerCapitalFee: {
-          pct: relayerFeeDetails.capitalFeePercent,
-          total: relayerFeeDetails.capitalFeeTotal,
-        },
-        relayerGasFee: {
-          pct: relayerFeeDetails.gasFeePercent,
-          total: relayerFeeDetails.gasFeeTotal,
-        },
-        lpFee: {
-          pct: lpFeePct.toString(),
-          total: lpFeeTotal.toString(),
-        },
+        pct: totalRelayFee.toString(),
+        total: totalRelayFeePct.toString(),
+      },
+      relayerCapitalFee: {
+        pct: relayerFeeDetails.capitalFeePercent,
+        total: relayerFeeDetails.capitalFeeTotal,
+      },
+      relayerGasFee: {
+        pct: relayerFeeDetails.gasFeePercent,
+        total: relayerFeeDetails.gasFeeTotal,
+      },
+      lpFee: {
+        pct: lpFeePct.toString(),
+        total: lpFeeTotal.toString(),
       },
     };
 
