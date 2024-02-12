@@ -25,7 +25,7 @@ export function useLoadAmpli() {
           defaultTracking: {
             attribution: true,
             pageViews: false,
-            sessions: true,
+            sessions: false,
             fileDownloads: false,
             formInteractions: false,
           },
