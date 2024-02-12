@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
 import { useState } from "react";
 
-import { useAmplitude } from "hooks";
+import { useAmplitude, useConnection } from "hooks";
 import {
   generateDepositConfirmed,
   getToken,
@@ -30,9 +30,10 @@ export function useDepositTracking(
   const [shouldRetryDepositQuery, setShouldRetryDepositQuery] = useState(true);
 
   const { addToAmpliQueue } = useAmplitude();
+  const { account } = useConnection();
 
   const depositQuery = useQuery(
-    ["deposit", depositTxHash, fromChainId],
+    ["deposit", depositTxHash, fromChainId, account],
     async () => {
       // On some L2s the tx is mined too fast for the animation to show, so we add a delay
       await wait(1_000);
@@ -63,6 +64,10 @@ export function useDepositTracking(
           // Optimistically add deposit to local storage for instant visibility on the
           // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
           addLocalDeposit(convertForDepositQuery(data, fromBridgePagePayload));
+        }
+
+        if (account !== fromBridgePagePayload.account) {
+          return;
         }
 
         addToAmpliQueue(() => {
@@ -115,21 +120,7 @@ export function useDepositTracking(
         // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
         addLocalDeposit(convertForFillQuery(data, fromBridgePagePayload));
 
-        const { referrer, quote, timeSigned, sendDepositArgs, tokenPrice } =
-          fromBridgePagePayload;
-
-        addToAmpliQueue(() => {
-          ampli.transferDepositCompleted(
-            generateDepositConfirmed(
-              quote,
-              referrer,
-              timeSigned,
-              data.fillTxHashes[0],
-              true,
-              data.fillTxTimestamp
-            )
-          );
-        });
+        const { quote, sendDepositArgs, tokenPrice } = fromBridgePagePayload;
 
         recordTransferUserProperties(
           sendDepositArgs.amount,
