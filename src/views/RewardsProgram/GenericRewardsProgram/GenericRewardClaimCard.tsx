@@ -52,9 +52,11 @@ const GenericRewardClaimCard = ({
                   title={`${capitalizeFirstLetter(
                     programName.toLowerCase()
                   )} claiming`}
-                  icon={<InfoIcon />}
+                  icon="info"
                   placement="bottom-start"
-                />
+                >
+                  <InfoIcon />
+                </Tooltip>
                 <Text color="grey-400" size="md">
                   {formatUnits(unclaimedAmount)} {rewardTokenSymbol} claimable
                 </Text>

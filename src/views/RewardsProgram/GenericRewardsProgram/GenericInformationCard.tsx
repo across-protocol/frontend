@@ -69,7 +69,9 @@ const GenericInformationCard = ({
                             title={prefixIconTooltip.title}
                             icon={prefixIcon}
                             placement="bottom-start"
-                          />
+                          >
+                            <InfoIcon />
+                          </Tooltip>
                         ) : (
                           <InfoIcon />
                         ))}

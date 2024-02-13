@@ -78,7 +78,7 @@ export function useACXReferralsProgram() {
         prefix: `${Math.floor(summary.referralRate * 100 * 0.25)}% for referee`,
       },
       {
-        title: "Total Rewards",
+        title: "Total rewards",
         value: `${formatUnits(summary.rewardsAmount, token.decimals)} ACX`,
         prefix: `${formatUnits(
           unclaimedReferralData?.claimableAmount ?? 0,
