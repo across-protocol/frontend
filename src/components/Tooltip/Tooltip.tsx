@@ -15,6 +15,7 @@ import { ReactComponent as RefereeIcon } from "assets/icons/referree.svg";
 import { ReactComponent as ReferrerIcon } from "assets/icons/referrer.svg";
 import { ReactComponent as SelfReferralIcon } from "assets/icons/self-referral.svg";
 import { ReactComponent as ClockIcon } from "assets/icons/clock.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 
 const iconMap = {
   "green-checkmark": <RoundedCheckmark16 />,
@@ -23,6 +24,7 @@ const iconMap = {
   referral: <ReferrerIcon />,
   referee: <RefereeIcon />,
   clock: <ClockIcon />,
+  info: <InfoIcon />,
 };
 
 export type TooltipIcon = keyof typeof iconMap;
