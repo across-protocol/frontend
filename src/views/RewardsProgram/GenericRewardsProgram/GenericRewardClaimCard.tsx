@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ReactComponent as ClockIcon } from "assets/icons/clock.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 import { PrimaryButton, Text } from "components";
 import { useState } from "react";
 import { COLORS, capitalizeFirstLetter, rewardProgramTypes } from "utils";
@@ -26,6 +26,7 @@ const GenericRewardClaimCard = ({
     formatUnits,
     isConnected,
     programName,
+    claimableTooltipBody,
   } = useGenericRewardClaimCard(program);
   const [isModalOpen, setModalOpen] = useState(false);
   return (
@@ -47,14 +48,14 @@ const GenericRewardClaimCard = ({
             {unclaimedAmount && (
               <ClaimableIconTextStack>
                 <Tooltip
-                  body={`New ${programName.toLowerCase()} rewards are claimable 2 weeks after the first day of every month`}
+                  body={claimableTooltipBody}
                   title={`${capitalizeFirstLetter(
                     programName.toLowerCase()
                   )} claiming`}
-                  icon="clock"
+                  icon="info"
                   placement="bottom-start"
                 >
-                  <ClockIcon />
+                  <InfoIcon />
                 </Tooltip>
                 <Text color="grey-400" size="md">
                   {formatUnits(unclaimedAmount)} {rewardTokenSymbol} claimable
