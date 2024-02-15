@@ -33,6 +33,7 @@ import {
   ENABLED_ROUTES,
   getDefaultRelayerAddress,
   sendResponse,
+  hasPotentialRouteCollision,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -118,11 +119,20 @@ const handler = async (
       routeEnabledResult.status === "rejected"
     ) {
       throw new InputError(`Unable to query route.`);
-    } else if (
-      !routeEnabledResult.value ||
-      disabledL1Tokens.includes(l1Token.toLowerCase())
-    ) {
+    } else if (disabledL1Tokens.includes(l1Token.toLowerCase())) {
       throw new InputError(`Route is not enabled.`);
+    } else if (!routeEnabledResult.value) {
+      const routeCollision = await hasPotentialRouteCollision(
+        provider,
+        undefined,
+        token,
+        originChainId
+      );
+      throw new InputError(
+        routeCollision
+          ? `More than one ACX route maps to the provided inputs causing ambiguity. Please specify the originChainId.`
+          : `Route is not enabled.`
+      );
     }
 
     const { l2Token: destinationToken } = tokenDetailsResult.value;

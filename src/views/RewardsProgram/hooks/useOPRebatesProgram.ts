@@ -13,7 +13,7 @@ import { useUnclaimedOpRewardsProofs } from "hooks/useUnclaimedProofs";
 export function useOPRebatesProgram() {
   const { account } = useConnection();
   const { summary } = useRewardSummary("op-rebates", account);
-  const { programName } = rewardPrograms["op-rebates"];
+  const { programName, claimableTooltipBody } = rewardPrograms["op-rebates"];
   const token = useMemo(() => getToken("OP"), []);
   const { data: unclaimedOpRewardsData } = useUnclaimedOpRewardsProofs();
 
@@ -41,14 +41,20 @@ export function useOPRebatesProgram() {
           unclaimedOpRewardsData?.claimableAmount ?? 0,
           token.decimals
         )} ${token.symbol} claimable`,
-        prefixIcon: "clock",
+        prefixIcon: "info",
         prefixIconTooltip: {
-          content: `New ${programName.toLowerCase()} rewards are claimable 2 weeks after the first day of every month`,
+          content: claimableTooltipBody,
           title: `${capitalizeFirstLetter(programName.toLowerCase())} claiming`,
         },
       },
     ],
-    [programName, summary, token, unclaimedOpRewardsData?.claimableAmount]
+    [
+      programName,
+      summary,
+      token,
+      unclaimedOpRewardsData?.claimableAmount,
+      claimableTooltipBody,
+    ]
   );
 
   return {

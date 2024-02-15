@@ -31,6 +31,7 @@ import {
   getSpokePoolAddress,
   getCachedTokenBalance,
   getDefaultRelayerAddress,
+  hasPotentialRouteCollision,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -185,9 +186,22 @@ const handler = async (
       isRouteEnabled(computedOriginChainId, destinationChainId, token),
     ]);
 
-    if (!routeEnabled || disabledL1Tokens.includes(l1Token.toLowerCase()))
+    if (disabledL1Tokens.includes(l1Token.toLowerCase())) {
       throw new InputError(`Route is not enabled.`);
-
+    }
+    if (!routeEnabled) {
+      const routeCollision = await hasPotentialRouteCollision(
+        provider,
+        undefined,
+        token,
+        originChainId
+      );
+      throw new InputError(
+        routeCollision
+          ? `More than one ACX route maps to the provided inputs causing ambiguity. Please specify the originChainId.`
+          : `Route is not enabled.`
+      );
+    }
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       ENABLED_ROUTES.acrossConfigStoreAddress,
       provider

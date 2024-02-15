@@ -4,7 +4,6 @@ import { QUERIESV2, isDefined, rewardProgramTypes } from "utils";
 import { Text } from "components";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 import { Tooltip } from "components/Tooltip";
-import { ReactComponent as ClockIcon } from "assets/icons/clock.svg";
 
 export type GenericRewardInformationRowType = {
   title: string;
@@ -13,7 +12,7 @@ export type GenericRewardInformationRowType = {
   prefix?: React.ReactNode;
   extendedPrefixSpacing?: boolean;
   prefixArrow?: boolean;
-  prefixIcon?: "clock";
+  prefixIcon?: "info";
   prefixIconTooltip?: {
     title: string;
     content: string;
@@ -62,7 +61,7 @@ const GenericInformationCard = ({
                 {prefix && (
                   <>
                     <PrefixIconPrefixStack>
-                      {prefixIcon === "clock" &&
+                      {prefixIcon === "info" &&
                         (prefixIconTooltip ? (
                           <Tooltip
                             tooltipId={`prefix-info-tooltip-${idx}-${program}`}
@@ -71,10 +70,10 @@ const GenericInformationCard = ({
                             icon={prefixIcon}
                             placement="bottom-start"
                           >
-                            <ClockIcon />
+                            <InfoIcon />
                           </Tooltip>
                         ) : (
-                          <ClockIcon />
+                          <InfoIcon />
                         ))}
                       <Text color="grey-400">{prefix}</Text>
                     </PrefixIconPrefixStack>

@@ -112,15 +112,15 @@ export const Link = styled(BaseLink)`
 export const WalletWrapper = styled.div`
   display: flex;
   align-items: center;
-`;
 
-export const MobileNavigation = styled(motion.nav)`
-  margin-left: 16px;
+  gap: 16px;
 
   @media (max-width: 428px) {
-    margin-left: 8px;
+    gap: 8px;
   }
 `;
+
+export const MobileNavigation = styled(motion.nav)``;
 
 export const TextWithIcon = styled.div`
   display: flex;

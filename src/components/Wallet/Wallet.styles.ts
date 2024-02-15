@@ -1,6 +1,18 @@
 import styled from "@emotion/styled";
-import { QUERIES } from "utils";
+import { COLORS, QUERIES } from "utils";
 import { ReactComponent as AcrossLogo } from "assets/across-mobile-logo.svg";
+
+export const WalletWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: baseline;
+
+  gap: 16px;
+
+  @media (max-width: 428px) {
+    gap: 8px;
+  }
+`;
 
 export const ConnectButton = styled.button`
   font-size: ${16 / 16}rem;
@@ -75,6 +87,11 @@ export const BalanceButton = styled.button`
     font-size: ${14 / 16}rem;
     line-height: ${18 / 16}rem;
   }
+`;
+
+export const SubscribeButton = styled(BalanceButton)`
+  border-color: ${COLORS["aqua"]};
+  color: ${COLORS["aqua"]};
 `;
 
 export const BalanceWallet = styled.div`

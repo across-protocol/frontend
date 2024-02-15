@@ -15,7 +15,7 @@ import { BigNumber } from "ethers";
 export function useACXReferralsProgram() {
   const { account } = useConnection();
   const { summary } = useRewardSummary("referrals", account);
-  const { programName } = rewardPrograms["referrals"];
+  const { programName, claimableTooltipBody } = rewardPrograms["referrals"];
   const token = useMemo(() => getToken("ACX"), []);
   const { data: unclaimedReferralData } = useUnclaimedReferralProofs();
 
@@ -78,15 +78,15 @@ export function useACXReferralsProgram() {
         prefix: `${Math.floor(summary.referralRate * 100 * 0.25)}% for referee`,
       },
       {
-        title: "Total Rewards",
+        title: "Total rewards",
         value: `${formatUnits(summary.rewardsAmount, token.decimals)} ACX`,
         prefix: `${formatUnits(
           unclaimedReferralData?.claimableAmount ?? 0,
           token.decimals
         )} ACX claimable`,
-        prefixIcon: "clock",
+        prefixIcon: "info",
         prefixIconTooltip: {
-          content: `New ${programName.toLowerCase()} rewards are claimable 2 weeks after the first day of every month`,
+          content: claimableTooltipBody,
           title: `${capitalizeFirstLetter(programName.toLowerCase())} claiming`,
         },
       },
@@ -98,6 +98,7 @@ export function useACXReferralsProgram() {
       token.decimals,
       unclaimedReferralData?.claimableAmount,
       programName,
+      claimableTooltipBody,
     ]
   );
 

@@ -362,6 +362,7 @@ export const rewardPrograms: Record<
     rewardTokenSymbol: string;
     backgroundUrl: string;
     highestPct: number;
+    claimableTooltipBody: string;
   }
 > = {
   referrals: {
@@ -371,6 +372,8 @@ export const rewardPrograms: Record<
     rewardTokenSymbol: "ACX",
     backgroundUrl: ACXCloudBackground,
     highestPct: 0.8,
+    claimableTooltipBody:
+      "ACX referral rewards earned during the month are made claimable after the ~15th of the following month",
   },
   "op-rebates": {
     programName: "OP Rewards Program",
@@ -379,6 +382,8 @@ export const rewardPrograms: Record<
     rewardTokenSymbol: "OP",
     backgroundUrl: OPCloudBackground,
     highestPct: 0.95,
+    claimableTooltipBody:
+      "OP rewards earned during the month are made claimable after the ~15th of the following month",
   },
 };
 
@@ -643,6 +648,7 @@ export const COLORS = {
   "light-100": "var(--color-neutrals-light-100)",
   "light-200": "var(--color-neutrals-light-200)",
   "light-300": "var(--color-neutrals-light-300)",
+  "light-blue-200": "var(--color-neutrals-blue-200)",
   "white-70": "var(--tints-shades-white-70)",
   "white-88": "var(--tints-shades-white-88)",
   "white-100": "var(--tints-shades-white-100)",
