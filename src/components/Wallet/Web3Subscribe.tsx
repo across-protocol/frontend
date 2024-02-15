@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { SubscribeButton } from "./Wallet.styles";
 import { useConnection } from "hooks";
+import { isDefined } from "utils";
 
 const Web3Subscribe = () => {
   const { wallet } = useConnection();
@@ -8,9 +9,11 @@ const Web3Subscribe = () => {
   const [isSubscribed, setISubscribed] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const isW3SubscribeAvailable = isDefined((window as any)?.CBWSubscribe);
+
   const handleSubscribe = useCallback(() => {
     if (isCBWallet) {
-      (window as any).CBWSubscribe.toggleSubscription();
+      (window as any)?.CBWSubscribe?.toggleSubscription();
     }
   }, [isCBWallet]);
 
@@ -20,7 +23,7 @@ const Web3Subscribe = () => {
   }, [wallet]);
 
   useEffect(() => {
-    (window as any).CBWSubscribe.createSubscriptionUI({
+    (window as any)?.CBWSubscribe?.createSubscriptionUI({
       partnerAddress: "0x7765007Ef1b9B75378F481613D842Fd7613e26f2",
       partnerName: "Across Protocol",
       modalTitle: "Subscribe to Across",
@@ -36,7 +39,7 @@ const Web3Subscribe = () => {
     ? "Unsubscribe"
     : "Subscribe";
 
-  return isCBWallet ? (
+  return isW3SubscribeAvailable && isCBWallet ? (
     <SubscribeButton onClick={handleSubscribe}>
       {subscribeButtonText}
     </SubscribeButton>
