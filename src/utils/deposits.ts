@@ -29,17 +29,21 @@ export function parseFundsDepositedLog(
       return [];
     }
   });
-  const v3Deposit = parsedLogs.find((log) => log.name === "V3FundsDeposited");
   const v2Deposit = parsedLogs.find((log) => log.name === "FundsDeposited");
-
-  if (!(isDefined(v3Deposit) || isDefined(v2Deposit))) {
+  const v3Deposit = parsedLogs.find((log) => log.name === "V3FundsDeposited");
+  if (isDefined(v3Deposit)) {
+    return {
+      ...v3Deposit,
+      isV2: false,
+    };
+  } else if (isDefined(v2Deposit)) {
+    return {
+      ...v2Deposit,
+      isV2: true,
+    };
+  } else {
     return undefined;
   }
-
-  return {
-    ...(v3Deposit ?? v2Deposit!),
-    isV2: isDefined(v2Deposit),
-  };
 }
 
 export async function getDepositByTxHash(
