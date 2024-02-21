@@ -272,8 +272,8 @@ const handler = async (
       // values are for backwards compatibility which will be removed in the future.
       totalRelayFee: {
         // capitalFee + gasFee + lpFee
-        pct: totalRelayFee.toString(),
-        total: totalRelayFeePct.toString(),
+        pct: totalRelayFeePct.toString(),
+        total: totalRelayFee.toString(),
       },
       relayerCapitalFee: {
         pct: relayerFeeDetails.capitalFeePercent,
