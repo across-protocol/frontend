@@ -128,8 +128,8 @@ export async function getFillByDepositTxHash(
       )
     : // If we make it to this point, we can be sure that there is exactly one filled relay event
       // that corresponds to the deposit we are looking for.
-      // The (depositId, depositor, fromChainId) tuple is unique for V3 filled relay events.
-      v3FilledRelayEvents.find((event) => event.args.depositor === depositor);
+      // The (depositId, fromChainId) tuple is unique for V3 filled relay events.
+      v3FilledRelayEvents[0];
 
   if (!isDefined(filledRelayEvent)) {
     throw new Error(
