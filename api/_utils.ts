@@ -14,6 +14,7 @@ import { StructError, define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
+import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 
 import {
   MINIMAL_BALANCER_V2_POOL_ABI,
@@ -88,7 +89,9 @@ export const DISABLED_TOKENS_FOR_AVAILABLE_ROUTES = (
 const _ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1
     ? enabledMainnetRoutesAsJson
-    : enabledGoerliRoutesAsJson;
+    : HUB_POOL_CHAIN_ID === 5
+    ? enabledGoerliRoutesAsJson
+    : enabledSepoliaRoutesAsJson;
 
 _ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
   ({ fromChain, toChain, fromTokenSymbol }) =>
@@ -307,6 +310,15 @@ export const makeHubPoolClientConfig = (chainId = 1) => {
         "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC",
       merkleDistributorAddress: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
     },
+    [CHAIN_IDs.SEPOLIA]: {
+      chainId: CHAIN_IDs.SEPOLIA,
+      hubPoolAddress: "0x14224e63716afAcE30C9a417E0542281869f7d9e",
+      wethAddress: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.SEPOLIA],
+      configStoreAddress: "0xB3De1e212B49e68f4a68b5993f31f63946FCA2a6",
+      acceleratingDistributorAddress:
+        "0x0000000000000000000000000000000000000000",
+      merkleDistributorAddress: "0x0000000000000000000000000000000000000000",
+    },
   }[chainId] as {
     chainId: number;
     hubPoolAddress: string;
@@ -440,6 +452,26 @@ export const queries: Record<
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.BASE_GOERLI)
+    ),
+  [CHAIN_IDs.SEPOLIA]: () =>
+    new sdk.relayFeeCalculator.EthereumSepoliaQueries(
+      getProvider(CHAIN_IDs.SEPOLIA),
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDs.SEPOLIA)
+    ),
+  [CHAIN_IDs.BASE_SEPOLIA]: () =>
+    new sdk.relayFeeCalculator.BaseSepoliaQueries(
+      getProvider(CHAIN_IDs.BASE_SEPOLIA),
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDs.BASE_SEPOLIA)
     ),
 };
 
