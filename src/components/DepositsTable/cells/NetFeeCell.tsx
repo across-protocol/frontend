@@ -76,8 +76,8 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
     Number(deposit.feeBreakdown?.totalBridgeFeeUsd || 0) -
     Number(deposit.feeBreakdown?.relayGasFeeUsd || 0);
   const capitalAndLpFeeAmount = BigNumber.from(
-    isBigNumberish(deposit.feeBreakdown?.totalBridgeFeeUsd)
-      ? deposit.feeBreakdown?.totalBridgeFeeUsd || 0
+    isBigNumberish(deposit.feeBreakdown?.totalBridgeFeeAmount)
+      ? deposit.feeBreakdown?.totalBridgeFeeAmount || 0
       : 0
   ).sub(
     BigNumber.from(
