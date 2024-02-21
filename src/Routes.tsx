@@ -44,7 +44,6 @@ const Send = lazyWithRetry(
 const Splash = lazyWithRetry(
   () => import(/* webpackChunkName: "Splash" */ "./views/Splash")
 );
-const Airdrop = lazyWithRetry(() => import("./views/Airdrop"));
 const Transactions = lazyWithRetry(
   () => import(/* webpackChunkName: "Transactions" */ "./views/Transactions")
 );
@@ -155,7 +154,6 @@ const Routes: React.FC = () => {
             component={OPRebates}
           />
           <Route exact path="/rewards" component={Rewards} />
-          <Route exact path="/airdrop" component={Airdrop} />
           <Route
             exact
             path="/rewards/staking/:poolId"
