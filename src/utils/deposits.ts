@@ -20,7 +20,7 @@ export function parseFundsDepositedLog(
     topics: string[];
     data: string;
   }>
-): (LogDescription & { isV2: boolean }) | undefined {
+): LogDescription | undefined {
   const spokePoolIface = SpokePool__factory.createInterface();
   const parsedLogs = logs.flatMap((log) => {
     try {
@@ -29,21 +29,10 @@ export function parseFundsDepositedLog(
       return [];
     }
   });
-  const v2Deposit = parsedLogs.find((log) => log.name === "FundsDeposited");
-  const v3Deposit = parsedLogs.find((log) => log.name === "V3FundsDeposited");
-  if (isDefined(v3Deposit)) {
-    return {
-      ...v3Deposit,
-      isV2: false,
-    };
-  } else if (isDefined(v2Deposit)) {
-    return {
-      ...v2Deposit,
-      isV2: true,
-    };
-  } else {
-    return undefined;
-  }
+  // Return either the V2 or V3 log if either is present
+  return parsedLogs.find(
+    (log) => log.name === "FundsDeposited" || log.name === "V3FundsDeposited"
+  );
 }
 
 export async function getDepositByTxHash(
@@ -74,6 +63,7 @@ export async function getDepositByTxHash(
     depositTxReceipt,
     parsedDepositLog,
     depositTimestamp: block.timestamp,
+    isV2: parseFundsDepositedLog.name === "FundsDeposited",
   };
 }
 
@@ -89,11 +79,10 @@ export async function getFillByDepositTxHash(
     );
   }
 
-  const { parsedDepositLog } = depositByTxHash;
+  const { parsedDepositLog, isV2 } = depositByTxHash;
 
   const depositId = Number(parsedDepositLog.args.depositId);
   const depositor = String(parsedDepositLog.args.depositor);
-  const isV2 = parsedDepositLog.isV2;
   const destinationSpokePool = config.getSpokePool(toChainId);
 
   const v2FilledRelayEvents = await destinationSpokePool.queryFilter(
