@@ -1,6 +1,7 @@
+import { Contract } from "ethers";
 import { getConfig } from "./config";
 import { getProvider } from "./providers";
-import { SpokePool__factory } from "./typechain";
+import { FilledV3RelayEvent, SpokePool__factory } from "./typechain";
 
 const config = getConfig();
 
@@ -26,7 +27,7 @@ export function parseFundsDepositedLog(
       return [];
     }
   });
-  return parsedLogs.find((log) => log.name === "FundsDeposited");
+  return parsedLogs.find((log) => log.name === "V3FundsDeposited");
 }
 
 export async function getDepositByTxHash(
@@ -76,33 +77,38 @@ export async function getFillByDepositTxHash(
 
   const depositId = Number(parsedDepositLog.args.depositId);
   const depositor = String(parsedDepositLog.args.depositor);
-  const destinationSpokePool = config.getSpokePool(toChainId);
-  const filledRelayEvents = await destinationSpokePool.queryFilter(
-    destinationSpokePool.filters.FilledRelay(
+  const destinationSpokePool = config.getSpokePool(toChainId) as Contract;
+  const filledRelayEvents = (await destinationSpokePool.queryFilter(
+    destinationSpokePool.filters.FilledV3Relay(
+      undefined,
       undefined,
       undefined,
       undefined,
       undefined,
       fromChainId,
-      undefined,
-      undefined,
-      undefined,
       depositId,
       undefined,
       undefined,
-      depositor
+      undefined,
+      undefined,
+      depositor,
+      undefined,
+      undefined,
+      undefined
     )
-  );
+  )) as FilledV3RelayEvent[];
 
-  if (filledRelayEvents.length === 0) {
+  // This is a 0 or 1 situation. The (depositId, depositor, originChainId) tuple should be
+  // unique. If there are more than one, something is wrong. If there are none, the deposit
+  // has not been filled.
+  if (filledRelayEvents.length !== 1) {
     throw new Error(
       `Could not find FilledRelay events for depositId ${depositId} on chain ${toChainId}`
     );
   }
-
-  const filledRelayEvent = filledRelayEvents.find((event) =>
-    event.args.amount.eq(event.args.totalFilledAmount)
-  );
+  // If we make it to this point, we can be sure that there is exactly one filled relay event
+  // that corresponds to the deposit we are looking for.
+  const filledRelayEvent = filledRelayEvents[0];
 
   if (!filledRelayEvent) {
     throw new Error(
