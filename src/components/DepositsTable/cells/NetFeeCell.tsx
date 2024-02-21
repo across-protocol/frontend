@@ -79,7 +79,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
     isBigNumberish(deposit.feeBreakdown?.totalBridgeFeeUsd)
       ? deposit.feeBreakdown?.totalBridgeFeeUsd || 0
       : 0
-  ).add(
+  ).sub(
     BigNumber.from(
       isBigNumberish(deposit.feeBreakdown?.relayGasFeeAmount)
         ? deposit.feeBreakdown?.relayGasFeeAmount || 0
