@@ -255,9 +255,7 @@ const handler = async (
       currentUt,
       nextUt
     );
-    const lpFeePct = destinationChainLpFeePct.gt(hubChainLpFeePct)
-      ? destinationChainLpFeePct
-      : hubChainLpFeePct;
+    const lpFeePct = sdk.utils.max(destinationChainLpFeePct, hubChainLpFeePct);
     const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
