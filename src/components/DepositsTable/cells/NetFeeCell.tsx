@@ -72,16 +72,21 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
     ? getToken(deposit.rewards.type === "op-rebates" ? "OP" : "ACX")
     : undefined;
 
-  const relayCapitalFeeAmount = BigNumber.from(
-    isBigNumberish(deposit.feeBreakdown?.relayCapitalFeeAmount)
-      ? deposit.feeBreakdown?.relayCapitalFeeAmount || 0
+  const capitalAndLpFeeUsd =
+    Number(deposit.feeBreakdown?.totalBridgeFeeUsd || 0) -
+    Number(deposit.feeBreakdown?.relayGasFeeUsd || 0);
+  const capitalAndLpFeeAmount = BigNumber.from(
+    isBigNumberish(deposit.feeBreakdown?.totalBridgeFeeUsd)
+      ? deposit.feeBreakdown?.totalBridgeFeeUsd || 0
       : 0
+  ).add(
+    BigNumber.from(
+      isBigNumberish(deposit.feeBreakdown?.relayGasFeeAmount)
+        ? deposit.feeBreakdown?.relayGasFeeAmount || 0
+        : 0
+    )
   );
-  const lpFeeAmount = BigNumber.from(
-    isBigNumberish(deposit.feeBreakdown?.lpFeeAmount)
-      ? deposit.feeBreakdown?.lpFeeAmount || 0
-      : 0
-  );
+
   return (
     <>
       <Text color="light-200">${netFee.toFixed(2)}</Text>
@@ -111,18 +116,10 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                 </Text>
                 <FeeValueWrapper>
                   <Text size="sm" color="grey-400">
-                    $
-                    {formatMaxFracDigits(
-                      Number(deposit.feeBreakdown?.relayCapitalFeeUsd || 0) +
-                        Number(deposit.feeBreakdown?.lpFeeUsd || 0),
-                      2
-                    )}
+                    ${formatMaxFracDigits(capitalAndLpFeeUsd, 2)}
                   </Text>
                   <Text size="sm" color="light-200">
-                    {formatUnits(
-                      relayCapitalFeeAmount.add(lpFeeAmount),
-                      tokenInfo.decimals
-                    )}{" "}
+                    {formatUnits(capitalAndLpFeeAmount, tokenInfo.decimals)}{" "}
                     {tokenInfo.symbol}
                   </Text>
                   <img src={tokenInfo.logoURI} alt={tokenInfo.symbol} />
