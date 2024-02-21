@@ -86,7 +86,7 @@ export function useBridge() {
           toChain: selectedRoute.toChain,
           timestamp: quotedFees.quoteTimestamp,
           referrer,
-          relayerFeePct: quotedFees.relayerFee.pct,
+          relayerFeePct: quotedFees.totalRelayFee.pct,
           tokenAddress: selectedRoute.fromTokenAddress,
           isNative: selectedRoute.isNative,
           toAddress: toAccount?.address ?? "",
