@@ -33,6 +33,7 @@ import {
   getDefaultRelayerAddress,
   hasPotentialRouteCollision,
 } from "./_utils";
+import { CHAIN_IDs } from "@across-protocol/constants-v2";
 
 const SuggestedFeesQueryParamsSchema = type({
   amount: parsableBigNumberString(),
@@ -209,7 +210,13 @@ const handler = async (
 
     const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
-    const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
+    const [
+      currentUt,
+      nextUt,
+      destinationChainRateModel,
+      hubChainRateModel,
+      tokenPrice,
+    ] = await Promise.all([
       hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
         blockTag,
       }),
@@ -224,13 +231,33 @@ const handler = async (
         computedOriginChainId,
         destinationChainId
       ),
+      configStoreClient.getRateModel(
+        l1Token,
+        {
+          blockTag,
+        },
+        computedOriginChainId,
+        CHAIN_IDs.MAINNET
+      ),
       getCachedTokenPrice(l1Token, baseCurrency),
     ]);
-    const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
-      rateModel,
+
+    // @dev: Relayers usually take repayment on mainnet or destination chain, so use the higher of the two LP fee %'s
+    // to avoid the relayer considering this deposit unprofitable.
+    const destinationChainLpFeePct =
+      sdk.lpFeeCalculator.calculateRealizedLpFeePct(
+        destinationChainRateModel,
+        currentUt,
+        nextUt
+      );
+    const hubChainLpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
+      hubChainRateModel,
       currentUt,
       nextUt
     );
+    const lpFeePct = destinationChainLpFeePct.gt(hubChainLpFeePct)
+      ? destinationChainLpFeePct
+      : hubChainLpFeePct;
     const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
