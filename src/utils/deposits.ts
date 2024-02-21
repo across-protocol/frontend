@@ -1,9 +1,8 @@
-import { Contract } from "ethers";
-import { getConfig } from "./config";
-import { getProvider } from "./providers";
-import { FilledV3RelayEvent, SpokePool__factory } from "./typechain";
 import { LogDescription } from "ethers/lib/utils";
+import { getConfig } from "./config";
 import { isDefined } from "./defined";
+import { getProvider } from "./providers";
+import { SpokePool__factory } from "./typechain";
 
 const config = getConfig();
 
@@ -102,25 +101,17 @@ export async function getFillByDepositTxHash(
     )
   );
 
-  const v3FilledRelayEvents = (await destinationSpokePool.queryFilter(
-    (destinationSpokePool as Contract).filters.FilledV3Relay(
+  const v3FilledRelayEvents = await destinationSpokePool.queryFilter(
+    destinationSpokePool.filters.FilledV3Relay(
       undefined,
       undefined,
       undefined,
       undefined,
       undefined,
       fromChainId,
-      depositId,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      depositor,
-      undefined,
-      undefined,
-      undefined
+      depositId
     )
-  )) as FilledV3RelayEvent[];
+  );
 
   if (
     (isV2 && v2FilledRelayEvents.length === 0) ||
@@ -138,7 +129,7 @@ export async function getFillByDepositTxHash(
     : // If we make it to this point, we can be sure that there is exactly one filled relay event
       // that corresponds to the deposit we are looking for.
       // The (depositId, depositor, fromChainId) tuple is unique for V3 filled relay events.
-      v3FilledRelayEvents[0];
+      v3FilledRelayEvents.find((event) => event.args.depositor === depositor);
 
   if (!isDefined(filledRelayEvent)) {
     throw new Error(
