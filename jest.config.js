@@ -16,5 +16,6 @@ module.exports = {
     "^hooks/(.*)$": "<rootDir>/src/hooks/$1",
     "^assets/(.*)$": "<rootDir>/src/assets/$1",
     "^data/(.*)$": "<rootDir>/src/data/$1",
+    uuid: require.resolve("uuid"),
   },
 };
