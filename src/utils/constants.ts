@@ -242,6 +242,34 @@ export const chainInfoList: ChainInfoList = [
     pollingInterval: defaultBlockPollingInterval,
     customRpcUrl: process.env.REACT_APP_CHAIN_84531_PROVIDER_URL,
   },
+  {
+    name: "Sepolia",
+    fullName: "Sepolia",
+    chainId: ChainId.SEPOLIA,
+    logoURI: ethereumLogo,
+    rpcUrl: "https://gateway.tenderly.co/public/sepolia	",
+    explorerUrl: "https://sepolia.etherscan.io/",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://sepolia.etherscan.io/"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_11155111_PROVIDER_URL,
+  },
+  {
+    name: "Base Sepolia",
+    fullName: "Base Testnet Sepolia",
+    chainId: ChainId.BASE_SEPOLIA,
+    logoURI: baseLogo,
+    rpcUrl: "https://sepolia.base.org",
+    explorerUrl: "https://base-sepolia.blockscout.com/",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://base-sepolia.blockscout.com/"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_84532_PROVIDER_URL,
+  },
 ];
 
 export const chainInfoTable: ChainInfoTable = Object.fromEntries(
