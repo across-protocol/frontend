@@ -60,7 +60,11 @@ const handler = async (
     query,
   });
   try {
-    const { QUOTE_TIMESTAMP_BUFFER, QUOTE_TIMESTAMP_PRECISION } = process.env;
+    const {
+      QUOTE_TIMESTAMP_BUFFER,
+      QUOTE_TIMESTAMP_PRECISION,
+      HUB_POOL_CHAIN_ID,
+    } = process.env;
     const quoteTimeBuffer = QUOTE_TIMESTAMP_BUFFER
       ? Number(QUOTE_TIMESTAMP_BUFFER)
       : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
@@ -237,7 +241,7 @@ const handler = async (
           blockTag,
         },
         computedOriginChainId,
-        CHAIN_IDs.MAINNET
+        Number(HUB_POOL_CHAIN_ID)
       ),
       getCachedTokenPrice(l1Token, baseCurrency),
     ]);
