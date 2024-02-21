@@ -31,6 +31,7 @@ import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 // all routes should be pre imported to be able to switch based on chain id
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import GoerliRoutes from "data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
+import SepoliaRoutes from "data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 
 /* Chains and Tokens section */
 export enum ChainId {
@@ -47,7 +48,8 @@ export enum ChainId {
   BASE_GOERLI = CHAIN_IDs.BASE_GOERLI,
   GOERLI = CHAIN_IDs.GOERLI,
   MUMBAI = CHAIN_IDs.MUMBAI,
-  LINEA_GOERLI = CHAIN_IDs.LINEA_GOERLI,
+  SEPOLIA = CHAIN_IDs.SEPOLIA,
+  BASE_SEPOLIA = CHAIN_IDs.BASE_SEPOLIA,
 }
 
 // Maps `ChainId` to an object and inverts the Key/Value
@@ -299,7 +301,7 @@ export type ExternalLPTokenList = Array<
 >;
 
 export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
-  1: [
+  [CHAIN_IDs.MAINNET]: [
     {
       name: "Balancer 50wstETH-50ACX",
       symbol: "50wstETH-50ACX",
@@ -316,7 +318,8 @@ export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
       ],
     },
   ],
-  5: [],
+  [CHAIN_IDs.GOERLI]: [],
+  [CHAIN_IDs.SEPOLIA]: [],
 };
 
 export const bridgedUSDCSymbolsMap = {
@@ -578,6 +581,10 @@ export function getRoutes(chainId: ChainId): RouteConfig {
   if (chainId === ChainId.GOERLI) {
     superstruct.assert(GoerliRoutes, RouteConfigSS);
     return GoerliRoutes;
+  }
+  if (chainId === ChainId.SEPOLIA) {
+    superstruct.assert(SepoliaRoutes, RouteConfigSS);
+    return SepoliaRoutes;
   }
   throw new Error("No routes defined for chainId: " + chainId);
 }
