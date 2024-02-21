@@ -33,7 +33,6 @@ import {
   getDefaultRelayerAddress,
   hasPotentialRouteCollision,
 } from "./_utils";
-import { CHAIN_IDs } from "@across-protocol/constants-v2";
 
 const SuggestedFeesQueryParamsSchema = type({
   amount: parsableBigNumberString(),
@@ -60,11 +59,7 @@ const handler = async (
     query,
   });
   try {
-    const {
-      QUOTE_TIMESTAMP_BUFFER,
-      QUOTE_TIMESTAMP_PRECISION,
-      HUB_POOL_CHAIN_ID,
-    } = process.env;
+    const { QUOTE_TIMESTAMP_BUFFER, QUOTE_TIMESTAMP_PRECISION } = process.env;
     const quoteTimeBuffer = QUOTE_TIMESTAMP_BUFFER
       ? Number(QUOTE_TIMESTAMP_BUFFER)
       : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
@@ -241,7 +236,7 @@ const handler = async (
           blockTag,
         },
         computedOriginChainId,
-        Number(HUB_POOL_CHAIN_ID)
+        HUB_POOL_CHAIN_ID
       ),
       getCachedTokenPrice(l1Token, baseCurrency),
     ]);
