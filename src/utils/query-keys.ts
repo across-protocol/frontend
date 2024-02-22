@@ -144,10 +144,6 @@ export function prelaunchUserDetailsQueryKey(jwt: string) {
   return ["prelaunch-data-discord-details", jwt];
 }
 
-export function splashGetDepositStatsQueryKey() {
-  return ["splash-screen-deposit-stats"];
-}
-
 export function isAirdropClaimedQueryKey(
   account?: string,
   airdropWindowIndex?: number
