@@ -266,6 +266,7 @@ const handler = async (
       message,
       relayer
     );
+    console.log(relayerFeeDetails);
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";
 
