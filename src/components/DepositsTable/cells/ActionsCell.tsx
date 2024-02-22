@@ -43,12 +43,8 @@ export function ActionsCell({ deposit, onClickSpeedUp }: Props) {
   }, [deposit, onClickSpeedUp]);
 
   const speedUp =
-    deposit.status === "pending" ? (
-      isProfitable ? (
-        <ZapIconOnHover id="speed-up-icon" onClick={handleClickSpeedUp} />
-      ) : (
-        <ZapIconPersistent onClick={handleClickSpeedUp} />
-      )
+    !isDelayed && !isProfitable ? (
+      <ZapIconPersistent onClick={handleClickSpeedUp} />
     ) : null;
 
   return (
