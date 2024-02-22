@@ -62,7 +62,7 @@ export async function getDepositByTxHash(
     depositTxReceipt,
     parsedDepositLog,
     depositTimestamp: block.timestamp,
-    isV2: parseFundsDepositedLog.name === "FundsDeposited",
+    isV2: parsedDepositLog.name === "FundsDeposited",
   };
 }
 
