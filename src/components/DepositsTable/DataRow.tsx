@@ -105,10 +105,4 @@ const StyledRow = styled.tr`
   border-width: 0px 1px 1px 1px;
   border-style: solid;
   border-color: ${COLORS["grey-600"]};
-
-  :hover {
-    #speed-up-icon {
-      display: block;
-    }
-  }
 `;
