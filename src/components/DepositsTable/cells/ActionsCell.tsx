@@ -107,14 +107,6 @@ const SlowRelayInfoIconTooltip = styled(InfoIcon)`
   }
 `;
 
-const ZapIconOnHover = styled(ZapIcon)`
-  display: none;
-
-  path {
-    stroke: ${COLORS["grey-400"]};
-  }
-`;
-
 const ZapIconPersistent = styled(ZapIcon)`
   path {
     stroke: ${COLORS.yellow};
