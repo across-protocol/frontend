@@ -20,10 +20,6 @@ const sidebarNavigationLinks = [
     pathName: "/transactions",
     title: "Transactions",
   },
-  {
-    pathName: "/airdrop",
-    title: "Airdrop",
-  },
 ];
 
 const sidebarAboutLinks = [
