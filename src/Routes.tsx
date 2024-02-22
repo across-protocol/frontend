@@ -1,5 +1,11 @@
 import { useState, useEffect, Suspense } from "react";
-import { Switch, Route, useLocation, useHistory } from "react-router-dom";
+import {
+  Switch,
+  Route,
+  useLocation,
+  useHistory,
+  Redirect,
+} from "react-router-dom";
 import { Header, SuperHeader, Banner, Sidebar } from "components";
 import { useConnection, useError } from "hooks";
 import styled from "@emotion/styled";
@@ -40,9 +46,6 @@ const Rewards = lazyWithRetry(
 );
 const Send = lazyWithRetry(
   () => import(/* webpackChunkName: "Send" */ "./views/Bridge")
-);
-const Splash = lazyWithRetry(
-  () => import(/* webpackChunkName: "Splash" */ "./views/Splash")
 );
 const Transactions = lazyWithRetry(
   () => import(/* webpackChunkName: "Transactions" */ "./views/Transactions")
@@ -172,7 +175,7 @@ const Routes: React.FC = () => {
           />
           <Route exact path="/bridge" component={Send} />
           <Route path="/bridge/:depositTxHash" component={DepositStatus} />
-          <Route exact path="/" component={Splash} />
+          <Redirect exact path="/" to="/bridge" />
         </Switch>
       </Suspense>
       <Toast position="top-right" />
