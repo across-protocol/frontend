@@ -62,9 +62,9 @@ function PendingStatusCell({ width, deposit }: Props) {
           title="Insufficient relayer funds"
           body={
             <Text size="sm" color="light-300">
-              Relayer funds are insufficient to complete this trasfer
+              Relayer funds are insufficient to complete this transfer
               immediately. The transfer will be settled directly by Across and
-              may may take up to 3 hours. No relayer fee will be charged on this
+              may take up to 3 hours. No relayer fee will be charged on this
               transfer.
             </Text>
           }

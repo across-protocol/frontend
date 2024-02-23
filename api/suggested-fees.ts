@@ -209,13 +209,7 @@ const handler = async (
 
     const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
-    const [
-      currentUt,
-      nextUt,
-      destinationChainRateModel,
-      hubChainRateModel,
-      tokenPrice,
-    ] = await Promise.all([
+    const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
       hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
         blockTag,
       }),
@@ -230,31 +224,13 @@ const handler = async (
         computedOriginChainId,
         destinationChainId
       ),
-      configStoreClient.getRateModel(
-        l1Token,
-        {
-          blockTag,
-        },
-        computedOriginChainId,
-        HUB_POOL_CHAIN_ID
-      ),
       getCachedTokenPrice(l1Token, baseCurrency),
     ]);
-
-    // @dev: Relayers usually take repayment on mainnet or destination chain, so use the higher of the two LP fee %'s
-    // to avoid the relayer considering this deposit unprofitable.
-    const destinationChainLpFeePct =
-      sdk.lpFeeCalculator.calculateRealizedLpFeePct(
-        destinationChainRateModel,
-        currentUt,
-        nextUt
-      );
-    const hubChainLpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
-      hubChainRateModel,
+    const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
+      rateModel,
       currentUt,
       nextUt
     );
-    const lpFeePct = sdk.utils.max(destinationChainLpFeePct, hubChainLpFeePct);
     const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,

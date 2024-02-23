@@ -43,12 +43,8 @@ export function ActionsCell({ deposit, onClickSpeedUp }: Props) {
   }, [deposit, onClickSpeedUp]);
 
   const speedUp =
-    deposit.status === "pending" ? (
-      isProfitable ? (
-        <ZapIconOnHover id="speed-up-icon" onClick={handleClickSpeedUp} />
-      ) : (
-        <ZapIconPersistent onClick={handleClickSpeedUp} />
-      )
+    !isDelayed && !isProfitable ? (
+      <ZapIconPersistent onClick={handleClickSpeedUp} />
     ) : null;
 
   return (
@@ -108,14 +104,6 @@ const SlowRelayInfoIconTooltip = styled(InfoIcon)`
   height: 16px;
   path {
     stroke: ${COLORS.yellow};
-  }
-`;
-
-const ZapIconOnHover = styled(ZapIcon)`
-  display: none;
-
-  path {
-    stroke: ${COLORS["grey-400"]};
   }
 `;
 
