@@ -226,11 +226,12 @@ const handler = async (
       ),
       getCachedTokenPrice(l1Token, baseCurrency),
     ]);
-    const realizedLPFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
+    const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
       nextUt
     );
+    const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
     const relayerFeeDetails = await getRelayerFeeDetails(
       l1Token,
       amount,
@@ -247,18 +248,45 @@ const handler = async (
     if (!skipAmountLimitEnabled && relayerFeeDetails.isAmountTooLow)
       throw new InputError("Sent amount is too low relative to fees");
 
+    // Across V3's new `deposit` function requires now a total fee that includes the LP fee
+    const totalRelayFee = ethers.BigNumber.from(
+      relayerFeeDetails.relayFeeTotal
+    ).add(lpFeeTotal);
+    const totalRelayFeePct = ethers.BigNumber.from(
+      relayerFeeDetails.relayFeePercent
+    ).add(lpFeePct);
+
     const responseJson = {
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
       relayGasFeeTotal: relayerFeeDetails.gasFeeTotal,
-      relayFeePct: relayerFeeDetails.relayFeePercent,
-      relayFeeTotal: relayerFeeDetails.relayFeeTotal,
-      lpFeePct: realizedLPFeePct.toString(),
+      relayFeePct: totalRelayFeePct.toString(), // capitalFeePct + gasFeePct + lpFeePct
+      relayFeeTotal: totalRelayFee.toString(), // capitalFeeTotal + gasFeeTotal + lpFeeTotal
+      lpFeePct: "0", // Note: lpFeePct is now included in relayFeePct. We set it to 0 here for backwards compatibility.
       timestamp: parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: blockTag.toString(),
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
+      // Note: v3's new fee structure. Below are the correct values for the new fee structure. The above `*Pct` and `*Total`
+      // values are for backwards compatibility which will be removed in the future.
+      totalRelayFee: {
+        // capitalFee + gasFee + lpFee
+        pct: totalRelayFeePct.toString(),
+        total: totalRelayFee.toString(),
+      },
+      relayerCapitalFee: {
+        pct: relayerFeeDetails.capitalFeePercent,
+        total: relayerFeeDetails.capitalFeeTotal,
+      },
+      relayerGasFee: {
+        pct: relayerFeeDetails.gasFeePercent,
+        total: relayerFeeDetails.gasFeeTotal,
+      },
+      lpFee: {
+        pct: lpFeePct.toString(),
+        total: lpFeeTotal.toString(),
+      },
     };
 
     logger.debug({

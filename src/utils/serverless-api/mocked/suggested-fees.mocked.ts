@@ -22,7 +22,7 @@ export async function suggestedFeesMockedApiCall(
   const decimals = token?.decimals ?? 18;
 
   return {
-    relayerFee: {
+    totalRelayFee: {
       pct: BigNumber.from("1"),
       total: parseUnits("0.5", decimals),
     },

@@ -1,4 +1,6 @@
+import { LogDescription } from "ethers/lib/utils";
 import { getConfig } from "./config";
+import { isDefined } from "./defined";
 import { getProvider } from "./providers";
 import { SpokePool__factory } from "./typechain";
 
@@ -17,7 +19,7 @@ export function parseFundsDepositedLog(
     topics: string[];
     data: string;
   }>
-) {
+): LogDescription | undefined {
   const spokePoolIface = SpokePool__factory.createInterface();
   const parsedLogs = logs.flatMap((log) => {
     try {
@@ -26,7 +28,10 @@ export function parseFundsDepositedLog(
       return [];
     }
   });
-  return parsedLogs.find((log) => log.name === "FundsDeposited");
+  // Return either the V2 or V3 log if either is present
+  return parsedLogs.find(
+    (log) => log.name === "FundsDeposited" || log.name === "V3FundsDeposited"
+  );
 }
 
 export async function getDepositByTxHash(
@@ -57,6 +62,7 @@ export async function getDepositByTxHash(
     depositTxReceipt,
     parsedDepositLog,
     depositTimestamp: block.timestamp,
+    isV2: parsedDepositLog.name === "FundsDeposited",
   };
 }
 
@@ -72,12 +78,13 @@ export async function getFillByDepositTxHash(
     );
   }
 
-  const { parsedDepositLog } = depositByTxHash;
+  const { parsedDepositLog, isV2 } = depositByTxHash;
 
   const depositId = Number(parsedDepositLog.args.depositId);
   const depositor = String(parsedDepositLog.args.depositor);
   const destinationSpokePool = config.getSpokePool(toChainId);
-  const filledRelayEvents = await destinationSpokePool.queryFilter(
+
+  const v2FilledRelayEvents = await destinationSpokePool.queryFilter(
     destinationSpokePool.filters.FilledRelay(
       undefined,
       undefined,
@@ -94,17 +101,37 @@ export async function getFillByDepositTxHash(
     )
   );
 
-  if (filledRelayEvents.length === 0) {
+  const v3FilledRelayEvents = await destinationSpokePool.queryFilter(
+    destinationSpokePool.filters.FilledV3Relay(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      fromChainId,
+      depositId
+    )
+  );
+
+  if (
+    (isV2 && v2FilledRelayEvents.length === 0) ||
+    (!isV2 && v3FilledRelayEvents.length === 0)
+  ) {
     throw new Error(
       `Could not find FilledRelay events for depositId ${depositId} on chain ${toChainId}`
     );
   }
+  const filledRelayEvent = isV2
+    ? // On V2 we need to look for fully filled relay events
+      v2FilledRelayEvents.find((event) =>
+        event.args.amount.eq(event.args.totalFilledAmount)
+      )
+    : // If we make it to this point, we can be sure that there is exactly one filled relay event
+      // that corresponds to the deposit we are looking for.
+      // The (depositId, fromChainId) tuple is unique for V3 filled relay events.
+      v3FilledRelayEvents[0];
 
-  const filledRelayEvent = filledRelayEvents.find((event) =>
-    event.args.amount.eq(event.args.totalFilledAmount)
-  );
-
-  if (!filledRelayEvent) {
+  if (!isDefined(filledRelayEvent)) {
     throw new Error(
       `Could not find FilledRelay event that fully filed depositId ${depositId} on chain ${toChainId}`
     );
@@ -113,7 +140,9 @@ export async function getFillByDepositTxHash(
   const fillTxBlock = await filledRelayEvent.getBlock();
 
   return {
-    fillTxHashes: filledRelayEvents.map((event) => event.transactionHash),
+    fillTxHashes: (isV2 ? v2FilledRelayEvents : v3FilledRelayEvents).map(
+      (event) => event.transactionHash
+    ),
     fillTxTimestamp: fillTxBlock.timestamp,
     depositByTxHash,
   };
