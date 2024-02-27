@@ -26,13 +26,15 @@ export function useIsProfitableAndDelayed(deposit: Deposit) {
     deposit.destinationChainId
   );
 
-  const isProfitable = BigNumber.from(
-    deposit.suggestedRelayerFeePct || fallbackSuggestedRelayerFeePct
-  ).lte(
-    BigNumber.from(deposit.depositRelayerFeePct || 0)
-      .mul(utils.parseEther(String(suggestedFeesDeviationBufferMultiplier)))
-      .div(fixedPointAdjustment)
-  );
+  const isProfitable =
+    deposit.status === "pending" &&
+    BigNumber.from(
+      deposit.suggestedRelayerFeePct || fallbackSuggestedRelayerFeePct
+    ).lte(
+      BigNumber.from(deposit.depositRelayerFeePct || 0)
+        .mul(utils.parseEther(String(suggestedFeesDeviationBufferMultiplier)))
+        .div(fixedPointAdjustment)
+    );
   const isDelayed =
     deposit.status === "pending" &&
     Math.abs(
