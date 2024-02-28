@@ -539,7 +539,10 @@ export const getRelayerFeeDetails = async (
   message?: string,
   relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const tokenAddresses = sdk.utils.getL2TokenAddresses(l1Token);
+  const tokenAddresses = sdk.utils.getL2TokenAddresses(
+    l1Token,
+    HUB_POOL_CHAIN_ID
+  );
   if (!tokenAddresses) {
     throw new InputError(
       `Could not resolve token address for token ${l1Token}`
