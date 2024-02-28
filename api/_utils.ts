@@ -35,6 +35,7 @@ import {
   relayerFeeCapitalCostConfig,
   BLOCK_TAG_LAG,
   defaultRelayerAddressOverride,
+  defaultRelayerAddressOverridePerToken,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
 
@@ -1263,11 +1264,15 @@ export function getDefaultRelayerAddress(
   destinationChainId: number
 ) {
   // All symbols are uppercase in this record.
-  const result = defaultRelayerAddressOverride[symbol.toUpperCase()];
-  if (result?.destinationChains.includes(destinationChainId)) {
-    return result.relayer;
+  const overrideForToken =
+    defaultRelayerAddressOverridePerToken[symbol.toUpperCase()];
+  if (overrideForToken?.destinationChains.includes(destinationChainId)) {
+    return overrideForToken.relayer;
   } else {
-    return sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+    return (
+      defaultRelayerAddressOverride ||
+      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS
+    );
   }
 }
 
