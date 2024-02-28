@@ -378,6 +378,50 @@ const enabledRoutes = {
       },
     ],
   },
+  [CHAIN_IDs.SEPOLIA]: {
+    hubPoolChain: CHAIN_IDs.SEPOLIA,
+    hubPoolAddress: getDeployedAddress("HubPool", CHAIN_IDs.SEPOLIA),
+    hubPoolWethAddress: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.SEPOLIA],
+    acrossConfigStoreAddress: getDeployedAddress(
+      "AcrossConfigStore",
+      CHAIN_IDs.SEPOLIA
+    ),
+    acrossTokenAddress: "0x0000000000000000000000000000000000000000",
+    acceleratingDistributorAddress:
+      "0x0000000000000000000000000000000000000000",
+    merkleDistributorAddress: "0x0000000000000000000000000000000000000000",
+    claimAndStakeAddress: "0x0000000000000000000000000000000000000000",
+    pools: [],
+    spokePoolVerifier: {
+      address: "0x0000000000000000000000000000000000000000",
+      enabledChains: [],
+    },
+    routes: [
+      {
+        fromChain: CHAIN_IDs.SEPOLIA,
+        fromSpokeAddress: getDeployedAddress("SpokePool", CHAIN_IDs.SEPOLIA),
+        toChains: [
+          {
+            chainId: CHAIN_IDs.BASE_SEPOLIA,
+            tokens: ["WETH"],
+          },
+        ],
+      },
+      {
+        fromChain: CHAIN_IDs.BASE_SEPOLIA,
+        fromSpokeAddress: getDeployedAddress(
+          "SpokePool",
+          CHAIN_IDs.BASE_SEPOLIA
+        ),
+        toChains: [
+          {
+            chainId: CHAIN_IDs.SEPOLIA,
+            tokens: ["WETH"],
+          },
+        ],
+      },
+    ],
+  },
 } as const;
 
 function generateRoutes(hubPoolChainId = 1) {
