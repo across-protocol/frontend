@@ -60,9 +60,12 @@ const availableSymbols = [
 
 const calculateUsdBalances = async (account: string) => {
   const coingeckoPrices = await Promise.all(
-    availableSymbols.map((symbol) =>
-      getApiEndpoint().coingecko(getToken(symbol).mainnetAddress!, "usd")
-    )
+    availableSymbols.flatMap((symbol) => {
+      const mainnetAddress = getToken(symbol).mainnetAddress;
+      return mainnetAddress
+        ? getApiEndpoint().coingecko(mainnetAddress, "usd")
+        : [];
+    })
   );
   const usdPrices: Record<string, BigNumber> = coingeckoPrices.reduce(
     (acc, { price }, i) => {
