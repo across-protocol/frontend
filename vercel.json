@@ -1,5 +1,12 @@
 {
   "devCommand": "yarn dev",
+  "redirects": [
+    {
+      "source": "/about",
+      "destination": "https://across.to",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
