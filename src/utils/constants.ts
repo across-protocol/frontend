@@ -22,6 +22,7 @@ import acxLogo from "assets/across.svg";
 import balLogo from "assets/bal.svg";
 import usdtLogo from "assets/usdt-logo.svg";
 import snxLogo from "assets/snx-logo.svg";
+import espressoLogo from "assets/espresso-logo.svg";
 import pooltogetherLogo from "assets/pooltogether-logo.svg";
 import unknownLogo from "assets/icons/question-24.svg";
 import ACXCloudBackground from "assets/bg-banners/cloud-staking.svg";
@@ -48,6 +49,9 @@ export enum ChainId {
   MUMBAI = CHAIN_IDs.MUMBAI,
   SEPOLIA = CHAIN_IDs.SEPOLIA,
   BASE_SEPOLIA = CHAIN_IDs.BASE_SEPOLIA,
+
+  ESPRESSO_1 = CHAIN_IDs.ESPRESSO_DEMO_1,
+  ESPRESSO_2 = CHAIN_IDs.ESPRESSO_DEMO_2,
 }
 
 // Maps `ChainId` to an object and inverts the Key/Value
@@ -90,9 +94,7 @@ export type ChainInfoTable = Record<number, ChainInfo>;
 
 export const defaultBlockPollingInterval =
   Number(process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL_S || 15) * 1000;
-export const hubPoolChainId = Number(
-  process.env.REACT_APP_HUBPOOL_CHAINID || 1
-);
+export const hubPoolChainId = Number(11155111);
 
 const defaultConstructExplorerLink =
   (explorerUrl: string) => (txHash: string) =>
@@ -255,6 +257,34 @@ export const chainInfoList: ChainInfoList = [
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
     customRpcUrl: process.env.REACT_APP_CHAIN_11155111_PROVIDER_URL,
+  },
+  {
+    name: "Espresso Rollup A",
+    fullName: "Espresso Rollup A",
+    chainId: ChainId.ESPRESSO_1,
+    logoURI: espressoLogo,
+    rpcUrl: "https://arb-1.across.aws.espresso.network",
+    explorerUrl: "https://be.across.aws.espresso.network/",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://be.across.aws.espresso.network/"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: "https://be.across.aws.espresso.network/",
+  },
+  {
+    name: "Espresso Rollup B",
+    fullName: "Espresso Rollup B",
+    chainId: ChainId.ESPRESSO_2,
+    logoURI: espressoLogo,
+    rpcUrl: "https://arb-2.across.aws.espresso.network",
+    explorerUrl: "https://be.across.aws.espresso.network/",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://be.across.aws.espresso.network/"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: "https://be.across.aws.espresso.network/",
   },
   {
     name: "Base Sepolia",

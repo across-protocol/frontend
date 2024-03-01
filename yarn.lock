@@ -16,6 +16,16 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
+"@across-protocol/constants-v2@1.0.11-beta.espresso.1":
+  version "1.0.11-beta.espresso.1"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.11-beta.espresso.1.tgz#fcc7a1749b53a1960278c023952fc2dc97bfb7e6"
+  integrity sha512-V2ECwWFEms7wZm2QYFCYZLxc64RUfkDxphuelR+W4vhCYWINS71nMPg53ydLrEpBCKcBiehgXVn+cuJ7MvNL5w==
+
+"@across-protocol/constants-v2@1.0.11-beta.espresso.2":
+  version "1.0.11-beta.espresso.2"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.11-beta.espresso.2.tgz#0d7f3a8e91b82d660a05495c6ffe7c1ff3001087"
+  integrity sha512-vuzss5/muvtvRn19Zla3hwhIKSs/ciEGeQ6pawP2ioU0zXopSkEzTAQrA59GPAiDpizZJRiyooDfkIk97TN6Sw==
+
 "@across-protocol/constants-v2@^1.0.11":
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.11.tgz#58d34b5cb50351d097f2ca43c5a30b5908faed7c"
@@ -27,6 +37,26 @@
   integrity sha512-/u6VB5QZwi9i7EDRBYNGMne+/ZXTI1XbHzEEI4+Z1Bb6xKvKjTsJJsStz7wwBplGAWCkmRLVxCbJtfN2o0iUSw==
   dependencies:
     "@across-protocol/constants-v2" "^1.0.11"
+    "@defi-wonderland/smock" "^2.3.4"
+    "@eth-optimism/contracts" "^0.5.40"
+    "@ethersproject/abstract-provider" "5.7.0"
+    "@ethersproject/abstract-signer" "5.7.0"
+    "@ethersproject/bignumber" "5.7.0"
+    "@openzeppelin/contracts" "4.9.3"
+    "@openzeppelin/contracts-upgradeable" "4.9.3"
+    "@scroll-tech/contracts" "^0.1.0"
+    "@uma/common" "^2.34.0"
+    "@uma/contracts-node" "^0.4.17"
+    "@uma/core" "^2.56.0"
+    axios "^1.6.2"
+    zksync-web3 "^0.14.3"
+
+"@across-protocol/contracts-v2@2.5.0-beta.espresso.4":
+  version "2.5.0-beta.espresso.4"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.5.0-beta.espresso.4.tgz#55c985c12aae886d3ad7282c63962fc0703ec8e6"
+  integrity sha512-qS9zd5SJ1tyapJsoOxNkNSBUzS59v/D6dwmvj6jD9mg3BdmkeO15oYTtAybp4PYBAP68m7YipbOUOVf3Ga0MaA==
+  dependencies:
+    "@across-protocol/constants-v2" "1.0.11-beta.espresso.1"
     "@defi-wonderland/smock" "^2.3.4"
     "@eth-optimism/contracts" "^0.5.40"
     "@ethersproject/abstract-provider" "5.7.0"
