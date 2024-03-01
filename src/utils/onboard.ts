@@ -3,6 +3,7 @@ import injectedModule from "@web3-onboard/injected-wallets";
 import walletConnectModule from "@web3-onboard/walletconnect";
 import gnosisModule from "@web3-onboard/gnosis";
 import coinbaseModule from "@web3-onboard/coinbase";
+import bitgetModule from "@web3-onboard/bitget";
 
 import {
   onboardApiKey,
@@ -19,11 +20,12 @@ const walletConnect = walletConnectModule({
   version: 2,
 });
 const coinbase = coinbaseModule();
+const bitget = bitgetModule();
 
 export function onboardInit() {
   return init({
     apiKey: onboardApiKey,
-    wallets: [injected, coinbase, walletConnect, gnosis],
+    wallets: [injected, coinbase, walletConnect, gnosis, bitget],
 
     chains: chainInfoList.map((chainInfo) => ({
       id: chainInfo.chainId,
