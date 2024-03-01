@@ -33,6 +33,7 @@ export default defineConfig({
   ],
   optimizeDeps: {
     disabled: false,
+    exclude: ["@web3-onboard/bitget"],
     include: [
       "@web3-onboard/common",
       "@walletconnect/ethereum-provider",
