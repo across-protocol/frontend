@@ -22,8 +22,6 @@ import { VoidHandler } from "utils/types";
 
 import { AmountInputError, getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
-import ReferralCTA from "./ReferralCTA";
-import { useRewardToken } from "hooks/useRewardToken";
 
 type BridgeFormProps = {
   selectedRoute: Route;
@@ -78,7 +76,6 @@ const BridgeForm = ({
   isBridgeDisabled,
   validationError,
 }: BridgeFormProps) => {
-  const { programName } = useRewardToken(selectedRoute.toChain);
   return (
     <>
       <CardWrapper>
@@ -137,7 +134,6 @@ const BridgeForm = ({
         </RowWrapper>
       </CardWrapper>
       <CardWrapper>
-        <ReferralCTA program={programName} />
         <EstimatedTable
           fromChainId={selectedRoute.fromChain}
           toChainId={selectedRoute.toChain}

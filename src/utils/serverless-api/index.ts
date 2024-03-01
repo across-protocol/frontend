@@ -8,7 +8,7 @@ import { ServerlessAPIEndpoints } from "./types";
  * @returns A set of mocked or production-ready functions depending on the `REACT_APP_MOCK_SERVERLESS` env variable.
  */
 export default function getApiEndpoint(): ServerlessAPIEndpoints {
-  if (mockServerlessAPI) {
+  if (mockServerlessAPI || true) {
     return mockedEndpoints;
   } else {
     return prodEndpoints;

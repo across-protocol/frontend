@@ -7,7 +7,7 @@ import { ReactComponent as CheckStarDepositingIcon } from "assets/check-star-rin
 import { ReactComponent as CheckStarFillingIcon } from "assets/check-star-ring-opaque-filling.svg";
 import { ReactComponent as CheckStarFilledIcon } from "assets/check-star-ring-opaque-filled.svg";
 import { ReactComponent as EthereumGrayscaleLogo } from "assets/grayscale-logos/eth.svg";
-import { ReactComponent as EspressoLogo } from "assets/espress-logo.svg";
+import { ReactComponent as EspressoLogo } from "assets/espresso-logo.svg";
 import { ReactComponent as PolygonGrayscaleLogo } from "assets/grayscale-logos/polygon.svg";
 import { ReactComponent as ArbitrumGrayscaleLogo } from "assets/grayscale-logos/arbitrum.svg";
 import { ReactComponent as OptimismGrayscaleLogo } from "assets/grayscale-logos/optimism.svg";

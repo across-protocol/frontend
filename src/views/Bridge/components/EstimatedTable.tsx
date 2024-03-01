@@ -112,25 +112,6 @@ const EstimatedTable = ({
 
   return (
     <Wrapper>
-      <Row stackOnMobile>
-        <Text size="md" color="grey-400">
-          {isRewardAcx
-            ? "Across Referral Rewards"
-            : `${rewardDisplaySymbol} Rewards`}
-        </Text>
-        <ReferralRewardWrapper
-          isACX={isRewardAcx}
-          isTransparent={!hasDepositReferralReward}
-        >
-          <PriceFee
-            token={rewardToken}
-            tokenFee={depositReferralReward}
-            baseCurrencyFee={referralRewardAsBaseCurrency}
-            hideSymbolOnEmpty={false}
-            tokenIconFirstOnMobile
-          />
-        </ReferralRewardWrapper>
-      </Row>
       <Row>
         <Text size="md" color="grey-400">
           Time to{" "}
@@ -143,7 +124,7 @@ const EstimatedTable = ({
         </Text>
       </Row>
       <Divider />
-      <ClickableRow onClick={() => setIsDetailedFeesAvailable((v) => !v)}>
+      <ClickableRow onClick={() => setIsDetailedFeesAvailable((v) => false)}>
         <ToolTipWrapper>
           <ArrowIcon />
           <Text size="md" color="grey-400">
@@ -385,30 +366,6 @@ const InfoIconWrapper = styled.div`
   align-items: center;
   height: 16px;
   width: 16px;
-`;
-
-const ReferralRewardWrapper = styled.div<{
-  isACX: boolean;
-  isTransparent?: boolean;
-}>`
-  //Layout
-  display: flex;
-  padding: 6px 12px;
-  align-items: center;
-  gap: 4px;
-
-  // Style
-  border-radius: 22px;
-  border: 1px solid ${({ isACX }) => COLORS[isACX ? "aqua-15" : "op-red-15"]};
-  background: ${({ isACX }) => COLORS[isACX ? "aqua-5" : "op-red-5"]};
-
-  // Opacity
-  opacity: ${({ isTransparent = false }) => (isTransparent ? 0.5 : 1)};
-
-  // Mobile
-  @media ${QUERIESV2.xs.andDown} {
-    width: 100%;
-  }
 `;
 
 const BaseCurrencyWrapper = styled.div<{ invertOnMobile: boolean }>`

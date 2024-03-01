@@ -474,6 +474,26 @@ export const queries: Record<
       getLogger(),
       getGasMarkup(CHAIN_IDs.BASE_SEPOLIA)
     ),
+  [CHAIN_IDs.ESPRESSO_DEMO_1]: () =>
+    new sdk.relayFeeCalculator.Espresso1SepoliaQueries(
+      getProvider(CHAIN_IDs.ESPRESSO_DEMO_1),
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDs.ESPRESSO_DEMO_1)
+    ),
+  [CHAIN_IDs.ESPRESSO_DEMO_2]: () =>
+    new sdk.relayFeeCalculator.Espresso2SepoliaQueries(
+      getProvider(CHAIN_IDs.ESPRESSO_DEMO_2),
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDs.ESPRESSO_DEMO_2)
+    ),
 };
 
 /**
@@ -540,10 +560,7 @@ export const getRelayerFeeDetails = async (
   message?: string,
   relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const tokenAddresses = sdk.utils.getL2TokenAddresses(
-    l1Token,
-    HUB_POOL_CHAIN_ID
-  );
+  const tokenAddresses = sdk.utils.getL2TokenAddresses(l1Token);
   if (!tokenAddresses) {
     throw new InputError(
       `Could not resolve token address for token ${l1Token}`
@@ -609,6 +626,16 @@ export const getProvider = (
   _chainId: number
 ): providers.StaticJsonRpcProvider => {
   const chainId = _chainId.toString();
+  if (_chainId === 10001) {
+    return new providers.JsonRpcProvider(
+      "https://arb-1.across.aws.espresso.network"
+    );
+  }
+  if (_chainId === 10002) {
+    return new providers.JsonRpcProvider(
+      "https://arb-2.across.aws.espresso.network"
+    );
+  }
   if (!providerCache[chainId]) {
     const override = overrideProvider(chainId);
     if (override) {

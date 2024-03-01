@@ -24,19 +24,19 @@ export async function suggestedFeesMockedApiCall(
   return {
     totalRelayFee: {
       pct: BigNumber.from("1"),
-      total: parseUnits("0.5", decimals),
+      total: parseUnits("0.01", decimals),
     },
     relayerCapitalFee: {
       pct: BigNumber.from("1"),
-      total: parseUnits("0.5", decimals),
+      total: parseUnits("0.01", decimals),
     },
     relayerGasFee: {
       pct: BigNumber.from("1"),
-      total: parseUnits("0.5", decimals),
+      total: parseUnits("0.01", decimals),
     },
     lpFee: {
       pct: BigNumber.from("1"),
-      total: parseUnits("0.5", decimals),
+      total: parseUnits("0.01", decimals),
     },
     isAmountTooLow: false,
     quoteBlock: BigNumber.from("1"),

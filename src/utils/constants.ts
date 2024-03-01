@@ -270,7 +270,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: "https://be.across.aws.espresso.network/",
+    customRpcUrl: "https://arb-1.across.aws.espresso.network",
   },
   {
     name: "Espresso Rollup B",
@@ -284,7 +284,7 @@ export const chainInfoList: ChainInfoList = [
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: "https://be.across.aws.espresso.network/",
+    customRpcUrl: "https://arb-2.across.aws.espresso.network",
   },
   {
     name: "Base Sepolia",
@@ -394,7 +394,9 @@ export const tokenList = [
         logoURI,
         symbol,
         displaySymbol: symbol,
-        mainnetAddress: usdcTokenInfo.addresses[hubPoolChainId],
+        mainnetAddress:
+          usdcTokenInfo.addresses[hubPoolChainId] ??
+          usdcTokenInfo.addresses[CHAIN_IDs.SEPOLIA],
       };
     }
 
@@ -408,7 +410,9 @@ export const tokenList = [
     return {
       ...tokenInfo,
       logoURI,
-      mainnetAddress: tokenInfo.addresses[hubPoolChainId],
+      mainnetAddress:
+        tokenInfo.addresses[hubPoolChainId] ??
+        tokenInfo.addresses[CHAIN_IDs.SEPOLIA],
     };
   }),
   ...externalLPsForStaking[hubPoolChainId],
