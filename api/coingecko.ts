@@ -145,6 +145,8 @@ const handler = async (
 
     redirectLookupAddresses["0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"] =
       "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+    redirectLookupAddresses["0x28077B47Cd03326De7838926A63699849DD4fa87"] =
+      "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
     // Perform a 1-deep lookup to see if the provided l1Token is
     // to be "redirected" to another provided token contract address
@@ -171,6 +173,10 @@ const handler = async (
         price,
       ])
     );
+
+    fixedTokenPrices["0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"] = 3410.46;
+    fixedTokenPrices["0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"] = 3410.46;
+    fixedTokenPrices["0x28077B47Cd03326De7838926A63699849DD4fa87"] = 3410.46;
 
     const balancerV2PoolTokens =
       BALANCER_V2_TOKENS !== undefined

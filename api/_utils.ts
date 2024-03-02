@@ -560,7 +560,7 @@ export const getRelayerFeeDetails = async (
   message?: string,
   relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const tokenAddresses = sdk.utils.getL2TokenAddresses(l1Token);
+  const tokenAddresses = sdk.utils.getL2TokenAddresses(l1Token, 11155111);
   if (!tokenAddresses) {
     throw new InputError(
       `Could not resolve token address for token ${l1Token}`
@@ -1310,20 +1310,10 @@ export async function getBalancerV2TokenPrice(
  * @returns A valid EOA address
  */
 export function getDefaultRelayerAddress(
-  symbol: string,
-  destinationChainId: number
+  _symbol: string,
+  _destinationChainId: number
 ) {
-  // All symbols are uppercase in this record.
-  const overrideForToken =
-    defaultRelayerAddressOverridePerToken[symbol.toUpperCase()];
-  if (overrideForToken?.destinationChains.includes(destinationChainId)) {
-    return overrideForToken.relayer;
-  } else {
-    return (
-      defaultRelayerAddressOverride ||
-      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS
-    );
-  }
+  return defaultRelayerAddressOverride;
 }
 
 /**

@@ -70,10 +70,10 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@0.22.6-beta.espresso.1":
-  version "0.22.6-beta.espresso.1"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.22.6-beta.espresso.1.tgz#ce34d947274b51cc71c307187290f1e2255b7108"
-  integrity sha512-DRL95o/V6/uBQpQb5xWM8bBtyZ18YoVr1PAMaw/jTtOmYCDGzw0SfagQeud6wGvqk8PArNQqzWiXSe3ZqrO+Gw==
+"@across-protocol/sdk-v2@0.22.7-beta.espresso.1":
+  version "0.22.7-beta.espresso.1"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.22.7-beta.espresso.1.tgz#52cf66e54dc44d5ea4526a8c946142448e491a03"
+  integrity sha512-Hmfj7NHHyUWavIE4FfTo/kopsSxKlOQS4wi4rU/oAko39tYDDA5AE4JQZgo1dZCWiTIhD2gAIEP9677xp8di7A==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
     "@across-protocol/constants-v2" "1.0.11-beta.espresso.1"
