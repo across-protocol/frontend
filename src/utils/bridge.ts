@@ -192,6 +192,9 @@ export async function sendAcrossDeposit(
   // If the spoke pool verifier is enabled, use it for native transfers.
   const shouldUseSpokePoolVerifier = Boolean(spokePoolVerifier) && isNative;
 
+  console.log(fromChain, "fromChain");
+  console.log(spokePool.address, "spokePool");
+
   if (shouldUseSpokePoolVerifier) {
     const spokePoolVerifierCode = await provider.getCode(
       spokePoolVerifier!.address
@@ -220,6 +223,8 @@ export async function sendAcrossDeposit(
     maxCount,
     { value },
   ] as const;
+
+  console.log(commonArgs, "commonArgs");
 
   const tx =
     shouldUseSpokePoolVerifier && spokePoolVerifier

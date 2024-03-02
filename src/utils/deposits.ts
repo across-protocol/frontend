@@ -50,6 +50,9 @@ export async function getDepositByTxHash(
     );
   }
 
+  console.log(depositTxReceipt);
+  console.log(await fromProvider.getTransaction(depositTxHash));
+
   const parsedDepositLog = parseFundsDepositedLog(depositTxReceipt.logs);
 
   if (!parsedDepositLog) {

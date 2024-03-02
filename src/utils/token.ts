@@ -26,6 +26,7 @@ export async function getBalance(
   tokenAddress: string,
   blockNumber: number | "latest" = "latest"
 ): Promise<ethers.BigNumber> {
+  console.log(tokenAddress, account, blockNumber, chainId);
   const provider = getProvider(chainId);
   const contract = ERC20__factory.connect(tokenAddress, provider);
   const balance = await contract.balanceOf(account, { blockTag: blockNumber });

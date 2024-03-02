@@ -1092,7 +1092,7 @@ export async function fetchStakingPool(
     : (await hubPool.pooledTokens(poolUnderlyingTokenAddress)).lpToken;
 
   const [acrossTokenAddress, tokenUSDExchangeRate] = await Promise.all([
-    acceleratingDistributor.rewardToken(),
+    sdk.utils.AddressZero,
     getCachedTokenPrice(poolUnderlyingTokenAddress, "usd"),
   ]);
   const acxPriceInUSD = await getCachedTokenPrice(acrossTokenAddress, "usd");

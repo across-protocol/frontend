@@ -8,9 +8,7 @@ import { getReceiveTokenSymbol } from "views/Bridge/utils";
 import { getToken, COLORS } from "utils";
 import { useIsContractAddress } from "hooks/useIsContractAddress";
 
-import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
 import { FromBridgePagePayload } from "../types";
-import ReferralCTA from "views/Bridge/components/ReferralCTA";
 import { useRewardToken } from "hooks/useRewardToken";
 
 type Props = {
@@ -53,17 +51,7 @@ export function DepositStatusLowerCard({
 
   return (
     <>
-      <EarnByLpAndStakingCard
-        l1TokenAddress={tokenInfo.mainnetAddress!}
-        bridgeTokenSymbol={bridgeTokenSymbol}
-      />
-      <ReferralCTA program={programName} />
-      {fromBridgePagePayload && (
-        <>
-          <Divider />
-          {FeesTable}
-        </>
-      )}
+      {fromBridgePagePayload && <>{FeesTable}</>}
       <Divider />
       <Button onClick={() => history.push("/bridge")}>
         Initiate new transaction

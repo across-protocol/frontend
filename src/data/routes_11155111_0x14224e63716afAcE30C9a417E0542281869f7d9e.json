@@ -29,8 +29,8 @@
     {
       "fromChain": 10001,
       "toChain": 10002,
-      "fromTokenAddress": "0xeF684C38F94F48775959ECf2012D7E864ffb9dd4",
-      "fromSpokeAddress": "0xeF684C38F94F48775959ECf2012D7E864ffb9dd4",
+      "fromTokenAddress": "0x28077B47Cd03326De7838926A63699849DD4fa87",
+      "fromSpokeAddress": "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
       "fromTokenSymbol": "WETH",
       "isNative": false,
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
@@ -38,8 +38,8 @@
     {
       "fromChain": 10002,
       "toChain": 10001,
-      "fromTokenAddress": "0xeF684C38F94F48775959ECf2012D7E864ffb9dd4",
-      "fromSpokeAddress": "0xeF684C38F94F48775959ECf2012D7E864ffb9dd4",
+      "fromTokenAddress": "0x28077B47Cd03326De7838926A63699849DD4fa87",
+      "fromSpokeAddress": "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
       "fromTokenSymbol": "WETH",
       "isNative": false,
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
