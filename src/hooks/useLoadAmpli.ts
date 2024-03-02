@@ -13,7 +13,7 @@ export function useLoadAmpli() {
   const [isAmpliLoaded, setIsAmpliLoaded] = useState(false);
 
   useEffect(() => {
-    if (amplitudeAPIKey && !isAmpliLoaded && false) {
+    if (amplitudeAPIKey && !isAmpliLoaded) {
       amplitude
         .init(amplitudeAPIKey, undefined, {
           serverUrl: amplitudeServerUrl,
