@@ -41,6 +41,6 @@ export async function suggestedFeesMockedApiCall(
     },
     isAmountTooLow: false,
     quoteBlock: BigNumber.from("1"),
-    quoteTimestamp: BigNumber.from(utils.getCurrentTime() - 30),
+    quoteTimestamp: BigNumber.from(utils.getCurrentTime()),
   };
 }
