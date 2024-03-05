@@ -10026,10 +10026,10 @@
   dependencies:
     "@web3-onboard/common" "^2.3.3"
 
-"@web3-onboard/injected-wallets@^2.10.6":
-  version "2.10.6"
-  resolved "https://registry.yarnpkg.com/@web3-onboard/injected-wallets/-/injected-wallets-2.10.6.tgz#8ba357e176f3261d57204742e2ee2ca683592784"
-  integrity sha512-/3mp+0ML478JuUXF0D1m5Nq83HMkfpdd8BcJJ//qN0Laxi+I2obquT47pcqbkRTwNAxpjzlpprjhN6V78bCF3g==
+"@web3-onboard/injected-wallets@^2.10.11":
+  version "2.10.11"
+  resolved "https://registry.yarnpkg.com/@web3-onboard/injected-wallets/-/injected-wallets-2.10.11.tgz#3f1b454a44277dfe815325dacfb4eedda171cbfc"
+  integrity sha512-4OuUSQKhciHBRO9hpSJh+7+ZtNOJQo4pOi18HcGJscqkb1cUtcrSfLqWpi37t27c/eKDW/1Tdmc8GpWHYOxEyQ==
   dependencies:
     "@web3-onboard/common" "^2.3.3"
     joi "17.9.1"
