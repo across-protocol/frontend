@@ -14,6 +14,7 @@ import bobaLogo from "assets/boba-logo.svg";
 import polygonLogo from "assets/polygon-logo.svg";
 import zkSyncLogo from "assets/zksync-logo.svg";
 import baseLogo from "assets/base-logo.svg";
+import lineaLogo from "assets/linea-logo.svg";
 import usdcLogo from "assets/usdc-logo.png";
 import daiLogo from "assets/dai.svg";
 import wbtcLogo from "assets/wbtc.svg";
@@ -39,12 +40,14 @@ export enum ChainId {
   POLYGON = CHAIN_IDs.POLYGON,
   ZK_SYNC = CHAIN_IDs.ZK_SYNC,
   BASE = CHAIN_IDs.BASE,
+  LINEA = CHAIN_IDs.LINEA,
   // testnets
   ARBITRUM_GOERLI = CHAIN_IDs.ARBITRUM_GOERLI,
   ZK_SYNC_GOERLI = CHAIN_IDs.ZK_SYNC_GOERLI,
   BASE_GOERLI = CHAIN_IDs.BASE_GOERLI,
   GOERLI = CHAIN_IDs.GOERLI,
   MUMBAI = CHAIN_IDs.MUMBAI,
+  LINEA_GOERLI = CHAIN_IDs.LINEA_GOERLI,
 }
 
 // Maps `ChainId` to an object and inverts the Key/Value
@@ -172,6 +175,20 @@ export const chainInfoList: ChainInfoList = [
     pollingInterval: 10_000,
     customRpcUrl: process.env.REACT_APP_CHAIN_8453_PROVIDER_URL,
   },
+  {
+    name: "Linea",
+    fullName: "Linea",
+    chainId: ChainId.LINEA,
+    logoURI: lineaLogo,
+    rpcUrl: "https://rpc.linea.build",
+    explorerUrl: "https://lineascan.build",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://lineascan.build"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: 10_000,
+    customRpcUrl: process.env.REACT_APP_CHAIN_59144_PROVIDER_URL,
+  },
   // testnets
   {
     name: "Goerli",
@@ -238,6 +255,20 @@ export const chainInfoList: ChainInfoList = [
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
     customRpcUrl: process.env.REACT_APP_CHAIN_84531_PROVIDER_URL,
+  },
+  {
+    name: "Linea Goerli",
+    fullName: "Linea Testnet Goerli",
+    chainId: ChainId.LINEA_GOERLI,
+    logoURI: lineaLogo,
+    rpcUrl: "https://rpc.goerli.linea.build",
+    explorerUrl: "https://goerli.lineascan.build/",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://goerli.lineascan.build/"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: 10_000,
+    customRpcUrl: process.env.REACT_APP_CHAIN_59140_PROVIDER_URL,
   },
 ];
 

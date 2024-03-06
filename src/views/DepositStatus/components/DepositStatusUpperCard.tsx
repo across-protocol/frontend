@@ -12,6 +12,7 @@ import { ReactComponent as ArbitrumGrayscaleLogo } from "assets/grayscale-logos/
 import { ReactComponent as OptimismGrayscaleLogo } from "assets/grayscale-logos/optimism.svg";
 import { ReactComponent as ZkSyncGrayscaleLogo } from "assets/grayscale-logos/zksync.svg";
 import { ReactComponent as BaseGrayscaleLogo } from "assets/grayscale-logos/base.svg";
+import { ReactComponent as LineaGrayscaleLogo } from "assets/grayscale-logos/linea.svg";
 import { Text, Badge } from "components";
 
 import { ChainId, QUERIESV2, COLORS, NoFundsDepositedLogError } from "utils";
@@ -29,12 +30,14 @@ const grayscaleLogos: Record<number, React.ReactNode> = {
   [ChainId.MAINNET]: <EthereumGrayscaleLogo />,
   [ChainId.ZK_SYNC]: <ZkSyncGrayscaleLogo />,
   [ChainId.BASE]: <BaseGrayscaleLogo />,
+  [ChainId.LINEA]: <LineaGrayscaleLogo />,
   // testnets
   [ChainId.GOERLI]: <EthereumGrayscaleLogo />,
   [ChainId.ARBITRUM_GOERLI]: <EthereumGrayscaleLogo />,
   [ChainId.MUMBAI]: <EthereumGrayscaleLogo />,
   [ChainId.ZK_SYNC_GOERLI]: <ZkSyncGrayscaleLogo />,
   [ChainId.BASE_GOERLI]: <BaseGrayscaleLogo />,
+  [ChainId.LINEA_GOERLI]: <LineaGrayscaleLogo />,
 };
 
 type Props = {
