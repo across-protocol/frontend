@@ -27,7 +27,7 @@ const enabledRoutes = {
       },
     ],
     spokePoolVerifier: {
-      address: "0x269727F088F16E1Aea52Cf5a97B1CD41DAA3f02D",
+      address: "0xbcfEb7d29BB1b40c6eA3A9e3d0822a79819d63F3",
       enabledChains: [
         CHAIN_IDs.MAINNET,
         CHAIN_IDs.OPTIMISM,
