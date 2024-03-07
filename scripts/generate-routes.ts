@@ -344,7 +344,7 @@ const enabledRoutes = {
       },
       {
         fromChain: CHAIN_IDs.LINEA,
-        fromSpokeAddress: getDeployedAddress("SpokePool", CHAIN_IDs.LINEA),
+        fromSpokeAddress: "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
         toChains: [
           {
             chainId: CHAIN_IDs.MAINNET,

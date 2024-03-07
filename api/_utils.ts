@@ -400,6 +400,16 @@ export const queries: Record<
       getLogger(),
       getGasMarkup(CHAIN_IDs.BASE)
     ),
+  [CHAIN_IDs.LINEA]: () =>
+    new sdk.relayFeeCalculator.LineaQueries(
+      getProvider(CHAIN_IDs.LINEA),
+      undefined,
+      "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDs.LINEA)
+    ),
   /* --------------------------- Testnet queries --------------------------- */
   [CHAIN_IDs.GOERLI]: () =>
     new sdk.relayFeeCalculator.EthereumGoerliQueries(
@@ -440,6 +450,16 @@ export const queries: Record<
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.BASE_GOERLI)
+    ),
+  [CHAIN_IDs.LINEA_GOERLI]: () =>
+    new sdk.relayFeeCalculator.LineaGoerliQueries(
+      getProvider(CHAIN_IDs.LINEA_GOERLI),
+      undefined,
+      "0xfa3DA25059F4ff59dA7566B58D3299dB8a04691F",
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDs.LINEA_GOERLI)
     ),
 };
 
