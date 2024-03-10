@@ -36,7 +36,6 @@ import {
   defaultRelayerAddressOverride,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
-import { bnUint32Max } from "@across-protocol/sdk-v2/dist/types/utils";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -531,7 +530,7 @@ export const getRelayerFeeDetails = async (
         quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
         inputToken: originToken,
         outputToken: destinationToken,
-        fillDeadline: bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
+        fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
         exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
         exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
         message: sdk.constants.EMPTY_MESSAGE,
