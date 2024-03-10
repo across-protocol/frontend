@@ -528,7 +528,7 @@ export const getRelayerFeeDetails = async (
         recipient: recipientAddress,
         destinationChainId,
         originChainId,
-        quoteTimestamp: sdk.utils.getCurrentTime(),
+        quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
         inputToken: originToken,
         outputToken: destinationToken,
         fillDeadline: bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
