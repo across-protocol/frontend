@@ -36,7 +36,6 @@ import {
   defaultRelayerAddressOverride,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
-import { bnUint32Max } from "@across-protocol/sdk-v2/dist/types/utils";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -521,20 +520,18 @@ export const getRelayerFeeDetails = async (
   try {
     return await relayFeeCalculator.relayerFeeDetails(
       {
-        inputAmount: sdk.utils.toBN(amount),
-        outputAmount: sdk.utils.toBN(amount),
+        amount: sdk.utils.toBN(amount),
         depositId: sdk.utils.bnUint32Max.toNumber(),
         depositor: recipientAddress,
-        recipient: recipientAddress,
         destinationChainId,
         originChainId,
+        relayerFeePct: sdk.utils.bnOne,
+        realizedLpFeePct: sdk.utils.bnOne,
+        recipient: recipientAddress,
+        message: message ?? sdk.constants.EMPTY_MESSAGE,
         quoteTimestamp: sdk.utils.getCurrentTime(),
-        inputToken: originToken,
-        outputToken: destinationToken,
-        fillDeadline: bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
-        exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
-        exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
-        message: sdk.constants.EMPTY_MESSAGE,
+        originToken,
+        destinationToken,
       },
       amount,
       sdk.utils.isMessageEmpty(message),
