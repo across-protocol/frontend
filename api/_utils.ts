@@ -533,7 +533,7 @@ export const getRelayerFeeDetails = async (
         fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
         exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
         exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
-        message: sdk.constants.EMPTY_MESSAGE,
+        message: message ?? sdk.constants.EMPTY_MESSAGE,
       },
       amount,
       sdk.utils.isMessageEmpty(message),
