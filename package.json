@@ -5,7 +5,7 @@
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@across-protocol/constants-v2": "^1.0.12",
-    "@across-protocol/contracts-v2": "2.5.0-beta.7",
+    "@across-protocol/contracts-v2": "2.5.1",
     "@across-protocol/sdk-v2": "^0.22.6",
     "@amplitude/analytics-browser": "^2.3.5",
     "@balancer-labs/sdk": "^1.1.5",
