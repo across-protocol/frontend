@@ -1,10 +1,9 @@
-import { ethers, BigNumber } from "ethers";
+import { ethers, BigNumber, PopulatedTransaction } from "ethers";
 
 import {
   ChainId,
   fixedPointAdjustment,
   referrerDelimiterHex,
-  bnUint32Max,
 } from "./constants";
 import { ERC20__factory } from "./typechain";
 import { tagAddress } from "./format";
@@ -175,6 +174,7 @@ export async function sendAcrossDeposit(
     fromChain,
     tokenAddress,
     amount,
+    maxCount = ethers.constants.MaxUint256,
     toAddress: recipient,
     toChain: destinationChainId,
     relayerFeePct,
@@ -212,40 +212,57 @@ export async function sendAcrossDeposit(
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
 
-  const depositor = await signer.getAddress();
-  const inputTokenInfo = config.getTokenInfoByAddress(fromChain, tokenAddress);
-  const outputTokenInfo = config.getTokenInfoByL1TokenAddress(
-    destinationChainId,
-    inputTokenInfo.l1TokenAddress
-  );
-  const inputAmount = amount;
-  const outputAmount = inputAmount.sub(
-    inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
-  );
-
   const value = isNative ? amount : ethers.constants.Zero;
-  const commonArgs = [
-    recipient,
-    inputTokenInfo.address,
-    outputTokenInfo.address,
-    inputAmount,
-    outputAmount,
-    destinationChainId,
-    ethers.constants.AddressZero,
-    quoteTimestamp,
-    bnUint32Max,
-    0,
-    message,
-    { value },
-  ] as const;
+  const depositor = await signer.getAddress();
 
-  const tx =
-    shouldUseSpokePoolVerifier && spokePoolVerifier
-      ? await spokePoolVerifier.populateTransaction.deposit(
-          spokePool.address,
-          ...commonArgs
-        )
-      : await spokePool.populateTransaction.depositV3(depositor, ...commonArgs);
+  let tx: PopulatedTransaction;
+
+  if (shouldUseSpokePoolVerifier && spokePoolVerifier) {
+    const inputTokenInfo = config.getTokenInfoByAddress(
+      fromChain,
+      tokenAddress
+    );
+    const outputTokenInfo = config.getTokenInfoByL1TokenAddress(
+      destinationChainId,
+      inputTokenInfo.l1TokenAddress
+    );
+    const inputAmount = amount;
+    const outputAmount = inputAmount.sub(
+      inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
+    );
+    const fillDeadlineBuffer = await spokePool.fillDeadlineBuffer();
+    const fillDeadline =
+      Math.floor(Date.now() / 1000) - 60 + fillDeadlineBuffer;
+
+    // The SpokePoolVerifier uses `depositV3`
+    tx = await spokePoolVerifier.populateTransaction.deposit(
+      spokePool.address,
+      recipient,
+      inputTokenInfo.address,
+      outputTokenInfo.address,
+      inputAmount,
+      outputAmount,
+      destinationChainId,
+      ethers.constants.AddressZero,
+      quoteTimestamp,
+      fillDeadline,
+      0,
+      message,
+      { value }
+    );
+  } else {
+    tx = await spokePool.populateTransaction.deposit(
+      recipient,
+      tokenAddress,
+      amount,
+      destinationChainId,
+      relayerFeePct,
+      quoteTimestamp,
+      message,
+      maxCount,
+      { value }
+    );
+  }
 
   // do not tag a referrer if data is not provided as a hex string.
   tx.data =
