@@ -61,11 +61,6 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
         await isWrongNetworkHandler();
       }
 
-      const depositByTxHash = await getDepositByTxHash(
-        transfer.depositTxHash,
-        transfer.sourceChainId
-      );
-
       const newRecipient =
         args.optionalUpdates?.newRecipient || transfer.recipientAddr;
       const newMessage =
