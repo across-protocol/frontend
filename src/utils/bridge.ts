@@ -215,7 +215,7 @@ export async function sendAcrossDeposit(
   const depositor = await signer.getAddress();
   const inputTokenInfo = config.getTokenInfoByAddress(fromChain, tokenAddress);
   const outputTokenInfo = config.getTokenInfoBySymbol(
-    fromChain,
+    destinationChainId,
     inputTokenInfo.symbol
   );
   const inputAmount = amount;
