@@ -62,7 +62,6 @@ export async function getDepositByTxHash(
     depositTxReceipt,
     parsedDepositLog,
     depositTimestamp: block.timestamp,
-    isV2: parsedDepositLog.name === "FundsDeposited",
   };
 }
 
@@ -78,30 +77,12 @@ export async function getFillByDepositTxHash(
     );
   }
 
-  const { parsedDepositLog, isV2 } = depositByTxHash;
+  const { parsedDepositLog } = depositByTxHash;
 
   const depositId = Number(parsedDepositLog.args.depositId);
-  const depositor = String(parsedDepositLog.args.depositor);
   const destinationSpokePool = config.getSpokePool(toChainId);
 
-  const v2FilledRelayEvents = await destinationSpokePool.queryFilter(
-    destinationSpokePool.filters.FilledRelay(
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      fromChainId,
-      undefined,
-      undefined,
-      undefined,
-      depositId,
-      undefined,
-      undefined,
-      depositor
-    )
-  );
-
-  const v3FilledRelayEvents = await destinationSpokePool.queryFilter(
+  const filledRelayEvents = await destinationSpokePool.queryFilter(
     destinationSpokePool.filters.FilledV3Relay(
       undefined,
       undefined,
@@ -113,23 +94,16 @@ export async function getFillByDepositTxHash(
     )
   );
 
-  if (
-    (isV2 && v2FilledRelayEvents.length === 0) ||
-    (!isV2 && v3FilledRelayEvents.length === 0)
-  ) {
+  if (filledRelayEvents.length === 0) {
     throw new Error(
       `Could not find FilledRelay events for depositId ${depositId} on chain ${toChainId}`
     );
   }
-  const filledRelayEvent = isV2
-    ? // On V2 we need to look for fully filled relay events
-      v2FilledRelayEvents.find((event) =>
-        event.args.amount.eq(event.args.totalFilledAmount)
-      )
-    : // If we make it to this point, we can be sure that there is exactly one filled relay event
-      // that corresponds to the deposit we are looking for.
-      // The (depositId, fromChainId) tuple is unique for V3 filled relay events.
-      v3FilledRelayEvents[0];
+
+  // If we make it to this point, we can be sure that there is exactly one filled relay event
+  // that corresponds to the deposit we are looking for.
+  // The (depositId, fromChainId) tuple is unique for V3 filled relay events.
+  const filledRelayEvent = filledRelayEvents[0];
 
   if (!isDefined(filledRelayEvent)) {
     throw new Error(
@@ -140,9 +114,7 @@ export async function getFillByDepositTxHash(
   const fillTxBlock = await filledRelayEvent.getBlock();
 
   return {
-    fillTxHashes: (isV2 ? v2FilledRelayEvents : v3FilledRelayEvents).map(
-      (event) => event.transactionHash
-    ),
+    fillTxHashes: [filledRelayEvent.transactionHash],
     fillTxTimestamp: fillTxBlock.timestamp,
     depositByTxHash,
   };

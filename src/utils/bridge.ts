@@ -1,6 +1,10 @@
 import { ethers, BigNumber } from "ethers";
 
-import { ChainId, referrerDelimiterHex } from "./constants";
+import {
+  ChainId,
+  fixedPointAdjustment,
+  referrerDelimiterHex,
+} from "./constants";
 import { ERC20__factory } from "./typechain";
 import { tagAddress } from "./format";
 import { getProvider } from "./providers";
@@ -208,16 +212,30 @@ export async function sendAcrossDeposit(
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
 
+  const depositor = await signer.getAddress();
+  const inputTokenInfo = config.getTokenInfoByAddress(fromChain, tokenAddress);
+  const outputTokenInfo = config.getTokenInfoBySymbol(
+    fromChain,
+    inputTokenInfo.symbol
+  );
+  const inputAmount = amount;
+  const outputAmount = inputAmount.sub(
+    inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
+  );
+
   const value = isNative ? amount : ethers.constants.Zero;
   const commonArgs = [
     recipient,
-    tokenAddress,
-    amount,
+    inputTokenInfo.address,
+    outputTokenInfo.address,
+    inputAmount,
+    outputAmount,
     destinationChainId,
-    relayerFeePct,
+    ethers.constants.AddressZero,
     quoteTimestamp,
+    ethers.constants.MaxUint256,
+    0,
     message,
-    maxCount,
     { value },
   ] as const;
 
@@ -227,7 +245,7 @@ export async function sendAcrossDeposit(
           spokePool.address,
           ...commonArgs
         )
-      : await spokePool.populateTransaction.deposit(...commonArgs);
+      : await spokePool.populateTransaction.depositV3(depositor, ...commonArgs);
 
   // do not tag a referrer if data is not provided as a hex string.
   tx.data =
@@ -242,7 +260,7 @@ export async function sendAcrossDeposit(
   const signerChainId = await signer.getChainId();
   if (signerChainId !== fromChain) {
     onNetworkMismatch?.({
-      signerAddress: await signer.getAddress(),
+      signerAddress: depositor,
       fromChainId: String(fromChain),
       toChainId: String(destinationChainId),
       signerChainId: String(signerChainId),
