@@ -9,7 +9,6 @@ import {
   getChainInfo,
   Token,
   waitOnTransaction,
-  getDepositByTxHash,
   fixedPointAdjustment,
 } from "utils";
 

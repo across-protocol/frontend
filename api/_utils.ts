@@ -520,18 +520,20 @@ export const getRelayerFeeDetails = async (
   try {
     return await relayFeeCalculator.relayerFeeDetails(
       {
-        amount: sdk.utils.toBN(amount),
+        inputAmount: sdk.utils.toBN(amount),
+        outputAmount: sdk.utils.toBN(amount),
         depositId: sdk.utils.bnUint32Max.toNumber(),
         depositor: recipientAddress,
+        recipient: recipientAddress,
         destinationChainId,
         originChainId,
-        relayerFeePct: sdk.utils.bnOne,
-        realizedLpFeePct: sdk.utils.bnOne,
-        recipient: recipientAddress,
+        quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
+        inputToken: originToken,
+        outputToken: destinationToken,
+        fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
+        exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
+        exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
         message: message ?? sdk.constants.EMPTY_MESSAGE,
-        quoteTimestamp: sdk.utils.getCurrentTime(),
-        originToken,
-        destinationToken,
       },
       amount,
       sdk.utils.isMessageEmpty(message),

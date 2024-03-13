@@ -6,10 +6,18 @@ import { SpokePool__factory } from "./typechain";
 
 const config = getConfig();
 
-export class NoFundsDepositedLogError extends Error {
+export class NoV3FundsDepositedLogError extends Error {
   constructor(depositTxHash: string, chainId: number) {
     super(
-      `Could not parse log FundsDeposited in tx ${depositTxHash} on chain ${chainId}`
+      `Could not parse log V3FundsDeposited in tx ${depositTxHash} on chain ${chainId}`
+    );
+  }
+}
+
+export class NoFilledV3RelayLogError extends Error {
+  constructor(depositId: number, chainId: number) {
+    super(
+      `Could find related FilledV3Relay for Deposit #${depositId} on chain ${chainId}`
     );
   }
 }
@@ -28,10 +36,7 @@ export function parseFundsDepositedLog(
       return [];
     }
   });
-  // Return either the V2 or V3 log if either is present
-  return parsedLogs.find(
-    (log) => log.name === "FundsDeposited" || log.name === "V3FundsDeposited"
-  );
+  return parsedLogs.find(({ name }) => name === "V3FundsDeposited");
 }
 
 export async function getDepositByTxHash(
@@ -39,25 +44,19 @@ export async function getDepositByTxHash(
   fromChainId: number
 ) {
   const fromProvider = getProvider(fromChainId);
-
   const depositTxReceipt = await fromProvider.getTransactionReceipt(
     depositTxHash
   );
-
   if (!depositTxReceipt) {
     throw new Error(
       `Could not fetch tx receipt for ${depositTxHash} on chain ${fromChainId}`
     );
   }
-
   const parsedDepositLog = parseFundsDepositedLog(depositTxReceipt.logs);
-
   if (!parsedDepositLog) {
-    throw new NoFundsDepositedLogError(depositTxHash, fromChainId);
+    throw new NoV3FundsDepositedLogError(depositTxHash, fromChainId);
   }
-
   const block = await fromProvider.getBlock(depositTxReceipt.blockNumber);
-
   return {
     depositTxReceipt,
     parsedDepositLog,
@@ -81,8 +80,7 @@ export async function getFillByDepositTxHash(
 
   const depositId = Number(parsedDepositLog.args.depositId);
   const destinationSpokePool = config.getSpokePool(toChainId);
-
-  const filledRelayEvents = await destinationSpokePool.queryFilter(
+  const v3FilledRelayEvents = await destinationSpokePool.queryFilter(
     destinationSpokePool.filters.FilledV3Relay(
       undefined,
       undefined,
@@ -93,28 +91,16 @@ export async function getFillByDepositTxHash(
       depositId
     )
   );
-
-  if (filledRelayEvents.length === 0) {
-    throw new Error(
-      `Could not find FilledRelay events for depositId ${depositId} on chain ${toChainId}`
-    );
-  }
-
   // If we make it to this point, we can be sure that there is exactly one filled relay event
   // that corresponds to the deposit we are looking for.
   // The (depositId, fromChainId) tuple is unique for V3 filled relay events.
-  const filledRelayEvent = filledRelayEvents[0];
-
+  const filledRelayEvent = v3FilledRelayEvents[0];
   if (!isDefined(filledRelayEvent)) {
-    throw new Error(
-      `Could not find FilledRelay event that fully filed depositId ${depositId} on chain ${toChainId}`
-    );
+    throw new NoFilledV3RelayLogError(depositId, toChainId);
   }
-
   const fillTxBlock = await filledRelayEvent.getBlock();
-
   return {
-    fillTxHashes: [filledRelayEvent.transactionHash],
+    fillTxHashes: v3FilledRelayEvents.map((event) => event.transactionHash),
     fillTxTimestamp: fillTxBlock.timestamp,
     depositByTxHash,
   };
