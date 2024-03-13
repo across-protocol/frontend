@@ -4,6 +4,7 @@ import {
   ChainId,
   fixedPointAdjustment,
   referrerDelimiterHex,
+  bnUint32Max,
 } from "./constants";
 import { ERC20__factory } from "./typechain";
 import { tagAddress } from "./format";
@@ -179,7 +180,6 @@ export async function sendAcrossDeposit(
     relayerFeePct,
     timestamp: quoteTimestamp,
     message = "0x",
-    maxCount = ethers.constants.MaxUint256,
     isNative,
     referrer,
   }: AcrossDepositArgs,
@@ -214,9 +214,9 @@ export async function sendAcrossDeposit(
 
   const depositor = await signer.getAddress();
   const inputTokenInfo = config.getTokenInfoByAddress(fromChain, tokenAddress);
-  const outputTokenInfo = config.getTokenInfoBySymbol(
+  const outputTokenInfo = config.getTokenInfoByL1TokenAddress(
     destinationChainId,
-    inputTokenInfo.symbol
+    inputTokenInfo.l1TokenAddress
   );
   const inputAmount = amount;
   const outputAmount = inputAmount.sub(
@@ -233,7 +233,7 @@ export async function sendAcrossDeposit(
     destinationChainId,
     ethers.constants.AddressZero,
     quoteTimestamp,
-    ethers.constants.MaxUint256,
+    bnUint32Max,
     0,
     message,
     { value },
