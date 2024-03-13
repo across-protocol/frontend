@@ -9,7 +9,7 @@ import {
   wait,
   getDepositByTxHash,
   getFillByDepositTxHash,
-  NoFundsDepositedLogError,
+  NoV3FundsDepositedLogError,
 } from "utils";
 import {
   getLocalDepositByTxHash,
@@ -42,10 +42,10 @@ export function useDepositTracking(
         const deposit = await getDepositByTxHash(depositTxHash, fromChainId);
         return deposit;
       } catch (e) {
-        // If the error NoFundsDepositedLogError is thrown, this implies that the used
+        // If the error NoV3FundsDepositedLogError is thrown, this implies that the used
         // tx hash is valid and mined but the origin is not a SpokePool contract. So we
         // should not retry the query and throw the error.
-        if (e instanceof NoFundsDepositedLogError) {
+        if (e instanceof NoV3FundsDepositedLogError) {
           setShouldRetryDepositQuery(false);
         }
         throw e;
