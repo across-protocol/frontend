@@ -34,7 +34,7 @@ export function useAmountInput(selectedRoute: Route) {
   );
 
   const handleClickMaxBalance = useCallback(() => {
-    console.log("handleClickMaxBalance", maxBalance?.toNumber());
+    console.log("handleClickMaxBalance", maxBalance?.toString());
     if (maxBalance) {
       setUserAmountInput(utils.formatUnits(maxBalance, token.decimals));
       addToAmpliQueue(() => {
