@@ -302,6 +302,13 @@ export function formatUSD(value: BigNumberish): string {
   return numeral(Number(formattedString).toFixed(2)).format("0,0.00");
 }
 
+/**
+ * A fault-tolerant version of `parseUnits` that will attempt to parse
+ * a string while being mindful of truncation.
+ * @param value The string to parse
+ * @param decimals The number of decimal places to parse this string with
+ * @returns A BigNumber representation of the parsed value with `decimals` precision
+ */
 export function parseUnitsWithExtendedDecimals(
   value: string,
   decimals: number
