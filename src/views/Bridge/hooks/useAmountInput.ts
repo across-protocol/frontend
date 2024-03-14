@@ -66,11 +66,13 @@ export function useAmountInput(selectedRoute: Route) {
   }, [prevFromTokenSymbol, selectedRoute.fromTokenSymbol, clearInput]);
 
   useEffect(() => {
-    try {
-      const parsed = utils.parseUnits(userAmountInput, token.decimals);
-      setParsedAmount(parsed);
-    } catch (error) {
-      setParsedAmount(undefined);
+    if (userAmountInput) {
+      try {
+        const parsed = utils.parseUnits(userAmountInput, token.decimals);
+        setParsedAmount(parsed);
+      } catch (error) {
+        setParsedAmount(undefined);
+      }
     }
   }, [userAmountInput, token.decimals]);
 
