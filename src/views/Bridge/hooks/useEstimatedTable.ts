@@ -9,6 +9,7 @@ import {
   formatUnits,
   isDefined,
   parseUnits,
+  parseUnitsWithExtendedDecimals,
 } from "utils";
 
 export function useEstimatedTable(
@@ -69,7 +70,9 @@ export function useEstimatedTable(
 
   const baseCurrencyConversions = useMemo(() => {
     const parseUsd = (usd?: number) =>
-      isDefined(usd) ? parseUnits(String(usd), 18) : undefined;
+      isDefined(usd)
+        ? parseUnitsWithExtendedDecimals(String(usd), 18)
+        : undefined;
     const formatNumericUsd = (usd: BigNumber) =>
       Number(Number(ethersUtils.formatUnits(usd, 18)).toFixed(2));
     const gasFeeInUSD = convertL1ToBaseCurrency(gasFee);
