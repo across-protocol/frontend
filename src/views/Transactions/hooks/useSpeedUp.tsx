@@ -62,8 +62,7 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
 
       const newRecipient =
         args.optionalUpdates?.newRecipient || transfer.recipientAddr;
-      const newMessage =
-        args.optionalUpdates?.newMessage || transfer.message || "0x";
+      const newMessage = args.optionalUpdates?.newMessage || transfer.message;
       const updatedOutputAmount = BigNumber.from(transfer.amount).sub(
         args.newRelayerFeePct.mul(transfer.amount).div(fixedPointAdjustment)
       );
