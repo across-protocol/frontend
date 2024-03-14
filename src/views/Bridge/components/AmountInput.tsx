@@ -57,6 +57,7 @@ export function AmountInput({
               placeholder="Enter amount"
               value={amountInput}
               onChange={(e) => {
+                console.log("onChangeAmountInput", e.target.value);
                 if (!didEnter) {
                   setDidEnter(true);
                 }
