@@ -34,6 +34,7 @@ export function useAmountInput(selectedRoute: Route) {
   );
 
   const handleClickMaxBalance = useCallback(() => {
+    console.log("handleClickMaxBalance", maxBalance?.toNumber());
     if (maxBalance) {
       setUserAmountInput(utils.formatUnits(maxBalance, token.decimals));
       addToAmpliQueue(() => {
@@ -43,10 +44,12 @@ export function useAmountInput(selectedRoute: Route) {
   }, [maxBalance, token.decimals, addToAmpliQueue]);
 
   const handleChangeAmountInput = useCallback((changedInput: string) => {
+    console.log("handleChangeAmountInput", changedInput);
     setUserAmountInput(changedInput);
   }, []);
 
   const clearInput = useCallback(() => {
+    console.log("clearInput");
     setUserAmountInput("");
     setParsedAmount(undefined);
   }, []);
