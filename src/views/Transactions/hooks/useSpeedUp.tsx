@@ -9,7 +9,6 @@ import {
   getChainInfo,
   Token,
   waitOnTransaction,
-  getDepositByTxHash,
   fixedPointAdjustment,
 } from "utils";
 
@@ -61,34 +60,20 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
         await isWrongNetworkHandler();
       }
 
-      const depositByTxHash = await getDepositByTxHash(
-        transfer.depositTxHash,
-        transfer.sourceChainId
-      );
-
       const newRecipient =
         args.optionalUpdates?.newRecipient || transfer.recipientAddr;
-      const newMessage =
-        args.optionalUpdates?.newMessage || transfer.message || "0x";
+      const newMessage = args.optionalUpdates?.newMessage || transfer.message;
       const updatedOutputAmount = BigNumber.from(transfer.amount).sub(
         args.newRelayerFeePct.mul(transfer.amount).div(fixedPointAdjustment)
       );
 
-      const typedData = depositByTxHash.isV2
-        ? sdkUtils.getUpdateDepositTypedData(
-            transfer.depositId,
-            transfer.sourceChainId,
-            args.newRelayerFeePct,
-            newRecipient,
-            newMessage
-          )
-        : sdkUtils.getUpdateV3DepositTypedData(
-            transfer.depositId,
-            transfer.sourceChainId,
-            updatedOutputAmount,
-            newRecipient,
-            newMessage
-          );
+      const typedData = sdkUtils.getUpdateV3DepositTypedData(
+        transfer.depositId,
+        transfer.sourceChainId,
+        updatedOutputAmount,
+        newRecipient,
+        newMessage
+      );
       const depositorSignature = await signer._signTypedData(
         typedData.domain as Omit<typeof typedData.domain, "salt">,
         typedData.types,
@@ -97,23 +82,14 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
 
       const depositor = await signer.getAddress();
       const spokePool = config.getSpokePool(transfer.sourceChainId, signer);
-      const txResponse = depositByTxHash.isV2
-        ? await spokePool.speedUpDeposit(
-            depositor,
-            args.newRelayerFeePct,
-            transfer.depositId,
-            newRecipient,
-            newMessage,
-            depositorSignature
-          )
-        : await spokePool.speedUpV3Deposit(
-            depositor,
-            transfer.depositId,
-            updatedOutputAmount,
-            newRecipient,
-            newMessage,
-            depositorSignature
-          );
+      const txResponse = await spokePool.speedUpV3Deposit(
+        depositor,
+        transfer.depositId,
+        updatedOutputAmount,
+        newRecipient,
+        newMessage,
+        depositorSignature
+      );
       setSpeedUpTxLink(
         getChainInfo(transfer.sourceChainId).constructExplorerLink(
           txResponse.hash

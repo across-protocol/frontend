@@ -52,6 +52,7 @@ export const pageLookup: Record<
   "/pool": "poolPage",
   "/rewards": "rewardsPage",
   "/rewards/referrals": "referralPage",
+  "/rewards/optimism-grant-program": "referralPage",
   "/airdrop": "airdropPage",
   "/transactions": "transactionsPage",
   ...getConfig()
@@ -66,9 +67,28 @@ export const pageLookup: Record<
 };
 
 export function getPageValue() {
-  const path = window.location.pathname;
-  const page = pageLookup[path] ?? "404Page";
-  return page;
+  // Resolve the sanitized pathname
+  const path = getSanitizedPathname();
+
+  // Check if the path is a deposit status page. We know that the
+  // deposit status page will always have a path that starts with /bridge/0x{tx hash}
+  if (/\/bridge\/0x[0-9a-fA-F]+/.test(path)) {
+    return "depositStatusPage";
+  }
+
+  // Check if the path is in the page lookup. If it is, return the value
+  // from the page lookup. If it isn't, return the 404 page
+  return pageLookup[path] ?? "404Page";
+}
+
+/**
+ * Returns the sanitized pathname of the current URL. This function performs the following transformations:
+ * 1. Removes any trailing slashes
+ * 2. Makes the path lowercase
+ * @returns The sanitized pathname of the current URL
+ */
+export function getSanitizedPathname(): string {
+  return window.location.pathname.replace(/\/$/, "").toLowerCase();
 }
 
 export function trackConnectWalletButtonClicked(

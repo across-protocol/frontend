@@ -15,7 +15,6 @@ export type { AcrossMerkleDistributor } from "@across-protocol/contracts-v2/dist
 export type { HubPool } from "@across-protocol/contracts-v2/dist/typechain/contracts/HubPool";
 export type {
   SpokePool,
-  FundsDepositedEvent,
   FilledV3RelayEvent,
 } from "@across-protocol/contracts-v2/dist/typechain/contracts/SpokePool.sol/SpokePool";
 export type { SpokePoolVerifier } from "@across-protocol/contracts-v2/dist/typechain/contracts/SpokePoolVerifier";

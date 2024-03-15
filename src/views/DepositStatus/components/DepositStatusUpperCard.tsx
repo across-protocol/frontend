@@ -15,7 +15,7 @@ import { ReactComponent as BaseGrayscaleLogo } from "assets/grayscale-logos/base
 import { ReactComponent as LineaGrayscaleLogo } from "assets/grayscale-logos/linea.svg";
 import { Text, Badge } from "components";
 
-import { ChainId, QUERIESV2, COLORS, NoFundsDepositedLogError } from "utils";
+import { ChainId, QUERIESV2, COLORS, NoV3FundsDepositedLogError } from "utils";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 
 import { useDepositTracking } from "../hooks/useDepositTracking";
@@ -81,7 +81,7 @@ export function DepositStatusUpperCard({
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
-  if (depositQuery.error instanceof NoFundsDepositedLogError) {
+  if (depositQuery.error instanceof NoV3FundsDepositedLogError) {
     return (
       <Wrapper>
         <TopWrapperTitleWrapper>
