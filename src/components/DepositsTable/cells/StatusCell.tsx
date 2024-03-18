@@ -50,10 +50,9 @@ function FilledStatusCell({ deposit, width }: Props) {
 
 function PendingStatusCell({ width, deposit }: Props) {
   const { isDelayed, isProfitable } = useIsProfitableAndDelayed(deposit);
-  const isExpired =
-    DateTime.fromSeconds(deposit.fillDeadline || bnUint32Max.toNumber())
-      .diffNow()
-      .as("seconds") < 0;
+  const isExpired = deposit.fillDeadline
+    ? DateTime.fromISO(deposit.fillDeadline).diffNow().as("seconds") < 0
+    : false;
 
   return (
     <StyledPendingStatusCell width={width}>
