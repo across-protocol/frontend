@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
+import { DateTime } from "luxon";
 
 import { ReactComponent as CheckIcon } from "assets/check.svg";
 import { ReactComponent as LoadingIcon } from "assets/loading.svg";
@@ -8,7 +9,7 @@ import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
-import { formatSeconds, COLORS } from "utils";
+import { formatSeconds, COLORS, bnUint32Max } from "utils";
 
 import { BaseCell } from "./BaseCell";
 import { useIsProfitableAndDelayed } from "../hooks/useIsProfitableAndDelayed";
@@ -49,11 +50,21 @@ function FilledStatusCell({ deposit, width }: Props) {
 
 function PendingStatusCell({ width, deposit }: Props) {
   const { isDelayed, isProfitable } = useIsProfitableAndDelayed(deposit);
+  const isExpired =
+    DateTime.fromSeconds(deposit.fillDeadline || bnUint32Max.toNumber())
+      .diffNow()
+      .as("seconds") < 0;
 
   return (
     <StyledPendingStatusCell width={width}>
       <Text color={isProfitable && !isDelayed ? "light-200" : "yellow"}>
-        {isDelayed ? "Delayed" : isProfitable ? "Processing..." : "Fee too low"}
+        {isExpired
+          ? "Expired"
+          : isDelayed
+          ? "Delayed"
+          : isProfitable
+          ? "Processing..."
+          : "Fee too low"}
       </Text>
       {isDelayed ? (
         <Tooltip

@@ -38,6 +38,7 @@ export type Deposit = {
   initialRelayerFeePct?: string;
   suggestedRelayerFeePct?: string;
   fillTime?: number;
+  fillDeadline?: number;
   rewards?:
     | {
         type: "op-rebates";
