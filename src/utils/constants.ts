@@ -785,5 +785,3 @@ export const pendingStateTimeUntilDelayed = 5 * 60; // 5 mins
 
 export const vercelApiBaseUrl =
   process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE || "";
-
-export const bnUint32Max = utils.bnUint32Max;

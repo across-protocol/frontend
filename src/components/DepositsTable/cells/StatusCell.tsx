@@ -9,7 +9,7 @@ import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
-import { formatSeconds, COLORS, bnUint32Max } from "utils";
+import { formatSeconds, COLORS } from "utils";
 
 import { BaseCell } from "./BaseCell";
 import { useIsProfitableAndDelayed } from "../hooks/useIsProfitableAndDelayed";
