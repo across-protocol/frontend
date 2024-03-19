@@ -96,7 +96,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC", "DAI", "BAL", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC", "DAI", "USDT", "WBTC"],
           },
         ],
       },

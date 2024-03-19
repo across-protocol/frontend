@@ -416,11 +416,11 @@
     {
       "fromChain": 1,
       "toChain": 59144,
-      "fromTokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D",
+      "fromTokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
       "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
-      "fromTokenSymbol": "BAL",
+      "fromTokenSymbol": "USDT",
       "isNative": false,
-      "l1TokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D"
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
     },
     {
       "fromChain": 1,
