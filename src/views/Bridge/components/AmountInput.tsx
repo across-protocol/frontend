@@ -56,6 +56,7 @@ export function AmountInput({
               valid={didEnter ? isAmountValid : true}
               placeholder="Enter amount"
               value={amountInput}
+              onWheel={(e) => e.currentTarget.blur()}
               onChange={(e) => {
                 if (!didEnter) {
                   setDidEnter(true);
