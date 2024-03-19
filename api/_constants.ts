@@ -103,12 +103,10 @@ export const defaultRelayerAddressOverride: Record<
   string,
   { relayer: string; destinationChains: number[] }
 > = {
-  // This should be added back in when SNX's relayer bot goes back online
-  // by referencing estimates for V3 events.
-  // SNX: {
-  //   relayer: "0x19cDc2b23AF0cC791ca64dda5BFc094Cddda31Cd",
-  //   destinationChains: [1, 10],
-  // },
+  SNX: {
+    relayer: "0x19cDc2b23AF0cC791ca64dda5BFc094Cddda31Cd",
+    destinationChains: [1, 10],
+  },
 };
 
 const relayerFeeCapitalCostOverrides: Record<
