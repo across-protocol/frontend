@@ -620,6 +620,8 @@ export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
     case CHAIN_IDs.ARBITRUM_GOERLI:
       return "0xD29C85F15DF544bA632C9E25829fd29d767d7978";
+    case CHAIN_IDs.LINEA: // FIXME: remove after updating sdk
+      return "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75";
     default:
       return sdk.utils.getDeployedAddress("SpokePool", chainId);
   }
