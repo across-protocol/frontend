@@ -94,6 +94,10 @@ const enabledRoutes = {
             chainId: CHAIN_IDs.BASE,
             tokens: ["WETH", "ETH", "USDC", "DAI", "BAL"],
           },
+          {
+            chainId: CHAIN_IDs.LINEA,
+            tokens: ["WETH", "ETH", "USDC", "DAI", "USDT", "WBTC"],
+          },
         ],
       },
       {
@@ -153,6 +157,10 @@ const enabledRoutes = {
             chainId: CHAIN_IDs.BASE,
             tokens: ["WETH", "ETH", "USDC", "DAI", "BAL"],
           },
+          {
+            chainId: CHAIN_IDs.LINEA,
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
+          },
         ],
       },
       {
@@ -207,6 +215,10 @@ const enabledRoutes = {
           {
             chainId: CHAIN_IDs.BASE,
             tokens: ["DAI", "WETH", "USDC", "BAL"],
+          },
+          {
+            chainId: CHAIN_IDs.LINEA,
+            tokens: ["WETH", "USDC", "DAI", "WBTC"],
           },
         ],
       },
@@ -264,6 +276,10 @@ const enabledRoutes = {
             chainId: CHAIN_IDs.BASE,
             tokens: ["USDC", "WETH", "ETH", "DAI", "BAL"],
           },
+          {
+            chainId: CHAIN_IDs.LINEA,
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
+          },
         ],
       },
       {
@@ -290,6 +306,10 @@ const enabledRoutes = {
             chainId: CHAIN_IDs.BASE,
             tokens: ["WETH", "ETH", "USDC", "DAI"],
           },
+          {
+            chainId: CHAIN_IDs.LINEA,
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
+          },
         ],
       },
       {
@@ -315,6 +335,40 @@ const enabledRoutes = {
           {
             chainId: CHAIN_IDs.ZK_SYNC,
             tokens: ["USDC", "WETH", "ETH", "DAI"],
+          },
+          {
+            chainId: CHAIN_IDs.LINEA,
+            tokens: ["WETH", "ETH", "USDC", "DAI"],
+          },
+        ],
+      },
+      {
+        fromChain: CHAIN_IDs.LINEA,
+        fromSpokeAddress: "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
+        toChains: [
+          {
+            chainId: CHAIN_IDs.MAINNET,
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
+          },
+          {
+            chainId: CHAIN_IDs.OPTIMISM,
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
+          },
+          {
+            chainId: CHAIN_IDs.POLYGON,
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
+          },
+          {
+            chainId: CHAIN_IDs.ARBITRUM,
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
+          },
+          {
+            chainId: CHAIN_IDs.ZK_SYNC,
+            tokens: ["USDC", "WETH", "ETH", "DAI"],
+          },
+          {
+            chainId: CHAIN_IDs.BASE,
+            tokens: ["WETH", "ETH", "USDC", "DAI"],
           },
         ],
       },

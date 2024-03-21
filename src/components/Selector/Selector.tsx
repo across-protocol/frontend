@@ -78,7 +78,7 @@ const Selector = <ElementValue,>({
         data-cy={`${dataCy}-modal`}
       >
         <ElementRowDivider />
-        <ElementRowWrapper enableScroll={elements.length > 7}>
+        <ElementRowWrapper enableScroll={elements.length > 6}>
           {elements.map((element, idx) => (
             <ElementRow
               key={String(element.value)}
