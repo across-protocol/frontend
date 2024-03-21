@@ -21,20 +21,15 @@
   resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.11.tgz#58d34b5cb50351d097f2ca43c5a30b5908faed7c"
   integrity sha512-RpseYB2QxGyfyrfXtUeFxUSCUW1zqu442QFzsdD1LBZtymuzdHuL2MwtTdmRRnJSvzRTFTtlRh4bYDoExSb5zQ==
 
-"@across-protocol/constants-v2@^1.0.12":
-  version "1.0.12"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.12.tgz#a85e8d39efa9c5294a368e229eab65357f00645e"
-  integrity sha512-UrrPOxV/+FjCHmlMnezviAMXDiGDzUNCwKC2ifQ0U8PGa+lNulb7KCGNIEIFAFLHNn+/CMFST5Vwf+aAqbumvQ==
-
 "@across-protocol/constants-v2@^1.0.14":
   version "1.0.14"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.14.tgz#2eb6624c306db3f184293d8abb023d2354abadce"
   integrity sha512-7C8hyH/7aDh8AOd5DLQrtcey6Ip4Q6o8FmSiDrBnxcD/aVeH+L8cZhh/hRMLm8CA5Olx4usEarfEfZ2rN0AZfg==
 
-"@across-protocol/contracts-v2@2.5.0-beta.7":
-  version "2.5.0-beta.7"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.5.0-beta.7.tgz#9410efc9e39b8b1b6e814dcd416e6017f7d40abd"
-  integrity sha512-/u6VB5QZwi9i7EDRBYNGMne+/ZXTI1XbHzEEI4+Z1Bb6xKvKjTsJJsStz7wwBplGAWCkmRLVxCbJtfN2o0iUSw==
+"@across-protocol/contracts-v2@2.5.3":
+  version "2.5.3"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.5.3.tgz#6e4d656e155a5b6ce0202dad5f3bc132e867f484"
+  integrity sha512-eIOX7K7NFS0KhVCZDU+ka+UPWq4UNf6Nht5YoutgrtMYC4tiubBAJN69auE+zClVniixKf0uz5klkDs988XhgA==
   dependencies:
     "@across-protocol/constants-v2" "^1.0.11"
     "@defi-wonderland/smock" "^2.3.4"
@@ -42,8 +37,8 @@
     "@ethersproject/abstract-provider" "5.7.0"
     "@ethersproject/abstract-signer" "5.7.0"
     "@ethersproject/bignumber" "5.7.0"
-    "@openzeppelin/contracts" "4.9.3"
-    "@openzeppelin/contracts-upgradeable" "4.9.3"
+    "@openzeppelin/contracts" "4.9.6"
+    "@openzeppelin/contracts-upgradeable" "4.9.6"
     "@scroll-tech/contracts" "^0.1.0"
     "@uma/common" "^2.34.0"
     "@uma/contracts-node" "^0.4.17"
@@ -80,15 +75,15 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.22.8":
-  version "0.22.8"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.22.8.tgz#e253fad003a09e8d62b9549cf987c7c0229ff79e"
-  integrity sha512-B7HCTp/QPsqNpGadfuVnefvhxbHJfeHCRipcVMZS8G4WkAccUFOWJlUGh6x7b5H4EpXvw6dzBVH9Cq8tx/VP4g==
+"@across-protocol/sdk-v2@^0.22.17":
+  version "0.22.17"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.22.17.tgz#db821db07438a2d158353466e8b2961c1b697fac"
+  integrity sha512-+ihA8yQWmVhdxyQjxYkQ0tfr70CICR8zyPAqi3NYaVKD/CnVksqZgTWNgWfolONzy2jK4NBCi92mm5Z+y1oEfQ==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
-    "@across-protocol/constants-v2" "^1.0.12"
-    "@across-protocol/contracts-v2" "2.5.0-beta.7"
-    "@eth-optimism/sdk" "^3.1.8"
+    "@across-protocol/constants-v2" "^1.0.14"
+    "@across-protocol/contracts-v2" "2.5.3"
+    "@eth-optimism/sdk" "^3.2.2"
     "@pinata/sdk" "^2.1.0"
     "@types/mocha" "^10.0.1"
     "@uma/sdk" "^0.34.1"
@@ -3269,10 +3264,10 @@
   dependencies:
     node-fetch "^2.6.1"
 
-"@eth-optimism/sdk@^3.1.8":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@eth-optimism/sdk/-/sdk-3.2.0.tgz#2e2f209c33443b8700f5b96795e23f7ddd8fc14f"
-  integrity sha512-+ZEO/mDWz3WLzaPVHvgOAK4iN723HmI6sLLr2tmO1/RUoCHVfWMUDwuiikrA49cAsdsjMxCV9+0XNZ8btD2JUg==
+"@eth-optimism/sdk@^3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@eth-optimism/sdk/-/sdk-3.2.2.tgz#732c2d6fde96a25303b3c5b39b3b3ed1f913d9aa"
+  integrity sha512-P8YXAlh2lun0KZlwrw4FqmK4kNIoOOzI816XXhfkW3nMVADGRAru3TKSM74MgmEuyGiHrA9EoPRq1WLqUX4B0w==
   dependencies:
     "@eth-optimism/contracts" "0.6.0"
     "@eth-optimism/contracts-bedrock" "0.17.1"
@@ -3280,7 +3275,7 @@
     lodash "^4.17.21"
     merkletreejs "^0.3.11"
     rlp "^2.2.7"
-    semver "^7.5.4"
+    semver "^7.6.0"
 
 "@ethereumjs/common@2.5.0":
   version "2.5.0"
@@ -5931,11 +5926,6 @@
   resolved "https://registry.yarnpkg.com/@oclif/screen/-/screen-1.0.4.tgz#b740f68609dfae8aa71c3a6cab15d816407ba493"
   integrity sha512-60CHpq+eqnTxLZQ4PGHYNwUX572hgpMHGPtTWMjdTMsAvlm69lZV/4ly6O3sAYkomo4NggGcomrDpBe34rxUqw==
 
-"@openzeppelin/contracts-upgradeable@4.9.3":
-  version "4.9.3"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.3.tgz#ff17a80fb945f5102571f8efecb5ce5915cc4811"
-  integrity sha512-jjaHAVRMrE4UuZNfDwjlLGDxTHWIOwTJS2ldnc278a0gevfXfPr8hxKEVBGFBE96kl2G3VHDZhUimw/+G3TG2A==
-
 "@openzeppelin/contracts-upgradeable@4.9.6":
   version "4.9.6"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.6.tgz#38b21708a719da647de4bb0e4802ee235a0d24df"
@@ -5965,6 +5955,11 @@
   version "4.9.3"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.3.tgz#00d7a8cf35a475b160b3f0293a6403c511099364"
   integrity sha512-He3LieZ1pP2TNt5JbkPA4PNT9WC3gOTOlDcFGJW4Le4QKqwmiNJCRt44APfxMxvq7OugU/cqYuPcSBzOw38DAg==
+
+"@openzeppelin/contracts@4.9.6":
+  version "4.9.6"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.6.tgz#2a880a24eb19b4f8b25adc2a5095f2aa27f39677"
+  integrity sha512-xSmezSupL+y9VkHZJGDoCBpmnB2ogM13ccaYDWqJTfS3dbuHkgjuwDFUmaFauBCboQMGB/S5UqUl2y54X99BmA==
 
 "@openzeppelin/contracts@^4.2.0", "@openzeppelin/contracts@^4.7.3", "@openzeppelin/contracts@^4.8.1":
   version "4.8.3"
@@ -24903,7 +24898,7 @@ semver@^7.3.7, semver@^7.5.3:
   dependencies:
     lru-cache "^6.0.0"
 
-semver@^7.5.4:
+semver@^7.6.0:
   version "7.6.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.6.0.tgz#1a46a4db4bffcccd97b743b5005c8325f23d4e2d"
   integrity sha512-EnwXhrlwXMk9gKu5/flx5sv/an57AkRplG3hTK68W7FRDN+k+OWBj65M7719OkA82XLBxrcX0KSHj+X5COhOVg==
