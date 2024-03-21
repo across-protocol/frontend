@@ -159,7 +159,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
           },
         ],
       },
@@ -218,7 +218,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "USDC", "DAI", "WBTC"],
           },
         ],
       },
@@ -278,7 +278,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
           },
         ],
       },
@@ -308,7 +308,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
           },
         ],
       },
@@ -348,19 +348,19 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.MAINNET,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC", "DAI", "WBTC"],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
