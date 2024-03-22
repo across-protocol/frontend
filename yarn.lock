@@ -16,48 +16,23 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/constants-v2@^1.0.11":
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.11.tgz#58d34b5cb50351d097f2ca43c5a30b5908faed7c"
-  integrity sha512-RpseYB2QxGyfyrfXtUeFxUSCUW1zqu442QFzsdD1LBZtymuzdHuL2MwtTdmRRnJSvzRTFTtlRh4bYDoExSb5zQ==
-
 "@across-protocol/constants-v2@^1.0.14":
   version "1.0.14"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.14.tgz#2eb6624c306db3f184293d8abb023d2354abadce"
   integrity sha512-7C8hyH/7aDh8AOd5DLQrtcey6Ip4Q6o8FmSiDrBnxcD/aVeH+L8cZhh/hRMLm8CA5Olx4usEarfEfZ2rN0AZfg==
 
-"@across-protocol/contracts-v2@2.5.3":
-  version "2.5.3"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.5.3.tgz#6e4d656e155a5b6ce0202dad5f3bc132e867f484"
-  integrity sha512-eIOX7K7NFS0KhVCZDU+ka+UPWq4UNf6Nht5YoutgrtMYC4tiubBAJN69auE+zClVniixKf0uz5klkDs988XhgA==
+"@across-protocol/contracts-v2@2.5.4":
+  version "2.5.4"
+  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.5.4.tgz#7e1b6ff26d159abdad3a0ac51991f09df0f33f74"
+  integrity sha512-LdHN2XQIrzj3CyzVlYY69ppeLxohwjwzsAaRtZ7nbB/HsVwUuJJoCjoUAV+ePGjqKhxN2lojFFlni7uMnSUeRw==
   dependencies:
-    "@across-protocol/constants-v2" "^1.0.11"
+    "@across-protocol/constants-v2" "^1.0.14"
     "@defi-wonderland/smock" "^2.3.4"
     "@eth-optimism/contracts" "^0.5.40"
     "@ethersproject/abstract-provider" "5.7.0"
     "@ethersproject/abstract-signer" "5.7.0"
     "@ethersproject/bignumber" "5.7.0"
     "@openzeppelin/contracts" "4.9.6"
-    "@openzeppelin/contracts-upgradeable" "4.9.6"
-    "@scroll-tech/contracts" "^0.1.0"
-    "@uma/common" "^2.34.0"
-    "@uma/contracts-node" "^0.4.17"
-    "@uma/core" "^2.56.0"
-    axios "^1.6.2"
-    zksync-web3 "^0.14.3"
-
-"@across-protocol/contracts-v2@^2.5.1":
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts-v2/-/contracts-v2-2.5.1.tgz#81a85f735fe5060ce33b7f7f502b559052cdad1d"
-  integrity sha512-/c/2De7JKaR5g95ZC94XFgUTQgfB/1Iu0IOfz6m5ixkR40i58yFJLQoN2NbeFRBmSFRJaTGvz/5lIZ0hOraOQA==
-  dependencies:
-    "@across-protocol/constants-v2" "^1.0.11"
-    "@defi-wonderland/smock" "^2.3.4"
-    "@eth-optimism/contracts" "^0.5.40"
-    "@ethersproject/abstract-provider" "5.7.0"
-    "@ethersproject/abstract-signer" "5.7.0"
-    "@ethersproject/bignumber" "5.7.0"
-    "@openzeppelin/contracts" "4.9.3"
     "@openzeppelin/contracts-upgradeable" "4.9.6"
     "@scroll-tech/contracts" "^0.1.0"
     "@uma/common" "^2.34.0"
@@ -75,14 +50,14 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.22.17":
-  version "0.22.17"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.22.17.tgz#db821db07438a2d158353466e8b2961c1b697fac"
-  integrity sha512-+ihA8yQWmVhdxyQjxYkQ0tfr70CICR8zyPAqi3NYaVKD/CnVksqZgTWNgWfolONzy2jK4NBCi92mm5Z+y1oEfQ==
+"@across-protocol/sdk-v2@^0.22.18":
+  version "0.22.18"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.22.18.tgz#eceecd35b58f5b5148ce147f2f8daccae0fec22a"
+  integrity sha512-wxkJBOX7bN9OEOqNTi/Y1T/bti2lVuGZCFrPvNH4oNXivKB3m4I9K/aQf6r+ICzBxDD8DcMIgUXH1SrAGmZZ+A==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
     "@across-protocol/constants-v2" "^1.0.14"
-    "@across-protocol/contracts-v2" "2.5.3"
+    "@across-protocol/contracts-v2" "2.5.4"
     "@eth-optimism/sdk" "^3.2.2"
     "@pinata/sdk" "^2.1.0"
     "@types/mocha" "^10.0.1"
@@ -5950,11 +5925,6 @@
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.4.2.tgz#4e889c9c66e736f7de189a53f8ba5b8d789425c2"
   integrity sha512-NyJV7sJgoGYqbtNUWgzzOGW4T6rR19FmX1IJgXGdapGPWsuMelGJn9h03nos0iqfforCbCB0iYIR0MtIuIFLLw==
-
-"@openzeppelin/contracts@4.9.3":
-  version "4.9.3"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.3.tgz#00d7a8cf35a475b160b3f0293a6403c511099364"
-  integrity sha512-He3LieZ1pP2TNt5JbkPA4PNT9WC3gOTOlDcFGJW4Le4QKqwmiNJCRt44APfxMxvq7OugU/cqYuPcSBzOw38DAg==
 
 "@openzeppelin/contracts@4.9.6":
   version "4.9.6"
