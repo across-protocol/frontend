@@ -8,6 +8,7 @@ import {
 import { ERC20__factory } from "./typechain";
 import { tagAddress } from "./format";
 import { getProvider } from "./providers";
+import { getFastFillTimeByRoute } from "./fill-times";
 import { getConfig } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
@@ -105,7 +106,7 @@ export const getConfirmationDepositTime = (
 ): ConfirmationDepositTimeType => {
   const config = getConfig();
   const depositDelay = config.depositDelays()[fromChain] || 0;
-  const getTimeEstimateString = (
+  const getTimeEstimateRangeString = (
     lowEstimate: number,
     highEstimate: number
   ): {
@@ -123,21 +124,29 @@ export const getConfirmationDepositTime = (
   };
 
   if (amount.lte(limits.maxDepositInstant)) {
-    return getTimeEstimateString(1, 5);
+    const fastFillTimeInSeconds = getFastFillTimeByRoute(fromChain, toChain);
+    return {
+      formattedString:
+        fastFillTimeInSeconds < 60
+          ? `~${Math.floor(fastFillTimeInSeconds)} seconds`
+          : `~${Math.floor(fastFillTimeInSeconds / 60)} minutes`,
+      lowEstimate: fastFillTimeInSeconds,
+      highEstimate: fastFillTimeInSeconds,
+    };
   } else if (amount.lte(limits.maxDepositShortDelay)) {
     // This is just a rough estimate of how long 2 bot runs (1-4 minutes allocated for each) + an arbitrum transfer of 3-10 minutes would take.
-    if (toChain === ChainId.ARBITRUM) return getTimeEstimateString(5, 15);
+    if (toChain === ChainId.ARBITRUM) return getTimeEstimateRangeString(5, 15);
 
     // Optimism transfers take about 10-20 minutes anecdotally.
     if (toChain === ChainId.OPTIMISM) {
-      return getTimeEstimateString(12, 25);
+      return getTimeEstimateRangeString(12, 25);
     }
 
     // Polygon transfers take 20-30 minutes anecdotally.
-    if (toChain === ChainId.POLYGON) return getTimeEstimateString(20, 35);
+    if (toChain === ChainId.POLYGON) return getTimeEstimateRangeString(20, 35);
 
     // Typical numbers for an arbitrary L2.
-    return getTimeEstimateString(10, 30);
+    return getTimeEstimateRangeString(10, 30);
   }
 
   // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.
