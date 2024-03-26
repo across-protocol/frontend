@@ -8,7 +8,7 @@
     "@across-protocol/contracts-v2": "2.5.4",
     "@across-protocol/sdk-v2": "^0.22.18",
     "@amplitude/analytics-browser": "^2.3.5",
-    "@balancer-labs/sdk": "^1.1.5",
+    "@balancer-labs/sdk": "1.1.6-beta.16",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
