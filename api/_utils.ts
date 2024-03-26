@@ -995,6 +995,9 @@ async function getBalancerPoolState(poolTokenAddress: string) {
       },
     },
     rpcUrl: getProvider(HUB_POOL_CHAIN_ID).connection.url,
+    coingecko: {
+      coingeckoApiKey: REACT_APP_COINGECKO_PRO_API_KEY!,
+    },
   };
   const balancer = new BalancerSDK(config);
 
