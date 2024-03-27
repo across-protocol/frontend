@@ -32,12 +32,9 @@ const grayscaleLogos: Record<number, React.ReactNode> = {
   [ChainId.BASE]: <BaseGrayscaleLogo />,
   [ChainId.LINEA]: <LineaGrayscaleLogo />,
   // testnets
-  [ChainId.GOERLI]: <EthereumGrayscaleLogo />,
-  [ChainId.ARBITRUM_GOERLI]: <EthereumGrayscaleLogo />,
+  [ChainId.SEPOLIA]: <EthereumGrayscaleLogo />,
   [ChainId.MUMBAI]: <EthereumGrayscaleLogo />,
-  [ChainId.ZK_SYNC_GOERLI]: <ZkSyncGrayscaleLogo />,
-  [ChainId.BASE_GOERLI]: <BaseGrayscaleLogo />,
-  [ChainId.LINEA_GOERLI]: <LineaGrayscaleLogo />,
+  [ChainId.BASE_SEPOLIA]: <BaseGrayscaleLogo />,
 };
 
 type Props = {

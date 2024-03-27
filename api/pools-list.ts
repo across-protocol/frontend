@@ -38,7 +38,7 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
       const underlyingToken = pool.underlyingToken;
       return {
         name: underlyingToken.symbol,
-        chain: HUB_POOL_CHAIN_ID === 1 ? "Ethereum" : "Goerli",
+        chain: HUB_POOL_CHAIN_ID === 1 ? "Ethereum" : "Sepolia",
         protocol: "Across",
         base: utils.formatEther(pool.apyData.poolApy),
         reward: utils.formatEther(pool.apyData.rewardsApy),
