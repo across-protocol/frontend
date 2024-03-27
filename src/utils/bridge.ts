@@ -125,11 +125,14 @@ export const getConfirmationDepositTime = (
 
   if (amount.lte(limits.maxDepositInstant)) {
     const fastFillTimeInSeconds = getFastFillTimeByRoute(fromChain, toChain);
+    const fastFillTimeInMinutes = Math.floor(fastFillTimeInSeconds / 60);
     return {
       formattedString:
         fastFillTimeInSeconds < 60
           ? `~${Math.floor(fastFillTimeInSeconds)} seconds`
-          : `~${Math.floor(fastFillTimeInSeconds / 60)} minutes`,
+          : `~${fastFillTimeInMinutes} ${
+              fastFillTimeInMinutes === 1 ? "minute" : "minutes"
+            }`,
       lowEstimate: fastFillTimeInSeconds,
       highEstimate: fastFillTimeInSeconds,
     };
