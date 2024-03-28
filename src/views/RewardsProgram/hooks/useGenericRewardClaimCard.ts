@@ -36,7 +36,7 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
     description:
       "Join the referral program and earn a portion of fees in ACX for transfers made from your unique referral link.",
     learnMoreLink:
-      "https://docs.across.to/how-to-use-across/rewards/referral-rewards#how-to-earn-referral-rewards",
+      "https://docs.across.to/v/user-docs/how-to-use-across/rewards/referral-rewards#how-to-earn-referral-rewards",
   };
 
   return {
