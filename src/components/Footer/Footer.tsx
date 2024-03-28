@@ -12,7 +12,7 @@ export const NAV_LINKS = [
   {
     key: "faq",
     name: "FAQ",
-    url: "https://docs.across.to/additional-info/faq",
+    url: "https://docs.across.to/v/user-docs/additional-info/faq",
     icon: "",
   },
   {

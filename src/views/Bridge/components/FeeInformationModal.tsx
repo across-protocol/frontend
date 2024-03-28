@@ -13,11 +13,11 @@ type FeeInformationModalProps = {
 const links: { text: string; link: string }[] = [
   {
     text: "The role of relayers",
-    link: "https://docs.across.to/how-across-works/overview",
+    link: "https://docs.across.to/v/user-docs/how-across-works/overview",
   },
   {
     text: "Relayer fees",
-    link: "https://docs.across.to/how-across-works/fees",
+    link: "https://docs.across.to/v/user-docs/how-across-works/fees",
   },
   {
     text: "Gas fees",
