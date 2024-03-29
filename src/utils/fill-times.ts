@@ -47,7 +47,8 @@ const fastFillTimesSecondsFromTo = {
 };
 
 export function getFastFillTimeByRoute(fromChainId: number, toChainId: number) {
-  const fillTimeInSeconds = fastFillTimesSecondsFromTo[fromChainId]?.[toChainId];
+  const fillTimeInSeconds =
+    fastFillTimesSecondsFromTo[fromChainId]?.[toChainId];
 
   return fillTimeInSeconds || 60;
 }
