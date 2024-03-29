@@ -43,7 +43,7 @@ const fastFillTimesSecondsFromTo = {
     [ChainId.POLYGON]: 111,
     [ChainId.ZK_SYNC]: 5,
     [ChainId.BASE]: 139,
-  }
+  },
 };
 
 export function getFastFillTimeByRoute(fromChainId: number, toChainId: number) {
