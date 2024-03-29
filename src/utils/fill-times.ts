@@ -44,10 +44,17 @@ const fastFillTimesSecondsFromTo = {
     [ChainId.ZK_SYNC]: 5,
     [ChainId.BASE]: 139,
   },
+  [ChainId.LINEA]: {
+    [ChainId.MAINNET]: 12,
+    [ChainId.OPTIMISM]: 247,
+    [ChainId.POLYGON]: 111,
+    [ChainId.ZK_SYNC]: 5,
+    [ChainId.BASE]: 139,
+  },
 };
 
 export function getFastFillTimeByRoute(fromChainId: number, toChainId: number) {
-  const fillTimeInSeconds = fastFillTimesSecondsFromTo[fromChainId][toChainId];
+  const fillTimeInSeconds = fastFillTimesSecondsFromTo[fromChainId]?.[toChainId];
 
   return fillTimeInSeconds || 60;
 }
