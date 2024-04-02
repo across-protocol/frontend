@@ -27,13 +27,14 @@ const enabledRoutes = {
       },
     ],
     spokePoolVerifier: {
-      address: "0xbcfEb7d29BB1b40c6eA3A9e3d0822a79819d63F3",
+      address: "0xB4A8d45647445EA9FC3E1058096142390683dBC2",
       enabledChains: [
         CHAIN_IDs.MAINNET,
         CHAIN_IDs.OPTIMISM,
         CHAIN_IDs.POLYGON,
         CHAIN_IDs.BASE,
         CHAIN_IDs.ARBITRUM,
+        CHAIN_IDs.LINEA,
       ],
     },
     routes: [

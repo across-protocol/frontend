@@ -2455,7 +2455,7 @@
     }
   ],
   "spokePoolVerifier": {
-    "address": "0xbcfEb7d29BB1b40c6eA3A9e3d0822a79819d63F3",
-    "enabledChains": [1, 10, 137, 8453, 42161]
+    "address": "0xB4A8d45647445EA9FC3E1058096142390683dBC2",
+    "enabledChains": [1, 10, 137, 8453, 42161, 59144]
   }
 }
