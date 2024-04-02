@@ -1,0 +1,35 @@
+{
+  "hubPoolChain": 11155111,
+  "hubPoolAddress": "0x14224e63716afAcE30C9a417E0542281869f7d9e",
+  "hubPoolWethAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+  "acrossConfigStoreAddress": "0xB3De1e212B49e68f4a68b5993f31f63946FCA2a6",
+  "acrossTokenAddress": "0x0000000000000000000000000000000000000000",
+  "acceleratingDistributorAddress": "0x0000000000000000000000000000000000000000",
+  "merkleDistributorAddress": "0x0000000000000000000000000000000000000000",
+  "claimAndStakeAddress": "0x0000000000000000000000000000000000000000",
+  "routes": [
+    {
+      "fromChain": 84532,
+      "toChain": 11155111,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+      "fromTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 11155111,
+      "toChain": 84532,
+      "fromTokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      "fromSpokeAddress": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
+      "fromTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    }
+  ],
+  "pools": [],
+  "spokePoolVerifier": {
+    "address": "0x0000000000000000000000000000000000000000",
+    "enabledChains": []
+  }
+}

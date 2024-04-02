@@ -13,7 +13,7 @@ import { BigNumber, ethers, providers, utils } from "ethers";
 import { StructError, define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
-import enabledGoerliRoutesAsJson from "../src/data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
+import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 
 import {
   MINIMAL_BALANCER_V2_POOL_ABI,
@@ -34,6 +34,7 @@ import {
   relayerFeeCapitalCostConfig,
   BLOCK_TAG_LAG,
   defaultRelayerAddressOverride,
+  defaultRelayerAddressOverridePerToken,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
 
@@ -58,7 +59,9 @@ export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 export const DEFAULT_GAS_MARKUP = 0;
 
 // Don't permit HUB_POOL_CHAIN_ID=0
-export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1);
+export const HUB_POOL_CHAIN_ID = Number(REACT_APP_HUBPOOL_CHAINID || 1) as
+  | 1
+  | 11155111;
 
 // Tokens that should be disabled in the routes
 export const DISABLED_ROUTE_TOKENS = (
@@ -88,7 +91,7 @@ export const DISABLED_TOKENS_FOR_AVAILABLE_ROUTES = (
 const _ENABLED_ROUTES =
   HUB_POOL_CHAIN_ID === 1
     ? enabledMainnetRoutesAsJson
-    : enabledGoerliRoutesAsJson;
+    : enabledSepoliaRoutesAsJson;
 
 _ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
   ({ fromChain, toChain, fromTokenSymbol }) =>
@@ -289,31 +292,13 @@ export const overrideProvider = (
  */
 export const makeHubPoolClientConfig = (chainId = 1) => {
   return {
-    1: {
-      chainId: 1,
-      hubPoolAddress: "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
-      wethAddress: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.MAINNET],
-      configStoreAddress: "0x3B03509645713718B78951126E0A6de6f10043f5",
-      acceleratingDistributorAddress:
-        "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
-      merkleDistributorAddress: "0xE50b2cEAC4f60E840Ae513924033E753e2366487",
-    },
-    5: {
-      chainId: 5,
-      hubPoolAddress: "0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d",
-      wethAddress: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.GOERLI],
-      configStoreAddress: "0x3215e3C91f87081757d0c41EF0CB77738123Be83",
-      acceleratingDistributorAddress:
-        "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC",
-      merkleDistributorAddress: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
-    },
-  }[chainId] as {
-    chainId: number;
-    hubPoolAddress: string;
-    wethAddress: string;
-    configStoreAddress: string;
-    acceleratingDistributorAddress: string;
-    merkleDistributorAddress: string;
+    chainId: chainId,
+    hubPoolAddress: ENABLED_ROUTES.hubPoolAddress,
+    wethAddress: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.MAINNET],
+    configStoreAddress: ENABLED_ROUTES.acrossConfigStoreAddress,
+    acceleratingDistributorAddress:
+      ENABLED_ROUTES.acceleratingDistributorAddress,
+    merkleDistributorAddress: ENABLED_ROUTES.merkleDistributorAddress,
   };
 };
 
@@ -411,55 +396,25 @@ export const queries: Record<
       getGasMarkup(CHAIN_IDs.LINEA)
     ),
   /* --------------------------- Testnet queries --------------------------- */
-  [CHAIN_IDs.GOERLI]: () =>
-    new sdk.relayFeeCalculator.EthereumGoerliQueries(
-      getProvider(CHAIN_IDs.GOERLI),
+  [CHAIN_IDs.SEPOLIA]: () =>
+    new sdk.relayFeeCalculator.EthereumSepoliaQueries(
+      getProvider(CHAIN_IDs.SEPOLIA),
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDs.GOERLI)
+      getGasMarkup(CHAIN_IDs.SEPOLIA)
     ),
-  [CHAIN_IDs.ARBITRUM_GOERLI]: () =>
-    new sdk.relayFeeCalculator.ArbitrumGoerliQueries(
-      getProvider(CHAIN_IDs.ARBITRUM_GOERLI),
+  [CHAIN_IDs.BASE_SEPOLIA]: () =>
+    new sdk.relayFeeCalculator.BaseSepoliaQueries(
+      getProvider(CHAIN_IDs.BASE_SEPOLIA),
       undefined,
       undefined,
       undefined,
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
-      getGasMarkup(CHAIN_IDs.ARBITRUM_GOERLI)
-    ),
-  [CHAIN_IDs.ZK_SYNC_GOERLI]: () =>
-    new sdk.relayFeeCalculator.zkSyncGoerliQueries(
-      getProvider(CHAIN_IDs.ZK_SYNC_GOERLI),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.ZK_SYNC_GOERLI)
-    ),
-  [CHAIN_IDs.BASE_GOERLI]: () =>
-    new sdk.relayFeeCalculator.BaseGoerliQueries(
-      getProvider(CHAIN_IDs.BASE_GOERLI),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.BASE_GOERLI)
-    ),
-  [CHAIN_IDs.LINEA_GOERLI]: () =>
-    new sdk.relayFeeCalculator.LineaGoerliQueries(
-      getProvider(CHAIN_IDs.LINEA_GOERLI),
-      undefined,
-      "0xfa3DA25059F4ff59dA7566B58D3299dB8a04691F",
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.LINEA_GOERLI)
+      getGasMarkup(CHAIN_IDs.BASE_SEPOLIA)
     ),
 };
 
@@ -527,7 +482,10 @@ export const getRelayerFeeDetails = async (
   message?: string,
   relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const tokenAddresses = sdk.utils.getL2TokenAddresses(l1Token);
+  const tokenAddresses = sdk.utils.getL2TokenAddresses(
+    l1Token,
+    HUB_POOL_CHAIN_ID
+  );
   if (!tokenAddresses) {
     throw new InputError(
       `Could not resolve token address for token ${l1Token}`
@@ -618,10 +576,6 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
-    case CHAIN_IDs.ARBITRUM_GOERLI:
-      return "0xD29C85F15DF544bA632C9E25829fd29d767d7978";
-    case CHAIN_IDs.LINEA: // FIXME: remove after updating sdk
-      return "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75";
     default:
       return sdk.utils.getDeployedAddress("SpokePool", chainId);
   }
@@ -977,21 +931,21 @@ export async function getExternalPoolState(
 
 async function getBalancerPoolState(poolTokenAddress: string) {
   const supportedBalancerPoolsMap = {
-    1: {
+    [CHAIN_IDs.MAINNET]: {
       "50wstETH-50ACX": {
         id: "0x36be1e97ea98ab43b4debf92742517266f5731a3000200000000000000000466",
         address: "0x36Be1E97eA98AB43b4dEBf92742517266F5731a3",
       },
     },
-    5: {},
+    [CHAIN_IDs.SEPOLIA]: {},
   };
 
   const config = {
     network: {
-      ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID as 1 | 5],
+      ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID],
       pools: {
-        ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID as 1 | 5].pools,
-        ...supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID as 1 | 5],
+        ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID].pools,
+        ...supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID],
       },
     },
     rpcUrl: getProvider(HUB_POOL_CHAIN_ID).connection.url,
@@ -1278,11 +1232,15 @@ export function getDefaultRelayerAddress(
   destinationChainId: number
 ) {
   // All symbols are uppercase in this record.
-  const result = defaultRelayerAddressOverride[symbol.toUpperCase()];
-  if (result?.destinationChains.includes(destinationChainId)) {
-    return result.relayer;
+  const overrideForToken =
+    defaultRelayerAddressOverridePerToken[symbol.toUpperCase()];
+  if (overrideForToken?.destinationChains.includes(destinationChainId)) {
+    return overrideForToken.relayer;
   } else {
-    return sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS;
+    return (
+      defaultRelayerAddressOverride ||
+      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS
+    );
   }
 }
 

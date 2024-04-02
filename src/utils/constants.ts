@@ -30,7 +30,7 @@ import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
-import GoerliRoutes from "data/routes_5_0x0e2817C49698cc0874204AeDf7c72Be2Bb7fCD5d.json";
+import SepoliaRoutes from "data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 
 /* Chains and Tokens section */
 export enum ChainId {
@@ -42,12 +42,9 @@ export enum ChainId {
   BASE = CHAIN_IDs.BASE,
   LINEA = CHAIN_IDs.LINEA,
   // testnets
-  ARBITRUM_GOERLI = CHAIN_IDs.ARBITRUM_GOERLI,
-  ZK_SYNC_GOERLI = CHAIN_IDs.ZK_SYNC_GOERLI,
-  BASE_GOERLI = CHAIN_IDs.BASE_GOERLI,
-  GOERLI = CHAIN_IDs.GOERLI,
   MUMBAI = CHAIN_IDs.MUMBAI,
-  LINEA_GOERLI = CHAIN_IDs.LINEA_GOERLI,
+  SEPOLIA = CHAIN_IDs.SEPOLIA,
+  BASE_SEPOLIA = CHAIN_IDs.BASE_SEPOLIA,
 }
 
 // Maps `ChainId` to an object and inverts the Key/Value
@@ -191,19 +188,6 @@ export const chainInfoList: ChainInfoList = [
   },
   // testnets
   {
-    name: "Goerli",
-    fullName: "Goerli Testnet",
-    chainId: ChainId.GOERLI,
-    logoURI: ethereumLogo,
-    explorerUrl: "https://goerli.etherscan.io/",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://goerli.etherscan.io/"
-    ),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_5_PROVIDER_URL,
-  },
-  {
     name: "Mumbai",
     chainId: ChainId.MUMBAI,
     logoURI: polygonLogo,
@@ -217,58 +201,32 @@ export const chainInfoList: ChainInfoList = [
     customRpcUrl: process.env.REACT_APP_CHAIN_80001_PROVIDER_URL,
   },
   {
-    name: "Arbitrum Goerli",
-    fullName: "Arbitrum Testnet Goerli",
-    chainId: ChainId.ARBITRUM_GOERLI,
-    logoURI: arbitrumLogo,
-    explorerUrl: "https://testnet.arbiscan.io",
-    constructExplorerLink: (txHash: string) =>
-      `https://testnet.arbiscan.io/tx/${txHash}`,
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_421613_PROVIDER_URL,
-  },
-  {
-    name: "zkSync Goerli",
-    fullName: "zkSync Testnet Goerli",
-    chainId: ChainId.ZK_SYNC_GOERLI,
-    logoURI: zkSyncLogo,
-    rpcUrl: "https://testnet.era.zksync.dev",
-    explorerUrl: "https://goerli.explorer.zksync.io",
+    name: "Sepolia",
+    fullName: "Sepolia",
+    chainId: ChainId.SEPOLIA,
+    logoURI: ethereumLogo,
+    rpcUrl: "https://gateway.tenderly.co/public/sepolia	",
+    explorerUrl: "https://sepolia.etherscan.io/",
     constructExplorerLink: defaultConstructExplorerLink(
-      "https://goerli.explorer.zksync.io"
+      "https://sepolia.etherscan.io/"
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_280_PROVIDER_URL,
+    customRpcUrl: process.env.REACT_APP_CHAIN_11155111_PROVIDER_URL,
   },
   {
-    name: "Base Goerli",
-    fullName: "Base Testnet Goerli",
-    chainId: ChainId.BASE_GOERLI,
+    name: "Base Sepolia",
+    fullName: "Base Testnet Sepolia",
+    chainId: ChainId.BASE_SEPOLIA,
     logoURI: baseLogo,
-    rpcUrl: "https://goerli.base.org",
-    explorerUrl: "https://goerli.basescan.org",
+    rpcUrl: "https://sepolia.base.org",
+    explorerUrl: "https://base-sepolia.blockscout.com/",
     constructExplorerLink: defaultConstructExplorerLink(
-      "https://goerli.basescan.org"
+      "https://base-sepolia.blockscout.com/"
     ),
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_84531_PROVIDER_URL,
-  },
-  {
-    name: "Linea Goerli",
-    fullName: "Linea Testnet Goerli",
-    chainId: ChainId.LINEA_GOERLI,
-    logoURI: lineaLogo,
-    rpcUrl: "https://rpc.goerli.linea.build",
-    explorerUrl: "https://goerli.lineascan.build/",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://goerli.lineascan.build/"
-    ),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: 10_000,
-    customRpcUrl: process.env.REACT_APP_CHAIN_59140_PROVIDER_URL,
+    customRpcUrl: process.env.REACT_APP_CHAIN_84532_PROVIDER_URL,
   },
 ];
 
@@ -299,7 +257,7 @@ export type ExternalLPTokenList = Array<
 >;
 
 export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
-  1: [
+  [CHAIN_IDs.MAINNET]: [
     {
       name: "Balancer 50wstETH-50ACX",
       symbol: "50wstETH-50ACX",
@@ -316,7 +274,8 @@ export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
       ],
     },
   ],
-  5: [],
+  [CHAIN_IDs.GOERLI]: [],
+  [CHAIN_IDs.SEPOLIA]: [],
 };
 
 export const bridgedUSDCSymbolsMap = {
@@ -575,9 +534,9 @@ export function getRoutes(chainId: ChainId): RouteConfig {
     superstruct.assert(MainnetRoutes, RouteConfigSS);
     return MainnetRoutes;
   }
-  if (chainId === ChainId.GOERLI) {
-    superstruct.assert(GoerliRoutes, RouteConfigSS);
-    return GoerliRoutes;
+  if (chainId === ChainId.SEPOLIA) {
+    superstruct.assert(SepoliaRoutes, RouteConfigSS);
+    return SepoliaRoutes;
   }
   throw new Error("No routes defined for chainId: " + chainId);
 }
