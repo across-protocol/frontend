@@ -100,8 +100,6 @@ const handler = async (
       throw new InputError(`Route is not enabled.`);
     }
 
-    const latestBlock = await provider.getBlock("latest");
-
     relayer ??= getDefaultRelayerAddress(symbol, destinationChainId);
     recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
 
@@ -148,6 +146,8 @@ const handler = async (
         }
       }
     }
+
+    const latestBlock = await provider.getBlock("latest");
 
     // Note: Add a buffer to "latest" timestamp so that it corresponds to a block older than HEAD.
     // This is to improve relayer UX who have heightened risk of sending inadvertent invalid fills

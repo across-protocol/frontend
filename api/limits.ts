@@ -138,11 +138,11 @@ const handler = async (
         l1Token,
         ethers.BigNumber.from("10").pow(decimals),
         computedOriginChainId,
-        Number(destinationChainId),
+        destinationChainId,
         DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
         tokenPriceNative,
         undefined,
-        getDefaultRelayerAddress(symbol, Number(destinationChainId))
+        getDefaultRelayerAddress(symbol, destinationChainId)
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
@@ -170,7 +170,7 @@ const handler = async (
     );
 
     const lpCushion = ethers.utils.parseUnits(
-      getLpCushion(symbol, computedOriginChainId, Number(destinationChainId)),
+      getLpCushion(symbol, computedOriginChainId, destinationChainId),
       decimals
     );
     liquidReserves = liquidReserves.sub(lpCushion);
