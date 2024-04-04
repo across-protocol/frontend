@@ -6,13 +6,12 @@ import { type, assert, Infer, optional, string } from "superstruct";
 import {
   disabledL1Tokens,
   DEFAULT_QUOTE_TIMESTAMP_BUFFER,
-  TOKEN_SYMBOLS_MAP,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
 } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
-  getTokenDetails,
+  getRouteDetails,
   InputError,
   getProvider,
   getRelayerFeeDetails,
@@ -28,7 +27,7 @@ import {
   getSpokePoolAddress,
   getCachedTokenBalance,
   getDefaultRelayerAddress,
-  hasPotentialRouteCollision,
+  getHubPool,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -62,6 +61,7 @@ const handler = async (
       : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
 
     const provider = getProvider(HUB_POOL_CHAIN_ID);
+    const hubPool = getHubPool(provider);
 
     assert(query, SuggestedFeesQueryParamsSchema);
 
@@ -83,24 +83,24 @@ const handler = async (
     const destinationChainId = Number(_destinationChainId);
     token = ethers.utils.getAddress(token);
 
-    const [latestBlock, tokenDetails] = await Promise.all([
-      provider.getBlock("latest"),
-      getTokenDetails(provider, undefined, token, originChainId),
-    ]);
-    const { l1Token, hubPool, chainId: computedOriginChainId } = tokenDetails;
-
-    const tokenInformation = Object.values(TOKEN_SYMBOLS_MAP).find(
-      (details) => details.addresses[HUB_POOL_CHAIN_ID] === l1Token
+    const {
+      l1Token,
+      resolvedOriginChainId: computedOriginChainId,
+      symbol,
+    } = getRouteDetails(
+      token,
+      destinationChainId,
+      originChainId ? Number(originChainId) : undefined
     );
 
-    if (!sdk.utils.isDefined(tokenInformation)) {
-      throw new InputError("Unsupported token address");
+    if (
+      disabledL1Tokens.includes(l1Token.toLowerCase()) ||
+      !isRouteEnabled(computedOriginChainId, destinationChainId, token)
+    ) {
+      throw new InputError(`Route is not enabled.`);
     }
 
-    relayer ??= getDefaultRelayerAddress(
-      tokenInformation.symbol,
-      destinationChainId
-    );
+    relayer ??= getDefaultRelayerAddress(symbol, destinationChainId);
     recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
 
     if (sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message)) {
@@ -147,6 +147,8 @@ const handler = async (
       }
     }
 
+    const latestBlock = await provider.getBlock("latest");
+
     // Note: Add a buffer to "latest" timestamp so that it corresponds to a block older than HEAD.
     // This is to improve relayer UX who have heightened risk of sending inadvertent invalid fills
     // for quote times right at HEAD (or worst, in the future of HEAD). If timestamp is supplied as
@@ -178,27 +180,10 @@ const handler = async (
     const amount = ethers.BigNumber.from(amountInput);
 
     const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
-    const [{ number: blockTag }, routeEnabled] = await Promise.all([
-      blockFinder.getBlockForTimestamp(parsedTimestamp),
-      isRouteEnabled(computedOriginChainId, destinationChainId, token),
-    ]);
+    const { number: blockTag } = await blockFinder.getBlockForTimestamp(
+      parsedTimestamp
+    );
 
-    if (disabledL1Tokens.includes(l1Token.toLowerCase())) {
-      throw new InputError(`Route is not enabled.`);
-    }
-    if (!routeEnabled) {
-      const routeCollision = await hasPotentialRouteCollision(
-        provider,
-        undefined,
-        token,
-        originChainId
-      );
-      throw new InputError(
-        routeCollision
-          ? `More than one ACX route maps to the provided inputs causing ambiguity. Please specify the originChainId.`
-          : `Route is not enabled.`
-      );
-    }
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       ENABLED_ROUTES.acrossConfigStoreAddress,
       provider
