@@ -201,62 +201,86 @@ export const resolveVercelEndpoint = () => {
   }
 };
 
-const _getTokenDetails = async (
-  provider: providers.Provider,
-  l1Token?: string,
-  l2Token?: string,
-  chainId?: string
+export const getTokenDetails = (
+  originTokenAddress: string,
+  destinationChainId: number,
+  originChainId?: number
 ) => {
-  const hubPool = HubPool__factory.connect(
-    ENABLED_ROUTES.hubPoolAddress,
-    provider
-  );
+  const token = _getTokenByAddress(originTokenAddress, originChainId);
 
-  // 2 queries: treating the token as the l1Token or treating the token as the L2 token.
-  const l2TokenFilter = hubPool.filters.SetPoolRebalanceRoute(
-    undefined,
-    l1Token,
-    l2Token
-  );
+  if (!token) {
+    throw new InputError(
+      originChainId
+        ? "Unsupported token on given origin chain"
+        : "Unsupported token address"
+    );
+  }
 
-  // Filter events by chainId.
-  const events = (await hubPool.queryFilter(l2TokenFilter, 0, "latest")).filter(
-    (event) => !chainId || event.args.destinationChainId.toString() === chainId
-  );
+  const possibleOriginChainIds = originChainId
+    ? [originChainId]
+    : _getChainIdsOfToken(originTokenAddress, token);
 
-  if (events.length === 0) throw new InputError("No whitelisted token found");
+  if (possibleOriginChainIds.length === 0) {
+    throw new InputError("Unsupported token address");
+  }
 
-  // Sorting from most recent to oldest.
-  events.sort((a, b) => {
-    if (b.blockNumber !== a.blockNumber) return b.blockNumber - a.blockNumber;
-    if (b.transactionIndex !== a.transactionIndex)
-      return b.transactionIndex - a.transactionIndex;
-    return b.logIndex - a.logIndex;
-  });
+  if (possibleOriginChainIds.length > 1) {
+    throw new InputError(
+      "More than one route is enabled for the provided inputs causing ambiguity. Please specify the originChainId."
+    );
+  }
 
-  return events.map((event) => ({
-    hubPool,
-    chainId: event.args.destinationChainId.toNumber(),
-    l1Token: event.args.l1Token,
-    l2Token: event.args.destinationToken,
-  }));
+  const resolvedOriginChainId = possibleOriginChainIds[0];
+  const originToken = token.addresses[resolvedOriginChainId];
+
+  if (!originToken) {
+    throw new InputError("Unsupported token address on given origin chain");
+  }
+
+  const destinationToken = token.addresses[destinationChainId];
+
+  if (!destinationToken) {
+    throw new InputError(
+      "Unsupported token address on given destination chain"
+    );
+  }
+
+  return {
+    ...token,
+    resolvedOriginChainId,
+    l1Token: token.addresses[HUB_POOL_CHAIN_ID],
+    originToken,
+    destinationToken,
+  };
 };
 
-export const getTokenDetails = async (
-  provider: providers.Provider,
-  l1Token?: string,
-  l2Token?: string,
-  chainId?: string
-) => (await _getTokenDetails(provider, l1Token, l2Token, chainId))[0];
+const _getTokenByAddress = (tokenAddress: string, chainId?: number) => {
+  const [, token] =
+    Object.entries(TOKEN_SYMBOLS_MAP).find(([_symbol, { addresses }]) =>
+      chainId
+        ? addresses[chainId]?.toLowerCase() === tokenAddress.toLowerCase()
+        : Object.values(addresses).some(
+            (address) => address.toLowerCase() === tokenAddress.toLowerCase()
+          )
+    ) || [];
+  return token;
+};
 
-export const hasPotentialRouteCollision = async (
-  provider: providers.Provider,
-  l1Token?: string,
-  l2Token?: string,
-  chainId?: string
-) => (await _getTokenDetails(provider, l1Token, l2Token, chainId)).length > 1;
+const _getChainIdsOfToken = (
+  tokenAddress: string,
+  token: typeof TOKEN_SYMBOLS_MAP[keyof typeof TOKEN_SYMBOLS_MAP]
+) => {
+  const chainIds = Object.entries(token.addresses).filter(
+    ([_, address]) => address.toLowerCase() === tokenAddress.toLowerCase()
+  );
+  return chainIds.map(([chainId]) => Number(chainId));
+};
 
 export class InputError extends Error {}
+
+export const getHubPool = (provider: providers.Provider) => {
+  return HubPool__factory.connect(ENABLED_ROUTES.hubPoolAddress, provider);
+};
 
 /**
  * Resolves an Infura provider given the name of the ETH network

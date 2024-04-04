@@ -1,7 +1,3 @@
-// Note: ideally this would be written in ts as vercel claims they support it natively.
-// However, when written in ts, the imports seem to fail, so this is in js for now.
-
-import { HubPool__factory } from "@across-protocol/contracts-v2/dist/typechain";
 import { utils as sdkUtils } from "@across-protocol/sdk-v2";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
@@ -9,7 +5,6 @@ import {
   BLOCK_TAG_LAG,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   disabledL1Tokens,
-  TOKEN_SYMBOLS_MAP,
 } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import { object, assert, Infer, optional } from "superstruct";
@@ -30,10 +25,9 @@ import {
   getLpCushion,
   getProvider,
   HUB_POOL_CHAIN_ID,
-  ENABLED_ROUTES,
   getDefaultRelayerAddress,
   sendResponse,
-  hasPotentialRouteCollision,
+  getHubPool,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -85,61 +79,39 @@ const handler = async (
 
     assert(query, LimitsQueryParamsSchema);
 
-    let { token, destinationChainId, originChainId } = query;
+    let {
+      token,
+      destinationChainId: _destinationChainId,
+      originChainId,
+    } = query;
 
-    if (originChainId === destinationChainId) {
+    if (originChainId === _destinationChainId) {
       throw new InputError("Origin and destination chains cannot be the same");
     }
 
+    const destinationChainId = Number(_destinationChainId);
     token = ethers.utils.getAddress(token);
 
-    const { l1Token, chainId: computedOriginChainId } = await getTokenDetails(
-      provider,
-      undefined,
+    const {
+      l1Token,
+      resolvedOriginChainId: computedOriginChainId,
+      destinationToken,
+      decimals,
+      symbol,
+    } = getTokenDetails(
       token,
-      originChainId
+      destinationChainId,
+      originChainId ? Number(originChainId) : undefined
     );
 
-    const tokenDetails = Object.values(TOKEN_SYMBOLS_MAP).find(
-      (details) => details.addresses[HUB_POOL_CHAIN_ID] === l1Token
-    );
-
-    if (tokenDetails === undefined) {
-      throw new InputError("Unsupported token address");
-    }
-    const symbol = tokenDetails.symbol;
-
-    const [tokenDetailsResult, routeEnabledResult] = await Promise.allSettled([
-      getTokenDetails(provider, l1Token, undefined, destinationChainId),
-      isRouteEnabled(computedOriginChainId, Number(destinationChainId), token),
-    ]);
-    // If any of the above fails or the route is not enabled, we assume that the
     if (
-      tokenDetailsResult.status === "rejected" ||
-      routeEnabledResult.status === "rejected"
+      disabledL1Tokens.includes(l1Token.toLowerCase()) ||
+      !isRouteEnabled(computedOriginChainId, destinationChainId, token)
     ) {
-      throw new InputError(`Unable to query route.`);
-    } else if (disabledL1Tokens.includes(l1Token.toLowerCase())) {
-      throw new InputError(`Route is not enabled.`);
-    } else if (!routeEnabledResult.value) {
-      const routeCollision = await hasPotentialRouteCollision(
-        provider,
-        undefined,
-        token,
-        originChainId
-      );
-      throw new InputError(
-        routeCollision
-          ? `More than one ACX route maps to the provided inputs causing ambiguity. Please specify the originChainId.`
-          : `Route is not enabled.`
-      );
+      throw new InputError("Route is not enabled.");
     }
 
-    const { l2Token: destinationToken } = tokenDetailsResult.value;
-    const hubPool = HubPool__factory.connect(
-      ENABLED_ROUTES.hubPoolAddress,
-      provider
-    );
+    const hubPool = getHubPool(provider);
 
     const multicallInput = [
       hubPool.interface.encodeFunctionData("sync", [l1Token]),
@@ -164,7 +136,7 @@ const handler = async (
     ] = await Promise.all([
       getRelayerFeeDetails(
         l1Token,
-        ethers.BigNumber.from("10").pow(tokenDetails.decimals),
+        ethers.BigNumber.from("10").pow(decimals),
         computedOriginChainId,
         Number(destinationChainId),
         DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
@@ -185,7 +157,7 @@ const handler = async (
       ),
       Promise.all(
         fullRelayers.map((relayer) =>
-          destinationChainId === "1"
+          destinationChainId === 1
             ? ethers.BigNumber.from("0")
             : getCachedTokenBalance("1", relayer, l1Token)
         )
@@ -199,7 +171,7 @@ const handler = async (
 
     const lpCushion = ethers.utils.parseUnits(
       getLpCushion(symbol, computedOriginChainId, Number(destinationChainId)),
-      tokenDetails.decimals
+      decimals
     );
     liquidReserves = liquidReserves.sub(lpCushion);
     if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
@@ -212,7 +184,7 @@ const handler = async (
       : ethers.utils
           .parseUnits(
             (minDeposits[destinationChainId] ?? 0).toString(),
-            tokenDetails.decimals
+            decimals
           )
           .mul(ethers.utils.parseUnits("1"))
           .div(tokenPriceUsd);
