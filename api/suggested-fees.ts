@@ -11,7 +11,7 @@ import {
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
-  getTokenDetails,
+  getRouteDetails,
   InputError,
   getProvider,
   getRelayerFeeDetails,
@@ -87,7 +87,7 @@ const handler = async (
       l1Token,
       resolvedOriginChainId: computedOriginChainId,
       symbol,
-    } = getTokenDetails(
+    } = getRouteDetails(
       token,
       destinationChainId,
       originChainId ? Number(originChainId) : undefined

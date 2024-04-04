@@ -14,7 +14,7 @@ import {
   InputError,
   getRelayerFeeDetails,
   getCachedTokenPrice,
-  getTokenDetails,
+  getRouteDetails,
   getCachedTokenBalance,
   maxBN,
   minBN,
@@ -95,10 +95,10 @@ const handler = async (
     const {
       l1Token,
       resolvedOriginChainId: computedOriginChainId,
-      destinationToken,
+      outputToken: destinationToken,
       decimals,
       symbol,
-    } = getTokenDetails(
+    } = getRouteDetails(
       token,
       destinationChainId,
       originChainId ? Number(originChainId) : undefined

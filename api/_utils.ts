@@ -201,12 +201,23 @@ export const resolveVercelEndpoint = () => {
   }
 };
 
-export const getTokenDetails = (
-  originTokenAddress: string,
+/**
+ * Utility function to resolve route details based on given `inputTokenAddress` and `destinationChainId`.
+ * The optional parameter `originChainId` can be omitted if the `inputTokenAddress` is unique across all
+ * chains. If the `inputTokenAddress` is not unique across all chains, the `originChainId` must be
+ * provided to resolve the correct token details.
+ * @param inputTokenAddress The token address to resolve details for.
+ * @param destinationChainId The destination chain id of the route.
+ * @param originChainId Optional if the `inputTokenAddress` is unique across all chains. Required if not.
+ * @returns Token details of route and additional information, such as the inferred origin chain id, L1
+ * token address and the input/output token addresses.
+ */
+export const getRouteDetails = (
+  inputTokenAddress: string,
   destinationChainId: number,
   originChainId?: number
 ) => {
-  const token = _getTokenByAddress(originTokenAddress, originChainId);
+  const token = _getTokenByAddress(inputTokenAddress, originChainId);
 
   if (!token) {
     throw new InputError(
@@ -218,7 +229,7 @@ export const getTokenDetails = (
 
   const possibleOriginChainIds = originChainId
     ? [originChainId]
-    : _getChainIdsOfToken(originTokenAddress, token);
+    : _getChainIdsOfToken(inputTokenAddress, token);
 
   if (possibleOriginChainIds.length === 0) {
     throw new InputError("Unsupported token address");
@@ -231,15 +242,15 @@ export const getTokenDetails = (
   }
 
   const resolvedOriginChainId = possibleOriginChainIds[0];
-  const originToken = token.addresses[resolvedOriginChainId];
+  const inputToken = token.addresses[resolvedOriginChainId];
 
-  if (!originToken) {
+  if (!inputToken) {
     throw new InputError("Unsupported token address on given origin chain");
   }
 
-  const destinationToken = token.addresses[destinationChainId];
+  const outputToken = token.addresses[destinationChainId];
 
-  if (!destinationToken) {
+  if (!outputToken) {
     throw new InputError(
       "Unsupported token address on given destination chain"
     );
@@ -249,8 +260,8 @@ export const getTokenDetails = (
     ...token,
     resolvedOriginChainId,
     l1Token: token.addresses[HUB_POOL_CHAIN_ID],
-    originToken,
-    destinationToken,
+    inputToken,
+    outputToken,
   };
 };
 
