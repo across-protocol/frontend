@@ -1,5 +1,4 @@
 import * as sdk from "@across-protocol/sdk-v2";
-import { BlockFinder } from "@uma/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
@@ -179,7 +178,7 @@ const handler = async (
 
     const amount = ethers.BigNumber.from(amountInput);
 
-    const blockFinder = new BlockFinder(provider.getBlock.bind(provider));
+    const blockFinder = new sdk.utils.BlockFinder(provider, [latestBlock]);
     const { number: blockTag } = await blockFinder.getBlockForTimestamp(
       parsedTimestamp
     );
