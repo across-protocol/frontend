@@ -375,59 +375,41 @@ const enabledRoutes = {
       },
     ],
   },
-  [CHAIN_IDs.GOERLI]: {
-    hubPoolChain: CHAIN_IDs.GOERLI,
-    hubPoolAddress: getDeployedAddress("HubPool", CHAIN_IDs.GOERLI),
-    hubPoolWethAddress: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.GOERLI],
+  [CHAIN_IDs.SEPOLIA]: {
+    hubPoolChain: CHAIN_IDs.SEPOLIA,
+    hubPoolAddress: getDeployedAddress("HubPool", CHAIN_IDs.SEPOLIA),
+    hubPoolWethAddress: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.SEPOLIA],
     acrossConfigStoreAddress: getDeployedAddress(
       "AcrossConfigStore",
-      CHAIN_IDs.GOERLI
+      CHAIN_IDs.SEPOLIA
     ),
-    acrossTokenAddress: TOKEN_SYMBOLS_MAP.ACX.addresses[CHAIN_IDs.GOERLI],
-    acceleratingDistributorAddress:
-      "0xA59CE9FDFf8a0915926C2AF021d54E58f9B207CC",
-    merkleDistributorAddress: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
-    claimAndStakeAddress: "0xF45D31fc33ea7d047172cd60ECc46d1a69696932",
+    acrossTokenAddress: TOKEN_SYMBOLS_MAP.ACX.addresses[CHAIN_IDs.MAINNET],
+    acceleratingDistributorAddress: sdkUtils.AddressZero,
+    merkleDistributorAddress: sdkUtils.AddressZero,
+    claimAndStakeAddress: sdkUtils.AddressZero,
     pools: [],
     spokePoolVerifier: {
-      address: "0x269727F088F16E1Aea52Cf5a97B1CD41DAA3f02D",
+      address: sdkUtils.AddressZero,
       enabledChains: [],
     },
     routes: [
       {
-        fromChain: CHAIN_IDs.GOERLI,
-        fromSpokeAddress: getDeployedAddress("SpokePool", CHAIN_IDs.GOERLI),
+        fromChain: CHAIN_IDs.SEPOLIA,
+        fromSpokeAddress: getDeployedAddress("SpokePool", CHAIN_IDs.SEPOLIA),
         toChains: [
           {
-            chainId: CHAIN_IDs.ARBITRUM_GOERLI,
-            tokens: ["WETH"],
-          },
-          {
-            chainId: CHAIN_IDs.ZK_SYNC_GOERLI,
-            tokens: ["WETH", "USDC"],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.ARBITRUM_GOERLI,
-        fromSpokeAddress: "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
-        toChains: [
-          {
-            chainId: CHAIN_IDs.GOERLI,
+            chainId: CHAIN_IDs.BASE_SEPOLIA,
             tokens: ["WETH"],
           },
         ],
       },
       {
-        fromChain: CHAIN_IDs.ZK_SYNC_GOERLI,
-        fromSpokeAddress: getDeployedAddress(
-          "SpokePool",
-          CHAIN_IDs.ZK_SYNC_GOERLI
-        ),
+        fromChain: CHAIN_IDs.BASE_SEPOLIA,
+        fromSpokeAddress: "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
         toChains: [
           {
-            chainId: CHAIN_IDs.GOERLI,
-            tokens: ["WETH", "USDC"],
+            chainId: CHAIN_IDs.SEPOLIA,
+            tokens: ["WETH"],
           },
         ],
       },
