@@ -9,19 +9,19 @@
   "claimAndStakeAddress": "0x0000000000000000000000000000000000000000",
   "routes": [
     {
-      "fromChain": 84532,
-      "toChain": 11155111,
-      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
-      "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+      "fromChain": 11155111,
+      "toChain": 84532,
+      "fromTokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      "fromSpokeAddress": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
       "fromTokenSymbol": "WETH",
       "isNative": false,
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
     },
     {
-      "fromChain": 11155111,
-      "toChain": 84532,
-      "fromTokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
-      "fromSpokeAddress": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
+      "fromChain": 84532,
+      "toChain": 11155111,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
       "fromTokenSymbol": "WETH",
       "isNative": false,
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
