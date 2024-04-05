@@ -34,9 +34,9 @@ const ChangeAccountModal = ({
 
   useEffect(() => {
     setValidInput(
-      ethers.utils.isAddress(userInput)
-      && userInput !== currentAccount
-      && !walletBlacklist.includes(userInput.toLowerCase())
+      ethers.utils.isAddress(userInput) &&
+        userInput !== currentAccount &&
+        !walletBlacklist.includes(userInput.toLowerCase())
     );
   }, [currentAccount, userInput]);
 
