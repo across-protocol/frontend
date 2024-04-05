@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { Modal, Text } from "components";
 import { useEffect, useState } from "react";
-import { QUERIESV2 } from "utils";
+import { QUERIESV2, walletBlacklist } from "utils";
 import { ReactComponent as CrossIcon } from "assets/icons/cross-16.svg";
 import { UnstyledButton } from "components/Button";
 import { ethers } from "ethers";
@@ -34,7 +34,9 @@ const ChangeAccountModal = ({
 
   useEffect(() => {
     setValidInput(
-      ethers.utils.isAddress(userInput) && userInput !== currentAccount
+      ethers.utils.isAddress(userInput)
+      && userInput !== currentAccount
+      && !walletBlacklist.includes(userInput.toLowerCase())
     );
   }, [currentAccount, userInput]);
 
