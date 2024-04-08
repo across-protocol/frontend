@@ -165,9 +165,7 @@ const handler = async (
       // We can use rounding here to increase the chance that a deposit's quote timestamp is re-used, thereby
       // allowing relayers hit the cache more often when fetching a block for a timestamp.
       // Divide by intended precision in seconds, round down to nearest integer, multiply by precision in seconds.
-      const precision = Number(
-        QUOTE_TIMESTAMP_PRECISION ?? DEFAULT_QUOTE_TIMESTAMP_BUFFER
-      );
+      const precision = Number(QUOTE_TIMESTAMP_PRECISION ?? 1);
       parsedTimestamp =
         Math.floor((latestBlock.timestamp - quoteTimeBuffer) / precision) *
         precision;
