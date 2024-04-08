@@ -135,8 +135,10 @@ export const relayerFeeCapitalCostConfig: {
   )
 );
 
+export const MAINNET_BLOCK_TIME_SECONDS = 12;
+
 // If `timestamp` is not passed into a suggested-fees query, then return the latest mainnet timestamp minus this buffer.
-export const DEFAULT_QUOTE_TIMESTAMP_BUFFER = 12 * 25; // ~25 blocks on mainnet (12s/block), ~= 5 minutes.
+export const DEFAULT_QUOTE_TIMESTAMP_BUFFER = MAINNET_BLOCK_TIME_SECONDS * 25; // ~25 blocks on mainnet (12s/block), ~= 5 minutes.
 
 // If `timestamp` is not passed into a suggested-fees query, then return the latest price rounded to
 // the nearest multiple of this value.
