@@ -6,6 +6,7 @@ import {
   disabledL1Tokens,
   DEFAULT_QUOTE_TIMESTAMP_BUFFER,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+  MAINNET_BLOCK_TIME_SECONDS,
 } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
@@ -155,6 +156,7 @@ const handler = async (
 
     // If the caller did not supply a quote timestamp, generate one from the latest block number.
     let parsedTimestamp = Number(timestamp);
+    let blockFinderHints;
     if (isNaN(parsedTimestamp)) {
       // Round timestamp. Assuming that depositors use this timestamp as the `quoteTimestamp` will allow relayers
       // to take advantage of cached blocklatest block number.for-timestamp values when computing LP fee %'s. Currently the relayer is assumed
@@ -169,6 +171,15 @@ const handler = async (
       parsedTimestamp =
         Math.floor((latestBlock.timestamp - quoteTimeBuffer) / precision) *
         precision;
+
+      const quoteTimeBufferInBlocks =
+        quoteTimeBuffer / MAINNET_BLOCK_TIME_SECONDS;
+      const highBlock = latestBlock.number - quoteTimeBufferInBlocks + 1;
+      const lowBlock = highBlock - 1;
+      blockFinderHints = {
+        highBlock,
+        lowBlock,
+      };
     }
 
     // Don't attempt to provide quotes for future timestamps.
@@ -180,7 +191,8 @@ const handler = async (
 
     const blockFinder = new sdk.utils.BlockFinder(provider, [latestBlock]);
     const { number: blockTag } = await blockFinder.getBlockForTimestamp(
-      parsedTimestamp
+      parsedTimestamp,
+      blockFinderHints
     );
 
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
