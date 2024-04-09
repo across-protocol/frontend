@@ -4,9 +4,8 @@ import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
 import {
   disabledL1Tokens,
-  DEFAULT_QUOTE_TIMESTAMP_BUFFER,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-  MAINNET_BLOCK_TIME_SECONDS,
+  DEFAULT_QUOTE_BLOCK_BUFFER,
 } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
@@ -55,10 +54,7 @@ const handler = async (
     query,
   });
   try {
-    const { QUOTE_TIMESTAMP_BUFFER, QUOTE_TIMESTAMP_PRECISION } = process.env;
-    const quoteTimeBuffer = QUOTE_TIMESTAMP_BUFFER
-      ? Number(QUOTE_TIMESTAMP_BUFFER)
-      : DEFAULT_QUOTE_TIMESTAMP_BUFFER;
+    const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = process.env;
 
     const provider = getProvider(HUB_POOL_CHAIN_ID);
     const hubPool = getHubPool(provider);
@@ -149,49 +145,49 @@ const handler = async (
 
     const latestBlock = await provider.getBlock("latest");
 
-    // Note: Add a buffer to "latest" timestamp so that it corresponds to a block older than HEAD.
+    // The actual `quoteTimestamp` will be derived from the `quoteBlockNumber` below. If the caller supplies a timestamp,
+    // we use the method `BlockFinder.getBlockForTimestamp` to find the block number for that timestamp. If the caller does
+    // not supply a timestamp, we generate a timestamp from the latest block number minus a buffer.
+    let quoteBlockNumber: number;
+
+    // Note: Add a buffer to "latest" block so that it corresponds to a block older than HEAD.
     // This is to improve relayer UX who have heightened risk of sending inadvertent invalid fills
     // for quote times right at HEAD (or worst, in the future of HEAD). If timestamp is supplied as
     // a query param, then no need to apply buffer.
+    const quoteBlockBuffer = QUOTE_BLOCK_BUFFER
+      ? Number(QUOTE_BLOCK_BUFFER)
+      : DEFAULT_QUOTE_BLOCK_BUFFER;
 
-    // If the caller did not supply a quote timestamp, generate one from the latest block number.
+    // If the caller did not supply a quote timestamp, generate one from the latest block number minus buffer.
     let parsedTimestamp = Number(timestamp);
-    let blockFinderHints;
     if (isNaN(parsedTimestamp)) {
-      // Round timestamp. Assuming that depositors use this timestamp as the `quoteTimestamp` will allow relayers
-      // to take advantage of cached blocklatest block number.for-timestamp values when computing LP fee %'s. Currently the relayer is assumed
+      // Round block number. Assuming that depositors use this timestamp as the `quoteTimestamp` will allow relayers
+      // to take advantage of cached block numbers for timestamp values when computing LP fee %'s. Currently the relayer is assumed
       // to first find the block for deposit's `quoteTimestamp` and then call `HubPool#liquidityUtilization` at that block
       // height to derive the LP fee. The expensive operation is finding a block for a timestamp and involves a binary search.
       // We can use rounding here to increase the chance that a deposit's quote timestamp is re-used, thereby
       // allowing relayers hit the cache more often when fetching a block for a timestamp.
-      // Divide by intended precision in seconds, round down to nearest integer, multiply by precision in seconds.
-      const precision = Number(QUOTE_TIMESTAMP_PRECISION ?? 1);
-      parsedTimestamp =
-        Math.floor((latestBlock.timestamp - quoteTimeBuffer) / precision) *
+      // Divide by intended precision in blocks, round down to nearest integer, multiply by precision in blocks.
+      const precision = Number(QUOTE_BLOCK_PRECISION ?? quoteBlockBuffer);
+      quoteBlockNumber =
+        Math.floor((latestBlock.number - quoteBlockBuffer) / precision) *
         precision;
-
-      const quoteTimeBufferInBlocks =
-        quoteTimeBuffer / MAINNET_BLOCK_TIME_SECONDS;
-      const highBlock = latestBlock.number - quoteTimeBufferInBlocks + 1;
-      const lowBlock = highBlock - 1;
-      blockFinderHints = {
-        highBlock,
-        lowBlock,
-      };
     }
+    // If the caller supplied a timestamp, find the block number for that timestamp. This branch adds a bit of latency
+    // to the response time as it requires a binary search to find the block number for the given timestamp.
+    else {
+      // Don't attempt to provide quotes for future timestamps.
+      if (parsedTimestamp > latestBlock.timestamp) {
+        throw new InputError("Invalid quote timestamp");
+      }
 
-    // Don't attempt to provide quotes for future timestamps.
-    if (parsedTimestamp > latestBlock.timestamp) {
-      throw new InputError("Invalid quote timestamp");
+      const blockFinder = new sdk.utils.BlockFinder(provider, [latestBlock]);
+      const { number: blockNumberForTimestamp } =
+        await blockFinder.getBlockForTimestamp(parsedTimestamp);
+      quoteBlockNumber = blockNumberForTimestamp;
     }
 
     const amount = ethers.BigNumber.from(amountInput);
-
-    const blockFinder = new sdk.utils.BlockFinder(provider, [latestBlock]);
-    const { number: blockTag } = await blockFinder.getBlockForTimestamp(
-      parsedTimestamp,
-      blockFinderHints
-    );
 
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       ENABLED_ROUTES.acrossConfigStoreAddress,
@@ -200,23 +196,27 @@ const handler = async (
 
     const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
-    const [currentUt, nextUt, rateModel, tokenPrice] = await Promise.all([
-      hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
-        blockTag,
-      }),
-      hubPool.callStatic.liquidityUtilizationPostRelay(l1Token, amount, {
-        blockTag,
-      }),
-      configStoreClient.getRateModel(
-        l1Token,
-        {
-          blockTag,
-        },
-        computedOriginChainId,
-        destinationChainId
-      ),
-      getCachedTokenPrice(l1Token, baseCurrency),
-    ]);
+    const [currentUt, nextUt, rateModel, tokenPrice, quoteTimestamp] =
+      await Promise.all([
+        hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
+          blockTag: quoteBlockNumber,
+        }),
+        hubPool.callStatic.liquidityUtilizationPostRelay(l1Token, amount, {
+          blockTag: quoteBlockNumber,
+        }),
+        configStoreClient.getRateModel(
+          l1Token,
+          {
+            blockTag: quoteBlockNumber,
+          },
+          computedOriginChainId,
+          destinationChainId
+        ),
+        getCachedTokenPrice(l1Token, baseCurrency),
+        hubPool.getCurrentTime({
+          blockTag: quoteBlockNumber,
+        }),
+      ]);
     const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
@@ -255,9 +255,9 @@ const handler = async (
       relayFeePct: totalRelayFeePct.toString(), // capitalFeePct + gasFeePct + lpFeePct
       relayFeeTotal: totalRelayFee.toString(), // capitalFeeTotal + gasFeeTotal + lpFeeTotal
       lpFeePct: "0", // Note: lpFeePct is now included in relayFeePct. We set it to 0 here for backwards compatibility.
-      timestamp: parsedTimestamp.toString(),
+      timestamp: quoteTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
-      quoteBlock: blockTag.toString(),
+      quoteBlock: quoteBlockNumber.toString(),
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
       // Note: v3's new fee structure. Below are the correct values for the new fee structure. The above `*Pct` and `*Total`
       // values are for backwards compatibility which will be removed in the future.
