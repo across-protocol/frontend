@@ -27,6 +27,7 @@ import {
   getCachedTokenBalance,
   getDefaultRelayerAddress,
   getHubPool,
+  callViaMulticall3,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -196,14 +197,28 @@ const handler = async (
 
     const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
-    const [currentUt, nextUt, rateModel, tokenPrice, quoteTimestamp] =
+    // Aggregate multiple calls into a single multicall to decrease
+    // opportunities for RPC calls to be delayed.
+    const multiCalls = [
+      {
+        contract: hubPool,
+        functionName: "liquidityUtilizationCurrent",
+        args: [l1Token],
+      },
+      {
+        contract: hubPool,
+        functionName: "liquidityUtilizationPostRelay",
+        args: [l1Token, amount],
+      },
+      {
+        contract: hubPool,
+        functionName: "getCurrentTime",
+      },
+    ];
+
+    const [[currentUt, nextUt, quoteTimestamp], rateModel, tokenPrice] =
       await Promise.all([
-        hubPool.callStatic.liquidityUtilizationCurrent(l1Token, {
-          blockTag: quoteBlockNumber,
-        }),
-        hubPool.callStatic.liquidityUtilizationPostRelay(l1Token, amount, {
-          blockTag: quoteBlockNumber,
-        }),
+        callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
         configStoreClient.getRateModel(
           l1Token,
           {
@@ -213,9 +228,6 @@ const handler = async (
           destinationChainId
         ),
         getCachedTokenPrice(l1Token, baseCurrency),
-        hubPool.getCurrentTime({
-          blockTag: quoteBlockNumber,
-        }),
       ]);
     const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
