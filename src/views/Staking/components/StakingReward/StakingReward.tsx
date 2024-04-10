@@ -3,7 +3,7 @@ import { Alert } from "components";
 import { SecondaryButton } from "components/Button";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { BigNumber } from "ethers";
-import { formatEther, QUERIESV2 } from "utils";
+import { formatUnitsWithMaxFractions, QUERIESV2 } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { StakingRewardPropType } from "../../types";
 import { Text } from "components/Text";
@@ -39,7 +39,7 @@ export const StakingReward = ({
                 <Text
                   color={outstandingRewards.gt(0) ? "white-100" : "white-70"}
                 >
-                  {formatEther(outstandingRewards)} ACX
+                  {formatUnitsWithMaxFractions(outstandingRewards, 18)} ACX
                 </Text>
               )}
             </RewardClaimWrapper>

@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
+import { BigNumberish, utils } from "ethers";
 
 import { Text } from "components/Text";
-import { COLORS, formatWeiPct, getChainInfo, makeFormatUnits } from "utils";
+import { COLORS, formatWeiPct, getChainInfo } from "utils";
 
 import {
   appendPercentageSign,
@@ -26,7 +27,8 @@ export function SpeedUpStats({
 }: Props) {
   const [token, transfer] = transferTokenTuple;
 
-  const formatTokenUnits = makeFormatUnits(token.decimals);
+  const formatTokenUnits = (value: BigNumberish) =>
+    utils.formatUnits(value, token.decimals);
 
   const isInputInvalid = isNaN(Number(removePercentageSign(feeInput)));
   const hideNewFee = inputError || isInitiallyFetchingFees || isInputInvalid;
