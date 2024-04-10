@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { getProvider, ChainId, getConfig, toWeiSafe, formatUnits } from "utils";
+import { getProvider, ChainId, getConfig } from "utils";
 import { ERC20__factory } from "utils/typechain";
 
 export async function getNativeBalance(
@@ -61,17 +61,3 @@ export async function getAllowance(
   const contract = ERC20__factory.connect(address, provider);
   return contract.allowance(owner, spender, { blockTag: blockNumber });
 }
-
-export const calculateRemoveAmount = (
-  percent: number,
-  position: ethers.BigNumber,
-  decimals: number
-) => {
-  if (position.toString() === "0") return "0";
-  const scaler = ethers.BigNumber.from("10").pow(decimals);
-
-  const removeAmountToWei = toWeiSafe(percent.toString(), decimals);
-
-  const weiAmount = position.mul(removeAmountToWei).div(scaler.mul(100));
-  return formatUnits(weiAmount, decimals);
-};

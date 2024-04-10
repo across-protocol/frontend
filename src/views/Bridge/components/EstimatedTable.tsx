@@ -10,7 +10,7 @@ import {
   bridgedUSDCSymbolsMap,
   capitalizeFirstLetter,
   COLORS,
-  formatUnits,
+  formatUnitsWithMaxFractions,
   formatUSD,
   formatWeiPct,
   getChainInfo,
@@ -70,7 +70,9 @@ const PriceFee = ({
       )}
       {tokenFee ? (
         <Text size="md" color={highlightTokenFee ? "primary" : "white"}>
-          {`${formatUnits(tokenFee, token.decimals)} ${token.symbol}`}
+          {`${formatUnitsWithMaxFractions(tokenFee, token.decimals)} ${
+            token.symbol
+          }`}
         </Text>
       ) : (
         <Text size="md" color="grey-400">

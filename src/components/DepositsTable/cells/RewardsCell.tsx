@@ -4,7 +4,11 @@ import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
 
 import { BaseCell } from "./BaseCell";
-import { formatUnits, getToken, formatMaxFracDigits } from "utils";
+import {
+  formatUnitsWithMaxFractions,
+  getToken,
+  formatMaxFracDigits,
+} from "utils";
 
 type Props = {
   deposit: Deposit;
@@ -23,7 +27,10 @@ export function RewardsCell({ deposit, width }: Props) {
           <TitleWrapper>
             <img src={rewardToken.logoURI} alt={rewardToken.symbol} />
             <Text color="light-200">
-              {formatUnits(deposit.rewards.amount, rewardToken.decimals)}{" "}
+              {formatUnitsWithMaxFractions(
+                deposit.rewards.amount,
+                rewardToken.decimals
+              )}{" "}
               {rewardToken.symbol}
             </Text>
           </TitleWrapper>

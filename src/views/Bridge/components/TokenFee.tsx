@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { Text, TextColor } from "components/Text";
 import { BigNumber } from "ethers";
-import { formatUnits, TokenInfo } from "utils";
+import { formatUnitsWithMaxFractions, TokenInfo } from "utils";
 
 type TokenFeeProps = {
   token: TokenInfo;
@@ -12,7 +12,7 @@ type TokenFeeProps = {
 const TokenFee = ({ token, amount, textColor = "grey-400" }: TokenFeeProps) => (
   <Wrapper>
     <NumericText size="md" color={textColor}>
-      {formatUnits(amount, token.decimals)}{" "}
+      {formatUnitsWithMaxFractions(amount, token.decimals)}{" "}
       {token.displaySymbol || token.symbol.toUpperCase()}{" "}
     </NumericText>
     <TokenSymbol src={token.logoURI} />

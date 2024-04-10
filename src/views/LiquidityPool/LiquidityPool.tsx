@@ -6,7 +6,7 @@ import CardWrapper from "components/CardWrapper";
 import { Tabs, Tab } from "components/Tabs";
 import {
   formatNumberMaxFracDigits,
-  formatUnits,
+  formatUnitsWithMaxFractions,
   formatWeiPct,
   getConfig,
   max,
@@ -77,7 +77,7 @@ export default function LiquidityPool() {
     if (!selectedLiquidityPool || !amount) {
       return "-";
     }
-    return `${formatUnits(amount, selectedToken.decimals, {
+    return `${formatUnitsWithMaxFractions(amount, selectedToken.decimals, {
       xl: 3,
     })} ${selectedToken.symbol}`;
   };

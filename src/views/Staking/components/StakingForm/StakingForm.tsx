@@ -20,7 +20,7 @@ import { Tab, Tabs } from "components/Tabs";
 import StakingInputBlock from "../StakingInputBlock";
 import { StakingFormPropType } from "../../types";
 import { repeatableTernaryBuilder } from "utils/ternary";
-import { formatEther, formatWeiPct, formatNumberMaxFracDigits } from "utils";
+import { formatWeiPct, formatNumberMaxFracDigits } from "utils";
 import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { Text } from "components/Text";
 import { useStakeFormLogic } from "views/Staking/hooks/useStakeFormLogic";
@@ -217,7 +217,7 @@ export const StakingForm = ({
                   />
                   <Text color={activeColor}>
                     {Number(
-                      formatEther(poolData.currentUserRewardMultiplier)
+                      utils.formatEther(poolData.currentUserRewardMultiplier)
                     ).toFixed(2)}
                     x
                   </Text>

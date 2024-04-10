@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { BigNumber, constants } from "ethers";
+import { BigNumber, constants, utils } from "ethers";
 
 import { useBalanceBySymbol, useConnection } from "hooks";
 import {
@@ -56,5 +56,8 @@ async function estimateGasCostsForDeposit(selectedRoute: Route) {
   const provider = getProvider(selectedRoute.fromChain);
   const gasPrice = await provider.getGasPrice();
   const gasMultiplier = gasMultiplierPerChain[selectedRoute.fromChain] || 3;
-  return gasPrice.mul(gasMultiplier).mul(gasExpenditureDeposit);
+  return gasPrice
+    .mul(utils.parseEther(String(gasMultiplier)))
+    .mul(gasExpenditureDeposit)
+    .div(constants.WeiPerEther);
 }

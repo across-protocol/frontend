@@ -3,7 +3,7 @@ import { GenericRewardInformationRowType } from "../GenericRewardsProgram/Generi
 import {
   capitalizeFirstLetter,
   formatNumberTwoFracDigits,
-  formatUnits,
+  formatUnitsWithMaxFractions,
   getToken,
   rewardPrograms,
   rewardTiers,
@@ -79,8 +79,11 @@ export function useACXReferralsProgram() {
       },
       {
         title: "Total rewards",
-        value: `${formatUnits(summary.rewardsAmount, token.decimals)} ACX`,
-        prefix: `${formatUnits(
+        value: `${formatUnitsWithMaxFractions(
+          summary.rewardsAmount,
+          token.decimals
+        )} ACX`,
+        prefix: `${formatUnitsWithMaxFractions(
           unclaimedReferralData?.claimableAmount ?? 0,
           token.decimals
         )} ACX claimable`,

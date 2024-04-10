@@ -1,7 +1,7 @@
 import {
   fixedPointAdjustment,
   formattedBigNumberToNumber,
-  formatUnitsFnBuilder,
+  formatUnitsWithMaxFractionsFnBuilder,
   getConfig,
   hubPoolChainId,
   parseEtherLike,
@@ -237,7 +237,8 @@ export async function fetchStakingPool(
 
   // We can resolve custom formatter & parsers for the current LP
   // token that we are working with.
-  const lpTokenFormatter = formatUnitsFnBuilder(lpTokenDecimalCount);
+  const lpTokenFormatter =
+    formatUnitsWithMaxFractionsFnBuilder(lpTokenDecimalCount);
   const lpTokenParser = (wei: BigNumberish) =>
     toWeiSafe(wei.toString(), lpTokenDecimalCount);
 

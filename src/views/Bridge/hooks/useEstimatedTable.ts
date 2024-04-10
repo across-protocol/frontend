@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import {
   TokenInfo,
   fixedPointAdjustment,
-  formatUnits,
+  formatUnitsWithMaxFractions,
   isDefined,
   parseUnits,
   parseUnitsWithExtendedDecimals,
@@ -91,7 +91,7 @@ export function useEstimatedTable(
     const numericBridgeFee = formatNumericUsd(bridgeFeeInUSD);
     const numericReward = availableRewardPercentage
       ? (numericBridgeFee + numericGasFee) *
-        Number(formatUnits(availableRewardPercentage, 18))
+        Number(formatUnitsWithMaxFractions(availableRewardPercentage, 18))
       : undefined;
 
     const netFeeAsBaseCurrency =
