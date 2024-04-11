@@ -101,17 +101,12 @@ export const MaxButton = styled(UnstyledButton)`
 `;
 
 export const ButtonWrapper = styled.div`
-  flex-grow: 1;
-  @media ${QUERIESV2.xs.andDown} {
-    width: 100%;
-  }
+  width: 100%;
 `;
 
 export const StakeButton = styled(PrimaryButton)`
   text-transform: capitalize;
-  @media ${QUERIESV2.sm.andDown} {
-    width: 100%;
-  }
+  width: 100%;
 `;
 
 export const StakeButtonContentWrapper = styled.div`

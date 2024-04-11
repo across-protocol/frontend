@@ -8,7 +8,6 @@ import { repeatableTernaryBuilder } from "utils/ternary";
 import { StakingRewardPropType } from "../../types";
 import { Text } from "components/Text";
 import ConnectWalletButton from "../ConnectWalletButton";
-import BouncingDotsLoader from "components/BouncingDotsLoader";
 import CardWrapper from "components/CardWrapper";
 
 export const StakingReward = ({
@@ -49,8 +48,7 @@ export const StakingReward = ({
               onClick={() => claimActionHandler()}
               borderColor="yellow"
             >
-              Claim Rewards
-              {isMutating && <BouncingDotsLoader dotColor="warning" />}
+              {isMutating ? "Claiming..." : "Claim"}
             </ClaimRewardButton>
           </ClaimRewardInputGroup>
         ) : (
