@@ -141,15 +141,16 @@ const Wrapper = styled.div<{ disabled?: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 8px 20px;
+  padding: 9px 12px 9px 16px;
 
-  height: 64px;
+  height: 48px;
   width: 100%;
 
   background: #2d2e33;
-  border: 1px solid #4c4e57;
-  border-radius: 32px;
+  border: 1px solid #3e4047;
+  border-radius: 12px;
 
+  opacity: ${({ disabled }) => (disabled ? "0.5" : "1")};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 
   @media ${QUERIESV2.sm.andDown} {

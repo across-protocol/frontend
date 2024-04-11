@@ -83,7 +83,7 @@ const InputWithButtonContainer = styled.div<{
   border: 1px solid
     ${({ isInputFocused, hasError }) =>
       hasError ? "#f96c6c" : isInputFocused ? "#E0F3FF" : "#3e4047"};
-  border-radius: 32px;
+  border-radius: 12px;
   padding: 9px 24px;
   height: 64px;
   gap: 16px;
