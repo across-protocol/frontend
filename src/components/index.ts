@@ -12,6 +12,7 @@ export { Text } from "./Text";
 export { WrongNetworkHeader } from "./WrongNetworkHeader";
 export { default as CardWrapper } from "./CardWrapper";
 
+export * from "./AmountInput";
 export * from "./Button";
 export * from "./Badge";
 export * from "./ExternalLink";
