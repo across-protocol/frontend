@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { useConnection, useRewardSummary } from "hooks";
 import { useUnclaimedProofs } from "hooks/useUnclaimedProofs";
 import {
-  formatUnitsFnBuilder,
+  formatUnitsWithMaxFractionsFnBuilder,
   getToken,
   rewardProgramTypes,
   rewardPrograms,
@@ -28,7 +28,9 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
       : summary.rewardsAmount;
   const unclaimedAmount = unclaimedReferralData?.claimableAmount;
 
-  const formatUnits = formatUnitsFnBuilder(token.decimals);
+  const formatUnitsWithMaxFractions = formatUnitsWithMaxFractionsFnBuilder(
+    token.decimals
+  );
 
   // TODO: add a state for OP rewards and a state for referral rewards
   const disconnectedState: GenericRewardClaimCardDisconnectedStateProps = {
@@ -44,7 +46,7 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
     token,
     rewardsAmount: BigNumber.from(rewardsAmount ?? 0),
     unclaimedAmount: BigNumber.from(unclaimedAmount ?? 0),
-    formatUnits,
+    formatUnitsWithMaxFractions,
     disconnectedState,
     isConnected,
   };

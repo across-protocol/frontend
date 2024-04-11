@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { useConnection } from "hooks";
 import { RewardsSummary, useRewardSummary } from "hooks/useRewardSummary";
 import { useMemo } from "react";
-import { formatUnitsFnBuilder } from "utils";
+import { formatUnitsWithMaxFractionsFnBuilder } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import { useStakingPools } from "./useStakingPools";
 
@@ -97,6 +97,6 @@ function formatReferralSummary(summary: RewardsSummary, isValid: boolean) {
     referralRewards: stringTernary(summary.rewardsAmount),
     referralTier: numericTernary(summary.tier),
     referralRate: numericTernary(summary.referralRate),
-    formatterFn: formatUnitsFnBuilder(18),
+    formatterFn: formatUnitsWithMaxFractionsFnBuilder(18),
   };
 }

@@ -24,8 +24,6 @@ import {
 import { ConfirmationDepositTimeType, GetBridgeFeesResult } from "./bridge";
 import { ConvertDecimals } from "./convertdecimals";
 import {
-  formatUnits,
-  formatEther,
   formatWeiPct,
   capitalizeFirstLetter,
   convertToCapitalCase,
@@ -276,7 +274,7 @@ export function generateTransferQuote(
 ): TransferQuoteReceivedProperties {
   // Create a function that converts a wei amount into a formatted token amount
   const formatTokens = (wei: BigNumber) =>
-    formatUnits(wei, tokenInfo?.decimals ?? 18).replaceAll(",", "");
+    utils.formatUnits(wei, tokenInfo?.decimals ?? 18);
   // Create a function that converts a wei amount to a USD equivalent
   const usdEquivalent = (wei: BigNumber) =>
     tokenPrice
@@ -286,7 +284,7 @@ export function generateTransferQuote(
       .div(fixedPointAdjustment);
   // Create a function that converts a wei amount to a USD equivalent string
   const usdEquivalentString = (wei: BigNumber) =>
-    formatEther(usdEquivalent(wei)).replaceAll(",", "");
+    utils.formatEther(usdEquivalent(wei)).replaceAll(",", "");
   const formatWeiEtherPct = (wei: BigNumber) => formatWeiPct(wei)!.toString();
 
   const totalBridgeFee = fees.totalRelayFee.total;
@@ -436,19 +434,13 @@ export function recordTransferUserProperties(
     .div(fixedPointAdjustment);
   // Generate a human readable (non gwei format) version of the token price in USD
   // Ensure that the human readable version does not contain commas
-  const tokenPriceInUSDHumanReadable = formatEther(tokenPriceInUSD).replaceAll(
-    ",",
-    ""
-  );
+  const tokenPriceInUSDHumanReadable = utils.formatEther(tokenPriceInUSD);
   // Convert the human readable string into a number for Amplitude
   const tokenPriceInUSDNumber = Number(tokenPriceInUSDHumanReadable);
 
   // Generate a human readable (non gwei format) version of the token amount
   // Ensure that the human readable version does not contain commas
-  const tokenAmountHumanReadable = formatUnits(amount, decimals).replaceAll(
-    ",",
-    ""
-  );
+  const tokenAmountHumanReadable = utils.formatUnits(amount, decimals);
   // Convert the human readable string into a number for Amplitude
   const tokenAmountNumber = Number(tokenAmountHumanReadable);
 
@@ -494,9 +486,7 @@ export function reportTokenBalance(
 
   const chainName = convertToCapitalCase(chain.name);
   const tokenName = convertToCapitalCase(token.symbol);
-  const tokenBalance = Number(
-    formatUnits(balance, token.decimals).replaceAll(",", "")
-  );
+  const tokenBalance = Number(utils.formatUnits(balance, token.decimals));
 
   const identifyObj = new Identify();
   identifyObj.set(`${chainName}${tokenName}WalletCurrentBalance`, tokenBalance);

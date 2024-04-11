@@ -23,7 +23,7 @@ const GenericRewardClaimCard = ({
     rewardsAmount,
     unclaimedAmount,
     rewardTokenSymbol,
-    formatUnits,
+    formatUnitsWithMaxFractions,
     isConnected,
     programName,
     claimableTooltipBody,
@@ -43,7 +43,7 @@ const GenericRewardClaimCard = ({
           </LogoContainer>
           <TextStack>
             <Text color="white" size="2xl">
-              {formatUnits(rewardsAmount)} {rewardTokenSymbol}
+              {formatUnitsWithMaxFractions(rewardsAmount)} {rewardTokenSymbol}
             </Text>
             {unclaimedAmount && (
               <ClaimableIconTextStack>
@@ -58,7 +58,8 @@ const GenericRewardClaimCard = ({
                   <InfoIcon />
                 </Tooltip>
                 <Text color="grey-400" size="md">
-                  {formatUnits(unclaimedAmount)} {rewardTokenSymbol} claimable
+                  {formatUnitsWithMaxFractions(unclaimedAmount)}{" "}
+                  {rewardTokenSymbol} claimable
                 </Text>
               </ClaimableIconTextStack>
             )}

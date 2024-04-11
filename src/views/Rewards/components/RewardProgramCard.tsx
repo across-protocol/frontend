@@ -1,5 +1,10 @@
 import styled from "@emotion/styled";
-import { COLORS, QUERIESV2, formatUnits, rewardProgramTypes } from "utils";
+import {
+  COLORS,
+  QUERIESV2,
+  formatUnitsWithMaxFractions,
+  rewardProgramTypes,
+} from "utils";
 import { Text } from "components";
 import { ReactComponent as ChevronRight } from "assets/icons/arrow-right-16.svg";
 import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
@@ -32,7 +37,8 @@ const RewardProgramCard = ({ program }: RewardProgramCardProps) => {
         </Text>
         {isConnected && (
           <Text color="grey-400" size="md">
-            {formatUnits(rewardsAmount, token.decimals)} {token.symbol} earned
+            {formatUnitsWithMaxFractions(rewardsAmount, token.decimals)}{" "}
+            {token.symbol} earned
           </Text>
         )}
       </TextStack>

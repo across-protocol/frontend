@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 
 import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
-import { formatUnits, Token } from "utils";
+import { formatUnitsWithMaxFractions, Token } from "utils";
 
 import { BaseCell } from "./BaseCell";
 
@@ -16,7 +16,7 @@ export function AmountCell({ deposit, token, width }: Props) {
   return (
     <StyledAmountCell width={width}>
       <Text color="light-200">
-        {formatUnits(deposit.amount, token.decimals)}
+        {formatUnitsWithMaxFractions(deposit.amount, token.decimals)}
       </Text>
     </StyledAmountCell>
   );

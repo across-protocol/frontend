@@ -100,7 +100,7 @@ export const veryLargeNumberFormatter = (num: number, precision?: number) =>
     maximumFractionDigits: precision || 0,
   }).format(num);
 
-export function formatUnits(
+export function formatUnitsWithMaxFractions(
   wei: ethers.BigNumberish,
   decimals: number,
   maxFractions?: Partial<{
@@ -119,19 +119,11 @@ export function formatUnits(
   return smallNumberFormatter(value, maxFractions?.s);
 }
 
-export function formatUnitsFnBuilder(decimals: number) {
+export function formatUnitsWithMaxFractionsFnBuilder(decimals: number) {
   function closure(wei: ethers.BigNumberish) {
-    return formatUnits(wei, decimals);
+    return formatUnitsWithMaxFractions(wei, decimals);
   }
   return closure;
-}
-
-export function makeFormatUnits(decimals: number) {
-  return (wei: ethers.BigNumberish) => formatUnits(wei, decimals);
-}
-
-export function formatEther(wei: ethers.BigNumberish): string {
-  return formatUnits(wei, 18);
 }
 
 export function formatEtherRaw(wei: ethers.BigNumberish): string {
@@ -178,7 +170,7 @@ export function formattedBigNumberToNumber(
   decimals: number = 18
 ): number {
   try {
-    return Number(formatUnits(value, decimals));
+    return Number(ethers.utils.formatUnits(value, decimals));
   } catch (_e) {
     return Number.NaN;
   }

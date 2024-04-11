@@ -7,7 +7,13 @@ import { Selector } from "components";
 import { Text } from "components/Text";
 import { SelectorPropType } from "components/Selector/Selector";
 
-import { formatUnits, QUERIESV2, TokenInfo, getToken, Route } from "utils";
+import {
+  formatUnitsWithMaxFractions,
+  QUERIESV2,
+  TokenInfo,
+  getToken,
+  Route,
+} from "utils";
 import { useBalancesBySymbols, useConnection } from "hooks";
 
 import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
@@ -77,7 +83,10 @@ export function TokenSelector({ selectedRoute, onSelectToken }: Props) {
         suffix:
           balances && balances[i]?.gt(0) ? (
             <Text size="md" color="grey-400">
-              {formatUnits(balances[i] ?? BigNumber.from(0), t.decimals)}
+              {formatUnitsWithMaxFractions(
+                balances[i] ?? BigNumber.from(0),
+                t.decimals
+              )}
             </Text>
           ) : undefined,
       }))}

@@ -4,7 +4,12 @@ import { BigNumber } from "ethers";
 import { Alert, Modal } from "components";
 import { SecondaryButton } from "components/Button";
 import { Text } from "components/Text";
-import { formatEther, QUERIESV2, rewardProgramTypes, rewardTiers } from "utils";
+import {
+  formatUnitsWithMaxFractions,
+  QUERIESV2,
+  rewardProgramTypes,
+  rewardTiers,
+} from "utils";
 
 import { useClaimModal } from "../hooks/useClaimModal";
 
@@ -53,8 +58,9 @@ export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
               "Loading..."
             ) : (
               <IconText>
-                {formatEther(
-                  unclaimedProofsQuery.data?.claimableAmount || "0"
+                {formatUnitsWithMaxFractions(
+                  unclaimedProofsQuery.data?.claimableAmount || "0",
+                  18
                 ) + ` ${token.symbol}`}
                 <Icon src={token.logoURI} />
               </IconText>

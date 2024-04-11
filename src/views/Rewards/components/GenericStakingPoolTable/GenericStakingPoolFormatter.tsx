@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { IRow } from "components/Table/Table";
-import { formatEther, formatWeiPct, getToken } from "utils";
+import { formatUnitsWithMaxFractions, formatWeiPct, getToken } from "utils";
 import { ReactComponent as ExternalLink16 } from "assets/icons/arrow-right-16.svg";
 import {
   ButtonCell,
@@ -178,7 +178,10 @@ function RowMultiplierCell({ data, meta }: PoolRowCellType) {
         percent={data.usersMultiplierPercentage}
       />
       <Text size="md" color={`white-${meta.hasLPStake ? "100" : "70"}`}>
-        {Number(formatEther(data.currentUserRewardMultiplier)).toFixed(2)}x
+        {Number(
+          formatUnitsWithMaxFractions(data.currentUserRewardMultiplier, 18)
+        ).toFixed(2)}
+        x
       </Text>
     </MultiplierCell>
   );
@@ -248,7 +251,7 @@ function RowRewardCell({ data, meta }: PoolRowCellType) {
       <RewardCellLogoTextWrapper>
         <RewardCellLogo src={getToken("ACX").logoURI} />
         <Text color={`white-${meta.hasLPStake ? 100 : 70}`} size="md">
-          {formatEther(data.outstandingRewards)} ACX
+          {formatUnitsWithMaxFractions(data.outstandingRewards, 18)} ACX
         </Text>
       </RewardCellLogoTextWrapper>
     </ExternalTextCell>

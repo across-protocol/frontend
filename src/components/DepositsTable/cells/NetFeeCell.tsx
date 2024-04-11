@@ -11,7 +11,7 @@ import { BaseCell } from "./BaseCell";
 import {
   COLORS,
   fixedPointAdjustment,
-  formatUnits,
+  formatUnitsWithMaxFractions,
   formatWeiPct,
   getConfig,
   getToken,
@@ -44,7 +44,7 @@ function FeeWithoutBreakdown({ deposit }: { deposit: Deposit }) {
   return (
     <>
       <Text color="light-200">
-        {formatUnits(
+        {formatUnitsWithMaxFractions(
           BigNumber.from(deposit.amount)
             .mul(deposit.depositRelayerFeePct || 0)
             .div(fixedPointAdjustment),
@@ -119,7 +119,10 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                     ${formatMaxFracDigits(capitalAndLpFeeUsd, 2)}
                   </Text>
                   <Text size="sm" color="light-200">
-                    {formatUnits(capitalAndLpFeeAmount, tokenInfo.decimals)}{" "}
+                    {formatUnitsWithMaxFractions(
+                      capitalAndLpFeeAmount,
+                      tokenInfo.decimals
+                    )}{" "}
                     {tokenInfo.symbol}
                   </Text>
                   <img src={tokenInfo.logoURI} alt={tokenInfo.symbol} />
@@ -138,7 +141,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                     )}
                   </Text>
                   <Text size="sm" color="light-200">
-                    {formatUnits(
+                    {formatUnitsWithMaxFractions(
                       BigNumber.from(
                         isBigNumberish(deposit.feeBreakdown?.relayGasFeeAmount)
                           ? deposit.feeBreakdown?.relayGasFeeAmount || 0

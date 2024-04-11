@@ -2,7 +2,7 @@ import { useConnection, useRewardSummary } from "hooks";
 import { GenericRewardInformationRowType } from "../GenericRewardsProgram/GenericInformationCard";
 import {
   capitalizeFirstLetter,
-  formatUnits,
+  formatUnitsWithMaxFractions,
   getToken,
   rewardPrograms,
 } from "utils";
@@ -34,10 +34,11 @@ export function useOPRebatesProgram() {
       {
         title: "Rewards",
         tooltip: "Rewards earned from this Optimism program",
-        value: `${formatUnits(summary.unclaimedRewards || 0, token.decimals)} ${
-          token.symbol
-        }`,
-        prefix: `${formatUnits(
+        value: `${formatUnitsWithMaxFractions(
+          summary.unclaimedRewards || 0,
+          token.decimals
+        )} ${token.symbol}`,
+        prefix: `${formatUnitsWithMaxFractions(
           unclaimedOpRewardsData?.claimableAmount ?? 0,
           token.decimals
         )} ${token.symbol} claimable`,
