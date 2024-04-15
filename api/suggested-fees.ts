@@ -267,7 +267,9 @@ const handler = async (
       relayFeePct: totalRelayFeePct.toString(), // capitalFeePct + gasFeePct + lpFeePct
       relayFeeTotal: totalRelayFee.toString(), // capitalFeeTotal + gasFeeTotal + lpFeeTotal
       lpFeePct: "0", // Note: lpFeePct is now included in relayFeePct. We set it to 0 here for backwards compatibility.
-      timestamp: quoteTimestamp.toString(),
+      timestamp: isNaN(parsedTimestamp)
+        ? quoteTimestamp.toString()
+        : parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: quoteBlockNumber.toString(),
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
