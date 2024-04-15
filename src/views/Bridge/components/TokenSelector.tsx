@@ -78,7 +78,7 @@ export function TokenSelector({
           <CoinIconTextWrapper>
             <CoinIcon src={t.logoURI} />
             <ElementTextWrapper>
-              <Text size="lg" color="white-100">
+              <Text size="md" color="white-100">
                 {t.name}
               </Text>
               {t.disabled ? (
