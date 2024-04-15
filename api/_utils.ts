@@ -1155,6 +1155,7 @@ export function getBaseRewardsApr(
  * @param provider Provider to use for the calls.
  * @param calls the calls to make via multicall3. Each call includes a contract, function name, and args, so that
  * this function can encode them correctly.
+ * @param overrides Overrides to use for the multicall3 call.
  * @returns An array of the decoded results in the same order that they were passed in.
  */
 export async function callViaMulticall3(
@@ -1163,7 +1164,8 @@ export async function callViaMulticall3(
     contract: ethers.Contract;
     functionName: string;
     args?: any[];
-  }[]
+  }[],
+  overrides?: ethers.CallOverrides
 ): Promise<ethers.utils.Result[]> {
   const multicall3 = new ethers.Contract(
     MULTICALL3_ADDRESS,
@@ -1175,9 +1177,10 @@ export async function callViaMulticall3(
     callData: contract.interface.encodeFunctionData(functionName, args),
   }));
 
-  const [, results] = await (multicall3.callStatic.aggregate(inputs) as Promise<
-    [BigNumber, string[]]
-  >);
+  const [, results] = await (multicall3.callStatic.aggregate(
+    inputs,
+    overrides
+  ) as Promise<[BigNumber, string[]]>);
   return results.map((result, i) =>
     calls[i].contract.interface.decodeFunctionResult(
       calls[i].functionName,
