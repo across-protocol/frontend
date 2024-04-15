@@ -57,7 +57,7 @@ const sizeMap: Record<
     height: "40px",
     padding: "0px 16px 1px 16px",
     gap: "4px",
-    borderRadius: "12px",
+    borderRadius: "6px",
     mobileSize: "sm",
   },
 };

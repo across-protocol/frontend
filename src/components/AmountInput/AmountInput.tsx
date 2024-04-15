@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { useState, useEffect } from "react";
 import { BigNumber, utils } from "ethers";
 
 import { Text } from "components/Text";
@@ -44,12 +43,6 @@ export function AmountInput({
   disableMaxButton,
   displayTokenIcon,
 }: Props) {
-  const [didEnter, setDidEnter] = useState(false);
-
-  useEffect(() => {
-    setDidEnter(false);
-  }, [inputTokenSymbol]);
-
   const token = getToken(inputTokenSymbol);
 
   const isAmountValid =
@@ -57,7 +50,7 @@ export function AmountInput({
 
   return (
     <Wrapper>
-      <InputGroupWrapper valid={didEnter ? isAmountValid : true}>
+      <InputGroupWrapper valid={isAmountValid}>
         {displayTokenIcon ? (
           token.logoURIs ? (
             <IconPairContainer>
@@ -73,14 +66,11 @@ export function AmountInput({
         ) : null}
         <Input
           type="number"
-          valid={didEnter ? isAmountValid : true}
+          valid={isAmountValid}
           placeholder="Enter amount"
           value={amountInput}
           onWheel={(e) => e.currentTarget.blur()}
           onChange={(e) => {
-            if (!didEnter) {
-              setDidEnter(true);
-            }
             const parsedInput = Number(e.target.value);
             if (parsedInput < 0 || isNaN(parsedInput)) {
               return;
@@ -109,19 +99,14 @@ export function AmountInput({
             </Tooltip>
           )}
           <MaxButtonWrapper
-            onClick={() => {
-              if (!didEnter) {
-                setDidEnter(true);
-              }
-              onClickMaxBalance();
-            }}
+            onClick={onClickMaxBalance}
             disabled={disableMaxButton}
           >
             MAX
           </MaxButtonWrapper>
         </BalanceAndMaxWrapper>
       </InputGroupWrapper>
-      {didEnter && !isAmountValid && !disableErrorText && (
+      {!isAmountValid && !disableErrorText && (
         <ErrorWrapper>
           <ErrorIcon />
           <Text size="sm" color="error">
@@ -186,11 +171,6 @@ const Input = styled.input<IValidInput>`
   }
 
   overflow-x: hidden;
-
-  @media ${QUERIESV2.sm.andDown} {
-    font-size: 16px;
-    line-height: 20px;
-  }
 
   // hide number input arrows
   /* Chrome, Safari, Edge, Opera */

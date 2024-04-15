@@ -17,8 +17,8 @@ export enum AmountInputError {
   INSUFFICIENT_BALANCE = "insufficientBalance",
   AMOUNT_TOO_LOW = "amountTooLow",
 }
-
-const enabledRoutes = getConfig().getEnabledRoutes();
+const config = getConfig();
+const enabledRoutes = config.getEnabledRoutes();
 
 const interchangeableTokenPairs: Record<string, string[]> = {
   USDC: ["USDbC", "USDC.e"],
@@ -72,7 +72,7 @@ export function getReceiveTokenSymbol(
   }
 
   if (
-    ["USDC", "USDbC"].includes(bridgeTokenSymbol) &&
+    ["USDC", "USDbC", "USDC.e"].includes(bridgeTokenSymbol) &&
     chainsWithNativeUSDC
       .filter((chainId) => chainId !== ChainId.BASE)
       .includes(destinationChainId)
@@ -124,7 +124,7 @@ export function validateBridgeAmount(
     };
   }
 
-  if (parsedAmountInput.lte(0)) {
+  if (parsedAmountInput.lt(0)) {
     return {
       error: AmountInputError.INVALID,
     };
@@ -310,4 +310,19 @@ export function getRouteFromQueryParams() {
   }
 
   return route;
+}
+
+export function getTokenExplorerLink(chainId: number, symbol: string) {
+  const explorerBaseUrl = getChainInfo(chainId).explorerUrl;
+  const token = config.getTokenInfoBySymbol(chainId, symbol);
+  return `${explorerBaseUrl}/address/${token.address}`;
+}
+
+export function getTokenExplorerLinkSafe(chainId: number, symbol: string) {
+  try {
+    return getTokenExplorerLink(chainId, symbol);
+  } catch (e) {
+    console.warn(e);
+    return "";
+  }
 }
