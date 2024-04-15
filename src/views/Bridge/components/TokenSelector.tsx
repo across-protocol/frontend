@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
 import { useMemo } from "react";
 
+import { ReactComponent as LinkExternalIcon } from "assets/icons/link-external.svg";
 import { Selector } from "components";
 import { Text } from "components/Text";
 
@@ -9,7 +10,11 @@ import { formatUnitsWithMaxFractions, TokenInfo, getToken, Route } from "utils";
 import { useBalancesBySymbols, useConnection } from "hooks";
 
 import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
-import { getAvailableTokens, getAllTokens } from "../utils";
+import {
+  getAvailableTokens,
+  getAllTokens,
+  getTokenExplorerLinkSafe,
+} from "../utils";
 
 type Props = {
   selectedRoute: Route;
@@ -72,9 +77,27 @@ export function TokenSelector({
         element: (
           <CoinIconTextWrapper>
             <CoinIcon src={t.logoURI} />
-            <Text size="lg" color="white-100">
-              {t.displaySymbol || t.symbol.toUpperCase()}
-            </Text>
+            <ElementTextWrapper>
+              <Text size="lg" color="white-100">
+                {t.name}
+              </Text>
+              {t.disabled ? (
+                <Text size="xs" color="grey-400">
+                  {t.displaySymbol || t.symbol.toUpperCase()}
+                </Text>
+              ) : (
+                <TokenLink
+                  href={getTokenExplorerLinkSafe(fromChain, t.symbol)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Text size="xs" color="grey-400">
+                    {t.displaySymbol || t.symbol.toUpperCase()}
+                  </Text>
+                  <LinkExternalIcon />
+                </TokenLink>
+              )}
+            </ElementTextWrapper>
           </CoinIconTextWrapper>
         ),
         suffix:
@@ -96,7 +119,7 @@ export function TokenSelector({
         </CoinIconTextWrapper>
       }
       selectedValue={selectedRoute.fromTokenSymbol}
-      title="Coins"
+      title="Select a token"
       setSelectedValue={(v) => onSelectToken(v)}
       allowSelectDisabled
       disabled={disabled}
@@ -116,6 +139,25 @@ const CoinIconTextWrapper = styled.div`
 `;
 
 const CoinIcon = styled.img`
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
+`;
+
+const ElementTextWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const TokenLink = styled.a`
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+  text-decoration: none;
+
+  &:hover {
+    color: #9daab3;
+    text-decoration: underline;
+  }
 `;
