@@ -1177,9 +1177,13 @@ export async function callViaMulticall3(
     callData: contract.interface.encodeFunctionData(functionName, args),
   }));
 
+  const inputsToMulticall: unknown[] = [inputs];
+  if (overrides !== undefined) {
+    inputsToMulticall.push(overrides);
+  }
+
   const [, results] = await (multicall3.callStatic.aggregate(
-    inputs,
-    overrides
+    ...inputsToMulticall
   ) as Promise<[BigNumber, string[]]>);
   return results.map((result, i) =>
     calls[i].contract.interface.decodeFunctionResult(
