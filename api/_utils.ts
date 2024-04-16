@@ -41,7 +41,6 @@ import {
   defaultRelayerAddressOverridePerToken,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
-import { NavLink } from "react-router-dom";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
