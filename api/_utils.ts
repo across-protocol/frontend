@@ -983,14 +983,6 @@ async function getBalancerPoolState(poolTokenAddress: string) {
   const config = {
     network: {
       ...defaultNetworkConfig,
-      addresses: {
-        contracts: defaultNetworkConfig.addresses.contracts,
-        tokens: {
-          wrappedNativeAsset:
-            defaultNetworkConfig.addresses.tokens.wrappedNativeAsset,
-          bal: defaultNetworkConfig.addresses.tokens.bal,
-        },
-      },
       pools: {
         ...defaultNetworkConfig.pools,
         ...supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID],
