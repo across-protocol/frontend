@@ -7,38 +7,20 @@ type QuickSwapPropTypes = {
 };
 
 const QuickSwap = ({ onQuickSwap, disabled }: QuickSwapPropTypes) => (
-  <Wrapper disabled={disabled}>
-    <Divider />
-    <IconWrapper disabled={disabled} onClick={() => !disabled && onQuickSwap()}>
-      <ArrowUpDown />
-    </IconWrapper>
-    <Divider />
-  </Wrapper>
+  <IconWrapper disabled={disabled} onClick={() => !disabled && onQuickSwap()}>
+    <QuickSwapIcon />
+  </IconWrapper>
 );
 
 export default QuickSwap;
-
-const Wrapper = styled.div<{ disabled?: boolean }>`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0px;
-  gap: 0px;
-
-  height: 58px;
-
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-`;
 
 const IconWrapper = styled.div<{ disabled?: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 0px;
-  gap: 0;
 
-  height: 40px;
+  height: 32px;
   width: 40px;
 
   border: 1px solid #4c4e57;
@@ -56,8 +38,7 @@ const IconWrapper = styled.div<{ disabled?: boolean }>`
   }
 `;
 
-const Divider = styled.div`
-  height: 9px;
-  width: 1px;
-  background-color: #4c4e57;
+const QuickSwapIcon = styled(ArrowUpDown)`
+  height: 12px;
+  width: 12px;
 `;

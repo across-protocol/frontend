@@ -32,6 +32,7 @@ const Bridge = () => {
     handleSelectToken,
     handleSelectFromChain,
     handleSelectToChain,
+    isQuoteLoading,
   } = useBridge();
 
   return (
@@ -70,6 +71,7 @@ const Bridge = () => {
             isBridgeDisabled={isBridgeDisabled}
             validationError={amountValidationError}
             balance={balance}
+            isQuoteLoading={isQuoteLoading}
           />
         </Wrapper>
       </LayoutV2>
