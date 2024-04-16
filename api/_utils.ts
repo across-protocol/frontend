@@ -9,8 +9,8 @@ import * as sdk from "@across-protocol/sdk-v2";
 import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
-  Pools as BalancerPools,
-  PoolType,
+  BalancerNetworkConfig,
+  PoolsSubgraphRepository,
 } from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
@@ -42,6 +42,7 @@ import {
   defaultRelayerAddressOverridePerToken,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
+import { NavLink } from "react-router-dom";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -980,20 +981,28 @@ async function getBalancerPoolState(poolTokenAddress: string) {
     [CHAIN_IDs.SEPOLIA]: {},
   };
 
+  const defaultNetworkConfig = BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID];
   const config = {
     network: {
-      ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID],
+      ...defaultNetworkConfig,
+      addresses: {
+        contracts: defaultNetworkConfig.addresses.contracts,
+        tokens: {
+          wrappedNativeAsset:
+            defaultNetworkConfig.addresses.tokens.wrappedNativeAsset,
+          bal: defaultNetworkConfig.addresses.tokens.bal,
+        },
+      },
       pools: {
-        ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID].pools,
+        ...defaultNetworkConfig.pools,
         ...supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID],
       },
-    },
+    } as BalancerNetworkConfig,
     rpcUrl: getProvider(HUB_POOL_CHAIN_ID).connection.url,
     coingecko: {
       coingeckoApiKey: REACT_APP_COINGECKO_PRO_API_KEY!,
     },
   };
-  const balancer = new BalancerSDK(config);
 
   const poolEntry = Object.entries(
     supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID]
@@ -1008,57 +1017,27 @@ async function getBalancerPoolState(poolTokenAddress: string) {
     );
   }
 
-  const poolQuery = await balancer.subgraph.client.Pool({
-    id: poolEntry[1].id,
+  const poolId = poolEntry[1].id as string;
+
+  const balancer = new BalancerSDK(config);
+  balancer.data.pools = new PoolsSubgraphRepository({
+    chainId: config.network.chainId,
+    url: config.network.urls.subgraph,
+    query: {
+      args: {
+        where: {
+          id: {
+            eq: poolId,
+          },
+        },
+      },
+      attrs: {},
+    },
   });
 
-  if (!poolQuery || !poolQuery.pool) {
-    throw new InputError(`Balancer pool with id ${poolEntry[1].id} not found`);
-  }
-
-  const subgraphPool = poolQuery.pool;
-  const pool = BalancerPools.wrap(
-    {
-      id: subgraphPool.id,
-      name: subgraphPool.name || "",
-      address: subgraphPool.address,
-      chainId: HUB_POOL_CHAIN_ID,
-      poolType: subgraphPool.poolType as PoolType,
-      poolTypeVersion: subgraphPool.poolTypeVersion || 1,
-      swapFee: subgraphPool.swapFee,
-      swapEnabled: subgraphPool.swapEnabled,
-      protocolYieldFeeCache: subgraphPool.protocolYieldFeeCache || "0.5", // Default protocol yield fee
-      protocolSwapFeeCache: subgraphPool.protocolSwapFeeCache || "0.5", // Default protocol swap fee
-      amp: subgraphPool.amp ?? undefined,
-      owner: subgraphPool.owner ?? undefined,
-      factory: subgraphPool.factory ?? undefined,
-      symbol: subgraphPool.symbol ?? undefined,
-      tokens: (subgraphPool.tokens || []).map((token) => ({
-        ...token,
-        isExemptFromYieldProtocolFee:
-          token.isExemptFromYieldProtocolFee || false,
-        token: {
-          pool: null,
-        },
-      })),
-      tokensList: subgraphPool.tokensList,
-      tokenAddresses: (subgraphPool.tokens || []).map((t) => t.address),
-      totalLiquidity: subgraphPool.totalLiquidity,
-      totalShares: subgraphPool.totalShares,
-      totalSwapFee: subgraphPool.totalSwapFee,
-      totalSwapVolume: subgraphPool.totalSwapVolume,
-      priceRateProviders: subgraphPool.priceRateProviders ?? undefined,
-      createTime: subgraphPool.createTime,
-      mainIndex: subgraphPool.mainIndex ?? undefined,
-      wrappedIndex: subgraphPool.wrappedIndex ?? undefined,
-      totalWeight: subgraphPool.totalWeight || "1",
-      lowerTarget: subgraphPool.lowerTarget ?? "0",
-      upperTarget: subgraphPool.upperTarget ?? "0",
-      isInRecoveryMode: subgraphPool.isInRecoveryMode ?? false,
-      isPaused: subgraphPool.isPaused ?? false,
-    },
-    config.network
-  );
+  console.time("fetch balancer pool");
+  const pool = await balancer.pools.find(poolId);
+  console.timeEnd("fetch balancer pool");
 
   if (!pool) {
     throw new InputError(
