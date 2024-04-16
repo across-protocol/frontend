@@ -11,6 +11,11 @@ import {
   BalancerSDK,
   BalancerNetworkConfig,
   PoolsSubgraphRepository,
+  Sor,
+  SOR,
+  SubPool,
+  Pools,
+  Liquidity,
 } from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
@@ -1019,14 +1024,14 @@ async function getBalancerPoolState(poolTokenAddress: string) {
 
   const poolId = poolEntry[1].id as string;
 
-  const balancer = new BalancerSDK(config);
-  balancer.data.pools = new PoolsSubgraphRepository({
-    chainId: config.network.chainId,
-    url: config.network.urls.subgraph,
-    query: {
+  const balancer = new BalancerSDK({
+    ...config,
+    subgraphQuery: {
       args: {
         where: {
           id: {
+            // Note: This ensures that only a single pool is queried which
+            // improves performance significantly.
             eq: poolId,
           },
         },
@@ -1035,9 +1040,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
     },
   });
 
-  console.time("fetch balancer pool");
   const pool = await balancer.pools.find(poolId);
-  console.timeEnd("fetch balancer pool");
 
   if (!pool) {
     throw new InputError(
