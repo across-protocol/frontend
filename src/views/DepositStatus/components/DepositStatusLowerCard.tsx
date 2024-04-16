@@ -5,6 +5,7 @@ import { useHistory } from "react-router-dom";
 import { SecondaryButton } from "components/Button";
 import EstimatedTable from "views/Bridge/components/EstimatedTable";
 import { getReceiveTokenSymbol } from "views/Bridge/utils";
+import { useEstimatedRewards } from "views/Bridge/hooks/useEstimatedRewards";
 import { getToken, COLORS } from "utils";
 import { useIsContractAddress } from "hooks/useIsContractAddress";
 
@@ -37,6 +38,20 @@ export function DepositStatusLowerCard({
   const outputTokenInfo = getToken(outputTokenSymbol);
   const { programName } = useRewardToken(toChainId);
 
+  const gasFee = utils.parseUnits(
+    quote?.relayGasFeeTotal || "0",
+    tokenInfo.decimals
+  );
+  const bridgeFee = utils
+    .parseUnits(quote?.totalBridgeFee || "0", tokenInfo.decimals)
+    .sub(utils.parseUnits(quote?.relayGasFeeTotal || "0", tokenInfo.decimals));
+  const estimatedRewards = useEstimatedRewards(
+    tokenInfo,
+    toChainId,
+    gasFee,
+    bridgeFee
+  );
+
   const FeesTable = quote ? (
     <EstimatedTable
       fromChainId={fromChainId}
@@ -56,6 +71,7 @@ export function DepositStatusLowerCard({
           isReceiverContract
         )
       )}
+      {...estimatedRewards}
     />
   ) : null;
 

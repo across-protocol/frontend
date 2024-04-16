@@ -22,7 +22,8 @@ import TokenFee from "./TokenFee";
 import { type Props as FeesCollapsibleProps } from "./FeesCollapsible";
 import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
 
-export type EstimatedTableProps = EstimatedRewards & FeesCollapsibleProps;
+export type EstimatedTableProps = EstimatedRewards &
+  Omit<FeesCollapsibleProps, "isQuoteLoading">;
 
 const PriceFee = ({
   tokenFee,
