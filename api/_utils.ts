@@ -10,12 +10,6 @@ import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
   BalancerNetworkConfig,
-  PoolsSubgraphRepository,
-  Sor,
-  SOR,
-  SubPool,
-  Pools,
-  Liquidity,
 } from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
