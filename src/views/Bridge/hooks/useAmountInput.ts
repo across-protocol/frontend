@@ -4,11 +4,7 @@ import { BigNumber, utils } from "ethers";
 import { useAmplitude, useBalanceBySymbol, usePrevious } from "hooks";
 import { getConfig, Route, trackMaxButtonClicked } from "utils";
 
-import {
-  AmountInputError,
-  validateBridgeAmount,
-  areTokensInterchangeable,
-} from "../utils";
+import { areTokensInterchangeable } from "../utils";
 import { useMaxBalance } from "./useMaxBalance";
 
 export function useAmountInput(selectedRoute: Route) {
@@ -33,18 +29,33 @@ export function useAmountInput(selectedRoute: Route) {
     selectedRoute.fromTokenSymbol
   );
 
+  const _handleParsedAmount = useCallback((input: string, decimals: number) => {
+    try {
+      const parsed = utils.parseUnits(input, decimals);
+      setParsedAmount(parsed);
+    } catch (error) {
+      setParsedAmount(undefined);
+    }
+  }, []);
+
   const handleClickMaxBalance = useCallback(() => {
     if (maxBalance) {
-      setUserAmountInput(utils.formatUnits(maxBalance, token.decimals));
+      const amountInput = utils.formatUnits(maxBalance, token.decimals);
+      setUserAmountInput(amountInput);
+      _handleParsedAmount(amountInput, token.decimals);
       addToAmpliQueue(() => {
         trackMaxButtonClicked("bridgeForm");
       });
     }
-  }, [maxBalance, token.decimals, addToAmpliQueue]);
+  }, [maxBalance, token.decimals, addToAmpliQueue, _handleParsedAmount]);
 
-  const handleChangeAmountInput = useCallback((changedInput: string) => {
-    setUserAmountInput(changedInput);
-  }, []);
+  const handleChangeAmountInput = useCallback(
+    (changedInput: string) => {
+      setUserAmountInput(changedInput);
+      _handleParsedAmount(changedInput, token.decimals);
+    },
+    [token.decimals, _handleParsedAmount]
+  );
 
   const clearInput = useCallback(() => {
     setUserAmountInput("");
@@ -65,15 +76,6 @@ export function useAmountInput(selectedRoute: Route) {
     clearInput();
   }, [prevFromTokenSymbol, selectedRoute.fromTokenSymbol, clearInput]);
 
-  useEffect(() => {
-    try {
-      const parsed = utils.parseUnits(userAmountInput, token.decimals);
-      setParsedAmount(parsed);
-    } catch (error) {
-      setParsedAmount(undefined);
-    }
-  }, [userAmountInput, token.decimals]);
-
   return {
     handleChangeAmountInput,
     handleClickMaxBalance,
@@ -82,31 +84,5 @@ export function useAmountInput(selectedRoute: Route) {
     parsedAmount,
     balance,
     maxBalance,
-  };
-}
-
-export function useValidAmount(
-  parsedAmount?: BigNumber,
-  isAmountTooLow?: boolean,
-  maxBalance?: BigNumber,
-  maxDeposit?: BigNumber
-) {
-  const [validationError, setValidationError] = useState<
-    AmountInputError | undefined
-  >();
-
-  useEffect(() => {
-    const { error } = validateBridgeAmount(
-      parsedAmount,
-      isAmountTooLow,
-      maxBalance,
-      maxDeposit
-    );
-    setValidationError(error);
-  }, [parsedAmount, isAmountTooLow, maxBalance, maxDeposit]);
-
-  return {
-    amountValidationError: validationError,
-    isAmountValid: !Boolean(validationError),
   };
 }

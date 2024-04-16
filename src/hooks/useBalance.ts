@@ -1,7 +1,5 @@
 import { useQuery, useQueries } from "react-query";
 import { useConnection } from "hooks";
-import { useBlock } from "./useBlock";
-import { usePrevious } from "hooks";
 import {
   getBalance,
   getNativeBalance,
@@ -9,47 +7,37 @@ import {
   ChainId,
   getConfig,
   ConfigClient,
+  getChainInfo,
 } from "utils";
 import { BigNumber } from "ethers";
 
 export function useNativeBalance(
   tokenSymbol?: string,
   chainId?: ChainId,
-  account?: string,
-  blockNumber?: number
+  account?: string
 ) {
   const { account: connectedAccount } = useConnection();
   const chainIdToQuery = chainId;
   const tokenSymbolToQuery = tokenSymbol;
   const accountToQuery = account ?? connectedAccount;
-  const { block: latestBlock } = useBlock(chainId);
-  const blockNumberToQuery = blockNumber ?? latestBlock?.number;
-  const enabledQuery =
-    !!chainIdToQuery && !!accountToQuery && !!blockNumberToQuery;
+  const enabledQuery = !!chainIdToQuery && !!accountToQuery;
   const queryKey = enabledQuery
-    ? balanceQueryKey(
-        accountToQuery,
-        blockNumberToQuery,
-        chainIdToQuery,
-        tokenSymbolToQuery
-      )
+    ? balanceQueryKey(accountToQuery, chainIdToQuery, tokenSymbolToQuery)
     : [
         "DISABLED_BALANCE_QUERY",
         chainIdToQuery,
         tokenSymbolToQuery,
         accountToQuery,
-        blockNumberToQuery,
       ];
   const { data: balance, ...delegated } = useQuery(
     queryKey,
     async () => {
       if (!chainIdToQuery) return BigNumber.from(0);
-      return getNativeBalance(chainId, accountToQuery!, blockNumberToQuery);
+      return getNativeBalance(chainId, accountToQuery!);
     },
     {
       enabled: enabledQuery,
-      // We already re-fetch when the block number changes, so we don't need to re-fetch.
-      staleTime: Infinity,
+      refetchInterval: getChainInfo(chainIdToQuery || 1).pollingInterval,
     }
   );
   return {
@@ -64,41 +52,21 @@ const QueryBalanceBySymbol =
     accountToQuery?: string;
     chainIdToQuery?: ChainId;
     tokenSymbolToQuery?: string;
-    blockNumberToQuery?: number;
     config: ConfigClient;
   }) =>
   async () => {
-    const {
-      accountToQuery,
-      chainIdToQuery,
-      tokenSymbolToQuery,
-      blockNumberToQuery,
-      config,
-    } = params;
-    if (
-      !chainIdToQuery ||
-      !tokenSymbolToQuery ||
-      !blockNumberToQuery ||
-      !accountToQuery
-    )
+    const { accountToQuery, chainIdToQuery, tokenSymbolToQuery, config } =
+      params;
+    if (!chainIdToQuery || !tokenSymbolToQuery || !accountToQuery)
       return BigNumber.from(0);
     const tokenInfo = config.getTokenInfoBySymbol(
       chainIdToQuery,
       tokenSymbolToQuery
     );
     if (tokenInfo.isNative) {
-      return getNativeBalance(
-        chainIdToQuery,
-        accountToQuery,
-        blockNumberToQuery
-      );
+      return getNativeBalance(chainIdToQuery, accountToQuery);
     } else {
-      return getBalance(
-        chainIdToQuery,
-        accountToQuery,
-        tokenInfo.address,
-        blockNumberToQuery
-      );
+      return getBalance(chainIdToQuery, accountToQuery, tokenInfo.address);
     }
   };
 /**
@@ -112,30 +80,20 @@ const QueryBalanceBySymbol =
 export function useBalanceBySymbol(
   tokenSymbol?: string,
   chainId?: ChainId,
-  account?: string,
-  blockNumber?: number
+  account?: string
 ) {
   const { account: connectedAccount } = useConnection();
   const chainIdToQuery = chainId;
   const tokenSymbolToQuery = tokenSymbol;
   const accountToQuery = account ?? connectedAccount;
-  const { block: latestBlock } = useBlock(chainId);
-  const blockNumberToQuery = blockNumber ?? latestBlock?.number;
-  const enabledQuery =
-    !!chainIdToQuery && !!accountToQuery && !!blockNumberToQuery;
+  const enabledQuery = !!chainIdToQuery && !!accountToQuery;
   const queryKey = enabledQuery
-    ? balanceQueryKey(
-        accountToQuery,
-        blockNumberToQuery,
-        chainIdToQuery,
-        tokenSymbolToQuery
-      )
+    ? balanceQueryKey(accountToQuery, chainIdToQuery, tokenSymbolToQuery)
     : [
         "DISABLED_BALANCE_QUERY",
         chainIdToQuery,
         tokenSymbolToQuery,
         accountToQuery,
-        blockNumberToQuery,
       ];
   const config = getConfig();
   const { data: balance, ...delegated } = useQuery(
@@ -144,13 +102,11 @@ export function useBalanceBySymbol(
       config,
       chainIdToQuery,
       tokenSymbolToQuery,
-      blockNumberToQuery,
       accountToQuery,
     }),
     {
       enabled: enabledQuery,
-      // We already re-fetch when the block number changes, so we don't need to re-fetch.
-      staleTime: Infinity,
+      refetchInterval: getChainInfo(chainIdToQuery || 1).pollingInterval,
     }
   );
   return {
@@ -164,64 +120,43 @@ export function useBalanceBySymbol(
  * @param tokens - The tokens to fetch the balance of.
  * @param chainId - The chain Id of the chain to execute the query on. If not specified, defaults to the chainId the user is connected to or undefined.
  * @param account - The account to query the balances of.
- * @param blockNumber - The block number to execute the query on, if not specified, defaults to the latest block. Note, past blocks require an archive node.
  */
 export function useBalancesBySymbols({
   tokenSymbols,
   chainId,
   account,
-  blockNumber,
 }: {
   tokenSymbols: string[];
   chainId?: ChainId;
   account?: string;
-  blockNumber?: number;
 }) {
   const config = getConfig();
   const { account: connectedAccount } = useConnection();
   const chainIdToQuery = chainId;
   const accountToQuery = account ?? connectedAccount;
-  const { block: latestBlock } = useBlock(chainId);
-  const blockNumberToQuery = blockNumber ?? latestBlock?.number;
-  const prevAccount = usePrevious(accountToQuery);
-  const prevChain = usePrevious(chainIdToQuery);
-  const prevTokens = usePrevious(tokenSymbols);
-  // Keep the previous data only when blockNumberToQuery changes.
-  const keepPreviousData =
-    prevAccount === accountToQuery &&
-    prevChain === chainIdToQuery &&
-    JSON.stringify(prevTokens) === JSON.stringify(tokenSymbols);
-  const enabled = !!chainIdToQuery && !!accountToQuery && !!blockNumberToQuery;
+  const enabled = !!chainIdToQuery && !!accountToQuery;
 
   // we use useQueries instead of useQuery so we can share cache values with the singular balance query
   const queries = tokenSymbols.map((tokenSymbolToQuery) => {
     const queryKey = enabled
-      ? balanceQueryKey(
-          accountToQuery,
-          blockNumberToQuery,
-          chainIdToQuery,
-          tokenSymbolToQuery
-        )
+      ? balanceQueryKey(accountToQuery, chainIdToQuery, tokenSymbolToQuery)
       : [
           "DISABLED_BALANCE_QUERY",
           chainIdToQuery,
           tokenSymbolToQuery,
           accountToQuery,
-          blockNumberToQuery,
         ];
     const queryFn = QueryBalanceBySymbol({
       config,
       chainIdToQuery,
       tokenSymbolToQuery,
-      blockNumberToQuery,
       accountToQuery,
     });
     return {
       queryKey,
       queryFn,
-      staleTime: Infinity,
-      keepPreviousData,
       enabled,
+      refetchInterval: getChainInfo(chainIdToQuery || 1).pollingInterval,
     };
   });
   const result = useQueries(queries);

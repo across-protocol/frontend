@@ -1,7 +1,6 @@
 import { useQuery } from "react-query";
 import { ethers } from "ethers";
 import { bridgeFeesQueryKey, getBridgeFees, ChainId } from "utils";
-import { useBlock } from "./useBlock";
 
 /**
  * This hook calculates the bridge fees for a given token and amount.
@@ -18,17 +17,10 @@ export function useBridgeFees(
   tokenSymbol?: string,
   recipientAddress?: string
 ) {
-  const { block } = useBlock(toChainId);
   const enabledQuery =
-    !!toChainId && !!fromChainId && !!block && !!tokenSymbol && amount.gt(0);
+    !!toChainId && !!fromChainId && !!tokenSymbol && amount.gt(0);
   const queryKey = enabledQuery
-    ? bridgeFeesQueryKey(
-        tokenSymbol,
-        amount,
-        fromChainId,
-        toChainId,
-        block.number
-      )
+    ? bridgeFeesQueryKey(tokenSymbol, amount, fromChainId, toChainId)
     : "DISABLED_BRIDGE_FEE_QUERY";
   const { data: fees, ...delegated } = useQuery(
     queryKey,
@@ -36,7 +28,6 @@ export function useBridgeFees(
       return getBridgeFees({
         amount,
         tokenSymbol: tokenSymbol!,
-        blockTimestamp: block!.timestamp,
         toChainId: toChainId!,
         fromChainId: fromChainId!,
         recipientAddress,
@@ -44,8 +35,7 @@ export function useBridgeFees(
     },
     {
       enabled: enabledQuery,
-      // We already re-fetch when the block number changes, so we don't need to re-fetch.
-      staleTime: Infinity,
+      refetchInterval: 5000,
     }
   );
   return {
