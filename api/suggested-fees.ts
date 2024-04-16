@@ -123,8 +123,10 @@ const handler = async (
         // the difference between an OUT_OF_FUNDS error in either the transfer or through the execution
         // of the `handleAcrossMessage` we will check that the balance of the relayer is sufficient to
         // support this deposit.
-        const destinationToken =
-          sdk.utils.getL2TokenAddresses(l1Token)?.[destinationChainId];
+        const destinationToken = sdk.utils.getL2TokenAddresses(
+          l1Token,
+          HUB_POOL_CHAIN_ID
+        )?.[destinationChainId];
         if (!sdk.utils.isDefined(destinationToken)) {
           throw new InputError(
             `Could not resolve token address on ${destinationChainId} for ${l1Token}`
