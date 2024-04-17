@@ -132,7 +132,7 @@ const StyledHandlerButton = styled(PrimaryButton)<{ primaryColor: string }>`
 
   background: ${COLORS["black-700"]};
 
-  border-radius: 32px;
+  border-radius: 12px;
   border: 1px solid
     ${({ primaryColor }) => COLORS[`${primaryColor}-15` as keyof typeof COLORS]};
 

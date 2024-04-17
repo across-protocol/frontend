@@ -39,7 +39,7 @@ const sizeMap: Record<
     height: "64px",
     padding: "0px 40px",
     gap: "4px",
-    borderRadius: "32px",
+    borderRadius: "12px",
     mobileSize: "md",
   },
   md: {
@@ -48,7 +48,7 @@ const sizeMap: Record<
     height: "40px",
     padding: "0px 20px",
     gap: "6px",
-    borderRadius: "20px",
+    borderRadius: "12px",
     mobileSize: "sm",
   },
   sm: {
@@ -57,7 +57,7 @@ const sizeMap: Record<
     height: "40px",
     padding: "0px 16px 1px 16px",
     gap: "4px",
-    borderRadius: "20px",
+    borderRadius: "6px",
     mobileSize: "sm",
   },
 };

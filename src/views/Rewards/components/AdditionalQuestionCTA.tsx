@@ -54,7 +54,7 @@ const ExternalButtonWrapper = styled.div`
 
 const ButtonWrapper = styled.a`
   border: 1px solid #4c4e57;
-  border-radius: 20px;
+  border-radius: 12px;
 
   display: flex;
   flex-direction: row;

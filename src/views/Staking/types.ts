@@ -21,4 +21,5 @@ export type StakingFormPropType = GenericStakingComponentProps & {
   isDataLoading: boolean;
   isMutating: boolean;
   isWrongNetwork: boolean;
+  tokenSymbol: string;
 };

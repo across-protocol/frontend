@@ -1,32 +1,34 @@
-import styled, { StyledComponent } from "@emotion/styled";
-import { Theme } from "@emotion/react";
+import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
 import { useMemo } from "react";
 
+import { ReactComponent as LinkExternalIcon } from "assets/icons/link-external.svg";
 import { Selector } from "components";
 import { Text } from "components/Text";
-import { SelectorPropType } from "components/Selector/Selector";
 
-import {
-  formatUnitsWithMaxFractions,
-  QUERIESV2,
-  TokenInfo,
-  getToken,
-  Route,
-} from "utils";
+import { formatUnitsWithMaxFractions, TokenInfo, getToken, Route } from "utils";
 import { useBalancesBySymbols, useConnection } from "hooks";
 
 import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
-import { getAvailableTokens, getAllTokens } from "../utils";
+import {
+  getAvailableTokens,
+  getAllTokens,
+  getTokenExplorerLinkSafe,
+} from "../utils";
 
 type Props = {
   selectedRoute: Route;
   onSelectToken: (token: string) => void;
+  disabled?: boolean;
 };
 
 const allTokens = getAllTokens();
 
-export function TokenSelector({ selectedRoute, onSelectToken }: Props) {
+export function TokenSelector({
+  selectedRoute,
+  onSelectToken,
+  disabled,
+}: Props) {
   const { fromChain, toChain, fromTokenSymbol } = selectedRoute;
   const selectedToken = getToken(fromTokenSymbol);
 
@@ -58,7 +60,7 @@ export function TokenSelector({ selectedRoute, onSelectToken }: Props) {
   });
 
   return (
-    <TokenSelection
+    <Selector
       elements={orderedTokens.map((t, i) => ({
         value: t.symbol,
         disabled: t.disabled,
@@ -75,14 +77,32 @@ export function TokenSelector({ selectedRoute, onSelectToken }: Props) {
         element: (
           <CoinIconTextWrapper>
             <CoinIcon src={t.logoURI} />
-            <Text size="md" color="white-100">
-              {t.displaySymbol || t.symbol.toUpperCase()}
-            </Text>
+            <ElementTextWrapper>
+              <Text size="md" color="white-100">
+                {t.name}
+              </Text>
+              {t.disabled ? (
+                <Text size="xs" color="grey-400">
+                  {t.displaySymbol || t.symbol.toUpperCase()}
+                </Text>
+              ) : (
+                <TokenLink
+                  href={getTokenExplorerLinkSafe(fromChain, t.symbol)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Text size="xs" color="grey-400">
+                    {t.displaySymbol || t.symbol.toUpperCase()}
+                  </Text>
+                  <LinkExternalIcon />
+                </TokenLink>
+              )}
+            </ElementTextWrapper>
           </CoinIconTextWrapper>
         ),
         suffix:
           balances && balances[i]?.gt(0) ? (
-            <Text size="md" color="grey-400">
+            <Text size="lg" color="grey-400">
               {formatUnitsWithMaxFractions(
                 balances[i] ?? BigNumber.from(0),
                 t.decimals
@@ -93,34 +113,21 @@ export function TokenSelector({ selectedRoute, onSelectToken }: Props) {
       displayElement={
         <CoinIconTextWrapper>
           <CoinIcon src={selectedToken.logoURI} />
-          <Text size="md" color="white-100">
+          <Text size="lg" color="white-100">
             {selectedToken.displaySymbol || selectedToken.symbol.toUpperCase()}
           </Text>
         </CoinIconTextWrapper>
       }
       selectedValue={selectedRoute.fromTokenSymbol}
-      title="Coins"
+      title="Select a token"
       setSelectedValue={(v) => onSelectToken(v)}
       allowSelectDisabled
+      disabled={disabled}
     />
   );
 }
 
 export default TokenSelector;
-
-const TokenSelection = styled(Selector)`
-  width: calc(30% - 6px);
-
-  @media ${QUERIESV2.xs.andDown} {
-    width: 100%;
-  }
-` as StyledComponent<
-  SelectorPropType<string> & {
-    theme?: Theme | undefined;
-  },
-  {},
-  {}
->;
 
 const CoinIconTextWrapper = styled.div`
   display: flex;
@@ -134,4 +141,23 @@ const CoinIconTextWrapper = styled.div`
 const CoinIcon = styled.img`
   width: 24px;
   height: 24px;
+`;
+
+const ElementTextWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const TokenLink = styled.a`
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+  text-decoration: none;
+
+  &:hover {
+    color: #9daab3;
+    text-decoration: underline;
+  }
 `;

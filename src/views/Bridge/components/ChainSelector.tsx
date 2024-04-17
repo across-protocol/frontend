@@ -73,7 +73,7 @@ function ChainInfoElement({
             {superText}
           </Text>
         )}
-        <Text size="md" color="white-100">
+        <Text size="lg" color="white-100">
           {capitalizeFirstLetter(chain.fullName ?? chain.name)}
         </Text>
       </ChainIconSuperTextWrapper>
