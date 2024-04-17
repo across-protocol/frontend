@@ -52,7 +52,7 @@ export function AmountInput({
     <Wrapper>
       <InputGroupWrapper valid={isAmountValid}>
         {displayTokenIcon ? (
-          token.logoURIs ? (
+          token.logoURIs?.length === 2 ? (
             <IconPairContainer>
               <IconPair
                 LeftIcon={<TokenIcon src={token.logoURIs[0]} />}

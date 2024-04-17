@@ -9,6 +9,7 @@ import {
   getConfig,
   getToken,
   hubPoolChainId,
+  isProductionBuild,
 } from "utils";
 
 export enum AmountInputError {
@@ -322,7 +323,9 @@ export function getTokenExplorerLinkSafe(chainId: number, symbol: string) {
   try {
     return getTokenExplorerLink(chainId, symbol);
   } catch (e) {
-    console.warn(e);
+    if (!isProductionBuild) {
+      console.warn(e);
+    }
     return "";
   }
 }

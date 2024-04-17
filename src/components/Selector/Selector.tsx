@@ -141,7 +141,8 @@ const Wrapper = styled.div<{ disabled?: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 9px 12px 9px 16px;
+  padding: 9px 12px;
+  padding-left: 16px;
 
   height: 48px;
   width: 100%;
