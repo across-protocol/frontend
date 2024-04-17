@@ -135,12 +135,9 @@ export const relayerFeeCapitalCostConfig: {
   )
 );
 
-// If `timestamp` is not passed into a suggested-fees query, then return the latest mainnet timestamp minus this buffer.
-export const DEFAULT_QUOTE_TIMESTAMP_BUFFER = 12 * 25; // ~25 blocks on mainnet (12s/block), ~= 5 minutes.
-
-// If `timestamp` is not passed into a suggested-fees query, then return the latest price rounded to
-// the nearest multiple of this value.
-export const DEFAULT_QUOTE_TIMESTAMP_PRECISION = 5 * 60; // 5 minutes
+// If `timestamp` is not passed into a suggested-fees query, then return the latest mainnet block minus this buffer
+// rounded down to the nearest `QUOTE_BLOCK_PRECISION`th block interval. Can be overridden by env var `QUOTE_BLOCK_BUFFER`.
+export const DEFAULT_QUOTE_BLOCK_BUFFER = 25; // ~25 blocks on mainnet (12s/block), ~= 5 minutes.
 
 export const BLOCK_TAG_LAG = -1;
 

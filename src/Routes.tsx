@@ -175,7 +175,14 @@ const Routes: React.FC = () => {
           />
           <Route exact path="/bridge" component={Send} />
           <Route path="/bridge/:depositTxHash" component={DepositStatus} />
-          <Redirect exact path="/" to="/bridge" />
+          <Redirect
+            exact
+            path="/"
+            to={{
+              pathname: "/bridge",
+              search: location.search,
+            }}
+          />
         </Switch>
       </Suspense>
       <Toast position="top-right" />

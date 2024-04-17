@@ -6,7 +6,11 @@ import {
   SpokePool__factory,
 } from "@across-protocol/contracts-v2/dist/typechain";
 import * as sdk from "@across-protocol/sdk-v2";
-import { BALANCER_NETWORK_CONFIG, BalancerSDK } from "@balancer-labs/sdk";
+import {
+  BALANCER_NETWORK_CONFIG,
+  BalancerSDK,
+  BalancerNetworkConfig,
+} from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
 import { BigNumber, ethers, providers, utils } from "ethers";
@@ -975,25 +979,53 @@ async function getBalancerPoolState(poolTokenAddress: string) {
     [CHAIN_IDs.SEPOLIA]: {},
   };
 
+  const defaultNetworkConfig = BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID];
   const config = {
     network: {
-      ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID],
+      ...defaultNetworkConfig,
       pools: {
-        ...BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID].pools,
+        ...defaultNetworkConfig.pools,
         ...supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID],
       },
-    },
+    } as BalancerNetworkConfig,
     rpcUrl: getProvider(HUB_POOL_CHAIN_ID).connection.url,
     coingecko: {
       coingeckoApiKey: REACT_APP_COINGECKO_PRO_API_KEY!,
     },
   };
-  const balancer = new BalancerSDK(config);
 
-  const pool = await balancer.pools.findBy(
-    "address",
-    poolTokenAddress.toLowerCase()
+  const poolEntry = Object.entries(
+    supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID]
+  ).find(
+    ([_, { address }]) =>
+      address.toLowerCase() === poolTokenAddress.toLowerCase()
   );
+
+  if (!poolEntry) {
+    throw new InputError(
+      `Balancer pool with address ${poolTokenAddress} not found`
+    );
+  }
+
+  const poolId = poolEntry[1].id as string;
+
+  const balancer = new BalancerSDK({
+    ...config,
+    subgraphQuery: {
+      args: {
+        where: {
+          id: {
+            // Note: This ensures that only a single pool is queried which
+            // improves performance significantly.
+            eq: poolId,
+          },
+        },
+      },
+      attrs: {},
+    },
+  });
+
+  const pool = await balancer.pools.find(poolId);
 
   if (!pool) {
     throw new InputError(
@@ -1155,6 +1187,7 @@ export function getBaseRewardsApr(
  * @param provider Provider to use for the calls.
  * @param calls the calls to make via multicall3. Each call includes a contract, function name, and args, so that
  * this function can encode them correctly.
+ * @param overrides Overrides to use for the multicall3 call.
  * @returns An array of the decoded results in the same order that they were passed in.
  */
 export async function callViaMulticall3(
@@ -1163,7 +1196,8 @@ export async function callViaMulticall3(
     contract: ethers.Contract;
     functionName: string;
     args?: any[];
-  }[]
+  }[],
+  overrides: ethers.CallOverrides = {}
 ): Promise<ethers.utils.Result[]> {
   const multicall3 = new ethers.Contract(
     MULTICALL3_ADDRESS,
@@ -1175,9 +1209,10 @@ export async function callViaMulticall3(
     callData: contract.interface.encodeFunctionData(functionName, args),
   }));
 
-  const [, results] = await (multicall3.callStatic.aggregate(inputs) as Promise<
-    [BigNumber, string[]]
-  >);
+  const [, results] = await (multicall3.callStatic.aggregate(
+    inputs,
+    overrides
+  ) as Promise<[BigNumber, string[]]>);
   return results.map((result, i) =>
     calls[i].contract.interface.decodeFunctionResult(
       calls[i].functionName,
