@@ -93,6 +93,7 @@ export function useBridge() {
         }
       : undefined,
     selectedRoute.fromTokenSymbol,
+    selectedRoute.toTokenSymbol,
     quote,
     initialQuoteTime,
     quotePriceUSD
