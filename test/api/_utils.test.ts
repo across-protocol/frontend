@@ -1,4 +1,4 @@
-import { TOKEN_SYMBOLS_MAP } from "@across-protocol/constants-v2";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
 import { getRouteDetails } from "../../api/_utils";
 
 describe("_utils", () => {
@@ -29,11 +29,26 @@ describe("_utils", () => {
       ).toThrowError(/More than one route is enabled/);
     });
 
-    test("should throw if destination token unknown", () => {
+    test("should throw if destination chain unknown", () => {
       const knownToken = TOKEN_SYMBOLS_MAP.ACX.addresses[1];
       const unknownDestinationChainId = 99999;
       expect(() =>
         getRouteDetails(knownToken, unknownDestinationChainId)
+      ).toThrowError(/Unsupported token address on given destination chain/);
+    });
+
+    test("should throw if provided output token address is not supported on destination chain", () => {
+      const originChainId = 1;
+      const knownToken = TOKEN_SYMBOLS_MAP.ACX.addresses[originChainId];
+      const destinationChainId = 10;
+      const outputTokenAddress = TOKEN_SYMBOLS_MAP.ACX.addresses[137];
+      expect(() =>
+        getRouteDetails(
+          knownToken,
+          destinationChainId,
+          originChainId,
+          outputTokenAddress
+        )
       ).toThrowError(/Unsupported token address on given destination chain/);
     });
 
@@ -42,12 +57,18 @@ describe("_utils", () => {
       const uniqueToken = TOKEN_SYMBOLS_MAP.ACX.addresses[originChainId];
       const destinationChainId = 137;
       expect(getRouteDetails(uniqueToken, destinationChainId)).toMatchObject({
-        l1Token: TOKEN_SYMBOLS_MAP.ACX.addresses[1],
+        l1Token: {
+          address: TOKEN_SYMBOLS_MAP.ACX.addresses[1],
+        },
         resolvedOriginChainId: originChainId,
-        inputToken: TOKEN_SYMBOLS_MAP.ACX.addresses[originChainId],
-        outputToken: TOKEN_SYMBOLS_MAP.ACX.addresses[destinationChainId],
-        decimals: TOKEN_SYMBOLS_MAP.ACX.decimals,
-        symbol: TOKEN_SYMBOLS_MAP.ACX.symbol,
+        inputToken: {
+          address: uniqueToken,
+          symbol: TOKEN_SYMBOLS_MAP.ACX.symbol,
+        },
+        outputToken: {
+          address: TOKEN_SYMBOLS_MAP.ACX.addresses[destinationChainId],
+          symbol: TOKEN_SYMBOLS_MAP.ACX.symbol,
+        },
       });
     });
 
@@ -59,12 +80,116 @@ describe("_utils", () => {
       expect(
         getRouteDetails(uniqueToken, destinationChainId, originChainId)
       ).toMatchObject({
-        l1Token: TOKEN_SYMBOLS_MAP.DAI.addresses[1],
+        l1Token: {
+          address: TOKEN_SYMBOLS_MAP.DAI.addresses[1],
+        },
         resolvedOriginChainId: originChainId,
-        inputToken: TOKEN_SYMBOLS_MAP.DAI.addresses[originChainId],
-        outputToken: TOKEN_SYMBOLS_MAP.DAI.addresses[destinationChainId],
-        decimals: TOKEN_SYMBOLS_MAP.DAI.decimals,
-        symbol: TOKEN_SYMBOLS_MAP.DAI.symbol,
+        inputToken: {
+          address: uniqueToken,
+          symbol: TOKEN_SYMBOLS_MAP.DAI.symbol,
+        },
+        outputToken: {
+          address: TOKEN_SYMBOLS_MAP.DAI.addresses[destinationChainId],
+          symbol: TOKEN_SYMBOLS_MAP.DAI.symbol,
+        },
+      });
+    });
+
+    // @TODO: Remove after switching to CCTP
+    describe("pre-CCTP", () => {
+      test("should return correct route details for native USDC", () => {
+        const originChainId = 1;
+        const nativeUsdc = TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId];
+
+        // to Optimism
+        expect(getRouteDetails(nativeUsdc, CHAIN_IDs.OPTIMISM)).toMatchObject({
+          l1Token: {
+            address: nativeUsdc,
+          },
+          resolvedOriginChainId: originChainId,
+          inputToken: {
+            address: nativeUsdc,
+            symbol: "USDC",
+          },
+          outputToken: {
+            address: TOKEN_SYMBOLS_MAP["USDC.e"].addresses[CHAIN_IDs.OPTIMISM],
+            symbol: "USDC.e",
+          },
+        });
+        // to Base
+        expect(getRouteDetails(nativeUsdc, CHAIN_IDs.BASE)).toMatchObject({
+          l1Token: {
+            address: nativeUsdc,
+          },
+          resolvedOriginChainId: originChainId,
+          inputToken: {
+            address: nativeUsdc,
+            symbol: "USDC",
+          },
+          outputToken: {
+            address: TOKEN_SYMBOLS_MAP.USDbC.addresses[CHAIN_IDs.BASE],
+            symbol: "USDbC",
+          },
+        });
+      });
+
+      test("should return correct route details for bridged USDC", () => {
+        const originChainId = CHAIN_IDs.OPTIMISM;
+        const nativeUsdc = TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.MAINNET];
+        const bridgedUsdcOrigin =
+          TOKEN_SYMBOLS_MAP["USDC.e"].addresses[originChainId];
+
+        // to Polygon
+        expect(
+          getRouteDetails(bridgedUsdcOrigin, CHAIN_IDs.POLYGON)
+        ).toMatchObject({
+          l1Token: {
+            address: nativeUsdc,
+          },
+          resolvedOriginChainId: originChainId,
+          inputToken: {
+            address: bridgedUsdcOrigin,
+            symbol: "USDC.e",
+          },
+          outputToken: {
+            address: TOKEN_SYMBOLS_MAP["USDC.e"].addresses[CHAIN_IDs.POLYGON],
+            symbol: "USDC.e",
+          },
+        });
+        // to Base
+        expect(
+          getRouteDetails(bridgedUsdcOrigin, CHAIN_IDs.BASE)
+        ).toMatchObject({
+          l1Token: {
+            address: nativeUsdc,
+          },
+          resolvedOriginChainId: originChainId,
+          inputToken: {
+            address: bridgedUsdcOrigin,
+            symbol: "USDC.e",
+          },
+          outputToken: {
+            address: TOKEN_SYMBOLS_MAP.USDbC.addresses[CHAIN_IDs.BASE],
+            symbol: "USDbC",
+          },
+        });
+        // to Mainnet
+        expect(
+          getRouteDetails(bridgedUsdcOrigin, CHAIN_IDs.MAINNET)
+        ).toMatchObject({
+          l1Token: {
+            address: nativeUsdc,
+          },
+          resolvedOriginChainId: originChainId,
+          inputToken: {
+            address: bridgedUsdcOrigin,
+            symbol: "USDC.e",
+          },
+          outputToken: {
+            address: nativeUsdc,
+            symbol: "USDC",
+          },
+        });
       });
     });
   });

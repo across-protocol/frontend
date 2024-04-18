@@ -39,6 +39,7 @@ import {
   BLOCK_TAG_LAG,
   defaultRelayerAddressOverride,
   defaultRelayerAddressOverridePerToken,
+  disabledL1Tokens,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
 
@@ -205,6 +206,77 @@ export const resolveVercelEndpoint = () => {
   }
 };
 
+export const isBridgedUsdc = (tokenSymbol: string) => {
+  return ["USDC.e", "USDbC"].includes(tokenSymbol);
+};
+
+export const validateChainAndTokenParams = (
+  queryParams: Partial<{
+    token: string;
+    inputToken: string;
+    outputToken: string;
+    originChainId: string;
+    destinationChainId: string;
+  }>
+) => {
+  let {
+    token,
+    inputToken: inputTokenAddress,
+    outputToken: outputTokenAddress,
+    originChainId,
+    destinationChainId: _destinationChainId,
+  } = queryParams;
+
+  if (!_destinationChainId) {
+    throw new InputError("Query param 'destinationChainId' must be provided");
+  }
+
+  if (originChainId === _destinationChainId) {
+    throw new InputError("Origin and destination chains cannot be the same");
+  }
+
+  if (!token && (!inputTokenAddress || !outputTokenAddress)) {
+    throw new InputError(
+      "Query param 'token' or 'inputToken' and 'outputToken' must be provided"
+    );
+  }
+
+  const destinationChainId = Number(_destinationChainId);
+  inputTokenAddress = ethers.utils.getAddress(
+    (token || inputTokenAddress) as string
+  );
+
+  const { l1Token, outputToken, inputToken, resolvedOriginChainId } =
+    getRouteDetails(
+      inputTokenAddress,
+      destinationChainId,
+      originChainId ? Number(originChainId) : undefined,
+      outputTokenAddress
+        ? ethers.utils.getAddress(outputTokenAddress)
+        : undefined
+    );
+
+  if (
+    disabledL1Tokens.includes(l1Token.address.toLowerCase()) ||
+    !isRouteEnabled(
+      resolvedOriginChainId,
+      destinationChainId,
+      inputToken.address,
+      outputToken.address
+    )
+  ) {
+    throw new InputError(`Route is not enabled.`);
+  }
+
+  return {
+    l1Token,
+    inputToken,
+    outputToken,
+    destinationChainId,
+    resolvedOriginChainId,
+  };
+};
+
 /**
  * Utility function to resolve route details based on given `inputTokenAddress` and `destinationChainId`.
  * The optional parameter `originChainId` can be omitted if the `inputTokenAddress` is unique across all
@@ -213,17 +285,19 @@ export const resolveVercelEndpoint = () => {
  * @param inputTokenAddress The token address to resolve details for.
  * @param destinationChainId The destination chain id of the route.
  * @param originChainId Optional if the `inputTokenAddress` is unique across all chains. Required if not.
+ * @param outputTokenAddress Optional output token address if .
  * @returns Token details of route and additional information, such as the inferred origin chain id, L1
  * token address and the input/output token addresses.
  */
 export const getRouteDetails = (
   inputTokenAddress: string,
   destinationChainId: number,
-  originChainId?: number
+  originChainId?: number,
+  outputTokenAddress?: string
 ) => {
-  const token = _getTokenByAddress(inputTokenAddress, originChainId);
+  const inputToken = _getTokenByAddress(inputTokenAddress, originChainId);
 
-  if (!token) {
+  if (!inputToken) {
     throw new InputError(
       originChainId
         ? "Unsupported token on given origin chain"
@@ -231,9 +305,56 @@ export const getRouteDetails = (
     );
   }
 
+  const l1TokenAddress = isBridgedUsdc(inputToken.symbol)
+    ? TOKEN_SYMBOLS_MAP.USDC.addresses[HUB_POOL_CHAIN_ID]
+    : inputToken.addresses[HUB_POOL_CHAIN_ID];
+  const l1Token = _getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
+
+  if (!l1Token) {
+    throw new InputError("No L1 token found for given input token address");
+  }
+
+  // NOTE: This ensures backwards compatibility for the `token` query param before we switch to CCTP.
+  // I.e. pre-CCTP, we support:
+  // - native USDC -> USDC.e (L1 -> L2)
+  // - USDC.e -> native USDC (L2 -> L1)
+  // - USDC.e -> USD.e (L2 -> L2)
+  // If integrators now only use the `token` query param, we need to infer above
+  // destination tokens correctly. Post-CCTP, this will behave differently. Therefore,
+  // this needs to be removed once we switch to CCTP.
+  if (
+    !outputTokenAddress &&
+    (inputToken.symbol === "USDC" || isBridgedUsdc(inputToken.symbol))
+  ) {
+    const direction = isBridgedUsdc(inputToken.symbol)
+      ? destinationChainId === HUB_POOL_CHAIN_ID
+        ? "l2ToL1"
+        : "l2ToL2"
+      : "l1ToL2";
+    if (direction === "l1ToL2" || direction === "l2ToL2") {
+      outputTokenAddress =
+        TOKEN_SYMBOLS_MAP.USDbC.addresses[destinationChainId] ||
+        TOKEN_SYMBOLS_MAP["USDC.e"].addresses[destinationChainId];
+    } else {
+      outputTokenAddress = TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId];
+    }
+  }
+
+  outputTokenAddress ??= inputToken.addresses[destinationChainId];
+
+  const outputToken = outputTokenAddress
+    ? _getTokenByAddress(outputTokenAddress, destinationChainId)
+    : undefined;
+
+  if (!outputToken) {
+    throw new InputError(
+      "Unsupported token address on given destination chain"
+    );
+  }
+
   const possibleOriginChainIds = originChainId
     ? [originChainId]
-    : _getChainIdsOfToken(inputTokenAddress, token);
+    : _getChainIdsOfToken(inputTokenAddress, inputToken);
 
   if (possibleOriginChainIds.length === 0) {
     throw new InputError("Unsupported token address");
@@ -246,38 +367,37 @@ export const getRouteDetails = (
   }
 
   const resolvedOriginChainId = possibleOriginChainIds[0];
-  const inputToken = token.addresses[resolvedOriginChainId];
-
-  if (!inputToken) {
-    throw new InputError("Unsupported token address on given origin chain");
-  }
-
-  const outputToken = token.addresses[destinationChainId];
-
-  if (!outputToken) {
-    throw new InputError(
-      "Unsupported token address on given destination chain"
-    );
-  }
 
   return {
-    ...token,
+    inputToken: {
+      ...inputToken,
+      address: inputToken.addresses[resolvedOriginChainId],
+    },
+    outputToken: {
+      ...outputToken,
+      symbol:
+        outputToken.symbol === "USDC.e" && destinationChainId === CHAIN_IDs.BASE
+          ? "USDbC"
+          : outputToken.symbol,
+      address: outputToken.addresses[destinationChainId],
+    },
+    l1Token: {
+      ...l1Token,
+      address: l1TokenAddress,
+    },
     resolvedOriginChainId,
-    l1Token: token.addresses[HUB_POOL_CHAIN_ID],
-    inputToken,
-    outputToken,
   };
 };
 
 const _getTokenByAddress = (tokenAddress: string, chainId?: number) => {
   const [, token] =
-    Object.entries(TOKEN_SYMBOLS_MAP).find(([_symbol, { addresses }]) =>
-      chainId
+    Object.entries(TOKEN_SYMBOLS_MAP).find(([_key, { addresses }]) => {
+      return chainId
         ? addresses[chainId]?.toLowerCase() === tokenAddress.toLowerCase()
         : Object.values(addresses).some(
             (address) => address.toLowerCase() === tokenAddress.toLowerCase()
-          )
-    ) || [];
+          );
+    }) || [];
   return token;
 };
 
@@ -292,6 +412,10 @@ const _getChainIdsOfToken = (
 };
 
 export class InputError extends Error {}
+
+export function throwInputError(message: string): never {
+  throw new InputError(message);
+}
 
 export const getHubPool = (provider: providers.Provider) => {
   return HubPool__factory.connect(ENABLED_ROUTES.hubPoolAddress, provider);
@@ -625,20 +749,23 @@ export const getSpokePoolAddress = (chainId: number): string => {
  * @param fromChainId The chain id of the origin bridge action
  * @param toChainId The chain id of the destination bridge action.
  * @param fromToken The originating token address. Note: is a valid ERC-20 address
+ * @param toToken The destination token address. Note: is a valid ERC-20 address
  * @returns A boolean representing if a route with these parameters is available
  */
 export const isRouteEnabled = (
   fromChainId: number,
   toChainId: number,
-  fromToken: string
+  fromToken: string,
+  toToken: string
 ): boolean => {
-  const enabled = ENABLED_ROUTES.routes.some(
-    ({ fromTokenAddress, fromChain, toChain }) =>
+  const enabled = ENABLED_ROUTES.routes.find(
+    ({ fromTokenAddress, toTokenAddress, fromChain, toChain }) =>
       fromChainId === fromChain &&
       toChainId === toChain &&
-      fromToken.toLowerCase() === fromTokenAddress.toLowerCase()
+      fromToken.toLowerCase() === fromTokenAddress.toLowerCase() &&
+      toToken.toLowerCase() === toTokenAddress.toLowerCase()
   );
-  return enabled;
+  return Boolean(enabled);
 };
 
 /**
