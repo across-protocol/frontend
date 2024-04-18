@@ -343,6 +343,7 @@ export const tokenList = [
 
     return {
       ...tokenInfo,
+      displaySymbol: symbol,
       logoURI,
       mainnetAddress: isBridgedUsdc(tokenInfo.symbol)
         ? TOKEN_SYMBOLS_MAP.USDC.addresses[hubPoolChainId]
