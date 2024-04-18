@@ -85,6 +85,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -93,7 +94,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.BASE,
-            tokens: ["WETH", "ETH", "USDC", "DAI", "BAL"],
+            tokens: ["WETH", "ETH", "USDC", "DAI", "BAL", "POOL"],
           },
           {
             chainId: CHAIN_IDs.LINEA,
@@ -148,6 +149,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -156,7 +158,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.BASE,
-            tokens: ["WETH", "ETH", "USDC", "DAI", "BAL"],
+            tokens: ["WETH", "ETH", "USDC", "DAI", "BAL", "POOL"],
           },
           {
             chainId: CHAIN_IDs.LINEA,
@@ -207,6 +209,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -215,7 +218,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.BASE,
-            tokens: ["DAI", "WETH", "USDC", "BAL"],
+            tokens: ["DAI", "WETH", "USDC", "BAL", "POOL"],
           },
           {
             chainId: CHAIN_IDs.LINEA,
@@ -239,6 +242,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -253,6 +257,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -267,6 +272,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -275,7 +281,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.BASE,
-            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL"],
+            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
           },
           {
             chainId: CHAIN_IDs.LINEA,
@@ -319,19 +325,19 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.MAINNET,
-            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL"],
+            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
-            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL"],
+            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
-            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL"],
+            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
-            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL"],
+            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
