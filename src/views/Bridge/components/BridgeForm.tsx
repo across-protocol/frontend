@@ -37,7 +37,8 @@ type BridgeFormProps = {
 
   onChangeAmountInput: (input: string) => void;
   onClickMaxBalance: VoidHandler;
-  onSelectToken: (token: string) => void;
+  onSelectInputToken: (token: string) => void;
+  onSelectOutputToken: (token: string) => void;
   onSelectFromChain: (chainId: number) => void;
   onSelectToChain: (chainId: number) => void;
   onClickQuickSwap: VoidHandler;
@@ -75,7 +76,8 @@ const BridgeForm = ({
 
   onClickMaxBalance,
   onChangeAmountInput,
-  onSelectToken,
+  onSelectInputToken,
+  onSelectOutputToken,
   onSelectFromChain,
   onSelectToChain,
   onClickQuickSwap,
@@ -96,6 +98,13 @@ const BridgeForm = ({
 }: BridgeFormProps) => {
   const { programName } = useRewardToken(selectedRoute.toChain);
   const { connect } = useConnection();
+
+  const receiveTokenSymbol = getReceiveTokenSymbol(
+    selectedRoute.toChain,
+    selectedRoute.fromTokenSymbol,
+    selectedRoute.toTokenSymbol,
+    Boolean(toAccount?.isContract)
+  );
 
   return (
     <CardWrapper>
@@ -119,7 +128,8 @@ const BridgeForm = ({
         <TokenSelectorWrapper>
           <TokenSelector
             selectedRoute={selectedRoute}
-            onSelectToken={onSelectToken}
+            onSelectToken={onSelectInputToken}
+            inputOrOutputToken="input"
           />
         </TokenSelectorWrapper>
       </RowWrapper>
@@ -168,9 +178,9 @@ const BridgeForm = ({
         <TokenSelectorWrapper>
           <TokenSelector
             selectedRoute={selectedRoute}
-            onSelectToken={onSelectToken}
-            // TODO: Implement `toTokenSymbol` when USDC/USDC.e distinction is supported
-            disabled
+            onSelectToken={onSelectOutputToken}
+            inputOrOutputToken="output"
+            receiveTokenSymbol={receiveTokenSymbol}
           />
         </TokenSelectorWrapper>
       </RowWrapper>
@@ -198,14 +208,8 @@ const BridgeForm = ({
             ? receiveAmount(amountToBridge, fees).receivable
             : undefined
         }
-        token={getToken(selectedRoute.fromTokenSymbol)}
-        receiveToken={getToken(
-          getReceiveTokenSymbol(
-            selectedRoute.toChain,
-            selectedRoute.fromTokenSymbol,
-            Boolean(toAccount?.isContract)
-          )
-        )}
+        inputToken={getToken(selectedRoute.fromTokenSymbol)}
+        outputToken={getToken(receiveTokenSymbol)}
       />
       {isWrongChain ? (
         <StyledSecondaryButton onClick={onClickChainSwitch}>

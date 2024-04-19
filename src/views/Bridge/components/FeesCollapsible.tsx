@@ -19,15 +19,15 @@ export type Props = {
   gasFee?: BigNumber;
   bridgeFee?: BigNumber;
   totalReceived?: BigNumber;
-  token: TokenInfo;
-  receiveToken: TokenInfo;
+  inputToken: TokenInfo;
+  outputToken: TokenInfo;
 };
 
 export function FeesCollapsible(props: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const estimatedRewards = useEstimatedRewards(
-    props.token,
+    props.inputToken,
     props.toChainId,
     props.gasFee,
     props.bridgeFee
@@ -48,10 +48,8 @@ export function FeesCollapsible(props: Props) {
                 <>
                   <TotalReceive
                     totalReceived={props.totalReceived}
-                    receiveToken={props.receiveToken}
-                    token={props.token}
-                    srcChainId={props.fromChainId}
-                    destinationChainId={props.toChainId}
+                    inputToken={props.inputToken}
+                    outputToken={props.outputToken}
                     textColor="light-200"
                   />{" "}
                   {estimatedRewards.reward && (

@@ -29,7 +29,8 @@ const Bridge = () => {
     setCustomToAddress,
     handleChangeAmountInput,
     handleClickMaxBalance,
-    handleSelectToken,
+    handleSelectInputToken,
+    handleSelectOutputToken,
     handleSelectFromChain,
     handleSelectToChain,
     isQuoteLoading,
@@ -56,7 +57,8 @@ const Bridge = () => {
             toAccount={toAccount}
             onChangeAmountInput={handleChangeAmountInput}
             onClickMaxBalance={handleClickMaxBalance}
-            onSelectToken={handleSelectToken}
+            onSelectInputToken={handleSelectInputToken}
+            onSelectOutputToken={handleSelectOutputToken}
             onSelectFromChain={handleSelectFromChain}
             onSelectToChain={handleSelectToChain}
             onClickQuickSwap={handleQuickSwap}

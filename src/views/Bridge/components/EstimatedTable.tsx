@@ -6,7 +6,6 @@ import { Tooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 
 import {
-  isBridgedUsdc,
   capitalizeFirstLetter,
   COLORS,
   formatUnitsWithMaxFractions,
@@ -61,7 +60,7 @@ const PriceFee = ({
         </>
       )}
       {tokenFee ? (
-        <Text size="md" color={highlightTokenFee ? "primary" : "white"}>
+        <Text size="md" color={highlightTokenFee ? "primary" : "light-200"}>
           {`${formatUnitsWithMaxFractions(tokenFee, token.decimals)} ${
             token.symbol
           }`}
@@ -77,14 +76,13 @@ const PriceFee = ({
 };
 
 const EstimatedTable = ({
-  fromChainId,
   toChainId,
   estimatedTime,
   gasFee,
   bridgeFee,
-  token,
+  inputToken,
   totalReceived,
-  receiveToken,
+  outputToken,
   referralRewardAsBaseCurrency,
   gasFeeAsBaseCurrency,
   bridgeFeeAsBaseCurrency,
@@ -122,9 +120,9 @@ const EstimatedTable = ({
       <Row>
         <Text size="md" color="grey-400">
           Time to{" "}
-          <WhiteText>
+          <Text as="span" color="light-200">
             {capitalizeFirstLetter(getChainInfo(toChainId).name)}
-          </WhiteText>
+          </Text>
         </Text>
         <Text size="md" color="grey-400">
           {estimatedTime ? estimatedTime : "-"}
@@ -146,7 +144,7 @@ const EstimatedTable = ({
             </InfoIconWrapper>
           </Tooltip>
         </ToolTipWrapper>
-        <Text size="md" color={netFeeAsBaseCurrency ? "white" : "grey-400"}>
+        <Text size="md" color={netFeeAsBaseCurrency ? "light-200" : "grey-400"}>
           {netFeeAsBaseCurrency ? `$ ${formatUSD(netFeeAsBaseCurrency)}` : "-"}
         </Text>
       </Row>
@@ -167,7 +165,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <PriceFee
-          token={token}
+          token={inputToken}
           tokenFee={bridgeFee}
           baseCurrencyFee={bridgeFeeAsBaseCurrency}
         />
@@ -188,7 +186,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <PriceFee
-          token={token}
+          token={inputToken}
           tokenFee={gasFee}
           baseCurrencyFee={gasFeeAsBaseCurrency}
         />
@@ -228,10 +226,9 @@ const EstimatedTable = ({
           {totalReceived ? (
             <TotalReceive
               totalReceived={totalReceived}
-              token={token}
-              receiveToken={receiveToken}
-              srcChainId={fromChainId}
-              destinationChainId={toChainId}
+              inputToken={inputToken}
+              outputToken={outputToken}
+              textColor="light-200"
             />
           ) : (
             "-"
@@ -244,40 +241,31 @@ const EstimatedTable = ({
 
 export function TotalReceive({
   totalReceived,
-  token,
-  receiveToken,
-  srcChainId,
-  destinationChainId,
+  inputToken,
+  outputToken,
   textColor,
 }: {
   totalReceived: BigNumber;
-  receiveToken: TokenInfo;
-  token: TokenInfo;
-  srcChainId: number;
-  destinationChainId: number;
+  outputToken: TokenInfo;
+  inputToken: TokenInfo;
   textColor?: TextColor;
 }) {
-  const areTokensSame = token.symbol === receiveToken.symbol;
-
-  if (areTokensSame) {
+  if (
+    inputToken.symbol === outputToken.symbol ||
+    inputToken.symbol === "USDC"
+  ) {
     return (
-      <TokenFee amount={totalReceived} token={token} textColor={textColor} />
+      <TokenFee
+        amount={totalReceived}
+        token={outputToken}
+        textColor={textColor}
+      />
     );
   }
-  const sourceChainName = capitalizeFirstLetter(getChainInfo(srcChainId).name);
-  const destinationChainName = capitalizeFirstLetter(
-    getChainInfo(destinationChainId).name
-  );
   const tooltipText =
-    token.symbol === "ETH"
+    inputToken.symbol === "ETH"
       ? "When bridging ETH and recipient address is a smart contract, or destination is Polygon, you will receive WETH."
-      : token.symbol === "WETH"
-      ? "When bridging WETH and recipient address is an EOA, you will receive ETH."
-      : `When bridging ${
-          token.symbol
-        } from ${sourceChainName} to ${destinationChainName}, you will receive ${
-          receiveToken.symbol
-        }${isBridgedUsdc(receiveToken.symbol) ? " (bridged USDC)" : ""}.`;
+      : "When bridging WETH and recipient address is an EOA, you will receive ETH.";
 
   return (
     <TotalReceiveRow>
@@ -290,7 +278,7 @@ export function TotalReceive({
       </Tooltip>
       <TokenFee
         amount={totalReceived}
-        token={receiveToken}
+        token={outputToken}
         textColor="warning"
       />
     </TotalReceiveRow>

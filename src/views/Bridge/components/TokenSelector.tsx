@@ -11,7 +11,8 @@ import { useBalancesBySymbols, useConnection } from "hooks";
 
 import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
 import {
-  getAvailableTokens,
+  getAvailableInputTokens,
+  getAvailableOutputTokens,
   getAllTokens,
   getTokenExplorerLinkSafe,
 } from "../utils";
@@ -19,7 +20,8 @@ import {
 type Props = {
   selectedRoute: Route;
   onSelectToken: (token: string) => void;
-  disabled?: boolean;
+  inputOrOutputToken: "input" | "output";
+  receiveTokenSymbol?: string;
 };
 
 const allTokens = getAllTokens();
@@ -27,10 +29,17 @@ const allTokens = getAllTokens();
 export function TokenSelector({
   selectedRoute,
   onSelectToken,
-  disabled,
+  inputOrOutputToken,
+  receiveTokenSymbol,
 }: Props) {
-  const { fromChain, toChain, fromTokenSymbol } = selectedRoute;
-  const selectedToken = getToken(fromTokenSymbol);
+  const isInputTokenSelector = inputOrOutputToken === "input";
+  const { fromChain, toChain, fromTokenSymbol, toTokenSymbol } = selectedRoute;
+  const selectedToken = getToken(
+    isInputTokenSelector ? fromTokenSymbol : toTokenSymbol
+  );
+  const receiveToken = receiveTokenSymbol
+    ? getToken(receiveTokenSymbol)
+    : selectedToken;
 
   const { account } = useConnection();
 
@@ -39,23 +48,27 @@ export function TokenSelector({
       disabled?: boolean;
     }
   > = useMemo(() => {
-    const availableTokens = getAvailableTokens(fromChain, toChain);
+    const availableTokens = isInputTokenSelector
+      ? getAvailableInputTokens(fromChain, toChain)
+      : getAvailableOutputTokens(fromChain, toChain, fromTokenSymbol);
     return [
       ...availableTokens,
-      ...allTokens
-        .filter(
-          (t) =>
-            !availableTokens.find(
-              (availableToken) => availableToken.symbol === t.symbol
+      ...(isInputTokenSelector
+        ? allTokens
+            .filter(
+              (t) =>
+                !availableTokens.find(
+                  (availableToken) => availableToken.symbol === t.symbol
+                )
             )
-        )
-        .map((t) => ({ ...t, disabled: true })),
+            .map((t) => ({ ...t, disabled: true }))
+        : []),
     ];
-  }, [fromChain, toChain]);
+  }, [fromChain, toChain, fromTokenSymbol, isInputTokenSelector]);
 
   const { balances } = useBalancesBySymbols({
     tokenSymbols: orderedTokens.filter((t) => !t.disabled).map((t) => t.symbol),
-    chainId: fromChain,
+    chainId: isInputTokenSelector ? fromChain : toChain,
     account,
   });
 
@@ -87,7 +100,10 @@ export function TokenSelector({
                 </Text>
               ) : (
                 <TokenLink
-                  href={getTokenExplorerLinkSafe(fromChain, t.symbol)}
+                  href={getTokenExplorerLinkSafe(
+                    isInputTokenSelector ? fromChain : toChain,
+                    t.symbol
+                  )}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -112,17 +128,17 @@ export function TokenSelector({
       }))}
       displayElement={
         <CoinIconTextWrapper>
-          <CoinIcon src={selectedToken.logoURI} />
+          <CoinIcon src={receiveToken.logoURI} />
           <Text size="lg" color="white-100">
-            {selectedToken.displaySymbol || selectedToken.symbol.toUpperCase()}
+            {receiveToken.displaySymbol || receiveToken.symbol.toUpperCase()}
           </Text>
         </CoinIconTextWrapper>
       }
-      selectedValue={selectedRoute.fromTokenSymbol}
+      selectedValue={receiveToken.symbol}
       title="Select a token"
       setSelectedValue={(v) => onSelectToken(v)}
       allowSelectDisabled
-      disabled={disabled}
+      disabled={orderedTokens.length === 1}
     />
   );
 }

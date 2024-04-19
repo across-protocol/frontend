@@ -396,6 +396,13 @@ export class ConfigClient {
     const tokens = this.getTokenList(chainId);
     return this._getTokenInfoBySymbol(chainId, symbol, tokens);
   }
+  getTokenInfoBySymbolSafe(chainId: number, symbol: string): Token | undefined {
+    try {
+      return this.getTokenInfoBySymbol(chainId, symbol);
+    } catch (error) {
+      return undefined;
+    }
+  }
   getStakingPoolTokenInfoBySymbol(chainId: number, symbol: string): Token {
     const tokens = this.getStakingPoolTokenList(chainId);
     return this._getTokenInfoBySymbol(chainId, symbol, tokens);

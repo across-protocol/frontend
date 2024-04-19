@@ -28,7 +28,8 @@ export function useBridge() {
     handleQuickSwap,
     handleSelectFromChain,
     handleSelectToChain,
-    handleSelectToken,
+    handleSelectInputToken,
+    handleSelectOutputToken,
   } = useSelectRoute();
 
   const {
@@ -158,7 +159,8 @@ export function useBridge() {
     amountValidationError,
     handleSelectFromChain,
     handleSelectToChain,
-    handleSelectToken,
+    handleSelectInputToken,
+    handleSelectOutputToken,
     isQuoteLoading: isQuoteLoading || Boolean(parsedAmount && isQuoteIdle),
   };
 }

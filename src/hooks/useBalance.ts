@@ -59,10 +59,13 @@ const QueryBalanceBySymbol =
       params;
     if (!chainIdToQuery || !tokenSymbolToQuery || !accountToQuery)
       return BigNumber.from(0);
-    const tokenInfo = config.getTokenInfoBySymbol(
+    const tokenInfo = config.getTokenInfoBySymbolSafe(
       chainIdToQuery,
       tokenSymbolToQuery
     );
+    if (!tokenInfo) {
+      return undefined;
+    }
     if (tokenInfo.isNative) {
       return getNativeBalance(chainIdToQuery, accountToQuery);
     } else {
