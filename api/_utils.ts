@@ -421,10 +421,6 @@ const _getBridgedUsdcTokenSymbol = (tokenSymbol: string, chainId: number) => {
 
 export class InputError extends Error {}
 
-export function throwInputError(message: string): never {
-  throw new InputError(message);
-}
-
 export const getHubPool = (provider: providers.Provider) => {
   return HubPool__factory.connect(ENABLED_ROUTES.hubPoolAddress, provider);
 };
