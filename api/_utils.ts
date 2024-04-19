@@ -285,7 +285,7 @@ export const validateChainAndTokenParams = (
  * @param inputTokenAddress The token address to resolve details for.
  * @param destinationChainId The destination chain id of the route.
  * @param originChainId Optional if the `inputTokenAddress` is unique across all chains. Required if not.
- * @param outputTokenAddress Optional output token address if .
+ * @param outputTokenAddress Optional output token address.
  * @returns Token details of route and additional information, such as the inferred origin chain id, L1
  * token address and the input/output token addresses.
  */
@@ -371,14 +371,16 @@ export const getRouteDetails = (
   return {
     inputToken: {
       ...inputToken,
+      symbol: isBridgedUsdc(inputToken.symbol)
+        ? _getBridgedUsdcTokenSymbol(inputToken.symbol, resolvedOriginChainId)
+        : inputToken.symbol,
       address: inputToken.addresses[resolvedOriginChainId],
     },
     outputToken: {
       ...outputToken,
-      symbol:
-        outputToken.symbol === "USDC.e" && destinationChainId === CHAIN_IDs.BASE
-          ? "USDbC"
-          : outputToken.symbol,
+      symbol: isBridgedUsdc(outputToken.symbol)
+        ? _getBridgedUsdcTokenSymbol(outputToken.symbol, destinationChainId)
+        : outputToken.symbol,
       address: outputToken.addresses[destinationChainId],
     },
     l1Token: {
@@ -409,6 +411,12 @@ const _getChainIdsOfToken = (
     ([_, address]) => address.toLowerCase() === tokenAddress.toLowerCase()
   );
   return chainIds.map(([chainId]) => Number(chainId));
+};
+
+const _getBridgedUsdcTokenSymbol = (tokenSymbol: string, chainId: number) => {
+  return tokenSymbol === "USDC.e" && chainId === CHAIN_IDs.BASE
+    ? "USDbC"
+    : tokenSymbol;
 };
 
 export class InputError extends Error {}

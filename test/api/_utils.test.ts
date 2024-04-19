@@ -1,5 +1,9 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
-import { getRouteDetails } from "../../api/_utils";
+import {
+  getRouteDetails,
+  validateChainAndTokenParams,
+  ENABLED_ROUTES,
+} from "../../api/_utils";
 
 describe("_utils", () => {
   describe("#getRouteDetails()", () => {
@@ -191,6 +195,144 @@ describe("_utils", () => {
           },
         });
       });
+    });
+  });
+
+  describe("#validateChainAndTokenParams()", () => {
+    test("throw if 'destinationChainId' is not provided", () => {
+      expect(() => validateChainAndTokenParams({})).toThrowError(
+        /Query param 'destinationChainId' must be provided/
+      );
+    });
+
+    test("throw if 'originChainId' and 'destinationChain' are equal", () => {
+      expect(() =>
+        validateChainAndTokenParams({
+          destinationChainId: "10",
+          originChainId: "10",
+        })
+      ).toThrowError(/Origin and destination chains cannot be the same/);
+    });
+
+    test("throw if 'token' is omitted and input/output tokens are not set", () => {
+      const expectedErrorRegEx =
+        /Query param 'token' or 'inputToken' and 'outputToken' must be provided/;
+      expect(() =>
+        validateChainAndTokenParams({
+          destinationChainId: "10",
+        })
+      ).toThrowError(expectedErrorRegEx);
+      expect(() =>
+        validateChainAndTokenParams({
+          destinationChainId: "10",
+          inputToken: "0x0",
+        })
+      ).toThrowError(expectedErrorRegEx);
+      expect(() =>
+        validateChainAndTokenParams({
+          destinationChainId: "10",
+          outputToken: "0x0",
+        })
+      ).toThrowError(expectedErrorRegEx);
+    });
+
+    // TODO: Remove after switching to CCTP
+    test("throw if route disabled pre-CCTP", () => {
+      const originChainId = 1;
+      const destinationChainId = 10;
+
+      // native USDC to native USDC only enabled after CCTP integration
+      expect(() =>
+        validateChainAndTokenParams({
+          originChainId: String(originChainId),
+          destinationChainId: String(destinationChainId),
+          inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
+          outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
+        })
+      ).toThrowError(/Route is not enabled/);
+    });
+
+    test("resolve all routes for unambiguous tokens and 'token' param", () => {
+      ENABLED_ROUTES.routes
+        .filter(
+          (route) => !["WETH", "ETH", "DAI"].includes(route.fromTokenSymbol)
+        )
+        .forEach((route) => {
+          expect(
+            validateChainAndTokenParams({
+              token: route.fromTokenAddress,
+              destinationChainId: String(route.toChain),
+            })
+          ).toMatchObject({
+            l1Token: {
+              address: route.l1TokenAddress,
+            },
+            inputToken: {
+              address: route.fromTokenAddress,
+              symbol: route.fromTokenSymbol,
+            },
+            outputToken: {
+              address: route.toTokenAddress,
+              symbol: route.toTokenSymbol,
+            },
+            destinationChainId: route.toChain,
+            resolvedOriginChainId: route.fromChain,
+          });
+        });
+    });
+
+    test("resolve all routes for ambiguous tokens and 'token' param", () => {
+      ENABLED_ROUTES.routes
+        .filter((route) => ["DAI"].includes(route.fromTokenSymbol))
+        .forEach((route) => {
+          expect(
+            validateChainAndTokenParams({
+              token: route.fromTokenAddress,
+              originChainId: String(route.fromChain),
+              destinationChainId: String(route.toChain),
+            })
+          ).toMatchObject({
+            l1Token: {
+              address: route.l1TokenAddress,
+            },
+            inputToken: {
+              address: route.fromTokenAddress,
+              symbol: route.fromTokenSymbol,
+            },
+            outputToken: {
+              address: route.toTokenAddress,
+              symbol: route.toTokenSymbol,
+            },
+            destinationChainId: route.toChain,
+            resolvedOriginChainId: route.fromChain,
+          });
+        });
+    });
+
+    test("resolve all routes for ETH/WETH and 'token' param", () => {
+      ENABLED_ROUTES.routes
+        .filter((route) => ["ETH", "WETH"].includes(route.fromTokenSymbol))
+        .forEach((route) => {
+          expect(
+            validateChainAndTokenParams({
+              token: route.fromTokenAddress,
+              originChainId: String(route.fromChain),
+              destinationChainId: String(route.toChain),
+            })
+          ).toMatchObject({
+            l1Token: {
+              address: route.l1TokenAddress,
+            },
+            inputToken: {
+              address: route.fromTokenAddress,
+            },
+            outputToken: {
+              address: route.toTokenAddress,
+            },
+            destinationChainId: route.toChain,
+            resolvedOriginChainId: route.fromChain,
+          });
+        });
     });
   });
 });
