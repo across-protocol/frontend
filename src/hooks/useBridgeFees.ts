@@ -42,7 +42,7 @@ export function useBridgeFees(
         amount: BigNumber.from(amountToQuery),
         tokenSymbol: tokenSymbolToQuery,
         toChainId: toChainIdToQuery,
-        fromChainId: toChainIdToQuery,
+        fromChainId: fromChainIdToQuery,
         recipientAddress,
       });
     },
