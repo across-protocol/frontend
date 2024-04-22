@@ -26,13 +26,14 @@ export default function DepositStatus() {
 
   const originChainId = queryParams.get("originChainId");
   const destinationChainId = queryParams.get("destinationChainId");
-  const bridgeTokenSymbol = queryParams.get("bridgeTokenSymbol");
+  const inputTokenSymbol = queryParams.get("inputTokenSymbol");
+  const outputTokenSymbol = queryParams.get("outputTokenSymbol");
 
   if (
     !depositTxHash ||
     !originChainId ||
     !destinationChainId ||
-    !bridgeTokenSymbol
+    !inputTokenSymbol
   ) {
     return <NotFound />;
   }
@@ -55,7 +56,8 @@ export default function DepositStatus() {
           <DepositStatusLowerCard
             fromChainId={Number(originChainId)}
             toChainId={Number(destinationChainId)}
-            bridgeTokenSymbol={bridgeTokenSymbol}
+            inputTokenSymbol={inputTokenSymbol}
+            outputTokenSymbol={outputTokenSymbol || inputTokenSymbol}
             fromBridgePagePayload={state.fromBridgePagePayload}
           />
         </InnerWrapper>

@@ -35,7 +35,7 @@ describe("API Test", () => {
     await limitsHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
     expect(response.send).toHaveBeenCalledWith(
-      expect.stringMatching(/At path: token/)
+      expect.stringMatching(/At path: destinationChainId/)
     );
   });
 

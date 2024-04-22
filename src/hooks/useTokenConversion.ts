@@ -2,9 +2,13 @@ import { utils } from "@across-protocol/sdk-v2";
 import { useCoingeckoPrice } from "./useCoingeckoPrice";
 import { BigNumber } from "ethers";
 import { useCallback } from "react";
-import { fixedPointAdjustment, getToken, getTokenByAddress } from "utils";
+import {
+  fixedPointAdjustment,
+  getToken,
+  getTokenByAddress,
+  TOKEN_SYMBOLS_MAP,
+} from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
-import { TOKEN_SYMBOLS_MAP } from "@across-protocol/constants-v2";
 
 export function useTokenConversion(symbol: string, baseCurrency: string) {
   const token = getToken(symbol);

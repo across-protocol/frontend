@@ -1,7 +1,10 @@
 import assert from "assert";
 import { BigNumber, ethers, providers } from "ethers";
 import { utils } from "@across-protocol/sdk-v2";
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants-v2";
+import {
+  CHAIN_IDs,
+  TOKEN_SYMBOLS_MAP as _TOKEN_SYMBOLS_MAP,
+} from "@across-protocol/constants-v2";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
@@ -46,6 +49,18 @@ export enum ChainId {
   SEPOLIA = CHAIN_IDs.SEPOLIA,
   BASE_SEPOLIA = CHAIN_IDs.BASE_SEPOLIA,
 }
+
+// NOTE: As a temporary workaround for backwards-compatibility, we have `USDC` and `_USDC`/`USDC.e`
+// entries in our constants package. See https://github.com/across-protocol/constants-v3/pull/28
+// for more details. Until the entry `USDC` is updated with the values of `_USDC`, we override the
+// entry locally.
+const { USDC, _USDC, ...tokenSymbols } = _TOKEN_SYMBOLS_MAP;
+export const TOKEN_SYMBOLS_MAP = {
+  ...tokenSymbols,
+  USDC: {
+    ..._USDC,
+  },
+} as const;
 
 // Maps `ChainId` to an object and inverts the Key/Value
 // pair. Ex) { "mainnet": 1 }
@@ -282,6 +297,8 @@ export const bridgedUSDCSymbolsMap = {
   [ChainId.ARBITRUM]: "USDC.e",
   [ChainId.OPTIMISM]: "USDC.e",
   [ChainId.POLYGON]: "USDC.e",
+  [ChainId.LINEA]: "USDC.e",
+  [ChainId.ZK_SYNC]: "USDC.e",
   [ChainId.BASE]: "USDbC",
 };
 export const bridgedUSDCSymbols = Array.from(
@@ -290,6 +307,9 @@ export const bridgedUSDCSymbols = Array.from(
 export const chainsWithNativeUSDC = Object.keys(bridgedUSDCSymbolsMap).map(
   Number
 );
+export function isBridgedUsdc(symbol: string) {
+  return bridgedUSDCSymbols.includes(symbol);
+}
 
 // Order of this map determines the order of the tokens in the token selector
 export const orderedTokenSymbolLogoMap = {
@@ -314,18 +334,6 @@ export const orderedTokenSymbolLogoMap = {
 
 export const tokenList = [
   ...Object.entries(orderedTokenSymbolLogoMap).flatMap(([symbol, logoURI]) => {
-    // NOTE: Handle cases for bridged USDC such as USDC.e or USDbC.
-    if (bridgedUSDCSymbols.includes(symbol)) {
-      const usdcTokenInfo = TOKEN_SYMBOLS_MAP.USDC;
-      return {
-        ...usdcTokenInfo,
-        logoURI,
-        symbol,
-        displaySymbol: symbol,
-        mainnetAddress: usdcTokenInfo.addresses[hubPoolChainId],
-      };
-    }
-
     const tokenInfo =
       TOKEN_SYMBOLS_MAP[symbol as keyof typeof TOKEN_SYMBOLS_MAP];
 
@@ -335,8 +343,11 @@ export const tokenList = [
 
     return {
       ...tokenInfo,
+      displaySymbol: symbol,
       logoURI,
-      mainnetAddress: tokenInfo.addresses[hubPoolChainId],
+      mainnetAddress: isBridgedUsdc(tokenInfo.symbol)
+        ? TOKEN_SYMBOLS_MAP.USDC.addresses[hubPoolChainId]
+        : tokenInfo.addresses[hubPoolChainId],
     };
   }),
   ...externalLPsForStaking[hubPoolChainId],
@@ -498,6 +509,8 @@ const RouteSS = superstruct.object({
   fromTokenAddress: superstruct.string(),
   fromSpokeAddress: superstruct.string(),
   fromTokenSymbol: superstruct.string(),
+  toTokenAddress: superstruct.string(),
+  toTokenSymbol: superstruct.string(),
   isNative: superstruct.boolean(),
   l1TokenAddress: superstruct.string(),
 });
