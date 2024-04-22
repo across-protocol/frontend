@@ -40,13 +40,15 @@ export function DepositStatusLowerCard({
 
   const gasFee = utils.parseUnits(
     quote?.relayGasFeeTotal || "0",
-    tokenInfo.decimals
+    inputTokenInfo.decimals
   );
   const bridgeFee = utils
-    .parseUnits(quote?.totalBridgeFee || "0", tokenInfo.decimals)
-    .sub(utils.parseUnits(quote?.relayGasFeeTotal || "0", tokenInfo.decimals));
+    .parseUnits(quote?.totalBridgeFee || "0", inputTokenInfo.decimals)
+    .sub(
+      utils.parseUnits(quote?.relayGasFeeTotal || "0", inputTokenInfo.decimals)
+    );
   const estimatedRewards = useEstimatedRewards(
-    tokenInfo,
+    inputTokenInfo,
     toChainId,
     gasFee,
     bridgeFee
@@ -62,8 +64,8 @@ export function DepositStatusLowerCard({
         .parseUnits(quote.totalBridgeFee, inputTokenInfo.decimals)
         .sub(utils.parseUnits(quote.relayGasFeeTotal, inputTokenInfo.decimals))}
       totalReceived={utils.parseUnits(quote.toAmount, inputTokenInfo.decimals)}
-      token={inputTokenInfo}
-      receiveToken={getToken(
+      inputToken={inputTokenInfo}
+      outputToken={getToken(
         getReceiveTokenSymbol(
           toChainId,
           inputTokenInfo.symbol,
