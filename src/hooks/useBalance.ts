@@ -68,7 +68,7 @@ export function useBalanceBySymbol(
       getChainInfo(chainId || 1).pollingInterval,
   });
   return {
-    balance,
+    balance: balance as BigNumber | undefined,
     ...delegated,
   };
 }
@@ -124,7 +124,7 @@ export function useBalancesBySymbols({
     })
   );
   return {
-    balances: result.map((result) => result.data),
+    balances: result.map((result) => result.data) as (BigNumber | undefined)[],
     isLoading: result.some((s) => s.isLoading),
   };
 }
