@@ -19,11 +19,11 @@ export function latestBlockQueryKey(chainId: ChainId) {
  * @returns An array of query keys for react-query `useQuery` hook.
  */
 export function balanceQueryKey(
-  account: string,
+  account?: string,
   chainId?: ChainId,
   token?: string
 ) {
-  return ["balance", chainId, token, account];
+  return ["balance", chainId, token, account] as const;
 }
 
 /**
@@ -34,12 +34,18 @@ export function balanceQueryKey(
  * @returns An array of query keys for react-query `useQuery` hook.
  */
 export function bridgeFeesQueryKey(
-  tokenSymbol: string,
   amount: ethers.BigNumber,
-  fromChainId: ChainId,
-  toChainId: ChainId
+  tokenSymbol?: string,
+  fromChainId?: ChainId,
+  toChainId?: ChainId
 ) {
-  return ["bridgeFees", tokenSymbol, amount, fromChainId, toChainId];
+  return [
+    "bridgeFees",
+    tokenSymbol,
+    amount.toString(),
+    fromChainId,
+    toChainId,
+  ] as const;
 }
 
 export function bridgeLimitsQueryKey(
