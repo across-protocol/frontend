@@ -88,9 +88,11 @@ paths:
           required: true
           description: >
             The desired destination chain ID of the transfer.
+
+
+            _Example:_ 10
           schema:
             type: integer
-            example: 10
         - name: amount
           in: query
           required: true
@@ -223,8 +225,7 @@ paths:
   /limits:
     get:
       summary: Retrieve current transfer limits of the system
-      description:
-        Returns transfer limits for specified `token` OR
+      description: Returns transfer limits for specified `token` OR
         `inputToken`+`outputToken` and `destinationChainId`.
       parameters:
         - name: token
