@@ -11,7 +11,8 @@ paths:
       summary: Retrieve suggested fee quote for a deposit.
       description: >
         Returns suggested fees based on the `token` OR
-        `inputToken`+`outputToken`,  `destinationChainId`, and `amount`.
+        `inputToken`+`outputToken`, `originChainId`, `destinationChainId`, and
+        `amount`.
       parameters:
         - name: token
           in: query
@@ -23,11 +24,8 @@ paths:
             i.e. WETH.
 
 
-            Note that the address provided can be the token address on any
-            chain. In the unlikely event where two different tokens have the
-            same address on different chains, you must also specify the
-            `originChainId` parameter defined below to indicate which chain
-            should be used.
+            Note that the address provided must exist on the specified
+            `originChainId`.
 
 
             **Also note that this parameter will eventually be deprecated in
@@ -48,11 +46,8 @@ paths:
             address, like WETH.
 
 
-            Note that the address provided can be the token address on any
-            chain. In the unlikely event where two different tokens have the
-            same address on different chains, you must also specify the
-            `originChainId` parameter defined below to indicate which chain
-            should be used.
+            Note that the address provided must exist on the specified
+            `originChainId` below.
 
 
             **Also note that this parameter will eventually replace the
@@ -72,8 +67,8 @@ paths:
             address, like WETH.
 
 
-            Note that the address provided must match the token address on the
-            specified `destinationChainId` below.
+            Note that the address provided must exist on the specified
+            `destinationChainId` below.
 
 
             **Also note that this parameter will eventually replace the
@@ -83,11 +78,21 @@ paths:
 
 
             _Example:_ 0x4200000000000000000000000000000000000006
+        - name: originChainId
+          in: query
+          required: true
+          description: >
+            Chain ID where the specified `token` or `inputToken` exists.
+
+
+            _Example:_ 10
+          schema:
+            type: integer
         - name: destinationChainId
           in: query
           required: true
           description: >
-            The desired destination chain ID of the transfer.
+            The desired destination chain ID of the bridge transfer.
 
 
             _Example:_ 10
@@ -107,19 +112,6 @@ paths:
 
 
             _Example:_ 100000000000
-          schema:
-            type: integer
-        - name: originChainId
-          in: query
-          required: false
-          description: >
-            Chain ID where the specified `token` or `inputToken` exists. Note
-            that this is only needed to disambiguate when there are matching
-            addresses on different chains. Otherwise, this can be inferred by
-            the API.
-
-
-            _Example:_ 10
           schema:
             type: integer
         - name: recipient
@@ -226,7 +218,7 @@ paths:
     get:
       summary: Retrieve current transfer limits of the system
       description: Returns transfer limits for specified `token` OR
-        `inputToken`+`outputToken` and `destinationChainId`.
+        `inputToken`+`outputToken`, `originChainId`, and `destinationChainId`.
       parameters:
         - name: token
           in: query
@@ -238,11 +230,8 @@ paths:
             i.e. WETH.
 
 
-            Note that the address provided can be the token address on any
-            chain. In the unlikely event where two different tokens have the
-            same address on different chains, you must also specify the
-            `originChainId` parameter defined below to indicate which chain
-            should be used.
+            Note that the address provided must exist on the specified
+            `originChainId`.
 
 
             **Also note that this parameter will eventually be deprecated in
@@ -263,11 +252,8 @@ paths:
             address, like WETH.
 
 
-            Note that the address provided can be the token address on any
-            chain. In the unlikely event where two different tokens have the
-            same address on different chains, you must also specify the
-            `originChainId` parameter defined below to indicate which chain
-            should be used.
+            Note that the address provided must exist on the specified
+            `originChainId`.
 
 
             **Also note that this parameter will eventually replace the
@@ -298,19 +284,9 @@ paths:
 
 
             _Example:_ 0x4200000000000000000000000000000000000006
-        - name: destinationChainId
-          in: query
-          required: true
-          description: >
-            The intended destination chain ID of the transfer.
-
-
-            _Example:_ 42161
-          schema:
-            type: integer
         - name: originChainId
           in: query
-          required: false
+          required: true
           description: >
             Used to specify the chain where the specified token address exists.
             Note: this is only needed to disambiguate when there are matching
@@ -319,6 +295,16 @@ paths:
 
 
             _Example:_ 10
+          schema:
+            type: integer
+        - name: destinationChainId
+          in: query
+          required: true
+          description: >
+            The intended destination chain ID of the bridge transfer.
+
+
+            _Example:_ 42161
           schema:
             type: integer
       responses:
@@ -547,8 +533,8 @@ components:
           description: >
             The max deposit size that can be relayed "instantly" on the
             destination chain. Instantly means that there is relayer capital
-            readily available and that a relayer is expected to relay within 1-4
-            minutes of the deposit.
+            readily available and that a relayer is expected to relay within
+            seconds to 5 minutes of the deposit.
           example: 201958902363
         maxDepositShortDelay:
           type: string
