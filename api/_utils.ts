@@ -242,9 +242,13 @@ export const validateChainAndTokenParams = (
   }
 
   const destinationChainId = Number(_destinationChainId);
-  inputTokenAddress = ethers.utils.getAddress(
-    (token || inputTokenAddress) as string
+  inputTokenAddress = _getAddressOrThrowInputError(
+    (token || inputTokenAddress) as string,
+    token ? "token" : "inputToken"
   );
+  outputTokenAddress = outputTokenAddress
+    ? _getAddressOrThrowInputError(outputTokenAddress, "outputToken")
+    : undefined;
 
   const { l1Token, outputToken, inputToken, resolvedOriginChainId } =
     getRouteDetails(
@@ -252,8 +256,6 @@ export const validateChainAndTokenParams = (
       destinationChainId,
       originChainId ? Number(originChainId) : undefined,
       outputTokenAddress
-        ? ethers.utils.getAddress(outputTokenAddress)
-        : undefined
     );
 
   if (
@@ -308,7 +310,9 @@ export const getRouteDetails = (
   const l1TokenAddress = isBridgedUsdc(inputToken.symbol)
     ? TOKEN_SYMBOLS_MAP.USDC.addresses[HUB_POOL_CHAIN_ID]
     : inputToken.addresses[HUB_POOL_CHAIN_ID];
-  const l1Token = _getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
+  const l1Token = isBridgedUsdc(inputToken.symbol)
+    ? TOKEN_SYMBOLS_MAP.USDC
+    : _getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
 
   if (!l1Token) {
     throw new InputError("No L1 token found for given input token address");
@@ -393,13 +397,13 @@ export const getRouteDetails = (
 
 const _getTokenByAddress = (tokenAddress: string, chainId?: number) => {
   const [, token] =
-    Object.entries(TOKEN_SYMBOLS_MAP).find(([_key, { addresses }]) => {
-      return chainId
+    Object.entries(TOKEN_SYMBOLS_MAP).find(([_symbol, { addresses }]) =>
+      chainId
         ? addresses[chainId]?.toLowerCase() === tokenAddress.toLowerCase()
         : Object.values(addresses).some(
             (address) => address.toLowerCase() === tokenAddress.toLowerCase()
-          );
-    }) || [];
+          )
+    ) || [];
   return token;
 };
 
@@ -417,6 +421,14 @@ const _getBridgedUsdcTokenSymbol = (tokenSymbol: string, chainId: number) => {
   return tokenSymbol === "USDC.e" && chainId === CHAIN_IDs.BASE
     ? "USDbC"
     : tokenSymbol;
+};
+
+const _getAddressOrThrowInputError = (address: string, paramName: string) => {
+  try {
+    return ethers.utils.getAddress(address);
+  } catch (err) {
+    throw new InputError(`Invalid address provided for '${paramName}'`);
+  }
 };
 
 export class InputError extends Error {}
@@ -769,7 +781,7 @@ export const isRouteEnabled = (
       fromToken.toLowerCase() === fromTokenAddress.toLowerCase() &&
       toToken.toLowerCase() === toTokenAddress.toLowerCase()
   );
-  return Boolean(enabled);
+  return !!enabled;
 };
 
 /**
