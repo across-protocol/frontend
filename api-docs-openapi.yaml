@@ -5,6 +5,7 @@ info:
   version: 0.1.0
 servers:
   - url: https://app.across.to/api
+  - url: https://testnet.across.to/api
 paths:
   /suggested-fees:
     get:
@@ -83,21 +84,43 @@ paths:
           required: true
           description: >
             Chain ID where the specified `token` or `inputToken` exists.
-
-
-            _Example:_ 10
           schema:
             type: integer
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
         - name: destinationChainId
           in: query
           required: true
           description: >
             The desired destination chain ID of the bridge transfer.
-
-
-            _Example:_ 10
           schema:
             type: integer
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
         - name: amount
           in: query
           required: true
@@ -114,6 +137,7 @@ paths:
             _Example:_ 100000000000
           schema:
             type: integer
+            minimum: 1
         - name: recipient
           in: query
           required: false
@@ -122,7 +146,7 @@ paths:
             EOA and message is defined, then the API will throw a 4xx error.
 
 
-            _Example_: 0xc186fa914353c44b2e33ebe05f21846f1048beda
+            _Example_: 0xc186fA914353c44b2E33eBE05f21846F1048bEda
           schema:
             type: string
         - name: message
@@ -152,7 +176,7 @@ paths:
             balance to make the fill.
 
 
-            _Example:_ 0x428ab2ba90eba0a4be7af34c9ac451ab061ac010
+            _Example:_ 0x428AB2BA90Eba0a4Be7aF34C9Ac451ab061AC010
           schema:
             type: string
         - name: timestamp
@@ -288,25 +312,44 @@ paths:
           in: query
           required: true
           description: >
-            Used to specify the chain where the specified token address exists.
-            Note: this is only needed to disambiguate when there are matching
-            addresses on different chains. In that case, an arbitrary one will
-            be chosen, so it is recommended that this is always provided.
-
-
-            _Example:_ 10
+            Chain ID where the specified `token` or `inputToken` exists.
           schema:
             type: integer
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
         - name: destinationChainId
           in: query
           required: true
           description: >
             The intended destination chain ID of the bridge transfer.
-
-
-            _Example:_ 42161
           schema:
             type: integer
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
       responses:
         "200":
           description: Transfer limits
@@ -335,21 +378,44 @@ paths:
           required: false
           description: >
             Chain ID of the originating chain.
-
-
-            _Example_: 1
           schema:
             type: integer
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
         - name: destinationChainId
           in: query
           required: false
           description: >
             Chain ID of the destination chain.
-
-
-            _Example:_ 10
           schema:
             type: integer
+            minimum: 1
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
         - name: originToken
           in: query
           required: false
