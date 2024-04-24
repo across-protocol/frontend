@@ -189,21 +189,26 @@ const handler = async (
         contract: hubPool,
         functionName: "getCurrentTime",
       },
+      {
+        contract: configStoreClient.contract,
+        functionName: "l1TokenConfig",
+        args: [l1Token.address],
+      },
     ];
 
-    const [[currentUt, nextUt, quoteTimestamp], rateModel, tokenPrice] =
+    const [[currentUt, nextUt, quoteTimestamp, rawL1TokenConfig], tokenPrice] =
       await Promise.all([
         callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
-        configStoreClient.getRateModel(
-          l1Token.address,
-          {
-            blockTag: quoteBlockNumber,
-          },
-          computedOriginChainId,
-          destinationChainId
-        ),
         getCachedTokenPrice(l1Token.address, baseCurrency),
       ]);
+    const parsedL1TokenConfig =
+      sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
+        String(rawL1TokenConfig)
+      );
+    const routeRateModelKey = `${computedOriginChainId}-${destinationChainId}`;
+    const rateModel =
+      parsedL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
+      parsedL1TokenConfig.rateModel;
     const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
