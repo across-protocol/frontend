@@ -11,9 +11,7 @@ export const CHAIN_IDs = constants.CHAIN_IDs;
 let { USDC, _USDC, ...tokenSymbols } = constants.TOKEN_SYMBOLS_MAP;
 export const TOKEN_SYMBOLS_MAP = {
   ...tokenSymbols,
-  USDC: {
-    ..._USDC,
-  },
+  USDC: _USDC,
 } as const;
 
 export const maxRelayFeePct = 0.25;

@@ -236,6 +236,29 @@ describe("_utils", () => {
       ).toThrowError(expectedErrorRegEx);
     });
 
+    test("throw if invalid address provided", () => {
+      expect(() =>
+        validateChainAndTokenParams({
+          destinationChainId: "10",
+          token: "0x0",
+        })
+      ).toThrowError(/Invalid address provided for 'token'/);
+      expect(() =>
+        validateChainAndTokenParams({
+          destinationChainId: "10",
+          inputToken: "0x0",
+          outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[10],
+        })
+      ).toThrowError(/Invalid address provided for 'inputToken'/);
+      expect(() =>
+        validateChainAndTokenParams({
+          destinationChainId: "10",
+          inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[1],
+          outputToken: "0x0",
+        })
+      ).toThrowError(/Invalid address provided for 'outputToken'/);
+    });
+
     // TODO: Remove after switching to CCTP
     test("throw if route disabled pre-CCTP", () => {
       const originChainId = 1;
