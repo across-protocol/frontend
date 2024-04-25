@@ -11,4 +11,11 @@ jobs:
       - name: 'Checkout Repository'
         uses: actions/checkout@v3
       - name: 'Dependency Review'
-        uses: actions/dependency-review-action@v3.0.4
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          # Comma-separated list of GHSA IDs to allow.
+          # We allow @openzeppelin/contracts@3.4.1-solc-0.7-2 critical vulnerabilities
+          # because they are not exploitable in our usage of the package.
+          allow-ghsas: >
+            "GHSA-fg47-3c2x-m2wr,GHSA-88g8-f5mf-f5rj"
