@@ -7,11 +7,11 @@ export { default as LayoutV2 } from "./LayoutV2";
 export { default as Modal } from "./Modal";
 export { default as Alert } from "./Alert";
 export { default as Selector } from "./Selector";
-export { default as InputWithMaxButton } from "./InputWithMaxButton";
 export { Text } from "./Text";
 export { WrongNetworkHeader } from "./WrongNetworkHeader";
 export { default as CardWrapper } from "./CardWrapper";
 
+export * from "./AmountInput";
 export * from "./Button";
 export * from "./Badge";
 export * from "./ExternalLink";

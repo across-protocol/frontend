@@ -9,6 +9,7 @@ const Staking = () => {
     poolName,
     poolLogoURI,
     poolLogoURIs,
+    tokenSymbol,
     isConnected,
     stakingPoolQuery,
     stakeActionMutation,
@@ -40,6 +41,7 @@ const Staking = () => {
             stakeActionFn={stakeActionMutation.mutateAsync}
             unstakeActionFn={unstakeActionMutation.mutateAsync}
             poolData={poolData}
+            tokenSymbol={tokenSymbol}
           />
           <StakingReward
             poolData={poolData}

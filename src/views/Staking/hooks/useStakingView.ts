@@ -17,7 +17,7 @@ export const useStakingView = () => {
   const { poolId } = useParams<StakingPathParams>();
   const { isConnected, provider } = useConnection();
   const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork();
-  const { l1TokenAddress, logoURI, logoURIs } =
+  const { l1TokenAddress, logoURI, logoURIs, symbol } =
     config.getStakingPoolTokenInfoBySymbol(hubPoolChainId, poolId);
 
   const stakingPoolQuery = useStakingPool(l1TokenAddress);
@@ -33,6 +33,7 @@ export const useStakingView = () => {
     claimActionMutation,
     poolId,
     exitLinkURI: "/rewards",
+    tokenSymbol: symbol,
     poolLogoURI: logoURI,
     poolLogoURIs: logoURIs,
     poolName: stakingPoolQuery.data?.lpTokenSymbolName ?? "-",

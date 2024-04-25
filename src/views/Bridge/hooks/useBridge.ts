@@ -9,7 +9,8 @@ import { useBridgeAction } from "./useBridgeAction";
 import { useToAccount } from "./useToAccount";
 import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote } from "./useTransferQuote";
-import { useAmountInput, useValidAmount } from "./useAmountInput";
+import { useAmountInput } from "./useAmountInput";
+import { validateBridgeAmount } from "../utils";
 
 export function useBridge() {
   const [shouldUpdateQuote, setShouldUpdateQuote] = useState(true);
@@ -27,7 +28,8 @@ export function useBridge() {
     handleQuickSwap,
     handleSelectFromChain,
     handleSelectToChain,
-    handleSelectToken,
+    handleSelectInputToken,
+    handleSelectOutputToken,
   } = useSelectRoute();
 
   const {
@@ -45,6 +47,7 @@ export function useBridge() {
     data: transferQuote,
     isLoading: isQuoteLoading,
     isFetching: isQuoteFetching,
+    isIdle: isQuoteIdle,
   } = useTransferQuote(
     selectedRoute,
     parsedAmount?.gt(0) ? parsedAmount : utils.bnZero,
@@ -62,14 +65,16 @@ export function useBridge() {
   } = usedTransferQuote || {};
 
   const isQuoteUpdating =
-    shouldUpdateQuote && (isQuoteLoading || isQuoteFetching);
+    shouldUpdateQuote &&
+    (isQuoteLoading || isQuoteFetching || Boolean(parsedAmount && isQuoteIdle));
 
-  const { amountValidationError, isAmountValid } = useValidAmount(
+  const { error: amountValidationError } = validateBridgeAmount(
     parsedAmount,
     quotedFees?.isAmountTooLow,
     maxBalance,
     quotedLimits?.maxDeposit
   );
+  const isAmountValid = !amountValidationError;
 
   const {
     isWrongNetwork,
@@ -130,9 +135,7 @@ export function useBridge() {
     bridgeAction.didActionError,
   ]);
 
-  const estimatedTimeString = isQuoteLoading
-    ? "loading..."
-    : estimatedTime?.formattedString;
+  const estimatedTimeString = estimatedTime?.formattedString;
 
   return {
     ...bridgeAction,
@@ -156,6 +159,8 @@ export function useBridge() {
     amountValidationError,
     handleSelectFromChain,
     handleSelectToChain,
-    handleSelectToken,
+    handleSelectInputToken,
+    handleSelectOutputToken,
+    isQuoteLoading: isQuoteLoading || Boolean(parsedAmount && isQuoteIdle),
   };
 }

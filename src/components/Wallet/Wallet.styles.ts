@@ -20,7 +20,7 @@ export const ConnectButton = styled.button`
   padding: 9px 20px;
   font-weight: 500;
   border: 1px solid var(--color-primary);
-  border-radius: 32px;
+  border-radius: 12px;
   background-color: #2d2e33;
   color: #6cf9d8;
   cursor: pointer;
@@ -73,7 +73,7 @@ export const BalanceButton = styled.button`
   color: #9daab2;
   font-weight: 500;
   border: 1px solid #4d4f56;
-  border-radius: 32px;
+  border-radius: 12px;
   background-color: transparent;
   outline: none;
   cursor: pointer;

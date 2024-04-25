@@ -7,7 +7,15 @@ import {
   getConfig,
   getToken,
   hubPoolChainId,
+  isProductionBuild,
 } from "utils";
+
+type RouteFilter = Partial<{
+  inputTokenSymbol: string;
+  outputTokenSymbol: string;
+  fromChain: number;
+  toChain: number;
+}>;
 
 export enum AmountInputError {
   INVALID = "invalid",
@@ -15,8 +23,8 @@ export enum AmountInputError {
   INSUFFICIENT_BALANCE = "insufficientBalance",
   AMOUNT_TOO_LOW = "amountTooLow",
 }
-
-const enabledRoutes = getConfig().getEnabledRoutes();
+const config = getConfig();
+const enabledRoutes = config.getEnabledRoutes();
 
 const interchangeableTokenPairs: Record<string, string[]> = {
   USDC: ["USDbC", "USDC.e"],
@@ -104,7 +112,7 @@ export function validateBridgeAmount(
     };
   }
 
-  if (parsedAmountInput.lte(0)) {
+  if (parsedAmountInput.lt(0)) {
     return {
       error: AmountInputError.INVALID,
     };
@@ -115,35 +123,26 @@ export function validateBridgeAmount(
   };
 }
 
-export function getInitialRoute(
-  defaults: Partial<{
-    symbol: string;
-    fromChain: number;
-    toChain: number;
-  }> = {}
-) {
+export function getInitialRoute(defaults: RouteFilter = {}) {
   return (
     findEnabledRoute({
-      symbol: defaults.symbol || "ETH",
+      inputTokenSymbol: defaults.inputTokenSymbol || "ETH",
       fromChain: defaults.fromChain || hubPoolChainId,
       toChain: defaults.toChain,
     }) || enabledRoutes[0]
   );
 }
 
-export function findEnabledRoute(
-  filter: Partial<{
-    symbol: string;
-    fromChain: number;
-    toChain: number;
-  }> = {}
-) {
-  const { symbol, fromChain, toChain } = filter;
+export function findEnabledRoute(filter: RouteFilter = {}) {
+  const { inputTokenSymbol, outputTokenSymbol, fromChain, toChain } = filter;
 
   const route = enabledRoutes.find(
     (route) =>
-      (symbol
-        ? route.fromTokenSymbol.toUpperCase() === symbol.toUpperCase()
+      (inputTokenSymbol
+        ? route.fromTokenSymbol.toUpperCase() === inputTokenSymbol.toUpperCase()
+        : true) &&
+      (outputTokenSymbol
+        ? route.toTokenSymbol.toUpperCase() === outputTokenSymbol.toUpperCase()
         : true) &&
       (fromChain ? route.fromChain === fromChain : true) &&
       (toChain ? route.toChain === toChain : true)
@@ -156,26 +155,27 @@ export function findEnabledRoute(
  * @param filter Filter to apply for best matching route.
  */
 export function findNextBestRoute(
-  priorityFilterKeys: ("symbol" | "fromChain" | "toChain")[],
-  filter: Partial<{
-    symbol: string;
-    fromChain: number;
-    toChain: number;
-  }> = {}
+  priorityFilterKeys: (
+    | "inputTokenSymbol"
+    | "outputTokenSymbol"
+    | "fromChain"
+    | "toChain"
+  )[],
+  filter: RouteFilter = {}
 ) {
   let route: Route | undefined;
 
-  const equivalentTokenSymbols = filter.symbol
-    ? interchangeableTokenPairs[filter.symbol]
+  const equivalentInputTokenSymbols = filter.inputTokenSymbol
+    ? interchangeableTokenPairs[filter.inputTokenSymbol]
     : undefined;
 
   route = findEnabledRoute(filter);
 
-  if (!route && equivalentTokenSymbols) {
-    for (const equivalentTokenSymbol of equivalentTokenSymbols) {
+  if (!route && equivalentInputTokenSymbols) {
+    for (const equivalentTokenSymbol of equivalentInputTokenSymbols) {
       route = findEnabledRoute({
         ...filter,
-        symbol: equivalentTokenSymbol,
+        inputTokenSymbol: equivalentTokenSymbol,
       });
 
       if (route) {
@@ -185,7 +185,7 @@ export function findNextBestRoute(
   }
 
   if (!route) {
-    const allFilterKeys = ["symbol", "fromChain", "toChain"] as const;
+    const allFilterKeys = ["inputTokenSymbol", "fromChain", "toChain"] as const;
     const nonPriorityFilterKeys = allFilterKeys.filter((key) =>
       priorityFilterKeys.includes(key)
     );
@@ -203,11 +203,15 @@ export function findNextBestRoute(
         [nonPrioKey]: filter[nonPrioKey],
       });
 
-      if (!route && nonPrioKey === "symbol" && equivalentTokenSymbols) {
-        for (const equivalentTokenSymbol of equivalentTokenSymbols) {
+      if (
+        !route &&
+        nonPrioKey === "inputTokenSymbol" &&
+        equivalentInputTokenSymbols
+      ) {
+        for (const equivalentTokenSymbol of equivalentInputTokenSymbols) {
           route = findEnabledRoute({
             ...priorityFilter,
-            symbol: equivalentTokenSymbol,
+            inputTokenSymbol: equivalentTokenSymbol,
           });
 
           if (route) {
@@ -234,7 +238,7 @@ export function getAllTokens() {
     );
 }
 
-export function getAvailableTokens(
+export function getAvailableInputTokens(
   selectedFromChain: number,
   selectedToChain: number
 ) {
@@ -245,6 +249,25 @@ export function getAvailableTokens(
         route.toChain === selectedToChain
     )
     .map((route) => getToken(route.fromTokenSymbol))
+    .filter(
+      (token, index, self) =>
+        index === self.findIndex((t) => t.symbol === token.symbol)
+    );
+}
+
+export function getAvailableOutputTokens(
+  selectedFromChain: number,
+  selectedToChain: number,
+  selectedInputTokenSymbol: string
+) {
+  return enabledRoutes
+    .filter(
+      (route) =>
+        route.fromChain === selectedFromChain &&
+        route.toChain === selectedToChain &&
+        route.fromTokenSymbol === selectedInputTokenSymbol
+    )
+    .map((route) => getToken(route.toTokenSymbol))
     .filter(
       (token, index, self) =>
         index === self.findIndex((t) => t.symbol === token.symbol)
@@ -290,4 +313,21 @@ export function getRouteFromQueryParams() {
   }
 
   return route;
+}
+
+export function getTokenExplorerLink(chainId: number, symbol: string) {
+  const explorerBaseUrl = getChainInfo(chainId).explorerUrl;
+  const token = config.getTokenInfoBySymbol(chainId, symbol);
+  return `${explorerBaseUrl}/address/${token.address}`;
+}
+
+export function getTokenExplorerLinkSafe(chainId: number, symbol: string) {
+  try {
+    return getTokenExplorerLink(chainId, symbol);
+  } catch (e) {
+    if (!isProductionBuild) {
+      console.warn(e);
+    }
+    return "";
+  }
 }

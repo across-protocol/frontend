@@ -1,15 +1,19 @@
 import { BigNumber } from "ethers";
 import styled from "@emotion/styled";
+import { Clock } from "react-feather";
 
 import ExternalCardWrapper from "components/CardWrapper";
-import { PrimaryButton } from "components/Button";
+import { PrimaryButton, SecondaryButton } from "components/Button";
 import { Text } from "components";
+import { InputErrorText } from "components/AmountInput";
 
-import EstimatedTable from "./EstimatedTable";
 import QuickSwap from "./QuickSwap";
 import { AmountInput } from "./AmountInput";
 import { TokenSelector } from "./TokenSelector";
 import { ChainSelector } from "./ChainSelector";
+import ReferralCTA from "./ReferralCTA";
+import { FeesCollapsible } from "./FeesCollapsible";
+import { RecipientRow } from "./RecipientRow";
 
 import {
   getToken,
@@ -22,8 +26,8 @@ import { VoidHandler } from "utils/types";
 
 import { AmountInputError, getReceiveTokenSymbol } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
-import ReferralCTA from "./ReferralCTA";
 import { useRewardToken } from "hooks/useRewardToken";
+import { useConnection } from "hooks";
 
 type BridgeFormProps = {
   selectedRoute: Route;
@@ -33,7 +37,8 @@ type BridgeFormProps = {
 
   onChangeAmountInput: (input: string) => void;
   onClickMaxBalance: VoidHandler;
-  onSelectToken: (token: string) => void;
+  onSelectInputToken: (token: string) => void;
+  onSelectOutputToken: (token: string) => void;
   onSelectFromChain: (chainId: number) => void;
   onSelectToChain: (chainId: number) => void;
   onClickQuickSwap: VoidHandler;
@@ -50,6 +55,17 @@ type BridgeFormProps = {
   buttonLabel: string;
   isBridgeDisabled: boolean;
   validationError?: AmountInputError;
+  isQuoteLoading: boolean;
+};
+
+const validationErrorTextMap = {
+  [AmountInputError.INSUFFICIENT_BALANCE]:
+    "Insufficient balance to process this transfer.",
+  [AmountInputError.INSUFFICIENT_LIQUIDITY]:
+    "Insufficient bridge liquidity to process this transfer.",
+  [AmountInputError.INVALID]: "Only positive numbers are allowed as an input.",
+  [AmountInputError.AMOUNT_TOO_LOW]:
+    "The amount you are trying to bridge is too low.",
 };
 
 const BridgeForm = ({
@@ -60,7 +76,8 @@ const BridgeForm = ({
 
   onClickMaxBalance,
   onChangeAmountInput,
-  onSelectToken,
+  onSelectInputToken,
+  onSelectOutputToken,
   onSelectFromChain,
   onSelectToChain,
   onClickQuickSwap,
@@ -77,105 +94,144 @@ const BridgeForm = ({
   buttonLabel,
   isBridgeDisabled,
   validationError,
+  isQuoteLoading,
 }: BridgeFormProps) => {
   const { programName } = useRewardToken(selectedRoute.toChain);
+  const { connect } = useConnection();
+
+  const receiveTokenSymbol = getReceiveTokenSymbol(
+    selectedRoute.toChain,
+    selectedRoute.fromTokenSymbol,
+    selectedRoute.toTokenSymbol,
+    Boolean(toAccount?.isContract)
+  );
+
   return (
-    <>
-      <CardWrapper>
-        <RowWrapper>
+    <CardWrapper>
+      <ReferralCTA program={programName} />
+      <RowWrapper>
+        <RowLabelWrapper>
           <Text size="md" color="grey-400">
             Send
           </Text>
-          <SendWrapper>
-            <AmountInput
-              amountInput={amountInput}
-              parsedAmountInput={amountToBridge}
-              selectedRoute={selectedRoute}
-              onChangeAmountInput={onChangeAmountInput}
-              onClickMaxBalance={onClickMaxBalance}
-              validationError={validationError}
-              balance={balance}
-            />
-            <TokenSelector
-              selectedRoute={selectedRoute}
-              onSelectToken={onSelectToken}
-            />
-          </SendWrapper>
-        </RowWrapper>
-        <RowWrapper>
+        </RowLabelWrapper>
+        <InputWrapper>
+          <AmountInput
+            amountInput={amountInput}
+            selectedRoute={selectedRoute}
+            onChangeAmountInput={onChangeAmountInput}
+            onClickMaxBalance={onClickMaxBalance}
+            validationError={validationError}
+            balance={balance}
+          />
+        </InputWrapper>
+        <TokenSelectorWrapper>
+          <TokenSelector
+            selectedRoute={selectedRoute}
+            onSelectToken={onSelectInputToken}
+            inputOrOutputToken="input"
+          />
+        </TokenSelectorWrapper>
+      </RowWrapper>
+      {amountInput && validationError && (
+        <InputErrorText errorText={validationErrorTextMap[validationError]} />
+      )}
+      <RowWrapper>
+        <RowLabelWrapper>
           <Text size="md" color="grey-400">
             From
           </Text>
-          <ChainSelector
+        </RowLabelWrapper>
+        <ChainSelector
+          selectedRoute={selectedRoute}
+          fromOrTo="from"
+          onSelectChain={onSelectFromChain}
+        />
+      </RowWrapper>
+      <FillTimeRowWrapper>
+        <QuickSwapRowLabelWrapper>
+          <QuickSwap onQuickSwap={onClickQuickSwap} />
+        </QuickSwapRowLabelWrapper>
+        <Divider />
+        <FillTimeWrapper>
+          <Clock color="#9DAAB3" size="16" />
+          <Text size="md" color="grey-400">
+            {estimatedTimeString || ""}
+          </Text>
+        </FillTimeWrapper>
+        <QuickSwapWrapperMobile>
+          <QuickSwap onQuickSwap={onClickQuickSwap} />
+        </QuickSwapWrapperMobile>
+        <Divider />
+      </FillTimeRowWrapper>
+      <RowWrapper>
+        <RowLabelWrapper>
+          <Text size="md" color="grey-400">
+            To
+          </Text>
+        </RowLabelWrapper>
+        <ChainSelector
+          selectedRoute={selectedRoute}
+          fromOrTo="to"
+          onSelectChain={onSelectToChain}
+        />
+        <TokenSelectorWrapper>
+          <TokenSelector
             selectedRoute={selectedRoute}
-            fromOrTo="from"
-            onSelectChain={onSelectFromChain}
+            onSelectToken={onSelectOutputToken}
+            inputOrOutputToken="output"
+            receiveTokenSymbol={receiveTokenSymbol}
+          />
+        </TokenSelectorWrapper>
+      </RowWrapper>
+      {toAccount && (
+        <RowWrapper>
+          <RecipientRow
+            onClickChangeToAddress={onClickChangeToAddress}
+            recipient={toAccount}
           />
         </RowWrapper>
-        <RowWrapper>
-          <PaddedText size="md" color="grey-400">
-            To
-          </PaddedText>
-          <QuickSwapWrapper>
-            <QuickSwap onQuickSwap={onClickQuickSwap} />
-          </QuickSwapWrapper>
-          <FromSelectionStack>
-            <ChainSelector
-              selectedRoute={selectedRoute}
-              fromOrTo="to"
-              onSelectChain={onSelectToChain}
-              toAddress={toAccount?.address}
-            />
-            <ChangeAddressLink
-              size="sm"
-              color="grey-400"
-              onClick={onClickChangeToAddress}
-            >
-              Change account
-            </ChangeAddressLink>
-          </FromSelectionStack>
-        </RowWrapper>
-      </CardWrapper>
-      <CardWrapper>
-        <ReferralCTA program={programName} />
-        <EstimatedTable
-          fromChainId={selectedRoute.fromChain}
-          toChainId={selectedRoute.toChain}
-          estimatedTime={estimatedTimeString}
-          gasFee={fees?.relayerGasFee.total}
-          bridgeFee={
-            fees && amountToBridge && amountToBridge.gt(0)
-              ? receiveAmount(amountToBridge, fees).deductionsSansRelayerGas
-              : undefined
-          }
-          totalReceived={
-            fees && amountToBridge && amountToBridge.gt(0)
-              ? receiveAmount(amountToBridge, fees).receivable
-              : undefined
-          }
-          token={getToken(selectedRoute.fromTokenSymbol)}
-          receiveToken={getToken(
-            getReceiveTokenSymbol(
-              selectedRoute.toChain,
-              selectedRoute.fromTokenSymbol,
-              selectedRoute.toTokenSymbol,
-              Boolean(toAccount?.isContract)
-            )
-          )}
-        />
-        {isWrongChain ? (
-          <Button onClick={onClickChainSwitch}>Switch Network</Button>
-        ) : (
-          <Button
-            disabled={isBridgeDisabled}
-            onClick={onClickActionButton}
-            data-cy={!isConnected ? "connect-wallet" : "bridge-button"}
-          >
-            {buttonLabel}
-          </Button>
-        )}
-      </CardWrapper>{" "}
-    </>
+      )}
+      <FeesCollapsible
+        isQuoteLoading={isQuoteLoading}
+        fromChainId={selectedRoute.fromChain}
+        toChainId={selectedRoute.toChain}
+        estimatedTime={estimatedTimeString}
+        gasFee={fees?.relayerGasFee.total}
+        bridgeFee={
+          fees && amountToBridge && amountToBridge.gt(0)
+            ? receiveAmount(amountToBridge, fees).deductionsSansRelayerGas
+            : undefined
+        }
+        totalReceived={
+          fees && amountToBridge && amountToBridge.gt(0)
+            ? receiveAmount(amountToBridge, fees).receivable
+            : undefined
+        }
+        inputToken={getToken(selectedRoute.fromTokenSymbol)}
+        outputToken={getToken(receiveTokenSymbol)}
+      />
+      {isWrongChain ? (
+        <StyledSecondaryButton onClick={onClickChainSwitch}>
+          Switch Network
+        </StyledSecondaryButton>
+      ) : !isConnected ? (
+        <StyledSecondaryButton
+          onClick={() => connect()}
+          data-cy="connect-wallet"
+        >
+          Connect Wallet
+        </StyledSecondaryButton>
+      ) : (
+        <Button
+          disabled={isBridgeDisabled}
+          onClick={onClickActionButton}
+          data-cy={!isConnected ? "connect-wallet" : "bridge-button"}
+        >
+          {buttonLabel}
+        </Button>
+      )}
+    </CardWrapper>
   );
 };
 
@@ -185,63 +241,91 @@ const CardWrapper = styled(ExternalCardWrapper)`
   width: 100%;
 `;
 
-const RowWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 0px;
-  gap: 12px;
-
-  width: 100%;
-
-  position: relative;
-`;
-
-const SendWrapper = styled.div`
+const RowLabelWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  justify-content: center;
+  width: 64px;
+  flex-shrink: 0;
+
+  @media ${QUERIESV2.sm.andDown} {
+    width: 100%;
+    justify-content: flex-start;
+  }
+`;
+
+const QuickSwapRowLabelWrapper = styled(RowLabelWrapper)`
+  @media ${QUERIESV2.sm.andDown} {
+    display: none;
+  }
+`;
+
+const RowWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   padding: 0px;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
 
-  @media ${QUERIESV2.xs.andDown} {
-    width: 100%;
+  @media ${QUERIESV2.sm.andDown} {
     flex-direction: column;
+    align-items: flex-start;
+  }
+`;
+
+const FillTimeRowWrapper = styled(RowWrapper)`
+  @media ${QUERIESV2.sm.andDown} {
+    flex-direction: row;
+    align-items: center;
+  }
+`;
+
+const QuickSwapWrapperMobile = styled.div`
+  display: none;
+
+  @media ${QUERIESV2.sm.andDown} {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     gap: 8px;
   }
 `;
 
-const QuickSwapWrapper = styled.div`
-  height: fit-content;
-  width: fit-content;
-  position: absolute;
-  left: calc(50% - 20px);
-  top: -25px;
+const InputWrapper = styled.div`
+  flex: 1;
+
   @media ${QUERIESV2.sm.andDown} {
-    top: -16px;
+    width: 100%;
   }
 `;
 
-const PaddedText = styled(Text)`
+const TokenSelectorWrapper = styled.div`
+  flex-shrink: 1;
+
   @media ${QUERIESV2.sm.andDown} {
-    padding-top: 12px;
+    width: 100%;
   }
 `;
 
-const FromSelectionStack = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: flex-start;
-  gap: 4px;
+const Divider = styled.div`
+  height: 1px;
   width: 100%;
+  background: #3f4047;
 `;
 
-const ChangeAddressLink = styled(Text)`
-  cursor: pointer;
+const FillTimeWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 `;
 
 const Button = styled(PrimaryButton)`
+  width: 100%;
+`;
+
+const StyledSecondaryButton = styled(SecondaryButton)`
   width: 100%;
 `;
