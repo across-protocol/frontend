@@ -23,8 +23,6 @@ type AvailableRoutesQueryParams = Infer<
   typeof AvailableRoutesQueryParamsSchema
 >;
 
-type L1TokenMapRouting = Record<string, Record<string, string>>;
-
 const handler = async (
   { query }: TypedVercelRequest<AvailableRoutesQueryParams>,
   response: VercelResponse
@@ -41,22 +39,6 @@ const handler = async (
     const { originToken, destinationToken, originChainId, destinationChainId } =
       query;
 
-    // Generate a mapping that contains similar tokens on each chain
-    // Note:  The key in this dictionary represents an l1Token address, and
-    //        the corresponding value is a nested hashmap containing a key
-    //        value pair of {chainId: l2TokenEquivalent}
-    const l1TokensToDestinationTokens: L1TokenMapRouting = {};
-    for (const {
-      l1TokenAddress,
-      fromChain,
-      fromTokenAddress,
-    } of ENABLED_ROUTES.routes) {
-      l1TokensToDestinationTokens[l1TokenAddress] = {
-        ...l1TokensToDestinationTokens[l1TokenAddress],
-        [fromChain]: fromTokenAddress,
-      };
-    }
-
     const enabledRoutes = applyMapFilter(
       ENABLED_ROUTES.routes,
       // Filter out elements from the request query parameters
@@ -66,6 +48,7 @@ const handler = async (
         destinationChainId: number;
         destinationToken: string;
         fromTokenSymbol: string;
+        toTokenSymbol: string;
       }) =>
         ![route.originChainId, route.destinationChainId].some((chainId) =>
           DISABLED_CHAINS_FOR_AVAILABLE_ROUTES.includes(String(chainId))
@@ -87,10 +70,8 @@ const handler = async (
         originToken: route.fromTokenAddress,
         destinationChainId: route.toChain,
         fromTokenSymbol: route.fromTokenSymbol,
-        // Resolve destination chain directly from the
-        // l1TokensToDestinationTokens map
-        destinationToken:
-          l1TokensToDestinationTokens[route.l1TokenAddress][route.toChain],
+        toTokenSymbol: route.toTokenSymbol,
+        destinationToken: route.toTokenAddress,
       })
     ).map((route) => ({
       originChainId: route.originChainId,

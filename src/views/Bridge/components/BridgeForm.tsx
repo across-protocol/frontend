@@ -158,6 +158,7 @@ const BridgeForm = ({
             getReceiveTokenSymbol(
               selectedRoute.toChain,
               selectedRoute.fromTokenSymbol,
+              selectedRoute.toTokenSymbol,
               Boolean(toAccount?.isContract)
             )
           )}

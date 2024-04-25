@@ -7,7 +7,7 @@ import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
 
 import {
-  bridgedUSDCSymbolsMap,
+  isBridgedUsdc,
   capitalizeFirstLetter,
   COLORS,
   formatUnitsWithMaxFractions,
@@ -293,10 +293,8 @@ function TotalReceive({
       : `When bridging ${
           token.symbol
         } from ${sourceChainName} to ${destinationChainName}, you will receive ${
-          bridgedUSDCSymbolsMap[destinationChainId] || "USDC"
-        }${
-          bridgedUSDCSymbolsMap[destinationChainId] ? " (bridged USDC)" : ""
-        }.`;
+          receiveToken.symbol
+        }${isBridgedUsdc(receiveToken.symbol) ? " (bridged USDC)" : ""}.`;
 
   return (
     <TotalReceiveRow>

@@ -4,21 +4,17 @@ import { ethers } from "ethers";
 import {
   BLOCK_TAG_LAG,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-  disabledL1Tokens,
 } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import { object, assert, Infer, optional } from "superstruct";
 
 import {
   getLogger,
-  InputError,
   getRelayerFeeDetails,
   getCachedTokenPrice,
-  getRouteDetails,
   getCachedTokenBalance,
   maxBN,
   minBN,
-  isRouteEnabled,
   handleErrorCondition,
   validAddress,
   positiveIntStr,
@@ -28,10 +24,13 @@ import {
   getDefaultRelayerAddress,
   sendResponse,
   getHubPool,
+  validateChainAndTokenParams,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
-  token: validAddress(),
+  token: optional(validAddress()),
+  inputToken: optional(validAddress()),
+  outputToken: optional(validAddress()),
   destinationChainId: positiveIntStr(),
   originChainId: optional(positiveIntStr()),
 });
@@ -79,51 +78,26 @@ const handler = async (
 
     assert(query, LimitsQueryParamsSchema);
 
-    let {
-      token,
-      destinationChainId: _destinationChainId,
-      originChainId,
-    } = query;
-
-    if (originChainId === _destinationChainId) {
-      throw new InputError("Origin and destination chains cannot be the same");
-    }
-
-    const destinationChainId = Number(_destinationChainId);
-    token = ethers.utils.getAddress(token);
-
     const {
-      l1Token,
-      resolvedOriginChainId: computedOriginChainId,
-      outputToken: destinationToken,
-      decimals,
-      symbol,
-    } = getRouteDetails(
-      token,
       destinationChainId,
-      originChainId ? Number(originChainId) : undefined
-    );
-
-    if (
-      disabledL1Tokens.includes(l1Token.toLowerCase()) ||
-      !isRouteEnabled(computedOriginChainId, destinationChainId, token)
-    ) {
-      throw new InputError("Route is not enabled.");
-    }
+      resolvedOriginChainId: computedOriginChainId,
+      l1Token,
+      outputToken,
+    } = validateChainAndTokenParams(query);
 
     const hubPool = getHubPool(provider);
 
     const multicallInput = [
-      hubPool.interface.encodeFunctionData("sync", [l1Token]),
-      hubPool.interface.encodeFunctionData("pooledTokens", [l1Token]),
+      hubPool.interface.encodeFunctionData("sync", [l1Token.address]),
+      hubPool.interface.encodeFunctionData("pooledTokens", [l1Token.address]),
     ];
 
     const [tokenPriceNative, _tokenPriceUsd] = await Promise.all([
       getCachedTokenPrice(
-        l1Token,
+        l1Token.address,
         sdkUtils.getNativeTokenSymbol(destinationChainId).toLowerCase()
       ),
-      getCachedTokenPrice(l1Token, "usd"),
+      getCachedTokenPrice(l1Token.address, "usd"),
     ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
@@ -135,31 +109,39 @@ const handler = async (
       fullRelayerMainnetBalances,
     ] = await Promise.all([
       getRelayerFeeDetails(
-        l1Token,
-        ethers.BigNumber.from("10").pow(decimals),
+        l1Token.address,
+        ethers.BigNumber.from("10").pow(l1Token.decimals),
         computedOriginChainId,
         destinationChainId,
         DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
         tokenPriceNative,
         undefined,
-        getDefaultRelayerAddress(symbol, destinationChainId)
+        getDefaultRelayerAddress(l1Token.symbol, destinationChainId)
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
         fullRelayers.map((relayer) =>
-          getCachedTokenBalance(destinationChainId!, relayer, destinationToken)
+          getCachedTokenBalance(
+            destinationChainId,
+            relayer,
+            outputToken.address
+          )
         )
       ),
       Promise.all(
         transferRestrictedRelayers.map((relayer) =>
-          getCachedTokenBalance(destinationChainId!, relayer, destinationToken)
+          getCachedTokenBalance(
+            destinationChainId,
+            relayer,
+            outputToken.address
+          )
         )
       ),
       Promise.all(
         fullRelayers.map((relayer) =>
           destinationChainId === 1
             ? ethers.BigNumber.from("0")
-            : getCachedTokenBalance("1", relayer, l1Token)
+            : getCachedTokenBalance("1", relayer, l1Token.address)
         )
       ),
     ]);
@@ -170,8 +152,8 @@ const handler = async (
     );
 
     const lpCushion = ethers.utils.parseUnits(
-      getLpCushion(symbol, computedOriginChainId, destinationChainId),
-      decimals
+      getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
+      l1Token.decimals
     );
     liquidReserves = liquidReserves.sub(lpCushion);
     if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
@@ -184,7 +166,7 @@ const handler = async (
       : ethers.utils
           .parseUnits(
             (minDeposits[destinationChainId] ?? 0).toString(),
-            decimals
+            l1Token.decimals
           )
           .mul(ethers.utils.parseUnits("1"))
           .div(tokenPriceUsd);

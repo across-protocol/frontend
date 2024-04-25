@@ -1,8 +1,10 @@
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants-v2";
+import { CHAIN_IDs } from "@across-protocol/constants-v2";
 import { utils as sdkUtils } from "@across-protocol/sdk-v2";
 import { utils } from "ethers";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
+
+import { TOKEN_SYMBOLS_MAP } from "../api/_constants";
 
 const { getDeployedAddress } = sdkUtils;
 
@@ -47,7 +49,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "UMA",
               "DAI",
@@ -63,7 +65,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "UMA",
               "DAI",
@@ -78,7 +80,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "UMA",
               "DAI",
@@ -89,15 +91,35 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "WBTC", "DAI"],
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+              "USDT",
+              "WBTC",
+              "DAI",
+            ],
           },
           {
             chainId: CHAIN_IDs.BASE,
-            tokens: ["WETH", "ETH", "USDC", "DAI", "BAL"],
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
+              "DAI",
+              "BAL",
+            ],
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC", "DAI", "USDT", "WBTC"],
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+              "DAI",
+              "USDT",
+              "WBTC",
+            ],
           },
         ],
       },
@@ -110,7 +132,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              "USDC",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "WBTC",
               "UMA",
               "DAI",
@@ -126,7 +148,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              "USDC",
+              "USDC.e",
               "WBTC",
               "UMA",
               "DAI",
@@ -141,7 +163,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              "USDC",
+              "USDC.e",
               "WBTC",
               "UMA",
               "DAI",
@@ -152,15 +174,21 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT", "DAI"],
+            tokens: ["WETH", "ETH", "USDC.e", "WBTC", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.BASE,
-            tokens: ["WETH", "ETH", "USDC", "DAI", "BAL"],
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
+              "DAI",
+              "BAL",
+            ],
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
           },
         ],
       },
@@ -174,7 +202,7 @@ const enabledRoutes = {
               "DAI",
               "UMA",
               "WETH",
-              "USDC",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "WBTC",
               "BAL",
               "ACX",
@@ -188,7 +216,7 @@ const enabledRoutes = {
               "DAI",
               "UMA",
               "WETH",
-              "USDC",
+              "USDC.e",
               "WBTC",
               "BAL",
               "ACX",
@@ -202,7 +230,7 @@ const enabledRoutes = {
               "UMA",
               "DAI",
               "WETH",
-              "USDC",
+              "USDC.e",
               "WBTC",
               "BAL",
               "ACX",
@@ -211,15 +239,20 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["WETH", "USDC", "WBTC", "USDT", "DAI"],
+            tokens: ["WETH", "USDC.e", "WBTC", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.BASE,
-            tokens: ["DAI", "WETH", "USDC", "BAL"],
+            tokens: [
+              "DAI",
+              "WETH",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
+              "BAL",
+            ],
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "USDC.e", "USDT", "DAI", "WBTC"],
           },
         ],
       },
@@ -231,7 +264,7 @@ const enabledRoutes = {
             chainId: CHAIN_IDs.MAINNET,
             tokens: [
               "WBTC",
-              "USDC",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "WETH",
               "ETH",
               "UMA",
@@ -245,7 +278,7 @@ const enabledRoutes = {
             chainId: CHAIN_IDs.OPTIMISM,
             tokens: [
               "WBTC",
-              "USDC",
+              "USDC.e",
               "WETH",
               "ETH",
               "UMA",
@@ -259,7 +292,7 @@ const enabledRoutes = {
             chainId: CHAIN_IDs.POLYGON,
             tokens: [
               "WBTC",
-              "USDC",
+              "USDC.e",
               "WETH",
               "ETH",
               "UMA",
@@ -271,15 +304,21 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["WBTC", "USDC", "WETH", "ETH", "USDT", "DAI"],
+            tokens: ["WBTC", "USDC.e", "WETH", "ETH", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.BASE,
-            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL"],
+            tokens: [
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
+              "WETH",
+              "ETH",
+              "DAI",
+              "BAL",
+            ],
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
           },
         ],
       },
@@ -289,27 +328,39 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.MAINNET,
-            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT", "DAI"],
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              "WBTC",
+              "USDT",
+              "DAI",
+            ],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
-            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT", "DAI"],
+            tokens: ["WETH", "ETH", "USDC.e", "WBTC", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
-            tokens: ["WETH", "ETH", "USDC", "WBTC", "USDT", "DAI"],
+            tokens: ["WETH", "ETH", "USDC.e", "WBTC", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
-            tokens: ["WETH", "USDC", "WBTC", "USDT", "DAI"],
+            tokens: ["WETH", "USDC.e", "WBTC", "USDT", "DAI"],
           },
           {
             chainId: CHAIN_IDs.BASE,
-            tokens: ["WETH", "ETH", "USDC", "DAI"],
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
+              "DAI",
+            ],
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
           },
         ],
       },
@@ -319,27 +370,61 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.MAINNET,
-            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL"],
+            tokens: [
+              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC" },
+              "WETH",
+              "ETH",
+              "DAI",
+              "BAL",
+            ],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
-            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL"],
+            tokens: [
+              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC.e" },
+              "WETH",
+              "ETH",
+              "DAI",
+              "BAL",
+            ],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
-            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL"],
+            tokens: [
+              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC.e" },
+              "WETH",
+              "ETH",
+              "DAI",
+              "BAL",
+            ],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
-            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL"],
+            tokens: [
+              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC.e" },
+              "WETH",
+              "ETH",
+              "DAI",
+              "BAL",
+            ],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["USDC", "WETH", "ETH", "DAI"],
+            tokens: [
+              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC.e" },
+              "WETH",
+              "ETH",
+              "DAI",
+            ],
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC", "DAI"],
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC.e" },
+              "DAI",
+            ],
           },
         ],
       },
@@ -349,27 +434,39 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.MAINNET,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              "USDT",
+              "DAI",
+              "WBTC",
+            ],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
-            tokens: ["WETH", "ETH", "USDC", "USDT", "DAI", "WBTC"],
+            tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["USDC", "WETH", "ETH", "DAI"],
+            tokens: ["USDC.e", "WETH", "ETH", "DAI"],
           },
           {
             chainId: CHAIN_IDs.BASE,
-            tokens: ["WETH", "ETH", "USDC", "DAI"],
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
+              "DAI",
+            ],
           },
         ],
       },
@@ -399,6 +496,14 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.BASE_SEPOLIA,
+            tokens: ["WETH", "USDC"],
+          },
+          {
+            chainId: CHAIN_IDs.OPTIMISM_SEPOLIA,
+            tokens: ["WETH", "USDC"],
+          },
+          {
+            chainId: CHAIN_IDs.ARBITRUM_SEPOLIA,
             tokens: ["WETH"],
           },
         ],
@@ -406,6 +511,32 @@ const enabledRoutes = {
       {
         fromChain: CHAIN_IDs.BASE_SEPOLIA,
         fromSpokeAddress: "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+        toChains: [
+          {
+            chainId: CHAIN_IDs.SEPOLIA,
+            tokens: ["WETH", "USDC"],
+          },
+        ],
+      },
+      {
+        fromChain: CHAIN_IDs.OPTIMISM_SEPOLIA,
+        fromSpokeAddress: getDeployedAddress(
+          "SpokePool",
+          CHAIN_IDs.OPTIMISM_SEPOLIA
+        ),
+        toChains: [
+          {
+            chainId: CHAIN_IDs.SEPOLIA,
+            tokens: ["WETH", "USDC"],
+          },
+        ],
+      },
+      {
+        fromChain: CHAIN_IDs.ARBITRUM_SEPOLIA,
+        fromSpokeAddress: getDeployedAddress(
+          "SpokePool",
+          CHAIN_IDs.ARBITRUM_SEPOLIA
+        ),
         toChains: [
           {
             chainId: CHAIN_IDs.SEPOLIA,
@@ -438,19 +569,47 @@ function generateRoutes(hubPoolChainId = 1) {
     routes: config.routes.flatMap((route) => {
       return route.toChains.flatMap((toChain) => {
         return toChain.tokens.map((token) => {
+          const inputTokenSymbol =
+            typeof token === "object" ? token.inputTokenSymbol : token;
+          const outputTokenSymbol =
+            typeof token === "object" ? token.outputTokenSymbol : token;
+          const inputTokenAddress =
+            TOKEN_SYMBOLS_MAP[inputTokenSymbol].addresses[route.fromChain];
+          const outputTokenAddress =
+            TOKEN_SYMBOLS_MAP[outputTokenSymbol].addresses[toChain.chainId];
+
+          if (!inputTokenAddress || !outputTokenAddress) {
+            const isInputMissing = !inputTokenAddress;
+            throw new Error(
+              `Could not find address for ${
+                isInputMissing ? "input" : "output"
+              } token ${
+                isInputMissing ? inputTokenSymbol : outputTokenSymbol
+              } on chain ${isInputMissing ? route.fromChain : toChain.chainId}`
+            );
+          }
+
+          const l1TokenAddress =
+            TOKEN_SYMBOLS_MAP[
+              isBridgedUsdc(inputTokenSymbol) ? "USDC" : inputTokenSymbol
+            ].addresses[hubPoolChainId];
+
+          if (!l1TokenAddress) {
+            throw new Error(
+              `Could not find L1 token address for ${inputTokenSymbol}`
+            );
+          }
+
           return {
             fromChain: route.fromChain,
             toChain: toChain.chainId,
-            fromTokenAddress: utils.getAddress(
-              TOKEN_SYMBOLS_MAP[token].addresses[route.fromChain]
-            ),
+            fromTokenAddress: utils.getAddress(inputTokenAddress),
+            toTokenAddress: utils.getAddress(outputTokenAddress),
             fromSpokeAddress: utils.getAddress(route.fromSpokeAddress),
-            fromTokenSymbol:
-              token === "USDC" ? getUsdcSymbol(route.fromChain) : token,
+            fromTokenSymbol: inputTokenSymbol,
+            toTokenSymbol: outputTokenSymbol,
             isNative: token === TOKEN_SYMBOLS_MAP.ETH.symbol,
-            l1TokenAddress: utils.getAddress(
-              TOKEN_SYMBOLS_MAP[token].addresses[hubPoolChainId]
-            ),
+            l1TokenAddress: utils.getAddress(l1TokenAddress),
           };
         });
       });
@@ -467,20 +626,8 @@ function generateRoutes(hubPoolChainId = 1) {
   );
 }
 
-function getUsdcSymbol(chainId: number) {
-  if (
-    [CHAIN_IDs.ARBITRUM, CHAIN_IDs.OPTIMISM, CHAIN_IDs.POLYGON].includes(
-      chainId
-    )
-  ) {
-    return "USDC.e";
-  }
-
-  if (chainId === CHAIN_IDs.BASE) {
-    return "USDbC";
-  }
-
-  return "USDC";
+function isBridgedUsdc(tokenSymbol: string) {
+  return tokenSymbol === "USDC.e" || tokenSymbol === "USDbC";
 }
 
 generateRoutes(Number(process.argv[2]));

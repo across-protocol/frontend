@@ -21,10 +21,10 @@
   resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.14.tgz#2eb6624c306db3f184293d8abb023d2354abadce"
   integrity sha512-7C8hyH/7aDh8AOd5DLQrtcey6Ip4Q6o8FmSiDrBnxcD/aVeH+L8cZhh/hRMLm8CA5Olx4usEarfEfZ2rN0AZfg==
 
-"@across-protocol/constants-v2@^1.0.15", "@across-protocol/constants-v2@^1.0.16":
-  version "1.0.16"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.16.tgz#a49690d231eacfdec289d093a77062fcc5bcca68"
-  integrity sha512-oxMAycZCRFe8Y7zy2PJTqhFE7PlX/gBtqG4fUlvVexwQOigZIlU0LqDlqiR3/B63TQtPGNLUjYMlBen6v97AcA==
+"@across-protocol/constants-v2@^1.0.18":
+  version "1.0.18"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants-v2/-/constants-v2-1.0.18.tgz#172a50f205e21f828430d8855132cb13fe63cce3"
+  integrity sha512-Iwzao1CYhlcVxEEbtBQxRC7GWaoV87iH6D7tx+HzDXKcL/qVYLWbxqbSpJrWx1QQeW/2RCwpxdEB2x2C+l+HSg==
 
 "@across-protocol/contracts-v2@2.5.4":
   version "2.5.4"
@@ -75,13 +75,13 @@
     "@openzeppelin/contracts" "4.1.0"
     "@uma/core" "^2.18.0"
 
-"@across-protocol/sdk-v2@^0.23.4":
-  version "0.23.4"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.23.4.tgz#bf1a29e2e8fb24d8f7b52003f784fac8a5a58bcb"
-  integrity sha512-Zzy1UB6cGa0iQLQ3uEJT7r0ZcVssBIh5QouyzI+tXx5R8ubHOJLnPg1BANiEvq50L04sG2OuBJSKu/BjJtbf/g==
+"@across-protocol/sdk-v2@^0.23.7":
+  version "0.23.7"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk-v2/-/sdk-v2-0.23.7.tgz#0bbf15408d3cd3813f42d5107819189e9f55221a"
+  integrity sha512-4fcl+q4feCE6hUGVH++fiFcB15mctaeguEgmlcJkfuWq11E4zxNQQ6sdIlYbWhNtx/eQO8f0mHoqQeq0khcy7Q==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
-    "@across-protocol/constants-v2" "^1.0.15"
+    "@across-protocol/constants-v2" "^1.0.18"
     "@across-protocol/contracts-v2" "2.5.4"
     "@eth-optimism/sdk" "^3.2.2"
     "@pinata/sdk" "^2.1.0"

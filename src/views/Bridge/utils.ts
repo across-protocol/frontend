@@ -3,8 +3,6 @@ import { BigNumber } from "ethers";
 import {
   ChainId,
   Route,
-  bridgedUSDCSymbols,
-  chainsWithNativeUSDC,
   getChainInfo,
   getConfig,
   getToken,
@@ -45,53 +43,35 @@ export function areTokensInterchangeable(
  * - If the user wants to bridge ETH and the receiver is a contract, the bridge will send WETH
  * - If the user wants to bridge WETH and the receiver is an EOA, the bridge will send ETH
  * @param destinationChainId Destination chain id.
- * @param bridgeTokenSymbol Token symbol to be bridged.
+ * @param inputTokenSymbol Input token symbol.
+ * @param outputTokenSymbol Output token symbol.
  * @param isReceiverContract Whether the receiver is a contract or not.
  * @returns The token symbol to be used for the receive token.
  */
 export function getReceiveTokenSymbol(
   destinationChainId: number,
-  bridgeTokenSymbol: string,
+  inputTokenSymbol: string,
+  outputTokenSymbol: string,
   isReceiverContract: boolean
 ) {
   const isDestinationChainPolygon = destinationChainId === ChainId.POLYGON;
 
   if (
-    bridgeTokenSymbol === "ETH" &&
+    inputTokenSymbol === "ETH" &&
     (isDestinationChainPolygon || isReceiverContract)
   ) {
     return "WETH";
   }
 
   if (
-    bridgeTokenSymbol === "WETH" &&
+    inputTokenSymbol === "WETH" &&
     !isDestinationChainPolygon &&
     !isReceiverContract
   ) {
     return "ETH";
   }
 
-  if (
-    ["USDC", "USDbC"].includes(bridgeTokenSymbol) &&
-    chainsWithNativeUSDC
-      .filter((chainId) => chainId !== ChainId.BASE)
-      .includes(destinationChainId)
-  ) {
-    return "USDC.e";
-  }
-
-  if (
-    ["USDC", "USDC.e"].includes(bridgeTokenSymbol) &&
-    destinationChainId === ChainId.BASE
-  ) {
-    return "USDbC";
-  }
-
-  if (bridgedUSDCSymbols.includes(bridgeTokenSymbol)) {
-    return "USDC";
-  }
-
-  return bridgeTokenSymbol;
+  return outputTokenSymbol;
 }
 
 export function validateBridgeAmount(

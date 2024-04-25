@@ -16,14 +16,16 @@ import { useRewardToken } from "hooks/useRewardToken";
 type Props = {
   fromChainId: number;
   toChainId: number;
-  bridgeTokenSymbol: string;
+  inputTokenSymbol: string;
+  outputTokenSymbol: string;
   fromBridgePagePayload?: FromBridgePagePayload;
 };
 
 export function DepositStatusLowerCard({
   fromChainId,
   toChainId,
-  bridgeTokenSymbol,
+  inputTokenSymbol,
+  outputTokenSymbol,
   fromBridgePagePayload,
 }: Props) {
   const { quote } = fromBridgePagePayload || {};
@@ -31,7 +33,8 @@ export function DepositStatusLowerCard({
   const isReceiverContract = useIsContractAddress(quote?.recipient);
   const history = useHistory();
 
-  const tokenInfo = getToken(bridgeTokenSymbol);
+  const inputTokenInfo = getToken(inputTokenSymbol);
+  const outputTokenInfo = getToken(outputTokenSymbol);
   const { programName } = useRewardToken(toChainId);
 
   const FeesTable = quote ? (
@@ -39,14 +42,19 @@ export function DepositStatusLowerCard({
       fromChainId={fromChainId}
       toChainId={toChainId}
       estimatedTime={quote.expectedFillTimeInMinutes}
-      gasFee={utils.parseUnits(quote.relayGasFeeTotal, tokenInfo.decimals)}
+      gasFee={utils.parseUnits(quote.relayGasFeeTotal, inputTokenInfo.decimals)}
       bridgeFee={utils
-        .parseUnits(quote.totalBridgeFee, tokenInfo.decimals)
-        .sub(utils.parseUnits(quote.relayGasFeeTotal, tokenInfo.decimals))}
-      totalReceived={utils.parseUnits(quote.toAmount, tokenInfo.decimals)}
-      token={tokenInfo}
+        .parseUnits(quote.totalBridgeFee, inputTokenInfo.decimals)
+        .sub(utils.parseUnits(quote.relayGasFeeTotal, inputTokenInfo.decimals))}
+      totalReceived={utils.parseUnits(quote.toAmount, inputTokenInfo.decimals)}
+      token={inputTokenInfo}
       receiveToken={getToken(
-        getReceiveTokenSymbol(toChainId, tokenInfo.symbol, isReceiverContract)
+        getReceiveTokenSymbol(
+          toChainId,
+          inputTokenInfo.symbol,
+          outputTokenInfo.symbol,
+          isReceiverContract
+        )
       )}
     />
   ) : null;
@@ -54,8 +62,8 @@ export function DepositStatusLowerCard({
   return (
     <>
       <EarnByLpAndStakingCard
-        l1TokenAddress={tokenInfo.mainnetAddress!}
-        bridgeTokenSymbol={bridgeTokenSymbol}
+        l1TokenAddress={inputTokenInfo.mainnetAddress!}
+        bridgeTokenSymbol={inputTokenSymbol}
       />
       <ReferralCTA program={programName} />
       {fromBridgePagePayload && (
