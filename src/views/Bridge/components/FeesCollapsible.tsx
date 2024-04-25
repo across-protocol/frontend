@@ -51,15 +51,21 @@ export function FeesCollapsible(props: Props) {
                     inputToken={props.inputToken}
                     outputToken={props.outputToken}
                     textColor="light-200"
-                  />{" "}
+                  />
                   {estimatedRewards.reward && (
                     <>
-                      <Text color="grey-400">and </Text>
+                      <Text color="grey-400"> and </Text>
                       <TokenFee
                         token={estimatedRewards.rewardToken}
                         amount={estimatedRewards.reward}
                         textColor="light-200"
                       />
+                    </>
+                  )}
+                  {props.estimatedTime && (
+                    <>
+                      <Text color="grey-400"> in </Text>
+                      <Text color="light-200">{props.estimatedTime}</Text>
                     </>
                   )}
                 </>
@@ -101,6 +107,7 @@ const CollapsedLoadingSkeleton = styled.div`
   height: 20px;
   width: 100%;
   border-radius: 24px;
+  margin-right: 12px;
   background: linear-gradient(
     90deg,
     rgba(76, 78, 87, 0) 40%,

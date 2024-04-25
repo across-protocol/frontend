@@ -315,10 +315,6 @@ const Row = styled.div<{ stackOnMobile?: boolean }>`
   }
 `;
 
-const WhiteText = styled.span`
-  color: ${COLORS.white};
-`;
-
 const TotalReceiveRow = styled.div`
   display: flex;
   flex-direction: row;
