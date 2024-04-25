@@ -12,6 +12,7 @@ export class UnsupportedDexOnChain extends Error {
   }
 }
 
+// TODO: use correct addresses
 export const swapAndBridgeAddresses = {
   uniswap: {
     [CHAIN_IDs.POLYGON]: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
