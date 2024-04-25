@@ -31,11 +31,11 @@ export function useSelectRoute() {
     setIsDefaultRouteTracked(true);
   }, [selectedRoute, addToAmpliQueue, isDefaultRouteTracked]);
 
-  const handleSelectToken = useCallback(
-    (tokenSymbol: string) => {
+  const handleSelectInputToken = useCallback(
+    (inputTokenSymbol: string) => {
       const route =
-        findNextBestRoute(["symbol"], {
-          symbol: tokenSymbol,
+        findNextBestRoute(["inputTokenSymbol"], {
+          inputTokenSymbol,
           fromChain: selectedRoute.fromChain,
           toChain: selectedRoute.toChain,
         }) || initialRoute;
@@ -49,16 +49,35 @@ export function useSelectRoute() {
     [selectedRoute.fromChain, selectedRoute.toChain, addToAmpliQueue]
   );
 
+  const handleSelectOutputToken = useCallback(
+    (outputTokenSymbol: string) => {
+      const route =
+        findNextBestRoute(["outputTokenSymbol"], {
+          outputTokenSymbol,
+          inputTokenSymbol: selectedRoute.fromTokenSymbol,
+          fromChain: selectedRoute.fromChain,
+          toChain: selectedRoute.toChain,
+        }) || initialRoute;
+
+      setSelectedRoute(route);
+    },
+    [
+      selectedRoute.fromChain,
+      selectedRoute.toChain,
+      selectedRoute.fromTokenSymbol,
+    ]
+  );
+
   const handleSelectFromChain = useCallback(
     (fromChainId: number) => {
       const filterBy = {
-        symbol: selectedRoute.fromTokenSymbol,
+        inputTokenSymbol: selectedRoute.fromTokenSymbol,
         fromChain: fromChainId,
         toChain: selectedRoute.toChain,
       };
       const route =
         findNextBestRoute(["fromChain", "toChain"], filterBy) ||
-        findNextBestRoute(["fromChain", "symbol"], filterBy) ||
+        findNextBestRoute(["fromChain", "inputTokenSymbol"], filterBy) ||
         initialRoute;
 
       setSelectedRoute(route);
@@ -73,13 +92,13 @@ export function useSelectRoute() {
   const handleSelectToChain = useCallback(
     (toChainId: number) => {
       const filterBy = {
-        symbol: selectedRoute.fromTokenSymbol,
+        inputTokenSymbol: selectedRoute.fromTokenSymbol,
         fromChain: selectedRoute.fromChain,
         toChain: toChainId,
       };
       const route =
         findNextBestRoute(["fromChain", "toChain"], filterBy) ||
-        findNextBestRoute(["symbol", "toChain"], filterBy) ||
+        findNextBestRoute(["inputTokenSymbol", "toChain"], filterBy) ||
         initialRoute;
 
       setSelectedRoute(route);
@@ -93,7 +112,7 @@ export function useSelectRoute() {
 
   const handleQuickSwap = useCallback(() => {
     const route = findNextBestRoute(["fromChain", "toChain"], {
-      symbol: selectedRoute.fromTokenSymbol,
+      inputTokenSymbol: selectedRoute.fromTokenSymbol,
       fromChain: selectedRoute.toChain,
       toChain: selectedRoute.fromChain,
     });
@@ -111,7 +130,8 @@ export function useSelectRoute() {
 
   return {
     selectedRoute,
-    handleSelectToken,
+    handleSelectInputToken,
+    handleSelectOutputToken,
     handleSelectFromChain,
     handleSelectToChain,
     handleQuickSwap,

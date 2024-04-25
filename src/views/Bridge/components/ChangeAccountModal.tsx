@@ -228,7 +228,7 @@ const CancelButton = styled(UnstyledButton)`
   height: 64px;
 
   border: 1px solid #9daab3;
-  border-radius: 32px;
+  border-radius: 12px;
   background: transparent;
 
   cursor: pointer;
@@ -248,7 +248,7 @@ const SaveButton = styled(UnstyledButton)`
   width: 100%;
   height: 64px;
 
-  border-radius: 32px;
+  border-radius: 12px;
 
   cursor: pointer;
 

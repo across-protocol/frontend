@@ -154,8 +154,5 @@ function getButtonLabel(args: {
   if (args.isMutating) {
     return "Confirming...";
   }
-  if (args.isDataLoading) {
-    return "Loading...";
-  }
   return "Confirm transaction";
 }

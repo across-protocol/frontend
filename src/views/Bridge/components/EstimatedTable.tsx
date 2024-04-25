@@ -1,13 +1,11 @@
 import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
 
-import { Text } from "components/Text";
+import { Text, TextColor } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
-import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
 
 import {
-  isBridgedUsdc,
   capitalizeFirstLetter,
   COLORS,
   formatUnitsWithMaxFractions,
@@ -20,18 +18,11 @@ import {
 } from "utils";
 
 import TokenFee from "./TokenFee";
-import { useEstimatedTable } from "../hooks/useEstimatedTable";
+import { type Props as FeesCollapsibleProps } from "./FeesCollapsible";
+import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
 
-type EstimatedTableProps = {
-  fromChainId: number;
-  toChainId: number;
-  estimatedTime?: string;
-  gasFee?: BigNumber;
-  bridgeFee?: BigNumber;
-  totalReceived?: BigNumber;
-  token: TokenInfo;
-  receiveToken: TokenInfo;
-};
+export type EstimatedTableProps = EstimatedRewards &
+  Omit<FeesCollapsibleProps, "isQuoteLoading">;
 
 const PriceFee = ({
   tokenFee,
@@ -69,7 +60,7 @@ const PriceFee = ({
         </>
       )}
       {tokenFee ? (
-        <Text size="md" color={highlightTokenFee ? "primary" : "white"}>
+        <Text size="md" color={highlightTokenFee ? "primary" : "light-200"}>
           {`${formatUnitsWithMaxFractions(tokenFee, token.decimals)} ${
             token.symbol
           }`}
@@ -85,30 +76,23 @@ const PriceFee = ({
 };
 
 const EstimatedTable = ({
-  fromChainId,
   toChainId,
   estimatedTime,
   gasFee,
   bridgeFee,
-  token,
+  inputToken,
   totalReceived,
-  receiveToken,
+  outputToken,
+  referralRewardAsBaseCurrency,
+  gasFeeAsBaseCurrency,
+  bridgeFeeAsBaseCurrency,
+  netFeeAsBaseCurrency,
+  reward,
+  rewardPercentage,
+  hasDepositReward,
+  rewardToken,
+  isRewardAcx,
 }: EstimatedTableProps) => {
-  const {
-    isDetailedFeesAvailable,
-    setIsDetailedFeesAvailable,
-    referralRewardAsBaseCurrency,
-    gasFeeAsBaseCurrency,
-    bridgeFeeAsBaseCurrency,
-    netFeeAsBaseCurrency,
-    depositReferralReward,
-    depositReferralPercentage,
-    hasDepositReferralReward,
-    rewardToken,
-    isRewardAcx,
-  } = useEstimatedTable(token, toChainId, gasFee, bridgeFee);
-
-  const ArrowIcon = isDetailedFeesAvailable ? ArrowIconUp : ArrowIconDown;
   const rewardDisplaySymbol =
     rewardToken.displaySymbol || rewardToken.symbol.toUpperCase();
 
@@ -122,11 +106,11 @@ const EstimatedTable = ({
         </Text>
         <ReferralRewardWrapper
           isACX={isRewardAcx}
-          isTransparent={!hasDepositReferralReward}
+          isTransparent={!hasDepositReward}
         >
           <PriceFee
             token={rewardToken}
-            tokenFee={depositReferralReward}
+            tokenFee={reward}
             baseCurrencyFee={referralRewardAsBaseCurrency}
             hideSymbolOnEmpty={false}
             tokenIconFirstOnMobile
@@ -136,18 +120,17 @@ const EstimatedTable = ({
       <Row>
         <Text size="md" color="grey-400">
           Time to{" "}
-          <WhiteText>
+          <Text as="span" color="light-200">
             {capitalizeFirstLetter(getChainInfo(toChainId).name)}
-          </WhiteText>
+          </Text>
         </Text>
         <Text size="md" color="grey-400">
           {estimatedTime ? estimatedTime : "-"}
         </Text>
       </Row>
       <Divider />
-      <ClickableRow onClick={() => setIsDetailedFeesAvailable((v) => !v)}>
+      <Row>
         <ToolTipWrapper>
-          <ArrowIcon />
           <Text size="md" color="grey-400">
             Net fee
           </Text>
@@ -161,85 +144,79 @@ const EstimatedTable = ({
             </InfoIconWrapper>
           </Tooltip>
         </ToolTipWrapper>
-        <Text size="md" color={netFeeAsBaseCurrency ? "white" : "grey-400"}>
+        <Text size="md" color={netFeeAsBaseCurrency ? "light-200" : "grey-400"}>
           {netFeeAsBaseCurrency ? `$ ${formatUSD(netFeeAsBaseCurrency)}` : "-"}
         </Text>
-      </ClickableRow>
-      {isDetailedFeesAvailable && (
-        <>
-          <ShiftedRow>
-            <Divider />
-          </ShiftedRow>
-          <ShiftedRow>
-            <ToolTipWrapper>
-              <Text size="md" color="grey-400">
-                Bridge fee
-              </Text>
-              <Tooltip
-                title="Bridge fee"
-                body="Fee paid to Across Liquidity Providers and Relayers."
-                placement="bottom-start"
-              >
-                <InfoIconWrapper>
-                  <InfoIcon />
-                </InfoIconWrapper>
-              </Tooltip>
-            </ToolTipWrapper>
-            <PriceFee
-              token={token}
-              tokenFee={bridgeFee}
-              baseCurrencyFee={bridgeFeeAsBaseCurrency}
-            />
-          </ShiftedRow>
-          <ShiftedRow>
-            <ToolTipWrapper>
-              <Text size="md" color="grey-400">
-                Destination gas fee
-              </Text>
-              <Tooltip
-                title="Destination gas fee"
-                body="Fee to cover gas for destination chain fill transaction."
-                placement="bottom-start"
-              >
-                <InfoIconWrapper>
-                  <InfoIcon />
-                </InfoIconWrapper>
-              </Tooltip>
-            </ToolTipWrapper>
-            <PriceFee
-              token={token}
-              tokenFee={gasFee}
-              baseCurrencyFee={gasFeeAsBaseCurrency}
-            />
-          </ShiftedRow>
-          <ShiftedRow>
-            <ToolTipWrapper>
-              <Text size="md" color="grey-400">
-                {rewardDisplaySymbol} Rebate
-              </Text>
-              <Tooltip
-                title={`${rewardDisplaySymbol} Referral Reward`}
-                body={`Estimate of ${rewardDisplaySymbol} earned on this transfer from the ${rewardDisplaySymbol} rebate program.`}
-                placement="bottom-start"
-              >
-                <InfoIconWrapper>
-                  <InfoIcon />
-                </InfoIconWrapper>
-              </Tooltip>
-            </ToolTipWrapper>
-            <TransparentWrapper isTransparent={!hasDepositReferralReward}>
-              <PriceFee
-                token={rewardToken}
-                tokenFee={depositReferralReward}
-                baseCurrencyFee={referralRewardAsBaseCurrency}
-                rewardPercentageOfFees={depositReferralPercentage}
-                highlightTokenFee={isRewardAcx}
-                hideSymbolOnEmpty={!isDefined(netFeeAsBaseCurrency)}
-              />
-            </TransparentWrapper>
-          </ShiftedRow>
-        </>
-      )}
+      </Row>
+      <Divider />
+      <Row>
+        <ToolTipWrapper>
+          <Text size="md" color="grey-400">
+            Bridge fee
+          </Text>
+          <Tooltip
+            title="Bridge fee"
+            body="Fee paid to Across Liquidity Providers and Relayers."
+            placement="bottom-start"
+          >
+            <InfoIconWrapper>
+              <InfoIcon />
+            </InfoIconWrapper>
+          </Tooltip>
+        </ToolTipWrapper>
+        <PriceFee
+          token={inputToken}
+          tokenFee={bridgeFee}
+          baseCurrencyFee={bridgeFeeAsBaseCurrency}
+        />
+      </Row>
+      <Row>
+        <ToolTipWrapper>
+          <Text size="md" color="grey-400">
+            Destination gas fee
+          </Text>
+          <Tooltip
+            title="Destination gas fee"
+            body="Fee to cover gas for destination chain fill transaction."
+            placement="bottom-start"
+          >
+            <InfoIconWrapper>
+              <InfoIcon />
+            </InfoIconWrapper>
+          </Tooltip>
+        </ToolTipWrapper>
+        <PriceFee
+          token={inputToken}
+          tokenFee={gasFee}
+          baseCurrencyFee={gasFeeAsBaseCurrency}
+        />
+      </Row>
+      <Row>
+        <ToolTipWrapper>
+          <Text size="md" color="grey-400">
+            {rewardDisplaySymbol} Rebate
+          </Text>
+          <Tooltip
+            title={`${rewardDisplaySymbol} Referral Reward`}
+            body={`Estimate of ${rewardDisplaySymbol} earned on this transfer from the ${rewardDisplaySymbol} rebate program.`}
+            placement="bottom-start"
+          >
+            <InfoIconWrapper>
+              <InfoIcon />
+            </InfoIconWrapper>
+          </Tooltip>
+        </ToolTipWrapper>
+        <TransparentWrapper isTransparent={!hasDepositReward}>
+          <PriceFee
+            token={rewardToken}
+            tokenFee={reward}
+            baseCurrencyFee={referralRewardAsBaseCurrency}
+            rewardPercentageOfFees={rewardPercentage}
+            highlightTokenFee={isRewardAcx}
+            hideSymbolOnEmpty={!isDefined(netFeeAsBaseCurrency)}
+          />
+        </TransparentWrapper>
+      </Row>
       <Divider />
       <Row>
         <Text size="md" color="grey-400">
@@ -249,10 +226,9 @@ const EstimatedTable = ({
           {totalReceived ? (
             <TotalReceive
               totalReceived={totalReceived}
-              token={token}
-              receiveToken={receiveToken}
-              srcChainId={fromChainId}
-              destinationChainId={toChainId}
+              inputToken={inputToken}
+              outputToken={outputToken}
+              textColor="light-200"
             />
           ) : (
             "-"
@@ -263,38 +239,33 @@ const EstimatedTable = ({
   );
 };
 
-function TotalReceive({
+export function TotalReceive({
   totalReceived,
-  token,
-  receiveToken,
-  srcChainId,
-  destinationChainId,
+  inputToken,
+  outputToken,
+  textColor,
 }: {
   totalReceived: BigNumber;
-  receiveToken: TokenInfo;
-  token: TokenInfo;
-  srcChainId: number;
-  destinationChainId: number;
+  outputToken: TokenInfo;
+  inputToken: TokenInfo;
+  textColor?: TextColor;
 }) {
-  const areTokensSame = token.symbol === receiveToken.symbol;
-
-  if (areTokensSame) {
-    return <TokenFee amount={totalReceived} token={token} />;
+  if (
+    inputToken.symbol === outputToken.symbol ||
+    inputToken.symbol === "USDC"
+  ) {
+    return (
+      <TokenFee
+        amount={totalReceived}
+        token={outputToken}
+        textColor={textColor}
+      />
+    );
   }
-  const sourceChainName = capitalizeFirstLetter(getChainInfo(srcChainId).name);
-  const destinationChainName = capitalizeFirstLetter(
-    getChainInfo(destinationChainId).name
-  );
   const tooltipText =
-    token.symbol === "ETH"
+    inputToken.symbol === "ETH"
       ? "When bridging ETH and recipient address is a smart contract, or destination is Polygon, you will receive WETH."
-      : token.symbol === "WETH"
-      ? "When bridging WETH and recipient address is an EOA, you will receive ETH."
-      : `When bridging ${
-          token.symbol
-        } from ${sourceChainName} to ${destinationChainName}, you will receive ${
-          receiveToken.symbol
-        }${isBridgedUsdc(receiveToken.symbol) ? " (bridged USDC)" : ""}.`;
+      : "When bridging WETH and recipient address is an EOA, you will receive ETH.";
 
   return (
     <TotalReceiveRow>
@@ -307,7 +278,7 @@ function TotalReceive({
       </Tooltip>
       <TokenFee
         amount={totalReceived}
-        token={receiveToken}
+        token={outputToken}
         textColor="warning"
       />
     </TotalReceiveRow>
@@ -344,18 +315,6 @@ const Row = styled.div<{ stackOnMobile?: boolean }>`
   }
 `;
 
-const ClickableRow = styled(Row)`
-  cursor: pointer;
-`;
-
-const ShiftedRow = styled(Row)`
-  padding-left: 24px;
-`;
-
-const WhiteText = styled.span`
-  color: ${COLORS.white};
-`;
-
 const TotalReceiveRow = styled.div`
   display: flex;
   flex-direction: row;
@@ -364,7 +323,6 @@ const TotalReceiveRow = styled.div`
 `;
 
 const WarningInfoIcon = styled(InfoIcon)`
-  margin-top: 8px;
   path {
     stroke: ${COLORS.warning};
   }
@@ -429,16 +387,6 @@ const Divider = styled.div`
   align-self: stretch;
   background: ${COLORS["grey-600"]};
   width: 100%;
-`;
-
-const ArrowIconDown = styled(UnstyledArrowIcon)`
-  path {
-    stroke: ${COLORS["white-70"]};
-  }
-`;
-
-const ArrowIconUp = styled(ArrowIconDown)`
-  rotate: 180deg;
 `;
 
 const TokenSymbol = styled.img`

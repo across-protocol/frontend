@@ -29,7 +29,6 @@ export type BridgeFees = {
 type GetBridgeFeesArgs = {
   amount: ethers.BigNumber;
   tokenSymbol: string;
-  blockTimestamp: number;
   fromChainId: ChainId;
   toChainId: ChainId;
   recipientAddress?: string;
@@ -43,7 +42,6 @@ export type GetBridgeFeesResult = BridgeFees & {
  *
  * @param amount - amount to bridge
  * @param tokenSymbol - symbol of the token to bridge
- * @param blockTimestamp - timestamp of the block to use for calculating fees on
  * @param fromChain The origin chain of this bridge action
  * @param toChain The destination chain of this bridge action
  * @returns Returns the `relayerFee` and `lpFee` fees for bridging the given amount of tokens, along with an `isAmountTooLow` flag indicating whether the amount is too low to bridge and an `isLiquidityInsufficient` flag indicating whether the liquidity is insufficient.
@@ -128,10 +126,10 @@ export const getConfirmationDepositTime = (
       formattedString:
         fastFillTimeInSeconds < 60
           ? `~${fastFillTimeInSeconds} ${
-              fastFillTimeInSeconds === 1 ? "second" : "seconds"
+              fastFillTimeInSeconds === 1 ? "sec" : "secs"
             }`
           : `~${fastFillTimeInMinutes} ${
-              fastFillTimeInMinutes === 1 ? "minute" : "minutes"
+              fastFillTimeInMinutes === 1 ? "min" : "mins"
             }`,
       lowEstimate: fastFillTimeInSeconds,
       highEstimate: fastFillTimeInSeconds,
