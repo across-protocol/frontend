@@ -297,7 +297,7 @@ export const getRouteDetails = (
   originChainId?: number,
   outputTokenAddress?: string
 ) => {
-  const inputToken = _getTokenByAddress(inputTokenAddress, originChainId);
+  const inputToken = getTokenByAddress(inputTokenAddress, originChainId);
 
   if (!inputToken) {
     throw new InputError(
@@ -312,7 +312,7 @@ export const getRouteDetails = (
     : inputToken.addresses[HUB_POOL_CHAIN_ID];
   const l1Token = isBridgedUsdc(inputToken.symbol)
     ? TOKEN_SYMBOLS_MAP.USDC
-    : _getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
+    : getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
 
   if (!l1Token) {
     throw new InputError("No L1 token found for given input token address");
@@ -347,7 +347,7 @@ export const getRouteDetails = (
   outputTokenAddress ??= inputToken.addresses[destinationChainId];
 
   const outputToken = outputTokenAddress
-    ? _getTokenByAddress(outputTokenAddress, destinationChainId)
+    ? getTokenByAddress(outputTokenAddress, destinationChainId)
     : undefined;
 
   if (!outputToken) {
@@ -395,7 +395,7 @@ export const getRouteDetails = (
   };
 };
 
-const _getTokenByAddress = (tokenAddress: string, chainId?: number) => {
+export const getTokenByAddress = (tokenAddress: string, chainId?: number) => {
   const [, token] =
     Object.entries(TOKEN_SYMBOLS_MAP).find(([_symbol, { addresses }]) =>
       chainId
