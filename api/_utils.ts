@@ -397,13 +397,13 @@ export const getRouteDetails = (
 
 const _getTokenByAddress = (tokenAddress: string, chainId?: number) => {
   const [, token] =
-    Object.entries(TOKEN_SYMBOLS_MAP).find(([_key, { addresses }]) => {
-      return chainId
+    Object.entries(TOKEN_SYMBOLS_MAP).find(([_symbol, { addresses }]) =>
+      chainId
         ? addresses[chainId]?.toLowerCase() === tokenAddress.toLowerCase()
         : Object.values(addresses).some(
             (address) => address.toLowerCase() === tokenAddress.toLowerCase()
-          );
-    }) || [];
+          )
+    ) || [];
   return token;
 };
 
