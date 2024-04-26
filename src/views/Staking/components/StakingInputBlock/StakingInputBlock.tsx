@@ -1,31 +1,19 @@
 import {
-  InputRow,
   ButtonWrapper,
   StakeButton,
   Wrapper,
-  LoaderWrapper,
   StakeButtonContentWrapper,
-  Input,
-  InputWrapper,
-  MaxButton,
-  TokenIcon,
-  IconPairContainer,
 } from "./StakingInputBlock.styles";
-import { capitalizeFirstLetter } from "utils/format";
-import BouncingDotsLoader from "components/BouncingDotsLoader";
 import { trackMaxButtonClicked } from "utils";
 import { useAmplitude } from "hooks";
-import { IconPair } from "components/IconPair";
-import { StakingPoolTokenPairLogoURIs } from "../../types";
+import { AmountInput } from "components/AmountInput";
 
 interface Props {
   value: string;
   setValue: React.Dispatch<React.SetStateAction<string | undefined>>;
   valid: boolean;
   invalid: boolean;
-  buttonText: string;
-  logoURI: string;
-  logoURIs?: StakingPoolTokenPairLogoURIs;
+  poolTokenSymbol: string;
   maxValue: string;
   onClickHandler: () => void | Promise<void>;
   displayLoader?: boolean;
@@ -39,9 +27,7 @@ const StakingInputBlock: React.FC<Props> = ({
   setValue,
   valid,
   invalid,
-  buttonText,
-  logoURI,
-  logoURIs,
+  poolTokenSymbol,
   maxValue,
   displayLoader,
   onClickHandler,
@@ -52,60 +38,39 @@ const StakingInputBlock: React.FC<Props> = ({
   const { addToAmpliQueue } = useAmplitude();
   return (
     <Wrapper>
-      <InputRow>
-        <InputWrapper valid={valid} invalid={invalid}>
-          {logoURIs ? (
-            <IconPairContainer>
-              <IconPair
-                LeftIcon={<TokenIcon src={logoURIs[0]} />}
-                RightIcon={<TokenIcon src={logoURIs[1]} />}
-              />
-            </IconPairContainer>
-          ) : (
-            <TokenIcon src={logoURI} />
-          )}
-          <Input
-            valid={valid}
-            invalid={invalid}
-            placeholder="Enter amount"
-            value={value}
-            type="text"
-            onChange={(e) => setValue(e.target.value)}
-            disabled={displayLoader || disableInput}
-            onKeyDown={(e) => e.key === "Enter" && valid && onClickHandler()}
-          />
-          <MaxButton
-            disabled={displayLoader || disableInput || !maxValue}
-            onClick={() => {
-              setValue(maxValue ?? "");
-              addToAmpliQueue(() => {
-                trackMaxButtonClicked(
-                  stakingAction === "stake" ? "stakeForm" : "unstakeForm"
-                );
-              });
-            }}
-          >
-            Max
-          </MaxButton>
-        </InputWrapper>
-
-        <ButtonWrapper>
-          <StakeButton
-            onClick={onClickHandler}
-            disabled={!valid || invalid || displayLoader}
-            backgroundColor={warningButtonColor ? "yellow" : "aqua"}
-          >
-            <StakeButtonContentWrapper>
-              <span>{capitalizeFirstLetter(buttonText)}</span>
-              {displayLoader && (
-                <LoaderWrapper>
-                  <BouncingDotsLoader />
-                </LoaderWrapper>
-              )}
-            </StakeButtonContentWrapper>
-          </StakeButton>
-        </ButtonWrapper>
-      </InputRow>
+      <AmountInput
+        amountInput={value}
+        onChangeAmountInput={setValue}
+        onClickMaxBalance={() => {
+          setValue(maxValue ?? "");
+          addToAmpliQueue(() => {
+            trackMaxButtonClicked(
+              stakingAction === "stake" ? "stakeForm" : "unstakeForm"
+            );
+          });
+        }}
+        validationError={invalid ? "Invalid amount" : undefined}
+        disableInput={disableInput}
+        displayTokenIcon={true}
+        inputTokenSymbol={poolTokenSymbol}
+      />
+      <ButtonWrapper>
+        <StakeButton
+          onClick={onClickHandler}
+          disabled={!valid || invalid || displayLoader}
+          backgroundColor={warningButtonColor ? "yellow" : "aqua"}
+        >
+          <StakeButtonContentWrapper>
+            {displayLoader ? (
+              <span>
+                {stakingAction === "stake" ? "Staking..." : "Unstaking..."}
+              </span>
+            ) : (
+              <span>{stakingAction}</span>
+            )}
+          </StakeButtonContentWrapper>
+        </StakeButton>
+      </ButtonWrapper>
     </Wrapper>
   );
 };

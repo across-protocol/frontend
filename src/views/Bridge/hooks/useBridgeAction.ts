@@ -22,7 +22,8 @@ const config = getConfig();
 export function useBridgeAction(
   dataLoading: boolean,
   payload?: AcrossDepositArgs,
-  tokenSymbol?: string,
+  inputTokenSymbol?: string,
+  outputTokenSymbol?: string,
   recentQuote?: TransferQuoteReceivedProperties,
   recentInitialQuoteTime?: number,
   tokenPrice?: BigNumber
@@ -57,7 +58,8 @@ export function useBridgeAction(
       !frozenQuote ||
       !frozenInitialQuoteTime ||
       !frozenTokenPrice ||
-      !tokenSymbol
+      !inputTokenSymbol ||
+      !outputTokenSymbol
     ) {
       throw new Error("Missing required data for bridge action");
     }
@@ -66,9 +68,9 @@ export function useBridgeAction(
       await isWrongNetworkHandler();
     }
 
-    if (tokenSymbol !== "ETH") {
+    if (inputTokenSymbol !== "ETH") {
       await approveHandler.mutateAsync({
-        erc20Symbol: tokenSymbol,
+        erc20Symbol: inputTokenSymbol,
         approvalAmount: frozenPayload.amount,
         allowedContractAddress: config.getSpokePoolAddress(
           frozenPayload.fromChain
@@ -103,7 +105,8 @@ export function useBridgeAction(
     const statusPageSearchParams = new URLSearchParams({
       originChainId: String(frozenPayload.fromChain),
       destinationChainId: String(frozenPayload.toChain),
-      bridgeTokenSymbol: tokenSymbol,
+      inputTokenSymbol,
+      outputTokenSymbol,
       referrer,
     }).toString();
     history.push(
@@ -150,9 +153,6 @@ function getButtonLabel(args: {
   }
   if (args.isMutating) {
     return "Confirming...";
-  }
-  if (args.isDataLoading) {
-    return "Loading...";
   }
   return "Confirm transaction";
 }

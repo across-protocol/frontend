@@ -2,9 +2,9 @@ import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { utils } from "ethers";
 
-import { QUERIESV2, trackMaxButtonClicked } from "utils";
-import { useStakingPool, useAmplitude } from "hooks";
-import { InputWithMaxButton, Text } from "components";
+import { QUERIESV2, trackMaxButtonClicked, getConfig } from "utils";
+import { useStakingPool, useAmplitude, useBalanceBySymbol } from "hooks";
+import { Text, AmountInput } from "components";
 
 import {
   useAddLiquidity,
@@ -24,6 +24,8 @@ type Props = {
   action: "add" | "remove";
 };
 
+const config = getConfig();
+
 export function ActionInputBlock({ action, selectedToken }: Props) {
   const [amount, setAmount] = useState("");
 
@@ -31,6 +33,10 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
   const maxAmountsQuery = useMaxAmounts(
     selectedToken.l1TokenAddress,
     selectedToken.symbol
+  );
+  const balanceQuery = useBalanceBySymbol(
+    selectedToken.symbol,
+    config.getHubPoolChainId()
   );
 
   const addLiquidityMutation = useAddLiquidity(
@@ -118,19 +124,20 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
             : maxAmountsQuery.data.maxRemovableAmount,
           selectedToken.decimals
         )
-      : "0";
+      : undefined;
 
   return (
     <Wrapper>
       <InputRow>
-        <InputWithMaxButton
-          valid={false}
-          invalid={Boolean(amountValidationError)}
-          value={amount}
-          onChangeValue={(e) => setAmount(e.target.value)}
-          disableInput={disableInputs}
-          onEnterKeyDown={handleAction}
-          onClickMaxButton={() => {
+        <AmountInput
+          balance={balanceQuery.balance}
+          displayBalance={action === "add"}
+          amountInput={amount}
+          onChangeAmountInput={(input) => setAmount(input)}
+          onClickMaxBalance={() => {
+            if (!maxAmount) {
+              return;
+            }
             setAmount(maxAmount);
             addToAmpliQueue(() => {
               trackMaxButtonClicked(
@@ -138,8 +145,10 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
               );
             });
           }}
-          maxValue={maxAmountsQuery.isLoading ? "" : maxAmount}
-          disableTokenIcon
+          validationError={amountValidationError}
+          inputTokenSymbol={selectedToken.symbol}
+          disableInput={disableInputs}
+          disableMaxButton={!maxAmount}
         />
 
         <ButtonWrapper>
@@ -162,11 +171,6 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
           </Button>
         </ButtonWrapper>
       </InputRow>
-      {amountValidationError && (
-        <ErrorContainer>
-          <Text color="error">{amountValidationError}</Text>
-        </ErrorContainer>
-      )}
     </Wrapper>
   );
 }
@@ -181,7 +185,7 @@ const Wrapper = styled.div`
 const InputRow = styled.div`
   display: flex;
   gap: 16px;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
 
   @media ${QUERIESV2.sm.andDown} {
@@ -191,14 +195,5 @@ const InputRow = styled.div`
 `;
 
 const ButtonWrapper = styled.div`
-  flex-shrink: 0;
-  @media ${QUERIESV2.sm.andDown} {
-    width: 100%;
-  }
-`;
-
-const ErrorContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
+  width: 100%;
 `;

@@ -4,9 +4,9 @@
   "private": true,
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "@across-protocol/constants-v2": "^1.0.19",
+    "@across-protocol/constants-v2": "^1.0.20",
     "@across-protocol/contracts-v2": "2.5.5",
-    "@across-protocol/sdk-v2": "^0.23.4",
+    "@across-protocol/sdk-v2": "^0.23.7",
     "@amplitude/analytics-browser": "^2.3.5",
     "@balancer-labs/sdk": "1.1.6-beta.16",
     "@emotion/react": "^11.4.1",

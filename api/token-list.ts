@@ -52,11 +52,7 @@ const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
     const enrichedTokensPerChain = Object.values(tokensPerChain).map(
       (token) => {
         const tokenInfo =
-          TOKEN_SYMBOLS_MAP[
-            ["USDC.e", "USDbC"].includes(token.symbol)
-              ? "USDC"
-              : (token.symbol as keyof typeof TOKEN_SYMBOLS_MAP)
-          ];
+          TOKEN_SYMBOLS_MAP[token.symbol as keyof typeof TOKEN_SYMBOLS_MAP];
         return {
           ...token,
           name: tokenInfo.name,

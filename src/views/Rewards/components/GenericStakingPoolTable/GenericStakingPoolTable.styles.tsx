@@ -132,7 +132,7 @@ export const StakeButton = styled.div`
   padding: 0px ${16 / 16}rem;
 
   border: 1px solid #6cf9d8;
-  border-radius: 20px;
+  border-radius: 12px;
 
   height: ${40 / 16}rem;
 
@@ -160,7 +160,7 @@ export const StyledProgressBar = styled(ProgressBar)<IStyledProgressBar>`
 
 export const ExternalLinkButton = styled(Link)`
   border: 1px solid #4c4e57;
-  border-radius: 32px;
+  border-radius: 12px;
   height: ${40 / 16}rem;
   width: ${40 / 16}rem;
 

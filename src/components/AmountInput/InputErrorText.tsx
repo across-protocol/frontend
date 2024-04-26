@@ -1,17 +1,22 @@
 import styled from "@emotion/styled";
+
+import { Text } from "components/Text";
 import { ReactComponent as II } from "assets/icons/info-16.svg";
-import { Text } from "components";
 
-const BridgeInputErrorAlert: React.FC = ({ children }) => (
-  <ErrorWrapper>
-    <ErrorIcon />
-    <Text size="sm" color="error">
-      {children}
-    </Text>
-  </ErrorWrapper>
-);
+type Props = {
+  errorText: string;
+};
 
-export default BridgeInputErrorAlert;
+export function InputErrorText({ errorText }: Props) {
+  return (
+    <ErrorWrapper>
+      <ErrorIcon />
+      <Text size="sm" color="error">
+        {errorText}
+      </Text>
+    </ErrorWrapper>
+  );
+}
 
 const ErrorWrapper = styled.div`
   display: flex;

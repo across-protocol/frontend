@@ -2,7 +2,7 @@ import { utils } from "@across-protocol/sdk-v2";
 import { BigNumber, utils as ethersUtils } from "ethers";
 import { useRewardToken } from "hooks/useRewardToken";
 import { useTokenConversion } from "hooks/useTokenConversion";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   TokenInfo,
   fixedPointAdjustment,
@@ -12,13 +12,14 @@ import {
   parseUnitsWithExtendedDecimals,
 } from "utils";
 
-export function useEstimatedTable(
+export type EstimatedRewards = ReturnType<typeof useEstimatedRewards>;
+
+export function useEstimatedRewards(
   token: TokenInfo,
   destinationChainId: number,
   gasFee?: BigNumber,
   bridgeFee?: BigNumber
 ) {
-  const [isDetailedFeesAvailable, setIsDetailedFeesAvailable] = useState(false);
   const { rewardToken, isACXRewardToken, availableRewardPercentage } =
     useRewardToken(destinationChainId);
   const { convertTokenToBaseCurrency: convertL1ToBaseCurrency } =
@@ -66,7 +67,7 @@ export function useEstimatedTable(
     rewardToken.decimals,
   ]);
 
-  const hasDepositReferralReward = depositReward?.rewardAsL1.gt(0) ?? false;
+  const hasDepositReward = depositReward?.rewardAsL1.gt(0) ?? false;
 
   const baseCurrencyConversions = useMemo(() => {
     const parseUsd = (usd?: number) =>
@@ -107,11 +108,9 @@ export function useEstimatedTable(
 
   return {
     ...baseCurrencyConversions,
-    isDetailedFeesAvailable,
-    setIsDetailedFeesAvailable,
-    depositReferralReward: depositReward?.rewardAsRewardToken,
-    depositReferralPercentage: availableRewardPercentage,
-    hasDepositReferralReward,
+    reward: depositReward?.rewardAsRewardToken,
+    rewardPercentage: availableRewardPercentage,
+    hasDepositReward,
     rewardToken,
     isRewardAcx: isACXRewardToken,
   };

@@ -5,6 +5,7 @@ import { useHistory } from "react-router-dom";
 import { SecondaryButton } from "components/Button";
 import EstimatedTable from "views/Bridge/components/EstimatedTable";
 import { getReceiveTokenSymbol } from "views/Bridge/utils";
+import { useEstimatedRewards } from "views/Bridge/hooks/useEstimatedRewards";
 import { getToken, COLORS } from "utils";
 import { useIsContractAddress } from "hooks/useIsContractAddress";
 
@@ -16,14 +17,16 @@ import { useRewardToken } from "hooks/useRewardToken";
 type Props = {
   fromChainId: number;
   toChainId: number;
-  bridgeTokenSymbol: string;
+  inputTokenSymbol: string;
+  outputTokenSymbol: string;
   fromBridgePagePayload?: FromBridgePagePayload;
 };
 
 export function DepositStatusLowerCard({
   fromChainId,
   toChainId,
-  bridgeTokenSymbol,
+  inputTokenSymbol,
+  outputTokenSymbol,
   fromBridgePagePayload,
 }: Props) {
   const { quote } = fromBridgePagePayload || {};
@@ -31,31 +34,54 @@ export function DepositStatusLowerCard({
   const isReceiverContract = useIsContractAddress(quote?.recipient);
   const history = useHistory();
 
-  const tokenInfo = getToken(bridgeTokenSymbol);
+  const inputTokenInfo = getToken(inputTokenSymbol);
+  const outputTokenInfo = getToken(outputTokenSymbol);
   const { programName } = useRewardToken(toChainId);
+
+  const gasFee = utils.parseUnits(
+    quote?.relayGasFeeTotal || "0",
+    inputTokenInfo.decimals
+  );
+  const bridgeFee = utils
+    .parseUnits(quote?.totalBridgeFee || "0", inputTokenInfo.decimals)
+    .sub(
+      utils.parseUnits(quote?.relayGasFeeTotal || "0", inputTokenInfo.decimals)
+    );
+  const estimatedRewards = useEstimatedRewards(
+    inputTokenInfo,
+    toChainId,
+    gasFee,
+    bridgeFee
+  );
 
   const FeesTable = quote ? (
     <EstimatedTable
       fromChainId={fromChainId}
       toChainId={toChainId}
       estimatedTime={quote.expectedFillTimeInMinutes}
-      gasFee={utils.parseUnits(quote.relayGasFeeTotal, tokenInfo.decimals)}
+      gasFee={utils.parseUnits(quote.relayGasFeeTotal, inputTokenInfo.decimals)}
       bridgeFee={utils
-        .parseUnits(quote.totalBridgeFee, tokenInfo.decimals)
-        .sub(utils.parseUnits(quote.relayGasFeeTotal, tokenInfo.decimals))}
-      totalReceived={utils.parseUnits(quote.toAmount, tokenInfo.decimals)}
-      token={tokenInfo}
-      receiveToken={getToken(
-        getReceiveTokenSymbol(toChainId, tokenInfo.symbol, isReceiverContract)
+        .parseUnits(quote.totalBridgeFee, inputTokenInfo.decimals)
+        .sub(utils.parseUnits(quote.relayGasFeeTotal, inputTokenInfo.decimals))}
+      totalReceived={utils.parseUnits(quote.toAmount, inputTokenInfo.decimals)}
+      inputToken={inputTokenInfo}
+      outputToken={getToken(
+        getReceiveTokenSymbol(
+          toChainId,
+          inputTokenInfo.symbol,
+          outputTokenInfo.symbol,
+          isReceiverContract
+        )
       )}
+      {...estimatedRewards}
     />
   ) : null;
 
   return (
     <>
       <EarnByLpAndStakingCard
-        l1TokenAddress={tokenInfo.mainnetAddress!}
-        bridgeTokenSymbol={bridgeTokenSymbol}
+        l1TokenAddress={inputTokenInfo.mainnetAddress!}
+        bridgeTokenSymbol={inputTokenSymbol}
       />
       <ReferralCTA program={programName} />
       {fromBridgePagePayload && (

@@ -1,7 +1,6 @@
 import { useQuery } from "react-query";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { bridgeFeesQueryKey, getBridgeFees, ChainId } from "utils";
-import { useBlock } from "./useBlock";
 
 /**
  * This hook calculates the bridge fees for a given token and amount.
@@ -18,34 +17,38 @@ export function useBridgeFees(
   tokenSymbol?: string,
   recipientAddress?: string
 ) {
-  const { block } = useBlock(toChainId);
-  const enabledQuery =
-    !!toChainId && !!fromChainId && !!block && !!tokenSymbol && amount.gt(0);
-  const queryKey = enabledQuery
-    ? bridgeFeesQueryKey(
-        tokenSymbol,
-        amount,
-        fromChainId,
-        toChainId,
-        block.number
-      )
-    : "DISABLED_BRIDGE_FEE_QUERY";
+  const queryKey = bridgeFeesQueryKey(
+    amount,
+    tokenSymbol,
+    fromChainId,
+    toChainId
+  );
   const { data: fees, ...delegated } = useQuery(
     queryKey,
-    async () => {
+    ({ queryKey }) => {
+      const [
+        ,
+        tokenSymbolToQuery,
+        amountToQuery,
+        fromChainIdToQuery,
+        toChainIdToQuery,
+      ] = queryKey;
+
+      if (!toChainIdToQuery || !fromChainIdToQuery || !tokenSymbolToQuery) {
+        return undefined;
+      }
+
       return getBridgeFees({
-        amount,
-        tokenSymbol: tokenSymbol!,
-        blockTimestamp: block!.timestamp,
-        toChainId: toChainId!,
-        fromChainId: fromChainId!,
+        amount: BigNumber.from(amountToQuery),
+        tokenSymbol: tokenSymbolToQuery,
+        toChainId: toChainIdToQuery,
+        fromChainId: fromChainIdToQuery,
         recipientAddress,
       });
     },
     {
-      enabled: enabledQuery,
-      // We already re-fetch when the block number changes, so we don't need to re-fetch.
-      staleTime: Infinity,
+      enabled: Boolean(toChainId && fromChainId && tokenSymbol && amount.gt(0)),
+      refetchInterval: 5000,
     }
   );
   return {

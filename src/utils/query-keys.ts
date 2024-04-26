@@ -16,16 +16,14 @@ export function latestBlockQueryKey(chainId: ChainId) {
  * @param chainId  The chain Id of the chain to execute the query on.
  * @param token  The token to fetch the balance of.
  * @param account  The account to query the balance of.
- * @param blockNumber  The block number to execute the query on.
  * @returns An array of query keys for react-query `useQuery` hook.
  */
 export function balanceQueryKey(
-  account: string,
-  blockNumber?: number,
+  account?: string,
   chainId?: ChainId,
   token?: string
 ) {
-  return ["balance", chainId, token, account, blockNumber];
+  return ["balance", chainId, token, account] as const;
 }
 
 /**
@@ -33,24 +31,21 @@ export function balanceQueryKey(
  * @param amount  The amount to check bridge fees for.
  * @param fromChainId The origin chain of this bridge action
  * @param toChainId The destination chain of this bridge action
- * @param blockNumber  The block number to execute the query on.
  * @returns An array of query keys for react-query `useQuery` hook.
  */
 export function bridgeFeesQueryKey(
-  tokenSymbol: string,
   amount: ethers.BigNumber,
-  fromChainId: ChainId,
-  toChainId: ChainId,
-  blockNumber: number
+  tokenSymbol?: string,
+  fromChainId?: ChainId,
+  toChainId?: ChainId
 ) {
   return [
     "bridgeFees",
     tokenSymbol,
-    amount,
+    amount.toString(),
     fromChainId,
     toChainId,
-    blockNumber,
-  ];
+  ] as const;
 }
 
 export function bridgeLimitsQueryKey(
@@ -59,25 +54,6 @@ export function bridgeLimitsQueryKey(
   toChainId: ChainId
 ) {
   return ["bridgeLimits", token, fromChainId, toChainId];
-}
-
-/**
- * Generates query keys for react-query `useQuery` hook, used in the `useAllowance` hook.
- * @param chainId  The chain Id of the chain to execute the query on.
- * @param token  The token to fetch the allowance of.
- * @param owner  The owner in the allowance call.
- * @param spender  The spender in the allowance call.
- * @param blockNumber  The block number to execute the query on.
- * @returns An array of query keys for react-query `useQuery` hook.
- */
-export function allowanceQueryKey(
-  owner: string,
-  spender: string,
-  blockNumber: number,
-  chainId?: ChainId,
-  tokenSymbol?: string
-) {
-  return ["allowance", chainId, tokenSymbol, owner, spender, blockNumber];
 }
 
 /**

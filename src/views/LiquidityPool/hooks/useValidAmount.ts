@@ -12,7 +12,9 @@ export function useValidAmount(
     maxRemovableAmount: BigNumber;
   }
 ) {
-  const [amountValidationError, setAmountValidationError] = useState("");
+  const [amountValidationError, setAmountValidationError] = useState<
+    string | undefined
+  >();
 
   useEffect(() => {
     if (amount && amountTokenDecimals && maxAmounts) {
@@ -22,12 +24,12 @@ export function useValidAmount(
             ? maxAmounts.maxAddableAmount
             : maxAmounts.maxRemovableAmount;
         parseAndValidateAmountInput(amount, amountTokenDecimals, maxAmount);
-        setAmountValidationError("");
+        setAmountValidationError(undefined);
       } catch (error) {
         setAmountValidationError((error as Error).message);
       }
     } else {
-      setAmountValidationError("");
+      setAmountValidationError(undefined);
     }
   }, [action, amount, amountTokenDecimals, maxAmounts]);
 

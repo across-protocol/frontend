@@ -3,18 +3,15 @@ import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
 import {
-  disabledL1Tokens,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   DEFAULT_QUOTE_BLOCK_BUFFER,
 } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
-  getRouteDetails,
   InputError,
   getProvider,
   getRelayerFeeDetails,
-  isRouteEnabled,
   getCachedTokenPrice,
   handleErrorCondition,
   parsableBigNumberString,
@@ -28,11 +25,14 @@ import {
   getDefaultRelayerAddress,
   getHubPool,
   callViaMulticall3,
+  validateChainAndTokenParams,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
   amount: parsableBigNumberString(),
-  token: validAddress(),
+  token: optional(validAddress()),
+  inputToken: optional(validAddress()),
+  outputToken: optional(validAddress()),
   destinationChainId: positiveIntStr(),
   originChainId: optional(positiveIntStr()),
   timestamp: optional(positiveIntStr()),
@@ -64,9 +64,6 @@ const handler = async (
 
     let {
       amount: amountInput,
-      token,
-      destinationChainId: _destinationChainId,
-      originChainId,
       timestamp,
       skipAmountLimit,
       recipient,
@@ -74,30 +71,15 @@ const handler = async (
       message,
     } = query;
 
-    if (originChainId === _destinationChainId) {
-      throw new InputError("Origin and destination chains cannot be the same");
-    }
-    const destinationChainId = Number(_destinationChainId);
-    token = ethers.utils.getAddress(token);
-
     const {
       l1Token,
-      resolvedOriginChainId: computedOriginChainId,
-      symbol,
-    } = getRouteDetails(
-      token,
+      inputToken,
+      outputToken,
       destinationChainId,
-      originChainId ? Number(originChainId) : undefined
-    );
+      resolvedOriginChainId: computedOriginChainId,
+    } = validateChainAndTokenParams(query);
 
-    if (
-      disabledL1Tokens.includes(l1Token.toLowerCase()) ||
-      !isRouteEnabled(computedOriginChainId, destinationChainId, token)
-    ) {
-      throw new InputError(`Route is not enabled.`);
-    }
-
-    relayer ??= getDefaultRelayerAddress(symbol, destinationChainId);
+    relayer ??= getDefaultRelayerAddress(inputToken.symbol, destinationChainId);
     recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
 
     if (sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message)) {
@@ -123,19 +105,10 @@ const handler = async (
         // the difference between an OUT_OF_FUNDS error in either the transfer or through the execution
         // of the `handleAcrossMessage` we will check that the balance of the relayer is sufficient to
         // support this deposit.
-        const destinationToken = sdk.utils.getL2TokenAddresses(
-          l1Token,
-          HUB_POOL_CHAIN_ID
-        )?.[destinationChainId];
-        if (!sdk.utils.isDefined(destinationToken)) {
-          throw new InputError(
-            `Could not resolve token address on ${destinationChainId} for ${l1Token}`
-          );
-        }
         const balanceOfToken = await getCachedTokenBalance(
           destinationChainId,
           relayer,
-          destinationToken
+          outputToken.address
         );
         if (balanceOfToken.lt(amountInput)) {
           throw new InputError(
@@ -205,32 +178,37 @@ const handler = async (
       {
         contract: hubPool,
         functionName: "liquidityUtilizationCurrent",
-        args: [l1Token],
+        args: [l1Token.address],
       },
       {
         contract: hubPool,
         functionName: "liquidityUtilizationPostRelay",
-        args: [l1Token, amount],
+        args: [l1Token.address, amount],
       },
       {
         contract: hubPool,
         functionName: "getCurrentTime",
       },
+      {
+        contract: configStoreClient.contract,
+        functionName: "l1TokenConfig",
+        args: [l1Token.address],
+      },
     ];
 
-    const [[currentUt, nextUt, quoteTimestamp], rateModel, tokenPrice] =
+    const [[currentUt, nextUt, quoteTimestamp, rawL1TokenConfig], tokenPrice] =
       await Promise.all([
         callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
-        configStoreClient.getRateModel(
-          l1Token,
-          {
-            blockTag: quoteBlockNumber,
-          },
-          computedOriginChainId,
-          destinationChainId
-        ),
-        getCachedTokenPrice(l1Token, baseCurrency),
+        getCachedTokenPrice(l1Token.address, baseCurrency),
       ]);
+    const parsedL1TokenConfig =
+      sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
+        String(rawL1TokenConfig)
+      );
+    const routeRateModelKey = `${computedOriginChainId}-${destinationChainId}`;
+    const rateModel =
+      parsedL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
+      parsedL1TokenConfig.rateModel;
     const lpFeePct = sdk.lpFeeCalculator.calculateRealizedLpFeePct(
       rateModel,
       currentUt,
@@ -238,7 +216,7 @@ const handler = async (
     );
     const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
     const relayerFeeDetails = await getRelayerFeeDetails(
-      l1Token,
+      l1Token.address,
       amount,
       computedOriginChainId,
       destinationChainId,

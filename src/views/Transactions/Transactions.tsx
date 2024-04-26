@@ -19,7 +19,7 @@ export function Transactions() {
   );
 
   return (
-    <LayoutV2 maxWidth={1140}>
+    <LayoutV2 maxWidth={activeTab === "personal" ? 1476 : 1132}>
       <Wrapper>
         <BreadcrumbV2 />
         <FilterWrapper>
@@ -63,8 +63,7 @@ const Wrapper = styled.div`
   flex-direction: column;
   gap: 24px;
 
-  max-width: calc(1140px);
-  width: calc(100%);
+  width: 100%;
 
   margin: 0 auto;
   padding: 32px 0;

@@ -1,0 +1,637 @@
+openapi: "3.0.0"
+info:
+  title: Across Protocol API
+  description: API documentation for Across Protocol services.
+  version: 0.1.0
+servers:
+  - url: https://app.across.to/api
+  - url: https://testnet.across.to/api
+paths:
+  /suggested-fees:
+    get:
+      summary: Retrieve suggested fee quote for a deposit.
+      description: >
+        Returns suggested fees based on the `token` OR
+        `inputToken`+`outputToken`, `originChainId`, `destinationChainId`, and
+        `amount`.
+      parameters:
+        - name: token
+          in: query
+          deprecated: true
+          schema:
+            type: string
+          description: >
+            Address of token to bridge. For native ETH, use the wrapped address,
+            i.e. WETH.
+
+
+            Note that the address provided must exist on the specified
+            `originChainId`.
+
+
+            **Also note that this parameter will eventually be deprecated in
+            favor of the parameters `inputToken` and `outputToken` below. For
+            now, you need to either specify `token` OR
+            `inputToken`+`outputToken` with the parameter `token` having a
+            higher precedence.**
+
+
+            _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+        - name: inputToken
+          in: query
+          schema:
+            type: string
+          description: >
+            Address of token to bridge on the _origin_ chain. Must be used
+            together with parameter `outputToken`. For ETH, use the wrapped
+            address, like WETH.
+
+
+            Note that the address provided must exist on the specified
+            `originChainId` below.
+
+
+            **Also note that this parameter will eventually replace the
+            parameter `token` above. For now, you need to either specify `token`
+            OR `inputToken` +`outputToken` with the parameter `token` having a
+            higher precedence.**
+
+
+            _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+        - name: outputToken
+          in: query
+          schema:
+            type: string
+          description: >
+            Address of token to bridge on the _destination_ chain. Must be used
+            together with parameter `inputToken`. For ETH, use the wrapped
+            address, like WETH.
+
+
+            Note that the address provided must exist on the specified
+            `destinationChainId` below.
+
+
+            **Also note that this parameter will eventually replace the
+            parameter `token` above. For now, you need to either specify `token`
+            OR `inputToken` +`outputToken` with the parameter `token` having a
+            higher precedence.**
+
+
+            _Example:_ 0x4200000000000000000000000000000000000006
+        - name: originChainId
+          in: query
+          required: true
+          description: >
+            Chain ID where the specified `token` or `inputToken` exists.
+          schema:
+            type: integer
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
+        - name: destinationChainId
+          in: query
+          required: true
+          description: >
+            The desired destination chain ID of the bridge transfer.
+          schema:
+            type: integer
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
+        - name: amount
+          in: query
+          required: true
+          description: >
+            Amount of the token to transfer.
+
+
+            Note that this amount is in the native decimals of the token. So,
+            for WETH, this would be the amount of human-readable WETH multiplied
+            by 1e18. For USDC, you would multiply the number of human-readable
+            USDC by 1e6.
+
+
+            _Example:_ 100000000000
+          schema:
+            type: integer
+            minimum: 1
+        - name: recipient
+          in: query
+          required: false
+          description: >
+            Recipient of the deposit. Can be an EOA or a contract. If this is an
+            EOA and message is defined, then the API will throw a 4xx error.
+
+
+            _Example_: 0xc186fA914353c44b2E33eBE05f21846F1048bEda
+          schema:
+            type: string
+        - name: message
+          in: query
+          required: false
+          description: >
+            Calldata passed to the `recipient` if `recipient` is a contract
+            address.  This calldata is passed to the recipient via the
+            recipient's handleAcrossMessage() public function. The length of
+            this value is constrained by the API to ~4096 chars minus the length
+            of the full URL.
+
+
+            _Example:_ 0xABC123
+          schema:
+            type: string
+        - name: relayer
+          in: query
+          required: false
+          description: >
+            Optionally override the relayer address used to simulate the
+            fillRelay() call that estimates the gas costs needed to fill a
+            deposit. This simulation result impacts the returned suggested-fees.
+            The reason to customize the EOA would be primarily if the
+            recipientAddress is a contract and requires a certain relayer to
+            submit the fill, or if one specific relayer has the necessary token
+            balance to make the fill.
+
+
+            _Example:_ 0x428AB2BA90Eba0a4Be7aF34C9Ac451ab061AC010
+          schema:
+            type: string
+        - name: timestamp
+          in: query
+          required: false
+          description: >
+            The quote timestamp used to compute the LP fees. When bridging with
+            across, the user only specifies the quote timestamp in their
+            transaction. The relayer then determines the utilization at that
+            timestamp to determine the user's fee. This timestamp must be close
+            (within 10 minutes or so) to the current time on the chain where the
+            user is depositing funds and it should be <= the current block
+            timestamp on mainnet. This allows the user to know exactly what LP
+            fee they will pay before sending the transaction. 
+
+
+            If this value isn't provided in the request, the API will assume the
+            latest block timestamp on mainnet.
+
+
+            _Example:_ 1653547649
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Suggested fees for the transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuggestedFees"
+              example:
+                {
+                  "fees":
+                    {
+                      "totalRelayFee":
+                        {
+                          "pct": "376607094864283",
+                          "total": "376607094864283",
+                        },
+                      "relayerCapitalFee":
+                        {
+                          "pct": "100200000000000",
+                          "total": "100200000000000",
+                        },
+                      "relayerGasFee":
+                        {
+                          "pct": "276407094864283",
+                          "total": "276407094864283",
+                        },
+                      "lpFee":
+                        { "pct": "4552495218411721", "total": "1708047000" },
+                    },
+                  "timestamp": "1708047000",
+                  "isAmountTooLow": false,
+                  "quoteBlock": "19237525",
+                  "spokePoolAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+                }
+        "400":
+          description: Invalid input
+        "500":
+          description: Unexpected error within the API
+  /limits:
+    get:
+      summary: Retrieve current transfer limits of the system
+      description: Returns transfer limits for specified `token` OR
+        `inputToken`+`outputToken`, `originChainId`, and `destinationChainId`.
+      parameters:
+        - name: token
+          in: query
+          deprecated: true
+          schema:
+            type: string
+          description: >
+            Address of token to bridge. For native ETH, use the wrapped address,
+            i.e. WETH.
+
+
+            Note that the address provided must exist on the specified
+            `originChainId`.
+
+
+            **Also note that this parameter will eventually be deprecated in
+            favor of the parameters `inputToken` and `outputToken` below. For
+            now, you need to either specify `token` OR
+            `inputToken`+`outputToken` with the parameter `token` having a
+            higher precedence.**
+
+
+            _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+        - name: inputToken
+          in: query
+          schema:
+            type: string
+          description: >
+            Address of token to bridge on the _origin_ chain. Must be used
+            together with parameter `outputToken`. For ETH, use the wrapped
+            address, like WETH.
+
+
+            Note that the address provided must exist on the specified
+            `originChainId`.
+
+
+            **Also note that this parameter will eventually replace the
+            parameter `token` above. For now, you need to either specify `token`
+            OR `inputToken` +`outputToken` with the parameter `token` having a
+            higher precedence.**
+
+
+            _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+        - name: outputToken
+          in: query
+          schema:
+            type: string
+          description: >
+            Address of token to bridge on the _destination_ chain. Must be used
+            together with parameter `inputToken`. For ETH, use the wrapped
+            address, like WETH.
+
+
+            Note that the address provided must match the token address on the
+            specified `destinationChainId` below.
+
+
+            **Also note that this parameter will eventually replace the
+            parameter `token` above. For now, you need to either specify `token`
+            OR `inputToken` +`outputToken` with the parameter `token` having a
+            higher precedence.**
+
+
+            _Example:_ 0x4200000000000000000000000000000000000006
+        - name: originChainId
+          in: query
+          required: true
+          description: >
+            Chain ID where the specified `token` or `inputToken` exists.
+          schema:
+            type: integer
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
+        - name: destinationChainId
+          in: query
+          required: true
+          description: >
+            The intended destination chain ID of the bridge transfer.
+          schema:
+            type: integer
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
+      responses:
+        "200":
+          description: Transfer limits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransferLimits"
+              example:
+                {
+                  "minDeposit": "7799819",
+                  "maxDeposit": "22287428516241",
+                  "maxDepositInstant": "201958902363",
+                  "maxDepositShortDelay": "2045367713809",
+                }
+        "400":
+          description: Invalid input
+        "500":
+          description: Unexpected error within the API
+  /available-routes:
+    get:
+      summary: Retrieve available routes for transfers
+      description: Returns available routes based on specified parameters.
+      parameters:
+        - name: originChainId
+          in: query
+          required: false
+          description: >
+            Chain ID of the originating chain.
+          schema:
+            type: integer
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
+        - name: destinationChainId
+          in: query
+          required: false
+          description: >
+            Chain ID of the destination chain.
+          schema:
+            type: integer
+            minimum: 1
+            enum: [
+                1,
+                10,
+                137,
+                324,
+                8453,
+                42161,
+                59144,
+                # testnets
+                84532,
+                421614,
+                11155420,
+                11155111,
+              ]
+        - name: originToken
+          in: query
+          required: false
+          description: >
+            Origin chain address of token contract to transfer.
+
+
+            _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+          schema:
+            type: string
+        - name: destinationToken
+          in: query
+          required: false
+          description: >
+            Destination chain address of token contract to receive.
+
+
+            _Example:_ 0x4200000000000000000000000000000000000006
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of available routes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AvailableRoute"
+              example:
+                [
+                  {
+                    "originChainId": "1",
+                    "destinationChainId": "10",
+                    "originToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                    "destinationToken": "0x4200000000000000000000000000000000000006",
+                  },
+                ]
+        "400":
+          description: Invalid input
+        "500":
+          description: Unexpected error within the API
+components:
+  schemas:
+    SuggestedFees:
+      type: object
+      properties:
+        fees:
+          type: object
+          description: >
+            Fee object for Across v3.
+          properties:
+            totalRelayFee:
+              type: object
+              properties:
+                pct:
+                  type: string
+                  description: >
+                    The percentage of the transfer amount that should go to the
+                    relayer as a fee in total. The value is inclusive of
+                    `lpFee.pct`. 
+
+
+                    This is the strongly recommended minimum value to ensure a
+                    relayer will perform the transfer under the current network
+                    conditions. The value returned in this field is guaranteed
+                    to be at least 0.03% in order to meet minimum relayer fee
+                    requirements.
+
+
+                    Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
+                    etc. These values are in the same format that the contract
+                    understands.
+                  example: "376607094864283"
+                total:
+                  type: string
+                  description: >
+                    The amount of the transfer that should go to the relayer a
+                    fee in total. This value is inclusive of `lpFee.total`.
+                  example: "376607094864283"
+            relayerCapitalFee:
+              type: object
+              properties:
+                pct:
+                  type: string
+                  example: "100200000000000"
+                  description: >
+                    The percentage of the transfer amount that should go the
+                    relayer as a fee to cover relayer capital costs.
+
+
+                    Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
+                    etc. These values are in the same format that the contract
+                    understands.
+                total:
+                  type: string
+                  description: >
+                    The amount that should go to the relayer as a fee to cover
+                    relayer capital costs.
+                  example: "100200000000000"
+            relayerGasFee:
+              type: object
+              properties:
+                pct:
+                  type: string
+                  description: >
+                    The percentage of the transfer amount that should go the
+                    relayer as a fee to cover relayer gas costs.
+
+
+                    Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
+                    etc. These values are in the same format that the contract
+                    understands.
+                  example: "276407094864283"
+                total:
+                  type: string
+                  description: >
+                    The amount that should go to the relayer as a fee to cover
+                    relayer gas costs.
+                  example: "276407094864283"
+            lpFee:
+              type: object
+              properties:
+                pct:
+                  type: string
+                  description: >
+                    The percent of the amount that will go to the LPs as a fee
+                    for borrowing their funds.
+
+
+                    Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
+                    etc. These values are in the same format that the contract
+                    understands.
+                  example: "4552495218411721"
+                total:
+                  type: string
+                  description: >
+                    The amount that will go to the LPs as a fee for borrowing
+                    their funds.
+                  example: "4552495218411721"
+        timestamp:
+          type: string
+          description: >
+            The quote timestamp that was used to compute the lpFeePct. To pay
+            the quoted LP fee, the user would need to pass this quote timestamp
+            to the protocol when sending their bridge transaction.
+          example: "1708047000"
+        isAmountTooLow:
+          type: boolean
+          description: >
+            Is the input amount below the minimum transfer amount.
+          example: false
+        quoteBlock:
+          type: string
+          description: >
+            The block used associated with this quote, used to compute lpFeePct.
+          example: "19237525"
+        spokePoolAddress:
+          type: string
+          description: >
+            The contract address of the origin SpokePool.
+          example: "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A"
+    TransferLimits:
+      type: object
+      properties:
+        minDeposit:
+          type: string
+          description: >
+            The minimum deposit size in the tokens' units. Note: USDC has 6
+            decimals, so this value would be the number of USDC multiplied by
+            1e6. For WETH, that would be 1e18.
+          example: 7799819
+        maxDeposit:
+          type: string
+          description: >
+            The maximum deposit size in the tokens' units. Note: The formatting
+            of this number is the same as minDeposit.
+          example: 22287428516241
+        maxDepositInstant:
+          type: string
+          description: >
+            The max deposit size that can be relayed "instantly" on the
+            destination chain. Instantly means that there is relayer capital
+            readily available and that a relayer is expected to relay within
+            seconds to 5 minutes of the deposit.
+          example: 201958902363
+        maxDepositShortDelay:
+          type: string
+          description: >
+            The max deposit size that can be relayed with a "short delay" on the
+            destination chain. This means that there is relayer capital
+            available on mainnet and that a relayer will immediately begin
+            moving that capital over the canonical bridge to relay the deposit.
+            Depending on the chain, the time for this can vary. Polygon is the
+            worst case where it can take between 20 and 35 minutes for the
+            relayer to receive the funds and relay. Arbitrum is much faster,
+            with a range between 5 and 15 minutes. Note: if the transfer size is
+            greater than this, the estimate should be between 2-4 hours for a
+            slow relay to be processed from the mainnet pool.
+          example: 2045367713809
+    AvailableRoute:
+      type: object
+      properties:
+        originChainId:
+          type: string
+          description: Chain ID of the originating chain.
+          example: 1
+        destinationChainId:
+          type: string
+          description: Chain ID of the destination chain.
+          example: 10
+        originToken:
+          type: string
+          description: Origin chain ddress of token contract to transfer.
+          example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+        destinationToken:
+          type: string
+          description: Destination chain ddress of token contract to receive.
+          example: "0x4200000000000000000000000000000000000006"
