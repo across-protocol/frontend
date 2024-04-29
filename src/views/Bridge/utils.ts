@@ -303,7 +303,7 @@ export function getRouteFromQueryParams() {
   const filter = {
     fromChain: fromChain || hubPoolChainId,
     toChain: toChain || undefined,
-    symbol: token ? token.toUpperCase() : "ETH",
+    inputTokenSymbol: token ? token.toUpperCase() : "ETH",
   };
 
   let route = findNextBestRoute(["fromChain"], filter);
