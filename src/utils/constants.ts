@@ -48,6 +48,8 @@ export enum ChainId {
   MUMBAI = CHAIN_IDs.MUMBAI,
   SEPOLIA = CHAIN_IDs.SEPOLIA,
   BASE_SEPOLIA = CHAIN_IDs.BASE_SEPOLIA,
+  OPTIMISM_SEPOLIA = CHAIN_IDs.OPTIMISM_SEPOLIA,
+  ARBITRUM_SEPOLIA = CHAIN_IDs.ARBITRUM_SEPOLIA,
 }
 
 // NOTE: As a temporary workaround for backwards-compatibility, we have `USDC` and `_USDC`/`USDC.e`
@@ -242,6 +244,34 @@ export const chainInfoList: ChainInfoList = [
     nativeCurrencySymbol: "ETH",
     pollingInterval: defaultBlockPollingInterval,
     customRpcUrl: process.env.REACT_APP_CHAIN_84532_PROVIDER_URL,
+  },
+  {
+    name: "Arbitrum Sepolia",
+    fullName: "Arbitrum Testnet Sepolia",
+    chainId: ChainId.ARBITRUM_SEPOLIA,
+    logoURI: arbitrumLogo,
+    rpcUrl: "https://sepolia-rollup.arbitrum.io/rpc",
+    explorerUrl: "https://sepolia.arbiscan.io",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://sepolia.arbiscan.io"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_421614_PROVIDER_URL,
+  },
+  {
+    name: "Optimism Sepolia",
+    fullName: "Optimism Testnet Sepolia",
+    chainId: ChainId.OPTIMISM_SEPOLIA,
+    logoURI: optimismLogo,
+    rpcUrl: "https://sepolia.optimism.io",
+    explorerUrl: "https://sepolia-optimism.etherscan.io",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://sepolia-optimism.etherscan.io"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_11155420_PROVIDER_URL,
   },
 ];
 
