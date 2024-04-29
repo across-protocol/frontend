@@ -595,6 +595,26 @@ export const queries: Record<
       getLogger(),
       getGasMarkup(CHAIN_IDs.BASE_SEPOLIA)
     ),
+  [CHAIN_IDs.OPTIMISM_SEPOLIA]: () =>
+    new sdk.relayFeeCalculator.OptimismSepoliaQueries(
+      getProvider(CHAIN_IDs.OPTIMISM_SEPOLIA),
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDs.OPTIMISM_SEPOLIA)
+    ),
+  [CHAIN_IDs.ARBITRUM_SEPOLIA]: () =>
+    new sdk.relayFeeCalculator.ArbitrumSepoliaQueries(
+      getProvider(CHAIN_IDs.ARBITRUM_SEPOLIA),
+      undefined,
+      undefined,
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDs.ARBITRUM_SEPOLIA)
+    ),
 };
 
 /**
