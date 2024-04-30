@@ -1011,6 +1011,12 @@ export function positiveIntStr() {
   });
 }
 
+export function positiveFloatStr(maxValue?: number) {
+  return define<string>("positiveFloatStr", (value) => {
+    return Number(value) >= 0 && (maxValue ? Number(value) <= maxValue : true);
+  });
+}
+
 export function boolStr() {
   return define<string>("boolStr", (value) => {
     return value === "true" || value === "false";

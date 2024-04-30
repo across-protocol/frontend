@@ -27,83 +27,69 @@ const POOL_FACTORY_CONTRACT_ADDRESS =
   "0x1F98431c8aD98523631AE4a59f267346ea31F984";
 const QUOTER_CONTRACT_ADDRESS = "0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6";
 
-// TODO: Should this be hardcoded or configurable?
-const config = {
-  poolFee: FeeAmount.LOW,
-  slippageTolerance: new Percent(50, 10_000), // 50 bips, or 0.50%
-  deadline: Math.floor(Date.now() / 1000) + 60 * 20, // 20 minutes from the current Unix time
-};
-
 export async function getUniswapQuoteAndCalldata(
   swap: AcrossSwap
 ): Promise<SwapQuoteAndCalldata> {
-  try {
-    const swapAndBridgeAddress = getSwapAndBridgeAddress(
-      "uniswap",
-      swap.swapToken.chainId
-    );
+  const swapAndBridgeAddress = getSwapAndBridgeAddress(
+    "uniswap",
+    swap.swapToken.chainId
+  );
 
-    const poolInfo = await getPoolInfo(swap);
-    const tokenA = new Token(
-      swap.swapToken.chainId,
-      swap.swapToken.address,
-      swap.swapToken.decimals
-    );
-    const tokenB = new Token(
-      swap.acrossInputToken.chainId,
-      swap.acrossInputToken.address,
-      swap.acrossInputToken.decimals
-    );
-    const pool = new Pool(
-      tokenA,
-      tokenB,
-      config.poolFee,
-      poolInfo.sqrtPriceX96.toString(),
-      poolInfo.liquidity.toString(),
-      poolInfo.tick
-    );
+  const poolInfo = await getPoolInfo(swap);
+  const tokenA = new Token(
+    swap.swapToken.chainId,
+    swap.swapToken.address,
+    swap.swapToken.decimals
+  );
+  const tokenB = new Token(
+    swap.acrossInputToken.chainId,
+    swap.acrossInputToken.address,
+    swap.acrossInputToken.decimals
+  );
+  const pool = new Pool(
+    tokenA,
+    tokenB,
+    FeeAmount.LOW,
+    poolInfo.sqrtPriceX96.toString(),
+    poolInfo.liquidity.toString(),
+    poolInfo.tick
+  );
 
-    const swapRoute = new Route([pool], tokenA, tokenB);
+  const swapRoute = new Route([pool], tokenA, tokenB);
 
-    const amountOut = await getOutputQuote(swap, swapRoute);
+  const amountOut = await getOutputQuote(swap, swapRoute);
 
-    const uncheckedTrade = Trade.createUncheckedTrade({
-      route: swapRoute,
-      inputAmount: CurrencyAmount.fromRawAmount(tokenA, swap.swapTokenAmount),
-      outputAmount: CurrencyAmount.fromRawAmount(
-        tokenB,
-        JSBI.BigInt(amountOut)
-      ),
-      tradeType: TradeType.EXACT_INPUT,
-    });
+  const uncheckedTrade = Trade.createUncheckedTrade({
+    route: swapRoute,
+    inputAmount: CurrencyAmount.fromRawAmount(tokenA, swap.swapTokenAmount),
+    outputAmount: CurrencyAmount.fromRawAmount(tokenB, JSBI.BigInt(amountOut)),
+    tradeType: TradeType.EXACT_INPUT,
+  });
 
-    const options: SwapOptions = {
-      slippageTolerance: config.slippageTolerance,
-      deadline: config.deadline,
-      recipient: swapAndBridgeAddress,
-    };
+  const options: SwapOptions = {
+    slippageTolerance: new Percent(swap.slippage, 100),
+    deadline: Math.floor(Date.now() / 1000) + 60 * 20, // 20 minutes from the current Unix time,
+    recipient: swapAndBridgeAddress,
+  };
 
-    const methodParameters = SwapRouter.swapCallParameters(
-      [uncheckedTrade],
-      options
-    );
+  const methodParameters = SwapRouter.swapCallParameters(
+    [uncheckedTrade],
+    options
+  );
 
-    return {
-      minExpectedInputTokenAmount: ethers.utils
-        .parseUnits(
-          uncheckedTrade.minimumAmountOut(options.slippageTolerance).toExact(),
-          swap.acrossInputToken.decimals
-        )
-        .toString(),
-      routerCalldata: methodParameters.calldata,
-      value: ethers.BigNumber.from(methodParameters.value).toString(),
-      swapAndBridgeAddress,
-      dex: "uniswap",
-    };
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
+  return {
+    minExpectedInputTokenAmount: ethers.utils
+      .parseUnits(
+        uncheckedTrade.minimumAmountOut(options.slippageTolerance).toExact(),
+        swap.acrossInputToken.decimals
+      )
+      .toString(),
+    routerCalldata: methodParameters.calldata,
+    value: ethers.BigNumber.from(methodParameters.value).toString(),
+    swapAndBridgeAddress,
+    dex: "uniswap",
+    slippage: swap.slippage,
+  };
 }
 
 async function getOutputQuote(

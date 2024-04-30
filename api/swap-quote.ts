@@ -1,25 +1,30 @@
 import { VercelResponse } from "@vercel/node";
-import { assert, Infer, type, string } from "superstruct";
+import { assert, Infer, type, string, optional, number } from "superstruct";
 import { ethers } from "ethers";
 
 import { TypedVercelRequest } from "./_types";
 import {
+  ENABLED_ROUTES,
   InputError,
   getLogger,
   getTokenByAddress,
   handleErrorCondition,
+  positiveFloatStr,
   positiveIntStr,
   validAddress,
+  validateChainAndTokenParams,
 } from "./_utils";
 import { getUniswapQuoteAndCalldata } from "./_dexes/uniswap";
 import { get1inchQuoteAndCalldata } from "./_dexes/1inch";
 
 const SwapQuoteQueryParamsSchema = type({
-  depositor: validAddress(),
   swapToken: validAddress(),
   acrossInputToken: validAddress(),
+  acrossOutputToken: validAddress(),
   swapTokenAmount: string(),
   originChainId: positiveIntStr(),
+  destinationChainId: positiveIntStr(),
+  swapSlippage: optional(positiveFloatStr(50)), // max. 50% slippage
 });
 
 type SwapQuoteQueryParams = Infer<typeof SwapQuoteQueryParamsSchema>;
@@ -38,28 +43,33 @@ const handler = async (
     assert(query, SwapQuoteQueryParamsSchema);
 
     let {
-      depositor,
       swapToken: swapTokenAddress,
       acrossInputToken: acrossInputTokenAddress,
+      acrossOutputToken: acrossOutputTokenAddress,
       swapTokenAmount,
       originChainId: _originChainId,
+      destinationChainId: _destinationChainId,
+      swapSlippage = "0.5", // Default to 0.5% slippage
     } = query;
 
+    const {
+      inputToken: acrossInputToken,
+      outputToken: acrossOutputToken,
+      destinationChainId,
+      resolvedOriginChainId: originChainId,
+    } = validateChainAndTokenParams({
+      inputToken: acrossInputTokenAddress,
+      outputToken: acrossOutputTokenAddress,
+      originChainId: _originChainId,
+      destinationChainId: _destinationChainId,
+    });
+
     swapTokenAddress = ethers.utils.getAddress(swapTokenAddress);
-    acrossInputTokenAddress = ethers.utils.getAddress(acrossInputTokenAddress);
-    const originChainId = parseInt(_originChainId);
-
     const _swapToken = getTokenByAddress(swapTokenAddress, originChainId);
-    const _acrossInputToken = getTokenByAddress(
-      acrossInputTokenAddress,
-      originChainId
-    );
 
-    if (!_swapToken || !_acrossInputToken) {
+    if (!_swapToken) {
       throw new InputError(
-        `Unsupported ${
-          !_swapToken ? "swap" : "input"
-        } token on chain ${originChainId}`
+        `Unsupported swap token ${swapTokenAddress} on chain ${originChainId}`
       );
     }
 
@@ -69,36 +79,48 @@ const handler = async (
       symbol: _swapToken.symbol,
       chainId: originChainId,
     };
-    const acrossInputToken = {
-      address: acrossInputTokenAddress,
-      decimals: _acrossInputToken.decimals,
-      symbol: _acrossInputToken.symbol,
-      chainId: originChainId,
+
+    // Only allow whitelisted swap routes. Can be viewed in the
+    // `src/data/routes_*.json` files under the `swapRoutes` key.
+    if (
+      !ENABLED_ROUTES.swapRoutes.find((route) => {
+        return (
+          route.fromChain === originChainId &&
+          route.toChain === destinationChainId &&
+          route.fromTokenSymbol === acrossInputToken.symbol &&
+          route.toTokenSymbol === acrossOutputToken.symbol &&
+          route.swapTokenAddress.toLowerCase() ===
+            swapTokenAddress.toLowerCase()
+        );
+      })
+    ) {
+      throw new InputError(`Unsupported swap route`);
+    }
+
+    const swap = {
+      swapToken,
+      acrossInputToken: {
+        ...acrossInputToken,
+        chainId: originChainId,
+      },
+      swapTokenAmount,
+      slippage: parseFloat(swapSlippage),
     };
 
-    // TODO: add retry and timeout logic?
     const quoteResults = await Promise.allSettled([
-      getUniswapQuoteAndCalldata({
-        depositor,
-        swapToken,
-        acrossInputToken,
-        swapTokenAmount,
-      }),
-      get1inchQuoteAndCalldata({
-        depositor,
-        swapToken,
-        acrossInputToken,
-        swapTokenAmount,
-      }),
+      getUniswapQuoteAndCalldata(swap),
+      get1inchQuoteAndCalldata(swap),
     ]);
 
     const settledResults = quoteResults.flatMap((result) =>
       result.status === "fulfilled" ? result.value : []
     );
-
-    console.log(settledResults);
+    const rejectedResults = quoteResults.flatMap((result) =>
+      result.status === "rejected" ? result.reason : []
+    );
 
     if (settledResults.length === 0) {
+      rejectedResults.forEach((error) => logger.error(error));
       throw new Error("No quote results available");
     }
 

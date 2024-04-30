@@ -1,4 +1,4 @@
-import { CHAIN_IDs } from "../_constants";
+import { ENABLED_ROUTES } from "../_utils";
 
 export class UnsupportedDex extends Error {
   constructor(dex: string) {
@@ -12,29 +12,24 @@ export class UnsupportedDexOnChain extends Error {
   }
 }
 
-// TODO: use correct addresses
-export const swapAndBridgeAddresses = {
-  uniswap: {
-    [CHAIN_IDs.POLYGON]: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
-  },
-  "1inch": {
-    [CHAIN_IDs.POLYGON]: "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D",
-  },
-} as const;
+export const swapAndBridgeDexes = Object.keys(
+  ENABLED_ROUTES.swapAndBridgeAddresses
+);
 
-export const swapAndBridgeDexes = Object.keys(swapAndBridgeAddresses);
-
-export function getSwapAndBridgeAddress(
-  dex: keyof typeof swapAndBridgeAddresses,
-  chainId: number
-) {
-  if (!swapAndBridgeDexes.includes(dex)) {
+export function getSwapAndBridgeAddress(dex: string, chainId: number) {
+  if (!_isDexSupported(dex)) {
     throw new UnsupportedDex(dex);
   }
 
-  const address = swapAndBridgeAddresses[dex]?.[chainId];
+  const address = ENABLED_ROUTES.swapAndBridgeAddresses[dex]?.[chainId];
   if (!address) {
     throw new UnsupportedDexOnChain(chainId, dex);
   }
   return address;
+}
+
+function _isDexSupported(
+  dex: string
+): dex is keyof typeof ENABLED_ROUTES.swapAndBridgeAddresses {
+  return swapAndBridgeDexes.includes(dex);
 }
