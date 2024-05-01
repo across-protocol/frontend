@@ -32,14 +32,14 @@ const fastFillTimesSecondsFromTo = {
   },
   [ChainId.BASE]: {
     [ChainId.MAINNET]: 12,
-    [ChainId.OPTIMISM]: 68,
+    [ChainId.OPTIMISM]: 8,
     [ChainId.POLYGON]: 144,
     [ChainId.ZK_SYNC]: 5,
     [ChainId.ARBITRUM]: 7,
   },
   [ChainId.ARBITRUM]: {
     [ChainId.MAINNET]: 12,
-    [ChainId.OPTIMISM]: 247,
+    [ChainId.OPTIMISM]: 8,
     [ChainId.POLYGON]: 111,
     [ChainId.ZK_SYNC]: 5,
     [ChainId.BASE]: 139,
