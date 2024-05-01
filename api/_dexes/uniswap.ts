@@ -67,8 +67,13 @@ export async function getUniswapQuoteAndCalldata(
   });
 
   const options: SwapOptions = {
-    slippageTolerance: new Percent(swap.slippage, 100),
-    deadline: Math.floor(Date.now() / 1000) + 60 * 20, // 20 minutes from the current Unix time,
+    slippageTolerance: new Percent(
+      // max. slippage decimals is 2
+      Number(swap.slippage.toFixed(2)) * 100,
+      10_000
+    ),
+    // 20 minutes from the current Unix time
+    deadline: Math.floor(Date.now() / 1000) + 60 * 20,
     recipient: swapAndBridgeAddress,
   };
 
