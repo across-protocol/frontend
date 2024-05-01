@@ -17,8 +17,10 @@ export type EstimatedRewards = ReturnType<typeof useEstimatedRewards>;
 export function useEstimatedRewards(
   token: TokenInfo,
   destinationChainId: number,
+  isSwap: boolean,
   gasFee?: BigNumber,
-  bridgeFee?: BigNumber
+  bridgeFee?: BigNumber,
+  swapFee?: BigNumber
 ) {
   const { rewardToken, isACXRewardToken, availableRewardPercentage } =
     useRewardToken(destinationChainId);
@@ -78,13 +80,19 @@ export function useEstimatedRewards(
       Number(Number(ethersUtils.formatUnits(usd, 18)).toFixed(2));
     const gasFeeInUSD = convertL1ToBaseCurrency(gasFee);
     const bridgeFeeInUSD = convertL1ToBaseCurrency(bridgeFee);
+    const swapFeeInUSD = convertL1ToBaseCurrency(swapFee);
 
-    if (!isDefined(gasFeeInUSD) || !isDefined(bridgeFeeInUSD)) {
+    if (
+      !isDefined(gasFeeInUSD) ||
+      !isDefined(bridgeFeeInUSD) ||
+      (isSwap && !isDefined(swapFeeInUSD))
+    ) {
       return {
         gasFeeAsBaseCurrency: undefined,
         bridgeFeeAsBaseCurrency: undefined,
         referralRewardAsBaseCurrency: undefined,
         netFeeAsBaseCurrency: undefined,
+        swapFeeAsBaseCurrency: undefined,
       };
     }
 
@@ -94,17 +102,26 @@ export function useEstimatedRewards(
       ? (numericBridgeFee + numericGasFee) *
         Number(formatUnitsWithMaxFractions(availableRewardPercentage, 18))
       : undefined;
+    const numericSwapFee = swapFeeInUSD ? formatNumericUsd(swapFeeInUSD) : 0;
 
     const netFeeAsBaseCurrency =
-      numericBridgeFee + numericGasFee - (numericReward ?? 0);
+      numericBridgeFee + numericGasFee + numericSwapFee - (numericReward ?? 0);
 
     return {
       gasFeeAsBaseCurrency: parseUsd(numericGasFee),
       bridgeFeeAsBaseCurrency: parseUsd(numericBridgeFee),
       referralRewardAsBaseCurrency: parseUsd(numericReward),
       netFeeAsBaseCurrency: parseUsd(netFeeAsBaseCurrency),
+      swapFeeAsBaseCurrency: parseUsd(numericSwapFee),
     };
-  }, [availableRewardPercentage, bridgeFee, convertL1ToBaseCurrency, gasFee]);
+  }, [
+    availableRewardPercentage,
+    bridgeFee,
+    convertL1ToBaseCurrency,
+    gasFee,
+    swapFee,
+    isSwap,
+  ]);
 
   return {
     ...baseCurrencyConversions,

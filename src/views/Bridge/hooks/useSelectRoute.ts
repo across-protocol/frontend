@@ -8,12 +8,17 @@ import {
 } from "utils";
 import { useAmplitude } from "hooks";
 
-import { getRouteFromQueryParams, findNextBestRoute } from "../utils";
+import {
+  getRouteFromQueryParams,
+  findNextBestRoute,
+  SelectedRoute,
+} from "../utils";
 
 const initialRoute = getRouteFromQueryParams();
 
 export function useSelectRoute() {
-  const [selectedRoute, setSelectedRoute] = useState(initialRoute);
+  const [selectedRoute, setSelectedRoute] =
+    useState<SelectedRoute>(initialRoute);
   const [isDefaultRouteTracked, setIsDefaultRouteTracked] = useState(false);
 
   const { addToAmpliQueue } = useAmplitude();

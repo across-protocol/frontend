@@ -3,12 +3,22 @@ import { BigNumber } from "ethers";
 import {
   ChainId,
   Route,
+  SwapRoute,
   getChainInfo,
   getConfig,
   getToken,
   hubPoolChainId,
   isProductionBuild,
 } from "utils";
+import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
+
+export type SelectedRoute =
+  | (Route & {
+      type: "bridge";
+    })
+  | (SwapRoute & {
+      type: "swap";
+    });
 
 type RouteFilter = Partial<{
   inputTokenSymbol: string;
@@ -25,6 +35,7 @@ export enum AmountInputError {
 }
 const config = getConfig();
 const enabledRoutes = config.getEnabledRoutes();
+const swapRoutes = config.getSwapRoutes();
 
 const interchangeableTokenPairs: Record<string, string[]> = {
   USDC: ["USDbC", "USDC.e"],
@@ -86,17 +97,12 @@ export function validateBridgeAmount(
   parsedAmountInput?: BigNumber,
   isAmountTooLow?: boolean,
   currentBalance?: BigNumber,
-  maxDeposit?: BigNumber
+  maxDeposit?: BigNumber,
+  amountToBridgeAfterSwap?: BigNumber
 ) {
-  if (!parsedAmountInput) {
+  if (!parsedAmountInput || !amountToBridgeAfterSwap) {
     return {
       error: AmountInputError.INVALID,
-    };
-  }
-
-  if (maxDeposit && parsedAmountInput.gt(maxDeposit)) {
-    return {
-      error: AmountInputError.INSUFFICIENT_LIQUIDITY,
     };
   }
 
@@ -106,13 +112,19 @@ export function validateBridgeAmount(
     };
   }
 
+  if (maxDeposit && amountToBridgeAfterSwap.gt(maxDeposit)) {
+    return {
+      error: AmountInputError.INSUFFICIENT_LIQUIDITY,
+    };
+  }
+
   if (isAmountTooLow) {
     return {
       error: AmountInputError.AMOUNT_TOO_LOW,
     };
   }
 
-  if (parsedAmountInput.lt(0)) {
+  if (parsedAmountInput.lt(0) || amountToBridgeAfterSwap.lt(0)) {
     return {
       error: AmountInputError.INVALID,
     };
@@ -129,11 +141,13 @@ export function getInitialRoute(defaults: RouteFilter = {}) {
       inputTokenSymbol: defaults.inputTokenSymbol || "ETH",
       fromChain: defaults.fromChain || hubPoolChainId,
       toChain: defaults.toChain,
-    }) || enabledRoutes[0]
+    }) || { ...enabledRoutes[0], type: "bridge" }
   );
 }
 
-export function findEnabledRoute(filter: RouteFilter = {}) {
+export function findEnabledRoute(
+  filter: RouteFilter = {}
+): SelectedRoute | undefined {
   const { inputTokenSymbol, outputTokenSymbol, fromChain, toChain } = filter;
 
   const route = enabledRoutes.find(
@@ -147,7 +161,36 @@ export function findEnabledRoute(filter: RouteFilter = {}) {
       (fromChain ? route.fromChain === fromChain : true) &&
       (toChain ? route.toChain === toChain : true)
   );
-  return route;
+
+  if (route) {
+    return {
+      ...route,
+      type: "bridge",
+    };
+  }
+
+  const swapRoute = swapRoutes.find(
+    (swapRoute) =>
+      (inputTokenSymbol
+        ? swapRoute.swapTokenSymbol.toUpperCase() ===
+          inputTokenSymbol.toUpperCase()
+        : true) &&
+      (outputTokenSymbol
+        ? swapRoute.toTokenSymbol.toUpperCase() ===
+          outputTokenSymbol.toUpperCase()
+        : true) &&
+      (fromChain ? swapRoute.fromChain === fromChain : true) &&
+      (toChain ? swapRoute.toChain === toChain : true)
+  );
+
+  if (swapRoute) {
+    return {
+      ...swapRoute,
+      type: "swap",
+    };
+  }
+
+  return undefined;
 }
 /**
  * Returns the next best matching route based on the given priority keys and filter.
@@ -163,7 +206,7 @@ export function findNextBestRoute(
   )[],
   filter: RouteFilter = {}
 ) {
-  let route: Route | undefined;
+  let route: SelectedRoute | undefined;
 
   const equivalentInputTokenSymbols = filter.inputTokenSymbol
     ? interchangeableTokenPairs[filter.inputTokenSymbol]
@@ -230,29 +273,38 @@ export function findNextBestRoute(
 }
 
 export function getAllTokens() {
-  return enabledRoutes
-    .map((route) => getToken(route.fromTokenSymbol))
-    .filter(
-      (token, index, self) =>
-        index === self.findIndex((t) => t.symbol === token.symbol)
-    );
+  const routeTokens = enabledRoutes.map((route) =>
+    getToken(route.fromTokenSymbol)
+  );
+  const swapTokens = swapRoutes.map((route) => getToken(route.swapTokenSymbol));
+  return [...routeTokens, ...swapTokens].filter(
+    (token, index, self) =>
+      index === self.findIndex((t) => t.symbol === token.symbol)
+  );
 }
 
 export function getAvailableInputTokens(
   selectedFromChain: number,
   selectedToChain: number
 ) {
-  return enabledRoutes
+  const routeTokens = enabledRoutes
     .filter(
       (route) =>
         route.fromChain === selectedFromChain &&
         route.toChain === selectedToChain
     )
-    .map((route) => getToken(route.fromTokenSymbol))
+    .map((route) => getToken(route.fromTokenSymbol));
+  const swapTokens = swapRoutes
     .filter(
-      (token, index, self) =>
-        index === self.findIndex((t) => t.symbol === token.symbol)
-    );
+      (route) =>
+        route.fromChain === selectedFromChain &&
+        route.toChain === selectedToChain
+    )
+    .map((route) => getToken(route.swapTokenSymbol));
+  return [...routeTokens, ...swapTokens].filter(
+    (token, index, self) =>
+      index === self.findIndex((t) => t.symbol === token.symbol)
+  );
 }
 
 export function getAvailableOutputTokens(
@@ -330,4 +382,54 @@ export function getTokenExplorerLinkSafe(chainId: number, symbol: string) {
     }
     return "";
   }
+}
+
+export function shouldUseDepositV3(selectedRoute: SelectedRoute) {
+  const matchingRoutes = enabledRoutes.filter(
+    (route) =>
+      route.fromChain === selectedRoute.fromChain &&
+      route.toChain === selectedRoute.toChain &&
+      route.fromTokenSymbol === selectedRoute.fromTokenSymbol
+  );
+  return matchingRoutes.length > 1;
+}
+
+export function calcFeesForEstimatedTable(params: {
+  capitalFee?: BigNumber;
+  lpFee?: BigNumber;
+  gasFee?: BigNumber;
+  isSwap: boolean;
+  parsedAmount?: BigNumber;
+  swapQuote?: SwapQuoteApiResponse;
+}) {
+  if (
+    !params.capitalFee ||
+    !params.lpFee ||
+    !params.gasFee ||
+    !params.parsedAmount
+  ) {
+    return;
+  }
+
+  // We display the sum of capital + lp fee as "bridge fee" in `EstimatedTable`.
+  const bridgeFee = params.capitalFee.add(params.lpFee);
+  const totalRelayFee = params.gasFee.add(bridgeFee);
+  const swapFee =
+    params.isSwap && params.swapQuote
+      ? params.parsedAmount.sub(params.swapQuote.minExpectedInputTokenAmount)
+      : BigNumber.from(0);
+  const totalFee = totalRelayFee.add(swapFee);
+  const outputAmount = params.parsedAmount.sub(totalFee);
+
+  return {
+    gasFee: params.gasFee,
+    lpFee: params.lpFee,
+    capitalFee: params.capitalFee,
+    bridgeFee,
+    totalRelayFee,
+    swapFee,
+    totalFee,
+    outputAmount,
+    swapQuote: params.swapQuote,
+  };
 }

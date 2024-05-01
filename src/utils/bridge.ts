@@ -1,7 +1,10 @@
 import { ethers, BigNumber } from "ethers";
 
-import { ChainId, referrerDelimiterHex } from "./constants";
-import { ERC20__factory } from "./typechain";
+import {
+  ChainId,
+  fixedPointAdjustment,
+  referrerDelimiterHex,
+} from "./constants";
 import { tagAddress } from "./format";
 import { getProvider } from "./providers";
 import { getFastFillTimeByRoute } from "./fill-times";
@@ -9,6 +12,7 @@ import { getConfig } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
+import { SwapQuoteApiResponse } from "./serverless-api/prod/swap-quote";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -167,18 +171,26 @@ export type AcrossDepositArgs = {
   referrer?: string;
   isNative: boolean;
 };
-type AcrossApprovalArgs = {
-  chainId: ChainId;
-  tokenAddress: string;
-  amount: ethers.BigNumber;
+
+export type AcrossDepositV3Args = AcrossDepositArgs & {
+  inputTokenAddress: string;
+  outputTokenAddress: string;
+  fillDeadline?: number;
+  exclusivityDeadline?: number;
+  exclusiveRelayer?: string;
 };
+
+type NetworkMismatchHandler = (
+  mismatchProperties: DepositNetworkMismatchProperties
+) => void;
+
 /**
- * Makes a deposit on Across.
+ * Makes a deposit on Across using the `SpokePool` contract's `deposit` function.
  * @param signer A valid signer, must be connected to a provider.
  * @param depositArgs - An object containing the {@link AcrossDepositArgs arguments} to pass to the deposit function of the bridge contract.
  * @returns The transaction response obtained after sending the transaction.
  */
-export async function sendAcrossDeposit(
+export async function sendDepositTx(
   signer: ethers.Signer,
   {
     fromChain,
@@ -193,10 +205,201 @@ export async function sendAcrossDeposit(
     isNative,
     referrer,
   }: AcrossDepositArgs,
-  onNetworkMismatch?: (
-    mismatchProperties: DepositNetworkMismatchProperties
-  ) => void
+  onNetworkMismatch?: NetworkMismatchHandler
 ): Promise<ethers.providers.TransactionResponse> {
+  const { spokePool, spokePoolVerifier, shouldUseSpokePoolVerifier } =
+    await _getSpokePoolAndVerifier({ fromChain, isNative });
+
+  const commonArgs = [
+    recipient,
+    tokenAddress,
+    amount,
+    destinationChainId,
+    relayerFeePct,
+    quoteTimestamp,
+    message,
+    maxCount,
+    { value: isNative ? amount : ethers.constants.Zero },
+  ] as const;
+  const tx =
+    shouldUseSpokePoolVerifier && spokePoolVerifier
+      ? await spokePoolVerifier.populateTransaction.deposit(
+          spokePool.address,
+          ...commonArgs
+        )
+      : await spokePool.populateTransaction.deposit(...commonArgs);
+
+  return _tagRefAndSignTx(
+    tx,
+    referrer || "",
+    signer,
+    fromChain,
+    destinationChainId,
+    onNetworkMismatch
+  );
+}
+
+export async function sendDepositV3Tx(
+  signer: ethers.Signer,
+  {
+    fromChain,
+    amount,
+    toAddress: recipient,
+    toChain: destinationChainId,
+    relayerFeePct,
+    timestamp: quoteTimestamp,
+    message = "0x",
+    isNative,
+    referrer,
+    fillDeadline,
+    inputTokenAddress,
+    outputTokenAddress,
+    exclusiveRelayer = ethers.constants.AddressZero,
+    exclusivityDeadline = 0,
+  }: AcrossDepositV3Args,
+  onNetworkMismatch?: NetworkMismatchHandler
+) {
+  const { spokePool, shouldUseSpokePoolVerifier } =
+    await _getSpokePoolAndVerifier({ fromChain, isNative });
+
+  // `SpokePoolVerifier` uses the signature of the `SpokePool` contract's `deposit`
+  // and therefore can not be used for V3 deposits.
+  if (shouldUseSpokePoolVerifier) {
+    throw new Error("SpokePoolVerifier can not be used for V3 deposits");
+  }
+
+  const value = isNative ? amount : ethers.constants.Zero;
+  const inputAmount = amount;
+  const outputAmount = inputAmount.sub(
+    inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
+  );
+  fillDeadline ??=
+    Math.floor(Date.now() / 1000) - 60 + (await spokePool.fillDeadlineBuffer());
+
+  const tx = await spokePool.populateTransaction.depositV3(
+    await signer.getAddress(),
+    recipient,
+    inputTokenAddress,
+    outputTokenAddress,
+    inputAmount,
+    outputAmount,
+    destinationChainId,
+    exclusiveRelayer,
+    quoteTimestamp,
+    fillDeadline,
+    exclusivityDeadline,
+    message,
+    { value }
+  );
+
+  return _tagRefAndSignTx(
+    tx,
+    referrer || "",
+    signer,
+    fromChain,
+    destinationChainId,
+    onNetworkMismatch
+  );
+}
+
+export async function sendSwapAndBridgeTx(
+  signer: ethers.Signer,
+  {
+    fromChain,
+    toAddress: recipient,
+    toChain: destinationChainId,
+    relayerFeePct,
+    timestamp: quoteTimestamp,
+    message = "0x",
+    isNative,
+    referrer,
+    fillDeadline,
+    inputTokenAddress,
+    outputTokenAddress,
+    swapTokenAddress,
+    exclusiveRelayer = ethers.constants.AddressZero,
+    exclusivityDeadline = 0,
+    swapQuote,
+    swapTokenAmount,
+  }: AcrossDepositV3Args & {
+    swapTokenAmount: BigNumber;
+    swapTokenAddress: string;
+    swapQuote: SwapQuoteApiResponse;
+  },
+  onNetworkMismatch?: NetworkMismatchHandler
+) {
+  const config = getConfig();
+  const provider = getProvider(fromChain);
+
+  if (isNative) {
+    throw new Error("Native swaps are not supported");
+  }
+
+  const spokePool = config.getSpokePool(fromChain);
+  if (!spokePool || (await provider.getCode(spokePool.address)) === "0x") {
+    throw new Error(`SpokePool not deployed at ${spokePool.address}`);
+  }
+
+  const swapAndBridge = config.getSwapAndBridge(fromChain, swapQuote.dex);
+  if (
+    !swapAndBridge ||
+    (await provider.getCode(swapAndBridge.address)) === "0x"
+  ) {
+    throw new Error(
+      `SwapAndBridge contract not deployed at ${swapAndBridge?.address} for ${swapQuote.dex}`
+    );
+  }
+
+  if (swapAndBridge.address !== swapQuote.swapAndBridgeAddress) {
+    throw new Error(
+      `Mismatch between the SwapAndBridge address provided by the API and the one configured in the app`
+    );
+  }
+
+  const inputAmount = BigNumber.from(swapQuote.minExpectedInputTokenAmount);
+  const outputAmount = inputAmount.sub(
+    inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
+  );
+  fillDeadline ??=
+    Math.floor(Date.now() / 1000) - 60 + (await spokePool.fillDeadlineBuffer());
+
+  const tx = await swapAndBridge.populateTransaction.swapAndBridge(
+    swapTokenAddress,
+    inputTokenAddress,
+    swapQuote.routerCalldata,
+    swapTokenAmount,
+    swapQuote.minExpectedInputTokenAmount,
+    {
+      outputToken: outputTokenAddress,
+      outputAmount,
+      depositor: await signer.getAddress(),
+      recipient,
+      destinationChainid: destinationChainId,
+      exclusiveRelayer,
+      quoteTimestamp,
+      fillDeadline,
+      exclusivityDeadline,
+      message,
+    }
+  );
+
+  return _tagRefAndSignTx(
+    tx,
+    referrer || "",
+    signer,
+    fromChain,
+    destinationChainId,
+    onNetworkMismatch
+  );
+}
+
+async function _getSpokePoolAndVerifier({
+  fromChain,
+  isNative,
+}: {
+  fromChain: ChainId;
+  isNative: boolean;
+}) {
   const config = getConfig();
   const provider = getProvider(fromChain);
 
@@ -222,25 +425,21 @@ export async function sendAcrossDeposit(
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
 
-  const commonArgs = [
-    recipient,
-    tokenAddress,
-    amount,
-    destinationChainId,
-    relayerFeePct,
-    quoteTimestamp,
-    message,
-    maxCount,
-    { value: isNative ? amount : ethers.constants.Zero },
-  ] as const;
-  const tx =
-    shouldUseSpokePoolVerifier && spokePoolVerifier
-      ? await spokePoolVerifier.populateTransaction.deposit(
-          spokePool.address,
-          ...commonArgs
-        )
-      : await spokePool.populateTransaction.deposit(...commonArgs);
+  return {
+    spokePool,
+    spokePoolVerifier,
+    shouldUseSpokePoolVerifier,
+  };
+}
 
+async function _tagRefAndSignTx(
+  tx: ethers.PopulatedTransaction,
+  referrer: string,
+  signer: ethers.Signer,
+  originChainId: ChainId,
+  destinationChainId: ChainId,
+  onNetworkMismatch?: NetworkMismatchHandler
+) {
   // do not tag a referrer if data is not provided as a hex string.
   tx.data =
     referrer && ethers.utils.isAddress(referrer)
@@ -252,10 +451,10 @@ export async function sendAcrossDeposit(
   // NOTE: I think this is a good candiate for using an RPC call
   //       to get the chainId of the signer.
   const signerChainId = await signer.getChainId();
-  if (signerChainId !== fromChain) {
+  if (signerChainId !== originChainId) {
     onNetworkMismatch?.({
       signerAddress: await signer.getAddress(),
-      fromChainId: String(fromChain),
+      fromChainId: String(originChainId),
       toChainId: String(destinationChainId),
       signerChainId: String(signerChainId),
     });
@@ -265,19 +464,4 @@ export async function sendAcrossDeposit(
   }
 
   return signer.sendTransaction(tx);
-}
-
-export async function sendAcrossApproval(
-  signer: ethers.Signer,
-  { tokenAddress, amount, chainId }: AcrossApprovalArgs
-): Promise<ethers.providers.TransactionResponse> {
-  const config = getConfig();
-  const spokePool = config.getSpokePool(chainId, signer);
-  const provider = getProvider(chainId);
-  const code = await provider.getCode(spokePool.address);
-  if (!code) {
-    throw new Error(`SpokePool not deployed at ${spokePool.address}`);
-  }
-  const tokenContract = ERC20__factory.connect(tokenAddress, signer);
-  return tokenContract.approve(spokePool.address, amount);
 }
