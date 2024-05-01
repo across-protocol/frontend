@@ -87,6 +87,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -108,6 +109,7 @@ const enabledRoutes = {
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
               "DAI",
               "BAL",
+              "POOL",
             ],
           },
           {
@@ -170,6 +172,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -184,6 +187,7 @@ const enabledRoutes = {
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
               "DAI",
               "BAL",
+              "POOL",
             ],
           },
           {
@@ -235,6 +239,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -248,6 +253,7 @@ const enabledRoutes = {
               "WETH",
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
               "BAL",
+              "POOL",
             ],
           },
           {
@@ -272,6 +278,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -286,6 +293,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -300,6 +308,7 @@ const enabledRoutes = {
               "BAL",
               "ACX",
               "USDT",
+              "POOL",
             ],
           },
           {
@@ -314,6 +323,7 @@ const enabledRoutes = {
               "ETH",
               "DAI",
               "BAL",
+              "POOL",
             ],
           },
           {
@@ -376,6 +386,7 @@ const enabledRoutes = {
               "ETH",
               "DAI",
               "BAL",
+              "POOL",
             ],
           },
           {
@@ -386,6 +397,7 @@ const enabledRoutes = {
               "ETH",
               "DAI",
               "BAL",
+              "POOL",
             ],
           },
           {
@@ -396,6 +408,7 @@ const enabledRoutes = {
               "ETH",
               "DAI",
               "BAL",
+              "POOL",
             ],
           },
           {
@@ -406,6 +419,7 @@ const enabledRoutes = {
               "ETH",
               "DAI",
               "BAL",
+              "POOL",
             ],
           },
           {
