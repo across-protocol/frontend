@@ -8,6 +8,7 @@ import { getDepositStatsMocked } from "./get-deposit-stats.mocked";
 import { coingeckoMockedApiCall } from "./coingecko.mocked";
 import { retrieveLimitsMocked } from "./bridge-limits.mocked";
 import { poolsApiCall } from "./pools.mocked";
+import { swapQuoteApiCall } from "./swap-quote";
 
 export const mockedEndpoints: ServerlessAPIEndpoints = {
   coingecko: coingeckoMockedApiCall,
@@ -23,4 +24,5 @@ export const mockedEndpoints: ServerlessAPIEndpoints = {
     getStats: getDepositStatsMocked,
   },
   pools: poolsApiCall,
+  swapQuote: swapQuoteApiCall,
 };

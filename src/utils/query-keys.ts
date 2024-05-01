@@ -133,3 +133,25 @@ export function getUnclaimedProofsQueryKey(
 ) {
   return [rewardsType, "unclaimed", account];
 }
+
+export type SwapQuoteQueryKeyParams = {
+  swapTokenSymbol?: string;
+  acrossInputTokenSymbol: string;
+  acrossOutputTokenSymbol: string;
+  swapTokenAmount: string;
+  originChainId: number;
+  destinationChainId: number;
+  swapSlippage: number;
+};
+export function swapQuoteQueryKey(params: SwapQuoteQueryKeyParams) {
+  return [
+    "swap-quote",
+    params.swapTokenSymbol,
+    params.acrossInputTokenSymbol,
+    params.acrossOutputTokenSymbol,
+    params.swapTokenAmount,
+    params.originChainId,
+    params.destinationChainId,
+    params.swapSlippage,
+  ];
+}

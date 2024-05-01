@@ -3,6 +3,7 @@ import { Fee } from "utils/bridge";
 import { ChainId } from "utils/constants";
 import { CoingeckoApiCall } from "./prod/coingecko";
 import { PoolsApiCall } from "./prod/pools";
+import { SwapQuoteApiCall } from "./prod/swap-quote";
 
 export type ServerlessAPIEndpoints = {
   coingecko: CoingeckoApiCall;
@@ -18,6 +19,7 @@ export type ServerlessAPIEndpoints = {
     getStats: GetDepositStatsType;
   };
   pools: PoolsApiCall;
+  swapQuote: SwapQuoteApiCall;
 };
 
 export type RewardsApiFunction =
