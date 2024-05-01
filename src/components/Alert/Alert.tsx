@@ -5,7 +5,7 @@ import {
   Wrapper,
 } from "./Alert.styles";
 
-export type AlertStatusType = "warn" | "danger" | "info";
+export type AlertStatusType = "base" | "warn" | "danger" | "info";
 export type AlertIconType = "info" | "question";
 
 type AlertProps = {

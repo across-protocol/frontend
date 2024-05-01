@@ -1,9 +1,12 @@
 import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
+import { useState } from "react";
 
 import { Text, TextColor } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
+import { ReactComponent as SwapIcon } from "assets/icons/swap.svg";
+import { ReactComponent as SettingsIcon } from "assets/icons/settings.svg";
 
 import {
   capitalizeFirstLetter,
@@ -12,6 +15,7 @@ import {
   formatUSD,
   formatWeiPct,
   getChainInfo,
+  isBridgedUsdc,
   isDefined,
   QUERIESV2,
   TokenInfo,
@@ -20,6 +24,8 @@ import {
 import TokenFee from "./TokenFee";
 import { type Props as FeesCollapsibleProps } from "./FeesCollapsible";
 import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
+import { calcFeesForEstimatedTable } from "../utils";
+import { SwapSlippageModal } from "./SwapSlippageModal";
 
 export type EstimatedTableProps = EstimatedRewards &
   Omit<FeesCollapsibleProps, "isQuoteLoading">;
@@ -79,22 +85,41 @@ const EstimatedTable = ({
   toChainId,
   estimatedTime,
   gasFee,
-  bridgeFee,
+  capitalFee,
+  lpFee,
   inputToken,
-  totalReceived,
   outputToken,
   referralRewardAsBaseCurrency,
   gasFeeAsBaseCurrency,
   bridgeFeeAsBaseCurrency,
   netFeeAsBaseCurrency,
+  swapFeeAsBaseCurrency,
   reward,
   rewardPercentage,
   hasDepositReward,
   rewardToken,
   isRewardAcx,
+  isSwap,
+  parsedAmount,
+  currentSwapSlippage,
+  swapQuote,
+  swapToken,
+  onSetNewSlippage,
 }: EstimatedTableProps) => {
   const rewardDisplaySymbol =
     rewardToken.displaySymbol || rewardToken.symbol.toUpperCase();
+  const baseToken = swapToken || inputToken;
+  const { bridgeFee, outputAmount, swapFee } =
+    calcFeesForEstimatedTable({
+      gasFee,
+      capitalFee,
+      lpFee,
+      isSwap,
+      parsedAmount,
+      swapQuote,
+    }) || {};
+
+  const [isSlippageModalOpen, setSlippageModalOpen] = useState(false);
 
   return (
     <Wrapper>
@@ -149,6 +174,58 @@ const EstimatedTable = ({
         </Text>
       </Row>
       <Divider />
+      {isSwap && swapQuote && swapToken && swapFee && (
+        <Row>
+          <ToolTipWrapper>
+            <Text size="md" color="grey-400">
+              Swap fee
+            </Text>
+            <Tooltip
+              tooltipId="swap-fee-info"
+              title="Swap fee"
+              maxWidth={420}
+              body={
+                <SwapRouteWrapper>
+                  <Text size="md" color="grey-400">
+                    Swap
+                  </Text>
+                  <Text color="white">
+                    {swapToken.displaySymbol || swapToken.symbol}
+                  </Text>
+                  <TokenSymbol src={swapToken.logoURI} />
+                  <Text color="grey-400">for</Text>
+                  <Text color="white">
+                    {inputToken.displaySymbol || inputToken.symbol}
+                  </Text>
+                  <TokenSymbol src={inputToken.logoURI} />
+                  <Text color="grey-400">on</Text>
+                  <Text color="white" casing="capitalize">
+                    {swapQuote.dex}
+                  </Text>
+                  <SwapIcon />
+                </SwapRouteWrapper>
+              }
+              placement="bottom-start"
+            >
+              <InfoIconWrapper>
+                <InfoIcon />
+              </InfoIconWrapper>
+            </Tooltip>
+          </ToolTipWrapper>
+          <SwapSlippageSettings
+            onClick={() => {
+              if (onSetNewSlippage && currentSwapSlippage) {
+                setSlippageModalOpen(true);
+              }
+            }}
+          >
+            <Text size="md" color={"light-200"}>
+              {`$${formatUSD(swapFeeAsBaseCurrency || 0)}`}
+            </Text>
+            <SettingsIcon />
+          </SwapSlippageSettings>
+        </Row>
+      )}
       <Row>
         <ToolTipWrapper>
           <Text size="md" color="grey-400">
@@ -165,7 +242,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <PriceFee
-          token={inputToken}
+          token={baseToken}
           tokenFee={bridgeFee}
           baseCurrencyFee={bridgeFeeAsBaseCurrency}
         />
@@ -186,7 +263,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <PriceFee
-          token={inputToken}
+          token={baseToken}
           tokenFee={gasFee}
           baseCurrencyFee={gasFeeAsBaseCurrency}
         />
@@ -223,10 +300,10 @@ const EstimatedTable = ({
           You will receive
         </Text>
         <Text size="md" color="grey-400">
-          {totalReceived ? (
+          {outputAmount ? (
             <TotalReceive
-              totalReceived={totalReceived}
-              inputToken={inputToken}
+              totalReceived={outputAmount}
+              inputToken={baseToken}
               outputToken={outputToken}
               textColor="light-200"
             />
@@ -235,6 +312,17 @@ const EstimatedTable = ({
           )}
         </Text>
       </Row>
+      {onSetNewSlippage && currentSwapSlippage && (
+        <SwapSlippageModal
+          isOpen={isSlippageModalOpen}
+          onClose={() => setSlippageModalOpen(false)}
+          onConfirm={(validSlippage) => {
+            onSetNewSlippage(validSlippage);
+            setSlippageModalOpen(false);
+          }}
+          currentSlippage={currentSwapSlippage}
+        />
+      )}
     </Wrapper>
   );
 };
@@ -252,7 +340,8 @@ export function TotalReceive({
 }) {
   if (
     inputToken.symbol === outputToken.symbol ||
-    inputToken.symbol === "USDC"
+    inputToken.symbol === "USDC" ||
+    isBridgedUsdc(inputToken.symbol)
   ) {
     return (
       <TokenFee
@@ -412,4 +501,24 @@ const PercentageText = styled(Text)`
   @media ${QUERIESV2.xs.andDown} {
     display: none;
   }
+`;
+
+const SwapSlippageSettings = styled.div`
+  display: flex;
+  padding: 6px 12px;
+  align-items: center;
+  gap: 4px;
+
+  border-radius: 22px;
+  border: 1px solid var(--Color-Neutrals-grey-500, #4c4e57);
+  background: var(--Color-Neutrals-grey-600, #3e4047);
+
+  cursor: pointer;
+`;
+
+const SwapRouteWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 `;

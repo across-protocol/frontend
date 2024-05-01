@@ -8,6 +8,11 @@ const AlertColors: Record<
   AlertStatusType,
   { bgColor: string; fontColor: string; borderColor: string }
 > = {
+  base: {
+    bgColor: "#2D2E33",
+    fontColor: "#9DAAB3",
+    borderColor: "#3E4047",
+  },
   warn: {
     bgColor: "rgba(249, 210, 108, 0.05)",
     fontColor: "#f9d26c",
