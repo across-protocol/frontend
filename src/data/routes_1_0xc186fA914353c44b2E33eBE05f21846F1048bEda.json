@@ -10,6 +10,9 @@
   "swapAndBridgeAddresses": {
     "1inch": {
       "137": "0xA0f2ecC40C9B6f470aA7483814fB7AFc2D5a7E73"
+    },
+    "uniswap": {
+      "137": "0x0c5b2fFDF21503cb31e2063B2B606313B6139DB9"
     }
   },
   "routes": [
