@@ -18,6 +18,8 @@ import {
   AcceleratingDistributor__factory,
   ClaimAndStake,
   ClaimAndStake__factory,
+  UniversalSwapAndBridge,
+  UniversalSwapAndBridge__factory,
 } from "utils/typechain";
 
 export type Token = constants.TokenInfo & {
@@ -38,9 +40,14 @@ export class ConfigClient {
   public readonly toChains: Set<number> = new Set();
   public readonly enabledChainsSpokePoolVerifier: Set<number> = new Set();
   public readonly spokePoolVerifierAddress: string = "";
+  public readonly swapAndBridgeAddresses: Record<
+    string,
+    Record<string, string>
+  > = {};
   public tokenOrder: Record<string, number> = {};
   public chainOrder: Record<string, number> = {};
   public routes: constants.Routes = [];
+  public swapRoutes: constants.SwapRoutes = [];
   public pools: constants.Pools = [];
   constructor(
     private config: constants.RouteConfig,
@@ -75,11 +82,13 @@ export class ConfigClient {
         this.tokenOrder[route.fromTokenSymbol] + this.chainOrder[route.toChain]
       );
     });
+    this.swapRoutes = this.config.swapRoutes;
     this.pools = this.config.pools;
     this.enabledChainsSpokePoolVerifier = new Set(
       this.config.spokePoolVerifier.enabledChains || []
     );
     this.spokePoolVerifierAddress = this.config.spokePoolVerifier.address;
+    this.swapAndBridgeAddresses = this.config.swapAndBridgeAddresses || {};
   }
   getWethAddress(): string {
     return this.config.hubPoolWethAddress;
@@ -98,6 +107,9 @@ export class ConfigClient {
           (s) => s.toUpperCase() === route.fromTokenSymbol.toUpperCase()
         )
     );
+  }
+  getSwapRoutes(): constants.SwapRoutes {
+    return this.swapRoutes;
   }
   getRoutes(): constants.Routes {
     return this.routes;
@@ -133,6 +145,26 @@ export class ConfigClient {
 
     const provider = signer ?? providerUtils.getProvider(chainId);
     return SpokePoolVerifier__factory.connect(address, provider);
+  }
+  getSwapAndBridgeAddress(
+    chainId: constants.ChainId,
+    dexKey: string
+  ): string | undefined {
+    return this.swapAndBridgeAddresses[dexKey]?.[chainId];
+  }
+  getSwapAndBridge(
+    chainId: constants.ChainId,
+    dexKey: string,
+    signer?: Signer
+  ): UniversalSwapAndBridge | undefined {
+    const address = this.getSwapAndBridgeAddress(chainId, dexKey);
+
+    if (!address) {
+      return undefined;
+    }
+
+    const provider = signer ?? providerUtils.getProvider(chainId);
+    return UniversalSwapAndBridge__factory.connect(address, provider);
   }
   getHubPoolChainId(): constants.ChainId {
     return this.config.hubPoolChain;
@@ -233,6 +265,14 @@ export class ConfigClient {
     );
     return filter(this.getRoutes(), cleanQuery);
   }
+  filterSwapRoutes(query: Partial<constants.SwapRoute>): constants.SwapRoutes {
+    const cleanQuery: Partial<constants.SwapRoute> = Object.fromEntries(
+      Object.entries(query).filter((entry) => {
+        return entry[1] !== undefined;
+      })
+    );
+    return filter(this.getSwapRoutes(), cleanQuery);
+  }
   filterPools(query: Partial<constants.Pool>): constants.Pools {
     const cleanQuery: Partial<constants.Pool> = Object.fromEntries(
       Object.entries(query).filter((entry) => {
@@ -302,8 +342,22 @@ export class ConfigClient {
           Number(chainIdOrCanonical)
       : asNumeric;
   };
-  // returns token list in order specified by constants, but adds in token address for the chain specified
   getTokenList(chainId?: number): TokenList {
+    return constants.tokenList.map((token) => {
+      return {
+        ...token,
+        l1TokenAddress:
+          token.addresses?.[chainId || constants.ChainId.MAINNET] ||
+          token.mainnetAddress!,
+        address:
+          token.addresses?.[chainId || constants.ChainId.MAINNET] ||
+          token.mainnetAddress!,
+        isNative: token.symbol === "ETH",
+      };
+    });
+  }
+  // returns token list in order specified by constants, but adds in token address for the chain specified
+  getRouteTokenList(chainId?: number): TokenList {
     const routeTable = Object.fromEntries(
       this.filterRoutes({ fromChain: chainId }).map((route) => {
         return [route.fromTokenSymbol, route];
@@ -342,11 +396,11 @@ export class ConfigClient {
         ];
       }
     );
-    return [...this.getTokenList(chainId), ...exclusivePools];
+    return [...this.getRouteTokenList(chainId), ...exclusivePools];
   }
   getStakingPoolTokenList(chainId?: number): TokenList {
     return [
-      ...this.getTokenList(chainId),
+      ...this.getRouteTokenList(chainId),
       ...constants.externalLPsForStaking[
         chainId || constants.hubPoolChainId
       ].map((token) => {

@@ -291,6 +291,7 @@ export type TokenInfo = {
   mainnetAddress?: string;
   // optional display symbol for tokens that have a different symbol on the frontend
   displaySymbol?: string;
+  addresses?: Record<number, string>;
 };
 export type TokenInfoList = TokenInfo[];
 
@@ -545,6 +546,15 @@ const RouteSS = superstruct.object({
   l1TokenAddress: superstruct.string(),
 });
 const RoutesSS = superstruct.array(RouteSS);
+const SwapRouteSS = superstruct.assign(
+  RouteSS,
+  superstruct.object({
+    swapTokenAddress: superstruct.string(),
+    swapTokenSymbol: superstruct.string(),
+    swapTokenL1TokenAddress: superstruct.string(),
+  })
+);
+const SwapRoutesSS = superstruct.array(SwapRouteSS);
 const PoolSS = superstruct.object({
   tokenSymbol: superstruct.string(),
   isNative: superstruct.boolean(),
@@ -553,9 +563,14 @@ const SpokePoolVerifierSS = superstruct.object({
   enabledChains: superstruct.array(superstruct.number()),
   address: superstruct.string(),
 });
+const SwapAndBridgeAddressesSS = superstruct.record(
+  superstruct.string(),
+  superstruct.record(superstruct.string(), superstruct.string())
+);
 const PoolsSS = superstruct.array(PoolSS);
 const RouteConfigSS = superstruct.type({
   routes: RoutesSS,
+  swapRoutes: SwapRoutesSS,
   pools: PoolsSS,
   spokePoolVerifier: SpokePoolVerifierSS,
   hubPoolWethAddress: superstruct.string(),
@@ -565,10 +580,13 @@ const RouteConfigSS = superstruct.type({
   acceleratingDistributorAddress: superstruct.optional(superstruct.string()),
   merkleDistributorAddress: superstruct.optional(superstruct.string()),
   claimAndStakeAddress: superstruct.optional(superstruct.string()),
+  swapAndBridgeAddresses: superstruct.optional(SwapAndBridgeAddressesSS),
 });
 export type RouteConfig = superstruct.Infer<typeof RouteConfigSS>;
 export type Route = superstruct.Infer<typeof RouteSS>;
 export type Routes = superstruct.Infer<typeof RoutesSS>;
+export type SwapRoute = superstruct.Infer<typeof SwapRouteSS>;
+export type SwapRoutes = superstruct.Infer<typeof SwapRoutesSS>;
 export type Pool = superstruct.Infer<typeof PoolSS>;
 export type Pools = superstruct.Infer<typeof PoolsSS>;
 export type SpokePoolVerifier = superstruct.Infer<typeof SpokePoolVerifierSS>;
