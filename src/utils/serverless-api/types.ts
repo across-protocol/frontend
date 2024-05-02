@@ -56,7 +56,8 @@ export type SuggestedApiFeeReturnType = {
 
 export type SuggestedApiFeeType = (
   amount: ethers.BigNumber,
-  originToken: string,
+  inputToken: string,
+  outputToken: string,
   toChainid: ChainId,
   fromChainid: ChainId,
   recipientAddress?: string
@@ -95,7 +96,8 @@ export interface BridgeLimitInterface {
 }
 
 export type BridgeLimitFunction = (
-  token: string,
+  inputTokenSymbol: string,
+  outputTokenSymbol: string,
   fromChainId: string | ChainId,
   toChainId: string | ChainId
 ) => Promise<BridgeLimitInterface>;

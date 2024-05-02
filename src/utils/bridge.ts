@@ -32,7 +32,8 @@ export type BridgeFees = {
 
 type GetBridgeFeesArgs = {
   amount: ethers.BigNumber;
-  tokenSymbol: string;
+  inputTokenSymbol: string;
+  outputTokenSymbol: string;
   fromChainId: ChainId;
   toChainId: ChainId;
   recipientAddress?: string;
@@ -42,17 +43,21 @@ export type GetBridgeFeesResult = BridgeFees & {
   isAmountTooLow: boolean;
 };
 
+const config = getConfig();
+
 /**
  *
  * @param amount - amount to bridge
- * @param tokenSymbol - symbol of the token to bridge
+ * @param inputTokenSymbol - symbol of the input token to bridge
+ * @param outputTokenSymbol - symbol of the output token to bridge
  * @param fromChain The origin chain of this bridge action
  * @param toChain The destination chain of this bridge action
  * @returns Returns the `relayerFee` and `lpFee` fees for bridging the given amount of tokens, along with an `isAmountTooLow` flag indicating whether the amount is too low to bridge and an `isLiquidityInsufficient` flag indicating whether the liquidity is insufficient.
  */
 export async function getBridgeFees({
   amount,
-  tokenSymbol,
+  inputTokenSymbol,
+  outputTokenSymbol,
   fromChainId,
   toChainId,
   recipientAddress,
@@ -68,7 +73,8 @@ export async function getBridgeFees({
     lpFee,
   } = await getApiEndpoint().suggestedFees(
     amount,
-    getConfig().getTokenInfoBySymbol(fromChainId, tokenSymbol).address,
+    config.getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
+    config.getTokenInfoBySymbol(toChainId, outputTokenSymbol).address,
     toChainId,
     fromChainId,
     recipientAddress

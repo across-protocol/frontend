@@ -661,7 +661,8 @@ export const getTokenSymbol = (tokenAddress: string): string => {
 
 /**
  * Retrieves the results of the `relayFeeCalculator` SDK function: `relayerFeeDetails`
- * @param l1Token A valid L1 ERC-20 token address
+ * @param inputToken A valid input token address
+ * @param outputToken A valid output token address
  * @param amount  The amount of funds that are requesting to be transferred
  * @param originChainId The origin chain that this token will be transferred from
  * @param destinationChainId The destination chain that this token will be transferred to
@@ -672,7 +673,8 @@ export const getTokenSymbol = (tokenAddress: string): string => {
  * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
  */
 export const getRelayerFeeDetails = async (
-  l1Token: string,
+  inputToken: string,
+  outputToken: string,
   amount: sdk.utils.BigNumberish,
   originChainId: number,
   destinationChainId: number,
@@ -681,18 +683,6 @@ export const getRelayerFeeDetails = async (
   message?: string,
   relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const tokenAddresses = sdk.utils.getL2TokenAddresses(
-    l1Token,
-    HUB_POOL_CHAIN_ID
-  );
-  if (!tokenAddresses) {
-    throw new InputError(
-      `Could not resolve token address for token ${l1Token}`
-    );
-  }
-  const originToken = tokenAddresses[originChainId];
-  const destinationToken = tokenAddresses[destinationChainId];
-
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   try {
     return await relayFeeCalculator.relayerFeeDetails(
@@ -705,8 +695,8 @@ export const getRelayerFeeDetails = async (
         destinationChainId,
         originChainId,
         quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
-        inputToken: originToken,
-        outputToken: destinationToken,
+        inputToken,
+        outputToken,
         fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
         exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
         exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol

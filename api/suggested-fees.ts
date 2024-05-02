@@ -216,7 +216,8 @@ const handler = async (
     );
     const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
     const relayerFeeDetails = await getRelayerFeeDetails(
-      l1Token.address,
+      inputToken.address,
+      outputToken.address,
       amount,
       computedOriginChainId,
       destinationChainId,

@@ -13,12 +13,13 @@ import { parseUnits } from "utils/format";
  */
 export async function suggestedFeesMockedApiCall(
   _amount: ethers.BigNumber,
-  _originToken: string,
+  _inputToken: string,
+  _outputToken: string,
   _toChainid: ChainId,
   _fromChainid: ChainId,
   _recipientAddress?: string
 ): Promise<SuggestedApiFeeReturnType> {
-  const token = getTokenByAddress(_originToken);
+  const token = getTokenByAddress(_inputToken);
   const decimals = token?.decimals ?? 18;
 
   return {

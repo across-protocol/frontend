@@ -26,10 +26,7 @@ export type SwapQuoteApiQueryParams = {
 export async function swapQuoteApiCall(
   params: SwapQuoteApiQueryParams
 ): Promise<SwapQuoteApiResponse> {
-  // const response = await axios.get(`${vercelApiBaseUrl}/api/swap-quote`, {
-  //   params,
-  // });
-  const response = await axios.get(`http://127.0.0.1:3000/api/swap-quote`, {
+  const response = await axios.get(`${vercelApiBaseUrl}/api/swap-quote`, {
     params,
   });
   return {

@@ -48,10 +48,12 @@ export function useTransferQuote(
     selectedRoute.fromChain,
     selectedRoute.toChain,
     selectedRoute.fromTokenSymbol,
+    selectedRoute.toTokenSymbol,
     toAddress
   );
   const limitsQuery = useBridgeLimits(
     selectedRoute.fromTokenSymbol,
+    selectedRoute.toTokenSymbol,
     selectedRoute.fromChain,
     selectedRoute.toChain
   );
