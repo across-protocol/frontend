@@ -70,6 +70,16 @@ export type Deposit = {
     totalBridgeFeePct: string; // wei pct
     totalBridgeFeeAmount: string;
   };
+  token?: {
+    symbol: string;
+    name: string;
+    decimals: number;
+  };
+  outputToken?: {
+    symbol: string;
+    name: string;
+    decimals: number;
+  };
 };
 
 export type Pagination = {

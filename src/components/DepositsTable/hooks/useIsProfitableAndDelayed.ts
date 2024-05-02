@@ -7,21 +7,14 @@ import {
   suggestedFeesDeviationBufferMultiplier,
   fixedPointAdjustment,
   pendingStateTimeUntilDelayed,
-  getConfig,
 } from "utils";
 import { useBridgeLimits } from "hooks";
 
-const config = getConfig();
-
 export function useIsProfitableAndDelayed(deposit: Deposit) {
-  const token = config.getTokenInfoByAddressSafe(
-    deposit.sourceChainId,
-    deposit.assetAddr
-  );
-
   const { limits } = useBridgeLimits(
     // disable query for filled deposits
-    deposit.status === "pending" ? token?.symbol : undefined,
+    deposit.status === "pending" ? deposit?.token?.symbol : undefined,
+    deposit?.outputToken?.symbol,
     deposit.sourceChainId,
     deposit.destinationChainId
   );

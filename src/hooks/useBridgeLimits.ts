@@ -21,19 +21,31 @@ const config = getConfig();
  * @returns The limits datastructure returned from the serverless api.
  */
 export function useBridgeLimits(
-  inputTokenSymbol: string,
-  outputTokenSymbol: string,
-  fromChainId: ChainId,
-  toChainId: ChainId
+  inputTokenSymbol?: string,
+  outputTokenSymbol?: string,
+  fromChainId?: ChainId,
+  toChainId?: ChainId
 ) {
+  const enabled = !!(
+    inputTokenSymbol &&
+    outputTokenSymbol &&
+    fromChainId &&
+    toChainId
+  );
   const { data: limits, ...delegated } = useQuery(
-    bridgeLimitsQueryKey(
-      inputTokenSymbol,
-      outputTokenSymbol,
-      fromChainId,
-      toChainId
-    ),
+    enabled
+      ? bridgeLimitsQueryKey(
+          inputTokenSymbol,
+          outputTokenSymbol,
+          fromChainId,
+          toChainId
+        )
+      : "DISABLED_BRIDGE_LIMITS_QUERY_KEY",
     () => {
+      if (!enabled) {
+        return undefined;
+      }
+
       return getApiEndpoint().limits(
         config.getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
         config.getTokenInfoBySymbol(toChainId, outputTokenSymbol).address,
@@ -42,6 +54,7 @@ export function useBridgeLimits(
       );
     },
     {
+      enabled,
       refetchInterval: 300_000,
     }
   );
