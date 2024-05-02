@@ -7,7 +7,11 @@
   "acceleratingDistributorAddress": "0x0000000000000000000000000000000000000000",
   "merkleDistributorAddress": "0x0000000000000000000000000000000000000000",
   "claimAndStakeAddress": "0x0000000000000000000000000000000000000000",
-  "swapAndBridgeAddresses": {},
+  "swapAndBridgeAddresses": {
+    "uniswap": {
+      "84532": "0xf81C7cbC1196FACb327BD5B7021f9C1c220D0328"
+    }
+  },
   "routes": [
     {
       "fromChain": 11155111,
@@ -120,7 +124,22 @@
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
     }
   ],
-  "swapRoutes": [],
+  "swapRoutes": [
+    {
+      "fromChain": 84532,
+      "toChain": 11155111,
+      "fromTokenAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "toTokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "swapTokenAddress": "0xE634Ec56B73779eCFfa78109a653FA0aE33D243f",
+      "swapTokenSymbol": "USDC.e",
+      "swapTokenL1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    }
+  ],
   "pools": [],
   "spokePoolVerifier": {
     "address": "0x0000000000000000000000000000000000000000",

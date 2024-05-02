@@ -62,6 +62,13 @@ export const TOKEN_SYMBOLS_MAP = {
   USDC: {
     ..._USDC,
   },
+  USDbC: {
+    ...tokenSymbols["USDbC"],
+    addresses: {
+      ...tokenSymbols["USDbC"].addresses,
+      [CHAIN_IDs.BASE_SEPOLIA]: "0xe634ec56b73779ecffa78109a653fa0ae33d243f",
+    },
+  },
 } as const;
 
 // Maps `ChainId` to an object and inverts the Key/Value

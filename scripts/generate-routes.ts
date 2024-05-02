@@ -551,7 +551,11 @@ const enabledRoutes = {
       address: sdkUtils.AddressZero,
       enabledChains: [],
     },
-    swapAndBridgeAddresses: {},
+    swapAndBridgeAddresses: {
+      uniswap: {
+        [CHAIN_IDs.BASE_SEPOLIA]: "0xf81C7cbC1196FACb327BD5B7021f9C1c220D0328", // Mocked
+      },
+    },
     routes: [
       {
         fromChain: CHAIN_IDs.SEPOLIA,
@@ -580,8 +584,14 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.SEPOLIA,
-            swapTokens: [],
             tokens: ["WETH", "USDC"],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+            ],
           },
         ],
       },

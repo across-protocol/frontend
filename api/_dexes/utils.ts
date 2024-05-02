@@ -21,7 +21,9 @@ export function getSwapAndBridgeAddress(dex: string, chainId: number) {
     throw new UnsupportedDex(dex);
   }
 
-  const address = ENABLED_ROUTES.swapAndBridgeAddresses[dex]?.[chainId];
+  const address = (
+    ENABLED_ROUTES.swapAndBridgeAddresses[dex] as Record<string, string>
+  )?.[chainId];
   if (!address) {
     throw new UnsupportedDexOnChain(chainId, dex);
   }
