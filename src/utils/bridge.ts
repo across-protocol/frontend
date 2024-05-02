@@ -43,8 +43,6 @@ export type GetBridgeFeesResult = BridgeFees & {
   isAmountTooLow: boolean;
 };
 
-const config = getConfig();
-
 /**
  *
  * @param amount - amount to bridge
@@ -73,8 +71,8 @@ export async function getBridgeFees({
     lpFee,
   } = await getApiEndpoint().suggestedFees(
     amount,
-    config.getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
-    config.getTokenInfoBySymbol(toChainId, outputTokenSymbol).address,
+    getConfig().getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
+    getConfig().getTokenInfoBySymbol(toChainId, outputTokenSymbol).address,
     toChainId,
     fromChainId,
     recipientAddress

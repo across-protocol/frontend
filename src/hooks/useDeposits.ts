@@ -71,11 +71,13 @@ export type Deposit = {
     totalBridgeFeeAmount: string;
   };
   token?: {
+    address: string;
     symbol: string;
     name: string;
     decimals: number;
   };
   outputToken?: {
+    address: string;
     symbol: string;
     name: string;
     decimals: number;

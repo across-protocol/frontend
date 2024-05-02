@@ -1,16 +1,27 @@
 import { BigNumber } from "ethers";
 
-import { getDepositByTxHash, getFillByDepositTxHash } from "utils";
+import { Deposit } from "hooks/useDeposits";
+import { getConfig, getDepositByTxHash, getFillByDepositTxHash } from "utils";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+
+const config = getConfig();
 
 export function convertForDepositQuery(
   data: Awaited<ReturnType<typeof getDepositByTxHash>>,
   fromBridgePagePayload: FromBridgePagePayload
-) {
+): Deposit {
   const { selectedRoute, depositArgs, quoteForAnalytics } =
     fromBridgePagePayload;
   const { depositId, depositor, recipient, message, inputAmount } =
     data.parsedDepositLog.args;
+  const inputToken = config.getTokenInfoByAddress(
+    selectedRoute.fromChain,
+    selectedRoute.fromTokenAddress
+  );
+  const outputToken = config.getTokenInfoByAddress(
+    selectedRoute.toChain,
+    selectedRoute.toTokenAddress
+  );
 
   return {
     depositId: Number(depositId),
@@ -49,17 +60,27 @@ export function convertForDepositQuery(
       totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
       totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
     },
+    token: inputToken,
+    outputToken,
   };
 }
 
 export function convertForFillQuery(
   data: Awaited<ReturnType<typeof getFillByDepositTxHash>>,
   fromBridgePagePayload: FromBridgePagePayload
-) {
+): Deposit {
   const { selectedRoute, depositArgs, quoteForAnalytics } =
     fromBridgePagePayload;
   const { depositId, depositor, recipient, message, inputAmount } =
     data.depositByTxHash.parsedDepositLog.args;
+  const inputToken = config.getTokenInfoByAddress(
+    selectedRoute.fromChain,
+    selectedRoute.fromTokenAddress
+  );
+  const outputToken = config.getTokenInfoByAddress(
+    selectedRoute.toChain,
+    selectedRoute.toTokenAddress
+  );
 
   return {
     depositId: Number(depositId),
@@ -99,5 +120,7 @@ export function convertForFillQuery(
       totalBridgeFeePct: quoteForAnalytics.totalBridgeFeePct,
       totalBridgeFeeAmount: quoteForAnalytics.totalBridgeFee,
     },
+    token: inputToken,
+    outputToken,
   };
 }
