@@ -554,6 +554,8 @@ const enabledRoutes = {
     swapAndBridgeAddresses: {
       uniswap: {
         [CHAIN_IDs.BASE_SEPOLIA]: "0xf81C7cbC1196FACb327BD5B7021f9C1c220D0328", // Mocked
+        [CHAIN_IDs.OPTIMISM_SEPOLIA]:
+          "0x17496824Ba574A4e9De80110A91207c4c63e552a", // Mocked
       },
     },
     routes: [
@@ -587,7 +589,7 @@ const enabledRoutes = {
             tokens: ["WETH", "USDC"],
             swapTokens: [
               {
-                swapInputTokenSymbol: "USDC.e",
+                swapInputTokenSymbol: "USDbC",
                 acrossInputTokenSymbol: "USDC",
                 acrossOutputTokenSymbol: "USDC",
               },
@@ -604,8 +606,14 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.SEPOLIA,
-            swapTokens: [],
             tokens: ["WETH", "USDC"],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+            ],
           },
         ],
       },

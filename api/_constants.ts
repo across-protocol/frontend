@@ -12,6 +12,14 @@ let { USDC, _USDC, ...tokenSymbols } = constants.TOKEN_SYMBOLS_MAP;
 export const TOKEN_SYMBOLS_MAP = {
   ...tokenSymbols,
   USDC: _USDC,
+  "USDC.e": {
+    ...tokenSymbols["USDC.e"],
+    addresses: {
+      ...tokenSymbols["USDC.e"].addresses,
+      [CHAIN_IDs.OPTIMISM_SEPOLIA]:
+        "0x9552a0a6624A23B848060AE5901659CDDa1f83f8",
+    },
+  },
   USDbC: {
     ...tokenSymbols["USDbC"],
     addresses: {
