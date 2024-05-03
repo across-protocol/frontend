@@ -47,10 +47,10 @@ const enabledRoutes = {
     },
     swapAndBridgeAddresses: {
       "1inch": {
-        [CHAIN_IDs.POLYGON]: "0xA0f2ecC40C9B6f470aA7483814fB7AFc2D5a7E73",
+        [CHAIN_IDs.POLYGON]: "0xf9735e425a36d22636ef4cb75c7a6c63378290ca",
       },
       uniswap: {
-        [CHAIN_IDs.POLYGON]: "0x0c5b2ffdf21503cb31e2063b2b606313b6139db9",
+        [CHAIN_IDs.POLYGON]: "0xc2dcb88873e00c9d401de2cbba4c6a28f8a6e2c2",
       },
     },
     routes: [
