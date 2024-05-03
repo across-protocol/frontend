@@ -82,6 +82,14 @@ export type Deposit = {
     name: string;
     decimals: number;
   };
+  swapToken?: {
+    address: string;
+    symbol: string;
+    name: string;
+    decimals: number;
+  };
+  swapTokenAmount?: string;
+  swapTokenAddress?: string;
 };
 
 export type Pagination = {
