@@ -235,7 +235,13 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC",
+                acrossInputTokenSymbol: "USDC.e",
+                acrossOutputTokenSymbol: "USDC",
+              },
+            ],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
@@ -270,12 +276,24 @@ const enabledRoutes = {
               "ACX",
               "USDT",
             ],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC",
+                acrossInputTokenSymbol: "USDC.e",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
             tokens: ["WETH", "USDC.e", "WBTC", "USDT", "DAI"],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC",
+                acrossInputTokenSymbol: "USDC.e",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -285,12 +303,24 @@ const enabledRoutes = {
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
               "BAL",
             ],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC",
+                acrossInputTokenSymbol: "USDC.e",
+                acrossOutputTokenSymbol: "USDbC",
+              },
+            ],
           },
           {
             chainId: CHAIN_IDs.LINEA,
             tokens: ["WETH", "USDC.e", "USDT", "DAI", "WBTC"],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC",
+                acrossInputTokenSymbol: "USDC.e",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
           },
         ],
       },
