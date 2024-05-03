@@ -27,7 +27,20 @@ export async function get1inchQuoteAndCalldata(
     receiver: swapAndBridgeAddress,
   };
 
-  const response = await axios.get(`${apiBaseUrl}/swap`, {
+  const response = await axios.get<
+    {},
+    {
+      // https://portal.1inch.dev/documentation/swap/swagger?method=get&path=%2Fv6.0%2F1%2Fswap
+      data: {
+        toAmount?: string;
+        dstAmount: string;
+        tx: {
+          data: string;
+          value: string;
+        };
+      };
+    }
+  >(`${apiBaseUrl}/swap`, {
     headers: apiHeaders,
     params: swapParams,
   });

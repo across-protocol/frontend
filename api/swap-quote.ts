@@ -4,7 +4,6 @@ import { ethers } from "ethers";
 
 import { TypedVercelRequest } from "./_types";
 import {
-  ENABLED_ROUTES,
   InputError,
   getLogger,
   getTokenByAddress,
@@ -13,6 +12,7 @@ import {
   positiveIntStr,
   validAddress,
   validateChainAndTokenParams,
+  isSwapRouteEnabled,
 } from "./_utils";
 import { getUniswapQuoteAndCalldata } from "./_dexes/uniswap";
 import { get1inchQuoteAndCalldata } from "./_dexes/1inch";
@@ -83,15 +83,12 @@ const handler = async (
     // Only allow whitelisted swap routes. Can be viewed in the
     // `src/data/routes_*.json` files under the `swapRoutes` key.
     if (
-      !ENABLED_ROUTES.swapRoutes.find((route) => {
-        return (
-          route.fromChain === originChainId &&
-          route.toChain === destinationChainId &&
-          route.fromTokenSymbol === acrossInputToken.symbol &&
-          route.toTokenSymbol === acrossOutputToken.symbol &&
-          route.swapTokenAddress.toLowerCase() ===
-            swapTokenAddress.toLowerCase()
-        );
+      !isSwapRouteEnabled({
+        originChainId,
+        destinationChainId,
+        acrossInputTokenSymbol: acrossInputToken.symbol,
+        acrossOutputTokenSymbol: acrossOutputToken.symbol,
+        swapTokenAddress,
       })
     ) {
       throw new InputError(`Unsupported swap route`);

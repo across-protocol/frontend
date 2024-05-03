@@ -1510,3 +1510,28 @@ export function sendResponse(
   );
   return response.status(statusCode).json(body);
 }
+
+export function isSwapRouteEnabled({
+  originChainId,
+  destinationChainId,
+  acrossInputTokenSymbol,
+  acrossOutputTokenSymbol,
+  swapTokenAddress,
+}: {
+  originChainId: number;
+  destinationChainId: number;
+  acrossInputTokenSymbol: string;
+  acrossOutputTokenSymbol: string;
+  swapTokenAddress: string;
+}) {
+  const swapRoute = ENABLED_ROUTES.swapRoutes.find((route) => {
+    return (
+      route.fromChain === originChainId &&
+      route.toChain === destinationChainId &&
+      route.fromTokenSymbol === acrossInputTokenSymbol &&
+      route.toTokenSymbol === acrossOutputTokenSymbol &&
+      route.swapTokenAddress.toLowerCase() === swapTokenAddress.toLowerCase()
+    );
+  });
+  return !!swapRoute;
+}

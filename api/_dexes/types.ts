@@ -1,4 +1,4 @@
-type Token = {
+export type Token = {
   address: string;
   decimals: number;
   symbol: string;
@@ -18,11 +18,13 @@ export type AcrossSwap = {
   slippage: number;
 };
 
+export type SupportedDex = "1inch" | "uniswap";
+
 export type SwapQuoteAndCalldata = {
   minExpectedInputTokenAmount: string;
   routerCalldata: string;
   value: string;
   swapAndBridgeAddress: string;
-  dex: string;
+  dex: SupportedDex;
   slippage: number;
 };

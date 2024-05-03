@@ -18,14 +18,42 @@ import {
 } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 import IUniswapV3PoolABI from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
+import { CHAIN_IDs } from "@across-protocol/constants-v2";
+import { utils } from "@across-protocol/sdk-v2";
 
 import { callViaMulticall3, getProvider } from "../_utils";
-import { AcrossSwap, SwapQuoteAndCalldata } from "./types";
+import { TOKEN_SYMBOLS_MAP } from "../_constants";
+import {
+  AcrossSwap,
+  SwapQuoteAndCalldata,
+  Token as AcrossToken,
+} from "./types";
 import { getSwapAndBridgeAddress } from "./utils";
 
-const POOL_FACTORY_CONTRACT_ADDRESS =
-  "0x1F98431c8aD98523631AE4a59f267346ea31F984";
-const QUOTER_CONTRACT_ADDRESS = "0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6";
+// https://docs.uniswap.org/contracts/v3/reference/deployments/
+const POOL_FACTORY_CONTRACT_ADDRESS = {
+  [CHAIN_IDs.MAINNET]: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+  [CHAIN_IDs.OPTIMISM]: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+  [CHAIN_IDs.ARBITRUM]: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+  [CHAIN_IDs.BASE]: "0x33128a8fC17869897dcE68Ed026d694621f6FDfD",
+  [CHAIN_IDs.POLYGON]: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+};
+const QUOTER_CONTRACT_ADDRESS = {
+  [CHAIN_IDs.MAINNET]: "0x61fFE014bA17989E743c5F6cB21bF9697530B21e",
+  [CHAIN_IDs.OPTIMISM]: "0x61fFE014bA17989E743c5F6cB21bF9697530B21e",
+  [CHAIN_IDs.ARBITRUM]: "0x61fFE014bA17989E743c5F6cB21bF9697530B21e",
+  [CHAIN_IDs.BASE]: "0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a",
+  [CHAIN_IDs.POLYGON]: "0x61fFE014bA17989E743c5F6cB21bF9697530B21e",
+};
+
+// Maps testnet chain IDs to their main counterparts. Used to get the mainnet token
+// info for testnet tokens.
+const TESTNET_TO_MAINNET = {
+  [CHAIN_IDs.SEPOLIA]: CHAIN_IDs.MAINNET,
+  [CHAIN_IDs.BASE_SEPOLIA]: CHAIN_IDs.BASE,
+  [CHAIN_IDs.OPTIMISM_SEPOLIA]: CHAIN_IDs.OPTIMISM,
+  [CHAIN_IDs.ARBITRUM_SEPOLIA]: CHAIN_IDs.ARBITRUM,
+};
 
 export async function getUniswapQuoteAndCalldata(
   swap: AcrossSwap
@@ -34,6 +62,13 @@ export async function getUniswapQuoteAndCalldata(
     "uniswap",
     swap.swapToken.chainId
   );
+
+  const initialSwapToken = { ...swap.swapToken };
+  const initialAcrossInputToken = { ...swap.acrossInputToken };
+  // Always use mainnet tokens for retrieving quote, so that we can get equivalent quotes
+  // for testnet tokens.
+  swap.swapToken = getMainnetToken(swap.swapToken);
+  swap.acrossInputToken = getMainnetToken(swap.acrossInputToken);
 
   const poolInfo = await getPoolInfo(swap);
   const tokenA = new Token(
@@ -73,13 +108,23 @@ export async function getUniswapQuoteAndCalldata(
       10_000
     ),
     // 20 minutes from the current Unix time
-    deadline: Math.floor(Date.now() / 1000) + 60 * 20,
+    deadline: utils.getCurrentTime() + 60 * 20,
     recipient: swapAndBridgeAddress,
   };
 
   const methodParameters = SwapRouter.swapCallParameters(
     [uncheckedTrade],
     options
+  );
+
+  // replace mainnet token addresses with initial token addresses in calldata
+  methodParameters.calldata = methodParameters.calldata.replace(
+    swap.swapToken.address.toLowerCase().slice(2),
+    initialSwapToken.address.toLowerCase().slice(2)
+  );
+  methodParameters.calldata = methodParameters.calldata.replace(
+    swap.acrossInputToken.address.toLowerCase().slice(2),
+    initialAcrossInputToken.address.toLowerCase().slice(2)
   );
 
   return {
@@ -113,11 +158,12 @@ async function getOutputQuote(
       ),
       swap.swapTokenAmount
     ),
-    TradeType.EXACT_INPUT
+    TradeType.EXACT_INPUT,
+    { useQuoterV2: true }
   );
 
   const quoteCallReturnData = await provider.call({
-    to: QUOTER_CONTRACT_ADDRESS,
+    to: QUOTER_CONTRACT_ADDRESS[swap.swapToken.chainId],
     data: calldata,
   });
 
@@ -139,7 +185,7 @@ async function getPoolInfo({
   const provider = getProvider(swapToken.chainId);
   const poolContract = new ethers.Contract(
     computePoolAddress({
-      factoryAddress: POOL_FACTORY_CONTRACT_ADDRESS,
+      factoryAddress: POOL_FACTORY_CONTRACT_ADDRESS[swapToken.chainId],
       tokenA: new Token(
         swapToken.chainId,
         swapToken.address,
@@ -174,12 +220,40 @@ async function getPoolInfo({
     );
 
   return {
-    token0: token0 as unknown as string,
-    token1: token1 as unknown as string,
-    fee: fee as unknown as number,
-    tickSpacing: tickSpacing as unknown as number,
-    liquidity: liquidity as unknown as ethers.BigNumber,
-    sqrtPriceX96: slot0[0] as unknown as ethers.BigNumber,
-    tick: slot0[1] as unknown as number,
+    token0,
+    token1,
+    fee,
+    tickSpacing,
+    liquidity,
+    sqrtPriceX96: slot0[0],
+    tick: slot0[1],
+  } as unknown as {
+    token0: string;
+    token1: string;
+    fee: number;
+    tickSpacing: number;
+    sqrtPriceX96: ethers.BigNumber;
+    liquidity: ethers.BigNumber;
+    tick: number;
+  };
+}
+
+function getMainnetToken(token: AcrossToken) {
+  const mainnetChainId = TESTNET_TO_MAINNET[token.chainId] || token.chainId;
+
+  const mainnetToken =
+    TOKEN_SYMBOLS_MAP[token.symbol as keyof typeof TOKEN_SYMBOLS_MAP];
+  const mainnetTokenAddress = mainnetToken?.addresses[mainnetChainId];
+
+  if (!mainnetToken || !mainnetTokenAddress) {
+    throw new Error(
+      `Mainnet token not found for ${token.symbol} on chain ${token.chainId}`
+    );
+  }
+
+  return {
+    ...mainnetToken,
+    chainId: mainnetChainId,
+    address: mainnetTokenAddress,
   };
 }
