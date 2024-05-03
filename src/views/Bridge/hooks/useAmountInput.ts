@@ -37,20 +37,14 @@ export function useAmountInput(selectedRoute: SelectedRoute) {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const _handleParsedAmount = useCallback(
-    debounce(
-      (input: string, decimals: number) => {
-        try {
-          const parsed = utils.parseUnits(input, decimals);
-          setParsedAmount(parsed);
-        } catch (error) {
-          setParsedAmount(undefined);
-        }
-      },
-      500,
-      {
-        leading: true,
+    debounce((input: string, decimals: number) => {
+      try {
+        const parsed = utils.parseUnits(input, decimals);
+        setParsedAmount(parsed);
+      } catch (error) {
+        setParsedAmount(undefined);
       }
-    ),
+    }, 500),
     []
   );
 

@@ -38,6 +38,7 @@ const PriceFee = ({
   rewardPercentageOfFees,
   hideSymbolOnEmpty = true,
   tokenIconFirstOnMobile = false,
+  hideTokenIcon,
 }: {
   tokenFee?: BigNumber;
   baseCurrencyFee?: BigNumber;
@@ -46,10 +47,10 @@ const PriceFee = ({
   rewardPercentageOfFees?: BigNumber;
   hideSymbolOnEmpty?: boolean;
   tokenIconFirstOnMobile?: boolean;
+  hideTokenIcon?: boolean;
 }) => {
-  const Token = (isDefined(tokenFee) || !hideSymbolOnEmpty) && (
-    <TokenSymbol src={token.logoURI} />
-  );
+  const Token = (isDefined(tokenFee) || !hideSymbolOnEmpty) &&
+    !hideTokenIcon && <TokenSymbol src={token.logoURI} />;
 
   return (
     <BaseCurrencyWrapper invertOnMobile={tokenIconFirstOnMobile}>
@@ -138,7 +139,6 @@ const EstimatedTable = ({
             tokenFee={reward}
             baseCurrencyFee={referralRewardAsBaseCurrency}
             hideSymbolOnEmpty={false}
-            tokenIconFirstOnMobile
           />
         </ReferralRewardWrapper>
       </Row>
@@ -177,33 +177,50 @@ const EstimatedTable = ({
       {isSwap && swapQuote && swapToken && swapFee && (
         <Row>
           <ToolTipWrapper>
-            <Text size="md" color="grey-400">
-              Swap fee
-            </Text>
+            <SwapFeeRowLabelWrapper>
+              <SwapIcon />
+              <Text size="md" color="grey-400">
+                Swap fee
+              </Text>
+            </SwapFeeRowLabelWrapper>
             <Tooltip
               tooltipId="swap-fee-info"
               title="Swap fee"
               maxWidth={420}
               body={
-                <SwapRouteWrapper>
-                  <Text size="md" color="grey-400">
-                    Swap
+                <SwapFeeTooltipBody>
+                  <Text size="sm" color="grey-400">
+                    This bridge transaction requires you to perform a token swap
+                    which incurs a swap fee.
                   </Text>
-                  <Text color="white">
-                    {swapToken.displaySymbol || swapToken.symbol}
+                  <Text size="sm" color="grey-400">
+                    You can tweak the fee by changing your slippage settings in
+                    the to the right.
                   </Text>
-                  <TokenSymbol src={swapToken.logoURI} />
-                  <Text color="grey-400">for</Text>
-                  <Text color="white">
-                    {inputToken.displaySymbol || inputToken.symbol}
-                  </Text>
-                  <TokenSymbol src={inputToken.logoURI} />
-                  <Text color="grey-400">on</Text>
-                  <Text color="white" casing="capitalize">
-                    {swapQuote.dex}
-                  </Text>
-                  <SwapIcon />
-                </SwapRouteWrapper>
+                  <Divider />
+                  <SwapRouteWrapper>
+                    <Text size="sm" color="grey-400">
+                      Swapping
+                    </Text>
+                    <Text size="sm" color="white">
+                      {swapToken.displaySymbol || swapToken.symbol}
+                    </Text>
+                    <TokenSymbol src={swapToken.logoURI} />
+                    <Text size="sm" color="grey-400">
+                      for
+                    </Text>
+                    <Text size="sm" color="white">
+                      {inputToken.displaySymbol || inputToken.symbol}
+                    </Text>
+                    <TokenSymbol src={inputToken.logoURI} />
+                    <Text size="sm" color="grey-400">
+                      on
+                    </Text>
+                    <Text size="sm" color="white" casing="capitalize">
+                      {swapQuote.dex}
+                    </Text>
+                  </SwapRouteWrapper>
+                </SwapFeeTooltipBody>
               }
               placement="bottom-start"
             >
@@ -219,9 +236,12 @@ const EstimatedTable = ({
               }
             }}
           >
-            <Text size="md" color={"light-200"}>
-              {`$${formatUSD(swapFeeAsBaseCurrency || 0)}`}
-            </Text>
+            <PriceFee
+              token={baseToken}
+              tokenFee={swapFee}
+              baseCurrencyFee={swapFeeAsBaseCurrency}
+              hideTokenIcon
+            />
             <SettingsIcon />
           </SwapSlippageSettings>
         </Row>
@@ -306,6 +326,7 @@ const EstimatedTable = ({
               inputToken={baseToken}
               outputToken={outputToken}
               textColor="light-200"
+              destinationChainId={toChainId}
             />
           ) : (
             "-"
@@ -332,11 +353,13 @@ export function TotalReceive({
   inputToken,
   outputToken,
   textColor,
+  destinationChainId,
 }: {
   totalReceived: BigNumber;
   outputToken: TokenInfo;
   inputToken: TokenInfo;
   textColor?: TextColor;
+  destinationChainId: number;
 }) {
   if (
     inputToken.symbol === outputToken.symbol ||
@@ -348,6 +371,8 @@ export function TotalReceive({
         amount={totalReceived}
         token={outputToken}
         textColor={textColor}
+        showTokenLinkOnHover
+        tokenChainId={destinationChainId}
       />
     );
   }
@@ -369,6 +394,8 @@ export function TotalReceive({
         amount={totalReceived}
         token={outputToken}
         textColor="warning"
+        showTokenLinkOnHover
+        tokenChainId={destinationChainId}
       />
     </TotalReceiveRow>
   );
@@ -514,6 +541,19 @@ const SwapSlippageSettings = styled.div`
   background: var(--Color-Neutrals-grey-600, #3e4047);
 
   cursor: pointer;
+`;
+
+const SwapFeeRowLabelWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+`;
+
+const SwapFeeTooltipBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 `;
 
 const SwapRouteWrapper = styled.div`
