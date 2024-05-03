@@ -66,6 +66,7 @@ export function FeesCollapsible(props: Props) {
                     inputToken={baseToken}
                     outputToken={props.outputToken}
                     textColor="light-200"
+                    destinationChainId={props.toChainId}
                   />
                   {estimatedRewards.reward && (
                     <>
@@ -74,6 +75,7 @@ export function FeesCollapsible(props: Props) {
                         token={estimatedRewards.rewardToken}
                         amount={estimatedRewards.reward}
                         textColor="light-200"
+                        tokenChainId={props.toChainId}
                       />
                     </>
                   )}

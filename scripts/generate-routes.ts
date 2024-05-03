@@ -542,10 +542,11 @@ const enabledRoutes = {
       "AcrossConfigStore",
       CHAIN_IDs.SEPOLIA
     ),
-    acrossTokenAddress: TOKEN_SYMBOLS_MAP.ACX.addresses[CHAIN_IDs.MAINNET],
-    acceleratingDistributorAddress: sdkUtils.AddressZero,
-    merkleDistributorAddress: sdkUtils.AddressZero,
-    claimAndStakeAddress: sdkUtils.AddressZero,
+    acrossTokenAddress: "0x49fCaC04AE71dbD074304Fb12071bD771e0E927A",
+    acceleratingDistributorAddress:
+      "0x3a202A5F5941b8b6b56EE24f8503aD31Fba18b05",
+    merkleDistributorAddress: "0x711615993FD2b9D22b598f7b36B762eA89E9EC2b",
+    claimAndStakeAddress: "0x765904d00BaAEF371ea1f6cfd41af19BbA644766",
     pools: [],
     spokePoolVerifier: {
       address: sdkUtils.AddressZero,

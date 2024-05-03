@@ -3,10 +3,10 @@
   "hubPoolAddress": "0x14224e63716afAcE30C9a417E0542281869f7d9e",
   "hubPoolWethAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
   "acrossConfigStoreAddress": "0xB3De1e212B49e68f4a68b5993f31f63946FCA2a6",
-  "acrossTokenAddress": "0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F",
-  "acceleratingDistributorAddress": "0x0000000000000000000000000000000000000000",
-  "merkleDistributorAddress": "0x0000000000000000000000000000000000000000",
-  "claimAndStakeAddress": "0x0000000000000000000000000000000000000000",
+  "acrossTokenAddress": "0x49fCaC04AE71dbD074304Fb12071bD771e0E927A",
+  "acceleratingDistributorAddress": "0x3a202A5F5941b8b6b56EE24f8503aD31Fba18b05",
+  "merkleDistributorAddress": "0x711615993FD2b9D22b598f7b36B762eA89E9EC2b",
+  "claimAndStakeAddress": "0x765904d00BaAEF371ea1f6cfd41af19BbA644766",
   "swapAndBridgeAddresses": {
     "uniswap": {
       "84532": "0xf81C7cbC1196FACb327BD5B7021f9C1c220D0328",
