@@ -41,12 +41,14 @@ export function SwapSlippageModal(props: Props) {
       <Wrapper>
         <Alert status="base">
           <Text color="grey-400">
-            Your bridge will not go through if the price increases by more than
-            this percentage.
+            This bridge transfer includes a swap transaction on the origin
+            chain. If the price changes unfavorably by more than this
+            percentage, the swap transaction will revert and no bridge transfer
+            will be executed.
           </Text>
         </Alert>
         <Row>
-          <Text color="grey-400">Max. slippage</Text>
+          <Text color="grey-400">Maximum slippage</Text>
           <InputWrapper>
             <Input
               value={userInput}
@@ -102,6 +104,11 @@ const InputWrapper = styled.div`
 `;
 
 const Input = styled.input`
+  font-family: Barlow;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
   border: none;
   max-width: 112px;
   background: var(--Color-Neutrals-black-800, #2d2e33);

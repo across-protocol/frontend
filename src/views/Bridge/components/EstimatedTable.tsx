@@ -194,8 +194,8 @@ const EstimatedTable = ({
                     which incurs a swap fee.
                   </Text>
                   <Text size="sm" color="grey-400">
-                    You can tweak the fee by changing your slippage settings in
-                    the to the right.
+                    You can change the swap slippage in the <SettingsIcon /> to
+                    the right.
                   </Text>
                   <Divider />
                   <SwapRouteWrapper>
