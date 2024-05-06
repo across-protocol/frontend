@@ -54,15 +54,7 @@ export function DepositStatusLowerCard({
   const { programName } = useRewardToken(toChainId);
 
   const { relayerGasFee, relayerCapitalFee, lpFee: _lpFee } = quote || {};
-  const {
-    bridgeFee,
-    swapFee,
-    outputAmount,
-    gasFee,
-    lpFee,
-    swapQuote,
-    capitalFee,
-  } =
+  const { bridgeFee, swapFee, gasFee, lpFee, swapQuote, capitalFee } =
     calcFeesForEstimatedTable({
       gasFee: relayerGasFee ? BigNumber.from(relayerGasFee.total) : undefined,
       capitalFee: relayerCapitalFee
@@ -90,7 +82,7 @@ export function DepositStatusLowerCard({
   );
 
   const FeesTable =
-    lpFee && gasFee && outputAmount ? (
+    lpFee && gasFee && depositArgs?.initialAmount ? (
       <EstimatedTable
         fromChainId={fromChainId}
         toChainId={toChainId}
@@ -107,7 +99,7 @@ export function DepositStatusLowerCard({
             isReceiverContract
           )
         )}
-        parsedAmount={BigNumber.from(outputAmount)}
+        parsedAmount={BigNumber.from(depositArgs.initialAmount)}
         isSwap={isSwap}
         swapQuote={swapQuote}
         swapToken={swapToken}

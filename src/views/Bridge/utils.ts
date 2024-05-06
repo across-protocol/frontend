@@ -400,10 +400,6 @@ export function calcFeesForEstimatedTable(params: {
   parsedAmount?: BigNumber;
   swapQuote?: SwapQuoteApiResponse;
 }) {
-  console.log(
-    params.parsedAmount?.toString(),
-    params.swapQuote?.minExpectedInputTokenAmount.toString()
-  );
   if (
     !params.capitalFee ||
     !params.lpFee ||
