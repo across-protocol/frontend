@@ -297,7 +297,7 @@ export const getRouteDetails = (
   originChainId?: number,
   outputTokenAddress?: string
 ) => {
-  const inputToken = _getTokenByAddress(inputTokenAddress, originChainId);
+  const inputToken = getTokenByAddress(inputTokenAddress, originChainId);
 
   if (!inputToken) {
     throw new InputError(
@@ -312,7 +312,7 @@ export const getRouteDetails = (
     : inputToken.addresses[HUB_POOL_CHAIN_ID];
   const l1Token = isBridgedUsdc(inputToken.symbol)
     ? TOKEN_SYMBOLS_MAP.USDC
-    : _getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
+    : getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
 
   if (!l1Token) {
     throw new InputError("No L1 token found for given input token address");
@@ -347,7 +347,7 @@ export const getRouteDetails = (
   outputTokenAddress ??= inputToken.addresses[destinationChainId];
 
   const outputToken = outputTokenAddress
-    ? _getTokenByAddress(outputTokenAddress, destinationChainId)
+    ? getTokenByAddress(outputTokenAddress, destinationChainId)
     : undefined;
 
   if (!outputToken) {
@@ -395,7 +395,7 @@ export const getRouteDetails = (
   };
 };
 
-const _getTokenByAddress = (tokenAddress: string, chainId?: number) => {
+export const getTokenByAddress = (tokenAddress: string, chainId?: number) => {
   const [, token] =
     Object.entries(TOKEN_SYMBOLS_MAP).find(([_symbol, { addresses }]) =>
       chainId
@@ -1011,6 +1011,12 @@ export function positiveIntStr() {
   });
 }
 
+export function positiveFloatStr(maxValue?: number) {
+  return define<string>("positiveFloatStr", (value) => {
+    return Number(value) >= 0 && (maxValue ? Number(value) <= maxValue : true);
+  });
+}
+
 export function boolStr() {
   return define<string>("boolStr", (value) => {
     return value === "true" || value === "false";
@@ -1503,4 +1509,29 @@ export function sendResponse(
     `s-maxage=${cacheSeconds}, stale-while-revalidate=${staleWhileRevalidateSeconds}`
   );
   return response.status(statusCode).json(body);
+}
+
+export function isSwapRouteEnabled({
+  originChainId,
+  destinationChainId,
+  acrossInputTokenSymbol,
+  acrossOutputTokenSymbol,
+  swapTokenAddress,
+}: {
+  originChainId: number;
+  destinationChainId: number;
+  acrossInputTokenSymbol: string;
+  acrossOutputTokenSymbol: string;
+  swapTokenAddress: string;
+}) {
+  const swapRoute = ENABLED_ROUTES.swapRoutes.find((route) => {
+    return (
+      route.fromChain === originChainId &&
+      route.toChain === destinationChainId &&
+      route.fromTokenSymbol === acrossInputTokenSymbol &&
+      route.toTokenSymbol === acrossOutputTokenSymbol &&
+      route.swapTokenAddress.toLowerCase() === swapTokenAddress.toLowerCase()
+    );
+  });
+  return !!swapRoute;
 }
