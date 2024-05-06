@@ -13,10 +13,11 @@ type Props = {
 };
 
 export function AmountCell({ deposit, token, width }: Props) {
+  const amountToDisplay = deposit.swapTokenAmount || deposit.amount;
   return (
     <StyledAmountCell width={width}>
       <Text color="light-200">
-        {formatUnitsWithMaxFractions(deposit.amount, token.decimals)}
+        {formatUnitsWithMaxFractions(amountToDisplay, token.decimals)}
       </Text>
     </StyledAmountCell>
   );
