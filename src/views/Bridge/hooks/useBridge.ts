@@ -145,7 +145,7 @@ export function useBridge() {
     handleSelectToChain,
     handleSelectInputToken,
     handleSelectOutputToken,
-    handleSetNewSlippage: (newSlippage: number) => setSwapSlippage(newSlippage),
+    handleSetNewSlippage: setSwapSlippage,
     isQuoteLoading: isQuoteLoading || Boolean(parsedAmount && isQuoteIdle),
   };
 }

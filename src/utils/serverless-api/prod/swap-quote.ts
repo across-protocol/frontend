@@ -4,12 +4,14 @@ import { vercelApiBaseUrl } from "utils";
 
 export type SwapQuoteApiCall = typeof swapQuoteApiCall;
 
+export type SupportedDex = "uniswap" | "1inch";
+
 export type SwapQuoteApiResponse = {
   minExpectedInputTokenAmount: BigNumber;
   routerCalldata: string;
   value: string;
   swapAndBridgeAddress: string;
-  dex: string;
+  dex: SupportedDex;
   slippage: number;
 };
 
@@ -26,9 +28,12 @@ export type SwapQuoteApiQueryParams = {
 export async function swapQuoteApiCall(
   params: SwapQuoteApiQueryParams
 ): Promise<SwapQuoteApiResponse> {
-  const response = await axios.get(`${vercelApiBaseUrl}/api/swap-quote`, {
-    params,
-  });
+  const response = await axios.get<{}, { data: SwapQuoteApiResponse }>(
+    `${vercelApiBaseUrl}/api/swap-quote`,
+    {
+      params,
+    }
+  );
   return {
     ...response.data,
     minExpectedInputTokenAmount: BigNumber.from(

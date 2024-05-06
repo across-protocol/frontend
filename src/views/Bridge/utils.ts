@@ -171,16 +171,14 @@ export function findEnabledRoute(
 
   const swapRoute = swapRoutes.find(
     (swapRoute) =>
-      (inputTokenSymbol
-        ? swapRoute.swapTokenSymbol.toUpperCase() ===
-          inputTokenSymbol.toUpperCase()
-        : true) &&
-      (outputTokenSymbol
-        ? swapRoute.toTokenSymbol.toUpperCase() ===
-          outputTokenSymbol.toUpperCase()
-        : true) &&
-      (fromChain ? swapRoute.fromChain === fromChain : true) &&
-      (toChain ? swapRoute.toChain === toChain : true)
+      (!inputTokenSymbol ||
+        swapRoute.swapTokenSymbol.toUpperCase() ===
+          inputTokenSymbol.toUpperCase()) &&
+      (!outputTokenSymbol ||
+        swapRoute.toTokenSymbol.toUpperCase() ===
+          outputTokenSymbol.toUpperCase()) &&
+      (!fromChain || swapRoute.fromChain === fromChain) &&
+      (!toChain || swapRoute.toChain === toChain)
   );
 
   if (swapRoute) {
@@ -402,11 +400,16 @@ export function calcFeesForEstimatedTable(params: {
   parsedAmount?: BigNumber;
   swapQuote?: SwapQuoteApiResponse;
 }) {
+  console.log(
+    params.parsedAmount?.toString(),
+    params.swapQuote?.minExpectedInputTokenAmount.toString()
+  );
   if (
     !params.capitalFee ||
     !params.lpFee ||
     !params.gasFee ||
-    !params.parsedAmount
+    !params.parsedAmount ||
+    (params.isSwap && !params.swapQuote)
   ) {
     return;
   }

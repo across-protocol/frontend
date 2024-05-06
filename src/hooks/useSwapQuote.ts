@@ -9,26 +9,19 @@ const config = getConfig();
 export function useSwapQuoteQuery(params: SwapQuoteQueryKeyParams) {
   return useQuery(
     swapQuoteQueryKey(params),
-    async ({ queryKey }) => {
+    ({ queryKey }) => {
       const [
         ,
-        swapTokenSymbol,
-        acrossInputTokenSymbol,
-        acrossOutputTokenSymbol,
-        swapTokenAmount,
-        originChainId,
-        destinationChainId,
-        swapSlippage,
-      ] = queryKey as [
-        string,
-        string | undefined,
-        string,
-        string,
-        string,
-        number,
-        number,
-        number
-      ];
+        {
+          swapTokenSymbol,
+          acrossInputTokenSymbol,
+          acrossOutputTokenSymbol,
+          swapTokenAmount,
+          originChainId,
+          destinationChainId,
+          swapSlippage,
+        },
+      ] = queryKey;
 
       if (
         !swapTokenSymbol ||
@@ -59,7 +52,7 @@ export function useSwapQuoteQuery(params: SwapQuoteQueryKeyParams) {
         return undefined;
       }
 
-      const swapQuote = await getApiEndpoint().swapQuote({
+      return getApiEndpoint().swapQuote({
         swapToken: swapToken.address,
         acrossInputToken: acrossInputToken.address,
         acrossOutputToken: acrossOutputToken.address,
@@ -68,8 +61,6 @@ export function useSwapQuoteQuery(params: SwapQuoteQueryKeyParams) {
         destinationChainId,
         swapSlippage,
       });
-
-      return swapQuote;
     },
     {
       enabled: !!params.swapTokenSymbol,

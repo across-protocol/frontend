@@ -27,8 +27,7 @@ import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
 import { calcFeesForEstimatedTable } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 
-export type EstimatedTableProps = EstimatedRewards &
-  Omit<FeesCollapsibleProps, "isQuoteLoading">;
+export type EstimatedTableProps = EstimatedRewards & FeesCollapsibleProps;
 
 const PriceFee = ({
   tokenFee,
@@ -106,6 +105,7 @@ const EstimatedTable = ({
   swapQuote,
   swapToken,
   onSetNewSlippage,
+  isQuoteLoading,
 }: EstimatedTableProps) => {
   const rewardDisplaySymbol =
     rewardToken.displaySymbol || rewardToken.symbol.toUpperCase();

@@ -7,6 +7,7 @@ import { Text, TextColor } from "components/Text";
 import {
   formatUnitsWithMaxFractions,
   getChainInfo,
+  getExplorerLinkForToken,
   hubPoolChainId,
   TokenInfo,
 } from "utils";
@@ -29,11 +30,10 @@ const TokenFee = ({
 }: TokenFeeProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const tokenAddress = token.addresses?.[tokenChainId];
-  const tokenLink = tokenAddress
-    ? `${getChainInfo(tokenChainId).explorerUrl}/address/${tokenAddress}`
-    : `${getChainInfo(hubPoolChainId).explorerUrl}/address/${
-        token.addresses?.[hubPoolChainId] || token.mainnetAddress
-      }`;
+  const tokenLink = getExplorerLinkForToken(
+    tokenAddress || token.mainnetAddress!,
+    tokenChainId
+  );
   return (
     <Wrapper>
       <NumericText size="md" color={textColor}>

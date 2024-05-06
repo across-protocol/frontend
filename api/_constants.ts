@@ -24,7 +24,7 @@ export const TOKEN_SYMBOLS_MAP = {
     ...tokenSymbols["USDbC"],
     addresses: {
       ...tokenSymbols["USDbC"].addresses,
-      [CHAIN_IDs.BASE_SEPOLIA]: "0xe634ec56b73779ecffa78109a653fa0ae33d243f",
+      [CHAIN_IDs.BASE_SEPOLIA]: "0xE634Ec56B73779eCFfa78109a653FA0aE33D243f",
     },
   },
 } as const;

@@ -111,6 +111,7 @@ export function DepositStatusLowerCard({
         isSwap={isSwap}
         swapQuote={swapQuote}
         swapToken={swapToken}
+        isQuoteLoading={false}
         {...estimatedRewards}
       />
     ) : null;

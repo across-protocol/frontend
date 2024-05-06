@@ -21,6 +21,7 @@ import {
   UniversalSwapAndBridge,
   UniversalSwapAndBridge__factory,
 } from "utils/typechain";
+import { SupportedDex } from "./serverless-api/prod/swap-quote";
 
 export type Token = constants.TokenInfo & {
   l1TokenAddress: string;
@@ -40,10 +41,11 @@ export class ConfigClient {
   public readonly toChains: Set<number> = new Set();
   public readonly enabledChainsSpokePoolVerifier: Set<number> = new Set();
   public readonly spokePoolVerifierAddress: string = "";
-  public readonly swapAndBridgeAddresses: Record<
-    string,
-    Record<string, string>
-  > = {};
+  public readonly swapAndBridgeAddresses: {
+    [dexKey: string]: {
+      [chainId: string]: string;
+    };
+  } = {};
   public tokenOrder: Record<string, number> = {};
   public chainOrder: Record<string, number> = {};
   public routes: constants.Routes = [];
@@ -148,13 +150,13 @@ export class ConfigClient {
   }
   getSwapAndBridgeAddress(
     chainId: constants.ChainId,
-    dexKey: string
+    dexKey: SupportedDex
   ): string | undefined {
     return this.swapAndBridgeAddresses[dexKey]?.[chainId];
   }
   getSwapAndBridge(
     chainId: constants.ChainId,
-    dexKey: string,
+    dexKey: SupportedDex,
     signer?: Signer
   ): UniversalSwapAndBridge | undefined {
     const address = this.getSwapAndBridgeAddress(chainId, dexKey);
@@ -267,8 +269,8 @@ export class ConfigClient {
   }
   filterSwapRoutes(query: Partial<constants.SwapRoute>): constants.SwapRoutes {
     const cleanQuery: Partial<constants.SwapRoute> = Object.fromEntries(
-      Object.entries(query).filter((entry) => {
-        return entry[1] !== undefined;
+      Object.entries(query).filter(([_, queryValue]) => {
+        return queryValue !== undefined;
       })
     );
     return filter(this.getSwapRoutes(), cleanQuery);
@@ -347,10 +349,10 @@ export class ConfigClient {
       return {
         ...token,
         l1TokenAddress:
-          token.addresses?.[chainId || constants.ChainId.MAINNET] ||
+          token.addresses?.[chainId || constants.hubPoolChainId] ||
           token.mainnetAddress!,
         address:
-          token.addresses?.[chainId || constants.ChainId.MAINNET] ||
+          token.addresses?.[chainId || constants.hubPoolChainId] ||
           token.mainnetAddress!,
         isNative: token.symbol === "ETH",
       };

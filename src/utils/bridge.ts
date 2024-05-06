@@ -1,4 +1,5 @@
 import { ethers, BigNumber } from "ethers";
+import { utils } from "@across-protocol/sdk-v2";
 
 import {
   ChainId,
@@ -8,7 +9,7 @@ import {
 import { tagAddress } from "./format";
 import { getProvider } from "./providers";
 import { getFastFillTimeByRoute } from "./fill-times";
-import { getConfig } from "utils";
+import { getConfig, getCurrentTime } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
@@ -278,7 +279,7 @@ export async function sendDepositV3Tx(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
   fillDeadline ??=
-    Math.floor(Date.now() / 1000) - 60 + (await spokePool.fillDeadlineBuffer());
+    getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
   const tx = await spokePool.populateTransaction.depositV3(
     await signer.getAddress(),
@@ -365,7 +366,7 @@ export async function sendSwapAndBridgeTx(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
   fillDeadline ??=
-    Math.floor(Date.now() / 1000) - 60 + (await spokePool.fillDeadlineBuffer());
+    getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
     swapTokenAddress,
@@ -414,18 +415,22 @@ async function _getSpokePoolAndVerifier({
   const shouldUseSpokePoolVerifier = Boolean(spokePoolVerifier) && isNative;
 
   if (shouldUseSpokePoolVerifier) {
-    const spokePoolVerifierCode = await provider.getCode(
-      spokePoolVerifier!.address
+    const isSpokePoolVerifierDeployed = await utils.isContractDeployedToAddress(
+      spokePoolVerifier!.address,
+      provider
     );
-    if (!spokePoolVerifierCode || spokePoolVerifierCode === "0x") {
+    if (!isSpokePoolVerifierDeployed) {
       throw new Error(
         `SpokePoolVerifier not deployed at ${spokePoolVerifier!.address}`
       );
     }
   }
 
-  const spokePoolCode = await provider.getCode(spokePool.address);
-  if (!spokePoolCode || spokePoolCode === "0x") {
+  const isSpokePoolDeployed = await utils.isContractDeployedToAddress(
+    spokePool.address,
+    provider
+  );
+  if (!isSpokePoolDeployed) {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
 

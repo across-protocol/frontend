@@ -51,11 +51,14 @@ export function bridgeFeesQueryKey(
 }
 
 export function bridgeLimitsQueryKey(
-  inputToken: string,
-  outputToken: string,
-  fromChainId: ChainId,
-  toChainId: ChainId
+  inputToken?: string,
+  outputToken?: string,
+  fromChainId?: ChainId,
+  toChainId?: ChainId
 ) {
+  if (!inputToken || !outputToken || !fromChainId || !toChainId) {
+    return "DISABLED_BRIDGE_LIMITS_QUERY_KEY";
+  }
   return ["bridgeLimits", inputToken, outputToken, fromChainId, toChainId];
 }
 
@@ -147,14 +150,5 @@ export type SwapQuoteQueryKeyParams = {
   swapSlippage: number;
 };
 export function swapQuoteQueryKey(params: SwapQuoteQueryKeyParams) {
-  return [
-    "swap-quote",
-    params.swapTokenSymbol,
-    params.acrossInputTokenSymbol,
-    params.acrossOutputTokenSymbol,
-    params.swapTokenAmount,
-    params.originChainId,
-    params.destinationChainId,
-    params.swapSlippage,
-  ];
+  return ["swap-quote", params] as const;
 }
