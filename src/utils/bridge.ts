@@ -341,15 +341,22 @@ export async function sendSwapAndBridgeTx(
   }
 
   const spokePool = config.getSpokePool(fromChain);
-  if (!spokePool || (await provider.getCode(spokePool.address)) === "0x") {
+  const isSpokePoolDeployed = await utils.isContractDeployedToAddress(
+    spokePool.address,
+    provider
+  );
+  if (!isSpokePoolDeployed) {
     throw new Error(`SpokePool not deployed at ${spokePool.address}`);
   }
 
   const swapAndBridge = config.getSwapAndBridge(fromChain, swapQuote.dex);
-  if (
-    !swapAndBridge ||
-    (await provider.getCode(swapAndBridge.address)) === "0x"
-  ) {
+  const isSwapAndBridgeDeployed =
+    swapAndBridge &&
+    (await utils.isContractDeployedToAddress(
+      swapAndBridge?.address || "",
+      provider
+    ));
+  if (!isSwapAndBridgeDeployed) {
     throw new Error(
       `SwapAndBridge contract not deployed at ${swapAndBridge?.address} for ${swapQuote.dex}`
     );
