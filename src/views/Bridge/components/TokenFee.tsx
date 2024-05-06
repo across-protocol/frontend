@@ -6,9 +6,7 @@ import { useState } from "react";
 import { Text, TextColor } from "components/Text";
 import {
   formatUnitsWithMaxFractions,
-  getChainInfo,
   getExplorerLinkForToken,
-  hubPoolChainId,
   TokenInfo,
 } from "utils";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/external-link-boxed.svg";
