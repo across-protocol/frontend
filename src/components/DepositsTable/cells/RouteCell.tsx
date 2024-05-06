@@ -32,12 +32,14 @@ export function RouteCell({ deposit, width }: Props) {
           iconSize={24}
         />
       </IconPairContainer>
-      <ChainNamesContainer>
-        <Text color="light-200">→ {destinationChain.name}</Text>
-        <Text size="sm" color="grey-400">
+      <div>
+        <ChainNameText color="light-200">
+          → {destinationChain.name}
+        </ChainNameText>
+        <ChainNameText size="sm" color="grey-400">
           {sourceChain.name}
-        </Text>
-      </ChainNamesContainer>
+        </ChainNameText>
+      </div>
     </StyledRouteCell>
   );
 }
@@ -55,4 +57,6 @@ const IconPairContainer = styled.div`
   align-items: center;
 `;
 
-const ChainNamesContainer = styled.div``;
+const ChainNameText = styled(Text)`
+  text-overflow: ellipsis;
+`;
