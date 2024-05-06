@@ -1,6 +1,11 @@
 import { ethers, BigNumber } from "ethers";
 
-import { ChainId, referrerDelimiterHex } from "./constants";
+import {
+  ChainId,
+  referrerDelimiterHex,
+  TOKEN_SYMBOLS_MAP,
+  WETH_ABI,
+} from "./constants";
 import { ERC20__factory } from "./typechain";
 import { tagAddress } from "./format";
 import { getProvider } from "./providers";
@@ -280,4 +285,20 @@ export async function sendAcrossApproval(
   }
   const tokenContract = ERC20__factory.connect(tokenAddress, signer);
   return tokenContract.approve(spokePool.address, amount);
+}
+
+export function buildAcrossHandlerMessage(
+  chainId: number,
+  value: BigNumber,
+  unwrapToEth: boolean
+) {
+  const abiCoder = new ethers.utils.AbiCoder();
+  let iface = new ethers.utils.Interface(WETH_ABI);
+  const data = unwrapToEth
+    ? iface.encodeFunctionData("deposit()")
+    : iface.encodeFunctionData("withdraw(uint256 wad)", [value]);
+  return abiCoder.encode(
+    ["address", "bytes", "uint256"],
+    [TOKEN_SYMBOLS_MAP.WETH.addresses[chainId], data, value]
+  );
 }
