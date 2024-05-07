@@ -610,12 +610,20 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.BASE_SEPOLIA,
-            tokens: ["WETH", "USDC"],
+            tokens: [
+              "WETH",
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
+            ],
             swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM_SEPOLIA,
-            tokens: ["WETH", "USDC"],
+            tokens: [
+              "WETH",
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+            ],
             swapTokens: [],
           },
           {
@@ -640,6 +648,25 @@ const enabledRoutes = {
               },
             ],
           },
+          {
+            chainId: CHAIN_IDs.OPTIMISM_SEPOLIA,
+            tokens: [
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+            ],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
+          },
         ],
       },
       {
@@ -657,6 +684,25 @@ const enabledRoutes = {
                 swapInputTokenSymbol: "USDC.e",
                 acrossInputTokenSymbol: "USDC",
                 acrossOutputTokenSymbol: "USDC",
+              },
+            ],
+          },
+          {
+            chainId: CHAIN_IDs.BASE_SEPOLIA,
+            tokens: [
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
+            ],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDbC",
               },
             ],
           },
@@ -738,14 +784,22 @@ function transformBridgeRoute(route: Route, hubPoolChainId: number) {
         typeof token === "object" ? token.inputTokenSymbol : token;
       const outputTokenSymbol =
         typeof token === "object" ? token.outputTokenSymbol : token;
-
-      return transformToRoute(
-        route,
-        toChain,
-        inputTokenSymbol,
-        outputTokenSymbol,
-        hubPoolChainId
-      );
+      try {
+        return transformToRoute(
+          route,
+          toChain,
+          inputTokenSymbol,
+          outputTokenSymbol,
+          hubPoolChainId
+        );
+      } catch (e) {
+        if (e instanceof Error) {
+          throw new Error(
+            `Failed to transform bridge route ${route.fromChain}->${toChain.chainId}: ${e.message}`
+          );
+        }
+        throw e;
+      }
     });
   });
 }
@@ -764,20 +818,29 @@ function transformSwapRoute(route: Route, hubPoolChainId: number) {
         route.fromChain,
         hubPoolChainId
       );
-      const bridgeRoute = transformToRoute(
-        route,
-        toChain,
-        acrossInputTokenSymbol,
-        acrossOutputTokenSymbol,
-        hubPoolChainId
-      );
+      try {
+        const bridgeRoute = transformToRoute(
+          route,
+          toChain,
+          acrossInputTokenSymbol,
+          acrossOutputTokenSymbol,
+          hubPoolChainId
+        );
 
-      return {
-        ...bridgeRoute,
-        swapTokenAddress: swapInputToken.address,
-        swapTokenSymbol: swapInputToken.symbol,
-        swapTokenL1TokenAddress: swapInputToken.l1TokenAddress,
-      };
+        return {
+          ...bridgeRoute,
+          swapTokenAddress: swapInputToken.address,
+          swapTokenSymbol: swapInputToken.symbol,
+          swapTokenL1TokenAddress: swapInputToken.l1TokenAddress,
+        };
+      } catch (e) {
+        if (e instanceof Error) {
+          throw new Error(
+            `Failed to transform swap route ${route.fromChain}->${toChain.chainId}: ${e.message}`
+          );
+        }
+        throw e;
+      }
     });
   });
 }
@@ -826,7 +889,7 @@ function getTokenBySymbol(
 
   if (!tokenAddress) {
     throw new Error(
-      `Could not find address for ${tokenSymbol}  on chain ${chainId}`
+      `Could not find address for ${tokenSymbol} on chain ${chainId}`
     );
   }
 
