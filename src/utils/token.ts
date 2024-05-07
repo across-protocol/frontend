@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { getProvider, ChainId, getConfig } from "utils";
+import { getProvider, ChainId, getConfig, getChainInfo } from "utils";
 import { ERC20__factory } from "utils/typechain";
 
 export async function getNativeBalance(
@@ -60,4 +60,11 @@ export async function getAllowance(
   }
   const contract = ERC20__factory.connect(address, provider);
   return contract.allowance(owner, spender, { blockTag: blockNumber });
+}
+
+export function getExplorerLinkForToken(
+  tokenAddress: string,
+  tokenChainId: number
+) {
+  return `${getChainInfo(tokenChainId).explorerUrl}/address/${tokenAddress}`;
 }

@@ -3,11 +3,16 @@
   "hubPoolAddress": "0x14224e63716afAcE30C9a417E0542281869f7d9e",
   "hubPoolWethAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
   "acrossConfigStoreAddress": "0xB3De1e212B49e68f4a68b5993f31f63946FCA2a6",
-  "acrossTokenAddress": "0x44108f0223A3C3028F5Fe7AEC7f9bb2E66beF82F",
-  "acceleratingDistributorAddress": "0x0000000000000000000000000000000000000000",
-  "merkleDistributorAddress": "0x0000000000000000000000000000000000000000",
-  "claimAndStakeAddress": "0x0000000000000000000000000000000000000000",
-  "swapAndBridgeAddresses": {},
+  "acrossTokenAddress": "0x49fCaC04AE71dbD074304Fb12071bD771e0E927A",
+  "acceleratingDistributorAddress": "0x3a202A5F5941b8b6b56EE24f8503aD31Fba18b05",
+  "merkleDistributorAddress": "0x711615993FD2b9D22b598f7b36B762eA89E9EC2b",
+  "claimAndStakeAddress": "0x765904d00BaAEF371ea1f6cfd41af19BbA644766",
+  "swapAndBridgeAddresses": {
+    "uniswap": {
+      "84532": "0xf81C7cbC1196FACb327BD5B7021f9C1c220D0328",
+      "11155420": "0x17496824Ba574A4e9De80110A91207c4c63e552a"
+    }
+  },
   "routes": [
     {
       "fromChain": 11155111,
@@ -120,7 +125,36 @@
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
     }
   ],
-  "swapRoutes": [],
+  "swapRoutes": [
+    {
+      "fromChain": 84532,
+      "toChain": 11155111,
+      "fromTokenAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "toTokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "fromSpokeAddress": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "swapTokenAddress": "0xE634Ec56B73779eCFfa78109a653FA0aE33D243f",
+      "swapTokenSymbol": "USDbC",
+      "swapTokenL1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    },
+    {
+      "fromChain": 11155420,
+      "toChain": 11155111,
+      "fromTokenAddress": "0x5fd84259d66Cd46123540766Be93DFE6D43130D7",
+      "toTokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "fromSpokeAddress": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "swapTokenAddress": "0x9552a0a6624A23B848060AE5901659CDDa1f83f8",
+      "swapTokenSymbol": "USDC.e",
+      "swapTokenL1TokenAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+    }
+  ],
   "pools": [],
   "spokePoolVerifier": {
     "address": "0x0000000000000000000000000000000000000000",

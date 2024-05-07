@@ -235,7 +235,13 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC",
+                acrossInputTokenSymbol: "USDC.e",
+                acrossOutputTokenSymbol: "USDC",
+              },
+            ],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
@@ -270,12 +276,24 @@ const enabledRoutes = {
               "ACX",
               "USDT",
             ],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC",
+                acrossInputTokenSymbol: "USDC.e",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
             tokens: ["WETH", "USDC.e", "WBTC", "USDT", "DAI"],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC",
+                acrossInputTokenSymbol: "USDC.e",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -285,12 +303,24 @@ const enabledRoutes = {
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
               "BAL",
             ],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC",
+                acrossInputTokenSymbol: "USDC.e",
+                acrossOutputTokenSymbol: "USDbC",
+              },
+            ],
           },
           {
             chainId: CHAIN_IDs.LINEA,
             tokens: ["WETH", "USDC.e", "USDT", "DAI", "WBTC"],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC",
+                acrossInputTokenSymbol: "USDC.e",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
           },
         ],
       },
@@ -542,16 +572,23 @@ const enabledRoutes = {
       "AcrossConfigStore",
       CHAIN_IDs.SEPOLIA
     ),
-    acrossTokenAddress: TOKEN_SYMBOLS_MAP.ACX.addresses[CHAIN_IDs.MAINNET],
-    acceleratingDistributorAddress: sdkUtils.AddressZero,
-    merkleDistributorAddress: sdkUtils.AddressZero,
-    claimAndStakeAddress: sdkUtils.AddressZero,
+    acrossTokenAddress: "0x49fCaC04AE71dbD074304Fb12071bD771e0E927A",
+    acceleratingDistributorAddress:
+      "0x3a202A5F5941b8b6b56EE24f8503aD31Fba18b05",
+    merkleDistributorAddress: "0x711615993FD2b9D22b598f7b36B762eA89E9EC2b",
+    claimAndStakeAddress: "0x765904d00BaAEF371ea1f6cfd41af19BbA644766",
     pools: [],
     spokePoolVerifier: {
       address: sdkUtils.AddressZero,
       enabledChains: [],
     },
-    swapAndBridgeAddresses: {},
+    swapAndBridgeAddresses: {
+      uniswap: {
+        [CHAIN_IDs.BASE_SEPOLIA]: "0xf81C7cbC1196FACb327BD5B7021f9C1c220D0328", // Mocked
+        [CHAIN_IDs.OPTIMISM_SEPOLIA]:
+          "0x17496824Ba574A4e9De80110A91207c4c63e552a", // Mocked
+      },
+    },
     routes: [
       {
         fromChain: CHAIN_IDs.SEPOLIA,
@@ -580,8 +617,14 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.SEPOLIA,
-            swapTokens: [],
             tokens: ["WETH", "USDC"],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+            ],
           },
         ],
       },
@@ -594,8 +637,14 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.SEPOLIA,
-            swapTokens: [],
             tokens: ["WETH", "USDC"],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+            ],
           },
         ],
       },

@@ -1,8 +1,7 @@
 import { useQuery } from "react-query";
-import { bridgeLimitsQueryKey, ChainId, getConfig } from "utils";
+import { bridgeLimitsQueryKey, ChainId, getConfig, isDefined } from "utils";
 import { BigNumber } from "ethers";
 import getApiEndpoint from "utils/serverless-api";
-import { isDefined } from "utils/defined";
 
 export interface BridgeLimits {
   minDeposit: BigNumber;
@@ -11,45 +10,50 @@ export interface BridgeLimits {
   maxDepositShortDelay: BigNumber;
 }
 
+const config = getConfig();
+
 /**
  * This hook calculates the limit .
- * @param token The token to get limits for.
+ * @param inputTokenSymbol The input token to get limits for.
+ * @param outputTokenSymbol The output token to get limits for.
  * @param fromChainId The chain id from which the deposit transaction is sent.
  * @param toChainId The chain id where the relay will be sent.
  * @returns The limits datastructure returned from the serverless api.
  */
 export function useBridgeLimits(
-  tokenSymbol?: string,
+  inputTokenSymbol?: string,
+  outputTokenSymbol?: string,
   fromChainId?: ChainId,
   toChainId?: ChainId
 ) {
-  const enabledQuery =
-    isDefined<string>(tokenSymbol) &&
-    isDefined<ChainId>(fromChainId) &&
-    isDefined<ChainId>(toChainId);
-  const queryKey = enabledQuery
-    ? bridgeLimitsQueryKey(tokenSymbol, fromChainId, toChainId)
-    : "DISABLED_BRIDGE_LIMITS_QUERY";
+  const enabled = !!(
+    inputTokenSymbol &&
+    outputTokenSymbol &&
+    fromChainId &&
+    toChainId
+  );
   const { data: limits, ...delegated } = useQuery(
-    queryKey,
+    bridgeLimitsQueryKey(
+      inputTokenSymbol,
+      outputTokenSymbol,
+      fromChainId,
+      toChainId
+    ),
     () => {
-      if (
-        !(
-          isDefined<string>(tokenSymbol) &&
-          isDefined<ChainId>(fromChainId) &&
-          isDefined<ChainId>(toChainId)
-        )
-      ) {
-        return;
+      if (!enabled) {
+        return undefined;
       }
-      const token = getConfig().getTokenInfoBySymbol(fromChainId, tokenSymbol);
-      return getApiEndpoint().limits(token.address, fromChainId, toChainId);
+
+      return getApiEndpoint().limits(
+        config.getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
+        config.getTokenInfoBySymbol(toChainId, outputTokenSymbol).address,
+        fromChainId,
+        toChainId
+      );
     },
     {
-      enabled: enabledQuery,
-      // 5 mins.
-      staleTime: 300000,
-      retry: 2,
+      enabled,
+      refetchInterval: 300_000, // 5 minutes
     }
   );
   return {

@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 import { useState } from "react";
+import { BigNumber } from "ethers";
 
 import { useAmplitude, useConnection } from "hooks";
 import {
@@ -19,7 +20,7 @@ import {
 import { ampli } from "ampli";
 
 import { convertForDepositQuery, convertForFillQuery } from "../utils";
-import { FromBridgePagePayload } from "../types";
+import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 
 export function useDepositTracking(
   depositTxHash: string,
@@ -66,14 +67,14 @@ export function useDepositTracking(
           addLocalDeposit(convertForDepositQuery(data, fromBridgePagePayload));
         }
 
-        if (account !== fromBridgePagePayload.account) {
+        if (account !== data.parsedDepositLog.args.depositor) {
           return;
         }
 
         addToAmpliQueue(() => {
           ampli.transferDepositCompleted(
             generateDepositConfirmed(
-              fromBridgePagePayload.quote,
+              fromBridgePagePayload.quoteForAnalytics,
               fromBridgePagePayload.referrer,
               fromBridgePagePayload.timeSigned,
               data.depositTxReceipt.transactionHash,
@@ -120,16 +121,17 @@ export function useDepositTracking(
         // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
         addLocalDeposit(convertForFillQuery(data, fromBridgePagePayload));
 
-        const { quote, sendDepositArgs, tokenPrice } = fromBridgePagePayload;
+        const { quoteForAnalytics, depositArgs, tokenPrice } =
+          fromBridgePagePayload;
 
         recordTransferUserProperties(
-          sendDepositArgs.amount,
-          tokenPrice,
-          getToken(quote.tokenSymbol).decimals,
-          quote.tokenSymbol.toLowerCase(),
-          Number(quote.fromChainId),
-          Number(quote.toChainId),
-          quote.fromChainName
+          BigNumber.from(depositArgs.amount),
+          BigNumber.from(tokenPrice),
+          getToken(quoteForAnalytics.tokenSymbol).decimals,
+          quoteForAnalytics.tokenSymbol.toLowerCase(),
+          Number(quoteForAnalytics.fromChainId),
+          Number(quoteForAnalytics.toChainId),
+          quoteForAnalytics.fromChainName
         );
       },
     }

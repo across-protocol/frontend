@@ -1,9 +1,12 @@
 import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
+import { useState } from "react";
 
 import { Text, TextColor } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
+import { ReactComponent as SwapIcon } from "assets/icons/swap.svg";
+import { ReactComponent as SettingsIcon } from "assets/icons/settings.svg";
 
 import {
   capitalizeFirstLetter,
@@ -12,6 +15,7 @@ import {
   formatUSD,
   formatWeiPct,
   getChainInfo,
+  isBridgedUsdc,
   isDefined,
   QUERIESV2,
   TokenInfo,
@@ -20,9 +24,10 @@ import {
 import TokenFee from "./TokenFee";
 import { type Props as FeesCollapsibleProps } from "./FeesCollapsible";
 import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
+import { calcFeesForEstimatedTable } from "../utils";
+import { SwapSlippageModal } from "./SwapSlippageModal";
 
-export type EstimatedTableProps = EstimatedRewards &
-  Omit<FeesCollapsibleProps, "isQuoteLoading">;
+export type EstimatedTableProps = EstimatedRewards & FeesCollapsibleProps;
 
 const PriceFee = ({
   tokenFee,
@@ -32,6 +37,7 @@ const PriceFee = ({
   rewardPercentageOfFees,
   hideSymbolOnEmpty = true,
   tokenIconFirstOnMobile = false,
+  hideTokenIcon,
 }: {
   tokenFee?: BigNumber;
   baseCurrencyFee?: BigNumber;
@@ -40,10 +46,10 @@ const PriceFee = ({
   rewardPercentageOfFees?: BigNumber;
   hideSymbolOnEmpty?: boolean;
   tokenIconFirstOnMobile?: boolean;
+  hideTokenIcon?: boolean;
 }) => {
-  const Token = (isDefined(tokenFee) || !hideSymbolOnEmpty) && (
-    <TokenSymbol src={token.logoURI} />
-  );
+  const Token = (isDefined(tokenFee) || !hideSymbolOnEmpty) &&
+    !hideTokenIcon && <TokenSymbol src={token.logoURI} />;
 
   return (
     <BaseCurrencyWrapper invertOnMobile={tokenIconFirstOnMobile}>
@@ -79,22 +85,42 @@ const EstimatedTable = ({
   toChainId,
   estimatedTime,
   gasFee,
-  bridgeFee,
+  capitalFee,
+  lpFee,
   inputToken,
-  totalReceived,
   outputToken,
   referralRewardAsBaseCurrency,
   gasFeeAsBaseCurrency,
   bridgeFeeAsBaseCurrency,
   netFeeAsBaseCurrency,
+  swapFeeAsBaseCurrency,
   reward,
   rewardPercentage,
   hasDepositReward,
   rewardToken,
   isRewardAcx,
+  isSwap,
+  parsedAmount,
+  currentSwapSlippage,
+  swapQuote,
+  swapToken,
+  onSetNewSlippage,
+  isQuoteLoading,
 }: EstimatedTableProps) => {
   const rewardDisplaySymbol =
     rewardToken.displaySymbol || rewardToken.symbol.toUpperCase();
+  const baseToken = swapToken || inputToken;
+  const { bridgeFee, outputAmount, swapFee } =
+    calcFeesForEstimatedTable({
+      gasFee,
+      capitalFee,
+      lpFee,
+      isSwap,
+      parsedAmount,
+      swapQuote,
+    }) || {};
+
+  const [isSlippageModalOpen, setSlippageModalOpen] = useState(false);
 
   return (
     <Wrapper>
@@ -113,7 +139,6 @@ const EstimatedTable = ({
             tokenFee={reward}
             baseCurrencyFee={referralRewardAsBaseCurrency}
             hideSymbolOnEmpty={false}
-            tokenIconFirstOnMobile
           />
         </ReferralRewardWrapper>
       </Row>
@@ -149,6 +174,78 @@ const EstimatedTable = ({
         </Text>
       </Row>
       <Divider />
+      {isSwap && swapQuote && swapToken && swapFee && (
+        <Row>
+          <ToolTipWrapper>
+            <SwapFeeRowLabelWrapper>
+              <SwapIcon />
+              <Text size="md" color="grey-400">
+                Swap fee
+              </Text>
+            </SwapFeeRowLabelWrapper>
+            <Tooltip
+              tooltipId="swap-fee-info"
+              title="Swap fee"
+              maxWidth={420}
+              body={
+                <SwapFeeTooltipBody>
+                  <Text size="sm" color="grey-400">
+                    This bridge transaction requires you to perform a token swap
+                    which incurs a swap fee.
+                  </Text>
+                  <Text size="sm" color="grey-400">
+                    You can change the swap slippage in the <SettingsIcon /> to
+                    the right.
+                  </Text>
+                  <Divider />
+                  <SwapRouteWrapper>
+                    <Text size="sm" color="grey-400">
+                      Swapping
+                    </Text>
+                    <Text size="sm" color="white">
+                      {swapToken.displaySymbol || swapToken.symbol}
+                    </Text>
+                    <TokenSymbol src={swapToken.logoURI} />
+                    <Text size="sm" color="grey-400">
+                      for
+                    </Text>
+                    <Text size="sm" color="white">
+                      {inputToken.displaySymbol || inputToken.symbol}
+                    </Text>
+                    <TokenSymbol src={inputToken.logoURI} />
+                    <Text size="sm" color="grey-400">
+                      on
+                    </Text>
+                    <Text size="sm" color="white" casing="capitalize">
+                      {swapQuote.dex}
+                    </Text>
+                  </SwapRouteWrapper>
+                </SwapFeeTooltipBody>
+              }
+              placement="bottom-start"
+            >
+              <InfoIconWrapper>
+                <InfoIcon />
+              </InfoIconWrapper>
+            </Tooltip>
+          </ToolTipWrapper>
+          <SwapSlippageSettings
+            onClick={() => {
+              if (onSetNewSlippage && currentSwapSlippage) {
+                setSlippageModalOpen(true);
+              }
+            }}
+          >
+            <PriceFee
+              token={baseToken}
+              tokenFee={swapFee}
+              baseCurrencyFee={swapFeeAsBaseCurrency}
+              hideTokenIcon
+            />
+            <SettingsIcon />
+          </SwapSlippageSettings>
+        </Row>
+      )}
       <Row>
         <ToolTipWrapper>
           <Text size="md" color="grey-400">
@@ -165,7 +262,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <PriceFee
-          token={inputToken}
+          token={baseToken}
           tokenFee={bridgeFee}
           baseCurrencyFee={bridgeFeeAsBaseCurrency}
         />
@@ -186,7 +283,7 @@ const EstimatedTable = ({
           </Tooltip>
         </ToolTipWrapper>
         <PriceFee
-          token={inputToken}
+          token={baseToken}
           tokenFee={gasFee}
           baseCurrencyFee={gasFeeAsBaseCurrency}
         />
@@ -223,18 +320,30 @@ const EstimatedTable = ({
           You will receive
         </Text>
         <Text size="md" color="grey-400">
-          {totalReceived ? (
+          {outputAmount ? (
             <TotalReceive
-              totalReceived={totalReceived}
-              inputToken={inputToken}
+              totalReceived={outputAmount}
+              inputToken={baseToken}
               outputToken={outputToken}
               textColor="light-200"
+              destinationChainId={toChainId}
             />
           ) : (
             "-"
           )}
         </Text>
       </Row>
+      {onSetNewSlippage && currentSwapSlippage && (
+        <SwapSlippageModal
+          isOpen={isSlippageModalOpen}
+          onClose={() => setSlippageModalOpen(false)}
+          onConfirm={(validSlippage) => {
+            onSetNewSlippage(validSlippage);
+            setSlippageModalOpen(false);
+          }}
+          currentSlippage={currentSwapSlippage}
+        />
+      )}
     </Wrapper>
   );
 };
@@ -244,21 +353,26 @@ export function TotalReceive({
   inputToken,
   outputToken,
   textColor,
+  destinationChainId,
 }: {
   totalReceived: BigNumber;
   outputToken: TokenInfo;
   inputToken: TokenInfo;
   textColor?: TextColor;
+  destinationChainId: number;
 }) {
   if (
     inputToken.symbol === outputToken.symbol ||
-    inputToken.symbol === "USDC"
+    inputToken.symbol === "USDC" ||
+    isBridgedUsdc(inputToken.symbol)
   ) {
     return (
       <TokenFee
         amount={totalReceived}
         token={outputToken}
         textColor={textColor}
+        showTokenLinkOnHover
+        tokenChainId={destinationChainId}
       />
     );
   }
@@ -280,6 +394,8 @@ export function TotalReceive({
         amount={totalReceived}
         token={outputToken}
         textColor="warning"
+        showTokenLinkOnHover
+        tokenChainId={destinationChainId}
       />
     </TotalReceiveRow>
   );
@@ -412,4 +528,37 @@ const PercentageText = styled(Text)`
   @media ${QUERIESV2.xs.andDown} {
     display: none;
   }
+`;
+
+const SwapSlippageSettings = styled.div`
+  display: flex;
+  padding: 6px 12px;
+  align-items: center;
+  gap: 4px;
+
+  border-radius: 22px;
+  border: 1px solid var(--Color-Neutrals-grey-500, #4c4e57);
+  background: var(--Color-Neutrals-grey-600, #3e4047);
+
+  cursor: pointer;
+`;
+
+const SwapFeeRowLabelWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+`;
+
+const SwapFeeTooltipBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const SwapRouteWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 `;

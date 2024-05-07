@@ -21,7 +21,8 @@ import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 import { useDepositTracking } from "../hooks/useDepositTracking";
 import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
-import { DepositStatus, FromBridgePagePayload } from "../types";
+import { DepositStatus } from "../types";
+import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 
 const grayscaleLogos: Record<number, React.ReactNode> = {
   [ChainId.ARBITRUM]: <ArbitrumGrayscaleLogo />,

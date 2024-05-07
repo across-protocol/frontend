@@ -5,32 +5,47 @@ import { BigNumber } from "ethers";
 
 import { Text } from "components";
 import { ReactComponent as ChevronDown } from "assets/icons/arrow-16.svg";
-import { TokenInfo } from "utils";
+import { ReactComponent as _SwapIcon } from "assets/icons/swap.svg";
+import { QUERIESV2, TokenInfo } from "utils";
 
 import EstimatedTable, { TotalReceive } from "./EstimatedTable";
 import { useEstimatedRewards } from "../hooks/useEstimatedRewards";
 import TokenFee from "./TokenFee";
+import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
+import { calcFeesForEstimatedTable } from "../utils";
 
 export type Props = {
   isQuoteLoading: boolean;
   fromChainId: number;
   toChainId: number;
+  isSwap: boolean;
   estimatedTime?: string;
   gasFee?: BigNumber;
-  bridgeFee?: BigNumber;
-  totalReceived?: BigNumber;
+  capitalFee?: BigNumber;
+  lpFee?: BigNumber;
   inputToken: TokenInfo;
   outputToken: TokenInfo;
+  swapToken?: TokenInfo;
+  swapQuote?: SwapQuoteApiResponse;
+  parsedAmount?: BigNumber;
+  currentSwapSlippage?: number;
+  onSetNewSlippage?: (slippage: number) => void;
 };
 
 export function FeesCollapsible(props: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const baseToken = props.swapToken || props.inputToken;
+  const { bridgeFee, outputAmount, swapFee } =
+    calcFeesForEstimatedTable(props) || {};
+
   const estimatedRewards = useEstimatedRewards(
-    props.inputToken,
+    baseToken,
     props.toChainId,
+    props.isSwap,
     props.gasFee,
-    props.bridgeFee
+    bridgeFee,
+    swapFee
   );
 
   if (!isExpanded) {
@@ -44,13 +59,14 @@ export function FeesCollapsible(props: Props) {
             <CollapsedLoadingSkeleton />
           ) : (
             <CollapsedFeesAmountsWrapper>
-              {props.totalReceived ? (
+              {outputAmount ? (
                 <>
                   <TotalReceive
-                    totalReceived={props.totalReceived}
-                    inputToken={props.inputToken}
+                    totalReceived={outputAmount}
+                    inputToken={baseToken}
                     outputToken={props.outputToken}
                     textColor="light-200"
+                    destinationChainId={props.toChainId}
                   />
                   {estimatedRewards.reward && (
                     <>
@@ -59,23 +75,26 @@ export function FeesCollapsible(props: Props) {
                         token={estimatedRewards.rewardToken}
                         amount={estimatedRewards.reward}
                         textColor="light-200"
+                        tokenChainId={props.toChainId}
                       />
                     </>
                   )}
-                  {props.estimatedTime && (
+                  {props.isSwap ? null : props.estimatedTime ? (
                     <>
                       <Text color="grey-400"> in </Text>
                       <Text color="light-200">{props.estimatedTime}</Text>
                     </>
-                  )}
+                  ) : null}
                 </>
               ) : (
                 "-"
               )}
             </CollapsedFeesAmountsWrapper>
           )}
-
-          <ChevronDown />
+          <CollapsedIconsWrapper>
+            {props.isSwap ? <SwapIcon /> : null}
+            <ChevronDown />
+          </CollapsedIconsWrapper>
         </CollapsedFeesReceiveWrapper>
       </CollapsedFeesWrapper>
     );
@@ -124,6 +143,11 @@ const CollapsedFeesWrapper = styled.div`
   height: 48px;
   gap: 12px;
   width: 100%;
+
+  @media ${QUERIESV2.xs.andDown} {
+    flex-direction: column;
+    height: auto;
+  }
 `;
 
 const CollapsedFeesLabel = styled.div`
@@ -150,11 +174,17 @@ const CollapsedFeesReceiveWrapper = styled.div`
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
 
   cursor: pointer;
+
+  @media ${QUERIESV2.xs.andDown} {
+    min-height: 50px;
+    margin-bottom: 12px;
+  }
 `;
 
 const CollapsedFeesAmountsWrapper = styled.div`
   display: flex;
   flex-direction: row;
+  align-items: center;
   gap: 8px;
 `;
 
@@ -186,4 +216,15 @@ const ExpandedFeesTableWrapper = styled.div`
 
 const ChevronUp = styled(ChevronDown)`
   rotate: 180deg;
+`;
+
+const SwapIcon = styled(_SwapIcon)`
+  align-self: flex-end;
+`;
+
+const CollapsedIconsWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 `;

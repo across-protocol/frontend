@@ -1,16 +1,15 @@
 import { BigNumber } from "ethers";
 
 import { AmountInput as BaseAmountInput } from "components/AmountInput";
-import { Route } from "utils";
 
-import { AmountInputError } from "../utils";
+import { AmountInputError, SelectedRoute } from "../utils";
 
 type Props = {
   balance?: BigNumber;
   amountInput: string;
   onChangeAmountInput: (input: string) => void;
   onClickMaxBalance: () => void;
-  selectedRoute: Route;
+  selectedRoute: SelectedRoute;
   validationError?: AmountInputError;
 };
 
@@ -25,7 +24,11 @@ export function AmountInput({
   return (
     <BaseAmountInput
       dataCy="bridge-amount-input"
-      inputTokenSymbol={selectedRoute.fromTokenSymbol}
+      inputTokenSymbol={
+        selectedRoute.type === "swap"
+          ? selectedRoute.swapTokenSymbol
+          : selectedRoute.fromTokenSymbol
+      }
       validationError={validationError}
       onChangeAmountInput={onChangeAmountInput}
       onClickMaxBalance={onClickMaxBalance}

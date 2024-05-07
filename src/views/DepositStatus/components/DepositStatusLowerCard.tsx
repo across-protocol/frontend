@@ -1,16 +1,19 @@
 import styled from "@emotion/styled";
-import { utils } from "ethers";
+import { BigNumber } from "ethers";
 import { useHistory } from "react-router-dom";
 
 import { SecondaryButton } from "components/Button";
 import EstimatedTable from "views/Bridge/components/EstimatedTable";
-import { getReceiveTokenSymbol } from "views/Bridge/utils";
+import {
+  calcFeesForEstimatedTable,
+  getReceiveTokenSymbol,
+} from "views/Bridge/utils";
 import { useEstimatedRewards } from "views/Bridge/hooks/useEstimatedRewards";
 import { getToken, COLORS } from "utils";
 import { useIsContractAddress } from "hooks/useIsContractAddress";
 
 import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
-import { FromBridgePagePayload } from "../types";
+import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import ReferralCTA from "views/Bridge/components/ReferralCTA";
 import { useRewardToken } from "hooks/useRewardToken";
 
@@ -29,58 +32,86 @@ export function DepositStatusLowerCard({
   outputTokenSymbol,
   fromBridgePagePayload,
 }: Props) {
-  const { quote } = fromBridgePagePayload || {};
+  const {
+    quote,
+    depositArgs,
+    expectedFillTime,
+    recipient,
+    selectedRoute,
+    swapQuote: _swapQuote,
+  } = fromBridgePagePayload || {};
 
-  const isReceiverContract = useIsContractAddress(quote?.recipient);
+  const isReceiverContract = useIsContractAddress(recipient);
   const history = useHistory();
 
-  const inputTokenInfo = getToken(inputTokenSymbol);
+  const isSwap = selectedRoute?.type === "swap";
+  const inputToken = getToken(inputTokenSymbol);
+  const swapToken = isSwap
+    ? getToken(selectedRoute.swapTokenSymbol)
+    : undefined;
+  const baseToken = swapToken || inputToken;
   const outputTokenInfo = getToken(outputTokenSymbol);
   const { programName } = useRewardToken(toChainId);
 
-  const gasFee = utils.parseUnits(
-    quote?.relayGasFeeTotal || "0",
-    inputTokenInfo.decimals
-  );
-  const bridgeFee = utils
-    .parseUnits(quote?.totalBridgeFee || "0", inputTokenInfo.decimals)
-    .sub(
-      utils.parseUnits(quote?.relayGasFeeTotal || "0", inputTokenInfo.decimals)
-    );
+  const { relayerGasFee, relayerCapitalFee, lpFee: _lpFee } = quote || {};
+  const { bridgeFee, swapFee, gasFee, lpFee, swapQuote, capitalFee } =
+    calcFeesForEstimatedTable({
+      gasFee: relayerGasFee ? BigNumber.from(relayerGasFee.total) : undefined,
+      capitalFee: relayerCapitalFee
+        ? BigNumber.from(relayerCapitalFee.total)
+        : undefined,
+      lpFee: _lpFee ? BigNumber.from(_lpFee.total) : undefined,
+      isSwap,
+      parsedAmount: depositArgs?.initialAmount,
+      swapQuote: _swapQuote
+        ? {
+            ..._swapQuote,
+            minExpectedInputTokenAmount: BigNumber.from(
+              _swapQuote.minExpectedInputTokenAmount
+            ),
+          }
+        : undefined,
+    }) || {};
   const estimatedRewards = useEstimatedRewards(
-    inputTokenInfo,
+    baseToken,
     toChainId,
+    isSwap,
     gasFee,
-    bridgeFee
+    bridgeFee,
+    swapFee
   );
 
-  const FeesTable = quote ? (
-    <EstimatedTable
-      fromChainId={fromChainId}
-      toChainId={toChainId}
-      estimatedTime={quote.expectedFillTimeInMinutes}
-      gasFee={utils.parseUnits(quote.relayGasFeeTotal, inputTokenInfo.decimals)}
-      bridgeFee={utils
-        .parseUnits(quote.totalBridgeFee, inputTokenInfo.decimals)
-        .sub(utils.parseUnits(quote.relayGasFeeTotal, inputTokenInfo.decimals))}
-      totalReceived={utils.parseUnits(quote.toAmount, inputTokenInfo.decimals)}
-      inputToken={inputTokenInfo}
-      outputToken={getToken(
-        getReceiveTokenSymbol(
-          toChainId,
-          inputTokenInfo.symbol,
-          outputTokenInfo.symbol,
-          isReceiverContract
-        )
-      )}
-      {...estimatedRewards}
-    />
-  ) : null;
+  const FeesTable =
+    lpFee && gasFee && depositArgs?.initialAmount ? (
+      <EstimatedTable
+        fromChainId={fromChainId}
+        toChainId={toChainId}
+        estimatedTime={expectedFillTime}
+        gasFee={gasFee}
+        lpFee={lpFee}
+        capitalFee={capitalFee}
+        inputToken={getToken(inputTokenSymbol)}
+        outputToken={getToken(
+          getReceiveTokenSymbol(
+            toChainId,
+            inputTokenSymbol,
+            outputTokenInfo.symbol,
+            isReceiverContract
+          )
+        )}
+        parsedAmount={BigNumber.from(depositArgs.initialAmount)}
+        isSwap={isSwap}
+        swapQuote={swapQuote}
+        swapToken={swapToken}
+        isQuoteLoading={false}
+        {...estimatedRewards}
+      />
+    ) : null;
 
   return (
     <>
       <EarnByLpAndStakingCard
-        l1TokenAddress={inputTokenInfo.mainnetAddress!}
+        l1TokenAddress={baseToken.mainnetAddress!}
         bridgeTokenSymbol={inputTokenSymbol}
       />
       <ReferralCTA program={programName} />
