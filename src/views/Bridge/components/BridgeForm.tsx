@@ -138,7 +138,7 @@ const BridgeForm = ({
           />
         </TokenSelectorWrapper>
       </RowWrapper>
-      {amountInput && validationError && (
+      {parsedAmountInput && validationError && (
         <InputErrorText errorText={validationErrorTextMap[validationError]} />
       )}
       <RowWrapper>

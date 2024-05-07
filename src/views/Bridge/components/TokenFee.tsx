@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 
 import { Text, TextColor } from "components/Text";
+import { LoadingSkeleton } from "components";
 import {
   formatUnitsWithMaxFractions,
   getExplorerLinkForToken,
@@ -17,6 +18,7 @@ type TokenFeeProps = {
   textColor?: TextColor;
   showTokenLinkOnHover?: boolean;
   tokenChainId: number;
+  showLoadingSkeleton?: boolean;
 };
 
 const TokenFee = ({
@@ -25,6 +27,7 @@ const TokenFee = ({
   textColor = "grey-400",
   showTokenLinkOnHover,
   tokenChainId,
+  showLoadingSkeleton,
 }: TokenFeeProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const tokenAddress = token.addresses?.[tokenChainId];
@@ -34,10 +37,14 @@ const TokenFee = ({
   );
   return (
     <Wrapper>
-      <NumericText size="md" color={textColor}>
-        {formatUnitsWithMaxFractions(amount, token.decimals)}{" "}
-        {token.displaySymbol || token.symbol.toUpperCase()}{" "}
-      </NumericText>
+      {showLoadingSkeleton ? (
+        <LoadingSkeleton width="70px" height="20px" />
+      ) : (
+        <NumericText size="md" color={textColor}>
+          {formatUnitsWithMaxFractions(amount, token.decimals)}{" "}
+          {token.displaySymbol || token.symbol.toUpperCase()}{" "}
+        </NumericText>
+      )}
       {showTokenLinkOnHover ? (
         <TokenLinkWrapper
           onMouseEnter={() => setIsHovered(true)}

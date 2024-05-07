@@ -26,6 +26,7 @@ import { type Props as FeesCollapsibleProps } from "./FeesCollapsible";
 import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
 import { calcFeesForEstimatedTable } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
+import { LoadingSkeleton } from "components";
 
 export type EstimatedTableProps = EstimatedRewards & FeesCollapsibleProps;
 
@@ -38,6 +39,7 @@ const PriceFee = ({
   hideSymbolOnEmpty = true,
   tokenIconFirstOnMobile = false,
   hideTokenIcon,
+  showLoadingSkeleton,
 }: {
   tokenFee?: BigNumber;
   baseCurrencyFee?: BigNumber;
@@ -47,34 +49,41 @@ const PriceFee = ({
   hideSymbolOnEmpty?: boolean;
   tokenIconFirstOnMobile?: boolean;
   hideTokenIcon?: boolean;
+  showLoadingSkeleton?: boolean;
 }) => {
   const Token = (isDefined(tokenFee) || !hideSymbolOnEmpty) &&
     !hideTokenIcon && <TokenSymbol src={token.logoURI} />;
 
   return (
     <BaseCurrencyWrapper invertOnMobile={tokenIconFirstOnMobile}>
-      {baseCurrencyFee && tokenFee && (
-        <>
-          {rewardPercentageOfFees && (
-            <PercentageText size="md" color="grey-400">
-              ({formatWeiPct(rewardPercentageOfFees)}% of fees)
-            </PercentageText>
-          )}
-          <Text size="md" color="grey-400">
-            {`$${formatUSD(baseCurrencyFee)}`}
-          </Text>
-        </>
-      )}
-      {tokenFee ? (
-        <Text size="md" color={highlightTokenFee ? "primary" : "light-200"}>
-          {`${formatUnitsWithMaxFractions(tokenFee, token.decimals)} ${
-            token.symbol
-          }`}
-        </Text>
+      {showLoadingSkeleton ? (
+        <LoadingSkeleton height="20px" width="70px" />
       ) : (
-        <Text size="md" color="grey-400">
-          -
-        </Text>
+        <>
+          {baseCurrencyFee && tokenFee && (
+            <>
+              {rewardPercentageOfFees && (
+                <PercentageText size="md" color="grey-400">
+                  ({formatWeiPct(rewardPercentageOfFees)}% of fees)
+                </PercentageText>
+              )}
+              <Text size="md" color="grey-400">
+                {`$${formatUSD(baseCurrencyFee)}`}
+              </Text>
+            </>
+          )}
+          {tokenFee ? (
+            <Text size="md" color={highlightTokenFee ? "primary" : "light-200"}>
+              {`${formatUnitsWithMaxFractions(tokenFee, token.decimals)} ${
+                token.symbol
+              }`}
+            </Text>
+          ) : (
+            <Text size="md" color="grey-400">
+              -
+            </Text>
+          )}
+        </>
       )}
       {Token}
     </BaseCurrencyWrapper>
@@ -139,6 +148,7 @@ const EstimatedTable = ({
             tokenFee={reward}
             baseCurrencyFee={referralRewardAsBaseCurrency}
             hideSymbolOnEmpty={false}
+            showLoadingSkeleton={isQuoteLoading}
           />
         </ReferralRewardWrapper>
       </Row>
@@ -149,9 +159,13 @@ const EstimatedTable = ({
             {capitalizeFirstLetter(getChainInfo(toChainId).name)}
           </Text>
         </Text>
-        <Text size="md" color="grey-400">
-          {estimatedTime ? estimatedTime : "-"}
-        </Text>
+        {isQuoteLoading ? (
+          <LoadingSkeleton height="20px" width="75px" />
+        ) : (
+          <Text size="md" color="grey-400">
+            {estimatedTime ? estimatedTime : "-"}
+          </Text>
+        )}
       </Row>
       <Divider />
       <Row>
@@ -169,9 +183,18 @@ const EstimatedTable = ({
             </InfoIconWrapper>
           </Tooltip>
         </ToolTipWrapper>
-        <Text size="md" color={netFeeAsBaseCurrency ? "light-200" : "grey-400"}>
-          {netFeeAsBaseCurrency ? `$ ${formatUSD(netFeeAsBaseCurrency)}` : "-"}
-        </Text>
+        {isQuoteLoading ? (
+          <LoadingSkeleton height="20px" width="75px" />
+        ) : (
+          <Text
+            size="md"
+            color={netFeeAsBaseCurrency ? "light-200" : "grey-400"}
+          >
+            {netFeeAsBaseCurrency
+              ? `$ ${formatUSD(netFeeAsBaseCurrency)}`
+              : "-"}
+          </Text>
+        )}
       </Row>
       <Divider />
       {isSwap && swapQuote && swapToken && swapFee && (
@@ -241,6 +264,7 @@ const EstimatedTable = ({
               tokenFee={swapFee}
               baseCurrencyFee={swapFeeAsBaseCurrency}
               hideTokenIcon
+              showLoadingSkeleton={isQuoteLoading}
             />
             <SettingsIcon />
           </SwapSlippageSettings>
@@ -265,6 +289,7 @@ const EstimatedTable = ({
           token={baseToken}
           tokenFee={bridgeFee}
           baseCurrencyFee={bridgeFeeAsBaseCurrency}
+          showLoadingSkeleton={isQuoteLoading}
         />
       </Row>
       <Row>
@@ -286,6 +311,7 @@ const EstimatedTable = ({
           token={baseToken}
           tokenFee={gasFee}
           baseCurrencyFee={gasFeeAsBaseCurrency}
+          showLoadingSkeleton={isQuoteLoading}
         />
       </Row>
       <Row>
@@ -311,6 +337,7 @@ const EstimatedTable = ({
             rewardPercentageOfFees={rewardPercentage}
             highlightTokenFee={isRewardAcx}
             hideSymbolOnEmpty={!isDefined(netFeeAsBaseCurrency)}
+            showLoadingSkeleton={isQuoteLoading}
           />
         </TransparentWrapper>
       </Row>
@@ -327,6 +354,7 @@ const EstimatedTable = ({
               outputToken={outputToken}
               textColor="light-200"
               destinationChainId={toChainId}
+              showLoadingSkeleton={isQuoteLoading}
             />
           ) : (
             "-"
@@ -354,12 +382,14 @@ export function TotalReceive({
   outputToken,
   textColor,
   destinationChainId,
+  showLoadingSkeleton,
 }: {
   totalReceived: BigNumber;
   outputToken: TokenInfo;
   inputToken: TokenInfo;
   textColor?: TextColor;
   destinationChainId: number;
+  showLoadingSkeleton?: boolean;
 }) {
   if (
     inputToken.symbol === outputToken.symbol ||
@@ -396,6 +426,7 @@ export function TotalReceive({
         textColor="warning"
         showTokenLinkOnHover
         tokenChainId={destinationChainId}
+        showLoadingSkeleton={showLoadingSkeleton}
       />
     </TotalReceiveRow>
   );

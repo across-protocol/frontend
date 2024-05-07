@@ -1,9 +1,8 @@
 import { useState } from "react";
 import styled from "@emotion/styled";
-import { keyframes } from "@emotion/react";
 import { BigNumber } from "ethers";
 
-import { Text } from "components";
+import { Text, LoadingSkeleton } from "components";
 import { ReactComponent as ChevronDown } from "assets/icons/arrow-16.svg";
 import { ReactComponent as _SwapIcon } from "assets/icons/swap.svg";
 import { QUERIESV2, TokenInfo } from "utils";
@@ -56,7 +55,7 @@ export function FeesCollapsible(props: Props) {
         </CollapsedFeesLabel>
         <CollapsedFeesReceiveWrapper onClick={() => setIsExpanded(true)}>
           {props.isQuoteLoading ? (
-            <CollapsedLoadingSkeleton />
+            <CollapsedLoadingSkeleton width="100%" height="20px" />
           ) : (
             <CollapsedFeesAmountsWrapper>
               {outputAmount ? (
@@ -115,27 +114,8 @@ export function FeesCollapsible(props: Props) {
   );
 }
 
-const shimmer = keyframes`
-  to {
-    background-position-x: 0%
-  }
-`;
-
-const CollapsedLoadingSkeleton = styled.div`
-  display: flex;
-  height: 20px;
-  width: 100%;
-  border-radius: 24px;
+const CollapsedLoadingSkeleton = styled(LoadingSkeleton)`
   margin-right: 12px;
-  background: linear-gradient(
-    90deg,
-    rgba(76, 78, 87, 0) 40%,
-    #4c4e57 50%,
-    rgba(76, 78, 87, 0) 60%
-  );
-  background-size: 300%;
-  background-position-x: 100%;
-  animation: ${shimmer} 1s infinite linear;
 `;
 
 const CollapsedFeesWrapper = styled.div`
