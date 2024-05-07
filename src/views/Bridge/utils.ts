@@ -233,7 +233,6 @@ export function findNextBestRoute(
     : undefined;
 
   route = findEnabledRoute(filter);
-  console.log("#1", route, filter);
 
   if (!route && equivalentInputTokenSymbols) {
     for (const equivalentTokenSymbol of equivalentInputTokenSymbols) {
