@@ -22,6 +22,10 @@ export function convertForDepositQuery(
     selectedRoute.toChain,
     selectedRoute.toTokenAddress
   );
+  const swapToken = config.getTokenInfoByAddressSafe(
+    selectedRoute.fromChain,
+    selectedRoute.type === "swap" ? selectedRoute.swapTokenAddress : ""
+  );
 
   return {
     depositId: Number(depositId),
@@ -62,6 +66,7 @@ export function convertForDepositQuery(
     },
     token: inputToken,
     outputToken,
+    swapToken,
   };
 }
 
@@ -80,6 +85,10 @@ export function convertForFillQuery(
   const outputToken = config.getTokenInfoByAddress(
     selectedRoute.toChain,
     selectedRoute.toTokenAddress
+  );
+  const swapToken = config.getTokenInfoByAddressSafe(
+    selectedRoute.fromChain,
+    selectedRoute.type === "swap" ? selectedRoute.swapTokenAddress : ""
   );
 
   return {
@@ -122,5 +131,6 @@ export function convertForFillQuery(
     },
     token: inputToken,
     outputToken,
+    swapToken,
   };
 }

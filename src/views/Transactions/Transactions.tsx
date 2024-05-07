@@ -19,7 +19,7 @@ export function Transactions() {
   );
 
   return (
-    <LayoutV2 maxWidth={activeTab === "personal" ? 1476 : 1132}>
+    <LayoutV2 maxWidth={activeTab === "personal" ? 1484 : 1140}>
       <Wrapper>
         <BreadcrumbV2 />
         <FilterWrapper>
