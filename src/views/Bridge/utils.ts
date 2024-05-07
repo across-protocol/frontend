@@ -22,6 +22,7 @@ export type SelectedRoute =
 
 type RouteFilter = Partial<{
   inputTokenSymbol: string;
+  swapTokenSymbol: string;
   outputTokenSymbol: string;
   fromChain: number;
   toChain: number;
@@ -39,8 +40,8 @@ const swapRoutes = config.getSwapRoutes();
 
 const interchangeableTokenPairs: Record<string, string[]> = {
   USDC: ["USDbC", "USDC.e"],
-  "USDC.e": ["USDC", "USDbC"],
-  USDbC: ["USDC", "USDC.e"],
+  "USDC.e": ["USDbC", "USDC"],
+  USDbC: ["USDC.e", "USDC"],
   ETH: ["WETH"],
   WETH: ["ETH"],
 };
@@ -148,18 +149,42 @@ export function getInitialRoute(defaults: RouteFilter = {}) {
 export function findEnabledRoute(
   filter: RouteFilter = {}
 ): SelectedRoute | undefined {
-  const { inputTokenSymbol, outputTokenSymbol, fromChain, toChain } = filter;
+  const {
+    inputTokenSymbol,
+    outputTokenSymbol,
+    swapTokenSymbol,
+    fromChain,
+    toChain,
+  } = filter;
+
+  const commonRouteFilter = (route: Route | SwapRoute) =>
+    (outputTokenSymbol
+      ? route.toTokenSymbol.toUpperCase() === outputTokenSymbol.toUpperCase()
+      : true) &&
+    (fromChain ? route.fromChain === fromChain : true) &&
+    (toChain ? route.toChain === toChain : true);
+
+  // prioritize swap routes if `swapTokenSymbol` is provided
+  if (swapTokenSymbol) {
+    const swapRoute = swapRoutes.find(
+      (route) =>
+        route.swapTokenSymbol.toUpperCase() === swapTokenSymbol.toUpperCase() &&
+        commonRouteFilter(route)
+    );
+
+    if (swapRoute) {
+      return {
+        ...swapRoute,
+        type: "swap",
+      };
+    }
+  }
 
   const route = enabledRoutes.find(
     (route) =>
       (inputTokenSymbol
         ? route.fromTokenSymbol.toUpperCase() === inputTokenSymbol.toUpperCase()
-        : true) &&
-      (outputTokenSymbol
-        ? route.toTokenSymbol.toUpperCase() === outputTokenSymbol.toUpperCase()
-        : true) &&
-      (fromChain ? route.fromChain === fromChain : true) &&
-      (toChain ? route.toChain === toChain : true)
+        : true) && commonRouteFilter(route)
   );
 
   if (route) {
@@ -174,11 +199,7 @@ export function findEnabledRoute(
       (!inputTokenSymbol ||
         swapRoute.swapTokenSymbol.toUpperCase() ===
           inputTokenSymbol.toUpperCase()) &&
-      (!outputTokenSymbol ||
-        swapRoute.toTokenSymbol.toUpperCase() ===
-          outputTokenSymbol.toUpperCase()) &&
-      (!fromChain || swapRoute.fromChain === fromChain) &&
-      (!toChain || swapRoute.toChain === toChain)
+      commonRouteFilter(swapRoute)
   );
 
   if (swapRoute) {
@@ -198,6 +219,7 @@ export function findEnabledRoute(
 export function findNextBestRoute(
   priorityFilterKeys: (
     | "inputTokenSymbol"
+    | "swapTokenSymbol"
     | "outputTokenSymbol"
     | "fromChain"
     | "toChain"
@@ -226,7 +248,7 @@ export function findNextBestRoute(
   }
 
   if (!route) {
-    const allFilterKeys = ["inputTokenSymbol", "fromChain", "toChain"] as const;
+    const allFilterKeys = Object.keys(filter) as Array<keyof RouteFilter>;
     const nonPriorityFilterKeys = allFilterKeys.filter((key) =>
       priorityFilterKeys.includes(key)
     );
