@@ -62,15 +62,15 @@ export function useSelectRoute() {
           inputTokenSymbol: selectedRoute.fromTokenSymbol,
           fromChain: selectedRoute.fromChain,
           toChain: selectedRoute.toChain,
+          swapTokenSymbol:
+            selectedRoute.type === "swap"
+              ? selectedRoute.swapTokenSymbol
+              : undefined,
         }) || initialRoute;
 
       setSelectedRoute(route);
     },
-    [
-      selectedRoute.fromChain,
-      selectedRoute.toChain,
-      selectedRoute.fromTokenSymbol,
-    ]
+    [selectedRoute]
   );
 
   const handleSelectFromChain = useCallback(
