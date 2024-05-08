@@ -270,15 +270,6 @@ export function findNextBestRoute(
         ...priorityFilter,
         [nonPrioKey]: filter[nonPrioKey],
       });
-      console.log(
-        "#3",
-        {
-          ...priorityFilter,
-          [nonPrioKey]: filter[nonPrioKey],
-        },
-        priorityFilterKeys,
-        route
-      );
 
       if (route) {
         break;
