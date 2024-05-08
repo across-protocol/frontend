@@ -96,7 +96,8 @@ export const getConfirmationDepositTime = (
   amount: BigNumber,
   limits: BridgeLimitInterface,
   toChain: ChainId,
-  fromChain: ChainId
+  fromChain: ChainId,
+  inputTokenSymbol: string
 ): ConfirmationDepositTimeType => {
   const config = getConfig();
   const depositDelay = config.depositDelays()[fromChain] || 0;
@@ -119,7 +120,7 @@ export const getConfirmationDepositTime = (
 
   if (amount.lte(limits.maxDepositInstant)) {
     const fastFillTimeInSeconds = Math.floor(
-      getFastFillTimeByRoute(fromChain, toChain)
+      getFastFillTimeByRoute(fromChain, toChain, inputTokenSymbol)
     );
     const fastFillTimeInMinutes = Math.floor(fastFillTimeInSeconds / 60);
     return {
