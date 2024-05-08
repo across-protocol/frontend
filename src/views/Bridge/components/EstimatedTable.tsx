@@ -214,7 +214,7 @@ const EstimatedTable = ({
                 <SwapFeeTooltipBody>
                   <Text size="sm" color="grey-400">
                     This bridge transaction requires you to perform a token swap
-                    which incurs a swap fee.
+                    on the origin chain which incurs a swap fee.
                   </Text>
                   <Text size="sm" color="grey-400">
                     You can change the swap slippage in the <SettingsIcon /> to
@@ -403,6 +403,7 @@ export function TotalReceive({
         textColor={textColor}
         showTokenLinkOnHover
         tokenChainId={destinationChainId}
+        showLoadingSkeleton={showLoadingSkeleton}
       />
     );
   }

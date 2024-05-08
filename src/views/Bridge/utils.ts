@@ -39,9 +39,8 @@ const enabledRoutes = config.getEnabledRoutes();
 const swapRoutes = config.getSwapRoutes();
 
 const interchangeableTokenPairs: Record<string, string[]> = {
-  USDC: ["USDbC", "USDC.e"],
-  "USDC.e": ["USDbC", "USDC"],
-  USDbC: ["USDC.e", "USDC"],
+  "USDC.e": ["USDbC"],
+  USDbC: ["USDC.e"],
   ETH: ["WETH"],
   WETH: ["ETH"],
 };
@@ -158,18 +157,22 @@ export function findEnabledRoute(
   } = filter;
 
   const commonRouteFilter = (route: Route | SwapRoute) =>
+    (inputTokenSymbol
+      ? route.fromTokenSymbol.toUpperCase() === inputTokenSymbol.toUpperCase()
+      : true) &&
     (outputTokenSymbol
       ? route.toTokenSymbol.toUpperCase() === outputTokenSymbol.toUpperCase()
       : true) &&
     (fromChain ? route.fromChain === fromChain : true) &&
     (toChain ? route.toChain === toChain : true);
 
-  // prioritize swap routes if `swapTokenSymbol` is provided
   if (swapTokenSymbol) {
     const swapRoute = swapRoutes.find(
       (route) =>
-        route.swapTokenSymbol.toUpperCase() === swapTokenSymbol.toUpperCase() &&
-        commonRouteFilter(route)
+        (swapTokenSymbol
+          ? route.swapTokenSymbol.toUpperCase() ===
+            swapTokenSymbol.toUpperCase()
+          : true) && commonRouteFilter(route)
     );
 
     if (swapRoute) {
@@ -178,35 +181,15 @@ export function findEnabledRoute(
         type: "swap",
       };
     }
-  }
+  } else {
+    const route = enabledRoutes.find((route) => commonRouteFilter(route));
 
-  const route = enabledRoutes.find(
-    (route) =>
-      (inputTokenSymbol
-        ? route.fromTokenSymbol.toUpperCase() === inputTokenSymbol.toUpperCase()
-        : true) && commonRouteFilter(route)
-  );
-
-  if (route) {
-    return {
-      ...route,
-      type: "bridge",
-    };
-  }
-
-  const swapRoute = swapRoutes.find(
-    (swapRoute) =>
-      (!inputTokenSymbol ||
-        swapRoute.swapTokenSymbol.toUpperCase() ===
-          inputTokenSymbol.toUpperCase()) &&
-      commonRouteFilter(swapRoute)
-  );
-
-  if (swapRoute) {
-    return {
-      ...swapRoute,
-      type: "swap",
-    };
+    if (route) {
+      return {
+        ...route,
+        type: "bridge",
+      };
+    }
   }
 
   return undefined;
@@ -231,6 +214,9 @@ export function findNextBestRoute(
   const equivalentInputTokenSymbols = filter.inputTokenSymbol
     ? interchangeableTokenPairs[filter.inputTokenSymbol]
     : undefined;
+  const equivalentSwapTokenSymbols = filter.swapTokenSymbol
+    ? interchangeableTokenPairs[filter.swapTokenSymbol]
+    : undefined;
 
   route = findEnabledRoute(filter);
 
@@ -247,8 +233,27 @@ export function findNextBestRoute(
     }
   }
 
+  if (!route && equivalentSwapTokenSymbols) {
+    for (const equivalentTokenSymbol of equivalentSwapTokenSymbols) {
+      route = findEnabledRoute({
+        ...filter,
+        swapTokenSymbol: equivalentTokenSymbol,
+      });
+
+      if (route) {
+        break;
+      }
+    }
+  }
+
   if (!route) {
-    const allFilterKeys = Object.keys(filter) as Array<keyof RouteFilter>;
+    const allFilterKeys = [
+      "inputTokenSymbol",
+      "swapTokenSymbol",
+      "outputTokenSymbol",
+      "fromChain",
+      "toChain",
+    ] as const;
     const nonPriorityFilterKeys = allFilterKeys.filter((key) =>
       priorityFilterKeys.includes(key)
     );
@@ -265,23 +270,15 @@ export function findNextBestRoute(
         ...priorityFilter,
         [nonPrioKey]: filter[nonPrioKey],
       });
-
-      if (
-        !route &&
-        nonPrioKey === "inputTokenSymbol" &&
-        equivalentInputTokenSymbols
-      ) {
-        for (const equivalentTokenSymbol of equivalentInputTokenSymbols) {
-          route = findEnabledRoute({
-            ...priorityFilter,
-            inputTokenSymbol: equivalentTokenSymbol,
-          });
-
-          if (route) {
-            break;
-          }
-        }
-      }
+      console.log(
+        "#3",
+        {
+          ...priorityFilter,
+          [nonPrioKey]: filter[nonPrioKey],
+        },
+        priorityFilterKeys,
+        route
+      );
 
       if (route) {
         break;

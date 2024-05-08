@@ -104,4 +104,5 @@ const TokenLinkWrapper = styled.a`
   overflow-y: hidden;
   height: 24px;
   cursor: pointer;
+  padding-top: 2px;
 `;

@@ -37,13 +37,30 @@ export function useSelectRoute() {
   }, [selectedRoute, addToAmpliQueue, isDefaultRouteTracked]);
 
   const handleSelectInputToken = useCallback(
-    (inputTokenSymbol: string) => {
+    (inputOrSwapTokenSymbol: string) => {
+      const baseFilter = {
+        fromChain: selectedRoute.fromChain,
+        toChain: selectedRoute.toChain,
+        outputTokenSymbol: selectedRoute.toTokenSymbol,
+      };
       const route =
+        findNextBestRoute(["inputTokenSymbol", "fromChain"], {
+          ...baseFilter,
+          inputTokenSymbol: inputOrSwapTokenSymbol,
+        }) ||
+        findNextBestRoute(["swapTokenSymbol", "fromChain"], {
+          ...baseFilter,
+          swapTokenSymbol: inputOrSwapTokenSymbol,
+        }) ||
         findNextBestRoute(["inputTokenSymbol"], {
-          inputTokenSymbol,
-          fromChain: selectedRoute.fromChain,
-          toChain: selectedRoute.toChain,
-        }) || initialRoute;
+          ...baseFilter,
+          inputTokenSymbol: inputOrSwapTokenSymbol,
+        }) ||
+        findNextBestRoute(["swapTokenSymbol"], {
+          ...baseFilter,
+          swapTokenSymbol: inputOrSwapTokenSymbol,
+        }) ||
+        initialRoute;
 
       setSelectedRoute(route);
 
@@ -51,17 +68,21 @@ export function useSelectRoute() {
         trackTokenChanged(route.fromTokenSymbol);
       });
     },
-    [selectedRoute.fromChain, selectedRoute.toChain, addToAmpliQueue]
+    [selectedRoute, addToAmpliQueue]
   );
 
   const handleSelectOutputToken = useCallback(
     (outputTokenSymbol: string) => {
+      const baseFilter = {
+        fromChain: selectedRoute.fromChain,
+        toChain: selectedRoute.toChain,
+        outputTokenSymbol,
+      };
       const route =
         findNextBestRoute(["outputTokenSymbol"], {
+          ...baseFilter,
           outputTokenSymbol,
           inputTokenSymbol: selectedRoute.fromTokenSymbol,
-          fromChain: selectedRoute.fromChain,
-          toChain: selectedRoute.toChain,
           swapTokenSymbol:
             selectedRoute.type === "swap"
               ? selectedRoute.swapTokenSymbol
@@ -75,14 +96,35 @@ export function useSelectRoute() {
 
   const handleSelectFromChain = useCallback(
     (fromChainId: number) => {
+      const isSwap = selectedRoute.type === "swap";
       const filterBy = {
-        inputTokenSymbol: selectedRoute.fromTokenSymbol,
+        inputTokenSymbol: isSwap ? undefined : selectedRoute.fromTokenSymbol,
+        swapTokenSymbol: isSwap ? selectedRoute.swapTokenSymbol : undefined,
+        outputTokenSymbol: selectedRoute.toTokenSymbol,
         fromChain: fromChainId,
         toChain: selectedRoute.toChain,
       };
       const route =
+        findNextBestRoute(
+          [
+            "fromChain",
+            "toChain",
+            isSwap ? "swapTokenSymbol" : "inputTokenSymbol",
+          ],
+          filterBy
+        ) ||
+        findNextBestRoute(
+          ["fromChain", isSwap ? "swapTokenSymbol" : "inputTokenSymbol"],
+          filterBy
+        ) ||
         findNextBestRoute(["fromChain", "toChain"], filterBy) ||
-        findNextBestRoute(["fromChain", "inputTokenSymbol"], filterBy) ||
+        findNextBestRoute(["fromChain", "toChain"], {
+          ...filterBy,
+          outputTokenSymbol: undefined,
+        }) ||
+        findNextBestRoute(["fromChain"], {
+          fromChain: fromChainId,
+        }) ||
         initialRoute;
 
       setSelectedRoute(route);
@@ -91,19 +133,40 @@ export function useSelectRoute() {
         trackFromChainChanged(route.fromChain);
       });
     },
-    [selectedRoute.fromTokenSymbol, selectedRoute.toChain, addToAmpliQueue]
+    [selectedRoute, addToAmpliQueue]
   );
 
   const handleSelectToChain = useCallback(
     (toChainId: number) => {
+      const isSwap = selectedRoute.type === "swap";
       const filterBy = {
-        inputTokenSymbol: selectedRoute.fromTokenSymbol,
+        inputTokenSymbol: isSwap ? undefined : selectedRoute.fromTokenSymbol,
+        swapTokenSymbol: isSwap ? selectedRoute.swapTokenSymbol : undefined,
+        outputTokenSymbol: selectedRoute.toTokenSymbol,
         fromChain: selectedRoute.fromChain,
         toChain: toChainId,
       };
       const route =
+        findNextBestRoute(
+          [
+            "fromChain",
+            "toChain",
+            isSwap ? "swapTokenSymbol" : "inputTokenSymbol",
+          ],
+          filterBy
+        ) ||
+        findNextBestRoute(
+          ["toChain", isSwap ? "swapTokenSymbol" : "inputTokenSymbol"],
+          filterBy
+        ) ||
         findNextBestRoute(["fromChain", "toChain"], filterBy) ||
-        findNextBestRoute(["inputTokenSymbol", "toChain"], filterBy) ||
+        findNextBestRoute(["fromChain", "toChain"], {
+          ...filterBy,
+          outputTokenSymbol: undefined,
+        }) ||
+        findNextBestRoute(["fromChain"], {
+          toChain: toChainId,
+        }) ||
         initialRoute;
 
       setSelectedRoute(route);
@@ -112,15 +175,32 @@ export function useSelectRoute() {
         trackToChainChanged(route.toChain);
       });
     },
-    [selectedRoute.fromTokenSymbol, selectedRoute.fromChain, addToAmpliQueue]
+    [selectedRoute, addToAmpliQueue]
   );
 
   const handleQuickSwap = useCallback(() => {
-    const route = findNextBestRoute(["fromChain", "toChain"], {
-      inputTokenSymbol: selectedRoute.fromTokenSymbol,
+    const isSwap = selectedRoute.type === "swap";
+    const baseFilter = {
+      outputTokenSymbol: isSwap
+        ? selectedRoute.swapTokenSymbol
+        : selectedRoute.fromTokenSymbol,
       fromChain: selectedRoute.toChain,
       toChain: selectedRoute.fromChain,
-    });
+    };
+    const route =
+      findNextBestRoute(["fromChain", "toChain", "inputTokenSymbol"], {
+        ...baseFilter,
+        inputTokenSymbol: selectedRoute.toTokenSymbol,
+      }) ||
+      findNextBestRoute(["fromChain", "toChain", "swapTokenSymbol"], {
+        ...baseFilter,
+        swapTokenSymbol: selectedRoute.toTokenSymbol,
+      }) ||
+      findNextBestRoute(["fromChain", "toChain"], {
+        ...baseFilter,
+        inputTokenSymbol: selectedRoute.toTokenSymbol,
+      }) ||
+      initialRoute;
 
     if (route) {
       setSelectedRoute(route);
