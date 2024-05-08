@@ -214,6 +214,7 @@ async function getDeposits(
         offset: params.offset,
         depositorOrRecipientAddress: params.address,
         orderBy: "status",
+        include: ["token"],
       },
     }
   );
