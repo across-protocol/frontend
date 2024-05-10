@@ -239,13 +239,7 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC",
-                acrossInputTokenSymbol: "USDC.e",
-                acrossOutputTokenSymbol: "USDC",
-              },
-            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
@@ -260,13 +254,7 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC",
-                acrossInputTokenSymbol: "USDC.e",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
@@ -281,24 +269,12 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC",
-                acrossInputTokenSymbol: "USDC.e",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
             tokens: ["WETH", "USDC.e", "WBTC", "USDT", "DAI"],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC",
-                acrossInputTokenSymbol: "USDC.e",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -309,24 +285,12 @@ const enabledRoutes = {
               "BAL",
               "POOL",
             ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC",
-                acrossInputTokenSymbol: "USDC.e",
-                acrossOutputTokenSymbol: "USDbC",
-              },
-            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.LINEA,
             tokens: ["WETH", "USDC.e", "USDT", "DAI", "WBTC"],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC",
-                acrossInputTokenSymbol: "USDC.e",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
+            swapTokens: [],
           },
         ],
       },
