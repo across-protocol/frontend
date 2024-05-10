@@ -113,10 +113,6 @@ export function useSelectRoute() {
           ],
           filterBy
         ) ||
-        findNextBestRoute(
-          ["fromChain", isSwap ? "swapTokenSymbol" : "inputTokenSymbol"],
-          filterBy
-        ) ||
         findNextBestRoute(["fromChain", "toChain"], filterBy) ||
         findNextBestRoute(["fromChain", "toChain"], {
           ...filterBy,
@@ -125,6 +121,10 @@ export function useSelectRoute() {
         findNextBestRoute(["fromChain"], {
           fromChain: fromChainId,
         }) ||
+        findNextBestRoute(
+          ["fromChain", isSwap ? "swapTokenSymbol" : "inputTokenSymbol"],
+          filterBy
+        ) ||
         initialRoute;
 
       setSelectedRoute(route);
@@ -155,10 +155,6 @@ export function useSelectRoute() {
           ],
           filterBy
         ) ||
-        findNextBestRoute(
-          ["toChain", isSwap ? "swapTokenSymbol" : "inputTokenSymbol"],
-          filterBy
-        ) ||
         findNextBestRoute(["fromChain", "toChain"], filterBy) ||
         findNextBestRoute(["fromChain", "toChain"], {
           ...filterBy,
@@ -167,6 +163,10 @@ export function useSelectRoute() {
         findNextBestRoute(["fromChain"], {
           toChain: toChainId,
         }) ||
+        findNextBestRoute(
+          ["toChain", isSwap ? "swapTokenSymbol" : "inputTokenSymbol"],
+          filterBy
+        ) ||
         initialRoute;
 
       setSelectedRoute(route);
