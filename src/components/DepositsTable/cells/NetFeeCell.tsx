@@ -61,12 +61,13 @@ function FeeWithoutBreakdown({ deposit }: { deposit: Deposit }) {
 
 function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
   const netFee =
-    Number(deposit.feeBreakdown?.totalBridgeFeeUsd || 0) -
+    Number(deposit.feeBreakdown?.totalBridgeFeeUsd || 0) +
+    Number(deposit.feeBreakdown?.swapFeeUsd || 0) -
     Number(deposit.rewards?.usd || 0);
 
   const tokenInfo = getConfig().getTokenInfoByAddress(
     deposit.sourceChainId,
-    deposit.assetAddr
+    deposit.swapToken?.address || deposit.token?.address || deposit.assetAddr
   );
   const rewardToken = deposit.rewards
     ? getToken(deposit.rewards.type === "op-rebates" ? "OP" : "ACX")
@@ -85,6 +86,13 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
         ? deposit.feeBreakdown?.relayGasFeeAmount || 0
         : 0
     )
+  );
+
+  const swapFeeUsd = Number(deposit.feeBreakdown?.swapFeeUsd || 0);
+  const swapFeeAmount = BigNumber.from(
+    isBigNumberish(deposit.feeBreakdown?.swapFeeAmount)
+      ? deposit.feeBreakdown?.swapFeeAmount || 0
+      : 0
   );
 
   return (
@@ -110,6 +118,26 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
                 </Text>
               </FeeBreakdownRow>
               <Divider />
+              {swapFeeUsd > 0 && swapFeeAmount.gt(0) && (
+                <FeeBreakdownRow>
+                  <Text size="sm" color="grey-400">
+                    Swap fee
+                  </Text>
+                  <FeeValueWrapper>
+                    <Text size="sm" color="grey-400">
+                      ${formatMaxFracDigits(swapFeeUsd, 2)}
+                    </Text>
+                    <Text size="sm" color="light-200">
+                      {formatUnitsWithMaxFractions(
+                        swapFeeAmount,
+                        tokenInfo.decimals
+                      )}{" "}
+                      {tokenInfo.symbol}
+                    </Text>
+                    <img src={tokenInfo.logoURI} alt={tokenInfo.symbol} />
+                  </FeeValueWrapper>
+                </FeeBreakdownRow>
+              )}
               <FeeBreakdownRow>
                 <Text size="sm" color="grey-400">
                   Bridge fee

@@ -69,6 +69,10 @@ export type Deposit = {
     totalBridgeFeeUsd: string;
     totalBridgeFeePct: string; // wei pct
     totalBridgeFeeAmount: string;
+    // swap fee
+    swapFeeUsd?: string;
+    swapFeePct?: string; // wei pct
+    swapFeeAmount?: string;
   };
   token?: {
     address: string;
