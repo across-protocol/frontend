@@ -9,10 +9,10 @@
   "claimAndStakeAddress": "0x985e8A89Dd6Af8896Ef075c8dd93512433dc5829",
   "swapAndBridgeAddresses": {
     "1inch": {
-      "137": "0xF9735e425A36d22636EF4cb75c7a6c63378290CA"
+      "137": "0xaBa0F11D55C5dDC52cD0Cb2cd052B621d45159d5"
     },
     "uniswap": {
-      "137": "0xC2dCB88873E00c9d401De2CBBa4C6A28f8A6e2c2"
+      "137": "0x9220fa27ae680e4e8d9733932128fa73362e0393"
     }
   },
   "routes": [
