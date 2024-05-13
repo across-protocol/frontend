@@ -26,12 +26,15 @@ export function AssetCell({
     <TokenPairContainer>
       <IconPair
         LeftIcon={
-          <img src={inputToken.logoURI} alt={`${inputToken.symbol} logo`} />
+          <img
+            src={swapToken?.logoURI || inputToken.logoURI}
+            alt={`${swapToken?.symbol || inputToken.symbol} logo`}
+          />
         }
         RightIcon={
           <img
-            src={swapToken?.logoURI || outputToken?.logoURI}
-            alt={`${swapToken?.symbol || outputToken?.symbol} logo`}
+            src={outputToken?.logoURI || inputToken.logoURI}
+            alt={`${outputToken?.symbol || inputToken.symbol} logo`}
           />
         }
         iconSize={24}

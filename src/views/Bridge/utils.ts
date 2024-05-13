@@ -45,6 +45,12 @@ const interchangeableTokenPairs: Record<string, string[]> = {
   WETH: ["ETH"],
 };
 
+export const similarTokenPairs: Record<string, string[]> = {
+  USDC: ["USDC.e", "USDbC"],
+  "USDC.e": ["USDC", "USDbC"],
+  USDbC: ["USDC", "USDC.e"],
+};
+
 export function areTokensInterchangeable(
   tokenSymbol1: string,
   tokenSymbol2: string
@@ -194,19 +200,20 @@ export function findEnabledRoute(
 
   return undefined;
 }
+
+export type PriorityFilterKey =
+  | "inputTokenSymbol"
+  | "swapTokenSymbol"
+  | "outputTokenSymbol"
+  | "fromChain"
+  | "toChain";
 /**
  * Returns the next best matching route based on the given priority keys and filter.
  * @param priorityFilterKeys Set of filter keys to use if no route is found based on `filter`.
  * @param filter Filter to apply for best matching route.
  */
 export function findNextBestRoute(
-  priorityFilterKeys: (
-    | "inputTokenSymbol"
-    | "swapTokenSymbol"
-    | "outputTokenSymbol"
-    | "fromChain"
-    | "toChain"
-  )[],
+  priorityFilterKeys: PriorityFilterKey[],
   filter: RouteFilter = {}
 ) {
   let route: SelectedRoute | undefined;
@@ -441,4 +448,15 @@ export function calcFeesForEstimatedTable(params: {
     outputAmount,
     swapQuote: params.swapQuote,
   };
+}
+
+export function getOutputTokenSymbol(
+  inputTokenSymbol: string,
+  outputTokenSymbol: string
+) {
+  return inputTokenSymbol === "ETH"
+    ? "ETH"
+    : inputTokenSymbol === "WETH"
+    ? "WETH"
+    : outputTokenSymbol;
 }

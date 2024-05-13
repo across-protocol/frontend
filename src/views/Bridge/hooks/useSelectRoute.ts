@@ -12,6 +12,9 @@ import {
   getRouteFromQueryParams,
   findNextBestRoute,
   SelectedRoute,
+  similarTokenPairs,
+  getOutputTokenSymbol,
+  PriorityFilterKey,
 } from "../utils";
 
 const initialRoute = getRouteFromQueryParams();
@@ -41,7 +44,10 @@ export function useSelectRoute() {
       const baseFilter = {
         fromChain: selectedRoute.fromChain,
         toChain: selectedRoute.toChain,
-        outputTokenSymbol: selectedRoute.toTokenSymbol,
+        outputTokenSymbol: getOutputTokenSymbol(
+          inputOrSwapTokenSymbol,
+          selectedRoute.toTokenAddress
+        ),
       };
       const route =
         findNextBestRoute(["inputTokenSymbol", "fromChain"], {
@@ -100,9 +106,29 @@ export function useSelectRoute() {
       const filterBy = {
         inputTokenSymbol: isSwap ? undefined : selectedRoute.fromTokenSymbol,
         swapTokenSymbol: isSwap ? selectedRoute.swapTokenSymbol : undefined,
-        outputTokenSymbol: selectedRoute.toTokenSymbol,
+        outputTokenSymbol: getOutputTokenSymbol(
+          selectedRoute.fromTokenSymbol,
+          selectedRoute.toTokenSymbol
+        ),
         fromChain: fromChainId,
         toChain: selectedRoute.toChain,
+      };
+      const similarTokenSymbols =
+        similarTokenPairs[
+          isSwap ? selectedRoute.swapTokenSymbol : selectedRoute.fromTokenSymbol
+        ] || [];
+      const findNextBestRouteBySimilarToken = (
+        priorityFilterKeys: PriorityFilterKey[]
+      ) => {
+        for (const similarTokenSymbol of similarTokenSymbols) {
+          const route = findNextBestRoute(priorityFilterKeys, {
+            ...filterBy,
+            inputTokenSymbol: similarTokenSymbol,
+          });
+          if (route) {
+            return route;
+          }
+        }
       };
       const route =
         findNextBestRoute(
@@ -113,6 +139,11 @@ export function useSelectRoute() {
           ],
           filterBy
         ) ||
+        findNextBestRouteBySimilarToken([
+          "fromChain",
+          "toChain",
+          "inputTokenSymbol",
+        ]) ||
         findNextBestRoute(["fromChain", "toChain"], filterBy) ||
         findNextBestRoute(["fromChain", "toChain"], {
           ...filterBy,
@@ -142,7 +173,10 @@ export function useSelectRoute() {
       const filterBy = {
         inputTokenSymbol: isSwap ? undefined : selectedRoute.fromTokenSymbol,
         swapTokenSymbol: isSwap ? selectedRoute.swapTokenSymbol : undefined,
-        outputTokenSymbol: selectedRoute.toTokenSymbol,
+        outputTokenSymbol: getOutputTokenSymbol(
+          selectedRoute.fromTokenSymbol,
+          selectedRoute.toTokenSymbol
+        ),
         fromChain: selectedRoute.fromChain,
         toChain: toChainId,
       };
