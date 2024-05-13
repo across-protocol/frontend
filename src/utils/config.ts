@@ -349,8 +349,7 @@ export class ConfigClient {
       return {
         ...token,
         l1TokenAddress:
-          token.addresses?.[chainId || constants.hubPoolChainId] ||
-          token.mainnetAddress!,
+          token.addresses?.[constants.hubPoolChainId] || token.mainnetAddress!,
         address:
           token.addresses?.[chainId || constants.hubPoolChainId] ||
           token.mainnetAddress!,
