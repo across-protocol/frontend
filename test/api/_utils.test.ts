@@ -259,26 +259,13 @@ describe("_utils", () => {
       ).toThrowError(/Invalid address provided for 'outputToken'/);
     });
 
-    // TODO: Remove after switching to CCTP
-    test("throw if route disabled pre-CCTP", () => {
-      const originChainId = 1;
-      const destinationChainId = 10;
-
-      // native USDC to native USDC only enabled after CCTP integration
-      expect(() =>
-        validateChainAndTokenParams({
-          originChainId: String(originChainId),
-          destinationChainId: String(destinationChainId),
-          inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
-          outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
-        })
-      ).toThrowError(/Route is not enabled/);
-    });
-
     test("resolve all routes for unambiguous tokens and 'token' param", () => {
       ENABLED_ROUTES.routes
         .filter(
-          (route) => !["WETH", "ETH", "DAI"].includes(route.fromTokenSymbol)
+          (route) =>
+            !["WETH", "ETH", "DAI", "USDC", "USDC.e", "USDbC"].includes(
+              route.fromTokenSymbol
+            )
         )
         .forEach((route) => {
           expect(
