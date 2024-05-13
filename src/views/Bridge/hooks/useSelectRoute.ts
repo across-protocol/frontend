@@ -50,6 +50,14 @@ export function useSelectRoute() {
         ),
       };
       const route =
+        findNextBestRoute(["inputTokenSymbol", "fromChain", "toChain"], {
+          ...baseFilter,
+          inputTokenSymbol: inputOrSwapTokenSymbol,
+        }) ||
+        findNextBestRoute(["swapTokenSymbol", "fromChain", "toChain"], {
+          ...baseFilter,
+          swapTokenSymbol: inputOrSwapTokenSymbol,
+        }) ||
         findNextBestRoute(["inputTokenSymbol", "fromChain"], {
           ...baseFilter,
           inputTokenSymbol: inputOrSwapTokenSymbol,
