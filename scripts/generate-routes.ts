@@ -47,10 +47,10 @@ const enabledRoutes = {
     },
     swapAndBridgeAddresses: {
       "1inch": {
-        [CHAIN_IDs.POLYGON]: "0xf9735e425a36d22636ef4cb75c7a6c63378290ca",
+        [CHAIN_IDs.POLYGON]: "0xaBa0F11D55C5dDC52cD0Cb2cd052B621d45159d5",
       },
       uniswap: {
-        [CHAIN_IDs.POLYGON]: "0xc2dcb88873e00c9d401de2cbba4c6a28f8a6e2c2",
+        [CHAIN_IDs.POLYGON]: "0x9220Fa27ae680E4e8D9733932128FA73362E0393",
       },
     },
     routes: [
@@ -82,6 +82,7 @@ const enabledRoutes = {
               "WETH",
               "ETH",
               "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "UMA",
               "DAI",

@@ -12,7 +12,7 @@
       "137": "0xaBa0F11D55C5dDC52cD0Cb2cd052B621d45159d5"
     },
     "uniswap": {
-      "137": "0x9220fa27ae680e4e8d9733932128fa73362e0393"
+      "137": "0x9220Fa27ae680E4e8D9733932128FA73362E0393"
     }
   },
   "routes": [
@@ -167,6 +167,17 @@
       "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
       "fromTokenSymbol": "USDC",
       "toTokenSymbol": "USDC",
+      "isNative": false,
+      "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 1,
+      "toChain": 137,
+      "fromTokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "toTokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "fromTokenSymbol": "USDC",
+      "toTokenSymbol": "USDC.e",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
