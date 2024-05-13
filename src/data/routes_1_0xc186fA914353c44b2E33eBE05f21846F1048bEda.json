@@ -3001,10 +3001,10 @@
       "fromChain": 59144,
       "toChain": 8453,
       "fromTokenAddress": "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
-      "toTokenAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "toTokenAddress": "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
       "fromSpokeAddress": "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
       "fromTokenSymbol": "USDC.e",
-      "toTokenSymbol": "USDC",
+      "toTokenSymbol": "USDbC",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
