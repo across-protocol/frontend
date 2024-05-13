@@ -436,7 +436,13 @@ const enabledRoutes = {
               "DAI",
               "WBTC",
             ],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
           },
         ],
       },
