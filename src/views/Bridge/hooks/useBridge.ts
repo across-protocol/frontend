@@ -1,25 +1,25 @@
 import { useEffect, useState } from "react";
 import { utils } from "@across-protocol/sdk-v2";
+import { BigNumber } from "ethers";
 
 import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
-import useReferrer from "hooks/useReferrer";
 import { ampli } from "ampli";
 
 import { useBridgeAction } from "./useBridgeAction";
 import { useToAccount } from "./useToAccount";
 import { useSelectRoute } from "./useSelectRoute";
-import { useTransferQuote } from "./useTransferQuote";
+import { useTransferQuote, type TransferQuote } from "./useTransferQuote";
 import { useAmountInput } from "./useAmountInput";
 import { validateBridgeAmount } from "../utils";
 
 export function useBridge() {
   const [shouldUpdateQuote, setShouldUpdateQuote] = useState(true);
-  const [usedTransferQuote, setUsedTransferQuote] =
-    useState<ReturnType<typeof useTransferQuote>["data"]>();
+  const [usedTransferQuote, setUsedTransferQuote] = useState<TransferQuote>();
+
+  // default slippage of 0.5%
+  const [swapSlippage, setSwapSlippage] = useState(0.5);
 
   const { isConnected, chainId: walletChainId, account } = useConnection();
-
-  const { referrer } = useReferrer();
 
   const { addToAmpliQueue } = useAmplitude();
 
@@ -51,18 +51,13 @@ export function useBridge() {
   } = useTransferQuote(
     selectedRoute,
     parsedAmount?.gt(0) ? parsedAmount : utils.bnZero,
+    swapSlippage,
     account,
     toAccount?.address
   );
 
-  const {
-    quote,
-    quotePriceUSD,
-    quotedFees,
-    quotedLimits,
-    initialQuoteTime,
-    estimatedTime,
-  } = usedTransferQuote || {};
+  const { quotedFees, quotedLimits, quotedSwap, estimatedTime } =
+    usedTransferQuote || {};
 
   const isQuoteUpdating =
     shouldUpdateQuote &&
@@ -72,7 +67,10 @@ export function useBridge() {
     parsedAmount,
     quotedFees?.isAmountTooLow,
     maxBalance,
-    quotedLimits?.maxDeposit
+    quotedLimits?.maxDeposit,
+    selectedRoute.type === "swap"
+      ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount || 0)
+      : parsedAmount
   );
   const isAmountValid = !amountValidationError;
 
@@ -84,24 +82,8 @@ export function useBridge() {
 
   const bridgeAction = useBridgeAction(
     isQuoteUpdating,
-    isAmountValid && parsedAmount && quotedFees && quotedLimits
-      ? {
-          amount: parsedAmount,
-          fromChain: selectedRoute.fromChain,
-          toChain: selectedRoute.toChain,
-          timestamp: quotedFees.quoteTimestamp,
-          referrer,
-          relayerFeePct: quotedFees.totalRelayFee.pct,
-          tokenAddress: selectedRoute.fromTokenAddress,
-          isNative: selectedRoute.isNative,
-          toAddress: toAccount?.address ?? "",
-        }
-      : undefined,
-    selectedRoute.fromTokenSymbol,
-    selectedRoute.toTokenSymbol,
-    quote,
-    initialQuoteTime,
-    quotePriceUSD
+    selectedRoute,
+    isAmountValid ? usedTransferQuote : undefined
   );
 
   useEffect(() => {
@@ -112,9 +94,9 @@ export function useBridge() {
     if (!isQuoteUpdating && shouldUpdateQuote) {
       setUsedTransferQuote(transferQuote);
 
-      if (transferQuote?.quote) {
+      if (transferQuote?.quoteForAnalytics) {
         addToAmpliQueue(() => {
-          ampli.transferQuoteReceived(transferQuote?.quote);
+          ampli.transferQuoteReceived(transferQuote?.quoteForAnalytics);
         });
       }
     }
@@ -144,6 +126,7 @@ export function useBridge() {
     toAccount,
     walletAccount: account,
     fees: quotedFees,
+    swapQuote: quotedSwap,
     balance,
     handleQuickSwap,
     isWrongChain: isWrongNetwork,
@@ -151,16 +134,18 @@ export function useBridge() {
     walletChainId,
     isConnected,
     isBridgeDisabled: isConnected && bridgeAction.buttonDisabled,
-    amountToBridge: parsedAmount,
+    parsedAmountInput: parsedAmount,
     estimatedTimeString,
     handleChangeAmountInput,
     handleClickMaxBalance,
     userAmountInput,
+    swapSlippage,
     amountValidationError,
     handleSelectFromChain,
     handleSelectToChain,
     handleSelectInputToken,
     handleSelectOutputToken,
+    handleSetNewSlippage: setSwapSlippage,
     isQuoteLoading: isQuoteLoading || Boolean(parsedAmount && isQuoteIdle),
   };
 }

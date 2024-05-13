@@ -3,6 +3,7 @@ import { Fee } from "utils/bridge";
 import { ChainId } from "utils/constants";
 import { CoingeckoApiCall } from "./prod/coingecko";
 import { PoolsApiCall } from "./prod/pools";
+import { SwapQuoteApiCall } from "./prod/swap-quote";
 
 export type ServerlessAPIEndpoints = {
   coingecko: CoingeckoApiCall;
@@ -18,6 +19,7 @@ export type ServerlessAPIEndpoints = {
     getStats: GetDepositStatsType;
   };
   pools: PoolsApiCall;
+  swapQuote: SwapQuoteApiCall;
 };
 
 export type RewardsApiFunction =
@@ -54,7 +56,8 @@ export type SuggestedApiFeeReturnType = {
 
 export type SuggestedApiFeeType = (
   amount: ethers.BigNumber,
-  originToken: string,
+  inputToken: string,
+  outputToken: string,
   toChainid: ChainId,
   fromChainid: ChainId,
   recipientAddress?: string
@@ -93,7 +96,8 @@ export interface BridgeLimitInterface {
 }
 
 export type BridgeLimitFunction = (
-  token: string,
+  inputTokenSymbol: string,
+  outputTokenSymbol: string,
   fromChainId: string | ChainId,
   toChainId: string | ChainId
 ) => Promise<BridgeLimitInterface>;

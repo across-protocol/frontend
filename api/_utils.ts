@@ -297,7 +297,7 @@ export const getRouteDetails = (
   originChainId?: number,
   outputTokenAddress?: string
 ) => {
-  const inputToken = _getTokenByAddress(inputTokenAddress, originChainId);
+  const inputToken = getTokenByAddress(inputTokenAddress, originChainId);
 
   if (!inputToken) {
     throw new InputError(
@@ -312,7 +312,7 @@ export const getRouteDetails = (
     : inputToken.addresses[HUB_POOL_CHAIN_ID];
   const l1Token = isBridgedUsdc(inputToken.symbol)
     ? TOKEN_SYMBOLS_MAP.USDC
-    : _getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
+    : getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
 
   if (!l1Token) {
     throw new InputError("No L1 token found for given input token address");
@@ -347,7 +347,7 @@ export const getRouteDetails = (
   outputTokenAddress ??= inputToken.addresses[destinationChainId];
 
   const outputToken = outputTokenAddress
-    ? _getTokenByAddress(outputTokenAddress, destinationChainId)
+    ? getTokenByAddress(outputTokenAddress, destinationChainId)
     : undefined;
 
   if (!outputToken) {
@@ -395,7 +395,7 @@ export const getRouteDetails = (
   };
 };
 
-const _getTokenByAddress = (tokenAddress: string, chainId?: number) => {
+export const getTokenByAddress = (tokenAddress: string, chainId?: number) => {
   const [, token] =
     Object.entries(TOKEN_SYMBOLS_MAP).find(([_symbol, { addresses }]) =>
       chainId
@@ -661,7 +661,8 @@ export const getTokenSymbol = (tokenAddress: string): string => {
 
 /**
  * Retrieves the results of the `relayFeeCalculator` SDK function: `relayerFeeDetails`
- * @param l1Token A valid L1 ERC-20 token address
+ * @param inputToken A valid input token address
+ * @param outputToken A valid output token address
  * @param amount  The amount of funds that are requesting to be transferred
  * @param originChainId The origin chain that this token will be transferred from
  * @param destinationChainId The destination chain that this token will be transferred to
@@ -672,7 +673,8 @@ export const getTokenSymbol = (tokenAddress: string): string => {
  * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
  */
 export const getRelayerFeeDetails = async (
-  l1Token: string,
+  inputToken: string,
+  outputToken: string,
   amount: sdk.utils.BigNumberish,
   originChainId: number,
   destinationChainId: number,
@@ -681,18 +683,6 @@ export const getRelayerFeeDetails = async (
   message?: string,
   relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const tokenAddresses = sdk.utils.getL2TokenAddresses(
-    l1Token,
-    HUB_POOL_CHAIN_ID
-  );
-  if (!tokenAddresses) {
-    throw new InputError(
-      `Could not resolve token address for token ${l1Token}`
-    );
-  }
-  const originToken = tokenAddresses[originChainId];
-  const destinationToken = tokenAddresses[destinationChainId];
-
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
   try {
     return await relayFeeCalculator.relayerFeeDetails(
@@ -705,8 +695,8 @@ export const getRelayerFeeDetails = async (
         destinationChainId,
         originChainId,
         quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
-        inputToken: originToken,
-        outputToken: destinationToken,
+        inputToken,
+        outputToken,
         fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
         exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
         exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
@@ -1008,6 +998,12 @@ export function validAddressOrENS() {
 export function positiveIntStr() {
   return define<string>("positiveIntStr", (value) => {
     return Number.isInteger(Number(value)) && Number(value) > 0;
+  });
+}
+
+export function positiveFloatStr(maxValue?: number) {
+  return define<string>("positiveFloatStr", (value) => {
+    return Number(value) >= 0 && (maxValue ? Number(value) <= maxValue : true);
   });
 }
 
@@ -1503,4 +1499,29 @@ export function sendResponse(
     `s-maxage=${cacheSeconds}, stale-while-revalidate=${staleWhileRevalidateSeconds}`
   );
   return response.status(statusCode).json(body);
+}
+
+export function isSwapRouteEnabled({
+  originChainId,
+  destinationChainId,
+  acrossInputTokenSymbol,
+  acrossOutputTokenSymbol,
+  swapTokenAddress,
+}: {
+  originChainId: number;
+  destinationChainId: number;
+  acrossInputTokenSymbol: string;
+  acrossOutputTokenSymbol: string;
+  swapTokenAddress: string;
+}) {
+  const swapRoute = ENABLED_ROUTES.swapRoutes.find((route) => {
+    return (
+      route.fromChain === originChainId &&
+      route.toChain === destinationChainId &&
+      route.fromTokenSymbol === acrossInputTokenSymbol &&
+      route.toTokenSymbol === acrossOutputTokenSymbol &&
+      route.swapTokenAddress.toLowerCase() === swapTokenAddress.toLowerCase()
+    );
+  });
+  return !!swapRoute;
 }

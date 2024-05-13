@@ -7,19 +7,22 @@ import { bridgeFeesQueryKey, getBridgeFees, ChainId } from "utils";
  * @param amount - The amount to check bridge fees for.
  * @param fromChainId The chain Id of the origin chain
  * @param toChainId The chain Id of the receiving chain, its timestamp will be used to calculate the fees.
- * @param tokenSymbol - The token symbol to check bridge fees for.
+ * @param inputTokenSymbol - The input token symbol to check bridge fees for.
+ * @param outputTokenSymbol - The output token symbol to check bridge fees for.
  * @returns The bridge fees for the given amount and token symbol and the UseQueryResult object.
  */
 export function useBridgeFees(
   amount: ethers.BigNumber,
-  fromChainId?: ChainId,
-  toChainId?: ChainId,
-  tokenSymbol?: string,
+  fromChainId: ChainId,
+  toChainId: ChainId,
+  inputTokenSymbol: string,
+  outputTokenSymbol: string,
   recipientAddress?: string
 ) {
   const queryKey = bridgeFeesQueryKey(
     amount,
-    tokenSymbol,
+    inputTokenSymbol,
+    outputTokenSymbol,
     fromChainId,
     toChainId
   );
@@ -28,26 +31,24 @@ export function useBridgeFees(
     ({ queryKey }) => {
       const [
         ,
-        tokenSymbolToQuery,
+        inputTokenSymbolToQuery,
+        outputTokenSymbolToQuery,
         amountToQuery,
         fromChainIdToQuery,
         toChainIdToQuery,
       ] = queryKey;
 
-      if (!toChainIdToQuery || !fromChainIdToQuery || !tokenSymbolToQuery) {
-        return undefined;
-      }
-
       return getBridgeFees({
         amount: BigNumber.from(amountToQuery),
-        tokenSymbol: tokenSymbolToQuery,
+        inputTokenSymbol: inputTokenSymbolToQuery,
+        outputTokenSymbol: outputTokenSymbolToQuery,
         toChainId: toChainIdToQuery,
         fromChainId: fromChainIdToQuery,
         recipientAddress,
       });
     },
     {
-      enabled: Boolean(toChainId && fromChainId && tokenSymbol && amount.gt(0)),
+      enabled: Boolean(amount.gt(0)),
       refetchInterval: 5000,
     }
   );

@@ -6,7 +6,12 @@ import { ReactComponent as LinkExternalIcon } from "assets/icons/link-external.s
 import { Selector } from "components";
 import { Text } from "components/Text";
 
-import { formatUnitsWithMaxFractions, TokenInfo, getToken, Route } from "utils";
+import {
+  formatUnitsWithMaxFractions,
+  TokenInfo,
+  getToken,
+  tokenList,
+} from "utils";
 import { useBalancesBySymbols, useConnection } from "hooks";
 
 import { RouteNotSupportedTooltipText } from "./RouteNotSupportedTooltipText";
@@ -15,10 +20,11 @@ import {
   getAvailableOutputTokens,
   getAllTokens,
   getTokenExplorerLinkSafe,
+  SelectedRoute,
 } from "../utils";
 
 type Props = {
-  selectedRoute: Route;
+  selectedRoute: SelectedRoute;
   onSelectToken: (token: string) => void;
   inputOrOutputToken: "input" | "output";
   receiveTokenSymbol?: string;
@@ -35,9 +41,13 @@ export function TokenSelector({
   const isInputTokenSelector = inputOrOutputToken === "input";
   const { fromChain, toChain, fromTokenSymbol, toTokenSymbol } = selectedRoute;
   const selectedToken = getToken(
-    isInputTokenSelector ? fromTokenSymbol : toTokenSymbol
+    isInputTokenSelector
+      ? selectedRoute.type === "swap"
+        ? selectedRoute.swapTokenSymbol
+        : fromTokenSymbol
+      : toTokenSymbol
   );
-  const receiveToken = receiveTokenSymbol
+  const tokenToDisplay = receiveTokenSymbol
     ? getToken(receiveTokenSymbol)
     : selectedToken;
 
@@ -51,8 +61,13 @@ export function TokenSelector({
     const availableTokens = isInputTokenSelector
       ? getAvailableInputTokens(fromChain, toChain)
       : getAvailableOutputTokens(fromChain, toChain, fromTokenSymbol);
+    const orderedAvailableTokens = tokenList.filter((orderedToken) =>
+      availableTokens.find(
+        (availableToken) => availableToken.symbol === orderedToken.symbol
+      )
+    );
     return [
-      ...availableTokens,
+      ...orderedAvailableTokens,
       ...(isInputTokenSelector
         ? allTokens
             .filter(
@@ -128,13 +143,14 @@ export function TokenSelector({
       }))}
       displayElement={
         <CoinIconTextWrapper>
-          <CoinIcon src={receiveToken.logoURI} />
+          <CoinIcon src={tokenToDisplay.logoURI} />
           <Text size="lg" color="white-100">
-            {receiveToken.displaySymbol || receiveToken.symbol.toUpperCase()}
+            {tokenToDisplay.displaySymbol ||
+              tokenToDisplay.symbol.toUpperCase()}
           </Text>
         </CoinIconTextWrapper>
       }
-      selectedValue={receiveToken.symbol}
+      selectedValue={tokenToDisplay.symbol}
       title="Select a token"
       setSelectedValue={(v) => onSelectToken(v)}
       allowSelectDisabled

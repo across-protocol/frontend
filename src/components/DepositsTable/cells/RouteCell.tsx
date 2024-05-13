@@ -3,17 +3,16 @@ import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { IconPair } from "components/IconPair";
 import { Deposit } from "hooks/useDeposits";
-import { getChainInfo, Token } from "utils";
+import { getChainInfo } from "utils";
 
 import { BaseCell } from "./BaseCell";
 
 type Props = {
   deposit: Deposit;
-  token: Token;
   width: number;
 };
 
-export function RouteCell({ deposit, token, width }: Props) {
+export function RouteCell({ deposit, width }: Props) {
   const sourceChain = getChainInfo(deposit.sourceChainId);
   const destinationChain = getChainInfo(deposit.destinationChainId);
 
@@ -30,15 +29,17 @@ export function RouteCell({ deposit, token, width }: Props) {
               alt={`${destinationChain.name} logo`}
             />
           }
-          iconSize={20}
+          iconSize={24}
         />
       </IconPairContainer>
-      <ChainNamesContainer>
-        <Text color="light-200">→ {destinationChain.name}</Text>
-        <Text size="sm" color="grey-400">
+      <div>
+        <ChainNameText color="light-200">
+          → {destinationChain.name}
+        </ChainNameText>
+        <ChainNameText size="sm" color="grey-400">
           {sourceChain.name}
-        </Text>
-      </ChainNamesContainer>
+        </ChainNameText>
+      </div>
     </StyledRouteCell>
   );
 }
@@ -56,4 +57,6 @@ const IconPairContainer = styled.div`
   align-items: center;
 `;
 
-const ChainNamesContainer = styled.div``;
+const ChainNameText = styled(Text)`
+  text-overflow: ellipsis;
+`;

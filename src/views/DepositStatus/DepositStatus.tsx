@@ -11,7 +11,7 @@ import NotFound from "views/NotFound";
 import { Breadcrumb } from "./components/Breadcrumb";
 import { DepositStatusUpperCard } from "./components/DepositStatusUpperCard";
 import { DepositStatusLowerCard } from "./components/DepositStatusLowerCard";
-import { FromBridgePagePayload } from "./types";
+import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 
 export default function DepositStatus() {
   const { depositTxHash } = useParams<

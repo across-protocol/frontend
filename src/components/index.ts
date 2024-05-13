@@ -10,6 +10,7 @@ export { default as Selector } from "./Selector";
 export { Text } from "./Text";
 export { WrongNetworkHeader } from "./WrongNetworkHeader";
 export { default as CardWrapper } from "./CardWrapper";
+export { LoadingSkeleton } from "./LoadingSkeleton";
 
 export * from "./AmountInput";
 export * from "./Button";

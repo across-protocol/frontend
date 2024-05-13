@@ -36,34 +36,43 @@ export function DataRow({
   disabledColumns = [],
   onClickSpeedUp,
 }: Props) {
-  const token = config.getTokenInfoByAddressSafe(
+  const swapToken = config.getTokenInfoByAddressSafe(
     deposit.sourceChainId,
-    deposit.assetAddr
+    deposit.swapToken?.address || ""
+  );
+  const inputToken = config.getTokenInfoByAddressSafe(
+    deposit.sourceChainId,
+    deposit.token?.address || deposit.assetAddr
+  );
+  const outputToken = config.getTokenInfoByAddressSafe(
+    deposit.destinationChainId,
+    deposit.outputToken?.address || ""
   );
 
   // Hide unsupported or unknown token deposits
-  if (!token) {
+  if (!inputToken) {
     return null;
   }
 
   return (
     <StyledRow>
       {isColumnDisabled(disabledColumns, "asset") ? null : (
-        <AssetCell token={token} width={headerCells.asset.width} />
+        <AssetCell
+          inputToken={inputToken}
+          outputToken={outputToken}
+          swapToken={swapToken}
+          width={headerCells.asset.width}
+        />
       )}
       {isColumnDisabled(disabledColumns, "amount") ? null : (
         <AmountCell
           deposit={deposit}
-          token={token}
+          token={swapToken || inputToken}
           width={headerCells.amount.width}
         />
       )}
       {isColumnDisabled(disabledColumns, "route") ? null : (
-        <RouteCell
-          deposit={deposit}
-          token={token}
-          width={headerCells.route.width}
-        />
+        <RouteCell deposit={deposit} width={headerCells.route.width} />
       )}
       {isColumnDisabled(disabledColumns, "address") ? null : (
         <AddressCell deposit={deposit} width={headerCells.address.width} />

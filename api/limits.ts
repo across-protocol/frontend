@@ -82,6 +82,7 @@ const handler = async (
       destinationChainId,
       resolvedOriginChainId: computedOriginChainId,
       l1Token,
+      inputToken,
       outputToken,
     } = validateChainAndTokenParams(query);
 
@@ -109,7 +110,8 @@ const handler = async (
       fullRelayerMainnetBalances,
     ] = await Promise.all([
       getRelayerFeeDetails(
-        l1Token.address,
+        inputToken.address,
+        outputToken.address,
         ethers.BigNumber.from("10").pow(l1Token.decimals),
         computedOriginChainId,
         destinationChainId,

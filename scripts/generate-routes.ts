@@ -8,6 +8,12 @@ import { TOKEN_SYMBOLS_MAP } from "../api/_constants";
 
 const { getDeployedAddress } = sdkUtils;
 
+type Route = typeof enabledRoutes[keyof typeof enabledRoutes]["routes"][number];
+type ToChain = Route["toChains"][number];
+type ToToken = ToChain["tokens"][number];
+type SwapToken = ToChain["swapTokens"][number];
+type ValidTokenSymbol = keyof typeof TOKEN_SYMBOLS_MAP;
+
 const enabledRoutes = {
   [CHAIN_IDs.MAINNET]: {
     hubPoolChain: CHAIN_IDs.MAINNET,
@@ -39,6 +45,14 @@ const enabledRoutes = {
         CHAIN_IDs.LINEA,
       ],
     },
+    swapAndBridgeAddresses: {
+      "1inch": {
+        [CHAIN_IDs.POLYGON]: "0xf9735e425a36d22636ef4cb75c7a6c63378290ca",
+      },
+      uniswap: {
+        [CHAIN_IDs.POLYGON]: "0xc2dcb88873e00c9d401de2cbba4c6a28f8a6e2c2",
+      },
+    },
     routes: [
       {
         fromChain: CHAIN_IDs.MAINNET,
@@ -59,6 +73,7 @@ const enabledRoutes = {
               "SNX",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
@@ -74,6 +89,7 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
@@ -89,6 +105,7 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
@@ -100,6 +117,7 @@ const enabledRoutes = {
               "WBTC",
               "DAI",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -111,6 +129,7 @@ const enabledRoutes = {
               "BAL",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.LINEA,
@@ -122,6 +141,7 @@ const enabledRoutes = {
               "USDT",
               "WBTC",
             ],
+            swapTokens: [],
           },
         ],
       },
@@ -144,6 +164,7 @@ const enabledRoutes = {
               "SNX",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
@@ -159,6 +180,7 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
@@ -174,10 +196,12 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
             tokens: ["WETH", "ETH", "USDC.e", "WBTC", "USDT", "DAI"],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -189,10 +213,12 @@ const enabledRoutes = {
               "BAL",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.LINEA,
             tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
+            swapTokens: [],
           },
         ],
       },
@@ -213,6 +239,7 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
@@ -227,6 +254,7 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
@@ -241,10 +269,12 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
             tokens: ["WETH", "USDC.e", "WBTC", "USDT", "DAI"],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -255,10 +285,12 @@ const enabledRoutes = {
               "BAL",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.LINEA,
             tokens: ["WETH", "USDC.e", "USDT", "DAI", "WBTC"],
+            swapTokens: [],
           },
         ],
       },
@@ -280,6 +312,7 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
@@ -295,6 +328,7 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
@@ -310,10 +344,12 @@ const enabledRoutes = {
               "USDT",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
             tokens: ["WBTC", "USDC.e", "WETH", "ETH", "USDT", "DAI"],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -325,10 +361,12 @@ const enabledRoutes = {
               "BAL",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.LINEA,
             tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
+            swapTokens: [],
           },
         ],
       },
@@ -346,18 +384,22 @@ const enabledRoutes = {
               "USDT",
               "DAI",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
             tokens: ["WETH", "ETH", "USDC.e", "WBTC", "USDT", "DAI"],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
             tokens: ["WETH", "ETH", "USDC.e", "WBTC", "USDT", "DAI"],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
             tokens: ["WETH", "USDC.e", "WBTC", "USDT", "DAI"],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -367,10 +409,12 @@ const enabledRoutes = {
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
               "DAI",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.LINEA,
             tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
+            swapTokens: [],
           },
         ],
       },
@@ -388,6 +432,7 @@ const enabledRoutes = {
               "BAL",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
@@ -399,6 +444,7 @@ const enabledRoutes = {
               "BAL",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
@@ -410,6 +456,7 @@ const enabledRoutes = {
               "BAL",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
@@ -421,6 +468,7 @@ const enabledRoutes = {
               "BAL",
               "POOL",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
@@ -430,6 +478,7 @@ const enabledRoutes = {
               "ETH",
               "DAI",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.LINEA,
@@ -439,6 +488,7 @@ const enabledRoutes = {
               { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC.e" },
               "DAI",
             ],
+            swapTokens: [],
           },
         ],
       },
@@ -456,22 +506,27 @@ const enabledRoutes = {
               "DAI",
               "WBTC",
             ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
             tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
             tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
             tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
             tokens: ["USDC.e", "WETH", "ETH", "DAI"],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.BASE,
@@ -481,6 +536,7 @@ const enabledRoutes = {
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
               "DAI",
             ],
+            swapTokens: [],
           },
         ],
       },
@@ -494,14 +550,22 @@ const enabledRoutes = {
       "AcrossConfigStore",
       CHAIN_IDs.SEPOLIA
     ),
-    acrossTokenAddress: TOKEN_SYMBOLS_MAP.ACX.addresses[CHAIN_IDs.MAINNET],
-    acceleratingDistributorAddress: sdkUtils.AddressZero,
-    merkleDistributorAddress: sdkUtils.AddressZero,
-    claimAndStakeAddress: sdkUtils.AddressZero,
+    acrossTokenAddress: "0x49fCaC04AE71dbD074304Fb12071bD771e0E927A",
+    acceleratingDistributorAddress:
+      "0x3a202A5F5941b8b6b56EE24f8503aD31Fba18b05",
+    merkleDistributorAddress: "0x711615993FD2b9D22b598f7b36B762eA89E9EC2b",
+    claimAndStakeAddress: "0x765904d00BaAEF371ea1f6cfd41af19BbA644766",
     pools: [],
     spokePoolVerifier: {
       address: sdkUtils.AddressZero,
       enabledChains: [],
+    },
+    swapAndBridgeAddresses: {
+      uniswap: {
+        [CHAIN_IDs.BASE_SEPOLIA]: "0xf81C7cbC1196FACb327BD5B7021f9C1c220D0328", // Mocked
+        [CHAIN_IDs.OPTIMISM_SEPOLIA]:
+          "0x17496824Ba574A4e9De80110A91207c4c63e552a", // Mocked
+      },
     },
     routes: [
       {
@@ -510,14 +574,25 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.BASE_SEPOLIA,
-            tokens: ["WETH", "USDC"],
+            tokens: [
+              "WETH",
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
+            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM_SEPOLIA,
-            tokens: ["WETH", "USDC"],
+            tokens: [
+              "WETH",
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM_SEPOLIA,
+            swapTokens: [],
             tokens: ["WETH"],
           },
         ],
@@ -529,6 +604,32 @@ const enabledRoutes = {
           {
             chainId: CHAIN_IDs.SEPOLIA,
             tokens: ["WETH", "USDC"],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+            ],
+          },
+          {
+            chainId: CHAIN_IDs.OPTIMISM_SEPOLIA,
+            tokens: [
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+            ],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
           },
         ],
       },
@@ -542,6 +643,32 @@ const enabledRoutes = {
           {
             chainId: CHAIN_IDs.SEPOLIA,
             tokens: ["WETH", "USDC"],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+            ],
+          },
+          {
+            chainId: CHAIN_IDs.BASE_SEPOLIA,
+            tokens: [
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
+            ],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDbC",
+              },
+            ],
           },
         ],
       },
@@ -554,6 +681,7 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.SEPOLIA,
+            swapTokens: [],
             tokens: ["WETH"],
           },
         ],
@@ -580,54 +708,27 @@ function generateRoutes(hubPoolChainId = 1) {
     ),
     merkleDistributorAddress: utils.getAddress(config.merkleDistributorAddress),
     claimAndStakeAddress: utils.getAddress(config.claimAndStakeAddress),
-    routes: config.routes.flatMap((route) => {
-      return route.toChains.flatMap((toChain) => {
-        return toChain.tokens.map((token) => {
-          const inputTokenSymbol =
-            typeof token === "object" ? token.inputTokenSymbol : token;
-          const outputTokenSymbol =
-            typeof token === "object" ? token.outputTokenSymbol : token;
-          const inputTokenAddress =
-            TOKEN_SYMBOLS_MAP[inputTokenSymbol].addresses[route.fromChain];
-          const outputTokenAddress =
-            TOKEN_SYMBOLS_MAP[outputTokenSymbol].addresses[toChain.chainId];
-
-          if (!inputTokenAddress || !outputTokenAddress) {
-            const isInputMissing = !inputTokenAddress;
-            throw new Error(
-              `Could not find address for ${
-                isInputMissing ? "input" : "output"
-              } token ${
-                isInputMissing ? inputTokenSymbol : outputTokenSymbol
-              } on chain ${isInputMissing ? route.fromChain : toChain.chainId}`
-            );
-          }
-
-          const l1TokenAddress =
-            TOKEN_SYMBOLS_MAP[
-              isBridgedUsdc(inputTokenSymbol) ? "USDC" : inputTokenSymbol
-            ].addresses[hubPoolChainId];
-
-          if (!l1TokenAddress) {
-            throw new Error(
-              `Could not find L1 token address for ${inputTokenSymbol}`
-            );
-          }
-
-          return {
-            fromChain: route.fromChain,
-            toChain: toChain.chainId,
-            fromTokenAddress: utils.getAddress(inputTokenAddress),
-            toTokenAddress: utils.getAddress(outputTokenAddress),
-            fromSpokeAddress: utils.getAddress(route.fromSpokeAddress),
-            fromTokenSymbol: inputTokenSymbol,
-            toTokenSymbol: outputTokenSymbol,
-            isNative: token === TOKEN_SYMBOLS_MAP.ETH.symbol,
-            l1TokenAddress: utils.getAddress(l1TokenAddress),
-          };
-        });
-      });
-    }),
+    swapAndBridgeAddresses: Object.entries(
+      config.swapAndBridgeAddresses
+    ).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: Object.entries(value).reduce(
+          (acc, [chainId, address]) => ({
+            ...acc,
+            [chainId]: utils.getAddress(address as string),
+          }),
+          {}
+        ),
+      }),
+      {}
+    ),
+    routes: config.routes.flatMap((route) =>
+      transformBridgeRoute(route, config.hubPoolChain)
+    ),
+    swapRoutes: config.routes.flatMap((route) =>
+      transformSwapRoute(route, config.hubPoolChain)
+    ),
     pools: config.pools,
     spokePoolVerifier: config.spokePoolVerifier,
   };
@@ -638,6 +739,138 @@ function generateRoutes(hubPoolChainId = 1) {
       parser: "json",
     })
   );
+}
+
+function transformBridgeRoute(route: Route, hubPoolChainId: number) {
+  return route.toChains.flatMap((toChain: ToChain) => {
+    return toChain.tokens.map((token: ToToken) => {
+      const inputTokenSymbol =
+        typeof token === "object" ? token.inputTokenSymbol : token;
+      const outputTokenSymbol =
+        typeof token === "object" ? token.outputTokenSymbol : token;
+      try {
+        return transformToRoute(
+          route,
+          toChain,
+          inputTokenSymbol,
+          outputTokenSymbol,
+          hubPoolChainId
+        );
+      } catch (e) {
+        if (e instanceof Error) {
+          throw new Error(
+            `Failed to transform bridge route ${route.fromChain}->${toChain.chainId}: ${e.message}`
+          );
+        }
+        throw e;
+      }
+    });
+  });
+}
+
+function transformSwapRoute(route: Route, hubPoolChainId: number) {
+  return route.toChains.flatMap((toChain: ToChain) => {
+    return toChain.swapTokens.map((token: SwapToken) => {
+      const {
+        swapInputTokenSymbol,
+        acrossInputTokenSymbol,
+        acrossOutputTokenSymbol,
+      } = token;
+
+      const swapInputToken = getTokenBySymbol(
+        swapInputTokenSymbol,
+        route.fromChain,
+        hubPoolChainId
+      );
+      try {
+        const bridgeRoute = transformToRoute(
+          route,
+          toChain,
+          acrossInputTokenSymbol,
+          acrossOutputTokenSymbol,
+          hubPoolChainId
+        );
+
+        return {
+          ...bridgeRoute,
+          swapTokenAddress: swapInputToken.address,
+          swapTokenSymbol: swapInputToken.symbol,
+          swapTokenL1TokenAddress: swapInputToken.l1TokenAddress,
+        };
+      } catch (e) {
+        if (e instanceof Error) {
+          throw new Error(
+            `Failed to transform swap route ${route.fromChain}->${toChain.chainId}: ${e.message}`
+          );
+        }
+        throw e;
+      }
+    });
+  });
+}
+
+function transformToRoute(
+  route: Route,
+  toChain: ToChain,
+  inputTokenSymbol: ValidTokenSymbol,
+  outputTokenSymbol: ValidTokenSymbol,
+  hubPoolChainId: number
+) {
+  const inputToken = getTokenBySymbol(
+    inputTokenSymbol,
+    route.fromChain,
+    hubPoolChainId
+  );
+  const outputToken = getTokenBySymbol(
+    outputTokenSymbol,
+    toChain.chainId,
+    hubPoolChainId
+  );
+
+  if (inputToken.l1TokenAddress !== outputToken.l1TokenAddress) {
+    throw new Error("Mismatching L1 addresses");
+  }
+
+  return {
+    fromChain: route.fromChain,
+    toChain: toChain.chainId,
+    fromTokenAddress: inputToken.address,
+    toTokenAddress: outputToken.address,
+    fromSpokeAddress: utils.getAddress(route.fromSpokeAddress),
+    fromTokenSymbol: inputTokenSymbol,
+    toTokenSymbol: outputTokenSymbol,
+    isNative: inputTokenSymbol === TOKEN_SYMBOLS_MAP.ETH.symbol,
+    l1TokenAddress: inputToken.l1TokenAddress,
+  };
+}
+
+function getTokenBySymbol(
+  tokenSymbol: ValidTokenSymbol,
+  chainId: number,
+  l1ChainId: number
+) {
+  const tokenAddress = TOKEN_SYMBOLS_MAP[tokenSymbol]?.addresses[chainId];
+
+  if (!tokenAddress) {
+    throw new Error(
+      `Could not find address for ${tokenSymbol} on chain ${chainId}`
+    );
+  }
+
+  const l1TokenAddress =
+    TOKEN_SYMBOLS_MAP[isBridgedUsdc(tokenSymbol) ? "USDC" : tokenSymbol]
+      ?.addresses[l1ChainId];
+
+  if (!l1TokenAddress) {
+    throw new Error(`Could not find L1 token address for ${tokenSymbol}`);
+  }
+
+  return {
+    chainId,
+    address: utils.getAddress(tokenAddress),
+    symbol: tokenSymbol,
+    l1TokenAddress: utils.getAddress(l1TokenAddress),
+  };
 }
 
 function isBridgedUsdc(tokenSymbol: string) {

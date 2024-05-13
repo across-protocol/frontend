@@ -23,8 +23,10 @@ const Bridge = () => {
     balance,
     amountValidationError,
     userAmountInput,
-    amountToBridge,
+    swapSlippage,
+    parsedAmountInput,
     estimatedTimeString,
+    swapQuote,
     toAccount,
     setCustomToAddress,
     handleChangeAmountInput,
@@ -33,6 +35,7 @@ const Bridge = () => {
     handleSelectOutputToken,
     handleSelectFromChain,
     handleSelectToChain,
+    handleSetNewSlippage,
     isQuoteLoading,
   } = useBridge();
 
@@ -52,8 +55,9 @@ const Bridge = () => {
           <Breadcrumb />
           <BridgeForm
             selectedRoute={selectedRoute}
-            amountToBridge={amountToBridge}
+            parsedAmountInput={parsedAmountInput}
             amountInput={userAmountInput}
+            swapSlippage={swapSlippage}
             toAccount={toAccount}
             onChangeAmountInput={handleChangeAmountInput}
             onClickMaxBalance={handleClickMaxBalance}
@@ -65,6 +69,7 @@ const Bridge = () => {
             onClickChainSwitch={handleChainSwitch}
             onClickActionButton={buttonActionHandler}
             onClickChangeToAddress={() => setDisplayChangeAccount(true)}
+            onSetNewSlippage={handleSetNewSlippage}
             fees={fees}
             estimatedTimeString={estimatedTimeString}
             isConnected={isConnected}
@@ -74,6 +79,7 @@ const Bridge = () => {
             validationError={amountValidationError}
             balance={balance}
             isQuoteLoading={isQuoteLoading}
+            swapQuote={swapQuote}
           />
         </Wrapper>
       </LayoutV2>

@@ -15,24 +15,24 @@ import ReferralCTA from "./ReferralCTA";
 import { FeesCollapsible } from "./FeesCollapsible";
 import { RecipientRow } from "./RecipientRow";
 
-import {
-  getToken,
-  GetBridgeFeesResult,
-  QUERIESV2,
-  receiveAmount,
-  Route,
-} from "utils";
+import { getToken, GetBridgeFeesResult, QUERIESV2 } from "utils";
 import { VoidHandler } from "utils/types";
 
-import { AmountInputError, getReceiveTokenSymbol } from "../utils";
+import {
+  AmountInputError,
+  SelectedRoute,
+  getReceiveTokenSymbol,
+} from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
 import { useRewardToken } from "hooks/useRewardToken";
 import { useConnection } from "hooks";
+import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
-type BridgeFormProps = {
-  selectedRoute: Route;
+export type BridgeFormProps = {
+  selectedRoute: SelectedRoute;
   amountInput: string;
-  amountToBridge?: BigNumber;
+  swapSlippage: number;
+  parsedAmountInput?: BigNumber;
   toAccount?: ToAccount;
 
   onChangeAmountInput: (input: string) => void;
@@ -45,10 +45,12 @@ type BridgeFormProps = {
   onClickChainSwitch: VoidHandler;
   onClickActionButton: VoidHandler;
   onClickChangeToAddress: VoidHandler;
+  onSetNewSlippage: (slippage: number) => void;
 
   fees?: GetBridgeFeesResult;
   estimatedTimeString?: string;
   balance?: BigNumber;
+  swapQuote?: SwapQuoteApiResponse;
 
   isConnected: boolean;
   isWrongChain: boolean;
@@ -70,9 +72,10 @@ const validationErrorTextMap = {
 
 const BridgeForm = ({
   selectedRoute,
-  amountToBridge,
+  parsedAmountInput,
   amountInput,
   toAccount,
+  swapSlippage,
 
   onClickMaxBalance,
   onChangeAmountInput,
@@ -84,10 +87,12 @@ const BridgeForm = ({
   onClickChainSwitch,
   onClickActionButton,
   onClickChangeToAddress,
+  onSetNewSlippage,
 
   fees,
   estimatedTimeString,
   balance,
+  swapQuote,
 
   isConnected,
   isWrongChain,
@@ -133,7 +138,7 @@ const BridgeForm = ({
           />
         </TokenSelectorWrapper>
       </RowWrapper>
-      {amountInput && validationError && (
+      {parsedAmountInput && validationError && (
         <InputErrorText errorText={validationErrorTextMap[validationError]} />
       )}
       <RowWrapper>
@@ -196,20 +201,22 @@ const BridgeForm = ({
         isQuoteLoading={isQuoteLoading}
         fromChainId={selectedRoute.fromChain}
         toChainId={selectedRoute.toChain}
+        isSwap={selectedRoute.type === "swap"}
         estimatedTime={estimatedTimeString}
         gasFee={fees?.relayerGasFee.total}
-        bridgeFee={
-          fees && amountToBridge && amountToBridge.gt(0)
-            ? receiveAmount(amountToBridge, fees).deductionsSansRelayerGas
-            : undefined
-        }
-        totalReceived={
-          fees && amountToBridge && amountToBridge.gt(0)
-            ? receiveAmount(amountToBridge, fees).receivable
-            : undefined
-        }
+        capitalFee={fees?.relayerCapitalFee.total}
+        lpFee={fees?.lpFee.total}
+        parsedAmount={parsedAmountInput}
+        swapQuote={swapQuote}
         inputToken={getToken(selectedRoute.fromTokenSymbol)}
         outputToken={getToken(receiveTokenSymbol)}
+        swapToken={
+          selectedRoute.type === "swap"
+            ? getToken(selectedRoute.swapTokenSymbol)
+            : undefined
+        }
+        onSetNewSlippage={onSetNewSlippage}
+        currentSwapSlippage={swapSlippage}
       />
       {isWrongChain ? (
         <StyledSecondaryButton onClick={onClickChainSwitch}>
