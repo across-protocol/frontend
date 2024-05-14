@@ -69,7 +69,31 @@ export type Deposit = {
     totalBridgeFeeUsd: string;
     totalBridgeFeePct: string; // wei pct
     totalBridgeFeeAmount: string;
+    // swap fee
+    swapFeeUsd?: string;
+    swapFeePct?: string; // wei pct
+    swapFeeAmount?: string;
   };
+  token?: {
+    address: string;
+    symbol: string;
+    name: string;
+    decimals: number;
+  };
+  outputToken?: {
+    address: string;
+    symbol: string;
+    name: string;
+    decimals: number;
+  };
+  swapToken?: {
+    address: string;
+    symbol: string;
+    name: string;
+    decimals: number;
+  };
+  swapTokenAmount?: string;
+  swapTokenAddress?: string;
 };
 
 export type Pagination = {
@@ -194,6 +218,7 @@ async function getDeposits(
         offset: params.offset,
         depositorOrRecipientAddress: params.address,
         orderBy: "status",
+        include: ["token"],
       },
     }
   );

@@ -1,3 +1,5 @@
+import { utils } from "@across-protocol/sdk-v2";
+
 /**
  * Create a function that takes a number of seconds and returns a string in the format of "XXh XXm XXs"
  * If the number of seconds is undefined, return undefined
@@ -54,3 +56,5 @@ export function formatMilliseconds(milliseconds?: number): string | undefined {
     .toString()
     .padStart(3, "0")}s`;
 }
+
+export const { getCurrentTime } = utils;

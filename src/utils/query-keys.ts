@@ -35,13 +35,15 @@ export function balanceQueryKey(
  */
 export function bridgeFeesQueryKey(
   amount: ethers.BigNumber,
-  tokenSymbol?: string,
-  fromChainId?: ChainId,
-  toChainId?: ChainId
+  inputToken: string,
+  outputToken: string,
+  fromChainId: ChainId,
+  toChainId: ChainId
 ) {
   return [
     "bridgeFees",
-    tokenSymbol,
+    inputToken,
+    outputToken,
     amount.toString(),
     fromChainId,
     toChainId,
@@ -49,11 +51,15 @@ export function bridgeFeesQueryKey(
 }
 
 export function bridgeLimitsQueryKey(
-  token: string,
-  fromChainId: ChainId,
-  toChainId: ChainId
+  inputToken?: string,
+  outputToken?: string,
+  fromChainId?: ChainId,
+  toChainId?: ChainId
 ) {
-  return ["bridgeLimits", token, fromChainId, toChainId];
+  if (!inputToken || !outputToken || !fromChainId || !toChainId) {
+    return "DISABLED_BRIDGE_LIMITS_QUERY_KEY";
+  }
+  return ["bridgeLimits", inputToken, outputToken, fromChainId, toChainId];
 }
 
 /**
@@ -132,4 +138,17 @@ export function getUnclaimedProofsQueryKey(
   account?: string
 ) {
   return [rewardsType, "unclaimed", account];
+}
+
+export type SwapQuoteQueryKeyParams = {
+  swapTokenSymbol?: string;
+  acrossInputTokenSymbol: string;
+  acrossOutputTokenSymbol: string;
+  swapTokenAmount: string;
+  originChainId: number;
+  destinationChainId: number;
+  swapSlippage: number;
+};
+export function swapQuoteQueryKey(params: SwapQuoteQueryKeyParams) {
+  return ["swap-quote", params] as const;
 }

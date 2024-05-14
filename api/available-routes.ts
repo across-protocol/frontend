@@ -78,6 +78,8 @@ const handler = async (
       originToken: route.originToken,
       destinationChainId: route.destinationChainId,
       destinationToken: route.destinationToken,
+      originTokenSymbol: route.fromTokenSymbol,
+      destinationTokenSymbol: route.toTokenSymbol,
     }));
 
     // Two different explanations for how `stale-while-revalidate` works:

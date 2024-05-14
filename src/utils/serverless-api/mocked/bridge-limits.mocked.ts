@@ -3,7 +3,8 @@ import { ChainId } from "utils";
 import { BridgeLimitInterface } from "../types";
 
 export async function retrieveLimitsMocked(
-  _token: string | ChainId,
+  _inputToken: string | ChainId,
+  _outputToken: string | ChainId,
   _fromChainId: string | ChainId,
   _toChainId: string | ChainId
 ): Promise<BridgeLimitInterface> {

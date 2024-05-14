@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { BigNumber, utils } from "ethers";
+import { debounce } from "lodash-es";
 
 import { useAmplitude, useBalanceBySymbol, usePrevious } from "hooks";
-import { getConfig, Route, trackMaxButtonClicked } from "utils";
+import { getConfig, trackMaxButtonClicked } from "utils";
 
-import { areTokensInterchangeable } from "../utils";
+import { SelectedRoute, areTokensInterchangeable } from "../utils";
 import { useMaxBalance } from "./useMaxBalance";
 
-export function useAmountInput(selectedRoute: Route) {
+export function useAmountInput(selectedRoute: SelectedRoute) {
   const [userAmountInput, setUserAmountInput] = useState("");
   const [parsedAmount, setParsedAmount] = useState<BigNumber | undefined>(
     undefined
@@ -17,8 +18,13 @@ export function useAmountInput(selectedRoute: Route) {
 
   const { addToAmpliQueue } = useAmplitude();
 
+  const amountTokenSymbol =
+    selectedRoute.type === "swap"
+      ? selectedRoute.swapTokenSymbol
+      : selectedRoute.fromTokenSymbol;
+
   const { balance } = useBalanceBySymbol(
-    selectedRoute.fromTokenSymbol,
+    amountTokenSymbol,
     selectedRoute.fromChain
   );
 
@@ -26,17 +32,21 @@ export function useAmountInput(selectedRoute: Route) {
 
   const token = getConfig().getTokenInfoBySymbol(
     selectedRoute.fromChain,
-    selectedRoute.fromTokenSymbol
+    amountTokenSymbol
   );
 
-  const _handleParsedAmount = useCallback((input: string, decimals: number) => {
-    try {
-      const parsed = utils.parseUnits(input, decimals);
-      setParsedAmount(parsed);
-    } catch (error) {
-      setParsedAmount(undefined);
-    }
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const _handleParsedAmount = useCallback(
+    debounce((input: string, decimals: number) => {
+      try {
+        const parsed = utils.parseUnits(input, decimals);
+        setParsedAmount(parsed);
+      } catch (error) {
+        setParsedAmount(undefined);
+      }
+    }, 500),
+    []
+  );
 
   const handleClickMaxBalance = useCallback(() => {
     if (maxBalance) {
@@ -64,17 +74,14 @@ export function useAmountInput(selectedRoute: Route) {
 
   useEffect(() => {
     if (
-      prevFromTokenSymbol === selectedRoute.fromTokenSymbol ||
-      areTokensInterchangeable(
-        prevFromTokenSymbol,
-        selectedRoute.fromTokenSymbol
-      )
+      prevFromTokenSymbol === amountTokenSymbol ||
+      areTokensInterchangeable(prevFromTokenSymbol, amountTokenSymbol)
     ) {
       return;
     }
 
     clearInput();
-  }, [prevFromTokenSymbol, selectedRoute.fromTokenSymbol, clearInput]);
+  }, [prevFromTokenSymbol, amountTokenSymbol, clearInput]);
 
   return {
     handleChangeAmountInput,

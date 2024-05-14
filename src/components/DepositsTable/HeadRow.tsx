@@ -8,7 +8,7 @@ export type ColumnKey = keyof HeaderCells;
 export const headerCells = {
   asset: {
     label: "Asset",
-    width: 124,
+    width: 136,
   },
   amount: {
     label: "Amount",
