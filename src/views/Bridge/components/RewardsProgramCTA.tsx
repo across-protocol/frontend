@@ -17,6 +17,11 @@ const RewardsProgramCTA = ({ program }: ReferralCTAProps) => {
   const { push: navigate } = useHistory();
 
   const rewardProgram = rewardPrograms[program];
+
+  if (!rewardProgram) {
+    return null;
+  }
+
   const rewardToken = getToken(rewardProgram.rewardTokenSymbol);
 
   const handleClick = () => {
