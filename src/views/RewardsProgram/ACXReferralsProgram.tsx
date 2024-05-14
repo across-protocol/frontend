@@ -5,6 +5,7 @@ import ACXReferralLinkCard from "./ACXReferralsProgram/ACXReferralLinkCard";
 import ACXReferralTierStepper from "./ACXReferralsProgram/ACXReferralTierStepper";
 import GenericRewardsProgram from "./GenericRewardsProgram/GenericRewardsProgram";
 import { useACXReferralsProgram } from "./hooks/useACXReferralsProgram";
+import { Alert, Text } from "components";
 
 const ACXReferralsProgram = () => {
   const { labels, rewardsAmount, claimableAmount } = useACXReferralsProgram();
@@ -24,6 +25,19 @@ const ACXReferralsProgram = () => {
         ),
       }}
       programName="ACX Referral Program"
+      Banner={
+        <Alert status="warn" alignIcon="center">
+          <AlertContent>
+            <Text color="warning">
+              The referral rewards program is being discontinued. Earning was
+              disabled on May 15th and you must claim all rewards by June 30th.
+            </Text>
+            <LearnMoreLink>
+              <Text color="white">Learn more</Text>
+            </LearnMoreLink>
+          </AlertContent>
+        </Alert>
+      }
     />
   );
 };
@@ -45,4 +59,31 @@ export const StyledReferralLogo = styled(ReferralSVG)`
   margin: 0 auto;
   height: 64px;
   width: 64px;
+`;
+
+const AlertContent = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+`;
+
+const LearnMoreLink = styled.a`
+  display: flex;
+  height: 40px;
+  padding: 0px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+
+  border-radius: 8px;
+  border: 1px solid var(--Color-Interface-yellow-15, rgba(249, 210, 108, 0.15));
+  background: var(--Color-Interface-yellow-5, rgba(249, 210, 108, 0.05));
+
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.75;
+  }
 `;
