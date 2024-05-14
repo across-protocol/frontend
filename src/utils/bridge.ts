@@ -132,14 +132,19 @@ export const getConfirmationDepositTime = (
       getFastFillTimeByRoute(fromChain, toChain, inputTokenSymbol)
     );
     const fastFillTimeInMinutes = Math.floor(fastFillTimeInSeconds / 60);
+    const fastFillTimeInHours = Math.floor(fastFillTimeInMinutes / 60);
     return {
       formattedString:
         fastFillTimeInSeconds < 60
           ? `~${fastFillTimeInSeconds} ${
               fastFillTimeInSeconds === 1 ? "sec" : "secs"
             }`
-          : `~${fastFillTimeInMinutes} ${
+          : fastFillTimeInHours < 60
+          ? `~${fastFillTimeInMinutes} ${
               fastFillTimeInMinutes === 1 ? "min" : "mins"
+            }`
+          : `~${fastFillTimeInHours} ${
+              fastFillTimeInHours === 1 ? "hour" : "hours"
             }`,
       lowEstimate: fastFillTimeInSeconds,
       highEstimate: fastFillTimeInSeconds,
