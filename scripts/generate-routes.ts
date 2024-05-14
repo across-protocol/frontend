@@ -48,9 +48,15 @@ const enabledRoutes = {
     swapAndBridgeAddresses: {
       "1inch": {
         [CHAIN_IDs.POLYGON]: "0xaBa0F11D55C5dDC52cD0Cb2cd052B621d45159d5",
+        [CHAIN_IDs.OPTIMISM]: "0x3E7448657409278C9d6E192b92F2b69B234FCc42",
+        [CHAIN_IDs.ARBITRUM]: "0xC456398D5eE3B93828252e48beDEDbc39e03368E",
+        [CHAIN_IDs.BASE]: "0x7CFaBF2eA327009B39f40078011B0Fb714b65926",
       },
       uniswap: {
         [CHAIN_IDs.POLYGON]: "0x9220Fa27ae680E4e8D9733932128FA73362E0393",
+        [CHAIN_IDs.OPTIMISM]: "0x6f4A733c7889f038D77D4f540182Dda17423CcbF",
+        [CHAIN_IDs.ARBITRUM]: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
+        [CHAIN_IDs.BASE]: "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4",
       },
     },
     routes: [
@@ -63,7 +69,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
+              "USDC",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "UMA",
@@ -98,7 +104,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
+              "USDC",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "UMA",
@@ -115,7 +121,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
+              "USDC",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "USDT",
               "WBTC",
@@ -128,7 +134,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
+              "USDC",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
               "DAI",
               "BAL",
@@ -159,7 +165,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
+              "USDC",
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "WBTC",
               "UMA",
@@ -171,11 +177,11 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
             ],
           },
           {
@@ -183,10 +189,8 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDC.e",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "UMA",
               "DAI",
@@ -196,16 +200,16 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
             ],
           },
           {
@@ -213,9 +217,8 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDC.e",
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "UMA",
               "DAI",
@@ -225,16 +228,16 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
             ],
           },
           {
@@ -242,24 +245,17 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDC.e",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "USDT",
               "DAI",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
             ],
           },
           {
@@ -267,24 +263,23 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
               "DAI",
               "BAL",
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDbC",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDbC",
+              },
             ],
           },
           {
@@ -292,13 +287,18 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDC.e",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "USDT",
               "DAI",
               "WBTC",
             ],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
           },
         ],
       },
@@ -333,7 +333,7 @@ const enabledRoutes = {
               "DAI",
               "UMA",
               "WETH",
-              // "USDC",
+              "USDC",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "BAL",
@@ -342,11 +342,11 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
               {
                 swapInputTokenSymbol: "USDC.e",
                 acrossInputTokenSymbol: "USDC",
@@ -360,7 +360,7 @@ const enabledRoutes = {
               "UMA",
               "DAI",
               "WETH",
-              // "USDC",
+              "USDC",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "BAL",
@@ -369,11 +369,11 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
               {
                 swapInputTokenSymbol: "USDC.e",
                 acrossInputTokenSymbol: "USDC",
@@ -385,18 +385,12 @@ const enabledRoutes = {
             chainId: CHAIN_IDs.ZK_SYNC,
             tokens: [
               "WETH",
-              // "USDC",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WBTC",
               "USDT",
               "DAI",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
               {
                 swapInputTokenSymbol: "USDC.e",
                 acrossInputTokenSymbol: "USDC",
@@ -409,17 +403,17 @@ const enabledRoutes = {
             tokens: [
               "DAI",
               "WETH",
-              // "USDC",
+              "USDC",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
               "BAL",
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
               {
                 swapInputTokenSymbol: "USDC.e",
                 acrossInputTokenSymbol: "USDC",
@@ -454,7 +448,7 @@ const enabledRoutes = {
             chainId: CHAIN_IDs.MAINNET,
             tokens: [
               "WBTC",
-              // "USDC",
+              "USDC",
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "WETH",
               "ETH",
@@ -466,20 +460,19 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
             ],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
             tokens: [
               "WBTC",
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDC.e",
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WETH",
               "ETH",
               "UMA",
@@ -490,26 +483,24 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
             ],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
             tokens: [
               "WBTC",
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDC.e",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WETH",
               "ETH",
               "UMA",
@@ -520,49 +511,41 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
             ],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
             tokens: [
               "WBTC",
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDC.e",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WETH",
               "ETH",
               "USDT",
               "DAI",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
             ],
           },
           {
             chainId: CHAIN_IDs.BASE,
             tokens: [
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
               "WETH",
               "ETH",
               "DAI",
@@ -570,16 +553,16 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDbC",
-              // },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDbC",
+              },
             ],
           },
           {
@@ -587,13 +570,19 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "USDC.e",
               "USDT",
               "DAI",
               "WBTC",
             ],
-            swapTokens: [],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
           },
         ],
       },
@@ -606,129 +595,65 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "WBTC",
               "USDT",
               "DAI",
             ],
-            swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDC.e",
               "WBTC",
               "USDT",
               "DAI",
             ],
-            swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
-            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDC.e",
               "WBTC",
               "USDT",
               "DAI",
             ],
-            swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
-            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
             tokens: [
               "WETH",
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "USDC.e",
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "WBTC",
               "USDT",
               "DAI",
             ],
-            swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
-            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.BASE,
             tokens: [
               "WETH",
               "ETH",
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
               "DAI",
             ],
-            swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDC.e",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDbC",
-              // },
-            ],
+            swapTokens: [],
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: [
-              "WETH",
-              "ETH",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDC.e",
-              "USDT",
-              "DAI",
-              "WBTC",
-            ],
+            tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
             swapTokens: [],
           },
         ],
@@ -739,29 +664,20 @@ const enabledRoutes = {
         toChains: [
           {
             chainId: CHAIN_IDs.MAINNET,
-            tokens: [
-              // { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC" },
-              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC" },
-              "WETH",
-              "ETH",
-              "DAI",
-              "BAL",
-              "POOL",
-            ],
+            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDbC",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
             ],
           },
           {
             chainId: CHAIN_IDs.OPTIMISM,
             tokens: [
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC.e" },
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WETH",
               "ETH",
               "DAI",
@@ -769,25 +685,23 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDbC",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDbC",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
             ],
           },
           {
             chainId: CHAIN_IDs.POLYGON,
             tokens: [
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC.e" },
-              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC" },
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WETH",
               "ETH",
               "DAI",
@@ -795,24 +709,23 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDbC",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDbC",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
             ],
           },
           {
             chainId: CHAIN_IDs.ARBITRUM,
             tokens: [
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC.e" },
+              "USDC",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WETH",
               "ETH",
               "DAI",
@@ -820,39 +733,32 @@ const enabledRoutes = {
               "POOL",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDbC",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDbC",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC",
+              },
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
             ],
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
             tokens: [
-              // "USDC",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC.e" },
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "WETH",
               "ETH",
               "DAI",
             ],
             swapTokens: [
-              // {
-              //   swapInputTokenSymbol: "USDbC",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC",
-              // },
-              // {
-              //   swapInputTokenSymbol: "USDbC",
-              //   acrossInputTokenSymbol: "USDC",
-              //   acrossOutputTokenSymbol: "USDC.e",
-              // },
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
             ],
           },
           {
@@ -860,7 +766,6 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               { inputTokenSymbol: "USDbC", outputTokenSymbol: "USDC.e" },
               "DAI",
             ],
@@ -877,7 +782,6 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDT",
               "DAI",
@@ -890,7 +794,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDC.e",
               "USDT",
               "DAI",
@@ -916,7 +820,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDC.e",
               "USDT",
               "DAI",
@@ -926,13 +830,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: [
-              // { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "USDC.e",
-              "WETH",
-              "ETH",
-              "DAI",
-            ],
+            tokens: ["USDC.e", "WETH", "ETH", "DAI"],
             swapTokens: [],
           },
           {
@@ -940,7 +838,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               "ETH",
-              // { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
               "DAI",
             ],
