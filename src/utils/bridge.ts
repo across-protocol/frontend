@@ -139,7 +139,7 @@ export const getConfirmationDepositTime = (
           ? `~${fastFillTimeInSeconds} ${
               fastFillTimeInSeconds === 1 ? "sec" : "secs"
             }`
-          : fastFillTimeInHours < 60
+          : fastFillTimeInMinutes < 60
           ? `~${fastFillTimeInMinutes} ${
               fastFillTimeInMinutes === 1 ? "min" : "mins"
             }`
