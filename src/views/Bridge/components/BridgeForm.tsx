@@ -130,7 +130,7 @@ const BridgeForm = ({
             selectedRoute={selectedRoute}
             onChangeAmountInput={onChangeAmountInput}
             onClickMaxBalance={onClickMaxBalance}
-            validationError={validationError}
+            validationError={parsedAmountInput ? validationError : undefined}
             balance={balance}
           />
         </InputWrapper>
