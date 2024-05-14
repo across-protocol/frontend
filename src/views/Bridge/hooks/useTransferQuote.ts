@@ -107,7 +107,8 @@ export function useTransferQuote(
         amountToBridgeAfterSwap,
         limitsQuery.limits,
         selectedRoute.toChain,
-        selectedRoute.fromChain
+        selectedRoute.fromChain,
+        selectedRoute.fromTokenSymbol
       );
       const quoteForAnalytics = generateTransferQuote(
         feesQuery.fees,

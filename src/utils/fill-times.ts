@@ -1,54 +1,73 @@
 import { ChainId } from "./constants";
 
-// Based on avg. fill times for 75th percentile of past bridge transfers
-const fastFillTimesSecondsFromTo = {
-  [ChainId.MAINNET]: {
-    [ChainId.OPTIMISM]: 32,
-    [ChainId.POLYGON]: 322.5,
-    [ChainId.ZK_SYNC]: 78.75,
-    [ChainId.BASE]: 174,
-    [ChainId.ARBITRUM]: 122,
-  },
-  [ChainId.OPTIMISM]: {
-    [ChainId.MAINNET]: 12,
-    [ChainId.POLYGON]: 388,
-    [ChainId.ZK_SYNC]: 6,
-    [ChainId.BASE]: 148,
-    [ChainId.ARBITRUM]: 9,
-  },
-  [ChainId.POLYGON]: {
-    [ChainId.MAINNET]: 70,
-    [ChainId.OPTIMISM]: 62,
-    [ChainId.ZK_SYNC]: 58,
-    [ChainId.BASE]: 178,
-    [ChainId.ARBITRUM]: 69,
-  },
-  [ChainId.ZK_SYNC]: {
-    [ChainId.MAINNET]: 12,
-    [ChainId.OPTIMISM]: 416,
-    [ChainId.POLYGON]: 20,
-    [ChainId.BASE]: 149,
-    [ChainId.ARBITRUM]: 237,
-  },
-  [ChainId.BASE]: {
-    [ChainId.MAINNET]: 12,
-    [ChainId.OPTIMISM]: 8,
-    [ChainId.POLYGON]: 144,
-    [ChainId.ZK_SYNC]: 5,
-    [ChainId.ARBITRUM]: 7,
-  },
-  [ChainId.ARBITRUM]: {
-    [ChainId.MAINNET]: 12,
-    [ChainId.OPTIMISM]: 8,
-    [ChainId.POLYGON]: 111,
-    [ChainId.ZK_SYNC]: 5,
-    [ChainId.BASE]: 139,
-  },
+// Raw json from https://3251bbf8.us2a.app.preset.io/superset/explore/p/ZxKyKB6om5P
+import rawAvgFillTimesPreset from "../data/fill-times-preset.json";
+
+const chainIdToPresetChainName = {
+  [ChainId.MAINNET]: "ethereum",
+  [ChainId.ARBITRUM]: "arbitrum",
+  [ChainId.BASE]: "base",
+  [ChainId.POLYGON]: "polygon",
+  [ChainId.LINEA]: "linea",
+  [ChainId.OPTIMISM]: "optimism",
+  [ChainId.ZK_SYNC]: "zksync",
 };
 
-export function getFastFillTimeByRoute(fromChainId: number, toChainId: number) {
-  const fillTimeInSeconds =
-    fastFillTimesSecondsFromTo[fromChainId]?.[toChainId];
+const fillTimeOverrides: {
+  [tokenSymbol: string]: {
+    origin_chain: string;
+    destination_chain: string;
+    fill_time_seconds: number;
+  }[];
+} = {
+  SNX: [
+    {
+      origin_chain: "ethereum",
+      destination_chain: "optimism",
+      fill_time_seconds: 9_000, // 2.5 hours
+    },
+    {
+      origin_chain: "optimism",
+      destination_chain: "ethereum",
+      fill_time_seconds: 9_000, // 2.5 hours
+    },
+  ],
+};
+
+export function getFastFillTimeByRoute(
+  fromChainId: number,
+  toChainId: number,
+  tokenSymbol: string
+) {
+  const fromChainName = chainIdToPresetChainName[fromChainId];
+  const toChainName = chainIdToPresetChainName[toChainId];
+
+  const overrides = fillTimeOverrides[tokenSymbol];
+
+  if (overrides) {
+    const override = overrides.find(
+      (entry) =>
+        entry.origin_chain === fromChainName &&
+        entry.destination_chain === toChainName
+    );
+
+    if (override) {
+      return override.fill_time_seconds;
+    }
+  }
+
+  const symbolFilter = ["ETH", "WETH"].includes(tokenSymbol)
+    ? "WETH"
+    : ["USDC", "USDC.e", "USDbC"].includes(tokenSymbol)
+    ? "USDC"
+    : "DAI";
+
+  const fillTimeInSeconds = rawAvgFillTimesPreset.result[0].data.find(
+    (entry) =>
+      entry.origin_chain === fromChainName &&
+      entry.destination_chain === toChainName &&
+      entry.origin_symbol === symbolFilter
+  )?.fill_time_seconds;
 
   return fillTimeInSeconds || 60;
 }
