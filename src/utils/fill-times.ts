@@ -13,6 +13,27 @@ const chainIdToPresetChainName = {
   [ChainId.ZK_SYNC]: "zksync",
 };
 
+const fillTimeOverrides: {
+  [tokenSymbol: string]: {
+    origin_chain: string;
+    destination_chain: string;
+    fill_time_seconds: number;
+  }[];
+} = {
+  SNX: [
+    {
+      origin_chain: "ethereum",
+      destination_chain: "optimism",
+      fill_time_seconds: 9_000, // 2.5 hours
+    },
+    {
+      origin_chain: "optimism",
+      destination_chain: "ethereum",
+      fill_time_seconds: 9_000, // 2.5 hours
+    },
+  ],
+};
+
 export function getFastFillTimeByRoute(
   fromChainId: number,
   toChainId: number,
@@ -20,6 +41,20 @@ export function getFastFillTimeByRoute(
 ) {
   const fromChainName = chainIdToPresetChainName[fromChainId];
   const toChainName = chainIdToPresetChainName[toChainId];
+
+  const overrides = fillTimeOverrides[tokenSymbol];
+
+  if (overrides) {
+    const override = overrides.find(
+      (entry) =>
+        entry.origin_chain === fromChainName &&
+        entry.destination_chain === toChainName
+    );
+
+    if (override) {
+      return override.fill_time_seconds;
+    }
+  }
 
   const symbolFilter = ["ETH", "WETH"].includes(tokenSymbol)
     ? "WETH"
@@ -32,7 +67,7 @@ export function getFastFillTimeByRoute(
       entry.origin_chain === fromChainName &&
       entry.destination_chain === toChainName &&
       entry.origin_symbol === symbolFilter
-  )?.["APPROX_QUANTILES(fill_time_secs, 100)[OFFSET(75)]"];
+  )?.fill_time_seconds;
 
   return fillTimeInSeconds || 60;
 }
