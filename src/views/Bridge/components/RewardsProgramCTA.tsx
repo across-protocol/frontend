@@ -7,50 +7,25 @@ import {
   rewardPrograms,
 } from "utils";
 import { PrimaryButton, Text } from "components";
-import { useReferralLink } from "hooks/useReferralLink";
-import { useCallback, useState } from "react";
-import { useConnection } from "hooks";
 import { useHistory } from "react-router-dom";
-import ReferralCTAModal from "./ReferralCTAModal";
 
 type ReferralCTAProps = {
   program: rewardProgramTypes;
 };
 
-const ReferralCTA = ({ program }: ReferralCTAProps) => {
+const RewardsProgramCTA = ({ program }: ReferralCTAProps) => {
   const { push: navigate } = useHistory();
-  const { referralLinkWithProtocol } = useReferralLink();
-  const { isConnected, connect } = useConnection();
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const rewardProgram = rewardPrograms[program];
   const rewardToken = getToken(rewardProgram.rewardTokenSymbol);
 
-  const handleClick = useCallback(() => {
-    if (rewardProgram.rewardTokenSymbol === "ACX") {
-      if (!isConnected) {
-        connect({
-          trackSection: "bridgeForm",
-        });
-      } else if (referralLinkWithProtocol) {
-        setIsShareModalOpen(true);
-      }
-    } else {
-      navigate(rewardProgram.url);
-    }
-  }, [connect, isConnected, navigate, referralLinkWithProtocol, rewardProgram]);
+  const handleClick = () => {
+    navigate(rewardProgram.url);
+  };
 
-  const bodyCopy =
-    rewardProgram.rewardTokenSymbol === "ACX"
-      ? "Share your unique referral link and earn on every transaction made with your link."
-      : "Bridge to Optimism and earn on every transaction.";
+  const bodyCopy = rewardProgram.ctaBody || "";
 
-  const buttonCopy =
-    rewardProgram.rewardTokenSymbol === "ACX"
-      ? isConnected
-        ? "Share"
-        : "Connect"
-      : "View Rewards";
+  const buttonCopy = "View Rewards";
 
   return (
     <>
@@ -91,15 +66,11 @@ const ReferralCTA = ({ program }: ReferralCTAProps) => {
           {buttonCopy}
         </TextButton>
       </Wrapper>
-      <ReferralCTAModal
-        isOpen={isShareModalOpen}
-        exitModalHandler={() => setIsShareModalOpen(false)}
-      />
     </>
   );
 };
 
-export default ReferralCTA;
+export default RewardsProgramCTA;
 
 const Wrapper = styled.div<{ bgUrl: string; primaryColor: string }>`
   display: flex;

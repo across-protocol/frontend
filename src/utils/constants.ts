@@ -410,6 +410,7 @@ export const rewardPrograms: Record<
     backgroundUrl: string;
     highestPct: number;
     claimableTooltipBody: string;
+    ctaBody?: string;
   }
 > = {
   referrals: {
@@ -429,10 +430,16 @@ export const rewardPrograms: Record<
     rewardTokenSymbol: "OP",
     backgroundUrl: OPCloudBackground,
     highestPct: 0.95,
+    ctaBody: "Bridge to Optimism and earn on every transaction.",
     claimableTooltipBody:
       "OP rewards earned during the month are made claimable after the ~15th of the following month",
   },
 };
+
+export const chainIdToRewardsProgramName = {
+  [ChainId.OPTIMISM]: "op-rebates",
+  [ChainId.OPTIMISM_SEPOLIA]: "op-rebates",
+} as const;
 
 // process.env variables
 export const rewardsApiUrl =

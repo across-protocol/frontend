@@ -1,15 +1,18 @@
 import { utils } from "@across-protocol/sdk-v2";
 import { BigNumber, utils as ethersUtils } from "ethers";
-import { useRewardToken } from "hooks/useRewardToken";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { useMemo } from "react";
 import {
   TokenInfo,
   fixedPointAdjustment,
   formatUnitsWithMaxFractions,
+  getToken,
   isDefined,
   parseUnits,
   parseUnitsWithExtendedDecimals,
+  rewardPrograms,
+  chainIdToRewardsProgramName,
+  rewardProgramTypes,
 } from "utils";
 
 export type EstimatedRewards = ReturnType<typeof useEstimatedRewards>;
@@ -22,16 +25,28 @@ export function useEstimatedRewards(
   bridgeFee?: BigNumber,
   swapFee?: BigNumber
 ) {
-  const { rewardToken, isACXRewardToken, availableRewardPercentage } =
-    useRewardToken(destinationChainId);
+  const rewardProgramName = chainIdToRewardsProgramName[destinationChainId];
+  const rewardProgram = rewardProgramName
+    ? rewardPrograms[
+        chainIdToRewardsProgramName[destinationChainId] as rewardProgramTypes
+      ]
+    : undefined;
+  const rewardToken = rewardProgram
+    ? getToken(rewardProgram.rewardTokenSymbol)
+    : undefined;
+  const availableRewardPercentage = rewardProgram
+    ? parseUnits(String(rewardProgram.highestPct), 18)
+    : undefined;
+
   const { convertTokenToBaseCurrency: convertL1ToBaseCurrency } =
     useTokenConversion(token.symbol, "usd");
   const { convertTokenToBaseCurrency: convertRewardToBaseCurrency } =
-    useTokenConversion(rewardToken.symbol, "usd");
+    useTokenConversion(rewardToken?.symbol || token.symbol, "usd");
 
   const depositReward = useMemo(() => {
     if (
       availableRewardPercentage === undefined ||
+      rewardToken === undefined ||
       bridgeFee === undefined ||
       gasFee === undefined
     ) {
@@ -66,7 +81,7 @@ export function useEstimatedRewards(
     convertL1ToBaseCurrency,
     convertRewardToBaseCurrency,
     gasFee,
-    rewardToken.decimals,
+    rewardToken,
   ]);
 
   const hasDepositReward = depositReward?.rewardAsL1.gt(0) ?? false;
@@ -129,6 +144,5 @@ export function useEstimatedRewards(
     rewardPercentage: availableRewardPercentage,
     hasDepositReward,
     rewardToken,
-    isRewardAcx: isACXRewardToken,
   };
 }
