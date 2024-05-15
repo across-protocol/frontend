@@ -855,7 +855,7 @@ export const vercelApiBaseUrl =
 export const bnUint32Max = utils.bnUint32Max;
 export const bnZero = utils.bnZero;
 
-// Swap slippage in %, 1 = 1%
+// Swap slippage in %, 0.5 = 0.5%
 export const defaultSwapSlippage = Number(
-  process.env.REACT_APP_DEFAULT_SWAP_SLIPPAGE || 1
+  process.env.REACT_APP_DEFAULT_SWAP_SLIPPAGE || 0.5
 );
