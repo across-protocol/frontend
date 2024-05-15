@@ -11,13 +11,13 @@ import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote, type TransferQuote } from "./useTransferQuote";
 import { useAmountInput } from "./useAmountInput";
 import { validateBridgeAmount } from "../utils";
+import { defaultSwapSlippage } from "utils";
 
 export function useBridge() {
   const [shouldUpdateQuote, setShouldUpdateQuote] = useState(true);
   const [usedTransferQuote, setUsedTransferQuote] = useState<TransferQuote>();
 
-  // default slippage of 0.5%
-  const [swapSlippage, setSwapSlippage] = useState(0.5);
+  const [swapSlippage, setSwapSlippage] = useState(defaultSwapSlippage);
 
   const { isConnected, chainId: walletChainId, account } = useConnection();
 
