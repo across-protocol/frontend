@@ -9,7 +9,7 @@ import {
   getReceiveTokenSymbol,
 } from "views/Bridge/utils";
 import { useEstimatedRewards } from "views/Bridge/hooks/useEstimatedRewards";
-import { getToken, COLORS } from "utils";
+import { getToken, COLORS, getBridgeUrlWithQueryParams } from "utils";
 import { useIsContractAddress } from "hooks/useIsContractAddress";
 
 import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
@@ -124,7 +124,18 @@ export function DepositStatusLowerCard({
         </>
       )}
       <Divider />
-      <Button onClick={() => history.push("/bridge")}>
+      <Button
+        onClick={() =>
+          history.push(
+            getBridgeUrlWithQueryParams({
+              fromChainId,
+              toChainId,
+              inputTokenSymbol,
+              outputTokenSymbol,
+            })
+          )
+        }
+      >
         Initiate new transaction
       </Button>
     </>

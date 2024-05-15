@@ -9,7 +9,7 @@ import { ReactComponent as ExternalLinkIcon } from "assets/icons/external-link-1
 import { ReactComponent as RefreshIcon } from "assets/icons/refresh.svg";
 
 import { Text, CardWrapper } from "components";
-import { getChainInfo, COLORS } from "utils";
+import { getChainInfo, COLORS, getBridgeUrlWithQueryParams } from "utils";
 import { useAmplitude } from "hooks";
 import { ampli } from "ampli";
 
@@ -71,7 +71,14 @@ export function DepositTimesCard({
             StatusIcon={<StyledLoadingIcon />}
           />
         ) : isDepositReverted ? (
-          <TryAgainButton to={tryAgainLink}>
+          <TryAgainButton
+            to={getBridgeUrlWithQueryParams({
+              fromChainId,
+              toChainId,
+              inputTokenSymbol,
+              outputTokenSymbol,
+            })}
+          >
             <Text color="warning">Try again</Text>
             <RefreshIcon />
           </TryAgainButton>

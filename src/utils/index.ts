@@ -21,3 +21,4 @@ export * from "./wait";
 export * from "./types";
 export * from "./defined";
 export * from "./network";
+export * from "./url";
