@@ -56,7 +56,7 @@ export function useDepositTracking(
       staleTime: Infinity,
       enabled: shouldRetryDepositQuery,
       onSuccess: (data) => {
-        if (!fromBridgePagePayload) {
+        if (!fromBridgePagePayload || !data.parsedDepositLog) {
           return;
         }
 
@@ -67,7 +67,7 @@ export function useDepositTracking(
           addLocalDeposit(convertForDepositQuery(data, fromBridgePagePayload));
         }
 
-        if (account !== data.parsedDepositLog?.args.depositor) {
+        if (account !== data.parsedDepositLog.args.depositor) {
           return;
         }
 

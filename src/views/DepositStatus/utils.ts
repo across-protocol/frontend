@@ -1,13 +1,17 @@
-import { BigNumber } from "ethers";
+import { BigNumber, providers, utils } from "ethers";
 
 import { Deposit } from "hooks/useDeposits";
-import { getConfig, getDepositByTxHash, getFillByDepositTxHash } from "utils";
+import { getConfig, getFillByDepositTxHash } from "utils";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 
 const config = getConfig();
 
 export function convertForDepositQuery(
-  data: Awaited<ReturnType<typeof getDepositByTxHash>>,
+  data: {
+    depositTxReceipt: providers.TransactionReceipt;
+    parsedDepositLog: utils.LogDescription;
+    depositTimestamp: number;
+  },
   fromBridgePagePayload: FromBridgePagePayload
 ): Deposit {
   const { selectedRoute, depositArgs, quoteForAnalytics } =
