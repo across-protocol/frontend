@@ -363,21 +363,39 @@ export function getAllChains() {
 export function getRouteFromQueryParams() {
   const params = new URLSearchParams(window.location.search);
 
-  const fromChain = Number(params.get("from"));
-  const toChain = Number(params.get("to"));
-  const token = params.get("token");
+  const fromChain = Number(
+    params.get("from") || params.get("fromChain") || params.get("originChainId")
+  );
+  const toChain = Number(
+    params.get("to") ||
+      params.get("toChain") ||
+      params.get("destinationChainId")
+  );
+  const inputTokenSymbol =
+    params.get("inputTokenSymbol") ||
+    params.get("inputToken") ||
+    params.get("token") ||
+    "ETH";
+  const outputTokenSymbol =
+    params.get("outputTokenSymbol") || params.get("outputToken");
 
   const filter = {
     fromChain: fromChain || hubPoolChainId,
     toChain: toChain || undefined,
-    inputTokenSymbol: token ? token.toUpperCase() : "ETH",
+    inputTokenSymbol,
+    outputTokenSymbol: outputTokenSymbol
+      ? outputTokenSymbol.toUpperCase()
+      : undefined,
   };
 
-  let route = findNextBestRoute(["fromChain"], filter);
-
-  if (!route) {
-    route = getInitialRoute(filter);
-  }
+  const route =
+    findNextBestRoute(["fromChain", "inputTokenSymbol"], filter) ||
+    findNextBestRoute(["fromChain", "swapTokenSymbol"], {
+      ...filter,
+      inputTokenSymbol: undefined,
+      swapTokenSymbol: inputTokenSymbol,
+    }) ||
+    getInitialRoute(filter);
 
   return route;
 }

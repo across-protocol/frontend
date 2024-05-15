@@ -62,7 +62,9 @@ export function DepositStatusLowerCard({
         : undefined,
       lpFee: _lpFee ? BigNumber.from(_lpFee.total) : undefined,
       isSwap,
-      parsedAmount: depositArgs?.initialAmount,
+      parsedAmount: depositArgs
+        ? BigNumber.from(depositArgs.initialAmount)
+        : undefined,
       swapQuote: _swapQuote
         ? {
             ..._swapQuote,

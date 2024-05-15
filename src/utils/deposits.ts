@@ -52,11 +52,22 @@ export async function getDepositByTxHash(
       `Could not fetch tx receipt for ${depositTxHash} on chain ${fromChainId}`
     );
   }
+
+  const block = await fromProvider.getBlock(depositTxReceipt.blockNumber);
+
+  if (depositTxReceipt.status === 0) {
+    return {
+      depositTxReceipt,
+      parsedDepositLog: undefined,
+      depositTimestamp: block.timestamp,
+    };
+  }
+
   const parsedDepositLog = parseFundsDepositedLog(depositTxReceipt.logs);
   if (!parsedDepositLog) {
     throw new NoV3FundsDepositedLogError(depositTxHash, fromChainId);
   }
-  const block = await fromProvider.getBlock(depositTxReceipt.blockNumber);
+
   return {
     depositTxReceipt,
     parsedDepositLog,
@@ -70,7 +81,7 @@ export async function getFillByDepositTxHash(
   toChainId: number,
   depositByTxHash: Awaited<ReturnType<typeof getDepositByTxHash>>
 ) {
-  if (!depositByTxHash) {
+  if (!depositByTxHash || !depositByTxHash.parsedDepositLog) {
     throw new Error(
       `Could not fetch deposit by tx hash ${depositTxHash} on chain ${fromChainId}`
     );

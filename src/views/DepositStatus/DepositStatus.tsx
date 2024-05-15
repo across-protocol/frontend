@@ -51,6 +51,8 @@ export default function DepositStatus() {
             depositTxHash={depositTxHash}
             fromChainId={Number(originChainId)}
             toChainId={Number(destinationChainId)}
+            inputTokenSymbol={inputTokenSymbol}
+            outputTokenSymbol={outputTokenSymbol || inputTokenSymbol}
             fromBridgePagePayload={state.fromBridgePagePayload}
           />
           <DepositStatusLowerCard

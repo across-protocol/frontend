@@ -4,8 +4,10 @@ import { keyframes } from "@emotion/react";
 
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
 import { ReactComponent as CheckStarDepositingIcon } from "assets/check-star-ring-opaque-depositing.svg";
+import { ReactComponent as CheckStarDepositRevertedIcon } from "assets/check-star-ring-opaque-deposit-reverted.svg";
 import { ReactComponent as CheckStarFillingIcon } from "assets/check-star-ring-opaque-filling.svg";
 import { ReactComponent as CheckStarFilledIcon } from "assets/check-star-ring-opaque-filled.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
 import { ReactComponent as EthereumGrayscaleLogo } from "assets/grayscale-logos/eth.svg";
 import { ReactComponent as PolygonGrayscaleLogo } from "assets/grayscale-logos/polygon.svg";
 import { ReactComponent as ArbitrumGrayscaleLogo } from "assets/grayscale-logos/arbitrum.svg";
@@ -15,7 +17,13 @@ import { ReactComponent as BaseGrayscaleLogo } from "assets/grayscale-logos/base
 import { ReactComponent as LineaGrayscaleLogo } from "assets/grayscale-logos/linea.svg";
 import { Text, Badge } from "components";
 
-import { ChainId, QUERIESV2, COLORS, NoV3FundsDepositedLogError } from "utils";
+import {
+  ChainId,
+  QUERIESV2,
+  COLORS,
+  NoV3FundsDepositedLogError,
+  getChainInfo,
+} from "utils";
 import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 
 import { useDepositTracking } from "../hooks/useDepositTracking";
@@ -23,6 +31,7 @@ import { DepositTimesCard } from "./DepositTimesCard";
 import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus } from "../types";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
+import { DateTime } from "luxon";
 
 const grayscaleLogos: Record<number, React.ReactNode> = {
   [ChainId.ARBITRUM]: <ArbitrumGrayscaleLogo />,
@@ -44,6 +53,8 @@ type Props = {
   depositTxHash: string;
   fromChainId: number;
   toChainId: number;
+  inputTokenSymbol: string;
+  outputTokenSymbol?: string;
   fromBridgePagePayload?: FromBridgePagePayload;
 };
 
@@ -52,6 +63,8 @@ export function DepositStatusUpperCard({
   fromChainId,
   toChainId,
   fromBridgePagePayload,
+  inputTokenSymbol,
+  outputTokenSymbol,
 }: Props) {
   const { depositQuery, fillQuery } = useDepositTracking(
     depositTxHash,
@@ -75,6 +88,8 @@ export function DepositStatusUpperCard({
 
   const status = !depositTxCompletedTime
     ? "depositing"
+    : depositQuery.data?.depositTxReceipt.status === 0
+    ? "deposit-reverted"
     : !fillTxCompletedTime
     ? "filling"
     : "filled";
@@ -104,6 +119,8 @@ export function DepositStatusUpperCard({
         <AnimatedDividerFromChain status={status} />
         {status === "depositing" ? (
           <StyledCheckStarDepositingIcon />
+        ) : status === "deposit-reverted" ? (
+          <StyledCheckStarDepositRevertedIcon />
         ) : status === "filling" ? (
           <StyledCheckStarFillingIcon />
         ) : (
@@ -116,7 +133,48 @@ export function DepositStatusUpperCard({
           </AnimatedLogoToChain>
         </AnimatedLogoWrapperToChain>
       </TopWrapperAnimationWrapper>
-      {status !== "filled" ? (
+      {status === "filled" ? (
+        <AnimatedTopWrapperTitleWrapper>
+          <ElapsedTime
+            textSize="3xl"
+            elapsedSeconds={fillTxElapsedSeconds}
+            isCompleted
+          />
+          <Text size="lg" color="grey-400">
+            Transfer successful!
+          </Text>
+        </AnimatedTopWrapperTitleWrapper>
+      ) : status === "deposit-reverted" ? (
+        <AnimatedTopWrapperTitleWrapper>
+          {depositTxElapsedSeconds ? (
+            <ElapsedTime
+              textSize="3xl"
+              elapsedSeconds={depositTxElapsedSeconds}
+              textColor="warning"
+            />
+          ) : (
+            <Text size="3xl" color="warning">
+              {DateTime.fromSeconds(
+                depositTxCompletedTime || Date.now()
+              ).toFormat("d MMM yyyy - t")}
+            </Text>
+          )}
+          <DepositRevertedRow>
+            <Text size="lg" color="warning">
+              Deposit unsuccessful
+            </Text>
+            <a
+              href={`${
+                getChainInfo(fromChainId).explorerUrl
+              }/tx/${depositTxHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <InfoIcon />
+            </a>
+          </DepositRevertedRow>
+        </AnimatedTopWrapperTitleWrapper>
+      ) : (
         <TopWrapperTitleWrapper>
           <ElapsedTime
             textSize="3xl"
@@ -139,17 +197,6 @@ export function DepositStatusUpperCard({
             </Badge>
           </SubTitleWrapper>
         </TopWrapperTitleWrapper>
-      ) : (
-        <AnimatedTopWrapperTitleWrapper>
-          <ElapsedTime
-            textSize="3xl"
-            elapsedSeconds={fillTxElapsedSeconds}
-            isCompleted
-          />
-          <Text size="lg" color="grey-400">
-            Transfer successful!
-          </Text>
-        </AnimatedTopWrapperTitleWrapper>
       )}
       <DepositTimesCard
         status={status}
@@ -160,6 +207,8 @@ export function DepositStatusUpperCard({
         depositTxHash={depositTxHash}
         fromChainId={fromChainId}
         toChainId={toChainId}
+        inputTokenSymbol={inputTokenSymbol}
+        outputTokenSymbol={outputTokenSymbol}
       />
     </Wrapper>
   );
@@ -222,6 +271,17 @@ const StyledCheckStarDepositingIcon = styled(CheckStarDepositingIcon)`
     height: 52px;
   }
 `;
+const StyledCheckStarDepositRevertedIcon = styled(CheckStarDepositRevertedIcon)`
+  & * {
+    transition: stroke 0.5s ease-in-out;
+  }
+  flex-shrink: 0;
+
+  @media ${QUERIESV2.sm.andDown} {
+    width: 52px;
+    height: 52px;
+  }
+`;
 const StyledCheckStarFillingIcon = styled(CheckStarFillingIcon)`
   & * {
     transition: stroke 0.5s ease-in-out;
@@ -266,14 +326,18 @@ const AnimatedDividerFromChain = styled(AnimatedDivider)<{
   status: DepositStatus;
 }>`
   background: ${({ status }) =>
-    status === "depositing" ? COLORS.white : COLORS.aqua};
+    status === "deposit-reverted"
+      ? COLORS.warning
+      : status === "depositing"
+      ? COLORS.white
+      : COLORS.aqua};
 `;
 
 const AnimatedDividerToChain = styled(AnimatedDivider)<{
   status: DepositStatus;
 }>`
   background: ${({ status }) =>
-    status === "depositing"
+    status === "depositing" || status === "deposit-reverted"
       ? COLORS["grey-400"]
       : status === "filling"
       ? COLORS.white
@@ -309,14 +373,18 @@ const AnimatedLogoWrapperFromChain = styled(AnimatedLogoWrapper)<{
   status: DepositStatus;
 }>`
   border-color: ${({ status }) =>
-    status === "depositing" ? COLORS.white : COLORS.aqua};
+    status === "deposit-reverted"
+      ? COLORS.warning
+      : status === "depositing"
+      ? COLORS.white
+      : COLORS.aqua};
 `;
 
 const AnimatedLogoWrapperToChain = styled(AnimatedLogoWrapper)<{
   status: DepositStatus;
 }>`
   border-color: ${({ status }) =>
-    status === "depositing"
+    status === "depositing" || status === "deposit-reverted"
       ? COLORS["grey-400"]
       : status === "filling"
       ? COLORS.white
@@ -356,7 +424,11 @@ const AnimatedLogoFromChain = styled(AnimatedLogo)<{ status: DepositStatus }>`
     circle,
     #path-to-animate {
       fill: ${({ status }) =>
-        status === "depositing" ? "COLORS.white" : COLORS.aqua};
+        status === "deposit-reverted"
+          ? COLORS.warning
+          : status === "depositing"
+          ? COLORS.white
+          : COLORS.aqua};
     }
   }
 `;
@@ -367,11 +439,32 @@ const AnimatedLogoToChain = styled(AnimatedLogo)<{ status: DepositStatus }>`
     circle,
     #path-to-animate {
       fill: ${({ status }) =>
-        status === "depositing"
+        status === "depositing" || status === "deposit-reverted"
           ? COLORS["grey-400"]
           : status === "filling"
           ? COLORS.white
           : COLORS.aqua};
+    }
+  }
+`;
+
+const DepositRevertedRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
+  a {
+    display: flex;
+  }
+
+  svg {
+    cursor: pointer;
+    height: 20px;
+    width: 20px;
+    path {
+      stroke: ${COLORS.warning};
     }
   }
 `;

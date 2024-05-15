@@ -21,6 +21,7 @@ export function ElapsedTime({
   StatusIcon,
   isCompleted,
   textSize,
+  textColor,
 }: Props) {
   if (elapsedSeconds >= maxSeconds && !isCompleted) {
     return <>{MaxSecondsFallback}</>;
@@ -28,7 +29,7 @@ export function ElapsedTime({
 
   return (
     <Wrapper>
-      <Text size={textSize} color={isCompleted ? "aqua" : "white"}>
+      <Text size={textSize} color={textColor || isCompleted ? "aqua" : "white"}>
         {formatSeconds(elapsedSeconds) ?? "00h 00m 00s"}
       </Text>
       {StatusIcon && StatusIcon}

@@ -54,9 +54,9 @@ export function useDepositTracking(
     },
     {
       staleTime: Infinity,
-      retry: shouldRetryDepositQuery,
+      enabled: shouldRetryDepositQuery,
       onSuccess: (data) => {
-        if (!fromBridgePagePayload) {
+        if (!fromBridgePagePayload || !data.parsedDepositLog) {
           return;
         }
 
