@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { Text, TextSize } from "components/Text";
+import { Text, TextColor, TextSize } from "components/Text";
 
 import { formatSeconds } from "utils";
 
@@ -8,7 +8,7 @@ type Props = {
   elapsedSeconds?: number;
   maxSeconds?: number;
   MaxSecondsFallback?: React.ReactNode;
-  textColor?: string;
+  textColor?: TextColor;
   StatusIcon?: React.ReactNode;
   isCompleted?: boolean;
   textSize?: TextSize;
@@ -29,7 +29,10 @@ export function ElapsedTime({
 
   return (
     <Wrapper>
-      <Text size={textSize} color={textColor || isCompleted ? "aqua" : "white"}>
+      <Text
+        size={textSize}
+        color={textColor || (isCompleted ? "aqua" : "white")}
+      >
         {formatSeconds(elapsedSeconds) ?? "00h 00m 00s"}
       </Text>
       {StatusIcon && StatusIcon}

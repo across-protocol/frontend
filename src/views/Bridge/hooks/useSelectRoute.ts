@@ -20,8 +20,9 @@ import {
 const initialRoute = getRouteFromQueryParams();
 
 export function useSelectRoute() {
-  const [selectedRoute, setSelectedRoute] =
-    useState<SelectedRoute>(initialRoute);
+  const [selectedRoute, setSelectedRoute] = useState<SelectedRoute>(
+    getRouteFromQueryParams()
+  );
   const [isDefaultRouteTracked, setIsDefaultRouteTracked] = useState(false);
 
   const { addToAmpliQueue } = useAmplitude();

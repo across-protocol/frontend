@@ -130,7 +130,7 @@ export function DepositStatusLowerCard({
             getBridgeUrlWithQueryParams({
               fromChainId,
               toChainId,
-              inputTokenSymbol,
+              inputTokenSymbol: baseToken.symbol,
               outputTokenSymbol,
             })
           )
