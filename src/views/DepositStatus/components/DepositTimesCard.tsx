@@ -1,10 +1,12 @@
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
 import { DateTime } from "luxon";
+import { Link } from "react-router-dom";
 
 import { ReactComponent as CheckIcon } from "assets/check.svg";
 import { ReactComponent as LoadingIcon } from "assets/loading.svg";
 import { ReactComponent as ExternalLinkIcon } from "assets/icons/external-link-16.svg";
+import { ReactComponent as RefreshIcon } from "assets/icons/refresh.svg";
 
 import { Text, CardWrapper } from "components";
 import { getChainInfo, COLORS } from "utils";
@@ -23,6 +25,8 @@ type Props = {
   depositTxHash?: string;
   fromChainId: number;
   toChainId: number;
+  inputTokenSymbol: string;
+  outputTokenSymbol?: string;
 };
 
 export function DepositTimesCard({
@@ -34,11 +38,27 @@ export function DepositTimesCard({
   depositTxHash,
   fromChainId,
   toChainId,
+  inputTokenSymbol,
+  outputTokenSymbol,
 }: Props) {
   const isDepositing = status === "depositing";
   const isFilled = status === "filled";
+  const isDepositReverted = status === "deposit-reverted";
 
   const { addToAmpliQueue } = useAmplitude();
+
+  const cleanParams = Object.entries({
+    from: fromChainId.toString(),
+    to: toChainId.toString(),
+    inputToken: inputTokenSymbol,
+    outputToken: outputTokenSymbol,
+  }).reduce((acc, [key, value]) => {
+    if (value) {
+      return { ...acc, [key]: value };
+    }
+    return acc;
+  }, {});
+  const tryAgainLink = "/bridge?" + new URLSearchParams(cleanParams).toString();
 
   return (
     <CardWrapper>
@@ -47,13 +67,18 @@ export function DepositTimesCard({
         {isDepositing ? (
           <ElapsedTime
             elapsedSeconds={depositTxElapsedSeconds}
-            isCompleted={false}
+            status="depositing"
             StatusIcon={<StyledLoadingIcon />}
           />
+        ) : isDepositReverted ? (
+          <TryAgainButton to={tryAgainLink}>
+            <Text color="warning">Try again</Text>
+            <RefreshIcon />
+          </TryAgainButton>
         ) : depositTxElapsedSeconds !== undefined ? (
           <ElapsedTime
             elapsedSeconds={depositTxElapsedSeconds}
-            isCompleted
+            status={"filling"}
             StatusIcon={
               <CheckIconExplorerLink
                 txHash={depositTxHash}
@@ -63,7 +88,7 @@ export function DepositTimesCard({
           />
         ) : (
           <DateWrapper>
-            <Text color="aqua">
+            <Text color={"aqua"}>
               {depositTxCompletedTimestampSeconds
                 ? DateTime.fromSeconds(
                     depositTxCompletedTimestampSeconds
@@ -79,12 +104,12 @@ export function DepositTimesCard({
       </Row>
       <Row>
         <Text>Fill time</Text>
-        {isDepositing ? (
+        {isDepositing || status === "deposit-reverted" ? (
           <Text>-</Text>
         ) : (
           <ElapsedTime
             elapsedSeconds={fillTxElapsedSeconds}
-            isCompleted={isFilled}
+            status={isFilled ? "filled" : "filling"}
             StatusIcon={
               isFilled ? (
                 <CheckIconExplorerLink
@@ -108,7 +133,7 @@ export function DepositTimesCard({
             elapsedSeconds={
               (depositTxElapsedSeconds || 0) + (fillTxElapsedSeconds || 0)
             }
-            isCompleted
+            status="filled"
             StatusIcon={<CheckIcon />}
           />
         )}
@@ -208,4 +233,22 @@ const RotationKeyframes = keyframes`
 
 const StyledLoadingIcon = styled(LoadingIcon)`
   animation: ${RotationKeyframes} 2.5s linear infinite;
+`;
+
+const TryAgainButton = styled(Link)`
+  display: flex;
+  flex-direction: row;
+  padding: 6px 12px;
+  align-items: center;
+  gap: 4px;
+
+  border-radius: 22px;
+  border: 1px solid var(--Color-Interface-yellow-15, rgba(249, 210, 108, 0.15));
+  background: var(--Color-Interface-yellow-5, rgba(249, 210, 108, 0.05));
+
+  &:hover {
+    opacity: 0.75;
+  }
+
+  text-decoration: none;
 `;

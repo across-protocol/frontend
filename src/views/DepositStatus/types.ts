@@ -1,1 +1,5 @@
-export type DepositStatus = "depositing" | "filling" | "filled";
+export type DepositStatus =
+  | "deposit-reverted"
+  | "depositing"
+  | "filling"
+  | "filled";
