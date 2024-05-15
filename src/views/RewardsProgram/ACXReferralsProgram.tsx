@@ -32,7 +32,11 @@ const ACXReferralsProgram = () => {
               The referral rewards program is being discontinued. Earning was
               disabled on May 15th and you must claim all rewards by June 30th.
             </Text>
-            <LearnMoreLink>
+            <LearnMoreLink
+              href="https://snapshot.org/#/acrossprotocol.eth/proposal/0xa8af5c0d2a9caea7057900744cfde4ee28529300f947abf7696856216a97f8eb"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Text color="white">Learn more</Text>
             </LearnMoreLink>
           </AlertContent>
