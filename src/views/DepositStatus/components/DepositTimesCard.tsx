@@ -67,7 +67,7 @@ export function DepositTimesCard({
         {isDepositing ? (
           <ElapsedTime
             elapsedSeconds={depositTxElapsedSeconds}
-            status="depositing"
+            isCompleted={false}
             StatusIcon={<StyledLoadingIcon />}
           />
         ) : isDepositReverted ? (
@@ -78,7 +78,7 @@ export function DepositTimesCard({
         ) : depositTxElapsedSeconds !== undefined ? (
           <ElapsedTime
             elapsedSeconds={depositTxElapsedSeconds}
-            status={"filling"}
+            isCompleted
             StatusIcon={
               <CheckIconExplorerLink
                 txHash={depositTxHash}
@@ -109,7 +109,7 @@ export function DepositTimesCard({
         ) : (
           <ElapsedTime
             elapsedSeconds={fillTxElapsedSeconds}
-            status={isFilled ? "filled" : "filling"}
+            isCompleted={isFilled}
             StatusIcon={
               isFilled ? (
                 <CheckIconExplorerLink
@@ -133,7 +133,7 @@ export function DepositTimesCard({
             elapsedSeconds={
               (depositTxElapsedSeconds || 0) + (fillTxElapsedSeconds || 0)
             }
-            status="filled"
+            isCompleted
             StatusIcon={<CheckIcon />}
           />
         )}

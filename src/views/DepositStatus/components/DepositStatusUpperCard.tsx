@@ -138,7 +138,7 @@ export function DepositStatusUpperCard({
           <ElapsedTime
             textSize="3xl"
             elapsedSeconds={fillTxElapsedSeconds}
-            status="filled"
+            isCompleted
           />
           <Text size="lg" color="grey-400">
             Transfer successful!
@@ -150,7 +150,7 @@ export function DepositStatusUpperCard({
             <ElapsedTime
               textSize="3xl"
               elapsedSeconds={depositTxElapsedSeconds}
-              status="deposit-reverted"
+              textColor="warning"
             />
           ) : (
             <Text size="3xl" color="warning">
@@ -178,7 +178,6 @@ export function DepositStatusUpperCard({
         <TopWrapperTitleWrapper>
           <ElapsedTime
             textSize="3xl"
-            status="depositing"
             elapsedSeconds={
               status === "depositing"
                 ? depositTxElapsedSeconds
