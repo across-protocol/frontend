@@ -47,19 +47,6 @@ export function DepositTimesCard({
 
   const { addToAmpliQueue } = useAmplitude();
 
-  const cleanParams = Object.entries({
-    from: fromChainId.toString(),
-    to: toChainId.toString(),
-    inputToken: inputTokenSymbol,
-    outputToken: outputTokenSymbol,
-  }).reduce((acc, [key, value]) => {
-    if (value) {
-      return { ...acc, [key]: value };
-    }
-    return acc;
-  }, {});
-  const tryAgainLink = "/bridge?" + new URLSearchParams(cleanParams).toString();
-
   return (
     <CardWrapper>
       <Row>

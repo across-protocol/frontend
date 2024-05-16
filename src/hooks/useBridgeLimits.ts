@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { bridgeLimitsQueryKey, ChainId, getConfig, isDefined } from "utils";
+import { bridgeLimitsQueryKey, ChainId, getConfig } from "utils";
 import { BigNumber } from "ethers";
 import getApiEndpoint from "utils/serverless-api";
 

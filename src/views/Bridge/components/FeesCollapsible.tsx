@@ -67,7 +67,7 @@ export function FeesCollapsible(props: Props) {
                     textColor="light-200"
                     destinationChainId={props.toChainId}
                   />
-                  {estimatedRewards.reward && (
+                  {estimatedRewards.reward && estimatedRewards.rewardToken && (
                     <>
                       <Text color="grey-400"> and </Text>
                       <TokenFee

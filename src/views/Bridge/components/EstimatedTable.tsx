@@ -107,7 +107,6 @@ const EstimatedTable = ({
   rewardPercentage,
   hasDepositReward,
   rewardToken,
-  isRewardAcx,
   isSwap,
   parsedAmount,
   currentSwapSlippage,
@@ -117,7 +116,7 @@ const EstimatedTable = ({
   isQuoteLoading,
 }: EstimatedTableProps) => {
   const rewardDisplaySymbol =
-    rewardToken.displaySymbol || rewardToken.symbol.toUpperCase();
+    rewardToken?.displaySymbol || rewardToken?.symbol.toUpperCase();
   const baseToken = swapToken || inputToken;
   const { bridgeFee, outputAmount, swapFee } =
     calcFeesForEstimatedTable({
@@ -133,25 +132,26 @@ const EstimatedTable = ({
 
   return (
     <Wrapper>
-      <Row stackOnMobile>
-        <Text size="md" color="grey-400">
-          {isRewardAcx
-            ? "Across Referral Rewards"
-            : `${rewardDisplaySymbol} Rewards`}
-        </Text>
-        <ReferralRewardWrapper
-          isACX={isRewardAcx}
-          isTransparent={!hasDepositReward}
-        >
-          <PriceFee
-            token={rewardToken}
-            tokenFee={reward}
-            baseCurrencyFee={referralRewardAsBaseCurrency}
-            hideSymbolOnEmpty={false}
-            showLoadingSkeleton={isQuoteLoading}
-          />
-        </ReferralRewardWrapper>
-      </Row>
+      {rewardToken && (
+        <Row stackOnMobile>
+          <Text size="md" color="grey-400">
+            {`${rewardDisplaySymbol} Rewards`}
+          </Text>
+          <ReferralRewardWrapper
+            isACX={false}
+            isTransparent={!hasDepositReward}
+          >
+            <PriceFee
+              token={rewardToken}
+              tokenFee={reward}
+              baseCurrencyFee={referralRewardAsBaseCurrency}
+              hideSymbolOnEmpty={false}
+              showLoadingSkeleton={isQuoteLoading}
+            />
+          </ReferralRewardWrapper>
+        </Row>
+      )}
+
       <Row>
         <Text size="md" color="grey-400">
           Time to{" "}
@@ -314,33 +314,34 @@ const EstimatedTable = ({
           showLoadingSkeleton={isQuoteLoading}
         />
       </Row>
-      <Row>
-        <ToolTipWrapper>
-          <Text size="md" color="grey-400">
-            {rewardDisplaySymbol} Rebate
-          </Text>
-          <Tooltip
-            title={`${rewardDisplaySymbol} Referral Reward`}
-            body={`Estimate of ${rewardDisplaySymbol} earned on this transfer from the ${rewardDisplaySymbol} rebate program.`}
-            placement="bottom-start"
-          >
-            <InfoIconWrapper>
-              <InfoIcon />
-            </InfoIconWrapper>
-          </Tooltip>
-        </ToolTipWrapper>
-        <TransparentWrapper isTransparent={!hasDepositReward}>
-          <PriceFee
-            token={rewardToken}
-            tokenFee={reward}
-            baseCurrencyFee={referralRewardAsBaseCurrency}
-            rewardPercentageOfFees={rewardPercentage}
-            highlightTokenFee={isRewardAcx}
-            hideSymbolOnEmpty={!isDefined(netFeeAsBaseCurrency)}
-            showLoadingSkeleton={isQuoteLoading}
-          />
-        </TransparentWrapper>
-      </Row>
+      {rewardDisplaySymbol && rewardToken && (
+        <Row>
+          <ToolTipWrapper>
+            <Text size="md" color="grey-400">
+              {rewardDisplaySymbol} Rebate
+            </Text>
+            <Tooltip
+              title={`${rewardDisplaySymbol} Referral Reward`}
+              body={`Estimate of ${rewardDisplaySymbol} earned on this transfer from the ${rewardDisplaySymbol} rebate program.`}
+              placement="bottom-start"
+            >
+              <InfoIconWrapper>
+                <InfoIcon />
+              </InfoIconWrapper>
+            </Tooltip>
+          </ToolTipWrapper>
+          <TransparentWrapper isTransparent={!hasDepositReward}>
+            <PriceFee
+              token={rewardToken}
+              tokenFee={reward}
+              baseCurrencyFee={referralRewardAsBaseCurrency}
+              rewardPercentageOfFees={rewardPercentage}
+              hideSymbolOnEmpty={!isDefined(netFeeAsBaseCurrency)}
+              showLoadingSkeleton={isQuoteLoading}
+            />
+          </TransparentWrapper>
+        </Row>
+      )}
       <Divider />
       <Row>
         <Text size="md" color="grey-400">

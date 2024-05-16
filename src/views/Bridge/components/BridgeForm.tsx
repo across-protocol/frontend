@@ -11,11 +11,16 @@ import QuickSwap from "./QuickSwap";
 import { AmountInput } from "./AmountInput";
 import { TokenSelector } from "./TokenSelector";
 import { ChainSelector } from "./ChainSelector";
-import ReferralCTA from "./ReferralCTA";
+import RewardsProgramCTA from "./RewardsProgramCTA";
 import { FeesCollapsible } from "./FeesCollapsible";
 import { RecipientRow } from "./RecipientRow";
 
-import { getToken, GetBridgeFeesResult, QUERIESV2 } from "utils";
+import {
+  getToken,
+  GetBridgeFeesResult,
+  QUERIESV2,
+  chainIdToRewardsProgramName,
+} from "utils";
 import { VoidHandler } from "utils/types";
 
 import {
@@ -24,7 +29,6 @@ import {
   getReceiveTokenSymbol,
 } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
-import { useRewardToken } from "hooks/useRewardToken";
 import { useConnection } from "hooks";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -101,7 +105,7 @@ const BridgeForm = ({
   validationError,
   isQuoteLoading,
 }: BridgeFormProps) => {
-  const { programName } = useRewardToken(selectedRoute.toChain);
+  const programName = chainIdToRewardsProgramName[selectedRoute.toChain];
   const { connect } = useConnection();
 
   const receiveTokenSymbol = getReceiveTokenSymbol(
@@ -113,7 +117,7 @@ const BridgeForm = ({
 
   return (
     <CardWrapper>
-      <ReferralCTA program={programName} />
+      {programName && <RewardsProgramCTA program={programName} />}
       <RowWrapper>
         <RowLabelWrapper>
           <Text size="md" color="grey-400">
@@ -126,7 +130,7 @@ const BridgeForm = ({
             selectedRoute={selectedRoute}
             onChangeAmountInput={onChangeAmountInput}
             onClickMaxBalance={onClickMaxBalance}
-            validationError={validationError}
+            validationError={parsedAmountInput ? validationError : undefined}
             balance={balance}
           />
         </InputWrapper>

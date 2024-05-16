@@ -9,13 +9,17 @@ import {
   getReceiveTokenSymbol,
 } from "views/Bridge/utils";
 import { useEstimatedRewards } from "views/Bridge/hooks/useEstimatedRewards";
-import { getToken, COLORS, getBridgeUrlWithQueryParams } from "utils";
+import {
+  getToken,
+  COLORS,
+  chainIdToRewardsProgramName,
+  getBridgeUrlWithQueryParams,
+} from "utils";
 import { useIsContractAddress } from "hooks/useIsContractAddress";
 
 import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
-import ReferralCTA from "views/Bridge/components/ReferralCTA";
-import { useRewardToken } from "hooks/useRewardToken";
+import RewardsProgramCTA from "views/Bridge/components/RewardsProgramCTA";
 
 type Props = {
   fromChainId: number;
@@ -51,7 +55,7 @@ export function DepositStatusLowerCard({
     : undefined;
   const baseToken = swapToken || inputToken;
   const outputTokenInfo = getToken(outputTokenSymbol);
-  const { programName } = useRewardToken(toChainId);
+  const programName = chainIdToRewardsProgramName[toChainId];
 
   const { relayerGasFee, relayerCapitalFee, lpFee: _lpFee } = quote || {};
   const { bridgeFee, swapFee, gasFee, lpFee, swapQuote, capitalFee } =
@@ -116,7 +120,7 @@ export function DepositStatusLowerCard({
         l1TokenAddress={baseToken.mainnetAddress!}
         bridgeTokenSymbol={inputTokenSymbol}
       />
-      <ReferralCTA program={programName} />
+      {programName && <RewardsProgramCTA program={programName} />}
       {fromBridgePagePayload && (
         <>
           <Divider />

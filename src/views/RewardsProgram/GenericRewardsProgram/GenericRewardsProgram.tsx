@@ -12,7 +12,7 @@ import SectionTitleWrapperV2 from "components/SectionTitleWrapperV2";
 import { useGenericRewardProgram } from "../hooks/useGenericRewardProgram";
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import GenericEmptyTable from "./GenericEmptyTable";
-import { useRef } from "react";
+import React, { useRef } from "react";
 
 type GenericRewardsProgramProps = {
   programName: string;
@@ -23,6 +23,7 @@ type GenericRewardsProgramProps = {
     children?: React.ReactNode;
   };
   metaCard: GenericRewardInformationRowType[];
+  Banner?: React.ReactNode;
 };
 
 const GenericRewardsProgram = ({
@@ -30,6 +31,7 @@ const GenericRewardsProgram = ({
   program,
   claimCard,
   metaCard,
+  Banner,
 }: GenericRewardsProgramProps) => {
   const {
     currentPage,
@@ -56,6 +58,7 @@ const GenericRewardsProgram = ({
   return (
     <LayoutV2 maxWidth={1140}>
       <Content>
+        {Banner && <BannerWrapper>{Banner}</BannerWrapper>}
         <BreadcrumbV2 customCurrentRoute={programName} />
         <CardStack>
           <CardWrapper height={metaRef?.current?.offsetHeight}>
@@ -154,4 +157,9 @@ const CardWrapper = styled.div<{ height?: number }>`
   @media ${QUERIESV2.tb.andUp} {
     height: ${({ height }) => (height ? `${height}px` : "fit-content")};
   }
+`;
+
+const BannerWrapper = styled.div`
+  margin-bottom: 40px;
+  width: 100%;
 `;
