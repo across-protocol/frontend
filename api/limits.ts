@@ -4,7 +4,6 @@ import { ethers } from "ethers";
 import {
   BLOCK_TAG_LAG,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-  RECOMMENDED_DEPOSIT_INSTANT_LIMITS,
 } from "./_constants";
 import { TypedVercelRequest } from "./_types";
 import { object, assert, Infer, optional } from "superstruct";
