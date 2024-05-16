@@ -574,6 +574,16 @@ export const queries: Record<
       getLogger(),
       getGasMarkup(CHAIN_IDs.LINEA)
     ),
+  [CHAIN_IDs.MODE]: () =>
+    new sdk.relayFeeCalculator.ModeQueries(
+      getProvider(CHAIN_IDs.MODE),
+      undefined,
+      sdk.utils.AddressZero, // TODO: Replace with Mode_SpokePool address as soon as it is deployed
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDs.MODE)
+    ),
   /* --------------------------- Testnet queries --------------------------- */
   [CHAIN_IDs.SEPOLIA]: () =>
     new sdk.relayFeeCalculator.EthereumSepoliaQueries(
@@ -614,6 +624,16 @@ export const queries: Record<
       REACT_APP_COINGECKO_PRO_API_KEY,
       getLogger(),
       getGasMarkup(CHAIN_IDs.ARBITRUM_SEPOLIA)
+    ),
+  [CHAIN_IDs.MODE_SEPOLIA]: () =>
+    new sdk.relayFeeCalculator.ModeSepoliaQueries(
+      getProvider(CHAIN_IDs.MODE_SEPOLIA),
+      undefined,
+      "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
+      undefined,
+      REACT_APP_COINGECKO_PRO_API_KEY,
+      getLogger(),
+      getGasMarkup(CHAIN_IDs.MODE_SEPOLIA)
     ),
 };
 
