@@ -903,6 +903,11 @@ const enabledRoutes = {
             swapTokens: [],
             tokens: ["WETH"],
           },
+          {
+            chainId: CHAIN_IDs.MODE_SEPOLIA,
+            tokens: ["WETH"],
+            swapTokens: [],
+          },
         ],
       },
       {
@@ -938,6 +943,11 @@ const enabledRoutes = {
                 acrossOutputTokenSymbol: "USDC.e",
               },
             ],
+          },
+          {
+            chainId: CHAIN_IDs.MODE_SEPOLIA,
+            tokens: ["WETH"],
+            swapTokens: [],
           },
         ],
       },
@@ -986,6 +996,17 @@ const enabledRoutes = {
           "SpokePool",
           CHAIN_IDs.ARBITRUM_SEPOLIA
         ),
+        toChains: [
+          {
+            chainId: CHAIN_IDs.SEPOLIA,
+            swapTokens: [],
+            tokens: ["WETH"],
+          },
+        ],
+      },
+      {
+        fromChain: CHAIN_IDs.MODE_SEPOLIA,
+        fromSpokeAddress: "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
         toChains: [
           {
             chainId: CHAIN_IDs.SEPOLIA,
