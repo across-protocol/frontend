@@ -35,11 +35,6 @@ const handler = async (
 
     const poolState = await getPoolState(token, externalPoolProvider);
 
-    const responseData = {
-      estimatedApy: poolState.estimatedApy,
-      exchangeRateCurrent: poolState.exchangeRateCurrent,
-    };
-
     // Instruct Vercel to cache limit data for this token for 5 minutes. Caching can be used to limit number of
     // Vercel invocations and run time for this serverless function and trades off potential inaccuracy in times of
     // high volume. "max-age=0" instructs browsers not to cache, while s-maxage instructs Vercel edge caching
@@ -47,13 +42,13 @@ const handler = async (
     logger.debug({
       at: "Pools",
       message: "Response data",
-      responseJson: responseData,
+      responseJson: poolState,
     });
     response.setHeader(
       "Cache-Control",
       "s-maxage=300, stale-while-revalidate=300"
     );
-    response.status(200).json(responseData);
+    response.status(200).json(poolState);
   } catch (error: unknown) {
     return handleErrorCondition("pools", response, logger, error);
   }
