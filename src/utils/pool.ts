@@ -1,15 +1,6 @@
 import { ethers, Signer, BigNumberish, BigNumber } from "ethers";
-import { pool } from "@across-protocol/sdk-v2";
 
-import {
-  getConfigStoreAddress,
-  ChainId,
-  hubPoolAddress,
-  hubPoolChainId,
-  getConfig,
-  toWeiSafe,
-  getProvider,
-} from "utils";
+import { getConfig, toWeiSafe } from "utils";
 
 export const DEFAULT_GAS_PRICE = toWeiSafe(
   process.env.REACT_APP_DEFAULT_GAS_PRICE || "400",
@@ -43,10 +34,12 @@ export function estimateGas(
 
 // this could be replaced eventually with a better gas estimator
 export async function getGasPrice(
-  provider: ethers.providers.Provider
+  providerOrSigner: ethers.providers.Provider | Signer
 ): Promise<ethers.BigNumber> {
-  const fees = await provider.getFeeData();
-  return fees.maxFeePerGas || fees.gasPrice || (await provider.getGasPrice());
+  const fees = await providerOrSigner.getFeeData();
+  return (
+    fees.maxFeePerGas || fees.gasPrice || (await providerOrSigner.getGasPrice())
+  );
 }
 
 // calculate exact amount of gas needed for tx
@@ -55,9 +48,9 @@ export async function gasForAddEthLiquidity(
   tokenAddress: string,
   balance: BigNumberish
 ) {
-  const poolClient = getPoolClient();
-  const contract = poolClient.createHubPoolContract(signer);
-  return contract.estimateGas.addLiquidity(tokenAddress, balance, {
+  const config = getConfig();
+  const hubPool = config.getHubPool(signer);
+  return hubPool.estimateGas.addLiquidity(tokenAddress, balance, {
     value: balance,
   });
 }
@@ -68,39 +61,7 @@ export async function estimateGasForAddEthLiquidity(
   tokenAddress: string,
   balance: BigNumberish = BigNumber.from("1")
 ) {
-  const poolClient = getPoolClient();
-  const { provider } = poolClient.deps;
-  const gasPrice = await getGasPrice(provider);
+  const gasPrice = await getGasPrice(signer);
   const gas = await gasForAddEthLiquidity(signer, tokenAddress, balance);
   return estimateGas(gas, gasPrice, GAS_PRICE_BUFFER);
-}
-
-export function makePoolClientConfig(chainId: ChainId): pool.Config {
-  const config = getConfig();
-  const configStoreAddress = ethers.utils.getAddress(
-    getConfigStoreAddress(chainId)
-  );
-  return {
-    chainId,
-    hubPoolAddress,
-    wethAddress: config.getWethAddress(),
-    configStoreAddress,
-    acceleratingDistributorAddress: config.getAcceleratingDistributorAddress(),
-    merkleDistributorAddress: config.getMerkleDistributorAddress(),
-  };
-}
-
-export let poolClient: undefined | pool.Client;
-
-export function getPoolClient(): pool.Client {
-  if (poolClient) return poolClient;
-  const hubPoolConfig = makePoolClientConfig(hubPoolChainId);
-  poolClient = new pool.Client(
-    hubPoolConfig,
-    {
-      provider: getProvider(hubPoolChainId),
-    },
-    () => {}
-  );
-  return poolClient;
 }

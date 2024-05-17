@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { object, assert, Infer, enums, optional } from "superstruct";
+import { object, assert, Infer } from "superstruct";
 
 import { TypedVercelRequest } from "./_types";
 
@@ -7,38 +7,32 @@ import {
   getLogger,
   handleErrorCondition,
   validAddress,
-  getPoolState,
+  getPoolStateForUser,
 } from "./_utils";
 
-const PoolsQueryParamsSchema = object({
+const PoolsUserQueryParamsSchema = object({
   token: validAddress(),
-  externalPoolProvider: optional(enums(["balancer"])),
-  user: optional(validAddress()),
+  user: validAddress(),
 });
 
-type PoolsQueryParams = Infer<typeof PoolsQueryParamsSchema>;
+type PoolsUserQueryParams = Infer<typeof PoolsUserQueryParamsSchema>;
 
 const handler = async (
-  { query }: TypedVercelRequest<PoolsQueryParams>,
+  { query }: TypedVercelRequest<PoolsUserQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
   logger.debug({
-    at: "Pools",
+    at: "PoolsUser",
     message: "Query data",
     query,
   });
   try {
-    assert(query, PoolsQueryParamsSchema);
+    assert(query, PoolsUserQueryParamsSchema);
 
-    const { token, externalPoolProvider } = query;
+    const { token, user } = query;
 
-    const poolState = await getPoolState(token, externalPoolProvider);
-
-    const responseData = {
-      estimatedApy: poolState.estimatedApy,
-      exchangeRateCurrent: poolState.exchangeRateCurrent,
-    };
+    const poolStateOfUser = await getPoolStateForUser(token, user);
 
     // Instruct Vercel to cache limit data for this token for 5 minutes. Caching can be used to limit number of
     // Vercel invocations and run time for this serverless function and trades off potential inaccuracy in times of
@@ -47,15 +41,15 @@ const handler = async (
     logger.debug({
       at: "Pools",
       message: "Response data",
-      responseJson: responseData,
+      responseJson: poolStateOfUser,
     });
     response.setHeader(
       "Cache-Control",
       "s-maxage=300, stale-while-revalidate=300"
     );
-    response.status(200).json(responseData);
+    response.status(200).json(poolStateOfUser);
   } catch (error: unknown) {
-    return handleErrorCondition("pools", response, logger, error);
+    return handleErrorCondition("pools-user", response, logger, error);
   }
 };
 

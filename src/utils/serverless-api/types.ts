@@ -4,6 +4,7 @@ import { ChainId } from "utils/constants";
 import { CoingeckoApiCall } from "./prod/coingecko";
 import { PoolsApiCall } from "./prod/pools";
 import { SwapQuoteApiCall } from "./prod/swap-quote";
+import { PoolsUserApiCall } from "./prod/pools-user";
 
 export type ServerlessAPIEndpoints = {
   coingecko: CoingeckoApiCall;
@@ -19,6 +20,7 @@ export type ServerlessAPIEndpoints = {
     getStats: GetDepositStatsType;
   };
   pools: PoolsApiCall;
+  poolsUser: PoolsUserApiCall;
   swapQuote: SwapQuoteApiCall;
 };
 
