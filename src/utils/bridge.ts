@@ -1,5 +1,4 @@
 import { ethers, BigNumber } from "ethers";
-import { utils } from "@across-protocol/sdk-v2";
 
 import {
   ChainId,
@@ -9,7 +8,7 @@ import {
 import { tagAddress } from "./format";
 import { getProvider } from "./providers";
 import { getFastFillTimeByRoute } from "./fill-times";
-import { getConfig, getCurrentTime } from "utils";
+import { getConfig, getCurrentTime, isContractDeployedToAddress } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
@@ -349,7 +348,7 @@ export async function sendSwapAndBridgeTx(
   }
 
   const spokePool = config.getSpokePool(fromChain);
-  const isSpokePoolDeployed = await utils.isContractDeployedToAddress(
+  const isSpokePoolDeployed = await isContractDeployedToAddress(
     spokePool.address,
     provider
   );
@@ -360,10 +359,7 @@ export async function sendSwapAndBridgeTx(
   const swapAndBridge = config.getSwapAndBridge(fromChain, swapQuote.dex);
   const isSwapAndBridgeDeployed =
     swapAndBridge &&
-    (await utils.isContractDeployedToAddress(
-      swapAndBridge?.address || "",
-      provider
-    ));
+    (await isContractDeployedToAddress(swapAndBridge?.address || "", provider));
   if (!isSwapAndBridgeDeployed) {
     throw new Error(
       `SwapAndBridge contract not deployed at ${swapAndBridge?.address} for ${swapQuote.dex}`
@@ -442,7 +438,7 @@ async function _getSpokePoolAndVerifier({
   const shouldUseSpokePoolVerifier = Boolean(spokePoolVerifier) && isNative;
 
   if (shouldUseSpokePoolVerifier) {
-    const isSpokePoolVerifierDeployed = await utils.isContractDeployedToAddress(
+    const isSpokePoolVerifierDeployed = await isContractDeployedToAddress(
       spokePoolVerifier!.address,
       provider
     );
@@ -453,7 +449,7 @@ async function _getSpokePoolAndVerifier({
     }
   }
 
-  const isSpokePoolDeployed = await utils.isContractDeployedToAddress(
+  const isSpokePoolDeployed = await isContractDeployedToAddress(
     spokePool.address,
     provider
   );

@@ -1,6 +1,5 @@
 import assert from "assert";
 import { BigNumber, ethers, providers } from "ethers";
-import { utils } from "@across-protocol/sdk-v2";
 import {
   CHAIN_IDs,
   TOKEN_SYMBOLS_MAP as _TOKEN_SYMBOLS_MAP,
@@ -494,20 +493,6 @@ export function isSupportedChainId(chainId: number): chainId is ChainId {
   return chainId in ChainId;
 }
 
-export function getConfigStoreAddress(
-  chainId: ChainId = hubPoolChainId
-): string {
-  const configStoreAddress = utils.getDeployedAddress(
-    "AcrossConfigStore",
-    chainId
-  );
-  assert(
-    ethers.utils.isAddress(configStoreAddress),
-    "Config Store address not set for chain: " + chainId
-  );
-  return configStoreAddress;
-}
-
 export function getChainInfo(chainId: number): ChainInfo {
   let chainInfo = chainInfoTable[chainId];
 
@@ -602,6 +587,7 @@ const RouteConfigSS = superstruct.type({
   acceleratingDistributorAddress: superstruct.optional(superstruct.string()),
   merkleDistributorAddress: superstruct.optional(superstruct.string()),
   claimAndStakeAddress: superstruct.optional(superstruct.string()),
+  configStoreAddress: superstruct.optional(superstruct.string()),
   swapAndBridgeAddresses: superstruct.optional(SwapAndBridgeAddressesSS),
 });
 export type RouteConfig = superstruct.Infer<typeof RouteConfigSS>;
@@ -858,9 +844,6 @@ export const pendingStateTimeUntilDelayed = 5 * 60; // 5 mins
 
 export const vercelApiBaseUrl =
   process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE || "";
-
-export const bnUint32Max = utils.bnUint32Max;
-export const bnZero = utils.bnZero;
 
 // Swap slippage in %, 0.5 = 0.5%
 export const defaultSwapSlippage = Number(

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { utils } from "@across-protocol/sdk-v2";
 import { BigNumber } from "ethers";
 
 import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
@@ -11,7 +10,7 @@ import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote, type TransferQuote } from "./useTransferQuote";
 import { useAmountInput } from "./useAmountInput";
 import { validateBridgeAmount } from "../utils";
-import { defaultSwapSlippage } from "utils";
+import { defaultSwapSlippage, bnZero } from "utils";
 
 export function useBridge() {
   const [shouldUpdateQuote, setShouldUpdateQuote] = useState(true);
@@ -50,7 +49,7 @@ export function useBridge() {
     isIdle: isQuoteIdle,
   } = useTransferQuote(
     selectedRoute,
-    parsedAmount?.gt(0) ? parsedAmount : utils.bnZero,
+    parsedAmount?.gt(0) ? parsedAmount : bnZero,
     swapSlippage,
     account,
     toAccount?.address

@@ -1,16 +1,10 @@
 import { useConnection } from "hooks";
 import { useQuery } from "react-query";
 
-import {
-  getConfig,
-  getPoolClient,
-  getBalance,
-  getNativeBalance,
-  hubPoolChainId,
-} from "utils";
+import { getConfig, getBalance, getNativeBalance, hubPoolChainId } from "utils";
+import getApiEndpoint from "utils/serverless-api";
 
 const config = getConfig();
-const poolClient = getPoolClient();
 
 export function useUserLiquidityPool(tokenSymbol?: string) {
   const { account } = useConnection();
@@ -43,14 +37,14 @@ async function fetchUserLiquidityPool(
   const { logoURI, symbol, l1TokenAddress, decimals } =
     config.getPoolTokenInfoBySymbol(config.getHubPoolChainId(), tokenSymbol);
 
-  const [l1Balance] = await Promise.all([
+  const [l1Balance, poolStateOfUser] = await Promise.all([
     tokenSymbol === "ETH"
       ? getNativeBalance(hubPoolChainId, userAddress)
       : getBalance(hubPoolChainId, userAddress, l1TokenAddress),
-    poolClient.updateUser(userAddress, l1TokenAddress),
+    getApiEndpoint().poolsUser(userAddress, l1TokenAddress),
   ]);
   return {
-    ...poolClient.getUserState(l1TokenAddress, userAddress),
+    ...poolStateOfUser,
     l1TokenLogoURI: logoURI,
     l1TokenSymbol: symbol,
     l1TokenDecimals: decimals,

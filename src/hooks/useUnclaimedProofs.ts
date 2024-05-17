@@ -1,10 +1,13 @@
 import { useQuery } from "react-query";
 import { BigNumber } from "ethers";
-import { utils } from "@across-protocol/sdk-v2";
 
 import { useConnection } from "hooks";
 import { fetchIsClaimed, fetchAirdropProofs } from "utils/merkle-distributor";
-import { getUnclaimedProofsQueryKey, rewardProgramTypes } from "utils";
+import {
+  getUnclaimedProofsQueryKey,
+  rewardProgramTypes,
+  mapAsync,
+} from "utils";
 
 export function useUnclaimedProofs(rewardsType: rewardProgramTypes) {
   const { isConnected, account } = useConnection();
@@ -75,7 +78,7 @@ async function fetchIsClaimedForIndices(
   indices: { accountIndex: number; windowIndex: number }[],
   rewardsType: rewardProgramTypes
 ) {
-  const isClaimedResults = await utils.mapAsync(
+  const isClaimedResults = await mapAsync(
     indices,
     async ({ accountIndex, windowIndex }) => {
       const isClaimed = await fetchIsClaimed(

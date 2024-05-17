@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
-import { utils as sdkUtils } from "@across-protocol/sdk-v2";
 import { useMutation } from "react-query";
 
 import { useConnection, useBridgeFees, useIsWrongNetwork } from "hooks";
@@ -10,6 +9,7 @@ import {
   Token,
   waitOnTransaction,
   fixedPointAdjustment,
+  getUpdateV3DepositTypedData,
 } from "utils";
 
 import type { Deposit } from "hooks/useDeposits";
@@ -67,7 +67,7 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
         args.newRelayerFeePct.mul(transfer.amount).div(fixedPointAdjustment)
       );
 
-      const typedData = sdkUtils.getUpdateV3DepositTypedData(
+      const typedData = getUpdateV3DepositTypedData(
         transfer.depositId,
         transfer.sourceChainId,
         updatedOutputAmount,
