@@ -7,6 +7,7 @@ import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfil
 import rollupNodePolyFill from "rollup-plugin-node-polyfills";
 import eslint from "vite-plugin-eslint";
 import EnvironmentPlugin from "vite-plugin-environment";
+import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
   build: {
@@ -30,6 +31,13 @@ export default defineConfig({
       exclude: ["**/node_modules/**", "**/sdk-v2/**"],
     }),
     EnvironmentPlugin("all", { prefix: "REACT_APP_" }),
+    visualizer({
+      template: "raw-data",
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+      filename: "bundle-size-analysis.json",
+    }),
   ],
   optimizeDeps: {
     disabled: false,
@@ -38,6 +46,7 @@ export default defineConfig({
       "@walletconnect/ethereum-provider",
       "rxjs",
       "rxjs/operators",
+      "@across-protocol/contracts-v2",
     ],
     esbuildOptions: {
       define: {
