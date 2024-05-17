@@ -1129,7 +1129,7 @@ export async function getAcrossPoolUserState(
 ) {
   const hubPoolClient = getHubPoolClient();
   await hubPoolClient.updateUser(userAddress, tokenAddress);
-  return hubPoolClient.getUserState(userAddress, tokenAddress);
+  return hubPoolClient.getUserState(tokenAddress, userAddress);
 }
 
 export async function getExternalPoolState(
