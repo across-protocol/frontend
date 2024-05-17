@@ -19,7 +19,7 @@ import zkSyncLogo from "assets/zksync-logo.svg";
 import baseLogo from "assets/base-logo.svg";
 import lineaLogo from "assets/linea-logo.svg";
 import modeLogo from "assets/mode-logo.svg";
-import usdcLogo from "assets/usdc-logo.png";
+import usdcLogo from "assets/usdc.svg";
 import daiLogo from "assets/dai.svg";
 import wbtcLogo from "assets/wbtc.svg";
 import umaLogo from "assets/uma.svg";
