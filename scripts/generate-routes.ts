@@ -1013,6 +1013,11 @@ const enabledRoutes = {
             swapTokens: [],
             tokens: ["WETH"],
           },
+          {
+            chainId: CHAIN_IDs.BASE_SEPOLIA,
+            swapTokens: [],
+            tokens: ["WETH"],
+          },
         ],
       },
     ],

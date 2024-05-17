@@ -222,6 +222,17 @@
       "toTokenSymbol": "WETH",
       "isNative": false,
       "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    },
+    {
+      "fromChain": 919,
+      "toChain": 84532,
+      "fromTokenAddress": "0x4200000000000000000000000000000000000006",
+      "toTokenAddress": "0x4200000000000000000000000000000000000006",
+      "fromSpokeAddress": "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
+      "fromTokenSymbol": "WETH",
+      "toTokenSymbol": "WETH",
+      "isNative": false,
+      "l1TokenAddress": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
     }
   ],
   "swapRoutes": [

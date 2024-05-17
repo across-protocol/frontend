@@ -785,6 +785,8 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
+    case CHAIN_IDs.MODE_SEPOLIA:
+      return "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b";
     default:
       return sdk.utils.getDeployedAddress("SpokePool", chainId);
   }
