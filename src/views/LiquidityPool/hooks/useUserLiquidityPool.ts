@@ -41,7 +41,7 @@ async function fetchUserLiquidityPool(
     tokenSymbol === "ETH"
       ? getNativeBalance(hubPoolChainId, userAddress)
       : getBalance(hubPoolChainId, userAddress, l1TokenAddress),
-    getApiEndpoint().poolsUser(userAddress, l1TokenAddress),
+    getApiEndpoint().poolsUser(l1TokenAddress, userAddress),
   ]);
   return {
     ...poolStateOfUser,
