@@ -638,6 +638,17 @@
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
     {
+      "fromChain": 1,
+      "toChain": 34443,
+      "fromTokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "toTokenAddress": "0xf0F161fDA2712DB8b566946122a5af183995e2eD",
+      "fromSpokeAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "fromTokenSymbol": "USDT",
+      "toTokenSymbol": "USDT",
+      "isNative": false,
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
       "fromChain": 10,
       "toChain": 1,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
@@ -1243,6 +1254,17 @@
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
     {
+      "fromChain": 10,
+      "toChain": 34443,
+      "fromTokenAddress": "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
+      "toTokenAddress": "0xf0F161fDA2712DB8b566946122a5af183995e2eD",
+      "fromSpokeAddress": "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
+      "fromTokenSymbol": "USDT",
+      "toTokenSymbol": "USDT",
+      "isNative": false,
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
       "fromChain": 137,
       "toChain": 1,
       "fromTokenAddress": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
@@ -1758,6 +1780,17 @@
       "toTokenSymbol": "USDC.e",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 137,
+      "toChain": 34443,
+      "fromTokenAddress": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+      "toTokenAddress": "0xf0F161fDA2712DB8b566946122a5af183995e2eD",
+      "fromSpokeAddress": "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
+      "fromTokenSymbol": "USDT",
+      "toTokenSymbol": "USDT",
+      "isNative": false,
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
     },
     {
       "fromChain": 42161,
@@ -2343,6 +2376,17 @@
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
     {
+      "fromChain": 42161,
+      "toChain": 34443,
+      "fromTokenAddress": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+      "toTokenAddress": "0xf0F161fDA2712DB8b566946122a5af183995e2eD",
+      "fromSpokeAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+      "fromTokenSymbol": "USDT",
+      "toTokenSymbol": "USDT",
+      "isNative": false,
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
       "fromChain": 324,
       "toChain": 1,
       "fromTokenAddress": "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91",
@@ -2781,6 +2825,17 @@
       "toTokenSymbol": "USDC.e",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 324,
+      "toChain": 34443,
+      "fromTokenAddress": "0x493257fD37EDB34451f62EDf8D2a0C418852bA4C",
+      "toTokenAddress": "0xf0F161fDA2712DB8b566946122a5af183995e2eD",
+      "fromSpokeAddress": "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF",
+      "fromTokenSymbol": "USDT",
+      "toTokenSymbol": "USDT",
+      "isNative": false,
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
     },
     {
       "fromChain": 8453,
@@ -3630,6 +3685,17 @@
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
     {
+      "fromChain": 59144,
+      "toChain": 34443,
+      "fromTokenAddress": "0xA219439258ca9da29E9Cc4cE5596924745e12B93",
+      "toTokenAddress": "0xf0F161fDA2712DB8b566946122a5af183995e2eD",
+      "fromSpokeAddress": "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
+      "fromTokenSymbol": "USDT",
+      "toTokenSymbol": "USDT",
+      "isNative": false,
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
       "fromChain": 34443,
       "toChain": 1,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
@@ -3661,6 +3727,17 @@
       "toTokenSymbol": "USDC",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 34443,
+      "toChain": 1,
+      "fromTokenAddress": "0xf0F161fDA2712DB8b566946122a5af183995e2eD",
+      "toTokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "fromSpokeAddress": "0x0000000000000000000000000000000000000000",
+      "fromTokenSymbol": "USDT",
+      "toTokenSymbol": "USDT",
+      "isNative": false,
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
     },
     {
       "fromChain": 34443,
@@ -3708,6 +3785,17 @@
     },
     {
       "fromChain": 34443,
+      "toChain": 10,
+      "fromTokenAddress": "0xf0F161fDA2712DB8b566946122a5af183995e2eD",
+      "toTokenAddress": "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
+      "fromSpokeAddress": "0x0000000000000000000000000000000000000000",
+      "fromTokenSymbol": "USDT",
+      "toTokenSymbol": "USDT",
+      "isNative": false,
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
+      "fromChain": 34443,
       "toChain": 137,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "toTokenAddress": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
@@ -3752,6 +3840,17 @@
     },
     {
       "fromChain": 34443,
+      "toChain": 137,
+      "fromTokenAddress": "0xf0F161fDA2712DB8b566946122a5af183995e2eD",
+      "toTokenAddress": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+      "fromSpokeAddress": "0x0000000000000000000000000000000000000000",
+      "fromTokenSymbol": "USDT",
+      "toTokenSymbol": "USDT",
+      "isNative": false,
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
+      "fromChain": 34443,
       "toChain": 42161,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "toTokenAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
@@ -3793,6 +3892,17 @@
       "toTokenSymbol": "USDC.e",
       "isNative": false,
       "l1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "fromChain": 34443,
+      "toChain": 42161,
+      "fromTokenAddress": "0xf0F161fDA2712DB8b566946122a5af183995e2eD",
+      "toTokenAddress": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+      "fromSpokeAddress": "0x0000000000000000000000000000000000000000",
+      "fromTokenSymbol": "USDT",
+      "toTokenSymbol": "USDT",
+      "isNative": false,
+      "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
     },
     {
       "fromChain": 34443,

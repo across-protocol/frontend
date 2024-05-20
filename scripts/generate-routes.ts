@@ -159,6 +159,7 @@ const enabledRoutes = {
               "WETH",
               "ETH",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+              "USDT",
             ],
             swapTokens: [],
           },
@@ -313,6 +314,7 @@ const enabledRoutes = {
               "WETH",
               "ETH",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+              "USDT",
             ],
             swapTokens: [
               {
@@ -465,6 +467,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+              "USDT",
             ],
             swapTokens: [
               {
@@ -623,6 +626,7 @@ const enabledRoutes = {
             tokens: [
               "WETH",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+              "USDT",
             ],
             swapTokens: [
               {
@@ -706,7 +710,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.MODE,
-            tokens: ["WETH", "ETH", "USDC.e"],
+            tokens: ["WETH", "ETH", "USDC.e", "USDT"],
             swapTokens: [],
           },
         ],
@@ -920,7 +924,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.MODE,
-            tokens: ["WETH", "ETH", "USDC.e"],
+            tokens: ["WETH", "ETH", "USDC.e", "USDT"],
             swapTokens: [],
           },
         ],
@@ -935,6 +939,7 @@ const enabledRoutes = {
               "WETH",
               "ETH",
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              "USDT",
             ],
             swapTokens: [],
           },
@@ -945,6 +950,7 @@ const enabledRoutes = {
               "ETH",
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDC.e",
+              "USDT",
             ],
             swapTokens: [],
           },
@@ -955,6 +961,7 @@ const enabledRoutes = {
               "ETH",
               "USDC.e",
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              "USDT",
             ],
             swapTokens: [],
           },
@@ -965,6 +972,7 @@ const enabledRoutes = {
               "ETH",
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDC.e",
+              "USDT",
             ],
             swapTokens: [],
           },
