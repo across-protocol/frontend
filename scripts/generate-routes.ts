@@ -1,6 +1,6 @@
 import { CHAIN_IDs } from "@across-protocol/constants-v2";
 import { utils as sdkUtils } from "@across-protocol/sdk-v2";
-import { utils } from "ethers";
+import { constants, utils } from "ethers";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
 
@@ -153,6 +153,15 @@ const enabledRoutes = {
             ],
             swapTokens: [],
           },
+          {
+            chainId: CHAIN_IDs.MODE,
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+            ],
+            swapTokens: [],
+          },
         ],
       },
       {
@@ -298,6 +307,21 @@ const enabledRoutes = {
               },
             ],
           },
+          {
+            chainId: CHAIN_IDs.MODE,
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+            ],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
+          },
         ],
       },
       {
@@ -427,6 +451,20 @@ const enabledRoutes = {
               "USDT",
               "DAI",
               "WBTC",
+            ],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
+          },
+          {
+            chainId: CHAIN_IDs.MODE,
+            tokens: [
+              "WETH",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
             ],
             swapTokens: [
               {
@@ -580,6 +618,20 @@ const enabledRoutes = {
               },
             ],
           },
+          {
+            chainId: CHAIN_IDs.MODE,
+            tokens: [
+              "WETH",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+            ],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDC.e",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
+          },
         ],
       },
       {
@@ -650,6 +702,11 @@ const enabledRoutes = {
           {
             chainId: CHAIN_IDs.LINEA,
             tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
+            swapTokens: [],
+          },
+          {
+            chainId: CHAIN_IDs.MODE,
+            tokens: ["WETH", "ETH", "USDC.e"],
             swapTokens: [],
           },
         ],
@@ -773,6 +830,21 @@ const enabledRoutes = {
               },
             ],
           },
+          {
+            chainId: CHAIN_IDs.MODE,
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
+            ],
+            swapTokens: [
+              {
+                swapInputTokenSymbol: "USDbC",
+                acrossInputTokenSymbol: "USDC",
+                acrossOutputTokenSymbol: "USDC.e",
+              },
+            ],
+          },
         ],
       },
       {
@@ -843,6 +915,71 @@ const enabledRoutes = {
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
               "DAI",
+            ],
+            swapTokens: [],
+          },
+          {
+            chainId: CHAIN_IDs.MODE,
+            tokens: ["WETH", "ETH", "USDC.e"],
+            swapTokens: [],
+          },
+        ],
+      },
+      {
+        fromChain: CHAIN_IDs.MODE,
+        fromSpokeAddress: constants.AddressZero, // TODO: Use correct address after deployment
+        toChains: [
+          {
+            chainId: CHAIN_IDs.MAINNET,
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+            ],
+            swapTokens: [],
+          },
+          {
+            chainId: CHAIN_IDs.OPTIMISM,
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              "USDC.e",
+            ],
+            swapTokens: [],
+          },
+          {
+            chainId: CHAIN_IDs.POLYGON,
+            tokens: [
+              "WETH",
+              "ETH",
+              "USDC.e",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+            ],
+            swapTokens: [],
+          },
+          {
+            chainId: CHAIN_IDs.ARBITRUM,
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              "USDC.e",
+            ],
+            swapTokens: [],
+          },
+          {
+            chainId: CHAIN_IDs.ZK_SYNC,
+            tokens: ["WETH", "ETH", "USDC.e"],
+            swapTokens: [],
+          },
+          {
+            chainId: CHAIN_IDs.BASE,
+            tokens: [
+              "WETH",
+              "ETH",
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
+              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
             ],
             swapTokens: [],
           },
