@@ -40,6 +40,7 @@ import {
   defaultRelayerAddressOverride,
   defaultRelayerAddressOverridePerToken,
   disabledL1Tokens,
+  DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
 
@@ -1524,4 +1525,29 @@ export function isSwapRouteEnabled({
     );
   });
   return !!swapRoute;
+}
+
+/**
+ * This value will be returned in the `GET /limits` response field `recommendedDepositInstant`.
+ * @param symbol The token symbol to retrieve the limit for.
+ * @param fromChainId The chain ID of the origin chain.
+ * @param toChainId The chain ID of the destination chain.
+ * @returns The recommended deposit instant limit in max. divisible units.
+ */
+export function getRecommendedDepositInstantLimit(
+  symbol: string,
+  fromChainId: number,
+  toChainId: number
+) {
+  const envVarBase = "RECOMMENDED_DEPOSIT_INSTANT_LIMIT";
+  return (
+    [
+      `${envVarBase}_${symbol}_${fromChainId}_${toChainId}`,
+      `${envVarBase}_${symbol}_${fromChainId}`,
+      `${envVarBase}_${symbol}`,
+    ]
+      .map((key) => process.env[key])
+      .find((value) => value !== undefined) ||
+    DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS[symbol]
+  );
 }

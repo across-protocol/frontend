@@ -25,6 +25,7 @@ import {
   sendResponse,
   getHubPool,
   validateChainAndTokenParams,
+  getRecommendedDepositInstantLimit,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -177,20 +178,31 @@ const handler = async (
       balance.add(fullRelayerMainnetBalances[i])
     );
 
+    const maxDepositInstant = minBN(
+      maxBN(...fullRelayerBalances, ...transferRestrictedBalances),
+      liquidReserves
+    ).toString();
+    const recommendedDepositInstant = getRecommendedDepositInstantLimit(
+      l1Token.symbol,
+      computedOriginChainId,
+      destinationChainId
+    );
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
       minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
       maxDeposit: liquidReserves.toString(),
       // Note: max is used here rather than sum because relayers currently do not partial fill.
-      maxDepositInstant: minBN(
-        maxBN(...fullRelayerBalances, ...transferRestrictedBalances),
-        liquidReserves
-      ).toString(),
+      maxDepositInstant,
       // Same as above.
       maxDepositShortDelay: minBN(
         maxBN(...transferBalances, ...transferRestrictedBalances),
         liquidReserves
       ).toString(),
+      recommendedDepositInstant: recommendedDepositInstant
+        ? ethers.utils
+            .parseUnits(recommendedDepositInstant, l1Token.decimals)
+            .toString()
+        : maxDepositInstant,
     };
     logger.debug({
       at: "Limits",
