@@ -43,6 +43,7 @@ const enabledRoutes = {
         CHAIN_IDs.BASE,
         CHAIN_IDs.ARBITRUM,
         CHAIN_IDs.LINEA,
+        CHAIN_IDs.MODE,
       ],
     },
     swapAndBridgeAddresses: {
@@ -931,7 +932,7 @@ const enabledRoutes = {
       },
       {
         fromChain: CHAIN_IDs.MODE,
-        fromSpokeAddress: constants.AddressZero, // TODO: Use correct address after deployment
+        fromSpokeAddress: "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
         toChains: [
           {
             chainId: CHAIN_IDs.MAINNET,
