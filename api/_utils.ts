@@ -500,141 +500,51 @@ export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
+function createFeeCalculatorQuerier(
+  chainId: number,
+  overrides: Partial<{
+    spokePoolAddress: string;
+  }> = {}
+) {
+  return sdk.relayFeeCalculator.QueryBase__factory.create(
+    CHAIN_IDs.MAINNET,
+    getProvider(chainId),
+    undefined,
+    overrides.spokePoolAddress,
+    getDefaultRelayerAddress(chainId),
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(chainId)
+  );
+}
+
 export const queries: Record<
   number,
   () => sdk.relayFeeCalculator.QueryInterface
 > = {
-  [CHAIN_IDs.MAINNET]: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(
-      getProvider(CHAIN_IDs.MAINNET),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.MAINNET)
-    ),
-  [CHAIN_IDs.OPTIMISM]: () =>
-    new sdk.relayFeeCalculator.OptimismQueries(
-      getProvider(CHAIN_IDs.OPTIMISM),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.OPTIMISM)
-    ),
-  [CHAIN_IDs.POLYGON]: () =>
-    new sdk.relayFeeCalculator.PolygonQueries(
-      getProvider(CHAIN_IDs.POLYGON),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.POLYGON)
-    ),
-  [CHAIN_IDs.ARBITRUM]: () =>
-    new sdk.relayFeeCalculator.ArbitrumQueries(
-      getProvider(CHAIN_IDs.ARBITRUM),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.ARBITRUM)
-    ),
-  [CHAIN_IDs.ZK_SYNC]: () =>
-    new sdk.relayFeeCalculator.ZkSyncQueries(
-      getProvider(CHAIN_IDs.ZK_SYNC),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.ZK_SYNC)
-    ),
-  [CHAIN_IDs.BASE]: () =>
-    new sdk.relayFeeCalculator.BaseQueries(
-      getProvider(CHAIN_IDs.BASE),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.BASE)
-    ),
-  [CHAIN_IDs.LINEA]: () =>
-    new sdk.relayFeeCalculator.LineaQueries(
-      getProvider(CHAIN_IDs.LINEA),
-      undefined,
-      "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.LINEA)
-    ),
+  [CHAIN_IDs.MAINNET]: () => createFeeCalculatorQuerier(CHAIN_IDs.MAINNET),
+  [CHAIN_IDs.OPTIMISM]: () => createFeeCalculatorQuerier(CHAIN_IDs.OPTIMISM),
+  [CHAIN_IDs.POLYGON]: () => createFeeCalculatorQuerier(CHAIN_IDs.POLYGON),
+  [CHAIN_IDs.ARBITRUM]: () => createFeeCalculatorQuerier(CHAIN_IDs.ARBITRUM),
+  [CHAIN_IDs.ZK_SYNC]: () => createFeeCalculatorQuerier(CHAIN_IDs.ZK_SYNC),
+  [CHAIN_IDs.BASE]: () => createFeeCalculatorQuerier(CHAIN_IDs.BASE),
+  [CHAIN_IDs.LINEA]: () => createFeeCalculatorQuerier(CHAIN_IDs.LINEA),
   [CHAIN_IDs.MODE]: () =>
-    new sdk.relayFeeCalculator.ModeQueries(
-      getProvider(CHAIN_IDs.MODE),
-      undefined,
-      sdk.utils.AddressZero, // TODO: Replace with Mode_SpokePool address as soon as it is deployed
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.MODE)
-    ),
+    createFeeCalculatorQuerier(CHAIN_IDs.MODE, {
+      spokePoolAddress: "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+    }),
   /* --------------------------- Testnet queries --------------------------- */
-  [CHAIN_IDs.SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.EthereumSepoliaQueries(
-      getProvider(CHAIN_IDs.SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.SEPOLIA)
-    ),
+  [CHAIN_IDs.SEPOLIA]: () => createFeeCalculatorQuerier(CHAIN_IDs.SEPOLIA),
   [CHAIN_IDs.BASE_SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.BaseSepoliaQueries(
-      getProvider(CHAIN_IDs.BASE_SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.BASE_SEPOLIA)
-    ),
+    createFeeCalculatorQuerier(CHAIN_IDs.BASE_SEPOLIA),
   [CHAIN_IDs.OPTIMISM_SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.OptimismSepoliaQueries(
-      getProvider(CHAIN_IDs.OPTIMISM_SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.OPTIMISM_SEPOLIA)
-    ),
+    createFeeCalculatorQuerier(CHAIN_IDs.OPTIMISM_SEPOLIA),
   [CHAIN_IDs.ARBITRUM_SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.ArbitrumSepoliaQueries(
-      getProvider(CHAIN_IDs.ARBITRUM_SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.ARBITRUM_SEPOLIA)
-    ),
+    createFeeCalculatorQuerier(CHAIN_IDs.ARBITRUM_SEPOLIA),
   [CHAIN_IDs.MODE_SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.ModeSepoliaQueries(
-      getProvider(CHAIN_IDs.MODE_SEPOLIA),
-      undefined,
-      "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.MODE_SEPOLIA)
-    ),
+    createFeeCalculatorQuerier(CHAIN_IDs.MODE_SEPOLIA, {
+      spokePoolAddress: "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
+    }),
 };
 
 /**
@@ -1474,17 +1384,18 @@ export async function getBalancerV2TokenPrice(
 
 /**
  * Returns the EOA that will serve as the default relayer address
- * @param symbol A valid token symbol
  * @param destinationChainId The destination chain that a bridge operation will transfer to
+ * @param symbol A valid token symbol
  * @returns A valid EOA address
  */
 export function getDefaultRelayerAddress(
-  symbol: string,
-  destinationChainId: number
+  destinationChainId: number,
+  symbol?: string
 ) {
   // All symbols are uppercase in this record.
-  const overrideForToken =
-    defaultRelayerAddressOverridePerToken[symbol.toUpperCase()];
+  const overrideForToken = symbol
+    ? defaultRelayerAddressOverridePerToken[symbol.toUpperCase()]
+    : undefined;
   if (overrideForToken?.destinationChains.includes(destinationChainId)) {
     return overrideForToken.relayer;
   } else {

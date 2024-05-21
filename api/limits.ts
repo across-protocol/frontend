@@ -118,7 +118,7 @@ const handler = async (
         DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
         tokenPriceNative,
         undefined,
-        getDefaultRelayerAddress(l1Token.symbol, destinationChainId)
+        getDefaultRelayerAddress(destinationChainId, l1Token.symbol)
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
