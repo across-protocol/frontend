@@ -507,7 +507,7 @@ function createFeeCalculatorQuerier(
   }> = {}
 ) {
   return sdk.relayFeeCalculator.QueryBase__factory.create(
-    CHAIN_IDs.MAINNET,
+    chainId,
     getProvider(chainId),
     undefined,
     overrides.spokePoolAddress,
