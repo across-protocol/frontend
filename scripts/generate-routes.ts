@@ -161,6 +161,7 @@ const enabledRoutes = {
               "ETH",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "USDT",
+              "WBTC",
             ],
             swapTokens: [],
           },
@@ -316,6 +317,7 @@ const enabledRoutes = {
               "ETH",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "USDT",
+              "WBTC",
             ],
             swapTokens: [
               {
@@ -469,6 +471,7 @@ const enabledRoutes = {
               "WETH",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "USDT",
+              "WBTC",
             ],
             swapTokens: [
               {
@@ -628,6 +631,7 @@ const enabledRoutes = {
               "WETH",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "USDT",
+              "WBTC",
             ],
             swapTokens: [
               {
@@ -711,7 +715,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.MODE,
-            tokens: ["WETH", "ETH", "USDC.e", "USDT"],
+            tokens: ["WETH", "ETH", "USDC.e", "USDT", "WBTC"],
             swapTokens: [],
           },
         ],
@@ -925,7 +929,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.MODE,
-            tokens: ["WETH", "ETH", "USDC.e", "USDT"],
+            tokens: ["WETH", "ETH", "USDC.e", "USDT", "WBTC"],
             swapTokens: [],
           },
         ],
@@ -941,6 +945,7 @@ const enabledRoutes = {
               "ETH",
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDT",
+              "WBTC",
             ],
             swapTokens: [],
           },
@@ -952,6 +957,7 @@ const enabledRoutes = {
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDC.e",
               "USDT",
+              "WBTC",
             ],
             swapTokens: [],
           },
@@ -963,6 +969,7 @@ const enabledRoutes = {
               "USDC.e",
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDT",
+              "WBTC",
             ],
             swapTokens: [],
           },
@@ -974,6 +981,7 @@ const enabledRoutes = {
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDC.e",
               "USDT",
+              "WBTC",
             ],
             swapTokens: [],
           },
@@ -994,7 +1002,7 @@ const enabledRoutes = {
           },
           {
             chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC.e"],
+            tokens: ["WETH", "ETH", "USDC.e", "WBTC"],
             swapTokens: [],
           },
         ],
