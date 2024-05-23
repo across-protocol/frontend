@@ -992,6 +992,11 @@ const enabledRoutes = {
             ],
             swapTokens: [],
           },
+          {
+            chainId: CHAIN_IDs.LINEA,
+            tokens: ["WETH", "ETH", "USDC.e"],
+            swapTokens: [],
+          },
         ],
       },
     ],
