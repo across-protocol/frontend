@@ -501,137 +501,25 @@ export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
-export const queries: Record<
-  number,
-  () => sdk.relayFeeCalculator.QueryInterface
-> = {
-  [CHAIN_IDs.MAINNET]: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(
-      getProvider(CHAIN_IDs.MAINNET),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.MAINNET)
-    ),
-  [CHAIN_IDs.OPTIMISM]: () =>
-    new sdk.relayFeeCalculator.OptimismQueries(
-      getProvider(CHAIN_IDs.OPTIMISM),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.OPTIMISM)
-    ),
-  [CHAIN_IDs.POLYGON]: () =>
-    new sdk.relayFeeCalculator.PolygonQueries(
-      getProvider(CHAIN_IDs.POLYGON),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.POLYGON)
-    ),
-  [CHAIN_IDs.ARBITRUM]: () =>
-    new sdk.relayFeeCalculator.ArbitrumQueries(
-      getProvider(CHAIN_IDs.ARBITRUM),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.ARBITRUM)
-    ),
-  [CHAIN_IDs.ZK_SYNC]: () =>
-    new sdk.relayFeeCalculator.ZkSyncQueries(
-      getProvider(CHAIN_IDs.ZK_SYNC),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.ZK_SYNC)
-    ),
-  [CHAIN_IDs.BASE]: () =>
-    new sdk.relayFeeCalculator.BaseQueries(
-      getProvider(CHAIN_IDs.BASE),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.BASE)
-    ),
-  [CHAIN_IDs.LINEA]: () =>
-    new sdk.relayFeeCalculator.LineaQueries(
-      getProvider(CHAIN_IDs.LINEA),
-      undefined,
-      "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.LINEA)
-    ),
-  /* --------------------------- Testnet queries --------------------------- */
-  [CHAIN_IDs.SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.EthereumSepoliaQueries(
-      getProvider(CHAIN_IDs.SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.SEPOLIA)
-    ),
-  [CHAIN_IDs.BASE_SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.BaseSepoliaQueries(
-      getProvider(CHAIN_IDs.BASE_SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.BASE_SEPOLIA)
-    ),
-  [CHAIN_IDs.OPTIMISM_SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.OptimismSepoliaQueries(
-      getProvider(CHAIN_IDs.OPTIMISM_SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.OPTIMISM_SEPOLIA)
-    ),
-  [CHAIN_IDs.ARBITRUM_SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.ArbitrumSepoliaQueries(
-      getProvider(CHAIN_IDs.ARBITRUM_SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.ARBITRUM_SEPOLIA)
-    ),
-};
-
 /**
  * Retrieves an isntance of the Across SDK RelayFeeCalculator
  * @param destinationChainId The destination chain that a bridge operation will transfer to
  * @returns An instance of the `RelayFeeCalculator` for the specific chain specified by `destinationChainId`
  */
 export const getRelayerFeeCalculator = (destinationChainId: number) => {
-  const queryFn = queries[destinationChainId];
-  if (queryFn === undefined) {
-    throw new InputError("Invalid destination chain Id");
-  }
-
+  const queries = sdk.relayFeeCalculator.QueryBase__factory.create(
+    destinationChainId,
+    getProvider(destinationChainId),
+    undefined,
+    undefined,
+    undefined,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(destinationChainId)
+  );
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
-    queries: queryFn(),
+    queries,
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
   if (relayerFeeCalculatorConfig.feeLimitPercent < 1)
