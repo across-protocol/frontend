@@ -1,4 +1,4 @@
-import { ethers, BigNumber } from "ethers";
+import { ethers, BigNumber, providers } from "ethers";
 import { utils } from "@across-protocol/sdk-v2";
 
 import {
@@ -204,7 +204,7 @@ type NetworkMismatchHandler = (
  * @returns The transaction response obtained after sending the transaction.
  */
 export async function sendDepositTx(
-  signer: ethers.Signer,
+  signer: ethers.providers.JsonRpcSigner,
   {
     fromChain,
     tokenAddress,
@@ -253,7 +253,7 @@ export async function sendDepositTx(
 }
 
 export async function sendDepositV3Tx(
-  signer: ethers.Signer,
+  signer: ethers.providers.JsonRpcSigner,
   {
     fromChain,
     amount,
@@ -316,7 +316,7 @@ export async function sendDepositV3Tx(
 }
 
 export async function sendSwapAndBridgeTx(
-  signer: ethers.Signer,
+  signer: ethers.providers.JsonRpcSigner,
   {
     fromChain,
     toAddress: recipient,
@@ -471,7 +471,7 @@ async function _getSpokePoolAndVerifier({
 async function _tagRefAndSignTx(
   tx: ethers.PopulatedTransaction,
   referrer: string,
-  signer: ethers.Signer,
+  signer: ethers.providers.JsonRpcSigner,
   originChainId: ChainId,
   destinationChainId: ChainId,
   onNetworkMismatch?: NetworkMismatchHandler
@@ -499,5 +499,17 @@ async function _tagRefAndSignTx(
     );
   }
 
-  return signer.sendTransaction(tx);
+  // NOTE: We are manually hexlifying the transaction here and signing/sending tx directly
+  // instead of calling `signer.sendTransaction(tx)` to drop redundant RPC calls that
+  // might open a time window where a user could change their network by accident.
+  const hexTx = providers.JsonRpcProvider.hexlifyTransaction(
+    {
+      ...tx,
+      from: await signer.getAddress(),
+      chainId: originChainId,
+    },
+    { from: true }
+  );
+  const txHash = await signer.provider.send("eth_sendTransaction", [hexTx]);
+  return signer.provider.getTransaction(txHash);
 }
