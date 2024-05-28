@@ -40,6 +40,7 @@ import {
   defaultRelayerAddressOverride,
   defaultRelayerAddressOverridePerToken,
   disabledL1Tokens,
+  DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
 
@@ -518,49 +519,31 @@ function createFeeCalculatorQuerier(
   );
 }
 
-export const queries: Record<
-  number,
-  () => sdk.relayFeeCalculator.QueryInterface
-> = {
-  [CHAIN_IDs.MAINNET]: () => createFeeCalculatorQuerier(CHAIN_IDs.MAINNET),
-  [CHAIN_IDs.OPTIMISM]: () => createFeeCalculatorQuerier(CHAIN_IDs.OPTIMISM),
-  [CHAIN_IDs.POLYGON]: () => createFeeCalculatorQuerier(CHAIN_IDs.POLYGON),
-  [CHAIN_IDs.ARBITRUM]: () => createFeeCalculatorQuerier(CHAIN_IDs.ARBITRUM),
-  [CHAIN_IDs.ZK_SYNC]: () => createFeeCalculatorQuerier(CHAIN_IDs.ZK_SYNC),
-  [CHAIN_IDs.BASE]: () => createFeeCalculatorQuerier(CHAIN_IDs.BASE),
-  [CHAIN_IDs.LINEA]: () => createFeeCalculatorQuerier(CHAIN_IDs.LINEA),
-  [CHAIN_IDs.MODE]: () =>
-    createFeeCalculatorQuerier(CHAIN_IDs.MODE, {
-      spokePoolAddress: "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
-    }),
-  /* --------------------------- Testnet queries --------------------------- */
-  [CHAIN_IDs.SEPOLIA]: () => createFeeCalculatorQuerier(CHAIN_IDs.SEPOLIA),
-  [CHAIN_IDs.BASE_SEPOLIA]: () =>
-    createFeeCalculatorQuerier(CHAIN_IDs.BASE_SEPOLIA),
-  [CHAIN_IDs.OPTIMISM_SEPOLIA]: () =>
-    createFeeCalculatorQuerier(CHAIN_IDs.OPTIMISM_SEPOLIA),
-  [CHAIN_IDs.ARBITRUM_SEPOLIA]: () =>
-    createFeeCalculatorQuerier(CHAIN_IDs.ARBITRUM_SEPOLIA),
-  [CHAIN_IDs.MODE_SEPOLIA]: () =>
-    createFeeCalculatorQuerier(CHAIN_IDs.MODE_SEPOLIA, {
-      spokePoolAddress: "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
-    }),
-};
-
 /**
  * Retrieves an isntance of the Across SDK RelayFeeCalculator
  * @param destinationChainId The destination chain that a bridge operation will transfer to
  * @returns An instance of the `RelayFeeCalculator` for the specific chain specified by `destinationChainId`
  */
-export const getRelayerFeeCalculator = (destinationChainId: number) => {
-  const queryFn = queries[destinationChainId];
-  if (queryFn === undefined) {
-    throw new InputError("Invalid destination chain Id");
-  }
-
+export const getRelayerFeeCalculator = (
+  destinationChainId: number,
+  overrides: Partial<{
+    spokePoolAddress: string;
+    relayerAddress: string;
+  }> = {}
+) => {
+  const queries = sdk.relayFeeCalculator.QueryBase__factory.create(
+    destinationChainId,
+    getProvider(destinationChainId),
+    undefined,
+    overrides.spokePoolAddress,
+    overrides.relayerAddress,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(destinationChainId)
+  );
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
-    queries: queryFn(),
+    queries,
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
   if (relayerFeeCalculatorConfig.feeLimitPercent < 1)
@@ -613,7 +596,9 @@ export const getRelayerFeeDetails = async (
   message?: string,
   relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
+  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
+    relayerAddress,
+  });
   try {
     return await relayFeeCalculator.relayerFeeDetails(
       {
@@ -1459,4 +1444,29 @@ export function isSwapRouteEnabled({
     );
   });
   return !!swapRoute;
+}
+
+/**
+ * This value will be returned in the `GET /limits` response field `recommendedDepositInstant`.
+ * @param symbol The token symbol to retrieve the limit for.
+ * @param fromChainId The chain ID of the origin chain.
+ * @param toChainId The chain ID of the destination chain.
+ * @returns The recommended deposit instant limit in max. divisible units.
+ */
+export function getRecommendedDepositInstantLimit(
+  symbol: string,
+  fromChainId: number,
+  toChainId: number
+) {
+  const envVarBase = "RECOMMENDED_DEPOSIT_INSTANT_LIMIT";
+  return (
+    [
+      `${envVarBase}_${symbol}_${fromChainId}_${toChainId}`,
+      `${envVarBase}_${symbol}_${fromChainId}`,
+      `${envVarBase}_${symbol}`,
+    ]
+      .map((key) => process.env[key])
+      .find((value) => value !== undefined) ||
+    DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS[symbol]
+  );
 }

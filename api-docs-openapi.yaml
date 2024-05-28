@@ -363,6 +363,7 @@ paths:
                   "maxDeposit": "22287428516241",
                   "maxDepositInstant": "201958902363",
                   "maxDepositShortDelay": "2045367713809",
+                  "recommendedDepositInstant": "201958902363",
                 }
         "400":
           description: Invalid input
@@ -615,6 +616,15 @@ components:
             with a range between 5 and 15 minutes. Note: if the transfer size is
             greater than this, the estimate should be between 2-4 hours for a
             slow relay to be processed from the mainnet pool.
+          example: 2045367713809
+        recommendedDepositInstant:
+          type: string
+          description: >
+            The recommended deposit size that can be relayed "instantly" on the
+            destination chain. Instantly means that there is relayer capital
+            readily available and that a relayer is expected to relay within
+            seconds to 5 minutes of the deposit. Value is in the smallest unit of
+            the respective token.
           example: 2045367713809
     AvailableRoute:
       type: object
