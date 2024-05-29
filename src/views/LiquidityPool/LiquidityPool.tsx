@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { BigNumber, BigNumberish } from "ethers";
 
-import { LayoutV2, WrongNetworkHeader } from "components";
+import { LayoutV2 } from "components";
 import CardWrapper from "components/CardWrapper";
 import { Tabs, Tab } from "components/Tabs";
 import {
@@ -10,7 +10,6 @@ import {
   formatWeiPct,
   getConfig,
   max,
-  hubPoolChainId,
 } from "utils";
 import { repeatableTernaryBuilder } from "utils/ternary";
 import {
@@ -93,7 +92,6 @@ export default function LiquidityPool() {
 
   return (
     <>
-      <WrongNetworkHeader requiredChainId={hubPoolChainId} />
       <LayoutV2 maxWidth={600}>
         <Container>
           <Breadcrumb />
