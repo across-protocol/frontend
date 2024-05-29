@@ -631,7 +631,6 @@ const enabledRoutes = {
               "WETH",
               { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
               "USDT",
-              "WBTC",
             ],
             swapTokens: [
               {
@@ -981,7 +980,6 @@ const enabledRoutes = {
               { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
               "USDC.e",
               "USDT",
-              "WBTC",
             ],
             swapTokens: [],
           },
