@@ -1405,13 +1405,6 @@ export function isSwapRouteEnabled({
   acrossOutputTokenSymbol: string;
   swapTokenAddress: string;
 }) {
-  console.log({
-    originChainId,
-    destinationChainId,
-    acrossInputTokenSymbol,
-    acrossOutputTokenSymbol,
-    swapTokenAddress,
-  });
   const swapRoute = ENABLED_ROUTES.swapRoutes.find((route) => {
     return (
       route.fromChain === originChainId &&
@@ -1421,7 +1414,6 @@ export function isSwapRouteEnabled({
       route.swapTokenAddress.toLowerCase() === swapTokenAddress.toLowerCase()
     );
   });
-  console.log({ swapRoute });
   return !!swapRoute;
 }
 
