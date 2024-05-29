@@ -490,24 +490,6 @@ export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
-function createFeeCalculatorQuerier(
-  chainId: number,
-  overrides: Partial<{
-    spokePoolAddress: string;
-  }> = {}
-) {
-  return sdk.relayFeeCalculator.QueryBase__factory.create(
-    chainId,
-    getProvider(chainId),
-    undefined,
-    overrides.spokePoolAddress,
-    getDefaultRelayerAddress(chainId),
-    REACT_APP_COINGECKO_PRO_API_KEY,
-    getLogger(),
-    getGasMarkup(chainId)
-  );
-}
-
 /**
  * Retrieves an isntance of the Across SDK RelayFeeCalculator
  * @param destinationChainId The destination chain that a bridge operation will transfer to
