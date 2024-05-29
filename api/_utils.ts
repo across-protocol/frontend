@@ -308,41 +308,18 @@ export const getRouteDetails = (
     );
   }
 
-  const l1TokenAddress = isBridgedUsdc(inputToken.symbol)
-    ? TOKEN_SYMBOLS_MAP.USDC.addresses[HUB_POOL_CHAIN_ID]
-    : inputToken.addresses[HUB_POOL_CHAIN_ID];
-  const l1Token = isBridgedUsdc(inputToken.symbol)
-    ? TOKEN_SYMBOLS_MAP.USDC
-    : getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
+  const isInputNativeUsdc = inputToken.symbol === "USDC";
+  const l1TokenAddress =
+    isBridgedUsdc(inputToken.symbol) || isInputNativeUsdc
+      ? TOKEN_SYMBOLS_MAP.USDC.addresses[HUB_POOL_CHAIN_ID]
+      : inputToken.addresses[HUB_POOL_CHAIN_ID];
+  const l1Token =
+    isBridgedUsdc(inputToken.symbol) || isInputNativeUsdc
+      ? TOKEN_SYMBOLS_MAP.USDC
+      : getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
 
   if (!l1Token) {
     throw new InputError("No L1 token found for given input token address");
-  }
-
-  // NOTE: This ensures backwards compatibility for the `token` query param before we switch to CCTP.
-  // I.e. pre-CCTP, we support:
-  // - native USDC -> USDC.e (L1 -> L2)
-  // - USDC.e -> native USDC (L2 -> L1)
-  // - USDC.e -> USD.e (L2 -> L2)
-  // If integrators now only use the `token` query param, we need to infer above
-  // destination tokens correctly. Post-CCTP, this will behave differently. Therefore,
-  // this needs to be removed once we switch to CCTP.
-  if (
-    !outputTokenAddress &&
-    (inputToken.symbol === "USDC" || isBridgedUsdc(inputToken.symbol))
-  ) {
-    const direction = isBridgedUsdc(inputToken.symbol)
-      ? destinationChainId === HUB_POOL_CHAIN_ID
-        ? "l2ToL1"
-        : "l2ToL2"
-      : "l1ToL2";
-    if (direction === "l1ToL2" || direction === "l2ToL2") {
-      outputTokenAddress =
-        TOKEN_SYMBOLS_MAP.USDbC.addresses[destinationChainId] ||
-        TOKEN_SYMBOLS_MAP["USDC.e"].addresses[destinationChainId];
-    } else {
-      outputTokenAddress = TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId];
-    }
   }
 
   outputTokenAddress ??= inputToken.addresses[destinationChainId];
@@ -397,15 +374,27 @@ export const getRouteDetails = (
 };
 
 export const getTokenByAddress = (tokenAddress: string, chainId?: number) => {
-  const [, token] =
-    Object.entries(TOKEN_SYMBOLS_MAP).find(([_symbol, { addresses }]) =>
+  const matches =
+    Object.entries(TOKEN_SYMBOLS_MAP).filter(([_symbol, { addresses }]) =>
       chainId
         ? addresses[chainId]?.toLowerCase() === tokenAddress.toLowerCase()
         : Object.values(addresses).some(
             (address) => address.toLowerCase() === tokenAddress.toLowerCase()
           )
     ) || [];
-  return token;
+
+  if (matches.length === 0) {
+    return undefined;
+  }
+
+  if (matches.length > 1) {
+    const nativeUsdc = matches.find(([symbol]) => symbol === "USDC");
+    if (chainId === HUB_POOL_CHAIN_ID && nativeUsdc) {
+      return nativeUsdc[1];
+    }
+  }
+
+  return matches[0][1];
 };
 
 const _getChainIdsOfToken = (
@@ -1434,6 +1423,13 @@ export function isSwapRouteEnabled({
   acrossOutputTokenSymbol: string;
   swapTokenAddress: string;
 }) {
+  console.log({
+    originChainId,
+    destinationChainId,
+    acrossInputTokenSymbol,
+    acrossOutputTokenSymbol,
+    swapTokenAddress,
+  });
   const swapRoute = ENABLED_ROUTES.swapRoutes.find((route) => {
     return (
       route.fromChain === originChainId &&
@@ -1443,6 +1439,7 @@ export function isSwapRouteEnabled({
       route.swapTokenAddress.toLowerCase() === swapTokenAddress.toLowerCase()
     );
   });
+  console.log({ swapRoute });
   return !!swapRoute;
 }
 
