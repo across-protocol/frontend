@@ -39,6 +39,7 @@ paths:
             _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
         - name: inputToken
           in: query
+          example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           schema:
             type: string
           description: >
@@ -55,13 +56,11 @@ paths:
             parameter `token` above. For now, you need to either specify `token`
             OR `inputToken` +`outputToken` with the parameter `token` having a
             higher precedence.**
-
-
-            _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
         - name: outputToken
           in: query
           schema:
             type: string
+          example: "0x4200000000000000000000000000000000000006"
           description: >
             Address of token to bridge on the _destination_ chain. Must be used
             together with parameter `inputToken`. For ETH, use the wrapped
@@ -76,9 +75,6 @@ paths:
             parameter `token` above. For now, you need to either specify `token`
             OR `inputToken` +`outputToken` with the parameter `token` having a
             higher precedence.**
-
-
-            _Example:_ 0x4200000000000000000000000000000000000006
         - name: originChainId
           in: query
           required: true
@@ -100,6 +96,7 @@ paths:
                 11155420,
                 11155111,
               ]
+          example: 1
         - name: destinationChainId
           in: query
           required: true
@@ -121,6 +118,7 @@ paths:
                 11155420,
                 11155111,
               ]
+          example: 10
         - name: amount
           in: query
           required: true
@@ -132,12 +130,10 @@ paths:
             for WETH, this would be the amount of human-readable WETH multiplied
             by 1e18. For USDC, you would multiply the number of human-readable
             USDC by 1e6.
-
-
-            _Example:_ 100000000000
           schema:
             type: integer
             minimum: 1
+          example: "1000000000000000000"
         - name: recipient
           in: query
           required: false
@@ -257,6 +253,7 @@ paths:
           in: query
           schema:
             type: string
+          example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           description: >
             Address of token to bridge on the _origin_ chain. Must be used
             together with parameter `outputToken`. For ETH, use the wrapped
@@ -271,13 +268,11 @@ paths:
             parameter `token` above. For now, you need to either specify `token`
             OR `inputToken` +`outputToken` with the parameter `token` having a
             higher precedence.**
-
-
-            _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
         - name: outputToken
           in: query
           schema:
             type: string
+          example: "0x4200000000000000000000000000000000000006"
           description: >
             Address of token to bridge on the _destination_ chain. Must be used
             together with parameter `inputToken`. For ETH, use the wrapped
@@ -292,9 +287,6 @@ paths:
             parameter `token` above. For now, you need to either specify `token`
             OR `inputToken` +`outputToken` with the parameter `token` having a
             higher precedence.**
-
-
-            _Example:_ 0x4200000000000000000000000000000000000006
         - name: originChainId
           in: query
           required: true
@@ -316,6 +308,7 @@ paths:
                 11155420,
                 11155111,
               ]
+            example: 1
         - name: destinationChainId
           in: query
           required: true
@@ -337,6 +330,7 @@ paths:
                 11155420,
                 11155111,
               ]
+          example: 10
       responses:
         "200":
           description: Transfer limits
