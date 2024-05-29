@@ -18,7 +18,8 @@ import polygonLogo from "assets/polygon-logo.svg";
 import zkSyncLogo from "assets/zksync-logo.svg";
 import baseLogo from "assets/base-logo.svg";
 import lineaLogo from "assets/linea-logo.svg";
-import usdcLogo from "assets/usdc-logo.png";
+import modeLogo from "assets/mode-logo.svg";
+import usdcLogo from "assets/usdc.svg";
 import daiLogo from "assets/dai.svg";
 import wbtcLogo from "assets/wbtc.svg";
 import umaLogo from "assets/uma.svg";
@@ -44,12 +45,14 @@ export enum ChainId {
   ZK_SYNC = CHAIN_IDs.ZK_SYNC,
   BASE = CHAIN_IDs.BASE,
   LINEA = CHAIN_IDs.LINEA,
+  MODE = CHAIN_IDs.MODE,
   // testnets
   MUMBAI = CHAIN_IDs.MUMBAI,
   SEPOLIA = CHAIN_IDs.SEPOLIA,
   BASE_SEPOLIA = CHAIN_IDs.BASE_SEPOLIA,
   OPTIMISM_SEPOLIA = CHAIN_IDs.OPTIMISM_SEPOLIA,
   ARBITRUM_SEPOLIA = CHAIN_IDs.ARBITRUM_SEPOLIA,
+  MODE_SEPOLIA = CHAIN_IDs.MODE_SEPOLIA,
 }
 
 // NOTE: As a temporary workaround for backwards-compatibility, we have `USDC` and `_USDC`/`USDC.e`
@@ -61,21 +64,6 @@ export const TOKEN_SYMBOLS_MAP = {
   ...tokenSymbols,
   USDC: {
     ..._USDC,
-  },
-  "USDC.e": {
-    ...tokenSymbols["USDC.e"],
-    addresses: {
-      ...tokenSymbols["USDC.e"].addresses,
-      [CHAIN_IDs.OPTIMISM_SEPOLIA]:
-        "0x9552a0a6624A23B848060AE5901659CDDa1f83f8",
-    },
-  },
-  USDbC: {
-    ...tokenSymbols["USDbC"],
-    addresses: {
-      ...tokenSymbols["USDbC"].addresses,
-      [CHAIN_IDs.BASE_SEPOLIA]: "0xE634Ec56B73779eCFfa78109a653FA0aE33D243f",
-    },
   },
 } as const;
 
@@ -218,6 +206,18 @@ export const chainInfoList: ChainInfoList = [
     pollingInterval: 10_000,
     customRpcUrl: process.env.REACT_APP_CHAIN_59144_PROVIDER_URL,
   },
+  {
+    name: "Mode",
+    fullName: "Mode",
+    chainId: ChainId.MODE,
+    logoURI: modeLogo,
+    rpcUrl: "https://mainnet.mode.network",
+    explorerUrl: "https://modescan.io",
+    constructExplorerLink: defaultConstructExplorerLink("https://modescan.ui"),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: 10_000,
+    customRpcUrl: process.env.REACT_APP_CHAIN_34443_PROVIDER_URL,
+  },
   // testnets
   {
     name: "Mumbai",
@@ -288,6 +288,20 @@ export const chainInfoList: ChainInfoList = [
     pollingInterval: defaultBlockPollingInterval,
     customRpcUrl: process.env.REACT_APP_CHAIN_11155420_PROVIDER_URL,
   },
+  {
+    name: "Mode Sepolia",
+    fullName: "Mode Testnet Sepolia",
+    chainId: ChainId.MODE_SEPOLIA,
+    logoURI: modeLogo,
+    rpcUrl: "https://sepolia.mode.network",
+    explorerUrl: "https://testnet.modescan.io",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://testnet.modescan.io"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: 10_000,
+    customRpcUrl: process.env.REACT_APP_CHAIN_919_PROVIDER_URL,
+  },
 ];
 
 export const chainInfoTable: ChainInfoTable = Object.fromEntries(
@@ -343,7 +357,6 @@ export const bridgedUSDCSymbolsMap = {
   [ChainId.ARBITRUM]: "USDC.e",
   [ChainId.OPTIMISM]: "USDC.e",
   [ChainId.POLYGON]: "USDC.e",
-  [ChainId.LINEA]: "USDC.e",
   [ChainId.ZK_SYNC]: "USDC.e",
   [ChainId.BASE]: "USDbC",
 };

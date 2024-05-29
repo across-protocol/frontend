@@ -308,41 +308,18 @@ export const getRouteDetails = (
     );
   }
 
-  const l1TokenAddress = isBridgedUsdc(inputToken.symbol)
-    ? TOKEN_SYMBOLS_MAP.USDC.addresses[HUB_POOL_CHAIN_ID]
-    : inputToken.addresses[HUB_POOL_CHAIN_ID];
-  const l1Token = isBridgedUsdc(inputToken.symbol)
-    ? TOKEN_SYMBOLS_MAP.USDC
-    : getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
+  const isInputNativeUsdc = inputToken.symbol === "USDC";
+  const l1TokenAddress =
+    isBridgedUsdc(inputToken.symbol) || isInputNativeUsdc
+      ? TOKEN_SYMBOLS_MAP.USDC.addresses[HUB_POOL_CHAIN_ID]
+      : inputToken.addresses[HUB_POOL_CHAIN_ID];
+  const l1Token =
+    isBridgedUsdc(inputToken.symbol) || isInputNativeUsdc
+      ? TOKEN_SYMBOLS_MAP.USDC
+      : getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
 
   if (!l1Token) {
     throw new InputError("No L1 token found for given input token address");
-  }
-
-  // NOTE: This ensures backwards compatibility for the `token` query param before we switch to CCTP.
-  // I.e. pre-CCTP, we support:
-  // - native USDC -> USDC.e (L1 -> L2)
-  // - USDC.e -> native USDC (L2 -> L1)
-  // - USDC.e -> USD.e (L2 -> L2)
-  // If integrators now only use the `token` query param, we need to infer above
-  // destination tokens correctly. Post-CCTP, this will behave differently. Therefore,
-  // this needs to be removed once we switch to CCTP.
-  if (
-    !outputTokenAddress &&
-    (inputToken.symbol === "USDC" || isBridgedUsdc(inputToken.symbol))
-  ) {
-    const direction = isBridgedUsdc(inputToken.symbol)
-      ? destinationChainId === HUB_POOL_CHAIN_ID
-        ? "l2ToL1"
-        : "l2ToL2"
-      : "l1ToL2";
-    if (direction === "l1ToL2" || direction === "l2ToL2") {
-      outputTokenAddress =
-        TOKEN_SYMBOLS_MAP.USDbC.addresses[destinationChainId] ||
-        TOKEN_SYMBOLS_MAP["USDC.e"].addresses[destinationChainId];
-    } else {
-      outputTokenAddress = TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId];
-    }
   }
 
   outputTokenAddress ??= inputToken.addresses[destinationChainId];
@@ -397,15 +374,27 @@ export const getRouteDetails = (
 };
 
 export const getTokenByAddress = (tokenAddress: string, chainId?: number) => {
-  const [, token] =
-    Object.entries(TOKEN_SYMBOLS_MAP).find(([_symbol, { addresses }]) =>
+  const matches =
+    Object.entries(TOKEN_SYMBOLS_MAP).filter(([_symbol, { addresses }]) =>
       chainId
         ? addresses[chainId]?.toLowerCase() === tokenAddress.toLowerCase()
         : Object.values(addresses).some(
             (address) => address.toLowerCase() === tokenAddress.toLowerCase()
           )
     ) || [];
-  return token;
+
+  if (matches.length === 0) {
+    return undefined;
+  }
+
+  if (matches.length > 1) {
+    const nativeUsdc = matches.find(([symbol]) => symbol === "USDC");
+    if (chainId === HUB_POOL_CHAIN_ID && nativeUsdc) {
+      return nativeUsdc[1];
+    }
+  }
+
+  return matches[0][1];
 };
 
 const _getChainIdsOfToken = (
@@ -506,13 +495,19 @@ export const getGasMarkup = (chainId: string | number) => {
  * @param destinationChainId The destination chain that a bridge operation will transfer to
  * @returns An instance of the `RelayFeeCalculator` for the specific chain specified by `destinationChainId`
  */
-export const getRelayerFeeCalculator = (destinationChainId: number) => {
+export const getRelayerFeeCalculator = (
+  destinationChainId: number,
+  overrides: Partial<{
+    spokePoolAddress: string;
+    relayerAddress: string;
+  }> = {}
+) => {
   const queries = sdk.relayFeeCalculator.QueryBase__factory.create(
     destinationChainId,
     getProvider(destinationChainId),
     undefined,
-    undefined,
-    undefined,
+    overrides.spokePoolAddress,
+    overrides.relayerAddress,
     REACT_APP_COINGECKO_PRO_API_KEY,
     getLogger(),
     getGasMarkup(destinationChainId)
@@ -572,7 +567,9 @@ export const getRelayerFeeDetails = async (
   message?: string,
   relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
+  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
+    relayerAddress,
+  });
   try {
     return await relayFeeCalculator.relayerFeeDetails(
       {
@@ -654,6 +651,10 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
+    case CHAIN_IDs.MODE_SEPOLIA:
+      return "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b";
+    case CHAIN_IDs.MODE:
+      return "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96s";
     default:
       return sdk.utils.getDeployedAddress("SpokePool", chainId);
   }
@@ -1341,17 +1342,18 @@ export async function getBalancerV2TokenPrice(
 
 /**
  * Returns the EOA that will serve as the default relayer address
- * @param symbol A valid token symbol
  * @param destinationChainId The destination chain that a bridge operation will transfer to
+ * @param symbol A valid token symbol
  * @returns A valid EOA address
  */
 export function getDefaultRelayerAddress(
-  symbol: string,
-  destinationChainId: number
+  destinationChainId: number,
+  symbol?: string
 ) {
   // All symbols are uppercase in this record.
-  const overrideForToken =
-    defaultRelayerAddressOverridePerToken[symbol.toUpperCase()];
+  const overrideForToken = symbol
+    ? defaultRelayerAddressOverridePerToken[symbol.toUpperCase()]
+    : undefined;
   if (overrideForToken?.destinationChains.includes(destinationChainId)) {
     return overrideForToken.relayer;
   } else {

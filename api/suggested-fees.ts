@@ -79,7 +79,7 @@ const handler = async (
       resolvedOriginChainId: computedOriginChainId,
     } = validateChainAndTokenParams(query);
 
-    relayer ??= getDefaultRelayerAddress(inputToken.symbol, destinationChainId);
+    relayer ??= getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
     recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
 
     if (sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message)) {

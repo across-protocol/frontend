@@ -15,6 +15,7 @@ import { ReactComponent as OptimismGrayscaleLogo } from "assets/grayscale-logos/
 import { ReactComponent as ZkSyncGrayscaleLogo } from "assets/grayscale-logos/zksync.svg";
 import { ReactComponent as BaseGrayscaleLogo } from "assets/grayscale-logos/base.svg";
 import { ReactComponent as LineaGrayscaleLogo } from "assets/grayscale-logos/linea.svg";
+import { ReactComponent as ModeGrayscaleLogo } from "assets/grayscale-logos/mode.svg";
 import { Text, Badge } from "components";
 
 import {
@@ -41,12 +42,14 @@ const grayscaleLogos: Record<number, React.ReactNode> = {
   [ChainId.ZK_SYNC]: <ZkSyncGrayscaleLogo />,
   [ChainId.BASE]: <BaseGrayscaleLogo />,
   [ChainId.LINEA]: <LineaGrayscaleLogo />,
+  [ChainId.MODE]: <ModeGrayscaleLogo />,
   // testnets
   [ChainId.SEPOLIA]: <EthereumGrayscaleLogo />,
   [ChainId.MUMBAI]: <EthereumGrayscaleLogo />,
   [ChainId.BASE_SEPOLIA]: <BaseGrayscaleLogo />,
   [ChainId.ARBITRUM_SEPOLIA]: <ArbitrumGrayscaleLogo />,
   [ChainId.OPTIMISM_SEPOLIA]: <OptimismGrayscaleLogo />,
+  [ChainId.MODE_SEPOLIA]: <ModeGrayscaleLogo />,
 };
 
 type Props = {
