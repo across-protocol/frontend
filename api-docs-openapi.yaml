@@ -209,26 +209,13 @@ paths:
                 $ref: "#/components/schemas/SuggestedFees"
               example:
                 {
-                  "fees":
-                    {
-                      "totalRelayFee":
-                        {
-                          "pct": "376607094864283",
-                          "total": "376607094864283",
-                        },
-                      "relayerCapitalFee":
-                        {
-                          "pct": "100200000000000",
-                          "total": "100200000000000",
-                        },
-                      "relayerGasFee":
-                        {
-                          "pct": "276407094864283",
-                          "total": "276407094864283",
-                        },
-                      "lpFee":
-                        { "pct": "4552495218411721", "total": "1708047000" },
-                    },
+                  "totalRelayFee":
+                    { "pct": "376607094864283", "total": "376607094864283" },
+                  "relayerCapitalFee":
+                    { "pct": "100200000000000", "total": "100200000000000" },
+                  "relayerGasFee":
+                    { "pct": "276407094864283", "total": "276407094864283" },
+                  "lpFee": { "pct": "4552495218411721", "total": "1708047000" },
                   "timestamp": "1708047000",
                   "isAmountTooLow": false,
                   "quoteBlock": "19237525",
