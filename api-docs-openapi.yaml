@@ -39,6 +39,7 @@ paths:
             _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
         - name: inputToken
           in: query
+          required: true
           schema:
             type: string
             example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
@@ -58,6 +59,7 @@ paths:
             higher precedence.**
         - name: outputToken
           in: query
+          required: true
           schema:
             type: string
             example: "0x4200000000000000000000000000000000000006"
@@ -223,6 +225,12 @@ paths:
           description: Unexpected error within the API
   /limits:
     get:
+      x-codeSamples:
+        - lang: bash
+          label: Curl
+          source: >
+            curl -L \
+              'https://app.across.to/api/suggested-fees?inputToken=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&outputToken=0x4200000000000000000000000000000000000006&originChainId=1&destinationChainId=10&amount=1000000000000000000'
       summary: Retrieve current transfer limits of the system
       description: Returns transfer limits for specified `token` OR
         `inputToken`+`outputToken`, `originChainId`, and `destinationChainId`.
@@ -251,6 +259,7 @@ paths:
             _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
         - name: inputToken
           in: query
+          required: true
           schema:
             type: string
             example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
@@ -270,6 +279,7 @@ paths:
             higher precedence.**
         - name: outputToken
           in: query
+          required: true
           schema:
             type: string
             example: "0x4200000000000000000000000000000000000006"
