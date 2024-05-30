@@ -213,7 +213,7 @@ export const chainInfoList: ChainInfoList = [
     logoURI: modeLogo,
     rpcUrl: "https://mainnet.mode.network",
     explorerUrl: "https://modescan.io",
-    constructExplorerLink: defaultConstructExplorerLink("https://modescan.ui"),
+    constructExplorerLink: defaultConstructExplorerLink("https://modescan.io"),
     nativeCurrencySymbol: "ETH",
     pollingInterval: 10_000,
     customRpcUrl: process.env.REACT_APP_CHAIN_34443_PROVIDER_URL,
