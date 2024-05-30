@@ -1,5 +1,5 @@
 import { ethers, BigNumber } from "ethers";
-import { utils } from "@across-protocol/sdk-v2";
+import { utils } from "@across-protocol/sdk";
 
 import {
   ChainId,

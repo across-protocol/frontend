@@ -1,10 +1,10 @@
 import assert from "assert";
 import { BigNumber, ethers, providers } from "ethers";
-import { utils } from "@across-protocol/sdk-v2";
+import { utils } from "@across-protocol/sdk";
 import {
   CHAIN_IDs,
   TOKEN_SYMBOLS_MAP as _TOKEN_SYMBOLS_MAP,
-} from "@across-protocol/constants-v2";
+} from "@across-protocol/constants";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";

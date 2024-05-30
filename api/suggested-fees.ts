@@ -1,4 +1,4 @@
-import * as sdk from "@across-protocol/sdk-v2";
+import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";

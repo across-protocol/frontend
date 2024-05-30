@@ -1,4 +1,4 @@
-import { utils } from "@across-protocol/sdk-v2";
+import { utils } from "@across-protocol/sdk";
 
 /**
  * Create a function that takes a number of seconds and returns a string in the format of "XXh XXm XXs"

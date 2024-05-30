@@ -1,5 +1,5 @@
 import { ethers, Signer, BigNumberish, BigNumber } from "ethers";
-import { pool } from "@across-protocol/sdk-v2";
+import { pool } from "@across-protocol/sdk";
 
 import {
   getConfigStoreAddress,

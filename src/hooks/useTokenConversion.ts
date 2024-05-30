@@ -1,4 +1,4 @@
-import { utils } from "@across-protocol/sdk-v2";
+import { utils } from "@across-protocol/sdk";
 import { useCoingeckoPrice } from "./useCoingeckoPrice";
 import { BigNumber } from "ethers";
 import { useCallback } from "react";

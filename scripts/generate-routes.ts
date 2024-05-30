@@ -1,5 +1,5 @@
-import { CHAIN_IDs } from "@across-protocol/constants-v2";
-import { utils as sdkUtils } from "@across-protocol/sdk-v2";
+import { CHAIN_IDs } from "@across-protocol/constants";
+import { utils as sdkUtils } from "@across-protocol/sdk";
 import { utils } from "ethers";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";

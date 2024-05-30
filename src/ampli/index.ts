@@ -10,7 +10,7 @@
  * Required dependencies: @amplitude/analytics-browser@^1.3.0
  * Tracking Plan Version: 50
  * Build: 1.0.0
- * Runtime: browser:typescript-ampli-v2
+ * Runtime: browser:typescript-ampli
  *
  * [View Tracking Plan](https://data.amplitude.com/risklabs/Risk%20Labs/events/main/latest)
  *

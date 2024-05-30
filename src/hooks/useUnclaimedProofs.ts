@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 import { BigNumber } from "ethers";
-import { utils } from "@across-protocol/sdk-v2";
+import { utils } from "@across-protocol/sdk";
 
 import { useConnection } from "hooks";
 import { fetchIsClaimed, fetchAirdropProofs } from "utils/merkle-distributor";

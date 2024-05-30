@@ -1,4 +1,4 @@
-import { utils } from "@across-protocol/sdk-v2";
+import { utils } from "@across-protocol/sdk";
 import { BigNumber, utils as ethersUtils } from "ethers";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { useMemo } from "react";

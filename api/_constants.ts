@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
-import { relayFeeCalculator, utils } from "@across-protocol/sdk-v2";
-import * as constants from "@across-protocol/constants-v2";
+import { relayFeeCalculator, utils } from "@across-protocol/sdk";
+import * as constants from "@across-protocol/constants";
 
 export const CHAIN_IDs = constants.CHAIN_IDs;
 
