@@ -1,10 +1,7 @@
 import assert from "assert";
 import { BigNumber, ethers, providers } from "ethers";
 import { utils } from "@across-protocol/sdk";
-import {
-  CHAIN_IDs,
-  TOKEN_SYMBOLS_MAP as _TOKEN_SYMBOLS_MAP,
-} from "@across-protocol/constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
@@ -54,18 +51,6 @@ export enum ChainId {
   ARBITRUM_SEPOLIA = CHAIN_IDs.ARBITRUM_SEPOLIA,
   MODE_SEPOLIA = CHAIN_IDs.MODE_SEPOLIA,
 }
-
-// NOTE: As a temporary workaround for backwards-compatibility, we have `USDC` and `_USDC`/`USDC.e`
-// entries in our constants package. See https://github.com/across-protocol/constants-v3/pull/28
-// for more details. Until the entry `USDC` is updated with the values of `_USDC`, we override the
-// entry locally.
-const { USDC, _USDC, ...tokenSymbols } = _TOKEN_SYMBOLS_MAP;
-export const TOKEN_SYMBOLS_MAP = {
-  ...tokenSymbols,
-  USDC: {
-    ..._USDC,
-  },
-} as const;
 
 // Maps `ChainId` to an object and inverts the Key/Value
 // pair. Ex) { "mainnet": 1 }
