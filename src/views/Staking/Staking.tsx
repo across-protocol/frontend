@@ -1,8 +1,7 @@
 import { Wrapper } from "./Staking.styles";
 import { StakingReward, StakingForm, StakingExitAction } from "./components";
 import { useStakingView } from "./hooks/useStakingView";
-import { LayoutV2, WrongNetworkHeader } from "components";
-import { hubPoolChainId } from "utils";
+import { LayoutV2 } from "components";
 
 const Staking = () => {
   const {
@@ -21,7 +20,6 @@ const Staking = () => {
 
   return (
     <>
-      <WrongNetworkHeader requiredChainId={hubPoolChainId} />
       <LayoutV2 maxWidth={600}>
         <Wrapper>
           <StakingExitAction

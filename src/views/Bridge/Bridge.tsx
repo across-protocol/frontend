@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { LayoutV2, WrongNetworkHeader } from "components";
+import { LayoutV2 } from "components";
 import { Wrapper } from "./Bridge.styles";
 import Breadcrumb from "./components/Breadcrumb";
 import BridgeForm from "./components/BridgeForm";
@@ -41,7 +41,6 @@ const Bridge = () => {
 
   return (
     <>
-      <WrongNetworkHeader requiredChainId={selectedRoute.fromChain} />
       {toAccount && (
         <ChangeAccountModal
           displayModal={displayChangeAccount}

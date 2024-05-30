@@ -8,7 +8,6 @@ export { default as Modal } from "./Modal";
 export { default as Alert } from "./Alert";
 export { default as Selector } from "./Selector";
 export { Text } from "./Text";
-export { WrongNetworkHeader } from "./WrongNetworkHeader";
 export { default as CardWrapper } from "./CardWrapper";
 export { LoadingSkeleton } from "./LoadingSkeleton";
 
