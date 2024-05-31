@@ -61,7 +61,7 @@ jobs:
           HARDHAT_INFURA_ID: ${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
         run: yarn hardhat:node &
       - name: Cypress run Chrome
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v6
         with:
           install: false
           browser: chrome
