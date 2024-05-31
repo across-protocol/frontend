@@ -4,7 +4,7 @@
 <a href="https://forum.across.to/" target="_blank" rel="noreferrer">![](https://img.shields.io/discourse/status?server=https%3A%2F%2Fforum.across.to%2F)</a>
 <a href="https://twitter.com/AcrossProtocol/" target="_blank" rel="noreferrer">![](https://img.shields.io/twitter/follow/AcrossProtocol?style=social)</a>
 
-Web UI for Across"
+Web UI for Across.
 
 - App: https://app.across.to
 - Docs: https://docs.across.to
