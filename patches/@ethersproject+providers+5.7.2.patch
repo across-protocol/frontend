@@ -1,0 +1,98 @@
+diff --git a/node_modules/@ethersproject/providers/lib.esm/index.js b/node_modules/@ethersproject/providers/lib.esm/index.js
+index 189a475..4ed0efb 100644
+--- a/node_modules/@ethersproject/providers/lib.esm/index.js
++++ b/node_modules/@ethersproject/providers/lib.esm/index.js
+@@ -20,6 +20,7 @@ import { Formatter, isCommunityResourcable, isCommunityResource, showThrottleMes
+ import { Logger } from "@ethersproject/logger";
+ import { version } from "./_version";
+ const logger = new Logger(version);
++console.log("@ethersproject/providers - lib-esm/index");
+ ////////////////////////
+ // Helper Functions
+ function getDefaultProvider(network, options) {
+diff --git a/node_modules/@ethersproject/providers/lib.esm/json-rpc-provider.js b/node_modules/@ethersproject/providers/lib.esm/json-rpc-provider.js
+index 02f6b39..3b1681a 100644
+--- a/node_modules/@ethersproject/providers/lib.esm/json-rpc-provider.js
++++ b/node_modules/@ethersproject/providers/lib.esm/json-rpc-provider.js
+@@ -187,7 +187,9 @@ export class JsonRpcSigner extends Signer {
+         });
+     }
+     sendUncheckedTransaction(transaction) {
++        const SLOWDOWN = 30_000;
+         transaction = shallowCopy(transaction);
++        console.log("##### CALLING artifically slowed-down sendUncheckedTransaction #####", transaction)
+         const fromAddress = this.getAddress().then((address) => {
+             if (address) {
+                 address = address.toLowerCase();
+@@ -200,7 +202,10 @@ export class JsonRpcSigner extends Signer {
+         if (transaction.gasLimit == null) {
+             const estimate = shallowCopy(transaction);
+             estimate.from = fromAddress;
+-            transaction.gasLimit = this.provider.estimateGas(estimate);
++
++            transaction.gasLimit = new Promise(resolve => setTimeout(resolve, SLOWDOWN)).then(() => __awaiter(this, void 0, void 0, function* () {
++                this.provider.estimateGas(estimate);
++            }));
+         }
+         if (transaction.to != null) {
+             transaction.to = Promise.resolve(transaction.to).then((to) => __awaiter(this, void 0, void 0, function* () {
+@@ -214,10 +219,12 @@ export class JsonRpcSigner extends Signer {
+                 return address;
+             }));
+         }
++        console.log("CHANGE YOUR WALLET NETWORK NOW")
+         return resolveProperties({
+             tx: resolveProperties(transaction),
+             sender: fromAddress
+         }).then(({ tx, sender }) => {
++            console.log("RPC CALLS RESOLVED NOW", tx)
+             if (tx.from != null) {
+                 if (tx.from.toLowerCase() !== sender) {
+                     logger.throwArgumentError("from address mismatch", "transaction", transaction);
+@@ -227,6 +234,9 @@ export class JsonRpcSigner extends Signer {
+                 tx.from = sender;
+             }
+             const hexTx = this.provider.constructor.hexlifyTransaction(tx, { from: true });
++            console.log("CALLING eth_sendTransaction", {
++                network: this.provider.network,
++            })
+             return this.provider.send("eth_sendTransaction", [hexTx]).then((hash) => {
+                 return hash;
+             }, (error) => {
+diff --git a/node_modules/@ethersproject/providers/lib/index.js b/node_modules/@ethersproject/providers/lib/index.js
+index ccad1d6..eb70b9e 100644
+--- a/node_modules/@ethersproject/providers/lib/index.js
++++ b/node_modules/@ethersproject/providers/lib/index.js
+@@ -1,4 +1,6 @@
+ "use strict";
++console.log("@ethersproject/providers - lin/index");
++
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.Formatter = exports.showThrottleMessage = exports.isCommunityResourcable = exports.isCommunityResource = exports.getNetwork = exports.getDefaultProvider = exports.JsonRpcSigner = exports.IpcProvider = exports.WebSocketProvider = exports.Web3Provider = exports.StaticJsonRpcProvider = exports.PocketProvider = exports.NodesmithProvider = exports.JsonRpcBatchProvider = exports.JsonRpcProvider = exports.InfuraWebSocketProvider = exports.InfuraProvider = exports.EtherscanProvider = exports.CloudflareProvider = exports.AnkrProvider = exports.AlchemyWebSocketProvider = exports.AlchemyProvider = exports.FallbackProvider = exports.UrlJsonRpcProvider = exports.Resolver = exports.BaseProvider = exports.Provider = void 0;
+ var abstract_provider_1 = require("@ethersproject/abstract-provider");
+diff --git a/node_modules/@ethersproject/providers/src.ts/index.ts b/node_modules/@ethersproject/providers/src.ts/index.ts
+index 0b7d4db..e0b3f8f 100644
+--- a/node_modules/@ethersproject/providers/src.ts/index.ts
++++ b/node_modules/@ethersproject/providers/src.ts/index.ts
+@@ -41,6 +41,8 @@ import { Logger } from "@ethersproject/logger";
+ import { version } from "./_version";
+ const logger = new Logger(version);
+ 
++console.log("@ethersproject/providers - src/index");
++
+ ////////////////////////
+ // Helper Functions
+ 
+diff --git a/node_modules/@ethersproject/providers/src.ts/json-rpc-provider.ts b/node_modules/@ethersproject/providers/src.ts/json-rpc-provider.ts
+index de4957f..0cf1492 100644
+--- a/node_modules/@ethersproject/providers/src.ts/json-rpc-provider.ts
++++ b/node_modules/@ethersproject/providers/src.ts/json-rpc-provider.ts
+@@ -161,6 +161,8 @@ export class JsonRpcSigner extends Signer implements TypedDataSigner {
+     _address: string;
+ 
+     constructor(constructorGuard: any, provider: JsonRpcProvider, addressOrIndex?: string | number) {
++        console.log("@ethers/providers - lib.esm ");
++
+         super();
+ 
+         if (constructorGuard !== _constructorGuard) {
