@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { utils } from "@across-protocol/sdk-v2";
+import { utils } from "@across-protocol/sdk";
 import { BigNumber } from "ethers";
 
 import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";

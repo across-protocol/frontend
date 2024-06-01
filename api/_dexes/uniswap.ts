@@ -18,8 +18,8 @@ import {
 } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 import IUniswapV3PoolABI from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
-import { CHAIN_IDs } from "@across-protocol/constants-v2";
-import { utils } from "@across-protocol/sdk-v2";
+import { CHAIN_IDs } from "@across-protocol/constants";
+import { utils } from "@across-protocol/sdk";
 
 import { callViaMulticall3, getProvider } from "../_utils";
 import { TOKEN_SYMBOLS_MAP } from "../_constants";

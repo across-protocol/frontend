@@ -1,18 +1,9 @@
 import { ethers } from "ethers";
-import { relayFeeCalculator, utils } from "@across-protocol/sdk-v2";
-import * as constants from "@across-protocol/constants-v2";
+import { relayFeeCalculator, utils } from "@across-protocol/sdk";
+import * as constants from "@across-protocol/constants";
 
 export const CHAIN_IDs = constants.CHAIN_IDs;
-
-// NOTE: As a temporary workaround for backwards-compatibility, we have `USDC` and `_USDC`/`USDC.e`
-// entries in our constants package. See https://github.com/across-protocol/constants-v3/pull/28
-// for more details. Until the entry `USDC` is updated with the values of `_USDC`, we override the
-// entry locally.
-let { USDC, _USDC, ...tokenSymbols } = constants.TOKEN_SYMBOLS_MAP;
-export const TOKEN_SYMBOLS_MAP = {
-  ...tokenSymbols,
-  USDC: _USDC,
-} as const;
+export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
 
 export const maxRelayFeePct = 0.25;
 

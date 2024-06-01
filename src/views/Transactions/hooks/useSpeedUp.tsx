@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
-import { utils as sdkUtils } from "@across-protocol/sdk-v2";
+import { utils as sdkUtils } from "@across-protocol/sdk";
 import { useMutation } from "react-query";
 
 import { useConnection, useBridgeFees, useIsWrongNetwork } from "hooks";

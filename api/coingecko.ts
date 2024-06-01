@@ -16,7 +16,7 @@ import {
   coinGeckoAssetPlatformLookup,
 } from "./_constants";
 
-import { coingecko } from "@across-protocol/sdk-v2";
+import { coingecko } from "@across-protocol/sdk";
 
 const { Coingecko } = coingecko;
 const {

@@ -4,8 +4,8 @@ import {
   HubPool__factory,
   SpokePool,
   SpokePool__factory,
-} from "@across-protocol/contracts-v2/dist/typechain";
-import * as sdk from "@across-protocol/sdk-v2";
+} from "@across-protocol/contracts/dist/typechain";
+import * as sdk from "@across-protocol/sdk";
 import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
