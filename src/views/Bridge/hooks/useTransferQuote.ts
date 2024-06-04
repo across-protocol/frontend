@@ -70,6 +70,7 @@ export function useTransferQuote(
       selectedRoute.toTokenSymbol,
       amount.toString(),
       swapSlippage,
+      toAddress,
     ],
     enabled: Boolean(
       feesQuery.fees &&
