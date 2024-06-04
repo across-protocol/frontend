@@ -53,9 +53,7 @@ export function useBridgeAction(
   const history = useHistory();
   const { referrer } = useReferrer();
 
-  const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork(
-    selectedRoute.fromChain
-  );
+  const { isWrongNetworkHandler } = useIsWrongNetwork(selectedRoute.fromChain);
   const approveHandler = useApprove(selectedRoute.fromChain);
   const { addToAmpliQueue } = useAmplitude();
 
