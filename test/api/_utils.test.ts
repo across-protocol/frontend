@@ -1,4 +1,4 @@
-import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
+import { TOKEN_SYMBOLS_MAP } from "../../api/_constants";
 import {
   getRouteDetails,
   validateChainAndTokenParams,
