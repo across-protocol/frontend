@@ -88,9 +88,7 @@ export function useBridgeAction(
       throw new Error("Missing required data for bridge action");
     }
 
-    if (isWrongNetwork) {
-      await isWrongNetworkHandler();
-    }
+    await isWrongNetworkHandler();
 
     // If swap route then we need to approve the swap token for the `SwapAndBridge`
     // contract instead of the `SpokePool` contract.
