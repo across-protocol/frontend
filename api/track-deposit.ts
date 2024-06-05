@@ -45,13 +45,9 @@ const handler = async (
     // Retrieve deposit status
     const fills = await resolveFillStatusOfDeposits(depositLogs);
 
-    const responseJson = {
-      hello: fills,
-    };
-
     // Respond with a 200 status code and 4 minutes of cache cache with
     // a minute of stale-while-revalidate.
-    sendResponse(response, responseJson, 200, 240, 60);
+    sendResponse(response, { fills }, 200, 240, 60);
   } catch (error: unknown) {
     return handleErrorCondition("track-deposit", response, logger, error);
   }
