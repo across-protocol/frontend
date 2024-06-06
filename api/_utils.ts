@@ -42,7 +42,7 @@ import {
   disabledL1Tokens,
   DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS,
 } from "./_constants";
-import { DepositLog, PoolStateResult } from "./_types";
+import { PoolStateResult } from "./_types";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -1445,103 +1445,5 @@ export function getRecommendedDepositInstantLimit(
       .map((key) => process.env[key])
       .find((value) => value !== undefined) ||
     DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS[symbol]
-  );
-}
-
-export async function extractDepositLogs(
-  originChainId: number,
-  depositHash: string
-): Promise<DepositLog[]> {
-  const originSpoke = getSpokePool(originChainId);
-  const receipt = await originSpoke.provider.getTransactionReceipt(depositHash);
-  if (!receipt) {
-    throw new Error("Transaction receipt not found for given details.");
-  }
-  // We need this because we need to specify the lookback filter when querying the logs
-  // for fills. If we're too far in the future we won't be able to find the fill logs.
-  const block = await originSpoke.provider.getBlock(receipt.blockNumber);
-  return (
-    receipt?.logs
-      .map((log) => {
-        try {
-          const { name, args } = originSpoke.interface.parseLog(log);
-          if (
-            name !== "V3FundsDeposited" ||
-            log.address !== originSpoke.address
-          ) {
-            return undefined;
-          }
-          return {
-            hash: depositHash,
-            depositId: Number(args.depositId),
-            depositor: String(args.depositor),
-            recipient: String(args.recipient),
-            originChainId,
-            destinationChainId: Number(args.destinationChainId),
-            blockTimestamp: block.timestamp,
-            fillDeadline: Number(args.fillDeadline),
-            l1Token: getTokenByAddress(args.inputToken, originChainId)!
-              .addresses[HUB_POOL_CHAIN_ID],
-          };
-        } catch {
-          return undefined;
-        }
-      })
-      .filter(sdk.utils.isDefined) ?? []
-  );
-}
-
-export async function resolveFillStatusOfDeposits(deposits: DepositLog[]) {
-  return sdk.utils.mapAsync(
-    deposits,
-    async ({
-      originChainId,
-      destinationChainId,
-      depositId,
-      blockTimestamp: originBlockTimestamp,
-      fillDeadline,
-      hash,
-      depositor,
-      recipient,
-    }) => {
-      const spokePool = getSpokePool(destinationChainId);
-      const blockFinder = new sdk.utils.BlockFinder(spokePool.provider);
-      const { number: destinationBlockNumber } =
-        await blockFinder.getBlockForTimestamp(originBlockTimestamp);
-
-      const v3FilledRelayEvents = await sdk.utils.paginatedEventQuery(
-        spokePool,
-        spokePool.filters.FilledV3Relay(
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          originChainId,
-          depositId
-        ),
-        {
-          fromBlock: destinationBlockNumber,
-          toBlock: destinationBlockNumber + 5000,
-        }
-      );
-      const filledEvent = v3FilledRelayEvents[0];
-      const status = filledEvent
-        ? "filled"
-        : sdk.utils.getCurrentTime() > fillDeadline
-        ? "expired"
-        : "pending";
-
-      return {
-        depositId,
-        depositTxHash: hash,
-        originChainId,
-        fillTxHash: filledEvent?.transactionHash,
-        destinationChainId,
-        status,
-        depositor,
-        recipient,
-      };
-    }
   );
 }
