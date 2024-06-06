@@ -891,12 +891,6 @@ export function positiveIntStr() {
   });
 }
 
-export function validTxnHash() {
-  return define<string>("validTxnHash", (value) => {
-    return utils.isHexString(value as string, 32);
-  });
-}
-
 export function positiveFloatStr(maxValue?: number) {
   return define<string>("positiveFloatStr", (value) => {
     return Number(value) >= 0 && (maxValue ? Number(value) <= maxValue : true);
