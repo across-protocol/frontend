@@ -50,9 +50,14 @@ const handler = async (
     ) {
       fillStatus = "expired";
     }
-    // Respond with a 200 status code and 4 minutes of cache cache with
-    // a minute of stale-while-revalidate.
-    sendResponse(response, { fillStatus }, 200, 240, 60);
+    // Respond with a 200 status code. The cache time is 5 seconds
+    // if the fill status is pending or slow-fill-requested, otherwise 240 seconds.
+    const cacheTime =
+      fillStatus === "pending" || fillStatus === "slow-fill-requested"
+        ? 5
+        : 240;
+
+    sendResponse(response, { fillStatus }, 200, cacheTime, 5);
   } catch (error: unknown) {
     return handleErrorCondition("track-deposit", response, logger, error);
   }
