@@ -81,21 +81,7 @@ paths:
           description: >
             Chain ID where the specified `token` or `inputToken` exists.
           schema:
-            type: integer
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
+            $ref: '#/components/schemas/ChainId'
           example: 1
         - name: destinationChainId
           in: query
@@ -103,21 +89,7 @@ paths:
           description: >
             The desired destination chain ID of the bridge transfer.
           schema:
-            type: integer
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
+            $ref: '#/components/schemas/ChainId'
           example: 10
         - name: amount
           in: query
@@ -293,43 +265,14 @@ paths:
           description: >
             Chain ID where the specified `token` or `inputToken` exists.
           schema:
-            type: integer
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
-            example: 1
+            $ref: '#/components/schemas/ChainId'
         - name: destinationChainId
           in: query
           required: true
           description: >
             The intended destination chain ID of the bridge transfer.
           schema:
-            type: integer
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
+            $ref: '#/components/schemas/ChainId'
           example: 10
       responses:
         "200":
@@ -350,6 +293,87 @@ paths:
           description: Invalid input
         "500":
           description: Unexpected error within the API
+  /deposit-status:
+    get:
+      summary: Retrieves current status about the fill status of a deposit
+      description: Returns fill status of a deposit given the specified parameters
+      parameters:
+        - name: destinationChainId
+          in: query
+          description: > 
+            A supported chain Id where the relevant Across Deposit is destined.
+          schema:
+            $ref: '#/components/schemas/ChainId'
+          required: true
+        - name: fillDeadline
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          example: 1
+          description: >
+            A timestamp (in seconds) provided to the DepositV3 function call in the origin spoke pool
+            to specify how long a deposit is valid for. A Deposit is marked to be 
+            refunded after this deadline is passed. \
+            
+            For more information you can [review the official documentation.](https://docs.across.to/reference/tracking-events#expired-deposits)
+          required: true
+        - name: relayHash
+          in: query
+          schema:
+            type: string
+          example: "0x13600b294191fc92924bb3ce4b969c1e7e2bab8f4c93c3fc6d0a51733df3c060"
+          required: true
+          description: >
+            The keccak-256 hash of the ABI-encoding of the [Relay Data Hash](https://github.com/across-protocol/contracts/blob/666bccb8cf839f2d82af2ecbb54c87c5b506d542/contracts/interfaces/V3SpokePoolInterface.sol#L34-L63) and the Destination ChainId as specified
+            in [SpokePool.sol](https://github.com/across-protocol/contracts/blob/e1a41ae4e613df258b39131cc6967e463e4154ae/contracts/SpokePool.sol#L1218-L1220) \
+            
+            __Example Usage__ 
+            
+            ```TypeScript
+              const v3RelayData = {
+                depositor: depositQuery[0].args.depositor,
+                recipient: depositQuery[0].args.recipient,
+                exclusiveRelayer: depositQuery[0].args.exclusiveRelayer,
+                inputToken: depositQuery[0].args.inputToken,
+                outputToken: depositQuery[0].args.outputToken,
+                inputAmount: depositQuery[0].args.inputAmount,
+                outputAmount: depositQuery[0].args.outputAmount,
+                originChainId: originChainId,
+                depositId: depositQuery[0].args.depositId,
+                fillDeadline: depositQuery[0].args.fillDeadline,
+                exclusivityDeadline: depositQuery[0].args.exclusivityDeadline,
+                message: depositQuery[0].args.message,
+              };
+          
+              // ABI Encode the V3RelayData struct and the destination chain ID and
+              // take the keccak256 hash of the result using ethers
+              const v3RelayDataHash = keccak256(
+                defaultAbiCoder.encode(
+                  [
+                    "tuple(address depositor, address recipient, address exclusiveRelayer, address inputToken, address outputToken, uint256 inputAmount, uint256 outputAmount, uint256 originChainId, uint256 depositId, uint256 fillDeadline, uint256 exclusivityDeadline, bytes message)",
+                    "uint256",
+                  ],
+                  [v3RelayData, destinationChainId]
+                )
+              );
+
+            ```
+      responses:
+        "200":
+          description: List of available routes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fillStatus:
+                    type: string
+                    enum: ["pending", "slow-fill-requested", "filled", "expired"]
+              example:
+                {
+                  fillStatus: "pending"
+                }
   /available-routes:
     get:
       summary: Retrieve available routes for transfers
@@ -361,43 +385,14 @@ paths:
           description: >
             Chain ID of the originating chain.
           schema:
-            type: integer
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
+            $ref: '#/components/schemas/ChainId'
         - name: destinationChainId
           in: query
           required: false
           description: >
             Chain ID of the destination chain.
           schema:
-            type: integer
-            minimum: 1
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
+            $ref: '#/components/schemas/ChainId'
         - name: originToken
           in: query
           required: false
@@ -626,3 +621,20 @@ components:
           type: string
           description: Destination chain ddress of token contract to receive.
           example: "0x4200000000000000000000000000000000000006"
+    ChainId:
+      type: integer
+      minimum: 1
+      enum: [
+        1,
+        10,
+        137,
+        324,
+        8453,
+        42161,
+        59144,
+        # testnets
+        84532,
+        421614,
+        11155420,
+        11155111,
+      ]
