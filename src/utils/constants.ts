@@ -28,6 +28,7 @@ import pooltogetherLogo from "assets/pooltogether-logo.svg";
 import unknownLogo from "assets/icons/question-24.svg";
 import ACXCloudBackground from "assets/bg-banners/cloud-staking.svg";
 import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
+import ARBCloudBackground from "assets/bg-banners/arb-cloud-rebate.svg";
 
 // all routes should be pre imported to be able to switch based on chain id
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -441,7 +442,7 @@ export const rewardPrograms: Record<
     primaryColor: "arb-blue",
     url: "/rewards/arbitrum-grant-program",
     rewardTokenSymbol: "ARB",
-    backgroundUrl: OPCloudBackground,
+    backgroundUrl: ARBCloudBackground,
     highestPct: 0.95,
     ctaBody: "Bridge to Arbitrum and earn on every transaction.",
     claimableTooltipBody:
