@@ -181,7 +181,7 @@ const handler = async (
     const maxDepositInstant = minBN(
       maxBN(...fullRelayerBalances, ...transferRestrictedBalances),
       liquidReserves
-    ).toString();
+    );
     const recommendedDepositInstant = getRecommendedDepositInstantLimit(
       l1Token.symbol,
       computedOriginChainId,
@@ -192,16 +192,20 @@ const handler = async (
       minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
       maxDeposit: liquidReserves.toString(),
       // Note: max is used here rather than sum because relayers currently do not partial fill.
-      maxDepositInstant,
+      maxDepositInstant: maxDepositInstant.toString(),
       // Same as above.
       maxDepositShortDelay: minBN(
         maxBN(...transferBalances, ...transferRestrictedBalances),
         liquidReserves
       ).toString(),
       recommendedDepositInstant: recommendedDepositInstant
-        ? ethers.utils
-            .parseUnits(recommendedDepositInstant, l1Token.decimals)
-            .toString()
+        ? minBN(
+            ethers.utils.parseUnits(
+              recommendedDepositInstant,
+              l1Token.decimals
+            ),
+            maxDepositInstant
+          ).toString()
         : maxDepositInstant,
     };
     logger.debug({
