@@ -9,6 +9,12 @@ servers:
 paths:
   /suggested-fees:
     get:
+      x-codeSamples:
+        - lang: bash
+          label: Curl
+          source: >
+            curl -L \
+              'https://app.across.to/api/suggested-fees?inputToken=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&outputToken=0x4200000000000000000000000000000000000006&originChainId=1&destinationChainId=10&amount=1000000000000000000'
       summary: Retrieve suggested fee quote for a deposit.
       description: >
         Returns suggested fees based on the `token` OR
@@ -39,9 +45,10 @@ paths:
             _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
         - name: inputToken
           in: query
-          example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+          required: true
           schema:
             type: string
+            example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           description: >
             Address of token to bridge on the _origin_ chain. Must be used
             together with parameter `outputToken`. For ETH, use the wrapped
@@ -58,9 +65,10 @@ paths:
             higher precedence.**
         - name: outputToken
           in: query
+          required: true
           schema:
             type: string
-          example: "0x4200000000000000000000000000000000000006"
+            example: "0x4200000000000000000000000000000000000006"
           description: >
             Address of token to bridge on the _destination_ chain. Must be used
             together with parameter `inputToken`. For ETH, use the wrapped
@@ -96,7 +104,7 @@ paths:
                 11155420,
                 11155111,
               ]
-          example: 1
+            example: 1
         - name: destinationChainId
           in: query
           required: true
@@ -118,7 +126,7 @@ paths:
                 11155420,
                 11155111,
               ]
-          example: 10
+            example: 10
         - name: amount
           in: query
           required: true
@@ -133,7 +141,7 @@ paths:
           schema:
             type: integer
             minimum: 1
-          example: "1000000000000000000"
+            example: "1000000000000000000"
         - name: recipient
           in: query
           required: false
@@ -223,6 +231,12 @@ paths:
           description: Unexpected error within the API
   /limits:
     get:
+      x-codeSamples:
+        - lang: bash
+          label: Curl
+          source: >
+            curl -L \
+              'https://app.across.to/api/limits?inputToken=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&outputToken=0x4200000000000000000000000000000000000006&originChainId=1&destinationChainId=10'
       summary: Retrieve current transfer limits of the system
       description: Returns transfer limits for specified `token` OR
         `inputToken`+`outputToken`, `originChainId`, and `destinationChainId`.
@@ -251,9 +265,10 @@ paths:
             _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
         - name: inputToken
           in: query
+          required: true
           schema:
             type: string
-          example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+            example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           description: >
             Address of token to bridge on the _origin_ chain. Must be used
             together with parameter `outputToken`. For ETH, use the wrapped
@@ -270,9 +285,10 @@ paths:
             higher precedence.**
         - name: outputToken
           in: query
+          required: true
           schema:
             type: string
-          example: "0x4200000000000000000000000000000000000006"
+            example: "0x4200000000000000000000000000000000000006"
           description: >
             Address of token to bridge on the _destination_ chain. Must be used
             together with parameter `inputToken`. For ETH, use the wrapped
@@ -330,7 +346,7 @@ paths:
                 11155420,
                 11155111,
               ]
-          example: 10
+            example: 10
       responses:
         "200":
           description: Transfer limits
@@ -445,99 +461,94 @@ components:
     SuggestedFees:
       type: object
       properties:
-        fees:
+        totalRelayFee:
           type: object
-          description: >
-            Fee object for Across v3.
           properties:
-            totalRelayFee:
-              type: object
-              properties:
-                pct:
-                  type: string
-                  description: >
-                    The percentage of the transfer amount that should go to the
-                    relayer as a fee in total. The value is inclusive of
-                    `lpFee.pct`. 
+            pct:
+              type: string
+              description: >
+                The percentage of the transfer amount that should go to the
+                relayer as a fee in total. The value is inclusive of
+                `lpFee.pct`. 
 
 
-                    This is the strongly recommended minimum value to ensure a
-                    relayer will perform the transfer under the current network
-                    conditions. The value returned in this field is guaranteed
-                    to be at least 0.03% in order to meet minimum relayer fee
-                    requirements.
+                This is the strongly recommended minimum value to ensure a
+                relayer will perform the transfer under the current network
+                conditions. The value returned in this field is guaranteed
+                to be at least 0.03% in order to meet minimum relayer fee
+                requirements.
 
 
-                    Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
-                    etc. These values are in the same format that the contract
-                    understands.
-                  example: "376607094864283"
-                total:
-                  type: string
-                  description: >
-                    The amount of the transfer that should go to the relayer a
-                    fee in total. This value is inclusive of `lpFee.total`.
-                  example: "376607094864283"
-            relayerCapitalFee:
-              type: object
-              properties:
-                pct:
-                  type: string
-                  example: "100200000000000"
-                  description: >
-                    The percentage of the transfer amount that should go the
-                    relayer as a fee to cover relayer capital costs.
+                Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
+                etc. These values are in the same format that the contract
+                understands.
+              example: "376607094864283"
+            total:
+              type: string
+              description: >
+                The amount of the transfer that should go to the relayer a
+                fee in total. This value is inclusive of `lpFee.total`.
+              example: "376607094864283"
+        relayerCapitalFee:
+          type: object
+          properties:
+            pct:
+              type: string
+              example: "100200000000000"
+              description: >
+                The percentage of the transfer amount that should go the
+                relayer as a fee to cover relayer capital costs.
 
 
-                    Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
-                    etc. These values are in the same format that the contract
-                    understands.
-                total:
-                  type: string
-                  description: >
-                    The amount that should go to the relayer as a fee to cover
-                    relayer capital costs.
-                  example: "100200000000000"
-            relayerGasFee:
-              type: object
-              properties:
-                pct:
-                  type: string
-                  description: >
-                    The percentage of the transfer amount that should go the
-                    relayer as a fee to cover relayer gas costs.
+                Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
+                etc. These values are in the same format that the contract
+                understands.
+            total:
+              type: string
+              description: >
+                The amount that should go to the relayer as a fee to cover
+                relayer capital costs.
+              example: "100200000000000"
+        relayerGasFee:
+          type: object
+          properties:
+            pct:
+              type: string
+              description: >
+                The percentage of the transfer amount that should go the
+                relayer as a fee to cover relayer gas costs.
 
 
-                    Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
-                    etc. These values are in the same format that the contract
-                    understands.
-                  example: "276407094864283"
-                total:
-                  type: string
-                  description: >
-                    The amount that should go to the relayer as a fee to cover
-                    relayer gas costs.
-                  example: "276407094864283"
-            lpFee:
-              type: object
-              properties:
-                pct:
-                  type: string
-                  description: >
-                    The percent of the amount that will go to the LPs as a fee
-                    for borrowing their funds.
+                Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
+                etc. These values are in the same format that the contract
+                understands.
+              example: "276407094864283"
+            total:
+              type: string
+              description: >
+                The amount that should go to the relayer as a fee to cover
+                relayer gas costs.
+              example: "276407094864283"
+        lpFee:
+          type: object
+          properties:
+            pct:
+              type: string
+              description: >
+                The percent of the amount that will go to the LPs as a fee
+                for borrowing their funds.
 
 
-                    Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
-                    etc. These values are in the same format that the contract
-                    understands.
-                  example: "4552495218411721"
-                total:
-                  type: string
-                  description: >
-                    The amount that will go to the LPs as a fee for borrowing
-                    their funds.
-                  example: "4552495218411721"
+                Note: 1% is represented as 1e16, 100% is 1e18, 50% is 5e17,
+                etc. These values are in the same format that the contract
+                understands.
+              example: "4552495218411721"
+            total:
+              type: string
+              description: >
+                The amount that will go to the LPs as a fee for borrowing
+                their funds.
+              example: "4552495218411721"
         timestamp:
           type: string
           description: >
