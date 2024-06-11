@@ -23,9 +23,9 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
   };
   const { summary } = useRewardSummary(program, account);
   const rewardsAmount =
-    summary.program === "op-rebates"
-      ? summary.unclaimedRewards
-      : summary.rewardsAmount;
+    summary.program === "referrals"
+      ? summary.rewardsAmount
+      : summary.unclaimedRewards;
   const unclaimedAmount = unclaimedReferralData?.claimableAmount;
 
   const formatUnitsWithMaxFractions = formatUnitsWithMaxFractionsFnBuilder(

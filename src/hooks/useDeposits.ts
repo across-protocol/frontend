@@ -41,7 +41,7 @@ export type Deposit = {
   fillDeadline?: string;
   rewards?:
     | {
-        type: "op-rebates";
+        type: "op-rebates" | "arb-rebates";
         rate: number;
         amount: string;
         usd: string;

@@ -42,6 +42,18 @@ export function useUnclaimedOpRewardsProofs() {
   );
 }
 
+export function useUnclaimedArbRewardsProofs() {
+  const { isConnected, account } = useConnection();
+
+  return useQuery(
+    getUnclaimedProofsQueryKey("arb-rebates", account),
+    () => fetchUnclaimedProofs("arb-rebates", account),
+    {
+      enabled: isConnected && !!account,
+    }
+  );
+}
+
 async function fetchUnclaimedProofs(
   rewardsType: rewardProgramTypes,
   account?: string

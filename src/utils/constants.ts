@@ -32,6 +32,7 @@ import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 // all routes should be pre imported to be able to switch based on chain id
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import SepoliaRoutes from "data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
+import { Deposit } from "hooks/useDeposits";
 
 export { TOKEN_SYMBOLS_MAP };
 
@@ -376,6 +377,7 @@ export const orderedTokenSymbolLogoMap = {
   POOL: pooltogetherLogo,
   BOBA: bobaLogo,
   OP: optimismLogo,
+  ARB: arbitrumLogo,
 };
 
 export const tokenList = [
@@ -399,7 +401,7 @@ export const tokenList = [
   ...externalLPsForStaking[hubPoolChainId],
 ];
 
-export type rewardProgramTypes = "referrals" | "op-rebates";
+export type rewardProgramTypes = "referrals" | "op-rebates" | "arb-rebates";
 export const rewardPrograms: Record<
   rewardProgramTypes,
   {
@@ -434,11 +436,22 @@ export const rewardPrograms: Record<
     claimableTooltipBody:
       "OP rewards earned during the month are made claimable after the ~15th of the following month",
   },
+  "arb-rebates": {
+    programName: "Arbitrum Rewards Program",
+    primaryColor: "arb-blue",
+    url: "/rewards/arbitrum-grant-program",
+    rewardTokenSymbol: "ARB",
+    backgroundUrl: OPCloudBackground,
+    highestPct: 0.95,
+    ctaBody: "Bridge to Arbitrum and earn on every transaction.",
+    claimableTooltipBody:
+      "Arbitrum rewards earned during the month are made claimable after the ~15th of the following month",
+  },
 };
 
 export const chainIdToRewardsProgramName = {
-  [ChainId.OPTIMISM]: "op-rebates",
-  [ChainId.OPTIMISM_SEPOLIA]: "op-rebates",
+  [ChainId.ARBITRUM]: "arb-rebates",
+  [ChainId.ARBITRUM_SEPOLIA]: "arb-rebates",
 } as const;
 
 // process.env variables
@@ -541,6 +554,20 @@ export const getToken = (symbol: string): TokenInfo => {
   const token = tokenTable[symbol.toUpperCase()];
   assert(token, "No token found for symbol: " + symbol);
   return token;
+};
+
+export const getRewardToken = (deposit: Deposit): TokenInfo | undefined => {
+  if (!deposit.rewards) {
+    return undefined;
+  }
+  const rewardType = deposit.rewards.type;
+  const symbol =
+    rewardType === "op-rebates"
+      ? "OP"
+      : rewardType === "arb-rebates"
+      ? "ARB"
+      : "ACX";
+  return getToken(symbol);
 };
 
 /**
@@ -702,6 +729,9 @@ export const COLORS = {
   "op-red": "var(--color-interface-op-red)",
   "op-red-5": "var(--color-interface-op-red-5)",
   "op-red-15": "var(--color-interface-op-red-15)",
+  "arb-blue": "var(--color-interface-arb-blue)",
+  "arb-blue-5": "var(--color-interface-arb-blue-5)",
+  "arb-blue-15": "var(--color-interface-arb-blue-15)",
   yellow: "var(--color-interface-yellow)",
   aqua: "var(--color-interface-aqua)",
   "aqua-0": "var(--color-interface-aqua-0)",

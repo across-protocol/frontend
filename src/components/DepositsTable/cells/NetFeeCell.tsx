@@ -14,9 +14,9 @@ import {
   formatUnitsWithMaxFractions,
   formatWeiPct,
   getConfig,
-  getToken,
   isBigNumberish,
   formatMaxFracDigits,
+  getRewardToken,
 } from "utils";
 
 type Props = {
@@ -69,10 +69,7 @@ function FeeWithBreakdown({ deposit }: { deposit: Deposit }) {
     deposit.sourceChainId,
     deposit.swapToken?.address || deposit.token?.address || deposit.assetAddr
   );
-  const rewardToken = deposit.rewards
-    ? getToken(deposit.rewards.type === "op-rebates" ? "OP" : "ACX")
-    : undefined;
-
+  const rewardToken = getRewardToken(deposit);
   const capitalAndLpFeeUsd =
     Number(deposit.feeBreakdown?.totalBridgeFeeUsd || 0) -
     Number(deposit.feeBreakdown?.relayGasFeeUsd || 0);

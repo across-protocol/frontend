@@ -44,6 +44,10 @@ const variables = css`
     --color-interface-op-red-5: #f96c6c0d;
     --color-interface-op-red-15: #f96c6c26;
 
+    --color-interface-arb-blue: #24abf4;
+    --color-interface-arb-blue-5: #24abf40d;
+    --color-interface-arb-blue-15: #24abf426;
+
     --color-brand-aqua: #6cf9d8;
     --color-interface-aqua: #6cf9d8;
     --color-interface-aqua-0: #6cf9d800;

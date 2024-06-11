@@ -138,7 +138,7 @@ const EstimatedTable = ({
             {`${rewardDisplaySymbol} Rewards`}
           </Text>
           <ReferralRewardWrapper
-            isACX={false}
+            rewardTokenSymbol={rewardToken.symbol}
             isTransparent={!hasDepositReward}
           >
             <PriceFee
@@ -495,7 +495,7 @@ const InfoIconWrapper = styled.div`
 `;
 
 const ReferralRewardWrapper = styled.div<{
-  isACX: boolean;
+  rewardTokenSymbol: string;
   isTransparent?: boolean;
 }>`
   //Layout
@@ -506,8 +506,23 @@ const ReferralRewardWrapper = styled.div<{
 
   // Style
   border-radius: 22px;
-  border: 1px solid ${({ isACX }) => COLORS[isACX ? "aqua-15" : "op-red-15"]};
-  background: ${({ isACX }) => COLORS[isACX ? "aqua-5" : "op-red-5"]};
+  border: 1px solid
+    ${({ rewardTokenSymbol }) =>
+      COLORS[
+        rewardTokenSymbol === "ACX"
+          ? "aqua-15"
+          : rewardTokenSymbol === "ARB"
+          ? "arb-blue-15"
+          : "op-red-15"
+      ]};
+  background: ${({ rewardTokenSymbol }) =>
+    COLORS[
+      rewardTokenSymbol === "ACX"
+        ? "aqua-5"
+        : rewardTokenSymbol === "ARB"
+        ? "arb-blue-5"
+        : "op-red-5"
+    ]};
 
   // Opacity
   opacity: ${({ isTransparent = false }) => (isTransparent ? 0.5 : 1)};
