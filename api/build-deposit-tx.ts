@@ -13,6 +13,7 @@ import {
   getSpokePool,
   tagReferrer,
   validAddressOrENS,
+  tagDomain,
 } from "./_utils";
 
 const BuildDepositTxQueryParamsSchema = type({
@@ -94,9 +95,10 @@ const handler = async (
     // do not tag a referrer if data is not provided as a hex string.
     tx.data = referrer ? await tagReferrer(tx.data!, referrer) : tx.data;
 
-    if (tx.data && domainIdentifier) {
-      tx.data = ethers.utils.hexConcat([tx.data, "0x1DC0de", domainIdentifier]);
-    }
+    // Tag the domain identifier to the data field of the transaction.
+    tx.data = domainIdentifier
+      ? tagDomain(tx.data!, domainIdentifier)
+      : tx.data;
 
     const responseJson = {
       data: tx.data,

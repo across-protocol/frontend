@@ -954,6 +954,16 @@ export async function tagReferrer(
   ]);
 }
 
+export function tagDomain(dataHex: string, domainIdentifier: string): string {
+  if (!ethers.utils.isHexString(dataHex)) {
+    throw new Error("Data must be a valid hex string");
+  }
+  if (!ethers.utils.isHexString(domainIdentifier)) {
+    throw new Error("Domain identifier must be a valid hex string");
+  }
+  return ethers.utils.hexConcat([dataHex, "0x1DC0de", domainIdentifier]);
+}
+
 export function getFallbackTokenLogoURI(l1TokenAddress: string) {
   const isACX = TOKEN_SYMBOLS_MAP.ACX.addresses[1] === l1TokenAddress;
 
