@@ -14,6 +14,7 @@ import {
   tagReferrer,
   validAddressOrENS,
 } from "./_utils";
+import { EXTERNAL_DOMAIN_TO_BYTE_MAP } from "./_constants";
 
 const BuildDepositTxQueryParamsSchema = type({
   amount: parsableBigNumberString(),
@@ -27,6 +28,9 @@ const BuildDepositTxQueryParamsSchema = type({
   maxCount: optional(boolStr()),
   referrer: optional(validAddressOrENS()),
   isNative: optional(boolStr()),
+  // Calling domain that issued the request. This will be
+  // used to tag the transaction with the domain's identifier.
+  domain: optional(string()),
 });
 
 type BuildDepositTxQueryParams = Infer<typeof BuildDepositTxQueryParamsSchema>;
@@ -58,6 +62,7 @@ const handler = async (
       maxCount = ethers.constants.MaxUint256.toString(),
       referrer,
       isNative: isNativeBoolStr,
+      domain,
     } = query;
 
     recipient = ethers.utils.getAddress(recipient);
@@ -89,6 +94,14 @@ const handler = async (
 
     // do not tag a referrer if data is not provided as a hex string.
     tx.data = referrer ? await tagReferrer(tx.data!, referrer) : tx.data;
+
+    // Append the domain identifier to the data field of the transaction.
+    const domainByteCode = domain
+      ? EXTERNAL_DOMAIN_TO_BYTE_MAP[domain]
+      : undefined;
+    if (tx.data && domainByteCode) {
+      tx.data = ethers.utils.hexConcat([tx.data, "0x1DC0de", domainByteCode]);
+    }
 
     const responseJson = {
       data: tx.data,
