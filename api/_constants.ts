@@ -179,6 +179,6 @@ export const DEFAULT_SIMULATED_RECIPIENT_ADDRESS =
 
 export const DEFAULT_LIMITS_BUFFER_MULTIPLIERS = {
   recommendedDepositInstant: "0.1",
-  depositInstant: "0.8",
-  depositShortDelay: "0.8",
+  depositInstant: "0.2",
+  depositShortDelay: "0.2",
 };
