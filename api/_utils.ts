@@ -617,6 +617,37 @@ export const getCachedTokenPrice = async (
   );
 };
 
+/**
+ * Creates an HTTP call to the `/api/limits` endpoint to resolve limits for a given token/route.
+ * @param inputToken The input token address
+ * @param outputToken The output token address
+ * @param originChainId The origin chain id
+ * @param destinationChainId The destination chain id
+ */
+export const getCachedLimits = async (
+  inputToken: string,
+  outputToken: string,
+  originChainId: number,
+  destinationChainId: number
+): Promise<{
+  minDeposit: string;
+  maxDeposit: string;
+  maxDepositInstant: string;
+  maxDepositShortDelay: string;
+  recommendedDepositInstant: string;
+}> => {
+  return (
+    await axios(`${resolveVercelEndpoint()}/api/limits`, {
+      params: {
+        inputToken,
+        outputToken,
+        originChainId,
+        destinationChainId,
+      },
+    })
+  ).data;
+};
+
 export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 
 /**

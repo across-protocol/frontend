@@ -26,6 +26,7 @@ import {
   getHubPool,
   callViaMulticall3,
   validateChainAndTokenParams,
+  getCachedLimits,
 } from "./_utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -196,11 +197,26 @@ const handler = async (
       },
     ];
 
-    const [[currentUt, nextUt, quoteTimestamp, rawL1TokenConfig], tokenPrice] =
-      await Promise.all([
-        callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
-        getCachedTokenPrice(l1Token.address, baseCurrency),
-      ]);
+    const [
+      [currentUt, nextUt, quoteTimestamp, rawL1TokenConfig],
+      tokenPrice,
+      limits,
+    ] = await Promise.all([
+      callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
+      getCachedTokenPrice(l1Token.address, baseCurrency),
+      getCachedLimits(
+        inputToken.address,
+        outputToken.address,
+        computedOriginChainId,
+        destinationChainId
+      ),
+    ]);
+
+    // Prevent quotes for slow-fills
+    if (amount.gt(limits.maxDepositShortDelay)) {
+      throw new InputError("Amount exceeds max deposit limit for short delay");
+    }
+
     const parsedL1TokenConfig =
       sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
         String(rawL1TokenConfig)
