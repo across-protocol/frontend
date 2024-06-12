@@ -182,7 +182,3 @@ export const DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS = {
   [TOKEN_SYMBOLS_MAP.WETH.symbol]: "2",
   [TOKEN_SYMBOLS_MAP.USDC.symbol]: "5000",
 };
-
-export const EXTERNAL_DOMAIN_TO_BYTE_MAP: Record<string, string> = {
-  across: "0x0000",
-};
