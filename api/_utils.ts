@@ -40,7 +40,7 @@ import {
   defaultRelayerAddressOverride,
   defaultRelayerAddressOverridePerToken,
   disabledL1Tokens,
-  DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS,
+  DEFAULT_LIMITS_BUFFER_MULTIPLIERS,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
 
@@ -1417,27 +1417,76 @@ export function isSwapRouteEnabled({
   return !!swapRoute;
 }
 
-/**
- * This value will be returned in the `GET /limits` response field `recommendedDepositInstant`.
- * @param symbol The token symbol to retrieve the limit for.
- * @param fromChainId The chain ID of the origin chain.
- * @param toChainId The chain ID of the destination chain.
- * @returns The recommended deposit instant limit in max. divisible units.
- */
-export function getRecommendedDepositInstantLimit(
+export function getLimitsBufferMultipliers(
   symbol: string,
   fromChainId: number,
   toChainId: number
 ) {
-  const envVarBase = "RECOMMENDED_DEPOSIT_INSTANT_LIMIT";
-  return (
-    [
-      `${envVarBase}_${symbol}_${fromChainId}_${toChainId}`,
-      `${envVarBase}_${symbol}_${fromChainId}`,
-      `${envVarBase}_${symbol}`,
-    ]
-      .map((key) => process.env[key])
-      .find((value) => value !== undefined) ||
-    DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS[symbol]
+  return {
+    recommendedDepositInstant: getRecommendedDepositInstantMultiplier(
+      symbol,
+      fromChainId,
+      toChainId
+    ),
+    depositInstant: getDepositInstantMultiplier(symbol, fromChainId, toChainId),
+    depositShortDelay: getDepositShortDelayMultiplier(
+      symbol,
+      fromChainId,
+      toChainId
+    ),
+  };
+}
+
+/**
+ * Returns a value that will be multiplied by `maxDepositInstant` to
+ * calculate the recommended deposit instant limit.
+ * @param symbol The token symbol to retrieve the multiplier for.
+ * @param fromChainId The chain ID of the origin chain.
+ * @param toChainId The chain ID of the destination chain.
+ */
+export const getRecommendedDepositInstantMultiplier =
+  _makeLimitsBufferMultiplierGetter(
+    "RECOMMENDED_DEPOSIT_INSTANT_MULTIPLIER",
+    DEFAULT_LIMITS_BUFFER_MULTIPLIERS.recommendedDepositInstant
   );
+
+/**
+ * Returns a value that will be multiplied by `maxDepositInstant` to
+ * calculate a buffered value instant deposit limit.
+ * @param symbol The token symbol to retrieve the multiplier for.
+ * @param fromChainId The chain ID of the origin chain.
+ * @param toChainId The chain ID of the destination chain.
+ */
+export const getDepositInstantMultiplier = _makeLimitsBufferMultiplierGetter(
+  "DEPOSIT_INSTANT_BUFFER_MULTIPLIER",
+  DEFAULT_LIMITS_BUFFER_MULTIPLIERS.depositInstant
+);
+
+/**
+ * Returns a value that will be multiplied by `maxDepositShortDelay` to
+ * calculate a buffered value short delay deposit limit.
+ * @param symbol The token symbol to retrieve the multiplier for.
+ * @param fromChainId The chain ID of the origin chain.
+ * @param toChainId The chain ID of the destination chain.
+ */
+export const getDepositShortDelayMultiplier = _makeLimitsBufferMultiplierGetter(
+  "DEPOSIT_SHORT_DELAY_BUFFER_MULTIPLIER",
+  DEFAULT_LIMITS_BUFFER_MULTIPLIERS.depositShortDelay
+);
+
+function _makeLimitsBufferMultiplierGetter(
+  envVarBase: string,
+  defaultLimitsBufferMultiplier: string
+) {
+  return (symbol: string, fromChainId: number, toChainId: number) => {
+    return ethers.utils.parseEther(
+      [
+        `${envVarBase}_${symbol}_${fromChainId}_${toChainId}`,
+        `${envVarBase}_${symbol}_${fromChainId}`,
+        `${envVarBase}_${symbol}`,
+      ]
+        .map((key) => process.env[key])
+        .find((value) => value !== undefined) || defaultLimitsBufferMultiplier
+    );
+  };
 }

@@ -25,7 +25,7 @@ import {
   sendResponse,
   getHubPool,
   validateChainAndTokenParams,
-  getRecommendedDepositInstantLimit,
+  getLimitsBufferMultipliers,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -179,10 +179,14 @@ const handler = async (
     );
 
     const maxDepositInstant = minBN(
-      maxBN(...fullRelayerBalances, ...transferRestrictedBalances),
+      maxBN(...fullRelayerBalances, ...transferRestrictedBalances), // balances on destination chain
       liquidReserves
     );
-    const recommendedDepositInstant = getRecommendedDepositInstantLimit(
+    const maxDepositShortDelay = minBN(
+      maxBN(...transferBalances, ...transferRestrictedBalances), // balances on destination chain + mainnet
+      liquidReserves
+    );
+    const bufferMultipliers = getLimitsBufferMultipliers(
       l1Token.symbol,
       computedOriginChainId,
       destinationChainId
@@ -191,22 +195,18 @@ const handler = async (
       // Absolute minimum may be overridden by the environment.
       minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
       maxDeposit: liquidReserves.toString(),
-      // Note: max is used here rather than sum because relayers currently do not partial fill.
-      maxDepositInstant: maxDepositInstant.toString(),
-      // Same as above.
-      maxDepositShortDelay: minBN(
-        maxBN(...transferBalances, ...transferRestrictedBalances),
-        liquidReserves
-      ).toString(),
-      recommendedDepositInstant: recommendedDepositInstant
-        ? minBN(
-            ethers.utils.parseUnits(
-              recommendedDepositInstant,
-              l1Token.decimals
-            ),
-            maxDepositInstant
-          ).toString()
-        : maxDepositInstant,
+      maxDepositInstant: bufferMultipliers.depositInstant
+        .mul(maxDepositInstant)
+        .div(sdkUtils.fixedPointAdjustment)
+        .toString(),
+      maxDepositShortDelay: bufferMultipliers.depositShortDelay
+        .mul(maxDepositShortDelay)
+        .div(sdkUtils.fixedPointAdjustment)
+        .toString(),
+      recommendedDepositInstant: bufferMultipliers.recommendedDepositInstant
+        .mul(maxDepositInstant)
+        .div(sdkUtils.fixedPointAdjustment)
+        .toString(),
     };
     logger.debug({
       at: "Limits",
