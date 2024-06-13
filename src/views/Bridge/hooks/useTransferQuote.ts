@@ -74,7 +74,6 @@ export function useTransferQuote(
     ],
     enabled: Boolean(
       feesQuery.fees &&
-        limitsQuery.limits &&
         usdPriceQuery.data?.price &&
         // If it's a swap route, we also need to wait for the swap quote to be fetched
         (isSwapRoute ? swapQuoteQuery.data : true)

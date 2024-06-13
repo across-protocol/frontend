@@ -29,6 +29,7 @@ export type BridgeFees = {
   quoteTimestampInMs: ethers.BigNumber;
   quoteLatency: ethers.BigNumber;
   quoteBlock: ethers.BigNumber;
+  limits: BridgeLimitInterface;
 };
 
 type GetBridgeFeesArgs = {
@@ -70,6 +71,7 @@ export async function getBridgeFees({
     quoteTimestamp,
     quoteBlock,
     lpFee,
+    limits,
   } = await getApiEndpoint().suggestedFees(
     amount,
     getConfig().getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
@@ -92,6 +94,7 @@ export async function getBridgeFees({
     quoteTimestampInMs: quoteTimestamp.mul(1000),
     quoteBlock,
     quoteLatency,
+    limits,
   };
 }
 

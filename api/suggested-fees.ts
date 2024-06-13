@@ -214,7 +214,12 @@ const handler = async (
 
     // Prevent quotes for slow-fills
     if (amount.gt(limits.maxDepositShortDelay)) {
-      throw new InputError("Amount exceeds max deposit limit for short delay");
+      throw new InputError(
+        `Amount exceeds max. deposit limit for short delay: ${ethers.utils.formatUnits(
+          limits.maxDepositShortDelay,
+          inputToken.decimals
+        )} ${inputToken.symbol}`
+      );
     }
 
     const parsedL1TokenConfig =
@@ -289,6 +294,7 @@ const handler = async (
         pct: lpFeePct.toString(),
         total: lpFeeTotal.toString(),
       },
+      limits,
     };
 
     logger.debug({
