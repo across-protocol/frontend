@@ -1,6 +1,7 @@
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import assert from "assert";
 import numeral from "numeral";
+import { DOMAIN_CALLDATA_DELIMITER } from "./constants";
 
 export function isValidString(s: string | null | undefined | ""): s is string {
   if (s != null && typeof s === "string" && s !== "") {
@@ -197,7 +198,7 @@ export function tagString(dataHex: string, tagString: string) {
 
 // tags the hardcoded across chain reference
 export function tagAcrossDomain(dataHex: string) {
-  return tagHex(dataHex, "0x0000", "0x1DC0de");
+  return tagHex(dataHex, "0x0000", DOMAIN_CALLDATA_DELIMITER);
 }
 
 // tags only an address

@@ -41,6 +41,7 @@ import {
   defaultRelayerAddressOverridePerToken,
   disabledL1Tokens,
   DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS,
+  DOMAIN_CALLDATA_DELIMITER,
 } from "./_constants";
 import { PoolStateResult } from "./_types";
 
@@ -961,7 +962,11 @@ export function tagDomain(dataHex: string, domainIdentifier: string): string {
   if (!ethers.utils.isHexString(domainIdentifier)) {
     throw new Error("Domain identifier must be a valid hex string");
   }
-  return ethers.utils.hexConcat([dataHex, "0x1DC0de", domainIdentifier]);
+  return ethers.utils.hexConcat([
+    dataHex,
+    DOMAIN_CALLDATA_DELIMITER,
+    domainIdentifier,
+  ]);
 }
 
 export function getFallbackTokenLogoURI(l1TokenAddress: string) {
