@@ -89,21 +89,7 @@ paths:
           description: >
             Chain ID where the specified `token` or `inputToken` exists.
           schema:
-            type: integer
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
+            $ref: "#/components/schemas/ChainId"
             example: 1
         - name: destinationChainId
           in: query
@@ -111,21 +97,7 @@ paths:
           description: >
             The desired destination chain ID of the bridge transfer.
           schema:
-            type: integer
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
+            $ref: "#/components/schemas/ChainId"
             example: 10
         - name: amount
           in: query
@@ -309,21 +281,7 @@ paths:
           description: >
             Chain ID where the specified `token` or `inputToken` exists.
           schema:
-            type: integer
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
+            $ref: "#/components/schemas/ChainId"
             example: 1
         - name: destinationChainId
           in: query
@@ -331,21 +289,7 @@ paths:
           description: >
             The intended destination chain ID of the bridge transfer.
           schema:
-            type: integer
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
+            $ref: "#/components/schemas/ChainId"
             example: 10
       responses:
         "200":
@@ -377,43 +321,14 @@ paths:
           description: >
             Chain ID of the originating chain.
           schema:
-            type: integer
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
+            $ref: "#/components/schemas/ChainId"
         - name: destinationChainId
           in: query
           required: false
           description: >
             Chain ID of the destination chain.
           schema:
-            type: integer
-            minimum: 1
-            enum: [
-                1,
-                10,
-                137,
-                324,
-                8453,
-                42161,
-                59144,
-                # testnets
-                84532,
-                421614,
-                11155420,
-                11155111,
-              ]
+            $ref: "#/components/schemas/ChainId"
         - name: originToken
           in: query
           required: false
@@ -456,6 +371,57 @@ paths:
           description: Invalid input
         "500":
           description: Unexpected error within the API
+  /deposit/status:
+    get:
+      summary: Track the lifecycle of a deposit
+      description: >
+        Returns the fill status of a deposit along with a corresponding fill transaction hash if filled.
+         
+        This endpoint loads data queried by an indexing service that polls relevant events on a 10-second cadence. 
+
+        Users should therefore expect an average latency of 1 to 15 seconds after submitting a deposit to see the status changed in this endpoint. 
+
+        This delay comes from the time it takes for the internal indexing to include the deposit transaction.
+      parameters:
+        - name: originChainId
+          in: query
+          required: true
+          description: >
+            Chain Id where the deposit originated from.
+          schema:
+            $ref: "#/components/schemas/ChainId"
+          example: 1
+        - name: depositId
+          in: query
+          required: true
+          description: >
+            The deposit id that is emitted from the `DepositV3` function call as a `V3FundsDeposited` event.
+          schema:
+            type: integer
+            minimum: 0
+          example: 10
+      responses:
+        200:
+          description: Lifecycle of a transaction
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fillStatus:
+                    type: string
+                    enum: ["filled", "pending", "expired"]
+                    description: >
+                      The status of the deposit.
+                       * filled: Deposits with this status have been filled on the destination chain and the recipient should have received funds. A FilledV3Relay event was emitted on the destination chain SpokePool.
+                       * pending: Deposit has not been filled yet.
+                       * expired: Deposit has expired and will not be filled. Expired deposits will be refunded to the `depositor` on the `originChainId` in the next batch of repayments.
+                  fillTxHash:
+                    type: string
+                    description: >
+                      The transaction hash of the fill transaction on the destination chain.
+                      This field is only present when `fillStatus` is `filled`.
+              example: { "fillStatus": "filled", "fillTxHash": "0x123abc<...>" }
 components:
   schemas:
     SuggestedFees:
@@ -637,3 +603,20 @@ components:
           type: string
           description: Destination chain ddress of token contract to receive.
           example: "0x4200000000000000000000000000000000000006"
+    ChainId:
+      type: integer
+      minimum: 1
+      enum: [
+        1,
+        10,
+        137,
+        324,
+        8453,
+        42161,
+        59144,
+        # testnets
+        84532,
+        421614,
+        11155420,
+        11155111,
+      ]
