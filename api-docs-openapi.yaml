@@ -390,7 +390,7 @@ paths:
             Chain Id where the deposit originated from.
           schema:
             $ref: "#/components/schemas/ChainId"
-          example: 1
+          example: 137
         - name: depositId
           in: query
           required: true
@@ -399,7 +399,7 @@ paths:
           schema:
             type: integer
             minimum: 0
-          example: 10
+          example: 1349975
       responses:
         200:
           description: Lifecycle of a transaction
