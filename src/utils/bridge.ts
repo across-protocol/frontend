@@ -6,7 +6,7 @@ import {
   fixedPointAdjustment,
   referrerDelimiterHex,
 } from "./constants";
-import { tagAddress } from "./format";
+import { tagAcrossDomain, tagAddress } from "./format";
 import { getProvider } from "./providers";
 import { getFastFillTimeByRoute } from "./fill-times";
 import { getConfig, getCurrentTime } from "utils";
@@ -477,10 +477,11 @@ async function _tagRefAndSignTx(
   onNetworkMismatch?: NetworkMismatchHandler
 ) {
   // do not tag a referrer if data is not provided as a hex string.
-  tx.data =
+  tx.data = tagAcrossDomain(
     referrer && ethers.utils.isAddress(referrer)
       ? tagAddress(tx.data!, referrer, referrerDelimiterHex)
-      : tx.data;
+      : tx.data!
+  );
 
   // Last test to ensure that the tx is valid and that the signer
   // is connected to the correct chain.
