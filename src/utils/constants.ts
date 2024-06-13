@@ -866,5 +866,3 @@ export const bnZero = utils.bnZero;
 export const defaultSwapSlippage = Number(
   process.env.REACT_APP_DEFAULT_SWAP_SLIPPAGE || 0.5
 );
-
-export const DOMAIN_CALLDATA_DELIMITER = "0x1dc0de";

@@ -1,7 +1,8 @@
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import assert from "assert";
 import numeral from "numeral";
-import { DOMAIN_CALLDATA_DELIMITER } from "./constants";
+
+export const DOMAIN_CALLDATA_DELIMITER = "0x1dc0de";
 
 export function isValidString(s: string | null | undefined | ""): s is string {
   if (s != null && typeof s === "string" && s !== "") {
