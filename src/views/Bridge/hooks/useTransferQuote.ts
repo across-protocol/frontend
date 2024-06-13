@@ -13,7 +13,9 @@ import { useCoingeckoPrice } from "hooks/useCoingeckoPrice";
 import { useSwapQuoteQuery } from "hooks/useSwapQuote";
 import { SelectedRoute } from "../utils";
 
-export type TransferQuote = ReturnType<typeof useTransferQuote>["data"];
+export type TransferQuote = ReturnType<
+  typeof useTransferQuote
+>["transferQuoteQuery"]["data"];
 
 export function useTransferQuote(
   selectedRoute: SelectedRoute,
@@ -59,7 +61,7 @@ export function useTransferQuote(
   );
   const usdPriceQuery = useCoingeckoPrice(selectedRoute.l1TokenAddress, "usd");
 
-  return useQuery({
+  const transferQuoteQuery = useQuery({
     queryKey: [
       "quote",
       selectedRoute.fromChain,
@@ -144,6 +146,14 @@ export function useTransferQuote(
       };
     },
   });
+
+  return {
+    transferQuoteQuery,
+    limitsQuery,
+    feesQuery,
+    swapQuoteQuery,
+    usdPriceQuery,
+  };
 }
 
 function getBridgeAmountAfterSwap(

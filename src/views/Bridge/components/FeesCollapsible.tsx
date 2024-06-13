@@ -11,7 +11,7 @@ import EstimatedTable, { TotalReceive } from "./EstimatedTable";
 import { useEstimatedRewards } from "../hooks/useEstimatedRewards";
 import TokenFee from "./TokenFee";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
-import { calcFeesForEstimatedTable } from "../utils";
+import { AmountInputError, calcFeesForEstimatedTable } from "../utils";
 
 export type Props = {
   isQuoteLoading: boolean;
@@ -29,6 +29,7 @@ export type Props = {
   parsedAmount?: BigNumber;
   currentSwapSlippage?: number;
   onSetNewSlippage?: (slippage: number) => void;
+  validationError?: AmountInputError;
 };
 
 export function FeesCollapsible(props: Props) {
@@ -47,6 +48,9 @@ export function FeesCollapsible(props: Props) {
     swapFee
   );
 
+  const doesAmountExceedMaxDeposit =
+    props.validationError === AmountInputError.INSUFFICIENT_LIQUIDITY;
+
   if (!isExpanded) {
     return (
       <CollapsedFeesWrapper>
@@ -54,11 +58,11 @@ export function FeesCollapsible(props: Props) {
           <Text color="grey-400">Receive</Text>
         </CollapsedFeesLabel>
         <CollapsedFeesReceiveWrapper onClick={() => setIsExpanded(true)}>
-          {props.isQuoteLoading ? (
+          {props.isQuoteLoading && !doesAmountExceedMaxDeposit ? (
             <CollapsedLoadingSkeleton width="100%" height="20px" />
           ) : (
             <CollapsedFeesAmountsWrapper>
-              {outputAmount ? (
+              {outputAmount && !doesAmountExceedMaxDeposit ? (
                 <>
                   <TotalReceive
                     totalReceived={outputAmount}

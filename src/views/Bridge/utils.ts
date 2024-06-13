@@ -112,15 +112,15 @@ export function validateBridgeAmount(
     };
   }
 
-  if (currentBalance && parsedAmountInput.gt(currentBalance)) {
-    return {
-      error: AmountInputError.INSUFFICIENT_BALANCE,
-    };
-  }
-
   if (maxDeposit && amountToBridgeAfterSwap.gt(maxDeposit)) {
     return {
       error: AmountInputError.INSUFFICIENT_LIQUIDITY,
+    };
+  }
+
+  if (currentBalance && parsedAmountInput.gt(currentBalance)) {
+    return {
+      error: AmountInputError.INSUFFICIENT_BALANCE,
     };
   }
 

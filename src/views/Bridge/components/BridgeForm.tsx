@@ -221,6 +221,7 @@ const BridgeForm = ({
         }
         onSetNewSlippage={onSetNewSlippage}
         currentSwapSlippage={swapSlippage}
+        validationError={validationError}
       />
       {isWrongChain ? (
         <StyledSecondaryButton onClick={onClickChainSwitch}>
