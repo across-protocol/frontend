@@ -424,7 +424,7 @@ paths:
                   destinationChainId:
                     type: integer
                     description: >
-                      The chain id where the fill transaction will take place
+                      The chain id where the fill transaction will take place.
               example: { "fillStatus": "filled", "fillTxHash": "0x123abc<...>", "destinationChainId": 42161 }
 components:
   schemas:
