@@ -46,7 +46,7 @@ export default defineConfig({
       "@walletconnect/ethereum-provider",
       "rxjs",
       "rxjs/operators",
-      "@across-protocol/contracts-v2",
+      "@across-protocol/contracts",
     ],
     esbuildOptions: {
       define: {
