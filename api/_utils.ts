@@ -41,8 +41,9 @@ import {
   defaultRelayerAddressOverridePerToken,
   disabledL1Tokens,
   DEFAULT_LIMITS_BUFFER_MULTIPLIERS,
+  DOMAIN_CALLDATA_DELIMITER,
 } from "./_constants";
-import { PoolStateResult } from "./_types";
+import { PoolStateOfUser, PoolStateResult } from "./_types";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -985,6 +986,20 @@ export async function tagReferrer(
   ]);
 }
 
+export function tagDomain(dataHex: string, domainIdentifier: string): string {
+  if (!ethers.utils.isHexString(dataHex)) {
+    throw new Error("Data must be a valid hex string");
+  }
+  if (!ethers.utils.isHexString(domainIdentifier)) {
+    throw new Error("Domain identifier must be a valid hex string");
+  }
+  return ethers.utils.hexConcat([
+    dataHex,
+    DOMAIN_CALLDATA_DELIMITER,
+    domainIdentifier,
+  ]);
+}
+
 export function getFallbackTokenLogoURI(l1TokenAddress: string) {
   const isACX = TOKEN_SYMBOLS_MAP.ACX.addresses[1] === l1TokenAddress;
 
@@ -1009,6 +1024,13 @@ export async function getPoolState(
   }
 }
 
+export async function getPoolStateForUser(
+  tokenAddress: string,
+  userAddress: string
+): Promise<PoolStateOfUser> {
+  return getAcrossPoolUserState(tokenAddress, userAddress);
+}
+
 export async function getDefiLlamaPoolState(
   tokenAddress: string
 ): Promise<PoolStateResult> {
@@ -1027,6 +1049,7 @@ export async function getDefiLlamaPoolState(
     estimatedApy: (lastElement.apy / 100).toFixed(4),
     exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE.toString(),
     totalPoolSize: lastElement.tvlUsd.toFixed(2),
+    liquidityUtilizationCurrent: "0",
   };
 }
 
@@ -1034,6 +1057,15 @@ export async function getAcrossPoolState(tokenAddress: string) {
   const hubPoolClient = getHubPoolClient();
   await hubPoolClient.updatePool(tokenAddress);
   return hubPoolClient.getPoolState(tokenAddress);
+}
+
+export async function getAcrossPoolUserState(
+  tokenAddress: string,
+  userAddress: string
+) {
+  const hubPoolClient = getHubPoolClient();
+  await hubPoolClient.updateUser(userAddress, tokenAddress);
+  return hubPoolClient.getUserState(tokenAddress, userAddress);
 }
 
 export async function getExternalPoolState(
@@ -1129,6 +1161,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
     estimatedApy: apyEstimated.toFixed(3),
     exchangeRateCurrent: EXTERNAL_POOL_TOKEN_EXCHANGE_RATE.toString(),
     totalPoolSize: pool.totalShares,
+    liquidityUtilizationCurrent: pool.liquidity || "0",
   };
 }
 

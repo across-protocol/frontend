@@ -9,6 +9,7 @@ import { coingeckoApiCall } from "./coingecko";
 import { retrieveLimits } from "./retrieveLimits";
 import { poolsApiCall } from "./pools";
 import { swapQuoteApiCall } from "./swap-quote";
+import { poolsUserApiCall } from "./pools-user";
 
 export const prodEndpoints: ServerlessAPIEndpoints = {
   coingecko: coingeckoApiCall,
@@ -24,5 +25,6 @@ export const prodEndpoints: ServerlessAPIEndpoints = {
     getStats: getDepositStats,
   },
   pools: poolsApiCall,
+  poolsUser: poolsUserApiCall,
   swapQuote: swapQuoteApiCall,
 };

@@ -44,3 +44,7 @@ storybook-static
 
 # Amplitude
 ampli.json
+
+# Bundle size analysis
+bundle-size-analysis.*
+stats.*

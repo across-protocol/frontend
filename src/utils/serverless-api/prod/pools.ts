@@ -6,6 +6,8 @@ export type PoolsApiCall = typeof poolsApiCall;
 export type PoolQueryData = {
   estimatedApy: string;
   exchangeRateCurrent: string;
+  totalPoolSize: string;
+  liquidityUtilizationCurrent: string;
 };
 
 export async function poolsApiCall(

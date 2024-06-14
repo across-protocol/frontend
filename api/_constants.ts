@@ -182,3 +182,5 @@ export const DEFAULT_LIMITS_BUFFER_MULTIPLIERS = {
   depositInstant: "0.2",
   depositShortDelay: "0.2",
 };
+
+export const DOMAIN_CALLDATA_DELIMITER = "0x1dc0de";
