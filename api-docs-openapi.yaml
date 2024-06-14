@@ -89,16 +89,18 @@ paths:
           description: >
             Chain ID where the specified `token` or `inputToken` exists.
           schema:
-            $ref: "#/components/schemas/ChainId"
-            example: 1
+            allOf:
+              - example: 1
+              - $ref: "#/components/schemas/ChainId"
         - name: destinationChainId
           in: query
           required: true
           description: >
             The desired destination chain ID of the bridge transfer.
           schema:
-            $ref: "#/components/schemas/ChainId"
-            example: 10
+            allOf:
+              - $ref: "#/components/schemas/ChainId"
+              - example: 10
         - name: amount
           in: query
           required: true
@@ -281,16 +283,18 @@ paths:
           description: >
             Chain ID where the specified `token` or `inputToken` exists.
           schema:
-            $ref: "#/components/schemas/ChainId"
-            example: 1
+            allOf:
+              - $ref: "#/components/schemas/ChainId"
+              - example: 1
         - name: destinationChainId
           in: query
           required: true
           description: >
             The intended destination chain ID of the bridge transfer.
           schema:
-            $ref: "#/components/schemas/ChainId"
-            example: 10
+            allOf:
+              - $ref: "#/components/schemas/ChainId"
+              - example: 10
       responses:
         "200":
           description: Transfer limits
