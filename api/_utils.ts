@@ -1476,7 +1476,7 @@ export function getLimitsBufferMultipliers(
  * @param toChainId The chain ID of the destination chain.
  */
 export const getRecommendedDepositInstantMultiplier =
-  _makeLimitsBufferMultiplierGetter(
+  makeLimitsBufferMultiplierGetter(
     "RECOMMENDED_DEPOSIT_INSTANT_MULTIPLIER",
     DEFAULT_LIMITS_BUFFER_MULTIPLIERS.recommendedDepositInstant
   );
@@ -1488,7 +1488,7 @@ export const getRecommendedDepositInstantMultiplier =
  * @param fromChainId The chain ID of the origin chain.
  * @param toChainId The chain ID of the destination chain.
  */
-export const getDepositInstantMultiplier = _makeLimitsBufferMultiplierGetter(
+export const getDepositInstantMultiplier = makeLimitsBufferMultiplierGetter(
   "DEPOSIT_INSTANT_BUFFER_MULTIPLIER",
   DEFAULT_LIMITS_BUFFER_MULTIPLIERS.depositInstant
 );
@@ -1500,12 +1500,12 @@ export const getDepositInstantMultiplier = _makeLimitsBufferMultiplierGetter(
  * @param fromChainId The chain ID of the origin chain.
  * @param toChainId The chain ID of the destination chain.
  */
-export const getDepositShortDelayMultiplier = _makeLimitsBufferMultiplierGetter(
+export const getDepositShortDelayMultiplier = makeLimitsBufferMultiplierGetter(
   "DEPOSIT_SHORT_DELAY_BUFFER_MULTIPLIER",
   DEFAULT_LIMITS_BUFFER_MULTIPLIERS.depositShortDelay
 );
 
-function _makeLimitsBufferMultiplierGetter(
+function makeLimitsBufferMultiplierGetter(
   envVarBase: string,
   defaultLimitsBufferMultiplier: string
 ) {
