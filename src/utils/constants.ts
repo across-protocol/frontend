@@ -451,6 +451,8 @@ export const rewardPrograms: Record<
 };
 
 export const chainIdToRewardsProgramName = {
+  [ChainId.OPTIMISM]: "op-rebates",
+  [ChainId.OPTIMISM_SEPOLIA]: "op-rebates",
   [ChainId.ARBITRUM]: "arb-rebates",
   [ChainId.ARBITRUM_SEPOLIA]: "arb-rebates",
 } as const;
