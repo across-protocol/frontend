@@ -1,9 +1,9 @@
 import { QueryFunctionContext, useQueries, useQuery } from "react-query";
 
-import { getConfig, getPoolClient, hubPoolChainId } from "utils";
+import { getConfig, hubPoolChainId } from "utils";
+import getApiEndpoint from "utils/serverless-api";
 
 const config = getConfig();
-const poolClient = getPoolClient();
 
 export function useAllLiquidityPools() {
   const tokenList = config.getTokenPoolList(hubPoolChainId);
@@ -41,9 +41,9 @@ async function fetchPool(tokenSymbol?: string) {
   }
   const { logoURI, symbol, decimals, l1TokenAddress } =
     config.getPoolTokenInfoBySymbol(config.getHubPoolChainId(), tokenSymbol);
-  await poolClient.updatePool(l1TokenAddress);
+  const pool = await getApiEndpoint().pools(l1TokenAddress);
   return {
-    ...poolClient.getPoolState(l1TokenAddress),
+    ...pool,
     l1TokenLogoURI: logoURI,
     l1TokenSymbol: symbol,
     l1TokenDecimals: decimals,

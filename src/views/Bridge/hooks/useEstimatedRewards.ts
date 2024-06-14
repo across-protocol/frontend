@@ -1,4 +1,3 @@
-import { utils } from "@across-protocol/sdk";
 import { BigNumber, utils as ethersUtils } from "ethers";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import { useMemo } from "react";
@@ -61,10 +60,7 @@ export function useEstimatedRewards(
     const rewardExchangeRate = convertRewardToBaseCurrency(
       parseUnits("1", rewardToken.decimals) // Convert 1 token to USD
     );
-    if (
-      !utils.isDefined(totalFeesUSD) ||
-      !utils.isDefined(rewardExchangeRate)
-    ) {
+    if (!isDefined(totalFeesUSD) || !isDefined(rewardExchangeRate)) {
       return undefined;
     }
     const totalRewardInRewardToken = totalFeesUSD
