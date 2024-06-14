@@ -421,7 +421,15 @@ paths:
                     description: >
                       The transaction hash of the fill transaction on the destination chain.
                       This field is only present when `fillStatus` is `filled`.
-              example: { "fillStatus": "filled", "fillTxHash": "0x123abc<...>" }
+                  originChainId:
+                    type: integer
+                    description: >
+                      The chain id that the deposit originated on. On an Optimism -> Arbitrum transfer, the originChainId would be 10
+                  destinationChainId:
+                    type: integer
+                    description: >
+                      The chain id that the deposit is destined for. On an Optimism -> Arbitrum transfer, the destinationChainId would be 42161
+              example: { "fillStatus": "filled", "fillTxHash": "0x123abc<...>", "destinationChainId": 42161, "originChainId": 10 }
 components:
   schemas:
     SuggestedFees:
