@@ -325,14 +325,18 @@ paths:
           description: >
             Chain ID of the originating chain.
           schema:
-            $ref: "#/components/schemas/ChainId"
+            allOf:
+              - example: 1
+              - $ref: "#/components/schemas/ChainId"
         - name: destinationChainId
           in: query
           required: false
           description: >
             Chain ID of the destination chain.
           schema:
-            $ref: "#/components/schemas/ChainId"
+            allOf:
+              - example: 10
+              - $ref: "#/components/schemas/ChainId"
         - name: originToken
           in: query
           required: false
@@ -393,7 +397,9 @@ paths:
           description: >
             Chain Id where the deposit originated from.
           schema:
-            $ref: "#/components/schemas/ChainId"
+            allOf:
+              - $ref: "#/components/schemas/ChainId"
+              - example: 137
           example: 137
         - name: depositId
           in: query
