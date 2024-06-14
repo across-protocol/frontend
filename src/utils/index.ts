@@ -21,4 +21,4 @@ export * from "./wait";
 export * from "./types";
 export * from "./network";
 export * from "./url";
-export * from "./sdk-v2";
+export * from "./sdk";

@@ -1,6 +1,6 @@
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { type, assert, Infer, optional, string } from "superstruct";
+import { type, assert, Infer, optional, string, pattern } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
@@ -13,6 +13,7 @@ import {
   getSpokePool,
   tagReferrer,
   validAddressOrENS,
+  tagDomain,
 } from "./_utils";
 
 const BuildDepositTxQueryParamsSchema = type({
@@ -27,6 +28,9 @@ const BuildDepositTxQueryParamsSchema = type({
   maxCount: optional(boolStr()),
   referrer: optional(validAddressOrENS()),
   isNative: optional(boolStr()),
+  // A 4-byte hex string representing the domain identifier.
+  // Optional: will be appended to the data field of the transaction.
+  domainIdentifier: optional(pattern(string(), /^0x[0-9a-fA-F]{4}$/)),
 });
 
 type BuildDepositTxQueryParams = Infer<typeof BuildDepositTxQueryParamsSchema>;
@@ -58,6 +62,7 @@ const handler = async (
       maxCount = ethers.constants.MaxUint256.toString(),
       referrer,
       isNative: isNativeBoolStr,
+      domainIdentifier,
     } = query;
 
     recipient = ethers.utils.getAddress(recipient);
@@ -89,6 +94,11 @@ const handler = async (
 
     // do not tag a referrer if data is not provided as a hex string.
     tx.data = referrer ? await tagReferrer(tx.data!, referrer) : tx.data;
+
+    // Tag the domain identifier to the data field of the transaction.
+    tx.data = domainIdentifier
+      ? tagDomain(tx.data!, domainIdentifier)
+      : tx.data;
 
     const responseJson = {
       data: tx.data,

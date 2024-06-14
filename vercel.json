@@ -1,5 +1,11 @@
 {
   "devCommand": "yarn dev",
+  "rewrites": [
+    {
+      "source": "/api/deposit/status",
+      "destination": "https://public.api.across.to/deposit/status"
+    }
+  ],
   "redirects": [
     {
       "source": "/about",

@@ -1,14 +1,14 @@
 import { BigNumber } from "ethers";
 
-export { isDefined } from "@across-protocol/sdk-v2/dist/esm/utils/TypeGuards";
-export { isContractDeployedToAddress } from "@across-protocol/sdk-v2/dist/esm/utils/AddressUtils";
+export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
+export { isContractDeployedToAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
 export {
   bnUint256Max,
   bnUint32Max,
   bnZero,
-} from "@across-protocol/sdk-v2/dist/esm/utils/BigNumberUtils";
-export { mapAsync } from "@across-protocol/sdk-v2/dist/esm/utils/ArrayUtils";
-export { getCurrentTime } from "@across-protocol/sdk-v2/dist/esm/utils/TimeUtils";
+} from "@across-protocol/sdk/dist/esm/utils/BigNumberUtils";
+export { mapAsync } from "@across-protocol/sdk/dist/esm/utils/ArrayUtils";
+export { getCurrentTime } from "@across-protocol/sdk/dist/esm/utils/TimeUtils";
 
 export function getUpdateV3DepositTypedData(
   depositId: number,

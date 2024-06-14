@@ -28,7 +28,7 @@ export default defineConfig({
     svgr(),
     tsconfigPaths(),
     eslint({
-      exclude: ["**/node_modules/**", "**/sdk-v2/**"],
+      exclude: ["**/node_modules/**", "**/sdk/**"],
     }),
     EnvironmentPlugin("all", { prefix: "REACT_APP_" }),
     visualizer({

@@ -1,9 +1,6 @@
 import assert from "assert";
 import { BigNumber, ethers, providers } from "ethers";
-import {
-  CHAIN_IDs,
-  TOKEN_SYMBOLS_MAP as _TOKEN_SYMBOLS_MAP,
-} from "@across-protocol/constants-v2";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
@@ -17,7 +14,8 @@ import polygonLogo from "assets/polygon-logo.svg";
 import zkSyncLogo from "assets/zksync-logo.svg";
 import baseLogo from "assets/base-logo.svg";
 import lineaLogo from "assets/linea-logo.svg";
-import usdcLogo from "assets/usdc-logo.png";
+import modeLogo from "assets/mode-logo.svg";
+import usdcLogo from "assets/usdc.svg";
 import daiLogo from "assets/dai.svg";
 import wbtcLogo from "assets/wbtc.svg";
 import umaLogo from "assets/uma.svg";
@@ -34,6 +32,8 @@ import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import SepoliaRoutes from "data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 
+export { TOKEN_SYMBOLS_MAP };
+
 /* Chains and Tokens section */
 export enum ChainId {
   MAINNET = CHAIN_IDs.MAINNET,
@@ -43,40 +43,15 @@ export enum ChainId {
   ZK_SYNC = CHAIN_IDs.ZK_SYNC,
   BASE = CHAIN_IDs.BASE,
   LINEA = CHAIN_IDs.LINEA,
+  MODE = CHAIN_IDs.MODE,
   // testnets
   MUMBAI = CHAIN_IDs.MUMBAI,
   SEPOLIA = CHAIN_IDs.SEPOLIA,
   BASE_SEPOLIA = CHAIN_IDs.BASE_SEPOLIA,
   OPTIMISM_SEPOLIA = CHAIN_IDs.OPTIMISM_SEPOLIA,
   ARBITRUM_SEPOLIA = CHAIN_IDs.ARBITRUM_SEPOLIA,
+  MODE_SEPOLIA = CHAIN_IDs.MODE_SEPOLIA,
 }
-
-// NOTE: As a temporary workaround for backwards-compatibility, we have `USDC` and `_USDC`/`USDC.e`
-// entries in our constants package. See https://github.com/across-protocol/constants-v3/pull/28
-// for more details. Until the entry `USDC` is updated with the values of `_USDC`, we override the
-// entry locally.
-const { USDC, _USDC, ...tokenSymbols } = _TOKEN_SYMBOLS_MAP;
-export const TOKEN_SYMBOLS_MAP = {
-  ...tokenSymbols,
-  USDC: {
-    ..._USDC,
-  },
-  "USDC.e": {
-    ...tokenSymbols["USDC.e"],
-    addresses: {
-      ...tokenSymbols["USDC.e"].addresses,
-      [CHAIN_IDs.OPTIMISM_SEPOLIA]:
-        "0x9552a0a6624A23B848060AE5901659CDDa1f83f8",
-    },
-  },
-  USDbC: {
-    ...tokenSymbols["USDbC"],
-    addresses: {
-      ...tokenSymbols["USDbC"].addresses,
-      [CHAIN_IDs.BASE_SEPOLIA]: "0xE634Ec56B73779eCFfa78109a653FA0aE33D243f",
-    },
-  },
-} as const;
 
 // Maps `ChainId` to an object and inverts the Key/Value
 // pair. Ex) { "mainnet": 1 }
@@ -217,6 +192,18 @@ export const chainInfoList: ChainInfoList = [
     pollingInterval: 10_000,
     customRpcUrl: process.env.REACT_APP_CHAIN_59144_PROVIDER_URL,
   },
+  {
+    name: "Mode",
+    fullName: "Mode",
+    chainId: ChainId.MODE,
+    logoURI: modeLogo,
+    rpcUrl: "https://mainnet.mode.network",
+    explorerUrl: "https://modescan.io",
+    constructExplorerLink: defaultConstructExplorerLink("https://modescan.io"),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: 10_000,
+    customRpcUrl: process.env.REACT_APP_CHAIN_34443_PROVIDER_URL,
+  },
   // testnets
   {
     name: "Mumbai",
@@ -287,6 +274,20 @@ export const chainInfoList: ChainInfoList = [
     pollingInterval: defaultBlockPollingInterval,
     customRpcUrl: process.env.REACT_APP_CHAIN_11155420_PROVIDER_URL,
   },
+  {
+    name: "Mode Sepolia",
+    fullName: "Mode Testnet Sepolia",
+    chainId: ChainId.MODE_SEPOLIA,
+    logoURI: modeLogo,
+    rpcUrl: "https://sepolia.mode.network",
+    explorerUrl: "https://testnet.modescan.io",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://testnet.modescan.io"
+    ),
+    nativeCurrencySymbol: "ETH",
+    pollingInterval: 10_000,
+    customRpcUrl: process.env.REACT_APP_CHAIN_919_PROVIDER_URL,
+  },
 ];
 
 export const chainInfoTable: ChainInfoTable = Object.fromEntries(
@@ -342,7 +343,6 @@ export const bridgedUSDCSymbolsMap = {
   [ChainId.ARBITRUM]: "USDC.e",
   [ChainId.OPTIMISM]: "USDC.e",
   [ChainId.POLYGON]: "USDC.e",
-  [ChainId.LINEA]: "USDC.e",
   [ChainId.ZK_SYNC]: "USDC.e",
   [ChainId.BASE]: "USDbC",
 };

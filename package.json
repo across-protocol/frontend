@@ -1,12 +1,12 @@
 {
-  "name": "across",
-  "version": "0.1.0",
+  "name": "@across-protocol/frontend",
+  "version": "3.0.0",
   "private": true,
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "@across-protocol/constants-v2": "^1.0.21",
-    "@across-protocol/contracts-v2": "^2.5.6",
-    "@across-protocol/sdk-v2": "^0.23.9",
+    "@across-protocol/constants": "^3.0.0",
+    "@across-protocol/contracts": "^3.0.0",
+    "@across-protocol/sdk": "^3.0.0",
     "@amplitude/analytics-browser": "^2.3.5",
     "@balancer-labs/sdk": "1.1.6-beta.16",
     "@emotion/react": "^11.4.1",

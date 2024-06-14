@@ -61,13 +61,13 @@ jobs:
           HARDHAT_INFURA_ID: ${{ secrets.CYPRESS_PUBLIC_INFURA_ID }}
         run: yarn hardhat:node &
       - name: Cypress run Chrome
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v6
         with:
           install: false
           browser: chrome
           start: yarn serve -l 3000
           wait-on: "http://localhost:3000"
-          wait-on-timeout: 300
+          wait-on-timeout: 600
       - name: Upload screenshots
         uses: actions/upload-artifact@v3
         if: failure() # only upload screenshots if tests fail

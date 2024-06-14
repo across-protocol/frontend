@@ -53,9 +53,7 @@ export function useBridgeAction(
   const history = useHistory();
   const { referrer } = useReferrer();
 
-  const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork(
-    selectedRoute.fromChain
-  );
+  const { isWrongNetworkHandler } = useIsWrongNetwork(selectedRoute.fromChain);
   const approveHandler = useApprove(selectedRoute.fromChain);
   const { addToAmpliQueue } = useAmplitude();
 
@@ -88,9 +86,7 @@ export function useBridgeAction(
       throw new Error("Missing required data for bridge action");
     }
 
-    if (isWrongNetwork) {
-      await isWrongNetworkHandler();
-    }
+    await isWrongNetworkHandler();
 
     // If swap route then we need to approve the swap token for the `SwapAndBridge`
     // contract instead of the `SpokePool` contract.

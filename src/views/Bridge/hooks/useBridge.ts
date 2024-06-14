@@ -3,6 +3,7 @@ import { BigNumber } from "ethers";
 
 import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
 import { ampli } from "ampli";
+import { defaultSwapSlippage, bnZero } from "utils";
 
 import { useBridgeAction } from "./useBridgeAction";
 import { useToAccount } from "./useToAccount";
@@ -10,7 +11,6 @@ import { useSelectRoute } from "./useSelectRoute";
 import { useTransferQuote, type TransferQuote } from "./useTransferQuote";
 import { useAmountInput } from "./useAmountInput";
 import { validateBridgeAmount } from "../utils";
-import { defaultSwapSlippage, bnZero } from "utils";
 
 export function useBridge() {
   const [shouldUpdateQuote, setShouldUpdateQuote] = useState(true);

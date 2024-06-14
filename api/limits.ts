@@ -1,4 +1,4 @@
-import { utils as sdkUtils } from "@across-protocol/sdk-v2";
+import { utils as sdkUtils } from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import {
@@ -25,6 +25,7 @@ import {
   sendResponse,
   getHubPool,
   validateChainAndTokenParams,
+  getRecommendedDepositInstantLimit,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -118,7 +119,7 @@ const handler = async (
         DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
         tokenPriceNative,
         undefined,
-        getDefaultRelayerAddress(l1Token.symbol, destinationChainId)
+        getDefaultRelayerAddress(destinationChainId, l1Token.symbol)
       ),
       hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
@@ -177,20 +178,35 @@ const handler = async (
       balance.add(fullRelayerMainnetBalances[i])
     );
 
+    const maxDepositInstant = minBN(
+      maxBN(...fullRelayerBalances, ...transferRestrictedBalances),
+      liquidReserves
+    );
+    const recommendedDepositInstant = getRecommendedDepositInstantLimit(
+      l1Token.symbol,
+      computedOriginChainId,
+      destinationChainId
+    );
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
       minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
       maxDeposit: liquidReserves.toString(),
       // Note: max is used here rather than sum because relayers currently do not partial fill.
-      maxDepositInstant: minBN(
-        maxBN(...fullRelayerBalances, ...transferRestrictedBalances),
-        liquidReserves
-      ).toString(),
+      maxDepositInstant: maxDepositInstant.toString(),
       // Same as above.
       maxDepositShortDelay: minBN(
         maxBN(...transferBalances, ...transferRestrictedBalances),
         liquidReserves
       ).toString(),
+      recommendedDepositInstant: recommendedDepositInstant
+        ? minBN(
+            ethers.utils.parseUnits(
+              recommendedDepositInstant,
+              l1Token.decimals
+            ),
+            maxDepositInstant
+          ).toString()
+        : maxDepositInstant,
     };
     logger.debug({
       at: "Limits",

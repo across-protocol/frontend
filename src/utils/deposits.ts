@@ -1,6 +1,6 @@
 import { LogDescription } from "ethers/lib/utils";
 import { getConfig } from "./config";
-import { isDefined } from "./sdk-v2";
+import { isDefined } from "./sdk";
 import { getProvider } from "./providers";
 import { SpokePool__factory } from "./typechain";
 

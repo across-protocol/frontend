@@ -4,8 +4,8 @@ import {
   HubPool__factory,
   SpokePool,
   SpokePool__factory,
-} from "@across-protocol/contracts-v2/dist/typechain";
-import * as sdk from "@across-protocol/sdk-v2";
+} from "@across-protocol/contracts/dist/typechain";
+import * as sdk from "@across-protocol/sdk";
 import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
@@ -40,6 +40,8 @@ import {
   defaultRelayerAddressOverride,
   defaultRelayerAddressOverridePerToken,
   disabledL1Tokens,
+  DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS,
+  DOMAIN_CALLDATA_DELIMITER,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
 
@@ -307,41 +309,18 @@ export const getRouteDetails = (
     );
   }
 
-  const l1TokenAddress = isBridgedUsdc(inputToken.symbol)
-    ? TOKEN_SYMBOLS_MAP.USDC.addresses[HUB_POOL_CHAIN_ID]
-    : inputToken.addresses[HUB_POOL_CHAIN_ID];
-  const l1Token = isBridgedUsdc(inputToken.symbol)
-    ? TOKEN_SYMBOLS_MAP.USDC
-    : getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
+  const isInputNativeUsdc = inputToken.symbol === "USDC";
+  const l1TokenAddress =
+    isBridgedUsdc(inputToken.symbol) || isInputNativeUsdc
+      ? TOKEN_SYMBOLS_MAP.USDC.addresses[HUB_POOL_CHAIN_ID]
+      : inputToken.addresses[HUB_POOL_CHAIN_ID];
+  const l1Token =
+    isBridgedUsdc(inputToken.symbol) || isInputNativeUsdc
+      ? TOKEN_SYMBOLS_MAP.USDC
+      : getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
 
   if (!l1Token) {
     throw new InputError("No L1 token found for given input token address");
-  }
-
-  // NOTE: This ensures backwards compatibility for the `token` query param before we switch to CCTP.
-  // I.e. pre-CCTP, we support:
-  // - native USDC -> USDC.e (L1 -> L2)
-  // - USDC.e -> native USDC (L2 -> L1)
-  // - USDC.e -> USD.e (L2 -> L2)
-  // If integrators now only use the `token` query param, we need to infer above
-  // destination tokens correctly. Post-CCTP, this will behave differently. Therefore,
-  // this needs to be removed once we switch to CCTP.
-  if (
-    !outputTokenAddress &&
-    (inputToken.symbol === "USDC" || isBridgedUsdc(inputToken.symbol))
-  ) {
-    const direction = isBridgedUsdc(inputToken.symbol)
-      ? destinationChainId === HUB_POOL_CHAIN_ID
-        ? "l2ToL1"
-        : "l2ToL2"
-      : "l1ToL2";
-    if (direction === "l1ToL2" || direction === "l2ToL2") {
-      outputTokenAddress =
-        TOKEN_SYMBOLS_MAP.USDbC.addresses[destinationChainId] ||
-        TOKEN_SYMBOLS_MAP["USDC.e"].addresses[destinationChainId];
-    } else {
-      outputTokenAddress = TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId];
-    }
   }
 
   outputTokenAddress ??= inputToken.addresses[destinationChainId];
@@ -396,15 +375,27 @@ export const getRouteDetails = (
 };
 
 export const getTokenByAddress = (tokenAddress: string, chainId?: number) => {
-  const [, token] =
-    Object.entries(TOKEN_SYMBOLS_MAP).find(([_symbol, { addresses }]) =>
+  const matches =
+    Object.entries(TOKEN_SYMBOLS_MAP).filter(([_symbol, { addresses }]) =>
       chainId
         ? addresses[chainId]?.toLowerCase() === tokenAddress.toLowerCase()
         : Object.values(addresses).some(
             (address) => address.toLowerCase() === tokenAddress.toLowerCase()
           )
     ) || [];
-  return token;
+
+  if (matches.length === 0) {
+    return undefined;
+  }
+
+  if (matches.length > 1) {
+    const nativeUsdc = matches.find(([symbol]) => symbol === "USDC");
+    if (chainId === HUB_POOL_CHAIN_ID && nativeUsdc) {
+      return nativeUsdc[1];
+    }
+  }
+
+  return matches[0][1];
 };
 
 const _getChainIdsOfToken = (
@@ -500,137 +491,31 @@ export const getGasMarkup = (chainId: string | number) => {
   return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
 };
 
-export const queries: Record<
-  number,
-  () => sdk.relayFeeCalculator.QueryInterface
-> = {
-  [CHAIN_IDs.MAINNET]: () =>
-    new sdk.relayFeeCalculator.EthereumQueries(
-      getProvider(CHAIN_IDs.MAINNET),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.MAINNET)
-    ),
-  [CHAIN_IDs.OPTIMISM]: () =>
-    new sdk.relayFeeCalculator.OptimismQueries(
-      getProvider(CHAIN_IDs.OPTIMISM),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.OPTIMISM)
-    ),
-  [CHAIN_IDs.POLYGON]: () =>
-    new sdk.relayFeeCalculator.PolygonQueries(
-      getProvider(CHAIN_IDs.POLYGON),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.POLYGON)
-    ),
-  [CHAIN_IDs.ARBITRUM]: () =>
-    new sdk.relayFeeCalculator.ArbitrumQueries(
-      getProvider(CHAIN_IDs.ARBITRUM),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.ARBITRUM)
-    ),
-  [CHAIN_IDs.ZK_SYNC]: () =>
-    new sdk.relayFeeCalculator.ZkSyncQueries(
-      getProvider(CHAIN_IDs.ZK_SYNC),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.ZK_SYNC)
-    ),
-  [CHAIN_IDs.BASE]: () =>
-    new sdk.relayFeeCalculator.BaseQueries(
-      getProvider(CHAIN_IDs.BASE),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.BASE)
-    ),
-  [CHAIN_IDs.LINEA]: () =>
-    new sdk.relayFeeCalculator.LineaQueries(
-      getProvider(CHAIN_IDs.LINEA),
-      undefined,
-      "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.LINEA)
-    ),
-  /* --------------------------- Testnet queries --------------------------- */
-  [CHAIN_IDs.SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.EthereumSepoliaQueries(
-      getProvider(CHAIN_IDs.SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.SEPOLIA)
-    ),
-  [CHAIN_IDs.BASE_SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.BaseSepoliaQueries(
-      getProvider(CHAIN_IDs.BASE_SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.BASE_SEPOLIA)
-    ),
-  [CHAIN_IDs.OPTIMISM_SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.OptimismSepoliaQueries(
-      getProvider(CHAIN_IDs.OPTIMISM_SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.OPTIMISM_SEPOLIA)
-    ),
-  [CHAIN_IDs.ARBITRUM_SEPOLIA]: () =>
-    new sdk.relayFeeCalculator.ArbitrumSepoliaQueries(
-      getProvider(CHAIN_IDs.ARBITRUM_SEPOLIA),
-      undefined,
-      undefined,
-      undefined,
-      REACT_APP_COINGECKO_PRO_API_KEY,
-      getLogger(),
-      getGasMarkup(CHAIN_IDs.ARBITRUM_SEPOLIA)
-    ),
-};
-
 /**
  * Retrieves an isntance of the Across SDK RelayFeeCalculator
  * @param destinationChainId The destination chain that a bridge operation will transfer to
  * @returns An instance of the `RelayFeeCalculator` for the specific chain specified by `destinationChainId`
  */
-export const getRelayerFeeCalculator = (destinationChainId: number) => {
-  const queryFn = queries[destinationChainId];
-  if (queryFn === undefined) {
-    throw new InputError("Invalid destination chain Id");
-  }
-
+export const getRelayerFeeCalculator = (
+  destinationChainId: number,
+  overrides: Partial<{
+    spokePoolAddress: string;
+    relayerAddress: string;
+  }> = {}
+) => {
+  const queries = sdk.relayFeeCalculator.QueryBase__factory.create(
+    destinationChainId,
+    getProvider(destinationChainId),
+    undefined,
+    overrides.spokePoolAddress,
+    overrides.relayerAddress,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(destinationChainId)
+  );
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
-    queries: queryFn(),
+    queries,
     capitalCostsConfig: relayerFeeCapitalCostConfig,
   };
   if (relayerFeeCalculatorConfig.feeLimitPercent < 1)
@@ -683,7 +568,9 @@ export const getRelayerFeeDetails = async (
   message?: string,
   relayerAddress?: string
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId);
+  const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
+    relayerAddress,
+  });
   try {
     return await relayFeeCalculator.relayerFeeDetails(
       {
@@ -765,6 +652,10 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
+    case CHAIN_IDs.MODE_SEPOLIA:
+      return "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b";
+    case CHAIN_IDs.MODE:
+      return "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96s";
     default:
       return sdk.utils.getDeployedAddress("SpokePool", chainId);
   }
@@ -1061,6 +952,20 @@ export async function tagReferrer(
     dataHex,
     "0xd00dfeeddeadbeef",
     referrerAddress,
+  ]);
+}
+
+export function tagDomain(dataHex: string, domainIdentifier: string): string {
+  if (!ethers.utils.isHexString(dataHex)) {
+    throw new Error("Data must be a valid hex string");
+  }
+  if (!ethers.utils.isHexString(domainIdentifier)) {
+    throw new Error("Domain identifier must be a valid hex string");
+  }
+  return ethers.utils.hexConcat([
+    dataHex,
+    DOMAIN_CALLDATA_DELIMITER,
+    domainIdentifier,
   ]);
 }
 
@@ -1470,17 +1375,18 @@ export async function getBalancerV2TokenPrice(
 
 /**
  * Returns the EOA that will serve as the default relayer address
- * @param symbol A valid token symbol
  * @param destinationChainId The destination chain that a bridge operation will transfer to
+ * @param symbol A valid token symbol
  * @returns A valid EOA address
  */
 export function getDefaultRelayerAddress(
-  symbol: string,
-  destinationChainId: number
+  destinationChainId: number,
+  symbol?: string
 ) {
   // All symbols are uppercase in this record.
-  const overrideForToken =
-    defaultRelayerAddressOverridePerToken[symbol.toUpperCase()];
+  const overrideForToken = symbol
+    ? defaultRelayerAddressOverridePerToken[symbol.toUpperCase()]
+    : undefined;
   if (overrideForToken?.destinationChains.includes(destinationChainId)) {
     return overrideForToken.relayer;
   } else {
@@ -1542,4 +1448,29 @@ export function isSwapRouteEnabled({
     );
   });
   return !!swapRoute;
+}
+
+/**
+ * This value will be returned in the `GET /limits` response field `recommendedDepositInstant`.
+ * @param symbol The token symbol to retrieve the limit for.
+ * @param fromChainId The chain ID of the origin chain.
+ * @param toChainId The chain ID of the destination chain.
+ * @returns The recommended deposit instant limit in max. divisible units.
+ */
+export function getRecommendedDepositInstantLimit(
+  symbol: string,
+  fromChainId: number,
+  toChainId: number
+) {
+  const envVarBase = "RECOMMENDED_DEPOSIT_INSTANT_LIMIT";
+  return (
+    [
+      `${envVarBase}_${symbol}_${fromChainId}_${toChainId}`,
+      `${envVarBase}_${symbol}_${fromChainId}`,
+      `${envVarBase}_${symbol}`,
+    ]
+      .map((key) => process.env[key])
+      .find((value) => value !== undefined) ||
+    DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS[symbol]
+  );
 }

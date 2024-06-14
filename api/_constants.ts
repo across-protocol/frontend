@@ -1,33 +1,9 @@
 import { ethers } from "ethers";
-import { relayFeeCalculator, utils } from "@across-protocol/sdk-v2";
-import * as constants from "@across-protocol/constants-v2";
+import { relayFeeCalculator, utils } from "@across-protocol/sdk";
+import * as constants from "@across-protocol/constants";
 
 export const CHAIN_IDs = constants.CHAIN_IDs;
-
-// NOTE: As a temporary workaround for backwards-compatibility, we have `USDC` and `_USDC`/`USDC.e`
-// entries in our constants package. See https://github.com/across-protocol/constants-v3/pull/28
-// for more details. Until the entry `USDC` is updated with the values of `_USDC`, we override the
-// entry locally.
-let { USDC, _USDC, ...tokenSymbols } = constants.TOKEN_SYMBOLS_MAP;
-export const TOKEN_SYMBOLS_MAP = {
-  ...tokenSymbols,
-  USDC: _USDC,
-  "USDC.e": {
-    ...tokenSymbols["USDC.e"],
-    addresses: {
-      ...tokenSymbols["USDC.e"].addresses,
-      [CHAIN_IDs.OPTIMISM_SEPOLIA]:
-        "0x9552a0a6624A23B848060AE5901659CDDa1f83f8",
-    },
-  },
-  USDbC: {
-    ...tokenSymbols["USDbC"],
-    addresses: {
-      ...tokenSymbols["USDbC"].addresses,
-      [CHAIN_IDs.BASE_SEPOLIA]: "0xE634Ec56B73779eCFfa78109a653FA0aE33D243f",
-    },
-  },
-} as const;
+export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
 
 export const maxRelayFeePct = 0.25;
 
@@ -118,6 +94,10 @@ const defaultRelayerFeeCapitalCostConfig: {
   },
 };
 
+defaultRelayerFeeCapitalCostConfig["USDC.e"] = {
+  ...defaultRelayerFeeCapitalCostConfig["USDC"],
+};
+
 export const coinGeckoAssetPlatformLookup: Record<string, string> = {
   "0x4200000000000000000000000000000000000042": "optimistic-ethereum",
 };
@@ -196,3 +176,11 @@ export const DEFI_LLAMA_POOL_LOOKUP: Record<string, string> = {
 
 export const DEFAULT_SIMULATED_RECIPIENT_ADDRESS =
   "0xBb23Cd0210F878Ea4CcA50e9dC307fb0Ed65Cf6B";
+
+export const DEFAULT_RECOMMENDED_DEPOSIT_INSTANT_LIMITS = {
+  [TOKEN_SYMBOLS_MAP.ETH.symbol]: "2",
+  [TOKEN_SYMBOLS_MAP.WETH.symbol]: "2",
+  [TOKEN_SYMBOLS_MAP.USDC.symbol]: "5000",
+};
+
+export const DOMAIN_CALLDATA_DELIMITER = "0x1dc0de";
