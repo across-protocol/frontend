@@ -68,7 +68,7 @@ const validationErrorTextMap = {
   [AmountInputError.INSUFFICIENT_BALANCE]:
     "Insufficient balance to process this transfer.",
   [AmountInputError.INSUFFICIENT_LIQUIDITY]:
-    "Insufficient bridge liquidity to process this transfer.",
+    "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [max short delay] or lower.",
   [AmountInputError.INVALID]: "Only positive numbers are allowed as an input.",
   [AmountInputError.AMOUNT_TOO_LOW]:
     "The amount you are trying to bridge is too low.",
