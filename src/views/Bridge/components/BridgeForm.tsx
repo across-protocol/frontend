@@ -20,6 +20,7 @@ import {
   GetBridgeFeesResult,
   QUERIESV2,
   chainIdToRewardsProgramName,
+  formatUnitsWithMaxFractions,
 } from "utils";
 import { VoidHandler } from "utils/types";
 
@@ -68,7 +69,7 @@ const validationErrorTextMap = {
   [AmountInputError.INSUFFICIENT_BALANCE]:
     "Insufficient balance to process this transfer.",
   [AmountInputError.INSUFFICIENT_LIQUIDITY]:
-    "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [max short delay] or lower.",
+    "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [MAX_DEPOSIT_SHORT_DELAY] or lower.",
   [AmountInputError.INVALID]: "Only positive numbers are allowed as an input.",
   [AmountInputError.AMOUNT_TOO_LOW]:
     "The amount you are trying to bridge is too low.",
@@ -143,7 +144,15 @@ const BridgeForm = ({
         </TokenSelectorWrapper>
       </RowWrapper>
       {parsedAmountInput && validationError && (
-        <InputErrorText errorText={validationErrorTextMap[validationError]} />
+        <InputErrorText
+          errorText={validationErrorTextMap[validationError].replace(
+            "[MAX_DEPOSIT_SHORT_DELAY]",
+            `${formatUnitsWithMaxFractions(
+              fees?.limits.maxDepositShortDelay || 0,
+              getToken(selectedRoute.fromTokenSymbol).decimals
+            )} ${selectedRoute.fromTokenSymbol}`
+          )}
+        />
       )}
       <RowWrapper>
         <RowLabelWrapper>

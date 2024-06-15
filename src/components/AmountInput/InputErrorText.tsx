@@ -11,9 +11,9 @@ export function InputErrorText({ errorText }: Props) {
   return (
     <ErrorWrapper>
       <ErrorIcon />
-      <Text size="sm" color="error">
+      <ErrorText size="sm" color="error">
         {errorText}
-      </Text>
+      </ErrorText>
     </ErrorWrapper>
   );
 }
@@ -22,7 +22,7 @@ const ErrorWrapper = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
-  align-items: flex-end;
+  align-items: center;
   padding: 0px;
   gap: 8px;
 
@@ -36,4 +36,8 @@ const ErrorIcon = styled(II)`
   & path {
     stroke: #f96c6c !important;
   }
+`;
+
+const ErrorText = styled(Text)`
+  max-width: 400px;
 `;
