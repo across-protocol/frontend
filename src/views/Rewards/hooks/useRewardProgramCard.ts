@@ -8,9 +8,9 @@ export function useRewardProgramCard(programName: rewardProgramTypes) {
   const token = getToken(programDetail.rewardTokenSymbol);
   const { summary } = useRewardSummary(programName, account);
   const rewardsAmount =
-    summary.program === "op-rebates"
-      ? summary.unclaimedRewards ?? 0
-      : summary.rewardsAmount;
+    summary.program === "referrals"
+      ? summary.rewardsAmount
+      : summary.unclaimedRewards ?? 0;
   return {
     ...programDetail,
     token,

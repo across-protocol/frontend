@@ -114,6 +114,7 @@ const EstimatedTable = ({
   swapToken,
   onSetNewSlippage,
   isQuoteLoading,
+  rewardProgram,
 }: EstimatedTableProps) => {
   const rewardDisplaySymbol =
     rewardToken?.displaySymbol || rewardToken?.symbol.toUpperCase();
@@ -129,7 +130,6 @@ const EstimatedTable = ({
     }) || {};
 
   const [isSlippageModalOpen, setSlippageModalOpen] = useState(false);
-
   return (
     <Wrapper>
       {rewardToken && (
@@ -138,7 +138,7 @@ const EstimatedTable = ({
             {`${rewardDisplaySymbol} Rewards`}
           </Text>
           <ReferralRewardWrapper
-            isACX={false}
+            rewardTokenPrimaryColor={rewardProgram?.primaryColor ?? "aqua"}
             isTransparent={!hasDepositReward}
           >
             <PriceFee
@@ -495,7 +495,7 @@ const InfoIconWrapper = styled.div`
 `;
 
 const ReferralRewardWrapper = styled.div<{
-  isACX: boolean;
+  rewardTokenPrimaryColor: string;
   isTransparent?: boolean;
 }>`
   //Layout
@@ -506,8 +506,10 @@ const ReferralRewardWrapper = styled.div<{
 
   // Style
   border-radius: 22px;
-  border: 1px solid ${({ isACX }) => COLORS[isACX ? "aqua-15" : "op-red-15"]};
-  background: ${({ isACX }) => COLORS[isACX ? "aqua-5" : "op-red-5"]};
+  border: 1px solid
+    ${({ rewardTokenPrimaryColor }) => `${rewardTokenPrimaryColor}-15`};
+  background: ${({ rewardTokenPrimaryColor }) =>
+    `${rewardTokenPrimaryColor}-5`};
 
   // Opacity
   opacity: ${({ isTransparent = false }) => (isTransparent ? 0.5 : 1)};

@@ -41,6 +41,12 @@ const OPRebates = lazyWithRetry(
       /* webpackChunkName: "OPRebates" */ "./views/RewardsProgram/OPRebatesProgram"
     )
 );
+const ARBRebates = lazyWithRetry(
+  () =>
+    import(
+      /* webpackChunkName: "ARBRebates" */ "./views/RewardsProgram/ARBRebatesProgram"
+    )
+);
 const Rewards = lazyWithRetry(
   () => import(/* webpackChunkName: "Rewards" */ "./views/Rewards")
 );
@@ -155,6 +161,11 @@ const Routes: React.FC = () => {
             exact
             path="/rewards/optimism-grant-program"
             component={OPRebates}
+          />
+          <Route
+            exact
+            path="/rewards/arbitrum-grant-program"
+            component={ARBRebates}
           />
           <Route exact path="/rewards" component={Rewards} />
           <Route
