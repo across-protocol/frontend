@@ -3,12 +3,12 @@ import styled from "@emotion/styled";
 import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
 
-import { BaseCell } from "./BaseCell";
 import {
-  formatUnitsWithMaxFractions,
-  getToken,
   formatMaxFracDigits,
+  formatUnitsWithMaxFractions,
+  getRewardToken,
 } from "utils";
+import { BaseCell } from "./BaseCell";
 
 type Props = {
   deposit: Deposit;
@@ -16,10 +16,7 @@ type Props = {
 };
 
 export function RewardsCell({ deposit, width }: Props) {
-  const rewardToken = deposit.rewards
-    ? getToken(deposit.rewards?.type === "op-rebates" ? "OP" : "ACX")
-    : undefined;
-
+  const rewardToken = getRewardToken(deposit);
   return (
     <StyledRewardsCell width={width}>
       {deposit.rewards && rewardToken ? (
