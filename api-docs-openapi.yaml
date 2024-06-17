@@ -345,11 +345,13 @@ paths:
 
 
             _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+          example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           schema:
             type: string
         - name: destinationToken
           in: query
           required: false
+          example: "0x4200000000000000000000000000000000000006"
           description: >
             Destination chain address of token contract to receive.
 
@@ -373,6 +375,8 @@ paths:
                     "destinationChainId": "10",
                     "originToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                     "destinationToken": "0x4200000000000000000000000000000000000006",
+                    "originTokenSymbol": "WETH",
+                    "destinationTokenSymbol": "WETH"
                   },
                 ]
         "400":
@@ -611,12 +615,20 @@ components:
           example: 10
         originToken:
           type: string
-          description: Origin chain ddress of token contract to transfer.
+          description: Origin chain address of token contract to transfer.
           example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
         destinationToken:
           type: string
-          description: Destination chain ddress of token contract to receive.
+          description: Destination chain address of token contract to receive.
           example: "0x4200000000000000000000000000000000000006"
+        originTokenSymbol:
+          type: string
+          description: The symbol of the origin token to transfer.
+          example: "WETH"
+        destinationTokenSymbol:
+          type: string
+          description: The symbol of the destination token to receive.
+          example: "WETH"
     ChainId:
       type: integer
       minimum: 1
