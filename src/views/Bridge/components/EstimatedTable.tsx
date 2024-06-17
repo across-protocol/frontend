@@ -507,22 +507,8 @@ const ReferralRewardWrapper = styled.div<{
   // Style
   border-radius: 22px;
   border: 1px solid
-    ${({ rewardTokenSymbol }) =>
-      COLORS[
-        rewardTokenSymbol === "ACX"
-          ? "aqua-15"
-          : rewardTokenSymbol === "ARB"
-          ? "arb-blue-15"
-          : "op-red-15"
-      ]};
-  background: ${({ rewardTokenSymbol }) =>
-    COLORS[
-      rewardTokenSymbol === "ACX"
-        ? "aqua-5"
-        : rewardTokenSymbol === "ARB"
-        ? "arb-blue-5"
-        : "op-red-5"
-    ]};
+    ${({ rewardTokenPrimaryColor }) => `${rewardTokenPrimaryColor}-15`};
+  background: ${({ rewardTokenPrimaryColor }) => `${rewardTokenPrimaryColor}-5`};
 
   // Opacity
   opacity: ${({ isTransparent = false }) => (isTransparent ? 0.5 : 1)};
