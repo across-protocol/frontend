@@ -1,67 +1,66 @@
 import styled from "@emotion/styled";
-import { COLORS, QUERIESV2 } from "utils";
 import { ReactComponent as Background } from "assets/bg-banners/overview-card-background.svg";
+import { ReactComponent as II } from "assets/icons/info-16.svg";
 import { Text } from "components";
 import { ReactNode } from "react";
+import { COLORS, QUERIESV2 } from "utils";
+import { Tooltip } from "components/Tooltip";
 
 type GenericOverviewCardTitleProps = {
-  subTitle: string;
-  title: ReactNode;
-};
-
-type GenericOverviewCardProps = {
-  Icon: ReactNode;
-  upperCard: GenericOverviewCardTitleProps;
-  lowerCard: {
-    left: GenericOverviewCardTitleProps;
-    right: GenericOverviewCardTitleProps;
+  subTitle?: ReactNode;
+  title: string;
+  tooltip?: {
+    content: string;
+    title: string;
   };
 };
 
+type GenericOverviewCardProps = {
+  upperCard: GenericOverviewCardTitleProps;
+  lowerCard?: ReactNode;
+  thinVerticalPadding?: boolean;
+};
+
 const GenericOverviewCard = ({
-  Icon,
   upperCard,
   lowerCard,
+  thinVerticalPadding,
 }: GenericOverviewCardProps) => (
   <Wrapper>
     <BackgroundWrapper>
       <Background />
     </BackgroundWrapper>
-    <ContentWrapper>
-      <UpperIconTextStack>
-        <IconWrapper>{Icon}</IconWrapper>
-        <UpperTextStack>
+    <ContentWrapper thinVerticalPadding={thinVerticalPadding}>
+      <UpperCardStack>
+        <UpperCardTitleStack>
           <Text size="md" color="grey-400">
-            {upperCard.subTitle}
-          </Text>
-          <Text
-            size="2xl"
-            color={upperCard.title === "-" ? "grey-400" : "white"}
-          >
             {upperCard.title}
           </Text>
-        </UpperTextStack>
-      </UpperIconTextStack>
-      <Divider />
-      <BottomContentWrapper>
-        <LowerTextStack>
-          <Text color="grey-400" size="md">
-            {lowerCard.left.subTitle}
-          </Text>
-          <Text color="white" size="md">
-            {lowerCard.left.title}
-          </Text>
-        </LowerTextStack>
-        <VerticalDivider />
-        <LowerTextStack>
-          <Text color="grey-400" size="md">
-            {lowerCard.right.subTitle}
-          </Text>
-          <Text color="white" size="md">
-            {lowerCard.right.title}
-          </Text>
-        </LowerTextStack>
-      </BottomContentWrapper>
+          {upperCard.subTitle}
+        </UpperCardTitleStack>
+        {upperCard.tooltip && (
+          <Tooltip
+            tooltipId={upperCard.tooltip.title}
+            title={upperCard.tooltip.title}
+            body={
+              <Text size="sm" color="white">
+                {upperCard.tooltip.content}
+              </Text>
+            }
+            placement="bottom-start"
+          >
+            <InfoIconWrapper>
+              <InfoIcon />
+            </InfoIconWrapper>
+          </Tooltip>
+        )}
+      </UpperCardStack>
+      {lowerCard && (
+        <>
+          <Divider />
+          {lowerCard}
+        </>
+      )}
     </ContentWrapper>
   </Wrapper>
 );
@@ -73,8 +72,6 @@ const Wrapper = styled.div`
   display: flex;
 
   position: relative;
-  overflow: clip;
-  isolation: isolate;
 
   width: 100%;
 
@@ -99,8 +96,11 @@ const BackgroundWrapper = styled.div`
   overflow: clip;
 `;
 
-const ContentWrapper = styled.div`
+const ContentWrapper = styled.div<{ thinVerticalPadding?: boolean }>`
   padding: 24px;
+  padding-top: ${(p) => (p.thinVerticalPadding ? "18px" : "24px")};
+  padding-bottom: ${(p) => (p.thinVerticalPadding ? "18px" : "24px")};
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -118,57 +118,39 @@ const ContentWrapper = styled.div`
   }
 `;
 
-const UpperIconTextStack = styled.div`
+const UpperCardStack = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
   align-self: stretch;
-`;
-
-const UpperTextStack = styled.div`
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-  gap: 4px;
-`;
-
-const LowerTextStack = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  flex: 1 0 0;
-`;
-
-const IconWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  flex-shrink: 0;
-
-  width: 64px;
-  height: 64px;
-
-  margin: -12px;
 `;
 
 const Divider = styled.div`
-  width: calc(100% + 48px);
-  margin-left: -24px;
   height: 1px;
-  background: ${COLORS["grey-600"]};
-`;
-
-const VerticalDivider = styled.div`
-  width: 1px;
   align-self: stretch;
-  background: ${COLORS["grey-600"]};
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
 `;
 
-const BottomContentWrapper = styled.div`
+const UpperCardTitleStack = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 16px;
-  align-self: stretch;
+  gap: 4px;
+`;
+const InfoIcon = styled(II)`
+  height: 20px;
+  width: 20px;
+`;
+
+const InfoIconWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 24px;
+  width: 24px;
 `;

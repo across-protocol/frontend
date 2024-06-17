@@ -140,5 +140,6 @@ export function useEstimatedRewards(
     rewardPercentage: availableRewardPercentage,
     hasDepositReward,
     rewardToken,
+    rewardProgram,
   };
 }

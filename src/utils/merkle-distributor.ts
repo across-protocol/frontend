@@ -33,6 +33,12 @@ export type AirdropRecipient = {
   }>;
 };
 
+const rewardProgramLookup = {
+  referrals: "referral-rewards",
+  "op-rebates": "op-rewards",
+  "arb-rebates": "arb-rewards",
+};
+
 const config = getConfig();
 
 export async function fetchIsClaimed(
@@ -72,13 +78,7 @@ export async function fetchAirdropProofs(
 
   const startWindowIndex =
     rewardsType === "referrals" ? referralsStartWindowIndex : 0;
-  let rewardsTypeQuery = "";
-
-  if (rewardsType === "referrals") {
-    rewardsTypeQuery = "referral-rewards";
-  } else if (rewardsType === "op-rebates") {
-    rewardsTypeQuery = "op-rewards";
-  }
+  const rewardsTypeQuery = rewardProgramLookup[rewardsType];
   const { data } = await axios.get<AirdropRecipient[]>(
     `${rewardsApiUrl}/airdrop/merkle-distributor-proofs`,
     {
