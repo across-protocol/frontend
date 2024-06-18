@@ -21,11 +21,13 @@ type OverviewSectionProps = {
     logo: string;
     amount: BigNumber;
   };
+  totalACXRewards?: BigNumber;
 };
 
 const OverviewSection = ({
   stakedTokens,
   largestStakedPool,
+  totalACXRewards,
 }: OverviewSectionProps) => (
   <SectionWrapper title="Overview">
     <InnerWrapper>
@@ -40,6 +42,9 @@ const OverviewSection = ({
                 <RewardProgramCard
                   program={program}
                   key={rewardPrograms[program].rewardTokenSymbol}
+                  rewardOverride={
+                    program === "referrals" ? totalACXRewards : undefined
+                  }
                 />
               ))}
             </RewardProgramWrapper>
@@ -79,7 +84,13 @@ const OverviewSection = ({
 
 export default OverviewSection;
 
-const RewardProgramCard = ({ program }: { program: rewardProgramTypes }) => {
+const RewardProgramCard = ({
+  program,
+  rewardOverride,
+}: {
+  program: rewardProgramTypes;
+  rewardOverride?: BigNumber;
+}) => {
   const { token, rewardsAmount, primaryColor } = useRewardProgramCard(program);
   return (
     <RewardProgramCardStack>
@@ -88,7 +99,10 @@ const RewardProgramCard = ({ program }: { program: rewardProgramTypes }) => {
       </LogoContainer>
       <RewardProgramTextStack>
         <Text color="white" size="lg">
-          {formatUnitsWithMaxFractions(rewardsAmount, token.decimals)}
+          {formatUnitsWithMaxFractions(
+            rewardOverride ?? rewardsAmount,
+            token.decimals
+          )}
         </Text>
         <Text color="grey-400" size="md">
           {token.symbol}
