@@ -15,7 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: yarn format --log-level debug
+      - run: yarn prettier --version
+      - run: yarn format
       - run: yarn lint
       - run: yarn format
 
