@@ -1,0 +1,27 @@
+name: E2E Tests
+
+on:
+  deployment_status:
+
+jobs:
+  e2e-tests:
+    if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/setup
+      - name: Install Playwright Browsers
+        run: yarn playwright install --with-deps
+      - name: Setup Synpress wallet cache
+        run: yarn synpress ./e2e/wallet-setup.ts
+        env:
+          E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
+      - name: Run tests
+        run: yarn playwright test
+        env:
+          E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

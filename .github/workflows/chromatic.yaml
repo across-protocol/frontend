@@ -1,4 +1,3 @@
-# Workflow name
 name: Chromatic
 
 on:
@@ -6,13 +5,10 @@ on:
   workflow_dispatch:
   pull_request:
 
-# List of jobs
 jobs:
   chromatic-deployment:
     if: ${{ contains( github.event.pull_request.labels.*.name, 'storybook') }}
-    # Operating System
     runs-on: ubuntu-latest
-    # Job steps
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -24,7 +20,6 @@ jobs:
           REACT_APP_REWARDS_API_URL: ${{ secrets.CYPRESS_REWARDS_API_URL }}
           REACT_APP_CHAIN_137_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_137_PROVIDER_URL }}
           REACT_APP_CHAIN_42161_PROVIDER_URL: ${{ secrets.CYPRESS_CHAIN_42161_PROVIDER_URL }}
-        # Chromatic GitHub Action options
         with:
           # 👇 Chromatic projectToken, refer to the manage page to obtain it.
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}

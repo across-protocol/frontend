@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": false,
+    "esModuleInterop": true,
+    "outDir": "./e2e/tests-out",
+    "skipLibCheck": true,
+    "baseUrl": "e2e"
+  },
+  "paths": {
+    "*": ["./e2e/*"]
+  },
+  "include": ["e2e"]
+}
