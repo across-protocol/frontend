@@ -64,7 +64,7 @@ export function useRewards() {
     connectHandler: () => {
       connect({ trackSection: "rewardsTable" });
     },
-    totalRewards: totalRewards,
+    totalRewards,
     stakingRewards,
     referralACXRewards: referralRewards,
     stakedTokens: usersLPStakedInUSD,

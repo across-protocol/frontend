@@ -17,6 +17,7 @@ const Rewards = () => {
     allPoolData,
     stakedTokens,
     largestStakedPool,
+    totalRewards,
   } = useRewards();
 
   useScrollElementByHashIntoView();
@@ -29,6 +30,7 @@ const Rewards = () => {
           <OverviewSection
             stakedTokens={stakedTokens}
             largestStakedPool={largestStakedPool}
+            totalACXRewards={totalRewards}
           />
           {isConnected && (areStakingPoolsLoading || myPoolData.length > 0) && (
             <SectionWrapper title="My pools" id="my-pools">
