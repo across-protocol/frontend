@@ -13,7 +13,7 @@ jobs:
       - name: Install Playwright Browsers
         run: yarn playwright install --with-deps
       - name: Setup Synpress wallet cache
-        run: yarn synpress ./e2e/wallet-setup.ts
+        run: yarn synpress ./e2e/wallet-setup
         env:
           E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
       - name: Run tests

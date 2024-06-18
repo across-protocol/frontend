@@ -10,11 +10,12 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  format-and-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
+      - run: yarn format:check
       - run: yarn lint
       - run: yarn format
 
