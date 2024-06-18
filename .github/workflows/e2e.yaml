@@ -5,7 +5,10 @@ on:
 
 jobs:
   e2e-tests:
-    if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
+    if: |
+      github.event_name == 'deployment_status' &&
+      github.event.deployment_status.state == 'success' &&
+      contains(github.event.deployment_status.environment_url, 'app-frontend-v3')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
