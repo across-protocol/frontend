@@ -89,16 +89,18 @@ paths:
           description: >
             Chain ID where the specified `token` or `inputToken` exists.
           schema:
-            $ref: "#/components/schemas/ChainId"
-            example: 1
+            allOf:
+              - example: 1
+              - $ref: "#/components/schemas/ChainId"
         - name: destinationChainId
           in: query
           required: true
           description: >
             The desired destination chain ID of the bridge transfer.
           schema:
-            $ref: "#/components/schemas/ChainId"
-            example: 10
+            allOf:
+              - $ref: "#/components/schemas/ChainId"
+              - example: 10
         - name: amount
           in: query
           required: true
@@ -281,16 +283,18 @@ paths:
           description: >
             Chain ID where the specified `token` or `inputToken` exists.
           schema:
-            $ref: "#/components/schemas/ChainId"
-            example: 1
+            allOf:
+              - $ref: "#/components/schemas/ChainId"
+              - example: 1
         - name: destinationChainId
           in: query
           required: true
           description: >
             The intended destination chain ID of the bridge transfer.
           schema:
-            $ref: "#/components/schemas/ChainId"
-            example: 10
+            allOf:
+              - $ref: "#/components/schemas/ChainId"
+              - example: 10
       responses:
         "200":
           description: Transfer limits
@@ -321,14 +325,18 @@ paths:
           description: >
             Chain ID of the originating chain.
           schema:
-            $ref: "#/components/schemas/ChainId"
+            allOf:
+              - example: 1
+              - $ref: "#/components/schemas/ChainId"
         - name: destinationChainId
           in: query
           required: false
           description: >
             Chain ID of the destination chain.
           schema:
-            $ref: "#/components/schemas/ChainId"
+            allOf:
+              - example: 10
+              - $ref: "#/components/schemas/ChainId"
         - name: originToken
           in: query
           required: false
@@ -337,11 +345,13 @@ paths:
 
 
             _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+          example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           schema:
             type: string
         - name: destinationToken
           in: query
           required: false
+          example: "0x4200000000000000000000000000000000000006"
           description: >
             Destination chain address of token contract to receive.
 
@@ -365,6 +375,8 @@ paths:
                     "destinationChainId": "10",
                     "originToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                     "destinationToken": "0x4200000000000000000000000000000000000006",
+                    "originTokenSymbol": "WETH",
+                    "destinationTokenSymbol": "WETH"
                   },
                 ]
         "400":
@@ -389,7 +401,9 @@ paths:
           description: >
             Chain Id where the deposit originated from.
           schema:
-            $ref: "#/components/schemas/ChainId"
+            allOf:
+              - $ref: "#/components/schemas/ChainId"
+              - example: 137
           example: 137
         - name: depositId
           in: query
@@ -601,12 +615,20 @@ components:
           example: 10
         originToken:
           type: string
-          description: Origin chain ddress of token contract to transfer.
+          description: Origin chain address of token contract to transfer.
           example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
         destinationToken:
           type: string
-          description: Destination chain ddress of token contract to receive.
+          description: Destination chain address of token contract to receive.
           example: "0x4200000000000000000000000000000000000006"
+        originTokenSymbol:
+          type: string
+          description: The symbol of the origin token to transfer.
+          example: "WETH"
+        destinationTokenSymbol:
+          type: string
+          description: The symbol of the destination token to receive.
+          example: "WETH"
     ChainId:
       type: integer
       minimum: 1

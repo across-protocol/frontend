@@ -6,7 +6,7 @@ import {
   rewardProgramTypes,
 } from "utils";
 
-export type OPRebateSummary = {
+export type RebateSummary = {
   depositsCount: number;
   unclaimedRewards?: string;
   volumeUsd: number;
@@ -28,8 +28,8 @@ export type RewardsSummary =
       program: "referrals";
     } & ACXReferralSummary)
   | ({
-      program: "op-rebates";
-    } & OPRebateSummary);
+      program: "op-rebates" | "arb-rebates";
+    } & RebateSummary);
 
 const defaultACXRewardsSummary: RewardsSummary = {
   program: "referrals",
@@ -50,6 +50,14 @@ const defaultOPRewardsSummary: RewardsSummary = {
   volumeUsd: 0,
 };
 
+const defaultARBRebatesSummary: RewardsSummary = {
+  program: "arb-rebates",
+  claimableRewards: "0",
+  depositsCount: 0,
+  unclaimedRewards: "0",
+  volumeUsd: 0,
+};
+
 export function useRewardSummary(
   program: rewardProgramTypes,
   account?: string
@@ -63,6 +71,8 @@ export function useRewardSummary(
     async ({ queryKey }) => {
       const rewardProgram = queryKey.includes("op-rebates")
         ? "op-rebates"
+        : queryKey.includes("arb-rebates")
+        ? "arb-rebates"
         : "referrals";
       return getRewardSummary(rewardProgram, account!);
     },
@@ -78,6 +88,8 @@ export function useRewardSummary(
       _summary?.data ||
       (program === "op-rebates"
         ? defaultOPRewardsSummary
+        : program === "arb-rebates"
+        ? defaultARBRebatesSummary
         : defaultACXRewardsSummary),
     ...other,
   };

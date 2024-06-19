@@ -10,8 +10,15 @@ import OverviewSection from "./components/OverviewSection";
 import RewardProgramSection from "./components/RewardProgramSection";
 
 const Rewards = () => {
-  const { isConnected, areStakingPoolsLoading, myPoolData, allPoolData } =
-    useRewards();
+  const {
+    isConnected,
+    areStakingPoolsLoading,
+    myPoolData,
+    allPoolData,
+    stakedTokens,
+    largestStakedPool,
+    totalRewards,
+  } = useRewards();
 
   useScrollElementByHashIntoView();
 
@@ -20,7 +27,11 @@ const Rewards = () => {
       <Wrapper>
         <BreadcrumbV2 />
         <InnerSectionWrapper>
-          <OverviewSection />
+          <OverviewSection
+            stakedTokens={stakedTokens}
+            largestStakedPool={largestStakedPool}
+            totalACXRewards={totalRewards}
+          />
           {isConnected && (areStakingPoolsLoading || myPoolData.length > 0) && (
             <SectionWrapper title="My pools" id="my-pools">
               <GenericStakingPoolTable

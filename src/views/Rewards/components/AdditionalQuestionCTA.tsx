@@ -18,7 +18,7 @@ const AdditionalQuestionCTA = () => (
     <ExternalButtonWrapper>
       <LinkButton
         text="FAQ"
-        link="https://docs.across.to/v/user-docs/how-across-works/overview"
+        link="https://docs.across.to/v/user-docs/additional-info/faq"
       />
       <LinkButton text="Discord" link="https://discord.across.to" />
     </ExternalButtonWrapper>
