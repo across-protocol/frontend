@@ -42,21 +42,21 @@ export function useBridge() {
 
   const { toAccount, setCustomToAddress } = useToAccount(selectedRoute.toChain);
 
-  const {
-    data: transferQuote,
-    isLoading: isQuoteLoading,
-    isFetching: isQuoteFetching,
-    isIdle: isQuoteIdle,
-  } = useTransferQuote(
+  const { transferQuoteQuery, limitsQuery } = useTransferQuote(
     selectedRoute,
     parsedAmount?.gt(0) ? parsedAmount : bnZero,
     swapSlippage,
     account,
     toAccount?.address
   );
+  const {
+    data: transferQuote,
+    isLoading: isQuoteLoading,
+    isFetching: isQuoteFetching,
+    isIdle: isQuoteIdle,
+  } = transferQuoteQuery;
 
-  const { quotedFees, quotedLimits, quotedSwap, estimatedTime } =
-    usedTransferQuote || {};
+  const { quotedFees, quotedSwap, estimatedTime } = usedTransferQuote || {};
 
   const isQuoteUpdating =
     shouldUpdateQuote &&
@@ -66,7 +66,7 @@ export function useBridge() {
     parsedAmount,
     quotedFees?.isAmountTooLow,
     maxBalance,
-    quotedLimits?.maxDeposit,
+    limitsQuery.limits?.maxDepositShortDelay,
     selectedRoute.type === "swap"
       ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount || 0)
       : parsedAmount
@@ -145,6 +145,6 @@ export function useBridge() {
     handleSelectInputToken,
     handleSelectOutputToken,
     handleSetNewSlippage: setSwapSlippage,
-    isQuoteLoading: isQuoteLoading || Boolean(parsedAmount && isQuoteIdle),
+    isQuoteLoading: isQuoteUpdating,
   };
 }

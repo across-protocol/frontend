@@ -42,5 +42,11 @@ export async function suggestedFeesMockedApiCall(
     isAmountTooLow: false,
     quoteBlock: BigNumber.from("1"),
     quoteTimestamp: BigNumber.from("1"),
+    limits: {
+      minDeposit: parseUnits("0.5", decimals),
+      maxDeposit: parseUnits("0.5", decimals),
+      maxDepositInstant: parseUnits("0.5", decimals),
+      maxDepositShortDelay: parseUnits("0.5", decimals),
+    },
   };
 }

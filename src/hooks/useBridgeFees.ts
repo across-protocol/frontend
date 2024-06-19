@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 import { BigNumber, ethers } from "ethers";
 import { bridgeFeesQueryKey, getBridgeFees, ChainId } from "utils";
+import { AxiosError } from "axios";
 
 /**
  * This hook calculates the bridge fees for a given token and amount.
@@ -50,6 +51,17 @@ export function useBridgeFees(
     {
       enabled: Boolean(amount.gt(0)),
       refetchInterval: 5000,
+      retry: (_, error) => {
+        if (
+          error instanceof AxiosError &&
+          error.response?.data.includes(
+            "Amount exceeds max. deposit limit for short delay"
+          )
+        ) {
+          return false;
+        }
+        return true;
+      },
     }
   );
   return {

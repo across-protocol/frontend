@@ -24,7 +24,7 @@ import {
 import TokenFee from "./TokenFee";
 import { type Props as FeesCollapsibleProps } from "./FeesCollapsible";
 import { type EstimatedRewards } from "../hooks/useEstimatedRewards";
-import { calcFeesForEstimatedTable } from "../utils";
+import { AmountInputError, calcFeesForEstimatedTable } from "../utils";
 import { SwapSlippageModal } from "./SwapSlippageModal";
 import { LoadingSkeleton } from "components";
 
@@ -114,22 +114,34 @@ const EstimatedTable = ({
   swapToken,
   onSetNewSlippage,
   isQuoteLoading,
+  validationError,
   rewardProgram,
 }: EstimatedTableProps) => {
   const rewardDisplaySymbol =
     rewardToken?.displaySymbol || rewardToken?.symbol.toUpperCase();
   const baseToken = swapToken || inputToken;
-  const { bridgeFee, outputAmount, swapFee } =
-    calcFeesForEstimatedTable({
-      gasFee,
-      capitalFee,
-      lpFee,
-      isSwap,
-      parsedAmount,
-      swapQuote,
-    }) || {};
+  const doesAmountExceedMaxDeposit =
+    validationError === AmountInputError.INSUFFICIENT_LIQUIDITY;
+
+  const { bridgeFee, outputAmount, swapFee } = doesAmountExceedMaxDeposit
+    ? {
+        bridgeFee: undefined,
+        outputAmount: undefined,
+        swapFee: undefined,
+      }
+    : calcFeesForEstimatedTable({
+        gasFee,
+        capitalFee,
+        lpFee,
+        isSwap,
+        parsedAmount,
+        swapQuote,
+      }) || {};
 
   const [isSlippageModalOpen, setSlippageModalOpen] = useState(false);
+
+  const showLoadingSkeleton = isQuoteLoading && !doesAmountExceedMaxDeposit;
+
   return (
     <Wrapper>
       {rewardToken && (
@@ -146,7 +158,7 @@ const EstimatedTable = ({
               tokenFee={reward}
               baseCurrencyFee={referralRewardAsBaseCurrency}
               hideSymbolOnEmpty={false}
-              showLoadingSkeleton={isQuoteLoading}
+              showLoadingSkeleton={showLoadingSkeleton}
             />
           </ReferralRewardWrapper>
         </Row>
@@ -159,11 +171,11 @@ const EstimatedTable = ({
             {capitalizeFirstLetter(getChainInfo(toChainId).name)}
           </Text>
         </Text>
-        {isQuoteLoading ? (
+        {showLoadingSkeleton ? (
           <LoadingSkeleton height="20px" width="75px" />
         ) : (
           <Text size="md" color="grey-400">
-            {estimatedTime ? estimatedTime : "-"}
+            {estimatedTime && !doesAmountExceedMaxDeposit ? estimatedTime : "-"}
           </Text>
         )}
       </Row>
@@ -183,93 +195,97 @@ const EstimatedTable = ({
             </InfoIconWrapper>
           </Tooltip>
         </ToolTipWrapper>
-        {isQuoteLoading ? (
+        {showLoadingSkeleton ? (
           <LoadingSkeleton height="20px" width="75px" />
         ) : (
           <Text
             size="md"
             color={netFeeAsBaseCurrency ? "light-200" : "grey-400"}
           >
-            {netFeeAsBaseCurrency
+            {netFeeAsBaseCurrency && !doesAmountExceedMaxDeposit
               ? `$ ${formatUSD(netFeeAsBaseCurrency)}`
               : "-"}
           </Text>
         )}
       </Row>
       <Divider />
-      {isSwap && swapQuote && swapToken && swapFee && (
-        <Row>
-          <ToolTipWrapper>
-            <SwapFeeRowLabelWrapper>
-              <SwapIcon />
-              <Text size="md" color="grey-400">
-                Swap fee
-              </Text>
-            </SwapFeeRowLabelWrapper>
-            <Tooltip
-              tooltipId="swap-fee-info"
-              title="Swap fee"
-              maxWidth={420}
-              body={
-                <SwapFeeTooltipBody>
-                  <Text size="sm" color="grey-400">
-                    This bridge transaction requires you to perform a token swap
-                    on the origin chain which incurs a swap fee.
-                  </Text>
-                  <Text size="sm" color="grey-400">
-                    You can change the swap slippage in the <SettingsIcon /> to
-                    the right.
-                  </Text>
-                  <Divider />
-                  <SwapRouteWrapper>
+      {isSwap &&
+        swapQuote &&
+        swapToken &&
+        swapFee &&
+        !doesAmountExceedMaxDeposit && (
+          <Row>
+            <ToolTipWrapper>
+              <SwapFeeRowLabelWrapper>
+                <SwapIcon />
+                <Text size="md" color="grey-400">
+                  Swap fee
+                </Text>
+              </SwapFeeRowLabelWrapper>
+              <Tooltip
+                tooltipId="swap-fee-info"
+                title="Swap fee"
+                maxWidth={420}
+                body={
+                  <SwapFeeTooltipBody>
                     <Text size="sm" color="grey-400">
-                      Swapping
+                      This bridge transaction requires you to perform a token
+                      swap on the origin chain which incurs a swap fee.
                     </Text>
-                    <Text size="sm" color="white">
-                      {swapToken.displaySymbol || swapToken.symbol}
-                    </Text>
-                    <TokenSymbol src={swapToken.logoURI} />
                     <Text size="sm" color="grey-400">
-                      for
+                      You can change the swap slippage in the <SettingsIcon />{" "}
+                      to the right.
                     </Text>
-                    <Text size="sm" color="white">
-                      {inputToken.displaySymbol || inputToken.symbol}
-                    </Text>
-                    <TokenSymbol src={inputToken.logoURI} />
-                    <Text size="sm" color="grey-400">
-                      on
-                    </Text>
-                    <Text size="sm" color="white" casing="capitalize">
-                      {swapQuote.dex}
-                    </Text>
-                  </SwapRouteWrapper>
-                </SwapFeeTooltipBody>
-              }
-              placement="bottom-start"
+                    <Divider />
+                    <SwapRouteWrapper>
+                      <Text size="sm" color="grey-400">
+                        Swapping
+                      </Text>
+                      <Text size="sm" color="white">
+                        {swapToken.displaySymbol || swapToken.symbol}
+                      </Text>
+                      <TokenSymbol src={swapToken.logoURI} />
+                      <Text size="sm" color="grey-400">
+                        for
+                      </Text>
+                      <Text size="sm" color="white">
+                        {inputToken.displaySymbol || inputToken.symbol}
+                      </Text>
+                      <TokenSymbol src={inputToken.logoURI} />
+                      <Text size="sm" color="grey-400">
+                        on
+                      </Text>
+                      <Text size="sm" color="white" casing="capitalize">
+                        {swapQuote.dex}
+                      </Text>
+                    </SwapRouteWrapper>
+                  </SwapFeeTooltipBody>
+                }
+                placement="bottom-start"
+              >
+                <InfoIconWrapper>
+                  <InfoIcon />
+                </InfoIconWrapper>
+              </Tooltip>
+            </ToolTipWrapper>
+            <SwapSlippageSettings
+              onClick={() => {
+                if (onSetNewSlippage && currentSwapSlippage) {
+                  setSlippageModalOpen(true);
+                }
+              }}
             >
-              <InfoIconWrapper>
-                <InfoIcon />
-              </InfoIconWrapper>
-            </Tooltip>
-          </ToolTipWrapper>
-          <SwapSlippageSettings
-            onClick={() => {
-              if (onSetNewSlippage && currentSwapSlippage) {
-                setSlippageModalOpen(true);
-              }
-            }}
-          >
-            <PriceFee
-              token={baseToken}
-              tokenFee={swapFee}
-              baseCurrencyFee={swapFeeAsBaseCurrency}
-              hideTokenIcon
-              showLoadingSkeleton={isQuoteLoading}
-            />
-            <SettingsIcon />
-          </SwapSlippageSettings>
-        </Row>
-      )}
+              <PriceFee
+                token={baseToken}
+                tokenFee={swapFee}
+                baseCurrencyFee={swapFeeAsBaseCurrency}
+                hideTokenIcon
+                showLoadingSkeleton={showLoadingSkeleton}
+              />
+              <SettingsIcon />
+            </SwapSlippageSettings>
+          </Row>
+        )}
       <Row>
         <ToolTipWrapper>
           <Text size="md" color="grey-400">
@@ -289,7 +305,7 @@ const EstimatedTable = ({
           token={baseToken}
           tokenFee={bridgeFee}
           baseCurrencyFee={bridgeFeeAsBaseCurrency}
-          showLoadingSkeleton={isQuoteLoading}
+          showLoadingSkeleton={showLoadingSkeleton}
         />
       </Row>
       <Row>
@@ -309,9 +325,9 @@ const EstimatedTable = ({
         </ToolTipWrapper>
         <PriceFee
           token={baseToken}
-          tokenFee={gasFee}
+          tokenFee={doesAmountExceedMaxDeposit ? undefined : gasFee}
           baseCurrencyFee={gasFeeAsBaseCurrency}
-          showLoadingSkeleton={isQuoteLoading}
+          showLoadingSkeleton={showLoadingSkeleton}
         />
       </Row>
       {rewardDisplaySymbol && rewardToken && (

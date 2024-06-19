@@ -54,6 +54,7 @@ export type SuggestedApiFeeReturnType = {
   isAmountTooLow: boolean;
   quoteTimestamp: ethers.BigNumber;
   quoteBlock: ethers.BigNumber;
+  limits: BridgeLimitInterface;
 };
 
 export type SuggestedApiFeeType = (

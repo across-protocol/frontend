@@ -48,6 +48,13 @@ export async function suggestedFeesApiCall(
   const quoteTimestamp = BigNumber.from(result["timestamp"]);
   const quoteBlock = BigNumber.from(result["quoteBlock"]);
 
+  const minDeposit = BigNumber.from(result["limits"].minDeposit);
+  const maxDeposit = BigNumber.from(result["limits"].maxDeposit);
+  const maxDepositInstant = BigNumber.from(result["limits"].maxDepositInstant);
+  const maxDepositShortDelay = BigNumber.from(
+    result["limits"].maxDepositShortDelay
+  );
+
   return {
     totalRelayFee: {
       pct: totalRelayFeePct,
@@ -68,5 +75,11 @@ export async function suggestedFeesApiCall(
     isAmountTooLow,
     quoteTimestamp,
     quoteBlock,
+    limits: {
+      maxDeposit,
+      maxDepositInstant,
+      maxDepositShortDelay,
+      minDeposit,
+    },
   };
 }
