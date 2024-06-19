@@ -1,3 +1,4 @@
+// Auto-generated with `yarn generate:routes:e2e 10`
 export const depositChainIdToTest = 10;
 export const originRoutesToTest = [
   {

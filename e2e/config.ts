@@ -5,6 +5,7 @@ dotenv.config({
 });
 
 export const IS_CI = process.env.CI === "true";
+export const RUN_DEPOSIT_TESTS = process.env.E2E_RUN_DEPOSIT_TESTS === "true";
 
 export const E2E_DAPP_URL = process.env.E2E_DAPP_URL || "http://127.0.0.1:3000";
 
