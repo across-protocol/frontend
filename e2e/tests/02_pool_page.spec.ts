@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/prefer-screen-queries */
 import { test, expect } from "@playwright/test";
 import { metaMaskFixtures, testWithSynpress } from "@synthetixio/synpress";
 
@@ -8,22 +7,24 @@ import connectedSetup from "../wallet-setup/connected.setup";
 const testWithConnectedMM = testWithSynpress(metaMaskFixtures(connectedSetup));
 const { expect: expectWithConnectedMM } = testWithConnectedMM;
 
-test("renders correctly /bridge - disconnected", async ({ page }) => {
-  await page.goto(E2E_DAPP_URL + "/bridge");
+const poolPageUrl = E2E_DAPP_URL + "/pool";
 
-  await expect(page.getByTestId("bridge-amount-input")).toBeVisible();
-  await expect(page.getByTestId("connect-wallet")).toBeVisible();
+test("renders correctly /pool - disconnected", async ({ page }) => {
+  await page.goto(poolPageUrl);
+
+  await expect(page.getByTestId("user-pool-info-box").first()).toBeVisible();
+  await expect(page.getByTestId("pool-info-box").first()).toBeVisible();
 });
 
 testWithConnectedMM(
-  "renders correctly /bridge - connected",
+  "renders correctly /pool - connected",
   async ({ page, metamask }) => {
     await metamask.switchNetwork("Ethereum Mainnet");
 
-    await page.goto(E2E_DAPP_URL + "/bridge");
+    await page.goto(poolPageUrl);
 
     await expectWithConnectedMM(
-      page.getByRole("button", { name: "Confirm transaction" })
+      page.getByRole("button", { name: "Add liquidity" })
     ).toBeVisible();
   }
 );

@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/prefer-screen-queries */
 import { Page } from "@playwright/test";
 import {
   metaMaskFixtures,

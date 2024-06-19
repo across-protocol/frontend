@@ -7,22 +7,25 @@ import connectedSetup from "../wallet-setup/connected.setup";
 const testWithConnectedMM = testWithSynpress(metaMaskFixtures(connectedSetup));
 const { expect: expectWithConnectedMM } = testWithConnectedMM;
 
-test("renders correctly /bridge - disconnected", async ({ page }) => {
-  await page.goto(E2E_DAPP_URL + "/bridge");
+const txPageUrl = E2E_DAPP_URL + "/transactions";
 
-  await expect(page.getByTestId("bridge-amount-input")).toBeVisible();
-  await expect(page.getByTestId("connect-wallet")).toBeVisible();
+test("renders correctly /transactions - disconnected", async ({ page }) => {
+  await page.goto(txPageUrl);
+
+  await expect(
+    page.getByText(/Please connect your wallet to view transactions/)
+  ).toBeVisible();
 });
 
 testWithConnectedMM(
-  "renders correctly /bridge - connected",
+  "renders correctly /rewards - connected",
   async ({ page, metamask }) => {
     await metamask.switchNetwork("Ethereum Mainnet");
 
-    await page.goto(E2E_DAPP_URL + "/bridge");
+    await page.goto(txPageUrl);
 
-    await expectWithConnectedMM(
-      page.getByRole("button", { name: "Confirm transaction" })
-    ).toBeVisible();
+    await expect(
+      page.getByText(/Please connect your wallet to view transactions/)
+    ).not.toBeVisible();
   }
 );
