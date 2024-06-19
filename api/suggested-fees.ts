@@ -239,8 +239,12 @@ const handler = async (
       sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
         String(rawL1TokenConfig)
       );
+<<<<<<< HEAD
     const liteChainIds =
       liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
+=======
+    const liteChainIds = JSON.parse(liteChainIdsEncoded);
+>>>>>>> ad55bc80 (feat: conditional logic for limits and suggested-fees endpoints when a lite chain is involved)
     const originChainIsLiteChain = liteChainIds.includes(computedOriginChainId);
     // We enforce repayment on the origin chain for lite chain deposits
     // so we overwrite the key to get the right rate model
