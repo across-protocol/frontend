@@ -400,7 +400,7 @@ export const getTokenByAddress = (tokenAddress: string, chainId?: number) => {
 
 const _getChainIdsOfToken = (
   tokenAddress: string,
-  token: typeof TOKEN_SYMBOLS_MAP[keyof typeof TOKEN_SYMBOLS_MAP]
+  token: (typeof TOKEN_SYMBOLS_MAP)[keyof typeof TOKEN_SYMBOLS_MAP]
 ) => {
   const chainIds = Object.entries(token.addresses).filter(
     ([_, address]) => address.toLowerCase() === tokenAddress.toLowerCase()

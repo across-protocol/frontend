@@ -45,7 +45,6 @@ export default function useReferrer() {
     } else {
       setIsResolved(true);
     }
-    // eslint-disable-next-line
   }, [provider, r]);
   // If ref and referrer params exist, prefer referrer param.
   // Not likely to happen but should have a catch if we get a bad link.

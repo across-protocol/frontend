@@ -14,7 +14,7 @@ const defaultReferralsSummary: SimplifiedReferralsSummary = {
 };
 
 export function useSimplifiedReferralSummary(account?: string) {
-  const queryKey = !!account
+  const queryKey = account
     ? simplifiedReferralSummaryQueryKey(account)
     : "DISABLED_REFERRAL_SUMMARY_KEY";
 

@@ -55,7 +55,7 @@ export async function fetchAirdropProof(account?: string) {
     return undefined;
   }
 
-  const { data } = await axios.get<AirdropRecipient | {}>(
+  const { data } = await axios.get<AirdropRecipient | Record<string, never>>(
     `${rewardsApiUrl}/airdrop/merkle-distributor-proof`,
     {
       params: {

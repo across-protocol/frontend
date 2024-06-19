@@ -62,7 +62,7 @@ export function useRewardSummary(
   program: rewardProgramTypes,
   account?: string
 ) {
-  const queryKey = !!account
+  const queryKey = account
     ? rewardSummaryQueryKey(account, program)
     : ["DISABLED_REFERRAL_SUMMARY_KEY", program];
 
@@ -72,8 +72,8 @@ export function useRewardSummary(
       const rewardProgram = queryKey.includes("op-rebates")
         ? "op-rebates"
         : queryKey.includes("arb-rebates")
-        ? "arb-rebates"
-        : "referrals";
+          ? "arb-rebates"
+          : "referrals";
       return getRewardSummary(rewardProgram, account!);
     },
     {
@@ -89,8 +89,8 @@ export function useRewardSummary(
       (program === "op-rebates"
         ? defaultOPRewardsSummary
         : program === "arb-rebates"
-        ? defaultARBRebatesSummary
-        : defaultACXRewardsSummary),
+          ? defaultARBRebatesSummary
+          : defaultACXRewardsSummary),
     ...other,
   };
 }

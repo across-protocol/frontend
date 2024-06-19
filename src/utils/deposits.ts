@@ -44,9 +44,8 @@ export async function getDepositByTxHash(
   fromChainId: number
 ) {
   const fromProvider = getProvider(fromChainId);
-  const depositTxReceipt = await fromProvider.getTransactionReceipt(
-    depositTxHash
-  );
+  const depositTxReceipt =
+    await fromProvider.getTransactionReceipt(depositTxHash);
   if (!depositTxReceipt) {
     throw new Error(
       `Could not fetch tx receipt for ${depositTxHash} on chain ${fromChainId}`

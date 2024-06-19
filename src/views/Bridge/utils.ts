@@ -475,6 +475,6 @@ export function getOutputTokenSymbol(
   return inputTokenSymbol === "ETH"
     ? "ETH"
     : inputTokenSymbol === "WETH"
-    ? "WETH"
-    : outputTokenSymbol;
+      ? "WETH"
+      : outputTokenSymbol;
 }

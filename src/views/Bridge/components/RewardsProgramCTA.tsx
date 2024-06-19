@@ -115,7 +115,8 @@ const LogoContainer = styled.div<{ primaryColor: string }>`
     ${({ primaryColor }) => COLORS[`${primaryColor}-15` as keyof typeof COLORS]};
   background: ${COLORS["grey-400-5"]};
 
-  box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.08),
+  box-shadow:
+    0px 4px 12px 0px rgba(0, 0, 0, 0.08),
     0px 2px 6px 0px rgba(0, 0, 0, 0.08);
 
   @media ${QUERIESV2.sm.andDown} {

@@ -81,7 +81,9 @@ export const PageSizeOptiontButton = styled(UnstyledButton)`
   color: #e0f3ff;
   border-radius: 0;
   cursor: pointer;
-  transition: background-color 0.1s ease-out, color 0.1s ease-out;
+  transition:
+    background-color 0.1s ease-out,
+    color 0.1s ease-out;
 
   :hover {
     background-color: var(--color-primary);

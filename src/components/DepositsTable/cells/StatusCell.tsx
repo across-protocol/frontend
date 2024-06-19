@@ -60,10 +60,10 @@ function PendingStatusCell({ width, deposit }: Props) {
         {isExpired
           ? "Expired"
           : isDelayed
-          ? "Delayed"
-          : isProfitable
-          ? "Processing..."
-          : "Fee too low"}
+            ? "Delayed"
+            : isProfitable
+              ? "Processing..."
+              : "Fee too low"}
       </Text>
       {isDelayed ? (
         <Tooltip

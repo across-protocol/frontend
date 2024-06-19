@@ -11,7 +11,10 @@ import {
 } from "./_utils";
 import { ENABLED_POOLS_UNDERLYING_TOKENS } from "./_constants";
 
-const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
+const handler = async (
+  _: TypedVercelRequest<Record<string, never>>,
+  response: VercelResponse
+) => {
   const logger = getLogger();
   logger.debug({
     at: "PoolsList",

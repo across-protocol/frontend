@@ -18,7 +18,6 @@ export function useIsWrongNetwork(baseChain?: number) {
 
   useEffect(() => {
     checkWrongNetworkHandler();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkWrongNetworkHandler]);
 
   const isWrongNetworkHandler = async () => {

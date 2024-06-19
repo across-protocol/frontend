@@ -38,14 +38,14 @@ export const Wrapper = styled.div<WrapperType>`
     direction.desktop === "middle"
       ? "center"
       : direction.desktop === "bottom"
-      ? "flex-end"
-      : "flex-start"};
+        ? "flex-end"
+        : "flex-start"};
   padding: ${({ direction }) =>
       direction.desktop === "middle"
         ? "0px"
         : direction.desktop === "bottom"
-        ? "16px"
-        : "calc(72px+16px)"}
+          ? "16px"
+          : "calc(72px+16px)"}
     0px;
 
   @media ${QUERIESV2.tb.andDown} {
@@ -53,14 +53,14 @@ export const Wrapper = styled.div<WrapperType>`
       direction.tablet === "middle"
         ? "center"
         : direction.tablet === "bottom"
-        ? "flex-end"
-        : "flex-start"};
+          ? "flex-end"
+          : "flex-start"};
     padding: ${({ direction }) =>
         direction.tablet === "middle"
           ? "0px"
           : direction.tablet === "bottom"
-          ? "16px"
-          : "calc(72px+16px)"}
+            ? "16px"
+            : "calc(72px+16px)"}
       0px;
   }
 
@@ -69,14 +69,14 @@ export const Wrapper = styled.div<WrapperType>`
       direction.mobile === "middle"
         ? "center"
         : direction.mobile === "bottom"
-        ? "flex-end"
-        : "flex-start"};
+          ? "flex-end"
+          : "flex-start"};
     padding: ${({ direction }) =>
         direction.mobile === "middle"
           ? "0px"
           : direction.mobile === "bottom"
-          ? "16px"
-          : "calc(72px+16px)"}
+            ? "16px"
+            : "calc(72px+16px)"}
       0px;
   }
 `;

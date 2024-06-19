@@ -46,8 +46,8 @@ export function getFastFillTimeByRoute(
   const symbolFilter = ["ETH", "WETH"].includes(tokenSymbol)
     ? "WETH"
     : ["USDC", "USDC.e", "USDbC"].includes(tokenSymbol)
-    ? "USDC"
-    : "DAI";
+      ? "USDC"
+      : "DAI";
 
   const fillTimeInSeconds = rawAvgFillTimesPreset.result[0].data.find(
     (entry) =>

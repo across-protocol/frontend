@@ -85,7 +85,7 @@ const Sidebar = ({ openSidebar, setOpenSidebar }: Props) => {
       toggled={openSidebar}
       breakPoint="all"
       width={sidebarWidth}
-      // @ts-ignore
+      // @ts-expect-error - react-pro-sidebar types are incorrect
       rootStyles={sidebarRootStyles}
       rtl // hack to display on the right side
     >

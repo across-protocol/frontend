@@ -37,8 +37,8 @@ const ACXReferralTierStepper = () => {
                     ? tier < 5 && index === tier - 1
                       ? "half"
                       : index < tier
-                      ? "full"
-                      : "empty"
+                        ? "full"
+                        : "empty"
                     : "empty"
                 }
               />

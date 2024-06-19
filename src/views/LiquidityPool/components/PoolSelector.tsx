@@ -72,9 +72,7 @@ const Wrapper = styled.div`
 const TokenSelection = styled(Selector)`` as StyledComponent<
   SelectorPropType<string> & {
     theme?: Theme | undefined;
-  },
-  {},
-  {}
+  }
 >;
 
 const PoolIconTextWrapper = styled.div`

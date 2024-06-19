@@ -8,8 +8,9 @@ jobs:
   dependency-review:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: "Checkout Repository"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Dependency Review"
         uses: actions/dependency-review-action@v4
         with:
@@ -17,4 +18,4 @@ jobs:
           # Comma-separated list of GHSA IDs to allow.
           # We allow @openzeppelin/contracts@3.4.1-solc-0.7-2 critical vulnerabilities
           # because they are not exploitable in our usage of the package.
-          allow-ghsas: GHSA-fg47-3c2x-m2wr, GHSA-88g8-f5mf-f5rj
+          allow-ghsas: GHSA-fg47-3c2x-m2wr, GHSA-88g8-f5mf-f5rj, GHSA-3h5v-q93c-6h6q

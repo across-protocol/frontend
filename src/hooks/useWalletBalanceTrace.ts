@@ -44,15 +44,18 @@ type TokenSymbolAddressType = {
 };
 const availableTokens: Record<number, TokenSymbolAddressType[]> = getRoutes(
   getConfig().getHubPoolChainId()
-).routes.reduce((acc, route) => {
-  const { fromChain, fromTokenSymbol, fromTokenAddress } = route;
-  const payload = { fromTokenSymbol, fromTokenAddress };
+).routes.reduce(
+  (acc, route) => {
+    const { fromChain, fromTokenSymbol, fromTokenAddress } = route;
+    const payload = { fromTokenSymbol, fromTokenAddress };
 
-  if (!acc[fromChain]?.some((t) => t.fromTokenAddress === fromTokenAddress)) {
-    acc[fromChain] = [...(acc[fromChain] ?? []), payload];
-  }
-  return acc;
-}, {} as Record<number, TokenSymbolAddressType[]>);
+    if (!acc[fromChain]?.some((t) => t.fromTokenAddress === fromTokenAddress)) {
+      acc[fromChain] = [...(acc[fromChain] ?? []), payload];
+    }
+    return acc;
+  },
+  {} as Record<number, TokenSymbolAddressType[]>
+);
 
 const availableSymbols = [
   ...new Set(getRoutes(ChainId.MAINNET).routes.map((r) => r.fromTokenSymbol)),
