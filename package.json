@@ -83,7 +83,7 @@
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": [
       "yarn lint:fix",
-      " yarn format:fix"
+      "yarn format:fix"
     ]
   },
   "browserslist": {
