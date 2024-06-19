@@ -10,3 +10,4 @@ runs:
         cache: yarn
 
     - run: yarn install --frozen-lockfile --ignore-scripts
+      shell: bash
