@@ -27,7 +27,7 @@ jobs:
         env:
           E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
       - name: Archive Playwright report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
           name: playwright-report-headful
