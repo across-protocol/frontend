@@ -167,6 +167,7 @@ const handler = async (
       ),
     ]);
 
+    let { liquidReserves } = multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
     const liteChainIds = JSON.parse(liteChainIdsEncoded);
     const routeInvolvesLiteChain = [
@@ -203,8 +204,6 @@ const handler = async (
     ); // balances on destination chain + mainnet
 
     if (!routeInvolvesLiteChain) {
-      let { liquidReserves } = multicallOutput[1];
-
       const lpCushion = ethers.utils.parseUnits(
         getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
         l1Token.decimals
