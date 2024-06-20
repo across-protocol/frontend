@@ -17,32 +17,9 @@ paths:
               'https://app.across.to/api/suggested-fees?inputToken=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&outputToken=0x4200000000000000000000000000000000000006&originChainId=1&destinationChainId=10&amount=1000000000000000000'
       summary: Retrieve suggested fee quote for a deposit.
       description: >
-        Returns suggested fees based on the `token` OR
-        `inputToken`+`outputToken`, `originChainId`, `destinationChainId`, and
+        Returns suggested fees based `inputToken`+`outputToken`, `originChainId`, `destinationChainId`, and
         `amount`.
       parameters:
-        - name: token
-          in: query
-          deprecated: true
-          schema:
-            type: string
-          description: >
-            Address of token to bridge. For native ETH, use the wrapped address,
-            i.e. WETH.
-
-
-            Note that the address provided must exist on the specified
-            `originChainId`.
-
-
-            **Also note that this parameter will eventually be deprecated in
-            favor of the parameters `inputToken` and `outputToken` below. For
-            now, you need to either specify `token` OR
-            `inputToken`+`outputToken` with the parameter `token` having a
-            higher precedence.**
-
-
-            _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
         - name: inputToken
           in: query
           required: true
@@ -212,31 +189,8 @@ paths:
             curl -L \
               'https://app.across.to/api/limits?inputToken=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&outputToken=0x4200000000000000000000000000000000000006&originChainId=1&destinationChainId=10'
       summary: Retrieve current transfer limits of the system
-      description: Returns transfer limits for specified `token` OR
-        `inputToken`+`outputToken`, `originChainId`, and `destinationChainId`.
+      description: Returns transfer limits for `inputToken`+`outputToken`, `originChainId`, and `destinationChainId`.
       parameters:
-        - name: token
-          in: query
-          deprecated: true
-          schema:
-            type: string
-          description: >
-            Address of token to bridge. For native ETH, use the wrapped address,
-            i.e. WETH.
-
-
-            Note that the address provided must exist on the specified
-            `originChainId`.
-
-
-            **Also note that this parameter will eventually be deprecated in
-            favor of the parameters `inputToken` and `outputToken` below. For
-            now, you need to either specify `token` OR
-            `inputToken`+`outputToken` with the parameter `token` having a
-            higher precedence.**
-
-
-            _Example:_ 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
         - name: inputToken
           in: query
           required: true
