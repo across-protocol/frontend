@@ -56,7 +56,8 @@ export function useBridge() {
     isIdle: isQuoteIdle,
   } = transferQuoteQuery;
 
-  const { quotedFees, quotedSwap, estimatedTime } = usedTransferQuote || {};
+  const { quotedFees, quotedSwap, estimatedTime, quotedLimits } =
+    usedTransferQuote || {};
 
   const isQuoteUpdating =
     shouldUpdateQuote &&
@@ -124,6 +125,7 @@ export function useBridge() {
     selectedRoute,
     toAccount,
     walletAccount: account,
+    limits: quotedLimits,
     fees: quotedFees,
     swapQuote: quotedSwap,
     balance,
