@@ -212,11 +212,10 @@ const handler = async (
       ),
     ]);
 
-    // Prevent quotes for slow-fills
-    if (amount.gt(limits.maxDepositShortDelay)) {
+    if (amount.gt(limits.maxDeposit)) {
       throw new InputError(
-        `Amount exceeds max. deposit limit for short delay: ${ethers.utils.formatUnits(
-          limits.maxDepositShortDelay,
+        `Amount exceeds max. deposit limit: ${ethers.utils.formatUnits(
+          limits.maxDeposit,
           inputToken.decimals
         )} ${inputToken.symbol}`
       );
