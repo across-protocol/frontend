@@ -70,7 +70,7 @@ const validationErrorTextMap = {
   [AmountInputError.INSUFFICIENT_BALANCE]:
     "Insufficient balance to process this transfer.",
   [AmountInputError.INSUFFICIENT_LIQUIDITY]:
-    "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [MAX_DEPOSIT_SHORT_DELAY] or lower.",
+    "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [MAX_DEPOSIT] or lower.",
   [AmountInputError.INVALID]: "Only positive numbers are allowed as an input.",
   [AmountInputError.AMOUNT_TOO_LOW]:
     "The amount you are trying to bridge is too low.",
@@ -148,7 +148,7 @@ const BridgeForm = ({
       {parsedAmountInput && validationError && (
         <InputErrorText
           errorText={validationErrorTextMap[validationError].replace(
-            "[MAX_DEPOSIT_SHORT_DELAY]",
+            "[MAX_DEPOSIT]",
             `${formatUnitsWithMaxFractions(
               limits?.maxDeposit || 0,
               getToken(selectedRoute.fromTokenSymbol).decimals
