@@ -30,7 +30,7 @@ import {
   getReceiveTokenSymbol,
 } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
-import { useConnection } from "hooks";
+import { BridgeLimits, useConnection } from "hooks";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
 export type BridgeFormProps = {
@@ -52,6 +52,7 @@ export type BridgeFormProps = {
   onClickChangeToAddress: VoidHandler;
   onSetNewSlippage: (slippage: number) => void;
 
+  limits?: BridgeLimits;
   fees?: GetBridgeFeesResult;
   estimatedTimeString?: string;
   balance?: BigNumber;
@@ -94,6 +95,7 @@ const BridgeForm = ({
   onClickChangeToAddress,
   onSetNewSlippage,
 
+  limits,
   fees,
   estimatedTimeString,
   balance,
@@ -148,7 +150,7 @@ const BridgeForm = ({
           errorText={validationErrorTextMap[validationError].replace(
             "[MAX_DEPOSIT_SHORT_DELAY]",
             `${formatUnitsWithMaxFractions(
-              fees?.limits.maxDepositShortDelay || 0,
+              limits?.maxDepositShortDelay || 0,
               getToken(selectedRoute.fromTokenSymbol).decimals
             )} ${selectedRoute.fromTokenSymbol}`
           )}
