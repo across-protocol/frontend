@@ -40,7 +40,6 @@ import {
   defaultRelayerAddressOverride,
   defaultRelayerAddressOverridePerToken,
   disabledL1Tokens,
-  DEFAULT_LIMITS_BUFFER_MULTIPLIERS,
   DOMAIN_CALLDATA_DELIMITER,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
@@ -1486,9 +1485,9 @@ export function getLimitsBufferMultiplier(symbol: string) {
     .LIMITS_BUFFER_MULTIPLIERS
     ? JSON.parse(process.env.LIMITS_BUFFER_MULTIPLIERS)
     : {};
-  return ethers.utils.parseEther(
-    limitsBufferMultipliers[symbol] ||
-      DEFAULT_LIMITS_BUFFER_MULTIPLIERS[symbol] ||
-      "1"
+  const bufferMultiplier = ethers.utils.parseEther(
+    limitsBufferMultipliers[symbol] || "1"
   );
+  const multiplierCap = ethers.utils.parseEther("1");
+  return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
 }
