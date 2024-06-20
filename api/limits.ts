@@ -25,7 +25,7 @@ import {
   sendResponse,
   getHubPool,
   validateChainAndTokenParams,
-  getLimitsBufferMultipliers,
+  getLimitsBufferMultiplier,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -186,12 +186,8 @@ const handler = async (
       maxBN(...transferBalances, ...transferRestrictedBalances), // balances on destination chain + mainnet
       liquidReserves
     );
-    const bufferMultipliers = getLimitsBufferMultipliers(
-      l1Token.symbol,
-      computedOriginChainId,
-      destinationChainId
-    );
-    const bufferedMaxDepositShortDelay = bufferMultipliers.depositShortDelay
+    const limitsBufferMultiplier = getLimitsBufferMultiplier(l1Token.symbol);
+    const bufferedMaxDepositShortDelay = limitsBufferMultiplier
       .mul(maxDepositShortDelay)
       .div(sdkUtils.fixedPointAdjustment)
       .toString();
@@ -199,14 +195,17 @@ const handler = async (
       // Absolute minimum may be overridden by the environment.
       minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
       // We set `maxDeposit` equal to `maxDepositShortDelay` to be backwards compatible
-      // but still prevent users from depositing more than the `maxDepositShortDelay`.
-      maxDeposit: bufferedMaxDepositShortDelay,
-      maxDepositInstant: bufferMultipliers.depositInstant
+      // but still prevent users from depositing more than the `maxDepositShortDelay`,
+      // only if buffer multiplier is set to 100%.
+      maxDeposit: limitsBufferMultiplier.eq(ethers.utils.parseEther("1"))
+        ? liquidReserves.toString()
+        : bufferedMaxDepositShortDelay,
+      maxDepositInstant: limitsBufferMultiplier
         .mul(maxDepositInstant)
         .div(sdkUtils.fixedPointAdjustment)
         .toString(),
       maxDepositShortDelay: bufferedMaxDepositShortDelay,
-      recommendedDepositInstant: bufferMultipliers.recommendedDepositInstant
+      recommendedDepositInstant: limitsBufferMultiplier
         .mul(maxDepositInstant)
         .div(sdkUtils.fixedPointAdjustment)
         .toString(),

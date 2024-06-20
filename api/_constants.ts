@@ -177,10 +177,4 @@ export const DEFI_LLAMA_POOL_LOOKUP: Record<string, string> = {
 export const DEFAULT_SIMULATED_RECIPIENT_ADDRESS =
   "0xBb23Cd0210F878Ea4CcA50e9dC307fb0Ed65Cf6B";
 
-export const DEFAULT_LIMITS_BUFFER_MULTIPLIERS = {
-  recommendedDepositInstant: "0.1",
-  depositInstant: "0.2",
-  depositShortDelay: "0.2",
-};
-
 export const DOMAIN_CALLDATA_DELIMITER = "0x1dc0de";
