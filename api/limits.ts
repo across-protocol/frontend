@@ -169,7 +169,8 @@ const handler = async (
 
     let { liquidReserves } = multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
-    const liteChainIds = JSON.parse(liteChainIdsEncoded);
+    const liteChainIds =
+      liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
     const routeInvolvesLiteChain = [
       computedOriginChainId,
       destinationChainId,
@@ -177,6 +178,12 @@ const handler = async (
 
     const transferBalances = fullRelayerBalances.map((balance, i) =>
       balance.add(fullRelayerMainnetBalances[i])
+    );
+
+    const bufferMultipliers = getLimitsBufferMultipliers(
+      l1Token.symbol,
+      computedOriginChainId,
+      destinationChainId
     );
 
     const minDeposit = ethers.BigNumber.from(relayerFeeDetails.minDeposit);
