@@ -150,7 +150,7 @@ const BridgeForm = ({
           errorText={validationErrorTextMap[validationError].replace(
             "[MAX_DEPOSIT_SHORT_DELAY]",
             `${formatUnitsWithMaxFractions(
-              limits?.maxDepositShortDelay || 0,
+              limits?.maxDeposit || 0,
               getToken(selectedRoute.fromTokenSymbol).decimals
             )} ${selectedRoute.fromTokenSymbol}`
           )}
