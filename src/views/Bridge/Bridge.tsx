@@ -19,6 +19,7 @@ const Bridge = () => {
     buttonActionHandler,
     buttonLabel,
     isBridgeDisabled,
+    limits,
     fees,
     balance,
     amountValidationError,
@@ -69,6 +70,7 @@ const Bridge = () => {
             onClickActionButton={buttonActionHandler}
             onClickChangeToAddress={() => setDisplayChangeAccount(true)}
             onSetNewSlippage={handleSetNewSlippage}
+            limits={limits}
             fees={fees}
             estimatedTimeString={estimatedTimeString}
             isConnected={isConnected}
