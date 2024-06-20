@@ -191,18 +191,21 @@ const handler = async (
       computedOriginChainId,
       destinationChainId
     );
+    const bufferedMaxDepositShortDelay = bufferMultipliers.depositShortDelay
+      .mul(maxDepositShortDelay)
+      .div(sdkUtils.fixedPointAdjustment)
+      .toString();
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
       minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
-      maxDeposit: liquidReserves.toString(),
+      // We set `maxDeposit` equal to `maxDepositShortDelay` to be backwards compatible
+      // but still prevent users from depositing more than the `maxDepositShortDelay`.
+      maxDeposit: bufferedMaxDepositShortDelay,
       maxDepositInstant: bufferMultipliers.depositInstant
         .mul(maxDepositInstant)
         .div(sdkUtils.fixedPointAdjustment)
         .toString(),
-      maxDepositShortDelay: bufferMultipliers.depositShortDelay
-        .mul(maxDepositShortDelay)
-        .div(sdkUtils.fixedPointAdjustment)
-        .toString(),
+      maxDepositShortDelay: bufferedMaxDepositShortDelay,
       recommendedDepositInstant: bufferMultipliers.recommendedDepositInstant
         .mul(maxDepositInstant)
         .div(sdkUtils.fixedPointAdjustment)
