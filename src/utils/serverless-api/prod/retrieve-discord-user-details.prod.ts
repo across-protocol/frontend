@@ -20,9 +20,8 @@ export async function retrieveDiscordUserDetails(backendJWT: string): Promise<{
       Authorization: `Bearer ${backendJWT}`,
     },
   });
-  const walletLinked = await getApiEndpoint().prelaunch.linkedWallet(
-    backendJWT
-  );
+  const walletLinked =
+    await getApiEndpoint().prelaunch.linkedWallet(backendJWT);
   return {
     discordId: jwtResolver.data.user.discordId,
     discordName: jwtResolver.data.user.discordName,

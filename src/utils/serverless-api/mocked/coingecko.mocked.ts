@@ -1,8 +1,8 @@
 import { ethers } from "ethers";
 
 export async function coingeckoMockedApiCall(
-  l1Token: string,
-  baseCurrency: string
+  _l1Token: string,
+  _baseCurrency: string
 ): Promise<{
   price: ethers.BigNumber;
 }> {

@@ -5,7 +5,7 @@ const HAS_REFRESHED_KEY = "retry-lazy-refreshed";
 export default function lazyWithRetry(
   componentImport: Parameters<typeof lazy>[0]
 ) {
-  // @ts-ignore
+  // @ts-expect-error - We are intentionally returning a promise here
   return lazy(async () => {
     const hasRefreshed = JSON.parse(
       window.localStorage.getItem(HAS_REFRESHED_KEY) || "false"

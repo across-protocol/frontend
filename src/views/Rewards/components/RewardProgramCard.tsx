@@ -87,7 +87,8 @@ const LogoContainer = styled.div<{ primaryColor: string }>`
   border: 1px solid ${COLORS["grey-400-15"]};
   background: ${({ primaryColor }) =>
     COLORS[`${primaryColor}-5` as keyof typeof COLORS]};
-  box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.08),
+  box-shadow:
+    0px 4px 12px 0px rgba(0, 0, 0, 0.08),
     0px 2px 6px 0px rgba(0, 0, 0, 0.08);
 `;
 

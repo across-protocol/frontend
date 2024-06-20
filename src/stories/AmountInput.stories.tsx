@@ -57,8 +57,6 @@ function Wrapper(props: typeof meta.args) {
   const {
     inputTokenSymbol = "ETH",
     balance = BigNumber.from(100),
-    onChangeAmountInput,
-    onClickMaxBalance,
     ...restProps
   } = props || {};
   const [input, setInput] = useState("");

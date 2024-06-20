@@ -21,7 +21,6 @@ export function PaginatedDepositsTable({
   currentPageSize,
   onPageSizeChange,
   totalCount,
-  initialPageSize = DEFAULT_PAGE_SIZES[0],
   pageSizes = DEFAULT_PAGE_SIZES,
   ...depositsTableProps
 }: Props) {

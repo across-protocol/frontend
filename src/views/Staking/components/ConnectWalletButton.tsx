@@ -19,8 +19,8 @@ const ConnectWalletButton = ({ reasonToConnect }: ConnectWalletButtonParam) => {
             reasonToConnect === "stake"
               ? "stakeForm"
               : reasonToConnect === "unstake"
-              ? "unstakeForm"
-              : "claimReferralRewardsForm",
+                ? "unstakeForm"
+                : "claimReferralRewardsForm",
         });
       }}
     >

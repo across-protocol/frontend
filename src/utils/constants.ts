@@ -553,8 +553,8 @@ export const getRewardToken = (deposit: Deposit): TokenInfo | undefined => {
     rewardType === "op-rebates"
       ? "OP"
       : rewardType === "arb-rebates"
-      ? "ARB"
-      : "ACX";
+        ? "ARB"
+        : "ACX";
   return getToken(symbol);
 };
 

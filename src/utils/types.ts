@@ -8,9 +8,7 @@ export type StylizedSVG = StyledComponent<
     children?: React.ReactNode;
   } & {
     theme?: Theme | undefined;
-  },
-  {},
-  {}
+  }
 >;
 
 export type VoidHandler = () => void;

@@ -64,14 +64,14 @@ export function deriveNewStakingValues(
   const updatedTimeEstimateInSeconds = noStake
     ? BigNumber.from(0) // If the user has no stake, their time is 0
     : isStake // The user wants to stake
-    ? currentSecondsElapsedSinceAvgDeposit.sub(
-        lpModification
-          .mul(fixedPointAdjustment)
-          .div(currentlyStaked)
-          .mul(currentSecondsElapsedSinceAvgDeposit)
-          .div(fixedPointAdjustment)
-      )
-    : BigNumber.from(currentSecondsElapsedSinceAvgDeposit); // The user wishes to unstake - the elapsed time does not change
+      ? currentSecondsElapsedSinceAvgDeposit.sub(
+          lpModification
+            .mul(fixedPointAdjustment)
+            .div(currentlyStaked)
+            .mul(currentSecondsElapsedSinceAvgDeposit)
+            .div(fixedPointAdjustment)
+        )
+      : BigNumber.from(currentSecondsElapsedSinceAvgDeposit); // The user wishes to unstake - the elapsed time does not change
 
   // Resolve the total amount of time in days that the user would have now staked
   const updatedTimeEstimate =

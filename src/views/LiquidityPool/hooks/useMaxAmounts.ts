@@ -42,9 +42,13 @@ export function useMaxAmounts(
                 .then((estimatedGasCosts) =>
                   max(l1Balance.sub(estimatedGasCosts), 0)
                 )
-                .catch((err) =>
-                  max(l1Balance.sub(utils.parseEther("0.01")), 0)
-                );
+                .catch((err) => {
+                  console.error(
+                    "Failed top estimated gas for adding eth liquidity",
+                    err
+                  );
+                  return max(l1Balance.sub(utils.parseEther("0.01")), 0);
+                });
         maxRemovableAmountInLP = BigNumber.from(
           userLiquidityPoolQuery.data.lpTokens
         );

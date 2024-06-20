@@ -144,12 +144,12 @@ export const getConfirmationDepositTime = (
               fastFillTimeInSeconds === 1 ? "sec" : "secs"
             }`
           : fastFillTimeInMinutes < 60
-          ? `~${fastFillTimeInMinutes} ${
-              fastFillTimeInMinutes === 1 ? "min" : "mins"
-            }`
-          : `~${fastFillTimeInHours} ${
-              fastFillTimeInHours === "1" ? "hour" : "hours"
-            }`,
+            ? `~${fastFillTimeInMinutes} ${
+                fastFillTimeInMinutes === 1 ? "min" : "mins"
+              }`
+            : `~${fastFillTimeInHours} ${
+                fastFillTimeInHours === "1" ? "hour" : "hours"
+              }`,
       lowEstimate: fastFillTimeInSeconds,
       highEstimate: fastFillTimeInSeconds,
     };

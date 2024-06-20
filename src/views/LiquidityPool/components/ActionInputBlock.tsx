@@ -165,8 +165,8 @@ export function ActionInputBlock({ action, selectedToken }: Props) {
                   ? "Adding liquidity..."
                   : "Add liquidity"
                 : removeLiquidityMutation.isLoading
-                ? "Removing liquidity..."
-                : "Remove liquidity"}
+                  ? "Removing liquidity..."
+                  : "Remove liquidity"}
             </Text>
           </Button>
         </ButtonWrapper>

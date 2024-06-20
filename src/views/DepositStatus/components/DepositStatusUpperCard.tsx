@@ -92,10 +92,10 @@ export function DepositStatusUpperCard({
   const status = !depositTxCompletedTime
     ? "depositing"
     : depositQuery.data?.depositTxReceipt.status === 0
-    ? "deposit-reverted"
-    : !fillTxCompletedTime
-    ? "filling"
-    : "filled";
+      ? "deposit-reverted"
+      : !fillTxCompletedTime
+        ? "filling"
+        : "filled";
 
   // This error indicates that the used deposit tx hash does not originate from
   // an Across SpokePool contract.
@@ -322,7 +322,9 @@ const AnimatedDivider = styled.div<{ status: DepositStatus }>`
   height: 1px;
   flex-shrink: 0;
 
-  transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
+  transition:
+    width 0.5s ease-in-out,
+    background-color 0.5s ease-in-out;
 `;
 
 const AnimatedDividerFromChain = styled(AnimatedDivider)<{
@@ -332,8 +334,8 @@ const AnimatedDividerFromChain = styled(AnimatedDivider)<{
     status === "deposit-reverted"
       ? COLORS.warning
       : status === "depositing"
-      ? COLORS.white
-      : COLORS.aqua};
+        ? COLORS.white
+        : COLORS.aqua};
 `;
 
 const AnimatedDividerToChain = styled(AnimatedDivider)<{
@@ -343,8 +345,8 @@ const AnimatedDividerToChain = styled(AnimatedDivider)<{
     status === "depositing" || status === "deposit-reverted"
       ? COLORS["grey-400"]
       : status === "filling"
-      ? COLORS.white
-      : COLORS.aqua};
+        ? COLORS.white
+        : COLORS.aqua};
 `;
 
 const AnimatedLogoWrapper = styled.div`
@@ -379,8 +381,8 @@ const AnimatedLogoWrapperFromChain = styled(AnimatedLogoWrapper)<{
     status === "deposit-reverted"
       ? COLORS.warning
       : status === "depositing"
-      ? COLORS.white
-      : COLORS.aqua};
+        ? COLORS.white
+        : COLORS.aqua};
 `;
 
 const AnimatedLogoWrapperToChain = styled(AnimatedLogoWrapper)<{
@@ -390,8 +392,8 @@ const AnimatedLogoWrapperToChain = styled(AnimatedLogoWrapper)<{
     status === "depositing" || status === "deposit-reverted"
       ? COLORS["grey-400"]
       : status === "filling"
-      ? COLORS.white
-      : COLORS.aqua};
+        ? COLORS.white
+        : COLORS.aqua};
 `;
 
 const AnimatedLogo = styled.div<{
@@ -430,8 +432,8 @@ const AnimatedLogoFromChain = styled(AnimatedLogo)<{ status: DepositStatus }>`
         status === "deposit-reverted"
           ? COLORS.warning
           : status === "depositing"
-          ? COLORS.white
-          : COLORS.aqua};
+            ? COLORS.white
+            : COLORS.aqua};
     }
   }
 `;
@@ -445,8 +447,8 @@ const AnimatedLogoToChain = styled(AnimatedLogo)<{ status: DepositStatus }>`
         status === "depositing" || status === "deposit-reverted"
           ? COLORS["grey-400"]
           : status === "filling"
-          ? COLORS.white
-          : COLORS.aqua};
+            ? COLORS.white
+            : COLORS.aqua};
     }
   }
 `;

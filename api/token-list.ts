@@ -10,7 +10,10 @@ import {
 import { TypedVercelRequest } from "./_types";
 import { TOKEN_SYMBOLS_MAP } from "./_constants";
 
-const handler = async (_: TypedVercelRequest<{}>, response: VercelResponse) => {
+const handler = async (
+  _: TypedVercelRequest<Record<string, never>>,
+  response: VercelResponse
+) => {
   const logger = getLogger();
 
   try {

@@ -36,8 +36,8 @@ const Web3Subscribe = () => {
   const subscribeButtonText = isLoading
     ? "Loading..."
     : isSubscribed
-    ? "Unsubscribe"
-    : "Subscribe";
+      ? "Unsubscribe"
+      : "Subscribe";
 
   return isW3SubscribeAvailable && isCBWallet ? (
     <SubscribeButton onClick={handleSubscribe}>
