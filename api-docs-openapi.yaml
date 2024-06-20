@@ -34,12 +34,6 @@ paths:
 
             Note that the address provided must exist on the specified
             `originChainId` below.
-
-
-            **Also note that this parameter will eventually replace the
-            parameter `token` above. For now, you need to either specify `token`
-            OR `inputToken` +`outputToken` with the parameter `token` having a
-            higher precedence.**
         - name: outputToken
           in: query
           required: true
@@ -54,12 +48,6 @@ paths:
 
             Note that the address provided must exist on the specified
             `destinationChainId` below.
-
-
-            **Also note that this parameter will eventually replace the
-            parameter `token` above. For now, you need to either specify `token`
-            OR `inputToken` +`outputToken` with the parameter `token` having a
-            higher precedence.**
         - name: originChainId
           in: query
           required: true
@@ -205,12 +193,6 @@ paths:
 
             Note that the address provided must exist on the specified
             `originChainId`.
-
-
-            **Also note that this parameter will eventually replace the
-            parameter `token` above. For now, you need to either specify `token`
-            OR `inputToken` +`outputToken` with the parameter `token` having a
-            higher precedence.**
         - name: outputToken
           in: query
           required: true
@@ -225,12 +207,6 @@ paths:
 
             Note that the address provided must match the token address on the
             specified `destinationChainId` below.
-
-
-            **Also note that this parameter will eventually replace the
-            parameter `token` above. For now, you need to either specify `token`
-            OR `inputToken` +`outputToken` with the parameter `token` having a
-            higher precedence.**
         - name: originChainId
           in: query
           required: true
