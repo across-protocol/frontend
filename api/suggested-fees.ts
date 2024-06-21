@@ -239,7 +239,8 @@ const handler = async (
       sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
         String(rawL1TokenConfig)
       );
-    const liteChainIds = JSON.parse(liteChainIdsEncoded);
+    const liteChainIds =
+      liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
     const originChainIsLiteChain = liteChainIds.includes(computedOriginChainId);
     // We enforce repayment on the origin chain for lite chain deposits
     // so we overwrite the key to get the right rate model
