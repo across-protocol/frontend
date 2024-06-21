@@ -48,7 +48,7 @@ const handler = async (
       .filter((address) => ethers.utils.isAddress(address));
     logger.debug({
       at: "LiquidReserves",
-      message: "Test",
+      message: "Parsed L1 tokens",
       parsedL1Tokens,
     });
 
@@ -110,9 +110,9 @@ const handler = async (
       message: "Response data",
       responses,
     });
-    // Respond with a 200 status code and 7 minutes of cache with
+    // Respond with a 200 status code and 4 minutes of cache with
     // a minute of stale-while-revalidate.
-    sendResponse(response, responses, 200, 420, 60);
+    sendResponse(response, responses, 200, 240, 60);
   } catch (error: unknown) {
     return handleErrorCondition("liquidReserves", response, logger, error);
   }
