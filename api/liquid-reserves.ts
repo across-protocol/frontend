@@ -85,15 +85,15 @@ const handler = async (
         )
       ),
     ]);
-    logger.debug({
-      at: "LiquidReserves",
-      message: "Test",
-      multicallOutput,
-      lpCushions,
-    });
     const liquidReservesForL1Tokens = multicallOutput.slice(
       parsedL1Tokens.length
     );
+    logger.debug({
+      at: "LiquidReserves",
+      message: "Test",
+      liquidReservesForL1Tokens,
+      lpCushions,
+    });
 
     const responses = Object.fromEntries(
       parsedL1Tokens.map((_l1Token, i) => {
