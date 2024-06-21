@@ -45,8 +45,8 @@ const handler = async (
     assert(query, LiquidReservesQueryParamsSchema);
     const { l1Token } = query;
 
-    const l1TokenDetails = query.l1Token.map((l1Token) =>
-      getTokenByAddress(l1Token, HUB_POOL_CHAIN_ID)
+    const l1TokenDetails = query.l1Token.map((_l1Token) =>
+      getTokenByAddress(_l1Token, HUB_POOL_CHAIN_ID)
     );
     if (!l1TokenDetails) {
       throw new InputError(
@@ -69,7 +69,7 @@ const handler = async (
         return {
           contract: hubPool,
           functionName: "pooledTokens",
-          args: [l1Token],
+          args: [_l1Token],
         };
       }),
     ];
@@ -77,10 +77,10 @@ const handler = async (
     const [multicallOutput, ...lpCushions] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: BLOCK_TAG_LAG }),
       Promise.resolve(
-        l1TokenDetails.map((l1Token) =>
+        l1TokenDetails.map((_l1Token) =>
           ethers.utils.parseUnits(
-            getLpCushion(l1Token!.symbol),
-            l1Token!.decimals
+            getLpCushion(_l1Token!.symbol),
+            _l1Token!.decimals
           )
         )
       ),
