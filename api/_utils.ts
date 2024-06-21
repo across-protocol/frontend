@@ -373,7 +373,15 @@ export const getRouteDetails = (
   };
 };
 
-export const getTokenByAddress = (tokenAddress: string, chainId?: number) => {
+export const getTokenByAddress = (
+  tokenAddress: string,
+  chainId?: number
+): {
+  decimals: number;
+  symbol: string;
+  name: string;
+  addresses: Record<number, string>;
+} => {
   const matches =
     Object.entries(TOKEN_SYMBOLS_MAP).filter(([_symbol, { addresses }]) =>
       chainId
