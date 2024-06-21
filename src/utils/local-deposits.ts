@@ -1,36 +1,60 @@
 import { Deposit } from "../hooks/useDeposits";
 
-const LOCAL_DEPOSITS_KEY = "local-deposits";
+const LOCAL_DEPOSITS_KEY = "local-deposits-v2";
+const LOCAL_DEPOSIT_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+type LocalDepositEntry = {
+  deposit: Deposit;
+  ttl: number;
+  createdAt: number;
+};
 
 export function addLocalDeposit(newDeposit: Deposit) {
-  const localPendingDeposits = getLocalDeposits();
+  const localPendingDeposits = getLocalDepositEntries();
   const filteredLocalPendingDeposits = localPendingDeposits.filter(
-    (deposit) => deposit.depositTxHash !== newDeposit.depositTxHash
+    ({ deposit }) => deposit.depositTxHash !== newDeposit.depositTxHash
+  );
+  const newDepositEntry: LocalDepositEntry = {
+    deposit: newDeposit,
+    ttl: LOCAL_DEPOSIT_TTL,
+    createdAt: Date.now(),
+  };
+  window.localStorage.setItem(
+    LOCAL_DEPOSITS_KEY,
+    JSON.stringify([newDepositEntry, ...filteredLocalPendingDeposits])
+  );
+}
+
+export function getLocalDepositEntries() {
+  const localPendingDepositsRaw =
+    window.localStorage.getItem(LOCAL_DEPOSITS_KEY);
+  const localPendingDeposits = (
+    localPendingDepositsRaw ? JSON.parse(localPendingDepositsRaw) : []
+  ) as LocalDepositEntry[];
+
+  const now = Date.now();
+  const localDepositsToKeep = localPendingDeposits.filter(
+    (localDeposit) => localDeposit.createdAt + localDeposit.ttl >= now
   );
   window.localStorage.setItem(
     LOCAL_DEPOSITS_KEY,
-    JSON.stringify([newDeposit, ...filteredLocalPendingDeposits])
+    JSON.stringify(localDepositsToKeep)
   );
-}
 
-export function getLocalDeposits() {
-  const localPendingDeposits = window.localStorage.getItem(LOCAL_DEPOSITS_KEY);
-  return (
-    localPendingDeposits ? JSON.parse(localPendingDeposits) : []
-  ) as Deposit[];
+  return localDepositsToKeep;
 }
 
 export function getLocalDepositByTxHash(depositTxHash: string) {
-  const localPendingDeposits = getLocalDeposits();
+  const localPendingDeposits = getLocalDepositEntries();
   return localPendingDeposits.find(
-    (deposit) => deposit.depositTxHash === depositTxHash
-  );
+    ({ deposit }) => deposit.depositTxHash === depositTxHash
+  )?.deposit;
 }
 
 export function removeLocalDeposits(depositTxHashes: string[]) {
-  const localPendingDeposits = getLocalDeposits();
+  const localPendingDeposits = getLocalDepositEntries();
   const filteredLocalPendingDeposits = localPendingDeposits.filter(
-    (deposit) => !depositTxHashes.includes(deposit.depositTxHash)
+    ({ deposit }) => !depositTxHashes.includes(deposit.depositTxHash)
   );
   window.localStorage.setItem(
     LOCAL_DEPOSITS_KEY,
