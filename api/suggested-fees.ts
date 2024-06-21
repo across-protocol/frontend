@@ -170,6 +170,9 @@ const handler = async (
       ENABLED_ROUTES.acrossConfigStoreAddress,
       provider
     );
+    const liteChainsKey =
+      sdk.clients.GLOBAL_CONFIG_STORE_KEYS.LITE_CHAIN_ID_INDICES;
+    const encodedLiteChainsKey = sdk.utils.utf8ToHex(liteChainsKey);
 
     const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
@@ -195,10 +198,21 @@ const handler = async (
         functionName: "l1TokenConfig",
         args: [l1Token.address],
       },
+      {
+        contract: configStoreClient.contract,
+        functionName: "globalConfig",
+        args: [encodedLiteChainsKey],
+      },
     ];
 
     const [
-      [currentUt, nextUt, quoteTimestamp, rawL1TokenConfig],
+      [
+        currentUt,
+        nextUt,
+        quoteTimestamp,
+        rawL1TokenConfig,
+        [liteChainIdsEncoded],
+      ],
       tokenPrice,
       limits,
     ] = await Promise.all([
@@ -225,7 +239,14 @@ const handler = async (
       sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
         String(rawL1TokenConfig)
       );
-    const routeRateModelKey = `${computedOriginChainId}-${destinationChainId}`;
+    const liteChainIds =
+      liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
+    const originChainIsLiteChain = liteChainIds.includes(computedOriginChainId);
+    // We enforce repayment on the origin chain for lite chain deposits
+    // so we overwrite the key to get the right rate model
+    const routeRateModelKey = originChainIsLiteChain
+      ? `${computedOriginChainId}-${computedOriginChainId}`
+      : `${computedOriginChainId}-${destinationChainId}`;
     const rateModel =
       parsedL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
       parsedL1TokenConfig.rateModel;

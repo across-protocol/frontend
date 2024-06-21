@@ -1,4 +1,4 @@
-import { utils as sdkUtils } from "@across-protocol/sdk";
+import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import {
@@ -9,23 +9,25 @@ import { TypedVercelRequest } from "./_types";
 import { object, assert, Infer, optional } from "superstruct";
 
 import {
-  getLogger,
-  getRelayerFeeDetails,
-  getCachedTokenPrice,
+  ENABLED_ROUTES,
+  HUB_POOL_CHAIN_ID,
+  callViaMulticall3,
   getCachedTokenBalance,
-  maxBN,
-  minBN,
-  handleErrorCondition,
-  validAddress,
-  positiveIntStr,
+  getCachedTokenPrice,
+  getDefaultRelayerAddress,
+  getHubPool,
+  getLimitsBufferMultiplier,
+  getLogger,
   getLpCushion,
   getProvider,
-  HUB_POOL_CHAIN_ID,
-  getDefaultRelayerAddress,
+  getRelayerFeeDetails,
+  handleErrorCondition,
+  maxBN,
+  minBN,
+  positiveIntStr,
   sendResponse,
-  getHubPool,
+  validAddress,
   validateChainAndTokenParams,
-  getLimitsBufferMultiplier,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -88,16 +90,32 @@ const handler = async (
     } = validateChainAndTokenParams(query);
 
     const hubPool = getHubPool(provider);
+    const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
+      ENABLED_ROUTES.acrossConfigStoreAddress,
+      provider
+    );
+    const liteChainsKey =
+      sdk.clients.GLOBAL_CONFIG_STORE_KEYS.LITE_CHAIN_ID_INDICES;
+    const encodedLiteChainsKey = sdk.utils.utf8ToHex(liteChainsKey);
 
-    const multicallInput = [
-      hubPool.interface.encodeFunctionData("sync", [l1Token.address]),
-      hubPool.interface.encodeFunctionData("pooledTokens", [l1Token.address]),
+    const multiCalls = [
+      { contract: hubPool, functionName: "sync", args: [l1Token.address] },
+      {
+        contract: hubPool,
+        functionName: "pooledTokens",
+        args: [l1Token.address],
+      },
+      {
+        contract: configStoreClient.contract,
+        functionName: "globalConfig",
+        args: [encodedLiteChainsKey],
+      },
     ];
 
     const [tokenPriceNative, _tokenPriceUsd] = await Promise.all([
       getCachedTokenPrice(
         l1Token.address,
-        sdkUtils.getNativeTokenSymbol(destinationChainId).toLowerCase()
+        sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
       ),
       getCachedTokenPrice(l1Token.address, "usd"),
     ]);
@@ -121,7 +139,7 @@ const handler = async (
         undefined,
         getDefaultRelayerAddress(destinationChainId, l1Token.symbol)
       ),
-      hubPool.callStatic.multicall(multicallInput, { blockTag: BLOCK_TAG_LAG }),
+      callViaMulticall3(provider, multiCalls, { blockTag: BLOCK_TAG_LAG }),
       Promise.all(
         fullRelayers.map((relayer) =>
           getCachedTokenBalance(
@@ -149,17 +167,18 @@ const handler = async (
       ),
     ]);
 
-    let { liquidReserves } = hubPool.interface.decodeFunctionResult(
-      "pooledTokens",
-      multicallOutput[1]
-    );
+    let { liquidReserves } = multicallOutput[1];
+    const [liteChainIdsEncoded] = multicallOutput[2];
+    const liteChainIds =
+      liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
+    const routeInvolvesLiteChain = [
+      computedOriginChainId,
+      destinationChainId,
+    ].some((chain) => liteChainIds.includes(chain));
 
-    const lpCushion = ethers.utils.parseUnits(
-      getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
-      l1Token.decimals
+    const transferBalances = fullRelayerBalances.map((balance, i) =>
+      balance.add(fullRelayerMainnetBalances[i])
     );
-    liquidReserves = liquidReserves.sub(lpCushion);
-    if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
 
     const minDeposit = ethers.BigNumber.from(relayerFeeDetails.minDeposit);
 
@@ -174,41 +193,56 @@ const handler = async (
           .mul(ethers.utils.parseUnits("1"))
           .div(tokenPriceUsd);
 
-    const transferBalances = fullRelayerBalances.map((balance, i) =>
-      balance.add(fullRelayerMainnetBalances[i])
-    );
+    let maxDepositInstant = maxBN(
+      ...fullRelayerBalances,
+      ...transferRestrictedBalances
+    ); // balances on destination chain
 
-    const maxDepositInstant = minBN(
-      maxBN(...fullRelayerBalances, ...transferRestrictedBalances), // balances on destination chain
-      liquidReserves
-    );
-    const maxDepositShortDelay = minBN(
-      maxBN(...transferBalances, ...transferRestrictedBalances), // balances on destination chain + mainnet
-      liquidReserves
-    );
+    // Same as above.
+    let maxDepositShortDelay = maxBN(
+      ...transferBalances,
+      ...transferRestrictedBalances
+    ); // balances on destination chain + mainnet
+
+    if (!routeInvolvesLiteChain) {
+      const lpCushion = ethers.utils.parseUnits(
+        getLpCushion(l1Token.symbol, computedOriginChainId, destinationChainId),
+        l1Token.decimals
+      );
+      liquidReserves = liquidReserves.sub(lpCushion);
+      if (liquidReserves.lt(0)) liquidReserves = ethers.BigNumber.from(0);
+
+      maxDepositInstant = minBN(maxDepositInstant, liquidReserves);
+      maxDepositShortDelay = minBN(maxDepositShortDelay, liquidReserves);
+    }
+
     const limitsBufferMultiplier = getLimitsBufferMultiplier(l1Token.symbol);
+
+    // Apply multipliers
+    const bufferedRecommendedDepositInstant = limitsBufferMultiplier
+      .mul(maxDepositInstant)
+      .div(sdk.utils.fixedPointAdjustment);
+    const bufferedMaxDepositInstant = limitsBufferMultiplier
+      .mul(maxDepositInstant)
+      .div(sdk.utils.fixedPointAdjustment);
     const bufferedMaxDepositShortDelay = limitsBufferMultiplier
       .mul(maxDepositShortDelay)
-      .div(sdkUtils.fixedPointAdjustment)
-      .toString();
+      .div(sdk.utils.fixedPointAdjustment);
+
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
       minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
       // We set `maxDeposit` equal to `maxDepositShortDelay` to be backwards compatible
       // but still prevent users from depositing more than the `maxDepositShortDelay`,
       // only if buffer multiplier is set to 100%.
-      maxDeposit: limitsBufferMultiplier.eq(ethers.utils.parseEther("1"))
-        ? liquidReserves.toString()
-        : bufferedMaxDepositShortDelay,
-      maxDepositInstant: limitsBufferMultiplier
-        .mul(maxDepositInstant)
-        .div(sdkUtils.fixedPointAdjustment)
-        .toString(),
-      maxDepositShortDelay: bufferedMaxDepositShortDelay,
-      recommendedDepositInstant: limitsBufferMultiplier
-        .mul(maxDepositInstant)
-        .div(sdkUtils.fixedPointAdjustment)
-        .toString(),
+      maxDeposit:
+        limitsBufferMultiplier.eq(ethers.utils.parseEther("1")) &&
+        !routeInvolvesLiteChain
+          ? liquidReserves.toString()
+          : bufferedMaxDepositShortDelay.toString(),
+      maxDepositInstant: bufferedMaxDepositInstant.toString(),
+      maxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
+      recommendedDepositInstant: bufferedRecommendedDepositInstant.toString(),
     };
     logger.debug({
       at: "Limits",
