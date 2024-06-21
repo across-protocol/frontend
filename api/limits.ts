@@ -235,7 +235,11 @@ const handler = async (
       // We set `maxDeposit` equal to `maxDepositShortDelay` to be backwards compatible
       // but still prevent users from depositing more than the `maxDepositShortDelay`,
       // only if buffer multiplier is set to 100%.
-      maxDeposit: bufferedMaxDepositShortDelay.toString(),
+      maxDeposit:
+        limitsBufferMultiplier.eq(ethers.utils.parseEther("1")) &&
+        !routeInvolvesLiteChain
+          ? liquidReserves.toString()
+          : bufferedMaxDepositShortDelay.toString(),
       maxDepositInstant: bufferedMaxDepositInstant.toString(),
       maxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
       recommendedDepositInstant: bufferedRecommendedDepositInstant.toString(),
