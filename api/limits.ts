@@ -180,12 +180,6 @@ const handler = async (
       balance.add(fullRelayerMainnetBalances[i])
     );
 
-    const bufferMultipliers = getLimitsBufferMultipliers(
-      l1Token.symbol,
-      computedOriginChainId,
-      destinationChainId
-    );
-
     const minDeposit = ethers.BigNumber.from(relayerFeeDetails.minDeposit);
 
     // Normalise the environment-set USD minimum to units of the token being bridged.
@@ -198,7 +192,7 @@ const handler = async (
           )
           .mul(ethers.utils.parseUnits("1"))
           .div(tokenPriceUsd);
-    
+
     let maxDepositInstant = maxBN(
       ...fullRelayerBalances,
       ...transferRestrictedBalances
@@ -223,18 +217,17 @@ const handler = async (
     }
 
     const limitsBufferMultiplier = getLimitsBufferMultiplier(l1Token.symbol);
-    
+
     // Apply multipliers
-    const bufferedRecommendedDepositInstant =
-    limitsBufferMultiplier
+    const bufferedRecommendedDepositInstant = limitsBufferMultiplier
       .mul(maxDepositInstant)
       .div(sdk.utils.fixedPointAdjustment);
     const bufferedMaxDepositInstant = limitsBufferMultiplier
       .mul(maxDepositInstant)
       .div(sdk.utils.fixedPointAdjustment);
     const bufferedMaxDepositShortDelay = limitsBufferMultiplier
-    .mul(maxDepositShortDelay)
-    .div(sdk.utils.fixedPointAdjustment);
+      .mul(maxDepositShortDelay)
+      .div(sdk.utils.fixedPointAdjustment);
 
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
@@ -243,12 +236,9 @@ const handler = async (
       // but still prevent users from depositing more than the `maxDepositShortDelay`,
       // only if buffer multiplier is set to 100%.
       maxDeposit: bufferedMaxDepositShortDelay.toString(),
-      maxDepositInstant: bufferedMaxDepositInstant
-        .toString(),
-      maxDepositShortDelay: bufferedMaxDepositShortDelay
-        .toString(),
-      recommendedDepositInstant:bufferedRecommendedDepositInstant
-        .toString(),
+      maxDepositInstant: bufferedMaxDepositInstant.toString(),
+      maxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
+      recommendedDepositInstant: bufferedRecommendedDepositInstant.toString(),
     };
     logger.debug({
       at: "Limits",
