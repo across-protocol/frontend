@@ -85,10 +85,11 @@ const handler = async (
         )
       ),
     ]);
+    const liquidReservesForL1Tokens = multicallOutput.slice(l1Tokens.length);
 
     const responses = Object.fromEntries(
       l1Tokens.map((l1Token, i) => {
-        const { liquidReserves } = multicallOutput[i * 2 + 1];
+        const { liquidReserves } = liquidReservesForL1Tokens[i];
         const lpCushion = lpCushions[i];
         const liquidReservesWithCushion = liquidReserves.sub(lpCushion);
         return [
