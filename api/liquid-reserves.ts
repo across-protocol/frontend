@@ -19,7 +19,7 @@ import {
 } from "./_utils";
 
 const LiquidReservesQueryParamsSchema = object({
-  l1Tokens: array(validAddress()),
+  l1Token: array(validAddress()),
 });
 
 type LiquidReservesQueryParamsSchema = Infer<
@@ -43,14 +43,14 @@ const handler = async (
   });
   try {
     assert(query, LiquidReservesQueryParamsSchema);
-    const { l1Tokens } = query;
+    const { l1Token } = query;
 
-    const l1TokenDetails = query.l1Tokens.map((l1Token) =>
+    const l1TokenDetails = query.l1Token.map((l1Token) =>
       getTokenByAddress(l1Token, HUB_POOL_CHAIN_ID)
     );
     if (!l1TokenDetails) {
       throw new InputError(
-        `Query contains an unsupported L1 token address: ${query.l1Tokens}`
+        `Query contains an unsupported L1 token address: ${query.l1Token}`
       );
     }
 
@@ -58,14 +58,14 @@ const handler = async (
     const hubPool = getHubPool(provider);
     const multiCalls = [
       // Simulate syncing all L1 tokens and then query pooledToken for reserves data post-sync
-      ...l1Tokens.map((l1Token) => {
+      ...l1Token.map((_l1Token) => {
         return {
           contract: hubPool,
           functionName: "sync",
-          args: [l1Token],
+          args: [_l1Token],
         };
       }),
-      ...l1Tokens.map((l1Token) => {
+      ...l1Token.map((_l1Token) => {
         return {
           contract: hubPool,
           functionName: "pooledTokens",
@@ -85,14 +85,14 @@ const handler = async (
         )
       ),
     ]);
-    const liquidReservesForL1Tokens = multicallOutput.slice(l1Tokens.length);
+    const liquidReservesForL1Tokens = multicallOutput.slice(l1Token.length);
 
     const responses = Object.fromEntries(
-      l1Tokens.map((l1Token, i) => {
+      l1Token.map((_l1Token, i) => {
         const { liquidReserves } = liquidReservesForL1Tokens[i];
         const lpCushion = lpCushions[i];
         const liquidReservesWithCushion = liquidReserves.sub(lpCushion);
-        return [l1Token, liquidReservesWithCushion.toString()];
+        return [_l1Token, liquidReservesWithCushion.toString()];
       })
     );
 
