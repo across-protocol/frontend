@@ -92,14 +92,7 @@ const handler = async (
         const { liquidReserves } = liquidReservesForL1Tokens[i];
         const lpCushion = lpCushions[i];
         const liquidReservesWithCushion = liquidReserves.sub(lpCushion);
-        return [
-          l1Token,
-          {
-            liquidReserves,
-            lpCushion,
-            liquidReservesWithCushion,
-          },
-        ];
+        return [l1Token, liquidReservesWithCushion];
       })
     );
 
