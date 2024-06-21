@@ -180,12 +180,6 @@ const handler = async (
       balance.add(fullRelayerMainnetBalances[i])
     );
 
-    const bufferMultipliers = getLimitsBufferMultipliers(
-      l1Token.symbol,
-      computedOriginChainId,
-      destinationChainId
-    );
-
     const minDeposit = ethers.BigNumber.from(relayerFeeDetails.minDeposit);
 
     // Normalise the environment-set USD minimum to units of the token being bridged.
@@ -198,7 +192,7 @@ const handler = async (
           )
           .mul(ethers.utils.parseUnits("1"))
           .div(tokenPriceUsd);
-    
+
     let maxDepositInstant = maxBN(
       ...fullRelayerBalances,
       ...transferRestrictedBalances
