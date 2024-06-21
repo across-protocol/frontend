@@ -61,15 +61,17 @@ const handler = async (
       },
     ];
 
-    const [multicallOutput] = await Promise.all([
+    const [multicallOutput, lpCushion] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: BLOCK_TAG_LAG }),
+      Promise.resolve(
+        ethers.utils.parseUnits(
+          getLpCushion(l1TokenDetails.symbol),
+          l1TokenDetails.decimals
+        )
+      ),
     ]);
 
     const { liquidReserves } = multicallOutput[1];
-    const lpCushion = ethers.utils.parseUnits(
-      getLpCushion(l1TokenDetails.symbol),
-      l1TokenDetails.decimals
-    );
     const liquidReservesWithCushion = liquidReserves.sub(lpCushion);
 
     const responseJson = {
