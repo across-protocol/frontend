@@ -43,7 +43,14 @@ const handler = async (
   try {
     assert(query, LiquidReservesQueryParamsSchema);
     const { l1Tokens } = query;
-    const parsedL1Tokens = l1Tokens.split(",");
+    const parsedL1Tokens = l1Tokens
+      .split(",")
+      .filter((address) => ethers.utils.isAddress(address));
+    logger.debug({
+      at: "LiquidReserves",
+      message: "Test",
+      parsedL1Tokens,
+    });
 
     const l1TokenDetails = parsedL1Tokens.map((_l1Token) =>
       getTokenByAddress(_l1Token, HUB_POOL_CHAIN_ID)
@@ -88,12 +95,6 @@ const handler = async (
     const liquidReservesForL1Tokens = multicallOutput.slice(
       parsedL1Tokens.length
     );
-    logger.debug({
-      at: "LiquidReserves",
-      message: "Test",
-      liquidReservesForL1Tokens,
-      lpCushions,
-    });
 
     const responses = Object.fromEntries(
       parsedL1Tokens.map((_l1Token, i) => {
