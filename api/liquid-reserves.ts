@@ -14,14 +14,12 @@ import {
   getProvider,
   getTokenByAddress,
   handleErrorCondition,
-  positiveIntStr,
   sendResponse,
   validAddress,
 } from "./_utils";
 
 const LiquidReservesQueryParamsSchema = object({
   l1Token: validAddress(),
-  originChainId: positiveIntStr(),
 });
 
 type LiquidReservesQueryParamsSchema = Infer<
@@ -30,6 +28,9 @@ type LiquidReservesQueryParamsSchema = Infer<
 
 // Returns the HubPool liquid reserves minus the LP cushion. Useful for relayers to query so that they don't
 // fill deposits that would overcommit the reserves.
+// Note: this always uses the default LP cushion for a token and does not let the caller specify an origin chain
+// or destination chain, so it should be used to get the max liquid reserves that can support an L2 to L1 transfer
+// where L2 is not the HubPool chain.
 const handler = async (
   { query }: TypedVercelRequest<LiquidReservesQueryParamsSchema>,
   response: VercelResponse
@@ -42,14 +43,11 @@ const handler = async (
   });
   try {
     assert(query, LiquidReservesQueryParamsSchema);
-    const { l1Token, originChainId } = query;
+    const { l1Token } = query;
 
     const l1TokenDetails = getTokenByAddress(query.l1Token, HUB_POOL_CHAIN_ID);
     if (!l1TokenDetails) {
       throw new InputError(`Unsupported L1 token address: ${query.l1Token}`);
-    }
-    if (!originChainId) {
-      throw new InputError("Query param 'originChainId' must be provided");
     }
 
     const provider = getProvider(HUB_POOL_CHAIN_ID);
@@ -69,7 +67,7 @@ const handler = async (
 
     const { liquidReserves } = multicallOutput[1];
     const lpCushion = ethers.utils.parseUnits(
-      getLpCushion(l1TokenDetails.symbol, Number(originChainId)),
+      getLpCushion(l1TokenDetails.symbol),
       l1TokenDetails.decimals
     );
     const liquidReservesWithCushion = liquidReserves.sub(lpCushion);
