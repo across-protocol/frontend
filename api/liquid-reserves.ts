@@ -50,7 +50,7 @@ const handler = async (
     );
     if (!l1TokenDetails) {
       throw new InputError(
-        `Query contais an unsupported L1 token address: ${query.l1Tokens}`
+        `Query contains an unsupported L1 token address: ${query.l1Tokens}`
       );
     }
 
