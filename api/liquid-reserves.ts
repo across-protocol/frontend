@@ -2,7 +2,7 @@ import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { BLOCK_TAG_LAG } from "./_constants";
 import { TypedVercelRequest } from "./_types";
-import { object, assert, Infer, array } from "superstruct";
+import { object, assert, Infer, string } from "superstruct";
 
 import {
   HUB_POOL_CHAIN_ID,
@@ -15,11 +15,10 @@ import {
   getTokenByAddress,
   handleErrorCondition,
   sendResponse,
-  validAddress,
 } from "./_utils";
 
 const LiquidReservesQueryParamsSchema = object({
-  l1Token: array(validAddress()),
+  l1Tokens: string(),
 });
 
 type LiquidReservesQueryParamsSchema = Infer<
@@ -43,14 +42,15 @@ const handler = async (
   });
   try {
     assert(query, LiquidReservesQueryParamsSchema);
-    const { l1Token } = query;
+    const { l1Tokens } = query;
+    const parsedL1Tokens = l1Tokens.split(",");
 
-    const l1TokenDetails = query.l1Token.map((_l1Token) =>
+    const l1TokenDetails = parsedL1Tokens.map((_l1Token) =>
       getTokenByAddress(_l1Token, HUB_POOL_CHAIN_ID)
     );
     if (!l1TokenDetails) {
       throw new InputError(
-        `Query contains an unsupported L1 token address: ${query.l1Token}`
+        `Query contains an unsupported L1 token address: ${query.l1Tokens}`
       );
     }
 
@@ -58,14 +58,14 @@ const handler = async (
     const hubPool = getHubPool(provider);
     const multiCalls = [
       // Simulate syncing all L1 tokens and then query pooledToken for reserves data post-sync
-      ...l1Token.map((_l1Token) => {
+      ...parsedL1Tokens.map((_l1Token) => {
         return {
           contract: hubPool,
           functionName: "sync",
           args: [_l1Token],
         };
       }),
-      ...l1Token.map((_l1Token) => {
+      ...parsedL1Tokens.map((_l1Token) => {
         return {
           contract: hubPool,
           functionName: "pooledTokens",
@@ -85,10 +85,18 @@ const handler = async (
         )
       ),
     ]);
-    const liquidReservesForL1Tokens = multicallOutput.slice(l1Token.length);
+    logger.debug({
+      at: "LiquidReserves",
+      message: "Test",
+      multicallOutput,
+      lpCushions,
+    });
+    const liquidReservesForL1Tokens = multicallOutput.slice(
+      parsedL1Tokens.length
+    );
 
     const responses = Object.fromEntries(
-      l1Token.map((_l1Token, i) => {
+      parsedL1Tokens.map((_l1Token, i) => {
         const { liquidReserves } = liquidReservesForL1Tokens[i];
         const lpCushion = lpCushions[i];
         const liquidReservesWithCushion = liquidReserves.sub(lpCushion);
