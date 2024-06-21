@@ -2,7 +2,7 @@ import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import { BLOCK_TAG_LAG } from "./_constants";
 import { TypedVercelRequest } from "./_types";
-import { object, assert, Infer } from "superstruct";
+import { object, assert, Infer, array } from "superstruct";
 
 import {
   HUB_POOL_CHAIN_ID,
@@ -19,7 +19,7 @@ import {
 } from "./_utils";
 
 const LiquidReservesQueryParamsSchema = object({
-  l1Token: validAddress(),
+  l1Tokens: array(validAddress()),
 });
 
 type LiquidReservesQueryParamsSchema = Infer<
@@ -43,50 +43,73 @@ const handler = async (
   });
   try {
     assert(query, LiquidReservesQueryParamsSchema);
-    const { l1Token } = query;
+    const { l1Tokens } = query;
 
-    const l1TokenDetails = getTokenByAddress(query.l1Token, HUB_POOL_CHAIN_ID);
+    const l1TokenDetails = query.l1Tokens.map((l1Token) =>
+      getTokenByAddress(l1Token, HUB_POOL_CHAIN_ID)
+    );
     if (!l1TokenDetails) {
-      throw new InputError(`Unsupported L1 token address: ${query.l1Token}`);
+      throw new InputError(
+        `Query contais an unsupported L1 token address: ${query.l1Tokens}`
+      );
     }
 
     const provider = getProvider(HUB_POOL_CHAIN_ID);
     const hubPool = getHubPool(provider);
     const multiCalls = [
-      { contract: hubPool, functionName: "sync", args: [l1Token] },
-      {
-        contract: hubPool,
-        functionName: "pooledTokens",
-        args: [l1Token],
-      },
+      // Simulate syncing all L1 tokens and then query pooledToken for reserves data post-sync
+      ...l1Tokens.map((l1Token) => {
+        return {
+          contract: hubPool,
+          functionName: "sync",
+          args: [l1Token],
+        };
+      }),
+      ...l1Tokens.map((l1Token) => {
+        return {
+          contract: hubPool,
+          functionName: "pooledTokens",
+          args: [l1Token],
+        };
+      }),
     ];
 
-    const [multicallOutput, lpCushion] = await Promise.all([
+    const [multicallOutput, ...lpCushions] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: BLOCK_TAG_LAG }),
       Promise.resolve(
-        ethers.utils.parseUnits(
-          getLpCushion(l1TokenDetails.symbol),
-          l1TokenDetails.decimals
+        l1TokenDetails.map((l1Token) =>
+          ethers.utils.parseUnits(
+            getLpCushion(l1Token!.symbol),
+            l1Token!.decimals
+          )
         )
       ),
     ]);
 
-    const { liquidReserves } = multicallOutput[1];
-    const liquidReservesWithCushion = liquidReserves.sub(lpCushion);
+    const responses = Object.fromEntries(
+      l1Tokens.map((l1Token, i) => {
+        const { liquidReserves } = multicallOutput[i * 2 + 1];
+        const lpCushion = lpCushions[i];
+        const liquidReservesWithCushion = liquidReserves.sub(lpCushion);
+        return [
+          l1Token,
+          {
+            liquidReserves,
+            lpCushion,
+            liquidReservesWithCushion,
+          },
+        ];
+      })
+    );
 
-    const responseJson = {
-      liquidReserves: liquidReserves.toString(),
-      lpCushion: lpCushion.toString(),
-      liquidReservesWithCushion: liquidReservesWithCushion.toString(),
-    };
     logger.debug({
       at: "LiquidReserves",
       message: "Response data",
-      responseJson,
+      responses,
     });
     // Respond with a 200 status code and 7 minutes of cache with
     // a minute of stale-while-revalidate.
-    sendResponse(response, responseJson, 200, 420, 60);
+    sendResponse(response, responses, 200, 420, 60);
   } catch (error: unknown) {
     return handleErrorCondition("liquidReserves", response, logger, error);
   }
