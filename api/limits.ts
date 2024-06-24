@@ -222,8 +222,8 @@ const handler = async (
         getLiteChainMaxBalanceUsd(computedOriginChainId, inputToken.symbol)
       );
       const liteChainInputTokenMaxBalance = liteChainUsdMaxBalance
-        .div(tokenPriceUsd)
-        .mul(sdk.utils.fixedPointAdjustment);
+        .mul(sdk.utils.fixedPointAdjustment)
+        .div(tokenPriceUsd);
       const relayers = [...fullRelayers, ...transferRestrictedRelayers];
       const originChainBalancesPerRelayer = await Promise.all(
         relayers.map((relayer) =>
