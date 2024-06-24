@@ -1516,13 +1516,9 @@ export function getLimitsBufferMultiplier(symbol: string) {
 }
 
 export function getLiteChainMaxBalanceUsd(chainId: number, symbol: string) {
-  const envVarBase = "LITE_CHAIN_MAX_BALANCES";
+  const envVarBase = "LITE_CHAIN_USD_MAX_BALANCES";
   const liteChainUsdMaxBalance =
-    [
-      `${envVarBase}_${symbol}_${chainId}`,
-      `${envVarBase}_${symbol}`,
-      `${envVarBase}`,
-    ]
+    [`${envVarBase}_${symbol}_${chainId}`, `${envVarBase}_${chainId}`]
       .map((key) => process.env[key])
       .find((value) => value !== undefined) ||
     DEFAULT_USD_MAX_LITE_CHAIN_BALANCE;
