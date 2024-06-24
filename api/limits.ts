@@ -17,6 +17,7 @@ import {
   getDefaultRelayerAddress,
   getHubPool,
   getLimitsBufferMultiplier,
+  getLiteChainMaxBalanceUsd,
   getLogger,
   getLpCushion,
   getProvider,
@@ -171,19 +172,20 @@ const handler = async (
     const [liteChainIdsEncoded] = multicallOutput[2];
     const liteChainIds =
       liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
-    const routeInvolvesLiteChain = [
-      computedOriginChainId,
-      destinationChainId,
-    ].some((chain) => liteChainIds.includes(chain));
+    const originChainIsLiteChain = liteChainIds.includes(computedOriginChainId);
+    const destinationChainIsLiteChain =
+      liteChainIds.includes(destinationChainId);
+    const routeInvolvesLiteChain =
+      originChainIsLiteChain || destinationChainIsLiteChain;
 
     const transferBalances = fullRelayerBalances.map((balance, i) =>
       balance.add(fullRelayerMainnetBalances[i])
     );
 
-    const minDeposit = ethers.BigNumber.from(relayerFeeDetails.minDeposit);
+    let minDeposit = ethers.BigNumber.from(relayerFeeDetails.minDeposit);
 
     // Normalise the environment-set USD minimum to units of the token being bridged.
-    const minDepositFloor = tokenPriceUsd.lte(0)
+    let minDepositFloor = tokenPriceUsd.lte(0)
       ? ethers.BigNumber.from(0)
       : ethers.utils
           .parseUnits(
@@ -198,7 +200,6 @@ const handler = async (
       ...transferRestrictedBalances
     ); // balances on destination chain
 
-    // Same as above.
     let maxDepositShortDelay = maxBN(
       ...transferBalances,
       ...transferRestrictedBalances
@@ -214,6 +215,39 @@ const handler = async (
 
       maxDepositInstant = minBN(maxDepositInstant, liquidReserves);
       maxDepositShortDelay = minBN(maxDepositShortDelay, liquidReserves);
+    }
+
+    if (originChainIsLiteChain) {
+      const liteChainUsdMaxBalance = ethers.utils.parseUnits(
+        getLiteChainMaxBalanceUsd(computedOriginChainId, inputToken.symbol)
+      );
+      const liteChainInputTokenMaxBalance = liteChainUsdMaxBalance
+        .div(tokenPriceUsd)
+        .mul(sdk.utils.fixedPointAdjustment);
+      const relayers = [...fullRelayers, ...transferRestrictedRelayers];
+      const originChainBalancesPerRelayer = await Promise.all(
+        relayers.map((relayer) =>
+          getCachedTokenBalance(
+            computedOriginChainId,
+            relayer,
+            inputToken.address
+          )
+        )
+      );
+      const totalOriginChainRelayersBalance =
+        originChainBalancesPerRelayer.reduce(
+          (totalBalance, relayerBalance) => totalBalance.add(relayerBalance),
+          sdk.utils.toBN("0")
+        );
+      const liteChainMaxDeposit = totalOriginChainRelayersBalance.gte(
+        liteChainInputTokenMaxBalance
+      )
+        ? sdk.utils.toBN("0")
+        : liteChainInputTokenMaxBalance.sub(totalOriginChainRelayersBalance);
+      minDeposit = minBN(minDeposit, liteChainMaxDeposit);
+      minDepositFloor = minBN(minDepositFloor, liteChainMaxDeposit);
+      maxDepositInstant = minBN(maxDepositInstant, liteChainMaxDeposit);
+      maxDepositShortDelay = minBN(maxDepositShortDelay, liteChainMaxDeposit);
     }
 
     const limitsBufferMultiplier = getLimitsBufferMultiplier(l1Token.symbol);

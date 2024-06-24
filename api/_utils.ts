@@ -28,20 +28,21 @@ import {
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { VercelResponse } from "@vercel/node";
 import {
+  BLOCK_TAG_LAG,
   CHAIN_IDs,
-  MULTICALL3_ADDRESS,
+  DEFAULT_USD_MAX_LITE_CHAIN_BALANCE,
   DEFI_LLAMA_POOL_LOOKUP,
+  DOMAIN_CALLDATA_DELIMITER,
   EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
+  MULTICALL3_ADDRESS,
   SECONDS_PER_YEAR,
   TOKEN_SYMBOLS_MAP,
-  maxRelayFeePct,
-  relayerFeeCapitalCostConfig,
-  BLOCK_TAG_LAG,
   defaultRelayerAddressOverride,
   defaultRelayerAddressOverridePerToken,
   disabledL1Tokens,
-  DOMAIN_CALLDATA_DELIMITER,
   graphAPIKey,
+  maxRelayFeePct,
+  relayerFeeCapitalCostConfig,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
 
@@ -1512,4 +1513,18 @@ export function getLimitsBufferMultiplier(symbol: string) {
   );
   const multiplierCap = ethers.utils.parseEther("1");
   return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
+}
+
+export function getLiteChainMaxBalanceUsd(chainId: number, symbol: string) {
+  const envVarBase = "LITE_CHAIN_MAX_BALANCES";
+  const liteChainUsdMaxBalance =
+    [
+      `${envVarBase}_${symbol}_${chainId}`,
+      `${envVarBase}_${symbol}`,
+      `${envVarBase}`,
+    ]
+      .map((key) => process.env[key])
+      .find((value) => value !== undefined) ||
+    DEFAULT_USD_MAX_LITE_CHAIN_BALANCE;
+  return liteChainUsdMaxBalance;
 }
