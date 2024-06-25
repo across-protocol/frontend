@@ -185,7 +185,7 @@ export function useUserDeposits(
             const indexedDeposit = deposits.find(
               (d) => d.depositTxHash === localUserDeposit.depositTxHash
             );
-            return indexedDeposit ? indexedDeposit.status === "pending" : true;
+            return !indexedDeposit || indexedDeposit.status === "pending";
           }
         }
       );
