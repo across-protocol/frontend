@@ -49,7 +49,7 @@ export async function getAllowance(
   spender: string,
   tokenSymbol: string,
   blockNumber: number | "latest" = "latest",
-  provider?: ethers.providers.Provider
+  provider: ethers.providers.Provider = getProvider(chainId)
 ): Promise<ethers.BigNumber> {
   provider ??= getProvider(chainId);
   const config = getConfig();
