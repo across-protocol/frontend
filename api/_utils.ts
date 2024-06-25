@@ -597,6 +597,7 @@ export const getRelayerFeeDetails = async (
         exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
         exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
         message: message ?? sdk.constants.EMPTY_MESSAGE,
+        originatesFromLiteChain: false, // FIXME
       },
       amount,
       sdk.utils.isMessageEmpty(message),

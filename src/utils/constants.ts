@@ -47,7 +47,6 @@ export enum ChainId {
   LINEA = CHAIN_IDs.LINEA,
   MODE = CHAIN_IDs.MODE,
   // testnets
-  MUMBAI = CHAIN_IDs.MUMBAI,
   SEPOLIA = CHAIN_IDs.SEPOLIA,
   BASE_SEPOLIA = CHAIN_IDs.BASE_SEPOLIA,
   OPTIMISM_SEPOLIA = CHAIN_IDs.OPTIMISM_SEPOLIA,
@@ -208,19 +207,6 @@ export const chainInfoList: ChainInfoList = [
   },
   // testnets
   {
-    name: "Mumbai",
-    chainId: ChainId.MUMBAI,
-    logoURI: polygonLogo,
-    rpcUrl: "https://matic-mumbai.chainstacklabs.com",
-    explorerUrl: "https://mumbai.polygonscan.com",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://mumbai.polygonscan.com"
-    ),
-    nativeCurrencySymbol: "WMATIC",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_80001_PROVIDER_URL,
-  },
-  {
     name: "Sepolia",
     fullName: "Sepolia",
     chainId: ChainId.SEPOLIA,
@@ -337,7 +323,6 @@ export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
       ],
     },
   ],
-  [CHAIN_IDs.GOERLI]: [],
   [CHAIN_IDs.SEPOLIA]: [],
 };
 
