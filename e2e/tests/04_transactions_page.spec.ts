@@ -5,7 +5,6 @@ import { E2E_DAPP_URL } from "../config";
 import connectedSetup from "../wallet-setup/connected.setup";
 
 const testWithConnectedMM = testWithSynpress(metaMaskFixtures(connectedSetup));
-const { expect: expectWithConnectedMM } = testWithConnectedMM;
 
 const txPageUrl = E2E_DAPP_URL + "/transactions";
 
