@@ -18,10 +18,12 @@ import {
   getHubPool,
   getLimitsBufferMultiplier,
   getLiteChainMaxBalanceUsd,
+  getLiteChainMaxDepositUsd,
   getLogger,
   getLpCushion,
   getProvider,
   getRelayerFeeDetails,
+  getSpokePoolAddress,
   handleErrorCondition,
   maxBN,
   minBN,
@@ -95,8 +97,7 @@ const handler = async (
       ENABLED_ROUTES.acrossConfigStoreAddress,
       provider
     );
-    const liteChainsKey =
-      sdk.clients.GLOBAL_CONFIG_STORE_KEYS.LITE_CHAIN_ID_INDICES;
+    const liteChainsKey = sdk.clients.GLOBAL_CONFIG_STORE_KEYS.CHAIN_ID_INDICES;
     const encodedLiteChainsKey = sdk.utils.utf8ToHex(liteChainsKey);
 
     const multiCalls = [
@@ -224,30 +225,54 @@ const handler = async (
       const liteChainInputTokenMaxBalance = liteChainUsdMaxBalance
         .mul(sdk.utils.fixedPointAdjustment)
         .div(tokenPriceUsd);
+
+      const originSpokePoolAddress = getSpokePoolAddress(computedOriginChainId);
       const relayers = [...fullRelayers, ...transferRestrictedRelayers];
-      const originChainBalancesPerRelayer = await Promise.all(
-        relayers.map((relayer) =>
+      const [originSpokePoolBalance, originChainBalancesPerRelayer] =
+        await Promise.all([
           getCachedTokenBalance(
             computedOriginChainId,
-            relayer,
+            originSpokePoolAddress,
             inputToken.address
-          )
-        )
-      );
+          ),
+          Promise.all(
+            relayers.map((relayer) =>
+              getCachedTokenBalance(
+                computedOriginChainId,
+                relayer,
+                inputToken.address
+              )
+            )
+          ),
+        ]);
       const totalOriginChainRelayersBalance =
         originChainBalancesPerRelayer.reduce(
           (totalBalance, relayerBalance) => totalBalance.add(relayerBalance),
           sdk.utils.toBN("0")
         );
-      const liteChainMaxDeposit = totalOriginChainRelayersBalance.gte(
+      const currentTotalChainBalance = totalOriginChainRelayersBalance.add(
+        originSpokePoolBalance
+      );
+      const liteChainAvailableAmountForDeposits = currentTotalChainBalance.gte(
         liteChainInputTokenMaxBalance
       )
         ? sdk.utils.toBN("0")
-        : liteChainInputTokenMaxBalance.sub(totalOriginChainRelayersBalance);
-      minDeposit = minBN(minDeposit, liteChainMaxDeposit);
-      minDepositFloor = minBN(minDepositFloor, liteChainMaxDeposit);
-      maxDepositInstant = minBN(maxDepositInstant, liteChainMaxDeposit);
-      maxDepositShortDelay = minBN(maxDepositShortDelay, liteChainMaxDeposit);
+        : liteChainInputTokenMaxBalance.sub(currentTotalChainBalance);
+      const liteChainUsdMaxDeposit = ethers.utils.parseUnits(
+        getLiteChainMaxDepositUsd(computedOriginChainId, inputToken.symbol)
+      );
+      const liteChainInputTokenMaxDeposit = liteChainUsdMaxDeposit
+        .mul(sdk.utils.fixedPointAdjustment)
+        .div(tokenPriceUsd);
+      const liteChainMaxBoundary = minBN(
+        liteChainInputTokenMaxDeposit,
+        liteChainAvailableAmountForDeposits
+      );
+
+      minDeposit = minBN(minDeposit, liteChainMaxBoundary);
+      minDepositFloor = minBN(minDepositFloor, liteChainMaxBoundary);
+      maxDepositInstant = minBN(maxDepositInstant, liteChainMaxBoundary);
+      maxDepositShortDelay = minBN(maxDepositShortDelay, liteChainMaxBoundary);
     }
 
     const limitsBufferMultiplier = getLimitsBufferMultiplier(l1Token.symbol);

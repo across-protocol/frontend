@@ -30,7 +30,8 @@ import { VercelResponse } from "@vercel/node";
 import {
   BLOCK_TAG_LAG,
   CHAIN_IDs,
-  DEFAULT_USD_MAX_LITE_CHAIN_BALANCE,
+  DEFAULT_LITE_CHAIN_USD_MAX_BALANCE,
+  DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT,
   DEFI_LLAMA_POOL_LOOKUP,
   DOMAIN_CALLDATA_DELIMITER,
   EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
@@ -1516,11 +1517,21 @@ export function getLimitsBufferMultiplier(symbol: string) {
 }
 
 export function getLiteChainMaxBalanceUsd(chainId: number, symbol: string) {
-  const envVarBase = "LITE_CHAIN_USD_MAX_BALANCES";
+  const envVarBase = "LITE_CHAIN_USD_MAX_BALANCE";
   const liteChainUsdMaxBalance =
-    [`${envVarBase}_${symbol}_${chainId}`, `${envVarBase}_${chainId}`]
+    [`${envVarBase}_${chainId}_${symbol}`, `${envVarBase}_${chainId}`]
       .map((key) => process.env[key])
       .find((value) => value !== undefined) ||
-    DEFAULT_USD_MAX_LITE_CHAIN_BALANCE;
+    DEFAULT_LITE_CHAIN_USD_MAX_BALANCE;
   return liteChainUsdMaxBalance;
+}
+
+export function getLiteChainMaxDepositUsd(chainId: number, symbol: string) {
+  const envVarBase = "LITE_CHAIN_USD_MAX_DEPOSIT";
+  const liteChainUsdMaxDeposit =
+    [`${envVarBase}_${chainId}_${symbol}`, `${envVarBase}_${chainId}`]
+      .map((key) => process.env[key])
+      .find((value) => value !== undefined) ||
+    DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT;
+  return liteChainUsdMaxDeposit;
 }
