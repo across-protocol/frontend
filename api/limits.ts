@@ -97,7 +97,8 @@ const handler = async (
       ENABLED_ROUTES.acrossConfigStoreAddress,
       provider
     );
-    const liteChainsKey = sdk.clients.GLOBAL_CONFIG_STORE_KEYS.CHAIN_ID_INDICES;
+    const liteChainsKey =
+      sdk.clients.GLOBAL_CONFIG_STORE_KEYS.LITE_CHAIN_ID_INDICES;
     const encodedLiteChainsKey = sdk.utils.utf8ToHex(liteChainsKey);
 
     const multiCalls = [
