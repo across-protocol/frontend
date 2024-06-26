@@ -8,7 +8,7 @@ import { MM_PASSWORD, MM_SEED_PHRASE, E2E_DAPP_URL } from "../config";
 
 export default defineWalletSetup(MM_PASSWORD, async (context, walletPage) => {
   // This is a workaround for the fact that the MetaMask extension ID changes.
-  // This workaround won't be needed in the near future! 😁
+  // This workaround won't be needed in the near future!
   const extensionId = await getExtensionId(context, "MetaMask");
 
   const metamask = new MetaMask(context, walletPage, MM_PASSWORD, extensionId);
