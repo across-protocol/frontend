@@ -30,7 +30,7 @@ import {
   getReceiveTokenSymbol,
 } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
-import { useConnection } from "hooks";
+import { BridgeLimits, useConnection } from "hooks";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
 export type BridgeFormProps = {
@@ -52,6 +52,7 @@ export type BridgeFormProps = {
   onClickChangeToAddress: VoidHandler;
   onSetNewSlippage: (slippage: number) => void;
 
+  limits?: BridgeLimits;
   fees?: GetBridgeFeesResult;
   estimatedTimeString?: string;
   balance?: BigNumber;
@@ -69,7 +70,7 @@ const validationErrorTextMap = {
   [AmountInputError.INSUFFICIENT_BALANCE]:
     "Insufficient balance to process this transfer.",
   [AmountInputError.INSUFFICIENT_LIQUIDITY]:
-    "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [MAX_DEPOSIT_SHORT_DELAY] or lower.",
+    "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [MAX_DEPOSIT] or lower.",
   [AmountInputError.INVALID]: "Only positive numbers are allowed as an input.",
   [AmountInputError.AMOUNT_TOO_LOW]:
     "The amount you are trying to bridge is too low.",
@@ -94,6 +95,7 @@ const BridgeForm = ({
   onClickChangeToAddress,
   onSetNewSlippage,
 
+  limits,
   fees,
   estimatedTimeString,
   balance,
@@ -146,9 +148,9 @@ const BridgeForm = ({
       {parsedAmountInput && validationError && (
         <InputErrorText
           errorText={validationErrorTextMap[validationError].replace(
-            "[MAX_DEPOSIT_SHORT_DELAY]",
+            "[MAX_DEPOSIT]",
             `${formatUnitsWithMaxFractions(
-              fees?.limits.maxDepositShortDelay || 0,
+              limits?.maxDeposit || 0,
               getToken(selectedRoute.fromTokenSymbol).decimals
             )} ${selectedRoute.fromTokenSymbol}`
           )}

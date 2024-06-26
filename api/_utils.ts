@@ -40,7 +40,6 @@ import {
   defaultRelayerAddressOverride,
   defaultRelayerAddressOverridePerToken,
   disabledL1Tokens,
-  DEFAULT_LIMITS_BUFFER_MULTIPLIERS,
   DOMAIN_CALLDATA_DELIMITER,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
@@ -374,7 +373,17 @@ export const getRouteDetails = (
   };
 };
 
-export const getTokenByAddress = (tokenAddress: string, chainId?: number) => {
+export const getTokenByAddress = (
+  tokenAddress: string,
+  chainId?: number
+):
+  | {
+      decimals: number;
+      symbol: string;
+      name: string;
+      addresses: Record<number, string>;
+    }
+  | undefined => {
   const matches =
     Object.entries(TOKEN_SYMBOLS_MAP).filter(([_symbol, { addresses }]) =>
       chainId
@@ -588,6 +597,7 @@ export const getRelayerFeeDetails = async (
         exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
         exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
         message: message ?? sdk.constants.EMPTY_MESSAGE,
+        originatesFromLiteChain: false, // FIXME
       },
       amount,
       sdk.utils.isMessageEmpty(message),
@@ -1481,76 +1491,14 @@ export function isSwapRouteEnabled({
   return !!swapRoute;
 }
 
-export function getLimitsBufferMultipliers(
-  symbol: string,
-  fromChainId: number,
-  toChainId: number
-) {
-  return {
-    recommendedDepositInstant: getRecommendedDepositInstantMultiplier(
-      symbol,
-      fromChainId,
-      toChainId
-    ),
-    depositInstant: getDepositInstantMultiplier(symbol, fromChainId, toChainId),
-    depositShortDelay: getDepositShortDelayMultiplier(
-      symbol,
-      fromChainId,
-      toChainId
-    ),
-  };
-}
-
-/**
- * Returns a value that will be multiplied by `maxDepositInstant` to
- * calculate the recommended deposit instant limit.
- * @param symbol The token symbol to retrieve the multiplier for.
- * @param fromChainId The chain ID of the origin chain.
- * @param toChainId The chain ID of the destination chain.
- */
-export const getRecommendedDepositInstantMultiplier =
-  makeLimitsBufferMultiplierGetter(
-    "RECOMMENDED_DEPOSIT_INSTANT_MULTIPLIER",
-    DEFAULT_LIMITS_BUFFER_MULTIPLIERS.recommendedDepositInstant
+export function getLimitsBufferMultiplier(symbol: string) {
+  const limitsBufferMultipliers: Record<string, string> = process.env
+    .LIMITS_BUFFER_MULTIPLIERS
+    ? JSON.parse(process.env.LIMITS_BUFFER_MULTIPLIERS)
+    : {};
+  const bufferMultiplier = ethers.utils.parseEther(
+    limitsBufferMultipliers[symbol] || "1"
   );
-
-/**
- * Returns a value that will be multiplied by `maxDepositInstant` to
- * calculate a buffered value instant deposit limit.
- * @param symbol The token symbol to retrieve the multiplier for.
- * @param fromChainId The chain ID of the origin chain.
- * @param toChainId The chain ID of the destination chain.
- */
-export const getDepositInstantMultiplier = makeLimitsBufferMultiplierGetter(
-  "DEPOSIT_INSTANT_BUFFER_MULTIPLIER",
-  DEFAULT_LIMITS_BUFFER_MULTIPLIERS.depositInstant
-);
-
-/**
- * Returns a value that will be multiplied by `maxDepositShortDelay` to
- * calculate a buffered value short delay deposit limit.
- * @param symbol The token symbol to retrieve the multiplier for.
- * @param fromChainId The chain ID of the origin chain.
- * @param toChainId The chain ID of the destination chain.
- */
-export const getDepositShortDelayMultiplier = makeLimitsBufferMultiplierGetter(
-  "DEPOSIT_SHORT_DELAY_BUFFER_MULTIPLIER",
-  DEFAULT_LIMITS_BUFFER_MULTIPLIERS.depositShortDelay
-);
-
-function makeLimitsBufferMultiplierGetter(
-  envVarBase: string,
-  defaultLimitsBufferMultiplier: string
-) {
-  return (symbol: string, fromChainId: number, toChainId: number) => {
-    return ethers.utils.parseEther(
-      [
-        `${envVarBase}_${symbol}_${fromChainId}_${toChainId}`,
-        `${envVarBase}_${symbol}_${fromChainId}`,
-        `${envVarBase}_${symbol}`,
-      ]
-        .map((key) => process.env[key])
-        .find((value) => value !== undefined) || defaultLimitsBufferMultiplier
-    );
-  };
+  const multiplierCap = ethers.utils.parseEther("1");
+  return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
 }

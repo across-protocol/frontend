@@ -66,7 +66,7 @@ export function useBridge() {
     parsedAmount,
     quotedFees?.isAmountTooLow,
     maxBalance,
-    limitsQuery.limits?.maxDepositShortDelay,
+    limitsQuery.limits?.maxDeposit,
     selectedRoute.type === "swap"
       ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount || 0)
       : parsedAmount
@@ -124,6 +124,7 @@ export function useBridge() {
     selectedRoute,
     toAccount,
     walletAccount: account,
+    limits: limitsQuery.limits,
     fees: quotedFees,
     swapQuote: quotedSwap,
     balance,
