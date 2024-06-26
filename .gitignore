@@ -20,6 +20,7 @@
 .env.test.local
 .env.production.local
 .env*.local
+.env.e2e
 
 # IDE
 .idea
@@ -48,3 +49,11 @@ ampli.json
 # Bundle size analysis
 bundle-size-analysis.*
 stats.*
+
+# Playwright and synpress
+/test-results/
+/e2e/tests-out/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+.cache-synpress

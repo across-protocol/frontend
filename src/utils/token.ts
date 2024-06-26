@@ -6,9 +6,10 @@ import { ERC20__factory } from "utils/typechain";
 export async function getNativeBalance(
   chainId: ChainId,
   account: string,
-  blockNumber: number | "latest" = "latest"
+  blockNumber: number | "latest" = "latest",
+  provider?: ethers.providers.JsonRpcProvider
 ) {
-  const provider = getProvider(chainId);
+  provider ??= getProvider(chainId);
   const balance = await provider.getBalance(account, blockNumber);
   return balance;
 }
@@ -24,9 +25,10 @@ export async function getBalance(
   chainId: ChainId,
   account: string,
   tokenAddress: string,
-  blockNumber: number | "latest" = "latest"
+  blockNumber: number | "latest" = "latest",
+  provider?: ethers.providers.JsonRpcProvider
 ): Promise<ethers.BigNumber> {
-  const provider = getProvider(chainId);
+  provider ??= getProvider(chainId);
   const contract = ERC20__factory.connect(tokenAddress, provider);
   const balance = await contract.balanceOf(account, { blockTag: blockNumber });
   return balance;
@@ -46,9 +48,10 @@ export async function getAllowance(
   owner: string,
   spender: string,
   tokenSymbol: string,
-  blockNumber: number | "latest" = "latest"
+  blockNumber: number | "latest" = "latest",
+  provider: ethers.providers.Provider = getProvider(chainId)
 ): Promise<ethers.BigNumber> {
-  const provider = getProvider(chainId);
+  provider ??= getProvider(chainId);
   const config = getConfig();
   const { isNative, address } = config.getTokenInfoBySymbol(
     chainId,

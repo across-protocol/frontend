@@ -9,7 +9,7 @@ import {
   ConfigClient,
   getChainInfo,
 } from "utils";
-import { BigNumber } from "ethers";
+import { BigNumber, providers } from "ethers";
 
 const config = getConfig();
 
@@ -19,8 +19,15 @@ const getBalanceBySymbol = async (params: {
   chainIdToQuery?: ChainId;
   tokenSymbolToQuery?: string;
   config: ConfigClient;
+  provider?: providers.JsonRpcProvider;
 }) => {
-  const { accountToQuery, chainIdToQuery, tokenSymbolToQuery, config } = params;
+  const {
+    accountToQuery,
+    chainIdToQuery,
+    tokenSymbolToQuery,
+    config,
+    provider,
+  } = params;
   if (!chainIdToQuery || !tokenSymbolToQuery || !accountToQuery)
     return BigNumber.from(0);
   const tokenInfo = config.getTokenInfoBySymbolSafe(
@@ -31,9 +38,15 @@ const getBalanceBySymbol = async (params: {
     return undefined;
   }
   if (tokenInfo.isNative) {
-    return getNativeBalance(chainIdToQuery, accountToQuery);
+    return getNativeBalance(chainIdToQuery, accountToQuery, "latest", provider);
   } else {
-    return getBalance(chainIdToQuery, accountToQuery, tokenInfo.address);
+    return getBalance(
+      chainIdToQuery,
+      accountToQuery,
+      tokenInfo.address,
+      "latest",
+      provider
+    );
   }
 };
 
@@ -49,7 +62,11 @@ export function useBalanceBySymbol(
   chainId?: ChainId,
   account?: string
 ) {
-  const { account: connectedAccount } = useConnection();
+  const {
+    account: connectedAccount,
+    provider,
+    chainId: connectedChainId,
+  } = useConnection();
   account ??= connectedAccount;
 
   const { data: balance, ...delegated } = useQuery({
@@ -61,6 +78,10 @@ export function useBalanceBySymbol(
         chainIdToQuery,
         tokenSymbolToQuery,
         accountToQuery,
+        provider:
+          chainIdToQuery === connectedChainId && provider
+            ? provider
+            : undefined,
       });
     },
     enabled: Boolean(chainId && account && tokenSymbol),
@@ -88,7 +109,11 @@ export function useBalancesBySymbols({
   chainId?: ChainId;
   account?: string;
 }) {
-  const { account: connectedAccount } = useConnection();
+  const {
+    account: connectedAccount,
+    chainId: connectedChainId,
+    provider,
+  } = useConnection();
   account ??= connectedAccount;
 
   const result = useQueries(
@@ -115,6 +140,10 @@ export function useBalancesBySymbols({
             chainIdToQuery,
             tokenSymbolToQuery,
             accountToQuery,
+            provider:
+              chainIdToQuery === connectedChainId && provider
+                ? provider
+                : undefined,
           });
         },
         enabled: Boolean(chainId && account && tokenSymbols.length),

@@ -41,6 +41,7 @@ import {
   defaultRelayerAddressOverridePerToken,
   disabledL1Tokens,
   DOMAIN_CALLDATA_DELIMITER,
+  graphAPIKey,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
 
@@ -1101,6 +1102,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
     [CHAIN_IDs.SEPOLIA]: {},
   };
 
+  const theGraphBaseUrl = `https://gateway-arbitrum.network.thegraph.com/api/${graphAPIKey}/subgraphs/id`;
   const defaultNetworkConfig = BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID];
   const config = {
     network: {
@@ -1108,6 +1110,15 @@ async function getBalancerPoolState(poolTokenAddress: string) {
       pools: {
         ...defaultNetworkConfig.pools,
         ...supportedBalancerPoolsMap[HUB_POOL_CHAIN_ID],
+      },
+      // Due to an upgrade, we can no longer rely on the balancer hosted subgraph
+      // to fetch the pool data. We need to use a new on-chain subgraph which requires
+      // us to hardcode the URLs for each required subgraph. The caveat here is that
+      // we now need an API key to access the subgraphs.
+      urls: {
+        subgraph: `${theGraphBaseUrl}/C4ayEZP2yTXRAB8vSaTrgN4m9anTe9Mdm2ViyiAuV9TV`,
+        gaugesSubgraph: `${theGraphBaseUrl}/4sESujoqmztX6pbichs4wZ1XXyYrkooMuHA8sKkYxpTn`,
+        blockNumberSubgraph: `${theGraphBaseUrl}/9A6bkprqEG2XsZUYJ5B2XXp6ymz9fNcn4tVPxMWDztYC`,
       },
     } as BalancerNetworkConfig,
     rpcUrl: getProvider(HUB_POOL_CHAIN_ID).connection.url,

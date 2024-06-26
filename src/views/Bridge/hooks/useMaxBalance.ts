@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { BigNumber, constants, utils } from "ethers";
+import { BigNumber, constants, ethers, utils } from "ethers";
 
 import { useBalanceBySymbol, useConnection } from "hooks";
 import {
@@ -23,7 +23,13 @@ export function useMaxBalance(selectedRoute: SelectedRoute) {
   const { account, signer } = useConnection();
 
   return useQuery(
-    ["max-balance", balanceTokenSymbol, selectedRoute.fromChain, account],
+    [
+      "max-balance",
+      balanceTokenSymbol,
+      selectedRoute.fromChain,
+      account,
+      balance?.toString(),
+    ],
     async () => {
       let maxBridgeAmount: BigNumber;
 
@@ -32,7 +38,7 @@ export function useMaxBalance(selectedRoute: SelectedRoute) {
           balanceTokenSymbol !== "ETH"
             ? balance
             : // For ETH, we need to take the gas costs into account before setting the max. bridgable amount
-              await estimateGasCostsForDeposit(selectedRoute).then(
+              await estimateGasCostsForDeposit(selectedRoute, signer).then(
                 (estimatedGasCosts) => max(balance.sub(estimatedGasCosts), 0)
               );
       } else {
@@ -52,8 +58,11 @@ export function useMaxBalance(selectedRoute: SelectedRoute) {
  * Estimated gas costs for a deposit with an empty message.
  * This is used to calculate the maximum amount of ETH that can be bridged.
  */
-async function estimateGasCostsForDeposit(selectedRoute: SelectedRoute) {
-  const provider = getProvider(selectedRoute.fromChain);
+async function estimateGasCostsForDeposit(
+  selectedRoute: SelectedRoute,
+  provider?: ethers.providers.JsonRpcSigner | ethers.providers.JsonRpcProvider
+) {
+  provider ??= getProvider(selectedRoute.fromChain);
   const gasPrice = await provider.getGasPrice();
   const gasMultiplier = gasMultiplierPerChain[selectedRoute.fromChain] || 3;
   return gasPrice
