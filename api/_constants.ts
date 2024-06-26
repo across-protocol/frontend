@@ -115,6 +115,8 @@ export const defaultRelayerAddressOverridePerToken: Record<
 export const defaultRelayerAddressOverride =
   process.env.RELAYER_ADDRESS_OVERRIDE;
 
+export const theGraphAPIKey = process.env.THE_GRAPH_API_KEY;
+
 const relayerFeeCapitalCostOverrides: Record<
   string,
   Record<string, Record<string, relayFeeCalculator.CapitalCostConfig>>
