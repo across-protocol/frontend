@@ -8,7 +8,8 @@ import { TOKEN_SYMBOLS_MAP } from "../api/_constants";
 
 const { getDeployedAddress } = sdkUtils;
 
-type Route = typeof enabledRoutes[keyof typeof enabledRoutes]["routes"][number];
+type Route =
+  (typeof enabledRoutes)[keyof typeof enabledRoutes]["routes"][number];
 type ToChain = Route["toChains"][number];
 type ToToken = ToChain["tokens"][number];
 type SwapToken = ToChain["swapTokens"][number];
@@ -1181,7 +1182,7 @@ const enabledRoutes = {
   },
 } as const;
 
-function generateRoutes(hubPoolChainId = 1) {
+async function generateRoutes(hubPoolChainId = 1) {
   const config = enabledRoutes[hubPoolChainId];
 
   if (!config) {
@@ -1226,7 +1227,7 @@ function generateRoutes(hubPoolChainId = 1) {
 
   writeFileSync(
     `./src/data/routes_${hubPoolChainId}_${routeFileContent.hubPoolAddress}.json`,
-    prettier.format(JSON.stringify(routeFileContent, null, 2), {
+    await prettier.format(JSON.stringify(routeFileContent, null, 2), {
       parser: "json",
     })
   );

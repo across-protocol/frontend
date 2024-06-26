@@ -53,6 +53,7 @@ export function ChainSelector({
       setSelectedValue={onSelectChain}
       title="Chain"
       allowSelectDisabled
+      data-cy={`${fromOrTo}-chain-select`}
     />
   );
 }

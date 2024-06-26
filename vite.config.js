@@ -29,6 +29,7 @@ export default defineConfig({
     tsconfigPaths(),
     eslint({
       exclude: ["**/node_modules/**", "**/sdk/**"],
+      failOnError: false,
     }),
     EnvironmentPlugin("all", { prefix: "REACT_APP_" }),
     visualizer({

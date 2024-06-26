@@ -155,6 +155,7 @@ export function TokenSelector({
       setSelectedValue={(v) => onSelectToken(v)}
       allowSelectDisabled
       disabled={orderedTokens.length === 1}
+      data-cy={`${inputOrOutputToken}-token-select`}
     />
   );
 }

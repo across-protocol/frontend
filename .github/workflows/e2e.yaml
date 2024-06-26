@@ -1,0 +1,36 @@
+name: E2E Tests
+
+on:
+  deployment_status:
+
+jobs:
+  e2e-tests:
+    if: |
+      github.event_name == 'deployment_status' &&
+      github.event.deployment_status.state == 'success' &&
+      contains(github.event.deployment_status.environment_url, 'app-frontend-v3')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      # For now, we only need Chromium.
+      - name: Install Playwright Browsers
+        run: yarn playwright install chromium
+      - name: Setup Synpress wallet cache
+        # https://synpress.io/docs/guides/ci#ci
+        run: xvfb-run yarn synpress ./e2e/wallet-setup
+        env:
+          E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
+      - name: Run tests
+        # https://synpress.io/docs/guides/ci#ci
+        run: xvfb-run yarn test:e2e:headful
+        env:
+          E2E_DAPP_URL: ${{ github.event.deployment_status.environment_url }}
+      - name: Archive Playwright report
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: playwright-report-headful
+          path: |
+            playwright-report/
+          if-no-files-found: error

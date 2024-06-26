@@ -23,7 +23,7 @@ export default tseslint.config(
   },
   eslintConfigPrettier,
   {
-    ignores: ["hardhat.config.js", "eslint.config.js"],
+    ignores: ["eslint.config.js"],
   },
   {
     rules: {
