@@ -41,7 +41,7 @@ import {
   defaultRelayerAddressOverridePerToken,
   disabledL1Tokens,
   DOMAIN_CALLDATA_DELIMITER,
-  theGraphAPIKey,
+  graphAPIKey,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
 
@@ -1102,7 +1102,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
     [CHAIN_IDs.SEPOLIA]: {},
   };
 
-  const theGraphBaseUrl = `https://gateway-arbitrum.network.thegraph.com/api/${theGraphAPIKey}/subgraphs/id`;
+  const theGraphBaseUrl = `https://gateway-arbitrum.network.thegraph.com/api/${graphAPIKey}/subgraphs/id`;
   const defaultNetworkConfig = BALANCER_NETWORK_CONFIG[HUB_POOL_CHAIN_ID];
   const config = {
     network: {
