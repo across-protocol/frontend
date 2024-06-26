@@ -1518,20 +1518,18 @@ export function getLimitsBufferMultiplier(symbol: string) {
 
 export function getLiteChainMaxBalanceUsd(chainId: number, symbol: string) {
   const envVarBase = "LITE_CHAIN_USD_MAX_BALANCE";
-  const liteChainUsdMaxBalance =
-    [`${envVarBase}_${chainId}_${symbol}`, `${envVarBase}_${chainId}`]
-      .map((key) => process.env[key])
-      .find((value) => value !== undefined) ||
-    DEFAULT_LITE_CHAIN_USD_MAX_BALANCE;
-  return liteChainUsdMaxBalance;
+  return (
+    process.env[`${envVarBase}_${chainId}_${symbol}`] ??
+    process.env[`${envVarBase}_${chainId}`] ??
+    DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
+  );
 }
 
 export function getLiteChainMaxDepositUsd(chainId: number, symbol: string) {
   const envVarBase = "LITE_CHAIN_USD_MAX_DEPOSIT";
-  const liteChainUsdMaxDeposit =
-    [`${envVarBase}_${chainId}_${symbol}`, `${envVarBase}_${chainId}`]
-      .map((key) => process.env[key])
-      .find((value) => value !== undefined) ||
-    DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT;
-  return liteChainUsdMaxDeposit;
+  return (
+    process.env[`${envVarBase}_${chainId}_${symbol}`] ??
+    process.env[`${envVarBase}_${chainId}`] ??
+    DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
+  );
 }

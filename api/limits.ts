@@ -1,11 +1,11 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import {
   BLOCK_TAG_LAG,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
 } from "./_constants";
-import { TypedVercelRequest } from "./_types";
+import { TokenInfo, TypedVercelRequest } from "./_types";
 import { object, assert, Infer, optional } from "superstruct";
 
 import {
@@ -220,54 +220,12 @@ const handler = async (
     }
 
     if (originChainIsLiteChain) {
-      const liteChainUsdMaxBalance = ethers.utils.parseUnits(
-        getLiteChainMaxBalanceUsd(computedOriginChainId, inputToken.symbol)
-      );
-      const liteChainInputTokenMaxBalance = liteChainUsdMaxBalance
-        .mul(sdk.utils.fixedPointAdjustment)
-        .div(tokenPriceUsd);
-
-      const originSpokePoolAddress = getSpokePoolAddress(computedOriginChainId);
       const relayers = [...fullRelayers, ...transferRestrictedRelayers];
-      const [originSpokePoolBalance, originChainBalancesPerRelayer] =
-        await Promise.all([
-          getCachedTokenBalance(
-            computedOriginChainId,
-            originSpokePoolAddress,
-            inputToken.address
-          ),
-          Promise.all(
-            relayers.map((relayer) =>
-              getCachedTokenBalance(
-                computedOriginChainId,
-                relayer,
-                inputToken.address
-              )
-            )
-          ),
-        ]);
-      const totalOriginChainRelayersBalance =
-        originChainBalancesPerRelayer.reduce(
-          (totalBalance, relayerBalance) => totalBalance.add(relayerBalance),
-          sdk.utils.toBN("0")
-        );
-      const currentTotalChainBalance = totalOriginChainRelayersBalance.add(
-        originSpokePoolBalance
-      );
-      const liteChainAvailableAmountForDeposits = currentTotalChainBalance.gte(
-        liteChainInputTokenMaxBalance
-      )
-        ? sdk.utils.toBN("0")
-        : liteChainInputTokenMaxBalance.sub(currentTotalChainBalance);
-      const liteChainUsdMaxDeposit = ethers.utils.parseUnits(
-        getLiteChainMaxDepositUsd(computedOriginChainId, inputToken.symbol)
-      );
-      const liteChainInputTokenMaxDeposit = liteChainUsdMaxDeposit
-        .mul(sdk.utils.fixedPointAdjustment)
-        .div(tokenPriceUsd);
-      const liteChainMaxBoundary = minBN(
-        liteChainInputTokenMaxDeposit,
-        liteChainAvailableAmountForDeposits
+      const liteChainMaxBoundary = await getLiteChainMaxBoundary(
+        computedOriginChainId,
+        inputToken,
+        tokenPriceUsd,
+        relayers
       );
 
       minDeposit = minBN(minDeposit, liteChainMaxBoundary);
@@ -315,6 +273,55 @@ const handler = async (
   } catch (error: unknown) {
     return handleErrorCondition("limits", response, logger, error);
   }
+};
+
+const getLiteChainMaxBoundary = async (
+  liteChainId: number,
+  inputToken: TokenInfo,
+  tokenPriceUsd: BigNumber,
+  relayers: string[]
+): Promise<BigNumber> => {
+  const liteChainUsdMaxBalance = ethers.utils.parseUnits(
+    getLiteChainMaxBalanceUsd(liteChainId, inputToken.symbol),
+    inputToken.decimals
+  );
+  const liteChainInputTokenMaxBalance = liteChainUsdMaxBalance
+    .mul(sdk.utils.fixedPointAdjustment)
+    .div(tokenPriceUsd);
+
+  const originSpokePoolAddress = getSpokePoolAddress(liteChainId);
+  const [originSpokePoolBalance, ...originChainBalancesPerRelayer] =
+    await Promise.all([
+      getCachedTokenBalance(
+        liteChainId,
+        originSpokePoolAddress,
+        inputToken.address
+      ),
+      ...relayers.map((relayer) =>
+        getCachedTokenBalance(liteChainId, relayer, inputToken.address)
+      ),
+    ]);
+  const currentTotalChainBalance = originChainBalancesPerRelayer.reduce(
+    (totalBalance, relayerBalance) => totalBalance.add(relayerBalance),
+    originSpokePoolBalance
+  );
+  const liteChainAvailableAmountForDeposits = currentTotalChainBalance.gte(
+    liteChainInputTokenMaxBalance
+  )
+    ? sdk.utils.bnZero
+    : liteChainInputTokenMaxBalance.sub(currentTotalChainBalance);
+  const liteChainUsdMaxDeposit = ethers.utils.parseUnits(
+    getLiteChainMaxDepositUsd(liteChainId, inputToken.symbol),
+    inputToken.decimals
+  );
+  const liteChainInputTokenMaxDeposit = liteChainUsdMaxDeposit
+    .mul(sdk.utils.fixedPointAdjustment)
+    .div(tokenPriceUsd);
+
+  return minBN(
+    liteChainInputTokenMaxDeposit,
+    liteChainAvailableAmountForDeposits
+  );
 };
 
 export default handler;
