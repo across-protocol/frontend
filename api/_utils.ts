@@ -309,21 +309,18 @@ export const getRouteDetails = (
     );
   }
 
-  const isInputNativeUsdc = inputToken.symbol === "USDC";
   const l1TokenAddress =
-    isBridgedUsdc(inputToken.symbol) || isInputNativeUsdc
-      ? TOKEN_SYMBOLS_MAP.USDC.addresses[HUB_POOL_CHAIN_ID]
-      : inputToken.addresses[HUB_POOL_CHAIN_ID];
-  const l1Token =
-    isBridgedUsdc(inputToken.symbol) || isInputNativeUsdc
-      ? TOKEN_SYMBOLS_MAP.USDC
-      : getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
+    TOKEN_SYMBOLS_MAP[inputToken.symbol as keyof typeof TOKEN_SYMBOLS_MAP]
+      .addresses[HUB_POOL_CHAIN_ID];
+  const l1Token = getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
 
   if (!l1Token) {
     throw new InputError("No L1 token found for given input token address");
   }
 
-  outputTokenAddress ??= inputToken.addresses[destinationChainId];
+  outputTokenAddress ??=
+    inputToken.addresses[destinationChainId] ||
+    l1Token.addresses[destinationChainId];
 
   const outputToken = outputTokenAddress
     ? getTokenByAddress(outputTokenAddress, destinationChainId)
