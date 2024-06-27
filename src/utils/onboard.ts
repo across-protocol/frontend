@@ -10,7 +10,7 @@ import {
   chainInfoList,
   providerUrlsTable,
 } from "utils";
-import logo from "assets/across.svg";
+import logo from "assets/acx.svg";
 
 const injected = injectedModule({
   sort: (wallets) =>

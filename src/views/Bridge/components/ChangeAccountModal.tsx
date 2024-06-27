@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { Modal, Text } from "components";
 import { useEffect, useState } from "react";
 import { QUERIESV2, walletBlacklist } from "utils";
-import { ReactComponent as CrossIcon } from "assets/icons/cross-16.svg";
+import { ReactComponent as CrossIcon } from "assets/icons/cross.svg";
 import { UnstyledButton } from "components/Button";
 import { ethers } from "ethers";
 import { ampli } from "ampli";

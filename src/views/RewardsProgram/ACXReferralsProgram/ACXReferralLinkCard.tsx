@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useReferralLink } from "hooks/useReferralLink";
-import { ReactComponent as UnstyledCopyIcon } from "assets/icons/copy-16.svg";
+import { ReactComponent as UnstyledCopyIcon } from "assets/icons/copy.svg";
 import { useCallback, useEffect, useState } from "react";
 import { COLORS, QUERIESV2 } from "utils";
 import { Text } from "components/Text";

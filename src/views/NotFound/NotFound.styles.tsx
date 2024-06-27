@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Link as UnstyledLink } from "react-router-dom";
-import { ReactComponent as EmptyCloud } from "assets/across-emptystate-clouds.svg";
+import { ReactComponent as EmptyCloud } from "assets/icons/empty-clouds.svg";
 
 export const Wrapper = styled.div`
   background-color: #2d2e33;

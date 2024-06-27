@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useHistory } from "react-router-dom";
 
-import { ReactComponent as ArrowStarRingIcon } from "assets/arrow-star-ring.svg";
+import { ReactComponent as ArrowStarRingIcon } from "assets/icons/arrow-star-ring.svg";
 import { Text } from "components/Text";
 import { SecondaryButton } from "components/Button";
 import { useStakingPool } from "hooks/useStakingPool";

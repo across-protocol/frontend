@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useBreadcrumb } from "./useBreadcrumb";
-import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
+import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
 import { Link } from "react-router-dom";
 import { Text } from "components/Text";
 import React from "react";

@@ -10,7 +10,7 @@ import {
   getExplorerLinkForToken,
   TokenInfo,
 } from "utils";
-import { ReactComponent as ExternalLinkIcon } from "assets/icons/external-link-boxed.svg";
+import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right-boxed.svg";
 
 type TokenFeeProps = {
   token: TokenInfo;

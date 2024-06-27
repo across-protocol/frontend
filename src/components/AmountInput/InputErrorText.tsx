@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 
 import { Text } from "components/Text";
-import { ReactComponent as II } from "assets/icons/info-16.svg";
+import { ReactComponent as II } from "assets/icons/info.svg";
 
 type Props = {
   errorText: string;

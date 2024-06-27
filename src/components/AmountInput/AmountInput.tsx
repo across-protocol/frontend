@@ -11,7 +11,7 @@ import {
   isDefined,
   formatUnitsWithMaxFractions,
 } from "utils";
-import { ReactComponent as II } from "assets/icons/info-16.svg";
+import { ReactComponent as II } from "assets/icons/info.svg";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet.svg";
 
 export type Props = {

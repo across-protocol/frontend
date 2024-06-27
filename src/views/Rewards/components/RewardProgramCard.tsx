@@ -6,7 +6,7 @@ import {
   rewardProgramTypes,
 } from "utils";
 import { Text } from "components";
-import { ReactComponent as ChevronRight } from "assets/icons/arrow-right-16.svg";
+import { ReactComponent as ChevronRight } from "assets/icons/chevron-right.svg";
 import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
 import { Link } from "react-router-dom";
 import { useConnection } from "hooks";

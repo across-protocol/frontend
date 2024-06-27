@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { BigNumber } from "ethers";
 
 import { Text } from "components/Text";

@@ -2,8 +2,8 @@ import styled from "@emotion/styled";
 import { css, keyframes } from "@emotion/react";
 import { ToastPosition, ToastType } from "./toast.d";
 import { ReactComponent as CloseIcon } from "assets/icons/cross.svg";
-import { ReactComponent as UnstyledInfoIcon } from "assets/icons/info-24.svg";
-import { ReactComponent as UnstyledSmInfoIcon } from "assets/icons/info-16.svg";
+import { ReactComponent as UnstyledInfoIcon } from "assets/icons/info.svg";
+import { ReactComponent as UnstyledSmInfoIcon } from "assets/icons/info.svg";
 
 interface IWrapper {
   position: ToastPosition;

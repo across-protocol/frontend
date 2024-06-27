@@ -1,8 +1,7 @@
 import styled from "@emotion/styled";
 import ProgressBar from "components/ProgressBar";
-import { ReactComponent as UnstyedUsdcLogo } from "assets/icons/usdc-24.svg";
-import { ReactComponent as UnstyledArrowIcon } from "assets/icons/arrow-16.svg";
-import { ReactComponent as II } from "assets/icons/info-16.svg";
+import { ReactComponent as UnstyledArrowIcon } from "assets/icons/chevron-down.svg";
+import { ReactComponent as II } from "assets/icons/info.svg";
 import { Divider as ExternalDivider } from "../../Staking.styles";
 
 import { QUERIESV2 } from "utils";
@@ -19,8 +18,6 @@ export const Wrapper = styled.div`
 `;
 
 export const Divider = ExternalDivider;
-
-export const UsdcLogo = styled(UnstyedUsdcLogo)``;
 
 export const InputWrapper = styled.div`
   flex-grow: 8;
