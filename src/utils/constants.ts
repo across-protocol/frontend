@@ -25,7 +25,6 @@ import usdtLogo from "assets/usdt-logo.svg";
 import snxLogo from "assets/snx-logo.svg";
 import pooltogetherLogo from "assets/pooltogether-logo.svg";
 import unknownLogo from "assets/icons/question-24.svg";
-import ACXCloudBackground from "assets/bg-banners/cloud-staking.svg";
 import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 import ARBCloudBackground from "assets/bg-banners/arb-cloud-rebate.svg";
 
@@ -401,7 +400,7 @@ export const tokenList = [
   ...externalLPsForStaking[hubPoolChainId],
 ];
 
-export type rewardProgramTypes = "referrals" | "op-rebates" | "arb-rebates";
+export type rewardProgramTypes = "op-rebates" | "arb-rebates";
 export const rewardPrograms: Record<
   rewardProgramTypes,
   {
@@ -415,16 +414,6 @@ export const rewardPrograms: Record<
     ctaBody?: string;
   }
 > = {
-  referrals: {
-    programName: "Across Referral Program",
-    primaryColor: "aqua",
-    url: "/rewards/referrals",
-    rewardTokenSymbol: "ACX",
-    backgroundUrl: ACXCloudBackground,
-    highestPct: 0.8,
-    claimableTooltipBody:
-      "ACX referral rewards earned during the month are made claimable after the ~15th of the following month",
-  },
   "op-rebates": {
     programName: "OP Rewards Program",
     primaryColor: "op-red",
@@ -480,15 +469,11 @@ export const debug = Boolean(process.env.REACT_APP_DEBUG);
 export const isProductionBuild = process.env.NODE_ENV === "production";
 export const isAmplitudeLoggingEnabled =
   process.env.REACT_APP_AMPLITUDE_DEBUG_LOGGING === "true";
-export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = [
-  // Our referrals program is always available
-  "referrals",
-  ...(
-    String(process.env.REACT_APP_REBATE_PROGRAMS_AVAILABLE || "")
-      .toLowerCase()
-      .split(",") as (keyof typeof rewardPrograms)[]
-  ).filter((v) => v),
-];
+export const rewardProgramsAvailable: (keyof typeof rewardPrograms)[] = (
+  String(process.env.REACT_APP_REBATE_PROGRAMS_AVAILABLE || "")
+    .toLowerCase()
+    .split(",") as (keyof typeof rewardPrograms)[]
+).filter((v) => v);
 export const rewardsBannerWarning =
   process.env.REACT_APP_REWARDS_BANNER_WARNING;
 

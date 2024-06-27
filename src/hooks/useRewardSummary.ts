@@ -13,34 +13,9 @@ export type RebateSummary = {
   claimableRewards: string;
 };
 
-export type ACXReferralSummary = {
-  referreeWallets: number;
-  transfers: number;
-  volume: number;
-  referralRate: number;
-  rewardsAmount: string;
-  tier: number;
-  activeRefereesCount: number;
-};
-
-export type RewardsSummary =
-  | ({
-      program: "referrals";
-    } & ACXReferralSummary)
-  | ({
-      program: "op-rebates" | "arb-rebates";
-    } & RebateSummary);
-
-const defaultACXRewardsSummary: RewardsSummary = {
-  program: "referrals",
-  referralRate: 0.4,
-  referreeWallets: 0,
-  rewardsAmount: "0",
-  tier: 1,
-  transfers: 0,
-  volume: 0,
-  activeRefereesCount: 0,
-};
+export type RewardsSummary = {
+  program: "op-rebates" | "arb-rebates";
+} & RebateSummary;
 
 const defaultOPRewardsSummary: RewardsSummary = {
   program: "op-rebates",
@@ -71,9 +46,7 @@ export function useRewardSummary(
     async ({ queryKey }) => {
       const rewardProgram = queryKey.includes("op-rebates")
         ? "op-rebates"
-        : queryKey.includes("arb-rebates")
-          ? "arb-rebates"
-          : "referrals";
+        : "arb-rebates";
       return getRewardSummary(rewardProgram, account!);
     },
     {
@@ -88,9 +61,7 @@ export function useRewardSummary(
       _summary?.data ||
       (program === "op-rebates"
         ? defaultOPRewardsSummary
-        : program === "arb-rebates"
-          ? defaultARBRebatesSummary
-          : defaultACXRewardsSummary),
+        : defaultARBRebatesSummary),
     ...other,
   };
 }
