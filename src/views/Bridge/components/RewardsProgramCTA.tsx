@@ -11,9 +11,10 @@ import { useHistory } from "react-router-dom";
 
 type ReferralCTAProps = {
   program: rewardProgramTypes;
+  toChain: number;
 };
 
-const RewardsProgramCTA = ({ program }: ReferralCTAProps) => {
+const RewardsProgramCTA = ({ program, toChain }: ReferralCTAProps) => {
   const { push: navigate } = useHistory();
 
   const rewardProgram = rewardPrograms[program];
@@ -28,7 +29,7 @@ const RewardsProgramCTA = ({ program }: ReferralCTAProps) => {
     navigate(rewardProgram.url);
   };
 
-  const bodyCopy = rewardProgram.ctaBody || "";
+  let bodyCopy = rewardProgram.ctaBody ? rewardProgram.ctaBody(toChain) : "";
 
   const buttonCopy = "View Rewards";
 

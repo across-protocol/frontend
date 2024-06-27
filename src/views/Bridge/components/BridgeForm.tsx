@@ -120,7 +120,12 @@ const BridgeForm = ({
 
   return (
     <CardWrapper>
-      {programName && <RewardsProgramCTA program={programName} />}
+      {programName && (
+        <RewardsProgramCTA
+          toChain={selectedRoute.toChain}
+          program={programName}
+        />
+      )}
       <RowWrapper>
         <RowLabelWrapper>
           <Text size="md" color="grey-400">

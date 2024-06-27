@@ -412,7 +412,7 @@ export const rewardPrograms: Record<
     backgroundUrl: string;
     highestPct: number;
     claimableTooltipBody: string;
-    ctaBody?: string;
+    ctaBody?: (toChain: number) => string;
   }
 > = {
   referrals: {
@@ -432,7 +432,8 @@ export const rewardPrograms: Record<
     rewardTokenSymbol: "OP",
     backgroundUrl: OPCloudBackground,
     highestPct: 0.95,
-    ctaBody: "Bridge to Optimism and earn on every transaction.",
+    ctaBody: (chainId: number) =>
+      `Bridge to ${getChainInfo(chainId).name} and earn on every transaction.`,
     claimableTooltipBody:
       "OP rewards earned during the month are made claimable after the ~15th of the following month",
   },
@@ -443,7 +444,7 @@ export const rewardPrograms: Record<
     rewardTokenSymbol: "ARB",
     backgroundUrl: ARBCloudBackground,
     highestPct: 0.95,
-    ctaBody: "Bridge to Arbitrum and earn on every transaction.",
+    ctaBody: () => "Bridge to Arbitrum and earn on every transaction.",
     claimableTooltipBody:
       "Arbitrum rewards earned during the month are made claimable after the ~15th of the following month",
   },
@@ -454,6 +455,10 @@ export const chainIdToRewardsProgramName = {
   [ChainId.OPTIMISM_SEPOLIA]: "op-rebates",
   [ChainId.ARBITRUM]: "arb-rebates",
   [ChainId.ARBITRUM_SEPOLIA]: "arb-rebates",
+  [ChainId.MODE]: "op-rebates",
+  [ChainId.MODE_SEPOLIA]: "op-rebates",
+  [ChainId.BASE]: "op-rebates",
+  [ChainId.BASE_SEPOLIA]: "op-rebates",
 } as const;
 
 // process.env variables
