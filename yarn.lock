@@ -21,11 +21,6 @@
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.0.1.tgz#8fb2760a3c64801c9324bcbf76084fae9dfabb52"
   integrity sha512-cCrhLEpYfiFeDrXscUgdRTnOW5Sn2W9mmdrxxl1dXLC+tYMb1c2rgQVBQNxrdW7LGiDqCR4a5m5jYgWPXonzQg==
 
-"@across-protocol/constants@^3.1.1":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.1.tgz#fdcb19a06948a445694274507cad99d01cb647c7"
-  integrity sha512-f0a+5LgGojmzG2J4OyjBUP/HyU+R6FztG9bcsWH4tl1TcSEm9JjWst3K26LYUIKLmVq/nu/QSXoC6IRIHKZsOQ==
-
 "@across-protocol/constants@^3.1.2":
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.2.tgz#966055007df2b8a03ea4253f4a5079e67daff1ed"
@@ -60,13 +55,13 @@
     axios "^1.6.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/sdk@^3.1.3":
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-3.1.3.tgz#be791b77a84b4098b4ebc691bc307cdc442c1464"
-  integrity sha512-+qVR7iMTF3cN0hLklLMeOVeIshPwbh/WNe6fMxnbfiGT27fRJQZFQgnH7PGC1FtcHnYAOewsDk0tP7HhQfi44A==
+"@across-protocol/sdk@^3.1.4":
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-3.1.4.tgz#179b9d926f71d1fa3cbce46984bbd14e53674025"
+  integrity sha512-X4NcJIF4vi7aaaUm7OIPOdlF8LZl9v43U/cq/SOit4iD+ALvAdEQfH77I7sB+U7SCigEKJ6iuJ8lXWMhCbtwZg==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
-    "@across-protocol/constants" "^3.1.1"
+    "@across-protocol/constants" "^3.1.2"
     "@across-protocol/contracts" "^3.0.1"
     "@eth-optimism/sdk" "^3.3.1"
     "@pinata/sdk" "^2.1.0"
