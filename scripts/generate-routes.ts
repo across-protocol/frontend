@@ -1066,6 +1066,11 @@ const enabledRoutes = {
             tokens: ["WETH"],
             swapTokens: [],
           },
+          {
+            chainId: CHAIN_IDs.POLYGON_AMOY,
+            tokens: ["WETH", "USDC"],
+            swapTokens: [],
+          },
         ],
       },
       {
@@ -1107,6 +1112,11 @@ const enabledRoutes = {
             tokens: ["WETH"],
             swapTokens: [],
           },
+          {
+            chainId: CHAIN_IDs.POLYGON_AMOY,
+            tokens: ["WETH", "USDC"],
+            swapTokens: [],
+          },
         ],
       },
       {
@@ -1146,6 +1156,11 @@ const enabledRoutes = {
               },
             ],
           },
+          {
+            chainId: CHAIN_IDs.POLYGON_AMOY,
+            tokens: ["WETH", "USDC"],
+            swapTokens: [],
+          },
         ],
       },
       {
@@ -1158,7 +1173,12 @@ const enabledRoutes = {
           {
             chainId: CHAIN_IDs.SEPOLIA,
             swapTokens: [],
-            tokens: ["WETH"],
+            tokens: ["WETH", "USDC"],
+          },
+          {
+            chainId: CHAIN_IDs.POLYGON_AMOY,
+            tokens: ["WETH", "USDC"],
+            swapTokens: [],
           },
         ],
       },
@@ -1175,6 +1195,35 @@ const enabledRoutes = {
             chainId: CHAIN_IDs.BASE_SEPOLIA,
             swapTokens: [],
             tokens: ["WETH"],
+          },
+        ],
+      },
+      {
+        fromChain: CHAIN_IDs.POLYGON_AMOY,
+        fromSpokeAddress: getDeployedAddress(
+          "SpokePool",
+          CHAIN_IDs.POLYGON_AMOY
+        ),
+        toChains: [
+          {
+            chainId: CHAIN_IDs.SEPOLIA,
+            swapTokens: [],
+            tokens: ["WETH", "USDC"],
+          },
+          {
+            chainId: CHAIN_IDs.OPTIMISM_SEPOLIA,
+            swapTokens: [],
+            tokens: ["WETH", "USDC"],
+          },
+          {
+            chainId: CHAIN_IDs.ARBITRUM_SEPOLIA,
+            swapTokens: [],
+            tokens: ["WETH", "USDC"],
+          },
+          {
+            chainId: CHAIN_IDs.BASE_SEPOLIA,
+            swapTokens: [],
+            tokens: ["WETH", "USDC"],
           },
         ],
       },

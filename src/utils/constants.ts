@@ -52,6 +52,7 @@ export enum ChainId {
   OPTIMISM_SEPOLIA = CHAIN_IDs.OPTIMISM_SEPOLIA,
   ARBITRUM_SEPOLIA = CHAIN_IDs.ARBITRUM_SEPOLIA,
   MODE_SEPOLIA = CHAIN_IDs.MODE_SEPOLIA,
+  POLYGON_AMOY = CHAIN_IDs.POLYGON_AMOY,
 }
 
 // Maps `ChainId` to an object and inverts the Key/Value
@@ -275,6 +276,20 @@ export const chainInfoList: ChainInfoList = [
     nativeCurrencySymbol: "ETH",
     pollingInterval: 10_000,
     customRpcUrl: process.env.REACT_APP_CHAIN_919_PROVIDER_URL,
+  },
+  {
+    name: "Polygon Amoy",
+    fullName: "Polygon Testnet Amoy",
+    chainId: ChainId.POLYGON_AMOY,
+    logoURI: polygonLogo,
+    rpcUrl: "https://rpc-amoy.polygon.technology",
+    explorerUrl: "https://amoy.polygonscan.com",
+    constructExplorerLink: defaultConstructExplorerLink(
+      "https://amoy.polygonscan.com"
+    ),
+    nativeCurrencySymbol: "MATIC",
+    pollingInterval: defaultBlockPollingInterval,
+    customRpcUrl: process.env.REACT_APP_CHAIN_80002_PROVIDER_URL,
   },
 ];
 
