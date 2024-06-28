@@ -19,7 +19,6 @@ export type Props = {
   fromChainId: number;
   toChainId: number;
   isSwap: boolean;
-  estimatedTime?: string;
   gasFee?: BigNumber;
   capitalFee?: BigNumber;
   lpFee?: BigNumber;
