@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { COLORS, QUERIES } from "utils";
-import { ReactComponent as AcrossLogo } from "assets/across-mobile-logo.svg";
+import { ReactComponent as AcrossLogo } from "assets/acx.svg";
 
 export const WalletWrapper = styled.div`
   display: flex;

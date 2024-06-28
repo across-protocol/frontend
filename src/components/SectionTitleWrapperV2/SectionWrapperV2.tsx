@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
-import { ReactComponent as ArrowIcon } from "assets/icons/arrow-right-16.svg";
+import { ReactComponent as ArrowIcon } from "assets/icons/chevron-right.svg";
 import { QUERIESV2 } from "utils";
 import { Text } from "components/Text";
 

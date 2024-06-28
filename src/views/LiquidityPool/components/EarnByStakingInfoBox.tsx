@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { ChevronRight } from "react-feather";
 import { Link } from "react-router-dom";
 
-import { ReactComponent as XStarRing } from "assets/x-star-ring.svg";
+import { ReactComponent as XStarRing } from "assets/icons/x-star-ring.svg";
 
 import { Text } from "components/Text";
 import { useStakingPool, useConnection } from "hooks";

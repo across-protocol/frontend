@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
-import { ReactComponent as UmaLogo } from "assets/icons/powered-by-logo.svg";
+import { ReactComponent as UmaLogo } from "assets/icons/powered-by-uma.svg";
+import { ReactComponent as TwitterLogo } from "assets/icons/x-white.svg";
 
 export const Wrapper = styled.div`
   padding: 25px 16px;
@@ -31,6 +32,12 @@ export const Link = styled.a`
   text-decoration: none;
   color: #9daab2;
 
+  svg {
+    path {
+      fill: #9daab2;
+    }
+  }
+
   :hover {
     color: #e0f3ff;
 
@@ -59,4 +66,9 @@ export const FooterLogo = styled(UmaLogo)`
   @media (max-width: 428px) {
     height: 18px;
   }
+`;
+
+export const StyledTwitterIcon = styled(TwitterLogo)`
+  height: 16px;
+  width: 16px;
 `;

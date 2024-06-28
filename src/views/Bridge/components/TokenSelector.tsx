@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
 import { useMemo } from "react";
 
-import { ReactComponent as LinkExternalIcon } from "assets/icons/link-external.svg";
+import { ReactComponent as LinkExternalIcon } from "assets/icons/arrow-up-right-boxed.svg";
 import { Selector } from "components";
 import { Text } from "components/Text";
 

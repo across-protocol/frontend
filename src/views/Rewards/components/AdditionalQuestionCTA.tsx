@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Text } from "components/Text";
-import { ReactComponent as ExternalLink16 } from "assets/icons/external-link-16.svg";
+import { ReactComponent as ExternalLink16 } from "assets/icons/arrow-up-right.svg";
 import { QUERIESV2 } from "utils";
 
 const LinkButton = ({ text, link }: { text: string; link: string }) => (

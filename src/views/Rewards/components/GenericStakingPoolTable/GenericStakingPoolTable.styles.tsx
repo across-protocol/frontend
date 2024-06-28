@@ -2,8 +2,8 @@ import styled from "@emotion/styled";
 import ProgressBar from "components/ProgressBar";
 import { BaseHeadCell } from "components/Table";
 import { Link } from "react-router-dom";
-import { ReactComponent as II } from "assets/icons/info-16.svg";
-import { ReactComponent as ConnectorVector } from "assets/connectors.svg";
+import { ReactComponent as II } from "assets/icons/info.svg";
+import { ReactComponent as ConnectorVector } from "assets/icons/connectors.svg";
 import { QUERIESV2 } from "utils";
 
 const Cell = styled(BaseHeadCell)<{ length: number }>`

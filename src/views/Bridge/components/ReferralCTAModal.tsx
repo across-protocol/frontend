@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ReactComponent as UserIcon } from "assets/icons/user-48.svg";
+import { ReactComponent as UserIcon } from "assets/icons/user.svg";
 import { ReactComponent as XBlueCheck } from "assets/icons/x-blue-check.svg";
 import { ReactComponent as XIconWhite } from "assets/icons/x-white.svg";
 import { Modal, PrimaryButton, Text } from "components";

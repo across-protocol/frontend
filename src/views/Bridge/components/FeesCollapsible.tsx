@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
 
 import { Text, LoadingSkeleton } from "components";
-import { ReactComponent as ChevronDown } from "assets/icons/arrow-16.svg";
+import { ReactComponent as ChevronDown } from "assets/icons/chevron-down.svg";
 import { ReactComponent as _SwapIcon } from "assets/icons/swap.svg";
 import { QUERIESV2, TokenInfo } from "utils";
 

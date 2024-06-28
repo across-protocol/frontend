@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ReactComponent as ReferralSVG } from "assets/icons/rewards/referral-within-star.svg";
+import { ReactComponent as ReferralSVG } from "assets/icons/referral-within-star.svg";
 import { COLORS, QUERIESV2 } from "utils";
 import ACXReferralLinkCard from "./ACXReferralsProgram/ACXReferralLinkCard";
 import ACXReferralTierStepper from "./ACXReferralsProgram/ACXReferralTierStepper";

@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { ReactComponent as ExternalLink12Icon } from "assets/icons/external-link-12.svg";
+import { ReactComponent as ExternalLink12Icon } from "assets/icons/arrow-up-right.svg";
 
 type Props = {
   text: string;
