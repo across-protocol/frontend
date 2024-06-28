@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import GenericCard from "./GenericCard";
 import { QUERIESV2, isDefined, rewardProgramTypes } from "utils";
 import { Text } from "components";
-import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { Tooltip } from "components/Tooltip";
 
 export type GenericRewardInformationRowType = {

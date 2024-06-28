@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ReactComponent as ArrowUpDown } from "assets/icons/arrow-up-down-16.svg";
+import { ReactComponent as ArrowUpDown } from "assets/icons/arrow-up-down.svg";
 
 type QuickSwapPropTypes = {
   onQuickSwap: () => void;

@@ -19,7 +19,7 @@ import usdcLogo from "assets/usdc.svg";
 import daiLogo from "assets/dai.svg";
 import wbtcLogo from "assets/wbtc.svg";
 import umaLogo from "assets/uma.svg";
-import acxLogo from "assets/across.svg";
+import acxLogo from "assets/acx.svg";
 import balLogo from "assets/bal.svg";
 import usdtLogo from "assets/usdt-logo.svg";
 import snxLogo from "assets/snx-logo.svg";

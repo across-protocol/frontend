@@ -20,7 +20,7 @@ import {
 } from "./Sidebar.styles";
 import { getChainInfo, isSupportedChainId } from "utils";
 import useSidebar from "./useSidebar";
-import closeIcon from "assets/across-close-button.svg";
+import closeIcon from "assets/icons/cross.svg";
 import { useConnection } from "hooks";
 import { Text } from "components";
 

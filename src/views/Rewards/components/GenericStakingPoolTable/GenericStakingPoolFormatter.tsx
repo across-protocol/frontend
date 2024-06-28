@@ -5,7 +5,7 @@ import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { IRow } from "components/Table/Table";
 import { formatUnitsWithMaxFractions, formatWeiPct, getToken } from "utils";
-import { ReactComponent as ExternalLink16 } from "assets/icons/arrow-right-16.svg";
+import { ReactComponent as ExternalLink16 } from "assets/icons/chevron-right.svg";
 import {
   ButtonCell,
   ExternalLinkButton,

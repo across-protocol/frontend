@@ -2,9 +2,9 @@ import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
 import { DateTime } from "luxon";
 
-import { ReactComponent as CheckIcon } from "assets/check.svg";
-import { ReactComponent as LoadingIcon } from "assets/loading.svg";
-import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
+import { ReactComponent as CheckIcon } from "assets/icons/check.svg";
+import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";

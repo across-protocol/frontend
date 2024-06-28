@@ -19,7 +19,7 @@ import {
   getConfig,
 } from "utils";
 import lazyWithRetry from "utils/lazy-with-retry";
-import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
+import { ReactComponent as InfoLogo } from "assets/icons/info.svg";
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";

@@ -2,8 +2,8 @@ import styled from "@emotion/styled";
 import { useState } from "react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
-import { ReactComponent as ArrowDownIcon } from "assets/icons/arrow-16.svg";
-import { ReactComponent as ArrowExternalLink } from "assets/icons/external-link-16.svg";
+import { ReactComponent as ArrowDownIcon } from "assets/icons/chevron-down.svg";
+import { ReactComponent as ArrowExternalLink } from "assets/icons/arrow-up-right.svg";
 import { Text } from "components/Text";
 import { Deposit } from "hooks/useDeposits";
 

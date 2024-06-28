@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Text, TextColor } from "components/Text";
 import { Tooltip } from "components/Tooltip";
-import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { ReactComponent as SwapIcon } from "assets/icons/swap.svg";
 import { ReactComponent as SettingsIcon } from "assets/icons/settings.svg";
 
