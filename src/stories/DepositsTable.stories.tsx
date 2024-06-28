@@ -107,13 +107,6 @@ const deposits: Deposit[] = [
       totalBridgeFeePct: "28434751200000000",
       totalBridgeFeeAmount: "28434751200000000",
     },
-    rewards: {
-      type: "referrals",
-      rate: 0.4,
-      tier: 1,
-      amount: "341217014400000000",
-      usd: "0.341217014400000000",
-    },
   },
 ];
 

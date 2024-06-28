@@ -401,19 +401,17 @@ export const tokenList = [
 ];
 
 export type rewardProgramTypes = "op-rebates" | "arb-rebates";
-export const rewardPrograms: Record<
-  rewardProgramTypes,
-  {
-    programName: string;
-    primaryColor: keyof typeof COLORS;
-    url: string;
-    rewardTokenSymbol: string;
-    backgroundUrl: string;
-    highestPct: number;
-    claimableTooltipBody: string;
-    ctaBody?: string;
-  }
-> = {
+export type rewardProgramValues = {
+  programName: string;
+  primaryColor: keyof typeof COLORS;
+  url: string;
+  rewardTokenSymbol: string;
+  backgroundUrl: string;
+  highestPct: number;
+  claimableTooltipBody: string;
+  ctaBody?: string;
+};
+export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
   "op-rebates": {
     programName: "OP Rewards Program",
     primaryColor: "op-red",
@@ -741,54 +739,6 @@ export const COLORS = {
 };
 
 export const insideStorybookRuntime = Boolean(process.env.STORYBOOK);
-
-export const rewardTiers = [
-  {
-    title: "Copper tier",
-    titleSecondary: "40% referral rate",
-    body: "Starting tier with no requirements to join.",
-    name: "Copper",
-    referralRate: 0.4,
-    referrals: 0,
-    volume: 0,
-  },
-  {
-    title: "Bronze tier",
-    titleSecondary: "50% referral rate",
-    body: "Requires over $50,000 of bridge volume or 3 unique referral transfers.",
-    name: "Bronze",
-    referralRate: 0.5,
-    referrals: 3,
-    volume: 50000,
-  },
-  {
-    title: "Silver tier",
-    titleSecondary: "60% referral rate",
-    body: "Requires over $100,000 of bridge volume or 5 unique referral transfers.",
-    name: "Silver",
-    referralRate: 0.6,
-    referrals: 5,
-    volume: 100000,
-  },
-  {
-    title: "Gold tier",
-    titleSecondary: "70% referral rate",
-    body: "Requires over $250,000 of bridge volume or 10 unique referral transfers.",
-    name: "Gold",
-    referralRate: 0.7,
-    referrals: 10,
-    volume: 250000,
-  },
-  {
-    title: "Platinum tier",
-    titleSecondary: "80% referral rate",
-    body: "Requires over $500,000 of bridge volume or 20 unique referral transfers.",
-    name: "Platinum",
-    referralRate: 0.8,
-    referrals: 20,
-    volume: 500000,
-  },
-];
 
 export const secondsPerYear = 31557600;
 export const secondsPerDay = 86400; // 60 sec/min * 60 min/hr * 24 hr/day

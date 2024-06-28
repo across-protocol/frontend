@@ -4,7 +4,6 @@ import { getConfig } from "utils/config";
 import {
   airdropWindowIndex,
   rewardsApiUrl,
-  referralsStartWindowIndex,
   rewardProgramTypes,
 } from "utils/constants";
 
@@ -76,8 +75,7 @@ export async function fetchAirdropProofs(
     return [];
   }
 
-  const startWindowIndex =
-    rewardsType === "referrals" ? referralsStartWindowIndex : 0;
+  const startWindowIndex = 0;
   const rewardsTypeQuery = rewardProgramLookup[rewardsType];
   const { data } = await axios.get<AirdropRecipient[]>(
     `${rewardsApiUrl}/airdrop/merkle-distributor-proofs`,
