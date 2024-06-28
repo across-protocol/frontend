@@ -19,6 +19,7 @@ import {
   isDefined,
   QUERIESV2,
   TokenInfo,
+  getConfirmationDepositTime,
 } from "utils";
 
 import TokenFee from "./TokenFee";
@@ -91,8 +92,8 @@ const PriceFee = ({
 };
 
 const EstimatedTable = ({
+  fromChainId,
   toChainId,
-  estimatedTime,
   gasFee,
   capitalFee,
   lpFee,
@@ -116,6 +117,7 @@ const EstimatedTable = ({
   isQuoteLoading,
   validationError,
   rewardProgram,
+  quotedLimits,
 }: EstimatedTableProps) => {
   const rewardDisplaySymbol =
     rewardToken?.displaySymbol || rewardToken?.symbol.toUpperCase();
@@ -141,6 +143,17 @@ const EstimatedTable = ({
   const [isSlippageModalOpen, setSlippageModalOpen] = useState(false);
 
   const showLoadingSkeleton = isQuoteLoading && !doesAmountExceedMaxDeposit;
+
+  const estimatedTime =
+    quotedLimits && outputAmount && !doesAmountExceedMaxDeposit
+      ? getConfirmationDepositTime(
+          outputAmount,
+          quotedLimits,
+          fromChainId,
+          toChainId,
+          outputToken.symbol
+        ).formattedString
+      : "-";
 
   return (
     <Wrapper>
@@ -175,7 +188,7 @@ const EstimatedTable = ({
           <LoadingSkeleton height="20px" width="75px" />
         ) : (
           <Text size="md" color="grey-400">
-            {estimatedTime && !doesAmountExceedMaxDeposit ? estimatedTime : "-"}
+            {estimatedTime}
           </Text>
         )}
       </Row>
