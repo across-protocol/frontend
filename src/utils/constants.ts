@@ -24,7 +24,7 @@ import balLogo from "assets/bal.svg";
 import usdtLogo from "assets/usdt-logo.svg";
 import snxLogo from "assets/snx-logo.svg";
 import pooltogetherLogo from "assets/pooltogether-logo.svg";
-import unknownLogo from "assets/icons/question-24.svg";
+import unknownLogo from "assets/icons/question-circle.svg";
 import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 import ARBCloudBackground from "assets/bg-banners/arb-cloud-rebate.svg";
 
