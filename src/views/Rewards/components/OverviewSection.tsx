@@ -14,6 +14,7 @@ import GenericOverviewCard from "./GenericOverviewCard";
 import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
 import { Text } from "components";
 import { BigNumber } from "ethers";
+import { useHistory } from "react-router-dom";
 
 type OverviewSectionProps = {
   stakedTokens?: BigNumber;
@@ -50,6 +51,8 @@ const OverviewSection = ({
                   acxOverride={
                     program === "acx-rewards" ? totalACXRewards : undefined
                   }
+                  enableLink={program !== "acx-rewards"}
+                  smallLogo={program !== "acx-rewards"}
                 />
               ))}
             </RewardProgramWrapper>
@@ -92,20 +95,32 @@ export default OverviewSection;
 const RewardProgramCard = ({
   program,
   acxOverride,
+  enableLink,
+  smallLogo,
 }: {
   program: rewardProgramTypes;
+  enableLink: boolean;
+  smallLogo: boolean;
   acxOverride?: BigNumber;
 }) => {
-  let { token, rewardsAmount, primaryColor } = useRewardProgramCard(program);
+  let { token, rewardsAmount, primaryColor, url } =
+    useRewardProgramCard(program);
+  const { push: navigate } = useHistory();
+
   if (isDefined(acxOverride)) {
     token = getToken("ACX");
     rewardsAmount = acxOverride;
     primaryColor = "aqua";
   }
+  const onClick = () => {
+    if (enableLink) {
+      navigate(url);
+    }
+  };
   return (
-    <RewardProgramCardStack>
-      <LogoContainer primaryColor={primaryColor}>
-        <Logo src={token.logoURI} alt={token.symbol} />
+    <RewardProgramCardStack onClick={onClick} enableLink={enableLink}>
+      <LogoContainer primaryColor={primaryColor} smallLogo={smallLogo}>
+        <Logo src={token.logoURI} alt={token.symbol} smallLogo={smallLogo} />
       </LogoContainer>
       <RewardProgramTextStack>
         <Text color="white" size="lg">
@@ -142,7 +157,7 @@ const InnerWrapperStack = styled.div`
   width: 100%;
 `;
 
-const RewardProgramCardStack = styled.div`
+const RewardProgramCardStack = styled.div<{ enableLink: boolean }>`
   display: flex;
   padding: 12px;
   align-items: center;
@@ -154,6 +169,8 @@ const RewardProgramCardStack = styled.div`
   background: ${COLORS["grey-600"]};
 
   height: 72px;
+
+  cursor: ${({ enableLink }) => (enableLink ? "pointer" : "default")};
 `;
 
 const RewardProgramWrapper = styled.div`
@@ -161,12 +178,19 @@ const RewardProgramWrapper = styled.div`
   align-items: flex-start;
   gap: 12px;
   align-self: stretch;
+
+  @media ${QUERIESV2.xs.andDown} {
+    flex-direction: column;
+    > div {
+      width: 100%;
+    }
+  }
 `;
 
-const LogoContainer = styled.div<{ primaryColor: string }>`
+const LogoContainer = styled.div<{ primaryColor: string; smallLogo?: boolean }>`
   // Layout
   display: flex;
-  padding: 8px;
+  padding: ${({ smallLogo }) => (smallLogo ? 4 : 8)}px;
   align-items: flex-start;
   // Colors
   border-radius: 32px;
@@ -178,9 +202,9 @@ const LogoContainer = styled.div<{ primaryColor: string }>`
     0px 2px 6px 0px rgba(0, 0, 0, 0.08);
 `;
 
-const Logo = styled.img`
-  height: 24px;
-  width: 24px;
+const Logo = styled.img<{ smallLogo: boolean }>`
+  height: ${({ smallLogo }) => (smallLogo ? 16 : 24)}px;
+  width: ${({ smallLogo }) => (smallLogo ? 16 : 24)}px;
 `;
 
 const RewardProgramTextStack = styled.div`
