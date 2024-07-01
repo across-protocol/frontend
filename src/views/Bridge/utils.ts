@@ -4,6 +4,7 @@ import {
   ChainId,
   Route,
   SwapRoute,
+  fixedPointAdjustment,
   getChainInfo,
   getConfig,
   getToken,
@@ -477,4 +478,16 @@ export function getOutputTokenSymbol(
     : inputTokenSymbol === "WETH"
       ? "WETH"
       : outputTokenSymbol;
+}
+
+export function calcSwapPriceImpact(
+  amountInput: BigNumber,
+  minExpectedInputTokenAmount: BigNumber
+) {
+  return amountInput.gt(0) && minExpectedInputTokenAmount.gt(0)
+    ? amountInput
+        .sub(minExpectedInputTokenAmount)
+        .mul(fixedPointAdjustment)
+        .div(amountInput)
+    : BigNumber.from(0);
 }

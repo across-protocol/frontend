@@ -106,7 +106,7 @@ const handler = async (
 
     const quoteResults = await Promise.allSettled([
       getUniswapQuoteAndCalldata(swap),
-      get1inchQuoteAndCalldata(swap),
+      // get1inchQuoteAndCalldata(swap),
     ]);
 
     const settledResults = quoteResults.flatMap((result) =>

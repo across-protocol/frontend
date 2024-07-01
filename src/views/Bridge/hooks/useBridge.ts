@@ -67,8 +67,8 @@ export function useBridge() {
     quotedFees?.isAmountTooLow,
     maxBalance,
     limitsQuery.limits?.maxDeposit,
-    selectedRoute.type === "swap"
-      ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount || 0)
+    selectedRoute.type === "swap" && quotedSwap?.minExpectedInputTokenAmount
+      ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount)
       : parsedAmount
   );
   const isAmountValid = !amountValidationError;

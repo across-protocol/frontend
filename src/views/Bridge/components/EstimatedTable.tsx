@@ -116,6 +116,8 @@ const EstimatedTable = ({
   isQuoteLoading,
   validationError,
   rewardProgram,
+  showPriceImpactWarning,
+  swapPriceImpact,
 }: EstimatedTableProps) => {
   const rewardDisplaySymbol =
     rewardToken?.displaySymbol || rewardToken?.symbol.toUpperCase();
@@ -372,6 +374,8 @@ const EstimatedTable = ({
               textColor="light-200"
               destinationChainId={toChainId}
               showLoadingSkeleton={isQuoteLoading}
+              showPriceImpactWarning={showPriceImpactWarning}
+              swapPriceImpact={swapPriceImpact}
             />
           ) : (
             "-"
@@ -400,6 +404,8 @@ export function TotalReceive({
   textColor,
   destinationChainId,
   showLoadingSkeleton,
+  swapPriceImpact,
+  showPriceImpactWarning,
 }: {
   totalReceived: BigNumber;
   outputToken: TokenInfo;
@@ -407,6 +413,8 @@ export function TotalReceive({
   textColor?: TextColor;
   destinationChainId: number;
   showLoadingSkeleton?: boolean;
+  swapPriceImpact?: BigNumber;
+  showPriceImpactWarning?: boolean;
 }) {
   if (
     inputToken.symbol === outputToken.symbol ||
@@ -414,14 +422,19 @@ export function TotalReceive({
     isBridgedUsdc(inputToken.symbol)
   ) {
     return (
-      <TokenFee
-        amount={totalReceived}
-        token={outputToken}
-        textColor={textColor}
-        showTokenLinkOnHover
-        tokenChainId={destinationChainId}
-        showLoadingSkeleton={showLoadingSkeleton}
-      />
+      <>
+        <TokenFee
+          amount={totalReceived}
+          token={outputToken}
+          textColor={textColor}
+          showTokenLinkOnHover
+          tokenChainId={destinationChainId}
+          showLoadingSkeleton={showLoadingSkeleton}
+        />
+        {showPriceImpactWarning && swapPriceImpact && (
+          <Text color="red">({formatWeiPct(swapPriceImpact, 5)}%)</Text>
+        )}
+      </>
     );
   }
   const tooltipText =
@@ -589,7 +602,6 @@ const SwapSlippageSettings = styled.div`
 
   border-radius: 22px;
   border: 1px solid var(--Color-Neutrals-grey-500, #4c4e57);
-  background: var(--Color-Neutrals-grey-600, #3e4047);
 
   cursor: pointer;
 `;

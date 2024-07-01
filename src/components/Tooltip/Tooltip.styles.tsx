@@ -2,8 +2,9 @@ import styled from "@emotion/styled";
 import { Tooltip } from "react-tooltip";
 import { ReactComponent as RoundedCheckmark16 } from "assets/icons/checkmark-circle.svg";
 
-export const StyledAnchor = styled.a`
+export const StyledAnchor = styled.a<{ width?: string }>`
   line-height: 1;
+  width: ${({ width }) => width};
 `;
 
 export const StyledTooltip = styled(Tooltip)`
