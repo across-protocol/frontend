@@ -30,6 +30,8 @@ export type Props = {
   currentSwapSlippage?: number;
   onSetNewSlippage?: (slippage: number) => void;
   validationError?: AmountInputError;
+  showPriceImpactWarning?: boolean;
+  swapPriceImpact?: BigNumber;
 };
 
 export function FeesCollapsible(props: Props) {
@@ -57,7 +59,10 @@ export function FeesCollapsible(props: Props) {
         <CollapsedFeesLabel>
           <Text color="grey-400">Receive</Text>
         </CollapsedFeesLabel>
-        <CollapsedFeesReceiveWrapper onClick={() => setIsExpanded(true)}>
+        <CollapsedFeesReceiveWrapper
+          errorOutline={props.showPriceImpactWarning}
+          onClick={() => setIsExpanded(true)}
+        >
           {props.isQuoteLoading && !doesAmountExceedMaxDeposit ? (
             <CollapsedLoadingSkeleton width="100%" height="20px" />
           ) : (
@@ -70,6 +75,8 @@ export function FeesCollapsible(props: Props) {
                     outputToken={props.outputToken}
                     textColor="light-200"
                     destinationChainId={props.toChainId}
+                    showPriceImpactWarning={props.showPriceImpactWarning}
+                    swapPriceImpact={props.swapPriceImpact}
                   />
                   {estimatedRewards.reward && estimatedRewards.rewardToken && (
                     <>
@@ -104,7 +111,7 @@ export function FeesCollapsible(props: Props) {
   }
 
   return (
-    <ExpandedFeesWrapper>
+    <ExpandedFeesWrapper errorOutline={props.showPriceImpactWarning}>
       <ExpandedFeesTopRow onClick={() => setIsExpanded(false)}>
         <Text size="md" color="grey-400">
           Transaction breakdown
@@ -142,7 +149,7 @@ const CollapsedFeesLabel = styled.div`
   flex-shrink: 0;
 `;
 
-const CollapsedFeesReceiveWrapper = styled.div`
+const CollapsedFeesReceiveWrapper = styled.div<{ errorOutline?: boolean }>`
   display: flex;
   height: 48px;
   padding-left: 16px;
@@ -153,8 +160,11 @@ const CollapsedFeesReceiveWrapper = styled.div`
   width: 100%;
 
   border-radius: 12px;
-  border: 1px solid #3e4047;
-  background: #393a40;
+  border: 1px solid;
+  border-color: ${({ errorOutline }) =>
+    errorOutline ? "rgba(249, 108, 108, 0.1)" : "#3e4047"};
+  background: ${({ errorOutline }) =>
+    errorOutline ? "rgba(249, 108, 108, 0.05)" : "#393a40"};
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
 
   cursor: pointer;
@@ -172,14 +182,17 @@ const CollapsedFeesAmountsWrapper = styled.div`
   gap: 8px;
 `;
 
-const ExpandedFeesWrapper = styled.div`
+const ExpandedFeesWrapper = styled.div<{ errorOutline?: boolean }>`
   display: flex;
   flex-direction: column;
   width: 100%;
 
   border-radius: 12px;
   border: 1px solid #3e4047;
-  background: #393a40;
+  border-color: ${({ errorOutline }) =>
+    errorOutline ? "rgba(249, 108, 108, 0.1)" : "#3e4047"};
+  background: ${({ errorOutline }) =>
+    errorOutline ? "rgba(249, 108, 108, 0.05)" : "#393a40"};
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
 `;
 
