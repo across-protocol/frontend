@@ -108,13 +108,6 @@ const mockedDeposits: Deposit[] = [
       totalBridgeFeePct: "28434751200000000",
       totalBridgeFeeAmount: "341217014400000000",
     },
-    rewards: {
-      type: "referrals",
-      rate: 0.4,
-      tier: 1,
-      amount: "341217014400000000",
-      usd: "341217014400000000",
-    },
   },
   {
     depositId: 1199309,
@@ -152,13 +145,6 @@ const mockedDeposits: Deposit[] = [
       totalBridgeFeeUsd: "341217014400000000",
       totalBridgeFeePct: "28434751200000000",
       totalBridgeFeeAmount: "341217014400000000",
-    },
-    rewards: {
-      type: "referrals",
-      rate: 0.4,
-      tier: 1,
-      amount: "341217014400000000",
-      usd: "341217014400000000",
     },
   },
 ];

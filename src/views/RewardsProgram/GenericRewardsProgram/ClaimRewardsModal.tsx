@@ -1,14 +1,13 @@
 import styled from "@emotion/styled";
 import { BigNumber } from "ethers";
 
-import { Alert, Modal } from "components";
+import { Modal } from "components";
 import { SecondaryButton } from "components/Button";
 import { Text } from "components/Text";
 import {
   formatUnitsWithMaxFractions,
   QUERIESV2,
   rewardProgramTypes,
-  rewardTiers,
 } from "utils";
 
 import { useClaimModal } from "../hooks/useClaimModal";
@@ -42,12 +41,6 @@ export function ClaimRewardsModal({ isOpen, onExit, program }: Props) {
         mobile: "bottom",
       }}
     >
-      {program === "referrals" && (
-        <Alert status="warn">
-          Claiming your ACX will reset your tier to Copper and referral rate to{" "}
-          {rewardTiers[0].referralRate * 100}%.
-        </Alert>
-      )}
       <ClaimableBoxInnerWrapper>
         <ClaimableBox>
           <Text size="lg" color="white-70">

@@ -5,8 +5,9 @@ import {
   QUERIESV2,
   formatUSD,
   formatUnitsWithMaxFractions,
+  getToken,
+  isDefined,
   rewardProgramTypes,
-  rewardPrograms,
   rewardProgramsAvailable,
 } from "utils";
 import GenericOverviewCard from "./GenericOverviewCard";
@@ -38,12 +39,16 @@ const OverviewSection = ({
           }}
           lowerCard={
             <RewardProgramWrapper>
-              {rewardProgramsAvailable.map((program) => (
+              {["acx-rewards", ...rewardProgramsAvailable].map((program) => (
                 <RewardProgramCard
-                  program={program}
-                  key={rewardPrograms[program].rewardTokenSymbol}
-                  rewardOverride={
-                    program === "referrals" ? totalACXRewards : undefined
+                  program={
+                    (program === "acx-rewards"
+                      ? "arb-rebates"
+                      : program) as rewardProgramTypes
+                  }
+                  key={program}
+                  acxOverride={
+                    program === "acx-rewards" ? totalACXRewards : undefined
                   }
                 />
               ))}
@@ -86,12 +91,17 @@ export default OverviewSection;
 
 const RewardProgramCard = ({
   program,
-  rewardOverride,
+  acxOverride,
 }: {
   program: rewardProgramTypes;
-  rewardOverride?: BigNumber;
+  acxOverride?: BigNumber;
 }) => {
-  const { token, rewardsAmount, primaryColor } = useRewardProgramCard(program);
+  let { token, rewardsAmount, primaryColor } = useRewardProgramCard(program);
+  if (isDefined(acxOverride)) {
+    token = getToken("ACX");
+    rewardsAmount = acxOverride;
+    primaryColor = "aqua";
+  }
   return (
     <RewardProgramCardStack>
       <LogoContainer primaryColor={primaryColor}>
@@ -99,10 +109,7 @@ const RewardProgramCard = ({
       </LogoContainer>
       <RewardProgramTextStack>
         <Text color="white" size="lg">
-          {formatUnitsWithMaxFractions(
-            rewardOverride ?? rewardsAmount,
-            token.decimals
-          )}
+          {formatUnitsWithMaxFractions(rewardsAmount, token.decimals)}
         </Text>
         <Text color="grey-400" size="md">
           {token.symbol}

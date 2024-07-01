@@ -29,12 +29,6 @@ import { AmpliTrace } from "components/AmpliTrace";
 const LiquidityPool = lazyWithRetry(
   () => import(/* webpackChunkName: "LiquidityPools" */ "./views/LiquidityPool")
 );
-const Referrals = lazyWithRetry(
-  () =>
-    import(
-      /* webpackChunkName: "Referrals" */ "./views/RewardsProgram/ACXReferralsProgram"
-    )
-);
 const OPRebates = lazyWithRetry(
   () =>
     import(
@@ -156,7 +150,6 @@ const Routes: React.FC = () => {
         <Switch>
           <Route exact path="/transactions" component={Transactions} />
           <Route exact path="/pool" component={LiquidityPool} />
-          <Route exact path="/rewards/referrals" component={Referrals} />
           <Route
             exact
             path="/rewards/optimism-grant-program"

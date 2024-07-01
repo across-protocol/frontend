@@ -42,20 +42,12 @@ export type Deposit = {
   suggestedRelayerFeePct?: string;
   fillTime?: number;
   fillDeadline?: string;
-  rewards?:
-    | {
-        type: "op-rebates" | "arb-rebates";
-        rate: number;
-        amount: string;
-        usd: string;
-      }
-    | {
-        type: "referrals";
-        rate: number;
-        tier: number;
-        amount: string;
-        usd: string;
-      };
+  rewards?: {
+    type: "op-rebates" | "arb-rebates";
+    rate: number;
+    amount: string;
+    usd: string;
+  };
   feeBreakdown?: {
     // lp fee
     lpFeeUsd: string;
