@@ -5,7 +5,6 @@ import { COLORS, QUERIESV2 } from "utils";
 
 import { FilterDropdown } from "./components/FilterDropdown";
 import { PersonalTransactions } from "./components/PersonalTransactions";
-import { AllTransactions } from "./components/AllTransactions";
 import { DepositStatusFilter } from "./types";
 import { LayoutV2 } from "components";
 import BreadcrumbV2 from "components/BreadcrumbV2";
@@ -30,12 +29,6 @@ export function Transactions() {
             >
               Personal
             </Tab>
-            <Tab
-              onClick={() => setActiveTab("all")}
-              active={activeTab === "all"}
-            >
-              All
-            </Tab>
           </TabWrapper>
           <FilterDropdown
             filterLabel="Status"
@@ -47,11 +40,7 @@ export function Transactions() {
           />
         </FilterWrapper>
         <BodyWrapper>
-          {activeTab === "personal" ? (
-            <PersonalTransactions statusFilter={statusFilter} />
-          ) : (
-            <AllTransactions statusFilter={statusFilter} />
-          )}
+          <PersonalTransactions statusFilter={statusFilter} />
         </BodyWrapper>
       </Wrapper>
     </LayoutV2>
