@@ -1,10 +1,10 @@
 import styled from "@emotion/styled";
-import { ReactComponent as Arrow } from "assets/icons/arrow-16.svg";
+import { ReactComponent as Arrow } from "assets/icons/chevron-down.svg";
 import Modal from "components/Modal";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { QUERIESV2 } from "utils";
-import { ReactComponent as II } from "assets/icons/info-16.svg";
+import { ReactComponent as II } from "assets/icons/info.svg";
 import { useSelector } from "./useSelector";
 
 export type SelectorElementType<Value> = {

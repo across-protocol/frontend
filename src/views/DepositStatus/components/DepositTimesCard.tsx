@@ -3,9 +3,9 @@ import { keyframes } from "@emotion/react";
 import { DateTime } from "luxon";
 import { Link } from "react-router-dom";
 
-import { ReactComponent as CheckIcon } from "assets/check.svg";
-import { ReactComponent as LoadingIcon } from "assets/loading.svg";
-import { ReactComponent as ExternalLinkIcon } from "assets/icons/external-link-16.svg";
+import { ReactComponent as CheckIcon } from "assets/icons/check.svg";
+import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
+import { ReactComponent as ExternalLinkIcon } from "assets/icons/arrow-up-right.svg";
 import { ReactComponent as RefreshIcon } from "assets/icons/refresh.svg";
 
 import { Text, CardWrapper } from "components";

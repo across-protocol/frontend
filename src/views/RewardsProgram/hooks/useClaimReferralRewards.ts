@@ -16,7 +16,7 @@ const config = getConfig();
 export function useClaimRewards(program: rewardProgramTypes) {
   const { account, signer, notify } = useConnection();
   const baseChainId =
-    program === "referrals" ? hubPoolChainId : ChainId.OPTIMISM;
+    program === "arb-rebates" ? ChainId.ARBITRUM : ChainId.OPTIMISM;
   const { isWrongNetwork, isWrongNetworkHandler } =
     useIsWrongNetwork(baseChainId);
   const unclaimedProofsQuery = useUnclaimedProofs(program);

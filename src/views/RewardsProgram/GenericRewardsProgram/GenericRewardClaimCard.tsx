@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { PrimaryButton, Text } from "components";
 import { useState } from "react";
 import { COLORS, capitalizeFirstLetter, rewardProgramTypes } from "utils";

@@ -19,7 +19,7 @@ import {
   getConfig,
 } from "utils";
 import lazyWithRetry from "utils/lazy-with-retry";
-import { ReactComponent as InfoLogo } from "assets/icons/info-24.svg";
+import { ReactComponent as InfoLogo } from "assets/icons/info.svg";
 import Toast from "components/Toast";
 import BouncingDotsLoader from "components/BouncingDotsLoader";
 import NotFound from "./views/NotFound";
@@ -28,12 +28,6 @@ import { AmpliTrace } from "components/AmpliTrace";
 
 const LiquidityPool = lazyWithRetry(
   () => import(/* webpackChunkName: "LiquidityPools" */ "./views/LiquidityPool")
-);
-const Referrals = lazyWithRetry(
-  () =>
-    import(
-      /* webpackChunkName: "Referrals" */ "./views/RewardsProgram/ACXReferralsProgram"
-    )
 );
 const OPRebates = lazyWithRetry(
   () =>
@@ -156,7 +150,6 @@ const Routes: React.FC = () => {
         <Switch>
           <Route exact path="/transactions" component={Transactions} />
           <Route exact path="/pool" component={LiquidityPool} />
-          <Route exact path="/rewards/referrals" component={Referrals} />
           <Route
             exact
             path="/rewards/optimism-grant-program"

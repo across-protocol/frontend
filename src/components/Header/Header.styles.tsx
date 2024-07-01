@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { Link as UnstyledLink } from "react-router-dom";
 import { motion } from "framer-motion";
+import { ReactComponent as Logo } from "assets/acx.svg";
 
 interface IWrapper {
   scrollPosition: number;
@@ -128,4 +129,9 @@ export const TextWithIcon = styled.div`
   justify-content: center;
   align-items: center;
   gap: 8px;
+`;
+
+export const StyledLogo = styled(Logo)`
+  width: 32px;
+  height: 32px;
 `;

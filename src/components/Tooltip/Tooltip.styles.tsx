@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Tooltip } from "react-tooltip";
-import { ReactComponent as RoundedCheckmark16 } from "assets/icons/rounded-checkmark-16.svg";
+import { ReactComponent as RoundedCheckmark16 } from "assets/icons/checkmark-circle.svg";
 
 export const StyledAnchor = styled.a`
   line-height: 1;

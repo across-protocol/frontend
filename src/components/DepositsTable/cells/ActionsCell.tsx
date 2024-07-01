@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import styled from "@emotion/styled";
 
-import { ReactComponent as ZapIcon } from "assets/zap.svg";
-import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
+import { ReactComponent as ZapIcon } from "assets/icons/zap.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";

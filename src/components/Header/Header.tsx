@@ -10,10 +10,10 @@ import {
   Item,
   WalletWrapper,
   Spacing,
+  StyledLogo,
 } from "./Header.styles";
 import MenuToggle from "./MenuToggle";
 import { enableMigration } from "utils";
-import { ReactComponent as Logo } from "assets/across-mobile-logo.svg";
 import useScrollPosition from "hooks/useScrollPosition";
 import { isChildPath } from "./utils";
 
@@ -54,7 +54,7 @@ const Header: React.FC<Props> = ({
         to={{ pathname: "/", search: location.search }}
         style={{ display: "flex" }}
       >
-        <Logo />
+        <StyledLogo />
       </UnstyledLink>
       <Navigation>
         <List>

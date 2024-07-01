@@ -199,6 +199,18 @@ export class ConfigClient {
       process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_CHAIN_ID || "10"
     );
   }
+  getArbRewardsMerkleDistributorAddress(): string {
+    return (
+      process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_ADDRESS ||
+      constants.AddressZero // FIXME: will need to be modified when Arb rewards come online to be claimed.
+    );
+  }
+  getArbRewardsMerkleDistributorChainId(): number {
+    return parseInt(
+      process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_CHAIN_ID ||
+        constants.ChainId.ARBITRUM.toString()
+    );
+  }
   getAcrossTokenAddress(): string {
     return (
       process.env.REACT_APP_ACROSS_TOKEN_ADDRESS ||
@@ -239,15 +251,15 @@ export class ConfigClient {
     signer?: Signer
   ): AcrossMerkleDistributor {
     let address =
-      rewardsType === "referrals"
-        ? this.getMerkleDistributorAddress()
+      rewardsType === "arb-rebates"
+        ? this.getArbRewardsMerkleDistributorAddress()
         : this.getOpRewardsMerkleDistributorAddress();
 
     let provider =
       signer ??
       providerUtils.getProvider(
-        rewardsType === "referrals"
-          ? this.getHubPoolChainId()
+        rewardsType === "arb-rebates"
+          ? this.getArbRewardsMerkleDistributorChainId()
           : this.getOpRewardsMerkleDistributorChainId()
       );
 

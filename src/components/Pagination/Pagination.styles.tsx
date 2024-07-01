@@ -2,7 +2,7 @@ import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import { UnstyledButton } from "components/Button";
 import { QUERIESV2 } from "utils";
-import { ReactComponent as ArrowIcon } from "assets/icons/arrow-16.svg";
+import { ReactComponent as ArrowIcon } from "assets/icons/chevron-down.svg";
 
 export const Wrapper = styled.div`
   display: flex;

@@ -58,7 +58,7 @@ const RewardsProgramCTA = ({ program, toChain }: ReferralCTAProps) => {
           onClick={handleClick}
           size="md"
           backgroundColor="black-700"
-          textColor={program === "referrals" ? "aqua" : "white"}
+          textColor="white"
           primaryColor={rewardProgram.primaryColor}
         >
           {buttonCopy}

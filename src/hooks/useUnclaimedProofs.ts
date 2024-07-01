@@ -21,18 +21,6 @@ export function useUnclaimedProofs(rewardsType: rewardProgramTypes) {
   );
 }
 
-export function useUnclaimedReferralProofs() {
-  const { isConnected, account } = useConnection();
-
-  return useQuery(
-    getUnclaimedProofsQueryKey("referrals", account),
-    () => fetchUnclaimedProofs("referrals", account),
-    {
-      enabled: isConnected && !!account,
-    }
-  );
-}
-
 export function useUnclaimedOpRewardsProofs() {
   const { isConnected, account } = useConnection();
 

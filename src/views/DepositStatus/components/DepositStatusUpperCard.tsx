@@ -3,11 +3,11 @@ import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
 
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
-import { ReactComponent as CheckStarDepositingIcon } from "assets/check-star-ring-opaque-depositing.svg";
-import { ReactComponent as CheckStarDepositRevertedIcon } from "assets/check-star-ring-opaque-deposit-reverted.svg";
-import { ReactComponent as CheckStarFillingIcon } from "assets/check-star-ring-opaque-filling.svg";
-import { ReactComponent as CheckStarFilledIcon } from "assets/check-star-ring-opaque-filled.svg";
-import { ReactComponent as InfoIcon } from "assets/icons/info-16.svg";
+import { ReactComponent as CheckStarDepositingIcon } from "assets/icons/check-star-ring-opaque-depositing.svg";
+import { ReactComponent as CheckStarDepositRevertedIcon } from "assets/icons/check-star-ring-opaque-deposit-reverted.svg";
+import { ReactComponent as CheckStarFillingIcon } from "assets/icons/check-star-ring-opaque-filling.svg";
+import { ReactComponent as CheckStarFilledIcon } from "assets/icons/check-star-ring-opaque-filled.svg";
+import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
 import { ReactComponent as EthereumGrayscaleLogo } from "assets/grayscale-logos/eth.svg";
 import { ReactComponent as PolygonGrayscaleLogo } from "assets/grayscale-logos/polygon.svg";
 import { ReactComponent as ArbitrumGrayscaleLogo } from "assets/grayscale-logos/arbitrum.svg";

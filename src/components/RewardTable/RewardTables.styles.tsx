@@ -1,20 +1,9 @@
 import styled from "@emotion/styled";
-import { ReactComponent as AcrossPlusIcon } from "assets/across-plus-icon.svg";
+import { ReactComponent as AcrossPlusIcon } from "assets/icons/plus-circle.svg";
 import { QUERIESV2 } from "utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
-import { ReactComponent as ETHLogo } from "assets/eth.svg";
-import { ReactComponent as UNILogo } from "assets/uni.svg";
-import { ReactComponent as USDCLogo } from "assets/usdc.svg";
-import { ReactComponent as WETHLogo } from "assets/weth.svg";
-import { ReactComponent as BadgerLogo } from "assets/badger.svg";
-import { ReactComponent as DaiLogo } from "assets/dai.svg";
-import { ReactComponent as UmaLogo } from "assets/uma.svg";
-import { ReactComponent as WBTCLogo } from "assets/wbtc.svg";
-import { ReactComponent as USDTLogo } from "assets/usdt-logo.svg";
-import { ReactComponent as SNXLogo } from "assets/snx-logo.svg";
-import { ReactComponent as PoolTogetherLogo } from "assets/pooltogether-logo.svg";
-import { ReactComponent as RightUpArrow } from "assets/across-right-up-arrow.svg";
+import { ReactComponent as RightUpArrow } from "assets/icons/arrow-up-right.svg";
 
 import ProgressBar from "components/ProgressBar";
 import {
@@ -275,33 +264,9 @@ export const ReferralIconContainer = styled.div`
   cursor: pointer;
 `;
 
-export const StyledETHIcon = styled(ETHLogo)``;
 export const StyledPoolIcon = styled.img<{ greyscale?: boolean }>`
   width: 32px;
   height: 32px;
 
   filter: ${({ greyscale }) => (greyscale ? "grayscale(100%)" : "none")};
-`;
-
-export const StyledUNILogo = styled(UNILogo)``;
-export const StyledUSDCLogo = styled(USDCLogo)``;
-export const StyledWETHLogo = styled(WETHLogo)``;
-export const StyledDaiLogo = styled(DaiLogo)`
-  width: 32px;
-  height: 32px;
-`;
-export const StyledWBTCLogo = styled(WBTCLogo)``;
-export const StyledUmaLogo = styled(UmaLogo)``;
-export const StyledBadgerLogo = styled(BadgerLogo)``;
-export const StyledUSDTLogo = styled(USDTLogo)`
-  width: 32px;
-  height: 32px;
-`;
-export const StyledSNXLogo = styled(SNXLogo)`
-  width: 32px;
-  height: 32px;
-`;
-export const StyledPoolTogetherLogo = styled(PoolTogetherLogo)`
-  width: 32px;
-  height: 32px;
 `;
