@@ -409,7 +409,7 @@ export type rewardProgramValues = {
   backgroundUrl: string;
   highestPct: number;
   claimableTooltipBody: string;
-  ctaBody?: string;
+  ctaBody?: (chainId: number) => string;
 };
 export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
   "op-rebates": {
