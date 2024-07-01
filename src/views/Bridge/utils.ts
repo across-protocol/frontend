@@ -485,8 +485,8 @@ export function calcSwapPriceImpact(
   minExpectedInputTokenAmount: BigNumber
 ) {
   return amountInput.gt(0) && minExpectedInputTokenAmount.gt(0)
-    ? amountInput
-        .sub(minExpectedInputTokenAmount)
+    ? minExpectedInputTokenAmount
+        .sub(amountInput)
         .mul(fixedPointAdjustment)
         .div(amountInput)
     : BigNumber.from(0);

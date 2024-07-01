@@ -5,7 +5,7 @@ import { BigNumber } from "ethers";
 import { Text, LoadingSkeleton } from "components";
 import { ReactComponent as ChevronDown } from "assets/icons/chevron-down.svg";
 import { ReactComponent as _SwapIcon } from "assets/icons/swap.svg";
-import { COLORS, QUERIESV2, TokenInfo } from "utils";
+import { QUERIESV2, TokenInfo } from "utils";
 
 import EstimatedTable, { TotalReceive } from "./EstimatedTable";
 import { useEstimatedRewards } from "../hooks/useEstimatedRewards";
