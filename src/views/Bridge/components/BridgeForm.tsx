@@ -134,10 +134,11 @@ const BridgeForm = ({
           swapQuote.minExpectedInputTokenAmount
         )
       : BigNumber.from(0);
-  const showPriceImpactWarning = utils
-    .parseEther(String(negativePriceImpactWarningThreshold))
-    .gt(swapPriceImpact);
-  console.log(swapPriceImpact.toString());
+  const showPriceImpactWarning =
+    !isQuoteLoading &&
+    utils
+      .parseEther(String(negativePriceImpactWarningThreshold))
+      .gt(swapPriceImpact);
 
   return (
     <CardWrapper>
