@@ -12,14 +12,7 @@ import {
 } from "utils";
 import logo from "assets/acx.svg";
 
-const injected = injectedModule({
-  sort: (wallets) =>
-    wallets.map((wallet) => ({
-      ...wallet,
-      label:
-        wallet.label === "Uniswap Extension" ? "Uniswap Wallet" : wallet.label,
-    })),
-});
+const injected = injectedModule();
 const gnosis = gnosisModule();
 const walletConnect = walletConnectModule({
   projectId: walletConnectProjectId,
