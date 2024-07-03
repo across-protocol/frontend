@@ -1,4 +1,4 @@
-import { TOKEN_SYMBOLS_MAP } from "../../api/_constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
 import {
   getRouteDetails,
   validateChainAndTokenParams,
@@ -195,7 +195,11 @@ describe("_utils", () => {
 
     test("resolve all routes for ambiguous tokens and 'token' param", () => {
       ENABLED_ROUTES.routes
-        .filter((route) => ["DAI"].includes(route.fromTokenSymbol))
+        .filter(
+          (route) =>
+            ["DAI"].includes(route.fromTokenSymbol) &&
+            route.toChain !== CHAIN_IDs.BLAST
+        )
         .forEach((route) => {
           expect(
             validateChainAndTokenParams({

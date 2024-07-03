@@ -14,6 +14,7 @@ import acxLogo from "assets/token-logos/acx.svg";
 import snxLogo from "assets/token-logos/snx.svg";
 import pooltogetherLogo from "assets/token-logos/pool.svg";
 import lskLogo from "assets/token-logos/lsk.svg";
+import usdbLogo from "assets/token-logos/usdb.svg";
 
 export type TokenInfo = {
   name: string;
@@ -40,6 +41,7 @@ export const orderedTokenLogos = {
   USDbC: usdcLogo,
   USDT: usdtLogo,
   DAI: daiLogo,
+  USDB: usdbLogo,
   WBTC: wbtcLogo,
   BAL: balLogo,
   UMA: umaLogo,
