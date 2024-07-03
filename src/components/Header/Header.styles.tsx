@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { Link as UnstyledLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ReactComponent as Logo } from "assets/acx.svg";
+import { ReactComponent as Logo } from "assets/token-logos/acx.svg";
 
 interface IWrapper {
   scrollPosition: number;

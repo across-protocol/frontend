@@ -10,7 +10,7 @@ import {
   chainInfoList,
   providerUrlsTable,
 } from "utils";
-import logo from "assets/acx.svg";
+import logo from "assets/token-logos/acx.svg";
 
 const injected = injectedModule();
 const gnosis = gnosisModule();

@@ -1,0 +1,53 @@
+import ethLogo from "assets/token-logos/eth.svg";
+import maticLogo from "assets/token-logos/matic.svg";
+import usdcLogo from "assets/token-logos/usdc.svg";
+import usdtLogo from "assets/token-logos/usdt.svg";
+import daiLogo from "assets/token-logos/dai.svg";
+import wbtcLogo from "assets/token-logos/wbtc.svg";
+import balLogo from "assets/token-logos/bal.svg";
+import optimismLogo from "assets/token-logos/op.svg";
+import wethLogo from "assets/token-logos/weth.svg";
+import arbitrumLogo from "assets/token-logos/arb.svg";
+import bobaLogo from "assets/token-logos/boba.svg";
+import umaLogo from "assets/token-logos/uma.svg";
+import acxLogo from "assets/token-logos/acx.svg";
+import snxLogo from "assets/token-logos/snx.svg";
+import pooltogetherLogo from "assets/token-logos/pool.svg";
+import lskLogo from "assets/token-logos/lsk.svg";
+
+export type TokenInfo = {
+  name: string;
+  symbol: string;
+  decimals: number;
+  logoURI: string;
+  logoURIs?: [string, string];
+  // tokens require a mainnet address to do price lookups on coingecko, not used for anything else.
+  mainnetAddress?: string;
+  // optional display symbol for tokens that have a different symbol on the frontend
+  displaySymbol?: string;
+  addresses?: Record<number, string>;
+};
+export type TokenInfoList = TokenInfo[];
+
+// Order of this map determines the order of the tokens in the token selector
+export const orderedTokenLogos = {
+  ETH: ethLogo,
+  WETH: wethLogo,
+  MATIC: maticLogo,
+  WMATIC: maticLogo,
+  USDC: usdcLogo,
+  "USDC.e": usdcLogo,
+  USDbC: usdcLogo,
+  USDT: usdtLogo,
+  DAI: daiLogo,
+  WBTC: wbtcLogo,
+  BAL: balLogo,
+  UMA: umaLogo,
+  ACX: acxLogo,
+  SNX: snxLogo,
+  POOL: pooltogetherLogo,
+  BOBA: bobaLogo,
+  OP: optimismLogo,
+  ARB: arbitrumLogo,
+  LSK: lskLogo,
+};

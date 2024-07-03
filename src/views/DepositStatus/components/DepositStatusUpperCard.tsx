@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
 
@@ -8,18 +7,9 @@ import { ReactComponent as CheckStarDepositRevertedIcon } from "assets/icons/che
 import { ReactComponent as CheckStarFillingIcon } from "assets/icons/check-star-ring-opaque-filling.svg";
 import { ReactComponent as CheckStarFilledIcon } from "assets/icons/check-star-ring-opaque-filled.svg";
 import { ReactComponent as InfoIcon } from "assets/icons/info.svg";
-import { ReactComponent as EthereumGrayscaleLogo } from "assets/grayscale-logos/eth.svg";
-import { ReactComponent as PolygonGrayscaleLogo } from "assets/grayscale-logos/polygon.svg";
-import { ReactComponent as ArbitrumGrayscaleLogo } from "assets/grayscale-logos/arbitrum.svg";
-import { ReactComponent as OptimismGrayscaleLogo } from "assets/grayscale-logos/optimism.svg";
-import { ReactComponent as ZkSyncGrayscaleLogo } from "assets/grayscale-logos/zksync.svg";
-import { ReactComponent as BaseGrayscaleLogo } from "assets/grayscale-logos/base.svg";
-import { ReactComponent as LineaGrayscaleLogo } from "assets/grayscale-logos/linea.svg";
-import { ReactComponent as ModeGrayscaleLogo } from "assets/grayscale-logos/mode.svg";
 import { Text, Badge } from "components";
 
 import {
-  ChainId,
   QUERIESV2,
   COLORS,
   NoV3FundsDepositedLogError,
@@ -33,24 +23,6 @@ import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus } from "../types";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DateTime } from "luxon";
-
-const grayscaleLogos: Record<number, React.ReactNode> = {
-  [ChainId.ARBITRUM]: <ArbitrumGrayscaleLogo />,
-  [ChainId.POLYGON]: <PolygonGrayscaleLogo />,
-  [ChainId.OPTIMISM]: <OptimismGrayscaleLogo />,
-  [ChainId.MAINNET]: <EthereumGrayscaleLogo />,
-  [ChainId.ZK_SYNC]: <ZkSyncGrayscaleLogo />,
-  [ChainId.BASE]: <BaseGrayscaleLogo />,
-  [ChainId.LINEA]: <LineaGrayscaleLogo />,
-  [ChainId.MODE]: <ModeGrayscaleLogo />,
-  // testnets
-  [ChainId.SEPOLIA]: <EthereumGrayscaleLogo />,
-  [ChainId.BASE_SEPOLIA]: <BaseGrayscaleLogo />,
-  [ChainId.ARBITRUM_SEPOLIA]: <ArbitrumGrayscaleLogo />,
-  [ChainId.OPTIMISM_SEPOLIA]: <OptimismGrayscaleLogo />,
-  [ChainId.MODE_SEPOLIA]: <ModeGrayscaleLogo />,
-  [ChainId.POLYGON_AMOY]: <PolygonGrayscaleLogo />,
-};
 
 type Props = {
   depositTxHash: string;
@@ -116,7 +88,7 @@ export function DepositStatusUpperCard({
       <TopWrapperAnimationWrapper>
         <AnimatedLogoWrapperFromChain status={status}>
           <AnimatedLogoFromChain status={status}>
-            {grayscaleLogos[fromChainId]}
+            <img src={getChainInfo(fromChainId).grayscaleLogoURI} />
           </AnimatedLogoFromChain>
         </AnimatedLogoWrapperFromChain>
         <AnimatedDividerFromChain status={status} />
@@ -132,7 +104,7 @@ export function DepositStatusUpperCard({
         <AnimatedDividerToChain status={status} />
         <AnimatedLogoWrapperToChain status={status}>
           <AnimatedLogoToChain status={status}>
-            {grayscaleLogos[toChainId]}
+            <img src={getChainInfo(toChainId).grayscaleLogoURI} />
           </AnimatedLogoToChain>
         </AnimatedLogoWrapperToChain>
       </TopWrapperAnimationWrapper>
