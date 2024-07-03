@@ -410,6 +410,7 @@ export type rewardProgramValues = {
   highestPct: number;
   claimableTooltipBody: string;
   ctaBody?: (chainId: number) => string;
+  enabledChains: ChainId[];
 };
 export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
   "op-rebates": {
@@ -423,6 +424,7 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
       `Bridge to ${getChainInfo(chainId).name} and earn on every transaction.`,
     claimableTooltipBody:
       "OP rewards earned during the month are made claimable after the ~15th of the following month",
+    enabledChains: [ChainId.OPTIMISM, ChainId.MODE, ChainId.BASE],
   },
   "arb-rebates": {
     programName: "Arbitrum Rewards Program",
@@ -434,19 +436,21 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
     ctaBody: () => "Bridge to Arbitrum and earn on every transaction.",
     claimableTooltipBody:
       "Arbitrum rewards earned during the month are made claimable after the ~15th of the following month",
+    enabledChains: [ChainId.ARBITRUM],
   },
 };
 
-export const chainIdToRewardsProgramName = {
-  [ChainId.OPTIMISM]: "op-rebates",
-  [ChainId.OPTIMISM_SEPOLIA]: "op-rebates",
-  [ChainId.ARBITRUM]: "arb-rebates",
-  [ChainId.ARBITRUM_SEPOLIA]: "arb-rebates",
-  [ChainId.MODE]: "op-rebates",
-  [ChainId.MODE_SEPOLIA]: "op-rebates",
-  [ChainId.BASE]: "op-rebates",
-  [ChainId.BASE_SEPOLIA]: "op-rebates",
-} as const;
+export const chainIdToRewardsProgramName = Object.entries(
+  rewardPrograms
+).reduce(
+  (acc, [key, { enabledChains }]) => {
+    enabledChains.forEach((chainId) => {
+      acc[chainId] = key as rewardProgramTypes;
+    });
+    return acc;
+  },
+  {} as Record<ChainId, rewardProgramTypes>
+);
 
 // process.env variables
 export const rewardsApiUrl =

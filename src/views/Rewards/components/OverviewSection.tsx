@@ -15,6 +15,7 @@ import { useRewardProgramCard } from "../hooks/useRewardProgramCard";
 import { Text } from "components";
 import { BigNumber } from "ethers";
 import { useHistory } from "react-router-dom";
+import ChainLogoOverlap from "./ChainLogoOverlap";
 
 type OverviewSectionProps = {
   stakedTokens?: BigNumber;
@@ -118,7 +119,11 @@ const RewardProgramCard = ({
     }
   };
   return (
-    <RewardProgramCardStack onClick={onClick} enableLink={enableLink}>
+    <RewardProgramCardStack
+      onClick={onClick}
+      enableLink={enableLink}
+      alignTop={smallLogo}
+    >
       <LogoContainer primaryColor={primaryColor} smallLogo={smallLogo}>
         <Logo src={token.logoURI} alt={token.symbol} smallLogo={smallLogo} />
       </LogoContainer>
@@ -126,9 +131,12 @@ const RewardProgramCard = ({
         <Text color="white" size="lg">
           {formatUnitsWithMaxFractions(rewardsAmount, token.decimals)}
         </Text>
-        <Text color="grey-400" size="md">
-          {token.symbol}
-        </Text>
+        <HorizontalWrapper>
+          <Text color="grey-400" size="md">
+            {token.symbol}
+          </Text>
+          {!acxOverride && <ChainLogoOverlap program={program} />}
+        </HorizontalWrapper>
       </RewardProgramTextStack>
     </RewardProgramCardStack>
   );
@@ -157,10 +165,13 @@ const InnerWrapperStack = styled.div`
   width: 100%;
 `;
 
-const RewardProgramCardStack = styled.div<{ enableLink: boolean }>`
+const RewardProgramCardStack = styled.div<{
+  enableLink: boolean;
+  alignTop: boolean;
+}>`
   display: flex;
   padding: 12px;
-  align-items: center;
+  align-items: ${({ alignTop }) => (alignTop ? "flex-start" : "center")};
   gap: 12px;
   flex: 1 0 0;
 
@@ -211,6 +222,7 @@ const RewardProgramTextStack = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: 100%;
 `;
 
 const IconPoolWrapper = styled.div`
@@ -222,4 +234,10 @@ const IconPoolWrapper = styled.div`
 const PoolLogo = styled.img`
   height: 16px;
   width: 16px;
+`;
+
+const HorizontalWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
 `;
