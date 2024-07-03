@@ -78,7 +78,9 @@
     "postinstall": "patch-package",
     "generate:routes": "tsx scripts/generate-routes.ts",
     "generate:routes:e2e": "tsx scripts/generate-e2e-test-routes.ts",
-    "generate:routes:mainnet": "yarn generate:routes 1"
+    "generate:routes:mainnet": "yarn generate:routes 1",
+    "generate:chain-config": "tsx scripts/generate-chain-config.ts",
+    "generate:ui-assets": "tsx scripts/generate-ui-assets.ts"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": [

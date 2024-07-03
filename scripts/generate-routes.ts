@@ -24,7 +24,6 @@ const enabledMainnetChainConfigs = [
   chainConfigs.BASE,
   chainConfigs.LINEA,
   chainConfigs.MODE,
-  chainConfigs.LISK,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -34,7 +33,6 @@ const enabledSepoliaChainConfigs = [
   chainConfigs.OPTIMISM_SEPOLIA,
   chainConfigs.MODE_SEPOLIA,
   chainConfigs.POLYGON_AMOY,
-  chainConfigs.LISK_SEPOLIA,
 ];
 
 const enabledRoutes = {

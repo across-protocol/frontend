@@ -192,7 +192,7 @@ assert(
   "Hubpool chain is not supported: " + hubPoolChainId
 );
 export function isSupportedChainId(chainId: number) {
-  return chainId in CHAIN_IDs;
+  return Object.values(CHAIN_IDs).includes(chainId);
 }
 
 export function getChainInfo(chainId: number): ChainInfo {
@@ -213,8 +213,8 @@ export function getChainInfo(chainId: number): ChainInfo {
         `https://blockscan.com/tx/${txHash}`,
       nativeCurrencySymbol: "ETH",
       pollingInterval: defaultBlockPollingInterval,
-      rpcUrl: "",
-      customRpcUrl: "",
+      rpcUrl: "https://rpc.com",
+      customRpcUrl: "https://rpc.com",
     };
   }
 

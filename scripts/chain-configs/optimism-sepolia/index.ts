@@ -13,7 +13,7 @@ export default {
   grayscaleLogoPath: "../optimism/assets/grayscale-logo.svg",
   spokePool: getDeployedAddress("SpokePool", chainId),
   chainId,
-  publicRpcUrl: "",
+  publicRpcUrl: "https://sepolia.optimism.io",
   tokens: [],
   enableCCTP: false,
   swapTokens: [],

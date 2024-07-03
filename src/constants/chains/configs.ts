@@ -216,7 +216,7 @@ export const optimismSepolia = {
   chainId: 11155420,
   logoURI: optimismSepoliaLogo,
   grayscaleLogoURI: optimismSepoliaGrayscaleLogo,
-  rpcUrl: "",
+  rpcUrl: "https://sepolia.optimism.io",
   explorerUrl: "https://sepolia-optimism.etherscan.io",
   constructExplorerLink: (txHash: string) =>
     `${optimismSepolia.explorerUrl}/tx/${txHash}`,
