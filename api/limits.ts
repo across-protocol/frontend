@@ -267,7 +267,7 @@ const handler = async (
       message: "Response data",
       responseJson,
     });
-    // Respond with a 200 status code and 15 seconds of cache cache with
+    // Respond with a 200 status code and 15 seconds of cache with
     // 45 seconds of stale-while-revalidate.
     sendResponse(response, responseJson, 200, 15, 45);
   } catch (error: unknown) {
