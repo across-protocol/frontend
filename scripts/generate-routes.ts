@@ -169,12 +169,6 @@ function transformChainConfigs(
 
       const tokens = chainConfig.tokens.flatMap((token) => {
         const tokenSymbol = typeof token === "string" ? token : token.symbol;
-        const chainIds =
-          typeof token === "string" ? [toChainId] : token.chainIds;
-
-        if (!chainIds.includes(toChainId)) {
-          return [];
-        }
 
         // Handle USDC -> USDC.e/USDbC routes
         if (tokenSymbol === "USDC") {
@@ -231,6 +225,9 @@ function transformChainConfigs(
           return ["WETH", "ETH"];
         }
 
+        const chainIds =
+          typeof token === "string" ? [toChainId] : token.chainIds;
+
         const toToken = toChainConfig.tokens.find((token) =>
           typeof token === "string"
             ? token === tokenSymbol
@@ -238,7 +235,9 @@ function transformChainConfigs(
         );
         if (
           !toToken ||
-          (typeof toToken === "object" && !toToken.chainIds.includes(toChainId))
+          (typeof toToken === "object" &&
+            !toToken.chainIds.includes(fromChainId)) ||
+          !chainIds.includes(toChainId)
         ) {
           return [];
         }
