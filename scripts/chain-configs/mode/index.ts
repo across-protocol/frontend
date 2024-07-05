@@ -14,13 +14,7 @@ export default {
   spokePool: getDeployedAddress("SpokePool", chainId),
   chainId,
   publicRpcUrl: "https://mainnet.mode.network",
-  tokens: [
-    "WETH",
-    "ETH",
-    "USDC.e",
-    { symbol: "USDT", chainIds: [CHAIN_IDs.MAINNET] },
-    { symbol: "WBTC", chainIds: [CHAIN_IDs.MAINNET] },
-  ],
+  tokens: ["WETH", "ETH", "USDC.e", "USDT", "WBTC"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;
