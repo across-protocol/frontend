@@ -168,8 +168,16 @@ function transformChainConfigs(
       }
 
       const tokens = chainConfig.tokens.flatMap((token) => {
+        const tokenSymbol = typeof token === "string" ? token : token.symbol;
+        const chainIds =
+          typeof token === "string" ? [toChainId] : token.chainIds;
+
+        if (!chainIds.includes(toChainId)) {
+          return [];
+        }
+
         // Handle USDC -> USDC.e/USDbC routes
-        if (token === "USDC") {
+        if (tokenSymbol === "USDC") {
           if (toChainConfig.enableCCTP) {
             return [
               "USDC",
@@ -191,35 +199,31 @@ function transformChainConfigs(
           }
         }
 
-        if (["USDC.e", "USDbC"].includes(token)) {
+        if (["USDC.e", "USDbC"].includes(tokenSymbol)) {
           if (toChainConfig.enableCCTP) {
             return [
               {
-                inputTokenSymbol: token,
+                inputTokenSymbol: tokenSymbol,
                 outputTokenSymbol: "USDC",
               },
               {
-                inputTokenSymbol: token,
+                inputTokenSymbol: tokenSymbol,
                 outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
               },
             ];
           } else if (toChainConfig.tokens.includes("USDC")) {
             return [
               {
-                inputTokenSymbol: token,
+                inputTokenSymbol: tokenSymbol,
                 outputTokenSymbol: "USDC",
               },
             ];
           }
         }
 
-        if (!toChainConfig.tokens.includes(token)) {
-          return [];
-        }
-
         // Handle WETH Polygon
         if (
-          token === "WETH" &&
+          tokenSymbol === "WETH" &&
           [CHAIN_IDs.POLYGON, CHAIN_IDs.POLYGON_AMOY].includes(
             toChainConfig.chainId
           )
@@ -227,7 +231,19 @@ function transformChainConfigs(
           return ["WETH", "ETH"];
         }
 
-        return token;
+        const toToken = toChainConfig.tokens.find((token) =>
+          typeof token === "string"
+            ? token === tokenSymbol
+            : token.symbol === tokenSymbol
+        );
+        if (
+          !toToken ||
+          (typeof toToken === "object" && !toToken.chainIds.includes(toChainId))
+        ) {
+          return [];
+        }
+
+        return tokenSymbol;
       });
 
       const toChain = {

@@ -9,7 +9,13 @@ export type ChainConfig = {
   logoPath: string;
   grayscaleLogoPath: string;
   spokePool: string;
-  tokens: string[];
+  tokens: (
+    | string
+    | {
+        symbol: string;
+        chainIds: number[];
+      }
+  )[];
   enableCCTP: boolean;
   swapTokens: {
     swapInputTokenSymbol: string;
