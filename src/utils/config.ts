@@ -201,13 +201,13 @@ export class ConfigClient {
   }
   getArbRewardsMerkleDistributorAddress(): string {
     return (
-      process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_ADDRESS ||
-      constants.AddressZero // FIXME: will need to be modified when Arb rewards come online to be claimed.
+      process.env.REACT_APP_ARB_REWARDS_MERKLE_DISTRIBUTOR_ADDRESS ||
+      "0x9f6Cb0A37F1ae91b8e65405f525A596bAFC5A9a6"
     );
   }
   getArbRewardsMerkleDistributorChainId(): number {
     return parseInt(
-      process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_CHAIN_ID ||
+      process.env.REACT_APP_ARB_REWARDS_MERKLE_DISTRIBUTOR_CHAIN_ID ||
         constants.ChainId.ARBITRUM.toString()
     );
   }
