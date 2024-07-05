@@ -40,6 +40,7 @@ import {
   TOKEN_SYMBOLS_MAP,
   defaultRelayerAddressOverride,
   defaultRelayerAddressOverridePerToken,
+  defaultRelayerAddressOverridePerChain,
   disabledL1Tokens,
   graphAPIKey,
   maxRelayFeePct,
@@ -516,7 +517,7 @@ export const getRelayerFeeCalculator = (
     destinationChainId,
     getProvider(destinationChainId),
     undefined,
-    overrides.spokePoolAddress,
+    overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
     overrides.relayerAddress,
     REACT_APP_COINGECKO_PRO_API_KEY,
     getLogger(),
@@ -1443,6 +1444,7 @@ export function getDefaultRelayerAddress(
     return overrideForToken.relayer;
   } else {
     return (
+      defaultRelayerAddressOverridePerChain[destinationChainId] ||
       defaultRelayerAddressOverride ||
       sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS
     );
