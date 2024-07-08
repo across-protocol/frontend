@@ -6,6 +6,7 @@ import * as superstruct from "superstruct";
 import { parseEtherLike } from "./format";
 
 import unknownLogo from "assets/icons/question-circle.svg";
+import { ReactComponent as unknownLogoSvg } from "assets/icons/question-circle.svg";
 import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 import ARBCloudBackground from "assets/bg-banners/arb-cloud-rebate.svg";
 
@@ -217,6 +218,8 @@ export function getChainInfo(chainId: number): ChainInfo {
       chainId,
       logoURI: unknownLogo,
       grayscaleLogoURI: unknownLogo,
+      logoSvg: unknownLogoSvg,
+      grayscaleLogoSvg: unknownLogoSvg,
       explorerUrl: "https://blockscan.com/",
       constructExplorerLink: (txHash: string) =>
         `https://blockscan.com/tx/${txHash}`,
