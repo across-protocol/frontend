@@ -7,6 +7,7 @@ import { useGenericRewardClaimCard } from "../hooks/useGenericRewardClaimCard";
 import { ClaimRewardsModal } from "./ClaimRewardsModal";
 import GenericCard from "./GenericCard";
 import { Tooltip } from "components/Tooltip";
+import ChainLogoOverlap from "views/Rewards/components/ChainLogoOverlap";
 
 type GenericRewardClaimCardProps = {
   program: rewardProgramTypes;
@@ -64,18 +65,20 @@ const GenericRewardClaimCard = ({
               </ClaimableIconTextStack>
             )}
           </TextStack>
-
-          {isConnected && (
+          <ButtonStack>
             <StyledHandlerButton
               onClick={() => setModalOpen(true)}
               primaryColor={primaryColor}
-              disabled={!unclaimedAmount || unclaimedAmount.lte(0)}
+              disabled={
+                !isConnected || !unclaimedAmount || unclaimedAmount.lte(0)
+              }
             >
               <Text color="white" size="md" weight={500}>
                 Claim
               </Text>
             </StyledHandlerButton>
-          )}
+            <ChainLogoOverlap program={program} />
+          </ButtonStack>
         </Header>
         {children}
       </GenericCard>
@@ -92,6 +95,13 @@ const Header = styled.div`
   flex: 1 0 0;
   align-self: stretch;
   gap: 16px;
+`;
+
+const ButtonStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 `;
 
 const Logo = styled.img`

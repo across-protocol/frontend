@@ -112,7 +112,8 @@ export type rewardProgramValues = {
   backgroundUrl: string;
   highestPct: number;
   claimableTooltipBody: string;
-  ctaBody?: string;
+  ctaBody?: (chainId: number) => string;
+  enabledChains: ChainId[];
 };
 export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
   "op-rebates": {
@@ -122,9 +123,11 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
     rewardTokenSymbol: "OP",
     backgroundUrl: OPCloudBackground,
     highestPct: 0.95,
-    ctaBody: "Bridge to Optimism and earn on every transaction.",
+    ctaBody: (chainId: number) =>
+      `Bridge to ${getChainInfo(chainId).name} and earn on every transaction.`,
     claimableTooltipBody:
       "OP rewards earned during the month are made claimable after the ~15th of the following month",
+    enabledChains: [ChainId.OPTIMISM, ChainId.MODE, ChainId.BASE],
   },
   "arb-rebates": {
     programName: "Arbitrum Rewards Program",
@@ -133,18 +136,24 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
     rewardTokenSymbol: "ARB",
     backgroundUrl: ARBCloudBackground,
     highestPct: 0.95,
-    ctaBody: "Bridge to Arbitrum and earn on every transaction.",
+    ctaBody: () => "Bridge to Arbitrum and earn on every transaction.",
     claimableTooltipBody:
       "Arbitrum rewards earned during the month are made claimable after the ~15th of the following month",
+    enabledChains: [ChainId.ARBITRUM],
   },
 };
 
-export const chainIdToRewardsProgramName = {
-  [CHAIN_IDs.OPTIMISM]: "op-rebates",
-  [CHAIN_IDs.OPTIMISM_SEPOLIA]: "op-rebates",
-  [CHAIN_IDs.ARBITRUM]: "arb-rebates",
-  [CHAIN_IDs.ARBITRUM_SEPOLIA]: "arb-rebates",
-} as const;
+export const chainIdToRewardsProgramName = Object.entries(
+  rewardPrograms
+).reduce(
+  (acc, [key, { enabledChains }]) => {
+    enabledChains.forEach((chainId) => {
+      acc[chainId] = key as rewardProgramTypes;
+    });
+    return acc;
+  },
+  {} as Record<ChainId, rewardProgramTypes>
+);
 
 // process.env variables
 export const rewardsApiUrl =
