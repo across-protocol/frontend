@@ -39,9 +39,13 @@ async function generateUiAssets() {
     const chainVarName = camelCase(name);
     const chainLogoVarName = camelCase(name + "Logo");
     const chainGrayscaleLogoVarName = camelCase(name + "GrayscaleLogo");
+    const chainLogoSvgVarName = chainLogoVarName + "Svg";
+    const chainGrayscaleLogoSvgVarName = chainGrayscaleLogoVarName + "Svg";
     chainsFileImports.push(`
       import ${chainLogoVarName} from "assets/chain-logos/${chainLogoTargetFileName}";
       import ${chainGrayscaleLogoVarName} from "assets/chain-logos/${chainGrayscaleLogoTargetFileName}";
+      import {ReactComponent as ${chainLogoSvgVarName}} from "assets/chain-logos/${chainLogoTargetFileName}";
+      import {ReactComponent as ${chainGrayscaleLogoSvgVarName}} from "assets/chain-logos/${chainGrayscaleLogoTargetFileName}";
     `);
     chainsFileContent.push(`
       export const ${chainVarName} = {
@@ -50,6 +54,8 @@ async function generateUiAssets() {
         chainId: ${chainId},
         logoURI: ${chainLogoVarName},
         grayscaleLogoURI: ${chainGrayscaleLogoVarName},
+        logoSvg: ${chainLogoSvgVarName},
+        grayscaleLogoSvg: ${chainGrayscaleLogoSvgVarName},
         rpcUrl: "${chainConfig.publicRpcUrl}",
         explorerUrl: "${chainConfig.blockExplorer}",
         constructExplorerLink: (txHash: string) => \`\${${chainVarName}.explorerUrl}/tx/\${txHash}\`,

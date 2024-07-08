@@ -1,6 +1,5 @@
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
-import React, { Suspense } from "react";
 
 import BgBanner from "assets/bg-banners/deposit-banner.svg";
 import { ReactComponent as CheckStarDepositingIcon } from "assets/icons/check-star-ring-opaque-depositing.svg";
@@ -89,9 +88,7 @@ export function DepositStatusUpperCard({
       <TopWrapperAnimationWrapper>
         <AnimatedLogoWrapperFromChain status={status}>
           <AnimatedLogoFromChain status={status}>
-            <GrayscaleLogo
-              grayscaleLogoURI={getChainInfo(fromChainId).grayscaleLogoURI}
-            />
+            {getChainInfo(fromChainId).grayscaleLogoSvg}
           </AnimatedLogoFromChain>
         </AnimatedLogoWrapperFromChain>
         <AnimatedDividerFromChain status={status} />
@@ -107,9 +104,7 @@ export function DepositStatusUpperCard({
         <AnimatedDividerToChain status={status} />
         <AnimatedLogoWrapperToChain status={status}>
           <AnimatedLogoToChain status={status}>
-            <GrayscaleLogo
-              grayscaleLogoURI={getChainInfo(toChainId).grayscaleLogoURI}
-            />
+            {getChainInfo(toChainId).grayscaleLogoSvg}
           </AnimatedLogoToChain>
         </AnimatedLogoWrapperToChain>
       </TopWrapperAnimationWrapper>
@@ -193,17 +188,6 @@ export function DepositStatusUpperCard({
     </Wrapper>
   );
 }
-
-const GrayscaleLogo = (props: { grayscaleLogoURI: string }) => {
-  const Logo = React.lazy(async () => ({
-    default: (await import(props.grayscaleLogoURI)).ReactComponent,
-  }));
-  return (
-    <Suspense fallback={<img src={props.grayscaleLogoURI} />}>
-      <Logo />
-    </Suspense>
-  );
-};
 
 const Wrapper = styled.div`
   display: flex;
