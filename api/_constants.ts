@@ -112,6 +112,9 @@ export const defaultRelayerAddressOverridePerToken: Record<
   },
 };
 
+export const defaultRelayerAddressOverridePerChain: Record<number, string> =
+  JSON.parse(process.env.RELAYER_ADDRESS_OVERRIDE_PER_CHAIN || "{}");
+
 export const defaultRelayerAddressOverride =
   process.env.RELAYER_ADDRESS_OVERRIDE;
 

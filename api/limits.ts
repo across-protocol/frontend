@@ -163,9 +163,9 @@ const handler = async (
       ),
       Promise.all(
         fullRelayers.map((relayer) =>
-          destinationChainId === 1
+          destinationChainId === HUB_POOL_CHAIN_ID
             ? ethers.BigNumber.from("0")
-            : getCachedTokenBalance("1", relayer, l1Token.address)
+            : getCachedTokenBalance(HUB_POOL_CHAIN_ID, relayer, l1Token.address)
         )
       ),
     ]);
