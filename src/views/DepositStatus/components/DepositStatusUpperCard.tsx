@@ -83,12 +83,15 @@ export function DepositStatusUpperCard({
     );
   }
 
+  const GrayscaleLogoFromChain = getChainInfo(fromChainId).grayscaleLogoSvg;
+  const GrayscaleLogoToChain = getChainInfo(toChainId).grayscaleLogoSvg;
+
   return (
     <Wrapper>
       <TopWrapperAnimationWrapper>
         <AnimatedLogoWrapperFromChain status={status}>
           <AnimatedLogoFromChain status={status}>
-            {getChainInfo(fromChainId).grayscaleLogoSvg}
+            <GrayscaleLogoFromChain />
           </AnimatedLogoFromChain>
         </AnimatedLogoWrapperFromChain>
         <AnimatedDividerFromChain status={status} />
@@ -104,7 +107,7 @@ export function DepositStatusUpperCard({
         <AnimatedDividerToChain status={status} />
         <AnimatedLogoWrapperToChain status={status}>
           <AnimatedLogoToChain status={status}>
-            {getChainInfo(toChainId).grayscaleLogoSvg}
+            <GrayscaleLogoToChain />
           </AnimatedLogoToChain>
         </AnimatedLogoWrapperToChain>
       </TopWrapperAnimationWrapper>
