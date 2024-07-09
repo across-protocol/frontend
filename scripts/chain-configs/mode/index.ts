@@ -14,7 +14,24 @@ export default {
   spokePool: getDeployedAddress("SpokePool", chainId),
   chainId,
   publicRpcUrl: "https://mainnet.mode.network",
-  tokens: ["WETH", "ETH", "USDC.e", "USDT", "WBTC"],
+  tokens: [
+    "WETH",
+    "ETH",
+    "USDC.e",
+    "USDT",
+    {
+      symbol: "WBTC",
+      // NOTE: We need to whitelist these chains because the route WBTC Mode <-> Arbitrum
+      // is not enabled by yet. As soon as it is enabled, we can remove this whitelist.
+      chainIds: [
+        CHAIN_IDs.MAINNET,
+        CHAIN_IDs.POLYGON,
+        CHAIN_IDs.ZK_SYNC,
+        CHAIN_IDs.OPTIMISM,
+        CHAIN_IDs.LINEA,
+      ],
+    },
+  ],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;
