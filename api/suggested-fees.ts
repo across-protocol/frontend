@@ -294,6 +294,8 @@ const handler = async (
         : parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: quoteBlockNumber.toString(),
+      exclusiveRelayer: ethers.constants.AddressZero, // Exclusivity is currently disabled.
+      exclusivityDeadline: "0", // Exclusivity is currently disabled.
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
       // Note: v3's new fee structure. Below are the correct values for the new fee structure. The above `*Pct` and `*Total`
       // values are for backwards compatibility which will be removed in the future.
