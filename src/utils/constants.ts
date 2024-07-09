@@ -5,26 +5,8 @@ import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
 
-import ethereumLogo from "assets/ethereum-logo.svg";
-import optimismLogo from "assets/optimism-alt-logo.svg";
-import wethLogo from "assets/weth-logo.svg";
-import arbitrumLogo from "assets/arbitrum-logo.svg";
-import bobaLogo from "assets/boba-logo.svg";
-import polygonLogo from "assets/polygon-logo.svg";
-import zkSyncLogo from "assets/zksync-logo.svg";
-import baseLogo from "assets/base-logo.svg";
-import lineaLogo from "assets/linea-logo.svg";
-import modeLogo from "assets/mode-logo.svg";
-import usdcLogo from "assets/usdc.svg";
-import daiLogo from "assets/dai.svg";
-import wbtcLogo from "assets/wbtc.svg";
-import umaLogo from "assets/uma.svg";
-import acxLogo from "assets/acx.svg";
-import balLogo from "assets/bal.svg";
-import usdtLogo from "assets/usdt-logo.svg";
-import snxLogo from "assets/snx-logo.svg";
-import pooltogetherLogo from "assets/pooltogether-logo.svg";
 import unknownLogo from "assets/icons/question-circle.svg";
+import { ReactComponent as unknownLogoSvg } from "assets/icons/question-circle.svg";
 import OPCloudBackground from "assets/bg-banners/op-cloud-rebate.svg";
 import ARBCloudBackground from "assets/bg-banners/arb-cloud-rebate.svg";
 
@@ -33,34 +15,36 @@ import MainnetRoutes from "data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048b
 import SepoliaRoutes from "data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
 import { Deposit } from "hooks/useDeposits";
 
-export { TOKEN_SYMBOLS_MAP };
+import {
+  ChainId,
+  ChainInfo,
+  ChainInfoList,
+  ChainInfoTable,
+  chainInfoList,
+  chainInfoTable,
+} from "../constants/chains";
+import {
+  TokenInfo,
+  TokenInfoList,
+  orderedTokenLogos,
+} from "../constants/tokens";
+import { ExternalLPTokenList, externalLPsForStaking } from "../constants/pools";
 
-/* Chains and Tokens section */
-export enum ChainId {
-  MAINNET = CHAIN_IDs.MAINNET,
-  OPTIMISM = CHAIN_IDs.OPTIMISM,
-  ARBITRUM = CHAIN_IDs.ARBITRUM,
-  POLYGON = CHAIN_IDs.POLYGON,
-  ZK_SYNC = CHAIN_IDs.ZK_SYNC,
-  BASE = CHAIN_IDs.BASE,
-  LINEA = CHAIN_IDs.LINEA,
-  MODE = CHAIN_IDs.MODE,
-  // testnets
-  SEPOLIA = CHAIN_IDs.SEPOLIA,
-  BASE_SEPOLIA = CHAIN_IDs.BASE_SEPOLIA,
-  OPTIMISM_SEPOLIA = CHAIN_IDs.OPTIMISM_SEPOLIA,
-  ARBITRUM_SEPOLIA = CHAIN_IDs.ARBITRUM_SEPOLIA,
-  MODE_SEPOLIA = CHAIN_IDs.MODE_SEPOLIA,
-  POLYGON_AMOY = CHAIN_IDs.POLYGON_AMOY,
-}
-
-// Maps `ChainId` to an object and inverts the Key/Value
-// pair. Ex) { "mainnet": 1 }
-export const CanonicalChainName = Object.fromEntries(
-  Object.entries(ChainId)
-    .filter((v) => Number.isNaN(Number(v[0])))
-    .map((v) => [v[0].toLowerCase(), Number(v[1])])
-);
+export type {
+  TokenInfo,
+  TokenInfoList,
+  ExternalLPTokenList,
+  ChainInfo,
+  ChainInfoList,
+  ChainInfoTable,
+};
+export {
+  TOKEN_SYMBOLS_MAP,
+  externalLPsForStaking,
+  chainInfoList,
+  chainInfoTable,
+  ChainId,
+};
 
 /* Colors and Media Queries section */
 export const BREAKPOINTS = {
@@ -76,269 +60,11 @@ export const QUERIES = {
   mobileAndDown: `(max-width: ${(BREAKPOINTS.tabletMin - 1) / 16}rem)`,
 };
 
-export type ChainInfo = {
-  name: string;
-  fullName?: string;
-  chainId: ChainId;
-  logoURI: string;
-  rpcUrl?: string;
-  customRpcUrl?: string;
-  explorerUrl: string;
-  constructExplorerLink: (txHash: string) => string;
-  pollingInterval: number;
-  nativeCurrencySymbol: string;
-};
-
-export type ChainInfoList = ChainInfo[];
-export type ChainInfoTable = Record<number, ChainInfo>;
-
 export const defaultBlockPollingInterval =
   Number(process.env.REACT_APP_DEFAULT_BLOCK_POLLING_INTERVAL_S || 15) * 1000;
 export const hubPoolChainId = Number(
   process.env.REACT_APP_HUBPOOL_CHAINID || 1
 );
-
-const defaultConstructExplorerLink =
-  (explorerUrl: string) => (txHash: string) =>
-    `${explorerUrl}/tx/${txHash}`;
-
-export const chainInfoList: ChainInfoList = [
-  {
-    name: "Ethereum",
-    fullName: "Ethereum Mainnet",
-    chainId: ChainId.MAINNET,
-    logoURI: ethereumLogo,
-    explorerUrl: "https://etherscan.io",
-    constructExplorerLink: defaultConstructExplorerLink("https://etherscan.io"),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_1_PROVIDER_URL,
-  },
-  {
-    name: "Arbitrum",
-    fullName: "Arbitrum One",
-    chainId: ChainId.ARBITRUM,
-    logoURI: arbitrumLogo,
-    rpcUrl: "https://arb1.arbitrum.io/rpc",
-    explorerUrl: "https://arbiscan.io",
-    constructExplorerLink: (txHash: string) =>
-      `https://arbiscan.io/tx/${txHash}`,
-    nativeCurrencySymbol: "AETH",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
-  },
-  {
-    name: "Optimism",
-    chainId: ChainId.OPTIMISM,
-    logoURI: optimismLogo,
-    rpcUrl: "https://mainnet.optimism.io",
-    explorerUrl: "https://optimistic.etherscan.io",
-    constructExplorerLink: (txHash: string) =>
-      `https://optimistic.etherscan.io/tx/${txHash}`,
-    nativeCurrencySymbol: "OETH",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_10_PROVIDER_URL,
-  },
-  {
-    name: "Polygon",
-    fullName: "Polygon Network",
-    chainId: ChainId.POLYGON,
-    logoURI: polygonLogo,
-    rpcUrl: "https://rpc.ankr.com/polygon",
-    explorerUrl: "https://polygonscan.com",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://polygonscan.com"
-    ),
-    nativeCurrencySymbol: "MATIC",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
-  },
-  {
-    name: "zkSync",
-    fullName: "zkSync Era",
-    chainId: ChainId.ZK_SYNC,
-    logoURI: zkSyncLogo,
-    rpcUrl: "https://mainnet.era.zksync.io",
-    explorerUrl: "https://explorer.zksync.io",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://explorer.zksync.io"
-    ),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: 10_000,
-    customRpcUrl: process.env.REACT_APP_CHAIN_324_PROVIDER_URL,
-  },
-  {
-    name: "Base",
-    fullName: "Base",
-    chainId: ChainId.BASE,
-    logoURI: baseLogo,
-    rpcUrl: "https://mainnet.base.org",
-    explorerUrl: "https://basescan.org",
-    constructExplorerLink: defaultConstructExplorerLink("https://basescan.org"),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: 10_000,
-    customRpcUrl: process.env.REACT_APP_CHAIN_8453_PROVIDER_URL,
-  },
-  {
-    name: "Linea",
-    fullName: "Linea",
-    chainId: ChainId.LINEA,
-    logoURI: lineaLogo,
-    rpcUrl: "https://rpc.linea.build",
-    explorerUrl: "https://lineascan.build",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://lineascan.build"
-    ),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: 10_000,
-    customRpcUrl: process.env.REACT_APP_CHAIN_59144_PROVIDER_URL,
-  },
-  {
-    name: "Mode",
-    fullName: "Mode",
-    chainId: ChainId.MODE,
-    logoURI: modeLogo,
-    rpcUrl: "https://mainnet.mode.network",
-    explorerUrl: "https://modescan.io",
-    constructExplorerLink: defaultConstructExplorerLink("https://modescan.io"),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: 10_000,
-    customRpcUrl: process.env.REACT_APP_CHAIN_34443_PROVIDER_URL,
-  },
-  // testnets
-  {
-    name: "Sepolia",
-    fullName: "Sepolia",
-    chainId: ChainId.SEPOLIA,
-    logoURI: ethereumLogo,
-    rpcUrl: "https://gateway.tenderly.co/public/sepolia	",
-    explorerUrl: "https://sepolia.etherscan.io/",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://sepolia.etherscan.io/"
-    ),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_11155111_PROVIDER_URL,
-  },
-  {
-    name: "Base Sepolia",
-    fullName: "Base Testnet Sepolia",
-    chainId: ChainId.BASE_SEPOLIA,
-    logoURI: baseLogo,
-    rpcUrl: "https://sepolia.base.org",
-    explorerUrl: "https://base-sepolia.blockscout.com/",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://base-sepolia.blockscout.com/"
-    ),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_84532_PROVIDER_URL,
-  },
-  {
-    name: "Arbitrum Sepolia",
-    fullName: "Arbitrum Testnet Sepolia",
-    chainId: ChainId.ARBITRUM_SEPOLIA,
-    logoURI: arbitrumLogo,
-    rpcUrl: "https://sepolia-rollup.arbitrum.io/rpc",
-    explorerUrl: "https://sepolia.arbiscan.io",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://sepolia.arbiscan.io"
-    ),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_421614_PROVIDER_URL,
-  },
-  {
-    name: "Optimism Sepolia",
-    fullName: "Optimism Testnet Sepolia",
-    chainId: ChainId.OPTIMISM_SEPOLIA,
-    logoURI: optimismLogo,
-    rpcUrl: "https://sepolia.optimism.io",
-    explorerUrl: "https://sepolia-optimism.etherscan.io",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://sepolia-optimism.etherscan.io"
-    ),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_11155420_PROVIDER_URL,
-  },
-  {
-    name: "Mode Sepolia",
-    fullName: "Mode Testnet Sepolia",
-    chainId: ChainId.MODE_SEPOLIA,
-    logoURI: modeLogo,
-    rpcUrl: "https://sepolia.mode.network",
-    explorerUrl: "https://testnet.modescan.io",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://testnet.modescan.io"
-    ),
-    nativeCurrencySymbol: "ETH",
-    pollingInterval: 10_000,
-    customRpcUrl: process.env.REACT_APP_CHAIN_919_PROVIDER_URL,
-  },
-  {
-    name: "Polygon Amoy",
-    fullName: "Polygon Testnet Amoy",
-    chainId: ChainId.POLYGON_AMOY,
-    logoURI: polygonLogo,
-    rpcUrl: "https://rpc-amoy.polygon.technology",
-    explorerUrl: "https://amoy.polygonscan.com",
-    constructExplorerLink: defaultConstructExplorerLink(
-      "https://amoy.polygonscan.com"
-    ),
-    nativeCurrencySymbol: "MATIC",
-    pollingInterval: defaultBlockPollingInterval,
-    customRpcUrl: process.env.REACT_APP_CHAIN_80002_PROVIDER_URL,
-  },
-];
-
-export const chainInfoTable: ChainInfoTable = Object.fromEntries(
-  chainInfoList.map((chain) => {
-    return [chain.chainId, chain];
-  }, [])
-);
-
-export type TokenInfo = {
-  name: string;
-  symbol: string;
-  decimals: number;
-  logoURI: string;
-  logoURIs?: [string, string];
-  // tokens require a mainnet address to do price lookups on coingecko, not used for anything else.
-  mainnetAddress?: string;
-  // optional display symbol for tokens that have a different symbol on the frontend
-  displaySymbol?: string;
-  addresses?: Record<number, string>;
-};
-export type TokenInfoList = TokenInfo[];
-
-export type ExternalLPTokenList = Array<
-  TokenInfo & {
-    provider: string;
-    linkToLP: string;
-  }
->;
-
-export const externalLPsForStaking: Record<number, ExternalLPTokenList> = {
-  [CHAIN_IDs.MAINNET]: [
-    {
-      name: "Balancer 50wstETH-50ACX",
-      symbol: "50wstETH-50ACX",
-      displaySymbol: "50wstETH-50ACX",
-      decimals: 18,
-      mainnetAddress: "0x36Be1E97eA98AB43b4dEBf92742517266F5731a3",
-      logoURI: balLogo,
-      provider: "balancer",
-      linkToLP:
-        "https://app.balancer.fi/#/ethereum/pool/0x36be1e97ea98ab43b4debf92742517266f5731a3000200000000000000000466",
-      logoURIs: [
-        acxLogo,
-        "https://assets.coingecko.com/coins/images/18834/small/wstETH.png?1633565443",
-      ],
-    },
-  ],
-  [CHAIN_IDs.SEPOLIA]: [],
-};
 
 export const bridgedUSDCSymbolsMap = {
   [ChainId.ARBITRUM]: "USDC.e",
@@ -357,30 +83,8 @@ export function isBridgedUsdc(symbol: string) {
   return bridgedUSDCSymbols.includes(symbol);
 }
 
-// Order of this map determines the order of the tokens in the token selector
-export const orderedTokenSymbolLogoMap = {
-  ETH: ethereumLogo,
-  WETH: wethLogo,
-  MATIC: polygonLogo,
-  WMATIC: polygonLogo,
-  USDC: usdcLogo,
-  "USDC.e": usdcLogo,
-  USDbC: usdcLogo,
-  USDT: usdtLogo,
-  DAI: daiLogo,
-  WBTC: wbtcLogo,
-  BAL: balLogo,
-  UMA: umaLogo,
-  ACX: acxLogo,
-  SNX: snxLogo,
-  POOL: pooltogetherLogo,
-  BOBA: bobaLogo,
-  OP: optimismLogo,
-  ARB: arbitrumLogo,
-};
-
 export const tokenList = [
-  ...Object.entries(orderedTokenSymbolLogoMap).flatMap(([symbol, logoURI]) => {
+  ...Object.entries(orderedTokenLogos).flatMap(([symbol, logoURI]) => {
     const tokenInfo =
       TOKEN_SYMBOLS_MAP[symbol as keyof typeof TOKEN_SYMBOLS_MAP];
 
@@ -497,8 +201,8 @@ assert(
   isSupportedChainId(hubPoolChainId),
   "Hubpool chain is not supported: " + hubPoolChainId
 );
-export function isSupportedChainId(chainId: number): chainId is ChainId {
-  return chainId in ChainId;
+export function isSupportedChainId(chainId: number) {
+  return Object.values(CHAIN_IDs).includes(chainId);
 }
 
 export function getChainInfo(chainId: number): ChainInfo {
@@ -513,11 +217,16 @@ export function getChainInfo(chainId: number): ChainInfo {
       fullName: name,
       chainId,
       logoURI: unknownLogo,
+      grayscaleLogoURI: unknownLogo,
+      logoSvg: unknownLogoSvg,
+      grayscaleLogoSvg: unknownLogoSvg,
       explorerUrl: "https://blockscan.com/",
       constructExplorerLink: (txHash: string) =>
         `https://blockscan.com/tx/${txHash}`,
       nativeCurrencySymbol: "ETH",
       pollingInterval: defaultBlockPollingInterval,
+      rpcUrl: "https://rpc.com",
+      customRpcUrl: "https://rpc.com",
     };
   }
 

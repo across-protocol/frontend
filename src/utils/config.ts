@@ -333,29 +333,6 @@ export class ConfigClient {
       constants.isSupportedChainId(chainId) && this.spokeChains.has(chainId)
     );
   };
-  getSupportedCanonicalNameAsChainId = (canonicalName?: string) => {
-    // Returns undefined if the canonicalName is not defined
-    if (!canonicalName) return;
-    // Transform the canonical name to match ChainId key
-    const modifiedCanonicalName = canonicalName.toLowerCase();
-    // Attempt to resolve the chainId and return
-    const resolvedChain = constants.CanonicalChainName[modifiedCanonicalName];
-    return resolvedChain && this.isSupportedChainId(resolvedChain)
-      ? resolvedChain
-      : undefined;
-  };
-  /**
-   * This function converts either a chainId or canonical name into a corresponding chainId.
-   * @param chainIdOrCanonical Either a numeric string, an enumerated canonical name, undefined, or an invalid value.
-   * @returns The chain ID in the valid case. NaN in the invalid case.
-   */
-  resolveChainIdFromNumericOrCanonical = (chainIdOrCanonical?: string) => {
-    const asNumeric = Number(chainIdOrCanonical);
-    return Number.isNaN(asNumeric)
-      ? this.getSupportedCanonicalNameAsChainId(chainIdOrCanonical) ??
-          Number(chainIdOrCanonical)
-      : asNumeric;
-  };
   getTokenList(chainId?: number): TokenList {
     return constants.tokenList.map((token) => {
       return {

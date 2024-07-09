@@ -1,5 +1,5 @@
 import { ethers, providers } from "ethers";
-import { hubPoolChainId, ChainId, infuraId, chainInfoTable } from "./constants";
+import { hubPoolChainId, ChainId, infuraId, getChainInfo } from "./constants";
 
 function getInfuraProviderUrl(chainId: number): string | undefined {
   try {
@@ -11,9 +11,9 @@ function getInfuraProviderUrl(chainId: number): string | undefined {
 
 function getProviderUrl(chainId: number): string {
   const resolvedRpcUrl =
-    chainInfoTable[chainId]?.customRpcUrl ||
+    getChainInfo(chainId)?.customRpcUrl ||
     getInfuraProviderUrl(chainId) ||
-    chainInfoTable[chainId]?.rpcUrl;
+    getChainInfo(chainId)?.rpcUrl;
   if (resolvedRpcUrl) {
     return resolvedRpcUrl;
   } else {

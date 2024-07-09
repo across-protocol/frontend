@@ -1,10 +1,10 @@
-import { CHAIN_IDs } from "@across-protocol/constants";
+import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
 import { utils } from "ethers";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
 
-import { TOKEN_SYMBOLS_MAP } from "../api/_constants";
+import * as chainConfigs from "./chain-configs";
 
 const { getDeployedAddress } = sdkUtils;
 
@@ -13,7 +13,27 @@ type Route =
 type ToChain = Route["toChains"][number];
 type ToToken = ToChain["tokens"][number];
 type SwapToken = ToChain["swapTokens"][number];
-type ValidTokenSymbol = keyof typeof TOKEN_SYMBOLS_MAP;
+type ValidTokenSymbol = string;
+
+const enabledMainnetChainConfigs = [
+  chainConfigs.MAINNET,
+  chainConfigs.OPTIMISM,
+  chainConfigs.POLYGON,
+  chainConfigs.ARBITRUM,
+  chainConfigs.ZK_SYNC,
+  chainConfigs.BASE,
+  chainConfigs.LINEA,
+  chainConfigs.MODE,
+];
+
+const enabledSepoliaChainConfigs = [
+  chainConfigs.SEPOLIA,
+  chainConfigs.BASE_SEPOLIA,
+  chainConfigs.ARBITRUM_SEPOLIA,
+  chainConfigs.OPTIMISM_SEPOLIA,
+  chainConfigs.MODE_SEPOLIA,
+  chainConfigs.POLYGON_AMOY,
+];
 
 const enabledRoutes = {
   [CHAIN_IDs.MAINNET]: {
@@ -61,952 +81,7 @@ const enabledRoutes = {
         // [CHAIN_IDs.BASE]: "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4",
       },
     },
-    routes: [
-      {
-        fromChain: CHAIN_IDs.MAINNET,
-        fromSpokeAddress: getDeployedAddress("SpokePool", CHAIN_IDs.MAINNET),
-        toChains: [
-          {
-            chainId: CHAIN_IDs.OPTIMISM,
-            tokens: [
-              "WETH",
-              "ETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WBTC",
-              "UMA",
-              "DAI",
-              "BAL",
-              "ACX",
-              "USDT",
-              "SNX",
-              "POOL",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.POLYGON,
-            tokens: [
-              "WETH",
-              "ETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WBTC",
-              "UMA",
-              "DAI",
-              "BAL",
-              "ACX",
-              "USDT",
-              "POOL",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.ARBITRUM,
-            tokens: [
-              "WETH",
-              "ETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WBTC",
-              "UMA",
-              "DAI",
-              "BAL",
-              "ACX",
-              "USDT",
-              "POOL",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDT",
-              "WBTC",
-              "DAI",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.BASE,
-            tokens: [
-              "WETH",
-              "ETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
-              "DAI",
-              "BAL",
-              "POOL",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.LINEA,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "DAI",
-              "USDT",
-              "WBTC",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.MODE,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDT",
-              "WBTC",
-            ],
-            swapTokens: [],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.OPTIMISM,
-        fromSpokeAddress: getDeployedAddress("SpokePool", CHAIN_IDs.OPTIMISM),
-        toChains: [
-          {
-            chainId: CHAIN_IDs.MAINNET,
-            tokens: [
-              "WETH",
-              "ETH",
-              "USDC",
-              "WBTC",
-              "UMA",
-              "DAI",
-              "BAL",
-              "ACX",
-              "USDT",
-              "SNX",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.POLYGON,
-            tokens: [
-              "WETH",
-              "ETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WBTC",
-              "UMA",
-              "DAI",
-              "BAL",
-              "ACX",
-              "USDT",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.ARBITRUM,
-            tokens: [
-              "WETH",
-              "ETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WBTC",
-              "UMA",
-              "DAI",
-              "BAL",
-              "ACX",
-              "USDT",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WBTC",
-              "USDT",
-              "DAI",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.BASE,
-            tokens: [
-              "WETH",
-              "ETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
-              "DAI",
-              "BAL",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDbC",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.LINEA,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDT",
-              "DAI",
-              "WBTC",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.MODE,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDT",
-              "WBTC",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.POLYGON,
-        fromSpokeAddress: getDeployedAddress("SpokePool", CHAIN_IDs.POLYGON),
-        toChains: [
-          {
-            chainId: CHAIN_IDs.MAINNET,
-            tokens: [
-              "DAI",
-              "UMA",
-              "WETH",
-              "USDC",
-              "WBTC",
-              "BAL",
-              "ACX",
-              "USDT",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.OPTIMISM,
-            tokens: [
-              "DAI",
-              "UMA",
-              "WETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WBTC",
-              "BAL",
-              "ACX",
-              "USDT",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.ARBITRUM,
-            tokens: [
-              "UMA",
-              "DAI",
-              "WETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WBTC",
-              "BAL",
-              "ACX",
-              "USDT",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: [
-              "WETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WBTC",
-              "USDT",
-              "DAI",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.BASE,
-            tokens: [
-              "DAI",
-              "WETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
-              "BAL",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDbC",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.LINEA,
-            tokens: [
-              "WETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDT",
-              "DAI",
-              "WBTC",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.MODE,
-            tokens: [
-              "WETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDT",
-              "WBTC",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.ARBITRUM,
-        fromSpokeAddress: getDeployedAddress("SpokePool", CHAIN_IDs.ARBITRUM),
-        toChains: [
-          {
-            chainId: CHAIN_IDs.MAINNET,
-            tokens: [
-              "WBTC",
-              "USDC",
-              "WETH",
-              "ETH",
-              "UMA",
-              "DAI",
-              "BAL",
-              "ACX",
-              "USDT",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.OPTIMISM,
-            tokens: [
-              "WBTC",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WETH",
-              "ETH",
-              "UMA",
-              "DAI",
-              "BAL",
-              "ACX",
-              "USDT",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.POLYGON,
-            tokens: [
-              "WBTC",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WETH",
-              "ETH",
-              "UMA",
-              "DAI",
-              "BAL",
-              "ACX",
-              "USDT",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: [
-              "WBTC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WETH",
-              "ETH",
-              "USDT",
-              "DAI",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.BASE,
-            tokens: [
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
-              "WETH",
-              "ETH",
-              "DAI",
-              "BAL",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDbC",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.LINEA,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDT",
-              "DAI",
-              "WBTC",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.MODE,
-            tokens: [
-              "WETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "USDT",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.ZK_SYNC,
-        fromSpokeAddress: getDeployedAddress("SpokePool", CHAIN_IDs.ZK_SYNC),
-        toChains: [
-          {
-            chainId: CHAIN_IDs.MAINNET,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "WBTC",
-              "USDT",
-              "DAI",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.OPTIMISM,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "USDC.e",
-              "WBTC",
-              "USDT",
-              "DAI",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.ARBITRUM,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "USDC.e",
-              "WBTC",
-              "USDT",
-              "DAI",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.POLYGON,
-            tokens: [
-              "WETH",
-              "USDC.e",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "WBTC",
-              "USDT",
-              "DAI",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.BASE,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
-              "DAI",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC.e", "USDT", "DAI", "WBTC"],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.MODE,
-            tokens: ["WETH", "ETH", "USDC.e", "USDT", "WBTC"],
-            swapTokens: [],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.BASE,
-        fromSpokeAddress: getDeployedAddress("SpokePool", CHAIN_IDs.BASE),
-        toChains: [
-          {
-            chainId: CHAIN_IDs.MAINNET,
-            tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.OPTIMISM,
-            tokens: [
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WETH",
-              "ETH",
-              "DAI",
-              "BAL",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.POLYGON,
-            tokens: [
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WETH",
-              "ETH",
-              "DAI",
-              "BAL",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.ARBITRUM,
-            tokens: [
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WETH",
-              "ETH",
-              "DAI",
-              "BAL",
-              "POOL",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: [
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "WETH",
-              "ETH",
-              "DAI",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.LINEA,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-              "DAI",
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.MODE,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.LINEA,
-        fromSpokeAddress: "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
-        toChains: [
-          {
-            chainId: CHAIN_IDs.MAINNET,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "USDT",
-              "DAI",
-              "WBTC",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.OPTIMISM,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "USDC.e",
-              "USDT",
-              "DAI",
-              "WBTC",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.POLYGON,
-            tokens: [
-              "WETH",
-              "ETH",
-              "USDC.e",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "USDT",
-              "DAI",
-              "WBTC",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.ARBITRUM,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "USDC.e",
-              "USDT",
-              "DAI",
-              "WBTC",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["USDC.e", "WETH", "ETH", "DAI"],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.BASE,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
-              "DAI",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.MODE,
-            tokens: ["WETH", "ETH", "USDC.e", "USDT", "WBTC"],
-            swapTokens: [],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.MODE,
-        fromSpokeAddress: "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
-        toChains: [
-          {
-            chainId: CHAIN_IDs.MAINNET,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "USDT",
-              "WBTC",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.OPTIMISM,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "USDC.e",
-              "USDT",
-              "WBTC",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.POLYGON,
-            tokens: [
-              "WETH",
-              "ETH",
-              "USDC.e",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "USDT",
-              "WBTC",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.ARBITRUM,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              "USDC.e",
-              "USDT",
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.ZK_SYNC,
-            tokens: ["WETH", "ETH", "USDC.e"],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.BASE,
-            tokens: [
-              "WETH",
-              "ETH",
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDC" },
-              { inputTokenSymbol: "USDC.e", outputTokenSymbol: "USDbC" },
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.LINEA,
-            tokens: ["WETH", "ETH", "USDC.e", "WBTC"],
-            swapTokens: [],
-          },
-        ],
-      },
-    ],
+    routes: transformChainConfigs(enabledMainnetChainConfigs),
   },
   [CHAIN_IDs.SEPOLIA]: {
     hubPoolChain: CHAIN_IDs.SEPOLIA,
@@ -1033,203 +108,172 @@ const enabledRoutes = {
           "0x17496824Ba574A4e9De80110A91207c4c63e552a", // Mocked
       },
     },
-    routes: [
-      {
-        fromChain: CHAIN_IDs.SEPOLIA,
-        fromSpokeAddress: getDeployedAddress("SpokePool", CHAIN_IDs.SEPOLIA),
-        toChains: [
-          {
-            chainId: CHAIN_IDs.BASE_SEPOLIA,
-            tokens: [
-              "WETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.OPTIMISM_SEPOLIA,
-            tokens: [
-              "WETH",
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-            ],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.ARBITRUM_SEPOLIA,
-            swapTokens: [],
-            tokens: ["WETH"],
-          },
-          {
-            chainId: CHAIN_IDs.MODE_SEPOLIA,
-            tokens: ["WETH"],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.POLYGON_AMOY,
-            tokens: ["WETH", "USDC"],
-            swapTokens: [],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.BASE_SEPOLIA,
-        fromSpokeAddress: "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
-        toChains: [
-          {
-            chainId: CHAIN_IDs.SEPOLIA,
-            tokens: ["WETH", "USDC"],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.OPTIMISM_SEPOLIA,
-            tokens: [
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDC.e" },
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDbC",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC.e",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.MODE_SEPOLIA,
-            tokens: ["WETH"],
-            swapTokens: [],
-          },
-          {
-            chainId: CHAIN_IDs.POLYGON_AMOY,
-            tokens: ["WETH", "USDC"],
-            swapTokens: [],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.OPTIMISM_SEPOLIA,
-        fromSpokeAddress: getDeployedAddress(
-          "SpokePool",
-          CHAIN_IDs.OPTIMISM_SEPOLIA
-        ),
-        toChains: [
-          {
-            chainId: CHAIN_IDs.SEPOLIA,
-            tokens: ["WETH", "USDC"],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.BASE_SEPOLIA,
-            tokens: [
-              "USDC",
-              { inputTokenSymbol: "USDC", outputTokenSymbol: "USDbC" },
-            ],
-            swapTokens: [
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDC",
-              },
-              {
-                swapInputTokenSymbol: "USDC.e",
-                acrossInputTokenSymbol: "USDC",
-                acrossOutputTokenSymbol: "USDbC",
-              },
-            ],
-          },
-          {
-            chainId: CHAIN_IDs.POLYGON_AMOY,
-            tokens: ["WETH", "USDC"],
-            swapTokens: [],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.ARBITRUM_SEPOLIA,
-        fromSpokeAddress: getDeployedAddress(
-          "SpokePool",
-          CHAIN_IDs.ARBITRUM_SEPOLIA
-        ),
-        toChains: [
-          {
-            chainId: CHAIN_IDs.SEPOLIA,
-            swapTokens: [],
-            tokens: ["WETH", "USDC"],
-          },
-          {
-            chainId: CHAIN_IDs.POLYGON_AMOY,
-            tokens: ["WETH", "USDC"],
-            swapTokens: [],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.MODE_SEPOLIA,
-        fromSpokeAddress: "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
-        toChains: [
-          {
-            chainId: CHAIN_IDs.SEPOLIA,
-            swapTokens: [],
-            tokens: ["WETH"],
-          },
-          {
-            chainId: CHAIN_IDs.BASE_SEPOLIA,
-            swapTokens: [],
-            tokens: ["WETH"],
-          },
-        ],
-      },
-      {
-        fromChain: CHAIN_IDs.POLYGON_AMOY,
-        fromSpokeAddress: getDeployedAddress(
-          "SpokePool",
-          CHAIN_IDs.POLYGON_AMOY
-        ),
-        toChains: [
-          {
-            chainId: CHAIN_IDs.SEPOLIA,
-            swapTokens: [],
-            tokens: ["WETH", "USDC"],
-          },
-          {
-            chainId: CHAIN_IDs.OPTIMISM_SEPOLIA,
-            swapTokens: [],
-            tokens: ["WETH", "USDC"],
-          },
-          {
-            chainId: CHAIN_IDs.ARBITRUM_SEPOLIA,
-            swapTokens: [],
-            tokens: ["WETH", "USDC"],
-          },
-          {
-            chainId: CHAIN_IDs.BASE_SEPOLIA,
-            swapTokens: [],
-            tokens: ["WETH", "USDC"],
-          },
-        ],
-      },
-    ],
+    routes: transformChainConfigs(enabledSepoliaChainConfigs),
   },
 } as const;
+
+function transformChainConfigs(
+  enabledChainConfigs: typeof enabledMainnetChainConfigs
+) {
+  const transformedChainConfigs: {
+    fromChain: number;
+    fromSpokeAddress: string;
+    toChains: {
+      chainId: number;
+      tokens: (
+        | string
+        | {
+            inputTokenSymbol: string;
+            outputTokenSymbol: string;
+          }
+      )[];
+      swapTokens: {
+        swapInputTokenSymbol: string;
+        acrossInputTokenSymbol: string;
+        acrossOutputTokenSymbol: string;
+      }[];
+    }[];
+  }[] = [];
+  const enabledChainIds = enabledChainConfigs.map((config) => config.chainId);
+
+  for (const chainConfig of enabledChainConfigs) {
+    const fromChainId = chainConfig.chainId;
+    const fromSpokeAddress = chainConfig.spokePool;
+    const toChainIds = enabledChainIds.filter(
+      (chainId) => chainId !== fromChainId
+    );
+    const toChains: {
+      chainId: number;
+      tokens: (
+        | string
+        | {
+            inputTokenSymbol: string;
+            outputTokenSymbol: string;
+          }
+      )[];
+      swapTokens: {
+        swapInputTokenSymbol: string;
+        acrossInputTokenSymbol: string;
+        acrossOutputTokenSymbol: string;
+      }[];
+    }[] = [];
+
+    for (const toChainId of toChainIds) {
+      const toChainConfig = enabledChainConfigs.find(
+        (config) => config.chainId === toChainId
+      );
+
+      if (!toChainConfig) {
+        throw new Error(`No config found for chain ${toChainId}`);
+      }
+
+      const tokens = chainConfig.tokens.flatMap((token) => {
+        const tokenSymbol = typeof token === "string" ? token : token.symbol;
+
+        // Handle USDC -> USDC.e/USDbC routes
+        if (tokenSymbol === "USDC") {
+          if (toChainConfig.enableCCTP) {
+            return [
+              "USDC",
+              {
+                inputTokenSymbol: "USDC",
+                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
+              },
+            ];
+          } else if (
+            toChainConfig.tokens.includes("USDC.e") ||
+            toChainConfig.tokens.includes("USDbC")
+          ) {
+            return [
+              {
+                inputTokenSymbol: "USDC",
+                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
+              },
+            ];
+          }
+        }
+
+        if (["USDC.e", "USDbC"].includes(tokenSymbol)) {
+          if (toChainConfig.enableCCTP) {
+            return [
+              {
+                inputTokenSymbol: tokenSymbol,
+                outputTokenSymbol: "USDC",
+              },
+              {
+                inputTokenSymbol: tokenSymbol,
+                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
+              },
+            ];
+          } else if (toChainConfig.tokens.includes("USDC")) {
+            return [
+              {
+                inputTokenSymbol: tokenSymbol,
+                outputTokenSymbol: "USDC",
+              },
+            ];
+          }
+        }
+
+        // Handle WETH Polygon
+        if (
+          tokenSymbol === "WETH" &&
+          [CHAIN_IDs.POLYGON, CHAIN_IDs.POLYGON_AMOY].includes(
+            toChainConfig.chainId
+          )
+        ) {
+          return ["WETH", "ETH"];
+        }
+
+        const chainIds =
+          typeof token === "string" ? [toChainId] : token.chainIds;
+
+        const toToken = toChainConfig.tokens.find((token) =>
+          typeof token === "string"
+            ? token === tokenSymbol
+            : token.symbol === tokenSymbol
+        );
+        if (
+          !toToken ||
+          (typeof toToken === "object" &&
+            !toToken.chainIds.includes(fromChainId)) ||
+          !chainIds.includes(toChainId)
+        ) {
+          return [];
+        }
+
+        return tokenSymbol;
+      });
+
+      const toChain = {
+        chainId: toChainId,
+        tokens,
+        swapTokens: chainConfig.swapTokens.filter(
+          ({ acrossInputTokenSymbol, acrossOutputTokenSymbol }) =>
+            tokens.some((token) =>
+              typeof token === "string"
+                ? token === acrossInputTokenSymbol
+                : token.inputTokenSymbol === acrossInputTokenSymbol
+            ) &&
+            tokens.some((token) =>
+              typeof token === "string"
+                ? token === acrossOutputTokenSymbol
+                : token.outputTokenSymbol === acrossOutputTokenSymbol
+            )
+        ),
+      };
+      toChains.push(toChain);
+    }
+
+    transformedChainConfigs.push({
+      fromChain: fromChainId,
+      fromSpokeAddress,
+      toChains,
+    });
+  }
+
+  return transformedChainConfigs;
+}
 
 async function generateRoutes(hubPoolChainId = 1) {
   const config = enabledRoutes[hubPoolChainId];
@@ -1387,7 +431,7 @@ function transformToRoute(
 
 function getTokenBySymbol(
   tokenSymbol: ValidTokenSymbol,
-  chainId: number,
+  chainId: number | string,
   l1ChainId: number
 ) {
   const tokenAddress = TOKEN_SYMBOLS_MAP[tokenSymbol]?.addresses[chainId];
@@ -1416,6 +460,12 @@ function getTokenBySymbol(
 
 function isBridgedUsdc(tokenSymbol: string) {
   return tokenSymbol === "USDC.e" || tokenSymbol === "USDbC";
+}
+
+function getBridgedUsdcSymbol(chainId: number) {
+  return [CHAIN_IDs.BASE, CHAIN_IDs.BASE_SEPOLIA].includes(chainId)
+    ? "USDbC"
+    : "USDC.e";
 }
 
 generateRoutes(Number(process.argv[2]));
