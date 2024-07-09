@@ -1,12 +1,7 @@
 import { BigNumber } from "ethers";
 import { useQuery } from "react-query";
 
-import {
-  defaultRefetchInterval,
-  getConfig,
-  swapQuoteQueryKey,
-  SwapQuoteQueryKeyParams,
-} from "utils";
+import { getConfig, swapQuoteQueryKey, SwapQuoteQueryKeyParams } from "utils";
 import getApiEndpoint from "utils/serverless-api";
 
 const config = getConfig();
@@ -69,7 +64,7 @@ export function useSwapQuoteQuery(params: SwapQuoteQueryKeyParams) {
     },
     {
       enabled: !!params.swapTokenSymbol,
-      refetchInterval: defaultRefetchInterval,
+      refetchInterval: 5_000,
     }
   );
 }

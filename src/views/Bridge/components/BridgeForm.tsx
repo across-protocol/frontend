@@ -1,10 +1,10 @@
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 import styled from "@emotion/styled";
-import { Clock } from "react-feather";
+import { Clock, Info } from "react-feather";
 
 import ExternalCardWrapper from "components/CardWrapper";
 import { PrimaryButton, SecondaryButton } from "components/Button";
-import { Text } from "components";
+import { Alert, Text } from "components";
 import { InputErrorText } from "components/AmountInput";
 
 import QuickSwap from "./QuickSwap";
@@ -21,17 +21,20 @@ import {
   QUERIESV2,
   chainIdToRewardsProgramName,
   formatUnitsWithMaxFractions,
+  formatWeiPct,
 } from "utils";
 import { VoidHandler } from "utils/types";
 
 import {
   AmountInputError,
   SelectedRoute,
+  calcSwapPriceImpact,
   getReceiveTokenSymbol,
 } from "../utils";
 import { ToAccount } from "../hooks/useToAccount";
 import { BridgeLimits, useConnection } from "hooks";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
+import { Tooltip } from "components/Tooltip";
 
 export type BridgeFormProps = {
   selectedRoute: SelectedRoute;
@@ -76,6 +79,10 @@ const validationErrorTextMap = {
     "The amount you are trying to bridge is too low.",
 };
 
+// If swap price impact is lower than this threshold, show a warning
+// Should be a negative percentage, e.g. -0.1 for -10%
+const negativePriceImpactWarningThreshold = -0.01;
+
 const BridgeForm = ({
   selectedRoute,
   parsedAmountInput,
@@ -118,9 +125,29 @@ const BridgeForm = ({
     Boolean(toAccount?.isContract)
   );
 
+  const swapPriceImpact =
+    selectedRoute.type === "swap" &&
+    parsedAmountInput &&
+    swapQuote?.minExpectedInputTokenAmount
+      ? calcSwapPriceImpact(
+          parsedAmountInput,
+          swapQuote.minExpectedInputTokenAmount
+        )
+      : BigNumber.from(0);
+  const showPriceImpactWarning =
+    !isQuoteLoading &&
+    utils
+      .parseEther(String(negativePriceImpactWarningThreshold))
+      .gt(swapPriceImpact);
+
   return (
     <CardWrapper>
-      {programName && <RewardsProgramCTA program={programName} />}
+      {programName && (
+        <RewardsProgramCTA
+          toChain={selectedRoute.toChain}
+          program={programName}
+        />
+      )}
       <RowWrapper>
         <RowLabelWrapper>
           <Text size="md" color="grey-400">
@@ -212,6 +239,34 @@ const BridgeForm = ({
           />
         </RowWrapper>
       )}
+      {showPriceImpactWarning && (
+        <Tooltip
+          tooltipId="price-impact-warning"
+          anchorWidth="100%"
+          maxWidth={384}
+          placement="bottom-end"
+          body={
+            <PriceImpactTooltipBody>
+              <div>
+                <Info color="#f96c6c" />
+              </div>
+              <Text size="sm" color="light-300">
+                This bridge transaction requires you to perform a swap on the
+                origin chain. Depending on the current liquidity in the pool
+                there may be a large difference between the input and output
+                amount.
+              </Text>
+            </PriceImpactTooltipBody>
+          }
+        >
+          <Alert status="danger" alignIcon="center">
+            <PriceImpactTextContainer>
+              <Text color="white">Price impact warning</Text>
+              <Text color="red">{formatWeiPct(swapPriceImpact, 5)}%</Text>
+            </PriceImpactTextContainer>
+          </Alert>
+        </Tooltip>
+      )}
       <FeesCollapsible
         isQuoteLoading={isQuoteLoading}
         fromChainId={selectedRoute.fromChain}
@@ -233,6 +288,8 @@ const BridgeForm = ({
         onSetNewSlippage={onSetNewSlippage}
         currentSwapSlippage={swapSlippage}
         validationError={validationError}
+        showPriceImpactWarning={showPriceImpactWarning}
+        swapPriceImpact={swapPriceImpact}
       />
       {isWrongChain ? (
         <StyledSecondaryButton onClick={onClickChainSwitch}>
@@ -351,4 +408,22 @@ const Button = styled(PrimaryButton)`
 
 const StyledSecondaryButton = styled(SecondaryButton)`
   width: 100%;
+`;
+
+const PriceImpactTextContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
+const PriceImpactTooltipBody = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+
+  svg {
+    margin-top: 4px;
+    height: 16px;
+    width: 16px;
+  }
 `;

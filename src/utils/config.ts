@@ -199,6 +199,18 @@ export class ConfigClient {
       process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_CHAIN_ID || "10"
     );
   }
+  getArbRewardsMerkleDistributorAddress(): string {
+    return (
+      process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_ADDRESS ||
+      constants.AddressZero // FIXME: will need to be modified when Arb rewards come online to be claimed.
+    );
+  }
+  getArbRewardsMerkleDistributorChainId(): number {
+    return parseInt(
+      process.env.REACT_APP_OP_REWARDS_MERKLE_DISTRIBUTOR_CHAIN_ID ||
+        constants.ChainId.ARBITRUM.toString()
+    );
+  }
   getAcrossTokenAddress(): string {
     return (
       process.env.REACT_APP_ACROSS_TOKEN_ADDRESS ||
@@ -239,15 +251,15 @@ export class ConfigClient {
     signer?: Signer
   ): AcrossMerkleDistributor {
     let address =
-      rewardsType === "referrals"
-        ? this.getMerkleDistributorAddress()
+      rewardsType === "arb-rebates"
+        ? this.getArbRewardsMerkleDistributorAddress()
         : this.getOpRewardsMerkleDistributorAddress();
 
     let provider =
       signer ??
       providerUtils.getProvider(
-        rewardsType === "referrals"
-          ? this.getHubPoolChainId()
+        rewardsType === "arb-rebates"
+          ? this.getArbRewardsMerkleDistributorChainId()
           : this.getOpRewardsMerkleDistributorChainId()
       );
 
@@ -320,29 +332,6 @@ export class ConfigClient {
     return (
       constants.isSupportedChainId(chainId) && this.spokeChains.has(chainId)
     );
-  };
-  getSupportedCanonicalNameAsChainId = (canonicalName?: string) => {
-    // Returns undefined if the canonicalName is not defined
-    if (!canonicalName) return;
-    // Transform the canonical name to match ChainId key
-    const modifiedCanonicalName = canonicalName.toLowerCase();
-    // Attempt to resolve the chainId and return
-    const resolvedChain = constants.CanonicalChainName[modifiedCanonicalName];
-    return resolvedChain && this.isSupportedChainId(resolvedChain)
-      ? resolvedChain
-      : undefined;
-  };
-  /**
-   * This function converts either a chainId or canonical name into a corresponding chainId.
-   * @param chainIdOrCanonical Either a numeric string, an enumerated canonical name, undefined, or an invalid value.
-   * @returns The chain ID in the valid case. NaN in the invalid case.
-   */
-  resolveChainIdFromNumericOrCanonical = (chainIdOrCanonical?: string) => {
-    const asNumeric = Number(chainIdOrCanonical);
-    return Number.isNaN(asNumeric)
-      ? this.getSupportedCanonicalNameAsChainId(chainIdOrCanonical) ??
-          Number(chainIdOrCanonical)
-      : asNumeric;
   };
   getTokenList(chainId?: number): TokenList {
     return constants.tokenList.map((token) => {

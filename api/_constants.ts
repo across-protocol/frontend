@@ -112,6 +112,9 @@ export const defaultRelayerAddressOverridePerToken: Record<
   },
 };
 
+export const defaultRelayerAddressOverridePerChain: Record<number, string> =
+  JSON.parse(process.env.RELAYER_ADDRESS_OVERRIDE_PER_CHAIN || "{}");
+
 export const defaultRelayerAddressOverride =
   process.env.RELAYER_ADDRESS_OVERRIDE;
 
@@ -180,3 +183,7 @@ export const DEFAULT_SIMULATED_RECIPIENT_ADDRESS =
   "0xBb23Cd0210F878Ea4CcA50e9dC307fb0Ed65Cf6B";
 
 export const DOMAIN_CALLDATA_DELIMITER = "0x1dc0de";
+
+export const DEFAULT_LITE_CHAIN_USD_MAX_BALANCE = "250000";
+
+export const DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT = "25000";

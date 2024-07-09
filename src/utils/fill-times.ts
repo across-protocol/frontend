@@ -19,7 +19,20 @@ const fillTimeOverrides: {
     destination_chain: string;
     fill_time_seconds: number;
   }[];
-} = {};
+} = {
+  SNX: [
+    {
+      origin_chain: "ethereum",
+      destination_chain: "optimism",
+      fill_time_seconds: 9_000, // 2.5 hours
+    },
+    {
+      origin_chain: "optimism",
+      destination_chain: "ethereum",
+      fill_time_seconds: 9_000, // 2.5 hours
+    },
+  ],
+};
 
 export function getFastFillTimeByRoute(
   fromChainId: number,

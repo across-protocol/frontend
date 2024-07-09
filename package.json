@@ -4,9 +4,9 @@
   "private": true,
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "@across-protocol/constants": "^3.1.3",
-    "@across-protocol/contracts": "^3.0.1",
-    "@across-protocol/sdk": "^3.1.6",
+    "@across-protocol/constants": "^3.1.5",
+    "@across-protocol/contracts": "^3.0.4",
+    "@across-protocol/sdk": "^3.1.10",
     "@amplitude/analytics-browser": "^2.3.5",
     "@balancer-labs/sdk": "1.1.6-beta.16",
     "@emotion/react": "^11.4.1",
@@ -78,7 +78,9 @@
     "postinstall": "patch-package",
     "generate:routes": "tsx scripts/generate-routes.ts",
     "generate:routes:e2e": "tsx scripts/generate-e2e-test-routes.ts",
-    "generate:routes:mainnet": "yarn generate:routes 1"
+    "generate:routes:mainnet": "yarn generate:routes 1",
+    "generate:chain-config": "tsx scripts/generate-chain-config.ts",
+    "generate:ui-assets": "tsx scripts/generate-ui-assets.ts"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": [

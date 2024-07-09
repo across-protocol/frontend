@@ -120,7 +120,9 @@ export function DepositStatusLowerCard({
         l1TokenAddress={baseToken.mainnetAddress!}
         bridgeTokenSymbol={inputTokenSymbol}
       />
-      {programName && <RewardsProgramCTA program={programName} />}
+      {programName && (
+        <RewardsProgramCTA toChain={toChainId} program={programName} />
+      )}
       {fromBridgePagePayload && (
         <>
           <Divider />

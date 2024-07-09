@@ -28,20 +28,23 @@ import {
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { VercelResponse } from "@vercel/node";
 import {
+  BLOCK_TAG_LAG,
   CHAIN_IDs,
-  MULTICALL3_ADDRESS,
+  DEFAULT_LITE_CHAIN_USD_MAX_BALANCE,
+  DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT,
   DEFI_LLAMA_POOL_LOOKUP,
+  DOMAIN_CALLDATA_DELIMITER,
   EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
+  MULTICALL3_ADDRESS,
   SECONDS_PER_YEAR,
   TOKEN_SYMBOLS_MAP,
-  maxRelayFeePct,
-  relayerFeeCapitalCostConfig,
-  BLOCK_TAG_LAG,
   defaultRelayerAddressOverride,
   defaultRelayerAddressOverridePerToken,
+  defaultRelayerAddressOverridePerChain,
   disabledL1Tokens,
-  DOMAIN_CALLDATA_DELIMITER,
   graphAPIKey,
+  maxRelayFeePct,
+  relayerFeeCapitalCostConfig,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
 
@@ -514,7 +517,7 @@ export const getRelayerFeeCalculator = (
     destinationChainId,
     getProvider(destinationChainId),
     undefined,
-    overrides.spokePoolAddress,
+    overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
     overrides.relayerAddress,
     REACT_APP_COINGECKO_PRO_API_KEY,
     getLogger(),
@@ -692,10 +695,6 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
-    case CHAIN_IDs.MODE_SEPOLIA:
-      return "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b";
-    case CHAIN_IDs.MODE:
-      return "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96s";
     default:
       return sdk.utils.getDeployedAddress("SpokePool", chainId);
   }
@@ -1441,6 +1440,7 @@ export function getDefaultRelayerAddress(
     return overrideForToken.relayer;
   } else {
     return (
+      defaultRelayerAddressOverridePerChain[destinationChainId] ||
       defaultRelayerAddressOverride ||
       sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS
     );
@@ -1510,4 +1510,22 @@ export function getLimitsBufferMultiplier(symbol: string) {
   );
   const multiplierCap = ethers.utils.parseEther("1");
   return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
+}
+
+export function getLiteChainMaxBalanceUsd(chainId: number, symbol: string) {
+  const envVarBase = "LITE_CHAIN_USD_MAX_BALANCE";
+  return (
+    process.env[`${envVarBase}_${chainId}_${symbol}`] ??
+    process.env[`${envVarBase}_${chainId}`] ??
+    DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
+  );
+}
+
+export function getLiteChainMaxDepositUsd(chainId: number, symbol: string) {
+  const envVarBase = "LITE_CHAIN_USD_MAX_DEPOSIT";
+  return (
+    process.env[`${envVarBase}_${chainId}_${symbol}`] ??
+    process.env[`${envVarBase}_${chainId}`] ??
+    DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
+  );
 }

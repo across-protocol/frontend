@@ -13,3 +13,11 @@ export type PoolStateOfUser = {
   totalDeposited: string;
   feesEarned: string;
 };
+
+export type TokenInfo = {
+  symbol: string;
+  address: string;
+  decimals: number;
+  name: string;
+  addresses: Record<number, string>;
+};

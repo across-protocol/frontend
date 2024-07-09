@@ -22,10 +22,7 @@ export function useGenericRewardClaimCard(program: rewardProgramTypes) {
     token: getToken(rewardPrograms[program].rewardTokenSymbol),
   };
   const { summary } = useRewardSummary(program, account);
-  const rewardsAmount =
-    summary.program === "referrals"
-      ? summary.rewardsAmount
-      : summary.unclaimedRewards;
+  const rewardsAmount = summary.unclaimedRewards;
   const unclaimedAmount = unclaimedReferralData?.claimableAmount;
 
   const formatUnitsWithMaxFractions = formatUnitsWithMaxFractionsFnBuilder(
