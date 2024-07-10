@@ -485,6 +485,23 @@ components:
           description: >
             The contract address of the origin SpokePool.
           example: "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A"
+        exclusiveRelayer:
+          type: string
+          description: >
+            The relayer that is suggested to be set as the exclusive relayer
+            for in the depositV3 call for the fastest fill. Note: when set
+            to "0x0000000000000000000000000000000000000000", relayer exclusivity
+            will be disabled. This value is returned in cases where using an
+            exclusive relayer is not recommended.
+          example: "0x428AB2BA90Eba0a4Be7aF34C9Ac451ab061AC010"
+        exclusivityDeadline:
+          type: string
+          description: >
+            The suggested exclusivity period (in seconds) the exclusive relayer should be given
+            to fill before other relayers are allowed to take the fill. Note: when set
+            to "0", relayer exclusivity will be disabled. This value is returned in cases
+            where using an exclusive relayer is not reccomended.
+          example: "10"
     TransferLimits:
       type: object
       properties:
