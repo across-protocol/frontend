@@ -340,7 +340,7 @@ const EstimatedTable = ({
             </Text>
             <Tooltip
               title={`${rewardDisplaySymbol} Referral Reward`}
-              body={`Estimate of ${rewardDisplaySymbol} earned on this transfer from the ${rewardDisplaySymbol} rebate program.`}
+              body={`Estimate of ${rewardDisplaySymbol} earned from this transfer. Final reward is calculated based on prior day ${rewardDisplaySymbol} price.`}
               placement="bottom-start"
             >
               <InfoIconWrapper>
