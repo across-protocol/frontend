@@ -97,6 +97,9 @@ const defaultRelayerFeeCapitalCostConfig: {
 defaultRelayerFeeCapitalCostConfig["USDC.e"] = {
   ...defaultRelayerFeeCapitalCostConfig["USDC"],
 };
+defaultRelayerFeeCapitalCostConfig["USDB"] = {
+  ...defaultRelayerFeeCapitalCostConfig["DAI"],
+};
 
 export const coinGeckoAssetPlatformLookup: Record<string, string> = {
   "0x4200000000000000000000000000000000000042": "optimistic-ethereum",
