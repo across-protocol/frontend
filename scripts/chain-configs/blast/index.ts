@@ -1,4 +1,7 @@
 import { CHAIN_IDs, PUBLIC_NETWORKS } from "@across-protocol/constants";
+import { utils as sdkUtils } from "@across-protocol/sdk";
+const { getDeployedAddress } = sdkUtils;
+
 import { ChainConfig } from "../types";
 
 const chainId = CHAIN_IDs.BLAST;
@@ -8,7 +11,7 @@ export default {
   ...chainInfoBase,
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
-  spokePool: "0x2D509190Ed0172ba588407D4c2df918F955Cc6E1",
+  spokePool: getDeployedAddress("SpokePool", chainId),
   chainId,
   publicRpcUrl: "https://rpc.blast.io",
   blockTimeSeconds: 2,
