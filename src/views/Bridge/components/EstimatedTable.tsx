@@ -420,6 +420,8 @@ export function TotalReceive({
     inputToken.symbol === outputToken.symbol ||
     inputToken.symbol === "USDC" ||
     isBridgedUsdc(inputToken.symbol) ||
+    // Handle Blast USDB <-> DAI equivalency
+    inputToken.symbol === "DAI" ||
     inputToken.symbol === "USDB"
   ) {
     return (
