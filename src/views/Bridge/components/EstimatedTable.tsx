@@ -419,7 +419,8 @@ export function TotalReceive({
   if (
     inputToken.symbol === outputToken.symbol ||
     inputToken.symbol === "USDC" ||
-    isBridgedUsdc(inputToken.symbol)
+    isBridgedUsdc(inputToken.symbol) ||
+    inputToken.symbol === "USDB"
   ) {
     return (
       <>
