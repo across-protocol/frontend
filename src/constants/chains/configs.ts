@@ -165,7 +165,7 @@ export const blast = {
   grayscaleLogoURI: blastGrayscaleLogo,
   logoSvg: blastLogoSvg,
   grayscaleLogoSvg: blastGrayscaleLogoSvg,
-  rpcUrl: "https://blast.din.dev/rpc",
+  rpcUrl: "https://rpc.blast.io",
   explorerUrl: "https://blastscan.io",
   constructExplorerLink: (txHash: string) =>
     `${blast.explorerUrl}/tx/${txHash}`,

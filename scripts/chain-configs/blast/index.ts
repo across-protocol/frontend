@@ -10,7 +10,7 @@ export default {
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: "0x2D509190Ed0172ba588407D4c2df918F955Cc6E1",
   chainId,
-  publicRpcUrl: "https://blast.din.dev/rpc",
+  publicRpcUrl: "https://rpc.blast.io",
   blockTimeSeconds: 2,
   tokens: ["WETH", "ETH", "USDB", "WBTC"],
   enableCCTP: false,
