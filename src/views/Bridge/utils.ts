@@ -42,6 +42,8 @@ const swapRoutes = config.getSwapRoutes();
 const interchangeableTokenPairs: Record<string, string[]> = {
   "USDC.e": ["USDbC"],
   USDbC: ["USDC.e"],
+  DAI: ["USDB"],
+  USDB: ["DAI"],
   ETH: ["WETH"],
   WETH: ["ETH"],
 };
