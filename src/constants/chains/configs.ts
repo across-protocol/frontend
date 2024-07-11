@@ -20,6 +20,16 @@ import baseSepoliaGrayscaleLogo from "assets/chain-logos/base-sepolia-grayscale.
 import { ReactComponent as baseSepoliaLogoSvg } from "assets/chain-logos/base-sepolia.svg";
 import { ReactComponent as baseSepoliaGrayscaleLogoSvg } from "assets/chain-logos/base-sepolia-grayscale.svg";
 
+import blastLogo from "assets/chain-logos/blast.svg";
+import blastGrayscaleLogo from "assets/chain-logos/blast-grayscale.svg";
+import { ReactComponent as blastLogoSvg } from "assets/chain-logos/blast.svg";
+import { ReactComponent as blastGrayscaleLogoSvg } from "assets/chain-logos/blast-grayscale.svg";
+
+import blastSepoliaLogo from "assets/chain-logos/blast-sepolia.svg";
+import blastSepoliaGrayscaleLogo from "assets/chain-logos/blast-sepolia-grayscale.svg";
+import { ReactComponent as blastSepoliaLogoSvg } from "assets/chain-logos/blast-sepolia.svg";
+import { ReactComponent as blastSepoliaGrayscaleLogoSvg } from "assets/chain-logos/blast-sepolia-grayscale.svg";
+
 import lineaLogo from "assets/chain-logos/linea.svg";
 import lineaGrayscaleLogo from "assets/chain-logos/linea-grayscale.svg";
 import { ReactComponent as lineaLogoSvg } from "assets/chain-logos/linea.svg";
@@ -145,6 +155,40 @@ export const baseSepolia = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_84532_PROVIDER_URL,
   pollingInterval: 15000,
+};
+
+export const blast = {
+  name: "Blast",
+  fullName: "Blast",
+  chainId: 81457,
+  logoURI: blastLogo,
+  grayscaleLogoURI: blastGrayscaleLogo,
+  logoSvg: blastLogoSvg,
+  grayscaleLogoSvg: blastGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.blast.io",
+  explorerUrl: "https://blastscan.io",
+  constructExplorerLink: (txHash: string) =>
+    `${blast.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_81457_PROVIDER_URL,
+  pollingInterval: 2,
+};
+
+export const blastSepolia = {
+  name: "Blast Sepolia",
+  fullName: "Blast sepolia",
+  chainId: 168587773,
+  logoURI: blastSepoliaLogo,
+  grayscaleLogoURI: blastSepoliaGrayscaleLogo,
+  logoSvg: blastSepoliaLogoSvg,
+  grayscaleLogoSvg: blastSepoliaGrayscaleLogoSvg,
+  rpcUrl: "https://sepolia.blast.io",
+  explorerUrl: "https://sepolia.blastscan.io",
+  constructExplorerLink: (txHash: string) =>
+    `${blastSepolia.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_168587773_PROVIDER_URL,
+  pollingInterval: 2,
 };
 
 export const linea = {
@@ -354,6 +398,8 @@ export const chainConfigs = [
   arbitrumSepolia,
   base,
   baseSepolia,
+  blast,
+  blastSepolia,
   linea,
   lisk,
   liskSepolia,

@@ -32,6 +32,8 @@ const Container = styled.div<{ borderColor?: BorderColor }>`
   svg {
     border: 2px solid ${({ borderColor }) => COLORS[borderColor || "black-800"]};
     border-radius: 50%;
+    background-color: ${({ borderColor }) =>
+      COLORS[borderColor || "black-800"]};
   }
 `;
 

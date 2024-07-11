@@ -24,6 +24,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.BASE,
   chainConfigs.LINEA,
   chainConfigs.MODE,
+  chainConfigs.BLAST,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -33,6 +34,7 @@ const enabledSepoliaChainConfigs = [
   chainConfigs.OPTIMISM_SEPOLIA,
   chainConfigs.MODE_SEPOLIA,
   chainConfigs.POLYGON_AMOY,
+  chainConfigs.BLAST_SEPOLIA,
 ];
 
 const enabledRoutes = {
@@ -65,6 +67,7 @@ const enabledRoutes = {
         CHAIN_IDs.ARBITRUM,
         CHAIN_IDs.LINEA,
         CHAIN_IDs.MODE,
+        CHAIN_IDs.BLAST,
       ],
     },
     swapAndBridgeAddresses: {
@@ -213,6 +216,24 @@ function transformChainConfigs(
               },
             ];
           }
+        }
+
+        // Handle USDB -> DAI
+        if (tokenSymbol === "USDB" && toChainConfig.tokens.includes("DAI")) {
+          return [
+            {
+              inputTokenSymbol: "USDB",
+              outputTokenSymbol: "DAI",
+            },
+          ];
+        }
+        if (tokenSymbol === "DAI" && toChainConfig.tokens.includes("USDB")) {
+          return [
+            {
+              inputTokenSymbol: "DAI",
+              outputTokenSymbol: "USDB",
+            },
+          ];
         }
 
         // Handle WETH Polygon

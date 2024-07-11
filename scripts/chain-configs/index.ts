@@ -2,6 +2,8 @@ export { default as ARBITRUM } from "./arbitrum";
 export { default as ARBITRUM_SEPOLIA } from "./arbitrum-sepolia";
 export { default as BASE } from "./base";
 export { default as BASE_SEPOLIA } from "./base-sepolia";
+export { default as BLAST } from "./blast";
+export { default as BLAST_SEPOLIA } from "./blast-sepolia";
 export { default as LINEA } from "./linea";
 export { default as LISK } from "./lisk";
 export { default as LISK_SEPOLIA } from "./lisk-sepolia";
