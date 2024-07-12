@@ -249,7 +249,9 @@ const handler = async (
       .div(sdk.utils.fixedPointAdjustment);
 
     const overrideMaxDepositForOrigin =
-      maxDepositForOriginChain[computedOriginChainId]?.[l1Token.symbol];
+      maxDepositForOriginChain[computedOriginChainId.toString()]?.[
+        l1Token.symbol
+      ];
 
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
