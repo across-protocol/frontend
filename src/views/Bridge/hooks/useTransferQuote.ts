@@ -109,8 +109,8 @@ export function useTransferQuote(
       const estimatedTime = getConfirmationDepositTime(
         amountToBridgeAfterSwap,
         limitsQuery.limits,
-        selectedRoute.toChain,
         selectedRoute.fromChain,
+        selectedRoute.toChain,
         selectedRoute.fromTokenSymbol
       );
       const quoteForAnalytics = generateTransferQuote(

@@ -5,20 +5,20 @@ import { BigNumber } from "ethers";
 import { Text, LoadingSkeleton } from "components";
 import { ReactComponent as ChevronDown } from "assets/icons/chevron-down.svg";
 import { ReactComponent as _SwapIcon } from "assets/icons/swap.svg";
-import { QUERIESV2, TokenInfo } from "utils";
+import { QUERIESV2, TokenInfo, getConfirmationDepositTime } from "utils";
 
 import EstimatedTable, { TotalReceive } from "./EstimatedTable";
 import { useEstimatedRewards } from "../hooks/useEstimatedRewards";
 import TokenFee from "./TokenFee";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { AmountInputError, calcFeesForEstimatedTable } from "../utils";
+import { BridgeLimitInterface } from "utils/serverless-api/types";
 
 export type Props = {
   isQuoteLoading: boolean;
   fromChainId: number;
   toChainId: number;
   isSwap: boolean;
-  estimatedTime?: string;
   gasFee?: BigNumber;
   capitalFee?: BigNumber;
   lpFee?: BigNumber;
@@ -30,6 +30,7 @@ export type Props = {
   currentSwapSlippage?: number;
   onSetNewSlippage?: (slippage: number) => void;
   validationError?: AmountInputError;
+  quotedLimits?: BridgeLimitInterface;
   showPriceImpactWarning?: boolean;
   swapPriceImpact?: BigNumber;
 };
@@ -52,6 +53,17 @@ export function FeesCollapsible(props: Props) {
 
   const doesAmountExceedMaxDeposit =
     props.validationError === AmountInputError.INSUFFICIENT_LIQUIDITY;
+
+  const estimatedTime =
+    props.quotedLimits && outputAmount && !doesAmountExceedMaxDeposit
+      ? getConfirmationDepositTime(
+          outputAmount,
+          props.quotedLimits,
+          props.fromChainId,
+          props.toChainId,
+          props.outputToken.symbol
+        ).formattedString
+      : "-";
 
   if (!isExpanded) {
     return (
@@ -89,10 +101,10 @@ export function FeesCollapsible(props: Props) {
                       />
                     </>
                   )}
-                  {props.isSwap ? null : props.estimatedTime ? (
+                  {props.isSwap ? null : estimatedTime ? (
                     <>
                       <Text color="grey-400"> in </Text>
-                      <Text color="light-200">{props.estimatedTime}</Text>
+                      <Text color="light-200">{estimatedTime}</Text>
                     </>
                   ) : null}
                 </>

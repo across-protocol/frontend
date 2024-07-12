@@ -272,7 +272,7 @@ const BridgeForm = ({
         fromChainId={selectedRoute.fromChain}
         toChainId={selectedRoute.toChain}
         isSwap={selectedRoute.type === "swap"}
-        estimatedTime={estimatedTimeString}
+        quotedLimits={limits}
         gasFee={fees?.relayerGasFee.total}
         capitalFee={fees?.relayerCapitalFee.total}
         lpFee={fees?.lpFee.total}

@@ -26,6 +26,7 @@ import { TransferQuote } from "./useTransferQuote";
 import { SelectedRoute, shouldUseDepositV3 } from "../utils";
 import useReferrer from "hooks/useReferrer";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
+import { BridgeLimitInterface } from "utils/serverless-api/types";
 
 const config = getConfig();
 
@@ -40,6 +41,7 @@ export type FromBridgePagePayload = {
   };
   selectedRoute: SelectedRoute;
   quote: GetBridgeFeesResult;
+  quotedLimits: BridgeLimitInterface;
   quoteForAnalytics: TransferQuoteReceivedProperties;
   depositArgs: DepositArgs;
 };
@@ -67,6 +69,7 @@ export function useBridgeAction(
     );
     const frozenSwapQuote = cloneDeep(usedTransferQuote?.quotedSwap);
     const frozenFeeQuote = cloneDeep(usedTransferQuote?.quotedFees);
+    const frozenLimits = cloneDeep(usedTransferQuote?.quotedLimits);
     const frozenTokenPrice = cloneDeep(usedTransferQuote?.quotePriceUSD);
     const frozenAccount = cloneDeep(account);
     const frozenRoute = cloneDeep(selectedRoute);
@@ -80,6 +83,7 @@ export function useBridgeAction(
       !frozenQuoteForAnalytics ||
       !frozenInitialQuoteTime ||
       !frozenTokenPrice ||
+      !frozenLimits ||
       // If swap route, we need also the swap quote
       (isSwapRoute && !frozenSwapQuote)
     ) {
@@ -197,6 +201,7 @@ export function useBridgeAction(
         : undefined,
       selectedRoute: frozenRoute,
       quote: frozenFeeQuote,
+      quotedLimits: frozenLimits,
       quoteForAnalytics: frozenQuoteForAnalytics,
       depositArgs: frozenDepositArgs,
       tokenPrice: frozenTokenPrice.toString(),

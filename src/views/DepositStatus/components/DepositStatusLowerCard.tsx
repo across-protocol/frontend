@@ -38,8 +38,8 @@ export function DepositStatusLowerCard({
 }: Props) {
   const {
     quote,
+    quotedLimits,
     depositArgs,
-    expectedFillTime,
     recipient,
     selectedRoute,
     swapQuote: _swapQuote,
@@ -92,7 +92,7 @@ export function DepositStatusLowerCard({
       <EstimatedTable
         fromChainId={fromChainId}
         toChainId={toChainId}
-        estimatedTime={expectedFillTime}
+        quotedLimits={quotedLimits}
         gasFee={gasFee}
         lpFee={lpFee}
         capitalFee={capitalFee}

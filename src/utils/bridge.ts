@@ -106,8 +106,8 @@ export type ConfirmationDepositTimeType = {
 export const getConfirmationDepositTime = (
   amount: BigNumber,
   limits: BridgeLimitInterface,
-  toChain: ChainId,
   fromChain: ChainId,
+  toChain: ChainId,
   inputTokenSymbol: string
 ): ConfirmationDepositTimeType => {
   const config = getConfig();
