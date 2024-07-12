@@ -64,7 +64,9 @@ const GOOGLE_SERVICE_ACCOUNT = _GOOGLE_SERVICE_ACCOUNT
   ? JSON.parse(_GOOGLE_SERVICE_ACCOUNT)
   : {};
 
-export const gasMarkup = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
+export const gasMarkup: {
+  [chainId: string]: number;
+} = GAS_MARKUP ? JSON.parse(GAS_MARKUP) : {};
 // Default to no markup.
 export const DEFAULT_GAS_MARKUP = 0;
 
@@ -498,7 +500,13 @@ export const getHubPoolClient = () => {
 };
 
 export const getGasMarkup = (chainId: string | number) => {
-  return gasMarkup[chainId] ?? DEFAULT_GAS_MARKUP;
+  if (typeof gasMarkup[chainId] === "number") {
+    return gasMarkup[chainId];
+  }
+
+  return sdk.utils.chainIsOPStack(Number(chainId))
+    ? gasMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
+    : DEFAULT_GAS_MARKUP;
 };
 
 /**
