@@ -1520,20 +1520,34 @@ export function getLimitsBufferMultiplier(symbol: string) {
   return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
 }
 
-export function getLiteChainMaxBalanceUsd(chainId: number, symbol: string) {
-  const envVarBase = "LITE_CHAIN_USD_MAX_BALANCE";
+export function getChainMaxBalanceUsd(
+  chainId: number,
+  symbol: string,
+  includeDefault: boolean
+) {
+  const envVarBase = "CHAIN_USD_MAX_BALANCE";
+  const defaultValue = includeDefault
+    ? DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
+    : undefined;
   return (
     process.env[`${envVarBase}_${chainId}_${symbol}`] ??
     process.env[`${envVarBase}_${chainId}`] ??
-    DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
+    defaultValue
   );
 }
 
-export function getLiteChainMaxDepositUsd(chainId: number, symbol: string) {
-  const envVarBase = "LITE_CHAIN_USD_MAX_DEPOSIT";
+export function getChainMaxDepositUsd(
+  chainId: number,
+  symbol: string,
+  includeDefault: boolean
+) {
+  const envVarBase = "CHAIN_USD_MAX_DEPOSIT";
+  const defaultValue = includeDefault
+    ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
+    : undefined;
   return (
     process.env[`${envVarBase}_${chainId}_${symbol}`] ??
     process.env[`${envVarBase}_${chainId}`] ??
-    DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
+    defaultValue
   );
 }
