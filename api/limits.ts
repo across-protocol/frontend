@@ -4,7 +4,6 @@ import { BigNumber, ethers } from "ethers";
 import {
   BLOCK_TAG_LAG,
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-  maxDepositForOriginChain,
 } from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
 import { object, assert, Infer, optional } from "superstruct";
@@ -301,11 +300,6 @@ const handler = async (
     const bufferedMaxDepositShortDelay = limitsBufferMultiplier
       .mul(maxDepositShortDelay)
       .div(sdk.utils.fixedPointAdjustment);
-
-    const overrideMaxDepositForOrigin =
-      maxDepositForOriginChain[computedOriginChainId.toString()]?.[
-        l1Token.symbol
-      ];
 
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
