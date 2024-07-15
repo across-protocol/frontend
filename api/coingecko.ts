@@ -89,9 +89,9 @@ const getCoingeckoPrices = async (
       .getContractPrices([baseCurrentTokenAddress, tokenAddress], "usd")
       .then((prices) => prices[0].price);
   } else if (tokenPriceUsdPromise === undefined) {
-    basePriceUsdPromise = coingeckoClient
+    tokenPriceUsdPromise = coingeckoClient
       .getContractPrices([baseCurrentTokenAddress, tokenAddress], "usd")
-      .then((prices) => prices[0].price);
+      .then((prices) => prices[1].price);
   }
 
   // Extract from a promise.all.
