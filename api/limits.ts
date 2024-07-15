@@ -172,7 +172,7 @@ const handler = async (
 
     let { liquidReserves } = multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
-    const liteChainIds =
+    const liteChainIds: number[] =
       liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
     const originChainIsLiteChain = liteChainIds.includes(computedOriginChainId);
     const destinationChainIsLiteChain =
@@ -222,71 +222,65 @@ const handler = async (
     // Apply chain max values when defined
     const includeDefaultMaxValues = originChainIsLiteChain;
     const includeRelayerBalances = originChainIsLiteChain;
-    let chainMaxBoundary;
+    let chainAvailableAmountForDeposits: BigNumber | undefined;
+    let chainInputTokenMaxDeposit: BigNumber | undefined;
+    let chainHasMaxBoundary: boolean = false;
 
     const chainUsdMaxBalance = getChainMaxBalanceUsd(
       computedOriginChainId,
       inputToken.symbol,
       includeDefaultMaxValues
     );
-    if (chainUsdMaxBalance) {
-      const parsedChainUsdMaxBalance = ethers.utils.parseUnits(
-        chainUsdMaxBalance,
-        inputToken.decimals
-      );
-      const relayers = includeRelayerBalances
-        ? [...fullRelayers, ...transferRestrictedRelayers]
-        : [];
-      const chainAvailableAmountForDeposits =
-        await getAvailableAmountForDeposits(
-          computedOriginChainId,
-          inputToken,
-          parsedChainUsdMaxBalance,
-          tokenPriceUsd,
-          relayers
-        );
-
-      chainMaxBoundary = chainMaxBoundary
-        ? minBN(chainMaxBoundary, chainAvailableAmountForDeposits)
-        : chainAvailableAmountForDeposits;
-
-      minDeposit = minBN(minDeposit, chainAvailableAmountForDeposits);
-      minDepositFloor = minBN(minDepositFloor, chainAvailableAmountForDeposits);
-      maxDepositInstant = minBN(
-        maxDepositInstant,
-        chainAvailableAmountForDeposits
-      );
-      maxDepositShortDelay = minBN(
-        maxDepositShortDelay,
-        chainAvailableAmountForDeposits
-      );
-    }
 
     const chainUsdMaxDeposit = getChainMaxDepositUsd(
       computedOriginChainId,
       inputToken.symbol,
       includeDefaultMaxValues
     );
-    if (chainUsdMaxDeposit) {
-      const parsedChainUsdMaxDeposit = ethers.utils.parseUnits(
-        chainUsdMaxDeposit,
-        inputToken.decimals
+
+    const parseInInputToken = (value: string) =>
+      ethers.utils.parseUnits(value, inputToken.decimals);
+
+    if (chainUsdMaxBalance) {
+      const parsedChainUsdMaxBalance = parseInInputToken(chainUsdMaxBalance);
+      const relayers = includeRelayerBalances
+        ? [...fullRelayers, ...transferRestrictedRelayers]
+        : [];
+      chainAvailableAmountForDeposits = await getAvailableAmountForDeposits(
+        computedOriginChainId,
+        inputToken,
+        parsedChainUsdMaxBalance,
+        tokenPriceUsd,
+        relayers
       );
-      const chainInputTokenMaxDeposit = parsedChainUsdMaxDeposit
+      chainHasMaxBoundary = true;
+    }
+
+    if (chainUsdMaxDeposit) {
+      const parsedChainUsdMaxDeposit = parseInInputToken(chainUsdMaxDeposit);
+      chainInputTokenMaxDeposit = parsedChainUsdMaxDeposit
         .mul(sdk.utils.fixedPointAdjustment)
         .div(tokenPriceUsd);
-
-      chainMaxBoundary = chainMaxBoundary
-        ? minBN(chainMaxBoundary, chainInputTokenMaxDeposit)
-        : chainInputTokenMaxDeposit;
-      minDeposit = minBN(minDeposit, chainInputTokenMaxDeposit);
-      minDepositFloor = minBN(minDepositFloor, chainInputTokenMaxDeposit);
-      maxDepositInstant = minBN(maxDepositInstant, chainInputTokenMaxDeposit);
-      maxDepositShortDelay = minBN(
-        maxDepositShortDelay,
-        chainInputTokenMaxDeposit
-      );
+      chainHasMaxBoundary = true;
     }
+
+    const bnOrMax = (value?: BigNumber) => value ?? ethers.constants.MaxUint256;
+    const resolvedChainAvailableAmountForDeposits = bnOrMax(
+      chainAvailableAmountForDeposits
+    );
+    const resolvedChainInputTokenMaxDeposit = bnOrMax(
+      chainInputTokenMaxDeposit
+    );
+
+    const chainMaxBoundary = minBN(
+      resolvedChainAvailableAmountForDeposits,
+      resolvedChainInputTokenMaxDeposit
+    );
+
+    minDeposit = minBN(minDeposit, chainMaxBoundary);
+    minDepositFloor = minBN(minDepositFloor, chainMaxBoundary);
+    maxDepositInstant = minBN(maxDepositInstant, chainMaxBoundary);
+    maxDepositShortDelay = minBN(maxDepositShortDelay, chainMaxBoundary);
 
     const limitsBufferMultiplier = getLimitsBufferMultiplier(l1Token.symbol);
 
@@ -308,7 +302,7 @@ const handler = async (
         liquidReserves,
         bufferedMaxDepositShortDelay,
         limitsBufferMultiplier,
-        chainMaxBoundary,
+        chainHasMaxBoundary,
         routeInvolvesLiteChain
       ).toString(),
       maxDepositInstant: bufferedMaxDepositInstant.toString(),
@@ -366,7 +360,7 @@ const getMaxDeposit = (
   liquidReserves: BigNumber,
   bufferedMaxDepositShortDelay: BigNumber,
   limitsBufferMultiplier: BigNumber,
-  chainMaxBoundary: BigNumber | undefined,
+  chainHasMaxBoundary: boolean,
   routeInvolvesLiteChain: boolean
 ): BigNumber => {
   // We set `maxDeposit` equal to `maxDepositShortDelay` to be backwards compatible
@@ -376,7 +370,7 @@ const getMaxDeposit = (
     ethers.utils.parseEther("1")
   );
   if (isBufferMultiplierOne && !routeInvolvesLiteChain) {
-    if (chainMaxBoundary)
+    if (chainHasMaxBoundary)
       return minBN(liquidReserves, bufferedMaxDepositShortDelay);
     return liquidReserves;
   }
