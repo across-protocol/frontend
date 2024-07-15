@@ -8,7 +8,15 @@ import {
 import { tagAcrossDomain, tagAddress } from "./format";
 import { getProvider } from "./providers";
 import { getFastFillTimeByRoute } from "./fill-times";
-import { getConfig, getCurrentTime, isContractDeployedToAddress } from "utils";
+import {
+  getConfig,
+  getCurrentTime,
+  isContractDeployedToAddress,
+  isWeth,
+  WETH_INTERFACE,
+  getMulticallHandlerAddress,
+  getWethAddressForChain,
+} from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
@@ -185,6 +193,7 @@ export type AcrossDepositArgs = {
   maxCount?: ethers.BigNumber;
   referrer?: string;
   isNative: boolean;
+  toNative: boolean;
 };
 
 export type AcrossDepositV3Args = AcrossDepositArgs & {
@@ -218,6 +227,7 @@ export async function sendDepositTx(
     timestamp: quoteTimestamp,
     message = "0x",
     isNative,
+    toNative = false,
     referrer,
   }: AcrossDepositArgs,
   onNetworkMismatch?: NetworkMismatchHandler
@@ -225,6 +235,11 @@ export async function sendDepositTx(
   const { spokePool, spokePoolVerifier, shouldUseSpokePoolVerifier } =
     await _getSpokePoolAndVerifier({ fromChain, isNative });
 
+  // If user deposits WETH, then use the multicall handler.
+  if (isWeth(tokenAddress)) {
+    message = defaultUnwrapToWethMessage(amount, toAddress, toChain, toNative);
+    toAddress = getMulticallHandlerAddress(toChain);
+  }
   const commonArgs = [
     recipient,
     tokenAddress,
@@ -265,6 +280,7 @@ export async function sendDepositV3Tx(
     timestamp: quoteTimestamp,
     message = "0x",
     isNative,
+    toNative = false,
     referrer,
     fillDeadline,
     inputTokenAddress,
@@ -291,6 +307,16 @@ export async function sendDepositV3Tx(
   fillDeadline ??=
     getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
+  // If user deposits WETH, then use the multicall handler.
+  if (isWeth(outputTokenAddress)) {
+    message = defaultUnwrapToWethMessage(
+      outputAmount,
+      toAddress,
+      toChain,
+      toNative
+    );
+    toAddress = getMulticallHandlerAddress(toChain);
+  }
   const tx = await spokePool.populateTransaction.depositV3(
     await signer.getAddress(),
     recipient,
@@ -327,6 +353,7 @@ export async function sendSwapAndBridgeTx(
     timestamp: quoteTimestamp,
     message = "0x",
     isNative,
+    toNative = false,
     referrer,
     fillDeadline,
     inputTokenAddress,
@@ -396,6 +423,16 @@ export async function sendSwapAndBridgeTx(
   fillDeadline ??=
     getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
+  // If user deposits WETH, then use the multicall handler.
+  if (isWeth(outputTokenAddress)) {
+    message = defaultUnwrapToWethMessage(
+      outputAmount,
+      toAddress,
+      toChain,
+      toNative
+    );
+    toAddress = getMulticallHandlerAddress(toChain);
+  }
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
     swapQuote.routerCalldata,
     swapTokenAmount,
@@ -500,4 +537,47 @@ async function _tagRefAndSignTx(
   }
 
   return signer.sendTransaction(tx);
+}
+
+const INSTRUCTIONS = "tuple(tuple(address, bytes, uint256)[], address)";
+
+function defaultUnwrapToWethMessage(
+  amount: ethers.BigNumber,
+  toAddress: string,
+  toChain: ChainId,
+  toNative: boolean
+): string {
+  const encoder = ethers.utils.defaultAbiCoder;
+  const wethInterface = new ethers.utils.Interface(WETH_INTERFACE);
+
+  const outputTokenAddress = getWethAddressForChain(toChain);
+  let data, call;
+  if (toNative) {
+    data = wethInterface.encodeFunctionData("withdraw(uint256 wad)", [amount]);
+    call = encoder.encode(
+      [INSTRUCTIONS],
+      [
+        [
+          [outputTokenAddress, data, 0], // Withdraw WETH
+          [toAddress, "0x", amount], // Send ETH to recipient
+        ],
+        toAddress,
+      ]
+    );
+  } else {
+    data = wethInterface.encodeFunctionData(
+      "transfer(address dst, uint256 wad)",
+      [toAddress, amount]
+    );
+    call = encoder.encode(
+      [INSTRUCTIONS],
+      [
+        [
+          [outputTokenAddress, data, 0], // Transfer WETH
+        ],
+        toAddress,
+      ]
+    );
+  }
+  return call;
 }
