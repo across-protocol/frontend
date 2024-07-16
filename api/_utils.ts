@@ -359,14 +359,14 @@ export const getRouteDetails = (
       symbol: isBridgedUsdc(inputToken.symbol)
         ? _getBridgedUsdcTokenSymbol(inputToken.symbol, resolvedOriginChainId)
         : inputToken.symbol,
-      address: inputToken.addresses[resolvedOriginChainId],
+      address: utils.getAddress(inputToken.addresses[resolvedOriginChainId]),
     },
     outputToken: {
       ...outputToken,
       symbol: isBridgedUsdc(outputToken.symbol)
         ? _getBridgedUsdcTokenSymbol(outputToken.symbol, destinationChainId)
         : outputToken.symbol,
-      address: outputToken.addresses[destinationChainId],
+      address: utils.getAddress(outputToken.addresses[destinationChainId]),
     },
     l1Token: {
       ...l1Token,
@@ -413,7 +413,10 @@ export const getTokenByAddress = (
 
 const _getChainIdsOfToken = (
   tokenAddress: string,
-  token: (typeof TOKEN_SYMBOLS_MAP)[keyof typeof TOKEN_SYMBOLS_MAP]
+  token: Omit<
+    (typeof TOKEN_SYMBOLS_MAP)[keyof typeof TOKEN_SYMBOLS_MAP],
+    "coingeckoId"
+  >
 ) => {
   const chainIds = Object.entries(token.addresses).filter(
     ([_, address]) => address.toLowerCase() === tokenAddress.toLowerCase()
