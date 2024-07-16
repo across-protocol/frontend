@@ -8,9 +8,13 @@ import {
   handleErrorCondition,
   validAddress,
   getBalancerV2TokenPrice,
+  getCachedTokenPrice,
 } from "./_utils";
 import {
+  CHAIN_IDs,
   SUPPORTED_CG_BASE_CURRENCIES,
+  SUPPORTED_CG_DERRIVED_CURRENCIES,
+  TOKEN_SYMBOLS_MAP,
   coinGeckoAssetPlatformLookup,
 } from "./_constants";
 
@@ -51,13 +55,18 @@ const handler = async (
     l1Token = ethers.utils.getAddress(l1Token);
 
     // Confirm that the base Currency is supported by Coingecko
-    if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
+    if (
+      !SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) &&
+      !SUPPORTED_CG_DERRIVED_CURRENCIES.has(baseCurrency)
+    ) {
       throw new InputError(
         `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
           SUPPORTED_CG_BASE_CURRENCIES
         ).join(", ")}].`
       );
     }
+    const isDerivedCurrency =
+      SUPPORTED_CG_DERRIVED_CURRENCIES.has(baseCurrency);
 
     // Resolve the optional address lookup that maps one token's
     // contract address to another.
@@ -114,16 +123,29 @@ const handler = async (
           "Only CG base currency allowed for BalancerV2 tokens is usd"
         );
       }
-    }
-    // Fetch price dynamically from Coingecko API
-    else {
-      // This base matches a supported base currency for CG.
+    } else {
+      // Fetch price dynamically from Coingecko API
       [, price] = await coingeckoClient.getCurrentPriceByContract(
         l1Token,
-        baseCurrency,
+        isDerivedCurrency ? "usd" : baseCurrency, // If derived, we need to convert to USD first.
         platformId
       );
     }
+
+    // If the base currency is a derived currency, we just need to grab
+    // the price of the quote currency in USD and perform the conversion.
+    let quotePrice = 1.0;
+    if (isDerivedCurrency) {
+      const token =
+        TOKEN_SYMBOLS_MAP[
+          baseCurrency.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
+        ];
+      quotePrice = await getCachedTokenPrice(
+        token.addresses[CHAIN_IDs.MAINNET],
+        "usd"
+      );
+    }
+    price = price / quotePrice;
 
     // Two different explanations for how `stale-while-revalidate` works:
 
