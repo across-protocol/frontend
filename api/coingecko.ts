@@ -53,7 +53,9 @@ const handler = async (
     // Confirm that the base Currency is supported by Coingecko
     if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
       throw new InputError(
-        "Base currency supplied is not supported by this endpoint. See documentation."
+        `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
+          SUPPORTED_CG_BASE_CURRENCIES
+        ).join(", ")}].`
       );
     }
 
