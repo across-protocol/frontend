@@ -1520,7 +1520,7 @@ export function getLimitsBufferMultiplier(symbol: string) {
   return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
 }
 
-export function getChainMaxBalanceUsd(
+export function getChainInputTokenMaxBalanceInUsd(
   chainId: number,
   symbol: string,
   includeDefault: boolean
@@ -1536,7 +1536,7 @@ export function getChainMaxBalanceUsd(
   );
 }
 
-export function getChainMaxDepositUsd(
+export function getChainInputTokenMaxDepositInUsd(
   chainId: number,
   symbol: string,
   includeDefault: boolean

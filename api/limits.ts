@@ -12,13 +12,14 @@ import {
   ENABLED_ROUTES,
   HUB_POOL_CHAIN_ID,
   callViaMulticall3,
+  ConvertDecimals,
   getCachedTokenBalance,
   getCachedTokenPrice,
   getDefaultRelayerAddress,
   getHubPool,
   getLimitsBufferMultiplier,
-  getChainMaxBalanceUsd,
-  getChainMaxDepositUsd,
+  getChainInputTokenMaxBalanceInUsd,
+  getChainInputTokenMaxDepositInUsd,
   getLogger,
   getLpCushion,
   getProvider,
@@ -222,55 +223,53 @@ const handler = async (
     // Apply chain max values when defined
     const includeDefaultMaxValues = originChainIsLiteChain;
     const includeRelayerBalances = originChainIsLiteChain;
-    let chainAvailableAmountForDeposits: BigNumber | undefined;
+    let chainAvailableInputTokenAmountForDeposits: BigNumber | undefined;
     let chainInputTokenMaxDeposit: BigNumber | undefined;
     let chainHasMaxBoundary: boolean = false;
 
-    const chainTokenMaxBalanceInUsd = getChainMaxBalanceUsd(
+    const chainInputTokenMaxBalanceInUsd = getChainInputTokenMaxBalanceInUsd(
       computedOriginChainId,
       inputToken.symbol,
       includeDefaultMaxValues
     );
 
-    const chainTokenMaxDepositInUsd = getChainMaxDepositUsd(
+    const chainInputTokenMaxDepositInUsd = getChainInputTokenMaxDepositInUsd(
       computedOriginChainId,
       inputToken.symbol,
       includeDefaultMaxValues
     );
 
-    const parseInInputToken = (value: string) =>
-      ethers.utils.parseUnits(value, inputToken.decimals);
-
-    if (chainTokenMaxBalanceInUsd) {
-      const parsedChainTokenMaxBalanceInUsd = parseInInputToken(
-        chainTokenMaxBalanceInUsd
+    if (chainInputTokenMaxBalanceInUsd) {
+      const chainInputTokenMaxBalance = parseAndConvertUsdToTokenUnits(
+        chainInputTokenMaxBalanceInUsd,
+        tokenPriceUsd,
+        inputToken
       );
       const relayers = includeRelayerBalances
         ? [...fullRelayers, ...transferRestrictedRelayers]
         : [];
-      chainAvailableAmountForDeposits = await getAvailableAmountForDeposits(
-        computedOriginChainId,
-        inputToken,
-        parsedChainTokenMaxBalanceInUsd,
-        tokenPriceUsd,
-        relayers
-      );
+      chainAvailableInputTokenAmountForDeposits =
+        await getAvailableAmountForDeposits(
+          computedOriginChainId,
+          inputToken,
+          chainInputTokenMaxBalance,
+          relayers
+        );
       chainHasMaxBoundary = true;
     }
 
-    if (chainTokenMaxDepositInUsd) {
-      const parsedChainUsdMaxDeposit = parseInInputToken(
-        chainTokenMaxDepositInUsd
+    if (chainInputTokenMaxDepositInUsd) {
+      chainInputTokenMaxDeposit = parseAndConvertUsdToTokenUnits(
+        chainInputTokenMaxDepositInUsd,
+        tokenPriceUsd,
+        inputToken
       );
-      chainInputTokenMaxDeposit = parsedChainUsdMaxDeposit
-        .mul(sdk.utils.fixedPointAdjustment)
-        .div(tokenPriceUsd);
       chainHasMaxBoundary = true;
     }
 
     const bnOrMax = (value?: BigNumber) => value ?? ethers.constants.MaxUint256;
     const resolvedChainAvailableAmountForDeposits = bnOrMax(
-      chainAvailableAmountForDeposits
+      chainAvailableInputTokenAmountForDeposits
     );
     const resolvedChainInputTokenMaxDeposit = bnOrMax(
       chainInputTokenMaxDeposit
@@ -329,13 +328,9 @@ const handler = async (
 const getAvailableAmountForDeposits = async (
   originChainId: number,
   inputToken: TokenInfo,
-  chainTokenMaxBalanceInUsd: BigNumber,
-  tokenPriceUsd: BigNumber,
+  chainTokenMaxBalance: BigNumber,
   relayers: string[]
-) => {
-  const chainInputTokenMaxBalance = chainTokenMaxBalanceInUsd
-    .mul(sdk.utils.fixedPointAdjustment)
-    .div(tokenPriceUsd);
+): Promise<BigNumber> => {
   const originSpokePoolAddress = getSpokePoolAddress(originChainId);
   const [originSpokePoolBalance, ...originChainBalancesPerRelayer] =
     await Promise.all([
@@ -353,10 +348,10 @@ const getAvailableAmountForDeposits = async (
     originSpokePoolBalance
   );
   const chainAvailableAmountForDeposits = currentTotalChainBalance.gte(
-    chainInputTokenMaxBalance
+    chainTokenMaxBalance
   )
     ? sdk.utils.bnZero
-    : chainInputTokenMaxBalance.sub(currentTotalChainBalance);
+    : chainTokenMaxBalance.sub(currentTotalChainBalance);
   return chainAvailableAmountForDeposits;
 };
 
@@ -379,6 +374,19 @@ const getMaxDeposit = (
     return liquidReserves;
   }
   return bufferedMaxDepositShortDelay;
+};
+
+const parseAndConvertUsdToTokenUnits = (
+  usdValue: string,
+  tokenPriceUsd: BigNumber,
+  inputToken: TokenInfo
+): BigNumber => {
+  const usdValueInWei = ethers.utils.parseUnits(usdValue);
+  const tokenValueInWei = usdValueInWei
+    .mul(sdk.utils.fixedPointAdjustment)
+    .div(tokenPriceUsd);
+  const tokenValue = ConvertDecimals(18, inputToken.decimals)(tokenValueInWei);
+  return sdk.utils.toBN(tokenValue);
 };
 
 export default handler;
