@@ -37,10 +37,33 @@ export function useEstimatedRewards(
     ? parseUnits(String(rewardProgram.highestPct), 18)
     : undefined;
 
+  // Rewards are handled in the previous day so we need to conver the current UTC date to the previous day
+  // As a note: if the current time is before 03:00 UTC, we need to actually go back two days because the
+  //            previous days pricing is not available until 03:00 UTC
+  const now = new Date();
+  const currentUTCDate = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  );
+
+  // Check if the current time is before 03:00 UTC
+  if (now.getUTCHours() < 3) {
+    currentUTCDate.setDate(currentUTCDate.getDate() - 2); // Go back two days
+  } else {
+    currentUTCDate.setDate(currentUTCDate.getDate() - 1); // Go back one day
+  }
+  const day = currentUTCDate.getUTCDate().toString().padStart(2, "0");
+  const month = (currentUTCDate.getUTCMonth() + 1).toString().padStart(2, "0");
+  const year = currentUTCDate.getUTCFullYear();
+  const yesterdaysDate = `${day}-${month}-${year}`;
+
   const { convertTokenToBaseCurrency: convertL1ToBaseCurrency } =
-    useTokenConversion(token.symbol, "usd");
+    useTokenConversion(token.symbol, "usd", yesterdaysDate);
   const { convertTokenToBaseCurrency: convertRewardToBaseCurrency } =
-    useTokenConversion(rewardToken?.symbol || token.symbol, "usd");
+    useTokenConversion(
+      rewardToken?.symbol || token.symbol,
+      "usd",
+      yesterdaysDate
+    );
 
   const depositReward = useMemo(() => {
     if (

@@ -6,7 +6,8 @@ export type CoingeckoApiCall = typeof coingeckoApiCall;
 
 export async function coingeckoApiCall(
   l1Token: string,
-  baseCurrency: string
+  baseCurrency: string,
+  date?: string
 ): Promise<{
   price: ethers.BigNumber;
 }> {
@@ -14,6 +15,7 @@ export async function coingeckoApiCall(
     params: {
       l1Token,
       baseCurrency,
+      date,
     },
   });
   const result = response.data;
