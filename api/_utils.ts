@@ -623,16 +623,19 @@ export const getRelayerFeeDetails = async (
 /**
  * Creates an HTTP call to the `/api/coingecko` endpoint to resolve a CoinGecko price
  * @param l1Token The ERC20 token address of the coin to find the cached price of
+ * @param baseCurrency The base currency to convert the token price to
+ * @param date An optional date string in the format of `DD-MM-YYYY` to resolve a historical price
  * @returns The price of the `l1Token` token.
  */
 export const getCachedTokenPrice = async (
   l1Token: string,
-  baseCurrency: string = "eth"
+  baseCurrency: string = "eth",
+  date?: string
 ): Promise<number> => {
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
-        params: { l1Token, baseCurrency },
+        params: { l1Token, baseCurrency, date },
       })
     ).data.price
   );
@@ -1369,7 +1372,7 @@ export async function callViaMulticall3(
 export async function getBalancerV2TokenPrice(
   tokenAddress: string,
   chainId = 1
-) {
+): Promise<number> {
   const provider = getProvider(chainId);
   const pool = new ethers.Contract(
     tokenAddress,
