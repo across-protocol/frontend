@@ -13,7 +13,7 @@ import {
 import {
   CHAIN_IDs,
   SUPPORTED_CG_BASE_CURRENCIES,
-  SUPPORTED_CG_DERRIVED_CURRENCIES,
+  SUPPORTED_CG_DERIVED_CURRENCIES,
   TOKEN_SYMBOLS_MAP,
   coinGeckoAssetPlatformLookup,
 } from "./_constants";
@@ -55,18 +55,14 @@ const handler = async (
     l1Token = ethers.utils.getAddress(l1Token);
 
     // Confirm that the base Currency is supported by Coingecko
-    if (
-      !SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) &&
-      !SUPPORTED_CG_DERRIVED_CURRENCIES.has(baseCurrency)
-    ) {
+    const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
+    if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
       throw new InputError(
         `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
           SUPPORTED_CG_BASE_CURRENCIES
         ).join(", ")}].`
       );
     }
-    const isDerivedCurrency =
-      SUPPORTED_CG_DERRIVED_CURRENCIES.has(baseCurrency);
 
     // Resolve the optional address lookup that maps one token's
     // contract address to another.
