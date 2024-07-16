@@ -226,13 +226,13 @@ const handler = async (
     let chainInputTokenMaxDeposit: BigNumber | undefined;
     let chainHasMaxBoundary: boolean = false;
 
-    const chainUsdMaxBalance = getChainMaxBalanceUsd(
+    const chainTokenMaxBalanceInUsd = getChainMaxBalanceUsd(
       computedOriginChainId,
       inputToken.symbol,
       includeDefaultMaxValues
     );
 
-    const chainUsdMaxDeposit = getChainMaxDepositUsd(
+    const chainTokenMaxDepositInUsd = getChainMaxDepositUsd(
       computedOriginChainId,
       inputToken.symbol,
       includeDefaultMaxValues
@@ -241,23 +241,27 @@ const handler = async (
     const parseInInputToken = (value: string) =>
       ethers.utils.parseUnits(value, inputToken.decimals);
 
-    if (chainUsdMaxBalance) {
-      const parsedChainUsdMaxBalance = parseInInputToken(chainUsdMaxBalance);
+    if (chainTokenMaxBalanceInUsd) {
+      const parsedChainTokenMaxBalanceInUsd = parseInInputToken(
+        chainTokenMaxBalanceInUsd
+      );
       const relayers = includeRelayerBalances
         ? [...fullRelayers, ...transferRestrictedRelayers]
         : [];
       chainAvailableAmountForDeposits = await getAvailableAmountForDeposits(
         computedOriginChainId,
         inputToken,
-        parsedChainUsdMaxBalance,
+        parsedChainTokenMaxBalanceInUsd,
         tokenPriceUsd,
         relayers
       );
       chainHasMaxBoundary = true;
     }
 
-    if (chainUsdMaxDeposit) {
-      const parsedChainUsdMaxDeposit = parseInInputToken(chainUsdMaxDeposit);
+    if (chainTokenMaxDepositInUsd) {
+      const parsedChainUsdMaxDeposit = parseInInputToken(
+        chainTokenMaxDepositInUsd
+      );
       chainInputTokenMaxDeposit = parsedChainUsdMaxDeposit
         .mul(sdk.utils.fixedPointAdjustment)
         .div(tokenPriceUsd);
@@ -325,11 +329,11 @@ const handler = async (
 const getAvailableAmountForDeposits = async (
   originChainId: number,
   inputToken: TokenInfo,
-  chainUsdMaxBalance: BigNumber,
+  chainTokenMaxBalanceInUsd: BigNumber,
   tokenPriceUsd: BigNumber,
   relayers: string[]
 ) => {
-  const chainInputTokenMaxBalance = chainUsdMaxBalance
+  const chainInputTokenMaxBalance = chainTokenMaxBalanceInUsd
     .mul(sdk.utils.fixedPointAdjustment)
     .div(tokenPriceUsd);
   const originSpokePoolAddress = getSpokePoolAddress(originChainId);
