@@ -135,6 +135,7 @@ const handler = async (
     // If the base currency is a derived currency, we just need to grab
     // the price of the quote currency in USD and perform the conversion.
     let quotePrice = 1.0;
+    let quotePrecision = 18;
     if (isDerivedCurrency) {
       const token =
         TOKEN_SYMBOLS_MAP[
@@ -144,8 +145,9 @@ const handler = async (
         token.addresses[CHAIN_IDs.MAINNET],
         "usd"
       );
+      quotePrecision = token.decimals;
     }
-    price = price / quotePrice;
+    price = Number((price / quotePrice).toFixed(quotePrecision));
 
     // Two different explanations for how `stale-while-revalidate` works:
 
