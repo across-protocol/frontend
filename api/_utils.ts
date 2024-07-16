@@ -385,6 +385,7 @@ export const getTokenByAddress = (
       symbol: string;
       name: string;
       addresses: Record<number, string>;
+      coingeckoId: string;
     }
   | undefined => {
   const matches =
