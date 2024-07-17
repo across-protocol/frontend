@@ -237,8 +237,13 @@ export async function sendDepositTx(
 
   // If user deposits WETH, then use the multicall handler.
   if (isWeth(tokenAddress)) {
-    message = defaultUnwrapToWethMessage(amount, toAddress, toChain, toNative);
-    toAddress = getMulticallHandlerAddress(toChain);
+    message = defaultUnwrapToWethMessage(
+      amount,
+      recipient,
+      destinationChainId,
+      toNative
+    );
+    recipient = getMulticallHandlerAddress(destinationChainId);
   }
   const commonArgs = [
     recipient,
@@ -311,11 +316,11 @@ export async function sendDepositV3Tx(
   if (isWeth(outputTokenAddress)) {
     message = defaultUnwrapToWethMessage(
       outputAmount,
-      toAddress,
-      toChain,
+      recipient,
+      destinationChainId,
       toNative
     );
-    toAddress = getMulticallHandlerAddress(toChain);
+    recipient = getMulticallHandlerAddress(destinationChainId);
   }
   const tx = await spokePool.populateTransaction.depositV3(
     await signer.getAddress(),
@@ -353,7 +358,6 @@ export async function sendSwapAndBridgeTx(
     timestamp: quoteTimestamp,
     message = "0x",
     isNative,
-    toNative = false,
     referrer,
     fillDeadline,
     inputTokenAddress,
@@ -423,16 +427,6 @@ export async function sendSwapAndBridgeTx(
   fillDeadline ??=
     getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
-  // If user deposits WETH, then use the multicall handler.
-  if (isWeth(outputTokenAddress)) {
-    message = defaultUnwrapToWethMessage(
-      outputAmount,
-      toAddress,
-      toChain,
-      toNative
-    );
-    toAddress = getMulticallHandlerAddress(toChain);
-  }
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
     swapQuote.routerCalldata,
     swapTokenAmount,
