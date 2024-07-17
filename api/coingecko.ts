@@ -23,7 +23,6 @@ import { coingecko } from "@across-protocol/sdk";
 const { Coingecko } = coingecko;
 const {
   REACT_APP_COINGECKO_PRO_API_KEY,
-  FIXED_TOKEN_PRICES,
   REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES,
   BALANCER_V2_TOKENS,
 } = process.env;
@@ -85,33 +84,13 @@ const handler = async (
     // We want to compute price and return to caller.
     let price: number;
 
-    // Make sure all keys in `fixedTokenPrices` are in checksum format.
-    const fixedTokenPrices = Object.fromEntries(
-      Object.entries(JSON.parse(FIXED_TOKEN_PRICES ?? "{}")).map(
-        ([token, price]) => [ethers.utils.getAddress(token), Number(price)]
-      )
-    );
-
     const balancerV2PoolTokens: string[] = JSON.parse(
       BALANCER_V2_TOKENS ?? "[]"
     ).map(ethers.utils.getAddress);
 
     const platformId = coinGeckoAssetPlatformLookup[l1Token] ?? "ethereum";
 
-    // Caller wants to override price for token, possibly because the token is not supported yet on the Coingecko API,
-    // so assume the caller set the USD price of the token. We now need to dynamically load the base currency.
-    if (!isNaN(fixedTokenPrices[l1Token])) {
-      // If base is USD, return hardcoded token price in USD.
-      if (baseCurrency === "usd") {
-        price = fixedTokenPrices[l1Token];
-      } else {
-        throw new InputError(
-          "This token has a fixed price in USD only. Switch to USD base currency."
-        );
-      }
-    } else if (
-      balancerV2PoolTokens.includes(ethers.utils.getAddress(l1Token))
-    ) {
+    if (balancerV2PoolTokens.includes(ethers.utils.getAddress(l1Token))) {
       if (baseCurrency === "usd") {
         price = await getBalancerV2TokenPrice(l1Token);
       } else {
