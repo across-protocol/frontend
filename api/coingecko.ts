@@ -114,7 +114,7 @@ const handler = async (
         );
       }
       if (baseCurrency === "usd") {
-        price = await getBalancerV2TokenPrice(l1Token, undefined);
+        price = await getBalancerV2TokenPrice(l1Token);
       } else {
         throw new InputError(
           "Only CG base currency allowed for BalancerV2 tokens is usd"
