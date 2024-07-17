@@ -8,9 +8,13 @@ import {
   handleErrorCondition,
   validAddress,
   getBalancerV2TokenPrice,
+  getCachedTokenPrice,
 } from "./_utils";
 import {
+  CHAIN_IDs,
   SUPPORTED_CG_BASE_CURRENCIES,
+  SUPPORTED_CG_DERIVED_CURRENCIES,
+  TOKEN_SYMBOLS_MAP,
   coinGeckoAssetPlatformLookup,
 } from "./_constants";
 
@@ -19,7 +23,6 @@ import { coingecko } from "@across-protocol/sdk";
 const { Coingecko } = coingecko;
 const {
   REACT_APP_COINGECKO_PRO_API_KEY,
-  FIXED_TOKEN_PRICES,
   REDIRECTED_TOKEN_PRICE_LOOKUP_ADDRESSES,
   BALANCER_V2_TOKENS,
 } = process.env;
@@ -52,7 +55,8 @@ const handler = async (
     l1Token = ethers.utils.getAddress(l1Token);
 
     // Confirm that the base Currency is supported by Coingecko
-    if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency)) {
+    const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
+    if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
       throw new InputError(
         `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
           SUPPORTED_CG_BASE_CURRENCIES
@@ -81,33 +85,13 @@ const handler = async (
     // We want to compute price and return to caller.
     let price: number;
 
-    // Make sure all keys in `fixedTokenPrices` are in checksum format.
-    const fixedTokenPrices = Object.fromEntries(
-      Object.entries(JSON.parse(FIXED_TOKEN_PRICES ?? "{}")).map(
-        ([token, price]) => [ethers.utils.getAddress(token), Number(price)]
-      )
-    );
-
     const balancerV2PoolTokens: string[] = JSON.parse(
       BALANCER_V2_TOKENS ?? "[]"
     ).map(ethers.utils.getAddress);
 
     const platformId = coinGeckoAssetPlatformLookup[l1Token] ?? "ethereum";
 
-    // Caller wants to override price for token, possibly because the token is not supported yet on the Coingecko API,
-    // so assume the caller set the USD price of the token. We now need to dynamically load the base currency.
-    if (!isNaN(fixedTokenPrices[l1Token])) {
-      // If base is USD, return hardcoded token price in USD.
-      if (baseCurrency === "usd") {
-        price = fixedTokenPrices[l1Token];
-      } else {
-        throw new InputError(
-          "This token has a fixed price in USD only. Switch to USD base currency."
-        );
-      }
-    } else if (
-      balancerV2PoolTokens.includes(ethers.utils.getAddress(l1Token))
-    ) {
+    if (balancerV2PoolTokens.includes(ethers.utils.getAddress(l1Token))) {
       if (dateStr) {
         throw new InputError(
           "Historical price not supported for BalancerV2 tokens"
@@ -125,20 +109,39 @@ const handler = async (
     // date is provided, fetch historical price. Otherwise, fetch
     // current price.
     else {
+      // // If derived, we need to convert to USD first.
+      const modifiedBaseCurrency = isDerivedCurrency ? "usd" : baseCurrency;
       if (dateStr) {
         price = await coingeckoClient.getContractHistoricDayPrice(
           l1Token,
           dateStr,
-          baseCurrency
+          modifiedBaseCurrency
         );
       } else {
         [, price] = await coingeckoClient.getCurrentPriceByContract(
           l1Token,
-          baseCurrency,
+          modifiedBaseCurrency,
           platformId
         );
       }
     }
+
+    // If the base currency is a derived currency, we just need to grab
+    // the price of the quote currency in USD and perform the conversion.
+    let quotePrice = 1.0;
+    let quotePrecision = 18;
+    if (isDerivedCurrency) {
+      const token =
+        TOKEN_SYMBOLS_MAP[
+          baseCurrency.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
+        ];
+      quotePrice = await getCachedTokenPrice(
+        token.addresses[CHAIN_IDs.MAINNET],
+        "usd"
+      );
+      quotePrecision = token.decimals;
+    }
+    price = Number((price / quotePrice).toFixed(quotePrecision));
 
     // Two different explanations for how `stale-while-revalidate` works:
 
