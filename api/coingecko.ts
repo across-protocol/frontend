@@ -1,6 +1,6 @@
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { object, assert, Infer, optional, string } from "superstruct";
+import { object, assert, Infer, optional, string, pattern } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
@@ -30,6 +30,7 @@ const {
 const CoingeckoQueryParamsSchema = object({
   l1Token: validAddress(),
   baseCurrency: optional(string()),
+  date: optional(pattern(string(), /\d{2}-\d{2}-\d{4}/)),
 });
 
 type CoingeckoQueryParams = Infer<typeof CoingeckoQueryParamsSchema>;
@@ -47,7 +48,7 @@ const handler = async (
   try {
     assert(query, CoingeckoQueryParamsSchema);
 
-    let { l1Token, baseCurrency } = query;
+    let { l1Token, baseCurrency, date: dateStr } = query;
 
     // Format the params for consistency
     baseCurrency = (baseCurrency ?? "eth").toLowerCase();
@@ -91,6 +92,11 @@ const handler = async (
     const platformId = coinGeckoAssetPlatformLookup[l1Token] ?? "ethereum";
 
     if (balancerV2PoolTokens.includes(ethers.utils.getAddress(l1Token))) {
+      if (dateStr) {
+        throw new InputError(
+          "Historical price not supported for BalancerV2 tokens"
+        );
+      }
       if (baseCurrency === "usd") {
         price = await getBalancerV2TokenPrice(l1Token);
       } else {
@@ -98,13 +104,26 @@ const handler = async (
           "Only CG base currency allowed for BalancerV2 tokens is usd"
         );
       }
-    } else {
-      // Fetch price dynamically from Coingecko API
-      [, price] = await coingeckoClient.getCurrentPriceByContract(
-        l1Token,
-        isDerivedCurrency ? "usd" : baseCurrency, // If derived, we need to convert to USD first.
-        platformId
-      );
+    }
+    // Fetch price dynamically from Coingecko API. If a historical
+    // date is provided, fetch historical price. Otherwise, fetch
+    // current price.
+    else {
+      // // If derived, we need to convert to USD first.
+      const modifiedBaseCurrency = isDerivedCurrency ? "usd" : baseCurrency;
+      if (dateStr) {
+        price = await coingeckoClient.getContractHistoricDayPrice(
+          l1Token,
+          dateStr,
+          modifiedBaseCurrency
+        );
+      } else {
+        [, price] = await coingeckoClient.getCurrentPriceByContract(
+          l1Token,
+          modifiedBaseCurrency,
+          platformId
+        );
+      }
     }
 
     // If the base currency is a derived currency, we just need to grab

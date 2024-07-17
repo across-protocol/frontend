@@ -10,7 +10,11 @@ import {
 } from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
 
-export function useTokenConversion(symbol: string, baseCurrency: string) {
+export function useTokenConversion(
+  symbol: string,
+  baseCurrency: string,
+  historicalDateISO?: string
+) {
   const token = getToken(symbol);
 
   // If the token is OP, we need to use the address of the token on Optimism
@@ -19,7 +23,12 @@ export function useTokenConversion(symbol: string, baseCurrency: string) {
       ? TOKEN_SYMBOLS_MAP["OP"].addresses[10]
       : token.mainnetAddress!;
 
-  const query = useCoingeckoPrice(l1Token, baseCurrency, isDefined(l1Token));
+  const query = useCoingeckoPrice(
+    l1Token,
+    baseCurrency,
+    historicalDateISO,
+    isDefined(l1Token)
+  );
   const convertTokenToBaseCurrency = useCallback(
     (amount?: BigNumber) => {
       const price = query.data?.price;
