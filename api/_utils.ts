@@ -631,12 +631,12 @@ export const getRelayerFeeDetails = async (
 export const getCachedTokenPrice = async (
   l1Token: string,
   baseCurrency: string = "eth",
-  date?: string
+  historicalDateISO?: string
 ): Promise<number> => {
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
-        params: { l1Token, baseCurrency, date },
+        params: { l1Token, baseCurrency, date: historicalDateISO },
       })
     ).data.price
   );

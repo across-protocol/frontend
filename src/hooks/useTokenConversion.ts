@@ -13,7 +13,7 @@ import { ConvertDecimals } from "utils/convertdecimals";
 export function useTokenConversion(
   symbol: string,
   baseCurrency: string,
-  date?: string
+  historicalDateISO?: string
 ) {
   const token = getToken(symbol);
 
@@ -26,7 +26,7 @@ export function useTokenConversion(
   const query = useCoingeckoPrice(
     l1Token,
     baseCurrency,
-    date,
+    historicalDateISO,
     isDefined(l1Token)
   );
   const convertTokenToBaseCurrency = useCallback(
