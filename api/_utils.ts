@@ -1525,15 +1525,13 @@ export function getChainInputTokenMaxBalanceInUsd(
   symbol: string,
   includeDefault: boolean
 ) {
-  const envVarBase = "CHAIN_USD_MAX_BALANCE";
+  const maxBalances = process.env.CHAIN_USD_MAX_BALANCES
+    ? JSON.parse(process.env.CHAIN_USD_MAX_BALANCES)
+    : {};
   const defaultValue = includeDefault
     ? DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
     : undefined;
-  return (
-    process.env[`${envVarBase}_${chainId}_${symbol}`] ??
-    process.env[`${envVarBase}_${chainId}`] ??
-    defaultValue
-  );
+  return maxBalances[chainId.toString()]?.[symbol] || defaultValue;
 }
 
 export function getChainInputTokenMaxDepositInUsd(
@@ -1541,13 +1539,11 @@ export function getChainInputTokenMaxDepositInUsd(
   symbol: string,
   includeDefault: boolean
 ) {
-  const envVarBase = "CHAIN_USD_MAX_DEPOSIT";
+  const maxDeposits = process.env.CHAIN_USD_MAX_DEPOSITS
+    ? JSON.parse(process.env.CHAIN_USD_MAX_DEPOSITS)
+    : {};
   const defaultValue = includeDefault
     ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
     : undefined;
-  return (
-    process.env[`${envVarBase}_${chainId}_${symbol}`] ??
-    process.env[`${envVarBase}_${chainId}`] ??
-    defaultValue
-  );
+  return maxDeposits[chainId.toString()]?.[symbol] || defaultValue;
 }
