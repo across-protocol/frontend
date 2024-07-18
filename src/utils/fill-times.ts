@@ -1,17 +1,7 @@
-import { ChainId } from "./constants";
+import { getChainInfo } from "./constants";
 
 // Raw json from https://3251bbf8.us2a.app.preset.io/superset/explore/p/ZxKyKB6om5P
 import rawAvgFillTimesPreset from "../data/fill-times-preset.json";
-
-const chainIdToPresetChainName = {
-  [ChainId.MAINNET]: "ethereum",
-  [ChainId.ARBITRUM]: "arbitrum",
-  [ChainId.BASE]: "base",
-  [ChainId.POLYGON]: "polygon",
-  [ChainId.LINEA]: "linea",
-  [ChainId.OPTIMISM]: "optimism",
-  [ChainId.ZK_SYNC]: "zksync",
-};
 
 const fillTimeOverrides: {
   [tokenSymbol: string]: {
@@ -39,8 +29,8 @@ export function getFastFillTimeByRoute(
   toChainId: number,
   tokenSymbol: string
 ) {
-  const fromChainName = chainIdToPresetChainName[fromChainId];
-  const toChainName = chainIdToPresetChainName[toChainId];
+  const fromChainName = getChainInfo(fromChainId).name?.toLowerCase();
+  const toChainName = getChainInfo(toChainId).name?.toLowerCase();
 
   const overrides = fillTimeOverrides[tokenSymbol];
 
