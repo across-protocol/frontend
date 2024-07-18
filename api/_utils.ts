@@ -1525,7 +1525,8 @@ export function getChainInputTokenMaxBalanceInUsd(
   symbol: string,
   includeDefault: boolean
 ) {
-  const maxBalances = process.env.CHAIN_USD_MAX_BALANCES
+  const maxBalances: Record<string, Record<string, string>> = process.env
+    .CHAIN_USD_MAX_BALANCES
     ? JSON.parse(process.env.CHAIN_USD_MAX_BALANCES)
     : {};
   const defaultValue = includeDefault
@@ -1539,7 +1540,8 @@ export function getChainInputTokenMaxDepositInUsd(
   symbol: string,
   includeDefault: boolean
 ) {
-  const maxDeposits = process.env.CHAIN_USD_MAX_DEPOSITS
+  const maxDeposits: Record<string, Record<string, string>> = process.env
+    .CHAIN_USD_MAX_DEPOSITS
     ? JSON.parse(process.env.CHAIN_USD_MAX_DEPOSITS)
     : {};
   const defaultValue = includeDefault

@@ -146,10 +146,6 @@ export const relayerFeeCapitalCostConfig: {
   )
 );
 
-export const maxDepositForOriginChain = JSON.parse(
-  process.env.MAX_DEPOSIT_FOR_ORIGIN_CHAIN || "{}"
-) as Record<string, Record<string, string>>;
-
 // If `timestamp` is not passed into a suggested-fees query, then return the latest mainnet block minus this buffer
 // rounded down to the nearest `QUOTE_BLOCK_PRECISION`th block interval. Can be overridden by env var `QUOTE_BLOCK_BUFFER`.
 export const DEFAULT_QUOTE_BLOCK_BUFFER = 25; // ~25 blocks on mainnet (12s/block), ~= 5 minutes.
