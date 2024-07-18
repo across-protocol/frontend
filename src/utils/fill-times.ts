@@ -29,8 +29,8 @@ export function getFastFillTimeByRoute(
   toChainId: number,
   tokenSymbol: string
 ) {
-  const fromChainName = getChainInfo(fromChainId).name?.toLowerCase();
-  const toChainName = getChainInfo(toChainId).name?.toLowerCase();
+  const fromChainName = getChainInfo(fromChainId).name.toLowerCase();
+  const toChainName = getChainInfo(toChainId).name.toLowerCase();
 
   const overrides = fillTimeOverrides[tokenSymbol];
 
