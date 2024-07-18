@@ -46,6 +46,7 @@ export function FeesCollapsible(props: Props) {
     baseToken,
     props.toChainId,
     props.isSwap,
+    props.parsedAmount,
     props.gasFee,
     bridgeFee,
     swapFee

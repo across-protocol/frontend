@@ -8,6 +8,11 @@ export function max(a: BigNumberish, b: BigNumberish) {
   return BigNumber.from(b);
 }
 
+export function min(a: BigNumberish, b: BigNumberish) {
+  if (BigNumber.from(a).lte(b)) return BigNumber.from(a);
+  return BigNumber.from(b);
+}
+
 /**
  * Finds the amount of tokens that will be received after fees are deducted
  * @param amount Amount of tokens to be received (gross amount before fees)

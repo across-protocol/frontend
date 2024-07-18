@@ -1,9 +1,14 @@
 import styled from "@emotion/styled";
+import { ReactComponent as II } from "assets/icons/info.svg";
 import { Text } from "components/Text";
+import { Tooltip } from "components/Tooltip";
 import { COLORS } from "utils";
 
 export type HeaderCells = typeof headerCells;
 export type ColumnKey = keyof HeaderCells;
+export type ColumnTooltipRecord = Partial<
+  Record<ColumnKey, { title: string; content: string }>
+>;
 
 export const headerCells = {
   asset: {
@@ -58,8 +63,10 @@ export const headerCells = {
 
 export function HeadRow({
   disabledColumns = [],
+  columnTooltips,
 }: {
   disabledColumns?: ColumnKey[];
+  columnTooltips?: ColumnTooltipRecord;
 }) {
   return (
     <StyledHead>
@@ -68,6 +75,20 @@ export function HeadRow({
           disabledColumns.includes(key as ColumnKey) ? null : (
             <StyledCell key={key} width={value.width}>
               <Text color="grey-400">{value.label}</Text>
+              {columnTooltips?.[key as ColumnKey] && (
+                <StylizedTooltip
+                  tooltipId={key}
+                  title={columnTooltips[key as ColumnKey]?.title}
+                  body={
+                    <BodyText size="md">
+                      {columnTooltips[key as ColumnKey]?.content ?? ""}
+                    </BodyText>
+                  }
+                  placement="bottom-start"
+                >
+                  <InfoIcon />
+                </StylizedTooltip>
+              )}
             </StyledCell>
           )
         )}
@@ -93,4 +114,24 @@ const StyledRow = styled.tr`
 const StyledCell = styled.th<{ width: number }>`
   display: flex;
   width: ${({ width }) => width}px;
+  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  padding-right: 4px;
+`;
+
+const InfoIcon = styled(II)`
+  height: 14px;
+  width: 14px;
+  margin-bottom: -3px;
+`;
+
+const StylizedTooltip = styled(Tooltip)`
+  width: fit-content;
+  height: fit-content;
+  text-align: left;
+`;
+
+const BodyText = styled(Text)`
+  text-align: left;
 `;

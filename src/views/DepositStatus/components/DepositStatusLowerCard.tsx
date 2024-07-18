@@ -78,10 +78,12 @@ export function DepositStatusLowerCard({
           }
         : undefined,
     }) || {};
+
   const estimatedRewards = useEstimatedRewards(
     baseToken,
     toChainId,
     isSwap,
+    depositArgs?.initialAmount,
     gasFee,
     bridgeFee,
     swapFee

@@ -36,7 +36,6 @@ const PriceFee = ({
   baseCurrencyFee,
   token,
   highlightTokenFee = false,
-  rewardPercentageOfFees,
   hideSymbolOnEmpty = true,
   tokenIconFirstOnMobile = false,
   hideTokenIcon,
@@ -46,7 +45,6 @@ const PriceFee = ({
   baseCurrencyFee?: BigNumber;
   token: TokenInfo;
   highlightTokenFee?: boolean;
-  rewardPercentageOfFees?: BigNumber;
   hideSymbolOnEmpty?: boolean;
   tokenIconFirstOnMobile?: boolean;
   hideTokenIcon?: boolean;
@@ -62,16 +60,9 @@ const PriceFee = ({
       ) : (
         <>
           {baseCurrencyFee && tokenFee && (
-            <>
-              {rewardPercentageOfFees && (
-                <PercentageText size="md" color="grey-400">
-                  ({formatWeiPct(rewardPercentageOfFees)}% of fees)
-                </PercentageText>
-              )}
-              <Text size="md" color="grey-400">
-                {`$${formatUSD(baseCurrencyFee)}`}
-              </Text>
-            </>
+            <Text size="md" color="grey-400">
+              {`$${formatUSD(baseCurrencyFee)}`}
+            </Text>
           )}
           {tokenFee ? (
             <Text size="md" color={highlightTokenFee ? "primary" : "light-200"}>
@@ -345,7 +336,7 @@ const EstimatedTable = ({
           showLoadingSkeleton={showLoadingSkeleton}
         />
       </Row>
-      {rewardDisplaySymbol && rewardToken && (
+      {rewardDisplaySymbol && rewardToken && rewardPercentage && (
         <Row>
           <ToolTipWrapper>
             <Text size="md" color="grey-400">
@@ -353,7 +344,14 @@ const EstimatedTable = ({
             </Text>
             <Tooltip
               title={`${rewardDisplaySymbol} Rebate Reward`}
-              body={`Estimate of ${rewardDisplaySymbol} earned from this transfer. Final reward is calculated based on prior day ${rewardDisplaySymbol} price.`}
+              body={
+                <>
+                  Up to {formatWeiPct(rewardPercentage)}% of bridge fee earned
+                  in {rewardDisplaySymbol}. Rebate is capped to a bridge fee of
+                  25 bps (0.25%). Final reward is calculated based on prior day{" "}
+                  {rewardDisplaySymbol} price.
+                </>
+              }
               placement="bottom-start"
             >
               <InfoIconWrapper>
@@ -366,7 +364,6 @@ const EstimatedTable = ({
               token={rewardToken}
               tokenFee={reward}
               baseCurrencyFee={referralRewardAsBaseCurrency}
-              rewardPercentageOfFees={rewardPercentage}
               hideSymbolOnEmpty={!isDefined(netFeeAsBaseCurrency)}
               showLoadingSkeleton={isQuoteLoading}
             />
@@ -602,12 +599,6 @@ const TransparentWrapper = styled.div<{ isTransparent: boolean }>`
   margin: 0;
 
   opacity: ${({ isTransparent }) => (isTransparent ? 0.5 : 1)};
-`;
-
-const PercentageText = styled(Text)`
-  @media ${QUERIESV2.xs.andDown} {
-    display: none;
-  }
 `;
 
 const SwapSlippageSettings = styled.div`
