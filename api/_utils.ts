@@ -1524,20 +1524,32 @@ export function getLimitsBufferMultiplier(symbol: string) {
   return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
 }
 
-export function getLiteChainMaxBalanceUsd(chainId: number, symbol: string) {
-  const envVarBase = "LITE_CHAIN_USD_MAX_BALANCE";
-  return (
-    process.env[`${envVarBase}_${chainId}_${symbol}`] ??
-    process.env[`${envVarBase}_${chainId}`] ??
-    DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
-  );
+export function getChainInputTokenMaxBalanceInUsd(
+  chainId: number,
+  symbol: string,
+  includeDefault: boolean
+) {
+  const maxBalances: Record<string, Record<string, string>> = process.env
+    .CHAIN_USD_MAX_BALANCES
+    ? JSON.parse(process.env.CHAIN_USD_MAX_BALANCES)
+    : {};
+  const defaultValue = includeDefault
+    ? DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
+    : undefined;
+  return maxBalances[chainId.toString()]?.[symbol] || defaultValue;
 }
 
-export function getLiteChainMaxDepositUsd(chainId: number, symbol: string) {
-  const envVarBase = "LITE_CHAIN_USD_MAX_DEPOSIT";
-  return (
-    process.env[`${envVarBase}_${chainId}_${symbol}`] ??
-    process.env[`${envVarBase}_${chainId}`] ??
-    DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
-  );
+export function getChainInputTokenMaxDepositInUsd(
+  chainId: number,
+  symbol: string,
+  includeDefault: boolean
+) {
+  const maxDeposits: Record<string, Record<string, string>> = process.env
+    .CHAIN_USD_MAX_DEPOSITS
+    ? JSON.parse(process.env.CHAIN_USD_MAX_DEPOSITS)
+    : {};
+  const defaultValue = includeDefault
+    ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
+    : undefined;
+  return maxDeposits[chainId.toString()]?.[symbol] || defaultValue;
 }
