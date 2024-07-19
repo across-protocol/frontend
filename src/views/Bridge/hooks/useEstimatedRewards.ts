@@ -4,15 +4,16 @@ import { DateTime } from "luxon";
 import { useMemo } from "react";
 import {
   TokenInfo,
+  chainIdToRewardsProgramName,
   fixedPointAdjustment,
   formatUnitsWithMaxFractions,
   getToken,
   isDefined,
+  min,
   parseUnits,
   parseUnitsWithExtendedDecimals,
-  rewardPrograms,
-  chainIdToRewardsProgramName,
   rewardProgramTypes,
+  rewardPrograms,
 } from "utils";
 
 export type EstimatedRewards = ReturnType<typeof useEstimatedRewards>;
@@ -21,6 +22,7 @@ export function useEstimatedRewards(
   token: TokenInfo,
   destinationChainId: number,
   isSwap: boolean,
+  inputAmount?: BigNumber,
   gasFee?: BigNumber,
   bridgeFee?: BigNumber,
   swapFee?: BigNumber
@@ -63,12 +65,16 @@ export function useEstimatedRewards(
       availableRewardPercentage === undefined ||
       rewardToken === undefined ||
       bridgeFee === undefined ||
-      gasFee === undefined
+      gasFee === undefined ||
+      inputAmount === undefined
     ) {
       return undefined;
     }
     const totalFeeInL1 = bridgeFee.add(gasFee);
-    const totalRewardInL1 = totalFeeInL1
+    const maximalFee = parseUnits("0.0025", token.decimals); // 25 bips parsed to the input amount decimals
+    const cappedFee = min(totalFeeInL1, maximalFee);
+
+    const totalRewardInL1 = cappedFee
       .mul(availableRewardPercentage)
       .div(fixedPointAdjustment);
 
@@ -94,6 +100,8 @@ export function useEstimatedRewards(
     convertRewardToBaseCurrency,
     gasFee,
     rewardToken,
+    inputAmount,
+    token.decimals,
   ]);
 
   const hasDepositReward = depositReward?.rewardAsL1.gt(0) ?? false;
@@ -108,10 +116,12 @@ export function useEstimatedRewards(
     const gasFeeInUSD = convertL1ToBaseCurrency(gasFee);
     const bridgeFeeInUSD = convertL1ToBaseCurrency(bridgeFee);
     const swapFeeInUSD = convertL1ToBaseCurrency(swapFee);
+    const inputAmountInUSD = convertL1ToBaseCurrency(inputAmount);
 
     if (
       !isDefined(gasFeeInUSD) ||
       !isDefined(bridgeFeeInUSD) ||
+      !isDefined(inputAmountInUSD) ||
       (isSwap && !isDefined(swapFeeInUSD))
     ) {
       return {
@@ -123,11 +133,14 @@ export function useEstimatedRewards(
       };
     }
 
+    const numericInputAmount = formatNumericUsd(inputAmountInUSD);
     const numericGasFee = formatNumericUsd(gasFeeInUSD);
     const numericBridgeFee = formatNumericUsd(bridgeFeeInUSD);
     const numericReward = availableRewardPercentage
-      ? (numericBridgeFee + numericGasFee) *
-        Number(formatUnitsWithMaxFractions(availableRewardPercentage, 18))
+      ? Math.min(
+          numericInputAmount * 0.0025, // Cap reward at 25 basis points
+          numericBridgeFee + numericGasFee
+        ) * Number(formatUnitsWithMaxFractions(availableRewardPercentage, 18))
       : undefined;
     const numericSwapFee = swapFeeInUSD ? formatNumericUsd(swapFeeInUSD) : 0;
 
@@ -148,6 +161,7 @@ export function useEstimatedRewards(
     gasFee,
     swapFee,
     isSwap,
+    inputAmount,
   ]);
 
   return {
