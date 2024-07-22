@@ -71,7 +71,10 @@ export function useEstimatedRewards(
       return undefined;
     }
     const totalFeeInL1 = bridgeFee.add(gasFee);
-    const maximalFee = parseUnits("0.0025", token.decimals); // 25 bips parsed to the input amount decimals
+    const maximalFee = inputAmount
+      .mul(parseUnits("0.0025", 18)) // Cap fee at 25 basis points of input amount
+      .div(fixedPointAdjustment);
+
     const cappedFee = min(totalFeeInL1, maximalFee);
 
     const totalRewardInL1 = cappedFee
@@ -101,7 +104,6 @@ export function useEstimatedRewards(
     gasFee,
     rewardToken,
     inputAmount,
-    token.decimals,
   ]);
 
   const hasDepositReward = depositReward?.rewardAsL1.gt(0) ?? false;
