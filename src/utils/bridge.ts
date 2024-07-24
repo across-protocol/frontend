@@ -545,21 +545,25 @@ function defaultUnwrapToWethMessage(
   const wethInterface = new ethers.utils.Interface(WETH_INTERFACE);
 
   const outputTokenAddress = getWethAddressForChain(toChain);
-  let data, call;
+  let call;
   if (toNative) {
-    data = wethInterface.encodeFunctionData("withdraw(uint256 wad)", [amount]);
+    const data = wethInterface.encodeFunctionData("withdraw(uint256 wad)", [
+      amount,
+    ]);
     call = encoder.encode(
       [INSTRUCTIONS],
       [
         [
-          [outputTokenAddress, data, 0], // Withdraw WETH
-          [toAddress, "0x", amount], // Send ETH to recipient
+          [
+            [outputTokenAddress, data, 0], // Withdraw WETH
+            [toAddress, "0x", amount], // Send ETH to recipient
+          ],
+          toAddress,
         ],
-        toAddress,
       ]
     );
   } else {
-    data = wethInterface.encodeFunctionData(
+    const data = wethInterface.encodeFunctionData(
       "transfer(address dst, uint256 wad)",
       [toAddress, amount]
     );
@@ -567,9 +571,11 @@ function defaultUnwrapToWethMessage(
       [INSTRUCTIONS],
       [
         [
-          [outputTokenAddress, data, 0], // Transfer WETH
+          [
+            [outputTokenAddress, data, 0], // Transfer WETH
+          ],
+          toAddress,
         ],
-        toAddress,
       ]
     );
   }
