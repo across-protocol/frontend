@@ -56,7 +56,7 @@ export function resolveTiming(
       amountUsdA.lt(amountUsdB) ? -1 : amountUsdA.gt(amountUsdB) ? 1 : 0
   );
   return (
-    sortedCutoffs.find((cutoff) => usdAmount <= cutoff.amountUsd)
+    sortedCutoffs.find((cutoff) => usdAmount.lt(cutoff.amountUsd))
       ?.timingInSecs ?? 10
   );
 }
