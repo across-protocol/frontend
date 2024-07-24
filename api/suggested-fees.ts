@@ -294,7 +294,12 @@ const handler = async (
     const responseJson = {
       estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
         ? 15 * 60 // hardcoded 15 minutes for large deposits
-        : resolveTiming("arbitrum", "ethereum", "ETH", amountInUsd),
+        : resolveTiming(
+            String(computedOriginChainId),
+            String(destinationChainId),
+            inputToken.symbol,
+            amountInUsd
+          ),
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,

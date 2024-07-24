@@ -48,8 +48,8 @@ export function resolveTiming(
   symbol: string,
   usdAmount: BigNumber
 ): number {
-  const sourceData = timingsLookup[sourceChainId] ?? timingsLookup["OTHER"];
-  const destinationData = sourceData[destinationChainId] ?? sourceData["OTHER"];
+  const sourceData = timingsLookup[sourceChainId] ?? timingsLookup["0"];
+  const destinationData = sourceData[destinationChainId] ?? sourceData["0"];
   const symbolData = destinationData[symbol] ?? destinationData["OTHER"];
   const sortedCutoffs = symbolData.sort(
     ({ amountUsd: amountUsdA }, { amountUsd: amountUsdB }) =>
