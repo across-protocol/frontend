@@ -23,6 +23,7 @@ export async function suggestedFeesMockedApiCall(
   const decimals = token?.decimals ?? 18;
 
   return {
+    estimatedFillTimeSec: 1,
     totalRelayFee: {
       pct: BigNumber.from("1"),
       total: parseUnits("0.5", decimals),

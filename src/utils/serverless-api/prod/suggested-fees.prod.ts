@@ -55,6 +55,8 @@ export async function suggestedFeesApiCall(
     result["limits"].maxDepositShortDelay
   );
 
+  const estimatedFillTimeSec = result["estimatedFillTimeSec"];
+
   return {
     totalRelayFee: {
       pct: totalRelayFeePct,
@@ -81,5 +83,6 @@ export async function suggestedFeesApiCall(
       maxDepositShortDelay,
       minDeposit,
     },
+    estimatedFillTimeSec,
   };
 }
