@@ -146,10 +146,6 @@ export const relayerFeeCapitalCostConfig: {
   )
 );
 
-export const maxDepositForOriginChain = JSON.parse(
-  process.env.MAX_DEPOSIT_FOR_ORIGIN_CHAIN || "{}"
-) as Record<string, Record<string, string>>;
-
 // If `timestamp` is not passed into a suggested-fees query, then return the latest mainnet block minus this buffer
 // rounded down to the nearest `QUOTE_BLOCK_PRECISION`th block interval. Can be overridden by env var `QUOTE_BLOCK_BUFFER`.
 export const DEFAULT_QUOTE_BLOCK_BUFFER = 25; // ~25 blocks on mainnet (12s/block), ~= 5 minutes.
@@ -159,6 +155,8 @@ export const BLOCK_TAG_LAG = -1;
 // Note: this is a small subset of all the supported base currencies, but since we don't expect to use the others,
 // we've decided to keep this list small for now.
 export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
+// Note: this is a small set of currencies that the API will derive from the base currencies by using USD as an intermediary.
+export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set(["matic"]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
 export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;

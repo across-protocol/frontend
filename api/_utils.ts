@@ -385,6 +385,7 @@ export const getTokenByAddress = (
       symbol: string;
       name: string;
       addresses: Record<number, string>;
+      coingeckoId: string;
     }
   | undefined => {
   const matches =
@@ -623,16 +624,19 @@ export const getRelayerFeeDetails = async (
 /**
  * Creates an HTTP call to the `/api/coingecko` endpoint to resolve a CoinGecko price
  * @param l1Token The ERC20 token address of the coin to find the cached price of
+ * @param baseCurrency The base currency to convert the token price to
+ * @param date An optional date string in the format of `DD-MM-YYYY` to resolve a historical price
  * @returns The price of the `l1Token` token.
  */
 export const getCachedTokenPrice = async (
   l1Token: string,
-  baseCurrency: string = "eth"
+  baseCurrency: string = "eth",
+  historicalDateISO?: string
 ): Promise<number> => {
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
-        params: { l1Token, baseCurrency },
+        params: { l1Token, baseCurrency, date: historicalDateISO },
       })
     ).data.price
   );
@@ -1369,7 +1373,7 @@ export async function callViaMulticall3(
 export async function getBalancerV2TokenPrice(
   tokenAddress: string,
   chainId = 1
-) {
+): Promise<number> {
   const provider = getProvider(chainId);
   const pool = new ethers.Contract(
     tokenAddress,
@@ -1520,20 +1524,32 @@ export function getLimitsBufferMultiplier(symbol: string) {
   return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;
 }
 
-export function getLiteChainMaxBalanceUsd(chainId: number, symbol: string) {
-  const envVarBase = "LITE_CHAIN_USD_MAX_BALANCE";
-  return (
-    process.env[`${envVarBase}_${chainId}_${symbol}`] ??
-    process.env[`${envVarBase}_${chainId}`] ??
-    DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
-  );
+export function getChainInputTokenMaxBalanceInUsd(
+  chainId: number,
+  symbol: string,
+  includeDefault: boolean
+) {
+  const maxBalances: Record<string, Record<string, string>> = process.env
+    .CHAIN_USD_MAX_BALANCES
+    ? JSON.parse(process.env.CHAIN_USD_MAX_BALANCES)
+    : {};
+  const defaultValue = includeDefault
+    ? DEFAULT_LITE_CHAIN_USD_MAX_BALANCE
+    : undefined;
+  return maxBalances[chainId.toString()]?.[symbol] || defaultValue;
 }
 
-export function getLiteChainMaxDepositUsd(chainId: number, symbol: string) {
-  const envVarBase = "LITE_CHAIN_USD_MAX_DEPOSIT";
-  return (
-    process.env[`${envVarBase}_${chainId}_${symbol}`] ??
-    process.env[`${envVarBase}_${chainId}`] ??
-    DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
-  );
+export function getChainInputTokenMaxDepositInUsd(
+  chainId: number,
+  symbol: string,
+  includeDefault: boolean
+) {
+  const maxDeposits: Record<string, Record<string, string>> = process.env
+    .CHAIN_USD_MAX_DEPOSITS
+    ? JSON.parse(process.env.CHAIN_USD_MAX_DEPOSITS)
+    : {};
+  const defaultValue = includeDefault
+    ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
+    : undefined;
+  return maxDeposits[chainId.toString()]?.[symbol] || defaultValue;
 }
