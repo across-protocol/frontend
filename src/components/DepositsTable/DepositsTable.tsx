@@ -1,6 +1,11 @@
 import styled from "@emotion/styled";
 
-import { HeadRow, headerCells, ColumnKey } from "./HeadRow";
+import {
+  HeadRow,
+  headerCells,
+  ColumnKey,
+  ColumnTooltipRecord,
+} from "./HeadRow";
 import { DataRow } from "./DataRow";
 import { Deposit } from "hooks/useDeposits";
 
@@ -9,6 +14,7 @@ export type DepositsTableProps = {
   onClickSpeedUp?: (deposit: Deposit) => void;
   deposits: Deposit[];
   filterKey?: string;
+  tooltips?: ColumnTooltipRecord;
 };
 
 export function DepositsTable({
@@ -16,11 +22,12 @@ export function DepositsTable({
   deposits,
   onClickSpeedUp,
   filterKey = "",
+  tooltips,
 }: DepositsTableProps) {
   return (
     <Wrapper>
       <StyledTable>
-        <HeadRow disabledColumns={disabledColumns} />
+        <HeadRow disabledColumns={disabledColumns} columnTooltips={tooltips} />
         <tbody>
           {deposits.map((deposit) => (
             <DataRow

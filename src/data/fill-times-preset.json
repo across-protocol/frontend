@@ -4,230 +4,98 @@
       "data": [
         {
           "origin_chain": "linea",
-          "destination_chain": "base",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 214
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "zksync",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 207
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "optimism",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 170
-        },
-        {
-          "origin_chain": "linea",
           "destination_chain": "polygon",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 168
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "polygon",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 165
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "zksync",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 163
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 162
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "linea",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 161
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 161
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "linea",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 159
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 157
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 155
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "base",
           "origin_symbol": "DAI",
           "fill_time_seconds": 152
         },
         {
-          "origin_chain": "ethereum",
-          "destination_chain": "polygon",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 151
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "linea",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 151
-        },
-        {
           "origin_chain": "polygon",
           "destination_chain": "zksync",
           "origin_symbol": "DAI",
-          "fill_time_seconds": 150
+          "fill_time_seconds": 146
         },
         {
-          "origin_chain": "polygon",
-          "destination_chain": "base",
+          "origin_chain": "optimism",
+          "destination_chain": "linea",
           "origin_symbol": "DAI",
-          "fill_time_seconds": 149
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 148
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 148
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
           "fill_time_seconds": 145
         },
         {
-          "origin_chain": "base",
-          "destination_chain": "polygon",
+          "origin_chain": "ethereum",
+          "destination_chain": "linea",
           "origin_symbol": "DAI",
-          "fill_time_seconds": 142
+          "fill_time_seconds": 143
         },
         {
-          "origin_chain": "ethereum",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 142
+          "origin_chain": "zksync",
+          "destination_chain": "polygon",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 141
         },
         {
           "origin_chain": "optimism",
           "destination_chain": "polygon",
           "origin_symbol": "DAI",
-          "fill_time_seconds": 142
+          "fill_time_seconds": 141
         },
         {
-          "origin_chain": "polygon",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 140
+          "origin_chain": "linea",
+          "destination_chain": "optimism",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 139
         },
         {
-          "origin_chain": "zksync",
-          "destination_chain": "linea",
+          "origin_chain": "optimism",
+          "destination_chain": "arbitrum",
           "origin_symbol": "DAI",
           "fill_time_seconds": 138
         },
         {
-          "origin_chain": "zksync",
+          "origin_chain": "polygon",
+          "destination_chain": "linea",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 136
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "zksync",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 135
+        },
+        {
+          "origin_chain": "ethereum",
           "destination_chain": "base",
           "origin_symbol": "DAI",
           "fill_time_seconds": 134
         },
         {
-          "origin_chain": "ethereum",
+          "origin_chain": "base",
           "destination_chain": "linea",
-          "origin_symbol": "USDC",
+          "origin_symbol": "DAI",
           "fill_time_seconds": 133
         },
         {
-          "origin_chain": "arbitrum",
+          "origin_chain": "zksync",
+          "destination_chain": "linea",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 133
+        },
+        {
+          "origin_chain": "base",
           "destination_chain": "polygon",
           "origin_symbol": "DAI",
-          "fill_time_seconds": 132
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "optimism",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 132
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "optimism",
-          "origin_symbol": "DAI",
           "fill_time_seconds": 131
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 131
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 130
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 130
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "linea",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 130
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "optimism",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 129
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 129
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "zksync",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 128
         },
         {
           "origin_chain": "ethereum",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
+          "destination_chain": "polygon",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 129
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "DAI",
           "fill_time_seconds": 128
         },
         {
@@ -237,400 +105,448 @@
           "fill_time_seconds": 127
         },
         {
-          "origin_chain": "ethereum",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 126
-        },
-        {
-          "origin_chain": "optimism",
+          "origin_chain": "linea",
           "destination_chain": "base",
           "origin_symbol": "DAI",
           "fill_time_seconds": 126
         },
         {
-          "origin_chain": "optimism",
+          "origin_chain": "arbitrum",
           "destination_chain": "linea",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 125
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "arbitrum",
           "origin_symbol": "DAI",
-          "fill_time_seconds": 124
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "optimism",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 124
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 122
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 122
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "polygon",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 121
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 121
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "linea",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 120
+          "fill_time_seconds": 126
         },
         {
           "origin_chain": "linea",
           "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 124
+        },
+        {
+          "origin_chain": "ethereum",
+          "destination_chain": "zksync",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 124
+        },
+        {
+          "origin_chain": "polygon",
+          "destination_chain": "base",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 122
+        },
+        {
+          "origin_chain": "polygon",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "DAI",
           "fill_time_seconds": 120
         },
         {
-          "origin_chain": "optimism",
+          "origin_chain": "ethereum",
           "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
+          "origin_symbol": "DAI",
           "fill_time_seconds": 119
         },
         {
-          "origin_chain": "arbitrum",
+          "origin_chain": "ethereum",
+          "destination_chain": "optimism",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 118
+        },
+        {
+          "origin_chain": "ethereum",
+          "destination_chain": "polygon",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 118
+        },
+        {
+          "origin_chain": "optimism",
           "destination_chain": "base",
           "origin_symbol": "DAI",
           "fill_time_seconds": 118
+        },
+        {
+          "origin_chain": "polygon",
+          "destination_chain": "optimism",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 117
         },
         {
           "origin_chain": "zksync",
           "destination_chain": "arbitrum",
           "origin_symbol": "DAI",
-          "fill_time_seconds": 118
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "zksync",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 114
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "ethereum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 114
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 113
+          "fill_time_seconds": 117
         },
         {
           "origin_chain": "base",
           "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 112
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 116
         },
         {
           "origin_chain": "arbitrum",
           "destination_chain": "polygon",
-          "origin_symbol": "USDC",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 115
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "base",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 112
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "blast",
+          "origin_symbol": "DAI",
           "fill_time_seconds": 112
         },
         {
           "origin_chain": "arbitrum",
-          "destination_chain": "linea",
-          "origin_symbol": "USDC",
+          "destination_chain": "base",
+          "origin_symbol": "DAI",
           "fill_time_seconds": 111
         },
         {
+          "origin_chain": "arbitrum",
+          "destination_chain": "optimism",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 111
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "zksync",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 107
+        },
+        {
           "origin_chain": "optimism",
           "destination_chain": "polygon",
           "origin_symbol": "USDC",
-          "fill_time_seconds": 110
+          "fill_time_seconds": 102
         },
         {
-          "origin_chain": "ethereum",
-          "destination_chain": "zksync",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 108
+          "origin_chain": "zksync",
+          "destination_chain": "ethereum",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 97
         },
         {
           "origin_chain": "zksync",
           "destination_chain": "optimism",
           "origin_symbol": "DAI",
-          "fill_time_seconds": 108
+          "fill_time_seconds": 95
         },
         {
-          "origin_chain": "zksync",
-          "destination_chain": "linea",
+          "origin_chain": "linea",
+          "destination_chain": "zksync",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 95
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "ethereum",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 93
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "polygon",
           "origin_symbol": "USDC",
-          "fill_time_seconds": 106
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 105
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 104
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 103
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 102
+          "fill_time_seconds": 92
         },
         {
           "origin_chain": "base",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 102
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 101
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 100
-        },
-        {
-          "origin_chain": "optimism",
           "destination_chain": "ethereum",
           "origin_symbol": "DAI",
-          "fill_time_seconds": 100
+          "fill_time_seconds": 92
         },
         {
-          "origin_chain": "arbitrum",
-          "destination_chain": "zksync",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 99
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "base",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 98
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
+          "origin_chain": "base",
+          "destination_chain": "polygon",
+          "origin_symbol": "USDC",
           "fill_time_seconds": 91
         },
         {
-          "origin_chain": "polygon",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 87
-        },
-        {
-          "origin_chain": "base",
+          "origin_chain": "mode",
           "destination_chain": "polygon",
           "origin_symbol": "USDC",
-          "fill_time_seconds": 81
+          "fill_time_seconds": 78
         },
         {
-          "origin_chain": "ethereum",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 74
+          "origin_chain": "polygon",
+          "destination_chain": "optimism",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 76
         },
         {
           "origin_chain": "linea",
           "destination_chain": "polygon",
           "origin_symbol": "USDC",
-          "fill_time_seconds": 73
+          "fill_time_seconds": 75
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "polygon",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 74
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "blast",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 74
         },
         {
           "origin_chain": "polygon",
-          "destination_chain": "base",
-          "origin_symbol": "WETH",
+          "destination_chain": "linea",
+          "origin_symbol": "USDC",
           "fill_time_seconds": 72
         },
         {
           "origin_chain": "polygon",
-          "destination_chain": "zksync",
+          "destination_chain": "base",
           "origin_symbol": "USDC",
-          "fill_time_seconds": 65
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "zksync",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 63
+          "fill_time_seconds": 72
         },
         {
           "origin_chain": "polygon",
-          "destination_chain": "ethereum",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 72
+        },
+        {
+          "origin_chain": "ethereum",
+          "destination_chain": "mode",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 66
+        },
+        {
+          "origin_chain": "polygon",
+          "destination_chain": "mode",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 59
+        },
+        {
+          "origin_chain": "polygon",
+          "destination_chain": "mode",
           "origin_symbol": "WETH",
           "fill_time_seconds": 58
         },
         {
-          "origin_chain": "zksync",
-          "destination_chain": "polygon",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 56
+          "origin_chain": "polygon",
+          "destination_chain": "optimism",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 58
         },
         {
           "origin_chain": "polygon",
-          "destination_chain": "zksync",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 56
-        },
-        {
-          "origin_chain": "ethereum",
           "destination_chain": "arbitrum",
           "origin_symbol": "WETH",
           "fill_time_seconds": 56
         },
         {
           "origin_chain": "polygon",
-          "destination_chain": "ethereum",
+          "destination_chain": "linea",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 55
+        },
+        {
+          "origin_chain": "polygon",
+          "destination_chain": "zksync",
           "origin_symbol": "USDC",
           "fill_time_seconds": 53
         },
         {
-          "origin_chain": "ethereum",
-          "destination_chain": "linea",
-          "origin_symbol": "DAI",
+          "origin_chain": "polygon",
+          "destination_chain": "ethereum",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 52
+        },
+        {
+          "origin_chain": "blast",
+          "destination_chain": "mode",
+          "origin_symbol": "WETH",
           "fill_time_seconds": 48
         },
         {
-          "origin_chain": "arbitrum",
-          "destination_chain": "ethereum",
-          "origin_symbol": "DAI",
+          "origin_chain": "ethereum",
+          "destination_chain": "base",
+          "origin_symbol": "USDC",
           "fill_time_seconds": 46
         },
         {
           "origin_chain": "ethereum",
+          "destination_chain": "optimism",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 44
+        },
+        {
+          "origin_chain": "ethereum",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 44
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "mode",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 44
+        },
+        {
+          "origin_chain": "polygon",
+          "destination_chain": "blast",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 43
+        },
+        {
+          "origin_chain": "optimism",
+          "destination_chain": "mode",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 42
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "mode",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 42
+        },
+        {
+          "origin_chain": "polygon",
+          "destination_chain": "base",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 41
+        },
+        {
+          "origin_chain": "polygon",
+          "destination_chain": "ethereum",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 40
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "mode",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 40
+        },
+        {
+          "origin_chain": "ethereum",
+          "destination_chain": "polygon",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 38
+        },
+        {
+          "origin_chain": "polygon",
+          "destination_chain": "blast",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 37
+        },
+        {
+          "origin_chain": "ethereum",
+          "destination_chain": "mode",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 36
+        },
+        {
+          "origin_chain": "ethereum",
+          "destination_chain": "linea",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 36
+        },
+        {
+          "origin_chain": "ethereum",
+          "destination_chain": "base",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 32
+        },
+        {
+          "origin_chain": "polygon",
           "destination_chain": "zksync",
           "origin_symbol": "WETH",
-          "fill_time_seconds": 42
+          "fill_time_seconds": 32
+        },
+        {
+          "origin_chain": "ethereum",
+          "destination_chain": "zksync",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 32
+        },
+        {
+          "origin_chain": "ethereum",
+          "destination_chain": "blast",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 32
         },
         {
           "origin_chain": "ethereum",
           "destination_chain": "optimism",
           "origin_symbol": "WETH",
-          "fill_time_seconds": 38
+          "fill_time_seconds": 32
         },
         {
-          "origin_chain": "arbitrum",
+          "origin_chain": "ethereum",
           "destination_chain": "linea",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 38
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 31
         },
         {
-          "origin_chain": "optimism",
-          "destination_chain": "zksync",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 38
-        },
-        {
-          "origin_chain": "zksync",
+          "origin_chain": "ethereum",
           "destination_chain": "arbitrum",
           "origin_symbol": "WETH",
           "fill_time_seconds": 30
         },
         {
-          "origin_chain": "linea",
-          "destination_chain": "ethereum",
-          "origin_symbol": "DAI",
+          "origin_chain": "ethereum",
+          "destination_chain": "zksync",
+          "origin_symbol": "WETH",
           "fill_time_seconds": 29
         },
         {
-          "origin_chain": "linea",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 21
+          "origin_chain": "optimism",
+          "destination_chain": "ethereum",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 20
         },
         {
-          "origin_chain": "linea",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 21
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "polygon",
+          "origin_chain": "mode",
+          "destination_chain": "ethereum",
           "origin_symbol": "WETH",
           "fill_time_seconds": 20
         },
         {
-          "origin_chain": "optimism",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 19
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 19
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
+          "origin_chain": "zksync",
+          "destination_chain": "blast",
+          "origin_symbol": "DAI",
           "fill_time_seconds": 18
         },
         {
           "origin_chain": "optimism",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
+          "destination_chain": "zksync",
+          "origin_symbol": "DAI",
           "fill_time_seconds": 17
         },
         {
-          "origin_chain": "base",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
+          "origin_chain": "mode",
+          "destination_chain": "ethereum",
+          "origin_symbol": "USDC",
           "fill_time_seconds": 16
         },
         {
-          "origin_chain": "arbitrum",
-          "destination_chain": "polygon",
+          "origin_chain": "blast",
+          "destination_chain": "ethereum",
           "origin_symbol": "WETH",
-          "fill_time_seconds": 16
+          "fill_time_seconds": 14
         },
         {
-          "origin_chain": "zksync",
+          "origin_chain": "linea",
           "destination_chain": "ethereum",
           "origin_symbol": "DAI",
-          "fill_time_seconds": 15
+          "fill_time_seconds": 14
         },
         {
-          "origin_chain": "zksync",
-          "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 13
+          "origin_chain": "optimism",
+          "destination_chain": "blast",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 14
         },
         {
           "origin_chain": "zksync",
@@ -641,36 +557,6 @@
         {
           "origin_chain": "base",
           "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "ethereum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "base",
           "origin_symbol": "WETH",
           "fill_time_seconds": 12
         },
@@ -683,25 +569,61 @@
         {
           "origin_chain": "optimism",
           "destination_chain": "ethereum",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 12
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "ethereum",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 12
+        },
+        {
+          "origin_chain": "mode",
+          "destination_chain": "polygon",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 12
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "ethereum",
           "origin_symbol": "USDC",
           "fill_time_seconds": 12
         },
         {
           "origin_chain": "optimism",
           "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
+          "origin_symbol": "USDC",
           "fill_time_seconds": 12
         },
         {
+          "origin_chain": "mode",
+          "destination_chain": "linea",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 11
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "linea",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 11
+        },
+        {
           "origin_chain": "arbitrum",
-          "destination_chain": "optimism",
+          "destination_chain": "ethereum",
           "origin_symbol": "WETH",
           "fill_time_seconds": 11
         },
         {
           "origin_chain": "linea",
-          "destination_chain": "base",
-          "origin_symbol": "WETH",
+          "destination_chain": "optimism",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 11
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "linea",
+          "origin_symbol": "USDC",
           "fill_time_seconds": 11
         },
         {
@@ -711,52 +633,454 @@
           "fill_time_seconds": 11
         },
         {
-          "origin_chain": "base",
-          "destination_chain": "zksync",
+          "origin_chain": "zksync",
+          "destination_chain": "optimism",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 11
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "ethereum",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 11
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "blast",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 11
+        },
+        {
+          "origin_chain": "mode",
+          "destination_chain": "optimism",
           "origin_symbol": "USDC",
           "fill_time_seconds": 10
         },
         {
           "origin_chain": "arbitrum",
+          "destination_chain": "polygon",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 10
+        },
+        {
+          "origin_chain": "optimism",
           "destination_chain": "base",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 10
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "optimism",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 10
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "base",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 10
+        },
+        {
+          "origin_chain": "mode",
+          "destination_chain": "base",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 10
+        },
+        {
+          "origin_chain": "optimism",
+          "destination_chain": "polygon",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 10
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 9
+        },
+        {
+          "origin_chain": "mode",
+          "destination_chain": "linea",
           "origin_symbol": "WETH",
           "fill_time_seconds": 9
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "base",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 9
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "linea",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 9
+        },
+        {
+          "origin_chain": "optimism",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 9
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "polygon",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 9
+        },
+        {
+          "origin_chain": "optimism",
+          "destination_chain": "linea",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 9
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "optimism",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 9
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "polygon",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 9
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "blast",
+          "origin_symbol": "DAI",
+          "fill_time_seconds": 9
+        },
+        {
+          "origin_chain": "mode",
+          "destination_chain": "base",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "mode",
+          "destination_chain": "optimism",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "blast",
+          "destination_chain": "optimism",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "base",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "mode",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "mode",
+          "destination_chain": "blast",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "polygon",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "mode",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "mode",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "blast",
+          "destination_chain": "polygon",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 8
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "blast",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 7
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "mode",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 7
+        },
+        {
+          "origin_chain": "optimism",
+          "destination_chain": "zksync",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 7
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "zksync",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 7
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "mode",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 6
+        },
+        {
+          "origin_chain": "blast",
+          "destination_chain": "base",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 6
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "mode",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 6
+        },
+        {
+          "origin_chain": "optimism",
+          "destination_chain": "blast",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 6
+        },
+        {
+          "origin_chain": "mode",
+          "destination_chain": "zksync",
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 6
+        },
+        {
+          "origin_chain": "optimism",
+          "destination_chain": "mode",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 6
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "optimism",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 6
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "blast",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 6
         },
         {
           "origin_chain": "arbitrum",
           "destination_chain": "zksync",
           "origin_symbol": "USDC",
-          "fill_time_seconds": 9
+          "fill_time_seconds": 6
         },
         {
           "origin_chain": "linea",
           "destination_chain": "zksync",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 9
+          "origin_symbol": "USDC",
+          "fill_time_seconds": 6
         },
         {
-          "origin_chain": "base",
-          "destination_chain": "zksync",
+          "origin_chain": "arbitrum",
+          "destination_chain": "optimism",
           "origin_symbol": "WETH",
-          "fill_time_seconds": 8
+          "fill_time_seconds": 6
+        },
+        {
+          "origin_chain": "blast",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 5
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "blast",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 5
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "optimism",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 5
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "optimism",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 5
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "mode",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 5
         },
         {
           "origin_chain": "optimism",
           "destination_chain": "base",
           "origin_symbol": "WETH",
-          "fill_time_seconds": 8
+          "fill_time_seconds": 4
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "linea",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 4
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "base",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 4
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "linea",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 3
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "base",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 3
+        },
+        {
+          "origin_chain": "mode",
+          "destination_chain": "zksync",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 3
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "base",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 3
+        },
+        {
+          "origin_chain": "optimism",
+          "destination_chain": "linea",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 3
+        },
+        {
+          "origin_chain": "blast",
+          "destination_chain": "zksync",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 3
+        },
+        {
+          "origin_chain": "optimism",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 3
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "linea",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 3
+        },
+        {
+          "origin_chain": "blast",
+          "destination_chain": "linea",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 3
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 2
+        },
+        {
+          "origin_chain": "zksync",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 2
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "zksync",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 2
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "zksync",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 2
         },
         {
           "origin_chain": "optimism",
           "destination_chain": "zksync",
           "origin_symbol": "WETH",
-          "fill_time_seconds": 7
+          "fill_time_seconds": 2
         },
         {
           "origin_chain": "arbitrum",
           "destination_chain": "zksync",
           "origin_symbol": "WETH",
-          "fill_time_seconds": 4
+          "fill_time_seconds": 2
+        },
+        {
+          "origin_chain": "linea",
+          "destination_chain": "arbitrum",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": 1
+        },
+        {
+          "origin_chain": "arbitrum",
+          "destination_chain": "lisk",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": null
+        },
+        {
+          "origin_chain": "base",
+          "destination_chain": "lisk",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": null
+        },
+        {
+          "origin_chain": "optimism",
+          "destination_chain": "lisk",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": null
+        },
+        {
+          "origin_chain": "blast",
+          "destination_chain": "lisk",
+          "origin_symbol": "WETH",
+          "fill_time_seconds": null
         }
       ],
       "colnames": [
@@ -766,8 +1090,8 @@
         "fill_time_seconds"
       ],
       "coltypes": [1, 1, 1, 0],
-      "rowcount": 126,
-      "sql_rowcount": 126
+      "rowcount": 180,
+      "sql_rowcount": 180
     }
   ]
 }

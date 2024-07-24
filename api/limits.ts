@@ -12,13 +12,14 @@ import {
   ENABLED_ROUTES,
   HUB_POOL_CHAIN_ID,
   callViaMulticall3,
+  ConvertDecimals,
   getCachedTokenBalance,
   getCachedTokenPrice,
   getDefaultRelayerAddress,
   getHubPool,
   getLimitsBufferMultiplier,
-  getLiteChainMaxBalanceUsd,
-  getLiteChainMaxDepositUsd,
+  getChainInputTokenMaxBalanceInUsd,
+  getChainInputTokenMaxDepositInUsd,
   getLogger,
   getLpCushion,
   getProvider,
@@ -172,7 +173,7 @@ const handler = async (
 
     let { liquidReserves } = multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
-    const liteChainIds =
+    const liteChainIds: number[] =
       liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
     const originChainIsLiteChain = liteChainIds.includes(computedOriginChainId);
     const destinationChainIsLiteChain =
@@ -219,20 +220,70 @@ const handler = async (
       maxDepositShortDelay = minBN(maxDepositShortDelay, liquidReserves);
     }
 
-    if (originChainIsLiteChain) {
-      const relayers = [...fullRelayers, ...transferRestrictedRelayers];
-      const liteChainMaxBoundary = await getLiteChainMaxBoundary(
-        computedOriginChainId,
-        inputToken,
-        tokenPriceUsd,
-        relayers
-      );
+    // Apply chain max values when defined
+    const includeDefaultMaxValues = originChainIsLiteChain;
+    const includeRelayerBalances = originChainIsLiteChain;
+    let chainAvailableInputTokenAmountForDeposits: BigNumber | undefined;
+    let chainInputTokenMaxDeposit: BigNumber | undefined;
+    let chainHasMaxBoundary: boolean = false;
 
-      minDeposit = minBN(minDeposit, liteChainMaxBoundary);
-      minDepositFloor = minBN(minDepositFloor, liteChainMaxBoundary);
-      maxDepositInstant = minBN(maxDepositInstant, liteChainMaxBoundary);
-      maxDepositShortDelay = minBN(maxDepositShortDelay, liteChainMaxBoundary);
+    const chainInputTokenMaxBalanceInUsd = getChainInputTokenMaxBalanceInUsd(
+      computedOriginChainId,
+      inputToken.symbol,
+      includeDefaultMaxValues
+    );
+
+    const chainInputTokenMaxDepositInUsd = getChainInputTokenMaxDepositInUsd(
+      computedOriginChainId,
+      inputToken.symbol,
+      includeDefaultMaxValues
+    );
+
+    if (chainInputTokenMaxBalanceInUsd) {
+      const chainInputTokenMaxBalance = parseAndConvertUsdToTokenUnits(
+        chainInputTokenMaxBalanceInUsd,
+        tokenPriceUsd,
+        inputToken
+      );
+      const relayers = includeRelayerBalances
+        ? [...fullRelayers, ...transferRestrictedRelayers]
+        : [];
+      chainAvailableInputTokenAmountForDeposits =
+        await getAvailableAmountForDeposits(
+          computedOriginChainId,
+          inputToken,
+          chainInputTokenMaxBalance,
+          relayers
+        );
+      chainHasMaxBoundary = true;
     }
+
+    if (chainInputTokenMaxDepositInUsd) {
+      chainInputTokenMaxDeposit = parseAndConvertUsdToTokenUnits(
+        chainInputTokenMaxDepositInUsd,
+        tokenPriceUsd,
+        inputToken
+      );
+      chainHasMaxBoundary = true;
+    }
+
+    const bnOrMax = (value?: BigNumber) => value ?? ethers.constants.MaxUint256;
+    const resolvedChainAvailableAmountForDeposits = bnOrMax(
+      chainAvailableInputTokenAmountForDeposits
+    );
+    const resolvedChainInputTokenMaxDeposit = bnOrMax(
+      chainInputTokenMaxDeposit
+    );
+
+    const chainMaxBoundary = minBN(
+      resolvedChainAvailableAmountForDeposits,
+      resolvedChainInputTokenMaxDeposit
+    );
+
+    minDeposit = minBN(minDeposit, chainMaxBoundary);
+    minDepositFloor = minBN(minDepositFloor, chainMaxBoundary);
+    maxDepositInstant = minBN(maxDepositInstant, chainMaxBoundary);
+    maxDepositShortDelay = minBN(maxDepositShortDelay, chainMaxBoundary);
 
     const limitsBufferMultiplier = getLimitsBufferMultiplier(l1Token.symbol);
 
@@ -250,14 +301,13 @@ const handler = async (
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
       minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
-      // We set `maxDeposit` equal to `maxDepositShortDelay` to be backwards compatible
-      // but still prevent users from depositing more than the `maxDepositShortDelay`,
-      // only if buffer multiplier is set to 100%.
-      maxDeposit:
-        limitsBufferMultiplier.eq(ethers.utils.parseEther("1")) &&
-        !routeInvolvesLiteChain
-          ? liquidReserves.toString()
-          : bufferedMaxDepositShortDelay.toString(),
+      maxDeposit: getMaxDeposit(
+        liquidReserves,
+        bufferedMaxDepositShortDelay,
+        limitsBufferMultiplier,
+        chainHasMaxBoundary,
+        routeInvolvesLiteChain
+      ).toString(),
       maxDepositInstant: bufferedMaxDepositInstant.toString(),
       maxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
       recommendedDepositInstant: bufferedRecommendedDepositInstant.toString(),
@@ -275,53 +325,68 @@ const handler = async (
   }
 };
 
-const getLiteChainMaxBoundary = async (
-  liteChainId: number,
+const getAvailableAmountForDeposits = async (
+  originChainId: number,
   inputToken: TokenInfo,
-  tokenPriceUsd: BigNumber,
+  chainTokenMaxBalance: BigNumber,
   relayers: string[]
 ): Promise<BigNumber> => {
-  const liteChainUsdMaxBalance = ethers.utils.parseUnits(
-    getLiteChainMaxBalanceUsd(liteChainId, inputToken.symbol),
-    inputToken.decimals
-  );
-  const liteChainInputTokenMaxBalance = liteChainUsdMaxBalance
-    .mul(sdk.utils.fixedPointAdjustment)
-    .div(tokenPriceUsd);
-
-  const originSpokePoolAddress = getSpokePoolAddress(liteChainId);
+  const originSpokePoolAddress = getSpokePoolAddress(originChainId);
   const [originSpokePoolBalance, ...originChainBalancesPerRelayer] =
     await Promise.all([
       getCachedTokenBalance(
-        liteChainId,
+        originChainId,
         originSpokePoolAddress,
         inputToken.address
       ),
       ...relayers.map((relayer) =>
-        getCachedTokenBalance(liteChainId, relayer, inputToken.address)
+        getCachedTokenBalance(originChainId, relayer, inputToken.address)
       ),
     ]);
   const currentTotalChainBalance = originChainBalancesPerRelayer.reduce(
     (totalBalance, relayerBalance) => totalBalance.add(relayerBalance),
     originSpokePoolBalance
   );
-  const liteChainAvailableAmountForDeposits = currentTotalChainBalance.gte(
-    liteChainInputTokenMaxBalance
+  const chainAvailableAmountForDeposits = currentTotalChainBalance.gte(
+    chainTokenMaxBalance
   )
     ? sdk.utils.bnZero
-    : liteChainInputTokenMaxBalance.sub(currentTotalChainBalance);
-  const liteChainUsdMaxDeposit = ethers.utils.parseUnits(
-    getLiteChainMaxDepositUsd(liteChainId, inputToken.symbol),
-    inputToken.decimals
+    : chainTokenMaxBalance.sub(currentTotalChainBalance);
+  return chainAvailableAmountForDeposits;
+};
+
+const getMaxDeposit = (
+  liquidReserves: BigNumber,
+  bufferedMaxDepositShortDelay: BigNumber,
+  limitsBufferMultiplier: BigNumber,
+  chainHasMaxBoundary: boolean,
+  routeInvolvesLiteChain: boolean
+): BigNumber => {
+  // We set `maxDeposit` equal to `maxDepositShortDelay` to be backwards compatible
+  // but still prevent users from depositing more than the `maxDepositShortDelay`,
+  // only if buffer multiplier is set to 100% and origin chain doesn't have an explicit max limit
+  const isBufferMultiplierOne = limitsBufferMultiplier.eq(
+    ethers.utils.parseEther("1")
   );
-  const liteChainInputTokenMaxDeposit = liteChainUsdMaxDeposit
+  if (isBufferMultiplierOne && !routeInvolvesLiteChain) {
+    if (chainHasMaxBoundary)
+      return minBN(liquidReserves, bufferedMaxDepositShortDelay);
+    return liquidReserves;
+  }
+  return bufferedMaxDepositShortDelay;
+};
+
+const parseAndConvertUsdToTokenUnits = (
+  usdValue: string,
+  tokenPriceUsd: BigNumber,
+  inputToken: TokenInfo
+): BigNumber => {
+  const usdValueInWei = ethers.utils.parseUnits(usdValue);
+  const tokenValueInWei = usdValueInWei
     .mul(sdk.utils.fixedPointAdjustment)
     .div(tokenPriceUsd);
-
-  return minBN(
-    liteChainInputTokenMaxDeposit,
-    liteChainAvailableAmountForDeposits
-  );
+  const tokenValue = ConvertDecimals(18, inputToken.decimals)(tokenValueInWei);
+  return sdk.utils.toBN(tokenValue);
 };
 
 export default handler;
