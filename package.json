@@ -81,7 +81,7 @@
     "generate:routes:mainnet": "yarn generate:routes 1",
     "generate:chain-config": "tsx scripts/generate-chain-config.ts",
     "generate:ui-assets": "tsx scripts/generate-ui-assets.ts",
-    "pull:timing": "sh -c '[ -z \"$CONFIG_SOURCE_REPOSITORY\" ] && echo \"CONFIG_SOURCE_REPOSITORY is not set.\" && exit 1 || curl -o src/data/fill-times-preset.json $CONFIG_SOURCE_REPOSITORY'"
+    "pull:timing": "sh -c '[ -z \"$CONFIG_SOURCE_REPOSITORY\" ] && echo \"CONFIG_SOURCE_REPOSITORY is not set. Skipping.\" || (curl -o src/data/fill-times-preset.json $CONFIG_SOURCE_REPOSITORY && yarn lint:fix)'"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": [
