@@ -5,6 +5,25 @@ import { parseUnits } from "ethers/lib/utils";
 const bigNumberComparator = (a: BigNumber, b: BigNumber) =>
   a.lt(b) ? -1 : a.gt(b) ? 1 : 0;
 
+const fillTimeOverrides: {
+  [srcId: string]: {
+    [dstId: string]: {
+      [symbol: string]: number;
+    };
+  };
+} = {
+  "1": {
+    "10": {
+      SNX: 9_000,
+    },
+  },
+  "10": {
+    "1": {
+      SNX: 9_000,
+    },
+  },
+};
+
 const timingsLookup = timings
   .map((timing) => ({
     p75_fill_time_secs: Number(timing.p75_fill_time_secs),
@@ -55,6 +74,12 @@ export function resolveTiming(
   symbol: string,
   usdAmount: BigNumber
 ): number {
+  const override =
+    fillTimeOverrides[sourceChainId]?.[destinationChainId]?.[symbol];
+  if (override) {
+    return override;
+  }
+
   const sourceData = timingsLookup[sourceChainId] ?? timingsLookup["0"];
   const destinationData = sourceData[destinationChainId] ?? sourceData["0"];
   const symbolData = destinationData[symbol] ?? destinationData["OTHER"]; // implicitly sorted
