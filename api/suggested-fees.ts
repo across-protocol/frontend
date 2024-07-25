@@ -170,10 +170,6 @@ const handler = async (
       ENABLED_ROUTES.acrossConfigStoreAddress,
       provider
     );
-    const liteChainsKey =
-      sdk.clients.GLOBAL_CONFIG_STORE_KEYS.LITE_CHAIN_ID_INDICES;
-    const encodedLiteChainsKey = sdk.utils.utf8ToHex(liteChainsKey);
-
     const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
     // Aggregate multiple calls into a single multicall to decrease
@@ -197,12 +193,7 @@ const handler = async (
         contract: configStoreClient.contract,
         functionName: "l1TokenConfig",
         args: [l1Token.address],
-      },
-      {
-        contract: configStoreClient.contract,
-        functionName: "globalConfig",
-        args: [encodedLiteChainsKey],
-      },
+      }
     ];
 
     const [
@@ -211,7 +202,6 @@ const handler = async (
         nextUt,
         quoteTimestamp,
         rawL1TokenConfig,
-        [liteChainIdsEncoded],
       ],
       tokenPrice,
       limits,
