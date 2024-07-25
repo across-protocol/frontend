@@ -114,8 +114,12 @@ export const getConfirmationDepositTime = (
   const timeToFill =
     (estimatedFillTimeSec ?? 900) + // 15 minutes if not provided
     depositDelay;
+
+  const inMinutes = timeToFill > 60;
+  const timing = Math.floor(inMinutes ? timeToFill / 60 : timeToFill);
+
   return {
-    formattedString: `~${timeToFill} seconds`,
+    formattedString: `~${timing} ${inMinutes ? "minute" : "second"}${timing > 1 ? "s" : ""}`,
     lowEstimate: timeToFill,
     highEstimate: timeToFill,
   };
