@@ -2,6 +2,9 @@ import { BigNumber } from "ethers";
 import timings from "../src/data/fill-times-preset.json";
 import { parseUnits } from "ethers/lib/utils";
 
+const bigNumberComparator = (a: BigNumber, b: BigNumber) =>
+  a.lt(b) ? -1 : a.gt(b) ? 1 : 0;
+
 const timingsLookup = timings
   .map((timing) => ({
     p75_fill_time_secs: Number(timing.p75_fill_time_secs),
@@ -25,6 +28,10 @@ const timingsLookup = timings
               amountUsd: timing.max_size_usd,
               timingInSecs: timing.p75_fill_time_secs,
             });
+            // Sort inline
+            acc[srcId][dstId][symbol].sort((a, b) =>
+              bigNumberComparator(a.amountUsd, b.amountUsd)
+            );
           });
         });
       });
@@ -50,13 +57,9 @@ export function resolveTiming(
 ): number {
   const sourceData = timingsLookup[sourceChainId] ?? timingsLookup["0"];
   const destinationData = sourceData[destinationChainId] ?? sourceData["0"];
-  const symbolData = destinationData[symbol] ?? destinationData["OTHER"];
-  const sortedCutoffs = symbolData.sort(
-    ({ amountUsd: amountUsdA }, { amountUsd: amountUsdB }) =>
-      amountUsdA.lt(amountUsdB) ? -1 : amountUsdA.gt(amountUsdB) ? 1 : 0
-  );
+  const symbolData = destinationData[symbol] ?? destinationData["OTHER"]; // implicitly sorted
   return (
-    sortedCutoffs.find((cutoff) => usdAmount.lt(cutoff.amountUsd))
-      ?.timingInSecs ?? 10
+    symbolData.find((cutoff) => usdAmount.lt(cutoff.amountUsd))?.timingInSecs ??
+    10
   );
 }

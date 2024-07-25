@@ -29,7 +29,7 @@ import {
   getCachedLimits,
 } from "./_utils";
 import { resolveTiming } from "./_timings";
-import { formatUnits, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 
 const SuggestedFeesQueryParamsSchema = type({
   amount: parsableBigNumberString(),
