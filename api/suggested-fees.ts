@@ -234,8 +234,6 @@ const handler = async (
       .mul(parseUnits(tokenPriceUsd.toString(), 18))
       .div(parseUnits("1", inputToken.decimals));
 
-    console.log(formatUnits(amountInUsd, 18));
-
     if (amount.gt(limits.maxDeposit)) {
       throw new InputError(
         `Amount exceeds max. deposit limit: ${ethers.utils.formatUnits(
