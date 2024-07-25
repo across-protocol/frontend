@@ -193,16 +193,11 @@ const handler = async (
         contract: configStoreClient.contract,
         functionName: "l1TokenConfig",
         args: [l1Token.address],
-      }
+      },
     ];
 
     const [
-      [
-        currentUt,
-        nextUt,
-        quoteTimestamp,
-        rawL1TokenConfig,
-      ],
+      [currentUt, nextUt, quoteTimestamp, rawL1TokenConfig],
       tokenPrice,
       limits,
     ] = await Promise.all([
