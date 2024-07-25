@@ -125,7 +125,7 @@ export function useBridge() {
     selectedRoute,
     toAccount,
     walletAccount: account,
-    limits: quotedLimits || limitsQuery.limits,
+    limits: transferQuote ? quotedLimits : limitsQuery.limits,
     fees: quotedFees,
     swapQuote: quotedSwap,
     balance,
