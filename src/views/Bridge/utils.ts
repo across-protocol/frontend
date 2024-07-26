@@ -116,7 +116,7 @@ export function validateBridgeAmount(
     };
   }
 
-  if (maxDeposit && maxDeposit.eq(0)) {
+  if (maxDeposit && BigNumber.from(0).eq(maxDeposit)) {
     return {
       error: AmountInputError.PAUSED_DEPOSITS,
     };
