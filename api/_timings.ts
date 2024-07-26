@@ -1,4 +1,5 @@
 import { BigNumber } from "ethers";
+// If this file is not found, run `yarn pull:timing` to fetch the latest data
 import timings from "../src/data/fill-times-preset.json";
 import { parseUnits } from "ethers/lib/utils";
 
