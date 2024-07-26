@@ -11,18 +11,7 @@ const fillTimeOverrides: {
       [symbol: string]: number;
     };
   };
-} = {
-  "1": {
-    "10": {
-      SNX: 9_000,
-    },
-  },
-  "10": {
-    "1": {
-      SNX: 9_000,
-    },
-  },
-};
+} = {};
 
 const timingsLookup = timings
   .map((timing) => ({
