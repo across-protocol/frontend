@@ -70,10 +70,10 @@ export function resolveTiming(
   }
 
   const sourceData = timingsLookup[sourceChainId] ?? timingsLookup["0"];
-  const destinationData = sourceData[destinationChainId] ?? sourceData["0"];
-  const symbolData = destinationData[symbol] ?? destinationData["OTHER"]; // implicitly sorted
+  const destinationData = sourceData?.[destinationChainId] ?? sourceData?.["0"];
+  const symbolData = destinationData?.[symbol] ?? destinationData?.["OTHER"]; // implicitly sorted
   return (
-    symbolData.find((cutoff) => usdAmount.lt(cutoff.amountUsd))?.timingInSecs ??
-    10
+    symbolData?.find((cutoff) => usdAmount.lt(cutoff.amountUsd))
+      ?.timingInSecs ?? 10
   );
 }
