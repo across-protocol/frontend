@@ -69,11 +69,15 @@ export function resolveTiming(
     return override;
   }
 
+  const DEFAULT_FILL_TIME_SECS = 10;
   const sourceData = timingsLookup[sourceChainId] ?? timingsLookup["0"];
-  const destinationData = sourceData[destinationChainId] ?? sourceData["0"];
-  const symbolData = destinationData[symbol] ?? destinationData["OTHER"]; // implicitly sorted
-  return (
-    symbolData.find((cutoff) => usdAmount.lt(cutoff.amountUsd))?.timingInSecs ??
-    10
-  );
+  if (sourceData) {
+    const destinationData = sourceData[destinationChainId] ?? sourceData["0"];
+    const symbolData = destinationData[symbol] ?? destinationData["OTHER"]; // implicitly sorted
+    return (
+      symbolData?.find((cutoff) => usdAmount.lt(cutoff.amountUsd))
+        ?.timingInSecs ?? DEFAULT_FILL_TIME_SECS
+    );
+  }
+  return DEFAULT_FILL_TIME_SECS;
 }
