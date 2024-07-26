@@ -290,6 +290,7 @@ const BridgeForm = ({
         validationError={validationError}
         showPriceImpactWarning={showPriceImpactWarning}
         swapPriceImpact={swapPriceImpact}
+        estimatedFillTimeSec={fees?.estimatedFillTimeSec}
       />
       {isWrongChain ? (
         <StyledSecondaryButton onClick={onClickChainSwitch}>

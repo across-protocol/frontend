@@ -7,7 +7,6 @@ import {
 } from "./constants";
 import { tagAcrossDomain, tagAddress } from "./format";
 import { getProvider } from "./providers";
-import { getFastFillTimeByRoute } from "./fill-times";
 import { getConfig, getCurrentTime, isContractDeployedToAddress } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
@@ -29,6 +28,7 @@ export type BridgeFees = {
   quoteLatency: ethers.BigNumber;
   quoteBlock: ethers.BigNumber;
   limits: BridgeLimitInterface;
+  estimatedFillTimeSec: number;
 };
 
 type GetBridgeFeesArgs = {
@@ -71,6 +71,7 @@ export async function getBridgeFees({
     quoteBlock,
     lpFee,
     limits,
+    estimatedFillTimeSec,
   } = await getApiEndpoint().suggestedFees(
     amount,
     getConfig().getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
@@ -94,6 +95,7 @@ export async function getBridgeFees({
     quoteBlock,
     quoteLatency,
     limits,
+    estimatedFillTimeSec,
   };
 }
 
@@ -104,73 +106,23 @@ export type ConfirmationDepositTimeType = {
 };
 
 export const getConfirmationDepositTime = (
-  amount: BigNumber,
-  limits: BridgeLimitInterface,
-  fromChain: ChainId,
-  toChain: ChainId,
-  inputTokenSymbol: string
+  fromChain: number,
+  estimatedFillTimeSec?: number
 ): ConfirmationDepositTimeType => {
   const config = getConfig();
   const depositDelay = config.depositDelays()[fromChain] || 0;
-  const getTimeEstimateRangeString = (
-    lowEstimate: number,
-    highEstimate: number
-  ): {
-    formattedString: string;
-    lowEstimate: number;
-    highEstimate: number;
-  } => {
-    return {
-      formattedString: `~${lowEstimate + depositDelay}-${
-        highEstimate + depositDelay
-      } minutes`,
-      lowEstimate: lowEstimate + depositDelay,
-      highEstimate: highEstimate + depositDelay,
-    };
+  const timeToFill =
+    (estimatedFillTimeSec ?? 900) + // 15 minutes if not provided
+    depositDelay;
+
+  const inMinutes = timeToFill > 60;
+  const timing = Math.floor(inMinutes ? timeToFill / 60 : timeToFill);
+
+  return {
+    formattedString: `~${timing} ${inMinutes ? "minute" : "second"}${timing > 1 ? "s" : ""}`,
+    lowEstimate: timeToFill,
+    highEstimate: timeToFill,
   };
-
-  if (amount.lte(limits.maxDepositInstant)) {
-    const fastFillTimeInSeconds = Math.floor(
-      getFastFillTimeByRoute(fromChain, toChain, inputTokenSymbol)
-    );
-    const fastFillTimeInMinutes = Math.floor(fastFillTimeInSeconds / 60);
-    const fastFillTimeInHours = Number(fastFillTimeInMinutes / 60)
-      .toFixed(1)
-      .replace(/\.0$/, "");
-    return {
-      formattedString:
-        fastFillTimeInSeconds < 60
-          ? `~${fastFillTimeInSeconds} ${
-              fastFillTimeInSeconds === 1 ? "sec" : "secs"
-            }`
-          : fastFillTimeInMinutes < 60
-            ? `~${fastFillTimeInMinutes} ${
-                fastFillTimeInMinutes === 1 ? "min" : "mins"
-              }`
-            : `~${fastFillTimeInHours} ${
-                fastFillTimeInHours === "1" ? "hour" : "hours"
-              }`,
-      lowEstimate: fastFillTimeInSeconds,
-      highEstimate: fastFillTimeInSeconds,
-    };
-  } else if (amount.lte(limits.maxDepositShortDelay)) {
-    // This is just a rough estimate of how long 2 bot runs (1-4 minutes allocated for each) + an arbitrum transfer of 3-10 minutes would take.
-    if (toChain === ChainId.ARBITRUM) return getTimeEstimateRangeString(5, 15);
-
-    // Optimism transfers take about 10-20 minutes anecdotally.
-    if (toChain === ChainId.OPTIMISM) {
-      return getTimeEstimateRangeString(12, 25);
-    }
-
-    // Polygon transfers take 20-30 minutes anecdotally.
-    if (toChain === ChainId.POLYGON) return getTimeEstimateRangeString(20, 35);
-
-    // Typical numbers for an arbitrary L2.
-    return getTimeEstimateRangeString(10, 30);
-  }
-
-  // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.
-  return { formattedString: "~2-4 hours", lowEstimate: 180, highEstimate: 360 };
 };
 
 export type AcrossDepositArgs = {

@@ -1,1097 +1,702 @@
-{
-  "result": [
-    {
-      "data": [
-        {
-          "origin_chain": "linea",
-          "destination_chain": "polygon",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 152
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "zksync",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 146
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "linea",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 145
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "linea",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 143
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "polygon",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 141
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "polygon",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 141
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "optimism",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 139
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 138
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "linea",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 136
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "zksync",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 135
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "base",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 134
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "linea",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 133
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "linea",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 133
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "polygon",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 131
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "polygon",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 129
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 128
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "ethereum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 127
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "base",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 126
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "linea",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 126
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 124
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "zksync",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 124
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "base",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 122
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 120
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 119
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "optimism",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 118
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "polygon",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 118
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "base",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 118
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "optimism",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 117
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 117
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "optimism",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 116
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "polygon",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 115
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "base",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 112
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "blast",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 112
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "base",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 111
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "optimism",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 111
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "zksync",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 107
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "polygon",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 102
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "ethereum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 97
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "optimism",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 95
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "zksync",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 95
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "ethereum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 93
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "polygon",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 92
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "ethereum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 92
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "polygon",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 91
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "polygon",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 78
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 76
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "polygon",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 75
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "polygon",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 74
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "blast",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 74
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "linea",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 72
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 72
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 72
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "mode",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 66
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "mode",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 59
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "mode",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 58
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 58
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 56
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 55
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "zksync",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 53
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "ethereum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 52
-        },
-        {
-          "origin_chain": "blast",
-          "destination_chain": "mode",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 48
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 46
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 44
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 44
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "mode",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 44
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "blast",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 43
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "mode",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 42
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "mode",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 42
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "base",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 41
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 40
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "mode",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 40
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 38
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "blast",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 37
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "mode",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 36
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "linea",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 36
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "base",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 32
-        },
-        {
-          "origin_chain": "polygon",
-          "destination_chain": "zksync",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 32
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "zksync",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 32
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "blast",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 32
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 32
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 31
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 30
-        },
-        {
-          "origin_chain": "ethereum",
-          "destination_chain": "zksync",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 29
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "ethereum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 20
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 20
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "blast",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 18
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "zksync",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 17
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "ethereum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 16
-        },
-        {
-          "origin_chain": "blast",
-          "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 14
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "ethereum",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 14
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "blast",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 14
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "ethereum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 13
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "ethereum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "ethereum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "ethereum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 12
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "linea",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 11
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "linea",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 11
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 11
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 11
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "linea",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 11
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "ethereum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 11
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 11
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "ethereum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 11
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "blast",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 11
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 10
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 10
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 10
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 10
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 10
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 10
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 10
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 9
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 9
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 9
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "linea",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 9
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 9
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 9
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "linea",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 9
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "optimism",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 9
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 9
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "blast",
-          "origin_symbol": "DAI",
-          "fill_time_seconds": 9
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "base",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "blast",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "base",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "blast",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "mode",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "blast",
-          "destination_chain": "polygon",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 8
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "blast",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 7
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "mode",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 7
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "zksync",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 7
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "zksync",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 7
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "mode",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 6
-        },
-        {
-          "origin_chain": "blast",
-          "destination_chain": "base",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 6
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "mode",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 6
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "blast",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 6
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "zksync",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 6
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "mode",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 6
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 6
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "blast",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 6
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "zksync",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 6
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "zksync",
-          "origin_symbol": "USDC",
-          "fill_time_seconds": 6
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 6
-        },
-        {
-          "origin_chain": "blast",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 5
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "blast",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 5
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 5
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "optimism",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 5
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "mode",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 5
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "base",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 4
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 4
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "base",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 4
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 3
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "base",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 3
-        },
-        {
-          "origin_chain": "mode",
-          "destination_chain": "zksync",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 3
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "base",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 3
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 3
-        },
-        {
-          "origin_chain": "blast",
-          "destination_chain": "zksync",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 3
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 3
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 3
-        },
-        {
-          "origin_chain": "blast",
-          "destination_chain": "linea",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 3
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 2
-        },
-        {
-          "origin_chain": "zksync",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 2
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "zksync",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 2
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "zksync",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 2
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "zksync",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 2
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "zksync",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 2
-        },
-        {
-          "origin_chain": "linea",
-          "destination_chain": "arbitrum",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": 1
-        },
-        {
-          "origin_chain": "arbitrum",
-          "destination_chain": "lisk",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": null
-        },
-        {
-          "origin_chain": "base",
-          "destination_chain": "lisk",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": null
-        },
-        {
-          "origin_chain": "optimism",
-          "destination_chain": "lisk",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": null
-        },
-        {
-          "origin_chain": "blast",
-          "destination_chain": "lisk",
-          "origin_symbol": "WETH",
-          "fill_time_seconds": null
-        }
-      ],
-      "colnames": [
-        "origin_chain",
-        "destination_chain",
-        "origin_symbol",
-        "fill_time_seconds"
-      ],
-      "coltypes": [1, 1, 1, 0],
-      "rowcount": 180,
-      "sql_rowcount": 180
-    }
-  ]
-}
+[
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "3",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "9",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "98",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "120",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "83",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "106",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "124",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "150",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "6",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "10",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "113",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "111",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "150",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "150",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "74",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "106",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "155",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "12",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "12",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "35",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "120",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "122",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "305",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "20",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "20",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "140",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "155",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "12",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "12",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "104",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "126",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "50",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "58",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "140",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "155",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "ethereum",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "4",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "10",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "104",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "113",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "180",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "112",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "140",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "140",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "170",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "190",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "190",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "5",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "11",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "122",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "105",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "190",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "190",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "80",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "104",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "145",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "145",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "190",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "other",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "190",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "7",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "106",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "165",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "165",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "165",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "165",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "77",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "135",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "540",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "860",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "860",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "860",
+    "token_liquidity_groups": "OTHER"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "25",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "105",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "140",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "150",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "190",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "190",
+    "token_liquidity_groups": "USDC"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "1000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "65",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "10000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "140",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "30000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "145",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "100000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "160",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "500000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "160",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "polygon,blast",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "arbitrum,optimism,base,zksync",
+    "p75_fill_time_secs": "160",
+    "token_liquidity_groups": "USDT,DAI,USDB"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "1000",
+    "origin_route_classification": "ethereum",
+    "p75_fill_time_secs": "30",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "10000",
+    "origin_route_classification": "ethereum",
+    "p75_fill_time_secs": "46",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "30000",
+    "origin_route_classification": "ethereum",
+    "p75_fill_time_secs": "132",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "arbitrum,optimism,base,zksync",
+    "max_size_usd": "100000",
+    "origin_route_classification": "ethereum",
+    "p75_fill_time_secs": "136",
+    "token_liquidity_groups": "ETH,WETH"
+  }
+]

@@ -56,7 +56,7 @@
   "scripts": {
     "start": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite",
     "dev": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite --port $PORT --host",
-    "build": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && tsc && vite build",
+    "build": "yarn pull:timing && export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && tsc && vite build",
     "analyze": "yarn build && rollup-plugin-visualizer --open ./bundle-size-analysis.json",
     "test": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && jest --env jsdom src",
     "serve": "vite preview --port 3000",
@@ -80,7 +80,8 @@
     "generate:routes:e2e": "tsx scripts/generate-e2e-test-routes.ts",
     "generate:routes:mainnet": "yarn generate:routes 1",
     "generate:chain-config": "tsx scripts/generate-chain-config.ts",
-    "generate:ui-assets": "tsx scripts/generate-ui-assets.ts"
+    "generate:ui-assets": "tsx scripts/generate-ui-assets.ts",
+    "pull:timing": "sh -c '[ -z \"$CONFIG_SOURCE_REPOSITORY\" ] && echo \"CONFIG_SOURCE_REPOSITORY is not set. Skipping.\" || (curl -o src/data/fill-times-preset.json $CONFIG_SOURCE_REPOSITORY && yarn lint:fix && yarn format:fix)'"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": [
