@@ -12,6 +12,7 @@ import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
 import { SwapQuoteApiResponse } from "./serverless-api/prod/swap-quote";
+import { SpokePool, SpokePoolVerifier } from "./typechain";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -152,12 +153,12 @@ type NetworkMismatchHandler = (
 ) => void;
 
 /**
- * Makes a deposit on Across using the `SpokePool` contract's `deposit` function.
+ * Makes a deposit on Across using the `SpokePoolVerifiers` contract's `deposit` function if possible.
  * @param signer A valid signer, must be connected to a provider.
  * @param depositArgs - An object containing the {@link AcrossDepositArgs arguments} to pass to the deposit function of the bridge contract.
  * @returns The transaction response obtained after sending the transaction.
  */
-export async function sendDepositTx(
+export async function sendSpokePoolVerifierDepositTx(
   signer: ethers.Signer,
   {
     fromChain,
@@ -172,12 +173,12 @@ export async function sendDepositTx(
     isNative,
     referrer,
   }: AcrossDepositArgs,
+  spokePool: SpokePool,
+  spokePoolVerifier: SpokePoolVerifier,
   onNetworkMismatch?: NetworkMismatchHandler
 ): Promise<ethers.providers.TransactionResponse> {
-  const { spokePool, spokePoolVerifier, shouldUseSpokePoolVerifier } =
-    await _getSpokePoolAndVerifier({ fromChain, isNative });
-
-  const commonArgs = [
+  const tx = await spokePoolVerifier.populateTransaction.deposit(
+    spokePool.address,
     recipient,
     tokenAddress,
     amount,
@@ -186,15 +187,8 @@ export async function sendDepositTx(
     quoteTimestamp,
     message,
     maxCount,
-    { value: isNative ? amount : ethers.constants.Zero },
-  ] as const;
-  const tx =
-    shouldUseSpokePoolVerifier && spokePoolVerifier
-      ? await spokePoolVerifier.populateTransaction.deposit(
-          spokePool.address,
-          ...commonArgs
-        )
-      : await spokePool.populateTransaction.deposit(...commonArgs);
+    { value: isNative ? amount : ethers.constants.Zero }
+  );
 
   return _tagRefAndSignTx(
     tx,
@@ -224,17 +218,9 @@ export async function sendDepositV3Tx(
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
   }: AcrossDepositV3Args,
+  spokePool: SpokePool,
   onNetworkMismatch?: NetworkMismatchHandler
 ) {
-  const { spokePool, shouldUseSpokePoolVerifier } =
-    await _getSpokePoolAndVerifier({ fromChain, isNative });
-
-  // `SpokePoolVerifier` uses the signature of the `SpokePool` contract's `deposit`
-  // and therefore can not be used for V3 deposits.
-  if (shouldUseSpokePoolVerifier) {
-    throw new Error("SpokePoolVerifier can not be used for V3 deposits");
-  }
-
   const value = isNative ? amount : ethers.constants.Zero;
   const inputAmount = amount;
   const outputAmount = inputAmount.sub(
@@ -376,7 +362,7 @@ export async function sendSwapAndBridgeTx(
   );
 }
 
-async function _getSpokePoolAndVerifier({
+export async function getSpokePoolAndVerifier({
   fromChain,
   isNative,
 }: {

@@ -18,12 +18,13 @@ import {
   generateTransferSigned,
   generateTransferSubmitted,
   getConfig,
-  sendDepositTx,
+  getSpokePoolAndVerifier,
+  sendSpokePoolVerifierDepositTx,
   sendDepositV3Tx,
   sendSwapAndBridgeTx,
 } from "utils";
 import { TransferQuote } from "./useTransferQuote";
-import { SelectedRoute, shouldUseDepositV3 } from "../utils";
+import { SelectedRoute } from "../utils";
 import useReferrer from "hooks/useReferrer";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { BridgeLimitInterface } from "utils/serverless-api/types";
@@ -158,22 +159,28 @@ export function useBridgeAction(
         },
         networkMismatchHandler
       );
-    } else if (shouldUseDepositV3(frozenRoute)) {
-      tx = await sendDepositV3Tx(
-        signer,
-        {
-          ...frozenDepositArgs,
-          inputTokenAddress: frozenRoute.fromTokenAddress,
-          outputTokenAddress: frozenRoute.toTokenAddress,
-        },
-        networkMismatchHandler
-      );
     } else {
-      tx = await sendDepositTx(
-        signer,
-        frozenDepositArgs,
-        networkMismatchHandler
-      );
+      const { spokePool, shouldUseSpokePoolVerifier, spokePoolVerifier } =
+        await getSpokePoolAndVerifier(frozenRoute);
+      tx =
+        shouldUseSpokePoolVerifier && spokePoolVerifier
+          ? await sendSpokePoolVerifierDepositTx(
+              signer,
+              frozenDepositArgs,
+              spokePool,
+              spokePoolVerifier,
+              networkMismatchHandler
+            )
+          : await sendDepositV3Tx(
+              signer,
+              {
+                ...frozenDepositArgs,
+                inputTokenAddress: frozenRoute.fromTokenAddress,
+                outputTokenAddress: frozenRoute.toTokenAddress,
+              },
+              spokePool,
+              networkMismatchHandler
+            );
     }
 
     addToAmpliQueue(() => {

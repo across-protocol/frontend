@@ -420,16 +420,6 @@ export function getTokenExplorerLinkSafe(chainId: number, symbol: string) {
   }
 }
 
-export function shouldUseDepositV3(selectedRoute: SelectedRoute) {
-  const matchingRoutes = enabledRoutes.filter(
-    (route) =>
-      route.fromChain === selectedRoute.fromChain &&
-      route.toChain === selectedRoute.toChain &&
-      route.fromTokenSymbol === selectedRoute.fromTokenSymbol
-  );
-  return matchingRoutes.length > 1;
-}
-
 export function calcFeesForEstimatedTable(params: {
   capitalFee?: BigNumber;
   lpFee?: BigNumber;
