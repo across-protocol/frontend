@@ -12,12 +12,30 @@ import {
   tokenAmountsMap,
   depositChainIdToTest,
   originRoutesToTest,
-  destinationChainIdsToTest,
   destinationRoutesToTest,
 } from "../utils/deposit-test-routes";
 
 const testWithConnectedMM = testWithSynpress(metaMaskFixtures(connectedSetup));
 const { expect } = testWithConnectedMM;
+
+const allChainIds = new Set([
+  depositChainIdToTest,
+  ...Object.keys(originRoutesToTest),
+  ...Object.keys(destinationRoutesToTest),
+]);
+
+testWithConnectedMM.beforeAll(async ({ metamask }) => {
+  for (const chainId of allChainIds) {
+    const chain = chains[chainId];
+
+    await metamask.addNetwork({
+      name: chain.name,
+      rpcUrl: chain.rpcUrl,
+      chainId: chain.chainId,
+      symbol: "ETH",
+    });
+  }
+});
 
 /**
  * This test suite tests the deposit flow from a specific chain to other chains and vice versa.
@@ -26,24 +44,24 @@ const { expect } = testWithConnectedMM;
  * It is NOT meant to be run in CI.
  */
 
-// This needs to be sequential because we are sending txsn from the same origin chain
-testWithConnectedMM(
-  `deposits from ${depositChainIdToTest} to ${destinationChainIdsToTest}`,
-  async ({ page, metamask }) => {
-    if (IS_CI || !RUN_DEPOSIT_TESTS) {
-      testWithConnectedMM.skip();
-    }
-    for (const { toChain } of originRoutesToTest) {
+// This needs to be run sequential because we are sending txns from the same origin chain
+for (const destinationChainId of Object.keys(originRoutesToTest)) {
+  testWithConnectedMM(
+    `deposits from ${depositChainIdToTest} to ${destinationChainId}`,
+    async ({ page, metamask }) => {
+      if (IS_CI || !RUN_DEPOSIT_TESTS) {
+        testWithConnectedMM.skip();
+      }
       await testDepositFlow(
         depositChainIdToTest,
-        [toChain],
+        originRoutesToTest[destinationChainId],
         tokenAmountsMap,
         page,
         metamask as any
       );
     }
-  }
-);
+  );
+}
 
 // These can be parallel because they are sending txns from different origin chains
 for (const originChainId of Object.keys(destinationRoutesToTest)) {
@@ -69,19 +87,13 @@ for (const originChainId of Object.keys(destinationRoutesToTest)) {
 
 async function testDepositFlow(
   fromChainId: number,
-  toChainIds: number[],
+  routes: (typeof originRoutesToTest)["1"],
   tokenAmounts: Record<string, number>,
   page: Page,
   metamask: MetaMask
 ) {
   const fromChain = chains[fromChainId];
 
-  await metamask.addNetwork({
-    name: fromChain.name,
-    rpcUrl: fromChain.rpcUrl,
-    chainId: fromChainId,
-    symbol: "ETH",
-  });
   await metamask.switchNetwork(fromChain.name);
 
   // Select route in following order:
@@ -90,11 +102,21 @@ async function testDepositFlow(
   // 3. input token
   await selectChain(page, "from", new RegExp(`${fromChain.name}`));
 
+  const toChainIds = routes.map(({ toChain }) => toChain);
+
   for (const toChainId of toChainIds) {
     const toChain = chains[toChainId];
     await selectChain(page, "to", new RegExp(`${toChain.name}`));
 
     for (const [symbol, amount] of Object.entries(tokenAmounts)) {
+      const isTokenSupported = routes.find(
+        ({ fromTokenSymbol }) => fromTokenSymbol === symbol
+      );
+
+      if (!isTokenSupported) {
+        continue;
+      }
+
       await selectToken(page, "input", symbol);
 
       // Disabled if input is empty

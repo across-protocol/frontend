@@ -28,10 +28,21 @@ async function generateTestRoutes(depositChainIdToTest?: number) {
   ) as Record<string, number>;
 
   // List of routes to test with origin chain as depositChainIdToTest
-  const originRoutesToTest = routes.routes.filter(
-    ({ fromChain, fromTokenSymbol }) =>
-      fromChain === depositChainIdToTest && fromTokenSymbol in tokenAmountsMap
-  );
+  const originRoutesToTest = routes.routes
+    .filter(
+      ({ fromChain, fromTokenSymbol }) =>
+        fromChain === depositChainIdToTest && fromTokenSymbol in tokenAmountsMap
+    )
+    .reduce(
+      (acc, route) => {
+        if (!(route.toChain in acc)) {
+          acc[route.toChain] = [];
+        }
+        acc[route.toChain].push(route);
+        return acc;
+      },
+      {} as Record<number, (typeof routes.routes)[0][]>
+    );
 
   // Map of routes to test with destination chain as depositChainIdToTest
   const destinationRoutesToTest = routes.routes

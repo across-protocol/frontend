@@ -24,9 +24,12 @@ async function selectFromSelector(
   itemLabel: string | RegExp
 ) {
   const selectorModal = page.getByTestId(`${selectorTestId}-modal`);
-  const item = page.getByText(itemLabel, { exact: true }).filter({
-    hasNot: page.getByRole("link"),
-  });
+  const item = page
+    .getByText(itemLabel, { exact: true })
+    .filter({
+      hasNot: page.getByRole("link"),
+    })
+    .first();
 
   await page.getByTestId(selectorTestId).click();
   await selectorModal.locator(item).scrollIntoViewIfNeeded();
