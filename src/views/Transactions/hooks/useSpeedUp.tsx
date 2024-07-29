@@ -25,7 +25,8 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
     BigNumber.from(transfer.amount),
     transfer.sourceChainId,
     transfer.destinationChainId,
-    token.symbol,
+    transfer.token?.symbol || token.symbol,
+    transfer.outputToken?.symbol || token.symbol,
     transfer.recipientAddr
   );
 
