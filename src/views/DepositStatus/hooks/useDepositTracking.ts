@@ -11,6 +11,7 @@ import {
   getDepositByTxHash,
   getFillByDepositTxHash,
   NoV3FundsDepositedLogError,
+  getChainInfo,
 } from "utils";
 import {
   getLocalDepositByTxHash,
@@ -55,6 +56,7 @@ export function useDepositTracking(
     {
       staleTime: Infinity,
       enabled: shouldRetryDepositQuery,
+      retryDelay: getChainInfo(fromChainId).pollingInterval || 5_000,
       onSuccess: (data) => {
         if (!fromBridgePagePayload || !data.parsedDepositLog) {
           return;
@@ -106,6 +108,7 @@ export function useDepositTracking(
     {
       staleTime: Infinity,
       retry: true,
+      retryDelay: getChainInfo(toChainId).pollingInterval || 5_000,
       enabled: !!depositQuery.data,
       onSuccess: (data) => {
         if (!fromBridgePagePayload) {
