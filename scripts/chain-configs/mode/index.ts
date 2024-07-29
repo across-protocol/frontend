@@ -13,6 +13,7 @@ export default {
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: getDeployedAddress("SpokePool", chainId),
   chainId,
+  blockTimeSeconds: 2,
   publicRpcUrl: "https://mainnet.mode.network",
   tokens: ["WETH", "ETH", "USDC.e", "USDT", "WBTC"],
   enableCCTP: false,
