@@ -72,6 +72,8 @@ export type BridgeFormProps = {
 const validationErrorTextMap = {
   [AmountInputError.INSUFFICIENT_BALANCE]:
     "Insufficient balance to process this transfer.",
+  [AmountInputError.PAUSED_DEPOSITS]:
+    "[INPUT_TOKEN] deposits are temporarily paused.",
   [AmountInputError.INSUFFICIENT_LIQUIDITY]:
     "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [MAX_DEPOSIT] or lower.",
   [AmountInputError.INVALID]: "Only positive numbers are allowed as an input.",
@@ -174,13 +176,15 @@ const BridgeForm = ({
       </RowWrapper>
       {parsedAmountInput && validationError && (
         <InputErrorText
-          errorText={validationErrorTextMap[validationError].replace(
-            "[MAX_DEPOSIT]",
-            `${formatUnitsWithMaxFractions(
-              limits?.maxDeposit || 0,
-              getToken(selectedRoute.fromTokenSymbol).decimals
-            )} ${selectedRoute.fromTokenSymbol}`
-          )}
+          errorText={validationErrorTextMap[validationError]
+            .replace("[INPUT_TOKEN]", selectedRoute.fromTokenSymbol)
+            .replace(
+              "[MAX_DEPOSIT]",
+              `${formatUnitsWithMaxFractions(
+                limits?.maxDeposit || 0,
+                getToken(selectedRoute.fromTokenSymbol).decimals
+              )} ${selectedRoute.fromTokenSymbol}`
+            )}
         />
       )}
       <RowWrapper>

@@ -31,6 +31,7 @@ type RouteFilter = Partial<{
 
 export enum AmountInputError {
   INVALID = "invalid",
+  PAUSED_DEPOSITS = "pausedDeposits",
   INSUFFICIENT_LIQUIDITY = "insufficientLiquidity",
   INSUFFICIENT_BALANCE = "insufficientBalance",
   AMOUNT_TOO_LOW = "amountTooLow",
@@ -112,6 +113,12 @@ export function validateBridgeAmount(
   if (!parsedAmountInput || !amountToBridgeAfterSwap) {
     return {
       error: AmountInputError.INVALID,
+    };
+  }
+
+  if (maxDeposit && BigNumber.from(0).eq(maxDeposit)) {
+    return {
+      error: AmountInputError.PAUSED_DEPOSITS,
     };
   }
 

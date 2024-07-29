@@ -54,7 +54,8 @@ export function FeesCollapsible(props: Props) {
   );
 
   const doesAmountExceedMaxDeposit =
-    props.validationError === AmountInputError.INSUFFICIENT_LIQUIDITY;
+    props.validationError === AmountInputError.INSUFFICIENT_LIQUIDITY ||
+    props.validationError === AmountInputError.PAUSED_DEPOSITS;
 
   const estimatedTime =
     props.quotedLimits && outputAmount && !doesAmountExceedMaxDeposit

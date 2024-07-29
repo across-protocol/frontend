@@ -117,7 +117,8 @@ const EstimatedTable = ({
     rewardToken?.displaySymbol || rewardToken?.symbol.toUpperCase();
   const baseToken = swapToken || inputToken;
   const doesAmountExceedMaxDeposit =
-    validationError === AmountInputError.INSUFFICIENT_LIQUIDITY;
+    validationError === AmountInputError.INSUFFICIENT_LIQUIDITY ||
+    validationError === AmountInputError.PAUSED_DEPOSITS;
 
   const { bridgeFee, outputAmount, swapFee } = doesAmountExceedMaxDeposit
     ? {
