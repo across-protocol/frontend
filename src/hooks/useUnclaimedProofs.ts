@@ -2,7 +2,11 @@ import { useQuery } from "react-query";
 import { BigNumber } from "ethers";
 
 import { useConnection } from "hooks";
-import { fetchIsClaimed, fetchAirdropProofs } from "utils/merkle-distributor";
+import {
+  fetchIsClaimed,
+  fetchAirdropProofs,
+  fetchNextCreatedIndex,
+} from "utils/merkle-distributor";
 import {
   getUnclaimedProofsQueryKey,
   rewardProgramTypes,
@@ -50,8 +54,12 @@ async function fetchUnclaimedProofs(
   account?: string
 ) {
   const allProofs = await fetchAirdropProofs(rewardsType, account);
+  const nextCreatedIndex = await fetchNextCreatedIndex(rewardsType);
+  const publishedProofs = allProofs.filter(
+    (proof) => proof.windowIndex < nextCreatedIndex.toNumber()
+  );
   const isClaimedResults = await fetchIsClaimedForIndices(
-    allProofs,
+    publishedProofs,
     rewardsType
   );
 
