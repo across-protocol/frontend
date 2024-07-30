@@ -9,6 +9,6 @@
      curl -s -o ${FILE_PATH} "https://${GH_TOKEN}@${GH_REPO_URL}/${FILE}"
      echo "Updated data at ${FILE_PATH}"
  else
-      echo '{"empty": "empty"}' > ${FILE_PATH}
+      cat src/data/fill-times-preset.json > ${FILE_PATH}
       echo "Using default data at ${FILE_PATH}"
  fi
