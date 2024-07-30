@@ -42,26 +42,22 @@ export function useBridge() {
 
   const { toAccount, setCustomToAddress } = useToAccount(selectedRoute.toChain);
 
-  const { transferQuoteQuery, limitsQuery } = useTransferQuote(
+  const { transferQuoteQuery, limitsQuery, feesQuery } = useTransferQuote(
     selectedRoute,
     parsedAmount?.gt(0) ? parsedAmount : bnZero,
     swapSlippage,
     account,
     toAccount?.address
   );
-  const {
-    data: transferQuote,
-    isLoading: isQuoteLoading,
-    isFetching: isQuoteFetching,
-    isIdle: isQuoteIdle,
-  } = transferQuoteQuery;
+  const { data: transferQuote } = transferQuoteQuery;
 
   const { quotedFees, quotedSwap, quotedLimits, estimatedTime } =
     usedTransferQuote || {};
 
   const isQuoteUpdating =
     shouldUpdateQuote &&
-    (isQuoteLoading || isQuoteFetching || Boolean(parsedAmount && isQuoteIdle));
+    (transferQuoteQuery.isInitialLoading || feesQuery.isInitialLoading) &&
+    !transferQuote;
 
   const { error: amountValidationError } = validateBridgeAmount(
     parsedAmount,

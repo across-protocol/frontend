@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 
 import { useConnection } from "hooks";
@@ -16,37 +16,31 @@ import {
 export function useUnclaimedProofs(rewardsType: rewardProgramTypes) {
   const { isConnected, account } = useConnection();
 
-  return useQuery(
-    getUnclaimedProofsQueryKey(rewardsType, account),
-    () => fetchUnclaimedProofs(rewardsType, account),
-    {
-      enabled: isConnected && !!account,
-    }
-  );
+  return useQuery({
+    queryKey: getUnclaimedProofsQueryKey(rewardsType, account),
+    queryFn: () => fetchUnclaimedProofs(rewardsType, account),
+    enabled: isConnected && !!account,
+  });
 }
 
 export function useUnclaimedOpRewardsProofs() {
   const { isConnected, account } = useConnection();
 
-  return useQuery(
-    getUnclaimedProofsQueryKey("op-rebates", account),
-    () => fetchUnclaimedProofs("op-rebates", account),
-    {
-      enabled: isConnected && !!account,
-    }
-  );
+  return useQuery({
+    queryKey: getUnclaimedProofsQueryKey("op-rebates", account),
+    queryFn: () => fetchUnclaimedProofs("op-rebates", account),
+    enabled: isConnected && !!account,
+  });
 }
 
 export function useUnclaimedArbRewardsProofs() {
   const { isConnected, account } = useConnection();
 
-  return useQuery(
-    getUnclaimedProofsQueryKey("arb-rebates", account),
-    () => fetchUnclaimedProofs("arb-rebates", account),
-    {
-      enabled: isConnected && !!account,
-    }
-  );
+  return useQuery({
+    queryKey: getUnclaimedProofsQueryKey("arb-rebates", account),
+    queryFn: () => fetchUnclaimedProofs("arb-rebates", account),
+    enabled: isConnected && !!account,
+  });
 }
 
 async function fetchUnclaimedProofs(

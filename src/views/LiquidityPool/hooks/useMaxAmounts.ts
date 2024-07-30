@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { BigNumber, utils } from "ethers";
 
 import { useConnection, useStakingPool } from "hooks";
@@ -14,14 +14,14 @@ export function useMaxAmounts(
   const stakingPoolQuery = useStakingPool(selectedTokenAddress);
   const userLiquidityPoolQuery = useUserLiquidityPool(selectedTokenSymbol);
 
-  return useQuery(
-    [
+  return useQuery({
+    queryKey: [
       "max-lp-amounts",
       selectedTokenSymbol,
       userLiquidityPoolQuery.data?.l1Balance.toString(),
       userLiquidityPoolQuery.data?.positionValue.toString(),
     ],
-    async () => {
+    queryFn: async () => {
       let maxAddableAmount: BigNumber;
       let maxRemovableAmount: BigNumber;
       let maxRemovableAmountInLP: BigNumber;
@@ -67,14 +67,12 @@ export function useMaxAmounts(
         maxRemovableAmountInLP,
       };
     },
-    {
-      enabled: Boolean(
-        selectedTokenSymbol &&
-          selectedTokenAddress &&
-          stakingPoolQuery.data &&
-          userLiquidityPoolQuery.data &&
-          signer
-      ),
-    }
-  );
+    enabled: Boolean(
+      selectedTokenSymbol &&
+        selectedTokenAddress &&
+        stakingPoolQuery.data &&
+        userLiquidityPoolQuery.data &&
+        signer
+    ),
+  });
 }

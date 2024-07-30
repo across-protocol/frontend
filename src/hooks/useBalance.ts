@@ -1,4 +1,4 @@
-import { useQuery, useQueries, UseQueryOptions } from "react-query";
+import { useQuery, useQueries, UseQueryOptions } from "@tanstack/react-query";
 import { useConnection } from "hooks";
 import {
   getBalance,
@@ -7,7 +7,6 @@ import {
   ChainId,
   getConfig,
   ConfigClient,
-  getChainInfo,
 } from "utils";
 import { BigNumber, providers } from "ethers";
 
@@ -85,8 +84,7 @@ export function useBalanceBySymbol(
       });
     },
     enabled: Boolean(chainId && account && tokenSymbol),
-    refetchInterval: (_, { queryKey: [, chainId] }) =>
-      getChainInfo(chainId || 1).pollingInterval,
+    refetchInterval: 10_000,
   });
   return {
     balance: balance as BigNumber | undefined,
@@ -116,8 +114,8 @@ export function useBalancesBySymbols({
   } = useConnection();
   account ??= connectedAccount;
 
-  const result = useQueries(
-    tokenSymbols.map<
+  const result = useQueries({
+    queries: tokenSymbols.map<
       // NOTE: For some reason, we need to explicitly type this as `UseQueryOptions` to avoid a type error.
       UseQueryOptions<
         ReturnType<typeof getBalanceBySymbol>,
@@ -132,7 +130,7 @@ export function useBalancesBySymbols({
           chainId,
           tokenSymbolToQuery
         ),
-        queryFn: async ({ queryKey }) => {
+        queryFn: ({ queryKey }) => {
           const [, chainIdToQuery, tokenSymbolToQuery, accountToQuery] =
             queryKey;
           return getBalanceBySymbol({
@@ -147,11 +145,10 @@ export function useBalancesBySymbols({
           });
         },
         enabled: Boolean(chainId && account && tokenSymbols.length),
-        refetchInterval: (_, { queryKey: [, chainId] }) =>
-          getChainInfo(chainId || 1).pollingInterval,
+        refetchInterval: 10_000,
       };
-    })
-  );
+    }),
+  });
   return {
     balances: result.map((result) => result.data) as (BigNumber | undefined)[],
     isLoading: result.some((s) => s.isLoading),

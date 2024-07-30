@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BigNumber } from "ethers";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   getToken,

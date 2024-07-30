@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { LayoutV2 } from "components";
 import BreadcrumbV2 from "components/BreadcrumbV2";
 import { BigNumber } from "ethers";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { QUERIESV2, rewardProgramTypes } from "utils";
 import GenericRewardClaimCard from "./GenericRewardClaimCard";
 import GenericInformationCard, {

@@ -1,4 +1,4 @@
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { getConfig } from "utils/config";
 import { useConnection, useIsWrongNetwork } from "hooks";
@@ -41,7 +41,8 @@ export function useClaimRewards(program: rewardProgramTypes) {
     );
     await waitOnTransaction(hubPoolChainId, claimMultiTx, notify);
   };
-  return useMutation(handleClaim, {
+  return useMutation({
+    mutationFn: handleClaim,
     onSuccess: () => unclaimedProofsQuery.refetch(),
   });
 }

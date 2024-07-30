@@ -1,5 +1,5 @@
 import { useConnection } from "hooks";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { BigNumberish } from "ethers";
 
 import {
@@ -69,5 +69,7 @@ export function useApprove(requiredChainId = hubPoolChainId) {
     await waitOnTransaction(requiredChainId, txResponse, notify);
   };
 
-  return useMutation(handleApprove);
+  return useMutation({
+    mutationFn: handleApprove,
+  });
 }
