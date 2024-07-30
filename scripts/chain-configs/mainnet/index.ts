@@ -15,6 +15,7 @@ export default {
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: getDeployedAddress("SpokePool", chainId),
   chainId,
+  blockTimeSeconds: 12,
   publicRpcUrl: "https://mainnet.gateway.tenderly.co",
   tokens: [
     "WETH",
