@@ -83,7 +83,7 @@
     "generate:routes:mainnet": "yarn generate:routes 1",
     "generate:chain-config": "tsx scripts/generate-chain-config.ts",
     "generate:ui-assets": "tsx scripts/generate-ui-assets.ts",
-    "pull:timing": "sh -c 'gh_tkn=$GH_TOKEN gh_repo=$GH_REPO_URL ./scripts/preBuild.sh && yarn lint:fix && yarn format:fix)'"
+    "pull:timing": "sh -c 'gh_tkn=$GH_TOKEN gh_repo=$GH_REPO_URL ./scripts/preBuild.sh && yarn lint:fix && yarn format:fix'"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": [
