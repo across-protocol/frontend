@@ -21,6 +21,7 @@
 .env.production.local
 .env*.local
 .env.e2e
+src/data/fill-times-preset.json
 
 # IDE
 .idea
