@@ -83,7 +83,7 @@ export function DepositStatusLowerCard({
     baseToken,
     toChainId,
     isSwap,
-    BigNumber.from(depositArgs?.initialAmount),
+    depositArgs ? BigNumber.from(depositArgs?.initialAmount) : undefined,
     gasFee,
     bridgeFee,
     swapFee
