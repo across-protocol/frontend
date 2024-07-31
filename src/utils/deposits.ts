@@ -1,8 +1,11 @@
 import { LogDescription } from "ethers/lib/utils";
+import axios from "axios";
+
 import { getConfig } from "./config";
-import { isDefined } from "./sdk";
+import { getBlockForTimestamp, isDefined } from "./sdk";
 import { getProvider } from "./providers";
 import { SpokePool__factory } from "./typechain";
+import { rewardsApiUrl } from "./constants";
 
 const config = getConfig();
 
@@ -87,8 +90,38 @@ export async function getFillByDepositTxHash(
   }
 
   const { parsedDepositLog } = depositByTxHash;
-
   const depositId = Number(parsedDepositLog.args.depositId);
+
+  try {
+    const { data } = await axios.get<{
+      status: "filled" | "pending";
+      fillTx: string | null;
+    }>(`${rewardsApiUrl}/deposit/status`, {
+      params: {
+        depositId,
+        originChainId: fromChainId,
+      },
+    });
+
+    if (data?.status === "filled" && data.fillTx) {
+      const provider = getProvider(toChainId);
+      const fillTxReceipt = await provider.getTransactionReceipt(data.fillTx);
+      const fillTxBlock = await provider.getBlock(fillTxReceipt.blockNumber);
+      return {
+        fillTxHashes: [data.fillTx],
+        fillTxTimestamp: fillTxBlock.timestamp,
+        depositByTxHash,
+      };
+    }
+  } catch (e) {
+    // If the deposit is not found, we can assume it is not indexed yet.
+    // We continue to look for the filled relay event via RPC.
+  }
+
+  const blockForTimestamp = await getBlockForTimestamp(
+    getProvider(toChainId),
+    depositByTxHash.depositTimestamp
+  );
   const destinationSpokePool = config.getSpokePool(toChainId);
   const v3FilledRelayEvents = await destinationSpokePool.queryFilter(
     destinationSpokePool.filters.FilledV3Relay(
@@ -99,7 +132,8 @@ export async function getFillByDepositTxHash(
       undefined,
       fromChainId,
       depositId
-    )
+    ),
+    blockForTimestamp
   );
   // If we make it to this point, we can be sure that there is exactly one filled relay event
   // that corresponds to the deposit we are looking for.
