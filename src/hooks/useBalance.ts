@@ -7,6 +7,7 @@ import {
   ChainId,
   getConfig,
   ConfigClient,
+  getChainInfo,
 } from "utils";
 import { BigNumber, providers } from "ethers";
 
@@ -84,7 +85,7 @@ export function useBalanceBySymbol(
       });
     },
     enabled: Boolean(chainId && account && tokenSymbol),
-    refetchInterval: 10_000,
+    refetchInterval: getChainInfo(chainId || 1).pollingInterval || 10_000,
   });
   return {
     balance: balance as BigNumber | undefined,
