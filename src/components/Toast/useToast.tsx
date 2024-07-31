@@ -44,7 +44,7 @@ function useToastManager() {
 
 const ToastContext = createContext<ToastContextValue>({} as ToastContextValue);
 ToastContext.displayName = "ToastContext";
-export const ToastProvider: React.FC = ({ children }) => {
+export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const value = useToastManager();
   return (
     <ToastContext.Provider value={value}>{children}</ToastContext.Provider>
