@@ -91,6 +91,7 @@ export async function getFillByDepositTxHash(
 
   const { parsedDepositLog } = depositByTxHash;
   const depositId = Number(parsedDepositLog.args.depositId);
+  const provider = getProvider(toChainId);
 
   try {
     const { data } = await axios.get<{
@@ -104,7 +105,6 @@ export async function getFillByDepositTxHash(
     });
 
     if (data?.status === "filled" && data.fillTx) {
-      const provider = getProvider(toChainId);
       const fillTxReceipt = await provider.getTransactionReceipt(data.fillTx);
       const fillTxBlock = await provider.getBlock(fillTxReceipt.blockNumber);
       return {
@@ -119,7 +119,7 @@ export async function getFillByDepositTxHash(
   }
 
   const blockForTimestamp = await getBlockForTimestamp(
-    getProvider(toChainId),
+    provider,
     depositByTxHash.depositTimestamp
   );
   const destinationSpokePool = config.getSpokePool(toChainId);
