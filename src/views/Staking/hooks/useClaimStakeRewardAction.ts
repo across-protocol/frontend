@@ -1,7 +1,7 @@
 import { API } from "bnc-notify";
 import { Signer } from "ethers";
 import { useConnection, useStakingPool } from "hooks";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { getConfig, hubPoolChainId, waitOnTransaction } from "utils";
 import { sendWithPaddedGas } from "utils/transactions";
 
@@ -15,7 +15,8 @@ export function useClaimStakeRewardAction(tokenAddress?: string) {
       await performClaimingAction(lpTokenAddress, signer, notify);
     }
   };
-  return useMutation(claimStakeRewardFn, {
+  return useMutation({
+    mutationFn: claimStakeRewardFn,
     onSuccess: () => stakingPoolQuery.refetch(),
   });
 }

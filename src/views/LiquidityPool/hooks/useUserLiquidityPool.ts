@@ -1,5 +1,5 @@
 import { useConnection } from "hooks";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { getConfig, getBalance, getNativeBalance, hubPoolChainId } from "utils";
 import getApiEndpoint from "utils/serverless-api";
@@ -9,14 +9,12 @@ const config = getConfig();
 export function useUserLiquidityPool(tokenSymbol?: string) {
   const { account } = useConnection();
 
-  return useQuery(
-    getUserLiquidityPoolQueryKey(tokenSymbol, account),
-    () => fetchUserLiquidityPool(account, tokenSymbol),
-    {
-      enabled: Boolean(account && tokenSymbol),
-      staleTime: 300_000,
-    }
-  );
+  return useQuery({
+    queryKey: getUserLiquidityPoolQueryKey(tokenSymbol, account),
+    queryFn: () => fetchUserLiquidityPool(account, tokenSymbol),
+    enabled: Boolean(account && tokenSymbol),
+    staleTime: 300_000,
+  });
 }
 
 export function getUserLiquidityPoolQueryKey(

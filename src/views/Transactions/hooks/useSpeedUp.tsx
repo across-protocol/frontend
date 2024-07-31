@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { useConnection, useBridgeFees, useIsWrongNetwork } from "hooks";
 import {
@@ -41,8 +41,8 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
     }
   }, [fees]);
 
-  const speedUp = useMutation(
-    async (args: {
+  const speedUp = useMutation({
+    mutationFn: async (args: {
       newRelayerFeePct: BigNumber;
       optionalUpdates?: Partial<{
         newMessage: string;
@@ -97,8 +97,8 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
         )
       );
       await waitOnTransaction(transfer.sourceChainId, txResponse, notify);
-    }
-  );
+    },
+  });
 
   return {
     speedUp,
