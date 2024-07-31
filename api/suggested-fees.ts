@@ -28,6 +28,8 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
 } from "./_utils";
+import { resolveTiming } from "./_timings";
+import { parseUnits } from "ethers/lib/utils";
 
 const SuggestedFeesQueryParamsSchema = type({
   amount: parsableBigNumberString(),
@@ -170,10 +172,6 @@ const handler = async (
       ENABLED_ROUTES.acrossConfigStoreAddress,
       provider
     );
-    const liteChainsKey =
-      sdk.clients.GLOBAL_CONFIG_STORE_KEYS.LITE_CHAIN_ID_INDICES;
-    const encodedLiteChainsKey = sdk.utils.utf8ToHex(liteChainsKey);
-
     const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
     // Aggregate multiple calls into a single multicall to decrease
@@ -198,26 +196,17 @@ const handler = async (
         functionName: "l1TokenConfig",
         args: [l1Token.address],
       },
-      {
-        contract: configStoreClient.contract,
-        functionName: "globalConfig",
-        args: [encodedLiteChainsKey],
-      },
     ];
 
     const [
-      [
-        currentUt,
-        nextUt,
-        quoteTimestamp,
-        rawL1TokenConfig,
-        [liteChainIdsEncoded],
-      ],
+      [currentUt, nextUt, quoteTimestamp, rawL1TokenConfig],
       tokenPrice,
+      tokenPriceUsd,
       limits,
     ] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
       getCachedTokenPrice(l1Token.address, baseCurrency),
+      getCachedTokenPrice(l1Token.address, "usd"),
       getCachedLimits(
         inputToken.address,
         outputToken.address,
@@ -225,6 +214,10 @@ const handler = async (
         destinationChainId
       ),
     ]);
+
+    const amountInUsd = amount
+      .mul(parseUnits(tokenPriceUsd.toString(), 18))
+      .div(parseUnits("1", inputToken.decimals));
 
     if (amount.gt(limits.maxDeposit)) {
       throw new InputError(
@@ -239,14 +232,7 @@ const handler = async (
       sdk.contracts.acrossConfigStore.Client.parseL1TokenConfig(
         String(rawL1TokenConfig)
       );
-    const liteChainIds =
-      liteChainIdsEncoded === "" ? [] : JSON.parse(liteChainIdsEncoded);
-    const originChainIsLiteChain = liteChainIds.includes(computedOriginChainId);
-    // We enforce repayment on the origin chain for lite chain deposits
-    // so we overwrite the key to get the right rate model
-    const routeRateModelKey = originChainIsLiteChain
-      ? `${computedOriginChainId}-${computedOriginChainId}`
-      : `${computedOriginChainId}-${destinationChainId}`;
+    const routeRateModelKey = `${computedOriginChainId}-${destinationChainId}`;
     const rateModel =
       parsedL1TokenConfig.routeRateModel?.[routeRateModelKey] ||
       parsedL1TokenConfig.rateModel;
@@ -282,6 +268,14 @@ const handler = async (
     ).add(lpFeePct);
 
     const responseJson = {
+      estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
+        ? 15 * 60 // hardcoded 15 minutes for large deposits
+        : resolveTiming(
+            String(computedOriginChainId),
+            String(destinationChainId),
+            inputToken.symbol,
+            amountInUsd
+          ),
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,

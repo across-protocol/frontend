@@ -1,4 +1,8 @@
-import { useQuery, useQueries, QueryFunctionContext } from "react-query";
+import {
+  useQuery,
+  useQueries,
+  QueryFunctionContext,
+} from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 
 import { getConfig, hubPoolChainId, defaultRefetchInterval } from "utils";
@@ -18,14 +22,13 @@ export function useStakingPool(tokenAddress?: string) {
   );
   const acxPrice = acxPriceQuery.data?.price;
 
-  const stakingPoolQuery = useQuery(
-    getStakingPoolQueryKey(tokenAddress, account),
-    ({ queryKey: keys }) => fetchStakingPool(keys[1], keys[2], acxPrice),
-    {
-      refetchInterval: defaultRefetchInterval,
-      enabled: Boolean(tokenAddress) && Boolean(acxPrice),
-    }
-  );
+  const stakingPoolQuery = useQuery({
+    queryKey: getStakingPoolQueryKey(tokenAddress, account),
+    queryFn: ({ queryKey: keys }) =>
+      fetchStakingPool(keys[1], keys[2], acxPrice),
+    refetchInterval: defaultRefetchInterval,
+    enabled: Boolean(tokenAddress) && Boolean(acxPrice),
+  });
 
   return {
     ...stakingPoolQuery,
@@ -44,8 +47,8 @@ export function useAllStakingPools() {
   );
   const acxPrice = acxPriceQuery.data?.price;
 
-  const batchedPoolQueries = useQueries(
-    tokenList
+  const batchedPoolQueries = useQueries({
+    queries: tokenList
       .filter((token) => !token.isNative)
       .map((token) => ({
         enabled: Boolean(acxPrice),
@@ -55,8 +58,8 @@ export function useAllStakingPools() {
           queryKey,
         }: QueryFunctionContext<[string, string?, string?]>) =>
           fetchStakingPool(queryKey[1], queryKey[2], acxPrice),
-      }))
-  );
+      })),
+  });
 
   return batchedPoolQueries.map((query) => ({
     ...query,

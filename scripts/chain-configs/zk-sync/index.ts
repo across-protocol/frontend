@@ -14,6 +14,7 @@ export default {
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: getDeployedAddress("SpokePool", chainId),
   chainId,
+  blockTimeSeconds: 2,
   publicRpcUrl: "https://mainnet.era.zksync.io",
   tokens: ["WETH", "ETH", "USDC.e", "WBTC", "USDT", "DAI"],
   enableCCTP: false,

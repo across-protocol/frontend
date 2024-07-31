@@ -1,5 +1,5 @@
-import { useQuery } from "react-query";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 
 import { useAmplitude, useConnection } from "hooks";
@@ -11,6 +11,7 @@ import {
   getDepositByTxHash,
   getFillByDepositTxHash,
   NoV3FundsDepositedLogError,
+  getChainInfo,
 } from "utils";
 import {
   getLocalDepositByTxHash,
@@ -33,9 +34,9 @@ export function useDepositTracking(
   const { addToAmpliQueue } = useAmplitude();
   const { account } = useConnection();
 
-  const depositQuery = useQuery(
-    ["deposit", depositTxHash, fromChainId, account],
-    async () => {
+  const depositQuery = useQuery({
+    queryKey: ["deposit", depositTxHash, fromChainId, account],
+    queryFn: async () => {
       // On some L2s the tx is mined too fast for the animation to show, so we add a delay
       await wait(1_000);
 
@@ -52,44 +53,57 @@ export function useDepositTracking(
         throw e;
       }
     },
-    {
-      staleTime: Infinity,
-      enabled: shouldRetryDepositQuery,
-      onSuccess: (data) => {
-        if (!fromBridgePagePayload || !data.parsedDepositLog) {
-          return;
-        }
+    staleTime: Infinity,
+    enabled: shouldRetryDepositQuery,
+    retryDelay: getChainInfo(fromChainId).pollingInterval || 5_000,
+  });
 
-        const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
-        if (!localDepositByTxHash) {
-          // Optimistically add deposit to local storage for instant visibility on the
-          // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
-          addLocalDeposit(convertForDepositQuery(data, fromBridgePagePayload));
-        }
+  useEffect(() => {
+    const data = depositQuery.data;
 
-        if (account !== data.parsedDepositLog.args.depositor) {
-          return;
-        }
-
-        addToAmpliQueue(() => {
-          ampli.transferDepositCompleted(
-            generateDepositConfirmed(
-              fromBridgePagePayload.quoteForAnalytics,
-              fromBridgePagePayload.referrer,
-              fromBridgePagePayload.timeSigned,
-              data.depositTxReceipt.transactionHash,
-              true,
-              data.depositTimestamp
-            )
-          );
-        });
-      },
+    if (!fromBridgePagePayload || !data || !data.parsedDepositLog) {
+      return;
     }
-  );
 
-  const fillQuery = useQuery(
-    ["fill-by-deposit-tx-hash", depositTxHash, fromChainId, toChainId],
-    async () => {
+    const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
+    if (!localDepositByTxHash) {
+      // Optimistically add deposit to local storage for instant visibility on the
+      // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
+      addLocalDeposit(convertForDepositQuery(data, fromBridgePagePayload));
+    }
+
+    if (account !== data.parsedDepositLog.args.depositor) {
+      return;
+    }
+
+    addToAmpliQueue(() => {
+      ampli.transferDepositCompleted(
+        generateDepositConfirmed(
+          fromBridgePagePayload.quoteForAnalytics,
+          fromBridgePagePayload.referrer,
+          fromBridgePagePayload.timeSigned,
+          data.depositTxReceipt.transactionHash,
+          true,
+          data.depositTimestamp
+        )
+      );
+    });
+  }, [
+    depositQuery.data,
+    addToAmpliQueue,
+    fromBridgePagePayload,
+    account,
+    depositTxHash,
+  ]);
+
+  const fillQuery = useQuery({
+    queryKey: [
+      "fill-by-deposit-tx-hash",
+      depositTxHash,
+      fromChainId,
+      toChainId,
+    ],
+    queryFn: async () => {
       if (!depositQuery.data) {
         throw new Error(
           `Could not fetch deposit by tx hash ${depositTxHash} on chain ${fromChainId}`
@@ -103,39 +117,39 @@ export function useDepositTracking(
         depositQuery.data
       );
     },
-    {
-      staleTime: Infinity,
-      retry: true,
-      enabled: !!depositQuery.data,
-      onSuccess: (data) => {
-        if (!fromBridgePagePayload) {
-          return;
-        }
+    staleTime: Infinity,
+    retry: true,
+    retryDelay: getChainInfo(toChainId).pollingInterval || 5_000,
+    enabled: !!depositQuery.data,
+  });
 
-        const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
-        if (localDepositByTxHash) {
-          removeLocalDeposits([depositTxHash]);
-        }
-
-        // Optimistically add deposit to local storage for instant visibility on the
-        // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
-        addLocalDeposit(convertForFillQuery(data, fromBridgePagePayload));
-
-        const { quoteForAnalytics, depositArgs, tokenPrice } =
-          fromBridgePagePayload;
-
-        recordTransferUserProperties(
-          BigNumber.from(depositArgs.amount),
-          BigNumber.from(tokenPrice),
-          getToken(quoteForAnalytics.tokenSymbol).decimals,
-          quoteForAnalytics.tokenSymbol.toLowerCase(),
-          Number(quoteForAnalytics.fromChainId),
-          Number(quoteForAnalytics.toChainId),
-          quoteForAnalytics.fromChainName
-        );
-      },
+  useEffect(() => {
+    if (!fromBridgePagePayload || !fillQuery.data) {
+      return;
     }
-  );
+
+    const localDepositByTxHash = getLocalDepositByTxHash(depositTxHash);
+    if (localDepositByTxHash) {
+      removeLocalDeposits([depositTxHash]);
+    }
+
+    // Optimistically add deposit to local storage for instant visibility on the
+    // "My Transactions" page. See `src/hooks/useDeposits.ts` for details.
+    addLocalDeposit(convertForFillQuery(fillQuery.data, fromBridgePagePayload));
+
+    const { quoteForAnalytics, depositArgs, tokenPrice } =
+      fromBridgePagePayload;
+
+    recordTransferUserProperties(
+      BigNumber.from(depositArgs.amount),
+      BigNumber.from(tokenPrice),
+      getToken(quoteForAnalytics.tokenSymbol).decimals,
+      quoteForAnalytics.tokenSymbol.toLowerCase(),
+      Number(quoteForAnalytics.fromChainId),
+      Number(quoteForAnalytics.toChainId),
+      quoteForAnalytics.fromChainName
+    );
+  }, [fillQuery.data, depositTxHash, fromBridgePagePayload]);
 
   return { depositQuery, fillQuery };
 }

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   rewardsApiUrl,
   rewardsQueryKey,
@@ -28,24 +28,19 @@ export function useRewards(
   const enabledQuery =
     account !== undefined && limit !== undefined && offset !== undefined;
 
-  const queryKey = enabledQuery
-    ? rewardsQueryKey(program, account, limit, offset)
-    : "DISABLED_REWARDS_KEY";
-
-  return useQuery(
-    queryKey,
-    async ({ queryKey: key }) => {
-      if (key[0] === "DISABLED_REWARDS_KEY") {
-        return;
+  return useQuery({
+    queryKey: rewardsQueryKey(program, account, limit, offset),
+    queryFn: async ({ queryKey: key }) => {
+      const [, _program, _account, _limit, _offset] = key;
+      if (!_program || !_account || !_limit) {
+        throw new Error("Disabled rewards query key");
       }
-      return getRewards(...key);
+      return getRewards(_program, _account, _limit, _offset ?? 0);
     },
-    {
-      enabled: enabledQuery,
-      refetchInterval: defaultRefetchInterval,
-      keepPreviousData: true,
-    }
-  );
+    enabled: enabledQuery,
+    refetchInterval: defaultRefetchInterval,
+    keepPreviousData: true,
+  });
 }
 
 /**

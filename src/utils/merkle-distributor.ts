@@ -49,6 +49,11 @@ export async function fetchIsClaimed(
   return merkleDistributor.isClaimed(windowIndex, accountIndex);
 }
 
+export async function fetchNextCreatedIndex(rewardsType: rewardProgramTypes) {
+  const merkleDistributor = config.getMerkleDistributor(rewardsType);
+  return merkleDistributor.nextCreatedIndex();
+}
+
 export async function fetchAirdropProof(account?: string) {
   if (!account) {
     return undefined;

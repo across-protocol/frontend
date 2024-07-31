@@ -1,5 +1,5 @@
 import { useHistory } from "react-router-dom";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { PaginatedDepositsTable } from "components/DepositsTable";
 import { Text } from "components/Text";

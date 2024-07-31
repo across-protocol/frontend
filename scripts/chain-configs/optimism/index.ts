@@ -27,6 +27,7 @@ export default {
     "SNX",
     "POOL",
   ],
+  blockTimeSeconds: 2,
   enableCCTP: true,
   swapTokens: [
     {

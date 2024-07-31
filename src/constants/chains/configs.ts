@@ -109,7 +109,7 @@ export const arbitrum = {
     `${arbitrum.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 1000,
 };
 
 export const arbitrumSepolia = {
@@ -142,7 +142,7 @@ export const base = {
   constructExplorerLink: (txHash: string) => `${base.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_8453_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const baseSepolia = {
@@ -176,7 +176,7 @@ export const blast = {
     `${blast.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_81457_PROVIDER_URL,
-  pollingInterval: 2,
+  pollingInterval: 2000,
 };
 
 export const blastSepolia = {
@@ -193,7 +193,7 @@ export const blastSepolia = {
     `${blastSepolia.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_168587773_PROVIDER_URL,
-  pollingInterval: 2,
+  pollingInterval: 2000,
 };
 
 export const linea = {
@@ -210,7 +210,7 @@ export const linea = {
     `${linea.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_59144_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const lisk = {
@@ -226,7 +226,7 @@ export const lisk = {
   constructExplorerLink: (txHash: string) => `${lisk.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_1135_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const liskSepolia = {
@@ -260,7 +260,7 @@ export const ethereum = {
     `${ethereum.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_1_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 12000,
 };
 
 export const mode = {
@@ -276,7 +276,7 @@ export const mode = {
   constructExplorerLink: (txHash: string) => `${mode.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_34443_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const modeSepolia = {
@@ -310,7 +310,7 @@ export const optimism = {
     `${optimism.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_10_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const optimismSepolia = {
@@ -344,7 +344,7 @@ export const polygon = {
     `${polygon.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "MATIC",
   customRpcUrl: process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 5000,
 };
 
 export const polygonAmoy = {
@@ -412,7 +412,7 @@ export const zkSync = {
     `${zkSync.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_324_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const chainConfigs = [

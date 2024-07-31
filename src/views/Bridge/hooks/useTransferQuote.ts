@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BigNumber } from "ethers";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   getToken,
@@ -107,11 +107,8 @@ export function useTransferQuote(
       const fromChainInfo = getChainInfo(selectedRoute.fromChain);
       const toChainInfo = getChainInfo(selectedRoute.toChain);
       const estimatedTime = getConfirmationDepositTime(
-        amountToBridgeAfterSwap,
-        limitsQuery.limits,
         selectedRoute.fromChain,
-        selectedRoute.toChain,
-        selectedRoute.fromTokenSymbol
+        feesQuery.fees.estimatedFillTimeSec
       );
       const quoteForAnalytics = generateTransferQuote(
         feesQuery.fees,

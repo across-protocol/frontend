@@ -6,8 +6,8 @@ import {
   QueryClient,
   QueryCache,
   MutationCache,
-} from "react-query";
-import { ReactQueryDevtools } from "react-query/devtools";
+} from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import App from "./App";
 import "./onboard-override.css";

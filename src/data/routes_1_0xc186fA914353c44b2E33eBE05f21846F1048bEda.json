@@ -2763,6 +2763,17 @@
     {
       "fromChain": 42161,
       "toChain": 34443,
+      "fromTokenAddress": "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
+      "toTokenAddress": "0xcDd475325D6F564d27247D1DddBb0DAc6fA0a5CF",
+      "fromSpokeAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+      "fromTokenSymbol": "WBTC",
+      "toTokenSymbol": "WBTC",
+      "isNative": false,
+      "l1TokenAddress": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+    },
+    {
+      "fromChain": 42161,
+      "toChain": 34443,
       "fromTokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
       "toTokenAddress": "0xd988097fb8612cc24eeC14542bC03424c656005f",
       "fromSpokeAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
@@ -4896,6 +4907,17 @@
     },
     {
       "fromChain": 34443,
+      "toChain": 42161,
+      "fromTokenAddress": "0xcDd475325D6F564d27247D1DddBb0DAc6fA0a5CF",
+      "toTokenAddress": "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
+      "fromSpokeAddress": "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+      "fromTokenSymbol": "WBTC",
+      "toTokenSymbol": "WBTC",
+      "isNative": false,
+      "l1TokenAddress": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+    },
+    {
+      "fromChain": 34443,
       "toChain": 324,
       "fromTokenAddress": "0x4200000000000000000000000000000000000006",
       "toTokenAddress": "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91",
@@ -5069,6 +5091,17 @@
       "toTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "fromChain": 34443,
+      "toChain": 81457,
+      "fromTokenAddress": "0xcDd475325D6F564d27247D1DddBb0DAc6fA0a5CF",
+      "toTokenAddress": "0xF7bc58b8D8f97ADC129cfC4c9f45Ce3C0E1D2692",
+      "fromSpokeAddress": "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+      "fromTokenSymbol": "WBTC",
+      "toTokenSymbol": "WBTC",
+      "isNative": false,
+      "l1TokenAddress": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
     },
     {
       "fromChain": 34443,
@@ -5465,6 +5498,17 @@
       "toTokenSymbol": "ETH",
       "isNative": true,
       "l1TokenAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "fromChain": 81457,
+      "toChain": 34443,
+      "fromTokenAddress": "0xF7bc58b8D8f97ADC129cfC4c9f45Ce3C0E1D2692",
+      "toTokenAddress": "0xcDd475325D6F564d27247D1DddBb0DAc6fA0a5CF",
+      "fromSpokeAddress": "0x2D509190Ed0172ba588407D4c2df918F955Cc6E1",
+      "fromTokenSymbol": "WBTC",
+      "toTokenSymbol": "WBTC",
+      "isNative": false,
+      "l1TokenAddress": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
     },
     {
       "fromChain": 81457,

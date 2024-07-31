@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import getApiEndpoint from "utils/serverless-api";
 
 export function useCoingeckoPrice(
@@ -7,12 +7,10 @@ export function useCoingeckoPrice(
   historicalDateISO?: string,
   enabled: boolean = true
 ) {
-  return useQuery(
-    ["price", historicalDateISO ?? "current", l1Token, baseCurrency],
-    async () =>
+  return useQuery({
+    queryKey: ["price", historicalDateISO ?? "current", l1Token, baseCurrency],
+    queryFn: async () =>
       getApiEndpoint().coingecko(l1Token, baseCurrency, historicalDateISO),
-    {
-      enabled,
-    }
-  );
+    enabled,
+  });
 }

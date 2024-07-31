@@ -1,4 +1,4 @@
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { BigNumber, Signer } from "ethers";
 import { API } from "bnc-notify";
 
@@ -35,7 +35,8 @@ export function useStakeAction(tokenAddress?: string) {
       )(args.amount);
     }
   };
-  return useMutation(stakeActionFn, {
+  return useMutation({
+    mutationFn: stakeActionFn,
     onSuccess: () => stakingPoolQuery.refetch(),
   });
 }
@@ -58,7 +59,8 @@ export function useUnstakeAction(tokenAddress?: string) {
       )(args.amount);
     }
   };
-  return useMutation(unstakeActionFn, {
+  return useMutation({
+    mutationFn: unstakeActionFn,
     onSuccess: () => stakingPoolQuery.refetch(),
   });
 }

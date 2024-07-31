@@ -14,28 +14,27 @@ import {
 } from "utils";
 import { ConvertDecimals } from "utils/convertdecimals";
 import getApiEndpoint from "utils/serverless-api";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export function useWalletBalanceTrace() {
   const { account } = useConnection();
 
-  return useQuery(
-    ["wallet-balance", account ?? "loading"],
-    async () => {
+  return useQuery({
+    enabled: Boolean(account),
+    queryKey: ["wallet-balance", account],
+    queryFn: async () => {
       if (!account) return;
       setUserId(account);
       const balance = await calculateUsdBalances(account);
       reportTotalWalletUsdBalance(balance);
       return balance;
     },
-    {
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-      refetchInterval: false,
-      retry: 5,
-      retryDelay: 3000,
-    }
-  );
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: false,
+    retry: 5,
+    retryDelay: 3000,
+  });
 }
 
 type TokenSymbolAddressType = {
