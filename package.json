@@ -79,7 +79,7 @@
     "generate:routes:mainnet": "yarn generate:routes 1",
     "generate:chain-config": "tsx scripts/generate-chain-config.ts",
     "generate:ui-assets": "tsx scripts/generate-ui-assets.ts",
-    "pull:timing": "sh -c '[ -z \"$CONFIG_SOURCE_REPOSITORY\" ] && cp src/data/fill-times-example.json src/data/fill-times-preset.json && echo \"CONFIG_SOURCE_REPOSITORY is not set. Using fill-times-example.json.\" || curl -o src/data/fill-times-preset.json $CONFIG_SOURCE_REPOSITORY; yarn lint:all:fix'"
+    "pull:timing": "sh -c 'gh_tkn=$GH_TOKEN gh_repo=$GH_REPO_URL ./scripts/preBuild.sh && yarn lint:fix && yarn format:fix'"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": [
