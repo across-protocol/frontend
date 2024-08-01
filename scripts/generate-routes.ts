@@ -26,6 +26,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.MODE,
   chainConfigs.BLAST,
   chainConfigs.LISK,
+  chainConfigs.REDSTONE,
 ];
 
 const enabledSepoliaChainConfigs = [

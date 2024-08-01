@@ -80,6 +80,11 @@ import polygonAmoyGrayscaleLogo from "assets/chain-logos/polygon-amoy-grayscale.
 import { ReactComponent as polygonAmoyLogoSvg } from "assets/chain-logos/polygon-amoy.svg";
 import { ReactComponent as polygonAmoyGrayscaleLogoSvg } from "assets/chain-logos/polygon-amoy-grayscale.svg";
 
+import redstoneLogo from "assets/chain-logos/redstone.svg";
+import redstoneGrayscaleLogo from "assets/chain-logos/redstone-grayscale.svg";
+import { ReactComponent as redstoneLogoSvg } from "assets/chain-logos/redstone.svg";
+import { ReactComponent as redstoneGrayscaleLogoSvg } from "assets/chain-logos/redstone-grayscale.svg";
+
 import sepoliaLogo from "assets/chain-logos/sepolia.svg";
 import sepoliaGrayscaleLogo from "assets/chain-logos/sepolia-grayscale.svg";
 import { ReactComponent as sepoliaLogoSvg } from "assets/chain-logos/sepolia.svg";
@@ -359,6 +364,23 @@ export const polygonAmoy = {
   pollingInterval: 15000,
 };
 
+export const redstone = {
+  name: "Redstone",
+  fullName: "Redstone",
+  chainId: 690,
+  logoURI: redstoneLogo,
+  grayscaleLogoURI: redstoneGrayscaleLogo,
+  logoSvg: redstoneLogoSvg,
+  grayscaleLogoSvg: redstoneGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.redstonechain.com",
+  explorerUrl: "https://explorer.redstone.xyz",
+  constructExplorerLink: (txHash: string) =>
+    `${redstone.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_690_PROVIDER_URL,
+  pollingInterval: 2000,
+};
+
 export const sepolia = {
   name: "Sepolia",
   fullName: "Sepolia",
@@ -410,6 +432,7 @@ export const chainConfigs = [
   optimismSepolia,
   polygon,
   polygonAmoy,
+  redstone,
   sepolia,
   zkSync,
 ].reduce(

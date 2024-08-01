@@ -1,0 +1,35 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0_12_64" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="128" height="128">
+<path d="M128 0H0V128H128V0Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_12_64)">
+<path opacity="0.75" d="M48 48H32V32H48V48Z" fill="#9DAAB3"/>
+<path d="M48 64H32V48H48V64Z" fill="#9DAAB3"/>
+<path d="M48 80H32V64H48V80Z" fill="#9DAAB3"/>
+<path opacity="0.75" d="M48 96H32V80H48V96Z" fill="#9DAAB3"/>
+<path opacity="0.75" d="M96 48H80V32H96V48Z" fill="#9DAAB3"/>
+<path d="M96 64H80V48H96V64Z" fill="#9DAAB3"/>
+<path d="M96 80H80V64H96V80Z" fill="#9DAAB3"/>
+<path opacity="0.75" d="M96 96H80V80H96V96Z" fill="#9DAAB3"/>
+<path d="M64 96H48V80H64V96Z" fill="#9DAAB3"/>
+<path d="M80 96H64V80H80V96Z" fill="#9DAAB3"/>
+<path d="M64 48H48V32H64V48Z" fill="#9DAAB3"/>
+<path d="M80 48H64V32H80V48Z" fill="#9DAAB3"/>
+<path d="M64 0H48V16H64V0Z" fill="#9DAAB3" fill-opacity="0.25"/>
+<path d="M80 112H64V96H80V112Z" fill="#9DAAB3" fill-opacity="0.75"/>
+<path d="M112 64H96V80H112V64Z" fill="#9DAAB3" fill-opacity="0.75"/>
+<path d="M32 80H16V64H32V80Z" fill="#9DAAB3" fill-opacity="0.75"/>
+<path d="M80 16H64V32H80V16Z" fill="#9DAAB3" fill-opacity="0.75"/>
+<path d="M80 0H64V16H80V0Z" fill="#9DAAB3" fill-opacity="0.25"/>
+<path d="M64 128H48V112H64V128Z" fill="#9DAAB3" fill-opacity="0.25"/>
+<path d="M80 128H64V112H80V128Z" fill="#9DAAB3" fill-opacity="0.25"/>
+<path d="M128 48H112V64H128V48Z" fill="#9DAAB3" fill-opacity="0.25"/>
+<path d="M128 64H112V80H128V64Z" fill="#9DAAB3" fill-opacity="0.25"/>
+<path d="M16 80H0V64H16V80Z" fill="#9DAAB3" fill-opacity="0.25"/>
+<path d="M16 64H0V48H16V64Z" fill="#9DAAB3" fill-opacity="0.25"/>
+<path d="M64 16H48V32H64V16Z" fill="#9DAAB3" fill-opacity="0.75"/>
+<path d="M64 112H48V96H64V112Z" fill="#9DAAB3" fill-opacity="0.75"/>
+<path d="M112 48H96V64H112V48Z" fill="#9DAAB3" fill-opacity="0.75"/>
+<path d="M32 64H16V48H32V64Z" fill="#9DAAB3" fill-opacity="0.75"/>
+</g>
+</svg>
