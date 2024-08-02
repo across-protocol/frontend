@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { useState, useCallback, createContext } from "react";
 
 type ExtendedError = Error;
@@ -25,7 +25,7 @@ function useErrorManager() {
 
 const ErrorContext = createContext<ErrorContextValue | undefined>(undefined);
 ErrorContext.displayName = "ErrorContext";
-export const ErrorProvider: React.FC = ({ children }) => {
+export const ErrorProvider = ({ children }: { children: React.ReactNode }) => {
   const value = useErrorManager();
   return (
     <ErrorContext.Provider value={value}>{children}</ErrorContext.Provider>
