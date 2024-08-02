@@ -56,7 +56,9 @@ export function useBridgeAction(
   const history = useHistory();
   const { referrer } = useReferrer();
 
-  const { isWrongNetworkHandler } = useIsWrongNetwork(selectedRoute.fromChain);
+  const { isWrongNetworkHandler, isWrongNetwork } = useIsWrongNetwork(
+    selectedRoute.fromChain
+  );
   const approveHandler = useApprove(selectedRoute.fromChain);
   const { addToAmpliQueue } = useAmplitude();
 
@@ -236,7 +238,6 @@ export function useBridgeAction(
     !usedTransferQuote ||
     (isConnected && dataLoading) ||
     buttonActionHandler.isLoading;
-
   return {
     isConnected,
     buttonActionHandler: buttonActionHandler.mutate,
@@ -246,6 +247,7 @@ export function useBridgeAction(
       isConnected,
       isDataLoading: dataLoading,
       isMutating: buttonActionHandler.isLoading,
+      isWrongNetwork,
     }),
     buttonDisabled,
   };
@@ -299,12 +301,16 @@ function getButtonLabel(args: {
   isConnected: boolean;
   isDataLoading: boolean;
   isMutating: boolean;
+  isWrongNetwork: boolean;
 }) {
   if (!args.isConnected) {
     return "Connect wallet";
   }
   if (args.isMutating) {
     return "Confirming...";
+  }
+  if (args.isWrongNetwork) {
+    return "Switch network and confirm transaction";
   }
   return "Confirm transaction";
 }
