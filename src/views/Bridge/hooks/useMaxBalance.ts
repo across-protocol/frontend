@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { BigNumber, constants, ethers, utils } from "ethers";
 
 import { useBalanceBySymbol, useConnection } from "hooks";
@@ -22,15 +22,15 @@ export function useMaxBalance(selectedRoute: SelectedRoute) {
   );
   const { account, signer } = useConnection();
 
-  return useQuery(
-    [
+  return useQuery({
+    queryKey: [
       "max-balance",
       balanceTokenSymbol,
       selectedRoute.fromChain,
       account,
       balance?.toString(),
     ],
-    async () => {
+    queryFn: async () => {
       let maxBridgeAmount: BigNumber;
 
       if (account && balance && signer) {
@@ -47,11 +47,9 @@ export function useMaxBalance(selectedRoute: SelectedRoute) {
 
       return maxBridgeAmount;
     },
-    {
-      enabled: Boolean(account && balance && signer),
-      retry: true,
-    }
-  );
+    enabled: Boolean(account && balance && signer),
+    retry: true,
+  });
 }
 
 /**

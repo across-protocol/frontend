@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   rewardsApiUrl,
   rewardSummaryQueryKey,
@@ -37,25 +37,16 @@ export function useRewardSummary(
   program: rewardProgramTypes,
   account?: string
 ) {
-  const queryKey = account
-    ? rewardSummaryQueryKey(account, program)
-    : ["DISABLED_REFERRAL_SUMMARY_KEY", program];
-
-  const { data: _summary, ...other } = useQuery(
-    queryKey,
-    async ({ queryKey }) => {
+  const { data: _summary, ...other } = useQuery({
+    queryKey: rewardSummaryQueryKey(program, account),
+    queryFn: async ({ queryKey }) => {
       const rewardProgram = queryKey.includes("op-rebates")
         ? "op-rebates"
         : "arb-rebates";
       return getRewardSummary(rewardProgram, account!);
     },
-    {
-      // refetch based on the chain polling interval
-      // disable this temporary
-      // refetchInterval: 60000,
-      enabled: !!account,
-    }
-  );
+    enabled: !!account,
+  });
   return {
     summary:
       _summary?.data ||

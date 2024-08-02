@@ -1,0 +1,16 @@
+[
+  {
+    "destination_route_classification": "1,10,324",
+    "max_size_usd": "1000",
+    "origin_route_classification": "1,10,324",
+    "p75_fill_time_secs": "3",
+    "token_liquidity_groups": "ETH,WETH"
+  },
+  {
+    "destination_route_classification": "0",
+    "max_size_usd": "100000000",
+    "origin_route_classification": "0",
+    "p75_fill_time_secs": "3",
+    "token_liquidity_groups": "OTHER"
+  }
+]

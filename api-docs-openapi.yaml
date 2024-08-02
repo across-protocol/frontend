@@ -25,7 +25,8 @@ paths:
           required: true
           schema:
             type: string
-            example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+            examples:
+              - "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           description: >
             Address of token to bridge on the _origin_ chain. Must be used
             together with parameter `outputToken`. For ETH, use the wrapped
@@ -39,7 +40,8 @@ paths:
           required: true
           schema:
             type: string
-            example: "0x4200000000000000000000000000000000000006"
+            examples:
+              - "0x4200000000000000000000000000000000000006"
           description: >
             Address of token to bridge on the _destination_ chain. Must be used
             together with parameter `inputToken`. For ETH, use the wrapped
@@ -55,8 +57,9 @@ paths:
             Chain ID where the specified `token` or `inputToken` exists.
           schema:
             allOf:
-              - example: 1
               - $ref: "#/components/schemas/ChainId"
+            examples:
+              - 1
         - name: destinationChainId
           in: query
           required: true
@@ -65,7 +68,8 @@ paths:
           schema:
             allOf:
               - $ref: "#/components/schemas/ChainId"
-              - example: 10
+            examples:
+              - 10
         - name: amount
           in: query
           required: true
@@ -80,7 +84,8 @@ paths:
           schema:
             type: integer
             minimum: 1
-            example: "1000000000000000000"
+            examples:
+              - "1000000000000000000"
         - name: recipient
           in: query
           required: false
@@ -184,7 +189,8 @@ paths:
           required: true
           schema:
             type: string
-            example: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+            examples:
+              - "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
           description: >
             Address of token to bridge on the _origin_ chain. Must be used
             together with parameter `outputToken`. For ETH, use the wrapped
@@ -198,7 +204,8 @@ paths:
           required: true
           schema:
             type: string
-            example: "0x4200000000000000000000000000000000000006"
+            examples:
+              - "0x4200000000000000000000000000000000000006"
           description: >
             Address of token to bridge on the _destination_ chain. Must be used
             together with parameter `inputToken`. For ETH, use the wrapped
@@ -215,7 +222,8 @@ paths:
           schema:
             allOf:
               - $ref: "#/components/schemas/ChainId"
-              - example: 1
+            examples:
+              - 1
         - name: destinationChainId
           in: query
           required: true
@@ -224,7 +232,8 @@ paths:
           schema:
             allOf:
               - $ref: "#/components/schemas/ChainId"
-              - example: 10
+            examples:
+              - 10
       responses:
         "200":
           description: Transfer limits
@@ -306,7 +315,7 @@ paths:
                     "originToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                     "destinationToken": "0x4200000000000000000000000000000000000006",
                     "originTokenSymbol": "WETH",
-                    "destinationTokenSymbol": "WETH"
+                    "destinationTokenSymbol": "WETH",
                   },
                 ]
         "400":
@@ -333,8 +342,8 @@ paths:
           schema:
             allOf:
               - $ref: "#/components/schemas/ChainId"
-              - example: 137
-          example: 137
+            examples:
+              - 137
         - name: depositId
           in: query
           required: true
@@ -343,7 +352,8 @@ paths:
           schema:
             type: integer
             minimum: 0
-          example: 1349975
+            examples:
+              - 1349975
       responses:
         200:
           description: Lifecycle of a transaction
@@ -369,7 +379,12 @@ paths:
                     type: integer
                     description: >
                       The chain id where the fill transaction will take place.
-              example: { "fillStatus": "filled", "fillTxHash": "0x123abc<...>", "destinationChainId": 42161 }
+              example:
+                {
+                  "fillStatus": "filled",
+                  "fillTxHash": "0x123abc<...>",
+                  "destinationChainId": 42161,
+                }
 components:
   schemas:
     SuggestedFees:
@@ -580,16 +595,16 @@ components:
       type: integer
       minimum: 1
       enum: [
-        1,
-        10,
-        137,
-        324,
-        8453,
-        42161,
-        59144,
-        # testnets
-        84532,
-        421614,
-        11155420,
-        11155111,
-      ]
+          1,
+          10,
+          137,
+          324,
+          8453,
+          42161,
+          59144,
+          # testnets
+          84532,
+          421614,
+          11155420,
+          11155111,
+        ]

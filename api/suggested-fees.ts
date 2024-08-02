@@ -28,6 +28,8 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
 } from "./_utils";
+import { resolveTiming } from "./_timings";
+import { parseUnits } from "ethers/lib/utils";
 
 const SuggestedFeesQueryParamsSchema = type({
   amount: parsableBigNumberString(),
@@ -199,10 +201,12 @@ const handler = async (
     const [
       [currentUt, nextUt, quoteTimestamp, rawL1TokenConfig],
       tokenPrice,
+      tokenPriceUsd,
       limits,
     ] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
       getCachedTokenPrice(l1Token.address, baseCurrency),
+      getCachedTokenPrice(l1Token.address, "usd"),
       getCachedLimits(
         inputToken.address,
         outputToken.address,
@@ -210,6 +214,10 @@ const handler = async (
         destinationChainId
       ),
     ]);
+
+    const amountInUsd = amount
+      .mul(parseUnits(tokenPriceUsd.toString(), 18))
+      .div(parseUnits("1", inputToken.decimals));
 
     if (amount.gt(limits.maxDeposit)) {
       throw new InputError(
@@ -260,6 +268,14 @@ const handler = async (
     ).add(lpFeePct);
 
     const responseJson = {
+      estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
+        ? 15 * 60 // hardcoded 15 minutes for large deposits
+        : resolveTiming(
+            String(computedOriginChainId),
+            String(destinationChainId),
+            inputToken.symbol,
+            amountInUsd
+          ),
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,

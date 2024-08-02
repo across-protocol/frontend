@@ -1,4 +1,5 @@
-import { BigNumber } from "ethers";
+import { BigNumber, providers } from "ethers";
+import { BlockFinder } from "@across-protocol/sdk/dist/esm/utils/BlockUtils";
 
 export { isDefined } from "@across-protocol/sdk/dist/esm/utils/TypeGuards";
 export { isContractDeployedToAddress } from "@across-protocol/sdk/dist/esm/utils/AddressUtils";
@@ -41,4 +42,14 @@ export function getUpdateV3DepositTypedData(
       updatedMessage: updatedMessage,
     },
   };
+}
+
+export async function getBlockForTimestamp(
+  provider: providers.JsonRpcProvider,
+  timestamp: number
+) {
+  const blockFinder = new BlockFinder(provider);
+  const { number: blockNumberForTimestamp } =
+    await blockFinder.getBlockForTimestamp(timestamp);
+  return blockNumberForTimestamp;
 }

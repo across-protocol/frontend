@@ -5,13 +5,14 @@ import { QUERIESV2 } from "utils";
 type LayoutProp = {
   maxWidth?: number;
   transparentBackground?: boolean;
+  children: React.ReactNode;
 };
 
-const LayoutV2: React.FC<LayoutProp> = ({
+const LayoutV2 = ({
   maxWidth,
   children,
   transparentBackground,
-}) => {
+}: LayoutProp) => {
   return (
     <Wrapper transparentBackground={transparentBackground}>
       <InnerWrapper maxWidth={maxWidth ?? 600}>{children}</InnerWrapper>

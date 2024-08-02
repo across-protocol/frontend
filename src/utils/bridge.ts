@@ -21,6 +21,7 @@ import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
 import { SwapQuoteApiResponse } from "./serverless-api/prod/swap-quote";
+import { SpokePool, SpokePoolVerifier } from "./typechain";
 
 export type Fee = {
   total: ethers.BigNumber;
@@ -37,6 +38,7 @@ export type BridgeFees = {
   quoteLatency: ethers.BigNumber;
   quoteBlock: ethers.BigNumber;
   limits: BridgeLimitInterface;
+  estimatedFillTimeSec: number;
 };
 
 type GetBridgeFeesArgs = {
@@ -79,6 +81,7 @@ export async function getBridgeFees({
     quoteBlock,
     lpFee,
     limits,
+    estimatedFillTimeSec,
   } = await getApiEndpoint().suggestedFees(
     amount,
     getConfig().getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
@@ -102,6 +105,7 @@ export async function getBridgeFees({
     quoteBlock,
     quoteLatency,
     limits,
+    estimatedFillTimeSec,
   };
 }
 
@@ -112,73 +116,23 @@ export type ConfirmationDepositTimeType = {
 };
 
 export const getConfirmationDepositTime = (
-  amount: BigNumber,
-  limits: BridgeLimitInterface,
-  fromChain: ChainId,
-  toChain: ChainId,
-  inputTokenSymbol: string
+  fromChain: number,
+  estimatedFillTimeSec?: number
 ): ConfirmationDepositTimeType => {
   const config = getConfig();
   const depositDelay = config.depositDelays()[fromChain] || 0;
-  const getTimeEstimateRangeString = (
-    lowEstimate: number,
-    highEstimate: number
-  ): {
-    formattedString: string;
-    lowEstimate: number;
-    highEstimate: number;
-  } => {
-    return {
-      formattedString: `~${lowEstimate + depositDelay}-${
-        highEstimate + depositDelay
-      } minutes`,
-      lowEstimate: lowEstimate + depositDelay,
-      highEstimate: highEstimate + depositDelay,
-    };
+  const timeToFill =
+    (estimatedFillTimeSec ?? 900) + // 15 minutes if not provided
+    depositDelay;
+
+  const inMinutes = timeToFill > 60;
+  const timing = Math.floor(inMinutes ? timeToFill / 60 : timeToFill);
+
+  return {
+    formattedString: `~${timing} ${inMinutes ? "minute" : "second"}${timing > 1 ? "s" : ""}`,
+    lowEstimate: timeToFill,
+    highEstimate: timeToFill,
   };
-
-  if (amount.lte(limits.maxDepositInstant)) {
-    const fastFillTimeInSeconds = Math.floor(
-      getFastFillTimeByRoute(fromChain, toChain, inputTokenSymbol)
-    );
-    const fastFillTimeInMinutes = Math.floor(fastFillTimeInSeconds / 60);
-    const fastFillTimeInHours = Number(fastFillTimeInMinutes / 60)
-      .toFixed(1)
-      .replace(/\.0$/, "");
-    return {
-      formattedString:
-        fastFillTimeInSeconds < 60
-          ? `~${fastFillTimeInSeconds} ${
-              fastFillTimeInSeconds === 1 ? "sec" : "secs"
-            }`
-          : fastFillTimeInMinutes < 60
-            ? `~${fastFillTimeInMinutes} ${
-                fastFillTimeInMinutes === 1 ? "min" : "mins"
-              }`
-            : `~${fastFillTimeInHours} ${
-                fastFillTimeInHours === "1" ? "hour" : "hours"
-              }`,
-      lowEstimate: fastFillTimeInSeconds,
-      highEstimate: fastFillTimeInSeconds,
-    };
-  } else if (amount.lte(limits.maxDepositShortDelay)) {
-    // This is just a rough estimate of how long 2 bot runs (1-4 minutes allocated for each) + an arbitrum transfer of 3-10 minutes would take.
-    if (toChain === ChainId.ARBITRUM) return getTimeEstimateRangeString(5, 15);
-
-    // Optimism transfers take about 10-20 minutes anecdotally.
-    if (toChain === ChainId.OPTIMISM) {
-      return getTimeEstimateRangeString(12, 25);
-    }
-
-    // Polygon transfers take 20-30 minutes anecdotally.
-    if (toChain === ChainId.POLYGON) return getTimeEstimateRangeString(20, 35);
-
-    // Typical numbers for an arbitrary L2.
-    return getTimeEstimateRangeString(10, 30);
-  }
-
-  // If the deposit size is above those, but is allowed by the app, we assume the pool will slow relay it.
-  return { formattedString: "~2-4 hours", lowEstimate: 180, highEstimate: 360 };
 };
 
 export type AcrossDepositArgs = {
@@ -209,12 +163,12 @@ type NetworkMismatchHandler = (
 ) => void;
 
 /**
- * Makes a deposit on Across using the `SpokePool` contract's `deposit` function.
+ * Makes a deposit on Across using the `SpokePoolVerifiers` contract's `deposit` function if possible.
  * @param signer A valid signer, must be connected to a provider.
  * @param depositArgs - An object containing the {@link AcrossDepositArgs arguments} to pass to the deposit function of the bridge contract.
  * @returns The transaction response obtained after sending the transaction.
  */
-export async function sendDepositTx(
+export async function sendSpokePoolVerifierDepositTx(
   signer: ethers.Signer,
   {
     fromChain,
@@ -230,6 +184,8 @@ export async function sendDepositTx(
     toNative = false,
     referrer,
   }: AcrossDepositArgs,
+  spokePool: SpokePool,
+  spokePoolVerifier: SpokePoolVerifier,
   onNetworkMismatch?: NetworkMismatchHandler
 ): Promise<ethers.providers.TransactionResponse> {
   const { spokePool, spokePoolVerifier, shouldUseSpokePoolVerifier } =
@@ -245,7 +201,8 @@ export async function sendDepositTx(
     );
     recipient = getMulticallHandlerAddress(destinationChainId);
   }
-  const commonArgs = [
+  const tx = await spokePoolVerifier.populateTransaction.deposit(
+    spokePool.address,
     recipient,
     tokenAddress,
     amount,
@@ -254,15 +211,8 @@ export async function sendDepositTx(
     quoteTimestamp,
     message,
     maxCount,
-    { value: isNative ? amount : ethers.constants.Zero },
-  ] as const;
-  const tx =
-    shouldUseSpokePoolVerifier && spokePoolVerifier
-      ? await spokePoolVerifier.populateTransaction.deposit(
-          spokePool.address,
-          ...commonArgs
-        )
-      : await spokePool.populateTransaction.deposit(...commonArgs);
+    { value: isNative ? amount : ethers.constants.Zero }
+  );
 
   return _tagRefAndSignTx(
     tx,
@@ -293,17 +243,9 @@ export async function sendDepositV3Tx(
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
   }: AcrossDepositV3Args,
+  spokePool: SpokePool,
   onNetworkMismatch?: NetworkMismatchHandler
 ) {
-  const { spokePool, shouldUseSpokePoolVerifier } =
-    await _getSpokePoolAndVerifier({ fromChain, isNative });
-
-  // `SpokePoolVerifier` uses the signature of the `SpokePool` contract's `deposit`
-  // and therefore can not be used for V3 deposits.
-  if (shouldUseSpokePoolVerifier) {
-    throw new Error("SpokePoolVerifier can not be used for V3 deposits");
-  }
-
   const value = isNative ? amount : ethers.constants.Zero;
   const inputAmount = amount;
   const outputAmount = inputAmount.sub(
@@ -455,7 +397,7 @@ export async function sendSwapAndBridgeTx(
   );
 }
 
-async function _getSpokePoolAndVerifier({
+export async function getSpokePoolAndVerifier({
   fromChain,
   isNative,
 }: {

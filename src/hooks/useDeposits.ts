@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   rewardsApiUrl,
@@ -107,9 +107,9 @@ export function useDeposits(
   limit: number,
   offset: number = 0
 ) {
-  return useQuery(
-    depositsQueryKey(status, limit, offset),
-    () => {
+  return useQuery({
+    queryKey: depositsQueryKey(status, limit, offset),
+    queryFn: () => {
       return getDeposits({
         status: status === "all" ? undefined : status,
         limit,
@@ -117,8 +117,9 @@ export function useDeposits(
         skipOldUnprofitable: true,
       });
     },
-    { keepPreviousData: true, refetchInterval: defaultRefetchInterval }
-  );
+    keepPreviousData: true,
+    refetchInterval: defaultRefetchInterval,
+  });
 }
 
 export function useUserDeposits(
@@ -127,9 +128,9 @@ export function useUserDeposits(
   offset: number = 0,
   userAddress?: string
 ) {
-  return useQuery(
-    userDepositsQueryKey(userAddress!, status, limit, offset),
-    async () => {
+  return useQuery({
+    queryKey: userDepositsQueryKey(userAddress!, status, limit, offset),
+    queryFn: async () => {
       if (!userAddress) {
         return {
           deposits: [],
@@ -202,12 +203,10 @@ export function useUserDeposits(
         pagination,
       };
     },
-    {
-      keepPreviousData: true,
-      refetchInterval: defaultRefetchInterval,
-      enabled: Boolean(userAddress),
-    }
-  );
+    keepPreviousData: true,
+    refetchInterval: defaultRefetchInterval,
+    enabled: Boolean(userAddress),
+  });
 }
 
 async function getDeposits(

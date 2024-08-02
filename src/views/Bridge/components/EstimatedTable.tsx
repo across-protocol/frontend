@@ -111,12 +111,14 @@ const EstimatedTable = ({
   quotedLimits,
   showPriceImpactWarning,
   swapPriceImpact,
+  estimatedFillTimeSec,
 }: EstimatedTableProps) => {
   const rewardDisplaySymbol =
     rewardToken?.displaySymbol || rewardToken?.symbol.toUpperCase();
   const baseToken = swapToken || inputToken;
   const doesAmountExceedMaxDeposit =
-    validationError === AmountInputError.INSUFFICIENT_LIQUIDITY;
+    validationError === AmountInputError.INSUFFICIENT_LIQUIDITY ||
+    validationError === AmountInputError.PAUSED_DEPOSITS;
 
   const { bridgeFee, outputAmount, swapFee } = doesAmountExceedMaxDeposit
     ? {
@@ -139,13 +141,8 @@ const EstimatedTable = ({
 
   const estimatedTime =
     quotedLimits && outputAmount && !doesAmountExceedMaxDeposit
-      ? getConfirmationDepositTime(
-          outputAmount,
-          quotedLimits,
-          fromChainId,
-          toChainId,
-          outputToken.symbol
-        ).formattedString
+      ? getConfirmationDepositTime(fromChainId, estimatedFillTimeSec)
+          .formattedString
       : "-";
 
   return (

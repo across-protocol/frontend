@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { BigNumber, ethers } from "ethers";
 import { bridgeFeesQueryKey, getBridgeFees, ChainId } from "utils";
 import { AxiosError } from "axios";
@@ -27,9 +27,9 @@ export function useBridgeFees(
     fromChainId,
     toChainId
   );
-  const { data: fees, ...delegated } = useQuery(
+  const { data: fees, ...delegated } = useQuery({
     queryKey,
-    ({ queryKey }) => {
+    queryFn: ({ queryKey }) => {
       const [
         ,
         inputTokenSymbolToQuery,
@@ -48,22 +48,20 @@ export function useBridgeFees(
         recipientAddress,
       });
     },
-    {
-      enabled: Boolean(amount.gt(0)),
-      refetchInterval: 5000,
-      retry: (_, error) => {
-        if (
-          error instanceof AxiosError &&
-          error.response?.data.includes(
-            "Amount exceeds max. deposit limit for short delay"
-          )
-        ) {
-          return false;
-        }
-        return true;
-      },
-    }
-  );
+    enabled: Boolean(amount.gt(0)),
+    refetchInterval: 5000,
+    retry: (_, error) => {
+      if (
+        error instanceof AxiosError &&
+        error.response?.data.includes(
+          "Amount exceeds max. deposit limit for short delay"
+        )
+      ) {
+        return false;
+      }
+      return true;
+    },
+  });
   return {
     fees,
     ...delegated,

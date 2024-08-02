@@ -1,5 +1,5 @@
 import { useConnection } from "hooks";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 
 import {
@@ -71,7 +71,8 @@ export function useAddLiquidity(tokenSymbol?: string, l1TokenAddress?: string) {
     await waitOnTransaction(hubPoolChainId, txResponse, notify);
   };
 
-  return useMutation(handleAddLiquidity, {
+  return useMutation({
+    mutationFn: handleAddLiquidity,
     onSuccess: () => {
       userLiquidityPoolQuery.refetch();
       stakingPoolQuery.refetch();
@@ -129,7 +130,8 @@ export function useRemoveLiquidity(
     await waitOnTransaction(hubPoolChainId, txResponse, notify);
   };
 
-  return useMutation(handleRemoveLiquidity, {
+  return useMutation({
+    mutationFn: handleRemoveLiquidity,
     onSuccess: () => {
       userLiquidityPoolQuery.refetch();
       stakingPoolQuery.refetch();

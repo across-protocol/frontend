@@ -1,4 +1,8 @@
-import { QueryFunctionContext, useQueries, useQuery } from "react-query";
+import {
+  QueryFunctionContext,
+  useQueries,
+  useQuery,
+} from "@tanstack/react-query";
 
 import { getConfig, hubPoolChainId } from "utils";
 import getApiEndpoint from "utils/serverless-api";
@@ -8,25 +12,23 @@ const config = getConfig();
 export function useAllLiquidityPools() {
   const tokenList = config.getTokenPoolList(hubPoolChainId);
 
-  return useQueries(
-    tokenList.map((token) => ({
+  return useQueries({
+    queries: tokenList.map((token) => ({
       staleTime: 60_000,
       queryKey: getLiquidityPoolQueryKey(token.symbol),
       queryFn: ({ queryKey }: QueryFunctionContext<[string, string?]>) =>
         fetchPool(queryKey[1]),
-    }))
-  );
+    })),
+  });
 }
 
 export function useLiquidityPool(tokenSymbol?: string) {
-  return useQuery(
-    getLiquidityPoolQueryKey(tokenSymbol),
-    () => fetchPool(tokenSymbol),
-    {
-      staleTime: 60_000,
-      enabled: Boolean(tokenSymbol),
-    }
-  );
+  return useQuery({
+    queryKey: getLiquidityPoolQueryKey(tokenSymbol),
+    queryFn: () => fetchPool(tokenSymbol),
+    staleTime: 60_000,
+    enabled: Boolean(tokenSymbol),
+  });
 }
 
 export function getLiquidityPoolQueryKey(

@@ -13,25 +13,9 @@ export default {
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: getDeployedAddress("SpokePool", chainId),
   chainId,
+  blockTimeSeconds: 2,
   publicRpcUrl: "https://mainnet.mode.network",
-  tokens: [
-    "WETH",
-    "ETH",
-    "USDC.e",
-    "USDT",
-    {
-      symbol: "WBTC",
-      // NOTE: We need to whitelist these chains because the route WBTC Mode <-> Arbitrum
-      // is not enabled by yet. As soon as it is enabled, we can remove this whitelist.
-      chainIds: [
-        CHAIN_IDs.MAINNET,
-        CHAIN_IDs.POLYGON,
-        CHAIN_IDs.ZK_SYNC,
-        CHAIN_IDs.OPTIMISM,
-        CHAIN_IDs.LINEA,
-      ],
-    },
-  ],
+  tokens: ["WETH", "ETH", "USDC.e", "USDT", "WBTC"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;

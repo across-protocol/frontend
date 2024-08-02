@@ -289,7 +289,6 @@ function transformChainConfigs(
         return tokenSymbol;
       });
 
-      console.log(tokens);
       const toChain = {
         chainId: toChainId,
         tokens,

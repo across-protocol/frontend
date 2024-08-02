@@ -38,6 +38,7 @@ export interface TooltipProps {
   maxWidth?: number;
   offset?: number;
   anchorWidth?: string;
+  children?: ReactNode;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({

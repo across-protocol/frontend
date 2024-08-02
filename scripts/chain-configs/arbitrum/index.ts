@@ -29,6 +29,7 @@ export default {
     "POOL",
   ],
   enableCCTP: true,
+  blockTimeSeconds: 1,
   swapTokens: [
     {
       swapInputTokenSymbol: "USDC.e",

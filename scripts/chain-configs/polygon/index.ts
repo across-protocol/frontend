@@ -17,6 +17,7 @@ export default {
   publicRpcUrl: "https://rpc.ankr.com/polygon",
   tokens: ["DAI", "UMA", "WETH", "USDC", "WBTC", "BAL", "ACX", "USDT", "POOL"],
   enableCCTP: true,
+  blockTimeSeconds: 5,
   swapTokens: [
     {
       swapInputTokenSymbol: "USDC.e",
