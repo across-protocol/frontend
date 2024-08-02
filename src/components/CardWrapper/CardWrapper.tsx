@@ -1,7 +1,9 @@
 import styled from "@emotion/styled";
 import { QUERIESV2 } from "utils";
 
-const CardWrapper: React.FC = ({ children }) => <Card>{children}</Card>;
+const CardWrapper = ({ children }: { children: React.ReactNode }) => (
+  <Card>{children}</Card>
+);
 
 export default CardWrapper;
 

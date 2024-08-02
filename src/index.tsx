@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { GlobalStyles, ErrorBoundary } from "components";
 import {
   QueryClientProvider,
@@ -42,8 +42,9 @@ const client = new QueryClient({
   }),
 });
 
-// eslint-disable-next-line react/no-deprecated
-ReactDOM.render(
+const container = document.getElementById("root");
+const root = createRoot(container!);
+root.render(
   <React.StrictMode>
     <GlobalStyles />
     <ErrorBoundary>
@@ -60,6 +61,5 @@ ReactDOM.render(
         </OnboardProvider>
       </QueryClientProvider>
     </ErrorBoundary>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );

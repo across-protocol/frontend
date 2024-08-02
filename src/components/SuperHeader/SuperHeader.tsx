@@ -52,6 +52,7 @@ const Wrapper = styled.div<IWrapper>`
 interface Props {
   darkMode?: boolean;
   size?: Size;
+  children?: React.ReactNode;
 }
 const SuperHeader: React.FC<Props> = ({ children, darkMode, size }) => {
   const container = useRef(document.getElementById("super-header"));

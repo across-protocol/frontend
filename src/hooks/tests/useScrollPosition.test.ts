@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react";
 import useScrollPosition from "../useScrollPosition";
 
 test("should have a default scroll position", () => {
