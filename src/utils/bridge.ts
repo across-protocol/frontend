@@ -7,7 +7,6 @@ import {
 } from "./constants";
 import { tagAcrossDomain, tagAddress } from "./format";
 import { getProvider } from "./providers";
-import { getFastFillTimeByRoute } from "./fill-times";
 import {
   getConfig,
   getCurrentTime,
@@ -188,9 +187,6 @@ export async function sendSpokePoolVerifierDepositTx(
   spokePoolVerifier: SpokePoolVerifier,
   onNetworkMismatch?: NetworkMismatchHandler
 ): Promise<ethers.providers.TransactionResponse> {
-  const { spokePool, spokePoolVerifier, shouldUseSpokePoolVerifier } =
-    await _getSpokePoolAndVerifier({ fromChain, isNative });
-
   // If user deposits WETH, then use the multicall handler.
   if (isWeth(tokenAddress)) {
     message = defaultUnwrapToWethMessage(
