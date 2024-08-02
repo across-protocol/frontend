@@ -23,6 +23,7 @@ export function useRouteTrace() {
     if (path && isReferralAddressResolved) {
       const referrer = document.referrer;
       const origin = window.location.origin;
+      const siteUrl = window.location.href.toString();
       const page = getPageValue();
       addToAmpliQueue(() => {
         ampli.pageViewed({
@@ -33,6 +34,7 @@ export function useRouteTrace() {
           page,
           gitCommitHash: currentGitCommitHash,
           referralProgramAddress: referralAddress,
+          siteUrl,
         });
       });
 
