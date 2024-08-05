@@ -22,6 +22,7 @@ export const CHAIN_IDs = {
   ARBITRUM: 42161,
   LINEA: 59144,
   SCROLL: 534352,
+  LISK: 1135,
 };
 
 export const MM_SEED_PHRASE =
@@ -69,5 +70,9 @@ export const chains = {
   [CHAIN_IDs.SCROLL]: {
     name: "Scroll",
     rpcUrl: `https://rpc.scroll.io`,
+  },
+  [CHAIN_IDs.LISK]: {
+    name: "Lisk",
+    rpcUrl: `https://rpc.api.lisk.com`,
   },
 };
