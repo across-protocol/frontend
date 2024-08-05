@@ -377,6 +377,17 @@ export const originRoutesToTest = {
       isNative: false,
       l1TokenAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     },
+    {
+      fromChain: 534352,
+      toChain: 34443,
+      fromTokenAddress: "0x3C1BCa5a656e69edCD0D4E36BEbb3FcDAcA60Cf1",
+      toTokenAddress: "0xcDd475325D6F564d27247D1DddBb0DAc6fA0a5CF",
+      fromSpokeAddress: "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+      fromTokenSymbol: "WBTC",
+      toTokenSymbol: "WBTC",
+      isNative: false,
+      l1TokenAddress: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+    },
   ],
   "42161": [
     {
@@ -525,6 +536,17 @@ export const originRoutesToTest = {
       toTokenSymbol: "ETH",
       isNative: true,
       l1TokenAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    },
+    {
+      fromChain: 534352,
+      toChain: 81457,
+      fromTokenAddress: "0x3C1BCa5a656e69edCD0D4E36BEbb3FcDAcA60Cf1",
+      toTokenAddress: "0xF7bc58b8D8f97ADC129cfC4c9f45Ce3C0E1D2692",
+      fromSpokeAddress: "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+      fromTokenSymbol: "WBTC",
+      toTokenSymbol: "WBTC",
+      isNative: false,
+      l1TokenAddress: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
     },
   ],
 };
@@ -839,6 +861,17 @@ export const destinationRoutesToTest = {
       isNative: false,
       l1TokenAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     },
+    {
+      fromChain: 34443,
+      toChain: 534352,
+      fromTokenAddress: "0xcDd475325D6F564d27247D1DddBb0DAc6fA0a5CF",
+      toTokenAddress: "0x3C1BCa5a656e69edCD0D4E36BEbb3FcDAcA60Cf1",
+      fromSpokeAddress: "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+      fromTokenSymbol: "WBTC",
+      toTokenSymbol: "WBTC",
+      isNative: false,
+      l1TokenAddress: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+    },
   ],
   "42161": [
     {
@@ -966,6 +999,17 @@ export const destinationRoutesToTest = {
       isNative: true,
       l1TokenAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     },
+    {
+      fromChain: 81457,
+      toChain: 534352,
+      fromTokenAddress: "0xF7bc58b8D8f97ADC129cfC4c9f45Ce3C0E1D2692",
+      toTokenAddress: "0x3C1BCa5a656e69edCD0D4E36BEbb3FcDAcA60Cf1",
+      fromSpokeAddress: "0x2D509190Ed0172ba588407D4c2df918F955Cc6E1",
+      fromTokenSymbol: "WBTC",
+      toTokenSymbol: "WBTC",
+      isNative: false,
+      l1TokenAddress: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+    },
   ],
 };
 export const destinationChainIdsToTest = [
@@ -981,8 +1025,8 @@ export const destinationChainIdsToTest = [
   "81457",
 ];
 export const tokenAmountsMap = {
-  ETH: 0.0001,
-  WETH: 0.0001,
+  ETH: 0.001,
+  WETH: 0.001,
   WBTC: 0.00001,
   USDC: 1,
   USDT: 1,

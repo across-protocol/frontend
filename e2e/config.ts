@@ -66,4 +66,8 @@ export const chains = {
     name: "Mode",
     rpcUrl: `https://mainnet.mode.network`,
   },
+  [CHAIN_IDs.SCROLL]: {
+    name: "Scroll",
+    rpcUrl: `https://rpc.scroll.io`,
+  },
 };

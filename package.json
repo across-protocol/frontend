@@ -193,5 +193,6 @@
     ]
   },
   "readme": "ERROR: No README data found!",
-  "_id": "across@0.1.0"
+  "_id": "across@0.1.0",
+  "type": "module"
 }
