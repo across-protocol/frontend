@@ -12,6 +12,7 @@ type AlertProps = {
   status: AlertStatusType;
   iconType?: AlertIconType;
   alignIcon?: "top" | "center";
+  children: React.ReactNode;
 };
 
 const Alert: React.FC<AlertProps> = ({

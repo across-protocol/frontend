@@ -16,6 +16,7 @@ export default {
   publicRpcUrl: "https://mainnet.base.org",
   tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
   enableCCTP: true,
+  blockTimeSeconds: 2,
   swapTokens: [
     {
       swapInputTokenSymbol: "USDbC",

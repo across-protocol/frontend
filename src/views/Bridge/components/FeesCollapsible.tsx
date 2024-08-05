@@ -33,6 +33,7 @@ export type Props = {
   quotedLimits?: BridgeLimitInterface;
   showPriceImpactWarning?: boolean;
   swapPriceImpact?: BigNumber;
+  estimatedFillTimeSec?: number;
 };
 
 export function FeesCollapsible(props: Props) {
@@ -53,16 +54,14 @@ export function FeesCollapsible(props: Props) {
   );
 
   const doesAmountExceedMaxDeposit =
-    props.validationError === AmountInputError.INSUFFICIENT_LIQUIDITY;
+    props.validationError === AmountInputError.INSUFFICIENT_LIQUIDITY ||
+    props.validationError === AmountInputError.PAUSED_DEPOSITS;
 
   const estimatedTime =
     props.quotedLimits && outputAmount && !doesAmountExceedMaxDeposit
       ? getConfirmationDepositTime(
-          outputAmount,
-          props.quotedLimits,
           props.fromChainId,
-          props.toChainId,
-          props.outputToken.symbol
+          props.estimatedFillTimeSec
         ).formattedString
       : "-";
 

@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { bridgeLimitsQueryKey, ChainId, getConfig } from "utils";
 import { BigNumber } from "ethers";
 import getApiEndpoint from "utils/serverless-api";
@@ -32,14 +32,14 @@ export function useBridgeLimits(
     fromChainId &&
     toChainId
   );
-  const { data: limits, ...delegated } = useQuery(
-    bridgeLimitsQueryKey(
+  const { data: limits, ...delegated } = useQuery({
+    queryKey: bridgeLimitsQueryKey(
       inputTokenSymbol,
       outputTokenSymbol,
       fromChainId,
       toChainId
     ),
-    () => {
+    queryFn: () => {
       if (!enabled) {
         return undefined;
       }
@@ -51,11 +51,9 @@ export function useBridgeLimits(
         toChainId
       );
     },
-    {
-      enabled,
-      refetchInterval: 300_000, // 5 minutes
-    }
-  );
+    enabled,
+    refetchInterval: 300_000, // 5 minutes
+  });
   return {
     limits,
     ...delegated,

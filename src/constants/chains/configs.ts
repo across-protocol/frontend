@@ -80,6 +80,11 @@ import polygonAmoyGrayscaleLogo from "assets/chain-logos/polygon-amoy-grayscale.
 import { ReactComponent as polygonAmoyLogoSvg } from "assets/chain-logos/polygon-amoy.svg";
 import { ReactComponent as polygonAmoyGrayscaleLogoSvg } from "assets/chain-logos/polygon-amoy-grayscale.svg";
 
+import scrollLogo from "assets/chain-logos/scroll.svg";
+import scrollGrayscaleLogo from "assets/chain-logos/scroll-grayscale.svg";
+import { ReactComponent as scrollLogoSvg } from "assets/chain-logos/scroll.svg";
+import { ReactComponent as scrollGrayscaleLogoSvg } from "assets/chain-logos/scroll-grayscale.svg";
+
 import sepoliaLogo from "assets/chain-logos/sepolia.svg";
 import sepoliaGrayscaleLogo from "assets/chain-logos/sepolia-grayscale.svg";
 import { ReactComponent as sepoliaLogoSvg } from "assets/chain-logos/sepolia.svg";
@@ -104,7 +109,7 @@ export const arbitrum = {
     `${arbitrum.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_42161_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 1000,
 };
 
 export const arbitrumSepolia = {
@@ -137,7 +142,7 @@ export const base = {
   constructExplorerLink: (txHash: string) => `${base.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_8453_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const baseSepolia = {
@@ -171,7 +176,7 @@ export const blast = {
     `${blast.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_81457_PROVIDER_URL,
-  pollingInterval: 2,
+  pollingInterval: 2000,
 };
 
 export const blastSepolia = {
@@ -188,7 +193,7 @@ export const blastSepolia = {
     `${blastSepolia.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_168587773_PROVIDER_URL,
-  pollingInterval: 2,
+  pollingInterval: 2000,
 };
 
 export const linea = {
@@ -205,7 +210,7 @@ export const linea = {
     `${linea.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_59144_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const lisk = {
@@ -221,7 +226,7 @@ export const lisk = {
   constructExplorerLink: (txHash: string) => `${lisk.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_1135_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const liskSepolia = {
@@ -255,7 +260,7 @@ export const ethereum = {
     `${ethereum.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_1_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 12000,
 };
 
 export const mode = {
@@ -271,7 +276,7 @@ export const mode = {
   constructExplorerLink: (txHash: string) => `${mode.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_34443_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const modeSepolia = {
@@ -305,7 +310,7 @@ export const optimism = {
     `${optimism.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_10_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const optimismSepolia = {
@@ -339,7 +344,7 @@ export const polygon = {
     `${polygon.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "MATIC",
   customRpcUrl: process.env.REACT_APP_CHAIN_137_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 5000,
 };
 
 export const polygonAmoy = {
@@ -357,6 +362,23 @@ export const polygonAmoy = {
   nativeCurrencySymbol: "MATIC",
   customRpcUrl: process.env.REACT_APP_CHAIN_80002_PROVIDER_URL,
   pollingInterval: 15000,
+};
+
+export const scroll = {
+  name: "Scroll",
+  fullName: "Scroll",
+  chainId: 534352,
+  logoURI: scrollLogo,
+  grayscaleLogoURI: scrollGrayscaleLogo,
+  logoSvg: scrollLogoSvg,
+  grayscaleLogoSvg: scrollGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.scroll.io",
+  explorerUrl: "https://scrollscan.com",
+  constructExplorerLink: (txHash: string) =>
+    `${scroll.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_534352_PROVIDER_URL,
+  pollingInterval: 3000,
 };
 
 export const sepolia = {
@@ -390,7 +412,7 @@ export const zkSync = {
     `${zkSync.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_324_PROVIDER_URL,
-  pollingInterval: 15000,
+  pollingInterval: 2000,
 };
 
 export const chainConfigs = [
@@ -410,6 +432,7 @@ export const chainConfigs = [
   optimismSepolia,
   polygon,
   polygonAmoy,
+  scroll,
   sepolia,
   zkSync,
 ].reduce(

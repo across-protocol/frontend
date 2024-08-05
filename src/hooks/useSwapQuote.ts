@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { getConfig, swapQuoteQueryKey, SwapQuoteQueryKeyParams } from "utils";
 import getApiEndpoint from "utils/serverless-api";
@@ -7,9 +7,9 @@ import getApiEndpoint from "utils/serverless-api";
 const config = getConfig();
 
 export function useSwapQuoteQuery(params: SwapQuoteQueryKeyParams) {
-  return useQuery(
-    swapQuoteQueryKey(params),
-    ({ queryKey }) => {
+  return useQuery({
+    queryKey: swapQuoteQueryKey(params),
+    queryFn: ({ queryKey }) => {
       const [
         ,
         {
@@ -62,11 +62,9 @@ export function useSwapQuoteQuery(params: SwapQuoteQueryKeyParams) {
         swapSlippage,
       });
     },
-    {
-      enabled: !!params.swapTokenSymbol,
-      refetchInterval: 5_000,
-    }
-  );
+    enabled: !!params.swapTokenSymbol,
+    refetchInterval: 5_000,
+  });
 }
 
 export function isSwapRoute(

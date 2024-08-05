@@ -11,6 +11,7 @@ type SectionWrapperType = {
     name: string;
   };
   id?: string;
+  children: React.ReactNode;
 };
 
 const SectionWrapper: React.FC<SectionWrapperType> = ({

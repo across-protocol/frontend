@@ -160,7 +160,11 @@ export function useOnboardManager() {
       // Unsubscribe to the observer when this component is
       // unmounted
       return () => {
-        unsubscribe();
+        try {
+          unsubscribe();
+        } catch (e) {
+          console.error("Failed to unsubscribe from onboard wallet state", e);
+        }
       };
     }
   }, [onboard]);
@@ -259,7 +263,11 @@ export const OnboardContext = createContext<OnboardContextValue | undefined>(
   undefined
 );
 OnboardContext.displayName = "OnboardContext";
-export const OnboardProvider: React.FC = ({ children }) => {
+export const OnboardProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const value = useOnboardManager();
   return (
     <OnboardContext.Provider value={value}>{children}</OnboardContext.Provider>
