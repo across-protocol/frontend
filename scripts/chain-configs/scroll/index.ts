@@ -14,7 +14,7 @@ export default {
   spokePool: getDeployedAddress("SpokePool", chainId),
   chainId,
   publicRpcUrl: "https://rpc.scroll.io",
-  blockTimeSeconds: 5,
+  blockTimeSeconds: 3,
   tokens: ["WETH", "ETH", "USDC", "USDT", "WBTC"],
   enableCCTP: false,
   swapTokens: [],

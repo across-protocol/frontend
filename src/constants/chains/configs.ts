@@ -378,7 +378,7 @@ export const scroll = {
     `${scroll.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_534352_PROVIDER_URL,
-  pollingInterval: 5,
+  pollingInterval: 3000,
 };
 
 export const sepolia = {

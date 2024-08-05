@@ -5181,6 +5181,17 @@
       "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
     },
     {
+      "fromChain": 34443,
+      "toChain": 534352,
+      "fromTokenAddress": "0xcDd475325D6F564d27247D1DddBb0DAc6fA0a5CF",
+      "toTokenAddress": "0x3C1BCa5a656e69edCD0D4E36BEbb3FcDAcA60Cf1",
+      "fromSpokeAddress": "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+      "fromTokenSymbol": "WBTC",
+      "toTokenSymbol": "WBTC",
+      "isNative": false,
+      "l1TokenAddress": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+    },
+    {
       "fromChain": 81457,
       "toChain": 1,
       "fromTokenAddress": "0x4300000000000000000000000000000000000004",
@@ -6334,6 +6345,17 @@
       "toTokenSymbol": "USDT",
       "isNative": false,
       "l1TokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
+      "fromChain": 534352,
+      "toChain": 34443,
+      "fromTokenAddress": "0x3C1BCa5a656e69edCD0D4E36BEbb3FcDAcA60Cf1",
+      "toTokenAddress": "0xcDd475325D6F564d27247D1DddBb0DAc6fA0a5CF",
+      "fromSpokeAddress": "0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96",
+      "fromTokenSymbol": "WBTC",
+      "toTokenSymbol": "WBTC",
+      "isNative": false,
+      "l1TokenAddress": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
     },
     {
       "fromChain": 534352,
