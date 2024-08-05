@@ -51,7 +51,7 @@ export const chains = {
     rpcUrl: `https://rpc.ankr.com/polygon`,
   },
   [CHAIN_IDs.ZK_SYNC]: {
-    name: "zkSync Era",
+    name: "ZkSync Era",
     rpcUrl: `https://mainnet.era.zksync.io`,
   },
   [CHAIN_IDs.BASE]: {
