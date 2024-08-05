@@ -9,6 +9,7 @@ import {
   useApprove,
   useIsWrongNetwork,
   useAmplitude,
+  useQueryParams,
 } from "hooks";
 import { cloneDeep } from "lodash";
 import { useMutation } from "@tanstack/react-query";
@@ -55,12 +56,15 @@ export function useBridgeAction(
   const { isConnected, signer, account } = useConnection();
   const history = useHistory();
   const { referrer } = useReferrer();
+  const params = useQueryParams();
 
   const { isWrongNetworkHandler, isWrongNetwork } = useIsWrongNetwork(
     selectedRoute.fromChain
   );
   const approveHandler = useApprove(selectedRoute.fromChain);
   const { addToAmpliQueue } = useAmplitude();
+
+  const existingIntegtrator = params["integrator"];
 
   const buttonActionHandler = useMutation({
     mutationFn: async () => {
@@ -224,6 +228,7 @@ export function useBridgeAction(
           : frozenRoute.fromTokenSymbol,
         outputTokenSymbol: frozenRoute.toTokenSymbol,
         referrer,
+        integtegtor: existingIntegtrator,
       }).toString();
       history.push(
         `/bridge/${tx.hash}?${statusPageSearchParams}`,
