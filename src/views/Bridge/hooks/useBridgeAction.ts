@@ -9,6 +9,7 @@ import {
   useApprove,
   useIsWrongNetwork,
   useAmplitude,
+  useQueryParams,
 } from "hooks";
 import { cloneDeep } from "lodash";
 import { useMutation } from "@tanstack/react-query";
@@ -55,10 +56,15 @@ export function useBridgeAction(
   const { isConnected, signer, account } = useConnection();
   const history = useHistory();
   const { referrer } = useReferrer();
+  const params = useQueryParams();
 
-  const { isWrongNetworkHandler } = useIsWrongNetwork(selectedRoute.fromChain);
+  const { isWrongNetworkHandler, isWrongNetwork } = useIsWrongNetwork(
+    selectedRoute.fromChain
+  );
   const approveHandler = useApprove(selectedRoute.fromChain);
   const { addToAmpliQueue } = useAmplitude();
+
+  const existingIntegtrator = params["integrator"];
 
   const buttonActionHandler = useMutation({
     mutationFn: async () => {
@@ -222,6 +228,7 @@ export function useBridgeAction(
           : frozenRoute.fromTokenSymbol,
         outputTokenSymbol: frozenRoute.toTokenSymbol,
         referrer,
+        integtegtor: existingIntegtrator,
       }).toString();
       history.push(
         `/bridge/${tx.hash}?${statusPageSearchParams}`,
@@ -236,7 +243,6 @@ export function useBridgeAction(
     !usedTransferQuote ||
     (isConnected && dataLoading) ||
     buttonActionHandler.isLoading;
-
   return {
     isConnected,
     buttonActionHandler: buttonActionHandler.mutate,
@@ -246,6 +252,7 @@ export function useBridgeAction(
       isConnected,
       isDataLoading: dataLoading,
       isMutating: buttonActionHandler.isLoading,
+      isWrongNetwork,
     }),
     buttonDisabled,
   };
@@ -301,12 +308,16 @@ function getButtonLabel(args: {
   isConnected: boolean;
   isDataLoading: boolean;
   isMutating: boolean;
+  isWrongNetwork: boolean;
 }) {
   if (!args.isConnected) {
     return "Connect wallet";
   }
   if (args.isMutating) {
     return "Confirming...";
+  }
+  if (args.isWrongNetwork) {
+    return "Switch network and confirm transaction";
   }
   return "Confirm transaction";
 }

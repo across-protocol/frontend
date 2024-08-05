@@ -99,7 +99,6 @@ const BridgeForm = ({
   onSelectFromChain,
   onSelectToChain,
   onClickQuickSwap,
-  onClickChainSwitch,
   onClickActionButton,
   onClickChangeToAddress,
   onSetNewSlippage,
@@ -111,7 +110,6 @@ const BridgeForm = ({
   swapQuote,
 
   isConnected,
-  isWrongChain,
   buttonLabel,
   isBridgeDisabled,
   validationError,
@@ -296,11 +294,7 @@ const BridgeForm = ({
         swapPriceImpact={swapPriceImpact}
         estimatedFillTimeSec={fees?.estimatedFillTimeSec}
       />
-      {isWrongChain ? (
-        <StyledSecondaryButton onClick={onClickChainSwitch}>
-          Switch Network
-        </StyledSecondaryButton>
-      ) : !isConnected ? (
+      {!isConnected ? (
         <StyledSecondaryButton
           onClick={() => connect()}
           data-cy="connect-wallet"
