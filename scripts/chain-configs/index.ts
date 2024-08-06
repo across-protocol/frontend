@@ -17,3 +17,4 @@ export { default as POLYGON_AMOY } from "./polygon-amoy";
 export { default as SCROLL } from "./scroll";
 export { default as SEPOLIA } from "./sepolia";
 export { default as ZK_SYNC } from "./zk-sync";
+export { default as ZORA } from "./zora";

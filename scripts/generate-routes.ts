@@ -27,6 +27,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.BLAST,
   chainConfigs.LISK,
   chainConfigs.SCROLL,
+  chainConfigs.ZORA,
 ];
 
 const enabledSepoliaChainConfigs = [
