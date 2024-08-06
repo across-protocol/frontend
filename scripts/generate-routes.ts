@@ -178,7 +178,7 @@ function transformChainConfigs(
       const tokens = chainConfig.tokens.flatMap((token) => {
         const tokenSymbol = typeof token === "string" ? token : token.symbol;
 
-        // Handle USDC -> USDC.e/USDbC routes
+        // Handle USDC -> USDC.e/USDbC/USDzC routes
         if (tokenSymbol === "USDC") {
           if (toChainConfig.enableCCTP) {
             return [
@@ -189,8 +189,10 @@ function transformChainConfigs(
               },
             ];
           } else if (
-            toChainConfig.tokens.includes("USDC.e") ||
-            toChainConfig.tokens.includes("USDbC")
+            toChainConfig.tokens.find(
+              (token) =>
+                typeof token === "string" && sdkUtils.isBridgedUsdc(token)
+            )
           ) {
             return [
               {
@@ -201,7 +203,7 @@ function transformChainConfigs(
           }
         }
 
-        if (["USDC.e", "USDbC"].includes(tokenSymbol)) {
+        if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
           if (toChainConfig.enableCCTP) {
             return [
               {
@@ -469,8 +471,9 @@ function getTokenBySymbol(
   }
 
   const l1TokenAddress =
-    TOKEN_SYMBOLS_MAP[isBridgedUsdc(tokenSymbol) ? "USDC" : tokenSymbol]
-      ?.addresses[l1ChainId];
+    TOKEN_SYMBOLS_MAP[
+      sdkUtils.isBridgedUsdc(tokenSymbol) ? "USDC" : tokenSymbol
+    ]?.addresses[l1ChainId];
 
   if (!l1TokenAddress) {
     throw new Error(`Could not find L1 token address for ${tokenSymbol}`);
@@ -484,14 +487,16 @@ function getTokenBySymbol(
   };
 }
 
-function isBridgedUsdc(tokenSymbol: string) {
-  return tokenSymbol === "USDC.e" || tokenSymbol === "USDbC";
-}
-
 function getBridgedUsdcSymbol(chainId: number) {
-  return [CHAIN_IDs.BASE, CHAIN_IDs.BASE_SEPOLIA].includes(chainId)
-    ? "USDbC"
-    : "USDC.e";
+  switch (chainId) {
+    case CHAIN_IDs.BASE:
+    case CHAIN_IDs.BASE_SEPOLIA:
+      return TOKEN_SYMBOLS_MAP.USDbC.symbol;
+    case CHAIN_IDs.ZORA:
+      return TOKEN_SYMBOLS_MAP.USDzC.symbol;
+    default:
+      return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
+  }
 }
 
 generateRoutes(Number(process.argv[2]));
