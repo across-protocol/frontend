@@ -74,6 +74,7 @@ const enabledRoutes = {
         CHAIN_IDs.BLAST,
         CHAIN_IDs.LISK,
         CHAIN_IDs.SCROLL,
+        CHAIN_IDs.ZORA,
       ],
     },
     swapAndBridgeAddresses: {
