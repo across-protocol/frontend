@@ -15,7 +15,7 @@ export default {
   chainId,
   publicRpcUrl: "https://rpc.zora.energy",
   blockTimeSeconds: 2,
-  tokens: ["WETH", "ETH", "USDC"],
+  tokens: ["WETH", "ETH", "USDzC"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;
