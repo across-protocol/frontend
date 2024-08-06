@@ -4,6 +4,7 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
+import { isBridgedUsdc } from "./sdk";
 
 import unknownLogo from "assets/icons/question-circle.svg";
 import { ReactComponent as unknownLogoSvg } from "assets/icons/question-circle.svg";
@@ -65,23 +66,6 @@ export const defaultBlockPollingInterval =
 export const hubPoolChainId = Number(
   process.env.REACT_APP_HUBPOOL_CHAINID || 1
 );
-
-export const bridgedUSDCSymbolsMap = {
-  [ChainId.ARBITRUM]: "USDC.e",
-  [ChainId.OPTIMISM]: "USDC.e",
-  [ChainId.POLYGON]: "USDC.e",
-  [ChainId.ZK_SYNC]: "USDC.e",
-  [ChainId.BASE]: "USDbC",
-};
-export const bridgedUSDCSymbols = Array.from(
-  new Set(Object.values(bridgedUSDCSymbolsMap)).values()
-);
-export const chainsWithNativeUSDC = Object.keys(bridgedUSDCSymbolsMap).map(
-  Number
-);
-export function isBridgedUsdc(symbol: string) {
-  return bridgedUSDCSymbols.includes(symbol);
-}
 
 export const tokenList = [
   ...Object.entries(orderedTokenLogos).flatMap(([symbol, logoURI]) => {
