@@ -33,9 +33,11 @@ type ModalProps = {
   topYOffset?: number;
   "data-cy"?: string;
   bottomYOffset?: number;
+
+  children?: React.ReactNode;
 };
 
-const Modal: React.FC<ModalProps> = ({
+const Modal = ({
   isOpen,
   title,
   height,
@@ -49,7 +51,7 @@ const Modal: React.FC<ModalProps> = ({
   bottomYOffset,
   padding,
   "data-cy": dataCy,
-}) => {
+}: ModalProps) => {
   const verticalLocation: ModalDirection | undefined =
     typeof _verticalLocation === "string"
       ? {
@@ -124,34 +126,38 @@ const Modal: React.FC<ModalProps> = ({
     return null;
   }
 
-  return createPortal(
-    <Wrapper
-      direction={direction}
-      onClick={offModalClickHandler}
-      reverseAnimation={!forwardAnimation}
-      data-cy={dataCy}
-    >
-      <ModalContentWrapper
-        ref={modalContentRef}
-        height={height}
-        width={width}
-        topYOffset={topYOffset}
-        bottomYOffset={bottomYOffset}
-        padding={padding ?? "normal"}
-      >
-        <TitleAndExitWrapper>
-          {typeof title === "string" ? (
-            <Title>{title}</Title>
-          ) : (
-            <div>{title}</div>
-          )}
+  return (
+    <>
+      {createPortal(
+        <Wrapper
+          direction={direction}
+          onClick={offModalClickHandler}
+          reverseAnimation={!forwardAnimation}
+          data-cy={dataCy}
+        >
+          <ModalContentWrapper
+            ref={modalContentRef}
+            height={height}
+            width={width}
+            topYOffset={topYOffset}
+            bottomYOffset={bottomYOffset}
+            padding={padding ?? "normal"}
+          >
+            <TitleAndExitWrapper>
+              {typeof title === "string" ? (
+                <Title>{title}</Title>
+              ) : (
+                <div>{title}</div>
+              )}
 
-          <StyledExitIcon onClick={() => externalModalExitHandler()} />
-        </TitleAndExitWrapper>
-        {children}
-      </ModalContentWrapper>
-    </Wrapper>,
-    container.current
+              <StyledExitIcon onClick={() => externalModalExitHandler()} />
+            </TitleAndExitWrapper>
+            {children}
+          </ModalContentWrapper>
+        </Wrapper>,
+        container.current
+      )}
+    </>
   );
 };
 

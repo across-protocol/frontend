@@ -85,6 +85,11 @@ import redstoneGrayscaleLogo from "assets/chain-logos/redstone-grayscale.svg";
 import { ReactComponent as redstoneLogoSvg } from "assets/chain-logos/redstone.svg";
 import { ReactComponent as redstoneGrayscaleLogoSvg } from "assets/chain-logos/redstone-grayscale.svg";
 
+import scrollLogo from "assets/chain-logos/scroll.svg";
+import scrollGrayscaleLogo from "assets/chain-logos/scroll-grayscale.svg";
+import { ReactComponent as scrollLogoSvg } from "assets/chain-logos/scroll.svg";
+import { ReactComponent as scrollGrayscaleLogoSvg } from "assets/chain-logos/scroll-grayscale.svg";
+
 import sepoliaLogo from "assets/chain-logos/sepolia.svg";
 import sepoliaGrayscaleLogo from "assets/chain-logos/sepolia-grayscale.svg";
 import { ReactComponent as sepoliaLogoSvg } from "assets/chain-logos/sepolia.svg";
@@ -381,6 +386,23 @@ export const redstone = {
   pollingInterval: 2000,
 };
 
+export const scroll = {
+  name: "Scroll",
+  fullName: "Scroll",
+  chainId: 534352,
+  logoURI: scrollLogo,
+  grayscaleLogoURI: scrollGrayscaleLogo,
+  logoSvg: scrollLogoSvg,
+  grayscaleLogoSvg: scrollGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.scroll.io",
+  explorerUrl: "https://scrollscan.com",
+  constructExplorerLink: (txHash: string) =>
+    `${scroll.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_534352_PROVIDER_URL,
+  pollingInterval: 3000,
+};
+
 export const sepolia = {
   name: "Sepolia",
   fullName: "Sepolia",
@@ -433,6 +455,7 @@ export const chainConfigs = [
   polygon,
   polygonAmoy,
   redstone,
+  scroll,
   sepolia,
   zkSync,
 ].reduce(

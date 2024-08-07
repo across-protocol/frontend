@@ -21,6 +21,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.BLAST,
   CHAIN_IDs.LISK,
   CHAIN_IDs.REDSTONE,
+  CHAIN_IDs.SCROLL,
   // testnet
   CHAIN_IDs.SEPOLIA,
   CHAIN_IDs.BASE_SEPOLIA,

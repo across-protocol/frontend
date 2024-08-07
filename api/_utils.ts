@@ -213,10 +213,6 @@ export const resolveVercelEndpoint = () => {
   }
 };
 
-export const isBridgedUsdc = (tokenSymbol: string) => {
-  return ["USDC.e", "USDbC"].includes(tokenSymbol);
-};
-
 export const validateChainAndTokenParams = (
   queryParams: Partial<{
     token: string;
@@ -356,17 +352,17 @@ export const getRouteDetails = (
   return {
     inputToken: {
       ...inputToken,
-      symbol: isBridgedUsdc(inputToken.symbol)
+      symbol: sdk.utils.isBridgedUsdc(inputToken.symbol)
         ? _getBridgedUsdcTokenSymbol(inputToken.symbol, resolvedOriginChainId)
         : inputToken.symbol,
-      address: inputToken.addresses[resolvedOriginChainId],
+      address: utils.getAddress(inputToken.addresses[resolvedOriginChainId]),
     },
     outputToken: {
       ...outputToken,
-      symbol: isBridgedUsdc(outputToken.symbol)
+      symbol: sdk.utils.isBridgedUsdc(outputToken.symbol)
         ? _getBridgedUsdcTokenSymbol(outputToken.symbol, destinationChainId)
         : outputToken.symbol,
-      address: outputToken.addresses[destinationChainId],
+      address: utils.getAddress(outputToken.addresses[destinationChainId]),
     },
     l1Token: {
       ...l1Token,
@@ -413,7 +409,10 @@ export const getTokenByAddress = (
 
 const _getChainIdsOfToken = (
   tokenAddress: string,
-  token: (typeof TOKEN_SYMBOLS_MAP)[keyof typeof TOKEN_SYMBOLS_MAP]
+  token: Omit<
+    (typeof TOKEN_SYMBOLS_MAP)[keyof typeof TOKEN_SYMBOLS_MAP],
+    "coingeckoId"
+  >
 ) => {
   const chainIds = Object.entries(token.addresses).filter(
     ([_, address]) => address.toLowerCase() === tokenAddress.toLowerCase()
@@ -422,9 +421,18 @@ const _getChainIdsOfToken = (
 };
 
 const _getBridgedUsdcTokenSymbol = (tokenSymbol: string, chainId: number) => {
-  return tokenSymbol === "USDC.e" && chainId === CHAIN_IDs.BASE
-    ? "USDbC"
-    : tokenSymbol;
+  if (!sdk.utils.isBridgedUsdc(tokenSymbol)) {
+    throw new InputError(`Token ${tokenSymbol} is not a bridged USDC token`);
+  }
+
+  switch (chainId) {
+    case CHAIN_IDs.BASE:
+      return TOKEN_SYMBOLS_MAP.USDbC.symbol;
+    case CHAIN_IDs.ZORA:
+      return TOKEN_SYMBOLS_MAP.USDzC.symbol;
+    default:
+      return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
+  }
 };
 
 const _getAddressOrThrowInputError = (address: string, paramName: string) => {

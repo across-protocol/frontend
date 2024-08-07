@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act } from "@testing-library/react";
 import useWindowSize from "../useWindowSize";
 
 test("should have a default window size", () => {
