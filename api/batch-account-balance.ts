@@ -10,16 +10,15 @@ import {
 } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import {
-  callViaMulticall3,
+  getBatchBalanceViaMulticall3,
   getLogger,
   getProvider,
   handleErrorCondition,
   validAddress,
 } from "./_utils";
-import { ERC20__factory } from "@across-protocol/contracts";
 
 const BatchAccountBalanceQueryParamsSchema = type({
-  tokenAddress: union([literal("native"), validAddress()]), // can be 0x00 address, ie native
+  tokenAddress: union([literal("native"), validAddress()]),
   addresses: array(validAddress()),
   chainId: string(),
 });
@@ -28,7 +27,10 @@ type BatchAccountBalanceQueryParams = Infer<
   typeof BatchAccountBalanceQueryParamsSchema
 >;
 
-export type BatchAccountBalanceResponse = Record<string, string>;
+export type BatchAccountBalanceResponse = Record<
+  BatchAccountBalanceQueryParams["addresses"][number],
+  string
+>;
 
 const handler = async (
   { query }: TypedVercelRequest<BatchAccountBalanceQueryParams>,
@@ -40,6 +42,7 @@ const handler = async (
     message: "Query data",
     query,
   });
+
   try {
     // Validate the query parameters
     assert(query, BatchAccountBalanceQueryParamsSchema);
@@ -52,7 +55,7 @@ const handler = async (
     const provider = getProvider(chainIdAsInt);
 
     if (tokenAddress === "native") {
-      // 1. if token address is native, map native balance calls
+      // fetch native balances
       const res = await Promise.all(
         addresses.map((a) => provider.getBalance(a, "latest"))
       );
@@ -60,20 +63,12 @@ const handler = async (
         (address, i) => (balances[address] = res[i].toString())
       );
     } else {
-      // 2. if token address is erc20, map token balance calls
-      const multicalls = addresses.map((address) => {
-        const erc20Contract = ERC20__factory.connect(tokenAddress, provider);
-        return {
-          contract: erc20Contract,
-          functionName: "balanceOf",
-          args: [address],
-        };
-      });
-
-      // 3. batch through multicall
-      const res = await callViaMulticall3(provider, multicalls, {
-        blockTag: "latest",
-      });
+      // fetch erc20 balances
+      const res = await getBatchBalanceViaMulticall3(
+        chainId,
+        addresses,
+        tokenAddress
+      );
       addresses.forEach(
         (address, i) => (balances[address] = res[i].toString())
       );

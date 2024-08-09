@@ -766,6 +766,32 @@ export const getBalance = (
 };
 
 /**
+ * Fetches the balances for an array of addresses on a particular chain, for a particular erc20 token
+ * @param chainId The blockchain Id to query against
+ * @param addresses An array of valid Web3 wallet addresses
+ * @param tokenAddress The valid ERC20 token address on the given `chainId`.
+ * @param blockTag Block to query from, defaults to latest block
+ * @returns a Promise that resolves to an array of BigNumbers
+ */
+export const getBatchBalanceViaMulticall3 = async (
+  chainId: string | number,
+  addresses: string[],
+  tokenAddress: string,
+  blockTag: providers.BlockTag = "latest"
+): Promise<ethers.utils.Result[]> => {
+  const provider = getProvider(Number(chainId));
+  const erc20Contract = ERC20__factory.connect(tokenAddress, provider);
+  const multicalls = addresses.map((address) => ({
+    contract: erc20Contract,
+    functionName: "balanceOf",
+    args: [address],
+  }));
+  return callViaMulticall3(provider, multicalls, {
+    blockTag,
+  });
+};
+
+/**
  * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
  * native currency will be returned.
  * @param chainId The blockchain Id to query against
