@@ -55,7 +55,7 @@ export function useBridgeAction(
 ) {
   const { isConnected, signer, account } = useConnection();
   const history = useHistory();
-  const { referrer } = useReferrer();
+  const { referrer, integratorId } = useReferrer();
   const params = useQueryParams();
 
   const { isWrongNetworkHandler, isWrongNetwork } = useIsWrongNetwork(
@@ -73,7 +73,7 @@ export function useBridgeAction(
       );
       const frozenInitialQuoteTime = usedTransferQuote?.initialQuoteTime;
       const frozenDepositArgs = cloneDeep(
-        getDepositArgs(selectedRoute, usedTransferQuote, referrer)
+        getDepositArgs(selectedRoute, usedTransferQuote, referrer, integratorId)
       );
       const frozenSwapQuote = cloneDeep(usedTransferQuote?.quotedSwap);
       const frozenFeeQuote = cloneDeep(usedTransferQuote?.quotedFees);
@@ -228,8 +228,10 @@ export function useBridgeAction(
           : frozenRoute.fromTokenSymbol,
         outputTokenSymbol: frozenRoute.toTokenSymbol,
         referrer,
-        integtegtor: existingIntegtrator,
-      }).toString();
+      });
+      if (existingIntegtrator) {
+        statusPageSearchParams.set("integrator", existingIntegtrator);
+      }
       history.push(
         `/bridge/${tx.hash}?${statusPageSearchParams}`,
         // This state is stored in session storage and therefore persist
@@ -269,11 +271,13 @@ type DepositArgs = {
   tokenAddress: string;
   isNative: boolean;
   toAddress: string;
+  integratorId: string;
 };
 function getDepositArgs(
   selectedRoute: SelectedRoute,
   usedTransferQuote: TransferQuote,
-  referrer: string
+  referrer: string,
+  integratorId: string
 ): DepositArgs | undefined {
   const { amountToBridgeAfterSwap, initialAmount, quotedFees, recipient } =
     usedTransferQuote || {};
@@ -299,6 +303,7 @@ function getDepositArgs(
     tokenAddress: selectedRoute.fromTokenAddress,
     isNative: selectedRoute.isNative,
     toAddress: recipient,
+    integratorId,
   };
 }
 
