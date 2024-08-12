@@ -197,11 +197,6 @@ export function tagString(dataHex: string, tagString: string) {
   return tagHex(dataHex, stringToHex(tagString));
 }
 
-// tags the hardcoded across chain reference
-export function tagAcrossDomain(dataHex: string) {
-  return tagHex(dataHex, "0x0000", DOMAIN_CALLDATA_DELIMITER);
-}
-
 // tags only an address
 export function tagAddress(
   dataHex: string,
