@@ -53,6 +53,7 @@
   "scripts": {
     "start": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite",
     "dev": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite --port $PORT --host",
+    "dev:api": "vercel dev --debug --listen $PORT",
     "build": "yarn pull:timing && export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && tsc && vite build",
     "analyze": "yarn build && rollup-plugin-visualizer --open ./bundle-size-analysis.json",
     "test": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && jest --env jsdom src",
