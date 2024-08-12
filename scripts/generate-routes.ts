@@ -6,7 +6,11 @@ import * as prettier from "prettier";
 
 import * as chainConfigs from "./chain-configs";
 
-const { getDeployedAddress } = sdkUtils;
+const { getDeployedAddress: _getDeployedAddress } = sdkUtils;
+
+function getDeployedAddress(contractName: string, chainId: number): string {
+  return _getDeployedAddress(contractName, chainId, true) as string;
+}
 
 type Route =
   (typeof enabledRoutes)[keyof typeof enabledRoutes]["routes"][number];
@@ -464,7 +468,10 @@ function getTokenBySymbol(
   chainId: number | string,
   l1ChainId: number
 ) {
-  const tokenAddress = TOKEN_SYMBOLS_MAP[tokenSymbol]?.addresses[chainId];
+  const tokenAddress =
+    TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP]?.addresses[
+      Number(chainId)
+    ];
 
   if (!tokenAddress) {
     throw new Error(
@@ -472,10 +479,11 @@ function getTokenBySymbol(
     );
   }
 
+  const effectiveSymbol = (
+    sdkUtils.isBridgedUsdc(tokenSymbol) ? "USDC" : tokenSymbol
+  ) as keyof typeof TOKEN_SYMBOLS_MAP;
   const l1TokenAddress =
-    TOKEN_SYMBOLS_MAP[
-      sdkUtils.isBridgedUsdc(tokenSymbol) ? "USDC" : tokenSymbol
-    ]?.addresses[l1ChainId];
+    TOKEN_SYMBOLS_MAP[effectiveSymbol]?.addresses[l1ChainId];
 
   if (!l1TokenAddress) {
     throw new Error(`Could not find L1 token address for ${tokenSymbol}`);
