@@ -64,7 +64,7 @@ export function useBridgeAction(
   const approveHandler = useApprove(selectedRoute.fromChain);
   const { addToAmpliQueue } = useAmplitude();
 
-  const existingIntegtrator = params["integrator"];
+  const existingIntegrator = params["integrator"];
 
   const buttonActionHandler = useMutation({
     mutationFn: async () => {
