@@ -229,8 +229,8 @@ export function useBridgeAction(
         outputTokenSymbol: frozenRoute.toTokenSymbol,
         referrer,
       });
-      if (existingIntegtrator) {
-        statusPageSearchParams.set("integrator", existingIntegtrator);
+      if (existingIntegrator) {
+        statusPageSearchParams.set("integrator", existingIntegrator);
       }
       history.push(
         `/bridge/${tx.hash}?${statusPageSearchParams}`,
