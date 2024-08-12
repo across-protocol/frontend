@@ -716,7 +716,7 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
     default:
-      return sdk.utils.getDeployedAddress("SpokePool", chainId);
+      return sdk.utils.getDeployedAddress("SpokePool", chainId, true) as string;
   }
 };
 
