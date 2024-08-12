@@ -6,10 +6,8 @@ import * as prettier from "prettier";
 
 import * as chainConfigs from "./chain-configs";
 
-const { getDeployedAddress: _getDeployedAddress } = sdkUtils;
-
 function getDeployedAddress(contractName: string, chainId: number): string {
-  return _getDeployedAddress(contractName, chainId, true) as string;
+  return sdkUtils.getDeployedAddress(contractName, chainId, true) as string;
 }
 
 type Route =
