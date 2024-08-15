@@ -1,8 +1,11 @@
 import ethers from "ethers";
+import * as sdk from "@across-protocol/sdk";
 import { getExclusivityPeriod, getStrategy } from "./config";
 import { ExclusiveRelayer } from "./types";
 
 type BigNumber = ethers.BigNumber;
+
+const { ZERO_ADDRESS } = sdk.constants;
 
 /**
  * Select a specific relayer exclusivity strategy to apply.
@@ -21,20 +24,19 @@ export function selectExclusiveRelayer(
   outputAmount: BigNumber,
   relayerFeePct: BigNumber
 ): ExclusiveRelayer {
-  const strategy = getStrategy();
-
-  const exclusivityPeriod = getExclusivityPeriod(
-    originChainId,
-    destinationChainId
-  );
-
   const relayers = getEligibleRelayers(
     destinationChainId,
     outputToken,
     outputAmount,
     relayerFeePct
   );
-  const exclusiveRelayer = strategy(relayers);
+  const exclusiveRelayer = getStrategy()(relayers);
+
+  const exclusivityPeriod =
+    exclusiveRelayer === ZERO_ADDRESS
+      ? 0
+      : getExclusivityPeriod(originChainId, destinationChainId);
+
   return { exclusiveRelayer, exclusivityPeriod };
 }
 
