@@ -778,7 +778,7 @@ export const getBatchBalanceViaMulticall3 = async (
   chainId: string | number,
   addresses: string[],
   tokenAddresses: string[],
-  blockTag?: providers.BlockTag
+  blockTag: providers.BlockTag = "latest"
 ): Promise<{
   blockNumber: providers.BlockTag;
   balances: Record<string, Record<string, string>>;
@@ -820,19 +820,21 @@ export const getBatchBalanceViaMulticall3 = async (
     }
   }
 
-  if (!blockTag) {
-    calls.push({
-      contract: multicall3,
-      functionName: "getBlockNumber",
-      args: [],
-    });
-  }
+  const inputs = calls.map(({ contract, functionName, args }) => ({
+    target: contract.address,
+    callData: contract.interface.encodeFunctionData(functionName, args),
+  }));
 
-  const results = await callViaMulticall3(provider, calls, {
-    blockTag: blockTag ?? "latest",
+  const [blockNumber, results] = await multicall3.callStatic.aggregate(inputs, {
+    blockTag,
   });
 
-  const blockNumber = blockTag ?? results.splice(-1)[0].toString();
+  const decodedResults = results.map((result, i) =>
+    calls[i].contract.interface.decodeFunctionResult(
+      calls[i].functionName,
+      result
+    )
+  );
 
   let balances: Record<string, Record<string, string>> = {};
 
@@ -842,13 +844,13 @@ export const getBatchBalanceViaMulticall3 = async (
       if (!balances[address]) {
         balances[address] = {};
       }
-      balances[address][tokenAddress] = results[resultIndex].toString();
+      balances[address][tokenAddress] = decodedResults[resultIndex].toString();
       resultIndex++;
     });
   }
 
   return {
-    blockNumber,
+    blockNumber: blockNumber.toString(),
     balances,
   };
 };
