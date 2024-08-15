@@ -20,6 +20,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.MODE,
   CHAIN_IDs.BLAST,
   CHAIN_IDs.LISK,
+  CHAIN_IDs.REDSTONE,
   CHAIN_IDs.SCROLL,
   CHAIN_IDs.ZORA,
   // testnet
