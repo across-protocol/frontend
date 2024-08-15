@@ -34,13 +34,7 @@ Adjust values in the created `.env` accordingly.
 Start the frontend with a dev server by running:
 
 ```bash
-PORT=3000 yarn dev
-```
-
-Serve serverless functions with a dev server by running:
-
-```bash
-PORT=3001 yarn dev:api
+PORT=3000 vercel dev
 ```
 
 ### Build production bundle
