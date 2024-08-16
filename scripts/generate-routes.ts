@@ -283,7 +283,7 @@ function transformChainConfigs(
           return ["WETH", "ETH"];
         }
 
-        // Handle WETH <-> ETH
+        // Handle WETH -> ETH/WETH
         if (tokenSymbol === "WETH") {
           return [
             "WETH",
@@ -293,6 +293,8 @@ function transformChainConfigs(
             },
           ];
         }
+        /*
+        * TODO: Handle ETH -> ETH/WETH
         if (tokenSymbol === "ETH") {
           return [
             "ETH",
@@ -302,6 +304,7 @@ function transformChainConfigs(
             },
           ];
         }
+       */
 
         const chainIds =
           typeof token === "string" ? [toChainId] : token.chainIds;

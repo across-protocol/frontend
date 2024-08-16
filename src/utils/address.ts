@@ -27,5 +27,11 @@ export function getWethAddressForChain(chainId: ChainId): string {
 }
 
 export function getMulticallHandlerAddress(chainId: ChainId): string {
-  return getDeployedAddress("MulticallHandler", chainId);
+  const maybeAddress = getDeployedAddress("MulticallHandler", chainId);
+  if (!maybeAddress) {
+    throw new Error(
+      `AddressUtils: No spoke pool verifier address for chain ${chainId}`
+    );
+  }
+  return maybeAddress;
 }
