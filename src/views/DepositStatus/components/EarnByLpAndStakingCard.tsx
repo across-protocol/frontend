@@ -6,7 +6,7 @@ import { Text } from "components/Text";
 import { SecondaryButton } from "components/Button";
 import { useStakingPool } from "hooks/useStakingPool";
 import { useAmplitude } from "hooks";
-import { formatWeiPct } from "utils";
+import { formatWeiPct, BRIDGED_USDC_SYMBOLS } from "utils";
 import { ampli } from "ampli";
 
 import { EarnActionCard } from "./EarnActionCard";
@@ -52,7 +52,7 @@ export function EarnByLpAndStakingCard({
             borderColor="teal-15"
             backgroundColor="black-700"
             onClick={() => {
-              const tokenSymbol = ["USDC.e", "USDbC"].includes(
+              const tokenSymbol = BRIDGED_USDC_SYMBOLS.includes(
                 bridgeTokenSymbol
               )
                 ? "USDC"

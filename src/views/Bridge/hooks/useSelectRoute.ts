@@ -5,6 +5,7 @@ import {
   trackToChainChanged,
   trackTokenChanged,
   trackQuickSwap,
+  similarTokensMap,
 } from "utils";
 import { useAmplitude } from "hooks";
 
@@ -12,7 +13,6 @@ import {
   getRouteFromQueryParams,
   findNextBestRoute,
   SelectedRoute,
-  similarTokenPairs,
   getOutputTokenSymbol,
   PriorityFilterKey,
 } from "../utils";
@@ -123,7 +123,7 @@ export function useSelectRoute() {
         toChain: selectedRoute.toChain,
       };
       const similarTokenSymbols =
-        similarTokenPairs[
+        similarTokensMap[
           isSwap ? selectedRoute.swapTokenSymbol : selectedRoute.fromTokenSymbol
         ] || [];
       const findNextBestRouteBySimilarToken = (
