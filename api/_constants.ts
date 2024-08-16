@@ -122,7 +122,7 @@ export const defaultRelayerAddressOverride: {
       chains?: { [chainId: string]: string };
     };
   };
-} = JSON.parse(process.env.RELAYER_ADDRESS_OVERRIDE || "{}");
+} = JSON.parse(process.env.RELAYER_ADDRESS_OVERRIDES || "{}");
 
 export const graphAPIKey = process.env.GRAPH_API_KEY;
 
