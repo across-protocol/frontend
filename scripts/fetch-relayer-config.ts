@@ -32,7 +32,7 @@ const commitHash = process.env.RELAYER_CONFIG_COMMIT_HASH ?? "master";
       );
     }
     const data = await res.json();
-    console.log(chalk.green(chalk.bold(JSON.stringify(data))));
+    console.log(data);
 
     writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
   } catch (e) {
