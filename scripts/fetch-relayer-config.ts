@@ -6,10 +6,8 @@ dotenv.config({
   path: [".env.local", ".env.production", ".env"],
 });
 
-const projectRoot = process.cwd();
-
 const FILE = "exclusive-relayer-configs.json";
-const FILE_PATH = `/src/data/${FILE}`;
+const FILE_PATH = `src/data/${FILE}`;
 
 const DEFAULT_REMOTE =
   "https://raw.githubusercontent.com/across-protocol/exclusive-relayer-configs";
@@ -36,7 +34,7 @@ const commitHash = process.env.RELAYER_CONFIG_COMMIT_HASH ?? "master";
     const data = await res.json();
     console.log(chalk.green(chalk.bold(JSON.stringify(data))));
 
-    writeFileSync(projectRoot + FILE_PATH, JSON.stringify(data, null, 2));
+    writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
   } catch (e) {
     console.error(chalk.bgRed("ERROR"));
     console.error(
