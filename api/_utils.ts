@@ -10,6 +10,7 @@ import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
   BalancerNetworkConfig,
+  Multicall3,
 } from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
@@ -766,6 +767,95 @@ export const getBalance = (
 };
 
 /**
+ * Fetches the balances for an array of addresses on a particular chain, for a particular erc20 token
+ * @param chainId The blockchain Id to query against
+ * @param addresses An array of valid Web3 wallet addresses
+ * @param tokenAddress The valid ERC20 token address on the given `chainId` or ZERO_ADDRESS for native balances
+ * @param blockTag Block to query from, defaults to latest block
+ * @returns a Promise that resolves to an array of BigNumbers
+ */
+export const getBatchBalanceViaMulticall3 = async (
+  chainId: string | number,
+  addresses: string[],
+  tokenAddresses: string[],
+  blockTag: providers.BlockTag = "latest"
+): Promise<{
+  blockNumber: providers.BlockTag;
+  balances: Record<string, Record<string, string>>;
+}> => {
+  const chainIdAsInt = Number(chainId);
+  const provider = getProvider(chainIdAsInt);
+
+  const multicall3 = (await sdk.utils.getMulticall3(
+    chainIdAsInt,
+    provider
+  )) as Multicall3;
+
+  if (!multicall3) {
+    throw new Error("No Multicall on this chain");
+  }
+
+  let calls: Parameters<typeof callViaMulticall3>[1] = [];
+
+  for (const tokenAddress of tokenAddresses) {
+    if (tokenAddress === sdk.constants.ZERO_ADDRESS) {
+      // For native currency
+      calls.push(
+        ...addresses.map((address) => ({
+          contract: multicall3,
+          functionName: "getEthBalance",
+          args: [address],
+        }))
+      );
+    } else {
+      // For ERC20 tokens
+      const erc20Contract = ERC20__factory.connect(tokenAddress, provider);
+      calls.push(
+        ...addresses.map((address) => ({
+          contract: erc20Contract,
+          functionName: "balanceOf",
+          args: [address],
+        }))
+      );
+    }
+  }
+
+  const inputs = calls.map(({ contract, functionName, args }) => ({
+    target: contract.address,
+    callData: contract.interface.encodeFunctionData(functionName, args),
+  }));
+
+  const [blockNumber, results] = await multicall3.callStatic.aggregate(inputs, {
+    blockTag,
+  });
+
+  const decodedResults = results.map((result, i) =>
+    calls[i].contract.interface.decodeFunctionResult(
+      calls[i].functionName,
+      result
+    )
+  );
+
+  let balances: Record<string, Record<string, string>> = {};
+
+  let resultIndex = 0;
+  for (const tokenAddress of tokenAddresses) {
+    addresses.forEach((address) => {
+      if (!balances[address]) {
+        balances[address] = {};
+      }
+      balances[address][tokenAddress] = decodedResults[resultIndex].toString();
+      resultIndex++;
+    });
+  }
+
+  return {
+    blockNumber: blockNumber.toNumber(),
+    balances,
+  };
+};
+
+/**
  * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
  * native currency will be returned.
  * @param chainId The blockchain Id to query against
@@ -1359,7 +1449,6 @@ export async function callViaMulticall3(
     target: contract.address,
     callData: contract.interface.encodeFunctionData(functionName, args),
   }));
-
   const [, results] = await (multicall3.callStatic.aggregate(
     inputs,
     overrides
