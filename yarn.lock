@@ -75,26 +75,6 @@
     axios "^1.6.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/contracts@^3.0.9":
-  version "3.0.9"
-  resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-3.0.9.tgz#26a738e95ddcc433bc1beeb7367f379886d0f037"
-  integrity sha512-8eoq2/+2GTVSg4t8mEjFtX7OqG92v5JMGKbwGp47/ucQZt1Hat5OocdqcGbpz3QUOPXmF7RU+1RP5TIei28ohA==
-  dependencies:
-    "@across-protocol/constants" "^3.1.13"
-    "@defi-wonderland/smock" "^2.3.4"
-    "@eth-optimism/contracts" "^0.5.40"
-    "@ethersproject/abstract-provider" "5.7.0"
-    "@ethersproject/abstract-signer" "5.7.0"
-    "@ethersproject/bignumber" "5.7.0"
-    "@openzeppelin/contracts" "4.9.6"
-    "@openzeppelin/contracts-upgradeable" "4.9.6"
-    "@scroll-tech/contracts" "^0.1.0"
-    "@uma/common" "^2.34.0"
-    "@uma/contracts-node" "^0.4.17"
-    "@uma/core" "^2.56.0"
-    axios "^1.6.2"
-    zksync-web3 "^0.14.3"
-
 "@across-protocol/sdk@^3.1.25":
   version "3.1.25"
   resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-3.1.25.tgz#e1273b1fe5d64eef867d748ded2f8b0dc93261dd"

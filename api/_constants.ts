@@ -103,6 +103,9 @@ const defaultRelayerFeeCapitalCostConfig: {
 defaultRelayerFeeCapitalCostConfig["USDC.e"] = {
   ...defaultRelayerFeeCapitalCostConfig["USDC"],
 };
+defaultRelayerFeeCapitalCostConfig["USDzC"] = {
+  ...defaultRelayerFeeCapitalCostConfig["USDC"],
+};
 defaultRelayerFeeCapitalCostConfig["USDB"] = {
   ...defaultRelayerFeeCapitalCostConfig["DAI"],
 };
