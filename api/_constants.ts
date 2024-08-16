@@ -16,14 +16,14 @@ const defaultRelayerFeeCapitalCostConfig: {
 } = {
   ETH: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0004").toString(),
-    cutoff: ethers.utils.parseUnits("750").toString(),
+    upperBound: ethers.utils.parseUnits("0.000075").toString(),
+    cutoff: ethers.utils.parseUnits("0.3").toString(),
     decimals: 18,
   },
   WETH: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0004").toString(),
-    cutoff: ethers.utils.parseUnits("750").toString(),
+    upperBound: ethers.utils.parseUnits("0.000075").toString(),
+    cutoff: ethers.utils.parseUnits("0.3").toString(),
     decimals: 18,
   },
   WBTC: {
@@ -34,19 +34,19 @@ const defaultRelayerFeeCapitalCostConfig: {
   },
   DAI: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0004").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("1500000").toString(),
     decimals: 18,
   },
   USDC: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0004").toString(),
-    cutoff: ethers.utils.parseUnits("1500000").toString(),
+    upperBound: ethers.utils.parseUnits("0").toString(),
+    cutoff: ethers.utils.parseUnits("100000").toString(),
     decimals: 6,
   },
   USDT: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
-    upperBound: ethers.utils.parseUnits("0.0004").toString(),
+    upperBound: ethers.utils.parseUnits("0.0001").toString(),
     cutoff: ethers.utils.parseUnits("1500000").toString(),
     decimals: 6,
   },
