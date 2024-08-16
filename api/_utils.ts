@@ -1450,7 +1450,9 @@ export function getDefaultRelayerAddress(
   destinationChainId: number,
   symbol?: string
 ) {
-  const symbolOverride = defaultRelayerAddressOverride?.symbols?.[symbol ?? ""];
+  const symbolOverride = symbol
+    ? defaultRelayerAddressOverride?.symbols?.[symbol]
+    : undefined;
   return (
     symbolOverride?.chains?.[destinationChainId] ?? // Specific Symbol/Chain override
     symbolOverride?.defaultAddr ?? // Specific Symbol override
