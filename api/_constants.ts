@@ -116,10 +116,10 @@ export const coinGeckoAssetPlatformLookup: Record<string, string> = {
 
 export const defaultRelayerAddressOverride: {
   defaultAddr?: string;
-  symbols: {
+  symbols?: {
     [symbol: string]: {
-      defaultAddr: string;
-      chains: { [chainId: string]: string };
+      defaultAddr?: string;
+      chains?: { [chainId: string]: string };
     };
   };
 } = JSON.parse(process.env.RELAYER_ADDRESS_OVERRIDE || "{}");
