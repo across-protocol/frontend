@@ -21,7 +21,7 @@ type BatchAccountBalanceQueryParams = Infer<
 type BatchAccountBalanceResponse = Awaited<
   ReturnType<typeof getBatchBalanceViaMulticall3>
 > & {
-  chainId: string;
+  chainId: number;
 };
 
 /**
@@ -69,22 +69,20 @@ const handler = async (
   try {
     // Validate the query parameters
     assert(query, BatchAccountBalanceQueryParamsSchema);
+
     // Deconstruct the query parameters
     let { tokenAddresses, addresses, chainId } = query;
-
-    console.log("Fetching balances for config on chainId: ", chainId);
-    console.log("TokenAddresses: ", tokenAddresses);
-    console.log("Accounts ", addresses);
+    const chainIdAsInt = Number(chainId);
 
     const result = await getBatchBalanceViaMulticall3(
-      chainId,
+      chainIdAsInt,
       addresses,
       tokenAddresses
     );
 
     const data: BatchAccountBalanceResponse = {
       ...result,
-      chainId,
+      chainId: chainIdAsInt,
     };
 
     // Log the response

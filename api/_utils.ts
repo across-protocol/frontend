@@ -850,7 +850,7 @@ export const getBatchBalanceViaMulticall3 = async (
   }
 
   return {
-    blockNumber: blockNumber.toString(),
+    blockNumber: blockNumber.toNumber(),
     balances,
   };
 };
