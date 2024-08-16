@@ -5,7 +5,7 @@ import {
   fixedPointAdjustment,
   referrerDelimiterHex,
 } from "./constants";
-import { tagAcrossDomain, tagAddress } from "./format";
+import { DOMAIN_CALLDATA_DELIMITER, tagAddress, tagHex } from "./format";
 import { getProvider } from "./providers";
 import {
   getConfig,
@@ -147,6 +147,7 @@ export type AcrossDepositArgs = {
   referrer?: string;
   isNative: boolean;
   toNative: boolean;
+  integratorId: string;
 };
 
 export type AcrossDepositV3Args = AcrossDepositArgs & {
@@ -182,6 +183,7 @@ export async function sendSpokePoolVerifierDepositTx(
     isNative,
     toNative = false,
     referrer,
+    integratorId,
   }: AcrossDepositArgs,
   spokePool: SpokePool,
   spokePoolVerifier: SpokePoolVerifier,
@@ -219,6 +221,7 @@ export async function sendSpokePoolVerifierDepositTx(
   return _tagRefAndSignTx(
     tx,
     referrer || "",
+    integratorId,
     signer,
     fromChain,
     destinationChainId,
@@ -244,6 +247,7 @@ export async function sendDepositV3Tx(
     outputTokenAddress,
     exclusiveRelayer = ethers.constants.AddressZero,
     exclusivityDeadline = 0,
+    integratorId,
   }: AcrossDepositV3Args,
   spokePool: SpokePool,
   onNetworkMismatch?: NetworkMismatchHandler
@@ -292,6 +296,7 @@ export async function sendDepositV3Tx(
   return _tagRefAndSignTx(
     tx,
     referrer || "",
+    integratorId,
     signer,
     fromChain,
     destinationChainId,
@@ -318,6 +323,7 @@ export async function sendSwapAndBridgeTx(
     exclusivityDeadline = 0,
     swapQuote,
     swapTokenAmount,
+    integratorId,
   }: AcrossDepositV3Args & {
     swapTokenAmount: BigNumber;
     swapTokenAddress: string;
@@ -399,6 +405,7 @@ export async function sendSwapAndBridgeTx(
   return _tagRefAndSignTx(
     tx,
     referrer || "",
+    integratorId,
     signer,
     fromChain,
     destinationChainId,
@@ -452,16 +459,19 @@ export async function getSpokePoolAndVerifier({
 async function _tagRefAndSignTx(
   tx: ethers.PopulatedTransaction,
   referrer: string,
+  integratorId: string,
   signer: ethers.Signer,
   originChainId: ChainId,
   destinationChainId: ChainId,
   onNetworkMismatch?: NetworkMismatchHandler
 ) {
   // do not tag a referrer if data is not provided as a hex string.
-  tx.data = tagAcrossDomain(
+  tx.data = tagHex(
     referrer && ethers.utils.isAddress(referrer)
       ? tagAddress(tx.data!, referrer, referrerDelimiterHex)
-      : tx.data!
+      : tx.data!,
+    integratorId,
+    DOMAIN_CALLDATA_DELIMITER
   );
 
   // Last test to ensure that the tx is valid and that the signer

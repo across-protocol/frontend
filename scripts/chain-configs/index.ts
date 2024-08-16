@@ -14,6 +14,8 @@ export { default as OPTIMISM } from "./optimism";
 export { default as OPTIMISM_SEPOLIA } from "./optimism-sepolia";
 export { default as POLYGON } from "./polygon";
 export { default as POLYGON_AMOY } from "./polygon-amoy";
+export { default as REDSTONE } from "./redstone";
 export { default as SCROLL } from "./scroll";
 export { default as SEPOLIA } from "./sepolia";
 export { default as ZK_SYNC } from "./zk-sync";
+export { default as ZORA } from "./zora";

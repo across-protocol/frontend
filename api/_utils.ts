@@ -213,10 +213,6 @@ export const resolveVercelEndpoint = () => {
   }
 };
 
-export const isBridgedUsdc = (tokenSymbol: string) => {
-  return ["USDC.e", "USDbC"].includes(tokenSymbol);
-};
-
 export const validateChainAndTokenParams = (
   queryParams: Partial<{
     token: string;
@@ -356,14 +352,14 @@ export const getRouteDetails = (
   return {
     inputToken: {
       ...inputToken,
-      symbol: isBridgedUsdc(inputToken.symbol)
+      symbol: sdk.utils.isBridgedUsdc(inputToken.symbol)
         ? _getBridgedUsdcTokenSymbol(inputToken.symbol, resolvedOriginChainId)
         : inputToken.symbol,
       address: utils.getAddress(inputToken.addresses[resolvedOriginChainId]),
     },
     outputToken: {
       ...outputToken,
-      symbol: isBridgedUsdc(outputToken.symbol)
+      symbol: sdk.utils.isBridgedUsdc(outputToken.symbol)
         ? _getBridgedUsdcTokenSymbol(outputToken.symbol, destinationChainId)
         : outputToken.symbol,
       address: utils.getAddress(outputToken.addresses[destinationChainId]),
@@ -425,9 +421,18 @@ const _getChainIdsOfToken = (
 };
 
 const _getBridgedUsdcTokenSymbol = (tokenSymbol: string, chainId: number) => {
-  return tokenSymbol === "USDC.e" && chainId === CHAIN_IDs.BASE
-    ? "USDbC"
-    : tokenSymbol;
+  if (!sdk.utils.isBridgedUsdc(tokenSymbol)) {
+    throw new InputError(`Token ${tokenSymbol} is not a bridged USDC token`);
+  }
+
+  switch (chainId) {
+    case CHAIN_IDs.BASE:
+      return TOKEN_SYMBOLS_MAP.USDbC.symbol;
+    case CHAIN_IDs.ZORA:
+      return TOKEN_SYMBOLS_MAP.USDzC.symbol;
+    default:
+      return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
+  }
 };
 
 const _getAddressOrThrowInputError = (address: string, paramName: string) => {
@@ -711,7 +716,7 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
     default:
-      return sdk.utils.getDeployedAddress("SpokePool", chainId);
+      return sdk.utils.getDeployedAddress("SpokePool", chainId, true) as string;
   }
 };
 

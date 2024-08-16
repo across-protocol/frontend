@@ -42,19 +42,38 @@ const enabledMainnetChainConfigs = [
 ];
 ```
 
-4. Run from the root of the project
+If a `SpokePoolVerifier` contract is deployed to the new chain, add the chain to
+
+```diff
+    // ...
+    spokePoolVerifier: {
+      address: "0xB4A8d45647445EA9FC3E1058096142390683dBC2",
+      enabledChains: [
+        CHAIN_IDs.MAINNET,
+        CHAIN_IDs.OPTIMISM,
+        CHAIN_IDs.POLYGON,
+        CHAIN_IDs.BASE,
+        CHAIN_IDs.ARBITRUM,
+        CHAIN_IDs.LINEA,
+        CHAIN_IDs.MODE,
++       CHAIN_IDs.BLAST,
+      ],
+    },
+```
+
+5. Run from the root of the project
 
 ```bash
 yarn generate:routes:mainnet
 ```
 
-5. Generate UI assets
+6. Generate UI assets
 
 ```bash
 yarn generate:ui-assets
 ```
 
-6. Enable new chain in [`src/constants/index.ts`](../src/constants/chains/index.ts)
+7. Enable new chain in [`src/constants/index.ts`](../src/constants/chains/index.ts)
 
 ```diff
 const orderedEnabledChainIds = [

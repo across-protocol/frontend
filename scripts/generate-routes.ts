@@ -6,7 +6,9 @@ import * as prettier from "prettier";
 
 import * as chainConfigs from "./chain-configs";
 
-const { getDeployedAddress } = sdkUtils;
+function getDeployedAddress(contractName: string, chainId: number): string {
+  return sdkUtils.getDeployedAddress(contractName, chainId, true) as string;
+}
 
 type Route =
   (typeof enabledRoutes)[keyof typeof enabledRoutes]["routes"][number];
@@ -27,6 +29,8 @@ const enabledMainnetChainConfigs = [
   chainConfigs.BLAST,
   chainConfigs.LISK,
   chainConfigs.SCROLL,
+  chainConfigs.REDSTONE,
+  chainConfigs.ZORA,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -72,7 +76,9 @@ const enabledRoutes = {
         CHAIN_IDs.MODE,
         CHAIN_IDs.BLAST,
         CHAIN_IDs.LISK,
+        CHAIN_IDs.REDSTONE,
         CHAIN_IDs.SCROLL,
+        CHAIN_IDs.ZORA,
       ],
     },
     swapAndBridgeAddresses: {
@@ -178,7 +184,7 @@ function transformChainConfigs(
       const tokens = chainConfig.tokens.flatMap((token) => {
         const tokenSymbol = typeof token === "string" ? token : token.symbol;
 
-        // Handle USDC -> USDC.e/USDbC routes
+        // Handle USDC -> USDC.e/USDbC/USDzC routes
         if (tokenSymbol === "USDC") {
           if (toChainConfig.enableCCTP) {
             return [
@@ -189,8 +195,10 @@ function transformChainConfigs(
               },
             ];
           } else if (
-            toChainConfig.tokens.includes("USDC.e") ||
-            toChainConfig.tokens.includes("USDbC")
+            toChainConfig.tokens.find(
+              (token) =>
+                typeof token === "string" && sdkUtils.isBridgedUsdc(token)
+            )
           ) {
             return [
               {
@@ -201,7 +209,10 @@ function transformChainConfigs(
           }
         }
 
-        if (["USDC.e", "USDbC"].includes(tokenSymbol)) {
+        // @todo: Additional brittle logic has been added to (badly) support Zora's USDzC.
+        // This should be revisited to auto-generate routes for USDC.e <-> USDbC <-> USDzC.
+        // In particular, CCTP origin chains still seem to be missing bridged -> USDzC routes.
+        if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
           if (toChainConfig.enableCCTP) {
             return [
               {
@@ -218,6 +229,27 @@ function transformChainConfigs(
               {
                 inputTokenSymbol: tokenSymbol,
                 outputTokenSymbol: "USDC",
+              },
+            ];
+          } else if (toChainConfig.tokens.includes("USDC.e")) {
+            return [
+              {
+                inputTokenSymbol: tokenSymbol,
+                outputTokenSymbol: "USDC.e",
+              },
+            ];
+          } else if (toChainConfig.tokens.includes("USDbC")) {
+            return [
+              {
+                inputTokenSymbol: tokenSymbol,
+                outputTokenSymbol: "USDbC",
+              },
+            ];
+          } else if (toChainConfig.tokens.includes("USDzC")) {
+            return [
+              {
+                inputTokenSymbol: tokenSymbol,
+                outputTokenSymbol: "USDzC",
               },
             ];
           }
@@ -481,7 +513,10 @@ function getTokenBySymbol(
   chainId: number | string,
   l1ChainId: number
 ) {
-  const tokenAddress = TOKEN_SYMBOLS_MAP[tokenSymbol]?.addresses[chainId];
+  const tokenAddress =
+    TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP]?.addresses[
+      Number(chainId)
+    ];
 
   if (!tokenAddress) {
     throw new Error(
@@ -489,9 +524,11 @@ function getTokenBySymbol(
     );
   }
 
+  const effectiveSymbol = (
+    sdkUtils.isBridgedUsdc(tokenSymbol) ? "USDC" : tokenSymbol
+  ) as keyof typeof TOKEN_SYMBOLS_MAP;
   const l1TokenAddress =
-    TOKEN_SYMBOLS_MAP[isBridgedUsdc(tokenSymbol) ? "USDC" : tokenSymbol]
-      ?.addresses[l1ChainId];
+    TOKEN_SYMBOLS_MAP[effectiveSymbol]?.addresses[l1ChainId];
 
   if (!l1TokenAddress) {
     throw new Error(`Could not find L1 token address for ${tokenSymbol}`);
@@ -505,14 +542,16 @@ function getTokenBySymbol(
   };
 }
 
-function isBridgedUsdc(tokenSymbol: string) {
-  return tokenSymbol === "USDC.e" || tokenSymbol === "USDbC";
-}
-
 function getBridgedUsdcSymbol(chainId: number) {
-  return [CHAIN_IDs.BASE, CHAIN_IDs.BASE_SEPOLIA].includes(chainId)
-    ? "USDbC"
-    : "USDC.e";
+  switch (chainId) {
+    case CHAIN_IDs.BASE:
+    case CHAIN_IDs.BASE_SEPOLIA:
+      return TOKEN_SYMBOLS_MAP.USDbC.symbol;
+    case CHAIN_IDs.ZORA:
+      return TOKEN_SYMBOLS_MAP.USDzC.symbol;
+    default:
+      return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
+  }
 }
 
 generateRoutes(Number(process.argv[2]));
