@@ -114,21 +114,15 @@ export const coinGeckoAssetPlatformLookup: Record<string, string> = {
   "0x4200000000000000000000000000000000000042": "optimistic-ethereum",
 };
 
-export const defaultRelayerAddressOverridePerToken: Record<
-  string,
-  { relayer: string; destinationChains: number[] }
-> = {
-  SNX: {
-    relayer: "0x19cDc2b23AF0cC791ca64dda5BFc094Cddda31Cd",
-    destinationChains: [1, 10],
-  },
-};
-
-export const defaultRelayerAddressOverridePerChain: Record<number, string> =
-  JSON.parse(process.env.RELAYER_ADDRESS_OVERRIDE_PER_CHAIN || "{}");
-
-export const defaultRelayerAddressOverride =
-  process.env.RELAYER_ADDRESS_OVERRIDE;
+export const defaultRelayerAddressOverride: {
+  defaultAddr?: string;
+  symbols: {
+    [symbol: string]: {
+      defaultAddr: string;
+      chains: { [chainId: string]: string };
+    };
+  };
+} = JSON.parse(process.env.RELAYER_ADDRESS_OVERRIDE || "{}");
 
 export const graphAPIKey = process.env.GRAPH_API_KEY;
 
