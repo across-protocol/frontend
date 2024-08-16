@@ -11,8 +11,10 @@ const projectRoot = process.cwd();
 const FILE = "exclusive-relayer-configs.json";
 const FILE_PATH = `/src/data/${FILE}`;
 
-const REMOTE =
+const DEFAULT_REMOTE =
   "https://raw.githubusercontent.com/across-protocol/exclusive-relayer-configs";
+
+const REMOTE = process.env.RELAYER_CONFIG_REMOTE ?? DEFAULT_REMOTE;
 
 const commitHash = process.env.RELAYER_CONFIG_COMMIT_HASH ?? "master";
 
@@ -27,10 +29,12 @@ const commitHash = process.env.RELAYER_CONFIG_COMMIT_HASH ?? "master";
     });
 
     if (!res.ok) {
-      throw new Error(`Unable to fetch file from ${REMOTE}`);
+      throw new Error(
+        `Failed to fetch file from ${REMOTE}, with error code %${res.status}`
+      );
     }
     const data = await res.json();
-    console.log(data);
+    console.log(chalk.green(chalk.bold(JSON.stringify(data))));
 
     writeFileSync(projectRoot + FILE_PATH, JSON.stringify(data, null, 2));
   } catch (e) {
