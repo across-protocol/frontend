@@ -21,6 +21,7 @@
       fill="url(#gzr)"
     />
     <path
+      id="path-to-animate"
       stroke="rgba(0,0,0,0.075)"
       fill="transparent"
       stroke-width="1"
