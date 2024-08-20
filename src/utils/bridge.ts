@@ -233,7 +233,12 @@ export async function sendDepositV3Tx(
   fillDeadline ??=
     getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
-  const tx = await spokePool.populateTransaction.depositV3(
+  const useExclusiveRelayer: boolean = !(
+    exclusiveRelayer === ethers.constants.AddressZero &&
+    exclusivityDeadline === 0
+  );
+
+  const depositArgs = [
     await signer.getAddress(),
     recipient,
     inputTokenAddress,
@@ -246,8 +251,12 @@ export async function sendDepositV3Tx(
     fillDeadline,
     exclusivityDeadline,
     message,
-    { value }
-  );
+    { value },
+  ] as const;
+
+  const tx = useExclusiveRelayer
+    ? await spokePool.populateTransaction.depositExclusive(...depositArgs)
+    : await spokePool.populateTransaction.depositV3(...depositArgs);
 
   return _tagRefAndSignTx(
     tx,
