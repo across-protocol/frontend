@@ -16,6 +16,8 @@ import pooltogetherLogo from "assets/token-logos/pool.svg";
 import lskLogo from "assets/token-logos/lsk.svg";
 import usdbLogo from "assets/token-logos/usdb.svg";
 
+import { BRIDGED_USDC_SYMBOLS } from "../utils/sdk";
+
 export type TokenInfo = {
   name: string;
   symbol: string;
@@ -30,6 +32,34 @@ export type TokenInfo = {
 };
 export type TokenInfoList = TokenInfo[];
 
+const equivalentTokens = [BRIDGED_USDC_SYMBOLS, ["DAI", "USDB"]];
+
+const similarTokens = [
+  ["USDC", ...BRIDGED_USDC_SYMBOLS],
+  ["ETH", "WETH"],
+];
+
+export const interchangeableTokensMap: Record<string, string[]> =
+  equivalentTokens.reduce(
+    (acc, tokens) => {
+      tokens.forEach((token) => {
+        acc[token] = tokens.filter((t) => t !== token);
+      });
+      return acc;
+    },
+    {} as Record<string, string[]>
+  );
+
+export const similarTokensMap: Record<string, string[]> = similarTokens.reduce(
+  (acc, tokens) => {
+    tokens.forEach((token) => {
+      acc[token] = tokens.filter((t) => t !== token);
+    });
+    return acc;
+  },
+  {} as Record<string, string[]>
+);
+
 // Order of this map determines the order of the tokens in the token selector
 export const orderedTokenLogos = {
   ETH: ethLogo,
@@ -39,6 +69,7 @@ export const orderedTokenLogos = {
   USDC: usdcLogo,
   "USDC.e": usdcLogo,
   USDbC: usdcLogo,
+  USDzC: usdcLogo,
   USDT: usdtLogo,
   DAI: daiLogo,
   USDB: usdbLogo,

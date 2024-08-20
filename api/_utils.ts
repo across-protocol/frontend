@@ -40,8 +40,6 @@ import {
   SECONDS_PER_YEAR,
   TOKEN_SYMBOLS_MAP,
   defaultRelayerAddressOverride,
-  defaultRelayerAddressOverridePerToken,
-  defaultRelayerAddressOverridePerChain,
   disabledL1Tokens,
   graphAPIKey,
   maxRelayFeePct,
@@ -717,7 +715,7 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
     default:
-      return sdk.utils.getDeployedAddress("SpokePool", chainId, true) as string;
+      return sdk.utils.getDeployedAddress("SpokePool", chainId) as string;
   }
 };
 
@@ -1541,19 +1539,15 @@ export function getDefaultRelayerAddress(
   destinationChainId: number,
   symbol?: string
 ) {
-  // All symbols are uppercase in this record.
-  const overrideForToken = symbol
-    ? defaultRelayerAddressOverridePerToken[symbol.toUpperCase()]
+  const symbolOverride = symbol
+    ? defaultRelayerAddressOverride?.symbols?.[symbol]
     : undefined;
-  if (overrideForToken?.destinationChains.includes(destinationChainId)) {
-    return overrideForToken.relayer;
-  } else {
-    return (
-      defaultRelayerAddressOverridePerChain[destinationChainId] ||
-      defaultRelayerAddressOverride ||
-      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS
-    );
-  }
+  return (
+    symbolOverride?.chains?.[destinationChainId] ?? // Specific Symbol/Chain override
+    symbolOverride?.defaultAddr ?? // Specific Symbol override
+    defaultRelayerAddressOverride?.defaultAddr ?? // Default override
+    sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS // Default hardcoded value
+  );
 }
 
 /**

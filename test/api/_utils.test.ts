@@ -1,3 +1,4 @@
+import { constants } from "@across-protocol/sdk";
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "../../api/_constants";
 import {
   getRouteDetails,
@@ -165,9 +166,13 @@ describe("_utils", () => {
       ENABLED_ROUTES.routes
         .filter(
           (route) =>
-            !["WETH", "ETH", "DAI", "USDC", "USDC.e", "USDbC"].includes(
-              route.fromTokenSymbol
-            )
+            ![
+              "WETH",
+              "ETH",
+              "DAI",
+              "USDC",
+              ...constants.BRIDGED_USDC_SYMBOLS,
+            ].includes(route.fromTokenSymbol)
         )
         .forEach((route) => {
           expect(

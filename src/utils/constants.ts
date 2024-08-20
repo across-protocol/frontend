@@ -28,6 +28,8 @@ import {
   TokenInfo,
   TokenInfoList,
   orderedTokenLogos,
+  interchangeableTokensMap,
+  similarTokensMap,
 } from "../constants/tokens";
 import { ExternalLPTokenList, externalLPsForStaking } from "../constants/pools";
 
@@ -45,6 +47,8 @@ export {
   chainInfoList,
   chainInfoTable,
   ChainId,
+  interchangeableTokensMap,
+  similarTokensMap,
 };
 
 /* Colors and Media Queries section */

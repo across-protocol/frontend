@@ -10,6 +10,7 @@ import {
   getToken,
   hubPoolChainId,
   isProductionBuild,
+  interchangeableTokensMap,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -40,28 +41,13 @@ const config = getConfig();
 const enabledRoutes = config.getEnabledRoutes();
 const swapRoutes = config.getSwapRoutes();
 
-const interchangeableTokenPairs: Record<string, string[]> = {
-  "USDC.e": ["USDbC"],
-  USDbC: ["USDC.e"],
-  DAI: ["USDB"],
-  USDB: ["DAI"],
-  ETH: ["WETH"],
-  WETH: ["ETH"],
-};
-
-export const similarTokenPairs: Record<string, string[]> = {
-  USDC: ["USDC.e", "USDbC"],
-  "USDC.e": ["USDC", "USDbC"],
-  USDbC: ["USDC", "USDC.e"],
-};
-
 export function areTokensInterchangeable(
   tokenSymbol1: string,
   tokenSymbol2: string
 ) {
   return (
-    Boolean(interchangeableTokenPairs[tokenSymbol1]) &&
-    interchangeableTokenPairs[tokenSymbol1].includes(tokenSymbol2)
+    Boolean(interchangeableTokensMap[tokenSymbol1]) &&
+    interchangeableTokensMap[tokenSymbol1].includes(tokenSymbol2)
   );
 }
 
@@ -229,10 +215,10 @@ export function findNextBestRoute(
   let route: SelectedRoute | undefined;
 
   const equivalentInputTokenSymbols = filter.inputTokenSymbol
-    ? interchangeableTokenPairs[filter.inputTokenSymbol]
+    ? interchangeableTokensMap[filter.inputTokenSymbol]
     : undefined;
   const equivalentSwapTokenSymbols = filter.swapTokenSymbol
-    ? interchangeableTokenPairs[filter.swapTokenSymbol]
+    ? interchangeableTokensMap[filter.swapTokenSymbol]
     : undefined;
 
   route = findEnabledRoute(filter);
