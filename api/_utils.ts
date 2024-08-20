@@ -500,7 +500,7 @@ export const getHubPoolClient = () => {
   return new sdk.pool.Client(
     hubPoolConfig,
     {
-      provider: infuraProvider(HUB_POOL_CHAIN_ID),
+      provider: getProvider(HUB_POOL_CHAIN_ID),
     },
     (_, __) => {} // Dummy function that does nothing and is needed to construct this client.
   );
@@ -993,7 +993,7 @@ export async function tagReferrer(
   if (ethers.utils.isAddress(referrerAddressOrENS)) {
     referrerAddress = referrerAddressOrENS;
   } else {
-    const provider = infuraProvider(1);
+    const provider = getProvider(HUB_POOL_CHAIN_ID);
     referrerAddress = await provider.resolveName(referrerAddressOrENS);
   }
 
