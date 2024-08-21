@@ -10,6 +10,10 @@ const DEFAULT_MIN_EXCLUSIVITY = 3;
 // For per-relayer configuration, filter by EXCLUSIVITY_MAX.
 // const EXCLUSIVITY_MAX = 5;
 
+/**
+ * Origin finality + destination confirmation delays are used initially for testing.
+ * These can likely be removed once actual per-route fill times are supplied by the data team.
+ */
 const DEFAULT_ORIGIN_FINALITY_DELAY = 1;
 const ORIGIN_FINALITY_DELAY: { [chainId: number]: number } = {
   [CHAIN_IDs.MAINNET]: 18,
