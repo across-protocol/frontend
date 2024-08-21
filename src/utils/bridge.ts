@@ -233,7 +233,7 @@ export async function sendDepositV3Tx(
   fillDeadline ??=
     getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
-  const useExclusiveRelayer: boolean = !(
+  const useExclusiveRelayer = !(
     exclusiveRelayer === ethers.constants.AddressZero &&
     exclusivityDeadline === 0
   );
