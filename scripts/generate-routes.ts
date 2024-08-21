@@ -184,7 +184,7 @@ function transformChainConfigs(
       const tokens = chainConfig.tokens.flatMap((token) => {
         const tokenSymbol = typeof token === "string" ? token : token.symbol;
 
-        // Handle USDC -> USDC.e/USDbC/USDzC routes
+        // Handle native USDC -> bridged USDC routes
         if (tokenSymbol === "USDC") {
           if (toChainConfig.enableCCTP) {
             return [
@@ -209,9 +209,7 @@ function transformChainConfigs(
           }
         }
 
-        // @todo: Additional brittle logic has been added to (badly) support Zora's USDzC.
-        // This should be revisited to auto-generate routes for USDC.e <-> USDbC <-> USDzC.
-        // In particular, CCTP origin chains still seem to be missing bridged -> USDzC routes.
+        // Handle bridged USDC -> native/bridged USDC routes
         if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
           if (toChainConfig.enableCCTP) {
             return [
@@ -231,25 +229,16 @@ function transformChainConfigs(
                 outputTokenSymbol: "USDC",
               },
             ];
-          } else if (toChainConfig.tokens.includes("USDC.e")) {
+          } else if (
+            toChainConfig.tokens.find(
+              (token) =>
+                typeof token === "string" && sdkUtils.isBridgedUsdc(token)
+            )
+          ) {
             return [
               {
                 inputTokenSymbol: tokenSymbol,
-                outputTokenSymbol: "USDC.e",
-              },
-            ];
-          } else if (toChainConfig.tokens.includes("USDbC")) {
-            return [
-              {
-                inputTokenSymbol: tokenSymbol,
-                outputTokenSymbol: "USDbC",
-              },
-            ];
-          } else if (toChainConfig.tokens.includes("USDzC")) {
-            return [
-              {
-                inputTokenSymbol: tokenSymbol,
-                outputTokenSymbol: "USDzC",
+                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
               },
             ];
           }
