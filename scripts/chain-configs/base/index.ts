@@ -17,16 +17,4 @@ export default {
   tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
   enableCCTP: true,
   blockTimeSeconds: 2,
-  swapTokens: [
-    {
-      swapInputTokenSymbol: "USDbC",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC",
-    },
-    {
-      swapInputTokenSymbol: "USDbC",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC.e",
-    },
-  ],
 } as ChainConfig;
