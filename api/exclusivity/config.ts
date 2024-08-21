@@ -1,5 +1,6 @@
 import * as sdk from "@across-protocol/sdk";
 import { RelayerSelector } from "./types";
+import { randomWeighted } from "./strategies";
 
 const { CHAIN_IDs, ZERO_ADDRESS } = sdk.constants;
 
@@ -28,6 +29,7 @@ const DESTINATION_CONFIRMATION_DELAY: { [chainId: number]: number } = {
  */
 const EXCLUSIVITY_STRATEGIES = {
   none: (_: string[]) => ZERO_ADDRESS,
+  randomWeighted,
 } as const;
 
 /**
