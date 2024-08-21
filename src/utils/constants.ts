@@ -127,7 +127,7 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
     highestPct: 0.95,
     ctaBody: () => "Bridge to Arbitrum and earn on every transaction.",
     claimableTooltipBody:
-      "Arbitrum rewards earned during the month can be claimed at the end of the following month.Ï",
+      "Arbitrum rewards earned during the month can be claimed at the end of the following month.",
     enabledChains: [ChainId.ARBITRUM],
   },
 };
