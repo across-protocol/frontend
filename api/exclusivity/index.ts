@@ -17,14 +17,14 @@ const { ZERO_ADDRESS } = sdk.constants;
  * @param outputamount Output amount to be used in fill.
  * @param relayerFeePct Estimated relayer fee, assuming destination chain repayment.
  */
-export function selectExclusiveRelayer(
+export async function selectExclusiveRelayer(
   originChainId: number,
   destinationChainId: number,
   outputToken: string,
   outputAmount: BigNumber,
   relayerFeePct: BigNumber
-): ExclusiveRelayer {
-  const relayers = getEligibleRelayers(
+): Promise<ExclusiveRelayer> {
+  const relayers = await getEligibleRelayers(
     destinationChainId,
     outputToken,
     outputAmount,
@@ -50,12 +50,12 @@ export function selectExclusiveRelayer(
  * @param outputamount Output amount to be used in fill.
  * @param relayerFeePct Estimated relayer fee, assuming destination chain repayment.
  */
-function getEligibleRelayers(
+async function getEligibleRelayers(
   _destintionChainId: number,
   _outputToken: string,
   _outputAmount: BigNumber,
   _relayerFeePct: BigNumber
-): string[] {
+): Promise<string[]> {
   // Source all relayers that have opted in for this destination chain.
 
   // Filter relayers by:

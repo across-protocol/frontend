@@ -271,13 +271,14 @@ const handler = async (
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
 
-    const { exclusiveRelayer, exclusivityPeriod } = selectExclusiveRelayer(
-      computedOriginChainId,
-      destinationChainId,
-      outputToken.address,
-      amount.sub(totalRelayFee),
-      BigNumber.from(relayerFeeDetails.relayFeePercent) // @todo: Subtract destination gas cost.
-    );
+    const { exclusiveRelayer, exclusivityPeriod } =
+      await selectExclusiveRelayer(
+        computedOriginChainId,
+        destinationChainId,
+        outputToken.address,
+        amount.sub(totalRelayFee),
+        BigNumber.from(relayerFeeDetails.relayFeePercent) // @todo: Subtract destination gas cost.
+      );
 
     // @todo: This assumes an instant deposit, with 0 user delay on approval & submission.
     // This is unrealistic and must be padded for consumers _other than_ the Across FE.
