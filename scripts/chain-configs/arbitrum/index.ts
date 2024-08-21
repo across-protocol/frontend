@@ -30,21 +30,4 @@ export default {
   ],
   enableCCTP: true,
   blockTimeSeconds: 1,
-  swapTokens: [
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC",
-    },
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC.e",
-    },
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDbC",
-    },
-  ],
 } as ChainConfig;

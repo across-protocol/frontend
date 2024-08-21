@@ -18,21 +18,4 @@ export default {
   tokens: ["DAI", "UMA", "WETH", "USDC", "WBTC", "BAL", "ACX", "USDT", "POOL"],
   enableCCTP: true,
   blockTimeSeconds: 5,
-  swapTokens: [
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC",
-    },
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC.e",
-    },
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDbC",
-    },
-  ],
 } as ChainConfig;

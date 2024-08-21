@@ -17,9 +17,4 @@ export type ChainConfig = {
       }
   )[];
   enableCCTP: boolean;
-  swapTokens: {
-    swapInputTokenSymbol: string;
-    acrossInputTokenSymbol: string;
-    acrossOutputTokenSymbol: string;
-  }[];
 };

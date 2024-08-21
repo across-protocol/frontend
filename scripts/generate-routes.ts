@@ -292,10 +292,15 @@ function transformChainConfigs(
         return tokenSymbol;
       });
 
+      // Handle USDC swap tokens
+      const usdcSwapTokens = chainConfig.enableCCTP
+        ? getUsdcSwapTokens(fromChainId, toChainId)
+        : [];
+
       const toChain = {
         chainId: toChainId,
         tokens,
-        swapTokens: chainConfig.swapTokens.filter(
+        swapTokens: usdcSwapTokens.filter(
           ({ acrossInputTokenSymbol, acrossOutputTokenSymbol }) =>
             tokens.some((token) =>
               typeof token === "string"
@@ -508,6 +513,22 @@ function getTokenBySymbol(
     symbol: tokenSymbol,
     l1TokenAddress: utils.getAddress(l1TokenAddress),
   };
+}
+
+function getUsdcSwapTokens(fromChainId: number, toChainId: number) {
+  const swapInputTokenSymbol = getBridgedUsdcSymbol(fromChainId);
+  return [
+    {
+      swapInputTokenSymbol,
+      acrossInputTokenSymbol: "USDC",
+      acrossOutputTokenSymbol: "USDC",
+    },
+    {
+      swapInputTokenSymbol,
+      acrossInputTokenSymbol: "USDC",
+      acrossOutputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+    },
+  ];
 }
 
 function getBridgedUsdcSymbol(chainId: number) {

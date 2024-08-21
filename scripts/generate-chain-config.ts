@@ -18,11 +18,10 @@ async function generateChainConfig(chainName: string) {
       grayscaleLogoPath: "./assets/grayscale-logo.svg",
       spokePool: getDeployedAddress("SpokePool", chainId),
       chainId,
-      publicRpcUrl: "",
+      publicRpcUrl: TODO,
       blockTimeSeconds: 15,
       tokens: [],
       enableCCTP: false,
-      swapTokens: [],
     } as ChainConfig;
   `;
 
