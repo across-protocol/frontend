@@ -1,16 +1,16 @@
-// @todo: relayers should be of type RelayerConfig.
-export function randomWeighted(relayers: string[]): string {
+import { CandidateRelayer } from "../types";
+
+export function randomWeighted(relayers: CandidateRelayer[]): string {
   const random = crypto.getRandomValues(new Uint8Array(relayers.length));
 
   const relayerWeights = relayers.map((relayer, idx) => {
-    const dynamicWeight = 1.0;
-    const fixedWeight = 1.0;
+    const { dynamicWeight, fixedWeight, address } = relayer;
     const effectiveWeight = (dynamicWeight + fixedWeight) * random[idx];
-    return { address: relayer, effectiveWeight };
+    return { relayer: address, effectiveWeight };
   });
 
   // Select the relayer with the highest effective weight.
-  const { address: exclusiveRelayer } = relayerWeights
+  const { relayer: exclusiveRelayer } = relayerWeights
     .slice(1)
     .reduce(
       (acc, relayer) =>

@@ -1,7 +1,7 @@
 import ethers from "ethers";
 import * as sdk from "@across-protocol/sdk";
-import { getExclusivityPeriod, getStrategy } from "./config";
-import { ExclusiveRelayer } from "./types";
+import { getExclusivityPeriod, getRelayerConfig, getStrategy } from "./config";
+import { CandidateRelayer, ExclusiveRelayer } from "./types";
 
 type BigNumber = ethers.BigNumber;
 
@@ -25,6 +25,7 @@ export async function selectExclusiveRelayer(
   relayerFeePct: BigNumber
 ): Promise<ExclusiveRelayer> {
   const relayers = await getEligibleRelayers(
+    originChainId,
     destinationChainId,
     outputToken,
     outputAmount,
@@ -51,12 +52,18 @@ export async function selectExclusiveRelayer(
  * @param relayerFeePct Estimated relayer fee, assuming destination chain repayment.
  */
 async function getEligibleRelayers(
-  _destintionChainId: number,
-  _outputToken: string,
+  originChainId: number,
+  destinationChainId: number,
+  outputToken: string,
   _outputAmount: BigNumber,
   _relayerFeePct: BigNumber
-): Promise<string[]> {
+): Promise<CandidateRelayer[]> {
   // Source all relayers that have opted in for this destination chain.
+  const relayers = getRelayerConfig(
+    originChainId,
+    destinationChainId,
+    outputToken
+  );
 
   // Filter relayers by:
   // - those whose gas token balance exceeds some base amount (i.e. enough to make a fill).
@@ -64,5 +71,11 @@ async function getEligibleRelayers(
   // - those whose configured minimum exclusivity is within the configured maximum permitted exclusivity.
   // - those whose configured minimum profitability is satisfied by the computed relayer fee.
 
-  return [];
+  return Promise.resolve(
+    relayers.map(({ address }) => ({
+      address,
+      fixedWeight: 1.0,
+      dynamicWeight: 1.0,
+    }))
+  );
 }

@@ -3,4 +3,21 @@ export type ExclusiveRelayer = {
   exclusivityPeriod: number; // Absolute number of seconds of exclusivity from deposit time.
 };
 
-export type RelayerSelector = (relayers: string[]) => string;
+// Initial relayer configuration items.
+export type RelayerConfig = {
+  address: string;
+  minExclusivityPeriod: number;
+  minProfitThreshold: number;
+  balanceMultiplier: number;
+  maxFillSize: number;
+  originChains: number[];
+  tokens: string[];
+};
+
+export type CandidateRelayer = {
+  address: string;
+  dynamicWeight: number;
+  fixedWeight: number;
+};
+
+export type RelayerSelector = (relayers: CandidateRelayer[]) => string;

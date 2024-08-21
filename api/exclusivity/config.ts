@@ -1,5 +1,5 @@
 import * as sdk from "@across-protocol/sdk";
-import { RelayerSelector } from "./types";
+import { CandidateRelayer, RelayerConfig, RelayerSelector } from "./types";
 import { randomWeighted } from "./strategies";
 
 const { CHAIN_IDs, ZERO_ADDRESS } = sdk.constants;
@@ -32,7 +32,7 @@ const DESTINATION_CONFIRMATION_DELAY: { [chainId: number]: number } = {
  * Object mapping named exclusivity strategies to their implementation.
  */
 const EXCLUSIVITY_STRATEGIES = {
-  none: (_: string[]) => ZERO_ADDRESS,
+  none: (_: CandidateRelayer[]) => ZERO_ADDRESS,
   randomWeighted,
 } as const;
 
@@ -46,6 +46,23 @@ export function getStrategy(): RelayerSelector {
   // @todo: Determine strategy based on configuration.
   const defaultStrategy = "none";
   return EXCLUSIVITY_STRATEGIES[defaultStrategy];
+}
+
+/**
+ * For a given deposit, identify the set of relayers that are eligible for exlusivity.
+ * @param originChainId Origin chain of deposit.
+ * @param destinationChainId Destination chain of deposit.
+ * @param outputToken Output token of deposit.
+ * @returns An array of relayer addresses & associated configuration.
+ */
+export function getRelayerConfig(
+  _originChainId: number,
+  _destinationChainId: number,
+  _outputToken: string
+): RelayerConfig[] {
+  // @todo: Read the relayer config based on the token + route combination.
+  const relayers: RelayerConfig[] = [];
+  return relayers;
 }
 
 /**
