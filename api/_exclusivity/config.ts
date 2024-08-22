@@ -1,4 +1,5 @@
 import * as sdk from "@across-protocol/sdk";
+import config from "../../../src/data/exclusive-relayers.json";
 import { RelayerConfig, RelayerSelector } from "./types";
 import { none, randomWeighted } from "./strategies";
 
