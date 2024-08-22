@@ -895,14 +895,11 @@ export const getCachedTokenBalances = async (
   tokenAddresses: string[]
 ): Promise<BatchAccountBalanceResponse> => {
   const response = await axios.get<BatchAccountBalanceResponse>(
-    `${resolveVercelEndpoint()}/api/batch-account-balance`,
-    {
-      params: {
-        chainId,
-        addresses,
-        tokenAddresses,
-      },
-    }
+    `${resolveVercelEndpoint()}/api/batch-account-balance?${buildSearchParams({
+      chainId,
+      addresses,
+      tokenAddresses,
+    })}`
   );
 
   return response.data;
@@ -1670,4 +1667,40 @@ export function getChainInputTokenMaxDepositInUsd(
     ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
     : undefined;
   return maxDeposits[chainId.toString()]?.[symbol] || defaultValue;
+}
+
+/**
+ * Builds a URL search string from an object of query parameters.
+ *
+ * @param params - An object where keys are query parameter names and values are either a string or an array of strings representing the parameter values.
+ *
+ * @returns queryString - A properly formatted query string for use in URLs, (without the leading '?').
+ *
+ * @example
+ * ```typescript
+ * const params = {
+ *   age: 45, // numbers will be converted to strings
+ *   foos: ["foo1", "foo1"],
+ *   bars: ["bar1", "bar2", "bar3"],
+ * };
+ *
+ * const queryString = buildSearchParams(params);
+ * console.log(queryString); // "search=test&filter=price&filter=rating&sort=asc"
+ * const res = await axios.get(`${base_url}?${queryString}`)
+ * ```
+ */
+
+export function buildSearchParams(
+  params: Record<string, number | string | Array<number | string>>
+): string {
+  const searchParams = new URLSearchParams();
+  for (const key in params) {
+    const value = params[key];
+    if (Array.isArray(value)) {
+      value.forEach((val) => searchParams.append(key, String(val)));
+    } else {
+      searchParams.append(key, String(value));
+    }
+  }
+  return searchParams.toString();
 }
