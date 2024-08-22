@@ -30,6 +30,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.LISK,
   chainConfigs.SCROLL,
   chainConfigs.REDSTONE,
+  chainConfigs.ZORA,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -77,6 +78,7 @@ const enabledRoutes = {
         CHAIN_IDs.LISK,
         CHAIN_IDs.REDSTONE,
         CHAIN_IDs.SCROLL,
+        CHAIN_IDs.ZORA,
       ],
     },
     swapAndBridgeAddresses: {
@@ -207,6 +209,9 @@ function transformChainConfigs(
           }
         }
 
+        // @todo: Additional brittle logic has been added to (badly) support Zora's USDzC.
+        // This should be revisited to auto-generate routes for USDC.e <-> USDbC <-> USDzC.
+        // In particular, CCTP origin chains still seem to be missing bridged -> USDzC routes.
         if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
           if (toChainConfig.enableCCTP) {
             return [
@@ -224,6 +229,27 @@ function transformChainConfigs(
               {
                 inputTokenSymbol: tokenSymbol,
                 outputTokenSymbol: "USDC",
+              },
+            ];
+          } else if (toChainConfig.tokens.includes("USDC.e")) {
+            return [
+              {
+                inputTokenSymbol: tokenSymbol,
+                outputTokenSymbol: "USDC.e",
+              },
+            ];
+          } else if (toChainConfig.tokens.includes("USDbC")) {
+            return [
+              {
+                inputTokenSymbol: tokenSymbol,
+                outputTokenSymbol: "USDbC",
+              },
+            ];
+          } else if (toChainConfig.tokens.includes("USDzC")) {
+            return [
+              {
+                inputTokenSymbol: tokenSymbol,
+                outputTokenSymbol: "USDzC",
               },
             ];
           }

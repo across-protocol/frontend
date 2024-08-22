@@ -100,6 +100,11 @@ import zkSyncGrayscaleLogo from "assets/chain-logos/zk-sync-grayscale.svg";
 import { ReactComponent as zkSyncLogoSvg } from "assets/chain-logos/zk-sync.svg";
 import { ReactComponent as zkSyncGrayscaleLogoSvg } from "assets/chain-logos/zk-sync-grayscale.svg";
 
+import zoraLogo from "assets/chain-logos/zora.svg";
+import zoraGrayscaleLogo from "assets/chain-logos/zora-grayscale.svg";
+import { ReactComponent as zoraLogoSvg } from "assets/chain-logos/zora.svg";
+import { ReactComponent as zoraGrayscaleLogoSvg } from "assets/chain-logos/zora-grayscale.svg";
+
 export const arbitrum = {
   name: "Arbitrum",
   fullName: "Arbitrum One",
@@ -437,6 +442,22 @@ export const zkSync = {
   pollingInterval: 2000,
 };
 
+export const zora = {
+  name: "Zora",
+  fullName: "Zora",
+  chainId: 7777777,
+  logoURI: zoraLogo,
+  grayscaleLogoURI: zoraGrayscaleLogo,
+  logoSvg: zoraLogoSvg,
+  grayscaleLogoSvg: zoraGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.zora.energy",
+  explorerUrl: "https://zorascan.xyz",
+  constructExplorerLink: (txHash: string) => `${zora.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_7777777_PROVIDER_URL,
+  pollingInterval: 2000,
+};
+
 export const chainConfigs = [
   arbitrum,
   arbitrumSepolia,
@@ -458,6 +479,7 @@ export const chainConfigs = [
   scroll,
   sepolia,
   zkSync,
+  zora,
 ].reduce(
   (acc, chain) => {
     acc[chain.chainId] = chain;
