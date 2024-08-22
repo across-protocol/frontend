@@ -1,4 +1,4 @@
-import config from "../../../src/data/exclusivity-random.json";
+import config from "../../../src/data/exclusive-relayer-weights.json";
 import { CandidateRelayer } from "../types";
 
 export function randomWeighted(relayers: string[]): string {
