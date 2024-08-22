@@ -61,7 +61,7 @@ export const fetchExclusiveRelayersFixedWeights = makeFetchRemoteConfig(
 
 function makeFetchRemoteConfig<T>(schema: Struct<T>, fallbackData?: T) {
   return async (
-    remoteBaseUrl: string | undefined,
+    remoteBaseUrl: string,
     remoteConfigFilePath: string,
     commitHash = "master"
   ) =>
@@ -75,7 +75,7 @@ function makeFetchRemoteConfig<T>(schema: Struct<T>, fallbackData?: T) {
 }
 
 async function fetchRemoteConfigAndValidate<T>(
-  remoteBaseUrl: string | undefined,
+  remoteBaseUrl: string,
   remoteConfigFilePath: string,
   schema: Struct<T>,
   commitHash = "master",
@@ -83,25 +83,32 @@ async function fetchRemoteConfigAndValidate<T>(
 ) {
   let data: T;
 
-  // If the remote base is not provided, we will use the fallback data.
-  // This is the case for private repos that require a GitHub token and for local development.
-  if (remoteBaseUrl === undefined && fallbackData !== undefined) {
-    data = fallbackData;
-  } else {
-    const url = `${remoteBaseUrl}/${commitHash}/${remoteConfigFilePath}`;
-    const res = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  const url = `${remoteBaseUrl}/${commitHash}/${remoteConfigFilePath}`;
+  const headers = process.env.GH_TOKEN
+    ? {
+        Authorization: `Basic ${Buffer.from(process.env.GH_TOKEN!).toString(
+          "base64"
+        )}`,
+      }
+    : undefined;
+  const res = await fetch(url, {
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+    },
+  });
 
-    if (!res.ok) {
-      throw new Error(
-        `Failed to fetch file from ${url}, with error code %${res.status}`
-      );
-    }
-    data = await res.json();
+  if (res.status === 401 && fallbackData) {
+    console.warn(
+      `Failed to fetch remote config from ${url}, falling back to local data...`
+    );
+    data = fallbackData;
+  } else if (!res.ok) {
+    throw new Error(
+      `Failed to fetch file from ${url}, with error code %${res.status}`
+    );
   }
+  data = await res.json();
 
   assert(data, schema);
 
@@ -113,8 +120,5 @@ export function getRemoteConfigCommitHash(config: RemoteConfig) {
 }
 
 export function getBqReaderRemoteBaseUrl() {
-  const GH_TOKEN = process.env.GH_TOKEN;
-  return GH_TOKEN !== undefined
-    ? `https://${GH_TOKEN}@raw.githubusercontent.com/UMAprotocol/across-bq-reader`
-    : undefined;
+  return `https://raw.githubusercontent.com/UMAprotocol/across-bq-reader`;
 }
