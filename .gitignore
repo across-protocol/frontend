@@ -23,8 +23,7 @@
 .env.e2e
 src/data/fill-times-preset.json
 src/data/exclusive-relayer-configs.json
-src/data/exclusive-relayers-dynamic-weights.json
-src/data/exclusive-relayers-fixed-weights.json
+src/data/exclusive-relayer-weights.json
 
 # IDE
 .idea
