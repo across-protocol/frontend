@@ -20,4 +20,4 @@ export type CandidateRelayer = {
   fixedWeight: number;
 };
 
-export type RelayerSelector = (relayers: CandidateRelayer[]) => string;
+export type RelayerSelector = (relayers: string[]) => string;

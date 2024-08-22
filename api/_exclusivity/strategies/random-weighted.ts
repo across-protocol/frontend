@@ -1,9 +1,9 @@
 import { CandidateRelayer } from "../types";
 
-export function randomWeighted(relayers: CandidateRelayer[]): string {
+export function randomWeighted(relayers: string[]): string {
   const random = crypto.getRandomValues(new Uint8Array(relayers.length));
 
-  const relayerWeights = relayers.map((relayer, idx) => {
+  const relayerWeights = getStrategyConfig(relayers).map((relayer, idx) => {
     const { dynamicWeight, fixedWeight, address } = relayer;
     const effectiveWeight = (dynamicWeight + fixedWeight) * random[idx];
     return { relayer: address, effectiveWeight };
@@ -19,4 +19,13 @@ export function randomWeighted(relayers: CandidateRelayer[]): string {
     );
 
   return exclusiveRelayer;
+}
+
+function getStrategyConfig(relayers: string[]): CandidateRelayer[] {
+  // @todo: Import strategy-specific configuration.
+  return relayers.map((address) => ({
+    address,
+    fixedWeight: 1.0,
+    dynamicWeight: 1.0,
+  }));
 }

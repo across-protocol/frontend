@@ -1,8 +1,8 @@
 import * as sdk from "@across-protocol/sdk";
-import { CandidateRelayer, RelayerConfig, RelayerSelector } from "./types";
-import { randomWeighted } from "./strategies";
+import { RelayerConfig, RelayerSelector } from "./types";
+import { none, randomWeighted } from "./strategies";
 
-const { CHAIN_IDs, ZERO_ADDRESS } = sdk.constants;
+const { CHAIN_IDs } = sdk.constants;
 
 // Absolute minimum exclusivity to set for any given transfer.
 const DEFAULT_MIN_EXCLUSIVITY = 3;
@@ -32,7 +32,7 @@ const DESTINATION_CONFIRMATION_DELAY: { [chainId: number]: number } = {
  * Object mapping named exclusivity strategies to their implementation.
  */
 const EXCLUSIVITY_STRATEGIES = {
-  none: (_: CandidateRelayer[]) => ZERO_ADDRESS,
+  none,
   randomWeighted,
 } as const;
 

@@ -1,7 +1,7 @@
 import ethers from "ethers";
 import * as sdk from "@across-protocol/sdk";
 import { getExclusivityPeriod, getRelayerConfig, getStrategy } from "./config";
-import { CandidateRelayer, ExclusiveRelayer } from "./types";
+import { ExclusiveRelayer } from "./types";
 
 type BigNumber = ethers.BigNumber;
 
@@ -57,7 +57,7 @@ async function getEligibleRelayers(
   outputToken: string,
   _outputAmount: BigNumber,
   _relayerFeePct: BigNumber
-): Promise<CandidateRelayer[]> {
+): Promise<string[]> {
   // Source all relayers that have opted in for this destination chain.
   const relayers = getRelayerConfig(
     originChainId,
@@ -72,10 +72,6 @@ async function getEligibleRelayers(
   // - those whose configured minimum profitability is satisfied by the computed relayer fee.
 
   return Promise.resolve(
-    relayers.map(({ address }) => ({
-      address,
-      fixedWeight: 1.0,
-      dynamicWeight: 1.0,
-    }))
+    relayers.filter(() => true).map(({ address }) => address)
   );
 }

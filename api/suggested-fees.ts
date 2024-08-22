@@ -29,7 +29,7 @@ import {
   getCachedLimits,
 } from "./_utils";
 import { resolveTiming } from "./_timings";
-import { selectExclusiveRelayer } from "./exclusivity";
+import { selectExclusiveRelayer } from "./_exclusivity";
 import { parseUnits } from "ethers/lib/utils";
 
 const { BigNumber } = ethers;
