@@ -5,8 +5,8 @@ import dotenv from "dotenv";
 import {
   fetchExclusiveRelayerConfigs,
   fetchFillTimes,
-  // fetchExclusiveRelayersDynamicWeights,
-  // fetchExclusiveRelayersFixedWeights,
+  fetchExclusiveRelayersDynamicWeights,
+  fetchExclusiveRelayersFixedWeights,
   getRemoteConfigCommitHash,
   getBqReaderRemoteBaseUrl,
   remoteConfigTypes,
@@ -35,28 +35,39 @@ const remoteConfigs = {
       ),
     localFilePath: "src/data/exclusive-relayer-configs.json",
   },
-  // [remoteConfigTypes.EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS]: {
-  //   fetchFn: () =>
-  //     fetchExclusiveRelayersDynamicWeights(
-  //       getBqReaderRemoteBaseUrl(),
-  //       "relayer-exclusivity/strategies/weighted-random/dynamic-weights.json",
-  //       getRemoteConfigCommitHash(
-  //         remoteConfigTypes.EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS
-  //       )
-  //     ),
-  //   localFilePath: "src/data/exclusive-relayers-dynamic-weights.json",
-  // },
-  // [remoteConfigTypes.EXCLUSIVE_RELAYERS_FIXED_WEIGHTS]: {
-  //   fetchFn: () =>
-  //     fetchExclusiveRelayersFixedWeights(
-  //       getBqReaderRemoteBaseUrl(),
-  //       "relayer-exclusivity/strategies/weighted-random/fixed-weights.json",
-  //       getRemoteConfigCommitHash(
-  //         remoteConfigTypes.EXCLUSIVE_RELAYERS_FIXED_WEIGHTS
-  //       )
-  //     ),
-  //   localFilePath: "src/data/exclusive-relayers-fixed-weights.json",
-  // },
+  [remoteConfigTypes.EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS]: {
+    fetchFn: async () => {
+      const [dynamicWeights, fixedWeights] = await Promise.all([
+        fetchExclusiveRelayersDynamicWeights(
+          getBqReaderRemoteBaseUrl(),
+          "relayer-exclusivity/strategies/weighted-random/dynamic-weights.json",
+          getRemoteConfigCommitHash(
+            remoteConfigTypes.EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS
+          )
+        ),
+        fetchExclusiveRelayersFixedWeights(
+          getBqReaderRemoteBaseUrl(),
+          "relayer-exclusivity/strategies/weighted-random/fixed-weights.json",
+          getRemoteConfigCommitHash(
+            remoteConfigTypes.EXCLUSIVE_RELAYERS_FIXED_WEIGHTS
+          )
+        ),
+      ]);
+      const mergedWeights = Object.entries(dynamicWeights).reduce(
+        (acc, [relayerAddress, dynamicWeight]) => {
+          const fixedWeight = fixedWeights[relayerAddress] ?? 1;
+          acc[relayerAddress] = {
+            dynamicWeight,
+            fixedWeight,
+          };
+          return acc;
+        },
+        {}
+      );
+      return mergedWeights;
+    },
+    localFilePath: "src/data/exclusive-relayer-weights.json",
+  },
 };
 
 (async () => {
