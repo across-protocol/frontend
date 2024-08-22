@@ -1,0 +1,10 @@
+{
+  "0x07ae8551be970cb1cca11dd7a11f47ae82e70e67": {
+    "originChains": [10, 324, 8453, 34443, 42161, 59144, 81457, 534352],
+    "maxFillSize": 9999,
+    "balanceMultiplier": 0.25,
+    "minExclusivityPeriod": 2,
+    "dynamicWeight": 1.0,
+    "minProfitThreshold": 0.00001
+  }
+}
