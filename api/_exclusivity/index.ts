@@ -1,4 +1,4 @@
-import ethers from "ethers";
+import { ethers } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 import { getCachedTokenBalances } from "../_utils";
 import { getExclusivityPeriod, getRelayerConfig, getStrategy } from "./config";
