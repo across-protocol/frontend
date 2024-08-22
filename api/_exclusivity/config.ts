@@ -1,5 +1,5 @@
 import * as sdk from "@across-protocol/sdk";
-import config from "../../../src/data/exclusive-relayers.json";
+import config from "../../src/data/exclusive-relayers.json";
 import { RelayerConfig, RelayerSelector } from "./types";
 import { none, randomWeighted } from "./strategies";
 
@@ -50,19 +50,18 @@ export function getStrategy(): RelayerSelector {
 }
 
 /**
- * For a given deposit, identify the set of relayers that are eligible for exlusivity.
+ * For a given deposit, identify the set of relayers that are eligible for exclusivity.
  * @param originChainId Origin chain of deposit.
- * @param destinationChainId Destination chain of deposit.
- * @param outputToken Output token of deposit.
  * @returns An array of relayer addresses & associated configuration.
  */
-export function getRelayerConfig(
-  _originChainId: number,
-  _destinationChainId: number,
-  _outputToken: string
-): RelayerConfig[] {
-  // @todo: Read the relayer config based on the token + route combination.
-  const relayers: RelayerConfig[] = [];
+export function getRelayerConfig(originChainId: number): RelayerConfig[] {
+  const relayers = Object.entries(config)
+    .filter(
+      ([, relayerConfig]) =>
+        relayerConfig.originChains?.includes(originChainId) ?? true
+    )
+    .map(([address, config]) => ({ address, ...config }));
+
   return relayers;
 }
 

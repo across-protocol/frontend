@@ -11,7 +11,6 @@ export type RelayerConfig = {
   balanceMultiplier: number;
   maxFillSize: number;
   originChains: number[];
-  tokens: string[];
 };
 
 export type CandidateRelayer = {

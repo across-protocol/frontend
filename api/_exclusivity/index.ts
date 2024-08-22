@@ -53,25 +53,35 @@ export async function selectExclusiveRelayer(
  */
 async function getEligibleRelayers(
   originChainId: number,
-  destinationChainId: number,
-  outputToken: string,
-  _outputAmount: BigNumber,
-  _relayerFeePct: BigNumber
+  _destinationChainId: number,
+  _outputToken: string,
+  outputAmount: BigNumber,
+  relayerFeePct: BigNumber
 ): Promise<string[]> {
   // Source all relayers that have opted in for this destination chain.
-  const relayers = getRelayerConfig(
-    originChainId,
-    destinationChainId,
-    outputToken
-  );
+  const relayers = getRelayerConfig(originChainId);
+
+  // @todo: Query gas token + outputToken balances.
+  const relayerAddresses = relayers.map(({ address }) => address);
+  const balances = relayerAddresses.map(() => ethers.BigNumber.from(1));
+
+  const candidateRelayers = Object.entries(relayers)
+    .filter(([, config], idx) => {
+      const balance = balances[idx];
+      if (balance.mul(config.balanceMultiplier).lte(outputAmount)) {
+        return false;
+      }
+
+      if (relayerFeePct.lt(config.minProfitThreshold)) {
+        return false;
+      }
+
+      return true;
+    })
+    .map(([relayer]) => relayer);
 
   // Filter relayers by:
-  // - those whose gas token balance exceeds some base amount (i.e. enough to make a fill).
-  // - those whose outputToken balance exceeds the min threshold (i.e. n * outputAmount).
   // - those whose configured minimum exclusivity is within the configured maximum permitted exclusivity.
-  // - those whose configured minimum profitability is satisfied by the computed relayer fee.
 
-  return Promise.resolve(
-    relayers.filter(() => true).map(({ address }) => address)
-  );
+  return candidateRelayers;
 }

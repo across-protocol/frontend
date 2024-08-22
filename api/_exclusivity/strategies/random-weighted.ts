@@ -23,7 +23,6 @@ export function randomWeighted(relayers: string[]): string {
 }
 
 function getStrategyConfig(relayers: string[]): CandidateRelayer[] {
-  // @todo: Import strategy-specific configuration.
   return relayers.map((address) => {
     const { fixedWeight, dynamicWeight } = config[
       address as keyof typeof config
