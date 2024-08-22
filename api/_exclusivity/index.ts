@@ -26,6 +26,7 @@ export async function selectExclusiveRelayer(
   outputAmount: BigNumber,
   relayerFeePct: BigNumber
 ): Promise<ExclusiveRelayer> {
+  // @todo: Resolving the strategy _after_ the eligible relayers imposes an undesirable blocking call.
   const relayers = await getEligibleRelayers(
     originChainId,
     destinationChainId,
