@@ -58,9 +58,15 @@ export function getRelayerConfig(originChainId: number): RelayerConfig[] {
   const relayers = Object.entries(config)
     .filter(
       ([, relayerConfig]) =>
-        relayerConfig.originChains?.includes(originChainId) ?? true
+        // relayerConfig.originChains?.includes(originChainId) ?? true
+        true // @todo: Update upstream spec.
     )
-    .map(([address, config]) => ({ address, ...config }));
+    .map(([address, config]) => ({
+      address,
+      ...config,
+      minExclusivityPeriod: config.minExclusivePeriod, // @todo
+      originChains: [originChainId], // @todo
+    }));
 
   return relayers;
 }
