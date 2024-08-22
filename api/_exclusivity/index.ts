@@ -4,8 +4,9 @@ import { getExclusivityPeriod, getRelayerConfig, getStrategy } from "./config";
 import { ExclusiveRelayer } from "./types";
 
 type BigNumber = ethers.BigNumber;
-
+const { parseUnits } = ethers.utils;
 const { ZERO_ADDRESS } = sdk.constants;
+const { fixedPointAdjustment: fixedPoint } = sdk.utils;
 
 /**
  * Select a specific relayer exclusivity strategy to apply.
@@ -68,11 +69,15 @@ async function getEligibleRelayers(
   const candidateRelayers = Object.entries(relayers)
     .filter(([, config], idx) => {
       const balance = balances[idx];
-      if (balance.mul(config.balanceMultiplier).lte(outputAmount)) {
+      // @todo: The balance multiplier must be scaled to n decimals to avoid underflow. Precompute it?
+      const effectiveBalance = balance
+        .mul(parseUnits(String(config.balanceMultiplier)))
+        .div(fixedPoint);
+      if (effectiveBalance.lte(outputAmount)) {
         return false;
       }
 
-      if (relayerFeePct.lt(config.minProfitThreshold)) {
+      if (relayerFeePct.lt(parseUnits(String(config.minProfitThreshold)))) {
         return false;
       }
 
