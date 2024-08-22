@@ -18,7 +18,7 @@ type BatchAccountBalanceQueryParams = Infer<
   typeof BatchAccountBalanceQueryParamsSchema
 >;
 
-type BatchAccountBalanceResponse = Awaited<
+export type BatchAccountBalanceResponse = Awaited<
   ReturnType<typeof getBatchBalanceViaMulticall3>
 > & {
   chainId: number;

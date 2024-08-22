@@ -25,7 +25,7 @@ import {
   MINIMAL_BALANCER_V2_VAULT_ABI,
   MINIMAL_MULTICALL3_ABI,
 } from "./_abis";
-
+import { BatchAccountBalanceResponse } from "./batch-account-balance";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { VercelResponse } from "@vercel/node";
 import {
@@ -879,6 +879,33 @@ export const getCachedTokenBalance = async (
   );
   // Return the balance
   return BigNumber.from(response.data.balance);
+};
+
+/**
+ * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
+ * native currency will be returned.
+ * @param chainId The blockchain Id to query against
+ * @param account A valid Web3 wallet address
+ * @param token The valid ERC20 token address on the given `chainId`.
+ * @returns A promise that resolves to the BigNumber of the balance
+ */
+export const getCachedTokenBalances = async (
+  chainId: string | number,
+  addresses: string[],
+  tokenAddresses: string[]
+): Promise<BatchAccountBalanceResponse> => {
+  const response = await axios.get<BatchAccountBalanceResponse>(
+    `${resolveVercelEndpoint()}/api/batch-account-balance`,
+    {
+      params: {
+        chainId,
+        addresses,
+        tokenAddresses,
+      },
+    }
+  );
+
+  return response.data;
 };
 
 /**

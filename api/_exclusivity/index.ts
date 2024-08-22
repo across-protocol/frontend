@@ -1,5 +1,6 @@
 import ethers from "ethers";
 import * as sdk from "@across-protocol/sdk";
+import { getCachedTokenBalances } from "../_utils";
 import { getExclusivityPeriod, getRelayerConfig, getStrategy } from "./config";
 import { ExclusiveRelayer } from "./types";
 
@@ -54,23 +55,29 @@ export async function selectExclusiveRelayer(
  */
 async function getEligibleRelayers(
   originChainId: number,
-  _destinationChainId: number,
-  _outputToken: string,
+  destinationChainId: number,
+  outputToken: string,
   outputAmount: BigNumber,
   relayerFeePct: BigNumber
 ): Promise<string[]> {
   // Source all relayers that have opted in for this destination chain.
   const relayers = getRelayerConfig(originChainId);
 
-  // @todo: Query gas token + outputToken balances.
-  const relayerAddresses = relayers.map(({ address }) => address);
-  const balances = relayerAddresses.map(() => ethers.BigNumber.from(1));
+  // @todo: Balances are returned as strings; consider mapping them automagically to BNs.
+  const { balances } = await getCachedTokenBalances(
+    destinationChainId,
+    relayers.map(({ address }) => address),
+    [ZERO_ADDRESS, outputToken]
+  );
 
+  // @todo: The minimum native token balance should probably be configurable.
+  const minNativeBalance = parseUnits("0.001");
   const candidateRelayers = Object.entries(relayers)
-    .filter(([, config], idx) => {
-      const balance = balances[idx];
+    .filter(([relayer, config]) => {
+      const balance = balances[relayer]; // Balances of outputToken + nativeToken.
+
       // @todo: The balance multiplier must be scaled to n decimals to avoid underflow. Precompute it?
-      const effectiveBalance = balance
+      const effectiveBalance = ethers.BigNumber.from(balance[outputToken])
         .mul(parseUnits(String(config.balanceMultiplier)))
         .div(fixedPoint);
       if (effectiveBalance.lte(outputAmount)) {
@@ -78,6 +85,10 @@ async function getEligibleRelayers(
       }
 
       if (relayerFeePct.lt(parseUnits(String(config.minProfitThreshold)))) {
+        return false;
+      }
+
+      if (ethers.BigNumber.from(balance[ZERO_ADDRESS]).lt(minNativeBalance)) {
         return false;
       }
 
