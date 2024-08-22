@@ -98,17 +98,18 @@ async function fetchRemoteConfigAndValidate<T>(
     },
   });
 
-  if (res.status === 401 && fallbackData) {
+  if (res.ok) {
+    data = await res.json();
+  } else if (res.status === 404 && fallbackData) {
     console.warn(
       `Failed to fetch remote config from ${url}, falling back to local data...`
     );
     data = fallbackData;
-  } else if (!res.ok) {
+  } else {
     throw new Error(
       `Failed to fetch file from ${url}, with error code %${res.status}`
     );
   }
-  data = await res.json();
 
   assert(data, schema);
 
