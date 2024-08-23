@@ -1,9 +1,9 @@
+import { randomBytes } from "crypto";
 import config from "../../../src/data/exclusive-relayer-weights.json";
 import { CandidateRelayer } from "../types";
 
 export function randomWeighted(relayers: string[]): string {
-  const random = crypto.getRandomValues(new Uint8Array(relayers.length));
-
+  const random = randomBytes(relayers.length);
   const relayerWeights = getStrategyConfig(relayers).map((relayer, idx) => {
     const { dynamicWeight, fixedWeight, address } = relayer;
     const effectiveWeight = (dynamicWeight + fixedWeight) * random[idx];
