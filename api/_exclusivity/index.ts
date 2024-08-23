@@ -34,12 +34,17 @@ export async function selectExclusiveRelayer(
     outputAmount,
     relayerFeePct
   );
-  const exclusiveRelayer = getStrategy()(relayers);
 
-  const exclusivityPeriod =
-    exclusiveRelayer === ZERO_ADDRESS
-      ? 0
-      : getExclusivityPeriod(originChainId, destinationChainId);
+  let exclusiveRelayer = ZERO_ADDRESS;
+  let exclusivityPeriod = 0;
+
+  if (relayers.length > 0) {
+    exclusiveRelayer = getStrategy()(relayers);
+    exclusivityPeriod =
+      exclusiveRelayer === ZERO_ADDRESS
+        ? 0
+        : getExclusivityPeriod(originChainId, destinationChainId);
+  }
 
   return { exclusiveRelayer, exclusivityPeriod };
 }
