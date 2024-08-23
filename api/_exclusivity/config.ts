@@ -64,7 +64,6 @@ export function getRelayerConfig(originChainId: number): RelayerConfig[] {
     .map(([address, config]) => ({
       address,
       ...config,
-      minExclusivityPeriod: config.minExclusivePeriod, // @todo
       originChains: [originChainId], // @todo
     }));
 
