@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { assert, Infer, type, string, array } from "superstruct";
+import { assert, Infer, type, string, array, union } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import {
   getBatchBalanceViaMulticall3,
@@ -9,8 +9,8 @@ import {
 } from "./_utils";
 
 const BatchAccountBalanceQueryParamsSchema = type({
-  tokenAddresses: array(validAddress()),
-  addresses: array(validAddress()),
+  tokenAddresses: union([validAddress(), array(validAddress())]),
+  addresses: union([validAddress(), array(validAddress())]),
   chainId: string(),
 });
 
@@ -23,6 +23,10 @@ export type BatchAccountBalanceResponse = Awaited<
 > & {
   chainId: number;
 };
+
+function paramToArray(param: string | string[]): string[] {
+  return Array.isArray(param) ? param : [param];
+}
 
 /**
  * ## Description
@@ -70,14 +74,14 @@ const handler = async (
     // Validate the query parameters
     assert(query, BatchAccountBalanceQueryParamsSchema);
 
-    // Deconstruct the query parameters
-    let { tokenAddresses, addresses, chainId } = query;
+    const { chainId, addresses, tokenAddresses } = query;
+
     const chainIdAsInt = Number(chainId);
 
     const result = await getBatchBalanceViaMulticall3(
       chainIdAsInt,
-      addresses,
-      tokenAddresses
+      paramToArray(addresses),
+      paramToArray(tokenAddresses)
     );
 
     const data: BatchAccountBalanceResponse = {
