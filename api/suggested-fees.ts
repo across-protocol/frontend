@@ -283,7 +283,9 @@ const handler = async (
     // @todo: This assumes an instant deposit, with 0 user delay on approval & submission.
     // This is unrealistic and must be padded for consumers _other than_ the Across FE.
     const exclusivityDeadline =
-      exclusivityPeriod > 0 ? quoteTimestamp + exclusivityPeriod : 0;
+      exclusivityPeriod > 0
+        ? sdk.utils.getCurrentTime() + exclusivityPeriod
+        : 0;
 
     const responseJson = {
       estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
