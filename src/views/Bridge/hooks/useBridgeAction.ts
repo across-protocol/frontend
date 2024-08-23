@@ -19,7 +19,6 @@ import {
   generateTransferSigned,
   generateTransferSubmitted,
   getConfig,
-  getCurrentTime,
   getSpokePoolAndVerifier,
   sendSpokePoolVerifierDepositTx,
   sendDepositV3Tx,
@@ -307,7 +306,7 @@ function getDepositArgs(
     isNative: selectedRoute.isNative,
     toAddress: recipient,
     exclusiveRelayer: quotedFees.exclusiveRelayer,
-    exclusivityDeadline: quotedFees.exclusivityDeadline - getCurrentTime(),
+    exclusivityDeadline: quotedFees.exclusivityDeadline,
     integratorId,
   };
 }

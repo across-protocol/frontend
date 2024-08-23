@@ -245,6 +245,10 @@ export async function sendDepositV3Tx(
       exclusivityDeadline === 0
     ) && false;
 
+  if (useExclusiveRelayer) {
+    exclusivityDeadline = Math.max(5, exclusivityDeadline - getCurrentTime());
+  }
+
   const depositArgs = [
     await signer.getAddress(),
     recipient,
