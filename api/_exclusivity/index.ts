@@ -73,8 +73,8 @@ async function getEligibleRelayers(
 
   // @todo: The minimum native token balance should probably be configurable.
   const minNativeBalance = parseUnits("0.001");
-  const candidateRelayers = Object.entries(relayers)
-    .filter(([relayer, config]) => {
+  const candidateRelayers = relayers
+    .filter(({ address: relayer, ...config }) => {
       const balance = balances[relayer]; // Balances of outputToken + nativeToken.
 
       // @todo: The balance multiplier must be scaled to n decimals to avoid underflow. Precompute it?
@@ -95,7 +95,7 @@ async function getEligibleRelayers(
 
       return true;
     })
-    .map(([relayer]) => relayer);
+    .map(({ address }) => address);
 
   // Filter relayers by:
   // - those whose configured minimum exclusivity is within the configured maximum permitted exclusivity.
