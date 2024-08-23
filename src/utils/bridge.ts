@@ -239,10 +239,11 @@ export async function sendDepositV3Tx(
   fillDeadline ??=
     getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
-  const useExclusiveRelayer = !(
-    exclusiveRelayer === ethers.constants.AddressZero &&
-    exclusivityDeadline === 0
-  );
+  const useExclusiveRelayer =
+    !(
+      exclusiveRelayer === ethers.constants.AddressZero &&
+      exclusivityDeadline === 0
+    ) && false;
 
   const depositArgs = [
     await signer.getAddress(),
