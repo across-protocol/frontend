@@ -53,7 +53,8 @@
   "scripts": {
     "start": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite",
     "dev": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite --port $PORT --host",
-    "build": "yarn pull:timing && export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && tsc && vite build",
+    "build": "yarn prebuild && export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && tsc && vite build",
+    "prebuild": "tsx scripts/pre-build.ts && yarn lint:fix && yarn format:fix",
     "analyze": "yarn build && rollup-plugin-visualizer --open ./bundle-size-analysis.json",
     "test": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && jest --env jsdom src",
     "serve": "vite preview --port 3000",
@@ -79,8 +80,7 @@
     "generate:routes:e2e": "tsx scripts/generate-e2e-test-routes.ts",
     "generate:routes:mainnet": "yarn generate:routes 1",
     "generate:chain-config": "tsx scripts/generate-chain-config.ts",
-    "generate:ui-assets": "tsx scripts/generate-ui-assets.ts",
-    "pull:timing": "sh -c 'gh_tkn=$GH_TOKEN gh_repo=$GH_REPO_URL ./scripts/preBuild.sh && yarn lint:fix && yarn format:fix'"
+    "generate:ui-assets": "tsx scripts/generate-ui-assets.ts"
   },
   "lint-staged": {
     "*.{jsx,tsx,js,ts}": [
