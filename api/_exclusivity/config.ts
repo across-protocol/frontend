@@ -45,7 +45,7 @@ const EXCLUSIVITY_STRATEGIES = {
  */
 export function getStrategy(): RelayerSelector {
   // @todo: Determine strategy based on configuration.
-  const defaultStrategy = "none";
+  const defaultStrategy = "randomWeighted";
   return EXCLUSIVITY_STRATEGIES[defaultStrategy];
 }
 
