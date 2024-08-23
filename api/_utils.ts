@@ -14,7 +14,7 @@ import {
 } from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
-import { BigNumber, ethers, providers, utils } from "ethers";
+import { BigNumber, ethers, providers, Signer, utils } from "ethers";
 import { StructError, define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -46,6 +46,7 @@ import {
   relayerFeeCapitalCostConfig,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
+import { Provider } from "utils";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -784,11 +785,11 @@ export const getBatchBalanceViaMulticall3 = async (
   const chainIdAsInt = Number(chainId);
   const provider = getProvider(chainIdAsInt);
 
-  const multicall3 = new ethers.Contract(
-    MULTICALL3_ADDRESS,
-    MINIMAL_MULTICALL3_ABI,
-    provider
-  ) as Multicall3;
+  const multicall3 = getMulticall3(chainIdAsInt, provider);
+
+  if (!multicall3) {
+    throw new Error("No Multicall3 deployed on this chain");
+  }
 
   let calls: Parameters<typeof callViaMulticall3>[1] = [];
 
@@ -849,6 +850,24 @@ export const getBatchBalanceViaMulticall3 = async (
     balances,
   };
 };
+
+export function getMulticall3(
+  chainId: number,
+  signerOrProvider?: Signer | Provider
+): Multicall3 | undefined {
+  const address = sdk.utils.multicall3Addresses[chainId];
+
+  // no multicall on this chain
+  if (!address) {
+    return undefined;
+  }
+
+  return new ethers.Contract(
+    address,
+    MINIMAL_MULTICALL3_ABI,
+    signerOrProvider
+  ) as Multicall3;
+}
 
 /**
  * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
