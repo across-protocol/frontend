@@ -784,14 +784,11 @@ export const getBatchBalanceViaMulticall3 = async (
   const chainIdAsInt = Number(chainId);
   const provider = getProvider(chainIdAsInt);
 
-  const multicall3 = (await sdk.utils.getMulticall3(
-    chainIdAsInt,
+  const multicall3 = new ethers.Contract(
+    MULTICALL3_ADDRESS,
+    MINIMAL_MULTICALL3_ABI,
     provider
-  )) as Multicall3;
-
-  if (!multicall3) {
-    throw new Error("No Multicall on this chain");
-  }
+  );
 
   let calls: Parameters<typeof callViaMulticall3>[1] = [];
 
