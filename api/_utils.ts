@@ -788,7 +788,7 @@ export const getBatchBalanceViaMulticall3 = async (
     MULTICALL3_ADDRESS,
     MINIMAL_MULTICALL3_ABI,
     provider
-  );
+  ) as Multicall3;
 
   let calls: Parameters<typeof callViaMulticall3>[1] = [];
 
