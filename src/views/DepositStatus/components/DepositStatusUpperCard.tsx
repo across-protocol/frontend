@@ -384,7 +384,9 @@ const AnimatedLogo = styled.div<{
     & rect,
     circle,
     #path-to-animate {
-      transition: fill 1s ease-in-out;
+      transition:
+        fill 1s ease-in-out,
+        color 1s ease-in-out;
     }
   }
 
@@ -402,30 +404,37 @@ const AnimatedLogo = styled.div<{
 
 const AnimatedLogoFromChain = styled(AnimatedLogo)<{ status: DepositStatus }>`
   & svg {
+    // Set the color on the svg based on status
+    color: ${({ status }) =>
+      status === "deposit-reverted"
+        ? COLORS.warning
+        : status === "depositing"
+          ? COLORS.white
+          : COLORS.aqua};
+    // Use currentColor for the fill of rect, circle, and #path-to-animate
     & rect,
     circle,
     #path-to-animate {
-      fill: ${({ status }) =>
-        status === "deposit-reverted"
-          ? COLORS.warning
-          : status === "depositing"
-            ? COLORS.white
-            : COLORS.aqua};
+      fill: currentColor;
     }
   }
 `;
 
 const AnimatedLogoToChain = styled(AnimatedLogo)<{ status: DepositStatus }>`
   & svg {
+    // Set the color on the svg based on status
+    color: ${({ status }) =>
+      status === "depositing" || status === "deposit-reverted"
+        ? COLORS["grey-400"]
+        : status === "filling"
+          ? COLORS.white
+          : COLORS.aqua};
+
+    // Use currentColor for the fill of rect, circle, and #path-to-animate
     & rect,
     circle,
     #path-to-animate {
-      fill: ${({ status }) =>
-        status === "depositing" || status === "deposit-reverted"
-          ? COLORS["grey-400"]
-          : status === "filling"
-            ? COLORS.white
-            : COLORS.aqua};
+      fill: currentColor;
     }
   }
 `;
