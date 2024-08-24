@@ -29,10 +29,7 @@ import {
   getCachedLimits,
 } from "./_utils";
 import { resolveTiming } from "./_timings";
-import { selectExclusiveRelayer } from "./exclusivity";
 import { parseUnits } from "ethers/lib/utils";
-
-const { BigNumber } = ethers;
 
 const SuggestedFeesQueryParamsSchema = type({
   amount: parsableBigNumberString(),
@@ -169,7 +166,7 @@ const handler = async (
       quoteBlockNumber = blockNumberForTimestamp;
     }
 
-    const amount = BigNumber.from(amountInput);
+    const amount = ethers.BigNumber.from(amountInput);
 
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       ENABLED_ROUTES.acrossConfigStoreAddress,
@@ -202,7 +199,7 @@ const handler = async (
     ];
 
     const [
-      [currentUt, nextUt, _quoteTimestamp, rawL1TokenConfig],
+      [currentUt, nextUt, quoteTimestamp, rawL1TokenConfig],
       tokenPrice,
       tokenPriceUsd,
       limits,
@@ -217,7 +214,6 @@ const handler = async (
         destinationChainId
       ),
     ]);
-    const quoteTimestamp = parseInt(_quoteTimestamp.toString());
 
     const amountInUsd = amount
       .mul(parseUnits(tokenPriceUsd.toString(), 18))
@@ -264,25 +260,12 @@ const handler = async (
       throw new InputError("Sent amount is too low relative to fees");
 
     // Across V3's new `deposit` function requires now a total fee that includes the LP fee
-    const totalRelayFee = BigNumber.from(relayerFeeDetails.relayFeeTotal).add(
-      lpFeeTotal
-    );
-    const totalRelayFeePct = BigNumber.from(
+    const totalRelayFee = ethers.BigNumber.from(
+      relayerFeeDetails.relayFeeTotal
+    ).add(lpFeeTotal);
+    const totalRelayFeePct = ethers.BigNumber.from(
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
-
-    const { exclusiveRelayer, exclusivityPeriod } = selectExclusiveRelayer(
-      computedOriginChainId,
-      destinationChainId,
-      outputToken.address,
-      amount.sub(totalRelayFee),
-      BigNumber.from(relayerFeeDetails.relayFeePercent) // @todo: Subtract destination gas cost.
-    );
-
-    // @todo: This assumes an instant deposit, with 0 user delay on approval & submission.
-    // This is unrealistic and must be padded for consumers _other than_ the Across FE.
-    const exclusivityDeadline =
-      exclusivityPeriod > 0 ? quoteTimestamp + exclusivityPeriod : 0;
 
     const responseJson = {
       estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
@@ -305,8 +288,8 @@ const handler = async (
         : parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: quoteBlockNumber.toString(),
-      exclusiveRelayer,
-      exclusivityDeadline: exclusivityDeadline.toString(),
+      exclusiveRelayer: ethers.constants.AddressZero, // Exclusivity is currently disabled.
+      exclusivityDeadline: "0", // Exclusivity is currently disabled.
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
       // Note: v3's new fee structure. Below are the correct values for the new fee structure. The above `*Pct` and `*Total`
       // values are for backwards compatibility which will be removed in the future.
