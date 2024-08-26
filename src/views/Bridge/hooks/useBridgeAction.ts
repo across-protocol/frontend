@@ -272,7 +272,7 @@ type DepositArgs = {
   isNative: boolean;
   toAddress: string;
   exclusiveRelayer: string;
-  exclusivityPeriod: number;
+  exclusivityDeadline: number;
   integratorId: string;
 };
 function getDepositArgs(
@@ -306,7 +306,7 @@ function getDepositArgs(
     isNative: selectedRoute.isNative,
     toAddress: recipient,
     exclusiveRelayer: quotedFees.exclusiveRelayer,
-    exclusivityPeriod: quotedFees.exclusivityPeriod,
+    exclusivityDeadline: quotedFees.exclusivityDeadline,
     integratorId,
   };
 }

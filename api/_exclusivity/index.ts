@@ -36,6 +36,8 @@ export async function selectExclusiveRelayer(
 
   const { name, selectorFn } = getStrategy();
 
+  console.log("Selected strategy:", name);
+
   if (name === "none") {
     return { exclusiveRelayer, exclusivityPeriod };
   }
@@ -48,6 +50,8 @@ export async function selectExclusiveRelayer(
     relayerFeePct,
     tokenPriceUsd
   );
+
+  console.log("Eligible relayers:", relayers);
 
   if (relayers.length > 0) {
     exclusiveRelayer = selectorFn(relayers);
@@ -107,6 +111,9 @@ async function getEligibleRelayers(
       const outputAmountUsd = outputAmount
         .mul(tokenPriceUsd)
         .div(parseUnits("1", outputToken.decimals));
+
+      console.log("Effective balance:", effectiveBalance.toString());
+      console.log("Output amount USD:", outputAmountUsd.toString());
 
       if (effectiveBalance.lte(outputAmount)) {
         return false;

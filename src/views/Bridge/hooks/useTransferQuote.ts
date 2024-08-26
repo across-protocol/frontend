@@ -101,7 +101,7 @@ export function useTransferQuote(
           initialAmount: undefined,
           recipient: undefined,
           exclusiveRelayer: undefined,
-          exclusivityPeriod: undefined,
+          exclusivityDeadline: undefined,
         };
       }
 
@@ -143,7 +143,7 @@ export function useTransferQuote(
         initialAmount: amount,
         recipient: toAddress,
         exclusiveRelayer: feesQuery.fees.exclusiveRelayer,
-        exclusivityPeriod: feesQuery.fees.exclusivityPeriod,
+        exclusivityDeadline: feesQuery.fees.exclusivityDeadline,
       };
     },
   });

@@ -50,6 +50,6 @@ export async function suggestedFeesMockedApiCall(
       maxDepositShortDelay: parseUnits("0.5", decimals),
     },
     exclusiveRelayer: ethers.constants.AddressZero,
-    exclusivityPeriod: 0,
+    exclusivityDeadline: 0,
   };
 }

@@ -31,7 +31,7 @@ export type BridgeFees = {
   limits: BridgeLimitInterface;
   estimatedFillTimeSec: number;
   exclusiveRelayer: string;
-  exclusivityPeriod: number;
+  exclusivityDeadline: number;
 };
 
 type GetBridgeFeesArgs = {
@@ -76,7 +76,7 @@ export async function getBridgeFees({
     limits,
     estimatedFillTimeSec,
     exclusiveRelayer,
-    exclusivityPeriod,
+    exclusivityDeadline,
   } = await getApiEndpoint().suggestedFees(
     amount,
     getConfig().getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
@@ -102,7 +102,7 @@ export async function getBridgeFees({
     limits,
     estimatedFillTimeSec,
     exclusiveRelayer,
-    exclusivityPeriod,
+    exclusivityDeadline,
   };
 }
 
@@ -151,7 +151,7 @@ export type AcrossDepositV3Args = AcrossDepositArgs & {
   inputTokenAddress: string;
   outputTokenAddress: string;
   fillDeadline?: number;
-  exclusivityPeriod?: number;
+  exclusivityDeadline?: number;
   exclusiveRelayer?: string;
 };
 
@@ -225,7 +225,7 @@ export async function sendDepositV3Tx(
     inputTokenAddress,
     outputTokenAddress,
     exclusiveRelayer = ethers.constants.AddressZero,
-    exclusivityPeriod = 0,
+    exclusivityDeadline = 0,
     integratorId,
   }: AcrossDepositV3Args,
   spokePool: SpokePool,
@@ -242,13 +242,13 @@ export async function sendDepositV3Tx(
   const useExclusiveRelayer =
     !(
       exclusiveRelayer === ethers.constants.AddressZero &&
-      exclusivityPeriod === 0
+      exclusivityDeadline === 0
     ) && [690, 1135, 81457, 534352].includes(fromChain); // @todo: Upgrade SpokePools.
 
   // @todo: remove after depositV3 supports exclusivity period instead of deadline.
   if (!useExclusiveRelayer) {
     exclusiveRelayer = ethers.constants.AddressZero;
-    exclusivityPeriod = 0;
+    exclusivityDeadline = 0;
   }
 
   const depositArgs = [
@@ -262,7 +262,7 @@ export async function sendDepositV3Tx(
     exclusiveRelayer,
     quoteTimestamp,
     fillDeadline,
-    exclusivityPeriod,
+    exclusivityDeadline,
     message,
     { value },
   ] as const;
@@ -298,7 +298,7 @@ export async function sendSwapAndBridgeTx(
     outputTokenAddress,
     swapTokenAddress,
     exclusiveRelayer = ethers.constants.AddressZero,
-    exclusivityPeriod = 0,
+    exclusivityDeadline = 0,
     swapQuote,
     swapTokenAmount,
     integratorId,
@@ -375,7 +375,7 @@ export async function sendSwapAndBridgeTx(
       exclusiveRelayer,
       quoteTimestamp,
       fillDeadline,
-      exclusivityDeadline: exclusivityPeriod,
+      exclusivityDeadline,
       message,
     }
   );

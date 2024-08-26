@@ -57,7 +57,7 @@ export type SuggestedApiFeeReturnType = {
   limits: BridgeLimitInterface;
   estimatedFillTimeSec: number;
   exclusiveRelayer: string;
-  exclusivityPeriod: number;
+  exclusivityDeadline: number;
 };
 
 export type SuggestedApiFeeType = (
