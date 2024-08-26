@@ -112,7 +112,9 @@ async function getEligibleRelayers(
         return false;
       }
 
-      if (outputAmountUsd.gt(config.maxFillSize)) {
+      if (
+        outputAmountUsd.gt(ethers.utils.parseEther(String(config.maxFillSize)))
+      ) {
         return false;
       }
 
