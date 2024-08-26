@@ -40,7 +40,6 @@ export async function selectExclusiveRelayer(
     return { exclusiveRelayer, exclusivityPeriod };
   }
 
-  // @todo: Resolving the strategy _after_ the eligible relayers imposes an undesirable blocking call.
   const relayers = await getEligibleRelayers(
     originChainId,
     destinationChainId,
