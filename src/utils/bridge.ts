@@ -245,7 +245,7 @@ export async function sendDepositV3Tx(
       exclusivityPeriod === 0
     ) && [690, 1135, 81457, 534352].includes(fromChain); // @todo: Upgrade SpokePools.
 
-  // @todo: remove after upgrade spokes
+  // @todo: remove after depositV3 supports exclusivity period instead of deadline.
   if (!useExclusiveRelayer) {
     exclusiveRelayer = ethers.constants.AddressZero;
     exclusivityPeriod = 0;
