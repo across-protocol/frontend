@@ -275,10 +275,12 @@ const handler = async (
       await selectExclusiveRelayer(
         computedOriginChainId,
         destinationChainId,
-        outputToken,
+        outputToken.address,
         amount.sub(totalRelayFee),
-        BigNumber.from(relayerFeeDetails.relayFeePercent), // @todo: Subtract destination gas cost.
-        parseUnits(tokenPriceUsd.toString(), 18)
+        amountInUsd,
+        BigNumber.from(relayerFeeDetails.relayFeePercent).sub(
+          relayerFeeDetails.gasFeePercent
+        )
       );
 
     const responseJson = {
