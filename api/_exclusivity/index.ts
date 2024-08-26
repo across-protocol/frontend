@@ -16,30 +16,42 @@ const { fixedPointAdjustment: fixedPoint } = sdk.utils;
  * @param originChainId Origin chain for deposit.
  * @param destinationChainId Destination chain for fill.
  * @param outputToken Output token to be used in fill.
- * @param outputamount Output amount to be used in fill.
+ * @param outputAmount Output amount to be used in fill.
  * @param relayerFeePct Estimated relayer fee, assuming destination chain repayment.
+ * @param tokenPriceUsd Price of output token in USD.
  */
 export async function selectExclusiveRelayer(
   originChainId: number,
   destinationChainId: number,
-  outputToken: string,
+  outputToken: {
+    address: string;
+    decimals: number;
+  },
   outputAmount: BigNumber,
-  relayerFeePct: BigNumber
+  relayerFeePct: BigNumber,
+  tokenPriceUsd: BigNumber
 ): Promise<ExclusiveRelayer> {
+  let exclusiveRelayer = ZERO_ADDRESS;
+  let exclusivityPeriod = 0;
+
+  const { name, selectorFn } = getStrategy();
+
+  if (name === "none") {
+    return { exclusiveRelayer, exclusivityPeriod };
+  }
+
   // @todo: Resolving the strategy _after_ the eligible relayers imposes an undesirable blocking call.
   const relayers = await getEligibleRelayers(
     originChainId,
     destinationChainId,
     outputToken,
     outputAmount,
-    relayerFeePct
+    relayerFeePct,
+    tokenPriceUsd
   );
 
-  let exclusiveRelayer = ZERO_ADDRESS;
-  let exclusivityPeriod = 0;
-
   if (relayers.length > 0) {
-    exclusiveRelayer = getStrategy()(relayers);
+    exclusiveRelayer = selectorFn(relayers);
     exclusivityPeriod =
       exclusiveRelayer === ZERO_ADDRESS
         ? 0
@@ -56,15 +68,20 @@ export async function selectExclusiveRelayer(
  * @param originChainId Origin chain for deposit.
  * @param destinationChainId Destination chain for fill.
  * @param outputToken Output token to be used in fill.
- * @param outputamount Output amount to be used in fill.
+ * @param outputAmount Output amount to be used in fill.
  * @param relayerFeePct Estimated relayer fee, assuming destination chain repayment.
+ * @param tokenPriceUsd Price of output token in USD.
  */
 async function getEligibleRelayers(
   originChainId: number,
   destinationChainId: number,
-  outputToken: string,
+  outputToken: {
+    address: string;
+    decimals: number;
+  },
   outputAmount: BigNumber,
-  relayerFeePct: BigNumber
+  relayerFeePct: BigNumber,
+  tokenPriceUsd: BigNumber
 ): Promise<string[]> {
   // Source all relayers that have opted in for this destination chain.
   const relayers = getRelayerConfig(originChainId);
@@ -73,7 +90,7 @@ async function getEligibleRelayers(
   const { balances } = await getCachedTokenBalances(
     destinationChainId,
     relayers.map(({ address }) => address),
-    [ZERO_ADDRESS, outputToken]
+    [ZERO_ADDRESS, outputToken.address]
   );
 
   // @todo: The minimum native token balance should probably be configurable.
@@ -83,10 +100,20 @@ async function getEligibleRelayers(
       const balance = balances[relayer]; // Balances of outputToken + nativeToken.
 
       // @todo: The balance multiplier must be scaled to n decimals to avoid underflow. Precompute it?
-      const effectiveBalance = ethers.BigNumber.from(balance[outputToken])
+      const effectiveBalance = ethers.BigNumber.from(
+        balance[outputToken.address]
+      )
         .mul(parseUnits(String(config.balanceMultiplier)))
         .div(fixedPoint);
+      const outputAmountUsd = outputAmount
+        .mul(tokenPriceUsd)
+        .div(parseUnits("1", outputToken.decimals));
+
       if (effectiveBalance.lte(outputAmount)) {
+        return false;
+      }
+
+      if (outputAmountUsd.gt(config.maxFillSize)) {
         return false;
       }
 

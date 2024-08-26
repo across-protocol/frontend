@@ -275,17 +275,11 @@ const handler = async (
       await selectExclusiveRelayer(
         computedOriginChainId,
         destinationChainId,
-        outputToken.address,
+        outputToken,
         amount.sub(totalRelayFee),
-        BigNumber.from(relayerFeeDetails.relayFeePercent) // @todo: Subtract destination gas cost.
+        BigNumber.from(relayerFeeDetails.relayFeePercent), // @todo: Subtract destination gas cost.
+        parseUnits(tokenPriceUsd.toString(), 18)
       );
-
-    // @todo: This assumes an instant deposit, with 0 user delay on approval & submission.
-    // This is unrealistic and must be padded for consumers _other than_ the Across FE.
-    const exclusivityDeadline =
-      exclusivityPeriod > 0
-        ? sdk.utils.getCurrentTime() + exclusivityPeriod
-        : 0;
 
     const responseJson = {
       estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
@@ -309,7 +303,7 @@ const handler = async (
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: quoteBlockNumber.toString(),
       exclusiveRelayer,
-      exclusivityDeadline: exclusivityDeadline.toString(),
+      exclusivityPeriod,
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
       // Note: v3's new fee structure. Below are the correct values for the new fee structure. The above `*Pct` and `*Total`
       // values are for backwards compatibility which will be removed in the future.
