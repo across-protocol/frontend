@@ -41,7 +41,7 @@ export const fetchExclusiveRelayerConfigs = makeFetchRemoteConfig(
   record(
     string(),
     type({
-      minExclusivePeriod: number(),
+      minExclusivityPeriod: number(),
       minProfitThreshold: number(),
       balanceMultiplier: number(),
       maxFillSize: number(),
