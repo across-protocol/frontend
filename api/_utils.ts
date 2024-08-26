@@ -14,7 +14,7 @@ import {
 } from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
-import { BigNumber, ethers, providers, utils } from "ethers";
+import { BigNumber, ethers, providers, Signer, utils } from "ethers";
 import { StructError, define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -25,7 +25,7 @@ import {
   MINIMAL_BALANCER_V2_VAULT_ABI,
   MINIMAL_MULTICALL3_ABI,
 } from "./_abis";
-
+import { BatchAccountBalanceResponse } from "./batch-account-balance";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { VercelResponse } from "@vercel/node";
 import {
@@ -46,6 +46,7 @@ import {
   relayerFeeCapitalCostConfig,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
+import { Provider } from "utils";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -784,13 +785,10 @@ export const getBatchBalanceViaMulticall3 = async (
   const chainIdAsInt = Number(chainId);
   const provider = getProvider(chainIdAsInt);
 
-  const multicall3 = (await sdk.utils.getMulticall3(
-    chainIdAsInt,
-    provider
-  )) as Multicall3;
+  const multicall3 = getMulticall3(chainIdAsInt, provider);
 
   if (!multicall3) {
-    throw new Error("No Multicall on this chain");
+    throw new Error("No Multicall3 deployed on this chain");
   }
 
   let calls: Parameters<typeof callViaMulticall3>[1] = [];
@@ -853,6 +851,24 @@ export const getBatchBalanceViaMulticall3 = async (
   };
 };
 
+export function getMulticall3(
+  chainId: number,
+  signerOrProvider?: Signer | Provider
+): Multicall3 | undefined {
+  const address = sdk.utils.multicall3Addresses[chainId];
+
+  // no multicall on this chain
+  if (!address) {
+    return undefined;
+  }
+
+  return new ethers.Contract(
+    address,
+    MINIMAL_MULTICALL3_ABI,
+    signerOrProvider
+  ) as Multicall3;
+}
+
 /**
  * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
  * native currency will be returned.
@@ -879,6 +895,30 @@ export const getCachedTokenBalance = async (
   );
   // Return the balance
   return BigNumber.from(response.data.balance);
+};
+
+/**
+ * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
+ * native currency will be returned.
+ * @param chainId The blockchain Id to query against
+ * @param account A valid Web3 wallet address
+ * @param token The valid ERC20 token address on the given `chainId`.
+ * @returns A promise that resolves to the BigNumber of the balance
+ */
+export const getCachedTokenBalances = async (
+  chainId: string | number,
+  addresses: string[],
+  tokenAddresses: string[]
+): Promise<BatchAccountBalanceResponse> => {
+  const response = await axios.get<BatchAccountBalanceResponse>(
+    `${resolveVercelEndpoint()}/api/batch-account-balance?${buildSearchParams({
+      chainId,
+      addresses,
+      tokenAddresses,
+    })}`
+  );
+
+  return response.data;
 };
 
 /**
@@ -1643,4 +1683,40 @@ export function getChainInputTokenMaxDepositInUsd(
     ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
     : undefined;
   return maxDeposits[chainId.toString()]?.[symbol] || defaultValue;
+}
+
+/**
+ * Builds a URL search string from an object of query parameters.
+ *
+ * @param params - An object where keys are query parameter names and values are either a string or an array of strings representing the parameter values.
+ *
+ * @returns queryString - A properly formatted query string for use in URLs, (without the leading '?').
+ *
+ * @example
+ * ```typescript
+ * const params = {
+ *   age: 45, // numbers will be converted to strings
+ *   foos: ["foo1", "foo1"],
+ *   bars: ["bar1", "bar2", "bar3"],
+ * };
+ *
+ * const queryString = buildSearchParams(params);
+ * console.log(queryString); // "search=test&filter=price&filter=rating&sort=asc"
+ * const res = await axios.get(`${base_url}?${queryString}`)
+ * ```
+ */
+
+export function buildSearchParams(
+  params: Record<string, number | string | Array<number | string>>
+): string {
+  const searchParams = new URLSearchParams();
+  for (const key in params) {
+    const value = params[key];
+    if (Array.isArray(value)) {
+      value.forEach((val) => searchParams.append(key, String(val)));
+    } else {
+      searchParams.append(key, String(value));
+    }
+  }
+  return searchParams.toString();
 }

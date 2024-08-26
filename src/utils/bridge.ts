@@ -30,6 +30,8 @@ export type BridgeFees = {
   quoteBlock: ethers.BigNumber;
   limits: BridgeLimitInterface;
   estimatedFillTimeSec: number;
+  exclusiveRelayer: string;
+  exclusivityDeadline: number;
 };
 
 type GetBridgeFeesArgs = {
@@ -73,6 +75,8 @@ export async function getBridgeFees({
     lpFee,
     limits,
     estimatedFillTimeSec,
+    exclusiveRelayer,
+    exclusivityDeadline,
   } = await getApiEndpoint().suggestedFees(
     amount,
     getConfig().getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
@@ -97,6 +101,8 @@ export async function getBridgeFees({
     quoteLatency,
     limits,
     estimatedFillTimeSec,
+    exclusiveRelayer,
+    exclusivityDeadline,
   };
 }
 
@@ -233,10 +239,15 @@ export async function sendDepositV3Tx(
   fillDeadline ??=
     getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
-  const useExclusiveRelayer = !(
-    exclusiveRelayer === ethers.constants.AddressZero &&
-    exclusivityDeadline === 0
-  );
+  const useExclusiveRelayer =
+    !(
+      exclusiveRelayer === ethers.constants.AddressZero &&
+      exclusivityDeadline === 0
+    ) && [690, 1135, 81457, 534352].includes(fromChain); // @todo: Upgrade SpokePools.
+
+  exclusivityDeadline = useExclusiveRelayer
+    ? Math.max(5, exclusivityDeadline - getCurrentTime())
+    : Math.max(getCurrentTime() + 30, exclusivityDeadline);
 
   const depositArgs = [
     await signer.getAddress(),
