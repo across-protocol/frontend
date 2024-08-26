@@ -510,7 +510,7 @@ components:
             will be disabled. This value is returned in cases where using an
             exclusive relayer is not recommended.
           example: "0x428AB2BA90Eba0a4Be7aF34C9Ac451ab061AC010"
-        exclusivityDeadline:
+        exclusivityPeriod:
           type: string
           description: >
             The suggested exclusivity period (in seconds) the exclusive relayer should be given
