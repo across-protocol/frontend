@@ -15,7 +15,7 @@ const fillTimeOverrides: {
   };
 } = {};
 
-const shortDelayTimeOverrides: {
+const rebalanceTimeOverrides: {
   [dstId: string]: number;
 } = {
   [CHAIN_IDs.POLYGON]: 1800, // 30 minutes
@@ -86,6 +86,6 @@ export function resolveTiming(
   );
 }
 
-export function resolveTimingShortDelay(destinationChainId: string): number {
-  return shortDelayTimeOverrides[destinationChainId] ?? 900; // 15 minutes
+export function resolveRebalanceTiming(destinationChainId: string): number {
+  return rebalanceTimeOverrides[destinationChainId] ?? 900; // 15 minutes
 }

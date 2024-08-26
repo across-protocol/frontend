@@ -28,7 +28,7 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
 } from "./_utils";
-import { resolveTiming, resolveTimingShortDelay } from "./_timings";
+import { resolveTiming, resolveRebalanceTiming } from "./_timings";
 import { parseUnits } from "ethers/lib/utils";
 
 const SuggestedFeesQueryParamsSchema = type({
@@ -269,7 +269,7 @@ const handler = async (
 
     const responseJson = {
       estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
-        ? resolveTimingShortDelay(String(destinationChainId))
+        ? resolveRebalanceTiming(String(destinationChainId))
         : resolveTiming(
             String(computedOriginChainId),
             String(destinationChainId),
