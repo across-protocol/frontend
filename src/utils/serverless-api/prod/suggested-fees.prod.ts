@@ -57,6 +57,9 @@ export async function suggestedFeesApiCall(
 
   const estimatedFillTimeSec = result["estimatedFillTimeSec"];
 
+  const exclusiveRelayer = result["exclusiveRelayer"];
+  const exclusivityDeadline = Number(result["exclusivityDeadline"]);
+
   return {
     totalRelayFee: {
       pct: totalRelayFeePct,
@@ -84,5 +87,7 @@ export async function suggestedFeesApiCall(
       minDeposit,
     },
     estimatedFillTimeSec,
+    exclusiveRelayer,
+    exclusivityDeadline,
   };
 }
