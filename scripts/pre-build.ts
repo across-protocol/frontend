@@ -12,6 +12,7 @@ import {
   getBqReaderRemoteBaseUrl,
   remoteConfigTypes,
   getAcrossConfigsRemoteBaseUrl,
+  getRelayerConfigsRemoteBaseUrl,
 } from "./remote-configs/utils";
 
 dotenv.config({
@@ -40,7 +41,7 @@ const remoteConfigs = {
   [remoteConfigTypes.EXCLUSIVE_RELAYERS]: {
     fetchFn: () =>
       fetchExclusiveRelayerConfigs(
-        "https://raw.githubusercontent.com/across-protocol/exclusive-relayer-configs",
+        getRelayerConfigsRemoteBaseUrl(),
         "build/exclusive-relayer-configs.json",
         getRemoteConfigCommitHash(remoteConfigTypes.EXCLUSIVE_RELAYERS)
       ),

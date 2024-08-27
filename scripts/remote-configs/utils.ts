@@ -128,14 +128,37 @@ async function fetchRemoteConfigAndValidate<T>(
   return data as Infer<typeof schema>;
 }
 
+export function getRemoteConfigBaseUrl(
+  envSuffix: string,
+  defaultBaseUrl: string
+) {
+  return (
+    process.env[`REMOTE_CONFIG_BASE_URL_${envSuffix.toUpperCase()}`] ??
+    defaultBaseUrl
+  );
+}
+
 export function getRemoteConfigCommitHash(config: RemoteConfig) {
   return process.env[`REMOTE_CONFIG_COMMIT_HASH_${config}`] ?? "master";
 }
 
+export function getRelayerConfigsRemoteBaseUrl() {
+  return getRemoteConfigBaseUrl(
+    "RELAYER_CONFIGS",
+    "https://raw.githubusercontent.com/across-protocol/exclusive-relayer-configs"
+  );
+}
+
 export function getBqReaderRemoteBaseUrl() {
-  return `https://raw.githubusercontent.com/UMAprotocol/across-bq-reader`;
+  return getRemoteConfigBaseUrl(
+    "BQ_READER",
+    "https://raw.githubusercontent.com/UMAprotocol/across-bq-reader"
+  );
 }
 
 export function getAcrossConfigsRemoteBaseUrl() {
-  return `https://raw.githubusercontent.com/UMAprotocol/across-configs`;
+  return getRemoteConfigBaseUrl(
+    "ACROSS_CONFIGS",
+    "https://raw.githubusercontent.com/UMAprotocol/across-configs"
+  );
 }

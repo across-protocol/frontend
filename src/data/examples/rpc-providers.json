@@ -7,7 +7,7 @@
       "public": {
         "1": "https://mainnet.gateway.tenderly.co",
         "10": "https://mainnet.optimism.io",
-        "137": "https://rpc.ankr.com/polygon",
+        "137": "https://polygon-mainnet.g.alchemy.com/v2/demo",
         "324": "https://mainnet.era.zksync.io",
         "690": "https://rpc.redstonechain.com",
         "8453": "https://mainnet.base.org",
