@@ -28,8 +28,8 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
 } from "./_utils";
-import { resolveTiming } from "./_timings";
 import { selectExclusiveRelayer } from "./_exclusivity";
+import { resolveTiming, resolveRebalanceTiming } from "./_timings";
 import { parseUnits } from "ethers/lib/utils";
 
 const { BigNumber } = ethers;
@@ -298,7 +298,14 @@ const handler = async (
         : 0;
 
     const responseJson = {
-      estimatedFillTimeSec,
+      estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
+        ? resolveRebalanceTiming(String(destinationChainId))
+        : resolveTiming(
+            String(computedOriginChainId),
+            String(destinationChainId),
+            inputToken.symbol,
+            amountInUsd
+          ),
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
