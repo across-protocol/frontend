@@ -53,6 +53,11 @@ const sidebarAboutLinks = [
     link: "https://forum.across.to/",
     isExternalLink: true,
   },
+  {
+    title: "Terms of Service",
+    link: "https://across.to/terms-of-service",
+    isExternalLink: true,
+  },
 ];
 
 export default function useSidebar(openSidebar: boolean) {
