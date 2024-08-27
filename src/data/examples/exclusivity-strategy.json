@@ -4,7 +4,7 @@
     "USDT": {
       "default": "none",
       "destinationChains": {
-        "690": "none"
+        "137": "weightedRandom"
       }
     }
   }
