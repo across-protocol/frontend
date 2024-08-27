@@ -28,7 +28,7 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
 } from "./_utils";
-import { selectExclusiveRelayer, getExclusivityDeadline } from "./_exclusivity";
+import { selectExclusiveRelayer } from "./_exclusivity";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
 import { parseUnits } from "ethers/lib/utils";
 
@@ -274,7 +274,7 @@ const handler = async (
     ).add(lpFeePct);
 
     const estimatedFillTimeSec = amount.gte(limits.maxDepositInstant)
-      ? 15 * 60 // hardcoded 15 minutes for large deposits
+      ? resolveRebalanceTiming(String(destinationChainId))
       : resolveTiming(
           String(computedOriginChainId),
           String(destinationChainId),
@@ -286,7 +286,7 @@ const handler = async (
       await selectExclusiveRelayer(
         computedOriginChainId,
         destinationChainId,
-        outputToken.address,
+        outputToken,
         amount.sub(totalRelayFee),
         amountInUsd,
         BigNumber.from(relayerFeeDetails.capitalFeePercent),
@@ -296,14 +296,7 @@ const handler = async (
       depositMethod === "depositExclusive" ? exclusivityPeriod : 0;
 
     const responseJson = {
-      estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
-        ? resolveRebalanceTiming(String(destinationChainId))
-        : resolveTiming(
-            String(computedOriginChainId),
-            String(destinationChainId),
-            inputToken.symbol,
-            amountInUsd
-          ),
+      estimatedFillTimeSec,
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,

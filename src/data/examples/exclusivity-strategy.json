@@ -1,0 +1,11 @@
+{
+  "default": "none",
+  "tokens": {
+    "USDT": {
+      "default": "none",
+      "destinationChains": {
+        "690": "none"
+      }
+    }
+  }
+}
