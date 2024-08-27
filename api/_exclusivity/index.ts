@@ -9,25 +9,6 @@ const { parseUnits } = ethers.utils;
 const { ZERO_ADDRESS } = sdk.constants;
 const { fixedPointAdjustment: fixedPoint } = sdk.utils;
 
-export function getExclusivityDeadline(
-  exclusivityPeriod: number,
-  exclusiveRelayer: string,
-  depositMethod: string
-) {
-  const useExclusiveRelayer =
-    exclusivityPeriod > 0 && exclusiveRelayer !== ZERO_ADDRESS;
-
-  if (!useExclusiveRelayer) {
-    return 0;
-  }
-
-  // NOTE: Currently, our SpokePool contracts either require a relative deadline (i.e. period) or
-  // an absolute deadline (i.e. timestamp) depending on the deposit method that will be called.
-  return depositMethod === "depositExclusive"
-    ? exclusivityPeriod
-    : sdk.utils.getCurrentTime() + exclusivityPeriod;
-}
-
 /**
  * Select a specific relayer exclusivity strategy to apply.
  * This currently hardcodes the "none" strategy, but will be updated to support additional strategies

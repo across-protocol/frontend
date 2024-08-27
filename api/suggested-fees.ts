@@ -28,7 +28,7 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
 } from "./_utils";
-import { selectExclusiveRelayer, getExclusivityDeadline } from "./_exclusivity";
+import { selectExclusiveRelayer } from "./_exclusivity";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
 import { parseUnits } from "ethers/lib/utils";
 
