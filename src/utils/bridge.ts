@@ -240,20 +240,8 @@ export async function sendDepositV3Tx(
     getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
   const useExclusiveRelayer =
-    !(
-      exclusiveRelayer === ethers.constants.AddressZero &&
-      exclusivityDeadline === 0
-    ) &&
-    // @todo: remove this when all other SpokePools are redeployed to support `depositExclusive`.
-    [690, 1135, 81457, 534352].includes(fromChain);
-
-  // @todo: remove this when all other SpokePools are redeployed to support `depositExclusive`.
-  // If we request a quote where exclusivity is enabled, but the SpokePool does not support
-  // `depositExclusive`, we should not use exclusivity.
-  if (!useExclusiveRelayer) {
-    exclusiveRelayer = ethers.constants.AddressZero;
-    exclusivityDeadline = 0;
-  }
+    exclusiveRelayer !== ethers.constants.AddressZero &&
+    exclusivityDeadline > 0;
 
   const depositArgs = [
     await signer.getAddress(),

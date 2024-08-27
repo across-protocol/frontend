@@ -289,16 +289,11 @@ const handler = async (
         outputToken.address,
         amount.sub(totalRelayFee),
         amountInUsd,
-        BigNumber.from(relayerFeeDetails.relayFeePercent).sub(
-          relayerFeeDetails.gasFeePercent
-        ),
+        BigNumber.from(relayerFeeDetails.capitalFeePercent),
         estimatedFillTimeSec
       );
-    const exclusivityDeadline = getExclusivityDeadline(
-      exclusivityPeriod,
-      exclusiveRelayer,
-      depositMethod
-    );
+    const exclusivityDeadline =
+      depositMethod === "depositExclusive" ? exclusivityPeriod : 0;
 
     const responseJson = {
       estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
