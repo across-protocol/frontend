@@ -28,6 +28,7 @@ export async function suggestedFeesApiCall(
       recipient: recipientAddress,
       amount: amount.toString(),
       skipAmountLimit: true,
+      depositMethod: "depositExclusive",
     },
   });
   const result = response.data;

@@ -1,7 +1,7 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { type, assert, Infer, optional, string } from "superstruct";
+import { type, assert, Infer, optional, string, enums } from "superstruct";
 import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   DEFAULT_QUOTE_BLOCK_BUFFER,
@@ -29,7 +29,7 @@ import {
   getCachedLimits,
 } from "./_utils";
 import { resolveTiming } from "./_timings";
-import { selectExclusiveRelayer } from "./_exclusivity";
+import { selectExclusiveRelayer, getExclusivityDeadline } from "./_exclusivity";
 import { parseUnits } from "ethers/lib/utils";
 
 const { BigNumber } = ethers;
@@ -46,6 +46,7 @@ const SuggestedFeesQueryParamsSchema = type({
   message: optional(string()),
   recipient: optional(validAddress()),
   relayer: optional(validAddress()),
+  depositMethod: optional(enums(["depositV3", "depositExclusive"])),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
@@ -75,6 +76,7 @@ const handler = async (
       recipient,
       relayer,
       message,
+      depositMethod = "depositV3",
     } = query;
 
     const {
@@ -289,10 +291,14 @@ const handler = async (
         amountInUsd,
         BigNumber.from(relayerFeeDetails.relayFeePercent).sub(
           relayerFeeDetails.gasFeePercent
-        )
-        BigNumber.from(relayerFeeDetails.relayFeePercent), // @todo: Subtract destination gas cost.
+        ),
         estimatedFillTimeSec
       );
+    const exclusivityDeadline = getExclusivityDeadline(
+      exclusivityPeriod,
+      exclusiveRelayer,
+      depositMethod
+    );
 
     const responseJson = {
       estimatedFillTimeSec,
@@ -309,7 +315,7 @@ const handler = async (
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: quoteBlockNumber.toString(),
       exclusiveRelayer,
-      exclusivityDeadline: exclusivityPeriod,
+      exclusivityDeadline,
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
       // Note: v3's new fee structure. Below are the correct values for the new fee structure. The above `*Pct` and `*Total`
       // values are for backwards compatibility which will be removed in the future.
