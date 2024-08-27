@@ -1,7 +1,7 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { type, assert, Infer, optional, string } from "superstruct";
+import { type, assert, Infer, optional, string, enums } from "superstruct";
 import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   DEFAULT_QUOTE_BLOCK_BUFFER,
@@ -28,7 +28,7 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
 } from "./_utils";
-import { selectExclusiveRelayer } from "./_exclusivity";
+import { selectExclusiveRelayer, getExclusivityDeadline } from "./_exclusivity";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
 import { parseUnits } from "ethers/lib/utils";
 
@@ -46,6 +46,7 @@ const SuggestedFeesQueryParamsSchema = type({
   message: optional(string()),
   recipient: optional(validAddress()),
   relayer: optional(validAddress()),
+  depositMethod: optional(enums(["depositV3", "depositExclusive"])),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
@@ -75,6 +76,7 @@ const handler = async (
       recipient,
       relayer,
       message,
+      depositMethod = "depositV3",
     } = query;
 
     const {
@@ -286,16 +288,12 @@ const handler = async (
         destinationChainId,
         outputToken.address,
         amount.sub(totalRelayFee),
-        BigNumber.from(relayerFeeDetails.relayFeePercent), // @todo: Subtract destination gas cost.
+        amountInUsd,
+        BigNumber.from(relayerFeeDetails.capitalFeePercent),
         estimatedFillTimeSec
       );
-
-    // @todo: This assumes an instant deposit, with 0 user delay on approval & submission.
-    // This is unrealistic and must be padded for consumers _other than_ the Across FE.
     const exclusivityDeadline =
-      exclusivityPeriod > 0
-        ? sdk.utils.getCurrentTime() + exclusivityPeriod
-        : 0;
+      depositMethod === "depositExclusive" ? exclusivityPeriod : 0;
 
     const responseJson = {
       estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
@@ -319,7 +317,7 @@ const handler = async (
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: quoteBlockNumber.toString(),
       exclusiveRelayer,
-      exclusivityDeadline: exclusivityDeadline.toString(),
+      exclusivityDeadline,
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
       // Note: v3's new fee structure. Below are the correct values for the new fee structure. The above `*Pct` and `*Total`
       // values are for backwards compatibility which will be removed in the future.

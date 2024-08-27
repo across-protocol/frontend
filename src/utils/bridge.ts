@@ -240,14 +240,8 @@ export async function sendDepositV3Tx(
     getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
   const useExclusiveRelayer =
-    !(
-      exclusiveRelayer === ethers.constants.AddressZero &&
-      exclusivityDeadline === 0
-    ) && [690, 1135, 81457, 534352].includes(fromChain); // @todo: Upgrade SpokePools.
-
-  exclusivityDeadline = useExclusiveRelayer
-    ? Math.max(5, exclusivityDeadline - getCurrentTime())
-    : Math.max(getCurrentTime() + 30, exclusivityDeadline);
+    exclusiveRelayer !== ethers.constants.AddressZero &&
+    exclusivityDeadline > 0;
 
   const depositArgs = [
     await signer.getAddress(),

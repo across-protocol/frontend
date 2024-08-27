@@ -46,7 +46,6 @@ import {
   relayerFeeCapitalCostConfig,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
-import { Provider } from "utils";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 
@@ -853,7 +852,7 @@ export const getBatchBalanceViaMulticall3 = async (
 
 export function getMulticall3(
   chainId: number,
-  signerOrProvider?: Signer | Provider
+  signerOrProvider?: Signer | providers.Provider
 ): Multicall3 | undefined {
   const address = sdk.utils.multicall3Addresses[chainId];
 

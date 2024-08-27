@@ -12,6 +12,7 @@ const EXCLUSIVITY_STRATEGIES = {
   none,
   randomWeighted,
 } as const;
+type ExclusivityStrategy = keyof typeof EXCLUSIVITY_STRATEGIES;
 
 /**
  * Select a specific relayer exclusivity strategy to apply.
@@ -19,10 +20,26 @@ const EXCLUSIVITY_STRATEGIES = {
  * and selection from on env-based configuration.
  * @returns A handler function that will narrow an array of relayers to a single address.
  */
-export function getStrategy(): RelayerSelector {
-  // @todo: Determine strategy based on configuration.
-  const defaultStrategy = "randomWeighted";
-  return EXCLUSIVITY_STRATEGIES[defaultStrategy];
+export function getStrategy(): { name: string; selectorFn: RelayerSelector } {
+  // @todo: use weights from global config
+  const weights: Record<ExclusivityStrategy, number> = {
+    none: 0,
+    randomWeighted: 1,
+  };
+  const keys = Object.keys(weights) as ExclusivityStrategy[];
+  const cumulativeWeights = Object.values(weights).map((_, index) =>
+    Object.values(weights)
+      .slice(0, index + 1)
+      .reduce((sum, w) => sum + w, 0)
+  );
+  const randomNumber = Math.random();
+  const strategyIndex = cumulativeWeights.findIndex((w) => randomNumber < w);
+  const strategyKey = keys[strategyIndex];
+
+  return {
+    name: strategyKey,
+    selectorFn: EXCLUSIVITY_STRATEGIES[strategyKey],
+  };
 }
 
 /**

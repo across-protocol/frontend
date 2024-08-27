@@ -9,6 +9,25 @@ const { parseUnits } = ethers.utils;
 const { ZERO_ADDRESS } = sdk.constants;
 const { fixedPointAdjustment: fixedPoint } = sdk.utils;
 
+export function getExclusivityDeadline(
+  exclusivityPeriod: number,
+  exclusiveRelayer: string,
+  depositMethod: string
+) {
+  const useExclusiveRelayer =
+    exclusivityPeriod > 0 && exclusiveRelayer !== ZERO_ADDRESS;
+
+  if (!useExclusiveRelayer) {
+    return 0;
+  }
+
+  // NOTE: Currently, our SpokePool contracts either require a relative deadline (i.e. period) or
+  // an absolute deadline (i.e. timestamp) depending on the deposit method that will be called.
+  return depositMethod === "depositExclusive"
+    ? exclusivityPeriod
+    : sdk.utils.getCurrentTime() + exclusivityPeriod;
+}
+
 /**
  * Select a specific relayer exclusivity strategy to apply.
  * This currently hardcodes the "none" strategy, but will be updated to support additional strategies
@@ -16,33 +35,47 @@ const { fixedPointAdjustment: fixedPoint } = sdk.utils;
  * @param originChainId Origin chain for deposit.
  * @param destinationChainId Destination chain for fill.
  * @param outputToken Output token to be used in fill.
- * @param outputamount Output amount to be used in fill.
+ * @param outputAmount Output amount to be used in fill.
+ * @param outputAmountUsd Output amount in USD.
  * @param relayerFeePct Estimated relayer fee, assuming destination chain repayment.
+ * @param estimatedFillTimeSec Estimated time to fill the transfer.
  */
 export async function selectExclusiveRelayer(
   originChainId: number,
   destinationChainId: number,
   outputToken: string,
   outputAmount: BigNumber,
+  outputAmountUsd: BigNumber,
   relayerFeePct: BigNumber,
   estimatedFillTimeSec: number
 ): Promise<ExclusiveRelayer> {
+  let exclusiveRelayer = ZERO_ADDRESS;
+  let exclusivityPeriod = 0;
+
+  const { name, selectorFn } = getStrategy();
+
+  if (name === "none") {
+    return { exclusiveRelayer, exclusivityPeriod };
+  }
+
+  // @todo: remove this when all other SpokePools are redeployed to support `depositExclusive`.
+  if (![690, 1135, 81457, 534352].includes(originChainId)) {
+    return { exclusiveRelayer, exclusivityPeriod };
+  }
+
   const exclusivityPeriodSec = getExclusivityPeriod(estimatedFillTimeSec);
-  // @todo: Resolving the strategy _after_ the eligible relayers imposes an undesirable blocking call.
   const relayers = await getEligibleRelayers(
     originChainId,
     destinationChainId,
     outputToken,
     outputAmount,
+    outputAmountUsd,
     relayerFeePct,
     exclusivityPeriodSec
   );
 
-  let exclusiveRelayer = ZERO_ADDRESS;
-  let exclusivityPeriod = 0;
-
   if (relayers.length > 0) {
-    exclusiveRelayer = getStrategy()(relayers);
+    exclusiveRelayer = selectorFn(relayers);
     exclusivityPeriod =
       exclusiveRelayer === ZERO_ADDRESS ? 0 : exclusivityPeriodSec;
   }
@@ -57,14 +90,17 @@ export async function selectExclusiveRelayer(
  * @param originChainId Origin chain for deposit.
  * @param destinationChainId Destination chain for fill.
  * @param outputToken Output token to be used in fill.
- * @param outputamount Output amount to be used in fill.
+ * @param outputAmount Output amount to be used in fill.
+ * @param outputAmountUsd Output amount in USD.
  * @param relayerFeePct Estimated relayer fee, assuming destination chain repayment.
+ * @param exclusivityPeriodSec Exclusivity period for the transfer.
  */
 async function getEligibleRelayers(
   originChainId: number,
   destinationChainId: number,
   outputToken: string,
   outputAmount: BigNumber,
+  outputAmountUsd: BigNumber,
   relayerFeePct: BigNumber,
   exclusivityPeriodSec: number
 ): Promise<string[]> {
@@ -92,7 +128,14 @@ async function getEligibleRelayers(
       if (exclusivityPeriodSec < config.minExclusivityPeriod) {
         return false;
       }
+
       if (effectiveBalance.lte(outputAmount)) {
+        return false;
+      }
+
+      if (
+        outputAmountUsd.gt(ethers.utils.parseEther(String(config.maxFillSize)))
+      ) {
         return false;
       }
 
@@ -107,9 +150,6 @@ async function getEligibleRelayers(
       return true;
     })
     .map(({ address }) => address);
-
-  // Filter relayers by:
-  // - those whose configured minimum exclusivity is within the configured maximum permitted exclusivity.
 
   return candidateRelayers;
 }
