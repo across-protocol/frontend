@@ -117,11 +117,11 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
     claimableTooltipBody:
       "OP rewards earned during the month can be claimed at the end of the following month.",
     enabledChains: [
+      ChainId.ZORA,
+      ChainId.REDSTONE,
       ChainId.OPTIMISM,
       ChainId.MODE,
       ChainId.BASE,
-      ChainId.ZORA,
-      ChainId.REDSTONE,
     ],
   },
   "arb-rebates": {
