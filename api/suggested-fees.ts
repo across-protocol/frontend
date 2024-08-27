@@ -271,6 +271,15 @@ const handler = async (
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
 
+    const estimatedFillTimeSec = amount.gte(limits.maxDepositInstant)
+      ? 15 * 60 // hardcoded 15 minutes for large deposits
+      : resolveTiming(
+          String(computedOriginChainId),
+          String(destinationChainId),
+          inputToken.symbol,
+          amountInUsd
+        );
+
     const { exclusiveRelayer, exclusivityPeriod } =
       await selectExclusiveRelayer(
         computedOriginChainId,
@@ -281,17 +290,12 @@ const handler = async (
         BigNumber.from(relayerFeeDetails.relayFeePercent).sub(
           relayerFeeDetails.gasFeePercent
         )
+        BigNumber.from(relayerFeeDetails.relayFeePercent), // @todo: Subtract destination gas cost.
+        estimatedFillTimeSec
       );
 
     const responseJson = {
-      estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
-        ? 15 * 60 // hardcoded 15 minutes for large deposits
-        : resolveTiming(
-            String(computedOriginChainId),
-            String(destinationChainId),
-            inputToken.symbol,
-            amountInUsd
-          ),
+      estimatedFillTimeSec,
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,

@@ -27,7 +27,8 @@ export async function selectExclusiveRelayer(
   outputToken: string,
   outputAmount: BigNumber,
   outputAmountUsd: BigNumber,
-  relayerFeePct: BigNumber
+  relayerFeePct: BigNumber,
+  estimatedFillTimeSec: number
 ): Promise<ExclusiveRelayer> {
   let exclusiveRelayer = ZERO_ADDRESS;
   let exclusivityPeriod = 0;
@@ -37,22 +38,22 @@ export async function selectExclusiveRelayer(
   if (name === "none") {
     return { exclusiveRelayer, exclusivityPeriod };
   }
-
+  
+  const exclusivityPeriodSec = getExclusivityPeriod(estimatedFillTimeSec);
   const relayers = await getEligibleRelayers(
     originChainId,
     destinationChainId,
     outputToken,
     outputAmount,
     outputAmountUsd,
-    relayerFeePct
+    relayerFeePct,
+    exclusivityPeriodSec
   );
 
   if (relayers.length > 0) {
     exclusiveRelayer = selectorFn(relayers);
     exclusivityPeriod =
-      exclusiveRelayer === ZERO_ADDRESS
-        ? 0
-        : getExclusivityPeriod(originChainId, destinationChainId);
+      exclusiveRelayer === ZERO_ADDRESS ? 0 : exclusivityPeriodSec;
   }
 
   return { exclusiveRelayer, exclusivityPeriod };
@@ -75,7 +76,8 @@ async function getEligibleRelayers(
   outputToken: string,
   outputAmount: BigNumber,
   outputAmountUsd: BigNumber,
-  relayerFeePct: BigNumber
+  relayerFeePct: BigNumber,
+  exclusivityPeriodSec: number
 ): Promise<string[]> {
   // Source all relayers that have opted in for this destination chain.
   const relayers = getRelayerConfig(originChainId);
@@ -97,6 +99,10 @@ async function getEligibleRelayers(
       const effectiveBalance = ethers.BigNumber.from(balance[outputToken])
         .mul(parseUnits(String(config.balanceMultiplier)))
         .div(fixedPoint);
+
+      if (exclusivityPeriodSec < config.minExclusivityPeriod) {
+        return false;
+      }
 
       if (effectiveBalance.lte(outputAmount)) {
         return false;
