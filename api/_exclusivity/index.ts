@@ -38,7 +38,7 @@ export function getExclusivityDeadline(
  * @param outputAmount Output amount to be used in fill.
  * @param outputAmountUsd Output amount in USD.
  * @param relayerFeePct Estimated relayer fee, assuming destination chain repayment.
- * @param tokenPriceUsd Price of output token in USD.
+ * @param estimatedFillTimeSec Estimated time to fill the transfer.
  */
 export async function selectExclusiveRelayer(
   originChainId: number,
@@ -88,6 +88,7 @@ export async function selectExclusiveRelayer(
  * @param outputAmount Output amount to be used in fill.
  * @param outputAmountUsd Output amount in USD.
  * @param relayerFeePct Estimated relayer fee, assuming destination chain repayment.
+ * @param exclusivityPeriodSec Exclusivity period for the transfer.
  */
 async function getEligibleRelayers(
   originChainId: number,
@@ -144,9 +145,6 @@ async function getEligibleRelayers(
       return true;
     })
     .map(({ address }) => address);
-
-  // Filter relayers by:
-  // - those whose configured minimum exclusivity is within the configured maximum permitted exclusivity.
 
   return candidateRelayers;
 }
