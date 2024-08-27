@@ -1,0 +1,23 @@
+{
+  "providers": {
+    "enabled": {
+      "default": ["public"]
+    },
+    "urls": {
+      "public": {
+        "1": "https://mainnet.gateway.tenderly.co",
+        "10": "https://mainnet.optimism.io",
+        "137": "https://rpc.ankr.com/polygon",
+        "324": "https://mainnet.era.zksync.io",
+        "690": "https://rpc.redstonechain.com",
+        "8453": "https://mainnet.base.org",
+        "34443": "https://mainnet.mode.network",
+        "42161": "https://arb1.arbitrum.io/rpc",
+        "59144": "https://rpc.linea.build",
+        "81457": "https://rpc.blast.io",
+        "534352": "https://rpc.scroll.io",
+        "7777777": "https://rpc.zora.energy"
+      }
+    }
+  }
+}

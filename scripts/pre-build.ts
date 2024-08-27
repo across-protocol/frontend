@@ -3,6 +3,7 @@ import { writeFileSync } from "fs";
 import dotenv from "dotenv";
 
 import {
+  fetchRpcProviderConfigs,
   fetchExclusiveRelayerConfigs,
   fetchFillTimes,
   fetchExclusiveRelayersDynamicWeights,
@@ -10,6 +11,7 @@ import {
   getRemoteConfigCommitHash,
   getBqReaderRemoteBaseUrl,
   remoteConfigTypes,
+  getAcrossConfigsRemoteBaseUrl,
 } from "./remote-configs/utils";
 
 dotenv.config({
@@ -17,6 +19,15 @@ dotenv.config({
 });
 
 const remoteConfigs = {
+  [remoteConfigTypes.RPC_PROVIDERS]: {
+    fetchFn: () =>
+      fetchRpcProviderConfigs(
+        getAcrossConfigsRemoteBaseUrl(),
+        "packages/quotes-api-config/config.json",
+        getRemoteConfigCommitHash(remoteConfigTypes.RPC_PROVIDERS)
+      ),
+    localFilePath: "src/data/rpc-providers.json",
+  },
   [remoteConfigTypes.FILL_TIMES]: {
     fetchFn: () =>
       fetchFillTimes(
