@@ -54,7 +54,7 @@
     "start": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite",
     "dev": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && vite --port $PORT --host",
     "build": "yarn prebuild && export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && tsc && vite build",
-    "prebuild": "tsx scripts/pre-build.ts && yarn lint:fix && yarn format:fix",
+    "prebuild": "tsx scripts/pre-build.ts",
     "analyze": "yarn build && rollup-plugin-visualizer --open ./bundle-size-analysis.json",
     "test": "export REACT_APP_GIT_COMMIT_HASH=$(git rev-parse HEAD) && jest --env jsdom src",
     "serve": "vite preview --port 3000",
