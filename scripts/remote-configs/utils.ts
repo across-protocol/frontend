@@ -13,12 +13,14 @@ import {
 import fillTimesFallbackData from "../../src/data/examples/fill-times.json";
 import dynamicWeightsFallbackData from "../../src/data/examples/dynamic-weights.json";
 import fixedWeightsFallbackData from "../../src/data/examples/fixed-weights.json";
+import exclusivityStrategyFallbackData from "../../src/data/examples/exclusivity-strategy.json";
 
 export const remoteConfigTypes = {
   FILL_TIMES: "FILL_TIMES",
   EXCLUSIVE_RELAYERS: "EXCLUSIVE_RELAYERS",
   EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS: "EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS",
   EXCLUSIVE_RELAYERS_FIXED_WEIGHTS: "EXCLUSIVE_RELAYER_WEIGHTS",
+  EXCLUSIVITY_STRATEGY: "EXCLUSIVITY_STRATEGY",
 } as const;
 
 export type RemoteConfig =
@@ -57,6 +59,20 @@ export const fetchExclusiveRelayersDynamicWeights = makeFetchRemoteConfig(
 export const fetchExclusiveRelayersFixedWeights = makeFetchRemoteConfig(
   record(string(), number()),
   fixedWeightsFallbackData
+);
+
+export const fetchExclusivityConfig = makeFetchRemoteConfig(
+  type({
+    default: string(),
+    tokens: record(
+      string(),
+      type({
+        default: string(),
+        destinationChains: record(string(), string()),
+      })
+    ),
+  }),
+  exclusivityStrategyFallbackData
 );
 
 function makeFetchRemoteConfig<T>(schema: Struct<T>, fallbackData?: T) {
