@@ -1,7 +1,7 @@
 {
   "default": "none",
   "tokens": {
-    "USDT": {
+    "WETH": {
       "default": "none",
       "destinationChains": {
         "137": "weightedRandom"
