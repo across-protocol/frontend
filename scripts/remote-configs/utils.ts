@@ -7,6 +7,8 @@ import {
   record,
   string,
   type,
+  union,
+  optional,
 } from "superstruct";
 
 // Fallback data for remote configs in private repos or local development
@@ -68,7 +70,18 @@ export const fetchExclusivityConfig = makeFetchRemoteConfig(
       string(),
       type({
         default: string(),
-        destinationChains: record(string(), string()),
+        destinationChains: optional(
+          record(
+            string(),
+            union([
+              string(),
+              type({
+                strategy: string(),
+                weight: number(),
+              }),
+            ])
+          )
+        ),
       })
     ),
   }),

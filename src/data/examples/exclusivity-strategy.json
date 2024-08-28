@@ -4,13 +4,13 @@
     "WETH": {
       "default": "none",
       "destinationChains": {
-        "137": "weightedRandom"
+        "137": { "strategy": "weightedRandom", "weight": 0.05 }
       }
     },
     "ETH": {
       "default": "none",
       "destinationChains": {
-        "137": "weightedRandom"
+        "137": { "strategy": "weightedRandom", "weight": 0.05 }
       }
     }
   }
