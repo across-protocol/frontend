@@ -13,16 +13,28 @@ import {
 import fillTimesFallbackData from "../../src/data/examples/fill-times.json";
 import dynamicWeightsFallbackData from "../../src/data/examples/dynamic-weights.json";
 import fixedWeightsFallbackData from "../../src/data/examples/fixed-weights.json";
+import rpcProvidersFallbackData from "../../src/data/examples/rpc-providers.json";
 
 export const remoteConfigTypes = {
   FILL_TIMES: "FILL_TIMES",
   EXCLUSIVE_RELAYERS: "EXCLUSIVE_RELAYERS",
   EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS: "EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS",
   EXCLUSIVE_RELAYERS_FIXED_WEIGHTS: "EXCLUSIVE_RELAYER_WEIGHTS",
+  RPC_PROVIDERS: "RPC_PROVIDERS",
 } as const;
 
 export type RemoteConfig =
   (typeof remoteConfigTypes)[keyof typeof remoteConfigTypes];
+
+export const fetchRpcProviderConfigs = makeFetchRemoteConfig(
+  type({
+    providers: type({
+      enabled: record(string(), array(string())),
+      urls: record(string(), record(string(), string())),
+    }),
+  }),
+  rpcProvidersFallbackData
+);
 
 export const fetchFillTimes = makeFetchRemoteConfig(
   array(
@@ -116,10 +128,37 @@ async function fetchRemoteConfigAndValidate<T>(
   return data as Infer<typeof schema>;
 }
 
+export function getRemoteConfigBaseUrl(
+  envSuffix: string,
+  defaultBaseUrl: string
+) {
+  return (
+    process.env[`REMOTE_CONFIG_BASE_URL_${envSuffix.toUpperCase()}`] ??
+    defaultBaseUrl
+  );
+}
+
 export function getRemoteConfigCommitHash(config: RemoteConfig) {
   return process.env[`REMOTE_CONFIG_COMMIT_HASH_${config}`] ?? "master";
 }
 
+export function getRelayerConfigsRemoteBaseUrl() {
+  return getRemoteConfigBaseUrl(
+    "RELAYER_CONFIGS",
+    "https://raw.githubusercontent.com/across-protocol/exclusive-relayer-configs"
+  );
+}
+
 export function getBqReaderRemoteBaseUrl() {
-  return `https://raw.githubusercontent.com/UMAprotocol/across-bq-reader`;
+  return getRemoteConfigBaseUrl(
+    "BQ_READER",
+    "https://raw.githubusercontent.com/UMAprotocol/across-bq-reader"
+  );
+}
+
+export function getAcrossConfigsRemoteBaseUrl() {
+  return getRemoteConfigBaseUrl(
+    "ACROSS_CONFIGS",
+    "https://raw.githubusercontent.com/UMAprotocol/across-configs"
+  );
 }
