@@ -1,7 +1,7 @@
 import config from "../../src/data/exclusive-relayer-configs.json";
 import strategyConfig from "../../src/data/exclusivity-strategy.json";
 import { RelayerConfig, RelayerSelector } from "./types";
-import { none, randomWeighted } from "./strategies";
+import { none, weightedRandom } from "./strategies";
 
 // Absolute minimum exclusivity to set for any given transfer.
 const DEFAULT_MIN_EXCLUSIVITY = 3;
@@ -11,7 +11,7 @@ const DEFAULT_MIN_EXCLUSIVITY = 3;
  */
 const EXCLUSIVITY_STRATEGIES = {
   none,
-  randomWeighted,
+  weightedRandom,
 } as const;
 type ExclusivityStrategy = keyof typeof EXCLUSIVITY_STRATEGIES;
 type StrategyConfigTokenKey = keyof typeof strategyConfig.tokens;
