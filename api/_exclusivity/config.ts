@@ -29,10 +29,34 @@ export function getStrategy(
     strategyConfig.tokens?.[outputTokenSymbol as StrategyConfigTokenKey] ?? {};
   // FIXME: Typecasting is a bit messy here.
   const tokenDestConfig = (
-    tokenConfig?.destinationChains as Record<string, ExclusivityStrategy>
+    tokenConfig?.destinationChains as Record<
+      string,
+      | "none"
+      | {
+          strategy: ExclusivityStrategy;
+          weight: number;
+        }
+    >
   )?.[String(destinationChainId)];
-  const strategy =
-    tokenDestConfig ?? tokenConfig?.default ?? strategyConfig.default;
+
+  let strategy = (tokenConfig.default ??
+    strategyConfig.default) as ExclusivityStrategy;
+
+  // Strategy is defined at the token > destination chain level with a weight.
+  if (
+    typeof tokenDestConfig === "object" &&
+    tokenDestConfig.strategy &&
+    tokenDestConfig.weight
+  ) {
+    strategy =
+      Math.random() <= tokenDestConfig.weight
+        ? tokenDestConfig.strategy
+        : strategy;
+  }
+  // Strategy is defined at the token > destination chain level without a weight.
+  else if (typeof tokenDestConfig === "string") {
+    strategy = tokenDestConfig;
+  }
 
   return {
     name: strategy,
