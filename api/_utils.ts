@@ -19,6 +19,7 @@ import { StructError, define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
+import rpcProvidersJson from "../src/data/rpc-providers.json";
 
 import {
   MINIMAL_BALANCER_V2_POOL_ABI,
@@ -48,6 +49,7 @@ import {
 import { PoolStateOfUser, PoolStateResult } from "./_types";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
+type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -684,7 +686,7 @@ export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 
 /**
  * Generates a relevant provider for the given input chainId
- * @param _chainId A valid chain identifier where an AcrossV2 contract is deployed
+ * @param _chainId A valid chain identifier where Across is deployed
  * @returns A provider object to query the requested blockchain
  */
 export const getProvider = (
@@ -692,8 +694,15 @@ export const getProvider = (
 ): providers.StaticJsonRpcProvider => {
   const chainId = _chainId.toString();
   if (!providerCache[chainId]) {
+    // Resolves provider from urls set in rpc-providers.json.
+    const providerFromConfigJson = getProviderFromConfigJson(chainId);
+    // Resolves provider from urls set via environment variables.
+    // Note that this is legacy and should be removed in the future.
     const override = overrideProvider(chainId);
-    if (override) {
+
+    if (providerFromConfigJson) {
+      providerCache[chainId] = providerFromConfigJson;
+    } else if (override) {
       providerCache[chainId] = override;
     } else {
       providerCache[chainId] = infuraProvider(_chainId);
@@ -701,6 +710,36 @@ export const getProvider = (
   }
   return providerCache[chainId];
 };
+
+/**
+ * Resolves a provider from the `rpc-providers.json` configuration file.
+ */
+function getProviderFromConfigJson(chainId: string) {
+  const { providers } = rpcProvidersJson;
+  const enabledProviders: RpcProviderName[] =
+    (providers.enabled as Record<string, RpcProviderName[]>)[chainId] ||
+    providers.enabled.default;
+
+  let providerUrl: string | undefined;
+  for (const provider of enabledProviders) {
+    providerUrl = (providers.urls[provider] as Record<string, string>)?.[
+      chainId
+    ];
+    if (providerUrl) {
+      console.log(`Using provider ${provider} for chainId ${chainId}`);
+      break;
+    }
+  }
+
+  if (!providerUrl) {
+    console.error(
+      `No provider URL found for chainId ${chainId} in rpc-providers.json`
+    );
+    return undefined;
+  }
+
+  return new ethers.providers.StaticJsonRpcProvider(providerUrl);
+}
 
 /**
  * Generates a relevant SpokePool given the input chain ID
