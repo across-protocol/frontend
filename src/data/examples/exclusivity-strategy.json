@@ -6,6 +6,12 @@
       "destinationChains": {
         "137": "weightedRandom"
       }
+    },
+    "ETH": {
+      "default": "none",
+      "destinationChains": {
+        "137": "weightedRandom"
+      }
     }
   }
 }
