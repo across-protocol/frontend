@@ -61,10 +61,6 @@ const handler = async (
       REACT_APP_MIN_DEPOSIT_USD,
     } = process.env;
     const provider = getProvider(HUB_POOL_CHAIN_ID);
-    logger.debug({
-      at: "limits",
-      message: `Using INFURA provider for chain ${HUB_POOL_CHAIN_ID}`,
-    });
 
     const minDeposits = REACT_APP_MIN_DEPOSIT_USD
       ? JSON.parse(REACT_APP_MIN_DEPOSIT_USD)
