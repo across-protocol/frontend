@@ -714,31 +714,41 @@ export const getProvider = (
 /**
  * Resolves a provider from the `rpc-providers.json` configuration file.
  */
-function getProviderFromConfigJson(chainId: string) {
+function getProviderFromConfigJson(_chainId: string) {
+  const chainId = Number(_chainId);
+  const urls: string[] = [];
+
   const { providers } = rpcProvidersJson;
   const enabledProviders: RpcProviderName[] =
     (providers.enabled as Record<string, RpcProviderName[]>)[chainId] ||
     providers.enabled.default;
 
-  let providerUrl: string | undefined;
   for (const provider of enabledProviders) {
-    providerUrl = (providers.urls[provider] as Record<string, string>)?.[
+    const providerUrl = (providers.urls[provider] as Record<string, string>)?.[
       chainId
     ];
     if (providerUrl) {
-      console.log(`Using provider ${provider} for chainId ${chainId}`);
-      break;
+      urls.push(providerUrl);
     }
   }
 
-  if (!providerUrl) {
-    console.error(
+  if (urls.length === 0) {
+    console.warn(
       `No provider URL found for chainId ${chainId} in rpc-providers.json`
     );
     return undefined;
   }
 
-  return new ethers.providers.StaticJsonRpcProvider(providerUrl);
+  return new sdk.providers.RetryProvider(
+    urls.map((url) => [url, chainId]),
+    chainId,
+    1, // quorum can be 1 in the context of the API
+    3, // retries
+    500, // delay
+    5, // max. concurrency
+    "QUOTES_API", // cache namespace
+    0 // disable RPC calls logging
+  );
 }
 
 /**
