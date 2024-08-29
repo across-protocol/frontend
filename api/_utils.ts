@@ -58,6 +58,7 @@ const {
   VERCEL_ENV,
   GAS_MARKUP,
   DISABLE_DEBUG_LOGS,
+  ENABLE_RPC_LOGS,
 } = process.env;
 
 const GOOGLE_SERVICE_ACCOUNT = _GOOGLE_SERVICE_ACCOUNT
@@ -746,7 +747,7 @@ function getProviderFromConfigJson(_chainId: string) {
     500, // delay
     5, // max. concurrency
     "QUOTES_API", // cache namespace
-    0 // disable RPC calls logging
+    ENABLE_RPC_LOGS === "true" ? 100 : 0
   );
 }
 
