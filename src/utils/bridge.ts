@@ -46,13 +46,26 @@ export type GetBridgeFeesResult = BridgeFees & {
 };
 
 /**
+ * Retrieves the bridge fees for a given token bridging operation.
  *
- * @param amount - amount to bridge
- * @param inputTokenSymbol - symbol of the input token to bridge
- * @param outputTokenSymbol - symbol of the output token to bridge
- * @param fromChain The origin chain of this bridge action
- * @param toChain The destination chain of this bridge action
- * @returns Returns the `relayerFee` and `lpFee` fees for bridging the given amount of tokens, along with an `isAmountTooLow` flag indicating whether the amount is too low to bridge and an `isLiquidityInsufficient` flag indicating whether the liquidity is insufficient.
+ * @param amount - The amount of tokens to be bridged.
+ * @param inputTokenSymbol - The symbol of the input token to be bridged.
+ * @param outputTokenSymbol - The symbol of the output token to be received after bridging.
+ * @param fromChainId - The ID of the origin chain for the bridge operation.
+ * @param toChainId - The ID of the destination chain for the bridge operation.
+ * @param recipientAddress - The address of the recipient who will receive the bridged tokens.
+ * @returns An object containing the following properties:
+ *   - `totalRelayFee`: The total relay fee for the bridge operation.
+ *   - `relayerGasFee`: The gas fee paid to the relayer.
+ *   - `relayerCapitalFee`: The capital fee paid to the relayer.
+ *   - `lpFee`: The fee paid to the liquidity provider.
+ *   - `isAmountTooLow`: A boolean indicating whether the provided amount is too low to bridge.
+ *   - `quoteTimestamp`: The timestamp of the bridge fee quote.
+ *   - `quoteTimestampInMs`: The quote timestamp in milliseconds.
+ *   - `quoteBlock`: The block number of the bridge fee quote.
+ *   - `quoteLatency`: The latency of the bridge fee quote request in milliseconds.
+ *   - `limits`: An object containing the minimum and maximum bridge limits.
+ *   - `estimatedFillTimeSec`: The estimated time in seconds for the bridge operation to be filled.
  */
 export async function getBridgeFees({
   amount,
@@ -154,10 +167,14 @@ type NetworkMismatchHandler = (
 ) => void;
 
 /**
- * Makes a deposit on Across using the `SpokePoolVerifiers` contract's `deposit` function if possible.
- * @param signer A valid signer, must be connected to a provider.
+ * Makes a deposit on the Across protocol using the `SpokePoolVerifiers` contract's `deposit` function, if possible.
+ *
+ * @param signer - A valid Ethereum signer, which must be connected to a provider.
+ * @param spokePool - The `SpokePool` contract instance used for the deposit operation.
+ * @param spokePoolVerifier - The `SpokePoolVerifier` contract instance used for the deposit operation.
+ * @param onNetworkMismatch - An optional callback function that will be called if the signer's network does not match the from/to chain IDs.
  * @param depositArgs - An object containing the {@link AcrossDepositArgs arguments} to pass to the deposit function of the bridge contract.
- * @returns The transaction response obtained after sending the transaction.
+ * @returns The transaction response obtained after sending the deposit transaction.
  */
 export async function sendSpokePoolVerifierDepositTx(
   signer: ethers.Signer,
