@@ -46,6 +46,7 @@ import {
   relayerFeeCapitalCostConfig,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
+import { redisCache } from "./_cache";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
@@ -58,6 +59,9 @@ const {
   VERCEL_ENV,
   GAS_MARKUP,
   DISABLE_DEBUG_LOGS,
+  KV_URL,
+  KV_REST_API_URL,
+  KV_REST_API_TOKEN,
 } = process.env;
 
 const GOOGLE_SERVICE_ACCOUNT = _GOOGLE_SERVICE_ACCOUNT
@@ -743,10 +747,14 @@ function getProviderFromConfigJson(_chainId: string) {
     chainId,
     1, // quorum can be 1 in the context of the API
     3, // retries
-    500, // delay
+    100, // delay
     5, // max. concurrency
-    "QUOTES_API", // cache namespace
-    0 // disable RPC calls logging
+    "RPC_PROVIDER", // cache namespace
+    0, // disable RPC calls logging
+    KV_URL && KV_REST_API_TOKEN && KV_REST_API_URL ? redisCache : undefined,
+    0, // always use standard ttl
+    undefined, // never use no ttl
+    60 // standard ttl 60 seconds
   );
 }
 
