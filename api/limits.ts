@@ -139,10 +139,11 @@ const handler = async (
         DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
         tokenPriceNative,
         undefined,
-        getDefaultRelayerAddress(destinationChainId, l1Token.symbol)
+        getDefaultRelayerAddress(destinationChainId, l1Token.symbol),
+        gasPrice
       ),
       callViaMulticall3(provider, multiCalls, {
-        blockTag: latestBlock.number - 1,
+        blockTag: latestBlock.number,
       }),
       Promise.all(
         fullRelayers.map((relayer) =>

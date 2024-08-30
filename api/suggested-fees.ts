@@ -1,6 +1,6 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
-import { ethers, utils } from "ethers";
+import { ethers } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
 import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
