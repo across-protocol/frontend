@@ -74,6 +74,8 @@ export type PoolQueryData = {
  * Calls on-chain data & the Vercel API to resolve information about the AcceleratingDistributor Contract
  * @param tokenAddress The address of the ERC-20 token on the current chain
  * @param account A user address to query against the on-chain data
+ * @param acxPriceInUSD The current price of the ACX token in US dollars
+ * @returns The staking pool information, or `undefined` if the required data is not available.
  */
 export async function fetchStakingPool(
   tokenAddress?: string,
