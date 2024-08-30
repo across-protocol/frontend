@@ -803,13 +803,14 @@ export const isRouteEnabled = (
 export const getBalance = (
   chainId: string | number,
   account: string,
-  token: string
+  token: string,
+  blockTag?: string | number
 ): Promise<BigNumber> => {
   return sdk.utils.getTokenBalance(
     account,
     token,
     getProvider(Number(chainId)),
-    BLOCK_TAG_LAG
+    blockTag ?? BLOCK_TAG_LAG
   );
 };
 
