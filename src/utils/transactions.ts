@@ -8,7 +8,7 @@ import { parseUnits } from "./format";
 
 /**
  * This function takes a raw transaction and a signer and returns the result of signing the transaction.
- * @param tx The raw transaction to sign.
+ * @param rawTx The raw transaction to sign.
  * @param signer A signer used to sign the transaction
  * @returns The raw transaction signed by the given `signer`.
  */
@@ -55,6 +55,7 @@ export async function getPaddedGasEstimation(
  * Pads the gas estimation by a fixed amount dictated in the `REACT_SEND_TXN_GAS_ESTIMATION_MULTIPLIER` env var
  * @param contract The contract that this transaction will originate from
  * @param method The specific call method
+ * @param chainId The chain ID to use for the gas estimation.
  * @returns A completed or failed transaction
  */
 export function sendWithPaddedGas(
