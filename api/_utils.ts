@@ -1401,7 +1401,6 @@ export async function callViaMulticall3(
   }[],
   overrides: ethers.CallOverrides = {}
 ): Promise<ethers.utils.Result[]> {
-  console.log("Calling multicall...", calls.length, overrides);
   const multicall3 = new ethers.Contract(
     MULTICALL3_ADDRESS,
     MINIMAL_MULTICALL3_ABI,
