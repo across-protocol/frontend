@@ -46,7 +46,7 @@ import {
   relayerFeeCapitalCostConfig,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
-import { redisCache } from "./_cache";
+import { buildInternalCacheKey, getCachedValue } from "./_cache";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
@@ -750,11 +750,7 @@ function getProviderFromConfigJson(_chainId: string) {
     100, // delay
     5, // max. concurrency
     "RPC_PROVIDER", // cache namespace
-    0, // disable RPC calls logging
-    KV_URL && KV_REST_API_TOKEN && KV_REST_API_URL ? redisCache : undefined,
-    0, // always use standard ttl
-    undefined, // never use no ttl
-    60 // standard ttl 60 seconds
+    0 // disable RPC calls logging
   );
 }
 
@@ -1405,6 +1401,7 @@ export async function callViaMulticall3(
   }[],
   overrides: ethers.CallOverrides = {}
 ): Promise<ethers.utils.Result[]> {
+  console.log("Calling multicall...", calls.length, overrides);
   const multicall3 = new ethers.Contract(
     MULTICALL3_ADDRESS,
     MINIMAL_MULTICALL3_ABI,
@@ -1611,4 +1608,12 @@ export function getChainInputTokenMaxDepositInUsd(
     ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
     : undefined;
   return maxDeposits[chainId.toString()]?.[symbol] || defaultValue;
+}
+
+export function getCachedLatestBlock(chainId: number, ttl: number) {
+  return getCachedValue(
+    buildInternalCacheKey("latestBlock", chainId),
+    ttl,
+    () => getProvider(chainId).getBlock("latest")
+  );
 }

@@ -12,9 +12,16 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
 
   async set<T>(key: string, value: T, ttl = 10): Promise<string | undefined> {
     try {
-      await kv.set(key, typeof value === "string" ? JSON.parse(value) : value, {
+      if (typeof value === "string") {
+        try {
+          const parsedJson = JSON.parse(value);
+          value = parsedJson;
+        } catch (error) {
+          // Do nothing
+        }
+      }
+      await kv.set(key, value, {
         ex: ttl === Number.POSITIVE_INFINITY ? 60 : ttl,
-        nx: true,
       });
       return key;
     } catch (error) {
