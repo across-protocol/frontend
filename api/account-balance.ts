@@ -38,7 +38,7 @@ const handler = async (
       chainId,
       account,
       token,
-      latestBlock.number - 1
+      latestBlock.number
     );
     const result = {
       balance: balance.toString(),

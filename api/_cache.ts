@@ -47,11 +47,12 @@ export function buildInternalCacheKey(...args: (string | number)[]): string {
 export async function getCachedValue<T>(
   key: string,
   ttl: number,
-  fetcher: () => Promise<T>
+  fetcher: () => Promise<T>,
+  parser?: (value: T) => T
 ) {
   const cachedValue = await redisCache.get<T>(key);
   if (cachedValue) {
-    return cachedValue;
+    return parser ? parser(cachedValue) : cachedValue;
   }
 
   const value = await fetcher();

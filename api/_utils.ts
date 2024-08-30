@@ -594,7 +594,8 @@ export const getRelayerFeeDetails = async (
   recipientAddress: string,
   tokenPrice?: number,
   message?: string,
-  relayerAddress?: string
+  relayerAddress?: string,
+  gasPrice?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
@@ -622,7 +623,8 @@ export const getRelayerFeeDetails = async (
       amount,
       sdk.utils.isMessageEmpty(message),
       relayerAddress,
-      tokenPrice
+      tokenPrice,
+      gasPrice
     );
   } catch (err: unknown) {
     const reason = resolveEthersError(err);
@@ -1611,6 +1613,21 @@ export function getCachedLatestBlock(chainId: number, ttl: number) {
   return getCachedValue(
     buildInternalCacheKey("latestBlock", chainId),
     ttl,
-    () => getProvider(chainId).getBlock("latest")
+    async () => {
+      const block = await getProvider(chainId).getBlock("latest");
+      return {
+        number: block.number,
+        timestamp: block.timestamp,
+      };
+    }
+  );
+}
+
+export function getCachedGasPrice(chainId: number, ttl: number) {
+  return getCachedValue(
+    buildInternalCacheKey("gasPrice", chainId),
+    ttl,
+    () => getProvider(chainId).getGasPrice(),
+    (bnFromCache) => BigNumber.from(bnFromCache)
   );
 }

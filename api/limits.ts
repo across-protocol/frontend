@@ -30,6 +30,7 @@ import {
   validAddress,
   validateChainAndTokenParams,
   getCachedLatestBlock,
+  getCachedGasPrice,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -110,14 +111,16 @@ const handler = async (
       },
     ];
 
-    const [tokenPriceNative, _tokenPriceUsd, latestBlock] = await Promise.all([
-      getCachedTokenPrice(
-        l1Token.address,
-        sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-      ),
-      getCachedTokenPrice(l1Token.address, "usd"),
-      getCachedLatestBlock(HUB_POOL_CHAIN_ID, 12),
-    ]);
+    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasPrice] =
+      await Promise.all([
+        getCachedTokenPrice(
+          l1Token.address,
+          sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
+        ),
+        getCachedTokenPrice(l1Token.address, "usd"),
+        getCachedLatestBlock(HUB_POOL_CHAIN_ID, 12),
+        getCachedGasPrice(destinationChainId, 10),
+      ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
     const [

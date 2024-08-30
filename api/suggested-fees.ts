@@ -28,6 +28,7 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
   getCachedLatestBlock,
+  getCachedGasPrice,
 } from "./_utils";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
 import { parseUnits } from "ethers/lib/utils";
@@ -161,7 +162,9 @@ const handler = async (
         throw new InputError("Invalid quote timestamp");
       }
 
-      const blockFinder = new sdk.utils.BlockFinder(provider, [latestBlock]);
+      const blockFinder = new sdk.utils.BlockFinder(provider, [
+        latestBlock as ethers.providers.Block,
+      ]);
       const { number: blockNumberForTimestamp } =
         await blockFinder.getBlockForTimestamp(parsedTimestamp);
       quoteBlockNumber = blockNumberForTimestamp;
@@ -204,6 +207,7 @@ const handler = async (
       tokenPrice,
       tokenPriceUsd,
       limits,
+      gasPrice,
     ] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
       getCachedTokenPrice(l1Token.address, baseCurrency),
@@ -214,6 +218,7 @@ const handler = async (
         computedOriginChainId,
         destinationChainId
       ),
+      getCachedGasPrice(destinationChainId, 10),
     ]);
 
     const amountInUsd = amount
@@ -252,7 +257,8 @@ const handler = async (
       recipient,
       tokenPrice,
       message,
-      relayer
+      relayer,
+      gasPrice
     );
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";
