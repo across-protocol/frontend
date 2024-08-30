@@ -1,6 +1,6 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
-import { ethers } from "ethers";
+import { ethers, utils } from "ethers";
 import { type, assert, Infer, optional, string } from "superstruct";
 import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
@@ -30,6 +30,7 @@ import {
 } from "./_utils";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
 import { parseUnits } from "ethers/lib/utils";
+import { buildInternalCacheKey, getCachedValue } from "./_cache";
 
 const SuggestedFeesQueryParamsSchema = type({
   amount: parsableBigNumberString(),
@@ -122,7 +123,11 @@ const handler = async (
       }
     }
 
-    const latestBlock = await provider.getBlock("latest");
+    const latestBlock = await getCachedValue<ethers.providers.Block>(
+      buildInternalCacheKey("latestBlock", HUB_POOL_CHAIN_ID),
+      12,
+      () => provider.getBlock("latest")
+    );
 
     // The actual `quoteTimestamp` will be derived from the `quoteBlockNumber` below. If the caller supplies a timestamp,
     // we use the method `BlockFinder.getBlockForTimestamp` to find the block number for that timestamp. If the caller does
