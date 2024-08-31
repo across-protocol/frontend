@@ -715,21 +715,7 @@ export const getProvider = (
  */
 function getProviderFromConfigJson(_chainId: string) {
   const chainId = Number(_chainId);
-  const urls: string[] = [];
-
-  const { providers } = rpcProvidersJson;
-  const enabledProviders: RpcProviderName[] =
-    (providers.enabled as Record<string, RpcProviderName[]>)[chainId] ||
-    providers.enabled.default;
-
-  for (const provider of enabledProviders) {
-    const providerUrl = (providers.urls[provider] as Record<string, string>)?.[
-      chainId
-    ];
-    if (providerUrl) {
-      urls.push(providerUrl);
-    }
-  }
+  const urls = getRpcUrlsFromConfigJson(chainId);
 
   if (urls.length === 0) {
     console.warn(
@@ -748,6 +734,26 @@ function getProviderFromConfigJson(_chainId: string) {
     "QUOTES_API", // cache namespace
     0 // disable RPC calls logging
   );
+}
+
+export function getRpcUrlsFromConfigJson(chainId: number) {
+  const urls: string[] = [];
+
+  const { providers } = rpcProvidersJson;
+  const enabledProviders: RpcProviderName[] =
+    (providers.enabled as Record<string, RpcProviderName[]>)[chainId] ||
+    providers.enabled.default;
+
+  for (const provider of enabledProviders) {
+    const providerUrl = (providers.urls[provider] as Record<string, string>)?.[
+      chainId
+    ];
+    if (providerUrl) {
+      urls.push(providerUrl);
+    }
+  }
+
+  return urls;
 }
 
 /**
@@ -1185,7 +1191,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
         blockNumberSubgraph: `${theGraphBaseUrl}/9A6bkprqEG2XsZUYJ5B2XXp6ymz9fNcn4tVPxMWDztYC`,
       },
     } as BalancerNetworkConfig,
-    rpcUrl: getProvider(HUB_POOL_CHAIN_ID).connection.url,
+    rpcUrl: getRpcUrlsFromConfigJson(HUB_POOL_CHAIN_ID)[0],
     coingecko: {
       coingeckoApiKey: REACT_APP_COINGECKO_PRO_API_KEY!,
     },
