@@ -10,7 +10,7 @@ export type RelayerConfig = {
   minProfitThreshold: number;
   balanceMultiplier: number;
   maxFillSize: number;
-  originChains: number[];
+  originChainIds: number[];
 };
 
 export type CandidateRelayer = {

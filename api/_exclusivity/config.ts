@@ -77,7 +77,6 @@ export function getRelayerConfig(originChainId: number): RelayerConfig[] {
     .map(([address, config]) => ({
       address,
       ...config,
-      originChains: [originChainId], // @todo
     }));
 
   return relayers;
