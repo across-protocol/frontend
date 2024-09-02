@@ -181,7 +181,7 @@ export async function sendSpokePoolVerifierDepositTx(
     timestamp: quoteTimestamp,
     message = "0x",
     isNative,
-    toNative = false,
+    toNative,
     referrer,
     integratorId,
   }: AcrossDepositArgs,
@@ -240,7 +240,7 @@ export async function sendDepositV3Tx(
     timestamp: quoteTimestamp,
     message = "0x",
     isNative,
-    toNative = false,
+    toNative,
     referrer,
     fillDeadline,
     inputTokenAddress,
@@ -265,17 +265,8 @@ export async function sendDepositV3Tx(
   // (except for Polygon). Therefore, we only need to use the multicall handler when the EOA
   // wants to receive WETH after an ETH or WETH deposit.
   if (isWeth(outputTokenAddress) && !toNative) {
-    message = wrapAndTransferMessage(
-      outputAmount,
-      recipient,
-      destinationChainId
-    );
+    message = transferWethMessage(outputAmount, recipient, destinationChainId);
     recipient = getMulticallHandlerAddress(destinationChainId);
-    if (!recipient) {
-      throw new Error(
-        `No multicall handler deployed to chain ${destinationChainId}. Unable to receive WETH at destination.`
-      );
-    }
   }
   const tx = await spokePool.populateTransaction.depositV3(
     await signer.getAddress(),
@@ -496,12 +487,11 @@ async function _tagRefAndSignTx(
 
 const INSTRUCTIONS = "tuple(tuple(address, bytes, uint256)[], address)";
 
-function wrapAndTransferMessage(
+function transferWethMessage(
   amount: ethers.BigNumber,
   toAddress: string,
   toChain: ChainId
 ): string {
-  const encoder = ethers.utils.defaultAbiCoder;
   const wethInterface = new ethers.utils.Interface(WETH_INTERFACE);
 
   const outputTokenAddress = getWethAddressForChain(toChain);
@@ -509,7 +499,7 @@ function wrapAndTransferMessage(
     "transfer(address dst, uint256 wad)",
     [toAddress, amount]
   );
-  const call = encoder.encode(
+  const call = ethers.utils.defaultAbiCoder.encode(
     [INSTRUCTIONS],
     [
       [
