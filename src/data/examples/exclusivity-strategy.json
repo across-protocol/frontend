@@ -3,13 +3,13 @@
   "tokens": {
     "WETH": {
       "default": "none",
-      "destinationChains": {
+      "destinationChainIds": {
         "137": { "strategy": "weightedRandom", "weight": 0.05 }
       }
     },
     "ETH": {
       "default": "none",
-      "destinationChains": {
+      "destinationChainIds": {
         "137": { "strategy": "weightedRandom", "weight": 0.05 }
       }
     }

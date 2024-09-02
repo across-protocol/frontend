@@ -29,7 +29,7 @@ export function getStrategy(
     strategyConfig.tokens?.[outputTokenSymbol as StrategyConfigTokenKey] ?? {};
   // FIXME: Typecasting is a bit messy here.
   const tokenDestConfig = (
-    tokenConfig?.destinationChains as Record<
+    tokenConfig?.destinationChainIds as Record<
       string,
       | "none"
       | {
