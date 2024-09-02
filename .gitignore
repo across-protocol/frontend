@@ -22,6 +22,9 @@
 .env*.local
 .env.e2e
 src/data/fill-times-preset.json
+src/data/exclusive-relayer-configs.json
+src/data/exclusive-relayer-weights.json
+src/data/rpc-providers.json
 
 # IDE
 .idea

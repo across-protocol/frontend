@@ -29,6 +29,9 @@ export function useLoadAmpli() {
             fileDownloads: false,
             formInteractions: false,
           },
+          trackingOptions: {
+            ipAddress: false,
+          },
         })
         .promise.then(
           () =>

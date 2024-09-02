@@ -18,6 +18,7 @@ import { StructError, define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
+import rpcProvidersJson from "../src/data/rpc-providers.json";
 
 import {
   MINIMAL_BALANCER_V2_POOL_ABI,
@@ -39,8 +40,6 @@ import {
   SECONDS_PER_YEAR,
   TOKEN_SYMBOLS_MAP,
   defaultRelayerAddressOverride,
-  defaultRelayerAddressOverridePerToken,
-  defaultRelayerAddressOverridePerChain,
   disabledL1Tokens,
   graphAPIKey,
   maxRelayFeePct,
@@ -49,6 +48,7 @@ import {
 import { PoolStateOfUser, PoolStateResult } from "./_types";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
+type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
 const {
   REACT_APP_HUBPOOL_CHAINID,
@@ -502,7 +502,7 @@ export const getHubPoolClient = () => {
   return new sdk.pool.Client(
     hubPoolConfig,
     {
-      provider: infuraProvider(HUB_POOL_CHAIN_ID),
+      provider: getProvider(HUB_POOL_CHAIN_ID),
     },
     (_, __) => {} // Dummy function that does nothing and is needed to construct this client.
   );
@@ -685,7 +685,7 @@ export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 
 /**
  * Generates a relevant provider for the given input chainId
- * @param _chainId A valid chain identifier where an AcrossV2 contract is deployed
+ * @param _chainId A valid chain identifier where Across is deployed
  * @returns A provider object to query the requested blockchain
  */
 export const getProvider = (
@@ -693,8 +693,15 @@ export const getProvider = (
 ): providers.StaticJsonRpcProvider => {
   const chainId = _chainId.toString();
   if (!providerCache[chainId]) {
+    // Resolves provider from urls set in rpc-providers.json.
+    const providerFromConfigJson = getProviderFromConfigJson(chainId);
+    // Resolves provider from urls set via environment variables.
+    // Note that this is legacy and should be removed in the future.
     const override = overrideProvider(chainId);
-    if (override) {
+
+    if (providerFromConfigJson) {
+      providerCache[chainId] = providerFromConfigJson;
+    } else if (override) {
       providerCache[chainId] = override;
     } else {
       providerCache[chainId] = infuraProvider(_chainId);
@@ -702,6 +709,52 @@ export const getProvider = (
   }
   return providerCache[chainId];
 };
+
+/**
+ * Resolves a provider from the `rpc-providers.json` configuration file.
+ */
+function getProviderFromConfigJson(_chainId: string) {
+  const chainId = Number(_chainId);
+  const urls = getRpcUrlsFromConfigJson(chainId);
+
+  if (urls.length === 0) {
+    console.warn(
+      `No provider URL found for chainId ${chainId} in rpc-providers.json`
+    );
+    return undefined;
+  }
+
+  return new sdk.providers.RetryProvider(
+    urls.map((url) => [url, chainId]),
+    chainId,
+    1, // quorum can be 1 in the context of the API
+    3, // retries
+    500, // delay
+    5, // max. concurrency
+    "QUOTES_API", // cache namespace
+    0 // disable RPC calls logging
+  );
+}
+
+export function getRpcUrlsFromConfigJson(chainId: number) {
+  const urls: string[] = [];
+
+  const { providers } = rpcProvidersJson;
+  const enabledProviders: RpcProviderName[] =
+    (providers.enabled as Record<string, RpcProviderName[]>)[chainId] ||
+    providers.enabled.default;
+
+  for (const provider of enabledProviders) {
+    const providerUrl = (providers.urls[provider] as Record<string, string>)?.[
+      chainId
+    ];
+    if (providerUrl) {
+      urls.push(providerUrl);
+    }
+  }
+
+  return urls;
+}
 
 /**
  * Generates a relevant SpokePool given the input chain ID
@@ -716,7 +769,7 @@ export const getSpokePool = (_chainId: number): SpokePool => {
 export const getSpokePoolAddress = (chainId: number): string => {
   switch (chainId) {
     default:
-      return sdk.utils.getDeployedAddress("SpokePool", chainId, true) as string;
+      return sdk.utils.getDeployedAddress("SpokePool", chainId) as string;
   }
 };
 
@@ -995,7 +1048,7 @@ export async function tagReferrer(
   if (ethers.utils.isAddress(referrerAddressOrENS)) {
     referrerAddress = referrerAddressOrENS;
   } else {
-    const provider = infuraProvider(1);
+    const provider = getProvider(HUB_POOL_CHAIN_ID);
     referrerAddress = await provider.resolveName(referrerAddressOrENS);
   }
 
@@ -1138,7 +1191,7 @@ async function getBalancerPoolState(poolTokenAddress: string) {
         blockNumberSubgraph: `${theGraphBaseUrl}/9A6bkprqEG2XsZUYJ5B2XXp6ymz9fNcn4tVPxMWDztYC`,
       },
     } as BalancerNetworkConfig,
-    rpcUrl: getProvider(HUB_POOL_CHAIN_ID).connection.url,
+    rpcUrl: getRpcUrlsFromConfigJson(HUB_POOL_CHAIN_ID)[0],
     coingecko: {
       coingeckoApiKey: REACT_APP_COINGECKO_PRO_API_KEY!,
     },
@@ -1452,19 +1505,15 @@ export function getDefaultRelayerAddress(
   destinationChainId: number,
   symbol?: string
 ) {
-  // All symbols are uppercase in this record.
-  const overrideForToken = symbol
-    ? defaultRelayerAddressOverridePerToken[symbol.toUpperCase()]
+  const symbolOverride = symbol
+    ? defaultRelayerAddressOverride?.symbols?.[symbol]
     : undefined;
-  if (overrideForToken?.destinationChains.includes(destinationChainId)) {
-    return overrideForToken.relayer;
-  } else {
-    return (
-      defaultRelayerAddressOverridePerChain[destinationChainId] ||
-      defaultRelayerAddressOverride ||
-      sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS
-    );
-  }
+  return (
+    symbolOverride?.chains?.[destinationChainId] ?? // Specific Symbol/Chain override
+    symbolOverride?.defaultAddr ?? // Specific Symbol override
+    defaultRelayerAddressOverride?.defaultAddr ?? // Default override
+    sdk.constants.DEFAULT_SIMULATED_RELAYER_ADDRESS // Default hardcoded value
+  );
 }
 
 /**

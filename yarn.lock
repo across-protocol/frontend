@@ -26,6 +26,11 @@
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.14.tgz#03b0e8b1104d5ec6559cdb8c25186cb365c67cba"
   integrity sha512-RhtuHCai2GZTRYEeMqsOK4yoIZZGfhUgCxhrY4Fo26tkEOBL+qf/Rjgw9THZHtlqNuGGFIeR4VyxS8GmgxjyZQ==
 
+"@across-protocol/constants@^3.1.15":
+  version "3.1.15"
+  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.15.tgz#b9fecef46209ad15f3c56c965977e3522b295b07"
+  integrity sha512-3BECNOWQReC/IIuI0a7GenYfdiZv9EyzWFK8n7y3SddcMZ2zW5TQHobfzjuccxOJ9nh+0ogrRw1gXFfESs00fg==
+
 "@across-protocol/contracts-v3.0.6@npm:@across-protocol/contracts@3.0.6":
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/@across-protocol/contracts/-/contracts-3.0.6.tgz#7508fc52db50cfa670edc7c4e9e615ad25cdd56c"
@@ -75,10 +80,10 @@
     axios "^1.6.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/sdk@^3.1.24":
-  version "3.1.24"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-3.1.24.tgz#4ada17db362abb5f6d77991db38e5c76c0030480"
-  integrity sha512-zFXr5u88fJUHgJfEKT7uo13RbwnX5oZLHmA8HvhkGnVPZh8+4s1IaNLRaYqd5ou5obIKZicisk9yn13SshfkxQ==
+"@across-protocol/sdk@^3.1.25":
+  version "3.1.25"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-3.1.25.tgz#e1273b1fe5d64eef867d748ded2f8b0dc93261dd"
+  integrity sha512-s+JhA0DSD3NXrut/L5IbmanfzHhy0lTlGcq5TgjtPLcZJ5GvWMqnNdVzUNbijb+lZAVW5gea0AgkFU0Z+6gdEg==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
     "@across-protocol/constants" "^3.1.14"

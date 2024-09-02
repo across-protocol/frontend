@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg color="#6cf9d8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
     <radialGradient
       id="gzr"
@@ -8,14 +8,18 @@
       cx="0"
       cy="0%"
     >
-      <stop offset="15.62%" stop-color="hsl(0, 0%, 88%)" />
-      <stop offset="39.58%" stop-color="hsl(0, 0%, 73%)" />
-      <stop offset="72.92%" stop-color="hsl(0, 0%, 53%)" />
-      <stop offset="90.63%" stop-color="hsl(0, 0%, 35%)" />
-      <stop offset="100%" stop-color="hsl(0, 0%, 35%)" />
+      <stop offset="15.62%" stop-color="currentColor" stop-opacity="0.2" />
+      <stop offset="39.58%" stop-color="currentColor" stop-opacity="0.4" />
+      <stop offset="72.92%" stop-color="currentColor" stop-opacity="0.8" />
+      <stop offset="90.63%" stop-color="currentColor" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="currentColor" stop-opacity="1" />
     </radialGradient>
   </defs>
   <g>
+    <path
+      d="M100 50C100 22.3858 77.6142 0 50 0C22.3858 0 0 22.3858 0 50C0 77.6142 22.3858 100 50 100C77.6142 100 100 77.6142 100 50Z"
+      fill="white"
+    />
     <path
       d="M100 50C100 22.3858 77.6142 0 50 0C22.3858 0 0 22.3858 0 50C0 77.6142 22.3858 100 50 100C77.6142 100 100 77.6142 100 50Z"
       fill="url(#gzr)"

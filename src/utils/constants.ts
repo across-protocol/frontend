@@ -115,8 +115,14 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
     ctaBody: (chainId: number) =>
       `Bridge to ${getChainInfo(chainId).name} and earn on every transaction.`,
     claimableTooltipBody:
-      "OP rewards earned during the month are made claimable after the ~15th of the following month",
-    enabledChains: [ChainId.OPTIMISM, ChainId.MODE, ChainId.BASE],
+      "OP rewards earned during the month can be claimed at the end of the following month.",
+    enabledChains: [
+      ChainId.ZORA,
+      ChainId.REDSTONE,
+      ChainId.OPTIMISM,
+      ChainId.MODE,
+      ChainId.BASE,
+    ],
   },
   "arb-rebates": {
     programName: "Arbitrum Rewards Program",
@@ -127,7 +133,7 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
     highestPct: 0.95,
     ctaBody: () => "Bridge to Arbitrum and earn on every transaction.",
     claimableTooltipBody:
-      "Arbitrum rewards earned during the month are made claimable after the ~15th of the following month",
+      "Arbitrum rewards earned during the month can be claimed at the end of the following month.",
     enabledChains: [ChainId.ARBITRUM],
   },
 };

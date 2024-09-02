@@ -2,6 +2,7 @@ import { BigNumber } from "ethers";
 // If this file is not found, run `yarn pull:timing` to fetch the latest data
 import timings from "../src/data/fill-times-preset.json";
 import { parseUnits } from "ethers/lib/utils";
+import { CHAIN_IDs } from "./_constants";
 
 const bigNumberComparator = (a: BigNumber, b: BigNumber) =>
   a.lt(b) ? -1 : a.gt(b) ? 1 : 0;
@@ -13,6 +14,12 @@ const fillTimeOverrides: {
     };
   };
 } = {};
+
+const rebalanceTimeOverrides: {
+  [dstId: string]: number;
+} = {
+  [CHAIN_IDs.POLYGON]: 1800, // 30 minutes
+};
 
 const timingsLookup = timings
   .map((timing) => ({
@@ -77,4 +84,8 @@ export function resolveTiming(
     symbolData?.find((cutoff) => usdAmount.lt(cutoff.amountUsd))
       ?.timingInSecs ?? 10
   );
+}
+
+export function resolveRebalanceTiming(destinationChainId: string): number {
+  return rebalanceTimeOverrides[destinationChainId] ?? 900; // 15 minutes
 }
