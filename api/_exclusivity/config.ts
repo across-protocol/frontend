@@ -71,10 +71,8 @@ export function getStrategy(
  */
 export function getRelayerConfig(originChainId: number): RelayerConfig[] {
   const relayers = Object.entries(config)
-    .filter(
-      ([, _relayerConfig]) =>
-        // relayerConfig.originChains?.includes(originChainId) ?? true
-        true // @todo: Update upstream spec.
+    .filter(([, relayerConfig]) =>
+      relayerConfig?.originChainIds?.includes(originChainId)
     )
     .map(([address, config]) => ({
       address,
