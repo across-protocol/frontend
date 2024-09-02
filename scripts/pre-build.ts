@@ -86,8 +86,8 @@ const remoteConfigs = {
       fetchExclusivityConfig(
         // TODO: Update below value to the correct remote URL and file path when the remote config is ready.
         // Using invalid URL will cause the fetch to fail and fallback to the local file for now.
-        getBqReaderRemoteBaseUrl(),
-        "exclusivity-strategy.json",
+        getAcrossConfigsRemoteBaseUrl(),
+        "packages/exclusive-relayer-strategy-config/config.json",
         getRemoteConfigCommitHash(remoteConfigTypes.EXCLUSIVITY_STRATEGY)
       ),
     localFilePath: "src/data/exclusivity-strategy.json",

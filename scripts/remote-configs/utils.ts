@@ -18,6 +18,8 @@ import fixedWeightsFallbackData from "../../src/data/examples/fixed-weights.json
 import exclusivityStrategyFallbackData from "../../src/data/examples/exclusivity-strategy.json";
 import rpcProvidersFallbackData from "../../src/data/examples/rpc-providers.json";
 
+const GITHUB_HOST = process.env.GH_HOST ?? "raw.githubusercontent.com";
+
 export const remoteConfigTypes = {
   FILL_TIMES: "FILL_TIMES",
   EXCLUSIVE_RELAYERS: "EXCLUSIVE_RELAYERS",
@@ -174,20 +176,20 @@ export function getRemoteConfigCommitHash(config: RemoteConfig) {
 export function getRelayerConfigsRemoteBaseUrl() {
   return getRemoteConfigBaseUrl(
     "RELAYER_CONFIGS",
-    "https://raw.githubusercontent.com/across-protocol/exclusive-relayer-configs"
+    `https://${GITHUB_HOST}/across-protocol/exclusive-relayer-configs`
   );
 }
 
 export function getBqReaderRemoteBaseUrl() {
   return getRemoteConfigBaseUrl(
     "BQ_READER",
-    "https://raw.githubusercontent.com/UMAprotocol/across-bq-reader"
+    `https://${GITHUB_HOST}/UMAprotocol/across-bq-reader`
   );
 }
 
 export function getAcrossConfigsRemoteBaseUrl() {
   return getRemoteConfigBaseUrl(
     "ACROSS_CONFIGS",
-    "https://raw.githubusercontent.com/UMAprotocol/across-configs"
+    `https://${GITHUB_HOST}/UMAprotocol/across-configs`
   );
 }
