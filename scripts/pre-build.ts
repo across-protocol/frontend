@@ -84,7 +84,6 @@ const remoteConfigs = {
   [remoteConfigTypes.EXCLUSIVITY_STRATEGY]: {
     fetchFn: () =>
       fetchExclusivityConfig(
-        // TODO: Update below value to the correct remote URL and file path when the remote config is ready.
         // Using invalid URL will cause the fetch to fail and fallback to the local file for now.
         getAcrossConfigsRemoteBaseUrl(),
         "packages/exclusive-relayer-strategy-config/config.json",
