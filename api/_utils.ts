@@ -10,10 +10,11 @@ import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
   BalancerNetworkConfig,
+  Multicall3,
 } from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
-import { BigNumber, ethers, providers, utils } from "ethers";
+import { BigNumber, ethers, providers, Signer, utils } from "ethers";
 import { StructError, define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -25,7 +26,7 @@ import {
   MINIMAL_BALANCER_V2_VAULT_ABI,
   MINIMAL_MULTICALL3_ABI,
 } from "./_abis";
-
+import { BatchAccountBalanceResponse } from "./batch-account-balance";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { VercelResponse } from "@vercel/node";
 import {
@@ -819,6 +820,110 @@ export const getBalance = (
 };
 
 /**
+ * Fetches the balances for an array of addresses on a particular chain, for a particular erc20 token
+ * @param chainId The blockchain Id to query against
+ * @param addresses An array of valid Web3 wallet addresses
+ * @param tokenAddress The valid ERC20 token address on the given `chainId` or ZERO_ADDRESS for native balances
+ * @param blockTag Block to query from, defaults to latest block
+ * @returns a Promise that resolves to an array of BigNumbers
+ */
+export const getBatchBalanceViaMulticall3 = async (
+  chainId: string | number,
+  addresses: string[],
+  tokenAddresses: string[],
+  blockTag: providers.BlockTag = "latest"
+): Promise<{
+  blockNumber: providers.BlockTag;
+  balances: Record<string, Record<string, string>>;
+}> => {
+  const chainIdAsInt = Number(chainId);
+  const provider = getProvider(chainIdAsInt);
+
+  const multicall3 = getMulticall3(chainIdAsInt, provider);
+
+  if (!multicall3) {
+    throw new Error("No Multicall3 deployed on this chain");
+  }
+
+  let calls: Parameters<typeof callViaMulticall3>[1] = [];
+
+  for (const tokenAddress of tokenAddresses) {
+    if (tokenAddress === sdk.constants.ZERO_ADDRESS) {
+      // For native currency
+      calls.push(
+        ...addresses.map((address) => ({
+          contract: multicall3,
+          functionName: "getEthBalance",
+          args: [address],
+        }))
+      );
+    } else {
+      // For ERC20 tokens
+      const erc20Contract = ERC20__factory.connect(tokenAddress, provider);
+      calls.push(
+        ...addresses.map((address) => ({
+          contract: erc20Contract,
+          functionName: "balanceOf",
+          args: [address],
+        }))
+      );
+    }
+  }
+
+  const inputs = calls.map(({ contract, functionName, args }) => ({
+    target: contract.address,
+    callData: contract.interface.encodeFunctionData(functionName, args),
+  }));
+
+  const [blockNumber, results] = await multicall3.callStatic.aggregate(inputs, {
+    blockTag,
+  });
+
+  const decodedResults = results.map((result, i) =>
+    calls[i].contract.interface.decodeFunctionResult(
+      calls[i].functionName,
+      result
+    )
+  );
+
+  let balances: Record<string, Record<string, string>> = {};
+
+  let resultIndex = 0;
+  for (const tokenAddress of tokenAddresses) {
+    addresses.forEach((address) => {
+      if (!balances[address]) {
+        balances[address] = {};
+      }
+      balances[address][tokenAddress] = decodedResults[resultIndex].toString();
+      resultIndex++;
+    });
+  }
+
+  return {
+    blockNumber: blockNumber.toNumber(),
+    balances,
+  };
+};
+
+export function getMulticall3(
+  chainId: number,
+  signerOrProvider?: Signer | providers.Provider
+): Multicall3 | undefined {
+  const address = sdk.utils.multicall3Addresses[chainId];
+
+  // no multicall on this chain
+  if (!address) {
+    return undefined;
+  }
+
+  return new ethers.Contract(
+    address,
+    MINIMAL_MULTICALL3_ABI,
+    signerOrProvider
+  ) as Multicall3;
+}
+
+/**
  * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
  * native currency will be returned.
  * @param chainId The blockchain Id to query against
@@ -844,6 +949,30 @@ export const getCachedTokenBalance = async (
   );
   // Return the balance
   return BigNumber.from(response.data.balance);
+};
+
+/**
+ * Resolves the cached balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
+ * native currency will be returned.
+ * @param chainId The blockchain Id to query against
+ * @param account A valid Web3 wallet address
+ * @param token The valid ERC20 token address on the given `chainId`.
+ * @returns A promise that resolves to the BigNumber of the balance
+ */
+export const getCachedTokenBalances = async (
+  chainId: string | number,
+  addresses: string[],
+  tokenAddresses: string[]
+): Promise<BatchAccountBalanceResponse> => {
+  const response = await axios.get<BatchAccountBalanceResponse>(
+    `${resolveVercelEndpoint()}/api/batch-account-balance?${buildSearchParams({
+      chainId,
+      addresses,
+      tokenAddresses,
+    })}`
+  );
+
+  return response.data;
 };
 
 /**
@@ -1412,7 +1541,6 @@ export async function callViaMulticall3(
     target: contract.address,
     callData: contract.interface.encodeFunctionData(functionName, args),
   }));
-
   const [, results] = await (multicall3.callStatic.aggregate(
     inputs,
     overrides
@@ -1609,4 +1737,40 @@ export function getChainInputTokenMaxDepositInUsd(
     ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
     : undefined;
   return maxDeposits[chainId.toString()]?.[symbol] || defaultValue;
+}
+
+/**
+ * Builds a URL search string from an object of query parameters.
+ *
+ * @param params - An object where keys are query parameter names and values are either a string or an array of strings representing the parameter values.
+ *
+ * @returns queryString - A properly formatted query string for use in URLs, (without the leading '?').
+ *
+ * @example
+ * ```typescript
+ * const params = {
+ *   age: 45, // numbers will be converted to strings
+ *   foos: ["foo1", "foo1"],
+ *   bars: ["bar1", "bar2", "bar3"],
+ * };
+ *
+ * const queryString = buildSearchParams(params);
+ * console.log(queryString); // "search=test&filter=price&filter=rating&sort=asc"
+ * const res = await axios.get(`${base_url}?${queryString}`)
+ * ```
+ */
+
+export function buildSearchParams(
+  params: Record<string, number | string | Array<number | string>>
+): string {
+  const searchParams = new URLSearchParams();
+  for (const key in params) {
+    const value = params[key];
+    if (Array.isArray(value)) {
+      value.forEach((val) => searchParams.append(key, String(val)));
+    } else {
+      searchParams.append(key, String(value));
+    }
+  }
+  return searchParams.toString();
 }

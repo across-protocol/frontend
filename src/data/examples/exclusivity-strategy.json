@@ -1,0 +1,17 @@
+{
+  "default": "none",
+  "tokens": {
+    "WETH": {
+      "default": "none",
+      "destinationChainIds": {
+        "137": { "strategy": "weightedRandom", "weight": 0.05 }
+      }
+    },
+    "ETH": {
+      "default": "none",
+      "destinationChainIds": {
+        "137": { "strategy": "weightedRandom", "weight": 0.05 }
+      }
+    }
+  }
+}

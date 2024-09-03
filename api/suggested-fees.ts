@@ -1,7 +1,7 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { type, assert, Infer, optional, string } from "superstruct";
+import { type, assert, Infer, optional, string, enums } from "superstruct";
 import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   DEFAULT_QUOTE_BLOCK_BUFFER,
@@ -28,8 +28,11 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
 } from "./_utils";
+import { selectExclusiveRelayer } from "./_exclusivity";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
 import { parseUnits } from "ethers/lib/utils";
+
+const { BigNumber } = ethers;
 
 const SuggestedFeesQueryParamsSchema = type({
   amount: parsableBigNumberString(),
@@ -43,6 +46,7 @@ const SuggestedFeesQueryParamsSchema = type({
   message: optional(string()),
   recipient: optional(validAddress()),
   relayer: optional(validAddress()),
+  depositMethod: optional(enums(["depositV3", "depositExclusive"])),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
@@ -72,6 +76,7 @@ const handler = async (
       recipient,
       relayer,
       message,
+      depositMethod = "depositV3",
     } = query;
 
     const {
@@ -166,7 +171,7 @@ const handler = async (
       quoteBlockNumber = blockNumberForTimestamp;
     }
 
-    const amount = ethers.BigNumber.from(amountInput);
+    const amount = BigNumber.from(amountInput);
 
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       ENABLED_ROUTES.acrossConfigStoreAddress,
@@ -199,7 +204,7 @@ const handler = async (
     ];
 
     const [
-      [currentUt, nextUt, quoteTimestamp, rawL1TokenConfig],
+      [currentUt, nextUt, _quoteTimestamp, rawL1TokenConfig],
       tokenPrice,
       tokenPriceUsd,
       limits,
@@ -214,6 +219,7 @@ const handler = async (
         destinationChainId
       ),
     ]);
+    const quoteTimestamp = parseInt(_quoteTimestamp.toString());
 
     const amountInUsd = amount
       .mul(parseUnits(tokenPriceUsd.toString(), 18))
@@ -260,22 +266,37 @@ const handler = async (
       throw new InputError("Sent amount is too low relative to fees");
 
     // Across V3's new `deposit` function requires now a total fee that includes the LP fee
-    const totalRelayFee = ethers.BigNumber.from(
-      relayerFeeDetails.relayFeeTotal
-    ).add(lpFeeTotal);
-    const totalRelayFeePct = ethers.BigNumber.from(
+    const totalRelayFee = BigNumber.from(relayerFeeDetails.relayFeeTotal).add(
+      lpFeeTotal
+    );
+    const totalRelayFeePct = BigNumber.from(
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
 
+    const estimatedFillTimeSec = amount.gte(limits.maxDepositInstant)
+      ? resolveRebalanceTiming(String(destinationChainId))
+      : resolveTiming(
+          String(computedOriginChainId),
+          String(destinationChainId),
+          inputToken.symbol,
+          amountInUsd
+        );
+
+    const { exclusiveRelayer, exclusivityPeriod } =
+      await selectExclusiveRelayer(
+        computedOriginChainId,
+        destinationChainId,
+        outputToken,
+        amount.sub(totalRelayFee),
+        amountInUsd,
+        BigNumber.from(relayerFeeDetails.capitalFeePercent),
+        estimatedFillTimeSec
+      );
+    const exclusivityDeadline =
+      depositMethod === "depositExclusive" ? exclusivityPeriod : 0;
+
     const responseJson = {
-      estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
-        ? resolveRebalanceTiming(String(destinationChainId))
-        : resolveTiming(
-            String(computedOriginChainId),
-            String(destinationChainId),
-            inputToken.symbol,
-            amountInUsd
-          ),
+      estimatedFillTimeSec,
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,
@@ -288,8 +309,8 @@ const handler = async (
         : parsedTimestamp.toString(),
       isAmountTooLow: relayerFeeDetails.isAmountTooLow,
       quoteBlock: quoteBlockNumber.toString(),
-      exclusiveRelayer: ethers.constants.AddressZero, // Exclusivity is currently disabled.
-      exclusivityDeadline: "0", // Exclusivity is currently disabled.
+      exclusiveRelayer,
+      exclusivityDeadline,
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
       // Note: v3's new fee structure. Below are the correct values for the new fee structure. The above `*Pct` and `*Total`
       // values are for backwards compatibility which will be removed in the future.
