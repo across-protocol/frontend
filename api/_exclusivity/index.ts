@@ -46,7 +46,7 @@ export async function selectExclusiveRelayer(
   }
 
   // @todo: remove this when all other SpokePools are redeployed to support `depositExclusive`.
-  if (![690, 1135, 81457, 534352].includes(originChainId)) {
+  if (![690, 1135, 81457, 534352, 7777777].includes(originChainId)) {
     return { exclusiveRelayer, exclusivityPeriod };
   }
 
