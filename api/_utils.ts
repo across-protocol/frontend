@@ -729,7 +729,7 @@ function getProviderFromConfigJson(_chainId: string) {
     chainId,
     1, // quorum can be 1 in the context of the API
     3, // retries
-    500, // delay
+    0.1, // delay
     5, // max. concurrency
     "QUOTES_API", // cache namespace
     0 // disable RPC calls logging
