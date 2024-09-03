@@ -99,7 +99,7 @@ const handler = async (
     // Set the caching headers that will be used by the CDN.
     response.setHeader(
       "Cache-Control",
-      "s-maxage=150, stale-while-revalidate=150"
+      "s-maxage=30, stale-while-revalidate=30"
     );
 
     // Return the response
