@@ -56,6 +56,8 @@ export type SuggestedApiFeeReturnType = {
   quoteBlock: ethers.BigNumber;
   limits: BridgeLimitInterface;
   estimatedFillTimeSec: number;
+  exclusiveRelayer: string;
+  exclusivityDeadline: number;
 };
 
 export type SuggestedApiFeeType = (
