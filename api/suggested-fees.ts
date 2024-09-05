@@ -167,9 +167,7 @@ const handler = async (
         throw new InputError("Invalid quote timestamp");
       }
 
-      const blockFinder = new sdk.utils.BlockFinder(provider, [
-        latestBlock as ethers.providers.Block,
-      ]);
+      const blockFinder = new sdk.utils.BlockFinder(provider, [latestBlock]);
       const { number: blockNumberForTimestamp } =
         await blockFinder.getBlockForTimestamp(parsedTimestamp);
       quoteBlockNumber = blockNumberForTimestamp;
