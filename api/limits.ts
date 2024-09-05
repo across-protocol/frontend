@@ -1,10 +1,7 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
-import {
-  BLOCK_TAG_LAG,
-  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-} from "./_constants";
+import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
 import { object, assert, Infer, optional } from "superstruct";
 
@@ -32,6 +29,8 @@ import {
   sendResponse,
   validAddress,
   validateChainAndTokenParams,
+  getCachedLatestBlock,
+  getCachedGasPrice,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -112,13 +111,16 @@ const handler = async (
       },
     ];
 
-    const [tokenPriceNative, _tokenPriceUsd] = await Promise.all([
-      getCachedTokenPrice(
-        l1Token.address,
-        sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-      ),
-      getCachedTokenPrice(l1Token.address, "usd"),
-    ]);
+    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasPrice] =
+      await Promise.all([
+        getCachedTokenPrice(
+          l1Token.address,
+          sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
+        ),
+        getCachedTokenPrice(l1Token.address, "usd"),
+        getCachedLatestBlock(HUB_POOL_CHAIN_ID),
+        getCachedGasPrice(destinationChainId),
+      ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
     const [
@@ -137,9 +139,12 @@ const handler = async (
         DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
         tokenPriceNative,
         undefined,
-        getDefaultRelayerAddress(destinationChainId, l1Token.symbol)
+        getDefaultRelayerAddress(destinationChainId, l1Token.symbol),
+        gasPrice
       ),
-      callViaMulticall3(provider, multiCalls, { blockTag: BLOCK_TAG_LAG }),
+      callViaMulticall3(provider, multiCalls, {
+        blockTag: latestBlock.number,
+      }),
       Promise.all(
         fullRelayers.map((relayer) =>
           getCachedTokenBalance(

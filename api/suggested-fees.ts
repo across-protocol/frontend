@@ -27,6 +27,8 @@ import {
   callViaMulticall3,
   validateChainAndTokenParams,
   getCachedLimits,
+  getCachedLatestBlock,
+  getCachedGasPrice,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
@@ -127,7 +129,7 @@ const handler = async (
       }
     }
 
-    const latestBlock = await provider.getBlock("latest");
+    const latestBlock = await getCachedLatestBlock(HUB_POOL_CHAIN_ID);
 
     // The actual `quoteTimestamp` will be derived from the `quoteBlockNumber` below. If the caller supplies a timestamp,
     // we use the method `BlockFinder.getBlockForTimestamp` to find the block number for that timestamp. If the caller does
@@ -208,6 +210,7 @@ const handler = async (
       tokenPrice,
       tokenPriceUsd,
       limits,
+      gasPrice,
     ] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
       getCachedTokenPrice(l1Token.address, baseCurrency),
@@ -218,6 +221,7 @@ const handler = async (
         computedOriginChainId,
         destinationChainId
       ),
+      getCachedGasPrice(destinationChainId),
     ]);
     const quoteTimestamp = parseInt(_quoteTimestamp.toString());
 
@@ -257,7 +261,8 @@ const handler = async (
       recipient,
       tokenPrice,
       message,
-      relayer
+      relayer,
+      gasPrice
     );
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";

@@ -47,6 +47,7 @@ import {
   relayerFeeCapitalCostConfig,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
+import { buildInternalCacheKey, getCachedValue } from "./_cache";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
@@ -594,7 +595,8 @@ export const getRelayerFeeDetails = async (
   recipientAddress: string,
   tokenPrice?: number,
   message?: string,
-  relayerAddress?: string
+  relayerAddress?: string,
+  gasPrice?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
@@ -622,7 +624,8 @@ export const getRelayerFeeDetails = async (
       amount,
       sdk.utils.isMessageEmpty(message),
       relayerAddress,
-      tokenPrice
+      tokenPrice,
+      gasPrice
     );
   } catch (err: unknown) {
     const reason = resolveEthersError(err);
@@ -731,8 +734,8 @@ function getProviderFromConfigJson(_chainId: string) {
     1, // quorum can be 1 in the context of the API
     3, // retries
     0.1, // delay
-    5, // max. concurrency
-    "QUOTES_API", // cache namespace
+    100, // max. concurrency
+    "RPC_PROVIDER", // cache namespace
     0 // disable RPC calls logging
   );
 }
@@ -809,13 +812,14 @@ export const isRouteEnabled = (
 export const getBalance = (
   chainId: string | number,
   account: string,
-  token: string
+  token: string,
+  blockTag?: string | number
 ): Promise<BigNumber> => {
   return sdk.utils.getTokenBalance(
     account,
     token,
     getProvider(Number(chainId)),
-    BLOCK_TAG_LAG
+    blockTag ?? BLOCK_TAG_LAG
   );
 };
 
@@ -1737,6 +1741,57 @@ export function getChainInputTokenMaxDepositInUsd(
     ? DEFAULT_LITE_CHAIN_USD_MAX_DEPOSIT
     : undefined;
   return maxDeposits[chainId.toString()]?.[symbol] || defaultValue;
+}
+
+export function getCachedLatestBlock(chainId: number) {
+  const ttlPerChain = {
+    default: 2,
+    [CHAIN_IDs.MAINNET]: 12,
+  };
+
+  return getCachedValue(
+    buildInternalCacheKey("latestBlock", chainId),
+    ttlPerChain[chainId] || ttlPerChain.default,
+    async () => {
+      const block = await getProvider(chainId).getBlock("latest");
+      return {
+        number: block.number,
+        timestamp: block.timestamp,
+      } as ethers.providers.Block;
+    }
+  );
+}
+
+export function getCachedGasPrice(chainId: number) {
+  const ttlPerChain = {
+    default: 10,
+    [CHAIN_IDs.MAINNET]: 12,
+  };
+
+  return getCachedValue(
+    buildInternalCacheKey("gasPrice", chainId),
+    ttlPerChain[chainId] || ttlPerChain.default,
+    () => getProvider(chainId).getGasPrice(),
+    (bnFromCache) => BigNumber.from(bnFromCache)
+  );
+}
+
+export function getCachedLatestBalance(
+  chainId: number,
+  tokenAddress: string,
+  address: string
+) {
+  const ttlPerChain = {
+    default: 5,
+    [CHAIN_IDs.MAINNET]: 12,
+  };
+
+  return getCachedValue(
+    buildInternalCacheKey("latestBalance", tokenAddress, chainId, address),
+    ttlPerChain[chainId] || ttlPerChain.default,
+    () => getBalance(chainId, address, tokenAddress),
+    (bnFromCache) => BigNumber.from(bnFromCache)
+  );
 }
 
 /**
