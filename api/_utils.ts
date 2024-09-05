@@ -729,7 +729,7 @@ function getProviderFromConfigJson(_chainId: string) {
   }
 
   return new sdk.providers.RetryProvider(
-    urls.map((url) => [url, chainId]),
+    urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
     chainId,
     1, // quorum can be 1 in the context of the API
     3, // retries
@@ -1050,7 +1050,7 @@ export function applyMapFilter<InputType, MapType>(
 export function resolveEthersError(err: unknown): string {
   // prettier-ignore
   return sdk.typeguards.isEthersError(err)
-    ? `${err.reason}: ${err.code}`
+    ? `${err.reason}: ${err.code} - ${err.error}`
     : sdk.typeguards.isError(err)
       ? err.message
       : "unknown error";
