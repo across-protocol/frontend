@@ -733,7 +733,7 @@ function getProviderFromConfigJson(_chainId: string) {
     chainId,
     1, // quorum can be 1 in the context of the API
     3, // retries
-    0.1, // delay
+    0.5, // delay
     5, // max. concurrency
     "RPC_PROVIDER", // cache namespace
     0 // disable RPC calls logging
