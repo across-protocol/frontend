@@ -1789,7 +1789,7 @@ export function getCachedLatestBalance(
   return getCachedValue(
     buildInternalCacheKey("latestBalance", tokenAddress, chainId, address),
     ttlPerChain[chainId] || ttlPerChain.default,
-    () => getBalance(chainId, tokenAddress, address),
+    () => getBalance(chainId, address, tokenAddress),
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
 }
