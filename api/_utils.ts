@@ -729,7 +729,7 @@ function getProviderFromConfigJson(_chainId: string) {
   }
 
   return new sdk.providers.RetryProvider(
-    urls.map((url) => [url, chainId]),
+    urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
     chainId,
     1, // quorum can be 1 in the context of the API
     3, // retries
