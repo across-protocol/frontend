@@ -624,8 +624,8 @@ export const getRelayerFeeDetails = async (
       amount,
       sdk.utils.isMessageEmpty(message),
       relayerAddress,
-      tokenPrice,
-      gasPrice
+      tokenPrice
+      // gasPrice // FIXME
     );
   } catch (err: unknown) {
     const reason = resolveEthersError(err);
