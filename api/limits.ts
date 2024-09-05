@@ -118,8 +118,8 @@ const handler = async (
           sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
         ),
         getCachedTokenPrice(l1Token.address, "usd"),
-        getCachedLatestBlock(HUB_POOL_CHAIN_ID, 12),
-        getCachedGasPrice(destinationChainId, 10),
+        getCachedLatestBlock(HUB_POOL_CHAIN_ID),
+        getCachedGasPrice(destinationChainId),
       ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
