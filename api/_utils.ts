@@ -1757,7 +1757,7 @@ export function getCachedLatestBlock(chainId: number) {
       return {
         number: block.number,
         timestamp: block.timestamp,
-      };
+      } as ethers.providers.Block;
     }
   );
 }
