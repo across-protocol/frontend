@@ -129,7 +129,7 @@ const handler = async (
       }
     }
 
-    const latestBlock = await getCachedLatestBlock(HUB_POOL_CHAIN_ID, 12);
+    const latestBlock = await getCachedLatestBlock(HUB_POOL_CHAIN_ID);
 
     // The actual `quoteTimestamp` will be derived from the `quoteBlockNumber` below. If the caller supplies a timestamp,
     // we use the method `BlockFinder.getBlockForTimestamp` to find the block number for that timestamp. If the caller does
@@ -223,7 +223,7 @@ const handler = async (
         computedOriginChainId,
         destinationChainId
       ),
-      getCachedGasPrice(destinationChainId, 10),
+      getCachedGasPrice(destinationChainId),
     ]);
     const quoteTimestamp = parseInt(_quoteTimestamp.toString());
 

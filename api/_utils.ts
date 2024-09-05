@@ -1743,10 +1743,15 @@ export function getChainInputTokenMaxDepositInUsd(
   return maxDeposits[chainId.toString()]?.[symbol] || defaultValue;
 }
 
-export function getCachedLatestBlock(chainId: number, ttl: number) {
+export function getCachedLatestBlock(chainId: number) {
+  const ttlPerChain = {
+    default: 2,
+    [CHAIN_IDs.MAINNET]: 12,
+  };
+
   return getCachedValue(
     buildInternalCacheKey("latestBlock", chainId),
-    ttl,
+    ttlPerChain[chainId] || ttlPerChain.default,
     async () => {
       const block = await getProvider(chainId).getBlock("latest");
       return {
@@ -1757,11 +1762,34 @@ export function getCachedLatestBlock(chainId: number, ttl: number) {
   );
 }
 
-export function getCachedGasPrice(chainId: number, ttl: number) {
+export function getCachedGasPrice(chainId: number) {
+  const ttlPerChain = {
+    default: 10,
+    [CHAIN_IDs.MAINNET]: 12,
+  };
+
   return getCachedValue(
     buildInternalCacheKey("gasPrice", chainId),
-    ttl,
+    ttlPerChain[chainId] || ttlPerChain.default,
     () => getProvider(chainId).getGasPrice(),
+    (bnFromCache) => BigNumber.from(bnFromCache)
+  );
+}
+
+export function getCachedLatestBalance(
+  chainId: number,
+  tokenAddress: string,
+  address: string
+) {
+  const ttlPerChain = {
+    default: 5,
+    [CHAIN_IDs.MAINNET]: 12,
+  };
+
+  return getCachedValue(
+    buildInternalCacheKey("latestBalance", tokenAddress, chainId, address),
+    ttlPerChain[chainId] || ttlPerChain.default,
+    () => getBalance(chainId, tokenAddress, address),
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
 }
