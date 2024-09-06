@@ -265,9 +265,12 @@ const handler = async (
       gasPrice
     );
 
-    const skipAmountLimitEnabled = skipAmountLimit === "true";
+    const isAmountTooLow =
+      relayerFeeDetails.isAmountTooLow ||
+      BigNumber.from(amountInput).lt(limits.minDeposit);
 
-    if (!skipAmountLimitEnabled && relayerFeeDetails.isAmountTooLow) {
+    const skipAmountLimitEnabled = skipAmountLimit === "true";
+    if (!skipAmountLimitEnabled && isAmountTooLow) {
       throw new InputError("Sent amount is too low relative to fees");
     }
 
@@ -287,10 +290,6 @@ const handler = async (
           inputToken.symbol,
           amountInUsd
         );
-
-    const isAmountTooLow =
-      relayerFeeDetails.isAmountTooLow ||
-      BigNumber.from(amountInput).lt(limits.minDeposit);
 
     const { exclusiveRelayer, exclusivityPeriod } =
       await selectExclusiveRelayer(
