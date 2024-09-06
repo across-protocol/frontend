@@ -90,6 +90,10 @@ const handler = async (
         MIN_DEPOSIT_USD ??
         0
     );
+    console.log(
+      `minDepositUsdForDestinationChainId:`,
+      minDepositUsdForDestinationChainId
+    );
 
     const hubPool = getHubPool(provider);
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
