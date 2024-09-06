@@ -169,6 +169,14 @@ paths:
                   "quoteBlock": "19237525",
                   "spokePoolAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
                   "expectedFillTimeSec": "4",
+                  "limits": 
+                    {
+                      "minDeposit": "7799819",
+                      "maxDeposit": "22287428516241",
+                      "maxDepositInstant": "201958902363",
+                      "maxDepositShortDelay": "2045367713809",
+                      "recommendedDepositInstant": "201958902363",
+                    }
                 }
         "400":
           description: Invalid input
