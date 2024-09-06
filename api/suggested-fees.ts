@@ -28,7 +28,6 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
   getCachedLatestBlock,
-  getCachedGasPrice,
   getCachedFillGasUsage,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
@@ -222,7 +221,6 @@ const handler = async (
       tokenPrice,
       tokenPriceUsd,
       limits,
-      gasPrice,
       gasUnits,
     ] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
@@ -234,7 +232,6 @@ const handler = async (
         computedOriginChainId,
         destinationChainId
       ),
-      getCachedGasPrice(destinationChainId),
       // Only use cached fill gas usage if message is empty
       sdk.utils.isMessageEmpty(message)
         ? undefined
@@ -272,7 +269,7 @@ const handler = async (
     const relayerFeeDetails = await getRelayerFeeDetails(
       depositArgs,
       tokenPrice,
-      gasPrice,
+      undefined,
       gasUnits
     );
 

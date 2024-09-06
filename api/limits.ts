@@ -30,7 +30,6 @@ import {
   validAddress,
   validateChainAndTokenParams,
   getCachedLatestBlock,
-  getCachedGasPrice,
   getCachedFillGasUsage,
 } from "./_utils";
 
@@ -126,7 +125,7 @@ const handler = async (
       relayerAddress,
     };
 
-    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasPrice, gasUnits] =
+    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasUnits] =
       await Promise.all([
         getCachedTokenPrice(
           l1Token.address,
@@ -134,7 +133,6 @@ const handler = async (
         ),
         getCachedTokenPrice(l1Token.address, "usd"),
         getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-        getCachedGasPrice(destinationChainId),
         getCachedFillGasUsage(depositArgs, {
           relayerAddress,
         }),
@@ -148,7 +146,7 @@ const handler = async (
       transferRestrictedBalances,
       fullRelayerMainnetBalances,
     ] = await Promise.all([
-      getRelayerFeeDetails(depositArgs, tokenPriceNative, gasPrice, gasUnits),
+      getRelayerFeeDetails(depositArgs, tokenPriceNative, undefined, gasUnits),
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,
       }),

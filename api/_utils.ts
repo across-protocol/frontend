@@ -1871,8 +1871,7 @@ export function getCachedFillGasUsage(
     );
     const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
       buildDepositForSimulation(deposit),
-      overrides?.relayerAddress,
-      await getCachedGasPrice(deposit.destinationChainId)
+      overrides?.relayerAddress
     );
     return nativeGasCost;
   };
