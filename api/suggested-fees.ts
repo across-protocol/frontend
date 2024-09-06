@@ -213,6 +213,8 @@ const handler = async (
       recipientAddress: recipient,
       originChainId: computedOriginChainId,
       destinationChainId,
+      message,
+      relayerAddress: relayer,
     };
 
     const [
@@ -221,6 +223,7 @@ const handler = async (
       tokenPriceUsd,
       limits,
       gasPrice,
+      gasUnits,
     ] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
       getCachedTokenPrice(l1Token.address, baseCurrency),
@@ -232,7 +235,10 @@ const handler = async (
         destinationChainId
       ),
       getCachedGasPrice(destinationChainId),
-      getCachedFillGasUsage(depositArgs, { relayerAddress: relayer }),
+      // Only use cached fill gas usage if message is empty
+      sdk.utils.isMessageEmpty(message)
+        ? undefined
+        : getCachedFillGasUsage(depositArgs, { relayerAddress: relayer }),
     ]);
     const quoteTimestamp = parseInt(_quoteTimestamp.toString());
 
@@ -266,9 +272,8 @@ const handler = async (
     const relayerFeeDetails = await getRelayerFeeDetails(
       depositArgs,
       tokenPrice,
-      message,
-      relayer,
-      gasPrice
+      gasPrice,
+      gasUnits
     );
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";

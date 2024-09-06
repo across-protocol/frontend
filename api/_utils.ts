@@ -613,10 +613,10 @@ export const getRelayerFeeDetails = async (
     originChainId: number;
     destinationChainId: number;
     recipientAddress: string;
+    message?: string;
+    relayerAddress?: string;
   },
   tokenPrice?: number,
-  message?: string,
-  relayerAddress?: string,
   gasPrice?: sdk.utils.BigNumberish,
   gasUnits?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
@@ -627,6 +627,8 @@ export const getRelayerFeeDetails = async (
     originChainId,
     destinationChainId,
     recipientAddress,
+    message,
+    relayerAddress,
   } = deposit;
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
@@ -646,7 +648,7 @@ export const getRelayerFeeDetails = async (
       sdk.utils.isMessageEmpty(message),
       relayerAddress,
       tokenPrice,
-      gasPrice, // FIXME: We need properly cache the gas price before this can be used reliably
+      gasPrice,
       gasUnits
     );
   } catch (err: unknown) {

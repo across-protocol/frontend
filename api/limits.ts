@@ -112,6 +112,10 @@ const handler = async (
       },
     ];
 
+    const relayerAddress = getDefaultRelayerAddress(
+      destinationChainId,
+      l1Token.symbol
+    );
     const depositArgs = {
       amount: ethers.BigNumber.from("10").pow(l1Token.decimals),
       inputToken: inputToken.address,
@@ -119,11 +123,8 @@ const handler = async (
       recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
       originChainId: computedOriginChainId,
       destinationChainId,
+      relayerAddress,
     };
-    const relayerAddress = getDefaultRelayerAddress(
-      destinationChainId,
-      l1Token.symbol
-    );
 
     const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasPrice, gasUnits] =
       await Promise.all([
@@ -147,14 +148,7 @@ const handler = async (
       transferRestrictedBalances,
       fullRelayerMainnetBalances,
     ] = await Promise.all([
-      getRelayerFeeDetails(
-        depositArgs,
-        tokenPriceNative,
-        undefined,
-        getDefaultRelayerAddress(destinationChainId, l1Token.symbol),
-        gasPrice,
-        gasUnits
-      ),
+      getRelayerFeeDetails(depositArgs, tokenPriceNative, gasPrice, gasUnits),
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,
       }),
