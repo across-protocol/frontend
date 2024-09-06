@@ -265,10 +265,14 @@ const handler = async (
       gasPrice
     );
 
-    const skipAmountLimitEnabled = skipAmountLimit === "true";
+    const isAmountTooLow =
+      relayerFeeDetails.isAmountTooLow ||
+      BigNumber.from(amountInput).lt(limits.minDeposit);
 
-    if (!skipAmountLimitEnabled && relayerFeeDetails.isAmountTooLow)
+    const skipAmountLimitEnabled = skipAmountLimit === "true";
+    if (!skipAmountLimitEnabled && isAmountTooLow) {
       throw new InputError("Sent amount is too low relative to fees");
+    }
 
     // Across V3's new `deposit` function requires now a total fee that includes the LP fee
     const totalRelayFee = BigNumber.from(relayerFeeDetails.relayFeeTotal).add(
@@ -312,7 +316,7 @@ const handler = async (
       timestamp: isNaN(parsedTimestamp)
         ? quoteTimestamp.toString()
         : parsedTimestamp.toString(),
-      isAmountTooLow: relayerFeeDetails.isAmountTooLow,
+      isAmountTooLow,
       quoteBlock: quoteBlockNumber.toString(),
       exclusiveRelayer,
       exclusivityDeadline,
