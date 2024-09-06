@@ -85,15 +85,12 @@ const handler = async (
       outputToken,
     } = validateChainAndTokenParams(query);
 
-    const minDepositUsdForDestinationChainId = Number(
-      process.env[`MIN_DEPOSIT_USD_${destinationChainId}`] ??
-        MIN_DEPOSIT_USD ??
-        0
+    let minDepositUsdForDestinationChainId = Number(
+      process.env[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
     );
-    console.log(
-      `minDepositUsdForDestinationChainId:`,
-      minDepositUsdForDestinationChainId
-    );
+    if (isNaN(minDepositUsdForDestinationChainId)) {
+      minDepositUsdForDestinationChainId = 0;
+    }
 
     const hubPool = getHubPool(provider);
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
