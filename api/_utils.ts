@@ -1000,19 +1000,8 @@ export const getCachedTokenBalance = async (
   account: string,
   token: string
 ): Promise<BigNumber> => {
-  // Make the request to the vercel API.
-  const response = await axios.get<{ balance: string }>(
-    `${resolveVercelEndpoint()}/api/account-balance`,
-    {
-      params: {
-        chainId,
-        account,
-        token,
-      },
-    }
-  );
-  // Return the balance
-  return BigNumber.from(response.data.balance);
+  const balance = await getCachedLatestBalance(Number(chainId), token, account);
+  return balance;
 };
 
 /**
@@ -1845,8 +1834,8 @@ export function getCachedLatestBalance(
   address: string
 ) {
   const ttlPerChain = {
-    default: 5,
-    [CHAIN_IDs.MAINNET]: 12,
+    default: 30,
+    [CHAIN_IDs.MAINNET]: 30,
   };
 
   return getCachedValue(
