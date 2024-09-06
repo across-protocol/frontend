@@ -288,6 +288,10 @@ const handler = async (
           amountInUsd
         );
 
+    const isAmountTooLow =
+      relayerFeeDetails.isAmountTooLow ||
+      BigNumber.from(amountInput).lt(limits.minDeposit);
+
     const { exclusiveRelayer, exclusivityPeriod } =
       await selectExclusiveRelayer(
         computedOriginChainId,
@@ -313,7 +317,7 @@ const handler = async (
       timestamp: isNaN(parsedTimestamp)
         ? quoteTimestamp.toString()
         : parsedTimestamp.toString(),
-      isAmountTooLow: relayerFeeDetails.isAmountTooLow,
+      isAmountTooLow,
       quoteBlock: quoteBlockNumber.toString(),
       exclusiveRelayer,
       exclusivityDeadline,
