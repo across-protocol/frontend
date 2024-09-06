@@ -57,7 +57,8 @@ const handler = async (
     const {
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
-      REACT_APP_MIN_DEPOSIT_USD,
+      MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
+      // returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
     } = process.env;
     const provider = getProvider(HUB_POOL_CHAIN_ID);
 
@@ -85,8 +86,8 @@ const handler = async (
     } = validateChainAndTokenParams(query);
 
     const minDepositUsdForDestinationChainId = Number(
-      process.env[`REACT_APP_MIN_DEPOSIT_USD_${destinationChainId}`] ??
-        REACT_APP_MIN_DEPOSIT_USD ??
+      process.env[`MIN_DEPOSIT_USD_${destinationChainId}`] ??
+        MIN_DEPOSIT_USD ??
         0
     );
 
