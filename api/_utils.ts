@@ -728,15 +728,13 @@ function getProviderFromConfigJson(_chainId: string) {
     return undefined;
   }
 
-  return new sdk.providers.RetryProvider(
+  return new sdk.providers.SpeedProvider(
     urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
     chainId,
-    1, // quorum can be 1 in the context of the API
-    3, // retries
-    0.5, // delay
-    5, // max. concurrency
+    3, // max. concurrency used in `SpeedProvider`
+    5, // max. concurrency used in `RateLimitedProvider`
     "RPC_PROVIDER", // cache namespace
-    0 // disable RPC calls logging
+    1 // disable RPC calls logging
   );
 }
 
