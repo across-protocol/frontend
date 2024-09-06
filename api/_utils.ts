@@ -14,7 +14,14 @@ import {
 } from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
-import { BigNumber, ethers, providers, Signer, utils } from "ethers";
+import {
+  BigNumber,
+  BigNumberish,
+  ethers,
+  providers,
+  utils,
+  Signer,
+} from "ethers";
 import { StructError, define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -532,16 +539,7 @@ export const getRelayerFeeCalculator = (
     relayerAddress: string;
   }> = {}
 ) => {
-  const queries = sdk.relayFeeCalculator.QueryBase__factory.create(
-    destinationChainId,
-    getProvider(destinationChainId),
-    undefined,
-    overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
-    overrides.relayerAddress,
-    REACT_APP_COINGECKO_PRO_API_KEY,
-    getLogger(),
-    getGasMarkup(destinationChainId)
-  );
+  const queries = getRelayerFeeCalculatorQueries(destinationChainId, overrides);
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     queries,
@@ -554,6 +552,25 @@ export const getRelayerFeeCalculator = (
   return new sdk.relayFeeCalculator.RelayFeeCalculator(
     relayerFeeCalculatorConfig,
     logger
+  );
+};
+
+const getRelayerFeeCalculatorQueries = (
+  destinationChainId: number,
+  overrides: Partial<{
+    spokePoolAddress: string;
+    relayerAddress: string;
+  }> = {}
+) => {
+  return sdk.relayFeeCalculator.QueryBase__factory.create(
+    destinationChainId,
+    getProvider(destinationChainId),
+    undefined,
+    overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
+    overrides.relayerAddress,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(destinationChainId)
   );
 };
 
@@ -584,53 +601,96 @@ export const getTokenSymbol = (tokenAddress: string): string => {
  * @param tokenPrice An optional overred price to prevent the SDK from creating its own call
  * @param message An optional message to include in the transfer
  * @param relayerAddress An optional relayer address to use for the transfer
+ * @param gasPrice An optional gas price to use for the transfer
+ * @param gasUnits An optional gas unit to use for the transfer
  * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
  */
 export const getRelayerFeeDetails = async (
-  inputToken: string,
-  outputToken: string,
-  amount: sdk.utils.BigNumberish,
-  originChainId: number,
-  destinationChainId: number,
-  recipientAddress: string,
+  deposit: {
+    inputToken: string;
+    outputToken: string;
+    amount: sdk.utils.BigNumberish;
+    originChainId: number;
+    destinationChainId: number;
+    recipientAddress: string;
+  },
   tokenPrice?: number,
   message?: string,
   relayerAddress?: string,
-  gasPrice?: sdk.utils.BigNumberish
+  gasPrice?: sdk.utils.BigNumberish,
+  gasUnits?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
+  const {
+    inputToken,
+    outputToken,
+    amount,
+    originChainId,
+    destinationChainId,
+    recipientAddress,
+  } = deposit;
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
   });
   try {
     return await relayFeeCalculator.relayerFeeDetails(
-      {
-        inputAmount: sdk.utils.toBN(amount),
-        outputAmount: sdk.utils.toBN(amount),
-        depositId: sdk.utils.bnUint32Max.toNumber(),
-        depositor: recipientAddress,
-        recipient: recipientAddress,
-        destinationChainId,
-        originChainId,
-        quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
+      buildDepositForSimulation({
+        amount: amount.toString(),
         inputToken,
         outputToken,
-        fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
-        exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
-        exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
-        message: message ?? sdk.constants.EMPTY_MESSAGE,
-        fromLiteChain: false, // FIXME
-        toLiteChain: false, // FIXME
-      },
+        recipientAddress,
+        originChainId,
+        destinationChainId,
+        message,
+      }),
       amount,
       sdk.utils.isMessageEmpty(message),
       relayerAddress,
-      tokenPrice
-      // gasPrice // FIXME
+      tokenPrice,
+      gasPrice, // FIXME: We need properly cache the gas price before this can be used reliably
+      gasUnits
     );
   } catch (err: unknown) {
     const reason = resolveEthersError(err);
     throw new InputError(`Relayer fill simulation failed - ${reason}`);
   }
+};
+
+export const buildDepositForSimulation = (depositArgs: {
+  amount: BigNumberish;
+  inputToken: string;
+  outputToken: string;
+  recipientAddress: string;
+  originChainId: number;
+  destinationChainId: number;
+  message?: string;
+}) => {
+  const {
+    amount,
+    inputToken,
+    outputToken,
+    recipientAddress,
+    originChainId,
+    destinationChainId,
+    message,
+  } = depositArgs;
+  return {
+    inputAmount: sdk.utils.toBN(amount),
+    outputAmount: sdk.utils.toBN(amount),
+    depositId: sdk.utils.bnUint32Max.toNumber(),
+    depositor: recipientAddress,
+    recipient: recipientAddress,
+    destinationChainId,
+    originChainId,
+    quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
+    inputToken,
+    outputToken,
+    fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
+    exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
+    exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
+    message: message ?? sdk.constants.EMPTY_MESSAGE,
+    fromLiteChain: false, // FIXME
+    toLiteChain: false, // FIXME
+  };
 };
 
 /**
@@ -911,7 +971,7 @@ export function getMulticall3(
   chainId: number,
   signerOrProvider?: Signer | providers.Provider
 ): Multicall3 | undefined {
-  const address = sdk.utils.multicall3Addresses[chainId];
+  const address = sdk.utils.getMulticallAddress(chainId);
 
   // no multicall on this chain
   if (!address) {
@@ -1762,14 +1822,17 @@ export function getCachedLatestBlock(chainId: number) {
 
 export function getCachedGasPrice(chainId: number) {
   const ttlPerChain = {
-    default: 10,
-    [CHAIN_IDs.MAINNET]: 12,
+    default: 5,
+    [CHAIN_IDs.ARBITRUM]: 2,
   };
 
   return getCachedValue(
     buildInternalCacheKey("gasPrice", chainId),
     ttlPerChain[chainId] || ttlPerChain.default,
-    () => getProvider(chainId).getGasPrice(),
+    async () => {
+      const gasPrice = await getProvider(chainId).getGasPrice();
+      return gasPrice.mul(2);
+    },
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
 }
@@ -1789,6 +1852,42 @@ export function getCachedLatestBalance(
     ttlPerChain[chainId] || ttlPerChain.default,
     () => getBalance(chainId, address, tokenAddress),
     (bnFromCache) => BigNumber.from(bnFromCache)
+  );
+}
+
+export function getCachedFillGasUsage(
+  deposit: Parameters<typeof buildDepositForSimulation>[0],
+  overrides?: Partial<{
+    spokePoolAddress: string;
+    relayerAddress: string;
+  }>
+) {
+  const ttlPerChain = {
+    default: 10,
+    [CHAIN_IDs.ARBITRUM]: 10,
+  };
+
+  const cacheKey = buildInternalCacheKey(
+    "fillGasUsage",
+    deposit.destinationChainId,
+    deposit.outputToken
+  );
+  const ttl = ttlPerChain[deposit.destinationChainId] || ttlPerChain.default;
+  const fetchFn = async () => {
+    const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+      deposit.destinationChainId,
+      overrides
+    );
+    const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
+      buildDepositForSimulation(deposit),
+      overrides?.relayerAddress,
+      await getCachedGasPrice(deposit.destinationChainId)
+    );
+    return nativeGasCost;
+  };
+
+  return getCachedValue(cacheKey, ttl, fetchFn, (bnFromCache) =>
+    BigNumber.from(bnFromCache)
   );
 }
 

@@ -31,6 +31,7 @@ import {
   validateChainAndTokenParams,
   getCachedLatestBlock,
   getCachedGasPrice,
+  getCachedFillGasUsage,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -111,7 +112,20 @@ const handler = async (
       },
     ];
 
-    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasPrice] =
+    const depositArgs = {
+      amount: ethers.BigNumber.from("10").pow(l1Token.decimals),
+      inputToken: inputToken.address,
+      outputToken: outputToken.address,
+      recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+      originChainId: computedOriginChainId,
+      destinationChainId,
+    };
+    const relayerAddress = getDefaultRelayerAddress(
+      destinationChainId,
+      l1Token.symbol
+    );
+
+    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasPrice, gasUnits] =
       await Promise.all([
         getCachedTokenPrice(
           l1Token.address,
@@ -120,6 +134,9 @@ const handler = async (
         getCachedTokenPrice(l1Token.address, "usd"),
         getCachedLatestBlock(HUB_POOL_CHAIN_ID),
         getCachedGasPrice(destinationChainId),
+        getCachedFillGasUsage(depositArgs, {
+          relayerAddress,
+        }),
       ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
@@ -131,16 +148,12 @@ const handler = async (
       fullRelayerMainnetBalances,
     ] = await Promise.all([
       getRelayerFeeDetails(
-        inputToken.address,
-        outputToken.address,
-        ethers.BigNumber.from("10").pow(l1Token.decimals),
-        computedOriginChainId,
-        destinationChainId,
-        DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+        depositArgs,
         tokenPriceNative,
         undefined,
         getDefaultRelayerAddress(destinationChainId, l1Token.symbol),
-        gasPrice
+        gasPrice,
+        gasUnits
       ),
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,

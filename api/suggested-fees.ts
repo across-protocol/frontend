@@ -29,6 +29,7 @@ import {
   getCachedLimits,
   getCachedLatestBlock,
   getCachedGasPrice,
+  getCachedFillGasUsage,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
@@ -205,6 +206,15 @@ const handler = async (
       },
     ];
 
+    const depositArgs = {
+      amount,
+      inputToken: inputToken.address,
+      outputToken: outputToken.address,
+      recipientAddress: recipient,
+      originChainId: computedOriginChainId,
+      destinationChainId,
+    };
+
     const [
       [currentUt, nextUt, _quoteTimestamp, rawL1TokenConfig],
       tokenPrice,
@@ -222,6 +232,7 @@ const handler = async (
         destinationChainId
       ),
       getCachedGasPrice(destinationChainId),
+      getCachedFillGasUsage(depositArgs, { relayerAddress: relayer }),
     ]);
     const quoteTimestamp = parseInt(_quoteTimestamp.toString());
 
@@ -253,12 +264,7 @@ const handler = async (
     );
     const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
     const relayerFeeDetails = await getRelayerFeeDetails(
-      inputToken.address,
-      outputToken.address,
-      amount,
-      computedOriginChainId,
-      destinationChainId,
-      recipient,
+      depositArgs,
       tokenPrice,
       message,
       relayer,
