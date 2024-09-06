@@ -3,7 +3,7 @@ import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
 import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
-import { object, assert, Infer, optional } from "superstruct";
+import { object, assert, Infer, optional, string } from "superstruct";
 
 import {
   ENABLED_ROUTES,
@@ -31,6 +31,9 @@ import {
   validateChainAndTokenParams,
   getCachedLatestBlock,
   getCachedGasPrice,
+  parsableBigNumberString,
+  validateDepositMessage,
+  InputError,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -39,6 +42,10 @@ const LimitsQueryParamsSchema = object({
   outputToken: optional(validAddress()),
   destinationChainId: positiveIntStr(),
   originChainId: optional(positiveIntStr()),
+  amount: optional(parsableBigNumberString()),
+  message: optional(string()),
+  recipient: optional(validAddress()),
+  relayer: optional(validAddress()),
 });
 
 type LimitsQueryParams = Infer<typeof LimitsQueryParamsSchema>;
@@ -88,6 +95,28 @@ const handler = async (
       outputToken,
     } = validateChainAndTokenParams(query);
 
+    // Optional parameters that caller can use to specify specific deposit details with which
+    // to compute limits.
+    let { amount: amountInput, recipient, relayer, message } = query;
+    recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+    relayer ??= getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
+    if (sdk.utils.isDefined(message)) {
+      if (!sdk.utils.isDefined(amountInput)) {
+        throw new InputError("amount must be defined when message is defined");
+      }
+      validateDepositMessage(
+        recipient,
+        destinationChainId,
+        relayer,
+        outputToken.address,
+        amountInput,
+        message
+      );
+    }
+    const amount = BigNumber.from(
+      amountInput ?? ethers.BigNumber.from("10").pow(l1Token.decimals)
+    );
+
     const hubPool = getHubPool(provider);
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       ENABLED_ROUTES.acrossConfigStoreAddress,
@@ -133,13 +162,13 @@ const handler = async (
       getRelayerFeeDetails(
         inputToken.address,
         outputToken.address,
-        ethers.BigNumber.from("10").pow(l1Token.decimals),
+        amount,
         computedOriginChainId,
         destinationChainId,
-        DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+        recipient,
         tokenPriceNative,
-        undefined,
-        getDefaultRelayerAddress(destinationChainId, l1Token.symbol),
+        message,
+        relayer,
         gasPrice
       ),
       callViaMulticall3(provider, multiCalls, {
@@ -312,6 +341,7 @@ const handler = async (
       maxDepositInstant: bufferedMaxDepositInstant.toString(),
       maxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
       recommendedDepositInstant: bufferedRecommendedDepositInstant.toString(),
+      relayerFeeDetails,
     };
     logger.debug({
       at: "Limits",
