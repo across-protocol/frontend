@@ -61,10 +61,6 @@ const handler = async (
     } = process.env;
     const provider = getProvider(HUB_POOL_CHAIN_ID);
 
-    const minDeposits = REACT_APP_MIN_DEPOSIT_USD
-      ? JSON.parse(REACT_APP_MIN_DEPOSIT_USD)
-      : {};
-
     const fullRelayers = !REACT_APP_FULL_RELAYERS
       ? []
       : (JSON.parse(REACT_APP_FULL_RELAYERS) as string[]).map((relayer) => {
@@ -87,6 +83,12 @@ const handler = async (
       inputToken,
       outputToken,
     } = validateChainAndTokenParams(query);
+
+    const minDepositUsdForDestinationChainId = Number(
+      process.env[`REACT_APP_MIN_DEPOSIT_USD_${destinationChainId}`] ??
+        REACT_APP_MIN_DEPOSIT_USD ??
+        0
+    );
 
     const hubPool = getHubPool(provider);
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
@@ -193,7 +195,7 @@ const handler = async (
       ? ethers.BigNumber.from(0)
       : ethers.utils
           .parseUnits(
-            (minDeposits[destinationChainId] ?? 0).toString(),
+            minDepositUsdForDestinationChainId.toString(),
             l1Token.decimals
           )
           .mul(ethers.utils.parseUnits("1"))
