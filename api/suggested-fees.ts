@@ -267,8 +267,9 @@ const handler = async (
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";
 
-    if (!skipAmountLimitEnabled && relayerFeeDetails.isAmountTooLow)
+    if (!skipAmountLimitEnabled && relayerFeeDetails.isAmountTooLow) {
       throw new InputError("Sent amount is too low relative to fees");
+    }
 
     // Across V3's new `deposit` function requires now a total fee that includes the LP fee
     const totalRelayFee = BigNumber.from(relayerFeeDetails.relayFeeTotal).add(

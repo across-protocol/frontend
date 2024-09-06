@@ -598,6 +598,19 @@ export const getRelayerFeeDetails = async (
   relayerAddress?: string,
   gasPrice?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
+  console.log("inputs:", {
+    inputToken,
+    outputToken,
+    amount,
+    originChainId,
+    destinationChainId,
+    recipientAddress,
+    tokenPrice,
+    message,
+    relayerAddress,
+    gasPrice,
+  });
+
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
   });
