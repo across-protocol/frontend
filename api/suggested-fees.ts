@@ -317,9 +317,6 @@ const handler = async (
         ? quoteTimestamp.toString()
         : parsedTimestamp.toString(),
       isAmountTooLow,
-
-      minDepositForRelayer: relayerFeeDetails.minDeposit,
-
       quoteBlock: quoteBlockNumber.toString(),
       exclusiveRelayer,
       exclusivityDeadline,
