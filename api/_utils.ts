@@ -598,24 +598,11 @@ export const getRelayerFeeDetails = async (
   relayerAddress?: string,
   gasPrice?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
-  console.log("function inputs:", {
-    inputToken,
-    outputToken,
-    amount: amount.toString(),
-    originChainId,
-    destinationChainId,
-    recipientAddress,
-    tokenPrice,
-    message,
-    relayerAddress,
-    gasPrice: gasPrice?.toString(),
-  });
-
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
   });
   try {
-    const results = await relayFeeCalculator.relayerFeeDetails(
+    return await relayFeeCalculator.relayerFeeDetails(
       {
         inputAmount: sdk.utils.toBN(amount),
         outputAmount: sdk.utils.toBN(amount),
@@ -640,16 +627,6 @@ export const getRelayerFeeDetails = async (
       tokenPrice
       // gasPrice // FIXME
     );
-    console.log("Relayer fee details:", {
-      amountToRelay: results.amountToRelay.toString(),
-      relayerFee: results.capitalDiscountPercent.toString(),
-      totalFee: results.capitalFeePercent.toString(),
-      capitalFeeTotal: results.capitalFeeTotal.toString(),
-      feeLimitPct: results.feeLimitPercent.toString(),
-      minDeposit: results.minDeposit.toString(),
-    });
-
-    return results;
   } catch (err: unknown) {
     const reason = resolveEthersError(err);
     throw new InputError(`Relayer fill simulation failed - ${reason}`);
