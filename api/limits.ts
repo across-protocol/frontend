@@ -200,6 +200,11 @@ const handler = async (
         )
       ),
     ]);
+    logger.debug({
+      at: "Limits",
+      message: "Relayer fee details from SDK",
+      relayerFeeDetails,
+    });
 
     let { liquidReserves } = multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
@@ -341,7 +346,6 @@ const handler = async (
       maxDepositInstant: bufferedMaxDepositInstant.toString(),
       maxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
       recommendedDepositInstant: bufferedRecommendedDepositInstant.toString(),
-      relayerFeeDetails,
     };
     logger.debug({
       at: "Limits",
