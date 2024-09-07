@@ -64,13 +64,10 @@ const handler = async (
     const {
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
-      REACT_APP_MIN_DEPOSIT_USD,
+      MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
+      // returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
     } = process.env;
     const provider = getProvider(HUB_POOL_CHAIN_ID);
-
-    const minDeposits = REACT_APP_MIN_DEPOSIT_USD
-      ? JSON.parse(REACT_APP_MIN_DEPOSIT_USD)
-      : {};
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
       ? []
@@ -116,6 +113,12 @@ const handler = async (
     const amount = BigNumber.from(
       amountInput ?? ethers.BigNumber.from("10").pow(l1Token.decimals)
     );
+    let minDepositUsdForDestinationChainId = Number(
+      process.env[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
+    );
+    if (isNaN(minDepositUsdForDestinationChainId)) {
+      minDepositUsdForDestinationChainId = 0;
+    }
 
     const hubPool = getHubPool(provider);
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
@@ -227,7 +230,7 @@ const handler = async (
       ? ethers.BigNumber.from(0)
       : ethers.utils
           .parseUnits(
-            (minDeposits[destinationChainId] ?? 0).toString(),
+            minDepositUsdForDestinationChainId.toString(),
             l1Token.decimals
           )
           .mul(ethers.utils.parseUnits("1"))
