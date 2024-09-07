@@ -712,9 +712,9 @@ export const getCachedLimits = async (
   outputToken: string,
   originChainId: number,
   destinationChainId: number,
-  amount: string,
-  recipient: string,
-  relayer: string,
+  amount?: string,
+  recipient?: string,
+  relayer?: string,
   message?: string
 ): Promise<{
   minDeposit: string;
