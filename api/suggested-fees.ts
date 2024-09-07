@@ -89,7 +89,8 @@ const handler = async (
 
     relayer ??= getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
     recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
-    if (sdk.utils.isDefined(message)) {
+    const depositWithMessage = sdk.utils.isDefined(message);
+    if (depositWithMessage) {
       validateDepositMessage(
         recipient,
         destinationChainId,
@@ -150,9 +151,6 @@ const handler = async (
       ENABLED_ROUTES.acrossConfigStoreAddress,
       provider
     );
-    const baseCurrency = sdk.utils
-      .getNativeTokenSymbol(destinationChainId)
-      .toLowerCase();
 
     // Aggregate multiple calls into a single multicall to decrease
     // opportunities for RPC calls to be delayed.
@@ -190,10 +188,12 @@ const handler = async (
         outputToken.address,
         computedOriginChainId,
         destinationChainId,
-        amountInput,
-        recipient,
-        relayer,
-        message
+        // Only pass in the following parameters if message is defined, otherwise leave them undefined so we are more
+        // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
+        depositWithMessage ? amountInput : undefined,
+        depositWithMessage ? recipient : undefined,
+        depositWithMessage ? relayer : undefined,
+        depositWithMessage ? message : undefined
       ),
     ]);
     const { maxDeposit, maxDepositInstant, minDeposit, relayerFeeDetails } =
