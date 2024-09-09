@@ -349,6 +349,14 @@ const handler = async (
       maxDepositInstant: bufferedMaxDepositInstant.toString(),
       maxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
       recommendedDepositInstant: bufferedRecommendedDepositInstant.toString(),
+      relayerFeeDetails: {
+        relayFeeTotal: relayerFeeDetails.relayFeeTotal,
+        relayFeePercent: relayerFeeDetails.relayFeePercent,
+        gasFeeTotal: relayerFeeDetails.gasFeeTotal,
+        gasFeePercent: relayerFeeDetails.gasFeePercent,
+        capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
+        capitalFeePercent: relayerFeeDetails.capitalFeePercent,
+      },
     };
     logger.debug({
       at: "Limits",
