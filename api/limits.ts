@@ -96,7 +96,7 @@ const handler = async (
     // to compute limits.
     let { amount: amountInput, recipient, relayer, message } = query;
     recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
-    relayer ??= getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
+    relayer ??= getDefaultRelayerAddress(destinationChainId, l1Token.symbol);
     if (sdk.utils.isDefined(message)) {
       if (!sdk.utils.isDefined(amountInput)) {
         throw new InputError("amount must be defined when message is defined");
