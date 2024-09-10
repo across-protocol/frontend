@@ -610,7 +610,7 @@ const getRelayerFeeCalculatorQueries = (
 ) => {
   return sdk.relayFeeCalculator.QueryBase__factory.create(
     destinationChainId,
-    getProvider(destinationChainId),
+    getProvider(destinationChainId, { useSpeedProvider: true }),
     undefined,
     overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
     overrides.relayerAddress,
