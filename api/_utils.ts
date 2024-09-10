@@ -718,9 +718,13 @@ export const buildDepositForSimulation = (depositArgs: {
     destinationChainId,
     message,
   } = depositArgs;
+  // Small amount to simulate filling with. Should be low enough to guarantee a successful fill.
+  const safeOutputAmount = sdk.utils.toBN(100);
   return {
     inputAmount: sdk.utils.toBN(amount),
-    outputAmount: sdk.utils.toBN(amount),
+    outputAmount: sdk.utils.isMessageEmpty(message)
+      ? safeOutputAmount
+      : sdk.utils.toBN(amount),
     depositId: sdk.utils.bnUint32Max.toNumber(),
     depositor: recipientAddress,
     recipient: recipientAddress,
@@ -1950,7 +1954,6 @@ export function getCachedFillGasUsage(
       deposit.destinationChainId,
       overrides
     );
-    console.log("relayerAddress", overrides?.relayerAddress);
     const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
       buildDepositForSimulation(deposit),
       overrides?.relayerAddress
