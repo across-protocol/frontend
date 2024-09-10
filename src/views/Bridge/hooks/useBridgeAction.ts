@@ -3,7 +3,7 @@ import {
   TransferQuoteReceivedProperties,
   ampli,
 } from "ampli";
-import { BigNumber, providers } from "ethers";
+import { BigNumber, constants, providers } from "ethers";
 import {
   useConnection,
   useApprove,
@@ -167,10 +167,13 @@ export function useBridgeAction(
           networkMismatchHandler
         );
       } else {
+        const isExclusive =
+          frozenDepositArgs.exclusivityDeadline > 0 &&
+          frozenDepositArgs.exclusiveRelayer !== constants.AddressZero;
         const { spokePool, shouldUseSpokePoolVerifier, spokePoolVerifier } =
           await getSpokePoolAndVerifier(frozenRoute);
         tx =
-          shouldUseSpokePoolVerifier && spokePoolVerifier
+          shouldUseSpokePoolVerifier && !isExclusive && spokePoolVerifier
             ? await sendSpokePoolVerifierDepositTx(
                 signer,
                 frozenDepositArgs,
