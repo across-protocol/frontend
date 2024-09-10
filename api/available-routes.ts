@@ -9,7 +9,6 @@ import {
   handleErrorCondition,
   DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
   DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
-  getSpokePoolAddress,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 
@@ -75,8 +74,6 @@ const handler = async (
         toTokenSymbol: route.toTokenSymbol,
         destinationToken: route.toTokenAddress,
         isNative: route.isNative,
-        originSpokePool: getSpokePoolAddress(route.fromChain),
-        destinationSpokePool: getSpokePoolAddress(route.toChain),
       })
     ).map((route) => ({
       originChainId: route.originChainId,
@@ -86,8 +83,6 @@ const handler = async (
       originTokenSymbol: route.fromTokenSymbol,
       destinationTokenSymbol: route.toTokenSymbol,
       isNative: route.isNative,
-      originSpokePool: route.originSpokePool,
-      destinationSpokePool: route.destinationSpokePool,
     }));
 
     // Two different explanations for how `stale-while-revalidate` works:
