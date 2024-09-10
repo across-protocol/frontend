@@ -147,7 +147,7 @@ const handler = async (
       amount,
       inputToken: inputToken.address,
       outputToken: outputToken.address,
-      recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+      recipientAddress: recipient,
       originChainId: computedOriginChainId,
       destinationChainId,
       message,

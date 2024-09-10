@@ -64,7 +64,9 @@ const handler = async (
   try {
     const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = process.env;
 
-    const provider = getProvider(HUB_POOL_CHAIN_ID);
+    const provider = getProvider(HUB_POOL_CHAIN_ID, {
+      useSpeedProvider: true,
+    });
     const hubPool = getHubPool(provider);
 
     assert(query, SuggestedFeesQueryParamsSchema);
@@ -97,7 +99,7 @@ const handler = async (
         relayer,
         outputToken.address,
         amountInput,
-        message
+        message!
       );
     }
 
@@ -190,9 +192,9 @@ const handler = async (
         destinationChainId,
         // Always pass amount since we get relayerFeeDetails (including gross fee amounts) from limits.
         amountInput,
+        recipient,
         // Only pass in the following parameters if message is defined, otherwise leave them undefined so we are more
         // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
-        depositWithMessage ? recipient : undefined,
         depositWithMessage ? relayer : undefined,
         depositWithMessage ? message : undefined
       ),

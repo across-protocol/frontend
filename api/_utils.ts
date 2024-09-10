@@ -647,7 +647,6 @@ export const getTokenSymbol = (tokenAddress: string): string => {
  * @param tokenPrice An optional overred price to prevent the SDK from creating its own call
  * @param message An optional message to include in the transfer
  * @param relayerAddress An optional relayer address to use for the transfer
- * @param gasPrice An optional gas price to use for the transfer
  * @param gasUnits An optional gas unit to use for the transfer
  * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
  */
@@ -663,7 +662,6 @@ export const getRelayerFeeDetails = async (
   },
   tokenPrice?: number,
   relayerAddress?: string,
-  gasPrice?: sdk.utils.BigNumberish,
   gasUnits?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const {
@@ -693,7 +691,7 @@ export const getRelayerFeeDetails = async (
       sdk.utils.isMessageEmpty(message),
       relayerAddress,
       tokenPrice,
-      gasPrice,
+      undefined,
       gasUnits
     );
   } catch (err: unknown) {
@@ -816,31 +814,40 @@ export const providerCache: Record<string, StaticJsonRpcProvider> = {};
  * @returns A provider object to query the requested blockchain
  */
 export const getProvider = (
-  _chainId: number
+  _chainId: number,
+  opts = {
+    useSpeedProvider: false,
+  }
 ): providers.StaticJsonRpcProvider => {
   const chainId = _chainId.toString();
-  if (!providerCache[chainId]) {
+  const cacheKey = `${chainId}-${opts.useSpeedProvider}`;
+  if (!providerCache[cacheKey]) {
     // Resolves provider from urls set in rpc-providers.json.
-    const providerFromConfigJson = getProviderFromConfigJson(chainId);
+    const providerFromConfigJson = getProviderFromConfigJson(chainId, opts);
     // Resolves provider from urls set via environment variables.
     // Note that this is legacy and should be removed in the future.
     const override = overrideProvider(chainId);
 
     if (providerFromConfigJson) {
-      providerCache[chainId] = providerFromConfigJson;
+      providerCache[cacheKey] = providerFromConfigJson;
     } else if (override) {
-      providerCache[chainId] = override;
+      providerCache[cacheKey] = override;
     } else {
-      providerCache[chainId] = infuraProvider(_chainId);
+      providerCache[cacheKey] = infuraProvider(_chainId);
     }
   }
-  return providerCache[chainId];
+  return providerCache[cacheKey];
 };
 
 /**
  * Resolves a provider from the `rpc-providers.json` configuration file.
  */
-function getProviderFromConfigJson(_chainId: string) {
+function getProviderFromConfigJson(
+  _chainId: string,
+  opts = {
+    useSpeedProvider: false,
+  }
+) {
   const chainId = Number(_chainId);
   const urls = getRpcUrlsFromConfigJson(chainId);
 
@@ -849,6 +856,19 @@ function getProviderFromConfigJson(_chainId: string) {
       `No provider URL found for chainId ${chainId} in rpc-providers.json`
     );
     return undefined;
+  }
+
+  if (!opts.useSpeedProvider) {
+    return new sdk.providers.RetryProvider(
+      urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
+      chainId,
+      1, // quorum can be 1 in the context of the API
+      3, // retries
+      0.5, // delay
+      5, // max. concurrency
+      "RPC_PROVIDER", // cache namespace
+      0 // disable RPC calls logging
+    );
   }
 
   return new sdk.providers.SpeedProvider(
@@ -1930,6 +1950,7 @@ export function getCachedFillGasUsage(
       deposit.destinationChainId,
       overrides
     );
+    console.log("relayerAddress", overrides?.relayerAddress);
     const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
       buildDepositForSimulation(deposit),
       overrides?.relayerAddress
