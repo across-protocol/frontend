@@ -11,7 +11,6 @@ import {
   getLogger,
   InputError,
   getProvider,
-  getRelayerFeeDetails,
   getCachedTokenPrice,
   handleErrorCondition,
   parsableBigNumberString,
@@ -21,14 +20,13 @@ import {
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
   getSpokePoolAddress,
-  getCachedTokenBalance,
   getDefaultRelayerAddress,
   getHubPool,
   callViaMulticall3,
   validateChainAndTokenParams,
   getCachedLimits,
   getCachedLatestBlock,
-  getCachedFillGasUsage,
+  validateDepositMessage,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
@@ -91,42 +89,16 @@ const handler = async (
 
     relayer ??= getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
     recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
-
-    if (sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message)) {
-      if (!ethers.utils.isHexString(message)) {
-        throw new InputError("Message must be a hex string");
-      }
-      if (message.length % 2 !== 0) {
-        // Our message encoding is a hex string, so we need to check that the length is even.
-        throw new InputError("Message must be an even hex string");
-      }
-      const isRecipientAContract = await sdk.utils.isContractDeployedToAddress(
+    const depositWithMessage = sdk.utils.isDefined(message);
+    if (depositWithMessage) {
+      validateDepositMessage(
         recipient,
-        getProvider(destinationChainId)
+        destinationChainId,
+        relayer,
+        outputToken.address,
+        amountInput,
+        message
       );
-      if (!isRecipientAContract) {
-        throw new InputError(
-          "Recipient must be a contract when a message is provided"
-        );
-      } else {
-        // If we're in this case, it's likely that we're going to have to simulate the execution of
-        // a complex message handling from the specified relayer to the specified recipient by calling
-        // the arbitrary function call `handleAcrossMessage` at the recipient. So that we can discern
-        // the difference between an OUT_OF_FUNDS error in either the transfer or through the execution
-        // of the `handleAcrossMessage` we will check that the balance of the relayer is sufficient to
-        // support this deposit.
-        const balanceOfToken = await getCachedTokenBalance(
-          destinationChainId,
-          relayer,
-          outputToken.address
-        );
-        if (balanceOfToken.lt(amountInput)) {
-          throw new InputError(
-            `Relayer Address (${relayer}) doesn't have enough funds to support this deposit;` +
-              ` for help, please reach out to https://discord.across.to`
-          );
-        }
-      }
     }
 
     const latestBlock = await getCachedLatestBlock(HUB_POOL_CHAIN_ID);
@@ -179,7 +151,6 @@ const handler = async (
       ENABLED_ROUTES.acrossConfigStoreAddress,
       provider
     );
-    const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
     // Aggregate multiple calls into a single multicall to decrease
     // opportunities for RPC calls to be delayed.
@@ -205,48 +176,39 @@ const handler = async (
       },
     ];
 
-    const depositArgs = {
-      amount,
-      inputToken: inputToken.address,
-      outputToken: outputToken.address,
-      recipientAddress: recipient,
-      originChainId: computedOriginChainId,
-      destinationChainId,
-      message,
-      relayerAddress: relayer,
-    };
-
     const [
       [currentUt, nextUt, _quoteTimestamp, rawL1TokenConfig],
-      tokenPrice,
       tokenPriceUsd,
       limits,
-      gasUnits,
     ] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
-      getCachedTokenPrice(l1Token.address, baseCurrency),
       getCachedTokenPrice(l1Token.address, "usd"),
       getCachedLimits(
         inputToken.address,
         outputToken.address,
         computedOriginChainId,
-        destinationChainId
+        destinationChainId,
+        // Always pass amount since we get relayerFeeDetails (including gross fee amounts) from limits.
+        amountInput,
+        // Only pass in the following parameters if message is defined, otherwise leave them undefined so we are more
+        // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
+        depositWithMessage ? recipient : undefined,
+        depositWithMessage ? relayer : undefined,
+        depositWithMessage ? message : undefined
       ),
-      // Only use cached fill gas usage if message is empty
-      sdk.utils.isMessageEmpty(message)
-        ? undefined
-        : getCachedFillGasUsage(depositArgs, { relayerAddress: relayer }),
     ]);
+    const { maxDeposit, maxDepositInstant, minDeposit, relayerFeeDetails } =
+      limits;
     const quoteTimestamp = parseInt(_quoteTimestamp.toString());
 
     const amountInUsd = amount
       .mul(parseUnits(tokenPriceUsd.toString(), 18))
       .div(parseUnits("1", inputToken.decimals));
 
-    if (amount.gt(limits.maxDeposit)) {
+    if (amount.gt(maxDeposit)) {
       throw new InputError(
         `Amount exceeds max. deposit limit: ${ethers.utils.formatUnits(
-          limits.maxDeposit,
+          maxDeposit,
           inputToken.decimals
         )} ${inputToken.symbol}`
       );
@@ -266,17 +228,13 @@ const handler = async (
       nextUt
     );
     const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
-    const relayerFeeDetails = await getRelayerFeeDetails(
-      depositArgs,
-      tokenPrice,
-      undefined,
-      gasUnits
-    );
+
+    const isAmountTooLow = BigNumber.from(amountInput).lt(minDeposit);
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";
-
-    if (!skipAmountLimitEnabled && relayerFeeDetails.isAmountTooLow)
+    if (!skipAmountLimitEnabled && isAmountTooLow) {
       throw new InputError("Sent amount is too low relative to fees");
+    }
 
     // Across V3's new `deposit` function requires now a total fee that includes the LP fee
     const totalRelayFee = BigNumber.from(relayerFeeDetails.relayFeeTotal).add(
@@ -286,7 +244,7 @@ const handler = async (
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
 
-    const estimatedFillTimeSec = amount.gte(limits.maxDepositInstant)
+    const estimatedFillTimeSec = amount.gte(maxDepositInstant)
       ? resolveRebalanceTiming(String(destinationChainId))
       : resolveTiming(
           String(computedOriginChainId),
@@ -320,7 +278,7 @@ const handler = async (
       timestamp: isNaN(parsedTimestamp)
         ? quoteTimestamp.toString()
         : parsedTimestamp.toString(),
-      isAmountTooLow: relayerFeeDetails.isAmountTooLow,
+      isAmountTooLow,
       quoteBlock: quoteBlockNumber.toString(),
       exclusiveRelayer,
       exclusivityDeadline,

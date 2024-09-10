@@ -3,7 +3,7 @@ import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
 import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
-import { object, assert, Infer, optional } from "superstruct";
+import { object, assert, Infer, optional, string } from "superstruct";
 
 import {
   ENABLED_ROUTES,
@@ -31,6 +31,9 @@ import {
   validateChainAndTokenParams,
   getCachedLatestBlock,
   getCachedFillGasUsage,
+  parsableBigNumberString,
+  validateDepositMessage,
+  InputError,
 } from "./_utils";
 
 const LimitsQueryParamsSchema = object({
@@ -39,6 +42,10 @@ const LimitsQueryParamsSchema = object({
   outputToken: optional(validAddress()),
   destinationChainId: positiveIntStr(),
   originChainId: optional(positiveIntStr()),
+  amount: optional(parsableBigNumberString()),
+  message: optional(string()),
+  recipient: optional(validAddress()),
+  relayer: optional(validAddress()),
 });
 
 type LimitsQueryParams = Infer<typeof LimitsQueryParamsSchema>;
@@ -57,13 +64,10 @@ const handler = async (
     const {
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
-      REACT_APP_MIN_DEPOSIT_USD,
+      MIN_DEPOSIT_USD, // The global minimum deposit in USD for all destination chains. The minimum deposit
+      // returned by the relayerFeeDetails() call will be floor'd with this value (after converting to token units).
     } = process.env;
     const provider = getProvider(HUB_POOL_CHAIN_ID);
-
-    const minDeposits = REACT_APP_MIN_DEPOSIT_USD
-      ? JSON.parse(REACT_APP_MIN_DEPOSIT_USD)
-      : {};
 
     const fullRelayers = !REACT_APP_FULL_RELAYERS
       ? []
@@ -88,6 +92,34 @@ const handler = async (
       outputToken,
     } = validateChainAndTokenParams(query);
 
+    // Optional parameters that caller can use to specify specific deposit details with which
+    // to compute limits.
+    let { amount: amountInput, recipient, relayer, message } = query;
+    recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+    relayer ??= getDefaultRelayerAddress(destinationChainId, l1Token.symbol);
+    if (sdk.utils.isDefined(message)) {
+      if (!sdk.utils.isDefined(amountInput)) {
+        throw new InputError("amount must be defined when message is defined");
+      }
+      validateDepositMessage(
+        recipient,
+        destinationChainId,
+        relayer,
+        outputToken.address,
+        amountInput,
+        message
+      );
+    }
+    const amount = BigNumber.from(
+      amountInput ?? ethers.BigNumber.from("10").pow(l1Token.decimals)
+    );
+    let minDepositUsdForDestinationChainId = Number(
+      process.env[`MIN_DEPOSIT_USD_${destinationChainId}`] ?? MIN_DEPOSIT_USD
+    );
+    if (isNaN(minDepositUsdForDestinationChainId)) {
+      minDepositUsdForDestinationChainId = 0;
+    }
+
     const hubPool = getHubPool(provider);
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       ENABLED_ROUTES.acrossConfigStoreAddress,
@@ -111,18 +143,16 @@ const handler = async (
       },
     ];
 
-    const relayerAddress = getDefaultRelayerAddress(
-      destinationChainId,
-      l1Token.symbol
-    );
     const depositArgs = {
-      amount: ethers.BigNumber.from("10").pow(l1Token.decimals),
+      amount,
       inputToken: inputToken.address,
       outputToken: outputToken.address,
-      recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+      recipientAddress: recipient,
       originChainId: computedOriginChainId,
       destinationChainId,
-      relayerAddress,
+      relayerAddress: relayer,
+      recipient,
+      message,
     };
 
     const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasUnits] =
@@ -133,9 +163,12 @@ const handler = async (
         ),
         getCachedTokenPrice(l1Token.address, "usd"),
         getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-        getCachedFillGasUsage(depositArgs, {
-          relayerAddress,
-        }),
+        // Only use cached fill gas usage if message is empty
+        sdk.utils.isMessageEmpty(message)
+          ? getCachedFillGasUsage(depositArgs, {
+              relayerAddress: relayer,
+            })
+          : undefined,
       ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
@@ -176,6 +209,11 @@ const handler = async (
         )
       ),
     ]);
+    logger.debug({
+      at: "Limits",
+      message: "Relayer fee details from SDK",
+      relayerFeeDetails,
+    });
 
     let { liquidReserves } = multicallOutput[1];
     const [liteChainIdsEncoded] = multicallOutput[2];
@@ -198,7 +236,7 @@ const handler = async (
       ? ethers.BigNumber.from(0)
       : ethers.utils
           .parseUnits(
-            (minDeposits[destinationChainId] ?? 0).toString(),
+            minDepositUsdForDestinationChainId.toString(),
             l1Token.decimals
           )
           .mul(ethers.utils.parseUnits("1"))
@@ -317,6 +355,14 @@ const handler = async (
       maxDepositInstant: bufferedMaxDepositInstant.toString(),
       maxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
       recommendedDepositInstant: bufferedRecommendedDepositInstant.toString(),
+      relayerFeeDetails: {
+        relayFeeTotal: relayerFeeDetails.relayFeeTotal,
+        relayFeePercent: relayerFeeDetails.relayFeePercent,
+        gasFeeTotal: relayerFeeDetails.gasFeeTotal,
+        gasFeePercent: relayerFeeDetails.gasFeePercent,
+        capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
+        capitalFeePercent: relayerFeeDetails.capitalFeePercent,
+      },
     };
     logger.debug({
       at: "Limits",

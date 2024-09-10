@@ -1,8 +1,21 @@
 import { kv } from "@vercel/kv";
 import { interfaces } from "@across-protocol/sdk";
 
+const {
+  KV_REST_API_READ_ONLY_TOKEN,
+  KV_REST_API_TOKEN,
+  KV_REST_API_URL,
+  KV_URL,
+} = process.env;
+const isRedisCacheEnabled =
+  KV_REST_API_URL && KV_REST_API_TOKEN && KV_REST_API_READ_ONLY_TOKEN && KV_URL;
+
 export class RedisCache implements interfaces.CachingMechanismInterface {
   async get<T>(key: string): Promise<T | null> {
+    if (!isRedisCacheEnabled) {
+      return null;
+    }
+
     const value = await kv.get(key);
     if (value === null || value === undefined) {
       return null;
@@ -11,6 +24,10 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
   }
 
   async set<T>(key: string, value: T, ttl = 10): Promise<string | undefined> {
+    if (!isRedisCacheEnabled) {
+      return;
+    }
+
     try {
       if (typeof value === "string") {
         try {
