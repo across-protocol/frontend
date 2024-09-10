@@ -188,12 +188,9 @@ const handler = async (
         outputToken.address,
         computedOriginChainId,
         destinationChainId,
-        // Always pass amount since we get relayerFeeDetails (including gross fee amounts) from limits.
         amountInput,
-        // Only pass in the following parameters if message is defined, otherwise leave them undefined so we are more
-        // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
-        depositWithMessage ? recipient : undefined,
-        depositWithMessage ? relayer : undefined,
+        recipient,
+        relayer,
         depositWithMessage ? message : undefined
       ),
     ]);
