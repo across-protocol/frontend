@@ -23,6 +23,7 @@ import {
   Signer,
 } from "ethers";
 import { StructError, define } from "superstruct";
+import { trace, context } from "@opentelemetry/api";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
@@ -122,6 +123,8 @@ _ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
 );
 
 export const ENABLED_ROUTES = _ENABLED_ROUTES;
+
+const tracer = trace.getTracer(process.env.VERCEL_URL ?? "app.across.to");
 
 /**
  * Writes a log using the google cloud logging utility
@@ -754,13 +757,17 @@ export const getCachedTokenPrice = async (
   baseCurrency: string = "eth",
   historicalDateISO?: string
 ): Promise<number> => {
-  return Number(
-    (
-      await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
-        params: { l1Token, baseCurrency, date: historicalDateISO },
-      })
-    ).data.price
-  );
+  return tracer.startActiveSpan("getCachedTokenPrice", async (span) => {
+    const cachedTokenPrice = Number(
+      (
+        await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
+          params: { l1Token, baseCurrency, date: historicalDateISO },
+        })
+      ).data.price
+    );
+    span.end();
+    return cachedTokenPrice;
+  });
 };
 
 /**

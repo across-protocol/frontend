@@ -2,7 +2,6 @@ import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { BigNumber, ethers } from "ethers";
 import { object, assert, Infer, optional, string } from "superstruct";
-import { trace, context } from "@opentelemetry/api";
 
 import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 import { TokenInfo, TypedVercelRequest } from "./_types";
@@ -55,8 +54,6 @@ const handler = async (
   { query }: TypedVercelRequest<LimitsQueryParams>,
   response: VercelResponse
 ) => {
-  const tracer = trace.getTracer(process.env.VERCEL_URL ?? "app.across.to");
-
   const logger = getLogger();
   logger.debug({
     at: "Limits",
@@ -158,14 +155,10 @@ const handler = async (
 
     const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasUnits] =
       await Promise.all([
-        tracer.startActiveSpan("getCachedTokenPrice", async (span) => {
-          const result = await getCachedTokenPrice(
-            l1Token.address,
-            sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-          );
-          span.end();
-          return result;
-        }),
+        getCachedTokenPrice(
+          l1Token.address,
+          sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
+        ),
         getCachedTokenPrice(l1Token.address, "usd"),
         getCachedLatestBlock(HUB_POOL_CHAIN_ID),
         getCachedFillGasUsage(depositArgs, {
