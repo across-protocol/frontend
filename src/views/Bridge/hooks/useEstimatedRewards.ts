@@ -14,6 +14,7 @@ import {
   parseUnitsWithExtendedDecimals,
   rewardProgramTypes,
   rewardPrograms,
+  rewardProgramsAvailable,
 } from "utils";
 
 export type EstimatedRewards = ReturnType<typeof useEstimatedRewards>;
@@ -28,11 +29,16 @@ export function useEstimatedRewards(
   swapFee?: BigNumber
 ) {
   const rewardProgramName = chainIdToRewardsProgramName[destinationChainId];
-  const rewardProgram = rewardProgramName
+  let rewardProgram = rewardProgramName
     ? rewardPrograms[
         chainIdToRewardsProgramName[destinationChainId] as rewardProgramTypes
       ]
     : undefined;
+
+  if (!rewardProgramsAvailable.includes(rewardProgramName)) {
+    rewardProgram = undefined;
+  }
+
   const rewardToken = rewardProgram
     ? getToken(rewardProgram.rewardTokenSymbol)
     : undefined;
