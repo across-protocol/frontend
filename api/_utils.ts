@@ -284,6 +284,52 @@ export const validateChainAndTokenParams = (
   };
 };
 
+export const validateDepositMessage = async (
+  recipient: string,
+  destinationChainId: number,
+  relayer: string,
+  outputTokenAddress: string,
+  amountInput: string,
+  message: string
+) => {
+  if (!sdk.utils.isMessageEmpty(message)) {
+    if (!ethers.utils.isHexString(message)) {
+      throw new InputError("Message must be a hex string");
+    }
+    if (message.length % 2 !== 0) {
+      // Our message encoding is a hex string, so we need to check that the length is even.
+      throw new InputError("Message must be an even hex string");
+    }
+    const isRecipientAContract = await sdk.utils.isContractDeployedToAddress(
+      recipient,
+      getProvider(destinationChainId)
+    );
+    if (!isRecipientAContract) {
+      throw new InputError(
+        "Recipient must be a contract when a message is provided"
+      );
+    } else {
+      // If we're in this case, it's likely that we're going to have to simulate the execution of
+      // a complex message handling from the specified relayer to the specified recipient by calling
+      // the arbitrary function call `handleAcrossMessage` at the recipient. So that we can discern
+      // the difference between an OUT_OF_FUNDS error in either the transfer or through the execution
+      // of the `handleAcrossMessage` we will check that the balance of the relayer is sufficient to
+      // support this deposit.
+      const balanceOfToken = await getCachedTokenBalance(
+        destinationChainId,
+        relayer,
+        outputTokenAddress
+      );
+      if (balanceOfToken.lt(amountInput)) {
+        throw new InputError(
+          `Relayer Address (${relayer}) doesn't have enough funds to support this deposit;` +
+            ` for help, please reach out to https://discord.across.to`
+        );
+      }
+    }
+  }
+};
+
 /**
  * Utility function to resolve route details based on given `inputTokenAddress` and `destinationChainId`.
  * The optional parameter `originChainId` can be omitted if the `inputTokenAddress` is unique across all
@@ -665,13 +711,25 @@ export const getCachedLimits = async (
   inputToken: string,
   outputToken: string,
   originChainId: number,
-  destinationChainId: number
+  destinationChainId: number,
+  amount?: string,
+  recipient?: string,
+  relayer?: string,
+  message?: string
 ): Promise<{
   minDeposit: string;
   maxDeposit: string;
   maxDepositInstant: string;
   maxDepositShortDelay: string;
   recommendedDepositInstant: string;
+  relayerFeeDetails: {
+    relayFeeTotal: string;
+    relayFeePercent: string;
+    capitalFeePercent: string;
+    capitalFeeTotal: string;
+    gasFeePercent: string;
+    gasFeeTotal: string;
+  };
 }> => {
   return (
     await axios(`${resolveVercelEndpoint()}/api/limits`, {
@@ -680,6 +738,10 @@ export const getCachedLimits = async (
         outputToken,
         originChainId,
         destinationChainId,
+        amount,
+        message,
+        recipient,
+        relayer,
       },
     })
   ).data;
