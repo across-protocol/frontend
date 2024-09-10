@@ -30,7 +30,7 @@ import {
   validAddress,
   validateChainAndTokenParams,
   getCachedLatestBlock,
-  getCachedFillGasUsage,
+  getCachedGasPrice,
   parsableBigNumberString,
   validateDepositMessage,
   InputError,
@@ -143,19 +143,7 @@ const handler = async (
       },
     ];
 
-    const depositArgs = {
-      amount,
-      inputToken: inputToken.address,
-      outputToken: outputToken.address,
-      recipientAddress: recipient,
-      originChainId: computedOriginChainId,
-      destinationChainId,
-      relayerAddress: relayer,
-      recipient,
-      message,
-    };
-
-    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasUnits] =
+    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasPrice] =
       await Promise.all([
         getCachedTokenPrice(
           l1Token.address,
@@ -163,12 +151,7 @@ const handler = async (
         ),
         getCachedTokenPrice(l1Token.address, "usd"),
         getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-        // Only use cached fill gas usage if message is empty
-        sdk.utils.isMessageEmpty(message)
-          ? getCachedFillGasUsage(depositArgs, {
-              relayerAddress: relayer,
-            })
-          : undefined,
+        getCachedGasPrice(destinationChainId),
       ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
@@ -179,7 +162,18 @@ const handler = async (
       transferRestrictedBalances,
       fullRelayerMainnetBalances,
     ] = await Promise.all([
-      getRelayerFeeDetails(depositArgs, tokenPriceNative, undefined, gasUnits),
+      getRelayerFeeDetails(
+        inputToken.address,
+        outputToken.address,
+        amount,
+        computedOriginChainId,
+        destinationChainId,
+        recipient,
+        tokenPriceNative,
+        message,
+        relayer,
+        gasPrice
+      ),
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,
       }),
