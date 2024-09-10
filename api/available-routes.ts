@@ -49,6 +49,7 @@ const handler = async (
         destinationToken: string;
         fromTokenSymbol: string;
         toTokenSymbol: string;
+        isNative: boolean;
       }) =>
         ![route.originChainId, route.destinationChainId].some((chainId) =>
           DISABLED_CHAINS_FOR_AVAILABLE_ROUTES.includes(String(chainId))
@@ -72,6 +73,7 @@ const handler = async (
         fromTokenSymbol: route.fromTokenSymbol,
         toTokenSymbol: route.toTokenSymbol,
         destinationToken: route.toTokenAddress,
+        isNative: route.isNative,
       })
     ).map((route) => ({
       originChainId: route.originChainId,
@@ -80,6 +82,7 @@ const handler = async (
       destinationToken: route.destinationToken,
       originTokenSymbol: route.fromTokenSymbol,
       destinationTokenSymbol: route.toTokenSymbol,
+      isNative: route.isNative,
     }));
 
     // Two different explanations for how `stale-while-revalidate` works:

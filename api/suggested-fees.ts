@@ -283,6 +283,7 @@ const handler = async (
       exclusiveRelayer,
       exclusivityDeadline,
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
+      destinationSpokePoolAddress: getSpokePoolAddress(destinationChainId),
       // Note: v3's new fee structure. Below are the correct values for the new fee structure. The above `*Pct` and `*Total`
       // values are for backwards compatibility which will be removed in the future.
       totalRelayFee: {
