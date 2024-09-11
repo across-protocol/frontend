@@ -25,7 +25,7 @@ const handler = async (
 ) => {
   const logger = getLogger();
   logger.debug({
-    at: "TokenList",
+    at: "Chains",
     message: "Query data",
     query,
   });
@@ -66,7 +66,7 @@ const handler = async (
     response.setHeader("Cache-Control", "s-maxage=3600");
     response.status(200).json(filteredChains);
   } catch (error: unknown) {
-    return handleErrorCondition("token-list", response, logger, error);
+    return handleErrorCondition("chains", response, logger, error);
   }
 };
 
