@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { object, assert, Infer, optional } from "superstruct";
+import { object, assert, Infer, optional, string } from "superstruct";
 import {
   getLogger,
   applyMapFilter,
@@ -17,6 +17,8 @@ const AvailableRoutesQueryParamsSchema = object({
   destinationToken: optional(validAddress()),
   destinationChainId: optional(positiveIntStr()),
   originChainId: optional(positiveIntStr()),
+  originTokenSymbol: optional(string()),
+  destinationTokenSymbol: optional(string()),
 });
 
 type AvailableRoutesQueryParams = Infer<
@@ -36,8 +38,14 @@ const handler = async (
   try {
     assert(query, AvailableRoutesQueryParamsSchema);
 
-    const { originToken, destinationToken, originChainId, destinationChainId } =
-      query;
+    const {
+      originToken,
+      destinationToken,
+      originChainId,
+      destinationChainId,
+      originTokenSymbol,
+      destinationTokenSymbol,
+    } = query;
 
     const enabledRoutes = applyMapFilter(
       ENABLED_ROUTES.routes,
@@ -64,7 +72,13 @@ const handler = async (
           destinationChainId === String(route.destinationChainId)) &&
         (!destinationToken ||
           destinationToken.toLowerCase() ===
-            route.destinationToken.toLowerCase()),
+            route.destinationToken.toLowerCase()) &&
+        (!originTokenSymbol ||
+          originTokenSymbol.toUpperCase() ===
+            route.fromTokenSymbol.toUpperCase()) &&
+        (!destinationTokenSymbol ||
+          destinationTokenSymbol.toUpperCase() ===
+            route.toTokenSymbol.toUpperCase()),
       // Create a mapping of enabled routes to a route with the destination token resolved.
       (route) => ({
         originChainId: route.fromChain,
