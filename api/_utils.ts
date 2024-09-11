@@ -14,7 +14,14 @@ import {
 } from "@balancer-labs/sdk";
 import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
-import { BigNumber, ethers, providers, Signer, utils } from "ethers";
+import {
+  BigNumber,
+  BigNumberish,
+  ethers,
+  providers,
+  utils,
+  Signer,
+} from "ethers";
 import { StructError, define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -578,16 +585,7 @@ export const getRelayerFeeCalculator = (
     relayerAddress: string;
   }> = {}
 ) => {
-  const queries = sdk.relayFeeCalculator.QueryBase__factory.create(
-    destinationChainId,
-    getProvider(destinationChainId),
-    undefined,
-    overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
-    overrides.relayerAddress,
-    REACT_APP_COINGECKO_PRO_API_KEY,
-    getLogger(),
-    getGasMarkup(destinationChainId)
-  );
+  const queries = getRelayerFeeCalculatorQueries(destinationChainId, overrides);
   const relayerFeeCalculatorConfig = {
     feeLimitPercent: maxRelayFeePct * 100,
     queries,
@@ -600,6 +598,25 @@ export const getRelayerFeeCalculator = (
   return new sdk.relayFeeCalculator.RelayFeeCalculator(
     relayerFeeCalculatorConfig,
     logger
+  );
+};
+
+const getRelayerFeeCalculatorQueries = (
+  destinationChainId: number,
+  overrides: Partial<{
+    spokePoolAddress: string;
+    relayerAddress: string;
+  }> = {}
+) => {
+  return sdk.relayFeeCalculator.QueryBase__factory.create(
+    destinationChainId,
+    getProvider(destinationChainId, { useSpeedProvider: true }),
+    undefined,
+    overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
+    overrides.relayerAddress,
+    REACT_APP_COINGECKO_PRO_API_KEY,
+    getLogger(),
+    getGasMarkup(destinationChainId)
   );
 };
 
@@ -630,53 +647,99 @@ export const getTokenSymbol = (tokenAddress: string): string => {
  * @param tokenPrice An optional overred price to prevent the SDK from creating its own call
  * @param message An optional message to include in the transfer
  * @param relayerAddress An optional relayer address to use for the transfer
+ * @param gasUnits An optional gas unit to use for the transfer
  * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
  */
 export const getRelayerFeeDetails = async (
-  inputToken: string,
-  outputToken: string,
-  amount: sdk.utils.BigNumberish,
-  originChainId: number,
-  destinationChainId: number,
-  recipientAddress: string,
+  deposit: {
+    inputToken: string;
+    outputToken: string;
+    amount: sdk.utils.BigNumberish;
+    originChainId: number;
+    destinationChainId: number;
+    recipientAddress: string;
+    message?: string;
+  },
   tokenPrice?: number,
-  message?: string,
   relayerAddress?: string,
-  gasPrice?: sdk.utils.BigNumberish
+  gasUnits?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
+  const {
+    inputToken,
+    outputToken,
+    amount,
+    originChainId,
+    destinationChainId,
+    recipientAddress,
+    message,
+  } = deposit;
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
   });
   try {
     return await relayFeeCalculator.relayerFeeDetails(
-      {
-        inputAmount: sdk.utils.toBN(amount),
-        outputAmount: sdk.utils.toBN(amount),
-        depositId: sdk.utils.bnUint32Max.toNumber(),
-        depositor: recipientAddress,
-        recipient: recipientAddress,
-        destinationChainId,
-        originChainId,
-        quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
+      buildDepositForSimulation({
+        amount: amount.toString(),
         inputToken,
         outputToken,
-        fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
-        exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
-        exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
-        message: message ?? sdk.constants.EMPTY_MESSAGE,
-        fromLiteChain: false, // FIXME
-        toLiteChain: false, // FIXME
-      },
+        recipientAddress,
+        originChainId,
+        destinationChainId,
+        message,
+      }),
       amount,
       sdk.utils.isMessageEmpty(message),
       relayerAddress,
-      tokenPrice
-      // gasPrice // FIXME
+      tokenPrice,
+      undefined,
+      gasUnits
     );
   } catch (err: unknown) {
     const reason = resolveEthersError(err);
     throw new InputError(`Relayer fill simulation failed - ${reason}`);
   }
+};
+
+export const buildDepositForSimulation = (depositArgs: {
+  amount: BigNumberish;
+  inputToken: string;
+  outputToken: string;
+  recipientAddress: string;
+  originChainId: number;
+  destinationChainId: number;
+  message?: string;
+}) => {
+  const {
+    amount,
+    inputToken,
+    outputToken,
+    recipientAddress,
+    originChainId,
+    destinationChainId,
+    message,
+  } = depositArgs;
+  // Small amount to simulate filling with. Should be low enough to guarantee a successful fill.
+  const safeOutputAmount = sdk.utils.toBN(100);
+  return {
+    inputAmount: sdk.utils.toBN(amount),
+    outputAmount: sdk.utils.isMessageEmpty(message)
+      ? safeOutputAmount
+      : sdk.utils.toBN(amount),
+    depositId: sdk.utils.bnUint32Max.toNumber(),
+    depositor: recipientAddress,
+    recipient: recipientAddress,
+    destinationChainId,
+    originChainId,
+    quoteTimestamp: sdk.utils.getCurrentTime() - 60, // Set the quote timestamp to 60 seconds ago ~ 1 ETH block
+    inputToken,
+    outputToken,
+    fillDeadline: sdk.utils.bnUint32Max.toNumber(), // Defined as `INFINITE_FILL_DEADLINE` in SpokePool.sol
+    exclusiveRelayer: sdk.constants.ZERO_ADDRESS,
+    exclusivityDeadline: 0, // Defined as ZERO in SpokePool.sol
+    message: message ?? sdk.constants.EMPTY_MESSAGE,
+    fromLiteChain: false, // FIXME
+    toLiteChain: false, // FIXME
+  };
 };
 
 /**
@@ -755,31 +818,40 @@ export const providerCache: Record<string, StaticJsonRpcProvider> = {};
  * @returns A provider object to query the requested blockchain
  */
 export const getProvider = (
-  _chainId: number
+  _chainId: number,
+  opts = {
+    useSpeedProvider: false,
+  }
 ): providers.StaticJsonRpcProvider => {
   const chainId = _chainId.toString();
-  if (!providerCache[chainId]) {
+  const cacheKey = `${chainId}-${opts.useSpeedProvider}`;
+  if (!providerCache[cacheKey]) {
     // Resolves provider from urls set in rpc-providers.json.
-    const providerFromConfigJson = getProviderFromConfigJson(chainId);
+    const providerFromConfigJson = getProviderFromConfigJson(chainId, opts);
     // Resolves provider from urls set via environment variables.
     // Note that this is legacy and should be removed in the future.
     const override = overrideProvider(chainId);
 
     if (providerFromConfigJson) {
-      providerCache[chainId] = providerFromConfigJson;
+      providerCache[cacheKey] = providerFromConfigJson;
     } else if (override) {
-      providerCache[chainId] = override;
+      providerCache[cacheKey] = override;
     } else {
-      providerCache[chainId] = infuraProvider(_chainId);
+      providerCache[cacheKey] = infuraProvider(_chainId);
     }
   }
-  return providerCache[chainId];
+  return providerCache[cacheKey];
 };
 
 /**
  * Resolves a provider from the `rpc-providers.json` configuration file.
  */
-function getProviderFromConfigJson(_chainId: string) {
+function getProviderFromConfigJson(
+  _chainId: string,
+  opts = {
+    useSpeedProvider: false,
+  }
+) {
   const chainId = Number(_chainId);
   const urls = getRpcUrlsFromConfigJson(chainId);
 
@@ -790,15 +862,26 @@ function getProviderFromConfigJson(_chainId: string) {
     return undefined;
   }
 
-  return new sdk.providers.RetryProvider(
+  if (!opts.useSpeedProvider) {
+    return new sdk.providers.RetryProvider(
+      urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
+      chainId,
+      1, // quorum can be 1 in the context of the API
+      3, // retries
+      0.5, // delay
+      5, // max. concurrency
+      "RPC_PROVIDER", // cache namespace
+      0 // disable RPC calls logging
+    );
+  }
+
+  return new sdk.providers.SpeedProvider(
     urls.map((url) => [{ url, errorPassThrough: true }, chainId]),
     chainId,
-    1, // quorum can be 1 in the context of the API
-    3, // retries
-    0.5, // delay
-    5, // max. concurrency
+    3, // max. concurrency used in `SpeedProvider`
+    5, // max. concurrency used in `RateLimitedProvider`
     "RPC_PROVIDER", // cache namespace
-    0 // disable RPC calls logging
+    1 // disable RPC calls logging
   );
 }
 
@@ -975,7 +1058,7 @@ export function getMulticall3(
   chainId: number,
   signerOrProvider?: Signer | providers.Provider
 ): Multicall3 | undefined {
-  const address = sdk.utils.multicall3Addresses[chainId];
+  const address = sdk.utils.getMulticallAddress(chainId);
 
   // no multicall on this chain
   if (!address) {
@@ -1002,19 +1085,8 @@ export const getCachedTokenBalance = async (
   account: string,
   token: string
 ): Promise<BigNumber> => {
-  // Make the request to the vercel API.
-  const response = await axios.get<{ balance: string }>(
-    `${resolveVercelEndpoint()}/api/account-balance`,
-    {
-      params: {
-        chainId,
-        account,
-        token,
-      },
-    }
-  );
-  // Return the balance
-  return BigNumber.from(response.data.balance);
+  const balance = await getCachedLatestBalance(Number(chainId), token, account);
+  return balance;
 };
 
 /**
@@ -1826,14 +1898,17 @@ export function getCachedLatestBlock(chainId: number) {
 
 export function getCachedGasPrice(chainId: number) {
   const ttlPerChain = {
-    default: 10,
-    [CHAIN_IDs.MAINNET]: 12,
+    default: 5,
+    [CHAIN_IDs.ARBITRUM]: 2,
   };
 
   return getCachedValue(
     buildInternalCacheKey("gasPrice", chainId),
     ttlPerChain[chainId] || ttlPerChain.default,
-    () => getProvider(chainId).getGasPrice(),
+    async () => {
+      const gasPrice = await getProvider(chainId).getGasPrice();
+      return gasPrice.mul(2);
+    },
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
 }
@@ -1844,8 +1919,8 @@ export function getCachedLatestBalance(
   address: string
 ) {
   const ttlPerChain = {
-    default: 5,
-    [CHAIN_IDs.MAINNET]: 12,
+    default: 30,
+    [CHAIN_IDs.MAINNET]: 30,
   };
 
   return getCachedValue(
@@ -1853,6 +1928,41 @@ export function getCachedLatestBalance(
     ttlPerChain[chainId] || ttlPerChain.default,
     () => getBalance(chainId, address, tokenAddress),
     (bnFromCache) => BigNumber.from(bnFromCache)
+  );
+}
+
+export function getCachedFillGasUsage(
+  deposit: Parameters<typeof buildDepositForSimulation>[0],
+  overrides?: Partial<{
+    spokePoolAddress: string;
+    relayerAddress: string;
+  }>
+) {
+  const ttlPerChain = {
+    default: 10,
+    [CHAIN_IDs.ARBITRUM]: 10,
+  };
+
+  const cacheKey = buildInternalCacheKey(
+    "fillGasUsage",
+    deposit.destinationChainId,
+    deposit.outputToken
+  );
+  const ttl = ttlPerChain[deposit.destinationChainId] || ttlPerChain.default;
+  const fetchFn = async () => {
+    const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+      deposit.destinationChainId,
+      overrides
+    );
+    const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
+      buildDepositForSimulation(deposit),
+      overrides?.relayerAddress
+    );
+    return nativeGasCost;
+  };
+
+  return getCachedValue(cacheKey, ttl, fetchFn, (bnFromCache) =>
+    BigNumber.from(bnFromCache)
   );
 }
 

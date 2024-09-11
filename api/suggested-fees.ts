@@ -64,7 +64,9 @@ const handler = async (
   try {
     const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = process.env;
 
-    const provider = getProvider(HUB_POOL_CHAIN_ID);
+    const provider = getProvider(HUB_POOL_CHAIN_ID, {
+      useSpeedProvider: true,
+    });
     const hubPool = getHubPool(provider);
 
     assert(query, SuggestedFeesQueryParamsSchema);
@@ -97,7 +99,7 @@ const handler = async (
         relayer,
         outputToken.address,
         amountInput,
-        message
+        message!
       );
     }
 
