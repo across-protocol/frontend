@@ -12,7 +12,7 @@ import {
 import mainnetChains from "../src/data/chains_1.json";
 
 const handler = async (
-  _: TypedVercelRequest<Record<string, never>>,
+  request: TypedVercelRequest<Record<string, never>>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -21,6 +21,14 @@ const handler = async (
     message: "Starting cron job...",
   });
   try {
+    const authHeader = (request.headers as any)?.get("authorization");
+    if (
+      !process.env.CRON_SECRET ||
+      authHeader !== `Bearer ${process.env.CRON_SECRET}`
+    ) {
+      return response.status(401).json({ success: false });
+    }
+
     const {
       REACT_APP_FULL_RELAYERS, // These are relayers running a full auto-rebalancing strategy.
       REACT_APP_TRANSFER_RESTRICTED_RELAYERS, // These are relayers whose funds stay put.
