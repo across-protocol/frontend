@@ -8,7 +8,7 @@ import { Tooltip } from "components/Tooltip";
 import { Deposit } from "hooks/useDeposits";
 import { COLORS } from "utils";
 
-import { useIsProfitableAndDelayed } from "../hooks/useIsProfitableAndDelayed";
+import { useDepositStatus } from "../hooks/useDepositStatus";
 
 type Props = {
   deposit: Deposit;
@@ -16,7 +16,7 @@ type Props = {
 };
 
 export function ActionsCell({ deposit, onClickSpeedUp }: Props) {
-  const { isDelayed, isProfitable } = useIsProfitableAndDelayed(deposit);
+  const { isDelayed, isProfitable, isExpired } = useDepositStatus(deposit);
 
   const slowRelayInfo =
     isDelayed && isProfitable ? (
@@ -43,7 +43,10 @@ export function ActionsCell({ deposit, onClickSpeedUp }: Props) {
   }, [deposit, onClickSpeedUp]);
 
   const speedUp =
-    !isDelayed && !isProfitable && deposit.status === "pending" ? (
+    !isExpired &&
+    !isDelayed &&
+    !isProfitable &&
+    deposit.status === "pending" ? (
       <ZapIconPersistent onClick={handleClickSpeedUp} />
     ) : null;
 

@@ -10,7 +10,7 @@ import {
 } from "utils";
 import { useBridgeLimits } from "hooks";
 
-export function useIsProfitableAndDelayed(deposit: Deposit) {
+export function useDepositStatus(deposit: Deposit) {
   const { limits } = useBridgeLimits(
     // disable query for filled deposits
     deposit.status === "pending" ? deposit?.token?.symbol : undefined,
@@ -37,8 +37,13 @@ export function useIsProfitableAndDelayed(deposit: Deposit) {
       ? BigNumber.from(deposit.amount).gt(limits?.maxDepositInstant)
       : false;
 
+  const isExpired = deposit.fillDeadline
+    ? DateTime.fromISO(deposit.fillDeadline).diffNow().as("seconds") < 0
+    : false;
+
   return {
     isProfitable,
     isDelayed,
+    isExpired,
   };
 }
