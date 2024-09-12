@@ -31,11 +31,11 @@ const handler = async (
 
     let { token, account, chainId } = query;
 
-    const balance = await latestBalanceCache(
-      Number(chainId),
-      token,
-      account
-    ).get();
+    const balance = await latestBalanceCache({
+      chainId: Number(chainId),
+      tokenAddress: token,
+      address: account,
+    }).get();
     const result = {
       balance: balance.toString(),
       account: account,

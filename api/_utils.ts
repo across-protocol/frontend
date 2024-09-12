@@ -1089,11 +1089,11 @@ export const getCachedTokenBalance = async (
   account: string,
   token: string
 ): Promise<BigNumber> => {
-  const balance = await latestBalanceCache(
-    Number(chainId),
-    token,
-    account
-  ).get();
+  const balance = await latestBalanceCache({
+    chainId: Number(chainId),
+    tokenAddress: token,
+    address: account,
+  }).get();
   return balance;
 };
 
@@ -1904,11 +1904,12 @@ export function getCachedLatestBlock(chainId: number) {
   );
 }
 
-export function latestBalanceCache(
-  chainId: number,
-  tokenAddress: string,
-  address: string
-) {
+export function latestBalanceCache(params: {
+  chainId: number;
+  tokenAddress: string;
+  address: string;
+}) {
+  const { chainId, tokenAddress, address } = params;
   const ttlPerChain = {
     default: 60,
     [CHAIN_IDs.MAINNET]: 60,

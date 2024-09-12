@@ -87,8 +87,10 @@ export function makeCacheGetterAndSetter<T>(
     get: async () => {
       return getCachedValue(key, ttl, fetcher, parser);
     },
-    set: async () => {
-      const value = await fetcher();
+    set: async (value?: T) => {
+      if (!value) {
+        value = await fetcher();
+      }
       await redisCache.set(key, value, ttl);
     },
   };

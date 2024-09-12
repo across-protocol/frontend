@@ -1,9 +1,10 @@
 import { VercelResponse } from "@vercel/node";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { TypedVercelRequest } from "./_types";
 
 import {
   HUB_POOL_CHAIN_ID,
+  getCachedTokenBalances,
   getLogger,
   handleErrorCondition,
   latestBalanceCache,
@@ -52,16 +53,32 @@ const handler = async (
       return;
     }
 
+    const allRelayers = [...fullRelayers, ...transferRestrictedRelayers];
     for (const chain of mainnetChains) {
-      for (const token of chain.inputTokens) {
-        const setTokenBalance = async (relayer: string) => {
-          await latestBalanceCache(chain.chainId, relayer, token.address).set();
-        };
-        await Promise.all([
-          Promise.all(fullRelayers.map(setTokenBalance)),
-          Promise.all(transferRestrictedRelayers.map(setTokenBalance)),
-        ]);
-      }
+      const batchResult = await getCachedTokenBalances(
+        chain.chainId,
+        allRelayers,
+        [
+          ethers.constants.AddressZero,
+          ...chain.outputTokens.map((token) => token.address),
+        ]
+      );
+
+      await Promise.all(
+        allRelayers.map((relayer) => {
+          return Promise.all(
+            chain.outputTokens.map((token) => {
+              return latestBalanceCache({
+                chainId: chain.chainId,
+                address: relayer,
+                tokenAddress: token.address,
+              }).set(
+                BigNumber.from(batchResult.balances[relayer][token.address])
+              );
+            })
+          );
+        })
+      );
     }
 
     logger.debug({
@@ -69,6 +86,7 @@ const handler = async (
       message: "Finished",
     });
     response.status(200);
+    response.send("OK");
   } catch (error: unknown) {
     return handleErrorCondition("cron-cache-balances", response, logger, error);
   }
