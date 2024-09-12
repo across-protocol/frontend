@@ -4,7 +4,7 @@ import { TypedVercelRequest } from "./_types";
 
 import {
   HUB_POOL_CHAIN_ID,
-  getCachedTokenBalances,
+  getBatchBalanceViaMulticall3,
   getLogger,
   handleErrorCondition,
   latestBalanceCache,
@@ -55,7 +55,7 @@ const handler = async (
 
     const allRelayers = [...fullRelayers, ...transferRestrictedRelayers];
     for (const chain of mainnetChains) {
-      const batchResult = await getCachedTokenBalances(
+      const batchResult = await getBatchBalanceViaMulticall3(
         chain.chainId,
         allRelayers,
         [
