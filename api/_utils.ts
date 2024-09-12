@@ -54,7 +54,11 @@ import {
   relayerFeeCapitalCostConfig,
 } from "./_constants";
 import { PoolStateOfUser, PoolStateResult } from "./_types";
-import { buildInternalCacheKey, getCachedValue } from "./_cache";
+import {
+  buildInternalCacheKey,
+  getCachedValue,
+  makeCacheGetterAndSetter,
+} from "./_cache";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
@@ -1085,7 +1089,11 @@ export const getCachedTokenBalance = async (
   account: string,
   token: string
 ): Promise<BigNumber> => {
-  const balance = await getCachedLatestBalance(Number(chainId), token, account);
+  const balance = await latestBalanceCache({
+    chainId: Number(chainId),
+    tokenAddress: token,
+    address: account,
+  }).get();
   return balance;
 };
 
@@ -1896,34 +1904,18 @@ export function getCachedLatestBlock(chainId: number) {
   );
 }
 
-export function getCachedGasPrice(chainId: number) {
+export function latestBalanceCache(params: {
+  chainId: number;
+  tokenAddress: string;
+  address: string;
+}) {
+  const { chainId, tokenAddress, address } = params;
   const ttlPerChain = {
-    default: 5,
-    [CHAIN_IDs.ARBITRUM]: 2,
+    default: 60,
+    [CHAIN_IDs.MAINNET]: 60,
   };
 
-  return getCachedValue(
-    buildInternalCacheKey("gasPrice", chainId),
-    ttlPerChain[chainId] || ttlPerChain.default,
-    async () => {
-      const gasPrice = await getProvider(chainId).getGasPrice();
-      return gasPrice.mul(2);
-    },
-    (bnFromCache) => BigNumber.from(bnFromCache)
-  );
-}
-
-export function getCachedLatestBalance(
-  chainId: number,
-  tokenAddress: string,
-  address: string
-) {
-  const ttlPerChain = {
-    default: 30,
-    [CHAIN_IDs.MAINNET]: 30,
-  };
-
-  return getCachedValue(
+  return makeCacheGetterAndSetter(
     buildInternalCacheKey("latestBalance", tokenAddress, chainId, address),
     ttlPerChain[chainId] || ttlPerChain.default,
     () => getBalance(chainId, address, tokenAddress),

@@ -2,7 +2,7 @@ import { VercelResponse } from "@vercel/node";
 import { assert, Infer, type, string } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import {
-  getCachedLatestBalance,
+  latestBalanceCache,
   getLogger,
   handleErrorCondition,
   validAddress,
@@ -31,11 +31,11 @@ const handler = async (
 
     let { token, account, chainId } = query;
 
-    const balance = await getCachedLatestBalance(
-      Number(chainId),
-      token,
-      account
-    );
+    const balance = await latestBalanceCache({
+      chainId: Number(chainId),
+      tokenAddress: token,
+      address: account,
+    }).get();
     const result = {
       balance: balance.toString(),
       account: account,

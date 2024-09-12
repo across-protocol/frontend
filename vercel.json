@@ -1,5 +1,11 @@
 {
   "devCommand": "yarn dev",
+  "crons": [
+    {
+      "path": "/api/cron-cache-balances",
+      "schedule": "* * * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/deposit/status",

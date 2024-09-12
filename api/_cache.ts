@@ -66,7 +66,7 @@ export async function getCachedValue<T>(
   ttl: number,
   fetcher: () => Promise<T>,
   parser?: (value: T) => T
-) {
+): Promise<T> {
   const cachedValue = await redisCache.get<T>(key);
   if (cachedValue) {
     return parser ? parser(cachedValue) : cachedValue;
@@ -75,4 +75,23 @@ export async function getCachedValue<T>(
   const value = await fetcher();
   await redisCache.set(key, value, ttl);
   return value;
+}
+
+export function makeCacheGetterAndSetter<T>(
+  key: string,
+  ttl: number,
+  fetcher: () => Promise<T>,
+  parser?: (value: T) => T
+) {
+  return {
+    get: async () => {
+      return getCachedValue(key, ttl, fetcher, parser);
+    },
+    set: async (value?: T) => {
+      if (!value) {
+        value = await fetcher();
+      }
+      await redisCache.set(key, value, ttl);
+    },
+  };
 }
