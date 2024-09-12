@@ -21,7 +21,7 @@ const handler = async (
     message: "Starting cron job...",
   });
   try {
-    const authHeader = (request.headers as any)?.get("authorization");
+    const authHeader = request.headers?.["authorization"];
     if (
       !process.env.CRON_SECRET ||
       authHeader !== `Bearer ${process.env.CRON_SECRET}`
