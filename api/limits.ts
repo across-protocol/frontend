@@ -97,7 +97,9 @@ const handler = async (
     let { amount: amountInput, recipient, relayer, message } = query;
     recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     relayer ??= getDefaultRelayerAddress(destinationChainId, l1Token.symbol);
-    if (sdk.utils.isDefined(message)) {
+
+    const isMessageDefined = sdk.utils.isDefined(message);
+    if (isMessageDefined) {
       if (!sdk.utils.isDefined(amountInput)) {
         throw new InputError("amount must be defined when message is defined");
       }
@@ -107,7 +109,7 @@ const handler = async (
         relayer,
         outputToken.address,
         amountInput,
-        message
+        message!
       );
     }
     const amount = BigNumber.from(
@@ -161,9 +163,12 @@ const handler = async (
         ),
         getCachedTokenPrice(l1Token.address, "usd"),
         getCachedLatestBlock(HUB_POOL_CHAIN_ID),
-        getCachedFillGasUsage(depositArgs, {
-          relayerAddress: relayer,
-        }),
+        // Only use cached gas units if message is not defined, i.e. standard for standard bridges
+        isMessageDefined
+          ? undefined
+          : getCachedFillGasUsage(depositArgs, {
+              relayerAddress: relayer,
+            }),
       ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
