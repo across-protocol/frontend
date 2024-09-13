@@ -314,7 +314,7 @@ export const validateDepositMessage = async (
     }
     const isRecipientAContract =
       getStaticIsContract(destinationChainId, recipient) ||
-      (await getCachedIsContract(destinationChainId, recipient));
+      (await isContractCache(destinationChainId, recipient).get());
     if (!isRecipientAContract) {
       throw new InputError(
         "Recipient must be a contract when a message is provided"
@@ -1940,10 +1940,10 @@ export function latestBalanceCache(params: {
   );
 }
 
-export function getCachedIsContract(chainId: number, address: string) {
-  return getCachedValue(
+export function isContractCache(chainId: number, address: string) {
+  return makeCacheGetterAndSetter(
     buildInternalCacheKey("isContract", chainId, address),
-    24 * 60 * 60, // 1 day - we can cache this for a long time
+    5 * 24 * 60 * 60, // 5 days - we can cache this for a long time
     async () => {
       const isDeployed = await sdk.utils.isContractDeployedToAddress(
         address,
