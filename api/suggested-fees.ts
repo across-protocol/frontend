@@ -26,7 +26,6 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
   getCachedLatestBlock,
-  validateDepositMessage,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
