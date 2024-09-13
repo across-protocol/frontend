@@ -88,8 +88,12 @@ const handler = async (
       resolvedOriginChainId: computedOriginChainId,
     } = validateChainAndTokenParams(query);
 
-    relayer ??= getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
-    recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+    relayer = relayer
+      ? ethers.utils.getAddress(relayer)
+      : getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
+    recipient = recipient
+      ? ethers.utils.getAddress(recipient)
+      : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     const depositWithMessage = sdk.utils.isDefined(message);
 
     const latestBlock = await getCachedLatestBlock(HUB_POOL_CHAIN_ID);

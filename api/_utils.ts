@@ -5,6 +5,7 @@ import {
   SpokePool,
   SpokePool__factory,
 } from "@across-protocol/contracts/dist/typechain";
+import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
 import {
   BALANCER_NETWORK_CONFIG,
@@ -311,10 +312,9 @@ export const validateDepositMessage = async (
       // Our message encoding is a hex string, so we need to check that the length is even.
       throw new InputError("Message must be an even hex string");
     }
-    const isRecipientAContract = await getCachedIsContract(
-      destinationChainId,
-      recipient
-    );
+    const isRecipientAContract =
+      getStaticIsContract(destinationChainId, recipient) ||
+      (await getCachedIsContract(destinationChainId, recipient));
     if (!isRecipientAContract) {
       throw new InputError(
         "Recipient must be a contract when a message is provided"
@@ -340,6 +340,23 @@ export const validateDepositMessage = async (
     }
   }
 };
+
+function getStaticIsContract(chainId: number, address: string) {
+  const deployedAcrossContract = Object.values(
+    (
+      acrossDeployments as {
+        [chainId: number]: {
+          [contractName: string]: {
+            address: string;
+          };
+        };
+      }
+    )[chainId]
+  ).find(
+    (contract) => contract.address.toLowerCase() === address.toLowerCase()
+  );
+  return !!deployedAcrossContract;
+}
 
 /**
  * Utility function to resolve route details based on given `inputTokenAddress` and `destinationChainId`.
