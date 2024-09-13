@@ -311,9 +311,9 @@ export const validateDepositMessage = async (
       // Our message encoding is a hex string, so we need to check that the length is even.
       throw new InputError("Message must be an even hex string");
     }
-    const isRecipientAContract = await sdk.utils.isContractDeployedToAddress(
-      recipient,
-      getProvider(destinationChainId)
+    const isRecipientAContract = await getCachedIsContract(
+      destinationChainId,
+      recipient
     );
     if (!isRecipientAContract) {
       throw new InputError(
@@ -1920,6 +1920,20 @@ export function latestBalanceCache(params: {
     ttlPerChain[chainId] || ttlPerChain.default,
     () => getBalance(chainId, address, tokenAddress),
     (bnFromCache) => BigNumber.from(bnFromCache)
+  );
+}
+
+export function getCachedIsContract(chainId: number, address: string) {
+  return getCachedValue(
+    buildInternalCacheKey("isContract", chainId, address),
+    24 * 60 * 60, // 1 day - we can cache this for a long time
+    async () => {
+      const isDeployed = await sdk.utils.isContractDeployedToAddress(
+        address,
+        getProvider(chainId)
+      );
+      return isDeployed;
+    }
   );
 }
 

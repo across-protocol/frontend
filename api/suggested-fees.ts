@@ -92,16 +92,6 @@ const handler = async (
     relayer ??= getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
     recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     const depositWithMessage = sdk.utils.isDefined(message);
-    if (depositWithMessage) {
-      validateDepositMessage(
-        recipient,
-        destinationChainId,
-        relayer,
-        outputToken.address,
-        amountInput,
-        message!
-      );
-    }
 
     const latestBlock = await getCachedLatestBlock(HUB_POOL_CHAIN_ID);
 

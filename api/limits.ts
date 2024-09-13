@@ -101,9 +101,11 @@ const handler = async (
     const isMessageDefined = sdk.utils.isDefined(message);
     if (isMessageDefined) {
       if (!sdk.utils.isDefined(amountInput)) {
-        throw new InputError("amount must be defined when message is defined");
+        throw new InputError(
+          "Parameter 'amount' must be defined when 'message' is defined"
+        );
       }
-      validateDepositMessage(
+      await validateDepositMessage(
         recipient,
         destinationChainId,
         relayer,
