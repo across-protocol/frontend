@@ -1,6 +1,5 @@
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
-import { DateTime } from "luxon";
 
 import { ReactComponent as CheckIcon } from "assets/icons/check.svg";
 import { ReactComponent as LoadingIcon } from "assets/icons/loading.svg";
@@ -12,7 +11,7 @@ import { useElapsedSeconds } from "hooks/useElapsedSeconds";
 import { formatSeconds, COLORS } from "utils";
 
 import { BaseCell } from "./BaseCell";
-import { useIsProfitableAndDelayed } from "../hooks/useIsProfitableAndDelayed";
+import { useDepositStatus } from "../hooks/useDepositStatus";
 
 type Props = {
   deposit: Deposit;
@@ -49,14 +48,15 @@ function FilledStatusCell({ deposit, width }: Props) {
 }
 
 function PendingStatusCell({ width, deposit }: Props) {
-  const { isDelayed, isProfitable } = useIsProfitableAndDelayed(deposit);
-  const isExpired = deposit.fillDeadline
-    ? DateTime.fromISO(deposit.fillDeadline).diffNow().as("seconds") < 0
-    : false;
+  const { isDelayed, isProfitable, isExpired } = useDepositStatus(deposit);
 
   return (
     <StyledPendingStatusCell width={width}>
-      <Text color={isProfitable && !isDelayed ? "light-200" : "yellow"}>
+      <Text
+        color={
+          (isProfitable && !isDelayed) || isExpired ? "light-200" : "yellow"
+        }
+      >
         {isExpired
           ? "Expired"
           : isDelayed
@@ -65,40 +65,42 @@ function PendingStatusCell({ width, deposit }: Props) {
               ? "Processing..."
               : "Fee too low"}
       </Text>
-      {isDelayed ? (
-        <Tooltip
-          tooltipId={`delayed-cell-info-${deposit.depositTxHash}`}
-          placement="bottom"
-          title="Insufficient relayer funds"
-          body={
-            <Text size="sm" color="light-300">
-              Relayer funds are insufficient to complete this transfer
-              immediately. The transfer will be settled directly by Across and
-              may take up to 3 hours. No relayer fee will be charged on this
-              transfer.
-            </Text>
-          }
-        >
-          <StyledInfoIcon />
-        </Tooltip>
-      ) : isProfitable ? (
-        <StyledLoadingIcon />
-      ) : (
-        <Tooltip
-          tooltipId={`fee-too-low-${deposit.depositTxHash}`}
-          placement="bottom"
-          title="Relayer fee is too low"
-          body={
-            <FeeTooLowTooltipTextContainer>
+      {!isExpired &&
+        (isDelayed ? (
+          <Tooltip
+            tooltipId={`delayed-cell-info-${deposit.depositTxHash}`}
+            placement="bottom"
+            title="Insufficient relayer funds"
+            body={
               <Text size="sm" color="light-300">
-                Click the button in the right end of the table to increase fee.
+                Relayer funds are insufficient to complete this transfer
+                immediately. The transfer will be settled directly by Across and
+                may take up to 3 hours. No relayer fee will be charged on this
+                transfer.
               </Text>
-            </FeeTooLowTooltipTextContainer>
-          }
-        >
-          <StyledInfoIcon />
-        </Tooltip>
-      )}
+            }
+          >
+            <StyledInfoIcon />
+          </Tooltip>
+        ) : isProfitable ? (
+          <StyledLoadingIcon />
+        ) : (
+          <Tooltip
+            tooltipId={`fee-too-low-${deposit.depositTxHash}`}
+            placement="bottom"
+            title="Relayer fee is too low"
+            body={
+              <FeeTooLowTooltipTextContainer>
+                <Text size="sm" color="light-300">
+                  Click the button in the right end of the table to increase
+                  fee.
+                </Text>
+              </FeeTooLowTooltipTextContainer>
+            }
+          >
+            <StyledInfoIcon />
+          </Tooltip>
+        ))}
     </StyledPendingStatusCell>
   );
 }
