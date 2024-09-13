@@ -305,7 +305,13 @@ const handler = async (
         pct: lpFeePct.toString(),
         total: lpFeeTotal.toString(),
       },
-      limits,
+      limits: {
+        minDeposit,
+        maxDeposit,
+        maxDepositInstant,
+        maxDepositShortDelay: limits.maxDepositShortDelay,
+        recommendedDepositInstant: limits.recommendedDepositInstant,
+      },
     };
 
     logger.debug({
