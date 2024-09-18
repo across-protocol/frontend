@@ -89,6 +89,10 @@ async function getEligibleRelayers(
   // Source all relayers that have opted in for this destination chain.
   const relayers = getRelayerConfig(originChainId);
 
+  if (relayers.length === 0) {
+    return [];
+  }
+
   // @todo: Balances are returned as strings; consider mapping them automagically to BNs.
   const { balances } = await getCachedTokenBalances(
     destinationChainId,
