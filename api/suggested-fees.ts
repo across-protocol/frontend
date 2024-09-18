@@ -26,7 +26,6 @@ import {
   validateChainAndTokenParams,
   getCachedLimits,
   getCachedLatestBlock,
-  validateDepositMessage,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
@@ -89,19 +88,13 @@ const handler = async (
       resolvedOriginChainId: computedOriginChainId,
     } = validateChainAndTokenParams(query);
 
-    relayer ??= getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
-    recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+    relayer = relayer
+      ? ethers.utils.getAddress(relayer)
+      : getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
+    recipient = recipient
+      ? ethers.utils.getAddress(recipient)
+      : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
     const depositWithMessage = sdk.utils.isDefined(message);
-    if (depositWithMessage) {
-      validateDepositMessage(
-        recipient,
-        destinationChainId,
-        relayer,
-        outputToken.address,
-        amountInput,
-        message!
-      );
-    }
 
     const latestBlock = await getCachedLatestBlock(HUB_POOL_CHAIN_ID);
 

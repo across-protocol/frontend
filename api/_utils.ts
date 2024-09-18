@@ -5,6 +5,7 @@ import {
   SpokePool,
   SpokePool__factory,
 } from "@across-protocol/contracts/dist/typechain";
+import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
 import {
   BALANCER_NETWORK_CONFIG,
@@ -311,10 +312,9 @@ export const validateDepositMessage = async (
       // Our message encoding is a hex string, so we need to check that the length is even.
       throw new InputError("Message must be an even hex string");
     }
-    const isRecipientAContract = await sdk.utils.isContractDeployedToAddress(
-      recipient,
-      getProvider(destinationChainId)
-    );
+    const isRecipientAContract =
+      getStaticIsContract(destinationChainId, recipient) ||
+      (await isContractCache(destinationChainId, recipient).get());
     if (!isRecipientAContract) {
       throw new InputError(
         "Recipient must be a contract when a message is provided"
@@ -340,6 +340,23 @@ export const validateDepositMessage = async (
     }
   }
 };
+
+function getStaticIsContract(chainId: number, address: string) {
+  const deployedAcrossContract = Object.values(
+    (
+      acrossDeployments as {
+        [chainId: number]: {
+          [contractName: string]: {
+            address: string;
+          };
+        };
+      }
+    )[chainId]
+  ).find(
+    (contract) => contract.address.toLowerCase() === address.toLowerCase()
+  );
+  return !!deployedAcrossContract;
+}
 
 /**
  * Utility function to resolve route details based on given `inputTokenAddress` and `destinationChainId`.
@@ -1920,6 +1937,20 @@ export function latestBalanceCache(params: {
     ttlPerChain[chainId] || ttlPerChain.default,
     () => getBalance(chainId, address, tokenAddress),
     (bnFromCache) => BigNumber.from(bnFromCache)
+  );
+}
+
+export function isContractCache(chainId: number, address: string) {
+  return makeCacheGetterAndSetter(
+    buildInternalCacheKey("isContract", chainId, address),
+    5 * 24 * 60 * 60, // 5 days - we can cache this for a long time
+    async () => {
+      const isDeployed = await sdk.utils.isContractDeployedToAddress(
+        address,
+        getProvider(chainId)
+      );
+      return isDeployed;
+    }
   );
 }
 

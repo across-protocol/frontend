@@ -95,15 +95,21 @@ const handler = async (
     // Optional parameters that caller can use to specify specific deposit details with which
     // to compute limits.
     let { amount: amountInput, recipient, relayer, message } = query;
-    recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
-    relayer ??= getDefaultRelayerAddress(destinationChainId, l1Token.symbol);
+    recipient = recipient
+      ? ethers.utils.getAddress(recipient)
+      : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+    relayer = relayer
+      ? ethers.utils.getAddress(relayer)
+      : getDefaultRelayerAddress(destinationChainId, l1Token.symbol);
 
     const isMessageDefined = sdk.utils.isDefined(message);
     if (isMessageDefined) {
       if (!sdk.utils.isDefined(amountInput)) {
-        throw new InputError("amount must be defined when message is defined");
+        throw new InputError(
+          "Parameter 'amount' must be defined when 'message' is defined"
+        );
       }
-      validateDepositMessage(
+      await validateDepositMessage(
         recipient,
         destinationChainId,
         relayer,
