@@ -213,23 +213,25 @@ export function handleErrorCondition(
   else if (typeguards.isEthersError(error)) {
     acrossApiError = resolveEthersError(error);
   }
+  // Rethrow instances of `AcrossApiError`
+  else if (error instanceof AcrossApiError) {
+    acrossApiError = error;
+  }
   // Handle other errors
-  else if (error instanceof Error) {
+  else {
     acrossApiError = new AcrossApiError(
       {
-        message: error.message,
+        message: (error as Error).message,
         status: HttpErrorToStatusCode.INTERNAL_SERVER_ERROR,
       },
       { cause: error }
     );
-  } else {
-    acrossApiError = error as AcrossApiError;
   }
 
   const logLevel = acrossApiError.status >= 500 ? "error" : "warn";
   logger[logLevel]({
     at: endpoint,
-    message: `${acrossApiError.code}: ${acrossApiError.message}`,
+    message: `Status ${acrossApiError.status} - ${acrossApiError.message}`,
   });
 
   return response.status(acrossApiError.status).json(acrossApiError);
