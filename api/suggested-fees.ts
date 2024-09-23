@@ -237,10 +237,7 @@ const handler = async (
     const skipAmountLimitEnabled = skipAmountLimit === "true";
     if (!skipAmountLimitEnabled && isAmountTooLow) {
       throw new AmountTooLowError({
-        message: `Sent amount is too low relative to fees. Minimum deposit is ${ethers.utils.formatUnits(
-          minDeposit,
-          inputToken.decimals
-        )} ${inputToken.symbol}`,
+        message: `Sent amount is too low relative to fees`,
       });
     }
 
