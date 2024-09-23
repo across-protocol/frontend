@@ -9,7 +9,6 @@ import {
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
-  InputError,
   getProvider,
   getCachedTokenPrice,
   handleErrorCondition,
