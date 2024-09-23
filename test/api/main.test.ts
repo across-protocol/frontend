@@ -34,32 +34,32 @@ describe("API Test", () => {
   test("limits has no load-time errors", async () => {
     await limitsHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
-    expect(response.send).toHaveBeenCalledWith(
-      expect.stringMatching(/At path: destinationChainId/)
+    expect(response.json).toHaveBeenCalledWith(
+      expect.objectContaining(/At path: destinationChainId/)
     );
   });
 
   test("suggested-fees has no load-time errors", async () => {
     await feesHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
-    expect(response.send).toHaveBeenCalledWith(
-      expect.stringMatching(/At path: amount/)
+    expect(response.json).toHaveBeenCalledWith(
+      expect.objectContaining(/At path: amount/)
     );
   });
 
   test("pools has no load-time errors", async () => {
     await poolsHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
-    expect(response.send).toHaveBeenCalledWith(
-      expect.stringMatching(/At path: token/)
+    expect(response.json).toHaveBeenCalledWith(
+      expect.objectContaining(/At path: token/)
     );
   });
 
   test("coingecko has no load-time errors", async () => {
     await coingeckoHandler(request as TypedVercelRequest<any>, response);
     expect(response.status).toHaveBeenCalledWith(400);
-    expect(response.send).toHaveBeenCalledWith(
-      expect.stringMatching(/At path: l1Token/)
+    expect(response.json).toHaveBeenCalledWith(
+      expect.objectContaining(/At path: l1Token/)
     );
   });
 

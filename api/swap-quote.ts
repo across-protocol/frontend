@@ -16,6 +16,7 @@ import {
 } from "./_utils";
 import { getUniswapQuoteAndCalldata } from "./_dexes/uniswap";
 import { get1inchQuoteAndCalldata } from "./_dexes/1inch";
+import { InvalidParamError } from "./_errors";
 
 const SwapQuoteQueryParamsSchema = type({
   swapToken: validAddress(),
@@ -68,9 +69,9 @@ const handler = async (
     const _swapToken = getTokenByAddress(swapTokenAddress, originChainId);
 
     if (!_swapToken) {
-      throw new InputError(
-        `Unsupported swap token ${swapTokenAddress} on chain ${originChainId}`
-      );
+      throw new InvalidParamError({
+        message: `Unsupported swap token ${swapTokenAddress} on chain ${originChainId}`,
+      });
     }
 
     const swapToken = {
@@ -91,7 +92,9 @@ const handler = async (
         swapTokenAddress,
       })
     ) {
-      throw new InputError(`Unsupported swap route`);
+      throw new InvalidParamError({
+        message: `Unsupported swap route`,
+      });
     }
 
     const swap = {
