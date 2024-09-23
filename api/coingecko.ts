@@ -4,7 +4,6 @@ import { object, assert, Infer, optional, string, pattern } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
-  InputError,
   handleErrorCondition,
   validAddress,
   getBalancerV2TokenPrice,
@@ -17,6 +16,7 @@ import {
   TOKEN_SYMBOLS_MAP,
   coinGeckoAssetPlatformLookup,
 } from "./_constants";
+import { InvalidParamError } from "./_errors";
 
 import { coingecko } from "@across-protocol/sdk";
 
@@ -57,11 +57,12 @@ const handler = async (
     // Confirm that the base Currency is supported by Coingecko
     const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
     if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
-      throw new InputError(
-        `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
+      throw new InvalidParamError({
+        message: `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
           SUPPORTED_CG_BASE_CURRENCIES
-        ).join(", ")}].`
-      );
+        ).join(", ")}].`,
+        param: "baseCurrency",
+      });
     }
 
     // Resolve the optional address lookup that maps one token's
@@ -93,16 +94,18 @@ const handler = async (
 
     if (balancerV2PoolTokens.includes(ethers.utils.getAddress(l1Token))) {
       if (dateStr) {
-        throw new InputError(
-          "Historical price not supported for BalancerV2 tokens"
-        );
+        throw new InvalidParamError({
+          message: "Historical price not supported for BalancerV2 tokens",
+          param: "date",
+        });
       }
       if (baseCurrency === "usd") {
         price = await getBalancerV2TokenPrice(l1Token);
       } else {
-        throw new InputError(
-          "Only CG base currency allowed for BalancerV2 tokens is usd"
-        );
+        throw new InvalidParamError({
+          message: "Only CG base currency allowed for BalancerV2 tokens is usd",
+          param: "baseCurrency",
+        });
       }
     }
     // Fetch price dynamically from Coingecko API. If a historical

@@ -4,7 +4,6 @@ import { type, assert, Infer, optional, string, pattern } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
-  InputError,
   handleErrorCondition,
   parsableBigNumberString,
   validAddress,
@@ -15,6 +14,7 @@ import {
   validAddressOrENS,
   tagDomain,
 } from "./_utils";
+import { InvalidParamError } from "./_errors";
 
 const BuildDepositTxQueryParamsSchema = type({
   amount: parsableBigNumberString(),
@@ -74,7 +74,9 @@ const handler = async (
     const isNative = isNativeBoolStr === "true";
 
     if (originChainId === destinationChainId) {
-      throw new InputError("Origin and destination chains cannot be the same");
+      throw new InvalidParamError({
+        message: "Origin and destination chains cannot be the same",
+      });
     }
 
     const spokePool = getSpokePool(originChainId);

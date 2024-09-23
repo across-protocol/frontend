@@ -32,9 +32,9 @@ import {
   getCachedLatestBlock,
   parsableBigNumberString,
   validateDepositMessage,
-  InputError,
   getCachedFillGasUsage,
 } from "./_utils";
+import { MissingParamError } from "./_errors";
 
 const LimitsQueryParamsSchema = object({
   token: optional(validAddress()),
@@ -105,9 +105,11 @@ const handler = async (
     const isMessageDefined = sdk.utils.isDefined(message);
     if (isMessageDefined) {
       if (!sdk.utils.isDefined(amountInput)) {
-        throw new InputError(
-          "Parameter 'amount' must be defined when 'message' is defined"
-        );
+        throw new MissingParamError({
+          message:
+            "Parameter 'amount' must be defined when 'message' is defined",
+          param: "amount",
+        });
       }
       await validateDepositMessage(
         recipient,

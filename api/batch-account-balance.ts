@@ -5,9 +5,9 @@ import {
   getBatchBalanceViaMulticall3,
   getLogger,
   handleErrorCondition,
-  InputError,
   validAddress,
 } from "./_utils";
+import { InvalidParamError } from "./_errors";
 
 const BatchAccountBalanceQueryParamsSchema = type({
   tokenAddresses: union([validAddress(), array(validAddress())]),
@@ -86,9 +86,9 @@ const handler = async (
     const tokenAddresses = paramToArray(_tokenAddresses);
 
     if (addresses.length === 0 || tokenAddresses.length === 0) {
-      throw new InputError(
-        "Params 'addresses' and 'tokenAddresses' must not be empty"
-      );
+      throw new InvalidParamError({
+        message: "Params 'addresses' and 'tokenAddresses' must not be empty",
+      });
     }
 
     const result = await getBatchBalanceViaMulticall3(

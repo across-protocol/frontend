@@ -30,6 +30,11 @@ import {
 import { selectExclusiveRelayer } from "./_exclusivity";
 import { resolveTiming, resolveRebalanceTiming } from "./_timings";
 import { parseUnits } from "ethers/lib/utils";
+import {
+  InvalidParamError,
+  AmountTooHighError,
+  AmountTooLowError,
+} from "./_errors";
 
 const { BigNumber } = ethers;
 
@@ -131,7 +136,10 @@ const handler = async (
     else {
       // Don't attempt to provide quotes for future timestamps.
       if (parsedTimestamp > latestBlock.timestamp) {
-        throw new InputError("Invalid quote timestamp");
+        throw new InvalidParamError({
+          message: "Provided timestamp can not be in the future",
+          param: "timestamp",
+        });
       }
 
       const blockFinder = new sdk.utils.BlockFinder(provider, [latestBlock]);
@@ -201,12 +209,12 @@ const handler = async (
       .div(parseUnits("1", inputToken.decimals));
 
     if (amount.gt(maxDeposit)) {
-      throw new InputError(
-        `Amount exceeds max. deposit limit: ${ethers.utils.formatUnits(
+      throw new AmountTooHighError({
+        message: `Amount exceeds max. deposit limit: ${ethers.utils.formatUnits(
           maxDeposit,
           inputToken.decimals
-        )} ${inputToken.symbol}`
-      );
+        )} ${inputToken.symbol}`,
+      });
     }
 
     const parsedL1TokenConfig =
@@ -228,7 +236,12 @@ const handler = async (
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";
     if (!skipAmountLimitEnabled && isAmountTooLow) {
-      throw new InputError("Sent amount is too low relative to fees");
+      throw new AmountTooLowError({
+        message: `Sent amount is too low relative to fees. Minimum deposit is ${ethers.utils.formatUnits(
+          minDeposit,
+          inputToken.decimals
+        )} ${inputToken.symbol}`,
+      });
     }
 
     // Across V3's new `deposit` function requires now a total fee that includes the LP fee

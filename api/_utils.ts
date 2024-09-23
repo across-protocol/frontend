@@ -23,7 +23,7 @@ import {
   utils,
   Signer,
 } from "ethers";
-import { StructError, define } from "superstruct";
+import { define } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
@@ -60,6 +60,15 @@ import {
   getCachedValue,
   makeCacheGetterAndSetter,
 } from "./_cache";
+import {
+  InputError,
+  MissingParamError,
+  InvalidParamError,
+  handleErrorCondition,
+  RouteNotEnabledError,
+} from "./_errors";
+
+export { InputError, handleErrorCondition } from "./_errors";
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
@@ -245,17 +254,22 @@ export const validateChainAndTokenParams = (
   } = queryParams;
 
   if (!_destinationChainId) {
-    throw new InputError("Query param 'destinationChainId' must be provided");
+    throw new MissingParamError({
+      message: "Query param 'destinationChainId' must be provided",
+    });
   }
 
   if (originChainId === _destinationChainId) {
-    throw new InputError("Origin and destination chains cannot be the same");
+    throw new InvalidParamError({
+      message: "Origin and destination chains cannot be the same",
+    });
   }
 
   if (!token && (!inputTokenAddress || !outputTokenAddress)) {
-    throw new InputError(
-      "Query param 'token' or 'inputToken' and 'outputToken' must be provided"
-    );
+    throw new MissingParamError({
+      message:
+        "Query param 'token' or 'inputToken' and 'outputToken' must be provided",
+    });
   }
 
   const destinationChainId = Number(_destinationChainId);
@@ -284,7 +298,9 @@ export const validateChainAndTokenParams = (
       outputToken.address
     )
   ) {
-    throw new InputError(`Route is not enabled.`);
+    throw new RouteNotEnabledError({
+      message: "Route is not enabled.",
+    });
   }
 
   return {
@@ -306,19 +322,26 @@ export const validateDepositMessage = async (
 ) => {
   if (!sdk.utils.isMessageEmpty(message)) {
     if (!ethers.utils.isHexString(message)) {
-      throw new InputError("Message must be a hex string");
+      throw new InvalidParamError({
+        message: "Message must be a hex string",
+        param: "message",
+      });
     }
     if (message.length % 2 !== 0) {
       // Our message encoding is a hex string, so we need to check that the length is even.
-      throw new InputError("Message must be an even hex string");
+      throw new InvalidParamError({
+        message: "Message must be an even hex string",
+        param: "message",
+      });
     }
     const isRecipientAContract =
       getStaticIsContract(destinationChainId, recipient) ||
       (await isContractCache(destinationChainId, recipient).get());
     if (!isRecipientAContract) {
-      throw new InputError(
-        "Recipient must be a contract when a message is provided"
-      );
+      throw new InvalidParamError({
+        message: "Recipient must be a contract when a message is provided",
+        param: "recipient",
+      });
     } else {
       // If we're in this case, it's likely that we're going to have to simulate the execution of
       // a complex message handling from the specified relayer to the specified recipient by calling
@@ -332,10 +355,12 @@ export const validateDepositMessage = async (
         outputTokenAddress
       );
       if (balanceOfToken.lt(amountInput)) {
-        throw new InputError(
-          `Relayer Address (${relayer}) doesn't have enough funds to support this deposit;` +
-            ` for help, please reach out to https://discord.across.to`
-        );
+        throw new InvalidParamError({
+          message:
+            `Relayer Address (${relayer}) doesn't have enough funds to support this deposit;` +
+            ` for help, please reach out to https://discord.across.to`,
+          param: "relayer",
+        });
       }
     }
   }
@@ -379,11 +404,12 @@ export const getRouteDetails = (
   const inputToken = getTokenByAddress(inputTokenAddress, originChainId);
 
   if (!inputToken) {
-    throw new InputError(
-      originChainId
+    throw new InvalidParamError({
+      message: originChainId
         ? "Unsupported token on given origin chain"
-        : "Unsupported token address"
-    );
+        : "Unsupported token address",
+      param: "inputTokenAddress",
+    });
   }
 
   const l1TokenAddress =
@@ -392,7 +418,10 @@ export const getRouteDetails = (
   const l1Token = getTokenByAddress(l1TokenAddress, HUB_POOL_CHAIN_ID);
 
   if (!l1Token) {
-    throw new InputError("No L1 token found for given input token address");
+    throw new InvalidParamError({
+      message: "No L1 token found for given input token address",
+      param: "inputTokenAddress",
+    });
   }
 
   outputTokenAddress ??=
@@ -404,9 +433,10 @@ export const getRouteDetails = (
     : undefined;
 
   if (!outputToken) {
-    throw new InputError(
-      "Unsupported token address on given destination chain"
-    );
+    throw new InvalidParamError({
+      message: "Unsupported token address on given destination chain",
+      param: "outputTokenAddress",
+    });
   }
 
   const possibleOriginChainIds = originChainId
@@ -414,13 +444,18 @@ export const getRouteDetails = (
     : _getChainIdsOfToken(inputTokenAddress, inputToken);
 
   if (possibleOriginChainIds.length === 0) {
-    throw new InputError("Unsupported token address");
+    throw new InvalidParamError({
+      message: "Unsupported token address",
+      param: "inputTokenAddress",
+    });
   }
 
   if (possibleOriginChainIds.length > 1) {
-    throw new InputError(
-      "More than one route is enabled for the provided inputs causing ambiguity. Please specify the originChainId."
-    );
+    throw new InvalidParamError({
+      message:
+        "More than one route is enabled for the provided inputs causing ambiguity. Please specify the originChainId.",
+      param: "inputTokenAddress",
+    });
   }
 
   const resolvedOriginChainId = possibleOriginChainIds[0];
@@ -498,7 +533,7 @@ const _getChainIdsOfToken = (
 
 const _getBridgedUsdcTokenSymbol = (tokenSymbol: string, chainId: number) => {
   if (!sdk.utils.isBridgedUsdc(tokenSymbol)) {
-    throw new InputError(`Token ${tokenSymbol} is not a bridged USDC token`);
+    throw new Error(`Token ${tokenSymbol} is not a bridged USDC token`);
   }
 
   switch (chainId) {
@@ -515,11 +550,12 @@ const _getAddressOrThrowInputError = (address: string, paramName: string) => {
   try {
     return ethers.utils.getAddress(address);
   } catch (err) {
-    throw new InputError(`Invalid address provided for '${paramName}'`);
+    throw new InvalidParamError({
+      message: `Invalid address provided for '${paramName}'`,
+      param: paramName,
+    });
   }
 };
-
-export class InputError extends Error {}
 
 export const getHubPool = (provider: providers.Provider) => {
   return HubPool__factory.connect(ENABLED_ROUTES.hubPoolAddress, provider);
@@ -642,22 +678,6 @@ const getRelayerFeeCalculatorQueries = (
 };
 
 /**
- * Resolves a tokenAddress to a given textual symbol
- * @param tokenAddress The token address to convert into a symbol
- * @returns A corresponding symbol to the given `tokenAddress`
- */
-export const getTokenSymbol = (tokenAddress: string): string => {
-  const symbol = Object.entries(TOKEN_SYMBOLS_MAP).find(
-    ([_symbol, { addresses }]) =>
-      addresses[HUB_POOL_CHAIN_ID]?.toLowerCase() === tokenAddress.toLowerCase()
-  )?.[0];
-  if (!symbol) {
-    throw new InputError("Token address provided was not whitelisted.");
-  }
-  return symbol;
-};
-
-/**
  * Retrieves the results of the `relayFeeCalculator` SDK function: `relayerFeeDetails`
  * @param inputToken A valid input token address
  * @param outputToken A valid output token address
@@ -697,28 +717,23 @@ export const getRelayerFeeDetails = async (
   const relayFeeCalculator = getRelayerFeeCalculator(destinationChainId, {
     relayerAddress,
   });
-  try {
-    return await relayFeeCalculator.relayerFeeDetails(
-      buildDepositForSimulation({
-        amount: amount.toString(),
-        inputToken,
-        outputToken,
-        recipientAddress,
-        originChainId,
-        destinationChainId,
-        message,
-      }),
-      amount,
-      sdk.utils.isMessageEmpty(message),
-      relayerAddress,
-      tokenPrice,
-      undefined,
-      gasUnits
-    );
-  } catch (err: unknown) {
-    const reason = resolveEthersError(err);
-    throw new InputError(`Relayer fill simulation failed - ${reason}`);
-  }
+  return await relayFeeCalculator.relayerFeeDetails(
+    buildDepositForSimulation({
+      amount: amount.toString(),
+      inputToken,
+      outputToken,
+      recipientAddress,
+      originChainId,
+      destinationChainId,
+      message,
+    }),
+    amount,
+    sdk.utils.isMessageEmpty(message),
+    relayerAddress,
+    tokenPrice,
+    undefined,
+    gasUnits
+  );
 };
 
 export const buildDepositForSimulation = (depositArgs: {
@@ -1206,60 +1221,6 @@ export function applyMapFilter<InputType, MapType>(
   }, []);
 }
 
-export function resolveEthersError(err: unknown): string {
-  // prettier-ignore
-  return sdk.typeguards.isEthersError(err)
-    ? `${err.reason}: ${err.code} - ${err.error}`
-    : sdk.typeguards.isError(err)
-      ? err.message
-      : "unknown error";
-}
-
-/**
- * Handles the recurring case of error handling
- * @param endpoint A string numeric to indicate to the logging utility where this error occurs
- * @param response A VercelResponse object that is used to interract with the returning reponse
- * @param logger A logging utility to write to a cloud logging provider
- * @param error The error that will be returned to the user
- * @returns The `response` input with a status/send sent. Note: using this object again will cause an exception
- */
-export function handleErrorCondition(
-  endpoint: string,
-  response: VercelResponse,
-  logger: LoggingUtility,
-  error: unknown
-): VercelResponse {
-  if (!(error instanceof Error)) {
-    console.error("Error could not be defined.", error);
-    return response.status(500).send("Error could not be defined.");
-  }
-  let status: number;
-  if (error instanceof InputError) {
-    logger.warn({
-      at: endpoint,
-      message: `400 input error: ${error.message}`,
-    });
-    status = 400;
-  } else if (error instanceof StructError) {
-    logger.warn({
-      at: endpoint,
-      message: `400 validation error: ${error.message}`,
-    });
-    status = 400;
-    const { type, path } = error;
-    // Sanitize the error message that will be sent to client
-    error.message = `ValidationError - At path: ${path}. Expected type: ${type}`;
-  } else {
-    logger.error({
-      at: endpoint,
-      message: "500 server error",
-    });
-    status = 500;
-  }
-  console.error(error);
-  return response.status(status).send(error.message);
-}
-
 /* ------------------------- superstruct validators ------------------------- */
 
 export function parsableBigNumberString() {
@@ -1449,7 +1410,10 @@ export async function getExternalPoolState(
     case "balancer":
       return getBalancerPoolState(tokenAddress);
     default:
-      throw new InputError("Invalid external pool provider");
+      throw new InvalidParamError({
+        message: "Invalid external pool provider",
+        param: "externalPoolProvider",
+      });
   }
 }
 
@@ -1497,9 +1461,10 @@ async function getBalancerPoolState(poolTokenAddress: string) {
   );
 
   if (!poolEntry) {
-    throw new InputError(
-      `Balancer pool with address ${poolTokenAddress} not found`
-    );
+    throw new InvalidParamError({
+      message: `Balancer pool with address ${poolTokenAddress} not found`,
+      param: "poolTokenAddress",
+    });
   }
 
   const poolId = poolEntry[1].id as string;
@@ -1523,9 +1488,10 @@ async function getBalancerPoolState(poolTokenAddress: string) {
   const pool = await balancer.pools.find(poolId);
 
   if (!pool) {
-    throw new InputError(
-      `Balancer pool with address ${poolTokenAddress} not found`
-    );
+    throw new InvalidParamError({
+      message: `Balancer pool with address ${poolTokenAddress} not found`,
+      param: "poolTokenAddress",
+    });
   }
 
   const apr = await balancer.pools.apr(pool);
