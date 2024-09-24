@@ -6,6 +6,12 @@ import { ethers } from "ethers";
 
 type AcrossApiErrorCodeKey = keyof typeof AcrossErrorCode;
 
+type EthersErrorTransaction = {
+  from: string;
+  to: string;
+  data: string;
+};
+
 export const HttpErrorToStatusCode = {
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
@@ -108,7 +114,15 @@ export class MissingParamError extends InputError {
 }
 
 export class SimulationError extends InputError {
-  constructor(args: { message: string }, opts?: ErrorOptions) {
+  public transaction: EthersErrorTransaction;
+
+  constructor(
+    args: {
+      message: string;
+      transaction: EthersErrorTransaction;
+    },
+    opts?: ErrorOptions
+  ) {
     super(
       {
         message: args.message,
@@ -116,6 +130,14 @@ export class SimulationError extends InputError {
       },
       opts
     );
+    this.transaction = args.transaction;
+  }
+
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      transaction: this.transaction,
+    };
   }
 }
 
@@ -251,9 +273,14 @@ export function resolveEthersError(err: unknown) {
 
   const { reason, code } = err;
   const method = "method" in err ? (err.method as string) : undefined;
+  const transaction =
+    "transaction" in err
+      ? (err.transaction as EthersErrorTransaction)
+      : undefined;
 
   // Simulation errors
   if (
+    transaction &&
     method === "estimateGas" &&
     (code === ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT ||
       code === ethers.utils.Logger.errors.CALL_EXCEPTION)
@@ -268,6 +295,7 @@ export function resolveEthersError(err: unknown) {
     return new SimulationError(
       {
         message: rpcErrorMessage,
+        transaction: transaction,
       },
       { cause: err }
     );
