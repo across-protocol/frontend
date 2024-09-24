@@ -430,6 +430,13 @@ const AnimatedLogoToChain = styled(AnimatedLogo)<{ status: DepositStatus }>`
           ? COLORS.white
           : COLORS.aqua};
 
+    fill: ${({ status }) =>
+      status === "depositing" || status === "deposit-reverted"
+        ? COLORS["grey-400"]
+        : status === "filling"
+          ? COLORS.white
+          : COLORS.aqua};
+
     // Use currentColor for the fill of rect, circle, and #path-to-animate
     & rect,
     circle,
