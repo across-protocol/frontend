@@ -257,18 +257,20 @@ const handler = async (
           amountInUsd
         );
 
-    const { exclusiveRelayer, exclusivityPeriod } =
-      await selectExclusiveRelayer(
-        computedOriginChainId,
-        destinationChainId,
-        outputToken,
-        amount.sub(totalRelayFee),
-        amountInUsd,
-        BigNumber.from(relayerFeeDetails.capitalFeePercent),
-        estimatedFillTimeSec
-      );
-    const exclusivityDeadline =
-      depositMethod === "depositExclusive" ? exclusivityPeriod : 0;
+    let exclusiveRelayer = sdk.constants.ZERO_ADDRESS;
+    let exclusivityDeadline = 0;
+    if (depositMethod === "depositExclusive") {
+      ({ exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
+        await selectExclusiveRelayer(
+          computedOriginChainId,
+          destinationChainId,
+          outputToken,
+          amount.sub(totalRelayFee),
+          amountInUsd,
+          BigNumber.from(relayerFeeDetails.capitalFeePercent),
+          estimatedFillTimeSec
+        ));
+    }
 
     const responseJson = {
       estimatedFillTimeSec,
