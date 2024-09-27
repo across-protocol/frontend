@@ -33,6 +33,7 @@ import {
   parsableBigNumberString,
   validateDepositMessage,
   getCachedFillGasUsage,
+  latestGasPriceCache,
 } from "./_utils";
 import { MissingParamError } from "./_errors";
 
@@ -163,7 +164,7 @@ const handler = async (
       message,
     };
 
-    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasUnits] =
+    const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasUnits, gasPrice] =
       await Promise.all([
         getCachedTokenPrice(
           l1Token.address,
@@ -177,6 +178,7 @@ const handler = async (
           : getCachedFillGasUsage(depositArgs, {
               relayerAddress: relayer,
             }),
+        latestGasPriceCache(destinationChainId).get(),
       ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
@@ -187,7 +189,13 @@ const handler = async (
       transferRestrictedBalances,
       fullRelayerMainnetBalances,
     ] = await Promise.all([
-      getRelayerFeeDetails(depositArgs, tokenPriceNative, relayer, gasUnits),
+      getRelayerFeeDetails(
+        depositArgs,
+        tokenPriceNative,
+        relayer,
+        gasUnits,
+        gasPrice
+      ),
       callViaMulticall3(provider, multiCalls, {
         blockTag: latestBlock.number,
       }),

@@ -7,6 +7,7 @@ import {
 } from "@across-protocol/contracts/dist/typechain";
 import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
+import { asL2Provider } from "@eth-optimism/sdk";
 import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
@@ -1965,11 +1966,16 @@ export function latestGasPriceCache(chainId: number) {
     buildInternalCacheKey("latestGasPriceCache", chainId),
     ttlPerChain[chainId] || ttlPerChain.default,
     async () => {
-      const gasPrice = await sdk.gasPriceOracle.getGasPriceEstimate(
+      if (sdk.utils.chainIsOPStack(chainId)) {
+        const l2Provider = asL2Provider(getProvider(chainId));
+        return l2Provider.getGasPrice();
+      }
+
+      const { maxFeePerGas } = await sdk.gasPriceOracle.getGasPriceEstimate(
         getProvider(chainId),
         chainId
       );
-      return gasPrice.maxFeePerGas;
+      return maxFeePerGas;
     },
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
