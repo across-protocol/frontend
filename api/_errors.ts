@@ -74,6 +74,18 @@ export class AcrossApiError extends Error {
   }
 }
 
+export class UnauthorizedError extends AcrossApiError {
+  constructor(args?: { message: string }, opts?: ErrorOptions) {
+    super(
+      {
+        message: args?.message ?? "Unauthorized",
+        status: HttpErrorToStatusCode.UNAUTHORIZED,
+      },
+      opts
+    );
+  }
+}
+
 export class InputError extends AcrossApiError {
   constructor(
     args: {

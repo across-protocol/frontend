@@ -687,6 +687,7 @@ const getRelayerFeeCalculatorQueries = (
  * @param message An optional message to include in the transfer
  * @param relayerAddress An optional relayer address to use for the transfer
  * @param gasUnits An optional gas unit to use for the transfer
+ * @param gasPrice An optional gas price to use for the transfer
  * @returns The a promise to the relayer fee for the given `amount` of transferring `l1Token` to `destinationChainId`
  */
 export const getRelayerFeeDetails = async (
@@ -701,7 +702,8 @@ export const getRelayerFeeDetails = async (
   },
   tokenPrice?: number,
   relayerAddress?: string,
-  gasUnits?: sdk.utils.BigNumberish
+  gasUnits?: sdk.utils.BigNumberish,
+  gasPrice?: sdk.utils.BigNumberish
 ): Promise<sdk.relayFeeCalculator.RelayerFeeDetails> => {
   const {
     inputToken,
@@ -729,7 +731,7 @@ export const getRelayerFeeDetails = async (
     sdk.utils.isMessageEmpty(message),
     relayerAddress,
     tokenPrice,
-    undefined,
+    gasPrice,
     gasUnits
   );
 };
@@ -1950,6 +1952,26 @@ export function getCachedFillGasUsage(
 
   return getCachedValue(cacheKey, ttl, fetchFn, (bnFromCache) =>
     BigNumber.from(bnFromCache)
+  );
+}
+
+export function latestGasPriceCache(chainId: number) {
+  const ttlPerChain = {
+    default: 30,
+    [CHAIN_IDs.ARBITRUM]: 15,
+  };
+
+  return makeCacheGetterAndSetter(
+    buildInternalCacheKey("latestGasPriceCache", chainId),
+    ttlPerChain[chainId] || ttlPerChain.default,
+    async () => {
+      const gasPrice = await sdk.gasPriceOracle.getGasPriceEstimate(
+        getProvider(chainId),
+        chainId
+      );
+      return gasPrice.maxFeePerGas;
+    },
+    (bnFromCache) => BigNumber.from(bnFromCache)
   );
 }
 
