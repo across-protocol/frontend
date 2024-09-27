@@ -7,7 +7,7 @@
     }
   ],
   "functions": {
-    "api/cron-cache-gas-prices": {
+    "api/cron-cache-gas-prices.ts": {
       "maxDuration": 90
     }
   },
