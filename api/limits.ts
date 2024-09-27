@@ -33,7 +33,6 @@ import {
   parsableBigNumberString,
   validateDepositMessage,
   getCachedFillGasUsage,
-  latestGasPriceCache,
 } from "./_utils";
 import { MissingParamError } from "./_errors";
 
