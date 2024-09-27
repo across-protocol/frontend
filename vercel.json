@@ -6,6 +6,11 @@
       "schedule": "* * * * *"
     }
   ],
+  "functions": {
+    "api/cron-cache-gas-prices": {
+      "maxDuration": 90
+    }
+  },
   "rewrites": [
     {
       "source": "/api/deposit/status",

@@ -9,6 +9,7 @@ import {
   handleErrorCondition,
   latestBalanceCache,
 } from "./_utils";
+import { UnauthorizedError } from "./_errors";
 
 import mainnetChains from "../src/data/chains_1.json";
 
@@ -27,7 +28,7 @@ const handler = async (
       !process.env.CRON_SECRET ||
       authHeader !== `Bearer ${process.env.CRON_SECRET}`
     ) {
-      return response.status(401).json({ success: false });
+      throw new UnauthorizedError();
     }
 
     const {
