@@ -4,7 +4,6 @@ import { ethers } from "ethers";
 
 import { TypedVercelRequest } from "./_types";
 import {
-  InputError,
   getLogger,
   getTokenByAddress,
   handleErrorCondition,

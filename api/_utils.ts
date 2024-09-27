@@ -61,10 +61,8 @@ import {
   makeCacheGetterAndSetter,
 } from "./_cache";
 import {
-  InputError,
   MissingParamError,
   InvalidParamError,
-  handleErrorCondition,
   RouteNotEnabledError,
 } from "./_errors";
 
