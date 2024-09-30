@@ -383,8 +383,6 @@ export function stringValueInArray(value: string, arr: string[]) {
 }
 export const maxRelayFee = 0.25; // 25%
 export const minRelayFee = 0.0001; // 0.01%
-// Chains where Blocknative Notify can be used. See https://docs.blocknative.com/notify#initialization
-export const supportedNotifyChainIds = [1, 3, 4, 5, 42, 56, 100, 137, 250];
 
 export const mockServerlessAPI =
   process.env.REACT_APP_MOCK_SERVERLESS === "true";
