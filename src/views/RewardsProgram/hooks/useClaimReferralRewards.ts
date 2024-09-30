@@ -14,7 +14,7 @@ import { useUnclaimedProofs } from "hooks/useUnclaimedProofs";
 const config = getConfig();
 
 export function useClaimRewards(program: rewardProgramTypes) {
-  const { account, signer, notify } = useConnection();
+  const { account, signer } = useConnection();
   const baseChainId =
     program === "arb-rebates" ? ChainId.ARBITRUM : ChainId.OPTIMISM;
   const { isWrongNetwork, isWrongNetworkHandler } =
@@ -39,7 +39,7 @@ export function useClaimRewards(program: rewardProgramTypes) {
         account,
       }))
     );
-    await waitOnTransaction(hubPoolChainId, claimMultiTx, notify);
+    await waitOnTransaction(hubPoolChainId, claimMultiTx);
   };
   return useMutation({
     mutationFn: handleClaim,

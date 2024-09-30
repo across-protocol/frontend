@@ -6,7 +6,6 @@ export * from "./useQueryParams";
 export * from "./useError";
 export * from "./useWindowSize";
 export * from "./useScrollPosition";
-export * from "./useNotify";
 export * from "./useCenteredInViewport";
 export * from "./useConnection";
 export * from "./useIsWrongNetwork";

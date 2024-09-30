@@ -52,8 +52,5 @@ export function onboardInit() {
         enabled: false,
       },
     },
-    notify: {
-      enabled: false,
-    },
   });
 }

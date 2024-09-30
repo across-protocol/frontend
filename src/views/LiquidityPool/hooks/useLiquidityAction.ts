@@ -18,7 +18,7 @@ import { parseAndValidateAmountInput } from "../utils";
 const config = getConfig();
 
 export function useAddLiquidity(tokenSymbol?: string, l1TokenAddress?: string) {
-  const { account, signer, notify } = useConnection();
+  const { account, signer } = useConnection();
   const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork();
 
   const userLiquidityPoolQuery = useUserLiquidityPool(tokenSymbol);
@@ -68,7 +68,7 @@ export function useAddLiquidity(tokenSymbol?: string, l1TokenAddress?: string) {
         value: isEth ? parsedAndValidAmount : undefined,
       }
     );
-    await waitOnTransaction(hubPoolChainId, txResponse, notify);
+    await waitOnTransaction(hubPoolChainId, txResponse);
   };
 
   return useMutation({
@@ -85,7 +85,7 @@ export function useRemoveLiquidity(
   tokenSymbol?: string,
   tokenAddress?: string
 ) {
-  const { account, signer, notify } = useConnection();
+  const { account, signer } = useConnection();
   const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork();
 
   const userLiquidityPoolQuery = useUserLiquidityPool(tokenSymbol);
@@ -127,7 +127,7 @@ export function useRemoveLiquidity(
       amountToRemoveInLP,
       isEth
     );
-    await waitOnTransaction(hubPoolChainId, txResponse, notify);
+    await waitOnTransaction(hubPoolChainId, txResponse);
   };
 
   return useMutation({

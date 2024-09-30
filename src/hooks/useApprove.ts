@@ -14,7 +14,7 @@ import { useIsWrongNetwork } from "hooks";
 const config = getConfig();
 
 export function useApprove(requiredChainId = hubPoolChainId) {
-  const { account, signer, notify } = useConnection();
+  const { account, signer } = useConnection();
   const { isWrongNetwork, isWrongNetworkHandler } =
     useIsWrongNetwork(requiredChainId);
 
@@ -59,14 +59,14 @@ export function useApprove(requiredChainId = hubPoolChainId) {
         args.allowedContractAddress,
         0
       );
-      await waitOnTransaction(requiredChainId, zeroAmountApprovalTx, notify);
+      await waitOnTransaction(requiredChainId, zeroAmountApprovalTx);
     }
 
     const txResponse = await erc20.approve(
       args.allowedContractAddress,
       MAX_APPROVAL_AMOUNT
     );
-    await waitOnTransaction(requiredChainId, txResponse, notify);
+    await waitOnTransaction(requiredChainId, txResponse);
   };
 
   return useMutation({

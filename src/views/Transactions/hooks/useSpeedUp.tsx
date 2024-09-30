@@ -17,7 +17,7 @@ import type { Deposit } from "hooks/useDeposits";
 const config = getConfig();
 
 export function useSpeedUp(transfer: Deposit, token: Token) {
-  const { signer, notify, account } = useConnection();
+  const { signer, account } = useConnection();
   const { isWrongNetwork, isWrongNetworkHandler } = useIsWrongNetwork(
     transfer.sourceChainId
   );
@@ -96,7 +96,7 @@ export function useSpeedUp(transfer: Deposit, token: Token) {
           txResponse.hash
         )
       );
-      await waitOnTransaction(transfer.sourceChainId, txResponse, notify);
+      await waitOnTransaction(transfer.sourceChainId, txResponse);
     },
   });
 
