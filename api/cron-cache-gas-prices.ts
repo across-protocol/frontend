@@ -1,12 +1,10 @@
 import { VercelResponse } from "@vercel/node";
-import { gasPriceOracle } from "@across-protocol/sdk";
 import { TypedVercelRequest } from "./_types";
 import {
   HUB_POOL_CHAIN_ID,
   getLogger,
   handleErrorCondition,
   latestGasPriceCache,
-  getProvider,
 } from "./_utils";
 import { UnauthorizedError } from "./_errors";
 
@@ -63,11 +61,7 @@ const handler = async (
         }
 
         // Update gas price every `updateIntervalSec` seconds
-        const gasPrice = await gasPriceOracle.getGasPriceEstimate(
-          getProvider(chain.chainId),
-          chain.chainId
-        );
-        await latestGasPriceCache(chain.chainId).set(gasPrice.maxFeePerGas);
+        await latestGasPriceCache(chain.chainId).set();
 
         // Sleep for `updateIntervalSec` seconds
         const updateIntervalSec =
