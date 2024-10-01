@@ -55,7 +55,7 @@ export function useDepositTracking(
     },
     staleTime: Infinity,
     enabled: shouldRetryDepositQuery,
-    retryDelay: getChainInfo(fromChainId).pollingInterval || 5_000,
+    retryDelay: getRetryDelay(fromChainId),
   });
 
   useEffect(() => {
@@ -119,7 +119,7 @@ export function useDepositTracking(
     },
     staleTime: Infinity,
     retry: true,
-    retryDelay: getChainInfo(toChainId).pollingInterval || 5_000,
+    retryDelay: getRetryDelay(toChainId),
     enabled: !!depositQuery.data,
   });
 
@@ -152,4 +152,9 @@ export function useDepositTracking(
   }, [fillQuery.data, depositTxHash, fromBridgePagePayload]);
 
   return { depositQuery, fillQuery };
+}
+
+function getRetryDelay(chainId: number) {
+  const pollingInterval = getChainInfo(chainId).pollingInterval || 1_000;
+  return Math.floor(pollingInterval / 3);
 }
