@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
-// If this file is not found, run `yarn pull:timing` to fetch the latest data
 import timings from "../src/data/fill-times-preset.json";
+import exclusivityTimings from "../src/data/exclusivity-fill-times.json";
 import { parseUnits } from "ethers/lib/utils";
 import { CHAIN_IDs } from "./_constants";
 
@@ -21,71 +21,93 @@ const rebalanceTimeOverrides: {
   [CHAIN_IDs.POLYGON]: 1800, // 30 minutes
 };
 
-const timingsLookup = timings
-  .map((timing) => ({
-    p75_fill_time_secs: Number(timing.p75_fill_time_secs),
-    max_size_usd: parseUnits(timing.max_size_usd, 18),
-    destination_route_classification:
-      timing.destination_route_classification.split(","),
-    origin_route_classification: timing.origin_route_classification?.split(","),
-    token_liquidity_groups: timing.token_liquidity_groups
-      .split(",")
-      .map((s) => s.toUpperCase()),
-  }))
-  .reduce(
-    (acc, timing) => {
-      timing.origin_route_classification.forEach((srcId) => {
-        timing.destination_route_classification.forEach((dstId) => {
-          timing.token_liquidity_groups.forEach((symbol) => {
-            acc[srcId] ??= {};
-            acc[srcId][dstId] ??= {};
-            acc[srcId][dstId][symbol] ??= [];
-            acc[srcId][dstId][symbol].push({
-              amountUsd: timing.max_size_usd,
-              timingInSecs: timing.p75_fill_time_secs,
-            });
-            // Sort inline
-            acc[srcId][dstId][symbol].sort((a, b) =>
-              bigNumberComparator(a.amountUsd, b.amountUsd)
-            );
-          });
-        });
-      });
-      return acc;
-    },
-    {} as {
-      [srcId: string]: {
-        [dstId: string]: {
-          [symbol: string]: {
-            amountUsd: BigNumber;
-            timingInSecs: number;
-          }[];
-        };
-      };
-    }
-  );
+const timingsLookup = makeLookup(timings);
+const exclusivityTimingsLookup = makeLookup(exclusivityTimings);
 
-export function resolveTiming(
-  sourceChainId: string,
-  destinationChainId: string,
-  symbol: string,
-  usdAmount: BigNumber
-): number {
-  const override =
-    fillTimeOverrides[sourceChainId]?.[destinationChainId]?.[symbol];
-  if (override) {
-    return override;
-  }
+/**
+ * Resolve the estimated fill time seconds as returned by the /suggested-fees API and
+ * displayed in the UI.
+ */
+export const resolveTiming = makeTimingResolver(timingsLookup);
 
-  const sourceData = timingsLookup[sourceChainId] ?? timingsLookup["0"];
-  const destinationData = sourceData?.[destinationChainId] ?? sourceData?.["0"];
-  const symbolData = destinationData?.[symbol] ?? destinationData?.["OTHER"]; // implicitly sorted
-  return (
-    symbolData?.find((cutoff) => usdAmount.lt(cutoff.amountUsd))
-      ?.timingInSecs ?? 10
-  );
-}
+/**
+ * Resolve the estimated fill time seconds to be used by the exclusivity strategy.
+ */
+export const resolveExclusivityTiming = makeTimingResolver(
+  exclusivityTimingsLookup
+);
 
 export function resolveRebalanceTiming(destinationChainId: string): number {
   return rebalanceTimeOverrides[destinationChainId] ?? 900; // 15 minutes
+}
+
+function makeTimingResolver(lookup: ReturnType<typeof makeLookup>) {
+  return (
+    sourceChainId: string,
+    destinationChainId: string,
+    symbol: string,
+    usdAmount: BigNumber
+  ) => {
+    const override =
+      fillTimeOverrides[sourceChainId]?.[destinationChainId]?.[symbol];
+    if (override) {
+      return override;
+    }
+
+    const sourceData = timingsLookup[sourceChainId] ?? timingsLookup["0"];
+    const destinationData =
+      sourceData?.[destinationChainId] ?? sourceData?.["0"];
+    const symbolData = destinationData?.[symbol] ?? destinationData?.["OTHER"]; // implicitly sorted
+    return (
+      symbolData?.find((cutoff) => usdAmount.lt(cutoff.amountUsd))
+        ?.timingInSecs ?? 10
+    );
+  };
+}
+
+function makeLookup(rawTimings: typeof timings) {
+  return rawTimings
+    .map((timing) => ({
+      p75_fill_time_secs: Number(timing.p75_fill_time_secs),
+      max_size_usd: parseUnits(timing.max_size_usd, 18),
+      destination_route_classification:
+        timing.destination_route_classification.split(","),
+      origin_route_classification:
+        timing.origin_route_classification?.split(","),
+      token_liquidity_groups: timing.token_liquidity_groups
+        .split(",")
+        .map((s) => s.toUpperCase()),
+    }))
+    .reduce(
+      (acc, timing) => {
+        timing.origin_route_classification.forEach((srcId) => {
+          timing.destination_route_classification.forEach((dstId) => {
+            timing.token_liquidity_groups.forEach((symbol) => {
+              acc[srcId] ??= {};
+              acc[srcId][dstId] ??= {};
+              acc[srcId][dstId][symbol] ??= [];
+              acc[srcId][dstId][symbol].push({
+                amountUsd: timing.max_size_usd,
+                timingInSecs: timing.p75_fill_time_secs,
+              });
+              // Sort inline
+              acc[srcId][dstId][symbol].sort((a, b) =>
+                bigNumberComparator(a.amountUsd, b.amountUsd)
+              );
+            });
+          });
+        });
+        return acc;
+      },
+      {} as {
+        [srcId: string]: {
+          [dstId: string]: {
+            [symbol: string]: {
+              amountUsd: BigNumber;
+              timingInSecs: number;
+            }[];
+          };
+        };
+      }
+    );
 }
