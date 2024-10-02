@@ -54,7 +54,7 @@ function makeTimingResolver(lookup: ReturnType<typeof makeLookup>) {
       return override;
     }
 
-    const sourceData = timingsLookup[sourceChainId] ?? timingsLookup["0"];
+    const sourceData = lookup[sourceChainId] ?? lookup["0"];
     const destinationData =
       sourceData?.[destinationChainId] ?? sourceData?.["0"];
     const symbolData = destinationData?.[symbol] ?? destinationData?.["OTHER"]; // implicitly sorted
