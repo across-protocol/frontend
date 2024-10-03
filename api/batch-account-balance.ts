@@ -5,6 +5,7 @@ import {
   getBatchBalanceViaMulticall3,
   getLogger,
   handleErrorCondition,
+  paramToArray,
   validAddress,
 } from "./_utils";
 import { InvalidParamError } from "./_errors";
@@ -24,10 +25,6 @@ export type BatchAccountBalanceResponse = Awaited<
 > & {
   chainId: number;
 };
-
-function paramToArray(param: string | string[]): string[] {
-  return Array.isArray(param) ? param : [param];
-}
 
 /**
  * ## Description
@@ -85,7 +82,7 @@ const handler = async (
     const addresses = paramToArray(_addresses);
     const tokenAddresses = paramToArray(_tokenAddresses);
 
-    if (addresses.length === 0 || tokenAddresses.length === 0) {
+    if (!addresses || !tokenAddresses) {
       throw new InvalidParamError({
         message: "Params 'addresses' and 'tokenAddresses' must not be empty",
       });

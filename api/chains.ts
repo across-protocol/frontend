@@ -1,10 +1,11 @@
 import { VercelResponse } from "@vercel/node";
-import { Infer, optional, string, type } from "superstruct";
+import { array, Infer, optional, string, type, union } from "superstruct";
 import {
   getLogger,
   handleErrorCondition,
   positiveIntStr,
   boolStr,
+  paramToArray,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 
@@ -13,7 +14,7 @@ import mainnetChains from "../src/data/chains_1.json";
 const ChainsQueryParams = type({
   inputTokenSymbol: optional(string()),
   outputTokenSymbol: optional(string()),
-  chainId: optional(positiveIntStr()),
+  chainId: optional(union([positiveIntStr(), array(positiveIntStr())])),
   omitTokens: optional(boolStr()),
 });
 
@@ -24,6 +25,7 @@ const handler = async (
   response: VercelResponse
 ) => {
   const logger = getLogger();
+
   logger.debug({
     at: "Chains",
     message: "Query data",
@@ -32,6 +34,7 @@ const handler = async (
 
   try {
     const { inputTokenSymbol, outputTokenSymbol, chainId, omitTokens } = query;
+    const chainIds = paramToArray(chainId)?.map(Number);
 
     const filteredChains = mainnetChains.filter((chain) => {
       return (
@@ -47,7 +50,7 @@ const handler = async (
                 token.symbol.toUpperCase() === outputTokenSymbol.toUpperCase()
             )
           : true) &&
-        (chainId ? chain.chainId === Number(chainId) : true)
+        (chainIds ? chainIds.includes(chain.chainId) : true)
       );
     });
 
