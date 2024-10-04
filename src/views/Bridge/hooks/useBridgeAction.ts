@@ -163,6 +163,9 @@ export function useBridgeAction(
             swapQuote: frozenSwapQuote!,
             swapTokenAddress: frozenRoute.swapTokenAddress,
             swapTokenAmount: frozenDepositArgs.initialAmount,
+            // Current `SwapAndBridge` contract does not support exclusivity.
+            exclusiveRelayer: constants.AddressZero,
+            exclusivityDeadline: 0,
           },
           networkMismatchHandler
         );
