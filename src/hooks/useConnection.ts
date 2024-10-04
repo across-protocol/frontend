@@ -10,13 +10,11 @@ export function useConnection() {
     isConnected,
     connect,
     disconnect,
-    notify,
     account,
     chainId,
     wallet,
     error,
     setChain,
-    setNotifyConfig,
     didAttemptAutoSelect,
   } = useOnboard();
 
@@ -29,8 +27,6 @@ export function useConnection() {
     provider,
     signer,
     isConnected,
-    notify,
-    setNotifyConfig,
     connect,
     disconnect,
     error,

@@ -6,7 +6,6 @@ import { object, assert, Infer, string } from "superstruct";
 
 import {
   HUB_POOL_CHAIN_ID,
-  InputError,
   callViaMulticall3,
   getHubPool,
   getLogger,
@@ -16,6 +15,7 @@ import {
   handleErrorCondition,
   sendResponse,
 } from "./_utils";
+import { InvalidParamError } from "./_errors";
 
 const LiquidReservesQueryParamsSchema = object({
   l1Tokens: string(),
@@ -56,9 +56,10 @@ const handler = async (
       getTokenByAddress(_l1Token, HUB_POOL_CHAIN_ID)
     );
     if (!l1TokenDetails) {
-      throw new InputError(
-        `Query contains an unsupported L1 token address: ${query.l1Tokens}`
-      );
+      throw new InvalidParamError({
+        message: `Query contains an unsupported L1 token address: ${query.l1Tokens}`,
+        param: "l1Tokens",
+      });
     }
 
     const provider = getProvider(HUB_POOL_CHAIN_ID);

@@ -38,6 +38,8 @@ export type BridgeFees = {
   quoteBlock: ethers.BigNumber;
   limits: BridgeLimitInterface;
   estimatedFillTimeSec: number;
+  exclusiveRelayer: string;
+  exclusivityDeadline: number;
 };
 
 type GetBridgeFeesArgs = {
@@ -81,6 +83,8 @@ export async function getBridgeFees({
     lpFee,
     limits,
     estimatedFillTimeSec,
+    exclusiveRelayer,
+    exclusivityDeadline,
   } = await getApiEndpoint().suggestedFees(
     amount,
     getConfig().getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
@@ -105,6 +109,8 @@ export async function getBridgeFees({
     quoteLatency,
     limits,
     estimatedFillTimeSec,
+    exclusiveRelayer,
+    exclusivityDeadline,
   };
 }
 
@@ -265,10 +271,14 @@ export async function sendDepositV3Tx(
   // (except for Polygon). Therefore, we only need to use the multicall handler when the EOA
   // wants to receive WETH after an ETH or WETH deposit.
   if (isWeth(outputTokenAddress) && !toNative) {
-    message = transferWethMessage(outputAmount, recipient, destinationChainId);
+    message = _transferWethMessage(outputAmount, recipient, destinationChainId);
     recipient = getMulticallHandlerAddress(destinationChainId);
   }
-  const tx = await spokePool.populateTransaction.depositV3(
+  const useExclusiveRelayer =
+    exclusiveRelayer !== ethers.constants.AddressZero &&
+    exclusivityDeadline > 0;
+
+  const depositArgs = [
     await signer.getAddress(),
     recipient,
     inputTokenAddress,
@@ -281,8 +291,12 @@ export async function sendDepositV3Tx(
     fillDeadline,
     exclusivityDeadline,
     message,
-    { value }
-  );
+    { value },
+  ] as const;
+
+  const tx = useExclusiveRelayer
+    ? await spokePool.populateTransaction.depositExclusive(...depositArgs)
+    : await spokePool.populateTransaction.depositV3(...depositArgs);
 
   return _tagRefAndSignTx(
     tx,
@@ -485,9 +499,10 @@ async function _tagRefAndSignTx(
   return signer.sendTransaction(tx);
 }
 
-const INSTRUCTIONS = "tuple(tuple(address, bytes, uint256)[], address)";
+const MULTICALL_HANDLER_INSTRUCTIONS =
+  "tuple(tuple(address, bytes, uint256)[], address)";
 
-function transferWethMessage(
+function _transferWethMessage(
   amount: ethers.BigNumber,
   toAddress: string,
   toChain: ChainId
@@ -500,7 +515,7 @@ function transferWethMessage(
     [toAddress, amount]
   );
   const call = ethers.utils.defaultAbiCoder.encode(
-    [INSTRUCTIONS],
+    [MULTICALL_HANDLER_INSTRUCTIONS],
     [
       [
         [

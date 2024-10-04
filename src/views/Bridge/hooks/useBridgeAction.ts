@@ -3,7 +3,7 @@ import {
   TransferQuoteReceivedProperties,
   ampli,
 } from "ampli";
-import { BigNumber, providers } from "ethers";
+import { BigNumber, constants, providers } from "ethers";
 import {
   useConnection,
   useApprove,
@@ -163,14 +163,21 @@ export function useBridgeAction(
             swapQuote: frozenSwapQuote!,
             swapTokenAddress: frozenRoute.swapTokenAddress,
             swapTokenAmount: frozenDepositArgs.initialAmount,
+            // Current `SwapAndBridge` contract does not support relative exclusivity.
+            // Disabling until we update the contract.
+            exclusiveRelayer: constants.AddressZero,
+            exclusivityDeadline: 0,
           },
           networkMismatchHandler
         );
       } else {
+        const isExclusive =
+          frozenDepositArgs.exclusivityDeadline > 0 &&
+          frozenDepositArgs.exclusiveRelayer !== constants.AddressZero;
         const { spokePool, shouldUseSpokePoolVerifier, spokePoolVerifier } =
           await getSpokePoolAndVerifier(frozenRoute);
         tx =
-          shouldUseSpokePoolVerifier && spokePoolVerifier
+          shouldUseSpokePoolVerifier && !isExclusive && spokePoolVerifier
             ? await sendSpokePoolVerifierDepositTx(
                 signer,
                 frozenDepositArgs,
@@ -272,6 +279,8 @@ type DepositArgs = {
   isNative: boolean;
   toNative: boolean;
   toAddress: string;
+  exclusiveRelayer: string;
+  exclusivityDeadline: number;
   integratorId: string;
 };
 function getDepositArgs(
@@ -305,6 +314,8 @@ function getDepositArgs(
     isNative: selectedRoute.isNative,
     toNative: selectedRoute.toNative,
     toAddress: recipient,
+    exclusiveRelayer: quotedFees.exclusiveRelayer,
+    exclusivityDeadline: quotedFees.exclusivityDeadline,
     integratorId,
   };
 }

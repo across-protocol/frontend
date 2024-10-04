@@ -6,8 +6,10 @@ import {
   fetchRpcProviderConfigs,
   fetchExclusiveRelayerConfigs,
   fetchFillTimes,
+  fetchExclusivityFillTimes,
   fetchExclusiveRelayersDynamicWeights,
   fetchExclusiveRelayersFixedWeights,
+  fetchExclusivityConfig,
   getRemoteConfigCommitHash,
   getBqReaderRemoteBaseUrl,
   remoteConfigTypes,
@@ -37,6 +39,15 @@ const remoteConfigs = {
         getRemoteConfigCommitHash(remoteConfigTypes.FILL_TIMES)
       ),
     localFilePath: "src/data/fill-times-preset.json",
+  },
+  [remoteConfigTypes.EXCLUSIVITY_FILL_TIMES]: {
+    fetchFn: () =>
+      fetchExclusivityFillTimes(
+        getBqReaderRemoteBaseUrl(),
+        "relayer-exclusivity/fill-times.json",
+        getRemoteConfigCommitHash(remoteConfigTypes.EXCLUSIVITY_FILL_TIMES)
+      ),
+    localFilePath: "src/data/exclusivity-fill-times.json",
   },
   [remoteConfigTypes.EXCLUSIVE_RELAYERS]: {
     fetchFn: () =>
@@ -79,6 +90,16 @@ const remoteConfigs = {
       return mergedWeights;
     },
     localFilePath: "src/data/exclusive-relayer-weights.json",
+  },
+  [remoteConfigTypes.EXCLUSIVITY_STRATEGY]: {
+    fetchFn: () =>
+      fetchExclusivityConfig(
+        // Using invalid URL will cause the fetch to fail and fallback to the local file for now.
+        getAcrossConfigsRemoteBaseUrl(),
+        "packages/exclusive-relayer-strategy-config/config.json",
+        getRemoteConfigCommitHash(remoteConfigTypes.EXCLUSIVITY_STRATEGY)
+      ),
+    localFilePath: "src/data/exclusivity-strategy.json",
   },
 };
 

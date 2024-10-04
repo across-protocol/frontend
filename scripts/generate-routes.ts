@@ -399,6 +399,75 @@ async function generateRoutes(hubPoolChainId = 1) {
       parser: "json",
     })
   );
+
+  // helper file with chains
+  const chainsFileContent = (
+    hubPoolChainId === CHAIN_IDs.MAINNET
+      ? enabledMainnetChainConfigs
+      : enabledSepoliaChainConfigs
+  ).map((chainConfig) => {
+    const [chainKey] =
+      Object.entries(chainConfigs).find(
+        ([, config]) => config.chainId === chainConfig.chainId
+      ) || [];
+    if (!chainKey) {
+      throw new Error(
+        `Could not find chain key for chain ${chainConfig.chainId}`
+      );
+    }
+    const assetsBaseUrl = `https://raw.githubusercontent.com/across-protocol/frontend/master`;
+    const getTokenInfo = (tokenSymbol: string) => {
+      const tokenInfo =
+        TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
+      return {
+        address: utils.getAddress(
+          tokenInfo.addresses[chainConfig.chainId] as string
+        ),
+        symbol: tokenSymbol,
+        name: tokenInfo.name,
+        decimals: tokenInfo.decimals,
+        logoUrl: `${assetsBaseUrl}/src/assets/token-logos/${tokenSymbol.toLowerCase()}.svg`,
+      };
+    };
+    return {
+      chainId: chainConfig.chainId,
+      name: chainConfig.name,
+      publicRpcUrl: chainConfig.publicRpcUrl,
+      explorerUrl: chainConfig.blockExplorer,
+      logoUrl: `${assetsBaseUrl}/scripts/chain-configs/${chainKey.toLowerCase()}/assets/logo.svg`,
+      spokePool: chainConfig.spokePool,
+      inputTokens: routeFileContent.routes
+        .filter((route) => route.fromChain === chainConfig.chainId)
+        .map((route) => getTokenInfo(route.fromTokenSymbol))
+        .reduce(
+          (acc, token) => {
+            if (!acc.find((t) => t.symbol === token.symbol)) {
+              return [...acc, token];
+            }
+            return acc;
+          },
+          [] as ReturnType<typeof getTokenInfo>[]
+        ),
+      outputTokens: routeFileContent.routes
+        .filter((route) => route.toChain === chainConfig.chainId)
+        .map((route) => getTokenInfo(route.toTokenSymbol))
+        .reduce(
+          (acc, token) => {
+            if (!acc.find((t) => t.symbol === token.symbol)) {
+              return [...acc, token];
+            }
+            return acc;
+          },
+          [] as ReturnType<typeof getTokenInfo>[]
+        ),
+    };
+  });
+  writeFileSync(
+    `./src/data/chains_${hubPoolChainId}.json`,
+    await prettier.format(JSON.stringify(chainsFileContent, null, 2), {
+      parser: "json",
+    })
+  );
 }
 
 function transformBridgeRoute(route: Route, hubPoolChainId: number) {

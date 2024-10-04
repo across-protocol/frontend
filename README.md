@@ -6,17 +6,17 @@
 
 Web UI for Across.
 
-- App: https://app.across.to
-- Docs: https://docs.across.to
-- Medium: https://medium.com/across-protocol
+- App: <https://app.across.to>
+- Docs: <https://docs.across.to>
+- Medium: <https://medium.com/across-protocol>
 
 ## Development
 
 ### Requirements
 
 - [yarn v1.22.22](https://classic.yarnpkg.com/en/docs/install)
-- NodeJS >=v18
-- [Vercel CLI](https://vercel.com/docs/cli)
+- NodeJS >=v20
+- [Vercel CLI (35 or higher)](https://vercel.com/docs/cli)
 
 ### Local setup
 
@@ -34,7 +34,7 @@ Adjust values in the created `.env` accordingly.
 Start the frontend with a dev server by running:
 
 ```bash
-PORT=3000 yarn dev
+PORT=3000 vercel dev
 ```
 
 ### Build production bundle

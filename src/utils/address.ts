@@ -2,7 +2,6 @@ import { utils } from "ethers";
 
 import { ChainId, TOKEN_SYMBOLS_MAP } from "./constants";
 import { getProvider } from "./providers";
-import { getDeployedAddress } from "@across-protocol/contracts";
 
 export function isValidAddress(address: string) {
   return utils.isAddress(address);

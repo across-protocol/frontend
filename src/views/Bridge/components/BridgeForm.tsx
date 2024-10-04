@@ -22,6 +22,7 @@ import {
   chainIdToRewardsProgramName,
   formatUnitsWithMaxFractions,
   formatWeiPct,
+  rewardProgramsAvailable,
 } from "utils";
 import { VoidHandler } from "utils/types";
 
@@ -142,7 +143,7 @@ const BridgeForm = ({
 
   return (
     <CardWrapper>
-      {programName && (
+      {programName && rewardProgramsAvailable.includes(programName) && (
         <RewardsProgramCTA
           toChain={selectedRoute.toChain}
           program={programName}

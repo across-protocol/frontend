@@ -1,5 +1,20 @@
 {
   "devCommand": "yarn dev",
+  "crons": [
+    {
+      "path": "/api/cron-cache-balances",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron-cache-gas-prices",
+      "schedule": "* * * * *"
+    }
+  ],
+  "functions": {
+    "api/cron-cache-gas-prices.ts": {
+      "maxDuration": 90
+    }
+  },
   "rewrites": [
     {
       "source": "/api/deposit/status",

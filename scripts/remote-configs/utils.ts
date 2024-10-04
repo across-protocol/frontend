@@ -7,19 +7,27 @@ import {
   record,
   string,
   type,
+  union,
+  optional,
 } from "superstruct";
 
 // Fallback data for remote configs in private repos or local development
 import fillTimesFallbackData from "../../src/data/examples/fill-times.json";
+import exclusivityFillTimesFallbackData from "../../src/data/examples/exclusivity-fill-times.json";
 import dynamicWeightsFallbackData from "../../src/data/examples/dynamic-weights.json";
 import fixedWeightsFallbackData from "../../src/data/examples/fixed-weights.json";
+import exclusivityStrategyFallbackData from "../../src/data/examples/exclusivity-strategy.json";
 import rpcProvidersFallbackData from "../../src/data/examples/rpc-providers.json";
+
+const GITHUB_HOST = process.env.GH_HOST ?? "raw.githubusercontent.com";
 
 export const remoteConfigTypes = {
   FILL_TIMES: "FILL_TIMES",
+  EXCLUSIVITY_FILL_TIMES: "EXCLUSIVITY_FILL_TIMES",
   EXCLUSIVE_RELAYERS: "EXCLUSIVE_RELAYERS",
   EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS: "EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS",
   EXCLUSIVE_RELAYERS_FIXED_WEIGHTS: "EXCLUSIVE_RELAYER_WEIGHTS",
+  EXCLUSIVITY_STRATEGY: "EXCLUSIVITY_STRATEGY",
   RPC_PROVIDERS: "RPC_PROVIDERS",
 } as const;
 
@@ -49,6 +57,19 @@ export const fetchFillTimes = makeFetchRemoteConfig(
   fillTimesFallbackData
 );
 
+export const fetchExclusivityFillTimes = makeFetchRemoteConfig(
+  array(
+    type({
+      destination_route_classification: string(),
+      max_size_usd: string(),
+      origin_route_classification: string(),
+      p75_fill_time_secs: string(),
+      token_liquidity_groups: string(),
+    })
+  ),
+  exclusivityFillTimesFallbackData
+);
+
 export const fetchExclusiveRelayerConfigs = makeFetchRemoteConfig(
   record(
     string(),
@@ -69,6 +90,31 @@ export const fetchExclusiveRelayersDynamicWeights = makeFetchRemoteConfig(
 export const fetchExclusiveRelayersFixedWeights = makeFetchRemoteConfig(
   record(string(), number()),
   fixedWeightsFallbackData
+);
+
+export const fetchExclusivityConfig = makeFetchRemoteConfig(
+  type({
+    default: string(),
+    tokens: record(
+      string(),
+      type({
+        default: string(),
+        destinationChains: optional(
+          record(
+            string(),
+            union([
+              string(),
+              type({
+                strategy: string(),
+                weight: number(),
+              }),
+            ])
+          )
+        ),
+      })
+    ),
+  }),
+  exclusivityStrategyFallbackData
 );
 
 function makeFetchRemoteConfig<T>(schema: Struct<T>, fallbackData?: T) {
@@ -145,20 +191,20 @@ export function getRemoteConfigCommitHash(config: RemoteConfig) {
 export function getRelayerConfigsRemoteBaseUrl() {
   return getRemoteConfigBaseUrl(
     "RELAYER_CONFIGS",
-    "https://raw.githubusercontent.com/across-protocol/exclusive-relayer-configs"
+    `https://${GITHUB_HOST}/across-protocol/exclusive-relayer-configs`
   );
 }
 
 export function getBqReaderRemoteBaseUrl() {
   return getRemoteConfigBaseUrl(
     "BQ_READER",
-    "https://raw.githubusercontent.com/UMAprotocol/across-bq-reader"
+    `https://${GITHUB_HOST}/UMAprotocol/across-bq-reader`
   );
 }
 
 export function getAcrossConfigsRemoteBaseUrl() {
   return getRemoteConfigBaseUrl(
     "ACROSS_CONFIGS",
-    "https://raw.githubusercontent.com/UMAprotocol/across-configs"
+    `https://${GITHUB_HOST}/UMAprotocol/across-configs`
   );
 }
