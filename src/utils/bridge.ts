@@ -187,7 +187,6 @@ export async function sendSpokePoolVerifierDepositTx(
     timestamp: quoteTimestamp,
     message = "0x",
     isNative,
-    toNative,
     referrer,
     integratorId,
   }: AcrossDepositArgs,
@@ -195,22 +194,6 @@ export async function sendSpokePoolVerifierDepositTx(
   spokePoolVerifier: SpokePoolVerifier,
   onNetworkMismatch?: NetworkMismatchHandler
 ): Promise<ethers.providers.TransactionResponse> {
-  /* We cannot send WETH to the recipient on the destination chain with the spoke pool verifier until
-   * we update the spoke pool verifier deployment to use depositV3.
-  if (isWeth(outputTokenAddress) && !toNative) {
-    message = wrapAndTransferMessage(
-      outputAmount,
-      recipient,
-      destinationChainId
-    );
-    recipient = getMulticallHandlerAddress(destinationChainId);
-    if (!recipient) {
-      throw new Error(
-        `No multicall handler deployed to chain ${destinationChainId}. Unable to receive WETH at destination`
-      );
-    }
-  }
-  */
   const tx = await spokePoolVerifier.populateTransaction.deposit(
     spokePool.address,
     recipient,
@@ -266,13 +249,36 @@ export async function sendDepositV3Tx(
   fillDeadline ??=
     getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
 
-  // If a user is interacting with the front end, assume that they are an EOA and not
-  // a contract. Since they are an EOA, by default they will receive ETH on the destination
-  // (except for Polygon). Therefore, we only need to use the multicall handler when the EOA
-  // wants to receive WETH after an ETH or WETH deposit.
-  if (isWeth(outputTokenAddress) && !toNative) {
-    message = _transferWethMessage(outputAmount, recipient, destinationChainId);
-    recipient = getMulticallHandlerAddress(destinationChainId);
+  if (isWeth(outputTokenAddress)) {
+    // We need to check if the recipient on the destination chain is a contract.
+    const provider = getProvider(destinationChainId);
+    const recipientIsContract = await isContractDeployedToAddress(
+      recipient,
+      provider
+    );
+    if (!toNative) {
+      // Recipient wants weth. If the recipient is a contract, do nothing. Otherwise,
+      // call the multicall handler so it can transfer weth to the recipient.
+      if (!recipientIsContract) {
+        message = _transferWethMessage(
+          outputAmount,
+          recipient,
+          destinationChainId
+        );
+        recipient = getMulticallHandlerAddress(destinationChainId);
+      }
+    } else {
+      // Recipient wants eth. If the recipient is an EOA, do nothing. Otherwise,
+      // call the multicall handler to unwrap the weth and send the eth to the recipient.
+      if (recipientIsContract) {
+        message = _unwrapAndTransferEthMessage(
+          outputAmount,
+          recipient,
+          destinationChainId
+        );
+        recipient = getMulticallHandlerAddress(destinationChainId);
+      }
+    }
   }
   const useExclusiveRelayer =
     exclusiveRelayer !== ethers.constants.AddressZero &&
@@ -509,21 +515,48 @@ function _transferWethMessage(
 ): string {
   const wethInterface = new ethers.utils.Interface(WETH_INTERFACE);
 
-  const outputTokenAddress = getWethAddressForChain(toChain);
-  const data = wethInterface.encodeFunctionData(
+  const destinationChainWethAddress = getWethAddressForChain(toChain);
+  const wethTransferData = wethInterface.encodeFunctionData(
     "transfer(address dst, uint256 wad)",
     [toAddress, amount]
   );
-  const call = ethers.utils.defaultAbiCoder.encode(
+  const multicallHandlerCall = ethers.utils.defaultAbiCoder.encode(
     [MULTICALL_HANDLER_INSTRUCTIONS],
     [
       [
         [
-          [outputTokenAddress, data, 0], // Transfer WETH
+          [destinationChainWethAddress, wethTransferData, 0], // Call WETH contract to transfer `amount` of WETH to `toAddress`.
         ],
         toAddress,
       ],
     ]
   );
-  return call;
+  return multicallHandlerCall;
+}
+
+function _unwrapAndTransferEthMessage(
+  amount: ethers.BigNumber,
+  toAddress: string,
+  toChain: ChainId
+): string {
+  const wethInterface = new ethers.utils.Interface(WETH_INTERFACE);
+
+  const destinationChainWethAddress = getWethAddressForChain(toChain);
+  const wethWithdrawData = wethInterface.encodeFunctionData(
+    "withdraw(uint256 wad)",
+    [amount]
+  );
+  const multicallHandlerCall = ethers.utils.defaultAbiCoder.encode(
+    [MULTICALL_HANDLER_INSTRUCTIONS],
+    [
+      [
+        [
+          [destinationChainWethAddress, wethWithdrawData, 0], // Withdraw WETH. Multicall handler receives `amount` of ETH.
+          [toAddress, "", amount], // Call the toAddress with no data and msg.value = amount.
+        ],
+        toAddress,
+      ],
+    ]
+  );
+  return multicallHandlerCall;
 }
