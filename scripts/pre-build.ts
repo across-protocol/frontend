@@ -6,6 +6,7 @@ import {
   fetchRpcProviderConfigs,
   fetchExclusiveRelayerConfigs,
   fetchFillTimes,
+  fetchExclusivityFillTimes,
   fetchExclusiveRelayersDynamicWeights,
   fetchExclusiveRelayersFixedWeights,
   fetchExclusivityConfig,
@@ -38,6 +39,15 @@ const remoteConfigs = {
         getRemoteConfigCommitHash(remoteConfigTypes.FILL_TIMES)
       ),
     localFilePath: "src/data/fill-times-preset.json",
+  },
+  [remoteConfigTypes.EXCLUSIVITY_FILL_TIMES]: {
+    fetchFn: () =>
+      fetchExclusivityFillTimes(
+        getBqReaderRemoteBaseUrl(),
+        "relayer-exclusivity/fill-times.json",
+        getRemoteConfigCommitHash(remoteConfigTypes.EXCLUSIVITY_FILL_TIMES)
+      ),
+    localFilePath: "src/data/exclusivity-fill-times.json",
   },
   [remoteConfigTypes.EXCLUSIVE_RELAYERS]: {
     fetchFn: () =>

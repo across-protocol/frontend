@@ -27,7 +27,11 @@ import {
   getCachedLatestBlock,
 } from "./_utils";
 import { selectExclusiveRelayer } from "./_exclusivity";
-import { resolveTiming, resolveRebalanceTiming } from "./_timings";
+import {
+  resolveTiming,
+  resolveExclusivityTiming,
+  resolveRebalanceTiming,
+} from "./_timings";
 import { parseUnits } from "ethers/lib/utils";
 import {
   InvalidParamError,
@@ -248,15 +252,6 @@ const handler = async (
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
 
-    const estimatedFillTimeSec = amount.gte(maxDepositInstant)
-      ? resolveRebalanceTiming(String(destinationChainId))
-      : resolveTiming(
-          String(computedOriginChainId),
-          String(destinationChainId),
-          inputToken.symbol,
-          amountInUsd
-        );
-
     let exclusiveRelayer = sdk.constants.ZERO_ADDRESS;
     let exclusivityDeadline = 0;
     if (depositMethod === "depositExclusive") {
@@ -268,12 +263,26 @@ const handler = async (
           amount.sub(totalRelayFee),
           amountInUsd,
           BigNumber.from(relayerFeeDetails.capitalFeePercent),
-          estimatedFillTimeSec
+          amount.gte(maxDepositInstant)
+            ? resolveRebalanceTiming(String(destinationChainId))
+            : resolveExclusivityTiming(
+                String(computedOriginChainId),
+                String(destinationChainId),
+                inputToken.symbol,
+                amountInUsd
+              )
         ));
     }
 
     const responseJson = {
-      estimatedFillTimeSec,
+      estimatedFillTimeSec: amount.gte(maxDepositInstant)
+        ? resolveRebalanceTiming(String(destinationChainId))
+        : resolveTiming(
+            String(computedOriginChainId),
+            String(destinationChainId),
+            inputToken.symbol,
+            amountInUsd
+          ),
       capitalFeePct: relayerFeeDetails.capitalFeePercent,
       capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
       relayGasFeePct: relayerFeeDetails.gasFeePercent,

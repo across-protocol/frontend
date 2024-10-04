@@ -13,6 +13,7 @@ import {
 
 // Fallback data for remote configs in private repos or local development
 import fillTimesFallbackData from "../../src/data/examples/fill-times.json";
+import exclusivityFillTimesFallbackData from "../../src/data/examples/exclusivity-fill-times.json";
 import dynamicWeightsFallbackData from "../../src/data/examples/dynamic-weights.json";
 import fixedWeightsFallbackData from "../../src/data/examples/fixed-weights.json";
 import exclusivityStrategyFallbackData from "../../src/data/examples/exclusivity-strategy.json";
@@ -22,6 +23,7 @@ const GITHUB_HOST = process.env.GH_HOST ?? "raw.githubusercontent.com";
 
 export const remoteConfigTypes = {
   FILL_TIMES: "FILL_TIMES",
+  EXCLUSIVITY_FILL_TIMES: "EXCLUSIVITY_FILL_TIMES",
   EXCLUSIVE_RELAYERS: "EXCLUSIVE_RELAYERS",
   EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS: "EXCLUSIVE_RELAYERS_DYNAMIC_WEIGHTS",
   EXCLUSIVE_RELAYERS_FIXED_WEIGHTS: "EXCLUSIVE_RELAYER_WEIGHTS",
@@ -53,6 +55,19 @@ export const fetchFillTimes = makeFetchRemoteConfig(
     })
   ),
   fillTimesFallbackData
+);
+
+export const fetchExclusivityFillTimes = makeFetchRemoteConfig(
+  array(
+    type({
+      destination_route_classification: string(),
+      max_size_usd: string(),
+      origin_route_classification: string(),
+      p75_fill_time_secs: string(),
+      token_liquidity_groups: string(),
+    })
+  ),
+  exclusivityFillTimesFallbackData
 );
 
 export const fetchExclusiveRelayerConfigs = makeFetchRemoteConfig(
