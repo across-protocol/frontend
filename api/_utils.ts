@@ -2008,6 +2008,7 @@ export function buildSearchParams(
   const searchParams = new URLSearchParams();
   for (const key in params) {
     const value = params[key];
+    if (!value) continue;
     if (Array.isArray(value)) {
       value.forEach((val) => searchParams.append(key, String(val)));
     } else {
@@ -2015,4 +2016,11 @@ export function buildSearchParams(
     }
   }
   return searchParams.toString();
+}
+
+export function paramToArray<T extends undefined | string | string[]>(
+  param: T
+): string[] | undefined {
+  if (!param) return;
+  return Array.isArray(param) ? param : [param];
 }
