@@ -21,6 +21,9 @@ const rebalanceTimeOverrides: {
 const CHAIN_WILDCARD = "0";
 const OTHER_TOKEN = "OTHER";
 
+const bigNumberComparator = (a: BigNumber, b: BigNumber) =>
+  a.lt(b) ? -1 : a.gt(b) ? 1 : 0;
+
 const defineOrderings = (
   sourceChainId: string,
   destinationChainId: string,
@@ -127,6 +130,3 @@ function makeLookup(rawTimings: typeof timings) {
       .toSorted((a, b) => bigNumberComparator(a.max_size_usd, b.max_size_usd))
   );
 }
-
-const bigNumberComparator = (a: BigNumber, b: BigNumber) =>
-  a.lt(b) ? -1 : a.gt(b) ? 1 : 0;
