@@ -1577,7 +1577,7 @@ export function getBaseRewardsApr(
  * @returns An array of the decoded results in the same order that they were passed in.
  */
 export async function callViaMulticall3(
-  provider: ethers.providers.Provider,
+  provider: ethers.providers.JsonRpcProvider,
   calls: {
     contract: ethers.Contract;
     functionName: string;

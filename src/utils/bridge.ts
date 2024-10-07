@@ -1,6 +1,4 @@
 import { ethers, BigNumber } from "ethers";
-
-import { callViaMulticall3 } from "../../api/_utils";
 import {
   ChainId,
   fixedPointAdjustment,
@@ -427,19 +425,12 @@ export async function getSpokePoolAndVerifier({
 
 async function getFillDeadline(spokePool: SpokePool): Promise<number> {
   const calls = [
-    {
-      contract: spokePool,
-      functionName: "getCurrentTime",
-    },
-    {
-      contract: spokePool,
-      functionName: "fillDeadlineBuffer",
-    },
+    spokePool.interface.encodeFunctionData("getCurrentTime"),
+    spokePool.interface.encodeFunctionData("fillDeadlineBuffer"),
   ];
-  const [currentTime, fillDeadlineBuffer] = await callViaMulticall3(
-    spokePool.provider,
-    calls
-  );
+
+  const [currentTime, fillDeadlineBuffer] =
+    await spokePool.callStatic.multicall(calls);
   return Number(currentTime) + Number(fillDeadlineBuffer);
 }
 
