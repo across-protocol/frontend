@@ -1,5 +1,4 @@
 import { ethers, BigNumber } from "ethers";
-
 import {
   ChainId,
   fixedPointAdjustment,
@@ -7,7 +6,7 @@ import {
 } from "./constants";
 import { DOMAIN_CALLDATA_DELIMITER, tagAddress, tagHex } from "./format";
 import { getProvider } from "./providers";
-import { getConfig, getCurrentTime, isContractDeployedToAddress } from "utils";
+import { getConfig, isContractDeployedToAddress } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
@@ -236,8 +235,7 @@ export async function sendDepositV3Tx(
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
-  fillDeadline ??=
-    getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
+  fillDeadline ??= await getFillDeadline(spokePool);
 
   const useExclusiveRelayer =
     exclusiveRelayer !== ethers.constants.AddressZero &&
@@ -351,8 +349,7 @@ export async function sendSwapAndBridgeTx(
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
-  fillDeadline ??=
-    getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
+  fillDeadline ??= await getFillDeadline(spokePool);
 
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
     swapQuote.routerCalldata,
@@ -424,6 +421,17 @@ export async function getSpokePoolAndVerifier({
     spokePoolVerifier,
     shouldUseSpokePoolVerifier,
   };
+}
+
+async function getFillDeadline(spokePool: SpokePool): Promise<number> {
+  const calls = [
+    spokePool.interface.encodeFunctionData("getCurrentTime"),
+    spokePool.interface.encodeFunctionData("fillDeadlineBuffer"),
+  ];
+
+  const [currentTime, fillDeadlineBuffer] =
+    await spokePool.callStatic.multicall(calls);
+  return Number(currentTime) + Number(fillDeadlineBuffer);
 }
 
 async function _tagRefAndSignTx(
