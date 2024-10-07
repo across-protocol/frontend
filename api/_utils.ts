@@ -76,6 +76,8 @@ const {
   REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
   GAS_MARKUP,
+  VERCEL_ENV,
+  LOG_LEVEL,
 } = process.env;
 
 export const gasMarkup: {
@@ -128,6 +130,12 @@ _ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
 
 export const ENABLED_ROUTES = _ENABLED_ROUTES;
 
+export const LogLevels = {
+  ERROR: 3,
+  WARN: 2,
+  INFO: 1,
+  DEBUG: 0,
+} as const;
 // Singleton logger so we don't create multiple.
 let logger: LoggingUtility;
 /**
@@ -136,7 +144,35 @@ let logger: LoggingUtility;
  */
 export const getLogger = (): LoggingUtility => {
   if (!logger) {
-    logger = sdk.relayFeeCalculator.DEFAULT_LOGGER;
+    const defaultLogLevel = VERCEL_ENV === "production" ? "ERROR" : "DEBUG";
+
+    let logLevel =
+      LOG_LEVEL && !Object.keys(LogLevels).includes(LOG_LEVEL)
+        ? defaultLogLevel
+        : (LOG_LEVEL as keyof typeof LogLevels);
+
+    logger = {
+      debug: (...args) => {
+        if (LogLevels[logLevel] <= LogLevels.DEBUG) {
+          console.debug(args);
+        }
+      },
+      info: (...args) => {
+        if (LogLevels[logLevel] <= LogLevels.INFO) {
+          console.info(args);
+        }
+      },
+      warn: (...args) => {
+        if (LogLevels[logLevel] <= LogLevels.WARN) {
+          console.warn(args);
+        }
+      },
+      error: (...args) => {
+        if (LogLevels[logLevel] <= LogLevels.ERROR) {
+          console.error(args);
+        }
+      },
+    };
   }
   return logger;
 };
