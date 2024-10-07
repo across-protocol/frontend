@@ -1,5 +1,5 @@
 import { ethers, BigNumber } from "ethers";
-
+import { callViaMulticall3 } from "../../api/_utils";
 import {
   ChainId,
   fixedPointAdjustment,
@@ -236,8 +236,23 @@ export async function sendDepositV3Tx(
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
-  fillDeadline ??=
-    getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
+  if (!fillDeadline) {
+    const calls = [
+      {
+        contract: spokePool,
+        functionName: "getCurrentTime",
+      },
+      {
+        contract: spokePool,
+        functionName: "fillDeadlineBuffer",
+      },
+    ];
+    const [currentTime, fillDeadlineBuffer] = await callViaMulticall3(
+      spokePool.provider,
+      calls
+    );
+    fillDeadline = Number(currentTime) + Number(fillDeadlineBuffer);
+  }
 
   const useExclusiveRelayer =
     exclusiveRelayer !== ethers.constants.AddressZero &&
