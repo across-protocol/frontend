@@ -7,7 +7,7 @@ import {
 } from "./constants";
 import { DOMAIN_CALLDATA_DELIMITER, tagAddress, tagHex } from "./format";
 import { getProvider } from "./providers";
-import { getConfig, getCurrentTime, isContractDeployedToAddress } from "utils";
+import { getConfig, isContractDeployedToAddress } from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
