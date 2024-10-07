@@ -24,7 +24,7 @@ const OTHER_TOKEN = "OTHER";
 const bigNumberComparator = (a: BigNumber, b: BigNumber) =>
   a.lt(b) ? -1 : a.gt(b) ? 1 : 0;
 
-export const defineOrderings = (
+const defineOrderings = (
   sourceChainId: string,
   destinationChainId: string,
   symbol: string
@@ -84,38 +84,30 @@ function makeTimingResolver(lookup: ReturnType<typeof makeLookup>) {
       return override;
     }
 
-    const sourceData = lookup[sourceChainId] ?? lookup["0"];
-    const destinationData =
-      sourceData?.[destinationChainId] ?? sourceData?.["0"];
-    const symbolData = destinationData?.[symbol] ?? destinationData?.["OTHER"]; // implicitly sorted
-    return (
-      symbolData?.find((cutoff) => usdAmount.lt(cutoff.amountUsd))
-        ?.timingInSecs ?? DEFAULT_SECONDS_TO_FILL
+    const orderings = defineOrderings(
+      sourceChainId,
+      destinationChainId,
+      symbol.toUpperCase()
     );
-    // const orderings = defineOrderings(
-    //   sourceChainId,
-    //   destinationChainId,
-    //   symbol.toUpperCase()
-    // );
 
-    // // For each priority ordering, find the first route that matches the ordering
-    // // and return the 75th percentile fill time. If no match is found, continue to
-    // // the next priority ordering. If no match is found for any priority ordering,
-    // // return the default value.
-    // for (const { dest, orig, token } of orderings) {
-    //   const matchedRoute = lookup.find((route) => {
-    //     const destMatch = route.destination_route_classification.includes(dest);
-    //     const origMatch = route.origin_route_classification.includes(orig);
-    //     const tokenMatch = route.token_liquidity_groups.includes(token);
-    //     const amountMatch = usdAmount.lte(route.max_size_usd);
-    //     return destMatch && origMatch && tokenMatch && amountMatch;
-    //   });
-    //   if (matchedRoute) {
-    //     return matchedRoute.p75_fill_time_secs;
-    //   }
-    // }
-    // // Return default value if no match is found
-    // return DEFAULT_SECONDS_TO_FILL;
+    // For each priority ordering, find the first route that matches the ordering
+    // and return the 75th percentile fill time. If no match is found, continue to
+    // the next priority ordering. If no match is found for any priority ordering,
+    // return the default value.
+    for (const { dest, orig, token } of orderings) {
+      const matchedRoute = lookup.find((route) => {
+        const destMatch = route.destination_route_classification.includes(dest);
+        const origMatch = route.origin_route_classification.includes(orig);
+        const tokenMatch = route.token_liquidity_groups.includes(token);
+        const amountMatch = usdAmount.lte(route.max_size_usd);
+        return destMatch && origMatch && tokenMatch && amountMatch;
+      });
+      if (matchedRoute) {
+        return matchedRoute.p75_fill_time_secs;
+      }
+    }
+    // Return default value if no match is found
+    return DEFAULT_SECONDS_TO_FILL;
   };
 }
 
@@ -135,38 +127,6 @@ function makeLookup(rawTimings: typeof timings) {
       }))
       // Sort by max_size_usd in ascending order to ensure that the smallest usdc rows
       // are checked first
-      // .toSorted((a, b) => bigNumberComparator(a.max_size_usd, b.max_size_usd))
-      .reduce(
-        (acc, timing) => {
-          timing.origin_route_classification.forEach((srcId) => {
-            timing.destination_route_classification.forEach((dstId) => {
-              timing.token_liquidity_groups.forEach((symbol) => {
-                acc[srcId] ??= {};
-                acc[srcId][dstId] ??= {};
-                acc[srcId][dstId][symbol] ??= [];
-                acc[srcId][dstId][symbol].push({
-                  amountUsd: timing.max_size_usd,
-                  timingInSecs: timing.p75_fill_time_secs,
-                });
-                // Sort inline
-                acc[srcId][dstId][symbol].sort((a, b) =>
-                  bigNumberComparator(a.amountUsd, b.amountUsd)
-                );
-              });
-            });
-          });
-          return acc;
-        },
-        {} as {
-          [srcId: string]: {
-            [dstId: string]: {
-              [symbol: string]: {
-                amountUsd: BigNumber;
-                timingInSecs: number;
-              }[];
-            };
-          };
-        }
-      )
+      .toSorted((a, b) => bigNumberComparator(a.max_size_usd, b.max_size_usd))
   );
 }
