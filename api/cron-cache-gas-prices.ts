@@ -83,7 +83,7 @@ const handler = async (
         const alpha = fixedPointAdjustment
           .mul(secondsPerUpdateForChain)
           .div(SECONDS_OF_GAS_AVERAGE);
-        // We are computing an expontential weighted moving average of the
+        // We are computing an exponential weighted moving average of the
         // gas price. To do this, we will follow the formula:
         // newValue = (1 - alpha) * previousValue + alpha * currentValue
         const newGasAverage = fixedPointAdjustment
