@@ -62,15 +62,14 @@ const handler = async (
         updateIntervalsSecPerChain[
           chain.chainId as keyof typeof updateIntervalsSecPerChain
         ] || updateIntervalsSecPerChain.default;
-
+      // Resolve the caching abstraction for the current chain
+      const cache = latestGasPriceCache(chain.chainId);
       while (true) {
         const diff = Date.now() - functionStart;
         // Stop after `maxDurationSec` seconds
         if (diff >= maxDurationSec * 1000) {
           break;
         }
-        // Resolve the caching abstraction for the current chain
-        const cache = latestGasPriceCache(chain.chainId);
         // Grab into the cache to get the previous value of the gas price
         // and directly compute the current value of the gas price.
         // Note: If the cache is empty, this fn will return a direct
