@@ -7,7 +7,7 @@ import {
   trackQuickSwap,
   similarTokensMap,
 } from "utils";
-import { useAmplitude } from "hooks";
+import { useAmplitude, useConnection } from "hooks";
 
 import {
   getRouteFromQueryParams,
@@ -15,17 +15,27 @@ import {
   SelectedRoute,
   getOutputTokenSymbol,
   PriorityFilterKey,
+  getInitialRoute,
 } from "../utils";
 
 const initialRoute = getRouteFromQueryParams();
 
 export function useSelectRoute() {
+  const { chainId: walletChainId, isConnected } = useConnection();
   const [selectedRoute, setSelectedRoute] = useState<SelectedRoute>(
     getRouteFromQueryParams()
   );
   const [isDefaultRouteTracked, setIsDefaultRouteTracked] = useState(false);
 
   const { addToAmpliQueue } = useAmplitude();
+
+  // set default fromChain when user first connects
+  useEffect(() => {
+    if (isConnected) {
+      setSelectedRoute(getInitialRoute({ fromChain: walletChainId }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected]);
 
   useEffect(() => {
     if (isDefaultRouteTracked) {
