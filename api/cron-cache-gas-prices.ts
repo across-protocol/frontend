@@ -71,12 +71,14 @@ const handler = async (
         }
         // Resolve the caching abstraction for the current chain
         const cache = latestGasPriceCache(chain.chainId);
-        // Grab into the cache to get the previous value of the gas price.
+        // Grab into the cache to get the previous value of the gas price
+        // and directly compute the current value of the gas price.
         // Note: If the cache is empty, this fn will return a direct
         //       value from the chain.
-        const previousGasPrice = await cache.get();
-        // Directly compute the current value of the gas price
-        const currentGasPrice = await getMaxFeePerGas(chain.chainId);
+        const [previousGasPrice, currentGasPrice] = await Promise.all([
+          cache.get(),
+          getMaxFeePerGas(chain.chainId),
+        ]);
         // Resolve and scale our alpha value
         const alpha = fixedPointAdjustment
           .mul(secondsPerUpdateForChain)
