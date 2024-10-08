@@ -137,13 +137,25 @@ export function validateBridgeAmount(
   };
 }
 
+const defaultRouteFilter = {
+  fromChain: hubPoolChainId,
+  inputTokenSymbol: "ETH",
+};
+
 export function getInitialRoute(defaults: RouteFilter = {}) {
   return (
     findEnabledRoute({
-      inputTokenSymbol: defaults.inputTokenSymbol || "ETH",
+      inputTokenSymbol:
+        defaults.inputTokenSymbol || defaults?.fromChain === 137
+          ? "WETH"
+          : "ETH",
       fromChain: defaults.fromChain || hubPoolChainId,
       toChain: defaults.toChain,
-    }) || { ...enabledRoutes[0], type: "bridge" }
+    }) ||
+    findEnabledRoute(defaultRouteFilter) || {
+      ...enabledRoutes[0],
+      type: "bridge",
+    }
   );
 }
 
@@ -371,12 +383,13 @@ export function getRouteFromQueryParams() {
     params.get("inputTokenSymbol") ||
     params.get("inputToken") ||
     params.get("token") ||
-    "ETH";
+    defaultRouteFilter.inputTokenSymbol;
+
   const outputTokenSymbol =
     params.get("outputTokenSymbol") || params.get("outputToken");
 
   const filter = {
-    fromChain: fromChain || hubPoolChainId,
+    fromChain: fromChain || defaultRouteFilter.fromChain,
     toChain: toChain || undefined,
     inputTokenSymbol,
     outputTokenSymbol: outputTokenSymbol
