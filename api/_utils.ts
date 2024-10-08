@@ -1924,20 +1924,26 @@ export function latestGasPriceCache(chainId: number) {
   return makeCacheGetterAndSetter(
     buildInternalCacheKey("latestGasPriceCache", chainId),
     ttlPerChain[chainId] || ttlPerChain.default,
-    async () => {
-      if (sdk.utils.chainIsOPStack(chainId)) {
-        const l2Provider = asL2Provider(getProvider(chainId));
-        return l2Provider.getGasPrice();
-      }
-
-      const { maxFeePerGas } = await sdk.gasPriceOracle.getGasPriceEstimate(
-        getProvider(chainId),
-        chainId
-      );
-      return maxFeePerGas;
-    },
+    () => getMaxFeePerGas(chainId),
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
+}
+
+/**
+ * Resolve the current gas price for a given chain
+ * @param chainId The chain ID to resolve the gas price for
+ * @returns The gas price in the native currency of the chain
+ */
+export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
+  if (sdk.utils.chainIsOPStack(chainId)) {
+    const l2Provider = asL2Provider(getProvider(chainId));
+    return l2Provider.getGasPrice();
+  }
+  const { maxFeePerGas } = await sdk.gasPriceOracle.getGasPriceEstimate(
+    getProvider(chainId),
+    chainId
+  );
+  return maxFeePerGas;
 }
 
 /**
