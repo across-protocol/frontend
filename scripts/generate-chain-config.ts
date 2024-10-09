@@ -47,7 +47,10 @@ async function generateChainConfig(chainName: string) {
   );
   const chainConfigDirNames: string[] = [];
   for (const chainConfigDirContent of chainConfigDirContents) {
-    if (chainConfigDirContent.endsWith(".ts")) {
+    if (
+      chainConfigDirContent.endsWith(".ts") ||
+      chainConfigDirContent.startsWith(".") // ignore dotfiles like .DS_Store on mac
+    ) {
       continue;
     }
     chainConfigDirNames.push(chainConfigDirContent);
