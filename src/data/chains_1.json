@@ -1351,5 +1351,52 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdzc.svg"
       }
     ]
+  },
+  {
+    "chainId": 480,
+    "name": "World Chain",
+    "publicRpcUrl": "https://worldchain-mainnet.g.alchemy.com/public",
+    "explorerUrl": "https://worldchain-mainnet-explorer.alchemy.com",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/world_chain/assets/logo.svg",
+    "spokePool": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+    "inputTokens": [
+      {
+        "address": "0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3",
+        "symbol": "WBTC",
+        "name": "Wrapped Bitcoin",
+        "decimals": 8,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wbtc.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3",
+        "symbol": "WBTC",
+        "name": "Wrapped Bitcoin",
+        "decimals": 8,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wbtc.svg"
+      }
+    ]
   }
 ]
