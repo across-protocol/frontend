@@ -95,6 +95,11 @@ import sepoliaGrayscaleLogo from "assets/chain-logos/sepolia-grayscale.svg";
 import { ReactComponent as sepoliaLogoSvg } from "assets/chain-logos/sepolia.svg";
 import { ReactComponent as sepoliaGrayscaleLogoSvg } from "assets/chain-logos/sepolia-grayscale.svg";
 
+import worldChainLogo from "assets/chain-logos/world-chain.svg";
+import worldChainGrayscaleLogo from "assets/chain-logos/world-chain-grayscale.svg";
+import { ReactComponent as worldChainLogoSvg } from "assets/chain-logos/world-chain.svg";
+import { ReactComponent as worldChainGrayscaleLogoSvg } from "assets/chain-logos/world-chain-grayscale.svg";
+
 import zkSyncLogo from "assets/chain-logos/zk-sync.svg";
 import zkSyncGrayscaleLogo from "assets/chain-logos/zk-sync-grayscale.svg";
 import { ReactComponent as zkSyncLogoSvg } from "assets/chain-logos/zk-sync.svg";
@@ -425,6 +430,23 @@ export const sepolia = {
   pollingInterval: 15000,
 };
 
+export const worldChain = {
+  name: "World Chain",
+  fullName: "World Chain",
+  chainId: 480,
+  logoURI: worldChainLogo,
+  grayscaleLogoURI: worldChainGrayscaleLogo,
+  logoSvg: worldChainLogoSvg,
+  grayscaleLogoSvg: worldChainGrayscaleLogoSvg,
+  rpcUrl: "https://worldchain-mainnet.g.alchemy.com/public",
+  explorerUrl: "https://worldchain-mainnet-explorer.alchemy.com",
+  constructExplorerLink: (txHash: string) =>
+    `${worldChain.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_480_PROVIDER_URL,
+  pollingInterval: 2000,
+};
+
 export const zkSync = {
   name: "zkSync",
   fullName: "zkSync Era",
@@ -478,6 +500,7 @@ export const chainConfigs = [
   redstone,
   scroll,
   sepolia,
+  worldChain,
   zkSync,
   zora,
 ].reduce(
