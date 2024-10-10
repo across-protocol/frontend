@@ -521,8 +521,7 @@ export const gasExpenditureDeposit = BigNumber.from(90_000);
 // Used to determine whether to show the "delayed" warning in the deposits table
 export const pendingStateTimeUntilDelayed = 5 * 60; // 5 mins
 
-export const vercelApiBaseUrl =
-  process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE || "";
+export const vercelApiBaseUrl = "https://across.to";
 
 // Swap slippage in %, 0.5 = 0.5%
 export const defaultSwapSlippage = Number(

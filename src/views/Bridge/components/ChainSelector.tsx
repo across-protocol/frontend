@@ -7,11 +7,16 @@ import {
   ChainInfo,
   Route,
   capitalizeFirstLetter,
+  formatUnitsWithMaxFractions,
   getChainInfo,
   shortenAddress,
+  tokenList,
 } from "utils";
 
 import { getAllChains } from "../utils";
+import { useBalanceBySymbolPerChain, useConnection } from "hooks";
+import { useMemo } from "react";
+import { BigNumber } from "ethers";
 
 type Props = {
   selectedRoute: Route;
@@ -28,17 +33,64 @@ export function ChainSelector({
   toAddress,
   onSelectChain,
 }: Props) {
-  const { fromChain, toChain } = selectedRoute;
-  const selectedChain = getChainInfo(fromOrTo === "from" ? fromChain : toChain);
+  const isFrom = fromOrTo === "from";
+
+  const { fromChain, toChain, fromTokenSymbol, toTokenSymbol } = selectedRoute;
+  const selectedChain = getChainInfo(isFrom ? fromChain : toChain);
+  const tokenInfo = tokenList.filter(
+    (t) => t.symbol === (isFrom ? fromTokenSymbol : toTokenSymbol)
+  )[0];
+
+  const { account } = useConnection();
+  const { balances, isLoading } = useBalanceBySymbolPerChain({
+    tokenSymbol: tokenInfo.symbol,
+    chainIds: allChains.map((c) => c.chainId),
+    account,
+  });
+
+  const sortOrder = useMemo(() => {
+    const chains = allChains.map((c) => ({
+      ...c,
+      balance: balances?.[c.chainId] ?? BigNumber.from(0),
+      disabled: false,
+    }));
+    if (!balances || isLoading) {
+      return chains;
+    } else {
+      return chains
+        .map((c) => ({
+          ...c,
+          disabled: c.balance.eq(0),
+        }))
+        .sort((a, b) => {
+          const aBalance = a.balance;
+          const bBalance = b.balance;
+          if (aBalance === undefined && bBalance === undefined) {
+            return 0;
+          } else if (aBalance === undefined) {
+            return 1;
+          } else if (bBalance === undefined) {
+            return -1;
+          } else {
+            return aBalance.lt(bBalance) ? 1 : -1;
+          }
+        });
+    }
+  }, [balances, isLoading]);
 
   return (
     <Selector<number>
-      elements={allChains.map((chain) => ({
+      elements={sortOrder.map((chain) => ({
         value: chain.chainId,
         element: <ChainInfoElement chain={chain} />,
+        suffix: (
+          <Text size="lg" color="grey-400">
+            {formatUnitsWithMaxFractions(chain.balance, tokenInfo.decimals)}
+          </Text>
+        ),
       }))}
       displayElement={
-        fromOrTo === "to" ? (
+        isFrom ? (
           <ChainInfoElement
             chain={selectedChain}
             superText={
@@ -49,10 +101,20 @@ export function ChainSelector({
           />
         ) : undefined
       }
-      selectedValue={fromOrTo === "from" ? fromChain : toChain}
+      selectedValue={isFrom ? fromChain : toChain}
       setSelectedValue={onSelectChain}
-      title="Chain"
-      allowSelectDisabled
+      title={
+        <TitleWrapper>
+          <Text size="md" color="grey-400">
+            Select chain to send
+          </Text>
+          <TitleTokenImg src={tokenInfo.logoURI} />
+          <Text size="md" color="grey-400">
+            {isFrom ? "from" : "to"}
+          </Text>
+        </TitleWrapper>
+      }
+      allowSelectDisabled={!isFrom}
       data-cy={`${fromOrTo}-chain-select`}
     />
   );
@@ -104,4 +166,16 @@ const ChainIconSuperTextWrapper = styled.div`
   justify-content: center;
   align-items: flex-start;
   padding: 0px;
+`;
+
+const TitleWrapper = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+`;
+
+const TitleTokenImg = styled.img`
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
 `;
