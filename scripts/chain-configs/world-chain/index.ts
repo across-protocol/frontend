@@ -16,6 +16,6 @@ export default {
   chainId,
   publicRpcUrl: "https://worldchain-mainnet.g.alchemy.com/public",
   blockTimeSeconds: 2,
-  tokens: ["WBTC", "WETH"], // "USDC.e" disabled for now
+  tokens: ["ETH", "WBTC", "WETH"], // "USDC.e" disabled for now
   enableCCTP: false,
 } as ChainConfig;
