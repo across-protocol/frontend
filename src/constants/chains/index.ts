@@ -23,6 +23,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.REDSTONE,
   CHAIN_IDs.SCROLL,
   CHAIN_IDs.ZORA,
+  CHAIN_IDs.WORLD_CHAIN,
   // testnet
   CHAIN_IDs.SEPOLIA,
   CHAIN_IDs.BASE_SEPOLIA,

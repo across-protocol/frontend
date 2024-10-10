@@ -31,6 +31,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.SCROLL,
   chainConfigs.REDSTONE,
   chainConfigs.ZORA,
+  chainConfigs.WORLD_CHAIN,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -79,6 +80,7 @@ const enabledRoutes = {
         CHAIN_IDs.REDSTONE,
         CHAIN_IDs.SCROLL,
         CHAIN_IDs.ZORA,
+        CHAIN_IDs.WORLD_CHAIN,
       ],
     },
     swapAndBridgeAddresses: {
