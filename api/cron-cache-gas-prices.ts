@@ -10,7 +10,6 @@ import {
 import { UnauthorizedError } from "./_errors";
 
 import mainnetChains from "../src/data/chains_1.json";
-import { fixedPointAdjustment } from "utils";
 import { utils } from "@across-protocol/sdk";
 
 const updateIntervalsSecPerChain = {
@@ -79,18 +78,18 @@ const handler = async (
           getMaxFeePerGas(chain.chainId),
         ]);
         // Resolve and scale our alpha value
-        const alpha = fixedPointAdjustment
+        const alpha = utils.fixedPointAdjustment
           .mul(secondsPerUpdateForChain)
           .div(SECONDS_OF_GAS_AVERAGE);
         // We are computing an exponential weighted moving average of the
         // gas price. To do this, we will follow the formula:
         // newValue = (1 - alpha) * previousValue + alpha * currentValue
-        const newGasAverage = fixedPointAdjustment
+        const newGasAverage = utils.fixedPointAdjustment
           .sub(alpha)
           .mul(previousGasPrice)
           .add(alpha.mul(currentGasPrice));
         // Scale the value back and set it in the cache
-        await cache.set(newGasAverage.div(fixedPointAdjustment));
+        await cache.set(newGasAverage.div(utils.fixedPointAdjustment));
         // Sleep for `updateIntervalSec` seconds
         await utils.delay(secondsPerUpdateForChain);
       }
