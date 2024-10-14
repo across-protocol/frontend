@@ -10,7 +10,6 @@ import {
 import { useAmplitude, useConnection } from "hooks";
 
 import {
-  getRouteFromQueryParams,
   findNextBestRoute,
   SelectedRoute,
   getOutputTokenSymbol,
@@ -18,13 +17,12 @@ import {
   getInitialRoute,
 } from "../utils";
 
-const initialRoute = getRouteFromQueryParams();
+const initialRoute = getInitialRoute();
 
 export function useSelectRoute() {
   const { chainId: walletChainId, isConnected } = useConnection();
-  const [selectedRoute, setSelectedRoute] = useState<SelectedRoute>(
-    getRouteFromQueryParams()
-  );
+  const [selectedRoute, setSelectedRoute] =
+    useState<SelectedRoute>(getInitialRoute());
   const [isDefaultRouteTracked, setIsDefaultRouteTracked] = useState(false);
 
   const { addToAmpliQueue } = useAmplitude();

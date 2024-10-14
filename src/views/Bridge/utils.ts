@@ -142,21 +142,19 @@ const defaultRouteFilter = {
   inputTokenSymbol: "ETH",
 };
 
-export function getInitialRoute(defaults: RouteFilter = {}) {
-  return (
-    findEnabledRoute({
-      inputTokenSymbol:
-        defaults.inputTokenSymbol || defaults?.fromChain === 137
-          ? "WETH"
-          : "ETH",
-      fromChain: defaults.fromChain || hubPoolChainId,
-      toChain: defaults.toChain,
-    }) ||
-    findEnabledRoute(defaultRouteFilter) || {
-      ...enabledRoutes[0],
-      type: "bridge",
-    }
-  );
+export function getInitialRoute(filter: RouteFilter = {}) {
+  const routeFromQueryParams = getRouteFromQueryParams(filter);
+  const routeFromFilter = findEnabledRoute({
+    inputTokenSymbol:
+      filter.inputTokenSymbol ?? (filter?.fromChain === 137 ? "WETH" : "ETH"),
+    fromChain: filter.fromChain || hubPoolChainId,
+    toChain: filter.toChain,
+  });
+  const defaultRoute = findEnabledRoute(defaultRouteFilter) ?? {
+    ...enabledRoutes[0],
+    type: "bridge",
+  };
+  return routeFromQueryParams ?? routeFromFilter ?? defaultRoute;
 }
 
 export function findEnabledRoute(
@@ -368,33 +366,43 @@ export function getAllChains() {
     });
 }
 
-export function getRouteFromQueryParams() {
+export function getRouteFromQueryParams(overrides?: RouteFilter) {
   const params = new URLSearchParams(window.location.search);
 
-  const fromChain = Number(
-    params.get("from") || params.get("fromChain") || params.get("originChainId")
-  );
-  const toChain = Number(
-    params.get("to") ||
-      params.get("toChain") ||
-      params.get("destinationChainId")
-  );
+  const fromChain =
+    Number(
+      params.get("from") ??
+        params.get("fromChain") ??
+        params.get("originChainId") ??
+        overrides?.fromChain
+    ) || undefined;
+
+  const toChain =
+    Number(
+      params.get("to") ??
+        params.get("toChain") ??
+        params.get("destinationChainId") ??
+        overrides?.toChain
+    ) || undefined;
+
   const inputTokenSymbol =
-    params.get("inputTokenSymbol") ||
-    params.get("inputToken") ||
-    params.get("token") ||
-    defaultRouteFilter.inputTokenSymbol;
+    params.get("inputTokenSymbol") ??
+    params.get("inputToken") ??
+    params.get("token") ??
+    overrides?.inputTokenSymbol;
+  undefined;
 
   const outputTokenSymbol =
-    params.get("outputTokenSymbol") || params.get("outputToken");
+    params.get("outputTokenSymbol") ??
+    params.get("outputToken") ??
+    overrides?.outputTokenSymbol ??
+    undefined;
 
   const filter = {
-    fromChain: fromChain || defaultRouteFilter.fromChain,
-    toChain: toChain || undefined,
+    fromChain,
+    toChain,
     inputTokenSymbol,
-    outputTokenSymbol: outputTokenSymbol
-      ? outputTokenSymbol.toUpperCase()
-      : undefined,
+    outputTokenSymbol: outputTokenSymbol?.toUpperCase(),
   };
 
   const route =
@@ -403,8 +411,7 @@ export function getRouteFromQueryParams() {
       ...filter,
       inputTokenSymbol: undefined,
       swapTokenSymbol: inputTokenSymbol,
-    }) ||
-    getInitialRoute(filter);
+    });
 
   return route;
 }
