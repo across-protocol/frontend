@@ -99,3 +99,4 @@ The `src/ampli` directory can be refreshed with new tracking data by running the
 ## Contributing
 
 Have a look at [CONTRIBUTING](./CONTRIBUTING.md) to get more information on contributions and best practices.
+
