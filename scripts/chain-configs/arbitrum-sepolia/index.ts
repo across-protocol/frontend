@@ -14,7 +14,7 @@ export default {
   spokePool: getDeployedAddress("SpokePool", chainId),
   chainId,
   publicRpcUrl: "https://sepolia-rollup.arbitrum.io/rpc",
-  tokens: ["WETH", "ETH", "USDC"],
+  tokens: ["WETH", "ETH"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;
