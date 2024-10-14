@@ -23,18 +23,17 @@ import {
   utils,
   Signer,
 } from "ethers";
-import { define } from "superstruct";
 
-import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
-import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
-import rpcProvidersJson from "../src/data/rpc-providers.json";
+import enabledMainnetRoutesAsJson from "../../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
+import enabledSepoliaRoutesAsJson from "../../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
+import rpcProvidersJson from "../../src/data/rpc-providers.json";
 
 import {
   MINIMAL_BALANCER_V2_POOL_ABI,
   MINIMAL_BALANCER_V2_VAULT_ABI,
   MINIMAL_MULTICALL3_ABI,
-} from "./_abis";
-import { BatchAccountBalanceResponse } from "./batch-account-balance";
+} from "../_abis";
+import { BatchAccountBalanceResponse } from "../batch-account-balance";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { VercelResponse } from "@vercel/node";
 import {
@@ -53,22 +52,31 @@ import {
   graphAPIKey,
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
-} from "./_constants";
-import { PoolStateOfUser, PoolStateResult } from "./_types";
+} from "../_constants";
+import { PoolStateOfUser, PoolStateResult } from "../_types";
 import {
   buildInternalCacheKey,
   getCachedValue,
   makeCacheGetterAndSetter,
-} from "./_cache";
+} from "../_cache";
 import {
   MissingParamError,
   InvalidParamError,
   RouteNotEnabledError,
-} from "./_errors";
+} from "../_errors";
+import { getLogger } from "./logger";
 
-export { InputError, handleErrorCondition } from "./_errors";
+export { InputError, handleErrorCondition } from "../_errors";
+export {
+  validAddress,
+  validAddressOrENS,
+  positiveIntStr,
+  parsableBigNumberString,
+  positiveFloatStr,
+  boolStr,
+} from "./validation";
+export { getLogger } from "./logger";
 
-type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;
 
 const {
@@ -76,8 +84,6 @@ const {
   REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
   GAS_MARKUP,
-  VERCEL_ENV,
-  LOG_LEVEL,
 } = process.env;
 
 export const gasMarkup: {
@@ -129,53 +135,6 @@ _ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
 );
 
 export const ENABLED_ROUTES = _ENABLED_ROUTES;
-
-export const LogLevels = {
-  ERROR: 3,
-  WARN: 2,
-  INFO: 1,
-  DEBUG: 0,
-} as const;
-// Singleton logger so we don't create multiple.
-let logger: LoggingUtility;
-/**
- * Resolves a logging utility to be used. This instance caches its responses
- * @returns A valid Logging utility that can be used throughout the runtime
- */
-export const getLogger = (): LoggingUtility => {
-  if (!logger) {
-    const defaultLogLevel = VERCEL_ENV === "production" ? "ERROR" : "DEBUG";
-
-    let logLevel =
-      LOG_LEVEL && !Object.keys(LogLevels).includes(LOG_LEVEL)
-        ? defaultLogLevel
-        : (LOG_LEVEL as keyof typeof LogLevels);
-
-    logger = {
-      debug: (...args) => {
-        if (LogLevels[logLevel] <= LogLevels.DEBUG) {
-          console.debug(args);
-        }
-      },
-      info: (...args) => {
-        if (LogLevels[logLevel] <= LogLevels.INFO) {
-          console.info(args);
-        }
-      },
-      warn: (...args) => {
-        if (LogLevels[logLevel] <= LogLevels.WARN) {
-          console.warn(args);
-        }
-      },
-      error: (...args) => {
-        if (LogLevels[logLevel] <= LogLevels.ERROR) {
-          console.error(args);
-        }
-      },
-    };
-  }
-  return logger;
-};
 
 /**
  * Resolves the current vercel endpoint dynamically
@@ -612,7 +571,7 @@ export const getRelayerFeeCalculator = (
     );
   return new sdk.relayFeeCalculator.RelayFeeCalculator(
     relayerFeeCalculatorConfig,
-    logger
+    getLogger()
   );
 };
 
@@ -1179,54 +1138,6 @@ export function applyMapFilter<InputType, MapType>(
     }
     return accumulator;
   }, []);
-}
-
-/* ------------------------- superstruct validators ------------------------- */
-
-export function parsableBigNumberString() {
-  return define<string>("parsableBigNumberString", (value) => {
-    try {
-      BigNumber.from(value);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  });
-}
-
-export function validAddress() {
-  return define<string>("validAddress", (value) =>
-    utils.isAddress(value as string)
-  );
-}
-
-export function validAddressOrENS() {
-  return define<string>("validAddressOrENS", (value) => {
-    const ensDomainRegex =
-      // eslint-disable-next-line no-useless-escape
-      /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/;
-    return (
-      utils.isAddress(value as string) || ensDomainRegex.test(value as string)
-    );
-  });
-}
-
-export function positiveIntStr() {
-  return define<string>("positiveIntStr", (value) => {
-    return Number.isInteger(Number(value)) && Number(value) > 0;
-  });
-}
-
-export function positiveFloatStr(maxValue?: number) {
-  return define<string>("positiveFloatStr", (value) => {
-    return Number(value) >= 0 && (maxValue ? Number(value) <= maxValue : true);
-  });
-}
-
-export function boolStr() {
-  return define<string>("boolStr", (value) => {
-    return value === "true" || value === "false";
-  });
 }
 
 /**

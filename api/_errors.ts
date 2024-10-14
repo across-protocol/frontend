@@ -1,8 +1,9 @@
 import type { VercelResponse } from "@vercel/node";
 import { AxiosError } from "axios";
 import { StructError } from "superstruct";
-import { relayFeeCalculator, typeguards } from "@across-protocol/sdk";
 import { ethers } from "ethers";
+
+import { isEthersError, Logger } from "./_utils/sdk";
 
 type AcrossApiErrorCodeKey = keyof typeof AcrossErrorCode;
 
@@ -200,7 +201,7 @@ export class AmountTooHighError extends InputError {
 export function handleErrorCondition(
   endpoint: string,
   response: VercelResponse,
-  logger: relayFeeCalculator.Logger,
+  logger: Logger,
   error: unknown
 ): VercelResponse {
   let acrossApiError: AcrossApiError;
@@ -244,7 +245,7 @@ export function handleErrorCondition(
     }
   }
   // Handle ethers errors
-  else if (typeguards.isEthersError(error)) {
+  else if (isEthersError(error)) {
     acrossApiError = resolveEthersError(error);
   }
   // Rethrow instances of `AcrossApiError`
@@ -272,7 +273,7 @@ export function handleErrorCondition(
 }
 
 export function resolveEthersError(err: unknown) {
-  if (!typeguards.isEthersError(err)) {
+  if (!isEthersError(err)) {
     return new AcrossApiError(
       {
         message: err instanceof Error ? err.message : "Unknown error",

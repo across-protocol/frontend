@@ -1,5 +1,5 @@
 import { kv } from "@vercel/kv";
-import { interfaces } from "@across-protocol/sdk";
+import { CachingMechanismInterface } from "./_utils/sdk";
 
 const {
   KV_REST_API_READ_ONLY_TOKEN,
@@ -10,7 +10,7 @@ const {
 const isRedisCacheEnabled =
   KV_REST_API_URL && KV_REST_API_TOKEN && KV_REST_API_READ_ONLY_TOKEN && KV_URL;
 
-export class RedisCache implements interfaces.CachingMechanismInterface {
+export class RedisCache implements CachingMechanismInterface {
   async get<T>(key: string): Promise<T | null> {
     if (!isRedisCacheEnabled) {
       return null;

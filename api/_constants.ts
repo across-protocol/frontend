@@ -1,6 +1,10 @@
-import { ethers } from "ethers";
-import { relayFeeCalculator, utils } from "@across-protocol/sdk";
+import { ethers, utils } from "ethers";
 import * as constants from "@across-protocol/constants";
+import {
+  CapitalCostConfig,
+  RelayCapitalCostConfig,
+  CapitalCostConfigOverride,
+} from "./_utils/sdk";
 
 export const CHAIN_IDs = constants.CHAIN_IDs;
 export const TOKEN_SYMBOLS_MAP = constants.TOKEN_SYMBOLS_MAP;
@@ -12,7 +16,7 @@ export const disabledL1Tokens = [
 ].map((x) => x.toLowerCase());
 
 const defaultRelayerFeeCapitalCostConfig: {
-  [token: string]: relayFeeCalculator.CapitalCostConfig;
+  [token: string]: CapitalCostConfig;
 } = {
   ETH: {
     lowerBound: ethers.utils.parseUnits("0.0001").toString(),
@@ -128,16 +132,16 @@ export const graphAPIKey = process.env.GRAPH_API_KEY;
 
 const relayerFeeCapitalCostOverrides: Record<
   string,
-  Record<string, Record<string, relayFeeCalculator.CapitalCostConfig>>
+  Record<string, Record<string, CapitalCostConfig>>
 > = process.env.RELAYER_FEE_CAPITAL_COST_OVERRIDES
   ? JSON.parse(process.env.RELAYER_FEE_CAPITAL_COST_OVERRIDES)
   : {};
 
 export const relayerFeeCapitalCostConfig: {
-  [token: string]: relayFeeCalculator.RelayCapitalCostConfig;
+  [token: string]: RelayCapitalCostConfig;
 } = Object.fromEntries(
   Object.keys(defaultRelayerFeeCapitalCostConfig).map(
-    (token): [string, relayFeeCalculator.CapitalCostConfigOverride] => {
+    (token): [string, CapitalCostConfigOverride] => {
       return [
         token,
         {
@@ -162,7 +166,7 @@ export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
 export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set(["matic"]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
-export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;
+export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.parseEther("1");
 
 export const ENABLED_POOLS_UNDERLYING_TOKENS = [
   TOKEN_SYMBOLS_MAP.ETH,
