@@ -16,10 +16,6 @@ const AccountBalanceQueryParamsSchema = type({
 
 type AccountBalanceQueryParams = Infer<typeof AccountBalanceQueryParamsSchema>;
 
-export const config = {
-  runtime: "edge",
-};
-
 const handler = async (
   { query }: TypedVercelRequest<AccountBalanceQueryParams>,
   response: VercelResponse
