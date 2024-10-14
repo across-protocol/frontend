@@ -6,10 +6,14 @@ import {
   positiveIntStr,
   boolStr,
   paramToArray,
+  HUB_POOL_CHAIN_ID,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
 
 import mainnetChains from "../src/data/chains_1.json";
+import testnetChains from "../src/data/chains_11155111.json";
+
+const chains = HUB_POOL_CHAIN_ID === 1 ? mainnetChains : testnetChains;
 
 const ChainsQueryParams = type({
   inputTokenSymbol: optional(string()),
@@ -36,7 +40,7 @@ const handler = async (
     const { inputTokenSymbol, outputTokenSymbol, chainId, omitTokens } = query;
     const chainIds = paramToArray(chainId)?.map(Number);
 
-    const filteredChains = mainnetChains.filter((chain) => {
+    const filteredChains = chains.filter((chain) => {
       return (
         (inputTokenSymbol
           ? !!chain.inputTokens.find(
