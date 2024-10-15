@@ -9,7 +9,7 @@ import {
   handleErrorCondition,
   DISABLED_CHAINS_FOR_AVAILABLE_ROUTES,
   DISABLED_TOKENS_FOR_AVAILABLE_ROUTES,
-} from "./_utils";
+} from "./_utils/optimized";
 import { TypedVercelRequest } from "./_types";
 
 const AvailableRoutesQueryParamsSchema = object({
@@ -24,6 +24,10 @@ const AvailableRoutesQueryParamsSchema = object({
 type AvailableRoutesQueryParams = Infer<
   typeof AvailableRoutesQueryParamsSchema
 >;
+
+export const config = {
+  runtime: "edge",
+};
 
 const handler = async (
   { query }: TypedVercelRequest<AvailableRoutesQueryParams>,
