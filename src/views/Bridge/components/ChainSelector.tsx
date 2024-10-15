@@ -41,7 +41,7 @@ export function ChainSelector({
     (t) => t.symbol === (isFrom ? fromTokenSymbol : toTokenSymbol)
   )[0];
 
-  const { account } = useConnection();
+  const { account, isConnected } = useConnection();
   const { balances } = useBalanceBySymbolPerChain({
     tokenSymbol: tokenInfo.symbol,
     chainIds: allChains.map((c) => c.chainId),
@@ -54,7 +54,7 @@ export function ChainSelector({
       balance: balances?.[c.chainId] ?? BigNumber.from(0),
       disabled: false,
     }));
-    if (!balances) {
+    if (!balances || !isConnected) {
       return chains;
     } else {
       return chains
@@ -76,18 +76,18 @@ export function ChainSelector({
           }
         });
     }
-  }, [balances]);
+  }, [balances, isConnected]);
 
   return (
     <Selector<number>
       elements={sortOrder.map((chain) => ({
         value: chain.chainId,
         element: <ChainInfoElement chain={chain} />,
-        suffix: (
+        suffix: isConnected ? (
           <Text size="lg" color="grey-400">
             {formatUnitsWithMaxFractions(chain.balance, tokenInfo.decimals)}
           </Text>
-        ),
+        ) : undefined,
       }))}
       displayElement={
         isFrom ? (
