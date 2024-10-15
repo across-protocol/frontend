@@ -42,7 +42,7 @@ export function ChainSelector({
   )[0];
 
   const { account } = useConnection();
-  const { balances, isLoading } = useBalanceBySymbolPerChain({
+  const { balances } = useBalanceBySymbolPerChain({
     tokenSymbol: tokenInfo.symbol,
     chainIds: allChains.map((c) => c.chainId),
     account,
@@ -54,7 +54,7 @@ export function ChainSelector({
       balance: balances?.[c.chainId] ?? BigNumber.from(0),
       disabled: false,
     }));
-    if (!balances || isLoading) {
+    if (!balances) {
       return chains;
     } else {
       return chains
@@ -76,7 +76,7 @@ export function ChainSelector({
           }
         });
     }
-  }, [balances, isLoading]);
+  }, [balances]);
 
   return (
     <Selector<number>
