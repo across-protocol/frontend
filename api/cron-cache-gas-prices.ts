@@ -3,7 +3,6 @@ import { TypedVercelRequest } from "./_types";
 import {
   HUB_POOL_CHAIN_ID,
   getLogger,
-  getMaxFeePerGas,
   handleErrorCondition,
   latestGasPriceCache,
 } from "./_utils";
@@ -16,8 +15,6 @@ const updateIntervalsSecPerChain = {
   default: 10,
   1: 12,
 };
-
-const SECONDS_OF_GAS_AVERAGE = 2 * 60 * 60; // 2 hours
 
 const maxDurationSec = 60;
 
@@ -56,41 +53,19 @@ const handler = async (
     // To circumvent this, we run the function in a loop and update gas prices every
     // `secondsPerUpdateForChain` seconds and stop after `maxDurationSec` seconds (1 minute).
     const gasPricePromises = mainnetChains.map(async (chain) => {
-      // Resolve how often we will be polling this chain for gas prices
       const secondsPerUpdateForChain =
         updateIntervalsSecPerChain[
           chain.chainId as keyof typeof updateIntervalsSecPerChain
         ] || updateIntervalsSecPerChain.default;
-      // Resolve the caching abstraction for the current chain
       const cache = latestGasPriceCache(chain.chainId);
+
       while (true) {
         const diff = Date.now() - functionStart;
         // Stop after `maxDurationSec` seconds
         if (diff >= maxDurationSec * 1000) {
           break;
         }
-        // Grab into the cache to get the previous value of the gas price
-        // and directly compute the current value of the gas price.
-        // Note: If the cache is empty, this fn will return a direct
-        //       value from the chain.
-        const [previousGasPrice, currentGasPrice] = await Promise.all([
-          cache.get(),
-          getMaxFeePerGas(chain.chainId),
-        ]);
-        // Resolve and scale our alpha value
-        const alpha = utils.fixedPointAdjustment
-          .mul(secondsPerUpdateForChain)
-          .div(SECONDS_OF_GAS_AVERAGE);
-        // We are computing an exponential weighted moving average of the
-        // gas price. To do this, we will follow the formula:
-        // newValue = (1 - alpha) * previousValue + alpha * currentValue
-        const newGasAverage = utils.fixedPointAdjustment
-          .sub(alpha)
-          .mul(previousGasPrice)
-          .add(alpha.mul(currentGasPrice));
-        // Scale the value back and set it in the cache
-        await cache.set(newGasAverage.div(utils.fixedPointAdjustment));
-        // Sleep for `updateIntervalSec` seconds
+        await cache.set();
         await utils.delay(secondsPerUpdateForChain);
       }
     });
