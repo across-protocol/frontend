@@ -18,7 +18,9 @@ const walletConnect = walletConnectModule({
   projectId: walletConnectProjectId,
   version: 2,
 });
-const coinbase = coinbaseModule();
+const coinbase = coinbaseModule({
+  supportedWalletType: "all",
+});
 
 export function onboardInit() {
   return init({
