@@ -64,10 +64,9 @@ const handler = async (
           ...chain.outputTokens.map((token) => token.address),
         ]
       );
-
-      await Promise.all(
-        allRelayers.map((relayer) => {
-          return Promise.all(
+      await Promise.allSettled(
+        allRelayers.map(async (relayer) => {
+          const results = await Promise.allSettled(
             chain.outputTokens.map((token) => {
               return latestBalanceCache({
                 chainId: chain.chainId,
@@ -78,6 +77,15 @@ const handler = async (
               );
             })
           );
+
+          const success = results.filter((res) => res.status === "fulfilled");
+          const fail = results.filter((res) => res.status === "rejected");
+          logger.debug({
+            at: `CronCacheBalances`,
+            chain: chain.chainId,
+            relayer,
+            message: `success: ${success.length}, fails: ${fail.length}`,
+          });
         })
       );
     }
