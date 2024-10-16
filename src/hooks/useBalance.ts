@@ -155,3 +155,49 @@ export function useBalancesBySymbols({
     isLoading: result.some((s) => s.isLoading),
   };
 }
+
+export function useBalanceBySymbolPerChain({
+  tokenSymbol,
+  chainIds,
+  account,
+}: {
+  tokenSymbol?: string;
+  chainIds: ChainId[];
+  account?: string;
+}) {
+  const result = useQueries({
+    queries: chainIds.map<
+      // NOTE: For some reason, we need to explicitly type this as `UseQueryOptions` to avoid a type error.
+      UseQueryOptions<
+        ReturnType<typeof getBalanceBySymbol>,
+        Error,
+        ReturnType<typeof getBalanceBySymbol>,
+        ReturnType<typeof balanceQueryKey>
+      >
+    >((chainId) => ({
+      queryKey: balanceQueryKey(account, chainId, tokenSymbol),
+      queryFn: ({ queryKey }) => {
+        const [, chainIdToQuery, tokenSymbolToQuery, accountToQuery] = queryKey;
+        return getBalanceBySymbol({
+          config,
+          chainIdToQuery,
+          tokenSymbolToQuery,
+          accountToQuery,
+          provider: undefined,
+        });
+      },
+      enabled: Boolean(account && tokenSymbol),
+      refetchInterval: 10_000,
+    })),
+  });
+  return {
+    balances: result.reduce(
+      (acc, { data }, idx) => ({
+        ...acc,
+        [chainIds[idx]]: (data ?? BigNumber.from(0)) as BigNumber,
+      }),
+      {} as Record<number, BigNumber>
+    ),
+    isLoading: result.some((s) => s.isLoading),
+  };
+}
