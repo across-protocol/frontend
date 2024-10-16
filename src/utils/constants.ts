@@ -123,6 +123,7 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
       ChainId.MODE,
       ChainId.BASE,
       ChainId.WORLD_CHAIN,
+      ChainId.LISK,
     ],
   },
   "arb-rebates": {
