@@ -256,7 +256,8 @@ export async function sendDepositV3Tx(
     if (!toNative) {
       // Recipient wants weth. If the recipient is a contract, do nothing. Otherwise,
       // call the multicall handler so it can transfer weth to the recipient.
-      if (!recipientIsContract) {
+      // Also skip this step for Polygon since the recipient will always receive WETH.
+      if (!recipientIsContract && destinationChainId !== ChainId.POLYGON) {
         message = _transferWethMessage(
           outputAmount,
           recipient,
