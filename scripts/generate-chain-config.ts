@@ -7,7 +7,7 @@ async function generateChainConfig(chainName: string) {
     import { utils as sdkUtils } from "@across-protocol/sdk";
     import { ChainConfig } from "../types";
 
-    const { getDeployedAddress } = sdkUtils;
+    const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
     const chainId = CHAIN_IDs.${chainName.replace("-", "_").toUpperCase()};
     const chainInfoBase = PUBLIC_NETWORKS[chainId];
@@ -16,7 +16,10 @@ async function generateChainConfig(chainName: string) {
       ...chainInfoBase,
       logoPath: "./assets/logo.svg",
       grayscaleLogoPath: "./assets/grayscale-logo.svg",
-      spokePool: getDeployedAddress("SpokePool", chainId),
+      spokePool: {
+        address: getDeployedAddress("SpokePool", chainId),
+        blockNumber: getDeployedBlockNumber("SpokePool", chainId),
+      },
       chainId,
       publicRpcUrl: TODO,
       blockTimeSeconds: 15,
