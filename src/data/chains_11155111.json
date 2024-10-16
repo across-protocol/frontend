@@ -6,6 +6,7 @@
     "explorerUrl": "https://sepolia.etherscan.io",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/sepolia/assets/logo.svg",
     "spokePool": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
+    "spokePoolBlock": 5288470,
     "inputTokens": [
       {
         "address": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
@@ -60,6 +61,7 @@
     "explorerUrl": "https://sepolia.basescan.org",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/base_sepolia/assets/logo.svg",
     "spokePool": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
+    "spokePoolBlock": 6082004,
     "inputTokens": [
       {
         "address": "0x4200000000000000000000000000000000000006",
@@ -121,6 +123,7 @@
     "explorerUrl": "https://sepolia.arbiscan.io",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/arbitrum_sepolia/assets/logo.svg",
     "spokePool": "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
+    "spokePoolBlock": 12411026,
     "inputTokens": [
       {
         "address": "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73",
@@ -175,6 +178,7 @@
     "explorerUrl": "https://sepolia-optimism.etherscan.io",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/optimism_sepolia/assets/logo.svg",
     "spokePool": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
+    "spokePoolBlock": 7762656,
     "inputTokens": [],
     "outputTokens": []
   },
@@ -185,6 +189,7 @@
     "explorerUrl": "https://sepolia.explorer.mode.network",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/mode_sepolia/assets/logo.svg",
     "spokePool": "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
+    "spokePoolBlock": 13999465,
     "inputTokens": [
       {
         "address": "0x4200000000000000000000000000000000000006",
@@ -225,6 +230,7 @@
     "explorerUrl": "https://amoy.polygonscan.com",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/polygon_amoy/assets/logo.svg",
     "spokePool": "0xd08baaE74D6d2eAb1F3320B2E1a53eeb391ce8e5",
+    "spokePoolBlock": 7529960,
     "inputTokens": [
       {
         "address": "0x52eF3d68BaB452a294342DC3e5f464d7f610f72E",
@@ -258,6 +264,7 @@
     "explorerUrl": "https://sepolia.blastscan.io",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/blast_sepolia/assets/logo.svg",
     "spokePool": "0x5545092553Cf5Bf786e87a87192E902D50D8f022",
+    "spokePoolBlock": 7634204,
     "inputTokens": [
       {
         "address": "0x4200000000000000000000000000000000000023",
@@ -298,6 +305,7 @@
     "explorerUrl": "https://sepolia-blockscout.lisk.com",
     "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/lisk_sepolia/assets/logo.svg",
     "spokePool": "0xeF684C38F94F48775959ECf2012D7E864ffb9dd4",
+    "spokePoolBlock": 7267988,
     "inputTokens": [
       {
         "address": "0x4200000000000000000000000000000000000006",
