@@ -37,7 +37,7 @@ export function getMulticallHandlerAddress(chainId: ChainId): string {
       return create2Deployment;
     case ChainId.ZK_SYNC:
       return "0x863859ef502F0Ee9676626ED5B418037252eFeb2";
-    case ChainId.WorldChain:
+    case ChainId.WORLD_CHAIN:
       return create2Deployment;
     case ChainId.REDSTONE:
       return create2Deployment;
