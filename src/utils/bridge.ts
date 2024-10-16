@@ -1,5 +1,4 @@
 import { ethers, BigNumber } from "ethers";
-
 import {
   ChainId,
   fixedPointAdjustment,
@@ -9,7 +8,6 @@ import { DOMAIN_CALLDATA_DELIMITER, tagAddress, tagHex } from "./format";
 import { getProvider } from "./providers";
 import {
   getConfig,
-  getCurrentTime,
   isContractDeployedToAddress,
   isWeth,
   WETH_INTERFACE,
@@ -246,8 +244,7 @@ export async function sendDepositV3Tx(
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
-  fillDeadline ??=
-    getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
+  fillDeadline ??= await getFillDeadline(spokePool);
 
   if (isWeth(outputTokenAddress)) {
     // We need to check if the recipient on the destination chain is a contract.
@@ -392,8 +389,7 @@ export async function sendSwapAndBridgeTx(
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
   );
-  fillDeadline ??=
-    getCurrentTime() - 60 + (await spokePool.fillDeadlineBuffer());
+  fillDeadline ??= await getFillDeadline(spokePool);
 
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
     swapQuote.routerCalldata,
@@ -465,6 +461,17 @@ export async function getSpokePoolAndVerifier({
     spokePoolVerifier,
     shouldUseSpokePoolVerifier,
   };
+}
+
+async function getFillDeadline(spokePool: SpokePool): Promise<number> {
+  const calls = [
+    spokePool.interface.encodeFunctionData("getCurrentTime"),
+    spokePool.interface.encodeFunctionData("fillDeadlineBuffer"),
+  ];
+
+  const [currentTime, fillDeadlineBuffer] =
+    await spokePool.callStatic.multicall(calls);
+  return Number(currentTime) + Number(fillDeadlineBuffer);
 }
 
 async function _tagRefAndSignTx(

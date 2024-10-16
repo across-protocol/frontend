@@ -14,7 +14,6 @@ import {
   BalancerNetworkConfig,
   Multicall3,
 } from "@balancer-labs/sdk";
-import { Log, Logging } from "@google-cloud/logging";
 import axios from "axios";
 import {
   BigNumber,
@@ -76,15 +75,10 @@ const {
   REACT_APP_HUBPOOL_CHAINID,
   REACT_APP_PUBLIC_INFURA_ID,
   REACT_APP_COINGECKO_PRO_API_KEY,
-  GOOGLE_SERVICE_ACCOUNT: _GOOGLE_SERVICE_ACCOUNT,
-  VERCEL_ENV,
   GAS_MARKUP,
-  DISABLE_DEBUG_LOGS,
+  VERCEL_ENV,
+  LOG_LEVEL,
 } = process.env;
-
-const GOOGLE_SERVICE_ACCOUNT = _GOOGLE_SERVICE_ACCOUNT
-  ? JSON.parse(_GOOGLE_SERVICE_ACCOUNT)
-  : {};
 
 export const gasMarkup: {
   [chainId: string]: number;
@@ -136,58 +130,12 @@ _ENABLED_ROUTES.routes = _ENABLED_ROUTES.routes.filter(
 
 export const ENABLED_ROUTES = _ENABLED_ROUTES;
 
-/**
- * Writes a log using the google cloud logging utility
- * @param gcpLogger A defined google cloud logging instance
- * @param severity A string opcode for severity
- * @param data an arbitrary data input that will be logged to the cloud utility
- */
-export const log = (
-  gcpLogger: Log,
-  severity: "DEBUG" | "INFO" | "WARN" | "ERROR",
-  data: LogType
-) => {
-  if (DISABLE_DEBUG_LOGS === "true" && severity === "DEBUG") {
-    console.log(data);
-    return;
-  }
-  // JSON.stringify(error) returns "{}", to mitigate we replace the error with
-  // a custom object that contains the error message and stack.
-  const dataWithReplacedError = data.error
-    ? {
-        ...data,
-        error: {
-          message: data.error?.message,
-          stack: data.error?.stack,
-        },
-      }
-    : data;
-  let message = JSON.stringify(dataWithReplacedError, null, 4);
-  // Fire and forget. we don't wait for this to finish.
-  gcpLogger
-    .write(
-      gcpLogger.entry(
-        {
-          resource: {
-            type: "global",
-          },
-          severity: severity,
-        },
-        message
-      )
-    )
-    .catch((error: Error) => {
-      // Ensure API doesn't fail if logging to GCP fails.
-      sdk.relayFeeCalculator.DEFAULT_LOGGER.error({
-        at: "GCP logger",
-        message: "Failed to log to GCP",
-        error,
-        data,
-      });
-    });
-};
-
-type LogType = any;
+export const LogLevels = {
+  ERROR: 3,
+  WARN: 2,
+  INFO: 1,
+  DEBUG: 0,
+} as const;
 // Singleton logger so we don't create multiple.
 let logger: LoggingUtility;
 /**
@@ -195,24 +143,35 @@ let logger: LoggingUtility;
  * @returns A valid Logging utility that can be used throughout the runtime
  */
 export const getLogger = (): LoggingUtility => {
-  // Use the default logger which logs to console if no GCP service account is configured.
-  if (Object.keys(GOOGLE_SERVICE_ACCOUNT).length === 0) {
-    logger = sdk.relayFeeCalculator.DEFAULT_LOGGER;
-  }
-
   if (!logger) {
-    const gcpLogger = new Logging({
-      projectId: GOOGLE_SERVICE_ACCOUNT.project_id,
-      credentials: {
-        client_email: GOOGLE_SERVICE_ACCOUNT.client_email,
-        private_key: GOOGLE_SERVICE_ACCOUNT.private_key,
-      },
-    }).log(VERCEL_ENV ?? "", { removeCircular: true });
+    const defaultLogLevel = VERCEL_ENV === "production" ? "ERROR" : "DEBUG";
+
+    let logLevel =
+      LOG_LEVEL && !Object.keys(LogLevels).includes(LOG_LEVEL)
+        ? defaultLogLevel
+        : (LOG_LEVEL as keyof typeof LogLevels);
+
     logger = {
-      debug: (data: LogType) => log(gcpLogger, "DEBUG", data),
-      info: (data: LogType) => log(gcpLogger, "INFO", data),
-      warn: (data: LogType) => log(gcpLogger, "WARN", data),
-      error: (data: LogType) => log(gcpLogger, "ERROR", data),
+      debug: (...args) => {
+        if (LogLevels[logLevel] <= LogLevels.DEBUG) {
+          console.debug(args);
+        }
+      },
+      info: (...args) => {
+        if (LogLevels[logLevel] <= LogLevels.INFO) {
+          console.info(args);
+        }
+      },
+      warn: (...args) => {
+        if (LogLevels[logLevel] <= LogLevels.WARN) {
+          console.warn(args);
+        }
+      },
+      error: (...args) => {
+        if (LogLevels[logLevel] <= LogLevels.ERROR) {
+          console.error(args);
+        }
+      },
     };
   }
   return logger;
@@ -1965,20 +1924,26 @@ export function latestGasPriceCache(chainId: number) {
   return makeCacheGetterAndSetter(
     buildInternalCacheKey("latestGasPriceCache", chainId),
     ttlPerChain[chainId] || ttlPerChain.default,
-    async () => {
-      if (sdk.utils.chainIsOPStack(chainId)) {
-        const l2Provider = asL2Provider(getProvider(chainId));
-        return l2Provider.getGasPrice();
-      }
-
-      const { maxFeePerGas } = await sdk.gasPriceOracle.getGasPriceEstimate(
-        getProvider(chainId),
-        chainId
-      );
-      return maxFeePerGas;
-    },
+    () => getMaxFeePerGas(chainId),
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
+}
+
+/**
+ * Resolve the current gas price for a given chain
+ * @param chainId The chain ID to resolve the gas price for
+ * @returns The gas price in the native currency of the chain
+ */
+export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
+  if (sdk.utils.chainIsOPStack(chainId)) {
+    const l2Provider = asL2Provider(getProvider(chainId));
+    return l2Provider.getGasPrice();
+  }
+  const { maxFeePerGas } = await sdk.gasPriceOracle.getGasPriceEstimate(
+    getProvider(chainId),
+    chainId
+  );
+  return maxFeePerGas;
 }
 
 /**

@@ -31,6 +31,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.SCROLL,
   chainConfigs.REDSTONE,
   chainConfigs.ZORA,
+  chainConfigs.WORLD_CHAIN,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -79,6 +80,7 @@ const enabledRoutes = {
         CHAIN_IDs.REDSTONE,
         CHAIN_IDs.SCROLL,
         CHAIN_IDs.ZORA,
+        CHAIN_IDs.WORLD_CHAIN,
       ],
     },
     swapAndBridgeAddresses: {
@@ -152,7 +154,7 @@ function transformChainConfigs(
 
   for (const chainConfig of enabledChainConfigs) {
     const fromChainId = chainConfig.chainId;
-    const fromSpokeAddress = chainConfig.spokePool;
+    const fromSpokeAddress = chainConfig.spokePool.address;
     const toChainIds = enabledChainIds.filter(
       (chainId) => chainId !== fromChainId
     );
@@ -435,7 +437,8 @@ async function generateRoutes(hubPoolChainId = 1) {
       publicRpcUrl: chainConfig.publicRpcUrl,
       explorerUrl: chainConfig.blockExplorer,
       logoUrl: `${assetsBaseUrl}/scripts/chain-configs/${chainKey.toLowerCase()}/assets/logo.svg`,
-      spokePool: chainConfig.spokePool,
+      spokePool: chainConfig.spokePool.address,
+      spokePoolBlock: chainConfig.spokePool.blockNumber,
       inputTokens: routeFileContent.routes
         .filter((route) => route.fromChain === chainConfig.chainId)
         .map((route) => getTokenInfo(route.fromTokenSymbol))

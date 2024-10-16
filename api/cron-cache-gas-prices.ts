@@ -9,6 +9,7 @@ import {
 import { UnauthorizedError } from "./_errors";
 
 import mainnetChains from "../src/data/chains_1.json";
+import { utils } from "@across-protocol/sdk";
 
 const updateIntervalsSecPerChain = {
   default: 10,
@@ -50,27 +51,22 @@ const handler = async (
     // The minimum interval for Vercel Serverless Functions cron jobs is 1 minute.
     // But we want to update gas prices more frequently than that.
     // To circumvent this, we run the function in a loop and update gas prices every
-    // `updateIntervalSec` seconds and stop after `maxDurationSec` seconds (1 minute).
+    // `secondsPerUpdateForChain` seconds and stop after `maxDurationSec` seconds (1 minute).
     const gasPricePromises = mainnetChains.map(async (chain) => {
+      const secondsPerUpdateForChain =
+        updateIntervalsSecPerChain[
+          chain.chainId as keyof typeof updateIntervalsSecPerChain
+        ] || updateIntervalsSecPerChain.default;
+      const cache = latestGasPriceCache(chain.chainId);
+
       while (true) {
         const diff = Date.now() - functionStart;
-
         // Stop after `maxDurationSec` seconds
         if (diff >= maxDurationSec * 1000) {
           break;
         }
-
-        // Update gas price every `updateIntervalSec` seconds
-        await latestGasPriceCache(chain.chainId).set();
-
-        // Sleep for `updateIntervalSec` seconds
-        const updateIntervalSec =
-          updateIntervalsSecPerChain[
-            chain.chainId as keyof typeof updateIntervalsSecPerChain
-          ] || updateIntervalsSecPerChain.default;
-        await new Promise((resolve) =>
-          setTimeout(resolve, updateIntervalSec * 1000)
-        );
+        await cache.set();
+        await utils.delay(secondsPerUpdateForChain);
       }
     });
     await Promise.all(gasPricePromises);

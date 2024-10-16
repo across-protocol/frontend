@@ -1,14 +1,15 @@
 import { CHAIN_IDs, PUBLIC_NETWORKS } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
-const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
-
 import { ChainConfig } from "../types";
 
-const chainId = CHAIN_IDs.BASE;
+const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
+
+const chainId = CHAIN_IDs.WORLD_CHAIN;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
   ...chainInfoBase,
+  fullName: "World Chain",
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
@@ -16,8 +17,8 @@ export default {
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  publicRpcUrl: "https://mainnet.base.org",
-  tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
-  enableCCTP: true,
+  publicRpcUrl: "https://worldchain-mainnet.g.alchemy.com/public",
   blockTimeSeconds: 2,
+  tokens: ["ETH", "WBTC", "WETH", "USDC.e"],
+  enableCCTP: false,
 } as ChainConfig;
