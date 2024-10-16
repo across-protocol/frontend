@@ -277,6 +277,7 @@ type DepositArgs = {
   relayerFeePct: BigNumber;
   tokenAddress: string;
   isNative: boolean;
+  toNative: boolean;
   toAddress: string;
   exclusiveRelayer: string;
   exclusivityDeadline: number;
@@ -311,6 +312,7 @@ function getDepositArgs(
     relayerFeePct: quotedFees.totalRelayFee.pct,
     tokenAddress: selectedRoute.fromTokenAddress,
     isNative: selectedRoute.isNative,
+    toNative: selectedRoute.toNative,
     toAddress: recipient,
     exclusiveRelayer: quotedFees.exclusiveRelayer,
     exclusivityDeadline: quotedFees.exclusivityDeadline,
