@@ -3,7 +3,7 @@ import {
   TransferQuoteReceivedProperties,
   ampli,
 } from "ampli";
-import { BigNumber, constants, providers } from "ethers";
+import { BigNumber, constants, providers, utils } from "ethers";
 import {
   useConnection,
   useApprove,
@@ -23,6 +23,8 @@ import {
   sendSpokePoolVerifierDepositTx,
   sendDepositV3Tx,
   sendSwapAndBridgeTx,
+  manualRebalancerAddresses,
+  ChainId,
 } from "utils";
 import { TransferQuote } from "./useTransferQuote";
 import { SelectedRoute } from "../utils";
@@ -153,7 +155,32 @@ export function useBridgeAction(
 
       let tx: providers.TransactionResponse;
 
-      if (isSwapRoute) {
+      // If the connected wallet is configured as a manual rebalancer and the origin
+      // chain is mainnet, we force the deposit to be unprofitable with a long
+      // exclusivity. The idea is to have these deposits paid out as a slow fill, in
+      // which case the SpokePool's own balance will be used to complete the fill, and
+      // the HubPool will pull funds back from the mainnet SpokePool instead. This
+      // allows us to skip the 7 day bridges and ensure a safe level of HubPool liquidity
+      if (
+        manualRebalancerAddresses.includes(utils.getAddress(frozenAccount)) &&
+        frozenRoute.fromChain === ChainId.MAINNET
+      ) {
+        const { spokePool } = await getSpokePoolAndVerifier(frozenRoute);
+        tx = await sendDepositV3Tx(
+          signer,
+          {
+            ...frozenDepositArgs,
+            inputTokenAddress: frozenRoute.fromTokenAddress,
+            outputTokenAddress: frozenRoute.toTokenAddress,
+            // Force overrides to make deposit unattractive for relayers
+            relayerFeePct: BigNumber.from(0),
+            exclusiveRelayer: frozenAccount,
+            exclusivityDeadline: 30, // seconds
+          },
+          spokePool,
+          networkMismatchHandler
+        );
+      } else if (isSwapRoute) {
         tx = await sendSwapAndBridgeTx(
           signer,
           {

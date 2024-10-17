@@ -528,3 +528,11 @@ export const vercelApiBaseUrl =
 export const defaultSwapSlippage = Number(
   process.env.REACT_APP_DEFAULT_SWAP_SLIPPAGE || 0.5
 );
+
+// List of addresses that have special manual rebalancing rights in the FE
+export const manualRebalancerAddresses = String(
+  process.env.REACT_APP_MANUAL_REBALANCER_ADDRESSES ||
+    "0x1d933Fd71FF07E69f066d50B39a7C34EB3b69F05"
+)
+  .split(",")
+  .map(ethers.utils.getAddress);
