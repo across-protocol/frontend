@@ -51,11 +51,13 @@ const getBalanceBySymbol = async (params: {
 };
 
 /**
- * @param token - The token to fetch the balance of.
- * @param chainId - The chain Id of the chain to execute the query on. If not specified, defaults to the chainId the user is connected to or undefined.
+ * Retrieves the balance of a specific token for a given account and chain.
+ *
+ * @param tokenSymbol - The symbol of the token to retrieve the balance for. If not provided, it will return the Ether (ETH) balance.
+ * @param chainId - The ID of the chain to execute the query on. If not specified, defaults to the chainId the user is connected to or undefined.
  * @param account - The account to query the balance of.
  * @remarks Passing the zero address as token will return the ETH balance. Passing no account will return the balance of the connected account.
- * @returns The balance of the account and the UseQueryResult object
+ * @returns An object containing the balance of the account (as a `BigNumber`) and the `UseQueryResult` object.
  */
 export function useBalanceBySymbol(
   tokenSymbol?: string,

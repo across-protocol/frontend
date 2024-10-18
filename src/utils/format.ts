@@ -273,7 +273,9 @@ export function formatWeiPct(wei?: ethers.BigNumberish, precision: number = 3) {
 
 /**
  * Formats a number into a human readable format
- * @param num The number to format
+ *
+ * @param num - The number to be formatted.
+ * @param decimals - The number of decimal places to display. Default is 0.
  * @returns A human readable format. I.e. 1000 -> 1K, 1001 -> 1K+
  */
 export function humanReadableNumber(num: number, decimals = 0): string {
