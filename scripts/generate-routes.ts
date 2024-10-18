@@ -1,5 +1,6 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
+
 import { utils } from "ethers";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
@@ -264,13 +265,8 @@ function transformChainConfigs(
           ];
         }
 
-        // Handle WETH Polygon
-        if (
-          tokenSymbol === "WETH" &&
-          [CHAIN_IDs.POLYGON, CHAIN_IDs.POLYGON_AMOY].includes(
-            toChainConfig.chainId
-          )
-        ) {
+        // Handle WETH Polygon & other non-eth chains
+        if (tokenSymbol === "WETH" && toChainConfig.tokens.includes("ETH")) {
           return ["WETH", "ETH"];
         }
 
