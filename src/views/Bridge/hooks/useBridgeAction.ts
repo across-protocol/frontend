@@ -175,7 +175,7 @@ export function useBridgeAction(
             // Force overrides to make deposit unattractive for relayers
             relayerFeePct: BigNumber.from(0),
             exclusiveRelayer: frozenAccount,
-            exclusivityDeadline: 30 * 60, // 30 minutes
+            exclusivityDeadline: 10 * 60, // 10 minutes
           },
           spokePool,
           networkMismatchHandler
