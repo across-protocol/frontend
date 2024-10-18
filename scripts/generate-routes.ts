@@ -266,7 +266,7 @@ function transformChainConfigs(
         }
 
         // Handle WETH Polygon & other non-eth chains
-        if (tokenSymbol === "WETH" && toChainConfig.tokens.includes("ETH")) {
+        if (tokenSymbol === "WETH" && !toChainConfig.tokens.includes("ETH")) {
           return ["WETH", "ETH"];
         }
 
