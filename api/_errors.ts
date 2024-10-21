@@ -265,6 +265,7 @@ export function handleErrorCondition(
   const logLevel = acrossApiError.status >= 500 ? "error" : "warn";
   logger[logLevel]({
     at: endpoint,
+    code: acrossApiError.code,
     message: `Status ${acrossApiError.status} - ${acrossApiError.message}`,
   });
 
