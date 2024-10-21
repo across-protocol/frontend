@@ -1,18 +1,37 @@
-import { kv } from "@vercel/kv";
+import { createClient, VercelKV } from "@vercel/kv";
 import { interfaces } from "@across-protocol/sdk";
 
-const { KV_REST_API_READ_ONLY_TOKEN, KV_REST_API_TOKEN, KV_REST_API_URL } =
-  process.env;
+const {
+  KV_REST_API_READ_ONLY_TOKEN,
+  KV_REST_API_TOKEN,
+  KV_REST_API_URL,
+  UPSTASH_REDIS_REST_URL,
+  UPSTASH_REDIS_REST_TOKEN,
+  UPSTASH_REDIS_READ_ONLY_TOKEN,
+} = process.env;
 const isRedisCacheEnabled =
-  KV_REST_API_URL && (KV_REST_API_TOKEN || KV_REST_API_READ_ONLY_TOKEN);
+  (KV_REST_API_URL && (KV_REST_API_TOKEN || KV_REST_API_READ_ONLY_TOKEN)) ||
+  (UPSTASH_REDIS_REST_URL &&
+    (UPSTASH_REDIS_REST_TOKEN || UPSTASH_REDIS_READ_ONLY_TOKEN));
 
 export class RedisCache implements interfaces.CachingMechanismInterface {
+  private client: VercelKV | undefined;
+
+  constructor() {
+    this.client = isRedisCacheEnabled
+      ? createClient({
+          url: UPSTASH_REDIS_REST_URL || KV_REST_API_URL,
+          token: UPSTASH_REDIS_REST_TOKEN || KV_REST_API_TOKEN,
+        })
+      : undefined;
+  }
+
   async get<T>(key: string): Promise<T | null> {
-    if (!isRedisCacheEnabled) {
+    if (!this.client) {
       return null;
     }
 
-    const value = await kv.get(key);
+    const value = await this.client.get(key);
     if (value === null || value === undefined) {
       return null;
     }
@@ -20,7 +39,7 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
   }
 
   async set<T>(key: string, value: T, ttl = 10): Promise<string | undefined> {
-    if (!isRedisCacheEnabled) {
+    if (!this.client) {
       return;
     }
 
@@ -33,7 +52,7 @@ export class RedisCache implements interfaces.CachingMechanismInterface {
           // Do nothing
         }
       }
-      await kv.set(key, value, {
+      await this.client.set(key, value, {
         ex: ttl === Number.POSITIVE_INFINITY ? 60 : ttl,
       });
       return key;
