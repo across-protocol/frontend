@@ -72,8 +72,9 @@ export function getReceiveTokenSymbol(
   const isDestinationChainPolygon = destinationChainId === ChainId.POLYGON;
 
   if (
-    (inputTokenSymbol === "ETH" || inputTokenSymbol === "WETH") &&
-    (isDestinationChainPolygon || isReceiverContract)
+    (inputTokenSymbol === "WETH" && isDestinationChainPolygon) ||
+    (inputTokenSymbol === "ETH" &&
+      (isDestinationChainPolygon || isReceiverContract))
   ) {
     return "WETH";
   }
