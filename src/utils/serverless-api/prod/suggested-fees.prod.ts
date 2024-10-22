@@ -90,5 +90,6 @@ export async function suggestedFeesApiCall(
     exclusiveRelayer,
     exclusivityDeadline,
     gasPrice: BigNumber.from(result["gasPrice"]),
+    gasUnits: BigNumber.from(result["gasUnits"]),
   };
 }

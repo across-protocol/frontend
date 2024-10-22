@@ -59,6 +59,7 @@ export type SuggestedApiFeeReturnType = {
   exclusiveRelayer: string;
   exclusivityDeadline: number;
   gasPrice: ethers.BigNumber;
+  gasUnits: ethers.BigNumber;
 };
 
 export type SuggestedApiFeeType = (

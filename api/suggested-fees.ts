@@ -326,6 +326,7 @@ const handler = async (
         recommendedDepositInstant: limits.recommendedDepositInstant,
       },
       gasPrice: relayerFeeDetails.gasPrice,
+      gasUnits: relayerFeeDetails.gasUnits,
     };
 
     logger.debug({

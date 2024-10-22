@@ -182,6 +182,8 @@ const handler = async (
       ]);
     const tokenPriceUsd = ethers.utils.parseUnits(_tokenPriceUsd.toString());
 
+    console.log(`xxx limits gasUnits: ${gasUnits}`);
+    console.log(`xxx limits gasPrice: ${gasPrice}`);
     const [
       relayerFeeDetails,
       multicallOutput,
@@ -379,6 +381,7 @@ const handler = async (
         capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
         capitalFeePercent: relayerFeeDetails.capitalFeePercent,
         gasPrice: gasPrice.toString(),
+        gasUnits: gasUnits?.toString() ?? BigNumber.from("0"),
       },
     };
     logger.debug({
