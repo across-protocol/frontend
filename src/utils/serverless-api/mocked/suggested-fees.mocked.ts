@@ -51,5 +51,6 @@ export async function suggestedFeesMockedApiCall(
     },
     exclusiveRelayer: ethers.constants.AddressZero,
     exclusivityDeadline: 0,
+    gasPrice: parseUnits("0", 18),
   };
 }

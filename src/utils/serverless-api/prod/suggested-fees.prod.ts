@@ -89,5 +89,6 @@ export async function suggestedFeesApiCall(
     estimatedFillTimeSec,
     exclusiveRelayer,
     exclusivityDeadline,
+    gasPrice: BigNumber.from(result["gasPrice"]),
   };
 }

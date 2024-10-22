@@ -31,6 +31,7 @@ export type BridgeFees = {
   estimatedFillTimeSec: number;
   exclusiveRelayer: string;
   exclusivityDeadline: number;
+  gasPrice: ethers.BigNumber;
 };
 
 type GetBridgeFeesArgs = {
@@ -76,6 +77,7 @@ export async function getBridgeFees({
     estimatedFillTimeSec,
     exclusiveRelayer,
     exclusivityDeadline,
+    gasPrice,
   } = await getApiEndpoint().suggestedFees(
     amount,
     getConfig().getTokenInfoBySymbol(fromChainId, inputTokenSymbol).address,
@@ -102,6 +104,7 @@ export async function getBridgeFees({
     estimatedFillTimeSec,
     exclusiveRelayer,
     exclusivityDeadline,
+    gasPrice,
   };
 }
 

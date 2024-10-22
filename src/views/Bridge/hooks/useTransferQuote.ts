@@ -131,6 +131,8 @@ export function useTransferQuote(
         setInitialQuoteTime((s) => s ?? initialQuoteTimeToUse);
       }
 
+      console.log("Gas price in WEI", feesQuery.fees.gasPrice.toString());
+
       return {
         estimatedTime,
         quoteForAnalytics,

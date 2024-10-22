@@ -325,6 +325,7 @@ const handler = async (
         maxDepositShortDelay: limits.maxDepositShortDelay,
         recommendedDepositInstant: limits.recommendedDepositInstant,
       },
+      gasPrice: relayerFeeDetails.gasPrice,
     };
 
     logger.debug({

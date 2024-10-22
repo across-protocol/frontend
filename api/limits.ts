@@ -378,6 +378,7 @@ const handler = async (
         gasFeePercent: relayerFeeDetails.gasFeePercent,
         capitalFeeTotal: relayerFeeDetails.capitalFeeTotal,
         capitalFeePercent: relayerFeeDetails.capitalFeePercent,
+        gasPrice: gasPrice.toString(),
       },
     };
     logger.debug({

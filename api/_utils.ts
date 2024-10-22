@@ -788,6 +788,7 @@ export const getCachedLimits = async (
     capitalFeeTotal: string;
     gasFeePercent: string;
     gasFeeTotal: string;
+    gasPrice: string;
   };
 }> => {
   return (
