@@ -560,7 +560,7 @@ function _unwrapAndTransferEthMessage(
       [
         [
           [destinationChainWethAddress, wethWithdrawData, 0], // Withdraw WETH. Multicall handler receives `amount` of ETH.
-          [toAddress, "", amount], // Call the toAddress with no data and msg.value = amount.
+          [toAddress, "0x", amount], // Call the toAddress with no data and msg.value = amount.
         ],
         toAddress,
       ],
