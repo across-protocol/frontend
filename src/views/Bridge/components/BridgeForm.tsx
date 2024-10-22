@@ -122,7 +122,8 @@ const BridgeForm = ({
   const receiveTokenSymbol = getReceiveTokenSymbol(
     selectedRoute.toChain,
     selectedRoute.fromTokenSymbol,
-    selectedRoute.toTokenSymbol
+    selectedRoute.toTokenSymbol,
+    Boolean(toAccount?.isContract)
   );
 
   const swapPriceImpact =

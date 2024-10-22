@@ -15,6 +15,7 @@ import {
   chainIdToRewardsProgramName,
   getBridgeUrlWithQueryParams,
 } from "utils";
+import { useIsContractAddress } from "hooks/useIsContractAddress";
 
 import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
@@ -39,10 +40,12 @@ export function DepositStatusLowerCard({
     quote,
     quotedLimits,
     depositArgs,
+    recipient,
     selectedRoute,
     swapQuote: _swapQuote,
   } = fromBridgePagePayload || {};
 
+  const isReceiverContract = useIsContractAddress(recipient);
   const history = useHistory();
 
   const isSwap = selectedRoute?.type === "swap";
@@ -100,7 +103,8 @@ export function DepositStatusLowerCard({
           getReceiveTokenSymbol(
             toChainId,
             inputTokenSymbol,
-            outputTokenInfo.symbol
+            outputTokenInfo.symbol,
+            isReceiverContract
           )
         )}
         parsedAmount={BigNumber.from(depositArgs.initialAmount)}

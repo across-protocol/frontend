@@ -66,13 +66,14 @@ export function areTokensInterchangeable(
 export function getReceiveTokenSymbol(
   destinationChainId: number,
   inputTokenSymbol: string,
-  outputTokenSymbol: string
+  outputTokenSymbol: string,
+  isReceiverContract: boolean
 ) {
   const isDestinationChainPolygon = destinationChainId === ChainId.POLYGON;
 
   if (
     (inputTokenSymbol === "ETH" || inputTokenSymbol === "WETH") &&
-    isDestinationChainPolygon
+    (isDestinationChainPolygon || isReceiverContract)
   ) {
     return "WETH";
   }
