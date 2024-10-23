@@ -5,7 +5,12 @@ import { BigNumber } from "ethers";
 import { Text, LoadingSkeleton } from "components";
 import { ReactComponent as ChevronDown } from "assets/icons/chevron-down.svg";
 import { ReactComponent as _SwapIcon } from "assets/icons/swap.svg";
-import { QUERIESV2, TokenInfo, getConfirmationDepositTime } from "utils";
+import {
+  QUERIESV2,
+  TokenInfo,
+  formatUSD,
+  getConfirmationDepositTime,
+} from "utils";
 
 import EstimatedTable, { TotalReceive } from "./EstimatedTable";
 import { useEstimatedRewards } from "../hooks/useEstimatedRewards";
@@ -13,6 +18,7 @@ import TokenFee from "./TokenFee";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 import { AmountInputError, calcFeesForEstimatedTable } from "../utils";
 import { BridgeLimitInterface } from "utils/serverless-api/types";
+import { useTokenConversion } from "hooks/useTokenConversion";
 
 export type Props = {
   isQuoteLoading: boolean;
@@ -52,6 +58,12 @@ export function FeesCollapsible(props: Props) {
     bridgeFee,
     swapFee
   );
+
+  const { convertTokenToBaseCurrency } = useTokenConversion(
+    props.outputToken.symbol,
+    "usd"
+  );
+  const outputAmountInUSD = convertTokenToBaseCurrency(outputAmount);
 
   const doesAmountExceedMaxDeposit =
     props.validationError === AmountInputError.INSUFFICIENT_LIQUIDITY ||
@@ -125,9 +137,32 @@ export function FeesCollapsible(props: Props) {
   return (
     <ExpandedFeesWrapper errorOutline={props.showPriceImpactWarning}>
       <ExpandedFeesTopRow onClick={() => setIsExpanded(false)}>
-        <Text size="md" color="grey-400">
-          Transaction breakdown
-        </Text>
+        {outputAmount ? (
+          <TokenFeeWrapper>
+            <TokenFee
+              token={props.outputToken}
+              amount={outputAmount}
+              tokenFirst
+              tokenChainId={props.toChainId}
+              textColor="light-200"
+            />
+            {outputAmountInUSD && (
+              <Text size="md" color="grey-400">
+                (${formatUSD(outputAmountInUSD)})
+              </Text>
+            )}
+            <Text size="md" color="grey-400">
+              in
+            </Text>
+            <Text size="md" color="light-200">
+              {estimatedTime}
+            </Text>
+          </TokenFeeWrapper>
+        ) : (
+          <Text size="md" color="grey-400">
+            Transaction breakdown
+          </Text>
+        )}
         <ChevronUp />
       </ExpandedFeesTopRow>
       <ExpandedFeesTableWrapper>
@@ -236,4 +271,11 @@ const CollapsedIconsWrapper = styled.div`
   flex-direction: row;
   align-items: center;
   gap: 8px;
+`;
+
+const TokenFeeWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
 `;
