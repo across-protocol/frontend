@@ -9,8 +9,8 @@ import {
   capitalizeFirstLetter,
   formatUnitsWithMaxFractions,
   getChainInfo,
+  getToken,
   shortenAddress,
-  tokenList,
 } from "utils";
 
 import { getAllChains } from "../utils";
@@ -34,12 +34,10 @@ export function ChainSelector({
   onSelectChain,
 }: Props) {
   const isFrom = fromOrTo === "from";
-
   const { fromChain, toChain, fromTokenSymbol, toTokenSymbol } = selectedRoute;
   const selectedChain = getChainInfo(isFrom ? fromChain : toChain);
-  const tokenInfo = tokenList.filter(
-    (t) => t.symbol === (isFrom ? fromTokenSymbol : toTokenSymbol)
-  )[0];
+
+  const tokenInfo = getToken(isFrom ? fromTokenSymbol : toTokenSymbol);
 
   const { account, isConnected } = useConnection();
   const { balances } = useBalanceBySymbolPerChain({
@@ -54,7 +52,7 @@ export function ChainSelector({
       balance: balances?.[c.chainId] ?? BigNumber.from(0),
       disabled: false,
     }));
-    if (!balances || !isConnected) {
+    if (!balances || !isConnected || !isFrom) {
       return chains;
     } else {
       return chains
@@ -76,18 +74,19 @@ export function ChainSelector({
           }
         });
     }
-  }, [balances, isConnected]);
+  }, [balances, isConnected, isFrom]);
 
   return (
     <Selector<number>
       elements={sortOrder.map((chain) => ({
         value: chain.chainId,
         element: <ChainInfoElement chain={chain} />,
-        suffix: isConnected ? (
-          <Text size="lg" color="grey-400">
-            {formatUnitsWithMaxFractions(chain.balance, tokenInfo.decimals)}
-          </Text>
-        ) : undefined,
+        suffix:
+          isConnected && isFrom ? (
+            <Text size="lg" color="grey-400">
+              {formatUnitsWithMaxFractions(chain.balance, tokenInfo.decimals)}
+            </Text>
+          ) : undefined,
       }))}
       displayElement={
         isFrom ? (

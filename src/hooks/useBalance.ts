@@ -8,8 +8,10 @@ import {
   getConfig,
   ConfigClient,
   getChainInfo,
+  TOKEN_SYMBOLS_MAP,
 } from "utils";
 import { BigNumber, providers } from "ethers";
+import { utils } from "@across-protocol/sdk";
 
 const config = getConfig();
 
@@ -178,12 +180,18 @@ export function useBalanceBySymbolPerChain({
       queryKey: balanceQueryKey(account, chainId, tokenSymbol),
       queryFn: ({ queryKey }) => {
         const [, chainIdToQuery, tokenSymbolToQuery, accountToQuery] = queryKey;
+        if (
+          tokenSymbolToQuery === TOKEN_SYMBOLS_MAP.ETH.symbol &&
+          utils.getNativeTokenSymbol(chainIdToQuery!) !==
+            TOKEN_SYMBOLS_MAP.ETH.symbol
+        ) {
+          return Promise.resolve(BigNumber.from(0));
+        }
         return getBalanceBySymbol({
           config,
           chainIdToQuery,
           tokenSymbolToQuery,
           accountToQuery,
-          provider: undefined,
         });
       },
       enabled: Boolean(account && tokenSymbol),
