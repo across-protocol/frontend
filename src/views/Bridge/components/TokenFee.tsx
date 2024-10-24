@@ -19,6 +19,7 @@ type TokenFeeProps = {
   showTokenLinkOnHover?: boolean;
   tokenChainId: number;
   showLoadingSkeleton?: boolean;
+  tokenFirst?: boolean;
 };
 
 const TokenFee = ({
@@ -28,6 +29,7 @@ const TokenFee = ({
   showTokenLinkOnHover,
   tokenChainId,
   showLoadingSkeleton,
+  tokenFirst,
 }: TokenFeeProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const tokenAddress = token.addresses?.[tokenChainId];
@@ -36,7 +38,7 @@ const TokenFee = ({
     tokenChainId
   );
   return (
-    <Wrapper>
+    <Wrapper invertDirection={tokenFirst}>
       {showLoadingSkeleton ? (
         <LoadingSkeleton width="70px" height="20px" />
       ) : (
@@ -83,9 +85,10 @@ const TokenFee = ({
 
 export default TokenFee;
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ invertDirection?: boolean }>`
   display: flex;
-  flex-direction: row;
+  flex-direction: ${({ invertDirection }) =>
+    invertDirection ? "row-reverse" : "row"};
   align-items: center;
   padding: 0px;
   gap: 8px;

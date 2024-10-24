@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { ReactComponent as ArrowUpDown } from "assets/icons/arrow-up-down.svg";
+import { COLORS } from "utils";
 
 type QuickSwapPropTypes = {
   onQuickSwap: () => void;
@@ -27,6 +28,7 @@ const IconWrapper = styled.div<{ disabled?: boolean }>`
   border-radius: 32px;
 
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  background-color: ${() => COLORS["black-700"]};
 
   &:hover {
     color: #e0f3ff;

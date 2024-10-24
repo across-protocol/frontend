@@ -3,6 +3,20 @@ import { BigNumber } from "ethers";
 import { AmountInput as BaseAmountInput } from "components/AmountInput";
 
 import { AmountInputError, SelectedRoute } from "../utils";
+import { formatUnitsWithMaxFractions, getToken } from "utils";
+import { BridgeLimits } from "hooks";
+
+const validationErrorTextMap = {
+  [AmountInputError.INSUFFICIENT_BALANCE]:
+    "Insufficient balance to process this transfer.",
+  [AmountInputError.PAUSED_DEPOSITS]:
+    "[INPUT_TOKEN] deposits are temporarily paused.",
+  [AmountInputError.INSUFFICIENT_LIQUIDITY]:
+    "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [MAX_DEPOSIT] or lower.",
+  [AmountInputError.INVALID]: "Only positive numbers are allowed as an input.",
+  [AmountInputError.AMOUNT_TOO_LOW]:
+    "The amount you are trying to bridge is too low.",
+};
 
 type Props = {
   balance?: BigNumber;
@@ -11,6 +25,7 @@ type Props = {
   onClickMaxBalance: () => void;
   selectedRoute: SelectedRoute;
   validationError?: AmountInputError;
+  limits?: BridgeLimits;
 };
 
 export function AmountInput({
@@ -20,6 +35,7 @@ export function AmountInput({
   onClickMaxBalance,
   selectedRoute,
   validationError,
+  limits,
 }: Props) {
   return (
     <BaseAmountInput
@@ -29,13 +45,24 @@ export function AmountInput({
           ? selectedRoute.swapTokenSymbol
           : selectedRoute.fromTokenSymbol
       }
-      validationError={validationError}
+      validationError={
+        validationError
+          ? validationErrorTextMap[validationError]
+              .replace("[INPUT_TOKEN]", selectedRoute.fromTokenSymbol)
+              .replace(
+                "[MAX_DEPOSIT]",
+                `${formatUnitsWithMaxFractions(
+                  limits?.maxDeposit || 0,
+                  getToken(selectedRoute.fromTokenSymbol).decimals
+                )} ${selectedRoute.fromTokenSymbol}`
+              )
+          : undefined
+      }
       onChangeAmountInput={onChangeAmountInput}
       onClickMaxBalance={onClickMaxBalance}
       balance={balance}
       displayBalance
       amountInput={amountInput}
-      disableErrorText
     />
   );
 }

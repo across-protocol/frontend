@@ -10,9 +10,11 @@ import {
   getToken,
   isDefined,
   formatUnitsWithMaxFractions,
+  parseUnits,
+  formatUSD,
 } from "utils";
-import { ReactComponent as II } from "assets/icons/info.svg";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet.svg";
+import { useTokenConversion } from "hooks/useTokenConversion";
 
 export type Props = {
   balance?: BigNumber;
@@ -47,6 +49,19 @@ export function AmountInput({
 
   const isAmountValid =
     (amountInput ?? "") === "" || !isDefined(validationError);
+
+  const { convertTokenToBaseCurrency } = useTokenConversion(
+    inputTokenSymbol,
+    "usd"
+  );
+  const symbolInfo = getToken(inputTokenSymbol);
+
+  const inputAmountAsNumeric =
+    amountInput === ""
+      ? undefined
+      : parseUnits(amountInput, symbolInfo.decimals);
+  const estimatedUsdInputAmount =
+    convertTokenToBaseCurrency(inputAmountAsNumeric);
 
   return (
     <Wrapper>
@@ -106,14 +121,20 @@ export function AmountInput({
           </MaxButtonWrapper>
         </BalanceAndMaxWrapper>
       </InputGroupWrapper>
-      {!isAmountValid && !disableErrorText && (
-        <ErrorWrapper>
-          <ErrorIcon />
-          <Text size="sm" color="error">
+      <InfoTextWrapper>
+        {estimatedUsdInputAmount &&
+          !isDefined(validationError) &&
+          amountInput !== "" && (
+            <Text size="md" color="grey-400">
+              ${formatUSD(estimatedUsdInputAmount)}
+            </Text>
+          )}
+        {!isAmountValid && !disableErrorText && (
+          <Text size="md" color="error">
             {validationError}
           </Text>
-        </ErrorWrapper>
-      )}
+        )}
+      </InfoTextWrapper>
     </Wrapper>
   );
 }
@@ -127,7 +148,7 @@ interface IValidInput {
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
 `;
 
@@ -244,26 +265,6 @@ const MaxButtonWrapper = styled(UnstyledButton)`
   }
 `;
 
-const ErrorWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: flex-end;
-  padding: 0px;
-  gap: 8px;
-
-  width: 100%;
-`;
-
-const ErrorIcon = styled(II)`
-  height: 16px;
-  width: 16px;
-
-  & path {
-    stroke: #f96c6c !important;
-  }
-`;
-
 const TokenIcon = styled.img`
   height: 16px;
   width: 16px;
@@ -272,4 +273,12 @@ const TokenIcon = styled.img`
 const IconPairContainer = styled.div`
   padding-top: 0px;
   margin-right: 8px;
+`;
+
+const InfoTextWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+
+  padding-left: 17px; /* 16px padding + 1px border */
 `;
