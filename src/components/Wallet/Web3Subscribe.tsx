@@ -19,7 +19,11 @@ const Web3Subscribe = () => {
 
   // Check if CBWallet is available
   useEffect(() => {
-    setIsCBWallet(wallet?.label === "Coinbase Wallet");
+    const cbExtensionExists = isDefined(
+      (window as any)?.coinbaseWalletExtension
+    );
+    const cbWalletSelected = wallet?.label === "Coinbase Wallet";
+    setIsCBWallet(cbExtensionExists && cbWalletSelected);
   }, [wallet]);
 
   useEffect(() => {
