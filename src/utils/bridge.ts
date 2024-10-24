@@ -6,7 +6,14 @@ import {
 } from "./constants";
 import { DOMAIN_CALLDATA_DELIMITER, tagAddress, tagHex } from "./format";
 import { getProvider } from "./providers";
-import { getConfig, isContractDeployedToAddress } from "utils";
+import {
+  getConfig,
+  isContractDeployedToAddress,
+  isWeth,
+  WETH_INTERFACE,
+  getMulticallHandlerAddress,
+  getWethAddressForChain,
+} from "utils";
 import getApiEndpoint from "./serverless-api";
 import { BridgeLimitInterface } from "./serverless-api/types";
 import { DepositNetworkMismatchProperties } from "ampli";
@@ -143,6 +150,7 @@ export type AcrossDepositArgs = {
   maxCount?: ethers.BigNumber;
   referrer?: string;
   isNative: boolean;
+  toNative: boolean;
   integratorId: string;
 };
 
@@ -219,6 +227,7 @@ export async function sendDepositV3Tx(
     timestamp: quoteTimestamp,
     message = "0x",
     isNative,
+    toNative,
     referrer,
     fillDeadline,
     inputTokenAddress,
@@ -237,6 +246,38 @@ export async function sendDepositV3Tx(
   );
   fillDeadline ??= await getFillDeadline(spokePool);
 
+  if (isWeth(outputTokenAddress)) {
+    // We need to check if the recipient on the destination chain is a contract.
+    const provider = getProvider(destinationChainId);
+    const recipientIsContract = await isContractDeployedToAddress(
+      recipient,
+      provider
+    );
+    if (!toNative) {
+      // Recipient wants weth. If the recipient is a contract, do nothing. Otherwise,
+      // call the multicall handler so it can transfer weth to the recipient.
+      // Also skip this step for Polygon since the recipient will always receive WETH.
+      if (!recipientIsContract && destinationChainId !== ChainId.POLYGON) {
+        message = _transferWethMessage(
+          outputAmount,
+          recipient,
+          destinationChainId
+        );
+        recipient = getMulticallHandlerAddress(destinationChainId);
+      }
+    } else {
+      // Recipient wants eth. If the recipient is an EOA, do nothing. Otherwise,
+      // call the multicall handler to unwrap the weth and send the eth to the recipient.
+      if (recipientIsContract) {
+        message = _unwrapAndTransferEthMessage(
+          outputAmount,
+          recipient,
+          destinationChainId
+        );
+        recipient = getMulticallHandlerAddress(destinationChainId);
+      }
+    }
+  }
   const useExclusiveRelayer =
     exclusiveRelayer !== ethers.constants.AddressZero &&
     exclusivityDeadline > 0;
@@ -470,4 +511,60 @@ async function _tagRefAndSignTx(
   }
 
   return signer.sendTransaction(tx);
+}
+
+const MULTICALL_HANDLER_INSTRUCTIONS =
+  "tuple(tuple(address, bytes, uint256)[], address)";
+
+function _transferWethMessage(
+  amount: ethers.BigNumber,
+  toAddress: string,
+  toChain: ChainId
+): string {
+  const wethInterface = new ethers.utils.Interface(WETH_INTERFACE);
+
+  const destinationChainWethAddress = getWethAddressForChain(toChain);
+  const wethTransferData = wethInterface.encodeFunctionData(
+    "transfer(address dst, uint256 wad)",
+    [toAddress, amount]
+  );
+  const multicallHandlerCall = ethers.utils.defaultAbiCoder.encode(
+    [MULTICALL_HANDLER_INSTRUCTIONS],
+    [
+      [
+        [
+          [destinationChainWethAddress, wethTransferData, 0], // Call WETH contract to transfer `amount` of WETH to `toAddress`.
+        ],
+        toAddress,
+      ],
+    ]
+  );
+  return multicallHandlerCall;
+}
+
+function _unwrapAndTransferEthMessage(
+  amount: ethers.BigNumber,
+  toAddress: string,
+  toChain: ChainId
+): string {
+  const wethInterface = new ethers.utils.Interface(WETH_INTERFACE);
+
+  const destinationChainWethAddress = getWethAddressForChain(toChain);
+  const wethWithdrawData = wethInterface.encodeFunctionData(
+    "withdraw(uint256 wad)",
+    [amount]
+  );
+  const multicallHandlerCall = ethers.utils.defaultAbiCoder.encode(
+    [MULTICALL_HANDLER_INSTRUCTIONS],
+    [
+      [
+        [
+          [destinationChainWethAddress, wethWithdrawData, 0], // Withdraw WETH. Multicall handler receives `amount` of ETH.
+          [toAddress, "0x", amount], // Call the toAddress with no data and msg.value = amount.
+        ],
+        toAddress,
+      ],
+    ]
+  );
+  return multicallHandlerCall;
 }
