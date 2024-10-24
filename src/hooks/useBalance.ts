@@ -159,14 +159,16 @@ export function useBalancesBySymbols({
 }
 
 export function useBalanceBySymbolPerChain({
-  chainSymbolPairs,
+  tokenSymbol,
+  chainIds,
   account,
 }: {
-  chainSymbolPairs: Array<{ chainId: ChainId; symbol: string }>;
+  tokenSymbol?: string;
+  chainIds: ChainId[];
   account?: string;
 }) {
   const result = useQueries({
-    queries: chainSymbolPairs.map<
+    queries: chainIds.map<
       // NOTE: For some reason, we need to explicitly type this as `UseQueryOptions` to avoid a type error.
       UseQueryOptions<
         ReturnType<typeof getBalanceBySymbol>,
@@ -174,13 +176,14 @@ export function useBalanceBySymbolPerChain({
         ReturnType<typeof getBalanceBySymbol>,
         ReturnType<typeof balanceQueryKey>
       >
-    >(({ chainId, symbol }) => ({
-      queryKey: balanceQueryKey(account, chainId, symbol),
+    >((chainId) => ({
+      queryKey: balanceQueryKey(account, chainId, tokenSymbol),
       queryFn: ({ queryKey }) => {
         const [, chainIdToQuery, tokenSymbolToQuery, accountToQuery] = queryKey;
         if (
-          utils.chainIsMatic(chainIdToQuery!) &&
-          tokenSymbolToQuery === TOKEN_SYMBOLS_MAP.ETH.symbol
+          tokenSymbolToQuery === TOKEN_SYMBOLS_MAP.ETH.symbol &&
+          utils.getNativeTokenSymbol(chainIdToQuery!) !==
+            TOKEN_SYMBOLS_MAP.ETH.symbol
         ) {
           return Promise.resolve(BigNumber.from(0));
         }
@@ -191,7 +194,7 @@ export function useBalanceBySymbolPerChain({
           accountToQuery,
         });
       },
-      enabled: Boolean(account && symbol),
+      enabled: Boolean(account && tokenSymbol),
       refetchInterval: 10_000,
     })),
   });
@@ -199,8 +202,7 @@ export function useBalanceBySymbolPerChain({
     balances: result.reduce(
       (acc, { data }, idx) => ({
         ...acc,
-        [chainSymbolPairs[idx].chainId]: (data ??
-          BigNumber.from(0)) as BigNumber,
+        [chainIds[idx]]: (data ?? BigNumber.from(0)) as BigNumber,
       }),
       {} as Record<number, BigNumber>
     ),

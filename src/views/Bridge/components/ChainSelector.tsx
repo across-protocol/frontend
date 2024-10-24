@@ -13,7 +13,7 @@ import {
   shortenAddress,
 } from "utils";
 
-import { getAllChains, getReceiveTokenSymbol } from "../utils";
+import { getAllChains } from "../utils";
 import { useBalanceBySymbolPerChain, useConnection } from "hooks";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
@@ -41,17 +41,8 @@ export function ChainSelector({
 
   const { account, isConnected } = useConnection();
   const { balances } = useBalanceBySymbolPerChain({
-    chainSymbolPairs: allChains.map((c) => ({
-      chainId: c.chainId,
-      symbol: isFrom
-        ? fromTokenSymbol
-        : getReceiveTokenSymbol(
-            selectedRoute.toChain,
-            selectedRoute.fromTokenSymbol,
-            selectedRoute.toTokenSymbol,
-            false
-          ),
-    })),
+    tokenSymbol: tokenInfo.symbol,
+    chainIds: allChains.map((c) => c.chainId),
     account,
   });
 
@@ -61,7 +52,7 @@ export function ChainSelector({
       balance: balances?.[c.chainId] ?? BigNumber.from(0),
       disabled: false,
     }));
-    if (!balances || !isConnected) {
+    if (!balances || !isConnected || !isFrom) {
       return chains;
     } else {
       return chains
@@ -83,18 +74,19 @@ export function ChainSelector({
           }
         });
     }
-  }, [balances, isConnected]);
+  }, [balances, isConnected, isFrom]);
 
   return (
     <Selector<number>
       elements={sortOrder.map((chain) => ({
         value: chain.chainId,
         element: <ChainInfoElement chain={chain} />,
-        suffix: isConnected ? (
-          <Text size="lg" color="grey-400">
-            {formatUnitsWithMaxFractions(chain.balance, tokenInfo.decimals)}
-          </Text>
-        ) : undefined,
+        suffix:
+          isConnected && isFrom ? (
+            <Text size="lg" color="grey-400">
+              {formatUnitsWithMaxFractions(chain.balance, tokenInfo.decimals)}
+            </Text>
+          ) : undefined,
       }))}
       displayElement={
         isFrom ? (
