@@ -8,8 +8,10 @@ import {
   getConfig,
   ConfigClient,
   getChainInfo,
+  TOKEN_SYMBOLS_MAP,
 } from "utils";
 import { BigNumber, providers } from "ethers";
+import { utils } from "@across-protocol/sdk";
 
 const config = getConfig();
 
@@ -157,16 +159,14 @@ export function useBalancesBySymbols({
 }
 
 export function useBalanceBySymbolPerChain({
-  tokenSymbol,
-  chainIds,
+  chainSymbolPairs,
   account,
 }: {
-  tokenSymbol?: string;
-  chainIds: ChainId[];
+  chainSymbolPairs: Array<{ chainId: ChainId; symbol: string }>;
   account?: string;
 }) {
   const result = useQueries({
-    queries: chainIds.map<
+    queries: chainSymbolPairs.map<
       // NOTE: For some reason, we need to explicitly type this as `UseQueryOptions` to avoid a type error.
       UseQueryOptions<
         ReturnType<typeof getBalanceBySymbol>,
@@ -174,19 +174,24 @@ export function useBalanceBySymbolPerChain({
         ReturnType<typeof getBalanceBySymbol>,
         ReturnType<typeof balanceQueryKey>
       >
-    >((chainId) => ({
-      queryKey: balanceQueryKey(account, chainId, tokenSymbol),
+    >(({ chainId, symbol }) => ({
+      queryKey: balanceQueryKey(account, chainId, symbol),
       queryFn: ({ queryKey }) => {
         const [, chainIdToQuery, tokenSymbolToQuery, accountToQuery] = queryKey;
+        if (
+          utils.chainIsMatic(chainIdToQuery!) &&
+          tokenSymbolToQuery === TOKEN_SYMBOLS_MAP.ETH.symbol
+        ) {
+          return Promise.resolve(BigNumber.from(0));
+        }
         return getBalanceBySymbol({
           config,
           chainIdToQuery,
           tokenSymbolToQuery,
           accountToQuery,
-          provider: undefined,
         });
       },
-      enabled: Boolean(account && tokenSymbol),
+      enabled: Boolean(account && symbol),
       refetchInterval: 10_000,
     })),
   });
@@ -194,7 +199,8 @@ export function useBalanceBySymbolPerChain({
     balances: result.reduce(
       (acc, { data }, idx) => ({
         ...acc,
-        [chainIds[idx]]: (data ?? BigNumber.from(0)) as BigNumber,
+        [chainSymbolPairs[idx].chainId]: (data ??
+          BigNumber.from(0)) as BigNumber,
       }),
       {} as Record<number, BigNumber>
     ),

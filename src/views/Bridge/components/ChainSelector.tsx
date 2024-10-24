@@ -9,11 +9,11 @@ import {
   capitalizeFirstLetter,
   formatUnitsWithMaxFractions,
   getChainInfo,
+  getToken,
   shortenAddress,
-  tokenList,
 } from "utils";
 
-import { getAllChains } from "../utils";
+import { getAllChains, getReceiveTokenSymbol } from "../utils";
 import { useBalanceBySymbolPerChain, useConnection } from "hooks";
 import { useMemo } from "react";
 import { BigNumber } from "ethers";
@@ -34,17 +34,24 @@ export function ChainSelector({
   onSelectChain,
 }: Props) {
   const isFrom = fromOrTo === "from";
-
   const { fromChain, toChain, fromTokenSymbol, toTokenSymbol } = selectedRoute;
   const selectedChain = getChainInfo(isFrom ? fromChain : toChain);
-  const tokenInfo = tokenList.filter(
-    (t) => t.symbol === (isFrom ? fromTokenSymbol : toTokenSymbol)
-  )[0];
+
+  const tokenInfo = getToken(isFrom ? fromTokenSymbol : toTokenSymbol);
 
   const { account, isConnected } = useConnection();
   const { balances } = useBalanceBySymbolPerChain({
-    tokenSymbol: tokenInfo.symbol,
-    chainIds: allChains.map((c) => c.chainId),
+    chainSymbolPairs: allChains.map((c) => ({
+      chainId: c.chainId,
+      symbol: isFrom
+        ? fromTokenSymbol
+        : getReceiveTokenSymbol(
+            selectedRoute.toChain,
+            selectedRoute.fromTokenSymbol,
+            selectedRoute.toTokenSymbol,
+            false
+          ),
+    })),
     account,
   });
 
