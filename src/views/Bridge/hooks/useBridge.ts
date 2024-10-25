@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BigNumber, utils } from "ethers";
+import { BigNumber, utils, constants } from "ethers";
 
 import { useConnection, useIsWrongNetwork, useAmplitude } from "hooks";
 import { ampli } from "ampli";
@@ -65,7 +65,7 @@ export function useBridge() {
     parsedAmount,
     quotedFees?.isAmountTooLow,
     maxBalance,
-    isManualRebalancer ? maxBalance : limitsQuery.limits?.maxDeposit,
+    isManualRebalancer ? constants.MaxUint256 : limitsQuery.limits?.maxDeposit,
     selectedRoute.type === "swap" && quotedSwap?.minExpectedInputTokenAmount
       ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount)
       : parsedAmount
