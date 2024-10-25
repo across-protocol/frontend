@@ -211,7 +211,9 @@ const handler = async (
       .mul(parseUnits(tokenPriceUsd.toString(), 18))
       .div(parseUnits("1", inputToken.decimals));
 
-    if (amount.gt(maxDeposit)) {
+    const skipAmountLimitEnabled = skipAmountLimit === "true";
+
+    if (!skipAmountLimitEnabled && amount.gt(maxDeposit)) {
       throw new AmountTooHighError({
         message: `Amount exceeds max. deposit limit: ${ethers.utils.formatUnits(
           maxDeposit,
@@ -237,7 +239,6 @@ const handler = async (
 
     const isAmountTooLow = BigNumber.from(amountInput).lt(minDeposit);
 
-    const skipAmountLimitEnabled = skipAmountLimit === "true";
     if (!skipAmountLimitEnabled && isAmountTooLow) {
       throw new AmountTooLowError({
         message: `Sent amount is too low relative to fees`,
