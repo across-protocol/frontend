@@ -9519,12 +9519,7 @@
       "swapTokenL1TokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     }
   ],
-  "pools": [
-    {
-      "tokenSymbol": "BOBA",
-      "isNative": false
-    }
-  ],
+  "pools": [],
   "spokePoolVerifier": {
     "address": "0xB4A8d45647445EA9FC3E1058096142390683dBC2",
     "enabledChains": [
