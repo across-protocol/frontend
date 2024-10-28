@@ -100,9 +100,9 @@ export function FeesCollapsible(props: Props) {
                       showTokenLinkOnHover
                     />
                     {outputAmountInUSD && (
-                      <Text size="md" color="grey-400">
+                      <HiddenMobileText size="md" color="grey-400">
                         (${formatUSD(outputAmountInUSD)})
-                      </Text>
+                      </HiddenMobileText>
                     )}
                     {estimatedRewards.rewardToken &&
                       estimatedRewards.reward && (
@@ -160,9 +160,9 @@ export function FeesCollapsible(props: Props) {
               showTokenLinkOnHover
             />
             {outputAmountInUSD && (
-              <Text size="md" color="grey-400">
+              <HiddenMobileText size="md" color="grey-400">
                 (${formatUSD(outputAmountInUSD)})
-              </Text>
+              </HiddenMobileText>
             )}
             {estimatedRewards.rewardToken && estimatedRewards.reward && (
               <>
@@ -306,4 +306,10 @@ const TokenFeeWrapper = styled.div`
   flex-direction: row;
   align-items: center;
   gap: 6px;
+`;
+
+const HiddenMobileText = styled(Text)`
+  @media ${QUERIESV2.xs.andDown} {
+    display: none;
+  }
 `;
