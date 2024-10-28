@@ -59,12 +59,7 @@ const enabledRoutes = {
       "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
     merkleDistributorAddress: "0xE50b2cEAC4f60E840Ae513924033E753e2366487",
     claimAndStakeAddress: "0x985e8A89Dd6Af8896Ef075c8dd93512433dc5829",
-    pools: [
-      {
-        tokenSymbol: "BOBA",
-        isNative: false,
-      },
-    ],
+    pools: [],
     spokePoolVerifier: {
       address: "0xB4A8d45647445EA9FC3E1058096142390683dBC2",
       enabledChains: [
