@@ -3,7 +3,6 @@ import { BigNumber } from "ethers";
 import { useHistory } from "react-router-dom";
 
 import { SecondaryButton } from "components/Button";
-import EstimatedTable from "views/Bridge/components/EstimatedTable";
 import {
   calcFeesForEstimatedTable,
   getReceiveTokenSymbol,
@@ -11,7 +10,6 @@ import {
 import { useEstimatedRewards } from "views/Bridge/hooks/useEstimatedRewards";
 import {
   getToken,
-  COLORS,
   chainIdToRewardsProgramName,
   getBridgeUrlWithQueryParams,
 } from "utils";
@@ -20,6 +18,7 @@ import { useIsContractAddress } from "hooks/useIsContractAddress";
 import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import RewardsProgramCTA from "views/Bridge/components/RewardsProgramCTA";
+import { FeesCollapsible } from "views/Bridge/components/FeesCollapsible";
 
 type Props = {
   fromChainId: number;
@@ -91,7 +90,7 @@ export function DepositStatusLowerCard({
 
   const FeesTable =
     lpFee && gasFee && depositArgs?.initialAmount ? (
-      <EstimatedTable
+      <FeesCollapsible
         fromChainId={fromChainId}
         toChainId={toChainId}
         quotedLimits={quotedLimits}
@@ -126,13 +125,7 @@ export function DepositStatusLowerCard({
       {programName && (
         <RewardsProgramCTA toChain={toChainId} program={programName} />
       )}
-      {fromBridgePagePayload && (
-        <>
-          <Divider />
-          {FeesTable}
-        </>
-      )}
-      <Divider />
+      {fromBridgePagePayload && FeesTable}
       <Button
         onClick={() =>
           history.push(
@@ -150,12 +143,6 @@ export function DepositStatusLowerCard({
     </>
   );
 }
-
-const Divider = styled.div`
-  width: 100%;
-  height: 1px;
-  background: ${COLORS["grey-600"]};
-`;
 
 const Button = styled(SecondaryButton)`
   width: 100%;

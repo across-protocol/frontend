@@ -12,7 +12,7 @@ import {
   getConfirmationDepositTime,
 } from "utils";
 
-import EstimatedTable, { TotalReceive } from "./EstimatedTable";
+import EstimatedTable from "./EstimatedTable";
 import { useEstimatedRewards } from "../hooks/useEstimatedRewards";
 import TokenFee from "./TokenFee";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
@@ -80,9 +80,6 @@ export function FeesCollapsible(props: Props) {
   if (!isExpanded) {
     return (
       <CollapsedFeesWrapper>
-        <CollapsedFeesLabel>
-          <Text color="grey-400">Receive</Text>
-        </CollapsedFeesLabel>
         <CollapsedFeesReceiveWrapper
           errorOutline={props.showPriceImpactWarning}
           onClick={() => setIsExpanded(true)}
@@ -93,32 +90,47 @@ export function FeesCollapsible(props: Props) {
             <CollapsedFeesAmountsWrapper>
               {outputAmount && !doesAmountExceedMaxDeposit ? (
                 <>
-                  <TotalReceive
-                    totalReceived={outputAmount}
-                    inputToken={baseToken}
-                    outputToken={props.outputToken}
-                    textColor="light-200"
-                    destinationChainId={props.toChainId}
-                    showPriceImpactWarning={props.showPriceImpactWarning}
-                    swapPriceImpact={props.swapPriceImpact}
-                  />
-                  {estimatedRewards.reward && estimatedRewards.rewardToken && (
-                    <>
-                      <Text color="grey-400"> and </Text>
-                      <TokenFee
-                        token={estimatedRewards.rewardToken}
-                        amount={estimatedRewards.reward}
-                        textColor="light-200"
-                        tokenChainId={props.toChainId}
-                      />
-                    </>
-                  )}
-                  {props.isSwap ? null : estimatedTime ? (
-                    <>
-                      <Text color="grey-400"> in </Text>
-                      <Text color="light-200">{estimatedTime}</Text>
-                    </>
-                  ) : null}
+                  <TokenFeeWrapper>
+                    <TokenFee
+                      token={props.outputToken}
+                      amount={outputAmount}
+                      tokenFirst
+                      tokenChainId={props.toChainId}
+                      textColor="light-200"
+                      showTokenLinkOnHover
+                    />
+                    {outputAmountInUSD && (
+                      <Text size="md" color="grey-400">
+                        (${formatUSD(outputAmountInUSD)})
+                      </Text>
+                    )}
+                    {estimatedRewards.rewardToken &&
+                      estimatedRewards.reward && (
+                        <>
+                          <Text size="md" color="grey-400">
+                            and
+                          </Text>
+                          <TokenFee
+                            token={estimatedRewards.rewardToken}
+                            amount={estimatedRewards.reward}
+                            tokenFirst
+                            tokenChainId={props.toChainId}
+                            textColor="light-200"
+                            showTokenLinkOnHover
+                          />
+                        </>
+                      )}
+                    {!props.isSwap && estimatedTime && (
+                      <>
+                        <Text size="md" color="grey-400">
+                          in
+                        </Text>
+                        <Text size="md" color="light-200">
+                          {estimatedTime}
+                        </Text>
+                      </>
+                    )}
+                  </TokenFeeWrapper>
                 </>
               ) : (
                 "-"
@@ -145,25 +157,48 @@ export function FeesCollapsible(props: Props) {
               tokenFirst
               tokenChainId={props.toChainId}
               textColor="light-200"
+              showTokenLinkOnHover
             />
             {outputAmountInUSD && (
               <Text size="md" color="grey-400">
                 (${formatUSD(outputAmountInUSD)})
               </Text>
             )}
-            <Text size="md" color="grey-400">
-              in
-            </Text>
-            <Text size="md" color="light-200">
-              {estimatedTime}
-            </Text>
+            {estimatedRewards.rewardToken && estimatedRewards.reward && (
+              <>
+                <Text size="md" color="grey-400">
+                  and
+                </Text>
+                <TokenFee
+                  token={estimatedRewards.rewardToken}
+                  amount={estimatedRewards.reward}
+                  tokenFirst
+                  tokenChainId={props.toChainId}
+                  textColor="light-200"
+                  showTokenLinkOnHover
+                />
+              </>
+            )}
+            {!props.isSwap && estimatedTime && (
+              <>
+                <Text size="md" color="grey-400">
+                  in
+                </Text>
+                <Text size="md" color="light-200">
+                  {estimatedTime}
+                </Text>
+              </>
+            )}
           </TokenFeeWrapper>
         ) : (
           <Text size="md" color="grey-400">
             Transaction breakdown
           </Text>
         )}
-        <ChevronUp />
+        <CollapsedIconsWrapper>
+          {props.isSwap ? <SwapIcon /> : null}
+          <ChevronUp />
+        </CollapsedIconsWrapper>
       </ExpandedFeesTopRow>
       <ExpandedFeesTableWrapper>
         <EstimatedTable {...props} {...estimatedRewards} />
@@ -186,14 +221,6 @@ const CollapsedFeesWrapper = styled.div`
     flex-direction: column;
     height: auto;
   }
-`;
-
-const CollapsedFeesLabel = styled.div`
-  width: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
 `;
 
 const CollapsedFeesReceiveWrapper = styled.div<{ errorOutline?: boolean }>`
@@ -256,6 +283,7 @@ const ExpandedFeesTopRow = styled.div`
 
 const ExpandedFeesTableWrapper = styled.div`
   padding: 16px;
+  padding-top: 0;
 `;
 
 const ChevronUp = styled(ChevronDown)`
