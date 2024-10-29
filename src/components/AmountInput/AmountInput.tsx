@@ -66,6 +66,7 @@ export function AmountInput({
         ) : null}
         <Input
           type="number"
+          inputMode="numeric"
           valid={isAmountValid}
           placeholder="Enter amount"
           value={amountInput}
