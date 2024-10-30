@@ -3,7 +3,7 @@ import { utils as sdkUtils } from "@across-protocol/sdk";
 import { utils } from "ethers";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
-
+import path from "path";
 import * as chainConfigs from "./chain-configs";
 
 function getDeployedAddress(contractName: string, chainId: number): string {
@@ -413,7 +413,7 @@ async function generateRoutes(hubPoolChainId = 1) {
       name: chainConfig.name,
       publicRpcUrl: chainConfig.publicRpcUrl,
       explorerUrl: chainConfig.blockExplorer,
-      logoUrl: `${assetsBaseUrl}/scripts/chain-configs/${chainKey.toLowerCase()}/assets/logo.svg`,
+      logoUrl: `${assetsBaseUrl}${path.resolve("/scripts/chain-configs/", chainKey.toLowerCase().replace("_", "-"), chainConfig.logoPath)}`,
       spokePool: chainConfig.spokePool.address,
       spokePoolBlock: chainConfig.spokePool.blockNumber,
       inputTokens: routeFileContent.routes
