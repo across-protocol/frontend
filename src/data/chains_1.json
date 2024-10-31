@@ -672,7 +672,7 @@
     "name": "zkSync",
     "publicRpcUrl": "https://mainnet.era.zksync.io",
     "explorerUrl": "https://era.zksync.network",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/zk_sync/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/zk-sync/assets/logo.svg",
     "spokePool": "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF",
     "spokePoolBlock": 10352565,
     "inputTokens": [
@@ -1384,7 +1384,7 @@
     "name": "World Chain",
     "publicRpcUrl": "https://worldchain-mainnet.g.alchemy.com/public",
     "explorerUrl": "https://worldchain-mainnet-explorer.alchemy.com",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/world_chain/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/world-chain/assets/logo.svg",
     "spokePool": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
     "spokePoolBlock": 4524742,
     "inputTokens": [
