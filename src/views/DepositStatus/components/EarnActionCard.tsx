@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { ReactNode } from "react";
 
 import TealBannerUrl from "assets/bg-banners/action-card-teal-banner.svg";
+import AquaBannerUrl from "assets/bg-banners/action-card-aqua-banner.svg";
 
 import { Text } from "components/Text";
 import { COLORS } from "utils";
@@ -11,6 +12,7 @@ type Props = {
   subTitle: string;
   LeftIcon: ReactNode;
   ActionButton: ReactNode;
+  color: "teal" | "aqua";
 };
 
 export function EarnActionCard({
@@ -18,10 +20,11 @@ export function EarnActionCard({
   subTitle,
   LeftIcon,
   ActionButton,
+  color,
 }: Props) {
   return (
-    <Wrapper>
-      <InnerWrapper>
+    <Wrapper color={color}>
+      <InnerWrapper color={color}>
         {LeftIcon}
         <TextWrapper>
           {title}
@@ -33,26 +36,30 @@ export function EarnActionCard({
   );
 }
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ color: string }>`
   border-radius: 0.5rem;
 
   background-image: linear-gradient(
       90deg,
-      rgba(40, 160, 240, 0.05) 0%,
-      rgba(40, 160, 240, 0) 100%
+      ${({ color }) => (color === "aqua" ? COLORS["aqua-5"] : COLORS["teal-5"])}
+        0%,
+      ${({ color }) => (color === "aqua" ? COLORS["aqua-0"] : COLORS["teal-0"])}
+        100%
     ),
-    url(${TealBannerUrl});
+    url(${({ color }) => (color === "aqua" ? AquaBannerUrl : TealBannerUrl)});
   background-size: cover;
 `;
 
-const InnerWrapper = styled.div`
+const InnerWrapper = styled.div<{ color: "teal" | "aqua" }>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  padding: 1.5rem 1rem;
+  padding: 24px 16px;
 
-  border: 1px solid ${COLORS["teal-15"]};
+  border: 1px solid
+    ${({ color }) => (color === "aqua" ? COLORS["aqua-15"] : COLORS["teal-15"])};
   border-radius: 0.5rem;
 `;
 

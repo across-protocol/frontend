@@ -55,6 +55,7 @@ const variables = css`
     --color-interface-aqua-15: #6cf9d826;
 
     --color-interface-teal: #44d2ff;
+    --color-interface-teal-0: #44d2ff00;
     --color-interface-teal-5: #44d2ff0d;
     --color-interface-teal-15: #44d2ff26;
 

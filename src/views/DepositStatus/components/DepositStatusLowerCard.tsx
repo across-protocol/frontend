@@ -19,6 +19,7 @@ import { EarnByLpAndStakingCard } from "./EarnByLpAndStakingCard";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import RewardsProgramCTA from "views/Bridge/components/RewardsProgramCTA";
 import { FeesCollapsible } from "views/Bridge/components/FeesCollapsible";
+import { BuildOnAcrossCard } from "./BuildOnAcrossCard";
 
 type Props = {
   fromChainId: number;
@@ -118,6 +119,7 @@ export function DepositStatusLowerCard({
 
   return (
     <>
+      <BuildOnAcrossCard />
       <EarnByLpAndStakingCard
         l1TokenAddress={baseToken.mainnetAddress!}
         bridgeTokenSymbol={inputTokenSymbol}
