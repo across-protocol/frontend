@@ -1,20 +1,21 @@
 import styled from "@emotion/styled";
 import { BigNumber, utils } from "ethers";
 
-import { Text } from "components/Text";
+import { ReactComponent as WalletIcon } from "assets/icons/wallet.svg";
 import { UnstyledButton } from "components/Button";
-import { Tooltip } from "components/Tooltip";
 import { IconPair } from "components/IconPair";
+import { Text } from "components/Text";
+import { Tooltip } from "components/Tooltip";
+import { useTokenConversion } from "hooks/useTokenConversion";
 import {
   QUERIESV2,
+  formatUSD,
+  formatUnitsWithMaxFractions,
   getToken,
   isDefined,
-  formatUnitsWithMaxFractions,
+  isNumberEthersParseable,
   parseUnits,
-  formatUSD,
 } from "utils";
-import { ReactComponent as WalletIcon } from "assets/icons/wallet.svg";
-import { useTokenConversion } from "hooks/useTokenConversion";
 
 export type Props = {
   balance?: BigNumber;
@@ -54,12 +55,14 @@ export function AmountInput({
     inputTokenSymbol,
     "usd"
   );
-  const symbolInfo = getToken(inputTokenSymbol);
 
-  const inputAmountAsNumeric =
-    amountInput === ""
-      ? undefined
-      : parseUnits(amountInput, symbolInfo.decimals);
+  const inputAmountAsNumeric = isNumberEthersParseable(
+    amountInput,
+    token.decimals
+  )
+    ? parseUnits(amountInput, token.decimals)
+    : undefined;
+
   const estimatedUsdInputAmount =
     convertTokenToBaseCurrency(inputAmountAsNumeric);
 
