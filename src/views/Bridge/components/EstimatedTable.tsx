@@ -74,46 +74,6 @@ const EstimatedTable = ({
   const showLoadingSkeleton = isQuoteLoading && !doesAmountExceedMaxDeposit;
 
   const nestedFeesRowElements = [
-    <>
-      <ToolTipWrapper>
-        <Text size="md" color="grey-400">
-          Bridge fee
-        </Text>
-        <Tooltip
-          title="Bridge fee"
-          body="Fee paid to Across Liquidity Providers and Relayers."
-          placement="bottom-start"
-        >
-          <InfoIconWrapper>
-            <InfoIcon />
-          </InfoIconWrapper>
-        </Tooltip>
-      </ToolTipWrapper>
-      <Text color="grey-400" size="md">
-        {bridgeFeeAsBaseCurrency
-          ? `$${formatUSD(bridgeFeeAsBaseCurrency)}`
-          : "-"}
-      </Text>
-    </>,
-    <>
-      <ToolTipWrapper>
-        <Text size="md" color="grey-400">
-          Destination gas fee
-        </Text>
-        <Tooltip
-          title="Destination gas fee"
-          body="Fee to cover gas for destination chain fill transaction."
-          placement="bottom-start"
-        >
-          <InfoIconWrapper>
-            <InfoIcon />
-          </InfoIconWrapper>
-        </Tooltip>
-      </ToolTipWrapper>
-      <Text color="grey-400" size="md">
-        {gasFeeAsBaseCurrency ? `$${formatUSD(gasFeeAsBaseCurrency)}` : "-"}
-      </Text>
-    </>,
     isSwap &&
     swapQuote &&
     swapToken &&
@@ -188,6 +148,46 @@ const EstimatedTable = ({
         </SwapSlippageSettings>
       </>
     ) : undefined,
+    <>
+      <ToolTipWrapper>
+        <Text size="md" color="grey-400">
+          Bridge fee
+        </Text>
+        <Tooltip
+          title="Bridge fee"
+          body="Fee paid to Across Liquidity Providers and Relayers."
+          placement="bottom-start"
+        >
+          <InfoIconWrapper>
+            <InfoIcon />
+          </InfoIconWrapper>
+        </Tooltip>
+      </ToolTipWrapper>
+      <Text color="grey-400" size="md">
+        {bridgeFeeAsBaseCurrency
+          ? `$${formatUSD(bridgeFeeAsBaseCurrency)}`
+          : "-"}
+      </Text>
+    </>,
+    <>
+      <ToolTipWrapper>
+        <Text size="md" color="grey-400">
+          Destination gas fee
+        </Text>
+        <Tooltip
+          title="Destination gas fee"
+          body="Fee to cover gas for destination chain fill transaction."
+          placement="bottom-start"
+        >
+          <InfoIconWrapper>
+            <InfoIcon />
+          </InfoIconWrapper>
+        </Tooltip>
+      </ToolTipWrapper>
+      <Text color="grey-400" size="md">
+        {gasFeeAsBaseCurrency ? `$${formatUSD(gasFeeAsBaseCurrency)}` : "-"}
+      </Text>
+    </>,
     rewardDisplaySymbol && rewardToken && rewardPercentage ? (
       <>
         <ToolTipWrapper>
