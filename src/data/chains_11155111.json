@@ -112,7 +112,7 @@
         "symbol": "USDbC",
         "name": "USD Coin (bridged)",
         "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdbc.svg"
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ]
   },

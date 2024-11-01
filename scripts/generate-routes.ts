@@ -6,6 +6,17 @@ import * as prettier from "prettier";
 import path from "path";
 import * as chainConfigs from "./chain-configs";
 
+function getTokenSymbolForLogo(tokenSymbol: string): string {
+  switch (tokenSymbol) {
+    case "USDC.e":
+    case "USDbC":
+    case "USDzC":
+      return "USDC";
+    default:
+      return tokenSymbol;
+  }
+}
+
 function getDeployedAddress(contractName: string, chainId: number): string {
   return sdkUtils.getDeployedAddress(contractName, chainId, true) as string;
 }
@@ -400,7 +411,7 @@ async function generateRoutes(hubPoolChainId = 1) {
         symbol: tokenSymbol,
         name: tokenInfo.name,
         decimals: tokenInfo.decimals,
-        logoUrl: `${assetsBaseUrl}/src/assets/token-logos/${tokenSymbol.toLowerCase()}.svg`,
+        logoUrl: `${assetsBaseUrl}/src/assets/token-logos/${getTokenSymbolForLogo(tokenSymbol).toLowerCase()}.svg`,
       };
     };
     return {
