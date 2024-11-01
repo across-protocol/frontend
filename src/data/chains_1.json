@@ -1447,5 +1447,53 @@
         "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/wbtc.svg"
       }
     ]
+  },
+  {
+    "chainId": 41455,
+    "name": "Aleph Zero",
+    "publicRpcUrl": "https://rpc.alephzero.raas.gelato.cloud",
+    "explorerUrl": "https://evm-explorer.alephzero.org",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/aleph-zero/assets/logo.svg",
+    "spokePool": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+    "spokePoolBlock": 4112376,
+    "inputTokens": [
+      {
+        "address": "0xD648529D4803d3467bA8850577BEd4e4b8Ae583C",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      },
+      {
+        "address": "0xB3f0eE446723f4258862D949B4c9688e7e7d35d3",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0xB3f0eE446723f4258862D949B4c9688e7e7d35d3",
+        "symbol": "ETH",
+        "name": "Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/eth.svg"
+      }
+    ],
+    "outputTokens": [
+      {
+        "address": "0xB3f0eE446723f4258862D949B4c9688e7e7d35d3",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/weth.svg"
+      },
+      {
+        "address": "0xD648529D4803d3467bA8850577BEd4e4b8Ae583C",
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdt.svg"
+      }
+    ]
   }
 ]
