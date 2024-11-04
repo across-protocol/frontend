@@ -125,13 +125,11 @@ export function AmountInput({
         </BalanceAndMaxWrapper>
       </InputGroupWrapper>
       <InfoTextWrapper>
-        {estimatedUsdInputAmount &&
-          !isDefined(validationError) &&
-          amountInput !== "" && (
-            <Text size="md" color="grey-400">
-              ${formatUSD(estimatedUsdInputAmount)}
-            </Text>
-          )}
+        {estimatedUsdInputAmount && amountInput !== "" && (
+          <Text size="md" color="grey-400">
+            ${formatUSD(estimatedUsdInputAmount)}
+          </Text>
+        )}
         {!isAmountValid && !disableErrorText && (
           <Text size="md" color="error">
             {validationError}
