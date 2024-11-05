@@ -333,7 +333,10 @@ const handler = async (
       responseJson,
     });
 
-    response.setHeader("Cache-Control", "s-maxage=10");
+    // Only cache response if exclusivity
+    if (exclusiveRelayer !== sdk.constants.ZERO_ADDRESS) {
+      response.setHeader("Cache-Control", "s-maxage=10");
+    }
     response.status(200).json(responseJson);
   } catch (error) {
     return handleErrorCondition("suggested-fees", response, logger, error);
