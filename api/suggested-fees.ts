@@ -333,8 +333,9 @@ const handler = async (
       responseJson,
     });
 
-    // Only cache response if exclusivity
-    if (exclusiveRelayer !== sdk.constants.ZERO_ADDRESS) {
+    // Only cache response if exclusivity is not set. This prevents race conditions where
+    // cached exclusivity data is returned for multiple deposits.
+    if (exclusiveRelayer === sdk.constants.ZERO_ADDRESS) {
       response.setHeader("Cache-Control", "s-maxage=10");
     }
     response.status(200).json(responseJson);
