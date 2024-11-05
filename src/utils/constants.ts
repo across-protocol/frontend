@@ -4,6 +4,7 @@ import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import * as superstruct from "superstruct";
 
 import { parseEtherLike } from "./format";
+import { isBridgedUsdc } from "./sdk";
 
 import unknownLogo from "assets/icons/question-circle.svg";
 import { ReactComponent as unknownLogoSvg } from "assets/icons/question-circle.svg";
@@ -27,6 +28,8 @@ import {
   TokenInfo,
   TokenInfoList,
   orderedTokenLogos,
+  interchangeableTokensMap,
+  similarTokensMap,
 } from "../constants/tokens";
 import { ExternalLPTokenList, externalLPsForStaking } from "../constants/pools";
 
@@ -44,6 +47,8 @@ export {
   chainInfoList,
   chainInfoTable,
   ChainId,
+  interchangeableTokensMap,
+  similarTokensMap,
 };
 
 /* Colors and Media Queries section */
@@ -65,23 +70,6 @@ export const defaultBlockPollingInterval =
 export const hubPoolChainId = Number(
   process.env.REACT_APP_HUBPOOL_CHAINID || 1
 );
-
-export const bridgedUSDCSymbolsMap = {
-  [ChainId.ARBITRUM]: "USDC.e",
-  [ChainId.OPTIMISM]: "USDC.e",
-  [ChainId.POLYGON]: "USDC.e",
-  [ChainId.ZK_SYNC]: "USDC.e",
-  [ChainId.BASE]: "USDbC",
-};
-export const bridgedUSDCSymbols = Array.from(
-  new Set(Object.values(bridgedUSDCSymbolsMap)).values()
-);
-export const chainsWithNativeUSDC = Object.keys(bridgedUSDCSymbolsMap).map(
-  Number
-);
-export function isBridgedUsdc(symbol: string) {
-  return bridgedUSDCSymbols.includes(symbol);
-}
 
 export const tokenList = [
   ...Object.entries(orderedTokenLogos).flatMap(([symbol, logoURI]) => {
@@ -127,8 +115,16 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
     ctaBody: (chainId: number) =>
       `Bridge to ${getChainInfo(chainId).name} and earn on every transaction.`,
     claimableTooltipBody:
-      "OP rewards earned during the month are made claimable after the ~15th of the following month",
-    enabledChains: [ChainId.OPTIMISM, ChainId.MODE, ChainId.BASE],
+      "OP rewards earned during the month can be claimed at the end of the following month.",
+    enabledChains: [
+      ChainId.ZORA,
+      ChainId.REDSTONE,
+      ChainId.OPTIMISM,
+      ChainId.MODE,
+      ChainId.BASE,
+      ChainId.WORLD_CHAIN,
+      ChainId.LISK,
+    ],
   },
   "arb-rebates": {
     programName: "Arbitrum Rewards Program",
@@ -139,8 +135,8 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
     highestPct: 0.95,
     ctaBody: () => "Bridge to Arbitrum and earn on every transaction.",
     claimableTooltipBody:
-      "Arbitrum rewards earned during the month are made claimable after the ~15th of the following month",
-    enabledChains: [ChainId.ARBITRUM],
+      "Arbitrum rewards earned during the month can be claimed at the end of the following month.",
+    enabledChains: [],
   },
 };
 
@@ -389,8 +385,6 @@ export function stringValueInArray(value: string, arr: string[]) {
 }
 export const maxRelayFee = 0.25; // 25%
 export const minRelayFee = 0.0001; // 0.01%
-// Chains where Blocknative Notify can be used. See https://docs.blocknative.com/notify#initialization
-export const supportedNotifyChainIds = [1, 3, 4, 5, 42, 56, 100, 137, 250];
 
 export const mockServerlessAPI =
   process.env.REACT_APP_MOCK_SERVERLESS === "true";

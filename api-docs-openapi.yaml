@@ -18,7 +18,7 @@ paths:
       summary: Retrieve suggested fee quote for a deposit.
       description: >
         Returns suggested fees based `inputToken`+`outputToken`, `originChainId`, `destinationChainId`, and
-        `amount`.
+        `amount`. Also includes data used to compute the fees.
       parameters:
         - name: inputToken
           in: query
@@ -150,7 +150,7 @@ paths:
             type: integer
       responses:
         200:
-          description: Suggested fees for the transaction
+          description: Suggested fees for the transaction and supporting data
           content:
             application/json:
               schema:
@@ -168,6 +168,14 @@ paths:
                   "isAmountTooLow": false,
                   "quoteBlock": "19237525",
                   "spokePoolAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+                  "expectedFillTimeSec": "4",
+                  "limits": {
+                      "minDeposit": "7799819",
+                      "maxDeposit": "22287428516241",
+                      "maxDepositInstant": "201958902363",
+                      "maxDepositShortDelay": "2045367713809",
+                      "recommendedDepositInstant": "201958902363"
+                    }
                 }
         "400":
           description: Invalid input
@@ -517,6 +525,13 @@ components:
             to "0", relayer exclusivity will be disabled. This value is returned in cases
             where using an exclusive relayer is not reccomended.
           example: "10"
+        expectedFillTimeSec:
+          type: string
+          description: >
+            The expected time (in seconds) for a fill to be made. Represents 75th percentile of the 7-day rolling average of times (updated daily). Times are dynamic by origin/destination token/chain for a given amount.
+          example: "4"
+        limits:
+          $ref: '#/components/schemas/TransferLimits'
     TransferLimits:
       type: object
       properties:

@@ -1,6 +1,6 @@
 import { CHAIN_IDs, PUBLIC_NETWORKS } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
-const { getDeployedAddress } = sdkUtils;
+const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
 import { ChainConfig } from "../types";
 
@@ -11,22 +11,13 @@ export default {
   ...chainInfoBase,
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
-  spokePool: getDeployedAddress("SpokePool", chainId),
+  spokePool: {
+    address: getDeployedAddress("SpokePool", chainId),
+    blockNumber: getDeployedBlockNumber("SpokePool", chainId),
+  },
   chainId,
   publicRpcUrl: "https://mainnet.base.org",
   tokens: ["USDC", "WETH", "ETH", "DAI", "BAL", "POOL"],
   enableCCTP: true,
   blockTimeSeconds: 2,
-  swapTokens: [
-    {
-      swapInputTokenSymbol: "USDbC",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC",
-    },
-    {
-      swapInputTokenSymbol: "USDbC",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC.e",
-    },
-  ],
 } as ChainConfig;

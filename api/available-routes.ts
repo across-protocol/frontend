@@ -1,5 +1,5 @@
 import { VercelResponse } from "@vercel/node";
-import { object, assert, Infer, optional } from "superstruct";
+import { object, assert, Infer, optional, string } from "superstruct";
 import {
   getLogger,
   applyMapFilter,
@@ -17,6 +17,8 @@ const AvailableRoutesQueryParamsSchema = object({
   destinationToken: optional(validAddress()),
   destinationChainId: optional(positiveIntStr()),
   originChainId: optional(positiveIntStr()),
+  originTokenSymbol: optional(string()),
+  destinationTokenSymbol: optional(string()),
 });
 
 type AvailableRoutesQueryParams = Infer<
@@ -36,8 +38,14 @@ const handler = async (
   try {
     assert(query, AvailableRoutesQueryParamsSchema);
 
-    const { originToken, destinationToken, originChainId, destinationChainId } =
-      query;
+    const {
+      originToken,
+      destinationToken,
+      originChainId,
+      destinationChainId,
+      originTokenSymbol,
+      destinationTokenSymbol,
+    } = query;
 
     const enabledRoutes = applyMapFilter(
       ENABLED_ROUTES.routes,
@@ -49,6 +57,7 @@ const handler = async (
         destinationToken: string;
         fromTokenSymbol: string;
         toTokenSymbol: string;
+        isNative: boolean;
       }) =>
         ![route.originChainId, route.destinationChainId].some((chainId) =>
           DISABLED_CHAINS_FOR_AVAILABLE_ROUTES.includes(String(chainId))
@@ -63,7 +72,13 @@ const handler = async (
           destinationChainId === String(route.destinationChainId)) &&
         (!destinationToken ||
           destinationToken.toLowerCase() ===
-            route.destinationToken.toLowerCase()),
+            route.destinationToken.toLowerCase()) &&
+        (!originTokenSymbol ||
+          originTokenSymbol.toUpperCase() ===
+            route.fromTokenSymbol.toUpperCase()) &&
+        (!destinationTokenSymbol ||
+          destinationTokenSymbol.toUpperCase() ===
+            route.toTokenSymbol.toUpperCase()),
       // Create a mapping of enabled routes to a route with the destination token resolved.
       (route) => ({
         originChainId: route.fromChain,
@@ -72,6 +87,7 @@ const handler = async (
         fromTokenSymbol: route.fromTokenSymbol,
         toTokenSymbol: route.toTokenSymbol,
         destinationToken: route.toTokenAddress,
+        isNative: route.isNative,
       })
     ).map((route) => ({
       originChainId: route.originChainId,
@@ -80,6 +96,7 @@ const handler = async (
       destinationToken: route.destinationToken,
       originTokenSymbol: route.fromTokenSymbol,
       destinationTokenSymbol: route.toTokenSymbol,
+      isNative: route.isNative,
     }));
 
     // Two different explanations for how `stale-while-revalidate` works:

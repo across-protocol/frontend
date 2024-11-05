@@ -1,7 +1,7 @@
 import * as sdk from "@across-protocol/sdk";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { type, assert, Infer, optional, string } from "superstruct";
+import { type, assert, Infer, optional, string, enums } from "superstruct";
 import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   DEFAULT_QUOTE_BLOCK_BUFFER,
@@ -9,9 +9,7 @@ import {
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
-  InputError,
   getProvider,
-  getRelayerFeeDetails,
   getCachedTokenPrice,
   handleErrorCondition,
   parsableBigNumberString,
@@ -21,15 +19,27 @@ import {
   HUB_POOL_CHAIN_ID,
   ENABLED_ROUTES,
   getSpokePoolAddress,
-  getCachedTokenBalance,
   getDefaultRelayerAddress,
   getHubPool,
   callViaMulticall3,
   validateChainAndTokenParams,
   getCachedLimits,
+  getCachedLatestBlock,
 } from "./_utils";
-import { resolveTiming } from "./_timings";
+import { selectExclusiveRelayer } from "./_exclusivity";
+import {
+  resolveTiming,
+  resolveExclusivityTiming,
+  resolveRebalanceTiming,
+} from "./_timings";
 import { parseUnits } from "ethers/lib/utils";
+import {
+  InvalidParamError,
+  AmountTooHighError,
+  AmountTooLowError,
+} from "./_errors";
+
+const { BigNumber } = ethers;
 
 const SuggestedFeesQueryParamsSchema = type({
   amount: parsableBigNumberString(),
@@ -43,6 +53,7 @@ const SuggestedFeesQueryParamsSchema = type({
   message: optional(string()),
   recipient: optional(validAddress()),
   relayer: optional(validAddress()),
+  depositMethod: optional(enums(["depositV3", "depositExclusive"])),
 });
 
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
@@ -60,7 +71,9 @@ const handler = async (
   try {
     const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = process.env;
 
-    const provider = getProvider(HUB_POOL_CHAIN_ID);
+    const provider = getProvider(HUB_POOL_CHAIN_ID, {
+      useSpeedProvider: true,
+    });
     const hubPool = getHubPool(provider);
 
     assert(query, SuggestedFeesQueryParamsSchema);
@@ -72,6 +85,7 @@ const handler = async (
       recipient,
       relayer,
       message,
+      depositMethod = "depositV3",
     } = query;
 
     const {
@@ -82,47 +96,15 @@ const handler = async (
       resolvedOriginChainId: computedOriginChainId,
     } = validateChainAndTokenParams(query);
 
-    relayer ??= getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
-    recipient ??= DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+    relayer = relayer
+      ? ethers.utils.getAddress(relayer)
+      : getDefaultRelayerAddress(destinationChainId, inputToken.symbol);
+    recipient = recipient
+      ? ethers.utils.getAddress(recipient)
+      : DEFAULT_SIMULATED_RECIPIENT_ADDRESS;
+    const depositWithMessage = sdk.utils.isDefined(message);
 
-    if (sdk.utils.isDefined(message) && !sdk.utils.isMessageEmpty(message)) {
-      if (!ethers.utils.isHexString(message)) {
-        throw new InputError("Message must be a hex string");
-      }
-      if (message.length % 2 !== 0) {
-        // Our message encoding is a hex string, so we need to check that the length is even.
-        throw new InputError("Message must be an even hex string");
-      }
-      const isRecipientAContract = await sdk.utils.isContractDeployedToAddress(
-        recipient,
-        getProvider(destinationChainId)
-      );
-      if (!isRecipientAContract) {
-        throw new InputError(
-          "Recipient must be a contract when a message is provided"
-        );
-      } else {
-        // If we're in this case, it's likely that we're going to have to simulate the execution of
-        // a complex message handling from the specified relayer to the specified recipient by calling
-        // the arbitrary function call `handleAcrossMessage` at the recipient. So that we can discern
-        // the difference between an OUT_OF_FUNDS error in either the transfer or through the execution
-        // of the `handleAcrossMessage` we will check that the balance of the relayer is sufficient to
-        // support this deposit.
-        const balanceOfToken = await getCachedTokenBalance(
-          destinationChainId,
-          relayer,
-          outputToken.address
-        );
-        if (balanceOfToken.lt(amountInput)) {
-          throw new InputError(
-            `Relayer Address (${relayer}) doesn't have enough funds to support this deposit;` +
-              ` for help, please reach out to https://discord.across.to`
-          );
-        }
-      }
-    }
-
-    const latestBlock = await provider.getBlock("latest");
+    const latestBlock = await getCachedLatestBlock(HUB_POOL_CHAIN_ID);
 
     // The actual `quoteTimestamp` will be derived from the `quoteBlockNumber` below. If the caller supplies a timestamp,
     // we use the method `BlockFinder.getBlockForTimestamp` to find the block number for that timestamp. If the caller does
@@ -157,7 +139,10 @@ const handler = async (
     else {
       // Don't attempt to provide quotes for future timestamps.
       if (parsedTimestamp > latestBlock.timestamp) {
-        throw new InputError("Invalid quote timestamp");
+        throw new InvalidParamError({
+          message: "Provided timestamp can not be in the future",
+          param: "timestamp",
+        });
       }
 
       const blockFinder = new sdk.utils.BlockFinder(provider, [latestBlock]);
@@ -166,13 +151,12 @@ const handler = async (
       quoteBlockNumber = blockNumberForTimestamp;
     }
 
-    const amount = ethers.BigNumber.from(amountInput);
+    const amount = BigNumber.from(amountInput);
 
     const configStoreClient = new sdk.contracts.acrossConfigStore.Client(
       ENABLED_ROUTES.acrossConfigStoreAddress,
       provider
     );
-    const baseCurrency = destinationChainId === 137 ? "matic" : "eth";
 
     // Aggregate multiple calls into a single multicall to decrease
     // opportunities for RPC calls to be delayed.
@@ -199,33 +183,41 @@ const handler = async (
     ];
 
     const [
-      [currentUt, nextUt, quoteTimestamp, rawL1TokenConfig],
-      tokenPrice,
+      [currentUt, nextUt, _quoteTimestamp, rawL1TokenConfig],
       tokenPriceUsd,
       limits,
     ] = await Promise.all([
       callViaMulticall3(provider, multiCalls, { blockTag: quoteBlockNumber }),
-      getCachedTokenPrice(l1Token.address, baseCurrency),
       getCachedTokenPrice(l1Token.address, "usd"),
       getCachedLimits(
         inputToken.address,
         outputToken.address,
         computedOriginChainId,
-        destinationChainId
+        destinationChainId,
+        // Always pass amount since we get relayerFeeDetails (including gross fee amounts) from limits.
+        amountInput,
+        // Only pass in the following parameters if message is defined, otherwise leave them undefined so we are more
+        // likely to hit the /limits cache using the above parameters that are not specific to this deposit.
+        depositWithMessage ? recipient : undefined,
+        depositWithMessage ? relayer : undefined,
+        depositWithMessage ? message : undefined
       ),
     ]);
+    const { maxDeposit, maxDepositInstant, minDeposit, relayerFeeDetails } =
+      limits;
+    const quoteTimestamp = parseInt(_quoteTimestamp.toString());
 
     const amountInUsd = amount
       .mul(parseUnits(tokenPriceUsd.toString(), 18))
       .div(parseUnits("1", inputToken.decimals));
 
-    if (amount.gt(limits.maxDeposit)) {
-      throw new InputError(
-        `Amount exceeds max. deposit limit: ${ethers.utils.formatUnits(
-          limits.maxDeposit,
+    if (amount.gt(maxDeposit)) {
+      throw new AmountTooHighError({
+        message: `Amount exceeds max. deposit limit: ${ethers.utils.formatUnits(
+          maxDeposit,
           inputToken.decimals
-        )} ${inputToken.symbol}`
-      );
+        )} ${inputToken.symbol}`,
+      });
     }
 
     const parsedL1TokenConfig =
@@ -242,34 +234,49 @@ const handler = async (
       nextUt
     );
     const lpFeeTotal = amount.mul(lpFeePct).div(ethers.constants.WeiPerEther);
-    const relayerFeeDetails = await getRelayerFeeDetails(
-      inputToken.address,
-      outputToken.address,
-      amount,
-      computedOriginChainId,
-      destinationChainId,
-      recipient,
-      tokenPrice,
-      message,
-      relayer
-    );
+
+    const isAmountTooLow = BigNumber.from(amountInput).lt(minDeposit);
 
     const skipAmountLimitEnabled = skipAmountLimit === "true";
-
-    if (!skipAmountLimitEnabled && relayerFeeDetails.isAmountTooLow)
-      throw new InputError("Sent amount is too low relative to fees");
+    if (!skipAmountLimitEnabled && isAmountTooLow) {
+      throw new AmountTooLowError({
+        message: `Sent amount is too low relative to fees`,
+      });
+    }
 
     // Across V3's new `deposit` function requires now a total fee that includes the LP fee
-    const totalRelayFee = ethers.BigNumber.from(
-      relayerFeeDetails.relayFeeTotal
-    ).add(lpFeeTotal);
-    const totalRelayFeePct = ethers.BigNumber.from(
+    const totalRelayFee = BigNumber.from(relayerFeeDetails.relayFeeTotal).add(
+      lpFeeTotal
+    );
+    const totalRelayFeePct = BigNumber.from(
       relayerFeeDetails.relayFeePercent
     ).add(lpFeePct);
 
+    let exclusiveRelayer = sdk.constants.ZERO_ADDRESS;
+    let exclusivityDeadline = 0;
+    if (depositMethod === "depositExclusive") {
+      ({ exclusiveRelayer, exclusivityPeriod: exclusivityDeadline } =
+        await selectExclusiveRelayer(
+          computedOriginChainId,
+          destinationChainId,
+          outputToken,
+          amount.sub(totalRelayFee),
+          amountInUsd,
+          BigNumber.from(relayerFeeDetails.capitalFeePercent),
+          amount.gte(maxDepositInstant)
+            ? resolveRebalanceTiming(String(destinationChainId))
+            : resolveExclusivityTiming(
+                String(computedOriginChainId),
+                String(destinationChainId),
+                inputToken.symbol,
+                amountInUsd
+              )
+        ));
+    }
+
     const responseJson = {
-      estimatedFillTimeSec: amount.gte(limits.maxDepositInstant)
-        ? 15 * 60 // hardcoded 15 minutes for large deposits
+      estimatedFillTimeSec: amount.gte(maxDepositInstant)
+        ? resolveRebalanceTiming(String(destinationChainId))
         : resolveTiming(
             String(computedOriginChainId),
             String(destinationChainId),
@@ -286,11 +293,12 @@ const handler = async (
       timestamp: isNaN(parsedTimestamp)
         ? quoteTimestamp.toString()
         : parsedTimestamp.toString(),
-      isAmountTooLow: relayerFeeDetails.isAmountTooLow,
+      isAmountTooLow,
       quoteBlock: quoteBlockNumber.toString(),
-      exclusiveRelayer: ethers.constants.AddressZero, // Exclusivity is currently disabled.
-      exclusivityDeadline: "0", // Exclusivity is currently disabled.
+      exclusiveRelayer,
+      exclusivityDeadline,
       spokePoolAddress: getSpokePoolAddress(Number(computedOriginChainId)),
+      destinationSpokePoolAddress: getSpokePoolAddress(destinationChainId),
       // Note: v3's new fee structure. Below are the correct values for the new fee structure. The above `*Pct` and `*Total`
       // values are for backwards compatibility which will be removed in the future.
       totalRelayFee: {
@@ -310,7 +318,13 @@ const handler = async (
         pct: lpFeePct.toString(),
         total: lpFeeTotal.toString(),
       },
-      limits,
+      limits: {
+        minDeposit,
+        maxDeposit,
+        maxDepositInstant,
+        maxDepositShortDelay: limits.maxDepositShortDelay,
+        recommendedDepositInstant: limits.recommendedDepositInstant,
+      },
     };
 
     logger.debug({

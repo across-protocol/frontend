@@ -80,6 +80,11 @@ import polygonAmoyGrayscaleLogo from "assets/chain-logos/polygon-amoy-grayscale.
 import { ReactComponent as polygonAmoyLogoSvg } from "assets/chain-logos/polygon-amoy.svg";
 import { ReactComponent as polygonAmoyGrayscaleLogoSvg } from "assets/chain-logos/polygon-amoy-grayscale.svg";
 
+import redstoneLogo from "assets/chain-logos/redstone.svg";
+import redstoneGrayscaleLogo from "assets/chain-logos/redstone-grayscale.svg";
+import { ReactComponent as redstoneLogoSvg } from "assets/chain-logos/redstone.svg";
+import { ReactComponent as redstoneGrayscaleLogoSvg } from "assets/chain-logos/redstone-grayscale.svg";
+
 import scrollLogo from "assets/chain-logos/scroll.svg";
 import scrollGrayscaleLogo from "assets/chain-logos/scroll-grayscale.svg";
 import { ReactComponent as scrollLogoSvg } from "assets/chain-logos/scroll.svg";
@@ -90,10 +95,20 @@ import sepoliaGrayscaleLogo from "assets/chain-logos/sepolia-grayscale.svg";
 import { ReactComponent as sepoliaLogoSvg } from "assets/chain-logos/sepolia.svg";
 import { ReactComponent as sepoliaGrayscaleLogoSvg } from "assets/chain-logos/sepolia-grayscale.svg";
 
+import worldChainLogo from "assets/chain-logos/world-chain.svg";
+import worldChainGrayscaleLogo from "assets/chain-logos/world-chain-grayscale.svg";
+import { ReactComponent as worldChainLogoSvg } from "assets/chain-logos/world-chain.svg";
+import { ReactComponent as worldChainGrayscaleLogoSvg } from "assets/chain-logos/world-chain-grayscale.svg";
+
 import zkSyncLogo from "assets/chain-logos/zk-sync.svg";
 import zkSyncGrayscaleLogo from "assets/chain-logos/zk-sync-grayscale.svg";
 import { ReactComponent as zkSyncLogoSvg } from "assets/chain-logos/zk-sync.svg";
 import { ReactComponent as zkSyncGrayscaleLogoSvg } from "assets/chain-logos/zk-sync-grayscale.svg";
+
+import zoraLogo from "assets/chain-logos/zora.svg";
+import zoraGrayscaleLogo from "assets/chain-logos/zora-grayscale.svg";
+import { ReactComponent as zoraLogoSvg } from "assets/chain-logos/zora.svg";
+import { ReactComponent as zoraGrayscaleLogoSvg } from "assets/chain-logos/zora-grayscale.svg";
 
 export const arbitrum = {
   name: "Arbitrum",
@@ -364,6 +379,23 @@ export const polygonAmoy = {
   pollingInterval: 15000,
 };
 
+export const redstone = {
+  name: "Redstone",
+  fullName: "Redstone",
+  chainId: 690,
+  logoURI: redstoneLogo,
+  grayscaleLogoURI: redstoneGrayscaleLogo,
+  logoSvg: redstoneLogoSvg,
+  grayscaleLogoSvg: redstoneGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.redstonechain.com",
+  explorerUrl: "https://explorer.redstone.xyz",
+  constructExplorerLink: (txHash: string) =>
+    `${redstone.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_690_PROVIDER_URL,
+  pollingInterval: 2000,
+};
+
 export const scroll = {
   name: "Scroll",
   fullName: "Scroll",
@@ -398,6 +430,23 @@ export const sepolia = {
   pollingInterval: 15000,
 };
 
+export const worldChain = {
+  name: "World Chain",
+  fullName: "World Chain",
+  chainId: 480,
+  logoURI: worldChainLogo,
+  grayscaleLogoURI: worldChainGrayscaleLogo,
+  logoSvg: worldChainLogoSvg,
+  grayscaleLogoSvg: worldChainGrayscaleLogoSvg,
+  rpcUrl: "https://worldchain-mainnet.g.alchemy.com/public",
+  explorerUrl: "https://worldchain-mainnet-explorer.alchemy.com",
+  constructExplorerLink: (txHash: string) =>
+    `${worldChain.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_480_PROVIDER_URL,
+  pollingInterval: 2000,
+};
+
 export const zkSync = {
   name: "zkSync",
   fullName: "zkSync Era",
@@ -412,6 +461,22 @@ export const zkSync = {
     `${zkSync.explorerUrl}/tx/${txHash}`,
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_324_PROVIDER_URL,
+  pollingInterval: 2000,
+};
+
+export const zora = {
+  name: "Zora",
+  fullName: "Zora",
+  chainId: 7777777,
+  logoURI: zoraLogo,
+  grayscaleLogoURI: zoraGrayscaleLogo,
+  logoSvg: zoraLogoSvg,
+  grayscaleLogoSvg: zoraGrayscaleLogoSvg,
+  rpcUrl: "https://rpc.zora.energy",
+  explorerUrl: "https://zorascan.xyz",
+  constructExplorerLink: (txHash: string) => `${zora.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_7777777_PROVIDER_URL,
   pollingInterval: 2000,
 };
 
@@ -432,9 +497,12 @@ export const chainConfigs = [
   optimismSepolia,
   polygon,
   polygonAmoy,
+  redstone,
   scroll,
   sepolia,
+  worldChain,
   zkSync,
+  zora,
 ].reduce(
   (acc, chain) => {
     acc[chain.chainId] = chain;

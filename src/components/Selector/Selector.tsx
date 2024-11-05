@@ -19,7 +19,7 @@ export type SelectorElementType<Value> = {
 };
 
 export type SelectorPropType<Value> = {
-  title: string;
+  title: string | JSX.Element;
   elements: SelectorElementType<Value>[];
   selectedValue: Value;
   setSelectedValue: (ind: Value) => void;
@@ -70,9 +70,13 @@ const Selector = <ElementValue,>({
         bottomYOffset={isMobile ? 112 : undefined}
         exitOnOutsideClick
         title={
-          <Text size="md" color="grey-400">
-            {title}
-          </Text>
+          typeof title === "string" ? (
+            <Text size="md" color="grey-400">
+              {title}
+            </Text>
+          ) : (
+            title
+          )
         }
         padding="thin"
         data-cy={`${dataCy}-modal`}

@@ -28,6 +28,7 @@ export async function suggestedFeesApiCall(
       recipient: recipientAddress,
       amount: amount.toString(),
       skipAmountLimit: true,
+      depositMethod: "depositExclusive",
     },
   });
   const result = response.data;
@@ -56,6 +57,8 @@ export async function suggestedFeesApiCall(
   );
 
   const estimatedFillTimeSec = result["estimatedFillTimeSec"];
+  const exclusiveRelayer = result["exclusiveRelayer"];
+  const exclusivityDeadline = result["exclusivityDeadline"];
 
   return {
     totalRelayFee: {
@@ -84,5 +87,7 @@ export async function suggestedFeesApiCall(
       minDeposit,
     },
     estimatedFillTimeSec,
+    exclusiveRelayer,
+    exclusivityDeadline,
   };
 }

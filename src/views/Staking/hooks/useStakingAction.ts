@@ -1,6 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
 import { BigNumber, Signer } from "ethers";
-import { API } from "bnc-notify";
 
 import { useConnection, useStakingPool } from "hooks";
 import {
@@ -18,7 +17,7 @@ export type StakingActionFunctionType = (
 ) => Promise<void>;
 
 export function useStakeAction(tokenAddress?: string) {
-  const { signer, notify } = useConnection();
+  const { signer } = useConnection();
   const stakingPoolQuery = useStakingPool(tokenAddress);
 
   const stakeActionFn: StakingActionFunctionType = async (
@@ -30,8 +29,7 @@ export function useStakeAction(tokenAddress?: string) {
         lpTokenAddress,
         signer,
         "stake",
-        requiresApproval,
-        notify
+        requiresApproval
       )(args.amount);
     }
   };
@@ -42,7 +40,7 @@ export function useStakeAction(tokenAddress?: string) {
 }
 
 export function useUnstakeAction(tokenAddress?: string) {
-  const { signer, notify } = useConnection();
+  const { signer } = useConnection();
   const stakingPoolQuery = useStakingPool(tokenAddress);
 
   const unstakeActionFn: StakingActionFunctionType = async (
@@ -54,8 +52,7 @@ export function useUnstakeAction(tokenAddress?: string) {
         lpTokenAddress,
         signer,
         "unstake",
-        requiresApproval,
-        notify
+        requiresApproval
       )(args.amount);
     }
   };
@@ -71,15 +68,13 @@ export function useUnstakeAction(tokenAddress?: string) {
  * @param signer A valid ethers signer
  * @param action The action that will build this function. Either 'stake' or 'unstake'
  * @param requiresApproval Whether or not this function will first attempt have the user set an allowance with the AcceleratingDistributor contract
- * @param notify A BNC notification API that will be used to visually notify the user of a successful/rejected transaction
  * @returns A closure function that is designed to stake or unstake a given LP token with the AcceleratingDistributor contract
  */
 const performStakingActionBuilderFn = (
   lpTokenAddress: string,
   signer: Signer,
   action: "stake" | "unstake",
-  requiresApproval: boolean,
-  notify: API
+  requiresApproval: boolean
 ) => {
   // The purpose of this variable is to keep track of whether or not
   // the closure needs to request approval from the ERC20 token to be
@@ -111,7 +106,7 @@ const performStakingActionBuilderFn = (
           MAX_APPROVAL_AMOUNT
         );
         // Wait for the transaction to return successful
-        await waitOnTransaction(hubPoolChainId, approvalResult, notify);
+        await waitOnTransaction(hubPoolChainId, approvalResult);
         innerApprovalRequired = false;
       } catch (_e) {
         // If this function fails to resolve (or the user rejects), we don't proceed.
@@ -125,7 +120,7 @@ const performStakingActionBuilderFn = (
     // wait until the tx has been resolved
     try {
       const result = await callingFn(lpTokenAddress, amountAsBigNumber);
-      await waitOnTransaction(hubPoolChainId, result, notify, 5000, true);
+      await waitOnTransaction(hubPoolChainId, result, true);
     } catch (_e) {
       // We currently don't handle the error case other than to exit gracefully.
     }

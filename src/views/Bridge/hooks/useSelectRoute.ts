@@ -5,27 +5,35 @@ import {
   trackToChainChanged,
   trackTokenChanged,
   trackQuickSwap,
+  similarTokensMap,
 } from "utils";
-import { useAmplitude } from "hooks";
+import { useAmplitude, useConnection } from "hooks";
 
 import {
-  getRouteFromQueryParams,
   findNextBestRoute,
   SelectedRoute,
-  similarTokenPairs,
   getOutputTokenSymbol,
   PriorityFilterKey,
+  getInitialRoute,
 } from "../utils";
 
-const initialRoute = getRouteFromQueryParams();
+const initialRoute = getInitialRoute();
 
 export function useSelectRoute() {
-  const [selectedRoute, setSelectedRoute] = useState<SelectedRoute>(
-    getRouteFromQueryParams()
-  );
+  const { chainId: walletChainId, isConnected } = useConnection();
+  const [selectedRoute, setSelectedRoute] =
+    useState<SelectedRoute>(getInitialRoute());
   const [isDefaultRouteTracked, setIsDefaultRouteTracked] = useState(false);
 
   const { addToAmpliQueue } = useAmplitude();
+
+  // set default fromChain when user first connects
+  useEffect(() => {
+    if (isConnected) {
+      setSelectedRoute(getInitialRoute({ fromChain: walletChainId }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected]);
 
   useEffect(() => {
     if (isDefaultRouteTracked) {
@@ -123,7 +131,7 @@ export function useSelectRoute() {
         toChain: selectedRoute.toChain,
       };
       const similarTokenSymbols =
-        similarTokenPairs[
+        similarTokensMap[
           isSwap ? selectedRoute.swapTokenSymbol : selectedRoute.fromTokenSymbol
         ] || [];
       const findNextBestRouteBySimilarToken = (

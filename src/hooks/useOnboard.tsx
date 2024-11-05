@@ -10,7 +10,6 @@ import {
   UnsupportedChainIdError,
   isSupportedChainId,
   insideStorybookRuntime,
-  hubPoolChainId,
   trackIfWalletSelected,
   trackConnectWalletButtonClicked,
   trackDisconnectWalletButtonClicked,
@@ -31,7 +30,6 @@ import { Account } from "@web3-onboard/core/dist/types";
 import { useConnectWallet, useSetChain } from "@web3-onboard/react";
 import { Chain } from "@web3-onboard/common";
 import { ethers } from "ethers";
-import Notify, { API as NotifyAPI, ConfigOptions } from "bnc-notify";
 import {
   ampli,
   ConnectWalletButtonClickedProperties,
@@ -72,19 +70,11 @@ type OnboardContextValue = {
   isConnected: boolean;
   signer: ethers.providers.JsonRpcSigner | undefined;
   provider: ethers.providers.Web3Provider | null;
-  notify: NotifyAPI;
-  setNotifyConfig: (opts: ConfigOptions) => void;
   account: Account | null;
   chainId: ChainId;
   error?: Error;
   didAttemptAutoSelect: boolean;
 };
-
-const notify = Notify({
-  dappId: process.env.REACT_APP_PUBLIC_ONBOARD_API_KEY,
-  networkId: hubPoolChainId,
-  desktopPosition: "topRight",
-});
 
 export function useOnboardManager() {
   const [onboard, setOnboard] = useState<OnboardAPI | null>(null);
@@ -250,8 +240,6 @@ export function useOnboardManager() {
     isConnected: !!connectedChain,
     signer,
     provider,
-    notify,
-    setNotifyConfig: (config: ConfigOptions) => notify.config(config),
     account,
     chainId: (Number(wallet?.chains[0].id) as ChainId) || 0,
     error,

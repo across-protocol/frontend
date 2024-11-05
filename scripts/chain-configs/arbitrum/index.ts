@@ -1,6 +1,6 @@
 import { CHAIN_IDs, PUBLIC_NETWORKS } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
-const { getDeployedAddress } = sdkUtils;
+const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
 import { ChainConfig } from "../types";
 
@@ -13,7 +13,10 @@ export default {
   fullName: "Arbitrum One",
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
-  spokePool: getDeployedAddress("SpokePool", chainId),
+  spokePool: {
+    address: getDeployedAddress("SpokePool", chainId),
+    blockNumber: getDeployedBlockNumber("SpokePool", chainId),
+  },
   publicRpcUrl: "https://arb1.arbitrum.io/rpc",
   chainId,
   tokens: [
@@ -30,21 +33,4 @@ export default {
   ],
   enableCCTP: true,
   blockTimeSeconds: 1,
-  swapTokens: [
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC",
-    },
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC.e",
-    },
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDbC",
-    },
-  ],
 } as ChainConfig;

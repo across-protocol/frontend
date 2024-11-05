@@ -100,6 +100,8 @@ export function useTransferQuote(
           amountToBridgeAfterSwap: undefined,
           initialAmount: undefined,
           recipient: undefined,
+          exclusiveRelayer: undefined,
+          exclusivityDeadline: undefined,
         };
       }
 
@@ -140,6 +142,8 @@ export function useTransferQuote(
         amountToBridgeAfterSwap,
         initialAmount: amount,
         recipient: toAddress,
+        exclusiveRelayer: feesQuery.fees.exclusiveRelayer,
+        exclusivityDeadline: feesQuery.fees.exclusivityDeadline,
       };
     },
   });

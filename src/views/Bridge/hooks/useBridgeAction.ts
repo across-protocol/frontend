@@ -3,12 +3,13 @@ import {
   TransferQuoteReceivedProperties,
   ampli,
 } from "ampli";
-import { BigNumber, providers } from "ethers";
+import { BigNumber, constants, providers } from "ethers";
 import {
   useConnection,
   useApprove,
   useIsWrongNetwork,
   useAmplitude,
+  useQueryParams,
 } from "hooks";
 import { cloneDeep } from "lodash";
 import { useMutation } from "@tanstack/react-query";
@@ -54,11 +55,16 @@ export function useBridgeAction(
 ) {
   const { isConnected, signer, account } = useConnection();
   const history = useHistory();
-  const { referrer } = useReferrer();
+  const { referrer, integratorId } = useReferrer();
+  const params = useQueryParams();
 
-  const { isWrongNetworkHandler } = useIsWrongNetwork(selectedRoute.fromChain);
+  const { isWrongNetworkHandler, isWrongNetwork } = useIsWrongNetwork(
+    selectedRoute.fromChain
+  );
   const approveHandler = useApprove(selectedRoute.fromChain);
   const { addToAmpliQueue } = useAmplitude();
+
+  const existingIntegrator = params["integrator"];
 
   const buttonActionHandler = useMutation({
     mutationFn: async () => {
@@ -67,7 +73,7 @@ export function useBridgeAction(
       );
       const frozenInitialQuoteTime = usedTransferQuote?.initialQuoteTime;
       const frozenDepositArgs = cloneDeep(
-        getDepositArgs(selectedRoute, usedTransferQuote, referrer)
+        getDepositArgs(selectedRoute, usedTransferQuote, referrer, integratorId)
       );
       const frozenSwapQuote = cloneDeep(usedTransferQuote?.quotedSwap);
       const frozenFeeQuote = cloneDeep(usedTransferQuote?.quotedFees);
@@ -157,14 +163,21 @@ export function useBridgeAction(
             swapQuote: frozenSwapQuote!,
             swapTokenAddress: frozenRoute.swapTokenAddress,
             swapTokenAmount: frozenDepositArgs.initialAmount,
+            // Current `SwapAndBridge` contract does not support relative exclusivity.
+            // Disabling until we update the contract.
+            exclusiveRelayer: constants.AddressZero,
+            exclusivityDeadline: 0,
           },
           networkMismatchHandler
         );
       } else {
+        const isExclusive =
+          frozenDepositArgs.exclusivityDeadline > 0 &&
+          frozenDepositArgs.exclusiveRelayer !== constants.AddressZero;
         const { spokePool, shouldUseSpokePoolVerifier, spokePoolVerifier } =
           await getSpokePoolAndVerifier(frozenRoute);
         tx =
-          shouldUseSpokePoolVerifier && spokePoolVerifier
+          shouldUseSpokePoolVerifier && !isExclusive && spokePoolVerifier
             ? await sendSpokePoolVerifierDepositTx(
                 signer,
                 frozenDepositArgs,
@@ -222,7 +235,10 @@ export function useBridgeAction(
           : frozenRoute.fromTokenSymbol,
         outputTokenSymbol: frozenRoute.toTokenSymbol,
         referrer,
-      }).toString();
+      });
+      if (existingIntegrator) {
+        statusPageSearchParams.set("integrator", existingIntegrator);
+      }
       history.push(
         `/bridge/${tx.hash}?${statusPageSearchParams}`,
         // This state is stored in session storage and therefore persist
@@ -236,7 +252,6 @@ export function useBridgeAction(
     !usedTransferQuote ||
     (isConnected && dataLoading) ||
     buttonActionHandler.isLoading;
-
   return {
     isConnected,
     buttonActionHandler: buttonActionHandler.mutate,
@@ -246,6 +261,7 @@ export function useBridgeAction(
       isConnected,
       isDataLoading: dataLoading,
       isMutating: buttonActionHandler.isLoading,
+      isWrongNetwork,
     }),
     buttonDisabled,
   };
@@ -262,11 +278,15 @@ type DepositArgs = {
   tokenAddress: string;
   isNative: boolean;
   toAddress: string;
+  exclusiveRelayer: string;
+  exclusivityDeadline: number;
+  integratorId: string;
 };
 function getDepositArgs(
   selectedRoute: SelectedRoute,
   usedTransferQuote: TransferQuote,
-  referrer: string
+  referrer: string,
+  integratorId: string
 ): DepositArgs | undefined {
   const { amountToBridgeAfterSwap, initialAmount, quotedFees, recipient } =
     usedTransferQuote || {};
@@ -292,6 +312,9 @@ function getDepositArgs(
     tokenAddress: selectedRoute.fromTokenAddress,
     isNative: selectedRoute.isNative,
     toAddress: recipient,
+    exclusiveRelayer: quotedFees.exclusiveRelayer,
+    exclusivityDeadline: quotedFees.exclusivityDeadline,
+    integratorId,
   };
 }
 
@@ -299,12 +322,16 @@ function getButtonLabel(args: {
   isConnected: boolean;
   isDataLoading: boolean;
   isMutating: boolean;
+  isWrongNetwork: boolean;
 }) {
   if (!args.isConnected) {
     return "Connect wallet";
   }
   if (args.isMutating) {
     return "Confirming...";
+  }
+  if (args.isWrongNetwork) {
+    return "Switch network and confirm transaction";
   }
   return "Confirm transaction";
 }

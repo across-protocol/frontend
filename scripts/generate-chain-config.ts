@@ -7,7 +7,7 @@ async function generateChainConfig(chainName: string) {
     import { utils as sdkUtils } from "@across-protocol/sdk";
     import { ChainConfig } from "../types";
 
-    const { getDeployedAddress } = sdkUtils;
+    const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
     const chainId = CHAIN_IDs.${chainName.replace("-", "_").toUpperCase()};
     const chainInfoBase = PUBLIC_NETWORKS[chainId];
@@ -16,13 +16,15 @@ async function generateChainConfig(chainName: string) {
       ...chainInfoBase,
       logoPath: "./assets/logo.svg",
       grayscaleLogoPath: "./assets/grayscale-logo.svg",
-      spokePool: getDeployedAddress("SpokePool", chainId),
+      spokePool: {
+        address: getDeployedAddress("SpokePool", chainId),
+        blockNumber: getDeployedBlockNumber("SpokePool", chainId),
+      },
       chainId,
-      publicRpcUrl: "",
+      publicRpcUrl: TODO,
       blockTimeSeconds: 15,
       tokens: [],
       enableCCTP: false,
-      swapTokens: [],
     } as ChainConfig;
   `;
 
@@ -48,7 +50,10 @@ async function generateChainConfig(chainName: string) {
   );
   const chainConfigDirNames: string[] = [];
   for (const chainConfigDirContent of chainConfigDirContents) {
-    if (chainConfigDirContent.endsWith(".ts")) {
+    if (
+      chainConfigDirContent.endsWith(".ts") ||
+      chainConfigDirContent.startsWith(".") // ignore dotfiles like .DS_Store on mac
+    ) {
       continue;
     }
     chainConfigDirNames.push(chainConfigDirContent);

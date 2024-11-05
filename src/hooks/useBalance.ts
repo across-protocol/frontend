@@ -8,8 +8,10 @@ import {
   getConfig,
   ConfigClient,
   getChainInfo,
+  TOKEN_SYMBOLS_MAP,
 } from "utils";
 import { BigNumber, providers } from "ethers";
+import { utils } from "@across-protocol/sdk";
 
 const config = getConfig();
 
@@ -152,6 +154,58 @@ export function useBalancesBySymbols({
   });
   return {
     balances: result.map((result) => result.data) as (BigNumber | undefined)[],
+    isLoading: result.some((s) => s.isLoading),
+  };
+}
+
+export function useBalanceBySymbolPerChain({
+  tokenSymbol,
+  chainIds,
+  account,
+}: {
+  tokenSymbol?: string;
+  chainIds: ChainId[];
+  account?: string;
+}) {
+  const result = useQueries({
+    queries: chainIds.map<
+      // NOTE: For some reason, we need to explicitly type this as `UseQueryOptions` to avoid a type error.
+      UseQueryOptions<
+        ReturnType<typeof getBalanceBySymbol>,
+        Error,
+        ReturnType<typeof getBalanceBySymbol>,
+        ReturnType<typeof balanceQueryKey>
+      >
+    >((chainId) => ({
+      queryKey: balanceQueryKey(account, chainId, tokenSymbol),
+      queryFn: ({ queryKey }) => {
+        const [, chainIdToQuery, tokenSymbolToQuery, accountToQuery] = queryKey;
+        if (
+          tokenSymbolToQuery === TOKEN_SYMBOLS_MAP.ETH.symbol &&
+          utils.getNativeTokenSymbol(chainIdToQuery!) !==
+            TOKEN_SYMBOLS_MAP.ETH.symbol
+        ) {
+          return Promise.resolve(BigNumber.from(0));
+        }
+        return getBalanceBySymbol({
+          config,
+          chainIdToQuery,
+          tokenSymbolToQuery,
+          accountToQuery,
+        });
+      },
+      enabled: Boolean(account && tokenSymbol),
+      refetchInterval: 10_000,
+    })),
+  });
+  return {
+    balances: result.reduce(
+      (acc, { data }, idx) => ({
+        ...acc,
+        [chainIds[idx]]: (data ?? BigNumber.from(0)) as BigNumber,
+      }),
+      {} as Record<number, BigNumber>
+    ),
     isLoading: result.some((s) => s.isLoading),
   };
 }

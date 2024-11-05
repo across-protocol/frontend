@@ -1,6 +1,6 @@
 import { CHAIN_IDs, PUBLIC_NETWORKS } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
-const { getDeployedAddress } = sdkUtils;
+const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
 import { ChainConfig } from "../types";
 
@@ -11,7 +11,10 @@ export default {
   ...chainInfoBase,
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
-  spokePool: getDeployedAddress("SpokePool", chainId),
+  spokePool: {
+    address: getDeployedAddress("SpokePool", chainId),
+    blockNumber: getDeployedBlockNumber("SpokePool", chainId),
+  },
   publicRpcUrl: "https://mainnet.optimism.io",
   chainId,
   tokens: [
@@ -29,21 +32,4 @@ export default {
   ],
   blockTimeSeconds: 2,
   enableCCTP: true,
-  swapTokens: [
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC",
-    },
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDC.e",
-    },
-    {
-      swapInputTokenSymbol: "USDC.e",
-      acrossInputTokenSymbol: "USDC",
-      acrossOutputTokenSymbol: "USDbC",
-    },
-  ],
 } as ChainConfig;

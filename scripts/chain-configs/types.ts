@@ -8,7 +8,10 @@ export type ChainConfig = {
   chainId: number;
   logoPath: string;
   grayscaleLogoPath: string;
-  spokePool: string;
+  spokePool: {
+    address: string;
+    blockNumber: number;
+  };
   tokens: (
     | string
     | {
@@ -17,9 +20,4 @@ export type ChainConfig = {
       }
   )[];
   enableCCTP: boolean;
-  swapTokens: {
-    swapInputTokenSymbol: string;
-    acrossInputTokenSymbol: string;
-    acrossOutputTokenSymbol: string;
-  }[];
 };

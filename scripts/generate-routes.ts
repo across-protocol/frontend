@@ -3,10 +3,23 @@ import { utils as sdkUtils } from "@across-protocol/sdk";
 import { utils } from "ethers";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
-
+import path from "path";
 import * as chainConfigs from "./chain-configs";
 
-const { getDeployedAddress } = sdkUtils;
+function getTokenSymbolForLogo(tokenSymbol: string): string {
+  switch (tokenSymbol) {
+    case "USDC.e":
+    case "USDbC":
+    case "USDzC":
+      return "USDC";
+    default:
+      return tokenSymbol;
+  }
+}
+
+function getDeployedAddress(contractName: string, chainId: number): string {
+  return sdkUtils.getDeployedAddress(contractName, chainId, true) as string;
+}
 
 type Route =
   (typeof enabledRoutes)[keyof typeof enabledRoutes]["routes"][number];
@@ -27,6 +40,9 @@ const enabledMainnetChainConfigs = [
   chainConfigs.BLAST,
   chainConfigs.LISK,
   chainConfigs.SCROLL,
+  chainConfigs.REDSTONE,
+  chainConfigs.ZORA,
+  chainConfigs.WORLD_CHAIN,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -54,12 +70,7 @@ const enabledRoutes = {
       "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
     merkleDistributorAddress: "0xE50b2cEAC4f60E840Ae513924033E753e2366487",
     claimAndStakeAddress: "0x985e8A89Dd6Af8896Ef075c8dd93512433dc5829",
-    pools: [
-      {
-        tokenSymbol: "BOBA",
-        isNative: false,
-      },
-    ],
+    pools: [],
     spokePoolVerifier: {
       address: "0xB4A8d45647445EA9FC3E1058096142390683dBC2",
       enabledChains: [
@@ -72,7 +83,10 @@ const enabledRoutes = {
         CHAIN_IDs.MODE,
         CHAIN_IDs.BLAST,
         CHAIN_IDs.LISK,
+        CHAIN_IDs.REDSTONE,
         CHAIN_IDs.SCROLL,
+        CHAIN_IDs.ZORA,
+        CHAIN_IDs.WORLD_CHAIN,
       ],
     },
     swapAndBridgeAddresses: {
@@ -146,7 +160,7 @@ function transformChainConfigs(
 
   for (const chainConfig of enabledChainConfigs) {
     const fromChainId = chainConfig.chainId;
-    const fromSpokeAddress = chainConfig.spokePool;
+    const fromSpokeAddress = chainConfig.spokePool.address;
     const toChainIds = enabledChainIds.filter(
       (chainId) => chainId !== fromChainId
     );
@@ -178,7 +192,7 @@ function transformChainConfigs(
       const tokens = chainConfig.tokens.flatMap((token) => {
         const tokenSymbol = typeof token === "string" ? token : token.symbol;
 
-        // Handle USDC -> USDC.e/USDbC routes
+        // Handle native USDC -> bridged USDC routes
         if (tokenSymbol === "USDC") {
           if (toChainConfig.enableCCTP) {
             return [
@@ -189,8 +203,10 @@ function transformChainConfigs(
               },
             ];
           } else if (
-            toChainConfig.tokens.includes("USDC.e") ||
-            toChainConfig.tokens.includes("USDbC")
+            toChainConfig.tokens.find(
+              (token) =>
+                typeof token === "string" && sdkUtils.isBridgedUsdc(token)
+            )
           ) {
             return [
               {
@@ -201,7 +217,8 @@ function transformChainConfigs(
           }
         }
 
-        if (["USDC.e", "USDbC"].includes(tokenSymbol)) {
+        // Handle bridged USDC -> native/bridged USDC routes
+        if (sdkUtils.isBridgedUsdc(tokenSymbol)) {
           if (toChainConfig.enableCCTP) {
             return [
               {
@@ -218,6 +235,18 @@ function transformChainConfigs(
               {
                 inputTokenSymbol: tokenSymbol,
                 outputTokenSymbol: "USDC",
+              },
+            ];
+          } else if (
+            toChainConfig.tokens.find(
+              (token) =>
+                typeof token === "string" && sdkUtils.isBridgedUsdc(token)
+            )
+          ) {
+            return [
+              {
+                inputTokenSymbol: tokenSymbol,
+                outputTokenSymbol: getBridgedUsdcSymbol(toChainConfig.chainId),
               },
             ];
           }
@@ -271,10 +300,15 @@ function transformChainConfigs(
         return tokenSymbol;
       });
 
+      // Handle USDC swap tokens
+      const usdcSwapTokens = chainConfig.enableCCTP
+        ? getUsdcSwapTokens(fromChainId, toChainId)
+        : [];
+
       const toChain = {
         chainId: toChainId,
         tokens,
-        swapTokens: chainConfig.swapTokens.filter(
+        swapTokens: usdcSwapTokens.filter(
           ({ acrossInputTokenSymbol, acrossOutputTokenSymbol }) =>
             tokens.some((token) =>
               typeof token === "string"
@@ -347,6 +381,76 @@ async function generateRoutes(hubPoolChainId = 1) {
   writeFileSync(
     `./src/data/routes_${hubPoolChainId}_${routeFileContent.hubPoolAddress}.json`,
     await prettier.format(JSON.stringify(routeFileContent, null, 2), {
+      parser: "json",
+    })
+  );
+
+  // helper file with chains
+  const chainsFileContent = (
+    hubPoolChainId === CHAIN_IDs.MAINNET
+      ? enabledMainnetChainConfigs
+      : enabledSepoliaChainConfigs
+  ).map((chainConfig) => {
+    const [chainKey] =
+      Object.entries(chainConfigs).find(
+        ([, config]) => config.chainId === chainConfig.chainId
+      ) || [];
+    if (!chainKey) {
+      throw new Error(
+        `Could not find chain key for chain ${chainConfig.chainId}`
+      );
+    }
+    const assetsBaseUrl = `https://raw.githubusercontent.com/across-protocol/frontend/master`;
+    const getTokenInfo = (tokenSymbol: string) => {
+      const tokenInfo =
+        TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP];
+      return {
+        address: utils.getAddress(
+          tokenInfo.addresses[chainConfig.chainId] as string
+        ),
+        symbol: tokenSymbol,
+        name: tokenInfo.name,
+        decimals: tokenInfo.decimals,
+        logoUrl: `${assetsBaseUrl}/src/assets/token-logos/${getTokenSymbolForLogo(tokenSymbol).toLowerCase()}.svg`,
+      };
+    };
+    return {
+      chainId: chainConfig.chainId,
+      name: chainConfig.name,
+      publicRpcUrl: chainConfig.publicRpcUrl,
+      explorerUrl: chainConfig.blockExplorer,
+      logoUrl: `${assetsBaseUrl}${path.resolve("/scripts/chain-configs/", chainKey.toLowerCase().replace("_", "-"), chainConfig.logoPath)}`,
+      spokePool: chainConfig.spokePool.address,
+      spokePoolBlock: chainConfig.spokePool.blockNumber,
+      inputTokens: routeFileContent.routes
+        .filter((route) => route.fromChain === chainConfig.chainId)
+        .map((route) => getTokenInfo(route.fromTokenSymbol))
+        .reduce(
+          (acc, token) => {
+            if (!acc.find((t) => t.symbol === token.symbol)) {
+              return [...acc, token];
+            }
+            return acc;
+          },
+          [] as ReturnType<typeof getTokenInfo>[]
+        ),
+      outputTokens: routeFileContent.routes
+        .filter((route) => route.toChain === chainConfig.chainId)
+        .map((route) => getTokenInfo(route.toTokenSymbol))
+        .reduce(
+          (acc, token) => {
+            if (!acc.find((t) => t.symbol === token.symbol)) {
+              return [...acc, token];
+            }
+            return acc;
+          },
+          [] as ReturnType<typeof getTokenInfo>[]
+        ),
+    };
+  });
+  writeFileSync(
+    `./src/data/chains_${hubPoolChainId}.json`,
+    await prettier.format(JSON.stringify(chainsFileContent, null, 2), {
       parser: "json",
     })
   );
@@ -460,7 +564,10 @@ function getTokenBySymbol(
   chainId: number | string,
   l1ChainId: number
 ) {
-  const tokenAddress = TOKEN_SYMBOLS_MAP[tokenSymbol]?.addresses[chainId];
+  const tokenAddress =
+    TOKEN_SYMBOLS_MAP[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP]?.addresses[
+      Number(chainId)
+    ];
 
   if (!tokenAddress) {
     throw new Error(
@@ -468,9 +575,11 @@ function getTokenBySymbol(
     );
   }
 
+  const effectiveSymbol = (
+    sdkUtils.isBridgedUsdc(tokenSymbol) ? "USDC" : tokenSymbol
+  ) as keyof typeof TOKEN_SYMBOLS_MAP;
   const l1TokenAddress =
-    TOKEN_SYMBOLS_MAP[isBridgedUsdc(tokenSymbol) ? "USDC" : tokenSymbol]
-      ?.addresses[l1ChainId];
+    TOKEN_SYMBOLS_MAP[effectiveSymbol]?.addresses[l1ChainId];
 
   if (!l1TokenAddress) {
     throw new Error(`Could not find L1 token address for ${tokenSymbol}`);
@@ -484,14 +593,32 @@ function getTokenBySymbol(
   };
 }
 
-function isBridgedUsdc(tokenSymbol: string) {
-  return tokenSymbol === "USDC.e" || tokenSymbol === "USDbC";
+function getUsdcSwapTokens(fromChainId: number, toChainId: number) {
+  const swapInputTokenSymbol = getBridgedUsdcSymbol(fromChainId);
+  return [
+    {
+      swapInputTokenSymbol,
+      acrossInputTokenSymbol: "USDC",
+      acrossOutputTokenSymbol: "USDC",
+    },
+    {
+      swapInputTokenSymbol,
+      acrossInputTokenSymbol: "USDC",
+      acrossOutputTokenSymbol: getBridgedUsdcSymbol(toChainId),
+    },
+  ];
 }
 
 function getBridgedUsdcSymbol(chainId: number) {
-  return [CHAIN_IDs.BASE, CHAIN_IDs.BASE_SEPOLIA].includes(chainId)
-    ? "USDbC"
-    : "USDC.e";
+  switch (chainId) {
+    case CHAIN_IDs.BASE:
+    case CHAIN_IDs.BASE_SEPOLIA:
+      return TOKEN_SYMBOLS_MAP.USDbC.symbol;
+    case CHAIN_IDs.ZORA:
+      return TOKEN_SYMBOLS_MAP.USDzC.symbol;
+    default:
+      return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
+  }
 }
 
 generateRoutes(Number(process.argv[2]));

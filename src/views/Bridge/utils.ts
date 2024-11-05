@@ -10,6 +10,7 @@ import {
   getToken,
   hubPoolChainId,
   isProductionBuild,
+  interchangeableTokensMap,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -40,28 +41,13 @@ const config = getConfig();
 const enabledRoutes = config.getEnabledRoutes();
 const swapRoutes = config.getSwapRoutes();
 
-const interchangeableTokenPairs: Record<string, string[]> = {
-  "USDC.e": ["USDbC"],
-  USDbC: ["USDC.e"],
-  DAI: ["USDB"],
-  USDB: ["DAI"],
-  ETH: ["WETH"],
-  WETH: ["ETH"],
-};
-
-export const similarTokenPairs: Record<string, string[]> = {
-  USDC: ["USDC.e", "USDbC"],
-  "USDC.e": ["USDC", "USDbC"],
-  USDbC: ["USDC", "USDC.e"],
-};
-
 export function areTokensInterchangeable(
   tokenSymbol1: string,
   tokenSymbol2: string
 ) {
   return (
-    Boolean(interchangeableTokenPairs[tokenSymbol1]) &&
-    interchangeableTokenPairs[tokenSymbol1].includes(tokenSymbol2)
+    Boolean(interchangeableTokensMap[tokenSymbol1]) &&
+    interchangeableTokensMap[tokenSymbol1].includes(tokenSymbol2)
   );
 }
 
@@ -151,14 +137,24 @@ export function validateBridgeAmount(
   };
 }
 
-export function getInitialRoute(defaults: RouteFilter = {}) {
-  return (
-    findEnabledRoute({
-      inputTokenSymbol: defaults.inputTokenSymbol || "ETH",
-      fromChain: defaults.fromChain || hubPoolChainId,
-      toChain: defaults.toChain,
-    }) || { ...enabledRoutes[0], type: "bridge" }
-  );
+const defaultRouteFilter = {
+  fromChain: hubPoolChainId,
+  inputTokenSymbol: "ETH",
+};
+
+export function getInitialRoute(filter: RouteFilter = {}) {
+  const routeFromQueryParams = getRouteFromQueryParams(filter);
+  const routeFromFilter = findEnabledRoute({
+    inputTokenSymbol:
+      filter.inputTokenSymbol ?? (filter?.fromChain === 137 ? "WETH" : "ETH"),
+    fromChain: filter.fromChain || hubPoolChainId,
+    toChain: filter.toChain,
+  });
+  const defaultRoute = findEnabledRoute(defaultRouteFilter) ?? {
+    ...enabledRoutes[0],
+    type: "bridge",
+  };
+  return routeFromQueryParams ?? routeFromFilter ?? defaultRoute;
 }
 
 export function findEnabledRoute(
@@ -229,10 +225,10 @@ export function findNextBestRoute(
   let route: SelectedRoute | undefined;
 
   const equivalentInputTokenSymbols = filter.inputTokenSymbol
-    ? interchangeableTokenPairs[filter.inputTokenSymbol]
+    ? interchangeableTokensMap[filter.inputTokenSymbol]
     : undefined;
   const equivalentSwapTokenSymbols = filter.swapTokenSymbol
-    ? interchangeableTokenPairs[filter.swapTokenSymbol]
+    ? interchangeableTokensMap[filter.swapTokenSymbol]
     : undefined;
 
   route = findEnabledRoute(filter);
@@ -370,32 +366,43 @@ export function getAllChains() {
     });
 }
 
-export function getRouteFromQueryParams() {
+export function getRouteFromQueryParams(overrides?: RouteFilter) {
   const params = new URLSearchParams(window.location.search);
 
-  const fromChain = Number(
-    params.get("from") || params.get("fromChain") || params.get("originChainId")
-  );
-  const toChain = Number(
-    params.get("to") ||
-      params.get("toChain") ||
-      params.get("destinationChainId")
-  );
+  const fromChain =
+    Number(
+      params.get("from") ??
+        params.get("fromChain") ??
+        params.get("originChainId") ??
+        overrides?.fromChain
+    ) || undefined;
+
+  const toChain =
+    Number(
+      params.get("to") ??
+        params.get("toChain") ??
+        params.get("destinationChainId") ??
+        overrides?.toChain
+    ) || undefined;
+
   const inputTokenSymbol =
-    params.get("inputTokenSymbol") ||
-    params.get("inputToken") ||
-    params.get("token") ||
-    "ETH";
+    params.get("inputTokenSymbol") ??
+    params.get("inputToken") ??
+    params.get("token") ??
+    overrides?.inputTokenSymbol;
+  undefined;
+
   const outputTokenSymbol =
-    params.get("outputTokenSymbol") || params.get("outputToken");
+    params.get("outputTokenSymbol") ??
+    params.get("outputToken") ??
+    overrides?.outputTokenSymbol ??
+    undefined;
 
   const filter = {
-    fromChain: fromChain || hubPoolChainId,
-    toChain: toChain || undefined,
+    fromChain,
+    toChain,
     inputTokenSymbol,
-    outputTokenSymbol: outputTokenSymbol
-      ? outputTokenSymbol.toUpperCase()
-      : undefined,
+    outputTokenSymbol: outputTokenSymbol?.toUpperCase(),
   };
 
   const route =
@@ -404,8 +411,7 @@ export function getRouteFromQueryParams() {
       ...filter,
       inputTokenSymbol: undefined,
       swapTokenSymbol: inputTokenSymbol,
-    }) ||
-    getInitialRoute(filter);
+    });
 
   return route;
 }
