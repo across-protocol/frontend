@@ -3,8 +3,19 @@ import { utils as sdkUtils } from "@across-protocol/sdk";
 import { utils } from "ethers";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
-
+import path from "path";
 import * as chainConfigs from "./chain-configs";
+
+function getTokenSymbolForLogo(tokenSymbol: string): string {
+  switch (tokenSymbol) {
+    case "USDC.e":
+    case "USDbC":
+    case "USDzC":
+      return "USDC";
+    default:
+      return tokenSymbol;
+  }
+}
 
 function getDeployedAddress(contractName: string, chainId: number): string {
   return sdkUtils.getDeployedAddress(contractName, chainId, true) as string;
@@ -59,12 +70,7 @@ const enabledRoutes = {
       "0x9040e41eF5E8b281535a96D9a48aCb8cfaBD9a48",
     merkleDistributorAddress: "0xE50b2cEAC4f60E840Ae513924033E753e2366487",
     claimAndStakeAddress: "0x985e8A89Dd6Af8896Ef075c8dd93512433dc5829",
-    pools: [
-      {
-        tokenSymbol: "BOBA",
-        isNative: false,
-      },
-    ],
+    pools: [],
     spokePoolVerifier: {
       address: "0xB4A8d45647445EA9FC3E1058096142390683dBC2",
       enabledChains: [
@@ -428,7 +434,7 @@ async function generateRoutes(hubPoolChainId = 1) {
         symbol: tokenSymbol,
         name: tokenInfo.name,
         decimals: tokenInfo.decimals,
-        logoUrl: `${assetsBaseUrl}/src/assets/token-logos/${tokenSymbol.toLowerCase()}.svg`,
+        logoUrl: `${assetsBaseUrl}/src/assets/token-logos/${getTokenSymbolForLogo(tokenSymbol).toLowerCase()}.svg`,
       };
     };
     return {
@@ -436,7 +442,7 @@ async function generateRoutes(hubPoolChainId = 1) {
       name: chainConfig.name,
       publicRpcUrl: chainConfig.publicRpcUrl,
       explorerUrl: chainConfig.blockExplorer,
-      logoUrl: `${assetsBaseUrl}/scripts/chain-configs/${chainKey.toLowerCase()}/assets/logo.svg`,
+      logoUrl: `${assetsBaseUrl}${path.resolve("/scripts/chain-configs/", chainKey.toLowerCase().replace("_", "-"), chainConfig.logoPath)}`,
       spokePool: chainConfig.spokePool.address,
       spokePoolBlock: chainConfig.spokePool.blockNumber,
       inputTokens: routeFileContent.routes

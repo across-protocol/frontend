@@ -4,7 +4,7 @@
     "name": "Sepolia",
     "publicRpcUrl": "https://gateway.tenderly.co/public/sepolia",
     "explorerUrl": "https://sepolia.etherscan.io",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/mainnet/assets/logo.svg",
     "spokePool": "0x5ef6C01E11889d86803e0B23e3cB3F9E9d97B662",
     "spokePoolBlock": 5288470,
     "inputTokens": [
@@ -59,7 +59,7 @@
     "name": "Base Sepolia",
     "publicRpcUrl": "https://sepolia.base.org",
     "explorerUrl": "https://sepolia.basescan.org",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/base_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/base/assets/logo.svg",
     "spokePool": "0x82B564983aE7274c86695917BBf8C99ECb6F0F8F",
     "spokePoolBlock": 6082004,
     "inputTokens": [
@@ -112,7 +112,7 @@
         "symbol": "USDbC",
         "name": "USD Coin (bridged)",
         "decimals": 6,
-        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdbc.svg"
+        "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/src/assets/token-logos/usdc.svg"
       }
     ]
   },
@@ -121,7 +121,7 @@
     "name": "Arbitrum Sepolia",
     "publicRpcUrl": "https://sepolia-rollup.arbitrum.io/rpc",
     "explorerUrl": "https://sepolia.arbiscan.io",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/arbitrum_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/arbitrum/assets/logo.svg",
     "spokePool": "0x7E63A5f1a8F0B4d0934B2f2327DAED3F6bb2ee75",
     "spokePoolBlock": 12411026,
     "inputTokens": [
@@ -176,7 +176,7 @@
     "name": "Optimism Sepolia",
     "publicRpcUrl": "https://sepolia.optimism.io",
     "explorerUrl": "https://sepolia-optimism.etherscan.io",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/optimism_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/optimism/assets/logo.svg",
     "spokePool": "0x4e8E101924eDE233C13e2D8622DC8aED2872d505",
     "spokePoolBlock": 7762656,
     "inputTokens": [],
@@ -187,7 +187,7 @@
     "name": "Mode Sepolia",
     "publicRpcUrl": "https://sepolia.mode.network",
     "explorerUrl": "https://sepolia.explorer.mode.network",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/mode_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/mode/assets/logo.svg",
     "spokePool": "0xbd886FC0725Cc459b55BbFEb3E4278610331f83b",
     "spokePoolBlock": 13999465,
     "inputTokens": [
@@ -228,7 +228,7 @@
     "name": "Polygon Amoy",
     "publicRpcUrl": "https://rpc-amoy.polygon.technology",
     "explorerUrl": "https://amoy.polygonscan.com",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/polygon_amoy/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/polygon/assets/logo.svg",
     "spokePool": "0xd08baaE74D6d2eAb1F3320B2E1a53eeb391ce8e5",
     "spokePoolBlock": 7529960,
     "inputTokens": [
@@ -262,7 +262,7 @@
     "name": "Blast Sepolia",
     "publicRpcUrl": "https://sepolia.blast.io",
     "explorerUrl": "https://sepolia.blastscan.io",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/blast_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/blast/assets/logo.svg",
     "spokePool": "0x5545092553Cf5Bf786e87a87192E902D50D8f022",
     "spokePoolBlock": 7634204,
     "inputTokens": [
@@ -303,7 +303,7 @@
     "name": "Lisk Sepolia",
     "publicRpcUrl": "https://rpc.sepolia-api.lisk.com",
     "explorerUrl": "https://sepolia-blockscout.lisk.com",
-    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/lisk_sepolia/assets/logo.svg",
+    "logoUrl": "https://raw.githubusercontent.com/across-protocol/frontend/master/scripts/chain-configs/lisk/assets/logo.svg",
     "spokePool": "0xeF684C38F94F48775959ECf2012D7E864ffb9dd4",
     "spokePoolBlock": 7267988,
     "inputTokens": [
