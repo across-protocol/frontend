@@ -13,8 +13,8 @@ import {
   validateChainAndTokenParams,
   isSwapRouteEnabled,
 } from "./_utils";
-import { getUniswapQuoteForOriginSwapExactInput } from "./_dexes/uniswap";
-// import { get1inchQuoteForOriginSwapExactInput } from "./_dexes/1inch";
+// import { getUniswapQuoteForOriginSwapExactInput } from "./_dexes/uniswap";
+import { get1inchQuoteForOriginSwapExactInput } from "./_dexes/1inch";
 import { InvalidParamError } from "./_errors";
 
 const SwapQuoteQueryParamsSchema = type({
@@ -109,8 +109,8 @@ const handler = async (
     } as const;
 
     const quoteResults = await Promise.allSettled([
-      getUniswapQuoteForOriginSwapExactInput(swap),
-      // get1inchQuoteForOriginSwapExactInput(swap),
+      // getUniswapQuoteForOriginSwapExactInput(swap),
+      get1inchQuoteForOriginSwapExactInput(swap),
     ]);
 
     const settledResults = quoteResults.flatMap((result) =>
