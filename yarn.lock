@@ -16,15 +16,10 @@
     "@uma/common" "^2.17.0"
     hardhat "^2.9.3"
 
-"@across-protocol/constants@^3.1.16":
+"@across-protocol/constants@^3.1.16", "@across-protocol/constants@^3.1.9":
   version "3.1.16"
   resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.16.tgz#c126085d29d4d051fd02a04c833d804d37c3c219"
   integrity sha512-+U+AecGWnfY4b4sSfKBvsDj/+yXKEqpTXcZgI8GVVmUTkUhs1efA0kN4q3q10yy5TXI5TtagaG7R9yZg1zgKKg==
-
-"@across-protocol/constants@^3.1.9":
-  version "3.1.13"
-  resolved "https://registry.yarnpkg.com/@across-protocol/constants/-/constants-3.1.13.tgz#b4caf494e9d9fe50290cca91b7883ea408fdb90a"
-  integrity sha512-EsTJgQL5p+XXs40aBxOSbMOpQr/f4ty+Iyget8Oh6MT/cncCa2+W8a78fbqYqTtSpH6Sm7E8nvT8gPuSS6ef1w==
 
 "@across-protocol/contracts-v3.0.6@npm:@across-protocol/contracts@3.0.6":
   version "3.0.6"
@@ -2332,25 +2327,13 @@
     ethers "^5.5.4"
     lodash "^4.17.21"
 
-"@eth-optimism/sdk@^3.2.2":
+"@eth-optimism/sdk@^3.2.2", "@eth-optimism/sdk@^3.3.1":
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/@eth-optimism/sdk/-/sdk-3.3.2.tgz#68a5f6e77f9c85f6eeb9db8044b3b69199520eb0"
   integrity sha512-+zhxT0YkBIEzHsuIayQGjr8g9NawZo6/HYfzg1NSEFsE2Yt0NyCWqVDFTuuak0T6AvIa2kNcl3r0Z8drdb2QmQ==
   dependencies:
     "@eth-optimism/contracts" "0.6.0"
     "@eth-optimism/core-utils" "^0.13.2"
-    lodash "^4.17.21"
-    merkletreejs "^0.3.11"
-    rlp "^2.2.7"
-    semver "^7.6.0"
-
-"@eth-optimism/sdk@^3.3.1":
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/@eth-optimism/sdk/-/sdk-3.3.1.tgz#f72b6f93b58e2a2943f10aca3be91dfc23d9839f"
-  integrity sha512-zf8qL+KwYWUUwvdcjF1HpBxgKSt5wsKr8oa6jwqUhdPkQHUtVK5SRKtqXqYplnAgKtxDQYwlK512GU16odEl1w==
-  dependencies:
-    "@eth-optimism/contracts" "0.6.0"
-    "@eth-optimism/core-utils" "0.13.2"
     lodash "^4.17.21"
     merkletreejs "^0.3.11"
     rlp "^2.2.7"
@@ -8929,12 +8912,7 @@ async@^2.0.1, async@^2.1.2, async@^2.4.0, async@^2.5.0:
   dependencies:
     lodash "^4.17.14"
 
-async@^3.2.0, async@^3.2.3:
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/async/-/async-3.2.4.tgz#2d22e00f8cddeb5fde5dd33522b56d1cf569a81c"
-  integrity sha512-iAB+JbDEGXhyIUavoDl9WP/Jj106Kz9DEn1DPgYw5ruDn0e3Wgi3sKFm55sASdGBNOQB8F59d9qQ7deqrHA8wQ==
-
-async@^3.2.5:
+async@^3.2.0, async@^3.2.3, async@^3.2.5:
   version "3.2.5"
   resolved "https://registry.yarnpkg.com/async/-/async-3.2.5.tgz#ebd52a8fdaf7a2289a24df399f8d8485c8a46b66"
   integrity sha512-baNZyqaaLhyLVKm/DlvdW051MSgO6b8eVfIezl9E5PqWxFgzLm/wQntEW4zOytVburDEr0JlALEpdOFwvErLsg==
@@ -9025,16 +9003,7 @@ axios@^0.27.2:
     follow-redirects "^1.14.9"
     form-data "^4.0.0"
 
-axios@^1.5.1, axios@^1.6.0, axios@^1.6.2:
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.2.tgz#b625db8a7051fbea61c35a3cbb3a1daa7b9c7621"
-  integrity sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==
-  dependencies:
-    follow-redirects "^1.15.6"
-    form-data "^4.0.0"
-    proxy-from-env "^1.1.0"
-
-axios@^1.7.4:
+axios@^1.5.1, axios@^1.6.0, axios@^1.6.2, axios@^1.7.4:
   version "1.7.7"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.7.tgz#2f554296f9892a72ac8d8e4c5b79c14a91d0a47f"
   integrity sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==
@@ -14830,12 +14799,7 @@ graphql-tag@^2.11.0:
   dependencies:
     tslib "^2.1.0"
 
-graphql@^15.4.0, graphql@^15.6.1:
-  version "15.8.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.8.0.tgz#33410e96b012fa3bdb1091cc99a94769db212b38"
-  integrity sha512-5gghUc24tP9HRznNpV2+FIoq3xKkj5dTQqf4v0CpdPbFVwFkWoxOM+o+2OC9ZSvjEMTjfmG9QT+gcvggTwW1zw==
-
-graphql@^15.5.0:
+graphql@^15.4.0, graphql@^15.5.0, graphql@^15.6.1:
   version "15.9.0"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.9.0.tgz#4e8ca830cfd30b03d44d3edd9cac2b0690304b53"
   integrity sha512-GCOQdvm7XxV1S4U4CGrsdlEN37245eC8P9zaYCMr6K1BG0IPGy5lUwmJsEOGyl1GD6HXjOtl2keCP9asRBwNvA==
@@ -17275,16 +17239,7 @@ jws@^4.0.0:
     jwa "^2.0.0"
     safe-buffer "^5.0.1"
 
-keccak@^3.0.0, keccak@^3.0.2:
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/keccak/-/keccak-3.0.3.tgz#4bc35ad917be1ef54ff246f904c2bbbf9ac61276"
-  integrity sha512-JZrLIAJWuZxKbCilMpNz5Vj7Vtb4scDG3dMXLOsbzBmQGyjwE61BbW7bJkfKKCShXiQZt3T6sBgALRtmd+nZaQ==
-  dependencies:
-    node-addon-api "^2.0.0"
-    node-gyp-build "^4.2.0"
-    readable-stream "^3.6.0"
-
-keccak@^3.0.3:
+keccak@^3.0.0, keccak@^3.0.2, keccak@^3.0.3:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/keccak/-/keccak-3.0.4.tgz#edc09b89e633c0549da444432ecf062ffadee86d"
   integrity sha512-3vKuW0jV8J3XNTzvfyicFR5qvxrSAGl7KIhvgOu5cmWwM7tZRj3fMbj/pfIf4be7aznbc+prBWGjywox/g2Y6Q==
