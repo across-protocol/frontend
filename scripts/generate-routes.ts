@@ -100,7 +100,7 @@ const enabledRoutes = {
         // [CHAIN_IDs.POLYGON]: "0x9220Fa27ae680E4e8D9733932128FA73362E0393",
         // [CHAIN_IDs.OPTIMISM]: "0x6f4A733c7889f038D77D4f540182Dda17423CcbF",
         // [CHAIN_IDs.ARBITRUM]: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
-        [CHAIN_IDs.BASE]: "0x409e76cE02AE9Cc04D8A112C77944FDbC23d64cA",
+        [CHAIN_IDs.BASE]: "0xed8b9c9aE7aCEf12eb4650d26Eb876005a4752d2",
       },
     },
     routes: transformChainConfigs(enabledMainnetChainConfigs),
