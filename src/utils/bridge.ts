@@ -331,20 +331,6 @@ export async function sendSwapAndBridgeTx(
     );
   }
 
-  const [_swapTokenAddress, _acrossInputTokenAddress] = await Promise.all([
-    swapAndBridge.SWAP_TOKEN(),
-    swapAndBridge.ACROSS_INPUT_TOKEN(),
-  ]);
-
-  if (
-    swapTokenAddress.toLowerCase() !== _swapTokenAddress.toLowerCase() ||
-    inputTokenAddress.toLowerCase() !== _acrossInputTokenAddress.toLowerCase()
-  ) {
-    throw new Error(
-      `Mismatch between the SwapAndBridge contract's swap token and input token addresses`
-    );
-  }
-
   const inputAmount = BigNumber.from(swapQuote.minExpectedInputTokenAmount);
   const outputAmount = inputAmount.sub(
     inputAmount.mul(relayerFeePct).div(fixedPointAdjustment)
@@ -352,6 +338,8 @@ export async function sendSwapAndBridgeTx(
   fillDeadline ??= await getFillDeadline(spokePool);
 
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
+    swapTokenAddress,
+    inputTokenAddress,
     swapQuote.routerCalldata,
     swapTokenAmount,
     swapQuote.minExpectedInputTokenAmount,
