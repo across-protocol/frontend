@@ -14,7 +14,7 @@ import {
   isSwapRouteEnabled,
 } from "./_utils";
 import { getUniswapQuoteForOriginSwapExactInput } from "./_dexes/uniswap";
-import { get1inchQuoteForOriginSwapExactInput } from "./_dexes/1inch";
+// import { get1inchQuoteForOriginSwapExactInput } from "./_dexes/1inch";
 import { InvalidParamError } from "./_errors";
 
 const SwapQuoteQueryParamsSchema = type({
@@ -110,7 +110,7 @@ const handler = async (
 
     const quoteResults = await Promise.allSettled([
       getUniswapQuoteForOriginSwapExactInput(swap),
-      get1inchQuoteForOriginSwapExactInput(swap),
+      // get1inchQuoteForOriginSwapExactInput(swap),
     ]);
 
     const settledResults = quoteResults.flatMap((result) =>
