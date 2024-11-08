@@ -20,4 +20,4 @@ jobs:
           # because they are not exploitable in our usage of the package.
           # - @openzeppelin/contracts@3.4.1-solc-0.7-2
           # - @openzeppelin/contracts@4.7.0
-          allow-ghsas: GHSA-fg47-3c2x-m2wr, GHSA-88g8-f5mf-f5rj, GHSA-3h5v-q93c-6h6q, GHSA-qh9x-gcfh-pcrw, GHSA-4g63-c64m-25w9, GHSA-xrc4-737v-9q75, GHSA-4h98-2769-gh6h, GHSA-4h98-2769-gh6h
+          allow-ghsas: GHSA-fg47-3c2x-m2wr, GHSA-88g8-f5mf-f5rj, GHSA-3h5v-q93c-6h6q, GHSA-qh9x-gcfh-pcrw, GHSA-4g63-c64m-25w9, GHSA-xrc4-737v-9q75, GHSA-4h98-2769-gh6h, GHSA-4h98-2769-gh6h, GHSA-93hq-5wgc-jc82
