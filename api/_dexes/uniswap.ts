@@ -15,7 +15,7 @@ import {
   Token as AcrossToken,
   Swap,
 } from "./types";
-import { getSwapAndBridgeAddress } from "./utils";
+import { getSwapAndBridgeAddress, NoSwapRouteError } from "./utils";
 
 // Maps testnet chain IDs to their main counterparts. Used to get the mainnet token
 // info for testnet tokens.
@@ -44,7 +44,8 @@ export async function getUniswapQuoteForOriginSwapExactInput(
   });
 
   if (!route.methodParameters) {
-    throw new NoUniswapRouteError({
+    throw new NoSwapRouteError({
+      dex: "uniswap",
       tokenInSymbol: swap.tokenIn.symbol,
       tokenOutSymbol: swap.tokenOut.symbol,
       chainId: swap.chainId,
@@ -85,6 +86,9 @@ export async function getUniswapQuote(swap: Swap) {
   const quoteCurrency =
     swap.type === "EXACT_INPUT" ? swap.tokenOut : swap.tokenIn;
 
+  console.log("amountCurrency", amountCurrency);
+  console.log("quoteCurrency", quoteCurrency);
+
   const route = await router.route(
     CurrencyAmount.fromRawAmount(
       new Token(
@@ -106,7 +110,8 @@ export async function getUniswapQuote(swap: Swap) {
   );
 
   if (!route || !route.methodParameters) {
-    throw new NoUniswapRouteError({
+    throw new NoSwapRouteError({
+      dex: "uniswap",
       tokenInSymbol: swap.tokenIn.symbol,
       tokenOutSymbol: swap.tokenOut.symbol,
       chainId: swap.chainId,
@@ -161,18 +166,4 @@ function getMainnetToken(token: AcrossToken) {
     chainId: mainnetChainId,
     address: mainnetTokenAddress,
   };
-}
-
-class NoUniswapRouteError extends Error {
-  constructor(args: {
-    tokenInSymbol: string;
-    tokenOutSymbol: string;
-    chainId: number;
-    swapType: string;
-  }) {
-    super(
-      `No Uniswap swap route found for '${args.swapType}' ${args.tokenInSymbol} to ${args.tokenOutSymbol} on chain ${args.chainId}`
-    );
-    this.name = "NoSwapRouteError";
-  }
 }
