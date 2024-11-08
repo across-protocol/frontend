@@ -13,7 +13,7 @@ import {
   validateChainAndTokenParams,
   isSwapRouteEnabled,
 } from "./_utils";
-// import { getUniswapQuoteForOriginSwapExactInput } from "./_dexes/uniswap";
+import { getUniswapQuoteForOriginSwapExactInput } from "./_dexes/uniswap";
 import { get1inchQuoteForOriginSwapExactInput } from "./_dexes/1inch";
 import { InvalidParamError } from "./_errors";
 
@@ -109,7 +109,7 @@ const handler = async (
     } as const;
 
     const quoteResults = await Promise.allSettled([
-      // getUniswapQuoteForOriginSwapExactInput(swap),
+      getUniswapQuoteForOriginSwapExactInput(swap),
       get1inchQuoteForOriginSwapExactInput(swap),
     ]);
 
