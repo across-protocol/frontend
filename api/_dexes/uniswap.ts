@@ -1,49 +1,33 @@
 import { ethers } from "ethers";
+import { CurrencyAmount, Percent, Token, TradeType } from "@uniswap/sdk-core";
 import {
-  FeeAmount,
-  Pool,
-  Route,
-  SwapOptions,
-  SwapQuoter,
-  SwapRouter,
-  Trade,
-  computePoolAddress,
-} from "@uniswap/v3-sdk";
-import {
-  Currency,
-  CurrencyAmount,
-  Percent,
-  Token,
-  TradeType,
-} from "@uniswap/sdk-core";
-import JSBI from "jsbi";
-import IUniswapV3PoolABI from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
+  AlphaRouter,
+  SwapOptionsSwapRouter02,
+  SwapType,
+} from "@uniswap/smart-order-router";
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { utils } from "@across-protocol/sdk";
 
-import { callViaMulticall3, getProvider } from "../_utils";
+import { getProvider } from "../_utils";
 import { TOKEN_SYMBOLS_MAP } from "../_constants";
 import {
-  AcrossSwap,
-  SwapQuoteAndCalldata,
+  OriginSwapQuoteAndCalldata,
   Token as AcrossToken,
+  Swap,
 } from "./types";
-import { getSwapAndBridgeAddress } from "./utils";
+import { getSwapAndBridgeAddress, NoSwapRouteError } from "./utils";
 
-// https://docs.uniswap.org/contracts/v3/reference/deployments/
-const POOL_FACTORY_CONTRACT_ADDRESS = {
-  [CHAIN_IDs.MAINNET]: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-  [CHAIN_IDs.OPTIMISM]: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-  [CHAIN_IDs.ARBITRUM]: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-  [CHAIN_IDs.BASE]: "0x33128a8fC17869897dcE68Ed026d694621f6FDfD",
-  [CHAIN_IDs.POLYGON]: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-};
-const QUOTER_CONTRACT_ADDRESS = {
-  [CHAIN_IDs.MAINNET]: "0x61fFE014bA17989E743c5F6cB21bF9697530B21e",
-  [CHAIN_IDs.OPTIMISM]: "0x61fFE014bA17989E743c5F6cB21bF9697530B21e",
-  [CHAIN_IDs.ARBITRUM]: "0x61fFE014bA17989E743c5F6cB21bF9697530B21e",
-  [CHAIN_IDs.BASE]: "0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a",
-  [CHAIN_IDs.POLYGON]: "0x61fFE014bA17989E743c5F6cB21bF9697530B21e",
+// Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
+export const SWAP_ROUTER_02_ADDRESS = {
+  [CHAIN_IDs.ARBITRUM]: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
+  [CHAIN_IDs.BASE]: "0x2626664c2603336E57B271c5C0b26F421741e481",
+  [CHAIN_IDs.BLAST]: "0x549FEB8c9bd4c12Ad2AB27022dA12492aC452B66",
+  [CHAIN_IDs.MAINNET]: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
+  [CHAIN_IDs.OPTIMISM]: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
+  [CHAIN_IDs.POLYGON]: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
+  [CHAIN_IDs.WORLD_CHAIN]: "0x091AD9e2e6e5eD44c1c66dB50e49A601F9f36cF6",
+  [CHAIN_IDs.ZK_SYNC]: "0x99c56385daBCE3E81d8499d0b8d0257aBC07E8A3",
+  [CHAIN_IDs.ZORA]: "0x7De04c96BE5159c3b5CeffC82aa176dc81281557",
 };
 
 // Maps testnet chain IDs to their main counterparts. Used to get the mainnet token
@@ -55,186 +39,125 @@ const TESTNET_TO_MAINNET = {
   [CHAIN_IDs.ARBITRUM_SEPOLIA]: CHAIN_IDs.ARBITRUM,
 };
 
-export async function getUniswapQuoteAndCalldata(
-  swap: AcrossSwap
-): Promise<SwapQuoteAndCalldata> {
-  const swapAndBridgeAddress = getSwapAndBridgeAddress(
-    "uniswap",
-    swap.swapToken.chainId
-  );
+export async function getUniswapQuoteForOriginSwapExactInput(
+  swap: Omit<Swap, "recipient">
+): Promise<OriginSwapQuoteAndCalldata> {
+  const swapAndBridgeAddress = getSwapAndBridgeAddress("uniswap", swap.chainId);
 
-  const initialSwapToken = { ...swap.swapToken };
-  const initialAcrossInputToken = { ...swap.acrossInputToken };
+  const initialTokenIn = { ...swap.tokenIn };
+  const initialTokenOut = { ...swap.tokenOut };
   // Always use mainnet tokens for retrieving quote, so that we can get equivalent quotes
   // for testnet tokens.
-  swap.swapToken = getMainnetToken(swap.swapToken);
-  swap.acrossInputToken = getMainnetToken(swap.acrossInputToken);
+  swap.tokenIn = getMainnetToken(swap.tokenIn);
+  swap.tokenOut = getMainnetToken(swap.tokenOut);
 
-  const poolInfo = await getPoolInfo(swap);
-  const tokenA = new Token(
-    swap.swapToken.chainId,
-    swap.swapToken.address,
-    swap.swapToken.decimals
-  );
-  const tokenB = new Token(
-    swap.acrossInputToken.chainId,
-    swap.acrossInputToken.address,
-    swap.acrossInputToken.decimals
-  );
-  const pool = new Pool(
-    tokenA,
-    tokenB,
-    FeeAmount.LOW,
-    poolInfo.sqrtPriceX96.toString(),
-    poolInfo.liquidity.toString(),
-    poolInfo.tick
-  );
-
-  const swapRoute = new Route([pool], tokenA, tokenB);
-
-  const amountOut = await getOutputQuote(swap, swapRoute);
-
-  const uncheckedTrade = Trade.createUncheckedTrade({
-    route: swapRoute,
-    inputAmount: CurrencyAmount.fromRawAmount(tokenA, swap.swapTokenAmount),
-    outputAmount: CurrencyAmount.fromRawAmount(tokenB, JSBI.BigInt(amountOut)),
-    tradeType: TradeType.EXACT_INPUT,
+  const { route, options } = await getUniswapQuote({
+    ...swap,
+    recipient: swapAndBridgeAddress,
   });
 
-  const options: SwapOptions = {
-    slippageTolerance: new Percent(
-      // max. slippage decimals is 2
-      Number(swap.slippage.toFixed(2)) * 100,
-      10_000
-    ),
-    // 20 minutes from the current Unix time
-    deadline: utils.getCurrentTime() + 60 * 20,
-    recipient: swapAndBridgeAddress,
-  };
-
-  const methodParameters = SwapRouter.swapCallParameters(
-    [uncheckedTrade],
-    options
-  );
+  if (!route.methodParameters) {
+    throw new NoSwapRouteError({
+      dex: "uniswap",
+      tokenInSymbol: swap.tokenIn.symbol,
+      tokenOutSymbol: swap.tokenOut.symbol,
+      chainId: swap.chainId,
+      swapType: "EXACT_INPUT",
+    });
+  }
 
   // replace mainnet token addresses with initial token addresses in calldata
-  methodParameters.calldata = methodParameters.calldata.replace(
-    swap.swapToken.address.toLowerCase().slice(2),
-    initialSwapToken.address.toLowerCase().slice(2)
+  route.methodParameters.calldata = route.methodParameters.calldata.replace(
+    swap.tokenIn.address.toLowerCase().slice(2),
+    initialTokenIn.address.toLowerCase().slice(2)
   );
-  methodParameters.calldata = methodParameters.calldata.replace(
-    swap.acrossInputToken.address.toLowerCase().slice(2),
-    initialAcrossInputToken.address.toLowerCase().slice(2)
+  route.methodParameters.calldata = route.methodParameters.calldata.replace(
+    swap.tokenOut.address.toLowerCase().slice(2),
+    initialTokenOut.address.toLowerCase().slice(2)
   );
 
   return {
     minExpectedInputTokenAmount: ethers.utils
       .parseUnits(
-        uncheckedTrade.minimumAmountOut(options.slippageTolerance).toExact(),
-        swap.acrossInputToken.decimals
+        route.trade.minimumAmountOut(options.slippageTolerance).toExact(),
+        swap.tokenIn.decimals
       )
       .toString(),
-    routerCalldata: methodParameters.calldata,
-    value: ethers.BigNumber.from(methodParameters.value).toString(),
+    routerCalldata: route.methodParameters.calldata,
+    value: ethers.BigNumber.from(route.methodParameters.value).toString(),
     swapAndBridgeAddress,
     dex: "uniswap",
-    slippage: swap.slippage,
+    slippage: swap.slippageTolerance,
   };
 }
 
-async function getOutputQuote(
-  swap: AcrossSwap,
-  route: Route<Currency, Currency>
-) {
-  const provider = getProvider(route.chainId);
+export async function getUniswapQuote(swap: Swap) {
+  const { router, options } = getSwapRouterAndOptions(swap);
 
-  const { calldata } = SwapQuoter.quoteCallParameters(
-    route,
+  const amountCurrency =
+    swap.type === "EXACT_INPUT" ? swap.tokenIn : swap.tokenOut;
+  const quoteCurrency =
+    swap.type === "EXACT_INPUT" ? swap.tokenOut : swap.tokenIn;
+
+  console.log("amountCurrency", amountCurrency);
+  console.log("quoteCurrency", quoteCurrency);
+
+  const route = await router.route(
     CurrencyAmount.fromRawAmount(
       new Token(
-        swap.swapToken.chainId,
-        swap.swapToken.address,
-        swap.swapToken.decimals
+        amountCurrency.chainId,
+        amountCurrency.address,
+        amountCurrency.decimals
       ),
-      swap.swapTokenAmount
+      swap.amount
     ),
-    TradeType.EXACT_INPUT,
-    { useQuoterV2: true }
+    new Token(
+      quoteCurrency.chainId,
+      quoteCurrency.address,
+      quoteCurrency.decimals
+    ),
+    swap.type === "EXACT_INPUT"
+      ? TradeType.EXACT_INPUT
+      : TradeType.EXACT_OUTPUT,
+    options
   );
 
-  const quoteCallReturnData = await provider.call({
-    to: QUOTER_CONTRACT_ADDRESS[swap.swapToken.chainId],
-    data: calldata,
-  });
+  if (!route || !route.methodParameters) {
+    throw new NoSwapRouteError({
+      dex: "uniswap",
+      tokenInSymbol: swap.tokenIn.symbol,
+      tokenOutSymbol: swap.tokenOut.symbol,
+      chainId: swap.chainId,
+      swapType: "EXACT_INPUT",
+    });
+  }
 
-  return ethers.utils.defaultAbiCoder.decode(["uint256"], quoteCallReturnData);
+  return { route, options };
 }
 
-async function getPoolInfo({
-  swapToken,
-  acrossInputToken,
-}: AcrossSwap): Promise<{
-  token0: string;
-  token1: string;
-  fee: number;
-  tickSpacing: number;
-  sqrtPriceX96: ethers.BigNumber;
-  liquidity: ethers.BigNumber;
-  tick: number;
-}> {
-  const provider = getProvider(swapToken.chainId);
-  const poolContract = new ethers.Contract(
-    computePoolAddress({
-      factoryAddress: POOL_FACTORY_CONTRACT_ADDRESS[swapToken.chainId],
-      tokenA: new Token(
-        swapToken.chainId,
-        swapToken.address,
-        swapToken.decimals
-      ),
-      tokenB: new Token(
-        acrossInputToken.chainId,
-        acrossInputToken.address,
-        acrossInputToken.decimals
-      ),
-      fee: FeeAmount.LOW,
-    }),
-    IUniswapV3PoolABI.abi,
-    provider
-  );
-
-  const poolMethods = [
-    "token0",
-    "token1",
-    "fee",
-    "tickSpacing",
-    "liquidity",
-    "slot0",
-  ];
-  const [token0, token1, fee, tickSpacing, liquidity, slot0] =
-    await callViaMulticall3(
-      provider,
-      poolMethods.map((method) => ({
-        contract: poolContract,
-        functionName: method,
-      }))
-    );
-
+function getSwapRouterAndOptions(params: {
+  chainId: number;
+  recipient: string;
+  slippageTolerance: number;
+}) {
+  const provider = getProvider(params.chainId);
+  const router = new AlphaRouter({
+    chainId: params.chainId,
+    provider,
+  });
+  const options: SwapOptionsSwapRouter02 = {
+    recipient: params.recipient,
+    deadline: utils.getCurrentTime() + 30 * 60, // 30 minutes from now
+    type: SwapType.SWAP_ROUTER_02,
+    slippageTolerance: new Percent(
+      // max. slippage decimals is 2
+      Number(params.slippageTolerance.toFixed(2)) * 100,
+      10_000
+    ),
+  };
   return {
-    token0,
-    token1,
-    fee,
-    tickSpacing,
-    liquidity,
-    sqrtPriceX96: slot0[0],
-    tick: slot0[1],
-  } as unknown as {
-    token0: string;
-    token1: string;
-    fee: number;
-    tickSpacing: number;
-    sqrtPriceX96: ethers.BigNumber;
-    liquidity: ethers.BigNumber;
-    tick: number;
+    router,
+    options,
   };
 }
 

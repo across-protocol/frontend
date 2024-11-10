@@ -18,8 +18,8 @@ import {
   AcceleratingDistributor__factory,
   ClaimAndStake,
   ClaimAndStake__factory,
-  SwapAndBridge,
-  SwapAndBridge__factory,
+  UniversalSwapAndBridge,
+  UniversalSwapAndBridge__factory,
 } from "utils/typechain";
 import { SupportedDex } from "./serverless-api/prod/swap-quote";
 
@@ -158,7 +158,7 @@ export class ConfigClient {
     chainId: constants.ChainId,
     dexKey: SupportedDex,
     signer?: Signer
-  ): SwapAndBridge | undefined {
+  ): UniversalSwapAndBridge | undefined {
     const address = this.getSwapAndBridgeAddress(chainId, dexKey);
 
     if (!address) {
@@ -166,7 +166,7 @@ export class ConfigClient {
     }
 
     const provider = signer ?? providerUtils.getProvider(chainId);
-    return SwapAndBridge__factory.connect(address, provider);
+    return UniversalSwapAndBridge__factory.connect(address, provider);
   }
   getHubPoolChainId(): constants.ChainId {
     return this.config.hubPoolChain;

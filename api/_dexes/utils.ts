@@ -1,4 +1,4 @@
-import { ENABLED_ROUTES } from "../_utils";
+import { ENABLED_ROUTES, getTokenByAddress } from "../_utils";
 
 export class UnsupportedDex extends Error {
   constructor(dex: string) {
@@ -9,6 +9,20 @@ export class UnsupportedDex extends Error {
 export class UnsupportedDexOnChain extends Error {
   constructor(chainId: number, dex: string) {
     super(`DEX/Aggregator ${dex} not supported on chain ${chainId}`);
+  }
+}
+
+export class NoSwapRouteError extends Error {
+  constructor(args: {
+    dex: string;
+    tokenInSymbol: string;
+    tokenOutSymbol: string;
+    chainId: number;
+    swapType: string;
+  }) {
+    super(
+      `No ${args.dex} swap route found for '${args.swapType}' ${args.tokenInSymbol} to ${args.tokenOutSymbol} on chain ${args.chainId}`
+    );
   }
 }
 
@@ -28,6 +42,16 @@ export function getSwapAndBridgeAddress(dex: string, chainId: number) {
     throw new UnsupportedDexOnChain(chainId, dex);
   }
   return address;
+}
+
+export function getAcrossSwapType(params: {
+  inputToken: string;
+  originChainId: number;
+  outputToken: string;
+  destinationChainId: number;
+}) {
+  // TODO: Implement this function
+  return "majorToMajor";
 }
 
 function _isDexSupported(
