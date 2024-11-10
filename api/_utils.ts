@@ -65,6 +65,7 @@ import {
   InvalidParamError,
   RouteNotEnabledError,
 } from "./_errors";
+import { Token } from "./_dexes/types";
 
 export { InputError, handleErrorCondition } from "./_errors";
 
@@ -806,6 +807,116 @@ export const getCachedLimits = async (
   ).data;
 };
 
+export async function getSuggestedFees(params: {
+  inputToken: string;
+  outputToken: string;
+  originChainId: number;
+  destinationChainId: number;
+  amount: string;
+  skipAmountLimit?: boolean;
+  message?: string;
+  depositMethod?: string;
+  recipient?: string;
+}): Promise<{
+  estimatedFillTimeSec: number;
+  timestamp: number;
+  isAmountTooLow: boolean;
+  quoteBlock: string;
+  exclusiveRelayer: string;
+  exclusivityDeadline: number;
+  spokePoolAddress: string;
+  destinationSpokePoolAddress: string;
+  totalRelayFee: {
+    pct: string;
+    total: string;
+  };
+  relayerCapitalFee: {
+    pct: string;
+    total: string;
+  };
+  relayerGasFee: {
+    pct: string;
+    total: string;
+  };
+  lpFee: {
+    pct: string;
+    total: string;
+  };
+  limits: {
+    minDeposit: string;
+    maxDeposit: string;
+    maxDepositInstant: string;
+    maxDepositShortDelay: string;
+    recommendedDepositInstant: string;
+  };
+}> {
+  return (
+    await axios(`${resolveVercelEndpoint()}/api/suggested-fees`, {
+      params,
+    })
+  ).data;
+}
+
+export async function getBridgeQuoteForMinOutput(params: {
+  inputToken: Token;
+  outputToken: Token;
+  minOutputAmount: BigNumber;
+  recipient?: string;
+  message?: string;
+}) {
+  const baseParams = {
+    inputToken: params.inputToken.address,
+    outputToken: params.outputToken.address,
+    originChainId: params.inputToken.chainId,
+    destinationChainId: params.outputToken.chainId,
+    skipAmountLimit: true,
+    recipient: params.recipient,
+    message: params.message,
+  };
+
+  // 1. Use 1 bps as indicative relayer fee pct
+  let tries = 0;
+  let adjustedInputAmount = params.minOutputAmount;
+  let adjustmentPct = utils.parseEther("0.001").toString();
+  let finalQuote: Awaited<ReturnType<typeof getSuggestedFees>> | undefined =
+    undefined;
+
+  // 2. Adjust input amount to meet minOutputAmount
+  while (tries < 3) {
+    adjustedInputAmount = adjustedInputAmount
+      .mul(utils.parseEther("1").add(adjustmentPct))
+      .div(sdk.utils.fixedPointAdjustment);
+    const adjustedQuote = await getSuggestedFees({
+      ...baseParams,
+      amount: adjustedInputAmount.toString(),
+    });
+    const outputAmount = adjustedInputAmount.sub(
+      adjustedInputAmount
+        .mul(adjustedQuote.totalRelayFee.pct)
+        .div(sdk.utils.fixedPointAdjustment)
+    );
+
+    if (outputAmount.gte(params.minOutputAmount)) {
+      finalQuote = adjustedQuote;
+      break;
+    } else {
+      tries++;
+    }
+  }
+
+  if (!finalQuote) {
+    throw new Error("Failed to adjust input amount to meet minOutputAmount");
+  }
+
+  return {
+    inputAmount: adjustedInputAmount,
+    outputAmount: adjustedInputAmount.sub(finalQuote.totalRelayFee.total),
+    minOutputAmount: params.minOutputAmount,
+    suggestedFees: finalQuote,
+    message: params.message,
+  };
+}
+
 export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 
 /**
@@ -941,6 +1052,60 @@ export const isRouteEnabled = (
   );
   return !!enabled;
 };
+
+export function isInputTokenBridgeable(
+  inputTokenAddress: string,
+  originChainId: number
+) {
+  return ENABLED_ROUTES.routes.some(
+    ({ fromTokenAddress, fromChain }) =>
+      originChainId === fromChain &&
+      inputTokenAddress.toLowerCase() === fromTokenAddress.toLowerCase()
+  );
+}
+
+export function isOutputTokenBridgeable(
+  outputTokenAddress: string,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.some(
+    ({ toTokenAddress, toChain }) =>
+      destinationChainId === toChain &&
+      toTokenAddress.toLowerCase() === outputTokenAddress.toLowerCase()
+  );
+}
+
+export function getRouteByInputTokenAndDestinationChain(
+  inputTokenAddress: string,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.find(
+    ({ fromTokenAddress, toChain }) =>
+      destinationChainId === toChain &&
+      fromTokenAddress.toLowerCase() === inputTokenAddress.toLowerCase()
+  );
+}
+
+export function getRouteByOutputTokenAndOriginChain(
+  outputTokenAddress: string,
+  originChainId: number
+) {
+  return ENABLED_ROUTES.routes.find(
+    ({ toTokenAddress, fromChain }) =>
+      originChainId === fromChain &&
+      outputTokenAddress.toLowerCase() === toTokenAddress.toLowerCase()
+  );
+}
+
+export function getRoutesByChainIds(
+  originChainId: number,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.filter(
+    ({ toChain, fromChain }) =>
+      originChainId === fromChain && destinationChainId === toChain
+  );
+}
 
 /**
  * Resolves the balance of a given ERC20 token at a provided address. If no token is provided, the balance of the

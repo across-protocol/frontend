@@ -1,4 +1,4 @@
-import { ENABLED_ROUTES, getTokenByAddress } from "../_utils";
+import { ENABLED_ROUTES } from "../_utils";
 
 export class UnsupportedDex extends Error {
   constructor(dex: string) {
@@ -42,16 +42,6 @@ export function getSwapAndBridgeAddress(dex: string, chainId: number) {
     throw new UnsupportedDexOnChain(chainId, dex);
   }
   return address;
-}
-
-export function getAcrossSwapType(params: {
-  inputToken: string;
-  originChainId: number;
-  outputToken: string;
-  destinationChainId: number;
-}) {
-  // TODO: Implement this function
-  return "majorToMajor";
 }
 
 function _isDexSupported(
