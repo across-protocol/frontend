@@ -1,4 +1,6 @@
-import { ENABLED_ROUTES } from "../_utils";
+import { UniversalSwapAndBridge__factory } from "@across-protocol/contracts/dist/typechain";
+
+import { ENABLED_ROUTES, getProvider } from "../_utils";
 
 export class UnsupportedDex extends Error {
   constructor(dex: string) {
@@ -42,6 +44,15 @@ export function getSwapAndBridgeAddress(dex: string, chainId: number) {
     throw new UnsupportedDexOnChain(chainId, dex);
   }
   return address;
+}
+
+export function getSwapAndBridge(dex: string, chainId: number) {
+  const swapAndBridgeAddress = getSwapAndBridgeAddress(dex, chainId);
+
+  return UniversalSwapAndBridge__factory.connect(
+    swapAndBridgeAddress,
+    getProvider(chainId)
+  );
 }
 
 function _isDexSupported(

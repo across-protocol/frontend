@@ -86,6 +86,7 @@ export async function getCrossSwapQuotesForMinOutputB2B(crossSwap: CrossSwap) {
     message: "0x",
   });
   return {
+    crossSwap,
     destinationSwapQuote: undefined,
     bridgeQuote,
     originSwapQuote: undefined,

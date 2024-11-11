@@ -54,10 +54,16 @@ export type SwapQuote = {
     data: string;
     value: string;
   };
+  tokenIn: Token;
+  tokenOut: Token;
 };
 
 export type CrossSwapQuotes = {
+  crossSwap: CrossSwap;
   bridgeQuote: {
+    message?: string;
+    inputToken: Token;
+    outputToken: Token;
     inputAmount: BigNumber;
     outputAmount: BigNumber;
     minOutputAmount: BigNumber;

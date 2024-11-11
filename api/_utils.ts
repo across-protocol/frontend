@@ -869,15 +869,20 @@ export async function getBridgeQuoteForMinOutput(params: {
     outputToken: params.outputToken.address,
     originChainId: params.inputToken.chainId,
     destinationChainId: params.outputToken.chainId,
-    skipAmountLimit: true,
+    skipAmountLimit: false,
     recipient: params.recipient,
     message: params.message,
   };
 
-  // 1. Use 1 bps as indicative relayer fee pct
+  // 1. Use the suggested fees to get an indicative quote with
+  // input amount equal to minOutputAmount
   let tries = 0;
   let adjustedInputAmount = params.minOutputAmount;
-  let adjustmentPct = utils.parseEther("0.001").toString();
+  let indicativeQuote = await getSuggestedFees({
+    ...baseParams,
+    amount: adjustedInputAmount.toString(),
+  });
+  let adjustmentPct = indicativeQuote.totalRelayFee.pct;
   let finalQuote: Awaited<ReturnType<typeof getSuggestedFees>> | undefined =
     undefined;
 
@@ -900,6 +905,7 @@ export async function getBridgeQuoteForMinOutput(params: {
       finalQuote = adjustedQuote;
       break;
     } else {
+      adjustmentPct = adjustedQuote.totalRelayFee.pct;
       tries++;
     }
   }
@@ -914,6 +920,8 @@ export async function getBridgeQuoteForMinOutput(params: {
     minOutputAmount: params.minOutputAmount,
     suggestedFees: finalQuote,
     message: params.message,
+    inputToken: params.inputToken,
+    outputToken: params.outputToken,
   };
 }
 

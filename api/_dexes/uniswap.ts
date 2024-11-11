@@ -26,6 +26,8 @@ import {
   Token as AcrossToken,
   Swap,
   CrossSwap,
+  SwapQuote,
+  CrossSwapQuotes,
 } from "./types";
 import { getSwapAndBridgeAddress, NoSwapRouteError } from "./utils";
 import { AMOUNT_TYPE } from "./cross-swap";
@@ -163,9 +165,35 @@ export async function getUniswapCrossSwapQuotesForMinOutputB2A(
     }),
   });
 
+  // 3. Re-fetch destination swap quote with updated input amount and EXACT_INPUT type.
+  // This prevents leftover tokens in the MulticallHandler contract.
+  const updatedDestinationSwapQuote = await getUniswapQuote({
+    chainId: destinationSwapChainId,
+    tokenIn: bridgeableOutputToken,
+    tokenOut: crossSwap.outputToken,
+    amount: bridgeQuote.outputAmount.toString(),
+    recipient: crossSwap.recipient,
+    slippageTolerance: crossSwap.slippageTolerance,
+    type: AMOUNT_TYPE.EXACT_INPUT,
+  });
+
+  // 4. Rebuild message
+  bridgeQuote.message = buildMulticallHandlerMessage({
+    // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
+    fallbackRecipient: crossSwap.recipient,
+    actions: [
+      {
+        target: updatedDestinationSwapQuote.swapTx.to,
+        callData: updatedDestinationSwapQuote.swapTx.data,
+        value: updatedDestinationSwapQuote.swapTx.value,
+      },
+    ],
+  });
+
   return {
+    crossSwap,
     bridgeQuote,
-    destinationSwapQuote,
+    destinationSwapQuote: updatedDestinationSwapQuote,
     originSwapQuote: undefined,
   };
 }
@@ -230,6 +258,7 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2B(
   });
 
   return {
+    crossSwap,
     bridgeQuote,
     destinationSwapQuote: undefined,
     originSwapQuote,
@@ -277,15 +306,26 @@ export async function getBestUniswapCrossSwapQuotesForMinOutputA2A(
     );
   }
 
-  const crossSwapQuotes = await Promise.all(
+  const crossSwapQuotesSettledResults = await Promise.allSettled(
     bridgeRoutesToCompare.map((bridgeRoute) =>
       getUniswapCrossSwapQuotesForMinOutputA2A(crossSwap, bridgeRoute)
     )
   );
+  const crossSwapQuotes = crossSwapQuotesSettledResults
+    .filter((res) => res.status === "fulfilled")
+    .map((res) => (res as PromiseFulfilledResult<CrossSwapQuotes>).value);
+
+  if (crossSwapQuotes.length === 0) {
+    console.log("crossSwapQuotesSettledResults", crossSwapQuotesSettledResults);
+    throw new Error(
+      `No successful bridge quotes found for ${originSwapChainId} -> ${destinationSwapChainId}`
+    );
+  }
+
   // Compare quotes by lowest input amount
   const bestCrossSwapQuote = crossSwapQuotes.reduce((prev, curr) =>
-    prev.originSwapQuote.maximumAmountIn.lt(
-      curr.originSwapQuote.maximumAmountIn
+    prev.originSwapQuote!.maximumAmountIn.lt(
+      curr.originSwapQuote!.maximumAmountIn
     )
       ? prev
       : curr
@@ -375,6 +415,31 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
     }),
   });
 
+  // 3. Re-fetch destination swap quote with updated input amount and EXACT_INPUT type.
+  // This prevents leftover tokens in the MulticallHandler contract.
+  const updatedDestinationSwapQuote = await getUniswapQuote({
+    chainId: destinationSwapChainId,
+    tokenIn: bridgeableOutputToken,
+    tokenOut: crossSwap.outputToken,
+    amount: bridgeQuote.outputAmount.toString(),
+    recipient: crossSwap.recipient,
+    slippageTolerance: crossSwap.slippageTolerance,
+    type: AMOUNT_TYPE.EXACT_INPUT,
+  });
+
+  // 4. Rebuild message
+  bridgeQuote.message = buildMulticallHandlerMessage({
+    // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
+    fallbackRecipient: crossSwap.recipient,
+    actions: [
+      {
+        target: updatedDestinationSwapQuote.swapTx.to,
+        callData: updatedDestinationSwapQuote.swapTx.data,
+        value: updatedDestinationSwapQuote.swapTx.value,
+      },
+    ],
+  });
+
   // 3. Get origin swap quote for any input token -> bridgeable input token
   const originSwapQuote = await getUniswapQuote({
     chainId: originSwapChainId,
@@ -387,13 +452,14 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
   });
 
   return {
-    destinationSwapQuote,
+    crossSwap,
+    destinationSwapQuote: updatedDestinationSwapQuote,
     bridgeQuote,
     originSwapQuote,
   };
 }
 
-export async function getUniswapQuote(swap: Swap) {
+export async function getUniswapQuote(swap: Swap): Promise<SwapQuote> {
   const { router, options } = getSwapRouterAndOptions(swap);
 
   const amountCurrency =
@@ -457,6 +523,17 @@ export async function getUniswapQuote(swap: Swap) {
       value: route.methodParameters.value,
     },
   };
+
+  console.log("swapQuote", {
+    type: swap.type,
+    tokenIn: swapQuote.tokenIn.symbol,
+    tokenOut: swapQuote.tokenOut.symbol,
+    chainId: swap.chainId,
+    maximumAmountIn: swapQuote.maximumAmountIn.toString(),
+    minAmountOut: swapQuote.minAmountOut.toString(),
+    expectedAmountOut: swapQuote.expectedAmountOut.toString(),
+    expectedAmountIn: swapQuote.expectedAmountIn.toString(),
+  });
 
   return swapQuote;
 }
