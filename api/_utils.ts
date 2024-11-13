@@ -54,7 +54,7 @@ import {
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
 } from "./_constants";
-import { PoolStateOfUser, PoolStateResult } from "./_types";
+import { PoolStateOfUser, PoolStateResult, TokenInfo } from "./_types";
 import {
   buildInternalCacheKey,
   getCachedValue,
@@ -65,6 +65,7 @@ import {
   InvalidParamError,
   RouteNotEnabledError,
 } from "./_errors";
+import { ZERO_ADDRESS } from "@across-protocol/sdk/dist/esm/constants";
 
 export { InputError, handleErrorCondition } from "./_errors";
 
@@ -1991,4 +1992,106 @@ export function paramToArray<T extends undefined | string | string[]>(
 ): string[] | undefined {
   if (!param) return;
   return Array.isArray(param) ? param : [param];
+}
+
+export type TokenOptions = {
+  chainId: number;
+  address: string;
+};
+
+const TTL_TOKEN_INFO = 30 * 24 * 60 * 60; // 30 days
+
+function tokenInfoCache(params: TokenOptions) {
+  return makeCacheGetterAndSetter(
+    buildInternalCacheKey("tokenInfo", ...Object.values(params)),
+    TTL_TOKEN_INFO,
+    () => getTokenInfo(params),
+    (tokenDetails) => tokenDetails
+  );
+}
+
+export async function getCachedTokenInfo(params: TokenOptions) {
+  return tokenInfoCache(params).get();
+}
+
+async function getNativeTokenInfo(
+  chainId: number
+): Promise<Pick<TokenInfo, "decimals" | "symbol"> | undefined> {
+  const res = await fetch("https://chainid.network/chains.json");
+  const data = (await res.json()) as Array<{
+    chainId: number;
+    nativeCurrency: {
+      name: string;
+      symbol: string;
+      decimals: number;
+    };
+  }>;
+
+  return data.find((chain) => chain.chainId === chainId)?.nativeCurrency;
+}
+
+// find decimals and symbol for any token address on any chain.
+// assumes zero address for native tokens
+export async function getTokenInfo({
+  chainId,
+  address,
+}: TokenOptions): Promise<Omit<TokenInfo, "addresses" | "name">> {
+  try {
+    // NATIVE
+    if (address === ZERO_ADDRESS) {
+      const nativeTokenInfo = await getNativeTokenInfo(chainId);
+
+      if (!nativeTokenInfo) {
+        throw new Error(
+          `No native token found for chain ${chainId} on https://chainid.network`
+        );
+      }
+
+      return {
+        ...nativeTokenInfo,
+        address,
+      };
+    }
+
+    // ERC20 resolved statically
+    const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
+      Boolean(
+        token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
+      )
+    );
+
+    if (token) {
+      return {
+        decimals: token.decimals,
+        symbol: token.symbol,
+        address: token.addresses[chainId],
+      };
+    }
+
+    // ERC20 resolved dynamically
+    const provider = getProvider(chainId);
+
+    const erc20 = ERC20__factory.connect(
+      ethers.utils.getAddress(address),
+      provider
+    );
+
+    const [decimals, symbol] = await Promise.all([
+      erc20.decimals(),
+      erc20.symbol(),
+    ]);
+
+    return {
+      address,
+      decimals,
+      symbol,
+    };
+  } catch (err) {
+    throw new Error(
+      `Unable to find tokenDetails for address: ${address}, on chain with id: ${chainId}`,
+      {
+        cause: err instanceof Error && err.cause,
+      }
+    );
+  }
 }
