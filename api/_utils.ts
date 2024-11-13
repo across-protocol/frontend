@@ -65,7 +65,6 @@ import {
   InvalidParamError,
   RouteNotEnabledError,
 } from "./_errors";
-import { ZERO_ADDRESS } from "@across-protocol/sdk/dist/esm/constants";
 
 export { InputError, handleErrorCondition } from "./_errors";
 
@@ -2014,45 +2013,12 @@ export async function getCachedTokenInfo(params: TokenOptions) {
   return tokenInfoCache(params).get();
 }
 
-async function getNativeTokenInfo(
-  chainId: number
-): Promise<Pick<TokenInfo, "decimals" | "symbol"> | undefined> {
-  const res = await fetch("https://chainid.network/chains.json");
-  const data = (await res.json()) as Array<{
-    chainId: number;
-    nativeCurrency: {
-      name: string;
-      symbol: string;
-      decimals: number;
-    };
-  }>;
-
-  return data.find((chain) => chain.chainId === chainId)?.nativeCurrency;
-}
-
 // find decimals and symbol for any token address on any chain.
-// assumes zero address for native tokens
 export async function getTokenInfo({
   chainId,
   address,
 }: TokenOptions): Promise<Omit<TokenInfo, "addresses" | "name">> {
   try {
-    // NATIVE
-    if (address === ZERO_ADDRESS) {
-      const nativeTokenInfo = await getNativeTokenInfo(chainId);
-
-      if (!nativeTokenInfo) {
-        throw new Error(
-          `No native token found for chain ${chainId} on https://chainid.network`
-        );
-      }
-
-      return {
-        ...nativeTokenInfo,
-        address,
-      };
-    }
-
     // ERC20 resolved statically
     const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
       Boolean(
