@@ -2090,7 +2090,7 @@ export async function getTokenInfo({
     throw new Error(
       `Unable to find tokenDetails for address: ${address}, on chain with id: ${chainId}`,
       {
-        cause: err instanceof Error && err.cause,
+        cause: err instanceof Error && err,
       }
     );
   }
