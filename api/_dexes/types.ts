@@ -25,6 +25,7 @@ export type CrossSwap = {
   amount: BigNumber;
   inputToken: Token;
   outputToken: Token;
+  depositor: string;
   recipient: string;
   slippageTolerance: number;
   type: AmountType;
