@@ -277,6 +277,7 @@ const RouteSS = superstruct.object({
   toTokenAddress: superstruct.string(),
   toTokenSymbol: superstruct.string(),
   isNative: superstruct.boolean(),
+  toNative: superstruct.boolean(),
   l1TokenAddress: superstruct.string(),
 });
 const RoutesSS = superstruct.array(RouteSS);
@@ -529,3 +530,10 @@ export const vercelApiBaseUrl =
 export const defaultSwapSlippage = Number(
   process.env.REACT_APP_DEFAULT_SWAP_SLIPPAGE || 0.5
 );
+
+// Since the MulticallHandler contract will only ever receive WETH, we will
+// only ever need to call withdraw and transfer.
+export const WETH_INTERFACE = [
+  "function withdraw(uint256 wad)",
+  "function transfer(address dst, uint256 wad)",
+];
