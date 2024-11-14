@@ -229,6 +229,10 @@ export function getChainInfo(chainId: number): ChainInfo {
   return chainInfo;
 }
 
+// For destination chains with no native ETH support, we will send WETH even if the receiver is an EOA
+// TODO: add Aleph Zero here
+export const nonEthChains = [ChainId.POLYGON, ChainId.POLYGON_AMOY];
+
 export const tokenTable = Object.fromEntries(
   tokenList.map((token) => {
     return [token.symbol.toUpperCase(), token];
