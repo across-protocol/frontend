@@ -55,7 +55,13 @@ const handler = async (
     l1Token = ethers.utils.getAddress(l1Token);
 
     // Confirm that the base Currency is supported by Coingecko
-    const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
+    const baseCurrencyCoingeckoId =
+      TOKEN_SYMBOLS_MAP[
+        baseCurrency.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
+      ].coingeckoId;
+    const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(
+      baseCurrencyCoingeckoId
+    );
     if (!SUPPORTED_CG_BASE_CURRENCIES.has(baseCurrency) && !isDerivedCurrency) {
       throw new InvalidParamError({
         message: `Base currency supplied is not supported by this endpoint. Supported currencies: [${Array.from(
