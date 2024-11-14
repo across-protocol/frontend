@@ -147,7 +147,6 @@ export async function getUniswapCrossSwapQuotesForMinOutputB2A(
       amount: crossSwap.amount.toString(),
       recipient: crossSwap.recipient,
       slippageTolerance: crossSwap.slippageTolerance,
-      type: AMOUNT_TYPE.MIN_OUTPUT,
     },
     TradeType.EXACT_OUTPUT
   );
@@ -221,16 +220,18 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2B(
     // @TODO: handle ETH/WETH message generation
   });
 
+  const originSwap = {
+    chainId: originSwapChainId,
+    tokenIn: crossSwap.inputToken,
+    tokenOut: bridgeableInputToken,
+    recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
+    slippageTolerance: crossSwap.slippageTolerance,
+  };
   // 2.1. Get origin swap quote for any input token -> bridgeable input token
   const originSwapQuote = await getUniswapQuote(
     {
-      chainId: originSwapChainId,
-      tokenIn: crossSwap.inputToken,
-      tokenOut: bridgeableInputToken,
+      ...originSwap,
       amount: bridgeQuote.inputAmount.toString(),
-      recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
-      slippageTolerance: crossSwap.slippageTolerance,
-      type: AMOUNT_TYPE.MIN_OUTPUT,
     },
     TradeType.EXACT_OUTPUT
   );
@@ -238,13 +239,8 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2B(
   //      This prevents leftover tokens in the SwapAndBridge contract.
   const adjOriginSwapQuote = await getUniswapQuote(
     {
-      chainId: originSwapChainId,
-      tokenIn: crossSwap.inputToken,
-      tokenOut: bridgeableInputToken,
+      ...originSwap,
       amount: originSwapQuote.maximumAmountIn.toString(),
-      recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
-      slippageTolerance: crossSwap.slippageTolerance,
-      type: AMOUNT_TYPE.EXACT_INPUT,
     },
     TradeType.EXACT_INPUT
   );
@@ -384,7 +380,6 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
       amount: crossSwap.amount.toString(),
       recipient: crossSwap.recipient,
       slippageTolerance: crossSwap.slippageTolerance,
-      type: AMOUNT_TYPE.MIN_OUTPUT,
     },
     TradeType.EXACT_OUTPUT
   );
@@ -402,16 +397,18 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
     }),
   });
 
+  const originSwap = {
+    chainId: originSwapChainId,
+    tokenIn: crossSwap.inputToken,
+    tokenOut: bridgeableInputToken,
+    recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
+    slippageTolerance: crossSwap.slippageTolerance,
+  };
   // 3.1. Get origin swap quote for any input token -> bridgeable input token
   const originSwapQuote = await getUniswapQuote(
     {
-      chainId: originSwapChainId,
-      tokenIn: crossSwap.inputToken,
-      tokenOut: bridgeableInputToken,
+      ...originSwap,
       amount: bridgeQuote.inputAmount.toString(),
-      recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
-      slippageTolerance: crossSwap.slippageTolerance,
-      type: AMOUNT_TYPE.MIN_OUTPUT,
     },
     TradeType.EXACT_OUTPUT
   );
@@ -419,13 +416,8 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
   //      This prevents leftover tokens in the SwapAndBridge contract.
   const adjOriginSwapQuote = await getUniswapQuote(
     {
-      chainId: originSwapChainId,
-      tokenIn: crossSwap.inputToken,
-      tokenOut: bridgeableInputToken,
+      ...originSwap,
       amount: originSwapQuote.maximumAmountIn.toString(),
-      recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
-      slippageTolerance: crossSwap.slippageTolerance,
-      type: AMOUNT_TYPE.EXACT_INPUT,
     },
     TradeType.EXACT_INPUT
   );
@@ -439,7 +431,7 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
 }
 
 export async function getUniswapQuote(
-  swap: Swap,
+  swap: Omit<Swap, "type">,
   tradeType: TradeType
 ): Promise<SwapQuote> {
   const { router, options } = getSwapRouterAndOptions(swap);
@@ -473,7 +465,8 @@ export async function getUniswapQuote(
       tokenInSymbol: swap.tokenIn.symbol,
       tokenOutSymbol: swap.tokenOut.symbol,
       chainId: swap.chainId,
-      swapType: swap.type,
+      swapType:
+        tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
     });
   }
 
