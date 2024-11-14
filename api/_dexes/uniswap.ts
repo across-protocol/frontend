@@ -249,10 +249,10 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2B(
     TradeType.EXACT_INPUT
   );
 
-  if (adjOriginSwapQuote.minAmountOut.lt(crossSwap.amount)) {
+  if (adjOriginSwapQuote.minAmountOut.lt(bridgeQuote.inputAmount)) {
     throw new Error(
       `Origin swap quote min. output amount ${adjOriginSwapQuote.minAmountOut.toString()} ` +
-        `is less than targeted min. output amount ${crossSwap.amount.toString()}`
+        `is less than required bridge input amount ${bridgeQuote.inputAmount.toString()}`
     );
   }
 

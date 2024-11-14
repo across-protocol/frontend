@@ -187,7 +187,6 @@ export async function buildCrossSwapTx(
       deposit
     );
     toAddress = swapAndBridge.address;
-    console.log(tx, toAddress);
   } else {
     const spokePool = getSpokePool(
       crossSwapQuotes.crossSwap.inputToken.chainId
