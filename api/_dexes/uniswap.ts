@@ -498,7 +498,7 @@ export async function getUniswapQuote(
   };
 
   console.log("swapQuote", {
-    type: swap.type,
+    type: tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
     tokenIn: swapQuote.tokenIn.symbol,
     tokenOut: swapQuote.tokenOut.symbol,
     chainId: swap.chainId,
