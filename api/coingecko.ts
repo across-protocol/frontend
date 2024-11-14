@@ -56,9 +56,11 @@ const handler = async (
 
     // Confirm that the base Currency is supported by Coingecko
     const baseCurrencyCoingeckoId =
-      TOKEN_SYMBOLS_MAP[
-        baseCurrency.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
-      ].coingeckoId;
+      baseCurrency === "usd"
+        ? baseCurrency
+        : TOKEN_SYMBOLS_MAP[
+            baseCurrency.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
+          ].coingeckoId;
     const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(
       baseCurrencyCoingeckoId
     );
