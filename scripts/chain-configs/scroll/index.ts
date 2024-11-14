@@ -18,7 +18,7 @@ export default {
   chainId,
   publicRpcUrl: "https://rpc.scroll.io",
   blockTimeSeconds: 3,
-  tokens: ["WETH", "ETH", "USDC", "USDT", "WBTC"],
+  tokens: ["WETH", "ETH", "USDC", "USDT", "WBTC", "POOL"],
   enableCCTP: false,
   swapTokens: [],
 } as ChainConfig;
