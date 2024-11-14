@@ -44,9 +44,9 @@ export const SWAP_ROUTER_02_ADDRESS = {
   [CHAIN_IDs.ZORA]: "0x7De04c96BE5159c3b5CeffC82aa176dc81281557",
 };
 
-// Maps testnet chain IDs to their main counterparts. Used to get the mainnet token
+// Maps testnet chain IDs to their prod counterparts. Used to get the prod token
 // info for testnet tokens.
-const TESTNET_TO_MAINNET = {
+const TESTNET_TO_PROD = {
   [CHAIN_IDs.SEPOLIA]: CHAIN_IDs.MAINNET,
   [CHAIN_IDs.BASE_SEPOLIA]: CHAIN_IDs.BASE,
   [CHAIN_IDs.OPTIMISM_SEPOLIA]: CHAIN_IDs.OPTIMISM,
@@ -66,8 +66,8 @@ export async function getUniswapQuoteForOriginSwapExactInput(
   const initialTokenOut = { ...swap.tokenOut };
   // Always use mainnet tokens for retrieving quote, so that we can get equivalent quotes
   // for testnet tokens.
-  swap.tokenIn = getMainnetToken(swap.tokenIn);
-  swap.tokenOut = getMainnetToken(swap.tokenOut);
+  swap.tokenIn = getProdToken(swap.tokenIn);
+  swap.tokenOut = getProdToken(swap.tokenOut);
 
   const { swapTx, minAmountOut } = await getUniswapQuote(
     {
@@ -548,23 +548,23 @@ function floatToPercent(value: number) {
   );
 }
 
-function getMainnetToken(token: AcrossToken) {
-  const mainnetChainId = TESTNET_TO_MAINNET[token.chainId] || token.chainId;
+function getProdToken(token: AcrossToken) {
+  const prodChainId = TESTNET_TO_PROD[token.chainId] || token.chainId;
 
-  const mainnetToken =
+  const prodToken =
     TOKEN_SYMBOLS_MAP[token.symbol as keyof typeof TOKEN_SYMBOLS_MAP];
-  const mainnetTokenAddress = mainnetToken?.addresses[mainnetChainId];
+  const prodTokenAddress = prodToken?.addresses[prodChainId];
 
-  if (!mainnetToken || !mainnetTokenAddress) {
+  if (!prodToken || !prodTokenAddress) {
     throw new Error(
-      `Mainnet token not found for ${token.symbol} on chain ${token.chainId}`
+      `Prod token not found for ${token.symbol} on chain ${token.chainId}`
     );
   }
 
   return {
-    ...mainnetToken,
-    chainId: mainnetChainId,
-    address: mainnetTokenAddress,
+    ...prodToken,
+    chainId: prodChainId,
+    address: prodTokenAddress,
   };
 }
 
@@ -582,7 +582,7 @@ function buildDestinationSwapCrossChainMessage({
     // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
     fallbackRecipient: crossSwap.recipient,
     actions: [
-      // approve bridgeable input token
+      // approve bridgeable output token
       {
         target: bridgeableOutputToken.address,
         callData: encodeApproveCalldata(
@@ -591,17 +591,18 @@ function buildDestinationSwapCrossChainMessage({
         ),
         value: "0",
       },
-      // swap
+      // swap bridgeable output token -> cross swap output token
       {
         target: destinationSwapQuote.swapTx.to,
         callData: destinationSwapQuote.swapTx.data,
         value: destinationSwapQuote.swapTx.value,
       },
-      // drain
+      // drain remaining bridgeable output tokens from MulticallHandler contract
       {
         target: getMultiCallHandlerAddress(destinationSwapChainId),
         callData: encodeDrainCalldata(
           bridgeableOutputToken.address,
+          // @TODO: determine whether to use 'depositor' or 'recipient'
           crossSwap.recipient
         ),
         value: "0",
