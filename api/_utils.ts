@@ -64,6 +64,7 @@ import {
   MissingParamError,
   InvalidParamError,
   RouteNotEnabledError,
+  TokenNotFoundError,
 } from "./_errors";
 
 export { InputError, handleErrorCondition } from "./_errors";
@@ -2013,11 +2014,13 @@ export async function getCachedTokenInfo(params: TokenOptions) {
   return tokenInfoCache(params).get();
 }
 
-// find decimals and symbol for any token address on any chain.
+// find decimals and symbol for any token address on any chain we support
 export async function getTokenInfo({
   chainId,
   address,
-}: TokenOptions): Promise<Omit<TokenInfo, "addresses" | "name">> {
+}: TokenOptions): Promise<
+  Pick<TokenInfo, "address" | "name" | "symbol" | "decimals">
+> {
   try {
     // ERC20 resolved statically
     const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
@@ -2031,6 +2034,7 @@ export async function getTokenInfo({
         decimals: token.decimals,
         symbol: token.symbol,
         address: token.addresses[chainId],
+        name: token.name,
       };
     }
 
@@ -2042,22 +2046,36 @@ export async function getTokenInfo({
       provider
     );
 
-    const [decimals, symbol] = await Promise.all([
-      erc20.decimals(),
-      erc20.symbol(),
-    ]);
+    const calls = [
+      {
+        contract: erc20,
+        functionName: "decimals",
+      },
+      {
+        contract: erc20,
+        functionName: "symbol",
+      },
+      {
+        contract: erc20,
+        functionName: "name",
+      },
+    ];
+
+    const [[decimals], [symbol], [name]] = await callViaMulticall3(
+      provider,
+      calls
+    );
 
     return {
       address,
       decimals,
       symbol,
+      name,
     };
-  } catch (err) {
-    throw new Error(
-      `Unable to find tokenDetails for address: ${address}, on chain with id: ${chainId}`,
-      {
-        cause: err instanceof Error && err,
-      }
-    );
+  } catch (error) {
+    throw new TokenNotFoundError({
+      chainId,
+      address,
+    });
   }
 }
