@@ -15,6 +15,7 @@ import {
 import { ConvertDecimals } from "utils/convertdecimals";
 import getApiEndpoint from "utils/serverless-api";
 import { useQuery } from "@tanstack/react-query";
+import { CHAIN_IDs } from "@across-protocol/constants";
 
 export function useWalletBalanceTrace() {
   const { account } = useConnection();
@@ -91,7 +92,9 @@ const calculateUsdBalances = async (account: string) => {
             ),
           })
         );
-        if (chainId !== "137") {
+        if (
+          ![CHAIN_IDs.ALEPH_ZERO, CHAIN_IDs.POLYGON].includes(Number(chainId))
+        ) {
           const fn = async () => {
             return {
               fromChainId: Number(chainId),
