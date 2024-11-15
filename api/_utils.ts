@@ -2003,7 +2003,7 @@ const TTL_TOKEN_INFO = 30 * 24 * 60 * 60; // 30 days
 
 function tokenInfoCache(params: TokenOptions) {
   return makeCacheGetterAndSetter(
-    buildInternalCacheKey("tokenInfo", ...Object.values(params)),
+    buildInternalCacheKey("tokenInfo", params.address, params.chainId),
     TTL_TOKEN_INFO,
     () => getTokenInfo(params),
     (tokenDetails) => tokenDetails
