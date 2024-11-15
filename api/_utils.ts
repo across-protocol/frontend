@@ -54,7 +54,7 @@ import {
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
 } from "./_constants";
-import { PoolStateOfUser, PoolStateResult } from "./_types";
+import { PoolStateOfUser, PoolStateResult, TokenInfo } from "./_types";
 import {
   buildInternalCacheKey,
   getCachedValue,
@@ -64,6 +64,7 @@ import {
   MissingParamError,
   InvalidParamError,
   RouteNotEnabledError,
+  TokenNotFoundError,
 } from "./_errors";
 import { Token } from "./_dexes/types";
 
@@ -2164,4 +2165,107 @@ export function paramToArray<T extends undefined | string | string[]>(
 ): string[] | undefined {
   if (!param) return;
   return Array.isArray(param) ? param : [param];
+}
+
+export type TokenOptions = {
+  chainId: number;
+  address: string;
+};
+
+const TTL_TOKEN_INFO = 30 * 24 * 60 * 60; // 30 days
+
+function tokenInfoCache(params: TokenOptions) {
+  return makeCacheGetterAndSetter(
+    buildInternalCacheKey("tokenInfo", params.address, params.chainId),
+    TTL_TOKEN_INFO,
+    () => getTokenInfo(params),
+    (tokenDetails) => tokenDetails
+  );
+}
+
+export async function getCachedTokenInfo(params: TokenOptions) {
+  return tokenInfoCache(params).get();
+}
+
+// find decimals and symbol for any token address on any chain we support
+export async function getTokenInfo({
+  chainId,
+  address,
+}: TokenOptions): Promise<
+  Pick<TokenInfo, "address" | "name" | "symbol" | "decimals">
+> {
+  try {
+    if (!ethers.utils.isAddress(address)) {
+      throw new InvalidParamError({
+        param: "address",
+        message: '"Address" must be a valid ethereum address',
+      });
+    }
+
+    if (!Number.isSafeInteger(chainId) || chainId < 0) {
+      throw new InvalidParamError({
+        param: "chainId",
+        message: '"chainId" must be a positive integer',
+      });
+    }
+
+    // ERC20 resolved statically
+    const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
+      Boolean(
+        token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
+      )
+    );
+
+    if (token) {
+      return {
+        decimals: token.decimals,
+        symbol: token.symbol,
+        address: token.addresses[chainId],
+        name: token.name,
+      };
+    }
+
+    // ERC20 resolved dynamically
+    const provider = getProvider(chainId);
+
+    const erc20 = ERC20__factory.connect(
+      ethers.utils.getAddress(address),
+      provider
+    );
+
+    const calls = [
+      {
+        contract: erc20,
+        functionName: "decimals",
+      },
+      {
+        contract: erc20,
+        functionName: "symbol",
+      },
+      {
+        contract: erc20,
+        functionName: "name",
+      },
+    ];
+
+    const [[decimals], [symbol], [name]] = await callViaMulticall3(
+      provider,
+      calls
+    );
+
+    return {
+      address,
+      decimals,
+      symbol,
+      name,
+    };
+  } catch (error) {
+    throw new TokenNotFoundError({
+      chainId,
+      address,
+      opts: {
+        cause: error,
+      },
+    });
+  }
 }
