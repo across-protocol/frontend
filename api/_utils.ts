@@ -2022,6 +2022,20 @@ export async function getTokenInfo({
   Pick<TokenInfo, "address" | "name" | "symbol" | "decimals">
 > {
   try {
+    if (!ethers.utils.isAddress(address)) {
+      throw new InvalidParamError({
+        param: "address",
+        message: '"Address" must be a valid ethereum address',
+      });
+    }
+
+    if (!Number.isSafeInteger(chainId) || chainId < 0) {
+      throw new InvalidParamError({
+        param: "chainId",
+        message: '"chainId" must be a positive integer',
+      });
+    }
+
     // ERC20 resolved statically
     const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
       Boolean(
@@ -2076,6 +2090,9 @@ export async function getTokenInfo({
     throw new TokenNotFoundError({
       chainId,
       address,
+      opts: {
+        cause: error,
+      },
     });
   }
 }
