@@ -160,6 +160,9 @@ export const BLOCK_TAG_LAG = -1;
 export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
 // Note: this is a small set of currencies that the API will derive from the base currencies by using USD as an intermediary.
 export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set(["azero", "matic"]);
+export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
+  TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
+]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
 export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;
