@@ -29,7 +29,6 @@ import {
   SwapQuote,
 } from "./types";
 import { getSwapAndBridgeAddress, NoSwapRouteError } from "./utils";
-import { AMOUNT_TYPE } from "./cross-swap";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
 export const SWAP_ROUTER_02_ADDRESS = {
