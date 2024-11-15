@@ -123,7 +123,7 @@ const handler = async (
         );
       } else {
         if (CG_CONTRACTS_DEFERRED_TO_ID.has(l1Token)) {
-          price = await coingeckoClient.getCurrentPriceById(
+          [, price] = await coingeckoClient.getCurrentPriceById(
             l1Token,
             modifiedBaseCurrency
           );
