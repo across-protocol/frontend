@@ -23,7 +23,16 @@ import {
   utils,
   Signer,
 } from "ethers";
-import { define } from "superstruct";
+import {
+  assert,
+  coerce,
+  define,
+  Infer,
+  number,
+  string,
+  Struct,
+  validate,
+} from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
@@ -36,7 +45,7 @@ import {
 } from "./_abis";
 import { BatchAccountBalanceResponse } from "./batch-account-balance";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
-import { VercelResponse } from "@vercel/node";
+import { VercelRequestQuery, VercelResponse } from "@vercel/node";
 import {
   BLOCK_TAG_LAG,
   CHAIN_IDs,
@@ -1179,6 +1188,29 @@ export function applyMapFilter<InputType, MapType>(
     }
     return accumulator;
   }, []);
+}
+
+export const coercibleInt = coerce(number(), string(), (value) =>
+  parseInt(value)
+);
+
+// parses query params, while coercing Ints
+export function parseQuery<
+  Q extends VercelRequestQuery,
+  S extends Struct<any, any>,
+>(
+  query: Q,
+  schema: S,
+  opts: Parameters<typeof validate>[2] = {
+    coerce: true,
+  }
+): Infer<S> {
+  const [error, parsed] = validate(query, schema, opts);
+  if (error) {
+    throw error;
+  }
+  assert(parsed, schema);
+  return parsed;
 }
 
 /* ------------------------- superstruct validators ------------------------- */
