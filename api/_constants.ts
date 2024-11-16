@@ -159,7 +159,10 @@ export const BLOCK_TAG_LAG = -1;
 // we've decided to keep this list small for now.
 export const SUPPORTED_CG_BASE_CURRENCIES = new Set(["eth", "usd"]);
 // Note: this is a small set of currencies that the API will derive from the base currencies by using USD as an intermediary.
-export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set(["matic"]);
+export const SUPPORTED_CG_DERIVED_CURRENCIES = new Set(["azero", "matic"]);
+export const CG_CONTRACTS_DEFERRED_TO_ID = new Set([
+  TOKEN_SYMBOLS_MAP.AZERO.addresses[CHAIN_IDs.MAINNET],
+]);
 
 // 1:1 because we don't need to handle underlying tokens on FE
 export const EXTERNAL_POOL_TOKEN_EXCHANGE_RATE = utils.fixedPointAdjustment;
@@ -181,6 +184,10 @@ export const ENABLED_POOLS_UNDERLYING_TOKENS = [
 export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
 
 export const MULTICALL3_ADDRESS = "0xcA11bde05977b3631167028862bE2a173976CA11";
+export const MULTICALL3_ADDRESS_OVERRIDES = {
+  [CHAIN_IDs.ALEPH_ZERO]: "0x3CA11702f7c0F28e0b4e03C31F7492969862C569",
+  [CHAIN_IDs.ZK_SYNC]: "0xF9cda624FBC7e059355ce98a31693d299FACd963",
+};
 
 export const DEFI_LLAMA_POOL_LOOKUP: Record<string, string> = {
   "0x36Be1E97eA98AB43b4dEBf92742517266F5731a3":
