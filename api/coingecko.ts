@@ -10,6 +10,7 @@ import {
   getCachedTokenPrice,
 } from "./_utils";
 import {
+  CG_CONTRACTS_DEFERRED_TO_ID,
   CHAIN_IDs,
   SUPPORTED_CG_BASE_CURRENCIES,
   SUPPORTED_CG_DERIVED_CURRENCIES,
@@ -121,11 +122,16 @@ const handler = async (
           modifiedBaseCurrency
         );
       } else {
-        [, price] = await coingeckoClient.getCurrentPriceByContract(
-          l1Token,
-          modifiedBaseCurrency,
-          platformId
-        );
+        [, price] = CG_CONTRACTS_DEFERRED_TO_ID.has(l1Token)
+          ? await coingeckoClient.getCurrentPriceById(
+              l1Token,
+              modifiedBaseCurrency
+            )
+          : await coingeckoClient.getCurrentPriceByContract(
+              l1Token,
+              modifiedBaseCurrency,
+              platformId
+            );
       }
     }
 
