@@ -187,7 +187,6 @@ export const getLogger = (): LoggingUtility => {
  * @returns A valid URL of the current endpoint in vercel
  */
 export const resolveVercelEndpoint = () => {
-  return "https://app.across.to";
   const url = process.env.VERCEL_URL ?? "across.to";
   const env = process.env.VERCEL_ENV ?? "development";
   switch (env) {
@@ -2221,11 +2220,10 @@ export async function getCachedTokenInfo(params: TokenOptions) {
 }
 
 // find decimals and symbol for any token address on any chain we support
-export async function getTokenInfo({
-  chainId,
-  address,
-}: TokenOptions): Promise<
-  Pick<TokenInfo, "address" | "name" | "symbol" | "decimals">
+export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
+  Pick<TokenInfo, "address" | "name" | "symbol" | "decimals"> & {
+    chainId: number;
+  }
 > {
   try {
     if (!ethers.utils.isAddress(address)) {
@@ -2255,6 +2253,7 @@ export async function getTokenInfo({
         symbol: token.symbol,
         address: token.addresses[chainId],
         name: token.name,
+        chainId,
       };
     }
 
@@ -2291,6 +2290,7 @@ export async function getTokenInfo({
       decimals,
       symbol,
       name,
+      chainId,
     };
   } catch (error) {
     throw new TokenNotFoundError({

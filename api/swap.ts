@@ -10,14 +10,13 @@ import {
   positiveIntStr,
   validAddress,
   boolStr,
-  getTokenByAddress,
+  getCachedTokenInfo,
 } from "./_utils";
 import {
   AMOUNT_TYPE,
   buildCrossSwapTx,
   getCrossSwapQuotes,
 } from "./_dexes/cross-swap";
-import { Token } from "./_dexes/types";
 import { InvalidParamError, MissingParamError } from "./_errors";
 import { isValidIntegratorId } from "./_integrator-id";
 
@@ -101,45 +100,17 @@ const handler = async (
         : _minOutputAmount
     );
 
-    // 1. Get auxiliary data
-    // - Token details
-    // - Token prices
-    const knownInputToken = getTokenByAddress(
-      _inputTokenAddress,
-      originChainId
-    );
-    const inputToken: Token = knownInputToken
-      ? {
-          address: knownInputToken.addresses[originChainId]!,
-          decimals: knownInputToken.decimals,
-          symbol: knownInputToken.symbol,
-          chainId: originChainId,
-        }
-      : // @FIXME: fetch dynamic token details. using hardcoded values for now
-        {
-          address: _inputTokenAddress,
-          decimals: 18,
-          symbol: "UNKNOWN",
-          chainId: originChainId,
-        };
-    const knownOutputToken = getTokenByAddress(
-      _outputTokenAddress,
-      destinationChainId
-    );
-    const outputToken: Token = knownOutputToken
-      ? {
-          address: knownOutputToken.addresses[destinationChainId]!,
-          decimals: knownOutputToken.decimals,
-          symbol: knownOutputToken.symbol,
-          chainId: destinationChainId,
-        }
-      : // @FIXME: fetch dynamic token details. using hardcoded values for now
-        {
-          address: _outputTokenAddress,
-          decimals: 18,
-          symbol: "UNKNOWN",
-          chainId: destinationChainId,
-        };
+    // 1. Get token details
+    const [inputToken, outputToken] = await Promise.all([
+      getCachedTokenInfo({
+        address: _inputTokenAddress,
+        chainId: originChainId,
+      }),
+      getCachedTokenInfo({
+        address: _outputTokenAddress,
+        chainId: destinationChainId,
+      }),
+    ]);
 
     // 2. Get swap quotes and calldata based on the swap type
     const crossSwapQuotes = await getCrossSwapQuotes({
