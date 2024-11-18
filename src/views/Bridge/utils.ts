@@ -1,3 +1,4 @@
+import { CHAIN_IDs } from "@across-protocol/constants";
 import { BigNumber } from "ethers";
 
 import {
@@ -146,7 +147,11 @@ export function getInitialRoute(filter: RouteFilter = {}) {
   const routeFromQueryParams = getRouteFromQueryParams(filter);
   const routeFromFilter = findEnabledRoute({
     inputTokenSymbol:
-      filter.inputTokenSymbol ?? (filter?.fromChain === 137 ? "WETH" : "ETH"),
+      filter.inputTokenSymbol ??
+      (filter?.fromChain === CHAIN_IDs.ALEPH_ZERO ||
+      filter?.fromChain === CHAIN_IDs.POLYGON
+        ? "WETH"
+        : "ETH"),
     fromChain: filter.fromChain || hubPoolChainId,
     toChain: filter.toChain,
   });
