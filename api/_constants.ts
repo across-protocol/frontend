@@ -110,8 +110,8 @@ defaultRelayerFeeCapitalCostConfig["USDB"] = {
   ...defaultRelayerFeeCapitalCostConfig["DAI"],
 };
 
-export const coinGeckoAssetPlatformLookup: Record<string, string> = {
-  "0x4200000000000000000000000000000000000042": "optimistic-ethereum",
+export const coinGeckoAssetPlatformLookup: Record<string, number> = {
+  "0x4200000000000000000000000000000000000042": CHAIN_IDs.OPTIMISM,
 };
 
 export const defaultRelayerAddressOverride: {

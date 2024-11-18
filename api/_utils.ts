@@ -26,12 +26,12 @@ import {
 import {
   assert,
   coerce,
+  create,
   define,
   Infer,
   number,
   string,
   Struct,
-  validate,
 } from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
@@ -1194,23 +1194,15 @@ export const coercibleInt = coerce(number(), string(), (value) =>
   parseInt(value)
 );
 
-// parses query params, while coercing Ints
+// parses, coerces and validates query params
 export function parseQuery<
   Q extends VercelRequestQuery,
   S extends Struct<any, any>,
->(
-  query: Q,
-  schema: S,
-  opts: Parameters<typeof validate>[2] = {
-    coerce: true,
-  }
-): Infer<S> {
-  const [error, parsed] = validate(query, schema, opts);
-  if (error) {
-    throw error;
-  }
-  assert(parsed, schema);
-  return parsed;
+>(query: Q, schema: S): Infer<S> {
+  const coerced = create(query, schema);
+
+  assert(coerced, schema);
+  return coerced;
 }
 
 /* ------------------------- superstruct validators ------------------------- */
