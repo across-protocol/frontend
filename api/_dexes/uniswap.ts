@@ -29,6 +29,7 @@ import {
   SwapQuote,
 } from "./types";
 import { getSwapAndBridgeAddress, NoSwapRouteError } from "./utils";
+import { LEFTOVER_TYPE } from "./cross-swap";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
 export const SWAP_ROUTER_02_ADDRESS = {
@@ -136,19 +137,41 @@ export async function getUniswapCrossSwapQuotesForMinOutputB2A(
     chainId: destinationSwapChainId,
   };
 
-  // 1. Get destination swap quote for bridgeable output token -> any token
-  //    with exact output amount.
-  const destinationSwapQuote = await getUniswapQuote(
+  const destinationSwap = {
+    chainId: destinationSwapChainId,
+    tokenIn: bridgeableOutputToken,
+    tokenOut: crossSwap.outputToken,
+    recipient: crossSwap.recipient,
+    slippageTolerance: crossSwap.slippageTolerance,
+  };
+  // 1.1. Get destination swap quote for bridgeable output token -> any token
+  //      with exact output amount.
+  let destinationSwapQuote = await getUniswapQuote(
     {
-      chainId: destinationSwapChainId,
-      tokenIn: bridgeableOutputToken,
-      tokenOut: crossSwap.outputToken,
+      ...destinationSwap,
       amount: crossSwap.amount.toString(),
-      recipient: crossSwap.recipient,
-      slippageTolerance: crossSwap.slippageTolerance,
     },
     TradeType.EXACT_OUTPUT
   );
+  // 1.2. Re-fetch destination swap quote with exact input amount if leftover tokens
+  //      should be sent as output tokens instead of bridgeable output tokens.
+  if (crossSwap.leftoverType === LEFTOVER_TYPE.OUTPUT_TOKEN) {
+    destinationSwapQuote = await getUniswapQuote(
+      {
+        ...destinationSwap,
+        amount: destinationSwapQuote.maximumAmountIn
+          .mul(
+            ethers.utils.parseEther(
+              (1 + Number(crossSwap.slippageTolerance) / 100).toString()
+            )
+          )
+          .div(utils.fixedPointAdjustment)
+          .toString(),
+      },
+      TradeType.EXACT_INPUT
+    );
+    assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
+  }
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForMinOutput({
@@ -368,20 +391,49 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
     symbol: _bridgeableOutputToken.symbol,
     chainId: bridgeRoute.toChain,
   };
+  const originSwap = {
+    chainId: originSwapChainId,
+    tokenIn: crossSwap.inputToken,
+    tokenOut: bridgeableInputToken,
+    recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
+    slippageTolerance: crossSwap.slippageTolerance,
+  };
+  const destinationSwap = {
+    chainId: destinationSwapChainId,
+    tokenIn: bridgeableOutputToken,
+    tokenOut: crossSwap.outputToken,
+    recipient: crossSwap.recipient,
+    slippageTolerance: crossSwap.slippageTolerance,
+  };
 
-  // 1. Get destination swap quote for bridgeable output token -> any token
-  //    with exact output amount
-  const destinationSwapQuote = await getUniswapQuote(
+  // 1.1. Get destination swap quote for bridgeable output token -> any token
+  //      with exact output amount
+  let destinationSwapQuote = await getUniswapQuote(
     {
-      chainId: destinationSwapChainId,
-      tokenIn: bridgeableOutputToken,
-      tokenOut: crossSwap.outputToken,
+      ...destinationSwap,
       amount: crossSwap.amount.toString(),
-      recipient: crossSwap.recipient,
-      slippageTolerance: crossSwap.slippageTolerance,
     },
     TradeType.EXACT_OUTPUT
   );
+  // 1.2. Re-fetch destination swap quote with exact input amount if leftover tokens
+  //      should be sent as output tokens instead of bridgeable output tokens.
+  if (crossSwap.leftoverType === LEFTOVER_TYPE.OUTPUT_TOKEN) {
+    destinationSwapQuote = await getUniswapQuote(
+      {
+        ...destinationSwap,
+        amount: destinationSwapQuote.maximumAmountIn
+          .mul(
+            ethers.utils.parseEther(
+              (1 + Number(crossSwap.slippageTolerance) / 100).toString()
+            )
+          )
+          .div(utils.fixedPointAdjustment)
+          .toString(),
+      },
+      TradeType.EXACT_INPUT
+    );
+    assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
+  }
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForMinOutput({
@@ -396,13 +448,6 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
     }),
   });
 
-  const originSwap = {
-    chainId: originSwapChainId,
-    tokenIn: crossSwap.inputToken,
-    tokenOut: bridgeableInputToken,
-    recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
-    slippageTolerance: crossSwap.slippageTolerance,
-  };
   // 3.1. Get origin swap quote for any input token -> bridgeable input token
   const originSwapQuote = await getUniswapQuote(
     {
@@ -589,7 +634,7 @@ function buildDestinationSwapCrossChainMessage({
         callData: destinationSwapQuote.swapTx.data,
         value: destinationSwapQuote.swapTx.value,
       },
-      // drain remaining bridgeable output tokens from MulticallHandler contract
+      // drain remaining bridgeable output tokens from MultiCallHandler contract
       {
         target: getMultiCallHandlerAddress(destinationSwapChainId),
         callData: encodeDrainCalldata(
@@ -617,4 +662,16 @@ function encodeDrainCalldata(token: string, destination: string) {
     token,
     destination,
   ]);
+}
+
+function assertMinOutputAmount(
+  amountOut: BigNumber,
+  expectedMinAmountOut: BigNumber
+) {
+  if (amountOut.lt(expectedMinAmountOut)) {
+    throw new Error(
+      `Swap quote output amount ${amountOut.toString()} ` +
+        `is less than required min. output amount ${expectedMinAmountOut.toString()}`
+    );
+  }
 }

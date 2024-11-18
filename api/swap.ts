@@ -123,6 +123,8 @@ const handler = async (
       type: amountType,
       refundOnOrigin,
       refundAddress,
+      // @TODO: Make this configurable via env var or query param
+      leftoverType: "outputToken",
     });
 
     // 3. Build cross swap tx

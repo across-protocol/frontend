@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import { getSuggestedFees } from "../_utils";
-import { AmountType, CrossSwapType } from "./cross-swap";
+import { AmountType, CrossSwapType, LeftoverType } from "./cross-swap";
 
 export type { AmountType, CrossSwapType };
 
@@ -19,6 +19,7 @@ export type Swap = {
   recipient: string;
   slippageTolerance: number;
   type: AmountType;
+  leftoverType?: LeftoverType;
 };
 
 export type CrossSwap = {
@@ -29,6 +30,7 @@ export type CrossSwap = {
   recipient: string;
   slippageTolerance: number;
   type: AmountType;
+  leftoverType?: LeftoverType;
   refundOnOrigin: boolean;
   refundAddress?: string;
 };
