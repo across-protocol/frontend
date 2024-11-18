@@ -1,7 +1,6 @@
 import { BigNumber } from "ethers";
 
 import {
-  ChainId,
   Route,
   SwapRoute,
   fixedPointAdjustment,
@@ -11,6 +10,7 @@ import {
   hubPoolChainId,
   isProductionBuild,
   interchangeableTokensMap,
+  nonEthChains,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -69,18 +69,18 @@ export function getReceiveTokenSymbol(
   outputTokenSymbol: string,
   isReceiverContract: boolean
 ) {
-  const isDestinationChainPolygon = destinationChainId === ChainId.POLYGON;
+  const isDestinationChainWethOnly = nonEthChains.includes(destinationChainId);
 
   if (
     inputTokenSymbol === "ETH" &&
-    (isDestinationChainPolygon || isReceiverContract)
+    (isDestinationChainWethOnly || isReceiverContract)
   ) {
     return "WETH";
   }
 
   if (
     inputTokenSymbol === "WETH" &&
-    !isDestinationChainPolygon &&
+    !isDestinationChainWethOnly &&
     !isReceiverContract
   ) {
     return "ETH";

@@ -12,6 +12,7 @@ import {
   parseQuery,
 } from "./_utils";
 import {
+  CG_CONTRACTS_DEFERRED_TO_ID,
   CHAIN_IDs,
   SUPPORTED_CG_BASE_CURRENCIES,
   SUPPORTED_CG_DERIVED_CURRENCIES,
@@ -130,7 +131,7 @@ const handler = async (
     // date is provided, fetch historical price. Otherwise, fetch
     // current price.
     else {
-      // // If derived, we need to convert to USD first.
+      //  If derived, we need to convert to USD first.
       const modifiedBaseCurrency = isDerivedCurrency ? "usd" : baseCurrency;
       if (dateStr) {
         price = await coingeckoClient.getContractHistoricDayPrice(
