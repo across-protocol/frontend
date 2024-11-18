@@ -617,7 +617,7 @@ function buildDestinationSwapCrossChainMessage({
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
   return buildMulticallHandlerMessage({
     // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
-    fallbackRecipient: crossSwap.recipient,
+    fallbackRecipient: crossSwap.depositor,
     actions: [
       // approve bridgeable output token
       {
@@ -639,8 +639,7 @@ function buildDestinationSwapCrossChainMessage({
         target: getMultiCallHandlerAddress(destinationSwapChainId),
         callData: encodeDrainCalldata(
           bridgeableOutputToken.address,
-          // @TODO: determine whether to use 'depositor' or 'recipient'
-          crossSwap.recipient
+          crossSwap.depositor
         ),
         value: "0",
       },
