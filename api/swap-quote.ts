@@ -16,6 +16,7 @@ import {
 import { getUniswapQuoteForOriginSwapExactInput } from "./_dexes/uniswap";
 import { get1inchQuoteForOriginSwapExactInput } from "./_dexes/1inch";
 import { InvalidParamError } from "./_errors";
+import { AMOUNT_TYPE } from "./_dexes/cross-swap";
 
 const SwapQuoteQueryParamsSchema = type({
   swapToken: validAddress(),
@@ -105,7 +106,7 @@ const handler = async (
       },
       amount: swapTokenAmount,
       slippageTolerance: parseFloat(swapSlippage),
-      type: "EXACT_INPUT",
+      type: AMOUNT_TYPE.EXACT_INPUT,
     } as const;
 
     const quoteResults = await Promise.allSettled([

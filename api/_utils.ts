@@ -63,7 +63,7 @@ import {
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
 } from "./_constants";
-import { PoolStateOfUser, PoolStateResult } from "./_types";
+import { PoolStateOfUser, PoolStateResult, TokenInfo } from "./_types";
 import {
   buildInternalCacheKey,
   getCachedValue,
@@ -73,7 +73,9 @@ import {
   MissingParamError,
   InvalidParamError,
   RouteNotEnabledError,
+  TokenNotFoundError,
 } from "./_errors";
+import { Token } from "./_dexes/types";
 
 export { InputError, handleErrorCondition } from "./_errors";
 
@@ -815,6 +817,124 @@ export const getCachedLimits = async (
   ).data;
 };
 
+export async function getSuggestedFees(params: {
+  inputToken: string;
+  outputToken: string;
+  originChainId: number;
+  destinationChainId: number;
+  amount: string;
+  skipAmountLimit?: boolean;
+  message?: string;
+  depositMethod?: string;
+  recipient?: string;
+}): Promise<{
+  estimatedFillTimeSec: number;
+  timestamp: number;
+  isAmountTooLow: boolean;
+  quoteBlock: string;
+  exclusiveRelayer: string;
+  exclusivityDeadline: number;
+  spokePoolAddress: string;
+  destinationSpokePoolAddress: string;
+  totalRelayFee: {
+    pct: string;
+    total: string;
+  };
+  relayerCapitalFee: {
+    pct: string;
+    total: string;
+  };
+  relayerGasFee: {
+    pct: string;
+    total: string;
+  };
+  lpFee: {
+    pct: string;
+    total: string;
+  };
+  limits: {
+    minDeposit: string;
+    maxDeposit: string;
+    maxDepositInstant: string;
+    maxDepositShortDelay: string;
+    recommendedDepositInstant: string;
+  };
+}> {
+  return (
+    await axios(`${resolveVercelEndpoint()}/api/suggested-fees`, {
+      params,
+    })
+  ).data;
+}
+
+export async function getBridgeQuoteForMinOutput(params: {
+  inputToken: Token;
+  outputToken: Token;
+  minOutputAmount: BigNumber;
+  recipient?: string;
+  message?: string;
+}) {
+  const baseParams = {
+    inputToken: params.inputToken.address,
+    outputToken: params.outputToken.address,
+    originChainId: params.inputToken.chainId,
+    destinationChainId: params.outputToken.chainId,
+    skipAmountLimit: false,
+    recipient: params.recipient,
+    message: params.message,
+  };
+
+  // 1. Use the suggested fees to get an indicative quote with
+  // input amount equal to minOutputAmount
+  let tries = 0;
+  let adjustedInputAmount = params.minOutputAmount;
+  let indicativeQuote = await getSuggestedFees({
+    ...baseParams,
+    amount: adjustedInputAmount.toString(),
+  });
+  let adjustmentPct = indicativeQuote.totalRelayFee.pct;
+  let finalQuote: Awaited<ReturnType<typeof getSuggestedFees>> | undefined =
+    undefined;
+
+  // 2. Adjust input amount to meet minOutputAmount
+  while (tries < 3) {
+    adjustedInputAmount = adjustedInputAmount
+      .mul(utils.parseEther("1").add(adjustmentPct))
+      .div(sdk.utils.fixedPointAdjustment);
+    const adjustedQuote = await getSuggestedFees({
+      ...baseParams,
+      amount: adjustedInputAmount.toString(),
+    });
+    const outputAmount = adjustedInputAmount.sub(
+      adjustedInputAmount
+        .mul(adjustedQuote.totalRelayFee.pct)
+        .div(sdk.utils.fixedPointAdjustment)
+    );
+
+    if (outputAmount.gte(params.minOutputAmount)) {
+      finalQuote = adjustedQuote;
+      break;
+    } else {
+      adjustmentPct = adjustedQuote.totalRelayFee.pct;
+      tries++;
+    }
+  }
+
+  if (!finalQuote) {
+    throw new Error("Failed to adjust input amount to meet minOutputAmount");
+  }
+
+  return {
+    inputAmount: adjustedInputAmount,
+    outputAmount: adjustedInputAmount.sub(finalQuote.totalRelayFee.total),
+    minOutputAmount: params.minOutputAmount,
+    suggestedFees: finalQuote,
+    message: params.message,
+    inputToken: params.inputToken,
+    outputToken: params.outputToken,
+  };
+}
+
 export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 
 /**
@@ -950,6 +1070,60 @@ export const isRouteEnabled = (
   );
   return !!enabled;
 };
+
+export function isInputTokenBridgeable(
+  inputTokenAddress: string,
+  originChainId: number
+) {
+  return ENABLED_ROUTES.routes.some(
+    ({ fromTokenAddress, fromChain }) =>
+      originChainId === fromChain &&
+      inputTokenAddress.toLowerCase() === fromTokenAddress.toLowerCase()
+  );
+}
+
+export function isOutputTokenBridgeable(
+  outputTokenAddress: string,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.some(
+    ({ toTokenAddress, toChain }) =>
+      destinationChainId === toChain &&
+      toTokenAddress.toLowerCase() === outputTokenAddress.toLowerCase()
+  );
+}
+
+export function getRouteByInputTokenAndDestinationChain(
+  inputTokenAddress: string,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.find(
+    ({ fromTokenAddress, toChain }) =>
+      destinationChainId === toChain &&
+      fromTokenAddress.toLowerCase() === inputTokenAddress.toLowerCase()
+  );
+}
+
+export function getRouteByOutputTokenAndOriginChain(
+  outputTokenAddress: string,
+  originChainId: number
+) {
+  return ENABLED_ROUTES.routes.find(
+    ({ toTokenAddress, fromChain }) =>
+      originChainId === fromChain &&
+      outputTokenAddress.toLowerCase() === toTokenAddress.toLowerCase()
+  );
+}
+
+export function getRoutesByChainIds(
+  originChainId: number,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.filter(
+    ({ toChain, fromChain }) =>
+      originChainId === fromChain && destinationChainId === toChain
+  );
+}
 
 /**
  * Resolves the balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
@@ -2015,4 +2189,107 @@ export function paramToArray<T extends undefined | string | string[]>(
 ): string[] | undefined {
   if (!param) return;
   return Array.isArray(param) ? param : [param];
+}
+
+export type TokenOptions = {
+  chainId: number;
+  address: string;
+};
+
+const TTL_TOKEN_INFO = 30 * 24 * 60 * 60; // 30 days
+
+function tokenInfoCache(params: TokenOptions) {
+  return makeCacheGetterAndSetter(
+    buildInternalCacheKey("tokenInfo", params.address, params.chainId),
+    TTL_TOKEN_INFO,
+    () => getTokenInfo(params),
+    (tokenDetails) => tokenDetails
+  );
+}
+
+export async function getCachedTokenInfo(params: TokenOptions) {
+  return tokenInfoCache(params).get();
+}
+
+// find decimals and symbol for any token address on any chain we support
+export async function getTokenInfo({
+  chainId,
+  address,
+}: TokenOptions): Promise<
+  Pick<TokenInfo, "address" | "name" | "symbol" | "decimals">
+> {
+  try {
+    if (!ethers.utils.isAddress(address)) {
+      throw new InvalidParamError({
+        param: "address",
+        message: '"Address" must be a valid ethereum address',
+      });
+    }
+
+    if (!Number.isSafeInteger(chainId) || chainId < 0) {
+      throw new InvalidParamError({
+        param: "chainId",
+        message: '"chainId" must be a positive integer',
+      });
+    }
+
+    // ERC20 resolved statically
+    const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
+      Boolean(
+        token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
+      )
+    );
+
+    if (token) {
+      return {
+        decimals: token.decimals,
+        symbol: token.symbol,
+        address: token.addresses[chainId],
+        name: token.name,
+      };
+    }
+
+    // ERC20 resolved dynamically
+    const provider = getProvider(chainId);
+
+    const erc20 = ERC20__factory.connect(
+      ethers.utils.getAddress(address),
+      provider
+    );
+
+    const calls = [
+      {
+        contract: erc20,
+        functionName: "decimals",
+      },
+      {
+        contract: erc20,
+        functionName: "symbol",
+      },
+      {
+        contract: erc20,
+        functionName: "name",
+      },
+    ];
+
+    const [[decimals], [symbol], [name]] = await callViaMulticall3(
+      provider,
+      calls
+    );
+
+    return {
+      address,
+      decimals,
+      symbol,
+      name,
+    };
+  } catch (error) {
+    throw new TokenNotFoundError({
+      chainId,
+      address,
+      opts: {
+        cause: error,
+      },
+    });
+  }
 }
