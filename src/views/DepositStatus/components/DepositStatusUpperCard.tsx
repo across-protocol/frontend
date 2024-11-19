@@ -23,6 +23,8 @@ import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus } from "../types";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DateTime } from "luxon";
+import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
+import SharedSocialsCard from "./SharedSocialsCard";
 import { useIndexerDepositsTracking } from "hooks/useIndexerDepositTracking";
 
 type Props = {
@@ -48,6 +50,13 @@ export function DepositStatusUpperCard({
     toChainId,
     fromBridgePagePayload
   );
+
+  const { estimatedRewards, amountAsBaseCurrency } =
+    useResolveFromBridgePagePayload(
+      toChainId,
+      inputTokenSymbol,
+      fromBridgePagePayload
+    );
 
   void useIndexerDepositsTracking([
     { originChainId: fromChainId, depositTxnHash: depositTxHash },
@@ -181,18 +190,28 @@ export function DepositStatusUpperCard({
           </SubTitleWrapper>
         </TopWrapperTitleWrapper>
       )}
-      <DepositTimesCard
-        status={status}
-        depositTxCompletedTimestampSeconds={depositTxCompletedTime}
-        depositTxElapsedSeconds={depositTxElapsedSeconds}
-        fillTxElapsedSeconds={fillTxElapsedSeconds}
-        fillTxHash={fillQuery.data?.fillTxHashes[0]}
-        depositTxHash={depositTxHash}
-        fromChainId={fromChainId}
-        toChainId={toChainId}
-        inputTokenSymbol={inputTokenSymbol}
-        outputTokenSymbol={outputTokenSymbol}
-      />
+      <DepositTimeCardSocialSharedWrapper>
+        <DepositTimesCard
+          status={status}
+          depositTxCompletedTimestampSeconds={depositTxCompletedTime}
+          depositTxElapsedSeconds={depositTxElapsedSeconds}
+          fillTxElapsedSeconds={fillTxElapsedSeconds}
+          fillTxHash={fillQuery.data?.fillTxHashes[0]}
+          depositTxHash={depositTxHash}
+          fromChainId={fromChainId}
+          toChainId={toChainId}
+          inputTokenSymbol={inputTokenSymbol}
+          outputTokenSymbol={outputTokenSymbol}
+          amountSent={amountAsBaseCurrency?.toString()}
+          netFee={estimatedRewards?.netFeeAsBaseCurrency?.toString()}
+        />
+        <SharedSocialsCard
+          inputTokenSymbol={inputTokenSymbol}
+          fromChainId={fromChainId}
+          toChainId={toChainId}
+          amountSent={fromBridgePagePayload?.depositArgs?.initialAmount}
+        />
+      </DepositTimeCardSocialSharedWrapper>
     </Wrapper>
   );
 }
@@ -202,13 +221,21 @@ const Wrapper = styled.div`
   flex-direction: column;
   gap: 30px;
 
-  background-image: url(${BgBanner});
+  /* background-image: url(${BgBanner}); */
   background-color: ${COLORS["black-800"]};
   border-bottom: 1px solid ${COLORS["grey-600"]};
 
   width: calc(100% + 48px);
   margin: 0 -24px;
   padding: 45px 24px 34px;
+`;
+
+const DepositTimeCardSocialSharedWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  align-self: stretch;
 `;
 
 const TopWrapperTitleWrapper = styled.div`

@@ -71,6 +71,7 @@ const variables = css`
 
     --color-neutrals-grey-500: #4c4e57;
     --color-neutrals-grey-600: #3e4047;
+    --color-neutrals-grey-650: #393a40;
 
     --color-neutrals-light-100: #ffffff;
     --color-neutrals-light-200: #e0f3ff;
