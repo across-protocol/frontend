@@ -346,6 +346,14 @@ function getStaticIsContract(chainId: number, address: string) {
   return !!deployedAcrossContract;
 }
 
+export function getWrappedNativeTokenAddress(chainId: number) {
+  if (chainId === CHAIN_IDs.POLYGON || chainId === CHAIN_IDs.POLYGON_AMOY) {
+    return TOKEN_SYMBOLS_MAP.WMATIC.addresses[chainId];
+  }
+
+  return TOKEN_SYMBOLS_MAP.WETH.addresses[chainId];
+}
+
 /**
  * Utility function to resolve route details based on given `inputTokenAddress` and `destinationChainId`.
  * The optional parameter `originChainId` can be omitted if the `inputTokenAddress` is unique across all

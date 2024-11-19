@@ -46,3 +46,34 @@ export function buildMulticallHandlerMessage(params: {
     ]
   );
 }
+
+export function encodeWethWithdrawCalldata(value: ethers.BigNumber) {
+  const withdrawFunction = "function withdraw(uint256 wad)";
+  const wethInterface = new ethers.utils.Interface([withdrawFunction]);
+  return wethInterface.encodeFunctionData("withdraw", [value]);
+}
+
+export function encodeApproveCalldata(
+  spender: string,
+  value: ethers.BigNumber
+) {
+  const approveFunction = "function approve(address spender, uint256 value)";
+  const erc20Interface = new ethers.utils.Interface([approveFunction]);
+  return erc20Interface.encodeFunctionData("approve", [spender, value]);
+}
+
+export function encodeTransferCalldata(to: string, value: ethers.BigNumber) {
+  const approveFunction = "function transfer(address to, uint256 value)";
+  const erc20Interface = new ethers.utils.Interface([approveFunction]);
+  return erc20Interface.encodeFunctionData("transfer", [to, value]);
+}
+
+export function encodeDrainCalldata(token: string, destination: string) {
+  const drainFunction =
+    "function drainLeftoverTokens(address token, address payable destination)";
+  const multicallHandlerInterface = new ethers.utils.Interface([drainFunction]);
+  return multicallHandlerInterface.encodeFunctionData("drainLeftoverTokens", [
+    token,
+    destination,
+  ]);
+}

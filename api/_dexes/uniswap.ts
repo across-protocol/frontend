@@ -19,6 +19,9 @@ import {
 import { TOKEN_SYMBOLS_MAP } from "../_constants";
 import {
   buildMulticallHandlerMessage,
+  encodeApproveCalldata,
+  encodeDrainCalldata,
+  encodeWethWithdrawCalldata,
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
 import {
@@ -28,7 +31,11 @@ import {
   CrossSwap,
   SwapQuote,
 } from "./types";
-import { getSwapAndBridgeAddress, NoSwapRouteError } from "./utils";
+import {
+  buildExactOutputBridgeTokenMessage,
+  getSwapAndBridgeAddress,
+  NoSwapRouteError,
+} from "./utils";
 import { LEFTOVER_TYPE } from "./cross-swap";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
@@ -141,7 +148,9 @@ export async function getUniswapCrossSwapQuotesForMinOutputB2A(
     chainId: destinationSwapChainId,
     tokenIn: bridgeableOutputToken,
     tokenOut: crossSwap.outputToken,
-    recipient: crossSwap.recipient,
+    recipient: crossSwap.isOutputNative
+      ? getMultiCallHandlerAddress(destinationSwapChainId)
+      : crossSwap.recipient,
     slippageTolerance: crossSwap.slippageTolerance,
   };
   // 1.1. Get destination swap quote for bridgeable output token -> any token
@@ -239,7 +248,7 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2B(
     inputToken: bridgeableInputToken,
     outputToken: crossSwap.outputToken,
     minOutputAmount: crossSwap.amount,
-    // @TODO: handle ETH/WETH message generation
+    message: buildExactOutputBridgeTokenMessage(crossSwap),
   });
 
   const originSwap = {
@@ -615,6 +624,22 @@ function buildDestinationSwapCrossChainMessage({
   destinationSwapQuote: SwapQuote;
 }) {
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
+  const nativeEthActions = crossSwap.isOutputNative
+    ? // If output token is native, we need to unwrap WETH before sending it to the
+      // recipient. This is because we only handle WETH in the destination swap.
+      [
+        {
+          target: crossSwap.outputToken.address,
+          callData: encodeWethWithdrawCalldata(crossSwap.amount),
+          value: "0",
+        },
+        {
+          target: crossSwap.recipient,
+          callData: "0x",
+          value: crossSwap.amount.toString(),
+        },
+      ]
+    : [];
   return buildMulticallHandlerMessage({
     // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
     fallbackRecipient: crossSwap.depositor,
@@ -634,6 +659,7 @@ function buildDestinationSwapCrossChainMessage({
         callData: destinationSwapQuote.swapTx.data,
         value: destinationSwapQuote.swapTx.value,
       },
+      ...nativeEthActions,
       // drain remaining bridgeable output tokens from MultiCallHandler contract
       {
         target: getMultiCallHandlerAddress(destinationSwapChainId),
@@ -645,22 +671,6 @@ function buildDestinationSwapCrossChainMessage({
       },
     ],
   });
-}
-
-function encodeApproveCalldata(spender: string, value: ethers.BigNumber) {
-  const approveFunction = "function approve(address spender, uint256 value)";
-  const erc20Interface = new ethers.utils.Interface([approveFunction]);
-  return erc20Interface.encodeFunctionData("approve", [spender, value]);
-}
-
-function encodeDrainCalldata(token: string, destination: string) {
-  const drainFunction =
-    "function drainLeftoverTokens(address token, address payable destination)";
-  const multicallHandlerInterface = new ethers.utils.Interface([drainFunction]);
-  return multicallHandlerInterface.encodeFunctionData("drainLeftoverTokens", [
-    token,
-    destination,
-  ]);
 }
 
 function assertMinOutputAmount(

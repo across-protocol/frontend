@@ -14,7 +14,7 @@ import {
   getBestUniswapCrossSwapQuotesForMinOutputA2A,
 } from "./uniswap";
 import { CrossSwap, CrossSwapQuotes } from "./types";
-import { getSwapAndBridge } from "./utils";
+import { buildExactOutputBridgeTokenMessage, getSwapAndBridge } from "./utils";
 import { tagIntegratorId } from "../_integrator-id";
 import { PopulatedTransaction } from "ethers";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
@@ -97,8 +97,8 @@ export async function getCrossSwapQuotesForMinOutputB2B(crossSwap: CrossSwap) {
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     minOutputAmount: crossSwap.amount,
-    // @TODO: handle ETH/WETH message generation
-    message: "0x",
+    recipient: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
+    message: buildExactOutputBridgeTokenMessage(crossSwap),
   });
   return {
     crossSwap,
@@ -163,9 +163,7 @@ export async function buildCrossSwapTx(
   const spokePool = getSpokePool(originChainId);
   const deposit = {
     depositor: crossSwapQuotes.crossSwap.recipient,
-    recipient: crossSwapQuotes.destinationSwapQuote
-      ? getMultiCallHandlerAddress(destinationChainId)
-      : crossSwapQuotes.crossSwap.recipient,
+    recipient: getMultiCallHandlerAddress(destinationChainId),
     inputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
     outputToken: crossSwapQuotes.bridgeQuote.outputToken.address,
     inputAmount: crossSwapQuotes.bridgeQuote.inputAmount,
@@ -192,6 +190,12 @@ export async function buildCrossSwapTx(
       crossSwapQuotes.originSwapQuote.maximumAmountIn,
       crossSwapQuotes.originSwapQuote.minAmountOut,
       deposit
+      // @FIXME: This needs a redeployed version of the contract
+      // {
+      //   value: crossSwapQuotes.crossSwap.isInputNative
+      //     ? deposit.inputAmount
+      //     : 0,
+      // }
     );
     toAddress = swapAndBridge.address;
   } else {
@@ -210,7 +214,12 @@ export async function buildCrossSwapTx(
       deposit.quoteTimestamp,
       deposit.fillDeadline,
       deposit.exclusivityDeadline,
-      deposit.message
+      deposit.message,
+      {
+        value: crossSwapQuotes.crossSwap.isInputNative
+          ? deposit.inputAmount
+          : 0,
+      }
     );
     toAddress = spokePool.address;
   }

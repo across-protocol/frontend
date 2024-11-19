@@ -1,6 +1,6 @@
 import { VercelResponse } from "@vercel/node";
 import { assert, Infer, type, string, optional } from "superstruct";
-import { BigNumber } from "ethers";
+import { BigNumber, constants, utils } from "ethers";
 
 import { TypedVercelRequest } from "./_types";
 import {
@@ -11,6 +11,7 @@ import {
   validAddress,
   boolStr,
   getCachedTokenInfo,
+  getWrappedNativeTokenAddress,
 } from "./_utils";
 import {
   AMOUNT_TYPE,
@@ -68,6 +69,14 @@ const handler = async (
     const originChainId = Number(_originChainId);
     const destinationChainId = Number(_destinationChainId);
     const refundOnOrigin = _refundOnOrigin === "true";
+    const isInputNative = _inputTokenAddress === constants.AddressZero;
+    const isOutputNative = _outputTokenAddress === constants.AddressZero;
+    const inputTokenAddress = isInputNative
+      ? getWrappedNativeTokenAddress(originChainId)
+      : utils.getAddress(_inputTokenAddress);
+    const outputTokenAddress = isOutputNative
+      ? getWrappedNativeTokenAddress(destinationChainId)
+      : utils.getAddress(_outputTokenAddress);
 
     if (!_minOutputAmount && !_exactInputAmount) {
       throw new MissingParamError({
@@ -91,6 +100,13 @@ const handler = async (
       });
     }
 
+    if (!inputTokenAddress || !outputTokenAddress) {
+      throw new InvalidParamError({
+        param: "inputToken, outputToken",
+        message: "Invalid input or output token address",
+      });
+    }
+
     const amountType = _minOutputAmount
       ? AMOUNT_TYPE.MIN_OUTPUT
       : AMOUNT_TYPE.EXACT_INPUT;
@@ -103,11 +119,11 @@ const handler = async (
     // 1. Get token details
     const [inputToken, outputToken] = await Promise.all([
       getCachedTokenInfo({
-        address: _inputTokenAddress,
+        address: inputTokenAddress,
         chainId: originChainId,
       }),
       getCachedTokenInfo({
-        address: _outputTokenAddress,
+        address: outputTokenAddress,
         chainId: destinationChainId,
       }),
     ]);
@@ -125,6 +141,8 @@ const handler = async (
       refundAddress,
       // @TODO: Make this configurable via env var or query param
       leftoverType: "bridgeableToken",
+      isInputNative,
+      isOutputNative,
     });
 
     // 3. Build cross swap tx
