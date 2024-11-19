@@ -439,6 +439,7 @@ export const COLORS = {
   "grey-400-5": "var(--color-neutrals-grey-400-5)",
   "grey-500": "var(--color-neutrals-grey-500)",
   "grey-600": "var(--color-neutrals-grey-600)",
+  "grey-650": "var(--color-neutrals-grey-650)",
   "light-100": "var(--color-neutrals-light-100)",
   "light-200": "var(--color-neutrals-light-200)",
   "light-300": "var(--color-neutrals-light-300)",
@@ -529,8 +530,7 @@ export const gasExpenditureDeposit = BigNumber.from(90_000);
 // Used to determine whether to show the "delayed" warning in the deposits table
 export const pendingStateTimeUntilDelayed = 5 * 60; // 5 mins
 
-export const vercelApiBaseUrl =
-  process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE || "";
+export const vercelApiBaseUrl = "https://app.across.to";
 
 // Swap slippage in %, 0.5 = 0.5%
 export const defaultSwapSlippage = Number(
