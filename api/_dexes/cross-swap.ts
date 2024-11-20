@@ -1,4 +1,5 @@
 import { SpokePool } from "@across-protocol/contracts/dist/typechain";
+import { PopulatedTransaction } from "ethers";
 
 import {
   isRouteEnabled,
@@ -20,7 +21,6 @@ import {
   getSwapAndBridge,
 } from "./utils";
 import { tagIntegratorId } from "../_integrator-id";
-import { PopulatedTransaction } from "ethers";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
 
 export type CrossSwapType =
