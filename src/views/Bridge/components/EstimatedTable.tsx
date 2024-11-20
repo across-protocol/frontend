@@ -164,7 +164,7 @@ const EstimatedTable = ({
         </Tooltip>
       </ToolTipWrapper>
       <Text color="grey-400" size="md">
-        {bridgeFeeAsBaseCurrency
+        {bridgeFeeAsBaseCurrency && !showLoadingSkeleton
           ? `$${formatUSD(bridgeFeeAsBaseCurrency)}`
           : "-"}
       </Text>
@@ -185,7 +185,9 @@ const EstimatedTable = ({
         </Tooltip>
       </ToolTipWrapper>
       <Text color="grey-400" size="md">
-        {gasFeeAsBaseCurrency ? `$${formatUSD(gasFeeAsBaseCurrency)}` : "-"}
+        {gasFeeAsBaseCurrency && !showLoadingSkeleton
+          ? `$${formatUSD(gasFeeAsBaseCurrency)}`
+          : "-"}
       </Text>
     </>,
     rewardDisplaySymbol && rewardToken && rewardPercentage ? (
