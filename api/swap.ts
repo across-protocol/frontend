@@ -10,11 +10,15 @@ import {
   positiveIntStr,
   validAddress,
   boolStr,
-  getTokenByAddress,
+  getCachedTokenInfo,
 } from "./_utils";
-import { AMOUNT_TYPE, getCrossSwapQuotes } from "./_dexes/cross-swap";
-import { Token } from "./_dexes/types";
+import {
+  AMOUNT_TYPE,
+  buildCrossSwapTx,
+  getCrossSwapQuotes,
+} from "./_dexes/cross-swap";
 import { InvalidParamError, MissingParamError } from "./_errors";
+import { isValidIntegratorId } from "./_integrator-id";
 
 const SwapQueryParamsSchema = type({
   minOutputAmount: optional(positiveIntStr()),
@@ -23,8 +27,9 @@ const SwapQueryParamsSchema = type({
   outputToken: validAddress(),
   originChainId: positiveIntStr(),
   destinationChainId: positiveIntStr(),
-  recipient: validAddress(),
-  integratorId: string(),
+  depositor: validAddress(),
+  recipient: optional(validAddress()),
+  integratorId: optional(string()),
   refundAddress: optional(validAddress()),
   refundOnOrigin: optional(boolStr()),
   slippageTolerance: optional(positiveFloatStr(50)), // max. 50% slippage
@@ -53,10 +58,11 @@ const handler = async (
       originChainId: _originChainId,
       destinationChainId: _destinationChainId,
       recipient,
+      depositor,
       integratorId,
       refundAddress,
       refundOnOrigin: _refundOnOrigin = "true",
-      slippageTolerance = "0.5", // Default to 0.5% slippage
+      slippageTolerance = "1", // Default to 1% slippage
     } = query;
 
     const originChainId = Number(_originChainId);
@@ -78,6 +84,13 @@ const handler = async (
       });
     }
 
+    if (integratorId && !isValidIntegratorId(integratorId)) {
+      throw new InvalidParamError({
+        param: "integratorId",
+        message: "Invalid integrator ID. Needs to be 2 bytes hex string.",
+      });
+    }
+
     const amountType = _minOutputAmount
       ? AMOUNT_TYPE.MIN_OUTPUT
       : AMOUNT_TYPE.EXACT_INPUT;
@@ -87,67 +100,52 @@ const handler = async (
         : _minOutputAmount
     );
 
-    // 1. Get auxiliary data
-    // - Token details
-    // - Token prices
-    const knownInputToken = getTokenByAddress(
-      _inputTokenAddress,
-      originChainId
-    );
-    const inputToken: Token = knownInputToken
-      ? {
-          address: knownInputToken.addresses[originChainId]!,
-          decimals: knownInputToken.decimals,
-          symbol: knownInputToken.symbol,
-          chainId: originChainId,
-        }
-      : // @FIXME: fetch dynamic token details. using hardcoded values for now
-        {
-          address: _inputTokenAddress,
-          decimals: 18,
-          symbol: "UNKNOWN",
-          chainId: originChainId,
-        };
-    const knownOutputToken = getTokenByAddress(
-      _outputTokenAddress,
-      destinationChainId
-    );
-    const outputToken: Token = knownOutputToken
-      ? {
-          address: knownOutputToken.addresses[destinationChainId]!,
-          decimals: knownOutputToken.decimals,
-          symbol: knownOutputToken.symbol,
-          chainId: destinationChainId,
-        }
-      : // @FIXME: fetch dynamic token details. using hardcoded values for now
-        {
-          address: _outputTokenAddress,
-          decimals: 18,
-          symbol: "UNKNOWN",
-          chainId: destinationChainId,
-        };
+    // 1. Get token details
+    const [inputToken, outputToken] = await Promise.all([
+      getCachedTokenInfo({
+        address: _inputTokenAddress,
+        chainId: originChainId,
+      }),
+      getCachedTokenInfo({
+        address: _outputTokenAddress,
+        chainId: destinationChainId,
+      }),
+    ]);
 
     // 2. Get swap quotes and calldata based on the swap type
     const crossSwapQuotes = await getCrossSwapQuotes({
       amount,
       inputToken,
       outputToken,
-      recipient,
+      depositor,
+      recipient: recipient || depositor,
       slippageTolerance: Number(slippageTolerance),
       type: amountType,
       refundOnOrigin,
       refundAddress,
+      // @TODO: Make this configurable via env var or query param
+      leftoverType: "bridgeableToken",
     });
 
-    // 3. Build tx and return
-    // @TODO
+    // 3. Build cross swap tx
+    const crossSwapTx = await buildCrossSwapTx(crossSwapQuotes, integratorId);
+
+    const responseJson = {
+      tx: {
+        to: crossSwapTx.to,
+        data: crossSwapTx.data,
+        value: crossSwapTx.value?.toString(),
+        gas: crossSwapTx.gas?.toString(),
+        gasPrice: crossSwapTx.gasPrice?.toString(),
+      },
+    };
 
     logger.debug({
       at: "Swap",
       message: "Response data",
-      responseJson: crossSwapQuotes,
+      responseJson,
     });
-    response.status(200).json(crossSwapQuotes);
+    response.status(200).json(responseJson);
   } catch (error: unknown) {
     return handleErrorCondition("swap", response, logger, error);
   }

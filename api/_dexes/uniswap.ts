@@ -27,10 +27,9 @@ import {
   Swap,
   CrossSwap,
   SwapQuote,
-  CrossSwapQuotes,
 } from "./types";
 import { getSwapAndBridgeAddress, NoSwapRouteError } from "./utils";
-import { AMOUNT_TYPE } from "./cross-swap";
+import { LEFTOVER_TYPE } from "./cross-swap";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
 export const SWAP_ROUTER_02_ADDRESS = {
@@ -45,9 +44,9 @@ export const SWAP_ROUTER_02_ADDRESS = {
   [CHAIN_IDs.ZORA]: "0x7De04c96BE5159c3b5CeffC82aa176dc81281557",
 };
 
-// Maps testnet chain IDs to their main counterparts. Used to get the mainnet token
+// Maps testnet chain IDs to their prod counterparts. Used to get the prod token
 // info for testnet tokens.
-const TESTNET_TO_MAINNET = {
+const TESTNET_TO_PROD = {
   [CHAIN_IDs.SEPOLIA]: CHAIN_IDs.MAINNET,
   [CHAIN_IDs.BASE_SEPOLIA]: CHAIN_IDs.BASE,
   [CHAIN_IDs.OPTIMISM_SEPOLIA]: CHAIN_IDs.OPTIMISM,
@@ -67,13 +66,16 @@ export async function getUniswapQuoteForOriginSwapExactInput(
   const initialTokenOut = { ...swap.tokenOut };
   // Always use mainnet tokens for retrieving quote, so that we can get equivalent quotes
   // for testnet tokens.
-  swap.tokenIn = getMainnetToken(swap.tokenIn);
-  swap.tokenOut = getMainnetToken(swap.tokenOut);
+  swap.tokenIn = getProdToken(swap.tokenIn);
+  swap.tokenOut = getProdToken(swap.tokenOut);
 
-  const { swapTx, minAmountOut } = await getUniswapQuote({
-    ...swap,
-    recipient: swapAndBridgeAddress,
-  });
+  const { swapTx, minAmountOut } = await getUniswapQuote(
+    {
+      ...swap,
+      recipient: swapAndBridgeAddress,
+    },
+    TradeType.EXACT_INPUT
+  );
 
   // replace mainnet token addresses with initial token addresses in calldata
   swapTx.data = swapTx.data.replace(
@@ -135,16 +137,37 @@ export async function getUniswapCrossSwapQuotesForMinOutputB2A(
     chainId: destinationSwapChainId,
   };
 
-  // 1. Get destination swap quote for bridgeable output token -> any token
-  const destinationSwapQuote = await getUniswapQuote({
+  const destinationSwap = {
     chainId: destinationSwapChainId,
     tokenIn: bridgeableOutputToken,
     tokenOut: crossSwap.outputToken,
-    amount: crossSwap.amount.toString(),
     recipient: crossSwap.recipient,
     slippageTolerance: crossSwap.slippageTolerance,
-    type: AMOUNT_TYPE.MIN_OUTPUT,
-  });
+  };
+  // 1.1. Get destination swap quote for bridgeable output token -> any token
+  //      with exact output amount.
+  let destinationSwapQuote = await getUniswapQuote(
+    {
+      ...destinationSwap,
+      amount: crossSwap.amount.toString(),
+    },
+    TradeType.EXACT_OUTPUT
+  );
+  // 1.2. Re-fetch destination swap quote with exact input amount if leftover tokens
+  //      should be sent as output tokens instead of bridgeable output tokens.
+  if (crossSwap.leftoverType === LEFTOVER_TYPE.OUTPUT_TOKEN) {
+    destinationSwapQuote = await getUniswapQuote(
+      {
+        ...destinationSwap,
+        amount: addSlippageToAmount(
+          destinationSwapQuote.maximumAmountIn,
+          crossSwap.slippageTolerance.toString()
+        ),
+      },
+      TradeType.EXACT_INPUT
+    );
+    assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
+  }
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForMinOutput({
@@ -152,48 +175,17 @@ export async function getUniswapCrossSwapQuotesForMinOutputB2A(
     outputToken: bridgeableOutputToken,
     minOutputAmount: destinationSwapQuote.maximumAmountIn,
     recipient: getMultiCallHandlerAddress(destinationSwapChainId),
-    message: buildMulticallHandlerMessage({
-      // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
-      fallbackRecipient: crossSwap.recipient,
-      actions: [
-        {
-          target: destinationSwapQuote.swapTx.to,
-          callData: destinationSwapQuote.swapTx.data,
-          value: destinationSwapQuote.swapTx.value,
-        },
-      ],
+    message: buildDestinationSwapCrossChainMessage({
+      crossSwap,
+      destinationSwapQuote,
+      bridgeableOutputToken,
     }),
-  });
-
-  // 3. Re-fetch destination swap quote with updated input amount and EXACT_INPUT type.
-  // This prevents leftover tokens in the MulticallHandler contract.
-  const updatedDestinationSwapQuote = await getUniswapQuote({
-    chainId: destinationSwapChainId,
-    tokenIn: bridgeableOutputToken,
-    tokenOut: crossSwap.outputToken,
-    amount: bridgeQuote.outputAmount.toString(),
-    recipient: crossSwap.recipient,
-    slippageTolerance: crossSwap.slippageTolerance,
-    type: AMOUNT_TYPE.EXACT_INPUT,
-  });
-
-  // 4. Rebuild message
-  bridgeQuote.message = buildMulticallHandlerMessage({
-    // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
-    fallbackRecipient: crossSwap.recipient,
-    actions: [
-      {
-        target: updatedDestinationSwapQuote.swapTx.to,
-        callData: updatedDestinationSwapQuote.swapTx.data,
-        value: updatedDestinationSwapQuote.swapTx.value,
-      },
-    ],
   });
 
   return {
     crossSwap,
     bridgeQuote,
-    destinationSwapQuote: updatedDestinationSwapQuote,
+    destinationSwapQuote,
     originSwapQuote: undefined,
   };
 }
@@ -246,22 +238,43 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2B(
     // @TODO: handle ETH/WETH message generation
   });
 
-  // 2. Get origin swap quote for any input token -> bridgeable input token
-  const originSwapQuote = await getUniswapQuote({
+  const originSwap = {
     chainId: originSwapChainId,
     tokenIn: crossSwap.inputToken,
     tokenOut: bridgeableInputToken,
-    amount: bridgeQuote.inputAmount.toString(),
     recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
     slippageTolerance: crossSwap.slippageTolerance,
-    type: AMOUNT_TYPE.MIN_OUTPUT,
-  });
+  };
+  // 2.1. Get origin swap quote for any input token -> bridgeable input token
+  const originSwapQuote = await getUniswapQuote(
+    {
+      ...originSwap,
+      amount: bridgeQuote.inputAmount.toString(),
+    },
+    TradeType.EXACT_OUTPUT
+  );
+  // 2.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
+  //      This prevents leftover tokens in the SwapAndBridge contract.
+  const adjOriginSwapQuote = await getUniswapQuote(
+    {
+      ...originSwap,
+      amount: originSwapQuote.maximumAmountIn.toString(),
+    },
+    TradeType.EXACT_INPUT
+  );
+
+  if (adjOriginSwapQuote.minAmountOut.lt(bridgeQuote.inputAmount)) {
+    throw new Error(
+      `Origin swap quote min. output amount ${adjOriginSwapQuote.minAmountOut.toString()} ` +
+        `is less than required bridge input amount ${bridgeQuote.inputAmount.toString()}`
+    );
+  }
 
   return {
     crossSwap,
     bridgeQuote,
     destinationSwapQuote: undefined,
-    originSwapQuote,
+    originSwapQuote: adjOriginSwapQuote,
   };
 }
 
@@ -293,8 +306,8 @@ export async function getBestUniswapCrossSwapQuotesForMinOutputA2A(
     );
   }
 
-  const preferredBridgeRoutes = allBridgeRoutes.filter(({ fromTokenSymbol }) =>
-    opts.preferredBridgeTokens.includes(fromTokenSymbol)
+  const preferredBridgeRoutes = allBridgeRoutes.filter(({ toTokenSymbol }) =>
+    opts.preferredBridgeTokens.includes(toTokenSymbol)
   );
   const bridgeRoutesToCompare = (
     preferredBridgeRoutes.length > 0 ? preferredBridgeRoutes : allBridgeRoutes
@@ -306,21 +319,11 @@ export async function getBestUniswapCrossSwapQuotesForMinOutputA2A(
     );
   }
 
-  const crossSwapQuotesSettledResults = await Promise.allSettled(
+  const crossSwapQuotes = await Promise.all(
     bridgeRoutesToCompare.map((bridgeRoute) =>
       getUniswapCrossSwapQuotesForMinOutputA2A(crossSwap, bridgeRoute)
     )
   );
-  const crossSwapQuotes = crossSwapQuotesSettledResults
-    .filter((res) => res.status === "fulfilled")
-    .map((res) => (res as PromiseFulfilledResult<CrossSwapQuotes>).value);
-
-  if (crossSwapQuotes.length === 0) {
-    console.log("crossSwapQuotesSettledResults", crossSwapQuotesSettledResults);
-    throw new Error(
-      `No successful bridge quotes found for ${originSwapChainId} -> ${destinationSwapChainId}`
-    );
-  }
 
   // Compare quotes by lowest input amount
   const bestCrossSwapQuote = crossSwapQuotes.reduce((prev, curr) =>
@@ -384,88 +387,95 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
     symbol: _bridgeableOutputToken.symbol,
     chainId: bridgeRoute.toChain,
   };
-
-  // 1. Get destination swap quote for bridgeable output token -> any token
-  const destinationSwapQuote = await getUniswapQuote({
+  const originSwap = {
+    chainId: originSwapChainId,
+    tokenIn: crossSwap.inputToken,
+    tokenOut: bridgeableInputToken,
+    recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
+    slippageTolerance: crossSwap.slippageTolerance,
+  };
+  const destinationSwap = {
     chainId: destinationSwapChainId,
     tokenIn: bridgeableOutputToken,
     tokenOut: crossSwap.outputToken,
-    amount: crossSwap.amount.toString(),
     recipient: crossSwap.recipient,
     slippageTolerance: crossSwap.slippageTolerance,
-    type: AMOUNT_TYPE.MIN_OUTPUT,
-  });
+  };
+
+  // 1.1. Get destination swap quote for bridgeable output token -> any token
+  //      with exact output amount
+  let destinationSwapQuote = await getUniswapQuote(
+    {
+      ...destinationSwap,
+      amount: crossSwap.amount.toString(),
+    },
+    TradeType.EXACT_OUTPUT
+  );
+  // 1.2. Re-fetch destination swap quote with exact input amount if leftover tokens
+  //      should be sent as output tokens instead of bridgeable output tokens.
+  if (crossSwap.leftoverType === LEFTOVER_TYPE.OUTPUT_TOKEN) {
+    destinationSwapQuote = await getUniswapQuote(
+      {
+        ...destinationSwap,
+        amount: addSlippageToAmount(
+          destinationSwapQuote.maximumAmountIn,
+          crossSwap.slippageTolerance.toString()
+        ),
+      },
+      TradeType.EXACT_INPUT
+    );
+    assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
+  }
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForMinOutput({
     inputToken: bridgeableInputToken,
     outputToken: bridgeableOutputToken,
-    minOutputAmount: destinationSwapQuote.maximumAmountIn,
+    minOutputAmount: destinationSwapQuote.expectedAmountIn,
     recipient: getMultiCallHandlerAddress(destinationSwapChainId),
-    message: buildMulticallHandlerMessage({
-      // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
-      fallbackRecipient: crossSwap.recipient,
-      actions: [
-        {
-          target: destinationSwapQuote.swapTx.to,
-          callData: destinationSwapQuote.swapTx.data,
-          value: destinationSwapQuote.swapTx.value,
-        },
-      ],
+    message: buildDestinationSwapCrossChainMessage({
+      crossSwap,
+      destinationSwapQuote,
+      bridgeableOutputToken,
     }),
   });
 
-  // 3. Re-fetch destination swap quote with updated input amount and EXACT_INPUT type.
-  // This prevents leftover tokens in the MulticallHandler contract.
-  const updatedDestinationSwapQuote = await getUniswapQuote({
-    chainId: destinationSwapChainId,
-    tokenIn: bridgeableOutputToken,
-    tokenOut: crossSwap.outputToken,
-    amount: bridgeQuote.outputAmount.toString(),
-    recipient: crossSwap.recipient,
-    slippageTolerance: crossSwap.slippageTolerance,
-    type: AMOUNT_TYPE.EXACT_INPUT,
-  });
-
-  // 4. Rebuild message
-  bridgeQuote.message = buildMulticallHandlerMessage({
-    // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
-    fallbackRecipient: crossSwap.recipient,
-    actions: [
-      {
-        target: updatedDestinationSwapQuote.swapTx.to,
-        callData: updatedDestinationSwapQuote.swapTx.data,
-        value: updatedDestinationSwapQuote.swapTx.value,
-      },
-    ],
-  });
-
-  // 3. Get origin swap quote for any input token -> bridgeable input token
-  const originSwapQuote = await getUniswapQuote({
-    chainId: originSwapChainId,
-    tokenIn: crossSwap.inputToken,
-    tokenOut: bridgeableInputToken,
-    amount: bridgeQuote.inputAmount.toString(),
-    recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
-    slippageTolerance: crossSwap.slippageTolerance,
-    type: AMOUNT_TYPE.MIN_OUTPUT,
-  });
+  // 3.1. Get origin swap quote for any input token -> bridgeable input token
+  const originSwapQuote = await getUniswapQuote(
+    {
+      ...originSwap,
+      amount: bridgeQuote.inputAmount.toString(),
+    },
+    TradeType.EXACT_OUTPUT
+  );
+  // 3.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
+  //      This prevents leftover tokens in the SwapAndBridge contract.
+  const adjOriginSwapQuote = await getUniswapQuote(
+    {
+      ...originSwap,
+      amount: originSwapQuote.maximumAmountIn.toString(),
+    },
+    TradeType.EXACT_INPUT
+  );
 
   return {
     crossSwap,
-    destinationSwapQuote: updatedDestinationSwapQuote,
+    destinationSwapQuote,
     bridgeQuote,
-    originSwapQuote,
+    originSwapQuote: adjOriginSwapQuote,
   };
 }
 
-export async function getUniswapQuote(swap: Swap): Promise<SwapQuote> {
+export async function getUniswapQuote(
+  swap: Omit<Swap, "type">,
+  tradeType: TradeType
+): Promise<SwapQuote> {
   const { router, options } = getSwapRouterAndOptions(swap);
 
   const amountCurrency =
-    swap.type === AMOUNT_TYPE.EXACT_INPUT ? swap.tokenIn : swap.tokenOut;
+    tradeType === TradeType.EXACT_INPUT ? swap.tokenIn : swap.tokenOut;
   const quoteCurrency =
-    swap.type === AMOUNT_TYPE.EXACT_INPUT ? swap.tokenOut : swap.tokenIn;
+    tradeType === TradeType.EXACT_INPUT ? swap.tokenOut : swap.tokenIn;
 
   const route = await router.route(
     CurrencyAmount.fromRawAmount(
@@ -481,9 +491,7 @@ export async function getUniswapQuote(swap: Swap): Promise<SwapQuote> {
       quoteCurrency.address,
       quoteCurrency.decimals
     ),
-    swap.type === AMOUNT_TYPE.EXACT_INPUT
-      ? TradeType.EXACT_INPUT
-      : TradeType.EXACT_OUTPUT,
+    tradeType,
     options
   );
 
@@ -493,7 +501,8 @@ export async function getUniswapQuote(swap: Swap): Promise<SwapQuote> {
       tokenInSymbol: swap.tokenIn.symbol,
       tokenOutSymbol: swap.tokenOut.symbol,
       chainId: swap.chainId,
-      swapType: swap.type,
+      swapType:
+        tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
     });
   }
 
@@ -525,7 +534,7 @@ export async function getUniswapQuote(swap: Swap): Promise<SwapQuote> {
   };
 
   console.log("swapQuote", {
-    type: swap.type,
+    type: tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
     tokenIn: swapQuote.tokenIn.symbol,
     tokenOut: swapQuote.tokenOut.symbol,
     chainId: swap.chainId,
@@ -568,22 +577,101 @@ function floatToPercent(value: number) {
   );
 }
 
-function getMainnetToken(token: AcrossToken) {
-  const mainnetChainId = TESTNET_TO_MAINNET[token.chainId] || token.chainId;
+function getProdToken(token: AcrossToken) {
+  const prodChainId = TESTNET_TO_PROD[token.chainId] || token.chainId;
 
-  const mainnetToken =
+  const prodToken =
     TOKEN_SYMBOLS_MAP[token.symbol as keyof typeof TOKEN_SYMBOLS_MAP];
-  const mainnetTokenAddress = mainnetToken?.addresses[mainnetChainId];
+  const prodTokenAddress = prodToken?.addresses[prodChainId];
 
-  if (!mainnetToken || !mainnetTokenAddress) {
+  if (!prodToken || !prodTokenAddress) {
     throw new Error(
-      `Mainnet token not found for ${token.symbol} on chain ${token.chainId}`
+      `Prod token not found for ${token.symbol} on chain ${token.chainId}`
     );
   }
 
   return {
-    ...mainnetToken,
-    chainId: mainnetChainId,
-    address: mainnetTokenAddress,
+    ...prodToken,
+    chainId: prodChainId,
+    address: prodTokenAddress,
   };
+}
+
+function buildDestinationSwapCrossChainMessage({
+  crossSwap,
+  destinationSwapQuote,
+  bridgeableOutputToken,
+}: {
+  crossSwap: CrossSwap;
+  bridgeableOutputToken: AcrossToken;
+  destinationSwapQuote: SwapQuote;
+}) {
+  const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
+  return buildMulticallHandlerMessage({
+    // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
+    fallbackRecipient: crossSwap.depositor,
+    actions: [
+      // approve bridgeable output token
+      {
+        target: bridgeableOutputToken.address,
+        callData: encodeApproveCalldata(
+          SWAP_ROUTER_02_ADDRESS[destinationSwapChainId],
+          destinationSwapQuote.maximumAmountIn
+        ),
+        value: "0",
+      },
+      // swap bridgeable output token -> cross swap output token
+      {
+        target: destinationSwapQuote.swapTx.to,
+        callData: destinationSwapQuote.swapTx.data,
+        value: destinationSwapQuote.swapTx.value,
+      },
+      // drain remaining bridgeable output tokens from MultiCallHandler contract
+      {
+        target: getMultiCallHandlerAddress(destinationSwapChainId),
+        callData: encodeDrainCalldata(
+          bridgeableOutputToken.address,
+          crossSwap.depositor
+        ),
+        value: "0",
+      },
+    ],
+  });
+}
+
+function encodeApproveCalldata(spender: string, value: ethers.BigNumber) {
+  const approveFunction = "function approve(address spender, uint256 value)";
+  const erc20Interface = new ethers.utils.Interface([approveFunction]);
+  return erc20Interface.encodeFunctionData("approve", [spender, value]);
+}
+
+function encodeDrainCalldata(token: string, destination: string) {
+  const drainFunction =
+    "function drainLeftoverTokens(address token, address payable destination)";
+  const multicallHandlerInterface = new ethers.utils.Interface([drainFunction]);
+  return multicallHandlerInterface.encodeFunctionData("drainLeftoverTokens", [
+    token,
+    destination,
+  ]);
+}
+
+function assertMinOutputAmount(
+  amountOut: BigNumber,
+  expectedMinAmountOut: BigNumber
+) {
+  if (amountOut.lt(expectedMinAmountOut)) {
+    throw new Error(
+      `Swap quote output amount ${amountOut.toString()} ` +
+        `is less than required min. output amount ${expectedMinAmountOut.toString()}`
+    );
+  }
+}
+
+function addSlippageToAmount(amount: BigNumber, slippageTolerance: string) {
+  return amount
+    .mul(
+      ethers.utils.parseEther((1 + Number(slippageTolerance) / 100).toString())
+    )
+    .div(utils.fixedPointAdjustment)
+    .toString();
 }

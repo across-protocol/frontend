@@ -14,7 +14,7 @@ import {
   BalancerNetworkConfig,
   Multicall3,
 } from "@balancer-labs/sdk";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import {
   BigNumber,
   BigNumberish,
@@ -64,6 +64,9 @@ import {
   MissingParamError,
   InvalidParamError,
   RouteNotEnabledError,
+  AcrossApiError,
+  HttpErrorToStatusCode,
+  AcrossErrorCode,
   TokenNotFoundError,
 } from "./_errors";
 import { Token } from "./_dexes/types";
@@ -875,55 +878,84 @@ export async function getBridgeQuoteForMinOutput(params: {
     message: params.message,
   };
 
-  // 1. Use the suggested fees to get an indicative quote with
-  // input amount equal to minOutputAmount
-  let tries = 0;
-  let adjustedInputAmount = params.minOutputAmount;
-  let indicativeQuote = await getSuggestedFees({
-    ...baseParams,
-    amount: adjustedInputAmount.toString(),
-  });
-  let adjustmentPct = indicativeQuote.totalRelayFee.pct;
-  let finalQuote: Awaited<ReturnType<typeof getSuggestedFees>> | undefined =
-    undefined;
-
-  // 2. Adjust input amount to meet minOutputAmount
-  while (tries < 3) {
-    adjustedInputAmount = adjustedInputAmount
-      .mul(utils.parseEther("1").add(adjustmentPct))
-      .div(sdk.utils.fixedPointAdjustment);
-    const adjustedQuote = await getSuggestedFees({
+  try {
+    // 1. Use the suggested fees to get an indicative quote with
+    // input amount equal to minOutputAmount
+    let tries = 0;
+    let adjustedInputAmount = params.minOutputAmount;
+    let indicativeQuote = await getSuggestedFees({
       ...baseParams,
       amount: adjustedInputAmount.toString(),
     });
-    const outputAmount = adjustedInputAmount.sub(
-      adjustedInputAmount
-        .mul(adjustedQuote.totalRelayFee.pct)
-        .div(sdk.utils.fixedPointAdjustment)
-    );
+    let adjustmentPct = indicativeQuote.totalRelayFee.pct;
+    let finalQuote: Awaited<ReturnType<typeof getSuggestedFees>> | undefined =
+      undefined;
 
-    if (outputAmount.gte(params.minOutputAmount)) {
-      finalQuote = adjustedQuote;
-      break;
-    } else {
-      adjustmentPct = adjustedQuote.totalRelayFee.pct;
-      tries++;
+    // 2. Adjust input amount to meet minOutputAmount
+    while (tries < 3) {
+      adjustedInputAmount = adjustedInputAmount
+        .mul(utils.parseEther("1").add(adjustmentPct))
+        .div(sdk.utils.fixedPointAdjustment);
+      const adjustedQuote = await getSuggestedFees({
+        ...baseParams,
+        amount: adjustedInputAmount.toString(),
+      });
+      const outputAmount = adjustedInputAmount.sub(
+        adjustedInputAmount
+          .mul(adjustedQuote.totalRelayFee.pct)
+          .div(sdk.utils.fixedPointAdjustment)
+      );
+
+      if (outputAmount.gte(params.minOutputAmount)) {
+        finalQuote = adjustedQuote;
+        break;
+      } else {
+        adjustmentPct = adjustedQuote.totalRelayFee.pct;
+        tries++;
+      }
     }
-  }
 
-  if (!finalQuote) {
-    throw new Error("Failed to adjust input amount to meet minOutputAmount");
-  }
+    if (!finalQuote) {
+      throw new Error("Failed to adjust input amount to meet minOutputAmount");
+    }
 
-  return {
-    inputAmount: adjustedInputAmount,
-    outputAmount: adjustedInputAmount.sub(finalQuote.totalRelayFee.total),
-    minOutputAmount: params.minOutputAmount,
-    suggestedFees: finalQuote,
-    message: params.message,
-    inputToken: params.inputToken,
-    outputToken: params.outputToken,
-  };
+    return {
+      inputAmount: adjustedInputAmount,
+      outputAmount: adjustedInputAmount.sub(finalQuote.totalRelayFee.total),
+      minOutputAmount: params.minOutputAmount,
+      suggestedFees: finalQuote,
+      message: params.message,
+      inputToken: params.inputToken,
+      outputToken: params.outputToken,
+    };
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      const { response = { data: {} } } = err;
+      // If upstream error is an AcrossApiError, we just return it
+      if (response?.data?.type === "AcrossApiError") {
+        throw new AcrossApiError(
+          {
+            message: response.data.message,
+            status: response.data.status,
+            code: response.data.code,
+            param: response.data.param,
+          },
+          { cause: err }
+        );
+      } else {
+        const message = `Upstream http request to ${err.request?.url} failed with ${err.status} ${err.message}`;
+        throw new AcrossApiError(
+          {
+            message,
+            status: HttpErrorToStatusCode.BAD_GATEWAY,
+            code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
+          },
+          { cause: err }
+        );
+      }
+    }
+    throw err;
+  }
 }
 
 export const providerCache: Record<string, StaticJsonRpcProvider> = {};
@@ -2188,11 +2220,10 @@ export async function getCachedTokenInfo(params: TokenOptions) {
 }
 
 // find decimals and symbol for any token address on any chain we support
-export async function getTokenInfo({
-  chainId,
-  address,
-}: TokenOptions): Promise<
-  Pick<TokenInfo, "address" | "name" | "symbol" | "decimals">
+export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
+  Pick<TokenInfo, "address" | "name" | "symbol" | "decimals"> & {
+    chainId: number;
+  }
 > {
   try {
     if (!ethers.utils.isAddress(address)) {
@@ -2222,6 +2253,7 @@ export async function getTokenInfo({
         symbol: token.symbol,
         address: token.addresses[chainId],
         name: token.name,
+        chainId,
       };
     }
 
@@ -2258,6 +2290,7 @@ export async function getTokenInfo({
       decimals,
       symbol,
       name,
+      chainId,
     };
   } catch (error) {
     throw new TokenNotFoundError({
