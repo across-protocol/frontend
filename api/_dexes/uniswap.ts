@@ -168,14 +168,10 @@ export async function getUniswapCrossSwapQuotesForMinOutputB2A(
     destinationSwapQuote = await getUniswapQuote(
       {
         ...destinationSwap,
-        amount: destinationSwapQuote.maximumAmountIn
-          .mul(
-            ethers.utils.parseEther(
-              (1 + Number(crossSwap.slippageTolerance) / 100).toString()
-            )
-          )
-          .div(utils.fixedPointAdjustment)
-          .toString(),
+        amount: addSlippageToAmount(
+          destinationSwapQuote.maximumAmountIn,
+          crossSwap.slippageTolerance.toString()
+        ),
       },
       TradeType.EXACT_INPUT
     );
@@ -430,14 +426,10 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
     destinationSwapQuote = await getUniswapQuote(
       {
         ...destinationSwap,
-        amount: destinationSwapQuote.maximumAmountIn
-          .mul(
-            ethers.utils.parseEther(
-              (1 + Number(crossSwap.slippageTolerance) / 100).toString()
-            )
-          )
-          .div(utils.fixedPointAdjustment)
-          .toString(),
+        amount: addSlippageToAmount(
+          destinationSwapQuote.maximumAmountIn,
+          crossSwap.slippageTolerance.toString()
+        ),
       },
       TradeType.EXACT_INPUT
     );
@@ -683,4 +675,13 @@ function assertMinOutputAmount(
         `is less than required min. output amount ${expectedMinAmountOut.toString()}`
     );
   }
+}
+
+function addSlippageToAmount(amount: BigNumber, slippageTolerance: string) {
+  return amount
+    .mul(
+      ethers.utils.parseEther((1 + Number(slippageTolerance) / 100).toString())
+    )
+    .div(utils.fixedPointAdjustment)
+    .toString();
 }

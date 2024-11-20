@@ -162,7 +162,7 @@ export async function buildCrossSwapTx(
   const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
   const spokePool = getSpokePool(originChainId);
   const deposit = {
-    depositor: crossSwapQuotes.crossSwap.recipient,
+    depositor: crossSwapQuotes.crossSwap.depositor,
     recipient: getMultiCallHandlerAddress(destinationChainId),
     inputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
     outputToken: crossSwapQuotes.bridgeQuote.outputToken.address,
@@ -175,7 +175,7 @@ export async function buildCrossSwapTx(
     fillDeadline: await getFillDeadline(spokePool),
     exclusivityDeadline:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline,
-    message: crossSwapQuotes.bridgeQuote?.message || "0x",
+    message: crossSwapQuotes.bridgeQuote.message || "0x",
   };
 
   let tx: PopulatedTransaction;
