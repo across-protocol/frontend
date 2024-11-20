@@ -5,7 +5,6 @@ import { Clock, Info } from "react-feather";
 import ExternalCardWrapper from "components/CardWrapper";
 import { PrimaryButton, SecondaryButton } from "components/Button";
 import { Alert, Text } from "components";
-import { InputErrorText } from "components/AmountInput";
 
 import QuickSwap from "./QuickSwap";
 import { AmountInput } from "./AmountInput";
@@ -20,9 +19,9 @@ import {
   GetBridgeFeesResult,
   QUERIESV2,
   chainIdToRewardsProgramName,
-  formatUnitsWithMaxFractions,
   formatWeiPct,
   rewardProgramsAvailable,
+  COLORS,
 } from "utils";
 import { VoidHandler } from "utils/types";
 
@@ -68,18 +67,6 @@ export type BridgeFormProps = {
   isBridgeDisabled: boolean;
   validationError?: AmountInputError;
   isQuoteLoading: boolean;
-};
-
-const validationErrorTextMap = {
-  [AmountInputError.INSUFFICIENT_BALANCE]:
-    "Insufficient balance to process this transfer.",
-  [AmountInputError.PAUSED_DEPOSITS]:
-    "[INPUT_TOKEN] deposits are temporarily paused.",
-  [AmountInputError.INSUFFICIENT_LIQUIDITY]:
-    "Input amount exceeds limits set to maintain optimal service for all users. Decrease amount to [MAX_DEPOSIT] or lower.",
-  [AmountInputError.INVALID]: "Only positive numbers are allowed as an input.",
-  [AmountInputError.AMOUNT_TOO_LOW]:
-    "The amount you are trying to bridge is too low.",
 };
 
 // If swap price impact is lower than this threshold, show a warning
@@ -149,12 +136,12 @@ const BridgeForm = ({
           program={programName}
         />
       )}
-      <RowWrapper>
-        <RowLabelWrapper>
+      <AmountRowWrapper>
+        <AmountRowLabelWrapper>
           <Text size="md" color="grey-400">
             Send
           </Text>
-        </RowLabelWrapper>
+        </AmountRowLabelWrapper>
         <InputWrapper>
           <AmountInput
             amountInput={amountInput}
@@ -163,6 +150,7 @@ const BridgeForm = ({
             onClickMaxBalance={onClickMaxBalance}
             validationError={parsedAmountInput ? validationError : undefined}
             balance={balance}
+            limits={limits}
           />
         </InputWrapper>
         <TokenSelectorWrapper>
@@ -172,20 +160,7 @@ const BridgeForm = ({
             inputOrOutputToken="input"
           />
         </TokenSelectorWrapper>
-      </RowWrapper>
-      {parsedAmountInput && validationError && (
-        <InputErrorText
-          errorText={validationErrorTextMap[validationError]
-            .replace("[INPUT_TOKEN]", selectedRoute.fromTokenSymbol)
-            .replace(
-              "[MAX_DEPOSIT]",
-              `${formatUnitsWithMaxFractions(
-                limits?.maxDeposit || 0,
-                getToken(selectedRoute.fromTokenSymbol).decimals
-              )} ${selectedRoute.fromTokenSymbol}`
-            )}
-        />
-      )}
+      </AmountRowWrapper>
       <RowWrapper>
         <RowLabelWrapper>
           <Text size="md" color="grey-400">
@@ -199,20 +174,25 @@ const BridgeForm = ({
         />
       </RowWrapper>
       <FillTimeRowWrapper>
+        <FillTimeRowUnderlay>
+          <Divider />
+        </FillTimeRowUnderlay>
         <QuickSwapRowLabelWrapper>
           <QuickSwap onQuickSwap={onClickQuickSwap} />
         </QuickSwapRowLabelWrapper>
-        <Divider />
+        <Spacer />
         <FillTimeWrapper>
           <Clock color="#9DAAB3" size="16" />
-          <Text size="md" color="grey-400">
-            {estimatedTimeString || ""}
-          </Text>
+          {estimatedTimeString && (
+            <Text size="md" color="grey-400">
+              {estimatedTimeString}
+            </Text>
+          )}
         </FillTimeWrapper>
         <QuickSwapWrapperMobile>
           <QuickSwap onQuickSwap={onClickQuickSwap} />
         </QuickSwapWrapperMobile>
-        <Divider />
+        <Spacer />
       </FillTimeRowWrapper>
       <RowWrapper>
         <RowLabelWrapper>
@@ -334,7 +314,12 @@ const RowLabelWrapper = styled.div`
   }
 `;
 
+const AmountRowLabelWrapper = styled(RowLabelWrapper)`
+  padding-top: 12px;
+`;
+
 const QuickSwapRowLabelWrapper = styled(RowLabelWrapper)`
+  z-index: 1;
   @media ${QUERIESV2.sm.andDown} {
     display: none;
   }
@@ -355,10 +340,15 @@ const RowWrapper = styled.div`
 `;
 
 const FillTimeRowWrapper = styled(RowWrapper)`
+  position: relative;
   @media ${QUERIESV2.sm.andDown} {
     flex-direction: row;
     align-items: center;
   }
+`;
+
+const AmountRowWrapper = styled(RowWrapper)`
+  align-items: start;
 `;
 
 const QuickSwapWrapperMobile = styled.div`
@@ -391,7 +381,20 @@ const TokenSelectorWrapper = styled.div`
 const Divider = styled.div`
   height: 1px;
   width: 100%;
-  background: #3f4047;
+  background-image: radial-gradient(circle, #3f4047 0%, #3f404700 100%);
+`;
+
+const Spacer = styled.div`
+  height: 1px;
+  width: 100%;
+`;
+
+const FillTimeRowUnderlay = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: 0;
+  width: 100%;
 `;
 
 const FillTimeWrapper = styled.div`
@@ -400,6 +403,9 @@ const FillTimeWrapper = styled.div`
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+  background: ${() => COLORS["black-700"]};
+  padding: 0px 12px;
+  z-index: 1;
 `;
 
 const Button = styled(PrimaryButton)`
