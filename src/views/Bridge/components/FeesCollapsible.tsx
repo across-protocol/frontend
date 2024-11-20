@@ -120,14 +120,14 @@ export function FeesCollapsible(props: Props) {
                           />
                         </>
                       )}
-                    {!props.isSwap && estimatedTime && (
+                    {estimatedTime && (
                       <>
-                        <Text size="md" color="grey-400">
+                        <HiddenMobileText size="md" color="grey-400">
                           in
-                        </Text>
-                        <Text size="md" color="light-200">
+                        </HiddenMobileText>
+                        <HiddenMobileText size="md" color="light-200">
                           {estimatedTime}
-                        </Text>
+                        </HiddenMobileText>
                       </>
                     )}
                   </TokenFeeWrapper>
@@ -179,14 +179,14 @@ export function FeesCollapsible(props: Props) {
                 />
               </>
             )}
-            {!props.isSwap && estimatedTime && (
+            {estimatedTime && (
               <>
-                <Text size="md" color="grey-400">
+                <HiddenMobileText size="md" color="grey-400">
                   in
-                </Text>
-                <Text size="md" color="light-200">
+                </HiddenMobileText>
+                <HiddenMobileText size="md" color="light-200">
                   {estimatedTime}
-                </Text>
+                </HiddenMobileText>
               </>
             )}
           </TokenFeeWrapper>
