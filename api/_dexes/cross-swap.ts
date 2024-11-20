@@ -28,6 +28,8 @@ export type CrossSwapType =
 
 export type AmountType = (typeof AMOUNT_TYPE)[keyof typeof AMOUNT_TYPE];
 
+export type LeftoverType = (typeof LEFTOVER_TYPE)[keyof typeof LEFTOVER_TYPE];
+
 export const AMOUNT_TYPE = {
   EXACT_INPUT: "exactInput",
   EXACT_OUTPUT: "exactOutput",
@@ -39,6 +41,11 @@ export const CROSS_SWAP_TYPE = {
   BRIDGEABLE_TO_ANY: "bridgeableToAny",
   ANY_TO_BRIDGEABLE: "anyToBridgeable",
   ANY_TO_ANY: "anyToAny",
+} as const;
+
+export const LEFTOVER_TYPE = {
+  OUTPUT_TOKEN: "outputToken",
+  BRIDGEABLE_TOKEN: "bridgeableToken",
 } as const;
 
 export const PREFERRED_BRIDGE_TOKENS = ["WETH", "USDC"];

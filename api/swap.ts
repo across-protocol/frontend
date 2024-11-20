@@ -102,6 +102,13 @@ const handler = async (
       });
     }
 
+    if (integratorId && !isValidIntegratorId(integratorId)) {
+      throw new InvalidParamError({
+        param: "integratorId",
+        message: "Invalid integrator ID. Needs to be 2 bytes hex string.",
+      });
+    }
+
     const amountType = _minOutputAmount
       ? AMOUNT_TYPE.MIN_OUTPUT
       : _exactInputAmount
@@ -163,5 +170,3 @@ const handler = async (
 };
 
 export default handler;
-
-function getAmountType() {}
