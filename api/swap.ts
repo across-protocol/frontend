@@ -23,6 +23,7 @@ import { isValidIntegratorId } from "./_integrator-id";
 
 const SwapQueryParamsSchema = type({
   minOutputAmount: optional(positiveIntStr()),
+  exactOutputAmount: optional(positiveIntStr()),
   exactInputAmount: optional(positiveIntStr()),
   inputToken: validAddress(),
   outputToken: validAddress(),
@@ -56,6 +57,7 @@ const handler = async (
       outputToken: _outputTokenAddress,
       exactInputAmount: _exactInputAmount,
       minOutputAmount: _minOutputAmount,
+      exactOutputAmount: _exactOutputAmount,
       originChainId: _originChainId,
       destinationChainId: _destinationChainId,
       recipient,
@@ -78,18 +80,11 @@ const handler = async (
       ? getWrappedNativeTokenAddress(destinationChainId)
       : utils.getAddress(_outputTokenAddress);
 
-    if (!_minOutputAmount && !_exactInputAmount) {
+    if (!_minOutputAmount && !_exactInputAmount && !_exactOutputAmount) {
       throw new MissingParamError({
-        param: "minOutputAmount, exactInputAmount",
-        message: "One of 'minOutputAmount' or 'exactInputAmount' is required",
-      });
-    }
-
-    if (_minOutputAmount && _exactInputAmount) {
-      throw new InvalidParamError({
-        param: "minOutputAmount, exactInputAmount",
+        param: "minOutputAmount, exactInputAmount, exactOutputAmount",
         message:
-          "Only one of 'minOutputAmount' or 'exactInputAmount' is allowed",
+          "One of 'minOutputAmount', 'exactInputAmount' or 'exactOutputAmount' is required",
       });
     }
 
@@ -109,11 +104,11 @@ const handler = async (
 
     const amountType = _minOutputAmount
       ? AMOUNT_TYPE.MIN_OUTPUT
-      : AMOUNT_TYPE.EXACT_INPUT;
+      : _exactInputAmount
+        ? AMOUNT_TYPE.EXACT_INPUT
+        : AMOUNT_TYPE.EXACT_OUTPUT;
     const amount = BigNumber.from(
-      amountType === AMOUNT_TYPE.EXACT_INPUT
-        ? _exactInputAmount
-        : _minOutputAmount
+      _minOutputAmount || _exactInputAmount || _exactOutputAmount
     );
 
     // 1. Get token details
@@ -139,8 +134,6 @@ const handler = async (
       type: amountType,
       refundOnOrigin,
       refundAddress,
-      // @TODO: Make this configurable via env var or query param
-      leftoverType: "bridgeableToken",
       isInputNative,
       isOutputNative,
     });
@@ -170,3 +163,5 @@ const handler = async (
 };
 
 export default handler;
+
+function getAmountType() {}
