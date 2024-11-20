@@ -1,4 +1,4 @@
-import { UniversalSwapAndBridge__factory } from "@across-protocol/contracts/dist/typechain";
+import { UniversalSwapAndBridge__factory } from "../_typechain/factories/SwapAndBridge.sol";
 import { BigNumber } from "ethers";
 
 import { ENABLED_ROUTES, getProvider } from "../_utils";

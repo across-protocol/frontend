@@ -201,13 +201,12 @@ export async function buildCrossSwapTx(
       crossSwapQuotes.originSwapQuote.swapTx.data,
       crossSwapQuotes.originSwapQuote.maximumAmountIn,
       crossSwapQuotes.originSwapQuote.minAmountOut,
-      deposit
-      // @FIXME: This needs a redeployed version of the contract
-      // {
-      //   value: crossSwapQuotes.crossSwap.isInputNative
-      //     ? deposit.inputAmount
-      //     : 0,
-      // }
+      deposit,
+      {
+        value: crossSwapQuotes.crossSwap.isInputNative
+          ? deposit.inputAmount
+          : 0,
+      }
     );
     toAddress = swapAndBridge.address;
   } else {
