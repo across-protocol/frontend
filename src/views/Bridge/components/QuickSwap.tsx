@@ -29,6 +29,7 @@ const IconWrapper = styled.div<{ disabled?: boolean }>`
 
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   background-color: ${() => COLORS["black-700"]};
+  z-index: 1;
 
   &:hover {
     color: #e0f3ff;
