@@ -26,25 +26,44 @@ const DepositStatusAnimatedIcons = ({
   const GrayscaleLogoToChain = getChainInfo(toChainId).grayscaleLogoSvg;
 
   return (
-    <TopWrapperAnimationWrapper>
-      <AnimatedLogoWrapper
-        completed={status === "filling" || status === "filled"}
-      >
-        {status === "depositing" && <BlurLoadingAnimation />}
-        <LogoWrapper>
-          <GrayscaleLogoFromChain />
-        </LogoWrapper>
-      </AnimatedLogoWrapper>
-      <Divider />
-      {status === "filled" ? <CheckStarCompleted /> : <CheckStarPending />}
-      <Divider />
-      <AnimatedLogoWrapper completed={status === "filled"}>
-        {status === "filling" && <BlurLoadingAnimation />}
-        <LogoWrapper>
-          <GrayscaleLogoToChain />
-        </LogoWrapper>
-      </AnimatedLogoWrapper>
-    </TopWrapperAnimationWrapper>
+    <>
+      <SVGGradientDefs />
+      <TopWrapperAnimationWrapper>
+        <AnimatedLogoWrapper
+          completed={status === "filling" || status === "filled"}
+        >
+          {status === "depositing" && <BlurLoadingAnimation />}
+          <LogoWrapper
+            status={
+              status === "filled"
+                ? "completed"
+                : status === "deposit-reverted"
+                  ? "pending"
+                  : "active"
+            }
+          >
+            <GrayscaleLogoFromChain />
+          </LogoWrapper>
+        </AnimatedLogoWrapper>
+        <Divider />
+        {status === "filled" ? <CheckStarCompleted /> : <CheckStarPending />}
+        <Divider />
+        <AnimatedLogoWrapper completed={status === "filled"}>
+          {status === "filling" && <BlurLoadingAnimation />}
+          <LogoWrapper
+            status={
+              status === "filling"
+                ? "active"
+                : status === "filled"
+                  ? "completed"
+                  : "pending"
+            }
+          >
+            <GrayscaleLogoToChain />
+          </LogoWrapper>
+        </AnimatedLogoWrapper>
+      </TopWrapperAnimationWrapper>
+    </>
   );
 };
 
@@ -59,11 +78,44 @@ const Divider = styled.div`
   border-radius: 16px;
 `;
 
-const LogoWrapper = styled.div`
+const LogoWrapper = styled.div<{ status: "pending" | "active" | "completed" }>`
   width: 100%;
   height: 100%;
 
   z-index: 1;
+
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.45);
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.45));
+  border-radius: 48px;
+
+  & svg,
+  img {
+    border-radius: 100%;
+    & rect,
+    circle,
+    #path-to-animate {
+      transition:
+        fill 1s ease-in-out,
+        color 1s ease-in-out;
+    }
+  }
+
+  & svg {
+    & rect,
+    circle,
+    #path-to-animate {
+      fill: ${({ status }) =>
+        status === "pending"
+          ? "url(#pendingGradient)"
+          : status === "active"
+            ? "url(#activeGradient)"
+            : "url(#completedGradient)"};
+    }
+
+    & path:not(#path-to-animate) {
+      fill: ${COLORS["grey-500"]};
+    }
+  }
 `;
 
 const TopWrapperAnimationWrapper = styled.div`
@@ -160,3 +212,26 @@ const AnimatedBlurLoaderFade = styled.div`
 
   z-index: 0;
 `;
+
+/**
+ * We need this here to provide gradient definitions so that we can dynamically update
+ * our chain logos
+ */
+const SVGGradientDefs = () => (
+  <svg width="0" height="0" style={{ position: "absolute" }}>
+    <defs>
+      <linearGradient id="pendingGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#9daab3" stopOpacity="1" />
+        <stop offset="100%" stopColor="#393a40" stopOpacity="1" />
+      </linearGradient>
+      <linearGradient id="activeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#FFF" stopOpacity="1" />
+        <stop offset="100%" stopColor="#A5A5A5" stopOpacity="1" />
+      </linearGradient>
+      <linearGradient id="completedGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#CFFFF4" stopOpacity="1" />
+        <stop offset="100%" stopColor="#6CF9D8" stopOpacity="1" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
