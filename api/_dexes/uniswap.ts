@@ -19,6 +19,10 @@ import {
 import { TOKEN_SYMBOLS_MAP } from "../_constants";
 import {
   buildMulticallHandlerMessage,
+  encodeApproveCalldata,
+  encodeDrainCalldata,
+  encodeTransferCalldata,
+  encodeWethWithdrawCalldata,
   getMultiCallHandlerAddress,
 } from "../_multicall-handler";
 import {
@@ -28,8 +32,13 @@ import {
   CrossSwap,
   SwapQuote,
 } from "./types";
-import { getSwapAndBridgeAddress, NoSwapRouteError } from "./utils";
-import { LEFTOVER_TYPE } from "./cross-swap";
+import {
+  buildExactOutputBridgeTokenMessage,
+  buildMinOutputBridgeTokenMessage,
+  getSwapAndBridgeAddress,
+  NoSwapRouteError,
+} from "./utils";
+import { AMOUNT_TYPE } from "./cross-swap";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
 export const SWAP_ROUTER_02_ADDRESS = {
@@ -103,7 +112,7 @@ export async function getUniswapQuoteForOriginSwapExactInput(
  * 1. Get destination swap quote for bridgeable output token -> any token
  * 2. Get bridge quote for bridgeable input token -> bridgeable output token
  */
-export async function getUniswapCrossSwapQuotesForMinOutputB2A(
+export async function getUniswapCrossSwapQuotesForOutputB2A(
   crossSwap: CrossSwap
 ) {
   const destinationSwapChainId = crossSwap.outputToken.chainId;
@@ -141,7 +150,7 @@ export async function getUniswapCrossSwapQuotesForMinOutputB2A(
     chainId: destinationSwapChainId,
     tokenIn: bridgeableOutputToken,
     tokenOut: crossSwap.outputToken,
-    recipient: crossSwap.recipient,
+    recipient: getMultiCallHandlerAddress(destinationSwapChainId),
     slippageTolerance: crossSwap.slippageTolerance,
   };
   // 1.1. Get destination swap quote for bridgeable output token -> any token
@@ -154,8 +163,8 @@ export async function getUniswapCrossSwapQuotesForMinOutputB2A(
     TradeType.EXACT_OUTPUT
   );
   // 1.2. Re-fetch destination swap quote with exact input amount if leftover tokens
-  //      should be sent as output tokens instead of bridgeable output tokens.
-  if (crossSwap.leftoverType === LEFTOVER_TYPE.OUTPUT_TOKEN) {
+  //      should be sent to receiver.
+  if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
     destinationSwapQuote = await getUniswapQuote(
       {
         ...destinationSwap,
@@ -196,10 +205,11 @@ export async function getUniswapCrossSwapQuotesForMinOutputB2A(
  * 1. Get bridge quote for bridgeable input token -> bridgeable output token
  * 2. Get origin swap quote for any input token -> bridgeable input token
  */
-export async function getUniswapCrossSwapQuotesForMinOutputA2B(
+export async function getUniswapCrossSwapQuotesForOutputA2B(
   crossSwap: CrossSwap
 ) {
   const originSwapChainId = crossSwap.inputToken.chainId;
+  const destinationChainId = crossSwap.outputToken.chainId;
   const bridgeRoute = getRouteByOutputTokenAndOriginChain(
     crossSwap.outputToken.address,
     originSwapChainId
@@ -235,8 +245,16 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2B(
     inputToken: bridgeableInputToken,
     outputToken: crossSwap.outputToken,
     minOutputAmount: crossSwap.amount,
-    // @TODO: handle ETH/WETH message generation
+    recipient: getMultiCallHandlerAddress(destinationChainId),
+    message: buildExactOutputBridgeTokenMessage(crossSwap),
   });
+  // 1.1. Update bridge quote message for min. output amount
+  if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT && crossSwap.isOutputNative) {
+    bridgeQuote.message = buildMinOutputBridgeTokenMessage(
+      crossSwap,
+      bridgeQuote.outputAmount
+    );
+  }
 
   const originSwap = {
     chainId: originSwapChainId,
@@ -286,7 +304,7 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2B(
  * @param crossSwap
  * @param opts
  */
-export async function getBestUniswapCrossSwapQuotesForMinOutputA2A(
+export async function getBestUniswapCrossSwapQuotesForOutputA2A(
   crossSwap: CrossSwap,
   opts: {
     preferredBridgeTokens: string[];
@@ -321,7 +339,7 @@ export async function getBestUniswapCrossSwapQuotesForMinOutputA2A(
 
   const crossSwapQuotes = await Promise.all(
     bridgeRoutesToCompare.map((bridgeRoute) =>
-      getUniswapCrossSwapQuotesForMinOutputA2A(crossSwap, bridgeRoute)
+      getUniswapCrossSwapQuotesForOutputA2A(crossSwap, bridgeRoute)
     )
   );
 
@@ -342,7 +360,7 @@ export async function getBestUniswapCrossSwapQuotesForMinOutputA2A(
  * @param crossSwap
  * @param bridgeRoute
  */
-export async function getUniswapCrossSwapQuotesForMinOutputA2A(
+export async function getUniswapCrossSwapQuotesForOutputA2A(
   crossSwap: CrossSwap,
   bridgeRoute: {
     fromTokenAddress: string;
@@ -398,7 +416,7 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
     chainId: destinationSwapChainId,
     tokenIn: bridgeableOutputToken,
     tokenOut: crossSwap.outputToken,
-    recipient: crossSwap.recipient,
+    recipient: getMultiCallHandlerAddress(destinationSwapChainId),
     slippageTolerance: crossSwap.slippageTolerance,
   };
 
@@ -412,8 +430,8 @@ export async function getUniswapCrossSwapQuotesForMinOutputA2A(
     TradeType.EXACT_OUTPUT
   );
   // 1.2. Re-fetch destination swap quote with exact input amount if leftover tokens
-  //      should be sent as output tokens instead of bridgeable output tokens.
-  if (crossSwap.leftoverType === LEFTOVER_TYPE.OUTPUT_TOKEN) {
+  //      should be sent to receiver.
+  if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
     destinationSwapQuote = await getUniswapQuote(
       {
         ...destinationSwap,
@@ -607,6 +625,41 @@ function buildDestinationSwapCrossChainMessage({
   destinationSwapQuote: SwapQuote;
 }) {
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
+  const transferActions = crossSwap.isOutputNative
+    ? // If output token is native, we need to unwrap WETH before sending it to the
+      // recipient. This is because we only handle WETH in the destination swap.
+      [
+        {
+          target: crossSwap.outputToken.address,
+          callData: encodeWethWithdrawCalldata(crossSwap.amount),
+          value: "0",
+        },
+        {
+          target: crossSwap.recipient,
+          callData: "0x",
+          value: crossSwap.amount.toString(),
+        },
+      ]
+    : [
+        {
+          target: crossSwap.outputToken.address,
+          callData: encodeTransferCalldata(
+            crossSwap.recipient,
+            crossSwap.amount
+          ),
+          value: "0",
+        },
+        {
+          target: getMultiCallHandlerAddress(destinationSwapChainId),
+          callData: encodeDrainCalldata(
+            crossSwap.outputToken.address,
+            crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
+              ? crossSwap.depositor
+              : crossSwap.recipient
+          ),
+          value: "0",
+        },
+      ];
   return buildMulticallHandlerMessage({
     // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
     fallbackRecipient: crossSwap.depositor,
@@ -626,33 +679,21 @@ function buildDestinationSwapCrossChainMessage({
         callData: destinationSwapQuote.swapTx.data,
         value: destinationSwapQuote.swapTx.value,
       },
+      // transfer output tokens to recipient
+      ...transferActions,
       // drain remaining bridgeable output tokens from MultiCallHandler contract
       {
         target: getMultiCallHandlerAddress(destinationSwapChainId),
         callData: encodeDrainCalldata(
           bridgeableOutputToken.address,
-          crossSwap.depositor
+          crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
+            ? crossSwap.depositor
+            : crossSwap.recipient
         ),
         value: "0",
       },
     ],
   });
-}
-
-function encodeApproveCalldata(spender: string, value: ethers.BigNumber) {
-  const approveFunction = "function approve(address spender, uint256 value)";
-  const erc20Interface = new ethers.utils.Interface([approveFunction]);
-  return erc20Interface.encodeFunctionData("approve", [spender, value]);
-}
-
-function encodeDrainCalldata(token: string, destination: string) {
-  const drainFunction =
-    "function drainLeftoverTokens(address token, address payable destination)";
-  const multicallHandlerInterface = new ethers.utils.Interface([drainFunction]);
-  return multicallHandlerInterface.encodeFunctionData("drainLeftoverTokens", [
-    token,
-    destination,
-  ]);
 }
 
 function assertMinOutputAmount(

@@ -1,4 +1,5 @@
 import { SpokePool } from "@across-protocol/contracts/dist/typechain";
+import { PopulatedTransaction } from "ethers";
 
 import {
   isRouteEnabled,
@@ -9,14 +10,17 @@ import {
   latestGasPriceCache,
 } from "../_utils";
 import {
-  getUniswapCrossSwapQuotesForMinOutputB2A,
-  getUniswapCrossSwapQuotesForMinOutputA2B,
-  getBestUniswapCrossSwapQuotesForMinOutputA2A,
+  getUniswapCrossSwapQuotesForOutputB2A,
+  getUniswapCrossSwapQuotesForOutputA2B,
+  getBestUniswapCrossSwapQuotesForOutputA2A,
 } from "./uniswap";
 import { CrossSwap, CrossSwapQuotes } from "./types";
-import { getSwapAndBridge } from "./utils";
+import {
+  buildExactOutputBridgeTokenMessage,
+  buildMinOutputBridgeTokenMessage,
+  getSwapAndBridge,
+} from "./utils";
 import { tagIntegratorId } from "../_integrator-id";
-import { PopulatedTransaction } from "ethers";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
 
 export type CrossSwapType =
@@ -28,6 +32,7 @@ export type LeftoverType = (typeof LEFTOVER_TYPE)[keyof typeof LEFTOVER_TYPE];
 
 export const AMOUNT_TYPE = {
   EXACT_INPUT: "exactInput",
+  EXACT_OUTPUT: "exactOutput",
   MIN_OUTPUT: "minOutput",
 } as const;
 
@@ -53,14 +58,17 @@ export async function getCrossSwapQuotes(
     throw new Error("Not implemented yet");
   }
 
-  if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
-    return getCrossSwapQuotesForMinOutput(crossSwap);
+  if (
+    crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT ||
+    crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
+  ) {
+    return getCrossSwapQuotesForOutput(crossSwap);
   }
 
   throw new Error("Invalid amount type");
 }
 
-export async function getCrossSwapQuotesForMinOutput(crossSwap: CrossSwap) {
+export async function getCrossSwapQuotesForOutput(crossSwap: CrossSwap) {
   const crossSwapType = getCrossSwapType({
     inputToken: crossSwap.inputToken.address,
     originChainId: crossSwap.inputToken.chainId,
@@ -69,19 +77,19 @@ export async function getCrossSwapQuotesForMinOutput(crossSwap: CrossSwap) {
   });
 
   if (crossSwapType === CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE) {
-    return getCrossSwapQuotesForMinOutputB2B(crossSwap);
+    return getCrossSwapQuotesForOutputB2B(crossSwap);
   }
 
   if (crossSwapType === CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY) {
-    return getCrossSwapQuotesForMinOutputB2A(crossSwap);
+    return getCrossSwapQuotesForOutputB2A(crossSwap);
   }
 
   if (crossSwapType === CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE) {
-    return getCrossSwapQuotesForMinOutputA2B(crossSwap);
+    return getCrossSwapQuotesForOutputA2B(crossSwap);
   }
 
   if (crossSwapType === CROSS_SWAP_TYPE.ANY_TO_ANY) {
-    return getCrossSwapQuotesForMinOutputA2A(crossSwap);
+    return getCrossSwapQuotesForOutputA2A(crossSwap);
   }
 
   throw new Error("Invalid cross swap type");
@@ -92,14 +100,25 @@ export async function getCrossSwapQuotesForExactInput(crossSwap: CrossSwap) {
   throw new Error("Not implemented yet");
 }
 
-export async function getCrossSwapQuotesForMinOutputB2B(crossSwap: CrossSwap) {
+export async function getCrossSwapQuotesForOutputB2B(crossSwap: CrossSwap) {
   const bridgeQuote = await getBridgeQuoteForMinOutput({
     inputToken: crossSwap.inputToken,
     outputToken: crossSwap.outputToken,
     minOutputAmount: crossSwap.amount,
-    // @TODO: handle ETH/WETH message generation
-    message: "0x",
+    recipient: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
+    message:
+      crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
+        ? buildExactOutputBridgeTokenMessage(crossSwap)
+        : buildMinOutputBridgeTokenMessage(crossSwap),
   });
+
+  if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
+    bridgeQuote.message = buildMinOutputBridgeTokenMessage(
+      crossSwap,
+      bridgeQuote.outputAmount
+    );
+  }
+
   return {
     crossSwap,
     destinationSwapQuote: undefined,
@@ -108,19 +127,19 @@ export async function getCrossSwapQuotesForMinOutputB2B(crossSwap: CrossSwap) {
   };
 }
 
-export async function getCrossSwapQuotesForMinOutputB2A(crossSwap: CrossSwap) {
+export async function getCrossSwapQuotesForOutputB2A(crossSwap: CrossSwap) {
   // @TODO: Add support for other DEXes / aggregators
-  return getUniswapCrossSwapQuotesForMinOutputB2A(crossSwap);
+  return getUniswapCrossSwapQuotesForOutputB2A(crossSwap);
 }
 
-export async function getCrossSwapQuotesForMinOutputA2B(crossSwap: CrossSwap) {
+export async function getCrossSwapQuotesForOutputA2B(crossSwap: CrossSwap) {
   // @TODO: Add support for other DEXes / aggregators
-  return getUniswapCrossSwapQuotesForMinOutputA2B(crossSwap);
+  return getUniswapCrossSwapQuotesForOutputA2B(crossSwap);
 }
 
-export async function getCrossSwapQuotesForMinOutputA2A(crossSwap: CrossSwap) {
+export async function getCrossSwapQuotesForOutputA2A(crossSwap: CrossSwap) {
   // @TODO: Add support for other DEXes / aggregators
-  return getBestUniswapCrossSwapQuotesForMinOutputA2A(crossSwap, {
+  return getBestUniswapCrossSwapQuotesForOutputA2A(crossSwap, {
     preferredBridgeTokens: PREFERRED_BRIDGE_TOKENS,
     bridgeRoutesLimit: 2,
   });
@@ -163,9 +182,7 @@ export async function buildCrossSwapTx(
   const spokePool = getSpokePool(originChainId);
   const deposit = {
     depositor: crossSwapQuotes.crossSwap.depositor,
-    recipient: crossSwapQuotes.destinationSwapQuote
-      ? getMultiCallHandlerAddress(destinationChainId)
-      : crossSwapQuotes.crossSwap.recipient,
+    recipient: getMultiCallHandlerAddress(destinationChainId),
     inputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
     outputToken: crossSwapQuotes.bridgeQuote.outputToken.address,
     inputAmount: crossSwapQuotes.bridgeQuote.inputAmount,
@@ -191,7 +208,12 @@ export async function buildCrossSwapTx(
       crossSwapQuotes.originSwapQuote.swapTx.data,
       crossSwapQuotes.originSwapQuote.maximumAmountIn,
       crossSwapQuotes.originSwapQuote.minAmountOut,
-      deposit
+      deposit,
+      {
+        value: crossSwapQuotes.crossSwap.isInputNative
+          ? deposit.inputAmount
+          : 0,
+      }
     );
     toAddress = swapAndBridge.address;
   } else {
@@ -210,7 +232,12 @@ export async function buildCrossSwapTx(
       deposit.quoteTimestamp,
       deposit.fillDeadline,
       deposit.exclusivityDeadline,
-      deposit.message
+      deposit.message,
+      {
+        value: crossSwapQuotes.crossSwap.isInputNative
+          ? deposit.inputAmount
+          : 0,
+      }
     );
     toAddress = spokePool.address;
   }

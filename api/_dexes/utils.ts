@@ -1,6 +1,15 @@
-import { UniversalSwapAndBridge__factory } from "@across-protocol/contracts/dist/typechain";
+import { UniversalSwapAndBridge__factory } from "../_typechain/factories/SwapAndBridge.sol";
+import { BigNumber } from "ethers";
 
 import { ENABLED_ROUTES, getProvider } from "../_utils";
+import {
+  buildMulticallHandlerMessage,
+  encodeDrainCalldata,
+  encodeTransferCalldata,
+  encodeWethWithdrawCalldata,
+  getMultiCallHandlerAddress,
+} from "../_multicall-handler";
+import { CrossSwap } from "./types";
 
 export class UnsupportedDex extends Error {
   constructor(dex: string) {
@@ -59,4 +68,97 @@ function _isDexSupported(
   dex: string
 ): dex is keyof typeof ENABLED_ROUTES.swapAndBridgeAddresses {
   return swapAndBridgeDexes.includes(dex);
+}
+
+/**
+ * This builds a cross-chain message for a (any/bridgeable)-to-bridgeable cross swap
+ * with a specific amount of output tokens that the recipient will receive. Excess
+ * tokens are refunded to the depositor.
+ */
+export function buildExactOutputBridgeTokenMessage(crossSwap: CrossSwap) {
+  const transferActions = crossSwap.isOutputNative
+    ? // WETH unwrap to ETH
+      [
+        {
+          target: crossSwap.outputToken.address,
+          callData: encodeWethWithdrawCalldata(crossSwap.amount),
+          value: "0",
+        },
+        {
+          target: crossSwap.recipient,
+          callData: "0x",
+          value: crossSwap.amount.toString(),
+        },
+      ]
+    : // ERC-20 token transfer
+      [
+        {
+          target: crossSwap.outputToken.address,
+          callData: encodeTransferCalldata(
+            crossSwap.recipient,
+            crossSwap.amount
+          ),
+          value: "0",
+        },
+      ];
+  return buildMulticallHandlerMessage({
+    // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
+    fallbackRecipient: crossSwap.depositor,
+    actions: [
+      ...transferActions,
+      // drain remaining bridgeable output tokens from MultiCallHandler contract
+      {
+        target: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
+        callData: encodeDrainCalldata(
+          crossSwap.outputToken.address,
+          crossSwap.depositor
+        ),
+        value: "0",
+      },
+    ],
+  });
+}
+
+/**
+ * This builds a cross-chain message for a (any/bridgeable)-to-bridgeable cross swap
+ * with a min. amount of output tokens that the recipient will receive.
+ */
+export function buildMinOutputBridgeTokenMessage(
+  crossSwap: CrossSwap,
+  unwrapAmount?: BigNumber
+) {
+  const transferActions = crossSwap.isOutputNative
+    ? // WETH unwrap to ETH
+      [
+        {
+          target: crossSwap.outputToken.address,
+          callData: encodeWethWithdrawCalldata(
+            unwrapAmount || crossSwap.amount
+          ),
+          value: "0",
+        },
+        {
+          target: crossSwap.recipient,
+          callData: "0x",
+          value: crossSwap.amount.toString(),
+        },
+      ]
+    : // ERC-20 token transfer
+      [];
+  return buildMulticallHandlerMessage({
+    // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
+    fallbackRecipient: crossSwap.depositor,
+    actions: [
+      ...transferActions,
+      // drain remaining bridgeable output tokens from MultiCallHandler contract
+      {
+        target: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
+        callData: encodeDrainCalldata(
+          crossSwap.outputToken.address,
+          crossSwap.recipient
+        ),
+        value: "0",
+      },
+    ],
+  });
 }

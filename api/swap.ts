@@ -1,6 +1,6 @@
 import { VercelResponse } from "@vercel/node";
 import { assert, Infer, type, string, optional } from "superstruct";
-import { BigNumber } from "ethers";
+import { BigNumber, constants, utils } from "ethers";
 
 import { TypedVercelRequest } from "./_types";
 import {
@@ -11,6 +11,7 @@ import {
   validAddress,
   boolStr,
   getCachedTokenInfo,
+  getWrappedNativeTokenAddress,
 } from "./_utils";
 import {
   AMOUNT_TYPE,
@@ -22,6 +23,7 @@ import { isValidIntegratorId } from "./_integrator-id";
 
 const SwapQueryParamsSchema = type({
   minOutputAmount: optional(positiveIntStr()),
+  exactOutputAmount: optional(positiveIntStr()),
   exactInputAmount: optional(positiveIntStr()),
   inputToken: validAddress(),
   outputToken: validAddress(),
@@ -55,6 +57,7 @@ const handler = async (
       outputToken: _outputTokenAddress,
       exactInputAmount: _exactInputAmount,
       minOutputAmount: _minOutputAmount,
+      exactOutputAmount: _exactOutputAmount,
       originChainId: _originChainId,
       destinationChainId: _destinationChainId,
       recipient,
@@ -68,19 +71,34 @@ const handler = async (
     const originChainId = Number(_originChainId);
     const destinationChainId = Number(_destinationChainId);
     const refundOnOrigin = _refundOnOrigin === "true";
+    const isInputNative = _inputTokenAddress === constants.AddressZero;
+    const isOutputNative = _outputTokenAddress === constants.AddressZero;
+    const inputTokenAddress = isInputNative
+      ? getWrappedNativeTokenAddress(originChainId)
+      : utils.getAddress(_inputTokenAddress);
+    const outputTokenAddress = isOutputNative
+      ? getWrappedNativeTokenAddress(destinationChainId)
+      : utils.getAddress(_outputTokenAddress);
 
-    if (!_minOutputAmount && !_exactInputAmount) {
+    if (!_minOutputAmount && !_exactInputAmount && !_exactOutputAmount) {
       throw new MissingParamError({
-        param: "minOutputAmount, exactInputAmount",
-        message: "One of 'minOutputAmount' or 'exactInputAmount' is required",
+        param: "minOutputAmount, exactInputAmount, exactOutputAmount",
+        message:
+          "One of 'minOutputAmount', 'exactInputAmount' or 'exactOutputAmount' is required",
       });
     }
 
-    if (_minOutputAmount && _exactInputAmount) {
+    if (integratorId && !isValidIntegratorId(integratorId)) {
       throw new InvalidParamError({
-        param: "minOutputAmount, exactInputAmount",
-        message:
-          "Only one of 'minOutputAmount' or 'exactInputAmount' is allowed",
+        param: "integratorId",
+        message: "Invalid integrator ID. Needs to be 2 bytes hex string.",
+      });
+    }
+
+    if (!inputTokenAddress || !outputTokenAddress) {
+      throw new InvalidParamError({
+        param: "inputToken, outputToken",
+        message: "Invalid input or output token address",
       });
     }
 
@@ -93,21 +111,21 @@ const handler = async (
 
     const amountType = _minOutputAmount
       ? AMOUNT_TYPE.MIN_OUTPUT
-      : AMOUNT_TYPE.EXACT_INPUT;
+      : _exactInputAmount
+        ? AMOUNT_TYPE.EXACT_INPUT
+        : AMOUNT_TYPE.EXACT_OUTPUT;
     const amount = BigNumber.from(
-      amountType === AMOUNT_TYPE.EXACT_INPUT
-        ? _exactInputAmount
-        : _minOutputAmount
+      _minOutputAmount || _exactInputAmount || _exactOutputAmount
     );
 
     // 1. Get token details
     const [inputToken, outputToken] = await Promise.all([
       getCachedTokenInfo({
-        address: _inputTokenAddress,
+        address: inputTokenAddress,
         chainId: originChainId,
       }),
       getCachedTokenInfo({
-        address: _outputTokenAddress,
+        address: outputTokenAddress,
         chainId: destinationChainId,
       }),
     ]);
@@ -123,8 +141,8 @@ const handler = async (
       type: amountType,
       refundOnOrigin,
       refundAddress,
-      // @TODO: Make this configurable via env var or query param
-      leftoverType: "bridgeableToken",
+      isInputNative,
+      isOutputNative,
     });
 
     // 3. Build cross swap tx

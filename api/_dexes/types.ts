@@ -19,7 +19,8 @@ export type Swap = {
   recipient: string;
   slippageTolerance: number;
   type: AmountType;
-  leftoverType?: LeftoverType;
+  isInputNative?: boolean;
+  isOutputNative?: boolean;
 };
 
 export type CrossSwap = {
@@ -33,6 +34,8 @@ export type CrossSwap = {
   leftoverType?: LeftoverType;
   refundOnOrigin: boolean;
   refundAddress?: string;
+  isInputNative?: boolean;
+  isOutputNative?: boolean;
 };
 
 export type SupportedDex = "1inch" | "uniswap";
