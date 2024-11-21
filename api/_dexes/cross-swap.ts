@@ -22,6 +22,7 @@ import {
 } from "./utils";
 import { tagIntegratorId } from "../_integrator-id";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
+import { getPermitTypedData } from "../_permit";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -248,6 +249,63 @@ export async function buildCrossSwapTxForAllowanceHolder(
     value: tx.value,
   };
 }
+
+export async function getCrossSwapTxForPermit(
+  crossSwapQuotes: CrossSwapQuotes,
+  permitDeadline: number
+) {
+  const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
+  const swapAndBridge = getSwapAndBridge("uniswap", originChainId);
+  const deposit = await extractDepositDataStruct(crossSwapQuotes);
+
+  let methodName: string;
+  let argsWithoutSignature: Record<string, unknown>;
+  if (crossSwapQuotes.originSwapQuote) {
+    methodName = "swapAndBridgeWithPermit";
+    argsWithoutSignature = {
+      swapToken: crossSwapQuotes.originSwapQuote.tokenIn.address,
+      acrossInputToken: crossSwapQuotes.originSwapQuote.tokenOut.address,
+      routerCalldata: crossSwapQuotes.originSwapQuote.swapTx.data,
+      swapTokenAmount: crossSwapQuotes.originSwapQuote.maximumAmountIn,
+      minExpectedInputTokenAmount: crossSwapQuotes.originSwapQuote.minAmountOut,
+      depositData: deposit,
+      deadline: permitDeadline,
+    };
+  } else {
+    methodName = "depositWithPermit";
+    argsWithoutSignature = {
+      acrossInputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
+      acrossInputAmount: crossSwapQuotes.bridgeQuote.inputAmount,
+      depositData: deposit,
+      deadline: permitDeadline,
+    };
+  }
+
+  const permitTypedData = await getPermitTypedData({
+    tokenAddress:
+      crossSwapQuotes.originSwapQuote?.tokenIn.address ||
+      crossSwapQuotes.bridgeQuote.inputToken.address,
+    chainId: originChainId,
+    ownerAddress: crossSwapQuotes.crossSwap.depositor,
+    spenderAddress: swapAndBridge.address,
+    value:
+      crossSwapQuotes.originSwapQuote?.maximumAmountIn ||
+      crossSwapQuotes.bridgeQuote.inputAmount,
+    deadline: permitDeadline,
+  });
+  return {
+    permit: {
+      eip712: permitTypedData.eip712,
+    },
+    tx: {
+      chainId: originChainId,
+      to: swapAndBridge.address,
+      methodName,
+      argsWithoutSignature,
+    },
+  };
+}
+
 async function extractDepositDataStruct(crossSwapQuotes: CrossSwapQuotes) {
   const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
   const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
