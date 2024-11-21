@@ -2104,9 +2104,9 @@ export function getCachedFillGasUsage(
     const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
       buildDepositForSimulation(deposit),
       overrides?.relayerAddress,
-      undefined,
-      undefined,
-      true
+      {
+        omitMarkup: true,
+      }
     );
     return nativeGasCost;
   };
