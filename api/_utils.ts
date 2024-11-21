@@ -201,6 +201,7 @@ export const getLogger = (): LoggingUtility => {
  * @returns A valid URL of the current endpoint in vercel
  */
 export const resolveVercelEndpoint = () => {
+  return "https://app.across.to";
   const url = process.env.VERCEL_URL ?? "across.to";
   const env = process.env.VERCEL_ENV ?? "development";
   switch (env) {
