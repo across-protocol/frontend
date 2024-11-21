@@ -29,9 +29,7 @@ const DepositStatusAnimatedIcons = ({
     <>
       <SVGGradientDefs />
       <TopWrapperAnimationWrapper>
-        <AnimatedLogoWrapper
-          completed={status === "filling" || status === "filled"}
-        >
+        <AnimatedLogoWrapper completed={status === "filled"}>
           {status === "depositing" && <BlurLoadingAnimation />}
           <LogoWrapper
             status={
