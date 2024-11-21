@@ -29,7 +29,8 @@ import {
   create,
   define,
   Infer,
-  number,
+  integer,
+  min,
   string,
   Struct,
 } from "superstruct";
@@ -1364,17 +1365,18 @@ export function applyMapFilter<InputType, MapType>(
   }, []);
 }
 
-export const coercibleInt = coerce(number(), string(), (value) =>
-  parseInt(value)
+// superstruct first coerces, then validates
+export const positiveInt = coerce(min(integer(), 0), string(), (value) =>
+  Number(value)
 );
 
 // parses, coerces and validates query params
+// first coerce any fields that can be coerced, then validate
 export function parseQuery<
   Q extends VercelRequestQuery,
   S extends Struct<any, any>,
 >(query: Q, schema: S): Infer<S> {
   const coerced = create(query, schema);
-
   assert(coerced, schema);
   return coerced;
 }

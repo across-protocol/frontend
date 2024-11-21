@@ -8,8 +8,8 @@ import {
   validAddress,
   getBalancerV2TokenPrice,
   getCachedTokenPrice,
-  coercibleInt,
   parseQuery,
+  positiveInt,
 } from "./_utils";
 import {
   CHAIN_IDs,
@@ -32,7 +32,7 @@ const {
 const CoingeckoQueryParamsSchema = object({
   l1Token: optional(validAddress()),
   tokenAddress: optional(validAddress()),
-  chainId: optional(coercibleInt),
+  chainId: optional(positiveInt),
   baseCurrency: optional(string()),
   date: optional(pattern(string(), /\d{2}-\d{2}-\d{4}/)),
 });
@@ -50,15 +50,13 @@ const handler = async (
     query,
   });
   try {
-    const parsed = parseQuery(query, CoingeckoQueryParamsSchema);
-
     let {
       l1Token,
       tokenAddress,
       chainId,
       baseCurrency,
       date: dateStr,
-    } = parsed;
+    } = parseQuery(query, CoingeckoQueryParamsSchema);
 
     let address = l1Token ?? tokenAddress;
     if (!address) {
