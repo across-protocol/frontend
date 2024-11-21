@@ -1,5 +1,5 @@
 import { SpokePool } from "@across-protocol/contracts/dist/typechain";
-import { PopulatedTransaction } from "ethers";
+import { ethers, PopulatedTransaction } from "ethers";
 
 import {
   isRouteEnabled,
@@ -7,7 +7,7 @@ import {
   isOutputTokenBridgeable,
   getBridgeQuoteForMinOutput,
   getSpokePool,
-  latestGasPriceCache,
+  getSpokePoolVerifier,
 } from "../_utils";
 import {
   getUniswapCrossSwapQuotesForOutputB2A,
@@ -173,29 +173,15 @@ export function getCrossSwapType(params: {
   return CROSS_SWAP_TYPE.ANY_TO_ANY;
 }
 
-export async function buildCrossSwapTx(
+export async function buildCrossSwapTxForAllowanceHolder(
   crossSwapQuotes: CrossSwapQuotes,
   integratorId?: string
 ) {
   const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
-  const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
+  const isInputNative = crossSwapQuotes.crossSwap.isInputNative;
   const spokePool = getSpokePool(originChainId);
-  const deposit = {
-    depositor: crossSwapQuotes.crossSwap.depositor,
-    recipient: getMultiCallHandlerAddress(destinationChainId),
-    inputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
-    outputToken: crossSwapQuotes.bridgeQuote.outputToken.address,
-    inputAmount: crossSwapQuotes.bridgeQuote.inputAmount,
-    outputAmount: crossSwapQuotes.bridgeQuote.outputAmount,
-    destinationChainid: crossSwapQuotes.bridgeQuote.outputToken.chainId,
-    exclusiveRelayer:
-      crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
-    quoteTimestamp: crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
-    fillDeadline: await getFillDeadline(spokePool),
-    exclusivityDeadline:
-      crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline,
-    message: crossSwapQuotes.bridgeQuote.message || "0x",
-  };
+  const spokePoolVerifier = getSpokePoolVerifier(originChainId);
+  const deposit = await extractDepositDataStruct(crossSwapQuotes);
 
   let tx: PopulatedTransaction;
   let toAddress: string;
@@ -216,10 +202,23 @@ export async function buildCrossSwapTx(
       }
     );
     toAddress = swapAndBridge.address;
-  } else {
-    const spokePool = getSpokePool(
-      crossSwapQuotes.crossSwap.inputToken.chainId
+  } else if (isInputNative && spokePoolVerifier) {
+    tx = await spokePoolVerifier.populateTransaction.deposit(
+      spokePool.address,
+      deposit.recipient,
+      deposit.inputToken,
+      deposit.inputAmount,
+      deposit.destinationChainid,
+      crossSwapQuotes.bridgeQuote.suggestedFees.totalRelayFee.pct,
+      deposit.quoteTimestamp,
+      deposit.message,
+      ethers.constants.MaxUint256,
+      {
+        value: deposit.inputAmount,
+      }
     );
+    toAddress = spokePoolVerifier.address;
+  } else {
     tx = await spokePool.populateTransaction.depositV3(
       deposit.depositor,
       deposit.recipient,
@@ -242,22 +241,38 @@ export async function buildCrossSwapTx(
     toAddress = spokePool.address;
   }
 
-  const [gas, gasPrice] = await Promise.all([
-    spokePool.provider.estimateGas({
-      from: crossSwapQuotes.crossSwap.depositor,
-      ...tx,
-    }),
-    latestGasPriceCache(originChainId).get(),
-  ]);
-
   return {
     from: crossSwapQuotes.crossSwap.depositor,
     to: toAddress,
     data: integratorId ? tagIntegratorId(integratorId, tx.data!) : tx.data,
-    gas,
-    gasPrice,
     value: tx.value,
   };
+}
+async function extractDepositDataStruct(crossSwapQuotes: CrossSwapQuotes) {
+  const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
+  const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
+  const spokePool = getSpokePool(originChainId);
+  const message = crossSwapQuotes.bridgeQuote.message || "0x";
+  const deposit = {
+    depositor: crossSwapQuotes.crossSwap.depositor,
+    recipient:
+      message && message !== "0x"
+        ? getMultiCallHandlerAddress(destinationChainId)
+        : crossSwapQuotes.crossSwap.recipient,
+    inputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
+    outputToken: crossSwapQuotes.bridgeQuote.outputToken.address,
+    inputAmount: crossSwapQuotes.bridgeQuote.inputAmount,
+    outputAmount: crossSwapQuotes.bridgeQuote.outputAmount,
+    destinationChainid: crossSwapQuotes.bridgeQuote.outputToken.chainId,
+    exclusiveRelayer:
+      crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
+    quoteTimestamp: crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
+    fillDeadline: await getFillDeadline(spokePool),
+    exclusivityDeadline:
+      crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline,
+    message,
+  };
+  return deposit;
 }
 
 async function getFillDeadline(spokePool: SpokePool): Promise<number> {

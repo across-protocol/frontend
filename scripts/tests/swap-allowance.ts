@@ -13,7 +13,7 @@ const depositor = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
 const MIN_OUTPUT_CASES = [
   // B2B
   {
-    labels: ["B2B", "MIN_OUTPUT", "Base USDC", "Arbitrum USDC"],
+    labels: ["B2B", "MIN_OUTPUT", "Base USDC - Arbitrum USDC"],
     params: {
       minOutputAmount: ethers.utils.parseUnits("1", 6).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
@@ -24,7 +24,7 @@ const MIN_OUTPUT_CASES = [
     },
   },
   {
-    labels: ["B2B", "MIN_OUTPUT", "Base USDC", "Arbitrum ETH"],
+    labels: ["B2B", "MIN_OUTPUT", "Base USDC - Arbitrum ETH"],
     params: {
       minOutputAmount: ethers.utils.parseUnits("0.001", 18).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
@@ -34,9 +34,20 @@ const MIN_OUTPUT_CASES = [
       depositor,
     },
   },
+  {
+    labels: ["B2B", "MIN_OUTPUT", "Arbitrum ETH - Base USDC"],
+    params: {
+      minOutputAmount: ethers.utils.parseUnits("3", 6).toString(),
+      inputToken: ethers.constants.AddressZero,
+      originChainId: CHAIN_IDs.ARBITRUM,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
+      destinationChainId: CHAIN_IDs.BASE,
+      depositor,
+    },
+  },
   // B2A
   {
-    labels: ["B2A", "MIN_OUTPUT", "Base USDC", "Arbitrum WETH"],
+    labels: ["B2A", "MIN_OUTPUT", "Base USDC - Arbitrum WETH"],
     params: {
       minOutputAmount: ethers.utils.parseUnits("0.001", 18).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
@@ -47,7 +58,7 @@ const MIN_OUTPUT_CASES = [
     },
   },
   {
-    labels: ["B2A", "MIN_OUTPUT", "Base USDC", "Arbitrum ETH"],
+    labels: ["B2A", "MIN_OUTPUT", "Base USDC - Arbitrum ETH"],
     params: {
       minOutputAmount: ethers.utils.parseUnits("0.001", 18).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
@@ -59,7 +70,7 @@ const MIN_OUTPUT_CASES = [
   },
   // A2B
   {
-    labels: ["A2B", "MIN_OUTPUT", "Base USDbC", "Arbitrum USDC"],
+    labels: ["A2B", "MIN_OUTPUT", "Base USDbC - Arbitrum USDC"],
     params: {
       minOutputAmount: ethers.utils.parseUnits("1", 6).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDbC.addresses[CHAIN_IDs.BASE],
@@ -71,7 +82,7 @@ const MIN_OUTPUT_CASES = [
   },
   // A2A
   {
-    labels: ["A2A", "MIN_OUTPUT", "Base USDbC", "Arbitrum APE"],
+    labels: ["A2A", "MIN_OUTPUT", "Base USDbC - Arbitrum APE"],
     params: {
       minOutputAmount: ethers.utils.parseUnits("1", 18).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDbC.addresses[CHAIN_IDs.BASE],
@@ -85,7 +96,7 @@ const MIN_OUTPUT_CASES = [
 const EXACT_OUTPUT_CASES = [
   // B2B
   {
-    labels: ["B2B", "EXACT_OUTPUT", "Base USDC", "Arbitrum USDC"],
+    labels: ["B2B", "EXACT_OUTPUT", "Base USDC - Arbitrum USDC"],
     params: {
       exactOutputAmount: ethers.utils.parseUnits("1", 6).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
@@ -96,7 +107,7 @@ const EXACT_OUTPUT_CASES = [
     },
   },
   {
-    labels: ["B2B", "EXACT_OUTPUT", "Base USDC", "Arbitrum ETH"],
+    labels: ["B2B", "EXACT_OUTPUT", "Base USDC -Arbitrum ETH"],
     params: {
       exactOutputAmount: ethers.utils.parseUnits("0.001", 18).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
@@ -108,7 +119,7 @@ const EXACT_OUTPUT_CASES = [
   },
   // B2A
   {
-    labels: ["B2A", "EXACT_OUTPUT", "Base USDC", "Arbitrum WETH"],
+    labels: ["B2A", "EXACT_OUTPUT", "Base USDC - Arbitrum WETH"],
     params: {
       exactOutputAmount: ethers.utils.parseUnits("0.001", 18).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
@@ -119,7 +130,7 @@ const EXACT_OUTPUT_CASES = [
     },
   },
   {
-    labels: ["B2A", "EXACT_OUTPUT", "Base USDC", "Arbitrum ETH"],
+    labels: ["B2A", "EXACT_OUTPUT", "Base USDC - Arbitrum ETH"],
     params: {
       exactOutputAmount: ethers.utils.parseUnits("0.001", 18).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
@@ -131,7 +142,7 @@ const EXACT_OUTPUT_CASES = [
   },
   // A2B
   {
-    labels: ["A2B", "EXACT_OUTPUT", "Base USDbC", "Arbitrum USDC"],
+    labels: ["A2B", "EXACT_OUTPUT", "Base USDbC - Arbitrum USDC"],
     params: {
       minOutputAmount: ethers.utils.parseUnits("1", 6).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDbC.addresses[CHAIN_IDs.BASE],
@@ -143,7 +154,7 @@ const EXACT_OUTPUT_CASES = [
   },
   // A2A
   {
-    labels: ["A2A", "EXACT_OUTPUT", "Base USDbC", "Arbitrum APE"],
+    labels: ["A2A", "EXACT_OUTPUT", "Base USDbC - Arbitrum APE"],
     params: {
       minOutputAmount: ethers.utils.parseUnits("1", 18).toString(),
       inputToken: TOKEN_SYMBOLS_MAP.USDbC.addresses[CHAIN_IDs.BASE],
@@ -169,9 +180,12 @@ async function swap() {
   });
   for (const testCase of filteredTestCases) {
     console.log("\nTest case:", testCase.labels.join(" "));
-    const response = await axios.get(`http://localhost:3000/api/swap`, {
-      params: testCase.params,
-    });
+    const response = await axios.get(
+      `http://localhost:3000/api/swap/allowance`,
+      {
+        params: testCase.params,
+      }
+    );
     console.log(response.data);
 
     if (process.env.DEV_WALLET_PK) {
