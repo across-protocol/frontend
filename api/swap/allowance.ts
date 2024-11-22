@@ -87,14 +87,14 @@ const handler = async (
         gasPrice: originTxGasPrice?.toString(),
       },
       inputAmount:
-        crossSwapQuotes.originSwapQuote?.expectedAmountIn ??
-        crossSwapQuotes.bridgeQuote.inputAmount,
+        crossSwapQuotes.originSwapQuote?.expectedAmountIn.toString() ??
+        crossSwapQuotes.bridgeQuote.inputAmount.toString(),
       expectedOutputAmount:
-        crossSwapQuotes.destinationSwapQuote?.expectedAmountOut ??
-        crossSwapQuotes.bridgeQuote.outputAmount,
+        crossSwapQuotes.destinationSwapQuote?.expectedAmountOut.toString() ??
+        crossSwapQuotes.bridgeQuote.outputAmount.toString(),
       minOutputAmount:
-        crossSwapQuotes.originSwapQuote?.minAmountOut ??
-        crossSwapQuotes.bridgeQuote.outputAmount,
+        crossSwapQuotes.originSwapQuote?.minAmountOut.toString() ??
+        crossSwapQuotes.bridgeQuote.outputAmount.toString(),
       expectedFillTime:
         crossSwapQuotes.bridgeQuote.suggestedFees.estimatedFillTimeSec,
     };
