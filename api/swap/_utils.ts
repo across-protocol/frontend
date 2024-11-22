@@ -19,8 +19,10 @@ import {
 import { InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
 import { CrossSwapFees, CrossSwapQuotes, SwapQuote } from "../_dexes/types";
-import { Coingecko } from "@across-protocol/sdk/dist/types/coingecko";
 import { formatUnits } from "ethers/lib/utils";
+import { coingecko } from "@across-protocol/sdk";
+
+const { Coingecko } = coingecko;
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
