@@ -17,6 +17,9 @@ import {
 } from "../_dexes/cross-swap";
 import { InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
+import { CrossSwapFees, CrossSwapQuotes, SwapQuote } from "../_dexes/types";
+import { Coingecko } from "@across-protocol/sdk/dist/types/coingecko";
+import { formatUnits } from "ethers/lib/utils";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -122,4 +125,98 @@ export async function handleBaseSwapQueryParams({
   });
 
   return { crossSwapQuotes, integratorId, skipOriginTxEstimation };
+}
+
+async function calculateSwapFee(
+  swapQuote: SwapQuote,
+  coingeckoClient: Coingecko,
+  baseCurrency: string
+): Promise<Record<string, number>> {
+  const { tokenIn, tokenOut, expectedAmountOut, expectedAmountIn } = swapQuote;
+  const [[, inputTokenPriceBase], [, outputTokenPriceBase]] = await Promise.all(
+    [
+      coingeckoClient.getCurrentPriceByContract(
+        tokenIn.address,
+        baseCurrency,
+        tokenIn.chainId
+      ),
+      coingeckoClient.getCurrentPriceByContract(
+        tokenOut.address,
+        baseCurrency,
+        tokenOut.chainId
+      ),
+    ]
+  );
+
+  const normalizedIn =
+    parseFloat(formatUnits(expectedAmountIn, tokenIn.decimals)) *
+    inputTokenPriceBase;
+  const normalizedOut =
+    parseFloat(formatUnits(expectedAmountOut, tokenOut.decimals)) *
+    outputTokenPriceBase;
+  return {
+    [baseCurrency]: normalizedIn - normalizedOut,
+  };
+}
+
+async function calculateBridgeFee(
+  bridgeQuote: CrossSwapQuotes["bridgeQuote"],
+  coingeckoClient: Coingecko,
+  baseCurrency: string
+): Promise<Record<string, number>> {
+  const { inputToken, suggestedFees } = bridgeQuote;
+  const [, inputTokenPriceBase] =
+    await coingeckoClient.getCurrentPriceByContract(
+      inputToken.address,
+      baseCurrency,
+      inputToken.chainId
+    );
+  const normalizedFee =
+    parseFloat(
+      formatUnits(suggestedFees.totalRelayFee.total, inputToken.decimals)
+    ) * inputTokenPriceBase;
+
+  return {
+    [baseCurrency]: normalizedFee,
+  };
+}
+
+export async function calculateCrossSwapFees(
+  crossSwapQuote: CrossSwapQuotes,
+  coingeckoClient: Coingecko,
+  baseCurrency = "usd"
+): Promise<CrossSwapFees> {
+  const bridgeFeePromise = calculateBridgeFee(
+    crossSwapQuote.bridgeQuote,
+    coingeckoClient,
+    baseCurrency
+  );
+
+  const originSwapFeePromise = crossSwapQuote?.originSwapQuote
+    ? calculateSwapFee(
+        crossSwapQuote.originSwapQuote,
+        coingeckoClient,
+        baseCurrency
+      )
+    : Promise.resolve(undefined);
+
+  const destinationSwapFeePromise = crossSwapQuote?.destinationSwapQuote
+    ? calculateSwapFee(
+        crossSwapQuote.destinationSwapQuote,
+        coingeckoClient,
+        baseCurrency
+      )
+    : Promise.resolve(undefined);
+
+  const [bridgeFees, originSwapFees, destinationSwapFees] = await Promise.all([
+    bridgeFeePromise,
+    originSwapFeePromise,
+    destinationSwapFeePromise,
+  ]);
+
+  return {
+    bridgeFees,
+    originSwapFees,
+    destinationSwapFees,
+  };
 }

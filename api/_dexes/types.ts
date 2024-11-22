@@ -77,4 +77,12 @@ export type CrossSwapQuotes = {
   };
   destinationSwapQuote?: SwapQuote;
   originSwapQuote?: SwapQuote;
+  // fees: CrossSwapFees;
+};
+
+// { currency => amount }
+export type CrossSwapFees = {
+  bridgeFees: Record<string, number>;
+  originSwapFees?: Record<string, number>;
+  destinationSwapFees?: Record<string, number>;
 };
