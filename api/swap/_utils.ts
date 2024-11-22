@@ -9,6 +9,7 @@ import {
   boolStr,
   getCachedTokenInfo,
   getWrappedNativeTokenAddress,
+  getLogger,
 } from "../_utils";
 import {
   AMOUNT_TYPE,
@@ -124,12 +125,26 @@ export async function handleBaseSwapQueryParams({
     isOutputNative,
   });
 
-  return { crossSwapQuotes, integratorId, skipOriginTxEstimation };
+  // 3. Calculate fees based for full route
+  const fees = await calculateCrossSwapFees(crossSwapQuotes);
+
+  return {
+    crossSwapQuotes: {
+      ...crossSwapQuotes,
+      fees,
+    },
+    integratorId,
+    skipOriginTxEstimation,
+  };
 }
+
+const coingeckoClient = Coingecko.get(
+  getLogger(),
+  process.env.REACT_APP_COINGECKO_PRO_API_KEY
+);
 
 async function calculateSwapFee(
   swapQuote: SwapQuote,
-  coingeckoClient: Coingecko,
   baseCurrency: string
 ): Promise<Record<string, number>> {
   const { tokenIn, tokenOut, expectedAmountOut, expectedAmountIn } = swapQuote;
@@ -161,7 +176,6 @@ async function calculateSwapFee(
 
 async function calculateBridgeFee(
   bridgeQuote: CrossSwapQuotes["bridgeQuote"],
-  coingeckoClient: Coingecko,
   baseCurrency: string
 ): Promise<Record<string, number>> {
   const { inputToken, suggestedFees } = bridgeQuote;
@@ -183,29 +197,19 @@ async function calculateBridgeFee(
 
 export async function calculateCrossSwapFees(
   crossSwapQuote: CrossSwapQuotes,
-  coingeckoClient: Coingecko,
   baseCurrency = "usd"
 ): Promise<CrossSwapFees> {
   const bridgeFeePromise = calculateBridgeFee(
     crossSwapQuote.bridgeQuote,
-    coingeckoClient,
     baseCurrency
   );
 
   const originSwapFeePromise = crossSwapQuote?.originSwapQuote
-    ? calculateSwapFee(
-        crossSwapQuote.originSwapQuote,
-        coingeckoClient,
-        baseCurrency
-      )
+    ? calculateSwapFee(crossSwapQuote.originSwapQuote, baseCurrency)
     : Promise.resolve(undefined);
 
   const destinationSwapFeePromise = crossSwapQuote?.destinationSwapQuote
-    ? calculateSwapFee(
-        crossSwapQuote.destinationSwapQuote,
-        coingeckoClient,
-        baseCurrency
-      )
+    ? calculateSwapFee(crossSwapQuote.destinationSwapQuote, baseCurrency)
     : Promise.resolve(undefined);
 
   const [bridgeFees, originSwapFees, destinationSwapFees] = await Promise.all([

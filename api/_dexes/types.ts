@@ -77,7 +77,10 @@ export type CrossSwapQuotes = {
   };
   destinationSwapQuote?: SwapQuote;
   originSwapQuote?: SwapQuote;
-  // fees: CrossSwapFees;
+};
+
+export type CrossSwapQuotesWithFees = CrossSwapQuotes & {
+  fees: CrossSwapFees;
 };
 
 // { currency => amount }
