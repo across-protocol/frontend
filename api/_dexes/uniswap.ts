@@ -273,7 +273,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
   );
   // 2.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
   //      This prevents leftover tokens in the SwapAndBridge contract.
-  const adjOriginSwapQuote = await getUniswapQuote(
+  let adjOriginSwapQuote = await getUniswapQuote(
     {
       ...originSwap,
       amount: originSwapQuote.maximumAmountIn.toString(),
@@ -282,10 +282,22 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
   );
 
   if (adjOriginSwapQuote.minAmountOut.lt(bridgeQuote.inputAmount)) {
-    throw new Error(
-      `Origin swap quote min. output amount ${adjOriginSwapQuote.minAmountOut.toString()} ` +
-        `is less than required bridge input amount ${bridgeQuote.inputAmount.toString()}`
+    adjOriginSwapQuote = await getUniswapQuote(
+      {
+        ...originSwap,
+        amount: addSlippageToAmount(
+          bridgeQuote.inputAmount,
+          crossSwap.slippageTolerance.toString()
+        ),
+      },
+      TradeType.EXACT_INPUT
     );
+    if (adjOriginSwapQuote.minAmountOut.lt(bridgeQuote.inputAmount)) {
+      throw new Error(
+        `Origin swap quote min. output amount ${adjOriginSwapQuote.minAmountOut.toString()} ` +
+          `is less than required bridge input amount ${bridgeQuote.inputAmount.toString()}`
+      );
+    }
   }
 
   return {
