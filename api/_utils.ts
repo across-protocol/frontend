@@ -5,6 +5,9 @@ import {
   SpokePool,
   SpokePool__factory,
 } from "@across-protocol/contracts/dist/typechain";
+// NOTE: We are still on v3.0.6 of verifier deployments until audit went through. Because the interface changed, we need to use the old factory.
+// export { SpokePoolVerifier__factory } from "@across-protocol/contracts/dist/typechain/factories/contracts/SpokePoolVerifier__factory";
+import { SpokePoolVerifier__factory } from "@across-protocol/contracts-v3.0.6/dist/typechain/factories/contracts/SpokePoolVerifier__factory";
 import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
 import { asL2Provider } from "@eth-optimism/sdk";
@@ -2335,4 +2338,17 @@ export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
       },
     });
   }
+}
+
+export function getSpokePoolVerifier(chainId: number) {
+  const isSpokePoolVerifierDeployed = (
+    ENABLED_ROUTES.spokePoolVerifier.enabledChains as number[]
+  ).includes(chainId);
+
+  if (!isSpokePoolVerifierDeployed) {
+    return undefined;
+  }
+
+  const address = ENABLED_ROUTES.spokePoolVerifier.address;
+  return SpokePoolVerifier__factory.connect(address, getProvider(chainId));
 }
