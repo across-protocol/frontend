@@ -46,7 +46,7 @@ const handler = async (
 
     const isSwapTxEstimationPossible =
       !skipOriginTxEstimation &&
-      allowance.lt(inputAmount) &&
+      allowance.gte(inputAmount) &&
       balance.gte(inputAmount);
 
     let originTxGas: BigNumber | undefined;
