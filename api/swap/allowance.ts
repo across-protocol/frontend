@@ -93,7 +93,7 @@ const handler = async (
         crossSwapQuotes.destinationSwapQuote?.expectedAmountOut.toString() ??
         crossSwapQuotes.bridgeQuote.outputAmount.toString(),
       minOutputAmount:
-        crossSwapQuotes.originSwapQuote?.minAmountOut.toString() ??
+        crossSwapQuotes.destinationSwapQuote?.minAmountOut.toString() ??
         crossSwapQuotes.bridgeQuote.outputAmount.toString(),
       expectedFillTime:
         crossSwapQuotes.bridgeQuote.suggestedFees.estimatedFillTimeSec,
