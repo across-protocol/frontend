@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from "ethers";
+import { BigNumber, constants, ethers } from "ethers";
 import { CurrencyAmount, Percent, Token, TradeType } from "@uniswap/sdk-core";
 import {
   AlphaRouter,
@@ -35,6 +35,7 @@ import {
 import {
   buildExactOutputBridgeTokenMessage,
   buildMinOutputBridgeTokenMessage,
+  getFallbackRecipient,
   getSwapAndBridgeAddress,
   NoSwapRouteError,
 } from "./utils";
@@ -661,8 +662,7 @@ function buildDestinationSwapCrossChainMessage({
         },
       ];
   return buildMulticallHandlerMessage({
-    // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
-    fallbackRecipient: crossSwap.depositor,
+    fallbackRecipient: getFallbackRecipient(crossSwap),
     actions: [
       // approve bridgeable output token
       {
