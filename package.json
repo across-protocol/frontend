@@ -7,7 +7,7 @@
     "@across-protocol/constants": "^3.1.16",
     "@across-protocol/contracts": "^3.0.11",
     "@across-protocol/contracts-v3.0.6": "npm:@across-protocol/contracts@3.0.6",
-    "@across-protocol/sdk": "^3.3.16",
+    "@across-protocol/sdk": "^3.3.18",
     "@amplitude/analytics-browser": "^2.3.5",
     "@balancer-labs/sdk": "1.1.6-beta.16",
     "@emotion/react": "^11.13.0",
