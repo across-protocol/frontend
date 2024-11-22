@@ -130,7 +130,7 @@ const handler = async (
           : await coingeckoClient.getCurrentPriceByContract(
               l1Token,
               modifiedBaseCurrency,
-              platformId
+              Number(platformId)
             );
       }
     }
