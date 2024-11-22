@@ -163,12 +163,12 @@ export function getCrossSwapType(params: {
     return CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
   }
 
-  if (isInputTokenBridgeable(params.inputToken, params.originChainId)) {
-    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
-  }
-
   if (isOutputTokenBridgeable(params.outputToken, params.destinationChainId)) {
     return CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE;
+  }
+
+  if (isInputTokenBridgeable(params.inputToken, params.originChainId)) {
+    return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
   }
 
   return CROSS_SWAP_TYPE.ANY_TO_ANY;
