@@ -1,4 +1,4 @@
-import { BigNumber, constants, ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { CurrencyAmount, Percent, Token, TradeType } from "@uniswap/sdk-core";
 import {
   AlphaRouter,
