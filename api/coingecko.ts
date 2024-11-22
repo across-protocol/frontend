@@ -12,6 +12,7 @@ import {
   positiveInt,
 } from "./_utils";
 import {
+  CG_CONTRACTS_DEFERRED_TO_ID,
   CHAIN_IDs,
   SUPPORTED_CG_BASE_CURRENCIES,
   SUPPORTED_CG_DERIVED_CURRENCIES,
@@ -138,11 +139,16 @@ const handler = async (
           chainId
         );
       } else {
-        [, price] = await coingeckoClient.getCurrentPriceByContract(
-          address,
-          modifiedBaseCurrency,
-          chainId
-        );
+        [, price] = CG_CONTRACTS_DEFERRED_TO_ID.has(address)
+          ? await coingeckoClient.getCurrentPriceById(
+              address,
+              modifiedBaseCurrency
+            )
+          : await coingeckoClient.getCurrentPriceByContract(
+              address,
+              modifiedBaseCurrency,
+              chainId
+            );
       }
     }
 

@@ -150,11 +150,15 @@ export function parseEtherLike(value: string): ethers.BigNumber {
 /**
  * Checks if a given input is parseable
  * @param amount A bignumberish value that will be attempted to be parsed
+ * @param decimals The number of decimals to parse. Defaults to 18
  * @returns A boolean if this value can be parsed
  */
-export function isNumberEthersParseable(amount: BigNumberish): boolean {
+export function isNumberEthersParseable(
+  amount: BigNumberish,
+  decimals = 18
+): boolean {
   try {
-    parseEtherLike(amount.toString());
+    parseUnits(amount.toString(), decimals);
     return true;
   } catch (_e) {
     return false;

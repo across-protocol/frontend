@@ -59,6 +59,7 @@ import {
   DOMAIN_CALLDATA_DELIMITER,
   EXTERNAL_POOL_TOKEN_EXCHANGE_RATE,
   MULTICALL3_ADDRESS,
+  MULTICALL3_ADDRESS_OVERRIDES,
   SECONDS_PER_YEAR,
   TOKEN_SYMBOLS_MAP,
   defaultRelayerAddressOverride,
@@ -1864,8 +1865,9 @@ export async function callViaMulticall3(
   }[],
   overrides: ethers.CallOverrides = {}
 ): Promise<ethers.utils.Result[]> {
+  const chainId = provider.network.chainId;
   const multicall3 = new ethers.Contract(
-    MULTICALL3_ADDRESS,
+    MULTICALL3_ADDRESS_OVERRIDES[chainId] ?? MULTICALL3_ADDRESS,
     MINIMAL_MULTICALL3_ABI,
     provider
   );

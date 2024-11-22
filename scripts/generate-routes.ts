@@ -1,5 +1,6 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
+
 import { utils } from "ethers";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
@@ -43,6 +44,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.REDSTONE,
   chainConfigs.ZORA,
   chainConfigs.WORLD_CHAIN,
+  chainConfigs.ALEPH_ZERO,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -270,12 +272,11 @@ function transformChainConfigs(
           ];
         }
 
-        // Handle WETH Polygon
+        // Handle WETH Polygon & other non-eth chains
         if (
           tokenSymbol === "WETH" &&
-          [CHAIN_IDs.POLYGON, CHAIN_IDs.POLYGON_AMOY].includes(
-            toChainConfig.chainId
-          )
+          !toChainConfig.tokens.includes("ETH") &&
+          chainConfig.tokens.includes("ETH")
         ) {
           return ["WETH", "ETH"];
         }
