@@ -10,8 +10,7 @@ import {
 import { buildCrossSwapTxForAllowanceHolder } from "../_dexes/cross-swap";
 import { handleBaseSwapQueryParams, BaseSwapQueryParams } from "./_utils";
 import { BigNumber } from "ethers";
-import { getAllowance, getBalance } from "../_erc20";
-import { encodeApproveCalldata } from "../_multicall-handler";
+import { getBalanceAndAllowance } from "../_erc20";
 
 const handler = async (
   request: TypedVercelRequest<BaseSwapQueryParams>,
@@ -38,40 +37,17 @@ const handler = async (
       crossSwapQuotes.originSwapQuote?.maximumAmountIn ||
       crossSwapQuotes.bridgeQuote.inputAmount;
 
-    const [allowance, balance] = await Promise.all([
-      getAllowance({
-        chainId: originChainId,
-        tokenAddress: inputTokenAddress,
-        owner: crossSwapQuotes.crossSwap.depositor,
-        spender: crossSwapTx.to,
-      }),
-      getBalance({
-        chainId: originChainId,
-        tokenAddress: inputTokenAddress,
-        owner: crossSwapQuotes.crossSwap.depositor,
-      }),
-    ]);
-
-    let allowanceTx:
-      | {
-          chainId: number;
-          from: string;
-          to: string;
-          data: string;
-          value?: string;
-        }
-      | undefined;
-    if (allowance.lt(inputAmount)) {
-      allowanceTx = {
-        to: crossSwapQuotes.crossSwap.inputToken.address,
-        chainId: originChainId,
-        from: crossSwapQuotes.crossSwap.depositor,
-        data: encodeApproveCalldata(crossSwapTx.to, inputAmount),
-      };
-    }
+    const { allowance, balance } = await getBalanceAndAllowance({
+      chainId: originChainId,
+      tokenAddress: inputTokenAddress,
+      owner: crossSwapQuotes.crossSwap.depositor,
+      spender: crossSwapTx.to,
+    });
 
     const isSwapTxEstimationPossible =
-      !skipOriginTxEstimation && !allowanceTx && balance.gte(inputAmount);
+      !skipOriginTxEstimation &&
+      allowance.lt(inputAmount) &&
+      balance.gte(inputAmount);
 
     let originTxGas: BigNumber | undefined;
     let originTxGasPrice: BigNumber | undefined;
@@ -95,7 +71,6 @@ const handler = async (
           spender: crossSwapTx.to,
           actual: allowance.toString(),
           expected: inputAmount.toString(),
-          tx: allowanceTx,
         },
         balance: {
           token: inputTokenAddress,

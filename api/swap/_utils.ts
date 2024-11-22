@@ -1,4 +1,4 @@
-import { assert, Infer, type, string, optional } from "superstruct";
+import { assert, Infer, type, string, optional, enums } from "superstruct";
 import { BigNumber, constants, utils } from "ethers";
 
 import { TypedVercelRequest } from "../_types";
@@ -10,14 +10,17 @@ import {
   getCachedTokenInfo,
   getWrappedNativeTokenAddress,
 } from "../_utils";
-import { AMOUNT_TYPE, getCrossSwapQuotes } from "../_dexes/cross-swap";
-import { InvalidParamError, MissingParamError } from "../_errors";
+import {
+  AMOUNT_TYPE,
+  getCrossSwapQuotes,
+  AmountType,
+} from "../_dexes/cross-swap";
+import { InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
 
 export const BaseSwapQueryParamsSchema = type({
-  minOutputAmount: optional(positiveIntStr()),
-  exactOutputAmount: optional(positiveIntStr()),
-  exactInputAmount: optional(positiveIntStr()),
+  amount: positiveIntStr(),
+  tradeType: optional(enums(["minOutput", "exactOutput"])),
   inputToken: validAddress(),
   outputToken: validAddress(),
   originChainId: positiveIntStr(),
@@ -41,11 +44,10 @@ export async function handleBaseSwapQueryParams({
   const {
     inputToken: _inputTokenAddress,
     outputToken: _outputTokenAddress,
-    exactInputAmount: _exactInputAmount,
-    minOutputAmount: _minOutputAmount,
-    exactOutputAmount: _exactOutputAmount,
     originChainId: _originChainId,
     destinationChainId: _destinationChainId,
+    amount: _amount,
+    tradeType = AMOUNT_TYPE.MIN_OUTPUT,
     recipient,
     depositor,
     integratorId,
@@ -68,14 +70,6 @@ export async function handleBaseSwapQueryParams({
     ? getWrappedNativeTokenAddress(destinationChainId)
     : utils.getAddress(_outputTokenAddress);
 
-  if (!_minOutputAmount && !_exactInputAmount && !_exactOutputAmount) {
-    throw new MissingParamError({
-      param: "minOutputAmount, exactInputAmount, exactOutputAmount",
-      message:
-        "One of 'minOutputAmount', 'exactInputAmount' or 'exactOutputAmount' is required",
-    });
-  }
-
   if (integratorId && !isValidIntegratorId(integratorId)) {
     throw new InvalidParamError({
       param: "integratorId",
@@ -97,14 +91,8 @@ export async function handleBaseSwapQueryParams({
     });
   }
 
-  const amountType = _minOutputAmount
-    ? AMOUNT_TYPE.MIN_OUTPUT
-    : _exactInputAmount
-      ? AMOUNT_TYPE.EXACT_INPUT
-      : AMOUNT_TYPE.EXACT_OUTPUT;
-  const amount = BigNumber.from(
-    _minOutputAmount || _exactInputAmount || _exactOutputAmount
-  );
+  const amountType = tradeType as AmountType;
+  const amount = BigNumber.from(_amount);
 
   // 1. Get token details
   const [inputToken, outputToken] = await Promise.all([

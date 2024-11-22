@@ -1,5 +1,6 @@
 import { SpokePool } from "@across-protocol/contracts/dist/typechain";
 import { ethers, PopulatedTransaction } from "ethers";
+import { utils } from "@across-protocol/sdk";
 
 import {
   isRouteEnabled,
@@ -255,15 +256,14 @@ async function extractDepositDataStruct(crossSwapQuotes: CrossSwapQuotes) {
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
   const deposit = {
     depositor: crossSwapQuotes.crossSwap.depositor,
-    recipient:
-      message && message !== "0x"
-        ? getMultiCallHandlerAddress(destinationChainId)
-        : crossSwapQuotes.crossSwap.recipient,
+    recipient: utils.isMessageEmpty(message)
+      ? getMultiCallHandlerAddress(destinationChainId)
+      : crossSwapQuotes.crossSwap.recipient,
     inputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
     outputToken: crossSwapQuotes.bridgeQuote.outputToken.address,
     inputAmount: crossSwapQuotes.bridgeQuote.inputAmount,
     outputAmount: crossSwapQuotes.bridgeQuote.outputAmount,
-    destinationChainid: crossSwapQuotes.bridgeQuote.outputToken.chainId,
+    destinationChainid: destinationChainId,
     exclusiveRelayer:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusiveRelayer,
     quoteTimestamp: crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
