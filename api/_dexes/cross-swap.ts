@@ -254,8 +254,13 @@ async function extractDepositDataStruct(crossSwapQuotes: CrossSwapQuotes) {
   const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
   const spokePool = getSpokePool(originChainId);
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
+  const refundAddress =
+    crossSwapQuotes.crossSwap.refundAddress ??
+    crossSwapQuotes.crossSwap.depositor;
   const deposit = {
-    depositor: crossSwapQuotes.crossSwap.depositor,
+    depositor: crossSwapQuotes.crossSwap.refundOnOrigin
+      ? refundAddress
+      : crossSwapQuotes.crossSwap.depositor,
     recipient: utils.isMessageEmpty(message)
       ? getMultiCallHandlerAddress(destinationChainId)
       : crossSwapQuotes.crossSwap.recipient,
