@@ -23,7 +23,17 @@ import {
   utils,
   Signer,
 } from "ethers";
-import { define } from "superstruct";
+import {
+  assert,
+  coerce,
+  create,
+  define,
+  Infer,
+  integer,
+  min,
+  string,
+  Struct,
+} from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
@@ -36,7 +46,7 @@ import {
 } from "./_abis";
 import { BatchAccountBalanceResponse } from "./batch-account-balance";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
-import { VercelResponse } from "@vercel/node";
+import { VercelRequestQuery, VercelResponse } from "@vercel/node";
 import {
   BLOCK_TAG_LAG,
   CHAIN_IDs,
@@ -1395,6 +1405,22 @@ export function applyMapFilter<InputType, MapType>(
   }, []);
 }
 
+// superstruct first coerces, then validates
+export const positiveInt = coerce(min(integer(), 0), string(), (value) =>
+  Number(value)
+);
+
+// parses, coerces and validates query params
+// first coerce any fields that can be coerced, then validate
+export function parseQuery<
+  Q extends VercelRequestQuery,
+  S extends Struct<any, any>,
+>(query: Q, schema: S): Infer<S> {
+  const coerced = create(query, schema);
+  assert(coerced, schema);
+  return coerced;
+}
+
 /* ------------------------- superstruct validators ------------------------- */
 
 export function parsableBigNumberString() {
@@ -2120,9 +2146,9 @@ export function getCachedFillGasUsage(
     const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
       buildDepositForSimulation(deposit),
       overrides?.relayerAddress,
-      undefined,
-      undefined,
-      true
+      {
+        omitMarkup: true,
+      }
     );
     return nativeGasCost;
   };
