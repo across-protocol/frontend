@@ -86,6 +86,17 @@ const handler = async (
         gas: originTxGas?.toString(),
         gasPrice: originTxGasPrice?.toString(),
       },
+      inputAmount:
+        crossSwapQuotes.originSwapQuote?.expectedAmountIn ??
+        crossSwapQuotes.bridgeQuote.inputAmount,
+      expectedOutputAmount:
+        crossSwapQuotes.destinationSwapQuote?.expectedAmountOut ??
+        crossSwapQuotes.bridgeQuote.outputAmount,
+      minOutputAmount:
+        crossSwapQuotes.originSwapQuote?.minAmountOut ??
+        crossSwapQuotes.bridgeQuote.outputAmount,
+      expectedFillTime:
+        crossSwapQuotes.bridgeQuote.suggestedFees.estimatedFillTimeSec,
     };
 
     logger.debug({
