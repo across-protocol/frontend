@@ -1,5 +1,5 @@
 import { SpokePool } from "@across-protocol/contracts/dist/typechain";
-import { ethers, PopulatedTransaction } from "ethers";
+import { PopulatedTransaction } from "ethers";
 import { utils } from "@across-protocol/sdk";
 
 import {
@@ -8,7 +8,6 @@ import {
   isOutputTokenBridgeable,
   getBridgeQuoteForMinOutput,
   getSpokePool,
-  getSpokePoolVerifier,
 } from "../_utils";
 import {
   getUniswapCrossSwapQuotesForOutputB2A,
@@ -179,9 +178,7 @@ export async function buildCrossSwapTxForAllowanceHolder(
   integratorId?: string
 ) {
   const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
-  const isInputNative = crossSwapQuotes.crossSwap.isInputNative;
   const spokePool = getSpokePool(originChainId);
-  const spokePoolVerifier = getSpokePoolVerifier(originChainId);
   const deposit = await extractDepositDataStruct(crossSwapQuotes);
 
   let tx: PopulatedTransaction;
@@ -203,22 +200,6 @@ export async function buildCrossSwapTxForAllowanceHolder(
       }
     );
     toAddress = swapAndBridge.address;
-  } else if (isInputNative && spokePoolVerifier) {
-    tx = await spokePoolVerifier.populateTransaction.deposit(
-      spokePool.address,
-      deposit.recipient,
-      deposit.inputToken,
-      deposit.inputAmount,
-      deposit.destinationChainid,
-      crossSwapQuotes.bridgeQuote.suggestedFees.totalRelayFee.pct,
-      deposit.quoteTimestamp,
-      deposit.message,
-      ethers.constants.MaxUint256,
-      {
-        value: deposit.inputAmount,
-      }
-    );
-    toAddress = spokePoolVerifier.address;
   } else {
     tx = await spokePool.populateTransaction.depositV3(
       deposit.depositor,
@@ -249,6 +230,7 @@ export async function buildCrossSwapTxForAllowanceHolder(
     value: tx.value,
   };
 }
+
 async function extractDepositDataStruct(crossSwapQuotes: CrossSwapQuotes) {
   const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
   const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
