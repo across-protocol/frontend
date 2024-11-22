@@ -171,6 +171,7 @@ describe("_utils", () => {
               "ETH",
               "DAI",
               "USDC",
+              "WBTC",
               ...constants.BRIDGED_USDC_SYMBOLS,
             ].includes(route.fromTokenSymbol)
         )

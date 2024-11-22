@@ -12,6 +12,7 @@ export { mapAsync } from "@across-protocol/sdk/dist/esm/utils/ArrayUtils";
 export { getCurrentTime } from "@across-protocol/sdk/dist/esm/utils/TimeUtils";
 export { isBridgedUsdc } from "@across-protocol/sdk/dist/esm/utils/TokenUtils";
 export { BRIDGED_USDC_SYMBOLS } from "@across-protocol/sdk/dist/esm/constants";
+export { getNativeTokenSymbol } from "@across-protocol/sdk/dist/esm/utils/NetworkUtils";
 
 export function getUpdateV3DepositTypedData(
   depositId: number,

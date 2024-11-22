@@ -46,7 +46,7 @@ const handler = async (
 
     const isSwapTxEstimationPossible =
       !skipOriginTxEstimation &&
-      allowance.lt(inputAmount) &&
+      allowance.gte(inputAmount) &&
       balance.gte(inputAmount);
 
     let originTxGas: BigNumber | undefined;
@@ -86,6 +86,17 @@ const handler = async (
         gas: originTxGas?.toString(),
         gasPrice: originTxGasPrice?.toString(),
       },
+      inputAmount:
+        crossSwapQuotes.originSwapQuote?.expectedAmountIn.toString() ??
+        crossSwapQuotes.bridgeQuote.inputAmount.toString(),
+      expectedOutputAmount:
+        crossSwapQuotes.destinationSwapQuote?.expectedAmountOut.toString() ??
+        crossSwapQuotes.bridgeQuote.outputAmount.toString(),
+      minOutputAmount:
+        crossSwapQuotes.destinationSwapQuote?.minAmountOut.toString() ??
+        crossSwapQuotes.bridgeQuote.outputAmount.toString(),
+      expectedFillTime:
+        crossSwapQuotes.bridgeQuote.suggestedFees.estimatedFillTimeSec,
     };
 
     logger.debug({

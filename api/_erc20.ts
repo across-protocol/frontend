@@ -40,7 +40,7 @@ export async function getBalanceAndAllowance(params: {
       args: [params.owner, params.spender],
     },
   ]);
-  return { balance, allowance };
+  return { balance: balance[0], allowance: allowance[0] };
 }
 
 export function getErc20(params: { chainId: number; tokenAddress: string }) {

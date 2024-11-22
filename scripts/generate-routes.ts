@@ -1,5 +1,6 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
 import { utils as sdkUtils } from "@across-protocol/sdk";
+
 import { utils } from "ethers";
 import { writeFileSync } from "fs";
 import * as prettier from "prettier";
@@ -43,6 +44,7 @@ const enabledMainnetChainConfigs = [
   chainConfigs.REDSTONE,
   chainConfigs.ZORA,
   chainConfigs.WORLD_CHAIN,
+  chainConfigs.ALEPH_ZERO,
 ];
 
 const enabledSepoliaChainConfigs = [
@@ -97,10 +99,15 @@ const enabledRoutes = {
         [CHAIN_IDs.BASE]: "0x98285D11B9F7aFec2d475805E5255f26B4490167",
       },
       uniswap: {
-        [CHAIN_IDs.POLYGON]: "0xC2dCB88873E00c9d401De2CBBa4C6A28f8A6e2c2",
-        [CHAIN_IDs.OPTIMISM]: "0x28249CD61170Ed200Db8988D7f69e21331AFFBD0",
-        [CHAIN_IDs.ARBITRUM]: "0x07b64BE6906A78fac5FaB47cD58d59D0A093B15e",
-        [CHAIN_IDs.BASE]: "0xef5a54BEeBDB4Ee98E2906e30e65AD53dA8D2b17",
+        [CHAIN_IDs.POLYGON]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.OPTIMISM]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.ARBITRUM]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.BASE]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.ZK_SYNC]: "0xB007dFe9A6b70e1AB5BD5E97C22e47C5e0c0B8D8",
+        [CHAIN_IDs.WORLD_CHAIN]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.BLAST]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.ZORA]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.MAINNET]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
       },
     },
     routes: transformChainConfigs(enabledMainnetChainConfigs),
@@ -270,12 +277,11 @@ function transformChainConfigs(
           ];
         }
 
-        // Handle WETH Polygon
+        // Handle WETH Polygon & other non-eth chains
         if (
           tokenSymbol === "WETH" &&
-          [CHAIN_IDs.POLYGON, CHAIN_IDs.POLYGON_AMOY].includes(
-            toChainConfig.chainId
-          )
+          !toChainConfig.tokens.includes("ETH") &&
+          chainConfig.tokens.includes("ETH")
         ) {
           return ["WETH", "ETH"];
         }

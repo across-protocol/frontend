@@ -1,7 +1,7 @@
+import { CHAIN_IDs } from "@across-protocol/constants";
 import { BigNumber } from "ethers";
 
 import {
-  ChainId,
   Route,
   SwapRoute,
   fixedPointAdjustment,
@@ -11,6 +11,7 @@ import {
   hubPoolChainId,
   isProductionBuild,
   interchangeableTokensMap,
+  nonEthChains,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -69,18 +70,18 @@ export function getReceiveTokenSymbol(
   outputTokenSymbol: string,
   isReceiverContract: boolean
 ) {
-  const isDestinationChainPolygon = destinationChainId === ChainId.POLYGON;
+  const isDestinationChainWethOnly = nonEthChains.includes(destinationChainId);
 
   if (
     inputTokenSymbol === "ETH" &&
-    (isDestinationChainPolygon || isReceiverContract)
+    (isDestinationChainWethOnly || isReceiverContract)
   ) {
     return "WETH";
   }
 
   if (
     inputTokenSymbol === "WETH" &&
-    !isDestinationChainPolygon &&
+    !isDestinationChainWethOnly &&
     !isReceiverContract
   ) {
     return "ETH";
@@ -146,7 +147,11 @@ export function getInitialRoute(filter: RouteFilter = {}) {
   const routeFromQueryParams = getRouteFromQueryParams(filter);
   const routeFromFilter = findEnabledRoute({
     inputTokenSymbol:
-      filter.inputTokenSymbol ?? (filter?.fromChain === 137 ? "WETH" : "ETH"),
+      filter.inputTokenSymbol ??
+      (filter?.fromChain === CHAIN_IDs.ALEPH_ZERO ||
+      filter?.fromChain === CHAIN_IDs.POLYGON
+        ? "WETH"
+        : "ETH"),
     fromChain: filter.fromChain || hubPoolChainId,
     toChain: filter.toChain,
   });
