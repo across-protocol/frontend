@@ -9,7 +9,11 @@ import {
   latestGasPriceCache,
 } from "../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "../_dexes/cross-swap";
-import { handleBaseSwapQueryParams, BaseSwapQueryParams } from "./_utils";
+import {
+  handleBaseSwapQueryParams,
+  BaseSwapQueryParams,
+  getApprovalTxns,
+} from "./_utils";
 import { getBalanceAndAllowance } from "../_erc20";
 
 const handler = async (
@@ -70,6 +74,23 @@ const handler = async (
       originTxGasPrice = await latestGasPriceCache(originChainId).get();
     }
 
+    let approvalTxns:
+      | {
+          chainId: number;
+          to: string;
+          data: string;
+        }[]
+      | undefined;
+    // @TODO: Allow for just enough approval amount to be set.
+    const approvalAmount = constants.MaxUint256;
+    if (allowance.lt(inputAmount)) {
+      approvalTxns = getApprovalTxns({
+        token: crossSwapQuotes.crossSwap.inputToken,
+        spender: crossSwapTx.to,
+        amount: approvalAmount,
+      });
+    }
+
     const refundToken = crossSwapQuotes.crossSwap.refundOnOrigin
       ? crossSwapQuotes.bridgeQuote.inputToken
       : crossSwapQuotes.bridgeQuote.outputToken;
@@ -88,7 +109,8 @@ const handler = async (
           expected: inputAmount.toString(),
         },
       },
-      tx: {
+      approvalTxns,
+      swapTx: {
         simulationSuccess: !!originTxGas,
         chainId: originChainId,
         to: crossSwapTx.to,

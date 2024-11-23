@@ -17,6 +17,8 @@ import {
 } from "../_dexes/cross-swap";
 import { InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
+import { Token } from "../_dexes/types";
+import { encodeApproveCalldata } from "../_multicall-handler";
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -127,4 +129,32 @@ export async function handleBaseSwapQueryParams({
     skipOriginTxEstimation,
     isInputNative,
   };
+}
+
+export function getApprovalTxns(params: {
+  token: Token;
+  spender: string;
+  amount: BigNumber;
+}) {
+  const approvalTxns: {
+    chainId: number;
+    to: string;
+    data: string;
+  }[] = [];
+  // USDT has a different approval flow when changing an already approve amount.
+  // We need to set the allowance to 0 first.
+  // See https://etherscan.io/address/0xdac17f958d2ee523a2206206994597c13d831ec7#code#L201
+  if (params.token.symbol === "USDT") {
+    approvalTxns.push({
+      chainId: params.token.chainId,
+      to: params.token.address,
+      data: encodeApproveCalldata(params.spender, BigNumber.from(0)),
+    });
+  }
+  approvalTxns.push({
+    chainId: params.token.chainId,
+    to: params.token.address,
+    data: encodeApproveCalldata(params.spender, params.amount),
+  });
+  return approvalTxns;
 }
