@@ -201,6 +201,11 @@ async function swap() {
     );
     console.log(response.data);
 
+    if (!response.data.tx.simulationSuccess) {
+      console.error("Tx simulation failed");
+      continue;
+    }
+
     if (process.env.DEV_WALLET_PK) {
       const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
         getProvider(testCase.params.originChainId)

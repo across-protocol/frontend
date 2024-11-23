@@ -1,4 +1,5 @@
 import { VercelResponse } from "@vercel/node";
+import { BigNumber, constants } from "ethers";
 
 import { TypedVercelRequest } from "../_types";
 import {
@@ -9,7 +10,6 @@ import {
 } from "../_utils";
 import { buildCrossSwapTxForAllowanceHolder } from "../_dexes/cross-swap";
 import { handleBaseSwapQueryParams, BaseSwapQueryParams } from "./_utils";
-import { BigNumber } from "ethers";
 import { getBalanceAndAllowance } from "../_erc20";
 
 const handler = async (
@@ -23,8 +23,12 @@ const handler = async (
     query: request.query,
   });
   try {
-    const { crossSwapQuotes, integratorId, skipOriginTxEstimation } =
-      await handleBaseSwapQueryParams(request);
+    const {
+      crossSwapQuotes,
+      integratorId,
+      skipOriginTxEstimation,
+      isInputNative,
+    } = await handleBaseSwapQueryParams(request);
 
     const crossSwapTx = await buildCrossSwapTxForAllowanceHolder(
       crossSwapQuotes,
@@ -32,7 +36,9 @@ const handler = async (
     );
 
     const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
-    const inputTokenAddress = crossSwapQuotes.crossSwap.inputToken.address;
+    const inputTokenAddress = isInputNative
+      ? constants.AddressZero
+      : crossSwapQuotes.crossSwap.inputToken.address;
     const inputAmount =
       crossSwapQuotes.originSwapQuote?.maximumAmountIn ||
       crossSwapQuotes.bridgeQuote.inputAmount;
@@ -64,6 +70,10 @@ const handler = async (
       originTxGasPrice = await latestGasPriceCache(originChainId).get();
     }
 
+    const refundToken = crossSwapQuotes.crossSwap.refundOnOrigin
+      ? crossSwapQuotes.bridgeQuote.inputToken
+      : crossSwapQuotes.bridgeQuote.outputToken;
+
     const responseJson = {
       checks: {
         allowance: {
@@ -79,6 +89,7 @@ const handler = async (
         },
       },
       tx: {
+        simulationSuccess: !!originTxGas,
         chainId: originChainId,
         to: crossSwapTx.to,
         data: crossSwapTx.data,
@@ -86,9 +97,13 @@ const handler = async (
         gas: originTxGas?.toString(),
         gasPrice: originTxGasPrice?.toString(),
       },
-      refundToken: crossSwapQuotes.crossSwap.refundOnOrigin
-        ? crossSwapQuotes.bridgeQuote.inputToken
-        : crossSwapQuotes.bridgeQuote.outputToken,
+      refundToken:
+        refundToken.symbol === "ETH"
+          ? {
+              ...refundToken,
+              symbol: "WETH",
+            }
+          : refundToken,
       inputAmount:
         crossSwapQuotes.originSwapQuote?.expectedAmountIn.toString() ??
         crossSwapQuotes.bridgeQuote.inputAmount.toString(),

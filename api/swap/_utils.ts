@@ -121,5 +121,10 @@ export async function handleBaseSwapQueryParams({
     isOutputNative,
   });
 
-  return { crossSwapQuotes, integratorId, skipOriginTxEstimation };
+  return {
+    crossSwapQuotes,
+    integratorId,
+    skipOriginTxEstimation,
+    isInputNative,
+  };
 }
