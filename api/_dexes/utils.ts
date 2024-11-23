@@ -110,7 +110,7 @@ export function buildExactOutputBridgeTokenMessage(crossSwap: CrossSwap) {
         target: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
         callData: encodeDrainCalldata(
           crossSwap.outputToken.address,
-          crossSwap.depositor
+          crossSwap.refundAddress ?? crossSwap.depositor
         ),
         value: "0",
       },
