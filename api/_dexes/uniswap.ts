@@ -641,26 +641,40 @@ function buildDestinationSwapCrossChainMessage({
           value: crossSwap.amount.toString(),
         },
       ]
-    : [
-        {
-          target: crossSwap.outputToken.address,
-          callData: encodeTransferCalldata(
-            crossSwap.recipient,
-            crossSwap.amount
-          ),
-          value: "0",
-        },
-        {
-          target: getMultiCallHandlerAddress(destinationSwapChainId),
-          callData: encodeDrainCalldata(
-            crossSwap.outputToken.address,
-            crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
-              ? crossSwap.depositor
-              : crossSwap.recipient
-          ),
-          value: "0",
-        },
-      ];
+    : // If output token is an ERC-20 token and amount type is EXACT_OUTPUT, we need
+      // to transfer the EXACT output amount to the recipient. The refundAddress / depositor
+      // will receive any leftovers.
+      crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
+      ? [
+          {
+            target: crossSwap.outputToken.address,
+            callData: encodeTransferCalldata(
+              crossSwap.recipient,
+              crossSwap.amount
+            ),
+            value: "0",
+          },
+          {
+            target: getMultiCallHandlerAddress(destinationSwapChainId),
+            callData: encodeDrainCalldata(
+              crossSwap.outputToken.address,
+              crossSwap.refundAddress ?? crossSwap.depositor
+            ),
+            value: "0",
+          },
+        ]
+      : // If output token is an ERC-20 token and amount type is MIN_OUTPUT, we need
+        // to transfer all realized output tokens to the recipient.
+        [
+          {
+            target: getMultiCallHandlerAddress(destinationSwapChainId),
+            callData: encodeDrainCalldata(
+              crossSwap.outputToken.address,
+              crossSwap.recipient
+            ),
+            value: "0",
+          },
+        ];
   return buildMulticallHandlerMessage({
     fallbackRecipient: getFallbackRecipient(crossSwap),
     actions: [
@@ -687,7 +701,7 @@ function buildDestinationSwapCrossChainMessage({
         callData: encodeDrainCalldata(
           bridgeableOutputToken.address,
           crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
-            ? crossSwap.depositor
+            ? crossSwap.refundAddress ?? crossSwap.depositor
             : crossSwap.recipient
         ),
         value: "0",
