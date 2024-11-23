@@ -86,6 +86,9 @@ const handler = async (
         gas: originTxGas?.toString(),
         gasPrice: originTxGasPrice?.toString(),
       },
+      refundToken: crossSwapQuotes.crossSwap.refundOnOrigin
+        ? crossSwapQuotes.bridgeQuote.inputToken
+        : crossSwapQuotes.bridgeQuote.outputToken,
     };
 
     logger.debug({

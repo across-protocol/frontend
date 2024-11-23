@@ -626,55 +626,64 @@ function buildDestinationSwapCrossChainMessage({
   destinationSwapQuote: SwapQuote;
 }) {
   const destinationSwapChainId = destinationSwapQuote.tokenOut.chainId;
-  const transferActions = crossSwap.isOutputNative
-    ? // If output token is native, we need to unwrap WETH before sending it to the
-      // recipient. This is because we only handle WETH in the destination swap.
-      [
-        {
-          target: crossSwap.outputToken.address,
-          callData: encodeWethWithdrawCalldata(crossSwap.amount),
-          value: "0",
-        },
-        {
-          target: crossSwap.recipient,
-          callData: "0x",
-          value: crossSwap.amount.toString(),
-        },
-      ]
-    : // If output token is an ERC-20 token and amount type is EXACT_OUTPUT, we need
-      // to transfer the EXACT output amount to the recipient. The refundAddress / depositor
-      // will receive any leftovers.
-      crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
-      ? [
-          {
-            target: crossSwap.outputToken.address,
-            callData: encodeTransferCalldata(
-              crossSwap.recipient,
-              crossSwap.amount
-            ),
-            value: "0",
-          },
-          {
-            target: getMultiCallHandlerAddress(destinationSwapChainId),
-            callData: encodeDrainCalldata(
-              crossSwap.outputToken.address,
-              crossSwap.refundAddress ?? crossSwap.depositor
-            ),
-            value: "0",
-          },
-        ]
-      : // If output token is an ERC-20 token and amount type is MIN_OUTPUT, we need
-        // to transfer all realized output tokens to the recipient.
-        [
-          {
-            target: getMultiCallHandlerAddress(destinationSwapChainId),
-            callData: encodeDrainCalldata(
-              crossSwap.outputToken.address,
-              crossSwap.recipient
-            ),
-            value: "0",
-          },
-        ];
+
+  let transferActions: {
+    target: string;
+    callData: string;
+    value: string;
+  }[] = [];
+
+  // If output token is native, we need to unwrap WETH before sending it to the
+  // recipient. This is because we only handle WETH in the destination swap.
+  if (crossSwap.isOutputNative) {
+    transferActions = [
+      {
+        target: crossSwap.outputToken.address,
+        callData: encodeWethWithdrawCalldata(crossSwap.amount),
+        value: "0",
+      },
+      {
+        target: crossSwap.recipient,
+        callData: "0x",
+        value: crossSwap.amount.toString(),
+      },
+    ];
+  }
+  // If output token is an ERC-20 token and amount type is EXACT_OUTPUT, we need
+  // to transfer the EXACT output amount to the recipient. The refundAddress / depositor
+  // will receive any leftovers.
+  else if (crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT) {
+    transferActions = [
+      {
+        target: crossSwap.outputToken.address,
+        callData: encodeTransferCalldata(crossSwap.recipient, crossSwap.amount),
+        value: "0",
+      },
+      {
+        target: getMultiCallHandlerAddress(destinationSwapChainId),
+        callData: encodeDrainCalldata(
+          crossSwap.outputToken.address,
+          crossSwap.refundAddress ?? crossSwap.depositor
+        ),
+        value: "0",
+      },
+    ];
+  }
+  // If output token is an ERC-20 token and amount type is MIN_OUTPUT, we need
+  // to transfer all realized output tokens to the recipient.
+  else if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
+    transferActions = [
+      {
+        target: getMultiCallHandlerAddress(destinationSwapChainId),
+        callData: encodeDrainCalldata(
+          crossSwap.outputToken.address,
+          crossSwap.recipient
+        ),
+        value: "0",
+      },
+    ];
+  }
+
   return buildMulticallHandlerMessage({
     fallbackRecipient: getFallbackRecipient(crossSwap),
     actions: [
