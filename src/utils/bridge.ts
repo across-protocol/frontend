@@ -125,7 +125,7 @@ export const getConfirmationDepositTime = (
   const timing = Math.floor(inMinutes ? timeToFill / 60 : timeToFill);
 
   return {
-    formattedString: `~${timing} ${inMinutes ? "minute" : "second"}${timing > 1 ? "s" : ""}`,
+    formattedString: `~${timing} ${inMinutes ? "min" : "sec"}${timing > 1 ? "s" : ""}`,
     lowEstimate: timeToFill,
     highEstimate: timeToFill,
   };
