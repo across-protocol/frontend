@@ -195,7 +195,7 @@ export async function buildCrossSwapTxForAllowanceHolder(
       deposit,
       {
         value: crossSwapQuotes.crossSwap.isInputNative
-          ? deposit.inputAmount
+          ? crossSwapQuotes.originSwapQuote.maximumAmountIn
           : 0,
       }
     );
@@ -244,8 +244,8 @@ async function extractDepositDataStruct(crossSwapQuotes: CrossSwapQuotes) {
       ? refundAddress
       : crossSwapQuotes.crossSwap.depositor,
     recipient: utils.isMessageEmpty(message)
-      ? getMultiCallHandlerAddress(destinationChainId)
-      : crossSwapQuotes.crossSwap.recipient,
+      ? crossSwapQuotes.crossSwap.recipient
+      : getMultiCallHandlerAddress(destinationChainId),
     inputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
     outputToken: crossSwapQuotes.bridgeQuote.outputToken.address,
     inputAmount: crossSwapQuotes.bridgeQuote.inputAmount,

@@ -287,7 +287,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
       {
         ...originSwap,
         amount: addSlippageToAmount(
-          bridgeQuote.inputAmount,
+          adjOriginSwapQuote.maximumAmountIn,
           crossSwap.slippageTolerance.toString()
         ),
       },

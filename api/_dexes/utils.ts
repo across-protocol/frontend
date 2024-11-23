@@ -139,7 +139,7 @@ export function buildMinOutputBridgeTokenMessage(
         {
           target: crossSwap.recipient,
           callData: "0x",
-          value: crossSwap.amount.toString(),
+          value: (unwrapAmount || crossSwap.amount).toString(),
         },
       ]
     : // ERC-20 token transfer
