@@ -94,8 +94,8 @@ const MIN_OUTPUT_CASES = [
       tradeType: "minOutput",
       inputToken: TOKEN_SYMBOLS_MAP.USDbC.addresses[CHAIN_IDs.BASE],
       originChainId: CHAIN_IDs.BASE,
-      outputToken: "0x74885b4D524d497261259B38900f54e6dbAd2210", // APE Coin
-      destinationChainId: CHAIN_IDs.ARBITRUM,
+      outputToken: "0xb7b31a6bc18e48888545ce79e83e06003be70930", // APE Coin
+      destinationChainId: CHAIN_IDs.POLYGON,
       depositor,
     },
   },
@@ -201,7 +201,7 @@ async function swap() {
     );
     console.log(response.data);
 
-    if (process.env.DEV_WALLET_PK) {
+    if (!process.env.DEV_WALLET_PK) {
       const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
         getProvider(testCase.params.originChainId)
       );
