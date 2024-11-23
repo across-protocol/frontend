@@ -10,174 +10,125 @@ dotenv.config();
  */
 
 const depositor = "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D";
+const originChainId = CHAIN_IDs.OPTIMISM;
+const destinationChainId = CHAIN_IDs.ARBITRUM;
+const anyDestinationOutputTokens = {
+  [CHAIN_IDs.ARBITRUM]: "0x74885b4D524d497261259B38900f54e6dbAd2210", // APE
+};
+
 const MIN_OUTPUT_CASES = [
   // B2B
   {
-    labels: ["B2B", "MIN_OUTPUT", "Base USDC - Arbitrum USDC"],
+    labels: ["B2B", "MIN_OUTPUT", "USDC - USDC"],
     params: {
       amount: ethers.utils.parseUnits("1", 6).toString(),
       tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
-      originChainId: CHAIN_IDs.BASE,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
-      destinationChainId: CHAIN_IDs.ARBITRUM,
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
+      originChainId,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
+      destinationChainId,
       depositor,
     },
   },
   {
-    labels: ["B2B", "MIN_OUTPUT", "Base USDC - Arbitrum ETH"],
+    labels: ["B2B", "MIN_OUTPUT", "Native ETH - Native ETH"],
     params: {
       amount: ethers.utils.parseUnits("0.001", 18).toString(),
       tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
-      originChainId: CHAIN_IDs.BASE,
+      inputToken: ethers.constants.AddressZero,
+      originChainId,
       outputToken: ethers.constants.AddressZero,
-      destinationChainId: CHAIN_IDs.ARBITRUM,
+      destinationChainId,
       depositor,
     },
   },
   {
-    labels: ["B2B", "MIN_OUTPUT", "Arbitrum ETH - Base USDC"],
+    labels: ["B2B", "MIN_OUTPUT", "USDC - Native ETH"],
+    params: {
+      amount: ethers.utils.parseUnits("0.001", 18).toString(),
+      tradeType: "minOutput",
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
+      originChainId,
+      outputToken: ethers.constants.AddressZero,
+      destinationChainId,
+      depositor,
+    },
+  },
+  {
+    labels: ["B2B", "MIN_OUTPUT", "Native ETH - USDC"],
     params: {
       amount: ethers.utils.parseUnits("3", 6).toString(),
       tradeType: "minOutput",
       inputToken: ethers.constants.AddressZero,
-      originChainId: CHAIN_IDs.ARBITRUM,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
-      destinationChainId: CHAIN_IDs.BASE,
+      originChainId,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
+      destinationChainId,
       depositor,
     },
   },
   // B2A
   {
-    labels: ["B2A", "MIN_OUTPUT", "Base USDC - Arbitrum WETH"],
+    labels: ["B2A", "MIN_OUTPUT", "USDC - APE"],
     params: {
-      amount: ethers.utils.parseUnits("0.001", 18).toString(),
+      amount: ethers.utils.parseUnits("1", 18).toString(),
       tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
-      originChainId: CHAIN_IDs.BASE,
-      outputToken: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
-      destinationChainId: CHAIN_IDs.ARBITRUM,
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
+      originChainId,
+      outputToken: anyDestinationOutputTokens[destinationChainId],
+      destinationChainId,
       depositor,
     },
   },
   {
-    labels: ["B2A", "MIN_OUTPUT", "Base USDC - Arbitrum ETH"],
+    labels: ["B2A", "MIN_OUTPUT", "USDC - Native ETH"],
     params: {
       amount: ethers.utils.parseUnits("0.001", 18).toString(),
       tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
-      originChainId: CHAIN_IDs.BASE,
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
+      originChainId,
       outputToken: ethers.constants.AddressZero,
-      destinationChainId: CHAIN_IDs.ARBITRUM,
+      destinationChainId,
       depositor,
     },
   },
   // A2B
   {
-    labels: ["A2B", "MIN_OUTPUT", "Base USDbC - Arbitrum USDC"],
+    labels: ["A2B", "MIN_OUTPUT", "bridged USDC - USDC"],
     params: {
       amount: ethers.utils.parseUnits("1", 6).toString(),
       tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDbC.addresses[CHAIN_IDs.BASE],
-      originChainId: CHAIN_IDs.BASE,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
-      destinationChainId: CHAIN_IDs.ARBITRUM,
+      inputToken:
+        TOKEN_SYMBOLS_MAP["USDC.e"].addresses[originChainId] ||
+        TOKEN_SYMBOLS_MAP.USDbC.addresses[originChainId],
+      originChainId,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
+      destinationChainId,
       depositor,
     },
   },
   // A2A
   {
-    labels: ["A2A", "MIN_OUTPUT", "Base USDbC - Arbitrum APE"],
+    labels: ["A2A", "MIN_OUTPUT", "bridged USDC - APE"],
     params: {
       amount: ethers.utils.parseUnits("1", 18).toString(),
       tradeType: "minOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDbC.addresses[CHAIN_IDs.BASE],
+      inputToken:
+        TOKEN_SYMBOLS_MAP["USDC.e"].addresses[originChainId] ||
+        TOKEN_SYMBOLS_MAP.USDbC.addresses[originChainId],
       originChainId: CHAIN_IDs.BASE,
-      outputToken: "0x74885b4D524d497261259B38900f54e6dbAd2210", // APE Coin
-      destinationChainId: CHAIN_IDs.ARBITRUM,
+      outputToken: anyDestinationOutputTokens[destinationChainId], // APE Coin
+      destinationChainId,
       depositor,
     },
   },
 ];
-const EXACT_OUTPUT_CASES = [
-  // B2B
-  {
-    labels: ["B2B", "EXACT_OUTPUT", "Base USDC - Arbitrum USDC"],
-    params: {
-      amount: ethers.utils.parseUnits("1", 6).toString(),
-      tradeType: "exactOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
-      originChainId: CHAIN_IDs.BASE,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
-      destinationChainId: CHAIN_IDs.ARBITRUM,
-      depositor,
-    },
+const EXACT_OUTPUT_CASES = MIN_OUTPUT_CASES.map((testCase) => ({
+  labels: testCase.labels.map((label) => label.replace("MIN", "EXACT")),
+  params: {
+    ...testCase.params,
+    tradeType: "exactOutput",
   },
-  {
-    labels: ["B2B", "EXACT_OUTPUT", "Base USDC -Arbitrum ETH"],
-    params: {
-      amount: ethers.utils.parseUnits("0.001", 18).toString(),
-      tradeType: "exactOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
-      originChainId: CHAIN_IDs.BASE,
-      outputToken: ethers.constants.AddressZero,
-      destinationChainId: CHAIN_IDs.ARBITRUM,
-      depositor,
-    },
-  },
-  // B2A
-  {
-    labels: ["B2A", "EXACT_OUTPUT", "Base USDC - Arbitrum WETH"],
-    params: {
-      amount: ethers.utils.parseUnits("0.001", 18).toString(),
-      tradeType: "exactOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
-      originChainId: CHAIN_IDs.BASE,
-      outputToken: TOKEN_SYMBOLS_MAP.WETH.addresses[CHAIN_IDs.ARBITRUM],
-      destinationChainId: CHAIN_IDs.ARBITRUM,
-      depositor,
-    },
-  },
-  {
-    labels: ["B2A", "EXACT_OUTPUT", "Base USDC - Arbitrum ETH"],
-    params: {
-      amount: ethers.utils.parseUnits("0.001", 18).toString(),
-      tradeType: "exactOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.BASE],
-      originChainId: CHAIN_IDs.BASE,
-      outputToken: ethers.constants.AddressZero,
-      destinationChainId: CHAIN_IDs.ARBITRUM,
-      depositor,
-    },
-  },
-  // A2B
-  {
-    labels: ["A2B", "EXACT_OUTPUT", "Base USDbC - Arbitrum USDC"],
-    params: {
-      amount: ethers.utils.parseUnits("1", 6).toString(),
-      tradeType: "exactOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDbC.addresses[CHAIN_IDs.BASE],
-      originChainId: CHAIN_IDs.BASE,
-      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[CHAIN_IDs.ARBITRUM],
-      destinationChainId: CHAIN_IDs.ARBITRUM,
-      depositor,
-    },
-  },
-  // A2A
-  {
-    labels: ["A2A", "EXACT_OUTPUT", "Base USDbC - Arbitrum APE"],
-    params: {
-      amount: ethers.utils.parseUnits("1", 18).toString(),
-      tradeType: "exactOutput",
-      inputToken: TOKEN_SYMBOLS_MAP.USDbC.addresses[CHAIN_IDs.BASE],
-      originChainId: CHAIN_IDs.BASE,
-      outputToken: "0x74885b4D524d497261259B38900f54e6dbAd2210", // APE Coin
-      destinationChainId: CHAIN_IDs.ARBITRUM,
-      depositor,
-    },
-  },
-];
+}));
 
 async function swap() {
   const filterString = process.argv[2];
@@ -201,22 +152,34 @@ async function swap() {
     );
     console.log(response.data);
 
-    if (!response.data.tx.simulationSuccess) {
-      console.error("Tx simulation failed");
-      continue;
-    }
-
     if (process.env.DEV_WALLET_PK) {
       const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
         getProvider(testCase.params.originChainId)
       );
+
+      if (response.data.approvalTxns) {
+        console.log("Approval needed...");
+        let step = 1;
+        for (const approvalTxn of response.data.approvalTxns) {
+          const stepLabel = `(${step}/${response.data.approvalTxns.length})`;
+          const tx = await wallet.sendTransaction({
+            to: approvalTxn.to,
+            data: approvalTxn.data,
+          });
+          console.log(`${stepLabel} Approval tx hash:`, tx.hash);
+          await tx.wait();
+          console.log(`${stepLabel} Approval tx mined`);
+          step++;
+        }
+      }
+
       try {
         const tx = await wallet.sendTransaction({
-          to: response.data.tx.to,
-          data: response.data.tx.data,
-          value: response.data.tx.value,
-          gasLimit: response.data.tx.gas,
-          gasPrice: response.data.tx.gasPrice,
+          to: response.data.swapTx.to,
+          data: response.data.swapTx.data,
+          value: response.data.swapTx.value,
+          gasLimit: response.data.swapTx.gas,
+          gasPrice: response.data.swapTx.gasPrice,
         });
         console.log("Tx hash: ", tx.hash);
         await tx.wait();
@@ -230,4 +193,9 @@ async function swap() {
 
 swap()
   .then(() => console.log("Done"))
-  .catch(console.error);
+  .catch((e) => {
+    console.error(e);
+    if (e.response?.data) {
+      console.log("Tx for debug sim:", e.response.data.transaction);
+    }
+  });
