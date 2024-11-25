@@ -144,7 +144,7 @@ const handler = async (
               address,
               modifiedBaseCurrency
             )
-          : await coingeckoClient.getCurrentPriceByContract(
+          : await coingeckoClient.getCurrentPriceById(
               address,
               modifiedBaseCurrency,
               chainId
