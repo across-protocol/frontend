@@ -28,13 +28,13 @@ const handler = async (
     const responseJson = crossSwapTxForPermit;
 
     logger.debug({
-      at: "Swap/allowance",
+      at: "Swap/permit",
       message: "Response data",
       responseJson,
     });
     response.status(200).json(responseJson);
   } catch (error: unknown) {
-    return handleErrorCondition("swap/allowance", response, logger, error);
+    return handleErrorCondition("swap/permit", response, logger, error);
   }
 };
 
