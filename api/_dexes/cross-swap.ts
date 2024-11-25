@@ -13,13 +13,13 @@ import {
   getUniswapCrossSwapQuotesForOutputB2A,
   getUniswapCrossSwapQuotesForOutputA2B,
   getBestUniswapCrossSwapQuotesForOutputA2A,
-} from "./uniswap";
+} from "./uniswap/swap-router-02";
 import { CrossSwap, CrossSwapQuotes } from "./types";
 import {
   buildExactOutputBridgeTokenMessage,
   buildMinOutputBridgeTokenMessage,
-  getSwapAndBridge,
 } from "./utils";
+import { getSpokePoolPeriphery } from "../_spoke-pool-periphery";
 import { tagIntegratorId } from "../_integrator-id";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
 
@@ -179,14 +179,14 @@ export async function buildCrossSwapTxForAllowanceHolder(
 ) {
   const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
   const spokePool = getSpokePool(originChainId);
+  const spokePoolPeriphery = getSpokePoolPeriphery("uniswap", originChainId);
   const deposit = await extractDepositDataStruct(crossSwapQuotes);
 
   let tx: PopulatedTransaction;
   let toAddress: string;
 
   if (crossSwapQuotes.originSwapQuote) {
-    const swapAndBridge = getSwapAndBridge("uniswap", originChainId);
-    tx = await swapAndBridge.populateTransaction.swapAndBridge(
+    tx = await spokePoolPeriphery.populateTransaction.swapAndBridge(
       crossSwapQuotes.originSwapQuote.tokenIn.address,
       crossSwapQuotes.originSwapQuote.tokenOut.address,
       crossSwapQuotes.originSwapQuote.swapTx.data,
@@ -199,7 +199,7 @@ export async function buildCrossSwapTxForAllowanceHolder(
           : 0,
       }
     );
-    toAddress = swapAndBridge.address;
+    toAddress = spokePoolPeriphery.address;
   } else {
     tx = await spokePool.populateTransaction.depositV3(
       deposit.depositor,
@@ -256,6 +256,8 @@ async function extractDepositDataStruct(crossSwapQuotes: CrossSwapQuotes) {
     quoteTimestamp: crossSwapQuotes.bridgeQuote.suggestedFees.timestamp,
     fillDeadline: await getFillDeadline(spokePool),
     exclusivityDeadline:
+      crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline,
+    exclusivityParameter:
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline,
     message,
   };

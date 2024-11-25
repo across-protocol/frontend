@@ -27,7 +27,7 @@ import type {
   OnEvent,
 } from "@across-protocol/contracts/dist/typechain/common";
 
-export declare namespace SwapAndBridgeBase {
+export declare namespace SpokePoolV3Periphery {
   export type DepositDataStruct = {
     outputToken: string;
     outputAmount: BigNumberish;
@@ -37,7 +37,7 @@ export declare namespace SwapAndBridgeBase {
     exclusiveRelayer: string;
     quoteTimestamp: BigNumberish;
     fillDeadline: BigNumberish;
-    exclusivityDeadline: BigNumberish;
+    exclusivityParameter: BigNumberish;
     message: BytesLike;
   };
 
@@ -61,19 +61,21 @@ export declare namespace SwapAndBridgeBase {
     exclusiveRelayer: string;
     quoteTimestamp: number;
     fillDeadline: number;
-    exclusivityDeadline: number;
+    exclusivityParameter: number;
     message: string;
   };
 }
 
-export interface UniversalSwapAndBridgeInterface extends utils.Interface {
+export interface SpokePoolV3PeripheryInterface extends utils.Interface {
   functions: {
-    "EXCHANGE()": FunctionFragment;
-    "SPOKE_POOL()": FunctionFragment;
     "allowedSelectors(bytes4)": FunctionFragment;
+    "deposit(address,address,uint256,uint256,uint256,address,uint32,uint32,uint32,bytes)": FunctionFragment;
     "depositWithAuthorization(address,uint256,(address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes),uint256,uint256,bytes32,uint8,bytes32,bytes32)": FunctionFragment;
     "depositWithPermit(address,uint256,(address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes),uint256,uint8,bytes32,bytes32)": FunctionFragment;
+    "exchange()": FunctionFragment;
+    "initialize(address,address,address)": FunctionFragment;
     "multicall(bytes[])": FunctionFragment;
+    "spokePool()": FunctionFragment;
     "swapAndBridge(address,address,bytes,uint256,uint256,(address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes))": FunctionFragment;
     "swapAndBridgeWithAuthorization(address,address,bytes,uint256,uint256,(address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes),uint256,uint256,bytes32,uint8,bytes32,bytes32)": FunctionFragment;
     "swapAndBridgeWithPermit(address,address,bytes,uint256,uint256,(address,uint256,address,address,uint256,address,uint32,uint32,uint32,bytes),uint256,uint8,bytes32,bytes32)": FunctionFragment;
@@ -81,32 +83,44 @@ export interface UniversalSwapAndBridgeInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "EXCHANGE"
-      | "SPOKE_POOL"
       | "allowedSelectors"
+      | "deposit"
       | "depositWithAuthorization"
       | "depositWithPermit"
+      | "exchange"
+      | "initialize"
       | "multicall"
+      | "spokePool"
       | "swapAndBridge"
       | "swapAndBridgeWithAuthorization"
       | "swapAndBridgeWithPermit"
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: "EXCHANGE", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "SPOKE_POOL",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "allowedSelectors",
     values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "deposit",
+    values: [
+      string,
+      string,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      string,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "depositWithAuthorization",
     values: [
       string,
       BigNumberish,
-      SwapAndBridgeBase.DepositDataStruct,
+      SpokePoolV3Periphery.DepositDataStruct,
       BigNumberish,
       BigNumberish,
       BytesLike,
@@ -120,17 +134,23 @@ export interface UniversalSwapAndBridgeInterface extends utils.Interface {
     values: [
       string,
       BigNumberish,
-      SwapAndBridgeBase.DepositDataStruct,
+      SpokePoolV3Periphery.DepositDataStruct,
       BigNumberish,
       BigNumberish,
       BytesLike,
       BytesLike,
     ]
   ): string;
+  encodeFunctionData(functionFragment: "exchange", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "initialize",
+    values: [string, string, string]
+  ): string;
   encodeFunctionData(
     functionFragment: "multicall",
     values: [BytesLike[]]
   ): string;
+  encodeFunctionData(functionFragment: "spokePool", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "swapAndBridge",
     values: [
@@ -139,7 +159,7 @@ export interface UniversalSwapAndBridgeInterface extends utils.Interface {
       BytesLike,
       BigNumberish,
       BigNumberish,
-      SwapAndBridgeBase.DepositDataStruct,
+      SpokePoolV3Periphery.DepositDataStruct,
     ]
   ): string;
   encodeFunctionData(
@@ -150,7 +170,7 @@ export interface UniversalSwapAndBridgeInterface extends utils.Interface {
       BytesLike,
       BigNumberish,
       BigNumberish,
-      SwapAndBridgeBase.DepositDataStruct,
+      SpokePoolV3Periphery.DepositDataStruct,
       BigNumberish,
       BigNumberish,
       BytesLike,
@@ -167,7 +187,7 @@ export interface UniversalSwapAndBridgeInterface extends utils.Interface {
       BytesLike,
       BigNumberish,
       BigNumberish,
-      SwapAndBridgeBase.DepositDataStruct,
+      SpokePoolV3Periphery.DepositDataStruct,
       BigNumberish,
       BigNumberish,
       BytesLike,
@@ -175,12 +195,11 @@ export interface UniversalSwapAndBridgeInterface extends utils.Interface {
     ]
   ): string;
 
-  decodeFunctionResult(functionFragment: "EXCHANGE", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "SPOKE_POOL", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "allowedSelectors",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "depositWithAuthorization",
     data: BytesLike
@@ -189,7 +208,10 @@ export interface UniversalSwapAndBridgeInterface extends utils.Interface {
     functionFragment: "depositWithPermit",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "exchange", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "multicall", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "spokePool", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "swapAndBridge",
     data: BytesLike
@@ -227,12 +249,12 @@ export type SwapBeforeBridgeEvent = TypedEvent<
 export type SwapBeforeBridgeEventFilter =
   TypedEventFilter<SwapBeforeBridgeEvent>;
 
-export interface UniversalSwapAndBridge extends BaseContract {
+export interface SpokePoolV3Periphery extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: UniversalSwapAndBridgeInterface;
+  interface: SpokePoolV3PeripheryInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -254,19 +276,29 @@ export interface UniversalSwapAndBridge extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    EXCHANGE(overrides?: CallOverrides): Promise<[string]>;
-
-    SPOKE_POOL(overrides?: CallOverrides): Promise<[string]>;
-
     allowedSelectors(
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    deposit(
+      recipient: string,
+      inputToken: string,
+      inputAmount: BigNumberish,
+      outputAmount: BigNumberish,
+      destinationChainId: BigNumberish,
+      exclusiveRelayer: string,
+      quoteTimestamp: BigNumberish,
+      fillDeadline: BigNumberish,
+      exclusivityParameter: BigNumberish,
+      message: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     depositWithAuthorization(
       acrossInputToken: string,
       acrossInputAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       nonce: BytesLike,
@@ -279,11 +311,20 @@ export interface UniversalSwapAndBridge extends BaseContract {
     depositWithPermit(
       acrossInputToken: string,
       acrossInputAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       deadline: BigNumberish,
       v: BigNumberish,
       r: BytesLike,
       s: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    exchange(overrides?: CallOverrides): Promise<[string]>;
+
+    initialize(
+      _spokePool: string,
+      _wrappedNativeToken: string,
+      _exchange: string,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -292,13 +333,15 @@ export interface UniversalSwapAndBridge extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
+    spokePool(overrides?: CallOverrides): Promise<[string]>;
+
     swapAndBridge(
       swapToken: string,
       acrossInputToken: string,
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -308,7 +351,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       nonce: BytesLike,
@@ -324,7 +367,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       deadline: BigNumberish,
       v: BigNumberish,
       r: BytesLike,
@@ -333,19 +376,29 @@ export interface UniversalSwapAndBridge extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  EXCHANGE(overrides?: CallOverrides): Promise<string>;
-
-  SPOKE_POOL(overrides?: CallOverrides): Promise<string>;
-
   allowedSelectors(
     arg0: BytesLike,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  deposit(
+    recipient: string,
+    inputToken: string,
+    inputAmount: BigNumberish,
+    outputAmount: BigNumberish,
+    destinationChainId: BigNumberish,
+    exclusiveRelayer: string,
+    quoteTimestamp: BigNumberish,
+    fillDeadline: BigNumberish,
+    exclusivityParameter: BigNumberish,
+    message: BytesLike,
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
   depositWithAuthorization(
     acrossInputToken: string,
     acrossInputAmount: BigNumberish,
-    depositData: SwapAndBridgeBase.DepositDataStruct,
+    depositData: SpokePoolV3Periphery.DepositDataStruct,
     validAfter: BigNumberish,
     validBefore: BigNumberish,
     nonce: BytesLike,
@@ -358,11 +411,20 @@ export interface UniversalSwapAndBridge extends BaseContract {
   depositWithPermit(
     acrossInputToken: string,
     acrossInputAmount: BigNumberish,
-    depositData: SwapAndBridgeBase.DepositDataStruct,
+    depositData: SpokePoolV3Periphery.DepositDataStruct,
     deadline: BigNumberish,
     v: BigNumberish,
     r: BytesLike,
     s: BytesLike,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  exchange(overrides?: CallOverrides): Promise<string>;
+
+  initialize(
+    _spokePool: string,
+    _wrappedNativeToken: string,
+    _exchange: string,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -371,13 +433,15 @@ export interface UniversalSwapAndBridge extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
+  spokePool(overrides?: CallOverrides): Promise<string>;
+
   swapAndBridge(
     swapToken: string,
     acrossInputToken: string,
     routerCalldata: BytesLike,
     swapTokenAmount: BigNumberish,
     minExpectedInputTokenAmount: BigNumberish,
-    depositData: SwapAndBridgeBase.DepositDataStruct,
+    depositData: SpokePoolV3Periphery.DepositDataStruct,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -387,7 +451,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
     routerCalldata: BytesLike,
     swapTokenAmount: BigNumberish,
     minExpectedInputTokenAmount: BigNumberish,
-    depositData: SwapAndBridgeBase.DepositDataStruct,
+    depositData: SpokePoolV3Periphery.DepositDataStruct,
     validAfter: BigNumberish,
     validBefore: BigNumberish,
     nonce: BytesLike,
@@ -403,7 +467,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
     routerCalldata: BytesLike,
     swapTokenAmount: BigNumberish,
     minExpectedInputTokenAmount: BigNumberish,
-    depositData: SwapAndBridgeBase.DepositDataStruct,
+    depositData: SpokePoolV3Periphery.DepositDataStruct,
     deadline: BigNumberish,
     v: BigNumberish,
     r: BytesLike,
@@ -412,19 +476,29 @@ export interface UniversalSwapAndBridge extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    EXCHANGE(overrides?: CallOverrides): Promise<string>;
-
-    SPOKE_POOL(overrides?: CallOverrides): Promise<string>;
-
     allowedSelectors(
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    deposit(
+      recipient: string,
+      inputToken: string,
+      inputAmount: BigNumberish,
+      outputAmount: BigNumberish,
+      destinationChainId: BigNumberish,
+      exclusiveRelayer: string,
+      quoteTimestamp: BigNumberish,
+      fillDeadline: BigNumberish,
+      exclusivityParameter: BigNumberish,
+      message: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     depositWithAuthorization(
       acrossInputToken: string,
       acrossInputAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       nonce: BytesLike,
@@ -437,7 +511,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
     depositWithPermit(
       acrossInputToken: string,
       acrossInputAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       deadline: BigNumberish,
       v: BigNumberish,
       r: BytesLike,
@@ -445,7 +519,18 @@ export interface UniversalSwapAndBridge extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    exchange(overrides?: CallOverrides): Promise<string>;
+
+    initialize(
+      _spokePool: string,
+      _wrappedNativeToken: string,
+      _exchange: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     multicall(data: BytesLike[], overrides?: CallOverrides): Promise<string[]>;
+
+    spokePool(overrides?: CallOverrides): Promise<string>;
 
     swapAndBridge(
       swapToken: string,
@@ -453,7 +538,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -463,7 +548,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       nonce: BytesLike,
@@ -479,7 +564,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       deadline: BigNumberish,
       v: BigNumberish,
       r: BytesLike,
@@ -510,19 +595,29 @@ export interface UniversalSwapAndBridge extends BaseContract {
   };
 
   estimateGas: {
-    EXCHANGE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    SPOKE_POOL(overrides?: CallOverrides): Promise<BigNumber>;
-
     allowedSelectors(
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    deposit(
+      recipient: string,
+      inputToken: string,
+      inputAmount: BigNumberish,
+      outputAmount: BigNumberish,
+      destinationChainId: BigNumberish,
+      exclusiveRelayer: string,
+      quoteTimestamp: BigNumberish,
+      fillDeadline: BigNumberish,
+      exclusivityParameter: BigNumberish,
+      message: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
     depositWithAuthorization(
       acrossInputToken: string,
       acrossInputAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       nonce: BytesLike,
@@ -535,11 +630,20 @@ export interface UniversalSwapAndBridge extends BaseContract {
     depositWithPermit(
       acrossInputToken: string,
       acrossInputAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       deadline: BigNumberish,
       v: BigNumberish,
       r: BytesLike,
       s: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    exchange(overrides?: CallOverrides): Promise<BigNumber>;
+
+    initialize(
+      _spokePool: string,
+      _wrappedNativeToken: string,
+      _exchange: string,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -548,13 +652,15 @@ export interface UniversalSwapAndBridge extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
+    spokePool(overrides?: CallOverrides): Promise<BigNumber>;
+
     swapAndBridge(
       swapToken: string,
       acrossInputToken: string,
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -564,7 +670,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       nonce: BytesLike,
@@ -580,7 +686,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       deadline: BigNumberish,
       v: BigNumberish,
       r: BytesLike,
@@ -590,19 +696,29 @@ export interface UniversalSwapAndBridge extends BaseContract {
   };
 
   populateTransaction: {
-    EXCHANGE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    SPOKE_POOL(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     allowedSelectors(
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    deposit(
+      recipient: string,
+      inputToken: string,
+      inputAmount: BigNumberish,
+      outputAmount: BigNumberish,
+      destinationChainId: BigNumberish,
+      exclusiveRelayer: string,
+      quoteTimestamp: BigNumberish,
+      fillDeadline: BigNumberish,
+      exclusivityParameter: BigNumberish,
+      message: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
     depositWithAuthorization(
       acrossInputToken: string,
       acrossInputAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       nonce: BytesLike,
@@ -615,11 +731,20 @@ export interface UniversalSwapAndBridge extends BaseContract {
     depositWithPermit(
       acrossInputToken: string,
       acrossInputAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       deadline: BigNumberish,
       v: BigNumberish,
       r: BytesLike,
       s: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    exchange(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    initialize(
+      _spokePool: string,
+      _wrappedNativeToken: string,
+      _exchange: string,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -628,13 +753,15 @@ export interface UniversalSwapAndBridge extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
+    spokePool(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     swapAndBridge(
       swapToken: string,
       acrossInputToken: string,
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -644,7 +771,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       validAfter: BigNumberish,
       validBefore: BigNumberish,
       nonce: BytesLike,
@@ -660,7 +787,7 @@ export interface UniversalSwapAndBridge extends BaseContract {
       routerCalldata: BytesLike,
       swapTokenAmount: BigNumberish,
       minExpectedInputTokenAmount: BigNumberish,
-      depositData: SwapAndBridgeBase.DepositDataStruct,
+      depositData: SpokePoolV3Periphery.DepositDataStruct,
       deadline: BigNumberish,
       v: BigNumberish,
       r: BytesLike,

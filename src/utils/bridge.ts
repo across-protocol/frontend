@@ -338,8 +338,6 @@ export async function sendSwapAndBridgeTx(
   fillDeadline ??= await getFillDeadline(spokePool);
 
   const tx = await swapAndBridge.populateTransaction.swapAndBridge(
-    swapTokenAddress,
-    inputTokenAddress,
     swapQuote.routerCalldata,
     swapTokenAmount,
     swapQuote.minExpectedInputTokenAmount,
