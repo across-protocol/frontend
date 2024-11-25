@@ -93,11 +93,18 @@ const enabledRoutes = {
     },
     swapAndBridgeAddresses: {
       "1inch": {
-        [CHAIN_IDs.POLYGON]: "0xF9735e425A36d22636EF4cb75c7a6c63378290CA",
-        [CHAIN_IDs.OPTIMISM]: "0x7631eA29479Ee265241F13FB48555A2C886d3Bf8",
-        [CHAIN_IDs.ARBITRUM]: "0x81C7601ac0c5825e89F967f9222B977CCD78aD77",
-        [CHAIN_IDs.BASE]: "0x98285D11B9F7aFec2d475805E5255f26B4490167",
+        [CHAIN_IDs.POLYGON]: "0xaBa0F11D55C5dDC52cD0Cb2cd052B621d45159d5",
+        [CHAIN_IDs.OPTIMISM]: "0x3E7448657409278C9d6E192b92F2b69B234FCc42",
+        [CHAIN_IDs.ARBITRUM]: "0xC456398D5eE3B93828252e48beDEDbc39e03368E",
+        [CHAIN_IDs.BASE]: "0x7CFaBF2eA327009B39f40078011B0Fb714b65926",
       },
+      uniswap: {
+        [CHAIN_IDs.POLYGON]: "0x9220Fa27ae680E4e8D9733932128FA73362E0393",
+        [CHAIN_IDs.OPTIMISM]: "0x6f4A733c7889f038D77D4f540182Dda17423CcbF",
+        [CHAIN_IDs.ARBITRUM]: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
+      },
+    },
+    spokePoolPeripheryAddresses: {
       uniswap: {
         [CHAIN_IDs.POLYGON]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
         [CHAIN_IDs.OPTIMISM]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
@@ -136,6 +143,9 @@ const enabledRoutes = {
         [CHAIN_IDs.OPTIMISM_SEPOLIA]:
           "0x17496824Ba574A4e9De80110A91207c4c63e552a", // Mocked
       },
+    },
+    spokePoolPeripheryAddresses: {
+      uniswap: {},
     },
     routes: transformChainConfigs(enabledSepoliaChainConfigs),
   },
@@ -361,6 +371,21 @@ async function generateRoutes(hubPoolChainId = 1) {
     claimAndStakeAddress: utils.getAddress(config.claimAndStakeAddress),
     swapAndBridgeAddresses: Object.entries(
       config.swapAndBridgeAddresses
+    ).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: Object.entries(value).reduce(
+          (acc, [chainId, address]) => ({
+            ...acc,
+            [chainId]: utils.getAddress(address as string),
+          }),
+          {}
+        ),
+      }),
+      {}
+    ),
+    spokePoolPeripheryAddresses: Object.entries(
+      config.spokePoolPeripheryAddresses
     ).reduce(
       (acc, [key, value]) => ({
         ...acc,

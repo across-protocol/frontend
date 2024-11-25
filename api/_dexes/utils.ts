@@ -1,4 +1,4 @@
-import { UniversalSwapAndBridge__factory } from "../_typechain/factories/SwapAndBridge.sol";
+import { SwapAndBridge__factory } from "@across-protocol/contracts";
 import { BigNumber, constants } from "ethers";
 
 import { ENABLED_ROUTES, getProvider } from "../_utils";
@@ -58,7 +58,7 @@ export function getSwapAndBridgeAddress(dex: string, chainId: number) {
 export function getSwapAndBridge(dex: string, chainId: number) {
   const swapAndBridgeAddress = getSwapAndBridgeAddress(dex, chainId);
 
-  return UniversalSwapAndBridge__factory.connect(
+  return SwapAndBridge__factory.connect(
     swapAndBridgeAddress,
     getProvider(chainId)
   );

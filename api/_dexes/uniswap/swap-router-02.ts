@@ -15,8 +15,7 @@ import {
   getBridgeQuoteForMinOutput,
   getRoutesByChainIds,
   getRouteByOutputTokenAndOriginChain,
-} from "../_utils";
-import { TOKEN_SYMBOLS_MAP } from "../_constants";
+} from "../../_utils";
 import {
   buildMulticallHandlerMessage,
   encodeApproveCalldata,
@@ -24,22 +23,16 @@ import {
   encodeTransferCalldata,
   encodeWethWithdrawCalldata,
   getMultiCallHandlerAddress,
-} from "../_multicall-handler";
-import {
-  OriginSwapQuoteAndCalldata,
-  Token as AcrossToken,
-  Swap,
-  CrossSwap,
-  SwapQuote,
-} from "./types";
+} from "../../_multicall-handler";
+import { Token as AcrossToken, Swap, CrossSwap, SwapQuote } from "../types";
 import {
   buildExactOutputBridgeTokenMessage,
   buildMinOutputBridgeTokenMessage,
   getFallbackRecipient,
   getSwapAndBridgeAddress,
   NoSwapRouteError,
-} from "./utils";
-import { AMOUNT_TYPE } from "./cross-swap";
+} from "../utils";
+import { AMOUNT_TYPE } from "../cross-swap";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
 export const SWAP_ROUTER_02_ADDRESS = {
@@ -53,59 +46,6 @@ export const SWAP_ROUTER_02_ADDRESS = {
   [CHAIN_IDs.ZK_SYNC]: "0x99c56385daBCE3E81d8499d0b8d0257aBC07E8A3",
   [CHAIN_IDs.ZORA]: "0x7De04c96BE5159c3b5CeffC82aa176dc81281557",
 };
-
-// Maps testnet chain IDs to their prod counterparts. Used to get the prod token
-// info for testnet tokens.
-const TESTNET_TO_PROD = {
-  [CHAIN_IDs.SEPOLIA]: CHAIN_IDs.MAINNET,
-  [CHAIN_IDs.BASE_SEPOLIA]: CHAIN_IDs.BASE,
-  [CHAIN_IDs.OPTIMISM_SEPOLIA]: CHAIN_IDs.OPTIMISM,
-  [CHAIN_IDs.ARBITRUM_SEPOLIA]: CHAIN_IDs.ARBITRUM,
-};
-
-/**
- * Returns Uniswap v3 quote for a swap with exact input amount.
- * @param swap
- */
-export async function getUniswapQuoteForOriginSwapExactInput(
-  swap: Omit<Swap, "recipient">
-): Promise<OriginSwapQuoteAndCalldata> {
-  const swapAndBridgeAddress = getSwapAndBridgeAddress("uniswap", swap.chainId);
-
-  const initialTokenIn = { ...swap.tokenIn };
-  const initialTokenOut = { ...swap.tokenOut };
-  // Always use mainnet tokens for retrieving quote, so that we can get equivalent quotes
-  // for testnet tokens.
-  swap.tokenIn = getProdToken(swap.tokenIn);
-  swap.tokenOut = getProdToken(swap.tokenOut);
-
-  const { swapTx, minAmountOut } = await getUniswapQuote(
-    {
-      ...swap,
-      recipient: swapAndBridgeAddress,
-    },
-    TradeType.EXACT_INPUT
-  );
-
-  // replace mainnet token addresses with initial token addresses in calldata
-  swapTx.data = swapTx.data.replace(
-    swap.tokenIn.address.toLowerCase().slice(2),
-    initialTokenIn.address.toLowerCase().slice(2)
-  );
-  swapTx.data = swapTx.data.replace(
-    swap.tokenOut.address.toLowerCase().slice(2),
-    initialTokenOut.address.toLowerCase().slice(2)
-  );
-
-  return {
-    minExpectedInputTokenAmount: minAmountOut.toString(),
-    routerCalldata: swapTx.data,
-    value: BigNumber.from(swapTx.value).toString(),
-    swapAndBridgeAddress,
-    dex: "uniswap",
-    slippage: swap.slippageTolerance,
-  };
-}
 
 /**
  * Returns Uniswap v3 quote for a swap with min. output amount for route
@@ -156,7 +96,7 @@ export async function getUniswapCrossSwapQuotesForOutputB2A(
   };
   // 1.1. Get destination swap quote for bridgeable output token -> any token
   //      with exact output amount.
-  let destinationSwapQuote = await getUniswapQuote(
+  let destinationSwapQuote = await getUniswapQuoteWithSwapRouter02(
     {
       ...destinationSwap,
       amount: crossSwap.amount.toString(),
@@ -166,7 +106,7 @@ export async function getUniswapCrossSwapQuotesForOutputB2A(
   // 1.2. Re-fetch destination swap quote with exact input amount if leftover tokens
   //      should be sent to receiver.
   if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
-    destinationSwapQuote = await getUniswapQuote(
+    destinationSwapQuote = await getUniswapQuoteWithSwapRouter02(
       {
         ...destinationSwap,
         amount: addSlippageToAmount(
@@ -265,7 +205,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
     slippageTolerance: crossSwap.slippageTolerance,
   };
   // 2.1. Get origin swap quote for any input token -> bridgeable input token
-  const originSwapQuote = await getUniswapQuote(
+  const originSwapQuote = await getUniswapQuoteWithSwapRouter02(
     {
       ...originSwap,
       amount: bridgeQuote.inputAmount.toString(),
@@ -274,7 +214,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
   );
   // 2.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
   //      This prevents leftover tokens in the SwapAndBridge contract.
-  let adjOriginSwapQuote = await getUniswapQuote(
+  let adjOriginSwapQuote = await getUniswapQuoteWithSwapRouter02(
     {
       ...originSwap,
       amount: originSwapQuote.maximumAmountIn.toString(),
@@ -283,7 +223,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
   );
 
   if (adjOriginSwapQuote.minAmountOut.lt(bridgeQuote.inputAmount)) {
-    adjOriginSwapQuote = await getUniswapQuote(
+    adjOriginSwapQuote = await getUniswapQuoteWithSwapRouter02(
       {
         ...originSwap,
         amount: addSlippageToAmount(
@@ -435,7 +375,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
 
   // 1.1. Get destination swap quote for bridgeable output token -> any token
   //      with exact output amount
-  let destinationSwapQuote = await getUniswapQuote(
+  let destinationSwapQuote = await getUniswapQuoteWithSwapRouter02(
     {
       ...destinationSwap,
       amount: crossSwap.amount.toString(),
@@ -445,7 +385,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   // 1.2. Re-fetch destination swap quote with exact input amount if leftover tokens
   //      should be sent to receiver.
   if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
-    destinationSwapQuote = await getUniswapQuote(
+    destinationSwapQuote = await getUniswapQuoteWithSwapRouter02(
       {
         ...destinationSwap,
         amount: addSlippageToAmount(
@@ -472,7 +412,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   });
 
   // 3.1. Get origin swap quote for any input token -> bridgeable input token
-  const originSwapQuote = await getUniswapQuote(
+  const originSwapQuote = await getUniswapQuoteWithSwapRouter02(
     {
       ...originSwap,
       amount: bridgeQuote.inputAmount.toString(),
@@ -481,7 +421,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   );
   // 3.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
   //      This prevents leftover tokens in the SwapAndBridge contract.
-  const adjOriginSwapQuote = await getUniswapQuote(
+  const adjOriginSwapQuote = await getUniswapQuoteWithSwapRouter02(
     {
       ...originSwap,
       amount: originSwapQuote.maximumAmountIn.toString(),
@@ -497,11 +437,11 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   };
 }
 
-export async function getUniswapQuote(
+export async function getUniswapQuoteWithSwapRouter02(
   swap: Omit<Swap, "type">,
   tradeType: TradeType
 ): Promise<SwapQuote> {
-  const { router, options } = getSwapRouterAndOptions(swap);
+  const { router, options } = getSwapRouter02AndOptions(swap);
 
   const amountCurrency =
     tradeType === TradeType.EXACT_INPUT ? swap.tokenIn : swap.tokenOut;
@@ -578,7 +518,7 @@ export async function getUniswapQuote(
   return swapQuote;
 }
 
-function getSwapRouterAndOptions(params: {
+function getSwapRouter02AndOptions(params: {
   chainId: number;
   recipient: string;
   slippageTolerance: number;
@@ -606,26 +546,6 @@ function floatToPercent(value: number) {
     Number(value.toFixed(2)) * 100,
     10_000
   );
-}
-
-function getProdToken(token: AcrossToken) {
-  const prodChainId = TESTNET_TO_PROD[token.chainId] || token.chainId;
-
-  const prodToken =
-    TOKEN_SYMBOLS_MAP[token.symbol as keyof typeof TOKEN_SYMBOLS_MAP];
-  const prodTokenAddress = prodToken?.addresses[prodChainId];
-
-  if (!prodToken || !prodTokenAddress) {
-    throw new Error(
-      `Prod token not found for ${token.symbol} on chain ${token.chainId}`
-    );
-  }
-
-  return {
-    ...prodToken,
-    chainId: prodChainId,
-    address: prodTokenAddress,
-  };
 }
 
 function buildDestinationSwapCrossChainMessage({
