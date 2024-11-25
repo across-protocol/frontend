@@ -775,12 +775,18 @@ export const buildDepositForSimulation = (depositArgs: {
 export const getCachedTokenPrice = async (
   l1Token: string,
   baseCurrency: string = "eth",
-  historicalDateISO?: string
+  historicalDateISO?: string,
+  chainId?: number
 ): Promise<number> => {
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
-        params: { l1Token, baseCurrency, date: historicalDateISO },
+        params: {
+          l1Token,
+          chainId,
+          baseCurrency,
+          date: historicalDateISO,
+        },
       })
     ).data.price
   );

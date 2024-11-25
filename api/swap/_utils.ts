@@ -9,7 +9,7 @@ import {
   boolStr,
   getCachedTokenInfo,
   getWrappedNativeTokenAddress,
-  getLogger,
+  getCachedTokenPrice,
 } from "../_utils";
 import {
   AMOUNT_TYPE,
@@ -20,9 +20,6 @@ import { InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
 import { CrossSwapFees, CrossSwapQuotes, SwapQuote } from "../_dexes/types";
 import { formatUnits } from "ethers/lib/utils";
-import { coingecko } from "@across-protocol/sdk";
-
-const { Coingecko } = coingecko;
 
 export const BaseSwapQueryParamsSchema = type({
   amount: positiveIntStr(),
@@ -140,30 +137,25 @@ export async function handleBaseSwapQueryParams({
   };
 }
 
-const coingeckoClient = Coingecko.get(
-  getLogger(),
-  process.env.REACT_APP_COINGECKO_PRO_API_KEY
-);
-
 async function calculateSwapFee(
   swapQuote: SwapQuote,
   baseCurrency: string
 ): Promise<Record<string, number>> {
   const { tokenIn, tokenOut, expectedAmountOut, expectedAmountIn } = swapQuote;
-  const [[, inputTokenPriceBase], [, outputTokenPriceBase]] = await Promise.all(
-    [
-      coingeckoClient.getCurrentPriceByContract(
-        tokenIn.address,
-        baseCurrency,
-        tokenIn.chainId
-      ),
-      coingeckoClient.getCurrentPriceByContract(
-        tokenOut.address,
-        baseCurrency,
-        tokenOut.chainId
-      ),
-    ]
-  );
+  const [inputTokenPriceBase, outputTokenPriceBase] = await Promise.all([
+    getCachedTokenPrice(
+      tokenIn.address,
+      baseCurrency,
+      undefined,
+      tokenIn.chainId
+    ),
+    getCachedTokenPrice(
+      tokenOut.address,
+      baseCurrency,
+      undefined,
+      tokenOut.chainId
+    ),
+  ]);
 
   const normalizedIn =
     parseFloat(formatUnits(expectedAmountIn, tokenIn.decimals)) *
@@ -181,12 +173,12 @@ async function calculateBridgeFee(
   baseCurrency: string
 ): Promise<Record<string, number>> {
   const { inputToken, suggestedFees } = bridgeQuote;
-  const [, inputTokenPriceBase] =
-    await coingeckoClient.getCurrentPriceByContract(
-      inputToken.address,
-      baseCurrency,
-      inputToken.chainId
-    );
+  const inputTokenPriceBase = await getCachedTokenPrice(
+    inputToken.address,
+    baseCurrency,
+    undefined,
+    inputToken.chainId
+  );
   const normalizedFee =
     parseFloat(
       formatUnits(suggestedFees.totalRelayFee.total, inputToken.decimals)
