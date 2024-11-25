@@ -641,9 +641,7 @@ function buildDestinationSwapCrossChainMessage({
         target: getMultiCallHandlerAddress(destinationSwapChainId),
         callData: encodeDrainCalldata(
           bridgeableOutputToken.address,
-          crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT
-            ? crossSwap.refundAddress ?? crossSwap.depositor
-            : crossSwap.recipient
+          crossSwap.refundAddress ?? crossSwap.depositor
         ),
         value: "0",
       },
