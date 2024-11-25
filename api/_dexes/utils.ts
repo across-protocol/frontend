@@ -1,5 +1,5 @@
 import { UniversalSwapAndBridge__factory } from "../_typechain/factories/SwapAndBridge.sol";
-import { BigNumber } from "ethers";
+import { BigNumber, constants } from "ethers";
 
 import { ENABLED_ROUTES, getProvider } from "../_utils";
 import {
@@ -102,8 +102,7 @@ export function buildExactOutputBridgeTokenMessage(crossSwap: CrossSwap) {
         },
       ];
   return buildMulticallHandlerMessage({
-    // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
-    fallbackRecipient: crossSwap.depositor,
+    fallbackRecipient: getFallbackRecipient(crossSwap),
     actions: [
       ...transferActions,
       // drain remaining bridgeable output tokens from MultiCallHandler contract
@@ -111,7 +110,7 @@ export function buildExactOutputBridgeTokenMessage(crossSwap: CrossSwap) {
         target: getMultiCallHandlerAddress(crossSwap.outputToken.chainId),
         callData: encodeDrainCalldata(
           crossSwap.outputToken.address,
-          crossSwap.depositor
+          crossSwap.refundAddress ?? crossSwap.depositor
         ),
         value: "0",
       },
@@ -140,14 +139,13 @@ export function buildMinOutputBridgeTokenMessage(
         {
           target: crossSwap.recipient,
           callData: "0x",
-          value: crossSwap.amount.toString(),
+          value: (unwrapAmount || crossSwap.amount).toString(),
         },
       ]
     : // ERC-20 token transfer
       [];
   return buildMulticallHandlerMessage({
-    // @TODO: handle fallback recipient for params `refundOnOrigin` and `refundAddress`
-    fallbackRecipient: crossSwap.depositor,
+    fallbackRecipient: getFallbackRecipient(crossSwap),
     actions: [
       ...transferActions,
       // drain remaining bridgeable output tokens from MultiCallHandler contract
@@ -161,4 +159,10 @@ export function buildMinOutputBridgeTokenMessage(
       },
     ],
   });
+}
+
+export function getFallbackRecipient(crossSwap: CrossSwap) {
+  return crossSwap.refundOnOrigin
+    ? constants.AddressZero
+    : crossSwap.refundAddress ?? crossSwap.depositor;
 }

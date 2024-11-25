@@ -1,4 +1,6 @@
 import { ERC20__factory } from "@across-protocol/contracts";
+import { constants } from "ethers";
+
 import { callViaMulticall3, getProvider } from "./_utils";
 
 export async function getAllowance(params: {
@@ -27,6 +29,12 @@ export async function getBalanceAndAllowance(params: {
   spender: string;
 }) {
   const provider = getProvider(params.chainId);
+
+  if (params.tokenAddress === constants.AddressZero) {
+    const balance = await provider.getBalance(params.owner);
+    return { balance, allowance: constants.MaxUint256 };
+  }
+
   const erc20 = getErc20(params);
   const [balance, allowance] = await callViaMulticall3(provider, [
     {

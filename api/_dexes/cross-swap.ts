@@ -195,7 +195,7 @@ export async function buildCrossSwapTxForAllowanceHolder(
       deposit,
       {
         value: crossSwapQuotes.crossSwap.isInputNative
-          ? deposit.inputAmount
+          ? crossSwapQuotes.originSwapQuote.maximumAmountIn
           : 0,
       }
     );
@@ -236,11 +236,16 @@ async function extractDepositDataStruct(crossSwapQuotes: CrossSwapQuotes) {
   const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
   const spokePool = getSpokePool(originChainId);
   const message = crossSwapQuotes.bridgeQuote.message || "0x";
+  const refundAddress =
+    crossSwapQuotes.crossSwap.refundAddress ??
+    crossSwapQuotes.crossSwap.depositor;
   const deposit = {
-    depositor: crossSwapQuotes.crossSwap.depositor,
+    depositor: crossSwapQuotes.crossSwap.refundOnOrigin
+      ? refundAddress
+      : crossSwapQuotes.crossSwap.depositor,
     recipient: utils.isMessageEmpty(message)
-      ? getMultiCallHandlerAddress(destinationChainId)
-      : crossSwapQuotes.crossSwap.recipient,
+      ? crossSwapQuotes.crossSwap.recipient
+      : getMultiCallHandlerAddress(destinationChainId),
     inputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
     outputToken: crossSwapQuotes.bridgeQuote.outputToken.address,
     inputAmount: crossSwapQuotes.bridgeQuote.inputAmount,
