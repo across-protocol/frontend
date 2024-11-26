@@ -15,6 +15,7 @@ import {
   getBridgeQuoteForMinOutput,
   getRoutesByChainIds,
   getRouteByOutputTokenAndOriginChain,
+  getLogger,
 } from "../../_utils";
 import {
   buildMulticallHandlerMessage,
@@ -29,10 +30,10 @@ import {
   buildExactOutputBridgeTokenMessage,
   buildMinOutputBridgeTokenMessage,
   getFallbackRecipient,
-  getSwapAndBridgeAddress,
   NoSwapRouteError,
 } from "../utils";
 import { AMOUNT_TYPE } from "../cross-swap";
+import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
 export const SWAP_ROUTER_02_ADDRESS = {
@@ -109,10 +110,7 @@ export async function getUniswapCrossSwapQuotesForOutputB2A(
     destinationSwapQuote = await getUniswapQuoteWithSwapRouter02(
       {
         ...destinationSwap,
-        amount: addSlippageToAmount(
-          destinationSwapQuote.maximumAmountIn,
-          crossSwap.slippageTolerance.toString()
-        ),
+        amount: addBufferToAmount(destinationSwapQuote.maximumAmountIn),
       },
       TradeType.EXACT_INPUT
     );
@@ -201,7 +199,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
     chainId: originSwapChainId,
     tokenIn: crossSwap.inputToken,
     tokenOut: bridgeableInputToken,
-    recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
+    recipient: getSpokePoolPeripheryAddress("uniswap", originSwapChainId),
     slippageTolerance: crossSwap.slippageTolerance,
   };
   // 2.1. Get origin swap quote for any input token -> bridgeable input token
@@ -217,29 +215,14 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
   let adjOriginSwapQuote = await getUniswapQuoteWithSwapRouter02(
     {
       ...originSwap,
-      amount: originSwapQuote.maximumAmountIn.toString(),
+      amount: addBufferToAmount(originSwapQuote.maximumAmountIn),
     },
     TradeType.EXACT_INPUT
   );
-
-  if (adjOriginSwapQuote.minAmountOut.lt(bridgeQuote.inputAmount)) {
-    adjOriginSwapQuote = await getUniswapQuoteWithSwapRouter02(
-      {
-        ...originSwap,
-        amount: addSlippageToAmount(
-          adjOriginSwapQuote.maximumAmountIn,
-          crossSwap.slippageTolerance.toString()
-        ),
-      },
-      TradeType.EXACT_INPUT
-    );
-    if (adjOriginSwapQuote.minAmountOut.lt(bridgeQuote.inputAmount)) {
-      throw new Error(
-        `Origin swap quote min. output amount ${adjOriginSwapQuote.minAmountOut.toString()} ` +
-          `is less than required bridge input amount ${bridgeQuote.inputAmount.toString()}`
-      );
-    }
-  }
+  assertMinOutputAmount(
+    adjOriginSwapQuote.minAmountOut,
+    bridgeQuote.inputAmount
+  );
 
   return {
     crossSwap,
@@ -362,7 +345,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
     chainId: originSwapChainId,
     tokenIn: crossSwap.inputToken,
     tokenOut: bridgeableInputToken,
-    recipient: getSwapAndBridgeAddress("uniswap", originSwapChainId),
+    recipient: getSpokePoolPeripheryAddress("uniswap", originSwapChainId),
     slippageTolerance: crossSwap.slippageTolerance,
   };
   const destinationSwap = {
@@ -388,10 +371,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
     destinationSwapQuote = await getUniswapQuoteWithSwapRouter02(
       {
         ...destinationSwap,
-        amount: addSlippageToAmount(
-          destinationSwapQuote.maximumAmountIn,
-          crossSwap.slippageTolerance.toString()
-        ),
+        amount: addBufferToAmount(destinationSwapQuote.maximumAmountIn),
       },
       TradeType.EXACT_INPUT
     );
@@ -424,9 +404,13 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   const adjOriginSwapQuote = await getUniswapQuoteWithSwapRouter02(
     {
       ...originSwap,
-      amount: originSwapQuote.maximumAmountIn.toString(),
+      amount: addBufferToAmount(originSwapQuote.maximumAmountIn),
     },
     TradeType.EXACT_INPUT
+  );
+  assertMinOutputAmount(
+    adjOriginSwapQuote.minAmountOut,
+    bridgeQuote.inputAmount
   );
 
   return {
@@ -504,7 +488,9 @@ export async function getUniswapQuoteWithSwapRouter02(
     },
   };
 
-  console.log("swapQuote", {
+  getLogger().debug({
+    at: "uniswap/getUniswapQuoteWithSwapRouter02",
+    message: "Swap quote",
     type: tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
     tokenIn: swapQuote.tokenIn.symbol,
     tokenOut: swapQuote.tokenOut.symbol,
@@ -523,11 +509,7 @@ function getSwapRouter02AndOptions(params: {
   recipient: string;
   slippageTolerance: number;
 }) {
-  const provider = getProvider(params.chainId);
-  const router = new AlphaRouter({
-    chainId: params.chainId,
-    provider,
-  });
+  const router = getSwapRouter02(params.chainId);
   const options: SwapOptionsSwapRouter02 = {
     recipient: params.recipient,
     deadline: utils.getCurrentTime() + 30 * 60, // 30 minutes from now
@@ -538,6 +520,15 @@ function getSwapRouter02AndOptions(params: {
     router,
     options,
   };
+}
+
+const swapRouterCache = new Map<number, AlphaRouter>();
+function getSwapRouter02(chainId: number) {
+  const provider = getProvider(chainId);
+  if (!swapRouterCache.has(chainId)) {
+    swapRouterCache.set(chainId, new AlphaRouter({ chainId, provider }));
+  }
+  return swapRouterCache.get(chainId)!;
 }
 
 function floatToPercent(value: number) {
@@ -661,11 +652,9 @@ function assertMinOutputAmount(
   }
 }
 
-function addSlippageToAmount(amount: BigNumber, slippageTolerance: string) {
+function addBufferToAmount(amount: BigNumber, buffer = 0.01) {
   return amount
-    .mul(
-      ethers.utils.parseEther((1 + Number(slippageTolerance) / 100).toString())
-    )
+    .mul(ethers.utils.parseEther((1 + Number(buffer) / 100).toString()))
     .div(utils.fixedPointAdjustment)
     .toString();
 }
