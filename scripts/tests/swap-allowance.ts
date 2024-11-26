@@ -70,7 +70,7 @@ const MIN_OUTPUT_CASES = [
   {
     labels: ["B2A", "MIN_OUTPUT", "USDC - APE"],
     params: {
-      amount: ethers.utils.parseUnits("1", 18).toString(),
+      amount: ethers.utils.parseUnits("3", 18).toString(),
       tradeType: "minOutput",
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
       originChainId,
@@ -106,6 +106,30 @@ const MIN_OUTPUT_CASES = [
       depositor,
     },
   },
+  {
+    labels: ["A2B", "MIN_OUTPUT", "USDC - WETH"],
+    params: {
+      amount: ethers.utils.parseUnits("0.01", 18).toString(),
+      tradeType: "minOutput",
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
+      originChainId,
+      outputToken: TOKEN_SYMBOLS_MAP.WETH.addresses[destinationChainId],
+      destinationChainId,
+      depositor,
+    },
+  },
+  {
+    labels: ["A2B", "MIN_OUTPUT", "WETH - USDC"],
+    params: {
+      amount: ethers.utils.parseUnits("1", 6).toString(),
+      tradeType: "minOutput",
+      inputToken: TOKEN_SYMBOLS_MAP.WETH.addresses[originChainId],
+      originChainId,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
+      destinationChainId,
+      depositor,
+    },
+  },
   // A2A
   {
     labels: ["A2A", "MIN_OUTPUT", "bridged USDC - APE"],
@@ -115,7 +139,7 @@ const MIN_OUTPUT_CASES = [
       inputToken:
         TOKEN_SYMBOLS_MAP["USDC.e"].addresses[originChainId] ||
         TOKEN_SYMBOLS_MAP.USDbC.addresses[originChainId],
-      originChainId: CHAIN_IDs.BASE,
+      originChainId,
       outputToken: anyDestinationOutputTokens[destinationChainId], // APE Coin
       destinationChainId,
       depositor,
@@ -144,7 +168,9 @@ async function swap() {
   });
   for (const testCase of filteredTestCases) {
     console.log("\nTest case:", testCase.labels.join(" "));
+    console.log("Params:", testCase.params);
     const response = await axios.get(
+      // `https://preview.across.to/api/swap/allowance`,
       `http://localhost:3000/api/swap/allowance`,
       {
         params: testCase.params,
@@ -152,7 +178,7 @@ async function swap() {
     );
     console.log(response.data);
 
-    if (process.env.DEV_WALLET_PK) {
+    if (!process.env.DEV_WALLET_PK) {
       const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
         getProvider(testCase.params.originChainId)
       );

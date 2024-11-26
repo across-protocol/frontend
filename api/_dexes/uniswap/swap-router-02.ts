@@ -654,7 +654,7 @@ function assertMinOutputAmount(
 
 function addBufferToAmount(amount: BigNumber, buffer = 0.01) {
   return amount
-    .mul(ethers.utils.parseEther((1 + Number(buffer) / 100).toString()))
+    .mul(ethers.utils.parseEther((1 + Number(buffer)).toString()))
     .div(utils.fixedPointAdjustment)
     .toString();
 }
