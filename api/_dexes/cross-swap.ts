@@ -51,7 +51,7 @@ export const LEFTOVER_TYPE = {
   BRIDGEABLE_TOKEN: "bridgeableToken",
 } as const;
 
-export const PREFERRED_BRIDGE_TOKENS = ["WETH", "USDC"];
+export const PREFERRED_BRIDGE_TOKENS = ["WETH"];
 
 const defaultQuoteFetchStrategy: UniswapQuoteFetchStrategy =
   getUniversalRouterStrategy();
