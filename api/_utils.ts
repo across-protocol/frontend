@@ -5,6 +5,9 @@ import {
   SpokePool,
   SpokePool__factory,
 } from "@across-protocol/contracts/dist/typechain";
+// NOTE: We are still on v3.0.6 of verifier deployments until audit went through. Because the interface changed, we need to use the old factory.
+// export { SpokePoolVerifier__factory } from "@across-protocol/contracts/dist/typechain/factories/contracts/SpokePoolVerifier__factory";
+import { SpokePoolVerifier__factory } from "@across-protocol/contracts-v3.0.6/dist/typechain/factories/contracts/SpokePoolVerifier__factory";
 import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
 import { asL2Provider } from "@eth-optimism/sdk";
@@ -14,7 +17,7 @@ import {
   BalancerNetworkConfig,
   Multicall3,
 } from "@balancer-labs/sdk";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import {
   BigNumber,
   BigNumberish,
@@ -23,7 +26,17 @@ import {
   utils,
   Signer,
 } from "ethers";
-import { define } from "superstruct";
+import {
+  assert,
+  coerce,
+  create,
+  define,
+  Infer,
+  integer,
+  min,
+  string,
+  Struct,
+} from "superstruct";
 
 import enabledMainnetRoutesAsJson from "../src/data/routes_1_0xc186fA914353c44b2E33eBE05f21846F1048bEda.json";
 import enabledSepoliaRoutesAsJson from "../src/data/routes_11155111_0x14224e63716afAcE30C9a417E0542281869f7d9e.json";
@@ -36,7 +49,7 @@ import {
 } from "./_abis";
 import { BatchAccountBalanceResponse } from "./batch-account-balance";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
-import { VercelResponse } from "@vercel/node";
+import { VercelRequestQuery, VercelResponse } from "@vercel/node";
 import {
   BLOCK_TAG_LAG,
   CHAIN_IDs,
@@ -55,7 +68,7 @@ import {
   maxRelayFeePct,
   relayerFeeCapitalCostConfig,
 } from "./_constants";
-import { PoolStateOfUser, PoolStateResult } from "./_types";
+import { PoolStateOfUser, PoolStateResult, TokenInfo } from "./_types";
 import {
   buildInternalCacheKey,
   getCachedValue,
@@ -65,7 +78,12 @@ import {
   MissingParamError,
   InvalidParamError,
   RouteNotEnabledError,
+  AcrossApiError,
+  HttpErrorToStatusCode,
+  AcrossErrorCode,
+  TokenNotFoundError,
 } from "./_errors";
+import { Token } from "./_dexes/types";
 
 export { InputError, handleErrorCondition } from "./_errors";
 
@@ -340,6 +358,14 @@ function getStaticIsContract(chainId: number, address: string) {
     (contract) => contract.address.toLowerCase() === address.toLowerCase()
   );
   return !!deployedAcrossContract;
+}
+
+export function getWrappedNativeTokenAddress(chainId: number) {
+  if (chainId === CHAIN_IDs.POLYGON || chainId === CHAIN_IDs.POLYGON_AMOY) {
+    return TOKEN_SYMBOLS_MAP.WMATIC.addresses[chainId];
+  }
+
+  return TOKEN_SYMBOLS_MAP.WETH.addresses[chainId];
 }
 
 /**
@@ -807,6 +833,153 @@ export const getCachedLimits = async (
   ).data;
 };
 
+export async function getSuggestedFees(params: {
+  inputToken: string;
+  outputToken: string;
+  originChainId: number;
+  destinationChainId: number;
+  amount: string;
+  skipAmountLimit?: boolean;
+  message?: string;
+  depositMethod?: string;
+  recipient?: string;
+}): Promise<{
+  estimatedFillTimeSec: number;
+  timestamp: number;
+  isAmountTooLow: boolean;
+  quoteBlock: string;
+  exclusiveRelayer: string;
+  exclusivityDeadline: number;
+  spokePoolAddress: string;
+  destinationSpokePoolAddress: string;
+  totalRelayFee: {
+    pct: string;
+    total: string;
+  };
+  relayerCapitalFee: {
+    pct: string;
+    total: string;
+  };
+  relayerGasFee: {
+    pct: string;
+    total: string;
+  };
+  lpFee: {
+    pct: string;
+    total: string;
+  };
+  limits: {
+    minDeposit: string;
+    maxDeposit: string;
+    maxDepositInstant: string;
+    maxDepositShortDelay: string;
+    recommendedDepositInstant: string;
+  };
+}> {
+  return (
+    await axios(`${resolveVercelEndpoint()}/api/suggested-fees`, {
+      params,
+    })
+  ).data;
+}
+
+export async function getBridgeQuoteForMinOutput(params: {
+  inputToken: Token;
+  outputToken: Token;
+  minOutputAmount: BigNumber;
+  recipient?: string;
+  message?: string;
+}) {
+  const baseParams = {
+    inputToken: params.inputToken.address,
+    outputToken: params.outputToken.address,
+    originChainId: params.inputToken.chainId,
+    destinationChainId: params.outputToken.chainId,
+    skipAmountLimit: false,
+    recipient: params.recipient,
+    message: params.message,
+  };
+
+  try {
+    // 1. Use the suggested fees to get an indicative quote with
+    // input amount equal to minOutputAmount
+    let tries = 0;
+    let adjustedInputAmount = params.minOutputAmount;
+    let indicativeQuote = await getSuggestedFees({
+      ...baseParams,
+      amount: adjustedInputAmount.toString(),
+    });
+    let adjustmentPct = indicativeQuote.totalRelayFee.pct;
+    let finalQuote: Awaited<ReturnType<typeof getSuggestedFees>> | undefined =
+      undefined;
+
+    // 2. Adjust input amount to meet minOutputAmount
+    while (tries < 3) {
+      adjustedInputAmount = adjustedInputAmount
+        .mul(utils.parseEther("1").add(adjustmentPct))
+        .div(sdk.utils.fixedPointAdjustment);
+      const adjustedQuote = await getSuggestedFees({
+        ...baseParams,
+        amount: adjustedInputAmount.toString(),
+      });
+      const outputAmount = adjustedInputAmount.sub(
+        adjustedInputAmount
+          .mul(adjustedQuote.totalRelayFee.pct)
+          .div(sdk.utils.fixedPointAdjustment)
+      );
+
+      if (outputAmount.gte(params.minOutputAmount)) {
+        finalQuote = adjustedQuote;
+        break;
+      } else {
+        adjustmentPct = adjustedQuote.totalRelayFee.pct;
+        tries++;
+      }
+    }
+
+    if (!finalQuote) {
+      throw new Error("Failed to adjust input amount to meet minOutputAmount");
+    }
+
+    return {
+      inputAmount: adjustedInputAmount,
+      outputAmount: adjustedInputAmount.sub(finalQuote.totalRelayFee.total),
+      minOutputAmount: params.minOutputAmount,
+      suggestedFees: finalQuote,
+      message: params.message,
+      inputToken: params.inputToken,
+      outputToken: params.outputToken,
+    };
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      const { response = { data: {} } } = err;
+      // If upstream error is an AcrossApiError, we just return it
+      if (response?.data?.type === "AcrossApiError") {
+        throw new AcrossApiError(
+          {
+            message: response.data.message,
+            status: response.data.status,
+            code: response.data.code,
+            param: response.data.param,
+          },
+          { cause: err }
+        );
+      } else {
+        const message = `Upstream http request to ${err.request?.url} failed with ${err.status} ${err.message}`;
+        throw new AcrossApiError(
+          {
+            message,
+            status: HttpErrorToStatusCode.BAD_GATEWAY,
+            code: AcrossErrorCode.UPSTREAM_HTTP_ERROR,
+          },
+          { cause: err }
+        );
+      }
+    }
+    throw err;
+  }
+}
+
 export const providerCache: Record<string, StaticJsonRpcProvider> = {};
 
 /**
@@ -942,6 +1115,60 @@ export const isRouteEnabled = (
   );
   return !!enabled;
 };
+
+export function isInputTokenBridgeable(
+  inputTokenAddress: string,
+  originChainId: number
+) {
+  return ENABLED_ROUTES.routes.some(
+    ({ fromTokenAddress, fromChain }) =>
+      originChainId === fromChain &&
+      inputTokenAddress.toLowerCase() === fromTokenAddress.toLowerCase()
+  );
+}
+
+export function isOutputTokenBridgeable(
+  outputTokenAddress: string,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.some(
+    ({ toTokenAddress, toChain }) =>
+      destinationChainId === toChain &&
+      toTokenAddress.toLowerCase() === outputTokenAddress.toLowerCase()
+  );
+}
+
+export function getRouteByInputTokenAndDestinationChain(
+  inputTokenAddress: string,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.find(
+    ({ fromTokenAddress, toChain }) =>
+      destinationChainId === toChain &&
+      fromTokenAddress.toLowerCase() === inputTokenAddress.toLowerCase()
+  );
+}
+
+export function getRouteByOutputTokenAndOriginChain(
+  outputTokenAddress: string,
+  originChainId: number
+) {
+  return ENABLED_ROUTES.routes.find(
+    ({ toTokenAddress, fromChain }) =>
+      originChainId === fromChain &&
+      outputTokenAddress.toLowerCase() === toTokenAddress.toLowerCase()
+  );
+}
+
+export function getRoutesByChainIds(
+  originChainId: number,
+  destinationChainId: number
+) {
+  return ENABLED_ROUTES.routes.filter(
+    ({ toChain, fromChain }) =>
+      originChainId === fromChain && destinationChainId === toChain
+  );
+}
 
 /**
  * Resolves the balance of a given ERC20 token at a provided address. If no token is provided, the balance of the
@@ -1180,6 +1407,22 @@ export function applyMapFilter<InputType, MapType>(
     }
     return accumulator;
   }, []);
+}
+
+// superstruct first coerces, then validates
+export const positiveInt = coerce(min(integer(), 0), string(), (value) =>
+  Number(value)
+);
+
+// parses, coerces and validates query params
+// first coerce any fields that can be coerced, then validate
+export function parseQuery<
+  Q extends VercelRequestQuery,
+  S extends Struct<any, any>,
+>(query: Q, schema: S): Infer<S> {
+  const coerced = create(query, schema);
+  assert(coerced, schema);
+  return coerced;
 }
 
 /* ------------------------- superstruct validators ------------------------- */
@@ -1907,7 +2150,10 @@ export function getCachedFillGasUsage(
     );
     const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
       buildDepositForSimulation(deposit),
-      overrides?.relayerAddress
+      overrides?.relayerAddress,
+      {
+        omitMarkup: true,
+      }
     );
     return nativeGasCost;
   };
@@ -1990,4 +2236,121 @@ export function paramToArray<T extends undefined | string | string[]>(
 ): string[] | undefined {
   if (!param) return;
   return Array.isArray(param) ? param : [param];
+}
+
+export type TokenOptions = {
+  chainId: number;
+  address: string;
+};
+
+const TTL_TOKEN_INFO = 30 * 24 * 60 * 60; // 30 days
+
+function tokenInfoCache(params: TokenOptions) {
+  return makeCacheGetterAndSetter(
+    buildInternalCacheKey("tokenInfo", params.address, params.chainId),
+    TTL_TOKEN_INFO,
+    () => getTokenInfo(params),
+    (tokenDetails) => tokenDetails
+  );
+}
+
+export async function getCachedTokenInfo(params: TokenOptions) {
+  return tokenInfoCache(params).get();
+}
+
+// find decimals and symbol for any token address on any chain we support
+export async function getTokenInfo({ chainId, address }: TokenOptions): Promise<
+  Pick<TokenInfo, "address" | "name" | "symbol" | "decimals"> & {
+    chainId: number;
+  }
+> {
+  try {
+    if (!ethers.utils.isAddress(address)) {
+      throw new InvalidParamError({
+        param: "address",
+        message: '"Address" must be a valid ethereum address',
+      });
+    }
+
+    if (!Number.isSafeInteger(chainId) || chainId < 0) {
+      throw new InvalidParamError({
+        param: "chainId",
+        message: '"chainId" must be a positive integer',
+      });
+    }
+
+    // ERC20 resolved statically
+    const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
+      Boolean(
+        token.addresses?.[chainId]?.toLowerCase() === address.toLowerCase()
+      )
+    );
+
+    if (token) {
+      return {
+        decimals: token.decimals,
+        symbol: token.symbol,
+        address: token.addresses[chainId],
+        name: token.name,
+        chainId,
+      };
+    }
+
+    // ERC20 resolved dynamically
+    const provider = getProvider(chainId);
+
+    const erc20 = ERC20__factory.connect(
+      ethers.utils.getAddress(address),
+      provider
+    );
+
+    const calls = [
+      {
+        contract: erc20,
+        functionName: "decimals",
+      },
+      {
+        contract: erc20,
+        functionName: "symbol",
+      },
+      {
+        contract: erc20,
+        functionName: "name",
+      },
+    ];
+
+    const [[decimals], [symbol], [name]] = await callViaMulticall3(
+      provider,
+      calls
+    );
+
+    return {
+      address,
+      decimals,
+      symbol,
+      name,
+      chainId,
+    };
+  } catch (error) {
+    throw new TokenNotFoundError({
+      chainId,
+      address,
+      opts: {
+        cause: error,
+      },
+    });
+  }
+}
+
+export function getSpokePoolVerifier(chainId: number) {
+  const isSpokePoolVerifierDeployed = (
+    ENABLED_ROUTES.spokePoolVerifier.enabledChains as number[]
+  ).includes(chainId);
+
+  if (!isSpokePoolVerifierDeployed) {
+    return undefined;
+  }
+
+  const address = ENABLED_ROUTES.spokePoolVerifier.address;
+  return SpokePoolVerifier__factory.connect(address, getProvider(chainId));
 }

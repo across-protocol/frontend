@@ -1,3 +1,9 @@
+import { BigNumber } from "ethers";
+import { getSuggestedFees } from "../_utils";
+import { AmountType, CrossSwapType, LeftoverType } from "./cross-swap";
+
+export type { AmountType, CrossSwapType };
+
 export type Token = {
   address: string;
   decimals: number;
@@ -5,26 +11,70 @@ export type Token = {
   chainId: number;
 };
 
-/**
- * @property `swapToken` - Address of the token that will be swapped for acrossInputToken.
- * @property `acrossInputToken` - Address of the token that will be bridged via Across as the inputToken.
- * @property `swapTokenAmount` - The amount of swapToken to be swapped for acrossInputToken.
- * @property `slippage` - The slippage tolerance for the swap in decimals, e.g. 1 for 1%.
- */
-export type AcrossSwap = {
-  swapToken: Token;
-  acrossInputToken: Token;
-  swapTokenAmount: string;
-  slippage: number;
+export type Swap = {
+  chainId: number;
+  tokenIn: Token;
+  tokenOut: Token;
+  amount: string;
+  recipient: string;
+  slippageTolerance: number;
+  type: AmountType;
+  isInputNative?: boolean;
+  isOutputNative?: boolean;
+};
+
+export type CrossSwap = {
+  amount: BigNumber;
+  inputToken: Token;
+  outputToken: Token;
+  depositor: string;
+  recipient: string;
+  slippageTolerance: number;
+  type: AmountType;
+  leftoverType?: LeftoverType;
+  refundOnOrigin: boolean;
+  refundAddress?: string;
+  isInputNative?: boolean;
+  isOutputNative?: boolean;
 };
 
 export type SupportedDex = "1inch" | "uniswap";
 
-export type SwapQuoteAndCalldata = {
+export type OriginSwapQuoteAndCalldata = {
   minExpectedInputTokenAmount: string;
   routerCalldata: string;
   value: string;
   swapAndBridgeAddress: string;
   dex: SupportedDex;
   slippage: number;
+};
+
+export type SwapQuote = {
+  maximumAmountIn: BigNumber;
+  minAmountOut: BigNumber;
+  expectedAmountOut: BigNumber;
+  expectedAmountIn: BigNumber;
+  slippageTolerance: number;
+  swapTx: {
+    to: string;
+    data: string;
+    value: string;
+  };
+  tokenIn: Token;
+  tokenOut: Token;
+};
+
+export type CrossSwapQuotes = {
+  crossSwap: CrossSwap;
+  bridgeQuote: {
+    message?: string;
+    inputToken: Token;
+    outputToken: Token;
+    inputAmount: BigNumber;
+    outputAmount: BigNumber;
+    minOutputAmount: BigNumber;
+    suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
+  };
+  destinationSwapQuote?: SwapQuote;
+  originSwapQuote?: SwapQuote;
 };
