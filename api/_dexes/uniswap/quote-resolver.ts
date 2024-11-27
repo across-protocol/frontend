@@ -24,6 +24,8 @@ import {
 import { AMOUNT_TYPE } from "../cross-swap";
 import { UniswapQuoteFetchStrategy, addMarkupToAmount } from "./utils";
 
+const indicativeQuoteBuffer = 0.5; // 0.5% buffer for indicative quotes
+
 /**
  * Returns Uniswap v3 quote for a swap with min. output amount for route
  * BRIDGEABLE input token -> ANY output token, e.g. USDC -> ARB. Required steps:
@@ -189,7 +191,10 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
   let adjOriginSwapQuote = await strategy.fetchFn(
     {
       ...originSwap,
-      amount: addMarkupToAmount(originSwapQuote.maximumAmountIn).toString(),
+      amount: addMarkupToAmount(
+        originSwapQuote.maximumAmountIn,
+        indicativeQuoteBuffer
+      ).toString(),
     },
     TradeType.EXACT_INPUT
   );
@@ -386,7 +391,10 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   let adjOriginSwapQuote = await originStrategy.fetchFn(
     {
       ...originSwap,
-      amount: addMarkupToAmount(originSwapQuote.maximumAmountIn).toString(),
+      amount: addMarkupToAmount(
+        originSwapQuote.maximumAmountIn,
+        indicativeQuoteBuffer
+      ).toString(),
     },
     TradeType.EXACT_INPUT
   );

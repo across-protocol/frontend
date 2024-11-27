@@ -3,11 +3,12 @@ import { TradeType } from "@uniswap/sdk-core";
 import { CHAIN_IDs } from "@across-protocol/constants";
 
 import { getLogger } from "../../_utils";
-import { Swap } from "../types";
+import { Swap, SwapQuote } from "../types";
 import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
 import {
   getUniswapClassicCalldataFromApi,
   getUniswapClassicQuoteFromApi,
+  getUniswapClassicIndicativeQuoteFromApi,
 } from "./trading-api";
 import { UniswapQuoteFetchStrategy, addMarkupToAmount } from "./utils";
 
@@ -39,45 +40,71 @@ export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
       useIndicativeQuote: false,
     }
   ) => {
-    const { quote } = await getUniswapClassicQuoteFromApi(
-      { ...swap, swapper: swap.recipient },
-      tradeType
-    );
-    const classicSwap = opts.useIndicativeQuote
-      ? {
-          swap: {
-            to: "0x",
-            data: "0x",
-            value: "0x",
-          },
-        }
-      : await getUniswapClassicCalldataFromApi(quote);
+    let swapQuote: SwapQuote;
+    if (!opts.useIndicativeQuote) {
+      const { quote } = await getUniswapClassicQuoteFromApi(
+        { ...swap, swapper: swap.recipient },
+        tradeType
+      );
+      const classicSwap = await getUniswapClassicCalldataFromApi(quote);
 
-    const expectedAmountIn = BigNumber.from(quote.input.amount);
-    const maxAmountIn =
-      tradeType === TradeType.EXACT_INPUT
-        ? expectedAmountIn
-        : addMarkupToAmount(expectedAmountIn, quote.slippage / 100);
-    const expectedAmountOut = BigNumber.from(quote.output.amount);
-    const minAmountOut =
-      tradeType === TradeType.EXACT_OUTPUT
-        ? expectedAmountOut
-        : addMarkupToAmount(expectedAmountOut, quote.slippage / 100);
+      const expectedAmountIn = BigNumber.from(quote.input.amount);
+      const maxAmountIn =
+        tradeType === TradeType.EXACT_INPUT
+          ? expectedAmountIn
+          : addMarkupToAmount(expectedAmountIn, quote.slippage / 100);
+      const expectedAmountOut = BigNumber.from(quote.output.amount);
+      const minAmountOut =
+        tradeType === TradeType.EXACT_OUTPUT
+          ? expectedAmountOut
+          : addMarkupToAmount(expectedAmountOut, quote.slippage / 100);
 
-    const swapQuote = {
-      tokenIn: swap.tokenIn,
-      tokenOut: swap.tokenOut,
-      maximumAmountIn: maxAmountIn,
-      minAmountOut,
-      expectedAmountOut,
-      expectedAmountIn,
-      slippageTolerance: quote.slippage,
-      swapTx: {
-        to: classicSwap.swap.to,
-        data: classicSwap.swap.data,
-        value: classicSwap.swap.value,
-      },
-    };
+      swapQuote = {
+        tokenIn: swap.tokenIn,
+        tokenOut: swap.tokenOut,
+        maximumAmountIn: maxAmountIn,
+        minAmountOut,
+        expectedAmountOut,
+        expectedAmountIn,
+        slippageTolerance: quote.slippage,
+        swapTx: {
+          to: classicSwap.swap.to,
+          data: classicSwap.swap.data,
+          value: classicSwap.swap.value,
+        },
+      };
+    } else {
+      const { input, output } = await getUniswapClassicIndicativeQuoteFromApi(
+        { ...swap, swapper: swap.recipient },
+        tradeType
+      );
+
+      const expectedAmountIn = BigNumber.from(input.amount);
+      const maxAmountIn =
+        tradeType === TradeType.EXACT_INPUT
+          ? expectedAmountIn
+          : addMarkupToAmount(expectedAmountIn, swap.slippageTolerance / 100);
+      const expectedAmountOut = BigNumber.from(output.amount);
+      const minAmountOut =
+        tradeType === TradeType.EXACT_OUTPUT
+          ? expectedAmountOut
+          : addMarkupToAmount(expectedAmountOut, swap.slippageTolerance / 100);
+
+      swapQuote = {
+        tokenIn: swap.tokenIn,
+        tokenOut: swap.tokenOut,
+        maximumAmountIn: maxAmountIn,
+        minAmountOut,
+        expectedAmountOut,
+        expectedAmountIn,
+        slippageTolerance: swap.slippageTolerance,
+        swapTx: {
+          to: "0x",
+          data: "0x",
+          value: "0x",
+        },
+      };
+    }
 
     getLogger().debug({
       at: "uniswap/universal-router/quoteFetchFn",
