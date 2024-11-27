@@ -61,7 +61,7 @@ export function useBridge() {
 
   const { error: amountValidationError } = validateBridgeAmount(
     parsedAmount,
-    quotedFees?.isAmountTooLow,
+    quotedFees,
     maxBalance,
     limitsQuery.limits?.maxDeposit,
     selectedRoute.type === "swap" && quotedSwap?.minExpectedInputTokenAmount
