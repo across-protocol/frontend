@@ -11,7 +11,7 @@ const handler = async (
 ) => {
   const logger = getLogger();
   logger.debug({
-    at: "Swap/permit",
+    at: "Swap/with-authorization",
     message: "Query data",
     query: request.query,
   });
@@ -29,14 +29,14 @@ const handler = async (
     const responseJson = crossSwapTxForTransferWithAuthorization;
 
     logger.debug({
-      at: "Swap/transfer-with-authorization",
+      at: "Swap/with-authorization",
       message: "Response data",
       responseJson,
     });
     response.status(200).json(responseJson);
   } catch (error: unknown) {
     return handleErrorCondition(
-      "swap/transfer-with-authorization",
+      "swap/with-authorization",
       response,
       logger,
       error

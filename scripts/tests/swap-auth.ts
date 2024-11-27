@@ -23,7 +23,7 @@ async function swap() {
         params: testCase.params,
       }
     );
-    console.log(response.data);
+    console.log(JSON.stringify(response.data, undefined, 2));
   }
 }
 
