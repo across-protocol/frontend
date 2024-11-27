@@ -6,7 +6,7 @@ import { AmountInputError, SelectedRoute } from "../utils";
 import { formatUnitsWithMaxFractions, getToken } from "utils";
 import { BridgeLimits } from "hooks";
 
-const validationErrorTextMap = {
+const validationErrorTextMap: Record<AmountInputError, string> = {
   [AmountInputError.INSUFFICIENT_BALANCE]:
     "Insufficient balance to process this transfer.",
   [AmountInputError.PAUSED_DEPOSITS]:
@@ -16,6 +16,8 @@ const validationErrorTextMap = {
   [AmountInputError.INVALID]: "Only positive numbers are allowed as an input.",
   [AmountInputError.AMOUNT_TOO_LOW]:
     "The amount you are trying to bridge is too low.",
+  [AmountInputError.PRICE_IMPACT_TOO_HIGH]:
+    "Price impact is too high. Check back later when liquidity is restored.",
 };
 
 type Props = {
