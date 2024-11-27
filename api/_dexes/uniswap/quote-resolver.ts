@@ -12,7 +12,6 @@ import {
   buildMulticallHandlerMessage,
   encodeApproveCalldata,
   encodeDrainCalldata,
-  encodeTransferCalldata,
   encodeWethWithdrawCalldata,
   getMultiCallHandlerAddress,
 } from "../../_multicall-handler";
