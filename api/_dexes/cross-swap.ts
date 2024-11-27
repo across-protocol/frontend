@@ -1,5 +1,5 @@
 import { SpokePool } from "@across-protocol/contracts/dist/typechain";
-import { PopulatedTransaction } from "ethers";
+import { ethers, PopulatedTransaction } from "ethers";
 import { utils } from "@across-protocol/sdk";
 
 import {
@@ -23,6 +23,7 @@ import { getSpokePoolPeriphery } from "../_spoke-pool-periphery";
 import { tagIntegratorId } from "../_integrator-id";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
 import { getPermitTypedData } from "../_permit";
+import { getTransferWithAuthTypedData } from "../_transferWithAuth";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -278,6 +279,74 @@ export async function getCrossSwapTxForPermit(
   return {
     permit: {
       eip712: permitTypedData.eip712,
+    },
+    swapTx: {
+      chainId: originChainId,
+      to: spokePoolPeriphery.address,
+      methodName,
+      argsWithoutSignature,
+    },
+  };
+}
+
+export async function getCrossSwapTxForTransferWithAuthorization(
+  crossSwapQuotes: CrossSwapQuotes,
+  validBefore: number,
+  validAfter = 0
+) {
+  const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
+  const spokePoolPeriphery = getSpokePoolPeriphery("uniswap", originChainId);
+  const deposit = await extractDepositDataStruct(crossSwapQuotes);
+
+  let methodName: string;
+  let argsWithoutSignature: Record<string, unknown>;
+
+  // random non-sequesntial nonce
+  const nonce = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+
+  if (crossSwapQuotes.originSwapQuote) {
+    methodName = "swapAndBridgeWithAuthorization";
+    argsWithoutSignature = {
+      swapToken: crossSwapQuotes.originSwapQuote.tokenIn.address,
+      acrossInputToken: crossSwapQuotes.originSwapQuote.tokenOut.address,
+      routerCalldata: crossSwapQuotes.originSwapQuote.swapTx.data,
+      swapTokenAmount: crossSwapQuotes.originSwapQuote.maximumAmountIn,
+      minExpectedInputTokenAmount: crossSwapQuotes.originSwapQuote.minAmountOut,
+      depositData: deposit,
+      validAfter,
+      validBefore,
+      nonce,
+    };
+  } else {
+    methodName = "depositWithAuthorization";
+    argsWithoutSignature = {
+      acrossInputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
+      acrossInputAmount: crossSwapQuotes.bridgeQuote.inputAmount,
+      depositData: deposit,
+      validAfter,
+      validBefore,
+      nonce,
+    };
+  }
+
+  const authTypedData = await getTransferWithAuthTypedData({
+    tokenAddress:
+      crossSwapQuotes.originSwapQuote?.tokenIn.address ||
+      crossSwapQuotes.bridgeQuote.inputToken.address,
+    chainId: originChainId,
+    ownerAddress: crossSwapQuotes.crossSwap.depositor,
+    receiverAddress: spokePoolPeriphery.address,
+    value:
+      crossSwapQuotes.originSwapQuote?.maximumAmountIn ||
+      crossSwapQuotes.bridgeQuote.inputAmount,
+    validBefore,
+    validAfter,
+    nonce,
+  });
+
+  return {
+    authorization: {
+      eip712: authTypedData.eip712,
     },
     swapTx: {
       chainId: originChainId,
