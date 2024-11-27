@@ -74,8 +74,8 @@ export async function getUniswapCrossSwapQuotesForOutputB2A(
     slippageTolerance: crossSwap.slippageTolerance,
     type: crossSwap.type,
   };
-  // 1.1. Get destination swap quote for bridgeable output token -> any token
-  //      with exact output amount.
+  // 1. Get destination swap quote for bridgeable output token -> any token
+  //    with exact output amount.
   let destinationSwapQuote = await strategy.fetchFn(
     {
       ...destinationSwap,
@@ -83,20 +83,6 @@ export async function getUniswapCrossSwapQuotesForOutputB2A(
     },
     TradeType.EXACT_OUTPUT
   );
-  // 1.2. Re-fetch destination swap quote with exact input amount if leftover tokens
-  //      should be sent to receiver.
-  if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
-    destinationSwapQuote = await strategy.fetchFn(
-      {
-        ...destinationSwap,
-        amount: addMarkupToAmount(
-          destinationSwapQuote.maximumAmountIn
-        ).toString(),
-      },
-      TradeType.EXACT_INPUT
-    );
-    assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
-  }
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForMinOutput({
@@ -404,7 +390,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
     },
     TradeType.EXACT_OUTPUT
   );
-  // 2.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
+  // 3.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
   //      This prevents leftover tokens in the SwapAndBridge contract.
   let adjOriginSwapQuote = await originStrategy.fetchFn(
     {
@@ -458,40 +444,6 @@ function buildDestinationSwapCrossChainMessage({
         target: crossSwap.recipient,
         callData: "0x",
         value: crossSwap.amount.toString(),
-      },
-    ];
-  }
-  // If output token is an ERC-20 token and amount type is EXACT_OUTPUT, we need
-  // to transfer the EXACT output amount to the recipient. The refundAddress / depositor
-  // will receive any leftovers.
-  else if (crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT) {
-    transferActions = [
-      {
-        target: crossSwap.outputToken.address,
-        callData: encodeTransferCalldata(crossSwap.recipient, crossSwap.amount),
-        value: "0",
-      },
-      {
-        target: getMultiCallHandlerAddress(destinationSwapChainId),
-        callData: encodeDrainCalldata(
-          crossSwap.outputToken.address,
-          crossSwap.refundAddress ?? crossSwap.depositor
-        ),
-        value: "0",
-      },
-    ];
-  }
-  // If output token is an ERC-20 token and amount type is MIN_OUTPUT, we need
-  // to transfer all realized output tokens to the recipient.
-  else if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
-    transferActions = [
-      {
-        target: getMultiCallHandlerAddress(destinationSwapChainId),
-        callData: encodeDrainCalldata(
-          crossSwap.outputToken.address,
-          crossSwap.recipient
-        ),
-        value: "0",
       },
     ];
   }

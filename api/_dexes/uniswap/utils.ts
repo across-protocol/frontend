@@ -13,7 +13,10 @@ export type UniswapQuoteFetchStrategy = {
 };
 export type UniswapQuoteFetchFn = (
   swap: Swap,
-  tradeType: TradeType
+  tradeType: TradeType,
+  opts?: Partial<{
+    useIndicativeQuote: boolean;
+  }>
 ) => Promise<SwapQuote>;
 
 // Maps testnet chain IDs to their prod counterparts. Used to get the prod token
