@@ -9,6 +9,7 @@ import {
   boolStr,
   getCachedTokenInfo,
   getWrappedNativeTokenAddress,
+  getCachedTokenPrice,
 } from "../_utils";
 import {
   AMOUNT_TYPE,
@@ -17,7 +18,13 @@ import {
 } from "../_dexes/cross-swap";
 import { InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
-import { Token } from "../_dexes/types";
+import {
+  CrossSwapFees,
+  CrossSwapQuotes,
+  SwapQuote,
+  Token,
+} from "../_dexes/types";
+import { formatUnits } from "ethers/lib/utils";
 import { encodeApproveCalldata } from "../_multicall-handler";
 
 export const BaseSwapQueryParamsSchema = type({
@@ -123,8 +130,14 @@ export async function handleBaseSwapQueryParams({
     isOutputNative,
   });
 
+  // 3. Calculate fees based for full route
+  const fees = await calculateCrossSwapFees(crossSwapQuotes);
+
   return {
-    crossSwapQuotes,
+    crossSwapQuotes: {
+      ...crossSwapQuotes,
+      fees,
+    },
     integratorId,
     skipOriginTxEstimation,
     isInputNative,
@@ -157,4 +170,86 @@ export function getApprovalTxns(params: {
     data: encodeApproveCalldata(params.spender, params.amount),
   });
   return approvalTxns;
+}
+
+async function calculateSwapFee(
+  swapQuote: SwapQuote,
+  baseCurrency: string
+): Promise<Record<string, number>> {
+  const { tokenIn, tokenOut, expectedAmountOut, expectedAmountIn } = swapQuote;
+  const [inputTokenPriceBase, outputTokenPriceBase] = await Promise.all([
+    getCachedTokenPrice(
+      tokenIn.address,
+      baseCurrency,
+      undefined,
+      tokenIn.chainId
+    ),
+    getCachedTokenPrice(
+      tokenOut.address,
+      baseCurrency,
+      undefined,
+      tokenOut.chainId
+    ),
+  ]);
+
+  const normalizedIn =
+    parseFloat(formatUnits(expectedAmountIn, tokenIn.decimals)) *
+    inputTokenPriceBase;
+  const normalizedOut =
+    parseFloat(formatUnits(expectedAmountOut, tokenOut.decimals)) *
+    outputTokenPriceBase;
+  return {
+    [baseCurrency]: normalizedIn - normalizedOut,
+  };
+}
+
+async function calculateBridgeFee(
+  bridgeQuote: CrossSwapQuotes["bridgeQuote"],
+  baseCurrency: string
+): Promise<Record<string, number>> {
+  const { inputToken, suggestedFees } = bridgeQuote;
+  const inputTokenPriceBase = await getCachedTokenPrice(
+    inputToken.address,
+    baseCurrency,
+    undefined,
+    inputToken.chainId
+  );
+  const normalizedFee =
+    parseFloat(
+      formatUnits(suggestedFees.totalRelayFee.total, inputToken.decimals)
+    ) * inputTokenPriceBase;
+
+  return {
+    [baseCurrency]: normalizedFee,
+  };
+}
+
+export async function calculateCrossSwapFees(
+  crossSwapQuote: CrossSwapQuotes,
+  baseCurrency = "usd"
+): Promise<CrossSwapFees> {
+  const bridgeFeePromise = calculateBridgeFee(
+    crossSwapQuote.bridgeQuote,
+    baseCurrency
+  );
+
+  const originSwapFeePromise = crossSwapQuote?.originSwapQuote
+    ? calculateSwapFee(crossSwapQuote.originSwapQuote, baseCurrency)
+    : Promise.resolve(undefined);
+
+  const destinationSwapFeePromise = crossSwapQuote?.destinationSwapQuote
+    ? calculateSwapFee(crossSwapQuote.destinationSwapQuote, baseCurrency)
+    : Promise.resolve(undefined);
+
+  const [bridgeFees, originSwapFees, destinationSwapFees] = await Promise.all([
+    bridgeFeePromise,
+    originSwapFeePromise,
+    destinationSwapFeePromise,
+  ]);
+
+  return {
+    bridgeFees,
+    originSwapFees,
+    destinationSwapFees,
+  };
 }
