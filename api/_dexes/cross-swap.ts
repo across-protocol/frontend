@@ -159,7 +159,7 @@ export async function getCrossSwapQuotesForOutputA2A(crossSwap: CrossSwap) {
     getQuoteFetchStrategy(crossSwap.outputToken.chainId),
     {
       preferredBridgeTokens: PREFERRED_BRIDGE_TOKENS,
-      bridgeRoutesLimit: 2,
+      bridgeRoutesLimit: 1,
     }
   );
 }
