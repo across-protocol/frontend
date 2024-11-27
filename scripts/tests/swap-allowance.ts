@@ -116,6 +116,7 @@ const MIN_OUTPUT_CASES = [
       outputToken: TOKEN_SYMBOLS_MAP.WETH.addresses[destinationChainId],
       destinationChainId,
       depositor,
+      skipOriginTxEstimation: true,
     },
   },
   {
@@ -178,7 +179,7 @@ async function swap() {
     );
     console.log(response.data);
 
-    if (!process.env.DEV_WALLET_PK) {
+    if (process.env.DEV_WALLET_PK) {
       const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
         getProvider(testCase.params.originChainId)
       );

@@ -105,7 +105,7 @@ const enabledRoutes = {
       },
     },
     spokePoolPeripheryAddresses: {
-      uniswap: {
+      "uniswap-swapRouter02": {
         [CHAIN_IDs.POLYGON]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
         [CHAIN_IDs.OPTIMISM]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
         [CHAIN_IDs.ARBITRUM]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
@@ -115,6 +115,10 @@ const enabledRoutes = {
         [CHAIN_IDs.BLAST]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
         [CHAIN_IDs.ZORA]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
         [CHAIN_IDs.MAINNET]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+      },
+      "uniswap-universalRouter": {
+        [CHAIN_IDs.OPTIMISM]: "0xaED9bBFdCC63219d77D54F8427aeb84C2Be46c5f",
+        [CHAIN_IDs.ARBITRUM]: "0xaED9bBFdCC63219d77D54F8427aeb84C2Be46c5f",
       },
     },
     routes: transformChainConfigs(enabledMainnetChainConfigs),
