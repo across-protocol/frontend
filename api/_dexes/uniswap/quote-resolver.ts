@@ -180,7 +180,10 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
       ...originSwap,
       amount: bridgeQuote.inputAmount.toString(),
     },
-    TradeType.EXACT_OUTPUT
+    TradeType.EXACT_OUTPUT,
+    {
+      useIndicativeQuote: true,
+    }
   );
   // 2.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
   //      This prevents leftover tokens in the SwapAndBridge contract.
@@ -342,8 +345,8 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
     type: crossSwap.type,
   };
 
-  // 1.1. Get destination swap quote for bridgeable output token -> any token
-  //      with exact output amount
+  // 1. Get destination swap quote for bridgeable output token -> any token
+  //    with exact output amount
   let destinationSwapQuote = await destinationStrategy.fetchFn(
     {
       ...destinationSwap,
@@ -351,20 +354,6 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
     },
     TradeType.EXACT_OUTPUT
   );
-  // 1.2. Re-fetch destination swap quote with exact input amount if leftover tokens
-  //      should be sent to receiver.
-  if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
-    destinationSwapQuote = await destinationStrategy.fetchFn(
-      {
-        ...destinationSwap,
-        amount: addMarkupToAmount(
-          destinationSwapQuote.maximumAmountIn
-        ).toString(),
-      },
-      TradeType.EXACT_INPUT
-    );
-    assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
-  }
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
   const bridgeQuote = await getBridgeQuoteForMinOutput({
@@ -388,7 +377,10 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
       ...originSwap,
       amount: bridgeQuote.inputAmount.toString(),
     },
-    TradeType.EXACT_OUTPUT
+    TradeType.EXACT_OUTPUT,
+    {
+      useIndicativeQuote: true,
+    }
   );
   // 3.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
   //      This prevents leftover tokens in the SwapAndBridge contract.

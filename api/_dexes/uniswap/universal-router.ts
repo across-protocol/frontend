@@ -30,12 +30,28 @@ export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
   const getPeripheryAddress = (chainId: number) =>
     getSpokePoolPeripheryAddress("uniswap-universalRouter", chainId);
 
-  const fetchFn = async (swap: Swap, tradeType: TradeType) => {
+  const fetchFn = async (
+    swap: Swap,
+    tradeType: TradeType,
+    opts: Partial<{
+      useIndicativeQuote: boolean;
+    }> = {
+      useIndicativeQuote: false,
+    }
+  ) => {
     const { quote } = await getUniswapClassicQuoteFromApi(
       { ...swap, swapper: swap.recipient },
       tradeType
     );
-    const classicSwap = await getUniswapClassicCalldataFromApi(quote);
+    const classicSwap = opts.useIndicativeQuote
+      ? {
+          swap: {
+            to: "0x",
+            data: "0x",
+            value: "0x",
+          },
+        }
+      : await getUniswapClassicCalldataFromApi(quote);
 
     const expectedAmountIn = BigNumber.from(quote.input.amount);
     const maxAmountIn =
