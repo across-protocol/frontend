@@ -50,9 +50,18 @@ export function AmountInput({
           : selectedRoute.fromTokenSymbol
       }
       validationError={
-        validationError || validationWarning
+        validationError
           ? getValidationErrorText({
-              validationError: validationError || validationWarning,
+              validationError: validationError,
+              selectedRoute,
+              limits,
+            })
+          : undefined
+      }
+      validationWarning={
+        validationWarning
+          ? getValidationErrorText({
+              validationError: validationWarning,
               selectedRoute,
               limits,
             })
