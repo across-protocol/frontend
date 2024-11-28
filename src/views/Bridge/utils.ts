@@ -130,26 +130,6 @@ export function validateBridgeAmount(
     };
   }
 
-  if (
-    isDefined(quoteFees) &&
-    isDefined(parsedAmountInput) &&
-    !quoteFees.isAmountTooLow
-  ) {
-    const bridgeFee = quoteFees.relayerCapitalFee.total.add(
-      quoteFees.lpFee.total
-    );
-    const gasFee = quoteFees.relayerGasFee.total;
-    const totalFeeInL1 = bridgeFee.add(gasFee);
-    const maximalFee = parsedAmountInput
-      .mul(parseUnits("0.0500", 18)) // Cap fee at 500 basis points of input amount
-      .div(fixedPointAdjustment);
-    if (totalFeeInL1.gt(maximalFee)) {
-      return {
-        warn: AmountInputError.PRICE_IMPACT_TOO_HIGH,
-      };
-    }
-  }
-
   if (parsedAmountInput.lt(0) || amountToBridgeAfterSwap.lt(0)) {
     return {
       error: AmountInputError.INVALID,
@@ -157,6 +137,7 @@ export function validateBridgeAmount(
   }
 
   return {
+    warn: undefined,
     error: undefined,
   };
 }
