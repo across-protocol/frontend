@@ -138,9 +138,7 @@ const handler = async (
         crossSwapQuotes.bridgeQuote.outputAmount.toString(),
       minOutputAmount:
         crossSwapQuotes.destinationSwapQuote?.minAmountOut.toString() ??
-        crossSwapQuotes.crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
-          ? crossSwapQuotes.bridgeQuote.outputAmount.toString()
-          : crossSwapQuotes.crossSwap.amount.toString(),
+        crossSwapQuotes.bridgeQuote.outputAmount.toString(),
       expectedFillTime:
         crossSwapQuotes.bridgeQuote.suggestedFees.estimatedFillTimeSec,
     };

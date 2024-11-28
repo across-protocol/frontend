@@ -372,7 +372,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   const bridgeQuote = await getBridgeQuoteForMinOutput({
     inputToken: bridgeableInputToken,
     outputToken: bridgeableOutputToken,
-    minOutputAmount: destinationSwapQuote.expectedAmountIn,
+    minOutputAmount: destinationSwapQuote.maximumAmountIn,
     recipient: getMultiCallHandlerAddress(destinationSwapChainId),
     message: buildDestinationSwapCrossChainMessage({
       crossSwap,

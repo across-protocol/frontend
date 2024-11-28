@@ -90,7 +90,7 @@ export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
       const minAmountOut =
         tradeType === TradeType.EXACT_OUTPUT
           ? expectedAmountOut
-          : addMarkupToAmount(expectedAmountOut, swap.slippageTolerance / 100);
+          : addMarkupToAmount(expectedAmountOut, -swap.slippageTolerance / 100);
 
       swapQuote = {
         tokenIn: swap.tokenIn,
