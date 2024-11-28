@@ -139,8 +139,8 @@ export function AmountInput({
           </Text>
         )}
         {validationLevel !== "valid" && !disableErrorText && (
-          <Text size="md" color="error">
-            {validationError}
+          <Text size="md" color={validationError ? "error" : "warning"}>
+            {validationError || validationWarning}
           </Text>
         )}
       </InfoTextWrapper>
