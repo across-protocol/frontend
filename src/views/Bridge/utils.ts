@@ -137,6 +137,7 @@ export function validateBridgeAmount(
   }
 
   return {
+    warn: undefined,
     error: undefined,
   };
 }
