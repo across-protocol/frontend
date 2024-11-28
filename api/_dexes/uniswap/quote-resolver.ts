@@ -15,7 +15,12 @@ import {
   encodeWethWithdrawCalldata,
   getMultiCallHandlerAddress,
 } from "../../_multicall-handler";
-import { Token as AcrossToken, CrossSwap, SwapQuote } from "../types";
+import {
+  Token as AcrossToken,
+  CrossSwap,
+  CrossSwapQuotes,
+  SwapQuote,
+} from "../types";
 import {
   buildExactOutputBridgeTokenMessage,
   buildMinOutputBridgeTokenMessage,
@@ -24,7 +29,7 @@ import {
 import { AMOUNT_TYPE } from "../cross-swap";
 import { UniswapQuoteFetchStrategy, addMarkupToAmount } from "./utils";
 
-const indicativeQuoteBuffer = 0.5; // 0.5% buffer for indicative quotes
+const indicativeQuoteBuffer = 0.005; // 0.5% buffer for indicative quotes
 
 /**
  * Returns Uniswap v3 quote for a swap with min. output amount for route
@@ -35,7 +40,7 @@ const indicativeQuoteBuffer = 0.5; // 0.5% buffer for indicative quotes
 export async function getUniswapCrossSwapQuotesForOutputB2A(
   crossSwap: CrossSwap,
   strategy: UniswapQuoteFetchStrategy
-) {
+): Promise<CrossSwapQuotes> {
   const destinationSwapChainId = crossSwap.outputToken.chainId;
   const bridgeRoute = getRouteByInputTokenAndDestinationChain(
     crossSwap.inputToken.address,
@@ -116,7 +121,7 @@ export async function getUniswapCrossSwapQuotesForOutputB2A(
 export async function getUniswapCrossSwapQuotesForOutputA2B(
   crossSwap: CrossSwap,
   strategy: UniswapQuoteFetchStrategy
-) {
+): Promise<CrossSwapQuotes> {
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationChainId = crossSwap.outputToken.chainId;
   const bridgeRoute = getRouteByOutputTokenAndOriginChain(
@@ -207,7 +212,10 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
     crossSwap,
     bridgeQuote,
     destinationSwapQuote: undefined,
-    originSwapQuote: adjOriginSwapQuote,
+    originSwapQuote: {
+      ...adjOriginSwapQuote,
+      peripheryAddress: spokePoolPeripheryAddress,
+    },
   };
 }
 
@@ -227,7 +235,7 @@ export async function getBestUniswapCrossSwapQuotesForOutputA2A(
     preferredBridgeTokens: string[];
     bridgeRoutesLimit: number;
   }
-) {
+): Promise<CrossSwapQuotes> {
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationSwapChainId = crossSwap.outputToken.chainId;
   const allBridgeRoutes = getRoutesByChainIds(
@@ -292,7 +300,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   },
   originStrategy: UniswapQuoteFetchStrategy,
   destinationStrategy: UniswapQuoteFetchStrategy
-) {
+): Promise<CrossSwapQuotes> {
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationSwapChainId = crossSwap.outputToken.chainId;
 
@@ -407,7 +415,10 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
     crossSwap,
     destinationSwapQuote,
     bridgeQuote,
-    originSwapQuote: adjOriginSwapQuote,
+    originSwapQuote: {
+      ...adjOriginSwapQuote,
+      peripheryAddress: originStrategy.getPeripheryAddress(originSwapChainId),
+    },
   };
 }
 

@@ -109,14 +109,13 @@ const MIN_OUTPUT_CASES = [
   {
     labels: ["A2B", "MIN_OUTPUT", "USDC - WETH"],
     params: {
-      amount: ethers.utils.parseUnits("0.01", 18).toString(),
+      amount: ethers.utils.parseUnits("0.001", 18).toString(),
       tradeType: "minOutput",
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
       originChainId,
       outputToken: TOKEN_SYMBOLS_MAP.WETH.addresses[destinationChainId],
       destinationChainId,
       depositor,
-      skipOriginTxEstimation: true,
     },
   },
   {
@@ -144,6 +143,8 @@ const MIN_OUTPUT_CASES = [
       outputToken: anyDestinationOutputTokens[destinationChainId], // APE Coin
       destinationChainId,
       depositor,
+      // skipOriginTxEstimation: true,
+      refundOnOrigin: false,
     },
   },
 ];
@@ -173,13 +174,14 @@ async function swap() {
     const response = await axios.get(
       // `https://preview.across.to/api/swap/allowance`,
       `http://localhost:3000/api/swap/allowance`,
+      // `https://app-frontend-v3-git-universal-router-support-uma.vercel.app/api/swap/allowance`,
       {
         params: testCase.params,
       }
     );
     console.log(response.data);
 
-    if (process.env.DEV_WALLET_PK) {
+    if (!process.env.DEV_WALLET_PK) {
       const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
         getProvider(testCase.params.originChainId)
       );

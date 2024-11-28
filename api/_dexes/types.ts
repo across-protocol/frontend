@@ -76,7 +76,9 @@ export type CrossSwapQuotes = {
     suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
   };
   destinationSwapQuote?: SwapQuote;
-  originSwapQuote?: SwapQuote;
+  originSwapQuote?: SwapQuote & {
+    peripheryAddress: string;
+  };
 };
 
 export type CrossSwapQuotesWithFees = CrossSwapQuotes & {

@@ -1,5 +1,5 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
-import { TradeType } from "@uniswap/sdk-core";
+import { Percent, TradeType } from "@uniswap/sdk-core";
 import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { utils } from "@across-protocol/sdk";
@@ -110,4 +110,12 @@ export function addMarkupToAmount(amount: BigNumber, markup = 0.01) {
   return amount
     .mul(ethers.utils.parseEther((1 + Number(markup)).toString()))
     .div(utils.fixedPointAdjustment);
+}
+
+export function floatToPercent(value: number) {
+  return new Percent(
+    // max. slippage decimals is 2
+    Number(value.toFixed(2)) * 100,
+    10_000
+  );
 }

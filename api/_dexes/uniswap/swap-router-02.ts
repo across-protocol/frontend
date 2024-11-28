@@ -1,18 +1,23 @@
-import { ethers } from "ethers";
-import { CurrencyAmount, Percent, Token, TradeType } from "@uniswap/sdk-core";
-import {
-  AlphaRouter,
-  SwapOptionsSwapRouter02,
-  SwapType,
-} from "@uniswap/smart-order-router";
-import { CHAIN_IDs } from "@across-protocol/constants";
-import { utils } from "@across-protocol/sdk";
+import { BigNumber } from "ethers";
+import { TradeType } from "@uniswap/sdk-core";
+import { SwapRouter } from "@uniswap/router-sdk";
 
-import { getProvider, getLogger } from "../../_utils";
-import { Swap } from "../types";
-import { NoSwapRouteError } from "../utils";
+import { CHAIN_IDs } from "@across-protocol/constants";
+
+import { getLogger } from "../../_utils";
+import { Swap, SwapQuote } from "../types";
 import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
-import { UniswapQuoteFetchStrategy } from "./utils";
+import {
+  addMarkupToAmount,
+  floatToPercent,
+  UniswapQuoteFetchStrategy,
+} from "./utils";
+import {
+  getUniswapClassicQuoteFromApi,
+  getUniswapClassicIndicativeQuoteFromApi,
+  UniswapClassicQuoteFromApi,
+} from "./trading-api";
+import { RouterTradeAdapter } from "./adapter";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
 export const SWAP_ROUTER_02_ADDRESS = {
@@ -32,72 +37,79 @@ export function getSwapRouter02Strategy(): UniswapQuoteFetchStrategy {
   const getPeripheryAddress = (chainId: number) =>
     getSpokePoolPeripheryAddress("uniswap-swapRouter02", chainId);
 
-  const fetchFn = async (swap: Swap, tradeType: TradeType) => {
-    const { router, options } = getSwapRouter02AndOptions(swap);
+  const fetchFn = async (
+    swap: Swap,
+    tradeType: TradeType,
+    opts: Partial<{
+      useIndicativeQuote: boolean;
+    }> = {
+      useIndicativeQuote: false,
+    }
+  ) => {
+    let swapQuote: SwapQuote;
+    if (!opts.useIndicativeQuote) {
+      const { quote } = await getUniswapClassicQuoteFromApi(
+        { ...swap, swapper: swap.recipient },
+        tradeType
+      );
+      const swapTx = buildSwapRouterSwapTx(swap, tradeType, quote);
 
-    const amountCurrency =
-      tradeType === TradeType.EXACT_INPUT ? swap.tokenIn : swap.tokenOut;
-    const quoteCurrency =
-      tradeType === TradeType.EXACT_INPUT ? swap.tokenOut : swap.tokenIn;
+      const expectedAmountIn = BigNumber.from(quote.input.amount);
+      const maxAmountIn =
+        tradeType === TradeType.EXACT_INPUT
+          ? expectedAmountIn
+          : addMarkupToAmount(expectedAmountIn, quote.slippage / 100);
+      const expectedAmountOut = BigNumber.from(quote.output.amount);
+      const minAmountOut =
+        tradeType === TradeType.EXACT_OUTPUT
+          ? expectedAmountOut
+          : addMarkupToAmount(expectedAmountOut, -quote.slippage / 100);
 
-    const route = await router.route(
-      CurrencyAmount.fromRawAmount(
-        new Token(
-          amountCurrency.chainId,
-          amountCurrency.address,
-          amountCurrency.decimals
-        ),
-        swap.amount
-      ),
-      new Token(
-        quoteCurrency.chainId,
-        quoteCurrency.address,
-        quoteCurrency.decimals
-      ),
-      tradeType,
-      options
-    );
+      swapQuote = {
+        tokenIn: swap.tokenIn,
+        tokenOut: swap.tokenOut,
+        maximumAmountIn: maxAmountIn,
+        minAmountOut,
+        expectedAmountOut,
+        expectedAmountIn,
+        slippageTolerance: quote.slippage,
+        swapTx,
+      };
+    } else {
+      const { input, output } = await getUniswapClassicIndicativeQuoteFromApi(
+        { ...swap, swapper: swap.recipient },
+        tradeType
+      );
 
-    if (!route || !route.methodParameters) {
-      throw new NoSwapRouteError({
-        dex: "uniswap",
-        tokenInSymbol: swap.tokenIn.symbol,
-        tokenOutSymbol: swap.tokenOut.symbol,
-        chainId: swap.chainId,
-        swapType:
-          tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
-      });
+      const expectedAmountIn = BigNumber.from(input.amount);
+      const maxAmountIn =
+        tradeType === TradeType.EXACT_INPUT
+          ? expectedAmountIn
+          : addMarkupToAmount(expectedAmountIn, swap.slippageTolerance / 100);
+      const expectedAmountOut = BigNumber.from(output.amount);
+      const minAmountOut =
+        tradeType === TradeType.EXACT_OUTPUT
+          ? expectedAmountOut
+          : addMarkupToAmount(expectedAmountOut, swap.slippageTolerance / 100);
+
+      swapQuote = {
+        tokenIn: swap.tokenIn,
+        tokenOut: swap.tokenOut,
+        maximumAmountIn: maxAmountIn,
+        minAmountOut,
+        expectedAmountOut,
+        expectedAmountIn,
+        slippageTolerance: swap.slippageTolerance,
+        swapTx: {
+          to: "0x",
+          data: "0x",
+          value: "0x",
+        },
+      };
     }
 
-    const swapQuote = {
-      tokenIn: swap.tokenIn,
-      tokenOut: swap.tokenOut,
-      maximumAmountIn: ethers.utils.parseUnits(
-        route.trade.maximumAmountIn(options.slippageTolerance).toExact(),
-        swap.tokenIn.decimals
-      ),
-      minAmountOut: ethers.utils.parseUnits(
-        route.trade.minimumAmountOut(options.slippageTolerance).toExact(),
-        swap.tokenOut.decimals
-      ),
-      expectedAmountOut: ethers.utils.parseUnits(
-        route.trade.outputAmount.toExact(),
-        swap.tokenOut.decimals
-      ),
-      expectedAmountIn: ethers.utils.parseUnits(
-        route.trade.inputAmount.toExact(),
-        swap.tokenIn.decimals
-      ),
-      slippageTolerance: swap.slippageTolerance,
-      swapTx: {
-        to: route.methodParameters.to,
-        data: route.methodParameters.calldata,
-        value: route.methodParameters.value,
-      },
-    };
-
     getLogger().debug({
-      at: "uniswap/universal-router/quoteFetchFn",
+      at: "uniswap/swap-router-02/fetchFn",
       message: "Swap quote",
       type:
         tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
@@ -120,37 +132,29 @@ export function getSwapRouter02Strategy(): UniswapQuoteFetchStrategy {
   };
 }
 
-function getSwapRouter02AndOptions(params: {
-  chainId: number;
-  recipient: string;
-  slippageTolerance: number;
-}) {
-  const router = getSwapRouter02(params.chainId);
-  const options: SwapOptionsSwapRouter02 = {
-    recipient: params.recipient,
-    deadline: utils.getCurrentTime() + 30 * 60, // 30 minutes from now
-    type: SwapType.SWAP_ROUTER_02,
-    slippageTolerance: floatToPercent(params.slippageTolerance),
+export function buildSwapRouterSwapTx(
+  swap: Swap,
+  tradeType: TradeType,
+  quote: UniswapClassicQuoteFromApi
+) {
+  const options = {
+    recipient: swap.recipient,
+    slippageTolerance: floatToPercent(swap.slippageTolerance),
   };
-  return {
-    router,
-    options,
-  };
-}
 
-const swapRouterCache = new Map<number, AlphaRouter>();
-function getSwapRouter02(chainId: number) {
-  const provider = getProvider(chainId);
-  if (!swapRouterCache.has(chainId)) {
-    swapRouterCache.set(chainId, new AlphaRouter({ chainId, provider }));
-  }
-  return swapRouterCache.get(chainId)!;
-}
-
-function floatToPercent(value: number) {
-  return new Percent(
-    // max. slippage decimals is 2
-    Number(value.toFixed(2)) * 100,
-    10_000
+  const routerTrade = RouterTradeAdapter.fromClassicQuote({
+    tokenIn: quote.input.token,
+    tokenOut: quote.output.token,
+    tradeType,
+    route: quote.route,
+  });
+  const { calldata, value } = SwapRouter.swapCallParameters(
+    routerTrade,
+    options
   );
+  return {
+    data: calldata,
+    value,
+    to: SWAP_ROUTER_02_ADDRESS[swap.chainId],
+  };
 }

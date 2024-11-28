@@ -2,8 +2,9 @@ import { TradeType } from "@uniswap/sdk-core";
 import axios from "axios";
 
 import { Swap } from "../types";
+import { V2PoolInRoute, V3PoolInRoute } from "./adapter";
 
-type UniswapClassicQuoteFromApi = {
+export type UniswapClassicQuoteFromApi = {
   chainId: number;
   input: {
     amount: string;
@@ -15,7 +16,7 @@ type UniswapClassicQuoteFromApi = {
     recipient: string;
   };
   swapper: string;
-  route: any[];
+  route: Array<(V3PoolInRoute | V2PoolInRoute)[]>;
   slippage: number;
   tradeType: "EXACT_OUTPUT" | "EXACT_INPUT";
   quoteId: string;

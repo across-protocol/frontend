@@ -14,7 +14,7 @@ import {
   getUniswapCrossSwapQuotesForOutputA2B,
   getUniswapCrossSwapQuotesForOutputB2A,
 } from "./uniswap/quote-resolver";
-import { getUniversalRouterStrategy } from "./uniswap/universal-router";
+import { getSwapRouter02Strategy } from "./uniswap/swap-router-02";
 import { UniswapQuoteFetchStrategy } from "./uniswap/utils";
 import { CrossSwap, CrossSwapQuotes } from "./types";
 import {
@@ -54,7 +54,7 @@ export const LEFTOVER_TYPE = {
 export const PREFERRED_BRIDGE_TOKENS = ["WETH"];
 
 const defaultQuoteFetchStrategy: UniswapQuoteFetchStrategy =
-  getUniversalRouterStrategy();
+  getSwapRouter02Strategy();
 const strategyOverrides = {
   [CHAIN_IDs.BLAST]: defaultQuoteFetchStrategy,
 };
@@ -202,16 +202,17 @@ export async function buildCrossSwapTxForAllowanceHolder(
 ) {
   const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
   const spokePool = getSpokePool(originChainId);
-  const spokePoolPeriphery = getSpokePoolPeriphery(
-    "uniswap-universalRouter",
-    originChainId
-  );
+
   const deposit = await extractDepositDataStruct(crossSwapQuotes);
 
   let tx: PopulatedTransaction;
   let toAddress: string;
 
   if (crossSwapQuotes.originSwapQuote) {
+    const spokePoolPeriphery = getSpokePoolPeriphery(
+      crossSwapQuotes.originSwapQuote.peripheryAddress,
+      originChainId
+    );
     tx = await spokePoolPeriphery.populateTransaction.swapAndBridge(
       crossSwapQuotes.originSwapQuote.tokenIn.address,
       crossSwapQuotes.originSwapQuote.tokenOut.address,

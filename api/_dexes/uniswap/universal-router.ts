@@ -1,16 +1,22 @@
 import { BigNumber } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 import { CHAIN_IDs } from "@across-protocol/constants";
+import { SwapRouter } from "@uniswap/universal-router-sdk";
 
 import { getLogger } from "../../_utils";
 import { Swap, SwapQuote } from "../types";
 import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
 import {
-  getUniswapClassicCalldataFromApi,
   getUniswapClassicQuoteFromApi,
   getUniswapClassicIndicativeQuoteFromApi,
+  UniswapClassicQuoteFromApi,
 } from "./trading-api";
-import { UniswapQuoteFetchStrategy, addMarkupToAmount } from "./utils";
+import {
+  UniswapQuoteFetchStrategy,
+  addMarkupToAmount,
+  floatToPercent,
+} from "./utils";
+import { RouterTradeAdapter } from "./adapter";
 
 // https://uniswap-docs.readme.io/reference/faqs#i-need-to-whitelist-the-router-addresses-where-can-i-find-them
 export const UNIVERSAL_ROUTER_ADDRESS = {
@@ -46,7 +52,7 @@ export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
         { ...swap, swapper: swap.recipient },
         tradeType
       );
-      const classicSwap = await getUniswapClassicCalldataFromApi(quote);
+      const swapTx = buildUniversalRouterSwapTx(swap, tradeType, quote);
 
       const expectedAmountIn = BigNumber.from(quote.input.amount);
       const maxAmountIn =
@@ -57,7 +63,7 @@ export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
       const minAmountOut =
         tradeType === TradeType.EXACT_OUTPUT
           ? expectedAmountOut
-          : addMarkupToAmount(expectedAmountOut, quote.slippage / 100);
+          : addMarkupToAmount(expectedAmountOut, -quote.slippage / 100);
 
       swapQuote = {
         tokenIn: swap.tokenIn,
@@ -67,11 +73,7 @@ export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
         expectedAmountOut,
         expectedAmountIn,
         slippageTolerance: quote.slippage,
-        swapTx: {
-          to: classicSwap.swap.to,
-          data: classicSwap.swap.data,
-          value: classicSwap.swap.value,
-        },
+        swapTx,
       };
     } else {
       const { input, output } = await getUniswapClassicIndicativeQuoteFromApi(
@@ -107,7 +109,7 @@ export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
     }
 
     getLogger().debug({
-      at: "uniswap/universal-router/quoteFetchFn",
+      at: "uniswap/universal-router/fetchFn",
       message: "Swap quote",
       type:
         tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
@@ -127,5 +129,31 @@ export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
     getRouterAddress,
     getPeripheryAddress,
     fetchFn,
+  };
+}
+
+export function buildUniversalRouterSwapTx(
+  swap: Swap,
+  tradeType: TradeType,
+  quote: UniswapClassicQuoteFromApi
+) {
+  const options = {
+    recipient: swap.recipient,
+    slippageTolerance: floatToPercent(swap.slippageTolerance),
+  };
+  const routerTrade = RouterTradeAdapter.fromClassicQuote({
+    tokenIn: quote.input.token,
+    tokenOut: quote.output.token,
+    tradeType,
+    route: quote.route,
+  });
+  const { calldata, value } = SwapRouter.swapCallParameters(
+    routerTrade,
+    options
+  );
+  return {
+    data: calldata,
+    value,
+    to: UNIVERSAL_ROUTER_ADDRESS[swap.chainId],
   };
 }

@@ -8,7 +8,10 @@ import {
   handleErrorCondition,
   latestGasPriceCache,
 } from "../_utils";
-import { buildCrossSwapTxForAllowanceHolder } from "../_dexes/cross-swap";
+import {
+  AMOUNT_TYPE,
+  buildCrossSwapTxForAllowanceHolder,
+} from "../_dexes/cross-swap";
 import {
   handleBaseSwapQueryParams,
   BaseSwapQueryParams,
@@ -135,7 +138,9 @@ const handler = async (
         crossSwapQuotes.bridgeQuote.outputAmount.toString(),
       minOutputAmount:
         crossSwapQuotes.destinationSwapQuote?.minAmountOut.toString() ??
-        crossSwapQuotes.bridgeQuote.outputAmount.toString(),
+        crossSwapQuotes.crossSwap.type === AMOUNT_TYPE.EXACT_INPUT
+          ? crossSwapQuotes.bridgeQuote.outputAmount.toString()
+          : crossSwapQuotes.crossSwap.amount.toString(),
       expectedFillTime:
         crossSwapQuotes.bridgeQuote.suggestedFees.estimatedFillTimeSec,
     };
