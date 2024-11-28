@@ -12,6 +12,7 @@ import {
   buildMulticallHandlerMessage,
   encodeApproveCalldata,
   encodeDrainCalldata,
+  encodeTransferCalldata,
   encodeWethWithdrawCalldata,
   getMultiCallHandlerAddress,
 } from "../../_multicall-handler";
@@ -454,6 +455,40 @@ function buildDestinationSwapCrossChainMessage({
         target: crossSwap.recipient,
         callData: "0x",
         value: crossSwap.amount.toString(),
+      },
+    ];
+  }
+  // If output token is an ERC-20 token and amount type is EXACT_OUTPUT, we need
+  // to transfer the EXACT output amount to the recipient. The refundAddress / depositor
+  // will receive any leftovers.
+  else if (crossSwap.type === AMOUNT_TYPE.EXACT_OUTPUT) {
+    transferActions = [
+      {
+        target: crossSwap.outputToken.address,
+        callData: encodeTransferCalldata(crossSwap.recipient, crossSwap.amount),
+        value: "0",
+      },
+      {
+        target: getMultiCallHandlerAddress(destinationSwapChainId),
+        callData: encodeDrainCalldata(
+          crossSwap.outputToken.address,
+          crossSwap.refundAddress ?? crossSwap.depositor
+        ),
+        value: "0",
+      },
+    ];
+  }
+  // If output token is an ERC-20 token and amount type is MIN_OUTPUT, we need
+  // to transfer all realized output tokens to the recipient.
+  else if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT) {
+    transferActions = [
+      {
+        target: getMultiCallHandlerAddress(destinationSwapChainId),
+        callData: encodeDrainCalldata(
+          crossSwap.outputToken.address,
+          crossSwap.recipient
+        ),
+        value: "0",
       },
     ];
   }

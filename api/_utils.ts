@@ -201,6 +201,7 @@ export const getLogger = (): LoggingUtility => {
  * @returns A valid URL of the current endpoint in vercel
  */
 export const resolveVercelEndpoint = () => {
+  return "https://app.across.to";
   const url = process.env.VERCEL_URL ?? "across.to";
   const env = process.env.VERCEL_ENV ?? "development";
   switch (env) {
@@ -971,7 +972,7 @@ export async function getBridgeQuoteForMinOutput(params: {
           { cause: err }
         );
       } else {
-        const message = `Upstream http request to ${err.request?.url} failed with ${err.status} ${err.message}`;
+        const message = `Upstream http request to ${err.request?.host} failed with ${err.response?.status}`;
         throw new AcrossApiError(
           {
             message,
