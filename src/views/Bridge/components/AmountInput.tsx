@@ -27,6 +27,7 @@ type Props = {
   onClickMaxBalance: () => void;
   selectedRoute: SelectedRoute;
   validationError?: AmountInputError;
+  validationWarning?: AmountInputError;
   limits?: BridgeLimits;
 };
 
@@ -37,6 +38,7 @@ export function AmountInput({
   onClickMaxBalance,
   selectedRoute,
   validationError,
+  validationWarning,
   limits,
 }: Props) {
   return (
@@ -48,16 +50,12 @@ export function AmountInput({
           : selectedRoute.fromTokenSymbol
       }
       validationError={
-        validationError
-          ? validationErrorTextMap[validationError]
-              .replace("[INPUT_TOKEN]", selectedRoute.fromTokenSymbol)
-              .replace(
-                "[MAX_DEPOSIT]",
-                `${formatUnitsWithMaxFractions(
-                  limits?.maxDeposit || 0,
-                  getToken(selectedRoute.fromTokenSymbol).decimals
-                )} ${selectedRoute.fromTokenSymbol}`
-              )
+        validationError || validationWarning
+          ? getValidationErrorText({
+              validationError: validationError || validationWarning,
+              selectedRoute,
+              limits,
+            })
           : undefined
       }
       onChangeAmountInput={onChangeAmountInput}
@@ -67,6 +65,25 @@ export function AmountInput({
       amountInput={amountInput}
     />
   );
+}
+
+function getValidationErrorText(props: {
+  validationError?: AmountInputError;
+  selectedRoute: SelectedRoute;
+  limits?: BridgeLimits;
+}) {
+  if (!props.validationError) {
+    return undefined;
+  }
+  return validationErrorTextMap[props.validationError]
+    .replace("[INPUT_TOKEN]", props.selectedRoute.fromTokenSymbol)
+    .replace(
+      "[MAX_DEPOSIT]",
+      `${formatUnitsWithMaxFractions(
+        props.limits?.maxDeposit || 0,
+        getToken(props.selectedRoute.fromTokenSymbol).decimals
+      )} ${props.selectedRoute.fromTokenSymbol}`
+    );
 }
 
 export default AmountInput;
