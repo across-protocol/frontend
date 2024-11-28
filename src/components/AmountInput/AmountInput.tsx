@@ -138,7 +138,7 @@ export function AmountInput({
             ${formatUSD(estimatedUsdInputAmount)}
           </Text>
         )}
-        {validationLevel === "valid" && !disableErrorText && (
+        {validationLevel !== "valid" && !disableErrorText && (
           <Text size="md" color="error">
             {validationError}
           </Text>
