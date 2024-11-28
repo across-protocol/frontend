@@ -8,11 +8,11 @@ import { Text } from "components/Text";
 import { Tooltip } from "components/Tooltip";
 import { useTokenConversion } from "hooks/useTokenConversion";
 import {
+  COLORS,
   QUERIESV2,
   formatUSD,
   formatUnitsWithMaxFractions,
   getToken,
-  isDefined,
   isNumberEthersParseable,
   parseUnits,
 } from "utils";
@@ -25,6 +25,7 @@ export type Props = {
   onClickMaxBalance: () => void;
   inputTokenSymbol: string;
   validationError?: string;
+  validationWarning?: string;
   dataCy?: string;
   disableErrorText?: boolean;
   disableInput?: boolean;
@@ -41,6 +42,7 @@ export function AmountInput({
   onClickMaxBalance,
   inputTokenSymbol,
   validationError,
+  validationWarning,
   disableErrorText,
   disableInput,
   disableMaxButton,
@@ -48,8 +50,14 @@ export function AmountInput({
 }: Props) {
   const token = getToken(inputTokenSymbol);
 
-  const isAmountValid =
-    (amountInput ?? "") === "" || !isDefined(validationError);
+  const validationLevel =
+    (amountInput ?? "") === ""
+      ? "valid"
+      : validationError
+        ? "error"
+        : validationWarning
+          ? "warning"
+          : "valid";
 
   const { convertTokenToBaseCurrency } = useTokenConversion(
     inputTokenSymbol,
@@ -68,7 +76,7 @@ export function AmountInput({
 
   return (
     <Wrapper>
-      <InputGroupWrapper valid={isAmountValid}>
+      <InputGroupWrapper validationLevel={validationLevel}>
         {displayTokenIcon ? (
           token.logoURIs?.length === 2 ? (
             <IconPairContainer>
@@ -84,7 +92,7 @@ export function AmountInput({
         ) : null}
         <Input
           type="number"
-          valid={isAmountValid}
+          validationLevel={validationLevel}
           placeholder="Enter amount"
           value={amountInput}
           onWheel={(e) => e.currentTarget.blur()}
@@ -130,9 +138,9 @@ export function AmountInput({
             ${formatUSD(estimatedUsdInputAmount)}
           </Text>
         )}
-        {!isAmountValid && !disableErrorText && (
-          <Text size="md" color="error">
-            {validationError}
+        {validationLevel !== "valid" && !disableErrorText && (
+          <Text size="md" color={validationError ? "error" : "warning"}>
+            {validationError || validationWarning}
           </Text>
         )}
       </InfoTextWrapper>
@@ -143,8 +151,23 @@ export function AmountInput({
 export default AmountInput;
 
 interface IValidInput {
-  valid: boolean;
+  validationLevel: "valid" | "error" | "warning";
 }
+
+const colorMap = {
+  valid: {
+    border: COLORS["grey-600"],
+    text: COLORS["white-100"],
+  },
+  error: {
+    border: COLORS.red,
+    text: COLORS.red,
+  },
+  warning: {
+    border: COLORS.yellow,
+    text: COLORS.yellow,
+  },
+};
 
 const Wrapper = styled.div`
   display: flex;
@@ -159,7 +182,7 @@ const InputGroupWrapper = styled.div<IValidInput>`
   align-items: center;
   padding: 9px 12px 9px 16px;
   background: #2d2e33;
-  border: 1px solid ${({ valid }) => (valid ? "#3E4047" : "#f96c6c")};
+  border: 1px solid ${({ validationLevel }) => colorMap[validationLevel].border};
   border-radius: 12px;
   height: 48px;
   gap: 8px;
@@ -173,9 +196,7 @@ const Input = styled.input<IValidInput>`
   font-weight: 400;
   font-size: 18px;
   line-height: 26px;
-  color: #e0f3ff;
-
-  color: ${({ valid }) => (valid ? "#e0f3ff" : "#f96c6c")};
+  color: ${({ validationLevel }) => colorMap[validationLevel].text};
   background: none;
 
   width: 100%;

@@ -145,7 +145,7 @@ export function validateBridgeAmount(
       .div(fixedPointAdjustment);
     if (totalFeeInL1.gt(maximalFee)) {
       return {
-        error: AmountInputError.PRICE_IMPACT_TOO_HIGH,
+        warn: AmountInputError.PRICE_IMPACT_TOO_HIGH,
       };
     }
   }
