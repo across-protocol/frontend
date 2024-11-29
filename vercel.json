@@ -8,6 +8,10 @@
     {
       "path": "/api/cron-cache-gas-prices",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron-ping-endpoints",
+      "schedule": "* * * * *"
     }
   ],
   "functions": {

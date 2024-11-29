@@ -66,6 +66,7 @@ export type BridgeFormProps = {
   buttonLabel: string;
   isBridgeDisabled: boolean;
   validationError?: AmountInputError;
+  validationWarning?: AmountInputError;
   isQuoteLoading: boolean;
 };
 
@@ -101,6 +102,7 @@ const BridgeForm = ({
   buttonLabel,
   isBridgeDisabled,
   validationError,
+  validationWarning,
   isQuoteLoading,
 }: BridgeFormProps) => {
   const programName = chainIdToRewardsProgramName[selectedRoute.toChain];
@@ -149,6 +151,9 @@ const BridgeForm = ({
             onChangeAmountInput={onChangeAmountInput}
             onClickMaxBalance={onClickMaxBalance}
             validationError={parsedAmountInput ? validationError : undefined}
+            validationWarning={
+              parsedAmountInput ? validationWarning : undefined
+            }
             balance={balance}
             limits={limits}
           />

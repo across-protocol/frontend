@@ -536,3 +536,6 @@ export const vercelApiBaseUrl =
 export const defaultSwapSlippage = Number(
   process.env.REACT_APP_DEFAULT_SWAP_SLIPPAGE || 0.5
 );
+
+export const indexerApiBaseUrl =
+  process.env.REACT_APP_INDEXER_BASE_URL || undefined;

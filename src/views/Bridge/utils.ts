@@ -1,6 +1,5 @@
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { BigNumber } from "ethers";
-
 import {
   Route,
   SwapRoute,
@@ -12,6 +11,9 @@ import {
   isProductionBuild,
   interchangeableTokensMap,
   nonEthChains,
+  GetBridgeFeesResult,
+  isDefined,
+  parseUnits,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -37,6 +39,7 @@ export enum AmountInputError {
   INSUFFICIENT_LIQUIDITY = "insufficientLiquidity",
   INSUFFICIENT_BALANCE = "insufficientBalance",
   AMOUNT_TOO_LOW = "amountTooLow",
+  PRICE_IMPACT_TOO_HIGH = "priceImpactTooHigh",
 }
 const config = getConfig();
 const enabledRoutes = config.getEnabledRoutes();
@@ -92,7 +95,7 @@ export function getReceiveTokenSymbol(
 
 export function validateBridgeAmount(
   parsedAmountInput?: BigNumber,
-  isAmountTooLow?: boolean,
+  quoteFees?: GetBridgeFeesResult,
   currentBalance?: BigNumber,
   maxDeposit?: BigNumber,
   amountToBridgeAfterSwap?: BigNumber
@@ -121,7 +124,7 @@ export function validateBridgeAmount(
     };
   }
 
-  if (isAmountTooLow) {
+  if (quoteFees?.isAmountTooLow) {
     return {
       error: AmountInputError.AMOUNT_TOO_LOW,
     };
@@ -134,6 +137,7 @@ export function validateBridgeAmount(
   }
 
   return {
+    warn: undefined,
     error: undefined,
   };
 }
