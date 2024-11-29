@@ -109,7 +109,7 @@ const MIN_OUTPUT_CASES = [
   {
     labels: ["A2B", "MIN_OUTPUT", "USDC - WETH"],
     params: {
-      amount: ethers.utils.parseUnits("0.01", 18).toString(),
+      amount: ethers.utils.parseUnits("0.001", 18).toString(),
       tradeType: "minOutput",
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
       originChainId,
@@ -170,7 +170,6 @@ async function swap() {
     console.log("\nTest case:", testCase.labels.join(" "));
     console.log("Params:", testCase.params);
     const response = await axios.get(
-      // `https://preview.across.to/api/swap/allowance`,
       `http://localhost:3000/api/swap/allowance`,
       {
         params: testCase.params,
@@ -178,7 +177,7 @@ async function swap() {
     );
     console.log(response.data);
 
-    if (!process.env.DEV_WALLET_PK) {
+    if (process.env.DEV_WALLET_PK) {
       const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
         getProvider(testCase.params.originChainId)
       );

@@ -21,7 +21,7 @@
     }
   },
   "spokePoolPeripheryAddresses": {
-    "uniswap": {
+    "uniswap-swapRouter02": {
       "1": "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
       "10": "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
       "137": "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
@@ -31,6 +31,10 @@
       "42161": "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
       "81457": "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
       "7777777": "0x8EB5FF2e23FD7789e59989aDe055A398800E394e"
+    },
+    "uniswap-universalRouter": {
+      "10": "0xaED9bBFdCC63219d77D54F8427aeb84C2Be46c5f",
+      "42161": "0xaED9bBFdCC63219d77D54F8427aeb84C2Be46c5f"
     }
   },
   "routes": [

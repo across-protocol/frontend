@@ -10,10 +10,12 @@ import {
   getSpokePool,
 } from "../_utils";
 import {
-  getUniswapCrossSwapQuotesForOutputB2A,
-  getUniswapCrossSwapQuotesForOutputA2B,
   getBestUniswapCrossSwapQuotesForOutputA2A,
-} from "./uniswap/swap-router-02";
+  getUniswapCrossSwapQuotesForOutputA2B,
+  getUniswapCrossSwapQuotesForOutputB2A,
+} from "./uniswap/quote-resolver";
+import { getSwapRouter02Strategy } from "./uniswap/swap-router-02";
+import { UniswapQuoteFetchStrategy } from "./uniswap/utils";
 import { CrossSwap, CrossSwapQuotes } from "./types";
 import {
   buildExactOutputBridgeTokenMessage,
@@ -22,6 +24,7 @@ import {
 import { getSpokePoolPeriphery } from "../_spoke-pool-periphery";
 import { tagIntegratorId } from "../_integrator-id";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
+import { CHAIN_IDs } from "../_constants";
 
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
@@ -48,7 +51,13 @@ export const LEFTOVER_TYPE = {
   BRIDGEABLE_TOKEN: "bridgeableToken",
 } as const;
 
-export const PREFERRED_BRIDGE_TOKENS = ["WETH", "USDC"];
+export const PREFERRED_BRIDGE_TOKENS = ["WETH"];
+
+const defaultQuoteFetchStrategy: UniswapQuoteFetchStrategy =
+  getSwapRouter02Strategy();
+const strategyOverrides = {
+  [CHAIN_IDs.BLAST]: defaultQuoteFetchStrategy,
+};
 
 export async function getCrossSwapQuotes(
   crossSwap: CrossSwap
@@ -128,21 +137,35 @@ export async function getCrossSwapQuotesForOutputB2B(crossSwap: CrossSwap) {
 }
 
 export async function getCrossSwapQuotesForOutputB2A(crossSwap: CrossSwap) {
-  // @TODO: Add support for other DEXes / aggregators
-  return getUniswapCrossSwapQuotesForOutputB2A(crossSwap);
+  return getUniswapCrossSwapQuotesForOutputB2A(
+    crossSwap,
+    // Destination swap requires destination chain's quote fetch strategy
+    getQuoteFetchStrategy(crossSwap.outputToken.chainId)
+  );
 }
 
 export async function getCrossSwapQuotesForOutputA2B(crossSwap: CrossSwap) {
-  // @TODO: Add support for other DEXes / aggregators
-  return getUniswapCrossSwapQuotesForOutputA2B(crossSwap);
+  return getUniswapCrossSwapQuotesForOutputA2B(
+    crossSwap,
+    // Origin swap requires origin chain's quote fetch strategy
+    getQuoteFetchStrategy(crossSwap.inputToken.chainId)
+  );
 }
 
 export async function getCrossSwapQuotesForOutputA2A(crossSwap: CrossSwap) {
-  // @TODO: Add support for other DEXes / aggregators
-  return getBestUniswapCrossSwapQuotesForOutputA2A(crossSwap, {
-    preferredBridgeTokens: PREFERRED_BRIDGE_TOKENS,
-    bridgeRoutesLimit: 2,
-  });
+  return getBestUniswapCrossSwapQuotesForOutputA2A(
+    crossSwap,
+    getQuoteFetchStrategy(crossSwap.inputToken.chainId),
+    getQuoteFetchStrategy(crossSwap.outputToken.chainId),
+    {
+      preferredBridgeTokens: PREFERRED_BRIDGE_TOKENS,
+      bridgeRoutesLimit: 1,
+    }
+  );
+}
+
+function getQuoteFetchStrategy(chainId: number) {
+  return strategyOverrides[chainId] ?? defaultQuoteFetchStrategy;
 }
 
 export function getCrossSwapType(params: {
@@ -179,13 +202,17 @@ export async function buildCrossSwapTxForAllowanceHolder(
 ) {
   const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
   const spokePool = getSpokePool(originChainId);
-  const spokePoolPeriphery = getSpokePoolPeriphery("uniswap", originChainId);
+
   const deposit = await extractDepositDataStruct(crossSwapQuotes);
 
   let tx: PopulatedTransaction;
   let toAddress: string;
 
   if (crossSwapQuotes.originSwapQuote) {
+    const spokePoolPeriphery = getSpokePoolPeriphery(
+      crossSwapQuotes.originSwapQuote.peripheryAddress,
+      originChainId
+    );
     tx = await spokePoolPeriphery.populateTransaction.swapAndBridge(
       crossSwapQuotes.originSwapQuote.tokenIn.address,
       crossSwapQuotes.originSwapQuote.tokenOut.address,

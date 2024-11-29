@@ -131,12 +131,12 @@ export async function handleBaseSwapQueryParams({
   });
 
   // 3. Calculate fees based for full route
-  const fees = await calculateCrossSwapFees(crossSwapQuotes);
+  // const fees = await calculateCrossSwapFees(crossSwapQuotes);
 
   return {
     crossSwapQuotes: {
       ...crossSwapQuotes,
-      fees,
+      // fees,
     },
     integratorId,
     skipOriginTxEstimation,

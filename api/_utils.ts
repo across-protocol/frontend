@@ -971,7 +971,7 @@ export async function getBridgeQuoteForMinOutput(params: {
           { cause: err }
         );
       } else {
-        const message = `Upstream http request to ${err.request?.url} failed with ${err.status} ${err.message}`;
+        const message = `Upstream http request to ${err.request?.host} failed with ${err.response?.status}`;
         throw new AcrossApiError(
           {
             message,

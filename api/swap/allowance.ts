@@ -8,7 +8,10 @@ import {
   handleErrorCondition,
   latestGasPriceCache,
 } from "../_utils";
-import { buildCrossSwapTxForAllowanceHolder } from "../_dexes/cross-swap";
+import {
+  AMOUNT_TYPE,
+  buildCrossSwapTxForAllowanceHolder,
+} from "../_dexes/cross-swap";
 import {
   handleBaseSwapQueryParams,
   BaseSwapQueryParams,
@@ -96,7 +99,7 @@ const handler = async (
       : crossSwapQuotes.bridgeQuote.outputToken;
 
     const responseJson = {
-      fees: crossSwapQuotes.fees,
+      // fees: crossSwapQuotes.fees,
       checks: {
         allowance: {
           token: inputTokenAddress,
