@@ -83,13 +83,13 @@
     yargs "^17.7.2"
     zksync-web3 "^0.14.3"
 
-"@across-protocol/sdk@^3.2.14":
-  version "3.2.14"
-  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-3.2.14.tgz#74da88db3f000322659d51928378c00745c424c5"
-  integrity sha512-gM1Q0hz0IRX+FMaTdcOxIlRO1fzXJAcqvCJ2cSbblvXmn62slfNR2NLcPf1U+jqvDbkbLukKiO4LZWfM+DY5HA==
+"@across-protocol/sdk@^3.3.22":
+  version "3.3.22"
+  resolved "https://registry.yarnpkg.com/@across-protocol/sdk/-/sdk-3.3.22.tgz#d71a88fcf239141a170aec12e7c8dd05f9c8405a"
+  integrity sha512-+YIJm5SU8tjWWwD8TNsJRoHwJ2PhyhwggfAX6CP3dSHsEza8r8T9c4ijV6oTmIvZRxQo3rTMSzLkrCh/tQGoCg==
   dependencies:
     "@across-protocol/across-token" "^1.0.0"
-    "@across-protocol/constants" "^3.1.19"
+    "@across-protocol/constants" "^3.1.20"
     "@across-protocol/contracts" "^3.0.16"
     "@eth-optimism/sdk" "^3.3.1"
     "@ethersproject/bignumber" "^5.7.0"
