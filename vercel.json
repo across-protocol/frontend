@@ -18,7 +18,7 @@
     "api/cron-cache-gas-prices.ts": {
       "maxDuration": 90
     },
-		"api/cron-ping-endpoints.ts": {
+    "api/cron-ping-endpoints.ts": {
       "maxDuration": 90
     }
   },
