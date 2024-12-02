@@ -7,6 +7,7 @@ import {
   getProvider,
   handleErrorCondition,
   latestGasPriceCache,
+  Profiler,
 } from "../_utils";
 import {
   AMOUNT_TYPE,
@@ -30,6 +31,11 @@ const handler = async (
     query: request.query,
   });
   try {
+    const profiler = new Profiler({
+      at: "swap/allowance",
+      logger,
+    });
+    const mark = profiler.start("e2e endpoint runtime");
     const {
       crossSwapQuotes,
       integratorId,
@@ -142,7 +148,10 @@ const handler = async (
       expectedFillTime:
         crossSwapQuotes.bridgeQuote.suggestedFees.estimatedFillTimeSec,
     };
-
+    mark.stop({
+      crossSwapQuotes,
+      request,
+    });
     logger.debug({
       at: "Swap/allowance",
       message: "Response data",
