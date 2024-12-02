@@ -23,6 +23,7 @@ import { ElapsedTime } from "./ElapsedTime";
 import { DepositStatus } from "../types";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DateTime } from "luxon";
+import { useIndexerDepositsTracking } from "hooks/useIndexerDepositTracking";
 
 type Props = {
   depositTxHash: string;
@@ -47,6 +48,10 @@ export function DepositStatusUpperCard({
     toChainId,
     fromBridgePagePayload
   );
+
+  void useIndexerDepositsTracking([
+    { originChainId: fromChainId, depositTxnHash: depositTxHash },
+  ]);
 
   const depositTxSentTime = fromBridgePagePayload?.timeSigned;
   const depositTxCompletedTime = depositQuery.data?.depositTimestamp;
