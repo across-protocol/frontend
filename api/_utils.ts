@@ -86,6 +86,7 @@ import {
 import { Token } from "./_dexes/types";
 
 export { InputError, handleErrorCondition } from "./_errors";
+export const { Profiler } = sdk.utils;
 
 type LoggingUtility = sdk.relayFeeCalculator.Logger;
 type RpcProviderName = keyof typeof rpcProvidersJson.providers.urls;

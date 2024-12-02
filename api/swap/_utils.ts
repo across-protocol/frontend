@@ -10,6 +10,8 @@ import {
   getCachedTokenInfo,
   getWrappedNativeTokenAddress,
   getCachedTokenPrice,
+  Profiler,
+  getLogger,
 } from "../_utils";
 import {
   AMOUNT_TYPE,
@@ -48,6 +50,10 @@ export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
 export async function handleBaseSwapQueryParams({
   query,
 }: TypedVercelRequest<BaseSwapQueryParams>) {
+  const profiler = new Profiler({
+    at: "api/_utils#handleBaseSwapQueryParams",
+    logger: getLogger(),
+  });
   assert(query, BaseSwapQueryParamsSchema);
 
   const {
@@ -116,19 +122,25 @@ export async function handleBaseSwapQueryParams({
   ]);
 
   // 2. Get swap quotes and calldata based on the swap type
-  const crossSwapQuotes = await getCrossSwapQuotes({
-    amount,
-    inputToken,
-    outputToken,
-    depositor,
-    recipient: recipient || depositor,
-    slippageTolerance: Number(slippageTolerance),
-    type: amountType,
-    refundOnOrigin,
-    refundAddress,
-    isInputNative,
-    isOutputNative,
-  });
+  const crossSwapQuotes = await profiler.measureAsync(
+    getCrossSwapQuotes({
+      amount,
+      inputToken,
+      outputToken,
+      depositor,
+      recipient: recipient || depositor,
+      slippageTolerance: Number(slippageTolerance),
+      type: amountType,
+      refundOnOrigin,
+      refundAddress,
+      isInputNative,
+      isOutputNative,
+    }),
+    "getCrossSwapQuotes",
+    {
+      swapType: amountType,
+    }
+  );
 
   // 3. Calculate fees based for full route
   // const fees = await calculateCrossSwapFees(crossSwapQuotes);
