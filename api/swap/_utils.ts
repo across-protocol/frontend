@@ -11,7 +11,6 @@ import {
   getWrappedNativeTokenAddress,
   getCachedTokenPrice,
   Profiler,
-  getLogger,
 } from "../_utils";
 import {
   AMOUNT_TYPE,
@@ -52,7 +51,7 @@ export async function handleBaseSwapQueryParams({
 }: TypedVercelRequest<BaseSwapQueryParams>) {
   const profiler = new Profiler({
     at: "api/_utils#handleBaseSwapQueryParams",
-    logger: getLogger(),
+    logger: console,
   });
   assert(query, BaseSwapQueryParamsSchema);
 

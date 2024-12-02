@@ -9,10 +9,7 @@ import {
   latestGasPriceCache,
   Profiler,
 } from "../_utils";
-import {
-  AMOUNT_TYPE,
-  buildCrossSwapTxForAllowanceHolder,
-} from "../_dexes/cross-swap";
+import { buildCrossSwapTxForAllowanceHolder } from "../_dexes/cross-swap";
 import {
   handleBaseSwapQueryParams,
   BaseSwapQueryParams,
@@ -33,7 +30,7 @@ const handler = async (
   try {
     const profiler = new Profiler({
       at: "swap/allowance",
-      logger,
+      logger: console,
     });
     const mark = profiler.start("e2e endpoint runtime");
     const {

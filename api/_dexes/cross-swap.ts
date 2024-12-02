@@ -9,7 +9,6 @@ import {
   getBridgeQuoteForMinOutput,
   getSpokePool,
   Profiler,
-  getLogger,
 } from "../_utils";
 import {
   getBestUniswapCrossSwapQuotesForOutputA2A,
@@ -82,7 +81,7 @@ export async function getCrossSwapQuotes(
 export async function getCrossSwapQuotesForOutput(crossSwap: CrossSwap) {
   const profiler = new Profiler({
     at: "api/cross-swap#getCrossSwapQuotesForOutput",
-    logger: getLogger(),
+    logger: console,
   });
   const crossSwapType = getCrossSwapType({
     inputToken: crossSwap.inputToken.address,
