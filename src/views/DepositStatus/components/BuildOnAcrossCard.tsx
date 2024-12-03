@@ -23,7 +23,10 @@ export function BuildOnAcrossCard() {
             borderColor="teal-15"
             backgroundColor="black-700"
             onClick={() => {
-              window.location.replace("https://across.to/across-plus");
+              window.open(
+                "https://docs.across.to/use-cases/instant-bridging-in-your-application",
+                "_blank"
+              );
             }}
           >
             Start Building

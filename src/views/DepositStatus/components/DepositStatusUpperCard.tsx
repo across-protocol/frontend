@@ -15,7 +15,6 @@ import { ElapsedTime } from "./ElapsedTime";
 import { FromBridgePagePayload } from "views/Bridge/hooks/useBridgeAction";
 import { DateTime } from "luxon";
 import { useResolveFromBridgePagePayload } from "../hooks/useResolveFromBridgePagePayload";
-import SharedSocialsCard from "./SharedSocialsCard";
 import { useIndexerDepositsTracking } from "hooks/useIndexerDepositTracking";
 import DepositStatusAnimatedIcons from "./DepositStatusAnimatedIcons";
 
@@ -175,12 +174,6 @@ export function DepositStatusUpperCard({
           outputTokenSymbol={outputTokenSymbol}
           amountSent={amountAsBaseCurrency?.toString()}
           netFee={estimatedRewards?.netFeeAsBaseCurrency?.toString()}
-        />
-        <SharedSocialsCard
-          inputTokenSymbol={inputTokenSymbol}
-          fromChainId={fromChainId}
-          toChainId={toChainId}
-          amountSent={fromBridgePagePayload?.depositArgs?.initialAmount}
         />
       </DepositTimeCardSocialSharedWrapper>
     </Wrapper>
