@@ -45,9 +45,9 @@ export const BaseSwapQueryParamsSchema = type({
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
 
-export async function handleBaseSwapQueryParams({
-  query,
-}: TypedVercelRequest<BaseSwapQueryParams>) {
+export async function handleBaseSwapQueryParams(
+  query: TypedVercelRequest<BaseSwapQueryParams>["query"]
+) {
   assert(query, BaseSwapQueryParamsSchema);
 
   const {

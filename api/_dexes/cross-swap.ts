@@ -296,12 +296,12 @@ export async function getCrossSwapTxForPermit(
   permitDeadline: number
 ) {
   const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
-  const spokePoolPeriphery = getSpokePoolPeriphery("uniswap", originChainId);
   const deposit = await extractDepositDataStruct(crossSwapQuotes);
 
   let methodName: string;
   let argsWithoutSignature: Record<string, unknown>;
   if (crossSwapQuotes.originSwapQuote) {
+    const spokePoolPeriphery = crossSwapQuotes.originSwapQuote.peripheryAddress;
     methodName = "swapAndBridgeWithPermit";
     argsWithoutSignature = {
       swapToken: crossSwapQuotes.originSwapQuote.tokenIn.address,

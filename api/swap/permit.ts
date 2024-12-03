@@ -1,12 +1,22 @@
 import { VercelResponse } from "@vercel/node";
+import { assert, Infer, optional, type } from "superstruct";
 
 import { TypedVercelRequest } from "../_types";
-import { getLogger, handleErrorCondition } from "../_utils";
+import { getLogger, handleErrorCondition, positiveIntStr } from "../_utils";
 import { getCrossSwapTxForPermit } from "../_dexes/cross-swap";
 import { handleBaseSwapQueryParams, BaseSwapQueryParams } from "./_utils";
 
+export const PermitSwapQueryParamsSchema = type({
+  permitDeadline: optional(positiveIntStr()),
+});
+
+export type PermitSwapQueryParams = Infer<typeof PermitSwapQueryParamsSchema>;
+
+const DEFAULT_PERMIT_DEADLINE =
+  Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365; // 1 year
+
 const handler = async (
-  request: TypedVercelRequest<BaseSwapQueryParams>,
+  request: TypedVercelRequest<BaseSwapQueryParams & PermitSwapQueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -16,10 +26,20 @@ const handler = async (
     query: request.query,
   });
   try {
-    const { crossSwapQuotes } = await handleBaseSwapQueryParams(request);
+    // `/swap/permit` specific params validation
+    const { permitDeadline: _permitDeadline, ...restQuery } = request.query;
+    assert(
+      {
+        permitDeadline: _permitDeadline,
+      },
+      PermitSwapQueryParamsSchema
+    );
+    const permitDeadline = Number(_permitDeadline ?? DEFAULT_PERMIT_DEADLINE);
 
-    const permitDeadline = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365; // 1 year
+    // `/swap` specific params validation + quote generation
+    const { crossSwapQuotes } = await handleBaseSwapQueryParams(restQuery);
 
+    // Build tx for permit
     const crossSwapTxForPermit = await getCrossSwapTxForPermit(
       crossSwapQuotes,
       permitDeadline
