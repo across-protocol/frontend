@@ -15,6 +15,7 @@ const Staking = () => {
     claimActionMutation,
     unstakeActionMutation,
     isWrongNetwork,
+    isWrongNetworkHandler,
     poolData,
   } = useStakingView();
 
@@ -35,6 +36,7 @@ const Staking = () => {
               stakeActionMutation.isLoading || unstakeActionMutation.isLoading
             }
             isWrongNetwork={isWrongNetwork}
+            switchNetwork={isWrongNetworkHandler}
             isConnected={isConnected}
             stakeActionFn={stakeActionMutation.mutateAsync}
             unstakeActionFn={unstakeActionMutation.mutateAsync}
@@ -46,6 +48,8 @@ const Staking = () => {
             isConnected={isConnected}
             claimActionHandler={claimActionMutation.mutateAsync}
             isMutating={claimActionMutation.isLoading}
+            isWrongNetwork={isWrongNetwork}
+            switchNetwork={isWrongNetworkHandler}
           />
         </Wrapper>
       </LayoutV2>
