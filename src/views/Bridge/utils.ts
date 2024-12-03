@@ -12,8 +12,6 @@ import {
   interchangeableTokensMap,
   nonEthChains,
   GetBridgeFeesResult,
-  isDefined,
-  parseUnits,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
