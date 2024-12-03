@@ -76,5 +76,18 @@ export type CrossSwapQuotes = {
     suggestedFees: Awaited<ReturnType<typeof getSuggestedFees>>;
   };
   destinationSwapQuote?: SwapQuote;
-  originSwapQuote?: SwapQuote;
+  originSwapQuote?: SwapQuote & {
+    peripheryAddress: string;
+  };
+};
+
+export type CrossSwapQuotesWithFees = CrossSwapQuotes & {
+  fees: CrossSwapFees;
+};
+
+// { currency => amount }
+export type CrossSwapFees = {
+  bridgeFees: Record<string, number>;
+  originSwapFees?: Record<string, number>;
+  destinationSwapFees?: Record<string, number>;
 };

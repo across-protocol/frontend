@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import ProgressBar from "components/ProgressBar";
+import { PrimaryButton } from "components/Button";
 import { ReactComponent as UnstyledArrowIcon } from "assets/icons/chevron-down.svg";
 import { ReactComponent as II } from "assets/icons/info.svg";
 import { Divider as ExternalDivider } from "../../Staking.styles";
@@ -140,4 +141,8 @@ export const InputBlockWrapper = styled.div`
   > div {
     width: 100%;
   }
+`;
+
+export const SwitchNetworkButton = styled(PrimaryButton)`
+  width: 100%;
 `;

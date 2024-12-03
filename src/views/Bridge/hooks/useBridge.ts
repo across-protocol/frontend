@@ -59,15 +59,16 @@ export function useBridge() {
     (transferQuoteQuery.isInitialLoading || feesQuery.isInitialLoading) &&
     !transferQuote;
 
-  const { error: amountValidationError } = validateBridgeAmount(
-    parsedAmount,
-    quotedFees?.isAmountTooLow,
-    maxBalance,
-    limitsQuery.limits?.maxDeposit,
-    selectedRoute.type === "swap" && quotedSwap?.minExpectedInputTokenAmount
-      ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount)
-      : parsedAmount
-  );
+  const { error: amountValidationError, warn: amountValidationWarning } =
+    validateBridgeAmount(
+      parsedAmount,
+      quotedFees,
+      maxBalance,
+      limitsQuery.limits?.maxDeposit,
+      selectedRoute.type === "swap" && quotedSwap?.minExpectedInputTokenAmount
+        ? BigNumber.from(quotedSwap?.minExpectedInputTokenAmount)
+        : parsedAmount
+    );
   const isAmountValid = !amountValidationError;
 
   const {
@@ -138,6 +139,7 @@ export function useBridge() {
     userAmountInput,
     swapSlippage,
     amountValidationError,
+    amountValidationWarning,
     handleSelectFromChain,
     handleSelectToChain,
     handleSelectInputToken,

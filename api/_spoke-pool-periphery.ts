@@ -25,9 +25,7 @@ export function getSpokePoolPeripheryAddress(dex: string, chainId: number) {
   return address;
 }
 
-export function getSpokePoolPeriphery(dex: string, chainId: number) {
-  const address = getSpokePoolPeripheryAddress(dex, chainId);
-
+export function getSpokePoolPeriphery(address: string, chainId: number) {
   return SpokePoolV3Periphery__factory.connect(address, getProvider(chainId));
 }
 

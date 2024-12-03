@@ -23,6 +23,7 @@ const Bridge = () => {
     fees,
     balance,
     amountValidationError,
+    amountValidationWarning,
     userAmountInput,
     swapSlippage,
     parsedAmountInput,
@@ -78,6 +79,7 @@ const Bridge = () => {
             buttonLabel={buttonLabel}
             isBridgeDisabled={isBridgeDisabled}
             validationError={amountValidationError}
+            validationWarning={amountValidationWarning}
             balance={balance}
             isQuoteLoading={isQuoteLoading}
             swapQuote={swapQuote}

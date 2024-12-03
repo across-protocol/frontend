@@ -775,12 +775,18 @@ export const buildDepositForSimulation = (depositArgs: {
 export const getCachedTokenPrice = async (
   l1Token: string,
   baseCurrency: string = "eth",
-  historicalDateISO?: string
+  historicalDateISO?: string,
+  chainId?: number
 ): Promise<number> => {
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
-        params: { l1Token, baseCurrency, date: historicalDateISO },
+        params: {
+          l1Token,
+          chainId,
+          baseCurrency,
+          date: historicalDateISO,
+        },
       })
     ).data.price
   );
@@ -965,7 +971,7 @@ export async function getBridgeQuoteForMinOutput(params: {
           { cause: err }
         );
       } else {
-        const message = `Upstream http request to ${err.request?.url} failed with ${err.status} ${err.message}`;
+        const message = `Upstream http request to ${err.request?.host} failed with ${err.response?.status}`;
         throw new AcrossApiError(
           {
             message,
@@ -2037,7 +2043,7 @@ export function getLimitsBufferMultiplier(symbol: string) {
     ? JSON.parse(process.env.LIMITS_BUFFER_MULTIPLIERS)
     : {};
   const bufferMultiplier = ethers.utils.parseEther(
-    limitsBufferMultipliers[symbol] || "1"
+    limitsBufferMultipliers[symbol] || "0.8"
   );
   const multiplierCap = ethers.utils.parseEther("1");
   return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;

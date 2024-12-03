@@ -8,10 +8,17 @@
     {
       "path": "/api/cron-cache-gas-prices",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron-ping-endpoints",
+      "schedule": "* * * * *"
     }
   ],
   "functions": {
     "api/cron-cache-gas-prices.ts": {
+      "maxDuration": 90
+    },
+    "api/cron-ping-endpoints.ts": {
       "maxDuration": 90
     }
   },

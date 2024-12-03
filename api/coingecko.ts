@@ -107,7 +107,8 @@ const handler = async (
       BALANCER_V2_TOKENS ?? "[]"
     ).map(ethers.utils.getAddress);
 
-    chainId = coinGeckoAssetPlatformLookup[address] ?? chainId ?? 1;
+    chainId =
+      coinGeckoAssetPlatformLookup[address] ?? chainId ?? CHAIN_IDs.MAINNET;
 
     if (balancerV2PoolTokens.includes(ethers.utils.getAddress(address))) {
       if (dateStr) {

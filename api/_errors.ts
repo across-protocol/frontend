@@ -241,7 +241,7 @@ export function handleErrorCondition(
         { cause: error }
       );
     } else {
-      const message = `Upstream http request to ${error.request?.url} failed with ${error.status} ${error.message}`;
+      const message = `Upstream http request to ${error.request?.host} failed with ${error.response?.status}`;
       acrossApiError = new AcrossApiError(
         {
           message,
@@ -276,6 +276,7 @@ export function handleErrorCondition(
     at: endpoint,
     code: acrossApiError.code,
     message: `Status ${acrossApiError.status} - ${acrossApiError.message}`,
+    cause: acrossApiError.cause,
   });
 
   return response.status(acrossApiError.status).json(acrossApiError);

@@ -29,17 +29,18 @@ export function useTokenConversion(
     historicalDateISO,
     isDefined(l1Token)
   );
+
   const convertTokenToBaseCurrency = useCallback(
     (amount?: BigNumber) => {
       const price = query.data?.price;
       if (!isDefined(price) || !isDefined(amount)) {
         return undefined;
       }
-      const { decimals } = getTokenByAddress(l1Token);
+      const decimals = token?.decimals ?? getTokenByAddress(l1Token)?.decimals;
       const convertedAmount = ConvertDecimals(decimals, 18)(amount);
       return price.mul(convertedAmount).div(fixedPointAdjustment);
     },
-    [l1Token, query.data?.price]
+    [l1Token, token, query.data?.price]
   );
   return {
     convertTokenToBaseCurrency,

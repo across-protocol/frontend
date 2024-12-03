@@ -4,6 +4,8 @@ import { StakingActionFunctionType } from "./hooks/useStakingAction";
 type GenericStakingComponentProps = {
   isConnected: boolean;
   poolData: StakingPool;
+  isWrongNetwork: boolean;
+  switchNetwork: () => Promise<void>;
 };
 
 export type StakingRewardPropType = GenericStakingComponentProps & {
@@ -20,6 +22,5 @@ export type StakingFormPropType = GenericStakingComponentProps & {
   unstakeActionFn: StakingActionFunctionType;
   isDataLoading: boolean;
   isMutating: boolean;
-  isWrongNetwork: boolean;
   tokenSymbol: string;
 };

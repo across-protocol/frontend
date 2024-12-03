@@ -268,8 +268,10 @@ export const getRewardToken = (deposit: Deposit): TokenInfo | undefined => {
  * @returns The token info for the token with the given address
  */
 export const getTokenByAddress = (address: string): TokenInfo => {
-  const token = Object.values(TOKEN_SYMBOLS_MAP).find((token) =>
-    Object.values(token.addresses).includes(address)
+  const token = Object.values(tokenTable).find(
+    (token) =>
+      Object.values(token?.addresses ?? {}).includes(address) ||
+      token?.mainnetAddress === address
   );
   assert(token, "No token found for address: " + address);
   return getToken(token.symbol);
@@ -536,3 +538,6 @@ export const vercelApiBaseUrl =
 export const defaultSwapSlippage = Number(
   process.env.REACT_APP_DEFAULT_SWAP_SLIPPAGE || 0.5
 );
+
+export const indexerApiBaseUrl =
+  process.env.REACT_APP_INDEXER_BASE_URL || undefined;
