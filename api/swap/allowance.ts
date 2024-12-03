@@ -8,10 +8,7 @@ import {
   handleErrorCondition,
   latestGasPriceCache,
 } from "../_utils";
-import {
-  AMOUNT_TYPE,
-  buildCrossSwapTxForAllowanceHolder,
-} from "../_dexes/cross-swap";
+import { buildCrossSwapTxForAllowanceHolder } from "../_dexes/cross-swap";
 import {
   handleBaseSwapQueryParams,
   BaseSwapQueryParams,
@@ -35,7 +32,7 @@ const handler = async (
       integratorId,
       skipOriginTxEstimation,
       isInputNative,
-    } = await handleBaseSwapQueryParams(request);
+    } = await handleBaseSwapQueryParams(request.query);
 
     const crossSwapTx = await buildCrossSwapTxForAllowanceHolder(
       crossSwapQuotes,

@@ -24,6 +24,7 @@ import {
 import { getSpokePoolPeriphery } from "../_spoke-pool-periphery";
 import { tagIntegratorId } from "../_integrator-id";
 import { getMultiCallHandlerAddress } from "../_multicall-handler";
+import { getPermitTypedData } from "../_permit";
 import { CHAIN_IDs } from "../_constants";
 
 export type CrossSwapType =
@@ -255,6 +256,62 @@ export async function buildCrossSwapTxForAllowanceHolder(
     to: toAddress,
     data: integratorId ? tagIntegratorId(integratorId, tx.data!) : tx.data,
     value: tx.value,
+  };
+}
+
+export async function getCrossSwapTxForPermit(
+  crossSwapQuotes: CrossSwapQuotes,
+  permitDeadline: number
+) {
+  const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
+  const deposit = await extractDepositDataStruct(crossSwapQuotes);
+
+  let methodName: string;
+  let argsWithoutSignature: Record<string, unknown>;
+  if (crossSwapQuotes.originSwapQuote) {
+    const spokePoolPeriphery = crossSwapQuotes.originSwapQuote.peripheryAddress;
+    methodName = "swapAndBridgeWithPermit";
+    argsWithoutSignature = {
+      swapToken: crossSwapQuotes.originSwapQuote.tokenIn.address,
+      acrossInputToken: crossSwapQuotes.originSwapQuote.tokenOut.address,
+      routerCalldata: crossSwapQuotes.originSwapQuote.swapTx.data,
+      swapTokenAmount: crossSwapQuotes.originSwapQuote.maximumAmountIn,
+      minExpectedInputTokenAmount: crossSwapQuotes.originSwapQuote.minAmountOut,
+      depositData: deposit,
+      deadline: permitDeadline,
+    };
+  } else {
+    methodName = "depositWithPermit";
+    argsWithoutSignature = {
+      acrossInputToken: crossSwapQuotes.bridgeQuote.inputToken.address,
+      acrossInputAmount: crossSwapQuotes.bridgeQuote.inputAmount,
+      depositData: deposit,
+      deadline: permitDeadline,
+    };
+  }
+
+  const permitTypedData = await getPermitTypedData({
+    tokenAddress:
+      crossSwapQuotes.originSwapQuote?.tokenIn.address ||
+      crossSwapQuotes.bridgeQuote.inputToken.address,
+    chainId: originChainId,
+    ownerAddress: crossSwapQuotes.crossSwap.depositor,
+    spenderAddress: spokePoolPeriphery.address,
+    value:
+      crossSwapQuotes.originSwapQuote?.maximumAmountIn ||
+      crossSwapQuotes.bridgeQuote.inputAmount,
+    deadline: permitDeadline,
+  });
+  return {
+    permit: {
+      eip712: permitTypedData.eip712,
+    },
+    swapTx: {
+      chainId: originChainId,
+      to: spokePoolPeriphery.address,
+      methodName,
+      argsWithoutSignature,
+    },
   };
 }
 
