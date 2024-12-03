@@ -358,16 +358,21 @@ const handler = async (
       .mul(maxDepositShortDelay)
       .div(sdk.utils.fixedPointAdjustment);
 
+    const maximumDeposit = getMaxDeposit(
+      liquidReserves,
+      bufferedMaxDepositShortDelay,
+      limitsBufferMultiplier,
+      chainHasMaxBoundary,
+      routeInvolvesLiteChain
+    );
+
     const responseJson = {
       // Absolute minimum may be overridden by the environment.
-      minDeposit: maxBN(minDeposit, minDepositFloor).toString(),
-      maxDeposit: getMaxDeposit(
-        liquidReserves,
-        bufferedMaxDepositShortDelay,
-        limitsBufferMultiplier,
-        chainHasMaxBoundary,
-        routeInvolvesLiteChain
+      minDeposit: minBN(
+        maximumDeposit,
+        maxBN(minDeposit, minDepositFloor)
       ).toString(),
+      maxDeposit: maximumDeposit.toString(),
       maxDepositInstant: bufferedMaxDepositInstant.toString(),
       maxDepositShortDelay: bufferedMaxDepositShortDelay.toString(),
       recommendedDepositInstant: bufferedRecommendedDepositInstant.toString(),
