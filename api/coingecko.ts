@@ -1,6 +1,6 @@
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
-import { object, assert, Infer, optional, string, pattern } from "superstruct";
+import { object, Infer, optional, string, pattern } from "superstruct";
 import { TypedVercelRequest } from "./_types";
 import {
   getLogger,
@@ -8,6 +8,8 @@ import {
   validAddress,
   getBalancerV2TokenPrice,
   getCachedTokenPrice,
+  parseQuery,
+  positiveInt,
 } from "./_utils";
 import {
   CG_CONTRACTS_DEFERRED_TO_ID,
@@ -29,7 +31,9 @@ const {
 } = process.env;
 
 const CoingeckoQueryParamsSchema = object({
-  l1Token: validAddress(),
+  l1Token: optional(validAddress()),
+  tokenAddress: optional(validAddress()),
+  chainId: optional(positiveInt),
   baseCurrency: optional(string()),
   date: optional(pattern(string(), /\d{2}-\d{2}-\d{4}/)),
 });
@@ -47,13 +51,25 @@ const handler = async (
     query,
   });
   try {
-    assert(query, CoingeckoQueryParamsSchema);
+    let {
+      l1Token,
+      tokenAddress,
+      chainId,
+      baseCurrency,
+      date: dateStr,
+    } = parseQuery(query, CoingeckoQueryParamsSchema);
 
-    let { l1Token, baseCurrency, date: dateStr } = query;
+    let address = l1Token ?? tokenAddress;
+    if (!address) {
+      throw new InvalidParamError({
+        message: `Token Address is undefined. You must define either "l1Token", or "tokenAddress"`,
+        param: "l1Token, tokenAddress",
+      });
+    }
 
     // Format the params for consistency
     baseCurrency = (baseCurrency ?? "eth").toLowerCase();
-    l1Token = ethers.utils.getAddress(l1Token);
+    address = ethers.utils.getAddress(address);
 
     // Confirm that the base Currency is supported by Coingecko
     const isDerivedCurrency = SUPPORTED_CG_DERIVED_CURRENCIES.has(baseCurrency);
@@ -75,8 +91,8 @@ const handler = async (
 
     // Perform a 1-deep lookup to see if the provided l1Token is
     // to be "redirected" to another provided token contract address
-    if (redirectLookupAddresses[l1Token]) {
-      l1Token = redirectLookupAddresses[l1Token];
+    if (redirectLookupAddresses[address]) {
+      address = redirectLookupAddresses[address];
     }
 
     const coingeckoClient = Coingecko.get(
@@ -91,9 +107,10 @@ const handler = async (
       BALANCER_V2_TOKENS ?? "[]"
     ).map(ethers.utils.getAddress);
 
-    const platformId = coinGeckoAssetPlatformLookup[l1Token] ?? "ethereum";
+    chainId =
+      coinGeckoAssetPlatformLookup[address] ?? chainId ?? CHAIN_IDs.MAINNET;
 
-    if (balancerV2PoolTokens.includes(ethers.utils.getAddress(l1Token))) {
+    if (balancerV2PoolTokens.includes(ethers.utils.getAddress(address))) {
       if (dateStr) {
         throw new InvalidParamError({
           message: "Historical price not supported for BalancerV2 tokens",
@@ -101,7 +118,7 @@ const handler = async (
         });
       }
       if (baseCurrency === "usd") {
-        price = await getBalancerV2TokenPrice(l1Token);
+        price = await getBalancerV2TokenPrice(address);
       } else {
         throw new InvalidParamError({
           message: "Only CG base currency allowed for BalancerV2 tokens is usd",
@@ -117,20 +134,21 @@ const handler = async (
       const modifiedBaseCurrency = isDerivedCurrency ? "usd" : baseCurrency;
       if (dateStr) {
         price = await coingeckoClient.getContractHistoricDayPrice(
-          l1Token,
+          address,
           dateStr,
-          modifiedBaseCurrency
+          modifiedBaseCurrency,
+          chainId
         );
       } else {
-        [, price] = CG_CONTRACTS_DEFERRED_TO_ID.has(l1Token)
+        [, price] = CG_CONTRACTS_DEFERRED_TO_ID.has(address)
           ? await coingeckoClient.getCurrentPriceById(
-              l1Token,
+              address,
               modifiedBaseCurrency
             )
           : await coingeckoClient.getCurrentPriceByContract(
-              l1Token,
+              address,
               modifiedBaseCurrency,
-              platformId
+              chainId
             );
       }
     }
