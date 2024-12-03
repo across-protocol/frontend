@@ -1,6 +1,8 @@
 import { CHAIN_IDs, TOKEN_SYMBOLS_MAP } from "@across-protocol/constants";
-import { ethers } from "ethers";
+import { ethers, Wallet } from "ethers";
 import dotenv from "dotenv";
+import axios from "axios";
+import { getProvider } from "../../api/_utils";
 dotenv.config();
 
 export const { SWAP_API_BASE_URL = "http://localhost:3000" } = process.env;
@@ -65,7 +67,7 @@ export const MIN_OUTPUT_CASES = [
   {
     labels: ["B2A", "MIN_OUTPUT", "USDC - APE"],
     params: {
-      amount: ethers.utils.parseUnits("1", 18).toString(),
+      amount: ethers.utils.parseUnits("3", 18).toString(),
       tradeType: "minOutput",
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
       originChainId,
@@ -101,6 +103,30 @@ export const MIN_OUTPUT_CASES = [
       depositor,
     },
   },
+  {
+    labels: ["A2B", "MIN_OUTPUT", "USDC - WETH"],
+    params: {
+      amount: ethers.utils.parseUnits("0.001", 18).toString(),
+      tradeType: "minOutput",
+      inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
+      originChainId,
+      outputToken: TOKEN_SYMBOLS_MAP.WETH.addresses[destinationChainId],
+      destinationChainId,
+      depositor,
+    },
+  },
+  {
+    labels: ["A2B", "MIN_OUTPUT", "WETH - USDC"],
+    params: {
+      amount: ethers.utils.parseUnits("1", 6).toString(),
+      tradeType: "minOutput",
+      inputToken: TOKEN_SYMBOLS_MAP.WETH.addresses[originChainId],
+      originChainId,
+      outputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[destinationChainId],
+      destinationChainId,
+      depositor,
+    },
+  },
   // A2A
   {
     labels: ["A2A", "MIN_OUTPUT", "bridged USDC - APE"],
@@ -110,7 +136,7 @@ export const MIN_OUTPUT_CASES = [
       inputToken:
         TOKEN_SYMBOLS_MAP["USDC.e"].addresses[originChainId] ||
         TOKEN_SYMBOLS_MAP.USDbC.addresses[originChainId],
-      originChainId: CHAIN_IDs.BASE,
+      originChainId,
       outputToken: anyDestinationOutputTokens[destinationChainId], // APE Coin
       destinationChainId,
       depositor,
@@ -142,4 +168,58 @@ export function filterTestCases(
     return matches.length === labelsToFilter.length;
   });
   return filteredTestCases;
+}
+
+export async function swap() {
+  const filterString = process.argv[2];
+  const testCases = [...MIN_OUTPUT_CASES, ...EXACT_OUTPUT_CASES];
+  const filteredTestCases = filterTestCases(testCases, filterString);
+  for (const testCase of filteredTestCases) {
+    console.log("\nTest case:", testCase.labels.join(" "));
+    console.log("Params:", testCase.params);
+    const response = await axios.get(
+      `${SWAP_API_BASE_URL}/api/swap/allowance`,
+      {
+        params: testCase.params,
+      }
+    );
+    console.log(response.data);
+
+    if (process.env.DEV_WALLET_PK) {
+      const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
+        getProvider(testCase.params.originChainId)
+      );
+
+      if (response.data.approvalTxns) {
+        console.log("Approval needed...");
+        let step = 1;
+        for (const approvalTxn of response.data.approvalTxns) {
+          const stepLabel = `(${step}/${response.data.approvalTxns.length})`;
+          const tx = await wallet.sendTransaction({
+            to: approvalTxn.to,
+            data: approvalTxn.data,
+          });
+          console.log(`${stepLabel} Approval tx hash:`, tx.hash);
+          await tx.wait();
+          console.log(`${stepLabel} Approval tx mined`);
+          step++;
+        }
+      }
+
+      try {
+        const tx = await wallet.sendTransaction({
+          to: response.data.swapTx.to,
+          data: response.data.swapTx.data,
+          value: response.data.swapTx.value,
+          gasLimit: response.data.swapTx.gas,
+          gasPrice: response.data.swapTx.gasPrice,
+        });
+        console.log("Tx hash: ", tx.hash);
+        await tx.wait();
+        console.log("Tx mined");
+      } catch (e) {
+        console.error("Tx reverted", e);
+      }
+    }
+  }
 }
