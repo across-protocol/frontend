@@ -91,7 +91,7 @@ export async function getCrossSwapQuotesForOutput(crossSwap: CrossSwap) {
   });
 
   if (crossSwapType === CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE) {
-    return await profiler.measureAsync(
+    return profiler.measureAsync(
       getCrossSwapQuotesForOutputB2B(crossSwap),
       "getCrossSwapQuotesForOutputB2B",
       crossSwap
@@ -99,7 +99,7 @@ export async function getCrossSwapQuotesForOutput(crossSwap: CrossSwap) {
   }
 
   if (crossSwapType === CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY) {
-    return await profiler.measureAsync(
+    return profiler.measureAsync(
       getCrossSwapQuotesForOutputB2A(crossSwap),
       "getCrossSwapQuotesForOutputB2A",
       crossSwap
@@ -107,7 +107,7 @@ export async function getCrossSwapQuotesForOutput(crossSwap: CrossSwap) {
   }
 
   if (crossSwapType === CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE) {
-    return await profiler.measureAsync(
+    return profiler.measureAsync(
       getCrossSwapQuotesForOutputA2B(crossSwap),
       "getCrossSwapQuotesForOutputA2B",
       crossSwap
@@ -115,7 +115,7 @@ export async function getCrossSwapQuotesForOutput(crossSwap: CrossSwap) {
   }
 
   if (crossSwapType === CROSS_SWAP_TYPE.ANY_TO_ANY) {
-    return await profiler.measureAsync(
+    return profiler.measureAsync(
       getCrossSwapQuotesForOutputA2A(crossSwap),
       "getCrossSwapQuotesForOutputA2A",
       crossSwap
