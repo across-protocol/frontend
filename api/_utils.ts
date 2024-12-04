@@ -2044,7 +2044,7 @@ export function getLimitsBufferMultiplier(symbol: string) {
     ? JSON.parse(process.env.LIMITS_BUFFER_MULTIPLIERS)
     : {};
   const bufferMultiplier = ethers.utils.parseEther(
-    limitsBufferMultipliers[symbol] || "1"
+    limitsBufferMultipliers[symbol] || "0.8"
   );
   const multiplierCap = ethers.utils.parseEther("1");
   return bufferMultiplier.gt(multiplierCap) ? multiplierCap : bufferMultiplier;

@@ -13,6 +13,7 @@ import {
   InnerPoolStakeInfo,
   ArrowIconUp,
   ArrowIconDown,
+  SwitchNetworkButton,
 } from "./StakingForm.styles";
 
 import { Tooltip } from "components/Tooltip";
@@ -32,6 +33,7 @@ export const StakingForm = ({
   stakeActionFn,
   unstakeActionFn,
   isWrongNetwork,
+  switchNetwork,
   isDataLoading,
   isMutating,
   poolData: originPoolData,
@@ -114,21 +116,27 @@ export const StakingForm = ({
         </Tabs>
         <InputBlockWrapper>
           {isConnected ? (
-            <StakingInputBlock
-              value={amount ?? ""}
-              setValue={setAmount}
-              valid={isAmountValid}
-              invalid={isAmountInvalid}
-              poolTokenSymbol={tokenSymbol}
-              maxValue={buttonMaxValueText}
-              stakingAction={stakingAction}
-              onClickHandler={buttonHandler}
-              displayLoader={isMutating}
-              warningButtonColor={stakingAction === "unstake"}
-              disableInput={
-                isDataLoading || isMutating || !poolData.poolEnabled
-              }
-            />
+            isWrongNetwork ? (
+              <SwitchNetworkButton size="lg" onClick={() => switchNetwork()}>
+                Switch network
+              </SwitchNetworkButton>
+            ) : (
+              <StakingInputBlock
+                value={amount ?? ""}
+                setValue={setAmount}
+                valid={isAmountValid}
+                invalid={isAmountInvalid}
+                poolTokenSymbol={tokenSymbol}
+                maxValue={buttonMaxValueText}
+                stakingAction={stakingAction}
+                onClickHandler={buttonHandler}
+                displayLoader={isMutating}
+                warningButtonColor={stakingAction === "unstake"}
+                disableInput={
+                  isDataLoading || isMutating || !poolData.poolEnabled
+                }
+              />
+            )
           ) : (
             <ConnectWalletButton reasonToConnect={stakingAction} />
           )}
