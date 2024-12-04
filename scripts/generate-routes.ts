@@ -102,7 +102,23 @@ const enabledRoutes = {
         [CHAIN_IDs.POLYGON]: "0x9220Fa27ae680E4e8D9733932128FA73362E0393",
         [CHAIN_IDs.OPTIMISM]: "0x6f4A733c7889f038D77D4f540182Dda17423CcbF",
         [CHAIN_IDs.ARBITRUM]: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
-        // [CHAIN_IDs.BASE]: "0xbcfbCE9D92A516e3e7b0762AE218B4194adE34b4",
+      },
+    },
+    spokePoolPeripheryAddresses: {
+      "uniswap-swapRouter02": {
+        [CHAIN_IDs.POLYGON]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.OPTIMISM]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.ARBITRUM]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.BASE]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.ZK_SYNC]: "0xB007dFe9A6b70e1AB5BD5E97C22e47C5e0c0B8D8",
+        [CHAIN_IDs.WORLD_CHAIN]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.BLAST]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.ZORA]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+        [CHAIN_IDs.MAINNET]: "0x8EB5FF2e23FD7789e59989aDe055A398800E394e",
+      },
+      "uniswap-universalRouter": {
+        [CHAIN_IDs.OPTIMISM]: "0xaED9bBFdCC63219d77D54F8427aeb84C2Be46c5f",
+        [CHAIN_IDs.ARBITRUM]: "0xaED9bBFdCC63219d77D54F8427aeb84C2Be46c5f",
       },
     },
     routes: transformChainConfigs(enabledMainnetChainConfigs),
@@ -131,6 +147,9 @@ const enabledRoutes = {
         [CHAIN_IDs.OPTIMISM_SEPOLIA]:
           "0x17496824Ba574A4e9De80110A91207c4c63e552a", // Mocked
       },
+    },
+    spokePoolPeripheryAddresses: {
+      uniswap: {},
     },
     routes: transformChainConfigs(enabledSepoliaChainConfigs),
   },
@@ -356,6 +375,21 @@ async function generateRoutes(hubPoolChainId = 1) {
     claimAndStakeAddress: utils.getAddress(config.claimAndStakeAddress),
     swapAndBridgeAddresses: Object.entries(
       config.swapAndBridgeAddresses
+    ).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: Object.entries(value).reduce(
+          (acc, [chainId, address]) => ({
+            ...acc,
+            [chainId]: utils.getAddress(address as string),
+          }),
+          {}
+        ),
+      }),
+      {}
+    ),
+    spokePoolPeripheryAddresses: Object.entries(
+      config.spokePoolPeripheryAddresses
     ).reduce(
       (acc, [key, value]) => ({
         ...acc,
