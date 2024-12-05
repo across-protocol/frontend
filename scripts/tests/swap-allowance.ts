@@ -21,7 +21,7 @@ const MIN_OUTPUT_CASES = [
   {
     labels: ["B2B", "MIN_OUTPUT", "USDC - USDC"],
     params: {
-      amount: ethers.utils.parseUnits("1", 6).toString(),
+      amount: ethers.utils.parseUnits("10", 6).toString(),
       tradeType: "minOutput",
       inputToken: TOKEN_SYMBOLS_MAP.USDC.addresses[originChainId],
       originChainId,

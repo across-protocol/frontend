@@ -10,6 +10,7 @@ import {
   getCachedTokenPrice,
   parseQuery,
   positiveInt,
+  boolStr,
 } from "./_utils";
 import {
   CG_CONTRACTS_DEFERRED_TO_ID,
@@ -35,10 +36,11 @@ const CoingeckoQueryParamsSchema = object({
   tokenAddress: optional(validAddress()),
   chainId: optional(positiveInt),
   baseCurrency: optional(string()),
+  searchAcrossChains: optional(boolStr()), // Tells CG client to find the token price by ID (more reliable)
   date: optional(pattern(string(), /\d{2}-\d{2}-\d{4}/)),
 });
 
-type CoingeckoQueryParams = Infer<typeof CoingeckoQueryParamsSchema>;
+export type CoingeckoQueryParams = Infer<typeof CoingeckoQueryParamsSchema>;
 
 const handler = async (
   { query }: TypedVercelRequest<CoingeckoQueryParams>,
@@ -56,6 +58,7 @@ const handler = async (
       tokenAddress,
       chainId,
       baseCurrency,
+      searchAcrossChains,
       date: dateStr,
     } = parseQuery(query, CoingeckoQueryParamsSchema);
 
@@ -140,16 +143,18 @@ const handler = async (
           chainId
         );
       } else {
-        [, price] = CG_CONTRACTS_DEFERRED_TO_ID.has(address)
-          ? await coingeckoClient.getCurrentPriceById(
-              address,
-              modifiedBaseCurrency
-            )
-          : await coingeckoClient.getCurrentPriceByContract(
-              address,
-              modifiedBaseCurrency,
-              chainId
-            );
+        [, price] =
+          CG_CONTRACTS_DEFERRED_TO_ID.has(address) || searchAcrossChains
+            ? await coingeckoClient.getCurrentPriceById(
+                address,
+                modifiedBaseCurrency,
+                chainId
+              )
+            : await coingeckoClient.getCurrentPriceByContract(
+                address,
+                modifiedBaseCurrency,
+                chainId
+              );
       }
     }
 
@@ -162,10 +167,10 @@ const handler = async (
         TOKEN_SYMBOLS_MAP[
           baseCurrency.toUpperCase() as keyof typeof TOKEN_SYMBOLS_MAP
         ];
-      quotePrice = await getCachedTokenPrice(
-        token.addresses[CHAIN_IDs.MAINNET],
-        "usd"
-      );
+      quotePrice = await getCachedTokenPrice({
+        l1Token: token.addresses[CHAIN_IDs.MAINNET],
+        baseCurrency: "usd",
+      });
       quotePrecision = token.decimals;
     }
     price = Number((price / quotePrice).toFixed(quotePrecision));

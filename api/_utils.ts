@@ -84,6 +84,7 @@ import {
   TokenNotFoundError,
 } from "./_errors";
 import { Token } from "./_dexes/types";
+import { CoingeckoQueryParams } from "./coingecko";
 
 export { InputError, handleErrorCondition } from "./_errors";
 export const { Profiler } = sdk.utils;
@@ -773,20 +774,16 @@ export const buildDepositForSimulation = (depositArgs: {
  * @param date An optional date string in the format of `DD-MM-YYYY` to resolve a historical price
  * @returns The price of the `l1Token` token.
  */
-export const getCachedTokenPrice = async (
-  l1Token: string,
-  baseCurrency: string = "eth",
-  historicalDateISO?: string,
-  chainId?: number
-): Promise<number> => {
+export const getCachedTokenPrice = async ({
+  baseCurrency = "eth",
+  ...params
+}: CoingeckoQueryParams): Promise<number> => {
   return Number(
     (
       await axios(`${resolveVercelEndpoint()}/api/coingecko`, {
         params: {
-          l1Token,
-          chainId,
           baseCurrency,
-          date: historicalDateISO,
+          ...params,
         },
       })
     ).data.price
@@ -1751,9 +1748,15 @@ export async function fetchStakingPool(
 
   const [acrossTokenAddress, tokenUSDExchangeRate] = await Promise.all([
     acceleratingDistributor.rewardToken(),
-    getCachedTokenPrice(poolUnderlyingTokenAddress, "usd"),
+    getCachedTokenPrice({
+      l1Token: poolUnderlyingTokenAddress,
+      baseCurrency: "usd",
+    }),
   ]);
-  const acxPriceInUSD = await getCachedTokenPrice(acrossTokenAddress, "usd");
+  const acxPriceInUSD = await getCachedTokenPrice({
+    l1Token: acrossTokenAddress,
+    baseCurrency: "usd",
+  });
 
   const lpTokenERC20 = ERC20__factory.connect(lpTokenAddress, provider);
 
@@ -1944,7 +1947,7 @@ export async function getBalancerV2TokenPrice(
     tokens.map(async (token: string, i: number): Promise<number> => {
       const tokenContract = ERC20__factory.connect(token, provider);
       const [price, decimals] = await Promise.all([
-        getCachedTokenPrice(token, "usd"),
+        getCachedTokenPrice({ l1Token: token, baseCurrency: "usd" }),
         tokenContract.decimals(),
       ]);
       const balance = parseFloat(

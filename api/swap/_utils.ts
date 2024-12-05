@@ -142,12 +142,12 @@ export async function handleBaseSwapQueryParams({
   );
 
   // 3. Calculate fees based for full route
-  // const fees = await calculateCrossSwapFees(crossSwapQuotes);
+  const fees = await calculateCrossSwapFees(crossSwapQuotes);
 
   return {
     crossSwapQuotes: {
       ...crossSwapQuotes,
-      // fees,
+      fees,
     },
     integratorId,
     skipOriginTxEstimation,
@@ -189,18 +189,18 @@ async function calculateSwapFee(
 ): Promise<Record<string, number>> {
   const { tokenIn, tokenOut, expectedAmountOut, expectedAmountIn } = swapQuote;
   const [inputTokenPriceBase, outputTokenPriceBase] = await Promise.all([
-    getCachedTokenPrice(
-      tokenIn.address,
+    getCachedTokenPrice({
+      tokenAddress: tokenIn.address,
       baseCurrency,
-      undefined,
-      tokenIn.chainId
-    ),
-    getCachedTokenPrice(
-      tokenOut.address,
+      chainId: tokenIn.chainId,
+      searchAcrossChains: "true",
+    }),
+    getCachedTokenPrice({
+      tokenAddress: tokenOut.address,
       baseCurrency,
-      undefined,
-      tokenOut.chainId
-    ),
+      chainId: tokenOut.chainId,
+      searchAcrossChains: "true",
+    }),
   ]);
 
   const normalizedIn =
@@ -219,12 +219,12 @@ async function calculateBridgeFee(
   baseCurrency: string
 ): Promise<Record<string, number>> {
   const { inputToken, suggestedFees } = bridgeQuote;
-  const inputTokenPriceBase = await getCachedTokenPrice(
-    inputToken.address,
+  const inputTokenPriceBase = await getCachedTokenPrice({
+    tokenAddress: inputToken.address,
     baseCurrency,
-    undefined,
-    inputToken.chainId
-  );
+    chainId: inputToken.chainId,
+    searchAcrossChains: "true",
+  });
   const normalizedFee =
     parseFloat(
       formatUnits(suggestedFees.totalRelayFee.total, inputToken.decimals)
