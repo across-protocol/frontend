@@ -26,10 +26,11 @@ export function EarnByLpAndStakingCard({
 
   return (
     <EarnActionCard
+      color="aqua"
       title={
         <Text color="white">
           Earn{" "}
-          <Text as="span" color="teal">
+          <Text as="span" color="aqua">
             {selectedRoutePool
               ? formatWeiPct(selectedRoutePool.apyData.maxApy, 3)
               : "-"}
@@ -48,8 +49,8 @@ export function EarnByLpAndStakingCard({
         <ButtonWrapper>
           <Button
             size="md"
-            textColor="teal"
-            borderColor="teal-15"
+            textColor="white"
+            borderColor="aqua-15"
             backgroundColor="black-700"
             onClick={() => {
               const tokenSymbol = BRIDGED_USDC_SYMBOLS.includes(
@@ -68,7 +69,7 @@ export function EarnByLpAndStakingCard({
               });
             }}
           >
-            Add liquidity
+            Add Liquidity
           </Button>
         </ButtonWrapper>
       }
@@ -79,6 +80,7 @@ export function EarnByLpAndStakingCard({
 const LogoWrapper = styled.div`
   margin-left: -8px;
   margin-right: -8px;
+  height: 48px;
 `;
 
 const ButtonWrapper = styled.div`
