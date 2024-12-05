@@ -229,6 +229,12 @@ export function getChainInfo(chainId: number): ChainInfo {
   return chainInfo;
 }
 
+export const chainEndpointToId = Object.fromEntries(
+  chainInfoList.map((chain) => {
+    return [chain.name.toLowerCase().replaceAll(" ", ""), chain.chainId];
+  }, [])
+);
+
 // For destination chains with no native ETH support, we will send WETH even if the receiver is an EOA
 export const nonEthChains = [
   ChainId.POLYGON,
