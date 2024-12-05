@@ -12,6 +12,7 @@ import {
   interchangeableTokensMap,
   nonEthChains,
   GetBridgeFeesResult,
+  chainEndpointToId,
 } from "utils";
 import { SwapQuoteApiResponse } from "utils/serverless-api/prod/swap-quote";
 
@@ -146,7 +147,7 @@ const defaultRouteFilter = {
 };
 
 export function getInitialRoute(filter: RouteFilter = {}) {
-  const routeFromQueryParams = getRouteFromQueryParams(filter);
+  const routeFromUrl = getRouteFromUrl(filter);
   const routeFromFilter = findEnabledRoute({
     inputTokenSymbol:
       filter.inputTokenSymbol ??
@@ -161,7 +162,7 @@ export function getInitialRoute(filter: RouteFilter = {}) {
     ...enabledRoutes[0],
     type: "bridge",
   };
-  return routeFromQueryParams ?? routeFromFilter ?? defaultRoute;
+  return routeFromUrl ?? routeFromFilter ?? defaultRoute;
 }
 
 export function findEnabledRoute(
@@ -373,8 +374,11 @@ export function getAllChains() {
     });
 }
 
-export function getRouteFromQueryParams(overrides?: RouteFilter) {
+export function getRouteFromUrl(overrides?: RouteFilter) {
   const params = new URLSearchParams(window.location.search);
+
+  const preferredToChainId =
+    chainEndpointToId[window.location.pathname.substring(1)];
 
   const fromChain =
     Number(
@@ -386,7 +390,8 @@ export function getRouteFromQueryParams(overrides?: RouteFilter) {
 
   const toChain =
     Number(
-      params.get("to") ??
+      preferredToChainId ??
+        params.get("to") ??
         params.get("toChain") ??
         params.get("destinationChainId") ??
         overrides?.toChain
