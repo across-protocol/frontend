@@ -34,8 +34,11 @@ export const UNIVERSAL_ROUTER_ADDRESS = {
 export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
   const getRouterAddress = (chainId: number) =>
     UNIVERSAL_ROUTER_ADDRESS[chainId];
-  const getPeripheryAddress = (chainId: number) =>
-    getSpokePoolPeripheryAddress("uniswap-universalRouter", chainId);
+  const getOriginSwapEntryPoint = (chainId: number) =>
+    ({
+      name: "SpokePoolPeriphery",
+      address: getSpokePoolPeripheryAddress("uniswap-universalRouter", chainId),
+    }) as const;
 
   const fetchFn = async (
     swap: Swap,
@@ -127,7 +130,7 @@ export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
 
   return {
     getRouterAddress,
-    getPeripheryAddress,
+    getOriginSwapEntryPoint,
     fetchFn,
   };
 }
