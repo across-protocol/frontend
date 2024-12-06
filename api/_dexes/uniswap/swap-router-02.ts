@@ -94,10 +94,11 @@ export function getSwapRouter02Strategy(
         swapTx,
       };
     } else {
-      const { input, output } = await getUniswapClassicIndicativeQuoteFromApi(
+      const indicativeQuote = await getUniswapClassicIndicativeQuoteFromApi(
         { ...swap, swapper: swap.recipient },
         tradeType
       );
+      const { input, output } = indicativeQuote;
 
       const expectedAmountIn = BigNumber.from(input.amount);
       const maxAmountIn =
@@ -119,9 +120,9 @@ export function getSwapRouter02Strategy(
         expectedAmountIn,
         slippageTolerance: swap.slippageTolerance,
         swapTx: {
-          to: "0x",
-          data: "0x",
-          value: "0x",
+          to: "0x0",
+          data: "0x0",
+          value: "0x0",
         },
       };
     }
