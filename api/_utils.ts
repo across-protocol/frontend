@@ -912,7 +912,7 @@ export async function getBridgeQuoteForMinOutput(params: {
     // input amount equal to minOutputAmount
     let tries = 0;
     let adjustedInputAmount = params.minOutputAmount
-      .mul(utils.parseEther("1.0001")) // 0.01% basis point buffer
+      .mul(utils.parseEther("1.0005")) // 5 basis points buffer
       .div(sdk.utils.fixedPointAdjustment);
     let adjustedQuote = await getSuggestedFees({
       ...baseParams,
