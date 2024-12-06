@@ -911,12 +911,14 @@ export async function getBridgeQuoteForMinOutput(params: {
     // 1. Use the suggested fees to get an indicative quote with
     // input amount equal to minOutputAmount
     let tries = 0;
-    let adjustedInputAmount = params.minOutputAmount;
-    let indicativeQuote = await getSuggestedFees({
+    let adjustedInputAmount = params.minOutputAmount
+      .mul(utils.parseEther("1.0001")) // 0.01% basis point buffer
+      .div(sdk.utils.fixedPointAdjustment);
+    let adjustedQuote = await getSuggestedFees({
       ...baseParams,
       amount: adjustedInputAmount.toString(),
     });
-    let adjustmentPct = indicativeQuote.totalRelayFee.pct;
+    let adjustmentPct = adjustedQuote.totalRelayFee.pct;
     let finalQuote: Awaited<ReturnType<typeof getSuggestedFees>> | undefined =
       undefined;
 
@@ -925,10 +927,6 @@ export async function getBridgeQuoteForMinOutput(params: {
       adjustedInputAmount = adjustedInputAmount
         .mul(utils.parseEther("1").add(adjustmentPct))
         .div(sdk.utils.fixedPointAdjustment);
-      const adjustedQuote = await getSuggestedFees({
-        ...baseParams,
-        amount: adjustedInputAmount.toString(),
-      });
       const outputAmount = adjustedInputAmount.sub(
         adjustedInputAmount
           .mul(adjustedQuote.totalRelayFee.pct)
@@ -942,6 +940,11 @@ export async function getBridgeQuoteForMinOutput(params: {
         adjustmentPct = adjustedQuote.totalRelayFee.pct;
         tries++;
       }
+
+      adjustedQuote = await getSuggestedFees({
+        ...baseParams,
+        amount: adjustedInputAmount.toString(),
+      });
     }
 
     if (!finalQuote) {
