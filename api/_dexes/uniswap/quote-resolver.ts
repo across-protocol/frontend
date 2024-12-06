@@ -88,10 +88,7 @@ export async function getUniswapCrossSwapQuotesForOutputB2A(
       ...destinationSwap,
       amount: crossSwap.amount.toString(),
     },
-    TradeType.EXACT_OUTPUT,
-    {
-      useIndicativeQuote: true,
-    }
+    TradeType.EXACT_OUTPUT
   );
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
@@ -205,10 +202,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
         indicativeQuoteBuffer
       ).toString(),
     },
-    TradeType.EXACT_INPUT,
-    {
-      useIndicativeQuote: true,
-    }
+    TradeType.EXACT_INPUT
   );
   assertMinOutputAmount(
     adjOriginSwapQuote.minAmountOut,
@@ -373,10 +367,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
       ...destinationSwap,
       amount: crossSwap.amount.toString(),
     },
-    TradeType.EXACT_OUTPUT,
-    {
-      useIndicativeQuote: true,
-    }
+    TradeType.EXACT_OUTPUT
   );
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
@@ -416,10 +407,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
         indicativeQuoteBuffer
       ).toString(),
     },
-    TradeType.EXACT_INPUT,
-    {
-      useIndicativeQuote: true,
-    }
+    TradeType.EXACT_INPUT
   );
   assertMinOutputAmount(
     adjOriginSwapQuote.minAmountOut,
