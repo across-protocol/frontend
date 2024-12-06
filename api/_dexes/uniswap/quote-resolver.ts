@@ -171,13 +171,13 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
     );
   }
 
-  const spokePoolPeripheryAddress =
-    strategy.getPeripheryAddress(originSwapChainId);
+  const originSwapEntryPoint =
+    strategy.getOriginSwapEntryPoint(originSwapChainId);
   const originSwap = {
     chainId: originSwapChainId,
     tokenIn: crossSwap.inputToken,
     tokenOut: bridgeableInputToken,
-    recipient: spokePoolPeripheryAddress,
+    recipient: originSwapEntryPoint.address,
     slippageTolerance: crossSwap.slippageTolerance,
     type: crossSwap.type,
   };
@@ -215,7 +215,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
     destinationSwapQuote: undefined,
     originSwapQuote: {
       ...adjOriginSwapQuote,
-      peripheryAddress: spokePoolPeripheryAddress,
+      entryPointContract: originSwapEntryPoint,
     },
   };
 }
@@ -341,11 +341,13 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   const multiCallHandlerAddress = getMultiCallHandlerAddress(
     destinationSwapChainId
   );
+  const originSwapEntryPoint =
+    originStrategy.getOriginSwapEntryPoint(originSwapChainId);
   const originSwap = {
     chainId: originSwapChainId,
     tokenIn: crossSwap.inputToken,
     tokenOut: bridgeableInputToken,
-    recipient: originStrategy.getPeripheryAddress(originSwapChainId),
+    recipient: originSwapEntryPoint.address,
     slippageTolerance: crossSwap.slippageTolerance,
     type: crossSwap.type,
   };
@@ -418,7 +420,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
     bridgeQuote,
     originSwapQuote: {
       ...adjOriginSwapQuote,
-      peripheryAddress: originStrategy.getPeripheryAddress(originSwapChainId),
+      entryPointContract: originSwapEntryPoint,
     },
   };
 }

@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import { getSuggestedFees } from "../_utils";
-import { AmountType, CrossSwapType, LeftoverType } from "./cross-swap";
+import { AmountType, CrossSwapType } from "./cross-swap";
 
 export type { AmountType, CrossSwapType };
 
@@ -31,7 +31,6 @@ export type CrossSwap = {
   recipient: string;
   slippageTolerance: number;
   type: AmountType;
-  leftoverType?: LeftoverType;
   refundOnOrigin: boolean;
   refundAddress?: string;
   isInputNative?: boolean;
@@ -77,9 +76,20 @@ export type CrossSwapQuotes = {
   };
   destinationSwapQuote?: SwapQuote;
   originSwapQuote?: SwapQuote & {
-    peripheryAddress: string;
+    entryPointContract: OriginSwapEntryPointContract;
   };
 };
+
+export type OriginSwapEntryPointContract =
+  | {
+      name: "SpokePoolPeriphery";
+      address: string;
+    }
+  | {
+      name: "UniversalSwapAndBridge";
+      address: string;
+      dex: SupportedDex;
+    };
 
 export type CrossSwapQuotesWithFees = CrossSwapQuotes & {
   fees: CrossSwapFees;

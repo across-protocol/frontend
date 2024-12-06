@@ -5,7 +5,7 @@ import { SwapRouter } from "@uniswap/router-sdk";
 import { CHAIN_IDs } from "@across-protocol/constants";
 
 import { getLogger } from "../../_utils";
-import { Swap, SwapQuote } from "../types";
+import { OriginSwapEntryPointContract, Swap, SwapQuote } from "../types";
 import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
 import {
   addMarkupToAmount,
@@ -18,6 +18,7 @@ import {
   UniswapClassicQuoteFromApi,
 } from "./trading-api";
 import { RouterTradeAdapter } from "./adapter";
+import { getUniversalSwapAndBridgeAddress } from "../utils";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
 export const SWAP_ROUTER_02_ADDRESS = {
@@ -32,10 +33,27 @@ export const SWAP_ROUTER_02_ADDRESS = {
   [CHAIN_IDs.ZORA]: "0x7De04c96BE5159c3b5CeffC82aa176dc81281557",
 };
 
-export function getSwapRouter02Strategy(): UniswapQuoteFetchStrategy {
+export function getSwapRouter02Strategy(
+  originSwapEntryPointContractName: OriginSwapEntryPointContract["name"]
+): UniswapQuoteFetchStrategy {
   const getRouterAddress = (chainId: number) => SWAP_ROUTER_02_ADDRESS[chainId];
-  const getPeripheryAddress = (chainId: number) =>
-    getSpokePoolPeripheryAddress("uniswap-swapRouter02", chainId);
+  const getOriginSwapEntryPoint = (chainId: number) => {
+    if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
+      return {
+        name: "SpokePoolPeriphery",
+        address: getSpokePoolPeripheryAddress("uniswap-swapRouter02", chainId),
+      } as const;
+    } else if (originSwapEntryPointContractName === "UniversalSwapAndBridge") {
+      return {
+        name: "UniversalSwapAndBridge",
+        address: getUniversalSwapAndBridgeAddress("uniswap", chainId),
+        dex: "uniswap",
+      } as const;
+    }
+    throw new Error(
+      `Unknown origin swap entry point contract '${originSwapEntryPointContractName}'`
+    );
+  };
 
   const fetchFn = async (
     swap: Swap,
@@ -127,7 +145,7 @@ export function getSwapRouter02Strategy(): UniswapQuoteFetchStrategy {
 
   return {
     getRouterAddress,
-    getPeripheryAddress,
+    getOriginSwapEntryPoint,
     fetchFn,
   };
 }

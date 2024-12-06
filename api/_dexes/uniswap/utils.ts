@@ -8,7 +8,16 @@ import { Swap, SwapQuote, Token } from "../types";
 
 export type UniswapQuoteFetchStrategy = {
   getRouterAddress: (chainId: number) => string;
-  getPeripheryAddress: (chainId: number) => string;
+  getOriginSwapEntryPoint: (chainId: number) =>
+    | {
+        name: "SpokePoolPeriphery";
+        address: string;
+      }
+    | {
+        name: "UniversalSwapAndBridge";
+        address: string;
+        dex: "uniswap" | "1inch";
+      };
   fetchFn: UniswapQuoteFetchFn;
 };
 export type UniswapQuoteFetchFn = (
