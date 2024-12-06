@@ -910,6 +910,8 @@ export async function getBridgeQuoteForMinOutput(params: {
   try {
     // 1. Use the suggested fees to get an indicative quote with
     // input amount equal to minOutputAmount
+    const chunkSize = 3;
+    const maxTries = 3;
     let tries = 0;
     let adjustedInputAmount = params.minOutputAmount;
     let indicativeQuote = await getSuggestedFees({
@@ -921,27 +923,41 @@ export async function getBridgeQuoteForMinOutput(params: {
       undefined;
 
     // 2. Adjust input amount to meet minOutputAmount
-    while (tries < 3) {
-      adjustedInputAmount = adjustedInputAmount
-        .mul(utils.parseEther("1").add(adjustmentPct))
-        .div(sdk.utils.fixedPointAdjustment);
-      const adjustedQuote = await getSuggestedFees({
-        ...baseParams,
-        amount: adjustedInputAmount.toString(),
+    while (tries < maxTries) {
+      const inputAmounts = Array.from({ length: chunkSize }).map((_, i) => {
+        const buffer = utils.parseEther("0.001").mul(i);
+        return adjustedInputAmount
+          .mul(utils.parseEther("1").add(adjustmentPct).add(buffer))
+          .div(sdk.utils.fixedPointAdjustment);
       });
-      const outputAmount = adjustedInputAmount.sub(
-        adjustedInputAmount
-          .mul(adjustedQuote.totalRelayFee.pct)
-          .div(sdk.utils.fixedPointAdjustment)
+      const quotes = await Promise.all(
+        inputAmounts.map((inputAmount) => {
+          return getSuggestedFees({
+            ...baseParams,
+            amount: inputAmount.toString(),
+          });
+        })
       );
 
-      if (outputAmount.gte(params.minOutputAmount)) {
-        finalQuote = adjustedQuote;
-        break;
-      } else {
-        adjustmentPct = adjustedQuote.totalRelayFee.pct;
-        tries++;
+      for (const [i, quote] of Object.entries(quotes)) {
+        const inputAmount = inputAmounts[Number(i)];
+        const outputAmount = inputAmount.sub(
+          inputAmount
+            .mul(quote.totalRelayFee.pct)
+            .div(sdk.utils.fixedPointAdjustment)
+        );
+        if (outputAmount.gte(params.minOutputAmount)) {
+          finalQuote = quote;
+          break;
+        }
       }
+
+      if (finalQuote) {
+        break;
+      }
+
+      adjustedInputAmount = inputAmounts[inputAmounts.length - 1];
+      tries++;
     }
 
     if (!finalQuote) {
