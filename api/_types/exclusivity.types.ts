@@ -1,48 +1,59 @@
 export type RelayerFillLimit = {
-    maxFillSize?: number;
-    minProfitThreshold?: number;
-    balanceMultiplier?: number;
+  maxFillSize?: number;
+  minProfitThreshold?: number;
+  balanceMultiplier?: number;
 };
-
 
 export type RelayerFillConfig = Required<RelayerFillLimit> & {
   originChainIds: number[];
   tokens: {
     [inputToken: string]: RelayerFillLimit & {
-      originChainIds?: number[];
-      [destinationChainId: number]: {
-          [outputToken: string]: { [maxFillSize: number]: number },
-      }
-    }
-  }
-}
+      originChainIds: number[];
+      [originChainId: number] : {
+        [destinationChainId: number]: RelayerFillLimit & {
+          [outputToken: string]: { [maxFillSize: number]: number };
+        };
+      };
+    };
+  };
+};
+
+POST: api/relayer/config/<token>/<originChainId>
+
+
 
 export const SampleConfig: RelayerFillConfig = {
   originChainIds: [1, 10, 137],
   maxFillSize: 10_000, // USD
   minProfitThreshold: 0.0001, // 1bps
-  balanceMultiplier: 0.5, 
+  balanceMultiplier: 0.5,
+
+
+
+
 
   tokens: {
-    WETH: {
-      // originChainIds: [59144],
-      42161: {
-        WETH: {
-          500: 0.0005,
-          1000: 0.001,
-          10_000: 0.0001,
-        },
-      }
-    },
     USDC: {
-      42161: {
-        "USDC.e" : {
+      balanceMultiplier: 0.3,
+      10: {
+        42161: {
+          USDC: {
             100: 0.0001,
-         },
-         USDC: {
-            100: 0.0005,
-         },
-      }
-    }
-  }
-}
+            1000: 0.0002,
+            10000: 0.0005,
+          },
+          "USDC.e": {
+            100: 0.0002,
+            1000: 0.0006,
+          }
+        },
+        59144: {
+          "USDC": {
+            100: 0.0002,
+            1000: 0.0005,
+          }
+        }
+      },
+    },
+  },
+};
