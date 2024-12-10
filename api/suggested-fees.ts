@@ -56,10 +56,18 @@ const SuggestedFeesQueryParamsSchema = type({
   depositMethod: optional(enums(["depositV3", "depositExclusive"])),
 });
 
+const SuggestedFeesBodySchema = type({
+  message: optional(string()),
+});
+
 type SuggestedFeesQueryParams = Infer<typeof SuggestedFeesQueryParamsSchema>;
+type SuggestedBodyParams = Infer<typeof SuggestedFeesBodySchema>;
 
 const handler = async (
-  { query }: TypedVercelRequest<SuggestedFeesQueryParams>,
+  {
+    query,
+    body,
+  }: TypedVercelRequest<SuggestedFeesQueryParams, SuggestedBodyParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
@@ -67,6 +75,7 @@ const handler = async (
     at: "SuggestedFees",
     message: "Query data",
     query,
+    body,
   });
   try {
     const { QUOTE_BLOCK_BUFFER, QUOTE_BLOCK_PRECISION } = process.env;
@@ -77,6 +86,7 @@ const handler = async (
     const hubPool = getHubPool(provider);
 
     assert(query, SuggestedFeesQueryParamsSchema);
+    assert(body, SuggestedFeesBodySchema);
 
     let {
       amount: amountInput,
@@ -84,9 +94,10 @@ const handler = async (
       skipAmountLimit,
       recipient,
       relayer,
-      message,
       depositMethod = "depositV3",
     } = query;
+
+    const message = body.message ?? query.message;
 
     const {
       l1Token,
