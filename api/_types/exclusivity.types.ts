@@ -1,56 +1,65 @@
-export type RelayerFillLimit = {
-  originChainId: number;
-  inputToken: string;
-  destinationChainId: number;
-  outputToken: string;
-  minOutputAmount?: number;
-  maxOutputAmount?: number;
-  minExclusivityPeriod?: number;
-  minProfitThreshold?: number;
-  balanceMultiplier?: number;
-  msgFill?: boolean;
-};
+import { boolean, Infer, object, optional } from "superstruct";
+import { positiveFloatStr, positiveIntStr, validAddress } from "../_utils";
 
-// Example config.
-export const RelayerConfigUpdate: RelayerFillLimit[] = [
-  {
-    originChainId: 1,
-    inputToken: "",
-    destinationChainId: 42161,
-    outputToken: "",
-    minExclusivityPeriod: 20,
-    minProfitThreshold: 0.0003,
-    balanceMultiplier: 0.6,
-    maxOutputAmount: 2500,
-  },
-  {
-    originChainId: 10,
-    inputToken: "",
-    destinationChainId: 42161,
-    outputToken: "",
-    minExclusivityPeriod: 5,
-    minProfitThreshold: 0.0003,
-    balanceMultiplier: 0.6,
-    maxOutputAmount: 2500,
-  },
-  {
-    originChainId: 137,
-    inputToken: "",
-    destinationChainId: 42161,
-    outputToken: "",
-    minExclusivityPeriod: 5,
-    minProfitThreshold: 0.0003,
-    balanceMultiplier: 0.6,
-    maxOutputAmount: 2500,
-  },
-  {
-    originChainId: 324,
-    inputToken: "",
-    destinationChainId: 42161,
-    outputToken: "",
-    minExclusivityPeriod: 5,
-    minProfitThreshold: 0.0003,
-    balanceMultiplier: 0.6,
-    maxOutputAmount: 2500,
-  },
-];
+export const RelayerFillLimitSchema = object({
+  originChainId: positiveIntStr(),
+  destinationChainId: positiveIntStr(),
+  inputToken: validAddress(),
+  outputToken: validAddress(),
+  minOutputAmount: positiveIntStr(),
+  maxOutputAmount: positiveIntStr(),
+  minProfitThreshold: positiveFloatStr(),
+  minExclusivityPeriod: optional(positiveIntStr()),
+  balanceMultiplier: optional(positiveFloatStr()),
+  msgFill: optional(boolean()),
+});
+
+export type RelayerFillLimit = Infer<typeof RelayerFillLimitSchema>;
+
+// // Example config.
+// export const RelayerConfigUpdate: RelayerFillLimit[] = [
+//   {
+//     originChainId: "1",
+//     inputToken: "",
+//     destinationChainId: "42161",
+//     outputToken: "",
+//     minExclusivityPeriod: "20",
+//     minProfitThreshold: "0.0003",
+//     balanceMultiplier: "0.6",
+//     minOutputAmount: "1",
+//     maxOutputAmount: "250",
+//   },
+//   {
+//     originChainId: "10",
+//     inputToken: "",
+//     destinationChainId: "42161",
+//     outputToken: "",
+//     minExclusivityPeriod: "5",
+//     minProfitThreshold: "0.0003",
+//     balanceMultiplier: "0.6",
+//     minOutputAmount: "251",
+//     maxOutputAmount: "500",
+//   },
+//   {
+//     originChainId: "137",
+//     inputToken: "",
+//     destinationChainId: "42161",
+//     outputToken: "",
+//     minExclusivityPeriod: "5",
+//     minProfitThreshold: "0.0003",
+//     balanceMultiplier: "0.6",
+//     minOutputAmount: "501",
+//     maxOutputAmount: "1000",
+//   },
+//   {
+//     originChainId: "324",
+//     inputToken: "",
+//     destinationChainId: "42161",
+//     outputToken: "",
+//     minExclusivityPeriod: "5",
+//     minProfitThreshold: "0.0003",
+//     balanceMultiplier: "0.6",
+//     minOutputAmount: "1001",
+//     maxOutputAmount: "2500",
+//   },
+// ];
