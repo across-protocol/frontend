@@ -5,20 +5,20 @@ import {
   getWhiteListedRelayers,
   MAX_MESSAGE_AGE_SECONDS,
 } from "./_exclusivity/utils";
-import { RelayerFillLimit, TypedVercelRequest } from "./_types";
+import { RelayerConfigUpdate, TypedVercelRequest } from "./_types";
 
 const handlePostRequest = async (
-  request: TypedVercelRequest<RelayerFillLimit[]>,
+  request: TypedVercelRequest<RelayerConfigUpdate>,
   response: VercelResponse
 ) => {
-  const { message } = request.body;
+  const body = request.body as RelayerConfigUpdate;
   const { signature } = request.headers;
-  const { timestamp } = JSON.parse(message);
+  const { timestamp, relayerFillLimits } = body;
   if (!isTimestampValid(timestamp, MAX_MESSAGE_AGE_SECONDS)) {
     return response.status(400).json({ message: "Message too old" });
   }
 
-  const relayer = getRelayerFromSignature(signature, message);
+  const relayer = getRelayerFromSignature(signature, JSON.stringify(body));
 
   if (!getWhiteListedRelayers().includes(relayer)) {
     return response.status(401).json({ message: "Unauthorized" });

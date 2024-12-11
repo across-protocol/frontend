@@ -16,6 +16,11 @@ export const RelayerFillLimitSchema = object({
 
 export type RelayerFillLimit = Infer<typeof RelayerFillLimitSchema>;
 
+export type RelayerConfigUpdate = {
+  timestamp: number;
+  relayerFillLimits: RelayerFillLimit[];
+};
+
 // // Example config.
 // export const RelayerConfigUpdate: RelayerFillLimit[] = [
 //   {

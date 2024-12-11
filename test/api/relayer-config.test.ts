@@ -1,5 +1,9 @@
 import handler from "../../api/relayer-config";
-import { RelayerFillLimit, TypedVercelRequest } from "../../api/_types";
+import {
+  RelayerConfigUpdate,
+  RelayerFillLimit,
+  TypedVercelRequest,
+} from "../../api/_types";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import * as utils from "../../api/_exclusivity/utils";
@@ -37,10 +41,8 @@ describe("Relayer Config API", () => {
       headers: {
         signature: signature,
       },
-      body: {
-        message: messageString,
-      },
-    } as TypedVercelRequest<RelayerFillLimit[]>;
+      body: message,
+    } as TypedVercelRequest<RelayerConfigUpdate>;
 
     await handler(request, response);
 
@@ -60,10 +62,8 @@ describe("Relayer Config API", () => {
       headers: {
         signature: signature,
       },
-      body: {
-        message: JSON.stringify(message),
-      },
-    } as TypedVercelRequest<RelayerFillLimit[]>;
+      body: message,
+    } as TypedVercelRequest<RelayerConfigUpdate>;
 
     await handler(request, response);
 
@@ -84,8 +84,8 @@ describe("Relayer Config API", () => {
       headers: {
         signature: signature,
       },
-      body: { message: JSON.stringify(message) },
-    } as TypedVercelRequest<RelayerFillLimit[]>;
+      body: message,
+    } as TypedVercelRequest<RelayerConfigUpdate>;
 
     await handler(request, response);
 
