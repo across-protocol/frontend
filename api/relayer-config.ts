@@ -22,13 +22,12 @@ const handlePostRequest = async (
     return response.status(400).json({ message: "Message too old" });
   }
 
-  if (!authorization) {
-    return response.status(401).json({ message: "Unauthorized" });
-  }
-
-  const relayer = getRelayerFromSignature(authorization, JSON.stringify(body));
-
-  if (!getWhiteListedRelayers().includes(relayer)) {
+  if (
+    !authorization ||
+    !getWhiteListedRelayers().includes(
+      getRelayerFromSignature(authorization, JSON.stringify(body))
+    )
+  ) {
     return response.status(401).json({ message: "Unauthorized" });
   }
 
