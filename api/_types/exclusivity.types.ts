@@ -1,17 +1,17 @@
 import { boolean, Infer, object, optional } from "superstruct";
-import { positiveIntStr, validAddress } from "../_utils";
+import { positiveFloatStr, positiveIntStr, validAddress } from "../_utils";
 
 export const RelayerFillLimitSchema = object({
   originChainId: positiveIntStr(),
   destinationChainId: positiveIntStr(),
   inputToken: validAddress(),
   outputToken: validAddress(),
-  minOutputAmount: optional(positiveIntStr()),
-  maxOutputAmount: optional(positiveIntStr()),
+  minOutputAmount: positiveIntStr(),
+  maxOutputAmount: positiveIntStr(),
+  minProfitThreshold: positiveFloatStr(),
   minExclusivityPeriod: optional(positiveIntStr()),
-  minProfitThreshold: optional(positiveIntStr()),
-  balanceMultiplier: optional(positiveIntStr()),
-  msgFill: boolean(),
+  balanceMultiplier: optional(positiveFloatStr()),
+  msgFill: optional(boolean()),
 });
 
 export type RelayerFillLimit = Infer<typeof RelayerFillLimitSchema>;
