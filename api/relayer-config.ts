@@ -20,8 +20,6 @@ const handleGetRequest = async (
 
   const relayer = await getRelayerFromSignature(signature, message);
 
-  console.log("relayer", relayer);
-
   if (!whiteListedRelayers.includes(relayer)) {
     return response.status(401).json({ message: "Unauthorized" });
   }
