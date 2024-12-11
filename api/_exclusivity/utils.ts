@@ -12,7 +12,7 @@ export const getRelayerFromSignature = async (
   return ethers.utils.verifyMessage(message, signature);
 };
 
-export const isMessageFresh = (
+export const isTimestampValid = (
   timestamp: number,
   maxAgeSeconds: number
 ): boolean => {

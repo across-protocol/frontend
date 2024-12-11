@@ -1,7 +1,7 @@
 import { VercelResponse } from "@vercel/node";
 import {
   getRelayerFromSignature,
-  isMessageFresh,
+  isTimestampValid,
   whiteListedRelayers,
 } from "./_exclusivity/utils";
 import { TypedVercelRequest } from "./_types";
@@ -15,7 +15,7 @@ const handleGetRequest = async (
   const { signature, message } = request.query;
 
   const { timestamp, ...restOfMessage } = JSON.parse(message);
-  if (!isMessageFresh(timestamp, MAX_MESSAGE_AGE_SECONDS)) {
+  if (!isTimestampValid(timestamp, MAX_MESSAGE_AGE_SECONDS)) {
     return response.status(400).json({ message: "Message too old" });
   }
 
@@ -39,7 +39,7 @@ const handlePostRequest = async (
   const { signature, message } = request.body;
 
   const { timestamp, ...restOfMessage } = message;
-  if (!isMessageFresh(timestamp, MAX_MESSAGE_AGE_SECONDS)) {
+  if (!isTimestampValid(timestamp, MAX_MESSAGE_AGE_SECONDS)) {
     return response.status(400).json({ message: "Message too old" });
   }
 
