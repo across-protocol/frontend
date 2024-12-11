@@ -1,16 +1,12 @@
 import { VercelResponse } from "@vercel/node";
+import {
+  getRelayerFromSignature,
+  isMessageFresh,
+  whiteListedRelayers,
+} from "./_exclusivity/utils";
 import { TypedVercelRequest } from "./_types";
-import { ethers } from "ethers";
 
-// TODO: prevent replay attacks by checking the timestamp of the message or using a nonce
-const getRelayerFromSignature = async (signature: string, message: string) => {
-  return ethers.utils.verifyMessage(message, signature);
-};
-
-// TODO: get this from gh
-const whiteListedRelayers = [
-  "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D", // dev wallet
-];
+export const MAX_MESSAGE_AGE_SECONDS = 300;
 
 const handleGetRequest = async (
   request: TypedVercelRequest<any>,
@@ -18,7 +14,15 @@ const handleGetRequest = async (
 ) => {
   const { signature, message } = request.query;
 
-  const relayer = await getRelayerFromSignature(signature, message);
+  const { timestamp, ...restOfMessage } = JSON.parse(message);
+  if (!isMessageFresh(timestamp, MAX_MESSAGE_AGE_SECONDS)) {
+    return response.status(400).json({ message: "Message too old" });
+  }
+
+  const relayer = await getRelayerFromSignature(
+    signature,
+    JSON.stringify(restOfMessage)
+  );
 
   if (!whiteListedRelayers.includes(relayer)) {
     return response.status(401).json({ message: "Unauthorized" });
@@ -34,9 +38,14 @@ const handlePostRequest = async (
 ) => {
   const { signature, message } = request.body;
 
+  const { timestamp, ...restOfMessage } = message;
+  if (!isMessageFresh(timestamp, MAX_MESSAGE_AGE_SECONDS)) {
+    return response.status(400).json({ message: "Message too old" });
+  }
+
   const relayer = await getRelayerFromSignature(
     signature,
-    JSON.stringify(message)
+    JSON.stringify(restOfMessage)
   );
 
   if (!whiteListedRelayers.includes(relayer)) {
@@ -51,13 +60,14 @@ const handler = async (
   request: TypedVercelRequest<any>,
   response: VercelResponse
 ) => {
-  if(["GET","POST"].includes(request.method) {
-    return request.method === "GET" ?  handleGetRequest(request, response) : handlePostRequest(request, response);
-   } else {
-     response.setHeader("Allow", ["GET", "POST"]);
-     response.status(405).end(`Method ${request.method} Not Allowed`);
+  if (request.method && ["GET", "POST"].includes(request.method)) {
+    return request.method === "GET"
+      ? handleGetRequest(request, response)
+      : handlePostRequest(request, response);
+  } else {
+    response.setHeader("Allow", ["GET", "POST"]);
+    response.status(405).end(`Method ${request.method} Not Allowed`);
   }
- 
 };
 
 export default handler;
