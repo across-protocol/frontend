@@ -1,12 +1,8 @@
-import handler from "../../api/relayer-config";
-import {
-  RelayerConfigUpdate,
-  RelayerFillLimit,
-  TypedVercelRequest,
-} from "../../api/_types";
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import * as utils from "../../api/_exclusivity/utils";
+import { TypedRelayerConfigUpdateRequest } from "../../api/_types";
+import handler from "../../api/relayer-config";
 const { MAX_MESSAGE_AGE_SECONDS } = utils;
 
 const getMockedResponse = () => {
@@ -39,10 +35,10 @@ describe("Relayer Config API", () => {
     const request = {
       method: "POST",
       headers: {
-        signature: signature,
+        authorization: signature,
       },
       body: message,
-    } as TypedVercelRequest<RelayerConfigUpdate>;
+    } as TypedRelayerConfigUpdateRequest;
 
     await handler(request, response);
 
@@ -60,10 +56,10 @@ describe("Relayer Config API", () => {
     const request = {
       method: "POST",
       headers: {
-        signature: signature,
+        authorization: signature,
       },
       body: message,
-    } as TypedVercelRequest<RelayerConfigUpdate>;
+    } as TypedRelayerConfigUpdateRequest;
 
     await handler(request, response);
 
@@ -82,10 +78,10 @@ describe("Relayer Config API", () => {
     const request = {
       method: "POST",
       headers: {
-        signature: signature,
+        authorization: signature,
       },
       body: message,
-    } as TypedVercelRequest<RelayerConfigUpdate>;
+    } as TypedRelayerConfigUpdateRequest;
 
     await handler(request, response);
 
