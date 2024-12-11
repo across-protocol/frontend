@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { RelayerFillLimit } from "../_types";
 
 // TODO: get this from gh
 export const whiteListedRelayers = [
@@ -19,3 +20,12 @@ export const isTimestampValid = (
   const currentTime = Math.floor(Date.now() / 1000);
   return currentTime - timestamp <= maxAgeSeconds;
 };
+
+export async function updateLimits(
+  relayer: string,
+  limits: RelayerFillLimit[]
+): Promise<void> {
+  relayer; // todo
+  limits; // todo
+  return;
+}

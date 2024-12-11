@@ -2,9 +2,10 @@ import { VercelResponse } from "@vercel/node";
 import {
   getRelayerFromSignature,
   isTimestampValid,
+  updateLimits,
   whiteListedRelayers,
 } from "./_exclusivity/utils";
-import { TypedVercelRequest } from "./_types";
+import { RelayerFillLimitsSchema, TypedVercelRequest } from "./_types";
 
 export const MAX_MESSAGE_AGE_SECONDS = 300;
 
@@ -52,7 +53,14 @@ const handlePostRequest = async (
     return response.status(401).json({ message: "Unauthorized" });
   }
 
-  // Handle POST request
+  if (!RelayerFillLimitsSchema.is(message)) {
+    return response
+      .status(400)
+      .json({ message: "Invalid configuration payload" });
+  }
+
+  await updateLimits(relayer, restOfMessage);
+
   response.status(200).json({ message: "POST request received" });
 };
 
