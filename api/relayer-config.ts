@@ -51,15 +51,13 @@ const handler = async (
   request: TypedVercelRequest<any>,
   response: VercelResponse
 ) => {
-  if (request.method === "GET") {
-    await handleGetRequest(request, response);
-  } else if (request.method === "POST") {
-    await handlePostRequest(request, response);
-  } else {
-    // Method not allowed
-    response.setHeader("Allow", ["GET", "POST"]);
-    response.status(405).end(`Method ${request.method} Not Allowed`);
+  if(["GET","POST"].includes(request.method) {
+    return request.method === "GET" ?  handleGetRequest(request, response) : handlePostRequest(request, response);
+   } else {
+     response.setHeader("Allow", ["GET", "POST"]);
+     response.status(405).end(`Method ${request.method} Not Allowed`);
   }
+ 
 };
 
 export default handler;
