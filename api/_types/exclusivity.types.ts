@@ -1,4 +1,4 @@
-import { boolean, Infer, object, optional } from "superstruct";
+import { array, boolean, Infer, object, optional } from "superstruct";
 import { positiveFloatStr, positiveIntStr, validAddress } from "../_utils";
 
 export const RelayerFillLimitSchema = object({
@@ -13,6 +13,8 @@ export const RelayerFillLimitSchema = object({
   balanceMultiplier: optional(positiveFloatStr()),
   msgFill: optional(boolean()),
 });
+
+export const RelayerFillLimitArraySchema = array(RelayerFillLimitSchema);
 
 export type RelayerFillLimit = Infer<typeof RelayerFillLimitSchema>;
 
