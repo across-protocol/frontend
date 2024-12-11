@@ -1,81 +1,49 @@
 import { VercelResponse } from "@vercel/node";
 import {
   getRelayerFromSignature,
+  getWhiteListedRelayers,
   isTimestampValid,
+  MAX_MESSAGE_AGE_SECONDS,
   updateLimits,
-  whiteListedRelayers,
 } from "./_exclusivity/utils";
-import { RelayerFillLimitsSchema, TypedVercelRequest } from "./_types";
+import {
+  RelayerConfigUpdate,
+  RelayerFillLimitArraySchema,
+  TypedRelayerConfigUpdateRequest,
+} from "./_types";
 
-export const MAX_MESSAGE_AGE_SECONDS = 300;
-
-const handleGetRequest = async (
-  request: TypedVercelRequest<any>,
+const handler = async (
+  request: TypedRelayerConfigUpdateRequest,
   response: VercelResponse
 ) => {
-  const { signature, message } = request.query;
+  if (request.method !== "POST") {
+    return response.status(405).end(`Method ${request.method} Not Allowed`);
+  }
 
-  const { timestamp, ...restOfMessage } = JSON.parse(message);
+  const body = request.body as RelayerConfigUpdate;
+  const { authorization } = request.headers;
+  const { relayerFillLimits, timestamp } = body;
   if (!isTimestampValid(timestamp, MAX_MESSAGE_AGE_SECONDS)) {
     return response.status(400).json({ message: "Message too old" });
   }
 
-  const relayer = await getRelayerFromSignature(
-    signature,
-    JSON.stringify(restOfMessage)
-  );
+  if (!authorization) {
+    return response.status(401).json({ message: "Unauthorized" });
+  }
+  const relayer = getRelayerFromSignature(authorization, JSON.stringify(body));
 
-  if (!whiteListedRelayers.includes(relayer)) {
+  if (!getWhiteListedRelayers().includes(relayer)) {
     return response.status(401).json({ message: "Unauthorized" });
   }
 
-  // Handle authenticated GET request
-  response.status(200).json({ message: "Authenticated GET request received" });
-};
-
-const handlePostRequest = async (
-  request: TypedVercelRequest<any>,
-  response: VercelResponse
-) => {
-  const { signature, message } = request.body;
-
-  const { timestamp, ...restOfMessage } = message;
-  if (!isTimestampValid(timestamp, MAX_MESSAGE_AGE_SECONDS)) {
-    return response.status(400).json({ message: "Message too old" });
-  }
-
-  const relayer = await getRelayerFromSignature(
-    signature,
-    JSON.stringify(restOfMessage)
-  );
-
-  if (!whiteListedRelayers.includes(relayer)) {
-    return response.status(401).json({ message: "Unauthorized" });
-  }
-
-  if (!RelayerFillLimitsSchema.is(message)) {
+  if (!RelayerFillLimitArraySchema.is(relayerFillLimits)) {
     return response
       .status(400)
       .json({ message: "Invalid configuration payload" });
   }
 
-  await updateLimits(relayer, restOfMessage);
-
-  response.status(200).json({ message: "POST request received" });
-};
-
-const handler = async (
-  request: TypedVercelRequest<any>,
-  response: VercelResponse
-) => {
-  if (request.method && ["GET", "POST"].includes(request.method)) {
-    return request.method === "GET"
-      ? handleGetRequest(request, response)
-      : handlePostRequest(request, response);
-  } else {
-    response.setHeader("Allow", ["GET", "POST"]);
-    response.status(405).end(`Method ${request.method} Not Allowed`);
-  }
+  await updateLimits(relayer, relayerFillLimits);
+  return response.status(200).json({ message: "POST request received" });
 };
 
 export default handler;
