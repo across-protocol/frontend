@@ -1,20 +1,19 @@
 import { VercelResponse } from "@vercel/node";
 import {
   getRelayerFromSignature,
-  isTimestampValid,
   getWhiteListedRelayers,
+  isTimestampValid,
   MAX_MESSAGE_AGE_SECONDS,
 } from "./_exclusivity/utils";
-import {
-  RelayerConfigUpdate,
-  TypedRelayerConfigUpdateRequest,
-  TypedVercelRequest,
-} from "./_types";
+import { RelayerConfigUpdate, TypedRelayerConfigUpdateRequest } from "./_types";
 
-const handlePostRequest = async (
+const handler = async (
   request: TypedRelayerConfigUpdateRequest,
   response: VercelResponse
 ) => {
+  if (request.method !== "POST") {
+    return response.status(405).end(`Method ${request.method} Not Allowed`);
+  }
   const body = request.body as RelayerConfigUpdate;
   const { authorization } = request.headers;
   const { timestamp } = body;
@@ -30,22 +29,7 @@ const handlePostRequest = async (
   ) {
     return response.status(401).json({ message: "Unauthorized" });
   }
-
-  // Handle POST request
-  response.status(200).json({ message: "POST request received" });
-};
-
-const handler = async (
-  request: TypedVercelRequest<any>,
-  response: VercelResponse
-) => {
-  if (request.method === "POST") {
-    return handlePostRequest(request, response);
-  } else {
-    // TODO: Add support for GET requests in the future
-    response.setHeader("Allow", ["POST"]);
-    response.status(405).end(`Method ${request.method} Not Allowed`);
-  }
+  return response.status(200).json({ message: "POST request received" });
 };
 
 export default handler;

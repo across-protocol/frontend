@@ -23,7 +23,7 @@ export type RelayerConfigUpdate = {
 };
 
 export type TypedRelayerConfigUpdateRequest = TypedVercelRequest<
-  none,
+  never,
   RelayerConfigUpdate
 >;
 
