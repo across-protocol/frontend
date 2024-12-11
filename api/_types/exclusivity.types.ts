@@ -1,59 +1,56 @@
 export type RelayerFillLimit = {
-  maxFillSize?: number;
+  originChainId: number;
+  inputToken: string;
+  destinationChainId: number;
+  outputToken: string;
+  minOutputAmount?: number;
+  maxOutputAmount?: number;
+  minExclusivityPeriod?: number;
   minProfitThreshold?: number;
   balanceMultiplier?: number;
+  msgFill?: boolean;
 };
 
-export type RelayerFillConfig = Required<RelayerFillLimit> & {
-  originChainIds: number[];
-  tokens: {
-    [inputToken: string]: RelayerFillLimit & {
-      originChainIds: number[];
-      [originChainId: number] : {
-        [destinationChainId: number]: RelayerFillLimit & {
-          [outputToken: string]: { [maxFillSize: number]: number };
-        };
-      };
-    };
-  };
-};
-
-POST: api/relayer/config/<token>/<originChainId>
-
-
-
-export const SampleConfig: RelayerFillConfig = {
-  originChainIds: [1, 10, 137],
-  maxFillSize: 10_000, // USD
-  minProfitThreshold: 0.0001, // 1bps
-  balanceMultiplier: 0.5,
-
-
-
-
-
-  tokens: {
-    USDC: {
-      balanceMultiplier: 0.3,
-      10: {
-        42161: {
-          USDC: {
-            100: 0.0001,
-            1000: 0.0002,
-            10000: 0.0005,
-          },
-          "USDC.e": {
-            100: 0.0002,
-            1000: 0.0006,
-          }
-        },
-        59144: {
-          "USDC": {
-            100: 0.0002,
-            1000: 0.0005,
-          }
-        }
-      },
-    },
+// Example config.
+export const RelayerConfigUpdate: RelayerFillLimit[] = [
+  {
+    originChainId: 1,
+    inputToken: "",
+    destinationChainId: 42161,
+    outputToken: "",
+    minExclusivityPeriod: 20,
+    minProfitThreshold: 0.0003,
+    balanceMultiplier: 0.6,
+    maxOutputAmount: 2500,
   },
-};
+  {
+    originChainId: 10,
+    inputToken: "",
+    destinationChainId: 42161,
+    outputToken: "",
+    minExclusivityPeriod: 5,
+    minProfitThreshold: 0.0003,
+    balanceMultiplier: 0.6,
+    maxOutputAmount: 2500,
+  },
+  {
+    originChainId: 137,
+    inputToken: "",
+    destinationChainId: 42161,
+    outputToken: "",
+    minExclusivityPeriod: 5,
+    minProfitThreshold: 0.0003,
+    balanceMultiplier: 0.6,
+    maxOutputAmount: 2500,
+  },
+  {
+    originChainId: 324,
+    inputToken: "",
+    destinationChainId: 42161,
+    outputToken: "",
+    minExclusivityPeriod: 5,
+    minProfitThreshold: 0.0003,
+    balanceMultiplier: 0.6,
+    maxOutputAmount: 2500,
+  },
+];
