@@ -5,10 +5,10 @@ import {
   getWhiteListedRelayers,
   MAX_MESSAGE_AGE_SECONDS,
 } from "./_exclusivity/utils";
-import { TypedVercelRequest } from "./_types";
+import { RelayerFillLimit, TypedVercelRequest } from "./_types";
 
 const handlePostRequest = async (
-  request: TypedVercelRequest<any>,
+  request: TypedVercelRequest<RelayerFillLimit[]>,
   response: VercelResponse
 ) => {
   const { message } = request.body;
