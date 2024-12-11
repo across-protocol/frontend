@@ -1,5 +1,6 @@
 import { array, boolean, Infer, object, optional } from "superstruct";
 import { positiveFloatStr, positiveIntStr, validAddress } from "../_utils";
+import { TypedVercelRequest } from "./generic.types";
 
 export const RelayerFillLimitSchema = object({
   originChainId: positiveIntStr(),
@@ -17,6 +18,16 @@ export const RelayerFillLimitSchema = object({
 export const RelayerFillLimitArraySchema = array(RelayerFillLimitSchema);
 
 export type RelayerFillLimit = Infer<typeof RelayerFillLimitSchema>;
+
+export type RelayerConfigUpdate = {
+  timestamp: number;
+  relayerFillLimits: RelayerFillLimit[];
+};
+
+export type TypedRelayerConfigUpdateRequest = TypedVercelRequest<
+  never,
+  RelayerConfigUpdate
+>;
 
 // // Example config.
 // export const RelayerConfigUpdate: RelayerFillLimit[] = [
