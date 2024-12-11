@@ -17,7 +17,7 @@ const handlePostRequest = async (
 ) => {
   const body = request.body as RelayerConfigUpdate;
   const { authorization } = request.headers;
-  const { timestamp, relayerFillLimits } = body;
+  const { timestamp } = body;
   if (!isTimestampValid(timestamp, MAX_MESSAGE_AGE_SECONDS)) {
     return response.status(400).json({ message: "Message too old" });
   }
