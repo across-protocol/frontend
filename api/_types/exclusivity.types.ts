@@ -16,11 +16,19 @@ export const RelayerFillLimitSchema = object({
 });
 
 export const RelayerFillLimitArraySchema = array(RelayerFillLimitSchema);
+export const RelayerRouteUpdateSchema = object({
+  RelayerRoute,
+  RelayerFillLimitArraySchema,
+});
 
 export type RelayerFillLimit = Infer<typeof RelayerFillLimitSchema>;
 
 export type RelayerConfigUpdate = {
   timestamp: number;
+  originChainId: number;
+  inputToken: string;
+  destinationChainId: number;
+  outputToken: string;
   relayerFillLimits: RelayerFillLimit[];
 };
 

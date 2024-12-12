@@ -26,6 +26,10 @@ export const isTimestampValid = (
 
 export async function updateLimits(
   relayer: string,
+  originChainId: number,
+  inputToken: string,
+  destinationChainId: number,
+  outputToken: string,
   limits: RelayerFillLimit[]
 ): Promise<void> {
   const sortedLimits = limits
@@ -51,6 +55,10 @@ export async function updateLimits(
 
   await setCachedRelayerFillLimit(
     relayer,
+    originChainId,
+    inputToken,
+    destinationChainId,
+    outputToken,
     sortedLimits.map(({ minOutputAmount, maxOutputAmount, ...rest }) => ({
       minOutputAmount: minOutputAmount.toString(), // @todo: Less bodge
       maxOutputAmount: maxOutputAmount.toString(), // @todo: Less bodge

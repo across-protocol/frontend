@@ -22,7 +22,14 @@ const handler = async (
 
   const body = request.body as RelayerConfigUpdate;
   const { authorization } = request.headers;
-  const { relayerFillLimits, timestamp } = body;
+  const {
+    originChainId,
+    destinationChainId,
+    inputToken,
+    outputToken,
+    relayerFillLimits,
+    timestamp,
+  } = body;
   if (!isTimestampValid(timestamp, MAX_MESSAGE_AGE_SECONDS)) {
     return response.status(400).json({ message: "Message too old" });
   }
@@ -42,7 +49,14 @@ const handler = async (
       .json({ message: "Invalid configuration payload" });
   }
 
-  await updateLimits(relayer, relayerFillLimits);
+  await updateLimits(
+    relayer,
+    originChainId,
+    inputToken,
+    destinationChainId,
+    outputToken,
+    relayerFillLimits
+  );
   return response.status(200).json({ message: "POST request received" });
 };
 

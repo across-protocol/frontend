@@ -67,11 +67,19 @@ export async function getCachedRelayerFillLimit(
  * Sets a series of relayer fill limits in the cache.
  *
  * @param {string} relayer - The unique identifier for the relayer.
+ * @param {originChainId} originChainId - The origin chain of the route.
+ * @param {inputToken} inputToken - The input token on the origin chain.
+ * @param {destinationChainId} destinationChainId - The destination chain of the route.
+ * @param {outputToken} outputToken - The output token on the destination chain.
  * @param {RelayerFillLimit[]} entries - An array of relayer fill limit entries to store.
  * @returns {Promise<void>} A promise that resolves when the operation is complete.
  */
 export async function setCachedRelayerFillLimit(
   relayer: string,
+  originChainId: number,
+  inputToken: string,
+  destinationChainId: number,
+  outputToken: string,
   entries: RelayerFillLimit[]
 ): Promise<void> {
   // Confirm what we're about to push to the cache is formatted properly
@@ -81,13 +89,13 @@ export async function setCachedRelayerFillLimit(
       redisCache.set(
         buildRelayerFillLimitCacheKey(
           relayer,
-          entry.originChainId,
-          entry.destinationChainId,
-          entry.inputToken,
-          entry.outputToken
+          originChainId,
+          destinationChainId,
+          inputToken,
+          outputToken
         ),
         entry,
-        120
+        600
       )
     )
   );

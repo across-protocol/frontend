@@ -31,12 +31,12 @@ describe("Relayer Config API", () => {
   test("POST request with valid timestamp", async () => {
     const message: RelayerConfigUpdate = {
       timestamp: Date.now() / 1000,
+      originChainId: "1",
+      inputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      destinationChainId: "42161",
+      outputToken: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
       relayerFillLimits: [
         {
-          originChainId: "1",
-          inputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-          destinationChainId: "42161",
-          outputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
           minOutputAmount: "1",
           maxOutputAmount: "2",
           balanceMultiplier: "1",
