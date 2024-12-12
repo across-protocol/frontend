@@ -3,11 +3,15 @@ import * as sdk from "@across-protocol/sdk";
 import { getCachedTokenBalances } from "../_utils";
 import { getExclusivityPeriod, getRelayerConfig, getStrategy } from "./config";
 import { ExclusiveRelayer } from "./types";
+import { getCachedRelayerFillLimit } from "./cache";
 
 type BigNumber = ethers.BigNumber;
 const { parseUnits } = ethers.utils;
 const { ZERO_ADDRESS } = sdk.constants;
 const { fixedPointAdjustment: fixedPoint } = sdk.utils;
+
+// @todo: The minimum native token balance should probably be configurable.
+const MIN_NATIVE_BALANCE = parseUnits("0.001");
 
 /**
  * Select a specific relayer exclusivity strategy to apply.
@@ -15,6 +19,7 @@ const { fixedPointAdjustment: fixedPoint } = sdk.utils;
  * and selection from on env-based configuration.
  * @param originChainId Origin chain for deposit.
  * @param destinationChainId Destination chain for fill.
+ * @param outputToken Input token to be referenced in fill.
  * @param outputToken Output token to be used in fill.
  * @param outputAmount Output amount to be used in fill.
  * @param outputAmountUsd Output amount in USD.
@@ -24,6 +29,10 @@ const { fixedPointAdjustment: fixedPoint } = sdk.utils;
 export async function selectExclusiveRelayer(
   originChainId: number,
   destinationChainId: number,
+  inputToken: {
+    address: string;
+    symbol: string;
+  },
   outputToken: {
     address: string;
     symbol: string;
@@ -49,6 +58,7 @@ export async function selectExclusiveRelayer(
   const relayers = await getEligibleRelayers(
     originChainId,
     destinationChainId,
+    inputToken.address,
     outputToken.address,
     outputAmount,
     outputAmountUsd,
@@ -71,6 +81,7 @@ export async function selectExclusiveRelayer(
  * and selection from on env-based configuration.
  * @param originChainId Origin chain for deposit.
  * @param destinationChainId Destination chain for fill.
+ * @param inputToken Input token to be referenced
  * @param outputToken Output token to be used in fill.
  * @param outputAmount Output amount to be used in fill.
  * @param outputAmountUsd Output amount in USD.
@@ -80,6 +91,7 @@ export async function selectExclusiveRelayer(
 async function getEligibleRelayers(
   originChainId: number,
   destinationChainId: number,
+  inputToken: string,
   outputToken: string,
   outputAmount: BigNumber,
   outputAmountUsd: BigNumber,
@@ -94,48 +106,79 @@ async function getEligibleRelayers(
   }
 
   // @todo: Balances are returned as strings; consider mapping them automagically to BNs.
-  const { balances } = await getCachedTokenBalances(
-    destinationChainId,
-    relayers.map(({ address }) => address),
-    [ZERO_ADDRESS, outputToken]
-  );
+  const [{ balances }, fillConfigurations] = await Promise.all([
+    getCachedTokenBalances(
+      destinationChainId,
+      relayers.map(({ address }) => address),
+      [ZERO_ADDRESS, outputToken]
+    ),
+    Promise.all(
+      relayers.map(({ address }) =>
+        getCachedRelayerFillLimit(
+          address,
+          originChainId,
+          destinationChainId,
+          inputToken,
+          outputToken
+        )
+      )
+    ),
+  ]);
 
-  // @todo: The minimum native token balance should probably be configurable.
-  const minNativeBalance = parseUnits("0.001");
-  const candidateRelayers = relayers
-    .filter(({ address: relayer, ...config }) => {
-      const balance = balances[relayer]; // Balances of outputToken + nativeToken.
+  const candidates = relayers.map(({ address: relayer, ...config }, idx) => {
+    const balance = balances[relayer]; // Balances of outputToken + nativeToken.
+    // Resolve the specific configuration for our given range
+    const relevantConfiguration = fillConfigurations[idx]?.find(
+      ({ maxOutputAmount, minOutputAmount }) =>
+        outputAmount.gte(minOutputAmount) && outputAmount.lte(maxOutputAmount)
+    );
+    // @todo: The balance multiplier must be scaled to n decimals to avoid underflow. Precompute it?
+    const effectiveBalance = ethers.BigNumber.from(balance[outputToken])
+      .mul(
+        parseUnits(
+          String(
+            // Check the custom configuration then fall back to the github multiplier
+            relevantConfiguration?.balanceMultiplier ?? config.balanceMultiplier
+          )
+        )
+      )
+      .div(fixedPoint);
+    const effectiveExclusivityPeriod =
+      relevantConfiguration?.minExclusivityPeriod
+        ? Number(relevantConfiguration.minExclusivityPeriod)
+        : config.minExclusivityPeriod;
 
-      // @todo: The balance multiplier must be scaled to n decimals to avoid underflow. Precompute it?
-      const effectiveBalance = ethers.BigNumber.from(balance[outputToken])
-        .mul(parseUnits(String(config.balanceMultiplier)))
-        .div(fixedPoint);
-
-      if (exclusivityPeriodSec < config.minExclusivityPeriod) {
-        return false;
-      }
-
-      if (effectiveBalance.lte(outputAmount)) {
-        return false;
-      }
-
+    if (exclusivityPeriodSec < effectiveExclusivityPeriod) {
+      return undefined;
+    }
+    if (effectiveBalance.lte(outputAmount)) {
+      return undefined;
+    }
+    if (
+      relayerFeePct.lt(
+        parseUnits(
+          String(
+            relevantConfiguration?.minProfitThreshold ??
+              config.minProfitThreshold
+          )
+        )
+      )
+    ) {
+      return undefined;
+    }
+    if (ethers.BigNumber.from(balance[ZERO_ADDRESS]).lt(MIN_NATIVE_BALANCE)) {
+      return undefined;
+    }
+    // No custom configuration set within defined buckets, fall back to the hardcoded configs
+    if (relevantConfiguration === undefined) {
       if (
         outputAmountUsd.gt(ethers.utils.parseEther(String(config.maxFillSize)))
       ) {
-        return false;
+        return undefined;
       }
-
-      if (relayerFeePct.lt(parseUnits(String(config.minProfitThreshold)))) {
-        return false;
-      }
-
-      if (ethers.BigNumber.from(balance[ZERO_ADDRESS]).lt(minNativeBalance)) {
-        return false;
-      }
-
-      return true;
-    })
-    .map(({ address }) => address);
-
-  return candidateRelayers;
+    }
+    // A valid custom configuration bucket is found and all above checks have been made
+    return relayer;
+  });
+  return candidates.filter((v) => v !== undefined);
 }
