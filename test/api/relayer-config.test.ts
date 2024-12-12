@@ -141,10 +141,6 @@ describe("Relayer Config API", () => {
     // Mock getLimits to return some test data
     const limits: RelayerFillLimit[] = [
       {
-        originChainId: "1",
-        destinationChainId: "42161",
-        inputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-        outputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         minOutputAmount: "1",
         maxOutputAmount: "2",
         balanceMultiplier: "1",
