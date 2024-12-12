@@ -5,14 +5,13 @@ import { RelayerFillLimit } from "../_types";
 export const MAX_MESSAGE_AGE_SECONDS = 300;
 
 // TODO: get this from gh
-export const whiteListedRelayers = [
-  "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D", // dev wallet
-];
+export const getWhiteListedRelayers = () => {
+  return [
+    "0x9A8f92a830A5cB89a3816e3D267CB7791c16b04D", // dev wallet
+  ];
+};
 
-export const getRelayerFromSignature = (
-  signature: string,
-  message: string
-) => {
+export const getRelayerFromSignature = (signature: string, message: string) => {
   return ethers.utils.verifyMessage(message, signature);
 };
 
@@ -51,7 +50,7 @@ export async function updateLimits(
 
   // todo: Push each limit entry to the backend cache/db.
   // The config types need to be reverted to strings as numbers.
-  relayer; 
+  relayer;
 
   return;
 }
