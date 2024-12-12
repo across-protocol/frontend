@@ -1,7 +1,10 @@
 import { VercelResponse } from "@vercel/node";
 import { ethers } from "ethers";
 import * as utils from "../../api/_exclusivity/utils";
-import { TypedRelayerConfigUpdateRequest } from "../../api/_types";
+import {
+  RelayerConfigUpdate,
+  TypedRelayerConfigUpdateRequest,
+} from "../../api/_types";
 import handler from "../../api/relayer-config";
 const { MAX_MESSAGE_AGE_SECONDS } = utils;
 
@@ -26,7 +29,7 @@ describe("Relayer Config API", () => {
   });
 
   test("POST request with valid timestamp", async () => {
-    const message = {
+    const message: RelayerConfigUpdate = {
       timestamp: Date.now() / 1000,
       relayerFillLimits: [
         {
@@ -59,8 +62,9 @@ describe("Relayer Config API", () => {
   });
 
   test("POST request with invalid timestamp", async () => {
-    const message = {
+    const message: RelayerConfigUpdate = {
       timestamp: Date.now() / 1000 - MAX_MESSAGE_AGE_SECONDS - 1,
+      relayerFillLimits: [],
     };
     const signature = await whitelistedRelayer.signMessage(
       JSON.stringify(message)
@@ -81,8 +85,9 @@ describe("Relayer Config API", () => {
   });
 
   test("POST request with invalid signature", async () => {
-    const message = {
+    const message: RelayerConfigUpdate = {
       timestamp: Date.now() / 1000,
+      relayerFillLimits: [],
     };
     const signature = await unauthorizedRelayer.signMessage(
       JSON.stringify(message)
