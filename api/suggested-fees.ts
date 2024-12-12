@@ -259,6 +259,7 @@ const handler = async (
         await selectExclusiveRelayer(
           computedOriginChainId,
           destinationChainId,
+          inputToken,
           outputToken,
           amount.sub(totalRelayFee),
           amountInUsd,
