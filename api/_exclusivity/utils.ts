@@ -1,6 +1,11 @@
 import { ethers } from "ethers";
 import { bnZero } from "../../src/utils/sdk";
-import { RelayerFillLimit } from "../_types";
+import {
+  ConfigUpdateGet,
+  RelayerConfigUpdate,
+  RelayerFillLimit,
+} from "../_types";
+import { getCachedRelayerFillLimit } from "./cache";
 import { setCachedRelayerFillLimit } from "./cache";
 
 export const MAX_MESSAGE_AGE_SECONDS = 300;
@@ -14,6 +19,20 @@ export const getWhiteListedRelayers = () => {
 
 export const getRelayerFromSignature = (signature: string, message: string) => {
   return ethers.utils.verifyMessage(message, signature);
+};
+
+export const authenticateRelayer = (
+  authorization: string | undefined,
+  body: RelayerConfigUpdate | ConfigUpdateGet
+) => {
+  if (!authorization) {
+    return null;
+  }
+  const relayer = getRelayerFromSignature(authorization, JSON.stringify(body));
+  if (getWhiteListedRelayers().includes(relayer)) {
+    return relayer;
+  }
+  return null;
 };
 
 export const isTimestampValid = (
@@ -65,4 +84,21 @@ export async function updateLimits(
       ...rest,
     }))
   );
+}
+
+export async function getLimits(
+  relayer: string,
+  originChainId: number,
+  destinationChainId: number,
+  inputToken: string,
+  outputToken: string
+): Promise<RelayerFillLimit[]> {
+  const cachedLimits = await getCachedRelayerFillLimit(
+    relayer,
+    originChainId,
+    destinationChainId,
+    inputToken,
+    outputToken
+  );
+  return cachedLimits ?? [];
 }

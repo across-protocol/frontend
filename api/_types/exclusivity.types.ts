@@ -1,5 +1,10 @@
 import { array, boolean, Infer, object, optional } from "superstruct";
-import { positiveFloatStr, positiveIntStr, validAddress } from "../_utils";
+import {
+  positiveFloatStr,
+  positiveInt,
+  positiveIntStr,
+  validAddress,
+} from "../_utils";
 import { TypedVercelRequest } from "./generic.types";
 
 export const RelayerRoute = object({
@@ -38,6 +43,27 @@ export type RelayerConfigUpdate = {
 export type TypedRelayerConfigUpdateRequest = TypedVercelRequest<
   never,
   RelayerConfigUpdate
+>;
+
+export type ConfigUpdateGet = {
+  timestamp: number;
+  originChainId: string;
+  destinationChainId: string;
+  inputToken: string;
+  outputToken: string;
+};
+
+export const ConfigUpdateGetSchema = object({
+  timestamp: positiveInt,
+  originChainId: positiveIntStr(),
+  destinationChainId: positiveIntStr(),
+  inputToken: validAddress(),
+  outputToken: validAddress(),
+});
+
+export type TypedRelayerConfigUpdateGetRequest = TypedVercelRequest<
+  ConfigUpdateGet,
+  never
 >;
 
 // // Example config.
