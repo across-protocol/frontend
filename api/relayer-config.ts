@@ -90,9 +90,9 @@ const handlePost = async (
 
   await updateLimits(
     relayer,
-    originChainId,
+    Number(originChainId),
     inputToken,
-    destinationChainId,
+    Number(destinationChainId),
     outputToken,
     relayerFillLimits
   );
