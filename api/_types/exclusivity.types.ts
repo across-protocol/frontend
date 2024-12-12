@@ -2,11 +2,14 @@ import { array, boolean, Infer, object, optional } from "superstruct";
 import { positiveFloatStr, positiveIntStr, validAddress } from "../_utils";
 import { TypedVercelRequest } from "./generic.types";
 
-export const RelayerFillLimitSchema = object({
+export const RelayerRoute = object({
   originChainId: positiveIntStr(),
-  destinationChainId: positiveIntStr(),
   inputToken: validAddress(),
+  destinationChainId: positiveIntStr(),
   outputToken: validAddress(),
+});
+
+export const RelayerFillLimitSchema = object({
   minOutputAmount: positiveIntStr(),
   maxOutputAmount: positiveIntStr(),
   minProfitThreshold: positiveFloatStr(),
@@ -25,9 +28,9 @@ export type RelayerFillLimit = Infer<typeof RelayerFillLimitSchema>;
 
 export type RelayerConfigUpdate = {
   timestamp: number;
-  originChainId: number;
+  originChainId: string;
   inputToken: string;
-  destinationChainId: number;
+  destinationChainId: string;
   outputToken: string;
   relayerFillLimits: RelayerFillLimit[];
 };
