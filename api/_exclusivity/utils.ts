@@ -6,6 +6,7 @@ import {
   RelayerFillLimit,
 } from "../_types";
 import { getCachedRelayerFillLimit } from "./cache";
+import { setCachedRelayerFillLimit } from "./cache";
 
 export const MAX_MESSAGE_AGE_SECONDS = 300;
 
@@ -67,11 +68,14 @@ export async function updateLimits(
     throw new Error("Relayer limits are overlapping");
   }
 
-  // todo: Push each limit entry to the backend cache/db.
-  // The config types need to be reverted to strings as numbers.
-  relayer;
-
-  return;
+  await setCachedRelayerFillLimit(
+    relayer,
+    sortedLimits.map(({ minOutputAmount, maxOutputAmount, ...rest }) => ({
+      minOutputAmount: minOutputAmount.toString(), // @todo: Less bodge
+      maxOutputAmount: maxOutputAmount.toString(), // @todo: Less bodge
+      ...rest,
+    }))
+  );
 }
 
 export async function getLimits(
