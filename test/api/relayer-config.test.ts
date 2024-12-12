@@ -28,6 +28,19 @@ describe("Relayer Config API", () => {
   test("POST request with valid timestamp", async () => {
     const message = {
       timestamp: Date.now() / 1000,
+      relayerFillLimits: [
+        {
+          originChainId: "1",
+          inputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+          destinationChainId: "42161",
+          outputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+          minOutputAmount: "1",
+          maxOutputAmount: "2",
+          balanceMultiplier: "1",
+          minProfitThreshold: "0.0001",
+          minExclusivityPeriod: "1",
+        },
+      ],
     };
     const messageString = JSON.stringify(message);
     const signature = await whitelistedRelayer.signMessage(messageString);
