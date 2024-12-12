@@ -4,6 +4,9 @@ import * as utils from "../../api/_exclusivity/utils";
 import {
   RelayerConfigUpdate,
   TypedRelayerConfigUpdateRequest,
+  TypedRelayerConfigUpdateGetRequest,
+  ConfigUpdateGet,
+  RelayerFillLimit,
 } from "../../api/_types";
 import handler from "../../api/relayer-config";
 const { MAX_MESSAGE_AGE_SECONDS } = utils;
@@ -30,7 +33,7 @@ describe("Relayer Config API", () => {
 
   test("POST request with valid timestamp", async () => {
     const message: RelayerConfigUpdate = {
-      timestamp: Date.now() / 1000,
+      timestamp: Math.floor(Date.now() / 1000),
       relayerFillLimits: [
         {
           originChainId: "1",
@@ -63,7 +66,7 @@ describe("Relayer Config API", () => {
 
   test("POST request with invalid timestamp", async () => {
     const message: RelayerConfigUpdate = {
-      timestamp: Date.now() / 1000 - MAX_MESSAGE_AGE_SECONDS - 1,
+      timestamp: Math.floor(Date.now() / 1000) - MAX_MESSAGE_AGE_SECONDS - 1,
       relayerFillLimits: [],
     };
     const signature = await whitelistedRelayer.signMessage(
@@ -86,7 +89,7 @@ describe("Relayer Config API", () => {
 
   test("POST request with invalid signature", async () => {
     const message: RelayerConfigUpdate = {
-      timestamp: Date.now() / 1000,
+      timestamp: Math.floor(Date.now() / 1000),
       relayerFillLimits: [],
     };
     const signature = await unauthorizedRelayer.signMessage(
@@ -105,5 +108,47 @@ describe("Relayer Config API", () => {
 
     expect(response.status).toHaveBeenCalledWith(401);
     expect(response.json).toHaveBeenCalledWith({ message: "Unauthorized" });
+  });
+
+  test("GET request with valid signature and query params", async () => {
+    const query: ConfigUpdateGet = {
+      timestamp: Math.floor(Date.now() / 1000),
+      originChainId: "1",
+      destinationChainId: "42161",
+      inputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      outputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    };
+    const signature = await whitelistedRelayer.signMessage(
+      JSON.stringify(query)
+    );
+
+    const request = {
+      method: "GET",
+      headers: {
+        authorization: signature,
+      },
+      query,
+    } as TypedRelayerConfigUpdateGetRequest;
+
+    // Mock getLimits to return some test data
+    const limits: RelayerFillLimit[] = [
+      {
+        originChainId: "1",
+        destinationChainId: "42161",
+        inputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        outputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        minOutputAmount: "1",
+        maxOutputAmount: "2",
+        balanceMultiplier: "1",
+        minProfitThreshold: "0.0001",
+        minExclusivityPeriod: "1",
+      },
+    ];
+    jest.spyOn(utils, "getLimits").mockResolvedValue(limits);
+
+    await handler(request, response);
+
+    expect(response.status).toHaveBeenCalledWith(200);
+    expect(response.json).toHaveBeenCalledWith(limits);
   });
 });
