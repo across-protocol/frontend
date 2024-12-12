@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { bnZero } from "../../src/utils/sdk";
 import { RelayerFillLimit } from "../_types";
 
 export const MAX_MESSAGE_AGE_SECONDS = 300;
@@ -26,7 +27,30 @@ export async function updateLimits(
   relayer: string,
   limits: RelayerFillLimit[]
 ): Promise<void> {
-  relayer; // todo
-  limits; // todo
+  const sortedLimits = limits
+    .map(({ minOutputAmount, maxOutputAmount, ...rest }) => ({
+      minOutputAmount: ethers.BigNumber.from(minOutputAmount),
+      maxOutputAmount: ethers.BigNumber.from(maxOutputAmount),
+      ...rest,
+    }))
+    .sort(({ minOutputAmount: minA }, { minOutputAmount: minB }) =>
+      minA.sub(minB).gte(bnZero) ? 1 : -1
+    );
+
+  const sorted = sortedLimits
+    .slice(1)
+    .every(({ minOutputAmount, maxOutputAmount }, idx) => {
+      const { maxOutputAmount: prevMax } = sortedLimits[idx];
+      return maxOutputAmount.gt(minOutputAmount) && minOutputAmount.gt(prevMax);
+    });
+
+  if (!sorted) {
+    throw new Error("Relayer limits are overlapping");
+  }
+
+  // todo: Push each limit entry to the backend cache/db.
+  // The config types need to be reverted to strings as numbers.
+  relayer;
+
   return;
 }
