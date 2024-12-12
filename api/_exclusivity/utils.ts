@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { RelayerFillLimit } from "../_types";
 
 export const MAX_MESSAGE_AGE_SECONDS = 300;
 
@@ -20,3 +21,12 @@ export const isTimestampValid = (
   const currentTime = Math.floor(Date.now() / 1000);
   return currentTime - timestamp <= maxAgeSeconds;
 };
+
+export async function updateLimits(
+  relayer: string,
+  limits: RelayerFillLimit[]
+): Promise<void> {
+  relayer; // todo
+  limits; // todo
+  return;
+}
