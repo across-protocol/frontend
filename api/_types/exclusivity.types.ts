@@ -7,11 +7,14 @@ import {
 } from "../_utils";
 import { TypedVercelRequest } from "./generic.types";
 
-export const RelayerFillLimitSchema = object({
+export const RelayerRoute = object({
   originChainId: positiveIntStr(),
-  destinationChainId: positiveIntStr(),
   inputToken: validAddress(),
+  destinationChainId: positiveIntStr(),
   outputToken: validAddress(),
+});
+
+export const RelayerFillLimitSchema = object({
   minOutputAmount: positiveIntStr(),
   maxOutputAmount: positiveIntStr(),
   minProfitThreshold: positiveFloatStr(),
@@ -21,11 +24,19 @@ export const RelayerFillLimitSchema = object({
 });
 
 export const RelayerFillLimitArraySchema = array(RelayerFillLimitSchema);
+export const RelayerRouteUpdateSchema = object({
+  RelayerRoute,
+  RelayerFillLimitArraySchema,
+});
 
 export type RelayerFillLimit = Infer<typeof RelayerFillLimitSchema>;
 
 export type RelayerConfigUpdate = {
   timestamp: number;
+  originChainId: string;
+  inputToken: string;
+  destinationChainId: string;
+  outputToken: string;
   relayerFillLimits: RelayerFillLimit[];
 };
 

@@ -34,12 +34,12 @@ describe("Relayer Config API", () => {
   test("POST request with valid timestamp", async () => {
     const message: RelayerConfigUpdate = {
       timestamp: Math.floor(Date.now() / 1000),
+      originChainId: "1",
+      inputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      destinationChainId: "42161",
+      outputToken: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
       relayerFillLimits: [
         {
-          originChainId: "1",
-          inputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-          destinationChainId: "42161",
-          outputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
           minOutputAmount: "1",
           maxOutputAmount: "2",
           balanceMultiplier: "1",
@@ -67,6 +67,10 @@ describe("Relayer Config API", () => {
   test("POST request with invalid timestamp", async () => {
     const message: RelayerConfigUpdate = {
       timestamp: Math.floor(Date.now() / 1000) - MAX_MESSAGE_AGE_SECONDS - 1,
+      originChainId: "1",
+      inputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      destinationChainId: "10",
+      outputToken: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
       relayerFillLimits: [],
     };
     const signature = await whitelistedRelayer.signMessage(
@@ -90,6 +94,10 @@ describe("Relayer Config API", () => {
   test("POST request with invalid signature", async () => {
     const message: RelayerConfigUpdate = {
       timestamp: Math.floor(Date.now() / 1000),
+      originChainId: "1",
+      inputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      destinationChainId: "10",
+      outputToken: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
       relayerFillLimits: [],
     };
     const signature = await unauthorizedRelayer.signMessage(
@@ -133,10 +141,6 @@ describe("Relayer Config API", () => {
     // Mock getLimits to return some test data
     const limits: RelayerFillLimit[] = [
       {
-        originChainId: "1",
-        destinationChainId: "42161",
-        inputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-        outputToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         minOutputAmount: "1",
         maxOutputAmount: "2",
         balanceMultiplier: "1",
