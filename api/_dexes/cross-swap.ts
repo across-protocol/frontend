@@ -21,6 +21,7 @@ import { CrossSwap, CrossSwapQuotes } from "./types";
 import {
   buildExactOutputBridgeTokenMessage,
   buildMinOutputBridgeTokenMessage,
+  getUniversalSwapAndBridge,
 } from "./utils";
 import { getSpokePoolPeriphery } from "../_spoke-pool-periphery";
 import { tagIntegratorId } from "../_integrator-id";
@@ -31,8 +32,6 @@ export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
 
 export type AmountType = (typeof AMOUNT_TYPE)[keyof typeof AMOUNT_TYPE];
-
-export type LeftoverType = (typeof LEFTOVER_TYPE)[keyof typeof LEFTOVER_TYPE];
 
 export const AMOUNT_TYPE = {
   EXACT_INPUT: "exactInput",
@@ -47,15 +46,11 @@ export const CROSS_SWAP_TYPE = {
   ANY_TO_ANY: "anyToAny",
 } as const;
 
-export const LEFTOVER_TYPE = {
-  OUTPUT_TOKEN: "outputToken",
-  BRIDGEABLE_TOKEN: "bridgeableToken",
-} as const;
-
 export const PREFERRED_BRIDGE_TOKENS = ["WETH"];
 
 const defaultQuoteFetchStrategy: UniswapQuoteFetchStrategy =
-  getSwapRouter02Strategy();
+  // This will be our default strategy until the periphery contract is audited
+  getSwapRouter02Strategy("UniversalSwapAndBridge");
 const strategyOverrides = {
   [CHAIN_IDs.BLAST]: defaultQuoteFetchStrategy,
 };
@@ -88,6 +83,7 @@ export async function getCrossSwapQuotesForOutput(crossSwap: CrossSwap) {
     originChainId: crossSwap.inputToken.chainId,
     outputToken: crossSwap.outputToken.address,
     destinationChainId: crossSwap.outputToken.chainId,
+    isInputNative: Boolean(crossSwap.isInputNative),
   });
 
   if (crossSwapType === CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE) {
@@ -194,6 +190,7 @@ export function getCrossSwapType(params: {
   originChainId: number;
   outputToken: string;
   destinationChainId: number;
+  isInputNative: boolean;
 }): CrossSwapType {
   if (
     isRouteEnabled(
@@ -204,6 +201,20 @@ export function getCrossSwapType(params: {
     )
   ) {
     return CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE;
+  }
+
+  // Prefer destination swap if input token is native because legacy
+  // `UniversalSwapAndBridge` does not support native tokens as input.
+  if (params.isInputNative) {
+    if (isInputTokenBridgeable(params.inputToken, params.originChainId)) {
+      return CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY;
+    }
+    // We can't bridge native tokens that are not ETH, e.g. MATIC or AZERO. Therefore
+    // throw until we have periphery contract audited so that it can accept native
+    // tokens and do an origin swap.
+    throw new Error(
+      "Unsupported swap: Input token is native but not bridgeable"
+    );
   }
 
   if (isOutputTokenBridgeable(params.outputToken, params.destinationChainId)) {
@@ -230,24 +241,45 @@ export async function buildCrossSwapTxForAllowanceHolder(
   let toAddress: string;
 
   if (crossSwapQuotes.originSwapQuote) {
-    const spokePoolPeriphery = getSpokePoolPeriphery(
-      crossSwapQuotes.originSwapQuote.peripheryAddress,
-      originChainId
-    );
-    tx = await spokePoolPeriphery.populateTransaction.swapAndBridge(
-      crossSwapQuotes.originSwapQuote.tokenIn.address,
-      crossSwapQuotes.originSwapQuote.tokenOut.address,
-      crossSwapQuotes.originSwapQuote.swapTx.data,
-      crossSwapQuotes.originSwapQuote.maximumAmountIn,
-      crossSwapQuotes.originSwapQuote.minAmountOut,
-      deposit,
-      {
-        value: crossSwapQuotes.crossSwap.isInputNative
-          ? crossSwapQuotes.originSwapQuote.maximumAmountIn
-          : 0,
-      }
-    );
-    toAddress = spokePoolPeriphery.address;
+    const { entryPointContract } = crossSwapQuotes.originSwapQuote;
+    if (entryPointContract.name === "SpokePoolPeriphery") {
+      const spokePoolPeriphery = getSpokePoolPeriphery(
+        entryPointContract.address,
+        originChainId
+      );
+      tx = await spokePoolPeriphery.populateTransaction.swapAndBridge(
+        crossSwapQuotes.originSwapQuote.tokenIn.address,
+        crossSwapQuotes.originSwapQuote.tokenOut.address,
+        crossSwapQuotes.originSwapQuote.swapTx.data,
+        crossSwapQuotes.originSwapQuote.maximumAmountIn,
+        crossSwapQuotes.originSwapQuote.minAmountOut,
+        deposit,
+        {
+          value: crossSwapQuotes.crossSwap.isInputNative
+            ? crossSwapQuotes.originSwapQuote.maximumAmountIn
+            : 0,
+        }
+      );
+      toAddress = spokePoolPeriphery.address;
+    } else if (entryPointContract.name === "UniversalSwapAndBridge") {
+      const universalSwapAndBridge = getUniversalSwapAndBridge(
+        entryPointContract.dex,
+        originChainId
+      );
+      tx = await universalSwapAndBridge.populateTransaction.swapAndBridge(
+        crossSwapQuotes.originSwapQuote.tokenIn.address,
+        crossSwapQuotes.originSwapQuote.tokenOut.address,
+        crossSwapQuotes.originSwapQuote.swapTx.data,
+        crossSwapQuotes.originSwapQuote.maximumAmountIn,
+        crossSwapQuotes.originSwapQuote.minAmountOut,
+        deposit
+      );
+      toAddress = universalSwapAndBridge.address;
+    } else {
+      throw new Error(
+        `Could not build cross swap tx for unknown entry point contract`
+      );
+    }
   } else {
     tx = await spokePool.populateTransaction.depositV3(
       deposit.depositor,
