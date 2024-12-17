@@ -1,11 +1,11 @@
 import { swap } from "./_swap-utils";
 
-async function swapWithAllowance() {
-  console.log("Swapping with allowance...");
+async function swapWithPermit() {
+  console.log("Swapping with permit...");
   await swap();
 }
 
-swapWithAllowance()
+swapWithPermit()
   .then(() => console.log("Done"))
   .catch((e) => {
     console.error(e);

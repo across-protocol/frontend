@@ -38,7 +38,7 @@ const handler = async (
       integratorId,
       skipOriginTxEstimation,
       isInputNative,
-    } = await handleBaseSwapQueryParams(request);
+    } = await handleBaseSwapQueryParams(request.query);
 
     const crossSwapTx = await buildCrossSwapTxForAllowanceHolder(
       crossSwapQuotes,
