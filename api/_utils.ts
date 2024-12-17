@@ -952,6 +952,7 @@ export async function getBridgeQuoteForMinOutput(params: {
         );
         if (outputAmount.gte(params.minOutputAmount)) {
           finalQuote = quote;
+          adjustedInputAmount = inputAmount;
           break;
         }
       }
