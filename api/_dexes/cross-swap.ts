@@ -8,7 +8,6 @@ import {
   isOutputTokenBridgeable,
   getBridgeQuoteForMinOutput,
   getSpokePool,
-  Profiler,
 } from "../_utils";
 import {
   getBestUniswapCrossSwapQuotesForOutputA2A,
@@ -74,10 +73,6 @@ export async function getCrossSwapQuotes(
 }
 
 export async function getCrossSwapQuotesForOutput(crossSwap: CrossSwap) {
-  const profiler = new Profiler({
-    at: "api/cross-swap#getCrossSwapQuotesForOutput",
-    logger: console,
-  });
   const crossSwapType = getCrossSwapType({
     inputToken: crossSwap.inputToken.address,
     originChainId: crossSwap.inputToken.chainId,
@@ -87,35 +82,19 @@ export async function getCrossSwapQuotesForOutput(crossSwap: CrossSwap) {
   });
 
   if (crossSwapType === CROSS_SWAP_TYPE.BRIDGEABLE_TO_BRIDGEABLE) {
-    return profiler.measureAsync(
-      getCrossSwapQuotesForOutputB2B(crossSwap),
-      "getCrossSwapQuotesForOutputB2B",
-      crossSwap
-    );
+    return getCrossSwapQuotesForOutputB2B(crossSwap);
   }
 
   if (crossSwapType === CROSS_SWAP_TYPE.BRIDGEABLE_TO_ANY) {
-    return profiler.measureAsync(
-      getCrossSwapQuotesForOutputB2A(crossSwap),
-      "getCrossSwapQuotesForOutputB2A",
-      crossSwap
-    );
+    return getCrossSwapQuotesForOutputB2A(crossSwap);
   }
 
   if (crossSwapType === CROSS_SWAP_TYPE.ANY_TO_BRIDGEABLE) {
-    return profiler.measureAsync(
-      getCrossSwapQuotesForOutputA2B(crossSwap),
-      "getCrossSwapQuotesForOutputA2B",
-      crossSwap
-    );
+    return getCrossSwapQuotesForOutputA2B(crossSwap);
   }
 
   if (crossSwapType === CROSS_SWAP_TYPE.ANY_TO_ANY) {
-    return profiler.measureAsync(
-      getCrossSwapQuotesForOutputA2A(crossSwap),
-      "getCrossSwapQuotesForOutputA2A",
-      crossSwap
-    );
+    return getCrossSwapQuotesForOutputA2A(crossSwap);
   }
 
   throw new Error("Invalid cross swap type");
