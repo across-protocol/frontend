@@ -24,7 +24,7 @@ const handler = async (
       })
     );
     const responseJson = Object.fromEntries(
-      chains.map(({ chainId }, i) => [chainId, gasPrices[i]])
+      chains.map(({ chainId }, i) => [chainId, gasPrices[i].toString()])
     );
 
     logger.debug({
