@@ -84,6 +84,7 @@ import {
   TokenNotFoundError,
 } from "./_errors";
 import { Token } from "./_dexes/types";
+import { addMarkupToAmount } from "./_dexes/uniswap/utils";
 
 export { InputError, handleErrorCondition } from "./_errors";
 export const { Profiler } = sdk.utils;
@@ -897,6 +898,8 @@ export async function getBridgeQuoteForMinOutput(params: {
   recipient?: string;
   message?: string;
 }) {
+  const maxTries = 3;
+  const tryChunkSize = 3;
   const baseParams = {
     inputToken: params.inputToken.address,
     outputToken: params.outputToken.address,
@@ -911,7 +914,7 @@ export async function getBridgeQuoteForMinOutput(params: {
     // 1. Use the suggested fees to get an indicative quote with
     // input amount equal to minOutputAmount
     let tries = 0;
-    let adjustedInputAmount = params.minOutputAmount;
+    let adjustedInputAmount = addMarkupToAmount(params.minOutputAmount, 0.005);
     let indicativeQuote = await getSuggestedFees({
       ...baseParams,
       amount: adjustedInputAmount.toString(),
@@ -921,27 +924,44 @@ export async function getBridgeQuoteForMinOutput(params: {
       undefined;
 
     // 2. Adjust input amount to meet minOutputAmount
-    while (tries < 3) {
-      adjustedInputAmount = adjustedInputAmount
-        .mul(utils.parseEther("1").add(adjustmentPct))
-        .div(sdk.utils.fixedPointAdjustment);
-      const adjustedQuote = await getSuggestedFees({
-        ...baseParams,
-        amount: adjustedInputAmount.toString(),
+    while (tries < maxTries) {
+      const inputAmounts = Array.from({ length: tryChunkSize }).map((_, i) => {
+        const buffer = 0.001 * i;
+        return addMarkupToAmount(
+          adjustedInputAmount
+            .mul(utils.parseEther("1").add(adjustmentPct))
+            .div(sdk.utils.fixedPointAdjustment),
+          buffer
+        );
       });
-      const outputAmount = adjustedInputAmount.sub(
-        adjustedInputAmount
-          .mul(adjustedQuote.totalRelayFee.pct)
-          .div(sdk.utils.fixedPointAdjustment)
+      const quotes = await Promise.all(
+        inputAmounts.map((inputAmount) => {
+          return getSuggestedFees({
+            ...baseParams,
+            amount: inputAmount.toString(),
+          });
+        })
       );
 
-      if (outputAmount.gte(params.minOutputAmount)) {
-        finalQuote = adjustedQuote;
-        break;
-      } else {
-        adjustmentPct = adjustedQuote.totalRelayFee.pct;
-        tries++;
+      for (const [i, quote] of Object.entries(quotes)) {
+        const inputAmount = inputAmounts[Number(i)];
+        const outputAmount = inputAmount.sub(
+          inputAmount
+            .mul(quote.totalRelayFee.pct)
+            .div(sdk.utils.fixedPointAdjustment)
+        );
+        if (outputAmount.gte(params.minOutputAmount)) {
+          finalQuote = quote;
+          break;
+        }
       }
+
+      if (finalQuote) {
+        break;
+      }
+
+      adjustedInputAmount = inputAmounts[inputAmounts.length - 1];
+      tries++;
     }
 
     if (!finalQuote) {
