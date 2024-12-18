@@ -408,88 +408,100 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   // 2. Bridge quote for bridgeable input token -> bridgeable output token
   // 3. Origin swap quote for any input token -> bridgeable input token
   // These requests are faster but do not contain calldata.
-  const indicativeDestinationSwapQuote = await destinationStrategy.fetchFn(
-    {
-      ...destinationSwap,
-      amount: crossSwap.amount.toString(),
-    },
-    TradeType.EXACT_OUTPUT,
-    {
-      useIndicativeQuote: true,
-    }
-  );
-  const indicativeBridgeQuote = await getBridgeQuoteForMinOutput({
-    inputToken: bridgeableInputToken,
-    outputToken: bridgeableOutputToken,
-    minOutputAmount: addMarkupToAmount(
-      indicativeDestinationSwapQuote.maximumAmountIn,
-      indicativeQuoteBuffer
+  const indicativeDestinationSwapQuote = await profiler.measureAsync(
+    destinationStrategy.fetchFn(
+      {
+        ...destinationSwap,
+        amount: crossSwap.amount.toString(),
+      },
+      TradeType.EXACT_OUTPUT,
+      {
+        useIndicativeQuote: true,
+      }
     ),
-    recipient: getMultiCallHandlerAddress(destinationSwapChainId),
-    message: buildDestinationSwapCrossChainMessage({
-      crossSwap,
-      destinationSwapQuote: indicativeDestinationSwapQuote,
-      bridgeableOutputToken,
-      routerAddress: destinationStrategy.getRouterAddress(
-        destinationSwapChainId
-      ),
-    }),
-  });
-  const indicativeOriginSwapQuote = await originStrategy.fetchFn(
-    {
-      ...originSwap,
-      amount: addMarkupToAmount(
-        indicativeBridgeQuote.inputAmount,
+    "INDICATIVE_getDestinationSwapQuote"
+  );
+  const indicativeBridgeQuote = await profiler.measureAsync(
+    getBridgeQuoteForMinOutput({
+      inputToken: bridgeableInputToken,
+      outputToken: bridgeableOutputToken,
+      minOutputAmount: addMarkupToAmount(
+        indicativeDestinationSwapQuote.maximumAmountIn,
         indicativeQuoteBuffer
-      ).toString(),
-    },
-    TradeType.EXACT_OUTPUT,
-    {
-      useIndicativeQuote: true,
-    }
+      ),
+      recipient: getMultiCallHandlerAddress(destinationSwapChainId),
+      message: buildDestinationSwapCrossChainMessage({
+        crossSwap,
+        destinationSwapQuote: indicativeDestinationSwapQuote,
+        bridgeableOutputToken,
+        routerAddress: destinationStrategy.getRouterAddress(
+          destinationSwapChainId
+        ),
+      }),
+    }),
+    "INDICATIVE_getBridgeQuote"
+  );
+  const indicativeOriginSwapQuote = await profiler.measureAsync(
+    originStrategy.fetchFn(
+      {
+        ...originSwap,
+        amount: addMarkupToAmount(
+          indicativeBridgeQuote.inputAmount,
+          indicativeQuoteBuffer
+        ).toString(),
+      },
+      TradeType.EXACT_OUTPUT,
+      {
+        useIndicativeQuote: true,
+      }
+    ),
+    "INDICATIVE_getOriginSwapQuote"
   );
 
   // Fetch REAL quotes in parallel. These requests are slower but contain calldata.
   const [destinationSwapQuote, bridgeQuote, originSwapQuote] =
-    await Promise.all([
-      destinationStrategy.fetchFn(
-        {
-          ...destinationSwap,
-          amount: crossSwap.amount.toString(),
-        },
-        TradeType.EXACT_OUTPUT
-      ),
-      getBridgeQuoteForMinOutput({
-        inputToken: bridgeableInputToken,
-        outputToken: bridgeableOutputToken,
-        minOutputAmount: indicativeDestinationSwapQuote.maximumAmountIn,
-        recipient: getMultiCallHandlerAddress(destinationSwapChainId),
-        message: buildDestinationSwapCrossChainMessage({
-          crossSwap,
-          destinationSwapQuote: indicativeDestinationSwapQuote,
-          bridgeableOutputToken,
-          routerAddress: destinationStrategy.getRouterAddress(
-            destinationSwapChainId
-          ),
+    await profiler.measureAsync(
+      Promise.all([
+        destinationStrategy.fetchFn(
+          {
+            ...destinationSwap,
+            amount: crossSwap.amount.toString(),
+          },
+          TradeType.EXACT_OUTPUT
+        ),
+        getBridgeQuoteForMinOutput({
+          inputToken: bridgeableInputToken,
+          outputToken: bridgeableOutputToken,
+          minOutputAmount: indicativeDestinationSwapQuote.maximumAmountIn,
+          recipient: getMultiCallHandlerAddress(destinationSwapChainId),
+          message: buildDestinationSwapCrossChainMessage({
+            crossSwap,
+            destinationSwapQuote: indicativeDestinationSwapQuote,
+            bridgeableOutputToken,
+            routerAddress: destinationStrategy.getRouterAddress(
+              destinationSwapChainId
+            ),
+          }),
         }),
-      }),
-      originStrategy.fetchFn(
-        {
-          ...originSwap,
-          amount: addMarkupToAmount(
-            indicativeOriginSwapQuote.maximumAmountIn,
-            indicativeQuoteBuffer
-          ).toString(),
-        },
-        TradeType.EXACT_INPUT
-      ),
-    ]);
-  assertMinOutputAmount(originSwapQuote.minAmountOut, bridgeQuote.inputAmount);
+        originStrategy.fetchFn(
+          {
+            ...originSwap,
+            amount: addMarkupToAmount(
+              indicativeOriginSwapQuote.maximumAmountIn,
+              indicativeQuoteBuffer
+            ).toString(),
+          },
+          TradeType.EXACT_INPUT
+        ),
+      ]),
+      "getAllQuotes"
+    );
+  assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
   assertMinOutputAmount(
     bridgeQuote.outputAmount,
     destinationSwapQuote.maximumAmountIn
   );
-  assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
+  assertMinOutputAmount(originSwapQuote.minAmountOut, bridgeQuote.inputAmount);
 
   bridgeQuote.message = buildDestinationSwapCrossChainMessage({
     crossSwap,
