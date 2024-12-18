@@ -107,7 +107,7 @@ export function getSwapRouter02Strategy(
                 Number(
                   ethers.utils.formatUnits(swap.amount, swap.tokenOut.decimals)
                 ) * indicativeQuotePricePerTokenOut
-              ).toString(),
+              ).toFixed(swap.tokenOut.decimals),
               swap.tokenIn.decimals
             );
       const outputAmount =
@@ -117,7 +117,7 @@ export function getSwapRouter02Strategy(
                 Number(
                   ethers.utils.formatUnits(swap.amount, swap.tokenIn.decimals)
                 ) / indicativeQuotePricePerTokenOut
-              ).toString(),
+              ).toFixed(swap.tokenIn.decimals),
               swap.tokenOut.decimals
             )
           : swap.amount;
