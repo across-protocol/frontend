@@ -36,7 +36,7 @@ const CoingeckoQueryParamsSchema = object({
   tokenAddress: optional(validAddress()),
   chainId: optional(positiveInt),
   baseCurrency: optional(string()),
-  searchAcrossChains: optional(boolStr()), // Tells CG client to find the token price by ID (more reliable)
+  findById: optional(boolStr()), // Tells CG client to find the token price by ID (more reliable)
   date: optional(pattern(string(), /\d{2}-\d{2}-\d{4}/)),
 });
 
@@ -58,7 +58,7 @@ const handler = async (
       tokenAddress,
       chainId,
       baseCurrency,
-      searchAcrossChains,
+      findById,
       date: dateStr,
     } = parseQuery(query, CoingeckoQueryParamsSchema);
 
@@ -144,7 +144,7 @@ const handler = async (
         );
       } else {
         [, price] =
-          CG_CONTRACTS_DEFERRED_TO_ID.has(address) || searchAcrossChains
+          CG_CONTRACTS_DEFERRED_TO_ID.has(address) || findById
             ? await coingeckoClient.getCurrentPriceById(
                 address,
                 modifiedBaseCurrency,

@@ -193,13 +193,13 @@ async function calculateSwapFee(
       tokenAddress: tokenIn.address,
       baseCurrency,
       chainId: tokenIn.chainId,
-      searchAcrossChains: "true",
+      findById: "true",
     }),
     getCachedTokenPrice({
       tokenAddress: tokenOut.address,
       baseCurrency,
       chainId: tokenOut.chainId,
-      searchAcrossChains: "true",
+      findById: "true",
     }),
   ]);
 
@@ -223,7 +223,7 @@ async function calculateBridgeFee(
     tokenAddress: inputToken.address,
     baseCurrency,
     chainId: inputToken.chainId,
-    searchAcrossChains: "true",
+    findById: "true",
   });
   const normalizedFee =
     parseFloat(
