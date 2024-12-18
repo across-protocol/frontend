@@ -209,7 +209,7 @@ export function indicativeQuotePriceCache(swap: Swap, tradeType: TradeType) {
     swap.tokenIn.symbol,
     swap.tokenOut.symbol
   );
-  const ttl = 60;
+  const ttl = 30;
   const fetchFn = async () => {
     const quote = await getUniswapClassicIndicativeQuoteFromApi(
       { ...swap, swapper: swap.recipient },

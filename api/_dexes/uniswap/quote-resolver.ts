@@ -127,6 +127,12 @@ export async function getUniswapCrossSwapQuotesForOutputB2A(
       }),
     }),
   ]);
+  assertMinOutputAmount(destinationSwapQuote.minAmountOut, crossSwap.amount);
+  assertMinOutputAmount(
+    bridgeQuote.outputAmount,
+    destinationSwapQuote.maximumAmountIn
+  );
+
   bridgeQuote.message = buildDestinationSwapCrossChainMessage({
     crossSwap,
     destinationSwapQuote,
