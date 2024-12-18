@@ -22,6 +22,10 @@ export type UniswapClassicQuoteFromApi = {
   quoteId: string;
 };
 
+export type UniswapIndicativeQuoteFromApi = Awaited<
+  ReturnType<typeof getUniswapClassicIndicativeQuoteFromApi>
+>;
+
 export type UniswapParamForApi = Omit<Swap, "type" | "slippageTolerance"> & {
   swapper: string;
   slippageTolerance?: number;
