@@ -237,12 +237,12 @@ const handler = async (
 
     const isAmountTooLow = BigNumber.from(amountInput).lt(minDeposit);
 
-    const skipAmountLimitEnabled = skipAmountLimit === "true";
-    if (!skipAmountLimitEnabled && isAmountTooLow) {
-      throw new AmountTooLowError({
-        message: `Sent amount is too low relative to fees`,
-      });
-    }
+    // const skipAmountLimitEnabled = skipAmountLimit === "true";
+    // if (!skipAmountLimitEnabled && isAmountTooLow) {
+    //   throw new AmountTooLowError({
+    //     message: `Sent amount is too low relative to fees`,
+    //   });
+    // }
 
     // Across V3's new `deposit` function requires now a total fee that includes the LP fee
     const totalRelayFee = BigNumber.from(relayerFeeDetails.relayFeeTotal).add(
