@@ -91,6 +91,7 @@ const enabledRoutes = {
         CHAIN_IDs.WORLD_CHAIN,
       ],
     },
+    // Addresses of token-scoped `SwapAndBridge` contracts, i.e. USDC.e -> USDC swaps
     swapAndBridgeAddresses: {
       "1inch": {
         [CHAIN_IDs.POLYGON]: "0xaBa0F11D55C5dDC52cD0Cb2cd052B621d45159d5",
@@ -102,6 +103,26 @@ const enabledRoutes = {
         [CHAIN_IDs.POLYGON]: "0x9220Fa27ae680E4e8D9733932128FA73362E0393",
         [CHAIN_IDs.OPTIMISM]: "0x6f4A733c7889f038D77D4f540182Dda17423CcbF",
         [CHAIN_IDs.ARBITRUM]: "0xF633b72A4C2Fb73b77A379bf72864A825aD35b6D",
+      },
+    },
+    // Addresses of `UniversalSwapAndBridge` contracts from deployment:
+    // https://github.com/across-protocol/contracts/pull/731/commits/6bdbfd38f50b616ac25e49687cbac6fb6bcb543b
+    universalSwapAndBridgeAddresses: {
+      "1inch": {
+        [CHAIN_IDs.ARBITRUM]: "0x81C7601ac0c5825e89F967f9222B977CCD78aD77",
+        [CHAIN_IDs.BASE]: "0x98285D11B9F7aFec2d475805E5255f26B4490167",
+        [CHAIN_IDs.OPTIMISM]: "0x7631eA29479Ee265241F13FB48555A2C886d3Bf8",
+        [CHAIN_IDs.POLYGON]: "0xc2dcb88873e00c9d401de2cbba4c6a28f8a6e2c2",
+      },
+      uniswap: {
+        [CHAIN_IDs.ARBITRUM]: "0x2414A759d4EFF700Ad81e257Ab5187d07eCeEbAb",
+        [CHAIN_IDs.BASE]: "0xed8b9c9aE7aCEf12eb4650d26Eb876005a4752d2",
+        [CHAIN_IDs.BLAST]: "0x57EE47829369e2EF62fBb423648bec70d0366204",
+        [CHAIN_IDs.MAINNET]: "0x0e84f089B0923EfeA51C6dF91581BFBa66A3484A",
+        [CHAIN_IDs.OPTIMISM]: "0x04989eaF03547E6583f9d9e42aeD11D2b78A808b",
+        [CHAIN_IDs.POLYGON]: "0xa55490E20057BD4775618D0FC8D51F59f602FED0",
+        [CHAIN_IDs.WORLD_CHAIN]: "0x56e2d1b8C7dE8D11B282E1b4C924C32D91f9102B",
+        [CHAIN_IDs.ZORA]: "0x75b84707e6Bf5bc48DbC3AD883c23192C869AAE4",
       },
     },
     spokePoolPeripheryAddresses: {
@@ -148,8 +169,11 @@ const enabledRoutes = {
           "0x17496824Ba574A4e9De80110A91207c4c63e552a", // Mocked
       },
     },
-    spokePoolPeripheryAddresses: {
+    universalSwapAndBridgeAddresses: {
       uniswap: {},
+    },
+    spokePoolPeripheryAddresses: {
+      "uniswap-universalRouter": {},
     },
     routes: transformChainConfigs(enabledSepoliaChainConfigs),
   },
@@ -373,35 +397,20 @@ async function generateRoutes(hubPoolChainId = 1) {
     ),
     merkleDistributorAddress: utils.getAddress(config.merkleDistributorAddress),
     claimAndStakeAddress: utils.getAddress(config.claimAndStakeAddress),
-    swapAndBridgeAddresses: Object.entries(
-      config.swapAndBridgeAddresses
-    ).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: Object.entries(value).reduce(
-          (acc, [chainId, address]) => ({
-            ...acc,
-            [chainId]: utils.getAddress(address as string),
-          }),
-          {}
-        ),
-      }),
-      {}
+    swapAndBridgeAddresses: checksumAddressesOfNestedMap(
+      config.swapAndBridgeAddresses as Record<string, Record<string, string>>
     ),
-    spokePoolPeripheryAddresses: Object.entries(
-      config.spokePoolPeripheryAddresses
-    ).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: Object.entries(value).reduce(
-          (acc, [chainId, address]) => ({
-            ...acc,
-            [chainId]: utils.getAddress(address as string),
-          }),
-          {}
-        ),
-      }),
-      {}
+    universalSwapAndBridgeAddresses: checksumAddressesOfNestedMap(
+      config.universalSwapAndBridgeAddresses as Record<
+        string,
+        Record<string, string>
+      >
+    ),
+    spokePoolPeripheryAddresses: checksumAddressesOfNestedMap(
+      config.spokePoolPeripheryAddresses as Record<
+        string,
+        Record<string, string>
+      >
     ),
     routes: config.routes.flatMap((route) =>
       transformBridgeRoute(route, config.hubPoolChain)
@@ -654,6 +663,24 @@ function getBridgedUsdcSymbol(chainId: number) {
     default:
       return TOKEN_SYMBOLS_MAP["USDC.e"].symbol;
   }
+}
+
+function checksumAddressesOfNestedMap(
+  nestedMap: Record<string, Record<string, string>>
+) {
+  return Object.entries(nestedMap).reduce(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: Object.entries(value).reduce(
+        (acc, [chainId, address]) => ({
+          ...acc,
+          [chainId]: utils.getAddress(address as string),
+        }),
+        {}
+      ),
+    }),
+    {}
+  );
 }
 
 generateRoutes(Number(process.argv[2]));

@@ -7,6 +7,7 @@ import {
   getBridgeQuoteForMinOutput,
   getRoutesByChainIds,
   getRouteByOutputTokenAndOriginChain,
+  Profiler,
 } from "../../_utils";
 import {
   buildMulticallHandlerMessage,
@@ -42,6 +43,10 @@ export async function getUniswapCrossSwapQuotesForOutputB2A(
   crossSwap: CrossSwap,
   strategy: UniswapQuoteFetchStrategy
 ): Promise<CrossSwapQuotes> {
+  const profiler = new Profiler({
+    at: "api/_dexes/uniswap/quote-resolver#getUniswapCrossSwapQuotesForOutputB2A",
+    logger: console,
+  });
   const destinationSwapChainId = crossSwap.outputToken.chainId;
   const bridgeRoute = getRouteByInputTokenAndDestinationChain(
     crossSwap.inputToken.address,
@@ -83,27 +88,33 @@ export async function getUniswapCrossSwapQuotesForOutputB2A(
   };
   // 1. Get destination swap quote for bridgeable output token -> any token
   //    with exact output amount.
-  let destinationSwapQuote = await strategy.fetchFn(
-    {
-      ...destinationSwap,
-      amount: crossSwap.amount.toString(),
-    },
-    TradeType.EXACT_OUTPUT
+  let destinationSwapQuote = await profiler.measureAsync(
+    strategy.fetchFn(
+      {
+        ...destinationSwap,
+        amount: crossSwap.amount.toString(),
+      },
+      TradeType.EXACT_OUTPUT
+    ),
+    "getDestinationSwapQuote"
   );
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
-  const bridgeQuote = await getBridgeQuoteForMinOutput({
-    inputToken: crossSwap.inputToken,
-    outputToken: bridgeableOutputToken,
-    minOutputAmount: destinationSwapQuote.maximumAmountIn,
-    recipient: getMultiCallHandlerAddress(destinationSwapChainId),
-    message: buildDestinationSwapCrossChainMessage({
-      crossSwap,
-      destinationSwapQuote,
-      bridgeableOutputToken,
-      routerAddress: strategy.getRouterAddress(destinationSwapChainId),
+  const bridgeQuote = await profiler.measureAsync(
+    getBridgeQuoteForMinOutput({
+      inputToken: crossSwap.inputToken,
+      outputToken: bridgeableOutputToken,
+      minOutputAmount: destinationSwapQuote.maximumAmountIn,
+      recipient: getMultiCallHandlerAddress(destinationSwapChainId),
+      message: buildDestinationSwapCrossChainMessage({
+        crossSwap,
+        destinationSwapQuote,
+        bridgeableOutputToken,
+        routerAddress: strategy.getRouterAddress(destinationSwapChainId),
+      }),
     }),
-  });
+    "getBridgeQuote"
+  );
 
   return {
     crossSwap,
@@ -123,6 +134,10 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
   crossSwap: CrossSwap,
   strategy: UniswapQuoteFetchStrategy
 ): Promise<CrossSwapQuotes> {
+  const profiler = new Profiler({
+    at: "api/_dexes/uniswap/quote-resolver#getUniswapCrossSwapQuotesForOutputA2B",
+    logger: console,
+  });
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationChainId = crossSwap.outputToken.chainId;
   const bridgeRoute = getRouteByOutputTokenAndOriginChain(
@@ -156,13 +171,16 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
   };
 
   // 1. Get bridge quote for bridgeable input token -> bridgeable output token
-  const bridgeQuote = await getBridgeQuoteForMinOutput({
-    inputToken: bridgeableInputToken,
-    outputToken: crossSwap.outputToken,
-    minOutputAmount: crossSwap.amount,
-    recipient: getMultiCallHandlerAddress(destinationChainId),
-    message: buildExactOutputBridgeTokenMessage(crossSwap),
-  });
+  const bridgeQuote = await profiler.measureAsync(
+    getBridgeQuoteForMinOutput({
+      inputToken: bridgeableInputToken,
+      outputToken: crossSwap.outputToken,
+      minOutputAmount: crossSwap.amount,
+      recipient: getMultiCallHandlerAddress(destinationChainId),
+      message: buildExactOutputBridgeTokenMessage(crossSwap),
+    }),
+    "getBridgeQuote"
+  );
   // 1.1. Update bridge quote message for min. output amount
   if (crossSwap.type === AMOUNT_TYPE.MIN_OUTPUT && crossSwap.isOutputNative) {
     bridgeQuote.message = buildMinOutputBridgeTokenMessage(
@@ -171,38 +189,44 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
     );
   }
 
-  const spokePoolPeripheryAddress =
-    strategy.getPeripheryAddress(originSwapChainId);
+  const originSwapEntryPoint =
+    strategy.getOriginSwapEntryPoint(originSwapChainId);
   const originSwap = {
     chainId: originSwapChainId,
     tokenIn: crossSwap.inputToken,
     tokenOut: bridgeableInputToken,
-    recipient: spokePoolPeripheryAddress,
+    recipient: originSwapEntryPoint.address,
     slippageTolerance: crossSwap.slippageTolerance,
     type: crossSwap.type,
   };
   // 2.1. Get origin swap quote for any input token -> bridgeable input token
-  const originSwapQuote = await strategy.fetchFn(
-    {
-      ...originSwap,
-      amount: bridgeQuote.inputAmount.toString(),
-    },
-    TradeType.EXACT_OUTPUT,
-    {
-      useIndicativeQuote: true,
-    }
+  const originSwapQuote = await profiler.measureAsync(
+    strategy.fetchFn(
+      {
+        ...originSwap,
+        amount: bridgeQuote.inputAmount.toString(),
+      },
+      TradeType.EXACT_OUTPUT,
+      {
+        useIndicativeQuote: true,
+      }
+    ),
+    "INDICATIVE_getOriginSwapQuote"
   );
   // 2.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
   //      This prevents leftover tokens in the SwapAndBridge contract.
-  let adjOriginSwapQuote = await strategy.fetchFn(
-    {
-      ...originSwap,
-      amount: addMarkupToAmount(
-        originSwapQuote.maximumAmountIn,
-        indicativeQuoteBuffer
-      ).toString(),
-    },
-    TradeType.EXACT_INPUT
+  let adjOriginSwapQuote = await profiler.measureAsync(
+    strategy.fetchFn(
+      {
+        ...originSwap,
+        amount: addMarkupToAmount(
+          originSwapQuote.maximumAmountIn,
+          indicativeQuoteBuffer
+        ).toString(),
+      },
+      TradeType.EXACT_INPUT
+    ),
+    "getOriginSwapQuote"
   );
   assertMinOutputAmount(
     adjOriginSwapQuote.minAmountOut,
@@ -215,7 +239,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2B(
     destinationSwapQuote: undefined,
     originSwapQuote: {
       ...adjOriginSwapQuote,
-      peripheryAddress: spokePoolPeripheryAddress,
+      entryPointContract: originSwapEntryPoint,
     },
   };
 }
@@ -302,6 +326,10 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   originStrategy: UniswapQuoteFetchStrategy,
   destinationStrategy: UniswapQuoteFetchStrategy
 ): Promise<CrossSwapQuotes> {
+  const profiler = new Profiler({
+    at: "api/_dexes/uniswap/quote-resolver#getUniswapCrossSwapQuotesForOutputA2A",
+    logger: console,
+  });
   const originSwapChainId = crossSwap.inputToken.chainId;
   const destinationSwapChainId = crossSwap.outputToken.chainId;
 
@@ -341,11 +369,13 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
   const multiCallHandlerAddress = getMultiCallHandlerAddress(
     destinationSwapChainId
   );
+  const originSwapEntryPoint =
+    originStrategy.getOriginSwapEntryPoint(originSwapChainId);
   const originSwap = {
     chainId: originSwapChainId,
     tokenIn: crossSwap.inputToken,
     tokenOut: bridgeableInputToken,
-    recipient: originStrategy.getPeripheryAddress(originSwapChainId),
+    recipient: originSwapEntryPoint.address,
     slippageTolerance: crossSwap.slippageTolerance,
     type: crossSwap.type,
   };
@@ -360,52 +390,64 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
 
   // 1. Get destination swap quote for bridgeable output token -> any token
   //    with exact output amount
-  let destinationSwapQuote = await destinationStrategy.fetchFn(
-    {
-      ...destinationSwap,
-      amount: crossSwap.amount.toString(),
-    },
-    TradeType.EXACT_OUTPUT
+  let destinationSwapQuote = await profiler.measureAsync(
+    destinationStrategy.fetchFn(
+      {
+        ...destinationSwap,
+        amount: crossSwap.amount.toString(),
+      },
+      TradeType.EXACT_OUTPUT
+    ),
+    "getDestinationSwapQuote"
   );
 
   // 2. Get bridge quote for bridgeable input token -> bridgeable output token
-  const bridgeQuote = await getBridgeQuoteForMinOutput({
-    inputToken: bridgeableInputToken,
-    outputToken: bridgeableOutputToken,
-    minOutputAmount: destinationSwapQuote.maximumAmountIn,
-    recipient: getMultiCallHandlerAddress(destinationSwapChainId),
-    message: buildDestinationSwapCrossChainMessage({
-      crossSwap,
-      destinationSwapQuote,
-      bridgeableOutputToken,
-      routerAddress: destinationStrategy.getRouterAddress(
-        destinationSwapChainId
-      ),
+  const bridgeQuote = await profiler.measureAsync(
+    getBridgeQuoteForMinOutput({
+      inputToken: bridgeableInputToken,
+      outputToken: bridgeableOutputToken,
+      minOutputAmount: destinationSwapQuote.maximumAmountIn,
+      recipient: getMultiCallHandlerAddress(destinationSwapChainId),
+      message: buildDestinationSwapCrossChainMessage({
+        crossSwap,
+        destinationSwapQuote,
+        bridgeableOutputToken,
+        routerAddress: destinationStrategy.getRouterAddress(
+          destinationSwapChainId
+        ),
+      }),
     }),
-  });
+    "getBridgeQuote"
+  );
 
   // 3.1. Get origin swap quote for any input token -> bridgeable input token
-  const originSwapQuote = await originStrategy.fetchFn(
-    {
-      ...originSwap,
-      amount: bridgeQuote.inputAmount.toString(),
-    },
-    TradeType.EXACT_OUTPUT,
-    {
-      useIndicativeQuote: true,
-    }
+  const originSwapQuote = await profiler.measureAsync(
+    originStrategy.fetchFn(
+      {
+        ...originSwap,
+        amount: bridgeQuote.inputAmount.toString(),
+      },
+      TradeType.EXACT_OUTPUT,
+      {
+        useIndicativeQuote: true,
+      }
+    ),
+    "INDICATIVE_getOriginSwapQuote"
   );
   // 3.2. Re-fetch origin swap quote with updated input amount and EXACT_INPUT type.
   //      This prevents leftover tokens in the SwapAndBridge contract.
-  let adjOriginSwapQuote = await originStrategy.fetchFn(
-    {
-      ...originSwap,
-      amount: addMarkupToAmount(
-        originSwapQuote.maximumAmountIn,
-        indicativeQuoteBuffer
-      ).toString(),
-    },
-    TradeType.EXACT_INPUT
+  let adjOriginSwapQuote = await profiler.measureAsync(
+    originStrategy.fetchFn(
+      {
+        ...originSwap,
+        amount: addMarkupToAmount(
+          originSwapQuote.maximumAmountIn,
+          indicativeQuoteBuffer
+        ).toString(),
+      },
+      TradeType.EXACT_INPUT
+    ),
+    "getOriginSwapQuote"
   );
   assertMinOutputAmount(
     adjOriginSwapQuote.minAmountOut,
@@ -418,7 +460,7 @@ export async function getUniswapCrossSwapQuotesForOutputA2A(
     bridgeQuote,
     originSwapQuote: {
       ...adjOriginSwapQuote,
-      peripheryAddress: originStrategy.getPeripheryAddress(originSwapChainId),
+      entryPointContract: originSwapEntryPoint,
     },
   };
 }
