@@ -594,9 +594,12 @@ export const getGasMarkup = (chainId: string | number) => {
     return gasMarkup[chainId];
   }
 
-  return sdk.utils.chainIsOPStack(Number(chainId))
-    ? gasMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
-    : DEFAULT_GAS_MARKUP;
+  return (
+    1 +
+    (sdk.utils.chainIsOPStack(Number(chainId))
+      ? gasMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
+      : DEFAULT_GAS_MARKUP)
+  );
 };
 
 /**
@@ -641,8 +644,7 @@ const getRelayerFeeCalculatorQueries = (
     overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
     overrides.relayerAddress,
     REACT_APP_COINGECKO_PRO_API_KEY,
-    getLogger(),
-    getGasMarkup(destinationChainId)
+    getLogger()
   );
 };
 
@@ -1972,7 +1974,8 @@ export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
   }
   const { maxFeePerGas } = await sdk.gasPriceOracle.getGasPriceEstimate(
     getProvider(chainId),
-    chainId
+    chainId,
+    getGasMarkup(chainId)
   );
   return maxFeePerGas;
 }
