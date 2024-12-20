@@ -11,11 +11,6 @@ import {
   getWrappedNativeTokenAddress,
   getCachedTokenPrice,
 } from "../_utils";
-import {
-  AMOUNT_TYPE,
-  getCrossSwapQuotes,
-  AmountType,
-} from "../_dexes/cross-swap";
 import { InvalidParamError } from "../_errors";
 import { isValidIntegratorId } from "../_integrator-id";
 import {
@@ -23,8 +18,9 @@ import {
   CrossSwapQuotes,
   SwapQuote,
   Token,
+  AmountType,
 } from "../_dexes/types";
-import { formatUnits } from "ethers/lib/utils";
+import { AMOUNT_TYPE } from "../_dexes/utils";
 import { encodeApproveCalldata } from "../_multicall-handler";
 
 export const BaseSwapQueryParamsSchema = type({
@@ -45,9 +41,9 @@ export const BaseSwapQueryParamsSchema = type({
 
 export type BaseSwapQueryParams = Infer<typeof BaseSwapQueryParamsSchema>;
 
-export async function handleBaseSwapQueryParams({
-  query,
-}: TypedVercelRequest<BaseSwapQueryParams>) {
+export async function handleBaseSwapQueryParams(
+  query: TypedVercelRequest<BaseSwapQueryParams>["query"]
+) {
   assert(query, BaseSwapQueryParamsSchema);
 
   const {
@@ -103,7 +99,6 @@ export async function handleBaseSwapQueryParams({
   const amountType = tradeType as AmountType;
   const amount = BigNumber.from(_amount);
 
-  // 1. Get token details
   const [inputToken, outputToken] = await Promise.all([
     getCachedTokenInfo({
       address: inputTokenAddress,
@@ -115,32 +110,20 @@ export async function handleBaseSwapQueryParams({
     }),
   ]);
 
-  // 2. Get swap quotes and calldata based on the swap type
-  const crossSwapQuotes = await getCrossSwapQuotes({
-    amount,
+  return {
     inputToken,
     outputToken,
-    depositor,
-    recipient: recipient || depositor,
-    slippageTolerance: Number(slippageTolerance),
-    type: amountType,
+    amount,
+    amountType,
     refundOnOrigin,
-    refundAddress,
-    isInputNative,
-    isOutputNative,
-  });
-
-  // 3. Calculate fees based for full route
-  // const fees = await calculateCrossSwapFees(crossSwapQuotes);
-
-  return {
-    crossSwapQuotes: {
-      ...crossSwapQuotes,
-      // fees,
-    },
     integratorId,
     skipOriginTxEstimation,
     isInputNative,
+    isOutputNative,
+    refundAddress,
+    recipient,
+    depositor,
+    slippageTolerance,
   };
 }
 
@@ -193,10 +176,10 @@ async function calculateSwapFee(
   ]);
 
   const normalizedIn =
-    parseFloat(formatUnits(expectedAmountIn, tokenIn.decimals)) *
+    parseFloat(utils.formatUnits(expectedAmountIn, tokenIn.decimals)) *
     inputTokenPriceBase;
   const normalizedOut =
-    parseFloat(formatUnits(expectedAmountOut, tokenOut.decimals)) *
+    parseFloat(utils.formatUnits(expectedAmountOut, tokenOut.decimals)) *
     outputTokenPriceBase;
   return {
     [baseCurrency]: normalizedIn - normalizedOut,
@@ -216,7 +199,7 @@ async function calculateBridgeFee(
   );
   const normalizedFee =
     parseFloat(
-      formatUnits(suggestedFees.totalRelayFee.total, inputToken.decimals)
+      utils.formatUnits(suggestedFees.totalRelayFee.total, inputToken.decimals)
     ) * inputTokenPriceBase;
 
   return {

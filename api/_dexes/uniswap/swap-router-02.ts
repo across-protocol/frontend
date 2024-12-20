@@ -4,21 +4,24 @@ import { SwapRouter } from "@uniswap/router-sdk";
 
 import { CHAIN_IDs } from "@across-protocol/constants";
 
-import { getLogger } from "../../_utils";
-import { OriginSwapEntryPointContract, Swap, SwapQuote } from "../types";
-import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
 import {
+  getLogger,
+  getSpokePoolAddress,
   addMarkupToAmount,
-  floatToPercent,
-  UniswapQuoteFetchStrategy,
-} from "./utils";
+} from "../../_utils";
+import { Swap, SwapQuote } from "../types";
+import {
+  getSpokePoolPeripheryAddress,
+  getSpokePoolPeripheryProxyAddress,
+} from "../../_spoke-pool-periphery";
+import { getUniversalSwapAndBridgeAddress } from "../../_swap-and-bridge";
+import { floatToPercent, UniswapQuoteFetchStrategy } from "./utils";
 import {
   getUniswapClassicQuoteFromApi,
   getUniswapClassicIndicativeQuoteFromApi,
   UniswapClassicQuoteFromApi,
 } from "./trading-api";
 import { RouterTradeAdapter } from "./adapter";
-import { getUniversalSwapAndBridgeAddress } from "../utils";
 import { buildCacheKey, makeCacheGetterAndSetter } from "../../_cache";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
@@ -35,20 +38,51 @@ export const SWAP_ROUTER_02_ADDRESS = {
 };
 
 export function getSwapRouter02Strategy(
-  originSwapEntryPointContractName: OriginSwapEntryPointContract["name"]
+  originSwapEntryPointContractName:
+    | "SpokePoolPeriphery"
+    | "SpokePoolPeripheryProxy"
+    | "UniversalSwapAndBridge"
 ): UniswapQuoteFetchStrategy {
-  const getRouterAddress = (chainId: number) => SWAP_ROUTER_02_ADDRESS[chainId];
-  const getOriginSwapEntryPoint = (chainId: number) => {
-    if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
+  const getRouter = (chainId: number) => {
+    return {
+      address: SWAP_ROUTER_02_ADDRESS[chainId],
+      name: "UniswapV3SwapRouter02",
+    };
+  };
+  const getOriginEntryPoints = (chainId: number) => {
+    if (originSwapEntryPointContractName === "SpokePoolPeripheryProxy") {
       return {
-        name: "SpokePoolPeriphery",
-        address: getSpokePoolPeripheryAddress("uniswap-swapRouter02", chainId),
+        swapAndBridge: {
+          name: "SpokePoolPeripheryProxy",
+          address: getSpokePoolPeripheryProxyAddress(chainId),
+        },
+        deposit: {
+          name: "SpokePoolPeriphery",
+          address: getSpokePoolPeripheryAddress(chainId),
+        },
+      } as const;
+    } else if (originSwapEntryPointContractName === "SpokePoolPeriphery") {
+      return {
+        swapAndBridge: {
+          name: "SpokePoolPeriphery",
+          address: getSpokePoolPeripheryAddress(chainId),
+        },
+        deposit: {
+          name: "SpokePoolPeriphery",
+          address: getSpokePoolPeripheryAddress(chainId),
+        },
       } as const;
     } else if (originSwapEntryPointContractName === "UniversalSwapAndBridge") {
       return {
-        name: "UniversalSwapAndBridge",
-        address: getUniversalSwapAndBridgeAddress("uniswap", chainId),
-        dex: "uniswap",
+        swapAndBridge: {
+          name: "UniversalSwapAndBridge",
+          address: getUniversalSwapAndBridgeAddress("uniswap", chainId),
+          dex: "uniswap",
+        },
+        deposit: {
+          name: "SpokePool",
+          address: getSpokePoolAddress(chainId),
+        },
       } as const;
     }
     throw new Error(
@@ -167,8 +201,8 @@ export function getSwapRouter02Strategy(
   };
 
   return {
-    getRouterAddress,
-    getOriginSwapEntryPoint,
+    getRouter,
+    getOriginEntryPoints,
     fetchFn,
   };
 }

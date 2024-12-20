@@ -84,7 +84,6 @@ import {
   TokenNotFoundError,
 } from "./_errors";
 import { Token } from "./_dexes/types";
-import { addMarkupToAmount } from "./_dexes/uniswap/utils";
 
 export { InputError, handleErrorCondition } from "./_errors";
 export const { Profiler } = sdk.utils;
@@ -908,7 +907,7 @@ export async function getBridgeQuoteForMinOutput(params: {
     outputToken: params.outputToken.address,
     originChainId: params.inputToken.chainId,
     destinationChainId: params.outputToken.chainId,
-    skipAmountLimit: false,
+    skipAmountLimit: true,
     recipient: params.recipient,
     message: params.message,
   };
@@ -2384,4 +2383,10 @@ export function getSpokePoolVerifier(chainId: number) {
 
   const address = ENABLED_ROUTES.spokePoolVerifier.address;
   return SpokePoolVerifier__factory.connect(address, getProvider(chainId));
+}
+
+export function addMarkupToAmount(amount: BigNumber, markup = 0.01) {
+  return amount
+    .mul(ethers.utils.parseEther((1 + Number(markup)).toString()))
+    .div(sdk.utils.fixedPointAdjustment);
 }

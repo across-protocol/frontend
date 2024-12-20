@@ -3,19 +3,18 @@ import { TradeType } from "@uniswap/sdk-core";
 import { CHAIN_IDs } from "@across-protocol/constants";
 import { SwapRouter } from "@uniswap/universal-router-sdk";
 
-import { getLogger } from "../../_utils";
+import { getLogger, addMarkupToAmount } from "../../_utils";
 import { Swap, SwapQuote } from "../types";
-import { getSpokePoolPeripheryAddress } from "../../_spoke-pool-periphery";
+import {
+  getSpokePoolPeripheryAddress,
+  getSpokePoolPeripheryProxyAddress,
+} from "../../_spoke-pool-periphery";
 import {
   getUniswapClassicQuoteFromApi,
   getUniswapClassicIndicativeQuoteFromApi,
   UniswapClassicQuoteFromApi,
 } from "./trading-api";
-import {
-  UniswapQuoteFetchStrategy,
-  addMarkupToAmount,
-  floatToPercent,
-} from "./utils";
+import { UniswapQuoteFetchStrategy, floatToPercent } from "./utils";
 import { RouterTradeAdapter } from "./adapter";
 
 // https://uniswap-docs.readme.io/reference/faqs#i-need-to-whitelist-the-router-addresses-where-can-i-find-them
@@ -32,12 +31,23 @@ export const UNIVERSAL_ROUTER_ADDRESS = {
 };
 
 export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
-  const getRouterAddress = (chainId: number) =>
-    UNIVERSAL_ROUTER_ADDRESS[chainId];
-  const getOriginSwapEntryPoint = (chainId: number) =>
+  const getRouter = (chainId: number) => {
+    return {
+      address: UNIVERSAL_ROUTER_ADDRESS[chainId],
+      name: "UniswapV3UniversalRouter",
+    };
+  };
+
+  const getOriginEntryPoints = (chainId: number) =>
     ({
-      name: "SpokePoolPeriphery",
-      address: getSpokePoolPeripheryAddress("uniswap-universalRouter", chainId),
+      swapAndBridge: {
+        name: "SpokePoolPeripheryProxy",
+        address: getSpokePoolPeripheryProxyAddress(chainId),
+      },
+      deposit: {
+        name: "SpokePoolPeriphery",
+        address: getSpokePoolPeripheryAddress(chainId),
+      },
     }) as const;
 
   const fetchFn = async (
@@ -129,8 +139,8 @@ export function getUniversalRouterStrategy(): UniswapQuoteFetchStrategy {
   };
 
   return {
-    getRouterAddress,
-    getOriginSwapEntryPoint,
+    getRouter,
+    getOriginEntryPoints,
     fetchFn,
   };
 }
