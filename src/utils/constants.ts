@@ -122,6 +122,7 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
       ChainId.OPTIMISM,
       ChainId.MODE,
       ChainId.BASE,
+      ChainId.INK,
       ChainId.WORLD_CHAIN,
       ChainId.LISK,
     ],
