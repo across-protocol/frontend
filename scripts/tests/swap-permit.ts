@@ -2,7 +2,7 @@ import { swap } from "./_swap-utils";
 
 async function swapWithPermit() {
   console.log("Swapping with permit...");
-  await swap();
+  await swap("permit");
 }
 
 swapWithPermit()

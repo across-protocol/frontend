@@ -2,7 +2,7 @@ import { swap } from "./_swap-utils";
 
 async function swapWithAllowance() {
   console.log("Swapping with allowance...");
-  await swap();
+  await swap("approval");
 }
 
 swapWithAllowance()

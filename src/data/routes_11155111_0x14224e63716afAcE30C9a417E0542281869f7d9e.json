@@ -16,9 +16,8 @@
   "universalSwapAndBridgeAddresses": {
     "uniswap": {}
   },
-  "spokePoolPeripheryAddresses": {
-    "uniswap-universalRouter": {}
-  },
+  "spokePoolPeripheryAddresses": {},
+  "spokePoolPeripheryProxyAddresses": {},
   "routes": [
     {
       "fromChain": 11155111,

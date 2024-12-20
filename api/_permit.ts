@@ -44,9 +44,12 @@ export async function getPermitTypedData(params: {
           : domainSeparatorResult.status === "rejected"
             ? domainSeparatorResult.reason
             : new Error("Unknown error");
-    throw new Error(`Contract ${params.tokenAddress} does not support permit`, {
-      cause: error,
-    });
+    throw new Error(
+      `ERC-20 contract ${params.tokenAddress} does not support permit`,
+      {
+        cause: error,
+      }
+    );
   }
 
   const name = nameResult.value;

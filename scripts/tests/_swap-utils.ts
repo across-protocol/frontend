@@ -170,19 +170,16 @@ export function filterTestCases(
   return filteredTestCases;
 }
 
-export async function swap() {
+export async function swap(slug: "approval" | "permit") {
   const filterString = process.argv[2];
   const testCases = [...MIN_OUTPUT_CASES, ...EXACT_OUTPUT_CASES];
   const filteredTestCases = filterTestCases(testCases, filterString);
   for (const testCase of filteredTestCases) {
     console.log("\nTest case:", testCase.labels.join(" "));
     console.log("Params:", testCase.params);
-    const response = await axios.get(
-      `${SWAP_API_BASE_URL}/api/swap/allowance`,
-      {
-        params: testCase.params,
-      }
-    );
+    const response = await axios.get(`${SWAP_API_BASE_URL}/api/swap/${slug}`, {
+      params: testCase.params,
+    });
     console.log(response.data);
 
     if (process.env.DEV_WALLET_PK) {

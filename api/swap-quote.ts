@@ -16,7 +16,7 @@ import {
 import { getUniswapQuoteWithSwapQuoter } from "./_dexes/uniswap/swap-quoter";
 import { get1inchQuoteForOriginSwapExactInput } from "./_dexes/1inch";
 import { InvalidParamError } from "./_errors";
-import { AMOUNT_TYPE } from "./_dexes/cross-swap";
+import { AMOUNT_TYPE } from "./_dexes/cross-swap-service";
 
 const SwapQuoteQueryParamsSchema = type({
   swapToken: validAddress(),
