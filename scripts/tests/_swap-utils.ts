@@ -170,7 +170,7 @@ export function filterTestCases(
   return filteredTestCases;
 }
 
-export async function swap(slug: "approval" | "permit") {
+export async function swap(slug: "approval" | "permit" | "auth") {
   const filterString = process.argv[2];
   const testCases = [...MIN_OUTPUT_CASES, ...EXACT_OUTPUT_CASES];
   const filteredTestCases = filterTestCases(testCases, filterString);
