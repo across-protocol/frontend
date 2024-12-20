@@ -166,11 +166,13 @@ const handler = async (
 
     const [tokenPriceNative, _tokenPriceUsd, latestBlock, gasUnits, gasPrice] =
       await Promise.all([
-        getCachedTokenPrice(
-          l1Token.address,
-          sdk.utils.getNativeTokenSymbol(destinationChainId).toLowerCase()
-        ),
-        getCachedTokenPrice(l1Token.address, "usd"),
+        getCachedTokenPrice({
+          l1Token: l1Token.address,
+          baseCurrency: sdk.utils
+            .getNativeTokenSymbol(destinationChainId)
+            .toLowerCase(),
+        }),
+        getCachedTokenPrice({ l1Token: l1Token.address, baseCurrency: "usd" }),
         getCachedLatestBlock(HUB_POOL_CHAIN_ID),
         // Only use cached gas units if message is not defined, i.e. standard for standard bridges
         isMessageDefined

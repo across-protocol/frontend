@@ -104,7 +104,7 @@ const handler = async (
       : bridgeQuote.outputToken;
 
     const responseJson = {
-      // fees: crossSwapQuotes.fees,
+      fees: crossSwapQuotes.fees,
       checks: {
         allowance: {
           token: inputTokenAddress,
