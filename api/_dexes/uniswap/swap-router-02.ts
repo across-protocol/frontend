@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { TradeType } from "@uniswap/sdk-core";
 import { SwapRouter } from "@uniswap/router-sdk";
 
@@ -19,6 +19,7 @@ import {
 } from "./trading-api";
 import { RouterTradeAdapter } from "./adapter";
 import { getUniversalSwapAndBridgeAddress } from "../utils";
+import { buildCacheKey, makeCacheGetterAndSetter } from "../../_cache";
 
 // Taken from here: https://docs.uniswap.org/contracts/v3/reference/deployments/
 export const SWAP_ROUTER_02_ADDRESS = {
@@ -94,17 +95,39 @@ export function getSwapRouter02Strategy(
         swapTx,
       };
     } else {
-      const { input, output } = await getUniswapClassicIndicativeQuoteFromApi(
-        { ...swap, swapper: swap.recipient },
+      const indicativeQuotePricePerTokenOut = await indicativeQuotePriceCache(
+        swap,
         tradeType
-      );
+      ).get();
+      const inputAmount =
+        tradeType === TradeType.EXACT_INPUT
+          ? swap.amount
+          : ethers.utils.parseUnits(
+              (
+                Number(
+                  ethers.utils.formatUnits(swap.amount, swap.tokenOut.decimals)
+                ) * indicativeQuotePricePerTokenOut
+              ).toFixed(swap.tokenIn.decimals),
+              swap.tokenIn.decimals
+            );
+      const outputAmount =
+        tradeType === TradeType.EXACT_INPUT
+          ? ethers.utils.parseUnits(
+              (
+                Number(
+                  ethers.utils.formatUnits(swap.amount, swap.tokenIn.decimals)
+                ) / indicativeQuotePricePerTokenOut
+              ).toFixed(swap.tokenOut.decimals),
+              swap.tokenOut.decimals
+            )
+          : swap.amount;
 
-      const expectedAmountIn = BigNumber.from(input.amount);
+      const expectedAmountIn = BigNumber.from(inputAmount);
       const maxAmountIn =
         tradeType === TradeType.EXACT_INPUT
           ? expectedAmountIn
           : addMarkupToAmount(expectedAmountIn, swap.slippageTolerance / 100);
-      const expectedAmountOut = BigNumber.from(output.amount);
+      const expectedAmountOut = BigNumber.from(outputAmount);
       const minAmountOut =
         tradeType === TradeType.EXACT_OUTPUT
           ? expectedAmountOut
@@ -119,9 +142,9 @@ export function getSwapRouter02Strategy(
         expectedAmountIn,
         slippageTolerance: swap.slippageTolerance,
         swapTx: {
-          to: "0x",
-          data: "0x",
-          value: "0x",
+          to: "0x0",
+          data: "0x0",
+          value: "0x0",
         },
       };
     }
@@ -175,4 +198,31 @@ export function buildSwapRouterSwapTx(
     value,
     to: SWAP_ROUTER_02_ADDRESS[swap.chainId],
   };
+}
+
+export function indicativeQuotePriceCache(swap: Swap, tradeType: TradeType) {
+  // TODO: Add price buckets based on USD value, e.g. 100, 1000, 10000
+  const cacheKey = buildCacheKey(
+    "uniswap-indicative-quote",
+    tradeType === TradeType.EXACT_INPUT ? "EXACT_INPUT" : "EXACT_OUTPUT",
+    swap.chainId,
+    swap.tokenIn.symbol,
+    swap.tokenOut.symbol
+  );
+  const ttl = 60;
+  const fetchFn = async () => {
+    const quote = await getUniswapClassicIndicativeQuoteFromApi(
+      { ...swap, swapper: swap.recipient },
+      tradeType
+    );
+    const pricePerTokenOut =
+      Number(
+        ethers.utils.formatUnits(quote.input.amount, swap.tokenIn.decimals)
+      ) /
+      Number(
+        ethers.utils.formatUnits(quote.output.amount, swap.tokenOut.decimals)
+      );
+    return pricePerTokenOut;
+  };
+  return makeCacheGetterAndSetter(cacheKey, ttl, fetchFn);
 }
