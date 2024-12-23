@@ -6,9 +6,11 @@ import { getSpokePool } from "../../_utils";
 import {
   getSpokePoolPeriphery,
   getSpokePoolPeripheryProxy,
-  TransferType,
 } from "../../_spoke-pool-periphery";
-import { extractDepositDataStruct } from "../../_dexes/utils";
+import {
+  extractDepositDataStruct,
+  extractSwapAndDepositDataStruct,
+} from "../../_dexes/utils";
 import { getUniversalSwapAndBridge } from "../../_swap-and-bridge";
 
 export async function buildCrossSwapTxForAllowanceHolder(
@@ -18,8 +20,6 @@ export async function buildCrossSwapTxForAllowanceHolder(
   const { originSwapQuote, crossSwap, contracts } = crossSwapQuotes;
   const { originSwapEntryPoint, originRouter, depositEntryPoint } = contracts;
   const originChainId = crossSwap.inputToken.chainId;
-
-  const deposit = await extractDepositDataStruct(crossSwapQuotes);
 
   let tx: PopulatedTransaction;
   let toAddress: string;
@@ -31,25 +31,17 @@ export async function buildCrossSwapTxForAllowanceHolder(
         `'originSwapEntryPoint' and 'originRouter' need to be defined for origin swap quotes`
       );
     }
+
+    const swapAndDepositData =
+      await extractSwapAndDepositDataStruct(crossSwapQuotes);
+
     if (originSwapEntryPoint.name === "SpokePoolPeripheryProxy") {
       const spokePoolPeripheryProxy = getSpokePoolPeripheryProxy(
         originSwapEntryPoint.address,
         originChainId
       );
       tx = await spokePoolPeripheryProxy.populateTransaction.swapAndBridge(
-        {
-          submissionFees: {
-            amount: 0,
-            recipient: crossSwap.depositor,
-          },
-          depositData: deposit,
-          swapToken: originSwapQuote.tokenIn.address,
-          exchange: originRouter.address,
-          transferType: TransferType.Approval,
-          swapTokenAmount: originSwapQuote.maximumAmountIn,
-          minExpectedInputTokenAmount: originSwapQuote.minAmountOut,
-          routerCalldata: originSwapQuote.swapTx.data,
-        }
+        swapAndDepositData
         // TODO: Add payable modifier to SpokePoolPeripheryProxy swapAndBridge function
         // {
         //   value: crossSwap.isInputNative ? originSwapQuote.maximumAmountIn : 0,
@@ -68,9 +60,11 @@ export async function buildCrossSwapTxForAllowanceHolder(
         originSwapQuote.maximumAmountIn,
         originSwapQuote.minAmountOut,
         {
-          ...deposit,
+          ...swapAndDepositData.depositData,
+          exclusivityDeadline:
+            swapAndDepositData.depositData.exclusivityParameter,
           // Typo in the contract
-          destinationChainid: deposit.destinationChainId,
+          destinationChainid: swapAndDepositData.depositData.destinationChainId,
         }
       );
       toAddress = universalSwapAndBridge.address;
@@ -88,26 +82,28 @@ export async function buildCrossSwapTxForAllowanceHolder(
       );
     }
 
+    const { baseDepositData } = await extractDepositDataStruct(crossSwapQuotes);
+
     if (depositEntryPoint.name === "SpokePoolPeriphery") {
       const spokePoolPeriphery = getSpokePoolPeriphery(
         depositEntryPoint.address,
         originChainId
       );
       tx = await spokePoolPeriphery.populateTransaction.deposit(
-        deposit.recipient,
-        deposit.inputToken,
-        // deposit.outputToken, // TODO: allow for output token in periphery contract
-        deposit.inputAmount,
-        deposit.outputAmount,
-        deposit.destinationChainId,
-        deposit.exclusiveRelayer,
-        deposit.quoteTimestamp,
-        deposit.fillDeadline,
-        deposit.exclusivityDeadline,
-        deposit.message,
+        baseDepositData.recipient,
+        baseDepositData.inputToken,
+        // baseDepositData.outputToken, // TODO: allow for output token in periphery contract
+        baseDepositData.inputAmount,
+        baseDepositData.outputAmount,
+        baseDepositData.destinationChainId,
+        baseDepositData.exclusiveRelayer,
+        baseDepositData.quoteTimestamp,
+        baseDepositData.fillDeadline,
+        baseDepositData.exclusivityDeadline,
+        baseDepositData.message,
         {
           value: crossSwapQuotes.crossSwap.isInputNative
-            ? deposit.inputAmount
+            ? baseDepositData.inputAmount
             : 0,
         }
       );
@@ -115,21 +111,21 @@ export async function buildCrossSwapTxForAllowanceHolder(
     } else if (depositEntryPoint.name === "SpokePool") {
       const spokePool = getSpokePool(originChainId);
       tx = await spokePool.populateTransaction.depositV3(
-        deposit.depositor,
-        deposit.recipient,
-        deposit.inputToken,
-        deposit.outputToken,
-        deposit.inputAmount,
-        deposit.outputAmount,
-        deposit.destinationChainId,
-        deposit.exclusiveRelayer,
-        deposit.quoteTimestamp,
-        deposit.fillDeadline,
-        deposit.exclusivityDeadline,
-        deposit.message,
+        baseDepositData.depositor,
+        baseDepositData.recipient,
+        baseDepositData.inputToken,
+        baseDepositData.outputToken,
+        baseDepositData.inputAmount,
+        baseDepositData.outputAmount,
+        baseDepositData.destinationChainId,
+        baseDepositData.exclusiveRelayer,
+        baseDepositData.quoteTimestamp,
+        baseDepositData.fillDeadline,
+        baseDepositData.exclusivityDeadline,
+        baseDepositData.message,
         {
           value: crossSwapQuotes.crossSwap.isInputNative
-            ? deposit.inputAmount
+            ? baseDepositData.inputAmount
             : 0,
         }
       );

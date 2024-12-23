@@ -1487,7 +1487,7 @@ export function validAddressOrENS() {
 
 export function positiveIntStr() {
   return define<string>("positiveIntStr", (value) => {
-    return Number.isInteger(Number(value)) && Number(value) > 0;
+    return Number.isInteger(Number(value)) && Number(value) >= 0;
   });
 }
 
@@ -1500,6 +1500,12 @@ export function positiveFloatStr(maxValue?: number) {
 export function boolStr() {
   return define<string>("boolStr", (value) => {
     return value === "true" || value === "false";
+  });
+}
+
+export function hexString() {
+  return define<string>("hexString", (value) => {
+    return utils.isHexString(value);
   });
 }
 

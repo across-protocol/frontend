@@ -1,4 +1,4 @@
-import { BigNumber, constants } from "ethers";
+import { BigNumber, BigNumberish, constants } from "ethers";
 import { utils } from "@across-protocol/sdk";
 import { SpokePool } from "@across-protocol/contracts/dist/typechain";
 
@@ -24,7 +24,9 @@ import {
   isOutputTokenBridgeable,
   getSpokePool,
 } from "../_utils";
-
+import { GAS_SPONSOR_ADDRESS } from "../relay/_utils";
+import { SpokePoolV3PeripheryInterface } from "../_typechain/SpokePoolV3Periphery";
+import { TransferType } from "../_spoke-pool-periphery";
 export type CrossSwapType =
   (typeof CROSS_SWAP_TYPE)[keyof typeof CROSS_SWAP_TYPE];
 
@@ -195,7 +197,11 @@ export function getFallbackRecipient(crossSwap: CrossSwap) {
 }
 
 export async function extractDepositDataStruct(
-  crossSwapQuotes: CrossSwapQuotes
+  crossSwapQuotes: CrossSwapQuotes,
+  submissionFees?: {
+    amount: BigNumberish;
+    recipient: string;
+  }
 ) {
   const originChainId = crossSwapQuotes.crossSwap.inputToken.chainId;
   const destinationChainId = crossSwapQuotes.crossSwap.outputToken.chainId;
@@ -204,7 +210,7 @@ export async function extractDepositDataStruct(
   const refundAddress =
     crossSwapQuotes.crossSwap.refundAddress ??
     crossSwapQuotes.crossSwap.depositor;
-  const deposit = {
+  const baseDepositData = {
     depositor: crossSwapQuotes.crossSwap.refundOnOrigin
       ? refundAddress
       : crossSwapQuotes.crossSwap.depositor,
@@ -226,7 +232,46 @@ export async function extractDepositDataStruct(
       crossSwapQuotes.bridgeQuote.suggestedFees.exclusivityDeadline,
     message,
   };
-  return deposit;
+  return {
+    inputAmount: baseDepositData.inputAmount,
+    baseDepositData,
+    submissionFees: submissionFees || {
+      amount: "0",
+      recipient: GAS_SPONSOR_ADDRESS,
+    },
+  };
+}
+
+export async function extractSwapAndDepositDataStruct(
+  crossSwapQuotes: CrossSwapQuotes,
+  submissionFees?: {
+    amount: BigNumberish;
+    recipient: string;
+  }
+): Promise<SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct> {
+  const { originSwapQuote, contracts } = crossSwapQuotes;
+  const { originRouter } = contracts;
+  if (!originSwapQuote || !originRouter) {
+    throw new Error(
+      "Can not extract 'SwapAndDepositDataStruct' without originSwapQuote and originRouter"
+    );
+  }
+
+  const { baseDepositData, submissionFees: _submissionFees } =
+    await extractDepositDataStruct(crossSwapQuotes, submissionFees);
+  return {
+    submissionFees: submissionFees || _submissionFees,
+    depositData: baseDepositData,
+    swapToken: originSwapQuote.tokenIn.address,
+    swapTokenAmount: originSwapQuote.maximumAmountIn,
+    minExpectedInputTokenAmount: originSwapQuote.minAmountOut,
+    routerCalldata: originSwapQuote.swapTx.data,
+    exchange: originRouter.address,
+    transferType:
+      originRouter.name === "UniswapV3UniversalRouter"
+        ? TransferType.Transfer
+        : TransferType.Approval,
+  };
 }
 
 async function getFillDeadline(spokePool: SpokePool): Promise<number> {
