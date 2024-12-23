@@ -238,8 +238,6 @@ export async function sendDepositV3Tx(
   );
   fillDeadline ??= await getFillDeadline(spokePool);
 
-  console.log("###", fillDeadline);
-
   const useExclusiveRelayer =
     exclusiveRelayer !== ethers.constants.AddressZero &&
     exclusivityDeadline > 0;
