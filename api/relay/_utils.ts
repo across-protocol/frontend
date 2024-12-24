@@ -197,39 +197,46 @@ export function encodeCalldataForRelayRequest(request: RelayRequest) {
   return encodedCalldata;
 }
 
+export function getRelayRequestHash(request: RelayRequest) {
+  return utils.keccak256(
+    utils.defaultAbiCoder.encode(
+      ["bytes", "bytes"],
+      [request.signatures.permit, request.signatures.deposit]
+    )
+  );
+}
+
 type CachedRelayRequest =
   | {
       status: "pending";
       request: RelayRequest;
-      requestId: string;
+      messageId: string;
     }
   | {
       status: "success";
       request: RelayRequest;
       txHash: string;
-      requestId: string;
+      messageId: string;
     }
   | {
       status: "failure";
       request: RelayRequest;
       error: Error;
-      requestId: string;
+      messageId: string;
     }
   | {
       status: "unknown";
-      requestId: string;
     };
 
 export async function getCachedRelayRequest(
-  requestId: string
+  requestOrHash: RelayRequest | string
 ): Promise<CachedRelayRequest> {
   const cachedRelayRequest = await redisCache.get<CachedRelayRequest>(
-    getRelayRequestCacheKey(requestId)
+    getRelayRequestCacheKey(requestOrHash)
   );
 
   if (!cachedRelayRequest) {
     return {
-      requestId,
       status: "unknown",
     };
   }
@@ -238,14 +245,14 @@ export async function getCachedRelayRequest(
 }
 
 export async function setCachedRelayRequestPending(params: {
-  requestId: string;
+  messageId: string;
   request: RelayRequest;
 }) {
   await redisCache.set(
-    getRelayRequestCacheKey(params.requestId),
+    getRelayRequestCacheKey(params.request),
     {
       status: "pending",
-      requestId: params.requestId,
+      messageId: params.messageId,
       request: params.request,
     },
     60 * 60 * 24 // 1 day
@@ -253,16 +260,27 @@ export async function setCachedRelayRequestPending(params: {
 }
 
 export async function setCachedRelayRequestFailure(params: {
-  requestId: string;
   request: RelayRequest;
   error: Error;
 }) {
+  const cachedRelayRequest = await getCachedRelayRequest(params.request);
+
+  if (!cachedRelayRequest || cachedRelayRequest.status === "unknown") {
+    throw new Error("Request not found in cache");
+  }
+
+  if (cachedRelayRequest.status !== "pending") {
+    throw new Error(
+      "Can not set 'failure' status for request that is not pending"
+    );
+  }
+
   await redisCache.set(
-    getRelayRequestCacheKey(params.requestId),
+    getRelayRequestCacheKey(params.request),
     {
       status: "failure",
-      requestId: params.requestId,
-      request: params.request,
+      messageId: cachedRelayRequest.messageId,
+      request: cachedRelayRequest.request,
       error: params.error,
     },
     60 * 60 * 24 // 1 day
@@ -270,22 +288,37 @@ export async function setCachedRelayRequestFailure(params: {
 }
 
 export async function setCachedRelayRequestSuccess(params: {
-  requestId: string;
   request: RelayRequest;
   txHash: string;
 }) {
+  const cachedRelayRequest = await getCachedRelayRequest(params.request);
+
+  if (!cachedRelayRequest || cachedRelayRequest.status === "unknown") {
+    throw new Error("Request not found in cache");
+  }
+
+  if (cachedRelayRequest.status !== "pending") {
+    throw new Error(
+      "Can not set 'success' status for request that is not pending"
+    );
+  }
+
   await redisCache.set(
-    getRelayRequestCacheKey(params.requestId),
+    getRelayRequestCacheKey(params.request),
     {
       status: "success",
-      requestId: params.requestId,
-      request: params.request,
+      messageId: cachedRelayRequest.messageId,
+      request: cachedRelayRequest.request,
       txHash: params.txHash,
     },
     60 * 60 * 24 // 1 day
   );
 }
 
-function getRelayRequestCacheKey(requestId: string) {
-  return `relay-request:${requestId}`;
+function getRelayRequestCacheKey(requestOrHash: RelayRequest | string) {
+  const requestHash =
+    typeof requestOrHash === "string"
+      ? requestOrHash
+      : getRelayRequestHash(requestOrHash);
+  return `relay-request:${requestHash}`;
 }

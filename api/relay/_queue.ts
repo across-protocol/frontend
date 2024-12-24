@@ -10,11 +10,9 @@ const client = new Client({
 export async function pushRelayRequestToQueue({
   request,
   strategy,
-  requestId,
 }: {
   request: RelayRequest;
   strategy: RelayStrategy;
-  requestId: string;
 }) {
   const strategyName = strategy.strategyName;
   const queue = getRelayRequestQueue(strategyName, request.chainId);
@@ -24,11 +22,13 @@ export async function pushRelayRequestToQueue({
 
   const baseUrl = resolveVercelEndpoint(true);
   const response = await queue.enqueueJSON({
+    headers: new Headers({
+      "Upstash-Content-Based-Deduplication": "true",
+    }),
     url: `${baseUrl}/api/relay/jobs/process`,
     // callbackUrl: `${baseUrl}/api/relay/jobs/success`,
     // failureCallbackUrl: `${baseUrl}/api/relay/jobs/failure`,
     body: {
-      requestId,
       request,
       strategyName,
     },

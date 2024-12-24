@@ -1,14 +1,15 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { assert, enums, type, string } from "superstruct";
+import { assert, enums, type } from "superstruct";
 import { Receiver } from "@upstash/qstash";
 
-import { handleErrorCondition } from "../../_errors";
+import { handleErrorCondition, InvalidParamError } from "../../_errors";
 import { getLogger } from "../../_utils";
 import {
   validateMethodArgs,
   verifySignatures,
   setCachedRelayRequestSuccess,
   setCachedRelayRequestFailure,
+  getCachedRelayRequest,
 } from "../_utils";
 import { RelayRequest } from "../_types";
 import { strategiesByName } from "../_strategies";
@@ -21,7 +22,6 @@ const messageReceiver = new Receiver({
 
 const RelayProcessJobBodySchema = type({
   strategyName: enums(Object.keys(strategiesByName)),
-  requestId: string(),
   request: BaseRelayRequestBodySchema,
 });
 
@@ -50,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     assert(req.body, RelayProcessJobBodySchema);
-    const { request, strategyName, requestId } = req.body;
+    const { request, strategyName } = req.body;
 
     // Validate method-specific request body
     const methodNameAndArgs = validateMethodArgs(
@@ -75,27 +75,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       signatures,
     };
 
+    // Get cached request
+    const cachedRequest = await getCachedRelayRequest(relayRequest);
+
+    if (!cachedRequest || cachedRequest.status !== "pending") {
+      throw new InvalidParamError({
+        param: "request",
+        message: "Request not found in cache or is not pending",
+      });
+    }
+
+    const { messageId } = cachedRequest;
+
     // Handle request via strategy
     try {
       const txHash = await strategy.relay(relayRequest);
       // Store requestId in database
       await setCachedRelayRequestSuccess({
-        requestId,
         request: relayRequest,
         txHash,
       });
       res.status(200).json({
-        requestId,
+        messageId,
         txHash,
       });
     } catch (error) {
       await setCachedRelayRequestFailure({
-        requestId,
         request: relayRequest,
         error: error as Error,
       });
       res.status(500).json({
-        requestId,
+        messageId,
         error: error as Error,
       });
     }

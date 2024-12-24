@@ -71,16 +71,19 @@ export default async function handler(
       methodNameAndArgs,
       signatures,
     };
-    const queueResponse = await pushRelayRequestToQueue(relayRequest, strategy);
+    const queueResponse = await pushRelayRequestToQueue({
+      request: relayRequest,
+      strategy,
+    });
 
     // Store requestId in database
     await setCachedRelayRequestPending({
-      requestId: queueResponse.messageId,
+      messageId: queueResponse.messageId,
       request: relayRequest,
     });
 
     response.status(200).json({
-      requestId: queueResponse.messageId,
+      messageId: queueResponse.messageId,
     });
   } catch (error) {
     return handleErrorCondition("api/relay", response, logger, error);

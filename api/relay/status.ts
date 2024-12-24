@@ -1,13 +1,13 @@
 import { VercelResponse } from "@vercel/node";
-import { assert, type, string, Infer } from "superstruct";
+import { assert, type, Infer } from "superstruct";
 
 import { handleErrorCondition } from "../_errors";
-import { getLogger } from "../_utils";
+import { getLogger, hexString } from "../_utils";
 import { getCachedRelayRequest } from "./_utils";
 import { TypedVercelRequest } from "../_types";
 
 const RelayRequestStatusSchema = type({
-  requestId: string(),
+  requestHash: hexString(),
 });
 
 type RelayRequestStatusType = Infer<typeof RelayRequestStatusSchema>;
@@ -27,7 +27,7 @@ export default async function handler(
     assert(request.query, RelayRequestStatusSchema);
 
     const cachedRelayRequest = await getCachedRelayRequest(
-      request.query.requestId
+      request.query.requestHash
     );
 
     response.status(200).json(cachedRelayRequest);
