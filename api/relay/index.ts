@@ -5,6 +5,7 @@ import { handleErrorCondition } from "../_errors";
 import { getLogger, hexString, validAddress } from "../_utils";
 import {
   allowedMethodNames,
+  getRelayRequestHash,
   setCachedRelayRequestPending,
   validateMethodArgs,
   verifySignatures,
@@ -83,7 +84,7 @@ export default async function handler(
     });
 
     response.status(200).json({
-      messageId: queueResponse.messageId,
+      requestHash: getRelayRequestHash(relayRequest),
     });
   } catch (error) {
     return handleErrorCondition("api/relay", response, logger, error);
