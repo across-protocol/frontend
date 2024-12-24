@@ -25,6 +25,7 @@ const orderedEnabledChainIds = [
   CHAIN_IDs.ZORA,
   CHAIN_IDs.WORLD_CHAIN,
   CHAIN_IDs.ALEPH_ZERO,
+  CHAIN_IDs.INK,
   // testnet
   CHAIN_IDs.SEPOLIA,
   CHAIN_IDs.BASE_SEPOLIA,
