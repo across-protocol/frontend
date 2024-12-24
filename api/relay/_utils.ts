@@ -5,11 +5,17 @@ import { hexString, positiveIntStr, validAddress } from "../_utils";
 import { getPermitTypedData } from "../_permit";
 import { InvalidParamError } from "../_errors";
 import {
+  encodeDepositWithPermitCalldata,
+  encodeSwapAndBridgeWithPermitCalldata,
   getDepositTypedData,
   getSwapAndDepositTypedData,
 } from "../_spoke-pool-periphery";
+import { RelayRequest } from "./_types";
+import { redisCache } from "../_cache";
 
-export const GAS_SPONSOR_ADDRESS = "0x0000000000000000000000000000000000000000";
+export const GAS_SPONSOR_ADDRESS =
+  process.env.GAS_SPONSOR_ADDRESS ??
+  "0x0000000000000000000000000000000000000000";
 
 const SubmissionFeesSchema = type({
   amount: positiveIntStr(),
@@ -79,21 +85,12 @@ export function validateMethodArgs(methodName: string, args: any) {
   throw new Error(`Invalid method name: ${methodName}`);
 }
 
-export async function verifySignatures(params: {
-  methodNameAndArgs: ReturnType<typeof validateMethodArgs>;
-  signatures: {
-    permit: string;
-    deposit: string;
-  };
-  originChainId: number;
-  entryPointContractAddress: string;
-}) {
-  const {
-    methodNameAndArgs,
-    signatures,
-    originChainId,
-    entryPointContractAddress,
-  } = params;
+export async function verifySignatures({
+  methodNameAndArgs,
+  signatures,
+  chainId,
+  to,
+}: RelayRequest) {
   const { methodName, args } = methodNameAndArgs;
 
   let signatureOwner: string;
@@ -107,14 +104,14 @@ export async function verifySignatures(params: {
     signatureOwner = _signatureOwner;
     getPermitTypedDataPromise = getPermitTypedData({
       tokenAddress: depositData.baseDepositData.inputToken,
-      chainId: originChainId,
+      chainId,
       ownerAddress: signatureOwner,
-      spenderAddress: entryPointContractAddress,
+      spenderAddress: to, // SpokePoolV3Periphery address
       value: depositData.inputAmount,
       deadline: Number(deadline),
     });
     getDepositTypedDataPromise = getDepositTypedData({
-      chainId: originChainId,
+      chainId,
       depositData,
     });
   } else if (methodName === "swapAndBridgeWithPermit") {
@@ -126,14 +123,14 @@ export async function verifySignatures(params: {
     signatureOwner = _signatureOwner;
     getPermitTypedDataPromise = getPermitTypedData({
       tokenAddress: swapAndDepositData.swapToken,
-      chainId: originChainId,
+      chainId,
       ownerAddress: signatureOwner,
-      spenderAddress: entryPointContractAddress,
+      spenderAddress: to, // SpokePoolV3Periphery address
       value: swapAndDepositData.swapTokenAmount,
       deadline: Number(deadline),
     });
     getDepositTypedDataPromise = getSwapAndDepositTypedData({
-      chainId: originChainId,
+      chainId,
       swapAndDepositData,
     });
   } else {
@@ -172,4 +169,123 @@ export async function verifySignatures(params: {
       param: "signatures.deposit",
     });
   }
+}
+
+export function encodeCalldataForRelayRequest(request: RelayRequest) {
+  let encodedCalldata: string;
+
+  if (request.methodNameAndArgs.methodName === "depositWithPermit") {
+    encodedCalldata = encodeDepositWithPermitCalldata({
+      ...request.methodNameAndArgs.args,
+      deadline: Number(request.methodNameAndArgs.args.deadline),
+      depositDataSignature: request.signatures.deposit,
+      permitSignature: request.signatures.permit,
+    });
+  } else if (
+    request.methodNameAndArgs.methodName === "swapAndBridgeWithPermit"
+  ) {
+    encodedCalldata = encodeSwapAndBridgeWithPermitCalldata({
+      ...request.methodNameAndArgs.args,
+      deadline: Number(request.methodNameAndArgs.args.deadline),
+      swapAndDepositDataSignature: request.signatures.deposit,
+      permitSignature: request.signatures.permit,
+    });
+  } else {
+    throw new Error(`Can not encode calldata for relay request`);
+  }
+
+  return encodedCalldata;
+}
+
+type CachedRelayRequest =
+  | {
+      status: "pending";
+      request: RelayRequest;
+      requestId: string;
+    }
+  | {
+      status: "success";
+      request: RelayRequest;
+      txHash: string;
+      requestId: string;
+    }
+  | {
+      status: "failure";
+      request: RelayRequest;
+      error: Error;
+      requestId: string;
+    }
+  | {
+      status: "unknown";
+      requestId: string;
+    };
+
+export async function getCachedRelayRequest(
+  requestId: string
+): Promise<CachedRelayRequest> {
+  const cachedRelayRequest = await redisCache.get<CachedRelayRequest>(
+    getRelayRequestCacheKey(requestId)
+  );
+
+  if (!cachedRelayRequest) {
+    return {
+      requestId,
+      status: "unknown",
+    };
+  }
+
+  return cachedRelayRequest;
+}
+
+export async function setCachedRelayRequestPending(params: {
+  requestId: string;
+  request: RelayRequest;
+}) {
+  await redisCache.set(
+    getRelayRequestCacheKey(params.requestId),
+    {
+      status: "pending",
+      requestId: params.requestId,
+      request: params.request,
+    },
+    60 * 60 * 24 // 1 day
+  );
+}
+
+export async function setCachedRelayRequestFailure(params: {
+  requestId: string;
+  request: RelayRequest;
+  error: Error;
+}) {
+  await redisCache.set(
+    getRelayRequestCacheKey(params.requestId),
+    {
+      status: "failure",
+      requestId: params.requestId,
+      request: params.request,
+      error: params.error,
+    },
+    60 * 60 * 24 // 1 day
+  );
+}
+
+export async function setCachedRelayRequestSuccess(params: {
+  requestId: string;
+  request: RelayRequest;
+  txHash: string;
+}) {
+  await redisCache.set(
+    getRelayRequestCacheKey(params.requestId),
+    {
+      status: "success",
+      requestId: params.requestId,
+      request: params.request,
+      txHash: params.txHash,
+    },
+    60 * 60 * 24 // 1 day
+  );
+}
+
+function getRelayRequestCacheKey(requestId: string) {
+  return `relay-request:${requestId}`;
 }

@@ -222,3 +222,41 @@ export async function getSwapAndDepositTypedData(params: {
     },
   };
 }
+
+export function encodeDepositWithPermitCalldata(args: {
+  signatureOwner: string;
+  depositData: SpokePoolV3PeripheryInterface.DepositDataStruct;
+  deadline: number;
+  permitSignature: string;
+  depositDataSignature: string;
+}) {
+  return SpokePoolV3Periphery__factory.createInterface().encodeFunctionData(
+    "depositWithPermit",
+    [
+      args.signatureOwner,
+      args.depositData,
+      args.deadline,
+      args.permitSignature,
+      args.depositDataSignature,
+    ]
+  );
+}
+
+export function encodeSwapAndBridgeWithPermitCalldata(args: {
+  signatureOwner: string;
+  swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct;
+  deadline: number;
+  permitSignature: string;
+  swapAndDepositDataSignature: string;
+}) {
+  return SpokePoolV3Periphery__factory.createInterface().encodeFunctionData(
+    "swapAndBridgeWithPermit",
+    [
+      args.signatureOwner,
+      args.swapAndDepositData,
+      args.deadline,
+      args.permitSignature,
+      args.swapAndDepositDataSignature,
+    ]
+  );
+}
