@@ -42,7 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const isValid = await messageReceiver.verify({
       signature: (req.headers["upstash-signature"] ||
         req.headers["Upstash-Signature"]) as string,
-      body: req.body,
+      body: JSON.stringify(req.body),
     });
 
     if (!isValid) {
