@@ -7,7 +7,7 @@ import { getProvider } from "../../_utils";
 
 const localSignerPrivateKeys =
   process.env.LOCAL_SIGNER_PRIVATE_KEYS!.split(",");
-const balanceAlertThreshold = utils.parseEther("0.000001");
+const balanceAlertThreshold = utils.parseEther("0.000001"); // TODO: Refine value
 
 export function getLocalSignersStrategy(): RelayStrategy {
   return {

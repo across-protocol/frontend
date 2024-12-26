@@ -227,6 +227,8 @@ type CachedRelayRequest =
   | {
       status: "unknown";
     };
+// TODO: Refine value
+const cachedRelayRequestTTL = 5 * 60 * 60 * 24; // 5 days
 
 export async function getCachedRelayRequest(
   requestOrHash: RelayRequest | string
@@ -255,7 +257,7 @@ export async function setCachedRelayRequestPending(params: {
       messageId: params.messageId,
       request: params.request,
     },
-    60 * 60 * 24 // 1 day
+    cachedRelayRequestTTL
   );
 }
 
@@ -283,7 +285,7 @@ export async function setCachedRelayRequestFailure(params: {
       request: cachedRelayRequest.request,
       error: params.error,
     },
-    60 * 60 * 24 // 1 day
+    cachedRelayRequestTTL
   );
 }
 
@@ -305,7 +307,7 @@ export async function setCachedRelayRequestSuccess(params: {
       request: cachedRelayRequest.request,
       txHash: params.txHash,
     },
-    60 * 60 * 24 // 1 day
+    cachedRelayRequestTTL
   );
 }
 

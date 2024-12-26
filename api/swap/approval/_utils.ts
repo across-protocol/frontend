@@ -84,7 +84,10 @@ export async function buildCrossSwapTxForAllowanceHolder(
 
     const { baseDepositData } = await extractDepositDataStruct(crossSwapQuotes);
 
-    if (depositEntryPoint.name === "SpokePoolPeriphery") {
+    if (
+      depositEntryPoint.name === "SpokePoolPeriphery" &&
+      crossSwapQuotes.crossSwap.isInputNative
+    ) {
       const spokePoolPeriphery = getSpokePoolPeriphery(
         depositEntryPoint.address,
         originChainId
@@ -92,7 +95,6 @@ export async function buildCrossSwapTxForAllowanceHolder(
       tx = await spokePoolPeriphery.populateTransaction.deposit(
         baseDepositData.recipient,
         baseDepositData.inputToken,
-        // baseDepositData.outputToken, // TODO: allow for output token in periphery contract
         baseDepositData.inputAmount,
         baseDepositData.outputAmount,
         baseDepositData.destinationChainId,
@@ -102,13 +104,15 @@ export async function buildCrossSwapTxForAllowanceHolder(
         baseDepositData.exclusivityDeadline,
         baseDepositData.message,
         {
-          value: crossSwapQuotes.crossSwap.isInputNative
-            ? baseDepositData.inputAmount
-            : 0,
+          value: baseDepositData.inputAmount,
         }
       );
       toAddress = spokePoolPeriphery.address;
-    } else if (depositEntryPoint.name === "SpokePool") {
+    } else if (
+      depositEntryPoint.name === "SpokePool" ||
+      (depositEntryPoint.name === "SpokePoolPeriphery" &&
+        !crossSwapQuotes.crossSwap.isInputNative)
+    ) {
       const spokePool = getSpokePool(originChainId);
       tx = await spokePool.populateTransaction.depositV3(
         baseDepositData.depositor,
