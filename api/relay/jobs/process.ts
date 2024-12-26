@@ -1,19 +1,19 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { assert, enums, type } from "superstruct";
+import { assert, enums, number, object, type } from "superstruct";
 import { Receiver } from "@upstash/qstash";
 
 import { handleErrorCondition, InvalidParamError } from "../../_errors";
-import { getLogger } from "../../_utils";
+import { getLogger, hexString, validAddress } from "../../_utils";
 import {
   validateMethodArgs,
   verifySignatures,
   setCachedRelayRequestSuccess,
   setCachedRelayRequestFailure,
   getCachedRelayRequest,
+  allowedMethodNames,
 } from "../_utils";
 import { RelayRequest } from "../_types";
 import { strategiesByName } from "../_strategies";
-import { BaseRelayRequestBodySchema } from "../index";
 
 const messageReceiver = new Receiver({
   currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY!,
@@ -22,7 +22,18 @@ const messageReceiver = new Receiver({
 
 const RelayProcessJobBodySchema = type({
   strategyName: enums(Object.keys(strategiesByName)),
-  request: BaseRelayRequestBodySchema,
+  request: type({
+    chainId: number(),
+    to: validAddress(),
+    methodNameAndArgs: type({
+      methodName: enums(allowedMethodNames),
+      args: object(),
+    }),
+    signatures: object({
+      permit: hexString(),
+      deposit: hexString(),
+    }),
+  }),
 });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -54,8 +65,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Validate method-specific request body
     const methodNameAndArgs = validateMethodArgs(
-      request.methodName,
-      request.argsWithoutSignatures
+      request.methodNameAndArgs.methodName,
+      request.methodNameAndArgs.args
     );
 
     // Verify user signatures

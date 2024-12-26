@@ -23,12 +23,11 @@ export async function pushRelayRequestToQueue({
   const baseUrl = resolveVercelEndpoint(true);
   const response = await queue.enqueueJSON({
     retries: 3,
+    contentBasedDeduplication: true,
     headers: new Headers({
-      "Upstash-Content-Based-Deduplication": "true",
+      "Retry-After": "1",
     }),
     url: `${baseUrl}/api/relay/jobs/process`,
-    // callbackUrl: `${baseUrl}/api/relay/jobs/success`,
-    // failureCallbackUrl: `${baseUrl}/api/relay/jobs/failure`,
     body: {
       request,
       strategyName,
