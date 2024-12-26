@@ -89,7 +89,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Get cached request
     const cachedRequest = await getCachedRelayRequest(relayRequest);
 
-    if (!cachedRequest || cachedRequest.status !== "pending") {
+    if (
+      !cachedRequest ||
+      cachedRequest.status === "unknown" ||
+      cachedRequest.status === "success"
+    ) {
       throw new InvalidParamError({
         param: "request",
         message: "Request not found in cache or is not pending",
@@ -106,7 +110,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         request: relayRequest,
         txHash,
       });
-      res.status(200).json({
+      return res.status(200).json({
         messageId,
         txHash,
       });
@@ -115,10 +119,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         request: relayRequest,
         error: error as Error,
       });
-      res.status(500).json({
-        messageId,
-        error: error as Error,
-      });
+      throw error;
     }
   } catch (error) {
     return handleErrorCondition("api/relay", res, logger, error);

@@ -269,9 +269,9 @@ export async function setCachedRelayRequestFailure(params: {
     throw new Error("Request not found in cache");
   }
 
-  if (cachedRelayRequest.status !== "pending") {
+  if (cachedRelayRequest.status === "success") {
     throw new Error(
-      "Can not set 'failure' status for request that is not pending"
+      "Can not set 'failure' status for request that is already successful"
     );
   }
 
@@ -295,12 +295,6 @@ export async function setCachedRelayRequestSuccess(params: {
 
   if (!cachedRelayRequest || cachedRelayRequest.status === "unknown") {
     throw new Error("Request not found in cache");
-  }
-
-  if (cachedRelayRequest.status !== "pending") {
-    throw new Error(
-      "Can not set 'success' status for request that is not pending"
-    );
   }
 
   await redisCache.set(
