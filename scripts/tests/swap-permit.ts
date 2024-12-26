@@ -13,12 +13,6 @@ async function swapWithPermit() {
       getProvider(swapQuote.swapTx.chainId)
     );
 
-    console.log("EIP712 Permit:", swapQuote.eip712.permit);
-    console.log(
-      "EIP712 Deposit:",
-      swapQuote.eip712.deposit.message.submissionFees
-    );
-
     // sign permit + deposit
     const permitSig = await wallet._signTypedData(
       swapQuote.eip712.permit.domain,
@@ -40,6 +34,20 @@ async function swapWithPermit() {
       signatures: { permit: permitSig, deposit: depositSig },
     });
     console.log("Relay response:", relayResponse.data);
+
+    // track relay
+    while (true) {
+      const relayStatusResponse = await axios.get(
+        `${SWAP_API_BASE_URL}/api/relay/status?requestHash=${relayResponse.data.requestHash}`
+      );
+      console.log("Relay status response:", relayStatusResponse.data);
+
+      if (relayStatusResponse.data.status === "success") {
+        break;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1_000));
+    }
   }
 }
 

@@ -23,10 +23,8 @@ export function getLocalSignersStrategy(): RelayStrategy {
       }
 
       for (const signerPrivateKey of localSignerPrivateKeys) {
-        const wallet = new Wallet(
-          signerPrivateKey,
-          getProvider(request.chainId)
-        );
+        const provider = getProvider(request.chainId);
+        const wallet = new Wallet(signerPrivateKey, provider);
         try {
           await lockSigner(wallet.address, request.chainId);
 
@@ -36,12 +34,11 @@ export function getLocalSignersStrategy(): RelayStrategy {
           }
 
           const txRequest = {
+            chainId: request.chainId,
             to: request.to,
             data: encodedCalldata,
             from: wallet.address,
           };
-          await wallet.estimateGas(txRequest);
-
           const tx = await wallet.sendTransaction(txRequest);
           const receipt = await tx.wait();
           return receipt.transactionHash;
