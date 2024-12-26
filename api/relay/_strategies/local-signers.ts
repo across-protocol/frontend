@@ -3,6 +3,7 @@ import { Wallet, utils } from "ethers";
 import { RelayRequest, RelayStrategy } from "../_types";
 import { encodeCalldataForRelayRequest } from "../_utils";
 import { redisCache } from "../../_cache";
+import { getProvider } from "../../_utils";
 
 const localSignerPrivateKeys =
   process.env.LOCAL_SIGNER_PRIVATE_KEYS!.split(",");
@@ -22,7 +23,10 @@ export function getLocalSignersStrategy(): RelayStrategy {
       }
 
       for (const signerPrivateKey of localSignerPrivateKeys) {
-        const wallet = new Wallet(signerPrivateKey);
+        const wallet = new Wallet(
+          signerPrivateKey,
+          getProvider(request.chainId)
+        );
         try {
           await lockSigner(wallet.address, request.chainId);
 
