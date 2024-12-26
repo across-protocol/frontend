@@ -22,6 +22,7 @@ export async function pushRelayRequestToQueue({
 
   const baseUrl = resolveVercelEndpoint(true);
   const response = await queue.enqueueJSON({
+    retries: 3,
     headers: new Headers({
       "Upstash-Content-Based-Deduplication": "true",
     }),
