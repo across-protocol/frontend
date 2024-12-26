@@ -10,7 +10,7 @@ import {
   validateMethodArgs,
   verifySignatures,
 } from "./_utils";
-import { getGelatoStrategy } from "./_strategies/gelato";
+import { strategiesByName } from "./_strategies";
 import { CHAIN_IDs } from "../_constants";
 import { pushRelayRequestToQueue } from "./_queue";
 import { RelayRequest } from "./_types";
@@ -27,8 +27,8 @@ export const BaseRelayRequestBodySchema = object({
 });
 
 const strategies = {
-  default: getGelatoStrategy(),
-  [CHAIN_IDs.MAINNET]: getGelatoStrategy(),
+  default: strategiesByName.gelato,
+  [CHAIN_IDs.ARBITRUM]: strategiesByName.localSigners,
 };
 
 export default async function handler(
