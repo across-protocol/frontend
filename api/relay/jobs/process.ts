@@ -12,7 +12,7 @@ import {
   getCachedRelayRequest,
   allowedMethodNames,
 } from "../_utils";
-import { RelayRequest } from "../_types";
+import { RelayRequest, RelayStrategyName } from "../_types";
 import { strategiesByName } from "../_strategies";
 
 const messageReceiver = new Receiver({
@@ -78,7 +78,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       to,
     });
 
-    const strategy = strategiesByName[strategyName];
+    const strategy = strategiesByName[strategyName as RelayStrategyName];
     const relayRequest: RelayRequest = {
       chainId,
       to,

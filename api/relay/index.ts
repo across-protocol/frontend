@@ -28,7 +28,7 @@ export const BaseRelayRequestBodySchema = object({
 
 const strategies = {
   default: strategiesByName.gelato,
-  [CHAIN_IDs.ARBITRUM]: strategiesByName.localSigners,
+  [CHAIN_IDs.ARBITRUM]: strategiesByName["local-signers"],
 };
 
 export default async function handler(
