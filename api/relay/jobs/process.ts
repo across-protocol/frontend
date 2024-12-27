@@ -96,7 +96,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ) {
       throw new InvalidParamError({
         param: "request",
-        message: "Request not found in cache or is not pending",
+        message: "Request not found in cache or succeeded already",
       });
     }
 
