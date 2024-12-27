@@ -589,7 +589,7 @@ export const getHubPoolClient = () => {
   );
 };
 
-export const getGasMarkup = (chainId: string | number) => {
+export const getGasMarkup = (chainId: string | number): number => {
   if (typeof gasMarkup[chainId] === "number") {
     return gasMarkup[chainId];
   }
@@ -1974,8 +1974,10 @@ export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
   }
   const { maxFeePerGas } = await sdk.gasPriceOracle.getGasPriceEstimate(
     getProvider(chainId),
-    chainId,
-    getGasMarkup(chainId)
+    {
+      chainId,
+      baseFeeMultiplier: getGasMarkup(chainId),
+    }
   );
   return maxFeePerGas;
 }
