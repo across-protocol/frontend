@@ -1,28 +1,9 @@
-import { BigNumber } from "ethers";
-import { extractDepositDataStruct } from "./_dexes/utils";
 import { SpokePoolPeripheryProxy__factory } from "./_typechain/factories/SpokePoolPeripheryProxy__factory";
 import { SpokePoolV3Periphery__factory } from "./_typechain/factories/SpokePoolV3Periphery__factory";
 import { ENABLED_ROUTES, getProvider } from "./_utils";
+import { SpokePoolV3PeripheryInterface } from "./_typechain/SpokePoolV3Periphery";
 
 const sharedEIP712Types = {
-  EIP712Domain: [
-    {
-      name: "name",
-      type: "string",
-    },
-    {
-      name: "version",
-      type: "string",
-    },
-    {
-      name: "chainId",
-      type: "uint256",
-    },
-    {
-      name: "verifyingContract",
-      type: "address",
-    },
-  ],
   Fees: [
     {
       name: "amount",
@@ -133,14 +114,7 @@ export function getSpokePoolPeripheryProxy(address: string, chainId: number) {
 }
 
 export async function getDepositTypedData(params: {
-  depositData: {
-    submissionFees: {
-      amount: BigNumber;
-      recipient: string;
-    };
-    baseDepositData: Awaited<ReturnType<typeof extractDepositDataStruct>>;
-    inputAmount: BigNumber;
-  };
+  depositData: SpokePoolV3PeripheryInterface.DepositDataStruct;
   chainId: number;
 }) {
   const spokePoolPeriphery = getSpokePoolPeriphery(
@@ -185,19 +159,7 @@ export async function getDepositTypedData(params: {
 }
 
 export async function getSwapAndDepositTypedData(params: {
-  swapAndDepositData: {
-    submissionFees: {
-      amount: BigNumber;
-      recipient: string;
-    };
-    depositData: Awaited<ReturnType<typeof extractDepositDataStruct>>;
-    swapToken: string;
-    exchange: string;
-    transferType: TransferType;
-    swapTokenAmount: BigNumber;
-    minExpectedInputTokenAmount: BigNumber;
-    routerCalldata: string;
-  };
+  swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct;
   chainId: number;
 }) {
   const spokePoolPeriphery = getSpokePoolPeriphery(
