@@ -20,6 +20,9 @@
     },
     "api/cron-ping-endpoints.ts": {
       "maxDuration": 90
+    },
+    "api/relay/jobs/process.ts": {
+      "maxDuration": 90
     }
   },
   "rewrites": [

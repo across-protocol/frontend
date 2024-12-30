@@ -5,11 +5,17 @@ import { handleErrorCondition } from "../_errors";
 import { getLogger, hexString, validAddress } from "../_utils";
 import {
   allowedMethodNames,
+  getRelayRequestHash,
+  setCachedRelayRequestPending,
   validateMethodArgs,
   verifySignatures,
 } from "./_utils";
+import { strategiesByName } from "./_strategies";
+import { CHAIN_IDs } from "../_constants";
+import { pushRelayRequestToQueue } from "./_queue";
+import { RelayRequest } from "./_types";
 
-const BaseRelayRequestBodySchema = object({
+export const BaseRelayRequestBodySchema = object({
   chainId: number(),
   to: validAddress(),
   methodName: enums(allowedMethodNames),
@@ -19,6 +25,11 @@ const BaseRelayRequestBodySchema = object({
     deposit: hexString(),
   }),
 });
+
+const strategies = {
+  default: strategiesByName.gelato,
+  [CHAIN_IDs.ARBITRUM]: strategiesByName["local-signers"],
+};
 
 export default async function handler(
   request: VercelRequest,
@@ -45,19 +56,35 @@ export default async function handler(
     );
 
     // Verify signatures
-    const { signatures } = request.body;
+    const { signatures, chainId, to } = request.body;
     await verifySignatures({
       methodNameAndArgs,
       signatures,
-      originChainId: request.body.chainId,
-      entryPointContractAddress: request.body.to,
+      chainId,
+      to,
     });
 
-    // TODO: Execute transaction based on configured strategies
+    // Push request to queue
+    const strategy = strategies[chainId] ?? strategies.default;
+    const relayRequest: RelayRequest = {
+      chainId,
+      to,
+      methodNameAndArgs,
+      signatures,
+    };
+    const queueResponse = await pushRelayRequestToQueue({
+      request: relayRequest,
+      strategy,
+    });
 
-    return response.status(200).json({
-      success: true,
-      // Add relevant response data
+    // Store requestId in database
+    await setCachedRelayRequestPending({
+      messageId: queueResponse.messageId,
+      request: relayRequest,
+    });
+
+    response.status(200).json({
+      requestHash: getRelayRequestHash(relayRequest),
     });
   } catch (error) {
     return handleErrorCondition("api/relay", response, logger, error);

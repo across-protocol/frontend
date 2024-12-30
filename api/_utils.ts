@@ -201,8 +201,8 @@ export const getLogger = (): LoggingUtility => {
  * Resolves the current vercel endpoint dynamically
  * @returns A valid URL of the current endpoint in vercel
  */
-export const resolveVercelEndpoint = () => {
-  if (process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE) {
+export const resolveVercelEndpoint = (omitOverride = false) => {
+  if (!omitOverride && process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE) {
     return process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE;
   }
   const url = process.env.VERCEL_URL ?? "across.to";
