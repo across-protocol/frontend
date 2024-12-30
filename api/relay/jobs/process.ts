@@ -122,6 +122,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       throw error;
     }
   } catch (error) {
-    return handleErrorCondition("api/relay", res, logger, error);
+    return handleErrorCondition("relay/jobs/process", res, logger, error);
   }
 }
