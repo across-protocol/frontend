@@ -6,7 +6,7 @@ import axios from "axios";
 
 async function swapWithPermit() {
   console.log("Swapping with permit...");
-  const swapQuote = await fetchSwapQuote("permit");
+  const swapQuote = await fetchSwapQuote<any>("permit");
 
   if (process.env.DEV_WALLET_PK) {
     const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(

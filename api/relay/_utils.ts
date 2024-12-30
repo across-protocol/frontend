@@ -5,7 +5,9 @@ import { hexString, positiveIntStr, validAddress } from "../_utils";
 import { getPermitTypedData } from "../_permit";
 import { InvalidParamError } from "../_errors";
 import {
+  encodeDepositWithAuthCalldata,
   encodeDepositWithPermitCalldata,
+  encodeSwapAndBridgeWithAuthCalldata,
   encodeSwapAndBridgeWithPermitCalldata,
   getDepositTypedData,
   getSwapAndDepositTypedData,
@@ -47,13 +49,15 @@ const SwapAndDepositDataSchema = type({
   routerCalldata: hexString(),
 });
 
+const DepositDataSchema = type({
+  submissionFees: SubmissionFeesSchema,
+  baseDepositData: BaseDepositDataSchema,
+  inputAmount: positiveIntStr(),
+});
+
 export const DepositWithPermitArgsSchema = type({
   signatureOwner: validAddress(),
-  depositData: type({
-    submissionFees: SubmissionFeesSchema,
-    baseDepositData: BaseDepositDataSchema,
-    inputAmount: positiveIntStr(),
-  }),
+  depositData: DepositDataSchema,
   deadline: positiveIntStr(),
 });
 
@@ -63,12 +67,33 @@ export const SwapAndDepositWithPermitArgsSchema = type({
   deadline: positiveIntStr(),
 });
 
+export const DepositWithAuthArgsSchema = type({
+  signatureOwner: validAddress(),
+  depositData: DepositDataSchema,
+  validAfter: positiveIntStr(),
+  validBefore: positiveIntStr(),
+  nonce: hexString(),
+});
+
+export const SwapAndDepositWithAuthArgsSchema = type({
+  signatureOwner: validAddress(),
+  swapAndDepositData: SwapAndDepositDataSchema,
+  validAfter: positiveIntStr(),
+  validBefore: positiveIntStr(),
+  nonce: hexString(),
+});
+
 export const allowedMethodNames = [
   "depositWithPermit",
   "swapAndBridgeWithPermit",
-];
+  "depositWithAuth",
+  "swapAndBridgeWithAuth",
+] as const;
 
-export function validateMethodArgs(methodName: string, args: any) {
+export function validateMethodArgs(
+  methodName: (typeof allowedMethodNames)[number],
+  args: any
+) {
   if (methodName === "depositWithPermit") {
     assert(args, DepositWithPermitArgsSchema);
     return {
@@ -79,6 +104,18 @@ export function validateMethodArgs(methodName: string, args: any) {
     assert(args, SwapAndDepositWithPermitArgsSchema);
     return {
       args: args as Infer<typeof SwapAndDepositWithPermitArgsSchema>,
+      methodName,
+    } as const;
+  } else if (methodName === "depositWithAuth") {
+    assert(args, DepositWithAuthArgsSchema);
+    return {
+      args: args as Infer<typeof DepositWithAuthArgsSchema>,
+      methodName,
+    } as const;
+  } else if (methodName === "swapAndBridgeWithAuth") {
+    assert(args, SwapAndDepositWithAuthArgsSchema);
+    return {
+      args: args as Infer<typeof SwapAndDepositWithAuthArgsSchema>,
       methodName,
     } as const;
   }
@@ -190,12 +227,29 @@ export function encodeCalldataForRelayRequest(request: RelayRequest) {
       swapAndDepositDataSignature: request.signatures.deposit,
       permitSignature: request.signatures.permit,
     });
+  } else if (request.methodNameAndArgs.methodName === "depositWithAuth") {
+    encodedCalldata = encodeDepositWithAuthCalldata({
+      ...request.methodNameAndArgs.args,
+      validAfter: Number(request.methodNameAndArgs.args.validAfter),
+      validBefore: Number(request.methodNameAndArgs.args.validAfter),
+      nonce: request.methodNameAndArgs.args.nonce,
+      receiveWithAuthSignature: request.signatures.deposit,
+      depositDataSignature: request.signatures.permit,
+    });
+  } else if (request.methodNameAndArgs.methodName === "swapAndBridgeWithAuth") {
+    encodedCalldata = encodeSwapAndBridgeWithAuthCalldata({
+      ...request.methodNameAndArgs.args,
+      validAfter: Number(request.methodNameAndArgs.args.validAfter),
+      validBefore: Number(request.methodNameAndArgs.args.validAfter),
+      nonce: request.methodNameAndArgs.args.nonce,
+      receiveWithAuthSignature: request.signatures.deposit,
+      depositDataSignature: request.signatures.permit,
+    });
   }
-  // TODO: Add cases for `withAuth` and `withPermit2`
+  // TODO: Add cases for `withPermit2`
   else {
     throw new Error(`Can not encode calldata for relay request`);
   }
-
   return encodedCalldata;
 }
 

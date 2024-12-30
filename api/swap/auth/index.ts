@@ -9,6 +9,7 @@ import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 import { InvalidParamError } from "../../_errors";
 import { QuoteFetchStrategies } from "../../_dexes/utils";
 import { buildAuthTxPayload } from "./_utils";
+import { GAS_SPONSOR_ADDRESS } from "../../relay/_utils";
 
 export const authSwapQueryParamsSchema = type({
   authDeadline: optional(positiveIntStr()),
@@ -90,11 +91,16 @@ const handler = async (
       quoteFetchStrategies
     );
     // Build tx for auth
-    const crossSwapTxForAuth = await buildAuthTxPayload(
+    const crossSwapTxForAuth = await buildAuthTxPayload({
       crossSwapQuotes,
       authDeadline,
-      authStart
-    );
+      authStart,
+      // FIXME: Calculate proper fees
+      submissionFees: {
+        amount: "0",
+        recipient: GAS_SPONSOR_ADDRESS,
+      },
+    });
 
     const responseJson = crossSwapTxForAuth;
 
