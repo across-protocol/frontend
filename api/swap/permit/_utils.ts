@@ -15,7 +15,6 @@ import {
   extractSwapAndDepositDataStruct,
 } from "../../_dexes/utils";
 import { SpokePoolV3PeripheryInterface } from "../../_typechain/SpokePoolV3Periphery";
-import { stringifyBigNumProps } from "../_utils";
 
 export async function buildPermitTxPayload({
   crossSwapQuotes,
@@ -137,22 +136,15 @@ export async function buildPermitTxPayload({
   ]);
   return {
     eip712: {
-      permit: {
-        ...permitTypedData.eip712,
-        message: stringifyBigNumProps(permitTypedData.eip712.message),
-      },
-      deposit: {
-        ...depositTypedData.eip712,
-        message: stringifyBigNumProps(depositTypedData.eip712.message),
-      },
+      permit: permitTypedData.eip712,
+      deposit: depositTypedData.eip712,
     },
     swapTx: {
       chainId: originChainId,
       to: entryPointContract.address,
       methodName: methodNameAndArgsWithoutSignatures.methodName,
-      argsWithoutSignatures: stringifyBigNumProps(
-        methodNameAndArgsWithoutSignatures.argsWithoutSignatures
-      ),
+      argsWithoutSignatures:
+        methodNameAndArgsWithoutSignatures.argsWithoutSignatures,
     },
   };
 }

@@ -190,7 +190,9 @@ export function encodeCalldataForRelayRequest(request: RelayRequest) {
       swapAndDepositDataSignature: request.signatures.deposit,
       permitSignature: request.signatures.permit,
     });
-  } else {
+  }
+  // TODO: Add cases for `withAuth` and `withPermit2`
+  else {
     throw new Error(`Can not encode calldata for relay request`);
   }
 
