@@ -4,11 +4,16 @@ import { assert, Infer, optional, type } from "superstruct";
 import { TypedVercelRequest } from "../../_types";
 import { getLogger, handleErrorCondition, positiveIntStr } from "../../_utils";
 import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
-import { handleBaseSwapQueryParams, BaseSwapQueryParams } from "../_utils";
+import {
+  handleBaseSwapQueryParams,
+  BaseSwapQueryParams,
+  stringifyBigNumProps,
+} from "../_utils";
 import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 import { InvalidParamError } from "../../_errors";
 import { buildPermitTxPayload } from "./_utils";
 import { QuoteFetchStrategies } from "../../_dexes/utils";
+import { GAS_SPONSOR_ADDRESS } from "../../relay/_utils";
 
 export const PermitSwapQueryParamsSchema = type({
   permitDeadline: optional(positiveIntStr()),
@@ -85,12 +90,17 @@ const handler = async (
       quoteFetchStrategies
     );
     // Build tx for permit
-    const crossSwapTxForPermit = await buildPermitTxPayload(
+    const crossSwapTxForPermit = await buildPermitTxPayload({
       crossSwapQuotes,
-      permitDeadline
-    );
+      permitDeadline,
+      // FIXME: Calculate proper fees
+      submissionFees: {
+        amount: "0",
+        recipient: GAS_SPONSOR_ADDRESS,
+      },
+    });
 
-    const responseJson = crossSwapTxForPermit;
+    const responseJson = stringifyBigNumProps(crossSwapTxForPermit);
 
     logger.debug({
       at: "Swap/permit",

@@ -1,3 +1,5 @@
+import { BigNumberish } from "ethers";
+
 import {
   CrossSwapQuotes,
   DepositEntryPointContract,
@@ -7,21 +9,29 @@ import { getPermitTypedData } from "../../_permit";
 import {
   getDepositTypedData,
   getSwapAndDepositTypedData,
-  TransferType,
 } from "../../_spoke-pool-periphery";
-import { extractDepositDataStruct } from "../../_dexes/utils";
-import { BigNumber } from "ethers";
+import {
+  extractDepositDataStruct,
+  extractSwapAndDepositDataStruct,
+} from "../../_dexes/utils";
+import { SpokePoolV3PeripheryInterface } from "../../_typechain/SpokePoolV3Periphery";
 
-export async function buildPermitTxPayload(
-  crossSwapQuotes: CrossSwapQuotes,
-  permitDeadline: number
-) {
+export async function buildPermitTxPayload({
+  crossSwapQuotes,
+  permitDeadline,
+  submissionFees,
+}: {
+  crossSwapQuotes: CrossSwapQuotes;
+  permitDeadline: number;
+  submissionFees?: {
+    amount: BigNumberish;
+    recipient: string;
+  };
+}) {
   const { originSwapQuote, bridgeQuote, crossSwap, contracts } =
     crossSwapQuotes;
   const originChainId = crossSwap.inputToken.chainId;
   const { originSwapEntryPoint, depositEntryPoint, originRouter } = contracts;
-
-  const baseDepositData = await extractDepositDataStruct(crossSwapQuotes);
 
   let entryPointContract:
     | DepositEntryPointContract
@@ -29,7 +39,23 @@ export async function buildPermitTxPayload(
   let getDepositTypedDataPromise:
     | ReturnType<typeof getDepositTypedData>
     | ReturnType<typeof getSwapAndDepositTypedData>;
-  let methodName: string;
+  let methodNameAndArgsWithoutSignatures:
+    | {
+        methodName: "depositWithPermit";
+        argsWithoutSignatures: {
+          signatureOwner: string;
+          depositData: SpokePoolV3PeripheryInterface.DepositDataStruct;
+          deadline: BigNumberish;
+        };
+      }
+    | {
+        methodName: "swapAndBridgeWithPermit";
+        argsWithoutSignatures: {
+          signatureOwner: string;
+          swapAndDepositData: SpokePoolV3PeripheryInterface.SwapAndDepositDataStruct;
+          deadline: BigNumberish;
+        };
+      };
 
   if (originSwapQuote) {
     if (!originSwapEntryPoint) {
@@ -50,28 +76,21 @@ export async function buildPermitTxPayload(
       );
     }
 
+    const swapAndDepositData =
+      await extractSwapAndDepositDataStruct(crossSwapQuotes);
     entryPointContract = originSwapEntryPoint;
     getDepositTypedDataPromise = getSwapAndDepositTypedData({
-      swapAndDepositData: {
-        // TODO: Make this dynamic
-        submissionFees: {
-          amount: BigNumber.from(0),
-          recipient: crossSwapQuotes.crossSwap.depositor,
-        },
-        depositData: baseDepositData,
-        swapToken: originSwapQuote.tokenIn.address,
-        swapTokenAmount: originSwapQuote.maximumAmountIn,
-        minExpectedInputTokenAmount: originSwapQuote.minAmountOut,
-        routerCalldata: originSwapQuote.swapTx.data,
-        exchange: originRouter.address,
-        transferType:
-          originRouter.name === "UniswapV3UniversalRouter"
-            ? TransferType.Transfer
-            : TransferType.Approval,
-      },
+      swapAndDepositData: swapAndDepositData,
       chainId: originChainId,
     });
-    methodName = "swapAndBridgeWithPermit";
+    methodNameAndArgsWithoutSignatures = {
+      methodName: "swapAndBridgeWithPermit",
+      argsWithoutSignatures: {
+        signatureOwner: crossSwap.depositor,
+        swapAndDepositData,
+        deadline: permitDeadline,
+      },
+    };
   } else {
     if (!depositEntryPoint) {
       throw new Error(
@@ -84,21 +103,23 @@ export async function buildPermitTxPayload(
         `Permit is not supported for deposit entry point contract '${depositEntryPoint.name}'`
       );
     }
-
+    const depositDataStruct = await extractDepositDataStruct(
+      crossSwapQuotes,
+      submissionFees
+    );
     entryPointContract = depositEntryPoint;
     getDepositTypedDataPromise = getDepositTypedData({
-      depositData: {
-        // TODO: Make this dynamic
-        submissionFees: {
-          amount: BigNumber.from(0),
-          recipient: crossSwap.depositor,
-        },
-        baseDepositData,
-        inputAmount: BigNumber.from(bridgeQuote.inputAmount),
-      },
+      depositData: depositDataStruct,
       chainId: originChainId,
     });
-    methodName = "depositWithPermit";
+    methodNameAndArgsWithoutSignatures = {
+      methodName: "depositWithPermit",
+      argsWithoutSignatures: {
+        signatureOwner: crossSwap.depositor,
+        depositData: depositDataStruct,
+        deadline: permitDeadline,
+      },
+    };
   }
 
   const [permitTypedData, depositTypedData] = await Promise.all([
@@ -121,7 +142,9 @@ export async function buildPermitTxPayload(
     swapTx: {
       chainId: originChainId,
       to: entryPointContract.address,
-      methodName,
+      methodName: methodNameAndArgsWithoutSignatures.methodName,
+      argsWithoutSignatures:
+        methodNameAndArgsWithoutSignatures.argsWithoutSignatures,
     },
   };
 }

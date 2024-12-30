@@ -201,8 +201,8 @@ export const getLogger = (): LoggingUtility => {
  * Resolves the current vercel endpoint dynamically
  * @returns A valid URL of the current endpoint in vercel
  */
-export const resolveVercelEndpoint = () => {
-  if (process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE) {
+export const resolveVercelEndpoint = (omitOverride = false) => {
+  if (!omitOverride && process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE) {
     return process.env.REACT_APP_VERCEL_API_BASE_URL_OVERRIDE;
   }
   const url = process.env.VERCEL_URL ?? "across.to";
@@ -1487,7 +1487,7 @@ export function validAddressOrENS() {
 
 export function positiveIntStr() {
   return define<string>("positiveIntStr", (value) => {
-    return Number.isInteger(Number(value)) && Number(value) > 0;
+    return Number.isInteger(Number(value)) && Number(value) >= 0;
   });
 }
 
@@ -1500,6 +1500,12 @@ export function positiveFloatStr(maxValue?: number) {
 export function boolStr() {
   return define<string>("boolStr", (value) => {
     return value === "true" || value === "false";
+  });
+}
+
+export function hexString() {
+  return define<string>("hexString", (value) => {
+    return utils.isHexString(value);
   });
 }
 
