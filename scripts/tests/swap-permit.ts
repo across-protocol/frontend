@@ -2,11 +2,19 @@ import { Wallet } from "ethers";
 
 import { getProvider } from "../../api/_utils";
 import { fetchSwapQuote, SWAP_API_BASE_URL } from "./_swap-utils";
+import { buildPermitTxPayload } from "../../api/swap/permit/_utils";
 import axios from "axios";
+
+type PermitPayload = Awaited<ReturnType<typeof buildPermitTxPayload>>;
 
 async function swapWithPermit() {
   console.log("Swapping with permit...");
-  const swapQuote = await fetchSwapQuote<any>("permit");
+  const swapQuote = await fetchSwapQuote<PermitPayload>("permit");
+
+  if (!swapQuote) {
+    console.log("No Quote");
+    return;
+  }
 
   if (process.env.DEV_WALLET_PK) {
     const wallet = new Wallet(process.env.DEV_WALLET_PK!).connect(
