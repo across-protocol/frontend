@@ -154,11 +154,11 @@ export async function buildAuthTxPayload({
       transferWithAuthorization: authTypedData.eip712,
       deposit: depositTypedData.eip712,
     },
+
     swapTx: {
       chainId: originChainId,
       to: entryPointContract.address,
-      argsWithoutSignatures:
-        methodNameAndArgsWithoutSignatures.argsWithoutSignatures,
+      ...methodNameAndArgsWithoutSignatures,
     },
   };
 }
