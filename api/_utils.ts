@@ -34,6 +34,7 @@ import {
   Infer,
   integer,
   min,
+  size,
   string,
   Struct,
 } from "superstruct";
@@ -1507,6 +1508,10 @@ export function hexString() {
   return define<string>("hexString", (value) => {
     return utils.isHexString(value);
   });
+}
+
+export function bytes32() {
+  return size(hexString(), 66); // inclusive of "0x"
 }
 
 /**

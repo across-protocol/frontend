@@ -7,7 +7,7 @@ import axios from "axios";
 
 type AuthPayload = Awaited<ReturnType<typeof buildAuthTxPayload>>;
 
-async function swapWithPermit() {
+async function swapWithAuth() {
   console.log("Swapping with auth...");
   const swapQuote = await fetchSwapQuote<AuthPayload>("auth");
 
@@ -59,7 +59,7 @@ async function swapWithPermit() {
   }
 }
 
-swapWithPermit()
+swapWithAuth()
   .then(() => console.log("Done"))
   .catch((e) => {
     console.error(e);

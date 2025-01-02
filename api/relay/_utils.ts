@@ -1,7 +1,7 @@
 import { assert, Infer, type } from "superstruct";
 import { utils } from "ethers";
 
-import { hexString, positiveIntStr, validAddress } from "../_utils";
+import { bytes32, hexString, positiveIntStr, validAddress } from "../_utils";
 import { getPermitTypedData } from "../_permit";
 import { InvalidParamError } from "../_errors";
 import {
@@ -72,7 +72,7 @@ export const DepositWithAuthArgsSchema = type({
   depositData: DepositDataSchema,
   validAfter: positiveIntStr(),
   validBefore: positiveIntStr(),
-  nonce: hexString(),
+  nonce: bytes32(),
 });
 
 export const SwapAndDepositWithAuthArgsSchema = type({
@@ -80,7 +80,7 @@ export const SwapAndDepositWithAuthArgsSchema = type({
   swapAndDepositData: SwapAndDepositDataSchema,
   validAfter: positiveIntStr(),
   validBefore: positiveIntStr(),
-  nonce: hexString(),
+  nonce: bytes32(),
 });
 
 export const allowedMethodNames = [
