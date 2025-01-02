@@ -4,7 +4,11 @@ import { assert, Infer, optional, type } from "superstruct";
 import { TypedVercelRequest } from "../../_types";
 import { getLogger, handleErrorCondition, positiveIntStr } from "../../_utils";
 import { getCrossSwapQuotes } from "../../_dexes/cross-swap-service";
-import { handleBaseSwapQueryParams, BaseSwapQueryParams } from "../_utils";
+import {
+  handleBaseSwapQueryParams,
+  BaseSwapQueryParams,
+  stringifyBigNumProps,
+} from "../_utils";
 import { getSwapRouter02Strategy } from "../../_dexes/uniswap/swap-router-02";
 import { InvalidParamError } from "../../_errors";
 import { QuoteFetchStrategies } from "../../_dexes/utils";
@@ -102,7 +106,7 @@ const handler = async (
       },
     });
 
-    const responseJson = crossSwapTxForAuth;
+    const responseJson = stringifyBigNumProps(crossSwapTxForAuth);
 
     logger.debug({
       at: "Swap/auth",
