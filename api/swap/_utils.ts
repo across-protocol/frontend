@@ -237,16 +237,28 @@ export async function calculateCrossSwapFees(
   };
 }
 
-export function stringifyBigNumProps(value: object): object {
+export function stringifyBigNumProps<T extends object | any[]>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((element) => {
+      if (element instanceof BigNumber) {
+        return element.toString();
+      }
+      if (typeof element === "object" && element !== null) {
+        return stringifyBigNumProps(element);
+      }
+      return element;
+    }) as T;
+  }
+
   return Object.fromEntries(
-    Object.entries(value).map(([key, value]) => {
-      if (value instanceof BigNumber) {
-        return [key, value.toString()];
+    Object.entries(value).map(([key, val]) => {
+      if (val instanceof BigNumber) {
+        return [key, val.toString()];
       }
-      if (typeof value === "object" && value !== null) {
-        return [key, stringifyBigNumProps(value)];
+      if (typeof val === "object" && val !== null) {
+        return [key, stringifyBigNumProps(val)];
       }
-      return [key, value];
+      return [key, val];
     })
-  );
+  ) as T;
 }
