@@ -5,6 +5,7 @@ export { default as BASE } from "./base";
 export { default as BASE_SEPOLIA } from "./base-sepolia";
 export { default as BLAST } from "./blast";
 export { default as BLAST_SEPOLIA } from "./blast-sepolia";
+export { default as INK } from "./ink";
 export { default as LINEA } from "./linea";
 export { default as LISK } from "./lisk";
 export { default as LISK_SEPOLIA } from "./lisk-sepolia";
