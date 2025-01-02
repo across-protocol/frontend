@@ -1937,10 +1937,7 @@ export function getCachedFillGasUsage(
     // we'll compute the gas price separately.
     const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
       buildDepositForSimulation(deposit),
-      overrides?.relayerAddress,
-      {
-        omitMarkup: true,
-      }
+      overrides?.relayerAddress
     );
     return nativeGasCost;
   };
