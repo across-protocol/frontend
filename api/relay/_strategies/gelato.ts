@@ -27,9 +27,7 @@ export function getGelatoStrategy(): RelayStrategy {
             taskStatus.taskState
           )
         ) {
-          throw new Error(
-            `Can not relay request via Gelato due to task state ${taskStatus.taskState}`
-          );
+          throw new GelatoTaskStatusError(taskStatus);
         }
 
         if (taskStatus.transactionHash) {
@@ -73,20 +71,50 @@ async function relayWithGelatoApi({
   return response.data.taskId as string;
 }
 
+type TaskStatus = {
+  taskState:
+    | "CheckPending"
+    | "ExecPending"
+    | "ExecSuccess"
+    | "ExecReverted"
+    | "WaitingForConfirmation"
+    | "Blacklisted"
+    | "Cancelled"
+    | "NotFound";
+  chainId: number;
+  taskId: string;
+  creationDate: string;
+  lastCheckDate?: string;
+  lastCheckMessage?: string;
+  transactionHash?: string;
+  blockNumber?: number;
+  executionDate?: string;
+  gasUsed?: string;
+  effectiveGasPrice?: string;
+};
+
 async function getGelatoTaskStatus(taskId: string) {
-  const response = await axios.get<{
-    task: {
-      taskState:
-        | "CheckPending"
-        | "ExecPending"
-        | "ExecSuccess"
-        | "ExecReverted"
-        | "WaitingForConfirmation"
-        | "Blacklisted"
-        | "Cancelled"
-        | "NotFound";
-      transactionHash?: string;
-    };
-  }>(`${gelatoBaseUrl}/tasks/status/${taskId}`);
+  const response = await axios.get<{ task: TaskStatus }>(
+    `${gelatoBaseUrl}/tasks/status/${taskId}`
+  );
   return response.data.task;
+}
+
+class GelatoTaskStatusError extends Error {
+  taskStatus: TaskStatus;
+
+  constructor(taskStatus: TaskStatus) {
+    super(
+      `Can not relay request via Gelato due to task state ${taskStatus.taskState}`
+    );
+    this.taskStatus = taskStatus;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      taskStatus: this.taskStatus,
+    };
+  }
 }
