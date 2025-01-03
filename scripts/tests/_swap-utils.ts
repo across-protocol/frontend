@@ -179,7 +179,7 @@ export async function fetchSwapQuote(slug: "approval" | "permit") {
     const response = await axios.get(`${SWAP_API_BASE_URL}/api/swap/${slug}`, {
       params: testCase.params,
     });
-    console.log(response.data);
+    console.log(JSON.stringify(response.data, null, 2));
     return response.data;
   }
 }
