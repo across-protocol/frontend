@@ -321,7 +321,7 @@ export function encodeCalldataForRelayRequest(request: RelayRequest) {
     encodedCalldata = encodeDepositWithAuthCalldata({
       ...request.methodNameAndArgs.args,
       validAfter: Number(request.methodNameAndArgs.args.validAfter),
-      validBefore: Number(request.methodNameAndArgs.args.validAfter),
+      validBefore: Number(request.methodNameAndArgs.args.validBefore),
       nonce: request.methodNameAndArgs.args.nonce,
       receiveWithAuthSignature: request.signatures.permit,
       depositDataSignature: request.signatures.deposit,
@@ -332,7 +332,7 @@ export function encodeCalldataForRelayRequest(request: RelayRequest) {
     encodedCalldata = encodeSwapAndBridgeWithAuthCalldata({
       ...request.methodNameAndArgs.args,
       validAfter: Number(request.methodNameAndArgs.args.validAfter),
-      validBefore: Number(request.methodNameAndArgs.args.validAfter),
+      validBefore: Number(request.methodNameAndArgs.args.validBefore),
       nonce: request.methodNameAndArgs.args.nonce,
       receiveWithAuthSignature: request.signatures.permit,
       depositDataSignature: request.signatures.deposit,
