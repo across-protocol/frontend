@@ -1969,10 +1969,6 @@ export function latestGasPriceCache(chainId: number) {
  * @returns The gas price in the native currency of the chain
  */
 export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
-  if (sdk.utils.chainIsOPStack(chainId)) {
-    const l2Provider = asL2Provider(getProvider(chainId));
-    return l2Provider.getGasPrice();
-  }
   const { maxFeePerGas } = await sdk.gasPriceOracle.getGasPriceEstimate(
     getProvider(chainId),
     {
