@@ -590,10 +590,12 @@ export const getHubPoolClient = () => {
 };
 
 export const getGasMarkup = (chainId: string | number): BigNumber => {
+  // If GAS_MARKUP is defined for chain, then use it.
   if (typeof gasMarkup[chainId] === "number") {
-    return utils.parseEther(gasMarkup[chainId].toString());
+    return utils.parseEther((1 + gasMarkup[chainId]).toString());
   }
 
+  // Otherwise, use default gas markup (or optimism's for OP stack).
   return utils.parseEther(
     (
       1 +
