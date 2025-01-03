@@ -76,7 +76,6 @@ import {
   InvalidParamError,
   RouteNotEnabledError,
 } from "./_errors";
-import { toWeiSafe } from "utils";
 
 export { InputError, handleErrorCondition } from "./_errors";
 
@@ -592,10 +591,10 @@ export const getHubPoolClient = () => {
 
 export const getGasMarkup = (chainId: string | number): BigNumber => {
   if (typeof gasMarkup[chainId] === "number") {
-    return toWeiSafe(gasMarkup[chainId].toString());
+    return utils.parseEther(gasMarkup[chainId].toString());
   }
 
-  return toWeiSafe(
+  return utils.parseEther(
     (
       1 +
       (sdk.utils.chainIsOPStack(Number(chainId))
