@@ -7,7 +7,7 @@ export type RelayRequest = {
   to: string;
   methodNameAndArgs: ReturnType<typeof validateMethodArgs>;
   signatures: {
-    permit: string;
+    permit: string; // use this for all auth signatures
     deposit: string;
   };
 };
