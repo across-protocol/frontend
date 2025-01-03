@@ -76,6 +76,7 @@ import {
   InvalidParamError,
   RouteNotEnabledError,
 } from "./_errors";
+import { toWeiSafe } from "utils";
 
 export { InputError, handleErrorCondition } from "./_errors";
 
@@ -589,16 +590,18 @@ export const getHubPoolClient = () => {
   );
 };
 
-export const getGasMarkup = (chainId: string | number): number => {
+export const getGasMarkup = (chainId: string | number): BigNumber => {
   if (typeof gasMarkup[chainId] === "number") {
-    return gasMarkup[chainId];
+    return toWeiSafe(gasMarkup[chainId].toString());
   }
 
-  return (
-    1 +
-    (sdk.utils.chainIsOPStack(Number(chainId))
-      ? gasMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
-      : DEFAULT_GAS_MARKUP)
+  return toWeiSafe(
+    (
+      1 +
+      (sdk.utils.chainIsOPStack(Number(chainId))
+        ? gasMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
+        : DEFAULT_GAS_MARKUP)
+    ).toString()
   );
 };
 
