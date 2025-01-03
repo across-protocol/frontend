@@ -3,7 +3,10 @@ import {
   DepositEntryPointContract,
   OriginSwapEntryPointContract,
 } from "../../_dexes/types";
-import { getTransferWithAuthTypedData } from "../../_transfer-with-auth";
+import {
+  convertMaybeMillisecondsToSeconds,
+  getTransferWithAuthTypedData,
+} from "../../_transfer-with-auth";
 import {
   getDepositTypedData,
   getSwapAndDepositTypedData,
@@ -65,6 +68,9 @@ export async function buildAuthTxPayload({
   // random non-sequesntial nonce
   const nonce = utils.hexlify(utils.randomBytes(32));
 
+  const validAfter = convertMaybeMillisecondsToSeconds(authStart);
+  const validBefore = convertMaybeMillisecondsToSeconds(authDeadline);
+
   if (originSwapQuote) {
     if (!originSwapEntryPoint) {
       throw new Error(
@@ -96,8 +102,8 @@ export async function buildAuthTxPayload({
       argsWithoutSignatures: {
         signatureOwner: crossSwap.depositor,
         swapAndDepositData,
-        validAfter: authStart,
-        validBefore: authDeadline,
+        validAfter,
+        validBefore,
         nonce,
       },
     };
@@ -127,8 +133,8 @@ export async function buildAuthTxPayload({
       argsWithoutSignatures: {
         signatureOwner: crossSwap.depositor,
         depositData: depositDataStruct,
-        validAfter: authStart,
-        validBefore: authDeadline,
+        validAfter,
+        validBefore,
         nonce,
       },
     };
@@ -143,8 +149,8 @@ export async function buildAuthTxPayload({
       spenderAddress: entryPointContract.address,
       value: originSwapQuote?.maximumAmountIn || bridgeQuote.inputAmount,
       nonce,
-      validAfter: authStart,
-      validBefore: authDeadline,
+      validAfter,
+      validBefore,
     }),
     getDepositTypedDataPromise,
   ]);

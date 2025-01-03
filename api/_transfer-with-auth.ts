@@ -115,10 +115,8 @@ export async function getTransferWithAuthTypedData(params: {
         from: params.ownerAddress,
         to: params.spenderAddress,
         value: String(params.value),
-        validAfter: params?.validAfter
-          ? convertMaybeMillisecondsToSeconds(params.validAfter)
-          : 0,
-        validBefore: convertMaybeMillisecondsToSeconds(params.validBefore),
+        validAfter: params.validAfter ?? 0,
+        validBefore: params.validBefore,
         nonce: params.nonce, // non-sequential nonce, random 32 byte hex string
       },
     },
