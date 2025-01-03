@@ -323,8 +323,8 @@ export function encodeCalldataForRelayRequest(request: RelayRequest) {
       validAfter: Number(request.methodNameAndArgs.args.validAfter),
       validBefore: Number(request.methodNameAndArgs.args.validAfter),
       nonce: request.methodNameAndArgs.args.nonce,
-      receiveWithAuthSignature: request.signatures.deposit,
-      depositDataSignature: request.signatures.permit,
+      receiveWithAuthSignature: request.signatures.permit,
+      depositDataSignature: request.signatures.deposit,
     });
   } else if (
     request.methodNameAndArgs.methodName === "swapAndBridgeWithAuthorization"
@@ -334,8 +334,8 @@ export function encodeCalldataForRelayRequest(request: RelayRequest) {
       validAfter: Number(request.methodNameAndArgs.args.validAfter),
       validBefore: Number(request.methodNameAndArgs.args.validAfter),
       nonce: request.methodNameAndArgs.args.nonce,
-      receiveWithAuthSignature: request.signatures.deposit,
-      depositDataSignature: request.signatures.permit,
+      receiveWithAuthSignature: request.signatures.permit,
+      depositDataSignature: request.signatures.deposit,
     });
   }
   // TODO: Add cases for `withPermit2`
