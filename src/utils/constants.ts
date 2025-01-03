@@ -122,6 +122,7 @@ export const rewardPrograms: Record<rewardProgramTypes, rewardProgramValues> = {
       ChainId.OPTIMISM,
       ChainId.MODE,
       ChainId.BASE,
+      ChainId.INK,
       ChainId.WORLD_CHAIN,
       ChainId.LISK,
     ],
@@ -549,3 +550,5 @@ export const defaultSwapSlippage = Number(
 
 export const indexerApiBaseUrl =
   process.env.REACT_APP_INDEXER_BASE_URL || undefined;
+
+export const DEFAULT_FILL_DEADLINE_BUFFER_SECONDS = 2.5 * 60 * 60; // 2.5 hours

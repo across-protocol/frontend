@@ -1,6 +1,7 @@
 import { ethers, BigNumber } from "ethers";
 import {
   ChainId,
+  DEFAULT_FILL_DEADLINE_BUFFER_SECONDS,
   fixedPointAdjustment,
   referrerDelimiterHex,
 } from "./constants";
@@ -424,14 +425,12 @@ export async function getSpokePoolAndVerifier({
 }
 
 async function getFillDeadline(spokePool: SpokePool): Promise<number> {
-  const calls = [
-    spokePool.interface.encodeFunctionData("getCurrentTime"),
-    spokePool.interface.encodeFunctionData("fillDeadlineBuffer"),
-  ];
-
-  const [currentTime, fillDeadlineBuffer] =
-    await spokePool.callStatic.multicall(calls);
-  return Number(currentTime) + Number(fillDeadlineBuffer);
+  const fillDeadlineBuffer = Number(
+    process.env.FILL_DEADLINE_BUFFER_SECONDS ??
+      DEFAULT_FILL_DEADLINE_BUFFER_SECONDS
+  );
+  const currentTime = await spokePool.callStatic.getCurrentTime();
+  return Number(currentTime) + fillDeadlineBuffer;
 }
 
 async function _tagRefAndSignTx(

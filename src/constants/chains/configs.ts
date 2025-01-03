@@ -35,6 +35,11 @@ import blastSepoliaGrayscaleLogo from "assets/chain-logos/blast-sepolia-grayscal
 import { ReactComponent as blastSepoliaLogoSvg } from "assets/chain-logos/blast-sepolia.svg";
 import { ReactComponent as blastSepoliaGrayscaleLogoSvg } from "assets/chain-logos/blast-sepolia-grayscale.svg";
 
+import inkLogo from "assets/chain-logos/ink.svg";
+import inkGrayscaleLogo from "assets/chain-logos/ink-grayscale.svg";
+import { ReactComponent as inkLogoSvg } from "assets/chain-logos/ink.svg";
+import { ReactComponent as inkGrayscaleLogoSvg } from "assets/chain-logos/ink-grayscale.svg";
+
 import lineaLogo from "assets/chain-logos/linea.svg";
 import lineaGrayscaleLogo from "assets/chain-logos/linea-grayscale.svg";
 import { ReactComponent as lineaLogoSvg } from "assets/chain-logos/linea.svg";
@@ -231,6 +236,22 @@ export const blastSepolia = {
   nativeCurrencySymbol: "ETH",
   customRpcUrl: process.env.REACT_APP_CHAIN_168587773_PROVIDER_URL,
   pollingInterval: 2000,
+};
+
+export const ink = {
+  name: "Ink",
+  fullName: "Ink",
+  chainId: 57073,
+  logoURI: inkLogo,
+  grayscaleLogoURI: inkGrayscaleLogo,
+  logoSvg: inkLogoSvg,
+  grayscaleLogoSvg: inkGrayscaleLogoSvg,
+  rpcUrl: "https://rpc-gel.inkonchain.com",
+  explorerUrl: "https://explorer.inkonchain.com",
+  constructExplorerLink: (txHash: string) => `${ink.explorerUrl}/tx/${txHash}`,
+  nativeCurrencySymbol: "ETH",
+  customRpcUrl: process.env.REACT_APP_CHAIN_57073_PROVIDER_URL,
+  pollingInterval: 1000,
 };
 
 export const linea = {
@@ -510,6 +531,7 @@ export const chainConfigs = [
   baseSepolia,
   blast,
   blastSepolia,
+  ink,
   linea,
   lisk,
   liskSepolia,

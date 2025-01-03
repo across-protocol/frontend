@@ -4,12 +4,11 @@ import { ChainConfig } from "../types";
 
 const { getDeployedAddress, getDeployedBlockNumber } = sdkUtils;
 
-const chainId = CHAIN_IDs.WORLD_CHAIN;
+const chainId = CHAIN_IDs.INK;
 const chainInfoBase = PUBLIC_NETWORKS[chainId];
 
 export default {
   ...chainInfoBase,
-  fullName: "World Chain",
   logoPath: "./assets/logo.svg",
   grayscaleLogoPath: "./assets/grayscale-logo.svg",
   spokePool: {
@@ -17,8 +16,8 @@ export default {
     blockNumber: getDeployedBlockNumber("SpokePool", chainId),
   },
   chainId,
-  publicRpcUrl: "https://worldchain-mainnet.g.alchemy.com/public",
-  blockTimeSeconds: 2,
-  tokens: ["ETH", "WBTC", "WETH", "USDC.e", "POOL"],
+  publicRpcUrl: "https://rpc-gel.inkonchain.com",
+  blockTimeSeconds: 1,
+  tokens: ["WETH", "ETH"],
   enableCCTP: false,
 } as ChainConfig;
