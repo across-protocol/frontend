@@ -2255,14 +2255,16 @@ export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
  * const res = await axios.get(`${base_url}?${queryString}`)
  * ```
  */
-
 export function buildSearchParams(
-  params: Record<string, number | string | Array<number | string>>
+  params: Record<
+    string,
+    number | string | boolean | Array<number | string | boolean>
+  >
 ): string {
   const searchParams = new URLSearchParams();
   for (const key in params) {
     const value = params[key];
-    if (!value) continue;
+    if (value === undefined || value === null) continue;
     if (Array.isArray(value)) {
       value.forEach((val) => searchParams.append(key, String(val)));
     } else {

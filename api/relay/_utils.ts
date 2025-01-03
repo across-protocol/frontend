@@ -86,8 +86,8 @@ export const SwapAndDepositWithAuthArgsSchema = type({
 export const allowedMethodNames = [
   "depositWithPermit",
   "swapAndBridgeWithPermit",
-  "depositWithAuth",
-  "swapAndBridgeWithAuth",
+  "depositWithAuthorization",
+  "swapAndBridgeWithAuthorization",
 ] as const;
 
 export function validateMethodArgs(
@@ -106,13 +106,13 @@ export function validateMethodArgs(
       args: args as Infer<typeof SwapAndDepositWithPermitArgsSchema>,
       methodName,
     } as const;
-  } else if (methodName === "depositWithAuth") {
+  } else if (methodName === "depositWithAuthorization") {
     assert(args, DepositWithAuthArgsSchema);
     return {
       args: args as Infer<typeof DepositWithAuthArgsSchema>,
       methodName,
     } as const;
-  } else if (methodName === "swapAndBridgeWithAuth") {
+  } else if (methodName === "swapAndBridgeWithAuthorization") {
     assert(args, SwapAndDepositWithAuthArgsSchema);
     return {
       args: args as Infer<typeof SwapAndDepositWithAuthArgsSchema>,
@@ -227,7 +227,9 @@ export function encodeCalldataForRelayRequest(request: RelayRequest) {
       swapAndDepositDataSignature: request.signatures.deposit,
       permitSignature: request.signatures.permit,
     });
-  } else if (request.methodNameAndArgs.methodName === "depositWithAuth") {
+  } else if (
+    request.methodNameAndArgs.methodName === "depositWithAuthorization"
+  ) {
     encodedCalldata = encodeDepositWithAuthCalldata({
       ...request.methodNameAndArgs.args,
       validAfter: Number(request.methodNameAndArgs.args.validAfter),
@@ -236,7 +238,9 @@ export function encodeCalldataForRelayRequest(request: RelayRequest) {
       receiveWithAuthSignature: request.signatures.deposit,
       depositDataSignature: request.signatures.permit,
     });
-  } else if (request.methodNameAndArgs.methodName === "swapAndBridgeWithAuth") {
+  } else if (
+    request.methodNameAndArgs.methodName === "swapAndBridgeWithAuthorization"
+  ) {
     encodedCalldata = encodeSwapAndBridgeWithAuthCalldata({
       ...request.methodNameAndArgs.args,
       validAfter: Number(request.methodNameAndArgs.args.validAfter),
