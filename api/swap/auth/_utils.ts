@@ -3,10 +3,7 @@ import {
   DepositEntryPointContract,
   OriginSwapEntryPointContract,
 } from "../../_dexes/types";
-import {
-  convertMaybeMillisecondsToSeconds,
-  getTransferWithAuthTypedData,
-} from "../../_transfer-with-auth";
+import { getTransferWithAuthTypedData } from "../../_transfer-with-auth";
 import {
   getDepositTypedData,
   getSwapAndDepositTypedData,
@@ -25,8 +22,8 @@ export async function buildAuthTxPayload({
   submissionFees,
 }: {
   crossSwapQuotes: CrossSwapQuotes;
-  authDeadline: number; // maybe milliseconds
-  authStart?: number; // maybe milliseconds
+  authDeadline: number;
+  authStart?: number;
   submissionFees?: {
     amount: BigNumberish;
     recipient: string;
@@ -68,8 +65,8 @@ export async function buildAuthTxPayload({
   // random non-sequesntial nonce
   const nonce = utils.hexlify(utils.randomBytes(32));
 
-  const validAfter = convertMaybeMillisecondsToSeconds(authStart);
-  const validBefore = convertMaybeMillisecondsToSeconds(authDeadline);
+  const validAfter = authStart;
+  const validBefore = authDeadline;
 
   if (originSwapQuote) {
     if (!originSwapEntryPoint) {

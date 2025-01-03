@@ -14,6 +14,7 @@ import { InvalidParamError } from "../../_errors";
 import { QuoteFetchStrategies } from "../../_dexes/utils";
 import { buildAuthTxPayload } from "./_utils";
 import { GAS_SPONSOR_ADDRESS } from "../../relay/_utils";
+import * as sdk from "@across-protocol/sdk";
 
 export const authSwapQueryParamsSchema = type({
   authDeadline: optional(positiveIntStr()),
@@ -21,8 +22,7 @@ export const authSwapQueryParamsSchema = type({
 
 export type authSwapQueryParams = Infer<typeof authSwapQueryParamsSchema>;
 
-const DEFAULT_AUTH_DEADLINE =
-  Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365; // 1 year
+const DEFAULT_AUTH_DEADLINE = sdk.utils.getCurrentTime() + 60 * 60 * 24 * 365; // 1 year
 
 // For auth-based flows, we have to use the `SpokePoolPeriphery` as an entry point
 const quoteFetchStrategies: QuoteFetchStrategies = {
@@ -53,7 +53,7 @@ const handler = async (
       authSwapQueryParamsSchema
     );
     const authDeadline = Number(_authDeadline ?? DEFAULT_AUTH_DEADLINE);
-    const authStart = Number(_authStart ?? Date.now());
+    const authStart = Number(_authStart ?? sdk.utils.getCurrentTime());
 
     if (authDeadline < Math.floor(Date.now() / 1000)) {
       throw new InvalidParamError({

@@ -122,8 +122,3 @@ export async function getTransferWithAuthTypedData(params: {
     },
   };
 }
-
-export function convertMaybeMillisecondsToSeconds(timestamp: number): number {
-  const isMilliseconds = timestamp > 1_000_000_000; // rough approximation
-  return isMilliseconds ? Math.floor(timestamp / 1000) : Math.floor(timestamp);
-}
