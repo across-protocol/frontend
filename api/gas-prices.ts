@@ -1,13 +1,17 @@
 import { VercelResponse } from "@vercel/node";
 import {
+  getCachedFillGasUsage,
   getLogger,
   handleErrorCondition,
   latestGasPriceCache,
   sendResponse,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
+import { ethers } from "ethers";
+import * as sdk from "@across-protocol/sdk";
 
 import mainnetChains from "../src/data/chains_1.json";
+import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
 
 const chains = mainnetChains;
 
@@ -18,13 +22,30 @@ const handler = async (
   const logger = getLogger();
 
   try {
-    const gasPrices = await Promise.all(
+    const [gasPrices, gasCosts] = await Promise.all([
       chains.map(({ chainId }) => {
         return latestGasPriceCache(chainId).get();
-      })
-    );
+      }),
+      chains.map(({ chainId }) => {
+        const depositArgs = {
+          amount: ethers.BigNumber.from(100),
+          inputToken: sdk.constants.ZERO_ADDRESS,
+          outputToken: sdk.constants.ZERO_ADDRESS,
+          recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+          originChainId: 0, // Shouldn't matter for simulation
+          destinationChainId: chainId,
+        };
+        return getCachedFillGasUsage(depositArgs);
+      }),
+    ]);
     const responseJson = Object.fromEntries(
-      chains.map(({ chainId }, i) => [chainId, gasPrices[i].toString()])
+      chains.map(({ chainId }, i) => [
+        chainId,
+        {
+          gasPrice: gasPrices[i].toString(),
+          gasCost: gasCosts[i].toString(),
+        },
+      ])
     );
 
     logger.debug({
