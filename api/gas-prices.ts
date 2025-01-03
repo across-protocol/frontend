@@ -23,20 +23,24 @@ const handler = async (
 
   try {
     const [gasPrices, gasCosts] = await Promise.all([
-      chains.map(({ chainId }) => {
-        return latestGasPriceCache(chainId).get();
-      }),
-      chains.map(({ chainId }) => {
-        const depositArgs = {
-          amount: ethers.BigNumber.from(100),
-          inputToken: sdk.constants.ZERO_ADDRESS,
-          outputToken: sdk.constants.ZERO_ADDRESS,
-          recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-          originChainId: 0, // Shouldn't matter for simulation
-          destinationChainId: chainId,
-        };
-        return getCachedFillGasUsage(depositArgs);
-      }),
+      await Promise.all(
+        chains.map(({ chainId }) => {
+          return latestGasPriceCache(chainId).get();
+        })
+      ),
+      await Promise.all(
+        chains.map(({ chainId }) => {
+          const depositArgs = {
+            amount: ethers.BigNumber.from(100),
+            inputToken: sdk.constants.ZERO_ADDRESS,
+            outputToken: sdk.constants.ZERO_ADDRESS,
+            recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+            originChainId: 0, // Shouldn't matter for simulation
+            destinationChainId: chainId,
+          };
+          return getCachedFillGasUsage(depositArgs);
+        })
+      ),
     ]);
     const responseJson = Object.fromEntries(
       chains.map(({ chainId }, i) => [
