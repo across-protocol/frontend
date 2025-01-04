@@ -72,23 +72,28 @@ const handler = async (
         );
       })
     );
-    const responseJson = Object.fromEntries(
-      chains.map(({ chainId }, i) => [
-        chainId,
-        {
-          gasPrice: gasPrices[i].maxFeePerGas.toString(),
-          gasPriceComponents: {
-            maxFeePerGas: gasPrices[i].maxFeePerGas
-              .sub(gasPrices[i].maxPriorityFeePerGas)
-              .toString(),
-            priorityFeePerGas: gasPrices[i].maxPriorityFeePerGas.toString(),
-            baseFeeMultiplier: ethers.utils.formatEther(getGasMarkup(chainId)),
+    const responseJson = {
+      tokenSymbol,
+      ...Object.fromEntries(
+        Object.keys(chainIdsWithToken).map(([chainId], i) => [
+          chainId,
+          {
+            gasPrice: gasPrices[i].maxFeePerGas.toString(),
+            gasPriceComponents: {
+              maxFeePerGas: gasPrices[i].maxFeePerGas
+                .sub(gasPrices[i].maxPriorityFeePerGas)
+                .toString(),
+              priorityFeePerGas: gasPrices[i].maxPriorityFeePerGas.toString(),
+              baseFeeMultiplier: ethers.utils.formatEther(
+                getGasMarkup(chainId)
+              ),
+            },
+            nativeGasCost: gasCosts[i].nativeGasCost.toString(),
+            tokenGasCost: gasCosts[i].tokenGasCost.toString(),
           },
-          nativeGasCost: gasCosts[i].nativeGasCost.toString(),
-          tokenGasCost: gasCosts[i].tokenGasCost.toString(),
-        },
-      ])
-    );
+        ])
+      ),
+    };
 
     logger.debug({
       at: "GasPrices",
