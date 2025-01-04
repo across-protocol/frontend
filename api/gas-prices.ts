@@ -1,13 +1,22 @@
 import { VercelResponse } from "@vercel/node";
 import {
+  buildDepositForSimulation,
+  getGasMarkup,
   getLogger,
+  getMaxFeePerGas,
+  getRelayerFeeCalculatorQueries,
   handleErrorCondition,
-  latestGasPriceCache,
   sendResponse,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
+import { ethers } from "ethers";
+import * as sdk from "@across-protocol/sdk";
 
 import mainnetChains from "../src/data/chains_1.json";
+import {
+  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+  TOKEN_SYMBOLS_MAP,
+} from "./_constants";
 
 const chains = mainnetChains;
 
@@ -20,11 +29,42 @@ const handler = async (
   try {
     const gasPrices = await Promise.all(
       chains.map(({ chainId }) => {
-        return latestGasPriceCache(chainId).get();
+        return getMaxFeePerGas(chainId);
+      })
+    );
+    const gasCosts = await Promise.all(
+      chains.map(({ chainId }, i) => {
+        const depositArgs = {
+          amount: ethers.BigNumber.from(100),
+          inputToken: sdk.constants.ZERO_ADDRESS,
+          outputToken: TOKEN_SYMBOLS_MAP?.WETH?.addresses?.[chainId],
+          recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+          originChainId: 0, // Shouldn't matter for simulation
+          destinationChainId: chainId,
+        };
+        const relayerFeeCalculatorQueries =
+          getRelayerFeeCalculatorQueries(chainId);
+        return relayerFeeCalculatorQueries.getGasCosts(
+          buildDepositForSimulation(depositArgs),
+          undefined,
+          {
+            gasPrice: gasPrices[i],
+          }
+        );
       })
     );
     const responseJson = Object.fromEntries(
-      chains.map(({ chainId }, i) => [chainId, gasPrices[i].toString()])
+      chains.map(({ chainId }, i) => [
+        chainId,
+        {
+          gasPrice: gasPrices[i].toString(),
+          baseFeeMultiplier: getGasMarkup(chainId).div(
+            sdk.utils.fixedPointAdjustment
+          ),
+          nativeGasCost: gasCosts[i].nativeGasCost.toString(),
+          tokenGasCost: gasCosts[i].tokenGasCost.toString(),
+        },
+      ])
     );
 
     logger.debug({

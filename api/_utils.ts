@@ -589,14 +589,21 @@ export const getHubPoolClient = () => {
   );
 };
 
-export const getGasMarkup = (chainId: string | number) => {
+export const getGasMarkup = (chainId: string | number): BigNumber => {
+  // If GAS_MARKUP is defined for chain, then use it.
   if (typeof gasMarkup[chainId] === "number") {
-    return gasMarkup[chainId];
+    return utils.parseEther((1 + gasMarkup[chainId]).toString());
   }
 
-  return sdk.utils.chainIsOPStack(Number(chainId))
-    ? gasMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
-    : DEFAULT_GAS_MARKUP;
+  // Otherwise, use default gas markup (or optimism's for OP stack).
+  return utils.parseEther(
+    (
+      1 +
+      (sdk.utils.chainIsOPStack(Number(chainId))
+        ? gasMarkup[CHAIN_IDs.OPTIMISM] ?? DEFAULT_GAS_MARKUP
+        : DEFAULT_GAS_MARKUP)
+    ).toString()
+  );
 };
 
 /**
@@ -627,7 +634,7 @@ export const getRelayerFeeCalculator = (
   );
 };
 
-const getRelayerFeeCalculatorQueries = (
+export const getRelayerFeeCalculatorQueries = (
   destinationChainId: number,
   overrides: Partial<{
     spokePoolAddress: string;
@@ -641,8 +648,7 @@ const getRelayerFeeCalculatorQueries = (
     overrides.spokePoolAddress || getSpokePoolAddress(destinationChainId),
     overrides.relayerAddress,
     REACT_APP_COINGECKO_PRO_API_KEY,
-    getLogger(),
-    getGasMarkup(destinationChainId)
+    getLogger()
   );
 };
 
@@ -1931,12 +1937,11 @@ export function getCachedFillGasUsage(
       deposit.destinationChainId,
       overrides
     );
+    // We don't care about the gas token price or the token gas price, only the raw gas units. In the API
+    // we'll compute the gas price separately.
     const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
       buildDepositForSimulation(deposit),
-      overrides?.relayerAddress,
-      {
-        omitMarkup: true,
-      }
+      overrides?.relayerAddress
     );
     return nativeGasCost;
   };
@@ -1966,13 +1971,12 @@ export function latestGasPriceCache(chainId: number) {
  * @returns The gas price in the native currency of the chain
  */
 export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
-  if (sdk.utils.chainIsOPStack(chainId)) {
-    const l2Provider = asL2Provider(getProvider(chainId));
-    return l2Provider.getGasPrice();
-  }
   const { maxFeePerGas } = await sdk.gasPriceOracle.getGasPriceEstimate(
     getProvider(chainId),
-    chainId
+    {
+      chainId,
+      baseFeeMultiplier: getGasMarkup(chainId),
+    }
   );
   return maxFeePerGas;
 }
