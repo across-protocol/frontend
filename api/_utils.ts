@@ -627,7 +627,7 @@ export const getRelayerFeeCalculator = (
   );
 };
 
-const getRelayerFeeCalculatorQueries = (
+export const getRelayerFeeCalculatorQueries = (
   destinationChainId: number,
   overrides: Partial<{
     spokePoolAddress: string;

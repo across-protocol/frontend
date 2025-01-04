@@ -1,9 +1,10 @@
 import { VercelResponse } from "@vercel/node";
 import {
-  getCachedFillGasUsage,
+  buildDepositForSimulation,
   getLogger,
+  getMaxFeePerGas,
+  getRelayerFeeCalculatorQueries,
   handleErrorCondition,
-  latestGasPriceCache,
   sendResponse,
 } from "./_utils";
 import { TypedVercelRequest } from "./_types";
@@ -28,11 +29,11 @@ const handler = async (
     const [gasPrices, gasCosts] = await Promise.all([
       await Promise.all(
         chains.map(({ chainId }) => {
-          return latestGasPriceCache(chainId).get();
+          return getMaxFeePerGas(chainId);
         })
       ),
       await Promise.all(
-        chains.map(({ chainId }) => {
+        chains.map(async ({ chainId }) => {
           const depositArgs = {
             amount: ethers.BigNumber.from(100),
             inputToken: sdk.constants.ZERO_ADDRESS,
@@ -41,7 +42,15 @@ const handler = async (
             originChainId: 0, // Shouldn't matter for simulation
             destinationChainId: chainId,
           };
-          return getCachedFillGasUsage(depositArgs);
+          const relayerFeeCalculatorQueries =
+            getRelayerFeeCalculatorQueries(chainId);
+          return relayerFeeCalculatorQueries.getGasCosts(
+            buildDepositForSimulation(depositArgs),
+            undefined,
+            {
+              omitMarkup: true,
+            }
+          );
         })
       ),
     ]);
@@ -50,7 +59,8 @@ const handler = async (
         chainId,
         {
           gasPrice: gasPrices[i].toString(),
-          gasCost: gasCosts[i].toString(),
+          nativeGasCost: gasCosts[i].nativeGasCost.toString(),
+          tokenGasCost: gasCosts[i].tokenGasCost.toString(),
         },
       ])
     );
