@@ -4,6 +4,7 @@ import {
   getGasMarkup,
   getLogger,
   getMaxFeePerGas,
+  getProvider,
   getRelayerFeeCalculatorQueries,
   handleErrorCondition,
   sendResponse,
@@ -46,7 +47,6 @@ const handler = async (
         })
         .filter(([, tokenAddress]) => tokenAddress !== undefined)
     );
-    // @dev getMaxFeePerGas will return the gas price after including the baseFeeMultiplier.
     const gasPrices = await Promise.all(
       Object.keys(chainIdsWithToken).map((chainId) => {
         return getMaxFeePerGas(Number(chainId));
@@ -63,41 +63,29 @@ const handler = async (
             originChainId: 0, // Shouldn't matter for simulation
             destinationChainId: Number(chainId),
           };
-          const deposit = buildDepositForSimulation(depositArgs);
           const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
             Number(chainId)
           );
-          // OPStack chains factor in the L1 gas cost of including the L2 transaction in an L1 rollup batch
-          // into the total gas cost of the L2 transaction.
-          const getOpStackL1GasCost = async () => {
-            if (sdk.utils.chainIsOPStack(Number(chainId))) {
-              const provider = relayerFeeCalculatorQueries.provider;
-              const unsignedTx = await sdk.utils.populateV3Relay(
-                relayerFeeCalculatorQueries.spokePool,
-                deposit,
-                relayerFeeCalculatorQueries.simulatedRelayerAddress
-              );
-              return (
-                provider as L2Provider<providers.Provider>
-              ).estimateL1GasCost(unsignedTx);
-            } else {
-              return undefined;
-            }
-          };
-          const [{ nativeGasCost, tokenGasCost }, opStackL1GasCost] =
-            await Promise.all([
-              relayerFeeCalculatorQueries.getGasCosts(
-                deposit,
-                relayerFeeCalculatorQueries.simulatedRelayerAddress,
-                {
-                  // @dev Pass in the already-computed gasPrice into this query so that the tokenGasCost includes
-                  // the scaled gas price,
-                  // e.g. tokenGasCost = nativeGasCost * (baseFee * baseFeeMultiplier + priorityFee).
-                  gasPrice: gasPrices[i].maxFeePerGas,
-                }
-              ),
-              getOpStackL1GasCost(),
-            ]);
+          const { nativeGasCost, tokenGasCost } =
+            await relayerFeeCalculatorQueries.getGasCosts(
+              buildDepositForSimulation(depositArgs),
+              undefined,
+              {
+                gasPrice: gasPrices[i].maxFeePerGas,
+              }
+            );
+          let opStackL1GasCost: ethers.BigNumber | undefined = undefined;
+          if (sdk.utils.chainIsOPStack(Number(chainId))) {
+            const provider = relayerFeeCalculatorQueries.provider;
+            const unsignedTx = await sdk.utils.populateV3Relay(
+              relayerFeeCalculatorQueries.spokePool,
+              buildDepositForSimulation(depositArgs),
+              relayerFeeCalculatorQueries.simulatedRelayerAddress
+            );
+            opStackL1GasCost = await (
+              provider as L2Provider<providers.Provider>
+            ).estimateL1GasCost(unsignedTx);
+          }
           return {
             nativeGasCost,
             tokenGasCost,
