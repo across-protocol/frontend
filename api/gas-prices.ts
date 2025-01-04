@@ -11,7 +11,10 @@ import { ethers } from "ethers";
 import * as sdk from "@across-protocol/sdk";
 
 import mainnetChains from "../src/data/chains_1.json";
-import { DEFAULT_SIMULATED_RECIPIENT_ADDRESS } from "./_constants";
+import {
+  DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+  TOKEN_SYMBOLS_MAP,
+} from "./_constants";
 
 const chains = mainnetChains;
 
@@ -33,7 +36,7 @@ const handler = async (
           const depositArgs = {
             amount: ethers.BigNumber.from(100),
             inputToken: sdk.constants.ZERO_ADDRESS,
-            outputToken: sdk.constants.ZERO_ADDRESS,
+            outputToken: TOKEN_SYMBOLS_MAP?.WETH?.addresses?.[chainId],
             recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
             originChainId: 0, // Shouldn't matter for simulation
             destinationChainId: chainId,
