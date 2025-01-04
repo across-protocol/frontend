@@ -67,7 +67,7 @@ const handler = async (
           buildDepositForSimulation(depositArgs),
           undefined,
           {
-            gasPrice: gasPrices[i],
+            gasPrice: gasPrices[i].maxFeePerGas,
           }
         );
       })
@@ -76,7 +76,8 @@ const handler = async (
       chains.map(({ chainId }, i) => [
         chainId,
         {
-          gasPrice: gasPrices[i].toString(),
+          maxFeePerGas: gasPrices[i].maxFeePerGas.toString(),
+          priorityFeePerGas: gasPrices[i].maxPriorityFeePerGas.toString(),
           baseFeeMultiplier: getGasMarkup(chainId).toString(),
           nativeGasCost: gasCosts[i].nativeGasCost.toString(),
           tokenGasCost: gasCosts[i].tokenGasCost.toString(),

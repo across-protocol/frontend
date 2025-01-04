@@ -7,7 +7,6 @@ import {
 } from "@across-protocol/contracts/dist/typechain";
 import acrossDeployments from "@across-protocol/contracts/dist/deployments/deployments.json";
 import * as sdk from "@across-protocol/sdk";
-import { asL2Provider } from "@eth-optimism/sdk";
 import {
   BALANCER_NETWORK_CONFIG,
   BalancerSDK,
@@ -1960,7 +1959,7 @@ export function latestGasPriceCache(chainId: number) {
   return makeCacheGetterAndSetter(
     buildInternalCacheKey("latestGasPriceCache", chainId),
     ttlPerChain[chainId] || ttlPerChain.default,
-    () => getMaxFeePerGas(chainId),
+    async () => (await getMaxFeePerGas(chainId)).maxFeePerGas,
     (bnFromCache) => BigNumber.from(bnFromCache)
   );
 }
@@ -1970,15 +1969,13 @@ export function latestGasPriceCache(chainId: number) {
  * @param chainId The chain ID to resolve the gas price for
  * @returns The gas price in the native currency of the chain
  */
-export async function getMaxFeePerGas(chainId: number): Promise<BigNumber> {
-  const { maxFeePerGas } = await sdk.gasPriceOracle.getGasPriceEstimate(
-    getProvider(chainId),
-    {
-      chainId,
-      baseFeeMultiplier: getGasMarkup(chainId),
-    }
-  );
-  return maxFeePerGas;
+export function getMaxFeePerGas(
+  chainId: number
+): Promise<sdk.gasPriceOracle.GasPriceEstimate> {
+  return sdk.gasPriceOracle.getGasPriceEstimate(getProvider(chainId), {
+    chainId,
+    baseFeeMultiplier: getGasMarkup(chainId),
+  });
 }
 
 /**
