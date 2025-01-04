@@ -76,7 +76,7 @@ const handler = async (
       chains.map(({ chainId }, i) => [
         chainId,
         {
-          maxFeePerGas: gasPrices[i].maxFeePerGas.toString(),
+          gasPrice: gasPrices[i].maxFeePerGas.toString(),
           priorityFeePerGas: gasPrices[i].maxPriorityFeePerGas.toString(),
           baseFeeMultiplier: getGasMarkup(chainId).toString(),
           nativeGasCost: gasCosts[i].nativeGasCost.toString(),
