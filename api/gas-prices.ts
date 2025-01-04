@@ -46,7 +46,7 @@ const handler = async (
         })
         .filter(([, tokenAddress]) => tokenAddress !== undefined)
     );
-    // @dev getMaxFeePerGas will return the gas price after including the baseFeeMultiplier.
+    // getMaxFeePerGas will return the gas price after including the baseFeeMultiplier.
     const gasPrices = await Promise.all(
       Object.keys(chainIdsWithToken).map((chainId) => {
         return getMaxFeePerGas(Number(chainId));
@@ -55,6 +55,9 @@ const handler = async (
     const gasCosts = await Promise.all(
       Object.entries(chainIdsWithToken).map(
         async ([chainId, tokenAddress], i) => {
+          // This is a dummy deposit used to pass into buildDepositForSimulation() to build a fill transaction
+          // that we can simulate without reversion. The only parameter that matters is that the destinationChainId
+          // is set to the spoke pool's chain ID we'll be simulating the fill call on.
           const depositArgs = {
             amount: ethers.BigNumber.from(100),
             inputToken: sdk.constants.ZERO_ADDRESS,
@@ -72,7 +75,7 @@ const handler = async (
               deposit,
               relayerFeeCalculatorQueries.simulatedRelayerAddress,
               {
-                // @dev Pass in the already-computed gasPrice into this query so that the tokenGasCost includes
+                // Pass in the already-computed gasPrice into this query so that the tokenGasCost includes
                 // the scaled gas price,
                 // e.g. tokenGasCost = nativeGasCost * (baseFee * baseFeeMultiplier + priorityFee).
                 gasPrice: gasPrices[i].maxFeePerGas,
