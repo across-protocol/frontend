@@ -48,7 +48,6 @@ const handler = async (
           undefined,
           {
             gasPrice: gasPrices[i],
-            omitMarkup: true,
           }
         );
       })
