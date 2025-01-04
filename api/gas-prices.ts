@@ -75,7 +75,7 @@ const handler = async (
     const responseJson = {
       tokenSymbol,
       ...Object.fromEntries(
-        Object.keys(chainIdsWithToken).map(([chainId], i) => [
+        Object.keys(chainIdsWithToken).map((chainId, i) => [
           chainId,
           {
             gasPrice: gasPrices[i].maxFeePerGas.toString(),
