@@ -18,7 +18,6 @@ import {
   TOKEN_SYMBOLS_MAP,
 } from "./_constants";
 import { assert, Infer, object, optional, string } from "superstruct";
-import { InvalidParamError } from "./_errors";
 
 const chains = mainnetChains;
 
@@ -36,31 +35,34 @@ const handler = async (
   const tokenSymbol = query.symbol ?? "WETH";
 
   try {
+    const chainIdsWithToken: { [chainId: string]: string } = Object.fromEntries(
+      chains
+        .map(({ chainId }) => {
+          const tokenAddress =
+            TOKEN_SYMBOLS_MAP?.[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP]
+              ?.addresses[chainId];
+          return [chainId, tokenAddress];
+        })
+        .filter(([, tokenAddress]) => tokenAddress !== undefined)
+    );
     const gasPrices = await Promise.all(
-      chains.map(({ chainId }) => {
-        return getMaxFeePerGas(chainId);
+      Object.keys(chainIdsWithToken).map((chainId) => {
+        return getMaxFeePerGas(Number(chainId));
       })
     );
     const gasCosts = await Promise.all(
-      chains.map(({ chainId }, i) => {
-        const tokenAddress =
-          TOKEN_SYMBOLS_MAP?.[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP]
-            ?.addresses[chainId];
-        if (tokenAddress === undefined) {
-          throw new InvalidParamError({
-            message: `Input token symbol ${tokenSymbol} does not exist in TOKEN_SYMBOLS_MAP for chain ${chainId}`,
-          });
-        }
+      Object.entries(chainIdsWithToken).map(([chainId, tokenAddress], i) => {
         const depositArgs = {
           amount: ethers.BigNumber.from(100),
           inputToken: sdk.constants.ZERO_ADDRESS,
           outputToken: tokenAddress,
           recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
           originChainId: 0, // Shouldn't matter for simulation
-          destinationChainId: chainId,
+          destinationChainId: Number(chainId),
         };
-        const relayerFeeCalculatorQueries =
-          getRelayerFeeCalculatorQueries(chainId);
+        const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+          Number(chainId)
+        );
         return relayerFeeCalculatorQueries.getGasCosts(
           buildDepositForSimulation(depositArgs),
           undefined,
