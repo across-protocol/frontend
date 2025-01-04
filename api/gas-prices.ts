@@ -1,6 +1,7 @@
 import { VercelResponse } from "@vercel/node";
 import {
   buildDepositForSimulation,
+  getGasMarkup,
   getLogger,
   getMaxFeePerGas,
   getRelayerFeeCalculatorQueries,
@@ -57,6 +58,9 @@ const handler = async (
         chainId,
         {
           gasPrice: gasPrices[i].toString(),
+          baseFeeMultiplier: getGasMarkup(chainId).div(
+            sdk.utils.fixedPointAdjustment
+          ),
           nativeGasCost: gasCosts[i].nativeGasCost.toString(),
           tokenGasCost: gasCosts[i].tokenGasCost.toString(),
         },
