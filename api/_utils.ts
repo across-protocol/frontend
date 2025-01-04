@@ -1939,6 +1939,10 @@ export function getCachedFillGasUsage(
     );
     // We don't care about the gas token price or the token gas price, only the raw gas units. In the API
     // we'll compute the gas price separately.
+    console.log(
+      `buildDepositForSimulation:`,
+      buildDepositForSimulation(deposit)
+    );
     const { nativeGasCost } = await relayerFeeCalculatorQueries.getGasCosts(
       buildDepositForSimulation(deposit),
       overrides?.relayerAddress
