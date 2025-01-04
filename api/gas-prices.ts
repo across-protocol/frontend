@@ -17,14 +17,23 @@ import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   TOKEN_SYMBOLS_MAP,
 } from "./_constants";
+import { assert, Infer, object, optional, string } from "superstruct";
+import { InvalidParamError } from "./_errors";
 
 const chains = mainnetChains;
 
+const QueryParamsSchema = object({
+  symbol: optional(string()),
+});
+type QueryParams = Infer<typeof QueryParamsSchema>;
+
 const handler = async (
-  _: TypedVercelRequest<Record<string, never>>,
+  { query }: TypedVercelRequest<QueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  assert(query, QueryParamsSchema);
+  const tokenSymbol = query.symbol ?? "WETH";
 
   try {
     const gasPrices = await Promise.all(
@@ -34,10 +43,18 @@ const handler = async (
     );
     const gasCosts = await Promise.all(
       chains.map(({ chainId }, i) => {
+        const tokenAddress =
+          TOKEN_SYMBOLS_MAP?.[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP]
+            ?.addresses[chainId];
+        if (tokenAddress === undefined) {
+          throw new InvalidParamError({
+            message: `Input token symbol ${tokenSymbol} does not exist in TOKEN_SYMBOLS_MAP for chain ${chainId}`,
+          });
+        }
         const depositArgs = {
           amount: ethers.BigNumber.from(100),
           inputToken: sdk.constants.ZERO_ADDRESS,
-          outputToken: TOKEN_SYMBOLS_MAP?.WETH?.addresses?.[chainId],
+          outputToken: tokenAddress,
           recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
           originChainId: 0, // Shouldn't matter for simulation
           destinationChainId: chainId,
