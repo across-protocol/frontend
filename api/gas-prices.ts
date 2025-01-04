@@ -26,34 +26,33 @@ const handler = async (
   const logger = getLogger();
 
   try {
-    const [gasPrices, gasCosts] = await Promise.all([
-      await Promise.all(
-        chains.map(({ chainId }) => {
-          return getMaxFeePerGas(chainId);
-        })
-      ),
-      await Promise.all(
-        chains.map(async ({ chainId }) => {
-          const depositArgs = {
-            amount: ethers.BigNumber.from(100),
-            inputToken: sdk.constants.ZERO_ADDRESS,
-            outputToken: TOKEN_SYMBOLS_MAP?.WETH?.addresses?.[chainId],
-            recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
-            originChainId: 0, // Shouldn't matter for simulation
-            destinationChainId: chainId,
-          };
-          const relayerFeeCalculatorQueries =
-            getRelayerFeeCalculatorQueries(chainId);
-          return relayerFeeCalculatorQueries.getGasCosts(
-            buildDepositForSimulation(depositArgs),
-            undefined,
-            {
-              omitMarkup: true,
-            }
-          );
-        })
-      ),
-    ]);
+    const gasPrices = await Promise.all(
+      chains.map(({ chainId }) => {
+        return getMaxFeePerGas(chainId);
+      })
+    );
+    const gasCosts = await Promise.all(
+      chains.map(({ chainId }, i) => {
+        const depositArgs = {
+          amount: ethers.BigNumber.from(100),
+          inputToken: sdk.constants.ZERO_ADDRESS,
+          outputToken: TOKEN_SYMBOLS_MAP?.WETH?.addresses?.[chainId],
+          recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
+          originChainId: 0, // Shouldn't matter for simulation
+          destinationChainId: chainId,
+        };
+        const relayerFeeCalculatorQueries =
+          getRelayerFeeCalculatorQueries(chainId);
+        return relayerFeeCalculatorQueries.getGasCosts(
+          buildDepositForSimulation(depositArgs),
+          undefined,
+          {
+            gasPrice: gasPrices[i],
+            omitMarkup: true,
+          }
+        );
+      })
+    );
     const responseJson = Object.fromEntries(
       chains.map(({ chainId }, i) => [
         chainId,
