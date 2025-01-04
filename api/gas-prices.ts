@@ -16,33 +16,53 @@ import {
   DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
   TOKEN_SYMBOLS_MAP,
 } from "./_constants";
+import { assert, Infer, object, optional, string } from "superstruct";
+import { InvalidParamError } from "./_errors";
 
 const chains = mainnetChains;
 
+const QueryParamsSchema = object({
+  symbol: optional(string()),
+});
+type QueryParams = Infer<typeof QueryParamsSchema>;
+
 const handler = async (
-  _: TypedVercelRequest<Record<string, never>>,
+  { query }: TypedVercelRequest<QueryParams>,
   response: VercelResponse
 ) => {
   const logger = getLogger();
+  assert(query, QueryParamsSchema);
+  const tokenSymbol = query.symbol ?? "WETH";
 
   try {
+    const chainIdsWithToken: { [chainId: string]: string } = Object.fromEntries(
+      chains
+        .map(({ chainId }) => {
+          const tokenAddress =
+            TOKEN_SYMBOLS_MAP?.[tokenSymbol as keyof typeof TOKEN_SYMBOLS_MAP]
+              ?.addresses[chainId];
+          return [chainId, tokenAddress];
+        })
+        .filter(([, tokenAddress]) => tokenAddress !== undefined)
+    );
     const gasPrices = await Promise.all(
-      chains.map(({ chainId }) => {
-        return getMaxFeePerGas(chainId);
+      Object.keys(chainIdsWithToken).map((chainId) => {
+        return getMaxFeePerGas(Number(chainId));
       })
     );
     const gasCosts = await Promise.all(
-      chains.map(({ chainId }, i) => {
+      Object.entries(chainIdsWithToken).map(([chainId, tokenAddress], i) => {
         const depositArgs = {
           amount: ethers.BigNumber.from(100),
           inputToken: sdk.constants.ZERO_ADDRESS,
-          outputToken: TOKEN_SYMBOLS_MAP?.WETH?.addresses?.[chainId],
+          outputToken: tokenAddress,
           recipientAddress: DEFAULT_SIMULATED_RECIPIENT_ADDRESS,
           originChainId: 0, // Shouldn't matter for simulation
-          destinationChainId: chainId,
+          destinationChainId: Number(chainId),
         };
-        const relayerFeeCalculatorQueries =
-          getRelayerFeeCalculatorQueries(chainId);
+        const relayerFeeCalculatorQueries = getRelayerFeeCalculatorQueries(
+          Number(chainId)
+        );
         return relayerFeeCalculatorQueries.getGasCosts(
           buildDepositForSimulation(depositArgs),
           undefined,
@@ -52,22 +72,25 @@ const handler = async (
         );
       })
     );
-    const responseJson = Object.fromEntries(
-      chains.map(({ chainId }, i) => [
-        chainId,
-        {
-          gasPrice: gasPrices[i].toString(),
-          nativeGasCost: gasCosts[i].nativeGasCost.toString(),
-          tokenGasCost: gasCosts[i].tokenGasCost.toString(),
-          gasCostMultiplier:
-            (
-              getRelayerFeeCalculatorQueries(
-                chainId
-              ) as sdk.relayFeeCalculator.QueryBase
-            ).gasMarkup + 1,
-        },
-      ])
-    );
+    const responseJson = {
+      ...Object.fromEntries(
+        Object.entries(chainIdsWithToken).map(([chainId], i) => [
+          chainId,
+          {
+            gasPrice: gasPrices[i].toString(),
+            nativeGasCost: gasCosts[i].nativeGasCost.toString(),
+            tokenGasCost: gasCosts[i].tokenGasCost.toString(),
+            gasCostMultiplier:
+              (
+                getRelayerFeeCalculatorQueries(
+                  Number(chainId)
+                ) as sdk.relayFeeCalculator.QueryBase
+              ).gasMarkup + 1,
+          },
+        ])
+      ),
+      tokenSymbol,
+    };
 
     logger.debug({
       at: "GasPrices",
