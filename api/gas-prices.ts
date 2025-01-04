@@ -17,7 +17,6 @@ import {
   TOKEN_SYMBOLS_MAP,
 } from "./_constants";
 import { assert, Infer, object, optional, string } from "superstruct";
-import { InvalidParamError } from "./_errors";
 
 const chains = mainnetChains;
 
