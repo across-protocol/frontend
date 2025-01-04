@@ -59,6 +59,12 @@ const handler = async (
           gasPrice: gasPrices[i].toString(),
           nativeGasCost: gasCosts[i].nativeGasCost.toString(),
           tokenGasCost: gasCosts[i].tokenGasCost.toString(),
+          gasCostMultiplier:
+            (
+              getRelayerFeeCalculatorQueries(
+                chainId
+              ) as sdk.relayFeeCalculator.QueryBase
+            ).gasMarkup + 1,
         },
       ])
     );
